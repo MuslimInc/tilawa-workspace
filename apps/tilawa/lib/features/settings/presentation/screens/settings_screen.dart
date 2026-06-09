@@ -52,7 +52,6 @@ class SettingsScreen extends StatelessWidget {
         appBar: TilawaCatalogAppBar.titleOnly(
           context,
           title: l10n.settings,
-          centerTitle: true,
           automaticallyImplyLeading: false,
         ),
         body: TilawaCatalogSettingsBody(

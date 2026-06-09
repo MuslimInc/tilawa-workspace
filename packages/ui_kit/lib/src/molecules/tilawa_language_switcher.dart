@@ -26,15 +26,34 @@ class TilawaLanguageSwitcher extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final designTokens = theme.tokens;
     final tokens = theme.componentTokens.segmentedControl;
 
     final ColorScheme colorScheme = theme.colorScheme;
+    final itemPadding = tokens.itemPadding.resolve(Directionality.of(context));
+    final containerPadding =
+        tokens.containerPadding.resolve(Directionality.of(context));
+    final labelStyle = theme.textTheme.labelLarge;
+    final double labelHeight =
+        (labelStyle?.fontSize ?? 14) * (labelStyle?.height ?? 1.2);
+    final double itemHeight = itemPadding.vertical + labelHeight;
+    final double containerHeight = itemHeight + containerPadding.vertical;
+    final double containerRadius = designTokens.resolveRadius(
+      family: TilawaRadiusFamily.pill,
+      height: containerHeight,
+    );
+    final double itemRadius = designTokens.concentricInner(
+      outerRadius: containerRadius,
+      padding: containerPadding.top,
+    );
+    final containerBorderRadius = BorderRadius.circular(containerRadius);
+    final itemBorderRadius = BorderRadius.circular(itemRadius);
 
     return Container(
       padding: tokens.containerPadding,
       decoration: BoxDecoration(
         color: colorScheme.primary,
-        borderRadius: BorderRadius.circular(tokens.containerRadius),
+        borderRadius: containerBorderRadius,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -45,12 +64,12 @@ class TilawaLanguageSwitcher extends StatelessWidget {
           final String label = getLanguageName(lang);
           return Material(
             color: isSelected ? colorScheme.onPrimary : Colors.transparent,
-            borderRadius: BorderRadius.circular(tokens.itemRadius),
+            borderRadius: itemBorderRadius,
             child: InkWell(
               onTap: enabled && !isLoading
                   ? () => onLanguageChanged(lang)
                   : null,
-              borderRadius: BorderRadius.circular(tokens.itemRadius),
+              borderRadius: itemBorderRadius,
               child: Semantics(
                 // fix: Accessibility — segment role (inside InkWell avoids merge bugs)
                 selected: isSelected,

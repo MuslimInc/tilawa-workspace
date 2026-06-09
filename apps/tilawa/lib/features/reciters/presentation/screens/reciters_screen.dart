@@ -128,8 +128,9 @@ class _RecitersScreenState extends State<RecitersScreen>
   final ScrollController _favoritesScrollController = ScrollController();
   final GlobalKey<NestedScrollViewState> _nestedScrollViewKey =
       GlobalKey<NestedScrollViewState>();
-  final ValueNotifier<bool> _alphabetScrubbingNotifier =
-      ValueNotifier<bool>(false);
+  final ValueNotifier<bool> _alphabetScrubbingNotifier = ValueNotifier<bool>(
+    false,
+  );
   late final RecitersAlphabetScrubCoordinator _alphabetScrub;
   Timer? _initialLoadTimer;
   Timer? _loadedResultsActivationTimer;
@@ -349,8 +350,9 @@ class _RecitersScreenState extends State<RecitersScreen>
   }
 
   bool _handleNestedScrollNotification(ScrollNotification notification) {
-    final bool needsEnforcement =
-        _alphabetScrub.handleNestedScrollNotification(notification);
+    final bool needsEnforcement = _alphabetScrub.handleNestedScrollNotification(
+      notification,
+    );
 
     if (!_alphabetScrub.alphabetScrubbingActive) {
       return false;
@@ -581,6 +583,10 @@ class _RecitersScreenState extends State<RecitersScreen>
 
                   return Scaffold(
                     resizeToAvoidBottomInset: false,
+                    appBar: TilawaCatalogAppBar.titleOnly(
+                      context,
+                      title: context.l10n.reciters,
+                    ),
                     body: SafeArea(
                       bottom: false,
                       child: NotificationListener<ScrollNotification>(
@@ -1170,9 +1176,6 @@ class _RecitersScrollingHeaderSliver extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TilawaDesignTokens tokens = theme.tokens;
-    final TextStyle? titleStyle = theme.textTheme.titleLarge?.copyWith(
-      fontWeight: FontWeight.w700,
-    );
 
     return SliverToBoxAdapter(
       child: ColoredBox(
@@ -1181,23 +1184,12 @@ class _RecitersScrollingHeaderSliver extends StatelessWidget {
           padding: TilawaAppBarConfig.catalogChromePadding(tokens).copyWith(
             bottom: 0,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: tokens.spaceSmall,
-            children: [
-              Semantics(
-                header: true,
-                child: Text(title, style: titleStyle),
-              ),
-              TourTarget(
-                targetId: RecitersTourTargets.searchField,
-                child: RecitersCatalogSearchField.launcher(
-                  semanticsIdentifier:
-                      ReciterSemanticsIds.recitersSearchLauncher,
-                  onTap: headerChrome.onOpenSearch,
-                ),
-              ),
-            ],
+          child: TourTarget(
+            targetId: RecitersTourTargets.searchField,
+            child: RecitersCatalogSearchField.launcher(
+              semanticsIdentifier: ReciterSemanticsIds.recitersSearchLauncher,
+              onTap: headerChrome.onOpenSearch,
+            ),
           ),
         ),
       ),
@@ -1840,4 +1832,3 @@ void _animateScrollControllerTo(
     );
   }
 }
-
