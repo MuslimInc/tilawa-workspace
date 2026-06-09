@@ -46,17 +46,26 @@ class TilawaSheetHandle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final designTokens = theme.tokens;
     final componentTokens = theme.componentTokens.sheetHandle;
     if (!showHandle) {
       return const SizedBox.shrink();
     }
 
+    final double pillHeight = height ?? componentTokens.height;
+    final BorderRadius borderRadius = BorderRadius.circular(
+      designTokens.resolveRadius(
+        family: TilawaRadiusFamily.pill,
+        height: pillHeight,
+      ),
+    );
+
     final Widget pill = Container(
       width: width ?? componentTokens.width,
-      height: height ?? componentTokens.height,
+      height: pillHeight,
       margin: margin,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(componentTokens.cornerRadius),
+        borderRadius: borderRadius,
         color:
             color ??
             theme.colorScheme.onSurface.withValues(

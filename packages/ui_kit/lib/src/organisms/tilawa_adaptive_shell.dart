@@ -498,13 +498,16 @@ class _SideNavRail extends StatelessWidget {
     final activeColor = theme.colorScheme.onPrimaryContainer;
     final designTokens = theme.tokens;
     final componentTokens = theme.componentTokens.adaptiveShell;
+    final double sideRailRadius = designTokens.resolveRadius(
+      family: TilawaRadiusFamily.chrome,
+    );
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(componentTokens.sideRailRadius),
+      borderRadius: BorderRadius.circular(sideRailRadius),
       child: Container(
         decoration: BoxDecoration(
           color: componentTokens.sideRailBackgroundColor,
-          borderRadius: BorderRadius.circular(componentTokens.sideRailRadius),
+          borderRadius: BorderRadius.circular(sideRailRadius),
           border: Border.all(
             color: componentTokens.sideRailOutlineColor,
             width: designTokens.borderWidthThin,
