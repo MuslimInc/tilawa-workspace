@@ -231,7 +231,7 @@ void main() {
         ),
       );
 
-      final button = tester.widget<ElevatedButton>(find.byType(ElevatedButton));
+      final button = tester.widget<TextButton>(find.byType(TextButton));
       expect(button.onPressed, isNull);
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });

@@ -3,8 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
+import 'package:tilawa/features/theme/domain/primary_color_preset.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa/router/app_router.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'router_mock_helper.mocks.dart';
 
@@ -33,6 +35,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          theme: AppTheme.getLightTheme(
+            primaryColor: PrimaryColorPreset.defaultPreset.value,
+          ),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: Builder(
@@ -45,7 +50,7 @@ void main() {
 
       expect(find.byIcon(Icons.error_outline_rounded), findsOneWidget);
       expect(find.textContaining('/not-found'), findsOneWidget);
-      expect(find.byType(ElevatedButton), findsOneWidget);
+      expect(find.widgetWithText(TilawaButton, 'Go Home'), findsOneWidget);
     });
 
     testWidgets('errorBuilder Go Home navigation works', (tester) async {
@@ -62,7 +67,9 @@ void main() {
           // InkSparkle (the default Material 3 splash) loads a shader asset
           // that is not available in the widget-test asset bundle. Use the
           // simpler InkRipple to avoid `shaders/ink_sparkle.frag not found`.
-          theme: ThemeData(splashFactory: InkRipple.splashFactory),
+          theme: AppTheme.getLightTheme(
+            primaryColor: PrimaryColorPreset.defaultPreset.value,
+          ).copyWith(splashFactory: InkRipple.splashFactory),
           routerConfig: router,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
@@ -71,8 +78,7 @@ void main() {
 
       expect(find.byIcon(Icons.error_outline_rounded), findsOneWidget);
 
-      // Tap Go Home button (line 27)
-      await tester.tap(find.byType(ElevatedButton));
+      await tester.tap(find.widgetWithText(TilawaButton, 'Go Home'));
       await tester.pumpAndSettle();
 
       expect(find.text('Home'), findsOneWidget);

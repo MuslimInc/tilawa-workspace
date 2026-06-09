@@ -15,7 +15,6 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     required this.loadingIndicator,
     required this.divider,
     required this.emptyState,
-    required this.errorState,
     required this.alphabetScrollbar,
     required this.feedbackStrip,
     required this.glassPanel,
@@ -43,7 +42,6 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
   final TilawaLoadingIndicatorTokens loadingIndicator;
   final TilawaDividerTokens divider;
   final TilawaEmptyStateTokens emptyState;
-  final TilawaErrorStateTokens errorState;
   final TilawaAlphabetScrollbarTokens alphabetScrollbar;
   final TilawaFeedbackStripTokens feedbackStrip;
   final TilawaGlassPanelTokens glassPanel;
@@ -95,7 +93,6 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       loadingIndicator: TilawaLoadingIndicatorTokens.defaults(),
       divider: TilawaDividerTokens.defaults(),
       emptyState: TilawaEmptyStateTokens.defaults(),
-      errorState: TilawaErrorStateTokens.defaults(),
       alphabetScrollbar: TilawaAlphabetScrollbarTokens.fromColorScheme(
         effectiveColorScheme,
       ),
@@ -140,7 +137,6 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     TilawaLoadingIndicatorTokens? loadingIndicator,
     TilawaDividerTokens? divider,
     TilawaEmptyStateTokens? emptyState,
-    TilawaErrorStateTokens? errorState,
     TilawaAlphabetScrollbarTokens? alphabetScrollbar,
     TilawaFeedbackStripTokens? feedbackStrip,
     TilawaGlassPanelTokens? glassPanel,
@@ -168,7 +164,6 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       loadingIndicator: loadingIndicator ?? this.loadingIndicator,
       divider: divider ?? this.divider,
       emptyState: emptyState ?? this.emptyState,
-      errorState: errorState ?? this.errorState,
       alphabetScrollbar: alphabetScrollbar ?? this.alphabetScrollbar,
       feedbackStrip: feedbackStrip ?? this.feedbackStrip,
       glassPanel: glassPanel ?? this.glassPanel,
@@ -216,7 +211,6 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       ),
       divider: TilawaDividerTokens.lerp(divider, other.divider, t),
       emptyState: TilawaEmptyStateTokens.lerp(emptyState, other.emptyState, t),
-      errorState: TilawaErrorStateTokens.lerp(errorState, other.errorState, t),
       alphabetScrollbar: TilawaAlphabetScrollbarTokens.lerp(
         alphabetScrollbar,
         other.alphabetScrollbar,

@@ -5,8 +5,9 @@ import '../foundation/design_tokens.dart';
 
 /// Shared heading for grouped settings and form-like screens.
 ///
-/// Use [TilawaSectionHeader.settings] for the same layout and styles as the
-/// former inline header in [TilawaSettingsGroup].
+/// Styling defaults come from [TilawaSettingsGroupTokens]; pass [padding],
+/// [titleTextStyle], or [subtitleTextStyle] only to deviate from the standard
+/// section heading look.
 class TilawaSectionHeader extends StatelessWidget {
   const TilawaSectionHeader({
     super.key,
@@ -14,13 +15,16 @@ class TilawaSectionHeader extends StatelessWidget {
     this.subtitle,
     this.leadingIcon,
     this.trailing,
-    required this.padding,
-    required this.titleTextStyle,
+    this.padding,
+    this.titleTextStyle,
     this.subtitleTextStyle,
     this.bottom,
   });
 
   /// Heading styled like [TilawaSettingsGroup] section titles.
+  ///
+  /// Kept for source compatibility — the unnamed constructor now applies the
+  /// same token-driven defaults, so this simply forwards.
   factory TilawaSectionHeader.settings(
     BuildContext context, {
     required String title,
@@ -29,43 +33,11 @@ class TilawaSectionHeader extends StatelessWidget {
     Widget? trailing,
     Widget? bottom,
   }) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final tokens = theme.componentTokens.settingsGroup;
-
-    final TextStyle? base = theme.textTheme.titleSmall?.copyWith(
-      fontWeight: FontWeight.w600,
-      letterSpacing: 0,
-      height: 1.3,
-      color: colorScheme.onSurface,
-    );
-
-    final TextStyle titleTextStyle =
-        base?.copyWith(
-          fontSize: tokens.groupTitleFontSize,
-          letterSpacing: tokens.groupTitleLetterSpacing,
-        ) ??
-        TextStyle(
-          fontSize: tokens.groupTitleFontSize,
-          fontWeight: FontWeight.w600,
-          letterSpacing: tokens.groupTitleLetterSpacing,
-          color: colorScheme.onSurface,
-        );
-
-    final TextStyle? subtitleTextStyle = subtitle == null
-        ? null
-        : theme.textTheme.bodySmall?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-          );
-
     return TilawaSectionHeader(
       title: title,
       subtitle: subtitle,
       leadingIcon: leadingIcon,
       trailing: trailing,
-      padding: tokens.groupHeaderPadding,
-      titleTextStyle: titleTextStyle,
-      subtitleTextStyle: subtitleTextStyle,
       bottom: bottom,
     );
   }
@@ -74,18 +46,50 @@ class TilawaSectionHeader extends StatelessWidget {
   final IconData? leadingIcon;
   final String? subtitle;
   final Widget? trailing;
-  final EdgeInsetsGeometry padding;
-  final TextStyle titleTextStyle;
+
+  /// Outer insets. Defaults to [TilawaSettingsGroupTokens.groupHeaderPadding].
+  final EdgeInsetsGeometry? padding;
+
+  /// Title style. Defaults to `titleSmall` shaped by
+  /// [TilawaSettingsGroupTokens] font size and letter spacing.
+  final TextStyle? titleTextStyle;
+
+  /// Subtitle style. Defaults to `bodySmall` in `onSurfaceVariant`.
   final TextStyle? subtitleTextStyle;
+
   final Widget? bottom;
 
   @override
   Widget build(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+    final groupTokens = theme.componentTokens.settingsGroup;
+
+    final TextStyle effectiveTitleStyle =
+        titleTextStyle ??
+        theme.textTheme.titleSmall?.copyWith(
+          fontWeight: FontWeight.w600,
+          height: 1.3,
+          color: colorScheme.onSurface,
+          fontSize: groupTokens.groupTitleFontSize,
+          letterSpacing: groupTokens.groupTitleLetterSpacing,
+        ) ??
+        TextStyle(
+          fontSize: groupTokens.groupTitleFontSize,
+          fontWeight: FontWeight.w600,
+          letterSpacing: groupTokens.groupTitleLetterSpacing,
+          color: colorScheme.onSurface,
+        );
+
+    final TextStyle? effectiveSubtitleStyle =
+        subtitleTextStyle ??
+        theme.textTheme.bodySmall?.copyWith(
+          color: colorScheme.onSurfaceVariant,
+        );
 
     return Padding(
-      padding: padding,
+      padding: padding ?? groupTokens.groupHeaderPadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
@@ -114,20 +118,18 @@ class TilawaSectionHeader extends StatelessWidget {
                           Flexible(
                             child: Text(
                               title,
-                              style: titleTextStyle,
+                              style: effectiveTitleStyle,
                               textAlign: TextAlign.start,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    if (subtitle != null && subtitleTextStyle != null) ...[
-                      SizedBox(
-                        height: Theme.of(context).tokens.spaceExtraSmall,
-                      ),
+                    if (subtitle != null && effectiveSubtitleStyle != null) ...[
+                      SizedBox(height: tokens.spaceExtraSmall),
                       Text(
                         subtitle!,
-                        style: subtitleTextStyle!,
+                        style: effectiveSubtitleStyle,
                         textAlign: TextAlign.start,
                       ),
                     ],
