@@ -45,8 +45,19 @@ enum TilawaButtonSize {
 /// Supports multiple variants, sizes, and states (including loading and disabled).
 ///
 /// [TilawaButton] handles its own internal layout, including icons and
-/// loading indicators, while ensuring a minimum touch target of 48×48
-/// unless [shrinkWrapTapTarget] is true (e.g. inline text-link actions).
+/// loading indicators, while ensuring a minimum touch target of 48×48.
+///
+/// ## Touch-target contract
+///
+/// All non-shrink-wrapped buttons are forced to ≥ 48×48
+/// ([kTilawaMinInteractiveDimension]) regardless of [size] — a `small`
+/// (32 dp visual) button still gets a 48 dp hit target via an outer
+/// [ConstrainedBox]. [shrinkWrapTapTarget] is the **only** way to drop below
+/// 48 dp and is reserved for *inline text-link* actions where 48 dp would
+/// break running text (think a "Learn more" link inside a paragraph). It must
+/// **not** be combined with an icon-only or control-style button — doing so
+/// ships a sub-target tappable control (WCAG 2.5.5 / the kit's own 48 dp law).
+/// This is asserted in debug builds.
 ///
 /// Optional [backgroundColor], [foregroundColor], and [borderColor] override
 /// the colours implied by [variant] for branded or marketing surfaces.
@@ -70,7 +81,13 @@ class TilawaButton extends StatelessWidget {
     this.padding,
     this.textStyle,
     this.shrinkWrapTapTarget = false,
-  });
+  }) : assert(
+         !shrinkWrapTapTarget || (leadingIcon == null && trailingIcon == null),
+         'shrinkWrapTapTarget is for inline text-link actions only and must '
+         'not be combined with an icon — an icon button below 48dp violates '
+         'the kit touch-target contract. Use a full-size button or '
+         'TilawaIconActionButton instead.',
+       );
 
   /// The text label to display.
   final String text;
@@ -143,8 +160,17 @@ class TilawaButton extends StatelessWidget {
     final (height, horizontalPadding, fontSize, iconSize) = _getDimensions();
 
     final designTokens = theme.extension<TilawaDesignTokens>();
+    // Buttons are tappable affordances → the `pill` radius family: a true
+    // pill when short, capped at the card radius when tall, so they never
+    // out-round adjacent cards (brand-doc §5; see [TilawaRadiusResolverX]).
+    // An explicit [borderRadius] still wins for one-off marketing surfaces.
     final double resolvedRadius =
-        borderRadius ?? designTokens?.radiusMedium ?? 12.0;
+        borderRadius ??
+        designTokens?.resolveRadius(
+          family: TilawaRadiusFamily.pill,
+          height: height,
+        ) ??
+        height / 2;
     final EdgeInsetsGeometry resolvedPadding =
         padding ?? EdgeInsets.symmetric(horizontal: horizontalPadding);
 
