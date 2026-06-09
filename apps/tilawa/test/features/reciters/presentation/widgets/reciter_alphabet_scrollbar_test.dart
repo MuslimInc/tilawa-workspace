@@ -19,12 +19,10 @@ void main() {
     ReciterEntity(id: 2, name: 'Beta', letter: 'B', date: '', moshaf: []),
   ];
 
-  late ScrollController scrollController;
   late RecitersBloc recitersBloc;
   late _MockGetRecitersUseCase mockGetReciters;
 
   setUp(() {
-    scrollController = ScrollController();
     mockGetReciters = _MockGetRecitersUseCase();
     recitersBloc = RecitersBloc(mockGetReciters)
       ..emit(
@@ -37,17 +35,19 @@ void main() {
   });
 
   tearDown(() async {
-    scrollController.dispose();
     await recitersBloc.close();
   });
 
   Widget buildScrollbar({
     required ValueChanged<String?> onLetterSelected,
+    VoidCallback? onScrubStart,
+    VoidCallback? onScrubEnd,
   }) {
     return ReciterAlphabetScrollbar(
       allReciters: reciters,
-      scrollController: scrollController,
       onLetterSelected: onLetterSelected,
+      onScrubStart: onScrubStart ?? () {},
+      onScrubEnd: onScrubEnd ?? () {},
     );
   }
 
