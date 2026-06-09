@@ -108,6 +108,11 @@ class TilawaCardTokens {
   });
 
   /// Corner radius of the card.
+  ///
+  /// Deprecated: [TilawaCard] resolves [TilawaRadiusFamily.card] from theme.
+  @Deprecated(
+    'Use TilawaRadiusFamily.card via resolveRadius. Will be removed.',
+  )
   final double borderRadius;
 
   /// Border width of the card outline.
@@ -118,7 +123,7 @@ class TilawaCardTokens {
 
   factory TilawaCardTokens.defaults() {
     return const TilawaCardTokens(
-      borderRadius: 20.0,
+      borderRadius: 24.0,
       borderWidth: 0.5,
       padding: EdgeInsets.all(16.0),
     );

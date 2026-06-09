@@ -319,6 +319,9 @@ class TilawaIconActionButtonTokens {
   });
 
   final double size;
+  @Deprecated(
+    'Use resolveRadius(pill, height: size). Will be removed.',
+  )
   final double borderRadius;
   final double activeBackgroundOpacity;
   final double activeBorderOpacity;
@@ -416,7 +419,9 @@ class TilawaChipTokens {
   final double iconSize;
   final double inlineIconSize;
   final double borderWidth;
+  @Deprecated('Use resolveRadius(pill, height). Will be removed.')
   final double pillRadius;
+  @Deprecated('Use resolveRadius(decorative). Will be removed.')
   final double roundedRadius;
   final double selectedShadowOpacity;
   final double selectedShadowBlur;
@@ -627,7 +632,9 @@ class TilawaSegmentedControlTokens {
   /// Outer border ([Border.all]) around the control track.
   final Color containerBorderColor;
 
+  @Deprecated('Use resolveRadius(chrome) or resolveSegmentedControlRadii.')
   final double containerRadius;
+  @Deprecated('Use concentricInner via resolveSegmentedControlRadii.')
   final double itemRadius;
   final double containerOpacity;
   final double minItemWidth;

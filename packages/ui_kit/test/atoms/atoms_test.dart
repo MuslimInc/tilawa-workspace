@@ -224,8 +224,8 @@ void main() {
   group('TilawaCardTokens', () {
     test('defaults match existing TilawaCard behavior', () {
       final tokens = TilawaCardTokens.defaults();
-      // Compact card family: 20dp radius, hairline border, 16dp padding.
-      expect(tokens.borderRadius, 20.0);
+      // Body cards use the card radius family (radiusExtraLarge = 24).
+      expect(tokens.borderRadius, 24.0);
       expect(tokens.borderWidth, 0.5);
       expect(tokens.padding, const EdgeInsets.all(16.0));
     });

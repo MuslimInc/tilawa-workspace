@@ -766,5 +766,33 @@ void main() {
         expect(result, isNull);
       });
     });
+
+    group('TilawaRadiusResolverX', () {
+      test('resolveRadius returns family rules', () {
+        final tokens = TilawaDesignTokens.light();
+        expect(
+          tokens.resolveRadius(family: TilawaRadiusFamily.card),
+          24.0,
+        );
+        expect(
+          tokens.resolveRadius(family: TilawaRadiusFamily.chrome),
+          16.0,
+        );
+        expect(
+          tokens.resolveRadius(family: TilawaRadiusFamily.pill, height: 48),
+          24.0,
+        );
+      });
+
+      test('resolveSegmentedControlRadii uses chrome track by default', () {
+        final tokens = TilawaDesignTokens.light();
+        final radii = tokens.resolveSegmentedControlRadii(
+          itemHeight: 32,
+          containerPadding: 4,
+        );
+        expect(radii.containerRadius, 16.0);
+        expect(radii.itemRadius, 12.0);
+      });
+    });
   });
 }
