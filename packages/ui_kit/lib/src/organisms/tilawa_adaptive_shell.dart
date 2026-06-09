@@ -146,10 +146,7 @@ class TilawaAdaptiveShell extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (phoneFooterAboveNav != null) ...[
-                  phoneFooterAboveNav!,
-                  SizedBox(height: Theme.of(context).tokens.spaceSmall),
-                ],
+                ?phoneFooterAboveNav,
                 _BottomNavBar(
                   destinations: destinations,
                   selectedIndex: displayIndex,

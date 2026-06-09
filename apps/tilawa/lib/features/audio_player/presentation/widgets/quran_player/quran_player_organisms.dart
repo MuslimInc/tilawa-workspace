@@ -161,24 +161,14 @@ class _MiniPlayerOrganism extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
-    return TilawaContentBounds(
-      kind: TilawaContentKind.settings,
-      alignment: Alignment.bottomCenter,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          tokens.spaceLarge,
-          tokens.spaceTiny,
-          tokens.spaceLarge,
-          0,
-        ),
-        child: _YtMusicMiniPlayer(
-          audio: audio,
-          useHeroArtwork: useHeroArtwork,
-          identityChromeOpacity: identityChromeOpacity,
-          onTap: onTap,
-          onClose: onClose,
-        ),
+    return SizedBox(
+      width: double.infinity,
+      child: _YtMusicMiniPlayer(
+        audio: audio,
+        useHeroArtwork: useHeroArtwork,
+        identityChromeOpacity: identityChromeOpacity,
+        onTap: onTap,
+        onClose: onClose,
       ),
     );
   }

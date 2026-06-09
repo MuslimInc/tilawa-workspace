@@ -213,11 +213,8 @@ class TilawaMediaPlayerBarTokens {
     // fix: Accessibility — ≥48dp transport control hit targets
     const shellOutlineAlpha = 0.1;
     return TilawaMediaPlayerBarTokens(
-      // Slightly tighter vertical padding so the bar fits [playerCollapsedHeight]
-      // with progress strip + 48dp artwork row inside the mini-player SizedBox
-      // (outer shell also adds horizontal margins and tiny vertical padding).
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      borderRadius: 18,
+      borderRadius: 0,
       artworkSize: 48,
       artworkRadius: 10,
       titleFontWeight: FontWeight.w600,
@@ -231,8 +228,8 @@ class TilawaMediaPlayerBarTokens {
       defaultIconSize: 24,
       playPauseIconSize: 16,
       disabledControlOpacity: 0.3,
-      shadowOpacity: 0.14,
-      shellBackgroundColor: colorScheme.surfaceContainerLow,
+      shadowOpacity: 0,
+      shellBackgroundColor: colorScheme.surface,
       progressTrackBackgroundColor: colorScheme.surfaceContainerHighest
           .withValues(alpha: shellOutlineAlpha),
       artworkPlaceholderColor: colorScheme.surfaceContainerHigh,

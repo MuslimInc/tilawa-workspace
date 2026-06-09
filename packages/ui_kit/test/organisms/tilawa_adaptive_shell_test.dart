@@ -172,6 +172,46 @@ void main() {
       },
     );
 
+    testWidgets(
+      'narrow docks phoneFooterAboveNav flush with visible bottom nav',
+      (tester) async {
+        const Key footerKey = Key('shell_footer_above_nav');
+
+        await tester.binding.setSurfaceSize(const Size(400, 800));
+        tester.view.physicalSize = const Size(400, 800);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        await tester.pumpWidget(
+          _wrap(
+            direction: TextDirection.ltr,
+            child: TilawaAdaptiveShell(
+              destinations: _destinations,
+              selectedIndex: 0,
+              onDestinationSelected: (_) {},
+              phoneFooterAboveNav: const SizedBox(
+                key: footerKey,
+                height: 72,
+                child: ColoredBox(color: Color(0xFF336699)),
+              ),
+              bottomPlayer: const SizedBox.shrink(),
+              child: const ColoredBox(color: Color(0xFFEEEEEE)),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        final Rect footerRect = tester.getRect(find.byKey(footerKey));
+        final Rect bottomNavRect = tester.getRect(
+          find.byType(BottomNavigationBar),
+        );
+
+        expect(footerRect.bottom, bottomNavRect.top);
+      },
+    );
+
     testWidgets('narrow body has zero bottom MediaQuery padding', (
       tester,
     ) async {
