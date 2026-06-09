@@ -95,7 +95,14 @@ class _HistoryChip extends StatelessWidget {
         ? history.surahName
         : history.surahNameEn;
 
-    final BorderRadius borderRadius = .circular(chipTokens.pillRadius);
+    final double chipHeight =
+        tokens.spaceSmall * 2 + (theme.textTheme.labelSmall?.fontSize ?? 12);
+    final BorderRadius borderRadius = BorderRadius.circular(
+      tokens.resolveRadius(
+        family: TilawaRadiusFamily.pill,
+        height: chipHeight,
+      ),
+    );
 
     final Color idleFill = ReciterCatalogChrome.idleFill(colorScheme);
     final Color hairline = ReciterCatalogChrome.hairline(colorScheme, tokens);
