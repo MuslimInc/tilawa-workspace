@@ -468,14 +468,18 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
                 color: theme.colorScheme.surface.withValues(
                   alpha: tokens.opacityGlass,
                 ),
-                borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
+                borderRadius: BorderRadiusDirectional.only(
+                  topStart: Radius.circular(tokens.radiusExtraLarge),
+                  bottomStart: Radius.circular(tokens.radiusExtraLarge),
+                ),
               ),
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final EdgeInsets resolvedPadding =
-                      componentTokens.verticalPadding.resolve(
-                    Directionality.of(context),
-                  );
+                  final EdgeInsets resolvedPadding = componentTokens
+                      .verticalPadding
+                      .resolve(
+                        Directionality.of(context),
+                      );
                   final layout = _AlphabetScrollbarTrackLayout.resolve(
                     letterCount: widget.letters.length,
                     visibleTrackHeight: constraints.maxHeight,
@@ -552,7 +556,7 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
         isSelected: isSelected,
         semanticsIdentifier: isSelected
             ? widget.selectedLetterStableSemanticsId ??
-                widget.selectedLetterSemanticsId?.call(letter)
+                  widget.selectedLetterSemanticsId?.call(letter)
             : null,
         selectedIndicatorSize: selectedIndicatorSize,
         fontSize: componentTokens.letterFontSize,
