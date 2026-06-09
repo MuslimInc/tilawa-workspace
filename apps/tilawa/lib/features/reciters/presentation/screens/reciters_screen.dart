@@ -11,6 +11,7 @@ import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/downloads/presentation/screens/downloads_screen.dart';
 import 'package:tilawa/features/downloads/presentation/widgets/downloads_screen_scope.dart';
+import 'package:tilawa/features/reciters/presentation/scroll/reciters_alphabet_scrub_coordinator.dart';
 import 'package:tilawa/features/reciters/presentation/widgets/reciter_card.dart';
 import 'package:tilawa/features/reciters/presentation/widgets/reciters_catalog_search_field.dart';
 import 'package:tilawa/features/reciters/presentation/widgets/reciters_favorites_tab.dart';
@@ -125,6 +126,11 @@ class _RecitersScreenState extends State<RecitersScreen>
 
   final ScrollController _allScrollController = ScrollController();
   final ScrollController _favoritesScrollController = ScrollController();
+  final GlobalKey<NestedScrollViewState> _nestedScrollViewKey =
+      GlobalKey<NestedScrollViewState>();
+  final ValueNotifier<bool> _alphabetScrubbingNotifier =
+      ValueNotifier<bool>(false);
+  late final RecitersAlphabetScrubCoordinator _alphabetScrub;
   Timer? _initialLoadTimer;
   Timer? _loadedResultsActivationTimer;
   Timer? _startupLiteUiTimer;
@@ -143,6 +149,15 @@ class _RecitersScreenState extends State<RecitersScreen>
   @override
   void initState() {
     super.initState();
+    _alphabetScrub = RecitersAlphabetScrubCoordinator(
+      innerController: () => _nestedScrollViewKey.currentState?.innerController,
+      primaryController: () {
+        if (!mounted) {
+          return null;
+        }
+        return PrimaryScrollController.maybeOf(context);
+      },
+    );
     _favoritesCubit = getIt<FavoritesCubit>();
     final RecitersBloc recitersBloc = context.read<RecitersBloc>();
     final RecitersTabsBloc tabsBloc = context.read<RecitersTabsBloc>();
@@ -253,6 +268,7 @@ class _RecitersScreenState extends State<RecitersScreen>
 
   @override
   void dispose() {
+    _alphabetScrubbingNotifier.dispose();
     _startupLiteUiTimer?.cancel();
     _loadedResultsActivationTimer?.cancel();
     _initialLoadTimer?.cancel();
@@ -263,7 +279,7 @@ class _RecitersScreenState extends State<RecitersScreen>
     super.dispose();
   }
 
-  void _scrollToTop() {
+  void _scrollPrimaryToTop() {
     final ScrollController? primaryScrollController =
         PrimaryScrollController.maybeOf(context);
     final ScrollController fallback = _activeRecitersScrollController;
@@ -275,11 +291,108 @@ class _RecitersScreenState extends State<RecitersScreen>
       return;
     }
 
-    scrollController.animateTo(
+    _animateScrollControllerTo(
+      scrollController,
       0,
       duration: context.tokens.durationFast,
       curve: Curves.easeOutCubic,
     );
+  }
+
+  void _scrollInnerCatalogToTop() {
+    final NestedScrollViewState? nestedScrollViewState =
+        _nestedScrollViewKey.currentState;
+    final ScrollController? innerController =
+        nestedScrollViewState?.innerController;
+    if (innerController == null || !innerController.hasClients) {
+      _scrollPrimaryToTop();
+      return;
+    }
+
+    _alphabetScrub.clampNestedScrollOverscroll();
+    _alphabetScrub.scrollInnerCatalogToTopPreservingHeader();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      _alphabetScrub.restoreNonCatalogScrubScrollLocks();
+    });
+  }
+
+  void _schedulePinnedScrollEnforcement({int pass = 0}) {
+    if (!_alphabetScrub.alphabetScrubbingActive || pass >= 3) {
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_alphabetScrub.alphabetScrubbingActive) {
+        return;
+      }
+      _alphabetScrub.enforcePinnedScrollLocks();
+      _schedulePinnedScrollEnforcement(pass: pass + 1);
+    });
+  }
+
+  void _scheduleScrubOverscrollClamp() {
+    if (_alphabetScrub.scrubOverscrollClampScheduled ||
+        !_alphabetScrub.alphabetScrubbingActive) {
+      return;
+    }
+    _alphabetScrub.scrubOverscrollClampScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _alphabetScrub.scrubOverscrollClampScheduled = false;
+      if (!mounted || !_alphabetScrub.alphabetScrubbingActive) {
+        return;
+      }
+      _alphabetScrub.clampNestedScrollOverscroll();
+      _alphabetScrub.enforcePinnedScrollLocks();
+    });
+  }
+
+  bool _handleNestedScrollNotification(ScrollNotification notification) {
+    final bool needsEnforcement =
+        _alphabetScrub.handleNestedScrollNotification(notification);
+
+    if (!_alphabetScrub.alphabetScrubbingActive) {
+      return false;
+    }
+
+    if (notification.metrics.pixels < 0) {
+      _scheduleScrubOverscrollClamp();
+      return false;
+    }
+
+    if (needsEnforcement) {
+      _schedulePinnedScrollEnforcement();
+    }
+
+    return false;
+  }
+
+  void _scrollToTop() => _scrollPrimaryToTop();
+
+  void _onAlphabetScrubStart() {
+    _alphabetScrub.alphabetScrubbingActive = true;
+    _alphabetScrubbingNotifier.value = true;
+    context.read<AlphabetScrollbarBloc>().add(const StartDragging());
+    _alphabetScrub.beginScrub();
+    _scheduleScrubOverscrollClamp();
+    setState(() {});
+  }
+
+  void _onAlphabetScrubEnd() {
+    _alphabetScrub.clampNestedScrollOverscroll();
+    _scrollInnerCatalogToTop();
+    _alphabetScrub.clearLockState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      _alphabetScrub.clampNestedScrollOverscroll();
+      _alphabetScrubbingNotifier.value = false;
+      if (_alphabetScrub.alphabetScrubbingActive) {
+        setState(() => _alphabetScrub.alphabetScrubbingActive = false);
+      }
+    });
   }
 
   void _onHomeTabChanged() {
@@ -326,7 +439,12 @@ class _RecitersScreenState extends State<RecitersScreen>
     }
 
     context.read<RecitersBloc>().add(FilterByLetter(letter));
-    _scrollToTop();
+    if (_alphabetScrub.alphabetScrubbingActive ||
+        context.read<AlphabetScrollbarBloc>().state.isDragging) {
+      _schedulePinnedScrollEnforcement();
+      return;
+    }
+    _scrollInnerCatalogToTop();
   }
 
   void _clearLetterFilter() {
@@ -451,43 +569,66 @@ class _RecitersScreenState extends State<RecitersScreen>
                 onTabSelected: _selectHomeTabIndex,
               );
 
-              return Scaffold(
-                resizeToAvoidBottomInset: false,
-                body: SafeArea(
-                  bottom: false,
-                  child: NestedScrollView(
-                    headerSliverBuilder: (context, innerBoxIsScrolled) {
-                      return [
-                        _RecitersScrollingHeaderSliver(
-                          title: context.l10n.reciters,
-                          headerChrome: headerChrome,
-                        ),
-                        SliverOverlapAbsorber(
-                          handle:
-                              NestedScrollView.sliverOverlapAbsorberHandleFor(
-                                context,
+              return ValueListenableBuilder<bool>(
+                valueListenable: _alphabetScrubbingNotifier,
+                builder: (context, notifierScrubbing, _) {
+                  final bool alphabetScrubbing =
+                      notifierScrubbing ||
+                      _alphabetScrub.alphabetScrubbingActive ||
+                      context.select<AlphabetScrollbarBloc, bool>(
+                        (bloc) => bloc.state.isDragging,
+                      );
+
+                  return Scaffold(
+                    resizeToAvoidBottomInset: false,
+                    body: SafeArea(
+                      bottom: false,
+                      child: NotificationListener<ScrollNotification>(
+                        onNotification: _handleNestedScrollNotification,
+                        child: NestedScrollView(
+                          key: _nestedScrollViewKey,
+                          physics: alphabetScrubbing
+                              ? const NeverScrollableScrollPhysics()
+                              : null,
+                          headerSliverBuilder: (context, innerBoxIsScrolled) {
+                            return [
+                              _RecitersScrollingHeaderSliver(
+                                title: context.l10n.reciters,
+                                headerChrome: headerChrome,
                               ),
-                          sliver: _RecitersPinnedTabBarSliver(
-                            headerChrome: headerChrome,
+                              SliverOverlapAbsorber(
+                                handle:
+                                    NestedScrollView.sliverOverlapAbsorberHandleFor(
+                                      context,
+                                    ),
+                                sliver: _RecitersPinnedTabBarSliver(
+                                  headerChrome: headerChrome,
+                                ),
+                              ),
+                            ];
+                          },
+                          body: _RecitersTabbedBody(
+                            tabController: _tabController,
+                            state: state,
+                            allowHeavyLoadedResults: _allowHeavyLoadedResults,
+                            showLetterIndex: showLetterIndex,
+                            allScrollController: _allScrollController,
+                            favoritesScrollController:
+                                _favoritesScrollController,
+                            onClearAll: _clearAllFilters,
+                            alphabetScrubbing: alphabetScrubbing,
+                            onLetterSelected: _onLetterSelected,
+                            onAlphabetScrubStart: _onAlphabetScrubStart,
+                            onAlphabetScrubEnd: _onAlphabetScrubEnd,
+                            onRetry: _refreshReciters,
+                            onBrowseReciters: () =>
+                                _selectHomeTab(RecitersHomeTab.all),
                           ),
                         ),
-                      ];
-                    },
-                    body: _RecitersTabbedBody(
-                      tabController: _tabController,
-                      state: state,
-                      allowHeavyLoadedResults: _allowHeavyLoadedResults,
-                      showLetterIndex: showLetterIndex,
-                      allScrollController: _allScrollController,
-                      favoritesScrollController: _favoritesScrollController,
-                      onClearAll: _clearAllFilters,
-                      onLetterSelected: _onLetterSelected,
-                      onRetry: _refreshReciters,
-                      onBrowseReciters: () =>
-                          _selectHomeTab(RecitersHomeTab.all),
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                },
               );
             },
           ),
@@ -541,7 +682,10 @@ class _RecitersSliverScreen extends StatelessWidget {
     required this.showLetterIndex,
     required this.scrollController,
     required this.onClearAll,
+    required this.alphabetScrubbing,
     required this.onLetterSelected,
+    required this.onAlphabetScrubStart,
+    required this.onAlphabetScrubEnd,
     required this.onRetry,
   });
 
@@ -551,7 +695,10 @@ class _RecitersSliverScreen extends StatelessWidget {
   final bool showLetterIndex;
   final ScrollController scrollController;
   final VoidCallback onClearAll;
+  final bool alphabetScrubbing;
   final ValueChanged<String?> onLetterSelected;
+  final VoidCallback onAlphabetScrubStart;
+  final VoidCallback onAlphabetScrubEnd;
   final Future<void> Function() onRetry;
 
   @override
@@ -570,8 +717,48 @@ class _RecitersSliverScreen extends StatelessWidget {
     final bool showLetterIndexRail = letterIndexAvailable && showLetterIndex;
     final ScrollController? primaryScrollController =
         PrimaryScrollController.maybeOf(context);
-    final ScrollController railScrollController =
-        primaryScrollController ?? scrollController;
+
+    final Widget catalogScrollView = CustomScrollView(
+      key: pageStorageKey,
+      controller: primaryScrollController == null ? scrollController : null,
+      physics: alphabetScrubbing
+          ? const NeverScrollableScrollPhysics()
+          : const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
+      slivers: [
+        SliverOverlapInjector(
+          handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+        ),
+        _RecitersResultSection(
+          state: state,
+          allowHeavyLoadedResults: allowHeavyLoadedResults,
+          reserveScrollbarSpace: showLetterIndexRail,
+          reserveScrollbarOnLeading: isRtl,
+          onClearAll: onClearAll,
+          onRetry: onRetry,
+        ),
+      ],
+    );
+
+    final Widget catalogLayer = alphabetScrubbing
+        ? NotificationListener<OverscrollIndicatorNotification>(
+            onNotification: (OverscrollIndicatorNotification notification) {
+              notification.disallowIndicator();
+              return true;
+            },
+            child: catalogScrollView,
+          )
+        : NotificationListener<OverscrollIndicatorNotification>(
+            onNotification: (OverscrollIndicatorNotification notification) {
+              return false;
+            },
+            child: RefreshIndicator.adaptive(
+              onRefresh: onRetry,
+              notificationPredicate: defaultScrollNotificationPredicate,
+              child: catalogScrollView,
+            ),
+          );
 
     return MediaQuery(
       data: MediaQuery.of(context).removeViewInsets(removeBottom: true),
@@ -579,41 +766,20 @@ class _RecitersSliverScreen extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           const Positioned.fill(child: _RecitersAmbientBackground()),
-          RefreshIndicator.adaptive(
-            onRefresh: onRetry,
-            child: CustomScrollView(
-              key: pageStorageKey,
-              controller: primaryScrollController == null
-                  ? scrollController
-                  : null,
-              physics: const AlwaysScrollableScrollPhysics(
-                parent: BouncingScrollPhysics(),
-              ),
-              slivers: [
-                SliverOverlapInjector(
-                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
-                    context,
-                  ),
-                ),
-                _RecitersResultSection(
-                  state: state,
-                  allowHeavyLoadedResults: allowHeavyLoadedResults,
-                  reserveScrollbarSpace: showLetterIndexRail,
-                  reserveScrollbarOnLeading: isRtl,
-                  onClearAll: onClearAll,
-                  onRetry: onRetry,
-                ),
-              ],
+          catalogLayer,
+          if (alphabetScrubbing)
+            const Positioned.fill(
+              child: AbsorbPointer(child: SizedBox.expand()),
             ),
-          ),
           if (showLetterIndexRail)
             _RecitersLetterIndexGutter(
               isRtl: isRtl,
               topInset: letterIndexTopInset,
               bottomInset: letterIndexBottomInset,
               reciters: (state as RecitersLoaded).reciters,
-              scrollController: railScrollController,
               onLetterSelected: onLetterSelected,
+              onScrubStart: onAlphabetScrubStart,
+              onScrubEnd: onAlphabetScrubEnd,
               scrollbarSemanticsLabel: context.l10n.a11yRecitersLetterIndex,
               scrollbarSemanticsHint:
                   context.l10n.a11yRecitersAlphabetScrollbarHint,
@@ -634,6 +800,9 @@ class _RecitersTabbedBody extends StatelessWidget {
     required this.favoritesScrollController,
     required this.onClearAll,
     required this.onLetterSelected,
+    required this.alphabetScrubbing,
+    required this.onAlphabetScrubStart,
+    required this.onAlphabetScrubEnd,
     required this.onRetry,
     required this.onBrowseReciters,
   });
@@ -646,6 +815,9 @@ class _RecitersTabbedBody extends StatelessWidget {
   final ScrollController favoritesScrollController;
   final VoidCallback onClearAll;
   final ValueChanged<String?> onLetterSelected;
+  final bool alphabetScrubbing;
+  final VoidCallback onAlphabetScrubStart;
+  final VoidCallback onAlphabetScrubEnd;
   final Future<void> Function() onRetry;
   final VoidCallback onBrowseReciters;
 
@@ -662,7 +834,10 @@ class _RecitersTabbedBody extends StatelessWidget {
             showLetterIndex: showLetterIndex,
             scrollController: allScrollController,
             onClearAll: onClearAll,
+            alphabetScrubbing: alphabetScrubbing,
             onLetterSelected: onLetterSelected,
+            onAlphabetScrubStart: onAlphabetScrubStart,
+            onAlphabetScrubEnd: onAlphabetScrubEnd,
             onRetry: onRetry,
           ),
         ),
@@ -736,8 +911,9 @@ class _RecitersLetterIndexGutter extends StatelessWidget {
     required this.topInset,
     required this.bottomInset,
     required this.reciters,
-    required this.scrollController,
     required this.onLetterSelected,
+    required this.onScrubStart,
+    required this.onScrubEnd,
     required this.scrollbarSemanticsLabel,
     required this.scrollbarSemanticsHint,
   });
@@ -746,8 +922,9 @@ class _RecitersLetterIndexGutter extends StatelessWidget {
   final double topInset;
   final double bottomInset;
   final List<ReciterEntity> reciters;
-  final ScrollController scrollController;
   final ValueChanged<String?> onLetterSelected;
+  final VoidCallback onScrubStart;
+  final VoidCallback onScrubEnd;
   final String? scrollbarSemanticsLabel;
   final String? scrollbarSemanticsHint;
 
@@ -763,25 +940,29 @@ class _RecitersLetterIndexGutter extends StatelessWidget {
       start: isRtl ? 0 : null,
       end: isRtl ? null : 0,
       width: gutterWidth,
-      child: SafeArea(
-        left: isRtl,
-        right: !isRtl,
-        top: false,
-        bottom: false,
-        minimum: EdgeInsets.zero,
-        child: Align(
-          alignment: isRtl
-              ? AlignmentDirectional.centerStart
-              : AlignmentDirectional.centerEnd,
-          child: SizedBox(
-            width: scrollbarWidth,
-            child: ReciterAlphabetScrollbar(
-              key: const ValueKey('alphabet_scrollbar'),
-              allReciters: reciters,
-              scrollController: scrollController,
-              onLetterSelected: onLetterSelected,
-              scrollbarSemanticsLabel: scrollbarSemanticsLabel,
-              scrollbarSemanticsHint: scrollbarSemanticsHint,
+      child: Listener(
+        behavior: HitTestBehavior.opaque,
+        child: SafeArea(
+          left: isRtl,
+          right: !isRtl,
+          top: false,
+          bottom: false,
+          minimum: EdgeInsets.zero,
+          child: Align(
+            alignment: isRtl
+                ? AlignmentDirectional.centerStart
+                : AlignmentDirectional.centerEnd,
+            child: SizedBox(
+              width: scrollbarWidth,
+              child: ReciterAlphabetScrollbar(
+                key: const ValueKey('alphabet_scrollbar'),
+                allReciters: reciters,
+                onLetterSelected: onLetterSelected,
+                onScrubStart: onScrubStart,
+                onScrubEnd: onScrubEnd,
+                scrollbarSemanticsLabel: scrollbarSemanticsLabel,
+                scrollbarSemanticsHint: scrollbarSemanticsHint,
+              ),
             ),
           ),
         ),
@@ -1521,14 +1702,16 @@ class ReciterAlphabetScrollbar extends StatefulWidget {
   const ReciterAlphabetScrollbar({
     super.key,
     required this.allReciters,
-    required this.scrollController,
     required this.onLetterSelected,
+    required this.onScrubStart,
+    required this.onScrubEnd,
     this.scrollbarSemanticsLabel,
     this.scrollbarSemanticsHint,
   });
   final List<ReciterEntity> allReciters;
-  final ScrollController scrollController;
-  final Function(String? letter) onLetterSelected;
+  final ValueChanged<String?> onLetterSelected;
+  final VoidCallback onScrubStart;
+  final VoidCallback onScrubEnd;
 
   /// Group label for the scrollbar (e.g. letter index).
   final String? scrollbarSemanticsLabel;
@@ -1565,18 +1748,6 @@ class _ReciterAlphabetScrollbarState extends State<ReciterAlphabetScrollbar> {
   }
 
   void _handleLetterSelection(String? letter) {
-    if (letter == null) {
-      widget.onLetterSelected(null);
-      return;
-    }
-
-    final int index = widget.allReciters.indexWhere(
-      (item) => item.letter == letter,
-    );
-    if (index != -1 && widget.scrollController.hasClients) {
-      widget.scrollController.jumpTo(0.0);
-    }
-
     widget.onLetterSelected(letter);
   }
 
@@ -1595,16 +1766,14 @@ class _ReciterAlphabetScrollbarState extends State<ReciterAlphabetScrollbar> {
       letters: _letters,
       selectedLetter: selectedLetter,
       onLetterSelected: _handleLetterSelection,
-      onPanStart: (_) =>
-          context.read<AlphabetScrollbarBloc>().add(const StartDragging()),
+      onPanStart: (_) {
+        widget.onScrubStart();
+      },
       onPanUpdate: (_) {},
-      onPanEnd: (_) =>
-          context.read<AlphabetScrollbarBloc>().add(const EndDragging()),
-      onLongPressStart: (details) =>
-          context.read<AlphabetScrollbarBloc>().add(const StartDragging()),
-      onLongPressMoveUpdate: (details) {},
-      onLongPressEnd: (_) =>
-          context.read<AlphabetScrollbarBloc>().add(const EndDragging()),
+      onPanEnd: (_) {
+        context.read<AlphabetScrollbarBloc>().add(const EndDragging());
+        widget.onScrubEnd();
+      },
       scrollbarSemanticsLabel: widget.scrollbarSemanticsLabel,
       scrollbarSemanticsHint: widget.scrollbarSemanticsHint,
       scrollbarSemanticsIdentifier:
@@ -1653,3 +1822,22 @@ EdgeInsetsGeometry _recitersResultPadding(
 bool _hasActiveFilters(RecitersLoaded state) {
   return state.selectedLetter != null;
 }
+
+void _animateScrollControllerTo(
+  ScrollController controller,
+  double offset, {
+  required Duration duration,
+  required Curve curve,
+}) {
+  if (!controller.hasClients) {
+    return;
+  }
+  for (final ScrollPosition position in controller.positions) {
+    position.animateTo(
+      offset.clamp(0.0, position.maxScrollExtent),
+      duration: duration,
+      curve: curve,
+    );
+  }
+}
+
