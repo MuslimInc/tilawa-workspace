@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../lib/src/atoms/tilawa_error_state.dart';
 import '../lib/src/atoms/tilawa_icon_toggle.dart';
+import '../lib/src/foundation/color_scheme_ext.dart';
 import '../lib/src/foundation/component_tokens/component_tokens_theme.dart';
 import '../lib/src/foundation/design_tokens.dart';
 import '../lib/src/molecules/tilawa_language_switcher.dart';
@@ -29,7 +30,8 @@ Widget _themed(Widget child) {
 Color _expectedFeedbackBorder(ColorScheme scheme, TilawaFeedbackVariant v) {
   return switch (v) {
     TilawaFeedbackVariant.info => scheme.outline.withValues(alpha: 0.35),
-    TilawaFeedbackVariant.warning => scheme.error.withValues(alpha: 0.45),
+    TilawaFeedbackVariant.success => scheme.success.withValues(alpha: 0.55),
+    TilawaFeedbackVariant.warning => scheme.warning.withValues(alpha: 0.55),
     TilawaFeedbackVariant.error => scheme.error.withValues(alpha: 0.72),
   };
 }

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../atoms/tilawa_loading_indicator.dart';
+import '../foundation/color_scheme_ext.dart';
 import '../foundation/component_tokens.dart';
 
 /// Semantic intent for [TilawaFeedbackStrip] (affects a11y label + border).
 enum TilawaFeedbackVariant {
   // fix: Feedback & states — structured info / warn / error presentation
   info,
+  success,
   warning,
   error,
 }
@@ -45,7 +47,11 @@ class TilawaFeedbackStrip extends StatelessWidget {
     final ColorScheme cs = Theme.of(context).colorScheme;
     return switch (v) {
       TilawaFeedbackVariant.info => cs.outline.withValues(alpha: 0.35),
-      TilawaFeedbackVariant.warning => cs.error.withValues(alpha: 0.45),
+      // Success and warning use their own hues so they are distinguishable
+      // from error (and each other) by colour, not just opacity. Relying on
+      // a single red at different alphas fails WCAG 1.4.1 (use of colour).
+      TilawaFeedbackVariant.success => cs.success.withValues(alpha: 0.55),
+      TilawaFeedbackVariant.warning => cs.warning.withValues(alpha: 0.55),
       TilawaFeedbackVariant.error => cs.error.withValues(alpha: 0.72),
     };
   }
