@@ -135,7 +135,7 @@ class TilawaButton extends StatelessWidget {
   /// unless you also set a transparent [backgroundColor] for a stroked look).
   final Color? borderColor;
 
-  /// Corner radius; defaults to [TilawaDesignTokens.radiusMedium] from theme.
+  /// Corner radius; defaults to [TilawaRadiusFamily.pill] from theme height.
   final double? borderRadius;
 
   /// Insets for label and icons; defaults to horizontal padding from [size].

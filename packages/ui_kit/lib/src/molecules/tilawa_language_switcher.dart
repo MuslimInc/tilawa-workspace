@@ -37,17 +37,13 @@ class TilawaLanguageSwitcher extends StatelessWidget {
     final double labelHeight =
         (labelStyle?.fontSize ?? 14) * (labelStyle?.height ?? 1.2);
     final double itemHeight = itemPadding.vertical + labelHeight;
-    final double containerHeight = itemHeight + containerPadding.vertical;
-    final double containerRadius = designTokens.resolveRadius(
-      family: TilawaRadiusFamily.pill,
-      height: containerHeight,
+    final radii = designTokens.resolveSegmentedControlRadii(
+      itemHeight: itemHeight,
+      containerPadding: containerPadding.top,
+      trackFamily: TilawaRadiusFamily.pill,
     );
-    final double itemRadius = designTokens.concentricInner(
-      outerRadius: containerRadius,
-      padding: containerPadding.top,
-    );
-    final containerBorderRadius = BorderRadius.circular(containerRadius);
-    final itemBorderRadius = BorderRadius.circular(itemRadius);
+    final containerBorderRadius = BorderRadius.circular(radii.containerRadius);
+    final itemBorderRadius = BorderRadius.circular(radii.itemRadius);
 
     return Container(
       padding: tokens.containerPadding,

@@ -267,11 +267,14 @@ class _SettingsLeadingIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final designTokens = Theme.of(context).tokens;
     return Container(
       padding: tokens.tileIconPadding,
       decoration: BoxDecoration(
         color: color.withValues(alpha: tokens.tileIconContainerOpacity),
-        borderRadius: BorderRadius.circular(tokens.tileIconBorderRadius),
+        borderRadius: BorderRadius.circular(
+          designTokens.resolveRadius(family: TilawaRadiusFamily.decorative),
+        ),
       ),
       child: Icon(icon, color: color, size: tokens.tileIconSize),
     );

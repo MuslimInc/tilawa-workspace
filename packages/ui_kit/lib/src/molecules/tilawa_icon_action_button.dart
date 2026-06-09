@@ -91,7 +91,10 @@ class _TilawaIconActionButtonState extends State<TilawaIconActionButton>
     final effectiveSize = widget.size ?? componentTokens.size;
     final effectiveIconSize = widget.iconSize ?? designTokens.iconSizeMedium;
     final effectiveBorderRadius = BorderRadius.circular(
-      componentTokens.borderRadius,
+      designTokens.resolveRadius(
+        family: TilawaRadiusFamily.pill,
+        height: effectiveSize,
+      ),
     );
 
     final Color iconColor = !widget.enabled

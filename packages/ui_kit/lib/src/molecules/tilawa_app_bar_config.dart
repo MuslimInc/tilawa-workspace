@@ -304,8 +304,12 @@ abstract final class TilawaAppBarChrome {
   }
 
   static BorderRadius toolbarIconBorderRadius(ThemeData theme) {
+    final tokens = theme.tokens;
     return BorderRadius.circular(
-      theme.componentTokens.iconActionButton.borderRadius,
+      tokens.resolveRadius(
+        family: TilawaRadiusFamily.pill,
+        height: tokens.minInteractiveDimension,
+      ),
     );
   }
 

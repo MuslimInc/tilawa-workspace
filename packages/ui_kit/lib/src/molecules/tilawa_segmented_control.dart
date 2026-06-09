@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
+import '../foundation/design_tokens.dart';
 import '../foundation/tilawa_interaction_feedback.dart';
 
 /// A segmented control widget for switching between a small number of options.
@@ -73,13 +74,26 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
         selectedTextColor ?? colorScheme.onPrimaryContainer;
     final effectiveUnselectedTextColor =
         unselectedTextColor ?? colorScheme.onSurfaceVariant;
+
+    final designTokens = theme.tokens;
+    final itemPadding = tokens.itemPadding.resolve(Directionality.of(context));
+    final containerPadding =
+        tokens.containerPadding.resolve(Directionality.of(context));
+    final labelStyle = theme.textTheme.labelLarge;
+    final double labelHeight =
+        (labelStyle?.fontSize ?? 14) * (labelStyle?.height ?? 1.2);
+    final double itemHeight = itemPadding.vertical + labelHeight;
+    final defaultRadii = designTokens.resolveSegmentedControlRadii(
+      itemHeight: itemHeight,
+      containerPadding: containerPadding.top,
+    );
     final double effectiveContainerRadius =
-        containerRadius ?? tokens.containerRadius;
-    // Concentric inner rounding: kit subtracts 2 to keep the selected pill
-    // visually nested inside the container. Honor the same rule for overrides
-    // unless [itemRadius] is supplied explicitly.
-    final double effectiveItemRadius =
-        itemRadius ?? (effectiveContainerRadius - 2);
+        containerRadius ?? defaultRadii.containerRadius;
+    final double effectiveItemRadius = itemRadius ??
+        designTokens.concentricInner(
+          outerRadius: effectiveContainerRadius,
+          padding: containerPadding.top,
+        );
 
     return Container(
       padding: tokens.containerPadding,

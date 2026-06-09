@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../atoms/tilawa_loading_indicator.dart';
 import '../foundation/color_scheme_ext.dart';
 import '../foundation/component_tokens.dart';
+import '../foundation/design_tokens.dart';
 
 /// Semantic intent for [TilawaFeedbackStrip] (affects a11y label + border).
 enum TilawaFeedbackVariant {
@@ -70,7 +71,10 @@ class TilawaFeedbackStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final componentTokens = theme.componentTokens.feedbackStrip;
-    final double radius = borderRadius ?? componentTokens.borderRadius;
+    final designTokens = theme.tokens;
+    final double radius =
+        borderRadius ??
+        designTokens.resolveRadius(family: TilawaRadiusFamily.chrome);
     final Color? accentColor =
         borderColor ?? _accentForVariant(context, variant);
 

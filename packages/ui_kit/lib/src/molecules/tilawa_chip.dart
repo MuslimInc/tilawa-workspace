@@ -53,18 +53,28 @@ class TilawaChip extends StatelessWidget {
     final effectiveBackground =
         backgroundColor ?? componentTokens.backgroundColor;
     final effectiveForeground = foregroundColor ?? colorScheme.onSurfaceVariant;
-    final effectiveRadius = borderRadius ?? componentTokens.roundedRadius;
     final effectiveBorderColor =
         borderColor ?? componentTokens.defaultBorderColor;
 
-    // Tappable chips honor the Tilawa 44 dp interactive minimum. At that size
-    // the dense 8 dp corner radius reads as a square button, so the corner
-    // rule shifts: pill rounding (radius = height / 2). Icon-only tappable
-    // chips become 44 dp circles for free since width == height. Static
-    // (label) chips keep their dense rounding.
-    final double resolvedRadius = onTap != null
-        ? kTilawaMinInteractiveDimension / 2
-        : effectiveRadius;
+    final EdgeInsets resolvedChipPadding =
+        (padding ?? componentTokens.padding).resolve(Directionality.of(context));
+    final TextStyle effectiveTextStyle =
+        textStyle ?? theme.textTheme.labelLarge ?? const TextStyle();
+    final double labelHeight =
+        (effectiveTextStyle.fontSize ?? 14) *
+        (effectiveTextStyle.height ?? 1.2);
+    final double visualHeight = resolvedChipPadding.vertical + labelHeight;
+
+    final double resolvedRadius =
+        borderRadius ??
+        (onTap != null
+            ? designTokens.resolveRadius(
+                family: TilawaRadiusFamily.pill,
+                height: visualHeight,
+              )
+            : designTokens.resolveRadius(
+                family: TilawaRadiusFamily.decorative,
+              ));
 
     final shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(resolvedRadius),
