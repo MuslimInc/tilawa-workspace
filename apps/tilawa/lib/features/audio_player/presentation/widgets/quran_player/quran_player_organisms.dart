@@ -89,10 +89,12 @@ class _MiniPlayerTransition extends StatelessWidget {
     this.retainExpandDragGestures = false,
     required this.dismissAnimController,
     required this.dismissAnimation,
-    required this.dismissOffsetY,
+    required this.dismissOffsetX,
     required this.onVerticalDragStart,
     required this.onVerticalDragUpdate,
     required this.onVerticalDragEnd,
+    required this.onHorizontalDragUpdate,
+    required this.onHorizontalDragEnd,
     required this.onTap,
     required this.onClose,
   });
@@ -107,10 +109,12 @@ class _MiniPlayerTransition extends StatelessWidget {
   final bool retainExpandDragGestures;
   final AnimationController dismissAnimController;
   final Animation<double>? dismissAnimation;
-  final double dismissOffsetY;
+  final double dismissOffsetX;
   final GestureDragStartCallback onVerticalDragStart;
   final GestureDragUpdateCallback onVerticalDragUpdate;
   final GestureDragEndCallback onVerticalDragEnd;
+  final GestureDragUpdateCallback onHorizontalDragUpdate;
+  final GestureDragEndCallback onHorizontalDragEnd;
   final VoidCallback onTap;
   final VoidCallback onClose;
 
@@ -125,11 +129,13 @@ class _MiniPlayerTransition extends StatelessWidget {
         onVerticalDragStart: onVerticalDragStart,
         onVerticalDragUpdate: onVerticalDragUpdate,
         onVerticalDragEnd: onVerticalDragEnd,
+        onHorizontalDragUpdate: onHorizontalDragUpdate,
+        onHorizontalDragEnd: onHorizontalDragEnd,
         child: AnimatedBuilder(
           animation: dismissAnimController,
           builder: (context, child) {
-            final offset = dismissAnimation?.value ?? dismissOffsetY;
-            return Transform.translate(offset: Offset(0, offset), child: child);
+            final offset = dismissAnimation?.value ?? dismissOffsetX;
+            return Transform.translate(offset: Offset(offset, 0), child: child);
           },
           child: _MiniPlayerOrganism(
             audio: audio,

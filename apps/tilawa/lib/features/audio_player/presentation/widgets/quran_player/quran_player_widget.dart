@@ -207,8 +207,8 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   bool _pendingPortalVisible = false;
   bool _shellPortalVisibilitySyncScheduled = false;
 
-  /// Controls the swipe-down-to-dismiss offset for the mini player.
-  double _dismissOffsetY = 0;
+  /// Controls the horizontal swipe-to-dismiss offset for the mini player.
+  double _dismissOffsetX = 0;
   Animation<double>? _dismissAnimation;
   late AnimationController _dismissAnimController;
 
@@ -241,7 +241,7 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
       'expandProgress': _expandController.value.toStringAsFixed(3),
       'expandStatus': _expandController.status.name,
       'expandIsAnimating': _expandController.isAnimating,
-      'dismissOffsetY': _dismissOffsetY.toStringAsFixed(1),
+      'dismissOffsetX': _dismissOffsetX.toStringAsFixed(1),
       'route': _currentRoutePath(),
       'portalShowing': _portalController.isShowing,
     };
@@ -410,8 +410,8 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
 
   /// Collapse the expanded now-playing sheet on system back.
   ///
-  /// The mini player is not stopped here; dismissal stays on swipe-down or the
-  /// overflow menu stop action.
+  /// The mini player is not stopped here; dismissal stays on horizontal swipe
+  /// or the overflow menu stop action.
   void handleSystemBack() {
     if (!mounted || !isExpanding) {
       return;
@@ -1152,17 +1152,6 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
 
   void _onVerticalDragUpdate(DragUpdateDetails details) {
     final double primaryDelta = details.primaryDelta ?? 0;
-    if ((_expandController.value == 0 && primaryDelta > 0) ||
-        _dismissOffsetY > 0) {
-      setState(() {
-        _dismissOffsetY = (_dismissOffsetY + primaryDelta).clamp(
-          0.0,
-          context.tokens.playerMaxDismissOffset,
-        );
-      });
-      return;
-    }
-
     if (_expandController.value <= 0 && primaryDelta < 0) {
       _onExpandGestureStart();
     }
@@ -1173,35 +1162,45 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     );
   }
 
-  void _onVerticalDragEnd(DragEndDetails details) {
-    final tokens = context.tokens;
-    final double primaryVelocity = details.primaryVelocity ?? 0;
-    if (_dismissOffsetY > 0) {
-      final String decision =
-          primaryVelocity > tokens.playerDismissVelocityThreshold ||
-              _dismissOffsetY > tokens.playerDismissThreshold
-          ? 'dismiss'
-          : 'dismissReset';
-      QuranPlayerDebugLog.drag(
-        'mini.end.dismiss',
-        <String, Object?>{
-          'decision': decision,
-          'dismissOffsetY': _dismissOffsetY.toStringAsFixed(1),
-          'dismissThreshold': tokens.playerDismissThreshold,
-          'dismissVelocityThreshold': tokens.playerDismissVelocityThreshold,
-          'primaryVelocity': primaryVelocity.toStringAsFixed(1),
-          ..._coreStateFields(),
-        },
-      );
-      if (primaryVelocity > tokens.playerDismissVelocityThreshold ||
-          _dismissOffsetY > tokens.playerDismissThreshold) {
-        _dismissWithUndo();
-      } else {
-        _animateDismissReset();
-      }
+  void _onHorizontalDragUpdate(DragUpdateDetails details) {
+    if (_expandController.value > 0.01) {
       return;
     }
+    final double primaryDelta = details.primaryDelta ?? 0;
+    setState(() {
+      _dismissOffsetX = (_dismissOffsetX + primaryDelta).clamp(
+        -context.tokens.playerMaxDismissOffset,
+        context.tokens.playerMaxDismissOffset,
+      );
+    });
+  }
 
+  void _onHorizontalDragEnd(DragEndDetails details) {
+    final tokens = context.tokens;
+    final double primaryVelocity = details.primaryVelocity ?? 0;
+    final bool shouldDismiss =
+        primaryVelocity.abs() > tokens.playerDismissVelocityThreshold ||
+        _dismissOffsetX.abs() > tokens.playerDismissThreshold;
+    QuranPlayerDebugLog.drag(
+      'mini.end.dismiss',
+      <String, Object?>{
+        'decision': shouldDismiss ? 'dismiss' : 'dismissReset',
+        'dismissOffsetX': _dismissOffsetX.toStringAsFixed(1),
+        'dismissThreshold': tokens.playerDismissThreshold,
+        'dismissVelocityThreshold': tokens.playerDismissVelocityThreshold,
+        'primaryVelocity': primaryVelocity.toStringAsFixed(1),
+        ..._coreStateFields(),
+      },
+    );
+    if (shouldDismiss) {
+      _dismissWithUndo();
+    } else {
+      _animateDismissReset();
+    }
+  }
+
+  void _onVerticalDragEnd(DragEndDetails details) {
+    final double primaryVelocity = details.primaryVelocity ?? 0;
     if (_expandController.value > 0.01 || _isUserDraggingExpand) {
       _finishExpandDrag(details, source: 'mini');
     } else {
@@ -1220,17 +1219,17 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     QuranPlayerDebugLog.drag(
       'mini.dismissReset',
       <String, Object?>{
-        'fromOffsetY': _dismissOffsetY.toStringAsFixed(1),
+        'fromOffsetX': _dismissOffsetX.toStringAsFixed(1),
         ..._coreStateFields(),
       },
     );
-    _dismissAnimation = Tween<double>(begin: _dismissOffsetY, end: 0).animate(
+    _dismissAnimation = Tween<double>(begin: _dismissOffsetX, end: 0).animate(
       CurvedAnimation(parent: _dismissAnimController, curve: Curves.easeOut),
     );
     _dismissAnimController.forward(from: 0).then((_) {
       if (!mounted) return;
       setState(() {
-        _dismissOffsetY = 0;
+        _dismissOffsetX = 0;
       });
     });
   }
@@ -1359,10 +1358,10 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
         // from a previous dismiss gesture.
         if (_dismissAnimation != null ||
             _dismissAnimController.value != 0 ||
-            _dismissOffsetY != 0) {
+            _dismissOffsetX != 0) {
           _dismissAnimation = null;
           _dismissAnimController.value = 0;
-          _dismissOffsetY = 0;
+          _dismissOffsetX = 0;
         }
         final String? message = state.failure?.localizedMessage(context);
         if (message != null) {
@@ -1421,10 +1420,12 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
                 retainExpandDragGestures: true,
                 dismissAnimController: _dismissAnimController,
                 dismissAnimation: _dismissAnimation,
-                dismissOffsetY: _dismissOffsetY,
+                dismissOffsetX: _dismissOffsetX,
                 onVerticalDragStart: _onVerticalDragStart,
                 onVerticalDragUpdate: _onVerticalDragUpdate,
                 onVerticalDragEnd: _onVerticalDragEnd,
+                onHorizontalDragUpdate: _onHorizontalDragUpdate,
+                onHorizontalDragEnd: _onHorizontalDragEnd,
                 onTap: expand,
                 onClose: _dismissWithUndo,
               )
@@ -1507,10 +1508,12 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
                       retainExpandDragGestures: _isUserDraggingExpand,
                       dismissAnimController: _dismissAnimController,
                       dismissAnimation: _dismissAnimation,
-                      dismissOffsetY: _dismissOffsetY,
+                      dismissOffsetX: _dismissOffsetX,
                       onVerticalDragStart: _onVerticalDragStart,
                       onVerticalDragUpdate: _onVerticalDragUpdate,
                       onVerticalDragEnd: _onVerticalDragEnd,
+                      onHorizontalDragUpdate: _onHorizontalDragUpdate,
+                      onHorizontalDragEnd: _onHorizontalDragEnd,
                       onTap: expand,
                       onClose: _dismissWithUndo,
                     ),
