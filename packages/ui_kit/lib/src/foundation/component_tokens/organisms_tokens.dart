@@ -1722,7 +1722,9 @@ class TilawaBottomSheetScaffoldTokens {
   factory TilawaBottomSheetScaffoldTokens.defaults() {
     return const TilawaBottomSheetScaffoldTokens(
       topRadius: 28,
-      headerPadding: EdgeInsets.fromLTRB(16, 8, 12, 12),
+      // Tighter end inset hugs the trailing close button; directional so the
+      // close-button side mirrors in RTL.
+      headerPadding: EdgeInsetsDirectional.fromSTEB(16, 8, 12, 12),
       bodyPadding: EdgeInsets.fromLTRB(16, 12, 16, 24),
       closeButtonSize: 40,
       footerPadding: EdgeInsets.fromLTRB(16, 12, 16, 16),

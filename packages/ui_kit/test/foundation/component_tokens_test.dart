@@ -615,7 +615,7 @@ void main() {
       expect(tokens.topRadius, 28.0);
       expect(
         tokens.headerPadding,
-        const EdgeInsets.fromLTRB(16, 8, 12, 12),
+        const EdgeInsetsDirectional.fromSTEB(16, 8, 12, 12),
       );
       expect(
         tokens.bodyPadding,
