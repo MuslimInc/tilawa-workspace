@@ -6,6 +6,8 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/shared/widgets/tilawa_back_button.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../../domain/entities/tasbeeh_dhikr.dart';
+import '../../domain/entities/tasbeeh_layout_mode.dart';
 import '../cubit/tasbeeh_cubit.dart';
 import '../cubit/tasbeeh_state.dart';
 import '../models/tasbeeh_counting_session.dart';
@@ -15,12 +17,14 @@ import '../widgets/tasbeeh/tasbeeh_create_view.dart';
 import '../widgets/tasbeeh/tasbeeh_ephemeral_counting_view.dart';
 import '../widgets/tasbeeh/tasbeeh_home_view.dart';
 import '../widgets/tasbeeh/tasbeeh_layout_widgets.dart';
+import '../widgets/tasbeeh/tasbeeh_reminder_sheet.dart';
 import '../widgets/tasbeeh/tasbeeh_saved_dhikr_counting_view.dart';
 
 class TasbeehScreen extends StatelessWidget {
-  const TasbeehScreen({super.key, this.cubit});
+  const TasbeehScreen({super.key, this.cubit, this.initialDhikrId});
 
   final TasbeehCubit? cubit;
+  final String? initialDhikrId;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +33,8 @@ class TasbeehScreen extends StatelessWidget {
       return BlocProvider<TasbeehCubit>.value(value: cubit!, child: child);
     }
     return BlocProvider<TasbeehCubit>(
-      create: (_) => getIt<TasbeehCubit>()..loadSavedDhikr(),
+      create: (_) =>
+          getIt<TasbeehCubit>()..loadSavedDhikr(openDhikrId: initialDhikrId),
       child: child,
     );
   }
@@ -113,6 +118,11 @@ class _TasbeehView extends StatelessWidget {
                     onPressed: () => context.pop(),
                   )
                 : null,
+            actions: _TasbeehAppBarActions(
+              cubit: cubit,
+              state: state,
+              savedSession: savedSession,
+            ).build(context),
           ),
           body: Stack(
             children: [
@@ -136,6 +146,91 @@ class _TasbeehView extends StatelessWidget {
             ],
           ),
         );
+      },
+    );
+  }
+}
+
+class _TasbeehAppBarActions {
+  const _TasbeehAppBarActions({
+    required this.cubit,
+    required this.state,
+    required this.savedSession,
+  });
+
+  final TasbeehCubit cubit;
+  final TasbeehState state;
+  final TasbeehDhikr? savedSession;
+
+  List<Widget>? build(BuildContext context) {
+    return switch (state.viewMode) {
+      TasbeehViewMode.home when state.savedDhikr.isNotEmpty => [
+        _LayoutToggleButton(cubit: cubit, layoutMode: state.layoutMode),
+        _ClearAllButton(cubit: cubit, itemCount: state.savedDhikr.length),
+      ],
+      TasbeehViewMode.home => [
+        _LayoutToggleButton(cubit: cubit, layoutMode: state.layoutMode),
+      ],
+      TasbeehViewMode.selectedCounting when savedSession != null => [
+        TilawaIconActionButton(
+          icon: savedSession!.reminderEnabled
+              ? Icons.notifications_active_rounded
+              : Icons.notifications_none_rounded,
+          tooltip: context.l10n.tasbeehReminderAction,
+          onTap: () => showTasbeehReminderSheet(
+            context: context,
+            cubit: cubit,
+            dhikr: savedSession!,
+          ),
+        ),
+      ],
+      _ => null,
+    };
+  }
+}
+
+class _LayoutToggleButton extends StatelessWidget {
+  const _LayoutToggleButton({
+    required this.cubit,
+    required this.layoutMode,
+  });
+
+  final TasbeehCubit cubit;
+  final TasbeehLayoutMode layoutMode;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isGrid = layoutMode == TasbeehLayoutMode.grid;
+    return TilawaIconActionButton(
+      icon: isGrid ? Icons.view_list_rounded : Icons.grid_view_rounded,
+      tooltip: isGrid
+          ? context.l10n.tasbeehShowAsList
+          : context.l10n.tasbeehShowAsGrid,
+      onTap: cubit.toggleLayoutMode,
+    );
+  }
+}
+
+class _ClearAllButton extends StatelessWidget {
+  const _ClearAllButton({required this.cubit, required this.itemCount});
+
+  final TasbeehCubit cubit;
+  final int itemCount;
+
+  @override
+  Widget build(BuildContext context) {
+    return TilawaIconActionButton(
+      icon: Icons.delete_sweep_rounded,
+      tooltip: context.l10n.tasbeehClearAllTitle,
+      onTap: () async {
+        final bool? confirmed = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) =>
+              TasbeehClearAllConfirmationDialog(itemCount: itemCount),
+        );
+        if (confirmed == true) {
+          await cubit.clearAllSavedDhikr();
+        }
       },
     );
   }

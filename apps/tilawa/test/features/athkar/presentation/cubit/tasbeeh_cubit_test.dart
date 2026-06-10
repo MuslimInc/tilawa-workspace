@@ -5,23 +5,23 @@ import 'package:tilawa/features/athkar/domain/constants/tasbeeh_constants.dart';
 import 'package:tilawa/features/athkar/domain/entities/tasbeeh_dhikr.dart';
 import 'package:tilawa/features/athkar/domain/repositories/tasbeeh_repository.dart';
 import 'package:tilawa/features/athkar/domain/services/tasbeeh_target_feedback_service.dart';
-import 'package:tilawa/features/athkar/domain/usecases/delete_tasbeeh_dhikr_use_case.dart';
-import 'package:tilawa/features/athkar/domain/usecases/get_saved_tasbeeh_use_case.dart';
-import 'package:tilawa/features/athkar/domain/usecases/increment_tasbeeh_count_use_case.dart';
-import 'package:tilawa/features/athkar/domain/usecases/reset_tasbeeh_count_use_case.dart';
-import 'package:tilawa/features/athkar/domain/usecases/save_custom_tasbeeh_use_case.dart';
-import 'package:tilawa/features/athkar/domain/usecases/set_tasbeeh_target_count_use_case.dart';
 import 'package:tilawa/features/athkar/presentation/cubit/tasbeeh_cubit.dart';
 import 'package:tilawa/features/athkar/presentation/cubit/tasbeeh_state.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/utils/typedefs.dart';
 
+import '../../helpers/tasbeeh_test_support.dart';
+
 class _InMemoryTasbeehRepository implements TasbeehRepository {
   final Map<String, TasbeehDhikr> _store = {};
   Duration incrementDelay = Duration.zero;
+  bool shouldFailLoad = false;
 
   @override
   ResultFuture<List<TasbeehDhikr>> getSavedDhikr() async {
+    if (shouldFailLoad) {
+      return const Left(CacheFailure('hive not ready'));
+    }
     final items = _store.values.toList()
       ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
     return Right(items);
@@ -108,6 +108,31 @@ class _InMemoryTasbeehRepository implements TasbeehRepository {
     _store.remove(dhikrId);
     return const Right(null);
   }
+
+  @override
+  ResultVoid deleteAllDhikr() async {
+    _store.clear();
+    return const Right(null);
+  }
+
+  @override
+  ResultFuture<TasbeehDhikr> setReminder({
+    required String dhikrId,
+    required bool enabled,
+    int? hour,
+    int? minute,
+  }) async {
+    final current = _store[dhikrId];
+    if (current == null) return const Left(CacheFailure('missing'));
+    final updated = current.copyWith(
+      reminderEnabled: enabled,
+      reminderHour: enabled ? hour : null,
+      reminderMinute: enabled ? minute : null,
+      updatedAt: DateTime(2026, 5, 1),
+    );
+    _store[dhikrId] = updated;
+    return Right(updated);
+  }
 }
 
 class _FakeTasbeehTargetFeedbackService
@@ -126,16 +151,11 @@ void main() {
   late _FakeTasbeehTargetFeedbackService feedbackService;
 
   setUp(() {
-    repository = _InMemoryTasbeehRepository();
+    repository = _InMemoryTasbeehRepository()..shouldFailLoad = false;
     feedbackService = _FakeTasbeehTargetFeedbackService();
-    cubit = TasbeehCubit(
-      GetSavedTasbeehUseCase(repository),
-      SaveCustomTasbeehUseCase(repository),
-      IncrementTasbeehCountUseCase(repository),
-      ResetTasbeehCountUseCase(repository),
-      SetTasbeehTargetCountUseCase(repository),
-      DeleteTasbeehDhikrUseCase(repository),
-      feedbackService,
+    cubit = buildTasbeehCubit(
+      repository,
+      feedbackService: feedbackService,
     );
   });
 
@@ -153,6 +173,60 @@ void main() {
         status: TasbeehStatus.loaded,
         draftTargetText: TasbeehConstants.defaultTargetCount.toString(),
       ),
+    ],
+  );
+
+  blocTest<TasbeehCubit, TasbeehState>(
+    'loadSavedDhikr with openDhikrId opens counting for matching dhikr',
+    build: () => cubit,
+    setUp: () async {
+      await repository.saveCustomDhikr(text: 'abc', targetCount: 10);
+    },
+    act: (cubit) => cubit.loadSavedDhikr(openDhikrId: '1'),
+    expect: () => [
+      const TasbeehState(status: TasbeehStatus.loading),
+      isA<TasbeehState>()
+          .having((s) => s.status, 'status', TasbeehStatus.loaded)
+          .having(
+            (s) => s.viewMode,
+            'viewMode',
+            TasbeehViewMode.selectedCounting,
+          )
+          .having((s) => s.activeSavedDhikrId, 'activeId', '1')
+          .having((s) => s.savedDhikr.length, 'saved count', 1)
+          .having((s) => s.savedDhikr.first.text, 'text', 'abc'),
+    ],
+  );
+
+  blocTest<TasbeehCubit, TasbeehState>(
+    'loadSavedDhikr with unknown openDhikrId stays on home view',
+    build: () => cubit,
+    setUp: () async {
+      await repository.saveCustomDhikr(text: 'abc', targetCount: 10);
+    },
+    act: (cubit) => cubit.loadSavedDhikr(openDhikrId: 'missing'),
+    expect: () => [
+      const TasbeehState(status: TasbeehStatus.loading),
+      isA<TasbeehState>()
+          .having((s) => s.status, 'status', TasbeehStatus.loaded)
+          .having((s) => s.viewMode, 'viewMode', TasbeehViewMode.home)
+          .having((s) => s.activeSavedDhikrId, 'activeId', isNull)
+          .having((s) => s.savedDhikr.length, 'saved count', 1),
+    ],
+  );
+
+  blocTest<TasbeehCubit, TasbeehState>(
+    'loadSavedDhikr emits error when repository fails',
+    build: () => cubit,
+    setUp: () {
+      repository.shouldFailLoad = true;
+    },
+    act: (cubit) => cubit.loadSavedDhikr(),
+    expect: () => [
+      const TasbeehState(status: TasbeehStatus.loading),
+      isA<TasbeehState>()
+          .having((s) => s.status, 'status', TasbeehStatus.error)
+          .having((s) => s.savedDhikr, 'savedDhikr', isEmpty),
     ],
   );
 
@@ -229,7 +303,11 @@ void main() {
     act: (cubit) => cubit.selectDhikrAndStartCounting('1'),
     expect: () => [
       isA<TasbeehState>()
-          .having((s) => s.viewMode, 'viewMode', TasbeehViewMode.selectedCounting)
+          .having(
+            (s) => s.viewMode,
+            'viewMode',
+            TasbeehViewMode.selectedCounting,
+          )
           .having((s) => s.activeSavedDhikrId, 'selected', '1')
           .having((s) => s.activeSavedDhikr?.text, 'text', 'Subhan Allah'),
     ],

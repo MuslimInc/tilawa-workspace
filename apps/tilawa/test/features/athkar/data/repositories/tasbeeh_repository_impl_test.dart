@@ -28,6 +28,11 @@ class _InMemoryTasbeehLocalDataSource implements TasbeehLocalDataSource {
   Future<void> deleteDhikr(String id) async {
     _store.remove(id);
   }
+
+  @override
+  Future<void> deleteAllDhikr() async {
+    _store.clear();
+  }
 }
 
 void main() {

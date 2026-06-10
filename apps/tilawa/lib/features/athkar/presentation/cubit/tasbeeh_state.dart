@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../../domain/entities/tasbeeh_dhikr.dart';
+import '../../domain/entities/tasbeeh_layout_mode.dart';
 import '../models/tasbeeh_counting_session.dart';
 
 enum TasbeehStatus { initial, loading, loaded, error }
@@ -9,9 +10,11 @@ enum TasbeehStatus { initial, loading, loaded, error }
 enum TasbeehViewMode {
   /// Entry hub: saved dhikr list, quick count, and create.
   home,
+
   /// In-memory tap-to-count (no persistence, no target feedback).
   quickCount,
   create,
+
   /// Counting a saved dhikr from the hub or after create.
   selectedCounting,
 }
@@ -26,6 +29,7 @@ class TasbeehState extends Equatable {
     this.ephemeralCount = 0,
     this.activeSavedDhikrId,
     this.savedTargetFeedbackPulse = 0,
+    this.layoutMode = TasbeehLayoutMode.list,
     this.failure,
     this.errorMessage,
   });
@@ -44,6 +48,8 @@ class TasbeehState extends Equatable {
 
   /// Bumps on target-reached feedback for saved-dhikr counting only.
   final int savedTargetFeedbackPulse;
+
+  final TasbeehLayoutMode layoutMode;
 
   final Failure? failure;
   final String? errorMessage;
@@ -80,6 +86,7 @@ class TasbeehState extends Equatable {
     String? draftTargetText,
     int? ephemeralCount,
     int? savedTargetFeedbackPulse,
+    TasbeehLayoutMode? layoutMode,
     Object? activeSavedDhikrId = _sentinel,
     Object? failure = _sentinel,
     Object? errorMessage = _sentinel,
@@ -96,6 +103,7 @@ class TasbeehState extends Equatable {
           : activeSavedDhikrId as String?,
       savedTargetFeedbackPulse:
           savedTargetFeedbackPulse ?? this.savedTargetFeedbackPulse,
+      layoutMode: layoutMode ?? this.layoutMode,
       failure: failure == _sentinel ? this.failure : failure as Failure?,
       errorMessage: errorMessage == _sentinel
           ? this.errorMessage
@@ -113,6 +121,7 @@ class TasbeehState extends Equatable {
     ephemeralCount,
     activeSavedDhikrId,
     savedTargetFeedbackPulse,
+    layoutMode,
     failure,
     errorMessage,
   ];

@@ -991,6 +991,45 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get tasbeehShowAsList => 'عرض كقائمة';
+
+  @override
+  String get tasbeehShowAsGrid => 'عرض كشبكة';
+
+  @override
+  String get tasbeehClearAllTitle => 'مسح كل المسبحات المحفوظة؟';
+
+  @override
+  String tasbeehClearAllMessage(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'سيؤدي هذا إلى إزالة كل الـ $countString أذكار محفوظة وتذكيراتها. لا يمكن التراجع عن ذلك.';
+  }
+
+  @override
+  String get tasbeehReminderSheetTitle => 'تذكير يومي';
+
+  @override
+  String get tasbeehReminderEnabledLabel => 'تذكير يومي';
+
+  @override
+  String get tasbeehReminderEnabledSubtitle =>
+      'تلقَّ إشعاراً محلياً في الوقت الذي تختاره';
+
+  @override
+  String tasbeehReminderPickTime(String time) {
+    return 'وقت التذكير: $time';
+  }
+
+  @override
+  String get tasbeehReminderAction => 'تذكير';
+
+  @override
+  String get tasbeehReminderNotificationBody => 'حان وقت ذكرك';
+
+  @override
   String get done => 'تم';
 
   @override

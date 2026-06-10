@@ -54,6 +54,22 @@ class _FakeTasbeehRepository implements TasbeehRepository {
   ResultVoid deleteDhikr(String dhikrId) async {
     return const Right(null);
   }
+
+  @override
+  ResultVoid deleteAllDhikr() async {
+    _items.clear();
+    return const Right(null);
+  }
+
+  @override
+  ResultFuture<TasbeehDhikr> setReminder({
+    required String dhikrId,
+    required bool enabled,
+    int? hour,
+    int? minute,
+  }) async {
+    return const Left(CacheFailure('not needed in this test'));
+  }
 }
 
 void main() {

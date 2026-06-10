@@ -10,6 +10,9 @@ class TasbeehDhikrModel extends TasbeehDhikr {
     required super.targetReachedNotified,
     required super.createdAt,
     required super.updatedAt,
+    super.reminderEnabled = false,
+    super.reminderHour,
+    super.reminderMinute,
   });
 
   factory TasbeehDhikrModel.fromEntity(TasbeehDhikr entity) {
@@ -21,6 +24,9 @@ class TasbeehDhikrModel extends TasbeehDhikr {
       targetReachedNotified: entity.targetReachedNotified,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
+      reminderEnabled: entity.reminderEnabled,
+      reminderHour: entity.reminderHour,
+      reminderMinute: entity.reminderMinute,
     );
   }
 
@@ -34,6 +40,9 @@ class TasbeehDhikrModel extends TasbeehDhikr {
       targetReachedNotified: (json['targetReachedNotified'] as bool?) ?? false,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
+      reminderEnabled: (json['reminderEnabled'] as bool?) ?? false,
+      reminderHour: json['reminderHour'] as int?,
+      reminderMinute: json['reminderMinute'] as int?,
     );
   }
 
@@ -46,6 +55,9 @@ class TasbeehDhikrModel extends TasbeehDhikr {
       'targetReachedNotified': targetReachedNotified,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
+      'reminderEnabled': reminderEnabled,
+      if (reminderHour != null) 'reminderHour': reminderHour,
+      if (reminderMinute != null) 'reminderMinute': reminderMinute,
     };
   }
 
@@ -58,6 +70,9 @@ class TasbeehDhikrModel extends TasbeehDhikr {
     bool? targetReachedNotified,
     DateTime? createdAt,
     DateTime? updatedAt,
+    bool? reminderEnabled,
+    Object? reminderHour = _modelSentinel,
+    Object? reminderMinute = _modelSentinel,
   }) {
     return TasbeehDhikrModel(
       id: id ?? this.id,
@@ -68,6 +83,15 @@ class TasbeehDhikrModel extends TasbeehDhikr {
           targetReachedNotified ?? this.targetReachedNotified,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      reminderEnabled: reminderEnabled ?? this.reminderEnabled,
+      reminderHour: reminderHour == _modelSentinel
+          ? this.reminderHour
+          : reminderHour as int?,
+      reminderMinute: reminderMinute == _modelSentinel
+          ? this.reminderMinute
+          : reminderMinute as int?,
     );
   }
 }
+
+const Object _modelSentinel = Object();

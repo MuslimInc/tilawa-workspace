@@ -2,21 +2,20 @@ import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/quran_reader/presentation/screens/quran_image_reader_screen.dart';
 import 'package:tilawa/features/quran_reader/presentation/screens/quran_render_demo_screen.dart';
 import 'package:tilawa/features/support/presentation/bloc/support_bloc.dart';
 import 'package:tilawa/features/support/presentation/bloc/support_event.dart';
-import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../features/app_review/domain/entities/app_review_blocked_flow.dart';
 import '../features/app_review/presentation/widgets/app_review_sacred_flow_scope.dart';
-import '../features/athkar/presentation/widgets/athkar_categories_screen_scope.dart';
-import '../features/qibla/presentation/widgets/qibla_screen_scope.dart';
 import '../features/athkar/presentation/screens/athkar_details_screen.dart';
 import '../features/athkar/presentation/screens/tasbeeh_screen.dart';
+import '../features/athkar/presentation/widgets/athkar_categories_screen_scope.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/bookmarks/presentation/bloc/bookmarks_bloc.dart';
 import '../features/bookmarks/presentation/screens/bookmarks_screen.dart';
@@ -28,8 +27,7 @@ import '../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../features/prayer_times/presentation/screens/prayer_alerts_permission_screen.dart';
 import '../features/prayer_times/presentation/screens/prayer_notification_status_screen.dart';
 import '../features/prayer_times/presentation/widgets/prayer_times_screen_scope.dart';
-import 'prayer_alerts_permission_nav_extra.dart';
-import '../features/support/presentation/screens/support_tilawa_screen.dart';
+import '../features/qibla/presentation/widgets/qibla_screen_scope.dart';
 import '../features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import '../features/reciters/presentation/bloc/reciter_download_bloc.dart';
 import '../features/reciters/presentation/screens/favorites_screen.dart';
@@ -38,16 +36,18 @@ import '../features/reciters/presentation/screens/reciter_details_screen.dart';
 import '../features/reciters/presentation/widgets/reciters_search_route_transition.dart';
 import '../features/reciters/presentation/widgets/reciters_search_screen_scope.dart';
 import '../features/settings/presentation/widgets/settings_screen_scope.dart';
-import '../features/share/presentation/widgets/share_composer_screen_scope.dart';
 import '../features/share/presentation/screens/screenshot_composer_screen.dart';
 import '../features/share/presentation/screens/video_reel_composer_screen.dart';
+import '../features/share/presentation/widgets/share_composer_screen_scope.dart';
 import '../features/splash/presentation/screens/splash_screen.dart';
+import '../features/support/presentation/screens/support_tilawa_screen.dart';
 import '../screens/app_shell_screen.dart';
 import '../screens/main_screen.dart';
 import '../screens/route_list_screen.dart';
 import '../shared/widgets/quran_player_expanded_page.dart';
 import '../shared/widgets/quran_player_expanded_route_transition.dart';
 import 'launch_route_page.dart';
+import 'prayer_alerts_permission_nav_extra.dart';
 import 'share_composer_extra.dart';
 
 part 'app_router_config.g.dart';
@@ -113,17 +113,18 @@ class RecitersSearchRoute extends GoRouteData with $RecitersSearchRoute {
       transitionDuration: RecitersSearchRouteTransition.transitionDuration,
       reverseTransitionDuration:
           RecitersSearchRouteTransition.reverseTransitionDuration,
-      transitionsBuilder: (
-        BuildContext context,
-        Animation<double> animation,
-        Animation<double> secondaryAnimation,
-        Widget child,
-      ) {
-        return RecitersSearchRouteTransition(
-          animation: animation,
-          child: child,
-        );
-      },
+      transitionsBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+            Widget child,
+          ) {
+            return RecitersSearchRouteTransition(
+              animation: animation,
+              child: child,
+            );
+          },
       child: build(context, state),
     );
   }
@@ -291,11 +292,13 @@ class AthkarCategoriesRoute extends GoRouteData with $AthkarCategoriesRoute {
 
 @TypedGoRoute<TasbeehRoute>(path: '/athkar/tasbeeh')
 class TasbeehRoute extends GoRouteData with $TasbeehRoute {
-  const TasbeehRoute();
+  const TasbeehRoute({this.dhikrId});
+
+  final String? dhikrId;
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return const TasbeehScreen();
+    return TasbeehScreen(initialDhikrId: dhikrId);
   }
 }
 
@@ -496,17 +499,18 @@ class QuranPlayerExpandedRoute extends GoRouteData
       transitionDuration: QuranPlayerExpandedRouteTransition.transitionDuration,
       reverseTransitionDuration:
           QuranPlayerExpandedRouteTransition.reverseTransitionDuration,
-      transitionsBuilder: (
-        BuildContext context,
-        Animation<double> animation,
-        Animation<double> secondaryAnimation,
-        Widget child,
-      ) {
-        return QuranPlayerExpandedRouteTransition(
-          animation: animation,
-          child: child,
-        );
-      },
+      transitionsBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+            Widget child,
+          ) {
+            return QuranPlayerExpandedRouteTransition(
+              animation: animation,
+              child: child,
+            );
+          },
       child: const QuranPlayerExpandedPage(),
     );
   }

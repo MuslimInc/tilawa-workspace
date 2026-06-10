@@ -86,6 +86,32 @@ class TasbeehShakeOnTrigger extends StatelessWidget {
   }
 }
 
+class TasbeehClearAllConfirmationDialog extends StatelessWidget {
+  const TasbeehClearAllConfirmationDialog({super.key, required this.itemCount});
+
+  final int itemCount;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(context.l10n.tasbeehClearAllTitle),
+      content: Text(context.l10n.tasbeehClearAllMessage(itemCount)),
+      actions: [
+        TilawaButton(
+          text: context.l10n.cancel,
+          variant: TilawaButtonVariant.ghost,
+          onPressed: () => Navigator.of(context).pop(false),
+        ),
+        TilawaButton(
+          text: context.l10n.deleteAll,
+          variant: TilawaButtonVariant.danger,
+          onPressed: () => Navigator.of(context).pop(true),
+        ),
+      ],
+    );
+  }
+}
+
 class TasbeehDeleteConfirmationDialog extends StatelessWidget {
   const TasbeehDeleteConfirmationDialog({super.key, required this.tasbeehText});
 

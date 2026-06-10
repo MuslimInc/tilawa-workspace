@@ -152,4 +152,53 @@ class TasbeehRepositoryImpl implements TasbeehRepository {
       return Left(PersistenceFailure(e.toString()));
     }
   }
+
+  @override
+  ResultVoid deleteAllDhikr() async {
+    try {
+      await _localDataSource.deleteAllDhikr();
+      return const Right(null);
+    } catch (e) {
+      return Left(PersistenceFailure(e.toString()));
+    }
+  }
+
+  @override
+  ResultFuture<TasbeehDhikr> setReminder({
+    required String dhikrId,
+    required bool enabled,
+    int? hour,
+    int? minute,
+  }) async {
+    if (enabled) {
+      if (hour == null ||
+          minute == null ||
+          hour < 0 ||
+          hour > 23 ||
+          minute < 0 ||
+          minute > 59) {
+        return const Left(
+          ValidationFailure('Tasbeeh reminder time is invalid'),
+        );
+      }
+    }
+
+    try {
+      final existing = await _localDataSource.getDhikrById(dhikrId);
+      if (existing == null) {
+        return const Left(CacheFailure('Tasbeeh item was not found'));
+      }
+
+      final updated = existing.copyWith(
+        reminderEnabled: enabled,
+        reminderHour: enabled ? hour : null,
+        reminderMinute: enabled ? minute : null,
+        updatedAt: DateTime.now(),
+      );
+      await _localDataSource.saveDhikr(updated);
+      return Right(updated);
+    } catch (e) {
+      return Left(PersistenceFailure(e.toString()));
+    }
+  }
 }

@@ -1868,6 +1868,66 @@ abstract class AppLocalizations {
   /// **'{current} / {target}'**
   String tasbeehProgressLabel(int current, int target);
 
+  /// Accessibility label for switching saved dhikr to list layout
+  ///
+  /// In en, this message translates to:
+  /// **'Show as list'**
+  String get tasbeehShowAsList;
+
+  /// Accessibility label for switching saved dhikr to grid layout
+  ///
+  /// In en, this message translates to:
+  /// **'Show as grid'**
+  String get tasbeehShowAsGrid;
+
+  /// Title for clear-all saved tasbeeh confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all saved Tasbeeh?'**
+  String get tasbeehClearAllTitle;
+
+  /// Body for clear-all saved tasbeeh confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'This removes all {count} saved dhikr and their reminders. This cannot be undone.'**
+  String tasbeehClearAllMessage(int count);
+
+  /// Title for per-dhikr reminder bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Daily reminder'**
+  String get tasbeehReminderSheetTitle;
+
+  /// Switch label for enabling a daily tasbeeh reminder
+  ///
+  /// In en, this message translates to:
+  /// **'Daily reminder'**
+  String get tasbeehReminderEnabledLabel;
+
+  /// Subtitle for daily tasbeeh reminder switch
+  ///
+  /// In en, this message translates to:
+  /// **'Get a local notification at your chosen time'**
+  String get tasbeehReminderEnabledSubtitle;
+
+  /// Button label showing selected reminder time
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder time: {time}'**
+  String tasbeehReminderPickTime(String time);
+
+  /// App bar action to open reminder settings while counting
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder'**
+  String get tasbeehReminderAction;
+
+  /// Body text for daily tasbeeh reminder local notifications
+  ///
+  /// In en, this message translates to:
+  /// **'Time for your dhikr'**
+  String get tasbeehReminderNotificationBody;
+
   /// Done label for thikr completion
   ///
   /// In en, this message translates to:

@@ -15,4 +15,11 @@ abstract class TasbeehRepository {
     required int targetCount,
   });
   ResultVoid deleteDhikr(String dhikrId);
+  ResultVoid deleteAllDhikr();
+  ResultFuture<TasbeehDhikr> setReminder({
+    required String dhikrId,
+    required bool enabled,
+    int? hour,
+    int? minute,
+  });
 }

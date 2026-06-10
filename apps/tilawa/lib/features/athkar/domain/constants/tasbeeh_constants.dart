@@ -12,4 +12,11 @@ class TasbeehConstants {
   static const int defaultTargetCount = 33;
   static const int minTargetCount = 1;
   static const int maxTargetCount = 100000;
+
+  static const String layoutPreferenceKey = 'tasbeeh_saved_layout_mode';
+
+  static const String reminderChannelId = 'com.tilawa.app.tasbeeh_reminders';
+  static const int reminderNotificationIdBase = 13000000;
+  static const int reminderNotificationIdRange = 100000;
+  static const String reminderPayloadPrefix = 'tasbeeh:dhikr:';
 }

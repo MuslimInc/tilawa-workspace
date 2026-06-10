@@ -1274,6 +1274,57 @@
             }
         }
     },
+    "tasbeehShowAsList": "عرض كقائمة",
+    "@tasbeehShowAsList": {
+        "description": "Accessibility label for switching saved dhikr to list layout"
+    },
+    "tasbeehShowAsGrid": "عرض كشبكة",
+    "@tasbeehShowAsGrid": {
+        "description": "Accessibility label for switching saved dhikr to grid layout"
+    },
+    "tasbeehClearAllTitle": "مسح كل المسبحات المحفوظة؟",
+    "@tasbeehClearAllTitle": {
+        "description": "Title for clear-all saved tasbeeh confirmation dialog"
+    },
+    "tasbeehClearAllMessage": "سيؤدي هذا إلى إزالة كل الـ {count} أذكار محفوظة وتذكيراتها. لا يمكن التراجع عن ذلك.",
+    "@tasbeehClearAllMessage": {
+        "description": "Body for clear-all saved tasbeeh confirmation dialog",
+        "placeholders": {
+            "count": {
+                "type": "int",
+                "format": "decimalPattern"
+            }
+        }
+    },
+    "tasbeehReminderSheetTitle": "تذكير يومي",
+    "@tasbeehReminderSheetTitle": {
+        "description": "Title for per-dhikr reminder bottom sheet"
+    },
+    "tasbeehReminderEnabledLabel": "تذكير يومي",
+    "@tasbeehReminderEnabledLabel": {
+        "description": "Switch label for enabling a daily tasbeeh reminder"
+    },
+    "tasbeehReminderEnabledSubtitle": "تلقَّ إشعاراً محلياً في الوقت الذي تختاره",
+    "@tasbeehReminderEnabledSubtitle": {
+        "description": "Subtitle for daily tasbeeh reminder switch"
+    },
+    "tasbeehReminderPickTime": "وقت التذكير: {time}",
+    "@tasbeehReminderPickTime": {
+        "description": "Button label showing selected reminder time",
+        "placeholders": {
+            "time": {
+                "type": "String"
+            }
+        }
+    },
+    "tasbeehReminderAction": "تذكير",
+    "@tasbeehReminderAction": {
+        "description": "App bar action to open reminder settings while counting"
+    },
+    "tasbeehReminderNotificationBody": "حان وقت ذكرك",
+    "@tasbeehReminderNotificationBody": {
+        "description": "Body text for daily tasbeeh reminder local notifications"
+    },
     "tasbeehSelectOrCreatePrompt": "اختر ذكراً محفوظاً أو أضف ذكراً جديداً للبدء",
     "@tasbeehSelectOrCreatePrompt": {
         "description": "Prompt shown when no dhikr is selected"

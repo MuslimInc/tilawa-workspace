@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:hive_ce/hive.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa/core/services/hive_readiness.dart';
 
 import '../../domain/constants/tasbeeh_constants.dart';
 import '../models/tasbeeh_dhikr_model.dart';
@@ -11,15 +12,18 @@ abstract class TasbeehLocalDataSource {
   Future<TasbeehDhikrModel?> getDhikrById(String id);
   Future<void> saveDhikr(TasbeehDhikrModel model);
   Future<void> deleteDhikr(String id);
+  Future<void> deleteAllDhikr();
 }
 
 @LazySingleton(as: TasbeehLocalDataSource)
 class TasbeehLocalDataSourceImpl implements TasbeehLocalDataSource {
-  TasbeehLocalDataSourceImpl(this._hive);
+  TasbeehLocalDataSourceImpl(this._hive, this._hiveReadiness);
 
   final HiveInterface _hive;
+  final HiveReadiness _hiveReadiness;
 
   Future<Box> _getBox() async {
+    await _hiveReadiness.ensureReady();
     if (_hive.isBoxOpen(TasbeehConstants.storageBoxName)) {
       return _hive.box(TasbeehConstants.storageBoxName);
     }
@@ -60,5 +64,11 @@ class TasbeehLocalDataSourceImpl implements TasbeehLocalDataSource {
   Future<void> deleteDhikr(String id) async {
     final box = await _getBox();
     await box.delete(id);
+  }
+
+  @override
+  Future<void> deleteAllDhikr() async {
+    final box = await _getBox();
+    await box.clear();
   }
 }

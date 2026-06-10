@@ -997,6 +997,45 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get tasbeehShowAsList => 'Show as list';
+
+  @override
+  String get tasbeehShowAsGrid => 'Show as grid';
+
+  @override
+  String get tasbeehClearAllTitle => 'Clear all saved Tasbeeh?';
+
+  @override
+  String tasbeehClearAllMessage(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'This removes all $countString saved dhikr and their reminders. This cannot be undone.';
+  }
+
+  @override
+  String get tasbeehReminderSheetTitle => 'Daily reminder';
+
+  @override
+  String get tasbeehReminderEnabledLabel => 'Daily reminder';
+
+  @override
+  String get tasbeehReminderEnabledSubtitle =>
+      'Get a local notification at your chosen time';
+
+  @override
+  String tasbeehReminderPickTime(String time) {
+    return 'Reminder time: $time';
+  }
+
+  @override
+  String get tasbeehReminderAction => 'Reminder';
+
+  @override
+  String get tasbeehReminderNotificationBody => 'Time for your dhikr';
+
+  @override
   String get done => 'Done';
 
   @override

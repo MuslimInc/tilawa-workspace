@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../../../domain/entities/tasbeeh_layout_mode.dart';
 import '../../cubit/tasbeeh_cubit.dart';
 import '../../cubit/tasbeeh_state.dart';
 import 'tasbeeh_layout_widgets.dart';
+import 'tasbeeh_saved_dhikr_grid.dart';
 import 'tasbeeh_saved_dhikr_list.dart';
 
 class TasbeehHomeView extends StatelessWidget {
@@ -65,6 +67,11 @@ class TasbeehHomeView extends StatelessWidget {
                   title: context.l10n.tasbeehHistoryEmpty,
                   semanticLabel: context.l10n.tasbeehHistoryEmpty,
                 ),
+              )
+            else if (state.layoutMode == TasbeehLayoutMode.grid)
+              TasbeehSavedDhikrGrid(
+                cubit: cubit,
+                savedDhikr: state.savedDhikr,
               )
             else
               TasbeehSavedDhikrList(

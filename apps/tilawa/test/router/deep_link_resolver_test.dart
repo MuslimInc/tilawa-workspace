@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/core/navigation/navigation_source.dart';
 import 'package:tilawa/core/navigation/notification_destination.dart';
+import 'package:tilawa/features/athkar/domain/constants/tasbeeh_constants.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa/router/deep_link_resolver.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
@@ -51,6 +52,22 @@ void main() {
           const {'actionType': 'settings'},
         ),
         const SettingsRoute().location,
+      );
+    });
+
+    test('maps tasbeeh notification to tasbeeh route with dhikrId', () {
+      expect(
+        DeepLinkResolver.resolveLocation(
+          const {'type': 'tasbeeh', 'dhikrId': 'abc'},
+        ),
+        const TasbeehRoute(dhikrId: 'abc').location,
+      );
+    });
+
+    test('maps tasbeeh notification without dhikrId to tasbeeh home', () {
+      expect(
+        DeepLinkResolver.resolveLocation(const {'type': 'tasbeeh'}),
+        const TasbeehRoute().location,
       );
     });
 
@@ -148,10 +165,29 @@ void main() {
       );
     });
 
+    test('resolves tasbeeh reminder string payload to tasbeeh data', () {
+      final Map<String, dynamic>? data =
+          DeepLinkResolver.notificationDataFromPayload(
+            '${TasbeehConstants.reminderPayloadPrefix}abc',
+          );
+
+      expect(data, const {'type': 'tasbeeh', 'dhikrId': 'abc'});
+      expect(
+        DeepLinkResolver.resolveLocation(data!),
+        const TasbeehRoute(dhikrId: 'abc').location,
+      );
+    });
+
     test('returns null for null, empty, or non-athkar non-JSON payloads', () {
       expect(DeepLinkResolver.notificationDataFromPayload(null), isNull);
       expect(DeepLinkResolver.notificationDataFromPayload(''), isNull);
       expect(DeepLinkResolver.notificationDataFromPayload('not-json'), isNull);
+      expect(
+        DeepLinkResolver.notificationDataFromPayload(
+          TasbeehConstants.reminderPayloadPrefix,
+        ),
+        isNull,
+      );
     });
   });
 

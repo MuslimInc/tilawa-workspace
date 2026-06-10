@@ -1,8 +1,8 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:tilawa_core/errors/failures.dart';
-import 'package:tilawa_core/utils/typedefs.dart';
 import 'package:tilawa/features/athkar/domain/entities/tasbeeh_dhikr.dart';
 import 'package:tilawa/features/athkar/domain/repositories/tasbeeh_repository.dart';
+import 'package:tilawa_core/errors/failures.dart';
+import 'package:tilawa_core/utils/typedefs.dart';
 
 /// In-memory [TasbeehRepository] for use-case tests.
 ///
@@ -113,6 +113,37 @@ class FakeTasbeehRepository implements TasbeehRepository {
     }
     _items.remove(dhikrId);
     return const Right(null);
+  }
+
+  @override
+  ResultVoid deleteAllDhikr() async {
+    final f = _consumeFailure();
+    if (f != null) return Left(f);
+    _items.clear();
+    return const Right(null);
+  }
+
+  @override
+  ResultFuture<TasbeehDhikr> setReminder({
+    required String dhikrId,
+    required bool enabled,
+    int? hour,
+    int? minute,
+  }) async {
+    final f = _consumeFailure();
+    if (f != null) return Left(f);
+    final current = _items[dhikrId];
+    if (current == null) {
+      return const Left(CacheFailure('dhikr not found'));
+    }
+    final updated = current.copyWith(
+      reminderEnabled: enabled,
+      reminderHour: enabled ? hour : null,
+      reminderMinute: enabled ? minute : null,
+      updatedAt: DateTime(2026, 1, 3),
+    );
+    _items[dhikrId] = updated;
+    return Right(updated);
   }
 }
 

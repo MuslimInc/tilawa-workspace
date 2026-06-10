@@ -1381,6 +1381,57 @@
             }
         }
     },
+    "tasbeehShowAsList": "Show as list",
+    "@tasbeehShowAsList": {
+        "description": "Accessibility label for switching saved dhikr to list layout"
+    },
+    "tasbeehShowAsGrid": "Show as grid",
+    "@tasbeehShowAsGrid": {
+        "description": "Accessibility label for switching saved dhikr to grid layout"
+    },
+    "tasbeehClearAllTitle": "Clear all saved Tasbeeh?",
+    "@tasbeehClearAllTitle": {
+        "description": "Title for clear-all saved tasbeeh confirmation dialog"
+    },
+    "tasbeehClearAllMessage": "This removes all {count} saved dhikr and their reminders. This cannot be undone.",
+    "@tasbeehClearAllMessage": {
+        "description": "Body for clear-all saved tasbeeh confirmation dialog",
+        "placeholders": {
+            "count": {
+                "type": "int",
+                "format": "decimalPattern"
+            }
+        }
+    },
+    "tasbeehReminderSheetTitle": "Daily reminder",
+    "@tasbeehReminderSheetTitle": {
+        "description": "Title for per-dhikr reminder bottom sheet"
+    },
+    "tasbeehReminderEnabledLabel": "Daily reminder",
+    "@tasbeehReminderEnabledLabel": {
+        "description": "Switch label for enabling a daily tasbeeh reminder"
+    },
+    "tasbeehReminderEnabledSubtitle": "Get a local notification at your chosen time",
+    "@tasbeehReminderEnabledSubtitle": {
+        "description": "Subtitle for daily tasbeeh reminder switch"
+    },
+    "tasbeehReminderPickTime": "Reminder time: {time}",
+    "@tasbeehReminderPickTime": {
+        "description": "Button label showing selected reminder time",
+        "placeholders": {
+            "time": {
+                "type": "String"
+            }
+        }
+    },
+    "tasbeehReminderAction": "Reminder",
+    "@tasbeehReminderAction": {
+        "description": "App bar action to open reminder settings while counting"
+    },
+    "tasbeehReminderNotificationBody": "Time for your dhikr",
+    "@tasbeehReminderNotificationBody": {
+        "description": "Body text for daily tasbeeh reminder local notifications"
+    },
     "done": "Done",
     "@done": {
         "description": "Done label for thikr completion"

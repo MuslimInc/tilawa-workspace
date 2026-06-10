@@ -1,0 +1,4 @@
+enum TasbeehLayoutMode {
+  list,
+  grid,
+}

@@ -6,13 +6,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:tilawa/features/athkar/domain/services/tasbeeh_target_feedback_service.dart';
-import 'package:tilawa/features/athkar/domain/usecases/delete_tasbeeh_dhikr_use_case.dart';
-import 'package:tilawa/features/athkar/domain/usecases/get_saved_tasbeeh_use_case.dart';
-import 'package:tilawa/features/athkar/domain/usecases/increment_tasbeeh_count_use_case.dart';
-import 'package:tilawa/features/athkar/domain/usecases/reset_tasbeeh_count_use_case.dart';
-import 'package:tilawa/features/athkar/domain/usecases/save_custom_tasbeeh_use_case.dart';
-import 'package:tilawa/features/athkar/domain/usecases/set_tasbeeh_target_count_use_case.dart';
 import 'package:tilawa/features/athkar/presentation/cubit/tasbeeh_cubit.dart';
 import 'package:tilawa/features/athkar/presentation/cubit/tasbeeh_state.dart';
 import 'package:tilawa/features/athkar/presentation/screens/tasbeeh_screen.dart';
@@ -21,21 +14,9 @@ import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../helpers/fake_tasbeeh_repository.dart';
+import '../../helpers/tasbeeh_test_support.dart';
 
-class _SilentFeedbackService implements TasbeehTargetFeedbackService {
-  @override
-  Future<void> onTargetReached() async {}
-}
-
-TasbeehCubit _buildCubit(FakeTasbeehRepository repo) => TasbeehCubit(
-  GetSavedTasbeehUseCase(repo),
-  SaveCustomTasbeehUseCase(repo),
-  IncrementTasbeehCountUseCase(repo),
-  ResetTasbeehCountUseCase(repo),
-  SetTasbeehTargetCountUseCase(repo),
-  DeleteTasbeehDhikrUseCase(repo),
-  _SilentFeedbackService(),
-);
+TasbeehCubit _buildCubit(FakeTasbeehRepository repo) => buildTasbeehCubit(repo);
 
 Widget _buildTestApp(TasbeehCubit cubit) {
   final router = GoRouter(
@@ -78,9 +59,12 @@ Future<void> _pumpHomeWithSavedDhikr(
 }
 
 Future<void> _tapDeleteIcon(WidgetTester tester) async {
-  final Finder deleteButton = find.byType(TilawaIconActionButton);
+  final Finder deleteButton = find.widgetWithIcon(
+    TilawaIconActionButton,
+    Icons.delete_outline_rounded,
+  );
   expect(deleteButton, findsOneWidget);
-  await tester.tapAt(tester.getCenter(deleteButton));
+  await tester.tap(deleteButton);
   await tester.pump();
 }
 

@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:tilawa/core/navigation/navigation_source.dart';
 import 'package:tilawa/core/navigation/notification_destination.dart';
+import 'package:tilawa/core/services/tasbeeh_reminder_notification_service.dart';
+import 'package:tilawa/features/athkar/domain/constants/tasbeeh_constants.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 
@@ -27,6 +29,10 @@ class DeepLinkResolver {
   /// the cold-start path must detect them before attempting [jsonDecode].
   static const String athkarMorningPayloadPrefix = 'morning_athkar_';
   static const String athkarEveningPayloadPrefix = 'evening_athkar_';
+
+  /// Prefix for per-dhikr tasbeeh reminder local notifications.
+  static const String tasbeehReminderPayloadPrefix =
+      TasbeehConstants.reminderPayloadPrefix;
 
   // ---------------------------------------------------------------------------
   // Map (FCM / generic deep-link) resolution
@@ -93,6 +99,12 @@ class DeepLinkResolver {
         return const SettingsRoute().location;
       case 'prayer':
         return const PrayerTimesRoute().location;
+      case 'tasbeeh':
+        final String? dhikrId = data['dhikrId']?.toString();
+        if (dhikrId != null && dhikrId.isNotEmpty) {
+          return TasbeehRoute(dhikrId: dhikrId).location;
+        }
+        return const TasbeehRoute().location;
       case 'home':
       default:
         return const HomeRoute().location;
@@ -149,6 +161,17 @@ class DeepLinkResolver {
     );
   }
 
+  /// Saved tasbeeh counting destination for a specific [dhikrId].
+  NotificationDestination tasbeehDhikr(
+    String dhikrId, {
+    NavigationSource source = NavigationSource.notification,
+  }) {
+    return NotificationDestination(
+      location: TasbeehRoute(dhikrId: dhikrId).location,
+      source: source,
+    );
+  }
+
   /// Prayer notification status destination, carrying the raw adhan [payload]
   /// string as the route extra (unchanged contract for the status screen).
   NotificationDestination prayerStatus(String payload) {
@@ -199,6 +222,10 @@ class DeepLinkResolver {
     if (athkar != null) {
       return athkar;
     }
+    final Map<String, dynamic>? tasbeeh = _tasbeehDataFromPayload(payload);
+    if (tasbeeh != null) {
+      return tasbeeh;
+    }
     try {
       return Map<String, dynamic>.from(jsonDecode(payload) as Map);
     } catch (_) {
@@ -208,6 +235,20 @@ class DeepLinkResolver {
 
   /// Maps a plain-string athkar payload to the normalized `athkar` data map
   /// consumed by [resolveLocation], or `null` when [payload] is not athkar.
+  static Map<String, dynamic>? _tasbeehDataFromPayload(String payload) {
+    if (!payload.startsWith(TasbeehConstants.reminderPayloadPrefix)) {
+      return null;
+    }
+    final String? dhikrId =
+        TasbeehReminderNotificationService.dhikrIdFromPayload(
+          payload,
+        );
+    if (dhikrId == null) {
+      return null;
+    }
+    return <String, dynamic>{'type': 'tasbeeh', 'dhikrId': dhikrId};
+  }
+
   static Map<String, dynamic>? _athkarDataFromPayload(String payload) {
     final bool isMorning = payload.startsWith(athkarMorningPayloadPrefix);
     final bool isEvening = payload.startsWith(athkarEveningPayloadPrefix);
@@ -216,9 +257,12 @@ class DeepLinkResolver {
     }
     return <String, dynamic>{
       'type': 'athkar',
-      'categoryId': isMorning ? athkarMorningCategoryId : athkarEveningCategoryId,
-      'categoryName':
-          isMorning ? athkarMorningCategoryName : athkarEveningCategoryName,
+      'categoryId': isMorning
+          ? athkarMorningCategoryId
+          : athkarEveningCategoryId,
+      'categoryName': isMorning
+          ? athkarMorningCategoryName
+          : athkarEveningCategoryName,
     };
   }
 

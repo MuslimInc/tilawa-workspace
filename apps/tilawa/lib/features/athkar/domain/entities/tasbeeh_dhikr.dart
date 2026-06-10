@@ -9,6 +9,9 @@ class TasbeehDhikr extends Equatable {
     required this.targetReachedNotified,
     required this.createdAt,
     required this.updatedAt,
+    this.reminderEnabled = false,
+    this.reminderHour,
+    this.reminderMinute,
   });
 
   final String id;
@@ -18,6 +21,9 @@ class TasbeehDhikr extends Equatable {
   final bool targetReachedNotified;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final bool reminderEnabled;
+  final int? reminderHour;
+  final int? reminderMinute;
 
   TasbeehDhikr copyWith({
     String? id,
@@ -27,6 +33,9 @@ class TasbeehDhikr extends Equatable {
     bool? targetReachedNotified,
     DateTime? createdAt,
     DateTime? updatedAt,
+    bool? reminderEnabled,
+    Object? reminderHour = _sentinel,
+    Object? reminderMinute = _sentinel,
   }) {
     return TasbeehDhikr(
       id: id ?? this.id,
@@ -37,6 +46,13 @@ class TasbeehDhikr extends Equatable {
           targetReachedNotified ?? this.targetReachedNotified,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      reminderEnabled: reminderEnabled ?? this.reminderEnabled,
+      reminderHour: reminderHour == _sentinel
+          ? this.reminderHour
+          : reminderHour as int?,
+      reminderMinute: reminderMinute == _sentinel
+          ? this.reminderMinute
+          : reminderMinute as int?,
     );
   }
 
@@ -49,5 +65,10 @@ class TasbeehDhikr extends Equatable {
     targetReachedNotified,
     createdAt,
     updatedAt,
+    reminderEnabled,
+    reminderHour,
+    reminderMinute,
   ];
 }
+
+const Object _sentinel = Object();

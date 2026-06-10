@@ -5,13 +5,19 @@ import 'package:tilawa_core/usecases/usecase.dart';
 
 import '../../domain/constants/tasbeeh_constants.dart';
 import '../../domain/entities/tasbeeh_dhikr.dart';
+import '../../domain/entities/tasbeeh_layout_mode.dart';
 import '../../domain/policies/tasbeeh_target_reached_policy.dart';
+import '../../domain/services/tasbeeh_reminder_scheduler.dart';
 import '../../domain/services/tasbeeh_target_feedback_service.dart';
+import '../../domain/usecases/clear_all_saved_tasbeeh_use_case.dart';
 import '../../domain/usecases/delete_tasbeeh_dhikr_use_case.dart';
 import '../../domain/usecases/get_saved_tasbeeh_use_case.dart';
+import '../../domain/usecases/get_tasbeeh_layout_mode_use_case.dart';
 import '../../domain/usecases/increment_tasbeeh_count_use_case.dart';
 import '../../domain/usecases/reset_tasbeeh_count_use_case.dart';
 import '../../domain/usecases/save_custom_tasbeeh_use_case.dart';
+import '../../domain/usecases/set_tasbeeh_layout_mode_use_case.dart';
+import '../../domain/usecases/set_tasbeeh_reminder_use_case.dart';
 import '../../domain/usecases/set_tasbeeh_target_count_use_case.dart';
 import 'tasbeeh_state.dart';
 
@@ -24,6 +30,11 @@ class TasbeehCubit extends Cubit<TasbeehState> {
     this._resetTasbeehCount,
     this._setTasbeehTargetCount,
     this._deleteTasbeehDhikr,
+    this._clearAllSavedTasbeeh,
+    this._getLayoutMode,
+    this._setLayoutMode,
+    this._setTasbeehReminder,
+    this._reminderScheduler,
     this._feedbackService, {
     TasbeehTargetReachedPolicy? targetReachedPolicy,
   }) : _targetReachedPolicy =
@@ -36,6 +47,11 @@ class TasbeehCubit extends Cubit<TasbeehState> {
   final ResetTasbeehCountUseCase _resetTasbeehCount;
   final SetTasbeehTargetCountUseCase _setTasbeehTargetCount;
   final DeleteTasbeehDhikrUseCase _deleteTasbeehDhikr;
+  final ClearAllSavedTasbeehUseCase _clearAllSavedTasbeeh;
+  final GetTasbeehLayoutModeUseCase _getLayoutMode;
+  final SetTasbeehLayoutModeUseCase _setLayoutMode;
+  final SetTasbeehReminderUseCase _setTasbeehReminder;
+  final TasbeehReminderScheduler _reminderScheduler;
   final TasbeehTargetFeedbackService _feedbackService;
   final TasbeehTargetReachedPolicy _targetReachedPolicy;
 
@@ -110,7 +126,7 @@ class TasbeehCubit extends Cubit<TasbeehState> {
 
   // ── Saved dhikr catalog ────────────────────────────────────────────────────
 
-  Future<void> loadSavedDhikr() async {
+  Future<void> loadSavedDhikr({String? openDhikrId}) async {
     emit(
       state.copyWith(
         status: TasbeehStatus.loading,
@@ -119,25 +135,42 @@ class TasbeehCubit extends Cubit<TasbeehState> {
       ),
     );
 
+    final layoutResult = await _getLayoutMode(const NoParams());
+    final TasbeehLayoutMode layoutMode = layoutResult.getOrElse(
+      () => TasbeehLayoutMode.list,
+    );
     final result = await _getSavedTasbeeh(const NoParams());
-    result.fold(
-      (failure) => emit(
-        state.copyWith(
-          status: TasbeehStatus.error,
-          failure: failure,
-          errorMessage: failure.message,
-        ),
-      ),
-      (items) {
+    await result.fold(
+      (failure) async {
+        emit(
+          state.copyWith(
+            status: TasbeehStatus.error,
+            failure: failure,
+            errorMessage: failure.message,
+          ),
+        );
+      },
+      (items) async {
         String? activeId = state.activeSavedDhikrId;
         TasbeehDhikr? active;
         if (activeId != null) {
           active = _findDhikr(activeId, items);
           if (active == null) activeId = null;
         }
+
+        final String? deepLinkId = openDhikrId;
+        TasbeehViewMode viewMode = state.viewMode;
+        if (deepLinkId != null && _findDhikr(deepLinkId, items) != null) {
+          activeId = deepLinkId;
+          viewMode = TasbeehViewMode.selectedCounting;
+          active = _findDhikr(deepLinkId, items);
+        }
+
         emit(
           state.copyWith(
             status: TasbeehStatus.loaded,
+            viewMode: viewMode,
+            layoutMode: layoutMode,
             savedDhikr: items,
             activeSavedDhikrId: activeId,
             draftTargetText:
@@ -147,6 +180,92 @@ class TasbeehCubit extends Cubit<TasbeehState> {
             errorMessage: null,
           ),
         );
+        await _reminderScheduler.ensureAllScheduled(items);
+      },
+    );
+  }
+
+  Future<void> toggleLayoutMode() async {
+    final TasbeehLayoutMode next = state.layoutMode == TasbeehLayoutMode.list
+        ? TasbeehLayoutMode.grid
+        : TasbeehLayoutMode.list;
+    final result = await _setLayoutMode(next);
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          status: TasbeehStatus.error,
+          failure: failure,
+          errorMessage: failure.message,
+        ),
+      ),
+      (_) => emit(state.copyWith(layoutMode: next)),
+    );
+  }
+
+  Future<void> clearAllSavedDhikr() async {
+    if (state.savedDhikr.isEmpty) return;
+
+    final List<String> ids = state.savedDhikr.map((item) => item.id).toList();
+    await _reminderScheduler.cancelReminders(ids);
+
+    final result = await _clearAllSavedTasbeeh(const NoParams());
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          status: TasbeehStatus.error,
+          failure: failure,
+          errorMessage: failure.message,
+        ),
+      ),
+      (_) {
+        emit(
+          state.copyWith(
+            status: TasbeehStatus.loaded,
+            viewMode: TasbeehViewMode.home,
+            savedDhikr: const [],
+            activeSavedDhikrId: null,
+            draftTargetText: TasbeehConstants.defaultTargetCount.toString(),
+            failure: null,
+            errorMessage: null,
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> setReminderForActiveDhikr({
+    required bool enabled,
+    int? hour,
+    int? minute,
+  }) async {
+    final TasbeehDhikr? active = state.activeSavedDhikr;
+    if (active == null) return;
+
+    final result = await _setTasbeehReminder(
+      SetTasbeehReminderParams(
+        dhikrId: active.id,
+        enabled: enabled,
+        hour: hour,
+        minute: minute,
+      ),
+    );
+    await result.fold(
+      (failure) async {
+        emit(
+          state.copyWith(
+            status: TasbeehStatus.error,
+            failure: failure,
+            errorMessage: failure.message,
+          ),
+        );
+      },
+      (updated) async {
+        _upsertSavedDhikr(updated);
+        if (enabled) {
+          await _reminderScheduler.scheduleReminder(updated);
+        } else {
+          await _reminderScheduler.cancelReminder(updated.id);
+        }
       },
     );
   }
@@ -316,6 +435,7 @@ class TasbeehCubit extends Cubit<TasbeehState> {
   }
 
   Future<void> removeDhikr(String dhikrId) async {
+    await _reminderScheduler.cancelReminder(dhikrId);
     final result = await _deleteTasbeehDhikr(dhikrId);
     result.fold(
       (failure) => emit(
@@ -331,8 +451,7 @@ class TasbeehCubit extends Cubit<TasbeehState> {
             .toList();
         final bool removedActive = state.activeSavedDhikrId == dhikrId;
         final bool leaveCounting =
-            removedActive &&
-            state.viewMode == TasbeehViewMode.selectedCounting;
+            removedActive && state.viewMode == TasbeehViewMode.selectedCounting;
         emit(
           state.copyWith(
             status: TasbeehStatus.loaded,
