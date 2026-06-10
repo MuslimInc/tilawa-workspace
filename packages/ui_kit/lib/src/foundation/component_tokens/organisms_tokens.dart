@@ -617,9 +617,9 @@ class TilawaAdaptiveShellTokens {
       bottomNavBorderWidth: 1,
       bottomNavItemGap: 4,
       bottomNavBackgroundColor: bottomNavBackgroundColor,
-      // Soft elevation: tight blur + small downward offset so the bar lifts
-      // slightly without a hazy band over scroll content.
-      bottomNavShadowOpacity: lightChrome ? 0.09 : 0.055,
+      // Bottom nav uses a top hairline ([bottomNavOutlineColor]) against the
+      // footer slot (e.g. mini player), not a drop shadow.
+      bottomNavShadowOpacity: 0,
       bottomNavShadowBlur: lightChrome ? 14 : 10,
       bottomNavShadowOffset: Offset(0, lightChrome ? 4 : 2),
       bottomNavOutlineColor: _bottomNavOutlineColor(colorScheme),

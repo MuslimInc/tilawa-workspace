@@ -354,8 +354,16 @@ class _BottomNavBar extends StatelessWidget {
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: bottomNavOverlayStyle,
-      child: ColoredBox(
-        color: navColor,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: navColor,
+          border: Border(
+            top: BorderSide(
+              color: tokens.bottomNavOutlineColor,
+              width: tokens.bottomNavBorderWidth,
+            ),
+          ),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -370,72 +378,55 @@ class _BottomNavBar extends StatelessWidget {
                   tokens.bottomNavHorizontalMargin,
                   0,
                 ),
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    boxShadow: tokens.bottomNavShadowOpacity > 0
-                        ? [
-                            BoxShadow(
-                              color: theme.colorScheme.shadow.withValues(
-                                alpha: tokens.bottomNavShadowOpacity,
-                              ),
-                              blurRadius: tokens.bottomNavShadowBlur,
-                              offset: tokens.bottomNavShadowOffset,
-                            ),
-                          ]
-                        : const [],
+                child: MediaQuery(
+                  data: MediaQuery.of(context).copyWith(
+                    textScaler: TextScaler.linear(bottomBarTextScale),
                   ),
-                  child: MediaQuery(
-                    data: MediaQuery.of(context).copyWith(
-                      textScaler: TextScaler.linear(bottomBarTextScale),
+                  child: Theme(
+                    data: theme.copyWith(
+                      splashColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      hoverColor: Colors.transparent,
                     ),
-                    child: Theme(
-                      data: theme.copyWith(
-                        splashColor: Colors.transparent,
-                        highlightColor: Colors.transparent,
-                        hoverColor: Colors.transparent,
-                      ),
-                      child: SizedBox(
-                        height: barHeight,
-                        child: BottomNavigationBar(
-                          type: BottomNavigationBarType.fixed,
-                          currentIndex: barIndex,
-                          onTap: (int index) {
-                            HapticFeedback.selectionClick();
-                            onDestinationSelected(index);
-                          },
-                          showSelectedLabels: true,
-                          showUnselectedLabels: true,
-                          backgroundColor: Colors.transparent,
-                          elevation: 0,
-                          selectedItemColor: hasSelection
+                    child: SizedBox(
+                      height: barHeight,
+                      child: BottomNavigationBar(
+                        type: BottomNavigationBarType.fixed,
+                        currentIndex: barIndex,
+                        onTap: (int index) {
+                          HapticFeedback.selectionClick();
+                          onDestinationSelected(index);
+                        },
+                        showSelectedLabels: true,
+                        showUnselectedLabels: true,
+                        backgroundColor: Colors.transparent,
+                        elevation: 0,
+                        selectedItemColor: hasSelection
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onSurfaceVariant,
+                        unselectedItemColor: theme.colorScheme.onSurfaceVariant,
+                        selectedLabelStyle: selectedLabelStyle,
+                        unselectedLabelStyle: unselectedLabelStyle,
+                        selectedIconTheme: IconThemeData(
+                          size: tokens.navButtonIconSize,
+                          color: hasSelection
                               ? theme.colorScheme.primary
                               : theme.colorScheme.onSurfaceVariant,
-                          unselectedItemColor:
-                              theme.colorScheme.onSurfaceVariant,
-                          selectedLabelStyle: selectedLabelStyle,
-                          unselectedLabelStyle: unselectedLabelStyle,
-                          selectedIconTheme: IconThemeData(
-                            size: tokens.navButtonIconSize,
-                            color: hasSelection
-                                ? theme.colorScheme.primary
-                                : theme.colorScheme.onSurfaceVariant,
-                          ),
-                          unselectedIconTheme: IconThemeData(
-                            size: tokens.navButtonIconSize,
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                          items: [
-                            for (int i = 0; i < count; i++)
-                              _barItem(
-                                context,
-                                destinations[i],
-                                tokens,
-                                theme,
-                                tabIsSelected:
-                                    hasSelection && selectedIndex == i,
-                              ),
-                          ],
                         ),
+                        unselectedIconTheme: IconThemeData(
+                          size: tokens.navButtonIconSize,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        items: [
+                          for (int i = 0; i < count; i++)
+                            _barItem(
+                              context,
+                              destinations[i],
+                              tokens,
+                              theme,
+                              tabIsSelected: hasSelection && selectedIndex == i,
+                            ),
+                        ],
                       ),
                     ),
                   ),

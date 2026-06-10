@@ -702,7 +702,7 @@ void main() {
       final tokens = TilawaAdaptiveShellTokens.fromColorScheme(scheme);
 
       expect(tokens.bottomNavBackgroundColor, Colors.white);
-      expect(tokens.bottomNavShadowOpacity, closeTo(0.09, 0.001));
+      expect(tokens.bottomNavShadowOpacity, 0);
       expect(tokens.bottomNavShadowBlur, 14);
       expect(tokens.bottomNavShadowOffset, const Offset(0, 4));
       expect(
@@ -787,7 +787,7 @@ void main() {
           0.32,
         ),
       );
-      expect(tokens.bottomNavShadowOpacity, closeTo(0.055, 0.001));
+      expect(tokens.bottomNavShadowOpacity, 0);
       expect(tokens.bottomNavShadowBlur, 10);
       expect(tokens.bottomNavShadowOffset, const Offset(0, 2));
       expect(
