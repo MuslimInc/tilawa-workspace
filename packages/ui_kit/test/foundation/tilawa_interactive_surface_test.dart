@@ -111,6 +111,31 @@ void main() {
       final semantics = tester.getSemantics(find.bySemanticsLabel('Filter'));
       expect(semantics.flagsCollection.isSelected, Tristate.isTrue);
     });
+
+    testWidgets('long-press-only surface ignores short taps', (tester) async {
+      var longPresses = 0;
+      await tester.pumpWidget(
+        _host(
+          TilawaInteractiveSurface(
+            onLongPress: () => longPresses++,
+            semanticLabel: 'Hold',
+            child: const SizedBox(width: 120, height: 48),
+          ),
+        ),
+      );
+
+      await tester.tap(find.bySemanticsLabel('Hold'));
+      expect(longPresses, 0);
+
+      final longPress = await tester.startGesture(
+        tester.getCenter(find.bySemanticsLabel('Hold')),
+      );
+      await tester.pump(const Duration(milliseconds: 600));
+      await longPress.up();
+      await tester.pumpAndSettle();
+
+      expect(longPresses, 1);
+    });
   });
 }
 

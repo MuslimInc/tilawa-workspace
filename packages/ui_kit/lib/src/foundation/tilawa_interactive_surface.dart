@@ -193,12 +193,13 @@ class _TilawaInteractiveSurfaceState extends State<TilawaInteractiveSurface> {
       onShowHoverHighlight: (v) => setState(() => _hovered = v),
       onShowFocusHighlight: (v) => setState(() => _focused = v),
       actions: <Type, Action<Intent>>{
-        ActivateIntent: CallbackAction<ActivateIntent>(
-          onInvoke: (_) {
-            _activate();
-            return null;
-          },
-        ),
+        if (widget.onTap != null)
+          ActivateIntent: CallbackAction<ActivateIntent>(
+            onInvoke: (_) {
+              _activate();
+              return null;
+            },
+          ),
       },
       child: GestureDetector(
         // Opaque so taps on transparent padding inside the bounds still
@@ -207,7 +208,7 @@ class _TilawaInteractiveSurfaceState extends State<TilawaInteractiveSurface> {
         onTapDown: (_) => setState(() => _pressed = true),
         onTapUp: (_) => setState(() => _pressed = false),
         onTapCancel: () => setState(() => _pressed = false),
-        onTap: _activate,
+        onTap: widget.onTap != null ? _activate : null,
         onLongPress: widget.onLongPress,
         child: surface,
       ),
