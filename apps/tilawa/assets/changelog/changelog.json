@@ -8,20 +8,20 @@
       "publishedAt": "2026-06-10",
       "highlights": {
         "en": [
-          "Reciters catalog: switch between All and Favorites tabs",
-          "Smoother A–Z scrub while browsing the reciters list",
-          "Settings toggle to show or hide the letter index",
-          "Clearer Downloads tabs for offline surahs",
-          "More natural Quran mini player expand and collapse",
-          "Stability fixes for lists and touch feedback"
+          "Tasbeeh: daily reminders, list or grid saved dhikr, clear all history",
+          "Prayer times: no more loading loop when location permission is denied",
+          "What's New highlights after each update",
+          "Reciters: All and Favorites tabs; smoother A–Z scrub",
+          "Settings toggle for the reciters letter index",
+          "Clearer Downloads tabs; smoother Quran mini player"
         ],
         "ar": [
-          "قائمة القرّاء: تبويبا الكل والمفضلة للتبديل السريع",
-          "تمرير أ–ي أنعم أثناء تصفح قائمة القرّاء",
-          "خيار في الإعدادات لإظهار أو إخفاء فهرس الحروف",
-          "تبويبات أوضح في التنزيلات للسور دون اتصال",
-          "توسيع وطي أنعم لمشغّل القرآن المصغّر",
-          "إصلاحات استقرار للقوائم وردود اللمس"
+          "التسبيح: تذكير يومي، عرض قائمة أو شبكة، مسح كل المحفوظ",
+          "أوقات الصلاة: لا مزيد من التحميل المتكرر عند رفض إذن الموقع",
+          "شاشة ما الجديد بعد كل تحديث",
+          "القرّاء: تبويبا الكل والمفضلة؛ تمرير أ–ي أنعم",
+          "خيار إظهار أو إخفاء فهرس حروف القرّاء من الإعدادات",
+          "تبويبات تنزيلات أوضح؛ مشغّل قرآن مصغّر أنعم"
         ]
       }
     },

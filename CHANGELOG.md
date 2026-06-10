@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Tasbeeh reminders**: Daily local notification per saved dhikr with tap-through
+  to resume counting.
+- **Tasbeeh history**: List or grid layout for saved dhikr and clear-all with
+  confirmation.
+- **Tasbeeh home**: Quick-count entry and refreshed saved-dhikr browsing.
+- **What's New**: In-app changelog sheet with a one-time post-update prompt.
 - **Reciters tabs**: All and Favorites tabs on the reciters catalog for faster
   switching without leaving the screen.
 - **Settings**: Toggle to show or hide the reciters A–Z letter index rail.
@@ -18,15 +24,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **Version**: Production track bumped to **2.0.8** (build **52**).
+- **Startup**: Hive-backed features wait until local boxes finish opening on cold
+  start.
 - **Reciters**: Alphabet scrub keeps header and catalog scroll positions stable,
   including on short filtered lists.
 - **Downloads**: Nested tab layout for clearer browsing of offline surahs.
 - **Quran player**: Smoother expand and collapse drag on the mini player shell.
-- **UI kit**: Shared interaction surface and radius tokens for more consistent
-  buttons, chips, and cards.
+- **UI kit**: Flatter bottom navigation chrome, simplified Tasbeeh count ring, and
+  shared interaction surface tokens for buttons, chips, and cards.
+- **Support**: Unified tier cards and footer alignment on the support screen.
 
 ### Fixed
 
+- **Prayer times**: Stopped the loading / enable-location loop after location
+  permission is denied.
 - **Reciters**: Scrub lock no longer skips catalog positions when the filtered
   list is shorter than the full catalog.
 - **Interactive surfaces**: Long-press-only controls no longer fire tap haptics.
