@@ -79,6 +79,9 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
 
   /// After the system location dialog closes, retry a stuck load instead of
   /// [refreshIfStale], which is ignored while [PrayerTimesStatus.loading].
+  ///
+  /// Do not reload from [PrayerTimesStatus.locationRequired]: that re-shows the
+  /// full-screen spinner and can re-prompt for permission after a denial.
   void _onAppResumed() {
     if (!mounted) {
       return;
@@ -87,8 +90,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
     final PrayerTimesBloc bloc = context.read<PrayerTimesBloc>();
     final PrayerTimesStatus status = bloc.state.status;
 
-    if (status == PrayerTimesStatus.loading ||
-        status == PrayerTimesStatus.locationRequired) {
+    if (status == PrayerTimesStatus.loading) {
       bloc.add(const PrayerTimesEvent.loadPrayerTimes(forceReschedule: true));
       return;
     }

@@ -35,8 +35,19 @@ void main() {
     verify(mockRepository.getCurrentLocation());
   });
 
-  test('should request permission if not granted', () async {
-    // Arrange
+  test('should fail fast when permission missing and requestIfDenied is false',
+      () async {
+    when(mockRepository.hasLocationPermission()).thenAnswer((_) async => false);
+
+    final Either<Failure, LocationResult> result = await useCase();
+
+    expect(result.fold((l) => l, (r) => null), isA<PermissionFailure>());
+    verifyNever(mockRepository.requestLocationPermission());
+    verifyNever(mockRepository.getCurrentLocation());
+  });
+
+  test('should request permission if not granted and requestIfDenied is true',
+      () async {
     when(mockRepository.hasLocationPermission()).thenAnswer((_) async => false);
     when(
       mockRepository.requestLocationPermission(),
@@ -45,25 +56,24 @@ void main() {
       mockRepository.getCurrentLocation(),
     ).thenAnswer((_) async => tLocationResult);
 
-    // Act
-    final Either<Failure, LocationResult> result = await useCase();
+    final Either<Failure, LocationResult> result = await useCase(
+      requestIfDenied: true,
+    );
 
-    // Assert
     expect(result, Right<Failure, LocationResult>(tLocationResult));
     verify(mockRepository.requestLocationPermission());
   });
 
-  test('should return failure if permission denied', () async {
-    // Arrange
+  test('should return failure if permission denied after request', () async {
     when(mockRepository.hasLocationPermission()).thenAnswer((_) async => false);
     when(
       mockRepository.requestLocationPermission(),
     ).thenAnswer((_) async => false);
 
-    // Act
-    final Either<Failure, LocationResult> result = await useCase();
+    final Either<Failure, LocationResult> result = await useCase(
+      requestIfDenied: true,
+    );
 
-    // Assert
     expect(result.fold((l) => l, (r) => null), isA<PermissionFailure>());
   });
 

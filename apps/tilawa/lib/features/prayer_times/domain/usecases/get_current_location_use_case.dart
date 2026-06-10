@@ -13,11 +13,16 @@ class GetCurrentLocationUseCase {
   Future<Either<Failure, LocationResult>> call({
     bool forceRefresh = false,
     bool allowOpenSettings = false,
+    bool requestIfDenied = false,
   }) async {
     try {
       final bool hasPermission = await _repository.hasLocationPermission();
 
       if (!hasPermission) {
+        if (!requestIfDenied) {
+          return Left(Failure.permissionDenied('Location permission denied'));
+        }
+
         final bool granted = await _repository.requestLocationPermission(
           allowOpenSettings: allowOpenSettings,
         );

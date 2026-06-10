@@ -144,7 +144,13 @@ void main() {
         when(
           mockLoadPrayerSettingsUseCase.call(),
         ).thenAnswer((_) async => const Right(tSettings));
-        when(mockGetCurrentLocationUseCase.call()).thenAnswer(
+        when(
+          mockGetCurrentLocationUseCase.call(
+            forceRefresh: anyNamed('forceRefresh'),
+            allowOpenSettings: anyNamed('allowOpenSettings'),
+            requestIfDenied: anyNamed('requestIfDenied'),
+          ),
+        ).thenAnswer(
           (_) => Future<Either<Failure, LocationResult>>.delayed(
             const Duration(milliseconds: 100),
             () => Right(tLocationResult),
@@ -161,13 +167,25 @@ void main() {
         return bloc;
       },
       act: (bloc) async {
-        bloc.add(const PrayerTimesEvent.loadPrayerTimes());
-        bloc.add(const PrayerTimesEvent.loadPrayerTimes());
+        bloc.add(
+          const PrayerTimesEvent.loadPrayerTimes(
+            requestLocationPermission: true,
+          ),
+        );
+        bloc.add(
+          const PrayerTimesEvent.loadPrayerTimes(
+            requestLocationPermission: true,
+          ),
+        );
         await Future<void>.delayed(const Duration(milliseconds: 150));
       },
       verify: (_) {
         verify(mockLoadPrayerSettingsUseCase.call()).called(2);
-        verify(mockGetCurrentLocationUseCase.call()).called(2);
+        verify(
+          mockGetCurrentLocationUseCase.call(
+            requestIfDenied: anyNamed('requestIfDenied'),
+          ),
+        ).called(2);
       },
     );
 
@@ -237,11 +255,19 @@ void main() {
           mockLoadPrayerSettingsUseCase.call(),
         ).thenAnswer((_) async => const Right(tSettings));
         when(
-          mockGetCurrentLocationUseCase.call(),
+          mockGetCurrentLocationUseCase.call(
+            forceRefresh: anyNamed('forceRefresh'),
+            allowOpenSettings: anyNamed('allowOpenSettings'),
+            requestIfDenied: anyNamed('requestIfDenied'),
+          ),
         ).thenAnswer((_) async => Left(Failure.unexpectedError('Error')));
         return bloc;
       },
-      act: (bloc) => bloc.add(const PrayerTimesEvent.loadPrayerTimes()),
+      act: (bloc) => bloc.add(
+        const PrayerTimesEvent.loadPrayerTimes(
+          requestLocationPermission: true,
+        ),
+      ),
       expect: () => [
         const PrayerTimesState(status: PrayerTimesStatus.loading),
 
@@ -304,6 +330,7 @@ void main() {
           mockGetCurrentLocationUseCase.call(
             forceRefresh: anyNamed('forceRefresh'),
             allowOpenSettings: anyNamed('allowOpenSettings'),
+            requestIfDenied: anyNamed('requestIfDenied'),
           ),
         ).thenAnswer((_) async => Right(tLocationResult));
         // Mocks for the triggered loadPrayerTimes
@@ -385,7 +412,11 @@ void main() {
           mockLoadPrayerSettingsUseCase.call(),
         ).thenAnswer((_) async => const Right(tSettings));
         when(
-          mockGetCurrentLocationUseCase.call(),
+          mockGetCurrentLocationUseCase.call(
+            forceRefresh: anyNamed('forceRefresh'),
+            allowOpenSettings: anyNamed('allowOpenSettings'),
+            requestIfDenied: anyNamed('requestIfDenied'),
+          ),
         ).thenAnswer((_) async => Right(tLocationResult));
         when(
           mockGetPrayerTimesUseCase.call(
@@ -397,7 +428,11 @@ void main() {
         ).thenAnswer((_) async => Right(tPrayerTimes));
         return bloc;
       },
-      act: (bloc) => bloc.add(const PrayerTimesEvent.loadPrayerTimes()),
+      act: (bloc) => bloc.add(
+        const PrayerTimesEvent.loadPrayerTimes(
+          requestLocationPermission: true,
+        ),
+      ),
       verify: (_) {
         final capturedSettings =
             verify(
@@ -458,7 +493,13 @@ void main() {
           ),
         );
 
-        when(mockGetCurrentLocationUseCase.call()).thenAnswer(
+        when(
+          mockGetCurrentLocationUseCase.call(
+            forceRefresh: anyNamed('forceRefresh'),
+            allowOpenSettings: anyNamed('allowOpenSettings'),
+            requestIfDenied: anyNamed('requestIfDenied'),
+          ),
+        ).thenAnswer(
           (_) async => Right(
             LocationResult(
               latitude: 30.0444,
@@ -486,9 +527,17 @@ void main() {
 
         return bloc;
       },
-      act: (bloc) => bloc.add(const PrayerTimesEvent.loadPrayerTimes()),
+      act: (bloc) => bloc.add(
+        const PrayerTimesEvent.loadPrayerTimes(
+          requestLocationPermission: true,
+        ),
+      ),
       verify: (bloc) {
-        verify(mockGetCurrentLocationUseCase.call()).called(1);
+        verify(
+          mockGetCurrentLocationUseCase.call(
+            requestIfDenied: anyNamed('requestIfDenied'),
+          ),
+        ).called(1);
 
         // specific verification for auto-detection
         final capturedSettings =
@@ -550,7 +599,13 @@ void main() {
         ).called(1);
 
         // Should NOT call getCurrentLocation
-        verifyNever(mockGetCurrentLocationUseCase.call());
+        verifyNever(
+          mockGetCurrentLocationUseCase.call(
+            forceRefresh: anyNamed('forceRefresh'),
+            allowOpenSettings: anyNamed('allowOpenSettings'),
+            requestIfDenied: anyNamed('requestIfDenied'),
+          ),
+        );
 
         // Should save new settings
         final capturedSettings =
@@ -748,7 +803,11 @@ void main() {
           (_) async => Left(Failure.unexpectedError('Settings fail')),
         );
         when(
-          mockGetCurrentLocationUseCase.call(),
+          mockGetCurrentLocationUseCase.call(
+            forceRefresh: anyNamed('forceRefresh'),
+            allowOpenSettings: anyNamed('allowOpenSettings'),
+            requestIfDenied: anyNamed('requestIfDenied'),
+          ),
         ).thenAnswer((_) async => Right(tLocationResult));
         when(
           mockGetPrayerTimesUseCase.call(
@@ -760,7 +819,11 @@ void main() {
         ).thenAnswer((_) async => Right(tPrayerTimes));
         return bloc;
       },
-      act: (bloc) => bloc.add(const PrayerTimesEvent.loadPrayerTimes()),
+      act: (bloc) => bloc.add(
+        const PrayerTimesEvent.loadPrayerTimes(
+          requestLocationPermission: true,
+        ),
+      ),
       verify: (bloc) {
         expect(bloc.state.status, PrayerTimesStatus.loaded);
         expect(bloc.state.settings.savedLatitude, isNull);
@@ -875,6 +938,7 @@ void main() {
           mockGetCurrentLocationUseCase.call(
             forceRefresh: anyNamed('forceRefresh'),
             allowOpenSettings: anyNamed('allowOpenSettings'),
+            requestIfDenied: anyNamed('requestIfDenied'),
           ),
         ).thenAnswer(
           (_) async => Left(Failure.unexpectedError('Location denied')),
@@ -885,6 +949,7 @@ void main() {
       expect: () => [
         const PrayerTimesState(isLoadingLocation: true),
         const PrayerTimesState(
+          status: PrayerTimesStatus.locationRequired,
           isLoadingLocation: false,
           errorMessage: 'Location denied',
         ),
@@ -1072,7 +1137,11 @@ void main() {
           ),
         );
         when(
-          mockGetCurrentLocationUseCase.call(),
+          mockGetCurrentLocationUseCase.call(
+            forceRefresh: anyNamed('forceRefresh'),
+            allowOpenSettings: anyNamed('allowOpenSettings'),
+            requestIfDenied: anyNamed('requestIfDenied'),
+          ),
         ).thenAnswer((_) async => Right(tLocationResult));
         when(
           mockGetPrayerTimesUseCase.call(
@@ -1084,7 +1153,11 @@ void main() {
         ).thenAnswer((_) async => Right(tPrayerTimes));
         return bloc;
       },
-      act: (bloc) => bloc.add(const PrayerTimesEvent.loadPrayerTimes()),
+      act: (bloc) => bloc.add(
+        const PrayerTimesEvent.loadPrayerTimes(
+          requestLocationPermission: true,
+        ),
+      ),
       verify: (_) {
         verifyNever(
           mockSavePrayerSettingsUseCase.call(settings: anyNamed('settings')),

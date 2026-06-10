@@ -19,6 +19,7 @@ part 'prayer_times_bloc.freezed.dart';
 class PrayerTimesEvent with _$PrayerTimesEvent {
   const factory PrayerTimesEvent.loadPrayerTimes({
     @Default(false) bool forceReschedule,
+    @Default(false) bool requestLocationPermission,
   }) = _LoadPrayerTimes;
   const factory PrayerTimesEvent.loadMonthlyPrayerTimes({
     required int year,
@@ -121,7 +122,9 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
       emit(state.copyWith(isLoadingLocation: true));
 
       final Either<Failure, LocationResult> locationResult =
-          await _getCurrentLocationUseCase.call();
+          await _getCurrentLocationUseCase.call(
+            requestIfDenied: event.requestLocationPermission,
+          );
 
       final LocationResult? resolvedLocation = locationResult.fold<LocationResult?>(
         (failure) {
@@ -278,11 +281,13 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
         await _getCurrentLocationUseCase.call(
           forceRefresh: true,
           allowOpenSettings: true,
+          requestIfDenied: true,
         );
 
     locationResult.fold(
       (failure) => emit(
         state.copyWith(
+          status: PrayerTimesStatus.locationRequired,
           isLoadingLocation: false,
           errorMessage: failure.message ?? 'Unknown error',
         ),

@@ -22,7 +22,11 @@ class PrayerTimesScreenScope extends StatelessWidget {
         BlocProvider(
           create: (context) =>
               getIt<PrayerTimesBloc>()
-                ..add(const PrayerTimesEvent.loadPrayerTimes()),
+                ..add(
+                  const PrayerTimesEvent.loadPrayerTimes(
+                    requestLocationPermission: true,
+                  ),
+                ),
         ),
         BlocProvider(
           create: (context) => getIt<PrayerPermissionsCubit>(),

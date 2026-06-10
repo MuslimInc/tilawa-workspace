@@ -188,7 +188,11 @@ void main() {
     );
 
     mocktail.verify(
-      () => loadMock.add(const PrayerTimesEvent.loadPrayerTimes()),
+      () => loadMock.add(
+        const PrayerTimesEvent.loadPrayerTimes(
+          requestLocationPermission: true,
+        ),
+      ),
     ).called(1);
   });
 
