@@ -49,7 +49,7 @@ class TilawaSheetHandleTokens {
 
   factory TilawaSheetHandleTokens.defaults() {
     return const TilawaSheetHandleTokens(
-      width: 46,
+      width: 36,
       height: 5,
       marginTop: 12,
       marginBottom: 16,

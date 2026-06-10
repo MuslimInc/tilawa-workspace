@@ -40,7 +40,7 @@ void main() {
   group('TilawaSheetHandleTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaSheetHandleTokens.defaults();
-      expect(tokens.width, 46.0);
+      expect(tokens.width, 36.0);
       expect(tokens.height, 5.0);
       expect(tokens.marginTop, 12.0);
       expect(tokens.marginBottom, 16.0);
@@ -321,10 +321,10 @@ void main() {
   group('TilawaCountProgressRingTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaCountProgressRingTokens.defaults();
-      expect(tokens.outerSize, 72.0);
-      expect(tokens.innerSize, 62.0);
-      expect(tokens.ringStrokeWidth, 10.0);
-      expect(tokens.activeGradientEndOpacity, 0.8);
+      expect(tokens.outerSize, 56.0);
+      expect(tokens.innerSize, 56.0);
+      expect(tokens.ringStrokeWidth, 0.0);
+      expect(tokens.activeGradientEndOpacity, 1.0);
       expect(tokens.countLineHeight, 1.0);
     });
 
