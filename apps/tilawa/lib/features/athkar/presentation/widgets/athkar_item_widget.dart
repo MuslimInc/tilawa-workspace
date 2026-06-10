@@ -315,7 +315,7 @@ Future<void> _confirmAthkarReset(
     message: context.l10n.athkarResetConfirmationMessage,
     confirmLabel: context.l10n.reset,
     cancelLabel: context.l10n.cancel,
-    confirmVariant: TilawaButtonVariant.secondary,
+    confirmVariant: TilawaButtonVariant.primary,
     onConfirm: () => Navigator.of(context).pop(true),
     onClose: () => Navigator.of(context).pop(false),
   );
