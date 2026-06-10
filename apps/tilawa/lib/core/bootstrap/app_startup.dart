@@ -99,11 +99,16 @@ Future<void> initializeHydratedStorage() {
   return _startupTasks.initializeHydratedStorage();
 }
 
-@visibleForTesting
-Future<void> initializeHive() {
-  logger.d('[AppLaunch] source=initializeHive: Start in (${DateTime.now()})');
+/// Waits until [Hive.init] has completed (safe to call multiple times).
+Future<void> ensureHiveInitialized() {
+  logger.d(
+    '[AppLaunch] source=ensureHiveInitialized: Start in (${DateTime.now()})',
+  );
   return _startupTasks.initializeHive();
 }
+
+@visibleForTesting
+Future<void> initializeHive() => ensureHiveInitialized();
 
 @visibleForTesting
 Future<void> initializeCredentialManager() {

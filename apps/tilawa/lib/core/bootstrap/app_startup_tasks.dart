@@ -8,6 +8,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:path_provider/path_provider.dart';
@@ -16,47 +17,48 @@ import 'package:quran_image/core/di/dependency_injection.dart'
 import 'package:quran_image/domain/repositories/quran_image_cache_repository.dart';
 import 'package:quran_image/domain/usecases/prepare_quran_image_cache.dart';
 import 'package:quran_qcf/quran_qcf.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/bootstrap/app_startup.dart';
 import 'package:tilawa/core/bootstrap/launch_timeline.dart';
 import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:tilawa/core/observers/composite_bloc_observer.dart';
+import 'package:tilawa/core/observers/crashlytics_bloc_observer.dart';
+import 'package:tilawa/core/services/analytics_initialization_service.dart';
+import 'package:tilawa/core/services/crashlytics_service.dart';
+import 'package:tilawa/core/services/firebase_initialization_service.dart';
+import 'package:tilawa/core/services/notification_permission_service.dart';
+import 'package:tilawa/core/services/notification_startup_service.dart';
+import 'package:tilawa/core/services/prayer_notification_payload_classifier.dart';
+import 'package:tilawa/core/services/quran_assets_prefetch_policy_service.dart';
+import 'package:tilawa/core/services/quran_assets_prefetch_service.dart';
+import 'package:tilawa/core/services/tasbeeh_reminder_notification_service.dart';
+import 'package:tilawa/core/telemetry/startup_telemetry.dart';
+import 'package:tilawa/features/athkar/domain/services/tasbeeh_reminder_scheduler.dart';
 import 'package:tilawa/features/audio_player/domain/repositories/audio_player_repository.dart';
 import 'package:tilawa/features/audio_player/domain/services/playback_notification_bridge.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/audio_player/presentation/player_presentation_controller.dart';
 import 'package:tilawa/features/audio_player/presentation/quran_player_presentation_entry.dart';
-import 'package:tilawa/core/logging/app_logger.dart';
-import 'package:tilawa_core/services/app_orientation_service.dart';
-import 'package:tilawa/core/observers/composite_bloc_observer.dart';
-import 'package:tilawa/core/observers/crashlytics_bloc_observer.dart';
-import 'package:tilawa/core/services/analytics_initialization_service.dart';
-import 'package:tilawa/core/services/crashlytics_service.dart';
-import 'package:tilawa/core/telemetry/startup_telemetry.dart';
-import 'package:tilawa/core/services/firebase_initialization_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tilawa/core/services/notification_permission_service.dart';
-import 'package:tilawa/core/services/notification_startup_service.dart';
-import 'package:tilawa/core/services/quran_assets_prefetch_policy_service.dart';
-import 'package:tilawa/core/services/quran_assets_prefetch_service.dart';
 import 'package:tilawa/features/auth/core/auth_config.dart';
-import 'package:tilawa/features/downloads/domain/services/downloads_initializer.dart';
 import 'package:tilawa/features/downloads/domain/services/download_notification_service_interface.dart';
-import 'package:tilawa/features/notifications/domain/repositories/notifications_repository.dart';
+import 'package:tilawa/features/downloads/domain/services/downloads_initializer.dart';
 import 'package:tilawa/features/notifications/data/services/fcm_service.dart';
+import 'package:tilawa/features/notifications/domain/repositories/notifications_repository.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/entities.dart';
 import 'package:tilawa/features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
 import 'package:tilawa/features/prayer_times/domain/services/prayer_adhan_notification_service_interface.dart';
 import 'package:tilawa/features/prayer_times/domain/services/prayer_notification_watchdog_scheduler.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/usecases.dart';
 import 'package:tilawa/firebase_options.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:tilawa/core/services/prayer_notification_payload_classifier.dart';
 import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa/router/notification_navigation_resolver.dart';
 import 'package:tilawa/shared/audio/audio_player_handler.dart';
 import 'package:tilawa_core/constants/app_strings.dart';
 import 'package:tilawa_core/observers/app_bloc_observer.dart';
+import 'package:tilawa_core/services/app_orientation_service.dart';
 import 'package:tilawa_core/services/interfaces/athkar_notification_service_interface.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 
@@ -88,6 +90,7 @@ class AppStartupTasks {
   QuranAssetsPrefetchPolicyService? _quranAssetsPrefetchPolicyService;
 
   Future<void>? _notificationServiceInitFuture;
+  Future<void>? _hiveInitFuture;
   Future<void>? _notificationHandlersInitFuture;
   Future<void>? _crashlyticsInitFuture;
   Future<void>? _analyticsInitFuture;
@@ -113,6 +116,7 @@ class AppStartupTasks {
       '[AppLaunch] source=AppStartupTasks.resetMemoizedInitFutures: Start in (${DateTime.now()})',
     );
     _notificationServiceInitFuture = null;
+    _hiveInitFuture = null;
     _notificationHandlersInitFuture = null;
     _crashlyticsInitFuture = null;
     _analyticsInitFuture = null;
@@ -488,26 +492,30 @@ class AppStartupTasks {
     }
   }
 
-  Future<void> initializeHive() async {
-    if (!_isEnabled(launchConfig.hiveInit, 'HIVE_INIT')) return;
-    logger.d(
-      '[AppLaunch] source=AppStartupTasks.initializeHive: Start in (${DateTime.now()})',
-    );
-    try {
-      final directory = kIsWeb
-          ? null
-          : await getApplicationDocumentsDirectory();
-      if (!kIsWeb && directory != null) {
-        Hive.init(directory.path);
-      }
-      logger.d(
-        '[AppLaunch] source=AppStartupTasks.initializeHive: Hive initialized successfully at (${DateTime.now()})',
-      );
-    } catch (e) {
-      logger.d(
-        '[AppLaunch] source=AppStartupTasks.initializeHive: Warning: Could not initialize Hive at (${DateTime.now()}): $e',
-      );
+  Future<void> initializeHive() {
+    if (!_isEnabled(launchConfig.hiveInit, 'HIVE_INIT')) {
+      return Future<void>.value();
     }
+    return _hiveInitFuture ??= () async {
+      logger.d(
+        '[AppLaunch] source=AppStartupTasks.initializeHive: Start in (${DateTime.now()})',
+      );
+      try {
+        final directory = kIsWeb
+            ? null
+            : await getApplicationDocumentsDirectory();
+        if (!kIsWeb && directory != null) {
+          Hive.init(directory.path);
+        }
+        logger.d(
+          '[AppLaunch] source=AppStartupTasks.initializeHive: Hive initialized successfully at (${DateTime.now()})',
+        );
+      } catch (e) {
+        logger.d(
+          '[AppLaunch] source=AppStartupTasks.initializeHive: Warning: Could not initialize Hive at (${DateTime.now()}): $e',
+        );
+      }
+    }();
   }
 
   Future<void> initializeCredentialManager() async {
@@ -696,7 +704,6 @@ class AppStartupTasks {
         await _applyNativeAdhanColdStartIfNeeded();
       }
 
-
       logger.d(
         '[AppLaunch] source=AppStartupTasks.prepareNotificationLaunchState: '
         'prepared fcm=${fcmInitialMessage != null} '
@@ -778,8 +785,7 @@ class AppStartupTasks {
   }
 
   Future<void> _applyNativeAdhanColdStartIfNeeded() async {
-    if (!Platform.isAndroid ||
-        !getIt.isRegistered<IAdhanAlarmPlayer>()) {
+    if (!Platform.isAndroid || !getIt.isRegistered<IAdhanAlarmPlayer>()) {
       return;
     }
 
@@ -816,6 +822,11 @@ class AppStartupTasks {
     }
   }
 
+  @visibleForTesting
+  void applyColdStartRouteFromPendingLaunchForTesting() {
+    _applyColdStartRouteFromPendingLaunch();
+  }
+
   void _applyColdStartRouteFromPendingLaunch() {
     Map<String, dynamic>? data;
 
@@ -849,6 +860,10 @@ class AppStartupTasks {
     AppRouter.setPendingColdStartRoute(location, extra: extra);
     AppRouter.pendingFcmMessage = null;
     AppRouter.pendingLocalNotificationResponse = null;
+
+    if (location.contains('/athkar/tasbeeh')) {
+      unawaited(initializeHive());
+    }
   }
 
   Future<void> initializeNotificationHandlers() async {
@@ -880,6 +895,12 @@ class AppStartupTasks {
         final IDownloadNotificationService downloadNotificationService =
             getIt<IDownloadNotificationService>();
         await downloadNotificationService.initialize();
+
+        final TasbeehReminderScheduler tasbeehReminderScheduler =
+            getIt<TasbeehReminderScheduler>();
+        if (tasbeehReminderScheduler is TasbeehReminderNotificationService) {
+          await tasbeehReminderScheduler.initialize();
+        }
 
         logger.d(
           '[AppLaunch] source=AppStartupTasks.initializeNotificationHandlers: Notification handlers initialized at (${DateTime.now()})',
@@ -1038,7 +1059,8 @@ class AppStartupTasks {
           (bloc.state.hasAudio ||
               getIt<AudioPlayerRepository>().readActivePlaybackSnapshot() !=
                   null);
-      if (!hasActiveAudio || !getIt.isRegistered<PlayerPresentationController>()) {
+      if (!hasActiveAudio ||
+          !getIt.isRegistered<PlayerPresentationController>()) {
         return;
       }
       unawaited(
