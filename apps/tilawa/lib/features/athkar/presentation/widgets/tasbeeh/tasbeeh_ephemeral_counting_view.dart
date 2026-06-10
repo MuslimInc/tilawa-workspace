@@ -7,8 +7,8 @@ import '../../models/tasbeeh_counting_session.dart';
 import 'tasbeeh_counter_card.dart';
 import 'tasbeeh_layout_widgets.dart';
 
-class TasbeehEphemeralCountingView extends StatelessWidget {
-  const TasbeehEphemeralCountingView({
+class TasbeehQuickCountView extends StatelessWidget {
+  const TasbeehQuickCountView({
     super.key,
     required this.cubit,
     required this.session,
@@ -19,33 +19,35 @@ class TasbeehEphemeralCountingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
 
     return TasbeehContentBounds(
+      alignTop: true,
       child: Padding(
-        padding: EdgeInsets.all(tokens.spaceLarge),
+        padding: EdgeInsets.fromLTRB(
+          tokens.spaceLarge,
+          tokens.spaceMedium,
+          tokens.spaceLarge,
+          tokens.spaceLarge,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Wrap(
-              spacing: tokens.spaceSmall,
-              runSpacing: tokens.spaceSmall,
-              children: [
-                TilawaButton(
-                  text: context.l10n.tasbeehAddNewOptionTitle,
-                  leadingIcon: const Icon(Icons.add_rounded),
-                  variant: TilawaButtonVariant.outline,
-                  onPressed: cubit.showCreateView,
-                ),
-                TilawaButton(
-                  text: context.l10n.tasbeehViewHistoryOptionTitle,
-                  leadingIcon: const Icon(Icons.history_rounded),
-                  variant: TilawaButtonVariant.outline,
-                  onPressed: cubit.showHistoryView,
-                ),
-              ],
+            Text(
+              context.l10n.tasbeehQuickCountTitle,
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w800,
+              ),
             ),
-            SizedBox(height: tokens.spaceMedium),
+            SizedBox(height: tokens.spaceExtraSmall),
+            Text(
+              context.l10n.tasbeehQuickCountSubtitle,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            SizedBox(height: tokens.spaceLarge),
             Expanded(
               child: TasbeehCounterCard(
                 displayCount: session.count,

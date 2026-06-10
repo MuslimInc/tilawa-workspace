@@ -41,32 +41,34 @@ class TasbeehCubit extends Cubit<TasbeehState> {
 
   // ── Navigation ───────────────────────────────────────────────────────────
 
+  void showHomeView() {
+    emit(
+      state.copyWith(
+        viewMode: TasbeehViewMode.home,
+        activeSavedDhikrId: null,
+        savedTargetFeedbackPulse: 0,
+        failure: null,
+        errorMessage: null,
+      ),
+    );
+  }
+
   void showCreateView() {
     emit(
       state.copyWith(
         viewMode: TasbeehViewMode.create,
         draftText: '',
-        draftTargetText: '',
+        draftTargetText: TasbeehConstants.defaultTargetCount.toString(),
         failure: null,
         errorMessage: null,
       ),
     );
   }
 
-  void showHistoryView() {
+  void startQuickCount() {
     emit(
       state.copyWith(
-        viewMode: TasbeehViewMode.history,
-        failure: null,
-        errorMessage: null,
-      ),
-    );
-  }
-
-  void startEphemeralCounting() {
-    emit(
-      state.copyWith(
-        viewMode: TasbeehViewMode.counting,
+        viewMode: TasbeehViewMode.quickCount,
         activeSavedDhikrId: null,
         savedTargetFeedbackPulse: 0,
         failure: null,
@@ -91,21 +93,18 @@ class TasbeehCubit extends Cubit<TasbeehState> {
     );
   }
 
-  /// Back from create/history sub-views.
-  void startCounting() => startEphemeralCounting();
-
   void selectDhikrAndStartCounting(String dhikrId) =>
       startSavedDhikrCounting(dhikrId);
 
   // ── Ephemeral counting ─────────────────────────────────────────────────────
 
   void incrementEphemeralCount() {
-    if (state.viewMode != TasbeehViewMode.counting) return;
+    if (state.viewMode != TasbeehViewMode.quickCount) return;
     emit(state.copyWith(ephemeralCount: state.ephemeralCount + 1));
   }
 
   void resetEphemeralCount() {
-    if (state.viewMode != TasbeehViewMode.counting) return;
+    if (state.viewMode != TasbeehViewMode.quickCount) return;
     emit(state.copyWith(ephemeralCount: 0));
   }
 
@@ -276,7 +275,10 @@ class TasbeehCubit extends Cubit<TasbeehState> {
       (updated) async {
         if (state.activeSavedDhikrId != activeId) return;
 
-        final bool shouldNotify = _targetReachedPolicy.shouldNotify(updated);
+        final bool shouldNotify = _targetReachedPolicy.shouldNotifyOnIncrement(
+          before: active,
+          after: updated,
+        );
         _upsertSavedDhikr(
           updated,
           feedbackPulse: shouldNotify
@@ -328,9 +330,13 @@ class TasbeehCubit extends Cubit<TasbeehState> {
             .where((item) => item.id != dhikrId)
             .toList();
         final bool removedActive = state.activeSavedDhikrId == dhikrId;
+        final bool leaveCounting =
+            removedActive &&
+            state.viewMode == TasbeehViewMode.selectedCounting;
         emit(
           state.copyWith(
             status: TasbeehStatus.loaded,
+            viewMode: leaveCounting ? TasbeehViewMode.home : state.viewMode,
             savedDhikr: updated,
             activeSavedDhikrId: removedActive ? null : state.activeSavedDhikrId,
             draftTargetText: updated.isEmpty

@@ -7,18 +7,19 @@ import '../models/tasbeeh_counting_session.dart';
 enum TasbeehStatus { initial, loading, loaded, error }
 
 enum TasbeehViewMode {
+  /// Entry hub: saved dhikr list, quick count, and create.
+  home,
+  /// In-memory tap-to-count (no persistence, no target feedback).
+  quickCount,
   create,
-  history,
-  /// Generic tap-to-count (no saved dhikr, no target feedback).
-  counting,
-  /// Counting a saved dhikr from history or after create.
+  /// Counting a saved dhikr from the hub or after create.
   selectedCounting,
 }
 
 class TasbeehState extends Equatable {
   const TasbeehState({
     this.status = TasbeehStatus.initial,
-    this.viewMode = TasbeehViewMode.counting,
+    this.viewMode = TasbeehViewMode.home,
     this.savedDhikr = const [],
     this.draftText = '',
     this.draftTargetText = '',
@@ -35,7 +36,7 @@ class TasbeehState extends Equatable {
   final String draftText;
   final String draftTargetText;
 
-  /// In-memory counter for [TasbeehViewMode.counting] only.
+  /// In-memory counter for [TasbeehViewMode.quickCount] only.
   final int ephemeralCount;
 
   /// Saved dhikr being counted in [TasbeehViewMode.selectedCounting].
@@ -57,7 +58,7 @@ class TasbeehState extends Equatable {
   }
 
   TasbeehCountingSession? get countingSession => switch (viewMode) {
-    TasbeehViewMode.counting => TasbeehEphemeralCountingSession(
+    TasbeehViewMode.quickCount => TasbeehEphemeralCountingSession(
       count: ephemeralCount,
     ),
     TasbeehViewMode.selectedCounting => () {

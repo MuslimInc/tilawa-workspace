@@ -979,6 +979,24 @@ class AppLocalizationsEn extends AppLocalizations {
       'Select or create a dhikr to start counting';
 
   @override
+  String get tasbeehQuickCountTitle => 'Quick count';
+
+  @override
+  String get tasbeehQuickCountSubtitle => 'Count without saving — tap to begin';
+
+  @override
+  String tasbeehProgressLabel(int current, int target) {
+    final intl.NumberFormat currentNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String currentString = currentNumberFormat.format(current);
+    final intl.NumberFormat targetNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String targetString = targetNumberFormat.format(target);
+
+    return '$currentString / $targetString';
+  }
+
+  @override
   String get done => 'Done';
 
   @override

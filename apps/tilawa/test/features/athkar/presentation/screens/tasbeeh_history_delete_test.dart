@@ -1,16 +1,11 @@
-// Regression tests for the delete button in the Tasbeeh history view.
+// Regression tests for the delete strip on Tasbeeh saved-dhikr tiles.
 //
-// Root cause: TilawaCard places its onTap handler as a Positioned.fill
-// InkWell overlay rendered last in the Stack (i.e. on top). Flutter's
-// hit-test walks children in reverse insertion order and stops as soon as
-// any child claims the event.  The transparent InkWell claims every tap
-// within the card bounds, so the TilawaIconActionButton inside the card
-// content is never reached.
-//
-// All four tests below fail BEFORE the fix and pass AFTER it.
+// Delete lives in a trailing column inside the raised card (no [onTap] on the
+// outer [TilawaCard]) so it does not compete with the body [InkWell].
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:tilawa/features/athkar/domain/services/tasbeeh_target_feedback_service.dart';
 import 'package:tilawa/features/athkar/domain/usecases/delete_tasbeeh_dhikr_use_case.dart';
 import 'package:tilawa/features/athkar/domain/usecases/get_saved_tasbeeh_use_case.dart';
@@ -27,14 +22,10 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../helpers/fake_tasbeeh_repository.dart';
 
-// ── Test doubles ──────────────────────────────────────────────────────────────
-
 class _SilentFeedbackService implements TasbeehTargetFeedbackService {
   @override
   Future<void> onTargetReached() async {}
 }
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
 
 TasbeehCubit _buildCubit(FakeTasbeehRepository repo) => TasbeehCubit(
   GetSavedTasbeehUseCase(repo),
@@ -46,36 +37,46 @@ TasbeehCubit _buildCubit(FakeTasbeehRepository repo) => TasbeehCubit(
   _SilentFeedbackService(),
 );
 
-Widget _buildTestApp(TasbeehCubit cubit) => MaterialApp(
-  theme: AppTheme.getLightTheme(
-    primaryColor: PrimaryColorPreset.defaultPreset.value,
-  ),
-  supportedLocales: AppLocalizations.supportedLocales,
-  localizationsDelegates: AppLocalizations.localizationsDelegates,
-  home: TasbeehScreen(cubit: cubit),
-);
+Widget _buildTestApp(TasbeehCubit cubit) {
+  final router = GoRouter(
+    routes: [
+      GoRoute(
+        path: '/',
+        builder: (context, state) => TasbeehScreen(cubit: cubit),
+      ),
+    ],
+  );
 
-/// Pumps the TasbeehScreen on the history list with seeded data loaded.
-Future<void> _pumpHistory(WidgetTester tester, TasbeehCubit cubit) async {
+  return MaterialApp.router(
+    theme: AppTheme.getLightTheme(
+      primaryColor: PrimaryColorPreset.defaultPreset.value,
+    ),
+    supportedLocales: AppLocalizations.supportedLocales,
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    locale: const Locale('en'),
+    routerConfig: router,
+  );
+}
+
+Future<void> _pumpHomeWithSavedDhikr(
+  WidgetTester tester,
+  TasbeehCubit cubit,
+) async {
   tester.view.physicalSize = const Size(800, 1200);
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
 
   await cubit.loadSavedDhikr();
-  cubit.showHistoryView();
 
   await tester.pumpWidget(_buildTestApp(cubit));
   await tester.pump();
 
-  expect(cubit.state.viewMode, TasbeehViewMode.history);
+  expect(cubit.state.viewMode, TasbeehViewMode.home);
   expect(cubit.state.savedDhikr, hasLength(1));
   expect(find.text('Subhan Allah'), findsOneWidget);
 }
 
-/// Taps the history delete control without [WidgetTester.tap]'s
-/// `pumpAndSettle` in [Scrollable.ensureVisible], which never completes while
-/// kit press animations are running.
 Future<void> _tapDeleteIcon(WidgetTester tester) async {
   final Finder deleteButton = find.byType(TilawaIconActionButton);
   expect(deleteButton, findsOneWidget);
@@ -83,10 +84,8 @@ Future<void> _tapDeleteIcon(WidgetTester tester) async {
   await tester.pump();
 }
 
-// ── Tests ─────────────────────────────────────────────────────────────────────
-
 void main() {
-  group('Tasbeeh history — delete button', () {
+  group('Tasbeeh home — delete button', () {
     late FakeTasbeehRepository repo;
     late TasbeehCubit cubit;
 
@@ -100,17 +99,13 @@ void main() {
       await cubit.close();
     });
 
-    // ── Bug confirmation (RED before fix) ─────────────────────────────────
-
     testWidgets(
       'tapping the delete icon shows the confirmation dialog',
       (tester) async {
-        await _pumpHistory(tester, cubit);
+        await _pumpHomeWithSavedDhikr(tester, cubit);
 
         await _tapDeleteIcon(tester);
 
-        // Before fix: the card's overlay InkWell fires selectDhikrAndStartCounting
-        // instead, the viewMode switches to counting, and no dialog appears.
         expect(
           find.byType(AlertDialog),
           findsOneWidget,
@@ -121,32 +116,27 @@ void main() {
     );
 
     testWidgets(
-      'tapping the delete icon does not navigate away from the history view',
+      'tapping the delete icon does not navigate away from the home view',
       (tester) async {
-        await _pumpHistory(tester, cubit);
+        await _pumpHomeWithSavedDhikr(tester, cubit);
 
         await _tapDeleteIcon(tester);
 
-        // Before fix: the card's onTap fires, switching to counting mode.
         expect(
           cubit.state.viewMode,
-          TasbeehViewMode.history,
-          reason:
-              'The view must stay in history mode when the delete icon is tapped.',
+          TasbeehViewMode.home,
+          reason: 'The view must stay on home when the delete icon is tapped.',
         );
       },
     );
 
-    // ── Correct behaviour after fix ───────────────────────────────────────
-
     testWidgets(
-      'confirming delete removes the item from the history list',
+      'confirming delete removes the item from the saved list',
       (tester) async {
-        await _pumpHistory(tester, cubit);
+        await _pumpHomeWithSavedDhikr(tester, cubit);
 
         await _tapDeleteIcon(tester);
 
-        // Tap the "Delete" action inside the AlertDialog.
         final deleteButtons = find.descendant(
           of: find.byType(AlertDialog),
           matching: find.byType(TilawaButton),
@@ -163,13 +153,12 @@ void main() {
     );
 
     testWidgets(
-      'cancelling the delete dialog keeps the item in the history list',
+      'cancelling the delete dialog keeps the item in the saved list',
       (tester) async {
-        await _pumpHistory(tester, cubit);
+        await _pumpHomeWithSavedDhikr(tester, cubit);
 
         await _tapDeleteIcon(tester);
 
-        // Tap the "Cancel" button inside the AlertDialog.
         final cancelButton = find.descendant(
           of: find.byType(AlertDialog),
           matching: find.byType(TilawaButton),

@@ -10,22 +10,33 @@ class TasbeehCounterCard extends StatelessWidget {
     super.key,
     required this.displayCount,
     required this.onTap,
-    this.progress,
+    this.targetCount,
     this.targetFeedbackPulse = 0,
   });
 
   final int displayCount;
   final VoidCallback onTap;
-  final double? progress;
+  final int? targetCount;
   final int targetFeedbackPulse;
 
-  bool get _usesTargetFeedback => progress != null;
+  bool get _usesTargetFeedback => targetCount != null && targetCount! > 0;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
+    final int? total = targetCount;
+    final bool isDone =
+        total != null && total > 0 && displayCount >= total;
+
+    final Widget counterBody = _usesTargetFeedback
+        ? TilawaCountProgressRing(
+            currentCount: displayCount.clamp(0, total!),
+            totalCount: total,
+            isDone: isDone,
+          )
+        : _QuickCountDisplay(count: displayCount);
 
     final Widget counterCard = TilawaCard(
       borderRadius: tokens.radiusExtraLarge,
@@ -35,54 +46,8 @@ class TasbeehCounterCard extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              padding: EdgeInsets.all(tokens.spaceExtraLarge),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: colorScheme.primary.withValues(
-                  alpha: tokens.opacitySubtle,
-                ),
-                border: Border.all(
-                  color: colorScheme.primary.withValues(
-                    alpha: tokens.opacityMedium,
-                  ),
-                  width: tokens.borderWidthThin,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: colorScheme.primary.withValues(
-                      alpha: tokens.opacityShadow * 0.35,
-                    ),
-                    blurRadius: tokens.blurShadow,
-                    offset: tokens.shadowOffsetSmall,
-                  ),
-                ],
-              ),
-              child: Text(
-                '$displayCount',
-                style: theme.textTheme.displayMedium?.copyWith(
-                  color: colorScheme.primary,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-            ),
+            counterBody,
             SizedBox(height: tokens.spaceLarge),
-            if (progress != null) ...[
-              ClipRRect(
-                borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
-                child: LinearProgressIndicator(
-                  value: progress,
-                  minHeight: tokens.progressHeight,
-                  backgroundColor: colorScheme.outlineVariant.withValues(
-                    alpha: tokens.opacitySubtle,
-                  ),
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    colorScheme.primary,
-                  ),
-                ),
-              ),
-              SizedBox(height: tokens.spaceMedium),
-            ],
             Text(
               context.l10n.tasbeehTapToCount,
               textAlign: TextAlign.center,
@@ -104,6 +69,47 @@ class TasbeehCounterCard extends StatelessWidget {
               child: counterCard,
             )
           : counterCard,
+    );
+  }
+}
+
+class _QuickCountDisplay extends StatelessWidget {
+  const _QuickCountDisplay({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      padding: EdgeInsets.all(tokens.spaceExtraLarge),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: colorScheme.primary.withValues(alpha: tokens.opacitySubtle),
+        border: Border.all(
+          color: colorScheme.primary.withValues(alpha: tokens.opacityMedium),
+          width: tokens.borderWidthThin,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.primary.withValues(
+              alpha: tokens.opacityShadow * 0.35,
+            ),
+            blurRadius: tokens.blurShadow,
+            offset: tokens.shadowOffsetSmall,
+          ),
+        ],
+      ),
+      child: Text(
+        '$count',
+        style: theme.textTheme.displayMedium?.copyWith(
+          color: colorScheme.primary,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
     );
   }
 }

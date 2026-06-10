@@ -9,7 +9,7 @@ class TasbeehConstants {
   static const int minTextLength = 1;
   static const int maxTextLength = 120;
 
-  static const int defaultTargetCount = 1;
+  static const int defaultTargetCount = 33;
   static const int minTargetCount = 1;
   static const int maxTargetCount = 100000;
 }

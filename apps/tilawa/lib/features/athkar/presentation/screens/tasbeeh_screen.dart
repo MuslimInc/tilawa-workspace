@@ -13,7 +13,7 @@ import '../widgets/athkar_ambient_background.dart';
 import '../widgets/tasbeeh/tasbeeh_counting_actions.dart';
 import '../widgets/tasbeeh/tasbeeh_create_view.dart';
 import '../widgets/tasbeeh/tasbeeh_ephemeral_counting_view.dart';
-import '../widgets/tasbeeh/tasbeeh_history_view.dart';
+import '../widgets/tasbeeh/tasbeeh_home_view.dart';
 import '../widgets/tasbeeh/tasbeeh_layout_widgets.dart';
 import '../widgets/tasbeeh/tasbeeh_saved_dhikr_counting_view.dart';
 
@@ -49,11 +49,18 @@ class _TasbeehView extends StatelessWidget {
         Widget? bottomActions;
 
         switch (state.viewMode) {
-          case TasbeehViewMode.counting:
+          case TasbeehViewMode.home:
+            if (state.status == TasbeehStatus.loading) {
+              content = const Center(child: CircularProgressIndicator());
+            } else {
+              content = TasbeehHomeView(cubit: cubit, state: state);
+              bottomActions = TasbeehHomeActions(cubit: cubit);
+            }
+          case TasbeehViewMode.quickCount:
             final TasbeehEphemeralCountingSession ephemeral =
                 session as TasbeehEphemeralCountingSession? ??
                 TasbeehEphemeralCountingSession(count: state.ephemeralCount);
-            content = TasbeehEphemeralCountingView(
+            content = TasbeehQuickCountView(
               cubit: cubit,
               session: ephemeral,
             );
@@ -80,32 +87,27 @@ class _TasbeehView extends StatelessWidget {
           case TasbeehViewMode.create:
             content = TasbeehCreateView(cubit: cubit, state: state);
             bottomActions = TasbeehCreateActions(cubit: cubit, state: state);
-          case TasbeehViewMode.history:
-            content = TasbeehHistoryView(cubit: cubit, state: state);
         }
 
         final savedSession = state.activeSavedDhikr;
-        final bool isSubView =
-            state.viewMode == TasbeehViewMode.create ||
-            state.viewMode == TasbeehViewMode.history ||
-            state.viewMode == TasbeehViewMode.selectedCounting;
+        final bool isSubView = state.viewMode != TasbeehViewMode.home;
 
         return Scaffold(
           appBar: TilawaCatalogAppBar(
             preferredHeight: TilawaAppBarConfig.catalogTitleOnlyHeight(context),
-            title: savedSession != null &&
-                    state.viewMode == TasbeehViewMode.selectedCounting
-                ? savedSession.text
-                : context.l10n.tasbeehCategory,
+            title: switch (state.viewMode) {
+              TasbeehViewMode.selectedCounting when savedSession != null =>
+                savedSession.text,
+              TasbeehViewMode.quickCount => context.l10n.tasbeehQuickCountTitle,
+              TasbeehViewMode.create => context.l10n.tasbeehAddNewOptionTitle,
+              _ => context.l10n.tasbeehCategory,
+            },
             leading: isSubView
                 ? TilawaBackButton(
                     compact: true,
-                    onPressed: switch (state.viewMode) {
-                      TasbeehViewMode.selectedCounting => cubit.showHistoryView,
-                      _ => cubit.startEphemeralCounting,
-                    },
+                    onPressed: cubit.showHomeView,
                   )
-                : context.canPop()
+                : Navigator.canPop(context)
                 ? TilawaBackButton(
                     compact: true,
                     onPressed: () => context.pop(),

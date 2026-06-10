@@ -60,7 +60,7 @@ void main() {
     repo = FakeTasbeehRepository();
   });
 
-  testWidgets('free counting shows history actions but not dhikr title', (
+  testWidgets('home shows quick count entry and add new action', (
     WidgetTester tester,
   ) async {
     final cubit = _buildCubit(repo);
@@ -69,11 +69,12 @@ void main() {
     await tester.pumpWidget(_buildApp(cubit));
     await tester.pump();
 
-    expect(find.text('View saved Tasbeeh'), findsOneWidget);
+    expect(find.text('Quick count'), findsOneWidget);
+    expect(find.text('Add new Tasbeeh'), findsOneWidget);
     expect(find.text('Subhan Allah'), findsNothing);
   });
 
-  testWidgets('selected counting shows dhikr title and hides history actions', (
+  testWidgets('selected counting shows dhikr title in app bar only', (
     WidgetTester tester,
   ) async {
     final cubit = _buildCubit(repo);
@@ -87,8 +88,8 @@ void main() {
     await tester.pumpWidget(_buildApp(cubit));
     await tester.pumpAndSettle();
 
-    expect(find.text('Subhan Allah'), findsWidgets);
-    expect(find.text('View saved Tasbeeh'), findsNothing);
+    expect(find.text('Subhan Allah'), findsOneWidget);
+    expect(find.text('Quick count'), findsNothing);
     expect(cubit.state.viewMode, TasbeehViewMode.selectedCounting);
   });
 }

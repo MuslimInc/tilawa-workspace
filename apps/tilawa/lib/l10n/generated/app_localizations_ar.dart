@@ -973,6 +973,24 @@ class AppLocalizationsAr extends AppLocalizations {
       'اختر ذكراً محفوظاً أو أضف ذكراً جديداً للبدء';
 
   @override
+  String get tasbeehQuickCountTitle => 'عد سريع';
+
+  @override
+  String get tasbeehQuickCountSubtitle => 'عد بدون حفظ — اضغط للبدء';
+
+  @override
+  String tasbeehProgressLabel(int current, int target) {
+    final intl.NumberFormat currentNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String currentString = currentNumberFormat.format(current);
+    final intl.NumberFormat targetNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String targetString = targetNumberFormat.format(target);
+
+    return '$currentString / $targetString';
+  }
+
+  @override
   String get done => 'تم';
 
   @override

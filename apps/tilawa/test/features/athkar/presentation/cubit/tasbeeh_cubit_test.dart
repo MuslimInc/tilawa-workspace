@@ -180,7 +180,7 @@ void main() {
   );
 
   blocTest<TasbeehCubit, TasbeehState>(
-    'startCounting clears selected dhikr and uses free counting mode',
+    'showHomeView clears selected dhikr and returns to home',
     build: () => cubit,
     seed: () {
       final item = TasbeehDhikr(
@@ -199,10 +199,10 @@ void main() {
         activeSavedDhikrId: '1',
       );
     },
-    act: (cubit) => cubit.startCounting(),
+    act: (cubit) => cubit.showHomeView(),
     expect: () => [
       isA<TasbeehState>()
-          .having((s) => s.viewMode, 'viewMode', TasbeehViewMode.counting)
+          .having((s) => s.viewMode, 'viewMode', TasbeehViewMode.home)
           .having((s) => s.activeSavedDhikrId, 'selected', isNull),
     ],
   );
@@ -222,7 +222,7 @@ void main() {
       );
       return TasbeehState(
         status: TasbeehStatus.loaded,
-        viewMode: TasbeehViewMode.history,
+        viewMode: TasbeehViewMode.home,
         savedDhikr: [item],
       );
     },
@@ -240,17 +240,17 @@ void main() {
     build: () => cubit,
     seed: () => const TasbeehState(
       status: TasbeehStatus.loaded,
-      viewMode: TasbeehViewMode.counting,
+      viewMode: TasbeehViewMode.home,
       draftText: 'Subhan Allah',
       draftTargetText: '10',
     ),
     act: (cubit) => cubit.showCreateView(),
     expect: () => [
-      const TasbeehState(
+      TasbeehState(
         status: TasbeehStatus.loaded,
         viewMode: TasbeehViewMode.create,
         draftText: '',
-        draftTargetText: '',
+        draftTargetText: TasbeehConstants.defaultTargetCount.toString(),
       ),
     ],
   );
@@ -260,7 +260,7 @@ void main() {
     build: () => cubit,
     seed: () => const TasbeehState(
       status: TasbeehStatus.loaded,
-      viewMode: TasbeehViewMode.counting,
+      viewMode: TasbeehViewMode.quickCount,
       ephemeralCount: 10,
     ),
     act: (cubit) {
@@ -363,7 +363,7 @@ void main() {
   );
 
   blocTest<TasbeehCubit, TasbeehState>(
-    'vibrates when incrementing beyond target',
+    'does not vibrate when target was already reached',
     build: () => cubit,
     seed: () {
       final item = TasbeehDhikr(
@@ -385,34 +385,7 @@ void main() {
     },
     act: (cubit) => cubit.incrementSelected(),
     verify: (_) {
-      expect(feedbackService.callCount, 1);
-    },
-  );
-
-  blocTest<TasbeehCubit, TasbeehState>(
-    'vibrates when incrementing while already above target',
-    build: () => cubit,
-    seed: () {
-      final item = TasbeehDhikr(
-        id: '1',
-        text: 'Subhan Allah',
-        count: 4,
-        targetCount: 3,
-        targetReachedNotified: true,
-        createdAt: DateTime(2026),
-        updatedAt: DateTime(2026),
-      );
-      repository._store['1'] = item;
-      return TasbeehState(
-        status: TasbeehStatus.loaded,
-        savedDhikr: [item],
-        viewMode: TasbeehViewMode.selectedCounting,
-        activeSavedDhikrId: '1',
-      );
-    },
-    act: (cubit) => cubit.incrementSelected(),
-    verify: (_) {
-      expect(feedbackService.callCount, 1);
+      expect(feedbackService.callCount, 0);
     },
   );
 

@@ -19,47 +19,61 @@ class TasbeehCreateView extends StatelessWidget {
     final tokens = theme.tokens;
 
     return TasbeehContentBounds(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            padding: EdgeInsets.all(tokens.spaceLarge),
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: TilawaCard(
-                borderRadius: tokens.radiusExtraLarge,
-                surface: TilawaCardSurface.raised,
-                backgroundColor: theme.colorScheme.surface,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      context.l10n.tasbeehAddNewOptionTitle,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    SizedBox(height: tokens.spaceMedium),
-                    TilawaTextField(
-                      hintText: context.l10n.tasbeehInputHint,
-                      prefixIcon: const Icon(Icons.edit_note_rounded),
-                      onChanged: cubit.updateDraftText,
-                      maxLength: TasbeehConstants.maxTextLength,
-                    ),
-                    SizedBox(height: tokens.spaceSmall),
-                    TilawaTextField(
-                      hintText: '${TasbeehConstants.defaultTargetCount}',
-                      prefixIcon: const Icon(Icons.flag_rounded),
-                      onChanged: cubit.updateDraftTargetText,
-                      keyboardType: TextInputType.number,
-                    ),
-                  ],
+      alignTop: true,
+      child: SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(
+          tokens.spaceLarge,
+          tokens.spaceMedium,
+          tokens.spaceLarge,
+          tokens.spaceLarge,
+        ),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        child: TilawaCard(
+          borderRadius: tokens.radiusExtraLarge,
+          surface: TilawaCardSurface.raised,
+          backgroundColor: theme.colorScheme.surface,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                context.l10n.tasbeehAddNewOptionSubtitle,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
-            ),
-          );
-        },
+              SizedBox(height: tokens.spaceLarge),
+              Text(
+                context.l10n.tasbeehInputLabel,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              SizedBox(height: tokens.spaceExtraSmall),
+              TilawaTextField(
+                hintText: context.l10n.tasbeehInputHint,
+                prefixIcon: const Icon(Icons.edit_note_rounded),
+                onChanged: cubit.updateDraftText,
+                maxLength: TasbeehConstants.maxTextLength,
+              ),
+              SizedBox(height: tokens.spaceMedium),
+              Text(
+                context.l10n.tasbeehTargetLabel,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              SizedBox(height: tokens.spaceExtraSmall),
+              TilawaTextField(
+                hintText: '${TasbeehConstants.defaultTargetCount}',
+                initialValue: state.draftTargetText,
+                prefixIcon: const Icon(Icons.flag_rounded),
+                onChanged: cubit.updateDraftTargetText,
+                keyboardType: TextInputType.number,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

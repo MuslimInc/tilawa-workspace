@@ -1359,6 +1359,28 @@
     "@tasbeehSelectOrCreatePrompt": {
         "description": "Prompt shown when no dhikr is selected"
     },
+    "tasbeehQuickCountTitle": "Quick count",
+    "@tasbeehQuickCountTitle": {
+        "description": "Title for ephemeral tap-to-count without saving"
+    },
+    "tasbeehQuickCountSubtitle": "Count without saving — tap to begin",
+    "@tasbeehQuickCountSubtitle": {
+        "description": "Subtitle for ephemeral quick count entry"
+    },
+    "tasbeehProgressLabel": "{current} / {target}",
+    "@tasbeehProgressLabel": {
+        "description": "Progress label for saved dhikr list items",
+        "placeholders": {
+            "current": {
+                "type": "int",
+                "format": "decimalPattern"
+            },
+            "target": {
+                "type": "int",
+                "format": "decimalPattern"
+            }
+        }
+    },
     "done": "Done",
     "@done": {
         "description": "Done label for thikr completion"

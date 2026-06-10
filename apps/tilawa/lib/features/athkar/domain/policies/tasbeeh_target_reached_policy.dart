@@ -6,7 +6,12 @@ import 'package:injectable/injectable.dart';
 class TasbeehTargetReachedPolicy {
   const TasbeehTargetReachedPolicy();
 
-  bool shouldNotify(TasbeehDhikr dhikr) {
-    return dhikr.targetCount > 0 && dhikr.count >= dhikr.targetCount;
+  bool shouldNotifyOnIncrement({
+    required TasbeehDhikr before,
+    required TasbeehDhikr after,
+  }) {
+    return after.targetCount > 0 &&
+        before.count < before.targetCount &&
+        after.count >= after.targetCount;
   }
 }

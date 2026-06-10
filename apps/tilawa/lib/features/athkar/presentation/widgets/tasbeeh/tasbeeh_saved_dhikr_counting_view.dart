@@ -21,8 +21,9 @@ class TasbeehSavedDhikrCountingView extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
     final dhikr = session.dhikr;
+    final bool isComplete =
+        dhikr.targetCount > 0 && dhikr.count >= dhikr.targetCount;
 
     return TasbeehContentBounds(
       child: Padding(
@@ -30,32 +31,23 @@ class TasbeehSavedDhikrCountingView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              dhikr.text,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w800,
-                color: colorScheme.onSurface,
-              ),
-            ),
-            SizedBox(height: tokens.spaceSmall),
-            Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: TilawaStatusChip(
-                padding: EdgeInsets.symmetric(
-                  horizontal: tokens.spaceMedium,
-                  vertical: tokens.spaceSmall,
+            if (isComplete)
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: TilawaStatusChip(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: tokens.spaceMedium,
+                    vertical: tokens.spaceSmall,
+                  ),
+                  icon: Icons.check_circle_rounded,
+                  label: context.l10n.done,
                 ),
-                icon: Icons.flag_rounded,
-                label: context.l10n.tasbeehCurrentTarget(dhikr.targetCount),
               ),
-            ),
-            SizedBox(height: tokens.spaceMedium),
+            if (isComplete) SizedBox(height: tokens.spaceMedium),
             Expanded(
               child: TasbeehCounterCard(
                 displayCount: dhikr.count,
-                progress: session.progress,
+                targetCount: dhikr.targetCount,
                 targetFeedbackPulse: session.targetFeedbackPulse,
                 onTap: cubit.incrementActiveSavedDhikr,
               ),

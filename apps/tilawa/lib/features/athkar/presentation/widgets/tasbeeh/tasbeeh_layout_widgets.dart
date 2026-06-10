@@ -8,20 +8,32 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../cubit/tasbeeh_state.dart';
 
 class TasbeehContentBounds extends StatelessWidget {
-  const TasbeehContentBounds({super.key, required this.child});
+  const TasbeehContentBounds({
+    super.key,
+    required this.child,
+    this.alignTop = false,
+  });
 
   final Widget child;
+
+  /// When true, content hugs the top instead of vertically centering in the
+  /// available body (hub, create, quick-count screens).
+  final bool alignTop;
 
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
 
-    return Center(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: tokens.contentMaxWidthSettings),
-        child: child,
-      ),
+    final Widget bounded = ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: tokens.contentMaxWidthSettings),
+      child: child,
     );
+
+    if (alignTop) {
+      return Align(alignment: Alignment.topCenter, child: bounded);
+    }
+
+    return Center(child: bounded);
   }
 }
 

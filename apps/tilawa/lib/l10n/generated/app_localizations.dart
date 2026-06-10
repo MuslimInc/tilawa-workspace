@@ -1850,6 +1850,24 @@ abstract class AppLocalizations {
   /// **'Select or create a dhikr to start counting'**
   String get tasbeehSelectOrCreatePrompt;
 
+  /// Title for ephemeral tap-to-count without saving
+  ///
+  /// In en, this message translates to:
+  /// **'Quick count'**
+  String get tasbeehQuickCountTitle;
+
+  /// Subtitle for ephemeral quick count entry
+  ///
+  /// In en, this message translates to:
+  /// **'Count without saving — tap to begin'**
+  String get tasbeehQuickCountSubtitle;
+
+  /// Progress label for saved dhikr list items
+  ///
+  /// In en, this message translates to:
+  /// **'{current} / {target}'**
+  String tasbeehProgressLabel(int current, int target);
+
   /// Done label for thikr completion
   ///
   /// In en, this message translates to:

@@ -1005,26 +1005,35 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
 
   void _handleShowIndex() => _showSurahIndex();
 
-  void _showSurahIndex() {
+  Future<void> _showSurahIndex() async {
     // Pre-load fonts for all surah start pages so that any index jump is instant.
     unawaited(_prewarmSurahIndexFonts());
-    showTilawaModalBottomSheet<int>(
-      context: context,
-      useSafeArea: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => SurahIndexSheet(
-        onSurahSelected: (surahNumber) =>
-            Navigator.of(context).pop(surahNumber),
-        onSurahTapped: (surahNumber) {
-          final pageNumber = getPageNumber(surahNumber, 1);
-          _handleOnWarming(pageNumber);
-        },
-      ),
-    ).then((surahNumber) {
+    final theme = Theme.of(context);
+    final readerOverlayStyle = AppSystemChromeStyle.quranReaderStyle;
+
+    SystemChrome.setSystemUIOverlayStyle(
+      _buildShareSheetSystemUiOverlayStyle(theme),
+    );
+    try {
+      final surahNumber = await showTilawaModalBottomSheet<int>(
+        context: context,
+        useSafeArea: true,
+        backgroundColor: Colors.transparent,
+        builder: (context) => SurahIndexSheet(
+          onSurahSelected: (surahNumber) =>
+              Navigator.of(context).pop(surahNumber),
+          onSurahTapped: (surahNumber) {
+            final pageNumber = getPageNumber(surahNumber, 1);
+            _handleOnWarming(pageNumber);
+          },
+        ),
+      );
       if (surahNumber != null && mounted) {
         unawaited(_jumpToSurah(surahNumber));
       }
-    });
+    } finally {
+      SystemChrome.setSystemUIOverlayStyle(readerOverlayStyle);
+    }
   }
 
   Future<void> _prewarmSurahIndexFonts() async {
