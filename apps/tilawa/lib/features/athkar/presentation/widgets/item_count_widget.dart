@@ -4,7 +4,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../domain/entities/athkar_item.dart';
 
 /// Athkar counter scale relative to [TilawaCountProgressRingTokens.defaults].
-const double kAthkarCountRingScale = 0.82;
+const double kAthkarCountRingScale = 1;
 
 /// Layout footprint for the counter in the Athkar footer row.
 double athkarCountRingLayoutSize(BuildContext context) {
