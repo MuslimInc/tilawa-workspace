@@ -27,7 +27,7 @@ Upload a release AAB via the **Android Release (Google Play)** GitHub workflow, 
 
 ```bash
 cd apps/tilawa
-flutter build appbundle --release --target-platform android-arm64 --split-debug-info=build/symbols
+flutter build appbundle --release --target-platform android-arm64 --obfuscate --split-debug-info=build/symbols
 ```
 
 Upload: `apps/tilawa/build/app/outputs/bundle/release/app-release.aab`
