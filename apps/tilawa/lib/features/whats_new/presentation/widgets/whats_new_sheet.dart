@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -29,7 +30,31 @@ Future<void> showWhatsNewSheet({
             trailingClose: true,
             onClose: () => Navigator.of(context).pop(),
           ),
-          betweenTopBarAndBody: const <Widget>[TilawaDivider(height: 1)],
+          betweenTopBarAndBody: <Widget>[
+            if (release.publishedAt != null)
+              Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(
+                  Theme.of(sheetContext).tokens.spaceLarge,
+                  Theme.of(sheetContext).tokens.spaceExtraSmall,
+                  Theme.of(sheetContext).tokens.spaceLarge,
+                  Theme.of(sheetContext).tokens.spaceSmall,
+                ),
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text(
+                    _publishedAtLabel(
+                      context: sheetContext,
+                      publishedAt: release.publishedAt!,
+                    ),
+                    style: Theme.of(sheetContext).textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            const TilawaDivider(height: 1),
+          ],
           footer: TilawaBottomSheetActions(
             primaryLabel: l10n.whatsNewGotIt,
             onPrimary: () => Navigator.of(context).pop(),
@@ -44,4 +69,15 @@ Future<void> showWhatsNewSheet({
       );
     },
   );
+}
+
+String _publishedAtLabel({
+  required BuildContext context,
+  required DateTime publishedAt,
+}) {
+  final String locale = context.isArabic ? 'ar' : 'en';
+  final String formatted = DateFormat.yMMMd(locale).add_jm().format(
+    publishedAt.toLocal(),
+  );
+  return '${context.l10n.lastUpdated}: $formatted';
 }

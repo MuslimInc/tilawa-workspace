@@ -7,10 +7,12 @@ class ChangelogCatalog extends Equatable {
   const ChangelogCatalog({
     required this.schemaVersion,
     required this.releases,
+    this.lastUpdatedAt,
   });
 
   final int schemaVersion;
   final List<ChangelogRelease> releases;
+  final DateTime? lastUpdatedAt;
 
   ChangelogRelease? findById(String releaseId) {
     for (final ChangelogRelease release in releases) {
@@ -22,5 +24,5 @@ class ChangelogCatalog extends Equatable {
   }
 
   @override
-  List<Object?> get props => [schemaVersion, releases];
+  List<Object?> get props => [schemaVersion, releases, lastUpdatedAt];
 }

@@ -5,11 +5,13 @@ class ChangelogCatalogDto {
   const ChangelogCatalogDto({
     required this.schemaVersion,
     required this.releases,
+    this.lastUpdatedAt,
   });
 
   factory ChangelogCatalogDto.fromJson(Map<String, dynamic> json) {
     final List<dynamic> rawReleases =
         json['releases'] as List<dynamic>? ?? <dynamic>[];
+    final String? lastUpdatedAtRaw = json['lastUpdatedAt'] as String?;
     return ChangelogCatalogDto(
       schemaVersion: json['schemaVersion'] as int? ?? 1,
       releases: rawReleases
@@ -19,16 +21,21 @@ class ChangelogCatalogDto {
             ),
           )
           .toList(),
+      lastUpdatedAt: lastUpdatedAtRaw == null
+          ? null
+          : DateTime.tryParse(lastUpdatedAtRaw),
     );
   }
 
   final int schemaVersion;
   final List<ChangelogReleaseDto> releases;
+  final DateTime? lastUpdatedAt;
 
   ChangelogCatalog toEntity() {
     return ChangelogCatalog(
       schemaVersion: schemaVersion,
       releases: releases.map((ChangelogReleaseDto dto) => dto.toEntity()).toList(),
+      lastUpdatedAt: lastUpdatedAt,
     );
   }
 }
