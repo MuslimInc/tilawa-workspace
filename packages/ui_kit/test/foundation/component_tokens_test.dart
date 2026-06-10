@@ -44,7 +44,6 @@ void main() {
       expect(tokens.height, 5.0);
       expect(tokens.marginTop, 12.0);
       expect(tokens.marginBottom, 16.0);
-      expect(tokens.cornerRadius, 999.0);
       expect(tokens.colorOpacity, 0.22);
     });
 
@@ -63,7 +62,6 @@ void main() {
         height: 4.0,
         marginTop: 8.0,
         marginBottom: 12.0,
-        cornerRadius: 900.0,
         colorOpacity: 0.2,
       );
       const second = TilawaSheetHandleTokens(
@@ -71,7 +69,6 @@ void main() {
         height: 6.0,
         marginTop: 16.0,
         marginBottom: 20.0,
-        cornerRadius: 999.0,
         colorOpacity: 0.3,
       );
       final result = TilawaSheetHandleTokens.lerp(first, second, 0.5);
@@ -87,7 +84,6 @@ void main() {
     test('defaults creates expected values', () {
       final tokens = TilawaFeedbackStripTokens.defaults();
       expect(tokens.padding, const EdgeInsets.all(16));
-      expect(tokens.borderRadius, 18.0);
       expect(tokens.spinnerSize, 18.0);
       expect(tokens.spinnerStrokeWidth, 2.2);
       expect(tokens.contentGap, 8.0);
@@ -101,13 +97,12 @@ void main() {
       );
       expect(updated.padding, const EdgeInsets.all(16));
       expect(updated.spinnerSize, 20.0);
-      expect(updated.borderRadius, original.borderRadius);
+      expect(updated.contentGap, original.contentGap);
     });
 
     test('lerp interpolates numeric values and EdgeInsets', () {
       const first = TilawaFeedbackStripTokens(
         padding: EdgeInsets.all(10),
-        borderRadius: 15.0,
         spinnerSize: 16.0,
         spinnerStrokeWidth: 2.0,
         contentGap: 8.0,
@@ -118,7 +113,6 @@ void main() {
       );
       const second = TilawaFeedbackStripTokens(
         padding: EdgeInsets.all(20),
-        borderRadius: 20.0,
         spinnerSize: 20.0,
         spinnerStrokeWidth: 3.0,
         contentGap: 12.0,
@@ -128,7 +122,6 @@ void main() {
         errorAccentOpacity: 0.8,
       );
       final result = TilawaFeedbackStripTokens.lerp(first, second, 0.5);
-      expect(result.borderRadius, closeTo(17.5, 0.01));
       expect(result.spinnerSize, closeTo(18.0, 0.01));
       expect(result.contentGap, closeTo(10.0, 0.01));
       expect(result.infoAccentOpacity, closeTo(0.35, 0.01));
@@ -178,7 +171,6 @@ void main() {
     test('defaults creates expected values', () {
       final tokens = TilawaIconActionButtonTokens.defaults();
       expect(tokens.size, 48.0);
-      expect(tokens.borderRadius, 16.0);
       expect(tokens.activeBackgroundOpacity, 0.12);
       expect(tokens.activeBorderOpacity, 0.35);
       expect(tokens.inactiveBorderOpacity, 0.26);
@@ -198,14 +190,12 @@ void main() {
     test('lerp interpolates all numeric values', () {
       const first = TilawaIconActionButtonTokens(
         size: 40.0,
-        borderRadius: 12.0,
         activeBackgroundOpacity: 0.1,
         activeBorderOpacity: 0.3,
         inactiveBorderOpacity: 0.2,
       );
       const second = TilawaIconActionButtonTokens(
         size: 50.0,
-        borderRadius: 20.0,
         activeBackgroundOpacity: 0.15,
         activeBorderOpacity: 0.4,
         inactiveBorderOpacity: 0.3,
@@ -221,7 +211,6 @@ void main() {
       final tokens = TilawaSearchFieldTokens.defaults();
       expect(tokens.height, 48.0);
       expect(tokens.backgroundColor, isA<Color>());
-      expect(tokens.borderRadius, 16.0);
       expect(tokens.contentPadding, const EdgeInsets.symmetric(vertical: 12));
       expect(tokens.iconSize, 18.0);
       expect(tokens.focusedBorderOpacity, 0.28);
@@ -234,7 +223,6 @@ void main() {
       final updated = original.copyWith(
         height: 52.0,
         backgroundColor: const Color(0xFFE8EFE9),
-        borderRadius: 20.0,
         focusedBorderOpacity: 0.3,
         shadowOffset: const Offset(0, 6),
       );
@@ -270,7 +258,6 @@ void main() {
       const first = TilawaSearchFieldTokens(
         height: 48.0,
         backgroundColor: Color(0xFFF1EFE8),
-        borderRadius: 14.0,
         contentPadding: EdgeInsets.symmetric(vertical: 10),
         scrollPadding: EdgeInsets.all(16),
         iconSize: 16.0,
@@ -291,7 +278,6 @@ void main() {
       const second = TilawaSearchFieldTokens(
         height: 56.0,
         backgroundColor: Color(0xFFE3D4E9),
-        borderRadius: 18.0,
         contentPadding: EdgeInsets.symmetric(vertical: 14),
         scrollPadding: EdgeInsets.all(24),
         iconSize: 20.0,
@@ -447,7 +433,6 @@ void main() {
     test('defaults creates expected values', () {
       final tokens = TilawaSettingsGroupTokens.defaults();
       expect(tokens.groupHorizontalPadding, 20.0);
-      expect(tokens.groupBorderRadius, 16.0);
       expect(tokens.groupShadowOpacity, 0);
       expect(tokens.tileTitleFontSize, 16.0);
       expect(tokens.tileSubtitleOpacity, 0.6);
@@ -484,11 +469,9 @@ void main() {
     test('copyWith updates nested EdgeInsets and numeric values', () {
       final original = TilawaSettingsGroupTokens.defaults();
       final updated = original.copyWith(
-        groupBorderRadius: 24.0,
         tileTitleFontSize: 16.0,
         tileSubtitleOpacity: 0.6,
       );
-      expect(updated.groupBorderRadius, 24.0);
       expect(updated.tileTitleFontSize, 16.0);
       expect(updated.tileSubtitleOpacity, 0.6);
       expect(updated.groupShadowOpacity, original.groupShadowOpacity);
@@ -498,7 +481,6 @@ void main() {
       const first = TilawaSettingsGroupTokens(
         groupHorizontalPadding: 12.0,
         groupHeaderPadding: EdgeInsets.fromLTRB(10, 14, 14, 6),
-        groupBorderRadius: 16.0,
         groupShadowOpacity: 0.04,
         groupShadowBlur: 8.0,
         groupShadowOffset: Offset(0, 2),
@@ -510,7 +492,6 @@ void main() {
           vertical: 10,
         ),
         tileIconPadding: EdgeInsets.all(8),
-        tileIconBorderRadius: 10.0,
         tileIconSize: 20.0,
         tileTitleFontSize: 15.0,
         tileSubtitleFontSize: 12.0,
@@ -535,7 +516,6 @@ void main() {
       const second = TilawaSettingsGroupTokens(
         groupHorizontalPadding: 20.0,
         groupHeaderPadding: EdgeInsets.fromLTRB(14, 18, 18, 10),
-        groupBorderRadius: 24.0,
         groupShadowOpacity: 0.08,
         groupShadowBlur: 12.0,
         groupShadowOffset: Offset(0, 6),
@@ -547,7 +527,6 @@ void main() {
           vertical: 14,
         ),
         tileIconPadding: EdgeInsets.all(12),
-        tileIconBorderRadius: 14.0,
         tileIconSize: 24.0,
         tileTitleFontSize: 16.0,
         tileSubtitleFontSize: 13.0,
@@ -571,7 +550,7 @@ void main() {
       );
 
       final result = TilawaSettingsGroupTokens.lerp(first, second, 0.5);
-      expect(result.groupBorderRadius, closeTo(20.0, 0.01));
+      expect(result.groupHorizontalPadding, closeTo(16.0, 0.01));
       expect(result.tileTitleFontSize, closeTo(15.5, 0.01));
       expect(result.switchActiveTrackOpacity, closeTo(0.5, 0.01));
       expect(
@@ -836,7 +815,7 @@ void main() {
       expect(updated.phoneBottomNavBarBaseHeight, 92.0);
       expect(updated.bottomNavBackgroundColor, backgroundColor);
       expect(updated.navButtonSelectedBackgroundColor, selectedBackgroundColor);
-      expect(updated.bottomNavRadius, original.bottomNavRadius);
+      expect(updated.bottomNavBorderWidth, original.bottomNavBorderWidth);
     });
 
     test('lerp interpolates phone bottom nav bar base height', () {
@@ -846,7 +825,6 @@ void main() {
         bottomNavVerticalMargin: 4.0,
         bottomNavIconOnlyVerticalMargin: 2.0,
         bottomNavInternalPadding: 8.0,
-        bottomNavInnerRadius: 24.0,
         bottomNavBorderWidth: 1.0,
         bottomNavItemGap: 4.0,
         bottomNavBackgroundColor: Color(0xFFE2DBC7),
@@ -854,7 +832,6 @@ void main() {
         bottomNavShadowBlur: 18.0,
         bottomNavShadowOffset: Offset(0, 6),
         bottomNavOutlineColor: Color(0xFFAA9988),
-        sideRailRadius: 16.0,
         sideRailIndicatorColor: Color(0xFFCC8866),
         sideRailBackgroundColor: Color(0x88E0E0E0),
         sideRailOutlineColor: Color(0xFF998877),
@@ -886,7 +863,6 @@ void main() {
         bottomNavVerticalMargin: 8.0,
         bottomNavIconOnlyVerticalMargin: 4.0,
         bottomNavInternalPadding: 12.0,
-        bottomNavInnerRadius: 28.0,
         bottomNavBorderWidth: 2.0,
         bottomNavItemGap: 6.0,
         bottomNavBackgroundColor: Color(0xFFD8CDB0),
@@ -894,7 +870,6 @@ void main() {
         bottomNavShadowBlur: 24.0,
         bottomNavShadowOffset: Offset(0, 8),
         bottomNavOutlineColor: Color(0xFF776655),
-        sideRailRadius: 20.0,
         sideRailIndicatorColor: Color(0xFF66AA88),
         sideRailBackgroundColor: Color(0x88D0D0D0),
         sideRailOutlineColor: Color(0xFF665544),

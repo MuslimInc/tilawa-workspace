@@ -224,33 +224,27 @@ void main() {
   group('TilawaCardTokens', () {
     test('defaults match existing TilawaCard behavior', () {
       final tokens = TilawaCardTokens.defaults();
-      // Body cards use the card radius family (radiusExtraLarge = 24).
-      expect(tokens.borderRadius, 24.0);
       expect(tokens.borderWidth, 0.5);
       expect(tokens.padding, const EdgeInsets.all(16.0));
     });
 
     test('copyWith preserves unchanged values', () {
       final original = TilawaCardTokens.defaults();
-      final updated = original.copyWith(borderRadius: 20.0);
-      expect(updated.borderRadius, 20.0);
-      expect(updated.borderWidth, original.borderWidth);
+      final updated = original.copyWith(borderWidth: 1.0);
+      expect(updated.borderWidth, 1.0);
       expect(updated.padding, original.padding);
     });
 
     test('lerp interpolates all values', () {
       const a = TilawaCardTokens(
-        borderRadius: 10.0,
         borderWidth: 0.5,
         padding: EdgeInsets.all(8.0),
       );
       const b = TilawaCardTokens(
-        borderRadius: 20.0,
         borderWidth: 1.5,
         padding: EdgeInsets.all(16.0),
       );
       final result = TilawaCardTokens.lerp(a, b, 0.5);
-      expect(result.borderRadius, closeTo(15.0, 0.01));
       expect(result.borderWidth, closeTo(1.0, 0.01));
     });
   });
@@ -258,10 +252,8 @@ void main() {
   group('TilawaIconBoxTokens', () {
     test('defaults match existing TilawaIconBox behavior', () {
       final tokens = TilawaIconBoxTokens.defaults();
-      // iconSizeLarge = 24.0, spaceSmall = 8.0, radiusMedium = 12.0
       expect(tokens.iconSize, 24.0);
       expect(tokens.padding, 8.0);
-      expect(tokens.borderRadius, 12.0);
     });
 
     test('copyWith preserves unchanged values', () {
@@ -269,7 +261,6 @@ void main() {
       final updated = original.copyWith(iconSize: 32.0);
       expect(updated.iconSize, 32.0);
       expect(updated.padding, original.padding);
-      expect(updated.borderRadius, original.borderRadius);
     });
 
     test('lerp interpolates all values', () {
@@ -277,14 +268,12 @@ void main() {
         iconSize: 20.0,
         backgroundColor: Color(0xFFE8EFE9),
         padding: 6.0,
-        borderRadius: 10.0,
         borderOpacity: 0.1,
       );
       const b = TilawaIconBoxTokens(
         iconSize: 30.0,
         backgroundColor: Color(0xFFD8F0EC),
         padding: 12.0,
-        borderRadius: 16.0,
         borderOpacity: 0.2,
       );
       final result = TilawaIconBoxTokens.lerp(a, b, 0.5);
@@ -294,7 +283,6 @@ void main() {
         Color.lerp(a.backgroundColor, b.backgroundColor, 0.5),
       );
       expect(result.padding, closeTo(9.0, 0.01));
-      expect(result.borderRadius, closeTo(13.0, 0.01));
       expect(result.borderOpacity, closeTo(0.15, 0.01));
     });
   });
@@ -407,9 +395,9 @@ void main() {
 
     test('copyWith updates card tokens', () {
       final original = TilawaComponentTokens.light();
-      final newCard = original.card.copyWith(borderRadius: 24.0);
+      final newCard = original.card.copyWith(borderWidth: 1.0);
       final updated = original.copyWith(card: newCard);
-      expect(updated.card.borderRadius, 24.0);
+      expect(updated.card.borderWidth, 1.0);
       expect(updated.iconBox, original.iconBox);
     });
 
