@@ -202,14 +202,9 @@ class RecitersAlphabetScrubCoordinator {
     enforcingScrubLock = true;
     try {
       final double target = scrubPinnedHeaderOffset!;
-      for (final ScrollController? controller in <ScrollController?>[
-        _primaryController(),
-        _innerController(),
-      ]) {
-        if (controller == null || !controller.hasClients) {
-          continue;
-        }
-        for (final ScrollPosition position in controller.positions) {
+      final ScrollController? primaryController = _primaryController();
+      if (primaryController != null && primaryController.hasClients) {
+        for (final ScrollPosition position in primaryController.positions) {
           if (!position.hasContentDimensions ||
               position.maxScrollExtent <= 0 ||
               position.maxScrollExtent > 500) {
@@ -223,7 +218,7 @@ class RecitersAlphabetScrubCoordinator {
         }
       }
 
-      final ScrollPosition? header = headerScrollPosition(_primaryController());
+      final ScrollPosition? header = headerScrollPosition(primaryController);
       if (header != null) {
         scrubLockedHeaderPosition = header;
         scrubLockedHeaderOffset = target;
@@ -250,7 +245,7 @@ class RecitersAlphabetScrubCoordinator {
       }
 
       for (final ScrollPosition position in innerController.positions) {
-        if (!position.hasContentDimensions || position.maxScrollExtent <= 500) {
+        if (!position.hasContentDimensions) {
           continue;
         }
         final double clamped = target.clamp(0.0, position.maxScrollExtent);

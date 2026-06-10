@@ -480,6 +480,59 @@ void main() {
       expect(inner.offset, closeTo(80, 1.0));
     });
 
+    testWidgets(
+      'enforcePinnedCatalogLock restores short filtered catalog lists',
+      (tester) async {
+        final ScrollController inner = ScrollController();
+        addTearDown(inner.dispose);
+
+        late RecitersAlphabetScrubCoordinator coordinator;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Builder(
+              builder: (context) {
+                coordinator = RecitersAlphabetScrubCoordinator(
+                  innerController: () => inner,
+                  primaryController: () => null,
+                );
+                return Column(
+                  children: [
+                    Expanded(
+                      child: ListView.builder(
+                        controller: inner,
+                        itemCount: 20,
+                        itemBuilder: (_, _) => const SizedBox(height: 48),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(inner.position.maxScrollExtent, greaterThan(0));
+        expect(inner.position.maxScrollExtent, lessThan(500));
+
+        inner.jumpTo(40);
+        await tester.pump();
+
+        coordinator
+          ..alphabetScrubbingActive = true
+          ..beginScrub();
+
+        inner.jumpTo(72);
+        await tester.pump();
+
+        coordinator.enforcePinnedCatalogLock();
+        await tester.pump();
+
+        expect(inner.position.pixels, closeTo(40, 1.0));
+      },
+    );
+
     testWidgets('scrollInnerCatalogToTopPreservingHeader keeps header pinned', (
       tester,
     ) async {
