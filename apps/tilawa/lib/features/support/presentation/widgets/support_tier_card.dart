@@ -7,7 +7,7 @@ import '../support_tier_labels.dart';
 import '../support_tier_visual.dart';
 import 'support_tier_arc_painter.dart';
 
-/// Premium selectable tier card with muted accent identity.
+/// Selectable support tier row with shared chrome and tier icon identity.
 class SupportTierCard extends StatelessWidget {
   const SupportTierCard({
     super.key,
@@ -27,16 +27,21 @@ class SupportTierCard extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final TilawaDesignTokens tokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
+    final Brightness brightness = theme.brightness;
     final SupportTierVisual visual = supportTierVisualFor(
       context,
       product.id,
     );
-    final double tintAlpha = selected
-        ? visual.selectedTintAlpha
-        : visual.idleTintAlpha;
-    final Color tint = visual.accentColor.withValues(alpha: tintAlpha);
+    final Color cardBackground = selected
+        ? Color.alphaBlend(
+            colorScheme.primary.withValues(
+              alpha: brightness == Brightness.dark ? 0.14 : 0.08,
+            ),
+            colorScheme.surface,
+          )
+        : colorScheme.surface;
     final Color borderColor = selected
-        ? visual.accentColor.withValues(alpha: tokens.opacityEmphasis)
+        ? colorScheme.primary.withValues(alpha: tokens.opacityEmphasis)
         : colorScheme.outlineVariant;
     final double borderWidth = selected ? 1.25 : tokens.borderWidthThin;
     final Duration duration = tokens.durationFast;
@@ -51,113 +56,101 @@ class SupportTierCard extends StatelessWidget {
       selected: selected,
       button: true,
       label: '$label, ${product.price}',
-      child: AnimatedScale(
-        scale: selected ? 1.01 : 1,
-        duration: duration,
-        curve: Curves.easeOutCubic,
-        child: Material(
-          color: colorScheme.surface,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(tokens.radiusLarge),
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.selectionClick();
+            onTap();
+          },
           borderRadius: BorderRadius.circular(tokens.radiusLarge),
-          child: InkWell(
-            onTap: () {
-              HapticFeedback.selectionClick();
-              onTap();
-            },
-            borderRadius: BorderRadius.circular(tokens.radiusLarge),
-            splashColor: visual.accentColor.withValues(alpha: 0.12),
-            highlightColor: visual.accentColor.withValues(alpha: 0.06),
-            child: AnimatedContainer(
-              duration: duration,
-              curve: Curves.easeOutCubic,
-              constraints: BoxConstraints(
-                minHeight: compact
-                    ? tokens.minInteractiveDimension
-                    : tokens.minInteractiveDimension + tokens.spaceLarge,
-              ),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(tokens.radiusLarge),
-                border: Border.all(color: borderColor, width: borderWidth),
-                color: Color.alphaBlend(tint, colorScheme.surface),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(tokens.radiusLarge),
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: CustomPaint(
-                        painter: SupportTierArcPainter(
-                          color: visual.accentColor.withValues(
-                            alpha: tokens.opacitySubtle * 0.4,
-                          ),
-                          variant: visual.arcVariant,
-                          textDirection: textDirection,
+          splashColor: colorScheme.primary.withValues(alpha: 0.12),
+          highlightColor: colorScheme.primary.withValues(alpha: 0.06),
+          child: AnimatedContainer(
+            duration: duration,
+            curve: Curves.easeOutCubic,
+            constraints: BoxConstraints(
+              minHeight: compact
+                  ? tokens.minInteractiveDimension
+                  : tokens.minInteractiveDimension + tokens.spaceLarge,
+            ),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(tokens.radiusLarge),
+              border: Border.all(color: borderColor, width: borderWidth),
+              color: cardBackground,
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(tokens.radiusLarge),
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: CustomPaint(
+                      painter: SupportTierArcPainter(
+                        color: colorScheme.primary.withValues(
+                          alpha: tokens.opacitySubtle * 0.25,
                         ),
+                        variant: visual.arcVariant,
+                        textDirection: textDirection,
                       ),
                     ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: tokens.spaceLarge,
-                        vertical: verticalPadding,
-                      ),
-                      child: Row(
-                        children: [
-                          _TierIconCapsule(
-                            visual: visual,
-                            selected: selected,
-                            size: compact ? tokens.spaceExtraLarge : capsule,
-                          ),
-                          SizedBox(width: tokens.spaceMedium),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              spacing: tokens.spaceExtraSmall,
-                              children: [
-                                Text(
-                                  label,
-                                  style: theme.textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                    color: colorScheme.onSurface,
-                                    height: compact
-                                        ? null
-                                        : tokens.textHeightLoose,
-                                  ),
-                                ),
-                                Text(
-                                  product.price,
-                                  style: (compact
-                                          ? theme.textTheme.bodyMedium
-                                          : theme.textTheme.titleMedium)
-                                      ?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(width: tokens.spaceSmall),
-                          AnimatedSwitcher(
-                            duration: duration,
-                            child: selected
-                                ? Icon(
-                                    Icons.check_circle_rounded,
-                                    key: const ValueKey<bool>(true),
-                                    color: visual.accentColor,
-                                    size: tokens.iconSizeMedium,
-                                  )
-                                : Icon(
-                                    Icons.circle_outlined,
-                                    key: const ValueKey<bool>(false),
-                                    color: colorScheme.outline,
-                                    size: tokens.iconSizeMedium,
-                                  ),
-                          ),
-                        ],
-                      ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: tokens.spaceMedium,
+                      vertical: verticalPadding,
                     ),
-                  ],
-                ),
+                    child: Row(
+                      children: [
+                        _TierIconCapsule(
+                          visual: visual,
+                          selected: selected,
+                          size: compact ? tokens.spaceExtraLarge : capsule,
+                        ),
+                        SizedBox(width: tokens.spaceMedium),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            spacing: tokens.spaceExtraSmall,
+                            children: [
+                              Text(
+                                label,
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: colorScheme.onSurface,
+                                  height: compact
+                                      ? null
+                                      : tokens.textHeightLoose,
+                                ),
+                              ),
+                              Text(
+                                product.price,
+                                style: (compact
+                                        ? theme.textTheme.bodyMedium
+                                        : theme.textTheme.titleMedium)
+                                    ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(width: tokens.spaceSmall),
+                        Icon(
+                          selected
+                              ? Icons.check_circle_rounded
+                              : Icons.circle_outlined,
+                          color: selected
+                              ? colorScheme.primary
+                              : colorScheme.outline,
+                          size: tokens.iconSizeMedium,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -180,8 +173,9 @@ class _TierIconCapsule extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
-    final double fillAlpha = selected ? 0.22 : 0.14;
+    final ThemeData theme = Theme.of(context);
+    final TilawaDesignTokens tokens = theme.tokens;
+    final ColorScheme colorScheme = theme.colorScheme;
 
     return AnimatedContainer(
       duration: tokens.durationFast,
@@ -189,19 +183,21 @@ class _TierIconCapsule extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: visual.accentColor.withValues(alpha: fillAlpha),
+        color: selected
+            ? colorScheme.primary.withValues(alpha: 0.12)
+            : colorScheme.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(tokens.radiusMedium),
         border: Border.all(
-          color: visual.accentColor.withValues(
-            alpha: selected ? tokens.opacityEmphasis : tokens.opacityMedium,
-          ),
+          color: selected
+              ? colorScheme.primary.withValues(alpha: tokens.opacityEmphasis)
+              : colorScheme.outlineVariant,
           width: selected ? 1.25 : tokens.borderWidthThin,
         ),
       ),
       child: Icon(
         visual.icon,
         size: tokens.iconSizeMedium,
-        color: visual.accentColor,
+        color: selected ? colorScheme.primary : colorScheme.onSurfaceVariant,
       ),
     );
   }

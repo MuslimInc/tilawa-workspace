@@ -138,7 +138,7 @@ class _SupportBody extends StatelessWidget {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: tokens.spaceMedium,
+          spacing: tokens.spaceLarge,
           children: [
             Text(
               l10n.supportIntroLine,

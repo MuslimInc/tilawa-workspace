@@ -31,30 +31,36 @@ class _SupportImpactSectionState extends State<SupportImpactSection> {
 
     final TextStyle titleStyle = theme.textTheme.titleSmall!.copyWith(
       fontWeight: FontWeight.w600,
-      color: colorScheme.onSurfaceVariant,
+      color: colorScheme.onSurface,
     );
 
     final TextStyle bulletStyle = theme.textTheme.bodyMedium!.copyWith(
       color: colorScheme.onSurfaceVariant,
+      height: tokens.textHeightLoose,
     );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: tokens.spaceSmall,
       children: [
-        SupportFooterLinedRow(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          content: InkWell(
+        Semantics(
+          button: true,
+          expanded: _expanded,
+          child: InkWell(
             onTap: () => setState(() => _expanded = !_expanded),
             borderRadius: BorderRadius.circular(tokens.radiusSmall),
             child: Padding(
               padding: EdgeInsets.symmetric(vertical: tokens.spaceExtraSmall),
               child: Row(
-                mainAxisSize: .min,
-                mainAxisAlignment: .spaceBetween,
+                spacing: tokens.spaceSmall,
                 children: [
-                  Text(l10n.supportImpactWhyTitle, style: titleStyle),
-                  SizedBox(width: tokens.spaceExtraSmall),
+                  Expanded(
+                    child: Text(
+                      l10n.supportImpactWhyTitle,
+                      style: titleStyle,
+                      textAlign: TextAlign.start,
+                    ),
+                  ),
                   AnimatedRotation(
                     turns: _expanded ? 0.5 : 0,
                     duration: tokens.durationFast,
@@ -84,9 +90,14 @@ class _SupportImpactSectionState extends State<SupportImpactSection> {
                           leading: Icon(
                             FluentIcons.checkmark_circle_24_regular,
                             size: tokens.iconSizeSmall,
-                            color: colorScheme.onSurfaceVariant,
+                            color: colorScheme.primary,
                           ),
-                          content: Text(text, style: bulletStyle),
+                          contentTextStyle: bulletStyle,
+                          content: Text(
+                            text,
+                            style: bulletStyle,
+                            textAlign: TextAlign.start,
+                          ),
                         ),
                       )
                       .toList(growable: false),

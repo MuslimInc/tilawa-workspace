@@ -25,13 +25,14 @@ class SupportTierSelector extends StatelessWidget {
     final ColorScheme colorScheme = theme.colorScheme;
 
     return Container(
+      padding: EdgeInsets.all(tokens.spaceMedium),
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(tokens.radiusLarge),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: tokens.spaceMedium,
+        spacing: tokens.spaceSmall,
         children: [
           Text(
             context.l10n.supportSelectTier,

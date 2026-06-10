@@ -22,6 +22,7 @@ class SupportFooterSection extends StatelessWidget {
 
     return Container(
       width: double.infinity,
+      padding: EdgeInsets.all(tokens.spaceMedium),
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(tokens.radiusLarge),
@@ -31,7 +32,6 @@ class SupportFooterSection extends StatelessWidget {
         spacing: tokens.spaceMedium,
         children: [
           SupportFooterLinedRow(
-            crossAxisAlignment: CrossAxisAlignment.start,
             content: SupportTrustLineText(baseStyle: trustStyle),
           ),
           Divider(
