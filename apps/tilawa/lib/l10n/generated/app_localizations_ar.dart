@@ -287,6 +287,22 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsSupportSection => 'الدعم';
 
   @override
+  String get whatsNewSettingsTile => 'ما الجديد';
+
+  @override
+  String whatsNewTitle(String version) {
+    return 'ما الجديد في $version';
+  }
+
+  @override
+  String whatsNewSemanticsLabel(String version) {
+    return 'ما الجديد في الإصدار $version';
+  }
+
+  @override
+  String get whatsNewGotIt => 'تم';
+
+  @override
   String get settingsAppearance => 'المظهر';
 
   @override

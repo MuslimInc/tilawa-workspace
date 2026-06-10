@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "releases": [
+    {
+      "id": "2.0.8+52",
+      "version": "2.0.8",
+      "buildNumber": 52,
+      "publishedAt": "2026-06-10",
+      "highlights": {
+        "en": [
+          "Reciters catalog: switch between All and Favorites tabs",
+          "Smoother A–Z scrub while browsing the reciters list",
+          "Settings toggle to show or hide the letter index",
+          "Clearer Downloads tabs for offline surahs",
+          "More natural Quran mini player expand and collapse",
+          "Stability fixes for lists and touch feedback"
+        ],
+        "ar": [
+          "قائمة القرّاء: تبويبا الكل والمفضلة للتبديل السريع",
+          "تمرير أ–ي أنعم أثناء تصفح قائمة القرّاء",
+          "خيار في الإعدادات لإظهار أو إخفاء فهرس الحروف",
+          "تبويبات أوضح في التنزيلات للسور دون اتصال",
+          "توسيع وطي أنعم لمشغّل القرآن المصغّر",
+          "إصلاحات استقرار للقوائم وردود اللمس"
+        ]
+      }
+    },
+    {
+      "id": "2.0.7+51",
+      "version": "2.0.7",
+      "buildNumber": 51,
+      "publishedAt": "2026-06-08",
+      "highlights": {
+        "en": [
+          "Fresh warm look with a softer canvas and cleaner cards",
+          "Pick your language on first launch before onboarding",
+          "Redesigned settings, grouped into clear sections",
+          "Reciters alphabet index stays clear of the mini player",
+          "Key buttons sit lower for easier one-handed reach"
+        ],
+        "ar": [
+          "مظهر دافئ جديد بخلفية أنعم وبطاقات أوضح",
+          "اختر لغتك عند أول تشغيل قبل بدء الإعداد",
+          "إعدادات بتصميم جديد مرتّبة في أقسام واضحة",
+          "فهرس القرّاء أ–ي لا يتداخل مع المشغّل المصغّر",
+          "أزرار رئيسية أقرب لليد لتحكّم أسهل بيد واحدة"
+        ]
+      }
+    },
+    {
+      "id": "2.0.6+50",
+      "version": "2.0.6",
+      "buildNumber": 50,
+      "publishedAt": "2026-06-07",
+      "highlights": {
+        "en": [
+          "In-app updates when a newer version is on Google Play",
+          "Surah index in the Quran image reader for quick navigation",
+          "Smaller downloads and faster updates on supported devices",
+          "More reliable prayer times when location lookup is slow",
+          "Reciters list and alphabet index behave better with the mini player",
+          "Navigation and stability fixes across the Quran reader"
+        ],
+        "ar": [
+          "تحديثات داخل التطبيق عند توفر إصدار أحدث على Google Play",
+          "فهرس السور في قارئ المصحف للانتقال السريع",
+          "تنزيلات أصغر وتحديثات أسرع على الأجهزة المدعومة",
+          "أوقات صلاة أكثر موثوقية عند بطء تحديد الموقع",
+          "قائمة القرّاء وفهرس الحروف يتصرفان بشكل أفضل مع المشغّل المصغّر",
+          "إصلاحات تنقّل واستقرار في قارئ القرآن"
+        ]
+      }
+    }
+  ]
+}

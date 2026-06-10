@@ -47,6 +47,13 @@ class AnalyticsEvents {
   static const String share = 'share';
   static const String favorite = 'favorite';
   static const String rating = 'rating';
+
+  // What's new
+  static const String whatsNewShown = 'whats_new_shown';
+  static const String whatsNewDismissed = 'whats_new_dismissed';
+  static const String whatsNewSkipped = 'whats_new_skipped';
+  static const String whatsNewOpenSettings = 'whats_new_open_settings';
+  static const String whatsNewLoadFailed = 'whats_new_load_failed';
 }
 
 class AnalyticsParams {
@@ -67,6 +74,7 @@ class AnalyticsParams {
   static const String patchNumber = 'patch_number';
   static const String platform = 'platform';
   static const String sessionId = 'session_id';
+  static const String releaseId = 'release_id';
 
   // Navigation
   static const String screenName = 'screen_name';

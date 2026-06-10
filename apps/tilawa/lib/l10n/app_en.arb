@@ -371,6 +371,32 @@
     "@settingsSupportSection": {
         "description": "Support section header on settings screen"
     },
+    "whatsNewSettingsTile": "What's new",
+    "@whatsNewSettingsTile": {
+        "description": "Settings tile to open release notes for the current version"
+    },
+    "whatsNewTitle": "What's new in {version}",
+    "@whatsNewTitle": {
+        "description": "Title for the what's new bottom sheet",
+        "placeholders": {
+            "version": {
+                "type": "String"
+            }
+        }
+    },
+    "whatsNewSemanticsLabel": "What's new in version {version}",
+    "@whatsNewSemanticsLabel": {
+        "description": "Screen reader label for the what's new sheet",
+        "placeholders": {
+            "version": {
+                "type": "String"
+            }
+        }
+    },
+    "whatsNewGotIt": "Got it",
+    "@whatsNewGotIt": {
+        "description": "Primary action to dismiss the what's new sheet"
+    },
     "settingsAppearance": "Appearance",
     "@settingsAppearance": {
         "description": "Appearance section header on settings screen"

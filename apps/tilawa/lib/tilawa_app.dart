@@ -19,6 +19,7 @@ import 'core/bootstrap/splash_launch_handoff.dart';
 import 'core/debug/device_preview_app_builder.dart';
 import 'core/services/notification_startup_service.dart';
 import 'features/in_app_update/in_app_update.dart';
+import 'features/whats_new/whats_new.dart';
 import 'features/downloads/data/services/batch_download_manager.dart';
 import 'features/downloads/data/services/download_queue_manager.dart';
 import 'features/localization/presentation/bloc/localization_bloc.dart';
@@ -40,10 +41,12 @@ class TilawaApp extends StatefulWidget {
 
 class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
   static const Duration _initialUpdateCheckDelay = Duration(seconds: 8);
+  static const Duration _initialWhatsNewDelay = Duration(milliseconds: 1500);
   static const Duration _resumeUpdateCheckDelay = Duration(seconds: 2);
 
   Timer? _resumeDebounceTimer;
   Timer? _updateCheckTimer;
+  Timer? _whatsNewTimer;
 
   late final NotificationStartupService _notificationStartupService =
       getIt<NotificationStartupService>();
@@ -74,6 +77,10 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
         delay: _initialUpdateCheckDelay,
         reason: 'initial-startup',
       );
+      _scheduleWhatsNewCheck(
+        delay: _initialWhatsNewDelay,
+        reason: 'initial-startup',
+      );
     });
   }
 
@@ -81,6 +88,7 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
   void dispose() {
     _resumeDebounceTimer?.cancel();
     _updateCheckTimer?.cancel();
+    _whatsNewTimer?.cancel();
     _notificationStartupService.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -126,6 +134,33 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
       }
     } catch (e) {
       logger.d('[QuranPlayerApp] Error checking for update: $e');
+    }
+  }
+
+  void _scheduleWhatsNewCheck({
+    required Duration delay,
+    required String reason,
+  }) {
+    _whatsNewTimer?.cancel();
+    logger.d(
+      '[AppLaunch] source=Startup whats-new scheduled '
+      'reason=$reason delayMs=${delay.inMilliseconds}',
+    );
+    _whatsNewTimer = Timer(delay, () {
+      logger.d(
+        '[AppLaunch] source=Startup whats-new started reason=$reason',
+      );
+      unawaited(_maybeShowWhatsNew());
+    });
+  }
+
+  Future<void> _maybeShowWhatsNew() async {
+    try {
+      if (getIt.isRegistered<WhatsNewCoordinator>()) {
+        await getIt<WhatsNewCoordinator>().maybeShowAfterLaunch();
+      }
+    } catch (e) {
+      logger.d('[QuranPlayerApp] Error showing what\'s new: $e');
     }
   }
 

@@ -287,6 +287,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsSupportSection => 'Support';
 
   @override
+  String get whatsNewSettingsTile => 'What\'s new';
+
+  @override
+  String whatsNewTitle(String version) {
+    return 'What\'s new in $version';
+  }
+
+  @override
+  String whatsNewSemanticsLabel(String version) {
+    return 'What\'s new in version $version';
+  }
+
+  @override
+  String get whatsNewGotIt => 'Got it';
+
+  @override
   String get settingsAppearance => 'Appearance';
 
   @override

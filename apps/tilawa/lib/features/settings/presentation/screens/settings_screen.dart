@@ -8,8 +8,10 @@ import 'package:tilawa/core/utils/legal_url_launcher.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../../../../core/di/injection.dart';
 import '../../../../core/env.dart';
 import '../../../../router/app_router_config.dart';
+import '../../../whats_new/whats_new.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../localization/presentation/bloc/localization_bloc.dart';
 import '../../../share/domain/entities/share_content.dart';
@@ -185,6 +187,11 @@ class SettingsScreen extends StatelessWidget {
                 leadingIcon: FluentIcons.person_support_24_regular,
                 children: [
                   const SettingsRateAppTile(),
+                  TilawaSettingsTile(
+                    title: l10n.whatsNewSettingsTile,
+                    onTap: () =>
+                        getIt<WhatsNewCoordinator>().showFromSettings(),
+                  ),
                   BlocBuilder<SettingsCubit, SettingsState>(
                     builder: (context, state) {
                       return SettingsShareAppTile(

@@ -608,6 +608,30 @@ abstract class AppLocalizations {
   /// **'Support'**
   String get settingsSupportSection;
 
+  /// Settings tile to open release notes for the current version
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s new'**
+  String get whatsNewSettingsTile;
+
+  /// Title for the what's new bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s new in {version}'**
+  String whatsNewTitle(String version);
+
+  /// Screen reader label for the what's new sheet
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s new in version {version}'**
+  String whatsNewSemanticsLabel(String version);
+
+  /// Primary action to dismiss the what's new sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get whatsNewGotIt;
+
   /// Appearance section header on settings screen
   ///
   /// In en, this message translates to:
