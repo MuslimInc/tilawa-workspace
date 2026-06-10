@@ -40,6 +40,11 @@ repository secret**:
 The version name/code are passed straight to the build, so you don't need to
 edit `pubspec.yaml` to bump the release.
 
+Before the AAB build, CI runs `apps/tilawa/tool/stamp_changelog_release.py`,
+which sets `lastUpdatedAt` on `assets/changelog/changelog.json` and stamps
+`publishedAt` (UTC date/time) on the matching release entry
+(`build_name+build_number`). The bundled What's New sheet shows that timestamp.
+
 ## Notes
 
 - Builds use `flutter build appbundle --release --target-platform android-arm64

@@ -104,6 +104,12 @@ jobs:
           echo "storeFile=$KEYSTORE_PATH" \
             >> "$GITHUB_WORKSPACE/apps/tilawa/android/key.properties"
 
+      - name: Stamp changelog publish timestamps
+        working-directory: apps/tilawa
+        run: |
+          python3 tool/stamp_changelog_release.py \
+            --release-id "${{ inputs.build_name }}+${{ inputs.build_number }}"
+
       - name: Build signed release AAB
         working-directory: apps/tilawa
         run: |
