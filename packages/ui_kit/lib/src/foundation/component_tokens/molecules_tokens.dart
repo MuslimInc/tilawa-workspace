@@ -155,7 +155,6 @@ class TilawaAlphabetScrollbarTokens {
 class TilawaFeedbackStripTokens {
   const TilawaFeedbackStripTokens({
     required this.padding,
-    required this.borderRadius,
     required this.spinnerSize,
     required this.spinnerStrokeWidth,
     required this.contentGap,
@@ -166,8 +165,6 @@ class TilawaFeedbackStripTokens {
   });
 
   final EdgeInsetsGeometry padding;
-  @Deprecated('Use resolveRadius(chrome). Will be removed.')
-  final double borderRadius;
   final double spinnerSize;
   final double spinnerStrokeWidth;
   final double contentGap;
@@ -182,7 +179,6 @@ class TilawaFeedbackStripTokens {
   factory TilawaFeedbackStripTokens.defaults() {
     return const TilawaFeedbackStripTokens(
       padding: EdgeInsets.all(16),
-      borderRadius: 18,
       spinnerSize: 18,
       spinnerStrokeWidth: 2.2,
       contentGap: 8,
@@ -195,7 +191,6 @@ class TilawaFeedbackStripTokens {
 
   TilawaFeedbackStripTokens copyWith({
     EdgeInsetsGeometry? padding,
-    double? borderRadius,
     double? spinnerSize,
     double? spinnerStrokeWidth,
     double? contentGap,
@@ -206,7 +201,6 @@ class TilawaFeedbackStripTokens {
   }) {
     return TilawaFeedbackStripTokens(
       padding: padding ?? this.padding,
-      borderRadius: borderRadius ?? this.borderRadius,
       spinnerSize: spinnerSize ?? this.spinnerSize,
       spinnerStrokeWidth: spinnerStrokeWidth ?? this.spinnerStrokeWidth,
       contentGap: contentGap ?? this.contentGap,
@@ -224,7 +218,6 @@ class TilawaFeedbackStripTokens {
   ) {
     return TilawaFeedbackStripTokens(
       padding: EdgeInsetsGeometry.lerp(a.padding, b.padding, t)!,
-      borderRadius: lerpTokenDouble(a.borderRadius, b.borderRadius, t),
       spinnerSize: lerpTokenDouble(a.spinnerSize, b.spinnerSize, t),
       spinnerStrokeWidth: lerpTokenDouble(
         a.spinnerStrokeWidth,
@@ -313,17 +306,12 @@ class TilawaGlassPanelTokens {
 class TilawaIconActionButtonTokens {
   const TilawaIconActionButtonTokens({
     required this.size,
-    required this.borderRadius,
     required this.activeBackgroundOpacity,
     required this.activeBorderOpacity,
     required this.inactiveBorderOpacity,
   });
 
   final double size;
-  @Deprecated(
-    'Use resolveRadius(pill, height: size). Will be removed.',
-  )
-  final double borderRadius;
   final double activeBackgroundOpacity;
   final double activeBorderOpacity;
   final double inactiveBorderOpacity;
@@ -333,7 +321,6 @@ class TilawaIconActionButtonTokens {
     // At the floor; do not shrink further.
     return const TilawaIconActionButtonTokens(
       size: kTilawaMinInteractiveDimension,
-      borderRadius: 16,
       activeBackgroundOpacity: 0.12,
       activeBorderOpacity: 0.35,
       inactiveBorderOpacity: 0.26,
@@ -342,14 +329,12 @@ class TilawaIconActionButtonTokens {
 
   TilawaIconActionButtonTokens copyWith({
     double? size,
-    double? borderRadius,
     double? activeBackgroundOpacity,
     double? activeBorderOpacity,
     double? inactiveBorderOpacity,
   }) {
     return TilawaIconActionButtonTokens(
       size: size ?? this.size,
-      borderRadius: borderRadius ?? this.borderRadius,
       activeBackgroundOpacity:
           activeBackgroundOpacity ?? this.activeBackgroundOpacity,
       activeBorderOpacity: activeBorderOpacity ?? this.activeBorderOpacity,
@@ -365,7 +350,6 @@ class TilawaIconActionButtonTokens {
   ) {
     return TilawaIconActionButtonTokens(
       size: lerpTokenDouble(a.size, b.size, t),
-      borderRadius: lerpTokenDouble(a.borderRadius, b.borderRadius, t),
       activeBackgroundOpacity: lerpTokenDouble(
         a.activeBackgroundOpacity,
         b.activeBackgroundOpacity,
@@ -398,8 +382,6 @@ class TilawaChipTokens {
     required this.iconSize,
     required this.inlineIconSize,
     required this.borderWidth,
-    required this.pillRadius,
-    required this.roundedRadius,
     required this.selectedShadowOpacity,
     required this.selectedShadowBlur,
     required this.selectionFontWeight,
@@ -420,10 +402,6 @@ class TilawaChipTokens {
   final double iconSize;
   final double inlineIconSize;
   final double borderWidth;
-  @Deprecated('Use resolveRadius(pill, height). Will be removed.')
-  final double pillRadius;
-  @Deprecated('Use resolveRadius(decorative). Will be removed.')
-  final double roundedRadius;
   final double selectedShadowOpacity;
   final double selectedShadowBlur;
   final FontWeight selectionFontWeight;
@@ -456,8 +434,6 @@ class TilawaChipTokens {
       iconSize: 16,
       inlineIconSize: 14,
       borderWidth: 0.5,
-      pillRadius: 999,
-      roundedRadius: 8,
       selectedShadowOpacity: 0.18,
       selectedShadowBlur: 12,
       selectionFontWeight: FontWeight.w700,
@@ -504,8 +480,6 @@ class TilawaChipTokens {
     double? iconSize,
     double? inlineIconSize,
     double? borderWidth,
-    double? pillRadius,
-    double? roundedRadius,
     double? selectedShadowOpacity,
     double? selectedShadowBlur,
     FontWeight? selectionFontWeight,
@@ -527,8 +501,6 @@ class TilawaChipTokens {
       iconSize: iconSize ?? this.iconSize,
       inlineIconSize: inlineIconSize ?? this.inlineIconSize,
       borderWidth: borderWidth ?? this.borderWidth,
-      pillRadius: pillRadius ?? this.pillRadius,
-      roundedRadius: roundedRadius ?? this.roundedRadius,
       selectedShadowOpacity:
           selectedShadowOpacity ?? this.selectedShadowOpacity,
       selectedShadowBlur: selectedShadowBlur ?? this.selectedShadowBlur,
@@ -570,8 +542,6 @@ class TilawaChipTokens {
       iconSize: lerpTokenDouble(a.iconSize, b.iconSize, t),
       inlineIconSize: lerpTokenDouble(a.inlineIconSize, b.inlineIconSize, t),
       borderWidth: lerpTokenDouble(a.borderWidth, b.borderWidth, t),
-      pillRadius: lerpTokenDouble(a.pillRadius, b.pillRadius, t),
-      roundedRadius: lerpTokenDouble(a.roundedRadius, b.roundedRadius, t),
       selectedShadowOpacity: lerpTokenDouble(
         a.selectedShadowOpacity,
         b.selectedShadowOpacity,
@@ -610,8 +580,6 @@ class TilawaSegmentedControlTokens {
     required this.containerBackgroundColor,
     required this.selectedBackgroundColor,
     required this.containerBorderColor,
-    required this.containerRadius,
-    required this.itemRadius,
     required this.containerOpacity,
     required this.minItemWidth,
     required this.selectedFontWeight,
@@ -633,10 +601,6 @@ class TilawaSegmentedControlTokens {
   /// Outer border ([Border.all]) around the control track.
   final Color containerBorderColor;
 
-  @Deprecated('Use resolveRadius(chrome) or resolveSegmentedControlRadii.')
-  final double containerRadius;
-  @Deprecated('Use concentricInner via resolveSegmentedControlRadii.')
-  final double itemRadius;
   final double containerOpacity;
   final double minItemWidth;
   final FontWeight selectedFontWeight;
@@ -666,8 +630,6 @@ class TilawaSegmentedControlTokens {
       containerBackgroundColor: containerBackgroundColor,
       selectedBackgroundColor: selectedBackgroundColor,
       containerBorderColor: containerBorderColor,
-      containerRadius: 12,
-      itemRadius: 8,
       containerOpacity: 0.3,
       minItemWidth: 100,
       selectedFontWeight: FontWeight.bold,
@@ -711,8 +673,6 @@ class TilawaSegmentedControlTokens {
     Color? containerBackgroundColor,
     Color? selectedBackgroundColor,
     Color? containerBorderColor,
-    double? containerRadius,
-    double? itemRadius,
     double? containerOpacity,
     double? minItemWidth,
     FontWeight? selectedFontWeight,
@@ -730,8 +690,6 @@ class TilawaSegmentedControlTokens {
       selectedBackgroundColor:
           selectedBackgroundColor ?? this.selectedBackgroundColor,
       containerBorderColor: containerBorderColor ?? this.containerBorderColor,
-      containerRadius: containerRadius ?? this.containerRadius,
-      itemRadius: itemRadius ?? this.itemRadius,
       containerOpacity: containerOpacity ?? this.containerOpacity,
       minItemWidth: minItemWidth ?? this.minItemWidth,
       selectedFontWeight: selectedFontWeight ?? this.selectedFontWeight,
@@ -773,8 +731,6 @@ class TilawaSegmentedControlTokens {
         b.containerBorderColor,
         t,
       )!,
-      containerRadius: lerpTokenDouble(a.containerRadius, b.containerRadius, t),
-      itemRadius: lerpTokenDouble(a.itemRadius, b.itemRadius, t),
       containerOpacity: lerpTokenDouble(
         a.containerOpacity,
         b.containerOpacity,
@@ -891,7 +847,6 @@ class TilawaSearchFieldTokens {
   const TilawaSearchFieldTokens({
     required this.height,
     required this.backgroundColor,
-    required this.borderRadius,
     required this.contentPadding,
     required this.scrollPadding, // fix: Spacing & alignment — tokenized scroll inset
     required this.iconSize,
@@ -912,8 +867,6 @@ class TilawaSearchFieldTokens {
 
   final double height;
   final Color backgroundColor;
-  @Deprecated('Use resolveRadius(chrome). Will be removed.')
-  final double borderRadius;
   final EdgeInsetsGeometry contentPadding;
 
   /// Padding passed to [TextField.scrollPadding] when the field is focused.
@@ -967,7 +920,6 @@ class TilawaSearchFieldTokens {
     return TilawaSearchFieldTokens(
       height: kTilawaMinInteractiveDimension,
       backgroundColor: backgroundColor,
-      borderRadius: 16,
       contentPadding: const EdgeInsets.symmetric(vertical: 12),
       scrollPadding: const EdgeInsets.all(
         16,
@@ -993,7 +945,6 @@ class TilawaSearchFieldTokens {
   TilawaSearchFieldTokens copyWith({
     double? height,
     Color? backgroundColor,
-    double? borderRadius,
     EdgeInsetsGeometry? contentPadding,
     EdgeInsets? scrollPadding,
     double? iconSize,
@@ -1014,7 +965,6 @@ class TilawaSearchFieldTokens {
     return TilawaSearchFieldTokens(
       height: height ?? this.height,
       backgroundColor: backgroundColor ?? this.backgroundColor,
-      borderRadius: borderRadius ?? this.borderRadius,
       contentPadding: contentPadding ?? this.contentPadding,
       scrollPadding: scrollPadding ?? this.scrollPadding,
       iconSize: iconSize ?? this.iconSize,
@@ -1044,7 +994,6 @@ class TilawaSearchFieldTokens {
     return TilawaSearchFieldTokens(
       height: lerpTokenDouble(a.height, b.height, t),
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t)!,
-      borderRadius: lerpTokenDouble(a.borderRadius, b.borderRadius, t),
       contentPadding: EdgeInsetsGeometry.lerp(
         a.contentPadding,
         b.contentPadding,
@@ -1252,15 +1201,12 @@ class TilawaCountProgressRingTokens {
 class TilawaPermissionBannerTokens {
   const TilawaPermissionBannerTokens({
     required this.padding,
-    required this.borderRadius,
     required this.iconSize,
     required this.iconSpacing,
     required this.actionSpacing,
   });
 
   final EdgeInsetsGeometry padding;
-  @Deprecated('Use resolveRadius(chrome). Will be removed.')
-  final double borderRadius;
   final double iconSize;
   final double iconSpacing;
   final double actionSpacing;
@@ -1268,7 +1214,6 @@ class TilawaPermissionBannerTokens {
   factory TilawaPermissionBannerTokens.defaults() {
     return const TilawaPermissionBannerTokens(
       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      borderRadius: 12,
       iconSize: 16,
       iconSpacing: 8,
       actionSpacing: 8,
@@ -1277,14 +1222,12 @@ class TilawaPermissionBannerTokens {
 
   TilawaPermissionBannerTokens copyWith({
     EdgeInsetsGeometry? padding,
-    double? borderRadius,
     double? iconSize,
     double? iconSpacing,
     double? actionSpacing,
   }) {
     return TilawaPermissionBannerTokens(
       padding: padding ?? this.padding,
-      borderRadius: borderRadius ?? this.borderRadius,
       iconSize: iconSize ?? this.iconSize,
       iconSpacing: iconSpacing ?? this.iconSpacing,
       actionSpacing: actionSpacing ?? this.actionSpacing,
@@ -1298,7 +1241,6 @@ class TilawaPermissionBannerTokens {
   ) {
     return TilawaPermissionBannerTokens(
       padding: EdgeInsetsGeometry.lerp(a.padding, b.padding, t)!,
-      borderRadius: lerpTokenDouble(a.borderRadius, b.borderRadius, t),
       iconSize: lerpTokenDouble(a.iconSize, b.iconSize, t),
       iconSpacing: lerpTokenDouble(a.iconSpacing, b.iconSpacing, t),
       actionSpacing: lerpTokenDouble(a.actionSpacing, b.actionSpacing, t),

@@ -366,7 +366,6 @@ class TilawaAdaptiveShellTokens {
     required this.bottomNavVerticalMargin,
     required this.bottomNavIconOnlyVerticalMargin,
     required this.bottomNavInternalPadding,
-    required this.bottomNavInnerRadius,
     required this.bottomNavBorderWidth,
     required this.bottomNavItemGap,
     required this.bottomNavBackgroundColor,
@@ -374,7 +373,6 @@ class TilawaAdaptiveShellTokens {
     required this.bottomNavShadowBlur,
     required this.bottomNavShadowOffset,
     required this.bottomNavOutlineColor,
-    required this.sideRailRadius,
     required this.sideRailIndicatorColor,
     required this.sideRailBackgroundColor,
     required this.sideRailOutlineColor,
@@ -416,16 +414,6 @@ class TilawaAdaptiveShellTokens {
   final double bottomNavIconOnlyVerticalMargin;
   final double bottomNavInternalPadding;
 
-  /// Top corner radius of the phone bottom bar (bottom corners are square).
-  ///
-  /// Deprecated: [TilawaAdaptiveShell] resolves [TilawaRadiusFamily.card].
-  @Deprecated('Use resolveRadius(card). Will be removed.')
-  final double bottomNavInnerRadius;
-
-  /// Alias for [bottomNavInnerRadius]; kept for token tests.
-  @Deprecated('Use resolveRadius(card). Will be removed.')
-  double get bottomNavRadius => bottomNavInnerRadius;
-
   final double bottomNavBorderWidth;
   final double bottomNavItemGap;
 
@@ -449,10 +437,6 @@ class TilawaAdaptiveShellTokens {
 
   /// [RoundedRectangleBorder.side] for the floating bottom nav ([TilawaDesignTokens.opacitySubtle] on [ColorScheme.outlineVariant]).
   final Color bottomNavOutlineColor;
-
-  /// Deprecated: side rail uses [TilawaRadiusFamily.chrome] via resolveRadius.
-  @Deprecated('Use resolveRadius(chrome). Will be removed.')
-  final double sideRailRadius;
 
   /// [NavigationRail.indicatorColor]: primary tint over [ColorScheme.surfaceContainerHigh].
   final Color sideRailIndicatorColor;
@@ -630,7 +614,6 @@ class TilawaAdaptiveShellTokens {
       bottomNavVerticalMargin: 8,
       bottomNavIconOnlyVerticalMargin: 2,
       bottomNavInternalPadding: 8,
-      bottomNavInnerRadius: 24,
       bottomNavBorderWidth: 1,
       bottomNavItemGap: 4,
       bottomNavBackgroundColor: bottomNavBackgroundColor,
@@ -640,7 +623,6 @@ class TilawaAdaptiveShellTokens {
       bottomNavShadowBlur: lightChrome ? 14 : 10,
       bottomNavShadowOffset: Offset(0, lightChrome ? 4 : 2),
       bottomNavOutlineColor: _bottomNavOutlineColor(colorScheme),
-      sideRailRadius: 16,
       sideRailIndicatorColor: _sideRailIndicatorColor(colorScheme),
       sideRailBackgroundColor: _sideRailBackgroundColor(colorScheme),
       sideRailOutlineColor: shellChromeOutline,
@@ -742,7 +724,6 @@ class TilawaAdaptiveShellTokens {
     double? bottomNavVerticalMargin,
     double? bottomNavIconOnlyVerticalMargin,
     double? bottomNavInternalPadding,
-    double? bottomNavInnerRadius,
     double? bottomNavBorderWidth,
     double? bottomNavItemGap,
     Color? bottomNavBackgroundColor,
@@ -750,7 +731,6 @@ class TilawaAdaptiveShellTokens {
     double? bottomNavShadowBlur,
     Offset? bottomNavShadowOffset,
     Color? bottomNavOutlineColor,
-    double? sideRailRadius,
     Color? sideRailIndicatorColor,
     Color? sideRailBackgroundColor,
     Color? sideRailOutlineColor,
@@ -788,7 +768,6 @@ class TilawaAdaptiveShellTokens {
           this.bottomNavIconOnlyVerticalMargin,
       bottomNavInternalPadding:
           bottomNavInternalPadding ?? this.bottomNavInternalPadding,
-      bottomNavInnerRadius: bottomNavInnerRadius ?? this.bottomNavInnerRadius,
       bottomNavBorderWidth: bottomNavBorderWidth ?? this.bottomNavBorderWidth,
       bottomNavItemGap: bottomNavItemGap ?? this.bottomNavItemGap,
       bottomNavBackgroundColor:
@@ -800,7 +779,6 @@ class TilawaAdaptiveShellTokens {
           bottomNavShadowOffset ?? this.bottomNavShadowOffset,
       bottomNavOutlineColor:
           bottomNavOutlineColor ?? this.bottomNavOutlineColor,
-      sideRailRadius: sideRailRadius ?? this.sideRailRadius,
       sideRailIndicatorColor:
           sideRailIndicatorColor ?? this.sideRailIndicatorColor,
       sideRailBackgroundColor:
@@ -881,11 +859,6 @@ class TilawaAdaptiveShellTokens {
         b.bottomNavInternalPadding,
         t,
       ),
-      bottomNavInnerRadius: lerpTokenDouble(
-        a.bottomNavInnerRadius,
-        b.bottomNavInnerRadius,
-        t,
-      ),
       bottomNavBorderWidth: lerpTokenDouble(
         a.bottomNavBorderWidth,
         b.bottomNavBorderWidth,
@@ -921,7 +894,6 @@ class TilawaAdaptiveShellTokens {
         b.bottomNavOutlineColor,
         t,
       )!,
-      sideRailRadius: lerpTokenDouble(a.sideRailRadius, b.sideRailRadius, t),
       sideRailIndicatorColor: Color.lerp(
         a.sideRailIndicatorColor,
         b.sideRailIndicatorColor,
@@ -1047,7 +1019,6 @@ class TilawaSettingsGroupTokens {
   const TilawaSettingsGroupTokens({
     required this.groupHorizontalPadding,
     required this.groupHeaderPadding,
-    required this.groupBorderRadius,
     required this.groupShadowOpacity,
     required this.groupShadowBlur,
     required this.groupShadowOffset,
@@ -1056,7 +1027,6 @@ class TilawaSettingsGroupTokens {
     required this.tileContentPadding,
     required this.switchTileContentPadding,
     required this.tileIconPadding,
-    required this.tileIconBorderRadius,
     required this.tileIconSize,
     required this.tileTitleFontSize,
     required this.tileSubtitleFontSize,
@@ -1083,8 +1053,6 @@ class TilawaSettingsGroupTokens {
   final double groupHorizontalPadding;
 
   final EdgeInsetsGeometry groupHeaderPadding;
-  @Deprecated('Use resolveRadius(chrome). Will be removed.')
-  final double groupBorderRadius;
   final double groupShadowOpacity;
   final double groupShadowBlur;
   final Offset groupShadowOffset;
@@ -1093,8 +1061,6 @@ class TilawaSettingsGroupTokens {
   final EdgeInsetsGeometry tileContentPadding;
   final EdgeInsetsGeometry switchTileContentPadding;
   final EdgeInsetsGeometry tileIconPadding;
-  @Deprecated('Use resolveRadius(decorative). Will be removed.')
-  final double tileIconBorderRadius;
   final double tileIconSize;
   final double tileTitleFontSize;
   final double tileSubtitleFontSize;
@@ -1166,7 +1132,6 @@ class TilawaSettingsGroupTokens {
         0,
         8,
       ),
-      groupBorderRadius: 16,
       groupShadowOpacity: 0,
       groupShadowBlur: 0,
       groupShadowOffset: Offset.zero,
@@ -1181,7 +1146,6 @@ class TilawaSettingsGroupTokens {
         vertical: 0,
       ),
       tileIconPadding: const EdgeInsets.all(7),
-      tileIconBorderRadius: 12,
       tileIconSize: 22,
       tileTitleFontSize: 16,
       tileSubtitleFontSize: 12.5,
@@ -1221,7 +1185,6 @@ class TilawaSettingsGroupTokens {
   TilawaSettingsGroupTokens copyWith({
     double? groupHorizontalPadding,
     EdgeInsetsGeometry? groupHeaderPadding,
-    double? groupBorderRadius,
     double? groupShadowOpacity,
     double? groupShadowBlur,
     Offset? groupShadowOffset,
@@ -1230,7 +1193,6 @@ class TilawaSettingsGroupTokens {
     EdgeInsetsGeometry? tileContentPadding,
     EdgeInsetsGeometry? switchTileContentPadding,
     EdgeInsetsGeometry? tileIconPadding,
-    double? tileIconBorderRadius,
     double? tileIconSize,
     double? tileTitleFontSize,
     double? tileSubtitleFontSize,
@@ -1256,7 +1218,6 @@ class TilawaSettingsGroupTokens {
       groupHorizontalPadding:
           groupHorizontalPadding ?? this.groupHorizontalPadding,
       groupHeaderPadding: groupHeaderPadding ?? this.groupHeaderPadding,
-      groupBorderRadius: groupBorderRadius ?? this.groupBorderRadius,
       groupShadowOpacity: groupShadowOpacity ?? this.groupShadowOpacity,
       groupShadowBlur: groupShadowBlur ?? this.groupShadowBlur,
       groupShadowOffset: groupShadowOffset ?? this.groupShadowOffset,
@@ -1267,7 +1228,6 @@ class TilawaSettingsGroupTokens {
       switchTileContentPadding:
           switchTileContentPadding ?? this.switchTileContentPadding,
       tileIconPadding: tileIconPadding ?? this.tileIconPadding,
-      tileIconBorderRadius: tileIconBorderRadius ?? this.tileIconBorderRadius,
       tileIconSize: tileIconSize ?? this.tileIconSize,
       tileTitleFontSize: tileTitleFontSize ?? this.tileTitleFontSize,
       tileSubtitleFontSize: tileSubtitleFontSize ?? this.tileSubtitleFontSize,
@@ -1315,11 +1275,6 @@ class TilawaSettingsGroupTokens {
         b.groupHeaderPadding,
         t,
       )!,
-      groupBorderRadius: lerpTokenDouble(
-        a.groupBorderRadius,
-        b.groupBorderRadius,
-        t,
-      ),
       groupShadowOpacity: lerpTokenDouble(
         a.groupShadowOpacity,
         b.groupShadowOpacity,
@@ -1356,11 +1311,6 @@ class TilawaSettingsGroupTokens {
         b.tileIconPadding,
         t,
       )!,
-      tileIconBorderRadius: lerpTokenDouble(
-        a.tileIconBorderRadius,
-        b.tileIconBorderRadius,
-        t,
-      ),
       tileIconSize: lerpTokenDouble(a.tileIconSize, b.tileIconSize, t),
       tileTitleFontSize: lerpTokenDouble(
         a.tileTitleFontSize,
