@@ -85,8 +85,6 @@ class TilawaAdaptiveShell extends StatelessWidget {
     required this.bottomPlayer,
     this.phoneFooterAboveNav,
     this.phoneBottomNavigationBarVisible,
-    this.bottomBarPadding,
-    this.bottomBarDecoration,
     this.avoidDisplayFeatures = true,
   });
 
@@ -108,12 +106,6 @@ class TilawaAdaptiveShell extends StatelessWidget {
   /// while this value is
   /// true (e.g. hide while a full-screen sheet covers the tab bar).
   final ValueListenable<bool>? phoneBottomNavigationBarVisible;
-
-  /// Optional padding for the bottom bar on phone layouts.
-  final EdgeInsetsGeometry? bottomBarPadding;
-
-  /// Optional decoration for the bottom bar on phone layouts.
-  final Decoration? bottomBarDecoration;
 
   /// Whether to avoid placing content under display features (hinges/folds).
   /// Defaults to true. Set to false to disable foldable-aware padding.
@@ -151,8 +143,6 @@ class TilawaAdaptiveShell extends StatelessWidget {
                   destinations: destinations,
                   selectedIndex: displayIndex,
                   onDestinationSelected: onDestinationSelected,
-                  padding: bottomBarPadding,
-                  decoration: bottomBarDecoration,
                 ),
               ],
             );
@@ -247,15 +237,11 @@ class _BottomNavBar extends StatelessWidget {
     required this.destinations,
     required this.selectedIndex,
     required this.onDestinationSelected,
-    this.padding,
-    this.decoration,
   });
 
   final List<TilawaNavDestination> destinations;
   final int? selectedIndex;
   final ValueChanged<int> onDestinationSelected;
-  final EdgeInsetsGeometry? padding;
-  final Decoration? decoration;
 
   static BottomNavigationBarItem _barItem(
     BuildContext context,
@@ -322,10 +308,6 @@ class _BottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.componentTokens.adaptiveShell;
-    final designTokens = theme.tokens;
-    final double bottomNavTopRadius = designTokens.resolveRadius(
-      family: TilawaRadiusFamily.card,
-    );
     final Color navColor = tokens.bottomNavBackgroundColor;
 
     final int count = destinations.length;
@@ -382,14 +364,12 @@ class _BottomNavBar extends StatelessWidget {
               kind: TilawaContentKind.media,
               alignment: .bottomCenter,
               child: Padding(
-                padding:
-                    padding ??
-                    EdgeInsets.fromLTRB(
-                      tokens.bottomNavHorizontalMargin,
-                      0,
-                      tokens.bottomNavHorizontalMargin,
-                      0,
-                    ),
+                padding: EdgeInsets.fromLTRB(
+                  tokens.bottomNavHorizontalMargin,
+                  0,
+                  tokens.bottomNavHorizontalMargin,
+                  0,
+                ),
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     boxShadow: tokens.bottomNavShadowOpacity > 0
@@ -404,73 +384,57 @@ class _BottomNavBar extends StatelessWidget {
                           ]
                         : const [],
                   ),
-                  child: Material(
-                    color: tokens.bottomNavBackgroundColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(bottomNavTopRadius),
-                      ),
-                      side: BorderSide(
-                        color: tokens.bottomNavOutlineColor,
-                        width: tokens.bottomNavBorderWidth,
-                      ),
+                  child: MediaQuery(
+                    data: MediaQuery.of(context).copyWith(
+                      textScaler: TextScaler.linear(bottomBarTextScale),
                     ),
-                    clipBehavior: Clip.antiAlias,
-                    child: DecoratedBox(
-                      decoration: decoration ?? const BoxDecoration(),
-                      child: MediaQuery(
-                        data: MediaQuery.of(context).copyWith(
-                          textScaler: TextScaler.linear(bottomBarTextScale),
-                        ),
-                        child: Theme(
-                          data: theme.copyWith(
-                            splashColor: Colors.transparent,
-                            highlightColor: Colors.transparent,
-                            hoverColor: Colors.transparent,
+                    child: Theme(
+                      data: theme.copyWith(
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        hoverColor: Colors.transparent,
+                      ),
+                      child: SizedBox(
+                        height: barHeight,
+                        child: BottomNavigationBar(
+                          type: BottomNavigationBarType.fixed,
+                          currentIndex: barIndex,
+                          onTap: (int index) {
+                            HapticFeedback.selectionClick();
+                            onDestinationSelected(index);
+                          },
+                          showSelectedLabels: true,
+                          showUnselectedLabels: true,
+                          backgroundColor: Colors.transparent,
+                          elevation: 0,
+                          selectedItemColor: hasSelection
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.onSurfaceVariant,
+                          unselectedItemColor:
+                              theme.colorScheme.onSurfaceVariant,
+                          selectedLabelStyle: selectedLabelStyle,
+                          unselectedLabelStyle: unselectedLabelStyle,
+                          selectedIconTheme: IconThemeData(
+                            size: tokens.navButtonIconSize,
+                            color: hasSelection
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.onSurfaceVariant,
                           ),
-                          child: SizedBox(
-                            height: barHeight,
-                            child: BottomNavigationBar(
-                              type: BottomNavigationBarType.fixed,
-                              currentIndex: barIndex,
-                              onTap: (int index) {
-                                HapticFeedback.selectionClick();
-                                onDestinationSelected(index);
-                              },
-                              showSelectedLabels: true,
-                              showUnselectedLabels: true,
-                              backgroundColor: Colors.transparent,
-                              elevation: 0,
-                              selectedItemColor: hasSelection
-                                  ? theme.colorScheme.primary
-                                  : theme.colorScheme.onSurfaceVariant,
-                              unselectedItemColor:
-                                  theme.colorScheme.onSurfaceVariant,
-                              selectedLabelStyle: selectedLabelStyle,
-                              unselectedLabelStyle: unselectedLabelStyle,
-                              selectedIconTheme: IconThemeData(
-                                size: tokens.navButtonIconSize,
-                                color: hasSelection
-                                    ? theme.colorScheme.primary
-                                    : theme.colorScheme.onSurfaceVariant,
-                              ),
-                              unselectedIconTheme: IconThemeData(
-                                size: tokens.navButtonIconSize,
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                              items: [
-                                for (int i = 0; i < count; i++)
-                                  _barItem(
-                                    context,
-                                    destinations[i],
-                                    tokens,
-                                    theme,
-                                    tabIsSelected:
-                                        hasSelection && selectedIndex == i,
-                                  ),
-                              ],
-                            ),
+                          unselectedIconTheme: IconThemeData(
+                            size: tokens.navButtonIconSize,
+                            color: theme.colorScheme.onSurfaceVariant,
                           ),
+                          items: [
+                            for (int i = 0; i < count; i++)
+                              _barItem(
+                                context,
+                                destinations[i],
+                                tokens,
+                                theme,
+                                tabIsSelected:
+                                    hasSelection && selectedIndex == i,
+                              ),
+                          ],
                         ),
                       ),
                     ),
