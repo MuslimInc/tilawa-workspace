@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.8+52] - 2026-06-10 [Google Play Release]
+
+### Added
+
+- **Reciters tabs**: All and Favorites tabs on the reciters catalog for faster
+  switching without leaving the screen.
+- **Settings**: Toggle to show or hide the reciters A–Z letter index rail.
+
+### Changed
+
+- **Version**: Production track bumped to **2.0.8** (build **52**).
+- **Reciters**: Alphabet scrub keeps header and catalog scroll positions stable,
+  including on short filtered lists.
+- **Downloads**: Nested tab layout for clearer browsing of offline surahs.
+- **Quran player**: Smoother expand and collapse drag on the mini player shell.
+- **UI kit**: Shared interaction surface and radius tokens for more consistent
+  buttons, chips, and cards.
+
+### Fixed
+
+- **Reciters**: Scrub lock no longer skips catalog positions when the filtered
+  list is shorter than the full catalog.
+- **Interactive surfaces**: Long-press-only controls no longer fire tap haptics.
+
 ## [2.0.7+51] - 2026-06-08 [Google Play Release]
 
 ### Added

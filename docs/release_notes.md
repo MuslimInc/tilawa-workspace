@@ -12,8 +12,41 @@ the changelog for full engineering detail.
 
 | Field | Value |
 |-------|--------|
+| Version | **2.0.8** (build **52**) |
+| Git tag | `v2.0.8+52` (pending) |
+| Date | 2026-06-10 |
+| Track | Internal testing → Production |
+
+### What's new (en-US) — copy for Play Console
+
+```text
+• Reciters catalog: switch between All and Favorites tabs
+• Smoother A–Z scrub while browsing the reciters list
+• Settings toggle to show or hide the letter index
+• Clearer Downloads tabs for offline surahs
+• More natural Quran mini player expand and collapse
+• Stability fixes for lists and touch feedback
+```
+
+### ما الجديد (ar) — نص متجر Play
+
+```text
+• قائمة القرّاء: تبويبا الكل والمفضلة للتبديل السريع
+• تمرير أ–ي أنعم أثناء تصفح قائمة القرّاء
+• خيار في الإعدادات لإظهار أو إخفاء فهرس الحروف
+• تبويبات أوضح في التنزيلات للسور دون اتصال
+• توسيع وطي أنعم لمشغّل القرآن المصغّر
+• إصلاحات استقرار للقوائم وردود اللمس
+```
+
+---
+
+## Previous current release (2.0.7+51)
+
+| Field | Value |
+|-------|--------|
 | Version | **2.0.7** (build **51**) |
-| Git tag | `v2.0.7+51` (pending) |
+| Git tag | `v2.0.7+51` |
 | Date | 2026-06-08 |
 | Track | Internal testing → Production |
 
@@ -180,7 +213,7 @@ Older entries: see [`CHANGELOG.md`](../CHANGELOG.md).
 
 ## Unreleased
 
-_Dart-only fixes queued for the next Play release — move here when shipped._
+_Move shipped notes to **Current release** when cutting a Play upload._
 
 ---
 

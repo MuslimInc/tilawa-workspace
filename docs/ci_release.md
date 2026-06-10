@@ -31,8 +31,8 @@ repository secret**:
 3. Fill the form:
    - **track**: `internal` first (recommended), then promote.
    - **build_name**: e.g. `2.0.8`.
-   - **build_number**: e.g. `51` — must be **higher** than the last uploaded
-     version code (current live is `2.0.7+51` in repo; confirm Play Console).
+   - **build_number**: e.g. `52` — must be **higher** than the last uploaded
+     version code (current live is `2.0.8+52` in repo; confirm Play Console).
    - **rollout**: only matters for `production` (e.g. `0.05` for 5%, `1.0` for
      full).
 4. Run it and watch the logs. On success the build is on the chosen Play track.
