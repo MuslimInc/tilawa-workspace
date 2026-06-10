@@ -124,7 +124,7 @@ void main() {
   });
 
   group('Collapse drag — expand-forward vs collapse-biased mini timing', () {
-    test('expand-forward hides mini mid-drag while collapse shows mini', () {
+    test('expand-forward hides mini mid-drag while collapse shows morph', () {
       const double progress = 0.70;
       final PlayerExpandTransitionMetrics expandForward =
           PlayerExpandTransitionMetrics.compute(
@@ -143,7 +143,12 @@ void main() {
       );
 
       expect(expandForward.showMiniPlayer, isFalse);
-      expect(collapseDrag.showMiniPlayer, isTrue);
+      expect(collapseDrag.showMiniPlayer, isFalse);
+      expect(collapseDrag.showMorphLayer, isTrue);
+      expect(
+        QuranPlayerAnimationStability.hasChromeVisibilityGap(collapseDrag),
+        isFalse,
+      );
     });
   });
 }

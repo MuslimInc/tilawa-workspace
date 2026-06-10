@@ -34,6 +34,11 @@ class AthkarCategoriesScreen extends StatelessWidget {
         title: context.l10n.athkar,
       ),
       floatingActionButton: FloatingActionButton.extended(
+        // Unique tag prevents this FAB's default Hero from colliding with
+        // another screen's FAB during route transitions (e.g. the Athkar tab
+        // FAB flying into Reciter Details while the tab is offstage in the
+        // shell's IndexedStack).
+        heroTag: 'athkar_tasbeeh_fab',
         onPressed: () => const TasbeehRoute().push(context),
         icon: const Icon(Icons.auto_awesome_rounded),
         label: Text(context.l10n.tasbeehCategory),

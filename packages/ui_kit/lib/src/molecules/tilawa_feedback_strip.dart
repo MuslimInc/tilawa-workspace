@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
 import '../atoms/tilawa_loading_indicator.dart';
+import '../foundation/color_scheme_ext.dart';
 import '../foundation/component_tokens.dart';
+import '../foundation/design_tokens.dart';
 
 /// Semantic intent for [TilawaFeedbackStrip] (affects a11y label + border).
 enum TilawaFeedbackVariant {
   // fix: Feedback & states — structured info / warn / error presentation
   info,
+  success,
   warning,
   error,
 }
@@ -42,11 +45,25 @@ class TilawaFeedbackStrip extends StatelessWidget {
     TilawaFeedbackVariant? v,
   ) {
     if (v == null) return null;
-    final ColorScheme cs = Theme.of(context).colorScheme;
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme cs = theme.colorScheme;
+    final tokens = theme.componentTokens.feedbackStrip;
     return switch (v) {
-      TilawaFeedbackVariant.info => cs.outline.withValues(alpha: 0.35),
-      TilawaFeedbackVariant.warning => cs.error.withValues(alpha: 0.45),
-      TilawaFeedbackVariant.error => cs.error.withValues(alpha: 0.72),
+      TilawaFeedbackVariant.info => cs.outline.withValues(
+        alpha: tokens.infoAccentOpacity,
+      ),
+      // Success and warning use their own hues so they are distinguishable
+      // from error (and each other) by colour, not just opacity. Relying on
+      // a single red at different alphas fails WCAG 1.4.1 (use of colour).
+      TilawaFeedbackVariant.success => cs.success.withValues(
+        alpha: tokens.successAccentOpacity,
+      ),
+      TilawaFeedbackVariant.warning => cs.warning.withValues(
+        alpha: tokens.warningAccentOpacity,
+      ),
+      TilawaFeedbackVariant.error => cs.error.withValues(
+        alpha: tokens.errorAccentOpacity,
+      ),
     };
   }
 
@@ -54,7 +71,10 @@ class TilawaFeedbackStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final componentTokens = theme.componentTokens.feedbackStrip;
-    final double radius = borderRadius ?? componentTokens.borderRadius;
+    final designTokens = theme.tokens;
+    final double radius =
+        borderRadius ??
+        designTokens.resolveRadius(family: TilawaRadiusFamily.chrome);
     final Color? accentColor =
         borderColor ?? _accentForVariant(context, variant);
 

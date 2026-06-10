@@ -48,7 +48,8 @@ class TilawaPermissionBanner extends StatelessWidget {
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(
-          borderRadius ?? tokens.borderRadius,
+          borderRadius ??
+              designTokens.resolveRadius(family: TilawaRadiusFamily.chrome),
         ),
       ),
       child: Row(

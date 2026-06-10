@@ -620,6 +620,12 @@ abstract class AppLocalizations {
   /// **'Playback & storage'**
   String get settingsPlaybackAndStorage;
 
+  /// Reciters section header on settings screen
+  ///
+  /// In en, this message translates to:
+  /// **'Reciters'**
+  String get settingsRecitersSection;
+
   /// Light theme option label
   ///
   /// In en, this message translates to:
@@ -1663,6 +1669,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Resume audio from where you left off'**
   String get restorePlaybackStateSubtitle;
+
+  /// Settings title for showing the reciters alphabet index rail
+  ///
+  /// In en, this message translates to:
+  /// **'Show Alphabet Index'**
+  String get showRecitersAlphabetIndex;
+
+  /// Settings subtitle for showing the reciters alphabet index rail
+  ///
+  /// In en, this message translates to:
+  /// **'Display the A-Z shortcut rail while browsing reciters'**
+  String get showRecitersAlphabetIndexSubtitle;
 
   /// Label for the time remaining until next prayer
   ///

@@ -52,7 +52,6 @@ class SettingsScreen extends StatelessWidget {
         appBar: TilawaCatalogAppBar.titleOnly(
           context,
           title: l10n.settings,
-          centerTitle: true,
           automaticallyImplyLeading: false,
         ),
         body: TilawaCatalogSettingsBody(
@@ -108,6 +107,24 @@ class SettingsScreen extends StatelessWidget {
                           context,
                           currentLocale: state.locale,
                         ),
+                        showDivider: false,
+                      );
+                    },
+                  ),
+                ],
+              ),
+              TilawaSettingsGroup(
+                title: l10n.settingsRecitersSection,
+                leadingIcon: Icons.record_voice_over_rounded,
+                children: [
+                  BlocBuilder<SettingsCubit, SettingsState>(
+                    builder: (context, state) {
+                      return TilawaSettingsSwitchTile(
+                        title: l10n.showRecitersAlphabetIndex,
+                        value: state.showRecitersAlphabetIndex,
+                        onChanged: context
+                            .read<SettingsCubit>()
+                            .setShowRecitersAlphabetIndex,
                         showDivider: false,
                       );
                     },

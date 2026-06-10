@@ -77,7 +77,9 @@ class TilawaStateVisual extends StatelessWidget {
               accent.withValues(alpha: tokens.opacitySubtle),
               colorScheme.surface,
             ),
-            borderRadius: BorderRadius.circular(tokens.radiusLarge),
+            borderRadius: BorderRadius.circular(
+              tokens.resolveRadius(family: TilawaRadiusFamily.chrome),
+            ),
             border: Border.all(
               color: accent.withValues(alpha: tokens.opacityMedium),
               width: 1.0,

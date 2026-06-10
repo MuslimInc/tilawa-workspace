@@ -776,3 +776,35 @@ extension TilawaRadiusResolverX on TilawaDesignTokens {
     }
   }
 }
+
+/// Track + segment radii for [TilawaSegmentedControl] and
+/// [TilawaLanguageSwitcher].
+extension TilawaSegmentedRadiusX on TilawaDesignTokens {
+  /// Returns concentric outer/inner radii from segment [itemHeight] and track
+  /// [containerPadding].
+  ///
+  /// Neutral segmented controls default to [TilawaRadiusFamily.chrome] on the
+  /// track (brand-doc §5). Standalone primary controls (language switcher) pass
+  /// [TilawaRadiusFamily.pill] so the track reads as one capsule.
+  ({double containerRadius, double itemRadius}) resolveSegmentedControlRadii({
+    required double itemHeight,
+    required double containerPadding,
+    TilawaRadiusFamily trackFamily = TilawaRadiusFamily.chrome,
+  }) {
+    final double containerHeight = itemHeight + (containerPadding * 2);
+    final double containerRadius = switch (trackFamily) {
+      TilawaRadiusFamily.pill => resolveRadius(
+        family: TilawaRadiusFamily.pill,
+        height: containerHeight,
+      ),
+      TilawaRadiusFamily.card ||
+      TilawaRadiusFamily.chrome ||
+      TilawaRadiusFamily.decorative => resolveRadius(family: trackFamily),
+    };
+    final double itemRadius = concentricInner(
+      outerRadius: containerRadius,
+      padding: containerPadding,
+    );
+    return (containerRadius: containerRadius, itemRadius: itemRadius);
+  }
+}

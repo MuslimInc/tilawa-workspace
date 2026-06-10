@@ -5,7 +5,7 @@ import 'tilawa_app_bar.dart';
 import 'tilawa_search_field.dart';
 
 /// Pinterest-style feature header: white [TilawaAppBarSurface.parchment],
-/// left-aligned title, optional search row — matches Reciters catalog chrome.
+/// left-aligned title, optional search row — the kit's catalog screen chrome.
 ///
 /// Prefer this over a raw [TilawaAppBar] on list/catalog screens. Pass
 /// [preferredHeight] from [TilawaAppBarConfig.catalogTitleOnlyHeight],

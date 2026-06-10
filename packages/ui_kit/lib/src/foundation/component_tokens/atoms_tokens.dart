@@ -36,7 +36,6 @@ class TilawaSheetHandleTokens {
     required this.height,
     required this.marginTop,
     required this.marginBottom,
-    required this.cornerRadius,
     required this.colorOpacity,
   });
 
@@ -46,7 +45,6 @@ class TilawaSheetHandleTokens {
   /// Space above the drag pill; matches [TilawaDesignTokens.spaceMedium].
   final double marginTop;
   final double marginBottom;
-  final double cornerRadius;
   final double colorOpacity;
 
   factory TilawaSheetHandleTokens.defaults() {
@@ -55,7 +53,6 @@ class TilawaSheetHandleTokens {
       height: 5,
       marginTop: 12,
       marginBottom: 16,
-      cornerRadius: 999,
       colorOpacity: 0.22,
     );
   }
@@ -65,7 +62,6 @@ class TilawaSheetHandleTokens {
     double? height,
     double? marginTop,
     double? marginBottom,
-    double? cornerRadius,
     double? colorOpacity,
   }) {
     return TilawaSheetHandleTokens(
@@ -73,7 +69,6 @@ class TilawaSheetHandleTokens {
       height: height ?? this.height,
       marginTop: marginTop ?? this.marginTop,
       marginBottom: marginBottom ?? this.marginBottom,
-      cornerRadius: cornerRadius ?? this.cornerRadius,
       colorOpacity: colorOpacity ?? this.colorOpacity,
     );
   }
@@ -88,7 +83,6 @@ class TilawaSheetHandleTokens {
       height: lerpTokenDouble(a.height, b.height, t),
       marginTop: lerpTokenDouble(a.marginTop, b.marginTop, t),
       marginBottom: lerpTokenDouble(a.marginBottom, b.marginBottom, t),
-      cornerRadius: lerpTokenDouble(a.cornerRadius, b.cornerRadius, t),
       colorOpacity: lerpTokenDouble(a.colorOpacity, b.colorOpacity, t),
     );
   }
@@ -96,19 +90,14 @@ class TilawaSheetHandleTokens {
 
 /// Component tokens for [TilawaCard].
 ///
-/// Defaults align with the brand-doc rule that body cards live in the
-/// `card` radius family (`radiusExtraLarge` = 24), with the hairline
-/// border width and `spaceMedium` inner padding from [TilawaDesignTokens].
+/// Border width and padding for [TilawaCard]. Corner radius comes from
+/// [TilawaRadiusFamily.card] via [TilawaDesignTokens.resolveRadius].
 @immutable
 class TilawaCardTokens {
   const TilawaCardTokens({
-    required this.borderRadius,
     required this.borderWidth,
     required this.padding,
   });
-
-  /// Corner radius of the card.
-  final double borderRadius;
 
   /// Border width of the card outline.
   final double borderWidth;
@@ -118,19 +107,16 @@ class TilawaCardTokens {
 
   factory TilawaCardTokens.defaults() {
     return const TilawaCardTokens(
-      borderRadius: 20.0,
       borderWidth: 0.5,
       padding: EdgeInsets.all(16.0),
     );
   }
 
   TilawaCardTokens copyWith({
-    double? borderRadius,
     double? borderWidth,
     EdgeInsets? padding,
   }) {
     return TilawaCardTokens(
-      borderRadius: borderRadius ?? this.borderRadius,
       borderWidth: borderWidth ?? this.borderWidth,
       padding: padding ?? this.padding,
     );
@@ -142,7 +128,6 @@ class TilawaCardTokens {
     double t,
   ) {
     return TilawaCardTokens(
-      borderRadius: lerpTokenDouble(a.borderRadius, b.borderRadius, t),
       borderWidth: lerpTokenDouble(a.borderWidth, b.borderWidth, t),
       padding: EdgeInsets.lerp(a.padding, b.padding, t)!,
     );
@@ -151,16 +136,15 @@ class TilawaCardTokens {
 
 /// Component tokens for [TilawaIconBox].
 ///
-/// Defaults match the existing behavior where the icon box reads
-/// `iconSizeLarge`, `spaceSmall`, and `radiusMedium` from
-/// [TilawaDesignTokens].
+/// Defaults match icon size, padding, and border opacity for [TilawaIconBox].
+/// Corner radius comes from [TilawaRadiusFamily.decorative].
 @immutable
 class TilawaIconBoxTokens {
   const TilawaIconBoxTokens({
     required this.iconSize,
     required this.backgroundColor,
     required this.padding,
-    required this.borderRadius,
+    required this.borderOpacity,
   });
 
   /// Default icon size inside the box.
@@ -172,8 +156,8 @@ class TilawaIconBoxTokens {
   /// Inner padding around the icon.
   final double padding;
 
-  /// Corner radius of the container.
-  final double borderRadius;
+  /// Alpha applied to the icon colour for the hairline container border.
+  final double borderOpacity;
 
   factory TilawaIconBoxTokens.defaults() {
     final colorScheme = ColorScheme.fromSeed(
@@ -188,7 +172,7 @@ class TilawaIconBoxTokens {
       iconSize: 24.0,
       backgroundColor: backgroundColor,
       padding: 8.0,
-      borderRadius: 12.0,
+      borderOpacity: 0.15,
     );
   }
 
@@ -205,13 +189,13 @@ class TilawaIconBoxTokens {
     double? iconSize,
     Color? backgroundColor,
     double? padding,
-    double? borderRadius,
+    double? borderOpacity,
   }) {
     return TilawaIconBoxTokens(
       iconSize: iconSize ?? this.iconSize,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       padding: padding ?? this.padding,
-      borderRadius: borderRadius ?? this.borderRadius,
+      borderOpacity: borderOpacity ?? this.borderOpacity,
     );
   }
 
@@ -224,7 +208,7 @@ class TilawaIconBoxTokens {
       iconSize: lerpTokenDouble(a.iconSize, b.iconSize, t),
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t)!,
       padding: lerpTokenDouble(a.padding, b.padding, t),
-      borderRadius: lerpTokenDouble(a.borderRadius, b.borderRadius, t),
+      borderOpacity: lerpTokenDouble(a.borderOpacity, b.borderOpacity, t),
     );
   }
 }
@@ -273,14 +257,12 @@ class TilawaIconToggleTokens {
     required this.activeBackgroundColor,
     required this.inactiveBackgroundColor,
     required this.padding,
-    required this.borderRadius,
   });
 
   final double iconSize;
   final Color activeBackgroundColor;
   final Color inactiveBackgroundColor;
   final double padding;
-  final double borderRadius;
 
   factory TilawaIconToggleTokens.defaults() {
     final colorScheme = ColorScheme.fromSeed(
@@ -295,7 +277,6 @@ class TilawaIconToggleTokens {
       activeBackgroundColor: _activeBackgroundColor(colorScheme),
       inactiveBackgroundColor: _inactiveBackgroundColor(colorScheme),
       padding: 8.0,
-      borderRadius: 12.0,
     );
   }
 
@@ -322,7 +303,6 @@ class TilawaIconToggleTokens {
     Color? activeBackgroundColor,
     Color? inactiveBackgroundColor,
     double? padding,
-    double? borderRadius,
   }) {
     return TilawaIconToggleTokens(
       iconSize: iconSize ?? this.iconSize,
@@ -331,7 +311,6 @@ class TilawaIconToggleTokens {
       inactiveBackgroundColor:
           inactiveBackgroundColor ?? this.inactiveBackgroundColor,
       padding: padding ?? this.padding,
-      borderRadius: borderRadius ?? this.borderRadius,
     );
   }
 
@@ -353,7 +332,6 @@ class TilawaIconToggleTokens {
         t,
       )!,
       padding: lerpTokenDouble(a.padding, b.padding, t),
-      borderRadius: lerpTokenDouble(a.borderRadius, b.borderRadius, t),
     );
   }
 }
@@ -484,147 +462,3 @@ class TilawaEmptyStateTokens {
   }
 }
 
-/// Component tokens for [TilawaErrorState].
-@immutable
-class TilawaErrorStateTokens {
-  const TilawaErrorStateTokens({
-    required this.iconSize,
-    required this.iconOpacity,
-    required this.titleSpacing,
-    required this.titleFontWeight,
-    required this.subtitleSpacing,
-    required this.subtitleOpacity,
-    required this.actionSpacing,
-    required this.padding,
-    required this.retryButtonPadding,
-    required this.retryButtonBorderRadius,
-    this.retryButtonBackgroundColor,
-    this.retryButtonForegroundColor,
-  });
-
-  /// Size of the error-state icon.
-  final double iconSize;
-
-  /// Opacity applied to the icon color.
-  final double iconOpacity;
-
-  /// Spacing between the icon and the title.
-  final double titleSpacing;
-
-  /// Font weight of the title text.
-  final FontWeight titleFontWeight;
-
-  /// Spacing between the title and the subtitle.
-  final double subtitleSpacing;
-
-  /// Opacity applied to the subtitle color.
-  final double subtitleOpacity;
-
-  /// Spacing between the subtitle and the action button.
-  final double actionSpacing;
-
-  /// Outer padding around the whole error-state layout.
-  final EdgeInsets padding;
-
-  /// Padding inside the retry button.
-  final EdgeInsets retryButtonPadding;
-
-  /// Border radius of the retry button.
-  final double retryButtonBorderRadius;
-
-  /// Background color of the retry button. If null, uses colorScheme.onSurface.
-  final Color? retryButtonBackgroundColor;
-
-  /// Foreground color of the retry button. If null, uses colorScheme.surface.
-  final Color? retryButtonForegroundColor;
-
-  factory TilawaErrorStateTokens.defaults() {
-    return const TilawaErrorStateTokens(
-      iconSize: 80.0,
-      iconOpacity: 0.8,
-      titleSpacing: 24.0,
-      titleFontWeight: FontWeight.w700,
-      subtitleSpacing: 12.0,
-      subtitleOpacity: 0.7,
-      actionSpacing: 32.0,
-      padding: EdgeInsets.symmetric(horizontal: 40.0),
-      retryButtonPadding: EdgeInsets.symmetric(
-        horizontal: 32.0,
-        vertical: 12.0,
-      ),
-      retryButtonBorderRadius: 24.0,
-    );
-  }
-
-  TilawaErrorStateTokens copyWith({
-    double? iconSize,
-    double? iconOpacity,
-    double? titleSpacing,
-    FontWeight? titleFontWeight,
-    double? subtitleSpacing,
-    double? subtitleOpacity,
-    double? actionSpacing,
-    EdgeInsets? padding,
-    EdgeInsets? retryButtonPadding,
-    double? retryButtonBorderRadius,
-    Color? retryButtonBackgroundColor,
-    Color? retryButtonForegroundColor,
-  }) {
-    return TilawaErrorStateTokens(
-      iconSize: iconSize ?? this.iconSize,
-      iconOpacity: iconOpacity ?? this.iconOpacity,
-      titleSpacing: titleSpacing ?? this.titleSpacing,
-      titleFontWeight: titleFontWeight ?? this.titleFontWeight,
-      subtitleSpacing: subtitleSpacing ?? this.subtitleSpacing,
-      subtitleOpacity: subtitleOpacity ?? this.subtitleOpacity,
-      actionSpacing: actionSpacing ?? this.actionSpacing,
-      padding: padding ?? this.padding,
-      retryButtonPadding: retryButtonPadding ?? this.retryButtonPadding,
-      retryButtonBorderRadius:
-          retryButtonBorderRadius ?? this.retryButtonBorderRadius,
-      retryButtonBackgroundColor:
-          retryButtonBackgroundColor ?? this.retryButtonBackgroundColor,
-      retryButtonForegroundColor:
-          retryButtonForegroundColor ?? this.retryButtonForegroundColor,
-    );
-  }
-
-  static TilawaErrorStateTokens lerp(
-    TilawaErrorStateTokens a,
-    TilawaErrorStateTokens b,
-    double t,
-  ) {
-    return TilawaErrorStateTokens(
-      iconSize: lerpTokenDouble(a.iconSize, b.iconSize, t),
-      iconOpacity: lerpTokenDouble(a.iconOpacity, b.iconOpacity, t),
-      titleSpacing: lerpTokenDouble(a.titleSpacing, b.titleSpacing, t),
-      titleFontWeight:
-          FontWeight.lerp(a.titleFontWeight, b.titleFontWeight, t) ??
-          a.titleFontWeight,
-      subtitleSpacing: lerpTokenDouble(a.subtitleSpacing, b.subtitleSpacing, t),
-      subtitleOpacity: lerpTokenDouble(a.subtitleOpacity, b.subtitleOpacity, t),
-      actionSpacing: lerpTokenDouble(a.actionSpacing, b.actionSpacing, t),
-      padding: EdgeInsets.lerp(a.padding, b.padding, t)!,
-      retryButtonPadding: EdgeInsets.lerp(
-        a.retryButtonPadding,
-        b.retryButtonPadding,
-        t,
-      )!,
-      retryButtonBorderRadius: lerpTokenDouble(
-        a.retryButtonBorderRadius,
-        b.retryButtonBorderRadius,
-        t,
-      ),
-      retryButtonBackgroundColor: Color.lerp(
-        a.retryButtonBackgroundColor,
-        b.retryButtonBackgroundColor,
-        t,
-      ),
-      retryButtonForegroundColor: Color.lerp(
-        a.retryButtonForegroundColor,
-        b.retryButtonForegroundColor,
-        t,
-      ),
-    );
-  }
-}

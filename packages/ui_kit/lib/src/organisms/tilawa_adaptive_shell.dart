@@ -146,10 +146,7 @@ class TilawaAdaptiveShell extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (phoneFooterAboveNav != null) ...[
-                  phoneFooterAboveNav!,
-                  SizedBox(height: Theme.of(context).tokens.spaceSmall),
-                ],
+                ?phoneFooterAboveNav,
                 _BottomNavBar(
                   destinations: destinations,
                   selectedIndex: displayIndex,
@@ -325,6 +322,10 @@ class _BottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.componentTokens.adaptiveShell;
+    final designTokens = theme.tokens;
+    final double bottomNavTopRadius = designTokens.resolveRadius(
+      family: TilawaRadiusFamily.card,
+    );
     final Color navColor = tokens.bottomNavBackgroundColor;
 
     final int count = destinations.length;
@@ -406,6 +407,9 @@ class _BottomNavBar extends StatelessWidget {
                   child: Material(
                     color: tokens.bottomNavBackgroundColor,
                     shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(bottomNavTopRadius),
+                      ),
                       side: BorderSide(
                         color: tokens.bottomNavOutlineColor,
                         width: tokens.bottomNavBorderWidth,
@@ -501,13 +505,16 @@ class _SideNavRail extends StatelessWidget {
     final activeColor = theme.colorScheme.onPrimaryContainer;
     final designTokens = theme.tokens;
     final componentTokens = theme.componentTokens.adaptiveShell;
+    final double sideRailRadius = designTokens.resolveRadius(
+      family: TilawaRadiusFamily.chrome,
+    );
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(componentTokens.sideRailRadius),
+      borderRadius: BorderRadius.circular(sideRailRadius),
       child: Container(
         decoration: BoxDecoration(
           color: componentTokens.sideRailBackgroundColor,
-          borderRadius: BorderRadius.circular(componentTokens.sideRailRadius),
+          borderRadius: BorderRadius.circular(sideRailRadius),
           border: Border.all(
             color: componentTokens.sideRailOutlineColor,
             width: designTokens.borderWidthThin,

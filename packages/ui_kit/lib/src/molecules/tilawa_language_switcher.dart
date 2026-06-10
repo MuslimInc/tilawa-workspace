@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../atoms/tilawa_loading_indicator.dart';
 import '../foundation/component_tokens.dart';
+import '../foundation/design_tokens.dart';
 
 /// Switches [languages] with the same chrome as [TilawaSegmentedControl].
 class TilawaLanguageSwitcher extends StatelessWidget {
@@ -24,15 +26,30 @@ class TilawaLanguageSwitcher extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final designTokens = theme.tokens;
     final tokens = theme.componentTokens.segmentedControl;
 
     final ColorScheme colorScheme = theme.colorScheme;
+    final itemPadding = tokens.itemPadding.resolve(Directionality.of(context));
+    final containerPadding =
+        tokens.containerPadding.resolve(Directionality.of(context));
+    final labelStyle = theme.textTheme.labelLarge;
+    final double labelHeight =
+        (labelStyle?.fontSize ?? 14) * (labelStyle?.height ?? 1.2);
+    final double itemHeight = itemPadding.vertical + labelHeight;
+    final radii = designTokens.resolveSegmentedControlRadii(
+      itemHeight: itemHeight,
+      containerPadding: containerPadding.top,
+      trackFamily: TilawaRadiusFamily.pill,
+    );
+    final containerBorderRadius = BorderRadius.circular(radii.containerRadius);
+    final itemBorderRadius = BorderRadius.circular(radii.itemRadius);
 
     return Container(
       padding: tokens.containerPadding,
       decoration: BoxDecoration(
         color: colorScheme.primary,
-        borderRadius: BorderRadius.circular(tokens.containerRadius),
+        borderRadius: containerBorderRadius,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -43,12 +60,12 @@ class TilawaLanguageSwitcher extends StatelessWidget {
           final String label = getLanguageName(lang);
           return Material(
             color: isSelected ? colorScheme.onPrimary : Colors.transparent,
-            borderRadius: BorderRadius.circular(tokens.itemRadius),
+            borderRadius: itemBorderRadius,
             child: InkWell(
               onTap: enabled && !isLoading
                   ? () => onLanguageChanged(lang)
                   : null,
-              borderRadius: BorderRadius.circular(tokens.itemRadius),
+              borderRadius: itemBorderRadius,
               child: Semantics(
                 // fix: Accessibility — segment role (inside InkWell avoids merge bugs)
                 selected: isSelected,
@@ -61,10 +78,10 @@ class TilawaLanguageSwitcher extends StatelessWidget {
                     padding: tokens.itemPadding,
                     child: Center(
                       child: isLoading && isSelected
-                          ? SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(
+                          ? SizedBox.square(
+                              dimension: theme.tokens.iconSizeSmall,
+                              child: TilawaLoadingIndicator(
+                                centered: false,
                                 strokeWidth: 2,
                                 color: colorScheme.primary,
                               ),

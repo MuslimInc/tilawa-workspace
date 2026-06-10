@@ -278,7 +278,9 @@ class _TilawaTextFieldState extends State<TilawaTextField> {
           prefixIcon: widget.prefixIcon,
           suffixIcon: suffix,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(tokens.radiusMedium),
+            borderRadius: BorderRadius.circular(
+              tokens.resolveRadius(family: TilawaRadiusFamily.chrome),
+            ),
           ),
           contentPadding: EdgeInsets.all(tokens.spaceMedium),
         ),

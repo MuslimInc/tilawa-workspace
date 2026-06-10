@@ -293,6 +293,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsPlaybackAndStorage => 'التشغيل والتخزين';
 
   @override
+  String get settingsRecitersSection => 'القراء';
+
+  @override
   String get themeLight => 'فاتح';
 
   @override
@@ -862,6 +865,13 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get restorePlaybackStateSubtitle => 'استئناف الصوت من حيث توقفت';
+
+  @override
+  String get showRecitersAlphabetIndex => 'إظهار فهرس الحروف';
+
+  @override
+  String get showRecitersAlphabetIndexSubtitle =>
+      'عرض شريط أ-ي أثناء تصفح القراء';
 
   @override
   String get timeRemaining => 'الوقت المتبقي';

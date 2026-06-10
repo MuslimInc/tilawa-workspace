@@ -90,7 +90,6 @@ class FavoritesScreen extends StatelessWidget {
                           },
                           child: ReciterCard(
                             reciter: reciter,
-                            favoritesOnlyContext: true,
                           ),
                         );
                       },

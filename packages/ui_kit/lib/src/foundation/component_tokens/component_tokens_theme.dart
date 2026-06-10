@@ -15,7 +15,6 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     required this.loadingIndicator,
     required this.divider,
     required this.emptyState,
-    required this.errorState,
     required this.alphabetScrollbar,
     required this.feedbackStrip,
     required this.glassPanel,
@@ -33,7 +32,6 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     required this.immersiveComposer,
     required this.iconToggle,
     required this.permissionBanner,
-    required this.prayerAlertRow,
     required this.bottomSheetScaffold,
   });
 
@@ -44,7 +42,6 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
   final TilawaLoadingIndicatorTokens loadingIndicator;
   final TilawaDividerTokens divider;
   final TilawaEmptyStateTokens emptyState;
-  final TilawaErrorStateTokens errorState;
   final TilawaAlphabetScrollbarTokens alphabetScrollbar;
   final TilawaFeedbackStripTokens feedbackStrip;
   final TilawaGlassPanelTokens glassPanel;
@@ -62,7 +59,6 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
   final TilawaImmersiveComposerTokens immersiveComposer;
   final TilawaIconToggleTokens iconToggle;
   final TilawaPermissionBannerTokens permissionBanner;
-  final TilawaPrayerAlertRowTokens prayerAlertRow;
   final TilawaBottomSheetScaffoldTokens bottomSheetScaffold;
 
   /// Creates light theme component tokens.
@@ -97,7 +93,6 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       loadingIndicator: TilawaLoadingIndicatorTokens.defaults(),
       divider: TilawaDividerTokens.defaults(),
       emptyState: TilawaEmptyStateTokens.defaults(),
-      errorState: TilawaErrorStateTokens.defaults(),
       alphabetScrollbar: TilawaAlphabetScrollbarTokens.fromColorScheme(
         effectiveColorScheme,
       ),
@@ -129,7 +124,6 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       ),
       iconToggle: TilawaIconToggleTokens.fromColorScheme(effectiveColorScheme),
       permissionBanner: TilawaPermissionBannerTokens.defaults(),
-      prayerAlertRow: TilawaPrayerAlertRowTokens.defaults(),
       bottomSheetScaffold: TilawaBottomSheetScaffoldTokens.defaults(),
     );
   }
@@ -143,7 +137,6 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     TilawaLoadingIndicatorTokens? loadingIndicator,
     TilawaDividerTokens? divider,
     TilawaEmptyStateTokens? emptyState,
-    TilawaErrorStateTokens? errorState,
     TilawaAlphabetScrollbarTokens? alphabetScrollbar,
     TilawaFeedbackStripTokens? feedbackStrip,
     TilawaGlassPanelTokens? glassPanel,
@@ -161,7 +154,6 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     TilawaImmersiveComposerTokens? immersiveComposer,
     TilawaIconToggleTokens? iconToggle,
     TilawaPermissionBannerTokens? permissionBanner,
-    TilawaPrayerAlertRowTokens? prayerAlertRow,
     TilawaBottomSheetScaffoldTokens? bottomSheetScaffold,
   }) {
     return TilawaComponentTokens(
@@ -172,7 +164,6 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       loadingIndicator: loadingIndicator ?? this.loadingIndicator,
       divider: divider ?? this.divider,
       emptyState: emptyState ?? this.emptyState,
-      errorState: errorState ?? this.errorState,
       alphabetScrollbar: alphabetScrollbar ?? this.alphabetScrollbar,
       feedbackStrip: feedbackStrip ?? this.feedbackStrip,
       glassPanel: glassPanel ?? this.glassPanel,
@@ -190,7 +181,6 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       immersiveComposer: immersiveComposer ?? this.immersiveComposer,
       iconToggle: iconToggle ?? this.iconToggle,
       permissionBanner: permissionBanner ?? this.permissionBanner,
-      prayerAlertRow: prayerAlertRow ?? this.prayerAlertRow,
       bottomSheetScaffold: bottomSheetScaffold ?? this.bottomSheetScaffold,
     );
   }
@@ -221,7 +211,6 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       ),
       divider: TilawaDividerTokens.lerp(divider, other.divider, t),
       emptyState: TilawaEmptyStateTokens.lerp(emptyState, other.emptyState, t),
-      errorState: TilawaErrorStateTokens.lerp(errorState, other.errorState, t),
       alphabetScrollbar: TilawaAlphabetScrollbarTokens.lerp(
         alphabetScrollbar,
         other.alphabetScrollbar,
@@ -285,11 +274,6 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       permissionBanner: TilawaPermissionBannerTokens.lerp(
         permissionBanner,
         other.permissionBanner,
-        t,
-      ),
-      prayerAlertRow: TilawaPrayerAlertRowTokens.lerp(
-        prayerAlertRow,
-        other.prayerAlertRow,
         t,
       ),
       bottomSheetScaffold: TilawaBottomSheetScaffoldTokens.lerp(

@@ -277,7 +277,10 @@ void main() {
         const FavoritesLoaded(favorites: [tReciter], favoriteIds: {1}),
       ],
       verify: (_) {
-        expect(cubit.state, const FavoritesLoaded(favorites: [tReciter], favoriteIds: {1}));
+        expect(
+          cubit.state,
+          const FavoritesLoaded(favorites: [tReciter], favoriteIds: {1}),
+        );
         verify(mockToggleFavorite(1)).called(1);
       },
     );

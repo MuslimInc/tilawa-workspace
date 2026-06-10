@@ -79,7 +79,9 @@ class TilawaCard extends StatelessWidget {
     final TilawaDesignTokens designTokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
 
-    final double effectiveRadius = borderRadius ?? tokens.borderRadius;
+    final double effectiveRadius =
+        borderRadius ??
+        designTokens.resolveRadius(family: TilawaRadiusFamily.card);
     final BorderRadius borderRadiusValue = BorderRadius.circular(
       effectiveRadius,
     );

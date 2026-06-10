@@ -84,7 +84,7 @@ Widget _defaultItemBuilder(
       color: Colors.transparent,
       child: InkWell(
         onTap: changeColor,
-        borderRadius: BorderRadius.circular(50),
+        customBorder: const CircleBorder(),
         child: AnimatedOpacity(
           duration: const Duration(milliseconds: 210),
           opacity: isCurrentColor ? 1 : 0,

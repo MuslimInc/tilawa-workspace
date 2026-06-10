@@ -1,0 +1,46 @@
+---
+description: Guard pass for generated or changed documentation — READMEs, API references, dartdoc/docstrings, ADRs, changelogs, tutorials. Apply reactively after writing or editing docs, after code changes documented behavior, or before publishing, and on requests like "review the docs", "is this documentation accurate", "update the docs", "write a README", "document this API", or "add a changelog entry". Core job: verify every referenced symbol, flag, path, and code sample against the source; catch docs-vs-code drift; strip filler. Not for production code (use clean-code-guard) or test review (use test-guard).
+globs: "**/*.md"
+alwaysApply: false
+---
+
+# docs-guard (Cursor rule)
+
+A quality gate for generated or changed **documentation**. The core principle:
+documentation is a set of claims about the codebase, and every claim is
+checkable — your job is to check them against the source, not from memory.
+
+Full skill (canonical source, with `references/`):
+[`.agents/skills/docs-guard/SKILL.md`](../../.agents/skills/docs-guard/SKILL.md).
+
+Project conventions win on conflict — read CLAUDE.md and any docs surface that
+moves together (README, ADRs under `docs/adr/`, dartdoc, changelog).
+
+## The rules
+
+**Accuracy — must fix**
+1. **Every referenced symbol must exist** — verify every function, class, flag, route, config key, env var, and file path against the actual source by *reading it*, not recalling it. An unverifiable reference does not ship.
+2. **Every code sample must work** — imports resolve, signatures match, runs on a clean machine (no local paths, no real credentials, no implicit state).
+3. **Document actual behavior, not intended** — read the implementation first; where code and comment/spec disagree, code is the truth and flag the disagreement.
+4. **No unverifiable claims** — performance numbers, compatibility, "production-ready" need a repo source (benchmark, CI matrix) or they come out.
+
+**Versioning and drift**
+5. **Versions are explicit** — features/flags/behaviors state the version that introduced them; prerequisites pinned or ranged, never "latest"; deprecations name the replacement.
+6. **A code change owes a docs change** — on rename/signature/default/flag changes, update every doc surface in the same change; grep docs for the old symbol before finishing.
+
+**Substance — should fix**
+7. **No filler** — delete docstrings that paraphrase the signature, sections that restate their heading, marketing adjectives, and intro padding. A docstring earns its place with contracts the signature can't express (units, ranges, error conditions, side effects).
+8. **Don't paraphrase upstream docs** — link instead; document only your project's relationship to the external thing.
+9. **Examples cover the failure path** using the error types the code actually raises (verify per Rule 1).
+
+**Structure — worth noting**
+10. **Navigation tells the truth** — headings match sections, TOC matches headings, internal links/anchors resolve, no TODO/"coming soon" stubs in published docs.
+
+## Self-check before delivery
+
+Did you verify each symbol/flag/path against source this session (not memory)?
+Would every sample run on a clean machine? Any number or superlative without a
+repo source? If code changed, did you grep all docs for the old names? Any
+docstring that just restates the signature? Do all internal links resolve?
+
+Severity: Rules 1–4 must fix; 5–9 should fix; 10 worth noting.

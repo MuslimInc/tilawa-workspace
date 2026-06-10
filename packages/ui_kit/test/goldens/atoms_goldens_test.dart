@@ -125,7 +125,12 @@ void main() {
       'TilawaEmptyState',
       fileName: 'atoms/tilawa_empty_state',
       builder: () => GoldenTestGroup(
-        scenarioConstraints: kUiKitGoldenScenarioConstraints,
+        // Tight height: the state layout centers via LayoutBuilder, which
+        // cannot answer the intrinsic-height probe from Alchemist's Table.
+        scenarioConstraints: kUiKitGoldenScenarioConstraints.copyWith(
+          minHeight: 480,
+          maxHeight: 480,
+        ),
         children: [
           GoldenTestScenario(
             name: 'Default',
@@ -258,7 +263,12 @@ void main() {
       'TilawaErrorState',
       fileName: 'atoms/tilawa_error_state',
       builder: () => GoldenTestGroup(
-        scenarioConstraints: kUiKitGoldenScenarioConstraints,
+        // Tight height: the state layout centers via LayoutBuilder, which
+        // cannot answer the intrinsic-height probe from Alchemist's Table.
+        scenarioConstraints: kUiKitGoldenScenarioConstraints.copyWith(
+          minHeight: 480,
+          maxHeight: 480,
+        ),
         children: [
           GoldenTestScenario(
             name: 'Default',

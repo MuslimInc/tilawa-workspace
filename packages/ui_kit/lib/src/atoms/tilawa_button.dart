@@ -4,6 +4,14 @@ import '../foundation/design_tokens.dart';
 import '../foundation/tilawa_interaction_feedback.dart';
 import './tilawa_loading_indicator.dart';
 
+// Material 3 state opacities (m3.material.io — interaction states):
+// disabled container 12%, disabled content 38%, pressed state layer 10%.
+// Hover is kit-calibrated below the M3 8% default for the soft Tilawa look.
+const double _disabledContainerOpacity = 0.12;
+const double _disabledContentOpacity = 0.38;
+const double _pressedOverlayOpacity = 0.1;
+const double _hoverOverlayOpacity = 0.04;
+
 /// Variants for [TilawaButton] determining its visual prominence.
 enum TilawaButtonVariant {
   /// Most prominent action, uses primary color.
@@ -45,8 +53,19 @@ enum TilawaButtonSize {
 /// Supports multiple variants, sizes, and states (including loading and disabled).
 ///
 /// [TilawaButton] handles its own internal layout, including icons and
-/// loading indicators, while ensuring a minimum touch target of 48×48
-/// unless [shrinkWrapTapTarget] is true (e.g. inline text-link actions).
+/// loading indicators, while ensuring a minimum touch target of 48×48.
+///
+/// ## Touch-target contract
+///
+/// All non-shrink-wrapped buttons are forced to ≥ 48×48
+/// ([kTilawaMinInteractiveDimension]) regardless of [size] — a `small`
+/// (32 dp visual) button still gets a 48 dp hit target via an outer
+/// [ConstrainedBox]. [shrinkWrapTapTarget] is the **only** way to drop below
+/// 48 dp and is reserved for *inline text-link* actions where 48 dp would
+/// break running text (think a "Learn more" link inside a paragraph). It must
+/// **not** be combined with an icon-only or control-style button — doing so
+/// ships a sub-target tappable control (WCAG 2.5.5 / the kit's own 48 dp law).
+/// This is asserted in debug builds.
 ///
 /// Optional [backgroundColor], [foregroundColor], and [borderColor] override
 /// the colours implied by [variant] for branded or marketing surfaces.
@@ -70,7 +89,13 @@ class TilawaButton extends StatelessWidget {
     this.padding,
     this.textStyle,
     this.shrinkWrapTapTarget = false,
-  });
+  }) : assert(
+         !shrinkWrapTapTarget || (leadingIcon == null && trailingIcon == null),
+         'shrinkWrapTapTarget is for inline text-link actions only and must '
+         'not be combined with an icon — an icon button below 48dp violates '
+         'the kit touch-target contract. Use a full-size button or '
+         'TilawaIconActionButton instead.',
+       );
 
   /// The text label to display.
   final String text;
@@ -110,7 +135,7 @@ class TilawaButton extends StatelessWidget {
   /// unless you also set a transparent [backgroundColor] for a stroked look).
   final Color? borderColor;
 
-  /// Corner radius; defaults to [TilawaDesignTokens.radiusMedium] from theme.
+  /// Corner radius; defaults to [TilawaRadiusFamily.pill] from theme height.
   final double? borderRadius;
 
   /// Insets for label and icons; defaults to horizontal padding from [size].
@@ -143,8 +168,17 @@ class TilawaButton extends StatelessWidget {
     final (height, horizontalPadding, fontSize, iconSize) = _getDimensions();
 
     final designTokens = theme.extension<TilawaDesignTokens>();
+    // Buttons are tappable affordances → the `pill` radius family: a true
+    // pill when short, capped at the card radius when tall, so they never
+    // out-round adjacent cards (brand-doc §5; see [TilawaRadiusResolverX]).
+    // An explicit [borderRadius] still wins for one-off marketing surfaces.
     final double resolvedRadius =
-        borderRadius ?? designTokens?.radiusMedium ?? 12.0;
+        borderRadius ??
+        designTokens?.resolveRadius(
+          family: TilawaRadiusFamily.pill,
+          height: height,
+        ) ??
+        height / 2;
     final EdgeInsetsGeometry resolvedPadding =
         padding ?? EdgeInsets.symmetric(horizontal: horizontalPadding);
 
@@ -163,22 +197,26 @@ class TilawaButton extends StatelessWidget {
           : MaterialTapTargetSize.padded,
       backgroundColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.disabled)) {
-          return colorScheme.onSurface.withValues(alpha: 0.12);
+          return colorScheme.onSurface.withValues(
+            alpha: _disabledContainerOpacity,
+          );
         }
         return resolvedBg;
       }),
       foregroundColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.disabled)) {
-          return colorScheme.onSurface.withValues(alpha: 0.38);
+          return colorScheme.onSurface.withValues(
+            alpha: _disabledContentOpacity,
+          );
         }
         return resolvedFg;
       }),
       overlayColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.pressed)) {
-          return overlayBase.withValues(alpha: 0.1);
+          return overlayBase.withValues(alpha: _pressedOverlayOpacity);
         }
         if (states.contains(WidgetState.hovered)) {
-          return overlayBase.withValues(alpha: 0.04);
+          return overlayBase.withValues(alpha: _hoverOverlayOpacity);
         }
         return null;
       }),
@@ -186,7 +224,9 @@ class TilawaButton extends StatelessWidget {
         if (resolvedBorder == null) return BorderSide.none;
         if (states.contains(WidgetState.disabled)) {
           return BorderSide(
-            color: colorScheme.onSurface.withValues(alpha: 0.12),
+            color: colorScheme.onSurface.withValues(
+              alpha: _disabledContainerOpacity,
+            ),
           );
         }
         return BorderSide(color: resolvedBorder);
@@ -200,7 +240,7 @@ class TilawaButton extends StatelessWidget {
     );
 
     final Color contentFg = _isDisabled
-        ? colorScheme.onSurface.withValues(alpha: 0.38)
+        ? colorScheme.onSurface.withValues(alpha: _disabledContentOpacity)
         : resolvedFg;
 
     final content = _ButtonContent(
@@ -322,6 +362,8 @@ class _ButtonContent extends StatelessWidget {
       ),
     );
 
+    final double iconGap = Theme.of(context).tokens.spaceSmall;
+
     return Row(
       mainAxisSize: isFullWidth ? MainAxisSize.max : MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -331,14 +373,14 @@ class _ButtonContent extends StatelessWidget {
             data: IconThemeData(size: iconSize, color: foregroundColor),
             child: leadingIcon!,
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: iconGap),
         ],
         if (isFullWidth)
           Expanded(child: label)
         else
           Flexible(fit: FlexFit.loose, child: label),
         if (trailingIcon != null) ...[
-          const SizedBox(width: 8),
+          SizedBox(width: iconGap),
           IconTheme(
             data: IconThemeData(size: iconSize, color: foregroundColor),
             child: trailingIcon!,

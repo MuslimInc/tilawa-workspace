@@ -1,0 +1,41 @@
+---
+description: Guard pass for generated or changed test code. Apply reactively after writing, editing, or refactoring tests — before presenting, committing, or merging — and on requests like "write tests for X", "add tests", "test this", or "review these tests". Catches mock abuse, duplicate tests, implementation-detail assertions, and tests that catch nothing. Not for production code (use clean-code-guard) or docs (use docs-guard).
+globs: "**/*_test.dart"
+alwaysApply: false
+---
+
+# test-guard (Cursor rule)
+
+A quality gate for generated or changed **test code** — the pass that prevents
+AI-generated test bloat and tests that hide real bugs. Run it after the first
+test-writing pass; if invoked before writing, apply the rules as you write.
+
+Full skill (canonical source, with `references/`):
+[`.agents/skills/test-guard/SKILL.md`](../../.agents/skills/test-guard/SKILL.md).
+
+## Adapt to the project first
+
+Project testing rules win over this rule when they conflict. In Tilawa:
+`package:test` + `package:checks` for unit tests, `WidgetTester` wrapped in
+`MaterialApp` + `AppTheme.getLightTheme(...)` + l10n for widget tests, and
+**fakes over mocks** (reach for `mockito` only when a fake is impractical). Map
+the real system boundaries (network, storage, clock, SDKs) — those are the only
+legitimate mock points.
+
+## The nine rules
+
+1. **Test behavior, not implementation.** Don't assert that an internal (non-boundary) function was called; assert the observable return value or state change. *(Must fix)*
+2. **Every mock must be justified.** Mock only true system boundaries. *(Must fix)*
+3. **One scenario per test; data-drive variants** rather than copy-pasting near-identical tests. *(Should fix)*
+4. **Every test must justify its existence.** Drop tests for constructors setting fields, input the type system already forbids, or a constant equaling its literal. *(Should fix)*
+5. **Name tests for the scenario**, not the method. *(Should fix)*
+6. **Production regression tests are sacred** — never delete or weaken to make a suite pass. *(Sacred)*
+7. **No tests for framework guarantees** — if it would pass with all project code deleted, drop it. *(Should fix)*
+8. **State and value objects are real, never mocked.** *(Must fix)*
+9. **Infrastructure under test gets real infrastructure** (e.g. a DB test hits a real/in-memory DB, not a mock). *(Worth noting)*
+
+## Reporting
+
+Report concisely: `Rule N violation` in `test/path::<test_name>` — why it
+violates, suggested fix. Severity: Rules 1/2/8 must fix; 3/4/5/7 should fix;
+6 sacred; 9 worth noting.

@@ -28,7 +28,12 @@ class DownloadAllButton extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final tokens = theme.tokens;
     final chipTokens = theme.componentTokens.chip;
-    final borderRadius = BorderRadius.circular(chipTokens.pillRadius);
+    final borderRadius = BorderRadius.circular(
+      tokens.resolveRadius(
+        family: TilawaRadiusFamily.pill,
+        height: tokens.minInteractiveDimension,
+      ),
+    );
     final Color idleFill = ReciterCatalogChrome.idleFill(colorScheme);
     final Color hairline = ReciterCatalogChrome.hairline(colorScheme, tokens);
 

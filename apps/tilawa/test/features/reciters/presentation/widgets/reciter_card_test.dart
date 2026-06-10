@@ -28,8 +28,7 @@ void main() {
     moshaf: [],
   );
 
-  setUpAll(() {
-  });
+  setUpAll(() {});
 
   setUp(() {
     provideDummy<Either<Failure, List<ReciterEntity>>>(const Right([]));
@@ -109,41 +108,43 @@ void main() {
     await cubit.close();
   });
 
-  testWidgets('hides favorite control in favorites-only context', (
+  testWidgets('shows remove control when reciter is favorited', (
     WidgetTester tester,
   ) async {
     final cubit = await loadedCubit(withFavoriteReciter: true);
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: AppTheme.getLightTheme(
-          primaryColor: PrimaryColorPreset.defaultPreset.value,
-        ),
-        supportedLocales: AppLocalizations.supportedLocales,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        locale: const Locale('en'),
-        home: Scaffold(
-          body: Center(
-            child: BlocProvider<FavoritesCubit>.value(
-              value: cubit,
-              child: const ReciterCard(
-                reciter: tReciter,
-                favoritesOnlyContext: true,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
+    await pumpCard(tester, cubit);
 
-    expect(find.bySemanticsLabel('Add to Favorites'), findsNothing);
-    expect(find.bySemanticsLabel('Remove from Favorites'), findsNothing);
-    expect(
-      find.bySemanticsIdentifier(
-        ReciterSemanticsIds.reciterFavoriteButton(tReciter.id),
-      ),
-      findsNothing,
+    final Finder favoriteButton = find.bySemanticsIdentifier(
+      ReciterSemanticsIds.reciterFavoriteButton(tReciter.id),
     );
+    expect(favoriteButton, findsOneWidget);
+    expect(
+      tester.getSemantics(favoriteButton).label,
+      startsWith('Remove from'),
+    );
+
+    await cubit.close();
+  });
+
+  testWidgets('reserves trailing padding for favorite control', (
+    WidgetTester tester,
+  ) async {
+    final ThemeData theme = AppTheme.getLightTheme(
+      primaryColor: PrimaryColorPreset.defaultPreset.value,
+    );
+    final cubit = await loadedCubit();
+    await pumpCard(tester, cubit);
+
+    final Finder infoPadding = find.descendant(
+      of: find.byType(ReciterCard),
+      matching: find.byWidgetPredicate(
+        (Widget widget) =>
+            widget is Padding &&
+            widget.padding ==
+                EdgeInsetsDirectional.only(end: theme.tokens.spaceExtraLarge),
+      ),
+    );
+    expect(infoPadding, findsOneWidget);
 
     await cubit.close();
   });

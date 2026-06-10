@@ -293,6 +293,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsPlaybackAndStorage => 'Playback & storage';
 
   @override
+  String get settingsRecitersSection => 'Reciters';
+
+  @override
   String get themeLight => 'Light';
 
   @override
@@ -866,6 +869,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get restorePlaybackStateSubtitle =>
       'Resume audio from where you left off';
+
+  @override
+  String get showRecitersAlphabetIndex => 'Show Alphabet Index';
+
+  @override
+  String get showRecitersAlphabetIndexSubtitle =>
+      'Display the A-Z shortcut rail while browsing reciters';
 
   @override
   String get timeRemaining => 'Time Remaining';

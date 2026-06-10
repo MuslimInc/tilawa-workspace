@@ -227,6 +227,10 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                 opacity: _showScrollToTop ? 1.0 : 0.0,
                 duration: tokens.durationFast,
                 child: FloatingActionButton.small(
+                  // Unique tag so this scroll-to-top FAB never shares the
+                  // default Hero tag with another route's FAB during
+                  // transitions.
+                  heroTag: 'reciter_details_scroll_top_fab',
                   onPressed: _scrollToTop,
                   backgroundColor: theme.colorScheme.primary,
                   foregroundColor: theme.colorScheme.onPrimary,

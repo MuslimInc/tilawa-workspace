@@ -70,10 +70,8 @@ abstract final class QuranPlayerExpandPhysics {
       return PlayerExpandSnapTarget.collapse;
     }
 
-    final bool collapseIntent =
-        netDragDy > netDragBiasThreshold;
-    final bool expandIntent =
-        netDragDy < -netDragBiasThreshold;
+    final bool collapseIntent = netDragDy > netDragBiasThreshold;
+    final bool expandIntent = netDragDy < -netDragBiasThreshold;
 
     if (collapseIntent && !expandIntent) {
       return PlayerExpandSnapTarget.collapse;
@@ -221,7 +219,7 @@ class PlayerExpandTransitionMetrics {
     final double miniSlideY = (1 - miniOpacity) * miniPlayerHeight * 0.2;
 
     // Linear travel tracks finger distance; easing is only for programmatic runs.
-    final double sheetMotionT = t;
+    final double sheetMotionT = _settledExpandedSheetMotionT(t);
 
     final double sheetTravelDim;
     if (collapseBiased) {
@@ -238,8 +236,8 @@ class PlayerExpandTransitionMetrics {
         (t / sheetOpaqueFrom).clamp(0.0, 1.0),
       );
     }
-    final double sheetPresentationOpacity =
-        (expandedOpacity * sheetTravelDim).clamp(0.0, 1.0);
+    final double sheetPresentationOpacity = (expandedOpacity * sheetTravelDim)
+        .clamp(0.0, 1.0);
 
     // Dim scrim only — never paint an opaque surface backdrop during the
     // transition (that reads as a full-height white flash while collapsing).
@@ -260,10 +258,14 @@ class PlayerExpandTransitionMetrics {
         ? _collapseHandoffT(t)
         : computeHandoffT(t);
     final double effectiveHandoffT = handoffT.clamp(0.0, 1.0);
-    final double stageChromeOpacity =
-        (1 - effectiveHandoffT * 0.98).clamp(0.0, 1.0);
-    final double miniIdentityOpacity =
-        (1 - effectiveHandoffT * 0.98).clamp(0.0, 1.0);
+    final double stageChromeOpacity = (1 - effectiveHandoffT * 0.98).clamp(
+      0.0,
+      1.0,
+    );
+    final double miniIdentityOpacity = (1 - effectiveHandoffT * 0.98).clamp(
+      0.0,
+      1.0,
+    );
 
     return PlayerExpandTransitionMetrics(
       miniOpacity: miniOpacity,
@@ -278,7 +280,8 @@ class PlayerExpandTransitionMetrics {
       sheetMotionT: sheetMotionT,
       queueChromeT: queueChromeT,
       showMiniPlayer: miniOpacity > 0.08,
-      showExpandedSheet: t > 0.001 &&
+      showExpandedSheet:
+          t > 0.001 &&
           sheetPresentationOpacity > 0.08 &&
           (!collapseBiased || t > 0.74),
       showMorphLayer: effectiveHandoffT > 0.02,
@@ -293,9 +296,9 @@ class PlayerExpandTransitionMetrics {
   }) {
     final PlayerExpandTransitionMetrics expandForward =
         _computeInteractiveExpandForwardMetrics(
-      progress: progress,
-      miniPlayerHeight: miniPlayerHeight,
-    );
+          progress: progress,
+          miniPlayerHeight: miniPlayerHeight,
+        );
 
     final double? anchor = collapseAnchor;
     if (anchor == null || progress >= anchor - 0.001) {
@@ -304,9 +307,9 @@ class PlayerExpandTransitionMetrics {
 
     final PlayerExpandTransitionMetrics collapse =
         _computeInteractiveCollapseDragMetrics(
-      progress: progress,
-      miniPlayerHeight: miniPlayerHeight,
-    );
+          progress: progress,
+          miniPlayerHeight: miniPlayerHeight,
+        );
 
     const double blendSpan = 0.35;
     final double blend = Curves.easeInOut.transform(
@@ -345,8 +348,8 @@ class PlayerExpandTransitionMetrics {
     final double sheetTravelDim = Curves.easeIn.transform(
       (t / sheetOpaqueFrom).clamp(0.0, 1.0),
     );
-    final double sheetPresentationOpacity =
-        (expandedOpacity * sheetTravelDim).clamp(0.0, 1.0);
+    final double sheetPresentationOpacity = (expandedOpacity * sheetTravelDim)
+        .clamp(0.0, 1.0);
 
     final double miniSlideY = (1 - miniOpacity) * miniPlayerHeight * 0.2;
     final double scrimOpacity = (0.45 * Curves.easeIn.transform(t)).clamp(
@@ -364,8 +367,8 @@ class PlayerExpandTransitionMetrics {
       backdropOpacity: 0,
       scrimOpacity: scrimOpacity,
       miniSlideY: miniSlideY,
-      sheetMotionT: t,
-      queueChromeT: 0,
+      sheetMotionT: _settledExpandedSheetMotionT(t),
+      queueChromeT: _settledExpandedQueueChromeT(t),
       showMiniPlayer: miniOpacity > 0.08,
       showExpandedSheet: t > 0.001 && sheetPresentationOpacity > 0.08,
       showMorphLayer: false,
@@ -380,10 +383,10 @@ class PlayerExpandTransitionMetrics {
     final double t = progress.clamp(0.0, 1.0);
     final PlayerExpandTransitionMetrics settled =
         PlayerExpandTransitionMetrics.compute(
-      progress: t,
-      miniPlayerHeight: miniPlayerHeight,
-      collapseBiased: true,
-    );
+          progress: t,
+          miniPlayerHeight: miniPlayerHeight,
+          collapseBiased: true,
+        );
 
     // Ramp morph fades during finger-driven collapse (no step at ~0.78).
     final double morphBlend = _interactiveCollapseMorphBlend(t);
@@ -391,20 +394,22 @@ class PlayerExpandTransitionMetrics {
     final double stageChromeOpacity =
         1 + (settled.stageChromeOpacity - 1) * morphBlend;
 
+    final bool morphActive = handoffT > 0.02;
+    final double miniOpacity = morphActive ? 0 : settled.miniOpacity;
+
     return PlayerExpandTransitionMetrics(
-      miniOpacity: settled.miniOpacity,
+      miniOpacity: miniOpacity,
       expandedOpacity: settled.expandedOpacity,
       handoffT: handoffT,
       stageChromeOpacity: stageChromeOpacity,
-      miniIdentityOpacity:
-          1 + (settled.miniIdentityOpacity - 1) * morphBlend,
+      miniIdentityOpacity: 1 + (settled.miniIdentityOpacity - 1) * morphBlend,
       sheetPresentationOpacity: settled.sheetPresentationOpacity,
       backdropOpacity: settled.backdropOpacity,
       scrimOpacity: settled.scrimOpacity,
       miniSlideY: settled.miniSlideY,
-      sheetMotionT: t,
+      sheetMotionT: _settledExpandedSheetMotionT(t),
       queueChromeT: settled.queueChromeT,
-      showMiniPlayer: settled.miniOpacity > 0.08,
+      showMiniPlayer: miniOpacity > 0.08,
       showExpandedSheet:
           t > 0.001 && settled.sheetPresentationOpacity > 0.08 && t > 0.74,
       showMorphLayer: handoffT > 0.02,
@@ -427,13 +432,29 @@ class PlayerExpandTransitionMetrics {
     return Curves.easeInOut.transform((high - t) / (high - low));
   }
 
+  static double _settledExpandedSheetMotionT(double progress) {
+    final double t = progress.clamp(0.0, 1.0);
+    return t >= 0.90 ? 1 : t;
+  }
+
+  static double _settledExpandedQueueChromeT(
+    double progress, {
+    double? fallback,
+  }) {
+    final double t = progress.clamp(0.0, 1.0);
+    return t >= 0.90 ? 1 : fallback ?? 0;
+  }
+
   static PlayerExpandTransitionMetrics _lerpTransitionMetrics(
     PlayerExpandTransitionMetrics a,
     PlayerExpandTransitionMetrics b,
     double t,
   ) {
     double lerp(double x, double y) => x + (y - x) * t;
-    final double miniOpacity = lerp(a.miniOpacity, b.miniOpacity);
+    final double handoffT = lerp(a.handoffT, b.handoffT);
+    final double miniOpacity = handoffT > 0.02
+        ? 0
+        : lerp(a.miniOpacity, b.miniOpacity);
     final double sheetPresentationOpacity = lerp(
       a.sheetPresentationOpacity,
       b.sheetPresentationOpacity,
@@ -441,19 +462,25 @@ class PlayerExpandTransitionMetrics {
     return PlayerExpandTransitionMetrics(
       miniOpacity: miniOpacity,
       expandedOpacity: lerp(a.expandedOpacity, b.expandedOpacity),
-      handoffT: lerp(a.handoffT, b.handoffT),
+      handoffT: handoffT,
       stageChromeOpacity: lerp(a.stageChromeOpacity, b.stageChromeOpacity),
       miniIdentityOpacity: lerp(a.miniIdentityOpacity, b.miniIdentityOpacity),
       sheetPresentationOpacity: sheetPresentationOpacity,
       backdropOpacity: lerp(a.backdropOpacity, b.backdropOpacity),
       scrimOpacity: lerp(a.scrimOpacity, b.scrimOpacity),
       miniSlideY: lerp(a.miniSlideY, b.miniSlideY),
-      sheetMotionT: lerp(a.sheetMotionT, b.sheetMotionT),
-      queueChromeT: lerp(a.queueChromeT, b.queueChromeT),
+      sheetMotionT: _settledExpandedSheetMotionT(
+        lerp(a.sheetMotionT, b.sheetMotionT),
+      ),
+      queueChromeT: _settledExpandedQueueChromeT(
+        lerp(a.sheetMotionT, b.sheetMotionT),
+        fallback: lerp(a.queueChromeT, b.queueChromeT),
+      ),
       showMiniPlayer: miniOpacity > 0.08,
       showExpandedSheet:
-          sheetPresentationOpacity > 0.08 && lerp(a.sheetMotionT, b.sheetMotionT) > 0.001,
-      showMorphLayer: lerp(a.handoffT, b.handoffT) > 0.02,
+          sheetPresentationOpacity > 0.08 &&
+          lerp(a.sheetMotionT, b.sheetMotionT) > 0.001,
+      showMorphLayer: handoffT > 0.02,
     );
   }
 

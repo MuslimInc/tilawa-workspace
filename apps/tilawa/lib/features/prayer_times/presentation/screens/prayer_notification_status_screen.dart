@@ -435,6 +435,8 @@ class _LocationBadge extends StatelessWidget {
       locationName: locationName,
       l10n: context.l10n,
     );
+    final double badgeHeight =
+        tokens.spaceTiny * 2 + (theme.textTheme.labelSmall?.fontSize ?? 12);
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -443,7 +445,12 @@ class _LocationBadge extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(100),
+        borderRadius: BorderRadius.circular(
+          tokens.resolveRadius(
+            family: TilawaRadiusFamily.pill,
+            height: badgeHeight,
+          ),
+        ),
         border: Border.all(
           color: colorScheme.outlineVariant.withValues(
             alpha: tokens.opacityMedium,

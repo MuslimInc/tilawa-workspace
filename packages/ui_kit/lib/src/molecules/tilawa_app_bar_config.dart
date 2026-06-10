@@ -16,10 +16,10 @@ enum TilawaAppBarSurface {
 
 /// Default constructor values for Tilawa app bars.
 abstract final class TilawaAppBarConfig {
-  /// Pinterest-style catalog screens (Reciters, Settings, lists).
+  /// Pinterest-style catalog screens (browsing/list surfaces).
   static const TilawaAppBarSurface surface = TilawaAppBarSurface.parchment;
 
-  /// Left-aligned titles in catalog chrome (matches Reciters header).
+  /// Left-aligned titles in catalog chrome.
   static const bool centerTitle = false;
   static const bool automaticallyImplyLeading = true;
   static const bool showLeadingControlBackground = false;
@@ -48,7 +48,7 @@ abstract final class TilawaAppBarConfig {
         theme.tokens.spaceMedium * 2;
   }
 
-  /// Insets for [TilawaCatalogAppBar] and catalog search slots (Reciters).
+  /// Insets for [TilawaCatalogAppBar] and catalog search slots.
   static EdgeInsets catalogChromePadding(TilawaDesignTokens tokens) {
     return EdgeInsets.fromLTRB(
       tokens.spaceMedium,
@@ -106,7 +106,7 @@ abstract final class TilawaAppBarConfig {
     return _ceilToDevicePixels(context, raw);
   }
 
-  /// Title + search + min-height filter row (Reciters catalog header).
+  /// Title + search + min-height filter row in catalog headers.
   static double catalogTitleSearchAndFilterRowHeight(BuildContext context) {
     final TilawaDesignTokens tokens = Theme.of(context).tokens;
     final double searchHeight =
@@ -304,8 +304,12 @@ abstract final class TilawaAppBarChrome {
   }
 
   static BorderRadius toolbarIconBorderRadius(ThemeData theme) {
+    final tokens = theme.tokens;
     return BorderRadius.circular(
-      theme.componentTokens.iconActionButton.borderRadius,
+      tokens.resolveRadius(
+        family: TilawaRadiusFamily.pill,
+        height: tokens.minInteractiveDimension,
+      ),
     );
   }
 

@@ -36,7 +36,6 @@ class TilawaMetadataChip extends StatelessWidget {
       foregroundColor: color,
       borderColor: borderColor ?? componentTokens.defaultBorderColor,
       padding: componentTokens.inlinePadding,
-      borderRadius: componentTokens.roundedRadius,
       iconSize: designTokens.iconSizeSmall,
       textStyle: theme.textTheme.labelMedium?.copyWith(
         color: color,

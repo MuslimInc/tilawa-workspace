@@ -13,7 +13,7 @@ class QuranPlayerShellChrome {
     required this.bottomNavBarHeight,
     required this.isKeyboardOpen,
     required this.isAudioBindingDeferred,
-    required     this.hostAbsorbsBottomSafeArea,
+    required this.hostAbsorbsBottomSafeArea,
   });
 
   final double bottomNavBarHeight;
@@ -216,8 +216,7 @@ abstract final class QuranPlayerLayoutInsets {
   static BuildContext mediaQueryContext(BuildContext context) =>
       AppRouter.navigatorKey.currentContext ?? context;
 
-  /// Height from the screen bottom through the phone shell bottom nav, plus a
-  /// small gap so the mini player sits just above the bar.
+  /// Height from the screen bottom through the phone shell bottom nav.
   static double phoneShellBottomReserve(BuildContext context) {
     final TilawaAdaptiveShellTokens shellTokens = Theme.of(
       context,
@@ -227,7 +226,7 @@ abstract final class QuranPlayerLayoutInsets {
       textScaler,
       context.systemBottomSafeArea,
     );
-    return rowHeight + shellTokens.bottomNavVerticalMargin;
+    return rowHeight;
   }
 
   /// Bottom inset on routes without the shell nav (e.g. `/reciter/:id`).
@@ -287,7 +286,7 @@ abstract final class QuranPlayerLayoutInsets {
 
     final double navColumn = phoneNavVisible ? shellReserve : 0;
     if (navColumn > 0) {
-      return navColumn + Theme.of(context).tokens.spaceSmall;
+      return navColumn;
     }
     if (hostAbsorbsBottomSafeArea && hostBottomNavBarHeight <= 0) {
       return 0;

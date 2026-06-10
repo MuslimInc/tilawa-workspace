@@ -78,8 +78,11 @@ void main() {
         final double sheetTop =
             screenHeight - (anchorHeight + (screenHeight - anchorHeight) * p);
         final double fingerY = 692 - p * travel;
-        expect(sheetTop, closeTo(fingerY, 0.01),
-            reason: 'sheet top should equal finger Y at progress=$p');
+        expect(
+          sheetTop,
+          closeTo(fingerY, 0.01),
+          reason: 'sheet top should equal finger Y at progress=$p',
+        );
       }
     });
   });
@@ -88,22 +91,22 @@ void main() {
     test('strong upward fling expands regardless of position', () {
       final PlayerExpandSnapTarget target =
           QuranPlayerExpandPhysics.resolveSnap(
-        progress: 0.1,
-        primaryVelocity: -600,
-        progressThreshold: 0.45,
-        velocityThreshold: 500,
-      );
+            progress: 0.1,
+            primaryVelocity: -600,
+            progressThreshold: 0.45,
+            velocityThreshold: 500,
+          );
       expect(target, PlayerExpandSnapTarget.expand);
     });
 
     test('strong downward fling collapses', () {
       final PlayerExpandSnapTarget target =
           QuranPlayerExpandPhysics.resolveSnap(
-        progress: 0.9,
-        primaryVelocity: 400,
-        progressThreshold: 0.45,
-        velocityThreshold: 500,
-      );
+            progress: 0.9,
+            primaryVelocity: 400,
+            progressThreshold: 0.45,
+            velocityThreshold: 500,
+          );
       expect(target, PlayerExpandSnapTarget.collapse);
     });
 
@@ -132,12 +135,12 @@ void main() {
     test('downward net drag collapses even above progress threshold', () {
       final PlayerExpandSnapTarget target =
           QuranPlayerExpandPhysics.resolveSnap(
-        progress: 0.846,
-        primaryVelocity: 0,
-        progressThreshold: 0.45,
-        velocityThreshold: 500,
-        netDragDy: 120,
-      );
+            progress: 0.846,
+            primaryVelocity: 0,
+            progressThreshold: 0.45,
+            velocityThreshold: 500,
+            netDragDy: 120,
+          );
       expect(target, PlayerExpandSnapTarget.collapse);
     });
   });
@@ -146,9 +149,9 @@ void main() {
     test('mini and expanded overlap mid-transition (no white gap)', () {
       final PlayerExpandTransitionMetrics mid =
           PlayerExpandTransitionMetrics.compute(
-        progress: 0.20,
-        miniPlayerHeight: 72,
-      );
+            progress: 0.20,
+            miniPlayerHeight: 72,
+          );
       expect(
         mid.miniOpacity + mid.expandedOpacity,
         greaterThan(0.15),
@@ -159,25 +162,25 @@ void main() {
     test('queue chrome appears only near fully expanded', () {
       final PlayerExpandTransitionMetrics mid =
           PlayerExpandTransitionMetrics.compute(
-        progress: 0.5,
-        miniPlayerHeight: 72,
-      );
+            progress: 0.5,
+            miniPlayerHeight: 72,
+          );
       expect(mid.queueChromeT, 0);
 
       final PlayerExpandTransitionMetrics full =
           PlayerExpandTransitionMetrics.compute(
-        progress: 1,
-        miniPlayerHeight: 72,
-      );
+            progress: 1,
+            miniPlayerHeight: 72,
+          );
       expect(full.queueChromeT, closeTo(1, 0.01));
     });
 
     test('collapsed shows mini hides expanded', () {
       final PlayerExpandTransitionMetrics collapsed =
           PlayerExpandTransitionMetrics.compute(
-        progress: 0,
-        miniPlayerHeight: 72,
-      );
+            progress: 0,
+            miniPlayerHeight: 72,
+          );
       expect(collapsed.showMiniPlayer, isTrue);
       expect(collapsed.showExpandedSheet, isFalse);
     });
@@ -185,9 +188,9 @@ void main() {
     test('sheet presentation fades during expand crossfade band', () {
       final PlayerExpandTransitionMetrics mid =
           PlayerExpandTransitionMetrics.compute(
-        progress: 0.20,
-        miniPlayerHeight: 72,
-      );
+            progress: 0.20,
+            miniPlayerHeight: 72,
+          );
       expect(
         mid.sheetPresentationOpacity,
         lessThan(mid.expandedOpacity),
@@ -195,38 +198,36 @@ void main() {
       expect(mid.sheetPresentationOpacity, lessThan(0.35));
     });
 
-    test('audit: collapse drag uses collapse-biased metrics not expand-forward', () {
+    test('interactive collapse hides mini while morph handoff is active', () {
       final PlayerExpandTransitionMetrics expandForwardDrag =
           PlayerExpandTransitionMetrics.compute(
-        progress: 0.70,
-        miniPlayerHeight: 72,
-        interactiveDrag: true,
-        collapseBiased: false,
-      );
+            progress: 0.70,
+            miniPlayerHeight: 72,
+            interactiveDrag: true,
+            collapseBiased: false,
+          );
       final PlayerExpandTransitionMetrics collapseDrag =
           PlayerExpandTransitionMetrics.compute(
-        progress: 0.70,
-        miniPlayerHeight: 72,
-        interactiveDrag: true,
-        collapseBiased: true,
-        interactiveCollapseAnchor: 1,
-      );
+            progress: 0.70,
+            miniPlayerHeight: 72,
+            interactiveDrag: true,
+            collapseBiased: true,
+            interactiveCollapseAnchor: 1,
+          );
 
       expect(expandForwardDrag.showMiniPlayer, isFalse);
-      expect(collapseDrag.showMiniPlayer, isTrue);
-      expect(
-        collapseDrag.miniOpacity,
-        greaterThan(expandForwardDrag.miniOpacity),
-      );
+      expect(collapseDrag.showMorphLayer, isTrue);
+      expect(collapseDrag.showMiniPlayer, isFalse);
+      expect(collapseDrag.miniOpacity, 0);
     });
 
     test('interactive drag tracks finger linearly at 0.811', () {
       final PlayerExpandTransitionMetrics mid =
           PlayerExpandTransitionMetrics.compute(
-        progress: 0.811,
-        miniPlayerHeight: 72,
-        interactiveDrag: true,
-      );
+            progress: 0.811,
+            miniPlayerHeight: 72,
+            interactiveDrag: true,
+          );
       expect(mid.sheetMotionT, closeTo(0.811, 0.01));
       expect(mid.sheetPresentationOpacity, greaterThan(0.65));
       expect(mid.sheetPresentationOpacity, lessThan(0.95));
@@ -237,12 +238,52 @@ void main() {
       expect(mid.showMorphLayer, isFalse);
     });
 
+    test('high-expanded collapse keeps sheet and queue chrome filled', () {
+      for (final double progress in <double>[0.99, 0.95, 0.90]) {
+        final PlayerExpandTransitionMetrics nearExpanded =
+            PlayerExpandTransitionMetrics.compute(
+              progress: progress,
+              miniPlayerHeight: 72,
+              interactiveDrag: true,
+              collapseBiased: true,
+              interactiveCollapseAnchor: 1,
+            );
+
+        expect(nearExpanded.sheetMotionT, 1, reason: 'progress=$progress');
+        expect(nearExpanded.queueChromeT, 1, reason: 'progress=$progress');
+        expect(
+          nearExpanded.showExpandedSheet,
+          isTrue,
+          reason: 'progress=$progress',
+        );
+        expect(
+          nearExpanded.showMiniPlayer,
+          isFalse,
+          reason: 'progress=$progress',
+        );
+      }
+    });
+
+    test('collapse resumes finger tracking below high-expanded band', () {
+      final PlayerExpandTransitionMetrics belowBand =
+          PlayerExpandTransitionMetrics.compute(
+            progress: 0.89,
+            miniPlayerHeight: 72,
+            interactiveDrag: true,
+            collapseBiased: true,
+            interactiveCollapseAnchor: 1,
+          );
+
+      expect(belowBand.sheetMotionT, closeTo(0.89, 0.01));
+      expect(belowBand.queueChromeT, lessThan(1));
+    });
+
     test('expand-forward keeps feed visible — sheet not opaque at 0.5', () {
       final PlayerExpandTransitionMetrics mid =
           PlayerExpandTransitionMetrics.compute(
-        progress: 0.5,
-        miniPlayerHeight: 72,
-      );
+            progress: 0.5,
+            miniPlayerHeight: 72,
+          );
       expect(mid.sheetPresentationOpacity, lessThan(0.55));
       expect(mid.scrimOpacity, greaterThan(0.1));
       expect(mid.scrimOpacity, lessThan(0.45));
@@ -252,10 +293,10 @@ void main() {
     test('collapse start keeps sheet visible at progress 1', () {
       final PlayerExpandTransitionMetrics start =
           PlayerExpandTransitionMetrics.compute(
-        progress: 1,
-        miniPlayerHeight: 72,
-        collapseBiased: true,
-      );
+            progress: 1,
+            miniPlayerHeight: 72,
+            collapseBiased: true,
+          );
       expect(start.sheetPresentationOpacity, closeTo(1, 0.01));
       expect(start.showExpandedSheet, isTrue);
     });
@@ -263,10 +304,10 @@ void main() {
     test('collapse route dims sheet with progress', () {
       final PlayerExpandTransitionMetrics mid =
           PlayerExpandTransitionMetrics.compute(
-        progress: 0.30,
-        miniPlayerHeight: 72,
-        collapseBiased: true,
-      );
+            progress: 0.30,
+            miniPlayerHeight: 72,
+            collapseBiased: true,
+          );
       expect(mid.sheetPresentationOpacity, lessThan(0.25));
       expect(mid.handoffT, greaterThan(0.2));
       expect(mid.showMorphLayer, isTrue);
@@ -275,11 +316,11 @@ void main() {
     test('footer collapse after route pop shows mini before sheet ends', () {
       final PlayerExpandTransitionMetrics mid =
           PlayerExpandTransitionMetrics.compute(
-        progress: 0.70,
-        miniPlayerHeight: 72,
-        collapseBiased: true,
-        heroHandoff: false,
-      );
+            progress: 0.70,
+            miniPlayerHeight: 72,
+            collapseBiased: true,
+            heroHandoff: false,
+          );
       expect(mid.showMiniPlayer, isTrue);
       expect(mid.miniOpacity, greaterThan(0.1));
       expect(mid.showExpandedSheet, isFalse);
@@ -288,16 +329,16 @@ void main() {
     test('footer collapse surfaces mini earlier than expand-forward', () {
       final PlayerExpandTransitionMetrics expandForward =
           PlayerExpandTransitionMetrics.compute(
-        progress: 0.70,
-        miniPlayerHeight: 72,
-      );
+            progress: 0.70,
+            miniPlayerHeight: 72,
+          );
       final PlayerExpandTransitionMetrics footerCollapse =
           PlayerExpandTransitionMetrics.compute(
-        progress: 0.70,
-        miniPlayerHeight: 72,
-        collapseBiased: true,
-        heroHandoff: false,
-      );
+            progress: 0.70,
+            miniPlayerHeight: 72,
+            collapseBiased: true,
+            heroHandoff: false,
+          );
       expect(
         footerCollapse.miniOpacity,
         greaterThan(expandForward.miniOpacity),
@@ -308,9 +349,9 @@ void main() {
     test('settled expanded keeps full sheet opacity', () {
       final PlayerExpandTransitionMetrics settled =
           PlayerExpandTransitionMetrics.compute(
-        progress: 0.99,
-        miniPlayerHeight: 72,
-      );
+            progress: 0.99,
+            miniPlayerHeight: 72,
+          );
       expect(settled.sheetPresentationOpacity, closeTo(1, 0.01));
       expect(settled.backdropOpacity, 0);
     });
@@ -318,10 +359,10 @@ void main() {
     test('late collapse drag clears scrim and hides expanded sheet', () {
       final PlayerExpandTransitionMetrics dragging =
           PlayerExpandTransitionMetrics.compute(
-        progress: 0.08,
-        miniPlayerHeight: 72,
-        collapseBiased: true,
-      );
+            progress: 0.08,
+            miniPlayerHeight: 72,
+            collapseBiased: true,
+          );
       expect(dragging.sheetPresentationOpacity, lessThan(0.08));
       expect(dragging.scrimOpacity, lessThan(0.05));
       expect(dragging.backdropOpacity, 0);
@@ -354,25 +395,28 @@ void main() {
     test('stage and mini identity fade during handoff', () {
       final PlayerExpandTransitionMetrics mid =
           PlayerExpandTransitionMetrics.compute(
-        progress: 0.35,
-        miniPlayerHeight: 72,
-      );
+            progress: 0.35,
+            miniPlayerHeight: 72,
+          );
       expect(mid.showMorphLayer, isTrue);
       expect(mid.stageChromeOpacity, lessThan(0.4));
       expect(mid.miniIdentityOpacity, lessThan(0.4));
     });
 
-    test('expanded opacity eases in between expandedStart and expandedFull', () {
-      final PlayerExpandTransitionMetrics mid =
-          PlayerExpandTransitionMetrics.compute(
-        progress: 0.3,
-        miniPlayerHeight: 72,
-        heroHandoff: true,
-      );
-      expect(mid.showExpandedSheet, isTrue);
-      expect(mid.sheetPresentationOpacity, greaterThan(0));
-      expect(mid.sheetPresentationOpacity, lessThan(1));
-    });
+    test(
+      'expanded opacity eases in between expandedStart and expandedFull',
+      () {
+        final PlayerExpandTransitionMetrics mid =
+            PlayerExpandTransitionMetrics.compute(
+              progress: 0.3,
+              miniPlayerHeight: 72,
+              heroHandoff: true,
+            );
+        expect(mid.showExpandedSheet, isTrue);
+        expect(mid.sheetPresentationOpacity, greaterThan(0));
+        expect(mid.sheetPresentationOpacity, lessThan(1));
+      },
+    );
   });
 
   group('QuranPlayerExpandPhysics edge cases', () {

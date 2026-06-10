@@ -15,13 +15,9 @@ class ReciterCard extends StatelessWidget {
   const ReciterCard({
     super.key,
     required this.reciter,
-    this.favoritesOnlyContext = false,
   });
 
   final ReciterEntity reciter;
-
-  /// When true, hides the per-row favorite control (favorites filter / list).
-  final bool favoritesOnlyContext;
 
   void _openReciterDetails(BuildContext context) {
     ReciterDetailsRoute(
@@ -58,22 +54,19 @@ class ReciterCard extends StatelessWidget {
                   ),
                   Expanded(
                     child: Padding(
-                      padding: favoritesOnlyContext
-                          ? EdgeInsets.zero
-                          : EdgeInsetsDirectional.only(
-                              end: tokens.spaceExtraLarge,
-                            ),
+                      padding: EdgeInsetsDirectional.only(
+                        end: tokens.spaceExtraLarge,
+                      ),
                       child: _ReciterInfo(reciter: reciter),
                     ),
                   ),
                 ],
               ),
-              if (!favoritesOnlyContext)
-                PositionedDirectional(
-                  top: 0,
-                  end: 0,
-                  child: _FavoriteButton(reciter: reciter),
-                ),
+              PositionedDirectional(
+                top: 0,
+                end: 0,
+                child: _FavoriteButton(reciter: reciter),
+              ),
             ],
           ),
         ),

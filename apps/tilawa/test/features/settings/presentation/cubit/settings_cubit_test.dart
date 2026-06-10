@@ -213,6 +213,18 @@ void main() {
       ],
     );
 
+    blocTest<SettingsCubit, SettingsState>(
+      'setShowRecitersAlphabetIndex updates state',
+      build: () => cubit,
+      act: (cubit) => cubit.setShowRecitersAlphabetIndex(false),
+      expect: () => [
+        const SettingsState(
+          showRecitersAlphabetIndex: false,
+          appInfo: testAppInfo,
+        ),
+      ],
+    );
+
     group('Serialization', () {
       test('fromJson returns correct state', () {
         expect(
@@ -220,10 +232,12 @@ void main() {
             'maxConcurrentDownloads': 5,
             'restorePlaybackState': true,
             'isSleepTimerEnabled': false,
+            'showRecitersAlphabetIndex': false,
           }),
           const SettingsState(
             maxConcurrentDownloads: 5,
             isSleepTimerEnabled: false,
+            showRecitersAlphabetIndex: false,
           ),
         );
       });
@@ -242,6 +256,7 @@ void main() {
           'isSleepTimerEnabled': true,
           'prefetchQuranAssetsOnWifiOnly': true,
           'showPrayerTimesAlertChipLabels': true,
+          'showRecitersAlphabetIndex': true,
         });
       });
 

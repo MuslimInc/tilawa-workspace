@@ -117,10 +117,7 @@ class TilawaSettingsTile extends StatelessWidget {
                     FluentIcons.chevron_right_20_regular,
                     size: tokens.tileTrailingSize,
                     color: colorScheme.onSurfaceVariant.withValues(
-                      alpha: (tokens.tileTrailingOpacity * 1.35).clamp(
-                        0.45,
-                        0.72,
-                      ),
+                      alpha: tokens.tileTrailingOpacity,
                     ),
                   ),
               onTap: onTap,
@@ -270,11 +267,14 @@ class _SettingsLeadingIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final designTokens = Theme.of(context).tokens;
     return Container(
       padding: tokens.tileIconPadding,
       decoration: BoxDecoration(
         color: color.withValues(alpha: tokens.tileIconContainerOpacity),
-        borderRadius: BorderRadius.circular(tokens.tileIconBorderRadius),
+        borderRadius: BorderRadius.circular(
+          designTokens.resolveRadius(family: TilawaRadiusFamily.decorative),
+        ),
       ),
       child: Icon(icon, color: color, size: tokens.tileIconSize),
     );

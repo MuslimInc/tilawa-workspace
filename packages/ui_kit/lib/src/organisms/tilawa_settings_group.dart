@@ -40,13 +40,17 @@ class TilawaSettingsGroupPanel extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final tokens = theme.componentTokens.settingsGroup;
+    final designTokens = theme.tokens;
+    final double groupRadius = designTokens.resolveRadius(
+      family: TilawaRadiusFamily.chrome,
+    );
 
     return SizedBox(
       width: double.infinity,
       child: Container(
         decoration: BoxDecoration(
           color: tokens.groupSurfaceColor,
-          borderRadius: BorderRadius.circular(tokens.groupBorderRadius),
+          borderRadius: BorderRadius.circular(groupRadius),
           border: Border.all(
             color: tokens.groupContainerBorderColor,
             width: tokens.tileDividerThickness,
@@ -77,7 +81,7 @@ class TilawaSettingsGroupPanel extends StatelessWidget {
                 borderRadius: tilawaSettingsGroupRowBorderRadius(
                   index: i,
                   rowCount: children.length,
-                  radius: tokens.groupBorderRadius,
+                  radius: groupRadius,
                 ),
                 child: children[i],
               ),

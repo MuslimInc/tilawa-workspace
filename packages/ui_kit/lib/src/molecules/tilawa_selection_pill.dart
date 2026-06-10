@@ -84,7 +84,6 @@ class TilawaSelectionPill extends StatelessWidget {
                 : theme.colorScheme.outline.withValues(
                     alpha: designTokens.opacitySubtle,
                   )),
-      borderRadius: componentTokens.pillRadius,
       padding: componentTokens.padding,
       showShadow: selected && elevatedWhenSelected && !isCatalog,
       shadowColor: background,
