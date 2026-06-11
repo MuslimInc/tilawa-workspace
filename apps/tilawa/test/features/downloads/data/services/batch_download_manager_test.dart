@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/features/downloads/data/models/download_progress.dart';
@@ -373,6 +374,58 @@ void main() {
         ),
       ).called(1);
     });
+
+    test(
+      'should show completed when all items reach 100% before status event',
+      () async {
+        const batchId = 'batch-1';
+        manager.startBatch(
+          batchId: batchId,
+          title: 'Test',
+          downloadIds: ['id1', 'id2'],
+        );
+
+        clearInteractions(mockNotificationService);
+
+        progressController.add(
+          const DownloadProgress(
+            id: 'id1',
+            progress: 1.0,
+            downloadedSize: 1000,
+            fileSize: 1000,
+            status: DownloadStatus.downloading,
+          ),
+        );
+
+        await Future.delayed(const Duration(milliseconds: 10));
+
+        progressController.add(
+          const DownloadProgress(
+            id: 'id2',
+            progress: 1.0,
+            downloadedSize: 1000,
+            fileSize: 1000,
+            status: DownloadStatus.downloading,
+          ),
+        );
+
+        await Future.delayed(const Duration(milliseconds: 10));
+
+        verify(
+          mockNotificationService.showBatchDownloadProgress(
+            batchId: batchId,
+            title: 'Test',
+            progress: 100,
+            completedCount: 2,
+            totalCount: 2,
+            status: DownloadStatus.completed,
+            progressMessage: anyNamed('progressMessage'),
+            completeMessage: anyNamed('completeMessage'),
+            failedMessage: anyNamed('failedMessage'),
+          ),
+        ).called(1);
+      },
+    );
 
     test('should increment completed count when item completes', () async {
       // Arrange
@@ -796,6 +849,319 @@ void main() {
 
       // Assert
       verify(mockPrefs.remove('batch_downloads_data')).called(1);
+    });
+
+    test('should restore counters from persisted item_progress map', () async {
+      final Map<String, dynamic> batchData = {
+        'batch-1': {
+          'id': 'batch-1',
+          'title': 'Restored Batch',
+          'item_ids': ['id1', 'id2'],
+          'total_items': 2,
+          'reciter_name': 'Reciter A',
+          'item_progress': {'id1': 100, 'id2': -1},
+        },
+      };
+
+      when(
+        mockPrefs.getString('batch_downloads_data'),
+      ).thenAnswer((_) async => jsonEncode(batchData));
+
+      when(
+        mockDownloadService.getDownloadProgress(any),
+      ).thenAnswer((_) async => null);
+
+      await manager.initialize();
+
+      verifyNever(
+        mockNotificationService.showBatchDownloadProgress(
+          batchId: anyNamed('batchId'),
+          title: anyNamed('title'),
+          progress: anyNamed('progress'),
+          completedCount: anyNamed('completedCount'),
+          totalCount: anyNamed('totalCount'),
+          status: anyNamed('status'),
+          progressMessage: anyNamed('progressMessage'),
+          completeMessage: anyNamed('completeMessage'),
+          failedMessage: anyNamed('failedMessage'),
+        ),
+      );
+    });
+
+    test('should swallow persistence errors when saving batches', () async {
+      when(mockPrefs.setString(any, any)).thenThrow(Exception('disk full'));
+
+      expect(
+        () => manager.startBatch(
+          batchId: 'batch-1',
+          title: 'New Batch',
+          downloadIds: ['id1'],
+        ),
+        returnsNormally,
+      );
+    });
+  });
+
+  group('BatchDownloadManager - initialization errors', () {
+    test('should swallow corrupt persisted batch data', () async {
+      when(
+        mockPrefs.getString('batch_downloads_data'),
+      ).thenAnswer((_) async => 'not-json');
+
+      await manager.initialize();
+
+      verifyNever(
+        mockNotificationService.showBatchDownloadProgress(
+          batchId: anyNamed('batchId'),
+          title: anyNamed('title'),
+          progress: anyNamed('progress'),
+          completedCount: anyNamed('completedCount'),
+          totalCount: anyNamed('totalCount'),
+          status: anyNamed('status'),
+          progressMessage: anyNamed('progressMessage'),
+          completeMessage: anyNamed('completeMessage'),
+          failedMessage: anyNamed('failedMessage'),
+        ),
+      );
+    });
+  });
+
+  group('BatchDownloadManager - lifecycle', () {
+    test('dispose cancels subscription and clears active batches', () async {
+      manager.startBatch(
+        batchId: 'batch-1',
+        title: 'Test',
+        downloadIds: ['id1'],
+      );
+
+      await manager.dispose();
+
+      clearInteractions(mockNotificationService);
+      progressController.add(
+        const DownloadProgress(
+          id: 'id1',
+          progress: 0.5,
+          downloadedSize: 500,
+          fileSize: 1000,
+          status: DownloadStatus.downloading,
+        ),
+      );
+
+      await Future.delayed(const Duration(milliseconds: 10));
+
+      verifyNever(
+        mockNotificationService.showBatchDownloadProgress(
+          batchId: anyNamed('batchId'),
+          title: anyNamed('title'),
+          progress: anyNamed('progress'),
+          completedCount: anyNamed('completedCount'),
+          totalCount: anyNamed('totalCount'),
+          status: anyNamed('status'),
+          progressMessage: anyNamed('progressMessage'),
+          completeMessage: anyNamed('completeMessage'),
+          failedMessage: anyNamed('failedMessage'),
+        ),
+      );
+    });
+
+    test('removes completed batch after delay and persists empty state', () {
+      fakeAsync((async) {
+        manager.startBatch(
+          batchId: 'batch-1',
+          title: 'Test',
+          downloadIds: ['id1'],
+        );
+
+        clearInteractions(mockPrefs);
+
+        progressController.add(
+          const DownloadProgress(
+            id: 'id1',
+            progress: 1.0,
+            downloadedSize: 1000,
+            fileSize: 1000,
+            status: DownloadStatus.completed,
+          ),
+        );
+
+        async.elapse(const Duration(seconds: 5));
+        async.flushMicrotasks();
+
+        verify(mockPrefs.remove('batch_downloads_data')).called(1);
+      });
+    });
+  });
+
+  group('BatchDownloadManager - counter edge cases', () {
+    test('should adjust counters when a failed item resumes downloading', () async {
+      manager.startBatch(
+        batchId: 'batch-1',
+        title: 'Test',
+        downloadIds: ['id1', 'id2'],
+      );
+
+      clearInteractions(mockNotificationService);
+
+      progressController.add(
+        const DownloadProgress(
+          id: 'id1',
+          progress: 0.5,
+          downloadedSize: 500,
+          fileSize: 1000,
+          status: DownloadStatus.failed,
+        ),
+      );
+
+      await Future.delayed(const Duration(milliseconds: 10));
+
+      progressController.add(
+        const DownloadProgress(
+          id: 'id1',
+          progress: 0.25,
+          downloadedSize: 250,
+          fileSize: 1000,
+          status: DownloadStatus.downloading,
+        ),
+      );
+
+      await Future.delayed(const Duration(milliseconds: 10));
+
+      verify(
+        mockNotificationService.showBatchDownloadProgress(
+          batchId: 'batch-1',
+          title: 'Test',
+          progress: 12,
+          completedCount: 0,
+          totalCount: 2,
+          status: DownloadStatus.downloading,
+          progressMessage: anyNamed('progressMessage'),
+          completeMessage: anyNamed('completeMessage'),
+          failedMessage: anyNamed('failedMessage'),
+        ),
+      ).called(1);
+    });
+
+    test('should recompute cancelled count from persisted item_progress', () async {
+      final Map<String, dynamic> batchData = {
+        'batch-1': {
+          'id': 'batch-1',
+          'title': 'Restored Batch',
+          'item_ids': ['id1', 'id2'],
+          'total_items': 2,
+          'item_progress': {'id1': -2, 'id2': 100},
+        },
+      };
+
+      when(
+        mockPrefs.getString('batch_downloads_data'),
+      ).thenAnswer((_) async => jsonEncode(batchData));
+
+      when(
+        mockDownloadService.getDownloadProgress(any),
+      ).thenAnswer((_) async => null);
+
+      await manager.initialize();
+
+      verifyNever(
+        mockNotificationService.showBatchDownloadProgress(
+          batchId: anyNamed('batchId'),
+          title: anyNamed('title'),
+          progress: anyNamed('progress'),
+          completedCount: anyNamed('completedCount'),
+          totalCount: anyNamed('totalCount'),
+          status: anyNamed('status'),
+          progressMessage: anyNamed('progressMessage'),
+          completeMessage: anyNamed('completeMessage'),
+          failedMessage: anyNamed('failedMessage'),
+        ),
+      );
+    });
+
+    test('should decrement completed count when a finished item resumes', () async {
+      manager.startBatch(
+        batchId: 'batch-1',
+        title: 'Test',
+        downloadIds: ['id1', 'id2'],
+      );
+
+      clearInteractions(mockNotificationService);
+
+      progressController.add(
+        const DownloadProgress(
+          id: 'id1',
+          progress: 1.0,
+          downloadedSize: 1000,
+          fileSize: 1000,
+          status: DownloadStatus.completed,
+        ),
+      );
+
+      await Future.delayed(const Duration(milliseconds: 10));
+
+      progressController.add(
+        const DownloadProgress(
+          id: 'id1',
+          progress: 0.4,
+          downloadedSize: 400,
+          fileSize: 1000,
+          status: DownloadStatus.downloading,
+        ),
+      );
+
+      await Future.delayed(const Duration(milliseconds: 10));
+
+      verify(
+        mockNotificationService.showBatchDownloadProgress(
+          batchId: 'batch-1',
+          title: 'Test',
+          progress: 20,
+          completedCount: 0,
+          totalCount: 2,
+          status: DownloadStatus.downloading,
+          progressMessage: anyNamed('progressMessage'),
+          completeMessage: anyNamed('completeMessage'),
+          failedMessage: anyNamed('failedMessage'),
+        ),
+      ).called(1);
+    });
+
+    test('should ignore duplicate 100% downloading updates', () async {
+      manager.startBatch(
+        batchId: 'batch-1',
+        title: 'Test',
+        downloadIds: ['id1'],
+      );
+
+      clearInteractions(mockNotificationService);
+
+      const DownloadProgress atFull = DownloadProgress(
+        id: 'id1',
+        progress: 1.0,
+        downloadedSize: 1000,
+        fileSize: 1000,
+        status: DownloadStatus.downloading,
+      );
+
+      progressController.add(atFull);
+      await Future.delayed(const Duration(milliseconds: 10));
+      clearInteractions(mockNotificationService);
+
+      progressController.add(atFull);
+      await Future.delayed(const Duration(milliseconds: 10));
+
+      verifyNever(
+        mockNotificationService.showBatchDownloadProgress(
+          batchId: anyNamed('batchId'),
+          title: anyNamed('title'),
+          progress: anyNamed('progress'),
+          completedCount: anyNamed('completedCount'),
+          totalCount: anyNamed('totalCount'),
+          status: anyNamed('status'),
+          progressMessage: anyNamed('progressMessage'),
+          completeMessage: anyNamed('completeMessage'),
+          failedMessage: anyNamed('failedMessage'),
+        ),
+      );
     });
   });
 }
