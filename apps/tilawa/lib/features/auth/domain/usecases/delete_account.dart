@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../../../premium/domain/repositories/premium_repository.dart';
@@ -27,27 +28,41 @@ class DeleteAccount {
   Future<Either<Failure, void>> call() async {
     final currentUser = _authRepository.currentUser;
     if (currentUser == null) {
+      logger.d('[DeleteFirebaseUser] Usecase: not signed in, aborting');
       return const Left(ValidationFailure('Not signed in'));
     }
 
     final String userId = currentUser.id;
+    logger.d('[DeleteFirebaseUser] Usecase: start userId=$userId');
 
     try {
       // Firestore rules require an authenticated owner — clean up before
       // deleting the Firebase Auth user. Re-auth runs inside [deleteAccount]
       // only when Firebase returns requires-recent-login.
       await _syncDeviceTokenUseCase.removeCurrentTokenForUser(userId);
+      logger.d('[DeleteFirebaseUser] Usecase: device token removed');
       await _userRepository.deleteUserData(userId);
+      logger.d('[DeleteFirebaseUser] Usecase: user data deleted');
       await _premiumRepository.clearPremiumStatus();
+      logger.d('[DeleteFirebaseUser] Usecase: premium status cleared');
 
       await _authRepository.deleteAccount();
+      logger.d('[DeleteFirebaseUser] Usecase: completed successfully');
       return const Right(null);
     } on FirebaseAuthException catch (e) {
+      logger.d(
+        '[DeleteFirebaseUser] Usecase: FirebaseAuthException '
+        'code=${e.code} message=${e.message}',
+      );
       if (_isReauthCancelled(e)) {
         return const Left(UserCancelledFailure());
       }
       return Left(UnexpectedFailure(e.message ?? e.code));
     } on GoogleSignInException catch (e) {
+      logger.d(
+        '[DeleteFirebaseUser] Usecase: GoogleSignInException '
+        'code=${e.code.name} description=${e.description}',
+      );
       if (e.code == GoogleSignInExceptionCode.canceled ||
           e.code == GoogleSignInExceptionCode.interrupted ||
           e.code == GoogleSignInExceptionCode.uiUnavailable) {
@@ -55,6 +70,10 @@ class DeleteAccount {
       }
       return Left(UnexpectedFailure(e.description ?? e.code.name));
     } on PlatformException catch (e) {
+      logger.d(
+        '[DeleteFirebaseUser] Usecase: PlatformException '
+        'code=${e.code} message=${e.message} details=${e.details}',
+      );
       if (e.code == '204' ||
           (e.message?.contains('No credentials available') ?? false) ||
           (e.message?.contains('Login failed') ?? false)) {
@@ -62,6 +81,9 @@ class DeleteAccount {
       }
       return Left(UnexpectedFailure(e.message ?? e.code));
     } catch (e) {
+      logger.d(
+        '[DeleteFirebaseUser] Usecase: unexpected ${e.runtimeType}: $e',
+      );
       return Left(UnexpectedFailure(e.toString()));
     }
   }

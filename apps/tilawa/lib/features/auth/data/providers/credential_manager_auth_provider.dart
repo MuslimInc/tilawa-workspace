@@ -2,6 +2,7 @@ import 'package:credential_manager/credential_manager.dart' hide User;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 
 import '../../domain/entities/auth_result.dart';
 import '../../domain/entities/user_entity.dart';
@@ -124,23 +125,34 @@ class CredentialManagerAuthProvider implements AuthProviderInterface {
   Future<void> deleteAccount() async {
     final User? user = _firebaseAuth.currentUser;
     if (user == null) {
+      logger.d('[DeleteFirebaseUser] No current Firebase user; nothing to delete');
       return;
     }
 
+    logger.d('[DeleteFirebaseUser] Deleting Firebase user uid=${user.uid}');
     try {
       await user.delete();
+      logger.d('[DeleteFirebaseUser] Initial delete succeeded');
     } on FirebaseAuthException catch (e) {
+      logger.d(
+        '[DeleteFirebaseUser] Initial delete failed: '
+        'code=${e.code} message=${e.message}',
+      );
       if (e.code != 'requires-recent-login') {
         rethrow;
       }
       await _reauthenticateCurrentGoogleUser(user);
+      logger.d('[DeleteFirebaseUser] Retrying delete after re-authentication');
       await _firebaseAuth.currentUser?.delete();
+      logger.d('[DeleteFirebaseUser] Delete after re-authentication succeeded');
     }
 
     try {
       await _credentialManager.logout();
-    } catch (_) {
+      logger.d('[DeleteFirebaseUser] Credential manager logout completed');
+    } catch (e) {
       // Best-effort cleanup after account deletion.
+      logger.d('[DeleteFirebaseUser] Credential manager logout failed: $e');
     }
   }
 
@@ -148,6 +160,7 @@ class CredentialManagerAuthProvider implements AuthProviderInterface {
   /// account. Uses [getCredentials], not [CredentialManager.saveGoogleCredential],
   /// which is a sign-in/save flow and can switch accounts.
   Future<void> _reauthenticateCurrentGoogleUser(User user) async {
+    logger.d('[DeleteFirebaseUser] Re-auth: fetching saved Google credential');
     await _credentialManagerInitializer.ensureReady();
     try {
       final Credentials credentials = await _credentialManager.getCredentials(
@@ -158,6 +171,10 @@ class CredentialManagerAuthProvider implements AuthProviderInterface {
         ),
       );
       final String? idToken = credentials.googleIdTokenCredential?.idToken;
+      logger.d(
+        '[DeleteFirebaseUser] Re-auth: credential fetched '
+        'idTokenPresent=${idToken != null}',
+      );
       if (idToken == null) {
         throw FirebaseAuthException(
           code: 'requires-recent-login',
@@ -168,7 +185,12 @@ class CredentialManagerAuthProvider implements AuthProviderInterface {
       await user.reauthenticateWithCredential(
         GoogleAuthProvider.credential(idToken: idToken),
       );
-    } on CredentialException {
+      logger.d('[DeleteFirebaseUser] Re-auth: reauthenticate succeeded');
+    } on CredentialException catch (e) {
+      logger.d(
+        '[DeleteFirebaseUser] Re-auth: CredentialException '
+        'code=${e.code} message=${e.message} details=${e.details}',
+      );
       throw FirebaseAuthException(
         code: 'requires-recent-login',
         message: 'Google re-authentication was cancelled',

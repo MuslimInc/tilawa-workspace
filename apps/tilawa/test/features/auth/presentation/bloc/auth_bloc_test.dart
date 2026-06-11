@@ -144,6 +144,25 @@ void main() {
       );
 
       blocTest<AuthBloc, AuthState>(
+        'emits [loading, error] when sign in fails with code and details',
+        build: () {
+          when(mockSignInWithGoogleUseCase()).thenAnswer(
+            (_) async => const AuthResult.failure(
+              message: 'Login failed',
+              code: '204',
+              details: 'GetCredentialProviderConfigurationException: …',
+            ),
+          );
+          return authBloc;
+        },
+        act: (bloc) => bloc.add(const SignInWithGoogleEvent()),
+        expect: () => [
+          const AuthState.loading(),
+          const AuthState.error(message: 'Login failed'),
+        ],
+      );
+
+      blocTest<AuthBloc, AuthState>(
         'emits [loading, error] when sign in throws',
         build: () {
           when(
@@ -191,6 +210,16 @@ void main() {
           verify(mockSignOut()).called(1);
         },
       );
+
+      blocTest<AuthBloc, AuthState>(
+        'still emits [unauthenticated] when sign out throws',
+        build: () {
+          when(mockSignOut()).thenThrow(Exception('network'));
+          return authBloc;
+        },
+        act: (bloc) => bloc.add(const SignOutEvent()),
+        expect: () => [const AuthState.unauthenticated()],
+      );
     });
 
     group('DeleteAccountEvent', () {
@@ -224,6 +253,64 @@ void main() {
         expect: () => [
           const AuthState.loading(),
           AuthState.authenticated(user: tUser),
+        ],
+      );
+
+      blocTest<AuthBloc, AuthState>(
+        'emits [unauthenticated] when delete is cancelled but no user '
+        'was signed in',
+        build: () {
+          when(mockGetCurrentUserUseCase()).thenReturn(null);
+          when(mockDeleteAccount()).thenAnswer(
+            (_) async => const Left(UserCancelledFailure()),
+          );
+          return authBloc;
+        },
+        act: (bloc) => bloc.add(const DeleteAccountEvent()),
+        expect: () => [
+          const AuthState.loading(),
+          const AuthState.unauthenticated(),
+        ],
+      );
+
+      blocTest<AuthBloc, AuthState>(
+        'emits [loading, error, authenticated] when delete fails and the '
+        'user is still signed in',
+        build: () {
+          when(mockGetCurrentUserUseCase()).thenReturn(tUser);
+          when(mockDeleteAccount()).thenAnswer(
+            (_) async => const Left(UnexpectedFailure('boom')),
+          );
+          return authBloc;
+        },
+        seed: () => AuthState.authenticated(user: tUser),
+        act: (bloc) => bloc.add(const DeleteAccountEvent()),
+        expect: () => [
+          const AuthState.loading(),
+          const AuthState.error(message: 'boom'),
+          AuthState.authenticated(user: tUser),
+        ],
+      );
+
+      blocTest<AuthBloc, AuthState>(
+        'emits [loading, error, unauthenticated] when delete fails and the '
+        'session is gone',
+        build: () {
+          int calls = 0;
+          when(mockGetCurrentUserUseCase()).thenAnswer((_) {
+            // Signed in before the delete, gone afterwards.
+            return calls++ == 0 ? tUser : null;
+          });
+          when(mockDeleteAccount()).thenAnswer(
+            (_) async => const Left(UnexpectedFailure(null)),
+          );
+          return authBloc;
+        },
+        act: (bloc) => bloc.add(const DeleteAccountEvent()),
+        expect: () => [
+          const AuthState.loading(),
+          const AuthState.error(message: 'Unable to delete account'),
+          const AuthState.unauthenticated(),
         ],
       );
     });

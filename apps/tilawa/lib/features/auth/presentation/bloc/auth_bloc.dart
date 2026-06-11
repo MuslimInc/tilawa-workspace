@@ -65,6 +65,7 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
           emit(AuthState.error(message: message));
         },
         cancelled: () {
+          logger.d('[GoogleSignIn] cancelled by user');
           emit(const AuthState.unauthenticated());
         },
       );
@@ -93,12 +94,20 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     final UserEntity? userBeforeDelete = _getCurrentUser();
+    logger.d(
+      '[DeleteFirebaseUser] Bloc: delete requested '
+      'signedIn=${userBeforeDelete != null}',
+    );
     emit(const AuthState.loading());
 
     final result = await _deleteAccount();
 
     await result.fold(
       (failure) async {
+        logger.d(
+          '[DeleteFirebaseUser] Bloc: failed with ${failure.runtimeType} '
+          'message=${failure.message}',
+        );
         if (failure is UserCancelledFailure) {
           if (userBeforeDelete != null) {
             emit(AuthState.authenticated(user: userBeforeDelete));
@@ -124,6 +133,7 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
         }
       },
       (_) async {
+        logger.d('[DeleteFirebaseUser] Bloc: account deleted, signing out');
         emit(const AuthState.unauthenticated());
       },
     );
