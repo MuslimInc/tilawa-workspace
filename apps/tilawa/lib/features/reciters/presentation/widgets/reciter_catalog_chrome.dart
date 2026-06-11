@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-/// Neutral Pinterest chrome for Reciter details (white / #E5E5E0 / black).
+/// Neutral Pinterest chrome for Reciter details (white / #E5E7EB / black).
 ///
 /// Brand [ColorScheme.primary] is reserved for global CTAs (bottom nav, hearts);
 /// surah rows and moshaf picker use these tokens instead.

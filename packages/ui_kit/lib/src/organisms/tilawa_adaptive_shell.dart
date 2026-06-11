@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../foundation/breakpoints.dart';
+import '../foundation/color_scheme_ext.dart';
 import '../foundation/component_tokens.dart';
 import '../foundation/content_bounds.dart';
 import '../foundation/design_tokens.dart';
@@ -401,8 +402,11 @@ class _BottomNavBar extends StatelessWidget {
                         showUnselectedLabels: true,
                         backgroundColor: Colors.transparent,
                         elevation: 0,
+                        // Labels render at caption size, so the accent must
+                        // clear the 4.5:1 small-text threshold; icons keep
+                        // [ColorScheme.primary] via [selectedIconTheme] (3:1).
                         selectedItemColor: hasSelection
-                            ? theme.colorScheme.primary
+                            ? theme.colorScheme.primarySmallLabel
                             : theme.colorScheme.onSurfaceVariant,
                         unselectedItemColor: theme.colorScheme.onSurfaceVariant,
                         selectedLabelStyle: selectedLabelStyle,

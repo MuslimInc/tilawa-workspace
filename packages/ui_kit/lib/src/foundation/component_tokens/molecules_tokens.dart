@@ -369,6 +369,26 @@ class TilawaIconActionButtonTokens {
   }
 }
 
+/// Pinterest-style catalog filter selected colours (chips, tab indicators).
+///
+/// Light: inverted ink (`onSurface` fill, `surface` label). Dark: lifted
+/// green-gray tier with a subtle sage wash — not a full white pill.
+Color catalogFilterSelectedBackground(ColorScheme colorScheme) {
+  if (colorScheme.brightness == Brightness.light) {
+    return colorScheme.onSurface;
+  }
+  return Color.alphaBlend(
+    colorScheme.primary.withValues(alpha: 0.16),
+    colorScheme.surfaceContainerHighest,
+  );
+}
+
+Color catalogFilterSelectedForeground(ColorScheme colorScheme) {
+  return colorScheme.brightness == Brightness.light
+      ? colorScheme.surface
+      : colorScheme.onSurface;
+}
+
 @immutable
 class TilawaChipTokens {
   const TilawaChipTokens({
@@ -376,6 +396,8 @@ class TilawaChipTokens {
     required this.inlinePadding,
     required this.backgroundColor,
     required this.defaultBorderColor,
+    required this.catalogSelectedBackgroundColor,
+    required this.catalogSelectedForegroundColor,
     required this.selectionSelectedBackgroundColor,
     required this.selectionUnselectedBackgroundColor,
     required this.contentGap,
@@ -395,6 +417,10 @@ class TilawaChipTokens {
 
   /// Default stroke for [TilawaChip] / [TilawaMetadataChip] ([TilawaDesignTokens.opacityMedium] on [ColorScheme.outlineVariant]).
   final Color defaultBorderColor;
+
+  /// Catalog [TilawaSelectionPillStyle.catalog] selected fill/label.
+  final Color catalogSelectedBackgroundColor;
+  final Color catalogSelectedForegroundColor;
 
   final Color selectionSelectedBackgroundColor;
   final Color selectionUnselectedBackgroundColor;
@@ -428,6 +454,12 @@ class TilawaChipTokens {
       inlinePadding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       backgroundColor: backgroundColor,
       defaultBorderColor: defaultBorderColor,
+      catalogSelectedBackgroundColor: catalogFilterSelectedBackground(
+        colorScheme,
+      ),
+      catalogSelectedForegroundColor: catalogFilterSelectedForeground(
+        colorScheme,
+      ),
       selectionSelectedBackgroundColor: selectionSelectedBackgroundColor,
       selectionUnselectedBackgroundColor: selectionUnselectedBackgroundColor,
       contentGap: 8,
@@ -474,6 +506,8 @@ class TilawaChipTokens {
     EdgeInsetsGeometry? inlinePadding,
     Color? backgroundColor,
     Color? defaultBorderColor,
+    Color? catalogSelectedBackgroundColor,
+    Color? catalogSelectedForegroundColor,
     Color? selectionSelectedBackgroundColor,
     Color? selectionUnselectedBackgroundColor,
     double? contentGap,
@@ -491,6 +525,12 @@ class TilawaChipTokens {
       inlinePadding: inlinePadding ?? this.inlinePadding,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       defaultBorderColor: defaultBorderColor ?? this.defaultBorderColor,
+      catalogSelectedBackgroundColor:
+          catalogSelectedBackgroundColor ??
+          this.catalogSelectedBackgroundColor,
+      catalogSelectedForegroundColor:
+          catalogSelectedForegroundColor ??
+          this.catalogSelectedForegroundColor,
       selectionSelectedBackgroundColor:
           selectionSelectedBackgroundColor ??
           this.selectionSelectedBackgroundColor,
@@ -526,6 +566,16 @@ class TilawaChipTokens {
       defaultBorderColor: Color.lerp(
         a.defaultBorderColor,
         b.defaultBorderColor,
+        t,
+      )!,
+      catalogSelectedBackgroundColor: Color.lerp(
+        a.catalogSelectedBackgroundColor,
+        b.catalogSelectedBackgroundColor,
+        t,
+      )!,
+      catalogSelectedForegroundColor: Color.lerp(
+        a.catalogSelectedForegroundColor,
+        b.catalogSelectedForegroundColor,
         t,
       )!,
       selectionSelectedBackgroundColor: Color.lerp(
@@ -656,10 +706,7 @@ class TilawaSegmentedControlTokens {
         colorScheme.surfaceContainerHigh,
       );
     }
-    return Color.alphaBlend(
-      colorScheme.primary.withValues(alpha: 0.16),
-      colorScheme.surfaceContainerHighest,
-    );
+    return catalogFilterSelectedBackground(colorScheme);
   }
 
   static Color _containerBorderColor(ColorScheme colorScheme) {
