@@ -776,6 +776,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Unable to delete your account. Please try again.';
 
   @override
+  String get deleteAccountInProgress => 'Deleting your account...';
+
+  @override
   String get privacyPolicy => 'Privacy policy';
 
   @override

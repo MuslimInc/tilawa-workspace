@@ -972,6 +972,10 @@
     "@deleteAccountFailed": {
         "description": "Generic error when account deletion fails"
     },
+    "deleteAccountInProgress": "جارٍ حذف حسابك...",
+    "@deleteAccountInProgress": {
+        "description": "Loading message shown while account deletion is in progress"
+    },
     "privacyPolicy": "سياسة الخصوصية",
     "@privacyPolicy": {
         "description": "Privacy policy link label"
