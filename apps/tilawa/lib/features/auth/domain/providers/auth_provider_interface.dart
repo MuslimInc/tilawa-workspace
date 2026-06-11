@@ -11,7 +11,10 @@ abstract class AuthProviderInterface {
   /// Sign out from the provider
   Future<void> signOut();
 
-  /// Deletes the signed-in Firebase user, re-authenticating when required.
+  /// Prompts for Google re-auth so Firestore cleanup can run before deletion.
+  Future<void> reauthenticateForAccountDeletion();
+
+  /// Deletes the signed-in Firebase user (call after Firestore cleanup).
   Future<void> deleteAccount();
 
   /// Get the current user from the provider

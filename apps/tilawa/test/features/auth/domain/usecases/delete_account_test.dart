@@ -52,6 +52,9 @@ void main() {
     ).thenAnswer((_) async {});
     when(mockUserRepository.deleteUserData(any)).thenAnswer((_) async {});
     when(mockPremiumRepository.clearPremiumStatus()).thenAnswer((_) async {});
+    when(
+      mockAuthRepository.reauthenticateForAccountDeletion(),
+    ).thenAnswer((_) async {});
     when(mockAuthRepository.deleteAccount()).thenAnswer((_) async {});
   });
 
@@ -68,20 +71,21 @@ void main() {
     verifyNever(mockUserRepository.deleteUserData(any));
   });
 
-  test('deletes auth account then app data when signed in', () async {
+  test('reauthenticates then deletes app data before auth account', () async {
     final Either<Failure, void> result = await useCase();
 
     expect(result.isRight, isTrue);
     verifyInOrder([
-      mockAuthRepository.deleteAccount(),
+      mockAuthRepository.reauthenticateForAccountDeletion(),
       mockSyncDeviceTokenUseCase.removeCurrentTokenForUser('user-1'),
       mockUserRepository.deleteUserData('user-1'),
       mockPremiumRepository.clearPremiumStatus(),
+      mockAuthRepository.deleteAccount(),
     ]);
   });
 
   test('returns UserCancelledFailure when re-auth is cancelled', () async {
-    when(mockAuthRepository.deleteAccount()).thenThrow(
+    when(mockAuthRepository.reauthenticateForAccountDeletion()).thenThrow(
       FirebaseAuthException(
         code: 'requires-recent-login',
         message: 'Google re-authentication was cancelled',
