@@ -26,6 +26,14 @@ class FakeNotificationDispatcher implements INotificationDispatcher {
   }) {}
 
   @override
+  void registerIdRangeHandler({
+    required String serviceId,
+    required int minIdInclusive,
+    required int maxIdExclusive,
+    required NotificationHandler handler,
+  }) {}
+
+  @override
   void registerPayloadHandler({
     required String serviceId,
     required bool Function(String? payload) matcher,
