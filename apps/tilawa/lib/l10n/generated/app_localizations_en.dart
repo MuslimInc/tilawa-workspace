@@ -611,6 +611,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Available storage may not be enough for this download. Free up space if downloads fail.';
 
   @override
+  String get downloadLowStorageBlocked =>
+      'Not enough storage space to download all surahs. Free up space and try again.';
+
+  @override
   String recitationsAvailable(int count) {
     return '$count recitation(s) available';
   }

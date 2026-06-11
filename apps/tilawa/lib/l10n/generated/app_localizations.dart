@@ -1214,6 +1214,12 @@ abstract class AppLocalizations {
   /// **'Available storage may not be enough for this download. Free up space if downloads fail.'**
   String get downloadLowStorageWarning;
 
+  /// Error toast when Download All is blocked because device storage is too low
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough storage space to download all surahs. Free up space and try again.'**
+  String get downloadLowStorageBlocked;
+
   /// Number of recitations available for a reciter
   ///
   /// In en, this message translates to:

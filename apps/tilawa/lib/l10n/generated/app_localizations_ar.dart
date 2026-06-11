@@ -610,6 +610,10 @@ class AppLocalizationsAr extends AppLocalizations {
       'قد لا تكون مساحة التخزين المتاحة كافية لهذا التحميل. حرّر مساحة إذا فشل التحميل.';
 
   @override
+  String get downloadLowStorageBlocked =>
+      'لا توجد مساحة تخزين كافية لتحميل كل السور. حرّر مساحة ثم أعد المحاولة.';
+
+  @override
   String recitationsAvailable(int count) {
     return '$count رواية متاحة';
   }

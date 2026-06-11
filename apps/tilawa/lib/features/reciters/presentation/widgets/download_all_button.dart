@@ -37,26 +37,20 @@ class DownloadAllButton extends StatelessWidget {
     final Color idleFill = ReciterCatalogChrome.idleFill(colorScheme);
     final Color hairline = ReciterCatalogChrome.hairline(colorScheme, tokens);
 
-    return MultiBlocListener(
-      listeners: [
-        BlocListener<ReciterDownloadBloc, ReciterDownloadState>(
-          listenWhen: (previous, current) =>
-              current.shouldShowLowStorageWarning(previous),
-          listener: (context, state) {
-            ToastUtils.showToast(msg: context.l10n.downloadLowStorageWarning);
-          },
-        ),
-        BlocListener<ReciterDownloadBloc, ReciterDownloadState>(
-          listenWhen: (previous, current) =>
-              current.shouldShowError(previous),
-          listener: (context, state) {
-            final String message = state.isNetworkError
-                ? context.l10n.networkError
-                : state.errorMessage ?? context.l10n.networkError;
-            ToastUtils.showToast(msg: message);
-          },
-        ),
-      ],
+    return BlocListener<ReciterDownloadBloc, ReciterDownloadState>(
+      listenWhen: (previous, current) => current.shouldShowError(previous),
+      listener: (context, state) {
+        if (state.isInsufficientStorage) {
+          ToastUtils.showErrorToast(
+            context.l10n.downloadLowStorageBlocked,
+          );
+          return;
+        }
+        final String message = state.isNetworkError
+            ? context.l10n.networkError
+            : state.errorMessage ?? context.l10n.networkError;
+        ToastUtils.showToast(msg: message);
+      },
       child: BlocBuilder<ReciterDownloadBloc, ReciterDownloadState>(
         builder: (context, state) {
         final bool isDownloading = state.isDownloadingAll;
