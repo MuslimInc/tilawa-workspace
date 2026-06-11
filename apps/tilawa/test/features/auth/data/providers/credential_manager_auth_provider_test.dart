@@ -105,5 +105,79 @@ void main() {
         expect(result, const AuthResult.cancelled());
       },
     );
+
+    test(
+      'signIn should return cancelled when CredentialException 204 carries '
+      'a native cancellation',
+      () async {
+        // Arrange
+        when(mockCredentialManager.saveGoogleCredential()).thenThrow(
+          CredentialException(
+            code: 204,
+            message: 'Login failed',
+            details:
+                'androidx.credentials.exceptions.'
+                'GetCredentialCancellationException: '
+                'activity is cancelled by the user.',
+          ),
+        );
+
+        // Act
+        final AuthResult result = await authProvider.signIn();
+
+        // Assert
+        expect(result, const AuthResult.cancelled());
+      },
+    );
+
+    test(
+      'signIn should return cancelled when CredentialException reports '
+      'login cancelled (201)',
+      () async {
+        // Arrange
+        when(mockCredentialManager.saveGoogleCredential()).thenThrow(
+          CredentialException(
+            code: 201,
+            message: 'Login cancelled',
+            details: null,
+          ),
+        );
+
+        // Act
+        final AuthResult result = await authProvider.signIn();
+
+        // Assert
+        expect(result, const AuthResult.cancelled());
+      },
+    );
+
+    test(
+      'signIn should return failure for a genuine CredentialException 204',
+      () async {
+        // Arrange
+        when(mockCredentialManager.saveGoogleCredential()).thenThrow(
+          CredentialException(
+            code: 204,
+            message: 'Login failed',
+            details:
+                'androidx.credentials.exceptions.'
+                'GetCredentialProviderConfigurationException: '
+                'Developer console is not set up correctly.',
+          ),
+        );
+
+        // Act
+        final AuthResult result = await authProvider.signIn();
+
+        // Assert
+        result.maybeWhen(
+          failure: (message, code) {
+            expect(message, 'Login failed');
+            expect(code, '204');
+          },
+          orElse: () => fail('Expected failure'),
+        );
+      },
+    );
   });
 }

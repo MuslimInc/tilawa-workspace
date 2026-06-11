@@ -65,6 +65,9 @@ class CredentialManagerAuthProvider implements AuthProviderInterface {
         code: e.code,
       );
     } on CredentialException catch (e) {
+      if (_isUserCancellation(e)) {
+        return const AuthResult.cancelled();
+      }
       return AuthResult.failure(message: e.message, code: e.code.toString());
     } on FirebaseAuthException catch (e) {
       return AuthResult.failure(
@@ -80,6 +83,25 @@ class CredentialManagerAuthProvider implements AuthProviderInterface {
         return const AuthResult.cancelled();
       }
       return AuthResult.failure(message: errorString);
+    }
+  }
+
+  /// The credential_manager plugin converts every [PlatformException] into a
+  /// [CredentialException] before it reaches app code, and its
+  /// save-Google-credential flow has no dedicated catch for the native
+  /// GetCredentialCancellationException — dismissing the sign-in sheet comes
+  /// back as the generic 204 "Login failed", with the cancellation visible
+  /// only in the native stack trace carried in [CredentialException.details].
+  bool _isUserCancellation(CredentialException e) {
+    switch (e.code) {
+      case 201: // Login cancelled
+      case 202: // No credentials found
+      case 207: // No Google account; plugin launched account settings
+        return true;
+      case 204:
+        return e.details?.toString().toLowerCase().contains('cancel') ?? false;
+      default:
+        return false;
     }
   }
 
