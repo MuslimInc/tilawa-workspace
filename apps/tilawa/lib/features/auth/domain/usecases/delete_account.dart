@@ -33,11 +33,9 @@ class DeleteAccount {
     final String userId = currentUser.id;
 
     try {
-      // Re-auth first; if the user cancels, no Firestore data is touched.
-      await _authRepository.reauthenticateForAccountDeletion();
-
       // Firestore rules require an authenticated owner — clean up before
-      // deleting the Firebase Auth user.
+      // deleting the Firebase Auth user. Re-auth runs inside [deleteAccount]
+      // only when Firebase returns requires-recent-login.
       await _syncDeviceTokenUseCase.removeCurrentTokenForUser(userId);
       await _userRepository.deleteUserData(userId);
       await _premiumRepository.clearPremiumStatus();

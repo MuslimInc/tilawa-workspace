@@ -11,9 +11,6 @@ abstract class AuthRepository {
 
   Future<void> signOut();
 
-  /// Google re-auth before account deletion (cancelled → throws).
-  Future<void> reauthenticateForAccountDeletion();
-
   /// Deletes the Firebase Auth account after Firestore cleanup.
   Future<void> deleteAccount();
 

@@ -94,31 +94,6 @@ class CredentialManagerAuthProvider implements AuthProviderInterface {
   }
 
   @override
-  Future<void> reauthenticateForAccountDeletion() async {
-    final User? user = _firebaseAuth.currentUser;
-    if (user == null) {
-      throw FirebaseAuthException(
-        code: 'user-not-found',
-        message: 'Not signed in',
-      );
-    }
-
-    await _credentialManagerInitializer.ensureReady();
-    final GoogleIdTokenCredential? credential = await _credentialManager
-        .saveGoogleCredential();
-    if (credential?.idToken == null) {
-      throw FirebaseAuthException(
-        code: 'requires-recent-login',
-        message: 'Google re-authentication was cancelled',
-      );
-    }
-
-    await user.reauthenticateWithCredential(
-      GoogleAuthProvider.credential(idToken: credential!.idToken),
-    );
-  }
-
-  @override
   Future<void> deleteAccount() async {
     final User? user = _firebaseAuth.currentUser;
     if (user == null) {
@@ -131,7 +106,7 @@ class CredentialManagerAuthProvider implements AuthProviderInterface {
       if (e.code != 'requires-recent-login') {
         rethrow;
       }
-      await reauthenticateForAccountDeletion();
+      await _reauthenticateCurrentGoogleUser(user);
       await _firebaseAuth.currentUser?.delete();
     }
 
@@ -139,6 +114,38 @@ class CredentialManagerAuthProvider implements AuthProviderInterface {
       await _credentialManager.logout();
     } catch (_) {
       // Best-effort cleanup after account deletion.
+    }
+  }
+
+  /// Re-authenticates the signed-in Firebase user with their saved Google
+  /// account. Uses [getCredentials], not [CredentialManager.saveGoogleCredential],
+  /// which is a sign-in/save flow and can switch accounts.
+  Future<void> _reauthenticateCurrentGoogleUser(User user) async {
+    await _credentialManagerInitializer.ensureReady();
+    try {
+      final Credentials credentials = await _credentialManager.getCredentials(
+        fetchOptions: FetchOptionsAndroid(
+          passKey: false,
+          passwordCredential: false,
+          googleCredential: true,
+        ),
+      );
+      final String? idToken = credentials.googleIdTokenCredential?.idToken;
+      if (idToken == null) {
+        throw FirebaseAuthException(
+          code: 'requires-recent-login',
+          message: 'Google re-authentication was cancelled',
+        );
+      }
+
+      await user.reauthenticateWithCredential(
+        GoogleAuthProvider.credential(idToken: idToken),
+      );
+    } on CredentialException {
+      throw FirebaseAuthException(
+        code: 'requires-recent-login',
+        message: 'Google re-authentication was cancelled',
+      );
     }
   }
 

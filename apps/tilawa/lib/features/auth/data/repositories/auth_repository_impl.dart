@@ -37,11 +37,6 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> reauthenticateForAccountDeletion() {
-    return _authProvider.reauthenticateForAccountDeletion();
-  }
-
-  @override
   Future<void> deleteAccount() async {
     await _authProvider.deleteAccount();
     await _googleSignInPrepare.clear();

@@ -75,31 +75,6 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
   }
 
   @override
-  Future<void> reauthenticateForAccountDeletion() async {
-    final User? user = _firebaseAuth.currentUser;
-    if (user == null) {
-      throw FirebaseAuthException(
-        code: 'user-not-found',
-        message: 'Not signed in',
-      );
-    }
-
-    final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
-    final GoogleSignInAuthentication googleAuth = googleUser.authentication;
-    final String? idToken = googleAuth.idToken;
-    if (idToken == null) {
-      throw FirebaseAuthException(
-        code: 'requires-recent-login',
-        message: 'Google re-authentication was cancelled',
-      );
-    }
-
-    await user.reauthenticateWithCredential(
-      GoogleAuthProvider.credential(idToken: idToken),
-    );
-  }
-
-  @override
   Future<void> deleteAccount() async {
     final User? user = _firebaseAuth.currentUser;
     if (user == null) {
@@ -112,7 +87,18 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
       if (e.code != 'requires-recent-login') {
         rethrow;
       }
-      await reauthenticateForAccountDeletion();
+      final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
+      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+      final String? idToken = googleAuth.idToken;
+      if (idToken == null) {
+        throw FirebaseAuthException(
+          code: 'requires-recent-login',
+          message: 'Google re-authentication was cancelled',
+        );
+      }
+      await user.reauthenticateWithCredential(
+        GoogleAuthProvider.credential(idToken: idToken),
+      );
       await _firebaseAuth.currentUser?.delete();
     }
 
