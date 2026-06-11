@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/bootstrap/app_error_guard.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:tilawa/core/telemetry/crash_reporting_context.dart';
 
 /// Centralized service for Firebase Crashlytics functionality
 abstract class CrashlyticsService {
@@ -91,6 +92,8 @@ class FirebaseCrashlyticsServiceImpl implements CrashlyticsService {
           return true;
         },
       );
+
+      await setCustomKeys(await CrashReportingContext.crashlyticsKeys());
 
       logger.d('Crashlytics initialized successfully');
     } catch (e) {

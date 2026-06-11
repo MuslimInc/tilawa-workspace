@@ -1,7 +1,10 @@
 package com.tilawa.app
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.ryanheise.audioservice.AudioServiceActivity
@@ -10,6 +13,7 @@ import com.tilawa.app.prayer.AdhanScheduler
 import com.tilawa.app.prayer.PrayerAdhanMethodChannel
 import com.tilawa.app.prayer.PrayerNotificationsWatchdogScheduler
 import io.flutter.embedding.android.RenderMode
+import io.sentry.flutter.SentryFlutterPlugin
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import org.json.JSONObject
@@ -18,10 +22,17 @@ class MainActivity : AudioServiceActivity() {
     companion object {
         private const val WATCHDOG_CHANNEL = "com.tilawa.app/prayer_watchdog"
         private const val LAUNCH_SPLASH_CHANNEL = "com.tilawa.app/launch_splash"
+        private const val APP_CONTEXT_CHANNEL = "com.tilawa.app/app_context"
         const val ACTION_OPEN_PRAYER_STATUS =
             "com.tilawa.app.prayer.ACTION_OPEN_PRAYER_STATUS"
         private const val TAG = "MainActivity"
         private const val FIRST_FRAME_TAG = "FirstFrame"
+
+        // Failsafe: must outlast the Dart-side LaunchFirstFrameGate failsafe
+        // (3s) so the graceful "ready" path wins on healthy launches. If Dart
+        // never sends "ready" (engine wedge, bad patch, crash before runApp),
+        // the splash is force-dismissed instead of holding the user forever.
+        private const val LAUNCH_SPLASH_FAILSAFE_MS = 6_000L
 
         @Volatile
         var keepLaunchSplashOnScreen: Boolean = true
@@ -43,6 +54,13 @@ class MainActivity : AudioServiceActivity() {
             firstFrameLog("splash exit animation → remove() (no fade)")
             splashScreenView.remove()
         }
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (keepLaunchSplashOnScreen) {
+                Log.w(TAG, "Launch splash failsafe fired — Flutter never sent 'ready'")
+                firstFrameLog("FAILSAFE: forcing keepLaunchSplashOnScreen=false")
+                keepLaunchSplashOnScreen = false
+            }
+        }, LAUNCH_SPLASH_FAILSAFE_MS)
         super.onCreate(savedInstanceState)
         firstFrameLog("MainActivity.onCreate complete")
         handleIntent(intent)
@@ -130,6 +148,54 @@ class MainActivity : AudioServiceActivity() {
                     else -> result.notImplemented()
                 }
             }
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, APP_CONTEXT_CHANNEL)
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "getInstallerPackageName" -> {
+                        result.success(readInstallerPackageName())
+                    }
+                    "restoreSentryApplicationContext" -> {
+                        restoreSentryFlutterApplicationContext()
+                        result.success(null)
+                    }
+                    else -> result.notImplemented()
+                }
+            }
+
+        // Belt-and-suspenders for cold start; hot restart is restored from Dart
+        // main() before SentryFlutter.init.
+        restoreSentryFlutterApplicationContext()
+    }
+
+    /**
+     * Hot restart detaches the Sentry plugin and nulls its static
+     * [SentryFlutterPlugin] applicationContext before Dart main() re-runs.
+     * Re-apply it so JNI init can succeed without onAttachedToEngine (not
+     * called again on hot restart).
+     */
+    private fun restoreSentryFlutterApplicationContext() {
+        val appContext = applicationContext ?: return
+        if (SentryFlutterPlugin.getApplicationContext() != null) {
+            return
+        }
+        try {
+            val contextField =
+                SentryFlutterPlugin::class.java.getDeclaredField("applicationContext")
+            contextField.isAccessible = true
+            contextField.set(null, appContext)
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to restore Sentry applicationContext", e)
+        }
+    }
+
+    private fun readInstallerPackageName(): String? {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            packageManager.getInstallSourceInfo(packageName).installingPackageName
+        } else {
+            @Suppress("DEPRECATION")
+            packageManager.getInstallerPackageName(packageName)
+        }
     }
 
     override fun getRenderMode(): RenderMode {

@@ -1,0 +1,113 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:tilawa/core/telemetry/crash_reporting_context.dart';
+import 'package:tilawa/core/telemetry/distribution_config.dart';
+
+void main() {
+  tearDown(CrashReportingContext.resetForTesting);
+
+  group('resolveBuildMode', () {
+    test('returns debug when debugMode is true', () {
+      expect(
+        CrashReportingContext.resolveBuildMode(
+          debugMode: true,
+          profileMode: false,
+        ),
+        'debug',
+      );
+    });
+
+    test('returns profile when profileMode is true', () {
+      expect(
+        CrashReportingContext.resolveBuildMode(
+          debugMode: false,
+          profileMode: true,
+        ),
+        'profile',
+      );
+    });
+
+    test('returns release otherwise', () {
+      expect(
+        CrashReportingContext.resolveBuildMode(
+          debugMode: false,
+          profileMode: false,
+        ),
+        'release',
+      );
+    });
+  });
+
+  group('mapInstallSource', () {
+    test('maps Play Store installer', () {
+      expect(
+        CrashReportingContext.mapInstallSource('com.android.vending'),
+        'play_store',
+      );
+    });
+
+    test('maps empty installer to sideload', () {
+      expect(CrashReportingContext.mapInstallSource(null), 'sideload');
+      expect(CrashReportingContext.mapInstallSource(''), 'sideload');
+    });
+
+    test('maps unknown installers to other_store', () {
+      expect(
+        CrashReportingContext.mapInstallSource('com.example.store'),
+        'other_store',
+      );
+    });
+  });
+
+  test('distribution defaults to local', () {
+    expect(DistributionConfig.distribution, 'local');
+  });
+
+  group('resolveDeviceKind', () {
+    test('returns physical for real devices', () {
+      expect(
+        CrashReportingContext.resolveDeviceKind(
+          isPhysicalDevice: true,
+          isIOS: false,
+        ),
+        'physical',
+      );
+    });
+
+    test('returns emulator for Android virtual devices', () {
+      expect(
+        CrashReportingContext.resolveDeviceKind(
+          isPhysicalDevice: false,
+          isIOS: false,
+        ),
+        'emulator',
+      );
+    });
+
+    test('returns simulator for iOS simulators', () {
+      expect(
+        CrashReportingContext.resolveDeviceKind(
+          isPhysicalDevice: false,
+          isIOS: true,
+        ),
+        'simulator',
+      );
+    });
+  });
+
+  group('filterEmulatorsInRelease', () {
+    test('keeps verify events tagged sentry.verify', () {
+      final SentryEvent event = SentryEvent(
+        tags: <String, String>{
+          CrashReportingTagKeys.sentryVerify: 'true',
+          CrashReportingTagKeys.deviceKind: 'emulator',
+        },
+      );
+
+      expect(
+        CrashReportingContext.filterEmulatorsInRelease(event, Hint()),
+        event,
+      );
+    });
+  });
+}

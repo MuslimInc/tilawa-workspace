@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/app_legal_urls.dart';
+import 'package:tilawa/core/telemetry/sentry_debug_verify_tile.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/legal_url_launcher.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
@@ -234,6 +235,7 @@ class SettingsScreen extends StatelessWidget {
                       title: 'Route list',
                       onTap: () => const RouteListRoute().push(context),
                     ),
+                    const SentryDebugVerifyTile(),
                     const TourGuideDebugResetTile(isLast: true),
                   ],
                 ),
