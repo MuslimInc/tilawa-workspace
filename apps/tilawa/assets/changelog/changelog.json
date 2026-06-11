@@ -1,7 +1,22 @@
 {
   "schemaVersion": 1,
-  "lastUpdatedAt": "2026-06-10T08:32:00Z",
+  "lastUpdatedAt": "2026-06-11T03:30:00Z",
   "releases": [
+    {
+      "id": "2.0.9+53",
+      "version": "2.0.9",
+      "buildNumber": 53,
+      "highlights": {
+        "en": [
+          "Improved stability and crash reporting",
+          "Clearer recovery screen when the app fails to start"
+        ],
+        "ar": [
+          "استقرار أفضل وتقارير أعطال أوضح",
+          "شاشة استعادة أوضح عند فشل بدء التطبيق"
+        ]
+      }
+    },
     {
       "id": "2.0.8+52",
       "version": "2.0.8",
