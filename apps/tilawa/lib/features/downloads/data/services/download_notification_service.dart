@@ -26,6 +26,12 @@ class DownloadNotificationService implements IDownloadNotificationService {
   static const String _downloadChannelName = 'Downloads';
   static const String _downloadChannelDescription = 'Shows download progress';
 
+  /// Notification ID block for download progress/completion notifications.
+  ///
+  /// Must stay below athkar dynamic IDs (11M+) and tasbeeh reminders (13M+).
+  static const int notificationIdOffset = 100000;
+  static const int notificationIdRangeEndExclusive = 1000000;
+
   FlutterLocalNotificationsPlugin get _notifications =>
       _dispatcher.notificationsPlugin;
 
@@ -48,8 +54,14 @@ class DownloadNotificationService implements IDownloadNotificationService {
       // deferred centrally in app_startup.
       await _dispatcher.initialize(createHighImportanceChannel: false);
 
-      // Register our payload handler with the dispatcher
-      // Download notifications use JSON payloads with reciterName
+      // Route taps by ID block first (failed/batch notifications may omit
+      // payload), then fall back to payload matching for legacy IDs.
+      _dispatcher.registerIdRangeHandler(
+        serviceId: 'downloads',
+        minIdInclusive: notificationIdOffset,
+        maxIdExclusive: notificationIdRangeEndExclusive,
+        handler: (response) => handleNotificationTap(response.payload),
+      );
       _dispatcher.registerPayloadHandler(
         serviceId: 'downloads',
         matcher: _isDownloadPayload,
@@ -89,7 +101,9 @@ class DownloadNotificationService implements IDownloadNotificationService {
     }
     try {
       final Map<String, dynamic> data = jsonDecode(payload);
-      return data.containsKey('reciterId') || data.containsKey('reciterName');
+      return data.containsKey('reciterId') ||
+          data.containsKey('reciterName') ||
+          data['type'] == 'download';
     } catch (_) {
       return false;
     }
@@ -190,6 +204,8 @@ class DownloadNotificationService implements IDownloadNotificationService {
           notificationId: notificationId,
           title: notificationTitle,
           message: failedMessage ?? 'Download failed',
+          reciterId: reciterId,
+          reciterName: reciterName,
         );
       } else if (status == DownloadStatus.cancelled ||
           status == DownloadStatus.paused) {
@@ -263,6 +279,7 @@ class DownloadNotificationService implements IDownloadNotificationService {
               progressMessage ??
               'Progress: $completedCount/$totalCount ($progress%)',
           notificationDetails: notificationDetails,
+          payload: _fallbackDownloadPayload,
         );
       } else if (status == DownloadStatus.completed) {
         await _showCompletedNotification(
@@ -380,9 +397,7 @@ class DownloadNotificationService implements IDownloadNotificationService {
   }
 
   /// Helper to generate a consistent notification ID from string ID
-  /// Offset to avoid collision with notification IDs used by other services.
-  static const int _idOffset = 100000;
-  int _nextId = _idOffset;
+  int _nextId = notificationIdOffset;
 
   int _getNotificationId(String id) {
     return _notificationIds.putIfAbsent(id, () => _nextId++);
@@ -440,6 +455,8 @@ class DownloadNotificationService implements IDownloadNotificationService {
     required int notificationId,
     required String title,
     required String message,
+    int? reciterId,
+    String? reciterName,
   }) async {
     if (!NotificationConfig.enableLocalNotifications) {
       return;
@@ -470,9 +487,17 @@ class DownloadNotificationService implements IDownloadNotificationService {
         title: title,
         body: message,
         notificationDetails: notificationDetails,
+        payload:
+            _buildNotificationPayload(
+              reciterId: reciterId,
+              reciterName: reciterName,
+            ) ??
+            _fallbackDownloadPayload,
       );
     } catch (e) {
       logger.e('[DownloadNotificationService] Error showing failure: $e');
     }
   }
+
+  static const String _fallbackDownloadPayload = '{"type":"download"}';
 }
