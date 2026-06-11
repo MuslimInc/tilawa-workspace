@@ -19,4 +19,11 @@ abstract final class ReciterCatalogChrome {
 
   static Color activeRowFill(ColorScheme scheme) =>
       scheme.surfaceContainer.withValues(alpha: 0.72);
+
+  /// Opaque pill fill for the batch-download control while active.
+  ///
+  /// Uses [surfaceContainerHigh] — not [surfaceContainer] — because on the
+  /// light theme canvas scaffold, `surfaceContainer` is the same porcelain
+  /// as the page background and the chip reads as borderless text.
+  static Color downloadingFill(ColorScheme scheme) => scheme.surfaceContainerHigh;
 }
