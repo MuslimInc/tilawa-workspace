@@ -22,6 +22,21 @@ class _HandlerRegistration {
   final NotificationHandler handler;
 }
 
+/// ID range handler registration data
+class _IdRangeHandlerRegistration {
+  _IdRangeHandlerRegistration({
+    required this.serviceId,
+    required this.minIdInclusive,
+    required this.maxIdExclusive,
+    required this.handler,
+  });
+
+  final String serviceId;
+  final int minIdInclusive;
+  final int maxIdExclusive;
+  final NotificationHandler handler;
+}
+
 /// Payload handler registration data
 class _PayloadHandlerRegistration {
   _PayloadHandlerRegistration({
@@ -47,6 +62,7 @@ class NotificationDispatcher implements INotificationDispatcher {
       FlutterLocalNotificationsPlugin();
 
   final List<_HandlerRegistration> _handlers = [];
+  final List<_IdRangeHandlerRegistration> _idRangeHandlers = [];
   final List<_PayloadHandlerRegistration> _payloadHandlers = [];
 
   bool _initialized = false;
@@ -138,6 +154,30 @@ class NotificationDispatcher implements INotificationDispatcher {
   }
 
   @override
+  void registerIdRangeHandler({
+    required String serviceId,
+    required int minIdInclusive,
+    required int maxIdExclusive,
+    required NotificationHandler handler,
+  }) {
+    _idRangeHandlers.removeWhere((h) => h.serviceId == serviceId);
+
+    _idRangeHandlers.add(
+      _IdRangeHandlerRegistration(
+        serviceId: serviceId,
+        minIdInclusive: minIdInclusive,
+        maxIdExclusive: maxIdExclusive,
+        handler: handler,
+      ),
+    );
+
+    logger.d(
+      '[NotificationDispatcher] Registered ID range handler for $serviceId: '
+      '[$minIdInclusive, $maxIdExclusive)',
+    );
+  }
+
+  @override
   void registerPayloadHandler({
     required String serviceId,
     required bool Function(String? payload) matcher,
@@ -162,6 +202,7 @@ class NotificationDispatcher implements INotificationDispatcher {
   @override
   void unregisterHandler(String serviceId) {
     _handlers.removeWhere((h) => h.serviceId == serviceId);
+    _idRangeHandlers.removeWhere((h) => h.serviceId == serviceId);
     _payloadHandlers.removeWhere((h) => h.serviceId == serviceId);
     logger.d('[NotificationDispatcher] Unregistered handler for $serviceId');
   }
@@ -245,6 +286,19 @@ class NotificationDispatcher implements INotificationDispatcher {
       }
     }
 
+    for (final _IdRangeHandlerRegistration registration in _idRangeHandlers) {
+      if (notificationId != null &&
+          notificationId >= registration.minIdInclusive &&
+          notificationId < registration.maxIdExclusive) {
+        logger.d(
+          '[NotificationDispatcher] Matched ID range handler: '
+          '${registration.serviceId}',
+        );
+        await registration.handler(response);
+        return true;
+      }
+    }
+
     // If no ID match, evaluate all payload handlers and pick deterministically.
     final List<_PayloadHandlerRegistration> matchedPayloadHandlers =
         <_PayloadHandlerRegistration>[];
@@ -281,6 +335,11 @@ class NotificationDispatcher implements INotificationDispatcher {
   /// Check if running on Android (for platform-specific logic)
   @visibleForTesting
   bool get isAndroid => Platform.isAndroid;
+
+  @visibleForTesting
+  Future<bool> routeNotificationForTest(NotificationResponse response) {
+    return _routeNotification(response);
+  }
 
   int _servicePriority(String serviceId) {
     switch (serviceId) {
