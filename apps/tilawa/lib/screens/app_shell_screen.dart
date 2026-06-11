@@ -63,6 +63,7 @@ class _AppShellScreenState extends State<AppShellScreen> {
   int _lastHandledIndex = 0;
   late final MainScreenCubit _mainScreenCubit;
   DateTime? _lastRecitersNavTap;
+  QuranPlayerChromeNotifier? _chromeNotifier;
 
   static const Duration _recitersNavDoubleTapWindow = Duration(milliseconds: 400);
 
@@ -74,10 +75,15 @@ class _AppShellScreenState extends State<AppShellScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Ancestor lookups are unsafe in dispose(); cache the notifier here.
+    _chromeNotifier = context.read<QuranPlayerChromeNotifier>();
+  }
+
+  @override
   void dispose() {
-    try {
-      context.read<QuranPlayerChromeNotifier>().clearShellChrome();
-    } catch (_) {}
+    _chromeNotifier?.clearShellChrome();
     _mainScreenCubit.close();
     _bottomNavVisibility.dispose();
     super.dispose();
