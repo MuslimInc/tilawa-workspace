@@ -606,6 +606,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get networkError => 'يرجى التحقق من اتصالك بالإنترنت';
 
   @override
+  String get downloadLowStorageWarning =>
+      'قد لا تكون مساحة التخزين المتاحة كافية لهذا التحميل. حرّر مساحة إذا فشل التحميل.';
+
+  @override
   String recitationsAvailable(int count) {
     return '$count رواية متاحة';
   }

@@ -607,6 +607,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get networkError => 'Please check your internet connection';
 
   @override
+  String get downloadLowStorageWarning =>
+      'Available storage may not be enough for this download. Free up space if downloads fail.';
+
+  @override
   String recitationsAvailable(int count) {
     return '$count recitation(s) available';
   }

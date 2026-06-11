@@ -8,6 +8,7 @@ class ReciterDownloadState extends Equatable {
     this.downloadedCount = 0,
     this.totalCount = 0,
     this.errorMessage,
+    this.lowStorageWarningSeq = 0,
   });
 
   final double progress;
@@ -16,6 +17,7 @@ class ReciterDownloadState extends Equatable {
   final int downloadedCount;
   final int totalCount;
   final String? errorMessage;
+  final int lowStorageWarningSeq;
 
   bool get isAllDownloaded => totalCount > 0 && downloadedCount == totalCount;
 
@@ -23,6 +25,10 @@ class ReciterDownloadState extends Equatable {
   /// Returns true when error message changes from null to a value
   bool shouldShowError(ReciterDownloadState previous) {
     return errorMessage != null && previous.errorMessage != errorMessage;
+  }
+
+  bool shouldShowLowStorageWarning(ReciterDownloadState previous) {
+    return lowStorageWarningSeq > previous.lowStorageWarningSeq;
   }
 
   /// Determines if download started toast should be shown
@@ -47,6 +53,7 @@ class ReciterDownloadState extends Equatable {
     downloadedCount,
     totalCount,
     errorMessage,
+    lowStorageWarningSeq,
   ];
 
   static const Object _sentinel = Object();
@@ -58,6 +65,7 @@ class ReciterDownloadState extends Equatable {
     int? downloadedCount,
     int? totalCount,
     Object? errorMessage = _sentinel,
+    int? lowStorageWarningSeq,
   }) {
     return ReciterDownloadState(
       progress: progress ?? this.progress,
@@ -68,6 +76,7 @@ class ReciterDownloadState extends Equatable {
       errorMessage: errorMessage == _sentinel
           ? this.errorMessage
           : errorMessage as String?,
+      lowStorageWarningSeq: lowStorageWarningSeq ?? this.lowStorageWarningSeq,
     );
   }
 }

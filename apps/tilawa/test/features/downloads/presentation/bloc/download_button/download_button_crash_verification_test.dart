@@ -388,6 +388,7 @@ void main() {
     late MockObserveDownloadProgressUseCase mockObserveDownloadProgress;
     late MockGetDownloadItemUseCase mockGetDownloadItem;
     late MockNetworkInfo mockNetworkInfo;
+    late MockCheckLowDeviceStorageUseCase mockCheckLowDeviceStorage;
 
     const testUrl = 'https://example.com/001.mp3';
     const testReciterName = 'Abdul Rahman Al-Sudais';
@@ -408,6 +409,13 @@ void main() {
       when(
         mockGetDownloadItem.call(any),
       ).thenAnswer((_) async => const Right(null));
+
+      mockCheckLowDeviceStorage = MockCheckLowDeviceStorageUseCase();
+      when(
+        mockCheckLowDeviceStorage.call(
+          estimatedRequiredBytes: anyNamed('estimatedRequiredBytes'),
+        ),
+      ).thenAnswer((_) async => false);
 
       when(
         mockCheckSurahDownloaded.call(
@@ -447,6 +455,7 @@ void main() {
           observeDownloadProgress: mockObserveDownloadProgress,
           getDownloadItem: mockGetDownloadItem,
           networkInfo: mockNetworkInfo,
+          checkLowDeviceStorage: mockCheckLowDeviceStorage,
         );
 
         // Initialize and start download
