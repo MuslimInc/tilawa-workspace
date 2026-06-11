@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.10+54] - 2026-06-11 [Google Play Release]
+
+### Added
+
+- **Sentry structured logs**: Warning-level and above `logger` output forwarded to
+  Sentry Logs in non-profile builds; emulator logs filtered in release (same as
+  crash events).
+- **Sentry verify**: Debug Settings tile now sends a paired test log for Explore →
+  Logs onboarding.
+
+### Changed
+
+- **Version**: Production track bumped to **2.0.10** (build **54**).
+- **Logging**: Production-relevant download, auth, and prayer paths promoted to
+  warn/error for Sentry visibility.
+- **Android**: System UI overlay re-applied on resume after back-gesture relaunch
+  (Android 12+).
+
 ## [2.0.9+53] - 2026-06-11 [Google Play Release]
 
 ### Added
