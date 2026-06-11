@@ -242,8 +242,17 @@ class DownloadNotificationService implements IDownloadNotificationService {
     final int notificationId = _getNotificationId(batchId);
 
     try {
-      if (status == DownloadStatus.downloading ||
-          status == DownloadStatus.pending) {
+      // Mirror single-download logic: 100% with all items done means complete.
+      final bool isEffectivelyCompleted =
+          status == DownloadStatus.completed ||
+          (status == DownloadStatus.downloading &&
+              progress >= 100 &&
+              totalCount > 0 &&
+              completedCount >= totalCount);
+
+      if (!isEffectivelyCompleted &&
+          (status == DownloadStatus.downloading ||
+              status == DownloadStatus.pending)) {
         final androidDetails = AndroidNotificationDetails(
           _downloadChannelId,
           _downloadChannelName,
@@ -281,7 +290,7 @@ class DownloadNotificationService implements IDownloadNotificationService {
           notificationDetails: notificationDetails,
           payload: _fallbackDownloadPayload,
         );
-      } else if (status == DownloadStatus.completed) {
+      } else if (isEffectivelyCompleted) {
         await _showCompletedNotification(
           notificationId: notificationId,
           title: title,
