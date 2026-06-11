@@ -1,6 +1,7 @@
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa/core/bootstrap/app_error_guard.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 
 /// Centralized service for Firebase Crashlytics functionality
@@ -81,38 +82,40 @@ class FirebaseCrashlyticsServiceImpl implements CrashlyticsService {
       // Only collect crashes in release builds; disable in debug and profile.
       await _crashlytics.setCrashlyticsCollectionEnabled(kReleaseMode);
 
-      // Set up Flutter error handling
-      FlutterError.onError = (FlutterErrorDetails details) {
-        FlutterError.presentError(details);
-        final Object exception = details.exception;
-        if (_isJustAudioInterruption(exception)) {
-          recordError(
-            exception,
-            details.stack,
-            reason: 'just_audio interruption',
-            fatal: false,
-          );
-          return;
-        }
-        // Network errors from image loading (e.g. profile photos offline) are
-        // non-fatal and expected — don't pollute the fatal crash dashboard.
-        if (_isNetworkImageError(exception)) {
-          recordFlutterError(details, fatal: false);
-          return;
-        }
-        recordFlutterError(details, fatal: true);
-      };
-
-      // Set up zone error handling
-      PlatformDispatcher.instance.onError = (error, stack) {
-        recordError(error, stack, fatal: true);
-        return true;
-      };
+      // The guard owns the global hooks (and already logs + presents errors);
+      // attaching here flushes everything captured since process start.
+      AppErrorGuard.attachReporter(
+        onFlutterError: _reportFlutterError,
+        onPlatformError: (Object error, StackTrace stack) {
+          recordError(error, stack, fatal: true);
+          return true;
+        },
+      );
 
       logger.d('Crashlytics initialized successfully');
     } catch (e) {
       logger.d('Crashlytics initialization error: $e');
     }
+  }
+
+  void _reportFlutterError(FlutterErrorDetails details) {
+    final Object exception = details.exception;
+    if (_isJustAudioInterruption(exception)) {
+      recordError(
+        exception,
+        details.stack,
+        reason: 'just_audio interruption',
+        fatal: false,
+      );
+      return;
+    }
+    // Network errors from image loading (e.g. profile photos offline) are
+    // non-fatal and expected — don't pollute the fatal crash dashboard.
+    if (_isNetworkImageError(exception)) {
+      recordFlutterError(details, fatal: false);
+      return;
+    }
+    recordFlutterError(details, fatal: true);
   }
 
   @override

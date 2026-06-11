@@ -23,17 +23,87 @@ extension AppStartupWidgets on AppStartupTasks {
   }
 
   /// Builds the fatal error fallback app when bootstrap fails catastrophically.
-  Widget buildFatalErrorApp() {
+  ///
+  /// Runs before DI/l10n exist, so strings are hardcoded in both app
+  /// languages. Retry re-runs the full bootstrap pipeline ([bootstrap] and
+  /// [configureDependencies] are both safe to re-enter).
+  Widget buildFatalErrorApp({Future<void> Function()? onRetry}) {
     return MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(32),
-            child: Text(
-              'Something went wrong.\nPlease restart the app.',
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 18),
-            ),
+      debugShowCheckedModeBanner: false,
+      home: _StartupFatalErrorScreen(onRetry: onRetry ?? () => bootstrap()),
+    );
+  }
+}
+
+class _StartupFatalErrorScreen extends StatefulWidget {
+  const _StartupFatalErrorScreen({required this.onRetry});
+
+  final Future<void> Function() onRetry;
+
+  @override
+  State<_StartupFatalErrorScreen> createState() =>
+      _StartupFatalErrorScreenState();
+}
+
+class _StartupFatalErrorScreenState extends State<_StartupFatalErrorScreen> {
+  bool _retrying = false;
+
+  Future<void> _retry() async {
+    if (_retrying) {
+      return;
+    }
+    setState(() => _retrying = true);
+    try {
+      // On success runApp replaces this tree; on failure bootstrap()
+      // builds a fresh fatal error app, so either way this screen goes away.
+      await widget.onRetry();
+    } finally {
+      if (mounted) {
+        setState(() => _retrying = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.launchSplashBackground,
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              const Icon(
+                Icons.error_outline_rounded,
+                size: 48,
+                color: Colors.white70,
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'حدث خطأ غير متوقع',
+                textDirection: TextDirection.rtl,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 18, color: Colors.white),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Something went wrong',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, color: Colors.white70),
+              ),
+              const SizedBox(height: 32),
+              FilledButton(
+                onPressed: _retrying ? null : _retry,
+                child: _retrying
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('إعادة المحاولة • Retry'),
+              ),
+            ],
           ),
         ),
       ),
@@ -66,11 +136,16 @@ class _BootGateState extends State<_BootGate> {
         backgroundColor: _launchBackground,
       );
 
+  /// Splash-stuck watchdog: comfortably above [AppStartupReadiness]'s 10s
+  /// safety net so it only fires for genuinely hung boots, not slow devices.
+  static const Duration _bootWatchdogTimeout = Duration(seconds: 20);
+
   bool _ready = false;
   bool _handoffToAppStarted = false;
   Future<void>? _criticalInitFuture;
   bool? _lastLoggedPainted;
   bool? _lastLoggedShowSplash;
+  Timer? _bootWatchdogTimer;
 
   @override
   void initState() {
@@ -80,7 +155,37 @@ class _BootGateState extends State<_BootGate> {
     firstFrameLog('BootGate critical init scheduling');
     SplashLaunchHandoff.resetForNewLaunch();
     LaunchFirstFrameGate.scheduleReleaseAfterFirstFrame();
+    _startBootWatchdog();
     _awaitCriticalInit();
+  }
+
+  @override
+  void dispose() {
+    _bootWatchdogTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startBootWatchdog() {
+    _bootWatchdogTimer = Timer(_bootWatchdogTimeout, () {
+      if (!mounted || _ready) {
+        return;
+      }
+      logger.e(
+        'BootGate stuck: critical init not complete after '
+        '${_bootWatchdogTimeout.inSeconds}s; user is still on launch splash',
+      );
+      unawaited(
+        StartupTelemetry.failure(
+          'boot_gate_stuck',
+          TimeoutException(
+            'critical init incomplete',
+            _bootWatchdogTimeout,
+          ),
+          StackTrace.current,
+          phase: 'boot_gate',
+        ),
+      );
+    });
   }
 
   @override
@@ -123,6 +228,7 @@ class _BootGateState extends State<_BootGate> {
               },
             ),
           );
+          _bootWatchdogTimer?.cancel();
           setState(() {
             _ready = true;
           });

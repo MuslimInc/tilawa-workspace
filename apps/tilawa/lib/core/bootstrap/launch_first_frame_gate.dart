@@ -6,14 +6,27 @@ import 'package:flutter/services.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
+import '../telemetry/startup_telemetry.dart';
 import 'first_frame_log.dart';
 
 /// Holds the first Flutter frame until [release] so cold start shows the launch
 /// splash immediately instead of a blank or native handoff frame.
 abstract final class LaunchFirstFrameGate {
+  /// Failsafe: the normal release path depends on BootGate's frame callbacks
+  /// actually running. If anything wedges before that (exception during the
+  /// warm-up frame, vsync never delivered, runApp failing), the user would be
+  /// stuck on the native launch window forever — force the release instead.
+  static const Duration releaseFailsafeTimeout = Duration(seconds: 3);
+
   static bool _deferred = false;
   static bool _released = false;
   static bool _nativeSplashNotified = false;
+  static Timer? _releaseFailsafeTimer;
+
+  /// Overrides the Android platform check so host tests can exercise the
+  /// native splash MethodChannel paths.
+  @visibleForTesting
+  static bool? debugIsAndroidOverride;
 
   /// Call once before [runApp] during bootstrap.
   static void defer() {
@@ -25,10 +38,33 @@ abstract final class LaunchFirstFrameGate {
     WidgetsFlutterBinding.ensureInitialized();
     WidgetsBinding.instance.deferFirstFrame();
     firstFrameLog('deferFirstFrame enabled (frames held until release)');
+    _releaseFailsafeTimer = Timer(releaseFailsafeTimeout, () {
+      if (_released) {
+        return;
+      }
+      firstFrameLog(
+        'FAILSAFE: first frame still deferred after '
+        '${releaseFailsafeTimeout.inSeconds}s — forcing release',
+      );
+      unawaited(
+        StartupTelemetry.failure(
+          'first_frame_release_failsafe',
+          TimeoutException(
+            'first frame never released by BootGate',
+            releaseFailsafeTimeout,
+          ),
+          StackTrace.current,
+          phase: 'first_frame_gate',
+        ),
+      );
+      release();
+    });
   }
 
   /// Paints the first frame and dismisses the Android 12 splash without animation.
   static void release() {
+    _releaseFailsafeTimer?.cancel();
+    _releaseFailsafeTimer = null;
     if (_released) {
       firstFrameLog('allowFirstFrame skipped (already released)');
       return;
@@ -66,7 +102,9 @@ abstract final class LaunchFirstFrameGate {
   }
 
   static Future<void> _invokeAndroidLaunchSplashReady() async {
-    if (kIsWeb || !Platform.isAndroid) {
+    final bool isAndroid =
+        debugIsAndroidOverride ?? (!kIsWeb && Platform.isAndroid);
+    if (!isAndroid) {
       firstFrameLog('native splash ready skipped (not Android)');
       return;
     }
@@ -84,8 +122,11 @@ abstract final class LaunchFirstFrameGate {
 
   @visibleForTesting
   static void reset() {
+    _releaseFailsafeTimer?.cancel();
+    _releaseFailsafeTimer = null;
     _deferred = false;
     _released = false;
     _nativeSplashNotified = false;
+    debugIsAndroidOverride = null;
   }
 }
