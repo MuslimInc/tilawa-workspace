@@ -156,6 +156,22 @@ void main() {
       });
     });
 
+    group('isInsufficientStorage', () {
+      test('returns true for storage error token', () {
+        const state = ReciterDownloadState(
+          errorMessage: kInsufficientStorageError,
+        );
+
+        expect(state.isInsufficientStorage, isTrue);
+      });
+
+      test('returns false for other errors', () {
+        const state = ReciterDownloadState(errorMessage: 'No internet');
+
+        expect(state.isInsufficientStorage, isFalse);
+      });
+    });
+
     group('isNetworkError', () {
       test('returns true when error contains "No internet"', () {
         const state = ReciterDownloadState(

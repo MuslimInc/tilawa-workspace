@@ -81,6 +81,11 @@ class ReciterDownloadBloc
       estimatedRequiredBytes: estimatedRequiredBytes,
     );
 
+    if (isStorageLow) {
+      emit(state.copyWith(errorMessage: kInsufficientStorageError));
+      return;
+    }
+
     _isBatchDownload = true;
     _isEnqueuingBatch = true;
     _activeBatchItemIds.clear();
@@ -91,9 +96,6 @@ class ReciterDownloadBloc
         isDownloadingAll: true,
         isPending: true,
         errorMessage: null,
-        lowStorageWarningSeq: isStorageLow
-            ? state.lowStorageWarningSeq + 1
-            : state.lowStorageWarningSeq,
       ),
     );
 

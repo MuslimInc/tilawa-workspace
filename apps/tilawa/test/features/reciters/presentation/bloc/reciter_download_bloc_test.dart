@@ -139,37 +139,30 @@ void main() {
     });
 
     blocTest<ReciterDownloadBloc, ReciterDownloadState>(
-      'increments lowStorageWarningSeq when storage check fails',
+      'blocks StartReciterDownloadAll when storage check fails',
       build: () {
         when(
           () => checkLowDeviceStorage(
             estimatedRequiredBytes: any(named: 'estimatedRequiredBytes'),
           ),
         ).thenAnswer((_) async => true);
-        when(
-          () => downloadAllSurahs(
-            surahs: any(named: 'surahs'),
-            reciterName: any(named: 'reciterName'),
-            reciterId: any(named: 'reciterId'),
-          ),
-        ).thenAnswer((_) async => const Right(null));
         return bloc;
       },
       act: (bloc) => bloc.add(
         const StartReciterDownloadAll(reciter: reciter, surahs: [surah1]),
       ),
       expect: () => [
-        const ReciterDownloadState(
-          isDownloadingAll: true,
-          isPending: true,
-          lowStorageWarningSeq: 1,
-        ),
-        const ReciterDownloadState(
-          isDownloadingAll: true,
-          isPending: false,
-          lowStorageWarningSeq: 1,
-        ),
+        const ReciterDownloadState(errorMessage: kInsufficientStorageError),
       ],
+      verify: (_) {
+        verifyNever(
+          () => downloadAllSurahs(
+            surahs: any(named: 'surahs'),
+            reciterName: any(named: 'reciterName'),
+            reciterId: any(named: 'reciterId'),
+          ),
+        );
+      },
     );
 
     test(
