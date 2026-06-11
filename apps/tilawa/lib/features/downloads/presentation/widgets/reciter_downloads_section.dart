@@ -217,29 +217,32 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
     );
   }
 
-  void _showDeleteReciterDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.l10n.deleteAll),
+  void _showDeleteReciterDialog(BuildContext parentContext) {
+    final DownloadsBloc downloadsBloc = parentContext.read<DownloadsBloc>();
+    final String reciterName = widget.reciterName;
+
+    showDialog<void>(
+      context: parentContext,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(dialogContext.l10n.deleteAll),
         content: Text(
           AppLocalizations.of(
-            context,
-          )!.deleteAllDownloadsConfirmation(widget.reciterName),
+            dialogContext,
+          )!.deleteAllDownloadsConfirmation(reciterName),
         ),
         actions: [
           TilawaButton(
-            text: context.l10n.cancel,
+            text: dialogContext.l10n.cancel,
             variant: TilawaButtonVariant.ghost,
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(),
           ),
           TilawaButton(
-            text: context.l10n.deleteAll,
+            text: dialogContext.l10n.deleteAll,
             variant: TilawaButtonVariant.danger,
             onPressed: () {
-              Navigator.of(context).pop();
-              context.read<DownloadsBloc>().add(
-                DeleteReciterDownloads(reciterName: widget.reciterName),
+              Navigator.of(dialogContext).pop();
+              downloadsBloc.add(
+                DeleteReciterDownloads(reciterName: reciterName),
               );
             },
           ),
