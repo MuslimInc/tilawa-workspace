@@ -857,6 +857,7 @@ class _RecitersTabbedBody extends StatelessWidget {
                   'reciters_favorites_tab',
                 ),
                 scrollController: favoritesScrollController,
+                onBrowseReciters: onBrowseReciters,
               ),
             ],
           ),
