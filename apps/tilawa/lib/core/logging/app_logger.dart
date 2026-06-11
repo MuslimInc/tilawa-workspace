@@ -14,7 +14,7 @@ final Logger logger = Logger(
   ),
   output: MultiOutput(<LogOutput>[
     if (!kReleaseMode) ConsoleOutput(),
-    SentryLogOutput(),
+    if (kReleaseMode) SentryLogOutput(),
   ]),
 );
 

@@ -2,17 +2,20 @@ import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
-/// Forwards [Logger] output to [Sentry.logger] when Sentry is enabled.
+/// Forwards [Logger] output to [Sentry.logger] in production release builds.
 ///
 /// Only warning-level and above are sent to avoid flooding Sentry with debug
-/// chatter from local development.
+/// chatter. Development and profile builds keep console logging only.
 class SentryLogOutput extends LogOutput {
   static const Level minimumLevel = Level.warning;
   static const int maxStackTraceLines = 10;
 
+  /// Whether [Sentry.logger] forwarding is active for this build.
+  static bool get forwardingEnabled => kReleaseMode && Sentry.isEnabled;
+
   @override
   void output(OutputEvent event) {
-    if (!Sentry.isEnabled || event.level < minimumLevel) {
+    if (!forwardingEnabled || event.level < minimumLevel) {
       return;
     }
 

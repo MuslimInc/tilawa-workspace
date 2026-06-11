@@ -10,6 +10,7 @@ import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:tilawa/core/telemetry/sentry_log_output.dart';
 import 'package:tilawa/core/navigation/notification_destination.dart';
 import 'package:tilawa/core/services/navigation_service.dart';
 import 'package:tilawa/router/app_router.dart';
@@ -555,7 +556,7 @@ class PrayerAdhanNotificationService
         '${PrayerNotificationConfig.logTag} Scheduled $scheduled prayer notifications '
         '(${pendingAdhans.length} adhan alarms persisted for boot recovery)',
       );
-      if (Sentry.isEnabled) {
+      if (SentryLogOutput.forwardingEnabled) {
         Sentry.logger.info(
           '${PrayerNotificationConfig.logTag} Prayer notifications scheduled',
           attributes: <String, SentryAttribute>{

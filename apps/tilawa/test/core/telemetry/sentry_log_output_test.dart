@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:logger/logger.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -6,6 +7,11 @@ import 'package:tilawa/core/telemetry/sentry_log_output.dart';
 
 void main() {
   group('SentryLogOutput', () {
+    test('forwardingEnabled is false outside release builds', () {
+      expect(kReleaseMode, isFalse);
+      expect(SentryLogOutput.forwardingEnabled, isFalse);
+    });
+
     test('formatBody includes error when present', () {
       final LogEvent event = LogEvent(
         Level.error,
