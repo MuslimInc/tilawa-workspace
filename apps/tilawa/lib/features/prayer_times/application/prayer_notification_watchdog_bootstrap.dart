@@ -90,6 +90,7 @@ class PrayerNotificationWatchdogBootstrap {
           success = false;
           retryable = true;
           message = failure.message ?? failure.toString();
+          logger.w('[PrayerWatchdog] Ensure scheduled failed: $message');
         },
         (ensureResult) async {
           action = ensureResult.action.name;

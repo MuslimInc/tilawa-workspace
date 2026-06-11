@@ -136,7 +136,7 @@ class DownloadRecoveryService {
         try {
           await _downloadService.cancel(download.url);
         } catch (e) {
-          logger.d(
+          logger.w(
             '[DownloadRecoveryService] Error canceling stuck active download: $e',
           );
         }

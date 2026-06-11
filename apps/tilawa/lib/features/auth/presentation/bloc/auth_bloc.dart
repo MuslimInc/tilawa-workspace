@@ -53,6 +53,10 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
           emit(AuthState.authenticated(user: user));
         },
         failure: (message, code) {
+          final String detail = code == null
+              ? 'Google sign-in failed: $message'
+              : 'Google sign-in failed: $message (code: $code)';
+          logger.w(detail);
           emit(AuthState.error(message: message));
         },
         cancelled: () {
@@ -70,8 +74,13 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onSignOut(SignOutEvent event, Emitter<AuthState> emit) async {
-    await _signOut();
-    emit(const AuthState.unauthenticated());
+    try {
+      await _signOut();
+      emit(const AuthState.unauthenticated());
+    } catch (error, stackTrace) {
+      logger.e('Sign out failed', error: error, stackTrace: stackTrace);
+      emit(const AuthState.unauthenticated());
+    }
   }
 
   Future<void> _onDeleteAccount(
@@ -96,6 +105,10 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
 
         final String message =
             failure.message ?? 'Unable to delete account';
+        logger.w(
+          'Delete account failed: $message',
+          error: failure,
+        );
         emit(AuthState.error(message: message));
 
         final UserEntity? currentUser = _getCurrentUser();

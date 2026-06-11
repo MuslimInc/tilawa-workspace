@@ -58,7 +58,7 @@ class DownloadsInitializationService implements DownloadsInitializer {
         _batchDownloadManager.locale = locale;
       }
     } catch (e) {
-      logger.d('DownloadsInitializationService: Could not sync locale: $e');
+      logger.w('DownloadsInitializationService: Could not sync locale: $e');
     }
   }
 }
