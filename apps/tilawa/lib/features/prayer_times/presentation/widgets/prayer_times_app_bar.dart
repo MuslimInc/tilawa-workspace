@@ -4,12 +4,14 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../prayer_notification_semantics_ids.dart';
 
-/// Height of the today / monthly segment row in [PrayerTimesAppBar.bottom].
+/// Height of the today / monthly tab row in [PrayerTimesAppBar.bottom].
 ///
-/// Matches [TilawaAppBarConfig.searchBottomHeight] used on reciters/bookmarks
-/// so the vellum chrome strip has the same vertical rhythm.
+/// Matches the reciters catalog tab strip:
+/// [TilawaAppBarConfig.catalogChromePadding] + [kTextTabBarHeight].
 double prayerTimesAppBarBottomExtent(BuildContext context) {
-  return TilawaAppBarConfig.searchBottomHeight(Theme.of(context));
+  final TilawaDesignTokens tokens = Theme.of(context).tokens;
+  return TilawaAppBarConfig.catalogChromePadding(tokens).vertical +
+      kTextTabBarHeight;
 }
 
 /// [RefreshIndicator.edgeOffset] below the pinned prayer-times header.
@@ -37,9 +39,7 @@ class PrayerTimesAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
-    final ColorScheme colorScheme = theme.colorScheme;
+    final TilawaDesignTokens tokens = Theme.of(context).tokens;
 
     return TilawaSliverAppBar(
       surface: TilawaAppBarSurface.parchment,
@@ -59,34 +59,84 @@ class PrayerTimesAppBar extends StatelessWidget {
         preferredSize: Size.fromHeight(prayerTimesAppBarBottomExtent(context)),
         child: Padding(
           padding: TilawaAppBarConfig.catalogChromePadding(tokens),
-          child: AnimatedBuilder(
-            animation: tabController.animation ?? tabController,
-            builder: (BuildContext context, Widget? child) {
-              final int selectedIndex = segmentIndexForTabPage(
-                tabController.animation?.value ??
-                    tabController.index.toDouble(),
-                tabController.length,
-              );
-              return TilawaSegmentedControl<String>(
-                segments: [
-                  TilawaSegment(value: 'today', label: context.l10n.today),
-                  TilawaSegment(
-                    value: 'monthly',
-                    label: context.l10n.monthly,
-                  ),
-                ],
-                selectedValue: selectedIndex == 0 ? 'today' : 'monthly',
-                backgroundColor: colorScheme.surfaceContainer,
-                selectedColor: colorScheme.surface,
-                selectedTextColor: colorScheme.primary,
-                containerRadius: tokens.resolveRadius(
-                  family: TilawaRadiusFamily.card,
-                ),
-                onValueChanged: onSegmentChanged,
-              );
-            },
+          child: _PrayerTimesHomeTabBar(
+            controller: tabController,
+            onSegmentChanged: onSegmentChanged,
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Catalog-style tab strip — same chrome as reciters (All / Favorites / Downloads).
+class _PrayerTimesHomeTabBar extends StatelessWidget {
+  const _PrayerTimesHomeTabBar({
+    required this.controller,
+    required this.onSegmentChanged,
+  });
+
+  final TabController controller;
+  final ValueChanged<String> onSegmentChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final TilawaDesignTokens tokens = theme.tokens;
+    final ColorScheme colorScheme = theme.colorScheme;
+    final chipTokens = theme.componentTokens.chip;
+
+    return SizedBox(
+      height: kTextTabBarHeight,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
+        ),
+        child: TabBar(
+          controller: controller,
+          onTap: (int index) {
+            onSegmentChanged(index == 0 ? 'today' : 'monthly');
+          },
+          splashBorderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
+          dividerColor: Colors.transparent,
+          indicatorSize: TabBarIndicatorSize.tab,
+          indicatorPadding: EdgeInsets.all(tokens.spaceExtraSmall),
+          indicator: BoxDecoration(
+            color: colorScheme.onSurface,
+            borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
+          ),
+          labelColor: colorScheme.surface,
+          unselectedLabelColor: colorScheme.onSurfaceVariant,
+          labelStyle: theme.textTheme.labelLarge?.copyWith(
+            fontWeight: chipTokens.selectionFontWeight,
+          ),
+          unselectedLabelStyle: theme.textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+          tabs: [
+            _PrayerTimesTab(label: context.l10n.today),
+            _PrayerTimesTab(label: context.l10n.monthly),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PrayerTimesTab extends StatelessWidget {
+  const _PrayerTimesTab({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tab(
+      height: kTextTabBarHeight,
+      child: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
       ),
     );
   }
