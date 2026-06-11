@@ -5,7 +5,7 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:tilawa/core/telemetry/crash_reporting_context.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-/// Developer-only control that sends an intentional error to Sentry.
+/// Developer-only control that sends a test issue and structured log to Sentry.
 class SentryDebugVerifyTile extends StatelessWidget {
   const SentryDebugVerifyTile({super.key, this.isLast = false});
 
@@ -52,6 +52,13 @@ class SentryDebugVerifyTile extends StatelessWidget {
       },
     );
 
+    Sentry.logger.warn(
+      'Sentry verify log ($verifyId)',
+      attributes: <String, SentryAttribute>{
+        CrashReportingTagKeys.sentryVerify: SentryAttribute.string('true'),
+      },
+    );
+
     if (!context.mounted) {
       return;
     }
@@ -59,14 +66,13 @@ class SentryDebugVerifyTile extends StatelessWidget {
     final String message;
     if (eventId == SentryId.empty()) {
       message =
-          'Event was dropped or failed to send. '
-          'Check logcat for [sentry] and filter Issues by '
-          'environment: development.';
+          'Issue was dropped or failed to send. '
+          'Check logcat for [sentry]. Filter Issues and Explore → Logs by '
+          'environment: development and sentry.verify:true.';
     } else {
       message =
-          'Sent to Sentry ($eventId). '
-          'In Issues, set environment to development and search '
-          'sentry.verify:true.';
+          'Sent issue ($eventId) and verify log. '
+          'Issues: sentry.verify:true. Logs: Explore → Logs, development.';
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
