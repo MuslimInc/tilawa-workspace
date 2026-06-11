@@ -1,21 +1,24 @@
 rules_version = '2';
 
-// WARNING: This file contains ONLY the app_startup_logs collection rule and
-// is NOT a complete Firestore ruleset. Deploying this file alone will deny
-// all access to every other collection (users/*, subscription_plans, premium,
-// etc.) because Firestore's default for unmatched paths is deny.
-//
-// Merge these rules into the project's full firestore.rules before any deploy.
-// See docs/observability/startup_health_logs.md for context on this collection.
+// Tilawa client + Cloud Functions Firestore rules.
+// Deploy: firebase deploy --only firestore:rules
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Client startup telemetry (see docs/observability/startup_health_logs.md).
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
     // Remote in-app update policy (see InAppUpdateConfigDataSourceImpl).
     match /app_config/in_app_update {
       allow read: if true;
       allow write: if false;
     }
 
+    // Client startup telemetry (see docs/observability/startup_health_logs.md).
     match /app_startup_logs/{logId} {
       allow create: if request.resource.data.keys().hasAll([
           'level',
@@ -30,6 +33,50 @@ service cloud.firestore {
           'startup_completed',
         ];
       allow read, update, delete: if false;
+    }
+
+    // Subscription catalog — read-only for clients; seed via admin tools.
+    match /subscription_plans/{planId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Support purchase ledger — written by verifySupportPurchase Cloud Function.
+    match /support_purchases/{tokenHash} {
+      allow read, write: if false;
+    }
+
+    // Push campaigns — created in console; sendNotification function delivers.
+    match /notifications/{notificationId} {
+      allow read, write: if false;
+    }
+
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+
+      match /fcm_tokens/{tokenId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      match /favorites/{favoriteDoc}/items/{itemId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      match /premium/{docId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      match /purchases/{purchaseId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId);
+        allow update, delete: if false;
+      }
+
+      match /cancellations/{cancellationId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId);
+        allow update, delete: if false;
+      }
     }
   }
 }
