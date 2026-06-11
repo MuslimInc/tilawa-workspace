@@ -27,7 +27,9 @@ Future<void> main() async {
       options.dsn = kProfileMode ? '' : SentryConfig.dsn;
       options.environment = kReleaseMode ? 'production' : 'development';
       options.debug = kDebugMode;
+      options.enableLogs = !kProfileMode;
       options.beforeSend = CrashReportingContext.filterEmulatorsInRelease;
+      options.beforeSendLog = CrashReportingContext.filterEmulatorLogsInRelease;
     },
     appRunner: () async {
       await CrashReportingContext.applyToSentry();

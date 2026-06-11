@@ -80,6 +80,36 @@ abstract final class CrashReportingContext {
     return event;
   }
 
+  /// Drops emulator/simulator structured logs in release builds.
+  ///
+  /// Uses the cached [device.kind] tag from [applyToSentry] — Sentry logs are
+  /// not enriched with `device.simulator` in SDK 9.21.
+  static SentryLog? filterEmulatorLogsInRelease(SentryLog log) {
+    final String? deviceKind = _sentryTags?[CrashReportingTagKeys.deviceKind];
+    return filterEmulatorLogsForMode(
+      log: log,
+      releaseMode: kReleaseMode,
+      deviceKind: deviceKind,
+    );
+  }
+
+  @visibleForTesting
+  static SentryLog? filterEmulatorLogsForMode({
+    required SentryLog log,
+    required bool releaseMode,
+    String? deviceKind,
+  }) {
+    if (!releaseMode) {
+      return log;
+    }
+
+    if (deviceKind == 'emulator' || deviceKind == 'simulator') {
+      return null;
+    }
+
+    return log;
+  }
+
   @visibleForTesting
   static String resolveBuildMode({
     required bool debugMode,
