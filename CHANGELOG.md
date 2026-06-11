@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.11+55] - 2026-06-11 [Google Play Release]
+
+### Added
+
+- **Downloads**: Low-storage check before single and batch downloads; **Download All**
+  is blocked (not just warned) when free space is insufficient.
+- **Downloads**: `disk_space_plus` integration for free-space reads on the download
+  volume.
+
+### Changed
+
+- **Version**: Production track bumped to **2.0.11** (build **55**).
+- **Downloads tab**: Lists only completed downloads with valid on-disk files.
+- **Reciters**: Download All chip keeps an opaque active background and a visible
+  progress ring at 0%.
+- **UI**: Semantic toast colors; RTL-correct swipe-to-delete backgrounds; undo
+  SnackBars on bookmarks and favorites dismiss.
+
+### Fixed
+
+- **Downloads**: Delete-all confirmation no longer throws `ProviderNotFoundException`.
+
 ## [2.0.10+54] - 2026-06-11 [Google Play Release]
 
 ### Added
