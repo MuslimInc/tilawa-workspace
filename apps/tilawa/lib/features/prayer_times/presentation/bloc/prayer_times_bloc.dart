@@ -26,6 +26,8 @@ class PrayerTimesEvent with _$PrayerTimesEvent {
     required int month,
   }) = _LoadMonthlyPrayerTimes;
   const factory PrayerTimesEvent.updateLocation() = _UpdateLocation;
+  const factory PrayerTimesEvent.retryLocationSilently() =
+      _RetryLocationSilently;
   const factory PrayerTimesEvent.updateSettings(PrayerSettingsEntity settings) =
       _UpdateSettings;
   const factory PrayerTimesEvent.refreshCountdown() = _RefreshCountdown;
@@ -77,6 +79,10 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
       transformer: restartable(),
     );
     on<_UpdateLocation>(_onUpdateLocation, transformer: restartable());
+    on<_RetryLocationSilently>(
+      _onRetryLocationSilently,
+      transformer: restartable(),
+    );
     on<_UpdateSettings>(_onUpdateSettings);
     on<_RefreshIfStale>(_onRefreshIfStale, transformer: droppable());
     on<_SetManualLocation>(_onSetManualLocation);
@@ -112,10 +118,21 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
     // We need to use the potentially updated settings
     var effectiveSettings = settings;
 
-    // Check for saved location or get current location
-    double? latitude = settings.savedLatitude;
-    double? longitude = settings.savedLongitude;
-    String? locationName = settings.savedLocationName;
+    // Prefer an explicit saved location, otherwise reuse the last coordinates
+    // that successfully loaded prayer times (avoids a fresh GPS fix every open).
+    double? latitude = settings.effectiveSchedulingLatitude;
+    double? longitude = settings.effectiveSchedulingLongitude;
+    String? locationName = settings.effectiveSchedulingLocationName;
+
+    // A location update may have resolved coordinates in-memory before the
+    // persisted settings reload reflects them.
+    if (latitude == null || longitude == null) {
+      if (state.latitude != null && state.longitude != null) {
+        latitude = state.latitude;
+        longitude = state.longitude;
+        locationName = state.locationName ?? locationName;
+      }
+    }
 
     if (latitude == null || longitude == null) {
       // Try to get current location
@@ -271,39 +288,81 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
     _UpdateLocation event,
     Emitter<PrayerTimesState> emit,
   ) async {
-    emit(state.copyWith(isLoadingLocation: true));
+    await _resolveLocationUpdate(
+      emit,
+      forceRefresh: true,
+      allowOpenSettings: true,
+      requestIfDenied: true,
+      showLoading: true,
+    );
+  }
 
-    // Explicit "Enable location" tap: allow opening app settings when the
-    // permission is permanently denied so the user can re-grant it. The passive
-    // load in [_onLoadPrayerTimes] leaves this false so opening the screen never
-    // navigates the user away to system settings.
+  /// After the user grants location in system settings, retry without opening
+  /// settings or re-prompting for permission.
+  Future<void> _onRetryLocationSilently(
+    _RetryLocationSilently event,
+    Emitter<PrayerTimesState> emit,
+  ) async {
+    if (state.status != PrayerTimesStatus.locationRequired) {
+      return;
+    }
+
+    await _resolveLocationUpdate(
+      emit,
+      forceRefresh: false,
+      allowOpenSettings: false,
+      requestIfDenied: false,
+      showLoading: false,
+    );
+  }
+
+  Future<void> _resolveLocationUpdate(
+    Emitter<PrayerTimesState> emit, {
+    required bool forceRefresh,
+    required bool allowOpenSettings,
+    required bool requestIfDenied,
+    required bool showLoading,
+  }) async {
+    if (showLoading) {
+      emit(state.copyWith(isLoadingLocation: true));
+    }
+
     final Either<Failure, LocationResult> locationResult =
         await _getCurrentLocationUseCase.call(
-          forceRefresh: true,
-          allowOpenSettings: true,
-          requestIfDenied: true,
+          forceRefresh: forceRefresh,
+          allowOpenSettings: allowOpenSettings,
+          requestIfDenied: requestIfDenied,
         );
 
-    locationResult.fold(
-      (failure) => emit(
-        state.copyWith(
-          status: PrayerTimesStatus.locationRequired,
-          isLoadingLocation: false,
-          errorMessage: failure.message ?? 'Unknown error',
-        ),
-      ),
-      (location) {
+    await locationResult.fold<Future<void>>(
+      (failure) async {
+        emit(
+          state.copyWith(
+            status: PrayerTimesStatus.locationRequired,
+            isLoadingLocation: false,
+            errorMessage: failure.message ?? 'Unknown error',
+          ),
+        );
+      },
+      (location) async {
+        final PrayerSettingsEntity updatedSettings =
+            await _persistLastResolvedLocationIfNeeded(
+              settings: state.settings,
+              latitude: location.latitude,
+              longitude: location.longitude,
+              locationName: location.locationName,
+            );
+
         emit(
           state.copyWith(
             latitude: location.latitude,
             longitude: location.longitude,
             locationName: location.locationName,
             isLoadingLocation: false,
+            settings: updatedSettings,
           ),
         );
 
-        // Reload prayer times with new location; force reschedule on next
-        // schedule attempt because location materially changes timings.
         add(const PrayerTimesEvent.loadPrayerTimes(forceReschedule: true));
       },
     );

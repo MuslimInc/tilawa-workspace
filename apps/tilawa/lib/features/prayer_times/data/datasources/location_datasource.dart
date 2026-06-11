@@ -64,17 +64,16 @@ class LocationDataSourceImpl implements LocationDataSource {
           .timeout(_positionTimeout);
       return _getLocationResultFromPosition(position);
     } catch (e) {
-      if (e is TimeoutException) {
-        return LocationResult.error(
-          'Location request timed out. Please check your GPS signal.',
-        );
-      }
-
-      // Fallback to last known position on any error
       final Position? lastKnown = await _geolocatorClient
           .getLastKnownPosition();
       if (lastKnown != null) {
         return _getLocationResultFromPosition(lastKnown);
+      }
+
+      if (e is TimeoutException) {
+        return LocationResult.error(
+          'Location request timed out. Please check your GPS signal.',
+        );
       }
 
       return LocationResult.error('Failed to get current location: $e');
