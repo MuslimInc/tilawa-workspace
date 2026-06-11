@@ -186,7 +186,6 @@ class _GoogleSignInButton extends StatelessWidget {
     return TilawaButton(
       text: context.l10n.continueWithGoogle,
       semanticLabel: context.l10n.continueWithGoogle,
-      size: TilawaButtonSize.large,
       isFullWidth: true,
       isLoading: isLoading,
       onPressed: onPressed,
