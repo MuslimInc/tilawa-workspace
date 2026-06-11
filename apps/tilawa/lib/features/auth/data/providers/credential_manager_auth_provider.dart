@@ -63,12 +63,17 @@ class CredentialManagerAuthProvider implements AuthProviderInterface {
       return AuthResult.failure(
         message: e.message ?? 'Authentication failed',
         code: e.code,
+        details: e.details?.toString(),
       );
     } on CredentialException catch (e) {
       if (_isUserCancellation(e)) {
         return const AuthResult.cancelled();
       }
-      return AuthResult.failure(message: e.message, code: e.code.toString());
+      return AuthResult.failure(
+        message: e.message,
+        code: e.code.toString(),
+        details: e.details?.toString(),
+      );
     } on FirebaseAuthException catch (e) {
       return AuthResult.failure(
         message: e.message ?? 'Firebase authentication failed',

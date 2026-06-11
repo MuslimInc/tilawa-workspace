@@ -56,6 +56,7 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
           return AuthResult.failure(
             message: e.description ?? 'Authentication failed',
             code: e.code.name,
+            details: e.details?.toString(),
           );
       }
     } on FirebaseAuthException catch (e) {

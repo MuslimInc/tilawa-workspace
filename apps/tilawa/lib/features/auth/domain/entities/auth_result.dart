@@ -8,8 +8,14 @@ part 'auth_result.g.dart';
 abstract class AuthResult with _$AuthResult {
   const factory AuthResult.success({required UserEntity user}) = AuthSuccess;
 
-  const factory AuthResult.failure({required String message, String? code}) =
-      AuthFailure;
+  const factory AuthResult.failure({
+    required String message,
+    String? code,
+
+    /// Provider diagnostics (e.g. the native stack trace carried in
+    /// `CredentialException.details`) — for logging, never for UI.
+    String? details,
+  }) = AuthFailure;
 
   const factory AuthResult.cancelled() = AuthCancelled;
 

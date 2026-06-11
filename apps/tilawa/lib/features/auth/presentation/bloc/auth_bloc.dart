@@ -52,11 +52,16 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
           unawaited(_syncDeviceToken(user.id).catchError((_) {}));
           emit(AuthState.authenticated(user: user));
         },
-        failure: (message, code) {
+        failure: (message, code, details) {
           final String detail = code == null
               ? 'Google sign-in failed: $message'
               : 'Google sign-in failed: $message (code: $code)';
-          logger.w(detail);
+          // Provider details are a native stack trace; passing them as the
+          // log stack trace gets them truncated and attached by Sentry.
+          logger.w(
+            detail,
+            stackTrace: details == null ? null : StackTrace.fromString(details),
+          );
           emit(AuthState.error(message: message));
         },
         cancelled: () {

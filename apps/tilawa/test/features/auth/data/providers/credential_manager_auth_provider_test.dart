@@ -171,9 +171,13 @@ void main() {
 
         // Assert
         result.maybeWhen(
-          failure: (message, code) {
+          failure: (message, code, details) {
             expect(message, 'Login failed');
             expect(code, '204');
+            expect(
+              details,
+              contains('GetCredentialProviderConfigurationException'),
+            );
           },
           orElse: () => fail('Expected failure'),
         );
