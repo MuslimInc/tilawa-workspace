@@ -63,34 +63,37 @@ class _LoginScreenState extends State<LoginScreen> {
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: overlayStyle,
         child: Scaffold(
-          body: SafeArea(
-            child: BlocConsumer<AuthBloc, AuthState>(
-              listenWhen: (AuthState previous, AuthState current) {
-                if (current is AuthAuthenticated &&
-                    previous is! AuthAuthenticated) {
-                  return true;
-                }
-                return current is AuthError && previous is! AuthError;
-              },
-              listener: (context, state) {
-                state.when(
-                  initial: () {},
-                  loading: () {},
-                  authenticated: (_) => _navigateToHome(context),
-                  unauthenticated: () {},
-                  error: (_) {
-                    ToastUtils.showToast(
-                      msg: context.l10n.unableToSignInWithThirdPartyAccount,
-                    );
-                  },
-                );
-              },
-              builder: (context, state) {
-                return TilawaThumbReachLayout(
-                  content: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: tokens.spaceLarge,
-                    ),
+          body: BlocConsumer<AuthBloc, AuthState>(
+            listenWhen: (AuthState previous, AuthState current) {
+              if (current is AuthAuthenticated &&
+                  previous is! AuthAuthenticated) {
+                return true;
+              }
+              return current is AuthError && previous is! AuthError;
+            },
+            listener: (context, state) {
+              state.when(
+                initial: () {},
+                loading: () {},
+                authenticated: (_) => _navigateToHome(context),
+                unauthenticated: () {},
+                error: (_) {
+                  ToastUtils.showToast(
+                    msg: context.l10n.unableToSignInWithThirdPartyAccount,
+                  );
+                },
+              );
+            },
+            builder: (context, state) {
+              return TilawaThumbReachLayout(
+                useSafeArea: true,
+                content: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: tokens.spaceLarge,
+                  ),
+                  child: TilawaContentBounds(
+                    kind: TilawaContentKind.form,
+                    alignment: Alignment.center,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -136,23 +139,23 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
                   ),
-                  actions: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    spacing: tokens.spaceMedium,
-                    children: <Widget>[
-                      _GoogleSignInButton(
-                        isLoading: state is AuthLoading,
-                        onPressed: () => context.read<AuthBloc>().add(
-                          const SignInWithGoogleEvent(),
-                        ),
+                ),
+                actions: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  spacing: tokens.spaceLarge,
+                  children: <Widget>[
+                    _GoogleSignInButton(
+                      isLoading: state is AuthLoading,
+                      onPressed: () => context.read<AuthBloc>().add(
+                        const SignInWithGoogleEvent(),
                       ),
-                      const _LoginLegalFooter(),
-                    ],
-                  ),
-                );
-              },
-            ),
+                    ),
+                    const _LoginLegalFooter(),
+                  ],
+                ),
+              );
+            },
           ),
         ),
       ),
@@ -178,9 +181,7 @@ class _GoogleSignInButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
-    final ColorScheme colorScheme = theme.colorScheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return TilawaButton(
       text: context.l10n.continueWithGoogle,
@@ -191,12 +192,6 @@ class _GoogleSignInButton extends StatelessWidget {
       onPressed: onPressed,
       backgroundColor: colorScheme.surface,
       foregroundColor: colorScheme.onSurface,
-      borderColor: colorScheme.outlineVariant,
-      borderRadius: tokens.radiusExtraLarge,
-      textStyle: theme.textTheme.labelLarge?.copyWith(
-        fontWeight: FontWeight.w600,
-        letterSpacing: 0.1,
-      ),
       leadingIcon: const _GoogleMark(),
     );
   }
@@ -208,15 +203,14 @@ class _GoogleMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double size = Theme.of(context).tokens.iconSizeMedium;
+    final double size =
+        IconTheme.of(context).size ?? Theme.of(context).tokens.iconSizeMedium;
 
-    return SizedBox(
+    return SvgPicture.asset(
+      'assets/icons/google_icon.svg',
       width: size,
       height: size,
-      child: SvgPicture.asset(
-        'assets/icons/google_icon.svg',
-        fit: BoxFit.contain,
-      ),
+      fit: BoxFit.contain,
     );
   }
 }
