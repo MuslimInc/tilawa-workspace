@@ -16,6 +16,7 @@ workspace:
   - packages/compass
 
 dev_dependencies:
+  sentry_dart_plugin: ^3.4.0
   melos: ^7.8.0
 
 melos:
@@ -81,3 +82,9 @@ melos:
       run: melos exec -- "dart run build_runner watch --delete-conflicting-outputs"
       packageFilters:
         dependsOn: build_runner
+
+sentry:
+  upload_debug_symbols: true
+  upload_source_maps: true
+  project: flutter
+  org: tilawa-2y

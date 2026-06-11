@@ -120,7 +120,8 @@ jobs:
             --target-platform android-arm64 \
             --split-debug-info=build/symbols \
             --build-name=${{ inputs.build_name }} \
-            --build-number=${{ inputs.build_number }}
+            --build-number=${{ inputs.build_number }} \
+            --dart-define=TILAWA_DISTRIBUTION=play_${{ inputs.track }}
 
       - name: Upload debug symbols
         if: always()

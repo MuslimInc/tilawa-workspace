@@ -79,3 +79,6 @@ packages/ui_kit/test/goldens/failures/
 
 # Claude Code agent worktrees (transient, harness-managed)
 .claude/worktrees/
+
+sentry.properties
+sentry-wizard
