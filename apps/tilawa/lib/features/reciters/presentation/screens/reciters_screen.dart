@@ -1638,13 +1638,26 @@ class _ReciterGridSliver extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     PerfLogger.markBuild('_ReciterGridSliver');
-    final tokens = Theme.of(context).tokens;
+    final ThemeData theme = Theme.of(context);
+    final tokens = theme.tokens;
     final double targetItemExtent =
         tokens.narrowCardWidthThreshold +
         tokens.spaceExtraLarge +
         tokens.spaceLarge;
+    // Tile height must fit [ReciterCard]'s text block: a two-line name
+    // (titleMedium, height 1.2) over a two-line moshaf label (bodySmall,
+    // height 1.35) — multi-column layouts wrap both — plus card padding.
+    final TextScaler textScaler = MediaQuery.textScalerOf(context);
+    final TextTheme textTheme = theme.textTheme;
+    final double nameBlockHeight =
+        2 * textScaler.scale((textTheme.titleMedium?.fontSize ?? 16) * 1.2);
+    final double moshafBlockHeight =
+        2 * textScaler.scale((textTheme.bodySmall?.fontSize ?? 12) * 1.35);
     final double targetItemHeight =
-        tokens.playerCollapsedHeight + tokens.spaceExtraLarge;
+        nameBlockHeight +
+        moshafBlockHeight +
+        tokens.spaceExtraSmall +
+        2 * tokens.spaceLarge;
 
     return SliverLayoutBuilder(
       builder: (context, constraints) {

@@ -190,27 +190,33 @@ class _ReciterInfo extends StatelessWidget {
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
+        // Flexible: grid tiles cap the card height (e.g. tablet two-column
+        // layout); the label drops to one line there instead of overflowing.
         if (moshafLabel != null)
-          Text(
-            moshafLabel,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w500,
-              height: 1.35,
+          Flexible(
+            child: Text(
+              moshafLabel,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
+                height: 1.35,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
           )
         else if (moshafCount == 0)
-          Text(
-            context.l10n.recitationsAvailable(moshafCount),
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w500,
-              height: 1.35,
+          Flexible(
+            child: Text(
+              context.l10n.recitationsAvailable(moshafCount),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
+                height: 1.35,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
       ],
     );
