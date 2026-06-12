@@ -6,6 +6,7 @@ import 'package:injectable/injectable.dart';
 
 import 'package:tilawa/core/logging/app_logger.dart';
 
+import '../services/android_sign_in_platform_policy.dart';
 import '../../domain/entities/auth_result.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/providers/auth_provider_interface.dart';
@@ -15,10 +16,12 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
   GoogleAuthProviderImpl(
     this._firebaseAuth,
     this._googleSignIn,
+    this._platformPolicy,
   );
   static const Duration signInTimeout = Duration(seconds: 60);
   final FirebaseAuth _firebaseAuth;
   final GoogleSignIn _googleSignIn;
+  final AndroidSignInPlatformPolicy _platformPolicy;
 
   @override
   Stream<UserEntity?> get authStateChanges {
@@ -94,6 +97,15 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
   /// [AuthResult.cancelled] by the caller — instead of falling through
   /// to a second sign-in UI.
   Future<GoogleSignInAccount> _signInAccount() async {
+    await _platformPolicy.warmUp();
+    if (_platformPolicy.skipAutomaticSignIn) {
+      logger.i(
+        '[GoogleSignIn] Transsion OEM: skipping lightweight Credential '
+        'Manager sheet; using account-chooser button flow',
+      );
+      return _googleSignIn.authenticate();
+    }
+
     final Future<GoogleSignInAccount?>? lightweight = _googleSignIn
         .attemptLightweightAuthentication(reportAllExceptions: true);
     final GoogleSignInAccount? account = lightweight == null
