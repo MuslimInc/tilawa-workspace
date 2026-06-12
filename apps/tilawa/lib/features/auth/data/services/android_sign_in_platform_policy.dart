@@ -10,15 +10,26 @@ import 'package:tilawa/features/auth/core/android_credential_manager_oem_policy.
 @lazySingleton
 class AndroidSignInPlatformPolicy {
   AndroidSignInPlatformPolicy({DeviceInfoPlugin? deviceInfoPlugin})
-    : _deviceInfoPlugin = deviceInfoPlugin ?? DeviceInfoPlugin();
+    : _deviceInfoPlugin = deviceInfoPlugin ?? DeviceInfoPlugin(),
+      _isAndroid = Platform.isAndroid;
 
   @visibleForTesting
   AndroidSignInPlatformPolicy.test({
     required this.skipAutomaticSignIn,
   }) : _deviceInfoPlugin = null,
+       _isAndroid = false,
        _warmUpComplete = true;
 
+  /// Allows host tests to exercise the Android-only warm-up path.
+  @visibleForTesting
+  AndroidSignInPlatformPolicy.forPlatform({
+    required DeviceInfoPlugin deviceInfoPlugin,
+    required bool isAndroid,
+  }) : _deviceInfoPlugin = deviceInfoPlugin,
+       _isAndroid = isAndroid;
+
   final DeviceInfoPlugin? _deviceInfoPlugin;
+  final bool _isAndroid;
 
   /// Transsion OEMs: skip auto sign-in and silent auth — their Play Services
   /// sign-in UI can stay invisible behind the Flutter surface.
@@ -28,7 +39,7 @@ class AndroidSignInPlatformPolicy {
 
   /// Loads OEM info once; safe to call concurrently.
   Future<void> warmUp() {
-    if (!Platform.isAndroid) {
+    if (!_isAndroid) {
       _warmUpComplete = true;
       return Future<void>.value();
     }
