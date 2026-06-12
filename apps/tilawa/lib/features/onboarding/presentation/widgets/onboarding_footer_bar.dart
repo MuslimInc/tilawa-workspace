@@ -59,7 +59,6 @@ class OnboardingFooterBar extends StatelessWidget {
             child: TilawaButton(
               text: backLabel,
               variant: TilawaButtonVariant.ghost,
-              size: TilawaButtonSize.large,
               semanticLabel: backLabel,
               onPressed: onBack,
             ),
@@ -67,7 +66,6 @@ class OnboardingFooterBar extends StatelessWidget {
         TilawaButton(
           text: _primaryLabel,
           variant: TilawaButtonVariant.primary,
-          size: TilawaButtonSize.large,
           semanticLabel: _primaryLabel,
           foregroundColor: colorScheme.onPrimary,
           onPressed: _onPrimary,

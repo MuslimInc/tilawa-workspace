@@ -286,6 +286,56 @@ void main() {
     );
 
     blocTest<PrayerTimesBloc, PrayerTimesState>(
+      'emits [loading, loaded] when last resolved location is cached',
+      build: () {
+        when(mockLoadPrayerSettingsUseCase.call()).thenAnswer(
+          (_) async => const Right(
+            PrayerSettingsEntity(
+              lastResolvedLatitude: 10.0,
+              lastResolvedLongitude: 10.0,
+              lastResolvedLocationName: 'City',
+            ),
+          ),
+        );
+        when(
+          mockGetPrayerTimesUseCase.call(
+            latitude: anyNamed('latitude'),
+            longitude: anyNamed('longitude'),
+            date: anyNamed('date'),
+            settings: anyNamed('settings'),
+          ),
+        ).thenAnswer((_) async => Right(tPrayerTimes));
+        return bloc;
+      },
+      act: (bloc) => bloc.add(const PrayerTimesEvent.loadPrayerTimes()),
+      expect: () => [
+        const PrayerTimesState(status: PrayerTimesStatus.loading),
+        const PrayerTimesState(
+          status: PrayerTimesStatus.loading,
+          settings: PrayerSettingsEntity(
+            lastResolvedLatitude: 10.0,
+            lastResolvedLongitude: 10.0,
+            lastResolvedLocationName: 'City',
+          ),
+        ),
+        isA<PrayerTimesState>()
+            .having((s) => s.status, 'status', PrayerTimesStatus.loaded)
+            .having((s) => s.latitude, 'latitude', 10.0)
+            .having((s) => s.longitude, 'longitude', 10.0)
+            .having((s) => s.locationName, 'locationName', 'City'),
+      ],
+      verify: (_) {
+        verifyNever(
+          mockGetCurrentLocationUseCase.call(
+            forceRefresh: anyNamed('forceRefresh'),
+            allowOpenSettings: anyNamed('allowOpenSettings'),
+            requestIfDenied: anyNamed('requestIfDenied'),
+          ),
+        );
+      },
+    );
+
+    blocTest<PrayerTimesBloc, PrayerTimesState>(
       'emits [loading, loaded] when location is saved and prayer times fetched successfully',
       build: () {
         when(mockLoadPrayerSettingsUseCase.call()).thenAnswer(
@@ -323,75 +373,53 @@ void main() {
       ],
     );
 
-    blocTest<PrayerTimesBloc, PrayerTimesState>(
-      'emits [isLoadingLocation=true, loaded] when updating location',
-      build: () {
-        when(
-          mockGetCurrentLocationUseCase.call(
-            forceRefresh: anyNamed('forceRefresh'),
-            allowOpenSettings: anyNamed('allowOpenSettings'),
-            requestIfDenied: anyNamed('requestIfDenied'),
-          ),
-        ).thenAnswer((_) async => Right(tLocationResult));
-        // Mocks for the triggered loadPrayerTimes
-        when(
-          mockLoadPrayerSettingsUseCase.call(),
-        ).thenAnswer((_) async => const Right(tSettings));
-        when(
-          mockGetPrayerTimesUseCase.call(
-            latitude: anyNamed('latitude'),
-            longitude: anyNamed('longitude'),
-            date: anyNamed('date'),
-            settings: anyNamed('settings'),
-          ),
-        ).thenAnswer((_) async => Right(tPrayerTimes));
-        return bloc;
-      },
-      act: (bloc) => bloc.add(const PrayerTimesEvent.updateLocation()),
-      expect: () => [
-        const PrayerTimesState(isLoadingLocation: true),
-        const PrayerTimesState(
-          latitude: 10.0,
-          longitude: 10.0,
-          locationName: 'City',
+    test('updateLocation loads prayer times after resolving coordinates', () async {
+      when(
+        mockGetCurrentLocationUseCase.call(
+          forceRefresh: anyNamed('forceRefresh'),
+          allowOpenSettings: anyNamed('allowOpenSettings'),
+          requestIfDenied: anyNamed('requestIfDenied'),
         ),
-        const PrayerTimesState(
-          latitude: 10.0,
-          longitude: 10.0,
-          locationName: 'City',
-          status: PrayerTimesStatus.loading,
+      ).thenAnswer((_) async => Right(tLocationResult));
+      when(
+        mockLoadPrayerSettingsUseCase.call(),
+      ).thenAnswer((_) async => const Right(tSettings));
+      when(
+        mockGetPrayerTimesUseCase.call(
+          latitude: anyNamed('latitude'),
+          longitude: anyNamed('longitude'),
+          date: anyNamed('date'),
+          settings: anyNamed('settings'),
         ),
-        const PrayerTimesState(
-          latitude: 10.0,
-          longitude: 10.0,
-          locationName: 'City',
-          status: PrayerTimesStatus.loading,
-          isLoadingLocation: true,
+      ).thenAnswer((_) async => Right(tPrayerTimes));
+
+      final PrayerTimesBloc testBloc = PrayerTimesBloc(
+        mockGetPrayerTimesUseCase,
+        mockGetMonthlyPrayerTimesUseCase,
+        mockGetCurrentLocationUseCase,
+        mockGetCountryCodeUseCase,
+        mockSavePrayerSettingsUseCase,
+        mockLoadPrayerSettingsUseCase,
+        mockSchedulePrayerNotificationsUseCase,
+        mockCancelPrayerNotificationsUseCase,
+      );
+      addTearDown(testBloc.close);
+
+      testBloc.add(const PrayerTimesEvent.updateLocation());
+      await testBloc.stream.firstWhere(
+        (PrayerTimesState state) => state.status == PrayerTimesStatus.loaded,
+      );
+
+      expect(testBloc.state.locationName, 'City');
+      expect(testBloc.state.isLoadingLocation, isFalse);
+      verify(
+        mockGetCurrentLocationUseCase.call(
+          forceRefresh: true,
+          allowOpenSettings: true,
+          requestIfDenied: true,
         ),
-        const PrayerTimesState(
-          latitude: 10.0,
-          longitude: 10.0,
-          locationName: 'City',
-          status: PrayerTimesStatus.loading,
-        ),
-        const PrayerTimesState(
-          latitude: 10.0,
-          longitude: 10.0,
-          locationName: 'City',
-          status: PrayerTimesStatus.loading,
-          settings: PrayerSettingsEntity(
-            lastResolvedLatitude: 10.0,
-            lastResolvedLongitude: 10.0,
-            lastResolvedLocationName: 'City',
-          ),
-        ),
-        isA<PrayerTimesState>()
-            .having((s) => s.status, 'status', PrayerTimesStatus.loaded)
-            .having((s) => s.todayPrayerTimes, 'todayPrayerTimes', tPrayerTimes)
-            .having((s) => s.locationName, 'locationName', 'City')
-            .having((s) => s.isLoadingLocation, 'isLoadingLocation', false),
-      ],
-    );
+      ).called(1);
+    });
 
     blocTest<PrayerTimesBloc, PrayerTimesState>(
       'emits updated settings when updating settings',
@@ -963,6 +991,61 @@ void main() {
             settings: anyNamed('settings'),
           ),
         );
+      },
+    );
+
+    test(
+      'retryLocationSilently reloads after permission is granted in settings',
+      () async {
+        when(
+          mockGetCurrentLocationUseCase.call(
+            forceRefresh: false,
+            allowOpenSettings: false,
+            requestIfDenied: false,
+          ),
+        ).thenAnswer((_) async => Right(tLocationResult));
+        when(
+          mockLoadPrayerSettingsUseCase.call(),
+        ).thenAnswer((_) async => const Right(tSettings));
+        when(
+          mockGetPrayerTimesUseCase.call(
+            latitude: anyNamed('latitude'),
+            longitude: anyNamed('longitude'),
+            date: anyNamed('date'),
+            settings: anyNamed('settings'),
+          ),
+        ).thenAnswer((_) async => Right(tPrayerTimes));
+
+        final PrayerTimesBloc testBloc = PrayerTimesBloc(
+          mockGetPrayerTimesUseCase,
+          mockGetMonthlyPrayerTimesUseCase,
+          mockGetCurrentLocationUseCase,
+          mockGetCountryCodeUseCase,
+          mockSavePrayerSettingsUseCase,
+          mockLoadPrayerSettingsUseCase,
+          mockSchedulePrayerNotificationsUseCase,
+          mockCancelPrayerNotificationsUseCase,
+        );
+        addTearDown(testBloc.close);
+
+        testBloc.emit(
+          const PrayerTimesState(
+            status: PrayerTimesStatus.locationRequired,
+            errorMessage: 'Location permission denied',
+          ),
+        );
+        testBloc.add(const PrayerTimesEvent.retryLocationSilently());
+        await testBloc.stream.firstWhere(
+          (PrayerTimesState state) => state.status == PrayerTimesStatus.loaded,
+        );
+
+        verify(
+          mockGetCurrentLocationUseCase.call(
+            forceRefresh: false,
+            allowOpenSettings: false,
+            requestIfDenied: false,
+          ),
+        ).called(1);
       },
     );
 

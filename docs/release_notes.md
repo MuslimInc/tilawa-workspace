@@ -12,8 +12,58 @@ the changelog for full engineering detail.
 
 | Field | Value |
 |-------|--------|
+| Version | **2.0.10** (build **54**) |
+| Git tag | `v2.0.10+54` (pending) |
+| Date | 2026-06-11 |
+| Track | Internal testing → Production |
+
+### What's new (en-US) — copy for Play Console
+
+```text
+• Improved stability and diagnostic logging
+• Fixed status bar appearance after Android back-gesture relaunch
+```
+
+### ما الجديد (ar) — نص متجر Play
+
+```text
+• استقرار أفضل وتسجيل تشخيصي أوضح
+• إصلاح مظهر شريط الحالة بعد إعادة فتح التطبيق بإيماءة الرجوع
+```
+
+---
+
+## Previous current release (2.0.9+53)
+
+| Field | Value |
+|-------|--------|
+| Version | **2.0.9** (build **53**) |
+| Git tag | `v2.0.9+53` |
+| Date | 2026-06-11 |
+| Track | Internal testing → Production |
+
+### What's new (en-US) — copy for Play Console
+
+```text
+• Improved stability and crash reporting
+• Clearer recovery screen when the app fails to start
+```
+
+### ما الجديد (ar) — نص متجر Play
+
+```text
+• استقرار أفضل وتقارير أعطال أوضح
+• شاشة استعادة أوضح عند فشل بدء التطبيق
+```
+
+---
+
+## Previous current release (2.0.8+52)
+
+| Field | Value |
+|-------|--------|
 | Version | **2.0.8** (build **52**) |
-| Git tag | `v2.0.8+52` (pending) |
+| Git tag | `v2.0.8+52` |
 | Date | 2026-06-10 |
 | Track | Internal testing → Production |
 

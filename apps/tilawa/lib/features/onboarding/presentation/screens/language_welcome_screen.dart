@@ -84,7 +84,6 @@ class LanguageWelcomeScreen extends StatelessWidget {
           actions: TilawaButton(
             text: context.l10n.next,
             variant: TilawaButtonVariant.primary,
-            size: TilawaButtonSize.large,
             semanticLabel: context.l10n.next,
             foregroundColor: colorScheme.onPrimary,
             isFullWidth: true,

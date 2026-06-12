@@ -34,7 +34,8 @@ class PrayerAlertsPermissionFlow extends StatefulWidget {
       _PrayerAlertsPermissionFlowState();
 }
 
-class _PrayerAlertsPermissionFlowState extends State<PrayerAlertsPermissionFlow> {
+class _PrayerAlertsPermissionFlowState
+    extends State<PrayerAlertsPermissionFlow> {
   late final PageController _pageController;
   int _currentPage = 0;
   bool _isRequesting = false;
@@ -59,7 +60,8 @@ class _PrayerAlertsPermissionFlowState extends State<PrayerAlertsPermissionFlow>
     }
     setState(() => _isRequesting = true);
     try {
-      final PrayerPermissionsCubit cubit = context.read<PrayerPermissionsCubit>();
+      final PrayerPermissionsCubit cubit = context
+          .read<PrayerPermissionsCubit>();
       switch (step) {
         case PrayerAlertsPermissionStep.location:
           await cubit.requestLocationPermission();
@@ -226,14 +228,12 @@ class _PermissionStepFooter extends StatelessWidget {
           child: TilawaButton(
             text: context.l10n.prayerAlertsPermissionSkip,
             variant: TilawaButtonVariant.ghost,
-            size: TilawaButtonSize.large,
             onPressed: isLoading ? null : onSkip,
           ),
         ),
         TilawaButton(
           text: primaryLabel,
           variant: TilawaButtonVariant.primary,
-          size: TilawaButtonSize.large,
           foregroundColor: colorScheme.onPrimary,
           isLoading: isLoading,
           onPressed: isLoading ? null : onAllow,

@@ -32,8 +32,9 @@ funnels.
 
 ## Security rules (deploy to Firebase)
 
-Rules live in repo root [`firestore.rules`](../../firestore.rules) (wired in
-`firebase.json`). Deploy before the first patched build:
+Startup log rules are part of the full ruleset in repo root
+[`firestore.rules`](../../firestore.rules) (also covers `users/*`,
+`subscription_plans`, `app_config`, etc.). Deploy after any rules change:
 
 ```bash
 firebase deploy --only firestore:rules

@@ -52,10 +52,20 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
           unawaited(_syncDeviceToken(user.id).catchError((_) {}));
           emit(AuthState.authenticated(user: user));
         },
-        failure: (message, code) {
+        failure: (message, code, details) {
+          final String detail = code == null
+              ? 'Google sign-in failed: $message'
+              : 'Google sign-in failed: $message (code: $code)';
+          // Provider details are a native stack trace; passing them as the
+          // log stack trace gets them truncated and attached by Sentry.
+          logger.w(
+            detail,
+            stackTrace: details == null ? null : StackTrace.fromString(details),
+          );
           emit(AuthState.error(message: message));
         },
         cancelled: () {
+          logger.d('[GoogleSignIn] cancelled by user');
           emit(const AuthState.unauthenticated());
         },
       );
@@ -70,8 +80,13 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onSignOut(SignOutEvent event, Emitter<AuthState> emit) async {
-    await _signOut();
-    emit(const AuthState.unauthenticated());
+    try {
+      await _signOut();
+      emit(const AuthState.unauthenticated());
+    } catch (error, stackTrace) {
+      logger.e('Sign out failed', error: error, stackTrace: stackTrace);
+      emit(const AuthState.unauthenticated());
+    }
   }
 
   Future<void> _onDeleteAccount(
@@ -79,12 +94,20 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     final UserEntity? userBeforeDelete = _getCurrentUser();
+    logger.d(
+      '[DeleteFirebaseUser] Bloc: delete requested '
+      'signedIn=${userBeforeDelete != null}',
+    );
     emit(const AuthState.loading());
 
     final result = await _deleteAccount();
 
     await result.fold(
       (failure) async {
+        logger.d(
+          '[DeleteFirebaseUser] Bloc: failed with ${failure.runtimeType} '
+          'message=${failure.message}',
+        );
         if (failure is UserCancelledFailure) {
           if (userBeforeDelete != null) {
             emit(AuthState.authenticated(user: userBeforeDelete));
@@ -96,6 +119,10 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
 
         final String message =
             failure.message ?? 'Unable to delete account';
+        logger.w(
+          'Delete account failed: $message',
+          error: failure,
+        );
         emit(AuthState.error(message: message));
 
         final UserEntity? currentUser = _getCurrentUser();
@@ -106,6 +133,7 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
         }
       },
       (_) async {
+        logger.d('[DeleteFirebaseUser] Bloc: account deleted, signing out');
         emit(const AuthState.unauthenticated());
       },
     );

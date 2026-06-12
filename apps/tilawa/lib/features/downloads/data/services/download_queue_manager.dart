@@ -808,7 +808,7 @@ class DownloadQueueManager implements IDownloadQueueService {
       }
     } catch (e) {
       // If sync fails (e.g., in test environment), just log and continue
-      logger.d('[DownloadQueueManager] Error syncing active downloads: $e');
+      logger.w('[DownloadQueueManager] Error syncing active downloads: $e');
     } finally {
       _isSyncing = false;
     }

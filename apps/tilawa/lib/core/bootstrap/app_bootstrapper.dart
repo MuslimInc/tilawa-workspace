@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:tilawa/core/bootstrap/app_startup.dart';
 import 'package:tilawa/core/bootstrap/app_startup_tasks.dart';
+import 'package:tilawa/core/bootstrap/launch_first_frame_gate.dart';
 import 'package:tilawa/core/bootstrap/launch_timeline.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
@@ -30,6 +31,10 @@ class AppBootstrapper {
       );
     } catch (e, stackTrace) {
       logger.f('CATASTROPHIC ERROR in bootstrap(): $e', stackTrace: stackTrace);
+      // bootstrap deferred the first frame; without this release the fatal
+      // error app could never paint and the user would be stuck on the
+      // native launch splash.
+      LaunchFirstFrameGate.release();
       run(_startupTasks.buildFatalErrorApp());
     }
   }

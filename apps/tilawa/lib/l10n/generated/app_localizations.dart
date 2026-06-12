@@ -1496,6 +1496,12 @@ abstract class AppLocalizations {
   /// **'Unable to delete your account. Please try again.'**
   String get deleteAccountFailed;
 
+  /// Loading message shown while account deletion is in progress
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting your account...'**
+  String get deleteAccountInProgress;
+
   /// Privacy policy link label
   ///
   /// In en, this message translates to:

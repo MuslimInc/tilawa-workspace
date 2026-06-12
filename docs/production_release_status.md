@@ -1,15 +1,15 @@
 # Production release status
 
-**Target:** Google Play **2.0.8+52** (version code **52**).  
-**Previous tagged build:** **2.0.7+51** (`v2.0.7+51`).
+**Target:** Google Play **2.0.9+53** (version code **53**).  
+**Previous tagged build:** **2.0.8+52** (`v2.0.8+52` pending).
 
-## Quality gates (2026-06-10)
+## Quality gates (2026-06-11)
 
 | Gate | Status |
 |------|--------|
-| `melos run analyze` | Clean |
-| `cd apps/tilawa && flutter test` | 2965 passed, 3 skipped |
-| Version bump committed | `apps/tilawa/pubspec.yaml` → `2.0.8+52` |
+| `melos run analyze` | Pending |
+| `cd apps/tilawa && flutter test` | Pending |
+| Version bump committed | `apps/tilawa/pubspec.yaml` → `2.0.9+53` |
 | Changelog / Play copy | [`CHANGELOG.md`](../CHANGELOG.md), [`release_notes.md`](release_notes.md), [`changelog.json`](../apps/tilawa/assets/changelog/changelog.json) |
 
 ## Pre-upload checklist

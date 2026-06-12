@@ -375,7 +375,7 @@ class AthkarNotificationService implements IAthkarNotificationService {
         body: _morningAthkarBody,
         scheduledDate: scheduledDate,
         notificationDetails: _athkarNotificationDetails,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        androidScheduleMode: await _resolveScheduleMode(),
         matchDateTimeComponents: DateTimeComponents.time,
         payload:
             '$_morningAthkarPayloadPrefix${scheduledDate.millisecondsSinceEpoch}',
@@ -403,7 +403,7 @@ class AthkarNotificationService implements IAthkarNotificationService {
         body: _eveningAthkarBody,
         scheduledDate: scheduledDate,
         notificationDetails: _athkarNotificationDetails,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        androidScheduleMode: await _resolveScheduleMode(),
         matchDateTimeComponents: DateTimeComponents.time,
         payload:
             '$_eveningAthkarPayloadPrefix${scheduledDate.millisecondsSinceEpoch}',
@@ -620,18 +620,7 @@ class AthkarNotificationService implements IAthkarNotificationService {
     ScheduledAthkarNotification notification,
   ) async {
     try {
-      // BUG #5 FIX: Check Android 12+ exact alarm permission before scheduling
-      AndroidScheduleMode scheduleMode =
-          AndroidScheduleMode.exactAllowWhileIdle;
-      if (Platform.isAndroid) {
-        final bool canScheduleExact = await _canScheduleExactAlarms();
-        if (!canScheduleExact) {
-          logger.w(
-            '[AthkarNotificationService] Exact alarm permission denied, using inexact scheduling for notification ${notification.id}',
-          );
-          scheduleMode = AndroidScheduleMode.inexact;
-        }
-      }
+      final AndroidScheduleMode scheduleMode = await _resolveScheduleMode();
 
       await _notifications.zonedSchedule(
         id: notification.id,
@@ -650,25 +639,52 @@ class AthkarNotificationService implements IAthkarNotificationService {
     }
   }
 
+  bool _warnedInexactFallback = false;
+
+  /// Test-only override for the Android platform check — dart:io [Platform]
+  /// cannot be faked on the test host.
+  @visibleForTesting
+  bool? debugIsAndroidOverride;
+
+  bool get _isAndroid => debugIsAndroidOverride ?? Platform.isAndroid;
+
   /// Check if app has permission to schedule exact alarms (Android 12+)
   /// On older Android versions, always returns true
   Future<bool> _canScheduleExactAlarms() async {
-    if (!Platform.isAndroid) {
+    if (!_isAndroid) {
       return true;
     }
 
     try {
-      // For Android 12+, we need to check SCHEDULE_EXACT_ALARM permission
-      // If using flutter_local_notifications >= 14.0, this is usually handled internally
-      // For now, we assume it's handled and return true
-      // In production, you'd use platform channels to check this
-      return true;
+      final AndroidFlutterLocalNotificationsPlugin? impl = _notifications
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
+      return await impl?.canScheduleExactNotifications() ?? true;
     } catch (e) {
-      logger.e(
+      logger.w(
         '[AthkarNotificationService] Error checking exact alarm permission: $e',
       );
-      return false;
+      // Fail-open: let the schedule path attempt; the OS will reject if needed.
+      return true;
     }
+  }
+
+  /// Resolve the schedule mode once per attempt, downgrading to inexact when
+  /// exact alarms are not permitted. Warns only once per session to avoid
+  /// one log line per scheduled notification.
+  Future<AndroidScheduleMode> _resolveScheduleMode() async {
+    if (!_isAndroid || await _canScheduleExactAlarms()) {
+      return AndroidScheduleMode.exactAllowWhileIdle;
+    }
+    if (!_warnedInexactFallback) {
+      _warnedInexactFallback = true;
+      logger.w(
+        '[AthkarNotificationService] Exact alarm permission denied; '
+        'using inexact scheduling',
+      );
+    }
+    return AndroidScheduleMode.inexact;
   }
 
   int _buildDynamicNotificationId({

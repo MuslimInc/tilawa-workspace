@@ -2,20 +2,17 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:quran_image/l10n/app_localizations.dart' as quran_image_l10n;
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/features/quran_reader/presentation/theme/quran_reader_theme.dart';
 import 'package:tilawa_core/constants/app_strings.dart';
-import 'package:tilawa_core/services/app_system_chrome_style.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'core/di/injection.dart';
 import 'app/app_providers.dart';
-import 'core/bootstrap/first_frame_log.dart';
-import 'core/bootstrap/splash_launch_handoff.dart';
+import 'app/default_route_system_ui_overlay.dart';
 import 'core/debug/device_preview_app_builder.dart';
 import 'core/services/notification_startup_service.dart';
 import 'features/in_app_update/in_app_update.dart';
@@ -29,7 +26,6 @@ import 'features/theme/presentation/cubit/theme_cubit.dart';
 import 'features/theme/presentation/theme_state_material.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'router/app_router.dart';
-import 'shared/widgets/quran_player_chrome.dart';
 import 'router/app_router_config.dart';
 
 class TilawaApp extends StatefulWidget {
@@ -203,7 +199,7 @@ class _PlayerApp extends StatelessWidget {
                 // checkerboardRasterCacheImages: kDebugMode || kProfileMode,
                 builder: (context, child) {
                   final app = applyDevicePreviewAppBuilder(context, child);
-                  final routedChild = _DefaultRouteSystemUiOverlay(
+                  final routedChild = DefaultRouteSystemUiOverlay(
                     child: app,
                   );
                   return MediaQuery(
@@ -255,169 +251,3 @@ class _PlayerApp extends StatelessWidget {
   }
 }
 
-class _DefaultRouteSystemUiOverlay extends StatefulWidget {
-  const _DefaultRouteSystemUiOverlay({required this.child});
-
-  final Widget? child;
-
-  @override
-  State<_DefaultRouteSystemUiOverlay> createState() =>
-      _DefaultRouteSystemUiOverlayState();
-}
-
-class _DefaultRouteSystemUiOverlayState
-    extends State<_DefaultRouteSystemUiOverlay> {
-  SystemUiOverlayStyle? _lastAppliedStyle;
-  bool _launchHandoffScheduled = false;
-  bool _loggedFirstBuild = false;
-  bool _chromeRefreshScheduled = false;
-
-  static final SystemUiOverlayStyle _launchSplashOverlayStyle =
-      AppSystemChromeStyle.buildColoredScreenStyle(
-        backgroundColor: AppColors.launchSplashBackground,
-      );
-
-  @override
-  void initState() {
-    super.initState();
-    SplashLaunchHandoff.splashRouteHasPainted.addListener(
-      _scheduleChromeRefresh,
-    );
-    AppRouter.router.routerDelegate.addListener(_scheduleChromeRefresh);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _scheduleLaunchHandoffMark();
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    SplashLaunchHandoff.splashRouteHasPainted.removeListener(
-      _scheduleChromeRefresh,
-    );
-    AppRouter.router.routerDelegate.removeListener(_scheduleChromeRefresh);
-    super.dispose();
-  }
-
-  /// Refreshes [SystemChrome] and [AnnotatedRegion] after the frame.
-  ///
-  /// Never call [setState] or [SystemChrome.setSystemUIOverlayStyle] from
-  /// [build] — GoRouter can notify [routerDelegate] while the child mounts,
-  /// which previously rebuilt [ListenableBuilder] mid-build (`!_dirty`).
-  void _scheduleChromeRefresh() {
-    if (!mounted || _chromeRefreshScheduled) {
-      return;
-    }
-    _chromeRefreshScheduled = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _chromeRefreshScheduled = false;
-      if (!mounted) {
-        return;
-      }
-      final bool styleChanged = _applySystemUiOverlay();
-      if (styleChanged) {
-        setState(() {});
-      }
-    });
-  }
-
-  SystemUiOverlayStyle _overlayStyleForRoute(ThemeData theme) {
-    final String path = AppRouter.router.state.uri.path.isNotEmpty
-        ? AppRouter.router.state.uri.path
-        : AppRouter.router.state.matchedLocation;
-    final Color? playerNavOverride = context
-        .read<QuranPlayerChromeNotifier>()
-        .systemNavigationBarColorOverride;
-
-    return switch (path) {
-      '/splash' => AppSystemChromeStyle.buildColoredScreenStyle(
-        backgroundColor: AppColors.launchSplashBackground,
-      ),
-      '/login' => AppSystemChromeStyle.buildColoredScreenStyle(
-        backgroundColor: theme.colorScheme.primary,
-      ),
-      '/language-welcome' || '/onboarding' =>
-        AppSystemChromeStyle.buildDefaultAppStyle(
-          theme,
-          statusBarBackgroundColor: theme.scaffoldBackgroundColor,
-          navigationBarColor: theme.scaffoldBackgroundColor,
-        ),
-      _ => AppSystemChromeStyle.buildDefaultAppStyle(
-        theme,
-        statusBarBackgroundColor: theme.scaffoldBackgroundColor,
-        navigationBarColor:
-            playerNavOverride ??
-            theme.componentTokens.adaptiveShell.bottomNavBackgroundColor,
-      ),
-    };
-  }
-
-  /// Returns true when the overlay style changed.
-  bool _applySystemUiOverlay() {
-    if (!SplashLaunchHandoff.splashRouteHasPainted.value) {
-      return false;
-    }
-    final theme = Theme.of(context);
-    final overlayStyle = _overlayStyleForRoute(theme);
-    if (_lastAppliedStyle == overlayStyle) {
-      return false;
-    }
-    _lastAppliedStyle = overlayStyle;
-    AppSystemChromeStyle.updateDefaultAppStyle(overlayStyle);
-    SystemChrome.setSystemUIOverlayStyle(overlayStyle);
-    return true;
-  }
-
-  SystemUiOverlayStyle _overlayStyleForBuild(BuildContext context) {
-    if (!SplashLaunchHandoff.splashRouteHasPainted.value) {
-      return _launchSplashOverlayStyle;
-    }
-    return _overlayStyleForRoute(Theme.of(context));
-  }
-
-  void _scheduleLaunchHandoffMark() {
-    if (_launchHandoffScheduled ||
-        widget.child == null ||
-        SplashLaunchHandoff.splashRouteHasPainted.value) {
-      return;
-    }
-    _launchHandoffScheduled = true;
-    firstFrameLog('TilawaApp scheduling routed first-frame handoff mark');
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      _launchHandoffScheduled = false;
-      if (!mounted ||
-          widget.child == null ||
-          SplashLaunchHandoff.splashRouteHasPainted.value) {
-        firstFrameLog(
-          'TilawaApp handoff mark skipped '
-          '(mounted=$mounted hasChild=${widget.child != null} '
-          'painted=${SplashLaunchHandoff.splashRouteHasPainted.value})',
-        );
-        return;
-      }
-      firstFrameLog('TilawaApp routed first post-frame → mark handoff');
-      SplashLaunchHandoff.markSplashRoutePainted();
-      // Apply immediately so Android drops launch-theme light icons before the
-      // next frame (NormalTheme no longer forces windowLightStatusBar=false).
-      if (_applySystemUiOverlay()) {
-        setState(() {});
-      } else {
-        _scheduleChromeRefresh();
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    context.watch<QuranPlayerChromeNotifier>();
-    if (!_loggedFirstBuild) {
-      _loggedFirstBuild = true;
-      firstFrameLog('TilawaApp DefaultRouteSystemUiOverlay first build');
-    }
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: _overlayStyleForBuild(context),
-      child: widget.child ?? const SizedBox.shrink(),
-    );
-  }
-}

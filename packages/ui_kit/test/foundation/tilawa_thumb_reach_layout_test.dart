@@ -39,8 +39,8 @@ void main() {
     final Rect screen = tester.getRect(find.byType(Scaffold));
     final Rect action = tester.getRect(find.text('Action'));
 
-    final double bandStart = screen.height *
-        TilawaThumbReachLayout.actionBandStartFraction();
+    final double bandStart =
+        screen.height * TilawaThumbReachLayout.actionBandStartFraction();
 
     expect(action.top, greaterThanOrEqualTo(bandStart - 1));
     expect(action.top, lessThan(bandStart + screen.height * 0.08));

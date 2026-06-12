@@ -1,23 +1,41 @@
-import 'dart:developer' as developer;
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
-import 'package:flutter/material.dart';
-
+import 'core/bootstrap/app_error_guard.dart';
 import 'core/bootstrap/app_startup.dart';
+import 'core/telemetry/crash_reporting_context.dart';
+import 'core/telemetry/sentry_android_context.dart';
+import 'core/telemetry/sentry_config.dart';
 import 'features/prayer_times/application/prayer_notification_watchdog_bootstrap.dart';
 
 Future<void> main() async {
-  FlutterError.onError = (FlutterErrorDetails details) {
-    developer.log(
-      details.exceptionAsString(),
-      name: '[WidgetError]',
-      error: details.exception,
-      stackTrace: details.stack,
-    );
+  // Required before any plugin (PackageInfo, device_info, MethodChannel) runs.
+  WidgetsFlutterBinding.ensureInitialized();
 
-    // Optional: keep default Flutter red screen behavior
-    FlutterError.presentError(details);
-  };
-  await bootstrap();
+  // Install before Sentry so its integrations chain on top of the guard
+  // instead of being replaced by it.
+  AppErrorGuard.install();
+
+  // Hot restart clears Sentry's Android applicationContext before main()
+  // re-runs; restore it before native JNI init.
+  await SentryAndroidContext.ensurePluginContext();
+
+  await SentryFlutter.init(
+    (SentryFlutterOptions options) {
+      // Profile builds stay off; debug needs the DSN for Settings → Verify Sentry.
+      options.dsn = kProfileMode ? '' : SentryConfig.dsn;
+      options.environment = kReleaseMode ? 'production' : 'development';
+      options.debug = kDebugMode;
+      options.enableLogs = kReleaseMode;
+      options.beforeSend = CrashReportingContext.filterEmulatorsInRelease;
+      options.beforeSendLog = CrashReportingContext.filterEmulatorLogsInRelease;
+    },
+    appRunner: () async {
+      await CrashReportingContext.applyToSentry();
+      await bootstrap();
+    },
+  );
 }
 
 @pragma('vm:entry-point')

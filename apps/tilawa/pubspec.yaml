@@ -3,7 +3,7 @@ resolution: workspace
 description: An Audio Quran Player project.
 
 publish_to: none
-version: 2.0.8+52
+version: 2.0.10+54
 
 environment:
   sdk: ^3.12.1
@@ -21,6 +21,7 @@ dependencies:
   coverage: ^1.15.0
   credential_manager: ^2.0.8
   cupertino_icons: ^1.0.8
+  device_info_plus: ^13.1.0
   dartz_plus: ^0.3.0
   dio: ^5.9.0
   equatable: ^2.0.8
@@ -79,6 +80,7 @@ dependencies:
     path: ../../packages/quran_image
 
   rxdart: ^0.28.0
+  sentry_flutter: ^9.21.0
   share_plus: ^13.1.0
   shared_preferences: ^2.5.4
   stream_transform: ^2.1.1

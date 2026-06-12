@@ -773,6 +773,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get deleteAccountFailed => 'تعذّر حذف حسابك. يرجى المحاولة مرة أخرى.';
 
   @override
+  String get deleteAccountInProgress => 'جارٍ حذف حسابك...';
+
+  @override
   String get privacyPolicy => 'سياسة الخصوصية';
 
   @override

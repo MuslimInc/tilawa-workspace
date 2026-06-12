@@ -451,6 +451,120 @@ void main() {
       });
     });
 
+    group('exact alarm schedule mode', () {
+      test('uses exact mode when exact alarms are permitted', () async {
+        service.debugIsAndroidOverride = true;
+        when(
+          mockAndroidPlugin.canScheduleExactNotifications(),
+        ).thenAnswer((_) async => true);
+
+        await service.scheduleAthkarNotifications();
+
+        verify(
+          mockNotificationsPlugin.zonedSchedule(
+            id: anyNamed('id'),
+            title: anyNamed('title'),
+            body: anyNamed('body'),
+            scheduledDate: anyNamed('scheduledDate'),
+            notificationDetails: anyNamed('notificationDetails'),
+            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+            matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+            payload: anyNamed('payload'),
+          ),
+        ).called(greaterThan(0));
+      });
+
+      test(
+        'falls back to inexact mode when exact alarms are not permitted',
+        () async {
+          service.debugIsAndroidOverride = true;
+          when(
+            mockAndroidPlugin.canScheduleExactNotifications(),
+          ).thenAnswer((_) async => false);
+
+          await service.scheduleAthkarNotifications();
+
+          verify(
+            mockNotificationsPlugin.zonedSchedule(
+              id: anyNamed('id'),
+              title: anyNamed('title'),
+              body: anyNamed('body'),
+              scheduledDate: anyNamed('scheduledDate'),
+              notificationDetails: anyNamed('notificationDetails'),
+              androidScheduleMode: AndroidScheduleMode.inexact,
+              matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+              payload: anyNamed('payload'),
+            ),
+          ).called(greaterThan(0));
+          verifyNever(
+            mockNotificationsPlugin.zonedSchedule(
+              id: anyNamed('id'),
+              title: anyNamed('title'),
+              body: anyNamed('body'),
+              scheduledDate: anyNamed('scheduledDate'),
+              notificationDetails: anyNamed('notificationDetails'),
+              androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+              matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+              payload: anyNamed('payload'),
+            ),
+          );
+        },
+      );
+
+      test(
+        'fails open to exact mode when the permission check throws',
+        () async {
+          service.debugIsAndroidOverride = true;
+          when(mockAndroidPlugin.canScheduleExactNotifications()).thenThrow(
+            PlatformException(code: 'channel-error'),
+          );
+
+          await service.scheduleAthkarNotifications();
+
+          verify(
+            mockNotificationsPlugin.zonedSchedule(
+              id: anyNamed('id'),
+              title: anyNamed('title'),
+              body: anyNamed('body'),
+              scheduledDate: anyNamed('scheduledDate'),
+              notificationDetails: anyNamed('notificationDetails'),
+              androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+              matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+              payload: anyNamed('payload'),
+            ),
+          ).called(greaterThan(0));
+        },
+      );
+
+      test(
+        'uses exact mode when the Android implementation is unavailable',
+        () async {
+          service.debugIsAndroidOverride = true;
+          when(
+            mockNotificationsPlugin
+                .resolvePlatformSpecificImplementation<
+                  AndroidFlutterLocalNotificationsPlugin
+                >(),
+          ).thenReturn(null);
+
+          await service.scheduleAthkarNotifications();
+
+          verify(
+            mockNotificationsPlugin.zonedSchedule(
+              id: anyNamed('id'),
+              title: anyNamed('title'),
+              body: anyNamed('body'),
+              scheduledDate: anyNamed('scheduledDate'),
+              notificationDetails: anyNamed('notificationDetails'),
+              androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+              matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+              payload: anyNamed('payload'),
+            ),
+          ).called(greaterThan(0));
+        },
+      );
+    });
+
     group('scheduling errors', () {
       test('should handle morning fallback scheduling error', () async {
         fakePrayerTimesRepository.prayerTimesForRange = [];

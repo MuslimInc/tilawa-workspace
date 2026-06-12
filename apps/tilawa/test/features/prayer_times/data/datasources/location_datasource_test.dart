@@ -199,7 +199,7 @@ void main() {
         ).thenAnswer((_) async => LocationPermission.whileInUse);
         when(
           mockGeolocatorClient.getLastKnownPosition(),
-        ).thenAnswer((_) async => null); // Initially null
+        ).thenAnswer((_) async => null);
         when(
           mockGeolocatorClient.getCurrentPosition(
             locationSettings: anyNamed('locationSettings'),
@@ -211,6 +211,31 @@ void main() {
 
         // Assert
         expect(result.error, contains('timed out'));
+        verify(mockGeolocatorClient.getLastKnownPosition()).called(2);
+      });
+
+      test('falls back to last known position on timeout', () async {
+        var lastKnownCalls = 0;
+        when(
+          mockGeolocatorClient.isLocationServiceEnabled(),
+        ).thenAnswer((_) async => true);
+        when(
+          mockGeolocatorClient.checkPermission(),
+        ).thenAnswer((_) async => LocationPermission.whileInUse);
+        when(mockGeolocatorClient.getLastKnownPosition()).thenAnswer((_) async {
+          lastKnownCalls++;
+          return lastKnownCalls == 1 ? null : tPosition;
+        });
+        when(
+          mockGeolocatorClient.getCurrentPosition(
+            locationSettings: anyNamed('locationSettings'),
+          ),
+        ).thenThrow(TimeoutException('Timeout'));
+
+        final LocationResult result = await dataSource.getCurrentLocation();
+
+        expect(result.latitude, tPosition.latitude);
+        expect(result.longitude, tPosition.longitude);
       });
     });
 

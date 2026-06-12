@@ -18,6 +18,15 @@ abstract interface class INotificationDispatcher {
     required NotificationHandler handler,
   });
 
+  /// Register a handler for notification IDs in a half-open range
+  /// [[minIdInclusive], [maxIdExclusive]).
+  void registerIdRangeHandler({
+    required String serviceId,
+    required int minIdInclusive,
+    required int maxIdExclusive,
+    required NotificationHandler handler,
+  });
+
   /// Register a fallback handler for payloads that match a pattern
   void registerPayloadHandler({
     required String serviceId,

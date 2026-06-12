@@ -1075,6 +1075,10 @@
     "@deleteAccountFailed": {
         "description": "Generic error when account deletion fails"
     },
+    "deleteAccountInProgress": "Deleting your account...",
+    "@deleteAccountInProgress": {
+        "description": "Loading message shown while account deletion is in progress"
+    },
     "privacyPolicy": "Privacy policy",
     "@privacyPolicy": {
         "description": "Privacy policy link label"

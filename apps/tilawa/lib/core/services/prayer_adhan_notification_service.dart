@@ -8,7 +8,9 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:injectable/injectable.dart';
 import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:tilawa/core/telemetry/sentry_log_output.dart';
 import 'package:tilawa/core/navigation/notification_destination.dart';
 import 'package:tilawa/core/services/navigation_service.dart';
 import 'package:tilawa/router/app_router.dart';
@@ -115,7 +117,7 @@ class PrayerAdhanNotificationService
         );
         if (lastTz != null && lastTz != resolvedTzName) {
           _pendingForceReschedule = true;
-          logger.d(
+          logger.w(
             '${PrayerNotificationConfig.logTag} Timezone changed ($lastTz -> $resolvedTzName); forcing next reschedule',
           );
         }
@@ -328,6 +330,7 @@ class PrayerAdhanNotificationService
       DateTime? earliestScheduledTarget;
       DateTime? latestScheduledTarget;
       final List<PendingAdhanAlarm> pendingAdhans = <PendingAdhanAlarm>[];
+      bool loggedAdhanFallbackThisPass = false;
       for (int dayOffset = 0; dayOffset < dayCount; dayOffset++) {
         final PrayerTimeEntity dayTimes = prayerTimesForDays[dayOffset];
 
@@ -498,10 +501,13 @@ class PrayerAdhanNotificationService
                 'exact_alarm_permission_granted': canScheduleExact,
               },
             );
-            logger.d(
-              '${PrayerNotificationConfig.logTag} [ADHAN] ${prayer.name}: adhanPlayer not supported or failed — '
-              'relying on notification channel sound (${PrayerNotificationConfig.adhanSoundRawName})',
-            );
+            if (!loggedAdhanFallbackThisPass) {
+              loggedAdhanFallbackThisPass = true;
+              logger.w(
+                '${PrayerNotificationConfig.logTag} [ADHAN] adhanPlayer not supported or failed — '
+                'relying on notification channel sound (${PrayerNotificationConfig.adhanSoundRawName})',
+              );
+            }
           } else if (!useAdhan) {
             logger.d(
               '${PrayerNotificationConfig.logTag} [ADHAN] ${prayer.name}: adhan disabled — '
@@ -550,6 +556,19 @@ class PrayerAdhanNotificationService
         '${PrayerNotificationConfig.logTag} Scheduled $scheduled prayer notifications '
         '(${pendingAdhans.length} adhan alarms persisted for boot recovery)',
       );
+      if (SentryLogOutput.forwardingEnabled) {
+        Sentry.logger.info(
+          '${PrayerNotificationConfig.logTag} Prayer notifications scheduled',
+          attributes: <String, SentryAttribute>{
+            'scheduled_count': SentryAttribute.int(scheduled),
+            'pending_adhan_count': SentryAttribute.int(pendingAdhans.length),
+            'exact_alarm': SentryAttribute.bool(canScheduleExact),
+            'schedule_mode': SentryAttribute.string(
+              canScheduleExact ? 'exact' : 'inexact',
+            ),
+          },
+        );
+      }
     } catch (e, stackTrace) {
       logger.e(
         '${PrayerNotificationConfig.logTag} Error scheduling notifications: $e',

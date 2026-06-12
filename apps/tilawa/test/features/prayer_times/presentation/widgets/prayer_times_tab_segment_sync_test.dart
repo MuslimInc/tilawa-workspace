@@ -131,7 +131,7 @@ Future<void> pumpUntilSegmentIndex(
 
 Finder findPrayerTimesSegment(String label) {
   return find.descendant(
-    of: find.byType(TilawaSegmentedControl<String>),
+    of: find.byType(TabBar),
     matching: find.text(label),
   );
 }

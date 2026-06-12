@@ -294,6 +294,9 @@ class _SwitchDemoState extends State<_SwitchDemo> {
 
   @override
   Widget build(BuildContext context) {
-    return TilawaSwitch(value: _value, onChanged: (v) => setState(() => _value = v));
+    return TilawaSwitch(
+      value: _value,
+      onChanged: (v) => setState(() => _value = v),
+    );
   }
 }

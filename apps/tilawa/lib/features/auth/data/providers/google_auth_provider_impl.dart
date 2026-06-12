@@ -56,6 +56,7 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
           return AuthResult.failure(
             message: e.description ?? 'Authentication failed',
             code: e.code.name,
+            details: e.details?.toString(),
           );
       }
     } on FirebaseAuthException catch (e) {
@@ -96,11 +97,10 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
           message: 'Google re-authentication was cancelled',
         );
       }
-      final OAuthCredential credential = GoogleAuthProvider.credential(
-        idToken: idToken,
+      await user.reauthenticateWithCredential(
+        GoogleAuthProvider.credential(idToken: idToken),
       );
-      await user.reauthenticateWithCredential(credential);
-      await user.delete();
+      await _firebaseAuth.currentUser?.delete();
     }
 
     await _googleSignIn.signOut();

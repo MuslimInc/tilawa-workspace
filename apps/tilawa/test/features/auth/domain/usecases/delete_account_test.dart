@@ -1,6 +1,8 @@
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
@@ -68,15 +70,15 @@ void main() {
     verifyNever(mockUserRepository.deleteUserData(any));
   });
 
-  test('deletes auth account then app data when signed in', () async {
+  test('deletes app data before auth account', () async {
     final Either<Failure, void> result = await useCase();
 
     expect(result.isRight, isTrue);
     verifyInOrder([
-      mockAuthRepository.deleteAccount(),
       mockSyncDeviceTokenUseCase.removeCurrentTokenForUser('user-1'),
       mockUserRepository.deleteUserData('user-1'),
       mockPremiumRepository.clearPremiumStatus(),
+      mockAuthRepository.deleteAccount(),
     ]);
   });
 
@@ -95,5 +97,127 @@ void main() {
       (failure) => expect(failure, isA<UserCancelledFailure>()),
       (_) => fail('expected left'),
     );
+  });
+
+  Future<Failure> failureFor(Object error) async {
+    when(mockAuthRepository.deleteAccount()).thenThrow(error);
+    final Either<Failure, void> result = await useCase();
+    expect(result.isLeft, isTrue);
+    late final Failure captured;
+    result.fold((failure) => captured = failure, (_) => fail('expected left'));
+    return captured;
+  }
+
+  group('FirebaseAuthException mapping', () {
+    test('returns UnexpectedFailure for non-cancellation auth errors',
+        () async {
+      final Failure failure = await failureFor(
+        FirebaseAuthException(
+          code: 'network-request-failed',
+          message: 'A network error occurred',
+        ),
+      );
+
+      expect(failure, isA<UnexpectedFailure>());
+      expect(failure.message, 'A network error occurred');
+    });
+
+    test(
+        'returns UnexpectedFailure when requires-recent-login is not '
+        'a cancellation', () async {
+      final Failure failure = await failureFor(
+        FirebaseAuthException(code: 'requires-recent-login'),
+      );
+
+      expect(failure, isA<UnexpectedFailure>());
+    });
+  });
+
+  group('GoogleSignInException mapping', () {
+    for (final code in [
+      GoogleSignInExceptionCode.canceled,
+      GoogleSignInExceptionCode.interrupted,
+      GoogleSignInExceptionCode.uiUnavailable,
+    ]) {
+      test('returns UserCancelledFailure for ${code.name}', () async {
+        final Failure failure = await failureFor(
+          GoogleSignInException(code: code),
+        );
+
+        expect(failure, isA<UserCancelledFailure>());
+      });
+    }
+
+    test('returns UnexpectedFailure for genuine sign-in errors', () async {
+      final Failure failure = await failureFor(
+        const GoogleSignInException(
+          code: GoogleSignInExceptionCode.providerConfigurationError,
+          description: 'Missing SHA-1 fingerprint',
+        ),
+      );
+
+      expect(failure, isA<UnexpectedFailure>());
+      expect(failure.message, 'Missing SHA-1 fingerprint');
+    });
+
+    test('falls back to the code name when description is missing', () async {
+      final Failure failure = await failureFor(
+        const GoogleSignInException(
+          code: GoogleSignInExceptionCode.unknownError,
+        ),
+      );
+
+      expect(failure.message, 'unknownError');
+    });
+  });
+
+  group('PlatformException mapping', () {
+    test('returns UserCancelledFailure for code 204', () async {
+      final Failure failure = await failureFor(
+        PlatformException(code: '204', message: 'Login failed'),
+      );
+
+      expect(failure, isA<UserCancelledFailure>());
+    });
+
+    test('returns UserCancelledFailure for "No credentials available"',
+        () async {
+      final Failure failure = await failureFor(
+        PlatformException(
+          code: '16',
+          message: 'No credentials available on this device',
+        ),
+      );
+
+      expect(failure, isA<UserCancelledFailure>());
+    });
+
+    test('returns UserCancelledFailure for "Login failed" messages',
+        () async {
+      final Failure failure = await failureFor(
+        PlatformException(
+          code: '500',
+          message: 'Login failed User cancelled the selector',
+        ),
+      );
+
+      expect(failure, isA<UserCancelledFailure>());
+    });
+
+    test('returns UnexpectedFailure for genuine platform errors', () async {
+      final Failure failure = await failureFor(
+        PlatformException(code: '500', message: 'Service unavailable'),
+      );
+
+      expect(failure, isA<UnexpectedFailure>());
+      expect(failure.message, 'Service unavailable');
+    });
+  });
+
+  test('returns UnexpectedFailure for unrecognised errors', () async {
+    final Failure failure = await failureFor(StateError('boom'));
+
+    expect(failure, isA<UnexpectedFailure>());
+    expect(failure.message, contains('boom'));
   });
 }
