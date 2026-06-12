@@ -1216,6 +1216,10 @@
     "@tasbeehTargetLabel": {
         "description": "Target count input label"
     },
+    "tasbeehTargetHint": "مثال: 33",
+    "@tasbeehTargetHint": {
+        "description": "Placeholder hint for target count input"
+    },
     "tasbeehSetTarget": "تعيين الهدف",
     "@tasbeehSetTarget": {
         "description": "Button label to apply target count"

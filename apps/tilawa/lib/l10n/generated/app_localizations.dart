@@ -1808,6 +1808,12 @@ abstract class AppLocalizations {
   /// **'Target'**
   String get tasbeehTargetLabel;
 
+  /// Placeholder hint for target count input
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 33'**
+  String get tasbeehTargetHint;
+
   /// Button label to apply target count
   ///
   /// In en, this message translates to:

@@ -69,7 +69,7 @@ class TasbeehCreateView extends StatelessWidget {
               ),
               SizedBox(height: tokens.spaceExtraSmall),
               TilawaTextField(
-                hintText: '${TasbeehConstants.defaultTargetCount}',
+                hintText: context.l10n.tasbeehTargetHint,
                 initialValue: state.draftTargetText,
                 prefixIcon: const Icon(Icons.flag_rounded),
                 onChanged: cubit.updateDraftTargetText,

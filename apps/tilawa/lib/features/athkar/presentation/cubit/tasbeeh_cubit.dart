@@ -74,7 +74,7 @@ class TasbeehCubit extends Cubit<TasbeehState> {
       state.copyWith(
         viewMode: TasbeehViewMode.create,
         draftText: '',
-        draftTargetText: TasbeehConstants.defaultTargetCount.toString(),
+        draftTargetText: '',
         failure: null,
         errorMessage: null,
       ),
@@ -173,9 +173,7 @@ class TasbeehCubit extends Cubit<TasbeehState> {
             layoutMode: layoutMode,
             savedDhikr: items,
             activeSavedDhikrId: activeId,
-            draftTargetText:
-                active?.targetCount.toString() ??
-                TasbeehConstants.defaultTargetCount.toString(),
+            draftTargetText: active?.targetCount.toString() ?? '',
             failure: null,
             errorMessage: null,
           ),
@@ -224,7 +222,7 @@ class TasbeehCubit extends Cubit<TasbeehState> {
             viewMode: TasbeehViewMode.home,
             savedDhikr: const [],
             activeSavedDhikrId: null,
-            draftTargetText: TasbeehConstants.defaultTargetCount.toString(),
+            draftTargetText: '',
             failure: null,
             errorMessage: null,
           ),
@@ -458,9 +456,8 @@ class TasbeehCubit extends Cubit<TasbeehState> {
             viewMode: leaveCounting ? TasbeehViewMode.home : state.viewMode,
             savedDhikr: updated,
             activeSavedDhikrId: removedActive ? null : state.activeSavedDhikrId,
-            draftTargetText: updated.isEmpty
-                ? TasbeehConstants.defaultTargetCount.toString()
-                : state.draftTargetText,
+            draftTargetText:
+                updated.isEmpty ? '' : state.draftTargetText,
             failure: null,
             errorMessage: null,
           ),

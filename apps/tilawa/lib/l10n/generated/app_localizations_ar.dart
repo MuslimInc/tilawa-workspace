@@ -946,6 +946,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tasbeehTargetLabel => 'الهدف';
 
   @override
+  String get tasbeehTargetHint => 'مثال: 33';
+
+  @override
   String get tasbeehSetTarget => 'تعيين الهدف';
 
   @override

@@ -950,6 +950,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tasbeehTargetLabel => 'Target';
 
   @override
+  String get tasbeehTargetHint => 'e.g. 33';
+
+  @override
   String get tasbeehSetTarget => 'Set target';
 
   @override
