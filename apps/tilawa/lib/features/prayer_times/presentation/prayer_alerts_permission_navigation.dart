@@ -17,6 +17,7 @@ abstract final class PrayerAlertsPermissionNavigation {
       context,
       markCompletedWhenDone: true,
       refreshPrayerSchedule: false,
+      continueToLoginOnFinish: true,
     );
   }
 
@@ -64,6 +65,7 @@ abstract final class PrayerAlertsPermissionNavigation {
     List<PrayerAlertsPermissionStep>? explicitSteps,
     required bool markCompletedWhenDone,
     required bool refreshPrayerSchedule,
+    bool continueToLoginOnFinish = false,
   }) async {
     final PrayerAlertsPermissionOnboardingRepository onboarding =
         getIt<PrayerAlertsPermissionOnboardingRepository>();
@@ -89,7 +91,10 @@ abstract final class PrayerAlertsPermissionNavigation {
     }
 
     await PrayerAlertsPermissionRoute(
-      $extra: PrayerAlertsPermissionNavExtra(steps: steps),
+      $extra: PrayerAlertsPermissionNavExtra(
+        steps: steps,
+        continueToLoginOnFinish: continueToLoginOnFinish,
+      ),
     ).push(context);
     if (!context.mounted) {
       return;
@@ -99,7 +104,7 @@ abstract final class PrayerAlertsPermissionNavigation {
       await _refreshAfterFlow(context);
     }
 
-    if (markCompletedWhenDone) {
+    if (markCompletedWhenDone && !continueToLoginOnFinish) {
       await onboarding.markFlowCompleted();
     }
   }
