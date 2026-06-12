@@ -411,7 +411,7 @@ class _AppShellChrome extends StatelessWidget {
       },
       child: Builder(
         builder: (context) {
-          final bool showPhoneMiniPlayer =
+          final bool showMiniPlayer =
               showPlayer && playerShouldShow && !isKeyboardOpen;
 
           final bool narrow = context.isNarrow;
@@ -426,7 +426,7 @@ class _AppShellChrome extends StatelessWidget {
                   context,
                   hostAbsorbsBottomSafeArea: navVisible,
                 );
-          final Widget? shellFooterPlayer = showPhoneMiniPlayer && narrow
+          final Widget? shellFooterPlayer = showMiniPlayer && narrow
               ? SizedBox(
                   height:
                       playerHeight + overlayBleedBuffer + footerBottomSpacing,
@@ -451,8 +451,14 @@ class _AppShellChrome extends StatelessWidget {
                 ),
                 child: shellChild,
               ),
-              if (showPlayer && !narrow)
-                Positioned.fill(
+              // Bottom-anchored with loose height: the footer mini paints an
+              // opaque ColoredBox, so Positioned.fill would cover the whole
+              // shell (rail included) with the player chrome color.
+              if (showMiniPlayer && !narrow)
+                PositionedDirectional(
+                  start: 0,
+                  end: 0,
+                  bottom: 0,
                   child: TourTarget(
                     targetId: RecitersTourTargets.miniPlayer,
                     child: QuranPlayerWidget(
