@@ -20,6 +20,7 @@ import '../../../../router/app_router_config.dart';
 import '../../data/services/android_sign_in_platform_policy.dart';
 import '../bloc/auth_bloc.dart';
 import '../services/google_sign_in_interactive_launcher.dart';
+import '../services/login_auto_sign_in_scheduler.dart';
 import '../widgets/login_sign_in_fallback_panel.dart';
 
 /// Warm brown login canvas — distinct from the runtime sage primary.
@@ -47,7 +48,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
-  bool _autoSignInScheduled = false;
+  final LoginAutoSignInScheduler _autoSignInScheduler =
+      LoginAutoSignInScheduler();
   bool _showFallbackFields = false;
   bool _signInLaunchPending = false;
   bool _awaitingManualSignInResult = false;
@@ -133,19 +135,14 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
   }
 
   void _scheduleAutoSignInWhenReady() {
-    if (_autoSignInScheduled) {
-      _logGoogleSignInButton('scheduleAutoSignIn skipped: already scheduled');
-      return;
-    }
-    // The OEM flag is loaded asynchronously; deciding before warm-up
-    // completes would read its default (false) and auto sign-in on
-    // Transsion devices, where the sign-in sheet can render invisibly.
-    unawaited(
-      _warmUpSignInPolicy().then((_) {
-        if (mounted) {
-          _scheduleAutoSignInAfterPolicyWarmUp();
-        }
-      }),
+    _autoSignInScheduler.scheduleWhenReady(
+      warmUpPolicy: _warmUpSignInPolicy,
+      shouldSkipAutoSignIn: _shouldSkipAutoSignIn,
+      isMounted: () => mounted,
+      isRouteCurrent: () => ModalRoute.of(context)?.isCurrent ?? false,
+      lifecycleState: () => WidgetsBinding.instance.lifecycleState,
+      onAutoSignIn: _maybeAutoSignIn,
+      log: _logGoogleSignInButton,
     );
   }
 
@@ -154,46 +151,6 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
       return Future<void>.value();
     }
     return getIt<AndroidSignInPlatformPolicy>().warmUp();
-  }
-
-  void _scheduleAutoSignInAfterPolicyWarmUp() {
-    if (_shouldSkipAutoSignIn()) {
-      _logGoogleSignInButton(
-        'scheduleAutoSignIn skipped: Transsion OEM (manual sign-in only)',
-      );
-      return;
-    }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) {
-        _logGoogleSignInButton(
-          'scheduleAutoSignIn postFrame skipped: unmounted',
-        );
-        return;
-      }
-      final ModalRoute<Object?>? route = ModalRoute.of(context);
-      final bool routeCurrent = route?.isCurrent ?? false;
-      final AppLifecycleState? lifecycle =
-          WidgetsBinding.instance.lifecycleState;
-      if (route != null && !route.isCurrent) {
-        _logGoogleSignInButton(
-          'scheduleAutoSignIn postFrame skipped: route not current '
-          '(routeCurrent=$routeCurrent lifecycle=$lifecycle)',
-        );
-        return;
-      }
-      if (lifecycle != AppLifecycleState.resumed) {
-        _logGoogleSignInButton(
-          'scheduleAutoSignIn postFrame skipped: lifecycle=$lifecycle',
-        );
-        return;
-      }
-      _autoSignInScheduled = true;
-      _logGoogleSignInButton(
-        'scheduleAutoSignIn firing auto sign-in '
-        '(routeCurrent=$routeCurrent lifecycle=$lifecycle)',
-      );
-      _maybeAutoSignIn();
-    });
   }
 
   bool _shouldSkipAutoSignIn() {
