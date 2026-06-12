@@ -35,10 +35,10 @@ jobs:
           java-version: "17"
 
       # Keep in sync with .github/workflows/android-release.yml.
-      - name: Set up Flutter 3.44.1
+      - name: Set up Flutter 3.44.2
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.44.1"
+          flutter-version: "3.44.2"
           channel: stable
           cache: true
 

@@ -19,6 +19,10 @@ void main() {
       expect(AppShellRoutePolicy.isInsideAppShell('/settings'), isTrue);
       expect(AppShellRoutePolicy.isInsideAppShell('/athkar'), isFalse);
       expect(AppShellRoutePolicy.isInsideAppShell('/quran-reader/1'), isFalse);
+      expect(
+        AppShellRoutePolicy.isInsideAppShell('/prayer-alerts-permissions'),
+        isFalse,
+      );
     });
 
     test('shows phone bottom navigation only on main shell', () {
@@ -44,6 +48,20 @@ void main() {
       );
       expect(
         AppShellRoutePolicy.isPhoneBottomNavigationVisible('/athkar/details'),
+        isFalse,
+      );
+      expect(
+        AppShellRoutePolicy.isPhoneBottomNavigationVisible(
+          '/prayer-alerts-permissions',
+        ),
+        isFalse,
+      );
+    });
+
+    test('prayer-alerts permissions is not the main tab shell', () {
+      expect(QuranPlayerRoutePolicy.isMainShell('/'), isTrue);
+      expect(
+        QuranPlayerRoutePolicy.isMainShell('/prayer-alerts-permissions'),
         isFalse,
       );
     });

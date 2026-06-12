@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/router/prayer_alerts_permission_nav_extra.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../bloc/prayer_permissions_cubit.dart';
 import '../bloc/prayer_times_bloc.dart';
@@ -39,43 +40,82 @@ class PrayerAlertsPermissionScreen extends StatefulWidget {
 
 class _PrayerAlertsPermissionScreenState
     extends State<PrayerAlertsPermissionScreen> {
+  /// Steps passed at navigation time; kept for the whole wizard session so a
+  /// later [PrayerPermissionsCubit] refresh cannot collapse the flow early.
+  List<PrayerAlertsPermissionStep>? _pinnedSteps;
+
+  @override
+  void initState() {
+    super.initState();
+    _pinnedSteps = widget.navExtra?.steps;
+  }
+
+  @override
+  void didUpdateWidget(covariant PrayerAlertsPermissionScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_pinnedSteps == null && widget.navExtra?.steps != null) {
+      _pinnedSteps = widget.navExtra!.steps;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<PrayerPermissionsCubit, PrayerPermissionsState>(
       buildWhen: (PrayerPermissionsState prev, PrayerPermissionsState next) =>
-          prev.capability != next.capability ||
-          prev.hasLocationPermission != next.hasLocationPermission,
+          _pinnedSteps == null &&
+          (prev.capability != next.capability ||
+              prev.hasLocationPermission != next.hasLocationPermission),
       builder: (BuildContext context, PrayerPermissionsState state) {
         final List<PrayerAlertsPermissionStep> steps =
-            widget.navExtra?.steps ??
+            _pinnedSteps ??
             prayerAlertsSetupPendingSteps(
               hasLocationPermission: state.hasLocationPermission,
               capability: state.capability,
             );
 
         if (steps.isEmpty) {
+          if (state.capability == null && _pinnedSteps == null) {
+            return const _PrayerAlertsPermissionLoadingScaffold();
+          }
+
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
               context.pop();
             }
           });
-          return const SizedBox.shrink();
+          return const _PrayerAlertsPermissionLoadingScaffold(
+            showProgress: false,
+          );
         }
 
         return PrayerAlertsPermissionFlow(
           steps: steps,
-          prayerTimesBloc: _tryReadPrayerTimesBloc(),
+          // Nullable read: the wizard can open outside the prayer-times
+          // scope (e.g. onboarding), where no PrayerTimesBloc is provided.
+          prayerTimesBloc: context.read<PrayerTimesBloc?>(),
           onFinished: () => context.pop(),
         );
       },
     );
   }
+}
 
-  PrayerTimesBloc? _tryReadPrayerTimesBloc() {
-    try {
-      return context.read<PrayerTimesBloc>();
-    } on Object {
-      return null;
-    }
+class _PrayerAlertsPermissionLoadingScaffold extends StatelessWidget {
+  const _PrayerAlertsPermissionLoadingScaffold({this.showProgress = true});
+
+  final bool showProgress;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: Center(
+        child: showProgress
+            ? CircularProgressIndicator(
+                color: context.colorScheme.primary,
+              )
+            : const SizedBox.shrink(),
+      ),
+    );
   }
 }

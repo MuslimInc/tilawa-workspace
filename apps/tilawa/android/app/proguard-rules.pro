@@ -181,12 +181,6 @@
 }
 
 # ============================================
-# Credential Manager
-# ============================================
--keep class androidx.credentials.** { *; }
--dontwarn androidx.credentials.**
-
-# ============================================
 # MultiDex
 # ============================================
 -keep class androidx.multidex.** { *; }

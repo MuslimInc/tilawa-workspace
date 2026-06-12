@@ -1,7 +1,7 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
-import 'package:credential_manager/credential_manager.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -41,7 +41,6 @@ import 'package:tilawa/features/audio_player/domain/services/playback_notificati
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/audio_player/presentation/player_presentation_controller.dart';
 import 'package:tilawa/features/audio_player/presentation/quran_player_presentation_entry.dart';
-import 'package:tilawa/features/auth/core/auth_config.dart';
 import 'package:tilawa/features/downloads/domain/services/download_notification_service_interface.dart';
 import 'package:tilawa/features/downloads/domain/services/downloads_initializer.dart';
 import 'package:tilawa/features/notifications/data/services/fcm_service.dart';
@@ -56,7 +55,6 @@ import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa/router/notification_navigation_resolver.dart';
 import 'package:tilawa/shared/audio/audio_player_handler.dart';
-import 'package:tilawa_core/constants/app_strings.dart';
 import 'package:tilawa_core/observers/app_bloc_observer.dart';
 import 'package:tilawa_core/services/app_orientation_service.dart';
 import 'package:tilawa_core/services/interfaces/athkar_notification_service_interface.dart';
@@ -258,7 +256,7 @@ class AppStartupTasks {
     _scheduleDeferredBackgroundTasks();
 
     await runPhase0Hive(timeline);
-    await runPhase1CredentialAndAnalytics(timeline);
+    await runPhase1Analytics(timeline);
     await runPhase3NotificationsAndAudio(timeline);
     await _runPhase4QuranAndFirebase(timeline);
 
@@ -516,35 +514,6 @@ class AppStartupTasks {
         );
       }
     }();
-  }
-
-  Future<void> initializeCredentialManager() async {
-    if (!_isEnabled(
-      launchConfig.credentialManagerInit,
-      'CREDENTIAL_MANAGER_INIT',
-    )) {
-      return;
-    }
-    if (!AuthConfig.useCredentialManager) {
-      return;
-    }
-    logger.d(
-      '[AppLaunch] source=AppStartupTasks.initializeCredentialManager: Start in (${DateTime.now()})',
-    );
-    try {
-      final CredentialManager credentialManager = getIt<CredentialManager>();
-      await credentialManager.init(
-        preferImmediatelyAvailableCredentials: true,
-        googleClientId: AppStrings.googleClientId,
-      );
-      logger.d(
-        '[AppLaunch] source=AppStartupTasks.initializeCredentialManager: Credential Manager initialized successfully at (${DateTime.now()})',
-      );
-    } catch (e) {
-      logger.d(
-        '[AppLaunch] source=AppStartupTasks.initializeCredentialManager: Warning: Could not initialize Credential Manager at (${DateTime.now()}): $e',
-      );
-    }
   }
 
   Future<void> initializeCrashlytics() async {

@@ -9,5 +9,7 @@ class PrepareGoogleSignInUseCase {
 
   final AuthRepository _authRepository;
 
-  Future<void> call() => _authRepository.prepareGoogleSignIn();
+  Future<void> call() {
+    return _authRepository.prepareGoogleSignIn();
+  }
 }

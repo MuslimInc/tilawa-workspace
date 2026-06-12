@@ -47,6 +47,7 @@ import '../screens/route_list_screen.dart';
 import '../shared/widgets/quran_player_expanded_page.dart';
 import '../shared/widgets/quran_player_expanded_route_transition.dart';
 import 'launch_route_page.dart';
+import 'app_navigator_keys.dart';
 import 'prayer_alerts_permission_nav_extra.dart';
 import 'share_composer_extra.dart';
 
@@ -71,9 +72,6 @@ part 'app_router_config.g.dart';
       path: '/prayer-notification-status',
     ),
     TypedGoRoute<PrayerTimesRoute>(path: '/prayer-times'),
-    TypedGoRoute<PrayerAlertsPermissionRoute>(
-      path: '/prayer-alerts-permissions',
-    ),
     TypedGoRoute<QuranRenderDemoRoute>(path: '/render-demo'),
   ],
 )
@@ -150,6 +148,31 @@ class LanguageWelcomeRoute extends GoRouteData with $LanguageWelcomeRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const LanguageWelcomeScreen();
+  }
+}
+
+@TypedGoRoute<PrayerAlertsPermissionRoute>(path: '/prayer-alerts-permissions')
+class PrayerAlertsPermissionRoute extends GoRouteData
+    with $PrayerAlertsPermissionRoute {
+  const PrayerAlertsPermissionRoute({this.$extra});
+
+  /// Covers shell chrome (bottom nav / side rail) when opened from in-app.
+  static final GlobalKey<NavigatorState> $parentNavigatorKey =
+      appRootNavigatorKey;
+
+  final PrayerAlertsPermissionNavExtra? $extra;
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return launchRoutePage(
+      state: state,
+      child: build(context, state),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return PrayerAlertsPermissionScreenScope(navExtra: $extra);
   }
 }
 
@@ -408,18 +431,6 @@ class PrayerTimesRoute extends GoRouteData with $PrayerTimesRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const PrayerTimesScreenScope();
-  }
-}
-
-class PrayerAlertsPermissionRoute extends GoRouteData
-    with $PrayerAlertsPermissionRoute {
-  const PrayerAlertsPermissionRoute({this.$extra});
-
-  final PrayerAlertsPermissionNavExtra? $extra;
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return PrayerAlertsPermissionScreenScope(navExtra: $extra);
   }
 }
 

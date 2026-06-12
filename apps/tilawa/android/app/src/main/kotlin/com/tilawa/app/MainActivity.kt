@@ -8,10 +8,10 @@ import android.os.Looper
 import android.util.Log
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.ryanheise.audioservice.AudioServiceActivity
-import com.tilawa.app.auth.GoogleSignInPrepareChannel
 import com.tilawa.app.prayer.AdhanScheduler
 import com.tilawa.app.prayer.PrayerAdhanMethodChannel
 import com.tilawa.app.prayer.PrayerNotificationsWatchdogScheduler
+import androidx.annotation.VisibleForTesting
 import io.flutter.embedding.android.RenderMode
 import io.sentry.flutter.SentryFlutterPlugin
 import io.flutter.embedding.engine.FlutterEngine
@@ -42,10 +42,13 @@ class MainActivity : AudioServiceActivity() {
         Log.d(FIRST_FRAME_TAG, message)
     }
 
+    private var renderMode: RenderMode = RenderMode.surface
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        renderMode = resolveRenderMode(intent)
         Log.d(
             TAG,
-            "MAIN_ACTIVITY_ON_CREATE_INTENT action=${intent?.action} extras=${intent?.extras?.keySet()}"
+            "MAIN_ACTIVITY_ON_CREATE_INTENT action=${intent?.action} extras=${intent?.extras?.keySet()} renderMode=$renderMode"
         )
         firstFrameLog("MainActivity.onCreate installSplashScreen")
         val splashScreen = installSplashScreen()
@@ -110,8 +113,14 @@ class MainActivity : AudioServiceActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        
-        // Register custom channels after super to ensure they are registered
+        registerAppMethodChannels(flutterEngine)
+        // Belt-and-suspenders for cold start; hot restart is restored from Dart
+        // main() before SentryFlutter.init.
+        restoreSentryFlutterApplicationContext()
+    }
+
+    @VisibleForTesting
+    internal fun registerAppMethodChannels(flutterEngine: FlutterEngine) {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, WATCHDOG_CHANNEL)
             .setMethodCallHandler { call, result ->
                 when (call.method) {
@@ -128,11 +137,6 @@ class MainActivity : AudioServiceActivity() {
             }
 
         PrayerAdhanMethodChannel.register(
-            flutterEngine.dartExecutor.binaryMessenger,
-            this,
-        )
-
-        GoogleSignInPrepareChannel.register(
             flutterEngine.dartExecutor.binaryMessenger,
             this,
         )
@@ -162,10 +166,6 @@ class MainActivity : AudioServiceActivity() {
                     else -> result.notImplemented()
                 }
             }
-
-        // Belt-and-suspenders for cold start; hot restart is restored from Dart
-        // main() before SentryFlutter.init.
-        restoreSentryFlutterApplicationContext()
     }
 
     /**
@@ -198,12 +198,20 @@ class MainActivity : AudioServiceActivity() {
         }
     }
 
-    override fun getRenderMode(): RenderMode {
-        // A cold start from a notification can launch through the lockscreen/
-        // notification shade path. With SurfaceView, Flutter delays the first
-        // Android draw until the first Flutter frame, which can deadlock that
-        // transition and leave a persistent black screen. TextureView avoids
-        // the pre-draw gate for this activity.
-        return RenderMode.texture
+    override fun getRenderMode(): RenderMode = renderMode
+
+    /**
+     * Notification cold starts can launch through the lockscreen/shade path.
+     * [RenderMode.surface] delays the first Android draw until the first
+     * Flutter frame and can deadlock that transition (persistent black screen).
+     * [RenderMode.texture] avoids the pre-draw gate for that path only.
+     *
+     * Normal launches use [RenderMode.surface].
+     */
+    private fun resolveRenderMode(intent: Intent?): RenderMode {
+        if (intent?.action == ACTION_OPEN_PRAYER_STATUS) {
+            return RenderMode.texture
+        }
+        return RenderMode.surface
     }
 }

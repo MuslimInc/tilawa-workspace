@@ -48,7 +48,7 @@ which sets `lastUpdatedAt` on `assets/changelog/changelog.json` and stamps
 ## Notes
 
 - Builds use `flutter build appbundle --release --target-platform android-arm64
-  --split-debug-info=build/symbols` (Flutter 3.44.1, Java 17). Arm64 is also
+  --split-debug-info=build/symbols` (Flutter 3.44.2, Java 17). Arm64 is also
   set via `ndk.abiFilters` in `app/build.gradle`; the CLI flag is still
   required so Flutter AOT does not compile unused ABIs into the AAB. Code
   generation runs via `melos run gen` before the build. Debug symbols are

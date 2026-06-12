@@ -387,9 +387,14 @@ class _AppShellChrome extends StatelessWidget {
         ? context.tokens.spaceSmall
         : 0;
 
-    final Widget shellChild = state.isShellActivated
-        ? child
-        : const SizedBox.shrink();
+    // Main tab shell (`/`) defers paint until [MainScreenCubit] activates.
+    // Pushed shell routes (e.g. prayer-alerts permissions) must paint
+    // immediately — otherwise users see a blank/grey screen behind chrome.
+    final Widget shellChild =
+        QuranPlayerRoutePolicy.isMainShell(location) &&
+            !state.isShellActivated
+        ? const SizedBox.shrink()
+        : child;
 
     return PopScope(
       canPop: _canPopShell(context, location, state),

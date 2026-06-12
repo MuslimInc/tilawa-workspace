@@ -105,7 +105,10 @@ abstract final class PrayerAlertsPermissionNavigation {
   }
 
   static PrayerPermissionsCubit _permissionsCubitFor(BuildContext context) {
-    return _tryReadPermissionsCubit(context) ?? getIt<PrayerPermissionsCubit>();
+    // Nullable reads here and below: callers may sit outside the
+    // prayer-times scope (e.g. onboarding), where neither bloc is provided.
+    return context.read<PrayerPermissionsCubit?>() ??
+        getIt<PrayerPermissionsCubit>();
   }
 
   static Future<void> _refreshAfterFlow(BuildContext context) async {
@@ -114,33 +117,16 @@ abstract final class PrayerAlertsPermissionNavigation {
     }
 
     final PrayerPermissionsCubit? permissionsCubit =
-        _tryReadPermissionsCubit(context);
+        context.read<PrayerPermissionsCubit?>();
     await permissionsCubit?.checkCapability();
     if (!context.mounted) {
       return;
     }
 
-    final PrayerTimesBloc? prayerTimesBloc = _tryReadPrayerTimesBloc(context);
+    final PrayerTimesBloc? prayerTimesBloc =
+        context.read<PrayerTimesBloc?>();
     prayerTimesBloc?.add(
       const PrayerTimesEvent.loadPrayerTimes(forceReschedule: true),
     );
-  }
-
-  static PrayerPermissionsCubit? _tryReadPermissionsCubit(
-    BuildContext context,
-  ) {
-    try {
-      return context.read<PrayerPermissionsCubit>();
-    } on Object {
-      return null;
-    }
-  }
-
-  static PrayerTimesBloc? _tryReadPrayerTimesBloc(BuildContext context) {
-    try {
-      return context.read<PrayerTimesBloc>();
-    } on Object {
-      return null;
-    }
   }
 }

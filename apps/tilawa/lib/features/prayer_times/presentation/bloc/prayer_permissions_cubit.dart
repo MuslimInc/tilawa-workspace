@@ -18,7 +18,7 @@ part 'prayer_permissions_cubit.freezed.dart';
 abstract class PrayerPermissionsState with _$PrayerPermissionsState {
   const factory PrayerPermissionsState({
     PrayerAlarmCapability? capability,
-    @Default(true) bool hasLocationPermission,
+    @Default(false) bool hasLocationPermission,
   }) = _PrayerPermissionsState;
 }
 

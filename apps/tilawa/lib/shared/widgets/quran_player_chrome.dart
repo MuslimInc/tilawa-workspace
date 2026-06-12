@@ -111,6 +111,7 @@ abstract final class QuranPlayerRoutePolicy {
     '/language-welcome',
     '/onboarding',
     '/login',
+    '/prayer-alerts-permissions',
     '/share/',
   ];
 
@@ -148,6 +149,7 @@ abstract final class AppShellRoutePolicy {
     '/language-welcome',
     '/onboarding',
     '/login',
+    '/prayer-alerts-permissions',
     '/share/',
     '/athkar',
     '/player',

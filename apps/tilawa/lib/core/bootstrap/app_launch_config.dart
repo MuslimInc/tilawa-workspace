@@ -29,7 +29,6 @@ class AppLaunchConfig extends Equatable {
     this.deferredNotificationChannel = true,
     this.crashlyticsInit = true,
     this.hiveInit = true,
-    this.credentialManagerInit = true,
     this.analyticsInit = true,
     this.notificationServiceInit = true,
     this.notificationHandlersInit = true,
@@ -97,10 +96,6 @@ class AppLaunchConfig extends Equatable {
       ),
       hiveInit: bool.fromEnvironment(
         'TILAWA_LAUNCH_HIVE_INIT',
-        defaultValue: true,
-      ),
-      credentialManagerInit: bool.fromEnvironment(
-        'TILAWA_LAUNCH_CREDENTIAL_MANAGER_INIT',
         defaultValue: true,
       ),
       analyticsInit: bool.fromEnvironment(
@@ -171,7 +166,6 @@ class AppLaunchConfig extends Equatable {
   final bool deferredNotificationChannel;
   final bool crashlyticsInit;
   final bool hiveInit;
-  final bool credentialManagerInit;
   final bool analyticsInit;
   final bool notificationServiceInit;
   final bool notificationHandlersInit;
@@ -201,7 +195,6 @@ class AppLaunchConfig extends Equatable {
     deferredNotificationChannel,
     crashlyticsInit,
     hiveInit,
-    credentialManagerInit,
     analyticsInit,
     notificationServiceInit,
     notificationHandlersInit,
