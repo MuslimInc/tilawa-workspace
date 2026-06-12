@@ -91,7 +91,7 @@ void main() {
       expect(primary.width, content.width);
     });
 
-    testWidgets('places back above the primary action in the lower stack', (
+    testWidgets('places primary above the back action in the lower stack', (
       WidgetTester tester,
     ) async {
       await pumpFooterBar(tester, locale: const Locale('en'), currentPage: 1);
@@ -99,8 +99,19 @@ void main() {
       final Rect back = tester.getRect(primaryButtonFinder(en.previous));
       final Rect primary = tester.getRect(primaryButtonFinder(en.next));
 
-      expect(back.bottom, lessThan(primary.top));
-      expect(back.center.dy, lessThan(primary.center.dy));
+      expect(primary.bottom, lessThan(back.top));
+      expect(primary.center.dy, lessThan(back.center.dy));
+    });
+
+    testWidgets('uses a full-width back action when previous page is available', (
+      WidgetTester tester,
+    ) async {
+      await pumpFooterBar(tester, locale: const Locale('ar'), currentPage: 1);
+
+      final Rect back = tester.getRect(primaryButtonFinder(ar.previous));
+      final Rect content = tester.getRect(contentColumnFinder());
+
+      expect(back.width, content.width);
     });
 
     testWidgets('starts the action band near 72% of the screen height', (

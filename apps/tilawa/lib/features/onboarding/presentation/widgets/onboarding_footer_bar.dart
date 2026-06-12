@@ -53,16 +53,6 @@ class OnboardingFooterBar extends StatelessWidget {
             currentIndex: currentPage,
           ),
         ),
-        if (_canGoBack)
-          Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: TilawaButton(
-              text: backLabel,
-              variant: TilawaButtonVariant.ghost,
-              semanticLabel: backLabel,
-              onPressed: onBack,
-            ),
-          ),
         TilawaButton(
           text: _primaryLabel,
           variant: TilawaButtonVariant.primary,
@@ -71,6 +61,14 @@ class OnboardingFooterBar extends StatelessWidget {
           onPressed: _onPrimary,
           isFullWidth: true,
         ),
+        if (_canGoBack)
+          TilawaButton(
+            text: backLabel,
+            variant: TilawaButtonVariant.ghost,
+            semanticLabel: backLabel,
+            onPressed: onBack,
+            isFullWidth: true,
+          ),
       ],
     );
   }
