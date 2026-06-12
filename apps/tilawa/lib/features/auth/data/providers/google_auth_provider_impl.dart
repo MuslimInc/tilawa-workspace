@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
@@ -9,7 +11,6 @@ import 'package:tilawa/core/logging/app_logger.dart';
 
 import '../services/android_sign_in_platform_policy.dart';
 import '../services/google_sign_in_session_tracker.dart';
-import '../../debug/tilawa_gsignin_debug_log.dart';
 import '../../domain/entities/auth_result.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/providers/auth_provider_interface.dart';
@@ -24,13 +25,17 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
   );
   static const Duration signInTimeout = Duration(seconds: 60);
 
-  /// Transsion/XOS: [HiddenActivity] can be torn down without completing the
-  /// Dart future; fail faster so the login screen can show the fallback panel.
-  static const Duration transsionSignInTimeout = Duration(seconds: 15);
-
-  /// CM bottom sheets can hang on some OEMs (e.g. Infinix XOS); cap wait time
-  /// so [authenticate] account-chooser can run as fallback.
+  /// CM bottom sheets can hang on some OEMs; cap wait time so [authenticate]
+  /// account-chooser can run as fallback.
   static const Duration credentialManagerTimeout = Duration(seconds: 15);
+
+  /// Transsion/XOS: GMS sign-in UI (CM sheet or account chooser) can be
+  /// composited invisibly behind the Flutter window. Visible GMS UI takes
+  /// this activity out of [AppLifecycleState.resumed]; if we are still
+  /// resumed this long after launching the flow, no UI ever appeared and
+  /// the session is treated as hung instead of waiting the full timeout.
+  @visibleForTesting
+  static Duration transsionUiProbeDelay = const Duration(seconds: 6);
 
   /// Lets a timed-out [HiddenActivity] finish tearing down before starting
   /// a second Credential Manager session (avoids `counts:2` overlap on XOS).
@@ -41,10 +46,6 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
   final GoogleSignIn _googleSignIn;
   final AndroidSignInPlatformPolicy _platformPolicy;
   final GoogleSignInSessionTracker _sessionTracker;
-
-  Duration get _interactiveSignInTimeout => _platformPolicy.skipAutomaticSignIn
-      ? transsionSignInTimeout
-      : signInTimeout;
 
   @override
   Stream<UserEntity?> get authStateChanges {
@@ -59,28 +60,11 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
   @override
   Future<AuthResult> signIn() async {
     logger.i('[GoogleSignIn] sign-in started (google_sign_in)');
-    // #region agent log
-    tilawaGSignInDebug(
-      'signIn started',
-      hypothesisId: 'H3',
-      data: <String, Object?>{
-        'timeoutSec': _interactiveSignInTimeout.inSeconds,
-        'transsion': _platformPolicy.skipAutomaticSignIn,
-      },
-    );
-    // #endregion
     _sessionTracker.markStarted();
     try {
       final GoogleSignInAccount googleUser = await _signInAccount().timeout(
-        _interactiveSignInTimeout,
+        signInTimeout,
       );
-      // #region agent log
-      tilawaGSignInDebug(
-        'signIn account obtained',
-        hypothesisId: 'H3',
-        data: <String, Object?>{'email': googleUser.email},
-      );
-      // #endregion
 
       final GoogleSignInAuthentication googleAuth = googleUser.authentication;
 
@@ -99,44 +83,19 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
 
       return AuthResult.success(user: user);
     } on TimeoutException {
-      // #region agent log
-      tilawaGSignInDebug(
-        'signIn TIMEOUT',
-        hypothesisId: 'H3',
-        data: <String, Object?>{
-          'timeoutSec': _interactiveSignInTimeout.inSeconds,
-        },
-      );
-      // #endregion
       try {
         await _googleSignIn.signOut();
-        // #region agent log
-        tilawaGSignInDebug('signOut after TIMEOUT', hypothesisId: 'H3');
-        // #endregion
       } catch (error) {
-        // #region agent log
-        tilawaGSignInDebug(
-          'signOut after TIMEOUT failed',
-          hypothesisId: 'H3',
-          data: <String, Object?>{'error': error.toString()},
+        logger.w(
+          '[GoogleSignIn] signOut after timeout failed',
+          error: error,
         );
-        // #endregion
       }
       return AuthResult.failure(
         message: _signInTimeoutMessage(),
         code: 'sign-in-timeout',
       );
     } on PlatformException catch (e) {
-      // #region agent log
-      tilawaGSignInDebug(
-        'signIn PlatformException',
-        hypothesisId: 'H4',
-        data: <String, Object?>{
-          'code': e.code,
-          'message': e.message,
-        },
-      );
-      // #endregion
       logger.w(
         '[GoogleSignIn] PlatformException during sign-in: ${e.code}',
         error: e,
@@ -147,16 +106,6 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
         details: e.details?.toString(),
       );
     } on GoogleSignInException catch (e) {
-      // #region agent log
-      tilawaGSignInDebug(
-        'signIn GoogleSignInException',
-        hypothesisId: 'H4',
-        data: <String, Object?>{
-          'code': e.code.name,
-          'description': e.description,
-        },
-      );
-      // #endregion
       switch (e.code) {
         case GoogleSignInExceptionCode.canceled:
         case GoogleSignInExceptionCode.interrupted:
@@ -196,15 +145,10 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
   Future<GoogleSignInAccount> _signInAccount() async {
     await _platformPolicy.warmUp();
 
-    // Transsion/XOS: lightweight CM always hangs and leaves [HiddenActivity]
-    // alive; starting authenticate() while it is still up yields `canceled`.
-    if (_platformPolicy.skipAutomaticSignIn) {
-      logger.i(
-        '[GoogleSignIn] Transsion OEM: skipping CM sheet → account chooser',
-      );
-      return _authenticateWithButtonFlow();
-    }
-
+    // Transsion/XOS included: the historical "CM always hangs" was observed
+    // under RenderMode.surface; with RenderMode.texture (MainActivity) the
+    // GMS overlay is composited correctly. _waitForInteractiveUi still
+    // fail-fasts if the sheet never becomes visible.
     final GoogleSignInAccount? lightweightAccount =
         await _tryCredentialManagerSignIn();
     if (lightweightAccount != null) {
@@ -222,7 +166,10 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
       if (lightweight == null) {
         return null;
       }
-      return await lightweight.timeout(credentialManagerTimeout);
+      return await _waitForInteractiveUi(
+        lightweight,
+        stageTimeout: credentialManagerTimeout,
+      );
     } on TimeoutException {
       logger.i(
         '[GoogleSignIn] Credential Manager sheet timed out; '
@@ -240,6 +187,35 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
         return null;
       }
       rethrow;
+    }
+  }
+
+  /// Waits for an interactive GMS sign-in [operation], capped at
+  /// [stageTimeout].
+  ///
+  /// Transsion/XOS only: the CM sheet / account chooser can be composited
+  /// invisibly (the original Infinix bug). If the app is still
+  /// [AppLifecycleState.resumed] after [transsionUiProbeDelay] — meaning no
+  /// GMS UI ever covered it — throws [TimeoutException] immediately so the
+  /// caller can fall back. Once UI is confirmed visible the user gets the
+  /// full [signInTimeout] regardless of [stageTimeout].
+  Future<T> _waitForInteractiveUi<T>(
+    Future<T> operation, {
+    required Duration stageTimeout,
+  }) async {
+    if (!_platformPolicy.skipAutomaticSignIn) {
+      return operation.timeout(stageTimeout);
+    }
+    try {
+      return await operation.timeout(transsionUiProbeDelay);
+    } on TimeoutException {
+      final AppLifecycleState? lifecycle =
+          SchedulerBinding.instance.lifecycleState;
+      if (lifecycle == AppLifecycleState.resumed) {
+        // No GMS UI ever covered the app — invisible-overlay hang.
+        rethrow;
+      }
+      return operation.timeout(signInTimeout);
     }
   }
 
@@ -270,30 +246,13 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
     logger.i(
       '[GoogleSignIn] authenticate() starting (button / account chooser)',
     );
-    // #region agent log
-    tilawaGSignInDebug('authenticate() calling', hypothesisId: 'H5');
-    // #endregion
     try {
-      final GoogleSignInAccount account = await _googleSignIn.authenticate();
-      // #region agent log
-      tilawaGSignInDebug(
-        'authenticate() returned',
-        hypothesisId: 'H5',
-        data: <String, Object?>{'email': account.email},
+      final GoogleSignInAccount account = await _waitForInteractiveUi(
+        _googleSignIn.authenticate(),
+        stageTimeout: signInTimeout,
       );
-      // #endregion
       return account;
     } on PlatformException catch (error) {
-      // #region agent log
-      tilawaGSignInDebug(
-        'authenticate() PlatformException',
-        hypothesisId: 'H4',
-        data: <String, Object?>{
-          'code': error.code,
-          'message': error.message,
-        },
-      );
-      // #endregion
       logger.w(
         '[GoogleSignIn] authenticate PlatformException: ${error.code}',
         error: error,

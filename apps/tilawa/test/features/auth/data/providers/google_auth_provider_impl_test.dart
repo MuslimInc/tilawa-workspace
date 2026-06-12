@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mockito/annotations.dart';
@@ -19,6 +22,8 @@ import 'google_auth_provider_impl_test.mocks.dart';
   User,
 ])
 void main() {
+  final TestWidgetsFlutterBinding binding =
+      TestWidgetsFlutterBinding.ensureInitialized();
   late GoogleAuthProviderImpl googleAuthProvider;
   late MockFirebaseAuth mockFirebaseAuth;
   late MockGoogleSignIn mockGoogleSignIn;
@@ -45,6 +50,8 @@ void main() {
     ).thenAnswer((_) => Future<GoogleSignInAccount?>.value());
     when(mockGoogleSignIn.supportsAuthenticate()).thenReturn(true);
     when(mockGoogleSignIn.signOut()).thenAnswer((_) async {});
+    // The sign-in debug log reads the account email on every success path.
+    when(mockGoogleUser.email).thenReturn('test@example.com');
 
     platformPolicy = AndroidSignInPlatformPolicy.test(
       skipAutomaticSignIn: false,
@@ -119,9 +126,8 @@ void main() {
       },
     );
 
-    test(
-      'signIn skips CM sheet on Transsion OEM and uses account chooser',
-      () async {
+    group('Transsion OEM', () {
+      void useTranssionProvider() {
         platformPolicy = AndroidSignInPlatformPolicy.test(
           skipAutomaticSignIn: true,
         );
@@ -131,9 +137,9 @@ void main() {
           platformPolicy,
           GoogleSignInSessionTracker(),
         );
-        when(
-          mockGoogleSignIn.authenticate(),
-        ).thenAnswer((_) async => mockGoogleUser);
+      }
+
+      void stubFirebaseSignIn() {
         when(mockGoogleUser.authentication).thenReturn(mockGoogleAuth);
         when(mockGoogleAuth.idToken).thenReturn('token');
         when(
@@ -145,6 +151,31 @@ void main() {
         when(mockFirebaseUser.displayName).thenReturn('Test User');
         when(mockFirebaseUser.photoURL).thenReturn('url');
         when(mockFirebaseUser.metadata).thenReturn(UserMetadata(0, 0));
+      }
+
+      setUp(() {
+        useTranssionProvider();
+        GoogleAuthProviderImpl.transsionUiProbeDelay = const Duration(
+          milliseconds: 50,
+        );
+        binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      });
+
+      tearDown(() {
+        GoogleAuthProviderImpl.transsionUiProbeDelay = const Duration(
+          seconds: 6,
+        );
+        binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      });
+
+      test('signIn tries the CM sheet first and skips the button flow when '
+          'it succeeds', () async {
+        when(
+          mockGoogleSignIn.attemptLightweightAuthentication(
+            reportAllExceptions: anyNamed('reportAllExceptions'),
+          ),
+        ).thenAnswer((_) => Future<GoogleSignInAccount?>.value(mockGoogleUser));
+        stubFirebaseSignIn();
 
         final AuthResult result = await googleAuthProvider.signIn();
 
@@ -152,14 +183,60 @@ void main() {
           success: (user) => expect(user.id, '123'),
           orElse: () => fail('Expected success'),
         );
-        verifyNever(
+        verifyNever(mockGoogleSignIn.authenticate());
+      });
+
+      test('signIn falls back to the button flow when the CM sheet never '
+          'shows UI (app stays resumed)', () async {
+        // Never completes: the XOS invisible-overlay hang.
+        when(
           mockGoogleSignIn.attemptLightweightAuthentication(
             reportAllExceptions: anyNamed('reportAllExceptions'),
           ),
+        ).thenAnswer(
+          (_) => Completer<GoogleSignInAccount?>().future,
         );
+        when(
+          mockGoogleSignIn.authenticate(),
+        ).thenAnswer((_) async => mockGoogleUser);
+        stubFirebaseSignIn();
+
+        final AuthResult result = await googleAuthProvider.signIn();
+
+        result.maybeWhen(
+          success: (user) => expect(user.id, '123'),
+          orElse: () => fail('Expected success'),
+        );
+        // Credential state is reset before the button flow starts.
+        verify(mockGoogleSignIn.signOut()).called(1);
         verify(mockGoogleSignIn.authenticate()).called(1);
-      },
-    );
+      });
+
+      test('signIn keeps waiting on the CM sheet when GMS UI is visible '
+          '(app left resumed)', () async {
+        binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+        // Completes after the probe delay, while the sheet is on screen.
+        when(
+          mockGoogleSignIn.attemptLightweightAuthentication(
+            reportAllExceptions: anyNamed('reportAllExceptions'),
+          ),
+        ).thenAnswer(
+          (_) => Future<GoogleSignInAccount?>.delayed(
+            const Duration(milliseconds: 150),
+            () => mockGoogleUser,
+          ),
+        );
+        stubFirebaseSignIn();
+
+        final AuthResult result = await googleAuthProvider.signIn();
+
+        result.maybeWhen(
+          success: (user) => expect(user.id, '123'),
+          orElse: () => fail('Expected success'),
+        );
+        verifyNever(mockGoogleSignIn.authenticate());
+      });
+    });
 
     test(
       'signIn falls back to button flow when Credential Manager sheet fails',

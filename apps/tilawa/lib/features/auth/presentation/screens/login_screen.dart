@@ -5,7 +5,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:tilawa/core/app_legal_urls.dart';
 import 'package:tilawa/core/bootstrap/splash_launch_handoff.dart';
 import 'package:tilawa/core/di/injection.dart';
@@ -18,12 +17,10 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../router/app_router.dart';
 import '../../../../router/app_router_config.dart';
+import '../../data/services/android_sign_in_platform_policy.dart';
 import '../bloc/auth_bloc.dart';
 import '../services/google_sign_in_interactive_launcher.dart';
 import '../widgets/login_sign_in_fallback_panel.dart';
-import '../../data/services/android_sign_in_platform_policy.dart';
-import '../../data/services/google_sign_in_android_resume_bridge.dart';
-import '../../debug/tilawa_gsignin_debug_log.dart';
 
 /// Warm brown login canvas — distinct from the runtime sage primary.
 const Color _kLoginAccent = AppColors.primaryBrown;
@@ -50,18 +47,10 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
-  static const Duration _transsionCredentialUiRecoveryDelay = Duration(
-    milliseconds: 600,
-  );
-
   bool _autoSignInScheduled = false;
   bool _showFallbackFields = false;
   bool _signInLaunchPending = false;
-  bool _credentialPickerWasBackgrounded = false;
   bool _awaitingManualSignInResult = false;
-  Timer? _transsionResumeRecoveryTimer;
-  StreamSubscription<void>? _nativeResumeSubscription;
-  StreamSubscription<void>? _credentialDismissedSubscription;
   String? _lastLoggedAuthStateLabel;
   bool? _lastLoggedButtonEnabled;
 
@@ -70,25 +59,6 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
     super.initState();
     _logGoogleSignInButton('LoginScreen initState');
     WidgetsBinding.instance.addObserver(this);
-    GoogleSignInAndroidResumeBridge.instance.ensureInitialized();
-    _nativeResumeSubscription = GoogleSignInAndroidResumeBridge
-        .instance
-        .onMainActivityResumed
-        .listen((_) {
-          if (_credentialPickerWasBackgrounded) {
-            _scheduleTranssionCredentialUiRecovery(reason: 'nativeOnResume');
-          }
-        });
-    _credentialDismissedSubscription = GoogleSignInAndroidResumeBridge
-        .instance
-        .onCredentialUiDismissed
-        .listen((_) {
-          if (_credentialPickerWasBackgrounded) {
-            _scheduleTranssionCredentialUiRecovery(
-              reason: 'hiddenActivityDismissed',
-            );
-          }
-        });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) {
         return;
@@ -101,9 +71,6 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
   @override
   void dispose() {
     _logGoogleSignInButton('LoginScreen dispose');
-    _transsionResumeRecoveryTimer?.cancel();
-    unawaited(_nativeResumeSubscription?.cancel());
-    unawaited(_credentialDismissedSubscription?.cancel());
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -111,157 +78,11 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     _logGoogleSignInButton('lifecycle=$state');
-    // #region agent log
-    tilawaGSignInDebug(
-      'lifecycle',
-      hypothesisId: 'H1',
-      data: <String, Object?>{
-        'state': state.name,
-        'authLoading': context.read<AuthBloc>().state is AuthLoading,
-        'pickerBackgrounded': _credentialPickerWasBackgrounded,
-      },
-    );
-    // #endregion
-    if (state == AppLifecycleState.inactive ||
-        state == AppLifecycleState.paused) {
-      _markCredentialPickerBackgroundedIfLoading();
-    }
     if (state == AppLifecycleState.resumed) {
-      // #region agent log
-      tilawaGSignInDebug(
-        'lifecycle resumed → schedule recovery',
-        hypothesisId: 'H1',
-      );
-      // #endregion
       unawaited(_recoverLoginSurface(reason: 'lifecycleResumed'));
       _recoverStalledSignIn();
-      _scheduleTranssionCredentialUiRecovery(reason: 'flutterResumed');
       _scheduleAutoSignInWhenReady();
     }
-  }
-
-  void _markCredentialPickerBackgroundedIfLoading() {
-    if (!mounted) {
-      return;
-    }
-    if (context.read<AuthBloc>().state is AuthLoading) {
-      _credentialPickerWasBackgrounded = true;
-      _logGoogleSignInButton(
-        'credential picker backgrounded while AuthLoading',
-      );
-      // #region agent log
-      tilawaGSignInDebug(
-        'picker backgrounded',
-        hypothesisId: 'H1',
-        data: <String, Object?>{
-          'lifecycle': WidgetsBinding.instance.lifecycleState?.name,
-        },
-      );
-      // #endregion
-      // Do not schedule recovery here — [inactive] also fires when the picker
-      // opens. Wait for MainActivity.onResume / [resumed] after the user backs
-      // out (or the 15s provider timeout as backstop).
-    }
-  }
-
-  /// When [HiddenActivity] is destroyed on XOS without completing the Dart
-  /// future, [authenticate] can hang until timeout. Recover after a short grace.
-  void _scheduleTranssionCredentialUiRecovery({required String reason}) {
-    if (!_shouldSkipAutoSignIn()) {
-      // #region agent log
-      tilawaGSignInDebug(
-        'recovery skipped: not Transsion',
-        hypothesisId: 'H1',
-      );
-      // #endregion
-      return;
-    }
-    if (!_credentialPickerWasBackgrounded) {
-      // #region agent log
-      tilawaGSignInDebug(
-        'recovery skipped: picker not backgrounded',
-        hypothesisId: 'H1',
-      );
-      // #endregion
-      return;
-    }
-    // #region agent log
-    tilawaGSignInDebug(
-      'recovery timer scheduled',
-      hypothesisId: 'H1',
-      data: <String, Object?>{
-        'reason': reason,
-        'delayMs': _transsionCredentialUiRecoveryDelay.inMilliseconds,
-      },
-    );
-    // #endregion
-    _transsionResumeRecoveryTimer?.cancel();
-    _transsionResumeRecoveryTimer = Timer(
-      _transsionCredentialUiRecoveryDelay,
-      () {
-        unawaited(_recoverFromHungCredentialPicker());
-      },
-    );
-  }
-
-  /// Dismisses a hung [GoogleSignIn.authenticate] after invisible picker/back.
-  Future<void> _recoverFromHungCredentialPicker() async {
-    if (!mounted) {
-      return;
-    }
-    _credentialPickerWasBackgrounded = false;
-    final AuthBloc authBloc = context.read<AuthBloc>();
-    final bool stillLoading = authBloc.state is AuthLoading;
-    // #region agent log
-    tilawaGSignInDebug(
-      'recovery timer fired',
-      hypothesisId: 'H2',
-      data: <String, Object?>{
-        'stillLoading': stillLoading,
-        'lifecycle': WidgetsBinding.instance.lifecycleState?.name,
-      },
-    );
-    // #endregion
-    if (!stillLoading) {
-      return;
-    }
-    _logGoogleSignInButton(
-      'Transsion: aborting hung authenticate after picker dismissed',
-    );
-    // #region agent log
-    tilawaGSignInDebug('calling signOut to unstick', hypothesisId: 'H3');
-    // #endregion
-    if (getIt.isRegistered<GoogleSignIn>()) {
-      try {
-        await getIt<GoogleSignIn>().signOut();
-        // #region agent log
-        tilawaGSignInDebug('signOut completed', hypothesisId: 'H3');
-        // #endregion
-      } catch (error) {
-        // #region agent log
-        tilawaGSignInDebug(
-          'signOut failed',
-          hypothesisId: 'H3',
-          data: <String, Object?>{'error': error.toString()},
-        );
-        // #endregion
-      }
-    }
-    if (!mounted) {
-      return;
-    }
-    if (authBloc.state is! AuthLoading) {
-      // #region agent log
-      tilawaGSignInDebug(
-        'recovery aborted: no longer loading after signOut',
-        hypothesisId: 'H2',
-      );
-      // #endregion
-      return;
-    }
-    _awaitingManualSignInResult = false;
-    authBloc.add(const AuthEvent.abortInteractiveSignIn());
-    _revealSignInFallback();
   }
 
   void _revealSignInFallback() {
@@ -539,9 +360,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                 initial: () {},
                 loading: () {},
                 authenticated: (_) {
-                  _credentialPickerWasBackgrounded = false;
                   _awaitingManualSignInResult = false;
-                  _transsionResumeRecoveryTimer?.cancel();
                   _navigateToHome(context);
                 },
                 unauthenticated: () {
