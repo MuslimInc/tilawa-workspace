@@ -261,9 +261,8 @@ class _AppShellScreenState extends State<AppShellScreen> {
           child: BlocBuilder<MainScreenCubit, MainScreenState>(
             builder: (context, state) {
               final bool isKeyboardOpen = context.isKeyboardVisible;
-              final double bottomNavBarHeight = context.isNarrow
-                  ? QuranPlayerLayoutInsets.phoneShellBottomReserve(context)
-                  : context.floatingBottomPadding;
+              final double bottomNavBarHeight =
+                  QuranPlayerLayoutInsets.phoneShellBottomReserve(context);
 
               final List<_NavDestination> navDestinations = _buildDestinations(
                 context,
@@ -365,7 +364,7 @@ class _AppShellChrome extends StatelessWidget {
         bottomNavBarHeight: navVisible ? bottomNavBarHeight : 0,
         isKeyboardOpen: isKeyboardOpen,
         isAudioBindingDeferred: state.isAudioBindingDeferred,
-        hostAbsorbsBottomSafeArea: context.isNarrow && navVisible,
+        hostAbsorbsBottomSafeArea: navVisible,
       ),
     );
     final bool showPlayer =
@@ -384,10 +383,6 @@ class _AppShellChrome extends StatelessWidget {
 
     final double playerHeight = playerShouldShow && !isKeyboardOpen
         ? context.tokens.playerCollapsedHeight
-        : 0;
-    final double overlayBleedBuffer =
-        (playerShouldShow && !isKeyboardOpen && !context.isNarrow)
-        ? context.tokens.spaceSmall
         : 0;
 
     // Main tab shell (`/`) defers paint until [MainScreenCubit] activates.
@@ -414,7 +409,6 @@ class _AppShellChrome extends StatelessWidget {
           final bool showMiniPlayer =
               showPlayer && playerShouldShow && !isKeyboardOpen;
 
-          final bool narrow = context.isNarrow;
           final Widget player = QuranPlayerWidget(
             key: const ValueKey<String>('app_shell_quran_player'),
             isKeyboardOpen: isKeyboardOpen,
@@ -426,10 +420,9 @@ class _AppShellChrome extends StatelessWidget {
                   context,
                   hostAbsorbsBottomSafeArea: navVisible,
                 );
-          final Widget? shellFooterPlayer = showMiniPlayer && narrow
+          final Widget? shellFooterPlayer = showMiniPlayer
               ? SizedBox(
-                  height:
-                      playerHeight + overlayBleedBuffer + footerBottomSpacing,
+                  height: playerHeight + footerBottomSpacing,
                   child: TourTarget(
                     targetId: RecitersTourTargets.miniPlayer,
                     child: player,
@@ -437,39 +430,16 @@ class _AppShellChrome extends StatelessWidget {
                 )
               : null;
 
-          return Stack(
-            fit: StackFit.expand,
-            children: [
-              TilawaAdaptiveShell(
-                destinations: adaptiveDestinations,
-                selectedIndex: selectedIndex,
-                onDestinationSelected: onDestinationSelected,
-                phoneBottomNavigationBarVisible: bottomNavVisibility,
-                phoneFooterAboveNav: shellFooterPlayer,
-                bottomPlayer: MainBottomOverlay(
-                  isOfflineIndicatorReady: state.isOfflineIndicatorReady,
-                ),
-                child: shellChild,
-              ),
-              // Bottom-anchored with loose height: the footer mini paints an
-              // opaque ColoredBox, so Positioned.fill would cover the whole
-              // shell (rail included) with the player chrome color.
-              if (showMiniPlayer && !narrow)
-                PositionedDirectional(
-                  start: 0,
-                  end: 0,
-                  bottom: 0,
-                  child: TourTarget(
-                    targetId: RecitersTourTargets.miniPlayer,
-                    child: QuranPlayerWidget(
-                      key: const ValueKey<String>('app_shell_quran_player'),
-                      bottomNavBarHeight: bottomNavBarHeight,
-                      isKeyboardOpen: isKeyboardOpen,
-                      hostAbsorbsBottomSafeArea: false,
-                    ),
-                  ),
-                ),
-            ],
+          return TilawaAdaptiveShell(
+            destinations: adaptiveDestinations,
+            selectedIndex: selectedIndex,
+            onDestinationSelected: onDestinationSelected,
+            phoneBottomNavigationBarVisible: bottomNavVisibility,
+            phoneFooterAboveNav: shellFooterPlayer,
+            bottomPlayer: MainBottomOverlay(
+              isOfflineIndicatorReady: state.isOfflineIndicatorReady,
+            ),
+            child: shellChild,
           );
         },
       ),

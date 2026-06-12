@@ -103,8 +103,8 @@ class QuranPlayerWidget extends StatefulWidget {
       final QuranPlayerShellChrome? shell = context
           .read<QuranPlayerChromeNotifier>()
           .shellChrome;
-      if (shell != null) {
-        if (context.isNarrow && shell.bottomNavBarHeight > 0) {
+        if (shell != null) {
+        if (shell.bottomNavBarHeight > 0) {
           return collapsedHeight(context);
         }
         return QuranPlayerLayoutInsets.phoneFooterSlotHeight(
@@ -136,9 +136,9 @@ class QuranPlayerWidget extends StatefulWidget {
       final QuranPlayerShellChrome? shell = context
           .read<QuranPlayerChromeNotifier>()
           .shellChrome;
-      // Phone shell: mini player lives in [Scaffold.bottomNavigationBar] below
-      // this route's scaffold, so only a standard FAB margin is needed.
-      if (shell != null && context.isNarrow) {
+      // Shell footer: mini player lives in [Scaffold.bottomNavigationBar]
+      // above the bottom bar, so only a standard FAB margin is needed.
+      if (shell != null && shell.bottomNavBarHeight > 0) {
         return context.tokens.spaceSmall;
       }
     }
