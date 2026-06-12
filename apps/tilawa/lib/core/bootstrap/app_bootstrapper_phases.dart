@@ -64,6 +64,7 @@ extension AppBootstrapperPhases on AppBootstrapper {
         configureDI: configureDI,
         timeline: timeline,
       );
+      _observeCriticalInitFailureSideChannel(f);
       completer.complete(f);
     }
 
@@ -102,4 +103,22 @@ extension AppBootstrapperPhases on AppBootstrapper {
     }
     await coordinator.completer.future.then((f) => f);
   }
+}
+
+/// Side-channel telemetry only: BootGate still owns UX on failure; [future]
+/// must propagate errors to initAction / ensureCriticalInitCompletes.
+void _observeCriticalInitFailureSideChannel(Future<void> future) {
+  unawaited(
+    future.catchError((Object error, StackTrace stackTrace) {
+      logger.e('Critical init failed: $error', stackTrace: stackTrace);
+      unawaited(
+        StartupTelemetry.failure(
+          'critical_init_pipeline_failed',
+          error,
+          stackTrace,
+          phase: 'critical_init',
+        ),
+      );
+    }),
+  );
 }
