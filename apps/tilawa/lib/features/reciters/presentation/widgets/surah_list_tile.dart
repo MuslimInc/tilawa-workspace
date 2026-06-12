@@ -74,13 +74,13 @@ class SurahListTile extends StatelessWidget {
     void handleTap() {
       if (isCurrentItem) {
         if (isPlaying) {
-          context
-              .read<AudioPlayerBloc>()
-              .add(const AudioPlayerEvent.pauseAudio());
+          context.read<AudioPlayerBloc>().add(
+            const AudioPlayerEvent.pauseAudio(),
+          );
         } else {
-          context
-              .read<AudioPlayerBloc>()
-              .add(const AudioPlayerEvent.playAudio());
+          context.read<AudioPlayerBloc>().add(
+            const AudioPlayerEvent.playAudio(),
+          );
         }
       } else {
         onTap();
@@ -95,11 +95,11 @@ class SurahListTile extends StatelessWidget {
       child: TilawaCard(
         surface: TilawaCardSurface.flat,
         backgroundColor: isCurrentItem
-            ? colorScheme.primaryContainer.withValues(alpha: tokens.opacitySubtle * 2)
+            ? colorScheme.primaryContainer.withValues(
+                alpha: tokens.opacitySubtle * 2,
+              )
             : colorScheme.surface,
-        borderColor: isCurrentItem
-            ? activeFill
-            : colorScheme.outlineVariant,
+        borderColor: isCurrentItem ? activeFill : colorScheme.outlineVariant,
         borderWidth: isCurrentItem
             ? tokens.borderWidthThin * 4
             : tokens.borderWidthThin,

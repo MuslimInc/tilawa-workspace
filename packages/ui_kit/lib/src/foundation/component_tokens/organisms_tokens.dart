@@ -511,8 +511,7 @@ class TilawaAdaptiveShellTokens {
   double phoneBottomNavPaintedHeight(
     TextScaler textScaler,
     double systemBottomViewPadding,
-  ) =>
-      phoneBottomNavLayoutHeight(textScaler) + systemBottomViewPadding;
+  ) => phoneBottomNavLayoutHeight(textScaler) + systemBottomViewPadding;
 
   /// Height of the phone bottom nav row in **icon-only** mode.
   ///

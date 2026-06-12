@@ -65,7 +65,9 @@ class _AppShellScreenState extends State<AppShellScreen> {
   DateTime? _lastRecitersNavTap;
   QuranPlayerChromeNotifier? _chromeNotifier;
 
-  static const Duration _recitersNavDoubleTapWindow = Duration(milliseconds: 400);
+  static const Duration _recitersNavDoubleTapWindow = Duration(
+    milliseconds: 400,
+  );
 
   @override
   void initState() {
@@ -354,8 +356,9 @@ class _AppShellChrome extends StatelessWidget {
   Widget build(BuildContext context) {
     final String location = QuranPlayerRoutePolicy.currentMatchedLocation();
     bottomNavVisibility.syncForLocation(location);
-    final bool navVisible =
-        AppShellRoutePolicy.isPhoneBottomNavigationVisible(location);
+    final bool navVisible = AppShellRoutePolicy.isPhoneBottomNavigationVisible(
+      location,
+    );
 
     context.read<QuranPlayerChromeNotifier>().updateShellChrome(
       QuranPlayerShellChrome(
@@ -391,8 +394,7 @@ class _AppShellChrome extends StatelessWidget {
     // Pushed shell routes (e.g. prayer-alerts permissions) must paint
     // immediately — otherwise users see a blank/grey screen behind chrome.
     final Widget shellChild =
-        QuranPlayerRoutePolicy.isMainShell(location) &&
-            !state.isShellActivated
+        QuranPlayerRoutePolicy.isMainShell(location) && !state.isShellActivated
         ? const SizedBox.shrink()
         : child;
 

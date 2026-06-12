@@ -1724,8 +1724,9 @@ class FakePrayerTimesRepository implements PrayerTimesRepository {
   Future<bool> hasLocationPermission() async => hasPermission;
 
   @override
-  Future<bool> requestLocationPermission({bool allowOpenSettings = false}) async =>
-      hasPermission;
+  Future<bool> requestLocationPermission({
+    bool allowOpenSettings = false,
+  }) async => hasPermission;
 }
 
 PrayerTimeEntity buildPrayerTimeEntity(DateTime date) {

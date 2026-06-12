@@ -48,8 +48,7 @@ class SupportRepositoryImpl implements SupportRepository {
   Future<bool> isBillingAvailable() => _billing.isAvailable();
 
   @override
-  Future<List<SupportProduct>> getSupportProducts() =>
-      _billing.queryProducts();
+  Future<List<SupportProduct>> getSupportProducts() => _billing.queryProducts();
 
   @override
   Future<void> prepareSupportSession({bool resetWaiters = true}) =>
@@ -73,8 +72,9 @@ class SupportRepositoryImpl implements SupportRepository {
 
     await _billing.buyConsumable(productId);
 
-    final PlayPurchaseEvent event =
-        await _billing.waitForPurchaseEvent(productId);
+    final PlayPurchaseEvent event = await _billing.waitForPurchaseEvent(
+      productId,
+    );
 
     return _verifyAndComplete(event);
   }
@@ -159,6 +159,5 @@ class SupportRepositoryImpl implements SupportRepository {
   Future<DateTime?> getLastSupportAt() => _local.getLastSupportAt();
 
   @override
-  Future<String?> getLastSupportProductId() =>
-      _local.getLastSupportProductId();
+  Future<String?> getLastSupportProductId() => _local.getLastSupportProductId();
 }

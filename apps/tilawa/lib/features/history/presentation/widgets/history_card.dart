@@ -175,11 +175,13 @@ class HistoryCard extends StatelessWidget {
 
                           // Progress bar
                           ClipRRect(
-                            borderRadius:
-                                BorderRadius.circular(tokens.radiusSmall),
+                            borderRadius: BorderRadius.circular(
+                              tokens.radiusSmall,
+                            ),
                             child: LinearProgressIndicator(
-                              value:
-                                  history.completed ? 1.0 : progressPercent / 100,
+                              value: history.completed
+                                  ? 1.0
+                                  : progressPercent / 100,
                               minHeight: tokens.progressHeight,
                               backgroundColor:
                                   colorScheme.surfaceContainerHighest,
@@ -211,7 +213,9 @@ class HistoryCard extends StatelessWidget {
               style: IconButton.styleFrom(
                 backgroundColor: colorScheme.primaryContainer,
               ),
-              tooltip: history.completed ? context.l10n.play : context.l10n.resume,
+              tooltip: history.completed
+                  ? context.l10n.play
+                  : context.l10n.resume,
             ),
           ],
         ),

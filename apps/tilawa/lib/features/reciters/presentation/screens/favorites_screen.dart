@@ -59,9 +59,11 @@ class FavoritesScreen extends StatelessWidget {
                     return TilawaIllustratedState(
                       icon: Icons.error_outline_rounded,
                       iconColor: colorScheme.error,
-                      title: state.failure.localizedMessage(context) ??
+                      title:
+                          state.failure.localizedMessage(context) ??
                           context.l10n.unexpectedError,
-                      semanticLabel: state.failure.localizedMessage(context) ??
+                      semanticLabel:
+                          state.failure.localizedMessage(context) ??
                           context.l10n.unexpectedError,
                       primaryAction: TilawaButton(
                         text: context.l10n.retry,

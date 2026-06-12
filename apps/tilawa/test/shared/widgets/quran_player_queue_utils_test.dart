@@ -119,26 +119,29 @@ void main() {
       );
     });
 
-    test('returns false when only AudioEntity instances differ by identity', () {
-      final List<AudioEntity> previous = <AudioEntity>[
-        _trackA.copyWith(title: 'A prev'),
-        _trackB,
-      ];
-      final List<AudioEntity> current = <AudioEntity>[
-        _trackA.copyWith(title: 'A next'),
-        _trackB,
-      ];
+    test(
+      'returns false when only AudioEntity instances differ by identity',
+      () {
+        final List<AudioEntity> previous = <AudioEntity>[
+          _trackA.copyWith(title: 'A prev'),
+          _trackB,
+        ];
+        final List<AudioEntity> current = <AudioEntity>[
+          _trackA.copyWith(title: 'A next'),
+          _trackB,
+        ];
 
-      expect(
-        QuranPlayerQueueUtils.queueSnapshotChanged(
-          previousQueue: previous,
-          currentQueue: current,
-          previousIndex: 0,
-          currentIndex: 0,
-        ),
-        isFalse,
-      );
-    });
+        expect(
+          QuranPlayerQueueUtils.queueSnapshotChanged(
+            previousQueue: previous,
+            currentQueue: current,
+            previousIndex: 0,
+            currentIndex: 0,
+          ),
+          isFalse,
+        );
+      },
+    );
 
     test('returns true when queue item order changes without generation', () {
       expect(

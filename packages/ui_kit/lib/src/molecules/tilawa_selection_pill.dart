@@ -67,9 +67,7 @@ class TilawaSelectionPill extends StatelessWidget {
                   ? componentTokens.catalogSelectedForegroundColor
                   : colorScheme.onPrimaryContainer))
         : (unselectedForegroundColor ??
-              (isCatalog
-                  ? colorScheme.onSurface
-                  : colorScheme.onSurface));
+              (isCatalog ? colorScheme.onSurface : colorScheme.onSurface));
 
     return TilawaChip(
       label: label,

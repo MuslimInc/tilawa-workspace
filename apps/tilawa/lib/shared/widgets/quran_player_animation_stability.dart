@@ -40,12 +40,12 @@ abstract final class QuranPlayerAnimationStability {
     for (final double progress in progressTimeline) {
       final PlayerExpandTransitionMetrics metrics =
           PlayerExpandTransitionMetrics.compute(
-        progress: progress,
-        miniPlayerHeight: miniPlayerHeight,
-        interactiveDrag: true,
-        collapseBiased: collapseBiasedAt(progress),
-        interactiveCollapseAnchor: interactiveCollapseAnchor,
-      );
+            progress: progress,
+            miniPlayerHeight: miniPlayerHeight,
+            interactiveDrag: true,
+            collapseBiased: collapseBiasedAt(progress),
+            interactiveCollapseAnchor: interactiveCollapseAnchor,
+          );
 
       if (previous != null) {
         void check(String name, double before, double after) {
@@ -69,7 +69,11 @@ abstract final class QuranPlayerAnimationStability {
           previous.sheetPresentationOpacity,
           metrics.sheetPresentationOpacity,
         );
-        check('stageChromeOpacity', previous.stageChromeOpacity, metrics.stageChromeOpacity);
+        check(
+          'stageChromeOpacity',
+          previous.stageChromeOpacity,
+          metrics.stageChromeOpacity,
+        );
         check('handoffT', previous.handoffT, metrics.handoffT);
         // Visibility flags may flip once; opacity jumps are the jank signal.
       }
@@ -97,12 +101,12 @@ abstract final class QuranPlayerAnimationStability {
     for (final double progress in progressTimeline) {
       final PlayerExpandTransitionMetrics metrics =
           PlayerExpandTransitionMetrics.compute(
-        progress: progress,
-        miniPlayerHeight: miniPlayerHeight,
-        interactiveDrag: interactiveDrag,
-        collapseBiased: collapseBiasedAt(progress),
-        interactiveCollapseAnchor: interactiveCollapseAnchor,
-      );
+            progress: progress,
+            miniPlayerHeight: miniPlayerHeight,
+            interactiveDrag: interactiveDrag,
+            collapseBiased: collapseBiasedAt(progress),
+            interactiveCollapseAnchor: interactiveCollapseAnchor,
+          );
       if (hasChromeVisibilityGap(metrics)) {
         gaps.add(progress);
       }

@@ -59,15 +59,18 @@ void main() {
       expect(box, isNotNull);
     });
 
-    test('ensureHiveInitialized shares the same memoized init future', () async {
-      await Future.wait<void>(<Future<void>>[
-        ensureHiveInitialized(),
-        startupTasks.initializeHive(),
-      ]);
+    test(
+      'ensureHiveInitialized shares the same memoized init future',
+      () async {
+        await Future.wait<void>(<Future<void>>[
+          ensureHiveInitialized(),
+          startupTasks.initializeHive(),
+        ]);
 
-      final box = await Hive.openBox(TasbeehConstants.storageBoxName);
-      expect(box, isNotNull);
-    });
+        final box = await Hive.openBox(TasbeehConstants.storageBoxName);
+        expect(box, isNotNull);
+      },
+    );
 
     test('initializeHive survives path provider failures', () async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -93,8 +96,7 @@ void main() {
   group('tasbeeh notification cold start', () {
     test('sets tasbeeh route and kicks off hive init', () async {
       AppRouter.pendingLocalNotificationResponse = NotificationResponse(
-        notificationResponseType:
-            NotificationResponseType.selectedNotification,
+        notificationResponseType: NotificationResponseType.selectedNotification,
         payload: '${TasbeehConstants.reminderPayloadPrefix}abc',
       );
 
@@ -111,19 +113,22 @@ void main() {
       expect(box, isNotNull);
     });
 
-    test('pending launch without resolvable data flags startup notification', () {
-      AppRouter.pendingLocalNotificationResponse = NotificationResponse(
-        notificationResponseType:
-            NotificationResponseType.selectedNotification,
-        payload: 'not-json-and-not-tasbeeh',
-      );
+    test(
+      'pending launch without resolvable data flags startup notification',
+      () {
+        AppRouter.pendingLocalNotificationResponse = NotificationResponse(
+          notificationResponseType:
+              NotificationResponseType.selectedNotification,
+          payload: 'not-json-and-not-tasbeeh',
+        );
 
-      startupTasks.applyColdStartRouteFromPendingLaunchForTesting();
+        startupTasks.applyColdStartRouteFromPendingLaunchForTesting();
 
-      expect(AppRouter.pendingStartupNotificationLaunch, isTrue);
-      expect(AppRouter.disableStateRestoration, isTrue);
-      expect(AppRouter.pendingColdStartLocation, isNull);
-    });
+        expect(AppRouter.pendingStartupNotificationLaunch, isTrue);
+        expect(AppRouter.disableStateRestoration, isTrue);
+        expect(AppRouter.pendingColdStartLocation, isNull);
+      },
+    );
 
     test('resolves cold start route from pending FCM message', () {
       AppRouter.pendingFcmMessage = RemoteMessage(
@@ -141,8 +146,7 @@ void main() {
 
     test('non-tasbeeh cold start does not require tasbeeh box', () async {
       AppRouter.pendingLocalNotificationResponse = NotificationResponse(
-        notificationResponseType:
-            NotificationResponseType.selectedNotification,
+        notificationResponseType: NotificationResponseType.selectedNotification,
         payload: '{"type":"settings"}',
       );
 

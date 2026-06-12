@@ -526,11 +526,9 @@ class TilawaChipTokens {
       backgroundColor: backgroundColor ?? this.backgroundColor,
       defaultBorderColor: defaultBorderColor ?? this.defaultBorderColor,
       catalogSelectedBackgroundColor:
-          catalogSelectedBackgroundColor ??
-          this.catalogSelectedBackgroundColor,
+          catalogSelectedBackgroundColor ?? this.catalogSelectedBackgroundColor,
       catalogSelectedForegroundColor:
-          catalogSelectedForegroundColor ??
-          this.catalogSelectedForegroundColor,
+          catalogSelectedForegroundColor ?? this.catalogSelectedForegroundColor,
       selectionSelectedBackgroundColor:
           selectionSelectedBackgroundColor ??
           this.selectionSelectedBackgroundColor,
@@ -988,7 +986,6 @@ class TilawaSearchFieldTokens {
     );
   }
 
-
   TilawaSearchFieldTokens copyWith({
     double? height,
     Color? backgroundColor,
@@ -1294,4 +1291,3 @@ class TilawaPermissionBannerTokens {
     );
   }
 }
-

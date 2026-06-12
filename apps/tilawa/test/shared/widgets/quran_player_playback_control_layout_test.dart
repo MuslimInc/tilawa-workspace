@@ -174,53 +174,56 @@ void main() {
       expect(previousX, greaterThan(playX));
     });
 
-    testWidgets('ambient RTL without LTR bands mirrors pill order (regression)', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          builder: (context, child) {
-            return Directionality(
-              textDirection: TextDirection.rtl,
-              child: child!,
-            );
-          },
-          home: Scaffold(
-            body: Center(
-              child: SizedBox(
-                width: 360,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Semantics(
-                      identifier: QuranPlayerSemanticsIds.actionPillSpeed,
-                      child: const SizedBox(width: 72, height: 40),
-                    ),
-                    const SizedBox(width: 8),
-                    Semantics(
-                      identifier: QuranPlayerSemanticsIds.actionPillVolume,
-                      child: const SizedBox(width: 72, height: 40),
-                    ),
-                  ],
+    testWidgets(
+      'ambient RTL without LTR bands mirrors pill order (regression)',
+      (
+        tester,
+      ) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            builder: (context, child) {
+              return Directionality(
+                textDirection: TextDirection.rtl,
+                child: child!,
+              );
+            },
+            home: Scaffold(
+              body: Center(
+                child: SizedBox(
+                  width: 360,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Semantics(
+                        identifier: QuranPlayerSemanticsIds.actionPillSpeed,
+                        child: const SizedBox(width: 72, height: 40),
+                      ),
+                      const SizedBox(width: 8),
+                      Semantics(
+                        identifier: QuranPlayerSemanticsIds.actionPillVolume,
+                        child: const SizedBox(width: 72, height: 40),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      );
-      await tester.pump();
+        );
+        await tester.pump();
 
-      final double speedX = _centerX(
-        find.bySemanticsIdentifier(QuranPlayerSemanticsIds.actionPillSpeed),
-        tester,
-      );
-      final double volumeX = _centerX(
-        find.bySemanticsIdentifier(QuranPlayerSemanticsIds.actionPillVolume),
-        tester,
-      );
+        final double speedX = _centerX(
+          find.bySemanticsIdentifier(QuranPlayerSemanticsIds.actionPillSpeed),
+          tester,
+        );
+        final double volumeX = _centerX(
+          find.bySemanticsIdentifier(QuranPlayerSemanticsIds.actionPillVolume),
+          tester,
+        );
 
-      // Row mirrors under ambient RTL: speed moves to physical right.
-      expect(speedX, greaterThan(volumeX));
-    });
+        // Row mirrors under ambient RTL: speed moves to physical right.
+        expect(speedX, greaterThan(volumeX));
+      },
+    );
   });
 }

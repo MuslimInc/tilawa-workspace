@@ -235,8 +235,7 @@ class _FakeAdhanAlarmPlayer implements IAdhanAlarmPlayer {
     required String prayerName,
     required String prayerKey,
     String? sound,
-  }) async =>
-      false;
+  }) async => false;
 
   @override
   Future<String?> getActiveAdhanPayload() async => null;

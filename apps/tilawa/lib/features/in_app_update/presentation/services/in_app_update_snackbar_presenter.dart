@@ -20,8 +20,9 @@ class InAppUpdateSnackBarPresenter implements InAppUpdatePromptPresenter {
         return;
       }
 
-      final ScaffoldMessengerState? messenger =
-          ScaffoldMessenger.maybeOf(context);
+      final ScaffoldMessengerState? messenger = ScaffoldMessenger.maybeOf(
+        context,
+      );
       messenger?.showSnackBar(
         SnackBar(
           content: Text(_messageFor(event)),

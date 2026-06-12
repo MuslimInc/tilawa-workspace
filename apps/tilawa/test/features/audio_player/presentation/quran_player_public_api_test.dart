@@ -24,9 +24,11 @@ Widget _wrapRouter({
     child: ChangeNotifierProvider<QuranPlayerChromeNotifier>(
       create: (_) => QuranPlayerChromeNotifier(),
       child: MaterialApp.router(
-        theme: ThemeData(extensions: <ThemeExtension<dynamic>>[
-          TilawaDesignTokens.light(),
-        ]),
+        theme: ThemeData(
+          extensions: <ThemeExtension<dynamic>>[
+            TilawaDesignTokens.light(),
+          ],
+        ),
         routerConfig: router,
       ),
     ),
@@ -35,24 +37,30 @@ Widget _wrapRouter({
 
 void main() {
   group('QuranPlayerWidget public layout API', () {
-    testWidgets('collapsedFootprint uses player height + spacing on shell routes', (
-      tester,
-    ) async {
-      late double footprint;
-      await tester.pumpWidget(
-        _wrapRouter(
-          child: Builder(
-            builder: (BuildContext context) {
-              footprint = QuranPlayerWidget.collapsedFootprint(context);
-              return const SizedBox.shrink();
-            },
+    testWidgets(
+      'collapsedFootprint uses player height + spacing on shell routes',
+      (
+        tester,
+      ) async {
+        late double footprint;
+        await tester.pumpWidget(
+          _wrapRouter(
+            child: Builder(
+              builder: (BuildContext context) {
+                footprint = QuranPlayerWidget.collapsedFootprint(context);
+                return const SizedBox.shrink();
+              },
+            ),
           ),
-        ),
-      );
+        );
 
-      final TilawaDesignTokens tokens = TilawaDesignTokens.light();
-      expect(footprint, tokens.playerCollapsedHeight + tokens.spaceExtraLarge);
-    });
+        final TilawaDesignTokens tokens = TilawaDesignTokens.light();
+        expect(
+          footprint,
+          tokens.playerCollapsedHeight + tokens.spaceExtraLarge,
+        );
+      },
+    );
 
     testWidgets('fabBottomOffset returns footprint off shell phone layout', (
       tester,

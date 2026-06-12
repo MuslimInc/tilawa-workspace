@@ -27,27 +27,28 @@ void main() {
     mockGetFavorites = MockGetFavoriteRecitersUseCase();
     readiness = AppStartupReadiness(mockGetReciters, mockGetFavorites);
     when(mockGetReciters.call()).thenAnswer(
-      (_) async =>
-          const Right<Failure, List<ReciterEntity>>(<ReciterEntity>[]),
+      (_) async => const Right<Failure, List<ReciterEntity>>(<ReciterEntity>[]),
     );
     when(mockGetFavorites.call(any)).thenAnswer(
-      (_) async =>
-          const Right<Failure, List<ReciterEntity>>(<ReciterEntity>[]),
+      (_) async => const Right<Failure, List<ReciterEntity>>(<ReciterEntity>[]),
     );
   });
 
   group('MainScreenCubit startup readiness', () {
-    test('starts with shell and tab ready when splash prep completed', () async {
-      await readiness.waitUntilReady(prepareShell: true);
-      final cubit = MainScreenCubit(readiness: readiness);
+    test(
+      'starts with shell and tab ready when splash prep completed',
+      () async {
+        await readiness.waitUntilReady(prepareShell: true);
+        final cubit = MainScreenCubit(readiness: readiness);
 
-      expect(cubit.state.isShellActivated, isTrue);
-      expect(cubit.state.isInitialTabMounted, isTrue);
-      expect(cubit.state.builtTabIndexes, contains(0));
-      expect(cubit.state.isStartupUiWarm, isFalse);
+        expect(cubit.state.isShellActivated, isTrue);
+        expect(cubit.state.isInitialTabMounted, isTrue);
+        expect(cubit.state.builtTabIndexes, contains(0));
+        expect(cubit.state.isStartupUiWarm, isFalse);
 
-      await cubit.close();
-    });
+        await cubit.close();
+      },
+    );
 
     test('starts deferred when splash prep did not run', () {
       final cubit = MainScreenCubit(readiness: readiness);

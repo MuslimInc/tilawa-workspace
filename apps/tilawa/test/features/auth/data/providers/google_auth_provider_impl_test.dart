@@ -5,6 +5,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/features/auth/data/providers/google_auth_provider_impl.dart';
 import 'package:tilawa/features/auth/data/services/android_sign_in_platform_policy.dart';
+import 'package:tilawa/features/auth/data/services/google_sign_in_session_tracker.dart';
 import 'package:tilawa/features/auth/domain/entities/auth_result.dart';
 
 import 'google_auth_provider_impl_test.mocks.dart';
@@ -42,6 +43,8 @@ void main() {
         reportAllExceptions: anyNamed('reportAllExceptions'),
       ),
     ).thenAnswer((_) => Future<GoogleSignInAccount?>.value());
+    when(mockGoogleSignIn.supportsAuthenticate()).thenReturn(true);
+    when(mockGoogleSignIn.signOut()).thenAnswer((_) async {});
 
     platformPolicy = AndroidSignInPlatformPolicy.test(
       skipAutomaticSignIn: false,
@@ -51,6 +54,7 @@ void main() {
       mockFirebaseAuth,
       mockGoogleSignIn,
       platformPolicy,
+      GoogleSignInSessionTracker(),
     );
   });
 
@@ -85,36 +89,38 @@ void main() {
       );
     });
 
-    test('signIn uses lightweight flow first and skips the button flow',
-        () async {
-      when(
-        mockGoogleSignIn.attemptLightweightAuthentication(
-          reportAllExceptions: anyNamed('reportAllExceptions'),
-        ),
-      ).thenAnswer((_) => Future<GoogleSignInAccount?>.value(mockGoogleUser));
-      when(mockGoogleUser.authentication).thenReturn(mockGoogleAuth);
-      when(mockGoogleAuth.idToken).thenReturn('token');
-      when(
-        mockFirebaseAuth.signInWithCredential(any),
-      ).thenAnswer((_) async => mockUserCredential);
-      when(mockUserCredential.user).thenReturn(mockFirebaseUser);
-      when(mockFirebaseUser.uid).thenReturn('123');
-      when(mockFirebaseUser.email).thenReturn('test@example.com');
-      when(mockFirebaseUser.displayName).thenReturn('Test User');
-      when(mockFirebaseUser.photoURL).thenReturn('url');
-      when(mockFirebaseUser.metadata).thenReturn(UserMetadata(0, 0));
+    test(
+      'signIn uses lightweight flow first and skips the button flow',
+      () async {
+        when(
+          mockGoogleSignIn.attemptLightweightAuthentication(
+            reportAllExceptions: anyNamed('reportAllExceptions'),
+          ),
+        ).thenAnswer((_) => Future<GoogleSignInAccount?>.value(mockGoogleUser));
+        when(mockGoogleUser.authentication).thenReturn(mockGoogleAuth);
+        when(mockGoogleAuth.idToken).thenReturn('token');
+        when(
+          mockFirebaseAuth.signInWithCredential(any),
+        ).thenAnswer((_) async => mockUserCredential);
+        when(mockUserCredential.user).thenReturn(mockFirebaseUser);
+        when(mockFirebaseUser.uid).thenReturn('123');
+        when(mockFirebaseUser.email).thenReturn('test@example.com');
+        when(mockFirebaseUser.displayName).thenReturn('Test User');
+        when(mockFirebaseUser.photoURL).thenReturn('url');
+        when(mockFirebaseUser.metadata).thenReturn(UserMetadata(0, 0));
 
-      final AuthResult result = await googleAuthProvider.signIn();
+        final AuthResult result = await googleAuthProvider.signIn();
 
-      result.maybeWhen(
-        success: (user) => expect(user.id, '123'),
-        orElse: () => fail('Expected success'),
-      );
-      verifyNever(mockGoogleSignIn.authenticate());
-    });
+        result.maybeWhen(
+          success: (user) => expect(user.id, '123'),
+          orElse: () => fail('Expected success'),
+        );
+        verifyNever(mockGoogleSignIn.authenticate());
+      },
+    );
 
     test(
-      'signIn skips lightweight flow on Transsion OEM and uses button flow',
+      'signIn skips CM sheet on Transsion OEM and uses account chooser',
       () async {
         platformPolicy = AndroidSignInPlatformPolicy.test(
           skipAutomaticSignIn: true,
@@ -123,6 +129,7 @@ void main() {
           mockFirebaseAuth,
           mockGoogleSignIn,
           platformPolicy,
+          GoogleSignInSessionTracker(),
         );
         when(
           mockGoogleSignIn.authenticate(),
@@ -154,21 +161,79 @@ void main() {
       },
     );
 
-    test('signIn should return cancelled when no idToken is returned',
-        () async {
-      when(
-        mockGoogleSignIn.authenticate(),
-      ).thenAnswer((_) async => mockGoogleUser);
-      when(mockGoogleUser.authentication).thenReturn(mockGoogleAuth);
-      when(mockGoogleAuth.idToken).thenReturn(null);
+    test(
+      'signIn falls back to button flow when Credential Manager sheet fails',
+      () async {
+        when(
+          mockGoogleSignIn.attemptLightweightAuthentication(
+            reportAllExceptions: anyNamed('reportAllExceptions'),
+          ),
+        ).thenThrow(
+          const GoogleSignInException(
+            code: GoogleSignInExceptionCode.uiUnavailable,
+            description: 'No activity',
+          ),
+        );
+        when(
+          mockGoogleSignIn.authenticate(),
+        ).thenAnswer((_) async => mockGoogleUser);
+        when(mockGoogleUser.authentication).thenReturn(mockGoogleAuth);
+        when(mockGoogleAuth.idToken).thenReturn('token');
+        when(
+          mockFirebaseAuth.signInWithCredential(any),
+        ).thenAnswer((_) async => mockUserCredential);
+        when(mockUserCredential.user).thenReturn(mockFirebaseUser);
+        when(mockFirebaseUser.uid).thenReturn('123');
+        when(mockFirebaseUser.email).thenReturn('test@example.com');
+        when(mockFirebaseUser.displayName).thenReturn('Test User');
+        when(mockFirebaseUser.photoURL).thenReturn('url');
+        when(mockFirebaseUser.metadata).thenReturn(UserMetadata(0, 0));
 
-      expect(await googleAuthProvider.signIn(), const AuthResult.cancelled());
-    });
+        final AuthResult result = await googleAuthProvider.signIn();
+
+        result.maybeWhen(
+          success: (user) => expect(user.id, '123'),
+          orElse: () => fail('Expected success'),
+        );
+        verify(mockGoogleSignIn.authenticate()).called(1);
+      },
+    );
+
+    test(
+      'signIn does not open button flow when user dismisses CM sheet',
+      () async {
+        when(
+          mockGoogleSignIn.attemptLightweightAuthentication(
+            reportAllExceptions: anyNamed('reportAllExceptions'),
+          ),
+        ).thenThrow(
+          const GoogleSignInException(code: GoogleSignInExceptionCode.canceled),
+        );
+
+        expect(
+          await googleAuthProvider.signIn(),
+          const AuthResult.cancelled(),
+        );
+        verifyNever(mockGoogleSignIn.authenticate());
+      },
+    );
+
+    test(
+      'signIn should return cancelled when no idToken is returned',
+      () async {
+        when(
+          mockGoogleSignIn.authenticate(),
+        ).thenAnswer((_) async => mockGoogleUser);
+        when(mockGoogleUser.authentication).thenReturn(mockGoogleAuth);
+        when(mockGoogleAuth.idToken).thenReturn(null);
+
+        expect(await googleAuthProvider.signIn(), const AuthResult.cancelled());
+      },
+    );
 
     for (final code in [
       GoogleSignInExceptionCode.canceled,
       GoogleSignInExceptionCode.interrupted,
-      GoogleSignInExceptionCode.uiUnavailable,
     ]) {
       test('signIn should return cancelled for ${code.name}', () async {
         when(
@@ -181,6 +246,26 @@ void main() {
         );
       });
     }
+
+    test('signIn should return failure for uiUnavailable', () async {
+      when(mockGoogleSignIn.authenticate()).thenThrow(
+        const GoogleSignInException(
+          code: GoogleSignInExceptionCode.uiUnavailable,
+          description: 'No activity',
+        ),
+      );
+
+      final AuthResult result = await googleAuthProvider.signIn();
+
+      expect(
+        result,
+        isA<AuthFailure>().having(
+          (AuthFailure f) => f.code,
+          'code',
+          'ui-unavailable',
+        ),
+      );
+    });
 
     test(
       'signIn should return failure with details for genuine sign-in errors',
@@ -307,8 +392,7 @@ void main() {
         verify(mockGoogleSignIn.signOut()).called(1);
       });
 
-      test('rethrows FirebaseAuthExceptions other than recent-login',
-          () async {
+      test('rethrows FirebaseAuthExceptions other than recent-login', () async {
         when(mockFirebaseUser.delete()).thenThrow(
           FirebaseAuthException(code: 'network-request-failed'),
         );
@@ -319,32 +403,33 @@ void main() {
         );
       });
 
-      test('re-authenticates and retries when recent login is required',
-          () async {
-        int deleteCalls = 0;
-        when(mockFirebaseUser.delete()).thenAnswer((_) async {
-          deleteCalls++;
-          if (deleteCalls == 1) {
-            throw FirebaseAuthException(code: 'requires-recent-login');
-          }
-        });
-        when(
-          mockGoogleSignIn.authenticate(),
-        ).thenAnswer((_) async => mockGoogleUser);
-        when(mockGoogleUser.authentication).thenReturn(mockGoogleAuth);
-        when(mockGoogleAuth.idToken).thenReturn('fresh_token');
-        when(
-          mockFirebaseUser.reauthenticateWithCredential(any),
-        ).thenAnswer((_) async => mockUserCredential);
-
-        await googleAuthProvider.deleteAccount();
-
-        expect(deleteCalls, 2);
-        verify(mockFirebaseUser.reauthenticateWithCredential(any)).called(1);
-      });
-
       test(
-          'maps a missing re-auth token to a requires-recent-login '
+        're-authenticates and retries when recent login is required',
+        () async {
+          int deleteCalls = 0;
+          when(mockFirebaseUser.delete()).thenAnswer((_) async {
+            deleteCalls++;
+            if (deleteCalls == 1) {
+              throw FirebaseAuthException(code: 'requires-recent-login');
+            }
+          });
+          when(
+            mockGoogleSignIn.authenticate(),
+          ).thenAnswer((_) async => mockGoogleUser);
+          when(mockGoogleUser.authentication).thenReturn(mockGoogleAuth);
+          when(mockGoogleAuth.idToken).thenReturn('fresh_token');
+          when(
+            mockFirebaseUser.reauthenticateWithCredential(any),
+          ).thenAnswer((_) async => mockUserCredential);
+
+          await googleAuthProvider.deleteAccount();
+
+          expect(deleteCalls, 2);
+          verify(mockFirebaseUser.reauthenticateWithCredential(any)).called(1);
+        },
+      );
+
+      test('maps a missing re-auth token to a requires-recent-login '
           'cancellation', () async {
         when(mockFirebaseUser.delete()).thenThrow(
           FirebaseAuthException(code: 'requires-recent-login'),

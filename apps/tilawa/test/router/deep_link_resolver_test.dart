@@ -77,13 +77,18 @@ void main() {
       );
       final Uri uri = Uri.parse(location);
       expect(uri.path, '/athkar/1');
-      expect(uri.queryParameters['source'], NavigationSource.notification.wireValue);
+      expect(
+        uri.queryParameters['source'],
+        NavigationSource.notification.wireValue,
+      );
     });
   });
 
   group('DeepLinkResolver.resolveExtra', () {
     test('returns embedded reciter entity for reciter routes', () {
-      final String location = const ReciterDetailsRoute(reciterId: '9').location;
+      final String location = const ReciterDetailsRoute(
+        reciterId: '9',
+      ).location;
       final Object? extra = DeepLinkResolver.resolveExtra(
         <String, dynamic>{
           'type': 'reciter',
@@ -113,15 +118,18 @@ void main() {
   });
 
   group('DeepLinkResolver typed factories', () {
-    test('athkarMorning targets category 1 and is attributed to notification', () {
-      final NotificationDestination dest = resolver.athkarMorning();
-      expect(Uri.parse(dest.location).path, '/athkar/1');
-      expect(dest.source, NavigationSource.notification);
-      expect(
-        Uri.parse(dest.location).queryParameters['source'],
-        NavigationSource.notification.wireValue,
-      );
-    });
+    test(
+      'athkarMorning targets category 1 and is attributed to notification',
+      () {
+        final NotificationDestination dest = resolver.athkarMorning();
+        expect(Uri.parse(dest.location).path, '/athkar/1');
+        expect(dest.source, NavigationSource.notification);
+        expect(
+          Uri.parse(dest.location).queryParameters['source'],
+          NavigationSource.notification.wireValue,
+        );
+      },
+    );
 
     test('athkarEvening targets category 2', () {
       final NotificationDestination dest = resolver.athkarEvening();
@@ -140,7 +148,9 @@ void main() {
   group('DeepLinkResolver.notificationDataFromPayload', () {
     test('resolves morning athkar string payload to category 1', () {
       final Map<String, dynamic>? data =
-          DeepLinkResolver.notificationDataFromPayload('morning_athkar_20260605');
+          DeepLinkResolver.notificationDataFromPayload(
+            'morning_athkar_20260605',
+          );
       expect(data, isNotNull);
       expect(
         DeepLinkResolver.resolveLocation(data!),
@@ -150,7 +160,9 @@ void main() {
 
     test('resolves evening athkar string payload to category 2', () {
       final Map<String, dynamic>? data =
-          DeepLinkResolver.notificationDataFromPayload('evening_athkar_20260605');
+          DeepLinkResolver.notificationDataFromPayload(
+            'evening_athkar_20260605',
+          );
       expect(data, isNotNull);
       expect(
         DeepLinkResolver.resolveLocation(data!),

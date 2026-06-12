@@ -173,8 +173,12 @@ void main() {
     test(
       'returns isIgnoringBatteryOptimizations=false when adhan player reports false',
       () async {
-        when(mockService.canScheduleExactAlarms()).thenAnswer((_) async => true);
-        when(mockPermissions.isPermissionGranted()).thenAnswer((_) async => true);
+        when(
+          mockService.canScheduleExactAlarms(),
+        ).thenAnswer((_) async => true);
+        when(
+          mockPermissions.isPermissionGranted(),
+        ).thenAnswer((_) async => true);
         when(
           mockAdhanPlayer.isIgnoringBatteryOptimizations(),
         ).thenAnswer((_) async => false);

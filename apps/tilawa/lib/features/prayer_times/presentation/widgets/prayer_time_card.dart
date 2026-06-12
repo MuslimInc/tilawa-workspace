@@ -43,19 +43,28 @@ class PrayerTimeCard extends StatelessWidget {
         final Color emphasisColor = colorScheme.onSurface;
 
         final Color surfaceColor = isNext
-            ? colorScheme.primaryContainer.withValues(alpha: tokens.opacityMedium)
+            ? colorScheme.primaryContainer.withValues(
+                alpha: tokens.opacityMedium,
+              )
             : colorScheme.surfaceContainerLow;
         final Color borderColor = isNext
             ? colorScheme.primary.withValues(alpha: tokens.opacitySubtle * 1.5)
-            : colorScheme.outlineVariant.withValues(alpha: tokens.opacitySubtle);
+            : colorScheme.outlineVariant.withValues(
+                alpha: tokens.opacitySubtle,
+              );
         final double cardPadH = tokens.spaceMedium;
-        final double cardPadV = tightHeight ? tokens.spaceSmall : tokens.spaceMedium;
+        final double cardPadV = tightHeight
+            ? tokens.spaceSmall
+            : tokens.spaceMedium;
 
         return Container(
           decoration: BoxDecoration(
             color: surfaceColor,
             borderRadius: BorderRadius.circular(tokens.radiusLarge),
-            border: Border.all(color: borderColor, width: tokens.borderWidthThin),
+            border: Border.all(
+              color: borderColor,
+              width: tokens.borderWidthThin,
+            ),
             boxShadow: isNext
                 ? [
                     BoxShadow(

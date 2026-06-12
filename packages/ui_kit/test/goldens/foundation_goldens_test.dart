@@ -52,7 +52,6 @@ class _LightNeutralSwatchRow extends StatelessWidget {
 }
 
 void main() {
-
   group('Foundation Golden Tests', () {
     goldenTest(
       'Light neutral ramp',
@@ -101,8 +100,8 @@ void main() {
                     appBar: TilawaCatalogAppBar(
                       preferredHeight:
                           TilawaAppBarConfig.catalogTitleAndSearchHeight(
-                        context,
-                      ),
+                            context,
+                          ),
                       title: 'Favorites',
                       bottomContent: TilawaSearchField(
                         hintText: 'Search',

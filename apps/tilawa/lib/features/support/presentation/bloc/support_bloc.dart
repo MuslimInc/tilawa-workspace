@@ -73,8 +73,8 @@ class SupportBloc extends Bloc<SupportEvent, SupportState> {
       ),
     );
 
-    final List<ConnectivityResult> connectivity =
-        await _connectivity.checkConnectivity();
+    final List<ConnectivityResult> connectivity = await _connectivity
+        .checkConnectivity();
     final bool offline = connectivity.contains(ConnectivityResult.none);
 
     if (offline) {

@@ -46,7 +46,9 @@ void main() {
       () => observeReciterDownloads(any()),
     ).thenAnswer((_) => downloadUpdatesController.stream);
     when(
-      () => checkLowDeviceStorage(estimatedRequiredBytes: any(named: 'estimatedRequiredBytes')),
+      () => checkLowDeviceStorage(
+        estimatedRequiredBytes: any(named: 'estimatedRequiredBytes'),
+      ),
     ).thenAnswer((_) async => false);
 
     bloc = ReciterDownloadBloc(

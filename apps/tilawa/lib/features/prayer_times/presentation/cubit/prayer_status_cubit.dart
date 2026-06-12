@@ -33,7 +33,7 @@ class PrayerStatusCubit extends Cubit<PrayerStatusState> {
   bool _isRefreshingPlayingStatus = false;
 
   PrayerStatusCubit(this._adhanPlayer, this._loadSettings)
-      : super(const PrayerStatusState.initial());
+    : super(const PrayerStatusState.initial());
 
   Future<void> init(String? payloadJson) async {
     if (payloadJson == null || payloadJson.isEmpty) {

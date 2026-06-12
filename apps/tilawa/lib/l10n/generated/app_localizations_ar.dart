@@ -603,6 +603,16 @@ class AppLocalizationsAr extends AppLocalizations {
       'تعذر تسجيل الدخول باستخدام حساب طرف ثالث';
 
   @override
+  String get googleSignInFallbackTitle => 'تعذّر فتح تسجيل الدخول عبر Google';
+
+  @override
+  String get googleSignInFallbackBody =>
+      'قد تكون نافذة اختيار حساب Google مخفية على هذا الجهاز. حدّث خدمات Google Play ثم أعد المحاولة. إذا استمرت المشكلة، اطلب من المطوّر تسجيل SHA-1 لهذا الإصدار في Firebase.';
+
+  @override
+  String get googleSignInUpdatePlayServices => 'تحديث خدمات Google Play';
+
+  @override
   String get networkError => 'يرجى التحقق من اتصالك بالإنترنت';
 
   @override

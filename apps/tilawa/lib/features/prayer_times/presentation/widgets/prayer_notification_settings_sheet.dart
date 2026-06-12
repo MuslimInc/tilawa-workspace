@@ -215,8 +215,6 @@ class _PrayerNotificationSettingsSheetState
                   notificationIdentifier:
                       PrayerNotificationSemanticsIds.ishaToggle,
                 ),
-
-
               ],
             ),
           ),

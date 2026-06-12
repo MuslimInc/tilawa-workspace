@@ -190,209 +190,215 @@ void main() {
     AppRouter.resetForTesting();
   });
 
-  group('regression: adhan tap during cold start (reported triple navigation)', () {
-    test(
-      'step 1 — native tap while splash is active defers navigation',
-      () async {
-        when(
-          mockNav.getCurrentLocation(),
-        ).thenReturn(const SplashRoute().location);
+  group(
+    'regression: adhan tap during cold start (reported triple navigation)',
+    () {
+      test(
+        'step 1 — native tap while splash is active defers navigation',
+        () async {
+          when(
+            mockNav.getCurrentLocation(),
+          ).thenReturn(const SplashRoute().location);
 
-        await prayerService.initialize();
-        await prayerService.handleNotificationResponse(
-          NotificationResponse(
-            notificationResponseType:
-                NotificationResponseType.selectedNotification,
-            payload: nativeAdhanPayload,
-          ),
-        );
-
-        expect(
-          notificationNavigations,
-          isEmpty,
-          reason:
-              'Tapping adhan during splash must not navigate immediately; '
-              'that is the first leg of the reported prayer→home→prayer race',
-        );
-        expect(
-          AppRouter.pendingColdStartLocation,
-          const PrayerNotificationStatusRoute().location,
-        );
-        expect(AppRouter.pendingColdStartExtra, nativeAdhanPayload);
-      },
-    );
-
-    test(
-      'step 2 — splash must open prayer status when cold start was queued',
-      () async {
-        AppRouter.setPendingColdStartRoute(
-          const PrayerNotificationStatusRoute().location,
-          extra: nativeAdhanPayload,
-        );
-        when(
-          mockGetSplashNextRoute.call(),
-        ).thenAnswer((_) async => SplashRouteResult(SplashDestination.home));
-
-        splashBloc.add(const SplashStarted());
-        await expectLater(
-          splashBloc.stream,
-          emits(
-            isA<SplashNavigateToNotification>().having(
-              (SplashNavigateToNotification state) => state.location,
-              'location',
-              const PrayerNotificationStatusRoute().location,
+          await prayerService.initialize();
+          await prayerService.handleNotificationResponse(
+            NotificationResponse(
+              notificationResponseType:
+                  NotificationResponseType.selectedNotification,
+              payload: nativeAdhanPayload,
             ),
-          ),
-        );
-      },
-    );
+          );
 
-    test(
-      'step 2b — getSplashNextRoute honors pending native adhan cold start',
-      () async {
-        AppRouter.setPendingColdStartRoute(
-          const PrayerNotificationStatusRoute().location,
-          extra: nativeAdhanPayload,
-        );
+          expect(
+            notificationNavigations,
+            isEmpty,
+            reason:
+                'Tapping adhan during splash must not navigate immediately; '
+                'that is the first leg of the reported prayer→home→prayer race',
+          );
+          expect(
+            AppRouter.pendingColdStartLocation,
+            const PrayerNotificationStatusRoute().location,
+          );
+          expect(AppRouter.pendingColdStartExtra, nativeAdhanPayload);
+        },
+      );
 
-        final mockGetCurrentUser = MockGetCurrentUserUseCase();
-        final mockCheckOnboarding = MockCheckOnboardingStatus();
-        final mockNotificationRepository = MockStartupNotificationRepository();
-        when(mockCheckOnboarding.call()).thenAnswer((_) async => true);
-        when(mockGetCurrentUser.call()).thenReturn(
-          UserEntity(
-            id: '1',
-            email: 'a@b.com',
-            displayName: 'Test',
-            createdAt: DateTime(2026),
-          ),
-        );
-        when(mockNotificationRepository.consumePendingNotification()).thenReturn(
-          Map<String, dynamic>.from(jsonDecode(nativeAdhanPayload) as Map),
-        );
+      test(
+        'step 2 — splash must open prayer status when cold start was queued',
+        () async {
+          AppRouter.setPendingColdStartRoute(
+            const PrayerNotificationStatusRoute().location,
+            extra: nativeAdhanPayload,
+          );
+          when(
+            mockGetSplashNextRoute.call(),
+          ).thenAnswer((_) async => SplashRouteResult(SplashDestination.home));
 
-        final useCase = GetSplashNextRouteUseCase(
-          mockGetCurrentUser,
-          mockCheckOnboarding,
-          mockNotificationRepository,
-        );
+          splashBloc.add(const SplashStarted());
+          await expectLater(
+            splashBloc.stream,
+            emits(
+              isA<SplashNavigateToNotification>().having(
+                (SplashNavigateToNotification state) => state.location,
+                'location',
+                const PrayerNotificationStatusRoute().location,
+              ),
+            ),
+          );
+        },
+      );
 
-        final result = await useCase();
+      test(
+        'step 2b — getSplashNextRoute honors pending native adhan cold start',
+        () async {
+          AppRouter.setPendingColdStartRoute(
+            const PrayerNotificationStatusRoute().location,
+            extra: nativeAdhanPayload,
+          );
 
-        expect(result.destination, SplashDestination.notificationLaunch);
-        expect(result.notificationData?['prayer_key'], 'fajr');
-      },
-    );
+          final mockGetCurrentUser = MockGetCurrentUserUseCase();
+          final mockCheckOnboarding = MockCheckOnboardingStatus();
+          final mockNotificationRepository =
+              MockStartupNotificationRepository();
+          when(mockCheckOnboarding.call()).thenAnswer((_) async => true);
+          when(mockGetCurrentUser.call()).thenReturn(
+            UserEntity(
+              id: '1',
+              email: 'a@b.com',
+              displayName: 'Test',
+              createdAt: DateTime(2026),
+            ),
+          );
+          when(
+            mockNotificationRepository.consumePendingNotification(),
+          ).thenReturn(
+            Map<String, dynamic>.from(jsonDecode(nativeAdhanPayload) as Map),
+          );
 
-    test(
-      'step 3 — resume must not re-navigate when already on prayer status',
-      () async {
-        AppRouter.isOnPrayerNotificationStatusRouteOverride = () => true;
+          final useCase = GetSplashNextRouteUseCase(
+            mockGetCurrentUser,
+            mockCheckOnboarding,
+            mockNotificationRepository,
+          );
 
-        when(mockAdhanPlayer.isSupported).thenReturn(true);
-        when(mockAdhanPlayer.isAdhanPlaying()).thenAnswer((_) async => true);
-        when(
-          mockAdhanPlayer.getActiveAdhanPayload(),
-        ).thenAnswer((_) async => nativeAdhanPayload);
+          final result = await useCase();
 
-        final resumeDispatcher = MockINotificationDispatcher();
-        final resumeHandlersInit = MockNotificationHandlersInitializer();
-        when(resumeHandlersInit()).thenAnswer((_) async {});
-        when(
-          resumeDispatcher.getNotificationAppLaunchDetails(),
-        ).thenAnswer((_) async => null);
+          expect(result.destination, SplashDestination.notificationLaunch);
+          expect(result.notificationData?['prayer_key'], 'fajr');
+        },
+      );
 
-        final resumeNavigations = <({String location, Object? extra})>[];
-        final service = NotificationStartupServiceImpl(
-          resumeDispatcher,
-          MockSharedPreferencesAsync(),
-          MockProcessIdProvider(),
-          resumeHandlersInit,
-          mockAdhanPlayer,
-          navigator: (location, {extra}) {
-            resumeNavigations.add((location: location, extra: extra));
-          },
-        );
+      test(
+        'step 3 — resume must not re-navigate when already on prayer status',
+        () async {
+          AppRouter.isOnPrayerNotificationStatusRouteOverride = () => true;
 
-        await service.handleAppResume();
+          when(mockAdhanPlayer.isSupported).thenReturn(true);
+          when(mockAdhanPlayer.isAdhanPlaying()).thenAnswer((_) async => true);
+          when(
+            mockAdhanPlayer.getActiveAdhanPayload(),
+          ).thenAnswer((_) async => nativeAdhanPayload);
 
-        expect(
-          resumeNavigations,
-          isEmpty,
-          reason:
-              'Resume adhan probe must not push prayer status again when user '
-              'is already there (third leg of the reported race)',
-        );
-      },
-    );
+          final resumeDispatcher = MockINotificationDispatcher();
+          final resumeHandlersInit = MockNotificationHandlersInitializer();
+          when(resumeHandlersInit()).thenAnswer((_) async {});
+          when(
+            resumeDispatcher.getNotificationAppLaunchDetails(),
+          ).thenAnswer((_) async => null);
 
-    test(
-      'full sequence — no eager navigation during splash and no resume redirect',
-      () async {
-        when(
-          mockNav.getCurrentLocation(),
-        ).thenReturn(const SplashRoute().location);
+          final resumeNavigations = <({String location, Object? extra})>[];
+          final service = NotificationStartupServiceImpl(
+            resumeDispatcher,
+            MockSharedPreferencesAsync(),
+            MockProcessIdProvider(),
+            resumeHandlersInit,
+            mockAdhanPlayer,
+            navigator: (location, {extra}) {
+              resumeNavigations.add((location: location, extra: extra));
+            },
+          );
 
-        await prayerService.initialize();
-        await prayerService.handleNotificationResponse(
-          NotificationResponse(
-            notificationResponseType:
-                NotificationResponseType.selectedNotification,
-            payload: nativeAdhanPayload,
-          ),
-        );
+          await service.handleAppResume();
 
-        expect(notificationNavigations, isEmpty);
+          expect(
+            resumeNavigations,
+            isEmpty,
+            reason:
+                'Resume adhan probe must not push prayer status again when user '
+                'is already there (third leg of the reported race)',
+          );
+        },
+      );
 
-        AppRouter.setPendingColdStartRoute(
-          const PrayerNotificationStatusRoute().location,
-          extra: nativeAdhanPayload,
-        );
+      test(
+        'full sequence — no eager navigation during splash and no resume redirect',
+        () async {
+          when(
+            mockNav.getCurrentLocation(),
+          ).thenReturn(const SplashRoute().location);
 
-        when(
-          mockGetSplashNextRoute.call(),
-        ).thenAnswer((_) async => SplashRouteResult(SplashDestination.home));
+          await prayerService.initialize();
+          await prayerService.handleNotificationResponse(
+            NotificationResponse(
+              notificationResponseType:
+                  NotificationResponseType.selectedNotification,
+              payload: nativeAdhanPayload,
+            ),
+          );
 
-        splashBloc.add(const SplashStarted());
-        final SplashState splashOutcome = await splashBloc.stream.firstWhere(
-          (SplashState state) => state is! SplashLoading,
-        );
-        expect(splashOutcome, isA<SplashNavigateToNotification>());
+          expect(notificationNavigations, isEmpty);
 
-        AppRouter.init();
-        AppRouter.router.go(
-          const PrayerNotificationStatusRoute().location,
-          extra: nativeAdhanPayload,
-        );
+          AppRouter.setPendingColdStartRoute(
+            const PrayerNotificationStatusRoute().location,
+            extra: nativeAdhanPayload,
+          );
 
-        when(mockAdhanPlayer.isSupported).thenReturn(true);
-        when(mockAdhanPlayer.isAdhanPlaying()).thenAnswer((_) async => true);
-        when(
-          mockAdhanPlayer.getActiveAdhanPayload(),
-        ).thenAnswer((_) async => nativeAdhanPayload);
+          when(
+            mockGetSplashNextRoute.call(),
+          ).thenAnswer((_) async => SplashRouteResult(SplashDestination.home));
 
-        final resumeDispatcher = MockINotificationDispatcher();
-        final resumeHandlersInit = MockNotificationHandlersInitializer();
-        when(resumeHandlersInit()).thenAnswer((_) async {});
-        when(
-          resumeDispatcher.getNotificationAppLaunchDetails(),
-        ).thenAnswer((_) async => null);
+          splashBloc.add(const SplashStarted());
+          final SplashState splashOutcome = await splashBloc.stream.firstWhere(
+            (SplashState state) => state is! SplashLoading,
+          );
+          expect(splashOutcome, isA<SplashNavigateToNotification>());
 
-        final resumeNavigations = <({String location, Object? extra})>[];
-        final resumeService = NotificationStartupServiceImpl(
-          resumeDispatcher,
-          MockSharedPreferencesAsync(),
-          MockProcessIdProvider(),
-          resumeHandlersInit,
-          mockAdhanPlayer,
-          navigator: (location, {extra}) {
-            resumeNavigations.add((location: location, extra: extra));
-          },
-        );
-        await resumeService.handleAppResume();
+          AppRouter.init();
+          AppRouter.router.go(
+            const PrayerNotificationStatusRoute().location,
+            extra: nativeAdhanPayload,
+          );
 
-        expect(resumeNavigations, isEmpty);
-      },
-    );
-  });
+          when(mockAdhanPlayer.isSupported).thenReturn(true);
+          when(mockAdhanPlayer.isAdhanPlaying()).thenAnswer((_) async => true);
+          when(
+            mockAdhanPlayer.getActiveAdhanPayload(),
+          ).thenAnswer((_) async => nativeAdhanPayload);
+
+          final resumeDispatcher = MockINotificationDispatcher();
+          final resumeHandlersInit = MockNotificationHandlersInitializer();
+          when(resumeHandlersInit()).thenAnswer((_) async {});
+          when(
+            resumeDispatcher.getNotificationAppLaunchDetails(),
+          ).thenAnswer((_) async => null);
+
+          final resumeNavigations = <({String location, Object? extra})>[];
+          final resumeService = NotificationStartupServiceImpl(
+            resumeDispatcher,
+            MockSharedPreferencesAsync(),
+            MockProcessIdProvider(),
+            resumeHandlersInit,
+            mockAdhanPlayer,
+            navigator: (location, {extra}) {
+              resumeNavigations.add((location: location, extra: extra));
+            },
+          );
+          await resumeService.handleAppResume();
+
+          expect(resumeNavigations, isEmpty);
+        },
+      );
+    },
+  );
 }

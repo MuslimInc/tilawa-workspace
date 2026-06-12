@@ -25,7 +25,8 @@ abstract class GoogleSignInPrepareDataSource {
 }
 
 @LazySingleton(as: GoogleSignInPrepareDataSource)
-class GoogleSignInPrepareDataSourceImpl implements GoogleSignInPrepareDataSource {
+class GoogleSignInPrepareDataSourceImpl
+    implements GoogleSignInPrepareDataSource {
   GoogleSignInPrepareDataSourceImpl(
     this._googleSignIn,
     this._platformPolicy,

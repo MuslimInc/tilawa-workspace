@@ -8,7 +8,11 @@ import '../../cubit/tasbeeh_state.dart';
 import 'tasbeeh_layout_widgets.dart';
 
 class TasbeehCreateView extends StatelessWidget {
-  const TasbeehCreateView({super.key, required this.cubit, required this.state});
+  const TasbeehCreateView({
+    super.key,
+    required this.cubit,
+    required this.state,
+  });
 
   final TasbeehCubit cubit;
   final TasbeehState state;

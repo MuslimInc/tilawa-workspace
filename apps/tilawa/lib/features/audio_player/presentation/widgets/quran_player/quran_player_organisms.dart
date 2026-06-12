@@ -793,33 +793,32 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
                                       ? 0
                                       : _queueReveal;
 
-                                  final Widget stage =
-                                      _YtMusicNowPlayingStage(
-                                        state: widget.state,
-                                        audio: widget.audio,
-                                        queueReveal: queueReveal,
-                                        onCollapse: widget.onCollapse,
-                                        useHeroArtwork: widget.useHeroArtwork,
-                                        onStageVerticalDragStart: (_) {
-                                          _onStageDragStart();
-                                          QuranPlayerDebugLog.log(
-                                            'queue.stageDragStart',
-                                            <String, Object?>{
-                                              'atPeek': _queueAtPeek,
-                                            },
-                                          );
+                                  final Widget stage = _YtMusicNowPlayingStage(
+                                    state: widget.state,
+                                    audio: widget.audio,
+                                    queueReveal: queueReveal,
+                                    onCollapse: widget.onCollapse,
+                                    useHeroArtwork: widget.useHeroArtwork,
+                                    onStageVerticalDragStart: (_) {
+                                      _onStageDragStart();
+                                      QuranPlayerDebugLog.log(
+                                        'queue.stageDragStart',
+                                        <String, Object?>{
+                                          'atPeek': _queueAtPeek,
                                         },
-                                        onStageVerticalDragUpdate: (details) {
-                                          _handleStageVerticalDragUpdate(
-                                            details,
-                                            sheetParentHeight:
-                                                constraints.maxHeight,
-                                            snapSizes: snapSizes,
-                                          );
-                                        },
-                                        onStageVerticalDragEnd:
-                                            _handleStageVerticalDragEnd,
                                       );
+                                    },
+                                    onStageVerticalDragUpdate: (details) {
+                                      _handleStageVerticalDragUpdate(
+                                        details,
+                                        sheetParentHeight:
+                                            constraints.maxHeight,
+                                        snapSizes: snapSizes,
+                                      );
+                                    },
+                                    onStageVerticalDragEnd:
+                                        _handleStageVerticalDragEnd,
+                                  );
 
                                   return Stack(
                                     children: [
@@ -941,83 +940,83 @@ class _YtMusicNowPlayingStage extends StatelessWidget {
       onVerticalDragEnd: onStageVerticalDragEnd,
       child: LayoutBuilder(
         builder: (context, constraints) {
-        final bool tightStage = constraints.maxHeight < 140;
-        final bool showCompactBar =
-            queueReveal > compactBarThreshold || tightStage;
-        final bool showQueueFocused =
-            queueReveal > queueControlsFocusThreshold && !showCompactBar;
+          final bool tightStage = constraints.maxHeight < 140;
+          final bool showCompactBar =
+              queueReveal > compactBarThreshold || tightStage;
+          final bool showQueueFocused =
+              queueReveal > queueControlsFocusThreshold && !showCompactBar;
 
-        if (showCompactBar) {
-          return _CompactNowPlayingBar(
-            audio: audio,
-            state: state,
-            onCollapse: onCollapse,
-            opacity: showCompactBar && !tightStage
-                ? ((queueReveal - compactBarThreshold) / 0.25).clamp(0.0, 1.0)
-                : 1.0,
-          );
-        }
+          if (showCompactBar) {
+            return _CompactNowPlayingBar(
+              audio: audio,
+              state: state,
+              onCollapse: onCollapse,
+              opacity: showCompactBar && !tightStage
+                  ? ((queueReveal - compactBarThreshold) / 0.25).clamp(0.0, 1.0)
+                  : 1.0,
+            );
+          }
 
-        if (showQueueFocused) {
+          if (showQueueFocused) {
+            final tokens = Theme.of(context).tokens;
+            return QuranPlayerExpandedStageQueueFocusedLayout(
+              maxHeight: constraints.maxHeight,
+              onVerticalDragStart: onStageVerticalDragStart,
+              onVerticalDragUpdate: onStageVerticalDragUpdate,
+              onVerticalDragEnd: onStageVerticalDragEnd,
+              children: [
+                _YtMusicPlayerHeader(state: state, onCollapse: onCollapse),
+                _PlayerReciterHistorySection(audio: audio, state: state),
+                _PlayerPlaybackCluster(
+                  state: state,
+                  queueReveal: queueReveal,
+                ),
+                SizedBox(height: tokens.spaceSmall),
+              ],
+            );
+          }
+
           final tokens = Theme.of(context).tokens;
-          return QuranPlayerExpandedStageQueueFocusedLayout(
-            maxHeight: constraints.maxHeight,
+          final PlayerExpandTransitionMetrics? expandMetrics =
+              PlayerExpandMetricsScope.maybeOf(context);
+          final double stageChromeOpacity =
+              expandMetrics?.stageChromeOpacity ?? 1;
+
+          return QuranPlayerExpandedStageDefaultLayout(
+            header: _YtMusicPlayerHeader(state: state, onCollapse: onCollapse),
             onVerticalDragStart: onStageVerticalDragStart,
             onVerticalDragUpdate: onStageVerticalDragUpdate,
             onVerticalDragEnd: onStageVerticalDragEnd,
-            children: [
-              _YtMusicPlayerHeader(state: state, onCollapse: onCollapse),
-              _PlayerReciterHistorySection(audio: audio, state: state),
-              _PlayerPlaybackCluster(
-                state: state,
-                queueReveal: queueReveal,
-              ),
-              SizedBox(height: tokens.spaceSmall),
-            ],
-          );
-        }
-
-        final tokens = Theme.of(context).tokens;
-        final PlayerExpandTransitionMetrics? expandMetrics =
-            PlayerExpandMetricsScope.maybeOf(context);
-        final double stageChromeOpacity =
-            expandMetrics?.stageChromeOpacity ?? 1;
-
-        return QuranPlayerExpandedStageDefaultLayout(
-          header: _YtMusicPlayerHeader(state: state, onCollapse: onCollapse),
-          onVerticalDragStart: onStageVerticalDragStart,
-          onVerticalDragUpdate: onStageVerticalDragUpdate,
-          onVerticalDragEnd: onStageVerticalDragEnd,
-          centeredChrome: Padding(
-            padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
-            child: Opacity(
-              opacity: stageChromeOpacity.clamp(0.0, 1.0),
-              child: Column(
-                mainAxisAlignment: .center,
-                mainAxisSize: .min,
-                spacing: tokens.spaceLarge,
-                children: [
-                  _PlayerArtAtom(
-                    audioId: audio.id,
-                    artUri: audio.artUri,
-                    useHeroArtwork: useHeroArtwork,
-                  ),
-                  _PlayerMetadataMolecule(
-                    title: audio.title,
-                    artist: audio.artist,
-                    centerAlign: true,
-                    audioId: audio.id,
-                    useHeroMetadata: useHeroArtwork,
-                  ),
-                ],
+            centeredChrome: Padding(
+              padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
+              child: Opacity(
+                opacity: stageChromeOpacity.clamp(0.0, 1.0),
+                child: Column(
+                  mainAxisAlignment: .center,
+                  mainAxisSize: .min,
+                  spacing: tokens.spaceLarge,
+                  children: [
+                    _PlayerArtAtom(
+                      audioId: audio.id,
+                      artUri: audio.artUri,
+                      useHeroArtwork: useHeroArtwork,
+                    ),
+                    _PlayerMetadataMolecule(
+                      title: audio.title,
+                      artist: audio.artist,
+                      centerAlign: true,
+                      audioId: audio.id,
+                      useHeroMetadata: useHeroArtwork,
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          playbackCluster: _PlayerPlaybackCluster(
-            state: state,
-            queueReveal: queueReveal,
-          ),
-        );
+            playbackCluster: _PlayerPlaybackCluster(
+              state: state,
+              queueReveal: queueReveal,
+            ),
+          );
         },
       ),
     );

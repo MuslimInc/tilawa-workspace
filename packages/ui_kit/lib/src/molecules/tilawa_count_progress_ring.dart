@@ -44,9 +44,7 @@ class TilawaCountProgressRing extends StatelessWidget {
     final double size = componentTokens.outerSize;
 
     return Semantics(
-      label: isDone
-          ? 'Completed'
-          : 'Count $currentCount of $totalCount',
+      label: isDone ? 'Completed' : 'Count $currentCount of $totalCount',
       value: isDone ? null : '$currentCount',
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -64,8 +62,8 @@ class TilawaCountProgressRing extends StatelessWidget {
                   ? Border.all(
                       color: (doneForegroundColor ?? colorScheme.onTertiary)
                           .withValues(
-                        alpha: componentTokens.doneBorderOpacity,
-                      ),
+                            alpha: componentTokens.doneBorderOpacity,
+                          ),
                       width: componentTokens.doneBorderWidth,
                     )
                   : null,
@@ -100,7 +98,8 @@ class TilawaCountProgressRing extends StatelessWidget {
                             maxLines: 1,
                             style: theme.textTheme.displaySmall?.copyWith(
                               color:
-                                  activeForegroundColor ?? colorScheme.onPrimary,
+                                  activeForegroundColor ??
+                                  colorScheme.onPrimary,
                               fontWeight: FontWeight.w700,
                               fontSize: componentTokens.countFontSize,
                               height: componentTokens.countLineHeight,

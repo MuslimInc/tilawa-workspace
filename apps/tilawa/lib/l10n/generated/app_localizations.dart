@@ -1202,6 +1202,24 @@ abstract class AppLocalizations {
   /// **'Unable to sign in with third-party account'**
   String get unableToSignInWithThirdPartyAccount;
 
+  /// Title when Google account picker fails to render on device
+  ///
+  /// In en, this message translates to:
+  /// **'Google sign-in could not open'**
+  String get googleSignInFallbackTitle;
+
+  /// Help text when Google sign-in UI is unavailable
+  ///
+  /// In en, this message translates to:
+  /// **'The Google account picker may be hidden on this device. Update Google Play Services, then try again. If it still fails, ask your developer to register this build\'s SHA-1 in Firebase.'**
+  String get googleSignInFallbackBody;
+
+  /// Opens Play Store to update Google Play Services
+  ///
+  /// In en, this message translates to:
+  /// **'Update Google Play Services'**
+  String get googleSignInUpdatePlayServices;
+
   /// Network error message
   ///
   /// In en, this message translates to:

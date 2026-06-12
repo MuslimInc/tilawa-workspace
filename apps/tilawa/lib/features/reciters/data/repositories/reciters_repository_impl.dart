@@ -208,9 +208,7 @@ class RecitersRepositoryImpl implements RecitersRepository {
     }
 
     final List<ReciterModel> reciters = await _getRecitersData();
-    final ReciterModel? reciter = reciters
-        .where((r) => r.id == id)
-        .firstOrNull;
+    final ReciterModel? reciter = reciters.where((r) => r.id == id).firstOrNull;
     if (reciter != null) {
       await _favoritesDataSource.addFavoriteReciter(
         userId: userId,

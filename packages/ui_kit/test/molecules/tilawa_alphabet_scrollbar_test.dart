@@ -819,11 +819,8 @@ void main() {
       await tester.pump();
 
       final theme = Theme.of(tester.element(find.byType(Scaffold)));
-      final double verticalPadding = theme
-          .componentTokens
-          .alphabetScrollbar
-          .verticalPadding
-          .vertical;
+      final double verticalPadding =
+          theme.componentTokens.alphabetScrollbar.verticalPadding.vertical;
       final double expectedSlot =
           (trackHeight - verticalPadding) / letters.length;
       final double firstCenter = tester.getCenter(find.text('ا')).dy;
@@ -856,14 +853,20 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byKey(const Key('alphabet_scrollbar_scroll')), findsOneWidget);
+      expect(
+        find.byKey(const Key('alphabet_scrollbar_scroll')),
+        findsOneWidget,
+      );
 
       final theme = Theme.of(tester.element(find.byType(Scaffold)));
       final double itemExtent =
           theme.componentTokens.alphabetScrollbar.itemExtent;
-      final double firstCenter = tester.getCenter(find.text(manyLetters.first)).dy;
-      final double secondCenter =
-          tester.getCenter(find.text(manyLetters[1])).dy;
+      final double firstCenter = tester
+          .getCenter(find.text(manyLetters.first))
+          .dy;
+      final double secondCenter = tester
+          .getCenter(find.text(manyLetters[1]))
+          .dy;
       expect(secondCenter - firstCenter, closeTo(itemExtent, 1.0));
 
       final ScrollableState scrollable =

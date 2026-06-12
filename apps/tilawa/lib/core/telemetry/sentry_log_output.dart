@@ -77,7 +77,9 @@ class SentryLogOutput extends LogOutput {
     final Map<String, SentryAttribute> attributes = <String, SentryAttribute>{};
     final Object? error = event.error;
     if (error != null) {
-      attributes['error_type'] = SentryAttribute.string(error.runtimeType.toString());
+      attributes['error_type'] = SentryAttribute.string(
+        error.runtimeType.toString(),
+      );
     }
     final StackTrace? stackTrace = event.stackTrace;
     if (stackTrace != null) {

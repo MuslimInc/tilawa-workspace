@@ -393,65 +393,65 @@ class _PlayerActionPillsMolecule extends StatelessWidget {
           children: [
             Semantics(
               identifier: QuranPlayerSemanticsIds.actionPillSpeed,
-            button: true,
-            child: _YtMusicActionPill(
-              label: '${state.speed.toStringAsFixed(1)}x',
-              icon: FluentIcons.gauge_24_regular,
-              onTap: () {
-                final AudioPlayerBloc bloc = context.read<AudioPlayerBloc>();
-                showSliderDialog(
-                  context: context,
-                  title: context.l10n.playbackSpeed,
-                  divisions: 8,
-                  min: 0.5,
-                  max: 2.5,
-                  value: state.speed,
-                  onChanged: (double speed) {
-                    bloc.add(AudioPlayerEvent.setSpeed(speed));
-                  },
-                );
-              },
-            ),
-          ),
-          Semantics(
-            identifier: QuranPlayerSemanticsIds.actionPillVolume,
-            button: true,
-            child: _YtMusicActionPill(
-              icon: FluentIcons.speaker_2_24_regular,
-              onTap: () {
-                final AudioPlayerBloc bloc = context.read<AudioPlayerBloc>();
-                showSliderDialog(
-                  context: context,
-                  title: context.l10n.adjustVolume,
-                  divisions: 10,
-                  min: 0.0,
-                  max: 1.0,
-                  value: state.volume,
-                  onChanged: (double volume) {
-                    bloc.add(AudioPlayerEvent.setVolume(volume));
-                  },
-                );
-              },
-            ),
-          ),
-          if (sleepEnabled) ...[
-            Semantics(
-              identifier: QuranPlayerSemanticsIds.actionPillSleepTimer,
               button: true,
               child: _YtMusicActionPill(
-                icon: state.isSleepTimerActive
-                    ? FluentIcons.timer_24_filled
-                    : FluentIcons.timer_24_regular,
+                label: '${state.speed.toStringAsFixed(1)}x',
+                icon: FluentIcons.gauge_24_regular,
                 onTap: () {
-                  showDialog(
+                  final AudioPlayerBloc bloc = context.read<AudioPlayerBloc>();
+                  showSliderDialog(
                     context: context,
-                    builder: (_) => const SleepTimerDialog(),
+                    title: context.l10n.playbackSpeed,
+                    divisions: 8,
+                    min: 0.5,
+                    max: 2.5,
+                    value: state.speed,
+                    onChanged: (double speed) {
+                      bloc.add(AudioPlayerEvent.setSpeed(speed));
+                    },
                   );
                 },
               ),
             ),
+            Semantics(
+              identifier: QuranPlayerSemanticsIds.actionPillVolume,
+              button: true,
+              child: _YtMusicActionPill(
+                icon: FluentIcons.speaker_2_24_regular,
+                onTap: () {
+                  final AudioPlayerBloc bloc = context.read<AudioPlayerBloc>();
+                  showSliderDialog(
+                    context: context,
+                    title: context.l10n.adjustVolume,
+                    divisions: 10,
+                    min: 0.0,
+                    max: 1.0,
+                    value: state.volume,
+                    onChanged: (double volume) {
+                      bloc.add(AudioPlayerEvent.setVolume(volume));
+                    },
+                  );
+                },
+              ),
+            ),
+            if (sleepEnabled) ...[
+              Semantics(
+                identifier: QuranPlayerSemanticsIds.actionPillSleepTimer,
+                button: true,
+                child: _YtMusicActionPill(
+                  icon: state.isSleepTimerActive
+                      ? FluentIcons.timer_24_filled
+                      : FluentIcons.timer_24_regular,
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (_) => const SleepTimerDialog(),
+                    );
+                  },
+                ),
+              ),
+            ],
           ],
-        ],
         ),
       ),
     );

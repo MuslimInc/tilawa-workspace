@@ -13,11 +13,12 @@ void main() {
         scaffoldBackgroundColor: scaffold,
       );
 
-      final SystemUiOverlayStyle style = AppSystemChromeStyle.buildDefaultAppStyle(
-        theme,
-        statusBarBackgroundColor: scaffold,
-        navigationBarColor: navBar,
-      );
+      final SystemUiOverlayStyle style =
+          AppSystemChromeStyle.buildDefaultAppStyle(
+            theme,
+            statusBarBackgroundColor: scaffold,
+            navigationBarColor: navBar,
+          );
 
       expect(style.statusBarIconBrightness, Brightness.dark);
       expect(style.systemNavigationBarIconBrightness, Brightness.dark);

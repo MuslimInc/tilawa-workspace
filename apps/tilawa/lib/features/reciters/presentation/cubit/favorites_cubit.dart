@@ -175,5 +175,4 @@ class FavoritesCubit extends Cubit<FavoritesState> {
       (_) {},
     );
   }
-
 }

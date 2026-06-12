@@ -2,7 +2,8 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/features/audio_player/presentation/widgets/quran_player/quran_player_widget.dart';
-import 'package:tilawa/shared/widgets/quran_player_widget.dart' as shared_export;
+import 'package:tilawa/shared/widgets/quran_player_widget.dart'
+    as shared_export;
 
 void main() {
   group('Quran player module layout', () {
@@ -33,10 +34,9 @@ void main() {
 
     test('no single part file exceeds 2200 lines', () {
       final Directory dir = Directory(libRoot);
-      final Iterable<File> dartFiles = dir
-          .listSync()
-          .whereType<File>()
-          .where((File f) => f.path.endsWith('.dart'));
+      final Iterable<File> dartFiles = dir.listSync().whereType<File>().where(
+        (File f) => f.path.endsWith('.dart'),
+      );
       for (final File file in dartFiles) {
         final int lines = file.readAsLinesSync().length;
         expect(

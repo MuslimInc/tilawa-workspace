@@ -23,9 +23,11 @@ class MainActivity : AudioServiceActivity() {
         private const val WATCHDOG_CHANNEL = "com.tilawa.app/prayer_watchdog"
         private const val LAUNCH_SPLASH_CHANNEL = "com.tilawa.app/launch_splash"
         private const val APP_CONTEXT_CHANNEL = "com.tilawa.app/app_context"
+        private const val GOOGLE_SIGN_IN_CHANNEL = "com.tilawa.app/google_sign_in"
         const val ACTION_OPEN_PRAYER_STATUS =
             "com.tilawa.app.prayer.ACTION_OPEN_PRAYER_STATUS"
         private const val TAG = "MainActivity"
+        private const val GSIGNIN_TAG = "TilawaGSignIn"
         private const val FIRST_FRAME_TAG = "FirstFrame"
 
         // Failsafe: must outlast the Dart-side LaunchFirstFrameGate failsafe
@@ -36,6 +38,10 @@ class MainActivity : AudioServiceActivity() {
 
         @Volatile
         var keepLaunchSplashOnScreen: Boolean = true
+
+        /** Updated on each [configureFlutterEngine]; used by credential UI lifecycle. */
+        @Volatile
+        var invokeCredentialUiDismissed: (() -> Unit)? = null
     }
 
     private fun firstFrameLog(message: String) {
@@ -114,6 +120,15 @@ class MainActivity : AudioServiceActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         registerAppMethodChannels(flutterEngine)
+        if (TranssionOemPolicy.isTranssionDevice()) {
+            TranssionCredentialUiLifecycle.ensureRegistered(application)
+            invokeCredentialUiDismissed = {
+                MethodChannel(
+                    flutterEngine.dartExecutor.binaryMessenger,
+                    GOOGLE_SIGN_IN_CHANNEL,
+                ).invokeMethod("onCredentialUiDismissed", null)
+            }
+        }
         // Belt-and-suspenders for cold start; hot restart is restored from Dart
         // main() before SentryFlutter.init.
         restoreSentryFlutterApplicationContext()
@@ -198,6 +213,21 @@ class MainActivity : AudioServiceActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (TranssionOemPolicy.isTranssionDevice()) {
+            Log.d(
+                GSIGNIN_TAG,
+                "H1 MainActivity.onResume " +
+                    "renderMode=$renderMode isFinishing=$isFinishing",
+            )
+            flutterEngine?.dartExecutor?.binaryMessenger?.let { messenger ->
+                MethodChannel(messenger, GOOGLE_SIGN_IN_CHANNEL)
+                    .invokeMethod("onMainActivityResumed", null)
+            }
+        }
+    }
+
     override fun getRenderMode(): RenderMode = renderMode
 
     /**
@@ -206,10 +236,22 @@ class MainActivity : AudioServiceActivity() {
      * Flutter frame and can deadlock that transition (persistent black screen).
      * [RenderMode.texture] avoids the pre-draw gate for that path only.
      *
-     * Normal launches use [RenderMode.surface].
+     * Transsion ROMs (Infinix, Tecno, Itel) also need [RenderMode.texture] so
+     * Credential Manager / Play Services sign-in UI is not hidden behind the
+     * Flutter surface (otherwise [authenticate] hangs until timeout).
+     *
+     * Other launches use [RenderMode.surface].
      */
     private fun resolveRenderMode(intent: Intent?): RenderMode {
         if (intent?.action == ACTION_OPEN_PRAYER_STATUS) {
+            return RenderMode.texture
+        }
+        if (TranssionOemPolicy.isTranssionDevice()) {
+            Log.d(
+                GSIGNIN_TAG,
+                "H5 onCreate renderMode=texture " +
+                    "manufacturer=${Build.MANUFACTURER} brand=${Build.BRAND}",
+            )
             return RenderMode.texture
         }
         return RenderMode.surface

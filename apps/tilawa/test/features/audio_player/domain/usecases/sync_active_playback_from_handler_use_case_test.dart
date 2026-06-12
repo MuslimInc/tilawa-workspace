@@ -45,7 +45,10 @@ void main() {
     final Either<Failure, ActivePlaybackSnapshot?> result = await useCase();
 
     expect(result.isRight, isTrue);
-    result.fold((_) => fail('expected Right'), (value) => expect(value, isNull));
+    result.fold(
+      (_) => fail('expected Right'),
+      (value) => expect(value, isNull),
+    );
     verify(repository.readActivePlaybackSnapshot()).called(1);
   });
 

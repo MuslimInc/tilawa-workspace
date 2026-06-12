@@ -20,9 +20,12 @@ void main() {
             children: [
               SizedBox(
                 height: 120,
-                child: ListView(controller: header, children: const [
-                  SizedBox(height: 40),
-                ]),
+                child: ListView(
+                  controller: header,
+                  children: const [
+                    SizedBox(height: 40),
+                  ],
+                ),
               ),
               Expanded(
                 child: ListView.builder(
@@ -40,7 +43,10 @@ void main() {
       final ScrollPosition? largest = largestScrollExtentPosition(catalog);
       expect(largest, isNotNull);
       expect(largest!.maxScrollExtent, greaterThan(500));
-      expect(largestScrollExtentPosition(header)!.maxScrollExtent, lessThan(500));
+      expect(
+        largestScrollExtentPosition(header)!.maxScrollExtent,
+        lessThan(500),
+      );
     });
 
     testWidgets('headerScrollPosition prefers highest header pixels', (
@@ -124,72 +130,78 @@ void main() {
       expect(fallback, same(header.position));
     });
 
-    testWidgets('largestScrollExtentPosition skips positions without dimensions', (
-      tester,
-    ) async {
-      final ScrollController catalog = ScrollController();
-      addTearDown(catalog.dispose);
+    testWidgets(
+      'largestScrollExtentPosition skips positions without dimensions',
+      (
+        tester,
+      ) async {
+        final ScrollController catalog = ScrollController();
+        addTearDown(catalog.dispose);
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: SizedBox(
-            height: 400,
-            child: ListView.builder(
-              controller: catalog,
-              itemCount: 30,
-              itemBuilder: (_, _) => const SizedBox(height: 48),
-            ),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(largestScrollExtentPosition(catalog), isNotNull);
-      expect(largestScrollExtentPosition(null), isNull);
-    });
-
-    testWidgets('headerScrollPosition breaks ties using smaller maxScrollExtent', (
-      tester,
-    ) async {
-      final ScrollController outer = ScrollController();
-      final ScrollController inner = ScrollController();
-      addTearDown(outer.dispose);
-      addTearDown(inner.dispose);
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: SizedBox(
-            height: 600,
-            child: NestedScrollView(
-              controller: outer,
-              headerSliverBuilder: (context, innerBoxIsScrolled) => [
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: 200,
-                    child: ListView(
-                      controller: inner,
-                      children: List<Widget>.generate(
-                        6,
-                        (_) => const SizedBox(height: 48),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-              body: ListView.builder(
-                itemCount: 40,
+        await tester.pumpWidget(
+          MaterialApp(
+            home: SizedBox(
+              height: 400,
+              child: ListView.builder(
+                controller: catalog,
+                itemCount: 30,
                 itemBuilder: (_, _) => const SizedBox(height: 48),
               ),
             ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      final ScrollPosition? header = headerScrollPosition(outer);
-      expect(header, isNotNull);
-      expect(header!.maxScrollExtent, lessThanOrEqualTo(500));
-    });
+        expect(largestScrollExtentPosition(catalog), isNotNull);
+        expect(largestScrollExtentPosition(null), isNull);
+      },
+    );
+
+    testWidgets(
+      'headerScrollPosition breaks ties using smaller maxScrollExtent',
+      (
+        tester,
+      ) async {
+        final ScrollController outer = ScrollController();
+        final ScrollController inner = ScrollController();
+        addTearDown(outer.dispose);
+        addTearDown(inner.dispose);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: SizedBox(
+              height: 600,
+              child: NestedScrollView(
+                controller: outer,
+                headerSliverBuilder: (context, innerBoxIsScrolled) => [
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: 200,
+                      child: ListView(
+                        controller: inner,
+                        children: List<Widget>.generate(
+                          6,
+                          (_) => const SizedBox(height: 48),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+                body: ListView.builder(
+                  itemCount: 40,
+                  itemBuilder: (_, _) => const SizedBox(height: 48),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final ScrollPosition? header = headerScrollPosition(outer);
+        expect(header, isNotNull);
+        expect(header!.maxScrollExtent, lessThanOrEqualTo(500));
+      },
+    );
 
     testWidgets('fallbackHeaderScrollPosition prefers smallest header extent', (
       tester,
@@ -320,63 +332,66 @@ void main() {
       expect(coordinator.scrubLockedCatalogPosition, isNotNull);
     });
 
-    testWidgets('beginScrub uses fallback header lock without primary controller', (
-      tester,
-    ) async {
-      final ScrollController inner = ScrollController();
-      addTearDown(inner.dispose);
+    testWidgets(
+      'beginScrub uses fallback header lock without primary controller',
+      (
+        tester,
+      ) async {
+        final ScrollController inner = ScrollController();
+        addTearDown(inner.dispose);
 
-      late RecitersAlphabetScrubCoordinator coordinator;
+        late RecitersAlphabetScrubCoordinator coordinator;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Builder(
-            builder: (context) {
-              coordinator = RecitersAlphabetScrubCoordinator(
-                innerController: () => inner,
-                primaryController: () => null,
-              );
-              return SizedBox(
-                height: 600,
-                child: Column(
-                  children: [
-                    SizedBox(
-                      height: 120,
-                      child: ListView(
-                        controller: inner,
-                        children: List<Widget>.generate(
-                          8,
-                          (_) => const SizedBox(height: 48),
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Builder(
+              builder: (context) {
+                coordinator = RecitersAlphabetScrubCoordinator(
+                  innerController: () => inner,
+                  primaryController: () => null,
+                );
+                return SizedBox(
+                  height: 600,
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: 120,
+                        child: ListView(
+                          controller: inner,
+                          children: List<Widget>.generate(
+                            8,
+                            (_) => const SizedBox(height: 48),
+                          ),
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: ListView.builder(
-                        controller: inner,
-                        itemCount: 40,
-                        itemBuilder: (_, _) => const SizedBox(height: 48),
+                      Expanded(
+                        child: ListView.builder(
+                          controller: inner,
+                          itemCount: 40,
+                          itemBuilder: (_, _) => const SizedBox(height: 48),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              );
-            },
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      inner.jumpTo(120);
-      await tester.pump();
+        inner.jumpTo(120);
+        await tester.pump();
 
-      coordinator
-        ..alphabetScrubbingActive = true
-        ..beginScrub();
+        coordinator
+          ..alphabetScrubbingActive = true
+          ..beginScrub();
 
-      expect(coordinator.scrubLockedCatalogPosition, isNotNull);
-      expect(coordinator.scrubLockedHeaderPosition, isNotNull);
-      expect(coordinator.scrubLockedHeaderOffset, isNotNull);
-    });
+        expect(coordinator.scrubLockedCatalogPosition, isNotNull);
+        expect(coordinator.scrubLockedHeaderPosition, isNotNull);
+        expect(coordinator.scrubLockedHeaderOffset, isNotNull);
+      },
+    );
 
     testWidgets('enforcePinnedHeaderLock restores drifted header offset', (
       tester,
@@ -603,9 +618,9 @@ void main() {
 
       final RecitersAlphabetScrubCoordinator coordinator =
           RecitersAlphabetScrubCoordinator(
-        innerController: () => null,
-        primaryController: () => primary,
-      );
+            innerController: () => null,
+            primaryController: () => primary,
+          );
 
       await tester.pumpWidget(
         MaterialApp(
@@ -691,9 +706,9 @@ void main() {
 
       final RecitersAlphabetScrubCoordinator coordinator =
           RecitersAlphabetScrubCoordinator(
-        innerController: () => inner,
-        primaryController: () => null,
-      );
+            innerController: () => inner,
+            primaryController: () => null,
+          );
 
       await tester.pumpWidget(
         MaterialApp(

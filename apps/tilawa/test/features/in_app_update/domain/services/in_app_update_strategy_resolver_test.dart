@@ -54,20 +54,22 @@ void main() {
       );
     });
 
-    test('prompts for optional immediate update when only immediate allowed',
-        () {
-      expect(
-        resolver.resolve(
-          policy: const InAppUpdatePolicy(),
-          availability: const InAppUpdateAvailability(
-            updateAvailable: true,
-            immediateUpdateAllowed: true,
-            flexibleUpdateAllowed: false,
+    test(
+      'prompts for optional immediate update when only immediate allowed',
+      () {
+        expect(
+          resolver.resolve(
+            policy: const InAppUpdatePolicy(),
+            availability: const InAppUpdateAvailability(
+              updateAvailable: true,
+              immediateUpdateAllowed: true,
+              flexibleUpdateAllowed: false,
+            ),
           ),
-        ),
-        InAppUpdateAction.offerOptionalImmediate,
-      );
-    });
+          InAppUpdateAction.offerOptionalImmediate,
+        );
+      },
+    );
 
     test('falls back to flexible when forced but immediate is unavailable', () {
       expect(

@@ -249,7 +249,7 @@ class PlayBillingDataSourceImpl implements PlayBillingDataSource {
           if (pending != null && !pending.isCompleted) {
             pending.complete(event);
           }
-        }
+      }
     }
   }
 

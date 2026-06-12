@@ -17,8 +17,8 @@ class GetSupportProductsUseCase {
       if (!available) {
         return const Left(PurchaseFailure.billingUnavailable());
       }
-      final List<SupportProduct> products =
-          await _repository.getSupportProducts();
+      final List<SupportProduct> products = await _repository
+          .getSupportProducts();
       if (products.isEmpty) {
         return const Left(PurchaseFailure.productNotFound());
       }

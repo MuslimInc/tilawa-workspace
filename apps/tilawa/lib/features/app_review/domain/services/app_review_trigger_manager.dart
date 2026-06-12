@@ -46,10 +46,11 @@ class AppReviewTriggerManager {
 
   Future<void> recordSignal(AppReviewSignal signal) async {
     final String dayKey = _dayKey(DateTime.now());
-    final AppReviewEngagement updated = await _engagementRepository.recordSignal(
-      signal,
-      dayKey: dayKey,
-    );
+    final AppReviewEngagement updated = await _engagementRepository
+        .recordSignal(
+          signal,
+          dayKey: dayKey,
+        );
     developer.log(
       'signal=$signal sessions=${updated.sessionCount} '
       'listening=${updated.listeningCompletions}',
@@ -75,8 +76,7 @@ class AppReviewTriggerManager {
       return false;
     }
 
-    final AppReviewEngagement engagement =
-        await _engagementRepository.load();
+    final AppReviewEngagement engagement = await _engagementRepository.load();
     if (!_isEligible(engagement, moment)) {
       developer.log(
         'ineligible moment=$moment sessions=${engagement.sessionCount}',
@@ -160,8 +160,7 @@ class AppReviewTriggerManager {
       AppReviewPromptMoment.returnedToRecitersTab => true,
       AppReviewPromptMoment.favoriteReciterAdded =>
         engagement.favoriteAdds >= 1,
-      AppReviewPromptMoment.bookmarkCreated =>
-        engagement.bookmarkCreates >= 1,
+      AppReviewPromptMoment.bookmarkCreated => engagement.bookmarkCreates >= 1,
       AppReviewPromptMoment.sessionStarted => false,
     };
   }

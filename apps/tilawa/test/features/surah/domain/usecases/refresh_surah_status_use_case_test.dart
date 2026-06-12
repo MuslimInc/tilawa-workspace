@@ -56,9 +56,9 @@ void main() {
       // isDownloading flag is preserved (only isDownloaded is refreshed here).
       expect(result.isDownloading, isTrue);
 
-      final captured = verify(mockSurahRepo.updateSurah(captureAny))
-          .captured
-          .single as SurahEntity;
+      final captured =
+          verify(mockSurahRepo.updateSurah(captureAny)).captured.single
+              as SurahEntity;
       expect(captured.isDownloaded, isTrue);
       expect(captured.audio.id, tSurahId);
     });

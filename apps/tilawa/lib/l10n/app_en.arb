@@ -809,6 +809,18 @@
     "@unableToSignInWithThirdPartyAccount": {
         "description": "Error message shown when third-party sign-in fails"
     },
+    "googleSignInFallbackTitle": "Google sign-in could not open",
+    "@googleSignInFallbackTitle": {
+        "description": "Title when Google account picker fails to render on device"
+    },
+    "googleSignInFallbackBody": "The Google account picker may be hidden on this device. Update Google Play Services, then try again. If it still fails, ask your developer to register this build's SHA-1 in Firebase.",
+    "@googleSignInFallbackBody": {
+        "description": "Help text when Google sign-in UI is unavailable"
+    },
+    "googleSignInUpdatePlayServices": "Update Google Play Services",
+    "@googleSignInUpdatePlayServices": {
+        "description": "Opens Play Store to update Google Play Services"
+    },
     "networkError": "Please check your internet connection",
     "@networkError": {
         "description": "Network error message"

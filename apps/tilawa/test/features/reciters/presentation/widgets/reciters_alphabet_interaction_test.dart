@@ -377,7 +377,9 @@ void main() {
 
       expect(alphabetBloc.state.isDragging, isFalse);
 
-      final gesture = await tester.startGesture(tester.getCenter(find.text('A')));
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.text('A')),
+      );
       await tester.pump();
 
       expect(alphabetBloc.state.isDragging, isTrue);
@@ -428,7 +430,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final gesture = await tester.startGesture(tester.getCenter(find.text('B')));
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.text('B')),
+      );
       await tester.pump();
       await gesture.moveBy(const Offset(0, 40));
       await tester.pump();
@@ -480,8 +484,7 @@ void main() {
   });
 }
 
-class _MockGetRecitersUseCase extends Mock
-    implements GetRecitersUseCase {}
+class _MockGetRecitersUseCase extends Mock implements GetRecitersUseCase {}
 
 void _noopLetterSelected(String? _) {}
 

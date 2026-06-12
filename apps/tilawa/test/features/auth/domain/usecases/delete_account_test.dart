@@ -109,21 +109,22 @@ void main() {
   }
 
   group('FirebaseAuthException mapping', () {
-    test('returns UnexpectedFailure for non-cancellation auth errors',
-        () async {
-      final Failure failure = await failureFor(
-        FirebaseAuthException(
-          code: 'network-request-failed',
-          message: 'A network error occurred',
-        ),
-      );
-
-      expect(failure, isA<UnexpectedFailure>());
-      expect(failure.message, 'A network error occurred');
-    });
-
     test(
-        'returns UnexpectedFailure when requires-recent-login is not '
+      'returns UnexpectedFailure for non-cancellation auth errors',
+      () async {
+        final Failure failure = await failureFor(
+          FirebaseAuthException(
+            code: 'network-request-failed',
+            message: 'A network error occurred',
+          ),
+        );
+
+        expect(failure, isA<UnexpectedFailure>());
+        expect(failure.message, 'A network error occurred');
+      },
+    );
+
+    test('returns UnexpectedFailure when requires-recent-login is not '
         'a cancellation', () async {
       final Failure failure = await failureFor(
         FirebaseAuthException(code: 'requires-recent-login'),
@@ -180,20 +181,21 @@ void main() {
       expect(failure, isA<UserCancelledFailure>());
     });
 
-    test('returns UserCancelledFailure for "No credentials available"',
-        () async {
-      final Failure failure = await failureFor(
-        PlatformException(
-          code: '16',
-          message: 'No credentials available on this device',
-        ),
-      );
+    test(
+      'returns UserCancelledFailure for "No credentials available"',
+      () async {
+        final Failure failure = await failureFor(
+          PlatformException(
+            code: '16',
+            message: 'No credentials available on this device',
+          ),
+        );
 
-      expect(failure, isA<UserCancelledFailure>());
-    });
+        expect(failure, isA<UserCancelledFailure>());
+      },
+    );
 
-    test('returns UserCancelledFailure for "Login failed" messages',
-        () async {
+    test('returns UserCancelledFailure for "Login failed" messages', () async {
       final Failure failure = await failureFor(
         PlatformException(
           code: '500',

@@ -24,7 +24,9 @@ class BookmarksScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: TilawaCatalogAppBar(
-        preferredHeight: TilawaAppBarConfig.catalogTitleAndSearchHeight(context),
+        preferredHeight: TilawaAppBarConfig.catalogTitleAndSearchHeight(
+          context,
+        ),
         title: context.l10n.bookmarks,
         automaticallyImplyLeading: true,
         onBackPressed: () => context.pop(),

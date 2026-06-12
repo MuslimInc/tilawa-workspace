@@ -27,8 +27,7 @@ class TasbeehCounterCard extends StatelessWidget {
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
     final int? total = targetCount;
-    final bool isDone =
-        total != null && total > 0 && displayCount >= total;
+    final bool isDone = total != null && total > 0 && displayCount >= total;
 
     final Widget counterBody = _usesTargetFeedback
         ? TilawaCountProgressRing(

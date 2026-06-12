@@ -116,15 +116,14 @@ abstract final class PrayerAlertsPermissionNavigation {
       return;
     }
 
-    final PrayerPermissionsCubit? permissionsCubit =
-        context.read<PrayerPermissionsCubit?>();
+    final PrayerPermissionsCubit? permissionsCubit = context
+        .read<PrayerPermissionsCubit?>();
     await permissionsCubit?.checkCapability();
     if (!context.mounted) {
       return;
     }
 
-    final PrayerTimesBloc? prayerTimesBloc =
-        context.read<PrayerTimesBloc?>();
+    final PrayerTimesBloc? prayerTimesBloc = context.read<PrayerTimesBloc?>();
     prayerTimesBloc?.add(
       const PrayerTimesEvent.loadPrayerTimes(forceReschedule: true),
     );

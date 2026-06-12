@@ -37,9 +37,7 @@ class RecitersFavoritesTab extends StatelessWidget {
       builder: (BuildContext context, FavoritesState state) {
         return CustomScrollView(
           key: pageStorageKey,
-          controller: primaryScrollController == null
-              ? scrollController
-              : null,
+          controller: primaryScrollController == null ? scrollController : null,
           physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics(),
           ),
@@ -48,7 +46,8 @@ class RecitersFavoritesTab extends StatelessWidget {
               handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
             ),
             switch (state) {
-              FavoritesLoading() || FavoritesInitial() => _FavoritesLoadingSliver(
+              FavoritesLoading() ||
+              FavoritesInitial() => _FavoritesLoadingSliver(
                 semanticsLabel: context.l10n.loadingReciters,
               ),
               FavoritesError(:final failure) => _FavoritesMessageSliver(

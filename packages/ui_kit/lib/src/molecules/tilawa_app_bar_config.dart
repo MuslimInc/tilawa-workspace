@@ -24,6 +24,7 @@ abstract final class TilawaAppBarConfig {
   static const bool automaticallyImplyLeading = true;
   static const bool showLeadingControlBackground = false;
   static const bool showActionControlBackground = false;
+
   /// Hairline under the bar — primary chrome separation (see brand §5).
   static const bool showBottomHairline = true;
 
@@ -83,8 +84,9 @@ abstract final class TilawaAppBarConfig {
 
   /// Title + one catalog search field (Bookmarks, History, Playlists).
   static double catalogTitleAndSearchHeight(BuildContext context) {
-    final double searchHeight =
-        Theme.of(context).componentTokens.searchField.height;
+    final double searchHeight = Theme.of(
+      context,
+    ).componentTokens.searchField.height;
     return catalogTitleAndContentHeight(
       context,
       contentHeight: searchHeight,
@@ -109,8 +111,9 @@ abstract final class TilawaAppBarConfig {
   /// Title + search + min-height filter row in catalog headers.
   static double catalogTitleSearchAndFilterRowHeight(BuildContext context) {
     final TilawaDesignTokens tokens = Theme.of(context).tokens;
-    final double searchHeight =
-        Theme.of(context).componentTokens.searchField.height;
+    final double searchHeight = Theme.of(
+      context,
+    ).componentTokens.searchField.height;
     final double contentHeight =
         searchHeight + tokens.spaceSmall + kMinInteractiveDimension;
     return catalogTitleAndContentHeight(
@@ -125,8 +128,9 @@ abstract final class TilawaAppBarConfig {
     double trailingMinHeight = kMinInteractiveDimension,
   }) {
     final TilawaDesignTokens tokens = Theme.of(context).tokens;
-    final double searchHeight =
-        Theme.of(context).componentTokens.searchField.height;
+    final double searchHeight = Theme.of(
+      context,
+    ).componentTokens.searchField.height;
     final double rowHeight = math.max(searchHeight, trailingMinHeight);
     final EdgeInsets padding = catalogChromePadding(tokens);
     final double raw = padding.vertical + rowHeight;

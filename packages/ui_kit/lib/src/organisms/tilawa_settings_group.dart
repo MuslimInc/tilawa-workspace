@@ -16,8 +16,9 @@ class TilawaSettingsGroupHorizontalInset extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final padding = Theme.of(context).componentTokens.settingsGroup
-        .groupHorizontalPadding;
+    final padding = Theme.of(
+      context,
+    ).componentTokens.settingsGroup.groupHorizontalPadding;
 
     return Padding(
       padding: EdgeInsetsDirectional.symmetric(horizontal: padding),

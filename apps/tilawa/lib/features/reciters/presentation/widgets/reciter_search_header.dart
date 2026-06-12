@@ -68,9 +68,9 @@ class ReciterDetailsSearchBar extends StatelessWidget {
           Semantics(
             identifier: ReciterSemanticsIds.reciterDetailsViewToggle,
             child: BlocBuilder<ReciterDetailsBloc, ReciterDetailsState>(
-              buildWhen: (ReciterDetailsState previous,
-                      ReciterDetailsState current) =>
-                  previous.viewMode != current.viewMode,
+              buildWhen:
+                  (ReciterDetailsState previous, ReciterDetailsState current) =>
+                      previous.viewMode != current.viewMode,
               builder: (BuildContext context, state) {
                 final bool isList = state.viewMode == ReciterViewMode.list;
                 return TilawaIconActionButton(

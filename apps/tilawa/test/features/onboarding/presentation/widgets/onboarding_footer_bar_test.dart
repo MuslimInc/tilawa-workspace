@@ -114,10 +114,12 @@ void main() {
       );
 
       final Rect screen = tester.getRect(find.byType(Scaffold));
-      final Rect indicator = tester.getRect(find.byType(OnboardingPageIndicator));
+      final Rect indicator = tester.getRect(
+        find.byType(OnboardingPageIndicator),
+      );
 
-      final double bandStart = screen.height *
-          TilawaThumbReachLayout.actionBandStartFraction();
+      final double bandStart =
+          screen.height * TilawaThumbReachLayout.actionBandStartFraction();
 
       expect(indicator.top, greaterThanOrEqualTo(bandStart - 1));
       expect(indicator.top, lessThan(bandStart + screen.height * 0.08));

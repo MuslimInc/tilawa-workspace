@@ -100,8 +100,7 @@ class FakeAppReviewRepository implements AppReviewRepository {
 }
 
 class FailingRequestAppReviewUseCase extends RequestAppReviewUseCase {
-  FailingRequestAppReviewUseCase()
-    : super(FakeAppReviewRepository());
+  FailingRequestAppReviewUseCase() : super(FakeAppReviewRepository());
 
   @override
   Future<Either<Failure, void>> call() async =>

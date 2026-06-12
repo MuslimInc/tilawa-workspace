@@ -14,7 +14,8 @@ void main() {
       dispatcher.registerIdRangeHandler(
         serviceId: 'downloads',
         minIdInclusive: DownloadNotificationService.notificationIdOffset,
-        maxIdExclusive: DownloadNotificationService.notificationIdRangeEndExclusive,
+        maxIdExclusive:
+            DownloadNotificationService.notificationIdRangeEndExclusive,
         handler: (NotificationResponse response) async {
           handledResponse = response;
         },

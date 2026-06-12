@@ -158,26 +158,29 @@ void main() {
       verifyNever(() => mockInAppPurchase.restorePurchases());
     });
 
-    test('canceled purchase status completes the waiter with userCancelled', () async {
-      final Future<PlayPurchaseEvent> pending = dataSource
-          .waitForPurchaseEvent(SupportProductIds.small);
+    test(
+      'canceled purchase status completes the waiter with userCancelled',
+      () async {
+        final Future<PlayPurchaseEvent> pending = dataSource
+            .waitForPurchaseEvent(SupportProductIds.small);
 
-      final Future<void> cancelled = expectLater(
-        pending,
-        throwsA(
-          isA<PurchaseFailure>().having(
-            (PurchaseFailure f) => f.reason,
-            'reason',
-            PurchaseFailureReason.userCancelled,
+        final Future<void> cancelled = expectLater(
+          pending,
+          throwsA(
+            isA<PurchaseFailure>().having(
+              (PurchaseFailure f) => f.reason,
+              'reason',
+              PurchaseFailureReason.userCancelled,
+            ),
           ),
-        ),
-      );
+        );
 
-      purchaseStream.add(<PurchaseDetails>[
-        supportPurchaseDetails(status: PurchaseStatus.canceled),
-      ]);
-      await cancelled;
-    });
+        purchaseStream.add(<PurchaseDetails>[
+          supportPurchaseDetails(status: PurchaseStatus.canceled),
+        ]);
+        await cancelled;
+      },
+    );
 
     test('does not cancel waiters when cancelActiveWaiters is false', () async {
       final Future<PlayPurchaseEvent> pending = dataSource.waitForPurchaseEvent(

@@ -11,7 +11,8 @@ import 'tilawa_search_field.dart';
 /// [preferredHeight] from [TilawaAppBarConfig.catalogTitleOnlyHeight],
 /// [TilawaAppBarConfig.catalogTitleAndSearchHeight], or
 /// [TilawaAppBarConfig.catalogTitleAndContentHeight].
-class TilawaCatalogAppBar extends StatelessWidget implements PreferredSizeWidget {
+class TilawaCatalogAppBar extends StatelessWidget
+    implements PreferredSizeWidget {
   const TilawaCatalogAppBar({
     super.key,
     required this.preferredHeight,
@@ -82,8 +83,7 @@ class TilawaCatalogAppBar extends StatelessWidget implements PreferredSizeWidget
     final TextStyle? titleStyle = theme.textTheme.titleLarge?.copyWith(
       fontWeight: FontWeight.w700,
     );
-    final Widget titleChild =
-        titleWidget ?? Text(title!, style: titleStyle);
+    final Widget titleChild = titleWidget ?? Text(title!, style: titleStyle);
 
     return TilawaAppBar(
       automaticallyImplyLeading: automaticallyImplyLeading,

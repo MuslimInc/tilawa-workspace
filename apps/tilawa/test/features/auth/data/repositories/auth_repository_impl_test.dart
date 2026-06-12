@@ -87,25 +87,31 @@ void main() {
       verify(mockAuthProvider.authStateChanges);
     });
 
-    test('signOut should ensure initialization and delegate to provider', () async {
-      await authRepository.signOut();
+    test(
+      'signOut should ensure initialization and delegate to provider',
+      () async {
+        await authRepository.signOut();
 
-      verifyInOrder([
-        mockPrepare.ensureInitialized(),
-        mockAuthProvider.signOut(),
-      ]);
-    });
+        verifyInOrder([
+          mockPrepare.ensureInitialized(),
+          mockAuthProvider.signOut(),
+        ]);
+      },
+    );
 
-    test('deleteAccount should ensure initialization before deleting', () async {
-      when(mockAuthProvider.deleteAccount()).thenAnswer((_) async {});
+    test(
+      'deleteAccount should ensure initialization before deleting',
+      () async {
+        when(mockAuthProvider.deleteAccount()).thenAnswer((_) async {});
 
-      await authRepository.deleteAccount();
+        await authRepository.deleteAccount();
 
-      verifyInOrder([
-        mockPrepare.ensureInitialized(),
-        mockAuthProvider.deleteAccount(),
-      ]);
-    });
+        verifyInOrder([
+          mockPrepare.ensureInitialized(),
+          mockAuthProvider.deleteAccount(),
+        ]);
+      },
+    );
 
     test('signOut should still sign out when initialization fails', () async {
       when(mockPrepare.ensureInitialized()).thenThrow(Exception('init failed'));

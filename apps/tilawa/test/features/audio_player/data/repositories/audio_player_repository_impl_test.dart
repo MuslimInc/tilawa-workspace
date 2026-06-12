@@ -99,8 +99,8 @@ void main() {
       playbackStateSubject.add(testPlaybackState);
       queueSubject.add(<audio_service.MediaItem>[testMediaItem]);
 
-      final ActivePlaybackSnapshot? snapshot =
-          repository.readActivePlaybackSnapshot();
+      final ActivePlaybackSnapshot? snapshot = repository
+          .readActivePlaybackSnapshot();
 
       expect(snapshot, isNotNull);
       expect(snapshot!.currentAudio.id, 'test-id');
@@ -121,25 +121,28 @@ void main() {
       expect(repository.readActivePlaybackSnapshot(), isNull);
     });
 
-    test('returns null after stop clears mediaItem and playback is idle', () async {
-      mediaItemSubject.add(testMediaItem);
-      playbackStateSubject.add(testPlaybackState);
-      queueSubject.add(<audio_service.MediaItem>[testMediaItem]);
-      expect(repository.readActivePlaybackSnapshot(), isNotNull);
+    test(
+      'returns null after stop clears mediaItem and playback is idle',
+      () async {
+        mediaItemSubject.add(testMediaItem);
+        playbackStateSubject.add(testPlaybackState);
+        queueSubject.add(<audio_service.MediaItem>[testMediaItem]);
+        expect(repository.readActivePlaybackSnapshot(), isNotNull);
 
-      when(mockAudioHandler.stop()).thenAnswer((_) async {
-        playbackStateSubject.add(
-          audio_service.PlaybackState(
-            processingState: audio_service.AudioProcessingState.idle,
-          ),
-        );
-        mediaItemSubject.add(null);
-      });
+        when(mockAudioHandler.stop()).thenAnswer((_) async {
+          playbackStateSubject.add(
+            audio_service.PlaybackState(
+              processingState: audio_service.AudioProcessingState.idle,
+            ),
+          );
+          mediaItemSubject.add(null);
+        });
 
-      await repository.stop();
+        await repository.stop();
 
-      expect(repository.readActivePlaybackSnapshot(), isNull);
-    });
+        expect(repository.readActivePlaybackSnapshot(), isNull);
+      },
+    );
   });
 
   group('AudioPlayerRepositoryImpl - currentAudio Stream', () {

@@ -77,8 +77,9 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
 
     final designTokens = theme.tokens;
     final itemPadding = tokens.itemPadding.resolve(Directionality.of(context));
-    final containerPadding =
-        tokens.containerPadding.resolve(Directionality.of(context));
+    final containerPadding = tokens.containerPadding.resolve(
+      Directionality.of(context),
+    );
     final labelStyle = theme.textTheme.labelLarge;
     final double labelHeight =
         (labelStyle?.fontSize ?? 14) * (labelStyle?.height ?? 1.2);
@@ -89,7 +90,8 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
     );
     final double effectiveContainerRadius =
         containerRadius ?? defaultRadii.containerRadius;
-    final double effectiveItemRadius = itemRadius ??
+    final double effectiveItemRadius =
+        itemRadius ??
         designTokens.concentricInner(
           outerRadius: effectiveContainerRadius,
           padding: containerPadding.top,

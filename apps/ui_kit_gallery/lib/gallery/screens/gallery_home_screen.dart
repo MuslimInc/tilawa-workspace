@@ -38,8 +38,10 @@ class _GalleryHomeScreenState extends State<GalleryHomeScreen> {
       body: ListView(
         children: [
           for (final category in GalleryCategory.values)
-            if (_entriesForCategory(grouped[category]!, normalizedQuery)
-                .isNotEmpty)
+            if (_entriesForCategory(
+              grouped[category]!,
+              normalizedQuery,
+            ).isNotEmpty)
               _CategorySection(
                 category: category,
                 entries: _entriesForCategory(

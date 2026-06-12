@@ -19,11 +19,11 @@ void main() {
     test('collapse drag progress is monotonic decreasing', () {
       final List<double> timeline =
           QuranPlayerAnimationStability.simulateCollapseDragProgress(
-        startProgress: 1,
-        travelPixels: 692,
-        steps: 40,
-        dragPixelsPerStep: 18,
-      );
+            startProgress: 1,
+            travelPixels: 692,
+            steps: 40,
+            dragPixelsPerStep: 18,
+          );
 
       expect(
         QuranPlayerAnimationStability.isMonotonicDecreasing(timeline),
@@ -41,22 +41,22 @@ void main() {
         const double travel = 692;
         final List<double> timeline =
             QuranPlayerAnimationStability.simulateCollapseDragProgress(
-          startProgress: dragStart,
-          travelPixels: travel,
-          steps: 50,
-          dragPixelsPerStep: 10,
-        );
+              startProgress: dragStart,
+              travelPixels: travel,
+              steps: 50,
+              dragPixelsPerStep: 10,
+            );
 
         final List<MetricJump> jumps =
             QuranPlayerAnimationStability.findMetricJumps(
-          progressTimeline: timeline,
-          miniPlayerHeight: 76,
-          collapseBiasedAt: (double p) => collapseBiasedAt(
-            progress: p,
-            dragStartProgress: dragStart,
-          ),
-          interactiveCollapseAnchor: dragStart,
-        );
+              progressTimeline: timeline,
+              miniPlayerHeight: 76,
+              collapseBiasedAt: (double p) => collapseBiasedAt(
+                progress: p,
+                dragStartProgress: dragStart,
+              ),
+              interactiveCollapseAnchor: dragStart,
+            );
 
         expect(
           jumps,
@@ -73,22 +73,22 @@ void main() {
         const double travel = 692;
         final List<double> timeline =
             QuranPlayerAnimationStability.simulateCollapseDragProgress(
-          startProgress: dragStart,
-          travelPixels: travel,
-          steps: 30,
-          dragPixelsPerStep: 16,
-        );
+              startProgress: dragStart,
+              travelPixels: travel,
+              steps: 30,
+              dragPixelsPerStep: 16,
+            );
 
         final List<MetricJump> jumps =
             QuranPlayerAnimationStability.findMetricJumps(
-          progressTimeline: timeline,
-          miniPlayerHeight: 76,
-          collapseBiasedAt: (double p) => collapseBiasedAt(
-            progress: p,
-            dragStartProgress: dragStart,
-          ),
-          interactiveCollapseAnchor: dragStart,
-        );
+              progressTimeline: timeline,
+              miniPlayerHeight: 76,
+              collapseBiasedAt: (double p) => collapseBiasedAt(
+                progress: p,
+                dragStartProgress: dragStart,
+              ),
+              interactiveCollapseAnchor: dragStart,
+            );
 
         expect(jumps, isEmpty);
       },
@@ -98,24 +98,24 @@ void main() {
       const double dragStart = 1.0;
       final List<double> timeline =
           QuranPlayerAnimationStability.simulateCollapseDragProgress(
-        startProgress: dragStart,
-        travelPixels: 692,
-        steps: 10,
-        dragPixelsPerStep: 30,
-      );
+            startProgress: dragStart,
+            travelPixels: 692,
+            steps: 10,
+            dragPixelsPerStep: 30,
+          );
 
       for (final double progress in timeline) {
         final PlayerExpandTransitionMetrics metrics =
             PlayerExpandTransitionMetrics.compute(
-          progress: progress,
-          miniPlayerHeight: 76,
-          interactiveDrag: true,
-          collapseBiased: collapseBiasedAt(
-            progress: progress,
-            dragStartProgress: dragStart,
-          ),
-          interactiveCollapseAnchor: dragStart,
-        );
+              progress: progress,
+              miniPlayerHeight: 76,
+              interactiveDrag: true,
+              collapseBiased: collapseBiasedAt(
+                progress: progress,
+                dragStartProgress: dragStart,
+              ),
+              interactiveCollapseAnchor: dragStart,
+            );
         if (progress >= 0.90) {
           expect(metrics.sheetMotionT, 1, reason: 'progress=$progress');
         } else {
@@ -140,8 +140,7 @@ void main() {
     });
 
     test('hasChromeVisibilityGap detects fully hidden chrome', () {
-      const PlayerExpandTransitionMetrics gap =
-          PlayerExpandTransitionMetrics(
+      const PlayerExpandTransitionMetrics gap = PlayerExpandTransitionMetrics(
         miniOpacity: 0,
         expandedOpacity: 0,
         handoffT: 0,
@@ -166,11 +165,11 @@ void main() {
     test('findMetricJumps reports large step discontinuities', () {
       final List<MetricJump> jumps =
           QuranPlayerAnimationStability.findMetricJumps(
-        progressTimeline: <double>[1, 0],
-        miniPlayerHeight: 76,
-        collapseBiasedAt: (_) => true,
-        interactiveCollapseAnchor: 1,
-      );
+            progressTimeline: <double>[1, 0],
+            miniPlayerHeight: 76,
+            collapseBiasedAt: (_) => true,
+            interactiveCollapseAnchor: 1,
+          );
       expect(jumps, isNotEmpty);
       expect(jumps.first.toString(), contains('MetricJump'));
     });
@@ -178,11 +177,11 @@ void main() {
     test('findChromeVisibilityGaps with non-interactive collapse', () {
       final List<double> gaps =
           QuranPlayerAnimationStability.findChromeVisibilityGaps(
-        progressTimeline: <double>[0, 1],
-        miniPlayerHeight: 76,
-        collapseBiasedAt: (_) => true,
-        interactiveDrag: false,
-      );
+            progressTimeline: <double>[0, 1],
+            miniPlayerHeight: 76,
+            collapseBiasedAt: (_) => true,
+            interactiveDrag: false,
+          );
       expect(gaps, isEmpty);
     });
   });
@@ -192,19 +191,19 @@ void main() {
       const double dragStart = 1;
       final List<double> timeline =
           QuranPlayerAnimationStability.simulateCollapseDragProgress(
-        startProgress: dragStart,
-        travelPixels: 692,
-        steps: 40,
-        dragPixelsPerStep: 12,
-      );
+            startProgress: dragStart,
+            travelPixels: 692,
+            steps: 40,
+            dragPixelsPerStep: 12,
+          );
 
       final List<double> gaps =
           QuranPlayerAnimationStability.findChromeVisibilityGaps(
-        progressTimeline: timeline,
-        miniPlayerHeight: 76,
-        collapseBiasedAt: (double p) => p < dragStart - 0.001,
-        interactiveCollapseAnchor: dragStart,
-      );
+            progressTimeline: timeline,
+            miniPlayerHeight: 76,
+            collapseBiasedAt: (double p) => p < dragStart - 0.001,
+            interactiveCollapseAnchor: dragStart,
+          );
 
       expect(gaps, isEmpty, reason: 'gaps at $gaps');
     });
@@ -215,20 +214,20 @@ void main() {
       const double anchor = 0.95;
       final PlayerExpandTransitionMetrics before =
           PlayerExpandTransitionMetrics.compute(
-        progress: anchor,
-        miniPlayerHeight: 76,
-        interactiveDrag: true,
-        collapseBiased: false,
-        interactiveCollapseAnchor: anchor,
-      );
+            progress: anchor,
+            miniPlayerHeight: 76,
+            interactiveDrag: true,
+            collapseBiased: false,
+            interactiveCollapseAnchor: anchor,
+          );
       final PlayerExpandTransitionMetrics after =
           PlayerExpandTransitionMetrics.compute(
-        progress: anchor - 0.002,
-        miniPlayerHeight: 76,
-        interactiveDrag: true,
-        collapseBiased: true,
-        interactiveCollapseAnchor: anchor,
-      );
+            progress: anchor - 0.002,
+            miniPlayerHeight: 76,
+            interactiveDrag: true,
+            collapseBiased: true,
+            interactiveCollapseAnchor: anchor,
+          );
 
       expect(
         (after.miniOpacity - before.miniOpacity).abs(),

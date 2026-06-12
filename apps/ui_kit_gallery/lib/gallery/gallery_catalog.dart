@@ -264,7 +264,8 @@ const List<GalleryEntry> galleryCatalog = [
     id: 'tilawa_content_bounds',
     name: 'TilawaContentBounds',
     category: GalleryCategory.foundation,
-    description: 'Token-backed max-width clamp for reader, form, media, settings.',
+    description:
+        'Token-backed max-width clamp for reader, form, media, settings.',
     builder: FoundationDemos.contentBounds,
   ),
   GalleryEntry(

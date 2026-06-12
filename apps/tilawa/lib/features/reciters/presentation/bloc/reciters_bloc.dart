@@ -40,7 +40,8 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
   }
 
   ReciterCatalogIndex _indexFor(List<entity.ReciterEntity> reciters) {
-    if (_catalogIndex == null || _catalogIndex!.reciters.length != reciters.length) {
+    if (_catalogIndex == null ||
+        _catalogIndex!.reciters.length != reciters.length) {
       _catalogIndex = ReciterCatalogIndex.from(reciters);
     }
     return _catalogIndex!;
@@ -211,11 +212,9 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
         : index.recitersForLetter(selectedLetter);
 
     if (showFavoritesOnly) {
-      filtered = filtered
-          .where((entity.ReciterEntity reciter) {
-            return favoriteIdsLookup.contains(reciter.id);
-          })
-          .toList();
+      filtered = filtered.where((entity.ReciterEntity reciter) {
+        return favoriteIdsLookup.contains(reciter.id);
+      }).toList();
     }
 
     if (favoriteIdsLookup.isEmpty) {

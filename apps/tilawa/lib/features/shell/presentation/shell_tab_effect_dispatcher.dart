@@ -13,7 +13,8 @@ void dispatchShellTabEffects(
   required bool Function() isMounted,
 }) {
   final AppReviewFlowGuard flowGuard = getIt<AppReviewFlowGuard>();
-  final AppReviewTriggerManager reviewTrigger = getIt<AppReviewTriggerManager>();
+  final AppReviewTriggerManager reviewTrigger =
+      getIt<AppReviewTriggerManager>();
 
   for (final ShellTabEffect effect in effects) {
     switch (effect) {

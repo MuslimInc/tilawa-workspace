@@ -18,5 +18,7 @@ abstract class PlayerBackgroundRepository {
   );
 
   /// Serializes player background settings for hydrated storage.
-  Map<String, dynamic> encodeConfiguration(PlayerBackgroundConfiguration config);
+  Map<String, dynamic> encodeConfiguration(
+    PlayerBackgroundConfiguration config,
+  );
 }

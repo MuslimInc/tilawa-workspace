@@ -7,7 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-
 import 'test_color_scheme_equality.dart';
 
 // FlexColorScheme default for inversePrimary color, when not using seeds.
@@ -5239,7 +5238,7 @@ void main() {
     });
     test('FCS9.2: GIVEN a FlexColorScheme test pageTransitionsTheme '
         'pass-through.', () {
-        PageTransitionsTheme transitionsTheme = PageTransitionsTheme(
+      PageTransitionsTheme transitionsTheme = PageTransitionsTheme(
         builders: <TargetPlatform, PageTransitionsBuilder>{
           TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
           TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),

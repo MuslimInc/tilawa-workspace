@@ -20,8 +20,8 @@ class CheckLowDeviceStorageUseCase {
       return true;
     }
 
-    final int requiredBytes = estimatedRequiredBytes >
-            DownloadStorageEstimates.minimumFreeBytes
+    final int requiredBytes =
+        estimatedRequiredBytes > DownloadStorageEstimates.minimumFreeBytes
         ? estimatedRequiredBytes
         : DownloadStorageEstimates.minimumFreeBytes;
 

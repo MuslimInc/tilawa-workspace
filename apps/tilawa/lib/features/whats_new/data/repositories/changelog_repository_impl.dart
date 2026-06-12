@@ -30,8 +30,7 @@ class ChangelogRepositoryImpl implements ChangelogRepository {
 
     try {
       final String raw = await _assetDataSource.loadRawCatalog();
-      final Map<String, dynamic> json =
-          jsonDecode(raw) as Map<String, dynamic>;
+      final Map<String, dynamic> json = jsonDecode(raw) as Map<String, dynamic>;
       final ChangelogCatalog catalog = ChangelogCatalogDto.fromJson(
         json,
       ).toEntity();
@@ -49,7 +48,8 @@ class ChangelogRepositoryImpl implements ChangelogRepository {
 
   @override
   Future<Either<Failure, ChangelogRelease>> getReleaseForCurrentApp() async {
-    final Either<Failure, ChangelogCatalog> catalogResult = await _loadCatalog();
+    final Either<Failure, ChangelogCatalog> catalogResult =
+        await _loadCatalog();
     Failure? catalogFailure;
     ChangelogCatalog? catalog;
     catalogResult.fold(

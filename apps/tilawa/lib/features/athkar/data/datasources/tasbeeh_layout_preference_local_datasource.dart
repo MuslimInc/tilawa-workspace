@@ -19,7 +19,9 @@ class TasbeehLayoutPreferenceLocalDataSourceImpl
 
   @override
   Future<TasbeehLayoutMode> readLayoutMode() async {
-    final String? raw = await _prefs.getString(TasbeehConstants.layoutPreferenceKey);
+    final String? raw = await _prefs.getString(
+      TasbeehConstants.layoutPreferenceKey,
+    );
     return TasbeehLayoutMode.values.firstWhere(
       (mode) => mode.name == raw,
       orElse: () => TasbeehLayoutMode.list,
