@@ -110,8 +110,7 @@ class _TilawaIconActionButtonState extends State<TilawaIconActionButton>
             ? appBarScope.actionControlFillColor(theme.colorScheme)
             : theme.colorScheme.surface);
 
-    Widget result = Container(
-      margin: EdgeInsets.symmetric(horizontal: designTokens.spaceExtraSmall),
+    Widget result = SizedBox(
       width: effectiveSize,
       height: effectiveSize,
       child: Material(

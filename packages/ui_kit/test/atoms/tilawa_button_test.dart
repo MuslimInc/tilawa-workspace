@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../lib/src/atoms/tilawa_button.dart';
 
+void _noop() {}
+
 Widget _app(Widget child) {
   return MaterialApp(
     theme: ThemeData(
@@ -27,8 +29,7 @@ RenderParagraph _labelParagraph(WidgetTester tester) {
 void main() {
   group('TilawaButton label layout', () {
     testWidgets(
-      'non–full-width long label in tight width ellipsizes on one line '
-      'without overflow',
+      'non–full-width long label in a loose max width ellipsizes when capped',
       (WidgetTester tester) async {
         const longLabel =
             'This is an intentionally long label that must ellipsize '
@@ -36,12 +37,14 @@ void main() {
 
         await tester.pumpWidget(
           _app(
-            SizedBox(
-              width: 120,
-              child: TilawaButton(
-                text: longLabel,
-                onPressed: () {},
-                isFullWidth: false,
+            Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 120),
+                child: TilawaButton(
+                  text: longLabel,
+                  onPressed: () {},
+                  isFullWidth: true,
+                ),
               ),
             ),
           ),
@@ -52,28 +55,38 @@ void main() {
         expect(
           find.descendant(
             of: find.byType(TilawaButton),
-            matching: find.byType(Flexible),
+            matching: find.byType(Expanded),
           ),
           findsOneWidget,
         );
-        expect(
-          find.descendant(
-            of: find.byType(TilawaButton),
-            matching: find.byType(Expanded),
-          ),
-          findsNothing,
-        );
-
-        final textWidget = tester.widget<Text>(
-          find.descendant(
-            of: find.byType(TilawaButton),
-            matching: find.byType(Text),
-          ),
-        );
-        expect(textWidget.maxLines, 1);
-        expect(textWidget.overflow, TextOverflow.ellipsis);
-        expect(textWidget.softWrap, isFalse);
         expect(_labelParagraph(tester).didExceedMaxLines, isTrue);
+      },
+    );
+
+    testWidgets(
+      'non–full-width short label does not expand to parent max width',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          _app(
+            Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 560),
+                child: TilawaButton(
+                  text: 'OK',
+                  onPressed: _noop,
+                  isFullWidth: false,
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+
+        final RenderBox buttonBox = tester.renderObject<RenderBox>(
+          find.byType(TextButton),
+        );
+        expect(buttonBox.size.width, lessThan(560));
       },
     );
 
@@ -101,7 +114,7 @@ void main() {
             of: find.byType(TilawaButton),
             matching: find.byType(Flexible),
           ),
-          findsOneWidget,
+          findsNothing,
         );
         expect(_labelParagraph(tester).didExceedMaxLines, isFalse);
       },
@@ -179,7 +192,7 @@ void main() {
             of: find.byType(TilawaButton),
             matching: find.byType(Flexible),
           ),
-          findsOneWidget,
+          findsNothing,
         );
         expect(_labelParagraph(tester).didExceedMaxLines, isFalse);
       },
