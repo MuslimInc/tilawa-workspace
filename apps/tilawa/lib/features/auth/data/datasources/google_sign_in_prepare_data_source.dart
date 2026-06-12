@@ -9,11 +9,9 @@ import 'package:tilawa_core/constants/app_strings.dart';
 
 /// Prepares Google sign-in before the login screen is shown.
 ///
-/// Interactive sign-in always goes through [GoogleSignIn.authenticate] (the
-/// "Sign in with Google" bottom sheet). The lightweight/silent flow is
-/// intentionally not used: it surfaces a different system UI (the
-/// "Choose an account" dialog) and adds nothing on top of the Firebase
-/// session, which already persists across launches.
+/// This deliberately shows no UI: it only initializes the plugin and warms
+/// the OEM policy. The interactive flows (lightweight bottom sheet first,
+/// button-flow dialog as fallback) are owned by GoogleAuthProviderImpl.
 abstract class GoogleSignInPrepareDataSource {
   /// Runs [GoogleSignIn.initialize] exactly once per process.
   ///

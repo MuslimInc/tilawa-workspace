@@ -33,6 +33,14 @@ void main() {
     mockUserCredential = MockUserCredential();
     mockFirebaseUser = MockUser();
 
+    // Default: lightweight flow finds nothing, so sign-in falls back to
+    // the button flow (authenticate), which individual tests stub.
+    when(
+      mockGoogleSignIn.attemptLightweightAuthentication(
+        reportAllExceptions: anyNamed('reportAllExceptions'),
+      ),
+    ).thenAnswer((_) => Future<GoogleSignInAccount?>.value());
+
     googleAuthProvider = GoogleAuthProviderImpl(
       mockFirebaseAuth,
       mockGoogleSignIn,
@@ -68,6 +76,34 @@ void main() {
         },
         orElse: () => fail('Expected success'),
       );
+    });
+
+    test('signIn uses lightweight flow first and skips the button flow',
+        () async {
+      when(
+        mockGoogleSignIn.attemptLightweightAuthentication(
+          reportAllExceptions: anyNamed('reportAllExceptions'),
+        ),
+      ).thenAnswer((_) => Future<GoogleSignInAccount?>.value(mockGoogleUser));
+      when(mockGoogleUser.authentication).thenReturn(mockGoogleAuth);
+      when(mockGoogleAuth.idToken).thenReturn('token');
+      when(
+        mockFirebaseAuth.signInWithCredential(any),
+      ).thenAnswer((_) async => mockUserCredential);
+      when(mockUserCredential.user).thenReturn(mockFirebaseUser);
+      when(mockFirebaseUser.uid).thenReturn('123');
+      when(mockFirebaseUser.email).thenReturn('test@example.com');
+      when(mockFirebaseUser.displayName).thenReturn('Test User');
+      when(mockFirebaseUser.photoURL).thenReturn('url');
+      when(mockFirebaseUser.metadata).thenReturn(UserMetadata(0, 0));
+
+      final AuthResult result = await googleAuthProvider.signIn();
+
+      result.maybeWhen(
+        success: (user) => expect(user.id, '123'),
+        orElse: () => fail('Expected success'),
+      );
+      verifyNever(mockGoogleSignIn.authenticate());
     });
 
     test('signIn should return cancelled when no idToken is returned',

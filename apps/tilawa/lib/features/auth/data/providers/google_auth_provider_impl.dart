@@ -34,9 +34,9 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
   Future<AuthResult> signIn() async {
     logger.i('[GoogleSignIn] sign-in started (google_sign_in)');
     try {
-      final GoogleSignInAccount googleUser = await _googleSignIn
-          .authenticate()
-          .timeout(signInTimeout);
+      final GoogleSignInAccount googleUser = await _signInAccount().timeout(
+        signInTimeout,
+      );
 
       final GoogleSignInAuthentication googleAuth = googleUser.authentication;
 
@@ -85,6 +85,29 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
     }
   }
 
+  /// Signs in via the lightweight Credential Manager flow: silent
+  /// auto-select for returning single-account users, otherwise the
+  /// "Sign in with Google" bottom sheet. Falls back to the button flow
+  /// (the "Choose an account" dialog, which can also add a new account)
+  /// only when no credential is available at all. Dismissing the bottom
+  /// sheet throws [GoogleSignInException] with `canceled` — mapped to
+  /// [AuthResult.cancelled] by the caller — instead of falling through
+  /// to a second sign-in UI.
+  Future<GoogleSignInAccount> _signInAccount() async {
+    final Future<GoogleSignInAccount?>? lightweight = _googleSignIn
+        .attemptLightweightAuthentication(reportAllExceptions: true);
+    final GoogleSignInAccount? account = lightweight == null
+        ? null
+        : await lightweight;
+    if (account != null) {
+      return account;
+    }
+    logger.i(
+      '[GoogleSignIn] lightweight flow returned no account; using button flow',
+    );
+    return _googleSignIn.authenticate();
+  }
+
   @override
   Future<void> signOut() async {
     await _firebaseAuth.signOut();
@@ -108,9 +131,9 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
       if (e.code != 'requires-recent-login') {
         rethrow;
       }
-      final GoogleSignInAccount googleUser = await _googleSignIn
-          .authenticate()
-          .timeout(signInTimeout);
+      final GoogleSignInAccount googleUser = await _signInAccount().timeout(
+        signInTimeout,
+      );
       final GoogleSignInAuthentication googleAuth = googleUser.authentication;
       final String? idToken = googleAuth.idToken;
       if (idToken == null) {
