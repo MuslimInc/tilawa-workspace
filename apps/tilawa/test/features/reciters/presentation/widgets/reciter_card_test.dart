@@ -126,25 +126,32 @@ void main() {
     await cubit.close();
   });
 
-  testWidgets('reserves trailing padding for favorite control', (
+  testWidgets('places favorite control as trailing row child', (
     WidgetTester tester,
   ) async {
-    final ThemeData theme = AppTheme.getLightTheme(
-      primaryColor: PrimaryColorPreset.defaultPreset.value,
-    );
     final cubit = await loadedCubit();
     await pumpCard(tester, cubit);
 
-    final Finder infoPadding = find.descendant(
-      of: find.byType(ReciterCard),
-      matching: find.byWidgetPredicate(
-        (Widget widget) =>
-            widget is Padding &&
-            widget.padding ==
-                EdgeInsetsDirectional.only(end: theme.tokens.spaceExtraLarge),
-      ),
+    final Finder favoriteButton = find.bySemanticsIdentifier(
+      ReciterSemanticsIds.reciterFavoriteButton(tReciter.id),
     );
-    expect(infoPadding, findsOneWidget);
+    expect(
+      find.ancestor(
+        of: favoriteButton,
+        matching: find.descendant(
+          of: find.byType(ReciterCard),
+          matching: find.byType(Row),
+        ),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byType(ReciterCard),
+        matching: find.byType(Stack),
+      ),
+      findsNothing,
+    );
 
     await cubit.close();
   });
@@ -160,6 +167,68 @@ void main() {
     );
     expect(rect.width, greaterThanOrEqualTo(kTilawaMinInteractiveDimension));
     expect(rect.height, greaterThanOrEqualTo(kTilawaMinInteractiveDimension));
+
+    await cubit.close();
+  });
+
+  testWidgets('favorite control does not stretch with tall card content', (
+    WidgetTester tester,
+  ) async {
+    const reciter = ReciterEntity(
+      id: 7,
+      name: 'Very Long Reciter Name That Wraps Across Multiple Lines',
+      letter: 'V',
+      date: '2023',
+      moshaf: [
+        MoshafEntity(
+          id: 1,
+          name: "Rewayat Hafs A'n Assem - Murattal - Mojawwad",
+          server: 'https://example.com',
+          surahTotal: 114,
+          moshafType: 0,
+          surahList: '1',
+        ),
+        MoshafEntity(
+          id: 2,
+          name: 'Murattal',
+          server: 'https://example.com',
+          surahTotal: 114,
+          moshafType: 0,
+          surahList: '1',
+        ),
+      ],
+    );
+    final cubit = await loadedCubit();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.getLightTheme(
+          primaryColor: PrimaryColorPreset.defaultPreset.value,
+        ),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        locale: const Locale('en'),
+        home: Scaffold(
+          body: Center(
+            child: SizedBox(
+              width: 360,
+              child: BlocProvider<FavoritesCubit>.value(
+                value: cubit,
+                child: const ReciterCard(reciter: reciter),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final Rect favoriteRect = tester.getRect(
+      find.bySemanticsIdentifier(
+        ReciterSemanticsIds.reciterFavoriteButton(reciter.id),
+      ),
+    );
+    expect(favoriteRect.height, kTilawaMinInteractiveDimension);
+    expect(favoriteRect.width, kTilawaMinInteractiveDimension);
 
     await cubit.close();
   });
@@ -245,11 +314,11 @@ void main() {
         findsNWidgets(2),
       );
 
-      // Row tap target: InkWell wrapping the card content [Stack], not the favorite.
+      // Card InkWell wraps the row content; favorite keeps its own InkWell.
       final Finder openInkWell = find.ancestor(
         of: find.descendant(
           of: find.byType(ReciterCard),
-          matching: find.byType(Stack),
+          matching: find.byType(Row),
         ),
         matching: find.byType(InkWell),
       );

@@ -7,6 +7,7 @@ import 'package:tilawa_core/errors/failures.dart';
 
 import '../../domain/services/reciter_catalog_index.dart';
 import '../../domain/usecases/get_reciters_use_case.dart';
+import '../utils/reciter_list_order.dart';
 
 part 'reciters_event.dart';
 part 'reciters_state.dart';
@@ -17,15 +18,23 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     this._getRecitersUseCase, {
     List<entity.ReciterEntity>? initialReciters,
   }) : super(_initialState(initialReciters)) {
+    if (state is RecitersLoaded) {
+      _favoriteIds = (state as RecitersLoaded).favoriteIds;
+    }
     on<LoadReciters>(_onLoadReciters);
     on<FilterByLetter>(_onFilterByLetter);
     on<ClearLetterFilter>(_onClearLetterFilter);
     on<SyncFavoriteIds>(_onSyncFavoriteIds);
+    on<ApplyFavoriteOrdering>(_onApplyFavoriteOrdering);
     on<ClearFavoritesFilter>(_onClearFavoritesFilter);
     on<LanguageChanged>(_onLanguageChanged);
   }
   final GetRecitersUseCase _getRecitersUseCase;
   ReciterCatalogIndex? _catalogIndex;
+
+  /// Persists favorite ids across [RecitersLoading] so [SyncFavoriteIds] can
+  /// commit while a pull-to-refresh fetch is in flight.
+  Set<int> _favoriteIds = const <int>{};
 
   static RecitersState _initialState(
     List<entity.ReciterEntity>? initialReciters,
@@ -57,9 +66,9 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     final bool showFavoritesOnly = state is RecitersLoaded
         ? (state as RecitersLoaded).showFavoritesOnly
         : false;
-    final Set<int> favoriteIds = state is RecitersLoaded
-        ? (state as RecitersLoaded).favoriteIds
-        : const <int>{};
+    if (state is RecitersLoaded) {
+      _favoriteIds = (state as RecitersLoaded).favoriteIds;
+    }
 
     emit(const RecitersLoading());
 
@@ -76,7 +85,8 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
             recitersData,
             selectedLetter,
             showFavoritesOnly,
-            favoriteIds,
+            _favoriteIds,
+            reorderFavorites: true,
           ),
         );
 
@@ -86,7 +96,7 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
             filteredReciters: filteredReciters,
             selectedLetter: selectedLetter,
             showFavoritesOnly: showFavoritesOnly,
-            favoriteIds: favoriteIds,
+            favoriteIds: _favoriteIds,
           ),
         );
       });
@@ -149,30 +159,68 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     );
   }
 
-  Future<void> _onSyncFavoriteIds(
+  void _onSyncFavoriteIds(
     SyncFavoriteIds event,
     Emitter<RecitersState> emit,
-  ) async {
+  ) {
+    if (sameFavoriteIdSet(_favoriteIds, event.favoriteIds)) {
+      return;
+    }
+
+    _favoriteIds = Set<int>.from(event.favoriteIds);
+
     if (state is! RecitersLoaded) {
       return;
     }
 
     final currentState = state as RecitersLoaded;
-    final List<entity.ReciterEntity> filteredReciters = await Future(
-      () => _filterReciters(
+
+    if (currentState.showFavoritesOnly) {
+      final List<entity.ReciterEntity> filteredReciters = _filterReciters(
         currentState.reciters,
         currentState.selectedLetter,
         currentState.showFavoritesOnly,
-        event.favoriteIds,
-      ),
+        _favoriteIds,
+      );
+
+      emit(
+        currentState.copyWith(
+          favoriteIds: _favoriteIds,
+          filteredReciters: filteredReciters,
+        ),
+      );
+      return;
+    }
+
+    emit(currentState.copyWith(favoriteIds: _favoriteIds));
+  }
+
+  void _onApplyFavoriteOrdering(
+    ApplyFavoriteOrdering event,
+    Emitter<RecitersState> emit,
+  ) {
+    if (state is! RecitersLoaded) {
+      return;
+    }
+
+    final currentState = state as RecitersLoaded;
+    if (currentState.favoriteIds.isEmpty) {
+      return;
+    }
+
+    if (recitersAlreadyFavoritesFirst(
+      currentState.filteredReciters,
+      currentState.favoriteIds,
+    )) {
+      return;
+    }
+
+    final List<entity.ReciterEntity> filteredReciters = bubbleFavoritesToTop(
+      currentState.filteredReciters,
+      currentState.favoriteIds,
     );
 
-    emit(
-      currentState.copyWith(
-        favoriteIds: event.favoriteIds,
-        filteredReciters: filteredReciters,
-      ),
-    );
+    emit(currentState.copyWith(filteredReciters: filteredReciters));
   }
 
   void _onClearFavoritesFilter(
@@ -203,8 +251,9 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     List<entity.ReciterEntity> reciters,
     String? selectedLetter,
     bool showFavoritesOnly,
-    Set<int> favoriteIds,
-  ) {
+    Set<int> favoriteIds, {
+    bool reorderFavorites = false,
+  }) {
     final ReciterCatalogIndex index = _indexFor(reciters);
     final Set<int> favoriteIdsLookup = favoriteIds;
     List<entity.ReciterEntity> filtered = selectedLetter == null
@@ -217,22 +266,11 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
       }).toList();
     }
 
-    if (favoriteIdsLookup.isEmpty) {
-      return filtered;
+    if (reorderFavorites && favoriteIdsLookup.isNotEmpty) {
+      return bubbleFavoritesToTop(filtered, favoriteIdsLookup);
     }
 
-    final List<entity.ReciterEntity> favorites = <entity.ReciterEntity>[];
-    final List<entity.ReciterEntity> others = <entity.ReciterEntity>[];
-
-    for (final entity.ReciterEntity reciter in filtered) {
-      if (favoriteIdsLookup.contains(reciter.id)) {
-        favorites.add(reciter);
-      } else {
-        others.add(reciter);
-      }
-    }
-
-    return <entity.ReciterEntity>[...favorites, ...others];
+    return filtered;
   }
 
   Future<void> _onLanguageChanged(

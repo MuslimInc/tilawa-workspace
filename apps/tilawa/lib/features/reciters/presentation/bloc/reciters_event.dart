@@ -38,3 +38,11 @@ class ClearFavoritesFilter extends RecitersEvent {
 class LanguageChanged extends RecitersEvent {
   const LanguageChanged();
 }
+
+/// Re-sorts the visible catalog so favorited reciters appear first.
+///
+/// Used after pull-to-refresh, initial catalog load, or returning to the
+/// reciters main tab — not during optimistic heart toggles.
+class ApplyFavoriteOrdering extends RecitersEvent {
+  const ApplyFavoriteOrdering();
+}

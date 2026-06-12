@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -8,6 +10,7 @@ import 'package:tilawa_core/usecases/usecase.dart';
 import '../../domain/usecases/clear_favorite_reciters_use_case.dart';
 import '../../domain/usecases/get_favorite_reciters_use_case.dart';
 import '../../domain/usecases/toggle_favorite_reciter_use_case.dart';
+import '../utils/reciter_list_order.dart';
 import 'favorites_state.dart';
 
 @injectable
@@ -19,15 +22,17 @@ class FavoritesCubit extends Cubit<FavoritesState> {
   ) : super(_initialState(_getFavorites)) {
     final FavoritesState current = state;
     if (current is FavoritesLoaded) {
-      _currentFavoriteIds = Set<int>.from(current.favoriteIds);
+      _replaceFavorites(current.favorites);
     }
   }
   final GetFavoriteRecitersUseCase _getFavorites;
   final ToggleFavoriteReciterUseCase _toggleFavorite;
   final ClearFavoriteRecitersUseCase _clearFavoriteReciters;
 
-  Set<int> _currentFavoriteIds = {};
-  final Set<int> _pendingReciterIds = {};
+  /// Insertion-ordered index: O(1) add/remove/lookup by reciter id.
+  final LinkedHashMap<int, ReciterEntity> _favoritesById =
+      LinkedHashMap<int, ReciterEntity>();
+  final Set<int> _pendingReciterIds = <int>{};
 
   /// Seeds the cubit from the splash-prefetched favorites so the reciters
   /// screen lands on [FavoritesLoaded] without a flash of loading state.
@@ -39,7 +44,7 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     }
     return FavoritesLoaded(
       favorites: cached,
-      favoriteIds: cached.map((r) => r.id).toSet(),
+      favoriteIds: cached.map((ReciterEntity r) => r.id).toSet(),
     );
   }
 
@@ -51,36 +56,65 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     );
     if (isClosed) return;
 
-    result.fold((failure) => emit(FavoritesError(failure)), (favorites) {
-      _currentFavoriteIds = favorites.map((e) => e.id).toSet();
-      emit(
-        FavoritesLoaded(favorites: favorites, favoriteIds: _currentFavoriteIds),
-      );
+    result.fold((failure) => emit(FavoritesError(failure)), (
+      List<ReciterEntity> favorites,
+    ) {
+      _replaceFavorites(favorites);
+      emit(_loadedState());
     });
+  }
+
+  /// Reorders the favorites list to match [catalogReciters] without a fetch.
+  ///
+  /// Called after [LoadReciters] completes or when returning to the reciters
+  /// main tab — not during optimistic heart toggles.
+  void applyCatalogOrder(List<ReciterEntity> catalogReciters) {
+    if (isClosed) return;
+    _syncIndexFromStateIfNeeded();
+    if (_favoritesById.isEmpty) {
+      return;
+    }
+
+    final List<ReciterEntity> ordered = <ReciterEntity>[];
+    for (final ReciterEntity reciter in catalogReciters) {
+      final ReciterEntity? favorite = _favoritesById[reciter.id];
+      if (favorite != null) {
+        ordered.add(favorite);
+      }
+    }
+    if (ordered.length != _favoritesById.length) {
+      return;
+    }
+    if (sameReciterOrder(_favoritesById.values.toList(), ordered)) {
+      return;
+    }
+
+    _replaceFavorites(ordered);
+    emit(_loadedState());
   }
 
   Future<void> toggleFavorite(ReciterEntity reciter) async {
     if (isClosed) return;
+    _syncIndexFromStateIfNeeded();
     if (_pendingReciterIds.contains(reciter.id)) {
       return;
     }
     _pendingReciterIds.add(reciter.id);
 
-    final FavoritesLoaded snapshot = _snapshotLoadedState();
-    _currentFavoriteIds = Set<int>.from(snapshot.favoriteIds);
-    final bool wasFavorite = snapshot.favoriteIds.contains(reciter.id);
+    final LinkedHashMap<int, ReciterEntity> snapshot = _snapshotMap();
+    final bool wasFavorite = _favoritesById.containsKey(reciter.id);
 
     try {
       if (wasFavorite) {
-        _currentFavoriteIds.remove(reciter.id);
+        _favoritesById.remove(reciter.id);
       } else {
-        _currentFavoriteIds.add(reciter.id);
+        _favoritesById[reciter.id] = reciter;
       }
 
-      _emitLoadedAfterToggle(
-        reciter: reciter,
-        wasFavorite: wasFavorite,
-        previousFavorites: snapshot.favorites,
+      emit(
+        _loadedState(
+          removedReciter: wasFavorite ? reciter : null,
+        ),
       );
 
       final Either<Failure, void> result = await _toggleFavorite(reciter.id);
@@ -88,9 +122,9 @@ class FavoritesCubit extends Cubit<FavoritesState> {
 
       result.fold(
         (_) {
-          _currentFavoriteIds = Set<int>.from(snapshot.favoriteIds);
+          _restoreMap(snapshot);
           if (!isClosed) {
-            emit(snapshot);
+            emit(_loadedState());
           }
         },
         (_) {},
@@ -100,61 +134,19 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     }
   }
 
-  FavoritesLoaded _snapshotLoadedState() {
-    if (state is FavoritesLoaded) {
-      final FavoritesLoaded loaded = state as FavoritesLoaded;
-      return FavoritesLoaded(
-        favorites: List<ReciterEntity>.from(loaded.favorites),
-        favoriteIds: Set<int>.from(loaded.favoriteIds),
-      );
-    }
-    return FavoritesLoaded(
-      favorites: const <ReciterEntity>[],
-      favoriteIds: Set<int>.from(_currentFavoriteIds),
-    );
-  }
-
-  void _emitLoadedAfterToggle({
-    required ReciterEntity reciter,
-    required bool wasFavorite,
-    required List<ReciterEntity> previousFavorites,
-  }) {
-    if (isClosed) return;
-
-    final List<ReciterEntity> updatedFavorites = wasFavorite
-        ? previousFavorites.where((r) => r.id != reciter.id).toList()
-        : [...previousFavorites, reciter];
-
-    emit(
-      FavoritesLoaded(
-        favorites: updatedFavorites,
-        favoriteIds: Set<int>.from(_currentFavoriteIds),
-        removedReciter: wasFavorite ? reciter : null,
-      ),
-    );
-  }
-
   Future<void> clearAllFavorites() async {
     if (isClosed) return;
+    _syncIndexFromStateIfNeeded();
     if (_pendingReciterIds.isNotEmpty) {
       return;
     }
-
-    final FavoritesLoaded? currentState = state is FavoritesLoaded
-        ? state as FavoritesLoaded
-        : null;
-    if (currentState == null || currentState.favoriteIds.isEmpty) {
+    if (_favoritesById.isEmpty) {
       return;
     }
 
-    final List<ReciterEntity> previousFavorites = List<ReciterEntity>.from(
-      currentState.favorites,
-    );
-    final Set<int> previousFavoriteIds = Set<int>.from(
-      currentState.favoriteIds,
-    );
+    final LinkedHashMap<int, ReciterEntity> snapshot = _snapshotMap();
 
-    _currentFavoriteIds = {};
+    _favoritesById.clear();
     emit(
       const FavoritesLoaded(favorites: <ReciterEntity>[], favoriteIds: <int>{}),
     );
@@ -164,15 +156,51 @@ class FavoritesCubit extends Cubit<FavoritesState> {
 
     result.fold(
       (_) {
-        _currentFavoriteIds = previousFavoriteIds;
-        emit(
-          FavoritesLoaded(
-            favorites: previousFavorites,
-            favoriteIds: previousFavoriteIds,
-          ),
-        );
+        _restoreMap(snapshot);
+        emit(_loadedState());
       },
       (_) {},
+    );
+  }
+
+  void _replaceFavorites(Iterable<ReciterEntity> favorites) {
+    _favoritesById
+      ..clear()
+      ..addEntries(
+        favorites.map((ReciterEntity reciter) => MapEntry(reciter.id, reciter)),
+      );
+  }
+
+  /// Keeps the id index aligned when [blocTest] seeds [FavoritesLoaded] after
+  /// construction.
+  void _syncIndexFromStateIfNeeded() {
+    if (_favoritesById.isNotEmpty || state is! FavoritesLoaded) {
+      return;
+    }
+
+    final FavoritesLoaded loaded = state as FavoritesLoaded;
+    if (loaded.favorites.isEmpty) {
+      return;
+    }
+
+    _replaceFavorites(loaded.favorites);
+  }
+
+  LinkedHashMap<int, ReciterEntity> _snapshotMap() {
+    return LinkedHashMap<int, ReciterEntity>.from(_favoritesById);
+  }
+
+  void _restoreMap(LinkedHashMap<int, ReciterEntity> snapshot) {
+    _favoritesById
+      ..clear()
+      ..addAll(snapshot);
+  }
+
+  FavoritesLoaded _loadedState({ReciterEntity? removedReciter}) {
+    return FavoritesLoaded(
+      favorites: _favoritesById.values.toList(growable: false),
+      favoriteIds: _favoritesById.keys.toSet(),
+      removedReciter: removedReciter,
     );
   }
 }
