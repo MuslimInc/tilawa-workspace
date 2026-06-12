@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 import 'package:tilawa/features/downloads/domain/usecases/cancel_downloads_for_reciter_use_case.dart';
+import 'package:tilawa/features/downloads/domain/usecases/check_low_device_storage_use_case.dart';
 import 'package:tilawa/features/downloads/domain/usecases/download_all_surahs_use_case.dart';
 import 'package:tilawa/features/downloads/domain/usecases/observe_reciter_downloads_use_case.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/reciter_download_bloc.dart';
@@ -23,27 +24,36 @@ class MockCancelDownloadsForReciterUseCase extends Mock
 class MockObserveReciterDownloadsUseCase extends Mock
     implements ObserveReciterDownloadsUseCase {}
 
+class MockCheckLowDeviceStorageUseCase extends Mock
+    implements CheckLowDeviceStorageUseCase {}
+
 void main() {
   late ReciterDownloadBloc bloc;
   late MockDownloadAllSurahsUseCase downloadAllSurahs;
   late MockCancelDownloadsForReciterUseCase cancelDownloadsForReciter;
   late MockObserveReciterDownloadsUseCase observeReciterDownloads;
+  late MockCheckLowDeviceStorageUseCase checkLowDeviceStorage;
   late StreamController<DownloadItem> downloadUpdatesController;
 
   setUp(() {
     downloadAllSurahs = MockDownloadAllSurahsUseCase();
     cancelDownloadsForReciter = MockCancelDownloadsForReciterUseCase();
     observeReciterDownloads = MockObserveReciterDownloadsUseCase();
+    checkLowDeviceStorage = MockCheckLowDeviceStorageUseCase();
 
     downloadUpdatesController = StreamController<DownloadItem>.broadcast();
     when(
       () => observeReciterDownloads(any()),
     ).thenAnswer((_) => downloadUpdatesController.stream);
+    when(
+      () => checkLowDeviceStorage(estimatedRequiredBytes: any(named: 'estimatedRequiredBytes')),
+    ).thenAnswer((_) async => false);
 
     bloc = ReciterDownloadBloc(
       downloadAllSurahs,
       cancelDownloadsForReciter,
       observeReciterDownloads,
+      checkLowDeviceStorage,
     );
   });
 
@@ -127,6 +137,33 @@ void main() {
         ),
       ).called(1);
     });
+
+    blocTest<ReciterDownloadBloc, ReciterDownloadState>(
+      'blocks StartReciterDownloadAll when storage check fails',
+      build: () {
+        when(
+          () => checkLowDeviceStorage(
+            estimatedRequiredBytes: any(named: 'estimatedRequiredBytes'),
+          ),
+        ).thenAnswer((_) async => true);
+        return bloc;
+      },
+      act: (bloc) => bloc.add(
+        const StartReciterDownloadAll(reciter: reciter, surahs: [surah1]),
+      ),
+      expect: () => [
+        const ReciterDownloadState(errorMessage: kInsufficientStorageError),
+      ],
+      verify: (_) {
+        verifyNever(
+          () => downloadAllSurahs(
+            surahs: any(named: 'surahs'),
+            reciterName: any(named: 'reciterName'),
+            reciterId: any(named: 'reciterId'),
+          ),
+        );
+      },
+    );
 
     test(
       'CancelReciterDownloadAll clears downloading and calls use case',

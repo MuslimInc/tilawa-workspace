@@ -1,14 +1,22 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
+
+import 'package:tilawa/core/logging/app_logger.dart';
 
 import '../../domain/entities/auth_result.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/providers/auth_provider_interface.dart';
 
-@LazySingleton()
+@LazySingleton(as: AuthProviderInterface)
 class GoogleAuthProviderImpl implements AuthProviderInterface {
-  GoogleAuthProviderImpl(this._firebaseAuth, this._googleSignIn);
+  GoogleAuthProviderImpl(
+    this._firebaseAuth,
+    this._googleSignIn,
+  );
+  static const Duration signInTimeout = Duration(seconds: 60);
   final FirebaseAuth _firebaseAuth;
   final GoogleSignIn _googleSignIn;
 
@@ -24,8 +32,11 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
 
   @override
   Future<AuthResult> signIn() async {
+    logger.i('[GoogleSignIn] sign-in started (google_sign_in)');
     try {
-      final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
+      final GoogleSignInAccount googleUser = await _signInAccount().timeout(
+        signInTimeout,
+      );
 
       final GoogleSignInAuthentication googleAuth = googleUser.authentication;
 
@@ -43,6 +54,11 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
       final UserEntity user = _mapFirebaseUserToUser(userCredential.user!);
 
       return AuthResult.success(user: user);
+    } on TimeoutException {
+      return const AuthResult.failure(
+        message: 'Sign-in timed out',
+        code: 'sign-in-timeout',
+      );
     } on GoogleSignInException catch (e) {
       switch (e.code) {
         case GoogleSignInExceptionCode.canceled:
@@ -69,10 +85,37 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
     }
   }
 
+  /// Signs in via the lightweight Credential Manager flow: silent
+  /// auto-select for returning single-account users, otherwise the
+  /// "Sign in with Google" bottom sheet. Falls back to the button flow
+  /// (the "Choose an account" dialog, which can also add a new account)
+  /// only when no credential is available at all. Dismissing the bottom
+  /// sheet throws [GoogleSignInException] with `canceled` — mapped to
+  /// [AuthResult.cancelled] by the caller — instead of falling through
+  /// to a second sign-in UI.
+  Future<GoogleSignInAccount> _signInAccount() async {
+    final Future<GoogleSignInAccount?>? lightweight = _googleSignIn
+        .attemptLightweightAuthentication(reportAllExceptions: true);
+    final GoogleSignInAccount? account = lightweight == null
+        ? null
+        : await lightweight;
+    if (account != null) {
+      return account;
+    }
+    logger.i(
+      '[GoogleSignIn] lightweight flow returned no account; using button flow',
+    );
+    return _googleSignIn.authenticate();
+  }
+
   @override
   Future<void> signOut() async {
     await _firebaseAuth.signOut();
-    await _googleSignIn.signOut();
+    try {
+      await _googleSignIn.signOut();
+    } catch (_) {
+      // Best-effort after Firebase sign-out.
+    }
   }
 
   @override
@@ -88,7 +131,9 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
       if (e.code != 'requires-recent-login') {
         rethrow;
       }
-      final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
+      final GoogleSignInAccount googleUser = await _signInAccount().timeout(
+        signInTimeout,
+      );
       final GoogleSignInAuthentication googleAuth = googleUser.authentication;
       final String? idToken = googleAuth.idToken;
       if (idToken == null) {

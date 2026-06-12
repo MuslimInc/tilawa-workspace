@@ -26,7 +26,6 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../firebase_options.dart';
 import '../../router/app_router.dart';
 import '../../tilawa_app.dart';
-import 'package:tilawa_core/network/network_info.dart';
 import 'package:tilawa_core/services/app_system_chrome_style.dart';
 
 import '../di/injection.dart';
@@ -109,14 +108,6 @@ Future<void> ensureHiveInitialized() {
 
 @visibleForTesting
 Future<void> initializeHive() => ensureHiveInitialized();
-
-@visibleForTesting
-Future<void> initializeCredentialManager() {
-  logger.d(
-    '[AppLaunch] source=initializeCredentialManager: Start in (${DateTime.now()})',
-  );
-  return _startupTasks.initializeCredentialManager();
-}
 
 @visibleForTesting
 Future<void> initializeCrashlytics() {

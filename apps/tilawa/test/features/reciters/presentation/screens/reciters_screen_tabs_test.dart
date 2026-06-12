@@ -241,13 +241,19 @@ void main() {
         find.text('Tap the heart to keep the reciters you love within reach.'),
         findsOneWidget,
       );
-      expect(
-        find.descendant(
-          of: find.byType(TilawaIllustratedState),
-          matching: find.byType(TilawaButton),
-        ),
-        findsNothing,
+
+      // The empty state offers the same browse-reciters CTA as the
+      // downloads tab so it does not dead-end.
+      final Finder browseRecitersButton = find.descendant(
+        of: find.byType(TilawaIllustratedState),
+        matching: find.widgetWithText(TilawaButton, 'Reciters'),
       );
+      expect(browseRecitersButton, findsOneWidget);
+
+      await tester.tap(browseRecitersButton);
+      await tester.pumpAndSettle();
+
+      expect(find.text('No favorites'), findsNothing);
       expect(tester.takeException(), isNull);
     });
 

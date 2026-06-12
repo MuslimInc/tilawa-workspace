@@ -385,6 +385,10 @@ class SettingsAccountActions extends StatelessWidget {
               children: [
                 TilawaButton(
                   text: context.l10n.logout,
+                  // Medium emphasis — leaving the app must not outshout the
+                  // screen's content; filled primary is reserved for the most
+                  // desired action (DESIGN.md accent discipline).
+                  variant: TilawaButtonVariant.outline,
                   isFullWidth: true,
                   onPressed: onLogout,
                 ),

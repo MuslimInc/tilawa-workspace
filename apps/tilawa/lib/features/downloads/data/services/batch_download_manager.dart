@@ -393,8 +393,19 @@ class _BatchInfo {
       cancelledCount++;
       return true;
     } else {
-      // Running
+      // Running / pending — treat 100% as completed; the status event may lag.
       final int newProgress = (progress.progress * 100).toInt();
+      final bool atFullProgress =
+          progress.progress >= 1.0 || newProgress >= 100;
+
+      if (atFullProgress) {
+        if (previousValue == 100) return false;
+        _decrementOldCounter(previousValue);
+        _itemProgress[progress.id] = 100;
+        completedCount++;
+        return true;
+      }
+
       if (previousValue == newProgress) return false;
       // If previously in a terminal state and now retrying, fix the counter
       _decrementOldCounter(previousValue);

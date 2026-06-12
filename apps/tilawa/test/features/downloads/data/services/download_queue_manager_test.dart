@@ -670,7 +670,54 @@ void main() {
       },
     );
 
-    test('watchdog should cancel stuck downloads after 30 seconds', () {
+    test('watchdog does not cancel slow downloads before 2 minute timeout', () {
+      fakeAsync((async) {
+        when(
+          mockDownloader.enqueue(
+            url: 'http://example.com/1.mp3',
+            savedDir: anyNamed('savedDir'),
+            fileName: anyNamed('fileName'),
+            showNotification: anyNamed('showNotification'),
+            openFileFromNotification: anyNamed('openFileFromNotification'),
+            title: anyNamed('title'),
+            headers: anyNamed('headers'),
+            requiresStorageNotLow: anyNamed('requiresStorageNotLow'),
+            saveInPublicStorage: anyNamed('saveInPublicStorage'),
+          ),
+        ).thenAnswer((_) async => 'task_1');
+
+        final runningTask = DownloadTask(
+          taskId: 'task_1',
+          status: DownloadTaskStatus.running,
+          progress: 0,
+          url: 'http://example.com/1.mp3',
+          filename: '1.mp3',
+          savedDir: tempDir.path,
+          timeCreated: DateTime.now().millisecondsSinceEpoch,
+          allowCellular: true,
+        );
+        when(mockDownloader.loadTasks()).thenAnswer((_) async => [runningTask]);
+
+        GetIt.instance<DownloadQueueManager>().initialize();
+        unawaited(
+          GetIt.instance<DownloadQueueManager>().enqueue(
+            id: 'http://example.com/1.mp3',
+            url: 'http://example.com/1.mp3',
+            filePath: '${tempDir.path}/1.mp3',
+            title: 'Title 1',
+            reciterName: 'Reciter',
+          ),
+        );
+        async.flushMicrotasks();
+
+        async.elapse(const Duration(seconds: 61));
+
+        verifyNever(mockDownloader.cancel(taskId: anyNamed('taskId')));
+        expect(GetIt.instance<DownloadQueueManager>().activeDownloadsCount, 1);
+      });
+    });
+
+    test('watchdog should cancel stuck downloads after 2 minutes', () {
       fakeAsync((async) {
         // Arrange
         // 1. Enqueue task 1 - starts successfully
@@ -744,11 +791,11 @@ void main() {
           reason: 'Download 1 should still be active',
         );
 
-        // Advance time by another 41s (total 61s) - watchdog (runs every 30s) should catch it
-        async.elapse(const Duration(seconds: 41));
+        // Advance past the 2-minute stuck threshold (sync runs every 30s).
+        async.elapse(const Duration(seconds: 115));
 
         // Assert
-        // Download 1 should be cancelled and removed because no progress updates were received for >30s
+        // Download 1 should be cancelled after no platform progress for >2 minutes
         verify(mockDownloader.cancel(taskId: 'task_1')).called(1);
         expect(
           GetIt.instance<DownloadQueueManager>().activeDownloadsCount,
@@ -1289,7 +1336,7 @@ void main() {
         async.flushMicrotasks();
 
         // If updated, lastActivityTime['u1'] = now.
-        // Advance 15s. Total since start=35s. Since update=15s.
+        // Advance 15s. Total since update=15s — still within 2-minute window.
         async.elapse(const Duration(seconds: 15));
 
         // Mock must still return the task
@@ -1299,8 +1346,8 @@ void main() {
           reason: 'Should be active because timer reset',
         );
 
-        // Advance another 50s. Total since update=65s.
-        async.elapse(const Duration(seconds: 50));
+        // Advance past the 2-minute stuck threshold since last progress.
+        async.elapse(const Duration(seconds: 125));
 
         expect(manager.activeDownloadsCount, 0, reason: 'Should timeout');
       });

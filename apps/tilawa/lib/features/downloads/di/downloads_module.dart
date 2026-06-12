@@ -1,3 +1,4 @@
+import 'package:disk_space_plus/disk_space_plus.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/network/network_info.dart';
 
@@ -14,6 +15,9 @@ import '../presentation/bloc/download_button/download_button_bloc_factory.dart';
 
 @module
 abstract class DownloadsModule {
+  @lazySingleton
+  DiskSpacePlus diskSpacePlus() => DiskSpacePlus();
+
   @lazySingleton
   SingleDownloadRepository singleDownloadRepository(DownloadsRepository repo) =>
       repo;
@@ -44,6 +48,7 @@ abstract class DownloadsModule {
     ObserveDownloadProgressUseCase observeDownloadProgress,
     GetDownloadItemUseCase getDownloadItem,
     NetworkInfo networkInfo,
+    CheckLowDeviceStorageUseCase checkLowDeviceStorage,
   ) =>
       DownloadButtonBlocFactory(
         checkSurahDownloaded: checkSurahDownloaded,
@@ -54,5 +59,6 @@ abstract class DownloadsModule {
         observeDownloadProgress: observeDownloadProgress,
         getDownloadItem: getDownloadItem,
         networkInfo: networkInfo,
+        checkLowDeviceStorage: checkLowDeviceStorage,
       );
 }

@@ -60,19 +60,10 @@ extension AppBootstrapperPhases on AppBootstrapper {
 
     void kickOff() {
       if (completer.isCompleted) return;
-      final Future<void> f = _startupTasks
-          .runCriticalInit(configureDI: configureDI, timeline: timeline)
-          .catchError((Object e, StackTrace stackTrace) {
-            logger.e('Critical init failed: $e', stackTrace: stackTrace);
-            unawaited(
-              StartupTelemetry.failure(
-                'critical_init_pipeline_failed',
-                e,
-                stackTrace,
-                phase: 'critical_init',
-              ),
-            );
-          });
+      final Future<void> f = _startupTasks.runCriticalInit(
+        configureDI: configureDI,
+        timeline: timeline,
+      );
       completer.complete(f);
     }
 

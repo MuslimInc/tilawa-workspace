@@ -84,17 +84,11 @@ class _PrayerAlertsPermissionFlowState
   }
 
   void _reschedulePrayerNotifications() {
+    // Nullable read: no PrayerTimesBloc is provided outside the
+    // prayer-times scope (e.g. onboarding).
     final PrayerTimesBloc? bloc =
-        widget.prayerTimesBloc ?? _tryReadPrayerTimesBloc();
+        widget.prayerTimesBloc ?? context.read<PrayerTimesBloc?>();
     bloc?.add(const PrayerTimesEvent.loadPrayerTimes(forceReschedule: true));
-  }
-
-  PrayerTimesBloc? _tryReadPrayerTimesBloc() {
-    try {
-      return context.read<PrayerTimesBloc>();
-    } on Object {
-      return null;
-    }
   }
 
   void _advance() {

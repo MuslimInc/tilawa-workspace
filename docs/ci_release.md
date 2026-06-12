@@ -48,13 +48,11 @@ which sets `lastUpdatedAt` on `assets/changelog/changelog.json` and stamps
 ## Notes
 
 - Builds use `flutter build appbundle --release --target-platform android-arm64
-  --obfuscate --split-debug-info=build/symbols` (Flutter 3.44.1, Java 17).
-  Arm64 is also set via `ndk.abiFilters` in `app/build.gradle`; the CLI flag is
-  still required so Flutter AOT does not compile unused ABIs into the AAB. Code
-  generation runs via `melos run gen` before the build. `--obfuscate` shrinks
-  `libapp.so`; `--split-debug-info` writes deobfuscation files to
-  `build/symbols/`, attached as the `debug-symbols-<versionCode>` artifact for
-  Crashlytics.
+  --split-debug-info=build/symbols` (Flutter 3.44.2, Java 17). Arm64 is also
+  set via `ndk.abiFilters` in `app/build.gradle`; the CLI flag is still
+  required so Flutter AOT does not compile unused ABIs into the AAB. Code
+  generation runs via `melos run gen` before the build. Debug symbols are
+  attached as the `debug-symbols-<versionCode>` artifact for Crashlytics.
 - The AAB is also attached to the run as the `app-release-aab` artifact, so you
   can download and upload it manually if the Play step ever needs to be skipped.
 - Release notes / Data Safety / screenshots are still managed in the Play

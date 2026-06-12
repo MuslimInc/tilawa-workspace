@@ -26,24 +26,40 @@ class GetDownloadsByReciterUseCase {
       final Either<Failure, List<ReciterEntity>> recitersResult =
           await _recitersRepository.getReciters();
 
-      return recitersResult.fold((failure) => Left(failure), (reciters) {
-        final Map<int, String> reciterNameLookup = {
-          for (final r in reciters) r.id: r.name,
-        };
-        return Right(_groupDownloadsByReciter(downloads, reciterNameLookup));
-      });
+      return await recitersResult.fold(
+        (failure) async => Left(failure),
+        (reciters) async {
+          final Map<int, String> reciterNameLookup = {
+            for (final r in reciters) r.id: r.name,
+          };
+          final Map<String, Map<String, List<DownloadItem>>> grouped =
+              await _groupDownloadsByReciter(downloads, reciterNameLookup);
+          return Right(grouped);
+        },
+      );
     } catch (e) {
       return Left(AudioFailure(e.toString()));
     }
   }
 
-  Map<String, Map<String, List<DownloadItem>>> _groupDownloadsByReciter(
+  Future<Map<String, Map<String, List<DownloadItem>>>> _groupDownloadsByReciter(
     List<DownloadItem> downloads,
     Map<int, String> reciterNameLookup,
-  ) {
+  ) async {
     final Map<String, Map<String, List<DownloadItem>>> grouped = {};
 
     for (final download in downloads) {
+      if (download.status != DownloadStatus.completed) {
+        continue;
+      }
+
+      final bool fileExists = await _repository.validateDownloadedFile(
+        download,
+      );
+      if (!fileExists) {
+        continue;
+      }
+
       // Use localized name from lookup if available, otherwise fallback to saved name
       String reciterName = download.reciterName;
       if (download.reciterId != null &&

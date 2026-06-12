@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 
+import 'package:flutter/material.dart' show Brightness, ColorScheme, Theme;
 import 'package:flutter/widgets.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart' show AppColors;
 
 import '../../domain/entities/tour_definition.dart';
 import '../../domain/entities/tour_step.dart';
@@ -187,11 +189,11 @@ class TourGuideService {
   }
 
   TourOverlayStyle _defaultStyle(BuildContext context) {
-    final Brightness brightness = MediaQuery.platformBrightnessOf(context);
+    final ColorScheme scheme = Theme.of(context).colorScheme;
     return TourOverlayStyle(
-      shadowColor: brightness == Brightness.dark
-          ? const Color(0xFF000000)
-          : const Color(0xFF1A1A1A),
+      shadowColor: scheme.brightness == Brightness.dark
+          ? scheme.scrim
+          : AppColors.lightInk,
       shadowOpacity: 0.72,
       focusPadding: 8,
       useSafeArea: true,

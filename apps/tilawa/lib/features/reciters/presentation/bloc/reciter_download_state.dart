@@ -1,5 +1,8 @@
 part of 'reciter_download_bloc.dart';
 
+/// Bloc error token mapped to [AppLocalizations.downloadLowStorageBlocked].
+const String kInsufficientStorageError = '__insufficient_storage__';
+
 class ReciterDownloadState extends Equatable {
   const ReciterDownloadState({
     this.progress = 0.0,
@@ -24,6 +27,8 @@ class ReciterDownloadState extends Equatable {
   bool shouldShowError(ReciterDownloadState previous) {
     return errorMessage != null && previous.errorMessage != errorMessage;
   }
+
+  bool get isInsufficientStorage => errorMessage == kInsufficientStorageError;
 
   /// Determines if download started toast should be shown
   /// Returns true only for user-initiated downloads (after pending state)

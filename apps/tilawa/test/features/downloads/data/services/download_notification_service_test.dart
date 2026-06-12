@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -12,11 +13,22 @@ import '../../helpers/mock_helper.mocks.dart';
 
 // Fake dispatcher for testing
 class FakeNotificationDispatcher implements INotificationDispatcher {
+  FakeNotificationDispatcher({this.throwOnInitialize = false});
+
+  final bool throwOnInitialize;
   final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
 
+  NotificationHandler? idRangeHandler;
+  bool Function(String? payload)? payloadMatcher;
+  NotificationHandler? payloadHandler;
+
   @override
-  Future<void> initialize({bool createHighImportanceChannel = true}) async {}
+  Future<void> initialize({bool createHighImportanceChannel = true}) async {
+    if (throwOnInitialize) {
+      throw Exception('init failed');
+    }
+  }
 
   @override
   void registerHandler({
@@ -31,14 +43,19 @@ class FakeNotificationDispatcher implements INotificationDispatcher {
     required int minIdInclusive,
     required int maxIdExclusive,
     required NotificationHandler handler,
-  }) {}
+  }) {
+    idRangeHandler = handler;
+  }
 
   @override
   void registerPayloadHandler({
     required String serviceId,
     required bool Function(String? payload) matcher,
     required NotificationHandler handler,
-  }) {}
+  }) {
+    payloadMatcher = matcher;
+    payloadHandler = handler;
+  }
 
   @override
   void unregisterHandler(String serviceId) {}
@@ -58,13 +75,19 @@ class FakeNotificationDispatcher implements INotificationDispatcher {
 class MockFlutterLocalNotificationsPlatform extends Mock
     with MockPlatformInterfaceMixin
     implements FlutterLocalNotificationsPlatform {
+  bool throwOnShow = false;
+
   @override
   Future<void> show({
     required int id,
     String? title,
     String? body,
     String? payload,
-  }) async {}
+  }) async {
+    if (throwOnShow) {
+      throw PlatformException(code: 'show_failed');
+    }
+  }
 
   @override
   Future<void> cancel({required int id, String? tag}) async {}
@@ -102,6 +125,42 @@ void main() {
       await service.initialize();
       await service.initialize();
       expect(service, isNotNull);
+    });
+
+    test('should register download payload and id-range handlers', () async {
+      await service.initialize();
+
+      expect(fakeDispatcher.payloadMatcher, isNotNull);
+      expect(fakeDispatcher.idRangeHandler, isNotNull);
+      expect(
+        fakeDispatcher.payloadMatcher!(jsonEncode({'reciterId': 1})),
+        isTrue,
+      );
+      expect(
+        fakeDispatcher.payloadMatcher!(jsonEncode({'reciterName': 'Test'})),
+        isTrue,
+      );
+      expect(
+        fakeDispatcher.payloadMatcher!(jsonEncode({'type': 'download'})),
+        isTrue,
+      );
+      expect(fakeDispatcher.payloadMatcher!(null), isFalse);
+      expect(fakeDispatcher.payloadMatcher!('not-json'), isFalse);
+      expect(
+        fakeDispatcher.payloadMatcher!(jsonEncode({'other': 'value'})),
+        isFalse,
+      );
+    });
+
+    test('should swallow initialization failures', () async {
+      final DownloadNotificationService failingService =
+          DownloadNotificationService(
+            mockNavigator,
+            FakeNotificationDispatcher(throwOnInitialize: true),
+          );
+
+      await failingService.initialize();
+      expect(failingService, isNotNull);
     });
   });
 
@@ -192,6 +251,58 @@ void main() {
       expect(service, isNotNull);
     });
 
+    test('should cancel notification when status is paused', () async {
+      await service.showDownloadProgress(
+        downloadId: downloadId,
+        title: title,
+        reciterName: reciterName,
+        progress: 50,
+        status: DownloadStatus.downloading,
+      );
+
+      await service.showDownloadProgress(
+        downloadId: downloadId,
+        title: title,
+        reciterName: reciterName,
+        progress: 50,
+        status: DownloadStatus.paused,
+      );
+      expect(service, isNotNull);
+    });
+
+    test('should include reciterId in notification payload', () async {
+      await service.showDownloadProgress(
+        downloadId: downloadId,
+        title: title,
+        reciterName: reciterName,
+        reciterId: 42,
+        progress: 50,
+        status: DownloadStatus.downloading,
+      );
+      expect(service, isNotNull);
+    });
+
+    test('should swallow show errors for single download notifications', () async {
+      (
+        FlutterLocalNotificationsPlatform.instance
+            as MockFlutterLocalNotificationsPlatform
+      ).throwOnShow = true;
+
+      await service.showDownloadProgress(
+        downloadId: downloadId,
+        title: title,
+        reciterName: reciterName,
+        progress: 100,
+        status: DownloadStatus.completed,
+      );
+
+      (
+        FlutterLocalNotificationsPlatform.instance
+            as MockFlutterLocalNotificationsPlatform
+      ).throwOnShow = false;
+      expect(service, isNotNull);
+    });
+
     test('should use default messages when not provided', () async {
       await service.showDownloadProgress(
         downloadId: downloadId,
@@ -255,6 +366,21 @@ void main() {
       expect(service, isNotNull);
     });
 
+    test(
+      'should show batch completed when progress is 100% even if status is downloading',
+      () async {
+        await service.showBatchDownloadProgress(
+          batchId: batchId,
+          title: title,
+          progress: 100,
+          completedCount: 30,
+          totalCount: 30,
+          status: DownloadStatus.downloading,
+        );
+        expect(service, isNotNull);
+      },
+    );
+
     test('should show batch failed notification', () async {
       await service.showBatchDownloadProgress(
         batchId: batchId,
@@ -285,6 +411,58 @@ void main() {
         totalCount: 30,
         status: DownloadStatus.cancelled,
       );
+      expect(service, isNotNull);
+    });
+
+    test('should cancel batch notification when status is paused', () async {
+      await service.showBatchDownloadProgress(
+        batchId: batchId,
+        title: title,
+        progress: 50,
+        completedCount: 15,
+        totalCount: 30,
+        status: DownloadStatus.downloading,
+      );
+
+      await service.showBatchDownloadProgress(
+        batchId: batchId,
+        title: title,
+        progress: 50,
+        completedCount: 15,
+        totalCount: 30,
+        status: DownloadStatus.paused,
+      );
+      expect(service, isNotNull);
+    });
+
+    test('should swallow show errors for batch notifications', () async {
+      (
+        FlutterLocalNotificationsPlatform.instance
+            as MockFlutterLocalNotificationsPlatform
+      ).throwOnShow = true;
+
+      await service.showBatchDownloadProgress(
+        batchId: batchId,
+        title: title,
+        progress: 100,
+        completedCount: 30,
+        totalCount: 30,
+        status: DownloadStatus.completed,
+      );
+
+      await service.showBatchDownloadProgress(
+        batchId: batchId,
+        title: title,
+        progress: 50,
+        completedCount: 15,
+        totalCount: 30,
+        status: DownloadStatus.failed,
+      );
+
+      (
+        FlutterLocalNotificationsPlatform.instance
+            as MockFlutterLocalNotificationsPlatform
+      ).throwOnShow = false;
       expect(service, isNotNull);
     });
 
@@ -416,6 +594,87 @@ void main() {
     test('should ignore non-JSON payloads', () async {
       await service.handleNotificationTap('plain_text_payload');
       verifyZeroInteractions(mockNavigator);
+    });
+
+    test('should swallow navigator failures', () async {
+      final String payload = jsonEncode({
+        'reciterId': reciterId,
+        'reciterName': reciterName,
+      });
+
+      when(
+        mockNavigator.navigateToReciter(
+          reciterId: anyNamed('reciterId'),
+          reciterName: anyNamed('reciterName'),
+        ),
+      ).thenThrow(Exception('navigation failed'));
+
+      await service.handleNotificationTap(payload);
+      verify(
+        mockNavigator.navigateToReciter(
+          reciterId: reciterId.toString(),
+          reciterName: reciterName,
+        ),
+      ).called(1);
+    });
+
+    test('payload handler forwards taps to handleNotificationTap', () async {
+      await service.initialize();
+
+      when(
+        mockNavigator.navigateToReciter(
+          reciterId: anyNamed('reciterId'),
+          reciterName: anyNamed('reciterName'),
+        ),
+      ).thenAnswer((_) async {});
+
+      final String payload = jsonEncode({'reciterName': reciterName});
+
+      await fakeDispatcher.payloadHandler!(
+        NotificationResponse(
+          notificationResponseType:
+              NotificationResponseType.selectedNotification,
+          payload: payload,
+        ),
+      );
+
+      verify(
+        mockNavigator.navigateToReciter(
+          reciterId: null,
+          reciterName: reciterName,
+        ),
+      ).called(1);
+    });
+
+    test('id-range handler forwards taps to handleNotificationTap', () async {
+      await service.initialize();
+
+      when(
+        mockNavigator.navigateToReciter(
+          reciterId: anyNamed('reciterId'),
+          reciterName: anyNamed('reciterName'),
+        ),
+      ).thenAnswer((_) async {});
+
+      final String payload = jsonEncode({
+        'reciterId': reciterId,
+        'reciterName': reciterName,
+      });
+
+      await fakeDispatcher.idRangeHandler!(
+        NotificationResponse(
+          notificationResponseType:
+              NotificationResponseType.selectedNotification,
+          payload: payload,
+        ),
+      );
+
+      verify(
+        mockNavigator.navigateToReciter(
+          reciterId: reciterId.toString(),
+          reciterName: reciterName,
+        ),
+      ).called(1);
     });
   });
 }

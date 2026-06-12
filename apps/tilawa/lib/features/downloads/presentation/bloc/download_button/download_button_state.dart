@@ -13,7 +13,9 @@ abstract class DownloadButtonState with _$DownloadButtonState {
   const factory DownloadButtonState.readyToDownload() = _ReadyToDownload;
 
   /// Download is pending (queued but not started)
-  const factory DownloadButtonState.pending() = _PendingState;
+  const factory DownloadButtonState.pending({
+    @Default(false) bool lowStorageWarning,
+  }) = _PendingState;
 
   /// Download is actively in progress
   const factory DownloadButtonState.downloading({
@@ -68,10 +70,23 @@ extension DownloadButtonStateX on DownloadButtonState {
     return maybeMap(networkError: (_) => true, orElse: () => false);
   }
 
+  bool shouldShowLowStorageWarning(DownloadButtonState previous) {
+    return maybeWhen(
+      pending: (lowStorageWarning) =>
+          lowStorageWarning &&
+          !previous.maybeWhen(
+            pending: (previousWarning) => previousWarning,
+            orElse: () => false,
+          ),
+      orElse: () => false,
+    );
+  }
+
   /// Determines if any toast should be shown
   bool shouldShowToast(DownloadButtonState previous) {
     return shouldShowDownloadStarted(previous) ||
-        shouldShowNetworkError(previous);
+        shouldShowNetworkError(previous) ||
+        shouldShowLowStorageWarning(previous);
   }
 
   /// Checks if progress update is significant enough to trigger rebuild

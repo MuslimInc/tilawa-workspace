@@ -68,7 +68,14 @@ class WhatsNewCoordinator {
   }
 
   Future<void> _maybeShowAfterLaunchInternal() async {
-    final String routePath = _currentRoutePath();
+    final String? routePath = _currentRoutePath();
+    if (routePath == null) {
+      // The launch timer fired before the router resolved its first route
+      // (seen on slow devices). The app is still on a launch surface, so
+      // treat it like a blocked route and retry on the next launch.
+      await _logSkipped(WhatsNewSkipReason.blockedRoute);
+      return;
+    }
     final WhatsNewEligibility eligibility = await _getEligibility(
       currentRoutePath: routePath,
       sacredFlowBlocked: _flowGuard.isBlocked,
@@ -140,7 +147,12 @@ class WhatsNewCoordinator {
     };
   }
 
-  String _currentRoutePath() {
+  /// Returns null while the router has no matches yet — reading
+  /// [GoRouter.state] before the first route resolves throws a StateError.
+  String? _currentRoutePath() {
+    if (AppRouter.router.routerDelegate.currentConfiguration.isEmpty) {
+      return null;
+    }
     final String path = AppRouter.router.state.uri.path;
     if (path.isNotEmpty) {
       return path;

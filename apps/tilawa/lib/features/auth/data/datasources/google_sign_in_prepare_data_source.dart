@@ -2,116 +2,80 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
-import 'package:tilawa/features/auth/core/auth_config.dart';
-import 'package:tilawa/features/auth/data/services/credential_manager_initializer.dart';
+import 'package:tilawa/features/auth/data/services/android_sign_in_platform_policy.dart';
 import 'package:tilawa_core/constants/app_strings.dart';
 
-/// Prepares the platform Google sign-in UI before the login screen is shown.
+/// Prepares Google sign-in before the login screen is shown.
+///
+/// This deliberately shows no UI: it only initializes the plugin and warms
+/// the OEM policy. The interactive flows (lightweight bottom sheet first,
+/// button-flow dialog as fallback) are owned by GoogleAuthProviderImpl.
 abstract class GoogleSignInPrepareDataSource {
-  Future<void> prepare();
+  /// Runs [GoogleSignIn.initialize] exactly once per process.
+  ///
+  /// google_sign_in 7.x requires initialize() before any other method and
+  /// forbids calling it twice (undefined behavior), so the cached future is
+  /// only dropped after a failure, to allow a retry.
+  Future<void> ensureInitialized();
 
-  Future<void> clear();
+  /// Best-effort warm-up of the OEM policy and sign-in initialization.
+  Future<void> prepare();
 }
 
 @LazySingleton(as: GoogleSignInPrepareDataSource)
 class GoogleSignInPrepareDataSourceImpl implements GoogleSignInPrepareDataSource {
-  /// Production constructor — only [googleSignIn] is resolved by injectable.
   GoogleSignInPrepareDataSourceImpl(
     this._googleSignIn,
-    this._credentialManagerInitializer,
-  ) : _useAndroidCredentialManager = null,
-      _useGoogleSignInPath = null;
-
-  /// Test-only overrides for platform branches (not registered in GetIt).
-  @visibleForTesting
-  GoogleSignInPrepareDataSourceImpl.withOptions(
-    this._googleSignIn,
-    this._credentialManagerInitializer, {
-    this._useAndroidCredentialManager,
-    this._useGoogleSignInPath,
-  });
+    this._platformPolicy,
+  );
 
   @visibleForTesting
   static void resetPrepareStateForTesting() {
-    _prepareDone = false;
-    _prepareInFlight = null;
+    _initFuture = null;
   }
 
-  static const MethodChannel _channel = MethodChannel(
-    'com.tilawa.app/google_sign_in_prepare',
-  );
-
-  static bool _prepareDone = false;
-  static Future<void>? _prepareInFlight;
+  static Future<void>? _initFuture;
 
   final GoogleSignIn _googleSignIn;
-  final CredentialManagerInitializer _credentialManagerInitializer;
-  final bool? _useAndroidCredentialManager;
-  final bool? _useGoogleSignInPath;
+  final AndroidSignInPlatformPolicy _platformPolicy;
 
-  bool get _shouldUseAndroidCredentialManager =>
-      _useAndroidCredentialManager ??
-      (AuthConfig.useCredentialManager && Platform.isAndroid);
+  @override
+  Future<void> ensureInitialized() {
+    final Future<void>? pending = _initFuture;
+    if (pending != null) {
+      return pending;
+    }
+    final Future<void> run = _runInitialize();
+    _initFuture = run;
+    // On failure, drop the cached future so the next call retries; the
+    // caller still observes the error through [run].
+    unawaited(
+      run.then<void>(
+        (_) {},
+        onError: (Object _) {
+          _initFuture = null;
+        },
+      ),
+    );
+    return run;
+  }
 
-  bool get _shouldUseGoogleSignIn =>
-      _useGoogleSignInPath ?? AuthConfig.useGoogleSignIn;
+  Future<void> _runInitialize() async {
+    await _googleSignIn.initialize(
+      clientId: Platform.isIOS ? AppStrings.googleIosClientId : null,
+      serverClientId: AppStrings.googleClientId,
+    );
+  }
 
   @override
   Future<void> prepare() async {
-    if (_prepareDone) {
-      return;
-    }
-    if (_prepareInFlight != null) {
-      await _prepareInFlight;
-      return;
-    }
-
-    final Future<void> run = _runPrepare();
-    _prepareInFlight = run;
+    await _platformPolicy.warmUp();
     try {
-      await run;
-      _prepareDone = true;
-    } finally {
-      _prepareInFlight = null;
-    }
-  }
-
-  Future<void> _runPrepare() async {
-    try {
-      if (_shouldUseAndroidCredentialManager) {
-        await _credentialManagerInitializer.ensureReady();
-        await _channel.invokeMethod<bool>(
-          'prepare',
-          <String, String>{'google_client_id': AppStrings.googleClientId},
-        );
-        return;
-      }
-      if (_shouldUseGoogleSignIn) {
-        await _googleSignIn.initialize(
-          clientId: Platform.isIOS ? AppStrings.googleIosClientId : null,
-          serverClientId: AppStrings.googleClientId,
-        );
-        await _googleSignIn.attemptLightweightAuthentication();
-        return;
-      }
+      await ensureInitialized();
     } catch (_) {
-      // Best-effort warmup; sign-in still works without prepare.
-    }
-  }
-
-  @override
-  Future<void> clear() async {
-    _prepareDone = false;
-    _prepareInFlight = null;
-    try {
-      if (_shouldUseAndroidCredentialManager) {
-        await _channel.invokeMethod<void>('clear');
-      }
-    } catch (_) {
-      // Best-effort cache reset.
+      // Best-effort warmup; sign-in surfaces its own initialization error.
     }
   }
 }

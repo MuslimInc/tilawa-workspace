@@ -7,8 +7,10 @@ import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
+import '../../../downloads/domain/constants/download_storage_estimates.dart';
 import '../../../downloads/domain/entities/download_item.dart';
 import '../../../downloads/domain/usecases/cancel_downloads_for_reciter_use_case.dart';
+import '../../../downloads/domain/usecases/check_low_device_storage_use_case.dart';
 import '../../../downloads/domain/usecases/download_all_surahs_use_case.dart';
 import '../../../downloads/domain/usecases/observe_reciter_downloads_use_case.dart';
 import '../../../surah/domain/entities/surah_entity.dart';
@@ -23,6 +25,7 @@ class ReciterDownloadBloc
     this._downloadAllSurahsUseCase,
     this._cancelDownloadsForReciterUseCase,
     this._observeReciterDownloads,
+    this._checkLowDeviceStorage,
   ) : super(const ReciterDownloadState()) {
     on<StartReciterDownloadAll>(_onStartDownloadAll);
     on<CancelReciterDownloadAll>(_onCancelDownloadAll);
@@ -33,6 +36,7 @@ class ReciterDownloadBloc
   final DownloadAllSurahsUseCase _downloadAllSurahsUseCase;
   final CancelDownloadsForReciterUseCase _cancelDownloadsForReciterUseCase;
   final ObserveReciterDownloadsUseCase _observeReciterDownloads;
+  final CheckLowDeviceStorageUseCase _checkLowDeviceStorage;
 
   StreamSubscription? _downloadsSubscription;
   String? _currentReciterName;
@@ -67,18 +71,31 @@ class ReciterDownloadBloc
     StartReciterDownloadAll event,
     Emitter<ReciterDownloadState> emit,
   ) async {
+    final int remainingSurahs = event.surahs
+        .where((surah) => !_completedSurahs.containsKey(surah.id))
+        .length;
+    final int estimatedRequiredBytes =
+        remainingSurahs * DownloadStorageEstimates.averageSurahBytes +
+        DownloadStorageEstimates.batchSafetyMarginBytes;
+    final bool isStorageLow = await _checkLowDeviceStorage(
+      estimatedRequiredBytes: estimatedRequiredBytes,
+    );
+
+    if (isStorageLow) {
+      emit(state.copyWith(errorMessage: kInsufficientStorageError));
+      return;
+    }
+
     _isBatchDownload = true;
     _isEnqueuingBatch = true;
     _activeBatchItemIds.clear();
     _activeBatchItemIds.addAll(event.surahs.map((s) => s.id));
-    // Clear previous error message and set pending state
+
     emit(
-      ReciterDownloadState(
-        progress: state.progress,
+      state.copyWith(
         isDownloadingAll: true,
         isPending: true,
-        downloadedCount: state.downloadedCount,
-        totalCount: state.totalCount,
+        errorMessage: null,
       ),
     );
 

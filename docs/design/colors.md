@@ -1,6 +1,6 @@
 # Tilawa colour system (design policy)
 
-Tilawa's visual identity is **calm, modern, and premium**. The palette is intentionally small: one **brand-locked** accent, a quiet neutral surface ramp anchored on `#E5E5E0`, and three semantic colours. Decorative parallel palettes are *not* part of the system.
+Tilawa's visual identity is **calm, modern, and premium**. The palette is intentionally small: one **brand-locked** accent, a quiet neutral surface ramp anchored on `#E5E7EB`, and three semantic colours. Decorative parallel palettes are *not* part of the system.
 
 > Spec references: [`specs/012-visual-simplification/`](../../specs/012-visual-simplification/spec.md),
 > [`specs/017-catalog-theme-freeze/`](../../specs/017-catalog-theme-freeze/spec.md).
@@ -9,7 +9,7 @@ Tilawa's visual identity is **calm, modern, and premium**. The palette is intent
 ## Brand lock (frozen 2026-05-25)
 
 The brand colour is **fixed**. Users do not pick a primary. Production builds
-always render Sage on the `#E5E5E0` neutral; the in-Settings colour picker is
+always render Sage on the `#E5E7EB` neutral; the in-Settings colour picker is
 retained behind `--dart-define=TILAWA_SHOW_COLOR_PICKER=true` for dev/QA only.
 
 - **Primary (Ink):** Sage `#219653` (`AppColors.primarySage` /
@@ -18,15 +18,20 @@ retained behind `--dart-define=TILAWA_SHOW_COLOR_PICKER=true` for dev/QA only.
   **Splash logo box:** `288dp` on Flutter (`AppColors.launchSplashLogoSize`)
   and Android (`@dimen/splash_logo_size` / `splash_icon` drawable) — change
   both together if resizing.
-- **Brand neutral:** `#E5E5E0` (`AppColors.lightSurfaceContainerHighBase` →
-  `ColorScheme.surfaceContainerHigh`). The Vellum tier for chips, search
-  fills, settings rows, and idle controls.
+- **Brand neutral:** `#E5E7EB` (`AppColors.lightSurfaceContainerHighBase` →
+  `ColorScheme.surfaceContainerHigh`). The cool-gray idle tier for chips, search
+  fills, settings rows, and idle controls. (Amended 2026-06-11: the light ramp
+  moved from warm Pinterest grays to one cool porcelain family — canvas
+  `#F4F5F7`, idle `#E5E7EB`, hairline `#DBDEE3` — for a crisper commercial
+  feel; never mix warm and cool tones in adjacent light fills.)
 - **Light scaffold / surface:** `#FFFFFF` — not tinted by primary.
 - **Ink (text):** `#0F172A` on white (`ColorScheme.onSurface`); body/mute/ash
   tiers in `AppColors` for secondary copy.
 - **On primary:** `#FFFFFF` on brand green `#219653` (filled CTAs, FABs).
-- **Secondary:** neutral `#E5E5E0` / `#F6F6F3` — no gold or yellow accents.
-- **Light error:** `#DC2626` on white labels.
+- **Secondary:** neutral `#E5E7EB` on `#F4F5F7` canvas — no gold or yellow accents.
+- **Semantic (light):** error `#DC2626`, success `#43A047`, warning `#C2410C`.
+- **Semantic (dark):** error `#FFB4AB`; success `#6BCF7F` and warning `#FB923C`
+  via `TilawaStatusColors` on `ColorScheme` (lifted for 3:1 on `#353E3A`).
 - **Runtime override:** `apps/tilawa/lib/features/theme/presentation/theme_state_material.dart`
   resolves `state.primaryColor` to the brand-locked value when
   `Env.kShowColorPicker` is `false`.
@@ -51,7 +56,9 @@ A fifth role — **outline** (`outlineVariant`) — is the hairline that separat
 2. **`AppTheme`** — Builds `ThemeData` and `ColorScheme` from `AppColors` plus the user-selected primary. Defines how primary maps to containers (`_containerForPrimary`, `_blendSurfaceTowardPrimary`). Must not introduce raw `Color(0x…)` literals.
 3. **`TilawaComponentTokens`** — Component-level fills and blends; formulas live in **token factories**, not in widgets.
 4. **Feature palettes** — Closed-scope feature themes (Quran reader, share/reel composer): centralised palette files or `ThemeExtension`s.
-5. **Exceptions** — `Colors.transparent`; the colour-picker tool data; tests / previews / debug; third-party packages.
+5. **Exceptions** — `Colors.transparent`; the colour-picker tool data; Quran
+   reader / share composer palettes (`AppQuranReaderLegacyColors`,
+   `AppShareComposerColors`); tests / previews / debug; third-party packages.
 
 ## Policy: accent vs surfaces
 
@@ -70,7 +77,7 @@ A fifth role — **outline** (`outlineVariant`) — is the hairline that separat
 |----|--------|
 | List app bar | `TilawaCatalogAppBar` + `TilawaAppBarSurface.parchment` |
 | Search | `TilawaSearchFieldVariant.catalog` (white `surface` + hairline border) |
-| Filters | `TilawaSelectionPillStyle.catalog` |
+| Filters | `TilawaSelectionPillStyle.catalog` (dark selected = lifted green-gray, not white) |
 | Feature rows (e.g. reciter details) | `ColorScheme` neutral roles or `*CatalogChrome` helper — no new hex |
 - **User-selected primary** drives the **accent / interactive** role only (CTA,
   active nav, favorites, switch ON, progress fill) — **not** search fields,
@@ -87,7 +94,7 @@ A fifth role — **outline** (`outlineVariant`) — is the hairline that separat
 |----|--------|
 | List app bar | `TilawaCatalogAppBar` + `TilawaAppBarSurface.parchment` |
 | Search | `TilawaSearchFieldVariant.catalog` (white `surface` + hairline border) |
-| Filters | `TilawaSelectionPillStyle.catalog` |
+| Filters | `TilawaSelectionPillStyle.catalog` (dark selected = lifted green-gray, not white) |
 | Feature rows (e.g. reciter details) | `ColorScheme` neutral roles or `*CatalogChrome` helper — no new hex |
 
 ## Gradients
@@ -129,15 +136,6 @@ These map directly to `TilawaCardSurface { raised, flat, outline }` on `TilawaCa
 
 ## Related tests
 
-- `packages/ui_kit/test/theme/app_theme_color_roles_test.dart` — contrast, Pinterest neutrals, preset surface no-op.
-- `packages/ui_kit/test/theme/app_theme_spec_compliance_test.dart` — M3 extensions, transparent `surfaceTint`, app bar = `surface`.
-- `packages/ui_kit/test/goldens/` — atoms, molecules, organisms, and foundation catalog chrome goldens.
-
-Regenerate after intentional visual changes:
-
-```bash
-cd packages/ui_kit && flutter test test/goldens/ --update-goldens
-```
 - `packages/ui_kit/test/theme/app_theme_color_roles_test.dart` — contrast, Pinterest neutrals, preset surface no-op.
 - `packages/ui_kit/test/theme/app_theme_spec_compliance_test.dart` — M3 extensions, transparent `surfaceTint`, app bar = `surface`.
 - `packages/ui_kit/test/goldens/` — atoms, molecules, organisms, and foundation catalog chrome goldens.

@@ -813,6 +813,14 @@
     "@networkError": {
         "description": "Network error message"
     },
+    "downloadLowStorageWarning": "Available storage may not be enough for this download. Free up space if downloads fail.",
+    "@downloadLowStorageWarning": {
+        "description": "Toast shown when device free storage is likely below the estimated download size"
+    },
+    "downloadLowStorageBlocked": "Not enough storage space to download all surahs. Free up space and try again.",
+    "@downloadLowStorageBlocked": {
+        "description": "Error toast when Download All is blocked because device storage is too low"
+    },
     "recitationsAvailable": "{count} recitation(s) available",
     "@recitationsAvailable": {
         "description": "Number of recitations available for a reciter",

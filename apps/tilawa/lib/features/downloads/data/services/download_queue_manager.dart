@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:clock/clock.dart';
+import 'package:flutter/foundation.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/config/language_config.dart';
@@ -67,6 +68,19 @@ class DownloadQueueManager implements IDownloadQueueService {
   // Track last activity time for each active download to detect stuck ones
   final Map<String, DateTime> _lastActivityTime = {};
 
+  // Last platform-reported progress (0.0–1.0) per active download
+  final Map<String, double> _lastKnownProgress = {};
+
+  /// How often we reconcile with [DownloadServiceInterface.getActiveDownloadIds].
+  static const Duration _syncInterval = Duration(seconds: 30);
+
+  /// Running downloads with no stream updates must be idle this long before
+  /// cancellation, after verifying the platform task is not advancing.
+  static const Duration _runningStuckTimeout = Duration(minutes: 2);
+
+  /// Enqueued downloads may wait longer before the server starts sending data.
+  static const Duration _enqueuedStuckTimeout = Duration(minutes: 5);
+
   // Stream controller for queue updates
   final StreamController<QueueUpdate> _queueUpdateController =
       StreamController<QueueUpdate>.broadcast();
@@ -100,7 +114,7 @@ class DownloadQueueManager implements IDownloadQueueService {
     // Periodically sync active downloads with DownloadService
     // This ensures we don't have stale entries in _activeDownloads
     // Raised to 30 seconds since the primary event source is now the stream
-    _syncTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+    _syncTimer = Timer.periodic(_syncInterval, (_) {
       _syncActiveDownloads().then((_) {
         // After syncing, check if we should process queue
         if (_activeDownloads.length < maxConcurrentDownloads &&
@@ -340,6 +354,7 @@ class DownloadQueueManager implements IDownloadQueueService {
           _activeDownloads.add(queuedDownload.id);
           _activeDownloadUrls[queuedDownload.id] = queuedDownload.url;
           _lastActivityTime[queuedDownload.id] = clock.now();
+          _lastKnownProgress[queuedDownload.id] = 0;
           actualRunningCount++;
 
           // Start the download
@@ -369,6 +384,7 @@ class DownloadQueueManager implements IDownloadQueueService {
           _activeDownloads.remove(queuedDownload.id);
           _activeDownloadUrls.remove(queuedDownload.id);
           _lastActivityTime.remove(queuedDownload.id);
+          _lastKnownProgress.remove(queuedDownload.id);
           actualRunningCount--;
 
           logger.e(
@@ -480,6 +496,7 @@ class DownloadQueueManager implements IDownloadQueueService {
       }
       // Update activity time
       _lastActivityTime[progress.id] = clock.now();
+      _lastKnownProgress[progress.id] = progress.progress;
     }
 
     // When a download completes or fails, remove it from active and process queue
@@ -507,6 +524,7 @@ class DownloadQueueManager implements IDownloadQueueService {
             wasActive = _activeDownloads.remove(compositeId);
             _activeDownloadUrls.remove(compositeId);
             _lastActivityTime.remove(compositeId);
+            _lastKnownProgress.remove(compositeId);
           }
         } catch (e) {
           // Ignore error in lookup
@@ -528,12 +546,14 @@ class DownloadQueueManager implements IDownloadQueueService {
         _activeDownloadUrls.remove(key);
         _activeDownloads.remove(key);
         _lastActivityTime.remove(key);
+        _lastKnownProgress.remove(key);
         wasActive = true;
       }
 
       // Cleanup any direct keys matching the raw progress.id
       _activeDownloadUrls.remove(progress.id);
       _lastActivityTime.remove(progress.id); // Cleanup activity tracking
+      _lastKnownProgress.remove(progress.id);
       _downloadMetadata.remove(progress.id); // Cleanup notification metadata
 
       // Also cleanup metadata for normalized keys
@@ -637,6 +657,7 @@ class DownloadQueueManager implements IDownloadQueueService {
     _activeDownloadUrls.clear();
     _downloadMetadata.clear();
     _lastActivityTime.clear();
+    _lastKnownProgress.clear();
 
     // Hide any batch notifications
     await _notificationService.cancelAllNotifications();
@@ -718,6 +739,7 @@ class DownloadQueueManager implements IDownloadQueueService {
         staleIds.forEach(_activeDownloads.remove);
         staleIds.forEach(_activeDownloadUrls.remove);
         staleIds.forEach(_lastActivityTime.remove);
+        staleIds.forEach(_lastKnownProgress.remove);
         logger.d(
           '[Downloading Queue] Removed stale downloads and cleaned up notifications. activeCount=${_activeDownloads.length} queueLength=${_queue.length}',
         );
@@ -748,27 +770,34 @@ class DownloadQueueManager implements IDownloadQueueService {
           _activeDownloads.add(norm);
           _activeDownloadUrls[norm] = url; // Map normalized -> original url
           _lastActivityTime[norm] = clock.now(); // Initialize activity
+          _lastKnownProgress.putIfAbsent(norm, () => 0);
           logger.d(
             '[DownloadQueueManager] Added missing active download: $url (normalized: $norm). activeCount=${_activeDownloads.length}',
           );
         }
       }
 
-      // watchdog: Check for stuck downloads (no activity for > 30 seconds)
+      // Watchdog: cancel only when the platform task is idle past the timeout.
       final DateTime now = clock.now();
       final List<String> stuckIds = [];
 
       for (final String id in _activeDownloads) {
-        final DateTime? lastActivity = _lastActivityTime[id];
-        if (lastActivity != null &&
-            now.difference(lastActivity).inSeconds > 30) {
+        final String lookupId = _activeDownloadUrls[id] ?? id;
+        final bool shouldCancel = await _shouldCancelStuckDownload(
+          trackingId: id,
+          lookupId: lookupId,
+          actualActiveSet: actualActiveSet,
+          now: now,
+        );
+        if (shouldCancel) {
           stuckIds.add(id);
         }
       }
 
       for (final id in stuckIds) {
-        logger.w(
-          '[Downloading Queue] Watchdog: Download $id appears stuck (no activity for 30s). Cancelling.',
+        logger.d(
+          '[Downloading Queue] Watchdog: Download $id appears stuck '
+          '(no progress for ${_runningStuckTimeout.inSeconds}s). Cancelling.',
         );
 
         // Cancel the stuck download using its URL, catching platform exceptions
@@ -789,6 +818,7 @@ class DownloadQueueManager implements IDownloadQueueService {
         _activeDownloads.remove(id);
         _activeDownloadUrls.remove(id);
         _lastActivityTime.remove(id);
+        _lastKnownProgress.remove(id);
 
         // Note: Cancellation will eventually trigger _handleDownloadProgress
         // with status.cancelled, which will safely try to process the queue again.
@@ -814,6 +844,59 @@ class DownloadQueueManager implements IDownloadQueueService {
     }
   }
 
+  /// Returns true when a tracked download should be cancelled as stuck.
+  @visibleForTesting
+  Future<bool> shouldCancelStuckDownloadForTest({
+    required String trackingId,
+    required String lookupId,
+    required Set<String> actualActiveSet,
+    required DateTime now,
+  }) {
+    return _shouldCancelStuckDownload(
+      trackingId: trackingId,
+      lookupId: lookupId,
+      actualActiveSet: actualActiveSet,
+      now: now,
+    );
+  }
+
+  Future<bool> _shouldCancelStuckDownload({
+    required String trackingId,
+    required String lookupId,
+    required Set<String> actualActiveSet,
+    required DateTime now,
+  }) async {
+    final DateTime? lastActivity = _lastActivityTime[trackingId];
+    if (lastActivity == null) {
+      return false;
+    }
+
+    final Duration elapsed = now.difference(lastActivity);
+    final String normalizedLookup = _normalizeUrlString(lookupId);
+
+    if (!actualActiveSet.contains(normalizedLookup)) {
+      return elapsed >= _runningStuckTimeout;
+    }
+
+    final DownloadProgress? platformProgress = await _downloadService
+        .getDownloadProgress(lookupId);
+    if (platformProgress == null) {
+      return elapsed >= _runningStuckTimeout;
+    }
+
+    final double lastProgress = _lastKnownProgress[trackingId] ?? -1;
+    if (platformProgress.progress > lastProgress) {
+      _lastKnownProgress[trackingId] = platformProgress.progress;
+      _lastActivityTime[trackingId] = now;
+      return false;
+    }
+
+    final Duration timeout = platformProgress.status == DownloadStatus.pending
+        ? _enqueuedStuckTimeout
+        : _runningStuckTimeout;
+    return elapsed >= timeout;
+  }
+
   /// Dispose resources
   void dispose() {
     _isDisposed = true;
@@ -824,6 +907,7 @@ class DownloadQueueManager implements IDownloadQueueService {
     _activeDownloads.clear();
     _activeDownloadUrls.clear();
     _lastActivityTime.clear();
+    _lastKnownProgress.clear();
     _isInitialized = false;
     logger.d('[DownloadQueueManager] Disposed');
   }

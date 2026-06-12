@@ -17,6 +17,17 @@ void main() {
     expect(steps, contains(PrayerAlertsPermissionStep.notifications));
   });
 
+  test('returns location only while capability is still loading', () {
+    final List<PrayerAlertsPermissionStep> steps = prayerAlertsSetupPendingSteps(
+      hasLocationPermission: false,
+      capability: null,
+    );
+
+    expect(steps, <PrayerAlertsPermissionStep>[
+      PrayerAlertsPermissionStep.location,
+    ]);
+  });
+
   test('returns empty when all grants present', () {
     final List<PrayerAlertsPermissionStep> steps = prayerAlertsSetupPendingSteps(
       hasLocationPermission: true,

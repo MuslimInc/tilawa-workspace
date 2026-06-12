@@ -143,35 +143,22 @@ extension AppStartupBackgroundPhases on AppStartupTasks {
     }
   }
 
-  /// Phase 1: Initialize credential manager and analytics in parallel.
-  Future<void> runPhase1CredentialAndAnalytics(LaunchTimeline timeline) async {
+  /// Phase 1: Initialize analytics.
+  Future<void> runPhase1Analytics(LaunchTimeline timeline) async {
     logger.d(
-      '[AppLaunch] source=AppStartupBackgroundPhases.runPhase1CredentialAndAnalytics: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupBackgroundPhases.runPhase1Analytics: Start in (${DateTime.now()})',
     );
     try {
       timeline.resetPhase();
-      // Parallelize independent startup tasks to reduce sequential blocking.
-      // Small 100ms staggering prevents massive platform channel congestion.
-      final List<Future<void>> tasks = <Future<void>>[];
-      if (launchConfig.credentialManagerInit) {
-        tasks.add(initializeCredentialManager());
-      }
       if (launchConfig.analyticsInit) {
-        tasks.add(
-          Future<void>.delayed(
-            const Duration(milliseconds: 100),
-          ).then((_) => initializeAnalytics()),
-        );
-      }
-      if (tasks.isNotEmpty) {
-        await Future.wait(tasks);
+        await initializeAnalytics();
       }
 
-      timeline.log('Phase1 (credential+analytics)');
+      timeline.log('Phase1 (analytics)');
       await Future<void>.delayed(const Duration(milliseconds: 250));
     } catch (e) {
       logger.d(
-        '[AppLaunch] source=AppStartupBackgroundPhases.runPhase1CredentialAndAnalytics: Phase1 error at (${DateTime.now()}): $e',
+        '[AppLaunch] source=AppStartupBackgroundPhases.runPhase1Analytics: Phase1 error at (${DateTime.now()}): $e',
       );
     }
   }

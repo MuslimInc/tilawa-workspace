@@ -30,16 +30,15 @@ class MainActivityTest {
     fun setup() {
         mockkConstructor(MethodChannel::class)
         every { anyConstructed<MethodChannel>().setMethodCallHandler(any()) } just Runs
-        
-        val realActivity = Robolectric.buildActivity(MainActivity::class.java).get()
-        activity = spyk(realActivity)
-        
+
+        activity = Robolectric.buildActivity(MainActivity::class.java).get()
+
         mockEngine = mockk(relaxed = true)
         mockMessenger = mockk(relaxed = true)
         val mockExecutor = mockk<DartExecutor>(relaxed = true)
         every { mockEngine.dartExecutor } returns mockExecutor
         every { mockExecutor.binaryMessenger } returns mockMessenger
-        
+
         mockkObject(PrayerAdhanMethodChannel)
         mockkObject(PrayerNotificationsWatchdogScheduler)
         every { PrayerAdhanMethodChannel.register(any(), any()) } just Runs
@@ -52,15 +51,11 @@ class MainActivityTest {
     }
 
     @Test
-    fun `configureFlutterEngine registers channels`() {
-        // Avoid super.configureFlutterEngine if possible or just ignore its failure
-        try {
-            activity.configureFlutterEngine(mockEngine)
-        } catch (e: Exception) {
-            // Ignore if it's just some internal Flutter error we don't care about
-        }
-        
-        verify { PrayerAdhanMethodChannel.register(any(), any()) }
+    fun `registerAppMethodChannels registers prayer adhan and app channels`() {
+        activity.registerAppMethodChannels(mockEngine)
+
+        verify { PrayerAdhanMethodChannel.register(mockMessenger, activity) }
+        verify(atLeast = 3) { anyConstructed<MethodChannel>().setMethodCallHandler(any()) }
     }
 
     @Test

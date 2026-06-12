@@ -710,6 +710,14 @@
     "@networkError": {
         "description": "Network error message"
     },
+    "downloadLowStorageWarning": "قد لا تكون مساحة التخزين المتاحة كافية لهذا التحميل. حرّر مساحة إذا فشل التحميل.",
+    "@downloadLowStorageWarning": {
+        "description": "Toast shown when device free storage is likely below the estimated download size"
+    },
+    "downloadLowStorageBlocked": "لا توجد مساحة تخزين كافية لتحميل كل السور. حرّر مساحة ثم أعد المحاولة.",
+    "@downloadLowStorageBlocked": {
+        "description": "Error toast when Download All is blocked because device storage is too low"
+    },
     "recitationsAvailable": "{count} رواية متاحة",
     "@recitationsAvailable": {
         "description": "Number of recitations available for a reciter",

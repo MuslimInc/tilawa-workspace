@@ -857,6 +857,7 @@ class _RecitersTabbedBody extends StatelessWidget {
                   'reciters_favorites_tab',
                 ),
                 scrollController: favoritesScrollController,
+                onBrowseReciters: onBrowseReciters,
               ),
             ],
           ),
@@ -1314,10 +1315,10 @@ class _RecitersHomeTabBar extends StatelessWidget {
                 indicatorSize: TabBarIndicatorSize.tab,
                 indicatorPadding: EdgeInsets.all(tokens.spaceExtraSmall),
                 indicator: BoxDecoration(
-                  color: colorScheme.onSurface,
+                  color: chipTokens.catalogSelectedBackgroundColor,
                   borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
                 ),
-                labelColor: colorScheme.surface,
+                labelColor: chipTokens.catalogSelectedForegroundColor,
                 unselectedLabelColor: colorScheme.onSurfaceVariant,
                 labelStyle: theme.textTheme.labelLarge?.copyWith(
                   fontWeight: chipTokens.selectionFontWeight,
