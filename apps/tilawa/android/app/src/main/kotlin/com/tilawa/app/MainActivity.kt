@@ -13,6 +13,7 @@ import com.tilawa.app.prayer.PrayerAdhanMethodChannel
 import com.tilawa.app.prayer.PrayerNotificationsWatchdogScheduler
 import androidx.annotation.VisibleForTesting
 import io.flutter.embedding.android.RenderMode
+import io.sentry.Sentry
 import io.sentry.flutter.SentryFlutterPlugin
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -177,6 +178,9 @@ class MainActivity : AudioServiceActivity() {
                     "restoreSentryApplicationContext" -> {
                         restoreSentryFlutterApplicationContext()
                         result.success(null)
+                    }
+                    "isSentryNativeSdkInitialized" -> {
+                        result.success(Sentry.isEnabled())
                     }
                     else -> result.notImplemented()
                 }
