@@ -31,7 +31,7 @@ For policy gaps, phased remediation, and Console-only verification, see
 - [ ] Build production AAB (arm64 enforced by `ndk.abiFilters` in `build.gradle`
       **and** `--target-platform android-arm64` on the Flutter CLI — both are
       required; they do not conflict):
-      `cd apps/tilawa && flutter build appbundle --release --target-platform android-arm64 --split-debug-info=build/symbols`
+      `cd apps/tilawa && flutter build appbundle --release --target-platform android-arm64 --obfuscate --split-debug-info=build/symbols`
 - [ ] Verify artifact exists: `apps/tilawa/build/app/outputs/bundle/release/app-release.aab`
 - [ ] Upload `build/symbols/` to Crashlytics (or download from the CI `debug-symbols` artifact).
 - [ ] Smoke test release build on physical Android devices.

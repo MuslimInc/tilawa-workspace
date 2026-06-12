@@ -14,9 +14,9 @@
 
 ## Pre-upload checklist
 
-1. Tag: `git tag -a v2.0.9+53 -m "Release 2.0.9+53"` and push tag (pending)
-2. Build via **Actions → Android Release (Google Play)** (`track: internal`, `build_name: 2.0.9`, `build_number: 53`) or locally:
-   `cd apps/tilawa && flutter build appbundle --release --target-platform android-arm64 --split-debug-info=build/symbols`
+1. Tag: `git tag -a v2.0.8+52 -m "Release 2.0.8+52"` and push tag (pending)
+2. Build via **Actions → Android Release (Google Play)** (`track: internal`, `build_name: 2.0.8`, `build_number: 52`) or locally:
+   `cd apps/tilawa && flutter build appbundle --release --target-platform android-arm64 --obfuscate --split-debug-info=build/symbols`
 3. Upload AAB to **Internal testing**; review pre-launch report
 4. Paste **What's new** from [`release_notes.md`](release_notes.md) (en-US + ar)
 5. Staged production rollout after sign-off
