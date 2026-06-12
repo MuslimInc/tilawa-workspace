@@ -4,6 +4,7 @@ import 'package:mockito/mockito.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
+import 'package:tilawa/features/downloads/domain/services/completed_download_file_validator.dart';
 import 'package:tilawa/features/downloads/domain/usecases/get_downloads_by_reciter_use_case.dart';
 
 import '../../helpers/mock_helper.mocks.dart';
@@ -24,6 +25,7 @@ void main() {
     useCase = GetDownloadsByReciterUseCase(
       mockRepository,
       mockRecitersRepository,
+      CompletedDownloadFileValidator(mockRepository),
     );
   });
 
