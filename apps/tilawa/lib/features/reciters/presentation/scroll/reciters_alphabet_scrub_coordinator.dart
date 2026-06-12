@@ -307,7 +307,8 @@ bool _isAlphabetRailNotification(ScrollNotification notification) {
   if (scrollContext == null) {
     return false;
   }
-  return scrollContext.findAncestorWidgetOfExactType<TilawaAlphabetScrollbar>() !=
+  return scrollContext
+          .findAncestorWidgetOfExactType<TilawaAlphabetScrollbar>() !=
       null;
 }
 

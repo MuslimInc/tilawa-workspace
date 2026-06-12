@@ -52,12 +52,14 @@ class GetDownloadsByReciterUseCase {
   ) async {
     final Map<String, Map<String, List<DownloadItem>>> grouped = {};
     final List<DownloadItem> completed = downloads
-        .where((DownloadItem download) =>
-            download.status == DownloadStatus.completed)
+        .where(
+          (DownloadItem download) =>
+              download.status == DownloadStatus.completed,
+        )
         .toList(growable: false);
 
-    final List<DownloadItem> validCompleted =
-        await _fileValidator.validateExistingFiles(completed);
+    final List<DownloadItem> validCompleted = await _fileValidator
+        .validateExistingFiles(completed);
 
     for (final DownloadItem download in validCompleted) {
       _addDownloadToGroup(grouped, download, reciterNameLookup);

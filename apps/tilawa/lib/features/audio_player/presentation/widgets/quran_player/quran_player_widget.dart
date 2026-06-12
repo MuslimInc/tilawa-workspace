@@ -103,7 +103,7 @@ class QuranPlayerWidget extends StatefulWidget {
       final QuranPlayerShellChrome? shell = context
           .read<QuranPlayerChromeNotifier>()
           .shellChrome;
-        if (shell != null) {
+      if (shell != null) {
         if (shell.bottomNavBarHeight > 0) {
           return collapsedHeight(context);
         }

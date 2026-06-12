@@ -22,8 +22,8 @@ class GetValidCompletedDownloadsUseCase {
 
   Future<Either<Failure, List<DownloadItem>>> call(String reciterName) async {
     try {
-      final List<DownloadItem> allDownloads =
-          await _repository.getAllDownloads();
+      final List<DownloadItem> allDownloads = await _repository
+          .getAllDownloads();
 
       final Either<Failure, List<ReciterEntity>> recitersResult =
           await _recitersRepository.getReciters();
@@ -51,8 +51,8 @@ class GetValidCompletedDownloadsUseCase {
           )
           .toList(growable: false);
 
-      final List<DownloadItem> validDownloads =
-          await _fileValidator.validateExistingFiles(completedForReciter);
+      final List<DownloadItem> validDownloads = await _fileValidator
+          .validateExistingFiles(completedForReciter);
 
       return Right(validDownloads);
     } catch (e) {

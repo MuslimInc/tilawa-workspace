@@ -80,7 +80,8 @@ List<ReciterEntity> bubbleFavoritesToTop(
   List<ReciterEntity> reciters,
   Set<int> favoriteIds,
 ) {
-  if (favoriteIds.isEmpty || recitersAlreadyFavoritesFirst(reciters, favoriteIds)) {
+  if (favoriteIds.isEmpty ||
+      recitersAlreadyFavoritesFirst(reciters, favoriteIds)) {
     return reciters;
   }
 

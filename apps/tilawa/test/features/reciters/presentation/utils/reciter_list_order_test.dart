@@ -3,12 +3,12 @@ import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa/features/reciters/presentation/utils/reciter_list_order.dart';
 
 ReciterEntity _reciter(int id) => ReciterEntity(
-      id: id,
-      name: 'Reciter $id',
-      letter: 'A',
-      date: '2023',
-      moshaf: const [],
-    );
+  id: id,
+  name: 'Reciter $id',
+  letter: 'A',
+  date: '2023',
+  moshaf: const [],
+);
 
 void main() {
   group('sameFavoriteIdSet', () {

@@ -19,7 +19,10 @@ void main() {
       expect(options.debug, kDebugMode);
       expect(options.enableLogs, kReleaseMode);
       expect(options.autoInitializeNativeSdk, isFalse);
-      expect(options.beforeSend, CrashReportingContext.filterEmulatorsInRelease);
+      expect(
+        options.beforeSend,
+        CrashReportingContext.filterEmulatorsInRelease,
+      );
       expect(
         options.beforeSendLog,
         CrashReportingContext.filterEmulatorLogsInRelease,

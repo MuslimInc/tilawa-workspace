@@ -75,7 +75,9 @@ void main() {
   setUp(() async {
     await getIt.reset();
     onboardingRepository = _FakeOnboardingRepository();
-    permissionsCubit = _FakePrayerPermissionsCubit(const PrayerPermissionsState());
+    permissionsCubit = _FakePrayerPermissionsCubit(
+      const PrayerPermissionsState(),
+    );
 
     getIt.registerSingleton<PrayerAlertsPermissionOnboardingRepository>(
       onboardingRepository,
@@ -226,7 +228,8 @@ void main() {
       await pumpNavigationApp(
         tester,
         cubit: permissionsCubit,
-        onShowAfterOnboarding: PrayerAlertsPermissionNavigation.showAfterOnboarding,
+        onShowAfterOnboarding:
+            PrayerAlertsPermissionNavigation.showAfterOnboarding,
       );
 
       await tester.tap(find.text('show-after-onboarding'));
@@ -359,11 +362,12 @@ void main() {
     testWidgets('uses scoped PrayerPermissionsCubit when provided', (
       WidgetTester tester,
     ) async {
-      final _FakePrayerPermissionsCubit scopedCubit = _FakePrayerPermissionsCubit(
-        const PrayerPermissionsState(
-          hasLocationPermission: false,
-        ),
-      );
+      final _FakePrayerPermissionsCubit scopedCubit =
+          _FakePrayerPermissionsCubit(
+            const PrayerPermissionsState(
+              hasLocationPermission: false,
+            ),
+          );
       addTearDown(scopedCubit.close);
 
       await pumpNavigationApp(
@@ -407,7 +411,9 @@ void main() {
       WidgetTester tester,
     ) async {
       final _MockPrayerTimesBloc prayerTimesBloc = _MockPrayerTimesBloc();
-      when(() => prayerTimesBloc.stream).thenAnswer((_) => const Stream.empty());
+      when(
+        () => prayerTimesBloc.stream,
+      ).thenAnswer((_) => const Stream.empty());
       when(() => prayerTimesBloc.state).thenReturn(const PrayerTimesState());
       when(() => prayerTimesBloc.add(any())).thenReturn(null);
 

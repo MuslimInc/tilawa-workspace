@@ -562,8 +562,7 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
                       borderRadius: borderRadius,
                       border: Border.all(
                         color: trackBorderColor,
-                        width:
-                            tokens.borderWidthThin * (_isScrubbing ? 2 : 1),
+                        width: tokens.borderWidthThin * (_isScrubbing ? 2 : 1),
                       ),
                       boxShadow: [
                         BoxShadow(

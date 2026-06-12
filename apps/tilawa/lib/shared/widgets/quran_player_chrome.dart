@@ -308,8 +308,7 @@ abstract final class QuranPlayerLayoutInsets {
       return 0;
     }
     final BuildContext mqContext = mediaQueryContext(context);
-    if (!mqContext.isNarrow &&
-        QuranPlayerRoutePolicy.isInAppShell(location)) {
+    if (!mqContext.isNarrow && QuranPlayerRoutePolicy.isInAppShell(location)) {
       return 0;
     }
     return offShellBottomInset(context);

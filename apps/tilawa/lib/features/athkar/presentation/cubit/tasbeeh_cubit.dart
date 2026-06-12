@@ -456,8 +456,7 @@ class TasbeehCubit extends Cubit<TasbeehState> {
             viewMode: leaveCounting ? TasbeehViewMode.home : state.viewMode,
             savedDhikr: updated,
             activeSavedDhikrId: removedActive ? null : state.activeSavedDhikrId,
-            draftTargetText:
-                updated.isEmpty ? '' : state.draftTargetText,
+            draftTargetText: updated.isEmpty ? '' : state.draftTargetText,
             failure: null,
             errorMessage: null,
           ),

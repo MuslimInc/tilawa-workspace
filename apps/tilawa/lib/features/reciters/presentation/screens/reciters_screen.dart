@@ -684,8 +684,8 @@ class _RecitersScreenState extends State<RecitersScreen>
                         (bloc) => bloc.state.isDragging,
                       );
 
-                  final Widget nestedScrollView = NotificationListener<
-                      ScrollNotification>(
+                  final Widget
+                  nestedScrollView = NotificationListener<ScrollNotification>(
                     onNotification: _handleNestedScrollNotification,
                     child: NestedScrollView(
                       key: _nestedScrollViewKey,
@@ -715,8 +715,7 @@ class _RecitersScreenState extends State<RecitersScreen>
                         allowHeavyLoadedResults: _allowHeavyLoadedResults,
                         showLetterIndex: showLetterIndex,
                         allScrollController: _allScrollController,
-                        favoritesScrollController:
-                            _favoritesScrollController,
+                        favoritesScrollController: _favoritesScrollController,
                         onClearAll: _clearAllFilters,
                         alphabetScrubbing: alphabetScrubbing,
                         onLetterSelected: _onLetterSelected,
@@ -740,9 +739,7 @@ class _RecitersScreenState extends State<RecitersScreen>
                     (bloc) => bloc.state.selectedTab == RecitersHomeTab.all,
                   );
                   final bool showLetterIndexRail =
-                      letterIndexAvailable &&
-                      showLetterIndex &&
-                      onAllTab;
+                      letterIndexAvailable && showLetterIndex && onAllTab;
                   final Widget nestedScrollContent = alphabetScrubbing
                       ? nestedScrollView
                       : RefreshIndicator.adaptive(
@@ -774,8 +771,9 @@ class _RecitersScreenState extends State<RecitersScreen>
                                   _recitersLetterIndexTopInsetFromScaffoldBody(
                                     context,
                                   ),
-                              bottomInset:
-                                  _recitersLetterIndexBottomInset(context),
+                              bottomInset: _recitersLetterIndexBottomInset(
+                                context,
+                              ),
                               reciters: (state as RecitersLoaded).reciters,
                               onLetterSelected: _onLetterSelected,
                               onScrubStart: _onAlphabetScrubStart,
@@ -901,15 +899,15 @@ class _RecitersSliverScreen extends StatelessWidget {
 
     final Widget catalogLayer =
         NotificationListener<OverscrollIndicatorNotification>(
-      onNotification: (OverscrollIndicatorNotification notification) {
-        if (alphabetScrubbing) {
-          notification.disallowIndicator();
-          return true;
-        }
-        return false;
-      },
-      child: catalogScrollView,
-    );
+          onNotification: (OverscrollIndicatorNotification notification) {
+            if (alphabetScrubbing) {
+              notification.disallowIndicator();
+              return true;
+            }
+            return false;
+          },
+          child: catalogScrollView,
+        );
 
     return MediaQuery(
       data: MediaQuery.of(context).removeViewInsets(removeBottom: true),

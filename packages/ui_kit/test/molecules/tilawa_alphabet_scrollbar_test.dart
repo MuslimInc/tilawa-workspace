@@ -1099,8 +1099,10 @@ void main() {
       themeMode.value = ThemeMode.light;
       await tester.pumpAndSettle();
 
-      final Color lightColor =
-          tester.widget<Text>(find.text('B')).style!.color!;
+      final Color lightColor = tester
+          .widget<Text>(find.text('B'))
+          .style!
+          .color!;
 
       expect(darkColor, isNot(equals(lightColor)));
     });

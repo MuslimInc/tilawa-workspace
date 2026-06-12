@@ -170,8 +170,7 @@ void main() {
       );
       expect(railScrollFinder, findsOneWidget);
 
-      final ScrollableState railScrollable =
-          tester.state<ScrollableState>(
+      final ScrollableState railScrollable = tester.state<ScrollableState>(
         find.descendant(
           of: railScrollFinder,
           matching: find.byType(Scrollable),
@@ -184,8 +183,7 @@ void main() {
       await railScrollable.position.moveTo(targetRailOffset);
       await tester.pump();
 
-      final ScrollableState catalogScrollable =
-          tester.state<ScrollableState>(
+      final ScrollableState catalogScrollable = tester.state<ScrollableState>(
         find.descendant(
           of: _allTabCustomScrollView(),
           matching: find.byType(Scrollable),
