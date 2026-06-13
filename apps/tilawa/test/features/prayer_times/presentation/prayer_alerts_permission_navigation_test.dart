@@ -19,6 +19,8 @@ import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa/router/prayer_alerts_permission_nav_extra.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import 'fakes/fake_prayer_permissions_cubit.dart';
+
 const Key _loginPageKey = Key('login-page');
 const Key _onboardingPageKey = Key('onboarding-page');
 
@@ -39,26 +41,6 @@ class _FakeOnboardingRepository
   }
 }
 
-class _FakePrayerPermissionsCubit extends Cubit<PrayerPermissionsState>
-    implements PrayerPermissionsCubit {
-  _FakePrayerPermissionsCubit(super.initial);
-
-  @override
-  Future<void> checkCapability() async {}
-
-  @override
-  Future<void> requestLocationPermission() async {}
-
-  @override
-  Future<void> requestExactAlarmPermission() async {}
-
-  @override
-  Future<void> requestNotificationPermission() async {}
-
-  @override
-  Future<void> requestIgnoreBatteryOptimizations() async {}
-}
-
 class _MockPrayerTimesBloc extends Mock implements PrayerTimesBloc {}
 
 void main() {
@@ -66,7 +48,7 @@ void main() {
 
   final GetIt getIt = GetIt.instance;
   late _FakeOnboardingRepository onboardingRepository;
-  late _FakePrayerPermissionsCubit permissionsCubit;
+  late FakePrayerPermissionsCubit permissionsCubit;
 
   setUpAll(() {
     registerFallbackValue(const PrayerTimesEvent.loadPrayerTimes());
@@ -75,7 +57,7 @@ void main() {
   setUp(() async {
     await getIt.reset();
     onboardingRepository = _FakeOnboardingRepository();
-    permissionsCubit = _FakePrayerPermissionsCubit(
+    permissionsCubit = FakePrayerPermissionsCubit(
       const PrayerPermissionsState(),
     );
 
@@ -93,7 +75,7 @@ void main() {
   });
 
   Widget buildNavigationApp({
-    required _FakePrayerPermissionsCubit cubit,
+    required FakePrayerPermissionsCubit cubit,
     PrayerPermissionsCubit? scopedCubit,
     PrayerTimesBloc? prayerTimesBloc,
     Future<void> Function(BuildContext context)? onShowAfterOnboarding,
@@ -191,7 +173,7 @@ void main() {
 
   Future<void> pumpNavigationApp(
     WidgetTester tester, {
-    required _FakePrayerPermissionsCubit cubit,
+    required FakePrayerPermissionsCubit cubit,
     PrayerPermissionsCubit? scopedCubit,
     PrayerTimesBloc? prayerTimesBloc,
     Future<void> Function(BuildContext context)? onShowAfterOnboarding,
@@ -362,8 +344,8 @@ void main() {
     testWidgets('uses scoped PrayerPermissionsCubit when provided', (
       WidgetTester tester,
     ) async {
-      final _FakePrayerPermissionsCubit scopedCubit =
-          _FakePrayerPermissionsCubit(
+      final FakePrayerPermissionsCubit scopedCubit =
+          FakePrayerPermissionsCubit(
             const PrayerPermissionsState(
               hasLocationPermission: false,
             ),

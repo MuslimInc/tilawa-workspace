@@ -13,28 +13,10 @@ import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa/router/prayer_alerts_permission_nav_extra.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../fakes/fake_prayer_permissions_cubit.dart';
+
 const Key _loginPageKey = Key('login-page');
 const Key _onboardingPageKey = Key('onboarding-page');
-
-class _FakePrayerPermissionsCubit extends Cubit<PrayerPermissionsState>
-    implements PrayerPermissionsCubit {
-  _FakePrayerPermissionsCubit(super.initial);
-
-  @override
-  Future<void> checkCapability() async {}
-
-  @override
-  Future<void> requestLocationPermission() async {}
-
-  @override
-  Future<void> requestExactAlarmPermission() async {}
-
-  @override
-  Future<void> requestNotificationPermission() async {}
-
-  @override
-  Future<void> requestIgnoreBatteryOptimizations() async {}
-}
 
 class _FakeOnboardingRepository
     implements PrayerAlertsPermissionOnboardingRepository {
@@ -60,7 +42,7 @@ class _TrackingOnboardingRepository
 
 Future<void> _pumpPermissionScreen(
   WidgetTester tester, {
-  required _FakePrayerPermissionsCubit cubit,
+  required FakePrayerPermissionsCubit cubit,
   PrayerAlertsPermissionNavExtra? navExtra,
   bool continueToLoginOnFinish = false,
   String initialLocation = '/permissions',
@@ -126,7 +108,7 @@ Future<void> _pumpPermissionScreen(
 class _PermissionScreenHarness extends StatefulWidget {
   const _PermissionScreenHarness({required this.cubit});
 
-  final _FakePrayerPermissionsCubit cubit;
+  final FakePrayerPermissionsCubit cubit;
 
   @override
   State<_PermissionScreenHarness> createState() =>
@@ -177,7 +159,7 @@ void main() {
     testWidgets('places primary action above skip in the footer', (
       WidgetTester tester,
     ) async {
-      final _FakePrayerPermissionsCubit cubit = _FakePrayerPermissionsCubit(
+      final FakePrayerPermissionsCubit cubit = FakePrayerPermissionsCubit(
         const PrayerPermissionsState(
           hasLocationPermission: false,
           capability: PrayerAlarmCapability(
@@ -202,7 +184,7 @@ void main() {
     testWidgets('skip on last step goes to login after onboarding', (
       WidgetTester tester,
     ) async {
-      final _FakePrayerPermissionsCubit cubit = _FakePrayerPermissionsCubit(
+      final FakePrayerPermissionsCubit cubit = FakePrayerPermissionsCubit(
         const PrayerPermissionsState(
           hasLocationPermission: false,
           capability: PrayerAlarmCapability(
@@ -228,7 +210,7 @@ void main() {
     testWidgets('skip on last step pops when not continuing to login', (
       WidgetTester tester,
     ) async {
-      final _FakePrayerPermissionsCubit cubit = _FakePrayerPermissionsCubit(
+      final FakePrayerPermissionsCubit cubit = FakePrayerPermissionsCubit(
         const PrayerPermissionsState(
           hasLocationPermission: false,
           capability: PrayerAlarmCapability(
@@ -295,7 +277,7 @@ void main() {
     testWidgets('empty resolved steps go to login after onboarding', (
       WidgetTester tester,
     ) async {
-      final _FakePrayerPermissionsCubit cubit = _FakePrayerPermissionsCubit(
+      final FakePrayerPermissionsCubit cubit = FakePrayerPermissionsCubit(
         const PrayerPermissionsState(
           hasLocationPermission: true,
           capability: PrayerAlarmCapability(
@@ -322,7 +304,7 @@ void main() {
     testWidgets('empty resolved steps pop when not continuing to login', (
       WidgetTester tester,
     ) async {
-      final _FakePrayerPermissionsCubit cubit = _FakePrayerPermissionsCubit(
+      final FakePrayerPermissionsCubit cubit = FakePrayerPermissionsCubit(
         const PrayerPermissionsState(
           hasLocationPermission: true,
           capability: PrayerAlarmCapability(
@@ -382,7 +364,7 @@ void main() {
     testWidgets('pins steps from nav extra for the full wizard session', (
       WidgetTester tester,
     ) async {
-      final _FakePrayerPermissionsCubit cubit = _FakePrayerPermissionsCubit(
+      final FakePrayerPermissionsCubit cubit = FakePrayerPermissionsCubit(
         const PrayerPermissionsState(
           hasLocationPermission: true,
           capability: PrayerAlarmCapability(
@@ -409,7 +391,7 @@ void main() {
     testWidgets('pins steps when nav extra arrives after first frame', (
       WidgetTester tester,
     ) async {
-      final _FakePrayerPermissionsCubit cubit = _FakePrayerPermissionsCubit(
+      final FakePrayerPermissionsCubit cubit = FakePrayerPermissionsCubit(
         const PrayerPermissionsState(
           hasLocationPermission: false,
         ),
@@ -440,7 +422,7 @@ void main() {
     testWidgets('rebuilds derived steps when capability resolves', (
       WidgetTester tester,
     ) async {
-      final _FakePrayerPermissionsCubit cubit = _FakePrayerPermissionsCubit(
+      final FakePrayerPermissionsCubit cubit = FakePrayerPermissionsCubit(
         const PrayerPermissionsState(
           hasLocationPermission: false,
         ),
@@ -474,7 +456,7 @@ void main() {
     testWidgets('rebuilds when location permission state changes', (
       WidgetTester tester,
     ) async {
-      final _FakePrayerPermissionsCubit cubit = _FakePrayerPermissionsCubit(
+      final FakePrayerPermissionsCubit cubit = FakePrayerPermissionsCubit(
         const PrayerPermissionsState(
           hasLocationPermission: false,
           capability: PrayerAlarmCapability(
@@ -517,7 +499,7 @@ void main() {
         repository,
       );
 
-      final _FakePrayerPermissionsCubit cubit = _FakePrayerPermissionsCubit(
+      final FakePrayerPermissionsCubit cubit = FakePrayerPermissionsCubit(
         const PrayerPermissionsState(
           hasLocationPermission: false,
         ),

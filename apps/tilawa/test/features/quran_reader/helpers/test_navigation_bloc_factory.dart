@@ -7,12 +7,14 @@ import 'package:quran_image/domain/domain.dart';
 import 'package:quran_image/presentation/bloc/navigation/navigation_bloc.dart';
 import 'package:quran_image/presentation/bloc/navigation/navigation_state.dart';
 
+import 'loaded_navigation_bloc.dart';
+
 /// Creates a loaded [NavigationBloc] for reader navigation tests.
 NavigationBloc createLoadedNavigationBloc({required int initialPage}) {
   final PageRepository pageRepository = InMemoryPageRepository();
   final PageState pageState = pageRepository.navigateToPage(initialPage);
 
-  return _LoadedNavigationBloc(
+  return LoadedNavigationBloc(
     initialState: NavigationLoaded(
       pageState: pageState,
       visibility: NavigationVisibility.initial(),
@@ -30,18 +32,6 @@ NavigationBloc createLoadedNavigationBloc({required int initialPage}) {
 
 Future<void> pumpNavigationBloc(NavigationBloc bloc) async {
   await Future<void>.delayed(Duration.zero);
-}
-
-class _LoadedNavigationBloc extends NavigationBloc {
-  _LoadedNavigationBloc({
-    required NavigationLoaded initialState,
-    required super.pageRepository,
-    required super.visibilityRepository,
-    required super.saveLastVisitedPageUseCase,
-    required super.getLastVisitedPageUseCase,
-  }) {
-    emit(initialState);
-  }
 }
 
 class _TestLastVisitedPageRepository implements LastVisitedPageRepository {
