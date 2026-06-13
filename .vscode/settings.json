@@ -8,5 +8,8 @@
     "usecases"
   ],
   "chatgpt.openOnStartup": false,
-  "kiroAgent.configureMCP": "Disabled"
+  "kiroAgent.configureMCP": "Disabled",
+  "yaml.schemas": {
+    "https://json.schemastore.org/github-action.json": ".github/actions/*/action.yml"
+  }
 }

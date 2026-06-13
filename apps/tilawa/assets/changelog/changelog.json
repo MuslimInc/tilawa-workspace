@@ -3,9 +3,9 @@
   "lastUpdatedAt": "2026-06-11T12:00:00Z",
   "releases": [
     {
-      "id": "2.0.12+56",
+      "id": "2.0.12+57",
       "version": "2.0.12",
-      "buildNumber": 56,
+      "buildNumber": 57,
       "highlights": {
         "en": [
           "Smoother and more reliable sign-in",

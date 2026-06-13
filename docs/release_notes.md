@@ -12,10 +12,10 @@ the changelog for full engineering detail.
 
 | Field | Value |
 |-------|--------|
-| Version | **2.0.12** (build **56**) |
-| Git tag | `v2.0.12+56` (pending) |
+| Version | **2.0.12** (build **57**) |
+| Git tag | `v2.0.12+57` (pending) |
 | Date | 2026-06-13 |
-| Track | Internal testing → Production |
+| Track | Production (supersedes build 56, same day) |
 
 ### What's new (en-US) — copy for Play Console
 

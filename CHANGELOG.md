@@ -7,7 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.0.12+56] - 2026-06-13 [Google Play Release]
+## [2.0.12+57] - 2026-06-13 [Google Play Release]
+
+> Supersedes build 56 (published earlier the same day) to include the
+> native-library packaging fix below.
 
 ### Added
 
@@ -19,7 +22,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Version**: Production track bumped to **2.0.12** (build **56**).
+- **Version**: Production track bumped to **2.0.12** (build **57**).
+- **Android**: Native libraries stored uncompressed in the APK
+  (`extractNativeLibs="false"`) so Google Play delta updates no longer
+  re-download the full app on every release.
 - **Player**: Tablet mini player anchored in the shell footer without overlapping
   the navigation rail or bar.
 - **Onboarding**: Full-width stacked primary and back actions in the footer bar.
