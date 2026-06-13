@@ -13,6 +13,10 @@
 #
 # Extra style lints were omitted where they produced hundreds of infos and break
 # `melos run analyze` (`dart analyze --fatal-infos`). Add them in focused PRs.
+#
+# Bloc: `bloc_lint` recommended rules (see https://pub.dev/packages/bloc_lint).
+# Run `melos run bloc:lint` for the bloc_tools CLI; member packages declare
+# `bloc_lint` in dev_dependencies so the include resolves.
 
 include:
   - package:flutter_lints/flutter.yaml

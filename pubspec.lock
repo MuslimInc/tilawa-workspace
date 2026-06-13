@@ -138,7 +138,7 @@ packages:
     source: hosted
     version: "0.3.0"
   bloc_lint:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: bloc_lint
       sha256: "5bf965e3be5346fd6133e7f2eb4c845de3f2ae09eeae4d6622f400848b4aba71"
@@ -153,6 +153,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "10.0.0"
+  bloc_tools:
+    dependency: "direct dev"
+    description:
+      name: bloc_tools
+      sha256: fa7fdef35d4ec5e8f2111a2079cef2204008d20dc15953812f46afde379b33ba
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0-dev.24"
   boolean_selector:
     dependency: transitive
     description:
@@ -1291,10 +1299,10 @@ packages:
     dependency: transitive
     description:
       name: in_app_purchase_android
-      sha256: "0585b7a762eb14b32187467c4bcadfab68d9978ae4b64d4164c54f06aaf73005"
+      sha256: eb8f551039481d1b265f12fa54f5ab5dd4f13ec5444a468b85a3793517a37fda
       url: "https://pub.dev"
     source: hosted
-    version: "0.5.0+2"
+    version: "0.5.1"
   in_app_purchase_platform_interface:
     dependency: transitive
     description:
@@ -1412,6 +1420,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.12.0"
+  json_rpc_2:
+    dependency: transitive
+    description:
+      name: json_rpc_2
+      sha256: "246b321532f0e8e2ba474b4d757eaa558ae4fdd0688fdbc1e1ca9705f9b8ca0e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.3"
   json_serializable:
     dependency: transitive
     description:
@@ -1500,6 +1516,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.0"
+  lsp_server_ce:
+    dependency: transitive
+    description:
+      name: lsp_server_ce
+      sha256: "06fb741620aad5529996ecced8fae132b5737a3f95c660a0e69b8ac9a5a5ec8d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.0"
+  mason:
+    dependency: transitive
+    description:
+      name: mason
+      sha256: "515b28eedc3e106bbbfb95f0ff63471003396978d3413daeba0a64bcac01367b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.2"
+  mason_logger:
+    dependency: transitive
+    description:
+      name: mason_logger
+      sha256: "4f053e4e7e1716002b72cad133d81612be3550d40ed9d43c1878c9b03ba93069"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.4"
   matcher:
     dependency: transitive
     description:
@@ -2325,10 +2365,10 @@ packages:
     dependency: transitive
     description:
       name: vibration
-      sha256: "9bb06614c69260f8bd11c80fe01ed7988905cf00e3417d656c2647e41f261d87"
+      sha256: c6c25eb7acadfd231925a60004736443cbf63f1eb5740d6dd83a1bc09cf00f6d
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.8"
+    version: "3.2.0"
   vibration_platform_interface:
     dependency: transitive
     description:

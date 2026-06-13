@@ -15,6 +15,7 @@ dependencies:
     path: ../../packages/ui_kit
 
 dev_dependencies:
+  bloc_lint: ^0.4.1
   flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
