@@ -2,6 +2,19 @@
 
 This review focuses on bugs, edge cases, and design issues that could impact the **Google Play** production release.
 
+> **Status (verified 2026-06-13, preparing 2.0.12+56): all 5 findings resolved.**
+>
+> 1. ✅ `requestPermissionOnFirstLaunch` replaced by
+>    `requestPermissionIfNecessary` — gated on "has requested" rather than
+>    first launch, so upgrading Android 13+ users are prompted.
+> 2. ✅ `BatchDownloadManager` persists batches to `SharedPreferencesAsync`
+>    and restores them on init.
+> 3. ✅ Pause/resume implemented end-to-end (`DownloadButtonBloc`
+>    `requestPause`/`requestResume` → repository → download service).
+> 4. ✅ `DownloadRecoveryService` size tolerance tightened to 1%.
+> 5. ✅ `DownloadButtonBloc._onStartDownload` wraps the use case in
+>    try/catch and emits `failed` on uncaught exceptions.
+
 ## 1. [Critical Bug] Android 13+ Notification Permissions
 
 The `NotificationPermissionService` only requests the `POST_NOTIFICATIONS` permission on the "first launch" (based on personal app storage).
