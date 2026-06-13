@@ -274,5 +274,5 @@ _Move shipped notes to **Current release** when cutting a Play upload._
 2. Record the same version in [`CHANGELOG.md`](../CHANGELOG.md).
 3. Tag: `git tag -a v1.0.5+32 -m "Release 1.0.5+32"` and `git push origin v1.0.5+32`.
 4. Build: GitHub Actions **Android Release (Google Play)** workflow, or locally:
-   `cd apps/tilawa && flutter build appbundle --release --target-platform android-arm64 --split-debug-info=build/symbols`
+   `cd apps/tilawa && flutter build appbundle --release --target-platform android-arm64 --obfuscate --split-debug-info=build/symbols`
 5. Checklist: [`google_play_release_checklist.md`](google_play_release_checklist.md)

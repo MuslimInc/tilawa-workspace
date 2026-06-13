@@ -23,9 +23,4 @@ class BlocWithFix extends Bloc<TestDownloadEvent, TestDownloadState> {
   final Stream<double> _progressStream;
   // ignore: unused_field
   StreamSubscription<double>? _subscription;
-
-  @override
-  Future<void> close() {
-    return super.close();
-  }
 }

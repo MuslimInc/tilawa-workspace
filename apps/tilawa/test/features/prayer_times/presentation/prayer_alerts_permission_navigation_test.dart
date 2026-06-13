@@ -344,12 +344,11 @@ void main() {
     testWidgets('uses scoped PrayerPermissionsCubit when provided', (
       WidgetTester tester,
     ) async {
-      final FakePrayerPermissionsCubit scopedCubit =
-          FakePrayerPermissionsCubit(
-            const PrayerPermissionsState(
-              hasLocationPermission: false,
-            ),
-          );
+      final FakePrayerPermissionsCubit scopedCubit = FakePrayerPermissionsCubit(
+        const PrayerPermissionsState(
+          hasLocationPermission: false,
+        ),
+      );
       addTearDown(scopedCubit.close);
 
       await pumpNavigationApp(

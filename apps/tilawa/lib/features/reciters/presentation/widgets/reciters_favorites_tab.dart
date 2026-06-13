@@ -157,6 +157,7 @@ class _FavoritesEmptySliver extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final TilawaDesignTokens tokens = Theme.of(context).tokens;
     final String title = context.l10n.noFavorites;
 
     return _FavoritesViewportSliver(
@@ -168,6 +169,9 @@ class _FavoritesEmptySliver extends StatelessWidget {
         title: title,
         subtitle: context.l10n.tourRecitersFavoritesDescription,
         semanticLabel: title,
+        maxWidth: tokens.contentMaxWidthForm * 0.6,
+        // Mirrors the downloads tab CTA so both empty tabs lead the user
+        // back to the catalog instead of dead-ending.
         primaryAction: onBrowseReciters == null
             ? null
             : TilawaButton(
