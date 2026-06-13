@@ -108,7 +108,9 @@ abstract final class LaunchFirstFrameGate {
       firstFrameLog('native splash ready skipped (not Android)');
       return;
     }
-    firstFrameLog('native splash ready → MethodChannel(com.tilawa.app/launch_splash)');
+    firstFrameLog(
+      'native splash ready → MethodChannel(com.tilawa.app/launch_splash)',
+    );
     try {
       await const MethodChannel(
         'com.tilawa.app/launch_splash',

@@ -140,6 +140,65 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('reciter list scroll preserves alphabet rail scroll offset', (
+      tester,
+    ) async {
+      final List<String> letters = List<String>.generate(
+        30,
+        (int index) => String.fromCharCode('A'.codeUnitAt(0) + index),
+      );
+      recitersBloc = loadedRecitersBloc(
+        reciters: _recitersForLetters(letters),
+      );
+
+      final Size previousPhysicalSize = tester.view.physicalSize;
+      final double previousDevicePixelRatio = tester.view.devicePixelRatio;
+      addTearDown(() {
+        tester.view.physicalSize = previousPhysicalSize;
+        tester.view.devicePixelRatio = previousDevicePixelRatio;
+      });
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(390, 844);
+
+      await pumpAlphabetScreen(tester);
+
+      final Finder railScrollFinder = find.descendant(
+        of: find.bySemanticsIdentifier(
+          ReciterSemanticsIds.recitersAlphabetScrollbar,
+        ),
+        matching: find.byKey(const Key('alphabet_scrollbar_scroll')),
+      );
+      expect(railScrollFinder, findsOneWidget);
+
+      final ScrollableState railScrollable = tester.state<ScrollableState>(
+        find.descendant(
+          of: railScrollFinder,
+          matching: find.byType(Scrollable),
+        ),
+      );
+      final double maxRailExtent = railScrollable.position.maxScrollExtent;
+      expect(maxRailExtent, greaterThan(0));
+
+      const double targetRailOffset = 80;
+      await railScrollable.position.moveTo(targetRailOffset);
+      await tester.pump();
+
+      final ScrollableState catalogScrollable = tester.state<ScrollableState>(
+        find.descendant(
+          of: _allTabCustomScrollView(),
+          matching: find.byType(Scrollable),
+        ),
+      );
+      await catalogScrollable.position.moveTo(240);
+      await tester.pump();
+
+      expect(
+        railScrollable.position.pixels,
+        closeTo(targetRailOffset, 1.0),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('alphabet scrub restores scroll physics after release', (
       tester,
     ) async {
@@ -377,7 +436,9 @@ void main() {
 
       expect(alphabetBloc.state.isDragging, isFalse);
 
-      final gesture = await tester.startGesture(tester.getCenter(find.text('A')));
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.text('A')),
+      );
       await tester.pump();
 
       expect(alphabetBloc.state.isDragging, isTrue);
@@ -428,7 +489,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final gesture = await tester.startGesture(tester.getCenter(find.text('B')));
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.text('B')),
+      );
       await tester.pump();
       await gesture.moveBy(const Offset(0, 40));
       await tester.pump();
@@ -480,8 +543,7 @@ void main() {
   });
 }
 
-class _MockGetRecitersUseCase extends Mock
-    implements GetRecitersUseCase {}
+class _MockGetRecitersUseCase extends Mock implements GetRecitersUseCase {}
 
 void _noopLetterSelected(String? _) {}
 

@@ -8,11 +8,12 @@ import android.os.Looper
 import android.util.Log
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.ryanheise.audioservice.AudioServiceActivity
-import com.tilawa.app.auth.GoogleSignInPrepareChannel
 import com.tilawa.app.prayer.AdhanScheduler
 import com.tilawa.app.prayer.PrayerAdhanMethodChannel
 import com.tilawa.app.prayer.PrayerNotificationsWatchdogScheduler
+import androidx.annotation.VisibleForTesting
 import io.flutter.embedding.android.RenderMode
+import io.sentry.Sentry
 import io.sentry.flutter.SentryFlutterPlugin
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -23,9 +24,11 @@ class MainActivity : AudioServiceActivity() {
         private const val WATCHDOG_CHANNEL = "com.tilawa.app/prayer_watchdog"
         private const val LAUNCH_SPLASH_CHANNEL = "com.tilawa.app/launch_splash"
         private const val APP_CONTEXT_CHANNEL = "com.tilawa.app/app_context"
+        private const val GOOGLE_SIGN_IN_CHANNEL = "com.tilawa.app/google_sign_in"
         const val ACTION_OPEN_PRAYER_STATUS =
             "com.tilawa.app.prayer.ACTION_OPEN_PRAYER_STATUS"
         private const val TAG = "MainActivity"
+        private const val GSIGNIN_TAG = "TilawaGSignIn"
         private const val FIRST_FRAME_TAG = "FirstFrame"
 
         // Failsafe: must outlast the Dart-side LaunchFirstFrameGate failsafe
@@ -36,16 +39,23 @@ class MainActivity : AudioServiceActivity() {
 
         @Volatile
         var keepLaunchSplashOnScreen: Boolean = true
+
+        /** Updated on each [configureFlutterEngine]; used by credential UI lifecycle. */
+        @Volatile
+        var invokeCredentialUiDismissed: (() -> Unit)? = null
     }
 
     private fun firstFrameLog(message: String) {
         Log.d(FIRST_FRAME_TAG, message)
     }
 
+    private var renderMode: RenderMode = RenderMode.surface
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        renderMode = resolveRenderMode(intent)
         Log.d(
             TAG,
-            "MAIN_ACTIVITY_ON_CREATE_INTENT action=${intent?.action} extras=${intent?.extras?.keySet()}"
+            "MAIN_ACTIVITY_ON_CREATE_INTENT action=${intent?.action} extras=${intent?.extras?.keySet()} renderMode=$renderMode"
         )
         firstFrameLog("MainActivity.onCreate installSplashScreen")
         val splashScreen = installSplashScreen()
@@ -110,8 +120,23 @@ class MainActivity : AudioServiceActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        
-        // Register custom channels after super to ensure they are registered
+        registerAppMethodChannels(flutterEngine)
+        if (TranssionOemPolicy.isTranssionDevice()) {
+            TranssionCredentialUiLifecycle.ensureRegistered(application)
+            invokeCredentialUiDismissed = {
+                MethodChannel(
+                    flutterEngine.dartExecutor.binaryMessenger,
+                    GOOGLE_SIGN_IN_CHANNEL,
+                ).invokeMethod("onCredentialUiDismissed", null)
+            }
+        }
+        // Belt-and-suspenders for cold start; hot restart is restored from Dart
+        // main() before SentryFlutter.init.
+        restoreSentryFlutterApplicationContext()
+    }
+
+    @VisibleForTesting
+    internal fun registerAppMethodChannels(flutterEngine: FlutterEngine) {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, WATCHDOG_CHANNEL)
             .setMethodCallHandler { call, result ->
                 when (call.method) {
@@ -128,11 +153,6 @@ class MainActivity : AudioServiceActivity() {
             }
 
         PrayerAdhanMethodChannel.register(
-            flutterEngine.dartExecutor.binaryMessenger,
-            this,
-        )
-
-        GoogleSignInPrepareChannel.register(
             flutterEngine.dartExecutor.binaryMessenger,
             this,
         )
@@ -159,13 +179,12 @@ class MainActivity : AudioServiceActivity() {
                         restoreSentryFlutterApplicationContext()
                         result.success(null)
                     }
+                    "isSentryNativeSdkInitialized" -> {
+                        result.success(Sentry.isEnabled())
+                    }
                     else -> result.notImplemented()
                 }
             }
-
-        // Belt-and-suspenders for cold start; hot restart is restored from Dart
-        // main() before SentryFlutter.init.
-        restoreSentryFlutterApplicationContext()
     }
 
     /**
@@ -198,12 +217,47 @@ class MainActivity : AudioServiceActivity() {
         }
     }
 
-    override fun getRenderMode(): RenderMode {
-        // A cold start from a notification can launch through the lockscreen/
-        // notification shade path. With SurfaceView, Flutter delays the first
-        // Android draw until the first Flutter frame, which can deadlock that
-        // transition and leave a persistent black screen. TextureView avoids
-        // the pre-draw gate for this activity.
-        return RenderMode.texture
+    override fun onResume() {
+        super.onResume()
+        if (TranssionOemPolicy.isTranssionDevice()) {
+            Log.d(
+                GSIGNIN_TAG,
+                "H1 MainActivity.onResume " +
+                    "renderMode=$renderMode isFinishing=$isFinishing",
+            )
+            flutterEngine?.dartExecutor?.binaryMessenger?.let { messenger ->
+                MethodChannel(messenger, GOOGLE_SIGN_IN_CHANNEL)
+                    .invokeMethod("onMainActivityResumed", null)
+            }
+        }
+    }
+
+    override fun getRenderMode(): RenderMode = renderMode
+
+    /**
+     * Notification cold starts can launch through the lockscreen/shade path.
+     * [RenderMode.surface] delays the first Android draw until the first
+     * Flutter frame and can deadlock that transition (persistent black screen).
+     * [RenderMode.texture] avoids the pre-draw gate for that path only.
+     *
+     * Transsion ROMs (Infinix, Tecno, Itel) also need [RenderMode.texture] so
+     * Credential Manager / Play Services sign-in UI is not hidden behind the
+     * Flutter surface (otherwise [authenticate] hangs until timeout).
+     *
+     * Other launches use [RenderMode.surface].
+     */
+    private fun resolveRenderMode(intent: Intent?): RenderMode {
+        if (intent?.action == ACTION_OPEN_PRAYER_STATUS) {
+            return RenderMode.texture
+        }
+        if (TranssionOemPolicy.isTranssionDevice()) {
+            Log.d(
+                GSIGNIN_TAG,
+                "H5 onCreate renderMode=texture " +
+                    "manufacturer=${Build.MANUFACTURER} brand=${Build.BRAND}",
+            )
+            return RenderMode.texture
+        }
+        return RenderMode.surface
     }
 }

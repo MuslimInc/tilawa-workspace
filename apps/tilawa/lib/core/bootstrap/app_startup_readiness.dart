@@ -123,16 +123,17 @@ class AppStartupReadiness {
     VoidCallback? onSuccess,
   }) async {
     try {
-      final Either<Failure, List<ReciterEntity>> result =
-          await Future.any(<Future<Either<Failure, List<ReciterEntity>>>>[
-            fetch(),
-            Future<Either<Failure, List<ReciterEntity>>>.delayed(
-              prefetchTimeout,
-              () => Left<Failure, List<ReciterEntity>>(
-                UnexpectedFailure('$label prefetch timeout'),
-              ),
+      final Either<Failure, List<ReciterEntity>> result = await Future.any(
+        <Future<Either<Failure, List<ReciterEntity>>>>[
+          fetch(),
+          Future<Either<Failure, List<ReciterEntity>>>.delayed(
+            prefetchTimeout,
+            () => Left<Failure, List<ReciterEntity>>(
+              UnexpectedFailure('$label prefetch timeout'),
             ),
-          ]);
+          ),
+        ],
+      );
       result.fold((_) {}, (_) => onSuccess?.call());
     } catch (e, st) {
       logger.w(

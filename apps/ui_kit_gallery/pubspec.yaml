@@ -5,7 +5,7 @@ publish_to: none
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.12.1
+  sdk: ^3.12.2
 
 dependencies:
   cupertino_icons: ^1.0.8
@@ -15,6 +15,7 @@ dependencies:
     path: ../../packages/ui_kit
 
 dev_dependencies:
+  bloc_lint: ^0.4.1
   flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter

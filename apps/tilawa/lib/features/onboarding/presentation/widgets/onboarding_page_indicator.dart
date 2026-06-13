@@ -32,9 +32,7 @@ class OnboardingPageIndicator extends StatelessWidget {
           height: dotHeight,
           width: active ? activeWidth : inactiveWidth,
           decoration: BoxDecoration(
-            color: active
-                ? colorScheme.primary
-                : colorScheme.outlineVariant,
+            color: active ? colorScheme.primary : colorScheme.outlineVariant,
             borderRadius: BorderRadius.circular(tokens.radiusSmall),
           ),
         );

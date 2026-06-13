@@ -138,7 +138,7 @@ packages:
     source: hosted
     version: "0.3.0"
   bloc_lint:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: bloc_lint
       sha256: "5bf965e3be5346fd6133e7f2eb4c845de3f2ae09eeae4d6622f400848b4aba71"
@@ -153,6 +153,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "10.0.0"
+  bloc_tools:
+    dependency: "direct dev"
+    description:
+      name: bloc_tools
+      sha256: fa7fdef35d4ec5e8f2111a2079cef2204008d20dc15953812f46afde379b33ba
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0-dev.24"
   boolean_selector:
     dependency: transitive
     description:
@@ -233,14 +241,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.1"
-  cbor:
-    dependency: transitive
-    description:
-      name: cbor
-      sha256: "2c5c37650f0a2d25149f03e748ab7b2857787bde338f95fe947738b80d713da2"
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.5.1"
   cel:
     dependency: transitive
     description:
@@ -417,38 +417,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.15.1"
-  credential_manager:
-    dependency: transitive
-    description:
-      name: credential_manager
-      sha256: "3d09d3a753e9975f07dd8d4ba777ce33dbd0269d5196fc1bc3c349da84b1ff5b"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.8"
-  credential_manager_android:
-    dependency: transitive
-    description:
-      name: credential_manager_android
-      sha256: cac9b34efc2629fb927ed565795d1e324dbd942d7e6c39e97ed090b5f0ce5f3e
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.8"
-  credential_manager_ios:
-    dependency: transitive
-    description:
-      name: credential_manager_ios
-      sha256: f174ec4b9a98c893ed79fc2149e4d703b3c04ba2168ba7d8e06b9715ff52f154
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.8"
-  credential_manager_platform_interface:
-    dependency: transitive
-    description:
-      name: credential_manager_platform_interface
-      sha256: e36781cc73dee360853275cd2fc7a535305d7368b5c3c7be7fb38f4be6bec3e7
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.8"
   cross_file:
     dependency: transitive
     description:
@@ -553,6 +521,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.2"
+  disk_space_plus:
+    dependency: transitive
+    description:
+      name: disk_space_plus
+      sha256: "1e454599a7dcec0c0bc1ad0b7f9f563b3fffbc988175bd452c4d3c7503ed3423"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.6"
   equatable:
     dependency: transitive
     description:
@@ -1027,50 +1003,50 @@ packages:
     dependency: transitive
     description:
       name: geolocator
-      sha256: "79939537046c9025be47ec645f35c8090ecadb6fe98eba146a0d25e8c1357516"
+      sha256: e146a6d63776582651e97a79cbe459f8e1211b100101fadcd84db83361fa599f
       url: "https://pub.dev"
     source: hosted
-    version: "14.0.2"
+    version: "14.0.3"
   geolocator_android:
     dependency: transitive
     description:
       name: geolocator_android
-      sha256: "179c3cb66dfa674fc9ccbf2be872a02658724d1c067634e2c427cf6df7df901a"
+      sha256: "86ea1654e4f61ff51466848e91c116b422d6010ea269fda0fbe1af7e9e742ce1"
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.2"
+    version: "5.0.3"
   geolocator_apple:
     dependency: transitive
     description:
       name: geolocator_apple
-      sha256: dbdd8789d5aaf14cf69f74d4925ad1336b4433a6efdf2fce91e8955dc921bf22
+      sha256: "853803d6bb1713c094e935b4a5ae5f19c0308acf81da13fa9ff84fb4c70c0b73"
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.13"
+    version: "2.3.14"
   geolocator_linux:
     dependency: transitive
     description:
       name: geolocator_linux
-      sha256: b02993d59b753bf1967ed28862002841aec5cdd5090c1f495213b32ce488aced
+      sha256: "3da7420f11c3496511a5bd3c18fd67b88e5659f12e46b7ce00a788f6996e850a"
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.5"
+    version: "0.2.6"
   geolocator_platform_interface:
     dependency: transitive
     description:
       name: geolocator_platform_interface
-      sha256: dde05dae7d584db6e82feb87dd9fb0b4b4c83ed68065667b4bef637be38e13a7
+      sha256: cdb082e4f048b69da244117b7914cc60d2a8897546ffaa4f2529c786ded7aee2
       url: "https://pub.dev"
     source: hosted
-    version: "4.2.7"
+    version: "4.2.8"
   geolocator_web:
     dependency: transitive
     description:
       name: geolocator_web
-      sha256: b1ae9bdfd90f861fde8fd4f209c37b953d65e92823cb73c7dee1fa021b06f172
+      sha256: "19e485a0f8d6a88abcf9c53cba3a4105e14b7435ed8ac1c108c067b938fe8429"
       url: "https://pub.dev"
     source: hosted
-    version: "4.1.3"
+    version: "4.1.4"
   geolocator_windows:
     dependency: transitive
     description:
@@ -1183,14 +1159,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.8"
-  hex:
-    dependency: transitive
-    description:
-      name: hex
-      sha256: "4e7cd54e4b59ba026432a6be2dd9d96e4c5205725194997193bf871703b82c4a"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.0"
   hive_ce:
     dependency: transitive
     description:
@@ -1331,10 +1299,10 @@ packages:
     dependency: transitive
     description:
       name: in_app_purchase_android
-      sha256: "0585b7a762eb14b32187467c4bcadfab68d9978ae4b64d4164c54f06aaf73005"
+      sha256: eb8f551039481d1b265f12fa54f5ab5dd4f13ec5444a468b85a3793517a37fda
       url: "https://pub.dev"
     source: hosted
-    version: "0.5.0+2"
+    version: "0.5.1"
   in_app_purchase_platform_interface:
     dependency: transitive
     description:
@@ -1452,6 +1420,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.12.0"
+  json_rpc_2:
+    dependency: transitive
+    description:
+      name: json_rpc_2
+      sha256: "246b321532f0e8e2ba474b4d757eaa558ae4fdd0688fdbc1e1ca9705f9b8ca0e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.3"
   json_serializable:
     dependency: transitive
     description:
@@ -1540,6 +1516,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.0"
+  lsp_server_ce:
+    dependency: transitive
+    description:
+      name: lsp_server_ce
+      sha256: "06fb741620aad5529996ecced8fae132b5737a3f95c660a0e69b8ac9a5a5ec8d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.0"
+  mason:
+    dependency: transitive
+    description:
+      name: mason
+      sha256: "515b28eedc3e106bbbfb95f0ff63471003396978d3413daeba0a64bcac01367b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.2"
+  mason_logger:
+    dependency: transitive
+    description:
+      name: mason_logger
+      sha256: "4f053e4e7e1716002b72cad133d81612be3550d40ed9d43c1878c9b03ba93069"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.4"
   matcher:
     dependency: transitive
     description:
@@ -1768,10 +1768,10 @@ packages:
     dependency: transitive
     description:
       name: permission_handler_apple
-      sha256: e20daf680eef1ca62ffe8c8c526b778cc386d50137c77ac71c8ec9c88c13fb9d
+      sha256: "79dfa1df734798aa3cfdad166d3a3698c206d8813de13516ea1071b5d7e2f420"
       url: "https://pub.dev"
     source: hosted
-    version: "9.4.9"
+    version: "9.4.10"
   permission_handler_html:
     dependency: transitive
     description:
@@ -1936,10 +1936,10 @@ packages:
     dependency: transitive
     description:
       name: sentry
-      sha256: "3284d220618d9344ce8a0765519129744a4cc658309496f052680909d74f7c51"
+      sha256: "3311f89e0c964c4df5f65670348c8a11744c94ae2b57032c947cfb26bfd03ef0"
       url: "https://pub.dev"
     source: hosted
-    version: "9.21.0"
+    version: "9.22.0"
   sentry_dart_plugin:
     dependency: "direct dev"
     description:
@@ -1952,10 +1952,10 @@ packages:
     dependency: transitive
     description:
       name: sentry_flutter
-      sha256: fc14658d90645e83e2305e8300513d5633aa5cd2cbf5b5d805e78416acbc61e9
+      sha256: efd3bebd7962438d0ecbe5c7b530de012e2e8efe14ef838b89195d7c2bb3f66c
       url: "https://pub.dev"
     source: hosted
-    version: "9.21.0"
+    version: "9.22.0"
   share_plus:
     dependency: transitive
     description:
@@ -2125,10 +2125,10 @@ packages:
     dependency: transitive
     description:
       name: sqflite_common
-      sha256: cce558075afe2a83f3fd7fc123acd6b090683e4f23910d44fbb31ecd7800b014
+      sha256: "5bf6a55c166e73bf651ba7ec3ed486e577620e3dc8f3a9c6a258a8031b624590"
       url: "https://pub.dev"
     source: hosted
-    version: "2.5.9"
+    version: "2.5.11"
   sqflite_darwin:
     dependency: transitive
     description:
@@ -2365,10 +2365,10 @@ packages:
     dependency: transitive
     description:
       name: vibration
-      sha256: "9bb06614c69260f8bd11c80fe01ed7988905cf00e3417d656c2647e41f261d87"
+      sha256: c6c25eb7acadfd231925a60004736443cbf63f1eb5740d6dd83a1bc09cf00f6d
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.8"
+    version: "3.2.0"
   vibration_platform_interface:
     dependency: transitive
     description:
@@ -2506,5 +2506,5 @@ packages:
     source: hosted
     version: "2.2.4"
 sdks:
-  dart: ">=3.12.1 <4.0.0"
+  dart: ">=3.12.2 <4.0.0"
   flutter: ">=3.44.0"

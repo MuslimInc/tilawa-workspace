@@ -6,60 +6,68 @@ import 'package:tilawa_core/errors/failures.dart';
 import '../../../reciters/domain/repositories/reciters_repository.dart';
 import '../entities/download_item.dart';
 import '../repositories/downloads_repository.dart';
+import '../services/completed_download_file_validator.dart';
 
 @injectable
 class GetValidCompletedDownloadsUseCase {
-  GetValidCompletedDownloadsUseCase(this._repository, this._recitersRepository);
+  const GetValidCompletedDownloadsUseCase(
+    this._repository,
+    this._recitersRepository,
+    this._fileValidator,
+  );
 
   final DownloadsRepository _repository;
   final RecitersRepository _recitersRepository;
+  final CompletedDownloadFileValidator _fileValidator;
 
   Future<Either<Failure, List<DownloadItem>>> call(String reciterName) async {
     try {
-      // 1. Get all downloads
       final List<DownloadItem> allDownloads = await _repository
           .getAllDownloads();
 
-      // 2. Resolve Reciter ID for better matching
       final Either<Failure, List<ReciterEntity>> recitersResult =
           await _recitersRepository.getReciters();
 
       final int? reciterId = recitersResult.fold(
-        (l) => null, // If failed to fetch reciters, fallback to name matching
-        (reciters) {
-          try {
-            return reciters.firstWhere((r) => r.name == reciterName).id;
-          } catch (_) {
-            return null;
-          }
+        (_) => null,
+        (List<ReciterEntity> reciters) {
+          final Map<String, int> reciterIdByName = {
+            for (final ReciterEntity reciter in reciters)
+              reciter.name: reciter.id,
+          };
+          return reciterIdByName[reciterName];
         },
       );
 
-      // 3. Filter and Validate
-      final List<DownloadItem> validDownloads = [];
+      final List<DownloadItem> completedForReciter = allDownloads
+          .where(
+            (DownloadItem download) =>
+                download.status == DownloadStatus.completed &&
+                _matchesReciter(
+                  download: download,
+                  reciterName: reciterName,
+                  reciterId: reciterId,
+                ),
+          )
+          .toList(growable: false);
 
-      for (final download in allDownloads) {
-        // Match Reciter
-        var isMatch = false;
-        if (reciterId != null && download.reciterId == reciterId) {
-          isMatch = true;
-        } else if (download.reciterName == reciterName) {
-          isMatch = true;
-        }
-
-        if (isMatch && download.status == DownloadStatus.completed) {
-          final bool fileExists = await _repository.validateDownloadedFile(
-            download,
-          );
-          if (fileExists) {
-            validDownloads.add(download);
-          }
-        }
-      }
+      final List<DownloadItem> validDownloads = await _fileValidator
+          .validateExistingFiles(completedForReciter);
 
       return Right(validDownloads);
     } catch (e) {
       return Left(CacheFailure(e.toString()));
     }
+  }
+
+  bool _matchesReciter({
+    required DownloadItem download,
+    required String reciterName,
+    required int? reciterId,
+  }) {
+    if (reciterId != null && download.reciterId == reciterId) {
+      return true;
+    }
+    return download.reciterName == reciterName;
   }
 }

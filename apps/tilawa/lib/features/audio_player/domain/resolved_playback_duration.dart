@@ -45,8 +45,7 @@ ResolvedPlaybackDuration resolvePlaybackDisplayDurationDetailed({
     }
   }
 
-  final Duration cachedDuration =
-      cachedDurations[audio.id] ?? Duration.zero;
+  final Duration cachedDuration = cachedDurations[audio.id] ?? Duration.zero;
   if (cachedDuration > Duration.zero) {
     return ResolvedPlaybackDuration(
       duration: cachedDuration,

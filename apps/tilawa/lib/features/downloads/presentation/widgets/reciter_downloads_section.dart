@@ -203,8 +203,7 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
               horizontalPadding: tokens.spaceLarge,
               onDelete: _dispatchDelete,
             ),
-            if (!isLastNarrative)
-              TilawaDivider(height: 1, color: dividerColor),
+            if (!isLastNarrative) TilawaDivider(height: 1, color: dividerColor),
           ],
         );
       }).toList(),
@@ -217,29 +216,32 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
     );
   }
 
-  void _showDeleteReciterDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.l10n.deleteAll),
+  void _showDeleteReciterDialog(BuildContext parentContext) {
+    final DownloadsBloc downloadsBloc = parentContext.read<DownloadsBloc>();
+    final String reciterName = widget.reciterName;
+
+    showDialog<void>(
+      context: parentContext,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(dialogContext.l10n.deleteAll),
         content: Text(
           AppLocalizations.of(
-            context,
-          )!.deleteAllDownloadsConfirmation(widget.reciterName),
+            dialogContext,
+          )!.deleteAllDownloadsConfirmation(reciterName),
         ),
         actions: [
           TilawaButton(
-            text: context.l10n.cancel,
+            text: dialogContext.l10n.cancel,
             variant: TilawaButtonVariant.ghost,
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(),
           ),
           TilawaButton(
-            text: context.l10n.deleteAll,
+            text: dialogContext.l10n.deleteAll,
             variant: TilawaButtonVariant.danger,
             onPressed: () {
-              Navigator.of(context).pop();
-              context.read<DownloadsBloc>().add(
-                DeleteReciterDownloads(reciterName: widget.reciterName),
+              Navigator.of(dialogContext).pop();
+              downloadsBloc.add(
+                DeleteReciterDownloads(reciterName: reciterName),
               );
             },
           ),
@@ -247,7 +249,6 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
       ),
     );
   }
-
 }
 
 class _ReciterAvatar extends StatelessWidget {
@@ -297,8 +298,9 @@ class _ReciterMetaLine extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final int count = downloads.length;
-    final String surahWord =
-        count == 1 ? 'surah' : context.l10n.surahs.toLowerCase();
+    final String surahWord = count == 1
+        ? 'surah'
+        : context.l10n.surahs.toLowerCase();
     final int totalBytes = downloads.fold<int>(
       0,
       (sum, d) => sum + (d.fileSize > 0 ? d.fileSize : d.downloadedSize),

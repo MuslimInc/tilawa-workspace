@@ -8,6 +8,7 @@ import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/network/network_info.dart';
 
+import '../../../domain/constants/download_storage_estimates.dart';
 import '../../../domain/entities/download_item.dart';
 import '../../../domain/usecases/usecases.dart';
 
@@ -38,6 +39,7 @@ class DownloadButtonBloc
     required this._observeDownloadProgress,
     required this._getDownloadItem,
     required this._networkInfo,
+    required this._checkLowDeviceStorage,
     this._initialIsDownloaded,
     this._initialIsDownloading,
     this._initialProgress,
@@ -78,6 +80,7 @@ class DownloadButtonBloc
   final ObserveDownloadProgressUseCase _observeDownloadProgress;
   final GetDownloadItemUseCase _getDownloadItem;
   final NetworkInfo _networkInfo;
+  final CheckLowDeviceStorageUseCase _checkLowDeviceStorage;
 
   final bool? _initialIsDownloaded;
   final bool? _initialIsDownloading;
@@ -177,6 +180,13 @@ class DownloadButtonBloc
 
     emit(const DownloadButtonState.pending());
     _listenToProgress();
+
+    final bool isStorageLow = await _checkLowDeviceStorage(
+      estimatedRequiredBytes: DownloadStorageEstimates.maxSurahBytes,
+    );
+    if (isStorageLow) {
+      emit(const DownloadButtonState.pending(lowStorageWarning: true));
+    }
 
     try {
       final Either<Failure, void> result = await _downloadSurah(

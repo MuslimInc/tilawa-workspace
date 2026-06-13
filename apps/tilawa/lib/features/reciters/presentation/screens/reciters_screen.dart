@@ -36,6 +36,32 @@ import '../tour/reciters_tour_launcher.dart';
 import '../tour/reciters_tour_targets.dart';
 import '../utils/reciters_loaded_rebuild_policy.dart';
 
+/// [RefreshIndicator.notificationPredicate] for reciters [NestedScrollView].
+///
+/// Inner catalog overscroll arrives at depth 2; [defaultScrollNotificationPredicate]
+/// only allows depth 0 and blocks pull-to-refresh.
+bool _recitersRefreshNotificationPredicate(ScrollNotification notification) {
+  if (notification.metrics.axis != Axis.vertical) {
+    return false;
+  }
+  return notification.depth == 0 || notification.depth == 2;
+}
+
+/// Positions the refresh spinner below the search row and pinned tab bar.
+double _recitersRefreshIndicatorEdgeOffset(BuildContext context) {
+  return TilawaAppBarConfig.catalogSearchRowHeight(context) +
+      _recitersPinnedTabBarHeight(context);
+}
+
+/// Alphabet rail top inset from [Scaffold.body] top (below the app bar).
+///
+/// Includes the collapsible search row so the rail keeps a stable screen
+/// position when the nested header scrolls away.
+double _recitersLetterIndexTopInsetFromScaffoldBody(BuildContext context) {
+  final TilawaDesignTokens tokens = Theme.of(context).tokens;
+  return _recitersRefreshIndicatorEdgeOffset(context) + tokens.spaceSmall;
+}
+
 /// Main-shell system back: collapse expanded player, focus the reciters tab,
 /// then exit — all handled explicitly.
 ///
@@ -138,6 +164,7 @@ class _RecitersScreenState extends State<RecitersScreen>
   bool _isStartupLiteUi = true;
   bool _allowHeavyLoadedResults = false;
   bool _introTourAttempted = false;
+  bool _pendingStartupFavoriteOrdering = false;
   late final FavoritesCubit _favoritesCubit;
   late final TabController _tabController;
 
@@ -173,8 +200,12 @@ class _RecitersScreenState extends State<RecitersScreen>
     if (startupState is RecitersLoaded) {
       _isStartupLiteUi = false;
       _allowHeavyLoadedResults = true;
+      _pendingStartupFavoriteOrdering = true;
       _ensureFavoritesLoaded();
       _scheduleRecitersIntroTour();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _tryCommitStartupFavoriteOrdering();
+      });
       return;
     }
 
@@ -463,7 +494,51 @@ class _RecitersScreenState extends State<RecitersScreen>
   }
 
   Future<void> _refreshReciters() async {
-    context.read<RecitersBloc>().add(const LoadReciters());
+    final RecitersBloc recitersBloc = context.read<RecitersBloc>();
+    final Future<void> recitersSettled = recitersBloc.stream
+        .firstWhere(
+          (RecitersState state) =>
+              state is RecitersLoaded || state is RecitersError,
+        )
+        .then((_) {});
+    recitersBloc.add(const LoadReciters());
+    await Future.wait<void>([
+      _favoritesCubit.loadFavorites(),
+      recitersSettled,
+    ]);
+    if (!mounted) {
+      return;
+    }
+    _applyFavoriteCatalogOrder();
+  }
+
+  void _applyFavoriteCatalogOrder() {
+    final RecitersState recitersState = context.read<RecitersBloc>().state;
+    if (recitersState is RecitersLoaded) {
+      _favoritesCubit.applyCatalogOrder(recitersState.reciters);
+    }
+    context.read<RecitersBloc>().add(const ApplyFavoriteOrdering());
+  }
+
+  /// Commits favorite ordering once when the screen starts from splash cache
+  /// (cold start or hot restart) without running [LoadReciters].
+  void _tryCommitStartupFavoriteOrdering() {
+    if (!_pendingStartupFavoriteOrdering || !mounted) {
+      return;
+    }
+
+    final RecitersState recitersState = context.read<RecitersBloc>().state;
+    final FavoritesState favoritesState = _favoritesCubit.state;
+    if (recitersState is! RecitersLoaded ||
+        favoritesState is! FavoritesLoaded) {
+      return;
+    }
+
+    _pendingStartupFavoriteOrdering = false;
+    context.read<RecitersBloc>().add(
+      SyncFavoriteIds(favoritesState.favoriteIds),
+    );
+    _applyFavoriteCatalogOrder();
   }
 
   @override
@@ -499,11 +574,18 @@ class _RecitersScreenState extends State<RecitersScreen>
         builder: (innerContext) => MultiBlocListener(
           listeners: [
             BlocListener<MainScreenCubit, MainScreenState>(
-              listenWhen: (previous, current) =>
+              listenWhen: (MainScreenState previous, MainScreenState current) =>
                   previous.recitersSearchFocusTick !=
                   current.recitersSearchFocusTick,
               listener: (context, state) {
                 const RecitersSearchRoute().push(context);
+              },
+            ),
+            BlocListener<MainScreenCubit, MainScreenState>(
+              listenWhen: (MainScreenState previous, MainScreenState current) =>
+                  previous.currentIndex != 0 && current.currentIndex == 0,
+              listener: (context, state) {
+                _applyFavoriteCatalogOrder();
               },
             ),
             BlocListener<RecitersTabsBloc, RecitersTabsState>(
@@ -523,7 +605,16 @@ class _RecitersScreenState extends State<RecitersScreen>
               },
             ),
             BlocListener<RecitersBloc, RecitersState>(
-              listenWhen: (previous, current) =>
+              listenWhen: (RecitersState previous, RecitersState current) =>
+                  previous is RecitersLoading && current is RecitersLoaded,
+              listener: (context, state) {
+                if (state is RecitersLoaded) {
+                  _favoritesCubit.applyCatalogOrder(state.reciters);
+                }
+              },
+            ),
+            BlocListener<RecitersBloc, RecitersState>(
+              listenWhen: (RecitersState previous, RecitersState current) =>
                   previous is! RecitersLoaded && current is RecitersLoaded,
               listener: (context, state) {
                 _scheduleLoadedResultsActivation();
@@ -536,12 +627,24 @@ class _RecitersScreenState extends State<RecitersScreen>
               },
             ),
             BlocListener<FavoritesCubit, FavoritesState>(
-              listenWhen: (_, current) => current is FavoritesLoaded,
+              listenWhen: (FavoritesState? previous, FavoritesState current) {
+                if (current is! FavoritesLoaded) {
+                  return false;
+                }
+                if (previous is! FavoritesLoaded) {
+                  return true;
+                }
+                return !sameFavoriteIdSet(
+                  previous.favoriteIds,
+                  current.favoriteIds,
+                );
+              },
               listener: (context, state) {
                 if (state is FavoritesLoaded) {
                   context.read<RecitersBloc>().add(
                     SyncFavoriteIds(state.favoriteIds),
                   );
+                  _tryCommitStartupFavoriteOrdering();
                 }
               },
             ),
@@ -581,6 +684,74 @@ class _RecitersScreenState extends State<RecitersScreen>
                         (bloc) => bloc.state.isDragging,
                       );
 
+                  final Widget
+                  nestedScrollView = NotificationListener<ScrollNotification>(
+                    onNotification: _handleNestedScrollNotification,
+                    child: NestedScrollView(
+                      key: _nestedScrollViewKey,
+                      physics: alphabetScrubbing
+                          ? const NeverScrollableScrollPhysics()
+                          : null,
+                      headerSliverBuilder: (context, innerBoxIsScrolled) {
+                        return [
+                          _RecitersScrollingHeaderSliver(
+                            title: context.l10n.reciters,
+                            headerChrome: headerChrome,
+                          ),
+                          SliverOverlapAbsorber(
+                            handle:
+                                NestedScrollView.sliverOverlapAbsorberHandleFor(
+                                  context,
+                                ),
+                            sliver: _RecitersPinnedTabBarSliver(
+                              headerChrome: headerChrome,
+                            ),
+                          ),
+                        ];
+                      },
+                      body: _RecitersTabbedBody(
+                        tabController: _tabController,
+                        state: state,
+                        allowHeavyLoadedResults: _allowHeavyLoadedResults,
+                        showLetterIndex: showLetterIndex,
+                        allScrollController: _allScrollController,
+                        favoritesScrollController: _favoritesScrollController,
+                        onClearAll: _clearAllFilters,
+                        alphabetScrubbing: alphabetScrubbing,
+                        onLetterSelected: _onLetterSelected,
+                        onAlphabetScrubStart: _onAlphabetScrubStart,
+                        onAlphabetScrubEnd: _onAlphabetScrubEnd,
+                        onRetry: _refreshReciters,
+                        onBrowseReciters: () =>
+                            _selectHomeTab(RecitersHomeTab.all),
+                      ),
+                    ),
+                  );
+
+                  final bool isRtl =
+                      Directionality.of(context) == TextDirection.rtl;
+                  final bool letterIndexAvailable = switch (state) {
+                    RecitersLoaded loaded when _allowHeavyLoadedResults =>
+                      loaded.filteredReciters.isNotEmpty,
+                    _ => false,
+                  };
+                  final bool onAllTab = context.select<RecitersTabsBloc, bool>(
+                    (bloc) => bloc.state.selectedTab == RecitersHomeTab.all,
+                  );
+                  final bool showLetterIndexRail =
+                      letterIndexAvailable && showLetterIndex && onAllTab;
+                  final Widget nestedScrollContent = alphabetScrubbing
+                      ? nestedScrollView
+                      : RefreshIndicator.adaptive(
+                          onRefresh: _refreshReciters,
+                          edgeOffset: _recitersRefreshIndicatorEdgeOffset(
+                            context,
+                          ),
+                          notificationPredicate:
+                              _recitersRefreshNotificationPredicate,
+                          child: nestedScrollView,
+                        );
+
                   return Scaffold(
                     resizeToAvoidBottomInset: false,
                     appBar: TilawaCatalogAppBar.titleOnly(
@@ -589,48 +760,31 @@ class _RecitersScreenState extends State<RecitersScreen>
                     ),
                     body: SafeArea(
                       bottom: false,
-                      child: NotificationListener<ScrollNotification>(
-                        onNotification: _handleNestedScrollNotification,
-                        child: NestedScrollView(
-                          key: _nestedScrollViewKey,
-                          physics: alphabetScrubbing
-                              ? const NeverScrollableScrollPhysics()
-                              : null,
-                          headerSliverBuilder: (context, innerBoxIsScrolled) {
-                            return [
-                              _RecitersScrollingHeaderSliver(
-                                title: context.l10n.reciters,
-                                headerChrome: headerChrome,
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          nestedScrollContent,
+                          if (showLetterIndexRail)
+                            _RecitersLetterIndexGutter(
+                              isRtl: isRtl,
+                              topInset:
+                                  _recitersLetterIndexTopInsetFromScaffoldBody(
+                                    context,
+                                  ),
+                              bottomInset: _recitersLetterIndexBottomInset(
+                                context,
                               ),
-                              SliverOverlapAbsorber(
-                                handle:
-                                    NestedScrollView.sliverOverlapAbsorberHandleFor(
-                                      context,
-                                    ),
-                                sliver: _RecitersPinnedTabBarSliver(
-                                  headerChrome: headerChrome,
-                                ),
-                              ),
-                            ];
-                          },
-                          body: _RecitersTabbedBody(
-                            tabController: _tabController,
-                            state: state,
-                            allowHeavyLoadedResults: _allowHeavyLoadedResults,
-                            showLetterIndex: showLetterIndex,
-                            allScrollController: _allScrollController,
-                            favoritesScrollController:
-                                _favoritesScrollController,
-                            onClearAll: _clearAllFilters,
-                            alphabetScrubbing: alphabetScrubbing,
-                            onLetterSelected: _onLetterSelected,
-                            onAlphabetScrubStart: _onAlphabetScrubStart,
-                            onAlphabetScrubEnd: _onAlphabetScrubEnd,
-                            onRetry: _refreshReciters,
-                            onBrowseReciters: () =>
-                                _selectHomeTab(RecitersHomeTab.all),
-                          ),
-                        ),
+                              reciters: (state as RecitersLoaded).reciters,
+                              onLetterSelected: _onLetterSelected,
+                              onScrubStart: _onAlphabetScrubStart,
+                              onScrubEnd: _onAlphabetScrubEnd,
+                              scrollbarSemanticsLabel:
+                                  context.l10n.a11yRecitersLetterIndex,
+                              scrollbarSemanticsHint: context
+                                  .l10n
+                                  .a11yRecitersAlphabetScrollbarHint,
+                            ),
+                        ],
                       ),
                     ),
                   );
@@ -711,10 +865,6 @@ class _RecitersSliverScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     PerfLogger.markBuild('_RecitersSliverScreen');
     final bool isRtl = Directionality.of(context) == TextDirection.rtl;
-    final tokens = Theme.of(context).tokens;
-    final double letterIndexTopInset =
-        _recitersPinnedTabBarHeight(context) + tokens.spaceSmall;
-    final double letterIndexBottomInset = tokens.spaceSmall;
     final bool letterIndexAvailable = switch (state) {
       RecitersLoaded loaded when allowHeavyLoadedResults =>
         loaded.filteredReciters.isNotEmpty,
@@ -747,24 +897,17 @@ class _RecitersSliverScreen extends StatelessWidget {
       ],
     );
 
-    final Widget catalogLayer = alphabetScrubbing
-        ? NotificationListener<OverscrollIndicatorNotification>(
-            onNotification: (OverscrollIndicatorNotification notification) {
+    final Widget catalogLayer =
+        NotificationListener<OverscrollIndicatorNotification>(
+          onNotification: (OverscrollIndicatorNotification notification) {
+            if (alphabetScrubbing) {
               notification.disallowIndicator();
               return true;
-            },
-            child: catalogScrollView,
-          )
-        : NotificationListener<OverscrollIndicatorNotification>(
-            onNotification: (OverscrollIndicatorNotification notification) {
-              return false;
-            },
-            child: RefreshIndicator.adaptive(
-              onRefresh: onRetry,
-              notificationPredicate: defaultScrollNotificationPredicate,
-              child: catalogScrollView,
-            ),
-          );
+            }
+            return false;
+          },
+          child: catalogScrollView,
+        );
 
     return MediaQuery(
       data: MediaQuery.of(context).removeViewInsets(removeBottom: true),
@@ -776,19 +919,6 @@ class _RecitersSliverScreen extends StatelessWidget {
           if (alphabetScrubbing)
             const Positioned.fill(
               child: AbsorbPointer(child: SizedBox.expand()),
-            ),
-          if (showLetterIndexRail)
-            _RecitersLetterIndexGutter(
-              isRtl: isRtl,
-              topInset: letterIndexTopInset,
-              bottomInset: letterIndexBottomInset,
-              reciters: (state as RecitersLoaded).reciters,
-              onLetterSelected: onLetterSelected,
-              onScrubStart: onAlphabetScrubStart,
-              onScrubEnd: onAlphabetScrubEnd,
-              scrollbarSemanticsLabel: context.l10n.a11yRecitersLetterIndex,
-              scrollbarSemanticsHint:
-                  context.l10n.a11yRecitersAlphabetScrollbarHint,
             ),
         ],
       ),
@@ -857,6 +987,7 @@ class _RecitersTabbedBody extends StatelessWidget {
                   'reciters_favorites_tab',
                 ),
                 scrollController: favoritesScrollController,
+                onBrowseReciters: onBrowseReciters,
               ),
             ],
           ),
@@ -937,8 +1068,10 @@ class _RecitersLetterIndexGutter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final tokens = theme.tokens;
     final double gutterWidth = _recitersLetterIndexGutterWidth(theme);
     final double scrollbarWidth = theme.componentTokens.alphabetScrollbar.width;
+    final double contentGap = tokens.spaceMedium;
 
     return PositionedDirectional(
       top: topInset,
@@ -954,10 +1087,11 @@ class _RecitersLetterIndexGutter extends StatelessWidget {
           top: false,
           bottom: false,
           minimum: EdgeInsets.zero,
-          child: Align(
-            alignment: isRtl
-                ? AlignmentDirectional.centerStart
-                : AlignmentDirectional.centerEnd,
+          child: Padding(
+            padding: EdgeInsetsDirectional.only(
+              start: isRtl ? contentGap : 0,
+              end: isRtl ? 0 : contentGap,
+            ),
             child: SizedBox(
               width: scrollbarWidth,
               child: ReciterAlphabetScrollbar(
@@ -1133,7 +1267,6 @@ class _RecitersEmptyStateContent extends StatelessWidget {
       icon: icon,
       title: title,
       semanticLabel: title,
-      maxWidth: tokens.contentMaxWidthForm * 0.6,
       primaryAction: primaryAction,
     );
   }
@@ -1314,10 +1447,10 @@ class _RecitersHomeTabBar extends StatelessWidget {
                 indicatorSize: TabBarIndicatorSize.tab,
                 indicatorPadding: EdgeInsets.all(tokens.spaceExtraSmall),
                 indicator: BoxDecoration(
-                  color: colorScheme.onSurface,
+                  color: chipTokens.catalogSelectedBackgroundColor,
                   borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
                 ),
-                labelColor: colorScheme.surface,
+                labelColor: chipTokens.catalogSelectedForegroundColor,
                 unselectedLabelColor: colorScheme.onSurfaceVariant,
                 labelStyle: theme.textTheme.labelLarge?.copyWith(
                   fontWeight: chipTokens.selectionFontWeight,
@@ -1327,20 +1460,16 @@ class _RecitersHomeTabBar extends StatelessWidget {
                 ),
                 tabs: [
                   _RecitersTab(
-                    label: context.l10n.reciters,
+                    label: Text(context.l10n.reciters),
                     identifier: ReciterSemanticsIds.recitersTab,
                   ),
                   _RecitersTab(
-                    label: favoriteCount > 0
-                        ? context.l10n.recitersFilterPillFavoritesCount(
-                            favoriteCount,
-                          )
-                        : context.l10n.recitersFilterChipFavorites,
+                    label: _FavoritesTabLabel(count: favoriteCount),
                     identifier: ReciterSemanticsIds.recitersFavoritesToggle,
                     tourTargetId: RecitersTourTargets.favoritesToggle,
                   ),
                   _RecitersTab(
-                    label: context.l10n.downloads,
+                    label: Text(context.l10n.downloads),
                     identifier: ReciterSemanticsIds.recitersViewDownloads,
                   ),
                 ],
@@ -1353,6 +1482,38 @@ class _RecitersHomeTabBar extends StatelessWidget {
   }
 }
 
+class _FavoritesTabLabel extends StatelessWidget {
+  const _FavoritesTabLabel({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final String label = count > 0
+        ? context.l10n.recitersFilterPillFavoritesCount(count)
+        : context.l10n.recitersFilterChipFavorites;
+
+    return AnimatedSwitcher(
+      duration: tokens.durationFast,
+      switchInCurve: Curves.easeOutBack,
+      switchOutCurve: Curves.easeIn,
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        return ScaleTransition(
+          scale: animation,
+          child: FadeTransition(opacity: animation, child: child),
+        );
+      },
+      child: Text(
+        label,
+        key: ValueKey<int>(count),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+}
+
 class _RecitersTab extends StatelessWidget {
   const _RecitersTab({
     required this.label,
@@ -1360,7 +1521,7 @@ class _RecitersTab extends StatelessWidget {
     this.tourTargetId,
   });
 
-  final String label;
+  final Widget label;
   final String identifier;
   final String? tourTargetId;
 
@@ -1368,11 +1529,7 @@ class _RecitersTab extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget labelWidget = Semantics(
       identifier: identifier,
-      child: Text(
-        label,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
+      child: label,
     );
 
     if (tourTargetId != null) {
@@ -1637,13 +1794,24 @@ class _ReciterGridSliver extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     PerfLogger.markBuild('_ReciterGridSliver');
-    final tokens = Theme.of(context).tokens;
-    final double targetItemExtent =
-        tokens.narrowCardWidthThreshold +
-        tokens.spaceExtraLarge +
-        tokens.spaceLarge;
+    final ThemeData theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final double crossAxisSpacing = tokens.spaceSmall + tokens.spaceTiny;
+    final double mainAxisSpacing = tokens.spaceSmall + tokens.spaceTiny;
+    // Tile height must fit [ReciterCard]'s text block: a two-line name
+    // (titleMedium, height 1.2) over a two-line moshaf label (bodySmall,
+    // height 1.35) — multi-column layouts wrap both — plus card padding.
+    final TextScaler textScaler = MediaQuery.textScalerOf(context);
+    final TextTheme textTheme = theme.textTheme;
+    final double nameBlockHeight =
+        2 * textScaler.scale((textTheme.titleMedium?.fontSize ?? 16) * 1.2);
+    final double moshafBlockHeight =
+        2 * textScaler.scale((textTheme.bodySmall?.fontSize ?? 12) * 1.35);
     final double targetItemHeight =
-        tokens.playerCollapsedHeight + tokens.spaceExtraLarge;
+        nameBlockHeight +
+        moshafBlockHeight +
+        tokens.spaceExtraSmall +
+        2 * tokens.spaceLarge;
 
     return SliverLayoutBuilder(
       builder: (context, constraints) {
@@ -1667,11 +1835,11 @@ class _ReciterGridSliver extends StatelessWidget {
                   count: state.filteredReciters.length,
                 ),
               SliverGrid.builder(
-                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: targetItemExtent,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
                   mainAxisExtent: targetItemHeight,
-                  mainAxisSpacing: tokens.spaceSmall + tokens.spaceTiny,
-                  crossAxisSpacing: tokens.spaceSmall + tokens.spaceTiny,
+                  mainAxisSpacing: mainAxisSpacing,
+                  crossAxisSpacing: crossAxisSpacing,
                 ),
                 itemCount: state.filteredReciters.length,
                 itemBuilder: (context, index) {
@@ -1807,8 +1975,20 @@ EdgeInsetsGeometry _recitersResultPadding(
     centeredInset + (reserveScrollbarOnLeading ? scrollbarInset : 0),
     top,
     centeredInset + (reserveScrollbarOnLeading ? 0 : scrollbarInset),
-    bottom,
+    bottom + _recitersWideShellBottomReserve(context),
   );
+}
+
+/// Bottom reserve so catalog content and the alphabet rail clear shell
+/// chrome. The mini-player lives in the shell footer on all layouts.
+double _recitersWideShellBottomReserve(BuildContext context) {
+  return 0;
+}
+
+/// Alphabet rail sits slightly above shell chrome with a tokenized gap.
+double _recitersLetterIndexBottomInset(BuildContext context) {
+  final TilawaDesignTokens tokens = Theme.of(context).tokens;
+  return tokens.spaceSmall + _recitersWideShellBottomReserve(context);
 }
 
 bool _hasActiveFilters(RecitersLoaded state) {

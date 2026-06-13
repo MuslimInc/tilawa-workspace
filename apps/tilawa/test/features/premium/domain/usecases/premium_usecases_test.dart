@@ -188,20 +188,23 @@ void main() {
   });
 
   group('StartTrialUseCase', () {
-    test('skips startTrial and reports ineligibility when not eligible', () async {
-      when(
-        mockRepository.isTrialEligible(),
-      ).thenAnswer((_) async => false);
+    test(
+      'skips startTrial and reports ineligibility when not eligible',
+      () async {
+        when(
+          mockRepository.isTrialEligible(),
+        ).thenAnswer((_) async => false);
 
-      final result = await StartTrialUseCase(mockRepository)();
+        final result = await StartTrialUseCase(mockRepository)();
 
-      expect(result.isEligible, isFalse);
-      expect(result.success, isFalse);
+        expect(result.isEligible, isFalse);
+        expect(result.success, isFalse);
 
-      verify(mockRepository.isTrialEligible()).called(1);
-      // Crucial: we must NOT call startTrial when ineligible.
-      verifyNever(mockRepository.startTrial());
-    });
+        verify(mockRepository.isTrialEligible()).called(1);
+        // Crucial: we must NOT call startTrial when ineligible.
+        verifyNever(mockRepository.startTrial());
+      },
+    );
 
     test('calls startTrial when eligible and reports its result', () async {
       when(

@@ -98,7 +98,7 @@ android {
 
             // R8 full-mode: shrinks/obfuscates Java/Kotlin bytecode and strips
             // unused resources. Keep rules for Flutter, Firebase, audio,
-            // credential manager, and the native prayer receivers live in
+            // and the native prayer receivers live in
             // proguard-rules.pro; plugin AARs supply their own consumer rules.
             // Does not affect libapp.so (Dart AOT) — that is governed by the
             // Flutter build flags — but trims the absolute install size.
@@ -125,11 +125,22 @@ flutter {
     source "../.."
 }
 
+// androidx.credentials 1.6.0 (pulled by google_sign_in_android) routes Google
+// sign-in through the new GMS identitycredentials module, whose
+// SignInCredentialChooserActivity renders invisibly on Transsion/XOS (Infinix
+// X1101B: chooser is top-resumed but SurfaceFlinger keeps it
+// hidden-by-policy, so sign-in hangs until timeout). 1.5.0 (ChatGPT's line)
+// avoids identityauth and uses the legacy playservices path these ROMs composite.
+// Plugin only uses androidx.credentials APIs that exist since 1.2.0.
+configurations.configureEach {
+    resolutionStrategy {
+        force "androidx.credentials:credentials:1.5.0"
+        force "androidx.credentials:credentials-play-services-auth:1.5.0"
+    }
+}
+
 dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
-    implementation "androidx.credentials:credentials:1.5.0"
-    implementation "androidx.credentials:credentials-play-services-auth:1.5.0"
-    implementation "com.google.android.libraries.identity.googleid:googleid:1.1.1"
     implementation "androidx.core:core-splashscreen:1.0.1"
     implementation "androidx.work:work-runtime-ktx:2.9.0"
     implementation 'com.google.firebase:firebase-analytics-ktx:21.6.2'

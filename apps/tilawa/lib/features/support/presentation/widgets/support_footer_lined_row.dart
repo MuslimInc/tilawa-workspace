@@ -58,7 +58,8 @@ class SupportFooterLinedRow extends StatelessWidget {
   }) {
     final TextScaler scaler = MediaQuery.textScalerOf(context);
     final double fontSize = contentStyle.fontSize ?? 14;
-    final double lineHeight = scaler.scale(fontSize) * (contentStyle.height ?? 1);
+    final double lineHeight =
+        scaler.scale(fontSize) * (contentStyle.height ?? 1);
     return (lineHeight - leadingSize) / 2;
   }
 }

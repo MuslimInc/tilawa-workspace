@@ -1202,11 +1202,41 @@ abstract class AppLocalizations {
   /// **'Unable to sign in with third-party account'**
   String get unableToSignInWithThirdPartyAccount;
 
+  /// Title when Google account picker fails to render on device
+  ///
+  /// In en, this message translates to:
+  /// **'Google sign-in could not open'**
+  String get googleSignInFallbackTitle;
+
+  /// Help text when Google sign-in UI is unavailable
+  ///
+  /// In en, this message translates to:
+  /// **'The Google account picker may be hidden on this device. Update Google Play Services, then try again. If it still fails, ask your developer to register this build\'s SHA-1 in Firebase.'**
+  String get googleSignInFallbackBody;
+
+  /// Opens Play Store to update Google Play Services
+  ///
+  /// In en, this message translates to:
+  /// **'Update Google Play Services'**
+  String get googleSignInUpdatePlayServices;
+
   /// Network error message
   ///
   /// In en, this message translates to:
   /// **'Please check your internet connection'**
   String get networkError;
+
+  /// Toast shown when device free storage is likely below the estimated download size
+  ///
+  /// In en, this message translates to:
+  /// **'Available storage may not be enough for this download. Free up space if downloads fail.'**
+  String get downloadLowStorageWarning;
+
+  /// Error toast when Download All is blocked because device storage is too low
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough storage space to download all surahs. Free up space and try again.'**
+  String get downloadLowStorageBlocked;
 
   /// Number of recitations available for a reciter
   ///
@@ -1777,6 +1807,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Target'**
   String get tasbeehTargetLabel;
+
+  /// Placeholder hint for target count input
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 33'**
+  String get tasbeehTargetHint;
 
   /// Button label to apply target count
   ///

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
@@ -10,92 +9,14 @@ import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/logger.dart';
 
 import '../../../helpers/mock_helper.mocks.dart';
+import 'bloc_with_fix.dart';
+import 'bloc_without_fix.dart';
+import 'test_download_bloc_types.dart';
 
 /// This test verifies that the crash WOULD occur without our fix.
 ///
 /// We create a minimal bloc WITHOUT the `isClosed` check to prove
 /// that the Firebase crash report was accurate.
-
-// Simplified event for test bloc
-sealed class TestDownloadEvent {}
-
-class TestInitialize extends TestDownloadEvent {}
-
-class TestProgressUpdated extends TestDownloadEvent {
-  TestProgressUpdated(this.progress);
-  final double progress;
-}
-
-// Simplified state for test bloc
-sealed class TestDownloadState {}
-
-class TestInitial extends TestDownloadState {}
-
-class TestDownloading extends TestDownloadState {
-  TestDownloading(this.progress);
-  final double progress;
-}
-
-/// Bloc WITHOUT the isClosed check - this WILL crash
-class BlocWithoutFix extends Bloc<TestDownloadEvent, TestDownloadState> {
-  BlocWithoutFix({required this._progressStream}) : super(TestInitial()) {
-    on<TestInitialize>((event, emit) async {
-      // Start listening to progress - NO isClosed check
-      emit(TestDownloading(0.0));
-      // Simulate real implementation: listen and add events
-      _subscription = _progressStream.listen((progress) {
-        // This is where it crashes if closed
-        add(TestProgressUpdated(progress));
-      });
-    });
-
-    on<TestProgressUpdated>((event, emit) async {
-      emit(TestDownloading(event.progress));
-    });
-  }
-
-  final Stream<double> _progressStream;
-  // ignore: unused_field
-  StreamSubscription<double>? _subscription;
-
-  @override
-  Future<void> close() {
-    // Intentionally NOT cancelling to simulate race condition
-    // where stream emits before cancellation is processed
-    // _subscription?.cancel();
-    return super.close();
-  }
-}
-
-/// Bloc WITH the isClosed check - this will NOT crash
-class BlocWithFix extends Bloc<TestDownloadEvent, TestDownloadState> {
-  BlocWithFix({required this._progressStream}) : super(TestInitial()) {
-    on<TestInitialize>((event, emit) async {
-      // Start listening to progress - WITH isClosed check
-      emit(TestDownloading(0.0));
-      _subscription = _progressStream.listen((progress) {
-        if (isClosed) return;
-        add(TestProgressUpdated(progress));
-      });
-    });
-
-    on<TestProgressUpdated>((event, emit) async {
-      emit(TestDownloading(event.progress));
-    });
-  }
-
-  final Stream<double> _progressStream;
-  // ignore: unused_field
-  StreamSubscription<double>? _subscription;
-
-  @override
-  Future<void> close() {
-    // Intentionally comment out cancellation to simulate race condition
-    // where stream emits before cancellation is processed
-    // _subscription?.cancel();
-    return super.close();
-  }
-}
 
 void main() {
   setUpAll(() {
@@ -388,6 +309,7 @@ void main() {
     late MockObserveDownloadProgressUseCase mockObserveDownloadProgress;
     late MockGetDownloadItemUseCase mockGetDownloadItem;
     late MockNetworkInfo mockNetworkInfo;
+    late MockCheckLowDeviceStorageUseCase mockCheckLowDeviceStorage;
 
     const testUrl = 'https://example.com/001.mp3';
     const testReciterName = 'Abdul Rahman Al-Sudais';
@@ -408,6 +330,13 @@ void main() {
       when(
         mockGetDownloadItem.call(any),
       ).thenAnswer((_) async => const Right(null));
+
+      mockCheckLowDeviceStorage = MockCheckLowDeviceStorageUseCase();
+      when(
+        mockCheckLowDeviceStorage.call(
+          estimatedRequiredBytes: anyNamed('estimatedRequiredBytes'),
+        ),
+      ).thenAnswer((_) async => false);
 
       when(
         mockCheckSurahDownloaded.call(
@@ -447,6 +376,7 @@ void main() {
           observeDownloadProgress: mockObserveDownloadProgress,
           getDownloadItem: mockGetDownloadItem,
           networkInfo: mockNetworkInfo,
+          checkLowDeviceStorage: mockCheckLowDeviceStorage,
         );
 
         // Initialize and start download

@@ -84,17 +84,11 @@ class _PrayerAlertsPermissionFlowState
   }
 
   void _reschedulePrayerNotifications() {
+    // Nullable read: no PrayerTimesBloc is provided outside the
+    // prayer-times scope (e.g. onboarding).
     final PrayerTimesBloc? bloc =
-        widget.prayerTimesBloc ?? _tryReadPrayerTimesBloc();
+        widget.prayerTimesBloc ?? context.read<PrayerTimesBloc?>();
     bloc?.add(const PrayerTimesEvent.loadPrayerTimes(forceReschedule: true));
-  }
-
-  PrayerTimesBloc? _tryReadPrayerTimesBloc() {
-    try {
-      return context.read<PrayerTimesBloc>();
-    } on Object {
-      return null;
-    }
   }
 
   void _advance() {
@@ -223,20 +217,18 @@ class _PermissionStepFooter extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: tokens.spaceLarge,
       children: <Widget>[
-        Align(
-          alignment: AlignmentDirectional.centerStart,
-          child: TilawaButton(
-            text: context.l10n.prayerAlertsPermissionSkip,
-            variant: TilawaButtonVariant.ghost,
-            onPressed: isLoading ? null : onSkip,
-          ),
-        ),
         TilawaButton(
           text: primaryLabel,
           variant: TilawaButtonVariant.primary,
           foregroundColor: colorScheme.onPrimary,
           isLoading: isLoading,
           onPressed: isLoading ? null : onAllow,
+          isFullWidth: true,
+        ),
+        TilawaButton(
+          text: context.l10n.prayerAlertsPermissionSkip,
+          variant: TilawaButtonVariant.ghost,
+          onPressed: isLoading ? null : onSkip,
           isFullWidth: true,
         ),
       ],

@@ -47,9 +47,10 @@ abstract final class AppErrorGuard {
     _reporterFlutterHandler = onFlutterError;
     _reporterPlatformHandler = onPlatformError;
 
-    final List<FlutterErrorDetails> flutterBacklog = List<FlutterErrorDetails>.of(
-      _bufferedFlutterErrors,
-    );
+    final List<FlutterErrorDetails> flutterBacklog =
+        List<FlutterErrorDetails>.of(
+          _bufferedFlutterErrors,
+        );
     final List<(Object, StackTrace)> platformBacklog =
         List<(Object, StackTrace)>.of(_bufferedPlatformErrors);
     _bufferedFlutterErrors.clear();

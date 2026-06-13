@@ -15,13 +15,14 @@ Page<void> launchRoutePage({
     child: child,
     transitionDuration: Duration.zero,
     reverseTransitionDuration: Duration.zero,
-    transitionsBuilder: (
-      BuildContext context,
-      Animation<double> animation,
-      Animation<double> secondaryAnimation,
-      Widget child,
-    ) {
-      return child;
-    },
+    transitionsBuilder:
+        (
+          BuildContext context,
+          Animation<double> animation,
+          Animation<double> secondaryAnimation,
+          Widget child,
+        ) {
+          return child;
+        },
   );
 }

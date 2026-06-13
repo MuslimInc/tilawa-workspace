@@ -36,7 +36,10 @@ void main() {
         );
 
         _expectCoreContrast(theme.colorScheme, label: entry.key);
+        _expectForegroundOnAllSurfaces(theme.colorScheme, label: entry.key);
         _expectSecondaryTextContrast(theme.colorScheme, label: entry.key);
+        _expectStatusContrast(theme.colorScheme, label: entry.key);
+        _expectDisabledUiContrast(theme.colorScheme, label: entry.key);
       }
     });
 
@@ -48,9 +51,46 @@ void main() {
         );
 
         _expectCoreContrast(theme.colorScheme, label: entry.key);
+        _expectForegroundOnAllSurfaces(theme.colorScheme, label: entry.key);
         _expectSecondaryTextContrast(theme.colorScheme, label: entry.key);
+        _expectStatusContrast(theme.colorScheme, label: entry.key);
+        _expectDisabledUiContrast(theme.colorScheme, label: entry.key);
       }
     });
+
+    test(
+      'true-black dark themes keep accessible contrast on core color roles',
+      () {
+        for (final entry in paletteCases.entries) {
+          final theme = AppTheme.getDarkTheme(
+            primaryColor: entry.value,
+            isDefaultPreset: entry.value == AppColors.defaultPrimary,
+            darkIsTrueBlack: true,
+          );
+
+          _expectCoreContrast(
+            theme.colorScheme,
+            label: '${entry.key} true-black',
+          );
+          _expectForegroundOnAllSurfaces(
+            theme.colorScheme,
+            label: '${entry.key} true-black',
+          );
+          _expectSecondaryTextContrast(
+            theme.colorScheme,
+            label: '${entry.key} true-black',
+          );
+          _expectStatusContrast(
+            theme.colorScheme,
+            label: '${entry.key} true-black',
+          );
+          _expectDisabledUiContrast(
+            theme.colorScheme,
+            label: '${entry.key} true-black',
+          );
+        }
+      },
+    );
 
     test(
       'light surfaceContainerHigh is Pinterest neutral for every preset',
@@ -71,22 +111,28 @@ void main() {
       },
     );
 
-    test('light scaffold and surfaces use warm canvas not primary', () {
-      final theme = AppTheme.getLightTheme(
-        primaryColor: AppColors.primaryCoral,
-      );
-      final scheme = theme.colorScheme;
+    test(
+      'light scaffold and surfaces use cool porcelain canvas not primary',
+      () {
+        final theme = AppTheme.getLightTheme(
+          primaryColor: AppColors.primaryCoral,
+        );
+        final scheme = theme.colorScheme;
 
-      expect(theme.scaffoldBackgroundColor, AppColors.lightCanvas);
-      expect(scheme.surface, AppColors.lightSurface);
-      expect(scheme.surfaceContainerLowest, AppColors.lightCanvas);
-      expect(scheme.surfaceContainerLow, AppColors.lightSurface);
-      expect(scheme.onSurface, AppColors.lightInk);
-      expect(scheme.surfaceContainerHigh, AppColors.catalogFilterUnselectedLight);
-      expect(scheme.surfaceTint, Colors.transparent);
-      expect(scheme.primary, isNot(equals(theme.scaffoldBackgroundColor)));
-      expect(scheme.secondary, AppColors.catalogFilterUnselectedLight);
-    });
+        expect(theme.scaffoldBackgroundColor, AppColors.lightCanvas);
+        expect(scheme.surface, AppColors.lightSurface);
+        expect(scheme.surfaceContainerLowest, AppColors.lightCanvas);
+        expect(scheme.surfaceContainerLow, AppColors.lightSurface);
+        expect(scheme.onSurface, AppColors.lightInk);
+        expect(
+          scheme.surfaceContainerHigh,
+          AppColors.catalogFilterUnselectedLight,
+        );
+        expect(scheme.surfaceTint, Colors.transparent);
+        expect(scheme.primary, isNot(equals(theme.scaffoldBackgroundColor)));
+        expect(scheme.secondary, AppColors.catalogFilterUnselectedLight);
+      },
+    );
 
     test('default sage light theme matches brand ColorScheme roles', () {
       final scheme = AppTheme.getLightTheme(
@@ -194,6 +240,8 @@ void main() {
   });
 }
 
+const double _kDisabledForegroundOpacity = 0.38;
+
 void _expectCoreContrast(ColorScheme colorScheme, {required String label}) {
   final checks = <String, (Color foreground, Color background)>{
     'onPrimary / primary': (colorScheme.onPrimary, colorScheme.primary),
@@ -228,6 +276,87 @@ void _expectCoreContrast(ColorScheme colorScheme, {required String label}) {
       entry.value.$2,
       minRatio: brandOnPrimary ? 3.0 : 4.5,
       label: '$label ${entry.key}',
+    );
+  }
+}
+
+void _expectForegroundOnAllSurfaces(
+  ColorScheme colorScheme, {
+  required String label,
+}) {
+  final surfaces = <String, Color>{
+    'surface': colorScheme.surface,
+    'surfaceContainerLow': colorScheme.surfaceContainerLow,
+    'surfaceContainerLowest': colorScheme.surfaceContainerLowest,
+    'surfaceContainer': colorScheme.surfaceContainer,
+    'surfaceContainerHigh': colorScheme.surfaceContainerHigh,
+    'surfaceContainerHighest': colorScheme.surfaceContainerHighest,
+  };
+
+  for (final entry in surfaces.entries) {
+    _expectContrast(
+      colorScheme.onSurface,
+      entry.value,
+      minRatio: 4.5,
+      label: '$label onSurface / ${entry.key}',
+    );
+  }
+}
+
+void _expectStatusContrast(ColorScheme colorScheme, {required String label}) {
+  // Light success (`#43A047`) clears 3:1 on white cards only; dark tones are
+  // lifted for green-tinted containers (see `TilawaStatusColors`).
+  final surfaces = colorScheme.brightness == Brightness.dark
+      ? <String, Color>{
+          'surface': colorScheme.surface,
+          'surfaceContainer': colorScheme.surfaceContainer,
+          'surfaceContainerHigh': colorScheme.surfaceContainerHigh,
+        }
+      : <String, Color>{
+          'surface': colorScheme.surface,
+        };
+
+  for (final entry in surfaces.entries) {
+    _expectContrast(
+      colorScheme.success,
+      entry.value,
+      minRatio: 3.0,
+      label: '$label success / ${entry.key}',
+    );
+    _expectContrast(
+      colorScheme.warning,
+      entry.value,
+      minRatio: 3.0,
+      label: '$label warning / ${entry.key}',
+    );
+    _expectContrast(
+      colorScheme.error,
+      entry.value,
+      minRatio: 3.0,
+      label: '$label error / ${entry.key}',
+    );
+  }
+}
+
+void _expectDisabledUiContrast(
+  ColorScheme colorScheme, {
+  required String label,
+}) {
+  final disabledOnSurface = colorScheme.onSurface.withValues(
+    alpha: _kDisabledForegroundOpacity,
+  );
+  final surfaces = <String, Color>{
+    'surface': colorScheme.surface,
+    'surfaceContainerLow': colorScheme.surfaceContainerLow,
+    'surfaceContainer': colorScheme.surfaceContainer,
+  };
+
+  for (final entry in surfaces.entries) {
+    _expectContrast(
+      disabledOnSurface,
+      entry.value,
+      minRatio: 3.0,
+      label: '$label disabled onSurface / ${entry.key}',
     );
   }
 }

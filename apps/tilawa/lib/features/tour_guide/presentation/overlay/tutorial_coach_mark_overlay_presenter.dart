@@ -74,22 +74,23 @@ class TutorialCoachMarkOverlayPresenter implements TourOverlayPresenter {
       contents: <TargetContent>[
         TargetContent(
           align: _mapAlign(step.contentAlign),
-          builder: (BuildContext context, TutorialCoachMarkController controller) {
-            return TourTooltipCard(
-              title: step.title,
-              description: step.description,
-              stepSemanticsLabel: step.stepSemanticsLabel,
-              primaryActionLabel: step.isLastStep
-                  ? step.finishLabel
-                  : step.nextLabel,
-              onPrimaryAction: () {
-                controller.next();
+          builder:
+              (BuildContext context, TutorialCoachMarkController controller) {
+                return TourTooltipCard(
+                  title: step.title,
+                  description: step.description,
+                  stepSemanticsLabel: step.stepSemanticsLabel,
+                  primaryActionLabel: step.isLastStep
+                      ? step.finishLabel
+                      : step.nextLabel,
+                  onPrimaryAction: () {
+                    controller.next();
+                  },
+                  skipLabel: step.skipLabel,
+                  onSkip: controller.skip,
+                  showSkip: true,
+                );
               },
-              skipLabel: step.skipLabel,
-              onSkip: controller.skip,
-              showSkip: true,
-            );
-          },
         ),
       ],
     );

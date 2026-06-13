@@ -7,6 +7,8 @@ import 'package:tilawa/features/auth/domain/usecases/sign_in_with_google_use_cas
 import '../../helpers/auth_mock_helper.mocks.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   late SignInWithGoogleUseCase useCase;
   late MockAuthRepository mockAuthRepository;
   late MockUserRepository mockUserRepository;
@@ -14,7 +16,10 @@ void main() {
   setUp(() {
     mockAuthRepository = MockAuthRepository();
     mockUserRepository = MockUserRepository();
-    useCase = SignInWithGoogleUseCase(mockAuthRepository, mockUserRepository);
+    useCase = SignInWithGoogleUseCase(
+      mockAuthRepository,
+      mockUserRepository,
+    );
   });
 
   final tUser = UserEntity(
@@ -52,7 +57,9 @@ void main() {
       when(
         mockAuthRepository.signInWithGoogle(),
       ).thenAnswer((_) async => AuthResult.success(user: tUser));
-      when(mockUserRepository.saveUserData(any)).thenThrow(Exception('offline'));
+      when(
+        mockUserRepository.saveUserData(any),
+      ).thenThrow(Exception('offline'));
 
       final AuthResult result = await useCase();
 

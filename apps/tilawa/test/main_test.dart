@@ -1,4 +1,3 @@
-import 'package:credential_manager/credential_manager.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -37,8 +36,6 @@ class MockNotificationsRepository extends Mock
 
 class MockDownloadsInitializer extends Mock implements DownloadsInitializer {}
 
-class MockCredentialManager extends Mock implements CredentialManager {}
-
 class MockFirebaseInitializationService extends Mock
     implements FirebaseInitializationService {}
 
@@ -71,7 +68,6 @@ void main() {
   late MockNotificationPermissionService mockNotificationPermission;
   late MockNotificationsRepository mockNotificationsRepo;
   late MockDownloadsInitializer mockDownloads;
-  late MockCredentialManager mockCredentialManager;
   late MockFirebaseInitializationService mockFirebaseInit;
   late MockAthkarNotificationService mockAthkarService;
   late MockStorage mockStorage;
@@ -133,7 +129,6 @@ void main() {
     mockNotificationPermission = MockNotificationPermissionService();
     mockNotificationsRepo = MockNotificationsRepository();
     mockDownloads = MockDownloadsInitializer();
-    mockCredentialManager = MockCredentialManager();
     mockFirebaseInit = MockFirebaseInitializationService();
     mockAthkarService = MockAthkarNotificationService();
     mockStorage = MockStorage();
@@ -154,7 +149,6 @@ void main() {
     );
     getIt.registerSingleton<NotificationsRepository>(mockNotificationsRepo);
     getIt.registerSingleton<DownloadsInitializer>(mockDownloads);
-    getIt.registerSingleton<CredentialManager>(mockCredentialManager);
     getIt.registerSingleton<FirebaseInitializationService>(mockFirebaseInit);
     getIt.registerSingleton<IAthkarNotificationService>(mockAthkarService);
     getIt.registerSingleton<FCMService>(mockFCMService);
@@ -190,14 +184,6 @@ void main() {
       () => mockNotificationsRepo.initializeListeners(),
     ).thenAnswer((_) async {});
     when(() => mockDownloads.initialize()).thenAnswer((_) async {});
-    when(
-      () => mockCredentialManager.init(
-        preferImmediatelyAvailableCredentials: any(
-          named: 'preferImmediatelyAvailableCredentials',
-        ),
-        googleClientId: any(named: 'googleClientId'),
-      ),
-    ).thenAnswer((_) async {});
     when(
       () => mockFirebaseInit.initializeFirebaseData(),
     ).thenAnswer((_) async {});
@@ -248,36 +234,6 @@ void main() {
       ).thenThrow(Exception('Fail'));
       await initializeNotificationService(); // Should catch exception
       verify(() => mockNotificationsRepo.requestPermission()).called(1);
-    });
-
-    test('initializeCredentialManager success', () async {
-      await initializeCredentialManager();
-      verify(
-        () => mockCredentialManager.init(
-          preferImmediatelyAvailableCredentials: true,
-          googleClientId: any(named: 'googleClientId'),
-        ),
-      ).called(1);
-    });
-
-    test('initializeCredentialManager failure', () async {
-      when(
-        () => mockCredentialManager.init(
-          preferImmediatelyAvailableCredentials: any(
-            named: 'preferImmediatelyAvailableCredentials',
-          ),
-          googleClientId: any(named: 'googleClientId'),
-        ),
-      ).thenThrow(Exception('Fail'));
-      await initializeCredentialManager();
-      verify(
-        () => mockCredentialManager.init(
-          preferImmediatelyAvailableCredentials: any(
-            named: 'preferImmediatelyAvailableCredentials',
-          ),
-          googleClientId: any(named: 'googleClientId'),
-        ),
-      ).called(1);
     });
 
     test('initializeCrashlytics success', () async {

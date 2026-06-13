@@ -155,5 +155,42 @@ void main() {
         expect(capability.isFullyCapable, isFalse);
       });
     });
+
+    test('flags Transsion Infinix ROM for autostart guidance', () async {
+      when(mockService.canScheduleExactAlarms()).thenAnswer((_) async => true);
+      when(mockPermissions.isPermissionGranted()).thenAnswer((_) async => true);
+      when(mockAdhanPlayer.manufacturer()).thenAnswer((_) async => 'INFINIX');
+
+      final result = await useCase();
+
+      result.fold((l) => fail('Expected Right but got Left: $l'), (
+        capability,
+      ) {
+        expect(capability.oemRequiresAutostart, isTrue);
+      });
+    });
+
+    test(
+      'returns isIgnoringBatteryOptimizations=false when adhan player reports false',
+      () async {
+        when(
+          mockService.canScheduleExactAlarms(),
+        ).thenAnswer((_) async => true);
+        when(
+          mockPermissions.isPermissionGranted(),
+        ).thenAnswer((_) async => true);
+        when(
+          mockAdhanPlayer.isIgnoringBatteryOptimizations(),
+        ).thenAnswer((_) async => false);
+
+        final result = await useCase();
+
+        result.fold((l) => fail('Expected Right but got Left: $l'), (
+          capability,
+        ) {
+          expect(capability.isIgnoringBatteryOptimizations, isFalse);
+        });
+      },
+    );
   });
 }

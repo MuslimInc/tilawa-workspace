@@ -77,8 +77,9 @@ class SurahGridItem extends StatelessWidget {
       colorScheme.onTertiaryContainer,
       colorScheme.onSurfaceVariant,
     ];
-    final Color idleBg =
-        bgPalette[index % bgPalette.length].withValues(alpha: tokens.opacityEmphasis);
+    final Color idleBg = bgPalette[index % bgPalette.length].withValues(
+      alpha: tokens.opacityEmphasis,
+    );
     final Color idleFg = fgPalette[index % fgPalette.length];
     final Color activeFill = ReciterCatalogChrome.activeFill(colorScheme);
     final Color activeOnFill = ReciterCatalogChrome.activeOnFill(colorScheme);
@@ -94,11 +95,11 @@ class SurahGridItem extends StatelessWidget {
       child: TilawaCard(
         surface: TilawaCardSurface.flat,
         backgroundColor: isCurrentItem
-            ? colorScheme.primaryContainer.withValues(alpha: tokens.opacitySubtle * 2)
+            ? colorScheme.primaryContainer.withValues(
+                alpha: tokens.opacitySubtle * 2,
+              )
             : colorScheme.surface,
-        borderColor: isCurrentItem
-            ? activeFill
-            : colorScheme.outlineVariant,
+        borderColor: isCurrentItem ? activeFill : colorScheme.outlineVariant,
         borderWidth: isCurrentItem
             ? tokens.borderWidthThin * 4
             : tokens.borderWidthThin,
@@ -133,7 +134,9 @@ class SurahGridItem extends StatelessWidget {
                   ),
                   child: isCurrentItem
                       ? Icon(
-                          isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                          isPlaying
+                              ? Icons.pause_rounded
+                              : Icons.play_arrow_rounded,
                           color: activeOnFill,
                           size: tokens.iconSizeMedium,
                         )

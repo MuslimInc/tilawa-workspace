@@ -224,9 +224,10 @@ abstract final class CrashReportingContext {
     }
 
     try {
-      final String? installer = await _androidInstallChannel.invokeMethod<String>(
-        'getInstallerPackageName',
-      );
+      final String? installer = await _androidInstallChannel
+          .invokeMethod<String>(
+            'getInstallerPackageName',
+          );
       return mapInstallSource(installer);
     } on PlatformException {
       return 'unknown';

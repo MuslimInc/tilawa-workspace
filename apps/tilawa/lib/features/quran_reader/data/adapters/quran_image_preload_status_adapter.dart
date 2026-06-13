@@ -12,10 +12,10 @@ class QuranImagePreloadStatusAdapter implements QuranImagePreloadStatus {
 
   @override
   bool get isReady {
-    final AssetVerseMarkerRepository markers =
-        qi_di.sl<AssetVerseMarkerRepository>();
-    final QuranImageCacheRepository images =
-        qi_di.sl<QuranImageCacheRepository>();
+    final AssetVerseMarkerRepository markers = qi_di
+        .sl<AssetVerseMarkerRepository>();
+    final QuranImageCacheRepository images = qi_di
+        .sl<QuranImageCacheRepository>();
     return markers.isInitialized && images.status.isReady;
   }
 }

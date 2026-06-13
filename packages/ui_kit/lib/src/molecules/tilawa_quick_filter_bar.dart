@@ -36,7 +36,8 @@ class TilawaQuickFilterBar extends StatelessWidget {
           Expanded(
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              padding: scrollPadding ??
+              padding:
+                  scrollPadding ??
                   EdgeInsetsDirectional.only(end: tokens.spaceSmall),
               child: Row(
                 spacing: tokens.spaceSmall,

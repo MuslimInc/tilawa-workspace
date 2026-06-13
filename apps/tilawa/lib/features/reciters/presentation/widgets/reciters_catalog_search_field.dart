@@ -29,12 +29,12 @@ class RecitersCatalogSearchField extends StatelessWidget {
     required this.onTap,
     this.semanticsIdentifier,
     this.enableHero = false,
-  })  : controller = null,
-        focusNode = null,
-        onChanged = null,
-        onClear = null,
-        onTapOutside = null,
-        scrollPadding = null;
+  }) : controller = null,
+       focusNode = null,
+       onChanged = null,
+       onClear = null,
+       onTapOutside = null,
+       scrollPadding = null;
 
   final TextEditingController? controller;
   final FocusNode? focusNode;

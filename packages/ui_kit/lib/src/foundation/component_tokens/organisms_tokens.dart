@@ -511,8 +511,7 @@ class TilawaAdaptiveShellTokens {
   double phoneBottomNavPaintedHeight(
     TextScaler textScaler,
     double systemBottomViewPadding,
-  ) =>
-      phoneBottomNavLayoutHeight(textScaler) + systemBottomViewPadding;
+  ) => phoneBottomNavLayoutHeight(textScaler) + systemBottomViewPadding;
 
   /// Height of the phone bottom nav row in **icon-only** mode.
   ///
@@ -1088,10 +1087,12 @@ class TilawaSettingsGroupTokens {
   /// Divider under [TilawaSelectionTile] rows (`outlineVariant` × [tileDividerOpacity]).
   final Color selectionTileDividerColor;
 
-  /// [Switch.adaptive] active track ([ColorScheme.primary] × [switchActiveTrackOpacity]).
+  /// [Switch.adaptive] active track — full [ColorScheme.primary] (M3
+  /// standard). A translucent track (the previous 0.5 × primary) reads as
+  /// near-disabled next to the calm neutral surfaces.
   final Color switchActiveTrackColor;
 
-  /// [Switch.adaptive] thumb when on.
+  /// [Switch.adaptive] thumb when on ([ColorScheme.onPrimary], M3 standard).
   final Color switchActiveThumbColor;
 
   /// Default tokens for the settings group.
@@ -1118,11 +1119,8 @@ class TilawaSettingsGroupTokens {
     final selectionTileDividerColor = colorScheme.outlineVariant.withValues(
       alpha: tileDividerOpacity,
     );
-    const switchActiveTrackOpacity = 0.5;
-    final switchActiveTrackColor = colorScheme.primary.withValues(
-      alpha: switchActiveTrackOpacity,
-    );
-    final switchActiveThumbColor = colorScheme.primary;
+    final switchActiveTrackColor = colorScheme.primary;
+    final switchActiveThumbColor = colorScheme.onPrimary;
 
     return TilawaSettingsGroupTokens(
       groupHorizontalPadding: 20,
@@ -1163,7 +1161,7 @@ class TilawaSettingsGroupTokens {
       tileDividerHeight: 1,
       tileDividerThickness: 0.5,
       tileDividerOpacity: tileDividerOpacity,
-      switchActiveTrackOpacity: 0.5,
+      switchActiveTrackOpacity: 1,
       tileItemGap: 16,
       selectionTileSelectedBackgroundColor:
           selectionTileSelectedBackgroundColor,

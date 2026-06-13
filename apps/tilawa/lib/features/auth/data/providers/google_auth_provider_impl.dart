@@ -1,16 +1,54 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
 
+import 'package:tilawa/core/logging/app_logger.dart';
+
+import '../services/android_sign_in_platform_policy.dart';
+import '../services/google_sign_in_android_resume_bridge.dart';
+import '../services/google_sign_in_session_tracker.dart';
 import '../../domain/entities/auth_result.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/providers/auth_provider_interface.dart';
 
-@LazySingleton()
+@LazySingleton(as: AuthProviderInterface)
 class GoogleAuthProviderImpl implements AuthProviderInterface {
-  GoogleAuthProviderImpl(this._firebaseAuth, this._googleSignIn);
+  GoogleAuthProviderImpl(
+    this._firebaseAuth,
+    this._googleSignIn,
+    this._platformPolicy,
+    this._sessionTracker,
+  ) {
+    GoogleSignInAndroidResumeBridge.instance.ensureInitialized();
+  }
+  static const Duration signInTimeout = Duration(seconds: 60);
+
+  /// CM bottom sheets can hang on some OEMs; cap wait time so [authenticate]
+  /// account-chooser can run as fallback.
+  static const Duration credentialManagerTimeout = Duration(seconds: 15);
+
+  /// Transsion/XOS: GMS sign-in UI (CM sheet or account chooser) can be
+  /// composited invisibly behind the Flutter window. Visible GMS UI takes
+  /// this activity out of [AppLifecycleState.resumed]; if we are still
+  /// resumed this long after launching the flow, no UI ever appeared and
+  /// the session is treated as hung instead of waiting the full timeout.
+  @visibleForTesting
+  static Duration transsionUiProbeDelay = const Duration(seconds: 6);
+
+  /// Lets a timed-out [HiddenActivity] finish tearing down before starting
+  /// a second Credential Manager session (avoids `counts:2` overlap on XOS).
+  static const Duration credentialManagerTeardownDelay = Duration(
+    milliseconds: 500,
+  );
   final FirebaseAuth _firebaseAuth;
   final GoogleSignIn _googleSignIn;
+  final AndroidSignInPlatformPolicy _platformPolicy;
+  final GoogleSignInSessionTracker _sessionTracker;
 
   @override
   Stream<UserEntity?> get authStateChanges {
@@ -24,8 +62,12 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
 
   @override
   Future<AuthResult> signIn() async {
+    logger.i('[GoogleSignIn] sign-in started (google_sign_in)');
+    _sessionTracker.markStarted();
     try {
-      final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
+      final GoogleSignInAccount googleUser = await _signInAccount().timeout(
+        signInTimeout,
+      );
 
       final GoogleSignInAuthentication googleAuth = googleUser.authentication;
 
@@ -43,12 +85,40 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
       final UserEntity user = _mapFirebaseUserToUser(userCredential.user!);
 
       return AuthResult.success(user: user);
+    } on TimeoutException {
+      try {
+        await _googleSignIn.signOut();
+      } catch (error) {
+        logger.w(
+          '[GoogleSignIn] signOut after timeout failed',
+          error: error,
+        );
+      }
+      return AuthResult.failure(
+        message: _signInTimeoutMessage(),
+        code: 'sign-in-timeout',
+      );
+    } on PlatformException catch (e) {
+      logger.w(
+        '[GoogleSignIn] PlatformException during sign-in: ${e.code}',
+        error: e,
+      );
+      return AuthResult.failure(
+        message: e.message ?? 'Google sign-in platform error',
+        code: e.code,
+        details: e.details?.toString(),
+      );
     } on GoogleSignInException catch (e) {
       switch (e.code) {
         case GoogleSignInExceptionCode.canceled:
         case GoogleSignInExceptionCode.interrupted:
-        case GoogleSignInExceptionCode.uiUnavailable:
           return const AuthResult.cancelled();
+        case GoogleSignInExceptionCode.uiUnavailable:
+          return AuthResult.failure(
+            message: e.description ?? 'Google sign-in UI is not available',
+            code: 'ui-unavailable',
+            details: e.details?.toString(),
+          );
         case GoogleSignInExceptionCode.unknownError:
         case GoogleSignInExceptionCode.clientConfigurationError:
         case GoogleSignInExceptionCode.providerConfigurationError:
@@ -66,13 +136,163 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
       );
     } catch (e) {
       return AuthResult.failure(message: e.toString());
+    } finally {
+      _sessionTracker.markFinished();
+    }
+  }
+
+  /// Tries Credential Manager (silent + bottom sheet), then the standard
+  /// account-chooser dialog ([GoogleSignIn.authenticate]) when CM fails,
+  /// times out, or returns no credential. User dismissal of the CM sheet
+  /// (`canceled`) does not open a second UI.
+  Future<GoogleSignInAccount> _signInAccount() async {
+    await _platformPolicy.warmUp();
+
+    // Transsion/XOS included: the historical "CM always hangs" was observed
+    // under RenderMode.surface; with RenderMode.texture (MainActivity) the
+    // GMS overlay is composited correctly. _waitForInteractiveUi still
+    // fail-fasts if the sheet never becomes visible.
+    final GoogleSignInAccount? lightweightAccount =
+        await _tryCredentialManagerSignIn();
+    if (lightweightAccount != null) {
+      return lightweightAccount;
+    }
+
+    logger.i('[GoogleSignIn] using account-chooser button flow');
+    return _authenticateWithButtonFlow();
+  }
+
+  Future<GoogleSignInAccount?> _tryCredentialManagerSignIn() async {
+    try {
+      final Future<GoogleSignInAccount?>? lightweight = _googleSignIn
+          .attemptLightweightAuthentication(reportAllExceptions: true);
+      if (lightweight == null) {
+        return null;
+      }
+      return await _waitForInteractiveUi(
+        lightweight,
+        stageTimeout: credentialManagerTimeout,
+      );
+    } on TimeoutException {
+      logger.i(
+        '[GoogleSignIn] Credential Manager sheet timed out; '
+        'clearing credential state before button flow',
+      );
+      await _resetCredentialManagerAfterFailure();
+      return null;
+    } on GoogleSignInException catch (e) {
+      if (_shouldFallbackToButtonFlowAfterCredentialManager(e)) {
+        logger.i(
+          '[GoogleSignIn] Credential Manager failed (${e.code.name}); '
+          'clearing credential state before button flow',
+        );
+        await _resetCredentialManagerAfterFailure();
+        return null;
+      }
+      rethrow;
+    }
+  }
+
+  /// Waits for an interactive GMS sign-in [operation], capped at
+  /// [stageTimeout].
+  ///
+  /// Transsion/XOS only: the CM sheet / account chooser can be composited
+  /// invisibly (the original Infinix bug). If the app is still
+  /// [AppLifecycleState.resumed] after [transsionUiProbeDelay] — meaning no
+  /// GMS UI ever covered it — throws [TimeoutException] immediately so the
+  /// caller can fall back. Once UI is confirmed visible the user gets the
+  /// full [signInTimeout] regardless of [stageTimeout].
+  Future<T> _waitForInteractiveUi<T>(
+    Future<T> operation, {
+    required Duration stageTimeout,
+  }) async {
+    if (!_platformPolicy.skipAutomaticSignIn) {
+      return operation.timeout(stageTimeout);
+    }
+    try {
+      return await operation.timeout(transsionUiProbeDelay);
+    } on TimeoutException {
+      final AppLifecycleState? lifecycle =
+          SchedulerBinding.instance.lifecycleState;
+      if (lifecycle == AppLifecycleState.resumed) {
+        // No GMS UI ever covered the app — invisible-overlay hang.
+        rethrow;
+      }
+      return operation.timeout(signInTimeout);
+    }
+  }
+
+  Future<void> _resetCredentialManagerAfterFailure() async {
+    try {
+      await _googleSignIn.signOut();
+    } catch (_) {
+      // Best-effort: drop any in-flight CM session before authenticate().
+    }
+    await Future<void>.delayed(credentialManagerTeardownDelay);
+  }
+
+  String _signInTimeoutMessage() {
+    if (_platformPolicy.skipAutomaticSignIn) {
+      return 'Sign-in timed out. If the account picker did not appear, press '
+          'back and try again, or use the options below.';
+    }
+    return 'Sign-in timed out';
+  }
+
+  Future<GoogleSignInAccount> _authenticateWithButtonFlow() async {
+    if (!_googleSignIn.supportsAuthenticate()) {
+      throw const GoogleSignInException(
+        code: GoogleSignInExceptionCode.uiUnavailable,
+        description: 'Interactive Google Sign-In is not supported',
+      );
+    }
+    logger.i(
+      '[GoogleSignIn] authenticate() starting (button / account chooser)',
+    );
+    try {
+      final GoogleSignInAccount account = await _waitForInteractiveUi(
+        _googleSignIn.authenticate(),
+        stageTimeout: signInTimeout,
+      );
+      return account;
+    } on PlatformException catch (error) {
+      logger.w(
+        '[GoogleSignIn] authenticate PlatformException: ${error.code}',
+        error: error,
+      );
+      throw GoogleSignInException(
+        code: GoogleSignInExceptionCode.unknownError,
+        description: error.message,
+        details: error.details,
+      );
+    }
+  }
+
+  bool _shouldFallbackToButtonFlowAfterCredentialManager(
+    GoogleSignInException exception,
+  ) {
+    switch (exception.code) {
+      case GoogleSignInExceptionCode.canceled:
+        return false;
+      case GoogleSignInExceptionCode.uiUnavailable:
+      case GoogleSignInExceptionCode.unknownError:
+      case GoogleSignInExceptionCode.interrupted:
+        return true;
+      case GoogleSignInExceptionCode.clientConfigurationError:
+      case GoogleSignInExceptionCode.providerConfigurationError:
+      case GoogleSignInExceptionCode.userMismatch:
+        return false;
     }
   }
 
   @override
   Future<void> signOut() async {
     await _firebaseAuth.signOut();
-    await _googleSignIn.signOut();
+    try {
+      await _googleSignIn.signOut();
+    } catch (_) {
+      // Best-effort after Firebase sign-out.
+    }
   }
 
   @override
@@ -88,7 +308,9 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
       if (e.code != 'requires-recent-login') {
         rethrow;
       }
-      final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
+      final GoogleSignInAccount googleUser = await _signInAccount().timeout(
+        signInTimeout,
+      );
       final GoogleSignInAuthentication googleAuth = googleUser.authentication;
       final String? idToken = googleAuth.idToken;
       if (idToken == null) {

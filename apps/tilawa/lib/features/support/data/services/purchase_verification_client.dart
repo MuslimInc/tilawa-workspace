@@ -34,14 +34,15 @@ class FirebasePurchaseVerificationClient implements PurchaseVerificationClient {
     required String purchaseToken,
   }) async {
     try {
-      final HttpsCallable callable =
-          _functions.httpsCallable('verifySupportPurchase');
-      final HttpsCallableResult<Map<String, dynamic>> result =
-          await callable.call<Map<String, dynamic>>(<String, String>{
-        'productId': productId,
-        'purchaseToken': purchaseToken,
-        'packageName': SupportProductIds.androidPackageName,
-      });
+      final HttpsCallable callable = _functions.httpsCallable(
+        'verifySupportPurchase',
+      );
+      final HttpsCallableResult<Map<String, dynamic>> result = await callable
+          .call<Map<String, dynamic>>(<String, String>{
+            'productId': productId,
+            'purchaseToken': purchaseToken,
+            'packageName': SupportProductIds.androidPackageName,
+          });
       final Map<String, dynamic> data = result.data;
       final bool verified = data['verified'] == true;
       if (!verified) {

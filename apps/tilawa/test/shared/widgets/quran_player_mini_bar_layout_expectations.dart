@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:tilawa/shared/widgets/quran_player_morph_layout.dart';
 
@@ -16,8 +15,7 @@ Rect quranPlayerExpectedMiniArtRect({
   required TextDirection textDirection,
 }) {
   final EdgeInsets pad = geometry.barContentPadding.resolve(textDirection);
-  final double top =
-      miniBarRect.top + geometry.progressHeight + pad.top;
+  final double top = miniBarRect.top + geometry.progressHeight + pad.top;
   final double size = geometry.barArtworkSize;
   switch (textDirection) {
     case TextDirection.ltr:
@@ -26,9 +24,7 @@ Rect quranPlayerExpectedMiniArtRect({
       return Rect.fromLTWH(left, top, size, size);
     case TextDirection.rtl:
       final double right =
-          miniBarRect.right -
-          geometry.shellHorizontalInset -
-          pad.right;
+          miniBarRect.right - geometry.shellHorizontalInset - pad.right;
       return Rect.fromLTWH(right - size, top, size, size);
   }
 }

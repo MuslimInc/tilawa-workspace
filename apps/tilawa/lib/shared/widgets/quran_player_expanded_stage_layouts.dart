@@ -61,8 +61,7 @@ DragEndDetails quranPlayerExpandedStageVerticalDragEndDetails(
 /// UI-only layout shell (no bloc). Matches [TilawaMediaPlayerBar] style: app
 /// wires [onVerticalDragStart], [onVerticalDragUpdate], and
 /// [onVerticalDragEnd] from [QuranPlayerExpandedStageGestureScope] parents.
-class QuranPlayerExpandedStageCollapsibleScrollRegion
-    extends StatefulWidget {
+class QuranPlayerExpandedStageCollapsibleScrollRegion extends StatefulWidget {
   const QuranPlayerExpandedStageCollapsibleScrollRegion({
     required this.onVerticalDragStart,
     required this.onVerticalDragUpdate,

@@ -58,21 +58,21 @@ emphasis per screen — primary CTA, active bottom nav, hearts/favorites, progre
 fill, switch ON. **Not** for scaffold, app bars, search fields, filter chips, or
 list row chrome.
 
-### Light neutral ramp (warm canvas + white cards, not primary-harmonized)
+### Light neutral ramp (cool porcelain canvas + white cards, not primary-harmonized)
 
 | `AppColors` | Hex | `ColorScheme` / usage |
 |-------------|-----|------------------------|
-| `lightCanvas` / `lightBackground` | `#F9F7F2` | Scaffold, `surfaceContainerLowest`, `surfaceContainer` |
+| `lightCanvas` / `lightBackground` | `#F4F5F7` | Scaffold, `surfaceContainerLowest`, `surfaceContainer` |
 | `lightSurface` | `#FFFFFF` | Cards, sheets, dialogs, app bars (`surface`, `surfaceContainerLow`) |
 | `lightInk` | `#0F172A` | `onSurface` |
-| `lightBody` | `#33332E` | Secondary body |
-| `lightMute` | `#62625B` | Muted labels (`onSurfaceVariant`) |
-| `lightAsh` | `#91918C` | Hints / idle icons |
-| `lightSurfaceContainerHighBase` | `#E5E5E0` | Idle chips, search fill, `surfaceContainerHigh` |
-| `lightSurfaceContainerHighestBase` | `#DADAD3` | Hairline tier (`surfaceContainerHighest`) |
-| `lightHairline` | `#DADAD3` | `outlineVariant` |
+| `lightBody` | `#30343C` | Secondary body |
+| `lightMute` | `#5F6470` | Muted labels (`onSurfaceVariant`) |
+| `lightAsh` | `#8F949E` | Hints / idle icons |
+| `lightSurfaceContainerHighBase` | `#E5E7EB` | Idle chips, search fill, `surfaceContainerHigh` |
+| `lightSurfaceContainerHighestBase` | `#DBDEE3` | Hairline tier (`surfaceContainerHighest`) |
+| `lightHairline` | `#DBDEE3` | `outlineVariant` |
 
-> The scaffold rests on the warm cream **canvas** (`#F9F7F2`); cards/sheets/app
+> The scaffold rests on the cool porcelain **canvas** (`#F4F5F7`); cards/sheets/app
 > bars lift with white **surface** (`#FFFFFF`) and a hairline outline rather than
 > heavy shadow. This is the inverse of a white-scaffold system — keep them
 > straight when reading `_refineLightColorScheme` in `app_theme.dart`.
@@ -83,8 +83,17 @@ app bars so Material 3 does not wash neutrals with the user primary.
 ### Dark mode
 
 Deep green-tinted neutral stack (`darkBackground` …); idle chips use
-`catalogFilterUnselectedDark` (`#3A3936`) without primary harmonization on
+`catalogFilterUnselectedDark` (`#353E3A`) without primary harmonization on
 `surfaceContainerHigh`. Optional **true-black** preset for OLED.
+
+| Semantic | Dark hex | Access |
+|----------|----------|--------|
+| Success | `#6BCF7F` | `colorScheme.success` (`TilawaStatusColors`) |
+| Warning | `#FB923C` | `colorScheme.warning` |
+| Error | `#FFB4AB` | `colorScheme.error` |
+
+Light-mode success/warning stay at `#43A047` / `#C2410C`; dark tones are
+lifted in the same hue family for WCAG 3:1 on green-tinted surfaces.
 
 ---
 
@@ -115,7 +124,7 @@ Settings lists, Athkar, etc.).
 | Family | Catalog behaviour |
 |--------|-------------------|
 | `searchField` | Catalog variant: white `surface` fill + `outlineVariant` border — not `primaryContainer` |
-| `chip` / selection | Catalog pills use `ColorScheme` roles above |
+| `chip` / selection | Catalog pills: light = `onSurface` fill + `surface` label; dark = sage-washed `surfaceContainerHighest` lift + `onSurface` label (not a white pill) |
 | `segmentedControl` | Neutral track; accent only on selected segment when product requires |
 
 Feature-specific neutral chrome (e.g. reciter details moshaf row) may use a
@@ -128,7 +137,7 @@ duplicate hex.
 
 | Suite | Path | Purpose |
 |-------|------|---------|
-| Colour roles | `test/theme/app_theme_color_roles_test.dart` | Contrast, warm neutral ramp, preset no-op on surfaces |
+| Colour roles | `test/theme/app_theme_color_roles_test.dart` | Contrast, cool neutral ramp, preset no-op on surfaces |
 | DESIGN compliance | `test/theme/app_theme_spec_compliance_test.dart` | M3 extensions, transparent elevation tint, app bar = `surface` |
 | Goldens | `test/goldens/` | Visual regression (Alchemist); default primary in `TilawaPreviewWrapper` |
 | Review checklist | `test/goldens/REVIEW_CHECKLIST.md` | Human sign-off after `--update-goldens` |

@@ -16,7 +16,8 @@ abstract final class QuranPlayerSystemBackCoordinator {
   /// Listenable so [RecitersRootBackScope]'s [PopScope] rebuilds when the
   /// expanded-sheet intercept flag flips. Without this, [PopScope.canPop]
   /// stays stuck on the value computed when the cubit last fired.
-  static ValueListenable<bool> get interceptsSystemBackListenable => _intercepts;
+  static ValueListenable<bool> get interceptsSystemBackListenable =>
+      _intercepts;
 
   static void setIntercepts(bool value) {
     _setInterceptsSafely(value);

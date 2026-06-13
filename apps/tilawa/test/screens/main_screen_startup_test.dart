@@ -295,7 +295,9 @@ void main() {
 
     final mockSettingsCubit = _MockSettingsCubit();
     when(() => mockSettingsCubit.state).thenReturn(const SettingsState());
-    when(() => mockSettingsCubit.stream).thenAnswer((_) => const Stream.empty());
+    when(
+      () => mockSettingsCubit.stream,
+    ).thenAnswer((_) => const Stream.empty());
 
     return MultiBlocProvider(
       providers: [

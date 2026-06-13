@@ -706,9 +706,29 @@
     "@unableToSignInWithThirdPartyAccount": {
         "description": "Error message shown when third-party sign-in fails"
     },
+    "googleSignInFallbackTitle": "تعذّر فتح تسجيل الدخول عبر Google",
+    "@googleSignInFallbackTitle": {
+        "description": "Title when Google account picker fails to render on device"
+    },
+    "googleSignInFallbackBody": "قد تكون نافذة اختيار حساب Google مخفية على هذا الجهاز. حدّث خدمات Google Play ثم أعد المحاولة. إذا استمرت المشكلة، اطلب من المطوّر تسجيل SHA-1 لهذا الإصدار في Firebase.",
+    "@googleSignInFallbackBody": {
+        "description": "Help text when Google sign-in UI is unavailable"
+    },
+    "googleSignInUpdatePlayServices": "تحديث خدمات Google Play",
+    "@googleSignInUpdatePlayServices": {
+        "description": "Opens Play Store to update Google Play Services"
+    },
     "networkError": "يرجى التحقق من اتصالك بالإنترنت",
     "@networkError": {
         "description": "Network error message"
+    },
+    "downloadLowStorageWarning": "قد لا تكون مساحة التخزين المتاحة كافية لهذا التحميل. حرّر مساحة إذا فشل التحميل.",
+    "@downloadLowStorageWarning": {
+        "description": "Toast shown when device free storage is likely below the estimated download size"
+    },
+    "downloadLowStorageBlocked": "لا توجد مساحة تخزين كافية لتحميل كل السور. حرّر مساحة ثم أعد المحاولة.",
+    "@downloadLowStorageBlocked": {
+        "description": "Error toast when Download All is blocked because device storage is too low"
     },
     "recitationsAvailable": "{count} رواية متاحة",
     "@recitationsAvailable": {
@@ -1195,6 +1215,10 @@
     "tasbeehTargetLabel": "الهدف",
     "@tasbeehTargetLabel": {
         "description": "Target count input label"
+    },
+    "tasbeehTargetHint": "مثال: 33",
+    "@tasbeehTargetHint": {
+        "description": "Placeholder hint for target count input"
     },
     "tasbeehSetTarget": "تعيين الهدف",
     "@tasbeehSetTarget": {

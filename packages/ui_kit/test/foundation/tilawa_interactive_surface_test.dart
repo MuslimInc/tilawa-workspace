@@ -140,11 +140,8 @@ void main() {
 }
 
 int _borderedBoxCount(WidgetTester tester) {
-  return tester
-      .widgetList<DecoratedBox>(find.byType(DecoratedBox))
-      .where((b) {
-        final d = b.decoration;
-        return d is BoxDecoration && d.border != null;
-      })
-      .length;
+  return tester.widgetList<DecoratedBox>(find.byType(DecoratedBox)).where((b) {
+    final d = b.decoration;
+    return d is BoxDecoration && d.border != null;
+  }).length;
 }

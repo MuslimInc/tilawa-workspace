@@ -14,6 +14,7 @@ class DownloadButtonBlocFactory {
     required this._observeDownloadProgress,
     required this._getDownloadItem,
     required this._networkInfo,
+    required this._checkLowDeviceStorage,
   });
 
   final CheckSurahDownloadedUseCase _checkSurahDownloaded;
@@ -24,6 +25,7 @@ class DownloadButtonBlocFactory {
   final ObserveDownloadProgressUseCase _observeDownloadProgress;
   final GetDownloadItemUseCase _getDownloadItem;
   final NetworkInfo _networkInfo;
+  final CheckLowDeviceStorageUseCase _checkLowDeviceStorage;
 
   DownloadButtonBloc create({
     required String url,
@@ -45,6 +47,7 @@ class DownloadButtonBlocFactory {
       observeDownloadProgress: _observeDownloadProgress,
       getDownloadItem: _getDownloadItem,
       networkInfo: _networkInfo,
+      checkLowDeviceStorage: _checkLowDeviceStorage,
       initialIsDownloaded: initialIsDownloaded,
       initialIsDownloading: initialIsDownloading,
       initialProgress: initialProgress,

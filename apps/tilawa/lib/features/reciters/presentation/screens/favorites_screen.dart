@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -26,9 +26,22 @@ class FavoritesScreen extends StatelessWidget {
         listener: (context, state) {
           if (state is FavoritesLoaded && state.removedReciter != null) {
             final ReciterEntity reciter = state.removedReciter!;
-            ToastUtils.showSuccessToast(
-              context.l10n.reciterRemovedFromFavorites(reciter.name),
-            );
+            final FavoritesCubit cubit = context.read<FavoritesCubit>();
+            // Swipe-removal is destructive and the card is already gone —
+            // offer undo instead of a passive toast.
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                SnackBar(
+                  content: Text(
+                    context.l10n.reciterRemovedFromFavorites(reciter.name),
+                  ),
+                  action: SnackBarAction(
+                    label: context.l10n.undo,
+                    onPressed: () => cubit.toggleFavorite(reciter),
+                  ),
+                ),
+              );
           }
         },
         child: Stack(
@@ -46,10 +59,18 @@ class FavoritesScreen extends StatelessWidget {
                     return TilawaIllustratedState(
                       icon: Icons.error_outline_rounded,
                       iconColor: colorScheme.error,
-                      title: state.failure.localizedMessage(context) ??
+                      title:
+                          state.failure.localizedMessage(context) ??
                           context.l10n.unexpectedError,
-                      semanticLabel: state.failure.localizedMessage(context) ??
+                      semanticLabel:
+                          state.failure.localizedMessage(context) ??
                           context.l10n.unexpectedError,
+                      primaryAction: TilawaButton(
+                        text: context.l10n.retry,
+                        variant: TilawaButtonVariant.outline,
+                        onPressed: () =>
+                            context.read<FavoritesCubit>().loadFavorites(),
+                      ),
                     );
                   } else if (state is FavoritesLoaded) {
                     if (state.favorites.isEmpty) {
@@ -69,9 +90,14 @@ class FavoritesScreen extends StatelessWidget {
                         final ReciterEntity reciter = state.favorites[index];
                         return Dismissible(
                           key: ValueKey(reciter.id),
+                          // Single direction so the background icon always
+                          // sits where the reveal happens — in LTR and RTL.
+                          direction: DismissDirection.endToStart,
                           background: Container(
-                            alignment: Alignment.centerRight,
-                            padding: EdgeInsets.only(right: tokens.spaceLarge),
+                            alignment: AlignmentDirectional.centerEnd,
+                            padding: EdgeInsetsDirectional.only(
+                              end: tokens.spaceLarge,
+                            ),
                             decoration: BoxDecoration(
                               color: colorScheme.error,
                               borderRadius: BorderRadius.circular(
@@ -110,6 +136,13 @@ class FavoritesScreen extends StatelessWidget {
       icon: Icons.favorite_border_rounded,
       title: l10n.noFavorites,
       semanticLabel: l10n.noFavorites,
+      // Same CTA as the downloads empty state — route to the catalog where
+      // the hearts actually live.
+      primaryAction: TilawaButton(
+        text: l10n.reciters,
+        leadingIcon: const Icon(Icons.record_voice_over_rounded),
+        onPressed: () => context.go('/'),
+      ),
     );
   }
 }

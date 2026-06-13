@@ -375,8 +375,7 @@ class DownloadNotificationService implements IDownloadNotificationService {
           reciterId: reciterId,
           reciterName: reciterName,
         );
-      } else {
-      }
+      } else {}
     } on FormatException catch (e) {
       // Not a JSON payload - not a download notification, ignore it
       // Other notification services handle their own payloads independently

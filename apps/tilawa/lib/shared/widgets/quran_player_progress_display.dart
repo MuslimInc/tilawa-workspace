@@ -24,8 +24,9 @@ PlayerProgressTimes resolvePlayerProgressTimes(PositionData data) {
     );
   }
   final Duration remaining = duration - elapsed;
-  final Duration safeRemaining =
-      remaining.isNegative ? Duration.zero : remaining;
+  final Duration safeRemaining = remaining.isNegative
+      ? Duration.zero
+      : remaining;
   return PlayerProgressTimes(
     elapsed: elapsed,
     remainingLabel: '−${formatPlayerDuration(safeRemaining)}',

@@ -18,10 +18,15 @@ class RecitersFavoritesTab extends StatelessWidget {
     super.key,
     required this.pageStorageKey,
     required this.scrollController,
+    this.onBrowseReciters,
   });
 
   final PageStorageKey<String> pageStorageKey;
   final ScrollController scrollController;
+
+  /// Navigates to the reciter catalog so the empty state is actionable —
+  /// the copy says "tap the heart" but no hearts exist on this tab.
+  final VoidCallback? onBrowseReciters;
 
   @override
   Widget build(BuildContext context) {
@@ -32,9 +37,7 @@ class RecitersFavoritesTab extends StatelessWidget {
       builder: (BuildContext context, FavoritesState state) {
         return CustomScrollView(
           key: pageStorageKey,
-          controller: primaryScrollController == null
-              ? scrollController
-              : null,
+          controller: primaryScrollController == null ? scrollController : null,
           physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics(),
           ),
@@ -43,7 +46,8 @@ class RecitersFavoritesTab extends StatelessWidget {
               handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
             ),
             switch (state) {
-              FavoritesLoading() || FavoritesInitial() => _FavoritesLoadingSliver(
+              FavoritesLoading() ||
+              FavoritesInitial() => _FavoritesLoadingSliver(
                 semanticsLabel: context.l10n.loadingReciters,
               ),
               FavoritesError(:final failure) => _FavoritesMessageSliver(
@@ -52,9 +56,15 @@ class RecitersFavoritesTab extends StatelessWidget {
                     failure.localizedMessage(context) ??
                     context.l10n.unexpectedError,
                 isError: true,
+                action: TilawaButton(
+                  text: context.l10n.retry,
+                  variant: TilawaButtonVariant.outline,
+                  onPressed: () =>
+                      context.read<FavoritesCubit>().loadFavorites(),
+                ),
               ),
               FavoritesLoaded(:final favorites) when favorites.isEmpty =>
-                const _FavoritesEmptySliver(),
+                _FavoritesEmptySliver(onBrowseReciters: onBrowseReciters),
               FavoritesLoaded(:final favorites) => _FavoritesListSliver(
                 favorites: favorites,
               ),
@@ -116,11 +126,13 @@ class _FavoritesMessageSliver extends StatelessWidget {
     required this.icon,
     required this.title,
     this.isError = false,
+    this.action,
   });
 
   final IconData icon;
   final String title;
   final bool isError;
+  final Widget? action;
 
   @override
   Widget build(BuildContext context) {
@@ -132,13 +144,16 @@ class _FavoritesMessageSliver extends StatelessWidget {
         iconColor: isError ? theme.colorScheme.error : null,
         title: title,
         semanticLabel: title,
+        primaryAction: action,
       ),
     );
   }
 }
 
 class _FavoritesEmptySliver extends StatelessWidget {
-  const _FavoritesEmptySliver();
+  const _FavoritesEmptySliver({this.onBrowseReciters});
+
+  final VoidCallback? onBrowseReciters;
 
   @override
   Widget build(BuildContext context) {
@@ -155,6 +170,15 @@ class _FavoritesEmptySliver extends StatelessWidget {
         subtitle: context.l10n.tourRecitersFavoritesDescription,
         semanticLabel: title,
         maxWidth: tokens.contentMaxWidthForm * 0.6,
+        // Mirrors the downloads tab CTA so both empty tabs lead the user
+        // back to the catalog instead of dead-ending.
+        primaryAction: onBrowseReciters == null
+            ? null
+            : TilawaButton(
+                text: context.l10n.reciters,
+                leadingIcon: const Icon(Icons.record_voice_over_rounded),
+                onPressed: onBrowseReciters,
+              ),
       ),
     );
   }

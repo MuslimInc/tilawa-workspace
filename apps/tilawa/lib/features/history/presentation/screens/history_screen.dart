@@ -241,7 +241,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 direction: DismissDirection.endToStart,
                 background: Container(
                   color: Theme.of(context).colorScheme.error,
-                  alignment: Alignment.centerRight,
+                  // Directional so the icon sits on the reveal side in RTL too.
+                  alignment: AlignmentDirectional.centerEnd,
                   padding: EdgeInsets.symmetric(
                     horizontal: Theme.of(context).tokens.spaceLarge,
                   ),

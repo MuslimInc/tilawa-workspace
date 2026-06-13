@@ -7,7 +7,6 @@ import '../../lib/src/previews/preview_wrapper.dart';
 import 'golden_constraints.dart';
 
 void main() {
-
   group('Organisms Golden Tests', () {
     goldenTest(
       'TilawaMediaPlayerBar',

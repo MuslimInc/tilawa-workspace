@@ -24,7 +24,9 @@ class BookmarksScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: TilawaCatalogAppBar(
-        preferredHeight: TilawaAppBarConfig.catalogTitleAndSearchHeight(context),
+        preferredHeight: TilawaAppBarConfig.catalogTitleAndSearchHeight(
+          context,
+        ),
         title: context.l10n.bookmarks,
         automaticallyImplyLeading: true,
         onBackPressed: () => context.pop(),
@@ -104,38 +106,17 @@ class BookmarksScreen extends StatelessWidget {
                                           ).tokens;
                                           return Dismissible(
                                             key: ValueKey(bookmark.id),
-                                            background: Container(
-                                              alignment: Alignment.centerRight,
-                                              padding: EdgeInsets.only(
-                                                right: tokens.spaceLarge,
-                                              ),
-                                              decoration: BoxDecoration(
-                                                color: Theme.of(
-                                                  context,
-                                                ).colorScheme.error,
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                  tokens.resolveRadius(
-                                                    family:
-                                                        TilawaRadiusFamily
-                                                            .card,
-                                                  ),
-                                                ),
-                                              ),
-                                              child: Icon(
-                                                Icons.delete_outline_rounded,
-                                                color: Theme.of(
-                                                  context,
-                                                ).colorScheme.onError,
-                                              ),
+                                            direction:
+                                                DismissDirection.endToStart,
+                                            background: _dismissBackground(
+                                              context,
+                                              tokens,
                                             ),
-                                            onDismissed: (direction) {
-                                              context.read<BookmarksBloc>().add(
-                                                DeleteBookmarkEvent(
-                                                  id: bookmark.id,
+                                            onDismissed: (_) =>
+                                                _onBookmarkDismissed(
+                                                  context,
+                                                  bookmark,
                                                 ),
-                                              );
-                                            },
                                             child: BookmarkCard(
                                               bookmark: bookmark,
                                               onTap: () => _playFromBookmark(
@@ -204,27 +185,9 @@ class BookmarksScreen extends StatelessWidget {
         final tokens = Theme.of(context).tokens;
         return Dismissible(
           key: ValueKey(bookmark.id),
-          background: Container(
-            alignment: Alignment.centerRight,
-            padding: EdgeInsets.only(
-              right: tokens.spaceLarge,
-            ),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.error,
-              borderRadius: BorderRadius.circular(
-                tokens.resolveRadius(family: TilawaRadiusFamily.card),
-              ),
-            ),
-            child: Icon(
-              Icons.delete_outline_rounded,
-              color: Theme.of(context).colorScheme.onError,
-            ),
-          ),
-          onDismissed: (direction) {
-            context.read<BookmarksBloc>().add(
-              DeleteBookmarkEvent(id: bookmark.id),
-            );
-          },
+          direction: DismissDirection.endToStart,
+          background: _dismissBackground(context, tokens),
+          onDismissed: (_) => _onBookmarkDismissed(context, bookmark),
           child: BookmarkCard(
             bookmark: bookmark,
             onTap: () => _playFromBookmark(context, bookmark),
@@ -233,6 +196,56 @@ class BookmarksScreen extends StatelessWidget {
         );
       },
     );
+  }
+
+  /// Delete background pinned to the reveal side in both LTR and RTL
+  /// (paired with `DismissDirection.endToStart`).
+  Widget _dismissBackground(BuildContext context, TilawaDesignTokens tokens) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      alignment: AlignmentDirectional.centerEnd,
+      padding: EdgeInsetsDirectional.only(end: tokens.spaceLarge),
+      decoration: BoxDecoration(
+        color: colorScheme.error,
+        borderRadius: BorderRadius.circular(
+          tokens.resolveRadius(family: TilawaRadiusFamily.card),
+        ),
+      ),
+      child: Icon(Icons.delete_outline_rounded, color: colorScheme.onError),
+    );
+  }
+
+  /// Deletes with an undo affordance — the recreated bookmark gets a fresh
+  /// id/timestamps, which is acceptable for undo semantics.
+  void _onBookmarkDismissed(BuildContext context, BookmarkEntity bookmark) {
+    final BookmarksBloc bloc = context.read<BookmarksBloc>();
+    bloc.add(DeleteBookmarkEvent(id: bookmark.id));
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.bookmarkDeleted),
+          action: SnackBarAction(
+            label: context.l10n.undo,
+            onPressed: () => bloc.add(
+              CreateBookmarkEvent(
+                surahId: bookmark.surahId,
+                surahName: bookmark.surahName,
+                surahNameEn: bookmark.surahNameEn,
+                reciterId: bookmark.reciterId,
+                reciterName: bookmark.reciterName,
+                moshafId: bookmark.moshafId,
+                moshafName: bookmark.moshafName,
+                positionMs: bookmark.positionMs,
+                durationMs: bookmark.durationMs,
+                audioUrl: bookmark.audioUrl,
+                label: bookmark.label,
+                artworkUrl: bookmark.artworkUrl,
+              ),
+            ),
+          ),
+        ),
+      );
   }
 
   Widget _buildEmptyState(BuildContext context, bool isSearching) {

@@ -70,14 +70,16 @@ void main() {
         expect(result[1].id, tOtherId);
         expect(result[1].isDownloaded, isFalse);
 
-        verify(mockDownloadsRepo.isSurahDownloaded(tTargetId, tReciter))
-            .called(1);
-        verify(mockDownloadsRepo.isSurahDownloading(tTargetId, tReciter))
-            .called(1);
+        verify(
+          mockDownloadsRepo.isSurahDownloaded(tTargetId, tReciter),
+        ).called(1);
+        verify(
+          mockDownloadsRepo.isSurahDownloading(tTargetId, tReciter),
+        ).called(1);
 
-        final captured = verify(mockSurahRepo.updateSurah(captureAny))
-            .captured
-            .single as SurahEntity;
+        final captured =
+            verify(mockSurahRepo.updateSurah(captureAny)).captured.single
+                as SurahEntity;
         expect(captured.id, tTargetId);
         expect(captured.isDownloaded, isTrue);
       },

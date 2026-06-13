@@ -8,7 +8,6 @@ import 'package:tilawa/features/shell/shell.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
-import '../shared/widgets/quran_player_widget.dart';
 import 'cubit/main_screen_cubit.dart';
 import 'cubit/main_screen_state.dart';
 import 'widgets/main_tab_viewport.dart';
@@ -52,16 +51,9 @@ class MainScreen extends StatelessWidget {
           final double playerHeight = playerShouldShow && !isKeyboardOpen
               ? context.tokens.playerCollapsedHeight
               : 0;
-          final double overlayBleedBuffer =
-              (playerShouldShow && !isKeyboardOpen && !context.isNarrow)
-              ? context.tokens.spaceSmall
-              : 0;
-
           final double contentBottomPadding = isKeyboardOpen
               ? 0
-              : context.isNarrow
-              ? (playerShouldShow ? playerHeight + overlayBleedBuffer : 0)
-              : QuranPlayerWidget.collapsedFootprint(context);
+              : (playerShouldShow ? playerHeight : 0);
 
           return state.isInitialTabMounted
               ? MainTabViewport(

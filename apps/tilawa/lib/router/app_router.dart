@@ -19,12 +19,12 @@ import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'app_router_config.dart';
+import 'app_navigator_keys.dart';
 import 'shell_route_location.dart';
 import 'json_type_registry.dart';
 
 class AppRouter {
-  static final GlobalKey<NavigatorState> navigatorKey =
-      GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> navigatorKey = appRootNavigatorKey;
 
   /// Flag to disable state restoration when launched from notification
   /// This is set before the router is created and prevents restoration

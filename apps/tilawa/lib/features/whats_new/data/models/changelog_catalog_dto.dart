@@ -34,7 +34,9 @@ class ChangelogCatalogDto {
   ChangelogCatalog toEntity() {
     return ChangelogCatalog(
       schemaVersion: schemaVersion,
-      releases: releases.map((ChangelogReleaseDto dto) => dto.toEntity()).toList(),
+      releases: releases
+          .map((ChangelogReleaseDto dto) => dto.toEntity())
+          .toList(),
       lastUpdatedAt: lastUpdatedAt,
     );
   }

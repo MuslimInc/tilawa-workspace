@@ -98,7 +98,8 @@ void main() {
       ).thenAnswer((_) async => tPlans);
 
       // Act
-      final List<SubscriptionPlan> result = await repository.getAvailablePlans();
+      final List<SubscriptionPlan> result = await repository
+          .getAvailablePlans();
 
       // Assert
       expect(result, tPlans);
@@ -112,7 +113,8 @@ void main() {
       ).thenThrow(Exception('Remote failure'));
 
       // Act
-      final List<SubscriptionPlan> result = await repository.getAvailablePlans();
+      final List<SubscriptionPlan> result = await repository
+          .getAvailablePlans();
 
       // Assert
       expect(result.length, 3); // 3 default plans
@@ -460,14 +462,16 @@ void main() {
       verifyNever(mockRemoteDataSource.getPremiumStatus());
     });
 
-    test('should return true for worship utility feature regardless of status',
-        () async {
-      // Act
-      final bool result = await repository.canAccessFeature('download');
+    test(
+      'should return true for worship utility feature regardless of status',
+      () async {
+        // Act
+        final bool result = await repository.canAccessFeature('download');
 
-      // Assert
-      expect(result, true);
-    });
+        // Assert
+        expect(result, true);
+      },
+    );
   });
 
   group('canDownload', () {

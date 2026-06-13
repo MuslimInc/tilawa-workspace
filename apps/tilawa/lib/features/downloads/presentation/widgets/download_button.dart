@@ -93,7 +93,7 @@ class DownloadButton extends StatelessWidget {
     return state.when(
       initial: () => null,
       readyToDownload: () => '${identifier}_ready',
-      pending: () => '${identifier}_pending',
+      pending: (_) => '${identifier}_pending',
       downloading: (_, _, _) => '${identifier}_downloading',
       completed: () => '${identifier}_complete',
       failed: (_) => '${identifier}_ready',
@@ -121,13 +121,18 @@ class DownloadButton extends StatelessWidget {
       },
       child: BlocConsumer<DownloadButtonBloc, DownloadButtonState>(
         listenWhen: (previous, current) =>
-            current.shouldShowNetworkError(previous),
+            current.shouldShowNetworkError(previous) ||
+            current.shouldShowLowStorageWarning(previous),
         listener: (context, state) {
-          state.whenOrNull(
-            networkError: (_) {
-              ToastUtils.showToast(msg: context.l10n.networkError);
-            },
+          final bool isNetworkError = state.maybeMap(
+            networkError: (_) => true,
+            orElse: () => false,
           );
+          if (isNetworkError) {
+            ToastUtils.showToast(msg: context.l10n.networkError);
+            return;
+          }
+          ToastUtils.showToast(msg: context.l10n.downloadLowStorageWarning);
         },
         buildWhen: (previous, current) =>
             current.hasSignificantProgressChange(previous),
@@ -158,7 +163,7 @@ class DownloadButton extends StatelessWidget {
                   () => context.read<DownloadButtonBloc>().add(
                     DownloadButtonEvent.startDownload(surahTitle: surahTitle),
                   ),
-              pending: () =>
+              pending: (_) =>
                   () => context.read<DownloadButtonBloc>().add(
                     const DownloadButtonEvent.cancel(),
                   ),
@@ -191,7 +196,7 @@ class DownloadButton extends StatelessWidget {
                       );
                     },
                   ),
-                  pending: () => _PendingDownloadButton(
+                  pending: (_) => _PendingDownloadButton(
                     palette: palette,
                     onCancel: () {
                       context.read<DownloadButtonBloc>().add(

@@ -809,9 +809,29 @@
     "@unableToSignInWithThirdPartyAccount": {
         "description": "Error message shown when third-party sign-in fails"
     },
+    "googleSignInFallbackTitle": "Google sign-in could not open",
+    "@googleSignInFallbackTitle": {
+        "description": "Title when Google account picker fails to render on device"
+    },
+    "googleSignInFallbackBody": "The Google account picker may be hidden on this device. Update Google Play Services, then try again. If it still fails, ask your developer to register this build's SHA-1 in Firebase.",
+    "@googleSignInFallbackBody": {
+        "description": "Help text when Google sign-in UI is unavailable"
+    },
+    "googleSignInUpdatePlayServices": "Update Google Play Services",
+    "@googleSignInUpdatePlayServices": {
+        "description": "Opens Play Store to update Google Play Services"
+    },
     "networkError": "Please check your internet connection",
     "@networkError": {
         "description": "Network error message"
+    },
+    "downloadLowStorageWarning": "Available storage may not be enough for this download. Free up space if downloads fail.",
+    "@downloadLowStorageWarning": {
+        "description": "Toast shown when device free storage is likely below the estimated download size"
+    },
+    "downloadLowStorageBlocked": "Not enough storage space to download all surahs. Free up space and try again.",
+    "@downloadLowStorageBlocked": {
+        "description": "Error toast when Download All is blocked because device storage is too low"
     },
     "recitationsAvailable": "{count} recitation(s) available",
     "@recitationsAvailable": {
@@ -1298,6 +1318,10 @@
     "tasbeehTargetLabel": "Target",
     "@tasbeehTargetLabel": {
         "description": "Target count input label"
+    },
+    "tasbeehTargetHint": "e.g. 33",
+    "@tasbeehTargetHint": {
+        "description": "Placeholder hint for target count input"
     },
     "tasbeehSetTarget": "Set target",
     "@tasbeehSetTarget": {

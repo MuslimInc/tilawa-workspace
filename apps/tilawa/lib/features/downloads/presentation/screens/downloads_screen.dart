@@ -271,12 +271,17 @@ class _DownloadsClearAllButton extends StatelessWidget {
 }
 
 class _ClearAllDownloadsDialog extends StatelessWidget {
-  const _ClearAllDownloadsDialog();
+  const _ClearAllDownloadsDialog({required this.downloadsBloc});
+
+  final DownloadsBloc downloadsBloc;
 
   static Future<void> show(BuildContext context) {
+    final DownloadsBloc downloadsBloc = context.read<DownloadsBloc>();
     return showDialog<void>(
       context: context,
-      builder: (BuildContext context) => const _ClearAllDownloadsDialog(),
+      builder: (BuildContext dialogContext) => _ClearAllDownloadsDialog(
+        downloadsBloc: downloadsBloc,
+      ),
     );
   }
 
@@ -296,7 +301,7 @@ class _ClearAllDownloadsDialog extends StatelessWidget {
           variant: TilawaButtonVariant.danger,
           onPressed: () {
             Navigator.of(context).pop();
-            context.read<DownloadsBloc>().add(const ClearAllDownloads());
+            downloadsBloc.add(const ClearAllDownloads());
           },
         ),
       ],

@@ -1071,15 +1071,18 @@ const double _kShareComposerBadgePillHeight = 32;
 const double _kShareComposerProgressHeight = 8;
 
 BorderRadius _shareComposerCardRadius(TilawaDesignTokens tokens) =>
-    BorderRadius.circular(tokens.resolveRadius(family: TilawaRadiusFamily.card));
+    BorderRadius.circular(
+      tokens.resolveRadius(family: TilawaRadiusFamily.card),
+    );
 
 BorderRadius _shareComposerChromeRadius(TilawaDesignTokens tokens) =>
-    BorderRadius.circular(tokens.resolveRadius(family: TilawaRadiusFamily.chrome));
+    BorderRadius.circular(
+      tokens.resolveRadius(family: TilawaRadiusFamily.chrome),
+    );
 
 BorderRadius _shareComposerPillRadius(
   TilawaDesignTokens tokens,
   double height,
-) =>
-    BorderRadius.circular(
-      tokens.resolveRadius(family: TilawaRadiusFamily.pill, height: height),
-    );
+) => BorderRadius.circular(
+  tokens.resolveRadius(family: TilawaRadiusFamily.pill, height: height),
+);

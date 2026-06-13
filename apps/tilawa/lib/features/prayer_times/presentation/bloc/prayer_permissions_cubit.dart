@@ -18,7 +18,7 @@ part 'prayer_permissions_cubit.freezed.dart';
 abstract class PrayerPermissionsState with _$PrayerPermissionsState {
   const factory PrayerPermissionsState({
     PrayerAlarmCapability? capability,
-    @Default(true) bool hasLocationPermission,
+    @Default(false) bool hasLocationPermission,
   }) = _PrayerPermissionsState;
 }
 
@@ -58,8 +58,8 @@ class PrayerPermissionsCubit extends Cubit<PrayerPermissionsState> {
   }
 
   Future<bool> _loadLocationPermission() async {
-    final Either<Failure, bool> result =
-        await _checkLocationPermissionUseCase.call();
+    final Either<Failure, bool> result = await _checkLocationPermissionUseCase
+        .call();
     return result.fold((_) => false, (bool granted) => granted);
   }
 

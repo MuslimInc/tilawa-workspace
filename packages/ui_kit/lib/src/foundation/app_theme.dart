@@ -16,8 +16,7 @@ class AppTheme {
   /// Brand typeface, bundled as a package asset (see `pubspec.yaml`). Fonts
   /// declared in a package are exposed to consumers under the
   /// `packages/<package>/<family>` namespace.
-  static const String _fontFamily =
-      'packages/tilawa_ui_kit/IBMPlexSansArabic';
+  static const String _fontFamily = 'packages/tilawa_ui_kit/IBMPlexSansArabic';
 
   // Light theme configuration constants
   static const FlexSurfaceMode _lightSurfaceMode =
@@ -240,8 +239,9 @@ class AppTheme {
       surfaceTint: Colors.transparent,
       surfaceContainerLowest: AppColors.lightCanvas,
       surfaceContainerLow: AppColors.lightSurface,
-      // Warm canvas + white card ramp. Fixed hexes — not harmonized toward
-      // [primary] — so chrome stays cream / white / #E5E5E0 / slate ink.
+      // Cool porcelain canvas + white card ramp. Fixed hexes — not harmonized
+      // toward [primary] — so chrome stays porcelain / white / #E5E7EB /
+      // slate ink.
       surfaceContainer: AppColors.lightCanvas,
       surfaceContainerHigh: AppColors.lightSurfaceContainerHighBase,
       surfaceContainerHighest: AppColors.lightSurfaceContainerHighestBase,
@@ -291,7 +291,10 @@ class AppTheme {
 
   /// M3 switch: OFF track uses a neutral outline tint on [ColorScheme.surfaceContainerLow]
   /// instead of primary-colored `surfaceContainerHighest` (avoids a muddy lavender
-  /// track when the user picks a purple or teal primary). ON/disabled tracks stay
+  /// track when the user picks a purple or teal primary). ON state uses the
+  /// M3 standard (full [ColorScheme.primary] track, [ColorScheme.onPrimary]
+  /// thumb) instead of Flex's muted track + dark thumb, which read as
+  /// ambiguous / near-disabled next to the calm neutrals. Disabled states stay
   /// Flex defaults.
   static SwitchThemeData _switchTheme(ColorScheme colorScheme) {
     final SwitchThemeData base = FlexSubThemes.switchTheme(
@@ -300,6 +303,7 @@ class AppTheme {
       useMaterial3: true,
     );
     final WidgetStateProperty<Color?>? origTrack = base.trackColor;
+    final WidgetStateProperty<Color?>? origThumb = base.thumbColor;
     if (origTrack == null) return base;
 
     Color offTrack({required bool interaction}) => Color.alphaBlend(
@@ -309,9 +313,11 @@ class AppTheme {
 
     return base.copyWith(
       trackColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-        if (states.contains(WidgetState.disabled) ||
-            states.contains(WidgetState.selected)) {
+        if (states.contains(WidgetState.disabled)) {
           return origTrack.resolve(states);
+        }
+        if (states.contains(WidgetState.selected)) {
+          return colorScheme.primary;
         }
         if (states.contains(WidgetState.pressed) ||
             states.contains(WidgetState.hovered) ||
@@ -319,6 +325,13 @@ class AppTheme {
           return offTrack(interaction: true);
         }
         return offTrack(interaction: false);
+      }),
+      thumbColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (!states.contains(WidgetState.disabled) &&
+            states.contains(WidgetState.selected)) {
+          return colorScheme.onPrimary;
+        }
+        return origThumb?.resolve(states);
       }),
     );
   }

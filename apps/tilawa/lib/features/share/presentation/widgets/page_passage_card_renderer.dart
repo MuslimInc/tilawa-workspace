@@ -202,7 +202,9 @@ class _PosterPill extends StatelessWidget {
       child: Container(
         padding: _PagePosterLayout.pillPadding,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(_PagePosterLayout.pillResolvedRadius),
+          borderRadius: BorderRadius.circular(
+            _PagePosterLayout.pillResolvedRadius,
+          ),
           color: AppPagePassagePosterColors.deepGreen.withValues(alpha: 0.08),
         ),
         child: Row(

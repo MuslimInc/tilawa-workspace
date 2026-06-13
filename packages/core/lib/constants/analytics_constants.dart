@@ -62,6 +62,7 @@ class AnalyticsParams {
   static const String error = 'error';
   static const String count = 'count';
   static const String timestamp = 'timestamp';
+
   /// Wall-clock ms when the action occurred on device (for offline-delayed uploads).
   static const String clientTimestampMs = 'client_timestamp_ms';
   static const String reason = 'reason';

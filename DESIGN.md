@@ -37,27 +37,30 @@ Additional constants exist in `AppColors` (e.g. gold) for Flex **secondary/terti
 
 ### Fixed semantic colors (`AppColors`)
 
-| Role | Light-oriented hex | Usage |
-|------|-------------------|--------|
-| Error | `#E53935` | Destructive / failures |
-| Success | `#43A047` | Positive outcomes |
-| Warning | `#FFA000` | Caution |
+| Role | Light hex | Dark hex (via `ColorScheme.success` / `.warning`) | Usage |
+|------|-----------|---------------------------------------------------|--------|
+| Error | `#DC2626` | `#FFB4AB` (`darkSchemeError`) | Destructive / failures |
+| Success | `#43A047` | `#6BCF7F` (`successDark`) | Positive outcomes |
+| Warning | `#C2410C` | `#FB923C` (`warningDark`) | Caution (deep orange, not gold) |
 
-### Neutral surfaces (light) — Pinterest catalog chrome
+Dark success/warning are brightness-tuned in `TilawaStatusColors` so status
+borders and icons clear WCAG 3:1 on green-tinted surfaces.
 
-Light surfaces are **not** primary-harmonized: idle controls stay warm neutral
-gray so coral/teal accents do not tint search fields or filter chips.
+### Neutral surfaces (light) — cool porcelain catalog chrome
+
+Light surfaces are **not** primary-harmonized: idle controls stay cool neutral
+gray so sage/teal accents do not tint search fields or filter chips.
 
 | Token / role | Hex (base) | Notes |
 |--------------|------------|--------|
-| Background / scaffold | `#FFFFFF` | `lightBackground` |
-| Surface | `#FFFFFF` | Cards on canvas |
-| Ink / onSurface | `#000000` | `lightInk` |
-| Body / mute / ash | `#33332E`, `#62625B`, `#91918C` | Secondary copy |
-| Container | `#F6F6F3` | `lightSurfaceContainer` |
-| High (idle chips, search fill) | `#E5E5E0` | `lightSurfaceContainerHighBase` → `surfaceContainerHigh` |
-| Highest / hairline | `#DADAD3` | Dividers, `outlineVariant` |
-| Outline (strong) | `#C0C0C0` | When hairline is too subtle |
+| Canvas / scaffold | `#F4F5F7` | `lightCanvas` / `lightBackground` |
+| Surface (cards, sheets) | `#FFFFFF` | `lightSurface` |
+| Ink / onSurface | `#0F172A` | `lightInk` |
+| Body / mute / ash | `#30343C`, `#5F6470`, `#8F949E` | Secondary copy |
+| Container | `#F4F5F7` | `lightSurfaceContainer` (matches canvas) |
+| High (idle chips, search fill) | `#E5E7EB` | `lightSurfaceContainerHighBase` → `surfaceContainerHigh` |
+| Highest / hairline | `#DBDEE3` | Dividers, `outlineVariant` |
+| Outline (strong) | `#D0D7DE` | `lightOutline` |
 
 See [`packages/ui_kit/docs/design_system.md`](packages/ui_kit/docs/design_system.md) and [`specs/017-catalog-theme-freeze/spec.md`](specs/017-catalog-theme-freeze/spec.md).
 
@@ -316,7 +319,7 @@ reference hex into feature code unless it becomes a deliberate token in
 | Field | Detail |
 |-------|--------|
 | **Visual reference** | [`design-md/pinterest/DESIGN.md`](design-md/pinterest/DESIGN.md) — catalog calm + accent discipline only. |
-| **Default primary** | Sage `#219653`; light neutrals white / `#E5E5E0` / black ink. |
+| **Default primary** | Sage `#219653`; light neutrals white / `#E5E7EB` / black ink. |
 | **Catalog header** | `TilawaCatalogAppBar` + catalog search/pills on major list screens. |
 | **Allowed changes** | New kit components; critical bugs; documented feature palettes (Quran reader, share output). |
 | **Enforcement** | `app_theme_color_roles_test.dart`, `app_theme_spec_compliance_test.dart`, `test/goldens/`. |

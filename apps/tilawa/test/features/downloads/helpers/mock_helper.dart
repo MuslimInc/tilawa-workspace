@@ -19,7 +19,9 @@ import 'package:tilawa/features/downloads/data/services/helpers/download_status_
 import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:tilawa/features/downloads/domain/usecases/cancel_download_use_case.dart';
 import 'package:tilawa/features/downloads/domain/usecases/cancel_downloads_for_reciter_use_case.dart';
+import 'package:tilawa/features/downloads/domain/services/device_storage_service.dart';
 import 'package:tilawa/features/downloads/domain/usecases/check_download_access_use_case.dart';
+import 'package:tilawa/features/downloads/domain/usecases/check_low_device_storage_use_case.dart';
 import 'package:tilawa/features/downloads/domain/usecases/check_surah_downloaded_use_case.dart';
 import 'package:tilawa/features/downloads/domain/usecases/clear_all_downloads_use_case.dart';
 import 'package:tilawa/features/downloads/domain/usecases/delete_download_use_case.dart';
@@ -79,6 +81,8 @@ import 'package:tilawa_core/services/interfaces/notification_dispatcher_interfac
     ValidateDownloadedFileUseCase,
     GetValidCompletedDownloadsUseCase,
     CheckDownloadAccessUseCase,
+    CheckLowDeviceStorageUseCase,
+    DeviceStorageService,
     PlayDownloadUseCase,
     PlayAllDownloadsUseCase,
     RetryDownloadUseCase,

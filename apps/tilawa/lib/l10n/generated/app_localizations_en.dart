@@ -604,7 +604,25 @@ class AppLocalizationsEn extends AppLocalizations {
       'Unable to sign in with third-party account';
 
   @override
+  String get googleSignInFallbackTitle => 'Google sign-in could not open';
+
+  @override
+  String get googleSignInFallbackBody =>
+      'The Google account picker may be hidden on this device. Update Google Play Services, then try again. If it still fails, ask your developer to register this build\'s SHA-1 in Firebase.';
+
+  @override
+  String get googleSignInUpdatePlayServices => 'Update Google Play Services';
+
+  @override
   String get networkError => 'Please check your internet connection';
+
+  @override
+  String get downloadLowStorageWarning =>
+      'Available storage may not be enough for this download. Free up space if downloads fail.';
+
+  @override
+  String get downloadLowStorageBlocked =>
+      'Not enough storage space to download all surahs. Free up space and try again.';
 
   @override
   String recitationsAvailable(int count) {
@@ -930,6 +948,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tasbeehTargetLabel => 'Target';
+
+  @override
+  String get tasbeehTargetHint => 'e.g. 33';
 
   @override
   String get tasbeehSetTarget => 'Set target';

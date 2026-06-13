@@ -436,7 +436,7 @@ void main() {
       expect(tokens.groupShadowOpacity, 0);
       expect(tokens.tileTitleFontSize, 16.0);
       expect(tokens.tileSubtitleOpacity, 0.6);
-      expect(tokens.switchActiveTrackOpacity, 0.5);
+      expect(tokens.switchActiveTrackOpacity, 1);
       expect(tokens.selectionTileSelectedBackgroundColor, isA<Color>());
     });
 
@@ -459,11 +459,9 @@ void main() {
         tokens.selectionTileDividerColor,
         scheme.outlineVariant.withValues(alpha: 0.05),
       );
-      expect(
-        tokens.switchActiveTrackColor,
-        scheme.primary.withValues(alpha: 0.5),
-      );
-      expect(tokens.switchActiveThumbColor, scheme.primary);
+      // M3 standard ON state: full-primary track, onPrimary thumb.
+      expect(tokens.switchActiveTrackColor, scheme.primary);
+      expect(tokens.switchActiveThumbColor, scheme.onPrimary);
     });
 
     test('copyWith updates nested EdgeInsets and numeric values', () {
@@ -1208,6 +1206,36 @@ void main() {
         );
       },
     );
+  });
+
+  group('catalog filter tokens', () {
+    test('dark selected fill is not full white onSurface', () {
+      final ColorScheme dark = ColorScheme.fromSeed(
+        seedColor: AppColors.defaultPrimary,
+        brightness: Brightness.dark,
+      );
+      final TilawaChipTokens tokens = TilawaChipTokens.fromColorScheme(dark);
+
+      expect(
+        tokens.catalogSelectedBackgroundColor,
+        isNot(equals(dark.onSurface)),
+      );
+      expect(
+        tokens.catalogSelectedForegroundColor,
+        dark.onSurface,
+      );
+    });
+
+    test('light catalog keeps inverted ink pill', () {
+      final ColorScheme light = ColorScheme.fromSeed(
+        seedColor: AppColors.defaultPrimary,
+        brightness: Brightness.light,
+      );
+      final TilawaChipTokens tokens = TilawaChipTokens.fromColorScheme(light);
+
+      expect(tokens.catalogSelectedBackgroundColor, light.onSurface);
+      expect(tokens.catalogSelectedForegroundColor, light.surface);
+    });
   });
 
   group('lerpTokenDouble utility', () {

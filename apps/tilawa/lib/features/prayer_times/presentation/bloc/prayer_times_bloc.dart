@@ -143,22 +143,23 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
             requestIfDenied: event.requestLocationPermission,
           );
 
-      final LocationResult? resolvedLocation = locationResult.fold<LocationResult?>(
-        (failure) {
-          emit(
-            state.copyWith(
-              status: PrayerTimesStatus.locationRequired,
-              isLoadingLocation: false,
-              errorMessage: failure.message ?? 'Unknown error',
-            ),
+      final LocationResult? resolvedLocation = locationResult
+          .fold<LocationResult?>(
+            (failure) {
+              emit(
+                state.copyWith(
+                  status: PrayerTimesStatus.locationRequired,
+                  isLoadingLocation: false,
+                  errorMessage: failure.message ?? 'Unknown error',
+                ),
+              );
+              return null;
+            },
+            (location) {
+              emit(state.copyWith(isLoadingLocation: false));
+              return location;
+            },
           );
-          return null;
-        },
-        (location) {
-          emit(state.copyWith(isLoadingLocation: false));
-          return location;
-        },
-      );
 
       if (resolvedLocation == null) {
         return;

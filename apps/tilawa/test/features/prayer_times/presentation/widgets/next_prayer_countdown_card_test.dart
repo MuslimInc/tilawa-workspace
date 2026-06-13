@@ -8,8 +8,7 @@ import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 void main() {
-  setUpAll(() {
-  });
+  setUpAll(() {});
 
   testWidgets('narrow width lays out without exceptions', (tester) async {
     final next = PrayerTimeItem(

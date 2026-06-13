@@ -35,8 +35,9 @@ class PrayerNotificationStatusScreen extends StatelessWidget {
           },
           child: Scaffold(
             appBar: TilawaCatalogAppBar(
-              preferredHeight:
-                  TilawaAppBarConfig.catalogTitleOnlyHeight(innerContext),
+              preferredHeight: TilawaAppBarConfig.catalogTitleOnlyHeight(
+                innerContext,
+              ),
               title: innerContext.l10n.prayerNotificationReceived,
               automaticallyImplyLeading: true,
               onBackPressed: () => _handleBack(innerContext),
@@ -54,8 +55,7 @@ class PrayerNotificationStatusScreen extends StatelessWidget {
   /// still playing.
   Future<void> _handleBack(BuildContext context) async {
     final bool playing = context.read<PrayerStatusCubit>().state.maybeWhen(
-      loaded: (_, _, isAdhanPlaying, _, _, _, _) =>
-          isAdhanPlaying,
+      loaded: (_, _, isAdhanPlaying, _, _, _, _) => isAdhanPlaying,
       orElse: () => false,
     );
 
@@ -84,8 +84,7 @@ class PrayerNotificationStatusScreen extends StatelessWidget {
   /// if it is still playing.
   Future<void> _handleClose(BuildContext context) async {
     final bool playing = context.read<PrayerStatusCubit>().state.maybeWhen(
-      loaded: (_, _, isAdhanPlaying, _, _, _, _) =>
-          isAdhanPlaying,
+      loaded: (_, _, isAdhanPlaying, _, _, _, _) => isAdhanPlaying,
       orElse: () => false,
     );
 
@@ -123,25 +122,26 @@ class _PrayerNotificationStatusView extends StatelessWidget {
           initial: () => const Center(child: TilawaLoadingIndicator()),
           loading: () => const Center(child: TilawaLoadingIndicator()),
           error: (failure) => _ErrorView(failure: failure),
-          loaded: (
-            prayerName,
-            scheduledTime,
-            isAdhanPlaying,
-            adhanEnabled,
-            soundName,
-            notificationId,
-            locationName,
-          ) {
-            return _StatusContent(
-              prayerName: prayerName,
-              scheduledTime: scheduledTime,
-              isAdhanPlaying: isAdhanPlaying,
-              adhanEnabled: adhanEnabled,
-              soundName: soundName,
-              locationName: locationName,
-              onClose: onClose,
-            );
-          },
+          loaded:
+              (
+                prayerName,
+                scheduledTime,
+                isAdhanPlaying,
+                adhanEnabled,
+                soundName,
+                notificationId,
+                locationName,
+              ) {
+                return _StatusContent(
+                  prayerName: prayerName,
+                  scheduledTime: scheduledTime,
+                  isAdhanPlaying: isAdhanPlaying,
+                  adhanEnabled: adhanEnabled,
+                  soundName: soundName,
+                  locationName: locationName,
+                  onClose: onClose,
+                );
+              },
         );
       },
     );

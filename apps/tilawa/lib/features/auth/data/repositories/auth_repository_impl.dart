@@ -5,15 +5,15 @@ import '../../domain/entities/user_entity.dart';
 import '../../domain/providers/auth_provider_interface.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/google_sign_in_prepare_data_source.dart';
-import '../providers/auth_provider_factory.dart';
 
 @LazySingleton(as: AuthRepository)
 class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(
-    AuthProviderFactory authProviderFactory,
+    AuthProviderInterface authProvider,
     GoogleSignInPrepareDataSource googleSignInPrepare,
-  ) : _authProvider = authProviderFactory.createAuthProvider(),
+  ) : _authProvider = authProvider,
       _googleSignInPrepare = googleSignInPrepare;
+
   final AuthProviderInterface _authProvider;
   final GoogleSignInPrepareDataSource _googleSignInPrepare;
 
@@ -21,7 +21,19 @@ class AuthRepositoryImpl implements AuthRepository {
   Stream<UserEntity?> get authStateChanges => _authProvider.authStateChanges;
 
   @override
-  Future<AuthResult> signInWithGoogle() {
+  Future<AuthResult> signInWithGoogle() async {
+    // Best-effort warm-up; a no-op when the login screen already ran it.
+    await _googleSignInPrepare.prepare();
+    // GoogleSignIn.authenticate() requires a completed initialize(). prepare()
+    // swallows initialization errors, so re-check the hard requirement here.
+    try {
+      await _googleSignInPrepare.ensureInitialized();
+    } catch (e) {
+      return AuthResult.failure(
+        message: 'Google Sign-In failed to initialize: $e',
+        code: 'sign-in-init-failed',
+      );
+    }
     return _authProvider.signIn();
   }
 
@@ -32,14 +44,21 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> signOut() async {
-    await _googleSignInPrepare.clear();
+    try {
+      await _googleSignInPrepare.ensureInitialized();
+    } catch (_) {
+      // Firebase sign-out must still run; the provider treats the
+      // google_sign_in part of sign-out as best-effort.
+    }
     await _authProvider.signOut();
   }
 
   @override
   Future<void> deleteAccount() async {
+    // The re-authentication path inside deleteAccount() calls
+    // GoogleSignIn.authenticate(), which requires initialize() first.
+    await _googleSignInPrepare.ensureInitialized();
     await _authProvider.deleteAccount();
-    await _googleSignInPrepare.clear();
   }
 
   @override

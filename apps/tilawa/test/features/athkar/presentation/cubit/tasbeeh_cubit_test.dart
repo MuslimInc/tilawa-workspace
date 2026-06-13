@@ -1,7 +1,6 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa/features/athkar/domain/constants/tasbeeh_constants.dart';
 import 'package:tilawa/features/athkar/domain/entities/tasbeeh_dhikr.dart';
 import 'package:tilawa/features/athkar/domain/repositories/tasbeeh_repository.dart';
 import 'package:tilawa/features/athkar/domain/services/tasbeeh_target_feedback_service.dart';
@@ -171,7 +170,7 @@ void main() {
       const TasbeehState(status: TasbeehStatus.loading),
       TasbeehState(
         status: TasbeehStatus.loaded,
-        draftTargetText: TasbeehConstants.defaultTargetCount.toString(),
+        draftTargetText: '',
       ),
     ],
   );
@@ -328,7 +327,7 @@ void main() {
         status: TasbeehStatus.loaded,
         viewMode: TasbeehViewMode.create,
         draftText: '',
-        draftTargetText: TasbeehConstants.defaultTargetCount.toString(),
+        draftTargetText: '',
       ),
     ],
   );

@@ -24,6 +24,12 @@ factories. Documentation, compliance tests, and goldens enforce the contract.
 - Scaffold and `ColorScheme.surface` are **white** (`#FFFFFF`).
 - `surfaceContainerHigh` is **`#E5E5E0`** for all primary presets (no
   primary harmonization on idle control surfaces).
+  *Amended 2026-06-11:* the light neutral ramp moved from the warm Pinterest
+  family to a **cool porcelain** family — canvas `#F4F5F7`,
+  `surfaceContainerHigh` `#E5E7EB`, hairline `#DBDEE3` — matching the slate
+  ink/outline that were always cool. Same lightness per tier; the
+  no-harmonization rule stands. (A sage-tinted rebase was trialled the same
+  day and reverted: tinted neutrals break accent discipline.)
 - `surfaceTint` is transparent on elevated Material surfaces in `AppTheme`.
 
 ### FB-003 — Catalog chrome components
@@ -75,3 +81,23 @@ factories. Documentation, compliance tests, and goldens enforce the contract.
 - Quran reader Mushaf palette migration
 - Dynamic-type golden matrix
 - Full dark-mode Pinterest parity (dark keeps Tilawa green-tinted stack)
+
+---
+
+## Amendment 2026-06-11 — theme 10/10 pass
+
+- **Cool porcelain light ramp** finalized: canvas `#F4F5F7`, cards `#FFFFFF`,
+  idle `#E5E7EB`, hairline `#DBDEE3`, slate ink `#0F172A`. Sage-tinted neutral
+  trials reverted (accent discipline).
+- **Switch ON** — M3 full `primary` track + `onPrimary` thumb in
+  `organisms_tokens.dart` and `AppTheme._switchTheme`.
+- **`primarySmallLabel`** — `ColorScheme` extension for ≥4.5:1 small accent
+  captions (bottom nav selected labels).
+- **Dark status colours** — `successDark` `#6BCF7F`, `warningDark` `#FB923C`
+  via `TilawaStatusColors`; WCAG 3:1 on `#353E3A`.
+- **Contrast tests** — `app_theme_color_roles_test.dart` covers all surface
+  tiers, true-black, disabled UI (38% `onSurface`), and semantic accents.
+- **Raw-hex sweep** — `tour_guide_service.dart` scrim uses `AppColors.lightInk`
+  / `ColorScheme.scrim`; colour-picker remains the only multi-hex feature area.
+- **Dark catalog filters** — selected tab/pill uses sage-washed
+  `surfaceContainerHighest` lift + `onSurface` label (not inverted white pill).

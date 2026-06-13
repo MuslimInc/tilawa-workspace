@@ -5,26 +5,40 @@ import 'package:tilawa/features/prayer_times/presentation/widgets/prayer_alerts_
 
 void main() {
   test('includes location before notification steps', () {
-    final List<PrayerAlertsPermissionStep> steps = prayerAlertsSetupPendingSteps(
-      hasLocationPermission: false,
-      capability: const PrayerAlarmCapability(
-        canScheduleExact: false,
-        hasNotificationPermission: false,
-      ),
-    );
+    final List<PrayerAlertsPermissionStep> steps =
+        prayerAlertsSetupPendingSteps(
+          hasLocationPermission: false,
+          capability: const PrayerAlarmCapability(
+            canScheduleExact: false,
+            hasNotificationPermission: false,
+          ),
+        );
 
     expect(steps.first, PrayerAlertsPermissionStep.location);
     expect(steps, contains(PrayerAlertsPermissionStep.notifications));
   });
 
+  test('returns location only while capability is still loading', () {
+    final List<PrayerAlertsPermissionStep> steps =
+        prayerAlertsSetupPendingSteps(
+          hasLocationPermission: false,
+          capability: null,
+        );
+
+    expect(steps, <PrayerAlertsPermissionStep>[
+      PrayerAlertsPermissionStep.location,
+    ]);
+  });
+
   test('returns empty when all grants present', () {
-    final List<PrayerAlertsPermissionStep> steps = prayerAlertsSetupPendingSteps(
-      hasLocationPermission: true,
-      capability: const PrayerAlarmCapability(
-        canScheduleExact: true,
-        hasNotificationPermission: true,
-      ),
-    );
+    final List<PrayerAlertsPermissionStep> steps =
+        prayerAlertsSetupPendingSteps(
+          hasLocationPermission: true,
+          capability: const PrayerAlarmCapability(
+            canScheduleExact: true,
+            hasNotificationPermission: true,
+          ),
+        );
 
     expect(steps, isEmpty);
   });

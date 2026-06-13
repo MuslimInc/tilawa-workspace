@@ -31,7 +31,9 @@ void main() {
       mockDownloadsRepo,
       mockRecitersRepo,
     );
-    when(mockSurahRepo.updateSurah(any)).thenAnswer((_) => Future<void>.value());
+    when(
+      mockSurahRepo.updateSurah(any),
+    ).thenAnswer((_) => Future<void>.value());
   });
 
   const tReciter = 'Abdul Basit';
@@ -163,40 +165,46 @@ void main() {
       expect(result.single.downloadProgress, 0.1);
     });
 
-    test('skips download lookup entirely when first audio has no artist', () async {
-      final a1 = audio('https://example.com/001.mp3', artist: '');
+    test(
+      'skips download lookup entirely when first audio has no artist',
+      () async {
+        final a1 = audio('https://example.com/001.mp3', artist: '');
 
-      final result = await useCase([a1]);
+        final result = await useCase([a1]);
 
-      expect(result, hasLength(1));
-      expect(result.single.isDownloaded, isFalse);
-      expect(result.single.isDownloading, isFalse);
-      verifyNever(mockDownloadsRepo.getAllDownloads());
-      verifyNever(mockRecitersRepo.getReciters());
-    });
+        expect(result, hasLength(1));
+        expect(result.single.isDownloaded, isFalse);
+        expect(result.single.isDownloading, isFalse);
+        verifyNever(mockDownloadsRepo.getAllDownloads());
+        verifyNever(mockRecitersRepo.getReciters());
+      },
+    );
 
-    test('ignores downloads that match neither reciterId nor reciterName', () async {
-      final a1 = audio('https://example.com/001.mp3');
-      when(
-        mockDownloadsRepo.getAllDownloads(),
-      ).thenAnswer(
-        (_) async => [
-          downloadItem(
-            url: a1.url,
-            status: DownloadStatus.completed,
-            reciterId: 999,
-            reciterName: 'someone-else',
-          ),
-        ],
-      );
-      when(
-        mockRecitersRepo.getReciters(),
-      ).thenAnswer((_) async => const Right([tReciterEntity]));
+    test(
+      'ignores downloads that match neither reciterId nor reciterName',
+      () async {
+        final a1 = audio('https://example.com/001.mp3');
+        when(
+          mockDownloadsRepo.getAllDownloads(),
+        ).thenAnswer(
+          (_) async => [
+            downloadItem(
+              url: a1.url,
+              status: DownloadStatus.completed,
+              reciterId: 999,
+              reciterName: 'someone-else',
+            ),
+          ],
+        );
+        when(
+          mockRecitersRepo.getReciters(),
+        ).thenAnswer((_) async => const Right([tReciterEntity]));
 
-      final result = await useCase([a1]);
+        final result = await useCase([a1]);
 
-      expect(result.single.isDownloaded, isFalse);
-    });
+        expect(result.single.isDownloaded, isFalse);
+      },
+    );
 
     test('persists each generated surah to the surah repository', () async {
       final a1 = audio('https://example.com/001.mp3');

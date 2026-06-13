@@ -35,10 +35,10 @@ jobs:
           java-version: "17"
 
       # Keep in sync with .github/workflows/android-release.yml.
-      - name: Set up Flutter 3.44.1
+      - name: Set up Flutter 3.44.2
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.44.1"
+          flutter-version: "3.44.2"
           channel: stable
           cache: true
 
@@ -46,7 +46,7 @@ jobs:
         run: flutter pub get
 
       - name: Activate melos
-        run: dart pub global activate melos '>=7.8.0 <8.0.0'
+        run: dart pub global activate melos '>=7.8.2 <8.0.0'
 
       # The melos scripts call `melos exec` internally, so melos must be on PATH
       # as a global executable. Export it once for every step that needs it.

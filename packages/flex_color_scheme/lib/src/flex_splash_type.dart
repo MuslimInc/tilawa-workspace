@@ -58,8 +58,7 @@ enum FlexSplashType {
   /// Uses an immediate highlight ink feature whose origin starts at the input
   /// touch point and expands from touch point with zero duration, for an
   /// immediate splash effect, instead of animated splash color based ink.
-  instantSplash
-  ;
+  instantSplash;
 
   /// Return the actual splashFactory defined by the [FlexSplashType] enum.
   ///

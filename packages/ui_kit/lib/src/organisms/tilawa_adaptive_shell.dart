@@ -2,12 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../foundation/breakpoints.dart';
+import '../foundation/color_scheme_ext.dart';
 import '../foundation/component_tokens.dart';
 import '../foundation/content_bounds.dart';
-import '../foundation/design_tokens.dart';
-import '../foundation/display_feature_insets.dart';
-import '../foundation/safe_area_ext.dart';
 
 /// [ValueListenable] that is always `true` and never notifies.
 ///
@@ -62,19 +59,16 @@ class TilawaNavDestination {
   final String? identifier;
 }
 
-/// A shell that adapts its navigation based on the window size.
+/// A shell with a shared bottom navigation bar on every window size.
 ///
-/// - Phone (narrow): one [Scaffold] hosts tab [child] and a shared
-///   [Scaffold.bottomNavigationBar] (not a nested bar per tab). Destination
-///   **labels are always shown** (icons + text). Optional
-///   [phoneBottomNavigationBarVisible] can hide the bar (e.g. full-screen
-///   player). Uses default [Scaffold.resizeToAvoidBottomInset] so the body
-///   and bar reflow cleanly when the IME opens (no dead inset band).
-///   [Scaffold.extendBody] is false.
-/// - Medium/Expanded: Shows a side navigation rail.
+/// One [Scaffold] hosts tab [child] and a shared [Scaffold.bottomNavigationBar]
+/// (not a nested bar per tab). Destination **labels are always shown** (icons +
+/// text). Optional [phoneBottomNavigationBarVisible] can hide the bar (e.g.
+/// full-screen player). Uses default [Scaffold.resizeToAvoidBottomInset] so the
+/// body and bar reflow cleanly when the IME opens. [Scaffold.extendBody] is
+/// false.
 ///
-/// This shell also respects [DisplayFeature]s (hinges/folds) on foldable
-/// devices, ensuring navigation elements don't overlap fold regions.
+/// Respects [DisplayFeature]s (hinges/folds) on foldable devices.
 class TilawaAdaptiveShell extends StatelessWidget {
   const TilawaAdaptiveShell({
     super.key,
@@ -113,121 +107,66 @@ class TilawaAdaptiveShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final windowSize = context.windowSize;
-    final displayIndex = (selectedIndex == -1) ? null : selectedIndex;
+    final int? displayIndex = (selectedIndex == -1) ? null : selectedIndex;
+    final ValueListenable<bool> phoneNavListenable =
+        phoneBottomNavigationBarVisible ?? _kAlwaysShowPhoneBottomNav;
 
-    if (windowSize == TilawaWindowSize.narrow) {
-      final ValueListenable<bool> phoneNavListenable =
-          phoneBottomNavigationBarVisible ?? _kAlwaysShowPhoneBottomNav;
+    return ValueListenableBuilder<bool>(
+      valueListenable: phoneNavListenable,
+      builder: (context, bottomNavVisible, _) {
+        // Do NOT wrap the whole [Scaffold] in [MediaQuery.removeViewPadding]
+        // (removeBottom: true): [BottomNavigationBar] reads
+        // [MediaQuery.viewPaddingOf] bottom and adds that as insets to the
+        // icon+label row (see Material bottom_navigation_bar.dart ~1107).
+        // Stripping view padding here made labels sit flush on newer
+        // Android gesture nav. Only the scrolling body should ignore the
+        // bottom inset so content can extend behind the bar.
+        final Color bodyColor = Theme.of(context).scaffoldBackgroundColor;
 
-      return ValueListenableBuilder<bool>(
-        valueListenable: phoneNavListenable,
-        builder: (context, bottomNavVisible, _) {
-          // Do NOT wrap the whole [Scaffold] in [MediaQuery.removeViewPadding]
-          // (removeBottom: true): [BottomNavigationBar] reads
-          // [MediaQuery.viewPaddingOf] bottom and adds that as insets to the
-          // icon+label row (see Material bottom_navigation_bar.dart ~1107).
-          // Stripping view padding here made labels sit flush on newer
-          // Android gesture nav. Only the scrolling body should ignore the
-          // bottom inset so content can extend behind the bar.
-          final Color bodyColor = Theme.of(context).scaffoldBackgroundColor;
-
-          Widget? bottomNavigationBar;
-          if (bottomNavVisible) {
-            bottomNavigationBar = Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                ?phoneFooterAboveNav,
-                _BottomNavBar(
-                  destinations: destinations,
-                  selectedIndex: displayIndex,
-                  onDestinationSelected: onDestinationSelected,
-                ),
-              ],
-            );
-          } else if (phoneFooterAboveNav != null) {
-            // Mini-player chrome (e.g. QuranPlayerWidget) must stay visible on
-            // shell routes that hide the bottom bar (/reciter/:id, search, …).
-            // Bottom safe-area spacing is owned by the footer slot height.
-            bottomNavigationBar = phoneFooterAboveNav!;
-          }
-
-          return Scaffold(
-            backgroundColor: bodyColor,
-            extendBody: false,
-            body: MediaQuery.removeViewPadding(
-              context: context,
-              removeBottom: true,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Positioned.fill(
-                    child: MediaQuery.removePadding(
-                      context: context,
-                      removeBottom: true,
-                      child: child,
-                    ),
-                  ),
-                  Positioned.fill(child: bottomPlayer),
-                ],
-              ),
-            ),
-            bottomNavigationBar: bottomNavigationBar,
-          );
-        },
-      );
-    }
-
-    final hingePadding = avoidDisplayFeatures
-        ? context.getHingeAvoidancePadding(.left)
-        : EdgeInsetsDirectional.zero;
-
-    final isRtl = Directionality.of(context) == TextDirection.rtl;
-    final padding = context.contentSafePadding;
-
-    final Color bodyColor = Theme.of(context).scaffoldBackgroundColor;
-
-    return Scaffold(
-      backgroundColor: bodyColor,
-      body: Stack(
-        children: [
-          Row(
+        Widget? bottomNavigationBar;
+        if (bottomNavVisible) {
+          bottomNavigationBar = Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Padding(
-                padding: EdgeInsetsDirectional.only(
-                  start: hingePadding.start,
-                  end: hingePadding.end,
-                ),
-                child: _SideNavRail(
-                  destinations: destinations,
-                  selectedIndex: displayIndex,
-                  onDestinationSelected: onDestinationSelected,
-                  extended: windowSize.index >= TilawaWindowSize.large.index,
-                ),
+              ?phoneFooterAboveNav,
+              _BottomNavBar(
+                destinations: destinations,
+                selectedIndex: displayIndex,
+                onDestinationSelected: onDestinationSelected,
               ),
-              Expanded(
-                child: MediaQuery(
-                  data: MediaQuery.of(context).copyWith(
-                    padding: padding.copyWith(
-                      left: isRtl ? padding.left : 0,
-                      right: isRtl ? 0 : padding.right,
-                    ),
-                  ),
-                  child: SafeArea(
-                    left: isRtl,
-                    right: !isRtl,
-                    top: false,
-                    bottom: false,
+            ],
+          );
+        } else if (phoneFooterAboveNav != null) {
+          // Mini-player chrome (e.g. QuranPlayerWidget) must stay visible on
+          // shell routes that hide the bottom bar (/reciter/:id, search, …).
+          // Bottom safe-area spacing is owned by the footer slot height.
+          bottomNavigationBar = phoneFooterAboveNav!;
+        }
+
+        return Scaffold(
+          backgroundColor: bodyColor,
+          extendBody: false,
+          body: MediaQuery.removeViewPadding(
+            context: context,
+            removeBottom: true,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Positioned.fill(
+                  child: MediaQuery.removePadding(
+                    context: context,
+                    removeBottom: true,
                     child: child,
                   ),
                 ),
-              ),
-            ],
+                Positioned.fill(child: bottomPlayer),
+              ],
+            ),
           ),
-          Positioned.fill(child: bottomPlayer),
-        ],
-      ),
+          bottomNavigationBar: bottomNavigationBar,
+        );
+      },
     );
   }
 }
@@ -401,8 +340,11 @@ class _BottomNavBar extends StatelessWidget {
                         showUnselectedLabels: true,
                         backgroundColor: Colors.transparent,
                         elevation: 0,
+                        // Labels render at caption size, so the accent must
+                        // clear the 4.5:1 small-text threshold; icons keep
+                        // [ColorScheme.primary] via [selectedIconTheme] (3:1).
                         selectedItemColor: hasSelection
-                            ? theme.colorScheme.primary
+                            ? theme.colorScheme.primarySmallLabel
                             : theme.colorScheme.onSurfaceVariant,
                         unselectedItemColor: theme.colorScheme.onSurfaceVariant,
                         selectedLabelStyle: selectedLabelStyle,
@@ -434,96 +376,6 @@ class _BottomNavBar extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SideNavRail extends StatelessWidget {
-  const _SideNavRail({
-    required this.destinations,
-    required this.selectedIndex,
-    required this.onDestinationSelected,
-    required this.extended,
-  });
-
-  final List<TilawaNavDestination> destinations;
-  final int? selectedIndex;
-  final ValueChanged<int> onDestinationSelected;
-  final bool extended;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final inactiveColor = theme.colorScheme.onSurfaceVariant;
-    final activeColor = theme.colorScheme.onPrimaryContainer;
-    final designTokens = theme.tokens;
-    final componentTokens = theme.componentTokens.adaptiveShell;
-    final double sideRailRadius = designTokens.resolveRadius(
-      family: TilawaRadiusFamily.chrome,
-    );
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(sideRailRadius),
-      child: Container(
-        decoration: BoxDecoration(
-          color: componentTokens.sideRailBackgroundColor,
-          borderRadius: BorderRadius.circular(sideRailRadius),
-          border: Border.all(
-            color: componentTokens.sideRailOutlineColor,
-            width: designTokens.borderWidthThin,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: theme.colorScheme.shadow.withValues(
-                alpha: componentTokens.sideRailShadowOpacity,
-              ),
-              blurRadius: componentTokens.sideRailShadowBlur,
-              offset: componentTokens.sideRailShadowOffset,
-            ),
-          ],
-        ),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                child: IntrinsicHeight(
-                  child: NavigationRail(
-                    extended: extended,
-                    selectedIndex: selectedIndex,
-                    onDestinationSelected: onDestinationSelected,
-                    backgroundColor: Colors.transparent,
-                    indicatorColor: componentTokens.sideRailIndicatorColor,
-                    labelType: extended
-                        ? NavigationRailLabelType.none
-                        : NavigationRailLabelType.all,
-                    destinations: [
-                      for (final d in destinations)
-                        NavigationRailDestination(
-                          icon: d.iconBuilder != null
-                              ? d.iconBuilder!(
-                                  context,
-                                  isSelected: false,
-                                  color: inactiveColor,
-                                )
-                              : Icon(d.icon),
-                          selectedIcon: d.iconBuilder != null
-                              ? d.iconBuilder!(
-                                  context,
-                                  isSelected: true,
-                                  color: activeColor,
-                                )
-                              : Icon(d.activeIcon ?? d.icon),
-                          label: Text(d.label),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
         ),
       ),
     );

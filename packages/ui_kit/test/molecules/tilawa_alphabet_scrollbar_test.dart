@@ -568,6 +568,77 @@ void main() {
       expect(selected, letters.last);
     });
 
+    testWidgets('scrubbing uses rounded border on track without ClipRRect', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        SizedBox(
+          width: 400,
+          height: 600,
+          child: _wrap(
+            TilawaAlphabetScrollbar(
+              letters: letters,
+              selectedLetter: null,
+              onLetterSelected: (_) {},
+              onPanUpdate: (_) {},
+              onPanStart: (_) {},
+              onPanEnd: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      final ThemeData theme = Theme.of(
+        tester.element(find.byType(TilawaAlphabetScrollbar)),
+      );
+      final Finder trackFinder = find.descendant(
+        of: find.byType(TilawaAlphabetScrollbar),
+        matching: find.byType(AnimatedContainer),
+      );
+
+      expect(trackFinder, findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(TilawaAlphabetScrollbar),
+          matching: find.byType(ClipRRect),
+        ),
+        findsNothing,
+      );
+
+      final BoxDecoration idleDecoration =
+          (tester.widget<AnimatedContainer>(trackFinder).decoration
+              as BoxDecoration);
+      expect(idleDecoration.borderRadius, isNotNull);
+      expect(
+        idleDecoration.border!.top.width,
+        theme.tokens.borderWidthThin,
+      );
+      expect(
+        tester.widget<AnimatedContainer>(trackFinder).clipBehavior,
+        Clip.antiAlias,
+      );
+
+      final Rect scrollbarRect = tester.getRect(
+        find.byType(TilawaAlphabetScrollbar),
+      );
+      await tester.startGesture(scrollbarRect.center);
+      await tester.pump();
+
+      final BoxDecoration scrubDecoration =
+          (tester.widget<AnimatedContainer>(trackFinder).decoration
+              as BoxDecoration);
+      expect(
+        scrubDecoration.border!.top.width,
+        theme.tokens.borderWidthThin * 2,
+      );
+      expect(
+        scrubDecoration.border!.top.color,
+        theme.colorScheme.primary.withValues(
+          alpha: theme.tokens.opacityMedium,
+        ),
+      );
+    });
+
     testWidgets('scrub into bottom of track selects last letter', (
       tester,
     ) async {
@@ -819,16 +890,11 @@ void main() {
       await tester.pump();
 
       final theme = Theme.of(tester.element(find.byType(Scaffold)));
-      final double verticalPadding = theme
-          .componentTokens
-          .alphabetScrollbar
-          .verticalPadding
-          .vertical;
-      final double expectedSlot =
-          (trackHeight - verticalPadding) / letters.length;
+      final double itemExtent =
+          theme.componentTokens.alphabetScrollbar.itemExtent;
       final double firstCenter = tester.getCenter(find.text('ا')).dy;
       final double secondCenter = tester.getCenter(find.text('ب')).dy;
-      expect(secondCenter - firstCenter, closeTo(expectedSlot, 1.0));
+      expect(secondCenter - firstCenter, closeTo(itemExtent, 1.0));
     });
 
     testWidgets('scrolls with fixed row height when letters overflow', (
@@ -856,14 +922,20 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byKey(const Key('alphabet_scrollbar_scroll')), findsOneWidget);
+      expect(
+        find.byKey(const Key('alphabet_scrollbar_scroll')),
+        findsOneWidget,
+      );
 
       final theme = Theme.of(tester.element(find.byType(Scaffold)));
       final double itemExtent =
           theme.componentTokens.alphabetScrollbar.itemExtent;
-      final double firstCenter = tester.getCenter(find.text(manyLetters.first)).dy;
-      final double secondCenter =
-          tester.getCenter(find.text(manyLetters[1])).dy;
+      final double firstCenter = tester
+          .getCenter(find.text(manyLetters.first))
+          .dy;
+      final double secondCenter = tester
+          .getCenter(find.text(manyLetters[1]))
+          .dy;
       expect(secondCenter - firstCenter, closeTo(itemExtent, 1.0));
 
       final ScrollableState scrollable =
@@ -876,6 +948,57 @@ void main() {
         greaterThan(0),
       );
       expect(find.text(manyLetters.last), findsOneWidget);
+    });
+
+    testWidgets('rail scroll notifications do not propagate to ancestors', (
+      tester,
+    ) async {
+      final manyLetters = List.generate(
+        30,
+        (i) => String.fromCharCode('ا'.codeUnitAt(0) + i),
+      );
+      var ancestorScrollNotifications = 0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            extensions: [
+              TilawaDesignTokens.light(),
+              TilawaComponentTokens.light(),
+            ],
+          ),
+          home: NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification notification) {
+              ancestorScrollNotifications++;
+              return false;
+            },
+            child: Scaffold(
+              body: SizedBox(
+                height: 220,
+                child: TilawaAlphabetScrollbar(
+                  letters: manyLetters,
+                  selectedLetter: null,
+                  onLetterSelected: (_) {},
+                  onPanUpdate: (_) {},
+                  onPanStart: (_) {},
+                  onPanEnd: (_) {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final ScrollableState railScrollable =
+          tester.state(find.byType(Scrollable)) as ScrollableState;
+      await railScrollable.position.moveTo(
+        railScrollable.position.maxScrollExtent,
+      );
+      await tester.pump();
+
+      expect(railScrollable.position.pixels, greaterThan(0));
+      expect(ancestorScrollNotifications, 0);
     });
 
     testWidgets('didUpdateWidget keeps letters evenly distributed', (
@@ -914,6 +1037,74 @@ void main() {
       await tester.pump();
 
       expect(find.text(manyLetters.last), findsOneWidget);
+    });
+
+    testWidgets('updates unselected letter colors when theme mode changes', (
+      tester,
+    ) async {
+      const letters = ['A', 'B', 'C'];
+      final ThemeData lightTheme = ThemeData(
+        brightness: Brightness.light,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+        extensions: [
+          TilawaDesignTokens.light(),
+          TilawaComponentTokens.light(),
+        ],
+      );
+      final ThemeData darkTheme = ThemeData(
+        brightness: Brightness.dark,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.green,
+          brightness: Brightness.dark,
+        ),
+        extensions: [
+          TilawaDesignTokens.dark(),
+          TilawaComponentTokens.dark(),
+        ],
+      );
+      final ValueNotifier<ThemeMode> themeMode = ValueNotifier<ThemeMode>(
+        ThemeMode.dark,
+      );
+
+      await tester.pumpWidget(
+        ValueListenableBuilder<ThemeMode>(
+          valueListenable: themeMode,
+          builder: (context, mode, _) {
+            return MaterialApp(
+              theme: lightTheme,
+              darkTheme: darkTheme,
+              themeMode: mode,
+              home: Scaffold(
+                body: SizedBox(
+                  height: 400,
+                  child: TilawaAlphabetScrollbar(
+                    key: const ValueKey<String>('alphabet_scrollbar'),
+                    letters: letters,
+                    selectedLetter: null,
+                    onLetterSelected: (_) {},
+                    onPanUpdate: (_) {},
+                    onPanStart: (_) {},
+                    onPanEnd: (_) {},
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final Color darkColor = tester.widget<Text>(find.text('B')).style!.color!;
+
+      themeMode.value = ThemeMode.light;
+      await tester.pumpAndSettle();
+
+      final Color lightColor = tester
+          .widget<Text>(find.text('B'))
+          .style!
+          .color!;
+
+      expect(darkColor, isNot(equals(lightColor)));
     });
   });
 }

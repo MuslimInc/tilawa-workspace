@@ -37,146 +37,169 @@ class DownloadAllButton extends StatelessWidget {
     final Color idleFill = ReciterCatalogChrome.idleFill(colorScheme);
     final Color hairline = ReciterCatalogChrome.hairline(colorScheme, tokens);
 
-    return BlocConsumer<ReciterDownloadBloc, ReciterDownloadState>(
+    return BlocListener<ReciterDownloadBloc, ReciterDownloadState>(
       listenWhen: (previous, current) => current.shouldShowError(previous),
       listener: (context, state) {
-        if (state.isNetworkError) {
-          ToastUtils.showToast(msg: context.l10n.networkError);
+        if (state.isInsufficientStorage) {
+          ToastUtils.showErrorToast(
+            context.l10n.downloadLowStorageBlocked,
+          );
+          return;
         }
+        final String message = state.isNetworkError
+            ? context.l10n.networkError
+            : state.errorMessage ?? context.l10n.networkError;
+        ToastUtils.showToast(msg: message);
       },
-      builder: (context, state) {
-        final bool isDownloading = state.isDownloadingAll;
-        final double progress = state.progress;
-        final bool isAllDownloaded = state.isAllDownloaded;
+      child: BlocBuilder<ReciterDownloadBloc, ReciterDownloadState>(
+        builder: (context, state) {
+          final bool isDownloading = state.isDownloadingAll;
+          final bool isActive = isDownloading || state.isPending;
+          final double progress = state.progress;
+          final bool isAllDownloaded = state.isAllDownloaded;
+          final Color fill = isAllDownloaded || !isActive
+              ? idleFill
+              : ReciterCatalogChrome.downloadingFill(colorScheme);
+          final EdgeInsetsGeometry chipPadding = chipTokens.inlinePadding.add(
+            EdgeInsets.symmetric(
+              horizontal: tokens.spaceSmall,
+              vertical: tokens.spaceExtraSmall,
+            ),
+          );
 
-        if (isAllDownloaded) {
-          return Semantics(
-            identifier: ReciterSemanticsIds.reciterDetailsDownloadAllCompleted,
-            child: Container(
-              height: tokens.minInteractiveDimension,
-              decoration: BoxDecoration(
-                color: idleFill,
-                borderRadius: borderRadius,
-                border: Border.all(
-                  color: hairline,
-                  width: chipTokens.borderWidth,
+          if (isAllDownloaded) {
+            return Semantics(
+              identifier:
+                  ReciterSemanticsIds.reciterDetailsDownloadAllCompleted,
+              child: Container(
+                height: tokens.minInteractiveDimension,
+                padding: chipPadding,
+                decoration: BoxDecoration(
+                  color: fill,
+                  borderRadius: borderRadius,
+                  border: Border.all(
+                    color: hairline,
+                    width: chipTokens.borderWidth,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.check_circle_rounded,
+                      color: colorScheme.onSurface,
+                      size: chipTokens.inlineIconSize,
+                    ),
+                    SizedBox(width: tokens.spaceExtraSmall),
+                    Text(
+                      context.l10n.allDownloaded,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: colorScheme.onSurface,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.check_circle_rounded,
-                    color: colorScheme.onSurface,
-                    size: chipTokens.inlineIconSize,
-                  ),
-                  SizedBox(width: tokens.spaceExtraSmall),
-                  Text(
-                    context.l10n.allDownloaded,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: colorScheme.onSurface,
-                      fontWeight: FontWeight.w700,
+            );
+          }
+
+          return Semantics(
+            identifier: isDownloading
+                ? ReciterSemanticsIds.reciterDetailsDownloadAllDownloading
+                : ReciterSemanticsIds.reciterDetailsDownloadAllIdle,
+            child: SizedBox(
+              height: tokens.minInteractiveDimension,
+              child: Material(
+                color: fill,
+                borderRadius: borderRadius,
+                child: InkWell(
+                  key: const Key('reciter_details_download_all_button'),
+                  onTap: () {
+                    if (state.isPending) return;
+                    HapticFeedback.lightImpact();
+                    if (isDownloading) {
+                      context.read<ReciterDownloadBloc>().add(
+                        CancelReciterDownloadAll(reciterName: reciter.name),
+                      );
+                    } else {
+                      context.read<ReciterDownloadBloc>().add(
+                        StartReciterDownloadAll(
+                          reciter: reciter,
+                          surahs: surahs,
+                        ),
+                      );
+                    }
+                  },
+                  borderRadius: borderRadius,
+                  child: Container(
+                    padding: chipPadding,
+                    decoration: BoxDecoration(
+                      color: fill,
+                      borderRadius: borderRadius,
+                      border: Border.all(
+                        color: hairline,
+                        width: chipTokens.borderWidth,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (isActive) ...[
+                          SizedBox(
+                            width: chipTokens.inlineIconSize,
+                            height: chipTokens.inlineIconSize,
+                            child: TilawaLoadingIndicator(
+                              strokeWidth: 2,
+                              value: isDownloading && progress > 0
+                                  ? progress.clamp(0.0, 1.0)
+                                  : null,
+                              color: colorScheme.onSurface,
+                              backgroundColor: colorScheme.onSurface.withValues(
+                                alpha: tokens.opacitySubtle,
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: tokens.spaceSmall),
+                          Text(
+                            '${state.downloadedCount}/${state.totalCount}',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: colorScheme.onSurface,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          if (isDownloading) ...[
+                            SizedBox(width: tokens.spaceExtraSmall),
+                            Icon(
+                              Icons.pause_rounded,
+                              color: colorScheme.onSurface,
+                              size: chipTokens.inlineIconSize,
+                            ),
+                          ],
+                        ] else ...[
+                          Icon(
+                            Icons.download_rounded,
+                            color: colorScheme.onSurfaceVariant,
+                            size: chipTokens.inlineIconSize,
+                          ),
+                          SizedBox(width: tokens.spaceExtraSmall),
+                          Text(
+                            '${state.downloadedCount}/${state.totalCount}',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
-                ],
+                ),
               ),
             ),
           );
-        }
-
-        return Semantics(
-          identifier: isDownloading
-              ? ReciterSemanticsIds.reciterDetailsDownloadAllDownloading
-              : ReciterSemanticsIds.reciterDetailsDownloadAllIdle,
-          child: SizedBox(
-            height: tokens.minInteractiveDimension,
-            child: Material(
-              color: isDownloading
-                  ? ReciterCatalogChrome.activeRowFill(colorScheme)
-                  : colorScheme.surface,
-              borderRadius: borderRadius,
-              child: InkWell(
-                key: const Key('reciter_details_download_all_button'),
-                onTap: () {
-                  if (state.isPending) return;
-                  HapticFeedback.lightImpact();
-                  if (isDownloading) {
-                    context.read<ReciterDownloadBloc>().add(
-                      CancelReciterDownloadAll(reciterName: reciter.name),
-                    );
-                  } else {
-                    context.read<ReciterDownloadBloc>().add(
-                      StartReciterDownloadAll(reciter: reciter, surahs: surahs),
-                    );
-                  }
-                },
-                borderRadius: borderRadius,
-                child: Container(
-                  padding: chipTokens.inlinePadding.add(
-                    EdgeInsets.symmetric(
-                      horizontal: tokens.spaceSmall,
-                      vertical: tokens.spaceExtraSmall,
-                    ),
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: borderRadius,
-                    border: Border.all(
-                      color: hairline,
-                      width: chipTokens.borderWidth,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (isDownloading) ...[
-                        SizedBox(
-                          width: 14,
-                          height: 14,
-                          child: TilawaLoadingIndicator(
-                            centered: false,
-                            strokeWidth: 2,
-                            value: progress,
-                            color: colorScheme.onSurface,
-                            backgroundColor: idleFill,
-                          ),
-                        ),
-                        SizedBox(width: tokens.spaceSmall),
-                        Text(
-                          '${state.downloadedCount}/${state.totalCount}',
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: colorScheme.onSurface,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        SizedBox(width: tokens.spaceExtraSmall),
-                        Icon(
-                          Icons.pause_rounded,
-                          color: colorScheme.onSurface,
-                          size: chipTokens.inlineIconSize,
-                        ),
-                      ] else ...[
-                        Icon(
-                          Icons.download_rounded,
-                          color: colorScheme.onSurfaceVariant,
-                          size: chipTokens.inlineIconSize,
-                        ),
-                        SizedBox(width: tokens.spaceExtraSmall),
-                        Text(
-                          '${state.downloadedCount}/${state.totalCount}',
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
+        },
+      ),
     );
   }
 }

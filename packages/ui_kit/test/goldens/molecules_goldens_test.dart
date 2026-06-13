@@ -15,7 +15,6 @@ const StrutStyle _kGoldenGlassPanelBodyStrut = StrutStyle(
 );
 
 void main() {
-
   group('Molecules Golden Tests', () {
     goldenTest(
       'TilawaGlassPanel',

@@ -192,8 +192,10 @@ class _BootGateState extends State<_BootGate> {
   void reassemble() {
     super.reassemble();
     // Hot reload rebuilds providers without re-running bootstrap DI.
-    if (!getIt.isRegistered<NetworkInfo>()) {
+    if (!isDependencyGraphReady) {
       _ready = false;
+      _criticalInitFuture = null;
+      _handoffToAppStarted = false;
       _awaitCriticalInit();
     }
   }
@@ -211,6 +213,12 @@ class _BootGateState extends State<_BootGate> {
         .startCriticalInit()
         .then((_) async {
           await _ensureDependenciesRegistered();
+          if (!isDependencyGraphReady) {
+            throw StateError(
+              'Dependency graph incomplete after critical init '
+              '(SettingsCubit missing)',
+            );
+          }
           final StartupLaunchPlan plan = await _resolveStartupLaunchPlan();
           _applyStartupLaunchPlan(plan);
           if (!mounted || _handoffToAppStarted) return;
@@ -252,7 +260,7 @@ class _BootGateState extends State<_BootGate> {
   }
 
   Future<void> _ensureDependenciesRegistered() async {
-    if (getIt.isRegistered<NetworkInfo>()) {
+    if (isDependencyGraphReady) {
       return;
     }
     // Firebase singletons in DI must not run before initializeApp() completes.

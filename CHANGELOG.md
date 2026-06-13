@@ -7,6 +7,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.12+56] - 2026-06-13 [Google Play Release]
+
+### Added
+
+- **Auth**: Native resume bridge and Transsion (Infinix/Tecno) sign-in policy —
+  GMS UI visibility probing, hidden-activity detection, and
+  `androidx.credentials` pinned to 1.5.0 on affected devices.
+- **Reciters**: Favorites missing from the catalog order are appended instead of
+  dropped; refined favorites ordering and alphabet scrubbing.
+
+### Changed
+
+- **Version**: Production track bumped to **2.0.12** (build **56**).
+- **Player**: Tablet mini player anchored in the shell footer without overlapping
+  the navigation rail or bar.
+- **Onboarding**: Full-width stacked primary and back actions in the footer bar.
+- **Support**: Screen reuses the catalog settings body layout.
+- **What's New**: Published date shown without time of day.
+- **CI**: Dart obfuscation (`--obfuscate --split-debug-info`) enabled in release
+  builds.
+
+### Fixed
+
+- **Downloads**: Hardened watchdog, storage probe, and completed-file validation;
+  recovery size check tightened to 1% tolerance; only verified files surface as
+  offline items.
+- **Prayer**: Tightened alerts permission flow navigation.
+- **Tasbeeh**: Target count hint and stricter create validation.
+- **Telemetry**: Critical init pipeline failures reported; duplicate Sentry
+  native init after hot restart skipped.
+
+## [2.0.11+55] - 2026-06-11 [Google Play Release]
+
+### Added
+
+- **Downloads**: Low-storage check before single and batch downloads; **Download All**
+  is blocked (not just warned) when free space is insufficient.
+- **Downloads**: `disk_space_plus` integration for free-space reads on the download
+  volume.
+
+### Changed
+
+- **Version**: Production track bumped to **2.0.11** (build **55**).
+- **Downloads tab**: Lists only completed downloads with valid on-disk files.
+- **Reciters**: Download All chip keeps an opaque active background and a visible
+  progress ring at 0%.
+- **UI**: Semantic toast colors; RTL-correct swipe-to-delete backgrounds; undo
+  SnackBars on bookmarks and favorites dismiss.
+
+### Fixed
+
+- **Downloads**: Delete-all confirmation no longer throws `ProviderNotFoundException`.
+
 ## [2.0.10+54] - 2026-06-11 [Google Play Release]
 
 ### Added

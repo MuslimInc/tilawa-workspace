@@ -90,7 +90,9 @@ void main() {
     verify(() => mockDownloadsBloc.close()).called(1);
   });
 
-  testWidgets('resolves DownloadsBloc from getIt on each mount', (tester) async {
+  testWidgets('resolves DownloadsBloc from getIt on each mount', (
+    tester,
+  ) async {
     var createCount = 0;
     scopeGetIt().unregister<DownloadsBloc>();
     scopeGetIt().registerFactory<DownloadsBloc>(() {

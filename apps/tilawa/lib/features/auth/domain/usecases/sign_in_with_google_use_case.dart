@@ -7,7 +7,10 @@ import '../repositories/user_repository.dart';
 
 @injectable
 class SignInWithGoogleUseCase {
-  SignInWithGoogleUseCase(this._authRepository, this._userRepository);
+  SignInWithGoogleUseCase(
+    this._authRepository,
+    this._userRepository,
+  );
 
   final AuthRepository _authRepository;
   final UserRepository _userRepository;

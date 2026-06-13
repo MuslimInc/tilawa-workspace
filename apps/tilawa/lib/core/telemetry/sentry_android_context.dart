@@ -26,4 +26,21 @@ abstract final class SentryAndroidContext {
       // Non-Android embedder or tests without a platform channel.
     }
   }
+
+  /// Whether the Android native SDK is still active after a Flutter hot restart.
+  static Future<bool> isNativeSdkInitialized() async {
+    if (!Platform.isAndroid) {
+      return false;
+    }
+    try {
+      final bool? initialized = await _channel.invokeMethod<bool>(
+        'isSentryNativeSdkInitialized',
+      );
+      return initialized ?? false;
+    } on PlatformException {
+      return false;
+    } on MissingPluginException {
+      return false;
+    }
+  }
 }

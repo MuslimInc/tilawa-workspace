@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
+import 'tilawa_button.dart';
 import 'tilawa_state_visual.dart';
 
 /// A reusable, feature-agnostic state layout with an illustration slot.
@@ -74,11 +75,18 @@ class TilawaIllustratedState extends StatelessWidget {
     } else {
       stateVisual = const SizedBox.shrink();
     }
-    final actionMaxWidth = maxWidth ?? designTokens.contentMaxWidthForm;
-    Widget constrainAction(Widget action) {
-      return ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: actionMaxWidth),
-        child: action,
+    final double actionMaxWidth = maxWidth ?? designTokens.contentMaxWidthForm;
+    Widget layoutAction(Widget action) {
+      final Widget slotAction = action is TilawaButton
+          ? _fullWidthIllustratedAction(action)
+          : action;
+
+      return SizedBox(
+        width: double.infinity,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: actionMaxWidth),
+          child: slotAction,
+        ),
       );
     }
 
@@ -119,9 +127,8 @@ class TilawaIllustratedState extends StatelessWidget {
                 spacing: designTokens.spaceSmall,
                 runSpacing: designTokens.spaceSmall,
                 children: [
-                  if (secondaryAction != null)
-                    constrainAction(secondaryAction!),
-                  if (primaryAction != null) constrainAction(primaryAction!),
+                  if (secondaryAction != null) layoutAction(secondaryAction!),
+                  if (primaryAction != null) layoutAction(primaryAction!),
                 ],
               ),
             ],
@@ -152,4 +159,30 @@ class TilawaIllustratedState extends StatelessWidget {
       ),
     );
   }
+}
+
+TilawaButton _fullWidthIllustratedAction(TilawaButton button) {
+  if (button.isFullWidth) {
+    return button;
+  }
+
+  return TilawaButton(
+    key: button.key,
+    text: button.text,
+    onPressed: button.onPressed,
+    variant: button.variant,
+    size: button.size,
+    leadingIcon: button.leadingIcon,
+    trailingIcon: button.trailingIcon,
+    isLoading: button.isLoading,
+    isFullWidth: true,
+    semanticLabel: button.semanticLabel,
+    backgroundColor: button.backgroundColor,
+    foregroundColor: button.foregroundColor,
+    borderColor: button.borderColor,
+    borderRadius: button.borderRadius,
+    padding: button.padding,
+    textStyle: button.textStyle,
+    shrinkWrapTapTarget: button.shrinkWrapTapTarget,
+  );
 }

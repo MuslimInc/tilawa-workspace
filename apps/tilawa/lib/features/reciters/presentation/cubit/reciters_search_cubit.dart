@@ -12,7 +12,7 @@ part 'reciters_search_state.dart';
 @injectable
 class RecitersSearchCubit extends Cubit<RecitersSearchState> {
   RecitersSearchCubit(this._searchReciters)
-      : super(const RecitersSearchInitial());
+    : super(const RecitersSearchInitial());
 
   static const Duration debounceDuration = Duration(milliseconds: 200);
 

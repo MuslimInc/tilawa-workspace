@@ -25,6 +25,7 @@ void main() {
   late MockObserveDownloadProgressUseCase mockObserveDownloadProgress;
   late MockGetDownloadItemUseCase mockGetDownloadItem;
   late MockNetworkInfo mockNetworkInfo;
+  late MockCheckLowDeviceStorageUseCase mockCheckLowDeviceStorage;
   DownloadButtonBloc? downloadButtonBloc;
 
   const testUrl = 'https://example.com/001.mp3';
@@ -63,6 +64,13 @@ void main() {
       mockGetDownloadItem.call(any),
     ).thenAnswer((_) async => const Right(null));
 
+    mockCheckLowDeviceStorage = MockCheckLowDeviceStorageUseCase();
+    when(
+      mockCheckLowDeviceStorage.call(
+        estimatedRequiredBytes: anyNamed('estimatedRequiredBytes'),
+      ),
+    ).thenAnswer((_) async => false);
+
     downloadButtonBloc = DownloadButtonBloc(
       url: testUrl,
       reciterName: testReciterName,
@@ -75,6 +83,7 @@ void main() {
       observeDownloadProgress: mockObserveDownloadProgress,
       getDownloadItem: mockGetDownloadItem,
       networkInfo: mockNetworkInfo,
+      checkLowDeviceStorage: mockCheckLowDeviceStorage,
     );
   });
 
@@ -172,6 +181,7 @@ void main() {
             observeDownloadProgress: mockObserveDownloadProgress,
             getDownloadItem: mockGetDownloadItem,
             networkInfo: mockNetworkInfo,
+            checkLowDeviceStorage: mockCheckLowDeviceStorage,
             initialIsDownloading: true,
             initialProgress: 0.1,
             pauseDownload: mockPauseDownload,
@@ -195,6 +205,7 @@ void main() {
             observeDownloadProgress: mockObserveDownloadProgress,
             getDownloadItem: mockGetDownloadItem,
             networkInfo: mockNetworkInfo,
+            checkLowDeviceStorage: mockCheckLowDeviceStorage,
             initialIsDownloaded: true,
             pauseDownload: mockPauseDownload,
             resumeDownload: mockResumeDownload,
@@ -419,6 +430,7 @@ void main() {
         observeDownloadProgress: mockObserveDownloadProgress,
         getDownloadItem: mockGetDownloadItem,
         networkInfo: mockNetworkInfo,
+        checkLowDeviceStorage: mockCheckLowDeviceStorage,
         pauseDownload: mockPauseDownload,
         resumeDownload: mockResumeDownload,
       );
@@ -661,6 +673,7 @@ void main() {
         observeDownloadProgress: mockObserveDownloadProgress,
         getDownloadItem: mockGetDownloadItem,
         networkInfo: mockNetworkInfo,
+        checkLowDeviceStorage: mockCheckLowDeviceStorage,
         pauseDownload: mockPauseDownload,
         resumeDownload: mockResumeDownload,
       );
@@ -720,6 +733,7 @@ void main() {
           observeDownloadProgress: mockObserveDownloadProgress,
           getDownloadItem: mockGetDownloadItem,
           networkInfo: mockNetworkInfo,
+          checkLowDeviceStorage: mockCheckLowDeviceStorage,
           pauseDownload: mockPauseDownload,
           resumeDownload: mockResumeDownload,
         );
@@ -809,6 +823,7 @@ void main() {
         observeDownloadProgress: mockObserveDownloadProgress,
         getDownloadItem: mockGetDownloadItem,
         networkInfo: mockNetworkInfo,
+        checkLowDeviceStorage: mockCheckLowDeviceStorage,
         pauseDownload: mockPauseDownload,
         resumeDownload: mockResumeDownload,
       );

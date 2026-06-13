@@ -282,14 +282,12 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
 
     // Keep audio_service / Android MediaSession position aligned with
     // just_audio (e.g. after hot restart when playbackEvent is stale).
-    _player.positionStream
-        .distinct()
-        .listen((Duration _) {
-          if (mediaItem.valueOrNull == null && queue.value.isEmpty) {
-            return;
-          }
-          _broadcastState(_player.playbackEvent);
-        });
+    _player.positionStream.distinct().listen((Duration _) {
+      if (mediaItem.valueOrNull == null && queue.value.isEmpty) {
+        return;
+      }
+      _broadcastState(_player.playbackEvent);
+    });
 
     _player.processingStateStream.listen((state) {
       if (state == ProcessingState.completed) {
@@ -634,8 +632,9 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
   }
 
   @override
-  Future<void> click([audio_service.MediaButton button =
-      audio_service.MediaButton.media]) {
+  Future<void> click([
+    audio_service.MediaButton button = audio_service.MediaButton.media,
+  ]) {
     if (button == audio_service.MediaButton.media) {
       PlaybackNotificationBridge.notifyContentTap();
     }

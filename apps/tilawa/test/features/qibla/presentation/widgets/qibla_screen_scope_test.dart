@@ -63,7 +63,9 @@ void main() {
     verify(() => mockQiblaBloc.close()).called(1);
   });
 
-  testWidgets('creates a new QiblaBloc from getIt on each mount', (tester) async {
+  testWidgets('creates a new QiblaBloc from getIt on each mount', (
+    tester,
+  ) async {
     var createCount = 0;
     scopeGetIt().unregister<QiblaBloc>();
     scopeGetIt().registerFactory<QiblaBloc>(() {

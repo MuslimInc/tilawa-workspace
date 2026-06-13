@@ -180,7 +180,9 @@ abstract final class StartupTelemetry {
           fatal: false,
         ),
       );
-      unawaited(_crashlyticsLog('startup_failed:$reason phase=$effectivePhase'));
+      unawaited(
+        _crashlyticsLog('startup_failed:$reason phase=$effectivePhase'),
+      );
     }
 
     unawaited(

@@ -603,7 +603,25 @@ class AppLocalizationsAr extends AppLocalizations {
       'تعذر تسجيل الدخول باستخدام حساب طرف ثالث';
 
   @override
+  String get googleSignInFallbackTitle => 'تعذّر فتح تسجيل الدخول عبر Google';
+
+  @override
+  String get googleSignInFallbackBody =>
+      'قد تكون نافذة اختيار حساب Google مخفية على هذا الجهاز. حدّث خدمات Google Play ثم أعد المحاولة. إذا استمرت المشكلة، اطلب من المطوّر تسجيل SHA-1 لهذا الإصدار في Firebase.';
+
+  @override
+  String get googleSignInUpdatePlayServices => 'تحديث خدمات Google Play';
+
+  @override
   String get networkError => 'يرجى التحقق من اتصالك بالإنترنت';
+
+  @override
+  String get downloadLowStorageWarning =>
+      'قد لا تكون مساحة التخزين المتاحة كافية لهذا التحميل. حرّر مساحة إذا فشل التحميل.';
+
+  @override
+  String get downloadLowStorageBlocked =>
+      'لا توجد مساحة تخزين كافية لتحميل كل السور. حرّر مساحة ثم أعد المحاولة.';
 
   @override
   String recitationsAvailable(int count) {
@@ -926,6 +944,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get tasbeehTargetLabel => 'الهدف';
+
+  @override
+  String get tasbeehTargetHint => 'مثال: 33';
 
   @override
   String get tasbeehSetTarget => 'تعيين الهدف';

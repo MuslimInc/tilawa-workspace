@@ -111,6 +111,7 @@ abstract final class QuranPlayerRoutePolicy {
     '/language-welcome',
     '/onboarding',
     '/login',
+    '/prayer-alerts-permissions',
     '/share/',
   ];
 
@@ -148,6 +149,7 @@ abstract final class AppShellRoutePolicy {
     '/language-welcome',
     '/onboarding',
     '/login',
+    '/prayer-alerts-permissions',
     '/share/',
     '/athkar',
     '/player',
@@ -237,15 +239,29 @@ abstract final class QuranPlayerLayoutInsets {
     return mediaQueryContext(context).floatingBottomPadding;
   }
 
-  /// Space reserved below the mini player inside [TilawaAdaptiveShell]'s
-  /// [TilawaAdaptiveShell.phoneFooterAboveNav] slot when the bottom bar is
-  /// hidden.
+  /// Extension below the collapsed bar on wide shell layouts.
+  ///
+  /// YouTube Music-style: bar controls sit in [playerCollapsedHeight]; the
+  /// shell background continues through the home-indicator zone only (no extra
+  /// [floatingBottomPadding] buffer).
+  static double wideShellFooterBottomExtension(BuildContext context) {
+    return mediaQueryContext(context).systemBottomSafeArea;
+  }
+
+  /// Space reserved below the mini player inside the shell footer column.
+  ///
+  /// Phone: [offShellBottomInset] when the bottom bar is hidden.
+  /// Wide: [wideShellFooterBottomExtension] only.
   static double phoneFooterBottomSpacing(
     BuildContext context, {
     required bool hostAbsorbsBottomSafeArea,
   }) {
     if (hostAbsorbsBottomSafeArea) {
       return 0;
+    }
+    final BuildContext mqContext = mediaQueryContext(context);
+    if (!mqContext.isNarrow) {
+      return wideShellFooterBottomExtension(context);
     }
     return offShellBottomInset(context);
   }
@@ -289,6 +305,10 @@ abstract final class QuranPlayerLayoutInsets {
       return navColumn;
     }
     if (hostAbsorbsBottomSafeArea && hostBottomNavBarHeight <= 0) {
+      return 0;
+    }
+    final BuildContext mqContext = mediaQueryContext(context);
+    if (!mqContext.isNarrow && QuranPlayerRoutePolicy.isInAppShell(location)) {
       return 0;
     }
     return offShellBottomInset(context);

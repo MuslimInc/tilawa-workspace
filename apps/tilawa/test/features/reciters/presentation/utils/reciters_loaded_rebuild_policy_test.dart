@@ -88,6 +88,21 @@ void main() {
       expect(shouldRebuildRecitersLoaded(previous, current), isTrue);
     });
 
+    test('skips rebuild when loaded state is unchanged', () {
+      const previous = RecitersLoaded(
+        reciters: [reciter1, reciter2, reciter3],
+        filteredReciters: [reciter1, reciter2, reciter3],
+        favoriteIds: {1},
+      );
+      const current = RecitersLoaded(
+        reciters: [reciter1, reciter2, reciter3],
+        filteredReciters: [reciter1, reciter2, reciter3],
+        favoriteIds: {1},
+      );
+
+      expect(shouldRebuildRecitersLoaded(previous, current), isFalse);
+    });
+
     test('rebuilds when showFavoritesOnly changes', () {
       const previous = RecitersLoaded(
         reciters: [reciter1, reciter2],
@@ -112,6 +127,21 @@ void main() {
         reciters: [reciter1, reciter2],
         filteredReciters: [reciter1],
         selectedLetter: 'A',
+      );
+
+      expect(shouldRebuildRecitersLoaded(previous, current), isTrue);
+    });
+
+    test('rebuilds when filtered list order changes', () {
+      const previous = RecitersLoaded(
+        reciters: [reciter1, reciter2, reciter3],
+        filteredReciters: [reciter1, reciter2, reciter3],
+        favoriteIds: {1, 3},
+      );
+      const current = RecitersLoaded(
+        reciters: [reciter1, reciter2, reciter3],
+        filteredReciters: [reciter1, reciter3, reciter2],
+        favoriteIds: {1, 3},
       );
 
       expect(shouldRebuildRecitersLoaded(previous, current), isTrue);

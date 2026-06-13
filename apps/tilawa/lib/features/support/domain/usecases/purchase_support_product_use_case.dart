@@ -13,8 +13,9 @@ class PurchaseSupportProductUseCase {
 
   Future<Either<Failure, PurchaseOutcome>> call(String productId) async {
     try {
-      final PurchaseOutcome outcome =
-          await _repository.purchaseSupportProduct(productId);
+      final PurchaseOutcome outcome = await _repository.purchaseSupportProduct(
+        productId,
+      );
       return Right(outcome);
     } on PurchaseFailure catch (failure) {
       return Left(failure);

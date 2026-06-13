@@ -23,6 +23,10 @@ const Set<String> _autostartOems = <String>{
   'honor',
   'meizu',
   'asus',
+  // Transsion brands (Infinix, Tecno, Itel) — aggressive background limits.
+  'infinix',
+  'tecno',
+  'itel',
 };
 
 /// Checks the device's capability to deliver prayer alarms reliably.
@@ -61,7 +65,7 @@ class CheckPrayerAlarmCapabilityUseCase {
 
     bool isIgnoringBatteryOptimizations;
     try {
-      isIgnoringBatteryOptimizations = await _permissions
+      isIgnoringBatteryOptimizations = await _adhanPlayer
           .isIgnoringBatteryOptimizations();
     } catch (_) {
       isIgnoringBatteryOptimizations = true;

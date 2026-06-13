@@ -63,21 +63,21 @@ void main() {
     ) async {
       const PlayerExpandTransitionMetrics collapsed =
           PlayerExpandTransitionMetrics(
-        miniOpacity: 1,
-        expandedOpacity: 0,
-        handoffT: 0,
-        stageChromeOpacity: 1,
-        miniIdentityOpacity: 1,
-        sheetPresentationOpacity: 0,
-        backdropOpacity: 0,
-        scrimOpacity: 0,
-        miniSlideY: 0,
-        sheetMotionT: 0,
-        queueChromeT: 0,
-        showMiniPlayer: true,
-        showExpandedSheet: false,
-        showMorphLayer: false,
-      );
+            miniOpacity: 1,
+            expandedOpacity: 0,
+            handoffT: 0,
+            stageChromeOpacity: 1,
+            miniIdentityOpacity: 1,
+            sheetPresentationOpacity: 0,
+            backdropOpacity: 0,
+            scrimOpacity: 0,
+            miniSlideY: 0,
+            sheetMotionT: 0,
+            queueChromeT: 0,
+            showMiniPlayer: true,
+            showExpandedSheet: false,
+            showMorphLayer: false,
+          );
       const PlayerExpandTransitionMetrics mid = PlayerExpandTransitionMetrics(
         miniOpacity: 0.5,
         expandedOpacity: 0.5,

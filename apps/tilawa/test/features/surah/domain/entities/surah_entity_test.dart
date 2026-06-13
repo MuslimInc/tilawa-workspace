@@ -13,20 +13,23 @@ void main() {
   );
 
   group('SurahEntity', () {
-    test('defaults isDownloaded/isDownloading/progress and exposes audio getters', () {
-      const surah = SurahEntity(audio: tAudio);
+    test(
+      'defaults isDownloaded/isDownloading/progress and exposes audio getters',
+      () {
+        const surah = SurahEntity(audio: tAudio);
 
-      expect(surah.isDownloaded, isFalse);
-      expect(surah.isDownloading, isFalse);
-      expect(surah.downloadProgress, 0.0);
-      expect(surah.downloadId, isNull);
+        expect(surah.isDownloaded, isFalse);
+        expect(surah.isDownloading, isFalse);
+        expect(surah.downloadProgress, 0.0);
+        expect(surah.downloadId, isNull);
 
-      expect(surah.id, tAudio.id);
-      expect(surah.name, tAudio.title);
-      expect(surah.nameEn, tAudio.title);
-      expect(surah.nameAr, tAudio.artist);
-      expect(surah.reciterName, tAudio.artist);
-    });
+        expect(surah.id, tAudio.id);
+        expect(surah.name, tAudio.title);
+        expect(surah.nameEn, tAudio.title);
+        expect(surah.nameAr, tAudio.artist);
+        expect(surah.reciterName, tAudio.artist);
+      },
+    );
 
     test('falls back to empty string when artist-derived fields are null', () {
       const audioNoArtist = AudioEntity(

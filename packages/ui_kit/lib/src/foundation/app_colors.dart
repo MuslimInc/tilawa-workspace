@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 /// Centralized app color constants.
 ///
 /// The Tilawa palette is intentionally **small and calm**:
-/// one **brand-locked** accent ([primarySage] `#219653`), a quiet neutral
-/// surface ramp anchored on the brand neutral [lightSurfaceContainerHighBase]
-/// `#E5E5E0`, and a handful of semantic colors. Decorative tones, parallel
+/// one **brand-locked** accent ([primarySage] `#219653`), a quiet cool
+/// neutral surface ramp anchored on [lightSurfaceContainerHighBase]
+/// `#E5E7EB`, and a handful of semantic colors. Decorative tones, parallel
 /// "category hues", and most decorative gradients have been removed so the UI
 /// feels premium without competing with content. The launch flow keeps a
 /// dedicated brand gradient via [brandGradientTop] → [brandGradientBottom].
@@ -86,45 +86,61 @@ abstract final class AppColors {
   static const double launchSplashLogoSize = 288;
 
   // ---------------------------------------------------------------------------
-  // Light neutral ramp — warm canvas + white cards (#F9F7F2 / #FFFFFF / ink).
+  // Light neutral ramp — cool porcelain canvas + white cards
+  // (#F4F5F7 / #FFFFFF / slate ink). One temperature family end-to-end:
+  // the ramp matches the slate [lightInk] / [lightOutline] that were always
+  // cool. Do not mix warm and cool tones in adjacent light fills.
   // ---------------------------------------------------------------------------
 
-  /// Warm app canvas / scaffold (Chaptrs-style cream `#F9F7F2`).
+  /// App canvas / scaffold — cool porcelain (`#F4F5F7`, noon/Apple-style).
+  ///
+  /// Replaced the warm Chaptrs cream (`#F9F7F2`, 2026-06-11): the cream read
+  /// as dated paper next to white cards; a cool near-white gives the crisp
+  /// commercial feel and matches the slate ink family. Same lightness, so
+  /// every contrast pairing is unchanged.
   ///
   /// The page rests on this tone; cards, sheets, and app bars use
   /// [lightSurface] (`#FFFFFF`) for quiet lift without heavy shadows.
-  static const Color lightCanvas = Color(0xFFF9F7F2);
+  static const Color lightCanvas = Color(0xFFF4F5F7);
 
   /// Alias for scaffold assembly — same as [lightCanvas].
   static const Color lightBackground = lightCanvas;
 
-  /// Raised cards, sheets, dialogs, and app bars on the warm canvas.
+  /// Raised cards, sheets, dialogs, and app bars on the porcelain canvas.
   static const Color lightSurface = Color(0xFFFFFFFF);
 
   /// Primary ink on surfaces (`#0F172A`).
   static const Color lightInk = Color(0xFF0F172A);
 
-  /// Body / secondary labels (`#33332e`).
-  static const Color lightBody = Color(0xFF33332E);
+  /// Body / secondary labels (`#30343C`, cool slate — one family with
+  /// [lightInk] and the porcelain ramp; replaced warm `#33332E` 2026-06-11).
+  static const Color lightBody = Color(0xFF30343C);
 
-  /// Muted labels (`#62625b`).
-  static const Color lightMute = Color(0xFF62625B);
+  /// Muted labels (`#5F6470`, cool slate; replaced warm `#62625B`).
+  static const Color lightMute = Color(0xFF5F6470);
 
-  /// Ash icons / hints (`#91918c`).
-  static const Color lightAsh = Color(0xFF91918C);
+  /// Ash icons / hints (`#8F949E`, cool slate; replaced warm `#91918C`).
+  static const Color lightAsh = Color(0xFF8F949E);
 
-  /// Light upper container / idle chip (Pinterest `secondary-bg` `#E5E5E0`).
+  /// Light upper container / idle chip — cool gray (`#E5E7EB`).
+  ///
+  /// Same lightness as the legacy warm Pinterest `secondary-bg` (`#E5E5E0`),
+  /// hue moved to the cool family with the canvas (2026-06-11).
   ///
   /// Mapped to [ColorScheme.surfaceContainerHigh] in [AppTheme] without
-  /// primary harmonization so unselected controls stay warm neutral gray.
-  static const Color lightSurfaceContainerHighBase = Color(0xFFE5E5E0);
+  /// primary harmonization so unselected controls stay neutral gray.
+  static const Color lightSurfaceContainerHighBase = Color(0xFFE5E7EB);
 
   /// Alias for catalog chips and docs (same as [lightSurfaceContainerHighBase]).
   static const Color catalogFilterUnselectedLight =
       lightSurfaceContainerHighBase;
 
-  /// Dark idle chip / upper container (warm neutral, no brand tint).
-  static const Color catalogFilterUnselectedDark = Color(0xFF3A3936);
+  /// Dark idle chip / upper container.
+  ///
+  /// Green-tinted to sit in the same family as the dark surface ramp
+  /// ([darkSurfaceContainer] etc.); replaced the warm `#3A3936` outlier
+  /// (2026-06-11) — same lightness, hue aligned.
+  static const Color catalogFilterUnselectedDark = Color(0xFF353E3A);
 
   /// Idle background for unselected filter chips and secondary controls.
   static Color catalogFilterUnselectedBackground(Brightness brightness) {
@@ -136,11 +152,11 @@ abstract final class AppColors {
   /// Section / list canvas tier — matches [lightCanvas].
   static const Color lightSurfaceContainer = lightCanvas;
 
-  /// Light top container tier (Pinterest `hairline` `#DADAD3`).
-  static const Color lightSurfaceContainerHighestBase = Color(0xFFDADAD3);
+  /// Light top container tier — cool hairline (`#DBDEE3`).
+  static const Color lightSurfaceContainerHighestBase = Color(0xFFDBDEE3);
 
-  /// Hairline dividers (`#dadad3`).
-  static const Color lightHairline = Color(0xFFDADAD3);
+  /// Hairline dividers (`#DBDEE3`, cool family with the canvas).
+  static const Color lightHairline = Color(0xFFDBDEE3);
 
   /// Default outline for fields and dividers (`#D0D7DE`).
   static const Color lightOutline = Color(0xFFD0D7DE);
@@ -244,11 +260,24 @@ abstract final class AppColors {
   /// Error / failure — maps to light [ColorScheme.error] (`#DC2626`).
   static const Color error = Color(0xFFDC2626);
 
-  /// Success.
+  /// Success on light surfaces (`#43A047`).
   static const Color success = Color(0xFF43A047);
 
-  /// Warning (deep orange — not gold/amber).
+  /// Lifted success for dark green-tinted surfaces (`#6BCF7F`).
+  ///
+  /// Same hue family as [success]; ~2× lighter so status borders and icons
+  /// clear WCAG 3:1 on `surfaceContainerHigh` (`#353E3A`) without changing
+  /// the light-mode tone (2026-06-11).
+  static const Color successDark = Color(0xFF6BCF7F);
+
+  /// Warning on light surfaces (deep orange — not gold/amber, `#C2410C`).
   static const Color warning = Color(0xFFC2410C);
+
+  /// Lifted warning for dark green-tinted surfaces (`#FB923C`).
+  ///
+  /// Raw [warning] sits at ≈2.1:1 on `#353E3A`; this tone passes 3:1 for
+  /// UI chrome while staying in the deep-orange family (2026-06-11).
+  static const Color warningDark = Color(0xFFFB923C);
 
   // ---------------------------------------------------------------------------
   // Platform-fixed accents — used outside Flutter's `ColorScheme`

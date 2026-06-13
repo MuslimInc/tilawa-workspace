@@ -14,6 +14,38 @@
       },
       "oauth_client": [
         {
+          "client_id": "181575856185-3tdkcorcrq2vq5hqoj40p1u5hjupnpam.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tilawa.app",
+            "certificate_hash": "81cc04c95eef1e72671bee8f5a292be99db65f55"
+          }
+        },
+        {
+          "client_id": "181575856185-eu3333hb18qm9rnmg84nq0830bho7ubg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tilawa.app",
+            "certificate_hash": "e5f1005cb4e83720ead0199276eb0f5663b5f3e2"
+          }
+        },
+        {
+          "client_id": "181575856185-ooq655itpliq73lfl63lfb08sbfijqpu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tilawa.app",
+            "certificate_hash": "58d7bc27fa288b07550afaba0c27ff27d76bd483"
+          }
+        },
+        {
+          "client_id": "181575856185-rjhk5fdjf9fvkvet13n6ag1pbr7ke5od.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tilawa.app",
+            "certificate_hash": "6bb232467039abe3a73bbf3f48ce9a1630c5c337"
+          }
+        },
+        {
           "client_id": "181575856185-2ioqgr7miir7hj7hvgcsi7qp7juo2gco.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -31,10 +63,10 @@
               "client_type": 3
             },
             {
-              "client_id": "181575856185-eamub0dns4ickt7ke4l3afu60vgtlj4a.apps.googleusercontent.com",
+              "client_id": "181575856185-0hpamtc8c188fdj2g448htrhgidtutjj.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.tilawa.app"
+                "bundle_id": "com.quranapp.quranConnect"
               }
             }
           ]

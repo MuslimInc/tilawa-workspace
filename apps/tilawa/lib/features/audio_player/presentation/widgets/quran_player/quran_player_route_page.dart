@@ -1,4 +1,5 @@
 part of 'quran_player_widget.dart';
+
 /// Full-screen expanded player presented via [QuranPlayerExpandedRoute].
 class QuranPlayerExpandedPageContent extends StatelessWidget {
   const QuranPlayerExpandedPageContent({

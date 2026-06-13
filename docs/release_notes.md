@@ -12,10 +12,68 @@ the changelog for full engineering detail.
 
 | Field | Value |
 |-------|--------|
+| Version | **2.0.12** (build **56**) |
+| Git tag | `v2.0.12+56` (pending) |
+| Date | 2026-06-13 |
+| Track | Internal testing → Production |
+
+### What's new (en-US) — copy for Play Console
+
+```text
+• Smoother and more reliable sign-in
+• Improved downloads and audio playback
+• Better layout across phones and tablets
+• Performance and stability improvements
+• Various bug fixes
+```
+
+### ما الجديد (ar) — نص متجر Play
+
+```text
+• تسجيل دخول أسلس وأكثر موثوقية
+• تحسينات على التنزيلات وتشغيل الصوت
+• تنسيق أفضل على الهواتف والأجهزة اللوحية
+• تحسينات في الأداء والاستقرار
+• إصلاحات متنوعة للأخطاء
+```
+
+---
+
+## Previous current release (2.0.11+55)
+
+| Field | Value |
+|-------|--------|
+| Version | **2.0.11** (build **55**) |
+| Git tag | `v2.0.11+55` (pending) |
+| Date | 2026-06-12 |
+| Track | Production |
+
+### What's new (en-US) — copy for Play Console
+
+```text
+• Download All blocked when storage is too low — no more stalled queues
+• Downloads tab shows only finished files
+• Clearer Download All progress and undo on swipe-delete lists
+```
+
+### ما الجديد (ar) — نص متجر Play
+
+```text
+• تحميل الكل يُوقف عند نقص المساحة — لا قوائم انتظار عالقة
+• تبويب التنزيلات يعرض الملفات المكتملة فقط
+• تقدّم أوضح لتحميل الكل وتراجع عند السحب للحذف
+```
+
+---
+
+## Previous current release (2.0.10+54)
+
+| Field | Value |
+|-------|--------|
 | Version | **2.0.10** (build **54**) |
 | Git tag | `v2.0.10+54` (pending) |
 | Date | 2026-06-11 |
-| Track | Internal testing → Production |
+| Track | Closed testing — Alpha |
 
 ### What's new (en-US) — copy for Play Console
 
@@ -274,5 +332,5 @@ _Move shipped notes to **Current release** when cutting a Play upload._
 2. Record the same version in [`CHANGELOG.md`](../CHANGELOG.md).
 3. Tag: `git tag -a v1.0.5+32 -m "Release 1.0.5+32"` and `git push origin v1.0.5+32`.
 4. Build: GitHub Actions **Android Release (Google Play)** workflow, or locally:
-   `cd apps/tilawa && flutter build appbundle --release --target-platform android-arm64 --split-debug-info=build/symbols`
+   `cd apps/tilawa && flutter build appbundle --release --target-platform android-arm64 --obfuscate --split-debug-info=build/symbols`
 5. Checklist: [`google_play_release_checklist.md`](google_play_release_checklist.md)

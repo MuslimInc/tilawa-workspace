@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Scroll-position helpers and lock state for alphabet scrub on [RecitersScreen].
 class RecitersAlphabetScrubCoordinator {
@@ -148,7 +149,7 @@ class RecitersAlphabetScrubCoordinator {
   }
 
   void trackScrollMetrics(ScrollNotification notification) {
-    if (alphabetScrubbingActive) {
+    if (alphabetScrubbingActive || _isAlphabetRailNotification(notification)) {
       return;
     }
 
@@ -172,6 +173,10 @@ class RecitersAlphabetScrubCoordinator {
   }
 
   bool handleNestedScrollNotification(ScrollNotification notification) {
+    if (_isAlphabetRailNotification(notification)) {
+      return false;
+    }
+
     trackScrollMetrics(notification);
 
     if (!alphabetScrubbingActive) {
@@ -295,6 +300,16 @@ class RecitersAlphabetScrubCoordinator {
     );
     return (catalog?.pixels ?? 0) - (scrubPinnedCatalogOffset ?? 0);
   }
+}
+
+bool _isAlphabetRailNotification(ScrollNotification notification) {
+  final BuildContext? scrollContext = notification.context;
+  if (scrollContext == null) {
+    return false;
+  }
+  return scrollContext
+          .findAncestorWidgetOfExactType<TilawaAlphabetScrollbar>() !=
+      null;
 }
 
 ScrollPosition? largestScrollExtentPosition(ScrollController? controller) {

@@ -1,7 +1,45 @@
 {
   "schemaVersion": 1,
-  "lastUpdatedAt": "2026-06-11T03:30:00Z",
+  "lastUpdatedAt": "2026-06-11T12:00:00Z",
   "releases": [
+    {
+      "id": "2.0.12+56",
+      "version": "2.0.12",
+      "buildNumber": 56,
+      "highlights": {
+        "en": [
+          "Smoother and more reliable sign-in",
+          "Improved downloads and audio playback",
+          "Better layout across phones and tablets",
+          "Performance and stability improvements",
+          "Various bug fixes"
+        ],
+        "ar": [
+          "تسجيل دخول أسلس وأكثر موثوقية",
+          "تحسينات على التنزيلات وتشغيل الصوت",
+          "تنسيق أفضل على الهواتف والأجهزة اللوحية",
+          "تحسينات في الأداء والاستقرار",
+          "إصلاحات متنوعة للأخطاء"
+        ]
+      }
+    },
+    {
+      "id": "2.0.11+55",
+      "version": "2.0.11",
+      "buildNumber": 55,
+      "highlights": {
+        "en": [
+          "Download All blocked when storage is too low — no more stalled queues",
+          "Downloads tab shows only finished files",
+          "Clearer Download All progress and undo on swipe-delete lists"
+        ],
+        "ar": [
+          "تحميل الكل يُوقف عند نقص المساحة — لا قوائم انتظار عالقة",
+          "تبويب التنزيلات يعرض الملفات المكتملة فقط",
+          "تقدّم أوضح لتحميل الكل وتراجع عند السحب للحذف"
+        ]
+      }
+    },
     {
       "id": "2.0.9+53",
       "version": "2.0.9",

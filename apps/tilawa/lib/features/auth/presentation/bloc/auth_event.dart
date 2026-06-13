@@ -6,4 +6,8 @@ abstract class AuthEvent with _$AuthEvent {
   const factory AuthEvent.signOut() = SignOutEvent;
   const factory AuthEvent.deleteAccount() = DeleteAccountEvent;
   const factory AuthEvent.checkAuthStatus() = CheckAuthStatusEvent;
+
+  /// Drops an in-flight interactive sign-in without signing out of Firebase.
+  const factory AuthEvent.abortInteractiveSignIn() =
+      AbortInteractiveSignInEvent;
 }

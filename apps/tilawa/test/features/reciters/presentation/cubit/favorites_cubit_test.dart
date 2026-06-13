@@ -349,4 +349,80 @@ void main() {
       await toggleFuture;
     });
   });
+
+  group('applyCatalogOrder', () {
+    const tReciter2 = ReciterEntity(
+      id: 2,
+      name: 'Second',
+      letter: 'S',
+      date: '2023',
+      moshaf: [],
+    );
+    const tReciter3 = ReciterEntity(
+      id: 3,
+      name: 'Third',
+      letter: 'T',
+      date: '2023',
+      moshaf: [],
+    );
+    const catalog = [tReciter, tReciter2, tReciter3];
+
+    test('reorders favorites to match catalog without fetching', () async {
+      when(mockGetFavorites(any)).thenAnswer(
+        (_) async => const Right(<ReciterEntity>[tReciter2]),
+      );
+      when(mockToggleFavorite(any)).thenAnswer(
+        (_) async => const Right(null),
+      );
+      await cubit.loadFavorites();
+      await cubit.toggleFavorite(tReciter);
+
+      final FavoritesLoaded optimistic = cubit.state as FavoritesLoaded;
+      expect(optimistic.favorites.map((r) => r.id).toList(), [2, 1]);
+
+      cubit.applyCatalogOrder(catalog);
+
+      final FavoritesLoaded reordered = cubit.state as FavoritesLoaded;
+      expect(reordered.favorites.map((r) => r.id).toList(), [1, 2]);
+      expect(reordered.favoriteIds, {1, 2});
+    });
+
+    test('does not emit when order already matches catalog', () async {
+      when(mockGetFavorites(any)).thenAnswer(
+        (_) async => const Right(<ReciterEntity>[tReciter, tReciter2]),
+      );
+      await cubit.loadFavorites();
+
+      final List<FavoritesState> states = <FavoritesState>[];
+      final subscription = cubit.stream.listen(states.add);
+
+      cubit.applyCatalogOrder(catalog);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(states, isEmpty);
+      await subscription.cancel();
+    });
+
+    test('appends favorites missing from catalog at end', () async {
+      const tReciterMissing = ReciterEntity(
+        id: 99,
+        name: 'Missing',
+        letter: 'M',
+        date: '2023',
+        moshaf: [],
+      );
+      when(mockGetFavorites(any)).thenAnswer(
+        (_) async => const Right(<ReciterEntity>[
+          tReciterMissing,
+          tReciter2,
+        ]),
+      );
+      await cubit.loadFavorites();
+
+      cubit.applyCatalogOrder(catalog);
+
+      final FavoritesLoaded reordered = cubit.state as FavoritesLoaded;
+      expect(reordered.favorites.map((r) => r.id).toList(), [2, 99]);
+    });
+  });
 }

@@ -81,7 +81,7 @@ void main() {
     });
 
     test(
-      'light warm canvas: cream scaffold, white cards, #E5E5E0 idle tier',
+      'light cool canvas: porcelain scaffold, white cards, #E5E7EB idle tier',
       () {
         final ThemeData theme = AppTheme.getLightTheme(
           primaryColor: AppColors.defaultPrimary,

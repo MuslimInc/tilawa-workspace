@@ -127,8 +127,7 @@ class _SupportBody extends StatelessWidget {
         state.purchasePhase == SupportPurchasePhase.purchasing;
     final bool hasTier = state.selectedProductId != null;
 
-    return TilawaContentBounds(
-      kind: TilawaContentKind.form,
+    return TilawaCatalogSettingsBody(
       child: SingleChildScrollView(
         padding: EdgeInsets.fromLTRB(
           tokens.spaceLarge,

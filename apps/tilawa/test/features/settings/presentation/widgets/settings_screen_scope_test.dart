@@ -70,7 +70,9 @@ void main() {
     verify(() => mockAppReviewCubit.close()).called(1);
   });
 
-  testWidgets('resolves AppReviewCubit from getIt on each mount', (tester) async {
+  testWidgets('resolves AppReviewCubit from getIt on each mount', (
+    tester,
+  ) async {
     var createCount = 0;
     scopeGetIt().unregister<AppReviewCubit>();
     scopeGetIt().registerFactory<AppReviewCubit>(() {

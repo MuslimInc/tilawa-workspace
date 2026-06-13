@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
+
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   // Stable metrics for [GoldenTestScenario] titles (Alchemist) — avoids ±1–2px
   // total golden height drift across Flutter / font versions vs committed PNGs.
