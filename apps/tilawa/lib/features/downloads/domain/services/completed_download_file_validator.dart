@@ -30,8 +30,9 @@ class CompletedDownloadFileValidator {
       final List<bool> validations = await Future.wait(
         List<Future<bool>>.generate(
           end - offset,
-          (int index) =>
-              _repository.validateDownloadedFile(downloads[offset + index]),
+          (int index) => _repository
+              .validateDownloadedFile(downloads[offset + index])
+              .catchError((Object _) => false),
         ),
       );
 

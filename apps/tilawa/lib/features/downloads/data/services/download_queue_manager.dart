@@ -884,6 +884,10 @@ class DownloadQueueManager implements IDownloadQueueService {
       return elapsed >= _runningStuckTimeout;
     }
 
+    if (platformProgress.status == DownloadStatus.paused) {
+      return false;
+    }
+
     final double lastProgress = _lastKnownProgress[trackingId] ?? -1;
     if (platformProgress.progress > lastProgress) {
       _lastKnownProgress[trackingId] = platformProgress.progress;
