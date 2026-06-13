@@ -179,8 +179,10 @@ void main() {
                         fit: FlexFit.loose,
                         child: SingleChildScrollView(
                           child: Padding(
-                            padding: TilawaBottomSheetScaffold
-                                .resolvedBodyPadding(context),
+                            padding:
+                                TilawaBottomSheetScaffold.resolvedBodyPadding(
+                                  context,
+                                ),
                             child: const Text(longMessage),
                           ),
                         ),

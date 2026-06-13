@@ -110,34 +110,37 @@ void main() {
       expect(collapsed.showMorphSubtitle, isTrue);
     });
 
-    test('collapse mid-progress uses horizontal identity not vertical stack', () {
-      final Rect miniBar = const Rect.fromLTWH(16, 620, 368, 76);
-      final QuranPlayerMorphLayout mid = QuranPlayerMorphLayout.compute(
-        progress: 0.25,
-        viewport: const Size(400, 800),
-        miniBarRect: miniBar,
-        sheetOffsetY: 120,
-        geometry: geometry,
-        textDirection: TextDirection.ltr,
-      );
-      expect(mid.horizontalIdentity, isTrue);
-      expect(mid.metadataIsVerticallyStacked, isFalse);
-      expect(
-        quranPlayerMorphMetadataIsBesideArt(
-          artRect: mid.artRect,
-          titleRect: mid.titleRect,
+    test(
+      'collapse mid-progress uses horizontal identity not vertical stack',
+      () {
+        final Rect miniBar = const Rect.fromLTWH(16, 620, 368, 76);
+        final QuranPlayerMorphLayout mid = QuranPlayerMorphLayout.compute(
+          progress: 0.25,
+          viewport: const Size(400, 800),
+          miniBarRect: miniBar,
+          sheetOffsetY: 120,
+          geometry: geometry,
           textDirection: TextDirection.ltr,
-        ),
-        isTrue,
-      );
-      expect(
-        quranPlayerMorphMetadataSharesArtRow(
-          artRect: mid.artRect,
-          titleRect: mid.titleRect,
-        ),
-        isTrue,
-      );
-    });
+        );
+        expect(mid.horizontalIdentity, isTrue);
+        expect(mid.metadataIsVerticallyStacked, isFalse);
+        expect(
+          quranPlayerMorphMetadataIsBesideArt(
+            artRect: mid.artRect,
+            titleRect: mid.titleRect,
+            textDirection: TextDirection.ltr,
+          ),
+          isTrue,
+        );
+        expect(
+          quranPlayerMorphMetadataSharesArtRow(
+            artRect: mid.artRect,
+            titleRect: mid.titleRect,
+          ),
+          isTrue,
+        );
+      },
+    );
 
     test('compute uses default optional parameters', () {
       final Rect miniBar = const Rect.fromLTWH(0, 600, 400, 72);

@@ -41,8 +41,9 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
 
   /// Debounce for trailing reconciliation; override in tests for faster timers.
   @visibleForTesting
-  static Duration playbackReconciliationDebounce =
-      const Duration(milliseconds: 150);
+  static Duration playbackReconciliationDebounce = const Duration(
+    milliseconds: 150,
+  );
 
   AudioPlayerBloc(
     this._getAudioStreams,
@@ -265,8 +266,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
         final Duration position = resolvePlaybackDisplayPosition(
           playbackState: playbackState,
           streamPosition: streamPosition,
-          cachedPosition:
-              _lastKnownPositions[currentAudio.id] ?? Duration.zero,
+          cachedPosition: _lastKnownPositions[currentAudio.id] ?? Duration.zero,
           trackDuration: duration,
         );
         final Duration buffered =
@@ -376,7 +376,9 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     final bool handlerHasMedia = event.audio != null;
     emit(
       state.copyWith(
-        status: handlerHasMedia ? AudioPlayerStatus.success : AudioPlayerStatus.initial,
+        status: handlerHasMedia
+            ? AudioPlayerStatus.success
+            : AudioPlayerStatus.initial,
         currentAudio: event.audio,
         dismissedAudioId: handlerHasMedia ? null : state.dismissedAudioId,
       ),

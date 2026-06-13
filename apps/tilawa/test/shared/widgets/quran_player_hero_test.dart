@@ -23,8 +23,7 @@ void main() {
 
   group('QuranPlayerExpansionSnapshot', () {
     test('visual progress follows route animation in route mode', () {
-      const QuranPlayerExpansionSnapshot snap =
-          QuranPlayerExpansionSnapshot(
+      const QuranPlayerExpansionSnapshot snap = QuranPlayerExpansionSnapshot(
         routeOpen: true,
         routeProgress: 0.35,
         controllerProgress: 0,
@@ -39,8 +38,7 @@ void main() {
     });
 
     test('footer mini metrics fade as route progresses', () {
-      const QuranPlayerExpansionSnapshot mid =
-          QuranPlayerExpansionSnapshot(
+      const QuranPlayerExpansionSnapshot mid = QuranPlayerExpansionSnapshot(
         routeOpen: true,
         routeProgress: 0.45,
         controllerProgress: 0,
@@ -60,8 +58,7 @@ void main() {
     });
 
     test('settled expanded hides footer mini chrome', () {
-      const QuranPlayerExpansionSnapshot settled =
-          QuranPlayerExpansionSnapshot(
+      const QuranPlayerExpansionSnapshot settled = QuranPlayerExpansionSnapshot(
         routeOpen: true,
         routeProgress: 1,
         controllerProgress: 0,
@@ -80,8 +77,7 @@ void main() {
     });
 
     test('route handoff keeps mini visible longer during expand', () {
-      const QuranPlayerExpansionSnapshot mid =
-          QuranPlayerExpansionSnapshot(
+      const QuranPlayerExpansionSnapshot mid = QuranPlayerExpansionSnapshot(
         routeOpen: true,
         routeProgress: 0.45,
         controllerProgress: 0,
@@ -106,8 +102,7 @@ void main() {
     });
 
     test('isTransitioning is true only during open mid-progress route', () {
-      const QuranPlayerExpansionSnapshot mid =
-          QuranPlayerExpansionSnapshot(
+      const QuranPlayerExpansionSnapshot mid = QuranPlayerExpansionSnapshot(
         routeOpen: true,
         routeProgress: 0.5,
         controllerProgress: 0,
@@ -121,8 +116,7 @@ void main() {
     });
 
     test('routeClosing transitionOwner when route animates out', () {
-      const QuranPlayerExpansionSnapshot closing =
-          QuranPlayerExpansionSnapshot(
+      const QuranPlayerExpansionSnapshot closing = QuranPlayerExpansionSnapshot(
         routeOpen: false,
         routeProgress: 0.2,
         controllerProgress: 0,
@@ -136,8 +130,7 @@ void main() {
     });
 
     test('shell overlay uses controller progress when route is closed', () {
-      const QuranPlayerExpansionSnapshot snap =
-          QuranPlayerExpansionSnapshot(
+      const QuranPlayerExpansionSnapshot snap = QuranPlayerExpansionSnapshot(
         routeOpen: false,
         routeProgress: 0,
         controllerProgress: 0.6,

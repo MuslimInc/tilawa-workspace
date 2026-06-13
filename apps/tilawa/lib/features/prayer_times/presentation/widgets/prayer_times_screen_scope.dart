@@ -20,13 +20,12 @@ class PrayerTimesScreenScope extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) =>
-              getIt<PrayerTimesBloc>()
-                ..add(
-                  const PrayerTimesEvent.loadPrayerTimes(
-                    requestLocationPermission: true,
-                  ),
-                ),
+          create: (context) => getIt<PrayerTimesBloc>()
+            ..add(
+              const PrayerTimesEvent.loadPrayerTimes(
+                requestLocationPermission: true,
+              ),
+            ),
         ),
         BlocProvider(
           create: (context) => getIt<PrayerPermissionsCubit>(),

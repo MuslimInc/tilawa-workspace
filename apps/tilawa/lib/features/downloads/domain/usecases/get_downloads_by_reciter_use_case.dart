@@ -7,16 +7,19 @@ import '../../../reciters/domain/repositories/reciters_repository.dart';
 import '../../utils/download_path_utils.dart';
 import '../entities/download_item.dart';
 import '../repositories/downloads_repository.dart';
+import '../services/completed_download_file_validator.dart';
 
 @injectable
 class GetDownloadsByReciterUseCase {
   const GetDownloadsByReciterUseCase(
     this._repository,
     this._recitersRepository,
+    this._fileValidator,
   );
 
   final DownloadsRepository _repository;
   final RecitersRepository _recitersRepository;
+  final CompletedDownloadFileValidator _fileValidator;
 
   Future<Either<Failure, Map<String, Map<String, List<DownloadItem>>>>>
   call() async {
@@ -30,7 +33,8 @@ class GetDownloadsByReciterUseCase {
         (failure) async => Left(failure),
         (reciters) async {
           final Map<int, String> reciterNameLookup = {
-            for (final r in reciters) r.id: r.name,
+            for (final ReciterEntity reciter in reciters)
+              reciter.id: reciter.name,
           };
           final Map<String, Map<String, List<DownloadItem>>> grouped =
               await _groupDownloadsByReciter(downloads, reciterNameLookup);
@@ -47,44 +51,38 @@ class GetDownloadsByReciterUseCase {
     Map<int, String> reciterNameLookup,
   ) async {
     final Map<String, Map<String, List<DownloadItem>>> grouped = {};
+    final List<DownloadItem> completed = downloads
+        .where(
+          (DownloadItem download) =>
+              download.status == DownloadStatus.completed,
+        )
+        .toList(growable: false);
 
-    for (final download in downloads) {
-      if (download.status != DownloadStatus.completed) {
-        continue;
-      }
+    final List<DownloadItem> validCompleted = await _fileValidator
+        .validateExistingFiles(completed);
 
-      final bool fileExists = await _repository.validateDownloadedFile(
-        download,
-      );
-      if (!fileExists) {
-        continue;
-      }
-
-      // Use localized name from lookup if available, otherwise fallback to saved name
-      String reciterName = download.reciterName;
-      if (download.reciterId != null &&
-          reciterNameLookup.containsKey(download.reciterId)) {
-        reciterName = reciterNameLookup[download.reciterId!]!;
-      }
-
-      final String narrative = DownloadPathUtils.extractNarrativeFromPath(
-        download.filePath,
-      );
-
-      // Ensure reciter group exists
-      if (!grouped.containsKey(reciterName)) {
-        grouped[reciterName] = {};
-      }
-
-      // Ensure narrative group exists within reciter
-      if (!grouped[reciterName]!.containsKey(narrative)) {
-        grouped[reciterName]![narrative] = [];
-      }
-
-      // Add download to appropriate narrative group
-      grouped[reciterName]![narrative]!.add(download);
+    for (final DownloadItem download in validCompleted) {
+      _addDownloadToGroup(grouped, download, reciterNameLookup);
     }
 
     return grouped;
+  }
+
+  void _addDownloadToGroup(
+    Map<String, Map<String, List<DownloadItem>>> grouped,
+    DownloadItem download,
+    Map<int, String> reciterNameLookup,
+  ) {
+    final String reciterName = download.reciterId != null
+        ? (reciterNameLookup[download.reciterId] ?? download.reciterName)
+        : download.reciterName;
+
+    final String narrative = DownloadPathUtils.extractNarrativeFromPath(
+      download.filePath,
+    );
+
+    grouped.putIfAbsent(reciterName, () => <String, List<DownloadItem>>{});
+    grouped[reciterName]!.putIfAbsent(narrative, () => <DownloadItem>[]);
+    grouped[reciterName]![narrative]!.add(download);
   }
 }

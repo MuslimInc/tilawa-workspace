@@ -56,8 +56,8 @@ class TilawaChip extends StatelessWidget {
     final effectiveBorderColor =
         borderColor ?? componentTokens.defaultBorderColor;
 
-    final EdgeInsets resolvedChipPadding =
-        (padding ?? componentTokens.padding).resolve(Directionality.of(context));
+    final EdgeInsets resolvedChipPadding = (padding ?? componentTokens.padding)
+        .resolve(Directionality.of(context));
     final TextStyle effectiveTextStyle =
         textStyle ?? theme.textTheme.labelLarge ?? const TextStyle();
     final double labelHeight =

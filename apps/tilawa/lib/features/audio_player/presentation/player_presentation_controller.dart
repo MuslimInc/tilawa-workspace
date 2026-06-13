@@ -175,8 +175,7 @@ class PlayerPresentationController extends ChangeNotifier {
 
   bool get isMiniSettled => !_routeOpen && _transitionProgress <= 0.01;
 
-  bool get overlayChromeActive =>
-      _routeOpen || _transitionProgress > 0.01;
+  bool get overlayChromeActive => _routeOpen || _transitionProgress > 0.01;
 
   /// True when transition metrics should favor collapse behavior.
   ///
@@ -231,9 +230,7 @@ class PlayerPresentationController extends ChangeNotifier {
       }
       return 'shellTransition';
     }
-    return _transitionProgress > 0.001
-        ? 'footerTransition'
-        : 'footerMini';
+    return _transitionProgress > 0.001 ? 'footerTransition' : 'footerMini';
   }
 
   String get visualMode => quranPlayerVisualMode(
@@ -451,8 +448,7 @@ class PlayerPresentationController extends ChangeNotifier {
   /// Syncs presentation when GoRouter no longer has `/player` (hot reload,
   /// external pop). Does not pop or push the route.
   void reconcileWithNavigationStack() {
-    if (_collapseRequested ||
-        _phase == PlayerPresentationPhase.collapsing) {
+    if (_collapseRequested || _phase == PlayerPresentationPhase.collapsing) {
       return;
     }
     if (_routeOpen && !_navigation.isExpandedRouteOnStack) {
@@ -513,8 +509,7 @@ class PlayerPresentationController extends ChangeNotifier {
       progress: visualProgress,
       miniPlayerHeight: miniPlayerHeight,
       collapseBiased: collapseBiasedForMetrics,
-      heroHandoff:
-          routeOpen && _phase != PlayerPresentationPhase.mini,
+      heroHandoff: routeOpen && _phase != PlayerPresentationPhase.mini,
     );
   }
 
@@ -585,8 +580,7 @@ class PlayerPresentationController extends ChangeNotifier {
   void _syncSystemBackIntercepts() {
     final bool intercepts =
         _systemBackHandle != null &&
-        (_routeOpen ||
-            (_shellHost != null && _transitionProgress > 0.01));
+        (_routeOpen || (_shellHost != null && _transitionProgress > 0.01));
     QuranPlayerSystemBackCoordinator.setIntercepts(intercepts);
   }
 

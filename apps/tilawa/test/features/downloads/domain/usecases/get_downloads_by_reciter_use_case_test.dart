@@ -4,6 +4,7 @@ import 'package:mockito/mockito.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
+import 'package:tilawa/features/downloads/domain/services/completed_download_file_validator.dart';
 import 'package:tilawa/features/downloads/domain/usecases/get_downloads_by_reciter_use_case.dart';
 
 import '../../helpers/mock_helper.mocks.dart';
@@ -24,6 +25,7 @@ void main() {
     useCase = GetDownloadsByReciterUseCase(
       mockRepository,
       mockRecitersRepository,
+      CompletedDownloadFileValidator(mockRepository),
     );
   });
 
@@ -154,7 +156,10 @@ void main() {
           progress: 0.5,
         ),
         downloadItem.copyWith(id: 'failed', status: DownloadStatus.failed),
-        downloadItem.copyWith(id: 'cancelled', status: DownloadStatus.cancelled),
+        downloadItem.copyWith(
+          id: 'cancelled',
+          status: DownloadStatus.cancelled,
+        ),
         downloadItem.copyWith(id: 'paused', status: DownloadStatus.paused),
       ];
 
@@ -208,8 +213,9 @@ void main() {
           .toList();
       expect(listed, [completedValid]);
       verify(mockRepository.validateDownloadedFile(completedValid)).called(1);
-      verify(mockRepository.validateDownloadedFile(completedMissingFile))
-          .called(1);
+      verify(
+        mockRepository.validateDownloadedFile(completedMissingFile),
+      ).called(1);
       verifyNever(mockRepository.validateDownloadedFile(pendingItem));
     });
 
@@ -273,7 +279,10 @@ void main() {
       expect(result, isA<Right>());
       final Map<String, Map<String, List<DownloadItem>>> grouped = result
           .getOrElse(() => {});
-      expect(grouped[testReciterName]!.keys, containsAll(['Narrative One', 'Narrative Two']));
+      expect(
+        grouped[testReciterName]!.keys,
+        containsAll(['Narrative One', 'Narrative Two']),
+      );
       expect(grouped[testReciterName]!['Narrative One'], hasLength(1));
       expect(grouped[testReciterName]!['Narrative Two'], hasLength(1));
     });

@@ -16,8 +16,7 @@ class AppTheme {
   /// Brand typeface, bundled as a package asset (see `pubspec.yaml`). Fonts
   /// declared in a package are exposed to consumers under the
   /// `packages/<package>/<family>` namespace.
-  static const String _fontFamily =
-      'packages/tilawa_ui_kit/IBMPlexSansArabic';
+  static const String _fontFamily = 'packages/tilawa_ui_kit/IBMPlexSansArabic';
 
   // Light theme configuration constants
   static const FlexSurfaceMode _lightSurfaceMode =

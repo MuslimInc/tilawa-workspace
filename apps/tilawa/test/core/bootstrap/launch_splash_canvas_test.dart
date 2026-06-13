@@ -11,14 +11,14 @@ void main() {
         size: Size(392.7, 761.5),
         padding: EdgeInsets.only(top: 24),
       );
-      final MediaQueryData frozen =
-          LaunchSplashCanvas.freezeLayoutMetrics(before);
+      final MediaQueryData frozen = LaunchSplashCanvas.freezeLayoutMetrics(
+        before,
+      );
 
       expect(frozen.size.width, 392.7);
       expect(frozen.size.height, 785.5);
       expect(frozen.padding, EdgeInsets.zero);
     });
-
   });
 
   group('LaunchSplashCanvas widget', () {

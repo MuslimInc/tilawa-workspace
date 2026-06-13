@@ -33,8 +33,7 @@ class NoOpAdhanAlarmPlayer implements IAdhanAlarmPlayer {
     required String prayerName,
     required String prayerKey,
     String? sound,
-  }) async =>
-      false;
+  }) async => false;
 
   @override
   Future<void> cancelAdhan(int id, {String? prayerName}) async {}

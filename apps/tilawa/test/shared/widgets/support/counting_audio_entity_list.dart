@@ -4,7 +4,8 @@ import 'package:tilawa_core/entities/audio.dart';
 
 /// Tracks [length] and `[]` reads so tests can assert O(1) hot paths.
 final class CountingAudioEntityList extends ListBase<AudioEntity> {
-  CountingAudioEntityList(List<AudioEntity> inner) : _inner = List<AudioEntity>.from(inner);
+  CountingAudioEntityList(List<AudioEntity> inner)
+    : _inner = List<AudioEntity>.from(inner);
 
   final List<AudioEntity> _inner;
 

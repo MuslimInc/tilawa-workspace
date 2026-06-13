@@ -80,7 +80,7 @@ jobs:
         run: |
           # The `gen` melos script calls `melos exec ...` internally, so melos
           # must be on PATH as a global executable (not just `dart run melos`).
-          dart pub global activate melos '>=7.8.0 <8.0.0'
+          dart pub global activate melos '>=7.8.2 <8.0.0'
           export PATH="$HOME/.pub-cache/bin:$PATH"
           melos run gen
 

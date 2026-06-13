@@ -303,7 +303,8 @@ class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
             return Scaffold(
               body: _FontLoaderSurface(
                 child: _ErrorView(
-                  message: error.failure.localizedMessage(context) ??
+                  message:
+                      error.failure.localizedMessage(context) ??
                       context.l10n.unexpectedError,
                   onRetry: () {
                     final page = initialPageNumber;

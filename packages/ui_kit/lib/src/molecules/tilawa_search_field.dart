@@ -186,9 +186,11 @@ class _SearchFieldBody extends StatelessWidget {
     final componentTokens = theme.componentTokens.searchField;
     final colorScheme = theme.colorScheme;
     final bool isCatalog = variant == TilawaSearchFieldVariant.catalog;
-    final effectiveFillColor = backgroundColor ??
+    final effectiveFillColor =
+        backgroundColor ??
         (isCatalog ? colorScheme.surface : componentTokens.backgroundColor);
-    final effectiveBorderRadius = borderRadius ??
+    final effectiveBorderRadius =
+        borderRadius ??
         BorderRadius.circular(
           isCatalog
               ? tokens.resolveRadius(family: TilawaRadiusFamily.card)

@@ -27,11 +27,14 @@ Future<void> configureDependencies({AppLaunchConfig? launchConfig}) async {
 
   final AppLaunchConfig config =
       launchConfig ??
-      (getIt.isRegistered<AppLaunchConfig>() ? getIt<AppLaunchConfig>() : null) ??
+      (getIt.isRegistered<AppLaunchConfig>()
+          ? getIt<AppLaunchConfig>()
+          : null) ??
       AppLaunchConfig.fromEnvironment();
 
   // Failed or partial init left registrations behind without a full graph.
-  if (getIt.isRegistered<NetworkInfo>() && !getIt.isRegistered<SettingsCubit>()) {
+  if (getIt.isRegistered<NetworkInfo>() &&
+      !getIt.isRegistered<SettingsCubit>()) {
     await getIt.reset();
   } else if (getIt.isRegistered<AppLaunchConfig>() &&
       !getIt.isRegistered<NetworkInfo>()) {

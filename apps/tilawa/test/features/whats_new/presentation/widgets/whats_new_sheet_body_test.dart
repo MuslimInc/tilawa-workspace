@@ -4,7 +4,9 @@ import 'package:tilawa/features/whats_new/presentation/widgets/whats_new_sheet_b
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 void main() {
-  testWidgets('renders localized highlight bullets', (WidgetTester tester) async {
+  testWidgets('renders localized highlight bullets', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.getLightTheme(primaryColor: AppColors.primarySage),

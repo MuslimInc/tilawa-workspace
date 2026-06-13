@@ -18,8 +18,7 @@ class AppReviewStoreConfig {
   final String appStoreId;
   final String microsoftStoreId;
 
-  String? get appStoreIdOrNull =>
-      appStoreId.isEmpty ? null : appStoreId;
+  String? get appStoreIdOrNull => appStoreId.isEmpty ? null : appStoreId;
 
   String? get microsoftStoreIdOrNull =>
       microsoftStoreId.isEmpty ? null : microsoftStoreId;

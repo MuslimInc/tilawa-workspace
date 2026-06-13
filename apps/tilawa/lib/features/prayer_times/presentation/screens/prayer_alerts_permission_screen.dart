@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/features/prayer_times/domain/repositories/prayer_alerts_permission_onboarding_repository.dart';
+import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa/router/prayer_alerts_permission_nav_extra.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -80,7 +84,7 @@ class _PrayerAlertsPermissionScreenState
 
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
-              context.pop();
+              _exitFlow(context);
             }
           });
           return const _PrayerAlertsPermissionLoadingScaffold(
@@ -93,10 +97,21 @@ class _PrayerAlertsPermissionScreenState
           // Nullable read: the wizard can open outside the prayer-times
           // scope (e.g. onboarding), where no PrayerTimesBloc is provided.
           prayerTimesBloc: context.read<PrayerTimesBloc?>(),
-          onFinished: () => context.pop(),
+          onFinished: () => _exitFlow(context),
         );
       },
     );
+  }
+
+  void _exitFlow(BuildContext context) {
+    if (widget.navExtra?.continueToLoginOnFinish ?? false) {
+      unawaited(
+        getIt<PrayerAlertsPermissionOnboardingRepository>().markFlowCompleted(),
+      );
+      const LoginRoute().go(context);
+      return;
+    }
+    context.pop();
   }
 }
 

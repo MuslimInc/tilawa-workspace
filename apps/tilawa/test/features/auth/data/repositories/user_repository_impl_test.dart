@@ -78,22 +78,28 @@ void main() {
       },
     );
 
-    test('deleteUserData removes user doc and fcm token subcollection', () async {
-      await userRepository.saveUserData(tUser);
-      await userRepository.saveDeviceToken(tUser.id, 'token_abc');
+    test(
+      'deleteUserData removes user doc and fcm token subcollection',
+      () async {
+        await userRepository.saveUserData(tUser);
+        await userRepository.saveDeviceToken(tUser.id, 'token_abc');
 
-      await userRepository.deleteUserData(tUser.id);
+        await userRepository.deleteUserData(tUser.id);
 
-      final userDoc = await fakeFirestore.collection('users').doc(tUser.id).get();
-      final tokenDoc = await fakeFirestore
-          .collection('users')
-          .doc(tUser.id)
-          .collection('fcm_tokens')
-          .doc('token_abc')
-          .get();
+        final userDoc = await fakeFirestore
+            .collection('users')
+            .doc(tUser.id)
+            .get();
+        final tokenDoc = await fakeFirestore
+            .collection('users')
+            .doc(tUser.id)
+            .collection('fcm_tokens')
+            .doc('token_abc')
+            .get();
 
-      expect(userDoc.exists, false);
-      expect(tokenDoc.exists, false);
-    });
+        expect(userDoc.exists, false);
+        expect(tokenDoc.exists, false);
+      },
+    );
   });
 }

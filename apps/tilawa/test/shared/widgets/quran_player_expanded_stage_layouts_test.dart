@@ -7,8 +7,8 @@ void main() {
     test('strips horizontal velocity for DragEndDetails assertion', () {
       final DragEndDetails details =
           quranPlayerExpandedStageVerticalDragEndDetails(
-        const Velocity(pixelsPerSecond: Offset(120, -80)),
-      );
+            const Velocity(pixelsPerSecond: Offset(120, -80)),
+          );
 
       expect(details.primaryVelocity, -80);
       expect(details.velocity.pixelsPerSecond.dx, 0);
@@ -18,8 +18,8 @@ void main() {
     test('non-finite vertical velocity returns safe zero end details', () {
       final DragEndDetails details =
           quranPlayerExpandedStageVerticalDragEndDetails(
-        const Velocity(pixelsPerSecond: Offset(0, double.nan)),
-      );
+            const Velocity(pixelsPerSecond: Offset(0, double.nan)),
+          );
 
       expect(details.primaryVelocity, 0);
       expect(() => details.velocity, returnsNormally);

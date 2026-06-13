@@ -58,8 +58,9 @@ final class AppSystemChromeStyle {
     final Color resolvedNavColor =
         navigationBarColor ?? theme.colorScheme.surface;
 
-    final Brightness statusBarBrightness =
-        ThemeData.estimateBrightnessForColor(statusBackground);
+    final Brightness statusBarBrightness = ThemeData.estimateBrightnessForColor(
+      statusBackground,
+    );
     final Brightness statusIconBrightness =
         statusBarBrightness == Brightness.dark
         ? Brightness.light

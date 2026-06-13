@@ -54,13 +54,12 @@ class TilawaAlphabetScrollbarTokens {
   ) {
     return TilawaAlphabetScrollbarTokens(
       width: kTilawaMinInteractiveDimension,
-      // Legacy row metric; spacing is computed from the live track height.
-      itemExtent: 24,
-      selectedIndicatorExtent: 32,
-      letterFontSize: 12,
-      verticalPadding: const EdgeInsets.symmetric(vertical: 8),
-      overlaySize: 64,
-      overlayFontSize: 32,
+      itemExtent: kTilawaMinInteractiveDimension,
+      selectedIndicatorExtent: 36,
+      letterFontSize: 13,
+      verticalPadding: EdgeInsets.zero,
+      overlaySize: 72,
+      overlayFontSize: 36,
       overlayRadius: 16,
       overlayOffset: 48,
       overlayBackgroundColor: colorScheme.surfaceContainerHighest,
@@ -526,11 +525,9 @@ class TilawaChipTokens {
       backgroundColor: backgroundColor ?? this.backgroundColor,
       defaultBorderColor: defaultBorderColor ?? this.defaultBorderColor,
       catalogSelectedBackgroundColor:
-          catalogSelectedBackgroundColor ??
-          this.catalogSelectedBackgroundColor,
+          catalogSelectedBackgroundColor ?? this.catalogSelectedBackgroundColor,
       catalogSelectedForegroundColor:
-          catalogSelectedForegroundColor ??
-          this.catalogSelectedForegroundColor,
+          catalogSelectedForegroundColor ?? this.catalogSelectedForegroundColor,
       selectionSelectedBackgroundColor:
           selectionSelectedBackgroundColor ??
           this.selectionSelectedBackgroundColor,
@@ -988,7 +985,6 @@ class TilawaSearchFieldTokens {
     );
   }
 
-
   TilawaSearchFieldTokens copyWith({
     double? height,
     Color? backgroundColor,
@@ -1294,4 +1290,3 @@ class TilawaPermissionBannerTokens {
     );
   }
 }
-

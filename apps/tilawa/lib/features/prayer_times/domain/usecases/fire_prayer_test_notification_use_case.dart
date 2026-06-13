@@ -12,9 +12,8 @@ class FirePrayerTestNotificationUseCase {
   Future<void> call({
     required PrayerType prayer,
     required bool playAdhan,
-  }) =>
-      _notificationService.fireTestNotification(
-        prayer: prayer,
-        playAdhan: playAdhan,
-      );
+  }) => _notificationService.fireTestNotification(
+    prayer: prayer,
+    playAdhan: playAdhan,
+  );
 }

@@ -8,7 +8,10 @@ void main() {
     test('shows bottom navigation only on main shell', () {
       expect(AppShellRoutePolicy.showsBottomNavigation('/'), isTrue);
       expect(AppShellRoutePolicy.showsBottomNavigation(''), isTrue);
-      expect(AppShellRoutePolicy.showsBottomNavigation('/reciters/search'), isFalse);
+      expect(
+        AppShellRoutePolicy.showsBottomNavigation('/reciters/search'),
+        isFalse,
+      );
       expect(AppShellRoutePolicy.showsBottomNavigation('/reciter/1'), isFalse);
       expect(AppShellRoutePolicy.showsBottomNavigation('/settings'), isFalse);
       expect(AppShellRoutePolicy.showsBottomNavigation('/history'), isFalse);

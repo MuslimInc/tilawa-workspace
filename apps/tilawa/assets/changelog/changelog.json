@@ -3,6 +3,27 @@
   "lastUpdatedAt": "2026-06-11T12:00:00Z",
   "releases": [
     {
+      "id": "2.0.12+56",
+      "version": "2.0.12",
+      "buildNumber": 56,
+      "highlights": {
+        "en": [
+          "Smoother and more reliable sign-in",
+          "Improved downloads and audio playback",
+          "Better layout across phones and tablets",
+          "Performance and stability improvements",
+          "Various bug fixes"
+        ],
+        "ar": [
+          "تسجيل دخول أسلس وأكثر موثوقية",
+          "تحسينات على التنزيلات وتشغيل الصوت",
+          "تنسيق أفضل على الهواتف والأجهزة اللوحية",
+          "تحسينات في الأداء والاستقرار",
+          "إصلاحات متنوعة للأخطاء"
+        ]
+      }
+    },
+    {
       "id": "2.0.11+55",
       "version": "2.0.11",
       "buildNumber": 55,

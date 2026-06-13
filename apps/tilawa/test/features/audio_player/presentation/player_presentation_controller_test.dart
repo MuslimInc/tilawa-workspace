@@ -55,23 +55,26 @@ void main() {
       expect(controller.phase, PlayerPresentationPhase.collapsing);
     });
 
-    test('expand reconciles stale routeOpen after route leaves stack', () async {
-      unawaited(controller.expand());
-      await Future<void>.delayed(Duration.zero);
-      controller.onRouteOpened();
-      controller.collapse();
-      navigation.completePush();
-      await Future<void>.delayed(Duration.zero);
-      expect(controller.phase, PlayerPresentationPhase.mini);
+    test(
+      'expand reconciles stale routeOpen after route leaves stack',
+      () async {
+        unawaited(controller.expand());
+        await Future<void>.delayed(Duration.zero);
+        controller.onRouteOpened();
+        controller.collapse();
+        navigation.completePush();
+        await Future<void>.delayed(Duration.zero);
+        expect(controller.phase, PlayerPresentationPhase.mini);
 
-      final Future<void> secondExpand = controller.expand();
-      await Future<void>.delayed(Duration.zero);
-      expect(navigation.pushCount, 2);
-      expect(controller.phase, PlayerPresentationPhase.expanding);
-      expect(controller.snapshot()['collapseBiased'], isFalse);
-      navigation.completePush();
-      await secondExpand;
-    });
+        final Future<void> secondExpand = controller.expand();
+        await Future<void>.delayed(Duration.zero);
+        expect(navigation.pushCount, 2);
+        expect(controller.phase, PlayerPresentationPhase.expanding);
+        expect(controller.snapshot()['collapseBiased'], isFalse);
+        navigation.completePush();
+        await secondExpand;
+      },
+    );
 
     test('re-expand after collapse pushes /player again', () async {
       unawaited(controller.expand());

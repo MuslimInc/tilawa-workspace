@@ -109,8 +109,7 @@ class TourGuideService {
     }
 
     try {
-      final TourOverlayStyle resolvedStyle =
-          style ?? _defaultStyle(context);
+      final TourOverlayStyle resolvedStyle = style ?? _defaultStyle(context);
       await _presenter.show(
         context: context,
         steps: steps,

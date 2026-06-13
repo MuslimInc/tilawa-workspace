@@ -74,7 +74,8 @@ class _DefaultRouteSystemUiOverlayState
       widget.splashRouteHasPainted ?? SplashLaunchHandoff.splashRouteHasPainted;
 
   VoidCallback get _markSplashRoutePainted =>
-      widget.markSplashRoutePainted ?? SplashLaunchHandoff.markSplashRoutePainted;
+      widget.markSplashRoutePainted ??
+      SplashLaunchHandoff.markSplashRoutePainted;
 
   String get _currentRoutePath {
     final ValueGetter<String>? override = widget.currentRoutePath;
@@ -163,12 +164,12 @@ class _DefaultRouteSystemUiOverlayState
       '/login' => AppSystemChromeStyle.buildColoredScreenStyle(
         backgroundColor: theme.colorScheme.primary,
       ),
-      '/language-welcome' || '/onboarding' =>
-        AppSystemChromeStyle.buildDefaultAppStyle(
-          theme,
-          statusBarBackgroundColor: theme.scaffoldBackgroundColor,
-          navigationBarColor: theme.scaffoldBackgroundColor,
-        ),
+      '/language-welcome' ||
+      '/onboarding' => AppSystemChromeStyle.buildDefaultAppStyle(
+        theme,
+        statusBarBackgroundColor: theme.scaffoldBackgroundColor,
+        navigationBarColor: theme.scaffoldBackgroundColor,
+      ),
       _ => AppSystemChromeStyle.buildDefaultAppStyle(
         theme,
         statusBarBackgroundColor: theme.scaffoldBackgroundColor,
@@ -212,9 +213,7 @@ class _DefaultRouteSystemUiOverlayState
     firstFrameLog('TilawaApp scheduling routed first-frame handoff mark');
     SchedulerBinding.instance.addPostFrameCallback((_) {
       _launchHandoffScheduled = false;
-      if (!mounted ||
-          widget.child == null ||
-          _splashRouteHasPainted.value) {
+      if (!mounted || widget.child == null || _splashRouteHasPainted.value) {
         firstFrameLog(
           'TilawaApp handoff mark skipped '
           '(mounted=$mounted hasChild=${widget.child != null} '

@@ -9,19 +9,19 @@ void main() {
     test('footer collapse timeline has no full chrome gap', () {
       final List<double> timeline =
           QuranPlayerAnimationStability.simulateCollapseDragProgress(
-        startProgress: 1,
-        travelPixels: 692,
-        steps: 60,
-        dragPixelsPerStep: 8,
-      );
+            startProgress: 1,
+            travelPixels: 692,
+            steps: 60,
+            dragPixelsPerStep: 8,
+          );
 
       final List<double> gaps =
           QuranPlayerAnimationStability.findChromeVisibilityGaps(
-        progressTimeline: timeline,
-        miniPlayerHeight: 76,
-        collapseBiasedAt: _collapseBiased,
-        interactiveDrag: false,
-      );
+            progressTimeline: timeline,
+            miniPlayerHeight: 76,
+            collapseBiasedAt: _collapseBiased,
+            interactiveDrag: false,
+          );
 
       expect(
         gaps,
@@ -33,20 +33,20 @@ void main() {
     test('interactive collapse drag with anchor has no full chrome gap', () {
       final List<double> timeline =
           QuranPlayerAnimationStability.simulateCollapseDragProgress(
-        startProgress: 1,
-        travelPixels: 692,
-        steps: 60,
-        dragPixelsPerStep: 8,
-      );
+            startProgress: 1,
+            travelPixels: 692,
+            steps: 60,
+            dragPixelsPerStep: 8,
+          );
 
       final List<double> gaps =
           QuranPlayerAnimationStability.findChromeVisibilityGaps(
-        progressTimeline: timeline,
-        miniPlayerHeight: 76,
-        collapseBiasedAt: _collapseBiased,
-        interactiveCollapseAnchor: 1,
-        interactiveDrag: true,
-      );
+            progressTimeline: timeline,
+            miniPlayerHeight: 76,
+            collapseBiasedAt: _collapseBiased,
+            interactiveCollapseAnchor: 1,
+            interactiveDrag: true,
+          );
 
       expect(
         gaps,
@@ -59,11 +59,11 @@ void main() {
       for (final double progress in <double>[0.25, 0.45, 0.65, 0.72]) {
         final PlayerExpandTransitionMetrics metrics =
             PlayerExpandTransitionMetrics.compute(
-          progress: progress,
-          miniPlayerHeight: 76,
-          collapseBiased: true,
-          heroHandoff: false,
-        );
+              progress: progress,
+              miniPlayerHeight: 76,
+              collapseBiased: true,
+              heroHandoff: false,
+            );
         expect(
           QuranPlayerAnimationStability.hasChromeVisibilityGap(metrics),
           isFalse,
@@ -78,11 +78,11 @@ void main() {
     test('late collapse drag still shows mini before sheet threshold', () {
       final PlayerExpandTransitionMetrics at70 =
           PlayerExpandTransitionMetrics.compute(
-        progress: 0.70,
-        miniPlayerHeight: 76,
-        collapseBiased: true,
-        heroHandoff: false,
-      );
+            progress: 0.70,
+            miniPlayerHeight: 76,
+            collapseBiased: true,
+            heroHandoff: false,
+          );
       expect(at70.showMiniPlayer, isTrue);
       expect(at70.showExpandedSheet, isFalse);
       expect(at70.showMorphLayer, isTrue);
@@ -95,10 +95,10 @@ void main() {
     test('settled collapsed shows mini only', () {
       final PlayerExpandTransitionMetrics settled =
           PlayerExpandTransitionMetrics.compute(
-        progress: 0,
-        miniPlayerHeight: 76,
-        collapseBiased: true,
-      );
+            progress: 0,
+            miniPlayerHeight: 76,
+            collapseBiased: true,
+          );
       expect(settled.showMiniPlayer, isTrue);
       expect(settled.showExpandedSheet, isFalse);
       expect(settled.showMorphLayer, isFalse);
@@ -111,10 +111,10 @@ void main() {
     test('settled expanded shows sheet at start of collapse', () {
       final PlayerExpandTransitionMetrics start =
           PlayerExpandTransitionMetrics.compute(
-        progress: 1,
-        miniPlayerHeight: 76,
-        collapseBiased: true,
-      );
+            progress: 1,
+            miniPlayerHeight: 76,
+            collapseBiased: true,
+          );
       expect(start.showExpandedSheet, isTrue);
       expect(
         QuranPlayerAnimationStability.hasChromeVisibilityGap(start),
@@ -128,19 +128,19 @@ void main() {
       const double progress = 0.70;
       final PlayerExpandTransitionMetrics expandForward =
           PlayerExpandTransitionMetrics.compute(
-        progress: progress,
-        miniPlayerHeight: 76,
-        interactiveDrag: true,
-        collapseBiased: false,
-      );
+            progress: progress,
+            miniPlayerHeight: 76,
+            interactiveDrag: true,
+            collapseBiased: false,
+          );
       final PlayerExpandTransitionMetrics collapseDrag =
           PlayerExpandTransitionMetrics.compute(
-        progress: progress,
-        miniPlayerHeight: 76,
-        interactiveDrag: true,
-        collapseBiased: true,
-        interactiveCollapseAnchor: 1,
-      );
+            progress: progress,
+            miniPlayerHeight: 76,
+            interactiveDrag: true,
+            collapseBiased: true,
+            interactiveCollapseAnchor: 1,
+          );
 
       expect(expandForward.showMiniPlayer, isFalse);
       expect(collapseDrag.showMiniPlayer, isFalse);

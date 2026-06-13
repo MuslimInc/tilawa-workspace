@@ -217,20 +217,18 @@ class _PermissionStepFooter extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: tokens.spaceLarge,
       children: <Widget>[
-        Align(
-          alignment: AlignmentDirectional.centerStart,
-          child: TilawaButton(
-            text: context.l10n.prayerAlertsPermissionSkip,
-            variant: TilawaButtonVariant.ghost,
-            onPressed: isLoading ? null : onSkip,
-          ),
-        ),
         TilawaButton(
           text: primaryLabel,
           variant: TilawaButtonVariant.primary,
           foregroundColor: colorScheme.onPrimary,
           isLoading: isLoading,
           onPressed: isLoading ? null : onAllow,
+          isFullWidth: true,
+        ),
+        TilawaButton(
+          text: context.l10n.prayerAlertsPermissionSkip,
+          variant: TilawaButtonVariant.ghost,
+          onPressed: isLoading ? null : onSkip,
           isFullWidth: true,
         ),
       ],

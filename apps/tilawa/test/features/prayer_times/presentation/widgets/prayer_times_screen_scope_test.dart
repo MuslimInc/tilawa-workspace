@@ -15,7 +15,8 @@ class _MockPrayerTimesBloc extends mocktail.Mock implements PrayerTimesBloc {}
 class _MockPrayerPermissionsCubit extends mocktail.Mock
     implements PrayerPermissionsCubit {}
 
-class _MockAdhanAlarmPlayer extends mocktail.Mock implements IAdhanAlarmPlayer {}
+class _MockAdhanAlarmPlayer extends mocktail.Mock
+    implements IAdhanAlarmPlayer {}
 
 class _MockFirePrayerTestNotificationUseCase extends mocktail.Mock
     implements FirePrayerTestNotificationUseCase {}
@@ -34,20 +35,28 @@ void main() {
     mockPermissionsCubit = _MockPrayerPermissionsCubit();
 
     mocktail.when(() => mockPrayerTimesBloc.close()).thenAnswer((_) async {});
-    mocktail.when(() => mockPrayerTimesBloc.state).thenReturn(
-      const PrayerTimesState(),
-    );
-    mocktail.when(
-      () => mockPrayerTimesBloc.stream,
-    ).thenAnswer((_) => const Stream.empty());
+    mocktail
+        .when(() => mockPrayerTimesBloc.state)
+        .thenReturn(
+          const PrayerTimesState(),
+        );
+    mocktail
+        .when(
+          () => mockPrayerTimesBloc.stream,
+        )
+        .thenAnswer((_) => const Stream.empty());
 
     mocktail.when(() => mockPermissionsCubit.close()).thenAnswer((_) async {});
-    mocktail.when(() => mockPermissionsCubit.state).thenReturn(
-      const PrayerPermissionsState(),
-    );
-    mocktail.when(
-      () => mockPermissionsCubit.stream,
-    ).thenAnswer((_) => const Stream.empty());
+    mocktail
+        .when(() => mockPermissionsCubit.state)
+        .thenReturn(
+          const PrayerPermissionsState(),
+        );
+    mocktail
+        .when(
+          () => mockPermissionsCubit.stream,
+        )
+        .thenAnswer((_) => const Stream.empty());
 
     scopeGetIt().registerFactory<PrayerTimesBloc>(() => mockPrayerTimesBloc);
     scopeGetIt().registerFactory<PrayerPermissionsCubit>(
@@ -129,9 +138,11 @@ void main() {
       permissionsCreateCount++;
       final mock = _MockPrayerPermissionsCubit();
       mocktail.when(() => mock.close()).thenAnswer((_) async {});
-      mocktail.when(() => mock.state).thenReturn(
-        const PrayerPermissionsState(),
-      );
+      mocktail
+          .when(() => mock.state)
+          .thenReturn(
+            const PrayerPermissionsState(),
+          );
       mocktail.when(() => mock.stream).thenAnswer((_) => const Stream.empty());
       return mock;
     });
@@ -170,7 +181,9 @@ void main() {
     final loadMock = _MockPrayerTimesBloc();
     mocktail.when(() => loadMock.close()).thenAnswer((_) async {});
     mocktail.when(() => loadMock.state).thenReturn(const PrayerTimesState());
-    mocktail.when(() => loadMock.stream).thenAnswer((_) => const Stream.empty());
+    mocktail
+        .when(() => loadMock.stream)
+        .thenAnswer((_) => const Stream.empty());
 
     scopeGetIt().unregister<PrayerTimesBloc>();
     scopeGetIt().registerFactory<PrayerTimesBloc>(() => loadMock);
@@ -187,13 +200,15 @@ void main() {
       ),
     );
 
-    mocktail.verify(
-      () => loadMock.add(
-        const PrayerTimesEvent.loadPrayerTimes(
-          requestLocationPermission: true,
-        ),
-      ),
-    ).called(1);
+    mocktail
+        .verify(
+          () => loadMock.add(
+            const PrayerTimesEvent.loadPrayerTimes(
+              requestLocationPermission: true,
+            ),
+          ),
+        )
+        .called(1);
   });
 
   testWidgets('renders probe child instead of PrayerTimesScreen', (

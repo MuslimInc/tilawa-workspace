@@ -52,17 +52,19 @@ void main() {
       expect(policy.isWarmUpComplete, isTrue);
     });
 
-    test('warmUp loads device info only once across concurrent calls',
-        () async {
-      stubOem(manufacturer: 'TECNO MOBILE LIMITED', brand: 'TECNO');
-      final AndroidSignInPlatformPolicy policy = buildAndroidPolicy();
+    test(
+      'warmUp loads device info only once across concurrent calls',
+      () async {
+        stubOem(manufacturer: 'TECNO MOBILE LIMITED', brand: 'TECNO');
+        final AndroidSignInPlatformPolicy policy = buildAndroidPolicy();
 
-      await Future.wait(<Future<void>>[policy.warmUp(), policy.warmUp()]);
-      await policy.warmUp();
+        await Future.wait(<Future<void>>[policy.warmUp(), policy.warmUp()]);
+        await policy.warmUp();
 
-      verify(() => mockDeviceInfoPlugin.androidInfo).called(1);
-      expect(policy.skipAutomaticSignIn, isTrue);
-    });
+        verify(() => mockDeviceInfoPlugin.androidInfo).called(1);
+        expect(policy.skipAutomaticSignIn, isTrue);
+      },
+    );
 
     test('warmUp swallows device info errors and completes', () async {
       when(
@@ -79,9 +81,9 @@ void main() {
     test('warmUp is a no-op off Android', () async {
       final AndroidSignInPlatformPolicy policy =
           AndroidSignInPlatformPolicy.forPlatform(
-        deviceInfoPlugin: mockDeviceInfoPlugin,
-        isAndroid: false,
-      );
+            deviceInfoPlugin: mockDeviceInfoPlugin,
+            isAndroid: false,
+          );
 
       await policy.warmUp();
 

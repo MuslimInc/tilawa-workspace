@@ -77,10 +77,12 @@ void main() {
       final theme = _lightTheme();
       final scheme = theme.colorScheme;
       final tokens = theme.extension<TilawaDesignTokens>()!;
-      final RoundedRectangleBorder shape = TilawaAppBarChrome.bottomHairline(
-        scheme,
-        tokens,
-      ) as RoundedRectangleBorder;
+      final RoundedRectangleBorder shape =
+          TilawaAppBarChrome.bottomHairline(
+                scheme,
+                tokens,
+              )
+              as RoundedRectangleBorder;
       expect(
         shape.side.color,
         scheme.outlineVariant.withValues(alpha: tokens.opacitySubtle * 2.5),

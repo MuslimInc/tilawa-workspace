@@ -20,8 +20,7 @@ class PlayInAppUpdatePlatformDataSource
       final AppUpdateInfo updateInfo = await InAppUpdate.checkForUpdate();
       return InAppUpdateAvailability(
         updateAvailable:
-            updateInfo.updateAvailability ==
-            UpdateAvailability.updateAvailable,
+            updateInfo.updateAvailability == UpdateAvailability.updateAvailable,
         immediateUpdateAllowed: updateInfo.immediateUpdateAllowed,
         flexibleUpdateAllowed: updateInfo.flexibleUpdateAllowed,
       );

@@ -261,6 +261,13 @@ class TilawaButton extends StatelessWidget {
       child: content,
     );
 
+    final Widget sizedButton = shrinkWrapTapTarget
+        ? textButton
+        : ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
+            child: textButton,
+          );
+
     return Semantics(
       label: isLoading
           ? '${semanticLabel ?? text}, Loading'
@@ -269,12 +276,7 @@ class TilawaButton extends StatelessWidget {
       enabled: !_isDisabled,
       child: TilawaPressAnimation(
         enabled: !_isDisabled,
-        child: shrinkWrapTapTarget
-            ? textButton
-            : ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
-                child: textButton,
-              ),
+        child: sizedButton,
       ),
     );
   }
@@ -344,10 +346,9 @@ class _ButtonContent extends StatelessWidget {
       );
     }
 
-    // Non–full-width: [Flexible] gives the label a finite max width on the row
-    // main axis when the parent is bounded, so ellipsis works without
-    // [LayoutBuilder] (intrinsic-safe for e.g. Alchemist golden [Table] probes).
-    // Full-width: [Expanded] unchanged.
+    // Full-width: [Expanded] so the label uses the row width and ellipsizes.
+    // Non–full-width: plain label — [Flexible] would expand to the parent's max
+    // width and stretch the button in loose layouts (e.g. illustrated states).
     final label = Center(
       child: Text(
         text,
@@ -375,10 +376,7 @@ class _ButtonContent extends StatelessWidget {
           ),
           SizedBox(width: iconGap),
         ],
-        if (isFullWidth)
-          Expanded(child: label)
-        else
-          Flexible(fit: FlexFit.loose, child: label),
+        if (isFullWidth) Expanded(child: label) else label,
         if (trailingIcon != null) ...[
           SizedBox(width: iconGap),
           IconTheme(

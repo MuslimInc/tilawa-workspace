@@ -23,7 +23,10 @@ void main() {
     });
 
     test('routes down to player and up to queue', () {
-      expect(QuranPlayerStageVerticalDragLogic.routesToPlayerCollapse(1), isTrue);
+      expect(
+        QuranPlayerStageVerticalDragLogic.routesToPlayerCollapse(1),
+        isTrue,
+      );
       expect(
         QuranPlayerStageVerticalDragLogic.routesToPlayerCollapse(-1),
         isFalse,
@@ -211,7 +214,9 @@ void main() {
   });
 
   group('QuranPlayerExpandedStageQueueFocusedLayout', () {
-    testWidgets('does not overflow at 360x403 with tall content', (tester) async {
+    testWidgets('does not overflow at 360x403 with tall content', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SizedBox(
@@ -277,40 +282,41 @@ void main() {
     testWidgets(
       'minHeight fill passes taps through to scope below short content',
       (tester) async {
-      var collapsed = false;
+        var collapsed = false;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: SizedBox(
-            width: 360,
-            height: 403,
-            child: QuranPlayerExpandedStageGestureScope(
-              onCollapse: () => collapsed = true,
-              onVerticalDragStart: (_) {},
-              onVerticalDragUpdate: (_) {},
-              onVerticalDragEnd: (_) {},
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  return QuranPlayerExpandedStageQueueFocusedLayout(
-                    maxHeight: constraints.maxHeight,
-                    onVerticalDragStart: (_) {},
-                    onVerticalDragUpdate: (_) {},
-                    onVerticalDragEnd: (_) {},
-                    children: const [
-                      SizedBox(height: 48, width: 360),
-                      SizedBox(height: 80, width: 360),
-                    ],
-                  );
-                },
+        await tester.pumpWidget(
+          MaterialApp(
+            home: SizedBox(
+              width: 360,
+              height: 403,
+              child: QuranPlayerExpandedStageGestureScope(
+                onCollapse: () => collapsed = true,
+                onVerticalDragStart: (_) {},
+                onVerticalDragUpdate: (_) {},
+                onVerticalDragEnd: (_) {},
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return QuranPlayerExpandedStageQueueFocusedLayout(
+                      maxHeight: constraints.maxHeight,
+                      onVerticalDragStart: (_) {},
+                      onVerticalDragUpdate: (_) {},
+                      onVerticalDragEnd: (_) {},
+                      children: const [
+                        SizedBox(height: 48, width: 360),
+                        SizedBox(height: 80, width: 360),
+                      ],
+                    );
+                  },
+                ),
               ),
             ),
           ),
-        ),
-      );
+        );
 
-      await tester.tapAt(const Offset(180, 350));
-      expect(collapsed, isTrue);
-    });
+        await tester.tapAt(const Offset(180, 350));
+        expect(collapsed, isTrue);
+      },
+    );
 
     testWidgets('tap on scrollable content does not invoke scope onCollapse', (
       tester,

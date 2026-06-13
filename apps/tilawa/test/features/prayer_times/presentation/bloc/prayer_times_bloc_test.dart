@@ -373,53 +373,56 @@ void main() {
       ],
     );
 
-    test('updateLocation loads prayer times after resolving coordinates', () async {
-      when(
-        mockGetCurrentLocationUseCase.call(
-          forceRefresh: anyNamed('forceRefresh'),
-          allowOpenSettings: anyNamed('allowOpenSettings'),
-          requestIfDenied: anyNamed('requestIfDenied'),
-        ),
-      ).thenAnswer((_) async => Right(tLocationResult));
-      when(
-        mockLoadPrayerSettingsUseCase.call(),
-      ).thenAnswer((_) async => const Right(tSettings));
-      when(
-        mockGetPrayerTimesUseCase.call(
-          latitude: anyNamed('latitude'),
-          longitude: anyNamed('longitude'),
-          date: anyNamed('date'),
-          settings: anyNamed('settings'),
-        ),
-      ).thenAnswer((_) async => Right(tPrayerTimes));
+    test(
+      'updateLocation loads prayer times after resolving coordinates',
+      () async {
+        when(
+          mockGetCurrentLocationUseCase.call(
+            forceRefresh: anyNamed('forceRefresh'),
+            allowOpenSettings: anyNamed('allowOpenSettings'),
+            requestIfDenied: anyNamed('requestIfDenied'),
+          ),
+        ).thenAnswer((_) async => Right(tLocationResult));
+        when(
+          mockLoadPrayerSettingsUseCase.call(),
+        ).thenAnswer((_) async => const Right(tSettings));
+        when(
+          mockGetPrayerTimesUseCase.call(
+            latitude: anyNamed('latitude'),
+            longitude: anyNamed('longitude'),
+            date: anyNamed('date'),
+            settings: anyNamed('settings'),
+          ),
+        ).thenAnswer((_) async => Right(tPrayerTimes));
 
-      final PrayerTimesBloc testBloc = PrayerTimesBloc(
-        mockGetPrayerTimesUseCase,
-        mockGetMonthlyPrayerTimesUseCase,
-        mockGetCurrentLocationUseCase,
-        mockGetCountryCodeUseCase,
-        mockSavePrayerSettingsUseCase,
-        mockLoadPrayerSettingsUseCase,
-        mockSchedulePrayerNotificationsUseCase,
-        mockCancelPrayerNotificationsUseCase,
-      );
-      addTearDown(testBloc.close);
+        final PrayerTimesBloc testBloc = PrayerTimesBloc(
+          mockGetPrayerTimesUseCase,
+          mockGetMonthlyPrayerTimesUseCase,
+          mockGetCurrentLocationUseCase,
+          mockGetCountryCodeUseCase,
+          mockSavePrayerSettingsUseCase,
+          mockLoadPrayerSettingsUseCase,
+          mockSchedulePrayerNotificationsUseCase,
+          mockCancelPrayerNotificationsUseCase,
+        );
+        addTearDown(testBloc.close);
 
-      testBloc.add(const PrayerTimesEvent.updateLocation());
-      await testBloc.stream.firstWhere(
-        (PrayerTimesState state) => state.status == PrayerTimesStatus.loaded,
-      );
+        testBloc.add(const PrayerTimesEvent.updateLocation());
+        await testBloc.stream.firstWhere(
+          (PrayerTimesState state) => state.status == PrayerTimesStatus.loaded,
+        );
 
-      expect(testBloc.state.locationName, 'City');
-      expect(testBloc.state.isLoadingLocation, isFalse);
-      verify(
-        mockGetCurrentLocationUseCase.call(
-          forceRefresh: true,
-          allowOpenSettings: true,
-          requestIfDenied: true,
-        ),
-      ).called(1);
-    });
+        expect(testBloc.state.locationName, 'City');
+        expect(testBloc.state.isLoadingLocation, isFalse);
+        verify(
+          mockGetCurrentLocationUseCase.call(
+            forceRefresh: true,
+            allowOpenSettings: true,
+            requestIfDenied: true,
+          ),
+        ).called(1);
+      },
+    );
 
     blocTest<PrayerTimesBloc, PrayerTimesState>(
       'emits updated settings when updating settings',

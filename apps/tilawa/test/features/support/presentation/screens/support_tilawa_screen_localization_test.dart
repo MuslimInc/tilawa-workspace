@@ -65,8 +65,9 @@ void main() {
 
     when(() => mockPrepare()).thenAnswer((_) async {});
     when(() => mockAbort(any())).thenReturn(true);
-    when(() => mockAnalytics.logEvent(any(), parameters: any(named: 'parameters')))
-        .thenAnswer((_) async {});
+    when(
+      () => mockAnalytics.logEvent(any(), parameters: any(named: 'parameters')),
+    ).thenAnswer((_) async {});
     when(() => mockConnectivity.checkConnectivity()).thenAnswer(
       (_) async => <ConnectivityResult>[ConnectivityResult.wifi],
     );
@@ -127,7 +128,9 @@ void main() {
       );
       bloc.add(const SupportEvent.started());
 
-      await tester.pumpWidget(buildSubject(locale: const Locale('ar'), bloc: bloc));
+      await tester.pumpWidget(
+        buildSubject(locale: const Locale('ar'), bloc: bloc),
+      );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
       addTearDown(bloc.close);
@@ -152,7 +155,9 @@ void main() {
       );
       bloc.add(const SupportEvent.started());
 
-      await tester.pumpWidget(buildSubject(locale: const Locale('en'), bloc: bloc));
+      await tester.pumpWidget(
+        buildSubject(locale: const Locale('en'), bloc: bloc),
+      );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
       addTearDown(bloc.close);
@@ -187,7 +192,9 @@ void main() {
       );
       bloc.add(const SupportEvent.started());
 
-      await tester.pumpWidget(buildSubject(locale: const Locale('ar'), bloc: bloc));
+      await tester.pumpWidget(
+        buildSubject(locale: const Locale('ar'), bloc: bloc),
+      );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
       addTearDown(bloc.close);

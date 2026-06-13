@@ -22,14 +22,14 @@ void main() {
     verifyNever(() => mockDeviceStorageService.getAvailableBytes());
   });
 
-  test('returns true when available storage cannot be read', () async {
+  test('returns false when available storage cannot be read', () async {
     when(
       () => mockDeviceStorageService.getAvailableBytes(),
     ).thenAnswer((_) async => null);
 
     final bool result = await useCase(estimatedRequiredBytes: 1024);
 
-    expect(result, isTrue);
+    expect(result, isFalse);
   });
 
   test('returns true when available storage is below estimate', () async {

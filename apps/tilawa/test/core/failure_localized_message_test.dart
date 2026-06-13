@@ -81,8 +81,9 @@ void main() {
             builder: (BuildContext context) {
               expect(
                 context.l10n.purchaseVerificationFailed,
-                lookupAppLocalizations(const Locale('ar'))
-                    .purchaseVerificationFailed,
+                lookupAppLocalizations(
+                  const Locale('ar'),
+                ).purchaseVerificationFailed,
               );
               expect(
                 context.l10n.purchaseVerificationFailed,

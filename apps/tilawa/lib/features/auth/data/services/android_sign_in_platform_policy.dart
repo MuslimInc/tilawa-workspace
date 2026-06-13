@@ -23,10 +23,9 @@ class AndroidSignInPlatformPolicy {
   /// Allows host tests to exercise the Android-only warm-up path.
   @visibleForTesting
   AndroidSignInPlatformPolicy.forPlatform({
-    required DeviceInfoPlugin deviceInfoPlugin,
-    required bool isAndroid,
-  }) : _deviceInfoPlugin = deviceInfoPlugin,
-       _isAndroid = isAndroid;
+    required DeviceInfoPlugin this._deviceInfoPlugin,
+    required this._isAndroid,
+  });
 
   final DeviceInfoPlugin? _deviceInfoPlugin;
   final bool _isAndroid;
@@ -53,11 +52,11 @@ class AndroidSignInPlatformPolicy {
   Future<void> _runWarmUp() async {
     try {
       final AndroidDeviceInfo info = await _deviceInfoPlugin!.androidInfo;
-      skipAutomaticSignIn = AndroidCredentialManagerOemPolicy
-          .shouldSkipAutomaticSignIn(
-        manufacturer: info.manufacturer,
-        brand: info.brand,
-      );
+      skipAutomaticSignIn =
+          AndroidCredentialManagerOemPolicy.shouldSkipAutomaticSignIn(
+            manufacturer: info.manufacturer,
+            brand: info.brand,
+          );
       if (skipAutomaticSignIn) {
         logger.i(
           '[GoogleSignIn] OEM (${info.manufacturer}/${info.brand}) '

@@ -31,8 +31,9 @@ class TilawaLanguageSwitcher extends StatelessWidget {
 
     final ColorScheme colorScheme = theme.colorScheme;
     final itemPadding = tokens.itemPadding.resolve(Directionality.of(context));
-    final containerPadding =
-        tokens.containerPadding.resolve(Directionality.of(context));
+    final containerPadding = tokens.containerPadding.resolve(
+      Directionality.of(context),
+    );
     final labelStyle = theme.textTheme.labelLarge;
     final double labelHeight =
         (labelStyle?.fontSize ?? 14) * (labelStyle?.height ?? 1.2);

@@ -126,13 +126,14 @@ class SupportTierCard extends StatelessWidget {
                               ),
                               Text(
                                 product.price,
-                                style: (compact
-                                        ? theme.textTheme.bodyMedium
-                                        : theme.textTheme.titleMedium)
-                                    ?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
+                                style:
+                                    (compact
+                                            ? theme.textTheme.bodyMedium
+                                            : theme.textTheme.titleMedium)
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: colorScheme.onSurfaceVariant,
+                                        ),
                               ),
                             ],
                           ),

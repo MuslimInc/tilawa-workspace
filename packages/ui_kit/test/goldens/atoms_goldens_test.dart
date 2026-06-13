@@ -14,7 +14,6 @@ const StrutStyle _kGoldenCardCaptionStrut = StrutStyle(
 );
 
 void main() {
-
   group('Atoms Golden Tests', () {
     goldenTest(
       'TilawaCard',

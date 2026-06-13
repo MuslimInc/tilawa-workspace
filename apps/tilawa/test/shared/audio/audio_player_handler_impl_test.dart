@@ -1698,32 +1698,35 @@ void main() {
       },
     );
 
-    test('positionStream rebroadcasts updatePosition to playbackState', () async {
-      const item = MediaItem(
-        id: '1',
-        title: 'Test',
-        duration: Duration(minutes: 10),
-        extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
-      );
-      await handler.addQueueItem(item);
-      currentIndexSubject.add(0);
-      processingStateSubject.add(ProcessingState.ready);
-      durationSubject.add(const Duration(minutes: 10));
-      await captureAndUpdate();
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-      expect(handler.mediaItem.value, isNotNull);
+    test(
+      'positionStream rebroadcasts updatePosition to playbackState',
+      () async {
+        const item = MediaItem(
+          id: '1',
+          title: 'Test',
+          duration: Duration(minutes: 10),
+          extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+        );
+        await handler.addQueueItem(item);
+        currentIndexSubject.add(0);
+        processingStateSubject.add(ProcessingState.ready);
+        durationSubject.add(const Duration(minutes: 10));
+        await captureAndUpdate();
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+        expect(handler.mediaItem.value, isNotNull);
 
-      const Duration enginePosition = Duration(seconds: 90);
-      when(mockPlayer.position).thenReturn(enginePosition);
-      positionStreamSubject.add(enginePosition);
+        const Duration enginePosition = Duration(seconds: 90);
+        when(mockPlayer.position).thenReturn(enginePosition);
+        positionStreamSubject.add(enginePosition);
 
-      await Future<void>.delayed(const Duration(milliseconds: 100));
+        await Future<void>.delayed(const Duration(milliseconds: 100));
 
-      expect(
-        handler.playbackState.value.updatePosition,
-        enginePosition,
-      );
-    });
+        expect(
+          handler.playbackState.value.updatePosition,
+          enginePosition,
+        );
+      },
+    );
 
     test('_broadcastState includes pause control when playing', () async {
       const item = MediaItem(

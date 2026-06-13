@@ -27,7 +27,9 @@ void main() {
   setUp(() {
     mockDownloadsBloc = _MockDownloadsBloc();
     when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
-    when(() => mockDownloadsBloc.stream).thenAnswer((_) => const Stream.empty());
+    when(
+      () => mockDownloadsBloc.stream,
+    ).thenAnswer((_) => const Stream.empty());
     when(() => mockDownloadsBloc.close()).thenAnswer((_) async {});
     when(() => mockDownloadsBloc.add(any())).thenReturn(null);
   });

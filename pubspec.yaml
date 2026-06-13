@@ -17,7 +17,9 @@ workspace:
 
 dev_dependencies:
   sentry_dart_plugin: ^3.4.0
-  melos: ^7.8.0
+  melos: ^7.8.2
+  bloc_lint: ^0.4.1
+  bloc_tools: ^0.1.0-dev.24
 
 melos:
   command:
@@ -52,6 +54,10 @@ melos:
       run: |
         melos run analyze
         melos run format
+
+    bloc:lint:
+      description: Run official bloc_lint rules via bloc_tools.
+      run: dart run bloc_tools:bloc lint .
 
     # -- Testing -------------------------------------------------------
     test:

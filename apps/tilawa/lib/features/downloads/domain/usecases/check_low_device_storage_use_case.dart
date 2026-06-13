@@ -17,11 +17,11 @@ class CheckLowDeviceStorageUseCase {
 
     final int? availableBytes = await _deviceStorageService.getAvailableBytes();
     if (availableBytes == null) {
-      return true;
+      return false;
     }
 
-    final int requiredBytes = estimatedRequiredBytes >
-            DownloadStorageEstimates.minimumFreeBytes
+    final int requiredBytes =
+        estimatedRequiredBytes > DownloadStorageEstimates.minimumFreeBytes
         ? estimatedRequiredBytes
         : DownloadStorageEstimates.minimumFreeBytes;
 

@@ -363,8 +363,8 @@ void main() {
       clearInteractions(mockAddOrUpdateHistory);
       playbackStateSubject.add(idlePlayback);
       await bloc.stream.firstWhere(
-        (s) => s.playbackState?.processingState ==
-            AudioProcessingStateStatus.idle,
+        (s) =>
+            s.playbackState?.processingState == AudioProcessingStateStatus.idle,
       );
       verifyNever(
         mockAddOrUpdateHistory.call(
@@ -385,20 +385,23 @@ void main() {
       await bloc.close();
     });
 
-    test('scheduleActivePlaybackSyncOnCreate dispatches leading sync', () async {
-      AudioPlayerBloc.scheduleActivePlaybackSyncOnCreate = true;
-      addTearDown(() {
-        AudioPlayerBloc.scheduleActivePlaybackSyncOnCreate = false;
-      });
+    test(
+      'scheduleActivePlaybackSyncOnCreate dispatches leading sync',
+      () async {
+        AudioPlayerBloc.scheduleActivePlaybackSyncOnCreate = true;
+        addTearDown(() {
+          AudioPlayerBloc.scheduleActivePlaybackSyncOnCreate = false;
+        });
 
-      when(mockSyncActivePlayback.call()).thenAnswer(
-        (_) async => const Right(null),
-      );
+        when(mockSyncActivePlayback.call()).thenAnswer(
+          (_) async => const Right(null),
+        );
 
-      buildBloc();
-      await Future<void>.delayed(Duration.zero);
-      verify(mockSyncActivePlayback.call()).called(1);
-    });
+        buildBloc();
+        await Future<void>.delayed(Duration.zero);
+        verify(mockSyncActivePlayback.call()).called(1);
+      },
+    );
 
     test('active reconcile seeks handler to reported position', () async {
       const Duration reportedPosition = Duration(seconds: 90);
@@ -429,7 +432,6 @@ void main() {
       verify(mockSyncActivePlayback.call()).called(1);
       await bloc.close();
     });
-
   });
 
   group('hot restart mini player visibility', () {
@@ -444,11 +446,10 @@ void main() {
       queueGeneration: 1,
     );
 
-    ActivePlaybackSnapshot activeHandlerSnapshot() =>
-        ActivePlaybackSnapshot(
-          currentAudio: hydratedSurah,
-          playbackState: pausedHandlerPlayback,
-        );
+    ActivePlaybackSnapshot activeHandlerSnapshot() => ActivePlaybackSnapshot(
+      currentAudio: hydratedSurah,
+      playbackState: pausedHandlerPlayback,
+    );
 
     test(
       'documents pre-stream hydrated mismatch before handler events arrive',
@@ -458,8 +459,7 @@ void main() {
           currentAudio: hydratedSurah,
           dismissedAudioId: '1',
         );
-        final ActivePlaybackSnapshot handlerSnapshot =
-            activeHandlerSnapshot();
+        final ActivePlaybackSnapshot handlerSnapshot = activeHandlerSnapshot();
 
         expect(handlerSnapshot.currentAudio.id, hydratedSurah.id);
         expect(hydratedAfterRestart.shouldShowBottomPlayer, isFalse);

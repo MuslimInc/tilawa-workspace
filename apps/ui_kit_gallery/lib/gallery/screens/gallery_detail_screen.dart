@@ -20,7 +20,11 @@ class GalleryDetailScreen extends StatelessWidget {
           IconButton(
             tooltip: 'Toggle RTL',
             onPressed: settings.toggleDirection,
-            icon: Icon(settings.isRtl ? Icons.format_textdirection_r_to_l : Icons.format_textdirection_l_to_r),
+            icon: Icon(
+              settings.isRtl
+                  ? Icons.format_textdirection_r_to_l
+                  : Icons.format_textdirection_l_to_r,
+            ),
           ),
           IconButton(
             tooltip: 'Toggle theme',

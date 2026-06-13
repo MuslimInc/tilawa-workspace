@@ -82,11 +82,13 @@ void main() {
     mockAnalytics = MockAnalyticsService();
 
     when(() => mockPrepare()).thenAnswer((_) async {});
-    when(() => mockPrepare(resetWaiters: any(named: 'resetWaiters')))
-        .thenAnswer((_) async {});
+    when(
+      () => mockPrepare(resetWaiters: any(named: 'resetWaiters')),
+    ).thenAnswer((_) async {});
     when(() => mockAbort(any())).thenReturn(true);
-    when(() => mockAnalytics.logEvent(any(), parameters: any(named: 'parameters')))
-        .thenAnswer((_) async {});
+    when(
+      () => mockAnalytics.logEvent(any(), parameters: any(named: 'parameters')),
+    ).thenAnswer((_) async {});
     when(() => mockConnectivity.checkConnectivity()).thenAnswer(
       (_) async => <ConnectivityResult>[ConnectivityResult.wifi],
     );

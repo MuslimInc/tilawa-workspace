@@ -10,7 +10,7 @@ import '../cubit/favorites_state.dart';
 import '../reciter_semantics_ids.dart';
 import '../utils/reciter_list_moshaf_label.dart';
 
-/// Talabat / Booking–style list row: leading visual, text block, top-end save.
+/// Talabat / Booking–style list row: leading visual, text block, trailing save.
 class ReciterCard extends StatelessWidget {
   const ReciterCard({
     super.key,
@@ -41,32 +41,18 @@ class ReciterCard extends StatelessWidget {
           padding: EdgeInsets.all(tokens.spaceLarge),
           borderRadius: tokens.radiusLarge,
           onTap: () => _openReciterDetails(context),
-          child: Stack(
-            clipBehavior: Clip.none,
+          child: Row(
+            mainAxisSize: .min,
+            spacing: tokens.spaceMedium,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: tokens.spaceMedium,
-                children: [
-                  _ReciterAvatar(
-                    reciterId: reciter.id,
-                    name: reciter.name,
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsetsDirectional.only(
-                        end: tokens.spaceExtraLarge,
-                      ),
-                      child: _ReciterInfo(reciter: reciter),
-                    ),
-                  ),
-                ],
+              _ReciterAvatar(
+                reciterId: reciter.id,
+                name: reciter.name,
               ),
-              PositionedDirectional(
-                top: 0,
-                end: 0,
-                child: _FavoriteButton(reciter: reciter),
+              Expanded(
+                child: _ReciterInfo(reciter: reciter),
               ),
+              _FavoriteButton(reciter: reciter),
             ],
           ),
         ),
@@ -176,8 +162,8 @@ class _ReciterInfo extends StatelessWidget {
         : null;
 
     return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: .min,
+      crossAxisAlignment: .stretch,
       spacing: tokens.spaceExtraSmall,
       children: [
         Text(
@@ -190,27 +176,33 @@ class _ReciterInfo extends StatelessWidget {
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
+        // Flexible: grid tiles cap the card height (e.g. tablet two-column
+        // layout); the label drops to one line there instead of overflowing.
         if (moshafLabel != null)
-          Text(
-            moshafLabel,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w500,
-              height: 1.35,
+          Flexible(
+            child: Text(
+              moshafLabel,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
+                height: 1.35,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
           )
         else if (moshafCount == 0)
-          Text(
-            context.l10n.recitationsAvailable(moshafCount),
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w500,
-              height: 1.35,
+          Flexible(
+            child: Text(
+              context.l10n.recitationsAvailable(moshafCount),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
+                height: 1.35,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
       ],
     );
@@ -235,25 +227,29 @@ class _FavoriteButton extends StatelessWidget {
 
     return Semantics(
       identifier: ReciterSemanticsIds.reciterFavoriteButton(reciter.id),
-      child: TilawaIconToggle(
-        icon: Icons.favorite_border_rounded,
-        activeIcon: Icons.favorite_rounded,
-        value: isFavorite,
-        onChanged: (_) =>
-            context.read<FavoritesCubit>().toggleFavorite(reciter),
-        iconSize: tokens.iconSizeSmall,
-        padding: tokens.spaceExtraSmall,
-        activeIconColor: colorScheme.primary.withValues(
-          alpha: tokens.opacityEmphasis,
+      child: SizedBox(
+        width: tokens.minInteractiveDimension,
+        height: tokens.minInteractiveDimension,
+        child: TilawaIconToggle(
+          icon: Icons.favorite_border_rounded,
+          activeIcon: Icons.favorite_rounded,
+          value: isFavorite,
+          onChanged: (_) =>
+              context.read<FavoritesCubit>().toggleFavorite(reciter),
+          iconSize: tokens.iconSizeSmall,
+          padding: tokens.spaceExtraSmall,
+          activeIconColor: colorScheme.primary.withValues(
+            alpha: tokens.opacityEmphasis,
+          ),
+          inactiveIconColor: colorScheme.onSurfaceVariant.withValues(
+            alpha: tokens.opacityMedium,
+          ),
+          activeBackgroundColor: Colors.transparent,
+          inactiveBackgroundColor: Colors.transparent,
+          semanticLabel: isFavorite
+              ? context.l10n.removeFromFavorites
+              : context.l10n.addToFavorites,
         ),
-        inactiveIconColor: colorScheme.onSurfaceVariant.withValues(
-          alpha: tokens.opacityMedium,
-        ),
-        activeBackgroundColor: Colors.transparent,
-        inactiveBackgroundColor: Colors.transparent,
-        semanticLabel: isFavorite
-            ? context.l10n.removeFromFavorites
-            : context.l10n.addToFavorites,
       ),
     );
   }

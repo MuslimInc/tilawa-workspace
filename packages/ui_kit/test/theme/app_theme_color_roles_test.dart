@@ -58,33 +58,39 @@ void main() {
       }
     });
 
-    test('true-black dark themes keep accessible contrast on core color roles', () {
-      for (final entry in paletteCases.entries) {
-        final theme = AppTheme.getDarkTheme(
-          primaryColor: entry.value,
-          isDefaultPreset: entry.value == AppColors.defaultPrimary,
-          darkIsTrueBlack: true,
-        );
+    test(
+      'true-black dark themes keep accessible contrast on core color roles',
+      () {
+        for (final entry in paletteCases.entries) {
+          final theme = AppTheme.getDarkTheme(
+            primaryColor: entry.value,
+            isDefaultPreset: entry.value == AppColors.defaultPrimary,
+            darkIsTrueBlack: true,
+          );
 
-        _expectCoreContrast(theme.colorScheme, label: '${entry.key} true-black');
-        _expectForegroundOnAllSurfaces(
-          theme.colorScheme,
-          label: '${entry.key} true-black',
-        );
-        _expectSecondaryTextContrast(
-          theme.colorScheme,
-          label: '${entry.key} true-black',
-        );
-        _expectStatusContrast(
-          theme.colorScheme,
-          label: '${entry.key} true-black',
-        );
-        _expectDisabledUiContrast(
-          theme.colorScheme,
-          label: '${entry.key} true-black',
-        );
-      }
-    });
+          _expectCoreContrast(
+            theme.colorScheme,
+            label: '${entry.key} true-black',
+          );
+          _expectForegroundOnAllSurfaces(
+            theme.colorScheme,
+            label: '${entry.key} true-black',
+          );
+          _expectSecondaryTextContrast(
+            theme.colorScheme,
+            label: '${entry.key} true-black',
+          );
+          _expectStatusContrast(
+            theme.colorScheme,
+            label: '${entry.key} true-black',
+          );
+          _expectDisabledUiContrast(
+            theme.colorScheme,
+            label: '${entry.key} true-black',
+          );
+        }
+      },
+    );
 
     test(
       'light surfaceContainerHigh is Pinterest neutral for every preset',
@@ -105,22 +111,28 @@ void main() {
       },
     );
 
-    test('light scaffold and surfaces use cool porcelain canvas not primary', () {
-      final theme = AppTheme.getLightTheme(
-        primaryColor: AppColors.primaryCoral,
-      );
-      final scheme = theme.colorScheme;
+    test(
+      'light scaffold and surfaces use cool porcelain canvas not primary',
+      () {
+        final theme = AppTheme.getLightTheme(
+          primaryColor: AppColors.primaryCoral,
+        );
+        final scheme = theme.colorScheme;
 
-      expect(theme.scaffoldBackgroundColor, AppColors.lightCanvas);
-      expect(scheme.surface, AppColors.lightSurface);
-      expect(scheme.surfaceContainerLowest, AppColors.lightCanvas);
-      expect(scheme.surfaceContainerLow, AppColors.lightSurface);
-      expect(scheme.onSurface, AppColors.lightInk);
-      expect(scheme.surfaceContainerHigh, AppColors.catalogFilterUnselectedLight);
-      expect(scheme.surfaceTint, Colors.transparent);
-      expect(scheme.primary, isNot(equals(theme.scaffoldBackgroundColor)));
-      expect(scheme.secondary, AppColors.catalogFilterUnselectedLight);
-    });
+        expect(theme.scaffoldBackgroundColor, AppColors.lightCanvas);
+        expect(scheme.surface, AppColors.lightSurface);
+        expect(scheme.surfaceContainerLowest, AppColors.lightCanvas);
+        expect(scheme.surfaceContainerLow, AppColors.lightSurface);
+        expect(scheme.onSurface, AppColors.lightInk);
+        expect(
+          scheme.surfaceContainerHigh,
+          AppColors.catalogFilterUnselectedLight,
+        );
+        expect(scheme.surfaceTint, Colors.transparent);
+        expect(scheme.primary, isNot(equals(theme.scaffoldBackgroundColor)));
+        expect(scheme.secondary, AppColors.catalogFilterUnselectedLight);
+      },
+    );
 
     test('default sage light theme matches brand ColorScheme roles', () {
       final scheme = AppTheme.getLightTheme(

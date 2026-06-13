@@ -8,8 +8,7 @@ List<PrayerAlertsPermissionStep> prayerAlertsSetupPendingSteps({
   required bool hasLocationPermission,
   PrayerAlarmCapability? capability,
 }) {
-  final List<PrayerAlertsPermissionStep> steps =
-      <PrayerAlertsPermissionStep>[];
+  final List<PrayerAlertsPermissionStep> steps = <PrayerAlertsPermissionStep>[];
 
   if (!hasLocationPermission) {
     steps.add(PrayerAlertsPermissionStep.location);

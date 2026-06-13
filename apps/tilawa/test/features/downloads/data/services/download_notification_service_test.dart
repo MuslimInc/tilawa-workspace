@@ -282,26 +282,29 @@ void main() {
       expect(service, isNotNull);
     });
 
-    test('should swallow show errors for single download notifications', () async {
-      (
-        FlutterLocalNotificationsPlatform.instance
-            as MockFlutterLocalNotificationsPlatform
-      ).throwOnShow = true;
+    test(
+      'should swallow show errors for single download notifications',
+      () async {
+        (FlutterLocalNotificationsPlatform.instance
+                    as MockFlutterLocalNotificationsPlatform)
+                .throwOnShow =
+            true;
 
-      await service.showDownloadProgress(
-        downloadId: downloadId,
-        title: title,
-        reciterName: reciterName,
-        progress: 100,
-        status: DownloadStatus.completed,
-      );
+        await service.showDownloadProgress(
+          downloadId: downloadId,
+          title: title,
+          reciterName: reciterName,
+          progress: 100,
+          status: DownloadStatus.completed,
+        );
 
-      (
-        FlutterLocalNotificationsPlatform.instance
-            as MockFlutterLocalNotificationsPlatform
-      ).throwOnShow = false;
-      expect(service, isNotNull);
-    });
+        (FlutterLocalNotificationsPlatform.instance
+                    as MockFlutterLocalNotificationsPlatform)
+                .throwOnShow =
+            false;
+        expect(service, isNotNull);
+      },
+    );
 
     test('should use default messages when not provided', () async {
       await service.showDownloadProgress(
@@ -436,10 +439,10 @@ void main() {
     });
 
     test('should swallow show errors for batch notifications', () async {
-      (
-        FlutterLocalNotificationsPlatform.instance
-            as MockFlutterLocalNotificationsPlatform
-      ).throwOnShow = true;
+      (FlutterLocalNotificationsPlatform.instance
+                  as MockFlutterLocalNotificationsPlatform)
+              .throwOnShow =
+          true;
 
       await service.showBatchDownloadProgress(
         batchId: batchId,
@@ -459,10 +462,10 @@ void main() {
         status: DownloadStatus.failed,
       );
 
-      (
-        FlutterLocalNotificationsPlatform.instance
-            as MockFlutterLocalNotificationsPlatform
-      ).throwOnShow = false;
+      (FlutterLocalNotificationsPlatform.instance
+                  as MockFlutterLocalNotificationsPlatform)
+              .throwOnShow =
+          false;
       expect(service, isNotNull);
     });
 

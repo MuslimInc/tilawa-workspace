@@ -700,7 +700,9 @@ class PrayerAdhanNotificationService
       bool adhanHandledNatively = false;
       if (playAdhan && _adhanPlayer.isSupported) {
         try {
-          final DateTime trigger = DateTime.now().add(const Duration(seconds: 1));
+          final DateTime trigger = DateTime.now().add(
+            const Duration(seconds: 1),
+          );
           adhanHandledNatively = await _adhanPlayer.scheduleAdhan(
             id: testId,
             scheduledTime: trigger,

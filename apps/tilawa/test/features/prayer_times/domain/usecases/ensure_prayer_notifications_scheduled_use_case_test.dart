@@ -308,8 +308,9 @@ class _FakePrayerTimesRepository implements PrayerTimesRepository {
   Future<bool> hasLocationPermission() async => false;
 
   @override
-  Future<bool> requestLocationPermission({bool allowOpenSettings = false}) async =>
-      false;
+  Future<bool> requestLocationPermission({
+    bool allowOpenSettings = false,
+  }) async => false;
 
   @override
   Future<void> saveSettings(PrayerSettingsEntity settings) async {
@@ -389,8 +390,7 @@ class _FakeAdhanAlarmPlayer implements IAdhanAlarmPlayer {
     required String prayerName,
     required String prayerKey,
     String? sound,
-  }) async =>
-      false;
+  }) async => false;
 
   @override
   Future<void> cancelAdhan(int id, {String? prayerName}) async {}

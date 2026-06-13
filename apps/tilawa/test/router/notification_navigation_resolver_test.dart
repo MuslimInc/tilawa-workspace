@@ -22,7 +22,9 @@ void main() {
     });
 
     test('resolveExtra returns embedded reciter entity for reciter routes', () {
-      final String location = const ReciterDetailsRoute(reciterId: '9').location;
+      final String location = const ReciterDetailsRoute(
+        reciterId: '9',
+      ).location;
 
       final Object? extra = NotificationNavigationResolver.resolveExtra(
         <String, dynamic>{

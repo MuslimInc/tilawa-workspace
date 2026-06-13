@@ -65,8 +65,8 @@ class CheckPrayerAlarmCapabilityUseCase {
 
     bool isIgnoringBatteryOptimizations;
     try {
-      isIgnoringBatteryOptimizations =
-          await _adhanPlayer.isIgnoringBatteryOptimizations();
+      isIgnoringBatteryOptimizations = await _adhanPlayer
+          .isIgnoringBatteryOptimizations();
     } catch (_) {
       isIgnoringBatteryOptimizations = true;
     }

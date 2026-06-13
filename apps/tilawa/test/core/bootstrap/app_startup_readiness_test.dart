@@ -33,8 +33,7 @@ void main() {
     mockGetReciters = MockGetRecitersUseCase();
     mockGetFavorites = MockGetFavoriteRecitersUseCase();
     when(mockGetFavorites.call(any)).thenAnswer(
-      (_) async =>
-          const Right<Failure, List<ReciterEntity>>(<ReciterEntity>[]),
+      (_) async => const Right<Failure, List<ReciterEntity>>(<ReciterEntity>[]),
     );
     readiness = AppStartupReadiness(mockGetReciters, mockGetFavorites);
   });

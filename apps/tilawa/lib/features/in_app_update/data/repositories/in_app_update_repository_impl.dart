@@ -31,7 +31,8 @@ class InAppUpdateRepositoryImpl implements InAppUpdateRepository {
       _platformDataSource.performImmediateUpdate();
 
   @override
-  Future<bool> startFlexibleUpdate() => _platformDataSource.startFlexibleUpdate();
+  Future<bool> startFlexibleUpdate() =>
+      _platformDataSource.startFlexibleUpdate();
 
   @override
   Future<void> completeFlexibleUpdate() =>

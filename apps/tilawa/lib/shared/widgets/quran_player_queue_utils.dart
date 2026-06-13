@@ -47,15 +47,14 @@ abstract final class QuranPlayerQueueUtils {
   static bool playerTreeQueueChanged(
     AudioPlayerState previous,
     AudioPlayerState current,
-  ) =>
-      queueSnapshotChanged(
-        previousQueue: previous.playbackState?.queue,
-        currentQueue: current.playbackState?.queue,
-        previousIndex: previous.playbackState?.currentIndex,
-        currentIndex: current.playbackState?.currentIndex,
-        previousQueueGeneration: previous.playbackState?.queueGeneration,
-        currentQueueGeneration: current.playbackState?.queueGeneration,
-      );
+  ) => queueSnapshotChanged(
+    previousQueue: previous.playbackState?.queue,
+    currentQueue: current.playbackState?.queue,
+    previousIndex: previous.playbackState?.currentIndex,
+    currentIndex: current.playbackState?.currentIndex,
+    previousQueueGeneration: previous.playbackState?.queueGeneration,
+    currentQueueGeneration: current.playbackState?.queueGeneration,
+  );
 
   /// Builds a stable id → index map for [SliverReorderableList] (O(n) once).
   static Map<String, int> queueIndexById(List<AudioEntity> queue) {

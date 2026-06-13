@@ -1,10 +1,11 @@
 /// OEM heuristics for Android Credential Manager Google sign-in.
 ///
-/// Transsion ROMs (Infinix, Tecno, Itel) launch [HiddenActivity] for the
-/// account picker but the bottom sheet stays invisible when Flutter's surface
-/// is stacked above it — the platform future may never complete. google_sign_in
-/// 7.x routes through Credential Manager / Play Services [HiddenActivity], so
-/// silent and automatic sign-in flows must be skipped on these devices.
+/// Transsion ROMs (Infinix, Tecno, Itel) can composite GMS sign-in UI
+/// invisibly behind Flutter's surface — the platform future may never
+/// complete. RenderMode.texture (MainActivity) fixes the compositing, but
+/// these devices still get a conservative policy: no auto sign-in on screen
+/// entry, and interactive flows fail fast when no GMS UI becomes visible
+/// (GoogleAuthProviderImpl UI visibility probe).
 abstract final class AndroidCredentialManagerOemPolicy {
   static const Set<String> _transsionOems = <String>{
     'infinix',
@@ -12,8 +13,8 @@ abstract final class AndroidCredentialManagerOemPolicy {
     'itel',
   };
 
-  /// Whether this OEM needs sign-in workarounds (no silent auth, no auto
-  /// sign-in; interactive sign-in only, triggered by an explicit user tap).
+  /// Whether this OEM needs sign-in workarounds (no auto sign-in on screen
+  /// entry; interactive flows guarded by the UI visibility probe).
   static bool shouldSkipAutomaticSignIn({
     required String manufacturer,
     required String brand,

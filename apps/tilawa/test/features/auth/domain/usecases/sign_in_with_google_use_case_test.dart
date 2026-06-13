@@ -57,7 +57,9 @@ void main() {
       when(
         mockAuthRepository.signInWithGoogle(),
       ).thenAnswer((_) async => AuthResult.success(user: tUser));
-      when(mockUserRepository.saveUserData(any)).thenThrow(Exception('offline'));
+      when(
+        mockUserRepository.saveUserData(any),
+      ).thenThrow(Exception('offline'));
 
       final AuthResult result = await useCase();
 

@@ -16,8 +16,10 @@ class AppReviewFlowGuard {
   bool get isSacredFlowActive =>
       _tabFlows.isNotEmpty || _scopeRefCounts.isNotEmpty;
 
-  Iterable<AppReviewBlockedFlow> get activeFlows =>
-      <AppReviewBlockedFlow>{..._tabFlows, ..._scopeRefCounts.keys};
+  Iterable<AppReviewBlockedFlow> get activeFlows => <AppReviewBlockedFlow>{
+    ..._tabFlows,
+    ..._scopeRefCounts.keys,
+  };
 
   void enter(AppReviewBlockedFlow flow) {
     _scopeRefCounts[flow] = (_scopeRefCounts[flow] ?? 0) + 1;

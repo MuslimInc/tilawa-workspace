@@ -208,53 +208,75 @@ class _TilawaDialogContent extends StatelessWidget {
     // `context` here is under the dialog route. Bind each action to it so a
     // pop dismisses only the dialog. Default close/barrier behaviour falls
     // back to popping the dialog route when no handler is supplied.
-    return Padding(
-      padding: EdgeInsets.all(tokens.spaceExtraLarge),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          TilawaBottomSheetTitleRow(
+    final double inset = tokens.spaceExtraLarge;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: EdgeInsetsDirectional.fromSTEB(inset, inset, inset, 0),
+          child: TilawaBottomSheetTitleRow(
             title: title,
             trailingClose: trailingClose,
             onClose: onClose == null
                 ? () => Navigator.of(context).maybePop()
                 : () => onClose!(context),
           ),
-          if (body != null) ...[
-            // Message bodies (confirm/form) need a clear gap below the title;
-            // list bodies (picker) carry their own row padding, so a tight gap
-            // avoids a loose double-space under the title.
-            SizedBox(
-              height: tightBody ? tokens.spaceExtraSmall : tokens.spaceMedium,
-            ),
-            // Compact, scroll-safe body for option lists / messages.
-            Flexible(
-              child: SingleChildScrollView(child: body!),
-            ),
-          ],
-          if (hasActions) ...[
-            SizedBox(height: tokens.spaceExtraLarge),
-            TilawaButton(
-              text: primaryLabel!,
-              variant: primaryVariant,
-              isFullWidth: true,
-              onPressed: onPrimary == null ? null : () => onPrimary!(context),
-            ),
-            if (secondaryLabel != null) ...[
-              SizedBox(height: tokens.spaceSmall),
-              TilawaButton(
-                text: secondaryLabel!,
-                variant: TilawaButtonVariant.outline,
-                isFullWidth: true,
-                onPressed: onSecondary == null
-                    ? null
-                    : () => onSecondary!(context),
+        ),
+        if (body != null) ...[
+          // Message bodies (confirm/form) need a clear gap below the title;
+          // list bodies (picker) carry their own row padding, so a tight gap
+          // avoids a loose double-space under the title.
+          SizedBox(
+            height: tightBody ? tokens.spaceExtraSmall : tokens.spaceMedium,
+          ),
+          // Picker lists bleed horizontally so row [InkWell] highlights span
+          // the card; confirm/form bodies keep horizontal inset.
+          Flexible(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsetsDirectional.only(
+                  start: tightBody ? 0 : inset,
+                  end: tightBody ? 0 : inset,
+                  bottom: hasActions ? 0 : inset,
+                ),
+                child: body!,
               ),
-            ],
-          ],
+            ),
+          ),
         ],
-      ),
+        if (hasActions)
+          Padding(
+            padding: EdgeInsetsDirectional.fromSTEB(inset, 0, inset, inset),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(height: tokens.spaceExtraLarge),
+                TilawaButton(
+                  text: primaryLabel!,
+                  variant: primaryVariant,
+                  isFullWidth: true,
+                  onPressed: onPrimary == null
+                      ? null
+                      : () => onPrimary!(context),
+                ),
+                if (secondaryLabel != null) ...[
+                  SizedBox(height: tokens.spaceSmall),
+                  TilawaButton(
+                    text: secondaryLabel!,
+                    variant: TilawaButtonVariant.outline,
+                    isFullWidth: true,
+                    onPressed: onSecondary == null
+                        ? null
+                        : () => onSecondary!(context),
+                  ),
+                ],
+              ],
+            ),
+          ),
+      ],
     );
   }
 }

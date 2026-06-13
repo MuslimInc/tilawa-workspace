@@ -1,24 +1,7 @@
-import 'package:tilawa_core/entities/reciter_entity.dart';
-
 import '../bloc/reciters_bloc.dart';
+import 'reciter_list_order.dart';
 
-/// Returns whether two reciter lists show the same ids in the same order.
-bool sameReciterOrder(
-  List<ReciterEntity> previous,
-  List<ReciterEntity> current,
-) {
-  if (previous.length != current.length) {
-    return false;
-  }
-
-  for (int i = 0; i < previous.length; i++) {
-    if (previous[i].id != current[i].id) {
-      return false;
-    }
-  }
-
-  return true;
-}
+export 'reciter_list_order.dart';
 
 /// Decides whether [RecitersScreen] should rebuild for two loaded states.
 ///

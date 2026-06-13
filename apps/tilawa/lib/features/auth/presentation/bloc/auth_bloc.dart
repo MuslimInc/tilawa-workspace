@@ -13,6 +13,7 @@ import '../../domain/usecases/get_current_user_use_case.dart';
 import '../../domain/usecases/sign_in_with_google_use_case.dart';
 import '../../domain/usecases/sign_out.dart';
 import '../../domain/usecases/sync_device_token_use_case.dart';
+import '../../debug/tilawa_gsignin_debug_log.dart';
 
 part 'auth_bloc.freezed.dart';
 part 'auth_event.dart';
@@ -31,7 +32,11 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
     on<SignOutEvent>(_onSignOut);
     on<DeleteAccountEvent>(_onDeleteAccount);
     on<CheckAuthStatusEvent>(_onCheckAuthStatus);
+    on<AbortInteractiveSignInEvent>(_onAbortInteractiveSignIn);
   }
+
+  int _interactiveSignInGeneration = 0;
+
   final SignInWithGoogleUseCase _signInWithGoogle;
   final SignOut _signOut;
   final DeleteAccount _deleteAccount;
@@ -42,10 +47,22 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
     SignInWithGoogleEvent event,
     Emitter<AuthState> emit,
   ) async {
+    final int generation = ++_interactiveSignInGeneration;
     emit(const AuthState.loading());
 
     try {
       final AuthResult result = await _signInWithGoogle();
+
+      if (generation != _interactiveSignInGeneration) {
+        // #region agent log
+        tilawaGSignInDebug(
+          'signIn result ignored (aborted)',
+          hypothesisId: 'H3',
+          data: <String, Object?>{'generation': generation},
+        );
+        // #endregion
+        return;
+      }
 
       result.when(
         success: (user) {
@@ -70,6 +87,9 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
         },
       );
     } catch (error, stackTrace) {
+      if (generation != _interactiveSignInGeneration) {
+        return;
+      }
       logger.e(
         'Google sign-in failed',
         error: error,
@@ -117,8 +137,7 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
           return;
         }
 
-        final String message =
-            failure.message ?? 'Unable to delete account';
+        final String message = failure.message ?? 'Unable to delete account';
         logger.w(
           'Delete account failed: $message',
           error: failure,
@@ -137,6 +156,19 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
         emit(const AuthState.unauthenticated());
       },
     );
+  }
+
+  void _onAbortInteractiveSignIn(
+    AbortInteractiveSignInEvent event,
+    Emitter<AuthState> emit,
+  ) {
+    _interactiveSignInGeneration++;
+    if (state is AuthLoading) {
+      // #region agent log
+      tilawaGSignInDebug('abortInteractiveSignIn emitted', hypothesisId: 'H2');
+      // #endregion
+      emit(const AuthState.unauthenticated());
+    }
   }
 
   Future<void> _onCheckAuthStatus(

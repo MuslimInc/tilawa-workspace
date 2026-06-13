@@ -94,8 +94,7 @@ class QuranPlayerMorphLayout {
   }
 
   /// True when metadata sits under artwork (expanded-style stack).
-  bool get metadataIsVerticallyStacked =>
-      titleRect.top >= artRect.bottom - 4;
+  bool get metadataIsVerticallyStacked => titleRect.top >= artRect.bottom - 4;
 
   /// Computes morph geometry in overlay coordinates.
   ///
@@ -154,8 +153,7 @@ class QuranPlayerMorphLayout {
               textDirection: textDirection,
             ),
             expandedTitle.bounds,
-            ((layoutT - horizontalIdentityEndT) /
-                    (1 - horizontalIdentityEndT))
+            ((layoutT - horizontalIdentityEndT) / (1 - horizontalIdentityEndT))
                 .clamp(0.0, 1.0),
           )!;
     final double titleScale = horizontalIdentity
@@ -163,8 +161,7 @@ class QuranPlayerMorphLayout {
         : lerpDouble(
             1.0,
             expandedTitle.scale,
-            ((layoutT - horizontalIdentityEndT) /
-                    (1 - horizontalIdentityEndT))
+            ((layoutT - horizontalIdentityEndT) / (1 - horizontalIdentityEndT))
                 .clamp(0.0, 1.0),
           )!;
     final TextAlign titleAlign = horizontalIdentity
@@ -203,8 +200,7 @@ class QuranPlayerMorphLayout {
     required TextDirection textDirection,
   }) {
     final EdgeInsets pad = geometry.barContentPadding.resolve(textDirection);
-    final double top =
-        miniBarRect.top + geometry.progressHeight + pad.top;
+    final double top = miniBarRect.top + geometry.progressHeight + pad.top;
     final double size = geometry.barArtworkSize;
     switch (textDirection) {
       case TextDirection.ltr:
@@ -225,12 +221,12 @@ class QuranPlayerMorphLayout {
     required double widthFactor,
     required double centerYFactor,
   }) {
-    final double width = (viewport.width - geometry.spaceLarge * 2) *
+    final double width =
+        (viewport.width - geometry.spaceLarge * 2) *
         widthFactor.clamp(0.45, 0.85);
     final double height = width * 9 / 16;
     final double centerX = viewport.width / 2;
-    final double centerY =
-        viewport.height * centerYFactor + sheetOffsetY;
+    final double centerY = viewport.height * centerYFactor + sheetOffsetY;
     return Rect.fromCenter(
       center: Offset(centerX, centerY),
       width: width,
@@ -259,9 +255,7 @@ class QuranPlayerMorphLayout {
       case TextDirection.rtl:
         final double right = artRect.left - geometry.barArtworkInfoGap;
         final double left =
-            miniBarRect.left +
-            geometry.shellHorizontalInset +
-            transportReserve;
+            miniBarRect.left + geometry.shellHorizontalInset + transportReserve;
         return Rect.fromLTRB(left, top, right, top + height);
     }
   }

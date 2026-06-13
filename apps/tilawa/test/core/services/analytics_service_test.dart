@@ -149,10 +149,13 @@ void main() {
       verify(
         () => mockAnalytics.logEvent(
           name: AnalyticsEvents.screenView,
-          parameters: any(named: 'parameters', that: analyticsParams({
-            AnalyticsParams.screenName: 'Home',
-            AnalyticsParams.screenClass: 'HomeScreen',
-          })),
+          parameters: any(
+            named: 'parameters',
+            that: analyticsParams({
+              AnalyticsParams.screenName: 'Home',
+              AnalyticsParams.screenClass: 'HomeScreen',
+            }),
+          ),
         ),
       ).called(1);
     });
@@ -162,10 +165,13 @@ void main() {
       verify(
         () => mockAnalytics.logEvent(
           name: AnalyticsEvents.audioPlay,
-          parameters: any(named: 'parameters', that: analyticsParams({
-            AnalyticsParams.audioId: '1',
-            AnalyticsParams.audioName: 'Surah',
-          })),
+          parameters: any(
+            named: 'parameters',
+            that: analyticsParams({
+              AnalyticsParams.audioId: '1',
+              AnalyticsParams.audioName: 'Surah',
+            }),
+          ),
         ),
       ).called(1);
     });
@@ -201,10 +207,13 @@ void main() {
       verify(
         () => mockAnalytics.logEvent(
           name: AnalyticsEvents.audioSeek,
-          parameters: any(named: 'parameters', that: analyticsParams({
-            AnalyticsParams.audioId: '1',
-            AnalyticsParams.position: 100,
-          })),
+          parameters: any(
+            named: 'parameters',
+            that: analyticsParams({
+              AnalyticsParams.audioId: '1',
+              AnalyticsParams.position: 100,
+            }),
+          ),
         ),
       ).called(1);
     });
@@ -219,12 +228,15 @@ void main() {
       verify(
         () => mockAnalytics.logEvent(
           name: AnalyticsEvents.purchase,
-          parameters: any(named: 'parameters', that: analyticsParams({
-            AnalyticsParams.transactionId: 't1',
-            AnalyticsParams.value: 9.99,
-            AnalyticsParams.currency: 'USD',
-            AnalyticsParams.itemId: 'i1',
-          })),
+          parameters: any(
+            named: 'parameters',
+            that: analyticsParams({
+              AnalyticsParams.transactionId: 't1',
+              AnalyticsParams.value: 9.99,
+              AnalyticsParams.currency: 'USD',
+              AnalyticsParams.itemId: 'i1',
+            }),
+          ),
         ),
       ).called(1);
     });
@@ -239,12 +251,15 @@ void main() {
       verify(
         () => mockAnalytics.logEvent(
           name: AnalyticsEvents.subscriptionStart,
-          parameters: any(named: 'parameters', that: analyticsParams({
-            AnalyticsParams.subscriptionId: 's1',
-            AnalyticsParams.planId: 'monthly',
-            AnalyticsParams.value: 4.99,
-            AnalyticsParams.currency: 'USD',
-          })),
+          parameters: any(
+            named: 'parameters',
+            that: analyticsParams({
+              AnalyticsParams.subscriptionId: 's1',
+              AnalyticsParams.planId: 'monthly',
+              AnalyticsParams.value: 4.99,
+              AnalyticsParams.currency: 'USD',
+            }),
+          ),
         ),
       ).called(1);
     });
@@ -254,10 +269,13 @@ void main() {
       verify(
         () => mockAnalytics.logEvent(
           name: AnalyticsEvents.subscriptionCancel,
-          parameters: any(named: 'parameters', that: analyticsParams({
-            AnalyticsParams.subscriptionId: 's1',
-            AnalyticsParams.planId: 'monthly',
-          })),
+          parameters: any(
+            named: 'parameters',
+            that: analyticsParams({
+              AnalyticsParams.subscriptionId: 's1',
+              AnalyticsParams.planId: 'monthly',
+            }),
+          ),
         ),
       ).called(1);
     });
@@ -267,10 +285,13 @@ void main() {
       verify(
         () => mockAnalytics.logEvent(
           name: AnalyticsEvents.search,
-          parameters: any(named: 'parameters', that: analyticsParams({
-            AnalyticsParams.searchTerm: 'test',
-            AnalyticsParams.resultCount: 5,
-          })),
+          parameters: any(
+            named: 'parameters',
+            that: analyticsParams({
+              AnalyticsParams.searchTerm: 'test',
+              AnalyticsParams.resultCount: 5,
+            }),
+          ),
         ),
       ).called(1);
     });
@@ -280,10 +301,13 @@ void main() {
       verify(
         () => mockAnalytics.logEvent(
           name: AnalyticsEvents.share,
-          parameters: any(named: 'parameters', that: analyticsParams({
-            AnalyticsParams.contentType: 'audio',
-            AnalyticsParams.itemId: '1',
-          })),
+          parameters: any(
+            named: 'parameters',
+            that: analyticsParams({
+              AnalyticsParams.contentType: 'audio',
+              AnalyticsParams.itemId: '1',
+            }),
+          ),
         ),
       ).called(1);
     });
@@ -293,10 +317,13 @@ void main() {
       verify(
         () => mockAnalytics.logEvent(
           name: AnalyticsEvents.favorite,
-          parameters: any(named: 'parameters', that: analyticsParams({
-            AnalyticsParams.itemId: '1',
-            AnalyticsParams.itemType: 'audio',
-          })),
+          parameters: any(
+            named: 'parameters',
+            that: analyticsParams({
+              AnalyticsParams.itemId: '1',
+              AnalyticsParams.itemType: 'audio',
+            }),
+          ),
         ),
       ).called(1);
     });
@@ -306,11 +333,14 @@ void main() {
       verify(
         () => mockAnalytics.logEvent(
           name: AnalyticsEvents.rating,
-          parameters: any(named: 'parameters', that: analyticsParams({
-            AnalyticsParams.ratingValue: 5,
-            AnalyticsParams.itemId: '1',
-            AnalyticsParams.itemType: 'audio',
-          })),
+          parameters: any(
+            named: 'parameters',
+            that: analyticsParams({
+              AnalyticsParams.ratingValue: 5,
+              AnalyticsParams.itemId: '1',
+              AnalyticsParams.itemType: 'audio',
+            }),
+          ),
         ),
       ).called(1);
     });

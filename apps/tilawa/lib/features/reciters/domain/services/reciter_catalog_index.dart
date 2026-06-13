@@ -22,9 +22,11 @@ final class ReciterCatalogIndex {
     for (var i = 0; i < reciters.length; i++) {
       final ReciterEntity reciter = reciters[i];
       normalizedNames[i] = ReciterSearchQueryNormalizer.normalize(reciter.name);
-      byLetter.putIfAbsent(reciter.letter, () => <ReciterEntity>[]).add(
-        reciter,
-      );
+      byLetter
+          .putIfAbsent(reciter.letter, () => <ReciterEntity>[])
+          .add(
+            reciter,
+          );
     }
 
     return ReciterCatalogIndex._(

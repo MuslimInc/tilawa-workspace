@@ -8,8 +8,9 @@ const double kAthkarCountRingScale = 1;
 
 /// Layout footprint for the counter in the Athkar footer row.
 double athkarCountRingLayoutSize(BuildContext context) {
-  final double outerSize =
-      Theme.of(context).componentTokens.countProgressRing.outerSize;
+  final double outerSize = Theme.of(
+    context,
+  ).componentTokens.countProgressRing.outerSize;
   return outerSize * kAthkarCountRingScale;
 }
 
@@ -29,8 +30,9 @@ class ItemCountWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double outerSize =
-        Theme.of(context).componentTokens.countProgressRing.outerSize;
+    final double outerSize = Theme.of(
+      context,
+    ).componentTokens.countProgressRing.outerSize;
     final double layoutSize = outerSize * kAthkarCountRingScale;
 
     return SizedBox(

@@ -63,8 +63,8 @@ void main() {
       hiveReadiness = FakeHiveReadiness();
       dataSource = TasbeehLocalDataSourceImpl(Hive, hiveReadiness);
 
-      final Future<List<TasbeehDhikrModel>> loadFuture =
-          dataSource.getAllDhikr();
+      final Future<List<TasbeehDhikrModel>> loadFuture = dataSource
+          .getAllDhikr();
       await Future<void>.delayed(Duration.zero);
 
       expect(hiveReadiness.ensureReadyCallCount, 1);
@@ -157,34 +157,37 @@ void main() {
   });
 
   group('cold start integration', () {
-    test('repository returns saved dhikr after hive readiness is released', () async {
-      final writer = TasbeehLocalDataSourceImpl(
-        Hive,
-        ImmediateHiveReadiness(),
-      );
-      await writer.saveDhikr(_model(id: 'abc', text: 'abc', count: 1));
+    test(
+      'repository returns saved dhikr after hive readiness is released',
+      () async {
+        final writer = TasbeehLocalDataSourceImpl(
+          Hive,
+          ImmediateHiveReadiness(),
+        );
+        await writer.saveDhikr(_model(id: 'abc', text: 'abc', count: 1));
 
-      final delayedReadiness = FakeHiveReadiness();
-      final repository = TasbeehRepositoryImpl(
-        TasbeehLocalDataSourceImpl(Hive, delayedReadiness),
-      );
+        final delayedReadiness = FakeHiveReadiness();
+        final repository = TasbeehRepositoryImpl(
+          TasbeehLocalDataSourceImpl(Hive, delayedReadiness),
+        );
 
-      final Future<dynamic> loadFuture = repository.getSavedDhikr();
-      await Future<void>.delayed(Duration.zero);
-      expect(delayedReadiness.ensureReadyCallCount, 1);
+        final Future<dynamic> loadFuture = repository.getSavedDhikr();
+        await Future<void>.delayed(Duration.zero);
+        expect(delayedReadiness.ensureReadyCallCount, 1);
 
-      delayedReadiness.release();
-      final result = await loadFuture;
+        delayedReadiness.release();
+        final result = await loadFuture;
 
-      expect(result.isRight, isTrue);
-      result.fold(
-        (_) => fail('expected saved dhikr'),
-        (items) {
-          expect(items, hasLength(1));
-          expect(items.single.text, 'abc');
-          expect(items.single.count, 1);
-        },
-      );
-    });
+        expect(result.isRight, isTrue);
+        result.fold(
+          (_) => fail('expected saved dhikr'),
+          (items) {
+            expect(items, hasLength(1));
+            expect(items.single.text, 'abc');
+            expect(items.single.count, 1);
+          },
+        );
+      },
+    );
   });
 }

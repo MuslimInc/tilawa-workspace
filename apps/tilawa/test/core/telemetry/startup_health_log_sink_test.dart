@@ -97,11 +97,12 @@ void main() {
       test('written document contains server_ingested_at field', () async {
         await sink.write({'level': 'info', 'event': 'startup_phase'});
 
-        final doc = (await fakeFirestore
-                .collection(FirestoreStartupHealthLogSink.collectionName)
-                .get())
-            .docs
-            .single;
+        final doc =
+            (await fakeFirestore
+                    .collection(FirestoreStartupHealthLogSink.collectionName)
+                    .get())
+                .docs
+                .single;
         expect(doc.data(), contains('server_ingested_at'));
       });
 
@@ -113,12 +114,13 @@ void main() {
           'phase': 'boot_gate',
         });
 
-        final data = (await fakeFirestore
-                .collection(FirestoreStartupHealthLogSink.collectionName)
-                .get())
-            .docs
-            .single
-            .data();
+        final data =
+            (await fakeFirestore
+                    .collection(FirestoreStartupHealthLogSink.collectionName)
+                    .get())
+                .docs
+                .single
+                .data();
         expect(data['level'], 'error');
         expect(data['event'], 'startup_failed');
         expect(data['reason'], 'di_missing');
@@ -190,18 +192,20 @@ void main() {
       },
     );
 
-    test('phase() writes structured log entry to the configured sink',
-        () async {
-      await StartupTelemetry.phase('firebase_ready');
+    test(
+      'phase() writes structured log entry to the configured sink',
+      () async {
+        await StartupTelemetry.phase('firebase_ready');
 
-      expect(sink.entries, hasLength(1));
-      final entry = sink.entries.single;
-      expect(entry['event'], AnalyticsEvents.startupPhase);
-      expect(entry['phase'], 'firebase_ready');
-      expect(entry['level'], 'info');
-      expect(entry['session_id'], isNotNull);
-      expect(entry['elapsed_ms'], isA<int>());
-    });
+        expect(sink.entries, hasLength(1));
+        final entry = sink.entries.single;
+        expect(entry['event'], AnalyticsEvents.startupPhase);
+        expect(entry['phase'], 'firebase_ready');
+        expect(entry['level'], 'info');
+        expect(entry['session_id'], isNotNull);
+        expect(entry['elapsed_ms'], isA<int>());
+      },
+    );
 
     test('failure() writes error log entry to the configured sink', () async {
       await StartupTelemetry.failure(

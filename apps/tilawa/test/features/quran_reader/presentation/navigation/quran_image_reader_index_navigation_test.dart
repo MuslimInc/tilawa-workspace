@@ -113,14 +113,16 @@ void main() {
       expect((bloc.state as NavigationLoaded).pageState.currentPage, 1);
     });
 
-    test('NavigationBloc ignores PageChanged when page is already current',
-        () async {
-      expect((bloc.state as NavigationLoaded).pageState.currentPage, 137);
+    test(
+      'NavigationBloc ignores PageChanged when page is already current',
+      () async {
+        expect((bloc.state as NavigationLoaded).pageState.currentPage, 137);
 
-      bloc.add(const PageChanged(137));
-      await pumpNavigationBloc(bloc);
+        bloc.add(const PageChanged(137));
+        await pumpNavigationBloc(bloc);
 
-      expect((bloc.state as NavigationLoaded).pageState.currentPage, 137);
-    });
+        expect((bloc.state as NavigationLoaded).pageState.currentPage, 137);
+      },
+    );
   });
 }

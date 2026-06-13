@@ -33,8 +33,7 @@ class QuranPlayerExpandedRouteTransition extends StatelessWidget {
       animation: Listenable.merge(<Listenable>[curved, animation]),
       builder: (context, _) {
         final double t = curved.value.clamp(0.0, 1.0);
-        final bool reversing =
-            animation.status == AnimationStatus.reverse;
+        final bool reversing = animation.status == AnimationStatus.reverse;
         final double scrimAlpha = (0.45 * t).clamp(0.0, 0.45);
 
         // YouTube Music: underlying feed stays visible; only a scrim dims it.

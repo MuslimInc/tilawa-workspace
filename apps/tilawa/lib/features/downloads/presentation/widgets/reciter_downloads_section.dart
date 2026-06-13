@@ -203,8 +203,7 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
               horizontalPadding: tokens.spaceLarge,
               onDelete: _dispatchDelete,
             ),
-            if (!isLastNarrative)
-              TilawaDivider(height: 1, color: dividerColor),
+            if (!isLastNarrative) TilawaDivider(height: 1, color: dividerColor),
           ],
         );
       }).toList(),
@@ -250,7 +249,6 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
       ),
     );
   }
-
 }
 
 class _ReciterAvatar extends StatelessWidget {
@@ -300,8 +298,9 @@ class _ReciterMetaLine extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final int count = downloads.length;
-    final String surahWord =
-        count == 1 ? 'surah' : context.l10n.surahs.toLowerCase();
+    final String surahWord = count == 1
+        ? 'surah'
+        : context.l10n.surahs.toLowerCase();
     final int totalBytes = downloads.fold<int>(
       0,
       (sum, d) => sum + (d.fileSize > 0 ? d.fileSize : d.downloadedSize),

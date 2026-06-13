@@ -181,7 +181,7 @@ void main() {
             observeDownloadProgress: mockObserveDownloadProgress,
             getDownloadItem: mockGetDownloadItem,
             networkInfo: mockNetworkInfo,
-      checkLowDeviceStorage: mockCheckLowDeviceStorage,
+            checkLowDeviceStorage: mockCheckLowDeviceStorage,
             initialIsDownloading: true,
             initialProgress: 0.1,
             pauseDownload: mockPauseDownload,
@@ -205,7 +205,7 @@ void main() {
             observeDownloadProgress: mockObserveDownloadProgress,
             getDownloadItem: mockGetDownloadItem,
             networkInfo: mockNetworkInfo,
-      checkLowDeviceStorage: mockCheckLowDeviceStorage,
+            checkLowDeviceStorage: mockCheckLowDeviceStorage,
             initialIsDownloaded: true,
             pauseDownload: mockPauseDownload,
             resumeDownload: mockResumeDownload,
@@ -430,7 +430,7 @@ void main() {
         observeDownloadProgress: mockObserveDownloadProgress,
         getDownloadItem: mockGetDownloadItem,
         networkInfo: mockNetworkInfo,
-      checkLowDeviceStorage: mockCheckLowDeviceStorage,
+        checkLowDeviceStorage: mockCheckLowDeviceStorage,
         pauseDownload: mockPauseDownload,
         resumeDownload: mockResumeDownload,
       );
@@ -673,7 +673,7 @@ void main() {
         observeDownloadProgress: mockObserveDownloadProgress,
         getDownloadItem: mockGetDownloadItem,
         networkInfo: mockNetworkInfo,
-      checkLowDeviceStorage: mockCheckLowDeviceStorage,
+        checkLowDeviceStorage: mockCheckLowDeviceStorage,
         pauseDownload: mockPauseDownload,
         resumeDownload: mockResumeDownload,
       );
@@ -733,7 +733,7 @@ void main() {
           observeDownloadProgress: mockObserveDownloadProgress,
           getDownloadItem: mockGetDownloadItem,
           networkInfo: mockNetworkInfo,
-      checkLowDeviceStorage: mockCheckLowDeviceStorage,
+          checkLowDeviceStorage: mockCheckLowDeviceStorage,
           pauseDownload: mockPauseDownload,
           resumeDownload: mockResumeDownload,
         );
@@ -823,7 +823,7 @@ void main() {
         observeDownloadProgress: mockObserveDownloadProgress,
         getDownloadItem: mockGetDownloadItem,
         networkInfo: mockNetworkInfo,
-      checkLowDeviceStorage: mockCheckLowDeviceStorage,
+        checkLowDeviceStorage: mockCheckLowDeviceStorage,
         pauseDownload: mockPauseDownload,
         resumeDownload: mockResumeDownload,
       );

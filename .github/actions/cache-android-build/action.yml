@@ -31,7 +31,7 @@ runs:
         path: |
           ~/.pub-cache/global_packages/melos
           ~/.pub-cache/bin/melos
-        key: melos-global-${{ runner.os }}-7.8
+        key: melos-global-${{ runner.os }}-7.8.2
         restore-keys: |
           melos-global-${{ runner.os }}-
 

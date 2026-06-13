@@ -6,7 +6,8 @@ import '../../domain/repositories/app_review_engagement_repository.dart';
 import '../datasources/app_review_engagement_local_datasource.dart';
 
 @LazySingleton(as: AppReviewEngagementRepository)
-class AppReviewEngagementRepositoryImpl implements AppReviewEngagementRepository {
+class AppReviewEngagementRepositoryImpl
+    implements AppReviewEngagementRepository {
   AppReviewEngagementRepositoryImpl(this._local);
 
   final AppReviewEngagementLocalDataSource _local;
@@ -15,8 +16,7 @@ class AppReviewEngagementRepositoryImpl implements AppReviewEngagementRepository
   Future<AppReviewEngagement> load() => _local.read();
 
   @override
-  Future<void> save(AppReviewEngagement engagement) =>
-      _local.write(engagement);
+  Future<void> save(AppReviewEngagement engagement) => _local.write(engagement);
 
   @override
   Future<AppReviewEngagement> recordSession({required String dayKey}) async {
@@ -71,7 +71,9 @@ class AppReviewEngagementRepositoryImpl implements AppReviewEngagementRepository
   }
 
   @override
-  Future<AppReviewEngagement> recordPromptShown({required int shownAtMs}) async {
+  Future<AppReviewEngagement> recordPromptShown({
+    required int shownAtMs,
+  }) async {
     final AppReviewEngagement current = await load();
     final AppReviewEngagement updated = current.copyWith(
       promptCount: current.promptCount + 1,

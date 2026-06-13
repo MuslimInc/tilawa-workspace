@@ -284,7 +284,7 @@ void main() {
       expect(find.byType(BottomNavigationBar), findsOneWidget);
     });
 
-    testInBothDirections('medium uses side rail (collapsed)', (
+    testInBothDirections('medium window uses bottom nav', (
       tester,
       direction,
     ) async {
@@ -293,12 +293,11 @@ void main() {
         size: const Size(700, 900),
         direction: direction,
       );
-      expect(find.byType(NavigationRail), findsOneWidget);
-      final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
-      expect(rail.extended, isFalse);
+      expect(find.byType(NavigationRail), findsNothing);
+      expect(find.byType(BottomNavigationBar), findsOneWidget);
     });
 
-    testInBothDirections('expanded uses collapsed side rail', (
+    testInBothDirections('expanded window uses bottom nav', (
       tester,
       direction,
     ) async {
@@ -307,12 +306,11 @@ void main() {
         size: const Size(1000, 900),
         direction: direction,
       );
-      expect(find.byType(NavigationRail), findsOneWidget);
-      final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
-      expect(rail.extended, isFalse);
+      expect(find.byType(NavigationRail), findsNothing);
+      expect(find.byType(BottomNavigationBar), findsOneWidget);
     });
 
-    testInBothDirections('large uses extended side rail', (
+    testInBothDirections('large window uses bottom nav', (
       tester,
       direction,
     ) async {
@@ -321,13 +319,12 @@ void main() {
         size: const Size(1200, 900),
         direction: direction,
       );
-      expect(find.byType(NavigationRail), findsOneWidget);
-      final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
-      expect(rail.extended, isTrue);
+      expect(find.byType(NavigationRail), findsNothing);
+      expect(find.byType(BottomNavigationBar), findsOneWidget);
     });
 
     testWidgets(
-      'expanded with selectedIndex -1 renders rail with no active item',
+      'expanded with selectedIndex -1 renders bottom nav with no active item',
       (tester) async {
         await _pumpShell(
           tester,
@@ -335,9 +332,11 @@ void main() {
           direction: TextDirection.ltr,
           selectedIndex: -1,
         );
-        expect(find.byType(NavigationRail), findsOneWidget);
-        final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
-        expect(rail.selectedIndex, isNull);
+        expect(find.byType(BottomNavigationBar), findsOneWidget);
+        final BottomNavigationBar bar = tester.widget(
+          find.byType(BottomNavigationBar),
+        );
+        expect(bar.currentIndex, 0);
       },
     );
   });
@@ -586,42 +585,6 @@ void main() {
       final size = tester.getSize(find.byKey(playerKey));
       expect(size.height, greaterThan(0));
       expect(size.width, greaterThan(0));
-    });
-  });
-
-  group('TilawaAdaptiveShell — RTL directional placement', () {
-    testWidgets('side rail is on the right in RTL', (tester) async {
-      await _pumpShell(
-        tester,
-        size: const Size(1000, 900),
-        direction: TextDirection.rtl,
-      );
-      // Find the top-level Row of the shell body; its first child in an RTL
-      // render is painted on the right side of the screen.
-      final rowFinder = find.byType(Row).first;
-      final rowBox = tester.renderObject<RenderBox>(rowFinder);
-      final rowWidth = rowBox.size.width;
-      // In RTL the Row's start is on the right; the rail (first child) occupies
-      // the right side. Verify that the content (Expanded) paints to the left
-      // of the rail's center-x, i.e. rail.left > content.left.
-      final railFinder = find.byType(NavigationRail);
-      if (tester.any(railFinder)) {
-        final railRect = tester.getRect(railFinder);
-        expect(railRect.right, closeTo(rowWidth, 1.0));
-      }
-    });
-
-    testWidgets('side rail is on the left in LTR', (tester) async {
-      await _pumpShell(
-        tester,
-        size: const Size(1000, 900),
-        direction: TextDirection.ltr,
-      );
-      final railFinder = find.byType(NavigationRail);
-      if (tester.any(railFinder)) {
-        final railRect = tester.getRect(railFinder);
-        expect(railRect.left, closeTo(0.0, 1.0));
-      }
     });
   });
 

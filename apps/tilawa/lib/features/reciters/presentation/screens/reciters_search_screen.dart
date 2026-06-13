@@ -115,7 +115,8 @@ class _RecitersSearchScreenState extends State<RecitersSearchScreen> {
             return audioState.shouldShowBottomPlayer &&
                 audioState.currentAudio != null;
           });
-          final double listBottomInset = keyboardInset +
+          final double listBottomInset =
+              keyboardInset +
               (showBottomPlayer
                   ? tokens.spaceSmall
                   : context.floatingBottomPadding);
@@ -135,8 +136,7 @@ class _RecitersSearchScreenState extends State<RecitersSearchScreen> {
                 semanticLabel: context.l10n.noRecitersForQuery(query),
               ),
             RecitersSearchLoaded(:final results) => ListView.separated(
-              keyboardDismissBehavior:
-                  ScrollViewKeyboardDismissBehavior.onDrag,
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               padding: EdgeInsetsDirectional.fromSTEB(
                 tokens.spaceMedium,
                 tokens.spaceMedium,
@@ -144,8 +144,7 @@ class _RecitersSearchScreenState extends State<RecitersSearchScreen> {
                 tokens.spaceMedium + listBottomInset,
               ),
               itemCount: results.length,
-              separatorBuilder: (_, _) =>
-                  SizedBox(height: tokens.spaceSmall),
+              separatorBuilder: (_, _) => SizedBox(height: tokens.spaceSmall),
               itemBuilder: (context, index) {
                 return ReciterCard(reciter: results[index]);
               },

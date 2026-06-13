@@ -286,8 +286,9 @@ class _InFlightProgress extends StatelessWidget {
   }
 
   String _pendingLabel(BuildContext context) {
-    final int queuePosition =
-        getIt<IDownloadQueueService>().getQueuePosition(download.id);
+    final int queuePosition = getIt<IDownloadQueueService>().getQueuePosition(
+      download.id,
+    );
     if (queuePosition > 0) {
       return '${context.l10n.pending} (#$queuePosition)';
     }

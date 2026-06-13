@@ -103,7 +103,9 @@ class PrayerTimesRepositoryImpl implements PrayerTimesRepository {
   }
 
   @override
-  Future<bool> requestLocationPermission({bool allowOpenSettings = false}) async {
+  Future<bool> requestLocationPermission({
+    bool allowOpenSettings = false,
+  }) async {
     return _locationDataSource.requestPermission(
       allowOpenSettings: allowOpenSettings,
     );

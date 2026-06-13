@@ -10,6 +10,7 @@ Widget _wrap({
   required Widget child,
   EdgeInsets viewPadding = EdgeInsets.zero,
   String initialLocation = '/downloads',
+  Size viewportSize = const Size(390, 844),
 }) {
   final GoRouter router = GoRouter(
     initialLocation: initialLocation,
@@ -26,7 +27,10 @@ Widget _wrap({
   );
 
   return MediaQuery(
-    data: MediaQueryData(viewPadding: viewPadding),
+    data: MediaQueryData(
+      viewPadding: viewPadding,
+      size: viewportSize,
+    ),
     child: ChangeNotifierProvider(
       create: (_) => QuranPlayerChromeNotifier(),
       child: MaterialApp.router(
@@ -106,5 +110,61 @@ void main() {
         tokens.playerCollapsedHeight + 56 + tokens.spaceExtraLarge,
       );
     });
+
+    testWidgets(
+      'shell with bottom nav uses player height only for footprint',
+      (tester) async {
+        late double footprint;
+
+        await tester.pumpWidget(
+          _wrap(
+            initialLocation: '/',
+            viewportSize: const Size(900, 1200),
+            viewPadding: const EdgeInsets.only(bottom: 34),
+            child: Builder(
+              builder: (context) {
+                context.read<QuranPlayerChromeNotifier>().updateShellChrome(
+                  const QuranPlayerShellChrome(
+                    bottomNavBarHeight: 72,
+                    isKeyboardOpen: false,
+                    isAudioBindingDeferred: false,
+                    hostAbsorbsBottomSafeArea: true,
+                  ),
+                );
+                footprint = QuranPlayerWidget.collapsedFootprint(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+        await tester.pump();
+
+        final tokens = TilawaDesignTokens.light();
+        expect(footprint, tokens.playerCollapsedHeight);
+      },
+    );
+
+    testWidgets(
+      'wide shell footer spacing is flush when safe area is zero',
+      (tester) async {
+        late double spacing;
+        await tester.pumpWidget(
+          _wrap(
+            viewportSize: const Size(900, 1200),
+            child: Builder(
+              builder: (context) {
+                spacing = QuranPlayerLayoutInsets.phoneFooterBottomSpacing(
+                  context,
+                  hostAbsorbsBottomSafeArea: false,
+                );
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        expect(spacing, 0);
+      },
+    );
   });
 }

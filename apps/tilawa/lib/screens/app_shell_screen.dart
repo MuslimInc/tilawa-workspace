@@ -65,7 +65,9 @@ class _AppShellScreenState extends State<AppShellScreen> {
   DateTime? _lastRecitersNavTap;
   QuranPlayerChromeNotifier? _chromeNotifier;
 
-  static const Duration _recitersNavDoubleTapWindow = Duration(milliseconds: 400);
+  static const Duration _recitersNavDoubleTapWindow = Duration(
+    milliseconds: 400,
+  );
 
   @override
   void initState() {
@@ -259,9 +261,8 @@ class _AppShellScreenState extends State<AppShellScreen> {
           child: BlocBuilder<MainScreenCubit, MainScreenState>(
             builder: (context, state) {
               final bool isKeyboardOpen = context.isKeyboardVisible;
-              final double bottomNavBarHeight = context.isNarrow
-                  ? QuranPlayerLayoutInsets.phoneShellBottomReserve(context)
-                  : context.floatingBottomPadding;
+              final double bottomNavBarHeight =
+                  QuranPlayerLayoutInsets.phoneShellBottomReserve(context);
 
               final List<_NavDestination> navDestinations = _buildDestinations(
                 context,
@@ -354,15 +355,16 @@ class _AppShellChrome extends StatelessWidget {
   Widget build(BuildContext context) {
     final String location = QuranPlayerRoutePolicy.currentMatchedLocation();
     bottomNavVisibility.syncForLocation(location);
-    final bool navVisible =
-        AppShellRoutePolicy.isPhoneBottomNavigationVisible(location);
+    final bool navVisible = AppShellRoutePolicy.isPhoneBottomNavigationVisible(
+      location,
+    );
 
     context.read<QuranPlayerChromeNotifier>().updateShellChrome(
       QuranPlayerShellChrome(
         bottomNavBarHeight: navVisible ? bottomNavBarHeight : 0,
         isKeyboardOpen: isKeyboardOpen,
         isAudioBindingDeferred: state.isAudioBindingDeferred,
-        hostAbsorbsBottomSafeArea: context.isNarrow && navVisible,
+        hostAbsorbsBottomSafeArea: navVisible,
       ),
     );
     final bool showPlayer =
@@ -382,17 +384,12 @@ class _AppShellChrome extends StatelessWidget {
     final double playerHeight = playerShouldShow && !isKeyboardOpen
         ? context.tokens.playerCollapsedHeight
         : 0;
-    final double overlayBleedBuffer =
-        (playerShouldShow && !isKeyboardOpen && !context.isNarrow)
-        ? context.tokens.spaceSmall
-        : 0;
 
     // Main tab shell (`/`) defers paint until [MainScreenCubit] activates.
     // Pushed shell routes (e.g. prayer-alerts permissions) must paint
     // immediately — otherwise users see a blank/grey screen behind chrome.
     final Widget shellChild =
-        QuranPlayerRoutePolicy.isMainShell(location) &&
-            !state.isShellActivated
+        QuranPlayerRoutePolicy.isMainShell(location) && !state.isShellActivated
         ? const SizedBox.shrink()
         : child;
 
@@ -409,10 +406,9 @@ class _AppShellChrome extends StatelessWidget {
       },
       child: Builder(
         builder: (context) {
-          final bool showPhoneMiniPlayer =
+          final bool showMiniPlayer =
               showPlayer && playerShouldShow && !isKeyboardOpen;
 
-          final bool narrow = context.isNarrow;
           final Widget player = QuranPlayerWidget(
             key: const ValueKey<String>('app_shell_quran_player'),
             isKeyboardOpen: isKeyboardOpen,
@@ -424,10 +420,9 @@ class _AppShellChrome extends StatelessWidget {
                   context,
                   hostAbsorbsBottomSafeArea: navVisible,
                 );
-          final Widget? shellFooterPlayer = showPhoneMiniPlayer && narrow
+          final Widget? shellFooterPlayer = showMiniPlayer
               ? SizedBox(
-                  height:
-                      playerHeight + overlayBleedBuffer + footerBottomSpacing,
+                  height: playerHeight + footerBottomSpacing,
                   child: TourTarget(
                     targetId: RecitersTourTargets.miniPlayer,
                     child: player,
@@ -435,33 +430,16 @@ class _AppShellChrome extends StatelessWidget {
                 )
               : null;
 
-          return Stack(
-            fit: StackFit.expand,
-            children: [
-              TilawaAdaptiveShell(
-                destinations: adaptiveDestinations,
-                selectedIndex: selectedIndex,
-                onDestinationSelected: onDestinationSelected,
-                phoneBottomNavigationBarVisible: bottomNavVisibility,
-                phoneFooterAboveNav: shellFooterPlayer,
-                bottomPlayer: MainBottomOverlay(
-                  isOfflineIndicatorReady: state.isOfflineIndicatorReady,
-                ),
-                child: shellChild,
-              ),
-              if (showPlayer && !narrow)
-                Positioned.fill(
-                  child: TourTarget(
-                    targetId: RecitersTourTargets.miniPlayer,
-                    child: QuranPlayerWidget(
-                      key: const ValueKey<String>('app_shell_quran_player'),
-                      bottomNavBarHeight: bottomNavBarHeight,
-                      isKeyboardOpen: isKeyboardOpen,
-                      hostAbsorbsBottomSafeArea: false,
-                    ),
-                  ),
-                ),
-            ],
+          return TilawaAdaptiveShell(
+            destinations: adaptiveDestinations,
+            selectedIndex: selectedIndex,
+            onDestinationSelected: onDestinationSelected,
+            phoneBottomNavigationBarVisible: bottomNavVisibility,
+            phoneFooterAboveNav: shellFooterPlayer,
+            bottomPlayer: MainBottomOverlay(
+              isOfflineIndicatorReady: state.isOfflineIndicatorReady,
+            ),
+            child: shellChild,
           );
         },
       ),

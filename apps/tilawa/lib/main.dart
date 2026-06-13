@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
@@ -8,6 +7,11 @@ import 'core/telemetry/crash_reporting_context.dart';
 import 'core/telemetry/sentry_android_context.dart';
 import 'core/telemetry/sentry_config.dart';
 import 'features/prayer_times/application/prayer_notification_watchdog_bootstrap.dart';
+
+Future<void> _runTilawaApp() async {
+  await CrashReportingContext.applyToSentry();
+  await bootstrap();
+}
 
 Future<void> main() async {
   // Required before any plugin (PackageInfo, device_info, MethodChannel) runs.
@@ -20,21 +24,17 @@ Future<void> main() async {
   // Hot restart clears Sentry's Android applicationContext before main()
   // re-runs; restore it before native JNI init.
   await SentryAndroidContext.ensurePluginContext();
+  final bool skipNativeSentryInit =
+      await SentryAndroidContext.isNativeSdkInitialized();
 
   await SentryFlutter.init(
     (SentryFlutterOptions options) {
-      // Profile builds stay off; debug needs the DSN for Settings → Verify Sentry.
-      options.dsn = kProfileMode ? '' : SentryConfig.dsn;
-      options.environment = kReleaseMode ? 'production' : 'development';
-      options.debug = kDebugMode;
-      options.enableLogs = kReleaseMode;
-      options.beforeSend = CrashReportingContext.filterEmulatorsInRelease;
-      options.beforeSendLog = CrashReportingContext.filterEmulatorLogsInRelease;
+      SentryConfig.applyFlutterOptions(
+        options,
+        autoInitializeNativeSdk: !skipNativeSentryInit,
+      );
     },
-    appRunner: () async {
-      await CrashReportingContext.applyToSentry();
-      await bootstrap();
-    },
+    appRunner: _runTilawaApp,
   );
 }
 

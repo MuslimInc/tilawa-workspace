@@ -1,4 +1,5 @@
 part of 'quran_player_widget.dart';
+
 /// Snap and drag helpers for the queue [DraggableScrollableSheet].
 abstract final class _QueueSheetSnap {
   static const Duration animationDuration = Duration(milliseconds: 320);
@@ -332,8 +333,7 @@ class _PlayerQueueSheet extends StatelessWidget {
     final tokens = theme.tokens;
     final List<AudioEntity> queue =
         state.playbackState?.queue ?? <AudioEntity>[];
-    final int queueGeneration =
-        state.playbackState?.queueGeneration ?? 0;
+    final int queueGeneration = state.playbackState?.queueGeneration ?? 0;
     final Map<String, int> queueIndexById = queueIndexCache.indexByIdFor(
       queue: queue,
       queueGeneration: queueGeneration,

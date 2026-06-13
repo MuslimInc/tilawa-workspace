@@ -10,7 +10,6 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 TabController? prayerTimesTabHarnessController;
 
 void main() {
-
   group('segmentIndexForTabPage', () {
     test('keeps today selected below the halfway point', () {
       expect(segmentIndexForTabPage(0, 2), 0);

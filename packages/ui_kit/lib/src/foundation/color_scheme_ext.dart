@@ -22,14 +22,12 @@ extension ColorSchemeExtension on BuildContext {
 /// [ColorScheme.brightness] here so every consumer updates at once.
 extension TilawaStatusColors on ColorScheme {
   /// Warning accent — deep orange, distinct from [error].
-  Color get warning => brightness == Brightness.dark
-      ? AppColors.warningDark
-      : AppColors.warning;
+  Color get warning =>
+      brightness == Brightness.dark ? AppColors.warningDark : AppColors.warning;
 
   /// Success accent — green confirmation tone.
-  Color get success => brightness == Brightness.dark
-      ? AppColors.successDark
-      : AppColors.success;
+  Color get success =>
+      brightness == Brightness.dark ? AppColors.successDark : AppColors.success;
 }
 
 /// Accent tones guaranteed readable as **small text** (WCAG AA, ≥ 4.5:1).

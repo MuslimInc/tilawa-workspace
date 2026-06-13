@@ -36,8 +36,7 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     try {
       final SplashRouteResult result = await _getSplashNextRoute();
 
-      final bool prepareShell =
-          result.destination == SplashDestination.home;
+      final bool prepareShell = result.destination == SplashDestination.home;
       await _readiness.waitUntilReady(prepareShell: prepareShell);
 
       String? location;

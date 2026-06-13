@@ -49,16 +49,15 @@ abstract class DownloadsModule {
     GetDownloadItemUseCase getDownloadItem,
     NetworkInfo networkInfo,
     CheckLowDeviceStorageUseCase checkLowDeviceStorage,
-  ) =>
-      DownloadButtonBlocFactory(
-        checkSurahDownloaded: checkSurahDownloaded,
-        downloadSurah: downloadSurah,
-        cancelDownload: cancelDownload,
-        pauseDownload: pauseDownload,
-        resumeDownload: resumeDownload,
-        observeDownloadProgress: observeDownloadProgress,
-        getDownloadItem: getDownloadItem,
-        networkInfo: networkInfo,
-        checkLowDeviceStorage: checkLowDeviceStorage,
-      );
+  ) => DownloadButtonBlocFactory(
+    checkSurahDownloaded: checkSurahDownloaded,
+    downloadSurah: downloadSurah,
+    cancelDownload: cancelDownload,
+    pauseDownload: pauseDownload,
+    resumeDownload: resumeDownload,
+    observeDownloadProgress: observeDownloadProgress,
+    getDownloadItem: getDownloadItem,
+    networkInfo: networkInfo,
+    checkLowDeviceStorage: checkLowDeviceStorage,
+  );
 }

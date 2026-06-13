@@ -706,6 +706,18 @@
     "@unableToSignInWithThirdPartyAccount": {
         "description": "Error message shown when third-party sign-in fails"
     },
+    "googleSignInFallbackTitle": "تعذّر فتح تسجيل الدخول عبر Google",
+    "@googleSignInFallbackTitle": {
+        "description": "Title when Google account picker fails to render on device"
+    },
+    "googleSignInFallbackBody": "قد تكون نافذة اختيار حساب Google مخفية على هذا الجهاز. حدّث خدمات Google Play ثم أعد المحاولة. إذا استمرت المشكلة، اطلب من المطوّر تسجيل SHA-1 لهذا الإصدار في Firebase.",
+    "@googleSignInFallbackBody": {
+        "description": "Help text when Google sign-in UI is unavailable"
+    },
+    "googleSignInUpdatePlayServices": "تحديث خدمات Google Play",
+    "@googleSignInUpdatePlayServices": {
+        "description": "Opens Play Store to update Google Play Services"
+    },
     "networkError": "يرجى التحقق من اتصالك بالإنترنت",
     "@networkError": {
         "description": "Network error message"
@@ -1203,6 +1215,10 @@
     "tasbeehTargetLabel": "الهدف",
     "@tasbeehTargetLabel": {
         "description": "Target count input label"
+    },
+    "tasbeehTargetHint": "مثال: 33",
+    "@tasbeehTargetHint": {
+        "description": "Placeholder hint for target count input"
     },
     "tasbeehSetTarget": "تعيين الهدف",
     "@tasbeehSetTarget": {

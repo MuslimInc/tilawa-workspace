@@ -291,7 +291,9 @@ class _IndexSearchBar extends StatelessWidget {
           color: readerTheme.textColor,
         ),
         hintStyle: theme.textTheme.bodyMedium?.copyWith(
-          color: readerTheme.textColor.withValues(alpha: tokens.opacityEmphasis),
+          color: readerTheme.textColor.withValues(
+            alpha: tokens.opacityEmphasis,
+          ),
         ),
         contentPadding: EdgeInsets.symmetric(
           vertical: indexTheme.searchBarVerticalPadding,

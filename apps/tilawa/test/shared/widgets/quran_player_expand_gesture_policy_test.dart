@@ -136,11 +136,11 @@ void main() {
 
         final PlayerExpandSnapTarget snap =
             QuranPlayerExpandPhysics.resolveSnap(
-          progress: progress,
-          primaryVelocity: upwardVelocity,
-          progressThreshold: 0.45,
-          velocityThreshold: 500,
-        );
+              progress: progress,
+              primaryVelocity: upwardVelocity,
+              progressThreshold: 0.45,
+              velocityThreshold: 500,
+            );
 
         expect(snap, PlayerExpandSnapTarget.expand);
       });
@@ -148,11 +148,11 @@ void main() {
       test('zero velocity at mid progress collapses without upward fling', () {
         final PlayerExpandSnapTarget snap =
             QuranPlayerExpandPhysics.resolveSnap(
-          progress: 0.35,
-          primaryVelocity: 0,
-          progressThreshold: 0.45,
-          velocityThreshold: 500,
-        );
+              progress: 0.35,
+              primaryVelocity: 0,
+              progressThreshold: 0.45,
+              velocityThreshold: 500,
+            );
 
         expect(snap, PlayerExpandSnapTarget.collapse);
       });

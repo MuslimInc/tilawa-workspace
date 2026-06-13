@@ -54,60 +54,67 @@ void main() {
         expect(result, isNotNull);
         expect(result!.isDownloaded, isTrue);
 
-        verify(mockDownloadsRepo.isSurahDownloaded(tSurahId, tReciter))
-            .called(1);
+        verify(
+          mockDownloadsRepo.isSurahDownloaded(tSurahId, tReciter),
+        ).called(1);
         verify(mockSurahRepo.getSurah(tSurahId, tReciter)).called(1);
-        final captured = verify(mockSurahRepo.updateSurah(captureAny))
-            .captured
-            .single as SurahEntity;
+        final captured =
+            verify(mockSurahRepo.updateSurah(captureAny)).captured.single
+                as SurahEntity;
         expect(captured.isDownloaded, isTrue);
         expect(captured.audio, tAudio);
       },
     );
 
-    test('returns null and does not update when surah is not in repository', () async {
-      when(
-        mockDownloadsRepo.isSurahDownloaded(any, any),
-      ).thenAnswer((_) async => false);
-      when(
-        mockSurahRepo.getSurah(any, any),
-      ).thenAnswer((_) async => null);
+    test(
+      'returns null and does not update when surah is not in repository',
+      () async {
+        when(
+          mockDownloadsRepo.isSurahDownloaded(any, any),
+        ).thenAnswer((_) async => false);
+        when(
+          mockSurahRepo.getSurah(any, any),
+        ).thenAnswer((_) async => null);
 
-      final result = await useCase(
-        surahId: tSurahId,
-        reciterName: tReciter,
-      );
+        final result = await useCase(
+          surahId: tSurahId,
+          reciterName: tReciter,
+        );
 
-      expect(result, isNull);
-      verifyNever(mockSurahRepo.updateSurah(any));
-    });
+        expect(result, isNull);
+        verifyNever(mockSurahRepo.updateSurah(any));
+      },
+    );
 
-    test('preserves other fields on the surah when toggling isDownloaded', () async {
-      const surahWithProgress = SurahEntity(
-        audio: tAudio,
-        isDownloading: true,
-        downloadProgress: 0.5,
-        downloadId: 'd-1',
-      );
-      when(
-        mockDownloadsRepo.isSurahDownloaded(any, any),
-      ).thenAnswer((_) async => true);
-      when(
-        mockSurahRepo.getSurah(any, any),
-      ).thenAnswer((_) async => surahWithProgress);
-      when(
-        mockSurahRepo.updateSurah(any),
-      ).thenAnswer((_) => Future<void>.value());
+    test(
+      'preserves other fields on the surah when toggling isDownloaded',
+      () async {
+        const surahWithProgress = SurahEntity(
+          audio: tAudio,
+          isDownloading: true,
+          downloadProgress: 0.5,
+          downloadId: 'd-1',
+        );
+        when(
+          mockDownloadsRepo.isSurahDownloaded(any, any),
+        ).thenAnswer((_) async => true);
+        when(
+          mockSurahRepo.getSurah(any, any),
+        ).thenAnswer((_) async => surahWithProgress);
+        when(
+          mockSurahRepo.updateSurah(any),
+        ).thenAnswer((_) => Future<void>.value());
 
-      final result = await useCase(
-        surahId: tSurahId,
-        reciterName: tReciter,
-      );
+        final result = await useCase(
+          surahId: tSurahId,
+          reciterName: tReciter,
+        );
 
-      expect(result!.isDownloaded, isTrue);
-      expect(result.isDownloading, isTrue);
-      expect(result.downloadProgress, 0.5);
-      expect(result.downloadId, 'd-1');
-    });
+        expect(result!.isDownloaded, isTrue);
+        expect(result.isDownloading, isTrue);
+        expect(result.downloadProgress, 0.5);
+        expect(result.downloadId, 'd-1');
+      },
+    );
   });
 }

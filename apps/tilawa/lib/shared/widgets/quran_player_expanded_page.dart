@@ -9,7 +9,8 @@ class QuranPlayerExpandedPage extends StatefulWidget {
   const QuranPlayerExpandedPage({super.key});
 
   @override
-  State<QuranPlayerExpandedPage> createState() => _QuranPlayerExpandedPageState();
+  State<QuranPlayerExpandedPage> createState() =>
+      _QuranPlayerExpandedPageState();
 }
 
 class _QuranPlayerExpandedPageState extends State<QuranPlayerExpandedPage> {

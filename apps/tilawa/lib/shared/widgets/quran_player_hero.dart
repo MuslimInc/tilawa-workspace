@@ -40,7 +40,8 @@ class QuranPlayerHeroArtwork extends StatelessWidget {
         ? CachedNetworkImage(
             imageUrl: artUri!,
             fit: BoxFit.cover,
-            errorWidget: (context, url, error) => _placeholder(tokens, bg, icon),
+            errorWidget: (context, url, error) =>
+                _placeholder(tokens, bg, icon),
           )
         : _placeholder(tokens, bg, icon);
 
@@ -49,38 +50,46 @@ class QuranPlayerHeroArtwork extends StatelessWidget {
       createRectTween: (begin, end) {
         return MaterialRectArcTween(begin: begin, end: end);
       },
-      flightShuttleBuilder: (
-        flightContext,
-        animation,
-        flightDirection,
-        fromHeroContext,
-        toHeroContext,
-      ) {
-        QuranPlayerDebugLog.hero(
-          'flight.artwork',
-          <String, Object?>{
-            'direction': flightDirection.name,
-            't': animation.value.toStringAsFixed(3),
-            'audioId': audioId,
-          },
-        );
-        final BorderRadius fromRadius = _readBorderRadius(fromHeroContext.widget);
-        final BorderRadius toRadius = _readBorderRadius(toHeroContext.widget);
-        final Widget shuttleChild = flightDirection == HeroFlightDirection.push
-            ? toHeroContext.widget
-            : fromHeroContext.widget;
-        return AnimatedBuilder(
-          animation: animation,
-          builder: (context, child) {
-            final double t = Curves.easeInOutCubic.transform(animation.value);
-            return ClipRRect(
-              borderRadius: BorderRadius.lerp(fromRadius, toRadius, t)!,
-              child: child,
+      flightShuttleBuilder:
+          (
+            flightContext,
+            animation,
+            flightDirection,
+            fromHeroContext,
+            toHeroContext,
+          ) {
+            QuranPlayerDebugLog.hero(
+              'flight.artwork',
+              <String, Object?>{
+                'direction': flightDirection.name,
+                't': animation.value.toStringAsFixed(3),
+                'audioId': audioId,
+              },
+            );
+            final BorderRadius fromRadius = _readBorderRadius(
+              fromHeroContext.widget,
+            );
+            final BorderRadius toRadius = _readBorderRadius(
+              toHeroContext.widget,
+            );
+            final Widget shuttleChild =
+                flightDirection == HeroFlightDirection.push
+                ? toHeroContext.widget
+                : fromHeroContext.widget;
+            return AnimatedBuilder(
+              animation: animation,
+              builder: (context, child) {
+                final double t = Curves.easeInOutCubic.transform(
+                  animation.value,
+                );
+                return ClipRRect(
+                  borderRadius: BorderRadius.lerp(fromRadius, toRadius, t)!,
+                  child: child,
+                );
+              },
+              child: shuttleChild,
             );
           },
-          child: shuttleChild,
-        );
-      },
       placeholderBuilder: (_, size, child) {
         return Opacity(
           opacity: 0,
@@ -186,34 +195,38 @@ class QuranPlayerHeroMetadata extends StatelessWidget {
 
     return Hero(
       tag: QuranPlayerHeroTags.metadata(audioId),
-      createRectTween: (begin, end) => MaterialRectArcTween(begin: begin, end: end),
-      flightShuttleBuilder: (
-        flightContext,
-        animation,
-        flightDirection,
-        fromHeroContext,
-        toHeroContext,
-      ) {
-        QuranPlayerDebugLog.hero(
-          'flight.metadata',
-          <String, Object?>{
-            'direction': flightDirection.name,
-            't': animation.value.toStringAsFixed(3),
-            'audioId': audioId,
+      createRectTween: (begin, end) =>
+          MaterialRectArcTween(begin: begin, end: end),
+      flightShuttleBuilder:
+          (
+            flightContext,
+            animation,
+            flightDirection,
+            fromHeroContext,
+            toHeroContext,
+          ) {
+            QuranPlayerDebugLog.hero(
+              'flight.metadata',
+              <String, Object?>{
+                'direction': flightDirection.name,
+                't': animation.value.toStringAsFixed(3),
+                'audioId': audioId,
+              },
+            );
+            final Widget shuttle = flightDirection == HeroFlightDirection.push
+                ? toHeroContext.widget
+                : fromHeroContext.widget;
+            return Material(
+              type: MaterialType.transparency,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: centerAlign
+                    ? Alignment.topCenter
+                    : Alignment.topLeft,
+                child: shuttle,
+              ),
+            );
           },
-        );
-        final Widget shuttle = flightDirection == HeroFlightDirection.push
-            ? toHeroContext.widget
-            : fromHeroContext.widget;
-        return Material(
-          type: MaterialType.transparency,
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: centerAlign ? Alignment.topCenter : Alignment.topLeft,
-            child: shuttle,
-          ),
-        );
-      },
       placeholderBuilder: (_, size, child) {
         return Opacity(
           opacity: 0,

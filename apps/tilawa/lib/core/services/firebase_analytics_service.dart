@@ -243,8 +243,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
 
   Map<String, Object> _withClientTimestamp(Map<String, Object>? parameters) {
     return _cleanParameters(<String, Object?>{
-      AnalyticsParams.clientTimestampMs:
-          DateTime.now().millisecondsSinceEpoch,
+      AnalyticsParams.clientTimestampMs: DateTime.now().millisecondsSinceEpoch,
       ...?parameters,
     });
   }

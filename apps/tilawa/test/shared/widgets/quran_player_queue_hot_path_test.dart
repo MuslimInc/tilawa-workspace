@@ -27,11 +27,10 @@ audio_service.MediaItem _mediaItemAt(int index) => audio_service.MediaItem(
 List<AudioEntity> _orderedLargeQueue() =>
     List<AudioEntity>.generate(_largeQueueSize, _trackAt);
 
-List<AudioEntity> _reversedLargeQueue() =>
-    List<AudioEntity>.generate(
-      _largeQueueSize,
-      (int i) => _trackAt(_largeQueueSize - 1 - i),
-    );
+List<AudioEntity> _reversedLargeQueue() => List<AudioEntity>.generate(
+  _largeQueueSize,
+  (int i) => _trackAt(_largeQueueSize - 1 - i),
+);
 
 List<audio_service.MediaItem> _orderedLargeMediaQueue() =>
     List<audio_service.MediaItem>.generate(_largeQueueSize, _mediaItemAt);
@@ -53,20 +52,23 @@ void main() {
       currentQueue = CountingAudioEntityList(_reversedLargeQueue());
     });
 
-    test('stable generation and index does not read queue (even if ids differ)', () {
-      final bool changed = QuranPlayerQueueUtils.queueSnapshotChanged(
-        previousQueue: previousQueue,
-        currentQueue: currentQueue,
-        previousIndex: 0,
-        currentIndex: 0,
-        previousQueueGeneration: 42,
-        currentQueueGeneration: 42,
-      );
+    test(
+      'stable generation and index does not read queue (even if ids differ)',
+      () {
+        final bool changed = QuranPlayerQueueUtils.queueSnapshotChanged(
+          previousQueue: previousQueue,
+          currentQueue: currentQueue,
+          previousIndex: 0,
+          currentIndex: 0,
+          previousQueueGeneration: 42,
+          currentQueueGeneration: 42,
+        );
 
-      expect(changed, isFalse);
-      expect(previousQueue.totalAccessCount, 0);
-      expect(currentQueue.totalAccessCount, 0);
-    });
+        expect(changed, isFalse);
+        expect(previousQueue.totalAccessCount, 0);
+        expect(currentQueue.totalAccessCount, 0);
+      },
+    );
 
     test('generation bump does not read queue', () {
       final bool changed = QuranPlayerQueueUtils.queueSnapshotChanged(
@@ -313,7 +315,8 @@ void main() {
   group('O(1) hot path: MappedPlaybackQueueCache', () {
     test('cache hit invokes map zero times for large queue', () {
       final MappedPlaybackQueueCache cache = MappedPlaybackQueueCache();
-      final List<audio_service.MediaItem> mediaQueue = _orderedLargeMediaQueue();
+      final List<audio_service.MediaItem> mediaQueue =
+          _orderedLargeMediaQueue();
       var mapInvocations = 0;
 
       final List<AudioEntity> first = cache.entitiesFor(
@@ -336,16 +339,23 @@ void main() {
       );
 
       expect(mapInvocations, _largeQueueSize);
-      expect(identical(first, cache.entitiesFor(
-        mediaQueue: mediaQueue,
-        queueGeneration: 1,
-        map: _mapMediaItem,
-      )), isTrue);
+      expect(
+        identical(
+          first,
+          cache.entitiesFor(
+            mediaQueue: mediaQueue,
+            queueGeneration: 1,
+            map: _mapMediaItem,
+          ),
+        ),
+        isTrue,
+      );
     });
 
     test('generation bump remaps exactly one additional time', () {
       final MappedPlaybackQueueCache cache = MappedPlaybackQueueCache();
-      final List<audio_service.MediaItem> mediaQueue = _orderedLargeMediaQueue();
+      final List<audio_service.MediaItem> mediaQueue =
+          _orderedLargeMediaQueue();
       var mapInvocations = 0;
 
       cache.entitiesFor(

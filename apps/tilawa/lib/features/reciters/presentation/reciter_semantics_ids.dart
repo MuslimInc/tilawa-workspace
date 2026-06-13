@@ -40,8 +40,7 @@ abstract final class ReciterSemanticsIds {
       'reciters_letter_index_toggle';
 
   /// Vertical A–Z scrubber rail on the Reciters list (when letter index is on).
-  static const String recitersAlphabetScrollbar =
-      'reciters_alphabet_scrollbar';
+  static const String recitersAlphabetScrollbar = 'reciters_alphabet_scrollbar';
 
   /// Center-screen letter bubble shown while scrubbing the alphabet rail.
   static const String alphabetScrollbarOverlay = 'alphabet_scrollbar_overlay';
@@ -56,8 +55,7 @@ abstract final class ReciterSemanticsIds {
       'reciters_alphabet_letter_${letter.toLowerCase()}';
 
   /// Active letter filter chip when the rail is hidden but a letter is selected.
-  static const String recitersLetterFilterChip =
-      'reciters_letter_filter_chip';
+  static const String recitersLetterFilterChip = 'reciters_letter_filter_chip';
 
   /// Clears all active Reciters list filters (search, favorites, letter, …).
   static const String recitersClearAllFilters = 'reciters_clear_all_filters';

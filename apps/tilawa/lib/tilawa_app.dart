@@ -15,6 +15,7 @@ import 'app/app_providers.dart';
 import 'app/default_route_system_ui_overlay.dart';
 import 'core/debug/device_preview_app_builder.dart';
 import 'core/services/notification_startup_service.dart';
+import 'features/auth/data/services/google_sign_in_session_tracker.dart';
 import 'features/in_app_update/in_app_update.dart';
 import 'features/whats_new/whats_new.dart';
 import 'features/downloads/data/services/batch_download_manager.dart';
@@ -109,6 +110,18 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
   }
 
   void _scheduleUpdateCheck({required Duration delay, required String reason}) {
+    if (getIt.isRegistered<GoogleSignInSessionTracker>() &&
+        getIt<GoogleSignInSessionTracker>().inFlight) {
+      logger.d(
+        '[AppLaunch] source=Startup update-check deferred '
+        'reason=$reason (Google sign-in in flight)',
+      );
+      _updateCheckTimer?.cancel();
+      _updateCheckTimer = Timer(const Duration(seconds: 5), () {
+        _scheduleUpdateCheck(delay: Duration.zero, reason: '$reason-deferred');
+      });
+      return;
+    }
     _updateCheckTimer?.cancel();
     logger.d(
       '[AppLaunch] source=Startup update-check scheduled '
@@ -250,4 +263,3 @@ class _PlayerApp extends StatelessWidget {
     );
   }
 }
-

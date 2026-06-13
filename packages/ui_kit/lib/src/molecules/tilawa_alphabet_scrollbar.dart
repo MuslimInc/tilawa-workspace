@@ -74,8 +74,20 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
   String? _pointerDownSelectedLetter;
   Offset? _pointerDownPosition;
   int? _activePointer;
+  bool _lastBuiltScrubbing = false;
+  Brightness? _cachedItemThemeBrightness;
 
   static const double _kPointerMoveSlop = 8;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final Brightness brightness = Theme.of(context).brightness;
+    if (_cachedItemThemeBrightness != brightness) {
+      _cachedItemThemeBrightness = brightness;
+      _itemCache.clear();
+    }
+  }
 
   @override
   void dispose() {
@@ -134,13 +146,9 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
     RenderBox box,
     TilawaAlphabetScrollbarTokens componentTokens,
   ) {
-    final resolvedPadding = componentTokens.verticalPadding.resolve(
-      Directionality.of(context),
-    );
     return _AlphabetScrollbarTrackLayout.resolve(
       letterCount: widget.letters.length,
-      visibleTrackHeight: box.size.height,
-      verticalPadding: resolvedPadding,
+      maxTrackHeight: box.size.height,
       preferredSlotExtent: componentTokens.itemExtent,
     );
   }
@@ -170,10 +178,20 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
 
     final double viewportHeight = renderObject.size.height;
     final double letterCenter = layout.centerForIndex(index);
-    final double targetOffset = (letterCenter - viewportHeight / 2).clamp(
-      0.0,
-      _railScrollController.position.maxScrollExtent,
-    );
+    final double bottomClearance = componentTokens.selectedIndicatorExtent / 2;
+    final double maxScrollExtent =
+        _railScrollController.position.maxScrollExtent;
+
+    final double targetOffset = switch (index) {
+      0 => 0,
+      final int last when last == widget.letters.length - 1 =>
+        (layout.centerForIndex(index) +
+                layout.slotHeight / 2 +
+                bottomClearance -
+                viewportHeight)
+            .clamp(0.0, maxScrollExtent),
+      _ => (letterCenter - viewportHeight / 2).clamp(0.0, maxScrollExtent),
+    };
     _railScrollController.animateTo(
       targetOffset,
       duration: theme.tokens.durationFast,
@@ -269,6 +287,7 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
     setState(() {
       _isScrubbing = true;
       _draggedLetter = letter;
+      _itemCache.clear();
     });
     _overlayController.show();
     _notifyPanStart(globalPosition);
@@ -328,6 +347,7 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
       _draggedLetter = null;
       _lastNotifiedLetter = null;
       _pointerDownPosition = null;
+      _itemCache.clear();
     });
     _overlayController.hide();
     _notifyPanEnd();
@@ -387,10 +407,14 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final componentTokens = theme.componentTokens.alphabetScrollbar;
-    final primaryColor = theme.colorScheme.primary;
-    final unselectedColor = theme.colorScheme.onSurfaceVariant.withValues(
-      alpha: tokens.opacityEmphasis,
+    final ColorScheme colorScheme = theme.colorScheme;
+    final Color primaryColor = colorScheme.primary;
+    final Color unselectedColor = colorScheme.onSurface.withValues(
+      alpha: _isScrubbing ? tokens.opacityEmphasis : tokens.opacityMedium,
     );
+    final Color trackBorderColor = _isScrubbing
+        ? primaryColor.withValues(alpha: tokens.opacityMedium)
+        : colorScheme.outlineVariant.withValues(alpha: tokens.opacityMedium);
 
     return RepaintBoundary(
       child: _MaybeScrollbarSemantics(
@@ -415,7 +439,7 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
               top: overlayTop,
               child: DefaultTextStyle(
                 style: theme.textTheme.displaySmall!.copyWith(
-                  color: theme.colorScheme.onPrimary,
+                  color: colorScheme.onPrimary,
                   fontWeight: FontWeight.bold,
                   fontSize: componentTokens.overlayFontSize,
                 ),
@@ -441,13 +465,26 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
                       width: componentTokens.overlaySize,
                       height: componentTokens.overlaySize,
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.primary,
+                        color: primaryColor,
                         shape: BoxShape.circle,
+                        border: Border.all(
+                          color: colorScheme.onPrimary.withValues(
+                            alpha: tokens.opacitySubtle,
+                          ),
+                          width: tokens.borderWidthThin * 2,
+                        ),
                         boxShadow: [
                           BoxShadow(
                             color: componentTokens.overlayShadowColor,
                             blurRadius: componentTokens.overlayShadowBlur,
                             offset: componentTokens.overlayShadowOffset,
+                          ),
+                          BoxShadow(
+                            color: primaryColor.withValues(
+                              alpha: tokens.opacityShadow,
+                            ),
+                            blurRadius: tokens.blurShadow,
+                            spreadRadius: 1,
                           ),
                         ],
                       ),
@@ -461,71 +498,86 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
           child: Listener(
             behavior: HitTestBehavior.opaque,
             onPointerDown: _handlePointerDown,
-            child: Container(
-              key: _trackKey,
-              width: componentTokens.width,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface.withValues(
-                  alpha: tokens.opacityGlass,
-                ),
-                borderRadius: BorderRadius.circular(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final BorderRadius borderRadius = BorderRadius.circular(
                   tokens.resolveRadius(family: TilawaRadiusFamily.card),
-                ),
-              ),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final EdgeInsets resolvedPadding = componentTokens
-                      .verticalPadding
-                      .resolve(
-                        Directionality.of(context),
-                      );
-                  final layout = _AlphabetScrollbarTrackLayout.resolve(
-                    letterCount: widget.letters.length,
-                    visibleTrackHeight: constraints.maxHeight,
-                    verticalPadding: resolvedPadding,
-                    preferredSlotExtent: componentTokens.itemExtent,
-                  );
-                  final Widget letterStack = SizedBox(
-                    height: layout.totalHeight,
-                    child: Stack(
-                      clipBehavior: Clip.hardEdge,
-                      children: [
-                        for (
-                          int index = 0;
-                          index < widget.letters.length;
-                          index++
-                        )
-                          Positioned(
-                            top: layout.topForIndex(index),
-                            left: 0,
-                            right: 0,
-                            height: layout.slotHeight,
-                            child: _buildLetterItem(
-                              letter: widget.letters[index],
-                              slotHeight: layout.slotHeight,
-                              primaryColor: primaryColor,
-                              unselectedColor: unselectedColor,
-                              componentTokens: componentTokens,
-                            ),
+                );
+                final _AlphabetScrollbarTrackLayout layout =
+                    _AlphabetScrollbarTrackLayout.resolve(
+                      letterCount: widget.letters.length,
+                      maxTrackHeight: constraints.maxHeight,
+                      preferredSlotExtent: componentTokens.itemExtent,
+                    );
+
+                final Widget letterStack = SizedBox(
+                  height: layout.contentHeight,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      for (
+                        int index = 0;
+                        index < widget.letters.length;
+                        index++
+                      )
+                        Positioned(
+                          top: layout.topForIndex(index),
+                          left: 0,
+                          right: 0,
+                          height: layout.slotHeight,
+                          child: _buildLetterItem(
+                            letter: widget.letters[index],
+                            slotHeight: layout.slotHeight,
+                            primaryColor: primaryColor,
+                            unselectedColor: unselectedColor,
+                            componentTokens: componentTokens,
+                            isScrubbing: _isScrubbing,
                           ),
+                        ),
+                    ],
+                  ),
+                );
+
+                final Widget letterRail = layout.isScrollable
+                    ? _AlphabetRailScrollView(
+                        controller: _railScrollController,
+                        physics: _isScrubbing
+                            ? const NeverScrollableScrollPhysics()
+                            : const ClampingScrollPhysics(),
+                        child: letterStack,
+                      )
+                    : letterStack;
+
+                return Align(
+                  alignment: Alignment.center,
+                  child: AnimatedContainer(
+                    duration: tokens.durationFast,
+                    curve: Curves.easeOutCubic,
+                    clipBehavior: Clip.antiAlias,
+                    key: _trackKey,
+                    width: componentTokens.width,
+                    height: layout.trackHeight,
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceContainerLow,
+                      borderRadius: borderRadius,
+                      border: Border.all(
+                        color: trackBorderColor,
+                        width: tokens.borderWidthThin * (_isScrubbing ? 2 : 1),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: colorScheme.shadow.withValues(
+                            alpha: tokens.opacityShadow * 0.6,
+                          ),
+                          blurRadius: tokens.blurShadow / 2,
+                          offset: tokens.shadowOffsetSmall,
+                        ),
                       ],
                     ),
-                  );
-
-                  if (!layout.isScrollable) {
-                    return letterStack;
-                  }
-
-                  return SingleChildScrollView(
-                    key: const Key('alphabet_scrollbar_scroll'),
-                    controller: _railScrollController,
-                    physics: _isScrubbing
-                        ? const NeverScrollableScrollPhysics()
-                        : const ClampingScrollPhysics(),
-                    child: letterStack,
-                  );
-                },
-              ),
+                    child: letterRail,
+                  ),
+                );
+              },
             ),
           ),
         ),
@@ -539,6 +591,7 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
     required Color primaryColor,
     required Color unselectedColor,
     required TilawaAlphabetScrollbarTokens componentTokens,
+    required bool isScrubbing,
   }) {
     final activeLetter = _activeLetter;
     final isSelected = letter == activeLetter;
@@ -548,11 +601,15 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
       slotHeight * 0.92,
     );
 
-    if (isSelected != wasActive || !_itemCache.containsKey(letter)) {
+    if (isSelected != wasActive ||
+        isScrubbing != _lastBuiltScrubbing ||
+        !_itemCache.containsKey(letter)) {
+      _lastBuiltScrubbing = isScrubbing;
       _itemCache[letter] = _LetterItem(
         key: ValueKey(letter),
         letter: letter,
         isSelected: isSelected,
+        isScrubbing: isScrubbing,
         semanticsIdentifier: isSelected
             ? widget.selectedLetterStableSemanticsId ??
                   widget.selectedLetterSemanticsId?.call(letter)
@@ -568,62 +625,88 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
   }
 }
 
+/// Keeps alphabet-rail scroll isolated from ancestor [ScrollView]s (e.g.
+/// [NestedScrollView] on Reciters).
+class _AlphabetRailScrollView extends StatelessWidget {
+  const _AlphabetRailScrollView({
+    required this.controller,
+    required this.physics,
+    required this.child,
+  });
+
+  final ScrollController controller;
+  final ScrollPhysics physics;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return PrimaryScrollController.none(
+      child: NotificationListener<ScrollNotification>(
+        onNotification: (_) => true,
+        child: NotificationListener<OverscrollIndicatorNotification>(
+          onNotification: (OverscrollIndicatorNotification notification) {
+            notification.disallowIndicator();
+            return true;
+          },
+          child: SingleChildScrollView(
+            key: const Key('alphabet_scrollbar_scroll'),
+            controller: controller,
+            physics: physics,
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 @immutable
 class _AlphabetScrollbarTrackLayout {
   const _AlphabetScrollbarTrackLayout({
     required this.slotHeight,
-    required this.contentTopInset,
     required this.contentHeight,
+    required this.trackHeight,
     required this.isScrollable,
-    required this.totalHeight,
   });
 
   final double slotHeight;
-  final double contentTopInset;
   final double contentHeight;
+  final double trackHeight;
   final bool isScrollable;
-  final double totalHeight;
 
   static _AlphabetScrollbarTrackLayout resolve({
     required int letterCount,
-    required double visibleTrackHeight,
-    required EdgeInsets verticalPadding,
+    required double maxTrackHeight,
     required double preferredSlotExtent,
   }) {
-    final double availableHeight =
-        visibleTrackHeight - verticalPadding.vertical;
-    if (letterCount <= 0 || !availableHeight.isFinite || availableHeight <= 0) {
+    if (letterCount <= 0 || !maxTrackHeight.isFinite || maxTrackHeight <= 0) {
       return const _AlphabetScrollbarTrackLayout(
         slotHeight: 0,
-        contentTopInset: 0,
         contentHeight: 0,
+        trackHeight: 0,
         isScrollable: false,
-        totalHeight: 0,
       );
     }
 
-    final double minContentHeight = letterCount * preferredSlotExtent;
-    if (minContentHeight <= availableHeight) {
-      final double slotHeight = availableHeight / letterCount;
+    final double packedContentHeight = letterCount * preferredSlotExtent;
+    if (packedContentHeight <= maxTrackHeight) {
       return _AlphabetScrollbarTrackLayout(
-        slotHeight: slotHeight,
-        contentTopInset: verticalPadding.top,
-        contentHeight: availableHeight,
+        slotHeight: preferredSlotExtent,
+        contentHeight: packedContentHeight,
+        trackHeight: packedContentHeight,
         isScrollable: false,
-        totalHeight: visibleTrackHeight,
       );
     }
 
     return _AlphabetScrollbarTrackLayout(
       slotHeight: preferredSlotExtent,
-      contentTopInset: verticalPadding.top,
-      contentHeight: minContentHeight,
+      contentHeight: packedContentHeight,
+      trackHeight: maxTrackHeight,
       isScrollable: true,
-      totalHeight: minContentHeight + verticalPadding.vertical,
     );
   }
 
-  double topForIndex(int index) => contentTopInset + (index * slotHeight);
+  double topForIndex(int index) => index * slotHeight;
 
   double centerForIndex(int index) => topForIndex(index) + (slotHeight / 2);
 
@@ -637,15 +720,17 @@ class _AlphabetScrollbarTrackLayout {
     }
 
     final double contentY = localY + scrollOffset;
-    final double contentTop = contentTopInset;
-    final double contentBottom = contentTop + contentHeight;
-    if (contentY < contentTop || contentY > contentBottom) {
-      return null;
+    if (contentY < 0) {
+      return letters.first;
+    }
+    if (contentY >= contentHeight) {
+      return letters.last;
     }
 
-    final int letterIndex = ((contentY - contentTop) / slotHeight)
-        .floor()
-        .clamp(0, letters.length - 1);
+    final int letterIndex = (contentY / slotHeight).floor().clamp(
+      0,
+      letters.length - 1,
+    );
     return letters[letterIndex];
   }
 }
@@ -684,6 +769,7 @@ class _LetterItem extends StatelessWidget {
     super.key,
     required this.letter,
     required this.isSelected,
+    required this.isScrubbing,
     required this.semanticsIdentifier,
     required this.selectedIndicatorSize,
     required this.fontSize,
@@ -693,6 +779,7 @@ class _LetterItem extends StatelessWidget {
 
   final String letter;
   final bool isSelected;
+  final bool isScrubbing;
   final String? semanticsIdentifier;
   final double selectedIndicatorSize;
   final double fontSize;
@@ -701,38 +788,61 @@ class _LetterItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final TilawaDesignTokens tokens = theme.tokens;
+    final TextStyle baseStyle =
+        theme.textTheme.labelSmall?.copyWith(
+          fontSize: fontSize,
+          fontWeight: FontWeight.w600,
+          height: 1,
+        ) ??
+        TextStyle(
+          fontSize: fontSize,
+          fontWeight: FontWeight.w600,
+          height: 1,
+        );
+
     return Center(
       child: Semantics(
         identifier: semanticsIdentifier,
         selected: isSelected,
         label: letter,
-        child: isSelected
-            ? Container(
-                width: selectedIndicatorSize,
-                height: selectedIndicatorSize,
-                decoration: BoxDecoration(
-                  color: primaryColor,
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text(
-                    letter,
-                    style: TextStyle(
-                      fontSize: fontSize,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onPrimary,
+        child: AnimatedScale(
+          scale: isSelected ? 1.0 : (isScrubbing ? 0.96 : 0.9),
+          duration: tokens.durationFast,
+          curve: Curves.easeOutCubic,
+          child: isSelected
+              ? Container(
+                  width: selectedIndicatorSize,
+                  height: selectedIndicatorSize,
+                  decoration: BoxDecoration(
+                    color: primaryColor,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: primaryColor.withValues(
+                          alpha: tokens.opacityMedium,
+                        ),
+                        blurRadius: 4,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Text(
+                      letter,
+                      style: baseStyle.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onPrimary,
+                      ),
                     ),
                   ),
+                )
+              : Text(
+                  letter,
+                  style: baseStyle.copyWith(color: unselectedColor),
                 ),
-              )
-            : Text(
-                letter,
-                style: TextStyle(
-                  fontSize: fontSize,
-                  fontWeight: FontWeight.w500,
-                  color: unselectedColor,
-                ),
-              ),
+        ),
       ),
     );
   }
