@@ -402,5 +402,27 @@ void main() {
       expect(states, isEmpty);
       await subscription.cancel();
     });
+
+    test('appends favorites missing from catalog at end', () async {
+      const tReciterMissing = ReciterEntity(
+        id: 99,
+        name: 'Missing',
+        letter: 'M',
+        date: '2023',
+        moshaf: [],
+      );
+      when(mockGetFavorites(any)).thenAnswer(
+        (_) async => const Right(<ReciterEntity>[
+          tReciterMissing,
+          tReciter2,
+        ]),
+      );
+      await cubit.loadFavorites();
+
+      cubit.applyCatalogOrder(catalog);
+
+      final FavoritesLoaded reordered = cubit.state as FavoritesLoaded;
+      expect(reordered.favorites.map((r) => r.id).toList(), [2, 99]);
+    });
   });
 }

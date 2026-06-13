@@ -76,14 +76,18 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     }
 
     final List<ReciterEntity> ordered = <ReciterEntity>[];
+    final Set<int> matchedIds = <int>{};
     for (final ReciterEntity reciter in catalogReciters) {
       final ReciterEntity? favorite = _favoritesById[reciter.id];
       if (favorite != null) {
         ordered.add(favorite);
+        matchedIds.add(reciter.id);
       }
     }
-    if (ordered.length != _favoritesById.length) {
-      return;
+    for (final ReciterEntity favorite in _favoritesById.values) {
+      if (!matchedIds.contains(favorite.id)) {
+        ordered.add(favorite);
+      }
     }
     if (sameReciterOrder(_favoritesById.values.toList(), ordered)) {
       return;
