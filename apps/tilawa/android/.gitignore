@@ -7,3 +7,6 @@ gradle-wrapper.jar
 GeneratedPluginRegistrant.java
 /.kotlin/*
 /app/java_pid*.hprof
+# Signing material — never commit keystores
+*.jks
+*.keystore
