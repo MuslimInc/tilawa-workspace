@@ -76,8 +76,8 @@ String _publishedAtLabel({
   required DateTime publishedAt,
 }) {
   final String locale = context.isArabic ? 'ar' : 'en';
-  final String formatted = DateFormat.yMMMd(locale).add_jm().format(
-    publishedAt.toLocal(),
-  );
+  final String formatted = DateFormat.yMMMd(
+    locale,
+  ).format(publishedAt.toLocal());
   return '${context.l10n.lastUpdated}: $formatted';
 }
