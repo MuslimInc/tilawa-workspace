@@ -67,17 +67,21 @@ class LoginSignInFallbackPanel extends StatelessWidget {
   }
 
   Future<void> _openPlayServices(BuildContext context) async {
-    final bool launched = await launchUrl(
-      _playServicesUri,
-      mode: LaunchMode.externalApplication,
-    );
-    if (!launched && context.mounted) {
-      await launchUrl(
-        Uri.parse(
-          'https://play.google.com/store/apps/details?id=com.google.android.gms',
-        ),
+    try {
+      final bool launched = await launchUrl(
+        _playServicesUri,
         mode: LaunchMode.externalApplication,
       );
+      if (!launched && context.mounted) {
+        await launchUrl(
+          Uri.parse(
+            'https://play.google.com/store/apps/details?id=com.google.android.gms',
+          ),
+          mode: LaunchMode.externalApplication,
+        );
+      }
+    } on Object {
+      // No Play Store / browser handler on this device.
     }
   }
 }

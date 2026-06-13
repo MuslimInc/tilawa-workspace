@@ -232,7 +232,13 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
         }
       });
     } finally {
-      _signInLaunchPending = false;
+      if (mounted) {
+        setState(() {
+          _signInLaunchPending = false;
+        });
+      } else {
+        _signInLaunchPending = false;
+      }
     }
   }
 

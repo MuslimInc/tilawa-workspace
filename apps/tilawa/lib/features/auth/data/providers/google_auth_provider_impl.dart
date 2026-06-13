@@ -10,6 +10,7 @@ import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 
 import '../services/android_sign_in_platform_policy.dart';
+import '../services/google_sign_in_android_resume_bridge.dart';
 import '../services/google_sign_in_session_tracker.dart';
 import '../../domain/entities/auth_result.dart';
 import '../../domain/entities/user_entity.dart';
@@ -22,7 +23,9 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
     this._googleSignIn,
     this._platformPolicy,
     this._sessionTracker,
-  );
+  ) {
+    GoogleSignInAndroidResumeBridge.instance.ensureInitialized();
+  }
   static const Duration signInTimeout = Duration(seconds: 60);
 
   /// CM bottom sheets can hang on some OEMs; cap wait time so [authenticate]
