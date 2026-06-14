@@ -95,6 +95,62 @@ void main() {
     });
   });
 
+  group('resolveAndroidDeviceKind', () {
+    test('returns emulator for sdk_phone fingerprints', () {
+      expect(
+        CrashReportingContext.resolveAndroidDeviceKind(
+          isPhysicalDevice: true,
+          fingerprint:
+              'Android/sdk_phone_arm64/generic_arm64:14/...:userdebug/test-keys',
+          product: 'sdk_phone_arm64',
+          model: 'sdk_phone_arm64',
+          hardware: 'ranchu',
+          brand: 'google',
+        ),
+        'emulator',
+      );
+    });
+
+    test('returns physical for retail device fingerprints', () {
+      expect(
+        CrashReportingContext.resolveAndroidDeviceKind(
+          isPhysicalDevice: true,
+          fingerprint:
+              'samsung/beyond1ltexx/beyond1:13/TP1A.220624.014/release-keys',
+          product: 'beyond1ltexx',
+          model: 'SM-G973F',
+          hardware: 'exynos9820',
+          brand: 'samsung',
+        ),
+        'physical',
+      );
+    });
+  });
+
+  group('looksLikeAndroidEmulatorBuild', () {
+    test('detects generic and test-keys fingerprints', () {
+      expect(
+        CrashReportingContext.looksLikeAndroidEmulatorBuild(
+          fingerprint: 'generic/sdk/generic:14/test-keys',
+        ),
+        isTrue,
+      );
+    });
+
+    test('returns false for release-key retail builds', () {
+      expect(
+        CrashReportingContext.looksLikeAndroidEmulatorBuild(
+          fingerprint: 'google/redfin/redfin:14/release-keys',
+          product: 'redfin',
+          model: 'Pixel 5',
+          hardware: 'redfin',
+          brand: 'google',
+        ),
+        isFalse,
+      );
+    });
+  });
+
   group('filterEmulatorsInRelease', () {
     test('keeps verify events tagged sentry.verify', () {
       final SentryEvent event = SentryEvent(

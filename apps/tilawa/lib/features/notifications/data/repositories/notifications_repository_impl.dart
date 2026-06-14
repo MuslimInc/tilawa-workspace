@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
 import 'package:tilawa/core/services/prayer_notification_payload_classifier.dart';
@@ -38,9 +39,26 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
       final String? token = await _remoteDataSource.getToken();
       return token;
     } catch (e) {
-      _logger.e('Error getting FCM token', error: e);
+      if (isExpectedFcmUnavailableError(e)) {
+        _logger.d('FCM token unavailable on this device', error: e);
+      } else {
+        _logger.e('Error getting FCM token', error: e);
+      }
       return null;
     }
+  }
+
+  /// True when FCM cannot run because Google Play Services / Instance ID is
+  /// missing (common on AOSP emulators and sideloaded GMS-free devices).
+  @visibleForTesting
+  static bool isExpectedFcmUnavailableError(Object error) {
+    final String message = error.toString().toLowerCase();
+    return message.contains('missing_instanceid_service') ||
+        message.contains('service_not_available') ||
+        message.contains('google play services not available') ||
+        message.contains('google_play_services_not_available') ||
+        message.contains('missing google play services') ||
+        message.contains('api_not_available');
   }
 
   @override

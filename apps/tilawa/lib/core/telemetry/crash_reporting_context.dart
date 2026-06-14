@@ -147,6 +147,68 @@ abstract final class CrashReportingContext {
     return isIOS ? 'simulator' : 'emulator';
   }
 
+  /// Resolves Android [CrashReportingTagKeys.deviceKind], including AOSP
+  /// images that incorrectly report [isPhysicalDevice] as true.
+  @visibleForTesting
+  static String resolveAndroidDeviceKind({
+    required bool isPhysicalDevice,
+    String? fingerprint,
+    String? product,
+    String? model,
+    String? hardware,
+    String? brand,
+  }) {
+    if (!isPhysicalDevice ||
+        looksLikeAndroidEmulatorBuild(
+          fingerprint: fingerprint,
+          product: product,
+          model: model,
+          hardware: hardware,
+          brand: brand,
+        )) {
+      return 'emulator';
+    }
+    return 'physical';
+  }
+
+  @visibleForTesting
+  static bool looksLikeAndroidEmulatorBuild({
+    String? fingerprint,
+    String? product,
+    String? model,
+    String? hardware,
+    String? brand,
+  }) {
+    final Iterable<String> haystacks = <String?>[
+      fingerprint,
+      product,
+      model,
+      hardware,
+      brand,
+    ].whereType<String>().map((String value) => value.toLowerCase());
+
+    for (final String haystack in haystacks) {
+      if (haystack.contains('generic') ||
+          haystack.contains('emulator') ||
+          haystack.contains('sdk_gphone') ||
+          haystack.contains('sdk_phone') ||
+          haystack.contains('goldfish') ||
+          haystack.contains('ranchu') ||
+          haystack.contains('google_sdk') ||
+          haystack.contains('android sdk built for')) {
+        return true;
+      }
+    }
+
+    final String? normalizedFingerprint = fingerprint?.toLowerCase();
+    if (normalizedFingerprint != null &&
+        normalizedFingerprint.contains('test-keys')) {
+      return true;
+    }
+
+    return false;
+  }
+
   static Future<Map<String, String>> _collectSentryTags() async {
     final ({String kind, String name}) device = await _resolveDeviceInfo();
     final String buildMode = resolveBuildMode(
@@ -192,9 +254,13 @@ abstract final class CrashReportingContext {
           ? info.model
           : info.device;
       return (
-        kind: resolveDeviceKind(
+        kind: resolveAndroidDeviceKind(
           isPhysicalDevice: info.isPhysicalDevice,
-          isIOS: false,
+          fingerprint: info.fingerprint,
+          product: info.product,
+          model: info.model,
+          hardware: info.hardware,
+          brand: info.brand,
         ),
         name: name,
       );

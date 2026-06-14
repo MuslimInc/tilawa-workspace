@@ -35,6 +35,19 @@ void main() {
     mockFcmHandlerService = MockFCMNotificationHandlerService();
     mockLogger = MockLogger();
 
+    when(
+      () => mockLogger.d(
+        any(),
+        error: any(named: 'error'),
+      ),
+    ).thenReturn(null);
+    when(
+      () => mockLogger.e(
+        any(),
+        error: any(named: 'error'),
+      ),
+    ).thenReturn(null);
+
     repository = NotificationsRepositoryImpl(
       mockRemoteDataSource,
       mockDispatcher,
@@ -78,6 +91,78 @@ void main() {
 
       expect(result, isNull);
       verify(() => mockRemoteDataSource.getToken()).called(1);
+      verify(
+        () => mockLogger.e(
+          'Error getting FCM token',
+          error: any(named: 'error'),
+        ),
+      ).called(1);
+      verifyNever(
+        () => mockLogger.d(
+          any(),
+          error: any(named: 'error'),
+        ),
+      );
+    });
+
+    test(
+      'logs debug and returns null for expected GMS-missing FCM errors',
+      () async {
+        when(() => mockRemoteDataSource.getToken()).thenThrow(
+          Exception(
+            '[firebase_messaging/unknown] java.io.IOException: '
+            'MISSING_INSTANCEID_SERVICE',
+          ),
+        );
+
+        final result = await repository.getToken();
+
+        expect(result, isNull);
+        verify(
+          () => mockLogger.d(
+            'FCM token unavailable on this device',
+            error: any(named: 'error'),
+          ),
+        ).called(1);
+        verifyNever(
+          () => mockLogger.e(
+            any(),
+            error: any(named: 'error'),
+          ),
+        );
+      },
+    );
+  });
+
+  group('isExpectedFcmUnavailableError', () {
+    test('matches known no-GMS patterns', () {
+      expect(
+        NotificationsRepositoryImpl.isExpectedFcmUnavailableError(
+          Exception('MISSING_INSTANCEID_SERVICE'),
+        ),
+        isTrue,
+      );
+      expect(
+        NotificationsRepositoryImpl.isExpectedFcmUnavailableError(
+          Exception('SERVICE_NOT_AVAILABLE'),
+        ),
+        isTrue,
+      );
+      expect(
+        NotificationsRepositoryImpl.isExpectedFcmUnavailableError(
+          Exception('Google Play services not available'),
+        ),
+        isTrue,
+      );
+    });
+
+    test('does not match unexpected failures', () {
+      expect(
+        NotificationsRepositoryImpl.isExpectedFcmUnavailableError(
+          Exception('network timeout'),
+        ),
+        isFalse,
+      );
     });
   });
 
