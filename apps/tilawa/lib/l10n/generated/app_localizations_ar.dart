@@ -39,6 +39,163 @@ class AppLocalizationsAr extends AppLocalizations {
   String get loadingReciters => 'جاري تحميل القراء...';
 
   @override
+  String get homeTitle => 'الصفحة الرئيسية';
+
+  @override
+  String get homeGreeting => 'السلام عليكم';
+
+  @override
+  String homeGreetingName(String name) {
+    return 'السلام عليكم، $name';
+  }
+
+  @override
+  String get homeProfileLabel => 'ملف المستخدم';
+
+  @override
+  String get homeLocationUnavailable => 'حدّد الموقع';
+
+  @override
+  String get homeNextPrayerUnavailable => 'حدّد موقعك لعرض الصلاة القادمة.';
+
+  @override
+  String get homePrayerTimesAction => 'مواقيت الصلاة';
+
+  @override
+  String get homePrayerNow => 'حان الوقت الآن';
+
+  @override
+  String homePrayerInMinutes(int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: 'بعد $minutes دقائق',
+      two: 'بعد دقيقتين',
+      one: 'بعد دقيقة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homePrayerInHoursMinutes(int hours, int minutes) {
+    return 'بعد $hours س $minutes د';
+  }
+
+  @override
+  String get homeExploreTitle => 'استكشف';
+
+  @override
+  String get homeQuickQuran => 'القرآن';
+
+  @override
+  String get homeQuickReciters => 'القراء';
+
+  @override
+  String get homeQuickPrayer => 'الصلاة';
+
+  @override
+  String get homeQuickQibla => 'القبلة';
+
+  @override
+  String get homeQuickAthkar => 'الأذكار';
+
+  @override
+  String get homeQuickSettings => 'الإعدادات';
+
+  @override
+  String get homeDailyAyahLabel => 'الآية اليومية';
+
+  @override
+  String get homeDailyAyahBody =>
+      'وَأَقِيمُوا الصَّلَاةَ وَآتُوا الزَّكَاةَ وَارْكَعُوا مَعَ الرَّاكِعِينَ';
+
+  @override
+  String get homeDailyAyahReference => 'القرآن ٢:٤٣';
+
+  @override
+  String get homeDailyDuaLabel => 'الدعاء اليومي';
+
+  @override
+  String get homeDailyDuaBody => 'اللهم أعني على ذكرك وشكرك وحسن عبادتك.';
+
+  @override
+  String get homeDailyDuaReference => 'أبو داود';
+
+  @override
+  String get todayPlanTitle => 'خطة اليوم';
+
+  @override
+  String get todayPlanMotivationDefault =>
+      'القليل كل يوم أسهل حفظًا واستمرارًا.';
+
+  @override
+  String get todayPlanMotivationComplete =>
+      'اكتملت خطة اليوم. حافظ على هذا النسق بهدوء.';
+
+  @override
+  String todayPlanReadPages(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'اقرأ $count صفحات',
+      two: 'اقرأ صفحتين',
+      one: 'اقرأ صفحة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String todayPlanContinueFromPage(int page) {
+    return 'تابع من صفحة $page';
+  }
+
+  @override
+  String get todayPlanShortReadingSession => 'ابدأ بجلسة قراءة قصيرة';
+
+  @override
+  String todayPlanListenMinutes(int minutes) {
+    return 'استمع لمدة $minutes دقائق';
+  }
+
+  @override
+  String get todayPlanContinueListening => 'تابع الاستماع';
+
+  @override
+  String todayPlanListeningSubtitle(String surahName, String reciterName) {
+    return '$surahName · $reciterName';
+  }
+
+  @override
+  String get todayPlanChooseReciter => 'اختر قارئًا واستمع بهدوء';
+
+  @override
+  String get todayPlanMorningAdhkar => 'أذكار الصباح';
+
+  @override
+  String get todayPlanMorningAdhkarSubtitle => 'ذكر قصير قبل انشغال اليوم';
+
+  @override
+  String get todayPlanTasbeehGoal => 'هدف التسبيح';
+
+  @override
+  String todayPlanProgress(int completed, int total, int minutes) {
+    return '$completed من $total مكتملة · المتبقي $minutes د';
+  }
+
+  @override
+  String get todayPlanContinue => 'تابع';
+
+  @override
+  String todayPlanStreakDays(int days) {
+    return '$days ي';
+  }
+
+  @override
+  String todayPlanMinutesShort(int minutes) {
+    return '$minutesد';
+  }
+
+  @override
   String get searchSurah => 'بحث عن سورة...';
 
   @override
@@ -322,6 +479,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get chooseTheme => 'اختر السمة';
+
+  @override
+  String get bottomNavHome => 'الرئيسية';
 
   @override
   String get bottomNavReciters => 'القراء';

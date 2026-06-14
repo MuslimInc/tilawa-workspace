@@ -39,6 +39,165 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loadingReciters => 'Loading reciters...';
 
   @override
+  String get homeTitle => 'Home';
+
+  @override
+  String get homeGreeting => 'Assalamu alaikum';
+
+  @override
+  String homeGreetingName(String name) {
+    return 'Assalamu alaikum, $name';
+  }
+
+  @override
+  String get homeProfileLabel => 'User profile';
+
+  @override
+  String get homeLocationUnavailable => 'Set location';
+
+  @override
+  String get homeNextPrayerUnavailable =>
+      'Set your location to see the next prayer.';
+
+  @override
+  String get homePrayerTimesAction => 'Prayer times';
+
+  @override
+  String get homePrayerNow => 'It is time now';
+
+  @override
+  String homePrayerInMinutes(int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: 'In $minutes minutes',
+      one: 'In 1 minute',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homePrayerInHoursMinutes(int hours, int minutes) {
+    return 'In ${hours}h ${minutes}m';
+  }
+
+  @override
+  String get homeExploreTitle => 'Explore';
+
+  @override
+  String get homeQuickQuran => 'Quran';
+
+  @override
+  String get homeQuickReciters => 'Reciters';
+
+  @override
+  String get homeQuickPrayer => 'Prayer';
+
+  @override
+  String get homeQuickQibla => 'Qibla';
+
+  @override
+  String get homeQuickAthkar => 'Athkar';
+
+  @override
+  String get homeQuickSettings => 'Settings';
+
+  @override
+  String get homeDailyAyahLabel => 'Daily ayah';
+
+  @override
+  String get homeDailyAyahBody =>
+      'And establish prayer and give zakah and bow with those who bow.';
+
+  @override
+  String get homeDailyAyahReference => 'Quran 2:43';
+
+  @override
+  String get homeDailyDuaLabel => 'Daily dua';
+
+  @override
+  String get homeDailyDuaBody =>
+      'O Allah, help me remember You, thank You, and worship You well.';
+
+  @override
+  String get homeDailyDuaReference => 'Abu Dawud';
+
+  @override
+  String get todayPlanTitle => 'Today’s Plan';
+
+  @override
+  String get todayPlanMotivationDefault =>
+      'A small amount every day is easier to protect.';
+
+  @override
+  String get todayPlanMotivationComplete =>
+      'Today is complete. Keep the rhythm gentle and steady.';
+
+  @override
+  String todayPlanReadPages(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Read $count pages',
+      one: 'Read 1 page',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String todayPlanContinueFromPage(int page) {
+    return 'Continue from page $page';
+  }
+
+  @override
+  String get todayPlanShortReadingSession =>
+      'Start with a short reading session';
+
+  @override
+  String todayPlanListenMinutes(int minutes) {
+    return 'Listen for $minutes minutes';
+  }
+
+  @override
+  String get todayPlanContinueListening => 'Continue listening';
+
+  @override
+  String todayPlanListeningSubtitle(String surahName, String reciterName) {
+    return '$surahName · $reciterName';
+  }
+
+  @override
+  String get todayPlanChooseReciter => 'Choose a reciter and listen calmly';
+
+  @override
+  String get todayPlanMorningAdhkar => 'Morning adhkar';
+
+  @override
+  String get todayPlanMorningAdhkarSubtitle =>
+      'A short remembrance before the day gets busy';
+
+  @override
+  String get todayPlanTasbeehGoal => 'Tasbeeh goal';
+
+  @override
+  String todayPlanProgress(int completed, int total, int minutes) {
+    return '$completed of $total completed · $minutes min left';
+  }
+
+  @override
+  String get todayPlanContinue => 'Continue';
+
+  @override
+  String todayPlanStreakDays(int days) {
+    return '$days d';
+  }
+
+  @override
+  String todayPlanMinutesShort(int minutes) {
+    return '${minutes}m';
+  }
+
+  @override
   String get searchSurah => 'Search surah...';
 
   @override
@@ -322,6 +481,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chooseTheme => 'Choose Theme';
+
+  @override
+  String get bottomNavHome => 'Home';
 
   @override
   String get bottomNavReciters => 'Reciters';

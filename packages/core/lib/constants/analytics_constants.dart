@@ -54,6 +54,18 @@ class AnalyticsEvents {
   static const String whatsNewSkipped = 'whats_new_skipped';
   static const String whatsNewOpenSettings = 'whats_new_open_settings';
   static const String whatsNewLoadFailed = 'whats_new_load_failed';
+
+  // Today Plan
+  static const String todayPlanViewed = 'today_plan_viewed';
+  static const String todayPlanStarted = 'today_plan_started';
+  static const String todayPlanCompleted = 'today_plan_completed';
+  static const String todayPlanTaskCompleted = 'today_plan_task_completed';
+  static const String todayPlanContinueReading = 'today_plan_continue_reading';
+  static const String todayPlanContinueListening =
+      'today_plan_continue_listening';
+  static const String todayPlanPremiumClicked = 'today_plan_premium_clicked';
+  static const String todayPlanPremiumConverted =
+      'today_plan_premium_converted';
 }
 
 class AnalyticsParams {

@@ -40,6 +40,165 @@
     "@loadingReciters": {
         "description": "Loading reciters message"
     },
+    "homeTitle": "الصفحة الرئيسية",
+    "homeGreeting": "السلام عليكم",
+    "homeGreetingName": "السلام عليكم، {name}",
+    "@homeGreetingName": {
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "homeProfileLabel": "ملف المستخدم",
+    "homeLocationUnavailable": "حدّد الموقع",
+    "homeNextPrayerUnavailable": "حدّد موقعك لعرض الصلاة القادمة.",
+    "homePrayerTimesAction": "مواقيت الصلاة",
+    "homePrayerNow": "حان الوقت الآن",
+    "homePrayerInMinutes": "{minutes, plural, =1{بعد دقيقة} =2{بعد دقيقتين} other{بعد {minutes} دقائق}}",
+    "@homePrayerInMinutes": {
+        "placeholders": {
+            "minutes": {
+                "type": "int"
+            }
+        }
+    },
+    "homePrayerInHoursMinutes": "بعد {hours} س {minutes} د",
+    "@homePrayerInHoursMinutes": {
+        "placeholders": {
+            "hours": {
+                "type": "int"
+            },
+            "minutes": {
+                "type": "int"
+            }
+        }
+    },
+    "homeExploreTitle": "استكشف",
+    "homeQuickQuran": "القرآن",
+    "homeQuickReciters": "القراء",
+    "homeQuickPrayer": "الصلاة",
+    "homeQuickQibla": "القبلة",
+    "homeQuickAthkar": "الأذكار",
+    "homeQuickSettings": "الإعدادات",
+    "homeDailyAyahLabel": "الآية اليومية",
+    "homeDailyAyahBody": "وَأَقِيمُوا الصَّلَاةَ وَآتُوا الزَّكَاةَ وَارْكَعُوا مَعَ الرَّاكِعِينَ",
+    "homeDailyAyahReference": "القرآن ٢:٤٣",
+    "homeDailyDuaLabel": "الدعاء اليومي",
+    "homeDailyDuaBody": "اللهم أعني على ذكرك وشكرك وحسن عبادتك.",
+    "homeDailyDuaReference": "أبو داود",
+    "todayPlanTitle": "خطة اليوم",
+    "@todayPlanTitle": {
+        "description": "Title for the daily Quran engagement plan card"
+    },
+    "todayPlanMotivationDefault": "القليل كل يوم أسهل حفظًا واستمرارًا.",
+    "@todayPlanMotivationDefault": {
+        "description": "Calm motivation copy for an incomplete Today Plan"
+    },
+    "todayPlanMotivationComplete": "اكتملت خطة اليوم. حافظ على هذا النسق بهدوء.",
+    "@todayPlanMotivationComplete": {
+        "description": "Calm completion copy for a completed Today Plan"
+    },
+    "todayPlanReadPages": "{count, plural, =1{اقرأ صفحة واحدة} =2{اقرأ صفحتين} other{اقرأ {count} صفحات}}",
+    "@todayPlanReadPages": {
+        "description": "Reading task title with page count",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "todayPlanContinueFromPage": "تابع من صفحة {page}",
+    "@todayPlanContinueFromPage": {
+        "description": "Reading task subtitle showing the last read Quran page",
+        "placeholders": {
+            "page": {
+                "type": "int"
+            }
+        }
+    },
+    "todayPlanShortReadingSession": "ابدأ بجلسة قراءة قصيرة",
+    "@todayPlanShortReadingSession": {
+        "description": "Fallback reading task subtitle when no last page is known"
+    },
+    "todayPlanListenMinutes": "استمع لمدة {minutes} دقائق",
+    "@todayPlanListenMinutes": {
+        "description": "Listening task title with duration",
+        "placeholders": {
+            "minutes": {
+                "type": "int"
+            }
+        }
+    },
+    "todayPlanContinueListening": "تابع الاستماع",
+    "@todayPlanContinueListening": {
+        "description": "Listening task title when listening history exists"
+    },
+    "todayPlanListeningSubtitle": "{surahName} · {reciterName}",
+    "@todayPlanListeningSubtitle": {
+        "description": "Listening task subtitle with surah and reciter names",
+        "placeholders": {
+            "surahName": {
+                "type": "String"
+            },
+            "reciterName": {
+                "type": "String"
+            }
+        }
+    },
+    "todayPlanChooseReciter": "اختر قارئًا واستمع بهدوء",
+    "@todayPlanChooseReciter": {
+        "description": "Fallback listening task subtitle"
+    },
+    "todayPlanMorningAdhkar": "أذكار الصباح",
+    "@todayPlanMorningAdhkar": {
+        "description": "Morning adhkar task title"
+    },
+    "todayPlanMorningAdhkarSubtitle": "ذكر قصير قبل انشغال اليوم",
+    "@todayPlanMorningAdhkarSubtitle": {
+        "description": "Morning adhkar task subtitle"
+    },
+    "todayPlanTasbeehGoal": "هدف التسبيح",
+    "@todayPlanTasbeehGoal": {
+        "description": "Tasbeeh task title"
+    },
+    "todayPlanProgress": "{completed} من {total} مكتملة · المتبقي {minutes} د",
+    "@todayPlanProgress": {
+        "description": "Today Plan progress summary",
+        "placeholders": {
+            "completed": {
+                "type": "int"
+            },
+            "total": {
+                "type": "int"
+            },
+            "minutes": {
+                "type": "int"
+            }
+        }
+    },
+    "todayPlanContinue": "تابع",
+    "@todayPlanContinue": {
+        "description": "Continue CTA for Today Plan"
+    },
+    "todayPlanStreakDays": "{days} ي",
+    "@todayPlanStreakDays": {
+        "description": "Compact streak day count",
+        "placeholders": {
+            "days": {
+                "type": "int"
+            }
+        }
+    },
+    "todayPlanMinutesShort": "{minutes}د",
+    "@todayPlanMinutesShort": {
+        "description": "Compact minute estimate",
+        "placeholders": {
+            "minutes": {
+                "type": "int"
+            }
+        }
+    },
     "searchSurah": "بحث عن سورة...",
     "@searchSurah": {
         "description": "Search surah hint text"
@@ -365,6 +524,7 @@
     "@settings": {
         "description": "Settings section title"
     },
+    "bottomNavHome": "الرئيسية",
     "bottomNavReciters": "القراء",
     "bottomNavSearch": "بحث",
     "a11yBottomNavRecitersTab": "الانتقال إلى القراء",
