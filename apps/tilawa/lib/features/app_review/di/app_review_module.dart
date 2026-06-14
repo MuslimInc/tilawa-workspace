@@ -13,7 +13,7 @@ import 'package:injectable/injectable.dart';
 ///    `isAvailable`, `requestReview` → `requestReview`, `storeListing` →
 ///    `openStoreListing`).
 /// 3. Move `@LazySingleton(as: AppReviewPlatformDataSource)` to that class.
-/// 4. Run `dart run build_runner build` and verify on a physical device.
+/// 4. Run `melos run gen` and verify on a physical device.
 @module
 abstract class AppReviewModule {
   @singleton

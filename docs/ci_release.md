@@ -51,7 +51,8 @@ which sets `lastUpdatedAt` on `assets/changelog/changelog.json` and stamps
   --split-debug-info=build/symbols` (Flutter 3.44.2, Java 17). Arm64 is also
   set via `ndk.abiFilters` in `app/build.gradle`; the CLI flag is still
   required so Flutter AOT does not compile unused ABIs into the AAB. Code
-  generation runs via `melos run gen` before the build. Debug symbols are
+  code generation runs via `melos run gen` (`build_runner build --workspace`)
+  before the build. Debug symbols are
   attached as the `debug-symbols-<versionCode>` artifact for Crashlytics.
 - The AAB is also attached to the run as the `app-release-aab` artifact, so you
   can download and upload it manually if the Play step ever needs to be skipped.

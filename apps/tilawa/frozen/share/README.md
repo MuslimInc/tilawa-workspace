@@ -38,5 +38,5 @@ FFmpeg is turned back on.
    `share_feature_flags.dart` or via `--dart-define`.
 6. Merge any presentation widget changes from this folder if preview UI was
    simplified while frozen.
-7. `dart run build_runner build --delete-conflicting-outputs`
+7. `melos run gen` (or `dart run build_runner build --workspace` from repo root)
 8. Full Shorebird **release** (not patch) — native binaries changed.

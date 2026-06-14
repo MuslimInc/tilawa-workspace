@@ -74,20 +74,20 @@ melos:
 
     # -- Code Generation -----------------------------------------------
     gen:
-      description: Run build_runner in packages that depend on it.
-      run: melos exec -- "dart run build_runner build --delete-conflicting-outputs"
-      packageFilters:
-        dependsOn: build_runner
+      description: Run build_runner for all workspace packages (one shared build).
+      run: dart run build_runner build --workspace
 
     build_runner:
       description: Alias for gen.
       run: melos run gen
 
     build_runner:watch:
-      description: Run build_runner in watch mode.
-      run: melos exec -- "dart run build_runner watch --delete-conflicting-outputs"
-      packageFilters:
-        dependsOn: build_runner
+      description: Run build_runner in watch mode across the workspace.
+      run: dart run build_runner watch --workspace
+
+    build_runner:stop:
+      description: Stop a running build_runner watch/serve across the workspace.
+      run: dart run build_runner stop --workspace
 
 sentry:
   upload_debug_symbols: true

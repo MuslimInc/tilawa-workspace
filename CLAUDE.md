@@ -99,12 +99,12 @@ Existing examples of the sibling pattern:
 
 ## Common commands
 
-Run from `apps/tilawa/`:
+Run from the workspace root (or `apps/tilawa/` for app-only commands):
 
 ```sh
-flutter test                        # all tests
-flutter test test/features/athkar  # single feature
-dart analyze                        # static analysis
-dart fix --apply                    # auto-fix lint issues
-flutter pub run build_runner build --delete-conflicting-outputs
+melos run gen                         # codegen (build_runner --workspace)
+flutter test                          # all tests (from apps/tilawa)
+flutter test test/features/athkar     # single feature
+dart analyze                          # static analysis
+dart fix --apply                      # auto-fix lint issues
 ```

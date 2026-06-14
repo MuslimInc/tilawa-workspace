@@ -121,7 +121,7 @@ import 'package:mockito/annotations.dart';
 import 'package:my_package/api_client.dart';
 import 'package:my_package/data_service.dart';
 
-// Generate the mock using build_runner: dart run build_runner build
+// Generate the mock using melos run gen (from workspace root)
 @GenerateNiceMocks([MockSpec<ApiClient>()])
 import 'data_service_test.mocks.dart';
 

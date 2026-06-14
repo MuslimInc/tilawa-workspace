@@ -35,7 +35,8 @@ Use `package:mockito` and `build_runner` to automatically generate mock classes 
 - Always use the `@GenerateNiceMocks` annotation (preferable to `@GenerateMocks` to avoid missing stub exceptions).
 - Place the annotation in the test file, passing a list of `MockSpec<Type>()` objects.
 - Import the generated file using the `.mocks.dart` extension.
-- Execute `build_runner` to generate the mock files: `dart run build_runner build`.
+- Execute `build_runner` to generate the mock files. In this monorepo run
+  `melos run gen` from the workspace root (or `dart run build_runner build --workspace`).
 
 ## Implementing Unit Tests
 Isolate the system under test using the generated mock objects. Use `package:test` to structure the test suite.
@@ -56,7 +57,7 @@ Use the following checklist to implement and verify mocked unit tests.
 - [ ] 2. Inject the dependency into the target class constructor.
 - [ ] 3. Create a test file (e.g., `target_test.dart`) and add `@GenerateNiceMocks([MockSpec<Dependency>()])`.
 - [ ] 4. Add the `part` or `import` directive for the generated `.mocks.dart` file.
-- [ ] 5. Run `dart run build_runner build` to generate the mock classes.
+- [ ] 5. Run `melos run gen` (workspace root) to generate the mock classes.
 - [ ] 6. Write the test cases using `group()` and `test()`.
 - [ ] 7. Stub required behaviors using `when()`.
 - [ ] 8. Execute the target method.
@@ -65,7 +66,7 @@ Use the following checklist to implement and verify mocked unit tests.
 
 ### Feedback Loop: Test Failures
 If tests fail or `build_runner` encounters errors:
-1. **Run validator:** Execute `dart test` or `dart run build_runner build`.
+1. **Run validator:** Execute `dart test` or `melos run gen` if mocks are missing.
 2. **Review errors:** Check for missing stubs, mismatched argument matchers, or syntax errors in the generated files.
 3. **Fix:**
    - If a mock method throws an unexpected null error, ensure you used `@GenerateNiceMocks`.

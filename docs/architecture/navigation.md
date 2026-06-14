@@ -93,8 +93,11 @@ Player policy helpers: `QuranPlayerRoutePolicy` in
 After editing `app_router_config.dart`:
 
 ```sh
-cd apps/tilawa
-dart run build_runner build --delete-conflicting-outputs
+# from workspace root (preferred)
+melos run gen
+
+# or from apps/tilawa
+dart run build_runner build
 ```
 
 ## Related

@@ -352,11 +352,14 @@ linter:
 * **Code Generation Tasks:** Use `build_runner` for all code generation tasks,
   such as for `json_serializable`.
 * **Running Build Runner:** After modifying files that require code generation,
-  run the build command:
+  run from the workspace root:
 
   ```shell
-  dart run build_runner build --delete-conflicting-outputs
+  melos run gen
   ```
+
+  Equivalent: `dart run build_runner build --workspace`. To stop a stuck watch:
+  `melos run build_runner:stop`.
 
 ## Testing
 * **Running Tests:** To run tests, use the `run_tests` tool if it is available,

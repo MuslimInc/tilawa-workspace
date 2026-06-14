@@ -51,13 +51,13 @@ Future<void> configureDependencies({AppLaunchConfig? launchConfig}) async {
   if (!getIt.isRegistered<NetworkInfo>()) {
     throw StateError(
       'NetworkInfo was not registered after getIt.init(). '
-      'Run: dart run build_runner build',
+      'Run: melos run gen (from workspace root)',
     );
   }
   if (!getIt.isRegistered<SettingsCubit>()) {
     throw StateError(
       'SettingsCubit was not registered after getIt.init(). '
-      'Run: dart run build_runner build',
+      'Run: melos run gen (from workspace root)',
     );
   }
 }
