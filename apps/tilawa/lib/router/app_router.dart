@@ -142,6 +142,11 @@ class AppRouter {
   }
 
   static String? redirect(BuildContext context, GoRouterState state) {
+    final String? invalidRestoredRoute = _redirectInvalidRestoredPath(state);
+    if (invalidRestoredRoute != null) {
+      return invalidRestoredRoute;
+    }
+
     // Presentation entry without active media is invalid (playback ≠ URL).
     // Guard with try-catch: during state restoration the BlocProvider ancestor
     // may not yet be mounted when GoRouter evaluates the first redirect.
@@ -167,6 +172,35 @@ class AppRouter {
         return const HomeRoute().location;
       }
     }
+    return null;
+  }
+
+  /// Sends users home when platform restoration replays a path-param route
+  /// without the param GoRouter expects (null-check crash in generated
+  /// `_fromState`, Sentry 7549523213).
+  static String? _redirectInvalidRestoredPath(GoRouterState state) {
+    final List<String> segments = state.uri.pathSegments;
+    if (segments.isEmpty) {
+      return null;
+    }
+
+    if (segments.first == 'reciter' &&
+        (segments.length < 2 || segments[1].isEmpty)) {
+      return const HomeRoute().location;
+    }
+
+    if (segments.first == 'quran-reader' &&
+        (segments.length < 2 || segments[1].isEmpty)) {
+      return const HomeRoute().location;
+    }
+
+    if (segments.first == 'athkar' &&
+        segments.length >= 2 &&
+        segments[1] != 'tasbeeh' &&
+        segments[1].isEmpty) {
+      return const HomeRoute().location;
+    }
+
     return null;
   }
 
@@ -415,7 +449,13 @@ class _ExtraDecoder extends Converter<Object?, Object?> {
 
   @override
   Object? convert(Object? input) {
-    return JsonTypeRegistry().decode(input);
+    final Object? decoded = JsonTypeRegistry().decode(input);
+    // Belt-and-suspenders: never pass typed wrapper maps to route casts such
+    // as `state.extra as ReciterEntity?` (Sentry 7549523148).
+    if (decoded is Map && decoded.containsKey('__type')) {
+      return null;
+    }
+    return decoded;
   }
 }
 

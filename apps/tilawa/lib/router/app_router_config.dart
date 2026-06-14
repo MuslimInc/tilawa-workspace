@@ -195,23 +195,42 @@ class OnboardingRoute extends GoRouteData with $OnboardingRoute {
 }
 
 class ReciterDetailsRoute extends GoRouteData with $ReciterDetailsRoute {
-  const ReciterDetailsRoute({this.$extra, required this.reciterId});
+  const ReciterDetailsRoute({this.$extra, this.reciterId});
 
   final ReciterEntity? $extra;
-  final String reciterId;
+  final String? reciterId;
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    if ($extra == null) {
-      return ReciterDetailsLoader(reciterId: reciterId);
+    final String? resolvedReciterId =
+        reciterId ?? state.pathParameters['reciterId'];
+    if (resolvedReciterId == null || resolvedReciterId.isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) {
+          const HomeRoute().go(context);
+        }
+      });
+      return const SizedBox.shrink();
+    }
+
+    final ReciterEntity? extra = $extra ?? _extraFromState(state.extra);
+    if (extra == null) {
+      return ReciterDetailsLoader(reciterId: resolvedReciterId);
     }
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => getIt<ReciterDetailsBloc>()),
         BlocProvider(create: (context) => getIt<ReciterDownloadBloc>()),
       ],
-      child: ReciterDetailsScreen(reciter: $extra!),
+      child: ReciterDetailsScreen(reciter: extra),
     );
+  }
+
+  static ReciterEntity? _extraFromState(Object? extra) {
+    if (extra is ReciterEntity) {
+      return extra;
+    }
+    return null;
   }
 }
 

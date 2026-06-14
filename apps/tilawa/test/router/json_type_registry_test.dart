@@ -71,6 +71,27 @@ void main() {
       expect(decoded, const TestObject(1, 'test'));
     });
 
+    test('should decode registered object from Map<Object?, Object?>', () {
+      final Map<Object?, Object?> encoded = <Object?, Object?>{
+        '__type': 'TestObject',
+        'data': <Object?, Object?>{'id': 1, 'content': 'test'},
+      };
+
+      final Object? decoded = registry.decode(encoded);
+
+      expect(decoded, isA<TestObject>());
+      expect(decoded, const TestObject(1, 'test'));
+    });
+
+    test('should return null for unknown typed wrapper maps', () {
+      final Map<String, Object> unknownMap = {
+        '__type': 'UnknownType',
+        'data': {},
+      };
+      final Object? result = registry.decode(unknownMap);
+      expect(result, isNull);
+    });
+
     test('should return null when input is null', () {
       expect(registry.encode(null), isNull);
       expect(registry.decode(null), isNull);
@@ -117,14 +138,26 @@ void main() {
       expect(result, rawMap);
     });
 
-    test('should pass through maps with unknown type during decoding', () {
-      final Map<String, Object> unknownMap = {
-        '__type': 'UnknownType',
-        'data': {},
+    test('should return null when registered decoder throws', () {
+      registry.register(
+        'BrokenObject',
+        (_) => throw const FormatException('bad data'),
+      );
+      final Map<String, Object> encoded = {
+        '__type': 'BrokenObject',
+        'data': {'id': 1},
       };
-      final Object? result = registry.decode(unknownMap);
-      // Since specific decoder is not found, it returns the map as is
-      expect(result, unknownMap);
+
+      expect(registry.decode(encoded), isNull);
+    });
+
+    test('should return null when typed wrapper has invalid data', () {
+      final Map<String, Object> encoded = {
+        '__type': 'TestObject',
+        'data': 'not-a-map',
+      };
+
+      expect(registry.decode(encoded), isNull);
     });
   });
 }

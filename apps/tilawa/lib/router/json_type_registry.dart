@@ -73,20 +73,52 @@ class JsonTypeRegistry {
       return null;
     }
 
-    if (object is Map<String, dynamic> && object.containsKey('__type')) {
-      final type = object['__type'] as String;
-      final dynamic data = object['data'];
+    final Map<String, dynamic>? map = _coerceStringKeyMap(object);
+    if (map != null && map.containsKey('__type')) {
+      final String type = map['__type'] as String;
+      final Map<String, dynamic>? data = _coerceStringKeyMap(map['data']);
 
       final Function(Map<String, dynamic>)? decoder = _decoders[type];
-      if (decoder != null && data is Map<String, dynamic>) {
+      if (decoder != null && data != null) {
         try {
           return decoder(data);
         } catch (_) {
-          // Decoding failed
+          // Decoding failed — drop the wrapper so typed route extras are not
+          // left as a raw Map (which crashes `state.extra as ReciterEntity?`).
         }
       }
+      return null;
     }
     return object;
+  }
+
+  /// Platform route restoration often delivers [Map<Object?, Object?>], which
+  /// is not a [Map<String, dynamic>] even when keys are strings.
+  static Map<String, dynamic>? _coerceStringKeyMap(Object? value) {
+    if (value is! Map) {
+      return null;
+    }
+    return Map<String, dynamic>.fromEntries(
+      value.entries.map(
+        (MapEntry<dynamic, dynamic> entry) => MapEntry(
+          entry.key.toString(),
+          _coerceJsonValue(entry.value),
+        ),
+      ),
+    );
+  }
+
+  static Object? _coerceJsonValue(Object? value) {
+    if (value == null || value is String || value is num || value is bool) {
+      return value;
+    }
+    if (value is Map) {
+      return _coerceStringKeyMap(value);
+    }
+    if (value is List) {
+      return value.map(_coerceJsonValue).toList();
+    }
+    return value;
   }
 }
 

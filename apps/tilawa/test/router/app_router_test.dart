@@ -6,6 +6,7 @@ import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa/features/theme/domain/primary_color_preset.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa/router/app_router.dart';
+import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'router_mock_helper.mocks.dart';
@@ -25,6 +26,33 @@ void main() {
       final context = MockBuildContext();
       final String? result = AppRouter.redirect(context, mockGoRouterState);
       expect(result, isNull);
+    });
+
+    test('redirect sends malformed reciter restoration paths home', () {
+      when(mockGoRouterState.uri).thenReturn(Uri.parse('/reciter'));
+      final String? result = AppRouter.redirect(
+        MockBuildContext(),
+        mockGoRouterState,
+      );
+      expect(result, const HomeRoute().location);
+    });
+
+    test('redirect sends malformed quran-reader restoration paths home', () {
+      when(mockGoRouterState.uri).thenReturn(Uri.parse('/quran-reader'));
+      final String? result = AppRouter.redirect(
+        MockBuildContext(),
+        mockGoRouterState,
+      );
+      expect(result, const HomeRoute().location);
+    });
+
+    test('redirect sends malformed athkar restoration paths home', () {
+      when(mockGoRouterState.uri).thenReturn(Uri.parse('/athkar/'));
+      final String? result = AppRouter.redirect(
+        MockBuildContext(),
+        mockGoRouterState,
+      );
+      expect(result, const HomeRoute().location);
     });
 
     testWidgets('errorBuilder builds Scaffold with error information', (
@@ -121,6 +149,15 @@ void main() {
       const token = 'some-string';
       expect(codec.encoder.convert(token), token);
       expect(codec.decoder.convert(token), token);
+    });
+
+    test('extraCodec drops undecodable typed wrapper maps', () {
+      const codec = AppRouterExtraCodec();
+      final Map<Object?, Object?> wrapper = <Object?, Object?>{
+        '__type': 'UnknownType',
+        'data': <Object?, Object?>{},
+      };
+      expect(codec.decoder.convert(wrapper), isNull);
     });
   });
 }
