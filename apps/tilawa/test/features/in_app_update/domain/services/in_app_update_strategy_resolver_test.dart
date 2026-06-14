@@ -100,6 +100,20 @@ void main() {
       );
     });
 
+    test('returns none when no update mode is available', () {
+      expect(
+        resolver.resolve(
+          policy: const InAppUpdatePolicy(),
+          availability: const InAppUpdateAvailability(
+            updateAvailable: true,
+            immediateUpdateAllowed: false,
+            flexibleUpdateAllowed: false,
+          ),
+        ),
+        InAppUpdateAction.none,
+      );
+    });
+
     test(
       'opens Play Store listing when forced but no in-app mode is allowed',
       () {

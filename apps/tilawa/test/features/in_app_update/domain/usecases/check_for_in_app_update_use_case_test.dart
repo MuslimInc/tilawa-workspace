@@ -3,11 +3,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/features/in_app_update/domain/entities/in_app_update_action.dart';
 import 'package:tilawa/features/in_app_update/domain/entities/in_app_update_availability.dart';
 import 'package:tilawa/features/in_app_update/domain/entities/in_app_update_policy.dart';
-import 'package:tilawa/features/in_app_update/domain/repositories/in_app_update_repository.dart';
 import 'package:tilawa/features/in_app_update/domain/services/in_app_update_strategy_resolver.dart';
+import 'package:tilawa/features/in_app_update/domain/usecases/complete_flexible_in_app_update_use_case.dart';
 import 'package:tilawa/features/in_app_update/domain/usecases/evaluate_in_app_update_use_case.dart';
 import 'package:tilawa/features/in_app_update/domain/usecases/execute_in_app_update_action_use_case.dart';
+import 'package:tilawa/features/in_app_update/domain/usecases/open_play_store_for_update_use_case.dart';
 import 'package:tilawa_core/errors/failures.dart';
+
+import '../../helpers/fake_in_app_update_repository.dart';
 
 void main() {
   late FakeInAppUpdateRepository repository;
@@ -75,6 +78,21 @@ void main() {
         ),
       );
     });
+
+    test('propagates availability failures', () async {
+      repository.availability = const Left(
+        InAppUpdateFailure.checkFailed('network'),
+      );
+
+      final Either<Failure, InAppUpdateAction> result = await evaluateUseCase();
+
+      expect(
+        result,
+        const Left<Failure, InAppUpdateAction>(
+          InAppUpdateFailure.checkFailed('network'),
+        ),
+      );
+    });
   });
 
   group('ExecuteInAppUpdateActionUseCase', () {
@@ -88,6 +106,18 @@ void main() {
         const Right<Failure, InAppUpdateAction>(InAppUpdateAction.none),
       );
       expect(repository.performImmediateUpdateCalls, 1);
+    });
+
+    test('propagates immediate update failures', () async {
+      repository.performImmediateUpdateResult = const Left(
+        InAppUpdateFailure.updateFailed(),
+      );
+
+      final Either<Failure, InAppUpdateAction> result = await executeUseCase(
+        InAppUpdateAction.performImmediate,
+      );
+
+      expect(result.isLeft, isTrue);
     });
 
     test('prompts for flexible restart after successful download', () async {
@@ -106,6 +136,19 @@ void main() {
       expect(repository.startFlexibleUpdateCalls, 1);
     });
 
+    test('returns none when flexible update does not start', () async {
+      repository.startFlexibleUpdateResult = const Right(false);
+
+      final Either<Failure, InAppUpdateAction> result = await executeUseCase(
+        InAppUpdateAction.startFlexible,
+      );
+
+      expect(
+        result,
+        const Right<Failure, InAppUpdateAction>(InAppUpdateAction.none),
+      );
+    });
+
     test('passes through prompt actions unchanged', () async {
       final Either<Failure, InAppUpdateAction> result = await executeUseCase(
         InAppUpdateAction.offerOptionalImmediate,
@@ -118,56 +161,53 @@ void main() {
         ),
       );
     });
+
+    test('returns none for none action', () async {
+      final Either<Failure, InAppUpdateAction> result = await executeUseCase(
+        InAppUpdateAction.none,
+      );
+
+      expect(
+        result,
+        const Right<Failure, InAppUpdateAction>(InAppUpdateAction.none),
+      );
+    });
+
+    test('passes through flexible restart action', () async {
+      final Either<Failure, InAppUpdateAction> result = await executeUseCase(
+        InAppUpdateAction.promptFlexibleRestart,
+      );
+
+      expect(
+        result,
+        const Right<Failure, InAppUpdateAction>(
+          InAppUpdateAction.promptFlexibleRestart,
+        ),
+      );
+    });
   });
-}
 
-class FakeInAppUpdateRepository implements InAppUpdateRepository {
-  bool isSupportedResult = true;
-  InAppUpdatePolicy policy = const InAppUpdatePolicy();
-  Either<Failure, InAppUpdateAvailability> availability = const Right(
-    InAppUpdateAvailability.unavailable(),
-  );
-  Either<Failure, bool> startFlexibleUpdateResult = const Right(false);
+  group('OpenPlayStoreForUpdateUseCase', () {
+    test('delegates to repository', () async {
+      final OpenPlayStoreForUpdateUseCase useCase =
+          OpenPlayStoreForUpdateUseCase(repository);
 
-  int checkAvailabilityCalls = 0;
-  int performImmediateUpdateCalls = 0;
-  int openAppStoreListingCalls = 0;
-  int startFlexibleUpdateCalls = 0;
-  int completeFlexibleUpdateCalls = 0;
+      final Either<Failure, void> result = await useCase();
 
-  @override
-  Future<Either<Failure, InAppUpdateAvailability>> checkAvailability() async {
-    checkAvailabilityCalls++;
-    return availability;
-  }
+      expect(result, const Right<Failure, void>(null));
+      expect(repository.openAppStoreListingCalls, 1);
+    });
+  });
 
-  @override
-  Future<Either<Failure, void>> completeFlexibleUpdate() async {
-    completeFlexibleUpdateCalls++;
-    return const Right(null);
-  }
+  group('CompleteFlexibleInAppUpdateUseCase', () {
+    test('delegates to repository', () async {
+      final CompleteFlexibleInAppUpdateUseCase useCase =
+          CompleteFlexibleInAppUpdateUseCase(repository);
 
-  @override
-  Future<InAppUpdatePolicy> getPolicy() async => policy;
+      final Either<Failure, void> result = await useCase();
 
-  @override
-  Future<bool> isSupported() async => isSupportedResult;
-
-  @override
-  Future<Either<Failure, void>> performImmediateUpdate() async {
-    performImmediateUpdateCalls++;
-    return const Right(null);
-  }
-
-  @override
-  Future<Either<Failure, void>> openAppStoreListing() async {
-    openAppStoreListingCalls++;
-    return const Right(null);
-  }
-
-  @override
-  Future<Either<Failure, bool>> startFlexibleUpdate() async {
-    startFlexibleUpdateCalls++;
-    return startFlexibleUpdateResult;
-  }
+      expect(result, const Right<Failure, void>(null));
+      expect(repository.completeFlexibleUpdateCalls, 1);
+    });
+  });
 }
