@@ -14,6 +14,7 @@ workspace:
   - packages/quran_image
   - packages/flex_color_scheme
   - packages/compass
+  - packages/in_app_update
 
 dev_dependencies:
   sentry_dart_plugin: ^3.4.0

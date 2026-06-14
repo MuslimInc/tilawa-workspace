@@ -4495,6 +4495,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Product tours reset'**
   String get tourDebugResetDone;
+
+  /// Snackbar message when a flexible in-app update finished downloading
+  ///
+  /// In en, this message translates to:
+  /// **'Update downloaded. Restart when you are ready to install it.'**
+  String get inAppUpdateFlexibleRestartMessage;
+
+  /// Snackbar message when an optional app update is available
+  ///
+  /// In en, this message translates to:
+  /// **'A new version of Tilawa is available.'**
+  String get inAppUpdateOptionalMessage;
+
+  /// Snackbar message when a forced update must go through the Play Store
+  ///
+  /// In en, this message translates to:
+  /// **'An update is required to continue using Tilawa.'**
+  String get inAppUpdateRequiredMessage;
+
+  /// Snackbar action to install a downloaded flexible update
+  ///
+  /// In en, this message translates to:
+  /// **'Restart'**
+  String get inAppUpdateRestartAction;
+
+  /// Snackbar action to open the Play Store for an optional update
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get inAppUpdateUpdateAction;
 }
 
 class _AppLocalizationsDelegate

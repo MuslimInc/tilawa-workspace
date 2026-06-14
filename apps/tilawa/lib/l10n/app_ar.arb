@@ -3162,5 +3162,25 @@
     "tourDebugResetDone": "تمت إعادة تعيين الجولات التعريفية",
     "@tourDebugResetDone": {
         "description": "Confirmation shown after the debug reset clears tour progress"
+    },
+    "inAppUpdateFlexibleRestartMessage": "تم تنزيل التحديث. أعد التشغيل عندما تكون مستعدًا للتثبيت.",
+    "@inAppUpdateFlexibleRestartMessage": {
+        "description": "Snackbar message when a flexible in-app update finished downloading"
+    },
+    "inAppUpdateOptionalMessage": "يتوفر إصدار جديد من تلاوة.",
+    "@inAppUpdateOptionalMessage": {
+        "description": "Snackbar message when an optional app update is available"
+    },
+    "inAppUpdateRequiredMessage": "يلزم التحديث لمتابعة استخدام تلاوة.",
+    "@inAppUpdateRequiredMessage": {
+        "description": "Snackbar message when a forced update must go through the Play Store"
+    },
+    "inAppUpdateRestartAction": "إعادة التشغيل",
+    "@inAppUpdateRestartAction": {
+        "description": "Snackbar action to install a downloaded flexible update"
+    },
+    "inAppUpdateUpdateAction": "تحديث",
+    "@inAppUpdateUpdateAction": {
+        "description": "Snackbar action to open the Play Store for an optional update"
     }
 }

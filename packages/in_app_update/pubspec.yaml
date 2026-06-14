@@ -1,0 +1,27 @@
+name: in_app_update
+description: >-
+  Tilawa fork of in_app_update. Adds download size fields and Play Store
+  listing launch for optional updates.
+version: 4.2.6
+publish_to: none
+resolution: workspace
+homepage: https://github.com/jonasbark/flutter_in_app_update
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  coverage: ^1.15.1
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: de.ffuf.in_app_update
+        pluginClass: InAppUpdatePlugin

@@ -1,4 +1,5 @@
 import 'package:injectable/injectable.dart';
+import 'package:tilawa_core/utils/typedefs.dart';
 
 import '../repositories/in_app_update_repository.dart';
 
@@ -8,5 +9,5 @@ class CompleteFlexibleInAppUpdateUseCase {
 
   final InAppUpdateRepository _repository;
 
-  Future<void> call() => _repository.completeFlexibleUpdate();
+  ResultFuture<void> call() => _repository.completeFlexibleUpdate();
 }
