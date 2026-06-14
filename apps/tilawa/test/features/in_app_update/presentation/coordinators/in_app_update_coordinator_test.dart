@@ -67,6 +67,53 @@ void main() {
     );
 
     test(
+      'throttles Play API checks when last evaluation returned none',
+      () async {
+        repository.availability = const Right(
+          InAppUpdateAvailability.unavailable(),
+        );
+
+        await coordinator.checkForUpdate();
+        await coordinator.checkForUpdate();
+
+        expect(repository.checkAvailabilityCalls, 1);
+        expect(presenter.promptCount, 0);
+      },
+    );
+
+    test(
+      'still re-checks Play for required update within minCheckInterval',
+      () async {
+        repository.policy = const InAppUpdatePolicy(forceUpdate: true);
+        repository.availability = const Right(
+          InAppUpdateAvailability(
+            updateAvailable: true,
+            immediateUpdateAllowed: false,
+            flexibleUpdateAllowed: false,
+          ),
+        );
+
+        await coordinator.checkForUpdate();
+        await coordinator.checkForUpdate();
+
+        expect(repository.checkAvailabilityCalls, 2);
+        expect(presenter.promptCount, 2);
+      },
+    );
+
+    test(
+      'still re-checks Play after evaluation failure within minCheckInterval',
+      () async {
+        repository.availability = const Left(InAppUpdateFailure.checkFailed());
+
+        await coordinator.checkForUpdate();
+        await coordinator.checkForUpdate();
+
+        expect(repository.checkAvailabilityCalls, 2);
+      },
+    );
+
+    test(
       'does not throttle flexible restart prompt within minCheckInterval',
       () async {
         repository.availability = const Right(

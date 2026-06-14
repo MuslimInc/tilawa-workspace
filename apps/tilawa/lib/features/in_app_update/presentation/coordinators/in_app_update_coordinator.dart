@@ -38,6 +38,7 @@ class InAppUpdateCoordinator {
   final InAppUpdatePromptPresenter _promptPresenter;
 
   DateTime? _lastCheckTime;
+  InAppUpdateAction? _lastEvaluatedAction;
   Future<void>? _inFlightCheck;
 
   /// Checks for an update and performs it if available.
@@ -63,6 +64,13 @@ class InAppUpdateCoordinator {
 
   Future<void> _checkForUpdateInternal() async {
     final DateTime now = DateTime.now();
+    final bool throttled =
+        _lastCheckTime != null &&
+        now.difference(_lastCheckTime!) < minCheckInterval;
+
+    if (throttled && _lastEvaluatedAction == InAppUpdateAction.none) {
+      return;
+    }
 
     try {
       final evaluateResult = await _evaluateUpdate();
@@ -73,18 +81,16 @@ class InAppUpdateCoordinator {
           );
         },
         (action) async {
+          _lastCheckTime = now;
+          _lastEvaluatedAction = action;
+
           if (action == InAppUpdateAction.none) {
             return;
           }
 
-          final bool throttled =
-              _lastCheckTime != null &&
-              now.difference(_lastCheckTime!) < minCheckInterval;
           if (throttled && action.isOptionalUserPrompt) {
             return;
           }
-
-          _lastCheckTime = now;
 
           final executeResult = await _executeAction(action);
           await executeResult.fold(
