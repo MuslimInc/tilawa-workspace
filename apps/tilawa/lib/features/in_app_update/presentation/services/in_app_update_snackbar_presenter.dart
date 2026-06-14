@@ -22,26 +22,37 @@ class InAppUpdateSnackBarPresenter implements InAppUpdatePromptPresenter {
         return;
       }
 
-      final ScaffoldMessengerState? messenger = ScaffoldMessenger.maybeOf(
-        context,
-      );
-      final l10n = context.l10n;
-      messenger?.showSnackBar(
-        SnackBar(
-          content: Text(_messageFor(action, l10n)),
-          action: SnackBarAction(
-            label: _actionLabelFor(action, l10n),
-            onPressed: () {
-              unawaited(onConfirm());
-            },
-          ),
-          duration: const Duration(minutes: 5),
-        ),
-      );
+      showPromptForContext(context, action, onConfirm: onConfirm);
     });
   }
 
-  String _messageFor(InAppUpdateAction action, AppLocalizations l10n) {
+  /// Test seam for widget tests without relying on [AppRouter.navigatorKey].
+  @visibleForTesting
+  void showPromptForContext(
+    BuildContext context,
+    InAppUpdateAction action, {
+    required Future<void> Function() onConfirm,
+  }) {
+    final ScaffoldMessengerState? messenger = ScaffoldMessenger.maybeOf(
+      context,
+    );
+    final AppLocalizations l10n = context.l10n;
+    messenger?.showSnackBar(
+      SnackBar(
+        content: Text(messageFor(action, l10n)),
+        action: SnackBarAction(
+          label: actionLabelFor(action, l10n),
+          onPressed: () {
+            unawaited(onConfirm());
+          },
+        ),
+        duration: const Duration(minutes: 5),
+      ),
+    );
+  }
+
+  @visibleForTesting
+  static String messageFor(InAppUpdateAction action, AppLocalizations l10n) {
     return switch (action) {
       InAppUpdateAction.promptFlexibleRestart =>
         l10n.inAppUpdateFlexibleRestartMessage,
@@ -51,7 +62,11 @@ class InAppUpdateSnackBarPresenter implements InAppUpdatePromptPresenter {
     };
   }
 
-  String _actionLabelFor(InAppUpdateAction action, AppLocalizations l10n) {
+  @visibleForTesting
+  static String actionLabelFor(
+    InAppUpdateAction action,
+    AppLocalizations l10n,
+  ) {
     return switch (action) {
       InAppUpdateAction.promptFlexibleRestart => l10n.inAppUpdateRestartAction,
       InAppUpdateAction.offerOptionalImmediate => l10n.inAppUpdateUpdateAction,
