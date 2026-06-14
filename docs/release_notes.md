@@ -13,7 +13,7 @@ the changelog for full engineering detail.
 | Field | Value |
 |-------|--------|
 | Version | **2.0.13** (build **58**) |
-| Git tag | `v2.0.13+58` (pending) |
+| Git tag | `v2.0.13+58` |
 | Date | 2026-06-14 |
 | Track | Production |
 
