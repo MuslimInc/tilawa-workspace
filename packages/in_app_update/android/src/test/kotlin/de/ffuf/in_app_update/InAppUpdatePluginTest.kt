@@ -496,6 +496,57 @@ class InAppUpdatePluginTest {
     }
 
     @Test
+    fun onActivityResumed_skipsResumeWhenActivityIsFinishing() {
+        val activity = createActivity()
+        activity.finish()
+        val info = mockUpdateInfo(
+            updateAvailability = UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS,
+        )
+        val manager = mockManager(info)
+        plugin.setAppUpdateManagerForTesting(manager)
+
+        plugin.onActivityResumed(activity)
+        dispatchAsyncTasks()
+
+        verify(manager, never()).startUpdateFlowForResult(
+            any<AppUpdateInfo>(),
+            any<Activity>(),
+            any<AppUpdateOptions>(),
+            anyInt(),
+        )
+    }
+
+    @Test
+    fun performImmediateUpdate_whenUpdateInProgress_returnsUpdateInProgress() {
+        val activity = createActivity()
+        attachActivity(activity)
+        plugin.setUpdateResultForTesting(mock(MethodChannel.Result::class.java))
+
+        callMethod("performImmediateUpdate")
+
+        verify(mockResult).error(
+            "UPDATE_IN_PROGRESS",
+            "An update flow is already in progress.",
+            null,
+        )
+    }
+
+    @Test
+    fun startFlexibleUpdate_whenUpdateInProgress_returnsUpdateInProgress() {
+        val activity = createActivity()
+        attachActivity(activity)
+        plugin.setUpdateResultForTesting(mock(MethodChannel.Result::class.java))
+
+        callMethod("startFlexibleUpdate")
+
+        verify(mockResult).error(
+            "UPDATE_IN_PROGRESS",
+            "An update flow is already in progress.",
+            null,
+        )
+    }
+
+    @Test
     fun onActivityResumed_resumesStalledImmediateUpdate() {
         val activity = createActivity()
         attachActivity(activity)

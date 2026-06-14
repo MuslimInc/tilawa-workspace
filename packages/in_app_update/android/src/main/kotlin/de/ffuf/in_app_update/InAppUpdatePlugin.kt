@@ -218,6 +218,9 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
         activity: Activity,
         info: AppUpdateInfo,
     ) {
+        if (activity.isFinishing || activity.isDestroyed) {
+            return
+        }
         if (info.updateAvailability()
             != UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS
         ) {
@@ -243,6 +246,14 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
     }
 
     private fun performImmediateUpdate(result: Result) {
+        if (updateResult != null) {
+            result.error(
+                "UPDATE_IN_PROGRESS",
+                "An update flow is already in progress.",
+                null,
+            )
+            return
+        }
         val manager = requireAppUpdateManager(result) ?: return
         val activity = requireActivity(result) ?: return
 
@@ -284,6 +295,14 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
     }
 
     private fun startFlexibleUpdate(result: Result) {
+        if (updateResult != null) {
+            result.error(
+                "UPDATE_IN_PROGRESS",
+                "An update flow is already in progress.",
+                null,
+            )
+            return
+        }
         val manager = requireAppUpdateManager(result) ?: return
         val activity = requireActivity(result) ?: return
 

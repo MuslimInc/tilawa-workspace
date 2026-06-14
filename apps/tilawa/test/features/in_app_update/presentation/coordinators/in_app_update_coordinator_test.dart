@@ -163,6 +163,22 @@ void main() {
       expect(repository.openAppStoreListingCalls, 1);
     });
 
+    test('confirming required store prompt opens Play Store listing', () async {
+      repository.policy = const InAppUpdatePolicy(forceUpdate: true);
+      repository.availability = const Right(
+        InAppUpdateAvailability(
+          updateAvailable: true,
+          immediateUpdateAllowed: false,
+          flexibleUpdateAllowed: false,
+        ),
+      );
+
+      await coordinator.checkForUpdate();
+      await presenter.lastOnConfirm!();
+
+      expect(repository.openAppStoreListingCalls, 1);
+    });
+
     test('confirming flexible restart completes the update', () async {
       repository.availability = const Right(
         InAppUpdateAvailability(
@@ -220,6 +236,17 @@ void main() {
 
       expect(presenter.lastAction, InAppUpdateAction.promptFlexibleRestart);
     });
+
+    test(
+      'confirming download-complete restart prompt completes update',
+      () async {
+        repository.flexibleDownloadedController.add(null);
+        await Future<void>.delayed(Duration.zero);
+        await presenter.lastOnConfirm!();
+
+        expect(repository.completeFlexibleUpdateCalls, 1);
+      },
+    );
 
     test('logs unexpected errors without showing a prompt', () async {
       repository.throwOnCheckAvailability = true;

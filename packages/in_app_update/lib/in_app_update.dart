@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 /// Status of a download/install.
@@ -18,6 +19,21 @@ enum InstallStatus {
 
   const InstallStatus(this.value);
   final int value;
+
+  /// O(1) lookup from Play Core [InstallStatus] integer codes.
+  static InstallStatus fromCode(int value) {
+    return switch (value) {
+      0 => InstallStatus.unknown,
+      1 => InstallStatus.pending,
+      2 => InstallStatus.downloading,
+      3 => InstallStatus.installing,
+      4 => InstallStatus.installed,
+      5 => InstallStatus.failed,
+      6 => InstallStatus.canceled,
+      11 => InstallStatus.downloaded,
+      _ => InstallStatus.unknown,
+    };
+  }
 }
 
 /// Availability of an update for the requested package.
@@ -32,6 +48,17 @@ enum UpdateAvailability {
 
   const UpdateAvailability(this.value);
   final int value;
+
+  /// O(1) lookup from Play Core [UpdateAvailability] integer codes.
+  static UpdateAvailability fromCode(int value) {
+    return switch (value) {
+      0 => UpdateAvailability.unknown,
+      1 => UpdateAvailability.updateNotAvailable,
+      2 => UpdateAvailability.updateAvailable,
+      3 => UpdateAvailability.developerTriggeredUpdateInProgress,
+      _ => UpdateAvailability.unknown,
+    };
+  }
 }
 
 enum AppUpdateResult {
@@ -64,8 +91,8 @@ class InAppUpdate {
     final result = await _channel.invokeMethod('checkForUpdate');
 
     return AppUpdateInfo(
-      updateAvailability: UpdateAvailability.values.firstWhere(
-        (element) => element.value == result['updateAvailability'],
+      updateAvailability: UpdateAvailability.fromCode(
+        result['updateAvailability'] as int? ?? 0,
       ),
       immediateUpdateAllowed: result['immediateAllowed'],
       immediateAllowedPreconditions: result['immediateAllowedPreconditions']
@@ -76,8 +103,8 @@ class InAppUpdate {
           ?.map<int>((e) => e as int)
           .toList(),
       availableVersionCode: result['availableVersionCode'],
-      installStatus: InstallStatus.values.firstWhere(
-        (element) => element.value == result['installStatus'],
+      installStatus: InstallStatus.fromCode(
+        result['installStatus'] as int? ?? 0,
       ),
       packageName: result['packageName'],
       clientVersionStalenessDays: result['clientVersionStalenessDays'],
@@ -87,31 +114,24 @@ class InAppUpdate {
     );
   }
 
+  /// Maps native install status integer codes to [InstallStatus].
+  static InstallStatus installStatusFromCode(int value) =>
+      InstallStatus.fromCode(value);
+
+  static Stream<InstallStatus>? _installUpdateStream;
+
+  /// Resets the cached install listener stream. For tests only.
+  @visibleForTesting
+  static void resetInstallUpdateListenerForTesting() {
+    _installUpdateStream = null;
+  }
+
   static Stream<InstallStatus> get installUpdateListener {
-    return _installListener.receiveBroadcastStream().cast<int>().map((
-      int value,
-    ) {
-      switch (value) {
-        case 0:
-          return InstallStatus.unknown;
-        case 1:
-          return InstallStatus.pending;
-        case 2:
-          return InstallStatus.downloading;
-        case 3:
-          return InstallStatus.installing;
-        case 4:
-          return InstallStatus.installed;
-        case 5:
-          return InstallStatus.failed;
-        case 6:
-          return InstallStatus.canceled;
-        case 11:
-          return InstallStatus.downloaded;
-        default:
-          return InstallStatus.unknown;
-      }
-    });
+    _installUpdateStream ??= _installListener
+        .receiveBroadcastStream()
+        .cast<int>()
+        .map(InstallStatus.fromCode);
+    return _installUpdateStream!;
   }
 
   /// Performs an immediate update that is entirely handled by the Play API.

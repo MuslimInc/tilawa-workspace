@@ -12,6 +12,9 @@ void main() {
   const MethodChannel methodChannel = MethodChannel(
     'de.ffuf.in_app_update/methods',
   );
+  const EventChannel eventChannel = EventChannel(
+    'de.ffuf.in_app_update/stateEvents',
+  );
 
   final TestDefaultBinaryMessenger messenger =
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
@@ -26,6 +29,9 @@ void main() {
 
   setUp(() {
     setMethodHandler(null);
+    messenger.setMockStreamHandler(eventChannel, null);
+    InAppUpdate.resetInstallUpdateListenerForTesting();
+    dataSource.androidPlatformForTesting = null;
   });
 
   group('PlayInAppUpdatePlatformDataSource', () {
@@ -115,23 +121,31 @@ void main() {
       );
     });
 
-    test('returns checkFailed when Play payload cannot be parsed', () async {
-      setMethodHandler((call) async {
-        return <String, Object?>{
-          'updateAvailability': 999,
-          'immediateAllowed': true,
-          'flexibleAllowed': true,
-          'installStatus': InstallStatus.downloaded.value,
-          'packageName': 'com.tilawa.app',
-          'updatePriority': 1,
-        };
-      });
+    test(
+      'maps unknown Play availability codes to unavailable update',
+      () async {
+        setMethodHandler((call) async {
+          return <String, Object?>{
+            'updateAvailability': 999,
+            'immediateAllowed': true,
+            'flexibleAllowed': true,
+            'installStatus': InstallStatus.downloaded.value,
+            'packageName': 'com.tilawa.app',
+            'updatePriority': 1,
+          };
+        });
 
-      final Either<Failure, InAppUpdateAvailability> result = await dataSource
-          .checkAvailability();
+        final Either<Failure, InAppUpdateAvailability> result = await dataSource
+            .checkAvailability();
 
-      expect(result.isLeft, isTrue);
-    });
+        expect(result.isRight, isTrue);
+        result.fold((_) => fail('expected Right'), (
+          InAppUpdateAvailability availability,
+        ) {
+          expect(availability.updateAvailable, isFalse);
+        });
+      },
+    );
 
     test('returns checkFailed for generic exceptions', () async {
       setMethodHandler((_) async {
@@ -244,5 +258,48 @@ void main() {
       });
       expect((await dataSource.completeFlexibleUpdate()).isLeft, isTrue);
     });
+
+    test(
+      'onFlexibleUpdateDownloaded returns empty stream off Android host',
+      () async {
+        dataSource.androidPlatformForTesting = false;
+
+        expect(await dataSource.onFlexibleUpdateDownloaded.isEmpty, isTrue);
+      },
+    );
+
+    test('onFlexibleUpdateDownloaded caches stream on Android host', () {
+      dataSource.androidPlatformForTesting = true;
+
+      expect(
+        identical(
+          dataSource.onFlexibleUpdateDownloaded,
+          dataSource.onFlexibleUpdateDownloaded,
+        ),
+        isTrue,
+      );
+    });
+
+    test(
+      'onFlexibleUpdateDownloaded emits when Play reports downloaded status',
+      () async {
+        dataSource.androidPlatformForTesting = true;
+        messenger.setMockStreamHandler(
+          eventChannel,
+          MockStreamHandler.inline(
+            onListen: (_, events) {
+              events.success(InstallStatus.downloading.value);
+              events.success(InstallStatus.downloaded.value);
+            },
+          ),
+        );
+
+        final List<void> events = await dataSource.onFlexibleUpdateDownloaded
+            .take(1)
+            .toList();
+
+        expect(events, hasLength(1));
+      },
+    );
   });
 }

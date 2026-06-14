@@ -24,6 +24,7 @@ void main() {
   setUp(() {
     setMethodHandler(null);
     messenger.setMockStreamHandler(eventChannel, null);
+    InAppUpdate.resetInstallUpdateListenerForTesting();
   });
 
   group('InAppUpdate.checkForUpdate', () {
@@ -166,6 +167,38 @@ void main() {
   });
 
   group('InAppUpdate.installUpdateListener', () {
+    test('installStatusFromCode maps known and unknown codes', () {
+      expect(
+        InstallStatus.fromCode(InstallStatus.downloaded.value),
+        InstallStatus.downloaded,
+      );
+      expect(InstallStatus.fromCode(999), InstallStatus.unknown);
+      expect(
+        InAppUpdate.installStatusFromCode(InstallStatus.downloaded.value),
+        InstallStatus.downloaded,
+      );
+    });
+
+    test('UpdateAvailability.fromCode maps known and unknown codes', () {
+      expect(
+        UpdateAvailability.fromCode(
+          UpdateAvailability.updateAvailable.value,
+        ),
+        UpdateAvailability.updateAvailable,
+      );
+      expect(UpdateAvailability.fromCode(999), UpdateAvailability.unknown);
+    });
+
+    test('caches the broadcast stream across getter accesses', () {
+      expect(
+        identical(
+          InAppUpdate.installUpdateListener,
+          InAppUpdate.installUpdateListener,
+        ),
+        isTrue,
+      );
+    });
+
     test('maps install status codes', () async {
       messenger.setMockStreamHandler(
         eventChannel,

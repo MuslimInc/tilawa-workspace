@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:dartz_plus/dartz_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:injectable/injectable.dart';
@@ -13,6 +15,13 @@ import 'in_app_update_platform_data_source.dart';
 @LazySingleton(as: InAppUpdatePlatformDataSource)
 class PlayInAppUpdatePlatformDataSource
     implements InAppUpdatePlatformDataSource {
+  Stream<void>? _flexibleDownloadedStream;
+
+  /// When set, overrides [Platform.isAndroid] for stream behavior in tests.
+  @visibleForTesting
+  bool? androidPlatformForTesting;
+
+  bool get _isAndroidHost => androidPlatformForTesting ?? Platform.isAndroid;
   @override
   Future<bool> isSupported() async => Platform.isAndroid;
 
@@ -112,13 +121,20 @@ class PlayInAppUpdatePlatformDataSource
 
   @override
   Stream<void> get onFlexibleUpdateDownloaded {
-    if (!Platform.isAndroid) {
+    if (!_isAndroidHost) {
       return const Stream<void>.empty();
     }
 
-    return InAppUpdate.installUpdateListener
-        .where((InstallStatus status) => status == InstallStatus.downloaded)
-        .map((InstallStatus status) {});
+    _flexibleDownloadedStream ??= InAppUpdate.installUpdateListener
+        .map(
+          (InstallStatus status) => switch (status) {
+            InstallStatus.downloaded => true,
+            _ => false,
+          },
+        )
+        .where((bool downloaded) => downloaded)
+        .map((_) {});
+    return _flexibleDownloadedStream!;
   }
 
   bool _isAppNotOwnedError(PlatformException error) {

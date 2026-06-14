@@ -35,9 +35,9 @@ void main() {
       );
       expect(
         InAppUpdateSnackBarPresenter.durationFor(
-          InAppUpdateAction.offerRequiredStoreUpdate,
+          InAppUpdateAction.offerOptionalImmediate,
         ),
-        const Duration(days: 1),
+        InAppUpdateSnackBarPresenter.snackBarPromptDuration,
       );
       expect(
         InAppUpdateSnackBarPresenter.messageFor(
@@ -97,6 +97,49 @@ void main() {
       expect(confirmed, isTrue);
     });
 
+    testWidgets('shows material banner for required store update', (
+      WidgetTester tester,
+    ) async {
+      var confirmed = false;
+      final InAppUpdateSnackBarPresenter presenter =
+          InAppUpdateSnackBarPresenter();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('en'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          theme: AppTheme.getLightTheme(
+            primaryColor: AppColors.primaryCoral,
+          ),
+          home: const Scaffold(body: SizedBox.shrink()),
+        ),
+      );
+
+      presenter.showPromptForContext(
+        tester.element(find.byType(Scaffold)),
+        InAppUpdateAction.offerRequiredStoreUpdate,
+        onConfirm: () async {
+          confirmed = true;
+        },
+      );
+      await tester.pump();
+
+      expect(
+        find.text('An update is required to continue using Tilawa.'),
+        findsOneWidget,
+      );
+      expect(find.byType(MaterialBanner), findsOneWidget);
+      expect(find.byType(SnackBar), findsNothing);
+
+      final MaterialBanner banner = tester.widget(find.byType(MaterialBanner));
+      final TextButton updateButton = banner.actions.first as TextButton;
+      updateButton.onPressed!();
+      await tester.pump();
+      expect(confirmed, isTrue);
+      expect(find.byType(MaterialBanner), findsNothing);
+    });
+
     testWidgets('showPrompt uses AppRouter navigator context', (
       WidgetTester tester,
     ) async {
@@ -142,6 +185,35 @@ void main() {
       await tester.pump();
 
       expect(find.byType(SnackBar), findsNothing);
+    });
+
+    testWidgets('showPromptForContext no-ops for non-prompt actions', (
+      WidgetTester tester,
+    ) async {
+      final InAppUpdateSnackBarPresenter presenter =
+          InAppUpdateSnackBarPresenter();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: const Scaffold(body: SizedBox.shrink()),
+        ),
+      );
+
+      for (final InAppUpdateAction action in <InAppUpdateAction>[
+        InAppUpdateAction.performImmediate,
+        InAppUpdateAction.startFlexible,
+        InAppUpdateAction.none,
+      ]) {
+        presenter.showPromptForContext(
+          tester.element(find.byType(Scaffold)),
+          action,
+          onConfirm: () async {},
+        );
+        await tester.pump();
+
+        expect(find.byType(SnackBar), findsNothing);
+        expect(find.byType(MaterialBanner), findsNothing);
+      }
     });
   });
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/features/in_app_update/data/datasources/in_app_update_config_remote_data_source.dart';
@@ -59,6 +61,17 @@ void main() {
       expect(platformDataSource.startFlexibleUpdateCalls, 1);
       expect(platformDataSource.completeFlexibleUpdateCalls, 1);
     });
+
+    test('delegates onFlexibleUpdateDownloaded to platform data source', () {
+      final StreamController<void> controller =
+          StreamController<void>.broadcast();
+      platformDataSource.flexibleDownloadedStream = controller.stream;
+
+      expect(
+        repository.onFlexibleUpdateDownloaded,
+        same(platformDataSource.onFlexibleUpdateDownloaded),
+      );
+    });
   });
 }
 
@@ -78,6 +91,10 @@ class FakePlatformDataSource implements InAppUpdatePlatformDataSource {
   int openAppStoreListingCalls = 0;
   int startFlexibleUpdateCalls = 0;
   int completeFlexibleUpdateCalls = 0;
+  Stream<void> flexibleDownloadedStream = const Stream<void>.empty();
+
+  @override
+  Stream<void> get onFlexibleUpdateDownloaded => flexibleDownloadedStream;
 
   @override
   ResultFuture<InAppUpdateAvailability> checkAvailability() async {
@@ -110,7 +127,4 @@ class FakePlatformDataSource implements InAppUpdatePlatformDataSource {
     startFlexibleUpdateCalls++;
     return const Right(true);
   }
-
-  @override
-  Stream<void> get onFlexibleUpdateDownloaded => const Stream<void>.empty();
 }
