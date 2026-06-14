@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:tilawa/core/services/hive_readiness.dart';
 import 'package:tilawa/features/history/data/datasources/history_local_datasource.dart';
 import 'package:tilawa/features/history/domain/entities/history_entity.dart';
+import '../../../../core/helpers/fake_hive_readiness.dart';
 
 class MockHiveInterface extends Mock implements HiveInterface {}
 
@@ -14,12 +16,14 @@ void main() {
   late HistoryLocalDataSourceImpl dataSource;
   late MockHiveInterface mockHive;
   late MockBox mockBox;
+  late HiveReadiness hiveReadiness;
   const historyBoxName = 'listening_history';
 
   setUp(() {
     mockHive = MockHiveInterface();
     mockBox = MockBox();
-    dataSource = HistoryLocalDataSourceImpl(mockHive);
+    hiveReadiness = ImmediateHiveReadiness();
+    dataSource = HistoryLocalDataSourceImpl(mockHive, hiveReadiness);
 
     when(
       () => mockHive.openBox(historyBoxName),
@@ -45,6 +49,24 @@ void main() {
   );
 
   group('getAllHistory', () {
+    test('waits for hive readiness before opening box', () async {
+      final FakeHiveReadiness gate = FakeHiveReadiness();
+      final HistoryLocalDataSourceImpl gatedSource = HistoryLocalDataSourceImpl(
+        mockHive,
+        gate,
+      );
+      when(() => mockBox.values).thenReturn([]);
+
+      final Future<List<HistoryEntity>> pending = gatedSource.getAllHistory();
+      await Future<void>.delayed(Duration.zero);
+      expect(gate.ensureReadyCallCount, 1);
+      verifyNever(() => mockHive.openBox(historyBoxName));
+
+      gate.release();
+      await pending;
+      verify(() => mockHive.openBox(historyBoxName)).called(1);
+    });
+
     test('should return list of HistoryEntity from Box', () async {
       // arrange
       final jsonString = jsonEncode(tHistoryEntity.toJson());

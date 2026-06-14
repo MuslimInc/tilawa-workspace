@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:hive_ce/hive.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa/core/services/hive_readiness.dart';
 
 import '../../domain/entities/history_entity.dart';
 
@@ -38,15 +39,17 @@ abstract class HistoryLocalDataSource {
 
 @LazySingleton(as: HistoryLocalDataSource)
 class HistoryLocalDataSourceImpl implements HistoryLocalDataSource {
-  HistoryLocalDataSourceImpl(this._hive);
+  HistoryLocalDataSourceImpl(this._hive, this._hiveReadiness);
 
   static const String _historyBoxName = 'listening_history';
   static const String _historyCounterKey = '__history_counter__';
   static const int _maxHistorySize = 500; // Limit history entries
 
   final HiveInterface _hive;
+  final HiveReadiness _hiveReadiness;
 
   Future<Box> _getBox() async {
+    await _hiveReadiness.ensureReady();
     if (_hive.isBoxOpen(_historyBoxName)) {
       return _hive.box(_historyBoxName);
     }
