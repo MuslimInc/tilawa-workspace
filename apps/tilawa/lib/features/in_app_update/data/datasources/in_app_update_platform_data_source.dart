@@ -1,14 +1,22 @@
+import 'package:tilawa_core/utils/typedefs.dart';
+
 import '../../domain/entities/in_app_update_availability.dart';
 
 /// Platform bridge for Google Play in-app updates.
 abstract class InAppUpdatePlatformDataSource {
   Future<bool> isSupported();
 
-  Future<InAppUpdateAvailability> checkAvailability();
+  ResultFuture<InAppUpdateAvailability> checkAvailability();
 
-  Future<void> performImmediateUpdate();
+  ResultFuture<void> performImmediateUpdate();
 
-  Future<bool> startFlexibleUpdate();
+  ResultFuture<void> openAppStoreListing();
 
-  Future<void> completeFlexibleUpdate();
+  /// Starts a flexible update flow.
+  ///
+  /// The native plugin completes this future only after Play reports
+  /// [InstallStatus.downloaded], not merely after user consent.
+  ResultFuture<bool> startFlexibleUpdate();
+
+  ResultFuture<void> completeFlexibleUpdate();
 }

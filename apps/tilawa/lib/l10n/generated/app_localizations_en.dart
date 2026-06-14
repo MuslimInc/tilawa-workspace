@@ -2489,4 +2489,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tourDebugResetDone => 'Product tours reset';
+
+  @override
+  String get inAppUpdateFlexibleRestartMessage =>
+      'Update downloaded. Restart when you are ready to install it.';
+
+  @override
+  String get inAppUpdateOptionalMessage =>
+      'A new version of Tilawa is available.';
+
+  @override
+  String get inAppUpdateRestartAction => 'Restart';
+
+  @override
+  String get inAppUpdateUpdateAction => 'Update';
 }

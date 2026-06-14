@@ -2,6 +2,15 @@
 enum InAppUpdateAction {
   performImmediate,
   startFlexible,
+  promptFlexibleRestart,
   offerOptionalImmediate,
   none,
+}
+
+/// Presentation helpers for [InAppUpdateAction].
+extension InAppUpdateActionPresentation on InAppUpdateAction {
+  /// Whether the app should show a snackbar and wait for user confirmation.
+  bool get requiresUserPrompt =>
+      this == InAppUpdateAction.promptFlexibleRestart ||
+      this == InAppUpdateAction.offerOptionalImmediate;
 }

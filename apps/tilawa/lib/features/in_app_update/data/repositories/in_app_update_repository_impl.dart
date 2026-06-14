@@ -1,4 +1,5 @@
 import 'package:injectable/injectable.dart';
+import 'package:tilawa_core/utils/typedefs.dart';
 
 import '../../domain/entities/in_app_update_availability.dart';
 import '../../domain/entities/in_app_update_policy.dart';
@@ -23,18 +24,22 @@ class InAppUpdateRepositoryImpl implements InAppUpdateRepository {
   Future<InAppUpdatePolicy> getPolicy() => _configDataSource.getPolicy();
 
   @override
-  Future<InAppUpdateAvailability> checkAvailability() =>
+  ResultFuture<InAppUpdateAvailability> checkAvailability() =>
       _platformDataSource.checkAvailability();
 
   @override
-  Future<void> performImmediateUpdate() =>
+  ResultFuture<void> performImmediateUpdate() =>
       _platformDataSource.performImmediateUpdate();
 
   @override
-  Future<bool> startFlexibleUpdate() =>
+  ResultFuture<void> openAppStoreListing() =>
+      _platformDataSource.openAppStoreListing();
+
+  @override
+  ResultFuture<bool> startFlexibleUpdate() =>
       _platformDataSource.startFlexibleUpdate();
 
   @override
-  Future<void> completeFlexibleUpdate() =>
+  ResultFuture<void> completeFlexibleUpdate() =>
       _platformDataSource.completeFlexibleUpdate();
 }

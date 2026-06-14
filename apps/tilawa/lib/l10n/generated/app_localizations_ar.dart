@@ -2471,4 +2471,17 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get tourDebugResetDone => 'تمت إعادة تعيين الجولات التعريفية';
+
+  @override
+  String get inAppUpdateFlexibleRestartMessage =>
+      'تم تنزيل التحديث. أعد التشغيل عندما تكون مستعدًا للتثبيت.';
+
+  @override
+  String get inAppUpdateOptionalMessage => 'يتوفر إصدار جديد من تلاوة.';
+
+  @override
+  String get inAppUpdateRestartAction => 'إعادة التشغيل';
+
+  @override
+  String get inAppUpdateUpdateAction => 'تحديث';
 }

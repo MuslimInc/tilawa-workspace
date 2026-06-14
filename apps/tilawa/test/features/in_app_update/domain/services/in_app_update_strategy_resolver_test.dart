@@ -84,5 +84,37 @@ void main() {
         InAppUpdateAction.startFlexible,
       );
     });
+
+    test('prompts to restart when flexible update is already downloaded', () {
+      expect(
+        resolver.resolve(
+          policy: const InAppUpdatePolicy(forceUpdate: true),
+          availability: const InAppUpdateAvailability(
+            updateAvailable: false,
+            immediateUpdateAllowed: true,
+            flexibleUpdateAllowed: true,
+            flexibleUpdateDownloaded: true,
+          ),
+        ),
+        InAppUpdateAction.promptFlexibleRestart,
+      );
+    });
+
+    test(
+      'opens Play Store listing when forced but no in-app mode is allowed',
+      () {
+        expect(
+          resolver.resolve(
+            policy: const InAppUpdatePolicy(forceUpdate: true),
+            availability: const InAppUpdateAvailability(
+              updateAvailable: true,
+              immediateUpdateAllowed: false,
+              flexibleUpdateAllowed: false,
+            ),
+          ),
+          InAppUpdateAction.offerOptionalImmediate,
+        );
+      },
+    );
   });
 }

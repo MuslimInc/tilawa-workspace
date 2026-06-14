@@ -1,27 +1,31 @@
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:tilawa_core/errors/failures.dart';
 
-import '../../domain/entities/in_app_update_check_result.dart';
-import '../../domain/entities/in_app_update_presentation_event.dart';
-import '../../domain/usecases/check_for_in_app_update_use_case.dart';
+import '../../domain/entities/in_app_update_action.dart';
 import '../../domain/usecases/complete_flexible_in_app_update_use_case.dart';
-import '../../domain/usecases/perform_immediate_in_app_update_use_case.dart';
+import '../../domain/usecases/evaluate_in_app_update_use_case.dart';
+import '../../domain/usecases/execute_in_app_update_action_use_case.dart';
+import '../../domain/usecases/open_play_store_for_update_use_case.dart';
 import '../services/in_app_update_prompt_presenter.dart';
 
 /// Orchestrates throttled update checks and routes UI prompts.
 @singleton
 class InAppUpdateCoordinator {
   InAppUpdateCoordinator(
-    this._checkForUpdate,
-    this._performImmediateUpdate,
+    this._evaluateUpdate,
+    this._executeAction,
+    this._openPlayStoreForUpdate,
     this._completeFlexibleUpdate,
     this._promptPresenter,
   );
 
   static const Duration minCheckInterval = Duration(hours: 6);
 
-  final CheckForInAppUpdateUseCase _checkForUpdate;
-  final PerformImmediateInAppUpdateUseCase _performImmediateUpdate;
+  final EvaluateInAppUpdateUseCase _evaluateUpdate;
+  final ExecuteInAppUpdateActionUseCase _executeAction;
+  final OpenPlayStoreForUpdateUseCase _openPlayStoreForUpdate;
   final CompleteFlexibleInAppUpdateUseCase _completeFlexibleUpdate;
   final InAppUpdatePromptPresenter _promptPresenter;
 
@@ -58,30 +62,57 @@ class InAppUpdateCoordinator {
     _lastCheckTime = now;
 
     try {
-      final InAppUpdateCheckResult result = await _checkForUpdate();
-      if (!result.hasPresentationEvent) {
-        return;
-      }
+      final evaluateResult = await _evaluateUpdate();
+      await evaluateResult.fold(
+        (failure) async {
+          logger.e(
+            '[InAppUpdateCoordinator] Failed to evaluate update: $failure',
+          );
+        },
+        (action) async {
+          if (action == InAppUpdateAction.none) {
+            return;
+          }
 
-      _promptPresenter.showPrompt(
-        result.presentationEvent,
-        onConfirm: () => _handlePromptConfirmation(result.presentationEvent),
+          final executeResult = await _executeAction(action);
+          await executeResult.fold(
+            (failure) async {
+              logger.e(
+                '[InAppUpdateCoordinator] Failed to execute update: $failure',
+              );
+            },
+            (presentationAction) async {
+              if (!presentationAction.requiresUserPrompt) {
+                return;
+              }
+
+              _promptPresenter.showPrompt(
+                presentationAction,
+                onConfirm: () => _handlePromptConfirmation(presentationAction),
+              );
+            },
+          );
+        },
       );
     } catch (e) {
       logger.e('[InAppUpdateCoordinator] Failed to check for update: $e');
     }
   }
 
-  Future<void> _handlePromptConfirmation(
-    InAppUpdatePresentationEvent event,
-  ) async {
-    switch (event) {
-      case InAppUpdatePresentationEvent.promptFlexibleRestart:
-        await _completeFlexibleUpdate();
-      case InAppUpdatePresentationEvent.promptOptionalImmediate:
-        await _performImmediateUpdate();
-      case InAppUpdatePresentationEvent.none:
-        return;
-    }
+  Future<void> _handlePromptConfirmation(InAppUpdateAction action) async {
+    final Either<Failure, void> result = switch (action) {
+      InAppUpdateAction.promptFlexibleRestart =>
+        await _completeFlexibleUpdate(),
+      InAppUpdateAction.offerOptionalImmediate =>
+        await _openPlayStoreForUpdate(),
+      _ => const Right(null),
+    };
+
+    result.fold(
+      (failure) => logger.e(
+        '[InAppUpdateCoordinator] Prompt action failed: $failure',
+      ),
+      (_) {},
+    );
   }
 }

@@ -3310,5 +3310,21 @@
     "tourDebugResetDone": "Product tours reset",
     "@tourDebugResetDone": {
         "description": "Confirmation shown after the debug reset clears tour progress"
+    },
+    "inAppUpdateFlexibleRestartMessage": "Update downloaded. Restart when you are ready to install it.",
+    "@inAppUpdateFlexibleRestartMessage": {
+        "description": "Snackbar message when a flexible in-app update finished downloading"
+    },
+    "inAppUpdateOptionalMessage": "A new version of Tilawa is available.",
+    "@inAppUpdateOptionalMessage": {
+        "description": "Snackbar message when an optional app update is available"
+    },
+    "inAppUpdateRestartAction": "Restart",
+    "@inAppUpdateRestartAction": {
+        "description": "Snackbar action to install a downloaded flexible update"
+    },
+    "inAppUpdateUpdateAction": "Update",
+    "@inAppUpdateUpdateAction": {
+        "description": "Snackbar action to open the Play Store for an optional update"
     }
 }

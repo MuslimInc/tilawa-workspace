@@ -1,9 +1,11 @@
 import 'dart:io';
 
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:tilawa_core/errors/failures.dart';
 
 import '../../domain/entities/in_app_update_availability.dart';
 import 'in_app_update_platform_data_source.dart';
@@ -15,14 +17,24 @@ class PlayInAppUpdatePlatformDataSource
   Future<bool> isSupported() async => Platform.isAndroid;
 
   @override
-  Future<InAppUpdateAvailability> checkAvailability() async {
+  Future<Either<Failure, InAppUpdateAvailability>> checkAvailability() async {
     try {
       final AppUpdateInfo updateInfo = await InAppUpdate.checkForUpdate();
-      return InAppUpdateAvailability(
-        updateAvailable:
-            updateInfo.updateAvailability == UpdateAvailability.updateAvailable,
-        immediateUpdateAllowed: updateInfo.immediateUpdateAllowed,
-        flexibleUpdateAllowed: updateInfo.flexibleUpdateAllowed,
+      if (updateInfo.totalBytesToDownload case final int bytes?) {
+        logger.d(
+          '[InAppUpdatePlatform] Play reports $bytes bytes to download.',
+        );
+      }
+      return Right(
+        InAppUpdateAvailability(
+          updateAvailable:
+              updateInfo.updateAvailability ==
+              UpdateAvailability.updateAvailable,
+          immediateUpdateAllowed: updateInfo.immediateUpdateAllowed,
+          flexibleUpdateAllowed: updateInfo.flexibleUpdateAllowed,
+          flexibleUpdateDownloaded:
+              updateInfo.installStatus == InstallStatus.downloaded,
+        ),
       );
     } on PlatformException catch (e) {
       if (_isAppNotOwnedError(e)) {
@@ -30,39 +42,82 @@ class PlayInAppUpdatePlatformDataSource
           '[InAppUpdatePlatform] App not owned (Install Error -10). '
           'Expected in debug or sideloaded builds.',
         );
-      } else {
-        logger.e('[InAppUpdatePlatform] checkAvailability failed: $e');
+        return const Right(InAppUpdateAvailability.unavailable());
       }
-      return const InAppUpdateAvailability.unavailable();
+      logger.e('[InAppUpdatePlatform] checkAvailability failed: $e');
+      return Left(InAppUpdateFailure.checkFailed(e.message));
     } catch (e) {
       logger.e('[InAppUpdatePlatform] checkAvailability failed: $e');
-      return const InAppUpdateAvailability.unavailable();
+      return Left(InAppUpdateFailure.checkFailed(e.toString()));
     }
   }
 
   @override
-  Future<void> performImmediateUpdate() async {
-    await InAppUpdate.performImmediateUpdate();
+  Future<Either<Failure, void>> performImmediateUpdate() async {
+    try {
+      final AppUpdateResult result = await InAppUpdate.performImmediateUpdate();
+      if (result == AppUpdateResult.userDeniedUpdate) {
+        logger.d('[InAppUpdatePlatform] Immediate update denied by user.');
+        return const Right(null);
+      }
+      if (result == AppUpdateResult.inAppUpdateFailed) {
+        logger.w('[InAppUpdatePlatform] Immediate update failed.');
+        return const Left(InAppUpdateFailure.updateFailed());
+      }
+      return const Right(null);
+    } on PlatformException catch (e) {
+      logger.e('[InAppUpdatePlatform] performImmediateUpdate failed: $e');
+      return Left(InAppUpdateFailure.platformError(e.message));
+    } catch (e) {
+      logger.e('[InAppUpdatePlatform] performImmediateUpdate failed: $e');
+      return Left(InAppUpdateFailure.platformError(e.toString()));
+    }
   }
 
   @override
-  Future<bool> startFlexibleUpdate() async {
+  Future<Either<Failure, void>> openAppStoreListing() async {
+    try {
+      await InAppUpdate.openAppStoreListing();
+      return const Right(null);
+    } on PlatformException catch (e) {
+      logger.e('[InAppUpdatePlatform] openAppStoreListing failed: $e');
+      return Left(InAppUpdateFailure.platformError(e.message));
+    } catch (e) {
+      logger.e('[InAppUpdatePlatform] openAppStoreListing failed: $e');
+      return Left(InAppUpdateFailure.platformError(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, bool>> startFlexibleUpdate() async {
     try {
       final AppUpdateResult result = await InAppUpdate.startFlexibleUpdate();
       if (result != AppUpdateResult.success) {
         logger.w('[InAppUpdatePlatform] Flexible update result: $result');
-        return false;
+        return const Right(false);
       }
-      return true;
+      return const Right(true);
+    } on PlatformException catch (e) {
+      logger.e('[InAppUpdatePlatform] startFlexibleUpdate failed: $e');
+      return Left(InAppUpdateFailure.platformError(e.message));
     } catch (e) {
       logger.e('[InAppUpdatePlatform] startFlexibleUpdate failed: $e');
-      return false;
+      return Left(InAppUpdateFailure.platformError(e.toString()));
     }
   }
 
   @override
-  Future<void> completeFlexibleUpdate() async {
-    await InAppUpdate.completeFlexibleUpdate();
+  Future<Either<Failure, void>> completeFlexibleUpdate() async {
+    try {
+      await InAppUpdate.completeFlexibleUpdate();
+      return const Right(null);
+    } on PlatformException catch (e) {
+      logger.e('[InAppUpdatePlatform] completeFlexibleUpdate failed: $e');
+      return Left(InAppUpdateFailure.platformError(e.message));
+    } catch (e) {
+      logger.e('[InAppUpdatePlatform] completeFlexibleUpdate failed: $e');
+      return Left(InAppUpdateFailure.platformError(e.toString()));
+    }
   }
 
   bool _isAppNotOwnedError(PlatformException error) {

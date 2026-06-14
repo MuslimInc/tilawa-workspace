@@ -1,3 +1,5 @@
+import 'package:tilawa_core/utils/typedefs.dart';
+
 import '../entities/in_app_update_availability.dart';
 import '../entities/in_app_update_policy.dart';
 
@@ -7,11 +9,13 @@ abstract class InAppUpdateRepository {
 
   Future<InAppUpdatePolicy> getPolicy();
 
-  Future<InAppUpdateAvailability> checkAvailability();
+  ResultFuture<InAppUpdateAvailability> checkAvailability();
 
-  Future<void> performImmediateUpdate();
+  ResultFuture<void> performImmediateUpdate();
 
-  Future<bool> startFlexibleUpdate();
+  ResultFuture<void> openAppStoreListing();
 
-  Future<void> completeFlexibleUpdate();
+  ResultFuture<bool> startFlexibleUpdate();
+
+  ResultFuture<void> completeFlexibleUpdate();
 }

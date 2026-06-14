@@ -2,16 +2,18 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa/l10n/generated/app_localizations.dart';
+import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/router/app_router.dart';
 
-import '../../domain/entities/in_app_update_presentation_event.dart';
+import '../../domain/entities/in_app_update_action.dart';
 import 'in_app_update_prompt_presenter.dart';
 
 @LazySingleton(as: InAppUpdatePromptPresenter)
 class InAppUpdateSnackBarPresenter implements InAppUpdatePromptPresenter {
   @override
   void showPrompt(
-    InAppUpdatePresentationEvent event, {
+    InAppUpdateAction action, {
     required Future<void> Function() onConfirm,
   }) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -23,11 +25,12 @@ class InAppUpdateSnackBarPresenter implements InAppUpdatePromptPresenter {
       final ScaffoldMessengerState? messenger = ScaffoldMessenger.maybeOf(
         context,
       );
+      final l10n = context.l10n;
       messenger?.showSnackBar(
         SnackBar(
-          content: Text(_messageFor(event)),
+          content: Text(_messageFor(action, l10n)),
           action: SnackBarAction(
-            label: _actionLabelFor(event),
+            label: _actionLabelFor(action, l10n),
             onPressed: () {
               unawaited(onConfirm());
             },
@@ -38,21 +41,21 @@ class InAppUpdateSnackBarPresenter implements InAppUpdatePromptPresenter {
     });
   }
 
-  String _messageFor(InAppUpdatePresentationEvent event) {
-    return switch (event) {
-      InAppUpdatePresentationEvent.promptFlexibleRestart =>
-        'Update downloaded. Restart when you are ready to install it.',
-      InAppUpdatePresentationEvent.promptOptionalImmediate =>
-        'A new version of Tilawa is available.',
-      InAppUpdatePresentationEvent.none => '',
+  String _messageFor(InAppUpdateAction action, AppLocalizations l10n) {
+    return switch (action) {
+      InAppUpdateAction.promptFlexibleRestart =>
+        l10n.inAppUpdateFlexibleRestartMessage,
+      InAppUpdateAction.offerOptionalImmediate =>
+        l10n.inAppUpdateOptionalMessage,
+      _ => '',
     };
   }
 
-  String _actionLabelFor(InAppUpdatePresentationEvent event) {
-    return switch (event) {
-      InAppUpdatePresentationEvent.promptFlexibleRestart => 'Restart',
-      InAppUpdatePresentationEvent.promptOptionalImmediate => 'Update',
-      InAppUpdatePresentationEvent.none => '',
+  String _actionLabelFor(InAppUpdateAction action, AppLocalizations l10n) {
+    return switch (action) {
+      InAppUpdateAction.promptFlexibleRestart => l10n.inAppUpdateRestartAction,
+      InAppUpdateAction.offerOptionalImmediate => l10n.inAppUpdateUpdateAction,
+      _ => '',
     };
   }
 }

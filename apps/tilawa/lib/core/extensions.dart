@@ -25,6 +25,7 @@ extension FailureExtensions on Failure {
   bool get shouldShowToUser => switch (this) {
     UserCancelledFailure() => false,
     PurchaseFailure(reason: PurchaseFailureReason.userCancelled) => false,
+    InAppUpdateFailure() => false,
     _ => true,
   };
 
@@ -90,6 +91,7 @@ extension FailureExtensions on Failure {
         AppReviewFailureReason.platformUnsupported =>
           l10n.appReviewPlatformUnsupported,
       },
+      InAppUpdateFailure() => null,
     };
   }
 }
