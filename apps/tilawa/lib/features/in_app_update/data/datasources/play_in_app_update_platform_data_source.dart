@@ -36,8 +36,8 @@ class PlayInAppUpdatePlatformDataSource
               updateInfo.installStatus == InstallStatus.downloaded,
         ),
       );
-    } on PlatformException catch (e) {
-      if (_isAppNotOwnedError(e)) {
+    } catch (e) {
+      if (e is PlatformException && _isAppNotOwnedError(e)) {
         logger.d(
           '[InAppUpdatePlatform] App not owned (Install Error -10). '
           'Expected in debug or sideloaded builds.',
@@ -45,10 +45,8 @@ class PlayInAppUpdatePlatformDataSource
         return const Right(InAppUpdateAvailability.unavailable());
       }
       logger.e('[InAppUpdatePlatform] checkAvailability failed: $e');
-      return Left(InAppUpdateFailure.checkFailed(e.message));
-    } catch (e) {
-      logger.e('[InAppUpdatePlatform] checkAvailability failed: $e');
-      return Left(InAppUpdateFailure.checkFailed(e.toString()));
+      final String? message = e is PlatformException ? e.message : e.toString();
+      return Left(InAppUpdateFailure.checkFailed(message));
     }
   }
 
@@ -65,12 +63,10 @@ class PlayInAppUpdatePlatformDataSource
         return const Left(InAppUpdateFailure.updateFailed());
       }
       return const Right(null);
-    } on PlatformException catch (e) {
-      logger.e('[InAppUpdatePlatform] performImmediateUpdate failed: $e');
-      return Left(InAppUpdateFailure.platformError(e.message));
     } catch (e) {
       logger.e('[InAppUpdatePlatform] performImmediateUpdate failed: $e');
-      return Left(InAppUpdateFailure.platformError(e.toString()));
+      final String? message = e is PlatformException ? e.message : e.toString();
+      return Left(InAppUpdateFailure.platformError(message));
     }
   }
 
@@ -79,12 +75,10 @@ class PlayInAppUpdatePlatformDataSource
     try {
       await InAppUpdate.openAppStoreListing();
       return const Right(null);
-    } on PlatformException catch (e) {
-      logger.e('[InAppUpdatePlatform] openAppStoreListing failed: $e');
-      return Left(InAppUpdateFailure.platformError(e.message));
     } catch (e) {
       logger.e('[InAppUpdatePlatform] openAppStoreListing failed: $e');
-      return Left(InAppUpdateFailure.platformError(e.toString()));
+      final String? message = e is PlatformException ? e.message : e.toString();
+      return Left(InAppUpdateFailure.platformError(message));
     }
   }
 
@@ -97,12 +91,10 @@ class PlayInAppUpdatePlatformDataSource
         return const Right(false);
       }
       return const Right(true);
-    } on PlatformException catch (e) {
-      logger.e('[InAppUpdatePlatform] startFlexibleUpdate failed: $e');
-      return Left(InAppUpdateFailure.platformError(e.message));
     } catch (e) {
       logger.e('[InAppUpdatePlatform] startFlexibleUpdate failed: $e');
-      return Left(InAppUpdateFailure.platformError(e.toString()));
+      final String? message = e is PlatformException ? e.message : e.toString();
+      return Left(InAppUpdateFailure.platformError(message));
     }
   }
 
@@ -111,12 +103,10 @@ class PlayInAppUpdatePlatformDataSource
     try {
       await InAppUpdate.completeFlexibleUpdate();
       return const Right(null);
-    } on PlatformException catch (e) {
-      logger.e('[InAppUpdatePlatform] completeFlexibleUpdate failed: $e');
-      return Left(InAppUpdateFailure.platformError(e.message));
     } catch (e) {
       logger.e('[InAppUpdatePlatform] completeFlexibleUpdate failed: $e');
-      return Left(InAppUpdateFailure.platformError(e.toString()));
+      final String? message = e is PlatformException ? e.message : e.toString();
+      return Left(InAppUpdateFailure.platformError(message));
     }
   }
 
