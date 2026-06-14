@@ -106,6 +106,27 @@ void main() {
       );
     });
 
+    test('returns unavailable when Play Store is missing', () async {
+      setMethodHandler((_) async {
+        throw PlatformException(
+          code: 'TASK_FAILURE',
+          message:
+              '-9: Install Error(-9): The Play Store app is either not '
+              'installed or not the official version.',
+        );
+      });
+
+      final Either<Failure, InAppUpdateAvailability> result = await dataSource
+          .checkAvailability();
+
+      result.fold(
+        (_) => fail('expected Right'),
+        (InAppUpdateAvailability availability) {
+          expect(availability.updateAvailable, isFalse);
+        },
+      );
+    });
+
     test('returns checkFailed for other platform exceptions', () async {
       setMethodHandler((_) async {
         throw PlatformException(code: 'TASK_FAILURE', message: 'other');

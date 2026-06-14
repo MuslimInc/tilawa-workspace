@@ -46,10 +46,10 @@ class PlayInAppUpdatePlatformDataSource
         ),
       );
     } catch (e) {
-      if (e is PlatformException && _isAppNotOwnedError(e)) {
+      if (e is PlatformException && _isUnsupportedPlayEnvironment(e)) {
         logger.d(
-          '[InAppUpdatePlatform] App not owned (Install Error -10). '
-          'Expected in debug or sideloaded builds.',
+          '[InAppUpdatePlatform] In-app updates unavailable (${_installErrorCode(e)}). '
+          'Expected on emulators, sideloads, or devices without Play Store.',
         );
         return const Right(InAppUpdateAvailability.unavailable());
       }
@@ -137,8 +137,21 @@ class PlayInAppUpdatePlatformDataSource
     return _flexibleDownloadedStream!;
   }
 
-  bool _isAppNotOwnedError(PlatformException error) {
-    return error.code == 'TASK_FAILURE' &&
-        (error.message?.contains('Install Error(-10)') ?? false);
+  bool _isUnsupportedPlayEnvironment(PlatformException error) {
+    if (error.code != 'TASK_FAILURE') {
+      return false;
+    }
+    return switch (_installErrorCode(error)) {
+      '-9' || '-10' => true,
+      _ => false,
+    };
+  }
+
+  String _installErrorCode(PlatformException error) {
+    final String message = error.message ?? '';
+    final RegExpMatch? match = RegExp(r'Install Error\((-?\d+)\)').firstMatch(
+      message,
+    );
+    return match?.group(1) ?? 'unknown';
   }
 }
