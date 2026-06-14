@@ -37,7 +37,10 @@ class MainScreenState extends Equatable {
   /// [OfflineIndicatorWidget] display to avoid startup frame contention.
   final bool isOfflineIndicatorReady;
 
-  /// Index of the currently selected main tab (0–3).
+  /// Index of the currently selected main tab (0–4).
+  ///
+  /// Home is index 0. Reciters remains a shell tab at index 1, but is opened
+  /// from Home instead of the bottom navigation bar.
   final int currentIndex;
 
   /// Set of tab indexes that have been selected at least once and therefore

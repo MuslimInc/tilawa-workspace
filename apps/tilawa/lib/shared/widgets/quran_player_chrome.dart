@@ -201,12 +201,12 @@ abstract final class AppShellRoutePolicy {
       return 0;
     }
     if (location.startsWith('/prayer') || location == '/qibla') {
-      return 1;
+      return 2;
     }
     if (location.startsWith('/settings') ||
         location == '/support' ||
         location == '/premium') {
-      return 3;
+      return 4;
     }
     return null;
   }

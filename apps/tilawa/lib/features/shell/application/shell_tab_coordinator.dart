@@ -27,7 +27,7 @@ class ShellTabCoordinator {
       SyncMainShellTabEffect(nextIndex),
     ];
 
-    if (previousIndex == 1 && nextIndex != 1) {
+    if (previousIndex == 2 && nextIndex != 2) {
       effects.add(
         const RecordAppReviewSignalEffect(
           AppReviewSignal.prayerTimesTabVisited,
@@ -42,7 +42,7 @@ class ShellTabCoordinator {
       }
     }
 
-    if (previousIndex == 2 && nextIndex == 0) {
+    if (previousIndex == 1 && nextIndex == 0) {
       effects.add(
         const TryAppReviewPromptEffect(
           AppReviewPromptMoment.returnedToRecitersTab,

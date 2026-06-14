@@ -103,20 +103,20 @@ class _AppShellScreenState extends State<AppShellScreen> {
   }
 
   bool _isRecitersTabActive(MainScreenState state) {
-    return state.currentIndex == 0 && _isOnMainShell();
+    return state.currentIndex == 1 && _isOnMainShell();
   }
 
   List<_NavDestination> _buildDestinations(BuildContext context) {
     return [
       _NavDestination(
         index: 0,
-        icon: FluentIcons.person_24_regular,
-        activeIcon: FluentIcons.person_24_filled,
-        label: context.l10n.bottomNavReciters,
-        identifier: 'reciters_tab',
+        icon: FluentIcons.home_24_regular,
+        activeIcon: FluentIcons.home_24_filled,
+        label: context.l10n.bottomNavHome,
+        identifier: 'home_tab',
       ),
       _NavDestination(
-        index: 1,
+        index: 2,
         icon: FluentIcons.clock_24_regular,
         activeIcon: FluentIcons.clock_24_filled,
         label: context.l10n.bottomNavPrayer,
@@ -128,14 +128,14 @@ class _AppShellScreenState extends State<AppShellScreen> {
         identifier: 'quran_last_read_nav',
       ),
       _NavDestination(
-        index: 2,
+        index: 3,
         icon: FluentIcons.book_open_24_regular,
         activeIcon: FluentIcons.book_open_24_filled,
         svgPath: 'assets/icons/athkar_icon.svg',
         label: context.l10n.bottomNavAthkar,
       ),
       _NavDestination(
-        index: 3,
+        index: 4,
         icon: FluentIcons.settings_24_regular,
         activeIcon: FluentIcons.settings_24_filled,
         label: context.l10n.bottomNavSettings,
@@ -151,9 +151,13 @@ class _AppShellScreenState extends State<AppShellScreen> {
   ) {
     final int? mapped = AppShellRoutePolicy.navIndexForLocation(location);
     if (mapped != null) {
-      return destinations.indexWhere((d) => d.index == mapped);
+      final int mappedIndex = destinations.indexWhere((d) => d.index == mapped);
+      return mappedIndex < 0 ? 0 : mappedIndex;
     }
-    return destinations.indexWhere((d) => d.index == state.currentIndex);
+    final int stateIndex = destinations.indexWhere(
+      (d) => d.index == state.currentIndex,
+    );
+    return stateIndex < 0 ? 0 : stateIndex;
   }
 
   bool _isOnMainShell() {
@@ -189,7 +193,7 @@ class _AppShellScreenState extends State<AppShellScreen> {
       if (!_isOnMainShell()) {
         _ensureMainShellRoute(context);
       }
-      _mainScreenCubit.selectTab(0, force: true);
+      _mainScreenCubit.selectTab(1, force: true);
       return;
     }
 
@@ -216,7 +220,7 @@ class _AppShellScreenState extends State<AppShellScreen> {
       return;
     }
 
-    if (destination.index == 0) {
+    if (destination.index == 1) {
       _onRecitersNavTap(context, state);
       return;
     }

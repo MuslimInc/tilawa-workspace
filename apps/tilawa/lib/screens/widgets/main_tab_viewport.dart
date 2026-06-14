@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../features/athkar/presentation/widgets/athkar_categories_screen_scope.dart';
+import '../../features/home/presentation/widgets/home_screen_scope.dart';
 import '../../features/prayer_times/presentation/widgets/prayer_times_screen_scope.dart';
 import '../../features/reciters/presentation/screens/reciters_screen.dart'
     show RecitersRootBackScope;
 import '../../features/reciters/presentation/widgets/reciters_screen_scope.dart';
 import '../../features/settings/presentation/widgets/settings_screen_scope.dart';
+import '../cubit/main_screen_cubit.dart';
 
 /// Lazily constructs and caches all main-tab screens, then manages the
 /// [Offstage] / [TickerMode] stack so only the active tab renders.
@@ -43,10 +46,16 @@ class _MainTabViewportState extends State<MainTabViewport> {
   Widget _buildScreenForIndex(int index) {
     return _screenCache.putIfAbsent(index, () {
       return switch (index) {
-        0 => const RecitersScreenScope(),
-        1 => const PrayerTimesScreenScope(),
-        2 => const AthkarCategoriesScreenScope(),
-        3 => const SettingsScreenScope(),
+        0 => HomeScreenScope(
+          onOpenReciters: () => context.read<MainScreenCubit>().selectTab(1),
+          onOpenPrayer: () => context.read<MainScreenCubit>().selectTab(2),
+          onOpenAthkar: () => context.read<MainScreenCubit>().selectTab(3),
+          onOpenSettings: () => context.read<MainScreenCubit>().selectTab(4),
+        ),
+        1 => const RecitersScreenScope(),
+        2 => const PrayerTimesScreenScope(),
+        3 => const AthkarCategoriesScreenScope(),
+        4 => const SettingsScreenScope(),
         _ => const SizedBox.shrink(),
       };
     });
@@ -61,7 +70,7 @@ class _MainTabViewportState extends State<MainTabViewport> {
       child: TilawaShellPadding(
         padding: widget.contentBottomPadding,
         child: Stack(
-          children: List<Widget>.generate(4, (int index) {
+          children: List<Widget>.generate(5, (int index) {
             if (!widget.builtTabIndexes.contains(index)) {
               return const SizedBox.shrink();
             }
