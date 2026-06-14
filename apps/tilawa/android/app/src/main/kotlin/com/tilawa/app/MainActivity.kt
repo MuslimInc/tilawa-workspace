@@ -49,13 +49,10 @@ class MainActivity : AudioServiceActivity() {
         Log.d(FIRST_FRAME_TAG, message)
     }
 
-    private var renderMode: RenderMode = RenderMode.surface
-
     override fun onCreate(savedInstanceState: Bundle?) {
-        renderMode = resolveRenderMode(intent)
         Log.d(
             TAG,
-            "MAIN_ACTIVITY_ON_CREATE_INTENT action=${intent?.action} extras=${intent?.extras?.keySet()} renderMode=$renderMode"
+            "MAIN_ACTIVITY_ON_CREATE_INTENT action=${intent?.action} extras=${intent?.extras?.keySet()} renderMode=texture"
         )
         firstFrameLog("MainActivity.onCreate installSplashScreen")
         val splashScreen = installSplashScreen()
@@ -223,7 +220,7 @@ class MainActivity : AudioServiceActivity() {
             Log.d(
                 GSIGNIN_TAG,
                 "H1 MainActivity.onResume " +
-                    "renderMode=$renderMode isFinishing=$isFinishing",
+                    "renderMode=texture isFinishing=$isFinishing",
             )
             flutterEngine?.dartExecutor?.binaryMessenger?.let { messenger ->
                 MethodChannel(messenger, GOOGLE_SIGN_IN_CHANNEL)
@@ -232,32 +229,17 @@ class MainActivity : AudioServiceActivity() {
         }
     }
 
-    override fun getRenderMode(): RenderMode = renderMode
-
     /**
-     * Notification cold starts can launch through the lockscreen/shade path.
-     * [RenderMode.surface] delays the first Android draw until the first
-     * Flutter frame and can deadlock that transition (persistent black screen).
-     * [RenderMode.texture] avoids the pre-draw gate for that path only.
+     * Always use [RenderMode.texture] on Android.
      *
-     * Transsion ROMs (Infinix, Tecno, Itel) also need [RenderMode.texture] so
-     * Credential Manager / Play Services sign-in UI is not hidden behind the
-     * Flutter surface (otherwise [authenticate] hangs until timeout).
+     * [RenderMode.surface] waits for the first Flutter frame before connecting
+     * the Android surface. With Dart `deferFirstFrame` during cold start that
+     * can wedge the main thread in `FlutterJNI.onSurfaceCreated` (ANR / black
+     * screen; Sentry issue 7549713436).
      *
-     * Other launches use [RenderMode.surface].
+     * [RenderMode.texture] also keeps Credential Manager / Play Services sign-in
+     * UI above the Flutter layer on Transsion ROMs and avoids notification cold-
+     * start deadlocks through the lockscreen/shade path.
      */
-    private fun resolveRenderMode(intent: Intent?): RenderMode {
-        if (intent?.action == ACTION_OPEN_PRAYER_STATUS) {
-            return RenderMode.texture
-        }
-        if (TranssionOemPolicy.isTranssionDevice()) {
-            Log.d(
-                GSIGNIN_TAG,
-                "H5 onCreate renderMode=texture " +
-                    "manufacturer=${Build.MANUFACTURER} brand=${Build.BRAND}",
-            )
-            return RenderMode.texture
-        }
-        return RenderMode.surface
-    }
+    override fun getRenderMode(): RenderMode = RenderMode.texture
 }

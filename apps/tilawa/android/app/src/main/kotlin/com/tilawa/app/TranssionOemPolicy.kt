@@ -4,7 +4,8 @@ import android.os.Build
 
 /**
  * Transsion ROMs (Infinix, Tecno, Itel) can stack Credential Manager /
- * Play Services sign-in UI behind Flutter's [RenderMode.surface] layer.
+ * Play Services sign-in UI behind Flutter when using [RenderMode.surface].
+ * [MainActivity] uses [RenderMode.texture] on all Android launches.
  */
 object TranssionOemPolicy {
     private val TRANSSION_OEMS = setOf("infinix", "tecno", "itel")

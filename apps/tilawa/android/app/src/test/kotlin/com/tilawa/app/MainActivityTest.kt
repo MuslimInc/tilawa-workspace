@@ -5,6 +5,7 @@ import android.os.Build
 import com.tilawa.app.prayer.AdhanScheduler
 import com.tilawa.app.prayer.PrayerAdhanMethodChannel
 import com.tilawa.app.prayer.PrayerNotificationsWatchdogScheduler
+import io.flutter.embedding.android.RenderMode
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.dart.DartExecutor
 import io.flutter.plugin.common.BinaryMessenger
@@ -48,6 +49,11 @@ class MainActivityTest {
     @After
     fun tearDown() {
         unmockkAll()
+    }
+
+    @Test
+    fun `getRenderMode always uses texture to avoid surface ANR`() {
+        assert(activity.getRenderMode() == RenderMode.texture)
     }
 
     @Test
