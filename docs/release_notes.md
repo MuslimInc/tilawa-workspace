@@ -12,6 +12,33 @@ the changelog for full engineering detail.
 
 | Field | Value |
 |-------|--------|
+| Version | **2.0.13** (build **58**) |
+| Git tag | `v2.0.13+58` (pending) |
+| Date | 2026-06-14 |
+| Track | Production |
+
+### What's new (en-US) — copy for Play Console
+
+```text
+• Fixed crashes when reopening reciter screens after backgrounding
+• Improved Android startup stability
+• Reduced crash-reporting noise from emulators and test devices
+```
+
+### ما الجديد (ar) — نص متجر Play
+
+```text
+• إصلاح تعطل عند العودة لشاشة القارئ بعد إبقاء التطبيق في الخلفية
+• تحسين استقرار بدء التشغيل على أندرويد
+• تقليل ضوضاء تقارير الأعطال من المحاكيات وأجهزة الاختبار
+```
+
+---
+
+## Previous current release (2.0.12+57)
+
+| Field | Value |
+|-------|--------|
 | Version | **2.0.12** (build **57**) |
 | Git tag | `v2.0.12+57` (pending) |
 | Date | 2026-06-13 |

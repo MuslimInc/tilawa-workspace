@@ -1,7 +1,24 @@
 {
   "schemaVersion": 1,
-  "lastUpdatedAt": "2026-06-11T12:00:00Z",
+  "lastUpdatedAt": "2026-06-14T12:00:00Z",
   "releases": [
+    {
+      "id": "2.0.13+58",
+      "version": "2.0.13",
+      "buildNumber": 58,
+      "highlights": {
+        "en": [
+          "Fixed crashes when reopening reciter screens after backgrounding",
+          "Improved Android startup stability",
+          "Reduced crash-reporting noise from emulators and test devices"
+        ],
+        "ar": [
+          "إصلاح تعطل عند العودة لشاشة القارئ بعد إبقاء التطبيق في الخلفية",
+          "تحسين استقرار بدء التشغيل على أندرويد",
+          "تقليل ضوضاء تقارير الأعطال من المحاكيات وأجهزة الاختبار"
+        ]
+      }
+    },
     {
       "id": "2.0.12+57",
       "version": "2.0.12",

@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.13+58] - 2026-06-14 [Google Play Release]
+
+### Fixed
+
+- **Router**: Harden Android route restoration for `/reciter`, `/quran-reader`, and
+  `/athkar` paths; safe typed extra decoding prevents null-check and Map cast
+  crashes when the app is restored from the background.
+- **Android**: Always use `RenderMode.texture` to avoid cold-start ANR in
+  `FlutterJNI.onSurfaceCreated` and keep Google sign-in UI visible on Transsion
+  ROMs.
+- **Telemetry**: Downgrade expected FCM token failures on GMS-free devices; detect
+  AOSP emulator fingerprints so release Sentry logs from emulators are filtered.
+
+### Changed
+
+- **Version**: Production track bumped to **2.0.13** (build **58**).
+
 ## [2.0.12+57] - 2026-06-13 [Google Play Release]
 
 > Supersedes build 56 (published earlier the same day) to include the
