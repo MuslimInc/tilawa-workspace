@@ -1,7 +1,7 @@
 name: Cache Android build tooling
 description: >
-  Restore Gradle, NDK/CMake, melos, and build_runner caches so repeat
-  release / App Distribution builds skip redundant work.
+  Restore Gradle, melos, and build_runner caches so repeat release / App
+  Distribution builds skip redundant work.
 
 runs:
   using: composite
@@ -15,22 +15,12 @@ runs:
         restore-keys: |
           gradle-project-${{ runner.os }}-
 
-    - name: Cache Android NDK and CMake
-      uses: actions/cache@v5
-      with:
-        path: |
-          ~/.android/sdk/ndk
-          ~/.android/sdk/cmake
-        key: android-ndk-cmake-${{ runner.os }}-${{ hashFiles('apps/tilawa/android/**/build.gradle', 'apps/tilawa/android/settings.gradle') }}
-        restore-keys: |
-          android-ndk-cmake-${{ runner.os }}-
-
     - name: Cache melos global package
       uses: actions/cache@v5
       with:
-        path: |
-          ~/.pub-cache/global_packages/melos
-          ~/.pub-cache/bin/melos
+        # Do not cache ~/.pub-cache/bin/melos — it is a symlink and can break
+        # actions/cache tar archival on save (exit code 2).
+        path: ~/.pub-cache/global_packages/melos
         key: melos-global-${{ runner.os }}-7.8.2
         restore-keys: |
           melos-global-${{ runner.os }}-
