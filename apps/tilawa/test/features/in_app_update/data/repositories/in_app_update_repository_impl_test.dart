@@ -110,4 +110,7 @@ class FakePlatformDataSource implements InAppUpdatePlatformDataSource {
     startFlexibleUpdateCalls++;
     return const Right(true);
   }
+
+  @override
+  Stream<void> get onFlexibleUpdateDownloaded => const Stream<void>.empty();
 }

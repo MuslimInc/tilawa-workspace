@@ -46,9 +46,17 @@ class InAppUpdateSnackBarPresenter implements InAppUpdatePromptPresenter {
             unawaited(onConfirm());
           },
         ),
-        duration: const Duration(minutes: 5),
+        duration: durationFor(action),
       ),
     );
+  }
+
+  @visibleForTesting
+  static Duration durationFor(InAppUpdateAction action) {
+    return switch (action) {
+      InAppUpdateAction.offerRequiredStoreUpdate => const Duration(days: 1),
+      _ => const Duration(minutes: 5),
+    };
   }
 
   @visibleForTesting
@@ -58,6 +66,8 @@ class InAppUpdateSnackBarPresenter implements InAppUpdatePromptPresenter {
         l10n.inAppUpdateFlexibleRestartMessage,
       InAppUpdateAction.offerOptionalImmediate =>
         l10n.inAppUpdateOptionalMessage,
+      InAppUpdateAction.offerRequiredStoreUpdate =>
+        l10n.inAppUpdateRequiredMessage,
       _ => '',
     };
   }
@@ -70,6 +80,8 @@ class InAppUpdateSnackBarPresenter implements InAppUpdatePromptPresenter {
     return switch (action) {
       InAppUpdateAction.promptFlexibleRestart => l10n.inAppUpdateRestartAction,
       InAppUpdateAction.offerOptionalImmediate => l10n.inAppUpdateUpdateAction,
+      InAppUpdateAction.offerRequiredStoreUpdate =>
+        l10n.inAppUpdateUpdateAction,
       _ => '',
     };
   }

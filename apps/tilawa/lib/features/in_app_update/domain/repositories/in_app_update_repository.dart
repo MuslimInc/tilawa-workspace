@@ -18,4 +18,7 @@ abstract class InAppUpdateRepository {
   ResultFuture<bool> startFlexibleUpdate();
 
   ResultFuture<void> completeFlexibleUpdate();
+
+  /// Notifies when a flexible update finished downloading and awaits install.
+  Stream<void> get onFlexibleUpdateDownloaded;
 }

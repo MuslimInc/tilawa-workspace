@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
@@ -8,6 +10,7 @@ import '../../domain/usecases/complete_flexible_in_app_update_use_case.dart';
 import '../../domain/usecases/evaluate_in_app_update_use_case.dart';
 import '../../domain/usecases/execute_in_app_update_action_use_case.dart';
 import '../../domain/usecases/open_play_store_for_update_use_case.dart';
+import '../../domain/repositories/in_app_update_repository.dart';
 import '../services/in_app_update_prompt_presenter.dart';
 
 /// Orchestrates throttled update checks and routes UI prompts.
@@ -19,7 +22,12 @@ class InAppUpdateCoordinator {
     this._openPlayStoreForUpdate,
     this._completeFlexibleUpdate,
     this._promptPresenter,
-  );
+    InAppUpdateRepository repository,
+  ) {
+    repository.onFlexibleUpdateDownloaded.listen(
+      (_) => unawaited(_showFlexibleRestartPrompt()),
+    );
+  }
 
   static const Duration minCheckInterval = Duration(hours: 6);
 
@@ -55,11 +63,6 @@ class InAppUpdateCoordinator {
 
   Future<void> _checkForUpdateInternal() async {
     final DateTime now = DateTime.now();
-    if (_lastCheckTime != null &&
-        now.difference(_lastCheckTime!) < minCheckInterval) {
-      return;
-    }
-    _lastCheckTime = now;
 
     try {
       final evaluateResult = await _evaluateUpdate();
@@ -73,6 +76,15 @@ class InAppUpdateCoordinator {
           if (action == InAppUpdateAction.none) {
             return;
           }
+
+          final bool throttled =
+              _lastCheckTime != null &&
+              now.difference(_lastCheckTime!) < minCheckInterval;
+          if (throttled && action.isOptionalUserPrompt) {
+            return;
+          }
+
+          _lastCheckTime = now;
 
           final executeResult = await _executeAction(action);
           await executeResult.fold(
@@ -103,7 +115,8 @@ class InAppUpdateCoordinator {
     final Either<Failure, void> result = switch (action) {
       InAppUpdateAction.promptFlexibleRestart =>
         await _completeFlexibleUpdate(),
-      InAppUpdateAction.offerOptionalImmediate =>
+      InAppUpdateAction.offerOptionalImmediate ||
+      InAppUpdateAction.offerRequiredStoreUpdate =>
         await _openPlayStoreForUpdate(),
       _ => const Right(null),
     };
@@ -113,6 +126,15 @@ class InAppUpdateCoordinator {
         '[InAppUpdateCoordinator] Prompt action failed: $failure',
       ),
       (_) {},
+    );
+  }
+
+  Future<void> _showFlexibleRestartPrompt() async {
+    _promptPresenter.showPrompt(
+      InAppUpdateAction.promptFlexibleRestart,
+      onConfirm: () => _handlePromptConfirmation(
+        InAppUpdateAction.promptFlexibleRestart,
+      ),
     );
   }
 }

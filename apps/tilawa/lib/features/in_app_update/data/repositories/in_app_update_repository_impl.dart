@@ -42,4 +42,8 @@ class InAppUpdateRepositoryImpl implements InAppUpdateRepository {
   @override
   ResultFuture<void> completeFlexibleUpdate() =>
       _platformDataSource.completeFlexibleUpdate();
+
+  @override
+  Stream<void> get onFlexibleUpdateDownloaded =>
+      _platformDataSource.onFlexibleUpdateDownloaded;
 }

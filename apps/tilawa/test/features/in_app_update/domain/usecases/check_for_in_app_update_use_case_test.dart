@@ -79,6 +79,30 @@ void main() {
       );
     });
 
+    test(
+      'returns required store prompt when forced with no in-app modes',
+      () async {
+        repository.policy = const InAppUpdatePolicy(forceUpdate: true);
+        repository.availability = const Right(
+          InAppUpdateAvailability(
+            updateAvailable: true,
+            immediateUpdateAllowed: false,
+            flexibleUpdateAllowed: false,
+          ),
+        );
+
+        final Either<Failure, InAppUpdateAction> result =
+            await evaluateUseCase();
+
+        expect(
+          result,
+          const Right<Failure, InAppUpdateAction>(
+            InAppUpdateAction.offerRequiredStoreUpdate,
+          ),
+        );
+      },
+    );
+
     test('propagates availability failures', () async {
       repository.availability = const Left(
         InAppUpdateFailure.checkFailed('network'),
@@ -150,14 +174,25 @@ void main() {
     });
 
     test('passes through prompt actions unchanged', () async {
-      final Either<Failure, InAppUpdateAction> result = await executeUseCase(
-        InAppUpdateAction.offerOptionalImmediate,
-      );
+      final Either<Failure, InAppUpdateAction> optionalResult =
+          await executeUseCase(
+            InAppUpdateAction.offerOptionalImmediate,
+          );
+      final Either<Failure, InAppUpdateAction> requiredResult =
+          await executeUseCase(
+            InAppUpdateAction.offerRequiredStoreUpdate,
+          );
 
       expect(
-        result,
+        optionalResult,
         const Right<Failure, InAppUpdateAction>(
           InAppUpdateAction.offerOptionalImmediate,
+        ),
+      );
+      expect(
+        requiredResult,
+        const Right<Failure, InAppUpdateAction>(
+          InAppUpdateAction.offerRequiredStoreUpdate,
         ),
       );
     });

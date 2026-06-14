@@ -19,4 +19,7 @@ abstract class InAppUpdatePlatformDataSource {
   ResultFuture<bool> startFlexibleUpdate();
 
   ResultFuture<void> completeFlexibleUpdate();
+
+  /// Emits when Play reports a flexible update reached downloaded state.
+  Stream<void> get onFlexibleUpdateDownloaded;
 }

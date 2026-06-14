@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:tilawa/features/in_app_update/domain/entities/in_app_update_availability.dart';
 import 'package:tilawa/features/in_app_update/domain/entities/in_app_update_policy.dart';
@@ -29,6 +31,13 @@ class FakeInAppUpdateRepository implements InAppUpdateRepository {
   int openAppStoreListingCalls = 0;
   int startFlexibleUpdateCalls = 0;
   int completeFlexibleUpdateCalls = 0;
+
+  final StreamController<void> flexibleDownloadedController =
+      StreamController<void>.broadcast();
+
+  @override
+  Stream<void> get onFlexibleUpdateDownloaded =>
+      flexibleDownloadedController.stream;
 
   @override
   Future<Either<Failure, InAppUpdateAvailability>> checkAvailability() async {

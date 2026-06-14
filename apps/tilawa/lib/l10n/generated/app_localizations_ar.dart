@@ -2480,6 +2480,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get inAppUpdateOptionalMessage => 'يتوفر إصدار جديد من تلاوة.';
 
   @override
+  String get inAppUpdateRequiredMessage =>
+      'يلزم التحديث لمتابعة استخدام تلاوة.';
+
+  @override
   String get inAppUpdateRestartAction => 'إعادة التشغيل';
 
   @override

@@ -28,6 +28,7 @@ void main() {
       OpenPlayStoreForUpdateUseCase(repository),
       CompleteFlexibleInAppUpdateUseCase(repository),
       presenter,
+      repository,
     );
   });
 
@@ -46,20 +47,65 @@ void main() {
       expect(presenter.lastAction, InAppUpdateAction.offerOptionalImmediate);
     });
 
-    test('throttles repeated checks within minCheckInterval', () async {
-      repository.availability = const Right(
-        InAppUpdateAvailability(
-          updateAvailable: true,
-          immediateUpdateAllowed: true,
-          flexibleUpdateAllowed: false,
-        ),
-      );
+    test(
+      'throttles repeated optional prompts within minCheckInterval',
+      () async {
+        repository.availability = const Right(
+          InAppUpdateAvailability(
+            updateAvailable: true,
+            immediateUpdateAllowed: true,
+            flexibleUpdateAllowed: false,
+          ),
+        );
 
-      await coordinator.checkForUpdate();
-      await coordinator.checkForUpdate();
+        await coordinator.checkForUpdate();
+        await coordinator.checkForUpdate();
 
-      expect(repository.checkAvailabilityCalls, 1);
-    });
+        expect(repository.checkAvailabilityCalls, 2);
+        expect(presenter.promptCount, 1);
+      },
+    );
+
+    test(
+      'does not throttle flexible restart prompt within minCheckInterval',
+      () async {
+        repository.availability = const Right(
+          InAppUpdateAvailability(
+            updateAvailable: true,
+            immediateUpdateAllowed: true,
+            flexibleUpdateAllowed: true,
+            flexibleUpdateDownloaded: true,
+          ),
+        );
+
+        await coordinator.checkForUpdate();
+        await coordinator.checkForUpdate();
+
+        expect(repository.checkAvailabilityCalls, 2);
+        expect(presenter.promptCount, 2);
+      },
+    );
+
+    test(
+      'shows required store prompt when forced with no in-app modes',
+      () async {
+        repository.policy = const InAppUpdatePolicy(forceUpdate: true);
+        repository.availability = const Right(
+          InAppUpdateAvailability(
+            updateAvailable: true,
+            immediateUpdateAllowed: false,
+            flexibleUpdateAllowed: false,
+          ),
+        );
+
+        await coordinator.checkForUpdate();
+
+        expect(
+          presenter.lastAction,
+          InAppUpdateAction.offerRequiredStoreUpdate,
+        );
+      },
+    );
 
     test('deduplicates in-flight checks', () async {
       repository.availability = const Right(
@@ -166,6 +212,13 @@ void main() {
       await presenter.lastOnConfirm!();
 
       expect(repository.openAppStoreListingCalls, 1);
+    });
+
+    test('shows restart prompt when flexible download completes', () async {
+      repository.flexibleDownloadedController.add(null);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(presenter.lastAction, InAppUpdateAction.promptFlexibleRestart);
     });
 
     test('logs unexpected errors without showing a prompt', () async {

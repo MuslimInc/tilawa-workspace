@@ -30,6 +30,7 @@ class ExecuteInAppUpdateActionUseCase {
         );
       case InAppUpdateAction.promptFlexibleRestart:
       case InAppUpdateAction.offerOptionalImmediate:
+      case InAppUpdateAction.offerRequiredStoreUpdate:
         return Right(action);
       case InAppUpdateAction.none:
         return const Right(InAppUpdateAction.none);

@@ -12,6 +12,18 @@ void main() {
         InAppUpdateAction.offerOptionalImmediate.requiresUserPrompt,
         isTrue,
       );
+      expect(
+        InAppUpdateAction.offerRequiredStoreUpdate.requiresUserPrompt,
+        isTrue,
+      );
+      expect(
+        InAppUpdateAction.offerOptionalImmediate.isOptionalUserPrompt,
+        isTrue,
+      );
+      expect(
+        InAppUpdateAction.offerRequiredStoreUpdate.isOptionalUserPrompt,
+        isFalse,
+      );
       expect(InAppUpdateAction.performImmediate.requiresUserPrompt, isFalse);
       expect(InAppUpdateAction.startFlexible.requiresUserPrompt, isFalse);
       expect(InAppUpdateAction.none.requiresUserPrompt, isFalse);

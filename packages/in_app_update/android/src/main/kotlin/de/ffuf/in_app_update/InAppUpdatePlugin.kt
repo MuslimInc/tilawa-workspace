@@ -12,6 +12,7 @@ import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.appupdate.AppUpdateOptions
+import com.google.android.play.core.install.InstallState
 import com.google.android.play.core.install.InstallStateUpdatedListener
 import com.google.android.play.core.install.model.*
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -34,6 +35,7 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
     EventChannel.StreamHandler {
 
     companion object {
+        private const val TAG = "in_app_update"
         private const val REQUEST_CODE_START_UPDATE = 1276
     }
 
@@ -59,8 +61,11 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
 
     private lateinit var channel: MethodChannel
     private lateinit var event: EventChannel
-    private lateinit var installStateUpdatedListener: InstallStateUpdatedListener
+    private val installStateUpdatedListener = InstallStateUpdatedListener { state ->
+        onInstallStateUpdated(state)
+    }
     private var installStateSink: EventChannel.EventSink? = null
+    private var globalListenerRegistered = false
 
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
         installStateSink = events
@@ -70,8 +75,13 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
         installStateSink = null
     }
 
-    private fun addState(status: Int){
-        installStateSink?.success(status)
+    private fun publishInstallStatusCode(installStatus: Int) {
+        installStateSink?.success(installStatus)
+    }
+
+    private fun onInstallStateUpdated(state: InstallState) {
+        publishInstallStatusCode(state.installStatus())
+        handleFlexibleInstallState(state)
     }
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
@@ -81,16 +91,13 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
         event = EventChannel(flutterPluginBinding.binaryMessenger,"de.ffuf.in_app_update/stateEvents" )
         event.setStreamHandler(this)
 
-        installStateUpdatedListener = InstallStateUpdatedListener { installState ->
-            addState(installState.installStatus())
-        }
-        appUpdateManager?.registerListener(installStateUpdatedListener)
+        appUpdateManager?.let { ensureGlobalListenerRegistered(it) }
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
         event.setStreamHandler(null)
-        appUpdateManager?.unregisterListener(installStateUpdatedListener)
+        unregisterGlobalListener()
         unregisterLifecycleCallbacksIfNeeded()
     }
 
@@ -100,7 +107,6 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
     private var appUpdateType: Int? = null
     private var appUpdateInfo: AppUpdateInfo? = null
     private var appUpdateManager: AppUpdateManager? = null
-    private var flexibleUpdateListener: InstallStateUpdatedListener? = null
     private var lifecycleApplication: Application? = null
 
     override fun onMethodCall(call: MethodCall, result: Result) {
@@ -196,26 +202,44 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
 
     override fun onActivityStopped(activity: Activity) {}
 
+    /// Play guidance: check stalled immediate updates and downloaded flexible
+    /// updates whenever the app returns to the foreground.
     override fun onActivityResumed(activity: Activity) {
-        appUpdateManager
-            ?.appUpdateInfo
-            ?.addOnSuccessListener { appUpdateInfo ->
-                if (appUpdateInfo.updateAvailability()
-                    == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS
-                    && appUpdateType == AppUpdateType.IMMEDIATE
-                ) {
-                    try {
-                        appUpdateManager?.startUpdateFlowForResult(
-                            appUpdateInfo,
-                            activity,
-                            AppUpdateOptions.defaultOptions(AppUpdateType.IMMEDIATE),
-                            REQUEST_CODE_START_UPDATE
-                        )
-                    } catch (e: SendIntentException) {
-                        Log.e("in_app_update", "Could not start update flow", e)
-                    }
-                }
+        val manager = appUpdateManager ?: return
+        manager.appUpdateInfo
+            .addOnSuccessListener { info ->
+                resumeImmediateUpdateIfNeeded(manager, activity, info)
+                notifyDownloadedFlexibleUpdateIfNeeded(info)
             }
+    }
+
+    private fun resumeImmediateUpdateIfNeeded(
+        manager: AppUpdateManager,
+        activity: Activity,
+        info: AppUpdateInfo,
+    ) {
+        if (info.updateAvailability()
+            != UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS
+        ) {
+            return
+        }
+
+        try {
+            manager.startUpdateFlowForResult(
+                info,
+                activity,
+                immediateUpdateOptions(),
+                REQUEST_CODE_START_UPDATE,
+            )
+        } catch (e: SendIntentException) {
+            Log.e(TAG, "Could not resume immediate update flow", e)
+        }
+    }
+
+    private fun notifyDownloadedFlexibleUpdateIfNeeded(info: AppUpdateInfo) {
+        if (info.installStatus() == InstallStatus.DOWNLOADED) {
+            publishInstallStatusCode(InstallStatus.DOWNLOADED)
+        }
     }
 
     private fun performImmediateUpdate(result: Result) {
@@ -224,7 +248,9 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
 
         manager.appUpdateInfo
             .addOnSuccessListener { info ->
-                if (!info.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
+                if (info.updateAvailability() != UpdateAvailability.UPDATE_AVAILABLE
+                    || !info.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
+                ) {
                     invalidateCachedUpdateInfo()
                     result.error(
                         "IN_APP_UPDATE_FAILED",
@@ -242,9 +268,10 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
                     manager.startUpdateFlowForResult(
                         info,
                         activity,
-                        AppUpdateOptions.defaultOptions(AppUpdateType.IMMEDIATE),
+                        immediateUpdateOptions(),
                         REQUEST_CODE_START_UPDATE,
                     )
+                    invalidateCachedUpdateInfo()
                 } catch (e: SendIntentException) {
                     invalidateCachedUpdateInfo()
                     result.error("IN_APP_UPDATE_FAILED", e.message, null)
@@ -262,7 +289,9 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
 
         manager.appUpdateInfo
             .addOnSuccessListener { info ->
-                if (!info.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
+                if (info.updateAvailability() != UpdateAvailability.UPDATE_AVAILABLE
+                    || !info.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)
+                ) {
                     invalidateCachedUpdateInfo()
                     result.error(
                         "IN_APP_UPDATE_FAILED",
@@ -276,32 +305,17 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
                 appUpdateType = AppUpdateType.FLEXIBLE
                 updateResult = result
 
-                flexibleUpdateListener?.let { manager.unregisterListener(it) }
-                flexibleUpdateListener = InstallStateUpdatedListener { state ->
-                    addState(state.installStatus())
-                    if (state.installStatus() == InstallStatus.DOWNLOADED) {
-                        updateResult?.success(null)
-                        updateResult = null
-                    } else if (state.installErrorCode() != InstallErrorCode.NO_ERROR) {
-                        updateResult?.error(
-                            "Error during installation",
-                            state.installErrorCode().toString(),
-                            null,
-                        )
-                        updateResult = null
-                        invalidateCachedUpdateInfo()
-                    }
-                }
                 // Register before starting the flow, per Play Core guidance.
-                manager.registerListener(flexibleUpdateListener!!)
+                ensureGlobalListenerRegistered(manager)
 
                 try {
                     manager.startUpdateFlowForResult(
                         info,
                         activity,
-                        AppUpdateOptions.defaultOptions(AppUpdateType.FLEXIBLE),
+                        flexibleUpdateOptions(),
                         REQUEST_CODE_START_UPDATE,
                     )
+                    invalidateCachedUpdateInfo()
                 } catch (e: SendIntentException) {
                     invalidateCachedUpdateInfo()
                     result.error("IN_APP_UPDATE_FAILED", e.message, null)
@@ -377,52 +391,68 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
     }
 
     private fun checkForUpdate(result: Result) {
-        val activity = activityProvider?.activity()
-        if (activity == null) {
-            result.error(
-                "REQUIRE_FOREGROUND_ACTIVITY",
-                "in_app_update requires a foreground activity",
-                null,
-            )
-            return
-        }
+        val activity = requireActivity(result) ?: return
+        val manager = requireAppUpdateManager(result) ?: return
 
         activityProvider?.addActivityResultListener(this)
         registerLifecycleCallbacksIfNeeded(activity)
 
-        appUpdateManager = appUpdateManagerFactory(activity)
-
-        // Returns an intent object that you use to check for an update.
-        val appUpdateInfoTask = appUpdateManager!!.appUpdateInfo
-
-        // Checks that the platform will allow the specified type of update.
-        appUpdateInfoTask.addOnSuccessListener { info ->
-            appUpdateInfo = info
-            result.success(
-                mapOf(
-                    "updateAvailability" to info.updateAvailability(),
-                    "immediateAllowed" to info.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE),
-                    "immediateAllowedPreconditions" to info.getFailedUpdatePreconditions(AppUpdateOptions.defaultOptions(AppUpdateType.IMMEDIATE)).map { it.toInt() }.toList(),
-                    "flexibleAllowed" to info.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE),
-                    "flexibleAllowedPreconditions" to info.getFailedUpdatePreconditions(AppUpdateOptions.defaultOptions(AppUpdateType.FLEXIBLE)).map { it.toInt() }.toList(),
-                    "availableVersionCode" to info.availableVersionCode(), //Nullable according to docs
-                    "installStatus" to info.installStatus(),
-                    "packageName" to info.packageName(),
-                    "clientVersionStalenessDays" to info.clientVersionStalenessDays(), //Nullable according to docs
-                    "updatePriority" to info.updatePriority(),
-                    "totalBytesToDownload" to info.totalBytesToDownload(),
-                    "bytesDownloaded" to info.bytesDownloaded(),
+        manager.appUpdateInfo
+            .addOnSuccessListener { info ->
+                appUpdateInfo = info
+                result.success(
+                    mapOf(
+                        "updateAvailability" to info.updateAvailability(),
+                        "immediateAllowed" to info.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE),
+                        "immediateAllowedPreconditions" to info.getFailedUpdatePreconditions(immediateUpdateOptions()).map { it.toInt() }.toList(),
+                        "flexibleAllowed" to info.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE),
+                        "flexibleAllowedPreconditions" to info.getFailedUpdatePreconditions(flexibleUpdateOptions()).map { it.toInt() }.toList(),
+                        "availableVersionCode" to info.availableVersionCode(),
+                        "installStatus" to info.installStatus(),
+                        "packageName" to info.packageName(),
+                        "clientVersionStalenessDays" to info.clientVersionStalenessDays(),
+                        "updatePriority" to info.updatePriority(),
+                        "totalBytesToDownload" to info.totalBytesToDownload(),
+                        "bytesDownloaded" to info.bytesDownloaded(),
+                    )
                 )
-            )
+            }
+            .addOnFailureListener {
+                result.error("TASK_FAILURE", it.message, null)
+            }
+    }
+
+    private fun handleFlexibleInstallState(state: InstallState) {
+        if (appUpdateType != AppUpdateType.FLEXIBLE) {
+            return
         }
-        appUpdateInfoTask.addOnFailureListener {
-            result.error("TASK_FAILURE", it.message, null)
+
+        when {
+            state.installStatus() == InstallStatus.DOWNLOADED -> {
+                updateResult?.success(null)
+                updateResult = null
+            }
+            state.installErrorCode() != InstallErrorCode.NO_ERROR -> {
+                updateResult?.error(
+                    "Error during installation",
+                    state.installErrorCode().toString(),
+                    null,
+                )
+                updateResult = null
+                invalidateCachedUpdateInfo()
+            }
         }
     }
 
     private fun invalidateCachedUpdateInfo() {
         appUpdateInfo = null
     }
+
+    private fun immediateUpdateOptions(): AppUpdateOptions =
+        AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE).build()
+
+    private fun flexibleUpdateOptions(): AppUpdateOptions =
+        AppUpdateOptions.newBuilder(AppUpdateType.FLEXIBLE).build()
 
     private fun registerLifecycleCallbacksIfNeeded(activity: Activity) {
         if (lifecycleApplication != null) {
@@ -443,7 +473,22 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
         if (appUpdateManager == null) {
             appUpdateManager = appUpdateManagerFactory(activity)
         }
+        ensureGlobalListenerRegistered(appUpdateManager!!)
         return appUpdateManager
+    }
+
+    private fun ensureGlobalListenerRegistered(manager: AppUpdateManager) {
+        if (!globalListenerRegistered) {
+            manager.registerListener(installStateUpdatedListener)
+            globalListenerRegistered = true
+        }
+    }
+
+    private fun unregisterGlobalListener() {
+        if (globalListenerRegistered) {
+            appUpdateManager?.unregisterListener(installStateUpdatedListener)
+            globalListenerRegistered = false
+        }
     }
 
     private fun requireActivity(result: Result): Activity? {

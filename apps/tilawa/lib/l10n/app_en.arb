@@ -3319,6 +3319,10 @@
     "@inAppUpdateOptionalMessage": {
         "description": "Snackbar message when an optional app update is available"
     },
+    "inAppUpdateRequiredMessage": "An update is required to continue using Tilawa.",
+    "@inAppUpdateRequiredMessage": {
+        "description": "Snackbar message when a forced update must go through the Play Store"
+    },
     "inAppUpdateRestartAction": "Restart",
     "@inAppUpdateRestartAction": {
         "description": "Snackbar action to install a downloaded flexible update"

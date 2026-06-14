@@ -126,7 +126,7 @@ void main() {
               flexibleUpdateAllowed: false,
             ),
           ),
-          InAppUpdateAction.offerOptionalImmediate,
+          InAppUpdateAction.offerRequiredStoreUpdate,
         );
       },
     );

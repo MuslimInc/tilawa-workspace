@@ -110,6 +110,17 @@ class PlayInAppUpdatePlatformDataSource
     }
   }
 
+  @override
+  Stream<void> get onFlexibleUpdateDownloaded {
+    if (!Platform.isAndroid) {
+      return const Stream<void>.empty();
+    }
+
+    return InAppUpdate.installUpdateListener
+        .where((InstallStatus status) => status == InstallStatus.downloaded)
+        .map((InstallStatus status) {});
+  }
+
   bool _isAppNotOwnedError(PlatformException error) {
     return error.code == 'TASK_FAILURE' &&
         (error.message?.contains('Install Error(-10)') ?? false);

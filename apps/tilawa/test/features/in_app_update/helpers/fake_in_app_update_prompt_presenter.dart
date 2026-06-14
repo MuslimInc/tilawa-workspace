@@ -4,6 +4,7 @@ import 'package:tilawa/features/in_app_update/presentation/services/in_app_updat
 class FakeInAppUpdatePromptPresenter implements InAppUpdatePromptPresenter {
   InAppUpdateAction? lastAction;
   Future<void> Function()? lastOnConfirm;
+  int promptCount = 0;
 
   @override
   void showPrompt(
@@ -12,5 +13,6 @@ class FakeInAppUpdatePromptPresenter implements InAppUpdatePromptPresenter {
   }) {
     lastAction = action;
     lastOnConfirm = onConfirm;
+    promptCount++;
   }
 }

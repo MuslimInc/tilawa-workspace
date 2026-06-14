@@ -28,7 +28,7 @@ class InAppUpdateStrategyResolver {
       if (availability.flexibleUpdateAllowed) {
         return InAppUpdateAction.startFlexible;
       }
-      return InAppUpdateAction.offerOptionalImmediate;
+      return InAppUpdateAction.offerRequiredStoreUpdate;
     }
 
     if (availability.flexibleUpdateAllowed) {

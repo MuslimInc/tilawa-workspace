@@ -4508,6 +4508,12 @@ abstract class AppLocalizations {
   /// **'A new version of Tilawa is available.'**
   String get inAppUpdateOptionalMessage;
 
+  /// Snackbar message when a forced update must go through the Play Store
+  ///
+  /// In en, this message translates to:
+  /// **'An update is required to continue using Tilawa.'**
+  String get inAppUpdateRequiredMessage;
+
   /// Snackbar action to install a downloaded flexible update
   ///
   /// In en, this message translates to:

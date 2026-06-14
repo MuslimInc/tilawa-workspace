@@ -120,6 +120,9 @@ class InAppUpdatePluginTest {
         return manager
     }
 
+    private fun immediateUpdateOptions(): AppUpdateOptions =
+        AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE).build()
+
     @Test
     fun onMethodCall_unknownMethod_returnsNotImplemented() {
         plugin.onMethodCall(MethodCall("unknown", null), mockResult)
@@ -148,6 +151,7 @@ class InAppUpdatePluginTest {
 
         callMethod("checkForUpdate")
 
+        verify(manager).registerListener(any())
         val captor = ArgumentCaptor.forClass(Map::class.java)
         verify(mockResult).success(captor.capture())
         @Suppress("UNCHECKED_CAST")
@@ -218,7 +222,7 @@ class InAppUpdatePluginTest {
         verify(manager).startUpdateFlowForResult(
             info,
             activity,
-            AppUpdateOptions.defaultOptions(AppUpdateType.IMMEDIATE),
+            immediateUpdateOptions(),
             1276,
         )
     }
@@ -283,11 +287,12 @@ class InAppUpdatePluginTest {
         plugin.setAppUpdateManagerForTesting(manager)
 
         callMethod("startFlexibleUpdate")
-        verify(manager).registerListener(listenerCaptor.capture())
+        verify(manager, atLeastOnce()).registerListener(listenerCaptor.capture())
 
+        val installListener = listenerCaptor.allValues.first()
         val state = mock(InstallState::class.java)
         whenever(state.installStatus()).thenReturn(InstallStatus.DOWNLOADED)
-        listenerCaptor.value.onStateUpdate(state)
+        installListener.onStateUpdate(state)
 
         verify(mockResult).success(null)
     }
@@ -302,12 +307,13 @@ class InAppUpdatePluginTest {
         plugin.setAppUpdateManagerForTesting(manager)
 
         callMethod("startFlexibleUpdate")
-        verify(manager).registerListener(listenerCaptor.capture())
+        verify(manager, atLeastOnce()).registerListener(listenerCaptor.capture())
 
+        val installListener = listenerCaptor.allValues.first()
         val state = mock(InstallState::class.java)
         whenever(state.installStatus()).thenReturn(InstallStatus.FAILED)
         whenever(state.installErrorCode()).thenReturn(InstallErrorCode.ERROR_INTERNAL_ERROR)
-        listenerCaptor.value.onStateUpdate(state)
+        installListener.onStateUpdate(state)
 
         verify(mockResult).error(
             "Error during installation",
@@ -498,7 +504,6 @@ class InAppUpdatePluginTest {
         )
         val manager = mockManager(info)
         plugin.setAppUpdateManagerForTesting(manager)
-        plugin.setAppUpdateTypeForTesting(AppUpdateType.IMMEDIATE)
 
         plugin.onActivityResumed(activity)
         dispatchAsyncTasks()
@@ -506,9 +511,24 @@ class InAppUpdatePluginTest {
         verify(manager).startUpdateFlowForResult(
             info,
             activity,
-            AppUpdateOptions.defaultOptions(AppUpdateType.IMMEDIATE),
+            immediateUpdateOptions(),
             1276,
         )
+    }
+
+    @Test
+    fun onActivityResumed_notifiesDownloadedFlexibleUpdate() {
+        val activity = createActivity()
+        attachActivity(activity)
+        val info = mockUpdateInfo(installStatus = InstallStatus.DOWNLOADED)
+        val manager = mockManager(info)
+        plugin.setAppUpdateManagerForTesting(manager)
+        plugin.onListen(null, mockEventSink)
+
+        plugin.onActivityResumed(activity)
+        dispatchAsyncTasks()
+
+        verify(mockEventSink).success(InstallStatus.DOWNLOADED)
     }
 
     @Test
@@ -541,6 +561,20 @@ class InAppUpdatePluginTest {
         plugin.onActivityDestroyed(activity)
         plugin.onActivityResumed(activity)
         dispatchAsyncTasks()
+    }
+
+    @Test
+    fun requireAppUpdateManager_registersGlobalListenerOnce() {
+        val activity = createActivity()
+        attachActivity(activity)
+        val info = mockUpdateInfo()
+        val manager = mockManager(info)
+        plugin.appUpdateManagerFactory = { manager }
+
+        callMethod("checkForUpdate")
+        callMethod("performImmediateUpdate")
+
+        verify(manager, atLeastOnce()).registerListener(any())
     }
 
     @Test

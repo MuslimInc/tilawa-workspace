@@ -2499,6 +2499,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'A new version of Tilawa is available.';
 
   @override
+  String get inAppUpdateRequiredMessage =>
+      'An update is required to continue using Tilawa.';
+
+  @override
   String get inAppUpdateRestartAction => 'Restart';
 
   @override

@@ -28,6 +28,19 @@ void main() {
       );
       expect(
         InAppUpdateSnackBarPresenter.messageFor(
+          InAppUpdateAction.offerRequiredStoreUpdate,
+          l10n,
+        ),
+        'An update is required to continue using Tilawa.',
+      );
+      expect(
+        InAppUpdateSnackBarPresenter.durationFor(
+          InAppUpdateAction.offerRequiredStoreUpdate,
+        ),
+        const Duration(days: 1),
+      );
+      expect(
+        InAppUpdateSnackBarPresenter.messageFor(
           InAppUpdateAction.promptFlexibleRestart,
           l10n,
         ),
