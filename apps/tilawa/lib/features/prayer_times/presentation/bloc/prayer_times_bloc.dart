@@ -8,6 +8,7 @@ import 'package:injectable/injectable.dart';
 import 'package:tilawa/features/prayer_times/domain/repositories/prayer_times_repository.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
+import '../../application/prayer_location_update_notifier.dart';
 import '../../domain/entities/entities.dart';
 import '../../domain/prayer_times_clock.dart';
 import '../../domain/usecases/usecases.dart';
@@ -20,6 +21,7 @@ class PrayerTimesEvent with _$PrayerTimesEvent {
   const factory PrayerTimesEvent.loadPrayerTimes({
     @Default(false) bool forceReschedule,
     @Default(false) bool requestLocationPermission,
+    String? localeIdentifier,
   }) = _LoadPrayerTimes;
   const factory PrayerTimesEvent.loadMonthlyPrayerTimes({
     required int year,
@@ -54,6 +56,7 @@ abstract class PrayerTimesState with _$PrayerTimesState {
     Duration? timeUntilNextPrayer,
     @Default('') String errorMessage,
     @Default(false) bool isLoadingLocation,
+    String? localeIdentifier,
   }) = _PrayerTimesState;
 }
 
@@ -66,10 +69,12 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
     this._getMonthlyPrayerTimesUseCase,
     this._getCurrentLocationUseCase,
     this._getCountryCodeUseCase,
+    this._getLocationNameUseCase,
     this._savePrayerSettingsUseCase,
     this._loadPrayerSettingsUseCase,
     this._schedulePrayerNotificationsUseCase,
-    this._cancelPrayerNotificationsUseCase, [
+    this._cancelPrayerNotificationsUseCase,
+    this._notifyPrayerLocationUpdated, [
     this._shouldRefreshPrayerTimesUseCase =
         const ShouldRefreshPrayerTimesUseCase(),
   ]) : super(const PrayerTimesState()) {
@@ -92,18 +97,31 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
   final GetMonthlyPrayerTimesUseCase _getMonthlyPrayerTimesUseCase;
   final GetCurrentLocationUseCase _getCurrentLocationUseCase;
   final GetCountryCodeUseCase _getCountryCodeUseCase;
+  final GetLocationNameUseCase _getLocationNameUseCase;
   final SavePrayerSettingsUseCase _savePrayerSettingsUseCase;
   final LoadPrayerSettingsUseCase _loadPrayerSettingsUseCase;
   final SchedulePrayerNotificationsUseCase _schedulePrayerNotificationsUseCase;
   // ignore: unused_field
   final CancelPrayerNotificationsUseCase _cancelPrayerNotificationsUseCase;
+  final NotifyPrayerLocationUpdatedUseCase _notifyPrayerLocationUpdated;
   final ShouldRefreshPrayerTimesUseCase _shouldRefreshPrayerTimesUseCase;
 
   Future<void> _onLoadPrayerTimes(
     _LoadPrayerTimes event,
     Emitter<PrayerTimesState> emit,
   ) async {
-    emit(state.copyWith(status: PrayerTimesStatus.loading));
+    final String? localeIdentifier =
+        event.localeIdentifier ?? state.localeIdentifier;
+    if (event.localeIdentifier != null) {
+      emit(
+        state.copyWith(
+          status: PrayerTimesStatus.loading,
+          localeIdentifier: event.localeIdentifier,
+        ),
+      );
+    } else {
+      emit(state.copyWith(status: PrayerTimesStatus.loading));
+    }
 
     // Load settings first
     final Either<Failure, PrayerSettingsEntity> settingsResult =
@@ -141,6 +159,7 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
       final Either<Failure, LocationResult> locationResult =
           await _getCurrentLocationUseCase.call(
             requestIfDenied: event.requestLocationPermission,
+            localeIdentifier: localeIdentifier,
           );
 
       final LocationResult? resolvedLocation = locationResult
@@ -220,6 +239,12 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
 
     final double resolvedLatitude = latitude;
     final double resolvedLongitude = longitude;
+    locationName = await _localizedLocationName(
+      latitude: resolvedLatitude,
+      longitude: resolvedLongitude,
+      fallback: locationName,
+      localeIdentifier: localeIdentifier,
+    );
 
     // Calculate prayer times
     final Either<Failure, PrayerTimeEntity> result =
@@ -333,6 +358,7 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
           forceRefresh: forceRefresh,
           allowOpenSettings: allowOpenSettings,
           requestIfDenied: requestIfDenied,
+          localeIdentifier: state.localeIdentifier,
         );
 
     await locationResult.fold<Future<void>>(
@@ -346,13 +372,19 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
         );
       },
       (location) async {
-        final PrayerSettingsEntity updatedSettings =
-            await _persistLastResolvedLocationIfNeeded(
-              settings: state.settings,
-              latitude: location.latitude,
-              longitude: location.longitude,
-              locationName: location.locationName,
-            );
+        final PrayerSettingsEntity updatedSettings = forceRefresh
+            ? await _persistUserRefreshedLocation(
+                settings: state.settings,
+                latitude: location.latitude,
+                longitude: location.longitude,
+                locationName: location.locationName,
+              )
+            : await _persistLastResolvedLocationIfNeeded(
+                settings: state.settings,
+                latitude: location.latitude,
+                longitude: location.longitude,
+                locationName: location.locationName,
+              );
 
         emit(
           state.copyWith(
@@ -362,6 +394,11 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
             isLoadingLocation: false,
             settings: updatedSettings,
           ),
+        );
+
+        _notifyPrayerLocationUpdated(
+          localeIdentifier: state.localeIdentifier,
+          source: PrayerLocationUpdateSource.prayerTimesTab,
         );
 
         add(const PrayerTimesEvent.loadPrayerTimes(forceReschedule: true));
@@ -445,8 +482,31 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
     await _savePrayerSettingsUseCase.call(settings: updatedSettings);
     emit(state.copyWith(settings: updatedSettings));
 
+    _notifyPrayerLocationUpdated(
+      localeIdentifier: state.localeIdentifier,
+      source: PrayerLocationUpdateSource.prayerTimesTab,
+    );
+
     // Reload prayer times; manual location overrides force a reschedule.
     add(const PrayerTimesEvent.loadPrayerTimes(forceReschedule: true));
+  }
+
+  Future<PrayerSettingsEntity> _persistUserRefreshedLocation({
+    required PrayerSettingsEntity settings,
+    required double latitude,
+    required double longitude,
+    required String? locationName,
+  }) async {
+    final PrayerSettingsEntity updatedSettings = settings.copyWith(
+      savedLatitude: latitude,
+      savedLongitude: longitude,
+      savedLocationName: locationName,
+      lastResolvedLatitude: latitude,
+      lastResolvedLongitude: longitude,
+      lastResolvedLocationName: locationName,
+    );
+    await _savePrayerSettingsUseCase.call(settings: updatedSettings);
+    return updatedSettings;
   }
 
   Future<PrayerSettingsEntity> _persistLastResolvedLocationIfNeeded({
@@ -472,5 +532,23 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
     );
     await _savePrayerSettingsUseCase.call(settings: updatedSettings);
     return updatedSettings;
+  }
+
+  Future<String?> _localizedLocationName({
+    required double latitude,
+    required double longitude,
+    required String? fallback,
+    required String? localeIdentifier,
+  }) async {
+    if (localeIdentifier == null || localeIdentifier.isEmpty) {
+      return fallback;
+    }
+
+    return await _getLocationNameUseCase.call(
+          latitude: latitude,
+          longitude: longitude,
+          localeIdentifier: localeIdentifier,
+        ) ??
+        fallback;
   }
 }

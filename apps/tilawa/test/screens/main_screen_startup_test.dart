@@ -203,6 +203,7 @@ void main() {
     when(() => mockGetReciters.call()).thenAnswer(
       (_) async => const Right<Failure, List<ReciterEntity>>([]),
     );
+    when(() => mockGetReciters.invalidateCache()).thenReturn(null);
 
     getIt.registerSingleton<GetRecitersUseCase>(mockGetReciters);
     getIt.registerFactory<AlphabetScrollbarBloc>(AlphabetScrollbarBloc.new);
@@ -223,7 +224,11 @@ void main() {
           create: (_) => mainScreenCubit ?? MainScreenCubit(),
         ),
         BlocProvider<LocalizationBloc>(
-          create: (_) => LocalizationBloc(mockGetLanguage, mockSetLanguage),
+          create: (_) => LocalizationBloc(
+            mockGetLanguage,
+            mockSetLanguage,
+            mockGetReciters,
+          ),
         ),
         BlocProvider<PlayerBackgroundCubit>.value(
           value: mockPlayerBackgroundCubit,
@@ -278,6 +283,7 @@ void main() {
     when(() => mockGetReciters.call()).thenAnswer(
       (_) async => const Right<Failure, List<ReciterEntity>>(reciters),
     );
+    when(() => mockGetReciters.invalidateCache()).thenReturn(null);
     when(
       () => mockGetLanguage(),
     ).thenAnswer((_) async => const Right<Failure, String>('en'));
@@ -312,7 +318,11 @@ void main() {
           create: (_) => AlphabetScrollbarBloc(),
         ),
         BlocProvider<LocalizationBloc>(
-          create: (_) => LocalizationBloc(mockGetLanguage, mockSetLanguage),
+          create: (_) => LocalizationBloc(
+            mockGetLanguage,
+            mockSetLanguage,
+            mockGetReciters,
+          ),
         ),
         BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),
       ],

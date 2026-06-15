@@ -10,8 +10,10 @@ import 'package:tilawa/features/prayer_times/domain/entities/prayer_settings_ent
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
 import 'package:tilawa/features/prayer_times/domain/repositories/prayer_times_repository.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/get_current_location_use_case.dart';
+import 'package:tilawa/features/prayer_times/domain/usecases/get_location_name_use_case.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/get_prayer_times_use_case.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/load_prayer_settings_use_case.dart';
+import 'package:tilawa/features/prayer_times/domain/usecases/save_prayer_settings_use_case.dart';
 
 void main() {
   group('HomeDashboardRepositoryImpl', () {
@@ -42,6 +44,29 @@ void main() {
       },
     );
 
+    test(
+      'localizes saved location label for the requested locale',
+      () async {
+        final now = DateTime(2026, 6, 15, 10);
+        final prayerRepository = _FakePrayerTimesRepository(
+          settings: const PrayerSettingsEntity(
+            savedLatitude: 30.0444,
+            savedLongitude: 31.2357,
+            savedLocationName: 'Cairo',
+          ),
+        );
+        final repository = _createRepository(
+          prayerRepository: prayerRepository,
+          now: () => now,
+        );
+
+        final dashboard = await repository.getDashboard(localeIdentifier: 'ar');
+
+        expect(dashboard.locationLabel, 'القاهرة');
+        expect(prayerRepository.locationNameRequests, 1);
+      },
+    );
+
     test('does not prompt for location permission on passive load', () async {
       final prayerRepository = _FakePrayerTimesRepository(
         settings: const PrayerSettingsEntity(),
@@ -58,6 +83,70 @@ void main() {
       expect(dashboard.nextPrayer, isNull);
       expect(prayerRepository.permissionChecks, 1);
       expect(prayerRepository.permissionRequests, 0);
+    });
+
+    test('resolves live location when saved coordinates are absent', () async {
+      final prayerRepository = _FakePrayerTimesRepository(
+        settings: const PrayerSettingsEntity(),
+        locationPermissionGranted: true,
+      );
+      final repository = _createRepository(
+        prayerRepository: prayerRepository,
+        now: () => DateTime(2026, 6, 15, 10),
+      );
+
+      final dashboard = await repository.getDashboard();
+
+      expect(dashboard.locationLabel, 'Cairo');
+      expect(dashboard.nextPrayer?.type, PrayerType.dhuhr);
+      expect(prayerRepository.currentLocationRequests, 1);
+      expect(prayerRepository.permissionRequests, 0);
+    });
+
+    test('uses tomorrow fajr when all prayers have passed', () async {
+      final now = DateTime(2026, 6, 15, 21);
+      final prayerRepository = _FakePrayerTimesRepository(
+        settings: const PrayerSettingsEntity(
+          savedLatitude: 30.0444,
+          savedLongitude: 31.2357,
+          savedLocationName: 'Cairo',
+        ),
+      );
+      final repository = _createRepository(
+        prayerRepository: prayerRepository,
+        now: () => now,
+      );
+
+      final dashboard = await repository.getDashboard();
+
+      expect(dashboard.nextPrayer?.type, PrayerType.fajr);
+      expect(dashboard.nextPrayer?.time.day, 16);
+    });
+
+    test('refreshLocation fetches GPS and persists coordinates', () async {
+      final now = DateTime(2026, 6, 15, 10);
+      final prayerRepository = _FakePrayerTimesRepository(
+        settings: const PrayerSettingsEntity(
+          savedLatitude: 30.0,
+          savedLongitude: 31.0,
+          savedLocationName: 'Old City',
+        ),
+        locationPermissionGranted: true,
+      );
+      final repository = _createRepository(
+        prayerRepository: prayerRepository,
+        now: () => now,
+      );
+
+      final dashboard = await repository.refreshLocation(
+        localeIdentifier: 'ar',
+      );
+
+      expect(dashboard.locationLabel, 'القاهرة');
+      expect(dashboard.nextPrayer?.type, PrayerType.dhuhr);
+      expect(prayerRepository.currentLocationRequests, 1);
+      expect(prayerRepository.savedSettingsRequests, 1);
+      expect(prayerRepository.lastSavedSettings?.savedLocationName, 'Cairo');
     });
   });
 }
@@ -79,7 +168,9 @@ HomeDashboardRepositoryImpl _createRepository({
     ),
     loadPrayerSettings: LoadPrayerSettingsUseCase(prayerRepository),
     getCurrentLocation: GetCurrentLocationUseCase(prayerRepository),
+    getLocationName: GetLocationNameUseCase(prayerRepository),
     getPrayerTimes: GetPrayerTimesUseCase(prayerRepository),
+    savePrayerSettings: SavePrayerSettingsUseCase(prayerRepository),
     now: now,
   );
 }
@@ -125,6 +216,9 @@ final class _FakePrayerTimesRepository implements PrayerTimesRepository {
   int permissionChecks = 0;
   int permissionRequests = 0;
   int currentLocationRequests = 0;
+  int locationNameRequests = 0;
+  int savedSettingsRequests = 0;
+  PrayerSettingsEntity? lastSavedSettings;
 
   @override
   Future<PrayerTimeEntity> getPrayerTimes({
@@ -150,7 +244,23 @@ final class _FakePrayerTimesRepository implements PrayerTimesRepository {
   }
 
   @override
-  Future<LocationResult> getCurrentLocation({bool forceRefresh = false}) async {
+  Future<String?> getLocationName({
+    required double latitude,
+    required double longitude,
+    String? localeIdentifier,
+  }) async {
+    locationNameRequests += 1;
+    if (localeIdentifier == 'ar') {
+      return 'القاهرة';
+    }
+    return 'Cairo';
+  }
+
+  @override
+  Future<LocationResult> getCurrentLocation({
+    bool forceRefresh = false,
+    String? localeIdentifier,
+  }) async {
     currentLocationRequests += 1;
     return LocationResult(
       latitude: 30.0444,
@@ -179,6 +289,8 @@ final class _FakePrayerTimesRepository implements PrayerTimesRepository {
 
   @override
   Future<void> saveSettings(PrayerSettingsEntity settings) async {
+    savedSettingsRequests += 1;
+    lastSavedSettings = settings;
     _settings = settings;
   }
 

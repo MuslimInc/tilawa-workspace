@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:tilawa/features/auth/application/account_deletion_flow_tracker.dart';
 import 'package:tilawa/features/auth/domain/entities/auth_result.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/domain/usecases/delete_account.dart';
@@ -31,6 +34,7 @@ void main() {
   late MockDeleteAccount mockDeleteAccount;
   late MockGetCurrentUserUseCase mockGetCurrentUserUseCase;
   late MockSyncDeviceTokenUseCase mockSyncDeviceTokenUseCase;
+  late AccountDeletionFlowTracker accountDeletionFlowTracker;
 
   setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
@@ -55,6 +59,7 @@ void main() {
     mockDeleteAccount = MockDeleteAccount();
     mockGetCurrentUserUseCase = MockGetCurrentUserUseCase();
     mockSyncDeviceTokenUseCase = MockSyncDeviceTokenUseCase();
+    accountDeletionFlowTracker = AccountDeletionFlowTracker();
 
     authBloc = AuthBloc(
       mockSignInWithGoogleUseCase,
@@ -62,6 +67,7 @@ void main() {
       mockDeleteAccount,
       mockGetCurrentUserUseCase,
       mockSyncDeviceTokenUseCase,
+      accountDeletionFlowTracker,
     );
   });
 
@@ -312,6 +318,44 @@ void main() {
           const AuthState.error(message: 'Unable to delete account'),
           const AuthState.unauthenticated(),
         ],
+      );
+    });
+
+    group('AbortInteractiveSignInEvent', () {
+      late Completer<AuthResult> signInCompleter;
+
+      blocTest<AuthBloc, AuthState>(
+        'emits [unauthenticated] when aborting an in-flight sign-in',
+        build: () => authBloc,
+        seed: () => const AuthState.loading(),
+        act: (bloc) => bloc.add(const AbortInteractiveSignInEvent()),
+        expect: () => [const AuthState.unauthenticated()],
+      );
+
+      blocTest<AuthBloc, AuthState>(
+        'ignores a late sign-in result after abort',
+        build: () {
+          signInCompleter = Completer<AuthResult>();
+          when(
+            mockSignInWithGoogleUseCase(),
+          ).thenAnswer((_) => signInCompleter.future);
+          return authBloc;
+        },
+        act: (bloc) async {
+          bloc.add(const SignInWithGoogleEvent());
+          await Future<void>.delayed(Duration.zero);
+          bloc.add(const AbortInteractiveSignInEvent());
+          signInCompleter.complete(AuthResult.success(user: tUser));
+          await Future<void>.delayed(Duration.zero);
+        },
+        expect: () => [
+          const AuthState.loading(),
+          const AuthState.unauthenticated(),
+        ],
+        verify: (_) {
+          verify(mockSignInWithGoogleUseCase()).called(1);
+          verifyNever(mockSyncDeviceTokenUseCase(any));
+        },
       );
     });
 

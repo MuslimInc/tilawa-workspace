@@ -81,6 +81,17 @@ void main() {
       verify(() => mockHive.openBox(historyBoxName)).called(1);
     });
 
+    test('reuses open box without calling openBox again', () async {
+      when(() => mockHive.isBoxOpen(historyBoxName)).thenReturn(true);
+      when(() => mockHive.box(historyBoxName)).thenReturn(mockBox);
+      when(() => mockBox.values).thenReturn([]);
+
+      await dataSource.getAllHistory();
+
+      verifyNever(() => mockHive.openBox(historyBoxName));
+      verify(() => mockHive.box(historyBoxName)).called(1);
+    });
+
     test('should return empty list when Box is empty', () async {
       // arrange
       when(() => mockBox.values).thenReturn([]);
@@ -262,6 +273,36 @@ void main() {
 
       verify(() => mockBox.deleteAll(['1', '2'])).called(1);
       verify(() => mockBox.putAll(any())).called(1);
+    });
+  });
+
+  group('composite key', () {
+    test('generateCompositeKey formats ids', () {
+      expect(
+        dataSource.generateCompositeKey(
+          surahId: 2,
+          reciterId: '7',
+          moshafId: 1,
+        ),
+        '2_7_1',
+      );
+    });
+
+    test('getHistoryByCompositeKey returns entity when present', () async {
+      final jsonString = jsonEncode(tHistoryEntity.toJson());
+      when(() => mockBox.get('1_1_1')).thenReturn(jsonString);
+
+      final result = await dataSource.getHistoryByCompositeKey('1_1_1');
+
+      expect(result?.id, tHistoryEntity.id);
+    });
+
+    test('getHistoryByCompositeKey returns null when missing', () async {
+      when(() => mockBox.get('missing')).thenReturn(null);
+
+      final result = await dataSource.getHistoryByCompositeKey('missing');
+
+      expect(result, isNull);
     });
   });
 }

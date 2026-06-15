@@ -12,6 +12,10 @@ bool shouldRebuildRecitersLoaded(
   RecitersLoaded previous,
   RecitersLoaded current,
 ) {
+  if (previous.reciters != current.reciters) {
+    return true;
+  }
+
   final bool onlyFavoritesChanged =
       previous.favoriteIds != current.favoriteIds &&
       previous.selectedLetter == current.selectedLetter &&

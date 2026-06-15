@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
+import 'package:tilawa/features/prayer_times/presentation/extensions/prayer_type_ui.dart';
+import 'package:tilawa/features/prayer_times/presentation/formatters/prayer_location_label_formatter.dart';
 import 'package:tilawa/features/today_plan/today_plan.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -36,7 +38,9 @@ class HomeScreen extends StatelessWidget {
         child: RefreshIndicator(
           onRefresh: () async {
             context.read<HomeDashboardBloc>().add(
-              const HomeDashboardRefreshRequested(),
+              HomeDashboardRefreshRequested(
+                localeIdentifier: Localizations.localeOf(context).languageCode,
+              ),
             );
           },
           child: CustomScrollView(
@@ -65,10 +69,23 @@ class HomeScreen extends StatelessWidget {
                     BlocBuilder<HomeDashboardBloc, HomeDashboardState>(
                       builder: (context, state) {
                         return switch (state) {
-                          HomeDashboardLoaded(:final dashboard) =>
+                          HomeDashboardLoaded(
+                            :final dashboard,
+                            :final isRefreshingLocation,
+                          ) =>
                             _NextPrayerPanel(
                               dashboard: dashboard,
+                              isRefreshingLocation: isRefreshingLocation,
                               onOpenPrayer: onOpenPrayer,
+                              onRefreshLocation: () {
+                                context.read<HomeDashboardBloc>().add(
+                                  HomeDashboardLocationRefreshRequested(
+                                    localeIdentifier: Localizations.localeOf(
+                                      context,
+                                    ).languageCode,
+                                  ),
+                                );
+                              },
                             ),
                           _ => _NextPrayerSkeleton(onOpenPrayer: onOpenPrayer),
                         };
@@ -244,83 +261,102 @@ class _ProfileMark extends StatelessWidget {
 class _NextPrayerPanel extends StatelessWidget {
   const _NextPrayerPanel({
     required this.dashboard,
+    required this.isRefreshingLocation,
     required this.onOpenPrayer,
+    required this.onRefreshLocation,
   });
 
   final HomeDashboard dashboard;
+  final bool isRefreshingLocation;
   final VoidCallback onOpenPrayer;
+  final VoidCallback onRefreshLocation;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
     final nextPrayer = dashboard.nextPrayer;
+    final Color onGradient = colorScheme.onPrimary;
 
-    return _HomePanel(
+    return _HomeNextPrayerHeroCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            spacing: tokens.spaceSmall,
             children: [
               Expanded(
-                child: _LocationChip(
-                  label:
-                      dashboard.locationLabel ??
-                      context.l10n.homeLocationUnavailable,
+                child: _HomeGradientLocationChip(
+                  locationName: dashboard.locationLabel,
+                  isLoading: isRefreshingLocation,
+                  onTap: isRefreshingLocation ? null : onRefreshLocation,
                 ),
               ),
-              SizedBox(width: tokens.spaceSmall),
-              OutlinedButton(
+              _HomeGradientActionButton(
+                label: context.l10n.homePrayerTimesAction,
                 onPressed: onOpenPrayer,
-                child: Text(context.l10n.homePrayerTimesAction),
               ),
             ],
           ),
           SizedBox(height: tokens.spaceLarge),
-          Text(
-            context.l10n.nextPrayer,
-            style: theme.textTheme.labelLarge?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          SizedBox(height: tokens.spaceExtraSmall),
           if (nextPrayer == null)
             Text(
               context.l10n.homeNextPrayerUnavailable,
               style: theme.textTheme.titleLarge?.copyWith(
-                color: theme.colorScheme.onSurface,
+                color: onGradient,
                 fontWeight: FontWeight.w800,
+                height: 1.2,
               ),
             )
           else
             Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: tokens.spaceMedium,
               children: [
                 Expanded(
-                  child: Text(
-                    _localizedPrayerName(context, nextPrayer.type),
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      color: theme.colorScheme.onSurface,
-                      fontWeight: FontWeight.w800,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: tokens.spaceExtraSmall,
+                    children: [
+                      Text(
+                        context.l10n.nextPrayer,
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: onGradient.withValues(alpha: 0.78),
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                      Text(
+                        _localizedPrayerName(context, nextPrayer.type),
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          color: onGradient,
+                          fontWeight: FontWeight.w800,
+                          height: 1.1,
+                        ),
+                      ),
+                      SizedBox(height: tokens.spaceTiny),
+                      _HomeCountdownBadge(
+                        label: _formatCountdown(
+                          context,
+                          nextPrayer.timeUntil,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Text(
-                  _formatTime(context, nextPrayer.time),
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
+                _HomePrayerVisual(icon: nextPrayer.type.icon),
               ],
             ),
           if (nextPrayer != null) ...[
-            SizedBox(height: tokens.spaceSmall),
+            SizedBox(height: tokens.spaceMedium),
             Text(
-              _formatCountdown(context, nextPrayer.timeUntil),
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+              _formatTime(context, nextPrayer.time),
+              style: theme.textTheme.displaySmall?.copyWith(
+                color: onGradient,
+                fontWeight: FontWeight.w800,
+                height: 1.0,
+                fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
           ],
@@ -337,18 +373,36 @@ class _NextPrayerSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _HomePanel(
-      child: Row(
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final Color onGradient = theme.colorScheme.onPrimary;
+
+    return _HomeNextPrayerHeroCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: tokens.spaceMedium,
         children: [
-          Expanded(
-            child: Text(
-              context.l10n.homeNextPrayerUnavailable,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
+          Row(
+            spacing: tokens.spaceSmall,
+            children: [
+              Expanded(
+                child: _HomeGradientLocationChip(
+                  locationName: null,
+                  isLoading: true,
+                  onTap: null,
+                ),
+              ),
+              _HomeGradientActionButton(
+                label: context.l10n.homePrayerTimesAction,
+                onPressed: onOpenPrayer,
+              ),
+            ],
           ),
-          OutlinedButton(
-            onPressed: onOpenPrayer,
-            child: Text(context.l10n.homePrayerTimesAction),
+          Text(
+            context.l10n.homeNextPrayerUnavailable,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: onGradient.withValues(alpha: 0.82),
+            ),
           ),
         ],
       ),
@@ -356,8 +410,252 @@ class _NextPrayerSkeleton extends StatelessWidget {
   }
 }
 
-class _LocationChip extends StatelessWidget {
-  const _LocationChip({required this.label});
+/// Hero next-prayer surface with a brand-derived linear gradient.
+class _HomeNextPrayerHeroCard extends StatelessWidget {
+  const _HomeNextPrayerHeroCard({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+    final BorderRadius borderRadius = BorderRadius.circular(
+      tokens.radiusExtraLarge,
+    );
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: borderRadius,
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.primary.withValues(
+              alpha: tokens.opacityShadowStrong,
+            ),
+            blurRadius: tokens.blurShadow * 1.35,
+            offset: tokens.shadowOffsetMedium,
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: borderRadius,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: _homeNextPrayerGradient(colorScheme),
+                ),
+              ),
+            ),
+            Positioned(
+              top: -tokens.spaceLarge,
+              right: -tokens.spaceSmall,
+              child: Container(
+                width: tokens.iconSizeLargePlus * 3.2,
+                height: tokens.iconSizeLargePlus * 3.2,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: colorScheme.onPrimary.withValues(alpha: 0.1),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: -tokens.spaceLarge,
+              left: -tokens.spaceMedium,
+              child: Container(
+                width: tokens.iconSizeLargePlus * 2.4,
+                height: tokens.iconSizeLargePlus * 2.4,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: colorScheme.tertiary.withValues(alpha: 0.14),
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(tokens.spaceLarge),
+              child: child,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+LinearGradient _homeNextPrayerGradient(ColorScheme colorScheme) {
+  final bool isLight = colorScheme.brightness == Brightness.light;
+  final Color topStop = Color.lerp(
+    colorScheme.primary,
+    colorScheme.tertiary,
+    isLight ? 0.24 : 0.14,
+  )!;
+  final Color bottomStop = Color.lerp(
+    colorScheme.primary,
+    colorScheme.shadow,
+    isLight ? 0.22 : 0.42,
+  )!;
+
+  return LinearGradient(
+    begin: AlignmentDirectional.topStart,
+    end: AlignmentDirectional.bottomEnd,
+    colors: [topStop, colorScheme.primary, bottomStop],
+    stops: const [0.0, 0.48, 1.0],
+  );
+}
+
+/// Frosted location pill for the gradient hero card.
+class _HomeGradientLocationChip extends StatelessWidget {
+  const _HomeGradientLocationChip({
+    required this.locationName,
+    required this.isLoading,
+    required this.onTap,
+  });
+
+  final String? locationName;
+  final bool isLoading;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+    final Color onGradient = colorScheme.onPrimary;
+    final String label = PrayerLocationLabelFormatter.abbreviatedLocationLabel(
+      locationName: locationName,
+      l10n: context.l10n,
+    );
+    final BorderRadius borderRadius = BorderRadius.circular(
+      tokens.resolveRadius(
+        family: TilawaRadiusFamily.pill,
+        height: kTilawaMinInteractiveDimension,
+      ),
+    );
+
+    return Material(
+      color: onGradient.withValues(alpha: 0.12),
+      shape: RoundedRectangleBorder(
+        borderRadius: borderRadius,
+        side: BorderSide(
+          color: onGradient.withValues(alpha: 0.22),
+          width: tokens.borderWidthThin,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: borderRadius,
+        splashColor: onGradient.withValues(alpha: 0.08),
+        highlightColor: onGradient.withValues(alpha: 0.04),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minHeight: kTilawaMinInteractiveDimension,
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: tokens.spaceSmall,
+              vertical: tokens.spaceExtraSmall,
+            ),
+            child: Row(
+              mainAxisSize: .min,
+              mainAxisAlignment: .spaceBetween,
+              spacing: tokens.spaceExtraSmall,
+              children: [
+                Expanded(
+                  child: Row(
+                    children: [
+                      if (isLoading)
+                        SizedBox(
+                          width: tokens.iconSizeSmall,
+                          height: tokens.iconSizeSmall,
+                          child: TilawaLoadingIndicator(
+                            centered: false,
+                            strokeWidth: 2,
+                            color: onGradient,
+                          ),
+                        )
+                      else
+                        Icon(
+                          FluentIcons.location_24_regular,
+                          size: tokens.iconSizeSmall,
+                          color: onGradient,
+                        ),
+                      SizedBox(width: tokens.spaceExtraSmall),
+                      Flexible(
+                        child: Text(
+                          label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: onGradient,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (!isLoading)
+                  Icon(
+                    Icons.gps_fixed_rounded,
+                    size: tokens.iconSizeSmall,
+                    color: onGradient.withValues(alpha: 0.88),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HomeGradientActionButton extends StatelessWidget {
+  const _HomeGradientActionButton({
+    required this.label,
+    required this.onPressed,
+  });
+
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final Color onGradient = theme.colorScheme.onPrimary;
+
+    return OutlinedButton(
+      onPressed: onPressed,
+      style: OutlinedButton.styleFrom(
+        foregroundColor: onGradient,
+        backgroundColor: onGradient.withValues(alpha: 0.1),
+        side: BorderSide(
+          color: onGradient.withValues(alpha: 0.34),
+          width: tokens.borderWidthThin,
+        ),
+        padding: EdgeInsets.symmetric(
+          horizontal: tokens.spaceMedium,
+          vertical: tokens.spaceSmall,
+        ),
+        minimumSize: const Size(0, kTilawaMinInteractiveDimension),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      child: Text(
+        label,
+        style: theme.textTheme.labelLarge?.copyWith(
+          color: onGradient,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+class _HomeCountdownBadge extends StatelessWidget {
+  const _HomeCountdownBadge({required this.label});
 
   final String label;
 
@@ -365,45 +663,65 @@ class _LocationChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
+    final Color onGradient = theme.colorScheme.onPrimary;
 
-    return Container(
-      constraints: const BoxConstraints(
-        minHeight: kTilawaMinInteractiveDimension,
-      ),
-      padding: EdgeInsets.symmetric(
-        horizontal: tokens.spaceSmall,
-        vertical: tokens.spaceExtraSmall,
-      ),
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: theme.colorScheme.secondaryContainer,
+        color: onGradient.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(
           tokens.resolveRadius(
             family: TilawaRadiusFamily.pill,
             height: kTilawaMinInteractiveDimension,
           ),
         ),
+        border: Border.all(
+          color: onGradient.withValues(alpha: 0.2),
+          width: tokens.borderWidthThin,
+        ),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            FluentIcons.location_24_regular,
-            size: tokens.iconSizeSmall,
-            color: theme.colorScheme.onSecondaryContainer,
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: tokens.spaceSmall,
+          vertical: tokens.spaceExtraSmall,
+        ),
+        child: Text(
+          label,
+          style: theme.textTheme.labelLarge?.copyWith(
+            color: onGradient,
+            fontWeight: FontWeight.w700,
           ),
-          SizedBox(width: tokens.spaceExtraSmall),
-          Flexible(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: theme.colorScheme.onSecondaryContainer,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HomePrayerVisual extends StatelessWidget {
+  const _HomePrayerVisual({required this.icon});
+
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      width: tokens.iconSizeLargePlus,
+      height: tokens.iconSizeLargePlus,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: colorScheme.onPrimary.withValues(alpha: 0.16),
+        border: Border.all(
+          color: colorScheme.onPrimary.withValues(alpha: 0.28),
+          width: tokens.borderWidthThin,
+        ),
+      ),
+      child: Icon(
+        icon,
+        size: tokens.iconSizeLarge,
+        color: colorScheme.onPrimary,
       ),
     );
   }

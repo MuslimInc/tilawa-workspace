@@ -69,4 +69,36 @@ void main() {
     expect(button.height, lessThan(80));
     expect(button.height, greaterThan(48));
   });
+
+  testWidgets('scrolls tall actions instead of overflowing the action band', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: TilawaThumbReachLayout(
+            content: const ColoredBox(
+              color: Color(0xFFE0E0E0),
+              child: SizedBox.expand(),
+            ),
+            actions: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: List<Widget>.generate(
+                8,
+                (int index) => SizedBox(
+                  height: 48,
+                  child: Text('Action $index'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.byType(SingleChildScrollView), findsOneWidget);
+  });
 }

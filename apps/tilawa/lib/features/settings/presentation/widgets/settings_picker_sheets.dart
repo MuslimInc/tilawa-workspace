@@ -6,6 +6,7 @@ import 'package:tilawa_core/config/language_config.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/widgets/delete_account_progress_dialog.dart';
 import '../../../color_picker/color_picker.dart';
 import '../../../localization/presentation/bloc/localization_bloc.dart';
 import '../../../theme/domain/app_theme_mode.dart';
@@ -147,6 +148,9 @@ abstract final class SettingsSheets {
     );
     if (confirmed == true) {
       authBloc.add(const DeleteAccountEvent());
+      if (context.mounted) {
+        await showDeleteAccountProgressDialog(context);
+      }
     }
   }
 }

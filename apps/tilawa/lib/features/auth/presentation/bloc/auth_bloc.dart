@@ -6,6 +6,7 @@ import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
+import '../../application/account_deletion_flow_tracker.dart';
 import '../../domain/entities/auth_result.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/usecases/delete_account.dart';
@@ -27,6 +28,7 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
     this._deleteAccount,
     this._getCurrentUser,
     this._syncDeviceToken,
+    this._accountDeletionFlow,
   ) : super(const AuthState.initial()) {
     on<SignInWithGoogleEvent>(_onSignInWithGoogle);
     on<SignOutEvent>(_onSignOut);
@@ -42,6 +44,7 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
   final DeleteAccount _deleteAccount;
   final GetCurrentUserUseCase _getCurrentUser;
   final SyncDeviceTokenUseCase _syncDeviceToken;
+  final AccountDeletionFlowTracker _accountDeletionFlow;
 
   Future<void> _onSignInWithGoogle(
     SignInWithGoogleEvent event,
@@ -66,6 +69,7 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
 
       result.when(
         success: (user) {
+          _accountDeletionFlow.clearLoginAutoSignInSuppression();
           unawaited(_syncDeviceToken(user.id).catchError((_) {}));
           emit(AuthState.authenticated(user: user));
         },
@@ -118,12 +122,15 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
       '[DeleteFirebaseUser] Bloc: delete requested '
       'signedIn=${userBeforeDelete != null}',
     );
+    _interactiveSignInGeneration++;
+    _accountDeletionFlow.markDeletionStarted();
     emit(const AuthState.loading());
 
     final result = await _deleteAccount();
 
     await result.fold(
       (failure) async {
+        _accountDeletionFlow.markDeletionEndedWithoutSuccess();
         logger.d(
           '[DeleteFirebaseUser] Bloc: failed with ${failure.runtimeType} '
           'message=${failure.message}',
@@ -152,6 +159,7 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
         }
       },
       (_) async {
+        _accountDeletionFlow.markDeletionSucceeded();
         logger.d('[DeleteFirebaseUser] Bloc: account deleted, signing out');
         emit(const AuthState.unauthenticated());
       },

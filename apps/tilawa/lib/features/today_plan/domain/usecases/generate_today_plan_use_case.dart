@@ -139,8 +139,22 @@ final class GenerateTodayPlanUseCase {
     final Set<String> activeDays = history
         .map((item) => _dateKey(item.playedAt))
         .toSet();
+    final String todayKey = _dateKey(today);
+    final String yesterdayKey = _dateKey(
+      today.subtract(const Duration(days: 1)),
+    );
+
+    late final DateTime startDay;
+    if (activeDays.contains(todayKey)) {
+      startDay = today;
+    } else if (activeDays.contains(yesterdayKey)) {
+      startDay = today.subtract(const Duration(days: 1));
+    } else {
+      return 0;
+    }
+
     var streak = 0;
-    for (var day = today; activeDays.contains(_dateKey(day));) {
+    for (var day = startDay; activeDays.contains(_dateKey(day));) {
       streak++;
       day = day.subtract(const Duration(days: 1));
     }

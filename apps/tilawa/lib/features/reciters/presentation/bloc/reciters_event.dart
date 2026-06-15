@@ -36,7 +36,12 @@ class ClearFavoritesFilter extends RecitersEvent {
 }
 
 class LanguageChanged extends RecitersEvent {
-  const LanguageChanged();
+  const LanguageChanged(this.languageCode);
+
+  final String languageCode;
+
+  @override
+  List<Object?> get props => [languageCode];
 }
 
 /// Re-sorts the visible catalog so favorited reciters appear first.

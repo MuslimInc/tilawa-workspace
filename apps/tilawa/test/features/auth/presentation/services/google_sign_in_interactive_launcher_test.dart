@@ -9,6 +9,8 @@ import 'google_sign_in_interactive_launcher_test.mocks.dart';
 
 @GenerateMocks([GoogleSignIn])
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   late MockGoogleSignIn mockGoogleSignIn;
   late AndroidSignInPlatformPolicy platformPolicy;
 
@@ -41,6 +43,24 @@ void main() {
         .checkReadiness();
 
     expect(result, isA<GoogleSignInLaunchUiUnavailable>());
+  });
+
+  testWidgets('runAfterUiSettled invokes the action after UI settle delay', (
+    WidgetTester tester,
+  ) async {
+    var ran = false;
+
+    final Future<void> run = buildLauncher().runAfterUiSettled(() async {
+      ran = true;
+    });
+
+    await tester.pump();
+    await tester.pump();
+    await tester.pump();
+    await tester.pump(SignInUiSettleTiming.defaultUiSettleDelay);
+    await run;
+
+    expect(ran, isTrue);
   });
 
   group('SignInUiSettleTiming', () {

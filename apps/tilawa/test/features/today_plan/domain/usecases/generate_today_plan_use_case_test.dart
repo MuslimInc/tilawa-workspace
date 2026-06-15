@@ -69,6 +69,90 @@ void main() {
       expect(plan.completedCount, 1);
       expect(plan.tasks.first.isCompleted, isTrue);
     });
+
+    test('preserves streak from yesterday before today activity', () async {
+      final useCase = _createUseCase(
+        history: [_history(playedAt: DateTime(2026, 6, 13, 20))],
+      );
+
+      final result = await useCase(now: DateTime(2026, 6, 14, 8));
+      final plan = result.getOrElse(() => throw StateError('expected plan'));
+
+      expect(plan.streakDays, 1);
+    });
+
+    test('keeps elevated reading goal when streak ended yesterday', () async {
+      final useCase = _createUseCase(
+        history: [
+          for (var day = 13; day >= 9; day--)
+            _history(playedAt: DateTime(2026, 6, day, 20)),
+        ],
+      );
+
+      final result = await useCase(now: DateTime(2026, 6, 14, 8));
+      final plan = result.getOrElse(() => throw StateError('expected plan'));
+
+      expect(plan.streakDays, 5);
+      final reading = plan.tasks.firstWhere(
+        (task) => task.kind == TodayPlanTaskKind.reading,
+      );
+      expect(reading.metadata['pages'], 3);
+    });
+
+    test('uses current date when now is omitted', () async {
+      final useCase = _createUseCase();
+
+      final result = await useCase();
+      final plan = result.getOrElse(() => throw StateError('expected plan'));
+
+      final DateTime today = DateTime.now();
+      final String month = today.month.toString().padLeft(2, '0');
+      final String day = today.day.toString().padLeft(2, '0');
+      expect(plan.dateKey, '${today.year}-$month-$day');
+    });
+
+    test('builds a default plan when history is empty', () async {
+      final useCase = _createUseCase(history: []);
+
+      final result = await useCase(now: DateTime(2026, 6, 14));
+      final plan = result.getOrElse(() => throw StateError('expected plan'));
+
+      expect(plan.streakDays, 0);
+      expect(plan.isAdaptive, isFalse);
+      final listening = plan.tasks.firstWhere(
+        (task) => task.kind == TodayPlanTaskKind.listening,
+      );
+      expect(listening.metadata, isEmpty);
+    });
+
+    test('counts streak from today when user already listened today', () async {
+      final useCase = _createUseCase(
+        history: [
+          _history(playedAt: DateTime(2026, 6, 14, 9)),
+          _history(playedAt: DateTime(2026, 6, 13, 20)),
+        ],
+      );
+
+      final result = await useCase(now: DateTime(2026, 6, 14, 20));
+      final plan = result.getOrElse(() => throw StateError('expected plan'));
+
+      expect(plan.streakDays, 2);
+    });
+
+    test('returns cache failure when dependencies throw', () async {
+      final useCase = GenerateTodayPlanUseCase(
+        _FakeQuranReaderRepository(null),
+        _ThrowingHistoryRepository(),
+        _MemoryTodayPlanRepository(),
+      );
+
+      final result = await useCase(now: DateTime(2026, 6, 14));
+
+      result.fold(
+        (failure) => expect(failure.message, contains('history unavailable')),
+        (_) => fail('expected failure'),
+      );
+    });
   });
 }
 
@@ -128,6 +212,16 @@ final class _FakeHistoryRepository implements HistoryRepository {
   @override
   Future<List<HistoryEntity>> getRecentHistory({int limit = 20}) async {
     return history.take(limit).toList(growable: false);
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+final class _ThrowingHistoryRepository implements HistoryRepository {
+  @override
+  Future<List<HistoryEntity>> getRecentHistory({int limit = 20}) async {
+    throw StateError('history unavailable');
   }
 
   @override

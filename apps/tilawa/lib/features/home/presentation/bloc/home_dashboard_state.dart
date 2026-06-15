@@ -18,12 +18,26 @@ final class HomeDashboardLoading extends HomeDashboardState {
 }
 
 final class HomeDashboardLoaded extends HomeDashboardState {
-  const HomeDashboardLoaded(this.dashboard);
+  const HomeDashboardLoaded(
+    this.dashboard, {
+    this.isRefreshingLocation = false,
+  });
 
   final HomeDashboard dashboard;
+  final bool isRefreshingLocation;
+
+  HomeDashboardLoaded copyWith({
+    HomeDashboard? dashboard,
+    bool? isRefreshingLocation,
+  }) {
+    return HomeDashboardLoaded(
+      dashboard ?? this.dashboard,
+      isRefreshingLocation: isRefreshingLocation ?? this.isRefreshingLocation,
+    );
+  }
 
   @override
-  List<Object?> get props => [dashboard];
+  List<Object?> get props => [dashboard, isRefreshingLocation];
 }
 
 final class HomeDashboardFailure extends HomeDashboardState {

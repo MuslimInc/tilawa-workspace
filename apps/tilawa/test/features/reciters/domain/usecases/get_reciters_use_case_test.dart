@@ -72,19 +72,37 @@ void main() {
       verifyNoMoreInteractions(mockRepository);
     });
 
-    test('returns one-shot cached success after first load', () async {
-      when(
-        mockRepository.getReciters(),
-      ).thenAnswer((_) async => Right(tReciters));
+    test(
+      'returns cached success only through takeCachedSuccessForStartup',
+      () async {
+        when(
+          mockRepository.getReciters(),
+        ).thenAnswer((_) async => Right(tReciters));
 
-      final first = await useCase();
-      final second = await useCase();
+        final first = await useCase();
+        final second = await useCase();
 
-      expect(first, Right<Failure, List<ReciterEntity>>(tReciters));
-      expect(second, Right<Failure, List<ReciterEntity>>(tReciters));
-      verify(mockRepository.getReciters()).called(1);
-      verifyNoMoreInteractions(mockRepository);
-    });
+        expect(first, Right<Failure, List<ReciterEntity>>(tReciters));
+        expect(second, Right<Failure, List<ReciterEntity>>(tReciters));
+        verify(mockRepository.getReciters()).called(2);
+        verifyNoMoreInteractions(mockRepository);
+      },
+    );
+
+    test(
+      'invalidateCache forces the next call to hit the repository',
+      () async {
+        when(
+          mockRepository.getReciters(),
+        ).thenAnswer((_) async => Right(tReciters));
+
+        await useCase();
+        useCase.invalidateCache();
+        await useCase();
+
+        verify(mockRepository.getReciters()).called(2);
+      },
+    );
 
     test('takeCachedSuccessForStartup consumes cached reciters', () async {
       when(

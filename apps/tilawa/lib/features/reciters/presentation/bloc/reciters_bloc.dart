@@ -17,6 +17,7 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
   RecitersBloc(
     this._getRecitersUseCase, {
     List<entity.ReciterEntity>? initialReciters,
+    this._catalogLanguageCode,
   }) : super(_initialState(initialReciters)) {
     if (state is RecitersLoaded) {
       _favoriteIds = (state as RecitersLoaded).favoriteIds;
@@ -31,6 +32,7 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
   }
   final GetRecitersUseCase _getRecitersUseCase;
   ReciterCatalogIndex? _catalogIndex;
+  String? _catalogLanguageCode;
 
   /// Persists favorite ids across [RecitersLoading] so [SyncFavoriteIds] can
   /// commit while a pull-to-refresh fetch is in flight.
@@ -277,11 +279,21 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     LanguageChanged event,
     Emitter<RecitersState> emit,
   ) async {
+    if (event.languageCode == _catalogLanguageCode && state is RecitersLoaded) {
+      return;
+    }
+
+    _getRecitersUseCase.invalidateCache();
+    _catalogIndex = null;
+
     if (state is RecitersLoaded) {
-      _catalogIndex = null;
       final currentState = state as RecitersLoaded;
       emit(currentState.copyWith(clearSelectedLetter: true));
-      await _onLoadReciters(const LoadReciters(), emit);
+    }
+
+    await _onLoadReciters(const LoadReciters(), emit);
+    if (state is RecitersLoaded) {
+      _catalogLanguageCode = event.languageCode;
     }
   }
 }

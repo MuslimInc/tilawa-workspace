@@ -8,7 +8,17 @@ import '../../domain/repositories/prayer_times_repository.dart';
 import '../services/geolocator_client.dart';
 
 abstract class LocationDataSource {
-  Future<LocationResult> getCurrentLocation({bool forceRefresh = false});
+  Future<LocationResult> getCurrentLocation({
+    bool forceRefresh = false,
+    String? localeIdentifier,
+  });
+
+  Future<String?> getLocationName(
+    double latitude,
+    double longitude, {
+    String? localeIdentifier,
+  });
+
   Future<String?> getCountryCode(double latitude, double longitude);
   Future<bool> hasPermission();
   Future<bool> requestPermission({bool allowOpenSettings = false});
@@ -39,7 +49,10 @@ class LocationDataSourceImpl implements LocationDataSource {
   static const Duration _positionTimeout = Duration(seconds: 18);
 
   @override
-  Future<LocationResult> getCurrentLocation({bool forceRefresh = false}) async {
+  Future<LocationResult> getCurrentLocation({
+    bool forceRefresh = false,
+    String? localeIdentifier,
+  }) async {
     final bool serviceEnabled = await isLocationServiceEnabled();
     if (!serviceEnabled) {
       return LocationResult.error('Location services are disabled');
@@ -54,7 +67,10 @@ class LocationDataSourceImpl implements LocationDataSource {
       final Position? lastKnown = await _geolocatorClient
           .getLastKnownPosition();
       if (lastKnown != null) {
-        return _getLocationResultFromPosition(lastKnown);
+        return _getLocationResultFromPosition(
+          lastKnown,
+          localeIdentifier: localeIdentifier,
+        );
       }
     }
 
@@ -62,12 +78,18 @@ class LocationDataSourceImpl implements LocationDataSource {
       final Position position = await _geolocatorClient
           .getCurrentPosition(locationSettings: _locationSettings)
           .timeout(_positionTimeout);
-      return _getLocationResultFromPosition(position);
+      return _getLocationResultFromPosition(
+        position,
+        localeIdentifier: localeIdentifier,
+      );
     } catch (e) {
       final Position? lastKnown = await _geolocatorClient
           .getLastKnownPosition();
       if (lastKnown != null) {
-        return _getLocationResultFromPosition(lastKnown);
+        return _getLocationResultFromPosition(
+          lastKnown,
+          localeIdentifier: localeIdentifier,
+        );
       }
 
       if (e is TimeoutException) {
@@ -77,6 +99,28 @@ class LocationDataSourceImpl implements LocationDataSource {
       }
 
       return LocationResult.error('Failed to get current location: $e');
+    }
+  }
+
+  @override
+  Future<String?> getLocationName(
+    double latitude,
+    double longitude, {
+    String? localeIdentifier,
+  }) async {
+    try {
+      await _applyGeocodingLocale(localeIdentifier);
+      final List<Placemark> placemarks = await placemarkFromCoordinates(
+        latitude,
+        longitude,
+      ).timeout(_geocodingTimeout);
+
+      return _locationNameFromPlacemarks(
+        placemarks,
+        localeIdentifier: localeIdentifier,
+      );
+    } catch (_) {
+      return null;
     }
   }
 
@@ -153,97 +197,32 @@ class LocationDataSourceImpl implements LocationDataSource {
   }
 
   Future<LocationResult> _getLocationResultFromPosition(
-    Position position,
-  ) async {
+    Position position, {
+    String? localeIdentifier,
+  }) async {
     String? locationName;
     String? countryCode;
 
     try {
+      await _applyGeocodingLocale(localeIdentifier);
       final List<Placemark> placemarks = await placemarkFromCoordinates(
         position.latitude,
         position.longitude,
       ).timeout(_geocodingTimeout);
 
       if (placemarks.isNotEmpty) {
-        final List<String> addressParts = [];
+        locationName = _locationNameFromPlacemarks(
+          placemarks,
+          localeIdentifier: localeIdentifier,
+        );
 
-        bool isValidPart(String? part) {
-          if (part == null || part.trim().isEmpty) return false;
-          final trimmed = part.trim();
-          if (trimmed.contains('Unnamed')) return false;
-          // Filter out Google Plus Codes
-          if (trimmed.contains('+') && !trimmed.contains(' ')) return false;
-          // Filter out single character/number strings (like '25', '7a') that aren't fully descriptive
-          if (RegExp(r'^[a-zA-Z0-9]{1,3}$').hasMatch(trimmed)) return false;
-          return true;
-        }
-
-        String? thoroughfare,
-            subLocality,
-            street,
-            name,
-            locality,
-            subAdmin,
-            admin,
-            country,
-            isoCountryCode;
-
-        for (final place in placemarks) {
-          if (thoroughfare == null && isValidPart(place.thoroughfare)) {
-            thoroughfare = place.thoroughfare!.trim();
-          }
-          if (subLocality == null && isValidPart(place.subLocality)) {
-            subLocality = place.subLocality!.trim();
-          }
-          if (street == null && isValidPart(place.street)) {
-            street = place.street!.trim();
-          }
-          if (name == null && isValidPart(place.name)) {
-            name = place.name!.trim();
-          }
-
-          if (locality == null && isValidPart(place.locality)) {
-            locality = place.locality!.trim();
-          }
-          if (subAdmin == null && isValidPart(place.subAdministrativeArea)) {
-            subAdmin = place.subAdministrativeArea!.trim();
-          }
-          if (admin == null && isValidPart(place.administrativeArea)) {
-            admin = place.administrativeArea!.trim();
-          }
-          if (country == null && isValidPart(place.country)) {
-            country = place.country!.trim();
-          }
-          if (isoCountryCode == null && place.isoCountryCode != null) {
-            isoCountryCode = place.isoCountryCode;
+        for (final Placemark place in placemarks) {
+          if (place.isoCountryCode != null &&
+              place.isoCountryCode!.isNotEmpty) {
+            countryCode = place.isoCountryCode;
+            break;
           }
         }
-
-        // 1. Street-level accuracy
-        if (thoroughfare != null) {
-          addressParts.add(thoroughfare);
-        } else if (subLocality != null) {
-          addressParts.add(subLocality);
-        } else if (street != null) {
-          addressParts.add(street);
-        } else if (name != null) {
-          addressParts.add(name);
-        }
-
-        // 2. City-level accuracy
-        if (locality != null && !addressParts.contains(locality)) {
-          addressParts.add(locality);
-        } else if (subAdmin != null && !addressParts.contains(subAdmin)) {
-          addressParts.add(subAdmin);
-        }
-
-        if (addressParts.isNotEmpty) {
-          locationName = addressParts.toSet().join('، ');
-        } else {
-          locationName = admin ?? country;
-        }
-
-        countryCode = isoCountryCode;
       }
     } catch (e) {
       // Ignore geocoding errors, just return coordinates
@@ -302,5 +281,103 @@ class LocationDataSourceImpl implements LocationDataSource {
     }
 
     return null;
+  }
+
+  Future<void> _applyGeocodingLocale(String? localeIdentifier) async {
+    if (localeIdentifier == null || localeIdentifier.isEmpty) {
+      return;
+    }
+    await setLocaleIdentifier(localeIdentifier);
+  }
+
+  String? _locationNameFromPlacemarks(
+    List<Placemark> placemarks, {
+    String? localeIdentifier,
+  }) {
+    if (placemarks.isEmpty) {
+      return null;
+    }
+
+    final List<String> addressParts = [];
+
+    bool isValidPart(String? part) {
+      if (part == null || part.trim().isEmpty) return false;
+      final trimmed = part.trim();
+      if (trimmed.contains('Unnamed')) return false;
+      // Filter out Google Plus Codes
+      if (trimmed.contains('+') && !trimmed.contains(' ')) return false;
+      // Filter out single character/number strings (like '25', '7a') that aren't fully descriptive
+      if (RegExp(r'^[a-zA-Z0-9]{1,3}$').hasMatch(trimmed)) return false;
+      return true;
+    }
+
+    String? thoroughfare,
+        subLocality,
+        street,
+        name,
+        locality,
+        subAdmin,
+        admin,
+        country;
+
+    for (final Placemark place in placemarks) {
+      if (thoroughfare == null && isValidPart(place.thoroughfare)) {
+        thoroughfare = place.thoroughfare!.trim();
+      }
+      if (subLocality == null && isValidPart(place.subLocality)) {
+        subLocality = place.subLocality!.trim();
+      }
+      if (street == null && isValidPart(place.street)) {
+        street = place.street!.trim();
+      }
+      if (name == null && isValidPart(place.name)) {
+        name = place.name!.trim();
+      }
+
+      if (locality == null && isValidPart(place.locality)) {
+        locality = place.locality!.trim();
+      }
+      if (subAdmin == null && isValidPart(place.subAdministrativeArea)) {
+        subAdmin = place.subAdministrativeArea!.trim();
+      }
+      if (admin == null && isValidPart(place.administrativeArea)) {
+        admin = place.administrativeArea!.trim();
+      }
+      if (country == null && isValidPart(place.country)) {
+        country = place.country!.trim();
+      }
+    }
+
+    // 1. Street-level accuracy
+    if (thoroughfare != null) {
+      addressParts.add(thoroughfare);
+    } else if (subLocality != null) {
+      addressParts.add(subLocality);
+    } else if (street != null) {
+      addressParts.add(street);
+    } else if (name != null) {
+      addressParts.add(name);
+    }
+
+    // 2. City-level accuracy
+    if (locality != null && !addressParts.contains(locality)) {
+      addressParts.add(locality);
+    } else if (subAdmin != null && !addressParts.contains(subAdmin)) {
+      addressParts.add(subAdmin);
+    }
+
+    if (addressParts.isNotEmpty) {
+      final separator = _locationNameSeparator(localeIdentifier);
+      return addressParts.toSet().join(separator);
+    }
+
+    return admin ?? country;
+  }
+
+  String _locationNameSeparator(String? localeIdentifier) {
+    if (localeIdentifier != null && localeIdentifier.startsWith('ar')) {
+      return '، ';
+    }
+    return ', ';
   }
 }

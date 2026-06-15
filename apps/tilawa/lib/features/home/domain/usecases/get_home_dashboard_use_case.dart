@@ -7,5 +7,9 @@ final class GetHomeDashboardUseCase {
 
   final HomeDashboardRepository _repository;
 
-  Future<HomeDashboard> call() => _repository.getDashboard();
+  Future<HomeDashboard> call({String? localeIdentifier}) =>
+      _repository.getDashboard(localeIdentifier: localeIdentifier);
+
+  Future<HomeDashboard> refreshLocation({String? localeIdentifier}) =>
+      _repository.refreshLocation(localeIdentifier: localeIdentifier);
 }

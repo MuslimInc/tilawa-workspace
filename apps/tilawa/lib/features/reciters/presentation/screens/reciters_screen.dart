@@ -597,11 +597,13 @@ class _RecitersScreenState extends State<RecitersScreen>
               },
             ),
             BlocListener<LocalizationBloc, LocalizationState>(
+              listenWhen:
+                  (LocalizationState previous, LocalizationState current) =>
+                      previous.locale != current.locale,
               listener: (context, state) {
                 context.read<AlphabetScrollbarBloc>().add(
                   const ClearSelection(),
                 );
-                context.read<RecitersBloc>().add(const LanguageChanged());
               },
             ),
             BlocListener<RecitersBloc, RecitersState>(

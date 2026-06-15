@@ -8,9 +8,37 @@ sealed class HomeDashboardEvent extends Equatable {
 }
 
 final class HomeDashboardStarted extends HomeDashboardEvent {
-  const HomeDashboardStarted();
+  const HomeDashboardStarted({this.localeIdentifier});
+
+  final String? localeIdentifier;
+
+  @override
+  List<Object?> get props => [localeIdentifier];
 }
 
 final class HomeDashboardRefreshRequested extends HomeDashboardEvent {
-  const HomeDashboardRefreshRequested();
+  const HomeDashboardRefreshRequested({this.localeIdentifier});
+
+  final String? localeIdentifier;
+
+  @override
+  List<Object?> get props => [localeIdentifier];
+}
+
+final class HomeDashboardLocaleChanged extends HomeDashboardEvent {
+  const HomeDashboardLocaleChanged({required this.localeIdentifier});
+
+  final String localeIdentifier;
+
+  @override
+  List<Object?> get props => [localeIdentifier];
+}
+
+final class HomeDashboardLocationRefreshRequested extends HomeDashboardEvent {
+  const HomeDashboardLocationRefreshRequested({this.localeIdentifier});
+
+  final String? localeIdentifier;
+
+  @override
+  List<Object?> get props => [localeIdentifier];
 }

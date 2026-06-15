@@ -33,7 +33,7 @@ class ShellTabCoordinator {
           AppReviewSignal.prayerTimesTabVisited,
         ),
       );
-      if (nextIndex == 0) {
+      if (nextIndex == 1) {
         effects.add(
           const TryAppReviewPromptEffect(
             AppReviewPromptMoment.leftPrayerTimesTab,
@@ -42,7 +42,7 @@ class ShellTabCoordinator {
       }
     }
 
-    if (previousIndex == 1 && nextIndex == 0) {
+    if (previousIndex == 3 && nextIndex == 1) {
       effects.add(
         const TryAppReviewPromptEffect(
           AppReviewPromptMoment.returnedToRecitersTab,

@@ -9,6 +9,7 @@ import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa/features/localization/domain/usecases/get_current_language_use_case.dart';
 import 'package:tilawa/features/localization/domain/usecases/set_language_use_case.dart';
 import 'package:tilawa/features/localization/presentation/bloc/localization_bloc.dart';
+import 'package:tilawa/features/reciters/domain/usecases/get_reciters_use_case.dart';
 
 import '../../../../helpers/hydrated_bloc_test_helper.dart';
 import 'localization_bloc_test.mocks.dart';
@@ -21,7 +22,11 @@ Either<Failure, String> provideDummyEitherFailureString() =>
 @visibleForTesting
 Either<Failure, void> provideDummyEitherFailureVoid() => const Right(null);
 
-@GenerateMocks([GetCurrentLanguageUseCase, SetLanguageUseCase])
+@GenerateMocks([
+  GetCurrentLanguageUseCase,
+  SetLanguageUseCase,
+  GetRecitersUseCase,
+])
 void main() {
   setUpAll(() async {
     await initializeHydratedStorageForTest();
@@ -35,6 +40,7 @@ void main() {
     late LocalizationBloc bloc;
     late MockGetCurrentLanguageUseCase mockGetCurrentLanguageUseCase;
     late MockSetLanguageUseCase mockSetLanguageUseCase;
+    late MockGetRecitersUseCase mockGetRecitersUseCase;
 
     setUp(() {
       // Provide dummy values for Either types
@@ -45,6 +51,7 @@ void main() {
 
       mockGetCurrentLanguageUseCase = MockGetCurrentLanguageUseCase();
       mockSetLanguageUseCase = MockSetLanguageUseCase();
+      mockGetRecitersUseCase = MockGetRecitersUseCase();
 
       // Mock GetCurrentLanguageUseCase to return default language
       when(
@@ -59,6 +66,7 @@ void main() {
       bloc = LocalizationBloc(
         mockGetCurrentLanguageUseCase,
         mockSetLanguageUseCase,
+        mockGetRecitersUseCase,
       );
     });
 
@@ -97,6 +105,7 @@ void main() {
           return LocalizationBloc(
             mockGetCurrentLanguageUseCase,
             mockSetLanguageUseCase,
+            mockGetRecitersUseCase,
           );
         },
         act: (bloc) async {
@@ -138,6 +147,7 @@ void main() {
           return LocalizationBloc(
             mockGetCurrentLanguageUseCase,
             mockSetLanguageUseCase,
+            mockGetRecitersUseCase,
           );
         },
         act: (bloc) async {
@@ -177,6 +187,7 @@ void main() {
           return LocalizationBloc(
             mockGetCurrentLanguageUseCase,
             mockSetLanguageUseCase,
+            mockGetRecitersUseCase,
           );
         },
         act: (bloc) async {
@@ -339,9 +350,12 @@ void main() {
           firstMockSetLanguageUseCase(any),
         ).thenAnswer((_) async => const Right(null));
 
+        final firstMockGetRecitersUseCase = MockGetRecitersUseCase();
+
         final firstBloc = LocalizationBloc(
           firstMockGetCurrentLanguageUseCase,
           firstMockSetLanguageUseCase,
+          firstMockGetRecitersUseCase,
         );
         firstBloc.add(const ChangeLanguage(Locale('en')));
 
@@ -362,9 +376,12 @@ void main() {
           newMockSetLanguageUseCase(any),
         ).thenAnswer((_) async => const Right(null));
 
+        final newMockGetRecitersUseCase = MockGetRecitersUseCase();
+
         final newBloc = LocalizationBloc(
           newMockGetCurrentLanguageUseCase,
           newMockSetLanguageUseCase,
+          newMockGetRecitersUseCase,
         );
         await Future.delayed(const Duration(milliseconds: 200));
 
