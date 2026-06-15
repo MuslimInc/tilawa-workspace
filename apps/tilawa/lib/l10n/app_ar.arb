@@ -3436,5 +3436,41 @@
     "recitationPracticeTooltip": "تدريب التلاوة",
     "@recitationPracticeTooltip": {
         "description": "Tooltip for the Mushaf recitation practice button"
+    },
+    "recitationPracticeSessionProgress": "الآية {current} من {total}",
+    "@recitationPracticeSessionProgress": {
+        "description": "Progress through ayahs on the current page during a session",
+        "placeholders": {
+            "current": {
+                "type": "int"
+            },
+            "total": {
+                "type": "int"
+            }
+        }
+    },
+    "recitationPracticeListening": "يستمع…",
+    "@recitationPracticeListening": {
+        "description": "Shown while the microphone is active during a session"
+    },
+    "recitationPracticeEndSession": "إنهاء الجلسة",
+    "@recitationPracticeEndSession": {
+        "description": "Stops the hands-free recitation session"
+    },
+    "recitationPracticeSessionComplete": "اكتملت الصفحة",
+    "@recitationPracticeSessionComplete": {
+        "description": "Shown when all ayahs on the page have been practiced"
+    },
+    "recitationPracticeCompletedCount": "{count} من {total} ناجحة",
+    "@recitationPracticeCompletedCount": {
+        "description": "Summary of passed ayahs after a session",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            },
+            "total": {
+                "type": "int"
+            }
+        }
     }
 }

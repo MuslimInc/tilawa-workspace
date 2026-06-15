@@ -4921,6 +4921,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Practice recitation'**
   String get recitationPracticeTooltip;
+
+  /// Progress through ayahs on the current page during a session
+  ///
+  /// In en, this message translates to:
+  /// **'Ayah {current} of {total}'**
+  String recitationPracticeSessionProgress(int current, int total);
+
+  /// Shown while the microphone is active during a session
+  ///
+  /// In en, this message translates to:
+  /// **'Listening…'**
+  String get recitationPracticeListening;
+
+  /// Stops the hands-free recitation session
+  ///
+  /// In en, this message translates to:
+  /// **'End session'**
+  String get recitationPracticeEndSession;
+
+  /// Shown when all ayahs on the page have been practiced
+  ///
+  /// In en, this message translates to:
+  /// **'Page complete'**
+  String get recitationPracticeSessionComplete;
+
+  /// Summary of passed ayahs after a session
+  ///
+  /// In en, this message translates to:
+  /// **'{count} of {total} passed'**
+  String recitationPracticeCompletedCount(int count, int total);
 }
 
 class _AppLocalizationsDelegate

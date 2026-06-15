@@ -3697,5 +3697,41 @@
     "recitationPracticeTooltip": "Practice recitation",
     "@recitationPracticeTooltip": {
         "description": "Tooltip for the Mushaf recitation practice button"
+    },
+    "recitationPracticeSessionProgress": "Ayah {current} of {total}",
+    "@recitationPracticeSessionProgress": {
+        "description": "Progress through ayahs on the current page during a session",
+        "placeholders": {
+            "current": {
+                "type": "int"
+            },
+            "total": {
+                "type": "int"
+            }
+        }
+    },
+    "recitationPracticeListening": "Listening…",
+    "@recitationPracticeListening": {
+        "description": "Shown while the microphone is active during a session"
+    },
+    "recitationPracticeEndSession": "End session",
+    "@recitationPracticeEndSession": {
+        "description": "Stops the hands-free recitation session"
+    },
+    "recitationPracticeSessionComplete": "Page complete",
+    "@recitationPracticeSessionComplete": {
+        "description": "Shown when all ayahs on the page have been practiced"
+    },
+    "recitationPracticeCompletedCount": "{count} of {total} passed",
+    "@recitationPracticeCompletedCount": {
+        "description": "Summary of passed ayahs after a session",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            },
+            "total": {
+                "type": "int"
+            }
+        }
     }
 }

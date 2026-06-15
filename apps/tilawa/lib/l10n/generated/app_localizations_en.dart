@@ -2778,4 +2778,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recitationPracticeTooltip => 'Practice recitation';
+
+  @override
+  String recitationPracticeSessionProgress(int current, int total) {
+    return 'Ayah $current of $total';
+  }
+
+  @override
+  String get recitationPracticeListening => 'Listening…';
+
+  @override
+  String get recitationPracticeEndSession => 'End session';
+
+  @override
+  String get recitationPracticeSessionComplete => 'Page complete';
+
+  @override
+  String recitationPracticeCompletedCount(int count, int total) {
+    return '$count of $total passed';
+  }
 }

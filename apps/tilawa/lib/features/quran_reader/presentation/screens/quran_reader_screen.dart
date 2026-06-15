@@ -1416,15 +1416,22 @@ Color? _recitationVerseBackgroundColor(
   int surah,
   int ayah,
 ) {
-  final target = practiceState.selectedTarget;
-  if (!practiceState.isPanelOpen || target == null) {
-    return null;
-  }
-  if (target.surahNumber != surah || target.ayahNumber != ayah) {
+  if (!practiceState.isPanelOpen) {
     return null;
   }
 
   final ColorScheme scheme = Theme.of(context).colorScheme;
+  if (practiceState.isAyahCompleted(surah, ayah)) {
+    return scheme.tertiaryContainer.withValues(alpha: 0.65);
+  }
+
+  final target = practiceState.selectedTarget;
+  if (target == null ||
+      target.surahNumber != surah ||
+      target.ayahNumber != ayah) {
+    return null;
+  }
+
   if (practiceState.phase == RecitationPracticePhase.listening) {
     final RecitationComparisonResult? liveResult =
         practiceState.comparisonResult;

@@ -19,13 +19,19 @@ class RecitationTextAligner {
       );
     }
 
+    final List<String> resolvedSpokenWords = _resolveSpokenWords(
+      spokenText: spokenText,
+      spokenWords: spokenWords,
+      targetWords: targetWords,
+    );
+
     final List<ComparedWord> alignedWords = <ComparedWord>[];
     var spokenIndex = 0;
     var correctCount = 0;
 
     for (final String targetWord in targetWords) {
-      if (spokenIndex < spokenWords.length &&
-          _wordsMatch(targetWord, spokenWords[spokenIndex])) {
+      if (spokenIndex < resolvedSpokenWords.length &&
+          _wordsMatch(targetWord, resolvedSpokenWords[spokenIndex])) {
         alignedWords.add(
           ComparedWord(word: targetWord, status: WordMatchStatus.correct),
         );
@@ -53,6 +59,64 @@ class RecitationTextAligner {
         .map((word) => word.trim())
         .where((word) => word.isNotEmpty)
         .toList(growable: false);
+  }
+
+  List<String> _resolveSpokenWords({
+    required String spokenText,
+    required List<String> spokenWords,
+    required List<String> targetWords,
+  }) {
+    if (spokenWords.length > 1 || targetWords.length <= 1) {
+      return spokenWords;
+    }
+
+    final String collapsed = spokenText.replaceAll(RegExp(r'\s+'), '');
+    if (collapsed.isEmpty) {
+      return spokenWords;
+    }
+
+    final List<String> segmented = _segmentByTargetWords(
+      collapsed,
+      targetWords,
+    );
+    if (segmented.length == targetWords.length) {
+      return segmented;
+    }
+
+    return spokenWords;
+  }
+
+  List<String> _segmentByTargetWords(
+    String spoken,
+    List<String> targetWords,
+  ) {
+    final List<String> segments = <String>[];
+    var index = 0;
+
+    for (final String targetWord in targetWords) {
+      if (index >= spoken.length) {
+        return const <String>[];
+      }
+
+      final int maxLength = spoken.length - index;
+      final int sliceLength = targetWord.length <= maxLength
+          ? targetWord.length
+          : maxLength;
+      final String slice = spoken.substring(index, index + sliceLength);
+
+      if (!_wordsMatch(slice, targetWord)) {
+        return const <String>[];
+      }
+
+      segments.add(slice);
+      index += sliceLength;
+    }
+
+    if (index != spoken.length) {
+      return const <String>[];
+    }
+
+    return segments;
   }
 
   bool _wordsMatch(String left, String right) {

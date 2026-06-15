@@ -8,6 +8,7 @@ enum RecitationPracticePhase {
   idle,
   listening,
   feedback,
+  sessionComplete,
 }
 
 class RecitationPracticeState extends Equatable {
@@ -20,6 +21,8 @@ class RecitationPracticeState extends Equatable {
     this.comparisonResult,
     this.failure,
     this.isInitializing = false,
+    this.isSessionActive = false,
+    this.completedTargetIndices = const <int>{},
   });
 
   final bool isPanelOpen;
@@ -30,12 +33,27 @@ class RecitationPracticeState extends Equatable {
   final RecitationComparisonResult? comparisonResult;
   final Failure? failure;
   final bool isInitializing;
+  final bool isSessionActive;
+  final Set<int> completedTargetIndices;
 
   RecitationTarget? get selectedTarget {
     if (targets.isEmpty || selectedTargetIndex >= targets.length) {
       return null;
     }
     return targets[selectedTargetIndex];
+  }
+
+  int? targetIndexForAyah(int surahNumber, int ayahNumber) {
+    final int index = targets.indexWhere(
+      (RecitationTarget target) =>
+          target.surahNumber == surahNumber && target.ayahNumber == ayahNumber,
+    );
+    return index >= 0 ? index : null;
+  }
+
+  bool isAyahCompleted(int surahNumber, int ayahNumber) {
+    final int? index = targetIndexForAyah(surahNumber, ayahNumber);
+    return index != null && completedTargetIndices.contains(index);
   }
 
   RecitationPracticeState copyWith({
@@ -49,6 +67,9 @@ class RecitationPracticeState extends Equatable {
     Failure? failure,
     bool clearFailure = false,
     bool? isInitializing,
+    bool? isSessionActive,
+    Set<int>? completedTargetIndices,
+    bool clearCompletedTargetIndices = false,
   }) {
     return RecitationPracticeState(
       isPanelOpen: isPanelOpen ?? this.isPanelOpen,
@@ -61,6 +82,10 @@ class RecitationPracticeState extends Equatable {
           : (comparisonResult ?? this.comparisonResult),
       failure: clearFailure ? null : (failure ?? this.failure),
       isInitializing: isInitializing ?? this.isInitializing,
+      isSessionActive: isSessionActive ?? this.isSessionActive,
+      completedTargetIndices: clearCompletedTargetIndices
+          ? const <int>{}
+          : (completedTargetIndices ?? this.completedTargetIndices),
     );
   }
 
@@ -74,5 +99,7 @@ class RecitationPracticeState extends Equatable {
     comparisonResult,
     failure,
     isInitializing,
+    isSessionActive,
+    completedTargetIndices,
   ];
 }

@@ -2760,4 +2760,23 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get recitationPracticeTooltip => 'تدريب التلاوة';
+
+  @override
+  String recitationPracticeSessionProgress(int current, int total) {
+    return 'الآية $current من $total';
+  }
+
+  @override
+  String get recitationPracticeListening => 'يستمع…';
+
+  @override
+  String get recitationPracticeEndSession => 'إنهاء الجلسة';
+
+  @override
+  String get recitationPracticeSessionComplete => 'اكتملت الصفحة';
+
+  @override
+  String recitationPracticeCompletedCount(int count, int total) {
+    return '$count من $total ناجحة';
+  }
 }

@@ -2,6 +2,7 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
+import '../../domain/entities/speech_recognition_update.dart';
 import '../../domain/repositories/speech_recognition_repository.dart';
 import '../datasources/speech_recognition_datasource.dart';
 import '../services/microphone_permission_service.dart';
@@ -42,7 +43,8 @@ class SpeechRecognitionRepositoryImpl implements SpeechRecognitionRepository {
   }
 
   @override
-  Stream<String> watchTranscript() => _datasource.transcriptStream;
+  Stream<SpeechRecognitionUpdate> watchRecognitionUpdates() =>
+      _datasource.recognitionUpdateStream;
 
   @override
   Future<Either<Failure, void>> startListening() async {
