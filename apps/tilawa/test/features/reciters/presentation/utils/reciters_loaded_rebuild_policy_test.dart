@@ -103,6 +103,26 @@ void main() {
       expect(shouldRebuildRecitersLoaded(previous, current), isFalse);
     });
 
+    test('rebuilds when catalog display content changes', () {
+      const previous = RecitersLoaded(
+        reciters: [reciter1, reciter2],
+        filteredReciters: [reciter1, reciter2],
+      );
+      const localizedReciter1 = ReciterEntity(
+        id: 1,
+        name: 'Localized Alpha',
+        letter: 'A',
+        date: '',
+        moshaf: [],
+      );
+      const current = RecitersLoaded(
+        reciters: [localizedReciter1, reciter2],
+        filteredReciters: [localizedReciter1, reciter2],
+      );
+
+      expect(shouldRebuildRecitersLoaded(previous, current), isTrue);
+    });
+
     test('rebuilds when showFavoritesOnly changes', () {
       const previous = RecitersLoaded(
         reciters: [reciter1, reciter2],

@@ -16,7 +16,6 @@ import '../../domain/services/adhan_alarm_player_interface.dart';
 import '../bloc/prayer_permissions_cubit.dart';
 import '../bloc/prayer_times_bloc.dart';
 import '../config/prayer_times_screen_loading_preview.dart';
-import '../formatters/prayer_location_label_formatter.dart';
 import '../layout/prayer_times_layout.dart';
 import '../mappers/prayer_row_view_data_mapper.dart';
 import '../models/prayer_row_view_data.dart';
@@ -327,14 +326,20 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                 sliver: SliverList.list(
                   children: [
                     _AdhanPlayingBanner(adhanPlayer: widget.adhanPlayer),
-                    _LocationUtilityCard(
+                    PrayerLocationUtilityCard(
                       locationName: state.locationName,
-                      onUpdateLocation: () {
+                      onTap: () {
                         context.read<PrayerTimesBloc>().add(
                           const PrayerTimesEvent.updateLocation(),
                         );
                       },
                       isLoading: state.isLoadingLocation,
+                      padding: EdgeInsets.fromLTRB(
+                        tokens.spaceLarge,
+                        0,
+                        tokens.spaceLarge,
+                        0,
+                      ),
                     ),
                     _CountdownCardSection(),
                     _TodayPrayerList(
@@ -681,67 +686,6 @@ class _TodayPrayerListState extends State<_TodayPrayerList> {
       prayerTimes: widget.prayerTimes,
       settings: widget.settings,
       currentPrayer: _currentPrayer,
-    );
-  }
-}
-
-class _LocationUtilityCard extends StatelessWidget {
-  const _LocationUtilityCard({
-    required this.locationName,
-    required this.isLoading,
-    required this.onUpdateLocation,
-  });
-
-  final String? locationName;
-  final bool isLoading;
-  final VoidCallback onUpdateLocation;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
-
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        tokens.spaceLarge,
-        0,
-        tokens.spaceLarge,
-        0,
-      ),
-      child: TilawaCard(
-        surface: TilawaCardSurface.raised,
-        // docs/tilawa_brand.md §5 — `card` family.
-        borderRadius: tokens.resolveRadius(family: TilawaRadiusFamily.card),
-        backgroundColor: colorScheme.surface,
-        onTap: isLoading ? null : onUpdateLocation,
-        padding: EdgeInsets.symmetric(
-          horizontal: tokens.spaceSmall,
-          vertical: tokens.spaceSmall,
-        ),
-        child: _UtilityActionRow(
-          icon: Icons.location_on_outlined,
-          label: PrayerLocationLabelFormatter.abbreviatedLocationLabel(
-            locationName: locationName,
-            l10n: context.l10n,
-          ),
-          trailing: isLoading
-              ? SizedBox(
-                  width: tokens.iconSizeSmall,
-                  height: tokens.iconSizeSmall,
-                  child: TilawaLoadingIndicator(
-                    centered: false,
-                    strokeWidth: 2,
-                    color: colorScheme.primary,
-                  ),
-                )
-              : Icon(
-                  Icons.gps_fixed_rounded,
-                  size: tokens.iconSizeSmall,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-        ),
-      ),
     );
   }
 }

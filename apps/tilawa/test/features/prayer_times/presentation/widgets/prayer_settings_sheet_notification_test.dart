@@ -6,6 +6,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/entities.dart';
 import 'package:tilawa/features/prayer_times/domain/repositories/prayer_times_repository.dart';
+import 'package:tilawa/features/prayer_times/application/prayer_location_update_notifier.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/usecases.dart';
 import 'package:tilawa/features/prayer_times/domain/value_objects/prayer_alarm_capability.dart';
 import 'package:tilawa/features/prayer_times/presentation/bloc/prayer_permissions_cubit.dart';
@@ -25,6 +26,7 @@ import 'prayer_settings_sheet_notification_test.mocks.dart';
   GetMonthlyPrayerTimesUseCase,
   GetCurrentLocationUseCase,
   GetCountryCodeUseCase,
+  GetLocationNameUseCase,
   SavePrayerSettingsUseCase,
   LoadPrayerSettingsUseCase,
   SchedulePrayerNotificationsUseCase,
@@ -71,6 +73,7 @@ void main() {
   late MockGetMonthlyPrayerTimesUseCase mockGetMonthlyPrayerTimes;
   late MockGetCurrentLocationUseCase mockGetCurrentLocation;
   late MockGetCountryCodeUseCase mockGetCountryCode;
+  late MockGetLocationNameUseCase mockGetLocationName;
   late MockSavePrayerSettingsUseCase mockSavePrayerSettings;
   late MockLoadPrayerSettingsUseCase mockLoadPrayerSettings;
   late MockSchedulePrayerNotificationsUseCase mockSchedule;
@@ -87,6 +90,7 @@ void main() {
     mockGetMonthlyPrayerTimes = MockGetMonthlyPrayerTimesUseCase();
     mockGetCurrentLocation = MockGetCurrentLocationUseCase();
     mockGetCountryCode = MockGetCountryCodeUseCase();
+    mockGetLocationName = MockGetLocationNameUseCase();
     mockSavePrayerSettings = MockSavePrayerSettingsUseCase();
     mockLoadPrayerSettings = MockLoadPrayerSettingsUseCase();
     mockSchedule = MockSchedulePrayerNotificationsUseCase();
@@ -121,10 +125,12 @@ void main() {
     mockGetMonthlyPrayerTimes,
     mockGetCurrentLocation,
     mockGetCountryCode,
+    mockGetLocationName,
     mockSavePrayerSettings,
     mockLoadPrayerSettings,
     mockSchedule,
     mockCancel,
+    NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
   );
 
   Widget buildSubject(PrayerTimesBloc bloc) {

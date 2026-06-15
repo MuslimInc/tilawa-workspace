@@ -40,6 +40,228 @@
     "@loadingReciters": {
         "description": "Loading reciters message"
     },
+    "homeTitle": "Home",
+    "@homeTitle": {
+        "description": "Home dashboard title"
+    },
+    "homeGreeting": "Assalamu alaikum",
+    "@homeGreeting": {
+        "description": "Default Home greeting"
+    },
+    "homeGreetingName": "Assalamu alaikum, {name}",
+    "@homeGreetingName": {
+        "description": "Home greeting with display name",
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "homeProfileLabel": "User profile",
+    "@homeProfileLabel": {
+        "description": "Accessibility label for the Home profile mark"
+    },
+    "homeLocationUnavailable": "Set location",
+    "@homeLocationUnavailable": {
+        "description": "Fallback Home location chip text when prayer location is not available"
+    },
+    "homeNextPrayerUnavailable": "Set your location to see the next prayer.",
+    "@homeNextPrayerUnavailable": {
+        "description": "Home next prayer fallback when no prayer time can be calculated"
+    },
+    "homePrayerTimesAction": "Prayer times",
+    "@homePrayerTimesAction": {
+        "description": "Action to open prayer times from Home"
+    },
+    "homePrayerNow": "It is time now",
+    "@homePrayerNow": {
+        "description": "Home countdown text when the next prayer is due now"
+    },
+    "homePrayerInMinutes": "{minutes, plural, =1{In 1 minute} other{In {minutes} minutes}}",
+    "@homePrayerInMinutes": {
+        "description": "Home next-prayer countdown under one hour",
+        "placeholders": {
+            "minutes": {
+                "type": "int"
+            }
+        }
+    },
+    "homePrayerInHoursMinutes": "In {hours}h {minutes}m",
+    "@homePrayerInHoursMinutes": {
+        "description": "Home next-prayer countdown with hours and minutes",
+        "placeholders": {
+            "hours": {
+                "type": "int"
+            },
+            "minutes": {
+                "type": "int"
+            }
+        }
+    },
+    "homeExploreTitle": "Explore",
+    "@homeExploreTitle": {
+        "description": "Home quick actions section title"
+    },
+    "homeQuickQuran": "Quran",
+    "@homeQuickQuran": {
+        "description": "Home quick action for Quran reader"
+    },
+    "homeQuickReciters": "Reciters",
+    "@homeQuickReciters": {
+        "description": "Home quick action for reciters catalog"
+    },
+    "homeQuickPrayer": "Prayer",
+    "@homeQuickPrayer": {
+        "description": "Home quick action for prayer times"
+    },
+    "homeQuickQibla": "Qibla",
+    "@homeQuickQibla": {
+        "description": "Home quick action for qibla"
+    },
+    "homeQuickAthkar": "Athkar",
+    "@homeQuickAthkar": {
+        "description": "Home quick action for athkar"
+    },
+    "homeQuickSettings": "Settings",
+    "@homeQuickSettings": {
+        "description": "Home quick action for settings"
+    },
+    "homeDailyAyahLabel": "Daily ayah",
+    "@homeDailyAyahLabel": {
+        "description": "Home daily ayah card label"
+    },
+    "homeDailyAyahBody": "And establish prayer and give zakah and bow with those who bow.",
+    "@homeDailyAyahBody": {
+        "description": "Home daily ayah body"
+    },
+    "homeDailyAyahReference": "Quran 2:43",
+    "@homeDailyAyahReference": {
+        "description": "Home daily ayah reference"
+    },
+    "homeDailyDuaLabel": "Daily dua",
+    "@homeDailyDuaLabel": {
+        "description": "Home daily dua card label"
+    },
+    "homeDailyDuaBody": "O Allah, help me remember You, thank You, and worship You well.",
+    "@homeDailyDuaBody": {
+        "description": "Home daily dua body"
+    },
+    "homeDailyDuaReference": "Abu Dawud",
+    "@homeDailyDuaReference": {
+        "description": "Home daily dua reference"
+    },
+    "todayPlanTitle": "Today’s Plan",
+    "@todayPlanTitle": {
+        "description": "Title for the daily Quran engagement plan card"
+    },
+    "todayPlanMotivationDefault": "A small amount every day is easier to protect.",
+    "@todayPlanMotivationDefault": {
+        "description": "Calm motivation copy for an incomplete Today Plan"
+    },
+    "todayPlanMotivationComplete": "Today is complete. Keep the rhythm gentle and steady.",
+    "@todayPlanMotivationComplete": {
+        "description": "Calm completion copy for a completed Today Plan"
+    },
+    "todayPlanReadPages": "{count, plural, =1{Read 1 page} other{Read {count} pages}}",
+    "@todayPlanReadPages": {
+        "description": "Reading task title with page count",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "todayPlanContinueFromPage": "Continue from page {page}",
+    "@todayPlanContinueFromPage": {
+        "description": "Reading task subtitle showing the last read Quran page",
+        "placeholders": {
+            "page": {
+                "type": "int"
+            }
+        }
+    },
+    "todayPlanShortReadingSession": "Start with a short reading session",
+    "@todayPlanShortReadingSession": {
+        "description": "Fallback reading task subtitle when no last page is known"
+    },
+    "todayPlanListenMinutes": "Listen for {minutes} minutes",
+    "@todayPlanListenMinutes": {
+        "description": "Listening task title with duration",
+        "placeholders": {
+            "minutes": {
+                "type": "int"
+            }
+        }
+    },
+    "todayPlanContinueListening": "Continue listening",
+    "@todayPlanContinueListening": {
+        "description": "Listening task title when listening history exists"
+    },
+    "todayPlanListeningSubtitle": "{surahName} · {reciterName}",
+    "@todayPlanListeningSubtitle": {
+        "description": "Listening task subtitle with surah and reciter names",
+        "placeholders": {
+            "surahName": {
+                "type": "String"
+            },
+            "reciterName": {
+                "type": "String"
+            }
+        }
+    },
+    "todayPlanChooseReciter": "Choose a reciter and listen calmly",
+    "@todayPlanChooseReciter": {
+        "description": "Fallback listening task subtitle"
+    },
+    "todayPlanMorningAdhkar": "Morning adhkar",
+    "@todayPlanMorningAdhkar": {
+        "description": "Morning adhkar task title"
+    },
+    "todayPlanMorningAdhkarSubtitle": "A short remembrance before the day gets busy",
+    "@todayPlanMorningAdhkarSubtitle": {
+        "description": "Morning adhkar task subtitle"
+    },
+    "todayPlanTasbeehGoal": "Tasbeeh goal",
+    "@todayPlanTasbeehGoal": {
+        "description": "Tasbeeh task title"
+    },
+    "todayPlanProgress": "{completed} of {total} completed · {minutes} min left",
+    "@todayPlanProgress": {
+        "description": "Today Plan progress summary",
+        "placeholders": {
+            "completed": {
+                "type": "int"
+            },
+            "total": {
+                "type": "int"
+            },
+            "minutes": {
+                "type": "int"
+            }
+        }
+    },
+    "todayPlanContinue": "Continue",
+    "@todayPlanContinue": {
+        "description": "Continue CTA for Today Plan"
+    },
+    "todayPlanStreakDays": "{days} d",
+    "@todayPlanStreakDays": {
+        "description": "Compact streak day count",
+        "placeholders": {
+            "days": {
+                "type": "int"
+            }
+        }
+    },
+    "todayPlanMinutesShort": "{minutes}m",
+    "@todayPlanMinutesShort": {
+        "description": "Compact minute estimate",
+        "placeholders": {
+            "minutes": {
+                "type": "int"
+            }
+        }
+    },
     "searchSurah": "Search surah...",
     "@searchSurah": {
         "description": "Search surah hint text"
@@ -424,6 +646,10 @@
     "chooseTheme": "Choose theme",
     "@chooseTheme": {
         "description": "Theme picker sheet title"
+    },
+    "bottomNavHome": "Home",
+    "@bottomNavHome": {
+        "description": "Single-word label for the Home tab in the phone bottom navigation bar"
     },
     "bottomNavReciters": "Reciters",
     "@bottomNavReciters": {

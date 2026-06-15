@@ -33,6 +33,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     required this.iconToggle,
     required this.permissionBanner,
     required this.bottomSheetScaffold,
+    required this.homeNextPrayerHero,
   });
 
   final TilawaSectionTitleTokens sectionTitle;
@@ -60,6 +61,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
   final TilawaIconToggleTokens iconToggle;
   final TilawaPermissionBannerTokens permissionBanner;
   final TilawaBottomSheetScaffoldTokens bottomSheetScaffold;
+  final TilawaHomeNextPrayerHeroTokens homeNextPrayerHero;
 
   /// Creates light theme component tokens.
   factory TilawaComponentTokens.light({ColorScheme? colorScheme}) =>
@@ -125,6 +127,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       iconToggle: TilawaIconToggleTokens.fromColorScheme(effectiveColorScheme),
       permissionBanner: TilawaPermissionBannerTokens.defaults(),
       bottomSheetScaffold: TilawaBottomSheetScaffoldTokens.defaults(),
+      homeNextPrayerHero: TilawaHomeNextPrayerHeroTokens.defaults(),
     );
   }
 
@@ -155,6 +158,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     TilawaIconToggleTokens? iconToggle,
     TilawaPermissionBannerTokens? permissionBanner,
     TilawaBottomSheetScaffoldTokens? bottomSheetScaffold,
+    TilawaHomeNextPrayerHeroTokens? homeNextPrayerHero,
   }) {
     return TilawaComponentTokens(
       sectionTitle: sectionTitle ?? this.sectionTitle,
@@ -182,6 +186,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       iconToggle: iconToggle ?? this.iconToggle,
       permissionBanner: permissionBanner ?? this.permissionBanner,
       bottomSheetScaffold: bottomSheetScaffold ?? this.bottomSheetScaffold,
+      homeNextPrayerHero: homeNextPrayerHero ?? this.homeNextPrayerHero,
     );
   }
 
@@ -279,6 +284,11 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       bottomSheetScaffold: TilawaBottomSheetScaffoldTokens.lerp(
         bottomSheetScaffold,
         other.bottomSheetScaffold,
+        t,
+      ),
+      homeNextPrayerHero: TilawaHomeNextPrayerHeroTokens.lerp(
+        homeNextPrayerHero,
+        other.homeNextPrayerHero,
         t,
       ),
     );

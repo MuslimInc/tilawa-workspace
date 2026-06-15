@@ -35,8 +35,8 @@ void main() {
 
     test('leaving prayer tab records signal', () {
       final List<ShellTabEffect> effects = coordinator.onTabChanged(
-        previousIndex: 1,
-        nextIndex: 2,
+        previousIndex: 2,
+        nextIndex: 3,
       );
 
       expect(
@@ -61,8 +61,8 @@ void main() {
 
     test('leaving prayer tab for reciters may prompt review', () {
       final List<ShellTabEffect> effects = coordinator.onTabChanged(
-        previousIndex: 1,
-        nextIndex: 0,
+        previousIndex: 2,
+        nextIndex: 1,
       );
 
       expect(
@@ -75,10 +75,28 @@ void main() {
       );
     });
 
-    test('athkar to reciters may prompt review', () {
+    test('leaving prayer tab for home does not prompt review', () {
       final List<ShellTabEffect> effects = coordinator.onTabChanged(
         previousIndex: 2,
         nextIndex: 0,
+      );
+
+      expect(
+        effects,
+        isNot(
+          contains(
+            const TryAppReviewPromptEffect(
+              AppReviewPromptMoment.leftPrayerTimesTab,
+            ),
+          ),
+        ),
+      );
+    });
+
+    test('athkar to reciters may prompt review', () {
+      final List<ShellTabEffect> effects = coordinator.onTabChanged(
+        previousIndex: 3,
+        nextIndex: 1,
       );
 
       expect(
@@ -91,10 +109,28 @@ void main() {
       );
     });
 
+    test('reciters to home does not prompt returnedToRecitersTab', () {
+      final List<ShellTabEffect> effects = coordinator.onTabChanged(
+        previousIndex: 1,
+        nextIndex: 0,
+      );
+
+      expect(
+        effects,
+        isNot(
+          contains(
+            const TryAppReviewPromptEffect(
+              AppReviewPromptMoment.returnedToRecitersTab,
+            ),
+          ),
+        ),
+      );
+    });
+
     test('opening prayer tab does not schedule a deferred prayer load', () {
       final List<ShellTabEffect> effects = coordinator.onTabChanged(
         previousIndex: 0,
-        nextIndex: 1,
+        nextIndex: 2,
       );
 
       expect(effects, contains(isA<SyncMainShellTabEffect>()));

@@ -3,6 +3,7 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:tilawa/features/prayer_times/application/prayer_location_update_notifier.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/entities.dart';
 import 'package:tilawa/features/prayer_times/domain/repositories/prayer_times_repository.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/usecases.dart';
@@ -16,6 +17,7 @@ import 'prayer_times_bloc_test.mocks.dart';
   GetMonthlyPrayerTimesUseCase,
   GetCurrentLocationUseCase,
   GetCountryCodeUseCase,
+  GetLocationNameUseCase,
   SavePrayerSettingsUseCase,
   LoadPrayerSettingsUseCase,
   SchedulePrayerNotificationsUseCase,
@@ -27,34 +29,42 @@ void main() {
   late MockGetMonthlyPrayerTimesUseCase mockGetMonthlyPrayerTimesUseCase;
   late MockGetCurrentLocationUseCase mockGetCurrentLocationUseCase;
   late MockGetCountryCodeUseCase mockGetCountryCodeUseCase;
+  late MockGetLocationNameUseCase mockGetLocationNameUseCase;
   late MockSavePrayerSettingsUseCase mockSavePrayerSettingsUseCase;
   late MockLoadPrayerSettingsUseCase mockLoadPrayerSettingsUseCase;
   late MockSchedulePrayerNotificationsUseCase
   mockSchedulePrayerNotificationsUseCase;
   late MockCancelPrayerNotificationsUseCase
   mockCancelPrayerNotificationsUseCase;
+  late NotifyPrayerLocationUpdatedUseCase notifyPrayerLocationUpdatedUseCase;
 
   setUp(() {
     mockGetPrayerTimesUseCase = MockGetPrayerTimesUseCase();
     mockGetMonthlyPrayerTimesUseCase = MockGetMonthlyPrayerTimesUseCase();
     mockGetCurrentLocationUseCase = MockGetCurrentLocationUseCase();
     mockGetCountryCodeUseCase = MockGetCountryCodeUseCase();
+    mockGetLocationNameUseCase = MockGetLocationNameUseCase();
     mockSavePrayerSettingsUseCase = MockSavePrayerSettingsUseCase();
     mockLoadPrayerSettingsUseCase = MockLoadPrayerSettingsUseCase();
     mockSchedulePrayerNotificationsUseCase =
         MockSchedulePrayerNotificationsUseCase();
     mockCancelPrayerNotificationsUseCase =
         MockCancelPrayerNotificationsUseCase();
+    notifyPrayerLocationUpdatedUseCase = NotifyPrayerLocationUpdatedUseCase(
+      PrayerLocationUpdateNotifier(),
+    );
 
     bloc = PrayerTimesBloc(
       mockGetPrayerTimesUseCase,
       mockGetMonthlyPrayerTimesUseCase,
       mockGetCurrentLocationUseCase,
       mockGetCountryCodeUseCase,
+      mockGetLocationNameUseCase,
       mockSavePrayerSettingsUseCase,
       mockLoadPrayerSettingsUseCase,
       mockSchedulePrayerNotificationsUseCase,
       mockCancelPrayerNotificationsUseCase,
+      notifyPrayerLocationUpdatedUseCase,
     );
 
     // Default stub
@@ -64,6 +74,18 @@ void main() {
         longitude: anyNamed('longitude'),
       ),
     ).thenAnswer((_) async => null);
+
+    when(
+      mockGetLocationNameUseCase.call(
+        latitude: anyNamed('latitude'),
+        longitude: anyNamed('longitude'),
+        localeIdentifier: anyNamed('localeIdentifier'),
+      ),
+    ).thenAnswer((invocation) async {
+      return invocation.namedArguments[#localeIdentifier] == 'ar'
+          ? 'القاهرة'
+          : null;
+    });
 
     when(
       mockSchedulePrayerNotificationsUseCase.call(
@@ -400,10 +422,12 @@ void main() {
           mockGetMonthlyPrayerTimesUseCase,
           mockGetCurrentLocationUseCase,
           mockGetCountryCodeUseCase,
+          mockGetLocationNameUseCase,
           mockSavePrayerSettingsUseCase,
           mockLoadPrayerSettingsUseCase,
           mockSchedulePrayerNotificationsUseCase,
           mockCancelPrayerNotificationsUseCase,
+          notifyPrayerLocationUpdatedUseCase,
         );
         addTearDown(testBloc.close);
 
@@ -421,6 +445,82 @@ void main() {
             requestIfDenied: true,
           ),
         ).called(1);
+      },
+    );
+
+    test(
+      'updateLocation overwrites saved coordinates when user refreshes GPS',
+      () async {
+        when(
+          mockGetCurrentLocationUseCase.call(
+            forceRefresh: anyNamed('forceRefresh'),
+            allowOpenSettings: anyNamed('allowOpenSettings'),
+            requestIfDenied: anyNamed('requestIfDenied'),
+            localeIdentifier: anyNamed('localeIdentifier'),
+          ),
+        ).thenAnswer((_) async => Right(tLocationResult));
+        when(
+          mockSavePrayerSettingsUseCase.call(settings: anyNamed('settings')),
+        ).thenAnswer((_) async => const Right(null));
+        when(
+          mockLoadPrayerSettingsUseCase.call(),
+        ).thenAnswer(
+          (_) async => const Right(
+            PrayerSettingsEntity(
+              savedLatitude: 30.0,
+              savedLongitude: 31.0,
+              savedLocationName: 'Old City',
+            ),
+          ),
+        );
+        when(
+          mockGetPrayerTimesUseCase.call(
+            latitude: anyNamed('latitude'),
+            longitude: anyNamed('longitude'),
+            date: anyNamed('date'),
+            settings: anyNamed('settings'),
+          ),
+        ).thenAnswer((_) async => Right(tPrayerTimes));
+
+        final PrayerTimesBloc testBloc = PrayerTimesBloc(
+          mockGetPrayerTimesUseCase,
+          mockGetMonthlyPrayerTimesUseCase,
+          mockGetCurrentLocationUseCase,
+          mockGetCountryCodeUseCase,
+          mockGetLocationNameUseCase,
+          mockSavePrayerSettingsUseCase,
+          mockLoadPrayerSettingsUseCase,
+          mockSchedulePrayerNotificationsUseCase,
+          mockCancelPrayerNotificationsUseCase,
+          notifyPrayerLocationUpdatedUseCase,
+        );
+        addTearDown(testBloc.close);
+
+        testBloc
+          ..emit(
+            const PrayerTimesState(
+              settings: PrayerSettingsEntity(
+                savedLatitude: 30.0,
+                savedLongitude: 31.0,
+                savedLocationName: 'Old City',
+              ),
+            ),
+          )
+          ..add(const PrayerTimesEvent.updateLocation());
+        await testBloc.stream.firstWhere(
+          (PrayerTimesState state) => state.status == PrayerTimesStatus.loaded,
+        );
+
+        final PrayerSettingsEntity savedSettings =
+            verify(
+                  mockSavePrayerSettingsUseCase.call(
+                    settings: captureAnyNamed('settings'),
+                  ),
+                ).captured.first
+                as PrayerSettingsEntity;
+        expect(savedSettings.savedLatitude, tLocationResult.latitude);
+        expect(savedSettings.savedLongitude, tLocationResult.longitude);
+        expect(savedSettings.savedLocationName, tLocationResult.locationName);
       },
     );
 
@@ -709,10 +809,12 @@ void main() {
         mockGetMonthlyPrayerTimesUseCase,
         mockGetCurrentLocationUseCase,
         mockGetCountryCodeUseCase,
+        mockGetLocationNameUseCase,
         mockSavePrayerSettingsUseCase,
         mockLoadPrayerSettingsUseCase,
         mockSchedulePrayerNotificationsUseCase,
         mockCancelPrayerNotificationsUseCase,
+        notifyPrayerLocationUpdatedUseCase,
         _FakeShouldRefreshPrayerTimesUseCase(shouldRefresh: false),
       ),
       seed: () => PrayerTimesState(
@@ -755,10 +857,12 @@ void main() {
           mockGetMonthlyPrayerTimesUseCase,
           mockGetCurrentLocationUseCase,
           mockGetCountryCodeUseCase,
+          mockGetLocationNameUseCase,
           mockSavePrayerSettingsUseCase,
           mockLoadPrayerSettingsUseCase,
           mockSchedulePrayerNotificationsUseCase,
           mockCancelPrayerNotificationsUseCase,
+          notifyPrayerLocationUpdatedUseCase,
           _FakeShouldRefreshPrayerTimesUseCase(shouldRefresh: true),
         );
       },
@@ -813,10 +917,12 @@ void main() {
           mockGetMonthlyPrayerTimesUseCase,
           mockGetCurrentLocationUseCase,
           mockGetCountryCodeUseCase,
+          mockGetLocationNameUseCase,
           mockSavePrayerSettingsUseCase,
           mockLoadPrayerSettingsUseCase,
           mockSchedulePrayerNotificationsUseCase,
           mockCancelPrayerNotificationsUseCase,
+          notifyPrayerLocationUpdatedUseCase,
           fakeRefresh,
         );
       },
@@ -1024,10 +1130,12 @@ void main() {
           mockGetMonthlyPrayerTimesUseCase,
           mockGetCurrentLocationUseCase,
           mockGetCountryCodeUseCase,
+          mockGetLocationNameUseCase,
           mockSavePrayerSettingsUseCase,
           mockLoadPrayerSettingsUseCase,
           mockSchedulePrayerNotificationsUseCase,
           mockCancelPrayerNotificationsUseCase,
+          notifyPrayerLocationUpdatedUseCase,
         );
         addTearDown(testBloc.close);
 

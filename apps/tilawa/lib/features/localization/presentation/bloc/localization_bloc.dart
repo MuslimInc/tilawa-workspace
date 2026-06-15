@@ -9,6 +9,7 @@ import 'package:tilawa_core/config/language_config.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import '../../domain/usecases/get_current_language_use_case.dart';
 import '../../domain/usecases/set_language_use_case.dart';
+import '../../../reciters/domain/usecases/get_reciters_use_case.dart';
 
 part 'localization_event.dart';
 part 'localization_state.dart';
@@ -16,8 +17,11 @@ part 'localization_state.dart';
 @injectable
 class LocalizationBloc
     extends HydratedBloc<LocalizationEvent, LocalizationState> {
-  LocalizationBloc(this._getCurrentLanguageUseCase, this._setLanguageUseCase)
-    : super(
+  LocalizationBloc(
+    this._getCurrentLanguageUseCase,
+    this._setLanguageUseCase,
+    this._getRecitersUseCase,
+  ) : super(
         LocalizationState(locale: Locale(LanguageConfig.defaultLanguageCode)),
       ) {
     on<LoadLanguage>(_onLoadLanguage);
@@ -28,6 +32,7 @@ class LocalizationBloc
 
   final GetCurrentLanguageUseCase _getCurrentLanguageUseCase;
   final SetLanguageUseCase _setLanguageUseCase;
+  final GetRecitersUseCase _getRecitersUseCase;
 
   @override
   LocalizationState? fromJson(Map<String, dynamic> json) {
@@ -83,6 +88,7 @@ class LocalizationBloc
   ) async {
     // Save to SharedPreferences so other parts of the app can read it
     await _setLanguageUseCase(event.locale.languageCode);
+    _getRecitersUseCase.invalidateCache();
     // Update the bloc state (which will also be persisted to HydratedStorage)
     emit(LocalizationState(locale: event.locale));
   }

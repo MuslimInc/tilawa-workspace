@@ -30,12 +30,16 @@ abstract class PrayerTimesRepository {
   });
 
   /// Get the user's current location
-  Future<LocationResult> getCurrentLocation({bool forceRefresh = false});
+  Future<LocationResult> getCurrentLocation({
+    bool forceRefresh = false,
+    String? localeIdentifier,
+  });
 
   /// Get location name from coordinates
   Future<String?> getLocationName({
     required double latitude,
     required double longitude,
+    String? localeIdentifier,
   });
 
   /// Get country code from coordinates

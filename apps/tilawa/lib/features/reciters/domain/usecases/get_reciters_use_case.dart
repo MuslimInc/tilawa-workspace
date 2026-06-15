@@ -16,12 +16,6 @@ class GetRecitersUseCase {
   Future<Either<Failure, List<ReciterEntity>>>? _inFlight;
 
   ResultFuture<List<ReciterEntity>> call() async {
-    final cachedSuccess = _cachedSuccess;
-    if (cachedSuccess != null) {
-      _cachedSuccess = null;
-      return cachedSuccess;
-    }
-
     final inFlight = _inFlight;
     if (inFlight != null) {
       return inFlight;
@@ -42,6 +36,14 @@ class GetRecitersUseCase {
         _inFlight = null;
       }
     });
+  }
+
+  /// Clears startup prefetch cache so the next [call] hits the repository.
+  ///
+  /// Used when the app language changes so reciter names reload in the new
+  /// locale instead of reusing a one-shot splash cache.
+  void invalidateCache() {
+    _cachedSuccess = null;
   }
 
   @visibleForTesting

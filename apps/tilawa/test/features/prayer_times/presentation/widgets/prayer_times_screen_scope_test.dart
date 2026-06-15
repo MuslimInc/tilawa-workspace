@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart' as mocktail;
+import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/features/localization/presentation/bloc/localization_bloc.dart';
+import 'package:tilawa/features/prayer_times/application/prayer_location_update_notifier.dart';
 import 'package:tilawa/features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/fire_prayer_test_notification_use_case.dart';
 import 'package:tilawa/features/prayer_times/presentation/bloc/prayer_permissions_cubit.dart';
@@ -20,6 +24,26 @@ class _MockAdhanAlarmPlayer extends mocktail.Mock
 
 class _MockFirePrayerTestNotificationUseCase extends mocktail.Mock
     implements FirePrayerTestNotificationUseCase {}
+
+class _MockLocalizationBloc extends mocktail.Mock implements LocalizationBloc {}
+
+Widget wrapPrayerTimesScopeTest({required Widget home}) {
+  final localizationBloc = _MockLocalizationBloc();
+  mocktail
+      .when(() => localizationBloc.state)
+      .thenReturn(const LocalizationState(locale: Locale('en')));
+  mocktail
+      .when(() => localizationBloc.stream)
+      .thenAnswer((_) => const Stream.empty());
+  mocktail.when(() => localizationBloc.close()).thenAnswer((_) async {});
+
+  return MaterialApp(
+    home: BlocProvider<LocalizationBloc>.value(
+      value: localizationBloc,
+      child: Scaffold(body: home),
+    ),
+  );
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -66,6 +90,9 @@ void main() {
     scopeGetIt().registerSingleton<FirePrayerTestNotificationUseCase>(
       _MockFirePrayerTestNotificationUseCase(),
     );
+    scopeGetIt().registerSingleton<PrayerLocationUpdateNotifier>(
+      PrayerLocationUpdateNotifier(),
+    );
   });
 
   tearDown(() async {
@@ -79,7 +106,7 @@ void main() {
     PrayerPermissionsCubit? permissionsCubit;
 
     await tester.pumpWidget(
-      wrapScopeTest(
+      wrapPrayerTimesScopeTest(
         home: PrayerTimesScreenScope(
           child: ScopeProbe(
             onBuilt: (context) {
@@ -99,7 +126,7 @@ void main() {
 
   testWidgets('closes scoped blocs when unmounted', (tester) async {
     await tester.pumpWidget(
-      wrapScopeTest(
+      wrapPrayerTimesScopeTest(
         home: PrayerTimesScreenScope(
           child: ScopeProbe(
             onBuilt: (context) {
@@ -148,7 +175,7 @@ void main() {
     });
 
     await tester.pumpWidget(
-      wrapScopeTest(
+      wrapPrayerTimesScopeTest(
         home: PrayerTimesScreenScope(
           child: ScopeProbe(
             onBuilt: (context) {
@@ -161,7 +188,7 @@ void main() {
     );
     await unmountScope(tester);
     await tester.pumpWidget(
-      wrapScopeTest(
+      wrapPrayerTimesScopeTest(
         home: PrayerTimesScreenScope(
           child: ScopeProbe(
             onBuilt: (context) {
@@ -189,7 +216,7 @@ void main() {
     scopeGetIt().registerFactory<PrayerTimesBloc>(() => loadMock);
 
     await tester.pumpWidget(
-      wrapScopeTest(
+      wrapPrayerTimesScopeTest(
         home: PrayerTimesScreenScope(
           child: ScopeProbe(
             onBuilt: (context) {
@@ -205,6 +232,52 @@ void main() {
           () => loadMock.add(
             const PrayerTimesEvent.loadPrayerTimes(
               requestLocationPermission: true,
+              localeIdentifier: 'en',
+            ),
+          ),
+        )
+        .called(1);
+  });
+
+  testWidgets('reloads prayer times when external location update fires', (
+    tester,
+  ) async {
+    final loadMock = _MockPrayerTimesBloc();
+    mocktail.when(() => loadMock.close()).thenAnswer((_) async {});
+    mocktail.when(() => loadMock.state).thenReturn(const PrayerTimesState());
+    mocktail
+        .when(() => loadMock.stream)
+        .thenAnswer((_) => const Stream.empty());
+
+    scopeGetIt().unregister<PrayerTimesBloc>();
+    scopeGetIt().registerFactory<PrayerTimesBloc>(() => loadMock);
+
+    await tester.pumpWidget(
+      wrapPrayerTimesScopeTest(
+        home: PrayerTimesScreenScope(
+          child: ScopeProbe(
+            onBuilt: (context) {
+              readScopeBloc<PrayerTimesBloc>(context);
+            },
+          ),
+        ),
+      ),
+    );
+
+    mocktail.clearInteractions(loadMock);
+
+    getIt<PrayerLocationUpdateNotifier>().notifyLocationUpdated(
+      localeIdentifier: 'ar',
+      source: PrayerLocationUpdateSource.homeDashboard,
+    );
+    await tester.pump();
+
+    mocktail
+        .verify(
+          () => loadMock.add(
+            const PrayerTimesEvent.loadPrayerTimes(
+              forceReschedule: true,
+              localeIdentifier: 'ar',
             ),
           ),
         )
@@ -215,7 +288,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      wrapScopeTest(
+      wrapPrayerTimesScopeTest(
         home: PrayerTimesScreenScope(
           child: ScopeProbe(onBuilt: (_) {}),
         ),
@@ -230,7 +303,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      wrapScopeTest(home: const PrayerTimesScreenScope()),
+      wrapPrayerTimesScopeTest(home: const PrayerTimesScreenScope()),
     );
 
     expect(find.byType(PrayerTimesScreen), findsOneWidget);

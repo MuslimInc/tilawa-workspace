@@ -9,8 +9,20 @@ class PrayerWatchdogLocationDataSource implements LocationDataSource {
   const PrayerWatchdogLocationDataSource();
 
   @override
-  Future<LocationResult> getCurrentLocation({bool forceRefresh = false}) async {
+  Future<LocationResult> getCurrentLocation({
+    bool forceRefresh = false,
+    String? localeIdentifier,
+  }) async {
     return LocationResult.error('Location lookup is disabled in watchdog');
+  }
+
+  @override
+  Future<String?> getLocationName(
+    double latitude,
+    double longitude, {
+    String? localeIdentifier,
+  }) async {
+    return null;
   }
 
   @override

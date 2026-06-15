@@ -158,6 +158,246 @@ abstract class AppLocalizations {
   /// **'Loading reciters...'**
   String get loadingReciters;
 
+  /// Home dashboard title
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get homeTitle;
+
+  /// Default Home greeting
+  ///
+  /// In en, this message translates to:
+  /// **'Assalamu alaikum'**
+  String get homeGreeting;
+
+  /// Home greeting with display name
+  ///
+  /// In en, this message translates to:
+  /// **'Assalamu alaikum, {name}'**
+  String homeGreetingName(String name);
+
+  /// Accessibility label for the Home profile mark
+  ///
+  /// In en, this message translates to:
+  /// **'User profile'**
+  String get homeProfileLabel;
+
+  /// Fallback Home location chip text when prayer location is not available
+  ///
+  /// In en, this message translates to:
+  /// **'Set location'**
+  String get homeLocationUnavailable;
+
+  /// Home next prayer fallback when no prayer time can be calculated
+  ///
+  /// In en, this message translates to:
+  /// **'Set your location to see the next prayer.'**
+  String get homeNextPrayerUnavailable;
+
+  /// Action to open prayer times from Home
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer times'**
+  String get homePrayerTimesAction;
+
+  /// Home countdown text when the next prayer is due now
+  ///
+  /// In en, this message translates to:
+  /// **'It is time now'**
+  String get homePrayerNow;
+
+  /// Home next-prayer countdown under one hour
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes, plural, =1{In 1 minute} other{In {minutes} minutes}}'**
+  String homePrayerInMinutes(int minutes);
+
+  /// Home next-prayer countdown with hours and minutes
+  ///
+  /// In en, this message translates to:
+  /// **'In {hours}h {minutes}m'**
+  String homePrayerInHoursMinutes(int hours, int minutes);
+
+  /// Home quick actions section title
+  ///
+  /// In en, this message translates to:
+  /// **'Explore'**
+  String get homeExploreTitle;
+
+  /// Home quick action for Quran reader
+  ///
+  /// In en, this message translates to:
+  /// **'Quran'**
+  String get homeQuickQuran;
+
+  /// Home quick action for reciters catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Reciters'**
+  String get homeQuickReciters;
+
+  /// Home quick action for prayer times
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer'**
+  String get homeQuickPrayer;
+
+  /// Home quick action for qibla
+  ///
+  /// In en, this message translates to:
+  /// **'Qibla'**
+  String get homeQuickQibla;
+
+  /// Home quick action for athkar
+  ///
+  /// In en, this message translates to:
+  /// **'Athkar'**
+  String get homeQuickAthkar;
+
+  /// Home quick action for settings
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get homeQuickSettings;
+
+  /// Home daily ayah card label
+  ///
+  /// In en, this message translates to:
+  /// **'Daily ayah'**
+  String get homeDailyAyahLabel;
+
+  /// Home daily ayah body
+  ///
+  /// In en, this message translates to:
+  /// **'And establish prayer and give zakah and bow with those who bow.'**
+  String get homeDailyAyahBody;
+
+  /// Home daily ayah reference
+  ///
+  /// In en, this message translates to:
+  /// **'Quran 2:43'**
+  String get homeDailyAyahReference;
+
+  /// Home daily dua card label
+  ///
+  /// In en, this message translates to:
+  /// **'Daily dua'**
+  String get homeDailyDuaLabel;
+
+  /// Home daily dua body
+  ///
+  /// In en, this message translates to:
+  /// **'O Allah, help me remember You, thank You, and worship You well.'**
+  String get homeDailyDuaBody;
+
+  /// Home daily dua reference
+  ///
+  /// In en, this message translates to:
+  /// **'Abu Dawud'**
+  String get homeDailyDuaReference;
+
+  /// Title for the daily Quran engagement plan card
+  ///
+  /// In en, this message translates to:
+  /// **'Today’s Plan'**
+  String get todayPlanTitle;
+
+  /// Calm motivation copy for an incomplete Today Plan
+  ///
+  /// In en, this message translates to:
+  /// **'A small amount every day is easier to protect.'**
+  String get todayPlanMotivationDefault;
+
+  /// Calm completion copy for a completed Today Plan
+  ///
+  /// In en, this message translates to:
+  /// **'Today is complete. Keep the rhythm gentle and steady.'**
+  String get todayPlanMotivationComplete;
+
+  /// Reading task title with page count
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Read 1 page} other{Read {count} pages}}'**
+  String todayPlanReadPages(int count);
+
+  /// Reading task subtitle showing the last read Quran page
+  ///
+  /// In en, this message translates to:
+  /// **'Continue from page {page}'**
+  String todayPlanContinueFromPage(int page);
+
+  /// Fallback reading task subtitle when no last page is known
+  ///
+  /// In en, this message translates to:
+  /// **'Start with a short reading session'**
+  String get todayPlanShortReadingSession;
+
+  /// Listening task title with duration
+  ///
+  /// In en, this message translates to:
+  /// **'Listen for {minutes} minutes'**
+  String todayPlanListenMinutes(int minutes);
+
+  /// Listening task title when listening history exists
+  ///
+  /// In en, this message translates to:
+  /// **'Continue listening'**
+  String get todayPlanContinueListening;
+
+  /// Listening task subtitle with surah and reciter names
+  ///
+  /// In en, this message translates to:
+  /// **'{surahName} · {reciterName}'**
+  String todayPlanListeningSubtitle(String surahName, String reciterName);
+
+  /// Fallback listening task subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a reciter and listen calmly'**
+  String get todayPlanChooseReciter;
+
+  /// Morning adhkar task title
+  ///
+  /// In en, this message translates to:
+  /// **'Morning adhkar'**
+  String get todayPlanMorningAdhkar;
+
+  /// Morning adhkar task subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'A short remembrance before the day gets busy'**
+  String get todayPlanMorningAdhkarSubtitle;
+
+  /// Tasbeeh task title
+  ///
+  /// In en, this message translates to:
+  /// **'Tasbeeh goal'**
+  String get todayPlanTasbeehGoal;
+
+  /// Today Plan progress summary
+  ///
+  /// In en, this message translates to:
+  /// **'{completed} of {total} completed · {minutes} min left'**
+  String todayPlanProgress(int completed, int total, int minutes);
+
+  /// Continue CTA for Today Plan
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get todayPlanContinue;
+
+  /// Compact streak day count
+  ///
+  /// In en, this message translates to:
+  /// **'{days} d'**
+  String todayPlanStreakDays(int days);
+
+  /// Compact minute estimate
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}m'**
+  String todayPlanMinutesShort(int minutes);
+
   /// Search surah hint text
   ///
   /// In en, this message translates to:
@@ -673,6 +913,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose Theme'**
   String get chooseTheme;
+
+  /// Single-word label for the Home tab in the phone bottom navigation bar
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get bottomNavHome;
 
   /// Legacy key; prefer bottomNavSearch for shell navigation
   ///

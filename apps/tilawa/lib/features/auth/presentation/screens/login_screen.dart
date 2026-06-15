@@ -17,11 +17,12 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../router/app_router.dart';
 import '../../../../router/app_router_config.dart';
+import '../../application/account_deletion_flow_tracker.dart';
 import '../../data/services/android_sign_in_platform_policy.dart';
+import '../../data/services/google_sign_in_session_tracker.dart';
 import '../bloc/auth_bloc.dart';
 import '../services/google_sign_in_interactive_launcher.dart';
 import '../services/login_auto_sign_in_scheduler.dart';
-import '../widgets/login_sign_in_fallback_panel.dart';
 
 /// Warm brown login canvas — distinct from the runtime sage primary.
 const Color _kLoginAccent = AppColors.primaryBrown;
@@ -50,7 +51,6 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
   final LoginAutoSignInScheduler _autoSignInScheduler =
       LoginAutoSignInScheduler();
-  bool _showFallbackFields = false;
   bool _signInLaunchPending = false;
   bool _awaitingManualSignInResult = false;
   String? _lastLoggedAuthStateLabel;
@@ -83,22 +83,24 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       unawaited(_recoverLoginSurface(reason: 'lifecycleResumed'));
       _recoverStalledSignIn();
+      if (_isGoogleSignInSessionInFlight() && mounted) {
+        setState(() {});
+      }
       _scheduleAutoSignInWhenReady();
     }
   }
 
-  void _revealSignInFallback() {
-    if (!mounted) {
-      return;
-    }
-    setState(() => _showFallbackFields = true);
-  }
-
   bool _isManualSignInReason(String reason) {
-    return reason == 'manualTap' || reason == 'fallbackRetry';
+    return reason == 'manualTap';
   }
 
   void _recoverStalledSignIn() {
+    if (_isGoogleSignInSessionInFlight()) {
+      _logGoogleSignInButton(
+        'recoverStalledSignIn skipped: interactive sign-in in flight',
+      );
+      return;
+    }
     if (_shouldSkipAutoSignIn()) {
       // Credential Manager launches HiddenActivity; AuthLoading across
       // inactive/paused/resumed is normal. Resetting here would emit
@@ -135,6 +137,12 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
   }
 
   void _scheduleAutoSignInWhenReady() {
+    if (_shouldSuppressLoginAutoSignInForAccountDeletion()) {
+      _logGoogleSignInButton(
+        'scheduleAutoSignIn skipped: account deletion flow',
+      );
+      return;
+    }
     _autoSignInScheduler.scheduleWhenReady(
       warmUpPolicy: _warmUpSignInPolicy,
       shouldSkipAutoSignIn: _shouldSkipAutoSignIn,
@@ -153,6 +161,13 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
     return getIt<AndroidSignInPlatformPolicy>().warmUp();
   }
 
+  bool _shouldSuppressLoginAutoSignInForAccountDeletion() {
+    if (!getIt.isRegistered<AccountDeletionFlowTracker>()) {
+      return false;
+    }
+    return getIt<AccountDeletionFlowTracker>().suppressLoginAutoSignIn;
+  }
+
   bool _shouldSkipAutoSignIn() {
     if (!getIt.isRegistered<AndroidSignInPlatformPolicy>()) {
       return false;
@@ -160,7 +175,34 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
     return getIt<AndroidSignInPlatformPolicy>().skipAutomaticSignIn;
   }
 
+  bool _isGoogleSignInSessionInFlight() {
+    if (!getIt.isRegistered<GoogleSignInSessionTracker>()) {
+      return false;
+    }
+    return getIt<GoogleSignInSessionTracker>().inFlight;
+  }
+
+  void _setSignInLaunchPending(bool value) {
+    if (_signInLaunchPending == value) {
+      return;
+    }
+    _signInLaunchPending = value;
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  void _clearSignInLaunchPending() {
+    _setSignInLaunchPending(false);
+  }
+
   void _maybeAutoSignIn() {
+    if (_shouldSuppressLoginAutoSignInForAccountDeletion()) {
+      _logGoogleSignInButton(
+        'maybeAutoSignIn skipped: account deletion flow',
+      );
+      return;
+    }
     final AuthBloc authBloc = context.read<AuthBloc>();
     final AuthState authState = authBloc.state;
     final String stateLabel = _authStateLabel(authState);
@@ -193,14 +235,12 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
       return;
     }
     if (!getIt.isRegistered<GoogleSignInInteractiveLauncher>()) {
+      _setSignInLaunchPending(true);
       _dispatchSignInWithGoogle(reason: reason);
       return;
     }
 
-    _signInLaunchPending = true;
-    if (mounted) {
-      setState(() => _showFallbackFields = false);
-    }
+    _setSignInLaunchPending(true);
 
     final GoogleSignInInteractiveLauncher launcher =
         getIt<GoogleSignInInteractiveLauncher>();
@@ -222,23 +262,30 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
             _logGoogleSignInButton(
               'launchInteractiveSignIn uiUnavailable reason=$reason',
             );
-            setState(() => _showFallbackFields = true);
+            _clearSignInLaunchPending();
+            ToastUtils.showToast(
+              msg: context.l10n.unableToSignInWithThirdPartyAccount,
+            );
           case GoogleSignInLaunchPlatformError(:final exception):
             _logGoogleSignInButton(
               'launchInteractiveSignIn platformError=${exception.code} '
               'reason=$reason',
             );
-            setState(() => _showFallbackFields = true);
+            _clearSignInLaunchPending();
+            ToastUtils.showToast(
+              msg:
+                  exception.message ??
+                  context.l10n.unableToSignInWithThirdPartyAccount,
+            );
         }
       });
-    } finally {
-      if (mounted) {
-        setState(() {
-          _signInLaunchPending = false;
-        });
-      } else {
-        _signInLaunchPending = false;
-      }
+    } catch (error, stackTrace) {
+      _clearSignInLaunchPending();
+      logger.w(
+        '[GoogleSignInButton] launchInteractiveSignIn failed',
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -250,15 +297,6 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
     _logGoogleSignInButton(
       'dispatched SignInWithGoogleEvent reason=$reason',
     );
-  }
-
-  void _onFallbackRetry() {
-    _logGoogleSignInButton('fallback retry tapped');
-    unawaited(_launchInteractiveSignIn(reason: 'fallbackRetry'));
-  }
-
-  bool _shouldRevealFallbackPanel(AuthState state) {
-    return state is AuthError;
   }
 
   void _logButtonStateIfChanged(bool isLoading) {
@@ -324,22 +362,21 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                 loading: () {},
                 authenticated: (_) {
                   _awaitingManualSignInResult = false;
+                  _clearSignInLaunchPending();
                   _navigateToHome(context);
                 },
                 unauthenticated: () {
+                  _clearSignInLaunchPending();
                   if (_awaitingManualSignInResult && _shouldSkipAutoSignIn()) {
                     _logGoogleSignInButton(
                       'manual sign-in cancelled (invisible picker / back)',
                     );
                     _awaitingManualSignInResult = false;
-                    _revealSignInFallback();
                   }
                 },
                 error: (message) {
                   _awaitingManualSignInResult = false;
-                  if (_shouldRevealFallbackPanel(state)) {
-                    _revealSignInFallback();
-                  }
+                  _clearSignInLaunchPending();
                   ToastUtils.showToast(
                     msg: message.isNotEmpty
                         ? message
@@ -350,7 +387,10 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
             },
             builder: (context, state) {
               _logAuthStateIfChanged(state);
-              final bool isLoading = state is AuthLoading;
+              final bool isLoading =
+                  state is AuthLoading ||
+                  _signInLaunchPending ||
+                  _isGoogleSignInSessionInFlight();
               _logButtonStateIfChanged(isLoading);
               return TilawaThumbReachLayout(
                 useSafeArea: true,
@@ -407,31 +447,28 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                     ),
                   ),
                 ),
-                actions: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    spacing: tokens.spaceMedium,
-                    children: <Widget>[
-                      if (_showFallbackFields)
-                        LoginSignInFallbackPanel(onRetry: _onFallbackRetry)
-                      else
-                        Listener(
-                          onPointerDown: (_) {
-                            _logGoogleSignInButton(
-                              'pointerDown on button (isLoading=$isLoading)',
-                            );
-                          },
-                          child: _GoogleSignInButton(
-                            isLoading: isLoading || _signInLaunchPending,
-                            onPressed: isLoading || _signInLaunchPending
-                                ? null
-                                : () => unawaited(_onGoogleSignInPressed()),
-                          ),
-                        ),
-                      const _LoginLegalFooter(),
-                    ],
-                  ),
+                actions: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  spacing: tokens.spaceMedium,
+                  children: <Widget>[
+                    Listener(
+                      onPointerDown: (_) {
+                        _logGoogleSignInButton(
+                          'pointerDown on button (isLoading=$isLoading)',
+                        );
+                      },
+                      child: _GoogleSignInButton(
+                        isLoading: isLoading,
+                        onPressed: isLoading
+                            ? null
+                            : () => unawaited(
+                                _onGoogleSignInPressed(),
+                              ),
+                      ),
+                    ),
+                    const _LoginLegalFooter(),
+                  ],
                 ),
               );
             },

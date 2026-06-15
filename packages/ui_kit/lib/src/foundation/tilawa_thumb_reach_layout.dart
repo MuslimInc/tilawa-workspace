@@ -33,6 +33,7 @@ class TilawaThumbReachLayout extends StatelessWidget {
   /// Controls rendered at the top of the lower band (buttons, footer chrome).
   ///
   /// Use a [Column] with [MainAxisSize.min]; do not wrap in [Expanded].
+  /// Tall content scrolls inside the action band automatically.
   final Widget actions;
 
   /// Flex for [content]; defaults to [defaultContentFlex].
@@ -68,19 +69,17 @@ class TilawaThumbReachLayout extends StatelessWidget {
         Expanded(flex: contentFlex, child: content),
         Expanded(
           flex: actionFlex,
-          child: Column(
-            children: <Widget>[
-              Padding(
+          child: SingleChildScrollView(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: maxActionWidth),
-                    child: actions,
-                  ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxActionWidth),
+                  child: actions,
                 ),
               ),
-              const Spacer(),
-            ],
+            ),
           ),
         ),
       ],

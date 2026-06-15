@@ -284,7 +284,10 @@ class _FakePrayerTimesRepository implements PrayerTimesRepository {
   }
 
   @override
-  Future<LocationResult> getCurrentLocation({bool forceRefresh = false}) async {
+  Future<LocationResult> getCurrentLocation({
+    bool forceRefresh = false,
+    String? localeIdentifier,
+  }) async {
     return LocationResult(latitude: 0, longitude: 0);
   }
 
@@ -292,6 +295,7 @@ class _FakePrayerTimesRepository implements PrayerTimesRepository {
   Future<String?> getLocationName({
     required double latitude,
     required double longitude,
+    String? localeIdentifier,
   }) async {
     return null;
   }

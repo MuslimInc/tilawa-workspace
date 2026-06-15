@@ -41,6 +41,7 @@ void main() {
   setUp(() {
     provideDummy<Either<Failure, List<ReciterEntity>>>(const Right([]));
     mockGetReciters = MockGetRecitersUseCase();
+    when(mockGetReciters.invalidateCache()).thenReturn(null);
     bloc = RecitersBloc(mockGetReciters);
   });
 
@@ -369,7 +370,7 @@ void main() {
         favoriteIds: {1},
       ),
       act: (bloc) async {
-        bloc.add(const LanguageChanged());
+        bloc.add(const LanguageChanged('en'));
         await bloc.stream.firstWhere(
           (RecitersState state) =>
               state is RecitersLoaded && (state).filteredReciters.length == 3,

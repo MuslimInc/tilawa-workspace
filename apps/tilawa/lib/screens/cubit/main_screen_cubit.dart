@@ -159,8 +159,8 @@ class MainScreenCubit extends Cubit<MainScreenState> {
   void requestRecitersSearchFocus() {
     emit(
       state.copyWith(
-        currentIndex: 0,
-        builtTabIndexes: {...state.builtTabIndexes, 0},
+        currentIndex: 1,
+        builtTabIndexes: {...state.builtTabIndexes, 1},
         recitersSearchFocusTick: state.recitersSearchFocusTick + 1,
       ),
     );

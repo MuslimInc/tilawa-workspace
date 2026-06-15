@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mockito/annotations.dart';
@@ -9,6 +10,8 @@ import 'google_sign_in_interactive_launcher_test.mocks.dart';
 
 @GenerateMocks([GoogleSignIn])
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   late MockGoogleSignIn mockGoogleSignIn;
   late AndroidSignInPlatformPolicy platformPolicy;
 
@@ -41,6 +44,26 @@ void main() {
         .checkReadiness();
 
     expect(result, isA<GoogleSignInLaunchUiUnavailable>());
+  });
+
+  test('checkReadiness returns platformError on PlatformException', () async {
+    when(mockGoogleSignIn.supportsAuthenticate()).thenThrow(
+      PlatformException(code: 'test', message: 'blocked'),
+    );
+
+    final GoogleSignInLaunchReadiness result = await buildLauncher()
+        .checkReadiness();
+
+    expect(result, isA<GoogleSignInLaunchPlatformError>());
+  });
+
+  test('checkReadiness returns platformError on unknown exceptions', () async {
+    when(mockGoogleSignIn.supportsAuthenticate()).thenThrow(Exception('boom'));
+
+    final GoogleSignInLaunchReadiness result = await buildLauncher()
+        .checkReadiness();
+
+    expect(result, isA<GoogleSignInLaunchPlatformError>());
   });
 
   group('SignInUiSettleTiming', () {

@@ -62,7 +62,7 @@ double _recitersLetterIndexTopInsetFromScaffoldBody(BuildContext context) {
   return _recitersRefreshIndicatorEdgeOffset(context) + tokens.spaceSmall;
 }
 
-/// Main-shell system back: collapse expanded player, focus the reciters tab,
+/// Main-shell system back: collapse expanded player, focus the Home tab,
 /// then exit — all handled explicitly.
 ///
 /// [canPop] is pinned to `false` so system back is *always* delivered to
@@ -83,7 +83,7 @@ class RecitersRootBackScope extends StatelessWidget {
   final Widget child;
 
   /// Pure exit policy, kept static so it stays unit-testable without a tree.
-  /// Only the reciters tab (index 0), sitting on the main shell, may exit.
+  /// Only the Home tab (index 0), sitting on the main shell, may exit.
   static bool canExitApp(int mainTabIndex) {
     if (mainTabIndex != 0) {
       return false;
@@ -123,7 +123,7 @@ class RecitersRootBackScope extends StatelessWidget {
           context.read<MainScreenCubit>().selectTab(0);
           return;
         }
-        // Reciters tab: this scope is the active back handler only on the main
+        // Home tab: this scope is the active back handler only on the main
         // shell ('/'); pushed routes handle their own back. So a back here
         // means "exit the app".
         SystemNavigator.pop();
@@ -583,7 +583,7 @@ class _RecitersScreenState extends State<RecitersScreen>
             ),
             BlocListener<MainScreenCubit, MainScreenState>(
               listenWhen: (MainScreenState previous, MainScreenState current) =>
-                  previous.currentIndex != 0 && current.currentIndex == 0,
+                  previous.currentIndex != 1 && current.currentIndex == 1,
               listener: (context, state) {
                 _applyFavoriteCatalogOrder();
               },
@@ -597,11 +597,13 @@ class _RecitersScreenState extends State<RecitersScreen>
               },
             ),
             BlocListener<LocalizationBloc, LocalizationState>(
+              listenWhen:
+                  (LocalizationState previous, LocalizationState current) =>
+                      previous.locale != current.locale,
               listener: (context, state) {
                 context.read<AlphabetScrollbarBloc>().add(
                   const ClearSelection(),
                 );
-                context.read<RecitersBloc>().add(const LanguageChanged());
               },
             ),
             BlocListener<RecitersBloc, RecitersState>(

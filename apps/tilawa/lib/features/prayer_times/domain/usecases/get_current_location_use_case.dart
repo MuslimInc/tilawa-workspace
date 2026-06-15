@@ -14,6 +14,7 @@ class GetCurrentLocationUseCase {
     bool forceRefresh = false,
     bool allowOpenSettings = false,
     bool requestIfDenied = false,
+    String? localeIdentifier,
   }) async {
     try {
       final bool hasPermission = await _repository.hasLocationPermission();
@@ -33,6 +34,7 @@ class GetCurrentLocationUseCase {
 
       final LocationResult location = await _repository.getCurrentLocation(
         forceRefresh: forceRefresh,
+        localeIdentifier: localeIdentifier,
       );
 
       if (location.hasError) {

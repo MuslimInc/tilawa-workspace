@@ -1695,12 +1695,14 @@ class FakePrayerTimesRepository implements PrayerTimesRepository {
   @override
   Future<LocationResult> getCurrentLocation({
     bool forceRefresh = false,
+    String? localeIdentifier,
   }) async => currentLocation;
 
   @override
   Future<String?> getLocationName({
     required double latitude,
     required double longitude,
+    String? localeIdentifier,
   }) async => null;
 
   @override

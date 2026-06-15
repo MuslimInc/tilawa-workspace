@@ -28,10 +28,6 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
   }
   static const Duration signInTimeout = Duration(seconds: 60);
 
-  /// CM bottom sheets can hang on some OEMs; cap wait time so [authenticate]
-  /// account-chooser can run as fallback.
-  static const Duration credentialManagerTimeout = Duration(seconds: 15);
-
   /// Transsion/XOS: GMS sign-in UI (CM sheet or account chooser) can be
   /// composited invisibly behind the Flutter window. Visible GMS UI takes
   /// this activity out of [AppLifecycleState.resumed]; if we are still
@@ -40,11 +36,6 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
   @visibleForTesting
   static Duration transsionUiProbeDelay = const Duration(seconds: 6);
 
-  /// Lets a timed-out [HiddenActivity] finish tearing down before starting
-  /// a second Credential Manager session (avoids `counts:2` overlap on XOS).
-  static const Duration credentialManagerTeardownDelay = Duration(
-    milliseconds: 500,
-  );
   final FirebaseAuth _firebaseAuth;
   final GoogleSignIn _googleSignIn;
   final AndroidSignInPlatformPolicy _platformPolicy;
@@ -141,10 +132,8 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
     }
   }
 
-  /// Tries Credential Manager (silent + bottom sheet), then the standard
-  /// account-chooser dialog ([GoogleSignIn.authenticate]) when CM fails,
-  /// times out, or returns no credential. User dismissal of the CM sheet
-  /// (`canceled`) does not open a second UI.
+  /// Credential Manager only (silent + bottom sheet). Does not fall back to
+  /// the centered account-chooser ([GoogleSignIn.authenticate]).
   Future<GoogleSignInAccount> _signInAccount() async {
     await _platformPolicy.warmUp();
 
@@ -152,45 +141,28 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
     // under RenderMode.surface; with RenderMode.texture (MainActivity) the
     // GMS overlay is composited correctly. _waitForInteractiveUi still
     // fail-fasts if the sheet never becomes visible.
-    final GoogleSignInAccount? lightweightAccount =
-        await _tryCredentialManagerSignIn();
-    if (lightweightAccount != null) {
-      return lightweightAccount;
-    }
-
-    logger.i('[GoogleSignIn] using account-chooser button flow');
-    return _authenticateWithButtonFlow();
+    return _tryCredentialManagerSignIn();
   }
 
-  Future<GoogleSignInAccount?> _tryCredentialManagerSignIn() async {
-    try {
-      final Future<GoogleSignInAccount?>? lightweight = _googleSignIn
-          .attemptLightweightAuthentication(reportAllExceptions: true);
-      if (lightweight == null) {
-        return null;
-      }
-      return await _waitForInteractiveUi(
-        lightweight,
-        stageTimeout: credentialManagerTimeout,
+  Future<GoogleSignInAccount> _tryCredentialManagerSignIn() async {
+    final Future<GoogleSignInAccount?>? lightweight = _googleSignIn
+        .attemptLightweightAuthentication(reportAllExceptions: true);
+    if (lightweight == null) {
+      throw const GoogleSignInException(
+        code: GoogleSignInExceptionCode.uiUnavailable,
+        description: 'Credential Manager sign-in is not supported',
       );
-    } on TimeoutException {
-      logger.i(
-        '[GoogleSignIn] Credential Manager sheet timed out; '
-        'clearing credential state before button flow',
-      );
-      await _resetCredentialManagerAfterFailure();
-      return null;
-    } on GoogleSignInException catch (e) {
-      if (_shouldFallbackToButtonFlowAfterCredentialManager(e)) {
-        logger.i(
-          '[GoogleSignIn] Credential Manager failed (${e.code.name}); '
-          'clearing credential state before button flow',
-        );
-        await _resetCredentialManagerAfterFailure();
-        return null;
-      }
-      rethrow;
     }
+    final GoogleSignInAccount? account = await _waitForInteractiveUi(
+      lightweight,
+      stageTimeout: signInTimeout,
+    );
+    if (account == null) {
+      throw const GoogleSignInException(
+        code: GoogleSignInExceptionCode.canceled,
+      );
+    }
+    return account;
   }
 
   /// Waits for an interactive GMS sign-in [operation], capped at
@@ -220,15 +192,6 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
       }
       return operation.timeout(signInTimeout);
     }
-  }
-
-  Future<void> _resetCredentialManagerAfterFailure() async {
-    try {
-      await _googleSignIn.signOut();
-    } catch (_) {
-      // Best-effort: drop any in-flight CM session before authenticate().
-    }
-    await Future<void>.delayed(credentialManagerTeardownDelay);
   }
 
   String _signInTimeoutMessage() {
@@ -268,23 +231,6 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
     }
   }
 
-  bool _shouldFallbackToButtonFlowAfterCredentialManager(
-    GoogleSignInException exception,
-  ) {
-    switch (exception.code) {
-      case GoogleSignInExceptionCode.canceled:
-        return false;
-      case GoogleSignInExceptionCode.uiUnavailable:
-      case GoogleSignInExceptionCode.unknownError:
-      case GoogleSignInExceptionCode.interrupted:
-        return true;
-      case GoogleSignInExceptionCode.clientConfigurationError:
-      case GoogleSignInExceptionCode.providerConfigurationError:
-      case GoogleSignInExceptionCode.userMismatch:
-        return false;
-    }
-  }
-
   @override
   Future<void> signOut() async {
     await _firebaseAuth.signOut();
@@ -308,9 +254,12 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
       if (e.code != 'requires-recent-login') {
         rethrow;
       }
-      final GoogleSignInAccount googleUser = await _signInAccount().timeout(
-        signInTimeout,
-      );
+      // Re-auth for account deletion must not open Credential Manager — only
+      // the explicit account-chooser flow.
+      final GoogleSignInAccount googleUser = await _authenticateWithButtonFlow()
+          .timeout(
+            signInTimeout,
+          );
       final GoogleSignInAuthentication googleAuth = googleUser.authentication;
       final String? idToken = googleAuth.idToken;
       if (idToken == null) {

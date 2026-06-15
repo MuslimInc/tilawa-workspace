@@ -5,6 +5,7 @@ import 'package:tilawa/core/di/injection.dart';
 import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../features/audio_player/presentation/cubit/player_background_cubit.dart';
 import '../features/auth/presentation/bloc/auth_bloc.dart';
+import '../features/auth/presentation/widgets/account_deletion_navigation_listener.dart';
 import '../features/localization/presentation/bloc/localization_bloc.dart';
 import '../features/settings/presentation/cubit/settings_cubit.dart';
 import '../features/theme/presentation/cubit/theme_cubit.dart';
@@ -41,7 +42,7 @@ class AppProviders {
       providers: providers,
       child: ChangeNotifierProvider<QuranPlayerChromeNotifier>(
         create: (_) => QuranPlayerChromeNotifier(),
-        child: child,
+        child: AccountDeletionNavigationListener(child: child),
       ),
     );
   }

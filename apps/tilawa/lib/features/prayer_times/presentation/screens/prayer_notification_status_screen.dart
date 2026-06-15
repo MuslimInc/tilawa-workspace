@@ -1,9 +1,11 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
-import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/load_prayer_settings_use_case.dart';
 import 'package:tilawa/features/prayer_times/presentation/formatters/prayer_location_label_formatter.dart';
 import 'package:tilawa_core/errors/failures.dart';
@@ -13,9 +15,9 @@ import '../../../../router/app_router_config.dart';
 import '../cubit/prayer_status_cubit.dart';
 
 class PrayerNotificationStatusScreen extends StatelessWidget {
-  final String? payloadJson;
-
   const PrayerNotificationStatusScreen({super.key, this.payloadJson});
+
+  final String? payloadJson;
 
   @override
   Widget build(BuildContext context) {
@@ -24,35 +26,22 @@ class PrayerNotificationStatusScreen extends StatelessWidget {
         getIt<IAdhanAlarmPlayer>(),
         getIt<LoadPrayerSettingsUseCase>(),
       )..init(payloadJson),
-      // Builder gives us a context that has PrayerStatusCubit for the guards.
       child: Builder(
         builder: (innerContext) => PopScope(
-          // Always intercept — _handleBack decides whether to actually pop.
           canPop: false,
           onPopInvokedWithResult: (didPop, _) async {
             if (didPop) return;
             await _handleBack(innerContext);
           },
-          child: Scaffold(
-            appBar: TilawaCatalogAppBar(
-              preferredHeight: TilawaAppBarConfig.catalogTitleOnlyHeight(
-                innerContext,
-              ),
-              title: innerContext.l10n.prayerNotificationReceived,
-              automaticallyImplyLeading: true,
-              onBackPressed: () => _handleBack(innerContext),
-            ),
-            body: _PrayerNotificationStatusView(
-              onClose: () => _handleClose(innerContext),
-            ),
+          child: _PrayerNotificationImmersiveScaffold(
+            onBack: () => _handleBack(innerContext),
+            onClose: () => _handleClose(innerContext),
           ),
         ),
       ),
     );
   }
 
-  /// Pops the route, but first asks the user to stop the adhan if it is
-  /// still playing.
   Future<void> _handleBack(BuildContext context) async {
     final bool playing = context.read<PrayerStatusCubit>().state.maybeWhen(
       loaded: (_, _, isAdhanPlaying, _, _, _, _) => isAdhanPlaying,
@@ -75,13 +64,10 @@ class PrayerNotificationStatusScreen extends StatelessWidget {
         await context.read<PrayerStatusCubit>().stopAdhan();
         if (context.mounted) context.pop();
       case null:
-        // Dialog dismissed — stay on screen.
         break;
     }
   }
 
-  /// Navigates to the home screen, but first asks the user to stop the adhan
-  /// if it is still playing.
   Future<void> _handleClose(BuildContext context) async {
     final bool playing = context.read<PrayerStatusCubit>().state.maybeWhen(
       loaded: (_, _, isAdhanPlaying, _, _, _, _) => isAdhanPlaying,
@@ -109,6 +95,141 @@ class PrayerNotificationStatusScreen extends StatelessWidget {
   }
 }
 
+class _PrayerNotificationImmersiveScaffold extends StatelessWidget {
+  const _PrayerNotificationImmersiveScaffold({
+    required this.onBack,
+    required this.onClose,
+  });
+
+  final VoidCallback onBack;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = context.tokens;
+    final heroTokens = Theme.of(context).componentTokens.homeNextPrayerHero;
+
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      body: DecoratedBox(
+        decoration: BoxDecoration(gradient: heroTokens.backgroundGradient),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Center(
+              child: Container(
+                width: tokens.iconSizeLargePlus * 5.5,
+                height: tokens.iconSizeLargePlus * 5.5,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: heroTokens.foregroundColor.withValues(alpha: 0.08),
+                ),
+              ),
+            ),
+            SafeArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _ImmersiveTopBar(onClose: onBack),
+                  Expanded(
+                    child: _PrayerNotificationStatusView(onClose: onClose),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ImmersiveTopBar extends StatelessWidget {
+  const _ImmersiveTopBar({required this.onClose});
+
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = context.tokens;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceMedium,
+        vertical: tokens.spaceSmall,
+      ),
+      child: Row(
+        children: [
+          _ImmersiveIconButton(
+            icon: Icons.close_rounded,
+            onTap: onClose,
+            semanticLabel: context.l10n.close,
+          ),
+          const Spacer(),
+          BlocBuilder<PrayerStatusCubit, PrayerStatusState>(
+            builder: (context, state) {
+              final bool isPlaying = state.maybeWhen(
+                loaded: (_, _, playing, _, _, _, _) => playing,
+                orElse: () => false,
+              );
+              if (!isPlaying) {
+                return const SizedBox.shrink();
+              }
+              return _ImmersiveIconButton(
+                icon: Icons.volume_up_rounded,
+                onTap: () => context.read<PrayerStatusCubit>().stopAdhan(),
+                semanticLabel: context.l10n.stopAdhan,
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ImmersiveIconButton extends StatelessWidget {
+  const _ImmersiveIconButton({
+    required this.icon,
+    required this.onTap,
+    required this.semanticLabel,
+  });
+
+  final IconData icon;
+  final VoidCallback onTap;
+  final String semanticLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = context.tokens;
+    final heroTokens = Theme.of(context).componentTokens.homeNextPrayerHero;
+    final Color foreground = heroTokens.foregroundColor;
+
+    return Semantics(
+      button: true,
+      label: semanticLabel,
+      child: Material(
+        color: foreground.withValues(alpha: heroTokens.locationChipFillOpacity),
+        shape: const CircleBorder(),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          customBorder: const CircleBorder(),
+          child: SizedBox(
+            width: kTilawaMinInteractiveDimension,
+            height: kTilawaMinInteractiveDimension,
+            child: Icon(
+              icon,
+              color: foreground,
+              size: tokens.iconSizeMedium,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _PrayerNotificationStatusView extends StatelessWidget {
   const _PrayerNotificationStatusView({required this.onClose});
 
@@ -116,11 +237,17 @@ class _PrayerNotificationStatusView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final heroTokens = Theme.of(context).componentTokens.homeNextPrayerHero;
+
     return BlocBuilder<PrayerStatusCubit, PrayerStatusState>(
       builder: (context, state) {
         return state.when(
-          initial: () => const Center(child: TilawaLoadingIndicator()),
-          loading: () => const Center(child: TilawaLoadingIndicator()),
+          initial: () => Center(
+            child: TilawaLoadingIndicator(color: heroTokens.foregroundColor),
+          ),
+          loading: () => Center(
+            child: TilawaLoadingIndicator(color: heroTokens.foregroundColor),
+          ),
           error: (failure) => _ErrorView(failure: failure),
           loaded:
               (
@@ -148,8 +275,6 @@ class _PrayerNotificationStatusView extends StatelessWidget {
   }
 }
 
-// ── Main content ──────────────────────────────────────────────────────────────
-
 class _StatusContent extends StatelessWidget {
   const _StatusContent({
     required this.prayerName,
@@ -173,144 +298,90 @@ class _StatusContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = context.tokens;
     final l10n = context.l10n;
-    final colorScheme = context.colorScheme;
-    final timeStr = MaterialLocalizations.of(
-      context,
-    ).formatTimeOfDay(TimeOfDay.fromDateTime(scheduledTime));
+    final heroTokens = Theme.of(context).componentTokens.homeNextPrayerHero;
+    final Color onHero = heroTokens.foregroundColor;
+    final localizedPrayerName = _localizePrayerName(context, prayerName);
 
-    return TilawaContentBounds(
-      kind: TilawaContentKind.form,
-      child: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(
-          horizontal: tokens.spaceExtraLarge,
-          vertical: tokens.spaceLarge,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(height: tokens.spaceExtraLarge),
-
-            // ── Animated bell icon ────────────────────────────────────────
-            _PulsingBellIcon(isPlaying: isAdhanPlaying),
-            SizedBox(height: tokens.spaceExtraLarge),
-
-            // ── Prayer name ───────────────────────────────────────────────
-            Text(
-              _localizePrayerName(context, prayerName),
-              style: context.textTheme.displayMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+    return SingleChildScrollView(
+      padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
+      child: Column(
+        children: [
+          SizedBox(height: tokens.spaceLarge),
+          _PulsingBellIcon(isPlaying: isAdhanPlaying),
+          SizedBox(height: tokens.spaceMedium),
+          Text(
+            localizedPrayerName,
+            style: context.textTheme.titleLarge?.copyWith(
+              color: onHero.withValues(
+                alpha: heroTokens.mutedForegroundOpacity,
               ),
-              textAlign: TextAlign.center,
+              fontWeight: FontWeight.w600,
             ),
-            SizedBox(height: tokens.spaceExtraSmall),
-
-            // ── Time ──────────────────────────────────────────────────────
-            Text(
-              l10n.prayerTimeAt(timeStr),
-              style: context.textTheme.titleMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: tokens.spaceSmall),
+          _HeroTimeDisplay(time: scheduledTime),
+          if (locationName != null) ...[
+            SizedBox(height: tokens.spaceMedium),
+            _LocationBadge(locationName: locationName!),
+          ],
+          SizedBox(height: tokens.spaceExtraLarge),
+          _ImmersiveStatusPanel(
+            isAdhanPlaying: isAdhanPlaying,
+            adhanEnabled: adhanEnabled,
+            soundName: soundName,
+          ),
+          SizedBox(height: tokens.spaceLarge),
+          if (isAdhanPlaying) ...[
+            _ImmersiveGradientButton(
+              label: l10n.stopAdhan,
+              icon: Icons.stop_rounded,
+              onPressed: () => context.read<PrayerStatusCubit>().stopAdhan(),
             ),
-
-            // ── Location badge ────────────────────────────────────────────
-            if (locationName != null) ...[
-              SizedBox(height: tokens.spaceMedium),
-              _LocationBadge(locationName: locationName!),
-            ],
-
-            SizedBox(height: tokens.spaceExtraLarge * 2),
-
-            // ── Status panel ──────────────────────────────────────────────
-            TilawaGlassPanel(
-              enableBackdropBlur: true,
-              child: Column(
-                children: [
-                  _StatusRow(
-                    icon: Icons.check_circle_outline_rounded,
-                    label: l10n.notificationStatus,
-                    iconColor: colorScheme.primary,
-                    iconBackgroundColor: colorScheme.primaryContainer,
-                    value: TilawaStatusChip(
-                      label: l10n.received,
-                      backgroundColor: colorScheme.primaryContainer,
-                      foregroundColor: colorScheme.onPrimaryContainer,
-                    ),
-                  ),
-                  TilawaDivider(indent: tokens.spaceLarge),
-                  _StatusRow(
-                    icon: isAdhanPlaying
-                        ? Icons.music_note_rounded
-                        : Icons.music_note_outlined,
-                    label: l10n.adhanStatus,
-                    iconColor: isAdhanPlaying
-                        ? colorScheme.secondary
-                        : colorScheme.onSurfaceVariant,
-                    iconBackgroundColor: isAdhanPlaying
-                        ? colorScheme.secondaryContainer
-                        : colorScheme.surfaceContainerHigh,
-                    value: TilawaStatusChip(
-                      label: isAdhanPlaying
-                          ? l10n.playing
-                          : (adhanEnabled ? l10n.enabled : l10n.disabled),
-                      backgroundColor: isAdhanPlaying
-                          ? colorScheme.secondaryContainer
-                          : colorScheme.surfaceContainerHigh,
-                      foregroundColor: isAdhanPlaying
-                          ? colorScheme.onSecondaryContainer
-                          : colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  if (soundName != null) ...[
-                    TilawaDivider(indent: tokens.spaceLarge),
-                    _StatusRow(
-                      icon: Icons.volume_up_outlined,
-                      label: l10n.sound,
-                      value: TilawaStatusChip(label: soundName!),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-
-            SizedBox(height: tokens.spaceExtraLarge * 2),
-
-            // ── Actions ───────────────────────────────────────────────────
-            if (isAdhanPlaying) ...[
-              SizedBox(
-                width: double.infinity,
-                child: TilawaButton(
-                  text: l10n.stopAdhan,
-                  variant: TilawaButtonVariant.danger,
-                  leadingIcon: const Icon(Icons.stop_rounded),
-                  onPressed: () =>
-                      context.read<PrayerStatusCubit>().stopAdhan(),
-                  isFullWidth: true,
+            SizedBox(height: tokens.spaceSmall),
+          ],
+          _ImmersiveGlassButton(
+            label: l10n.viewAllPrayerTimes,
+            icon: Icons.calendar_today_outlined,
+            onPressed: () => const PrayerTimesRoute().go(context),
+          ),
+          SizedBox(height: tokens.spaceSmall),
+          Row(
+            spacing: tokens.spaceSmall,
+            children: [
+              Expanded(
+                child: _ImmersiveGlassButton(
+                  label: l10n.homeQuickQuran,
+                  icon: Icons.menu_book_rounded,
+                  onPressed: () => const QuranLastReadRoute().go(context),
                 ),
               ),
-              SizedBox(height: tokens.spaceMedium),
+              Expanded(
+                child: _ImmersiveGlassButton(
+                  label: l10n.homeQuickQibla,
+                  icon: Icons.explore_outlined,
+                  onPressed: () => const QiblaRoute().go(context),
+                ),
+              ),
             ],
-            SizedBox(
-              width: double.infinity,
-              child: TilawaButton(
-                text: l10n.viewAllPrayerTimes,
-                variant: TilawaButtonVariant.outline,
-                leadingIcon: const Icon(Icons.calendar_today_outlined),
-                onPressed: () => const PrayerTimesRoute().go(context),
-                isFullWidth: true,
+          ),
+          SizedBox(height: tokens.spaceSmall),
+          Center(
+            child: TextButton(
+              onPressed: onClose,
+              child: Text(
+                l10n.close,
+                style: context.textTheme.labelLarge?.copyWith(
+                  color: onHero.withValues(
+                    alpha: heroTokens.footerForegroundOpacity,
+                  ),
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
-            SizedBox(height: tokens.spaceMedium),
-            Center(
-              child: TilawaButton(
-                text: l10n.close,
-                variant: TilawaButtonVariant.ghost,
-                onPressed: onClose,
-              ),
-            ),
-            SizedBox(height: tokens.spaceLarge),
-          ],
-        ),
+          ),
+          SizedBox(height: tokens.spaceMedium),
+        ],
       ),
     );
   }
@@ -327,7 +398,274 @@ class _StatusContent extends StatelessWidget {
   }
 }
 
-// ── Pulsing bell icon (animated when adhan is playing) ────────────────────────
+class _HeroTimeDisplay extends StatelessWidget {
+  const _HeroTimeDisplay({required this.time});
+
+  final DateTime time;
+
+  @override
+  Widget build(BuildContext context) {
+    final heroTokens = Theme.of(context).componentTokens.homeNextPrayerHero;
+    final Color onHero = heroTokens.foregroundColor;
+    final TimeOfDay timeOfDay = TimeOfDay.fromDateTime(time);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(
+      context,
+    );
+    final String timeText = localizations.formatTimeOfDay(
+      timeOfDay,
+      alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
+    );
+
+    return Text(
+      timeText,
+      style: context.textTheme.displayLarge?.copyWith(
+        color: onHero,
+        fontWeight: FontWeight.w800,
+        height: 1.0,
+        fontFeatures: const [FontFeature.tabularFigures()],
+      ),
+      textAlign: TextAlign.center,
+    );
+  }
+}
+
+class _ImmersiveStatusPanel extends StatelessWidget {
+  const _ImmersiveStatusPanel({
+    required this.isAdhanPlaying,
+    required this.adhanEnabled,
+    this.soundName,
+  });
+
+  final bool isAdhanPlaying;
+  final bool adhanEnabled;
+  final String? soundName;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = context.tokens;
+    final l10n = context.l10n;
+    final heroTokens = Theme.of(context).componentTokens.homeNextPrayerHero;
+    final Color onHero = heroTokens.foregroundColor;
+    final BorderRadius radius = BorderRadius.circular(tokens.radiusExtraLarge);
+
+    return ClipRRect(
+      borderRadius: radius,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(
+          sigmaX: tokens.blurGlass,
+          sigmaY: tokens.blurGlass,
+        ),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: onHero.withValues(alpha: heroTokens.locationChipFillOpacity),
+            borderRadius: radius,
+            border: Border.all(
+              color: onHero.withValues(
+                alpha: heroTokens.locationChipBorderOpacity,
+              ),
+              width: tokens.borderWidthThin,
+            ),
+          ),
+          child: Column(
+            children: [
+              _StatusRow(
+                icon: Icons.check_circle_outline_rounded,
+                label: l10n.notificationStatus,
+                value: TilawaStatusChip(
+                  label: l10n.received,
+                  backgroundColor: onHero.withValues(alpha: 0.18),
+                  foregroundColor: onHero,
+                ),
+              ),
+              _ImmersiveDivider(),
+              _StatusRow(
+                icon: isAdhanPlaying
+                    ? Icons.music_note_rounded
+                    : Icons.music_note_outlined,
+                label: l10n.adhanStatus,
+                value: TilawaStatusChip(
+                  label: isAdhanPlaying
+                      ? l10n.playing
+                      : (adhanEnabled ? l10n.enabled : l10n.disabled),
+                  backgroundColor: onHero.withValues(
+                    alpha: isAdhanPlaying ? 0.22 : 0.12,
+                  ),
+                  foregroundColor: onHero,
+                ),
+              ),
+              if (soundName != null) ...[
+                _ImmersiveDivider(),
+                _StatusRow(
+                  icon: Icons.volume_up_outlined,
+                  label: l10n.sound,
+                  value: TilawaStatusChip(
+                    label: soundName!,
+                    backgroundColor: onHero.withValues(alpha: 0.12),
+                    foregroundColor: onHero.withValues(
+                      alpha: heroTokens.footerForegroundOpacity,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ImmersiveDivider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final heroTokens = Theme.of(context).componentTokens.homeNextPrayerHero;
+
+    return Divider(
+      height: 1,
+      thickness: context.tokens.borderWidthThin,
+      color: heroTokens.foregroundColor.withValues(
+        alpha: heroTokens.locationChipBorderOpacity * 0.6,
+      ),
+    );
+  }
+}
+
+class _ImmersiveGradientButton extends StatelessWidget {
+  const _ImmersiveGradientButton({
+    required this.label,
+    required this.icon,
+    required this.onPressed,
+  });
+
+  final String label;
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = context.tokens;
+    final heroTokens = Theme.of(context).componentTokens.homeNextPrayerHero;
+    final BorderRadius radius = BorderRadius.circular(
+      tokens.resolveRadius(family: TilawaRadiusFamily.card),
+    );
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: radius,
+        child: Ink(
+          decoration: BoxDecoration(
+            gradient: heroTokens.backgroundGradient,
+            borderRadius: radius,
+            boxShadow: [
+              BoxShadow(
+                color: heroTokens.gradientBottomEnd.withValues(
+                  alpha: tokens.opacityShadowStrong,
+                ),
+                blurRadius: tokens.blurShadow,
+                offset: tokens.shadowOffsetMedium,
+              ),
+            ],
+          ),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: kTilawaMinInteractiveDimension,
+            ),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                spacing: tokens.spaceSmall,
+                children: [
+                  Icon(
+                    icon,
+                    color: heroTokens.foregroundColor,
+                    size: tokens.iconSizeMedium,
+                  ),
+                  Text(
+                    label,
+                    style: context.textTheme.titleMedium?.copyWith(
+                      color: heroTokens.foregroundColor,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ImmersiveGlassButton extends StatelessWidget {
+  const _ImmersiveGlassButton({
+    required this.label,
+    required this.icon,
+    required this.onPressed,
+  });
+
+  final String label;
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = context.tokens;
+    final heroTokens = Theme.of(context).componentTokens.homeNextPrayerHero;
+    final Color onHero = heroTokens.foregroundColor;
+    final BorderRadius radius = BorderRadius.circular(
+      tokens.resolveRadius(family: TilawaRadiusFamily.card),
+    );
+
+    return Material(
+      color: onHero.withValues(alpha: heroTokens.locationChipFillOpacity),
+      shape: RoundedRectangleBorder(
+        borderRadius: radius,
+        side: BorderSide(
+          color: onHero.withValues(alpha: heroTokens.locationChipBorderOpacity),
+          width: tokens.borderWidthThin,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: radius,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minHeight: kTilawaMinInteractiveDimension,
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: tokens.spaceMedium,
+              vertical: tokens.spaceSmall,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: tokens.spaceExtraSmall,
+              children: [
+                Icon(icon, color: onHero, size: tokens.iconSizeSmall),
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textTheme.labelLarge?.copyWith(
+                      color: onHero,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class _PulsingBellIcon extends StatefulWidget {
   const _PulsingBellIcon({required this.isPlaying});
@@ -350,7 +688,7 @@ class _PulsingBellIconState extends State<_PulsingBellIcon>
       vsync: this,
       duration: const Duration(milliseconds: 900),
     );
-    _scale = Tween<double>(begin: 1.0, end: 1.1).animate(
+    _scale = Tween<double>(begin: 1.0, end: 1.08).animate(
       CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
     );
     if (widget.isPlaying) _ctrl.repeat(reverse: true);
@@ -375,8 +713,9 @@ class _PulsingBellIconState extends State<_PulsingBellIcon>
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
     final tokens = context.tokens;
+    final heroTokens = Theme.of(context).componentTokens.homeNextPrayerHero;
+    final Color onHero = heroTokens.foregroundColor;
 
     return AnimatedBuilder(
       animation: _ctrl,
@@ -386,29 +725,37 @@ class _PulsingBellIconState extends State<_PulsingBellIcon>
           child: Stack(
             alignment: Alignment.center,
             children: [
-              // Soft glow ring shown only while playing
               if (widget.isPlaying)
                 Container(
-                  width: 108,
-                  height: 108,
+                  width: tokens.iconSizeLargePlus * 2.4,
+                  height: tokens.iconSizeLargePlus * 2.4,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: colorScheme.primary.withValues(alpha: 0.12),
+                    color: onHero.withValues(alpha: 0.14),
                   ),
                 ),
-              TilawaIconBox(
-                icon: widget.isPlaying
-                    ? Icons.notifications_active_rounded
-                    : Icons.notifications_rounded,
-                size: tokens.iconSizeExtraLarge,
-                iconColor: widget.isPlaying
-                    ? colorScheme.primary
-                    : colorScheme.onSurfaceVariant,
-                backgroundColor: widget.isPlaying
-                    ? colorScheme.primaryContainer
-                    : colorScheme.surfaceContainerHigh,
-                borderRadius: tokens.radiusExtraLarge,
-                padding: tokens.spaceLarge,
+              Container(
+                width: tokens.iconSizeLargePlus * 1.6,
+                height: tokens.iconSizeLargePlus * 1.6,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: onHero.withValues(
+                    alpha: heroTokens.locationChipFillOpacity,
+                  ),
+                  border: Border.all(
+                    color: onHero.withValues(
+                      alpha: heroTokens.locationChipBorderOpacity,
+                    ),
+                    width: tokens.borderWidthThin,
+                  ),
+                ),
+                child: Icon(
+                  widget.isPlaying
+                      ? Icons.notifications_active_rounded
+                      : Icons.notifications_rounded,
+                  size: tokens.iconSizeLarge,
+                  color: onHero,
+                ),
               ),
             ],
           ),
@@ -417,8 +764,6 @@ class _PulsingBellIconState extends State<_PulsingBellIcon>
     );
   }
 }
-
-// ── Location badge ────────────────────────────────────────────────────────────
 
 class _LocationBadge extends StatelessWidget {
   const _LocationBadge({required this.locationName});
@@ -429,77 +774,72 @@ class _LocationBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
+    final heroTokens = theme.componentTokens.homeNextPrayerHero;
+    final Color onHero = heroTokens.foregroundColor;
 
     final label = PrayerLocationLabelFormatter.abbreviatedLocationLabel(
       locationName: locationName,
       l10n: context.l10n,
     );
-    final double badgeHeight =
-        tokens.spaceTiny * 2 + (theme.textTheme.labelSmall?.fontSize ?? 12);
 
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: tokens.spaceSmall,
-        vertical: tokens.spaceTiny,
-      ),
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHigh,
+        color: onHero.withValues(alpha: heroTokens.locationChipFillOpacity),
         borderRadius: BorderRadius.circular(
           tokens.resolveRadius(
             family: TilawaRadiusFamily.pill,
-            height: badgeHeight,
+            height: kTilawaMinInteractiveDimension,
           ),
         ),
         border: Border.all(
-          color: colorScheme.outlineVariant.withValues(
-            alpha: tokens.opacityMedium,
-          ),
+          color: onHero.withValues(alpha: heroTokens.locationChipBorderOpacity),
           width: tokens.borderWidthThin,
         ),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.location_on_rounded,
-            size: 13,
-            color: colorScheme.primary,
-          ),
-          SizedBox(width: tokens.spaceTiny),
-          Text(
-            label,
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: tokens.spaceSmall,
+          vertical: tokens.spaceExtraSmall,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.location_on_rounded,
+              size: tokens.iconSizeSmall,
+              color: onHero,
             ),
-          ),
-        ],
+            SizedBox(width: tokens.spaceExtraSmall),
+            Text(
+              label,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: onHero,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
-
-// ── Status row ────────────────────────────────────────────────────────────────
 
 class _StatusRow extends StatelessWidget {
   const _StatusRow({
     required this.icon,
     required this.label,
     required this.value,
-    this.iconColor,
-    this.iconBackgroundColor,
   });
 
   final IconData icon;
   final String label;
   final Widget value;
-  final Color? iconColor;
-  final Color? iconBackgroundColor;
 
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
-    final colorScheme = context.colorScheme;
+    final heroTokens = Theme.of(context).componentTokens.homeNextPrayerHero;
+    final Color onHero = heroTokens.foregroundColor;
 
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -508,21 +848,26 @@ class _StatusRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          TilawaIconBox(
-            icon: icon,
-            size: tokens.iconSizeMedium,
-            backgroundColor:
-                iconBackgroundColor ?? colorScheme.surfaceContainerHigh,
-            iconColor: iconColor ?? colorScheme.onSurfaceVariant,
-            borderRadius: tokens.radiusMedium,
-            padding: tokens.spaceExtraSmall,
+          Container(
+            width: tokens.iconSizeExtraLarge,
+            height: tokens.iconSizeExtraLarge,
+            decoration: BoxDecoration(
+              color: onHero.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(tokens.radiusMedium),
+            ),
+            child: Icon(
+              icon,
+              size: tokens.iconSizeMedium,
+              color: onHero,
+            ),
           ),
           SizedBox(width: tokens.spaceMedium),
           Expanded(
             child: Text(
               label,
               style: context.textTheme.bodyLarge?.copyWith(
-                color: colorScheme.onSurface,
+                color: onHero,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -532,8 +877,6 @@ class _StatusRow extends StatelessWidget {
     );
   }
 }
-
-// ── Error view ────────────────────────────────────────────────────────────────
 
 class _ErrorView extends StatelessWidget {
   const _ErrorView({required this.failure});
@@ -558,8 +901,6 @@ class _ErrorView extends StatelessWidget {
   }
 }
 
-// ── Exit guard ────────────────────────────────────────────────────────────────
-
 enum _ExitChoice { stop }
 
 class _AdhanExitDialog extends StatelessWidget {
@@ -573,13 +914,11 @@ class _AdhanExitDialog extends StatelessWidget {
       title: Text(l10n.adhanIsPlaying),
       content: Text(l10n.adhanStillPlayingMessage),
       actions: [
-        // Stay on this screen — adhan keeps playing.
         TilawaButton(
           text: l10n.continueListening,
           variant: TilawaButtonVariant.ghost,
           onPressed: () => Navigator.of(context).pop(null),
         ),
-        // Stop the adhan and navigate away.
         TilawaButton(
           text: l10n.stopAdhan,
           variant: TilawaButtonVariant.danger,

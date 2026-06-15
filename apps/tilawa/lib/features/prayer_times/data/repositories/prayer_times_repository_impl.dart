@@ -66,17 +66,27 @@ class PrayerTimesRepositoryImpl implements PrayerTimesRepository {
   }
 
   @override
-  Future<LocationResult> getCurrentLocation({bool forceRefresh = false}) async {
-    return _locationDataSource.getCurrentLocation(forceRefresh: forceRefresh);
+  Future<LocationResult> getCurrentLocation({
+    bool forceRefresh = false,
+    String? localeIdentifier,
+  }) {
+    return _locationDataSource.getCurrentLocation(
+      forceRefresh: forceRefresh,
+      localeIdentifier: localeIdentifier,
+    );
   }
 
   @override
   Future<String?> getLocationName({
     required double latitude,
     required double longitude,
-  }) async {
-    // For now, return null. This can be enhanced with geocoding
-    return null;
+    String? localeIdentifier,
+  }) {
+    return _locationDataSource.getLocationName(
+      latitude,
+      longitude,
+      localeIdentifier: localeIdentifier,
+    );
   }
 
   @override
