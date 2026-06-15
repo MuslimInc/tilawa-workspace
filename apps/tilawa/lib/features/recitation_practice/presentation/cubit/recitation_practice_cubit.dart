@@ -5,6 +5,7 @@ import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../../domain/entities/recitation_comparison_result.dart';
+import '../../domain/entities/recitation_target.dart';
 import '../../domain/usecases/compare_recitation_use_case.dart';
 import '../../domain/usecases/get_page_recitation_targets_use_case.dart';
 import '../../domain/usecases/request_microphone_permission_use_case.dart';
@@ -28,7 +29,34 @@ class RecitationPracticeCubit extends Cubit<RecitationPracticeState> {
   StreamSubscription<String>? _transcriptSubscription;
 
   Future<void> openForPage(int pageNumber) async {
-    final targets = _getPageTargets(pageNumber);
+    _openWithTargets(_getPageTargets(pageNumber));
+  }
+
+  Future<void> openForAyah({
+    required int pageNumber,
+    required int surahNumber,
+    required int ayahNumber,
+  }) async {
+    final List<RecitationTarget> targets = _getPageTargets(pageNumber);
+    if (targets.isEmpty) {
+      return;
+    }
+
+    final int selectedIndex = targets.indexWhere(
+      (RecitationTarget target) =>
+          target.surahNumber == surahNumber && target.ayahNumber == ayahNumber,
+    );
+
+    _openWithTargets(
+      targets,
+      selectedTargetIndex: selectedIndex >= 0 ? selectedIndex : 0,
+    );
+  }
+
+  void _openWithTargets(
+    List<RecitationTarget> targets, {
+    int selectedTargetIndex = 0,
+  }) {
     if (targets.isEmpty) {
       return;
     }
@@ -37,7 +65,7 @@ class RecitationPracticeCubit extends Cubit<RecitationPracticeState> {
       state.copyWith(
         isPanelOpen: true,
         targets: targets,
-        selectedTargetIndex: 0,
+        selectedTargetIndex: selectedTargetIndex.clamp(0, targets.length - 1),
         phase: RecitationPracticePhase.idle,
         liveTranscript: '',
         clearComparisonResult: true,
@@ -139,7 +167,7 @@ class RecitationPracticeCubit extends Cubit<RecitationPracticeState> {
     await _transcriptSubscription?.cancel();
     _transcriptSubscription = _speechRecognition.watchTranscript().listen(
       (String transcript) {
-        emit(state.copyWith(liveTranscript: transcript));
+        _emitLiveTranscript(transcript);
       },
     );
 
@@ -213,6 +241,29 @@ class RecitationPracticeCubit extends Cubit<RecitationPracticeState> {
         liveTranscript: '',
         clearComparisonResult: true,
         clearFailure: true,
+      ),
+    );
+  }
+
+  void _emitLiveTranscript(String transcript) {
+    final RecitationTarget? target = state.selectedTarget;
+    if (target == null) {
+      return;
+    }
+
+    final RecitationComparisonResult? liveComparison =
+        transcript.trim().isEmpty
+        ? null
+        : _compareRecitation(
+            targetText: target.normalText,
+            spokenText: transcript,
+          );
+
+    emit(
+      state.copyWith(
+        liveTranscript: transcript,
+        comparisonResult: liveComparison,
+        clearComparisonResult: liveComparison == null,
       ),
     );
   }

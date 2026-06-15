@@ -6,6 +6,7 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/compared_word.dart';
+import '../../domain/entities/recitation_target.dart';
 import '../../domain/entities/word_match_status.dart';
 import '../cubit/recitation_practice_cubit.dart';
 import '../cubit/recitation_practice_state.dart';
@@ -66,6 +67,8 @@ class RecitationPracticePanel extends StatelessWidget {
           previous.isPanelOpen != current.isPanelOpen ||
           previous.phase != current.phase ||
           previous.selectedTarget != current.selectedTarget ||
+          previous.selectedTargetIndex != current.selectedTargetIndex ||
+          previous.targets != current.targets ||
           previous.liveTranscript != current.liveTranscript ||
           previous.comparisonResult != current.comparisonResult ||
           previous.failure != current.failure ||
@@ -117,6 +120,14 @@ class RecitationPracticePanel extends StatelessWidget {
                         ),
                       ],
                     ),
+                    if (state.targets.length > 1) ...[
+                      SizedBox(height: tokens.spaceSmall),
+                      _AyahTargetSelector(
+                        targets: state.targets,
+                        selectedIndex: state.selectedTargetIndex,
+                        onSelected: cubit.selectTarget,
+                      ),
+                    ],
                     SizedBox(height: tokens.spaceSmall),
                     Directionality(
                       textDirection: TextDirection.rtl,
@@ -128,7 +139,9 @@ class RecitationPracticePanel extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (state.liveTranscript.isNotEmpty) ...[
+                    if (state.liveTranscript.isNotEmpty &&
+                        state.phase == RecitationPracticePhase.listening &&
+                        state.comparisonResult == null) ...[
                       SizedBox(height: tokens.spaceSmall),
                       Text(
                         state.liveTranscript,
@@ -183,7 +196,10 @@ class RecitationPracticePanel extends StatelessWidget {
                           TilawaButton(
                             text: l10n.recitationPracticeNextAyah,
                             variant: TilawaButtonVariant.secondary,
-                            onPressed: cubit.selectNextTarget,
+                            onPressed: () {
+                              cubit.selectNextTarget();
+                              unawaited(cubit.startListening());
+                            },
                           ),
                         if (state.phase != RecitationPracticePhase.feedback)
                           FilledButton.icon(
@@ -217,6 +233,43 @@ class RecitationPracticePanel extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _AyahTargetSelector extends StatelessWidget {
+  const _AyahTargetSelector({
+    required this.targets,
+    required this.selectedIndex,
+    required this.onSelected,
+  });
+
+  final List<RecitationTarget> targets;
+  final int selectedIndex;
+  final ValueChanged<int> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: List<Widget>.generate(targets.length, (int index) {
+          final RecitationTarget target = targets[index];
+          final bool isSelected = index == selectedIndex;
+          return Padding(
+            padding: EdgeInsets.only(
+              right: index == targets.length - 1 ? 0 : tokens.spaceExtraSmall,
+            ),
+            child: ChoiceChip(
+              label: Text('${target.surahNumber}:${target.ayahNumber}'),
+              selected: isSelected,
+              onSelected: (_) => onSelected(index),
+            ),
+          );
+        }),
+      ),
     );
   }
 }

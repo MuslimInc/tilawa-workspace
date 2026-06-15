@@ -6,4 +6,5 @@ export 'domain/usecases/compare_recitation_use_case.dart';
 export 'domain/usecases/get_page_recitation_targets_use_case.dart';
 export 'presentation/cubit/recitation_practice_cubit.dart';
 export 'presentation/cubit/recitation_practice_state.dart';
+export 'presentation/widgets/recitation_practice_host.dart';
 export 'presentation/widgets/recitation_practice_panel.dart';
