@@ -75,6 +75,15 @@ abstract final class AppColors {
   /// Bottom stop for the brand launch gradient.
   static const Color brandGradientBottom = defaultPrimary;
 
+  /// Top-start stop for the Home next-prayer hero card gradient (`#67BD65`).
+  static const Color homeNextPrayerGradientTop = Color(0xFF67BD65);
+
+  /// Bottom-end stop for the Home next-prayer hero card gradient (`#217C48`).
+  static const Color homeNextPrayerGradientBottom = Color(0xFF217C48);
+
+  /// Foreground on the Home next-prayer hero gradient (`#FFFFFF`).
+  static const Color homeNextPrayerGradientForeground = Color(0xFFFFFFFF);
+
   /// Launch / splash canvas — matches adaptive icon background (`#219653`).
   static const Color launchSplashBackground = primarySage;
 

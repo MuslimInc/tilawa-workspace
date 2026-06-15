@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mockito/annotations.dart';
@@ -45,22 +46,24 @@ void main() {
     expect(result, isA<GoogleSignInLaunchUiUnavailable>());
   });
 
-  testWidgets('runAfterUiSettled invokes the action after UI settle delay', (
-    WidgetTester tester,
-  ) async {
-    var ran = false;
+  test('checkReadiness returns platformError on PlatformException', () async {
+    when(mockGoogleSignIn.supportsAuthenticate()).thenThrow(
+      PlatformException(code: 'test', message: 'blocked'),
+    );
 
-    final Future<void> run = buildLauncher().runAfterUiSettled(() async {
-      ran = true;
-    });
+    final GoogleSignInLaunchReadiness result = await buildLauncher()
+        .checkReadiness();
 
-    await tester.pump();
-    await tester.pump();
-    await tester.pump();
-    await tester.pump(SignInUiSettleTiming.defaultUiSettleDelay);
-    await run;
+    expect(result, isA<GoogleSignInLaunchPlatformError>());
+  });
 
-    expect(ran, isTrue);
+  test('checkReadiness returns platformError on unknown exceptions', () async {
+    when(mockGoogleSignIn.supportsAuthenticate()).thenThrow(Exception('boom'));
+
+    final GoogleSignInLaunchReadiness result = await buildLauncher()
+        .checkReadiness();
+
+    expect(result, isA<GoogleSignInLaunchPlatformError>());
   });
 
   group('SignInUiSettleTiming', () {

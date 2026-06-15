@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,11 +12,6 @@ import 'package:tilawa/features/auth/data/services/android_sign_in_platform_poli
 import 'package:tilawa/features/auth/data/services/google_sign_in_session_tracker.dart';
 import 'package:tilawa/features/auth/domain/entities/auth_result.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
-import 'package:tilawa/features/auth/domain/usecases/delete_account.dart';
-import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.dart';
-import 'package:tilawa/features/auth/domain/usecases/sign_in_with_google_use_case.dart';
-import 'package:tilawa/features/auth/domain/usecases/sign_out.dart';
-import 'package:tilawa/features/auth/domain/usecases/sync_device_token_use_case.dart';
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tilawa/features/auth/presentation/screens/login_screen.dart';
 import 'package:tilawa/features/auth/presentation/services/google_sign_in_interactive_launcher.dart';
@@ -27,12 +23,13 @@ import '../../../../helpers/hydrated_bloc_test_helper.dart';
 import '../bloc/auth_bloc_test.mocks.dart';
 import '../services/google_sign_in_interactive_launcher_test.mocks.dart';
 
-class TestGoogleSignInInteractiveLauncher extends GoogleSignInInteractiveLauncher {
+class TestGoogleSignInInteractiveLauncher
+    extends GoogleSignInInteractiveLauncher {
   TestGoogleSignInInteractiveLauncher()
-      : super(
-          MockGoogleSignIn(),
-          AndroidSignInPlatformPolicy.test(skipAutomaticSignIn: true),
-        );
+    : super(
+        MockGoogleSignIn(),
+        AndroidSignInPlatformPolicy.test(skipAutomaticSignIn: true),
+      );
 
   GoogleSignInLaunchReadiness readiness = const GoogleSignInLaunchReady();
   int settledInvocations = 0;
@@ -168,13 +165,40 @@ void main() {
       expect(find.text('Privacy policy'), findsOneWidget);
     });
 
-    testWidgets('manual tap launches sign-in through the interactive launcher', (
+    testWidgets(
+      'manual tap launches sign-in through the interactive launcher',
+      (
+        WidgetTester tester,
+      ) async {
+        final Completer<AuthResult> signInCompleter = Completer<AuthResult>();
+        when(
+          mockSignInWithGoogleUseCase(),
+        ).thenAnswer((_) => signInCompleter.future);
+
+        await pumpLoginScreen(tester);
+        await pumpLoginInitFrames(tester);
+
+        await tester.tap(googleButtonFinder());
+        await tester.pump();
+
+        expect(testLauncher.settledInvocations, 1);
+        verify(mockSignInWithGoogleUseCase()).called(1);
+        expect(isGoogleButtonLoading(tester), isTrue);
+
+        signInCompleter.complete(AuthResult.success(user: testUser));
+        await tester.pump();
+        await tester.pump();
+
+        expect(authBloc.state, isA<AuthAuthenticated>());
+      },
+    );
+
+    testWidgets('clears pending loading when readiness is a platform error', (
       WidgetTester tester,
     ) async {
-      final Completer<AuthResult> signInCompleter = Completer<AuthResult>();
-      when(
-        mockSignInWithGoogleUseCase(),
-      ).thenAnswer((_) => signInCompleter.future);
+      testLauncher.readiness = GoogleSignInLaunchPlatformError(
+        PlatformException(code: 'test', message: 'blocked'),
+      );
 
       await pumpLoginScreen(tester);
       await pumpLoginInitFrames(tester);
@@ -182,28 +206,39 @@ void main() {
       await tester.tap(googleButtonFinder());
       await tester.pump();
 
-      expect(testLauncher.settledInvocations, 1);
-      verify(mockSignInWithGoogleUseCase()).called(1);
-      expect(isGoogleButtonLoading(tester), isTrue);
-
-      signInCompleter.complete(AuthResult.success(user: testUser));
-      await tester.pump();
-
-      expect(authBloc.state, isA<AuthAuthenticated>());
+      verifyNever(mockSignInWithGoogleUseCase());
+      expect(isGoogleButtonLoading(tester), isFalse);
     });
 
-    testWidgets('keeps the button loading while the Google session is in flight', (
+    testWidgets('dispatches sign-in when the interactive launcher is missing', (
       WidgetTester tester,
     ) async {
+      getIt.unregister<GoogleSignInInteractiveLauncher>();
+
       await pumpLoginScreen(tester);
-      sessionTracker.markStarted();
-      binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
-      binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await pumpLoginInitFrames(tester);
+
+      await tester.tap(googleButtonFinder());
       await tester.pump();
 
-      expect(isGoogleButtonLoading(tester), isTrue);
-      expect(sessionTracker.inFlight, isTrue);
+      verify(mockSignInWithGoogleUseCase()).called(1);
     });
+
+    testWidgets(
+      'keeps the button loading while the Google session is in flight',
+      (
+        WidgetTester tester,
+      ) async {
+        await pumpLoginScreen(tester);
+        sessionTracker.markStarted();
+        binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+        binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+        await tester.pump();
+
+        expect(isGoogleButtonLoading(tester), isTrue);
+        expect(sessionTracker.inFlight, isTrue);
+      },
+    );
 
     testWidgets('clears pending loading when readiness is uiUnavailable', (
       WidgetTester tester,
@@ -224,29 +259,32 @@ void main() {
       );
     });
 
-    testWidgets('does not dispatch CheckAuthStatus while sign-in is in flight', (
-      WidgetTester tester,
-    ) async {
-      registerAutoSignInPolicy();
+    testWidgets(
+      'does not dispatch CheckAuthStatus while sign-in is in flight',
+      (
+        WidgetTester tester,
+      ) async {
+        registerAutoSignInPolicy();
 
-      when(
-        mockSignInWithGoogleUseCase(),
-      ).thenAnswer((_) => Completer<AuthResult>().future);
+        when(
+          mockSignInWithGoogleUseCase(),
+        ).thenAnswer((_) => Completer<AuthResult>().future);
 
-      await pumpLoginScreen(tester);
-      await pumpLoginInitFrames(tester);
+        await pumpLoginScreen(tester);
+        await pumpLoginInitFrames(tester);
 
-      expect(authBloc.state, isA<AuthLoading>());
+        expect(authBloc.state, isA<AuthLoading>());
 
-      sessionTracker.markStarted();
-      clearInteractions(mockGetCurrentUserUseCase);
+        sessionTracker.markStarted();
+        clearInteractions(mockGetCurrentUserUseCase);
 
-      binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
-      binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-      await tester.pump();
+        binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+        binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+        await tester.pump();
 
-      verifyNever(mockGetCurrentUserUseCase());
-    });
+        verifyNever(mockGetCurrentUserUseCase());
+      },
+    );
 
     testWidgets('dispatches CheckAuthStatus after resume when loading stalls', (
       WidgetTester tester,

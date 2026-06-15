@@ -1290,3 +1290,142 @@ class TilawaPermissionBannerTokens {
     );
   }
 }
+
+/// Component tokens for the Home next-prayer hero card gradient shell.
+///
+/// Fixed brand greens — documented exception to runtime [ColorScheme] primary
+/// (same pattern as [AppShareComposerColors] for marketing-style surfaces).
+@immutable
+class TilawaHomeNextPrayerHeroTokens {
+  const TilawaHomeNextPrayerHeroTokens({
+    required this.gradientTopStart,
+    required this.gradientBottomEnd,
+    required this.foregroundColor,
+    required this.locationChipFillOpacity,
+    required this.locationChipBorderOpacity,
+    required this.locationChipSplashOpacity,
+    required this.locationChipHighlightOpacity,
+    required this.mutedForegroundOpacity,
+    required this.footerForegroundOpacity,
+  });
+
+  /// Top-start gradient stop.
+  final Color gradientTopStart;
+
+  /// Bottom-end gradient stop; also used for material fill and card shadow.
+  final Color gradientBottomEnd;
+
+  /// Text and icons on the gradient surface.
+  final Color foregroundColor;
+
+  /// Frosted location chip fill alpha on [foregroundColor].
+  final double locationChipFillOpacity;
+
+  /// Frosted location chip border alpha on [foregroundColor].
+  final double locationChipBorderOpacity;
+
+  final double locationChipSplashOpacity;
+  final double locationChipHighlightOpacity;
+
+  /// Secondary copy (labels, countdown) on the gradient.
+  final double mutedForegroundOpacity;
+
+  /// Footer schedule affordance alpha on [foregroundColor].
+  final double footerForegroundOpacity;
+
+  LinearGradient get backgroundGradient => LinearGradient(
+    begin: AlignmentDirectional.topStart,
+    end: AlignmentDirectional.bottomEnd,
+    colors: [gradientTopStart, gradientBottomEnd],
+  );
+
+  factory TilawaHomeNextPrayerHeroTokens.defaults() {
+    return const TilawaHomeNextPrayerHeroTokens(
+      gradientTopStart: AppColors.homeNextPrayerGradientTop,
+      gradientBottomEnd: AppColors.homeNextPrayerGradientBottom,
+      foregroundColor: AppColors.homeNextPrayerGradientForeground,
+      locationChipFillOpacity: 0.14,
+      locationChipBorderOpacity: 0.28,
+      locationChipSplashOpacity: 0.1,
+      locationChipHighlightOpacity: 0.05,
+      mutedForegroundOpacity: 0.76,
+      footerForegroundOpacity: 0.88,
+    );
+  }
+
+  TilawaHomeNextPrayerHeroTokens copyWith({
+    Color? gradientTopStart,
+    Color? gradientBottomEnd,
+    Color? foregroundColor,
+    double? locationChipFillOpacity,
+    double? locationChipBorderOpacity,
+    double? locationChipSplashOpacity,
+    double? locationChipHighlightOpacity,
+    double? mutedForegroundOpacity,
+    double? footerForegroundOpacity,
+  }) {
+    return TilawaHomeNextPrayerHeroTokens(
+      gradientTopStart: gradientTopStart ?? this.gradientTopStart,
+      gradientBottomEnd: gradientBottomEnd ?? this.gradientBottomEnd,
+      foregroundColor: foregroundColor ?? this.foregroundColor,
+      locationChipFillOpacity:
+          locationChipFillOpacity ?? this.locationChipFillOpacity,
+      locationChipBorderOpacity:
+          locationChipBorderOpacity ?? this.locationChipBorderOpacity,
+      locationChipSplashOpacity:
+          locationChipSplashOpacity ?? this.locationChipSplashOpacity,
+      locationChipHighlightOpacity:
+          locationChipHighlightOpacity ?? this.locationChipHighlightOpacity,
+      mutedForegroundOpacity:
+          mutedForegroundOpacity ?? this.mutedForegroundOpacity,
+      footerForegroundOpacity:
+          footerForegroundOpacity ?? this.footerForegroundOpacity,
+    );
+  }
+
+  static TilawaHomeNextPrayerHeroTokens lerp(
+    TilawaHomeNextPrayerHeroTokens a,
+    TilawaHomeNextPrayerHeroTokens b,
+    double t,
+  ) {
+    return TilawaHomeNextPrayerHeroTokens(
+      gradientTopStart: Color.lerp(a.gradientTopStart, b.gradientTopStart, t)!,
+      gradientBottomEnd: Color.lerp(
+        a.gradientBottomEnd,
+        b.gradientBottomEnd,
+        t,
+      )!,
+      foregroundColor: Color.lerp(a.foregroundColor, b.foregroundColor, t)!,
+      locationChipFillOpacity: lerpTokenDouble(
+        a.locationChipFillOpacity,
+        b.locationChipFillOpacity,
+        t,
+      ),
+      locationChipBorderOpacity: lerpTokenDouble(
+        a.locationChipBorderOpacity,
+        b.locationChipBorderOpacity,
+        t,
+      ),
+      locationChipSplashOpacity: lerpTokenDouble(
+        a.locationChipSplashOpacity,
+        b.locationChipSplashOpacity,
+        t,
+      ),
+      locationChipHighlightOpacity: lerpTokenDouble(
+        a.locationChipHighlightOpacity,
+        b.locationChipHighlightOpacity,
+        t,
+      ),
+      mutedForegroundOpacity: lerpTokenDouble(
+        a.mutedForegroundOpacity,
+        b.mutedForegroundOpacity,
+        t,
+      ),
+      footerForegroundOpacity: lerpTokenDouble(
+        a.footerForegroundOpacity,
+        b.footerForegroundOpacity,
+        t,
+      ),
+    );
+  }
+}

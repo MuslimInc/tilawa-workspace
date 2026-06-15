@@ -1091,6 +1091,23 @@ void main() {
     });
   });
 
+  group('TilawaHomeNextPrayerHeroTokens', () {
+    test('defaults use centralized AppColors gradient stops', () {
+      final tokens = TilawaHomeNextPrayerHeroTokens.defaults();
+
+      expect(tokens.gradientTopStart, AppColors.homeNextPrayerGradientTop);
+      expect(tokens.gradientBottomEnd, AppColors.homeNextPrayerGradientBottom);
+      expect(
+        tokens.foregroundColor,
+        AppColors.homeNextPrayerGradientForeground,
+      );
+      expect(
+        tokens.backgroundGradient.colors,
+        [tokens.gradientTopStart, tokens.gradientBottomEnd],
+      );
+    });
+  });
+
   group('TilawaComponentTokens', () {
     test('light() creates all component tokens', () {
       final tokens = TilawaComponentTokens.light();
@@ -1104,6 +1121,7 @@ void main() {
       expect(tokens.playerBackground, isNotNull);
       expect(tokens.settingsGroup, isNotNull);
       expect(tokens.immersiveComposer, isNotNull);
+      expect(tokens.homeNextPrayerHero, isNotNull);
     });
 
     test('dark() returns same as light()', () {

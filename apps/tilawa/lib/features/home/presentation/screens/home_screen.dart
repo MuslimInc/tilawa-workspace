@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -275,31 +277,18 @@ class _NextPrayerPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
+    final heroTokens = theme.componentTokens.homeNextPrayerHero;
     final nextPrayer = dashboard.nextPrayer;
-    final Color onGradient = colorScheme.onPrimary;
+    final Color onGradient = heroTokens.foregroundColor;
 
     return _HomeNextPrayerHeroCard(
+      onTap: onOpenPrayer,
+      semanticLabel: nextPrayer == null
+          ? context.l10n.homeNextPrayerUnavailable
+          : _nextPrayerSemantics(context, nextPrayer),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            spacing: tokens.spaceSmall,
-            children: [
-              Expanded(
-                child: _HomeGradientLocationChip(
-                  locationName: dashboard.locationLabel,
-                  isLoading: isRefreshingLocation,
-                  onTap: isRefreshingLocation ? null : onRefreshLocation,
-                ),
-              ),
-              _HomeGradientActionButton(
-                label: context.l10n.homePrayerTimesAction,
-                onPressed: onOpenPrayer,
-              ),
-            ],
-          ),
-          SizedBox(height: tokens.spaceLarge),
           if (nextPrayer == null)
             Text(
               context.l10n.homeNextPrayerUnavailable,
@@ -309,7 +298,7 @@ class _NextPrayerPanel extends StatelessWidget {
                 height: 1.2,
               ),
             )
-          else
+          else ...[
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: tokens.spaceMedium,
@@ -322,24 +311,18 @@ class _NextPrayerPanel extends StatelessWidget {
                       Text(
                         context.l10n.nextPrayer,
                         style: theme.textTheme.labelLarge?.copyWith(
-                          color: onGradient.withValues(alpha: 0.78),
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.2,
+                          color: onGradient.withValues(
+                            alpha: heroTokens.mutedForegroundOpacity,
+                          ),
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                       Text(
                         _localizedPrayerName(context, nextPrayer.type),
-                        style: theme.textTheme.headlineMedium?.copyWith(
+                        style: theme.textTheme.headlineLarge?.copyWith(
                           color: onGradient,
                           fontWeight: FontWeight.w800,
-                          height: 1.1,
-                        ),
-                      ),
-                      SizedBox(height: tokens.spaceTiny),
-                      _HomeCountdownBadge(
-                        label: _formatCountdown(
-                          context,
-                          nextPrayer.timeUntil,
+                          height: 1.05,
                         ),
                       ),
                     ],
@@ -348,7 +331,6 @@ class _NextPrayerPanel extends StatelessWidget {
                 _HomePrayerVisual(icon: nextPrayer.type.icon),
               ],
             ),
-          if (nextPrayer != null) ...[
             SizedBox(height: tokens.spaceMedium),
             Text(
               _formatTime(context, nextPrayer.time),
@@ -359,7 +341,15 @@ class _NextPrayerPanel extends StatelessWidget {
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
+            SizedBox(height: tokens.spaceExtraSmall),
+            _HomeNextPrayerRemainingText(prayerTime: nextPrayer.time),
           ],
+          SizedBox(height: tokens.spaceLarge),
+          _HomeNextPrayerFooter(
+            locationName: dashboard.locationLabel,
+            isRefreshingLocation: isRefreshingLocation,
+            onRefreshLocation: onRefreshLocation,
+          ),
         ],
       ),
     );
@@ -375,34 +365,33 @@ class _NextPrayerSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final Color onGradient = theme.colorScheme.onPrimary;
+    final heroTokens = theme.componentTokens.homeNextPrayerHero;
+    final Color onGradient = heroTokens.foregroundColor;
 
     return _HomeNextPrayerHeroCard(
+      onTap: onOpenPrayer,
+      semanticLabel: context.l10n.homeNextPrayerUnavailable,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: tokens.spaceMedium,
+        spacing: tokens.spaceLarge,
         children: [
-          Row(
-            spacing: tokens.spaceSmall,
-            children: [
-              Expanded(
-                child: _HomeGradientLocationChip(
-                  locationName: null,
-                  isLoading: true,
-                  onTap: null,
-                ),
-              ),
-              _HomeGradientActionButton(
-                label: context.l10n.homePrayerTimesAction,
-                onPressed: onOpenPrayer,
-              ),
-            ],
+          TilawaLoadingIndicator(
+            centered: false,
+            strokeWidth: 2,
+            color: onGradient,
           ),
           Text(
             context.l10n.homeNextPrayerUnavailable,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: onGradient.withValues(alpha: 0.82),
+              color: onGradient.withValues(
+                alpha: heroTokens.mutedForegroundOpacity,
+              ),
             ),
+          ),
+          _HomeNextPrayerFooter(
+            locationName: null,
+            isRefreshingLocation: true,
+            onRefreshLocation: null,
           ),
         ],
       ),
@@ -410,287 +399,267 @@ class _NextPrayerSkeleton extends StatelessWidget {
   }
 }
 
-/// Hero next-prayer surface with a brand-derived linear gradient.
+/// Tappable hero card for the next-prayer summary.
 class _HomeNextPrayerHeroCard extends StatelessWidget {
-  const _HomeNextPrayerHeroCard({required this.child});
+  const _HomeNextPrayerHeroCard({
+    required this.child,
+    this.onTap,
+    this.semanticLabel,
+  });
 
   final Widget child;
+  final VoidCallback? onTap;
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
+    final heroTokens = theme.componentTokens.homeNextPrayerHero;
     final BorderRadius borderRadius = BorderRadius.circular(
       tokens.radiusExtraLarge,
     );
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: borderRadius,
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.primary.withValues(
-              alpha: tokens.opacityShadowStrong,
-            ),
-            blurRadius: tokens.blurShadow * 1.35,
-            offset: tokens.shadowOffsetMedium,
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: borderRadius,
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: _homeNextPrayerGradient(colorScheme),
-                ),
+    return Semantics(
+      button: onTap != null,
+      label: semanticLabel,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: borderRadius,
+          boxShadow: [
+            BoxShadow(
+              color: heroTokens.gradientBottomEnd.withValues(
+                alpha: tokens.opacityShadowStrong,
               ),
-            ),
-            Positioned(
-              top: -tokens.spaceLarge,
-              right: -tokens.spaceSmall,
-              child: Container(
-                width: tokens.iconSizeLargePlus * 3.2,
-                height: tokens.iconSizeLargePlus * 3.2,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: colorScheme.onPrimary.withValues(alpha: 0.1),
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: -tokens.spaceLarge,
-              left: -tokens.spaceMedium,
-              child: Container(
-                width: tokens.iconSizeLargePlus * 2.4,
-                height: tokens.iconSizeLargePlus * 2.4,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: colorScheme.tertiary.withValues(alpha: 0.14),
-                ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.all(tokens.spaceLarge),
-              child: child,
+              blurRadius: tokens.blurShadow * 1.35,
+              offset: tokens.shadowOffsetMedium,
             ),
           ],
+        ),
+        child: ClipRRect(
+          borderRadius: borderRadius,
+          child: Material(
+            color: heroTokens.gradientBottomEnd,
+            child: InkWell(
+              onTap: onTap,
+              child: Ink(
+                decoration: BoxDecoration(
+                  gradient: heroTokens.backgroundGradient,
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(tokens.spaceLarge),
+                  child: child,
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );
   }
 }
 
-LinearGradient _homeNextPrayerGradient(ColorScheme colorScheme) {
-  final bool isLight = colorScheme.brightness == Brightness.light;
-  final Color topStop = Color.lerp(
-    colorScheme.primary,
-    colorScheme.tertiary,
-    isLight ? 0.24 : 0.14,
-  )!;
-  final Color bottomStop = Color.lerp(
-    colorScheme.primary,
-    colorScheme.shadow,
-    isLight ? 0.22 : 0.42,
-  )!;
-
-  return LinearGradient(
-    begin: AlignmentDirectional.topStart,
-    end: AlignmentDirectional.bottomEnd,
-    colors: [topStop, colorScheme.primary, bottomStop],
-    stops: const [0.0, 0.48, 1.0],
-  );
-}
-
-/// Frosted location pill for the gradient hero card.
-class _HomeGradientLocationChip extends StatelessWidget {
-  const _HomeGradientLocationChip({
+/// Footer row: refresh location (nested tap) + schedule affordance.
+class _HomeNextPrayerFooter extends StatelessWidget {
+  const _HomeNextPrayerFooter({
     required this.locationName,
-    required this.isLoading,
-    required this.onTap,
+    required this.isRefreshingLocation,
+    required this.onRefreshLocation,
   });
 
   final String? locationName;
-  final bool isLoading;
-  final VoidCallback? onTap;
+  final bool isRefreshingLocation;
+  final VoidCallback? onRefreshLocation;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
-    final Color onGradient = colorScheme.onPrimary;
-    final String label = PrayerLocationLabelFormatter.abbreviatedLocationLabel(
-      locationName: locationName,
-      l10n: context.l10n,
-    );
-    final BorderRadius borderRadius = BorderRadius.circular(
+    final heroTokens = theme.componentTokens.homeNextPrayerHero;
+    final Color onGradient = heroTokens.foregroundColor;
+    final String locationLabel =
+        PrayerLocationLabelFormatter.abbreviatedLocationLabel(
+          locationName: locationName,
+          l10n: context.l10n,
+        );
+
+    final BorderRadius locationRadius = BorderRadius.circular(
       tokens.resolveRadius(
         family: TilawaRadiusFamily.pill,
         height: kTilawaMinInteractiveDimension,
       ),
     );
 
-    return Material(
-      color: onGradient.withValues(alpha: 0.12),
-      shape: RoundedRectangleBorder(
-        borderRadius: borderRadius,
-        side: BorderSide(
-          color: onGradient.withValues(alpha: 0.22),
-          width: tokens.borderWidthThin,
-        ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: borderRadius,
-        splashColor: onGradient.withValues(alpha: 0.08),
-        highlightColor: onGradient.withValues(alpha: 0.04),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minHeight: kTilawaMinInteractiveDimension,
+    return Row(
+      spacing: tokens.spaceSmall,
+      mainAxisAlignment: .spaceBetween,
+      children: [
+        Material(
+          color: onGradient.withValues(
+            alpha: heroTokens.locationChipFillOpacity,
           ),
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: tokens.spaceSmall,
-              vertical: tokens.spaceExtraSmall,
+          shape: RoundedRectangleBorder(
+            borderRadius: locationRadius,
+            side: BorderSide(
+              color: onGradient.withValues(
+                alpha: heroTokens.locationChipBorderOpacity,
+              ),
+              width: tokens.borderWidthThin,
             ),
-            child: Row(
-              mainAxisSize: .min,
-              mainAxisAlignment: .spaceBetween,
-              spacing: tokens.spaceExtraSmall,
-              children: [
-                Expanded(
-                  child: Row(
-                    children: [
-                      if (isLoading)
-                        SizedBox(
-                          width: tokens.iconSizeSmall,
-                          height: tokens.iconSizeSmall,
-                          child: TilawaLoadingIndicator(
-                            centered: false,
-                            strokeWidth: 2,
-                            color: onGradient,
-                          ),
-                        )
-                      else
-                        Icon(
-                          FluentIcons.location_24_regular,
-                          size: tokens.iconSizeSmall,
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: isRefreshingLocation ? null : onRefreshLocation,
+            borderRadius: locationRadius,
+            splashColor: onGradient.withValues(
+              alpha: heroTokens.locationChipSplashOpacity,
+            ),
+            highlightColor: onGradient.withValues(
+              alpha: heroTokens.locationChipHighlightOpacity,
+            ),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: kTilawaMinInteractiveDimension,
+              ),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: tokens.spaceSmall,
+                  vertical: tokens.spaceExtraSmall,
+                ),
+                child: Row(
+                  children: [
+                    if (isRefreshingLocation)
+                      SizedBox(
+                        width: tokens.iconSizeSmall,
+                        height: tokens.iconSizeSmall,
+                        child: TilawaLoadingIndicator(
+                          centered: false,
+                          strokeWidth: 2,
                           color: onGradient,
                         ),
-                      SizedBox(width: tokens.spaceExtraSmall),
-                      Flexible(
-                        child: Text(
-                          label,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.labelLarge?.copyWith(
-                            color: onGradient,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
+                      )
+                    else
+                      Icon(
+                        FluentIcons.location_24_regular,
+                        size: tokens.iconSizeSmall,
+                        color: onGradient,
                       ),
-                    ],
-                  ),
+                    SizedBox(width: tokens.spaceExtraSmall),
+                    Text(
+                      locationLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: onGradient,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
                 ),
-                if (!isLoading)
-                  Icon(
-                    Icons.gps_fixed_rounded,
-                    size: tokens.iconSizeSmall,
-                    color: onGradient.withValues(alpha: 0.88),
-                  ),
-              ],
+              ),
             ),
           ),
         ),
-      ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          spacing: tokens.spaceExtraSmall,
+          children: [
+            Text(
+              context.l10n.homePrayerTimesAction,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: onGradient.withValues(
+                  alpha: heroTokens.footerForegroundOpacity,
+                ),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_rounded,
+              size: tokens.iconSizeMedium,
+              color: onGradient.withValues(
+                alpha: heroTokens.footerForegroundOpacity,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
 
-class _HomeGradientActionButton extends StatelessWidget {
-  const _HomeGradientActionButton({
-    required this.label,
-    required this.onPressed,
-  });
+/// Keeps the human countdown fresh without a heavy live ticker UI.
+class _HomeNextPrayerRemainingText extends StatefulWidget {
+  const _HomeNextPrayerRemainingText({required this.prayerTime});
 
-  final String label;
-  final VoidCallback onPressed;
+  final DateTime prayerTime;
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final Color onGradient = theme.colorScheme.onPrimary;
-
-    return OutlinedButton(
-      onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
-        foregroundColor: onGradient,
-        backgroundColor: onGradient.withValues(alpha: 0.1),
-        side: BorderSide(
-          color: onGradient.withValues(alpha: 0.34),
-          width: tokens.borderWidthThin,
-        ),
-        padding: EdgeInsets.symmetric(
-          horizontal: tokens.spaceMedium,
-          vertical: tokens.spaceSmall,
-        ),
-        minimumSize: const Size(0, kTilawaMinInteractiveDimension),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      ),
-      child: Text(
-        label,
-        style: theme.textTheme.labelLarge?.copyWith(
-          color: onGradient,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-    );
-  }
+  State<_HomeNextPrayerRemainingText> createState() =>
+      _HomeNextPrayerRemainingTextState();
 }
 
-class _HomeCountdownBadge extends StatelessWidget {
-  const _HomeCountdownBadge({required this.label});
+class _HomeNextPrayerRemainingTextState
+    extends State<_HomeNextPrayerRemainingText> {
+  Timer? _ticker;
 
-  final String label;
+  @override
+  void initState() {
+    super.initState();
+    _scheduleTicker();
+  }
+
+  @override
+  void didUpdateWidget(covariant _HomeNextPrayerRemainingText oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.prayerTime != widget.prayerTime) {
+      _scheduleTicker();
+    }
+  }
+
+  void _scheduleTicker() {
+    _ticker?.cancel();
+    final Duration remaining = _remaining;
+    if (remaining <= Duration.zero) {
+      return;
+    }
+
+    final Duration interval = remaining < const Duration(hours: 1)
+        ? const Duration(seconds: 1)
+        : const Duration(minutes: 1);
+
+    _ticker = Timer.periodic(interval, (_) {
+      if (!mounted) {
+        return;
+      }
+      if (_remaining <= Duration.zero) {
+        _ticker?.cancel();
+      }
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _ticker?.cancel();
+    super.dispose();
+  }
+
+  Duration get _remaining {
+    final Duration difference = widget.prayerTime.difference(DateTime.now());
+    return difference.isNegative ? Duration.zero : difference;
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final Color onGradient = theme.colorScheme.onPrimary;
+    final heroTokens = theme.componentTokens.homeNextPrayerHero;
+    final Color onGradient = heroTokens.foregroundColor;
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: onGradient.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(
-          tokens.resolveRadius(
-            family: TilawaRadiusFamily.pill,
-            height: kTilawaMinInteractiveDimension,
-          ),
-        ),
-        border: Border.all(
-          color: onGradient.withValues(alpha: 0.2),
-          width: tokens.borderWidthThin,
-        ),
-      ),
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: tokens.spaceSmall,
-          vertical: tokens.spaceExtraSmall,
-        ),
-        child: Text(
-          label,
-          style: theme.textTheme.labelLarge?.copyWith(
-            color: onGradient,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+    return Text(
+      _formatCountdown(context, _remaining),
+      style: theme.textTheme.bodyLarge?.copyWith(
+        color: onGradient.withValues(alpha: heroTokens.mutedForegroundOpacity),
+        fontWeight: FontWeight.w600,
       ),
     );
   }
@@ -705,23 +674,28 @@ class _HomePrayerVisual extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
+    final heroTokens = theme.componentTokens.homeNextPrayerHero;
+    final Color onGradient = heroTokens.foregroundColor;
 
     return Container(
       width: tokens.iconSizeLargePlus,
       height: tokens.iconSizeLargePlus,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: colorScheme.onPrimary.withValues(alpha: 0.16),
+        color: onGradient.withValues(
+          alpha: heroTokens.locationChipFillOpacity,
+        ),
         border: Border.all(
-          color: colorScheme.onPrimary.withValues(alpha: 0.28),
+          color: onGradient.withValues(
+            alpha: heroTokens.locationChipBorderOpacity,
+          ),
           width: tokens.borderWidthThin,
         ),
       ),
       child: Icon(
         icon,
         size: tokens.iconSizeLarge,
-        color: colorScheme.onPrimary,
+        color: onGradient,
       ),
     );
   }
@@ -912,6 +886,13 @@ class _HomePanel extends StatelessWidget {
       child: child,
     );
   }
+}
+
+String _nextPrayerSemantics(BuildContext context, HomeNextPrayer nextPrayer) {
+  return '${context.l10n.nextPrayer}: '
+      '${_localizedPrayerName(context, nextPrayer.type)}. '
+      '${_formatTime(context, nextPrayer.time)}. '
+      '${_formatCountdown(context, nextPrayer.timeUntil)}.';
 }
 
 String _localizedPrayerName(BuildContext context, PrayerType type) {

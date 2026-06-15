@@ -1,5 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/core/services/prayer_notification_config.dart';
+import 'package:tilawa/core/utils/toast_utils.dart';
+import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
+import 'package:tilawa/features/prayer_times/domain/usecases/fire_prayer_test_notification_use_case.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../router/app_router_config.dart';
@@ -18,6 +25,13 @@ class RouteListScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: const TilawaAppBar(title: 'All Routes'),
+      floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'route_list_fajr_adhan_fab',
+        tooltip: 'Preview Fajr adhan notification screen',
+        onPressed: () => _previewFajrAdhanNotification(context),
+        icon: const Icon(Icons.notifications_active_outlined),
+        label: const Text('Fajr Adhan'),
+      ),
       body: ListView.separated(
         itemCount: interactions.length,
         separatorBuilder: (context, index) => const TilawaDivider(height: 1),
@@ -93,5 +107,32 @@ class RouteListScreen extends StatelessWidget {
     }
 
     return paths;
+  }
+}
+
+Future<void> _previewFajrAdhanNotification(BuildContext context) async {
+  final int scheduledMs = DateTime.now().millisecondsSinceEpoch;
+  final String payload = jsonEncode({
+    PrayerNotificationConfig.payloadTypeKey:
+        PrayerNotificationConfig.payloadTypeValue,
+    PrayerNotificationConfig.payloadPrayerKey: PrayerType.fajr.name,
+    'prayer_name': PrayerType.fajr.name,
+    'prayer_key': PrayerType.fajr.name,
+    'scheduled_time_ms': scheduledMs,
+    'adhan_enabled': true,
+    'sound_name': PrayerNotificationConfig.adhanSoundRawName,
+    'notification_id': PrayerNotificationConfig.staticId(PrayerType.fajr),
+  });
+
+  try {
+    await getIt<FirePrayerTestNotificationUseCase>()(
+      prayer: PrayerType.fajr,
+      playAdhan: true,
+    );
+    if (!context.mounted) return;
+    await PrayerNotificationStatusRoute($extra: payload).push(context);
+  } catch (e) {
+    if (!context.mounted) return;
+    ToastUtils.showErrorToast('Fajr adhan preview failed: $e');
   }
 }
