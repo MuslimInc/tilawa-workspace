@@ -123,6 +123,93 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeDailyDuaReference => 'Abu Dawud';
 
   @override
+  String get khatmaEmptyTitle => 'Start a Khatma';
+
+  @override
+  String get khatmaEmptySubtitle =>
+      'Choose a calm reading plan. We will adjust gently when life gets busy.';
+
+  @override
+  String khatmaDurationDays(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get khatmaProgressTitle => 'Khatma Progress';
+
+  @override
+  String khatmaProgressSubtitle(int currentDay, int totalDays) {
+    return 'Day $currentDay of $totalDays';
+  }
+
+  @override
+  String get khatmaProgressPercent => 'Progress';
+
+  @override
+  String get khatmaTodayGoal => 'Today';
+
+  @override
+  String get khatmaRemaining => 'Remaining';
+
+  @override
+  String khatmaPagesShort(int pages) {
+    String _temp0 = intl.Intl.pluralLogic(
+      pages,
+      locale: localeName,
+      other: '$pages pages',
+      one: '1 page',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String khatmaDaysShort(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get khatmaAdjustedPlan => 'We adjusted your plan gently for today.';
+
+  @override
+  String khatmaContinueFromPage(int page) {
+    return 'Continue from page $page';
+  }
+
+  @override
+  String get khatmaRemainingPages => 'Pages left';
+
+  @override
+  String get khatmaCatchUpAction => 'Catch up today';
+
+  @override
+  String get khatmaExtendAction => 'Extend plan';
+
+  @override
+  String get khatmaResetAction => 'Reset plan';
+
+  @override
+  String get khatmaResetTitle => 'Reset Khatma plan?';
+
+  @override
+  String get khatmaResetMessage =>
+      'This clears your current Khatma plan. Your last-read Quran page and bookmarks stay saved.';
+
+  @override
+  String get khatmaContinueReading => 'Continue Reading';
+
+  @override
   String get todayPlanTitle => 'Today’s Plan';
 
   @override

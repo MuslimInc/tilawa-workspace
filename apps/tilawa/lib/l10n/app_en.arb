@@ -150,6 +150,110 @@
     "@homeDailyDuaReference": {
         "description": "Home daily dua reference"
     },
+    "khatmaEmptyTitle": "Start a Khatma",
+    "@khatmaEmptyTitle": {
+        "description": "Title for the empty Smart Khatma card"
+    },
+    "khatmaEmptySubtitle": "Choose a calm reading plan. We will adjust gently when life gets busy.",
+    "@khatmaEmptySubtitle": {
+        "description": "Subtitle for the empty Smart Khatma card"
+    },
+    "khatmaDurationDays": "{days, plural, =1{1 day} other{{days} days}}",
+    "@khatmaDurationDays": {
+        "description": "Duration preset label for Smart Khatma",
+        "placeholders": {
+            "days": {
+                "type": "int"
+            }
+        }
+    },
+    "khatmaProgressTitle": "Khatma Progress",
+    "@khatmaProgressTitle": {
+        "description": "Title for active Smart Khatma dashboard card"
+    },
+    "khatmaProgressSubtitle": "Day {currentDay} of {totalDays}",
+    "@khatmaProgressSubtitle": {
+        "description": "Current day summary for Smart Khatma",
+        "placeholders": {
+            "currentDay": {
+                "type": "int"
+            },
+            "totalDays": {
+                "type": "int"
+            }
+        }
+    },
+    "khatmaProgressPercent": "Progress",
+    "@khatmaProgressPercent": {
+        "description": "Progress metric label for Smart Khatma"
+    },
+    "khatmaTodayGoal": "Today",
+    "@khatmaTodayGoal": {
+        "description": "Today target metric label for Smart Khatma"
+    },
+    "khatmaRemaining": "Remaining",
+    "@khatmaRemaining": {
+        "description": "Remaining days metric label for Smart Khatma"
+    },
+    "khatmaPagesShort": "{pages, plural, =1{1 page} other{{pages} pages}}",
+    "@khatmaPagesShort": {
+        "description": "Short page count for Smart Khatma",
+        "placeholders": {
+            "pages": {
+                "type": "int"
+            }
+        }
+    },
+    "khatmaDaysShort": "{days, plural, =1{1 day} other{{days} days}}",
+    "@khatmaDaysShort": {
+        "description": "Short day count for Smart Khatma",
+        "placeholders": {
+            "days": {
+                "type": "int"
+            }
+        }
+    },
+    "khatmaAdjustedPlan": "We adjusted your plan gently for today.",
+    "@khatmaAdjustedPlan": {
+        "description": "Calm Smart Khatma recovery message"
+    },
+    "khatmaContinueFromPage": "Continue from page {page}",
+    "@khatmaContinueFromPage": {
+        "description": "Resume-page line for Smart Khatma",
+        "placeholders": {
+            "page": {
+                "type": "int"
+            }
+        }
+    },
+    "khatmaRemainingPages": "Pages left",
+    "@khatmaRemainingPages": {
+        "description": "Remaining page metric label for Smart Khatma"
+    },
+    "khatmaCatchUpAction": "Catch up today",
+    "@khatmaCatchUpAction": {
+        "description": "Action for keeping the current Khatma end date"
+    },
+    "khatmaExtendAction": "Extend plan",
+    "@khatmaExtendAction": {
+        "description": "Action for extending the current Khatma plan"
+    },
+    "khatmaResetAction": "Reset plan",
+    "@khatmaResetAction": {
+        "description": "Action for resetting the active Khatma plan"
+    },
+    "khatmaResetTitle": "Reset Khatma plan?",
+    "@khatmaResetTitle": {
+        "description": "Confirmation dialog title for resetting Smart Khatma"
+    },
+    "khatmaResetMessage": "This clears your current Khatma plan. Your last-read Quran page and bookmarks stay saved.",
+    "@khatmaResetMessage": {
+        "description": "Confirmation dialog message for resetting Smart Khatma"
+    },
+    "khatmaContinueReading": "Continue Reading",
+    "@khatmaContinueReading": {
+        "description": "Continue reading action for Smart Khatma"
+    },
     "todayPlanTitle": "Today’s Plan",
     "@todayPlanTitle": {
         "description": "Title for the daily Quran engagement plan card"

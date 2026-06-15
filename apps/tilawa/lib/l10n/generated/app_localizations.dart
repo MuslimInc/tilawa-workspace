@@ -296,6 +296,120 @@ abstract class AppLocalizations {
   /// **'Abu Dawud'**
   String get homeDailyDuaReference;
 
+  /// Title for the empty Smart Khatma card
+  ///
+  /// In en, this message translates to:
+  /// **'Start a Khatma'**
+  String get khatmaEmptyTitle;
+
+  /// Subtitle for the empty Smart Khatma card
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a calm reading plan. We will adjust gently when life gets busy.'**
+  String get khatmaEmptySubtitle;
+
+  /// Duration preset label for Smart Khatma
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{1 day} other{{days} days}}'**
+  String khatmaDurationDays(int days);
+
+  /// Title for active Smart Khatma dashboard card
+  ///
+  /// In en, this message translates to:
+  /// **'Khatma Progress'**
+  String get khatmaProgressTitle;
+
+  /// Current day summary for Smart Khatma
+  ///
+  /// In en, this message translates to:
+  /// **'Day {currentDay} of {totalDays}'**
+  String khatmaProgressSubtitle(int currentDay, int totalDays);
+
+  /// Progress metric label for Smart Khatma
+  ///
+  /// In en, this message translates to:
+  /// **'Progress'**
+  String get khatmaProgressPercent;
+
+  /// Today target metric label for Smart Khatma
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get khatmaTodayGoal;
+
+  /// Remaining days metric label for Smart Khatma
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining'**
+  String get khatmaRemaining;
+
+  /// Short page count for Smart Khatma
+  ///
+  /// In en, this message translates to:
+  /// **'{pages, plural, =1{1 page} other{{pages} pages}}'**
+  String khatmaPagesShort(int pages);
+
+  /// Short day count for Smart Khatma
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{1 day} other{{days} days}}'**
+  String khatmaDaysShort(int days);
+
+  /// Calm Smart Khatma recovery message
+  ///
+  /// In en, this message translates to:
+  /// **'We adjusted your plan gently for today.'**
+  String get khatmaAdjustedPlan;
+
+  /// Resume-page line for Smart Khatma
+  ///
+  /// In en, this message translates to:
+  /// **'Continue from page {page}'**
+  String khatmaContinueFromPage(int page);
+
+  /// Remaining page metric label for Smart Khatma
+  ///
+  /// In en, this message translates to:
+  /// **'Pages left'**
+  String get khatmaRemainingPages;
+
+  /// Action for keeping the current Khatma end date
+  ///
+  /// In en, this message translates to:
+  /// **'Catch up today'**
+  String get khatmaCatchUpAction;
+
+  /// Action for extending the current Khatma plan
+  ///
+  /// In en, this message translates to:
+  /// **'Extend plan'**
+  String get khatmaExtendAction;
+
+  /// Action for resetting the active Khatma plan
+  ///
+  /// In en, this message translates to:
+  /// **'Reset plan'**
+  String get khatmaResetAction;
+
+  /// Confirmation dialog title for resetting Smart Khatma
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Khatma plan?'**
+  String get khatmaResetTitle;
+
+  /// Confirmation dialog message for resetting Smart Khatma
+  ///
+  /// In en, this message translates to:
+  /// **'This clears your current Khatma plan. Your last-read Quran page and bookmarks stay saved.'**
+  String get khatmaResetMessage;
+
+  /// Continue reading action for Smart Khatma
+  ///
+  /// In en, this message translates to:
+  /// **'Continue Reading'**
+  String get khatmaContinueReading;
+
   /// Title for the daily Quran engagement plan card
   ///
   /// In en, this message translates to:

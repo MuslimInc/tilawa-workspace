@@ -87,6 +87,63 @@
     "homeDailyDuaLabel": "الدعاء اليومي",
     "homeDailyDuaBody": "اللهم أعني على ذكرك وشكرك وحسن عبادتك.",
     "homeDailyDuaReference": "أبو داود",
+    "khatmaEmptyTitle": "ابدأ ختمة",
+    "khatmaEmptySubtitle": "اختر خطة قراءة هادئة. سنعدّلها بلطف إذا انشغل يومك.",
+    "khatmaDurationDays": "{days, plural, =1{يوم واحد} =2{يومان} other{{days} يومًا}}",
+    "@khatmaDurationDays": {
+        "placeholders": {
+            "days": {
+                "type": "int"
+            }
+        }
+    },
+    "khatmaProgressTitle": "تقدّم الختمة",
+    "khatmaProgressSubtitle": "اليوم {currentDay} من {totalDays}",
+    "@khatmaProgressSubtitle": {
+        "placeholders": {
+            "currentDay": {
+                "type": "int"
+            },
+            "totalDays": {
+                "type": "int"
+            }
+        }
+    },
+    "khatmaProgressPercent": "التقدّم",
+    "khatmaTodayGoal": "اليوم",
+    "khatmaRemaining": "المتبقي",
+    "khatmaPagesShort": "{pages, plural, =1{صفحة} =2{صفحتان} other{{pages} صفحات}}",
+    "@khatmaPagesShort": {
+        "placeholders": {
+            "pages": {
+                "type": "int"
+            }
+        }
+    },
+    "khatmaDaysShort": "{days, plural, =1{يوم} =2{يومان} other{{days} أيام}}",
+    "@khatmaDaysShort": {
+        "placeholders": {
+            "days": {
+                "type": "int"
+            }
+        }
+    },
+    "khatmaAdjustedPlan": "عدّلنا خطتك بلطف لهذا اليوم.",
+    "khatmaContinueFromPage": "تابع من صفحة {page}",
+    "@khatmaContinueFromPage": {
+        "placeholders": {
+            "page": {
+                "type": "int"
+            }
+        }
+    },
+    "khatmaRemainingPages": "صفحات متبقية",
+    "khatmaCatchUpAction": "عوّض اليوم",
+    "khatmaExtendAction": "مدّد الخطة",
+    "khatmaResetAction": "إعادة ضبط الخطة",
+    "khatmaResetTitle": "إعادة ضبط خطة الختمة؟",
+    "khatmaResetMessage": "سيتم حذف خطة الختمة الحالية فقط. ستبقى آخر صفحة قرأتها والعلامات المرجعية محفوظة.",
+    "khatmaContinueReading": "تابع القراءة",
     "todayPlanTitle": "خطة اليوم",
     "@todayPlanTitle": {
         "description": "Title for the daily Quran engagement plan card"
