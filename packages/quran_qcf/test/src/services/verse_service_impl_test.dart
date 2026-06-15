@@ -83,5 +83,11 @@ void main() {
         );
       });
     });
+
+    group('getVerseNormal', () {
+      test('returns text_normal for Al-Fatiha 1:1', () {
+        expect(service.getVerseNormal(1, 1), 'بسم الله الرحمن الرحيم');
+      });
+    });
   });
 }

@@ -5,6 +5,9 @@ abstract class VerseService {
   /// Gets the verse text in Arabic.
   String getVerse(int surahNumber, int verseNumber, {bool verseEndSymbol});
 
+  /// Gets diacritic-stripped verse text for search and speech comparison.
+  String getVerseNormal(int surahNumber, int verseNumber);
+
   /// Gets the verse text in QCF font format.
   String getVerseQCF(int surahNumber, int verseNumber, {bool verseEndSymbol});
 
