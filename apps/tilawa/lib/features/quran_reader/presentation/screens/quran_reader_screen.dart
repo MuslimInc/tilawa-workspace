@@ -96,8 +96,6 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
   late final ValueNotifier<_WarmingState> _warmingNotifier;
   late final LoadQuranFontsToEngineUseCase _fontEngine =
       getIt<LoadQuranFontsToEngineUseCase>();
-  late final RecitationPracticeCubit _recitationPracticeCubit =
-      getIt<RecitationPracticeCubit>();
   late final UiVisibilityCubit _uiVisibilityCubit;
   late final GlobalKey _screenshotBoundaryKey;
   bool _didInitDependencies = false;
@@ -265,7 +263,6 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     _showOverlaysNotifier.dispose();
     _warmingNotifier.dispose();
     _programmaticJumpNotifier.dispose();
-    unawaited(_recitationPracticeCubit.close());
     unawaited(AppOrientationService.restoreDefaultOrientations());
     AppSystemChromeStyle.applyDefault();
     _uiVisibilityCubit.show();
@@ -366,53 +363,49 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<RecitationPracticeCubit>.value(
-      value: _recitationPracticeCubit,
-      child: PopScope(
-        canPop: _allowSystemPop,
-        onPopInvokedWithResult: (didPop, result) {
-          if (didPop || _allowSystemPop) return;
-          unawaited(_handleExitRequest());
-        },
-        child: AnnotatedRegion<SystemUiOverlayStyle>(
-          value: _cachedReaderSystemUiStyle!,
-          child: _ReaderListener(
-            programmaticJump: _programmaticJumpNotifier,
-            syncToPage: _syncToPage,
-            updateSystemUiConfig: _updateSystemUiConfig,
-            showOverlaysNotifier: _showOverlaysNotifier,
-            child: _ReaderStack(
-              pageController: _pageController,
-              currentPageNotifier: _currentPageNotifier,
-              cacheExtentNotifier: _cacheExtentNotifier,
-              preparedWindowNotifier: _preparedWindowNotifier,
+    return RecitationPracticeHost(
+      builder: (BuildContext context, openPractice) {
+        return PopScope(
+          canPop: _allowSystemPop,
+          onPopInvokedWithResult: (didPop, result) {
+            if (didPop || _allowSystemPop) return;
+            unawaited(_handleExitRequest());
+          },
+          child: AnnotatedRegion<SystemUiOverlayStyle>(
+            value: _cachedReaderSystemUiStyle!,
+            child: _ReaderListener(
+              programmaticJump: _programmaticJumpNotifier,
+              syncToPage: _syncToPage,
+              updateSystemUiConfig: _updateSystemUiConfig,
               showOverlaysNotifier: _showOverlaysNotifier,
-              screenshotBoundaryKey: _screenshotBoundaryKey,
-              warmingNotifier: _warmingNotifier,
-              headerFontSizeMultiplier: _headerFontSizeMultiplier,
-              readerTheme: _cachedReaderTheme!,
-              onPageChanged: _handleOnPageChanged,
-              getSurahName: _getSurahName,
-              jumpToSurah: _jumpToSurah,
-              handleShowIndex: _handleShowIndex,
-              showSurahIndex: _showSurahIndex,
-              showShareOptions: _showShareOptions,
-              onPractice: _openRecitationPractice,
-              jumpToPage: _jumpToPage,
-              onWarming: _handleOnWarming,
-              onPointerDown: _pauseWarming,
-              onPointerUp: _resumeWarming,
-              isScrollingNotifier: _isScrollingNotifier,
+              child: _ReaderStack(
+                pageController: _pageController,
+                currentPageNotifier: _currentPageNotifier,
+                cacheExtentNotifier: _cacheExtentNotifier,
+                preparedWindowNotifier: _preparedWindowNotifier,
+                showOverlaysNotifier: _showOverlaysNotifier,
+                screenshotBoundaryKey: _screenshotBoundaryKey,
+                warmingNotifier: _warmingNotifier,
+                headerFontSizeMultiplier: _headerFontSizeMultiplier,
+                readerTheme: _cachedReaderTheme!,
+                onPageChanged: _handleOnPageChanged,
+                getSurahName: _getSurahName,
+                jumpToSurah: _jumpToSurah,
+                handleShowIndex: _handleShowIndex,
+                showSurahIndex: _showSurahIndex,
+                showShareOptions: _showShareOptions,
+                onPractice: () =>
+                    unawaited(openPractice(_currentPageNotifier.value)),
+                jumpToPage: _jumpToPage,
+                onWarming: _handleOnWarming,
+                onPointerDown: _pauseWarming,
+                onPointerUp: _resumeWarming,
+                isScrollingNotifier: _isScrollingNotifier,
+              ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  void _openRecitationPractice() {
-    unawaited(
-      _recitationPracticeCubit.openForPage(_currentPageNotifier.value),
+        );
+      },
     );
   }
 
@@ -1412,7 +1405,6 @@ class _ReaderStack extends StatelessWidget {
           onPointerDown: onPointerDown,
           onPointerUp: onPointerUp,
         ),
-        const RecitationPracticePanel(),
       ],
     );
   }
@@ -1434,6 +1426,13 @@ Color? _recitationVerseBackgroundColor(
 
   final ColorScheme scheme = Theme.of(context).colorScheme;
   if (practiceState.phase == RecitationPracticePhase.listening) {
+    final RecitationComparisonResult? liveResult =
+        practiceState.comparisonResult;
+    if (liveResult != null) {
+      return liveResult.score >= 0.8
+          ? scheme.tertiaryContainer.withValues(alpha: 0.65)
+          : scheme.primaryContainer.withValues(alpha: 0.35);
+    }
     return scheme.primaryContainer.withValues(alpha: 0.35);
   }
 

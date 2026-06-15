@@ -20,6 +20,8 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/extensions.dart';
 import '../../../../features/audio_player/presentation/bloc/audio_player_bloc.dart'
     show AudioPlayerBloc;
+import '../../../../features/recitation_practice/presentation/cubit/recitation_practice_cubit.dart';
+import '../../../../features/recitation_practice/presentation/widgets/recitation_practice_host.dart';
 import '../../../../features/share/presentation/widgets/share_options_sheet.dart';
 import '../../../../features/smart_khatma/smart_khatma.dart';
 import '../../domain/ports/quran_image_preload_status.dart';
@@ -48,6 +50,7 @@ class QuranImageReaderScreen extends StatefulWidget {
     super.key,
     required this.surahNumber,
     this.initialAyah,
+    this.openPracticeOnLaunch = false,
   });
 
   /// Surah number to open (`1`–`114`), or `0` to use last-read.
@@ -55,6 +58,9 @@ class QuranImageReaderScreen extends StatefulWidget {
 
   /// Optional ayah to jump to within the surah.
   final int? initialAyah;
+
+  /// Opens the recitation practice panel after the reader is ready.
+  final bool openPracticeOnLaunch;
 
   @override
   State<QuranImageReaderScreen> createState() => _QuranImageReaderScreenState();
@@ -66,6 +72,8 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen>
   NavigationBloc? _navigationBloc;
   late final SaveLastReadPositionUseCase _saveLastReadPosition;
   late final UpdateKhatmaProgressUseCase _updateKhatmaProgress;
+  late final ValueNotifier<int> _currentPageNotifier = ValueNotifier<int>(1);
+  bool _didSchedulePracticeLaunch = false;
 
   // Stable fallback key — no RenderRepaintBoundary is attached here, so the
   // share composer will simply skip the reader-page screenshot preview for
@@ -88,6 +96,7 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     unawaited(AppOrientationService.restoreDefaultOrientations());
+    _currentPageNotifier.dispose();
     _navigationBloc?.close();
     super.dispose();
   }
@@ -298,6 +307,7 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen>
   }
 
   Future<void> _recordReadingProgress(int currentPage) async {
+    _currentPageNotifier.value = currentPage;
     final pageData = getPageData(currentPage);
     if (pageData.isEmpty) {
       return;
@@ -317,13 +327,42 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen>
 
     final bloc = _navigationBloc!;
 
-    return BlocProvider<NavigationBloc>.value(
-      value: bloc,
-      child: _ReaderShell(
-        onShareRequested: _showShareOptions,
-        onShowIndex: _showSurahIndex,
-        onPageSettled: (page) => unawaited(_recordReadingProgress(page)),
-      ),
+    return RecitationPracticeHost(
+      currentPageListenable: _currentPageNotifier,
+      showFloatingMic: true,
+      builder: (BuildContext context, openPractice) {
+        if (widget.openPracticeOnLaunch && !_didSchedulePracticeLaunch) {
+          _didSchedulePracticeLaunch = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) {
+              return;
+            }
+            final int page = _currentPageNotifier.value;
+            final RecitationPracticeCubit practiceCubit = context
+                .read<RecitationPracticeCubit>();
+            if (widget.surahNumber > 0) {
+              unawaited(
+                practiceCubit.openForAyah(
+                  pageNumber: page,
+                  surahNumber: widget.surahNumber,
+                  ayahNumber: widget.initialAyah ?? 1,
+                ),
+              );
+              return;
+            }
+            unawaited(openPractice(page));
+          });
+        }
+
+        return BlocProvider<NavigationBloc>.value(
+          value: bloc,
+          child: _ReaderShell(
+            onShareRequested: _showShareOptions,
+            onShowIndex: _showSurahIndex,
+            onPageSettled: (page) => unawaited(_recordReadingProgress(page)),
+          ),
+        );
+      },
     );
   }
 }
