@@ -7,6 +7,7 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
 import 'package:tilawa/features/prayer_times/presentation/extensions/prayer_type_ui.dart';
 import 'package:tilawa/features/prayer_times/presentation/formatters/prayer_location_label_formatter.dart';
+import 'package:tilawa/features/smart_khatma/smart_khatma.dart';
 import 'package:tilawa/features/today_plan/today_plan.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -94,6 +95,8 @@ class HomeScreen extends StatelessWidget {
                       },
                     ),
                     SizedBox(height: context.tokens.spaceMedium),
+                    const SmartKhatmaCard(),
+                    SizedBox(height: context.tokens.spaceMedium),
                     const TodayPlanCard(),
                     SizedBox(height: context.tokens.spaceLarge),
                     _SectionTitle(text: context.l10n.homeExploreTitle),
@@ -103,7 +106,7 @@ class HomeScreen extends StatelessWidget {
                         _HomeQuickAction(
                           label: context.l10n.homeQuickQuran,
                           icon: Icons.menu_book_rounded,
-                          onTap: () => const QuranLastReadRoute().push(context),
+                          onTap: () => _openReaderAndRefreshPlans(context),
                         ),
                         _HomeQuickAction(
                           label: context.l10n.homeQuickReciters,
@@ -152,6 +155,15 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _openReaderAndRefreshPlans(BuildContext context) async {
+    await const QuranLastReadRoute().push(context);
+    if (!context.mounted) {
+      return;
+    }
+    context.read<KhatmaPlanBloc>().add(const KhatmaPlanStarted());
+    context.read<TodayPlanBloc>().add(const TodayPlanSourceChanged());
   }
 }
 
@@ -741,51 +753,39 @@ class _QuickActionTile extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
 
-    final ColorScheme colorScheme = theme.colorScheme;
-    final Color tileFill = colorScheme.brightness == Brightness.dark
+    final colorScheme = theme.colorScheme;
+    final tileFill = colorScheme.brightness == Brightness.dark
         ? colorScheme.surfaceContainerHigh
-        : colorScheme.surfaceContainerLow;
+        : colorScheme.surface;
 
-    return Material(
-      color: tileFill,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(
-          tokens.resolveRadius(family: TilawaRadiusFamily.card),
-        ),
-        side: BorderSide(
-          color: colorScheme.outlineVariant,
-          width: tokens.borderWidthThin,
-        ),
-      ),
-      child: InkWell(
-        onTap: action.onTap,
-        borderRadius: BorderRadius.circular(
-          tokens.resolveRadius(family: TilawaRadiusFamily.card),
-        ),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 104),
-          child: Padding(
-            padding: EdgeInsets.all(tokens.spaceMedium),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Icon(
-                  action.icon,
-                  color: colorScheme.primary,
-                  size: tokens.iconSizeLarge,
+    return TilawaCard(
+      surface: TilawaCardSurface.raised,
+      backgroundColor: tileFill,
+      padding: EdgeInsets.zero,
+      onTap: action.onTap,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 104),
+        child: Padding(
+          padding: EdgeInsets.all(tokens.spaceMedium),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Icon(
+                action.icon,
+                color: colorScheme.primary,
+                size: tokens.iconSizeLarge,
+              ),
+              Text(
+                action.label,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.w800,
                 ),
-                Text(
-                  action.label,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    color: colorScheme.onSurface,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

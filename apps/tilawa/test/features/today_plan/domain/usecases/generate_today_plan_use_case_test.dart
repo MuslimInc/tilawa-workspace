@@ -1,7 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tilawa/core/services/hive_readiness.dart';
 import 'package:tilawa/features/history/domain/entities/history_entity.dart';
 import 'package:tilawa/features/history/domain/repositories/history_repository.dart';
 import 'package:tilawa/features/quran_reader/domain/repositories/quran_reader_repository.dart';
+import 'package:tilawa/features/smart_khatma/smart_khatma.dart';
 import 'package:tilawa/features/today_plan/domain/entities/today_plan.dart';
 import 'package:tilawa/features/today_plan/domain/repositories/today_plan_repository.dart';
 import 'package:tilawa/features/today_plan/domain/usecases/generate_today_plan_use_case.dart';
@@ -144,6 +146,7 @@ void main() {
         _FakeQuranReaderRepository(null),
         _ThrowingHistoryRepository(),
         _MemoryTodayPlanRepository(),
+        _FakeHiveReadiness(),
       );
 
       final result = await useCase(now: DateTime(2026, 6, 14));
@@ -152,6 +155,57 @@ void main() {
         (failure) => expect(failure.message, contains('history unavailable')),
         (_) => fail('expected failure'),
       );
+    });
+
+    test('awaits Hive readiness before reading listening history', () async {
+      final readiness = _FakeHiveReadiness();
+      final historyRepository = _ReadinessAwareHistoryRepository(readiness);
+      final useCase = GenerateTodayPlanUseCase(
+        const _FakeQuranReaderRepository(null),
+        historyRepository,
+        _MemoryTodayPlanRepository(),
+        readiness,
+      );
+
+      final result = await useCase(now: DateTime(2026, 6, 14));
+      final plan = result.getOrElse(() => throw StateError('expected plan'));
+
+      expect(readiness.ensureCount, 1);
+      expect(historyRepository.readAfterReady, isTrue);
+      expect(plan.tasks, isNotEmpty);
+    });
+
+    test('uses active Khatma target for reading task', () async {
+      final khatmaRepository = _MemoryKhatmaPlanRepository(
+        KhatmaPlan(
+          id: 'khatma-1',
+          createdAt: DateTime(2026, 6, 14),
+          startDate: DateTime(2026, 6, 14),
+          durationDays: 30,
+          startPage: 1,
+          targetPage: 604,
+          currentPage: 303,
+        ),
+      );
+      final quranRepository = const _FakeQuranReaderRepository(303);
+      final useCase = GenerateTodayPlanUseCase(
+        quranRepository,
+        const _FakeHistoryRepository([]),
+        _MemoryTodayPlanRepository(),
+        _FakeHiveReadiness(),
+        GetKhatmaTodayTargetUseCase(khatmaRepository, quranRepository),
+      );
+
+      final result = await useCase(now: DateTime(2026, 6, 14));
+      final plan = result.getOrElse(() => throw StateError('expected plan'));
+      final reading = plan.tasks.firstWhere(
+        (task) => task.kind == TodayPlanTaskKind.reading,
+      );
+
+      expect(reading.metadata['pages'], 11);
+      expect(reading.metadata['page'], 303);
+      expect(reading.metadata['khatma_plan_id'], 'khatma-1');
+      expect(reading.metadata['khatma_remaining_pages'], 302);
     });
   });
 }
@@ -165,6 +219,7 @@ GenerateTodayPlanUseCase _createUseCase({
     _FakeQuranReaderRepository(lastReadPage),
     _FakeHistoryRepository(history),
     completionRepository ?? _MemoryTodayPlanRepository(),
+    _FakeHiveReadiness(),
   );
 }
 
@@ -226,6 +281,54 @@ final class _ThrowingHistoryRepository implements HistoryRepository {
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+final class _ReadinessAwareHistoryRepository implements HistoryRepository {
+  const _ReadinessAwareHistoryRepository(this.readiness);
+
+  final _FakeHiveReadiness readiness;
+
+  bool get readAfterReady => readiness.wasReadyWhenHistoryRead;
+
+  @override
+  Future<List<HistoryEntity>> getRecentHistory({int limit = 20}) async {
+    readiness.wasReadyWhenHistoryRead = readiness.isReady;
+    return const <HistoryEntity>[];
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+final class _FakeHiveReadiness implements HiveReadiness {
+  int ensureCount = 0;
+  bool isReady = false;
+  bool wasReadyWhenHistoryRead = false;
+
+  @override
+  Future<void> ensureReady() async {
+    ensureCount += 1;
+    isReady = true;
+  }
+}
+
+final class _MemoryKhatmaPlanRepository implements KhatmaPlanRepository {
+  _MemoryKhatmaPlanRepository(this._plan);
+
+  KhatmaPlan? _plan;
+
+  @override
+  Future<void> clearActivePlan() async {
+    _plan = null;
+  }
+
+  @override
+  Future<KhatmaPlan?> getActivePlan() async => _plan;
+
+  @override
+  Future<void> saveActivePlan(KhatmaPlan plan) async {
+    _plan = plan;
+  }
 }
 
 final class _MemoryTodayPlanRepository implements TodayPlanRepository {

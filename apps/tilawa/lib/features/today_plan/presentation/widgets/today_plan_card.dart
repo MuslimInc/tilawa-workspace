@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/features/smart_khatma/smart_khatma.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -314,13 +315,22 @@ class _TodayPlanFooter extends StatelessWidget {
                   context.read<TodayPlanBloc>().add(
                     const TodayPlanContinuePressed(),
                   );
-                  const QuranLastReadRoute().push(context);
+                  _openReaderAndRefreshPlans(context);
                 },
           icon: const Icon(Icons.arrow_forward_rounded),
           label: Text(context.l10n.todayPlanContinue),
         ),
       ],
     );
+  }
+
+  Future<void> _openReaderAndRefreshPlans(BuildContext context) async {
+    await const QuranLastReadRoute().push(context);
+    if (!context.mounted) {
+      return;
+    }
+    context.read<KhatmaPlanBloc>().add(const KhatmaPlanStarted());
+    context.read<TodayPlanBloc>().add(const TodayPlanSourceChanged());
   }
 }
 
