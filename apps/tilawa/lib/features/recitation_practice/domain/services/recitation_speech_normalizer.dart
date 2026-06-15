@@ -7,6 +7,9 @@ class RecitationSpeechNormalizer {
   final TextNormalizationService _textNormalizer;
 
   static final RegExp _formatCharacters = RegExp(r'[\u200C-\u200F\uFEFF\u061C]');
+  static final RegExp _speechPunctuation = RegExp(
+    r'[،؛؟!.,"«»٪٫٬\-–—:؛]',
+  );
   static final RegExp _arabicLetters = RegExp(r'[\u0600-\u06FF]');
   static final RegExp _latinLetters = RegExp(r'[A-Za-z]');
   static final RegExp _arabicRuns = RegExp(
@@ -44,6 +47,7 @@ class RecitationSpeechNormalizer {
     }
 
     result = result.replaceAll(_formatCharacters, '');
+    result = result.replaceAll(_speechPunctuation, ' ');
     result = result.replaceAll(RegExp(r'\s+'), ' ').trim();
     return result;
   }

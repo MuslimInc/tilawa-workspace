@@ -25,27 +25,16 @@ class RecitationTextAligner {
       targetWords: targetWords,
     );
 
-    final List<ComparedWord> alignedWords = <ComparedWord>[];
-    var spokenIndex = 0;
-    var correctCount = 0;
+    final List<ComparedWord> alignedWords = _alignToTarget(
+      targetWords: targetWords,
+      spokenWords: resolvedSpokenWords,
+    );
 
-    for (final String targetWord in targetWords) {
-      if (spokenIndex < resolvedSpokenWords.length &&
-          _wordsMatch(targetWord, resolvedSpokenWords[spokenIndex])) {
-        alignedWords.add(
-          ComparedWord(word: targetWord, status: WordMatchStatus.correct),
-        );
-        correctCount++;
-        spokenIndex++;
-        continue;
-      }
-
-      alignedWords.add(
-        ComparedWord(word: targetWord, status: WordMatchStatus.missing),
-      );
-    }
-
+    final int correctCount = alignedWords
+        .where((ComparedWord word) => word.status == WordMatchStatus.correct)
+        .length;
     final double score = correctCount / targetWords.length;
+
     return RecitationComparisonResult(
       words: alignedWords,
       score: score,
@@ -66,7 +55,7 @@ class RecitationTextAligner {
     required List<String> spokenWords,
     required List<String> targetWords,
   }) {
-    if (spokenWords.length > 1 || targetWords.length <= 1) {
+    if (targetWords.length <= 1) {
       return spokenWords;
     }
 
@@ -119,14 +108,117 @@ class RecitationTextAligner {
     return segments;
   }
 
+  List<ComparedWord> _alignToTarget({
+    required List<String> targetWords,
+    required List<String> spokenWords,
+  }) {
+    final int targetCount = targetWords.length;
+    final int spokenCount = spokenWords.length;
+
+    if (targetCount == 0) {
+      return const <ComparedWord>[];
+    }
+
+    final List<List<int>> scores = List<List<int>>.generate(
+      targetCount + 1,
+      (_) => List<int>.filled(spokenCount + 1, 0),
+    );
+    final List<List<int>> directions = List<List<int>>.generate(
+      targetCount + 1,
+      (_) => List<int>.filled(spokenCount + 1, 0),
+    );
+
+    for (var targetIndex = 1; targetIndex <= targetCount; targetIndex++) {
+      scores[targetIndex][0] = scores[targetIndex - 1][0];
+      directions[targetIndex][0] = 1;
+    }
+    for (var spokenIndex = 1; spokenIndex <= spokenCount; spokenIndex++) {
+      scores[0][spokenIndex] = scores[0][spokenIndex - 1];
+      directions[0][spokenIndex] = 2;
+    }
+
+    for (var targetIndex = 1; targetIndex <= targetCount; targetIndex++) {
+      for (var spokenIndex = 1; spokenIndex <= spokenCount; spokenIndex++) {
+        var bestScore = scores[targetIndex - 1][spokenIndex];
+        var direction = 1;
+
+        final int skipSpokenScore = scores[targetIndex][spokenIndex - 1];
+        if (skipSpokenScore > bestScore) {
+          bestScore = skipSpokenScore;
+          direction = 2;
+        }
+
+        final String targetWord = targetWords[targetIndex - 1];
+        final String spokenWord = spokenWords[spokenIndex - 1];
+        if (_wordsMatch(targetWord, spokenWord)) {
+          final int matchScore = scores[targetIndex - 1][spokenIndex - 1] + 1;
+          if (matchScore >= bestScore) {
+            bestScore = matchScore;
+            direction = 0;
+          }
+        }
+
+        scores[targetIndex][spokenIndex] = bestScore;
+        directions[targetIndex][spokenIndex] = direction;
+      }
+    }
+
+    final List<WordMatchStatus> statuses = List<WordMatchStatus>.filled(
+      targetCount,
+      WordMatchStatus.missing,
+    );
+
+    var targetIndex = targetCount;
+    var spokenIndex = spokenCount;
+    while (targetIndex > 0) {
+      switch (directions[targetIndex][spokenIndex]) {
+        case 0:
+          statuses[targetIndex - 1] = WordMatchStatus.correct;
+          targetIndex--;
+          spokenIndex--;
+        case 1:
+          targetIndex--;
+        case 2:
+          spokenIndex--;
+        default:
+          targetIndex--;
+      }
+    }
+
+    return List<ComparedWord>.generate(
+      targetCount,
+      (int index) => ComparedWord(
+        word: targetWords[index],
+        status: statuses[index],
+      ),
+    );
+  }
+
   bool _wordsMatch(String left, String right) {
     if (left == right) {
       return true;
     }
-    if (left.length <= 2 || right.length <= 2) {
+
+    final int maxLength = left.length > right.length ? left.length : right.length;
+    if (maxLength == 0) {
+      return true;
+    }
+    if (maxLength <= 2) {
       return false;
     }
-    return _editDistance(left, right) <= 1;
+
+    final int allowedDistance = _allowedEditDistance(maxLength);
+    return _editDistance(left, right) <= allowedDistance;
+  }
+
+  int _allowedEditDistance(int wordLength) {
+    if (wordLength <= 4) {
+      return 1;
+    }
+    if (wordLength <= 8) {
+      return 2;
+    }
+    return 3;
   }
 
   int _editDistance(String left, String right) {

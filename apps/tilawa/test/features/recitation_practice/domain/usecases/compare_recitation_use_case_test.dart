@@ -122,5 +122,107 @@ void main() {
 
       expect(result.score, 0);
     });
+
+    group('Al-Fatiha ASR robustness', () {
+      void expectHighScore({
+        required String target,
+        required String spoken,
+        double minScore = 0.95,
+      }) {
+        final result = useCase(
+          targetText: target,
+          spokenText: spoken,
+        );
+        expect(
+          result.score,
+          greaterThanOrEqualTo(minScore),
+          reason: 'spoken: $spoken',
+        );
+      }
+
+      test('ayah 2 with minor typos and punctuation', () {
+        final String target = getVerseNormal(1, 2);
+        expectHighScore(
+          target: target,
+          spoken: 'الحمد لله، رب العالمين؟',
+        );
+        expectHighScore(
+          target: target,
+          spoken: 'الحمد لله رب العلمين',
+        );
+      });
+
+      test('ayah 3 with extra spoken filler', () {
+        expectHighScore(
+          target: getVerseNormal(1, 3),
+          spoken: 'الرحمن و الرحيم',
+        );
+        expectHighScore(
+          target: getVerseNormal(1, 3),
+          spoken: 'الرحمان الرحيم',
+        );
+      });
+
+      test('ayah 4 with collapsed speech', () {
+        expectHighScore(
+          target: getVerseNormal(1, 4),
+          spoken: 'مالكيومالدين',
+        );
+      });
+
+      test('ayah 5 with hamza variants and extra words', () {
+        final String target = getVerseNormal(1, 5);
+        expectHighScore(
+          target: target,
+          spoken: 'اياك نعبد و اياك نستعين',
+        );
+        expectHighScore(
+          target: target,
+          spoken: 'إياك نعبد وإياك نستعين man hello',
+        );
+      });
+
+      test('ayah 6 with ASR spacing noise', () {
+        expectHighScore(
+          target: getVerseNormal(1, 6),
+          spoken: 'اهدنا الصراط المستقيم',
+        );
+        expectHighScore(
+          target: getVerseNormal(1, 6),
+          spoken: 'اهدنا و الصراط المستقيم',
+        );
+      });
+
+      test('ayah 7 with one-word typo stays above 95%', () {
+        final String target = getVerseNormal(1, 7);
+        final int wordCount = target.split(RegExp(r'\s+')).length;
+        final double minScore = (wordCount - 1) / wordCount;
+
+        expectHighScore(
+          target: target,
+          spoken:
+              'صراط الذين انعمت عليهم غير المغضوب عليهم ولا الضالين',
+          minScore: minScore,
+        );
+      });
+
+      test('wrong ayah stays below pass threshold', () {
+        final result = useCase(
+          targetText: getVerseNormal(1, 1),
+          spokenText: getVerseNormal(1, 2),
+        );
+
+        expect(result.score, lessThan(0.8));
+      });
+
+      test('reversed word order does not pass', () {
+        final result = useCase(
+          targetText: 'بسم الله الرحمن الرحيم',
+          spokenText: 'الرحيم الرحمن الله بسم',
+        );
+
+        expect(result.score, lessThan(0.8));
+      });
+    });
   });
 }
