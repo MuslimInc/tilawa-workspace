@@ -19,6 +19,7 @@ class PageNavigationBar extends StatefulWidget {
     required this.onPageChanged,
     required this.onShowIndex,
     required this.onShare,
+    this.onPractice,
     this.onWarming,
     this.onPointerDown,
     this.onPointerUp,
@@ -28,6 +29,7 @@ class PageNavigationBar extends StatefulWidget {
   final ValueChanged<int> onPageChanged;
   final VoidCallback onShowIndex;
   final VoidCallback onShare;
+  final VoidCallback? onPractice;
   final ValueChanged<int>? onWarming;
   final VoidCallback? onPointerDown;
   final VoidCallback? onPointerUp;
@@ -373,6 +375,18 @@ class _PageNavigationBarState extends State<PageNavigationBar> {
                                 },
                                 tooltip: context.l10n.surahIndex,
                               ),
+                              if (widget.onPractice != null) ...[
+                                const SizedBox(width: 10),
+                                NavActionButton(
+                                  icon: Icons.mic_rounded,
+                                  onTap: () {
+                                    HapticFeedback.selectionClick();
+                                    widget.onPractice!.call();
+                                  },
+                                  tooltip:
+                                      context.l10n.recitationPracticeTooltip,
+                                ),
+                              ],
                               if (kShareScreenshotEnabled ||
                                   kShareVideoReelEnabled) ...[
                                 const SizedBox(width: 10),

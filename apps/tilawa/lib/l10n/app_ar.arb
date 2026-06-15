@@ -3399,5 +3399,42 @@
     "inAppUpdateUpdateAction": "تحديث",
     "@inAppUpdateUpdateAction": {
         "description": "Snackbar action to open the Play Store for an optional update"
+    },
+    "recitationPracticeTitle": "تدريب {surah}:{ayah}",
+    "@recitationPracticeTitle": {
+        "description": "Title for the recitation practice panel",
+        "placeholders": {
+            "surah": {
+                "type": "int"
+            },
+            "ayah": {
+                "type": "int"
+            }
+        }
+    },
+    "recitationPracticeStart": "ابدأ التلاوة",
+    "@recitationPracticeStart": {
+        "description": "Starts microphone listening for recitation practice"
+    },
+    "recitationPracticeStop": "إيقاف",
+    "@recitationPracticeStop": {
+        "description": "Stops microphone listening for recitation practice"
+    },
+    "recitationPracticeScore": "التطابق {percent}٪",
+    "@recitationPracticeScore": {
+        "description": "Score label after comparing recitation",
+        "placeholders": {
+            "percent": {
+                "type": "int"
+            }
+        }
+    },
+    "recitationPracticeNextAyah": "الآية التالية",
+    "@recitationPracticeNextAyah": {
+        "description": "Moves practice to the next ayah on the page"
+    },
+    "recitationPracticeTooltip": "تدريب التلاوة",
+    "@recitationPracticeTooltip": {
+        "description": "Tooltip for the Mushaf recitation practice button"
     }
 }

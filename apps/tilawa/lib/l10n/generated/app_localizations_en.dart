@@ -2756,4 +2756,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get inAppUpdateUpdateAction => 'Update';
+
+  @override
+  String recitationPracticeTitle(int surah, int ayah) {
+    return 'Practice $surah:$ayah';
+  }
+
+  @override
+  String get recitationPracticeStart => 'Start reciting';
+
+  @override
+  String get recitationPracticeStop => 'Stop';
+
+  @override
+  String recitationPracticeScore(int percent) {
+    return '$percent% match';
+  }
+
+  @override
+  String get recitationPracticeNextAyah => 'Next ayah';
+
+  @override
+  String get recitationPracticeTooltip => 'Practice recitation';
 }

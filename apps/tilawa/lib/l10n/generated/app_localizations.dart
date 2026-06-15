@@ -4885,6 +4885,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Update'**
   String get inAppUpdateUpdateAction;
+
+  /// Title for the recitation practice panel
+  ///
+  /// In en, this message translates to:
+  /// **'Practice {surah}:{ayah}'**
+  String recitationPracticeTitle(int surah, int ayah);
+
+  /// Starts microphone listening for recitation practice
+  ///
+  /// In en, this message translates to:
+  /// **'Start reciting'**
+  String get recitationPracticeStart;
+
+  /// Stops microphone listening for recitation practice
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get recitationPracticeStop;
+
+  /// Score label after comparing recitation
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% match'**
+  String recitationPracticeScore(int percent);
+
+  /// Moves practice to the next ayah on the page
+  ///
+  /// In en, this message translates to:
+  /// **'Next ayah'**
+  String get recitationPracticeNextAyah;
+
+  /// Tooltip for the Mushaf recitation practice button
+  ///
+  /// In en, this message translates to:
+  /// **'Practice recitation'**
+  String get recitationPracticeTooltip;
 }
 
 class _AppLocalizationsDelegate
