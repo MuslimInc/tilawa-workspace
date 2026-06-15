@@ -21,8 +21,10 @@ import '../../../../core/extensions.dart';
 import '../../../../features/audio_player/presentation/bloc/audio_player_bloc.dart'
     show AudioPlayerBloc;
 import '../../../../features/share/presentation/widgets/share_options_sheet.dart';
+import '../../../../features/smart_khatma/smart_khatma.dart';
 import '../../domain/ports/quran_image_preload_status.dart';
 import '../../domain/usecases/load_quran_fonts_to_engine_use_case.dart';
+import '../../domain/usecases/save_last_read_position_use_case.dart';
 import '../navigation/quran_image_reader_index_navigation.dart';
 import '../theme/quran_reader_theme.dart';
 import '../widgets/surah_index_sheet.dart';
@@ -62,6 +64,8 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen>
     with WidgetsBindingObserver {
   bool _isPreloaded = false;
   NavigationBloc? _navigationBloc;
+  late final SaveLastReadPositionUseCase _saveLastReadPosition;
+  late final UpdateKhatmaProgressUseCase _updateKhatmaProgress;
 
   // Stable fallback key — no RenderRepaintBoundary is attached here, so the
   // share composer will simply skip the reader-page screenshot preview for
@@ -73,6 +77,8 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen>
   @override
   void initState() {
     super.initState();
+    _saveLastReadPosition = getIt<SaveLastReadPositionUseCase>();
+    _updateKhatmaProgress = SmartKhatmaDependencies.updateProgress();
     WidgetsBinding.instance.addObserver(this);
     unawaited(AppOrientationService.allowReaderOrientations());
     _checkPreloadStatus();
@@ -291,6 +297,18 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen>
     }
   }
 
+  Future<void> _recordReadingProgress(int currentPage) async {
+    final pageData = getPageData(currentPage);
+    if (pageData.isEmpty) {
+      return;
+    }
+    await _saveLastReadPosition(
+      surahNumber: pageData.first.surah,
+      page: currentPage,
+    );
+    await _updateKhatmaProgress(currentPage: currentPage);
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!_isPreloaded) {
@@ -304,6 +322,7 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen>
       child: _ReaderShell(
         onShareRequested: _showShareOptions,
         onShowIndex: _showSurahIndex,
+        onPageSettled: (page) => unawaited(_recordReadingProgress(page)),
       ),
     );
   }
@@ -315,54 +334,70 @@ class _ReaderShell extends StatelessWidget {
   const _ReaderShell({
     required this.onShareRequested,
     required this.onShowIndex,
+    required this.onPageSettled,
   });
 
   final Future<void> Function(int currentPage) onShareRequested;
   final VoidCallback onShowIndex;
+  final ValueChanged<int> onPageSettled;
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<NavigationBloc, NavigationState>(
-      buildWhen: (previous, current) {
-        if (previous is NavigationLoaded && current is NavigationLoaded) {
+    return BlocListener<NavigationBloc, NavigationState>(
+      listenWhen: (previous, current) {
+        if (current is! NavigationLoaded) {
           return false;
         }
-        return current is NavigationLoaded || current is NavigationError;
+        return previous is! NavigationLoaded ||
+            previous.pageState.currentPage != current.pageState.currentPage;
       },
-      builder: (context, state) {
+      listener: (context, state) {
         if (state is NavigationLoaded) {
-          return QuranImageReader(
-            preferredSystemUiMode: SystemUiMode.edgeToEdge,
-            restoreSystemUiMode: SystemUiMode.edgeToEdge,
-            preferredOrientations: AppOrientationService.readerOrientations,
-            restoreOrientations: AppOrientationService.defaultOrientations,
-            restoreSystemUiOverlayStyle: AppSystemChromeStyle.defaultAppStyle,
-            onShareRequested: onShareRequested,
-            onShowIndex: onShowIndex,
-            headerImageFilter: Theme.of(
-              context,
-            ).extension<QuranReaderTheme>()?.headerImageFilter,
-          );
+          onPageSettled(state.pageState.currentPage);
         }
-
-        if (state is NavigationError) {
-          return Scaffold(
-            body: TilawaErrorState(
-              icon: Icons.error_outline_rounded,
-              title: context.l10n.error,
-              retryLabel: context.l10n.retry,
-              onRetry: () => context.read<NavigationBloc>().add(
-                const NavigationRetryRequested(),
-              ),
-              iconColor: Theme.of(context).colorScheme.error,
-            ),
-          );
-        }
-
-        return const Scaffold(
-          body: TilawaLoadingIndicator(),
-        );
       },
+      child: BlocBuilder<NavigationBloc, NavigationState>(
+        buildWhen: (previous, current) {
+          if (previous is NavigationLoaded && current is NavigationLoaded) {
+            return false;
+          }
+          return current is NavigationLoaded || current is NavigationError;
+        },
+        builder: (context, state) {
+          if (state is NavigationLoaded) {
+            return QuranImageReader(
+              preferredSystemUiMode: SystemUiMode.edgeToEdge,
+              restoreSystemUiMode: SystemUiMode.edgeToEdge,
+              preferredOrientations: AppOrientationService.readerOrientations,
+              restoreOrientations: AppOrientationService.defaultOrientations,
+              restoreSystemUiOverlayStyle: AppSystemChromeStyle.defaultAppStyle,
+              onShareRequested: onShareRequested,
+              onShowIndex: onShowIndex,
+              headerImageFilter: Theme.of(
+                context,
+              ).extension<QuranReaderTheme>()?.headerImageFilter,
+            );
+          }
+
+          if (state is NavigationError) {
+            return Scaffold(
+              body: TilawaErrorState(
+                icon: Icons.error_outline_rounded,
+                title: context.l10n.error,
+                retryLabel: context.l10n.retry,
+                onRetry: () => context.read<NavigationBloc>().add(
+                  const NavigationRetryRequested(),
+                ),
+                iconColor: Theme.of(context).colorScheme.error,
+              ),
+            );
+          }
+
+          return const Scaffold(
+            body: TilawaLoadingIndicator(),
+          );
+        },
+      ),
     );
   }
 }
