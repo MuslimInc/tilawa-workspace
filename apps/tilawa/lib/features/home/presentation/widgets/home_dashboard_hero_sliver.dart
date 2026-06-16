@@ -145,7 +145,12 @@ class _HomeDashboardHeroAppBarState extends State<_HomeDashboardHeroAppBar> {
   @override
   void didUpdateWidget(covariant _HomeDashboardHeroAppBar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.state != widget.state) {
+    final HomePrayerDayBoundaries? oldBoundaries = switch (oldWidget.state) {
+      HomeDashboardLoaded(:final dashboard) => dashboard.prayerBoundaries,
+      _ => null,
+    };
+    final HomePrayerDayBoundaries? newBoundaries = _dashboard?.prayerBoundaries;
+    if (oldWidget.state != widget.state || oldBoundaries != newBoundaries) {
       _syncGradientRefreshTimer();
     }
   }
@@ -182,11 +187,25 @@ class _HomeDashboardHeroAppBarState extends State<_HomeDashboardHeroAppBar> {
       return;
     }
 
-    _gradientRefreshTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+    _scheduleNextGradientRefresh(boundaries);
+  }
+
+  void _scheduleNextGradientRefresh(HomePrayerDayBoundaries boundaries) {
+    final Duration? delay =
+        HomeHeroGradientResolver.delayUntilNextGradientRefresh(
+          now: DateTime.now(),
+          boundaries: boundaries,
+        );
+    if (delay == null) {
+      return;
+    }
+
+    _gradientRefreshTimer = Timer(delay, () {
       if (!mounted) {
         return;
       }
       setState(() {});
+      _scheduleNextGradientRefresh(boundaries);
     });
   }
 
@@ -643,37 +662,22 @@ class _HomeHeroCollapsedToolbar extends StatelessWidget {
     final heroTokens = theme.componentTokens.homeNextPrayerHero;
     final Color onGradient = heroTokens.foregroundColor;
     final String? displayName = dashboard?.displayName;
+    final TextStyle? summaryStyle = theme.textTheme.titleSmall?.copyWith(
+      color: onGradient,
+      fontWeight: FontWeight.w700,
+    );
 
     final Widget summary = switch (nextPrayer) {
       null => Text(
         context.l10n.homeNextPrayerUnavailable,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: theme.textTheme.titleSmall?.copyWith(
-          color: onGradient,
-          fontWeight: FontWeight.w700,
-        ),
+        style: summaryStyle,
       ),
-      final prayer => Semantics(
-        button: true,
-        label:
-            '${_localizedPrayerName(context, prayer.type)}, '
-            '${_formatTime(context, prayer.time)}',
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onOpenPrayer,
-            child: Text(
-              _collapsedPrayerSummary(context, prayer),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleSmall?.copyWith(
-                color: onGradient,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ),
+      final prayer => _HomeHeroCollapsedPrayerSummary(
+        prayer: prayer,
+        onOpenPrayer: onOpenPrayer,
+        style: summaryStyle!,
       ),
     };
 
@@ -689,15 +693,99 @@ class _HomeHeroCollapsedToolbar extends StatelessWidget {
       ],
     );
   }
+}
 
-  String _collapsedPrayerSummary(BuildContext context, HomeNextPrayer prayer) {
-    final String name = _localizedPrayerName(context, prayer.type);
-    final String time = _formatTime(context, prayer.time);
-    final Duration remaining = prayer.time.difference(DateTime.now());
-    if (remaining <= Duration.zero) {
-      return '$name · $time · ${context.l10n.homePrayerNow}';
+class _HomeHeroCollapsedPrayerSummary extends StatefulWidget {
+  const _HomeHeroCollapsedPrayerSummary({
+    required this.prayer,
+    required this.onOpenPrayer,
+    required this.style,
+  });
+
+  final HomeNextPrayer prayer;
+  final VoidCallback onOpenPrayer;
+  final TextStyle style;
+
+  @override
+  State<_HomeHeroCollapsedPrayerSummary> createState() =>
+      _HomeHeroCollapsedPrayerSummaryState();
+}
+
+class _HomeHeroCollapsedPrayerSummaryState
+    extends State<_HomeHeroCollapsedPrayerSummary> {
+  Timer? _ticker;
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleTicker();
+  }
+
+  @override
+  void didUpdateWidget(covariant _HomeHeroCollapsedPrayerSummary oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.prayer.time != widget.prayer.time) {
+      _scheduleTicker();
     }
-    return '$name · $time · ${_formatCountdown(context, remaining)}';
+  }
+
+  void _scheduleTicker() {
+    _ticker?.cancel();
+    final Duration remaining = _remaining;
+    if (remaining <= Duration.zero) {
+      return;
+    }
+
+    final Duration interval = remaining < const Duration(hours: 1)
+        ? const Duration(seconds: 1)
+        : const Duration(minutes: 1);
+
+    _ticker = Timer.periodic(interval, (_) {
+      if (!mounted) {
+        return;
+      }
+      if (_remaining <= Duration.zero) {
+        _ticker?.cancel();
+      }
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _ticker?.cancel();
+    super.dispose();
+  }
+
+  Duration get _remaining {
+    final Duration difference = widget.prayer.time.difference(DateTime.now());
+    return difference.isNegative ? Duration.zero : difference;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final String name = _localizedPrayerName(context, widget.prayer.type);
+    final String time = _formatTime(context, widget.prayer.time);
+    final String summary = _remaining <= Duration.zero
+        ? '$name · $time · ${context.l10n.homePrayerNow}'
+        : '$name · $time · ${_formatCountdown(context, _remaining)}';
+
+    return Semantics(
+      button: true,
+      label: '$name, $time',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: widget.onOpenPrayer,
+          child: Text(
+            summary,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: widget.style,
+          ),
+        ),
+      ),
+    );
   }
 }
 

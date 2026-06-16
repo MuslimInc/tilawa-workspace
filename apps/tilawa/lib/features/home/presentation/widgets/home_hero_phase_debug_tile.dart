@@ -1,4 +1,5 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tilawa/features/home/debug/home_hero_gradient_debug.dart';
 import 'package:tilawa/features/home/domain/home_hero_gradient_resolver.dart';
@@ -12,6 +13,10 @@ class HomeHeroPhaseDebugTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!kDebugMode) {
+      return const SizedBox.shrink();
+    }
+
     return ValueListenableBuilder<HomeHeroDayPhase?>(
       valueListenable: HomeHeroGradientDebug.phaseOverride,
       builder: (BuildContext context, HomeHeroDayPhase? phase, Widget? child) {

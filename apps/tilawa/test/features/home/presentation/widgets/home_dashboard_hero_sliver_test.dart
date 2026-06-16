@@ -85,7 +85,7 @@ void main() {
         locationLabel: 'Abha',
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     final chipFinder = find.ancestor(
       of: find.text('Abha'),
