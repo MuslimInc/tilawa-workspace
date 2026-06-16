@@ -115,5 +115,46 @@ void main() {
 
       expect(tokens.gradientTopStart, AppColors.homeNextPrayerGradientNightTop);
     });
+
+    test('isBlendingAt is true inside sunrise blend window', () {
+      expect(
+        HomeHeroGradientResolver.isBlendingAt(
+          now: boundaries.sunrise.add(const Duration(minutes: 10)),
+          boundaries: boundaries,
+        ),
+        isTrue,
+      );
+    });
+
+    test('isBlendingAt is false during steady day phase', () {
+      expect(
+        HomeHeroGradientResolver.isBlendingAt(
+          now: DateTime(2026, 6, 15, 12),
+          boundaries: boundaries,
+        ),
+        isFalse,
+      );
+    });
+
+    test('delayUntilNextGradientRefresh returns one minute while blending', () {
+      expect(
+        HomeHeroGradientResolver.delayUntilNextGradientRefresh(
+          now: boundaries.maghrib.add(const Duration(minutes: 5)),
+          boundaries: boundaries,
+        ),
+        const Duration(minutes: 1),
+      );
+    });
+
+    test('delayUntilNextGradientRefresh waits until next boundary', () {
+      final DateTime now = DateTime(2026, 6, 15, 12);
+      expect(
+        HomeHeroGradientResolver.delayUntilNextGradientRefresh(
+          now: now,
+          boundaries: boundaries,
+        ),
+        boundaries.maghrib.difference(now),
+      );
+    });
   });
 }

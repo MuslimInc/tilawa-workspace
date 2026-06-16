@@ -124,12 +124,61 @@ abstract final class HomeHeroGradientResolver {
     return null;
   }
 
+  /// Whether [now] falls inside a sunrise, Maghrib, or Isha blend window.
+  static bool isBlendingAt({
+    required DateTime now,
+    required HomePrayerDayBoundaries boundaries,
+  }) {
+    return _isInBlendWindow(now, boundaries.sunrise, blendDuration) ||
+        _isInBlendWindow(
+          now,
+          boundaries.maghrib,
+          maghribBlendDuration,
+        ) ||
+        _isInBlendWindow(now, boundaries.isha, blendDuration);
+  }
+
+  /// Delay until the hero gradient should refresh again.
+  ///
+  /// Returns one minute while blending; otherwise waits until the next
+  /// prayer boundary when the gradient is steady-state.
+  static Duration? delayUntilNextGradientRefresh({
+    required DateTime now,
+    required HomePrayerDayBoundaries boundaries,
+  }) {
+    if (isBlendingAt(now: now, boundaries: boundaries)) {
+      return const Duration(minutes: 1);
+    }
+
+    final DateTime? nextBoundary = nextBoundaryAfter(
+      now: now,
+      boundaries: boundaries,
+    );
+    if (nextBoundary == null) {
+      return null;
+    }
+
+    final Duration untilBoundary = nextBoundary.difference(now);
+    if (untilBoundary <= Duration.zero) {
+      return const Duration(minutes: 1);
+    }
+    return untilBoundary;
+  }
+
   static bool _isNight(DateTime now, HomePrayerDayBoundaries boundaries) {
     return !now.isBefore(boundaries.isha) || now.isBefore(boundaries.sunrise);
   }
 
   static bool _isBefore(DateTime now, DateTime boundary) {
     return now.isBefore(boundary);
+  }
+
+  static bool _isInBlendWindow(
+    DateTime now,
+    DateTime boundary,
+    Duration duration,
+  ) {
+    return !now.isBefore(boundary) && now.isBefore(boundary.add(duration));
   }
 
   static TilawaHomeNextPrayerHeroTokens? _blendAcross({
