@@ -1,5 +1,6 @@
 export { verifySupportPurchase } from "./verifySupportPurchase";
 export { crashlyticsToGithubIssue } from "./crashlyticsToGithubIssue";
+export { verifyRecitationAudio } from "./verifyRecitationAudio";
 
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { initializeApp } from "firebase-admin/app";
