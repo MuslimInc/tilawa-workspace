@@ -137,7 +137,7 @@ abstract class AppLocalizations {
   /// The title of the application
   ///
   /// In en, this message translates to:
-  /// **'Tilawa'**
+  /// **'MeMuslim'**
   String get appTitle;
 
   /// Reciters section title

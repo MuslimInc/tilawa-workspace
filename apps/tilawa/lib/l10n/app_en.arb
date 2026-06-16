@@ -24,7 +24,7 @@
     "@west": {
         "description": "West direction label"
     },
-    "appTitle": "Tilawa",
+    "appTitle": "MeMuslim",
     "@appTitle": {
         "description": "The title of the application"
     },

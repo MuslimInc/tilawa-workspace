@@ -27,7 +27,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get west => 'W';
 
   @override
-  String get appTitle => 'Tilawa';
+  String get appTitle => 'MeMuslim';
 
   @override
   String get reciters => 'Reciters';

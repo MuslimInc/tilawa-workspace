@@ -27,7 +27,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get west => 'غرب';
 
   @override
-  String get appTitle => 'تلاوة';
+  String get appTitle => 'أنا مسلم';
 
   @override
   String get reciters => 'القراء';
