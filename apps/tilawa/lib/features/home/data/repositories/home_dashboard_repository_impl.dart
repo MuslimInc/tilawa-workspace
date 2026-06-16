@@ -10,6 +10,7 @@ import 'package:tilawa/features/prayer_times/domain/usecases/save_prayer_setting
 import 'package:tilawa_core/core.dart';
 
 import '../../domain/entities/home_dashboard.dart';
+import '../../domain/entities/home_prayer_day_boundaries.dart';
 import '../../domain/repositories/home_dashboard_repository.dart';
 
 typedef HomeDashboardNow = DateTime Function();
@@ -117,6 +118,12 @@ final class HomeDashboardRepositoryImpl implements HomeDashboardRepository {
       location: location,
       generatedAt: generatedAt,
     );
+    final HomePrayerDayBoundaries? prayerBoundaries =
+        await _loadPrayerBoundaries(
+          settings: settings,
+          location: location,
+          generatedAt: generatedAt,
+        );
 
     return HomeDashboard(
       generatedAt: generatedAt,
@@ -124,6 +131,7 @@ final class HomeDashboardRepositoryImpl implements HomeDashboardRepository {
       photoUrl: photoUrl,
       locationLabel: location.label,
       nextPrayer: nextPrayer,
+      prayerBoundaries: prayerBoundaries,
     );
   }
 
@@ -213,6 +221,23 @@ final class HomeDashboardRepositoryImpl implements HomeDashboardRepository {
       localeIdentifier: localeIdentifier,
     );
     return localized ?? fallback;
+  }
+
+  Future<HomePrayerDayBoundaries?> _loadPrayerBoundaries({
+    required PrayerSettingsEntity settings,
+    required _HomeLocation location,
+    required DateTime generatedAt,
+  }) async {
+    final Either<Failure, PrayerTimeEntity> result = await _getPrayerTimes(
+      latitude: location.latitude,
+      longitude: location.longitude,
+      date: generatedAt,
+      settings: settings,
+    );
+    return result.fold(
+      (_) => null,
+      HomePrayerDayBoundaries.fromPrayerTimes,
+    );
   }
 
   Future<HomeNextPrayer?> _loadNextPrayer({

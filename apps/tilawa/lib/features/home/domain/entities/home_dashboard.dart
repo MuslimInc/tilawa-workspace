@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
 
+import 'home_prayer_day_boundaries.dart';
+
 /// Data needed to render the main Home dashboard.
 final class HomeDashboard extends Equatable {
   const HomeDashboard({
@@ -9,6 +11,7 @@ final class HomeDashboard extends Equatable {
     this.photoUrl,
     this.locationLabel,
     this.nextPrayer,
+    this.prayerBoundaries,
   });
 
   /// Time the dashboard snapshot was generated.
@@ -26,6 +29,9 @@ final class HomeDashboard extends Equatable {
   /// Next main prayer for the dashboard location, if known.
   final HomeNextPrayer? nextPrayer;
 
+  /// Today's prayer anchors for hero gradient phase resolution.
+  final HomePrayerDayBoundaries? prayerBoundaries;
+
   bool get hasPrayerLocation => locationLabel != null && locationLabel != '';
 
   @override
@@ -35,6 +41,7 @@ final class HomeDashboard extends Equatable {
     photoUrl,
     locationLabel,
     nextPrayer,
+    prayerBoundaries,
   ];
 }
 

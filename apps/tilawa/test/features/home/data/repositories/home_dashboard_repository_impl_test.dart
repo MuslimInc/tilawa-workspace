@@ -40,6 +40,8 @@ void main() {
         expect(dashboard.locationLabel, 'Cairo');
         expect(dashboard.nextPrayer?.type, PrayerType.dhuhr);
         expect(dashboard.nextPrayer?.timeUntil, const Duration(hours: 2));
+        expect(dashboard.prayerBoundaries?.sunrise.hour, 5);
+        expect(dashboard.prayerBoundaries?.maghrib.hour, 18);
         expect(prayerRepository.currentLocationRequests, 0);
         expect(prayerRepository.permissionRequests, 0);
       },
