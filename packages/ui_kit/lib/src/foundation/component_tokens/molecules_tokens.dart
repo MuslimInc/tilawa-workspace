@@ -1306,6 +1306,7 @@ class TilawaHomeNextPrayerHeroTokens {
     required this.locationChipSplashOpacity,
     required this.locationChipHighlightOpacity,
     required this.mutedForegroundOpacity,
+    required this.tertiaryForegroundOpacity,
     required this.footerForegroundOpacity,
   });
 
@@ -1327,10 +1328,13 @@ class TilawaHomeNextPrayerHeroTokens {
   final double locationChipSplashOpacity;
   final double locationChipHighlightOpacity;
 
-  /// Secondary copy (labels, countdown) on the gradient.
+  /// Secondary copy (countdown, supporting lines) on the gradient.
   final double mutedForegroundOpacity;
 
-  /// Footer schedule affordance alpha on [foregroundColor].
+  /// Tertiary copy (eyebrows, metadata) on the gradient.
+  final double tertiaryForegroundOpacity;
+
+  /// Greeting and prayer-name alpha on [foregroundColor].
   final double footerForegroundOpacity;
 
   LinearGradient get backgroundGradient => LinearGradient(
@@ -1339,7 +1343,11 @@ class TilawaHomeNextPrayerHeroTokens {
     colors: [gradientTopStart, gradientBottomEnd],
   );
 
-  factory TilawaHomeNextPrayerHeroTokens.defaults() {
+  factory TilawaHomeNextPrayerHeroTokens.defaults() =>
+      TilawaHomeNextPrayerHeroTokens.day();
+
+  /// Daytime hero gradient (sunrise through Asr).
+  factory TilawaHomeNextPrayerHeroTokens.day() {
     return const TilawaHomeNextPrayerHeroTokens(
       gradientTopStart: AppColors.homeNextPrayerGradientTop,
       gradientBottomEnd: AppColors.homeNextPrayerGradientBottom,
@@ -1348,8 +1356,41 @@ class TilawaHomeNextPrayerHeroTokens {
       locationChipBorderOpacity: 0.28,
       locationChipSplashOpacity: 0.1,
       locationChipHighlightOpacity: 0.05,
-      mutedForegroundOpacity: 0.76,
+      mutedForegroundOpacity: 0.64,
+      tertiaryForegroundOpacity: 0.56,
       footerForegroundOpacity: 0.88,
+    );
+  }
+
+  /// Maghrib-through-Isha hero gradient with a subtle warm cast.
+  factory TilawaHomeNextPrayerHeroTokens.dusk() {
+    return const TilawaHomeNextPrayerHeroTokens(
+      gradientTopStart: AppColors.homeNextPrayerGradientDuskTop,
+      gradientBottomEnd: AppColors.homeNextPrayerGradientDuskBottom,
+      foregroundColor: AppColors.homeNextPrayerGradientForeground,
+      locationChipFillOpacity: 0.14,
+      locationChipBorderOpacity: 0.28,
+      locationChipSplashOpacity: 0.1,
+      locationChipHighlightOpacity: 0.05,
+      mutedForegroundOpacity: 0.64,
+      tertiaryForegroundOpacity: 0.56,
+      footerForegroundOpacity: 0.88,
+    );
+  }
+
+  /// Night hero gradient (Isha through pre-sunrise).
+  factory TilawaHomeNextPrayerHeroTokens.night() {
+    return const TilawaHomeNextPrayerHeroTokens(
+      gradientTopStart: AppColors.homeNextPrayerGradientNightTop,
+      gradientBottomEnd: AppColors.homeNextPrayerGradientNightBottom,
+      foregroundColor: AppColors.homeNextPrayerGradientForeground,
+      locationChipFillOpacity: 0.12,
+      locationChipBorderOpacity: 0.24,
+      locationChipSplashOpacity: 0.1,
+      locationChipHighlightOpacity: 0.05,
+      mutedForegroundOpacity: 0.68,
+      tertiaryForegroundOpacity: 0.58,
+      footerForegroundOpacity: 0.90,
     );
   }
 
@@ -1362,6 +1403,7 @@ class TilawaHomeNextPrayerHeroTokens {
     double? locationChipSplashOpacity,
     double? locationChipHighlightOpacity,
     double? mutedForegroundOpacity,
+    double? tertiaryForegroundOpacity,
     double? footerForegroundOpacity,
   }) {
     return TilawaHomeNextPrayerHeroTokens(
@@ -1378,6 +1420,8 @@ class TilawaHomeNextPrayerHeroTokens {
           locationChipHighlightOpacity ?? this.locationChipHighlightOpacity,
       mutedForegroundOpacity:
           mutedForegroundOpacity ?? this.mutedForegroundOpacity,
+      tertiaryForegroundOpacity:
+          tertiaryForegroundOpacity ?? this.tertiaryForegroundOpacity,
       footerForegroundOpacity:
           footerForegroundOpacity ?? this.footerForegroundOpacity,
     );
@@ -1419,6 +1463,11 @@ class TilawaHomeNextPrayerHeroTokens {
       mutedForegroundOpacity: lerpTokenDouble(
         a.mutedForegroundOpacity,
         b.mutedForegroundOpacity,
+        t,
+      ),
+      tertiaryForegroundOpacity: lerpTokenDouble(
+        a.tertiaryForegroundOpacity,
+        b.tertiaryForegroundOpacity,
         t,
       ),
       footerForegroundOpacity: lerpTokenDouble(

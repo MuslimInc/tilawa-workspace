@@ -1,17 +1,20 @@
 import 'dart:async';
 
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
-import 'package:tilawa/features/prayer_times/presentation/extensions/prayer_type_ui.dart';
 import 'package:tilawa/features/prayer_times/presentation/formatters/prayer_location_label_formatter.dart';
 import 'package:tilawa/shared/widgets/profile_avatar.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../../debug/home_hero_gradient_debug.dart';
 import '../../domain/entities/home_dashboard.dart';
+import '../../domain/entities/home_prayer_day_boundaries.dart';
+import '../../domain/home_hero_gradient_resolver.dart';
 import '../bloc/home_dashboard_bloc.dart';
 import '../bloc/home_dashboard_event.dart';
 import '../bloc/home_dashboard_state.dart';
@@ -22,10 +25,10 @@ abstract final class HomeDashboardHeroSliver {
   const HomeDashboardHeroSliver._();
 
   /// Greeting area inside the expanded app bar (below toolbar).
-  static const double _greetingBodyHeight = 50;
+  static const double _greetingBodyHeight = 56;
 
-  /// Intrinsic prayer metrics column height (measured at default text scale).
-  static const double _metricsContentHeight = 130;
+  /// Intrinsic prayer focus height (measured at default text scale).
+  static const double _metricsContentHeight = 112;
 
   /// Overlap between the hero and the content sheet lip.
   static const double sheetOverlap = 24;
@@ -46,24 +49,7 @@ abstract final class HomeDashboardHeroSliver {
     required VoidCallback onOpenPrayer,
     required VoidCallback onOpenSettings,
   }) {
-    final heroTokens = Theme.of(context).componentTokens.homeNextPrayerHero;
     final double topInset = MediaQuery.paddingOf(context).top;
-
-    final HomeDashboard? dashboard = switch (state) {
-      HomeDashboardLoaded(:final dashboard) => dashboard,
-      _ => null,
-    };
-    final bool isRefreshingLocation = switch (state) {
-      HomeDashboardLoaded(:final isRefreshingLocation) => isRefreshingLocation,
-      _ => true,
-    };
-    final HomeNextPrayer? nextPrayer = switch (state) {
-      HomeDashboardLoaded(:final dashboard) => dashboard.nextPrayer,
-      _ => null,
-    };
-    final bool metricsLoading =
-        state is! HomeDashboardLoaded && state is! HomeDashboardFailure;
-    final String? locationName = dashboard?.locationLabel;
     final double heroBodyHeight = _resolveHeroBodyHeight(context);
     final double bottomInset = _resolveBottomInset(context);
     final double metricsMaxHeight = _resolveMetricsMaxHeight(context);
@@ -96,7 +82,176 @@ abstract final class HomeDashboardHeroSliver {
     );
 
     return [
-      SliverAppBar(
+      _HomeDashboardHeroAppBar(
+        state: state,
+        onOpenPrayer: onOpenPrayer,
+        onOpenSettings: onOpenSettings,
+      ),
+    ];
+  }
+
+  static double _resolveHeroBodyHeight(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+    return _greetingBodyHeight +
+        tokens.spaceLarge +
+        _resolveMetricsMaxHeight(context) +
+        _footerRowHeight +
+        _resolveBottomInset(context);
+  }
+
+  static double _resolveMetricsMaxHeight(BuildContext context) {
+    return _metricsContentHeight + Theme.of(context).tokens.spaceSmall;
+  }
+
+  static double _resolveBottomInset(BuildContext context) {
+    return Theme.of(context).tokens.spaceLarge + sheetOverlap;
+  }
+}
+
+/// Pinned hero [SliverAppBar] with prayer-period gradient refresh.
+class _HomeDashboardHeroAppBar extends StatefulWidget {
+  const _HomeDashboardHeroAppBar({
+    required this.state,
+    required this.onOpenPrayer,
+    required this.onOpenSettings,
+  });
+
+  final HomeDashboardState state;
+  final VoidCallback onOpenPrayer;
+  final VoidCallback onOpenSettings;
+
+  @override
+  State<_HomeDashboardHeroAppBar> createState() =>
+      _HomeDashboardHeroAppBarState();
+}
+
+class _HomeDashboardHeroAppBarState extends State<_HomeDashboardHeroAppBar> {
+  Timer? _gradientRefreshTimer;
+
+  HomeDashboard? get _dashboard => switch (widget.state) {
+    HomeDashboardLoaded(:final dashboard) => dashboard,
+    _ => null,
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    if (kDebugMode) {
+      HomeHeroGradientDebug.phaseOverride.addListener(_onGradientInputsChanged);
+    }
+    _syncGradientRefreshTimer();
+  }
+
+  @override
+  void didUpdateWidget(covariant _HomeDashboardHeroAppBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final HomePrayerDayBoundaries? oldBoundaries = switch (oldWidget.state) {
+      HomeDashboardLoaded(:final dashboard) => dashboard.prayerBoundaries,
+      _ => null,
+    };
+    final HomePrayerDayBoundaries? newBoundaries = _dashboard?.prayerBoundaries;
+    if (oldWidget.state != widget.state || oldBoundaries != newBoundaries) {
+      _syncGradientRefreshTimer();
+    }
+  }
+
+  @override
+  void dispose() {
+    if (kDebugMode) {
+      HomeHeroGradientDebug.phaseOverride.removeListener(
+        _onGradientInputsChanged,
+      );
+    }
+    _gradientRefreshTimer?.cancel();
+    super.dispose();
+  }
+
+  void _onGradientInputsChanged() {
+    if (!mounted) {
+      return;
+    }
+    setState(() {});
+    _syncGradientRefreshTimer();
+  }
+
+  void _syncGradientRefreshTimer() {
+    _gradientRefreshTimer?.cancel();
+    _gradientRefreshTimer = null;
+
+    if (kDebugMode && HomeHeroGradientDebug.phaseOverride.value != null) {
+      return;
+    }
+
+    final HomePrayerDayBoundaries? boundaries = _dashboard?.prayerBoundaries;
+    if (boundaries == null) {
+      return;
+    }
+
+    _scheduleNextGradientRefresh(boundaries);
+  }
+
+  void _scheduleNextGradientRefresh(HomePrayerDayBoundaries boundaries) {
+    final Duration? delay =
+        HomeHeroGradientResolver.delayUntilNextGradientRefresh(
+          now: DateTime.now(),
+          boundaries: boundaries,
+        );
+    if (delay == null) {
+      return;
+    }
+
+    _gradientRefreshTimer = Timer(delay, () {
+      if (!mounted) {
+        return;
+      }
+      setState(() {});
+      _scheduleNextGradientRefresh(boundaries);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final double topInset = MediaQuery.paddingOf(context).top;
+    final HomeDashboard? dashboard = _dashboard;
+    final bool isRefreshingLocation = switch (widget.state) {
+      HomeDashboardLoaded(:final isRefreshingLocation) => isRefreshingLocation,
+      _ => true,
+    };
+    final HomeNextPrayer? nextPrayer = switch (widget.state) {
+      HomeDashboardLoaded(:final dashboard) => dashboard.nextPrayer,
+      _ => null,
+    };
+    final bool metricsLoading =
+        widget.state is! HomeDashboardLoaded &&
+        widget.state is! HomeDashboardFailure;
+    final String? locationName = dashboard?.locationLabel;
+    final double heroBodyHeight =
+        HomeDashboardHeroSliver._resolveHeroBodyHeight(
+          context,
+        );
+    final double bottomInset = HomeDashboardHeroSliver._resolveBottomInset(
+      context,
+    );
+    final double expandedHeight = topInset + heroBodyHeight;
+
+    final HomeHeroDayPhase? debugPhaseOverride = kDebugMode
+        ? HomeHeroGradientDebug.phaseOverride.value
+        : null;
+
+    final TilawaHomeNextPrayerHeroTokens heroTokens =
+        HomeHeroGradientResolver.resolve(
+          now: DateTime.now(),
+          boundaries: dashboard?.prayerBoundaries,
+          debugPhaseOverride: debugPhaseOverride,
+        );
+    final ThemeData heroTheme = _themeWithHeroTokens(
+      Theme.of(context),
+      heroTokens,
+    );
+
+    return Theme(
+      data: heroTheme,
+      child: SliverAppBar(
         pinned: true,
         stretch: true,
         expandedHeight: expandedHeight,
@@ -123,29 +278,28 @@ abstract final class HomeDashboardHeroSliver {
               ),
             );
           },
-          onOpenPrayer: onOpenPrayer,
-          onOpenSettings: onOpenSettings,
+          onOpenPrayer: widget.onOpenPrayer,
+          onOpenSettings: widget.onOpenSettings,
           bottomInset: bottomInset,
           heroBodyHeight: heroBodyHeight,
         ),
       ),
-    ];
+    );
   }
+}
 
-  static double _resolveHeroBodyHeight(BuildContext context) {
-    return _greetingBodyHeight +
-        _resolveMetricsMaxHeight(context) +
-        _footerRowHeight +
-        _resolveBottomInset(context);
-  }
-
-  static double _resolveMetricsMaxHeight(BuildContext context) {
-    return _metricsContentHeight + Theme.of(context).tokens.spaceSmall;
-  }
-
-  static double _resolveBottomInset(BuildContext context) {
-    return Theme.of(context).tokens.spaceLarge + sheetOverlap;
-  }
+ThemeData _themeWithHeroTokens(
+  ThemeData theme,
+  TilawaHomeNextPrayerHeroTokens heroTokens,
+) {
+  final TilawaComponentTokens componentTokens = theme.componentTokens.copyWith(
+    homeNextPrayerHero: heroTokens,
+  );
+  final List<ThemeExtension<dynamic>> extensions =
+      theme.extensions.values.where((ThemeExtension<dynamic> extension) {
+        return extension is! TilawaComponentTokens;
+      }).toList()..add(componentTokens);
+  return theme.copyWith(extensions: extensions);
 }
 
 /// Unified [SliverAppBar] flexible space: one gradient + all hero content.
@@ -358,6 +512,8 @@ class _HomeHeroFlexibleSpaceState extends State<_HomeHeroFlexibleSpace> {
                       opacity: collapsedOpacity,
                       child: _HomeHeroCollapsedToolbar(
                         dashboard: widget.dashboard,
+                        nextPrayer: widget.nextPrayer,
+                        onOpenPrayer: widget.onOpenPrayer,
                         onOpenSettings: widget.onOpenSettings,
                       ),
                     ),
@@ -388,31 +544,21 @@ class _HomeHeroExpandedBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
 
-    return Stack(
-      clipBehavior: Clip.hardEdge,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(
-              height: HomeDashboardHeroSliver._greetingBodyHeight,
+        Opacity(
+          opacity: greetingOpacity,
+          child: Padding(
+            padding: EdgeInsetsDirectional.only(
+              start: tokens.spaceMedium,
+              end: tokens.spaceMedium,
             ),
-            metricsFooterSection,
-          ],
-        ),
-        if (greetingOpacity > 0)
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: Padding(
-              padding: EdgeInsetsDirectional.only(
-                start: tokens.spaceMedium,
-                end: tokens.spaceMedium,
-              ),
-              child: Opacity(
-                opacity: greetingOpacity,
+            child: SizedBox(
+              height: HomeDashboardHeroSliver._greetingBodyHeight,
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
                 child: _HomeHeroHeader(
                   dashboard: dashboard,
                   onOpenSettings: onOpenSettings,
@@ -420,6 +566,9 @@ class _HomeHeroExpandedBody extends StatelessWidget {
               ),
             ),
           ),
+        ),
+        SizedBox(height: tokens.spaceLarge),
+        metricsFooterSection,
       ],
     );
   }
@@ -454,9 +603,10 @@ class _HomeHeroMetricsFooterSection extends StatelessWidget {
 
     final Widget metricsChild = metricsLoading
         ? _HomeHeroMetricsSkeleton(onGradient: onGradient)
-        : _HomeHeroPrayerMetrics(
+        : _HomeHeroNextPrayerFocus(
             nextPrayer: nextPrayer,
             onGradient: onGradient,
+            onOpenPrayer: onOpenPrayer,
           );
 
     return RepaintBoundary(
@@ -468,17 +618,21 @@ class _HomeHeroMetricsFooterSection extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: tokens.spaceLarge,
+          spacing: tokens.spaceMedium,
           children: [
-            SizedBox(
-              height: HomeDashboardHeroSliver._metricsContentHeight,
-              child: metricsChild,
+            ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: HomeDashboardHeroSliver._metricsContentHeight,
+              ),
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: metricsChild,
+              ),
             ),
             _HomeHeroPrayerFooter(
               locationName: locationName,
               isRefreshingLocation: isRefreshingLocation,
               onRefreshLocation: onRefreshLocation,
-              onOpenPrayer: onOpenPrayer,
             ),
           ],
         ),
@@ -487,14 +641,18 @@ class _HomeHeroMetricsFooterSection extends StatelessWidget {
   }
 }
 
-/// Pinned toolbar row: title + profile avatar when the hero is collapsed.
+/// Pinned toolbar row: compact prayer summary + profile when collapsed.
 class _HomeHeroCollapsedToolbar extends StatelessWidget {
   const _HomeHeroCollapsedToolbar({
     required this.dashboard,
+    required this.nextPrayer,
+    required this.onOpenPrayer,
     required this.onOpenSettings,
   });
 
   final HomeDashboard? dashboard;
+  final HomeNextPrayer? nextPrayer;
+  final VoidCallback onOpenPrayer;
   final VoidCallback onOpenSettings;
 
   @override
@@ -504,20 +662,28 @@ class _HomeHeroCollapsedToolbar extends StatelessWidget {
     final heroTokens = theme.componentTokens.homeNextPrayerHero;
     final Color onGradient = heroTokens.foregroundColor;
     final String? displayName = dashboard?.displayName;
+    final TextStyle? summaryStyle = theme.textTheme.titleSmall?.copyWith(
+      color: onGradient,
+      fontWeight: FontWeight.w700,
+    );
+
+    final Widget summary = switch (nextPrayer) {
+      null => Text(
+        context.l10n.homeNextPrayerUnavailable,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: summaryStyle,
+      ),
+      final prayer => _HomeHeroCollapsedPrayerSummary(
+        prayer: prayer,
+        onOpenPrayer: onOpenPrayer,
+        style: summaryStyle!,
+      ),
+    };
 
     return Row(
       children: [
-        Expanded(
-          child: Text(
-            context.l10n.homeTitle,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: onGradient,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ),
+        Expanded(child: summary),
         SizedBox(width: tokens.spaceMedium),
         _HomeHeroProfileMark(
           displayName: displayName,
@@ -525,6 +691,100 @@ class _HomeHeroCollapsedToolbar extends StatelessWidget {
           onTap: onOpenSettings,
         ),
       ],
+    );
+  }
+}
+
+class _HomeHeroCollapsedPrayerSummary extends StatefulWidget {
+  const _HomeHeroCollapsedPrayerSummary({
+    required this.prayer,
+    required this.onOpenPrayer,
+    required this.style,
+  });
+
+  final HomeNextPrayer prayer;
+  final VoidCallback onOpenPrayer;
+  final TextStyle style;
+
+  @override
+  State<_HomeHeroCollapsedPrayerSummary> createState() =>
+      _HomeHeroCollapsedPrayerSummaryState();
+}
+
+class _HomeHeroCollapsedPrayerSummaryState
+    extends State<_HomeHeroCollapsedPrayerSummary> {
+  Timer? _ticker;
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleTicker();
+  }
+
+  @override
+  void didUpdateWidget(covariant _HomeHeroCollapsedPrayerSummary oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.prayer.time != widget.prayer.time) {
+      _scheduleTicker();
+    }
+  }
+
+  void _scheduleTicker() {
+    _ticker?.cancel();
+    final Duration remaining = _remaining;
+    if (remaining <= Duration.zero) {
+      return;
+    }
+
+    final Duration interval = remaining < const Duration(hours: 1)
+        ? const Duration(seconds: 1)
+        : const Duration(minutes: 1);
+
+    _ticker = Timer.periodic(interval, (_) {
+      if (!mounted) {
+        return;
+      }
+      if (_remaining <= Duration.zero) {
+        _ticker?.cancel();
+      }
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _ticker?.cancel();
+    super.dispose();
+  }
+
+  Duration get _remaining {
+    final Duration difference = widget.prayer.time.difference(DateTime.now());
+    return difference.isNegative ? Duration.zero : difference;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final String name = _localizedPrayerName(context, widget.prayer.type);
+    final String time = _formatTime(context, widget.prayer.time);
+    final String summary = _remaining <= Duration.zero
+        ? '$name · $time · ${context.l10n.homePrayerNow}'
+        : '$name · $time · ${_formatCountdown(context, _remaining)}';
+
+    return Semantics(
+      button: true,
+      label: '$name, $time',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: widget.onOpenPrayer,
+          child: Text(
+            summary,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: widget.style,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -544,35 +804,57 @@ class _HomeHeroHeader extends StatelessWidget {
     final tokens = theme.tokens;
     final heroTokens = theme.componentTokens.homeNextPrayerHero;
     final Color onGradient = heroTokens.foregroundColor;
+    final Color secondary = onGradient.withValues(
+      alpha: heroTokens.footerForegroundOpacity,
+    );
     final String? displayName = dashboard?.displayName;
 
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                context.l10n.homeTitle,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  color: onGradient,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              SizedBox(height: tokens.spaceExtraSmall),
-              Text(
-                displayName == null
-                    ? context.l10n.homeGreeting
-                    : context.l10n.homeGreetingName(displayName),
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: onGradient.withValues(
-                    alpha: heroTokens.mutedForegroundOpacity,
-                  ),
-                ),
-              ),
-            ],
-          ),
+    final Widget greeting = switch (displayName) {
+      null => Text(
+        context.l10n.homeGreeting,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: theme.textTheme.titleMedium?.copyWith(
+          color: secondary,
+          fontWeight: FontWeight.w600,
+          height: 1.2,
         ),
+      ),
+      final name => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            context.l10n.homeGreeting,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: onGradient.withValues(
+                alpha: heroTokens.tertiaryForegroundOpacity,
+              ),
+              fontWeight: FontWeight.w500,
+              height: 1.2,
+            ),
+          ),
+          SizedBox(height: tokens.spaceExtraSmall),
+          Text(
+            name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: secondary,
+              fontWeight: FontWeight.w600,
+              height: 1.1,
+            ),
+          ),
+        ],
+      ),
+    };
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: greeting),
         SizedBox(width: tokens.spaceMedium),
         _HomeHeroProfileMark(
           displayName: displayName,
@@ -696,14 +978,16 @@ class _HomeHeroMetricsSkeleton extends StatelessWidget {
   }
 }
 
-class _HomeHeroPrayerMetrics extends StatelessWidget {
-  const _HomeHeroPrayerMetrics({
+class _HomeHeroNextPrayerFocus extends StatelessWidget {
+  const _HomeHeroNextPrayerFocus({
     required this.nextPrayer,
     required this.onGradient,
+    required this.onOpenPrayer,
   });
 
   final HomeNextPrayer? nextPrayer;
   final Color onGradient;
+  final VoidCallback onOpenPrayer;
 
   @override
   Widget build(BuildContext context) {
@@ -714,74 +998,97 @@ class _HomeHeroPrayerMetrics extends StatelessWidget {
       data: {
         'buildCount': buildCount,
         'hasNextPrayer': nextPrayer != null,
-        'layoutMode': 'flexible_space',
+        'layoutMode': 'typographic_focus',
       },
     );
 
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final heroTokens = theme.componentTokens.homeNextPrayerHero;
+    final Color tertiary = onGradient.withValues(
+      alpha: heroTokens.tertiaryForegroundOpacity,
+    );
+    final Color secondary = onGradient.withValues(
+      alpha: heroTokens.footerForegroundOpacity,
+    );
+    final Color muted = onGradient.withValues(
+      alpha: heroTokens.mutedForegroundOpacity,
+    );
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (nextPrayer == null)
-          Text(
-            context.l10n.homeNextPrayerUnavailable,
-            style: theme.textTheme.titleLarge?.copyWith(
-              color: onGradient,
-              fontWeight: FontWeight.w800,
-              height: 1.2,
-            ),
-          )
-        else ...[
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: tokens.spaceMedium,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: tokens.spaceExtraSmall,
-                  children: [
-                    Text(
-                      context.l10n.nextPrayer,
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: onGradient.withValues(
-                          alpha: heroTokens.mutedForegroundOpacity,
-                        ),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      _localizedPrayerName(context, nextPrayer!.type),
-                      style: theme.textTheme.headlineLarge?.copyWith(
-                        color: onGradient,
-                        fontWeight: FontWeight.w800,
-                        height: 1.05,
-                      ),
-                    ),
-                  ],
+    if (nextPrayer == null) {
+      return Text(
+        context.l10n.homeNextPrayerUnavailable,
+        style: theme.textTheme.titleMedium?.copyWith(
+          color: secondary,
+          fontWeight: FontWeight.w600,
+          height: 1.2,
+        ),
+      );
+    }
+
+    final HomeNextPrayer prayer = nextPrayer!;
+    final String prayerName = _localizedPrayerName(context, prayer.type);
+    final String timeLabel = _formatTime(context, prayer.time);
+    final String semanticsLabel =
+        '${context.l10n.nextPrayer}: $prayerName, $timeLabel';
+
+    return Semantics(
+      button: true,
+      label: semanticsLabel,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onOpenPrayer,
+          splashColor: onGradient.withValues(
+            alpha: heroTokens.locationChipSplashOpacity,
+          ),
+          highlightColor: onGradient.withValues(
+            alpha: heroTokens.locationChipHighlightOpacity,
+          ),
+          child: Padding(
+            padding: EdgeInsets.only(top: tokens.spaceSmall),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.l10n.nextPrayer,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: tertiary,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.2,
+                  ),
                 ),
-              ),
-              _HomeHeroPrayerVisual(icon: nextPrayer!.type.icon),
-            ],
-          ),
-          SizedBox(height: tokens.spaceSmall),
-          Text(
-            _formatTime(context, nextPrayer!.time),
-            style: theme.textTheme.displaySmall?.copyWith(
-              color: onGradient,
-              fontWeight: FontWeight.w800,
-              height: 1.0,
-              fontFeatures: const [FontFeature.tabularFigures()],
+                SizedBox(height: tokens.spaceSmall),
+                Text(
+                  prayerName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: secondary,
+                    fontWeight: FontWeight.w600,
+                    height: 1.1,
+                  ),
+                ),
+                SizedBox(height: tokens.spaceSmall),
+                Text(
+                  timeLabel,
+                  style: theme.textTheme.headlineLarge?.copyWith(
+                    color: onGradient,
+                    fontWeight: FontWeight.w700,
+                    height: 1.0,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+                SizedBox(height: tokens.spaceMedium),
+                _HomeHeroPrayerRemainingText(
+                  prayerTime: prayer.time,
+                  color: muted,
+                ),
+              ],
             ),
           ),
-          SizedBox(height: tokens.spaceExtraSmall),
-          _HomeHeroPrayerRemainingText(prayerTime: nextPrayer!.time),
-        ],
-      ],
+        ),
+      ),
     );
   }
 }
@@ -791,117 +1098,26 @@ class _HomeHeroPrayerFooter extends StatelessWidget {
     required this.locationName,
     required this.isRefreshingLocation,
     required this.onRefreshLocation,
-    required this.onOpenPrayer,
   });
 
   final String? locationName;
   final bool isRefreshingLocation;
   final VoidCallback? onRefreshLocation;
-  final VoidCallback onOpenPrayer;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
     final String locationLabel =
         PrayerLocationLabelFormatter.abbreviatedLocationLabel(
           locationName: locationName,
           l10n: context.l10n,
         );
 
-    final BorderRadius prayerActionRadius = BorderRadius.circular(
-      tokens.resolveRadius(
-        family: TilawaRadiusFamily.pill,
-        height: kTilawaMinInteractiveDimension,
-      ),
-    );
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      spacing: tokens.spaceSmall,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Flexible(
-          fit: FlexFit.loose,
-          child: _HomeHeroLocationChip(
-            locationLabel: locationLabel,
-            isRefreshingLocation: isRefreshingLocation,
-            onRefreshLocation: onRefreshLocation,
-          ),
-        ),
-        _HomeHeroPrayerAction(
-          label: context.l10n.homePrayerTimesAction,
-          borderRadius: prayerActionRadius,
-          onTap: onOpenPrayer,
-        ),
-      ],
-    );
-  }
-}
-
-class _HomeHeroPrayerAction extends StatelessWidget {
-  const _HomeHeroPrayerAction({
-    required this.label,
-    required this.borderRadius,
-    required this.onTap,
-  });
-
-  final String label;
-  final BorderRadius borderRadius;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final heroTokens = theme.componentTokens.homeNextPrayerHero;
-    final Color onGradient = heroTokens.foregroundColor.withValues(
-      alpha: heroTokens.footerForegroundOpacity,
-    );
-
-    return Material(
-      color: Colors.transparent,
-      shape: RoundedRectangleBorder(borderRadius: borderRadius),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: borderRadius,
-        splashColor: heroTokens.foregroundColor.withValues(
-          alpha: heroTokens.locationChipSplashOpacity,
-        ),
-        highlightColor: heroTokens.foregroundColor.withValues(
-          alpha: heroTokens.locationChipHighlightOpacity,
-        ),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minHeight: kTilawaMinInteractiveDimension,
-          ),
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              spacing: tokens.spaceExtraSmall,
-              children: [
-                Flexible(
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: onGradient,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                Icon(
-                  Icons.arrow_forward_rounded,
-                  size: tokens.iconSizeMedium,
-                  color: onGradient,
-                ),
-              ],
-            ),
-          ),
-        ),
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: _HomeHeroLocationChip(
+        locationLabel: locationLabel,
+        isRefreshingLocation: isRefreshingLocation,
+        onRefreshLocation: onRefreshLocation,
       ),
     );
   }
@@ -1042,9 +1258,13 @@ class _HomeHeroLocationChip extends StatelessWidget {
 }
 
 class _HomeHeroPrayerRemainingText extends StatefulWidget {
-  const _HomeHeroPrayerRemainingText({required this.prayerTime});
+  const _HomeHeroPrayerRemainingText({
+    required this.prayerTime,
+    required this.color,
+  });
 
   final DateTime prayerTime;
+  final Color color;
 
   @override
   State<_HomeHeroPrayerRemainingText> createState() =>
@@ -1115,50 +1335,12 @@ class _HomeHeroPrayerRemainingTextState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final heroTokens = theme.componentTokens.homeNextPrayerHero;
-    final Color onGradient = heroTokens.foregroundColor;
 
     return Text(
       _formatCountdown(context, _remaining),
-      style: theme.textTheme.bodyLarge?.copyWith(
-        color: onGradient.withValues(alpha: heroTokens.mutedForegroundOpacity),
-        fontWeight: FontWeight.w600,
-      ),
-    );
-  }
-}
-
-class _HomeHeroPrayerVisual extends StatelessWidget {
-  const _HomeHeroPrayerVisual({required this.icon});
-
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final heroTokens = theme.componentTokens.homeNextPrayerHero;
-    final Color onGradient = heroTokens.foregroundColor;
-
-    return Container(
-      width: tokens.iconSizeLargePlus,
-      height: tokens.iconSizeLargePlus,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: onGradient.withValues(
-          alpha: heroTokens.locationChipFillOpacity,
-        ),
-        border: Border.all(
-          color: onGradient.withValues(
-            alpha: heroTokens.locationChipBorderOpacity,
-          ),
-          width: tokens.borderWidthThin,
-        ),
-      ),
-      child: Icon(
-        icon,
-        size: tokens.iconSizeLarge,
-        color: onGradient,
+      style: theme.textTheme.labelMedium?.copyWith(
+        color: widget.color,
+        fontWeight: FontWeight.w500,
       ),
     );
   }

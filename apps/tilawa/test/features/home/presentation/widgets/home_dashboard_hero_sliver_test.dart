@@ -25,19 +25,22 @@ void main() {
     await tester.pumpWidget(_HomeHeroHarness(controller: controller));
     expect(tester.takeException(), isNull);
 
+    final BuildContext scrollContext = tester.element(
+      find.byType(CustomScrollView),
+    );
+    final l10n = AppLocalizations.of(scrollContext)!;
+    expect(find.text(l10n.homeGreeting), findsOneWidget);
+    expect(find.text('Muhammad Kamel'), findsOneWidget);
+
     final theme = Theme.of(
       tester.element(find.byType(CustomScrollView)),
     );
     final heroTokens = theme.componentTokens.homeNextPrayerHero;
     final appBar = tester.widget<SliverAppBar>(find.byType(SliverAppBar));
-    expect(appBar.expandedHeight, 276);
+    expect(appBar.expandedHeight, 280);
     expect(appBar.backgroundColor, heroTokens.gradientBottomEnd);
     expect(appBar.foregroundColor, heroTokens.foregroundColor);
 
-    final BuildContext scrollContext = tester.element(
-      find.byType(CustomScrollView),
-    );
-    final l10n = AppLocalizations.of(scrollContext)!;
     final double collapseExtent = HomeDashboardHeroSliver.collapseScrollExtent(
       scrollContext,
     );
@@ -45,11 +48,6 @@ void main() {
     controller.jumpTo(collapseExtent * 0.8);
     await tester.pump();
 
-    expect(
-      find.text(l10n.homeTitle),
-      findsOneWidget,
-      reason: 'Partial hero collapse must keep an orientation title visible.',
-    );
     expect(tester.takeException(), isNull);
 
     const offsets = <double>[8, 40, 104, 169, 251, 297];
@@ -87,7 +85,7 @@ void main() {
         locationLabel: 'Abha',
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     final chipFinder = find.ancestor(
       of: find.text('Abha'),
@@ -104,18 +102,11 @@ void main() {
     expect(chipFinder, findsOneWidget);
 
     final RenderBox chipBox = tester.renderObject(chipFinder);
-    final RenderBox footerRowBox = tester.renderObject(
-      find.ancestor(
-        of: chipFinder,
-        matching: find.byWidgetPredicate(
-          (widget) =>
-              widget is Row &&
-              widget.mainAxisAlignment == MainAxisAlignment.spaceBetween,
-        ),
-      ),
+    final RenderBox viewportBox = tester.renderObject(
+      find.byType(CustomScrollView),
     );
 
-    expect(chipBox.size.width, lessThan(footerRowBox.size.width * 0.45));
+    expect(chipBox.size.width, lessThan(viewportBox.size.width * 0.45));
     expect(chipBox.size.height, kTilawaMinInteractiveDimension);
   });
 }

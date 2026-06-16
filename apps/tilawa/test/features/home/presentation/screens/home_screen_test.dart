@@ -31,7 +31,10 @@ void main() {
     addTearDown(bloc.close);
 
     await tester.pumpWidget(_HomeScreenHarness(bloc: bloc));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    for (var frame = 0; frame < 20; frame++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
 
     expect(find.byType(SliverPersistentHeader), findsOneWidget);
 
@@ -54,7 +57,13 @@ void main() {
       context: tester.element(scrollableFinder),
     ).dispatch(tester.element(scrollableFinder));
 
-    await tester.pumpAndSettle();
+    await tester.pump();
+    for (var frame = 0; frame < 50; frame++) {
+      await tester.pump(const Duration(milliseconds: 16));
+      if ((position.pixels - collapseExtent).abs() < 0.5) {
+        break;
+      }
+    }
 
     expect(position.pixels, closeTo(collapseExtent, 0.5));
     expect(tester.takeException(), isNull);
