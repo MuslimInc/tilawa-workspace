@@ -59,6 +59,22 @@ class VerseServiceImpl implements VerseService {
   }
 
   @override
+  String getVerseNormal(int surahNumber, int verseNumber) {
+    final Map<String, dynamic>? verseData = _findVerse(
+      surahNumber,
+      verseNumber,
+    );
+
+    if (verseData == null) {
+      throw const QuranException(
+        'No verse found with given surahNumber and verseNumber.',
+      );
+    }
+
+    return verseData['text_normal'] as String;
+  }
+
+  @override
   String getVerseQCF(
     int surahNumber,
     int verseNumber, {

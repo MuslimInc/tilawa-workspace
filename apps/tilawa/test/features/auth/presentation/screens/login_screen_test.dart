@@ -139,11 +139,13 @@ void main() {
   }
 
   Finder googleButtonFinder() {
-    return find.byType(TilawaButton);
+    return find.byType(TilawaGoogleSignInButton);
   }
 
   bool isGoogleButtonLoading(WidgetTester tester) {
-    return tester.widget<TilawaButton>(googleButtonFinder()).isLoading;
+    return tester
+        .widget<TilawaGoogleSignInButton>(googleButtonFinder())
+        .isLoading;
   }
 
   void registerAutoSignInPolicy() {
@@ -161,7 +163,7 @@ void main() {
       await pumpLoginInitFrames(tester);
 
       expect(find.text('Welcome to Tilawa'), findsOneWidget);
-      expect(find.text('Continue with Google'), findsOneWidget);
+      expect(find.text('Sign in with Google'), findsOneWidget);
       expect(find.text('Privacy policy'), findsOneWidget);
     });
 
@@ -254,7 +256,7 @@ void main() {
       verifyNever(mockSignInWithGoogleUseCase());
       expect(isGoogleButtonLoading(tester), isFalse);
       expect(
-        tester.widget<TilawaButton>(googleButtonFinder()).onPressed,
+        tester.widget<TilawaGoogleSignInButton>(googleButtonFinder()).onPressed,
         isNotNull,
       );
     });

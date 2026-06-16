@@ -180,12 +180,16 @@ class SettingsScreen extends StatelessWidget {
                   ),
                   TilawaSettingsTile(
                     title: l10n.manageStorage,
+                    subtitle: l10n.manageStorageSubtitle,
                     onTap: () => const DownloadsRoute().push(context),
                   ),
                   BlocBuilder<SettingsCubit, SettingsState>(
                     builder: (context, state) {
                       return TilawaSettingsTile(
                         title: l10n.concurrentDownloads,
+                        subtitle: l10n.concurrentDownloadsSubtitle(
+                          state.maxConcurrentDownloads,
+                        ),
                         trailing: settingsPickerTrailing(
                           context,
                           value: '${state.maxConcurrentDownloads}',
@@ -230,6 +234,7 @@ class SettingsScreen extends StatelessWidget {
                   if (supportTilawaEnabled)
                     TilawaSettingsTile(
                       title: l10n.supportTilawa,
+                      subtitle: l10n.supportHelpKeepFree,
                       onTap: () => const SupportRoute().push(context),
                     ),
                   TilawaSettingsTile(

@@ -123,6 +123,93 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeDailyDuaReference => 'Abu Dawud';
 
   @override
+  String get khatmaEmptyTitle => 'Start a Khatma';
+
+  @override
+  String get khatmaEmptySubtitle =>
+      'Choose a calm reading plan. We will adjust gently when life gets busy.';
+
+  @override
+  String khatmaDurationDays(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get khatmaProgressTitle => 'Khatma Progress';
+
+  @override
+  String khatmaProgressSubtitle(int currentDay, int totalDays) {
+    return 'Day $currentDay of $totalDays';
+  }
+
+  @override
+  String get khatmaProgressPercent => 'Progress';
+
+  @override
+  String get khatmaTodayGoal => 'Today';
+
+  @override
+  String get khatmaRemaining => 'Remaining';
+
+  @override
+  String khatmaPagesShort(int pages) {
+    String _temp0 = intl.Intl.pluralLogic(
+      pages,
+      locale: localeName,
+      other: '$pages pages',
+      one: '1 page',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String khatmaDaysShort(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get khatmaAdjustedPlan => 'We adjusted your plan gently for today.';
+
+  @override
+  String khatmaContinueFromPage(int page) {
+    return 'Continue from page $page';
+  }
+
+  @override
+  String get khatmaRemainingPages => 'Pages left';
+
+  @override
+  String get khatmaCatchUpAction => 'Catch up today';
+
+  @override
+  String get khatmaExtendAction => 'Extend plan';
+
+  @override
+  String get khatmaResetAction => 'Reset plan';
+
+  @override
+  String get khatmaResetTitle => 'Reset Khatma plan?';
+
+  @override
+  String get khatmaResetMessage =>
+      'This clears your current Khatma plan. Your last-read Quran page and bookmarks stay saved.';
+
+  @override
+  String get khatmaContinueReading => 'Continue Reading';
+
+  @override
   String get todayPlanTitle => 'Today’s Plan';
 
   @override
@@ -755,7 +842,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signingIn => 'Signing in...';
 
   @override
-  String get continueWithGoogle => 'Continue with Google';
+  String get continueWithGoogle => 'Sign in with Google';
 
   @override
   String get googleSignInNotConfigured =>
@@ -2669,4 +2756,45 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get inAppUpdateUpdateAction => 'Update';
+
+  @override
+  String recitationPracticeTitle(int surah, int ayah) {
+    return 'Practice $surah:$ayah';
+  }
+
+  @override
+  String get recitationPracticeStart => 'Start reciting';
+
+  @override
+  String get recitationPracticeStop => 'Stop';
+
+  @override
+  String recitationPracticeScore(int percent) {
+    return '$percent% match';
+  }
+
+  @override
+  String get recitationPracticeNextAyah => 'Next ayah';
+
+  @override
+  String get recitationPracticeTooltip => 'Practice recitation';
+
+  @override
+  String recitationPracticeSessionProgress(int current, int total) {
+    return 'Ayah $current of $total';
+  }
+
+  @override
+  String get recitationPracticeListening => 'Listening…';
+
+  @override
+  String get recitationPracticeEndSession => 'End session';
+
+  @override
+  String get recitationPracticeSessionComplete => 'Page complete';
+
+  @override
+  String recitationPracticeCompletedCount(int count, int total) {
+    return '$count of $total passed';
+  }
 }

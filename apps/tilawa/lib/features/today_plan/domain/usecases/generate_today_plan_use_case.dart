@@ -1,9 +1,12 @@
 import 'package:dartz_plus/dartz_plus.dart';
+import 'package:tilawa/core/services/hive_readiness.dart';
 import 'package:tilawa_core/core.dart';
 
 import '../../../history/domain/entities/history_entity.dart';
 import '../../../history/domain/repositories/history_repository.dart';
 import '../../../quran_reader/domain/repositories/quran_reader_repository.dart';
+import '../../../smart_khatma/domain/entities/khatma_plan.dart';
+import '../../../smart_khatma/domain/usecases/get_khatma_today_target_use_case.dart';
 import '../entities/today_plan.dart';
 import '../repositories/today_plan_repository.dart';
 
@@ -12,11 +15,15 @@ final class GenerateTodayPlanUseCase {
     this._quranReaderRepository,
     this._historyRepository,
     this._todayPlanRepository,
-  );
+    this._hiveReadiness, [
+    this._getKhatmaTodayTarget,
+  ]);
 
   final QuranReaderRepository _quranReaderRepository;
   final HistoryRepository _historyRepository;
   final TodayPlanRepository _todayPlanRepository;
+  final HiveReadiness? _hiveReadiness;
+  final GetKhatmaTodayTargetUseCase? _getKhatmaTodayTarget;
 
   Future<Either<Failure, TodayPlan>> call({DateTime? now}) async {
     try {
@@ -26,12 +33,15 @@ final class GenerateTodayPlanUseCase {
         dateKey,
       );
       final lastRead = await _quranReaderRepository.getLastReadPosition();
+      await _hiveReadiness?.ensureReady();
       final history = await _historyRepository.getRecentHistory(limit: 10);
       final bool listeningHeavy = _isListeningHeavy(history, today);
-      final int readingPages = _readingPagesFor(history, today);
+      final KhatmaTodayTarget? khatmaTarget = await _loadKhatmaTarget(today);
+      final int readingPages =
+          khatmaTarget?.pages ?? _readingPagesFor(history, today);
 
       final tasks = <TodayPlanTask>[
-        _readingTask(lastRead, readingPages),
+        _readingTask(lastRead, readingPages, khatmaTarget),
         _listeningTask(history),
         const TodayPlanTask(
           id: 'morning_adhkar',
@@ -59,7 +69,10 @@ final class GenerateTodayPlanUseCase {
           dateKey: dateKey,
           tasks: hydratedTasks,
           streakDays: _streakDays(history, today),
-          isAdaptive: listeningHeavy || readingPages != 2,
+          isAdaptive:
+              listeningHeavy ||
+              readingPages != 2 ||
+              (khatmaTarget?.missedDays ?? 0) > 0,
         ),
       );
     } catch (e) {
@@ -70,8 +83,9 @@ final class GenerateTodayPlanUseCase {
   TodayPlanTask _readingTask(
     ({int? surahNumber, int? ayahNumber, int? page}) lastRead,
     int pages,
+    KhatmaTodayTarget? khatmaTarget,
   ) {
-    final int? page = lastRead.page;
+    final int? page = khatmaTarget?.startPage ?? lastRead.page;
     return TodayPlanTask(
       id: 'read_quran',
       kind: TodayPlanTaskKind.reading,
@@ -79,8 +93,23 @@ final class GenerateTodayPlanUseCase {
       metadata: <String, Object?>{
         'pages': pages,
         'page': page,
+        if (khatmaTarget != null) ...<String, Object?>{
+          'khatma_plan_id': khatmaTarget.plan.id,
+          'khatma_progress_percent': (khatmaTarget.progress * 100).round(),
+          'khatma_remaining_pages': khatmaTarget.remainingPages,
+          'khatma_missed_days': khatmaTarget.missedDays,
+        },
       },
     );
+  }
+
+  Future<KhatmaTodayTarget?> _loadKhatmaTarget(DateTime today) async {
+    final useCase = _getKhatmaTodayTarget;
+    if (useCase == null) {
+      return null;
+    }
+    final result = await useCase(now: today);
+    return result.fold((_) => null, (target) => target);
   }
 
   TodayPlanTask _listeningTask(List<HistoryEntity> history) {

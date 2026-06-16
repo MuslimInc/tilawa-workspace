@@ -79,6 +79,7 @@ dependencies:
   quran_image:
     path: ../../packages/quran_image
 
+  record: ^7.1.0
   rxdart: ^0.28.0
   sentry_flutter: ^9.21.0
   share_plus: ^13.1.0
@@ -95,6 +96,7 @@ dependencies:
   in_app_review: ^2.0.12
   url_launcher: ^6.3.2
   disk_space_plus: ^0.2.6
+  speech_to_text: ^7.4.0
 
 dev_dependencies:
   bloc_lint: ^0.4.1

@@ -34,6 +34,7 @@ void main() {
     await tester.pumpWidget(_buildHarness(cubit: cubit));
 
     expect(find.text('Rate Tilawa'), findsOneWidget);
+    expect(find.text('Share your feedback on the app store.'), findsOneWidget);
   });
 
   testWidgets('tap requests rating from settings flow', (

@@ -66,6 +66,17 @@ class AnalyticsEvents {
   static const String todayPlanPremiumClicked = 'today_plan_premium_clicked';
   static const String todayPlanPremiumConverted =
       'today_plan_premium_converted';
+  static const String khatmaCreated = 'khatma_created';
+  static const String khatmaStarted = 'khatma_started';
+  static const String khatmaProgressUpdated = 'khatma_progress_updated';
+  static const String khatmaGoalCompleted = 'khatma_goal_completed';
+  static const String khatmaPlanAdjusted = 'khatma_plan_adjusted';
+  static const String khatmaCatchupSelected = 'khatma_catchup_selected';
+  static const String khatmaExtendSelected = 'khatma_extend_selected';
+  static const String khatmaCompleted = 'khatma_completed';
+  static const String khatmaDashboardViewed = 'khatma_dashboard_viewed';
+  static const String khatmaContinueReading = 'khatma_continue_reading';
+  static const String khatmaReset = 'khatma_reset';
 }
 
 class AnalyticsParams {

@@ -15,6 +15,7 @@ final class TodayPlanBloc extends Bloc<TodayPlanEvent, TodayPlanState> {
     this._analyticsService,
   ) : super(const TodayPlanInitial()) {
     on<TodayPlanStarted>(_onStarted);
+    on<TodayPlanSourceChanged>(_onSourceChanged);
     on<TodayPlanTaskToggled>(_onTaskToggled);
     on<TodayPlanContinuePressed>(_onContinuePressed);
     on<TodayPlanSupportPressed>(_onSupportPressed);
@@ -29,13 +30,29 @@ final class TodayPlanBloc extends Bloc<TodayPlanEvent, TodayPlanState> {
     Emitter<TodayPlanState> emit,
   ) async {
     emit(const TodayPlanLoading());
+    await _emitGeneratedPlan(emit, logViewed: true);
+  }
+
+  Future<void> _onSourceChanged(
+    TodayPlanSourceChanged event,
+    Emitter<TodayPlanState> emit,
+  ) {
+    return _emitGeneratedPlan(emit, logViewed: false);
+  }
+
+  Future<void> _emitGeneratedPlan(
+    Emitter<TodayPlanState> emit, {
+    required bool logViewed,
+  }) async {
     final result = await _generatePlan();
     result.fold(
       (failure) =>
           emit(TodayPlanFailure(failure.message ?? 'Plan unavailable')),
       (plan) {
         emit(TodayPlanLoaded(plan));
-        _logEvent(AnalyticsEvents.todayPlanViewed, plan: plan);
+        if (logViewed) {
+          _logEvent(AnalyticsEvents.todayPlanViewed, plan: plan);
+        }
       },
     );
   }

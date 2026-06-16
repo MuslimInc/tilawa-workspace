@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tilawa/core/app_legal_urls.dart';
 import 'package:tilawa/core/bootstrap/splash_launch_handoff.dart';
 import 'package:tilawa/core/di/injection.dart';
@@ -458,7 +457,10 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                           'pointerDown on button (isLoading=$isLoading)',
                         );
                       },
-                      child: _GoogleSignInButton(
+                      child: TilawaGoogleSignInButton(
+                        label: context.l10n.continueWithGoogle,
+                        semanticLabel: context.l10n.continueWithGoogle,
+                        appearance: GoogleSignInButtonAppearance.light,
                         isLoading: isLoading,
                         onPressed: isLoading
                             ? null
@@ -486,47 +488,6 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
       AppRouter.disableStateRestoration = false;
       AppRouter.router.go(const HomeRoute().location);
     });
-  }
-}
-
-class _GoogleSignInButton extends StatelessWidget {
-  const _GoogleSignInButton({required this.isLoading, this.onPressed});
-
-  final bool isLoading;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-
-    return TilawaButton(
-      text: context.l10n.continueWithGoogle,
-      semanticLabel: context.l10n.continueWithGoogle,
-      isFullWidth: true,
-      isLoading: isLoading,
-      onPressed: onPressed,
-      backgroundColor: colorScheme.surface,
-      foregroundColor: colorScheme.onSurface,
-      leadingIcon: const _GoogleMark(),
-    );
-  }
-}
-
-/// Multicolor Google “G” — kept outside [IconTheme] tinting.
-class _GoogleMark extends StatelessWidget {
-  const _GoogleMark();
-
-  @override
-  Widget build(BuildContext context) {
-    final double size =
-        IconTheme.of(context).size ?? Theme.of(context).tokens.iconSizeMedium;
-
-    return SvgPicture.asset(
-      'assets/icons/google_icon.svg',
-      width: size,
-      height: size,
-      fit: BoxFit.contain,
-    );
   }
 }
 

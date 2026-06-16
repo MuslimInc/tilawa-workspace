@@ -10,6 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_svg: ^2.2.3
 
   # Utils
   flex_color_scheme:
@@ -26,6 +27,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/icons/google_g_logo.svg
   fonts:
     # Bundled IBM Plex Sans Arabic (SIL Open Font License 1.1) so the brand
     # typeface ships with the app instead of being fetched from

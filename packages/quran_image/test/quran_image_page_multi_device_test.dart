@@ -86,6 +86,35 @@ Future<void> _pumpQuranImagePage(
   await tester.pump();
 }
 
+Future<void> _pumpQuranImagePageBox(
+  WidgetTester tester, {
+  required Size mediaQuerySize,
+  required Size boxSize,
+}) async {
+  tester.view.physicalSize = mediaQuerySize;
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
+
+  await tester.pumpWidget(
+    MediaQuery(
+      data: MediaQueryData(size: mediaQuerySize),
+      child: MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox.fromSize(
+              size: boxSize,
+              child: const QuranImagePage(pageNumber: 1),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+  await tester.pump();
+}
+
 void main() {
   late Directory tempDirectory;
 
@@ -106,6 +135,29 @@ void main() {
         expect(find.byType(Image), findsWidgets);
       });
     }
+
+    testWidgets('same mounted page relayouts when constraints rotate', (
+      tester,
+    ) async {
+      const portrait = Size(390, 844);
+      const landscape = Size(844, 390);
+
+      await _pumpQuranImagePageBox(
+        tester,
+        mediaQuerySize: portrait,
+        boxSize: portrait,
+      );
+      expect(find.byType(SingleChildScrollView), findsNothing);
+
+      await _pumpQuranImagePageBox(
+        tester,
+        mediaQuerySize: portrait,
+        boxSize: landscape,
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(SingleChildScrollView), findsOneWidget);
+    });
   });
 
   group('VerseMarkersOverlay — layout width vs stale pageWidth', () {

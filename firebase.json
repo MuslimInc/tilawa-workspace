@@ -15,6 +15,9 @@
     {
       "source": "functions",
       "codebase": "default",
+      "predeploy": [
+        "functions/node_modules/.bin/tsc -p functions/tsconfig.json"
+      ],
       "ignore": [
         "node_modules",
         ".git"

@@ -19,6 +19,10 @@ String getVerse(
   verseEndSymbol: verseEndSymbol,
 );
 
+/// Diacritic-stripped verse text for speech comparison.
+String getVerseNormal(int surahNumber, int verseNumber) =>
+    QuranServiceLocator.verseService.getVerseNormal(surahNumber, verseNumber);
+
 /// Takes [verseNumber], [arabicNumeral] (optional) and returns '۝' symbol
 /// with verse number.
 String getVerseEndSymbol(int verseNumber, {bool arabicNumeral = true}) =>

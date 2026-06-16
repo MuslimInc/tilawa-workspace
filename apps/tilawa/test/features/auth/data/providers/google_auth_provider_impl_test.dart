@@ -246,6 +246,70 @@ void main() {
       },
     );
 
+    group('iOS interactive fallback', () {
+      void stubFirebaseSignIn() {
+        when(mockGoogleUser.authentication).thenReturn(mockGoogleAuth);
+        when(mockGoogleAuth.idToken).thenReturn('token');
+        when(
+          mockFirebaseAuth.signInWithCredential(any),
+        ).thenAnswer((_) async => mockUserCredential);
+        when(mockUserCredential.user).thenReturn(mockFirebaseUser);
+        when(mockFirebaseUser.uid).thenReturn('123');
+        when(mockFirebaseUser.email).thenReturn('test@example.com');
+        when(mockFirebaseUser.displayName).thenReturn('Test User');
+        when(mockFirebaseUser.photoURL).thenReturn('url');
+        when(mockFirebaseUser.metadata).thenReturn(UserMetadata(0, 0));
+      }
+
+      setUp(() {
+        GoogleAuthProviderImpl.useIosInteractiveSignInFallback = true;
+      });
+
+      tearDown(() {
+        GoogleAuthProviderImpl.useIosInteractiveSignInFallback = false;
+      });
+
+      test(
+        'falls back to authenticate when lightweight returns no account',
+        () async {
+          when(
+            mockGoogleSignIn.authenticate(),
+          ).thenAnswer((_) async => mockGoogleUser);
+          stubFirebaseSignIn();
+
+          final AuthResult result = await googleAuthProvider.signIn();
+
+          result.maybeWhen(
+            success: (user) => expect(user.id, '123'),
+            orElse: () => fail('Expected success'),
+          );
+          verify(mockGoogleSignIn.authenticate()).called(1);
+        },
+      );
+
+      test(
+        'skips authenticate when lightweight sign-in succeeds',
+        () async {
+          when(
+            mockGoogleSignIn.attemptLightweightAuthentication(
+              reportAllExceptions: anyNamed('reportAllExceptions'),
+            ),
+          ).thenAnswer(
+            (_) => Future<GoogleSignInAccount?>.value(mockGoogleUser),
+          );
+          stubFirebaseSignIn();
+
+          final AuthResult result = await googleAuthProvider.signIn();
+
+          result.maybeWhen(
+            success: (user) => expect(user.id, '123'),
+            orElse: () => fail('Expected success'),
+          );
+          verifyNever(mockGoogleSignIn.authenticate());
+        },
+      );
+    });
+
     test(
       'signIn returns failure when Credential Manager API is unavailable',
       () async {

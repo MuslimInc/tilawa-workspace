@@ -100,4 +100,26 @@ void main() {
     verify(mockDeviceTokenService.getToken()).called(1);
     verifyNever(mockUserRepository.saveDeviceToken(any, any));
   });
+
+  test(
+    'removeCurrentTokenForUser clears cache when getToken throws',
+    () async {
+      when(mockDeviceTokenService.getToken()).thenThrow(
+        Exception('[firebase_messaging/apns-token-not-set]'),
+      );
+      when(
+        mockTokenSyncCache.getLastSyncedToken(),
+      ).thenAnswer((_) async => null);
+      when(
+        mockTokenSyncCache.getLastSyncedUserId(),
+      ).thenAnswer((_) async => null);
+      when(mockTokenSyncCache.clearSync()).thenAnswer((_) async {});
+
+      await useCase.removeCurrentTokenForUser(tUserId);
+
+      verify(mockDeviceTokenService.getToken()).called(1);
+      verifyNever(mockUserRepository.deleteDeviceToken(any, any));
+      verify(mockTokenSyncCache.clearSync()).called(1);
+    },
+  );
 }

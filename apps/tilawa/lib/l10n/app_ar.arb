@@ -87,6 +87,63 @@
     "homeDailyDuaLabel": "الدعاء اليومي",
     "homeDailyDuaBody": "اللهم أعني على ذكرك وشكرك وحسن عبادتك.",
     "homeDailyDuaReference": "أبو داود",
+    "khatmaEmptyTitle": "ابدأ ختمة",
+    "khatmaEmptySubtitle": "اختر خطة قراءة هادئة. سنعدّلها بلطف إذا انشغل يومك.",
+    "khatmaDurationDays": "{days, plural, =1{يوم واحد} =2{يومان} other{{days} يومًا}}",
+    "@khatmaDurationDays": {
+        "placeholders": {
+            "days": {
+                "type": "int"
+            }
+        }
+    },
+    "khatmaProgressTitle": "تقدّم الختمة",
+    "khatmaProgressSubtitle": "اليوم {currentDay} من {totalDays}",
+    "@khatmaProgressSubtitle": {
+        "placeholders": {
+            "currentDay": {
+                "type": "int"
+            },
+            "totalDays": {
+                "type": "int"
+            }
+        }
+    },
+    "khatmaProgressPercent": "التقدّم",
+    "khatmaTodayGoal": "اليوم",
+    "khatmaRemaining": "المتبقي",
+    "khatmaPagesShort": "{pages, plural, =1{صفحة} =2{صفحتان} other{{pages} صفحات}}",
+    "@khatmaPagesShort": {
+        "placeholders": {
+            "pages": {
+                "type": "int"
+            }
+        }
+    },
+    "khatmaDaysShort": "{days, plural, =1{يوم} =2{يومان} other{{days} أيام}}",
+    "@khatmaDaysShort": {
+        "placeholders": {
+            "days": {
+                "type": "int"
+            }
+        }
+    },
+    "khatmaAdjustedPlan": "عدّلنا خطتك بلطف لهذا اليوم.",
+    "khatmaContinueFromPage": "تابع من صفحة {page}",
+    "@khatmaContinueFromPage": {
+        "placeholders": {
+            "page": {
+                "type": "int"
+            }
+        }
+    },
+    "khatmaRemainingPages": "صفحات متبقية",
+    "khatmaCatchUpAction": "عوّض اليوم",
+    "khatmaExtendAction": "مدّد الخطة",
+    "khatmaResetAction": "إعادة ضبط الخطة",
+    "khatmaResetTitle": "إعادة ضبط خطة الختمة؟",
+    "khatmaResetMessage": "سيتم حذف خطة الختمة الحالية فقط. ستبقى آخر صفحة قرأتها والعلامات المرجعية محفوظة.",
+    "khatmaContinueReading": "تابع القراءة",
     "todayPlanTitle": "خطة اليوم",
     "@todayPlanTitle": {
         "description": "Title for the daily Quran engagement plan card"
@@ -854,9 +911,9 @@
     "@signingIn": {
         "description": "Signing in progress text"
     },
-    "continueWithGoogle": "المتابعة مع جوجل",
+    "continueWithGoogle": "تسجيل الدخول باستخدام Google",
     "@continueWithGoogle": {
-        "description": "Continue with Google button text"
+        "description": "Sign in with Google button text (Google Identity branding)"
     },
     "googleSignInNotConfigured": "تسجيل الدخول بجوجل غير مُعد. يرجى الاتصال بالدعم.",
     "@googleSignInNotConfigured": {
@@ -3342,5 +3399,78 @@
     "inAppUpdateUpdateAction": "تحديث",
     "@inAppUpdateUpdateAction": {
         "description": "Snackbar action to open the Play Store for an optional update"
+    },
+    "recitationPracticeTitle": "تدريب {surah}:{ayah}",
+    "@recitationPracticeTitle": {
+        "description": "Title for the recitation practice panel",
+        "placeholders": {
+            "surah": {
+                "type": "int"
+            },
+            "ayah": {
+                "type": "int"
+            }
+        }
+    },
+    "recitationPracticeStart": "ابدأ التلاوة",
+    "@recitationPracticeStart": {
+        "description": "Starts microphone listening for recitation practice"
+    },
+    "recitationPracticeStop": "إيقاف",
+    "@recitationPracticeStop": {
+        "description": "Stops microphone listening for recitation practice"
+    },
+    "recitationPracticeScore": "التطابق {percent}٪",
+    "@recitationPracticeScore": {
+        "description": "Score label after comparing recitation",
+        "placeholders": {
+            "percent": {
+                "type": "int"
+            }
+        }
+    },
+    "recitationPracticeNextAyah": "الآية التالية",
+    "@recitationPracticeNextAyah": {
+        "description": "Moves practice to the next ayah on the page"
+    },
+    "recitationPracticeTooltip": "تدريب التلاوة",
+    "@recitationPracticeTooltip": {
+        "description": "Tooltip for the Mushaf recitation practice button"
+    },
+    "recitationPracticeSessionProgress": "الآية {current} من {total}",
+    "@recitationPracticeSessionProgress": {
+        "description": "Progress through ayahs on the current page during a session",
+        "placeholders": {
+            "current": {
+                "type": "int"
+            },
+            "total": {
+                "type": "int"
+            }
+        }
+    },
+    "recitationPracticeListening": "يستمع…",
+    "@recitationPracticeListening": {
+        "description": "Shown while the microphone is active during a session"
+    },
+    "recitationPracticeEndSession": "إنهاء الجلسة",
+    "@recitationPracticeEndSession": {
+        "description": "Stops the hands-free recitation session"
+    },
+    "recitationPracticeSessionComplete": "اكتملت الصفحة",
+    "@recitationPracticeSessionComplete": {
+        "description": "Shown when all ayahs on the page have been practiced"
+    },
+    "recitationPracticeCompletedCount": "{count} من {total} ناجحة",
+    "@recitationPracticeCompletedCount": {
+        "description": "Summary of passed ayahs after a session",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            },
+            "total": {
+                "type": "int"
+            }
+        }
     }
 }

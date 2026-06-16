@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -27,6 +28,11 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
     GoogleSignInAndroidResumeBridge.instance.ensureInitialized();
   }
   static const Duration signInTimeout = Duration(seconds: 60);
+
+  /// iOS has no Credential Manager sheet; after [GoogleSignIn.signOut] the
+  /// lightweight path returns no account and must fall back to [authenticate].
+  @visibleForTesting
+  static bool useIosInteractiveSignInFallback = Platform.isIOS;
 
   /// Transsion/XOS: GMS sign-in UI (CM sheet or account chooser) can be
   /// composited invisibly behind the Flutter window. Visible GMS UI takes
@@ -132,16 +138,48 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
     }
   }
 
-  /// Credential Manager only (silent + bottom sheet). Does not fall back to
-  /// the centered account-chooser ([GoogleSignIn.authenticate]).
   Future<GoogleSignInAccount> _signInAccount() async {
     await _platformPolicy.warmUp();
 
-    // Transsion/XOS included: the historical "CM always hangs" was observed
-    // under RenderMode.surface; with RenderMode.texture (MainActivity) the
-    // GMS overlay is composited correctly. _waitForInteractiveUi still
-    // fail-fasts if the sheet never becomes visible.
+    if (useIosInteractiveSignInFallback) {
+      return _tryIosSignIn();
+    }
+
+    // Android Credential Manager only (silent + bottom sheet). Does not fall
+    // back to the centered account-chooser ([GoogleSignIn.authenticate]).
     return _tryCredentialManagerSignIn();
+  }
+
+  Future<GoogleSignInAccount> _tryIosSignIn() async {
+    final GoogleSignInAccount? lightweightAccount =
+        await _attemptLightweightAccount();
+    if (lightweightAccount != null) {
+      return lightweightAccount;
+    }
+    return _authenticateWithButtonFlow();
+  }
+
+  Future<GoogleSignInAccount?> _attemptLightweightAccount() async {
+    final Future<GoogleSignInAccount?>? lightweight = _googleSignIn
+        .attemptLightweightAuthentication(reportAllExceptions: true);
+    if (lightweight == null) {
+      return null;
+    }
+    try {
+      return await lightweight;
+    } on GoogleSignInException catch (error) {
+      switch (error.code) {
+        case GoogleSignInExceptionCode.canceled:
+        case GoogleSignInExceptionCode.interrupted:
+          return null;
+        case GoogleSignInExceptionCode.uiUnavailable:
+        case GoogleSignInExceptionCode.unknownError:
+        case GoogleSignInExceptionCode.clientConfigurationError:
+        case GoogleSignInExceptionCode.providerConfigurationError:
+        case GoogleSignInExceptionCode.userMismatch:
+          rethrow;
+      }
+    }
   }
 
   Future<GoogleSignInAccount> _tryCredentialManagerSignIn() async {

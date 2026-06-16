@@ -122,6 +122,96 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeDailyDuaReference => 'أبو داود';
 
   @override
+  String get khatmaEmptyTitle => 'ابدأ ختمة';
+
+  @override
+  String get khatmaEmptySubtitle =>
+      'اختر خطة قراءة هادئة. سنعدّلها بلطف إذا انشغل يومك.';
+
+  @override
+  String khatmaDurationDays(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days يومًا',
+      two: 'يومان',
+      one: 'يوم واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get khatmaProgressTitle => 'تقدّم الختمة';
+
+  @override
+  String khatmaProgressSubtitle(int currentDay, int totalDays) {
+    return 'اليوم $currentDay من $totalDays';
+  }
+
+  @override
+  String get khatmaProgressPercent => 'التقدّم';
+
+  @override
+  String get khatmaTodayGoal => 'اليوم';
+
+  @override
+  String get khatmaRemaining => 'المتبقي';
+
+  @override
+  String khatmaPagesShort(int pages) {
+    String _temp0 = intl.Intl.pluralLogic(
+      pages,
+      locale: localeName,
+      other: '$pages صفحات',
+      two: 'صفحتان',
+      one: 'صفحة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String khatmaDaysShort(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days أيام',
+      two: 'يومان',
+      one: 'يوم',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get khatmaAdjustedPlan => 'عدّلنا خطتك بلطف لهذا اليوم.';
+
+  @override
+  String khatmaContinueFromPage(int page) {
+    return 'تابع من صفحة $page';
+  }
+
+  @override
+  String get khatmaRemainingPages => 'صفحات متبقية';
+
+  @override
+  String get khatmaCatchUpAction => 'عوّض اليوم';
+
+  @override
+  String get khatmaExtendAction => 'مدّد الخطة';
+
+  @override
+  String get khatmaResetAction => 'إعادة ضبط الخطة';
+
+  @override
+  String get khatmaResetTitle => 'إعادة ضبط خطة الختمة؟';
+
+  @override
+  String get khatmaResetMessage =>
+      'سيتم حذف خطة الختمة الحالية فقط. ستبقى آخر صفحة قرأتها والعلامات المرجعية محفوظة.';
+
+  @override
+  String get khatmaContinueReading => 'تابع القراءة';
+
+  @override
   String get todayPlanTitle => 'خطة اليوم';
 
   @override
@@ -752,7 +842,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get signingIn => 'جاري تسجيل الدخول...';
 
   @override
-  String get continueWithGoogle => 'المتابعة مع جوجل';
+  String get continueWithGoogle => 'تسجيل الدخول باستخدام Google';
 
   @override
   String get googleSignInNotConfigured =>
@@ -2648,4 +2738,45 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get inAppUpdateUpdateAction => 'تحديث';
+
+  @override
+  String recitationPracticeTitle(int surah, int ayah) {
+    return 'تدريب $surah:$ayah';
+  }
+
+  @override
+  String get recitationPracticeStart => 'ابدأ التلاوة';
+
+  @override
+  String get recitationPracticeStop => 'إيقاف';
+
+  @override
+  String recitationPracticeScore(int percent) {
+    return 'التطابق $percent٪';
+  }
+
+  @override
+  String get recitationPracticeNextAyah => 'الآية التالية';
+
+  @override
+  String get recitationPracticeTooltip => 'تدريب التلاوة';
+
+  @override
+  String recitationPracticeSessionProgress(int current, int total) {
+    return 'الآية $current من $total';
+  }
+
+  @override
+  String get recitationPracticeListening => 'يستمع…';
+
+  @override
+  String get recitationPracticeEndSession => 'إنهاء الجلسة';
+
+  @override
+  String get recitationPracticeSessionComplete => 'اكتملت الصفحة';
+
+  @override
+  String recitationPracticeCompletedCount(int count, int total) {
+    return '$count من $total ناجحة';
+  }
 }

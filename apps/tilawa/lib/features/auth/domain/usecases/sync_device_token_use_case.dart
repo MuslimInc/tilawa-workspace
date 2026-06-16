@@ -18,7 +18,7 @@ class SyncDeviceTokenUseCase {
 
   Future<void> call(String userId) async {
     try {
-      final String? token = await _deviceTokenService.getToken();
+      final String? token = await _getTokenQuietly();
       if (token == null || token.isEmpty) {
         return;
       }
@@ -44,7 +44,7 @@ class SyncDeviceTokenUseCase {
 
   Future<void> removeCurrentTokenForUser(String userId) async {
     try {
-      final String? currentToken = await _deviceTokenService.getToken();
+      final String? currentToken = await _getTokenQuietly();
       final String? previousToken = await _tokenSyncCache.getLastSyncedToken();
       final String? previousUserId = await _tokenSyncCache
           .getLastSyncedUserId();
@@ -62,6 +62,14 @@ class SyncDeviceTokenUseCase {
       }
     } finally {
       await _tokenSyncCache.clearSync();
+    }
+  }
+
+  Future<String?> _getTokenQuietly() async {
+    try {
+      return await _deviceTokenService.getToken();
+    } catch (_) {
+      return null;
     }
   }
 

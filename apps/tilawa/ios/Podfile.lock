@@ -1,0 +1,28 @@
+PODS:
+  - disk_space_plus (0.0.1):
+    - Flutter
+  - Flutter (1.0.0)
+  - flutter_downloader (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - disk_space_plus (from `.symlinks/plugins/disk_space_plus/ios`)
+  - Flutter (from `Flutter`)
+  - flutter_downloader (from `.symlinks/plugins/flutter_downloader/ios`)
+
+EXTERNAL SOURCES:
+  disk_space_plus:
+    :path: ".symlinks/plugins/disk_space_plus/ios"
+  Flutter:
+    :path: Flutter
+  flutter_downloader:
+    :path: ".symlinks/plugins/flutter_downloader/ios"
+
+SPEC CHECKSUMS:
+  disk_space_plus: 47b68514830946bee63abfc90c892610fae735d6
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  flutter_downloader: b7301ae057deadd4b1650dc7c05375f10ff12c39
+
+PODFILE CHECKSUM: 288656d4464589360115d6f81dd5d8f559352730
+
+COCOAPODS: 1.16.2
