@@ -24,6 +24,7 @@ class TilawaSettingsTile extends StatelessWidget {
     this.icon,
     required this.title,
     required this.onTap,
+    this.subtitle,
     this.iconColor,
     this.showDivider = true,
     this.borderRadius = BorderRadius.zero,
@@ -34,6 +35,13 @@ class TilawaSettingsTile extends StatelessWidget {
   final Color? iconColor;
   final String title;
   final VoidCallback onTap;
+
+  /// Optional supporting copy shown under [title].
+  ///
+  /// Use this for calm settings context that prevents ambiguity, such as
+  /// explaining a privacy or download preference without a custom row layout.
+  final String? subtitle;
+
   final bool showDivider;
   final BorderRadiusGeometry borderRadius;
   final Widget? trailing;
@@ -64,19 +72,7 @@ class TilawaSettingsTile extends StatelessWidget {
     final double minLeadingWidth = icon == null
         ? 0
         : resolvedIconPadding.horizontal + tokens.tileIconSize;
-    final TextStyle titleStyle =
-        theme.textTheme.bodyLarge?.copyWith(
-          fontSize: tokens.tileTitleFontSize,
-          fontWeight: FontWeight.w600,
-          color: colorScheme.onSurface,
-          height: 1.2,
-        ) ??
-        TextStyle(
-          fontSize: tokens.tileTitleFontSize,
-          fontWeight: FontWeight.w600,
-          color: colorScheme.onSurface,
-          height: 1.2,
-        );
+    final TextStyle titleStyle = _titleStyle(context, tokens);
     return Column(
       children: [
         Material(
@@ -103,11 +99,10 @@ class TilawaSettingsTile extends StatelessWidget {
                       color: effectiveIconColor,
                       tokens: tokens,
                     ),
-              title: Text(
+              title: _SettingsTileLabel(
                 title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.start,
+                subtitle: subtitle,
+                tokens: tokens,
               ),
               trailing:
                   trailing ??
@@ -145,6 +140,7 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
     required this.title,
     required this.value,
     required this.onChanged,
+    this.subtitle,
     this.iconColor,
     this.showDivider = true,
     this.borderRadius = BorderRadius.zero,
@@ -155,6 +151,10 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
   final String title;
   final bool value;
   final ValueChanged<bool> onChanged;
+
+  /// Optional supporting copy shown under [title].
+  final String? subtitle;
+
   final bool showDivider;
   final BorderRadiusGeometry borderRadius;
 
@@ -183,19 +183,7 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
     final double minLeadingWidth = icon == null
         ? 0
         : resolvedIconPadding.horizontal + tokens.tileIconSize;
-    final TextStyle titleStyle =
-        theme.textTheme.bodyLarge?.copyWith(
-          fontSize: tokens.tileTitleFontSize,
-          fontWeight: FontWeight.w600,
-          color: colorScheme.onSurface,
-          height: 1.2,
-        ) ??
-        TextStyle(
-          fontSize: tokens.tileTitleFontSize,
-          fontWeight: FontWeight.w600,
-          color: colorScheme.onSurface,
-          height: 1.2,
-        );
+    final TextStyle titleStyle = _titleStyle(context, tokens);
     return Column(
       children: [
         Material(
@@ -222,12 +210,10 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
                       color: effectiveIconColor,
                       tokens: tokens,
                     ),
-              title: Text(
+              title: _SettingsTileLabel(
                 title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.start,
-                style: titleStyle,
+                subtitle: subtitle,
+                tokens: tokens,
               ),
               trailing: TilawaSwitch(
                 value: value,
@@ -252,6 +238,132 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
       ],
     );
   }
+}
+
+class _SettingsTileLabel extends StatelessWidget {
+  const _SettingsTileLabel(
+    this.title, {
+    required this.tokens,
+    this.subtitle,
+  });
+
+  final String title;
+  final String? subtitle;
+  final TilawaSettingsGroupTokens tokens;
+
+  @override
+  Widget build(BuildContext context) {
+    final subtitleText = subtitle;
+    if (subtitleText == null || subtitleText.isEmpty) {
+      return _SettingsTileTitle(
+        title,
+        tokens: tokens,
+      );
+    }
+
+    return _SettingsTileTitleStack(
+      title: title,
+      subtitle: subtitleText,
+      tokens: tokens,
+    );
+  }
+}
+
+class _SettingsTileTitleStack extends StatelessWidget {
+  const _SettingsTileTitleStack({
+    required this.title,
+    required this.subtitle,
+    required this.tokens,
+  });
+
+  final String title;
+  final String subtitle;
+  final TilawaSettingsGroupTokens tokens;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: tokens.tileSubtitleSpacing,
+      children: [
+        _SettingsTileTitle(
+          title,
+          tokens: tokens,
+        ),
+        Text(
+          subtitle,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.start,
+          style: _subtitleStyle(context, tokens),
+        ),
+      ],
+    );
+  }
+}
+
+class _SettingsTileTitle extends StatelessWidget {
+  const _SettingsTileTitle(
+    this.title, {
+    required this.tokens,
+  });
+
+  final String title;
+  final TilawaSettingsGroupTokens tokens;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      title,
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+      textAlign: TextAlign.start,
+      style: _titleStyle(context, tokens),
+    );
+  }
+}
+
+TextStyle _titleStyle(
+  BuildContext context,
+  TilawaSettingsGroupTokens tokens,
+) {
+  final theme = Theme.of(context);
+  return theme.textTheme.bodyLarge?.copyWith(
+        fontSize: tokens.tileTitleFontSize,
+        fontWeight: FontWeight.w600,
+        color: theme.colorScheme.onSurface,
+        height: 1.2,
+      ) ??
+      TextStyle(
+        fontSize: tokens.tileTitleFontSize,
+        fontWeight: FontWeight.w600,
+        color: theme.colorScheme.onSurface,
+        height: 1.2,
+      );
+}
+
+TextStyle _subtitleStyle(
+  BuildContext context,
+  TilawaSettingsGroupTokens tokens,
+) {
+  final theme = Theme.of(context);
+  return theme.textTheme.bodySmall?.copyWith(
+        fontSize: tokens.tileSubtitleFontSize,
+        fontWeight: FontWeight.w400,
+        color: theme.colorScheme.onSurfaceVariant.withValues(
+          alpha: tokens.tileSubtitleOpacity,
+        ),
+        height: 1.35,
+      ) ??
+      TextStyle(
+        fontSize: tokens.tileSubtitleFontSize,
+        fontWeight: FontWeight.w400,
+        color: theme.colorScheme.onSurfaceVariant.withValues(
+          alpha: tokens.tileSubtitleOpacity,
+        ),
+        height: 1.35,
+      );
 }
 
 class _SettingsLeadingIcon extends StatelessWidget {
