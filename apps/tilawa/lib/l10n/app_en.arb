@@ -254,6 +254,18 @@
     "@khatmaContinueReading": {
         "description": "Continue reading action for Smart Khatma"
     },
+    "khatmaHubTitle": "Smart Khatma",
+    "@khatmaHubTitle": {
+        "description": "Screen title for the Smart Khatma hub"
+    },
+    "khatmaHomeViewPlan": "View plan",
+    "@khatmaHomeViewPlan": {
+        "description": "Home dashboard affordance to open the Smart Khatma hub"
+    },
+    "khatmaHubResetSubtitle": "Clear the current plan. Your bookmarks stay saved.",
+    "@khatmaHubResetSubtitle": {
+        "description": "Subtitle for the reset-plan row on the Smart Khatma hub"
+    },
     "todayPlanTitle": "Today’s Plan",
     "@todayPlanTitle": {
         "description": "Title for the daily Quran engagement plan card"

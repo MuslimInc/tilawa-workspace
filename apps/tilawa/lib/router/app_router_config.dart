@@ -36,6 +36,7 @@ import '../features/reciters/presentation/screens/reciter_details_screen.dart';
 import '../features/reciters/presentation/widgets/reciters_search_route_transition.dart';
 import '../features/reciters/presentation/widgets/reciters_search_screen_scope.dart';
 import '../features/settings/presentation/widgets/settings_screen_scope.dart';
+import '../features/smart_khatma/presentation/widgets/smart_khatma_hub_scope.dart';
 import '../features/share/presentation/screens/screenshot_composer_screen.dart';
 import '../features/share/presentation/screens/video_reel_composer_screen.dart';
 import '../features/share/presentation/widgets/share_composer_screen_scope.dart';
@@ -67,6 +68,7 @@ part 'app_router_config.g.dart';
     TypedGoRoute<BookmarksRoute>(path: '/bookmarks'),
     TypedGoRoute<HistoryRoute>(path: '/history'),
     TypedGoRoute<QiblaRoute>(path: '/qibla'),
+    TypedGoRoute<SmartKhatmaHubRoute>(path: '/smart-khatma'),
     TypedGoRoute<RouteListRoute>(path: '/routes'),
     TypedGoRoute<PrayerNotificationStatusRoute>(
       path: '/prayer-notification-status',
@@ -371,6 +373,15 @@ class QiblaRoute extends GoRouteData with $QiblaRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const QiblaScreenScope();
+  }
+}
+
+class SmartKhatmaHubRoute extends GoRouteData with $SmartKhatmaHubRoute {
+  const SmartKhatmaHubRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const SmartKhatmaHubScope();
   }
 }
 

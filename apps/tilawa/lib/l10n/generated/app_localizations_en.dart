@@ -210,6 +210,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get khatmaContinueReading => 'Continue Reading';
 
   @override
+  String get khatmaHubTitle => 'Smart Khatma';
+
+  @override
+  String get khatmaHomeViewPlan => 'View plan';
+
+  @override
+  String get khatmaHubResetSubtitle =>
+      'Clear the current plan. Your bookmarks stay saved.';
+
+  @override
   String get todayPlanTitle => 'Today’s Plan';
 
   @override

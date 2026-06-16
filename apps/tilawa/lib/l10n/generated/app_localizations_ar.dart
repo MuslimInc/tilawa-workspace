@@ -212,6 +212,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get khatmaContinueReading => 'تابع القراءة';
 
   @override
+  String get khatmaHubTitle => 'ختمة ذكية';
+
+  @override
+  String get khatmaHomeViewPlan => 'عرض الخطة';
+
+  @override
+  String get khatmaHubResetSubtitle =>
+      'يمسح الخطة الحالية فقط. علاماتك المرجعية تبقى محفوظة.';
+
+  @override
   String get todayPlanTitle => 'خطة اليوم';
 
   @override

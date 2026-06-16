@@ -410,6 +410,24 @@ abstract class AppLocalizations {
   /// **'Continue Reading'**
   String get khatmaContinueReading;
 
+  /// Screen title for the Smart Khatma hub
+  ///
+  /// In en, this message translates to:
+  /// **'Smart Khatma'**
+  String get khatmaHubTitle;
+
+  /// Home dashboard affordance to open the Smart Khatma hub
+  ///
+  /// In en, this message translates to:
+  /// **'View plan'**
+  String get khatmaHomeViewPlan;
+
+  /// Subtitle for the reset-plan row on the Smart Khatma hub
+  ///
+  /// In en, this message translates to:
+  /// **'Clear the current plan. Your bookmarks stay saved.'**
+  String get khatmaHubResetSubtitle;
+
   /// Title for the daily Quran engagement plan card
   ///
   /// In en, this message translates to:
