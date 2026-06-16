@@ -17,13 +17,14 @@ class SignOut {
 
   Future<void> call() async {
     final currentUser = _repository.currentUser;
-    try {
-      if (currentUser != null) {
+    if (currentUser != null) {
+      try {
         await _syncDeviceTokenUseCase.removeCurrentTokenForUser(currentUser.id);
+      } catch (_) {
+        // Best-effort only; sign-out must still complete.
       }
-      await _premiumRepository.clearPremiumStatus();
-    } finally {
-      await _repository.signOut();
     }
+    await _premiumRepository.clearPremiumStatus();
+    await _repository.signOut();
   }
 }

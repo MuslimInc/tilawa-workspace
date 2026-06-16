@@ -61,4 +61,21 @@ void main() {
       verify(mockAuthRepository.signOut()).called(1);
     },
   );
+
+  test(
+    'should still sign out when device token removal throws',
+    () async {
+      when(mockAuthRepository.currentUser).thenReturn(tUser);
+      when(
+        mockSyncDeviceTokenUseCase.removeCurrentTokenForUser(tUser.id),
+      ).thenThrow(Exception('apns-token-not-set'));
+      when(mockPremiumRepository.clearPremiumStatus()).thenAnswer((_) async {});
+      when(mockAuthRepository.signOut()).thenAnswer((_) async {});
+
+      await useCase();
+
+      verify(mockPremiumRepository.clearPremiumStatus()).called(1);
+      verify(mockAuthRepository.signOut()).called(1);
+    },
+  );
 }
