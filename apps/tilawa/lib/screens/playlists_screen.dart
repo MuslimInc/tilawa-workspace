@@ -134,10 +134,11 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: TilawaPrimaryFab(
         heroTag: 'playlists_fab',
+        icon: Icons.add,
+        placement: TilawaFabPlacement.end,
         onPressed: () => _showCreatePlaylistDialog(context),
-        child: const Icon(Icons.add),
       ),
     );
   }

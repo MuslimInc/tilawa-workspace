@@ -113,75 +113,65 @@ class _SurahIndexSheetState extends State<SurahIndexSheet> {
     final indexTheme = SurahIndexTheme.of(context);
     final colorScheme = Theme.of(context).colorScheme;
 
-    final double keyboardInset = context.keyboardInset;
-
-    return AnimatedPadding(
-      duration: _sheetAnimationDuration,
-      curve: Curves.easeOutCubic,
-      padding: EdgeInsets.only(bottom: keyboardInset),
-      child: DraggableScrollableSheet(
-        controller: _sheetController,
-        initialChildSize: _initialSheetSize,
-        minChildSize: _minSheetSize,
-        maxChildSize: _maxSheetSize,
-        snap: true,
-        snapSizes: const [_initialSheetSize, _focusedSheetSize],
-        expand: false,
-        builder: (context, scrollController) {
-          return SafeArea(
-            top: false,
-            child: Container(
-              decoration: BoxDecoration(
-                color: colorScheme.surface,
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(indexTheme.sheetRadius),
-                ),
-                border: Border(
-                  top: BorderSide(
-                    color: colorScheme.outlineVariant.withValues(alpha: 0.35),
-                    width: indexTheme.tileBorderWidth,
-                  ),
-                ),
-              ),
-              child: Column(
-                children: [
-                  TilawaSheetHandle(
-                    width: indexTheme.dragHandleWidth,
-                    height: indexTheme.dragHandleHeight,
-                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.28),
-                  ),
-                  _IndexHeader(
-                    filteredSurahsNotifier: _filteredSurahsNotifier,
-                    isSearchingListenable: ValueNotifier(
-                      _searchController.text.isNotEmpty,
-                    ),
-                  ),
-                  _IndexSearchBar(
-                    controller: _searchController,
-                    focusNode: _searchFocusNode,
-                    onChanged: (value) {
-                      _filteredSurahsNotifier.value = _computeFilteredSurahs();
-                    },
-                    onClear: () {
-                      _searchController.clear();
-                      _filteredSurahsNotifier.value = _computeFilteredSurahs();
-                    },
-                  ),
-                  TilawaDivider(
-                    color: colorScheme.outlineVariant.withValues(alpha: 0.42),
-                  ),
-                  _IndexList(
-                    scrollController: scrollController,
-                    filteredSurahsNotifier: _filteredSurahsNotifier,
-                    onSurahSelected: widget.onSurahSelected,
-                    onSurahTapped: widget.onSurahTapped,
-                  ),
-                ],
+    return DraggableScrollableSheet(
+      controller: _sheetController,
+      initialChildSize: _initialSheetSize,
+      minChildSize: _minSheetSize,
+      maxChildSize: _maxSheetSize,
+      snap: true,
+      snapSizes: const [_initialSheetSize, _focusedSheetSize],
+      expand: false,
+      builder: (context, scrollController) {
+        return Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(indexTheme.sheetRadius),
+            ),
+            border: Border(
+              top: BorderSide(
+                color: colorScheme.outlineVariant.withValues(alpha: 0.35),
+                width: indexTheme.tileBorderWidth,
               ),
             ),
-          );
-        },
-      ),
+          ),
+          child: Column(
+            children: [
+              TilawaSheetHandle(
+                width: indexTheme.dragHandleWidth,
+                height: indexTheme.dragHandleHeight,
+                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.28),
+              ),
+              _IndexHeader(
+                filteredSurahsNotifier: _filteredSurahsNotifier,
+                isSearchingListenable: ValueNotifier(
+                  _searchController.text.isNotEmpty,
+                ),
+              ),
+              _IndexSearchBar(
+                controller: _searchController,
+                focusNode: _searchFocusNode,
+                onChanged: (value) {
+                  _filteredSurahsNotifier.value = _computeFilteredSurahs();
+                },
+                onClear: () {
+                  _searchController.clear();
+                  _filteredSurahsNotifier.value = _computeFilteredSurahs();
+                },
+              ),
+              TilawaDivider(
+                color: colorScheme.outlineVariant.withValues(alpha: 0.42),
+              ),
+              _IndexList(
+                scrollController: scrollController,
+                filteredSurahsNotifier: _filteredSurahsNotifier,
+                onSurahSelected: widget.onSurahSelected,
+                onSurahTapped: widget.onSurahTapped,
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -342,7 +332,7 @@ class _IndexList extends StatelessWidget {
                 tokens.spaceLarge,
                 tokens.spaceMedium,
                 tokens.spaceLarge,
-                tokens.spaceMedium + keyboardInset,
+                tokens.spaceExtraLarge + keyboardInset,
               ),
               itemCount: filteredSurahs.length,
               separatorBuilder: (_, _) =>
