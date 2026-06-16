@@ -13,6 +13,9 @@ import 'package:flutter/foundation.dart';
 /// Example: `--dart-define=TILAWA_LAUNCH_FIREBASE_INIT=false`
 /// Example: `--dart-define=TILAWA_LAUNCH_SUBSCRIPTION_SERVICE_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_SUPPORT_TILAWA_ENABLED=false`
+/// Example: `--dart-define=TILAWA_LAUNCH_RECITATION_PRACTICE_ENABLED=true`
+/// Example: `--dart-define=TILAWA_LAUNCH_SMART_KHATMA_ENABLED=true`
+/// Example: `--dart-define=TILAWA_LAUNCH_TODAY_PLAN_ENABLED=true`
 @immutable
 class AppLaunchConfig extends Equatable {
   const AppLaunchConfig({
@@ -41,6 +44,9 @@ class AppLaunchConfig extends Equatable {
     this.firebaseDataInit = true,
     this.subscriptionServiceEnabled = false,
     this.supportTilawaEnabled = true,
+    this.recitationPracticeEnabled = false,
+    this.smartKhatmaEnabled = false,
+    this.todayPlanEnabled = false,
     this.notificationPermissionRequest = true,
   });
 
@@ -146,6 +152,18 @@ class AppLaunchConfig extends Equatable {
         'TILAWA_LAUNCH_SUPPORT_TILAWA_ENABLED',
         defaultValue: true,
       ),
+      recitationPracticeEnabled: bool.fromEnvironment(
+        'TILAWA_LAUNCH_RECITATION_PRACTICE_ENABLED',
+        defaultValue: false,
+      ),
+      smartKhatmaEnabled: bool.fromEnvironment(
+        'TILAWA_LAUNCH_SMART_KHATMA_ENABLED',
+        defaultValue: false,
+      ),
+      todayPlanEnabled: bool.fromEnvironment(
+        'TILAWA_LAUNCH_TODAY_PLAN_ENABLED',
+        defaultValue: false,
+      ),
       notificationPermissionRequest: bool.fromEnvironment(
         'TILAWA_LAUNCH_NOTIFICATION_PERMISSION_REQUEST',
         defaultValue: true,
@@ -178,6 +196,9 @@ class AppLaunchConfig extends Equatable {
   final bool firebaseDataInit;
   final bool subscriptionServiceEnabled;
   final bool supportTilawaEnabled;
+  final bool recitationPracticeEnabled;
+  final bool smartKhatmaEnabled;
+  final bool todayPlanEnabled;
   final bool notificationPermissionRequest;
 
   @override
@@ -207,6 +228,9 @@ class AppLaunchConfig extends Equatable {
     firebaseDataInit,
     subscriptionServiceEnabled,
     supportTilawaEnabled,
+    recitationPracticeEnabled,
+    smartKhatmaEnabled,
+    todayPlanEnabled,
     notificationPermissionRequest,
   ];
 }

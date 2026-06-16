@@ -10,6 +10,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../cubit/recitation_practice_cubit.dart';
 import '../cubit/recitation_practice_state.dart';
+import '../../recitation_practice_feature_flags.dart';
 import 'recitation_practice_panel.dart';
 
 typedef RecitationPracticeBuilder =
@@ -37,22 +38,40 @@ class RecitationPracticeHost extends StatefulWidget {
 }
 
 class _RecitationPracticeHostState extends State<RecitationPracticeHost> {
-  late final RecitationPracticeCubit _cubit = getIt<RecitationPracticeCubit>();
+  RecitationPracticeCubit? _cubit;
+
+  @override
+  void initState() {
+    super.initState();
+    if (isRecitationPracticeEnabled()) {
+      _cubit = getIt<RecitationPracticeCubit>();
+    }
+  }
 
   @override
   void dispose() {
-    unawaited(_cubit.close());
+    final RecitationPracticeCubit? cubit = _cubit;
+    if (cubit != null) {
+      unawaited(cubit.close());
+    }
     super.dispose();
   }
 
+  Future<void> _noopOpenPractice(int pageNumber) async {}
+
   Future<void> _openPractice(int pageNumber) {
-    return _cubit.openForPage(pageNumber);
+    return _cubit!.openForPage(pageNumber);
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!isRecitationPracticeEnabled()) {
+      return widget.builder(context, _noopOpenPractice);
+    }
+
+    final RecitationPracticeCubit cubit = _cubit!;
     return BlocProvider<RecitationPracticeCubit>.value(
-      value: _cubit,
+      value: cubit,
       child: BlocListener<RecitationPracticeCubit, RecitationPracticeState>(
         listenWhen: (RecitationPracticeState previous, current) =>
             previous.phase != RecitationPracticePhase.listening &&

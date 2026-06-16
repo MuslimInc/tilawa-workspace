@@ -22,6 +22,7 @@ import '../../../../features/audio_player/presentation/bloc/audio_player_bloc.da
     show AudioPlayerBloc;
 import '../../../../features/recitation_practice/presentation/cubit/recitation_practice_cubit.dart';
 import '../../../../features/recitation_practice/presentation/widgets/recitation_practice_host.dart';
+import '../../../../features/recitation_practice/recitation_practice_feature_flags.dart';
 import '../../../../features/share/presentation/widgets/share_options_sheet.dart';
 import '../../../../features/smart_khatma/smart_khatma.dart';
 import '../../domain/ports/quran_image_preload_status.dart';
@@ -71,7 +72,7 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen>
   bool _isPreloaded = false;
   NavigationBloc? _navigationBloc;
   late final SaveLastReadPositionUseCase _saveLastReadPosition;
-  late final UpdateKhatmaProgressUseCase _updateKhatmaProgress;
+  UpdateKhatmaProgressUseCase? _updateKhatmaProgress;
   late final ValueNotifier<int> _currentPageNotifier = ValueNotifier<int>(1);
   bool _didSchedulePracticeLaunch = false;
 
@@ -86,7 +87,9 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen>
   void initState() {
     super.initState();
     _saveLastReadPosition = getIt<SaveLastReadPositionUseCase>();
-    _updateKhatmaProgress = SmartKhatmaDependencies.updateProgress();
+    if (isSmartKhatmaEnabled()) {
+      _updateKhatmaProgress = SmartKhatmaDependencies.updateProgress();
+    }
     WidgetsBinding.instance.addObserver(this);
     unawaited(AppOrientationService.allowReaderOrientations());
     _checkPreloadStatus();
@@ -316,7 +319,11 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen>
       surahNumber: pageData.first.surah,
       page: currentPage,
     );
-    await _updateKhatmaProgress(currentPage: currentPage);
+    final UpdateKhatmaProgressUseCase? updateKhatmaProgress =
+        _updateKhatmaProgress;
+    if (updateKhatmaProgress != null) {
+      await updateKhatmaProgress(currentPage: currentPage);
+    }
   }
 
   @override
@@ -326,6 +333,19 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen>
     }
 
     final bloc = _navigationBloc!;
+
+    final Widget reader = BlocProvider<NavigationBloc>.value(
+      value: bloc,
+      child: _ReaderShell(
+        onShareRequested: _showShareOptions,
+        onShowIndex: _showSurahIndex,
+        onPageSettled: (page) => unawaited(_recordReadingProgress(page)),
+      ),
+    );
+
+    if (!isRecitationPracticeEnabled()) {
+      return reader;
+    }
 
     return RecitationPracticeHost(
       currentPageListenable: _currentPageNotifier,
@@ -354,14 +374,7 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen>
           });
         }
 
-        return BlocProvider<NavigationBloc>.value(
-          value: bloc,
-          child: _ReaderShell(
-            onShareRequested: _showShareOptions,
-            onShowIndex: _showSurahIndex,
-            onPageSettled: (page) => unawaited(_recordReadingProgress(page)),
-          ),
-        );
+        return reader;
       },
     );
   }

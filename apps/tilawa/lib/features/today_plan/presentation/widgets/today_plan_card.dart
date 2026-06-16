@@ -329,7 +329,9 @@ class _TodayPlanFooter extends StatelessWidget {
     if (!context.mounted) {
       return;
     }
-    context.read<KhatmaPlanBloc>().add(const KhatmaPlanStarted());
+    if (isSmartKhatmaEnabled()) {
+      context.read<KhatmaPlanBloc>().add(const KhatmaPlanStarted());
+    }
     context.read<TodayPlanBloc>().add(const TodayPlanSourceChanged());
   }
 }

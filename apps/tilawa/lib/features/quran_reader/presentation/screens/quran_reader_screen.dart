@@ -394,8 +394,11 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
                 handleShowIndex: _handleShowIndex,
                 showSurahIndex: _showSurahIndex,
                 showShareOptions: _showShareOptions,
-                onPractice: () =>
-                    unawaited(openPractice(_currentPageNotifier.value)),
+                onPractice: isRecitationPracticeEnabled()
+                    ? () => unawaited(
+                        openPractice(_currentPageNotifier.value),
+                      )
+                    : null,
                 jumpToPage: _jumpToPage,
                 onWarming: _handleOnWarming,
                 onPointerDown: _pauseWarming,
@@ -1273,7 +1276,7 @@ class _ReaderStack extends StatelessWidget {
     required this.handleShowIndex,
     required this.showSurahIndex,
     required this.showShareOptions,
-    required this.onPractice,
+    this.onPractice,
     required this.jumpToPage,
     this.onWarming,
     this.onPointerDown,
@@ -1296,7 +1299,7 @@ class _ReaderStack extends StatelessWidget {
   final VoidCallback handleShowIndex;
   final VoidCallback showSurahIndex;
   final Future<void> Function(int) showShareOptions;
-  final VoidCallback onPractice;
+  final VoidCallback? onPractice;
   final Future<void> Function(int) jumpToPage;
   final ValueChanged<int>? onWarming;
   final VoidCallback? onPointerDown;
@@ -1341,54 +1344,26 @@ class _ReaderStack extends StatelessWidget {
                 // and missing the first notifier fire after mount.
                 child: _ReaderPageStage(
                   readerTheme: readerTheme,
-                  child:
-                      BlocBuilder<
-                        RecitationPracticeCubit,
-                        RecitationPracticeState
-                      >(
-                        buildWhen: (previous, current) =>
-                            previous.isPanelOpen != current.isPanelOpen ||
-                            previous.phase != current.phase ||
-                            previous.selectedTarget != current.selectedTarget ||
-                            previous.comparisonResult !=
-                                current.comparisonResult,
-                        builder: (context, practiceState) {
-                          return QuranPageView(
-                            mushafService: quranQcfLocator<MushafService>(),
-                            pageSnapshotService:
-                                quranQcfLocator<PageSnapshotService>(),
-                            controller: pageController,
-                            currentPageListenable: currentPageNotifier,
-                            cacheExtentListenable: cacheExtentNotifier,
-                            preparedWindowListenable: preparedWindowNotifier,
-                            pageBackgroundColor: readerTheme.pageBackground,
-                            textColor: readerTheme.textColor,
-                            headerImageFilter: readerTheme.headerImageFilter,
-                            headerTextColor: readerTheme.headerTextColor,
-                            headerFontSizeMultiplier: headerFontSizeMultiplier,
-                            uiTextDirection: Directionality.of(context),
-                            onPageChanged: onPageChanged,
-                            onScrollStarted: onPointerDown,
-                            onScrollEnded: onPointerUp,
-                            juzLabel: context.l10n.juzPart,
-                            hizbLabel: context.l10n.hizb,
-                            surahNameBuilder: getSurahName,
-                            onSurahSelected: (surahNumber) =>
-                                unawaited(jumpToSurah(surahNumber)),
-                            onShowIndex: handleShowIndex,
-                            showOverlaysListenable: showOverlaysNotifier,
-                            isScrollingListenable: isScrollingNotifier,
-                            showShadows: false,
-                            verseBackgroundColor: (int surah, int ayah) =>
-                                _recitationVerseBackgroundColor(
-                                  context,
-                                  practiceState,
-                                  surah,
-                                  ayah,
-                                ),
-                          );
-                        },
-                      ),
+                  child: isRecitationPracticeEnabled()
+                      ? BlocBuilder<
+                          RecitationPracticeCubit,
+                          RecitationPracticeState
+                        >(
+                          buildWhen: (previous, current) =>
+                              previous.isPanelOpen != current.isPanelOpen ||
+                              previous.phase != current.phase ||
+                              previous.selectedTarget !=
+                                  current.selectedTarget ||
+                              previous.comparisonResult !=
+                                  current.comparisonResult,
+                          builder: (context, practiceState) {
+                            return _buildQuranPageView(
+                              context,
+                              practiceState: practiceState,
+                            );
+                          },
+                        )
+                      : _buildQuranPageView(context),
                 ),
               ),
             ),
@@ -1406,6 +1381,45 @@ class _ReaderStack extends StatelessWidget {
           onPointerUp: onPointerUp,
         ),
       ],
+    );
+  }
+
+  Widget _buildQuranPageView(
+    BuildContext context, {
+    RecitationPracticeState? practiceState,
+  }) {
+    return QuranPageView(
+      mushafService: quranQcfLocator<MushafService>(),
+      pageSnapshotService: quranQcfLocator<PageSnapshotService>(),
+      controller: pageController,
+      currentPageListenable: currentPageNotifier,
+      cacheExtentListenable: cacheExtentNotifier,
+      preparedWindowListenable: preparedWindowNotifier,
+      pageBackgroundColor: readerTheme.pageBackground,
+      textColor: readerTheme.textColor,
+      headerImageFilter: readerTheme.headerImageFilter,
+      headerTextColor: readerTheme.headerTextColor,
+      headerFontSizeMultiplier: headerFontSizeMultiplier,
+      uiTextDirection: Directionality.of(context),
+      onPageChanged: onPageChanged,
+      onScrollStarted: onPointerDown,
+      onScrollEnded: onPointerUp,
+      juzLabel: context.l10n.juzPart,
+      hizbLabel: context.l10n.hizb,
+      surahNameBuilder: getSurahName,
+      onSurahSelected: (surahNumber) => unawaited(jumpToSurah(surahNumber)),
+      onShowIndex: handleShowIndex,
+      showOverlaysListenable: showOverlaysNotifier,
+      isScrollingListenable: isScrollingNotifier,
+      showShadows: false,
+      verseBackgroundColor: practiceState == null
+          ? null
+          : (int surah, int ayah) => _recitationVerseBackgroundColor(
+              context,
+              practiceState,
+              surah,
+              ayah,
+            ),
     );
   }
 }
@@ -1625,7 +1639,7 @@ class _ReaderOverlay extends StatelessWidget {
     required this.jumpToPage,
     required this.showSurahIndex,
     required this.showShareOptions,
-    required this.onPractice,
+    this.onPractice,
     this.onWarming,
     this.onPointerDown,
     this.onPointerUp,
@@ -1636,7 +1650,7 @@ class _ReaderOverlay extends StatelessWidget {
   final Future<void> Function(int) jumpToPage;
   final VoidCallback showSurahIndex;
   final Future<void> Function(int) showShareOptions;
-  final VoidCallback onPractice;
+  final VoidCallback? onPractice;
   final ValueChanged<int>? onWarming;
   final VoidCallback? onPointerDown;
   final VoidCallback? onPointerUp;

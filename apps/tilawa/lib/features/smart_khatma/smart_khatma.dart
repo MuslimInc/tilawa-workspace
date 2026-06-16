@@ -14,3 +14,4 @@ export 'presentation/bloc/khatma_plan_event.dart';
 export 'presentation/bloc/khatma_plan_state.dart';
 export 'presentation/widgets/smart_khatma_card.dart';
 export 'smart_khatma_dependencies.dart';
+export 'smart_khatma_feature_flags.dart';

@@ -61,14 +61,19 @@ class HomeScreenScope extends StatelessWidget {
       getIt<SharedPreferencesAsync>(),
     );
     final repository = TodayPlanRepositoryImpl(localDataSource);
-    final khatmaRepository = SmartKhatmaDependencies.repository();
+    final GetKhatmaTodayTargetUseCase? getKhatmaTodayTarget =
+        isSmartKhatmaEnabled()
+        ? SmartKhatmaDependencies.getTodayTarget(
+            SmartKhatmaDependencies.repository(),
+          )
+        : null;
     return TodayPlanBloc(
       GenerateTodayPlanUseCase(
         getIt<QuranReaderRepository>(),
         getIt<HistoryRepository>(),
         repository,
         getIt<HiveReadiness>(),
-        SmartKhatmaDependencies.getTodayTarget(khatmaRepository),
+        getKhatmaTodayTarget,
       ),
       SetTodayPlanTaskCompletedUseCase(repository),
       getIt<AnalyticsService>(),
@@ -78,36 +83,52 @@ class HomeScreenScope extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localeIdentifier = Localizations.localeOf(context).languageCode;
+    final Widget homeContent = _HomeLocalizationListener(
+      child:
+          child ??
+          HomeScreen(
+            onOpenReciters: onOpenReciters,
+            onOpenPrayer: onOpenPrayer,
+            onOpenAthkar: onOpenAthkar,
+            onOpenSettings: onOpenSettings,
+          ),
+    );
 
     return MultiBlocProvider(
       providers: [
         BlocProvider(
           create: (_) => _createHomeDashboardBloc(localeIdentifier),
         ),
-        BlocProvider(create: (_) => SmartKhatmaDependencies.bloc()),
-        BlocProvider(create: (_) => _createTodayPlanBloc()),
+        if (isSmartKhatmaEnabled())
+          BlocProvider(create: (_) => SmartKhatmaDependencies.bloc()),
+        if (isTodayPlanEnabled())
+          BlocProvider(create: (_) => _createTodayPlanBloc()),
       ],
-      child: _HomeKhatmaPlanSyncListener(
-        child: _HomeLocationSyncListener(
-          child: BlocListener<LocalizationBloc, LocalizationState>(
-            listener: (context, state) {
-              context.read<HomeDashboardBloc>().add(
-                HomeDashboardLocaleChanged(
-                  localeIdentifier: state.locale.languageCode,
-                ),
-              );
-            },
-            child:
-                child ??
-                HomeScreen(
-                  onOpenReciters: onOpenReciters,
-                  onOpenPrayer: onOpenPrayer,
-                  onOpenAthkar: onOpenAthkar,
-                  onOpenSettings: onOpenSettings,
-                ),
-          ),
-        ),
+      child: _HomeLocationSyncListener(
+        child: isSmartKhatmaEnabled() && isTodayPlanEnabled()
+            ? _HomeKhatmaPlanSyncListener(child: homeContent)
+            : homeContent,
       ),
+    );
+  }
+}
+
+class _HomeLocalizationListener extends StatelessWidget {
+  const _HomeLocalizationListener({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<LocalizationBloc, LocalizationState>(
+      listener: (context, state) {
+        context.read<HomeDashboardBloc>().add(
+          HomeDashboardLocaleChanged(
+            localeIdentifier: state.locale.languageCode,
+          ),
+        );
+      },
+      child: child,
     );
   }
 }

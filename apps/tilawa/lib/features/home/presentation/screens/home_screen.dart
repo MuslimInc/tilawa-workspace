@@ -95,10 +95,14 @@ class HomeScreen extends StatelessWidget {
                       },
                     ),
                     SizedBox(height: context.tokens.spaceMedium),
-                    const SmartKhatmaCard(),
-                    SizedBox(height: context.tokens.spaceMedium),
-                    const TodayPlanCard(),
-                    SizedBox(height: context.tokens.spaceLarge),
+                    if (isSmartKhatmaEnabled()) ...[
+                      const SmartKhatmaCard(),
+                      SizedBox(height: context.tokens.spaceMedium),
+                    ],
+                    if (isTodayPlanEnabled()) ...[
+                      const TodayPlanCard(),
+                      SizedBox(height: context.tokens.spaceLarge),
+                    ],
                     _SectionTitle(text: context.l10n.homeExploreTitle),
                     SizedBox(height: context.tokens.spaceSmall),
                     _QuickActionsGrid(
@@ -162,8 +166,12 @@ class HomeScreen extends StatelessWidget {
     if (!context.mounted) {
       return;
     }
-    context.read<KhatmaPlanBloc>().add(const KhatmaPlanStarted());
-    context.read<TodayPlanBloc>().add(const TodayPlanSourceChanged());
+    if (isSmartKhatmaEnabled()) {
+      context.read<KhatmaPlanBloc>().add(const KhatmaPlanStarted());
+    }
+    if (isTodayPlanEnabled()) {
+      context.read<TodayPlanBloc>().add(const TodayPlanSourceChanged());
+    }
   }
 }
 
