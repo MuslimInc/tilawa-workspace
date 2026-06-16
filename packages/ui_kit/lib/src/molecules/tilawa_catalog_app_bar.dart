@@ -24,6 +24,7 @@ class TilawaCatalogAppBar extends StatelessWidget
     this.automaticallyImplyLeading = false,
     this.onBackPressed,
     this.showBottomHairline = TilawaAppBarConfig.showBottomHairline,
+    this.showElevationShadow = TilawaAppBarConfig.showElevationShadow,
     this.centerTitle = false,
   }) : assert(title != null || titleWidget != null);
 
@@ -44,6 +45,7 @@ class TilawaCatalogAppBar extends StatelessWidget
   /// GoRouter-friendly back handler; defaults to [Navigator.maybePop].
   final VoidCallback? onBackPressed;
   final bool showBottomHairline;
+  final bool showElevationShadow;
 
   /// When true, the title is centered between balanced leading/trailing slots.
   final bool centerTitle;
@@ -58,6 +60,7 @@ class TilawaCatalogAppBar extends StatelessWidget
     bool automaticallyImplyLeading = true,
     VoidCallback? onBackPressed,
     bool showBottomHairline = TilawaAppBarConfig.showBottomHairline,
+    bool showElevationShadow = TilawaAppBarConfig.showElevationShadow,
     bool centerTitle = false,
   }) {
     return TilawaCatalogAppBar(
@@ -69,6 +72,7 @@ class TilawaCatalogAppBar extends StatelessWidget
       automaticallyImplyLeading: automaticallyImplyLeading,
       onBackPressed: onBackPressed,
       showBottomHairline: showBottomHairline,
+      showElevationShadow: showElevationShadow,
       centerTitle: centerTitle,
     );
   }
@@ -91,6 +95,7 @@ class TilawaCatalogAppBar extends StatelessWidget
       centerTitle: centerTitle,
       toolbarHeight: 0,
       showBottomHairline: showBottomHairline,
+      showElevationShadow: showElevationShadow,
       bottom: PreferredSize(
         preferredSize: Size.fromHeight(preferredHeight),
         child: Semantics(

@@ -5,6 +5,15 @@ import '../foundation/design_tokens.dart';
 import '../molecules/tilawa_section_header.dart';
 import '../molecules/tilawa_settings_group_row_style.dart';
 
+/// Visual style for [TilawaSettingsGroupPanel].
+enum TilawaSettingsGroupPanelStyle {
+  /// Settings sections — chrome radius, flat hairline panel.
+  settings,
+
+  /// Feature hub navigation — hero radius, flat surface card.
+  hub,
+}
+
 /// Applies the screen-edge horizontal inset shared by settings groups.
 class TilawaSettingsGroupHorizontalInset extends StatelessWidget {
   const TilawaSettingsGroupHorizontalInset({
@@ -32,9 +41,11 @@ class TilawaSettingsGroupPanel extends StatelessWidget {
   const TilawaSettingsGroupPanel({
     super.key,
     required this.children,
+    this.style = TilawaSettingsGroupPanelStyle.settings,
   });
 
   final List<Widget> children;
+  final TilawaSettingsGroupPanelStyle style;
 
   @override
   Widget build(BuildContext context) {
@@ -42,8 +53,12 @@ class TilawaSettingsGroupPanel extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final tokens = theme.componentTokens.settingsGroup;
     final designTokens = theme.tokens;
+    final TilawaRadiusFamily radiusFamily = switch (style) {
+      TilawaSettingsGroupPanelStyle.settings => TilawaRadiusFamily.chrome,
+      TilawaSettingsGroupPanelStyle.hub => TilawaRadiusFamily.hero,
+    };
     final double groupRadius = designTokens.resolveRadius(
-      family: TilawaRadiusFamily.chrome,
+      family: radiusFamily,
     );
 
     return SizedBox(
@@ -88,6 +103,31 @@ class TilawaSettingsGroupPanel extends StatelessWidget {
               ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Grouped hub navigation card for feature discovery screens.
+///
+/// Wraps [TilawaNavigationRow] children in a single hero-radius panel.
+/// No section header — the screen title lives in the app bar above.
+///
+/// **Worship-context rule:** do not use on Quran reader, prayer times, or athkar.
+class TilawaHubNavigationGroup extends StatelessWidget {
+  const TilawaHubNavigationGroup({
+    super.key,
+    required this.children,
+  });
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return TilawaSettingsGroupHorizontalInset(
+      child: TilawaSettingsGroupPanel(
+        style: TilawaSettingsGroupPanelStyle.hub,
+        children: children,
       ),
     );
   }
