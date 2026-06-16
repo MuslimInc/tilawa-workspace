@@ -6,6 +6,7 @@ final class HomeDashboard extends Equatable {
   const HomeDashboard({
     required this.generatedAt,
     this.displayName,
+    this.photoUrl,
     this.locationLabel,
     this.nextPrayer,
   });
@@ -15,6 +16,9 @@ final class HomeDashboard extends Equatable {
 
   /// Best available user-facing profile name.
   final String? displayName;
+
+  /// Remote profile photo URL from Firebase Auth, when signed in.
+  final String? photoUrl;
 
   /// Best available prayer location label.
   final String? locationLabel;
@@ -28,6 +32,7 @@ final class HomeDashboard extends Equatable {
   List<Object?> get props => [
     generatedAt,
     displayName,
+    photoUrl,
     locationLabel,
     nextPrayer,
   ];

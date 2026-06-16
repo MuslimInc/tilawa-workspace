@@ -5,6 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/services/hive_readiness.dart';
+import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
+import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.dart';
 import 'package:tilawa/features/history/domain/repositories/history_repository.dart';
 import 'package:tilawa/features/home/home.dart';
@@ -105,9 +107,11 @@ class HomeScreenScope extends StatelessWidget {
           BlocProvider(create: (_) => _createTodayPlanBloc()),
       ],
       child: _HomeLocationSyncListener(
-        child: isSmartKhatmaEnabled() && isTodayPlanEnabled()
-            ? _HomeKhatmaPlanSyncListener(child: homeContent)
-            : homeContent,
+        child: _HomeAuthSyncListener(
+          child: isSmartKhatmaEnabled() && isTodayPlanEnabled()
+              ? _HomeKhatmaPlanSyncListener(child: homeContent)
+              : homeContent,
+        ),
       ),
     );
   }
@@ -204,4 +208,37 @@ class _HomeLocationSyncListenerState extends State<_HomeLocationSyncListener> {
 
   @override
   Widget build(BuildContext context) => widget.child;
+}
+
+/// Reloads the home dashboard when the signed-in profile changes.
+class _HomeAuthSyncListener extends StatelessWidget {
+  const _HomeAuthSyncListener({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<AuthBloc, AuthState>(
+      listenWhen: (previous, current) =>
+          _profileSnapshot(previous) != _profileSnapshot(current),
+      listener: (context, state) {
+        context.read<HomeDashboardBloc>().add(
+          HomeDashboardRefreshRequested(
+            localeIdentifier: Localizations.localeOf(context).languageCode,
+          ),
+        );
+      },
+      child: child,
+    );
+  }
+
+  static String? _profileSnapshot(AuthState state) {
+    final UserEntity? user = state.mapOrNull(
+      authenticated: (value) => value.user,
+    );
+    if (user == null) {
+      return null;
+    }
+    return '${user.id}|${user.displayName}|${user.photoUrl ?? ''}';
+  }
 }

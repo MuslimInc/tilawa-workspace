@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -7,6 +6,7 @@ import 'package:tilawa/core/app_legal_urls.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/legal_url_launcher.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
+import 'package:tilawa/shared/widgets/profile_avatar.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../l10n/generated/app_localizations.dart';
@@ -167,7 +167,7 @@ class SettingsProfileHeader extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    _ProfileAvatar(photoUrl: photoUrl, size: 72),
+                    ProfileAvatar(photoUrl: photoUrl, size: 72),
                     SizedBox(height: tokens.spaceMedium),
                     Text(
                       title,
@@ -196,35 +196,6 @@ class SettingsProfileHeader extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class _ProfileAvatar extends StatelessWidget {
-  const _ProfileAvatar({required this.photoUrl, this.size = 56});
-
-  final String photoUrl;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final iconSize = size * 0.5;
-
-    return CircleAvatar(
-      radius: size / 2,
-      backgroundColor: colorScheme.surfaceContainerHigh,
-      foregroundColor: colorScheme.onSurface,
-      backgroundImage: photoUrl.isNotEmpty
-          ? CachedNetworkImageProvider(photoUrl)
-          : null,
-      child: photoUrl.isEmpty
-          ? Icon(
-              FluentIcons.person_24_regular,
-              size: iconSize,
-              color: colorScheme.onSurfaceVariant,
-            )
-          : null,
     );
   }
 }

@@ -37,7 +37,7 @@ final class HomeDashboardRepositoryImpl implements HomeDashboardRepository {
   @override
   Future<HomeDashboard> getDashboard({String? localeIdentifier}) async {
     final DateTime generatedAt = _now();
-    final String? displayName = _getCurrentUser()?.displayName.trimOrNull;
+    final _HomeUserProfile? profile = _currentUserProfile();
     final PrayerSettingsEntity settings = await _loadSettings();
     final _HomeLocation? location = await _resolveLocation(
       settings,
@@ -46,7 +46,8 @@ final class HomeDashboardRepositoryImpl implements HomeDashboardRepository {
 
     return _composeDashboard(
       generatedAt: generatedAt,
-      displayName: displayName,
+      displayName: profile?.displayName,
+      photoUrl: profile?.photoUrl,
       settings: settings,
       location: location,
     );
@@ -67,7 +68,7 @@ final class HomeDashboardRepositoryImpl implements HomeDashboardRepository {
       ),
       (location) async {
         final DateTime generatedAt = _now();
-        final String? displayName = _getCurrentUser()?.displayName.trimOrNull;
+        final _HomeUserProfile? profile = _currentUserProfile();
         final PrayerSettingsEntity settings = await _persistGpsLocation(
           await _loadSettings(),
           location,
@@ -86,7 +87,8 @@ final class HomeDashboardRepositoryImpl implements HomeDashboardRepository {
 
         return _composeDashboard(
           generatedAt: generatedAt,
-          displayName: displayName,
+          displayName: profile?.displayName,
+          photoUrl: profile?.photoUrl,
           settings: settings,
           location: homeLocation,
         );
@@ -97,6 +99,7 @@ final class HomeDashboardRepositoryImpl implements HomeDashboardRepository {
   Future<HomeDashboard> _composeDashboard({
     required DateTime generatedAt,
     required String? displayName,
+    required String? photoUrl,
     required PrayerSettingsEntity settings,
     required _HomeLocation? location,
   }) async {
@@ -104,6 +107,7 @@ final class HomeDashboardRepositoryImpl implements HomeDashboardRepository {
       return HomeDashboard(
         generatedAt: generatedAt,
         displayName: displayName,
+        photoUrl: photoUrl,
         locationLabel: settings.effectiveSchedulingLocationName,
       );
     }
@@ -117,8 +121,20 @@ final class HomeDashboardRepositoryImpl implements HomeDashboardRepository {
     return HomeDashboard(
       generatedAt: generatedAt,
       displayName: displayName,
+      photoUrl: photoUrl,
       locationLabel: location.label,
       nextPrayer: nextPrayer,
+    );
+  }
+
+  _HomeUserProfile? _currentUserProfile() {
+    final user = _getCurrentUser();
+    if (user == null) {
+      return null;
+    }
+    return _HomeUserProfile(
+      displayName: user.displayName.trimOrNull,
+      photoUrl: user.photoUrl.trimOrNull,
     );
   }
 
@@ -246,6 +262,16 @@ final class _HomeLocation {
   final double latitude;
   final double longitude;
   final String? label;
+}
+
+final class _HomeUserProfile {
+  const _HomeUserProfile({
+    required this.displayName,
+    required this.photoUrl,
+  });
+
+  final String? displayName;
+  final String? photoUrl;
 }
 
 /// Thrown when the user-initiated home location refresh fails.
