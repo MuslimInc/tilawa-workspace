@@ -10,6 +10,10 @@ Rules in `.cursor/rules/` apply when this workspace is open in Cursor.
 | [test-guard.mdc](rules/test-guard.mdc) | `**/*_test.dart`, agent-requested | Guard pass for changed test code (mock abuse, bloat, implementation-detail asserts) |
 | [docs-guard.mdc](rules/docs-guard.mdc) | `**/*.md`, agent-requested | Guard pass for changed docs (verify symbols/samples vs source, catch drift) |
 
+**Senior Flutter persona:** skill [`tilawa-senior-flutter`](../.agents/skills/tilawa-senior-flutter/SKILL.md)
+(**TilawaAISeniorFlutter**) — clean architecture, SOLID, and verifiable feature
+implementation. Delegate PR fixes and feature work to this agent by name.
+
 **Confirm in Cursor:** Settings → Rules — all rules should appear;
 `karpathy-guidelines` is always on; the others activate by glob or when the
 agent requests them for a review/guard pass.
