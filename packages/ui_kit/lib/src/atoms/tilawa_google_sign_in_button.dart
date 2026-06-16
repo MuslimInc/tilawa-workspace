@@ -27,8 +27,8 @@ abstract final class GoogleSignInButtonBrand {
   static const double labelFontSize = 14;
   static const double labelLineHeight = 20;
 
-  static const String logoAsset =
-      'packages/tilawa_ui_kit/assets/icons/google_g_logo.svg';
+  static const String logoAsset = 'assets/icons/google_g_logo.svg';
+  static const String logoPackage = 'tilawa_ui_kit';
 }
 
 /// Visual theme for [TilawaGoogleSignInButton].
@@ -180,6 +180,7 @@ class TilawaGoogleSignInButton extends StatelessWidget {
                 child: Center(
                   child: SvgPicture.asset(
                     GoogleSignInButtonBrand.logoAsset,
+                    package: GoogleSignInButtonBrand.logoPackage,
                     width: GoogleSignInButtonBrand.logoSize,
                     height: GoogleSignInButtonBrand.logoSize,
                     fit: BoxFit.contain,

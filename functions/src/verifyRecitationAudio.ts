@@ -42,6 +42,9 @@ export const verifyRecitationAudio = onCall(
   },
   async (request): Promise<VerifyRecitationAudioResponse> => {
     const data = request.data as VerifyRecitationAudioRequest;
+    if (!data) {
+      throw new HttpsError("invalid-argument", "Request data is required.");
+    }
     const payload = validateRequest(data);
     const verifierUrl = process.env.RECITATION_VERIFIER_URL?.trim();
 

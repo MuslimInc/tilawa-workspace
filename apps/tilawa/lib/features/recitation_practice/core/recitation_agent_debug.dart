@@ -8,6 +8,7 @@ import 'package:tilawa/features/recitation_practice/core/voice_recitation_log.da
 abstract final class RecitationAgentDebug {
   static const String _sessionId = 'b34c36';
   static const String _ingestId = 'bbbf0204-215c-4477-92e7-9e08b76a9f83';
+  static final HttpClient _client = HttpClient();
 
   static void log({
     required String hypothesisId,
@@ -37,7 +38,7 @@ abstract final class RecitationAgentDebug {
       'timestamp': DateTime.now().millisecondsSinceEpoch,
     };
 
-    HttpClient()
+    _client
         .postUrl(uri)
         .then((HttpClientRequest request) {
           request.headers.set('Content-Type', 'application/json');

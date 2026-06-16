@@ -81,21 +81,26 @@ class _RecitationPracticeHostState extends State<RecitationPracticeHost> {
             const AudioPlayerEvent.pauseAudio(),
           );
         },
-        child: Stack(
-          children: [
-            widget.builder(context, _openPractice),
-            const RecitationPracticePanel(),
-            if (widget.showFloatingMic && widget.currentPageListenable != null)
-              ValueListenableBuilder<int>(
-                valueListenable: widget.currentPageListenable!,
-                builder: (BuildContext context, int currentPage, _) {
-                  return _RecitationPracticeFab(
-                    currentPage: currentPage,
-                    onPressed: () => unawaited(_openPractice(currentPage)),
-                  );
-                },
-              ),
-          ],
+        child: Builder(
+          builder: (BuildContext innerContext) {
+            return Stack(
+              children: [
+                widget.builder(innerContext, _openPractice),
+                const RecitationPracticePanel(),
+                if (widget.showFloatingMic &&
+                    widget.currentPageListenable != null)
+                  ValueListenableBuilder<int>(
+                    valueListenable: widget.currentPageListenable!,
+                    builder: (BuildContext context, int currentPage, _) {
+                      return _RecitationPracticeFab(
+                        currentPage: currentPage,
+                        onPressed: () => unawaited(_openPractice(currentPage)),
+                      );
+                    },
+                  ),
+              ],
+            );
+          },
         ),
       ),
     );

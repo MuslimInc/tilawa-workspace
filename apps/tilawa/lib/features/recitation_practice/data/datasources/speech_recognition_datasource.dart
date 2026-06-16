@@ -295,6 +295,9 @@ class SpeechRecognitionDatasource {
     _shouldRestartOnDone = false;
     _restartPending = false;
     await _speech.cancel();
+    if (!_updateController.isClosed) {
+      await _updateController.close();
+    }
   }
 
   void _commitLiveTranscript() {
