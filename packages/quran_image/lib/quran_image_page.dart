@@ -48,7 +48,6 @@ class _QuranImagePageState extends State<QuranImagePage> {
   double _devicePixelRatio = 1.0;
   double _pageWidth = 0;
   double _pageHeight = 0;
-  bool _isLandscape = false;
 
   List<VerseMarkerData> _markers = const <VerseMarkerData>[];
   List<SurahHeaderData> _headers = const <SurahHeaderData>[];
@@ -122,7 +121,6 @@ class _QuranImagePageState extends State<QuranImagePage> {
     _devicePixelRatio = dpr;
     _pageWidth = availableWidth;
     _pageHeight = availableHeight;
-    _isLandscape = newIsLandscape;
 
     if (cacheWidthChanged) {
       _rebuildLineProviders();
@@ -132,7 +130,7 @@ class _QuranImagePageState extends State<QuranImagePage> {
       widgetName: 'QuranImagePage',
       message:
           'didChangeDependencies page=${widget.pageNumber} '
-          'landscape=$_isLandscape '
+          'landscape=$newIsLandscape '
           'rebuildProviders=$cacheWidthChanged '
           'pageWidth=${availableWidth.toStringAsFixed(1)} '
           'cacheWidth=$newCacheWidth',
@@ -147,8 +145,9 @@ class _QuranImagePageState extends State<QuranImagePage> {
   ({double layoutHeight, List<double> yOffsets}) _calculateLayoutMetrics({
     required double availableHeight,
     required double lineHeight,
+    required bool isLandscape,
   }) {
-    final layoutHeight = _isLandscape
+    final layoutHeight = isLandscape
         ? lineHeight * SurahHeaderConstants.lineCount
         : availableHeight;
 
@@ -203,11 +202,13 @@ class _QuranImagePageState extends State<QuranImagePage> {
 
               final layoutPageWidth = constraints.maxWidth;
               final layoutPageHeight = constraints.maxHeight;
+              final layoutIsLandscape = layoutPageWidth > layoutPageHeight;
               final layoutLineHeight = widget.surahHeaderLayoutPolicy
                   .lineHeightForPageWidth(layoutPageWidth);
               final (:layoutHeight, :yOffsets) = _calculateLayoutMetrics(
                 availableHeight: constraints.maxHeight,
                 lineHeight: layoutLineHeight,
+                isLandscape: layoutIsLandscape,
               );
 
               // Isolates line stack + markers from app bar / footer repaint
@@ -227,7 +228,7 @@ class _QuranImagePageState extends State<QuranImagePage> {
                   surahHeaderLayoutPolicy: widget.surahHeaderLayoutPolicy,
                   imageCacheRepository: _imageCacheRepository,
                   devicePixelRatio: _devicePixelRatio,
-                  isLandscape: _isLandscape,
+                  isLandscape: layoutIsLandscape,
                   headerImageFilter: widget.headerImageFilter,
                 ),
               );
