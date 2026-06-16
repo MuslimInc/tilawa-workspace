@@ -47,9 +47,11 @@ class SpeechRecognitionRepositoryImpl implements SpeechRecognitionRepository {
       _datasource.recognitionUpdateStream;
 
   @override
-  Future<Either<Failure, void>> startListening() async {
+  Future<Either<Failure, void>> startListening({
+    bool resetTranscript = true,
+  }) async {
     try {
-      await _datasource.startListening();
+      await _datasource.startListening(resetTranscript: resetTranscript);
       return const Right(null);
     } catch (error) {
       return Left(Failure.unexpectedError(error.toString()));
@@ -57,10 +59,28 @@ class SpeechRecognitionRepositoryImpl implements SpeechRecognitionRepository {
   }
 
   @override
-  Future<Either<Failure, String>> stopListening() async {
+  Future<Either<Failure, String>> stopListening({
+    bool clearTranscript = true,
+    bool discardPendingLive = false,
+  }) async {
     try {
-      final String transcript = await _datasource.stopListening();
+      final String transcript = await _datasource.stopListening(
+        clearTranscript: clearTranscript,
+        discardPendingLive: discardPendingLive,
+      );
       return Right(transcript);
+    } catch (error) {
+      return Left(Failure.unexpectedError(error.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> alignCommittedTranscript(
+    String sanitizedPrefix,
+  ) async {
+    try {
+      _datasource.alignCommittedTranscript(sanitizedPrefix);
+      return const Right(null);
     } catch (error) {
       return Left(Failure.unexpectedError(error.toString()));
     }

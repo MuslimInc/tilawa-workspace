@@ -13,8 +13,7 @@ abstract class RecitationPracticeModule {
   @lazySingleton
   RecitationSpeechNormalizer recitationSpeechNormalizer(
     TextNormalizationService textNormalizationService,
-  ) =>
-      RecitationSpeechNormalizer(textNormalizationService);
+  ) => RecitationSpeechNormalizer(textNormalizationService);
 
   @lazySingleton
   VerseService verseService() => const VerseServiceImpl();

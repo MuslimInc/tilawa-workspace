@@ -10,6 +10,7 @@ class RecitationTextAligner {
     required List<String> targetWords,
     required List<String> spokenWords,
     required String spokenText,
+    int maxLeadingExtras = 1000,
   }) {
     if (targetWords.isEmpty) {
       return RecitationComparisonResult(
@@ -25,9 +26,33 @@ class RecitationTextAligner {
       targetWords: targetWords,
     );
 
-    final List<ComparedWord> alignedWords = _alignToTarget(
+    final List<String> boundedSpokenWords = _boundLeadingSpokenWords(
       targetWords: targetWords,
       spokenWords: resolvedSpokenWords,
+      maxLeadingExtras: maxLeadingExtras,
+    );
+
+    final int firstMatchIndex = _indexOfFirstTargetMatch(
+      targetWords: targetWords,
+      spokenWords: boundedSpokenWords,
+    );
+    if (firstMatchIndex > maxLeadingExtras) {
+      return RecitationComparisonResult(
+        words: List<ComparedWord>.generate(
+          targetWords.length,
+          (int index) => ComparedWord(
+            word: targetWords[index],
+            status: WordMatchStatus.missing,
+          ),
+        ),
+        score: 0,
+        spokenText: spokenText,
+      );
+    }
+
+    final List<ComparedWord> alignedWords = _alignToTarget(
+      targetWords: targetWords,
+      spokenWords: boundedSpokenWords,
     );
 
     final int correctCount = alignedWords
@@ -48,6 +73,36 @@ class RecitationTextAligner {
         .map((word) => word.trim())
         .where((word) => word.isNotEmpty)
         .toList(growable: false);
+  }
+
+  List<String> _boundLeadingSpokenWords({
+    required List<String> targetWords,
+    required List<String> spokenWords,
+    required int maxLeadingExtras,
+  }) {
+    if (spokenWords.length <= targetWords.length + maxLeadingExtras) {
+      return spokenWords;
+    }
+    return spokenWords
+        .sublist(0, targetWords.length + maxLeadingExtras)
+        .toList(growable: false);
+  }
+
+  int _indexOfFirstTargetMatch({
+    required List<String> targetWords,
+    required List<String> spokenWords,
+  }) {
+    if (targetWords.isEmpty || spokenWords.isEmpty) {
+      return 0;
+    }
+
+    for (var spokenIndex = 0; spokenIndex < spokenWords.length; spokenIndex++) {
+      if (_wordsMatch(spokenWords[spokenIndex], targetWords.first)) {
+        return spokenIndex;
+      }
+    }
+
+    return spokenWords.length;
   }
 
   List<String> _resolveSpokenWords({
@@ -199,7 +254,9 @@ class RecitationTextAligner {
       return true;
     }
 
-    final int maxLength = left.length > right.length ? left.length : right.length;
+    final int maxLength = left.length > right.length
+        ? left.length
+        : right.length;
     if (maxLength == 0) {
       return true;
     }

@@ -200,8 +200,7 @@ void main() {
 
         expectHighScore(
           target: target,
-          spoken:
-              'صراط الذين انعمت عليهم غير المغضوب عليهم ولا الضالين',
+          spoken: 'صراط الذين انعمت عليهم غير المغضوب عليهم ولا الضالين',
           minScore: minScore,
         );
       });
@@ -223,6 +222,96 @@ void main() {
 
         expect(result.score, lessThan(0.8));
       });
+    });
+
+    test(
+      'extractPassScopedSpoken returns aligned slice from a longer tail',
+      () {
+        final String? scoped = useCase.extractPassScopedSpoken(
+          targetText: getVerseNormal(1, 5),
+          spokenText: 'مالك يوم الدين ${getVerseNormal(1, 5)}',
+          threshold: 0.8,
+          maxLeadingExtras: 12,
+        );
+
+        expect(scoped, isNotNull);
+        expect(
+          useCase.passes(
+            targetText: getVerseNormal(1, 5),
+            spokenText: scoped!,
+            threshold: 0.8,
+          ),
+          isTrue,
+        );
+      },
+    );
+
+    test('extractPassScopedSpoken rejects tail without a passable slice', () {
+      final String? scoped = useCase.extractPassScopedSpoken(
+        targetText: getVerseNormal(1, 5),
+        spokenText: 'مالك يوم الدين',
+        threshold: 0.8,
+        maxLeadingExtras: 12,
+      );
+
+      expect(scoped, isNull);
+    });
+
+    test('extractPassScopedSpoken finds ayah 5 words after ayah 4 tail', () {
+      final String? scoped = useCase.extractPassScopedSpoken(
+        targetText: getVerseNormal(1, 5),
+        spokenText: 'مالك يوم اياك نعبد واياك نستعين',
+        threshold: 0.8,
+        maxLeadingExtras: 12,
+      );
+
+      expect(scoped, isNotNull);
+      expect(
+        useCase.passes(
+          targetText: getVerseNormal(1, 5),
+          spokenText: scoped!,
+          threshold: 0.8,
+        ),
+        isTrue,
+      );
+    });
+
+    test('alignmentSliceForTarget trims trailing ayah words', () {
+      final String? slice = useCase.alignmentSliceForTarget(
+        targetText: getVerseNormal(1, 3),
+        spokenText: 'الرحمن الرحيم مالك يوم الدين اياك نعبد',
+      );
+
+      expect(slice, isNotNull);
+      expect(slice!.split(RegExp(r'\s+')).length, 2);
+      expect(
+        useCase
+            .callForPass(
+              targetText: getVerseNormal(1, 3),
+              spokenText: slice,
+            )
+            .score,
+        1.0,
+      );
+    });
+
+    test('callForLive recovers ayah 1 after ayah-2 ASR bleed', () {
+      const String target = 'بسم الله الرحمن الرحيم';
+      final result = useCase.callForLiveScoring(
+        targetText: target,
+        spokenText: 'بسم الله الرحمن العالمين الرحمن الرحيم',
+      );
+
+      expect(result.score, greaterThanOrEqualTo(0.8));
+    });
+
+    test('callForLiveScoring does not pass ayah 4 on ayah 5 tail', () {
+      final result = useCase.callForLiveScoring(
+        targetText: getVerseNormal(1, 4),
+        spokenText: 'مالك اياك نعبد واياك نستعين',
+      );
+
+      expect(result.score, lessThan(0.8));
     });
   });
 }

@@ -4,37 +4,28 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
+import '../../core/voice_recitation_log.dart';
 import '../../domain/entities/recitation_comparison_result.dart';
 import '../../domain/entities/recitation_session_config.dart';
 import '../../domain/entities/recitation_target.dart';
-import '../../domain/entities/speech_recognition_update.dart';
-import '../../domain/repositories/speech_recognition_repository.dart';
-import '../../domain/usecases/compare_recitation_use_case.dart';
+import '../../domain/repositories/recitation_audio_verification_repository.dart';
 import '../../domain/usecases/get_page_recitation_targets_use_case.dart';
-import '../../domain/usecases/request_microphone_permission_use_case.dart';
 import 'recitation_practice_state.dart';
 
 @injectable
 class RecitationPracticeCubit extends Cubit<RecitationPracticeState> {
   RecitationPracticeCubit(
     this._getPageTargets,
-    this._compareRecitation,
-    this._requestMicrophonePermission,
-    this._speechRecognition,
+    this._audioVerification,
   ) : super(const RecitationPracticeState());
 
   static const RecitationSessionConfig _sessionConfig =
       RecitationSessionConfig.defaults;
 
   final GetPageRecitationTargetsUseCase _getPageTargets;
-  final CompareRecitationUseCase _compareRecitation;
-  final RequestMicrophonePermissionUseCase _requestMicrophonePermission;
-  final SpeechRecognitionRepository _speechRecognition;
+  final RecitationAudioVerificationRepository _audioVerification;
 
-  StreamSubscription<SpeechRecognitionUpdate>? _updateSubscription;
-  bool _isAdvancingAyah = false;
-  String _bestSpokenTranscript = '';
-  double _bestScoreThisAyah = 0;
+  bool _isCompletingAyah = false;
 
   Future<void> openForPage(int pageNumber) async {
     await _openWithTargets(_getPageTargets(pageNumber));
@@ -87,6 +78,7 @@ class RecitationPracticeCubit extends Cubit<RecitationPracticeState> {
   }
 
   void closePanel() {
+    VoiceRecitationLog.i('closePanel');
     unawaited(endSession(closePanel: true));
   }
 
@@ -94,6 +86,7 @@ class RecitationPracticeCubit extends Cubit<RecitationPracticeState> {
     if (state.isSessionActive || index < 0 || index >= state.targets.length) {
       return;
     }
+
     emit(
       state.copyWith(
         selectedTargetIndex: index,
@@ -106,60 +99,11 @@ class RecitationPracticeCubit extends Cubit<RecitationPracticeState> {
   }
 
   Future<void> startSession() async {
-    if (state.isSessionActive ||
-        state.selectedTarget == null ||
-        state.isInitializing) {
+    final RecitationTarget? target = state.selectedTarget;
+    if (state.isSessionActive || target == null || state.isInitializing) {
       return;
     }
 
-    final bool ready = await _ensureSpeechReady();
-    if (!ready) {
-      return;
-    }
-
-    await _updateSubscription?.cancel();
-    _updateSubscription = _speechRecognition.watchRecognitionUpdates().listen(
-      _onRecognitionUpdate,
-    );
-    _resetAyahTranscriptTracking();
-
-    final startResult = await _speechRecognition.startListening();
-    startResult.fold(
-      (Failure failure) => emit(
-        state.copyWith(
-          isInitializing: false,
-          failure: failure,
-        ),
-      ),
-      (_) => emit(
-        state.copyWith(
-          isInitializing: false,
-          isSessionActive: true,
-          phase: RecitationPracticePhase.listening,
-          clearFailure: true,
-        ),
-      ),
-    );
-  }
-
-  Future<void> endSession({bool closePanel = false}) async {
-    _isAdvancingAyah = false;
-    await _stopListeningInternal();
-    if (closePanel) {
-      emit(const RecitationPracticeState());
-      return;
-    }
-    emit(
-      state.copyWith(
-        isSessionActive: false,
-        phase: RecitationPracticePhase.idle,
-        liveTranscript: '',
-        clearComparisonResult: true,
-      ),
-    );
-  }
-
-  Future<bool> _ensureSpeechReady() async {
     emit(
       state.copyWith(
         isInitializing: true,
@@ -169,90 +113,59 @@ class RecitationPracticeCubit extends Cubit<RecitationPracticeState> {
       ),
     );
 
-    final permissionResult = await _requestMicrophonePermission();
-    final bool permissionGranted = permissionResult.fold(
+    final startResult = await _audioVerification.startRecording(target);
+    startResult.fold(
       (Failure failure) {
+        VoiceRecitationLog.w('recording start failed ${failure.message}');
         emit(
           state.copyWith(
             isInitializing: false,
+            isSessionActive: false,
             failure: failure,
           ),
         );
-        return false;
       },
-      (bool granted) => granted,
-    );
-    if (!permissionGranted) {
-      if (state.failure == null) {
+      (_) {
+        VoiceRecitationLog.i(
+          'recording started surah=${target.surahNumber} '
+          'ayah=${target.ayahNumber}',
+        );
         emit(
           state.copyWith(
             isInitializing: false,
-            failure: Failure.permissionDenied(
-              'Microphone permission is required.',
-            ),
+            isSessionActive: true,
+            phase: RecitationPracticePhase.listening,
+            clearFailure: true,
           ),
         );
-      }
-      return false;
-    }
-
-    final initResult = await _speechRecognition.initialize();
-    return initResult.fold(
-      (Failure failure) {
-        emit(
-          state.copyWith(
-            isInitializing: false,
-            failure: failure,
-          ),
-        );
-        return false;
       },
-      (_) => true,
     );
   }
 
-  void _resetAyahTranscriptTracking() {
-    _bestSpokenTranscript = '';
-    _bestScoreThisAyah = 0;
+  Future<void> endSession({bool closePanel = false}) async {
+    if (closePanel) {
+      await _audioVerification.cancel();
+      emit(const RecitationPracticeState());
+      return;
+    }
+
+    if (!state.isSessionActive) {
+      emit(
+        state.copyWith(
+          isSessionActive: false,
+          phase: RecitationPracticePhase.idle,
+          liveTranscript: '',
+          clearComparisonResult: true,
+        ),
+      );
+      return;
+    }
+
+    await _verifyCurrentRecording();
   }
 
-  void _onRecognitionUpdate(SpeechRecognitionUpdate update) {
-    final String sanitized = _compareRecitation.sanitizeSpokenTranscript(
-      update.transcript,
-    );
-    if (sanitized.isEmpty) {
-      return;
-    }
-
-    _emitLiveTranscript(sanitized);
-
-    if (!state.isSessionActive ||
-        state.phase != RecitationPracticePhase.listening ||
-        _isAdvancingAyah) {
-      return;
-    }
-
-    final RecitationComparisonResult? comparison = state.comparisonResult;
-    if (comparison == null) {
-      return;
-    }
-
-    if (comparison.score > _bestScoreThisAyah) {
-      _bestScoreThisAyah = comparison.score;
-      _bestSpokenTranscript = sanitized;
-    }
-
-    final bool passed =
-        comparison.score >= _sessionConfig.passScoreThreshold;
-    if (!passed && !update.isFinal) {
-      return;
-    }
-
-    unawaited(_handleVerseComplete(sanitized));
-  }
-
-  Future<void> _handleVerseComplete(String transcript) async {
-    if (_isAdvancingAyah || !state.isSessionActive) {
+  Future<void> _verifyCurrentRecording() async {
+    if (_isCompletingAyah) {
       return;
     }
 
@@ -261,23 +174,33 @@ class RecitationPracticeCubit extends Cubit<RecitationPracticeState> {
       return;
     }
 
-    final String effectiveTranscript = _bestSpokenTranscript.trim().isNotEmpty
-        ? _bestSpokenTranscript
-        : _compareRecitation.sanitizeSpokenTranscript(transcript);
-    if (effectiveTranscript.trim().isEmpty) {
-      _isAdvancingAyah = false;
-      return;
-    }
+    _isCompletingAyah = true;
+    emit(state.copyWith(isInitializing: true, clearFailure: true));
 
-    _isAdvancingAyah = true;
-
-    final RecitationComparisonResult comparison = _compareRecitation(
-      targetText: target.normalText,
-      spokenText: effectiveTranscript,
+    final verificationResult = await _audioVerification.stopAndVerify(target);
+    await verificationResult.fold(
+      (Failure failure) async {
+        VoiceRecitationLog.w('audio verification failed ${failure.message}');
+        emit(
+          state.copyWith(
+            isInitializing: false,
+            isSessionActive: false,
+            phase: RecitationPracticePhase.feedback,
+            failure: failure,
+          ),
+        );
+      },
+      (RecitationComparisonResult comparison) async {
+        await _handleVerificationResult(comparison);
+      },
     );
+    _isCompletingAyah = false;
+  }
 
-    final bool passed =
-        comparison.score >= _sessionConfig.passScoreThreshold;
+  Future<void> _handleVerificationResult(
+    RecitationComparisonResult comparison,
+  ) async {
+    final bool passed = comparison.score >= _sessionConfig.passScoreThreshold;
     final Set<int> completed = Set<int>.from(state.completedTargetIndices);
     if (passed) {
       completed.add(state.selectedTargetIndex);
@@ -285,103 +208,51 @@ class RecitationPracticeCubit extends Cubit<RecitationPracticeState> {
 
     emit(
       state.copyWith(
-        phase: RecitationPracticePhase.feedback,
-        liveTranscript: effectiveTranscript,
+        isInitializing: false,
+        isSessionActive: false,
+        phase: passed
+            ? RecitationPracticePhase.feedback
+            : RecitationPracticePhase.idle,
         comparisonResult: comparison,
         completedTargetIndices: completed,
         clearFailure: true,
       ),
     );
 
-    if (passed) {
-      final bool hasMoreAyahs =
-          state.selectedTargetIndex < state.targets.length - 1;
-      if (hasMoreAyahs) {
-        await Future<void>.delayed(_sessionConfig.verseAdvanceDelay);
-        await _advanceToNextAyah();
-      } else {
-        await Future<void>.delayed(_sessionConfig.verseAdvanceDelay);
-        await _stopListeningInternal();
-        emit(
-          state.copyWith(
-            isSessionActive: false,
-            phase: RecitationPracticePhase.sessionComplete,
-          ),
-        );
-      }
-    } else {
-      await Future<void>.delayed(_sessionConfig.retryDelay);
-      await _restartListeningForCurrentAyah();
-    }
-
-    _isAdvancingAyah = false;
-  }
-
-  Future<void> _advanceToNextAyah() async {
-    await _speechRecognition.stopListening();
-    await Future<void>.delayed(const Duration(milliseconds: 250));
-    final int nextIndex = state.selectedTargetIndex + 1;
-    emit(
-      state.copyWith(
-        selectedTargetIndex: nextIndex,
-        phase: RecitationPracticePhase.listening,
-        liveTranscript: '',
-        clearComparisonResult: true,
-        clearFailure: true,
-      ),
-    );
-    _resetAyahTranscriptTracking();
-    await _speechRecognition.startListening();
-  }
-
-  Future<void> _restartListeningForCurrentAyah() async {
-    await _speechRecognition.stopListening();
-    await Future<void>.delayed(const Duration(milliseconds: 250));
-    emit(
-      state.copyWith(
-        phase: RecitationPracticePhase.listening,
-        liveTranscript: '',
-        clearComparisonResult: true,
-        clearFailure: true,
-      ),
-    );
-    _resetAyahTranscriptTracking();
-    await _speechRecognition.startListening();
-  }
-
-  void _emitLiveTranscript(String transcript) {
-    final RecitationTarget? target = state.selectedTarget;
-    if (target == null) {
+    if (!passed) {
       return;
     }
 
-    final RecitationComparisonResult? liveComparison =
-        transcript.trim().isEmpty
-        ? null
-        : _compareRecitation(
-            targetText: target.normalText,
-            spokenText: transcript,
-          );
+    final bool hasMoreAyahs =
+        state.selectedTargetIndex < state.targets.length - 1;
+    if (!hasMoreAyahs) {
+      await Future<void>.delayed(_sessionConfig.verseAdvanceDelay);
+      emit(
+        state.copyWith(
+          isSessionActive: false,
+          phase: RecitationPracticePhase.sessionComplete,
+        ),
+      );
+      return;
+    }
 
+    await Future<void>.delayed(_sessionConfig.verseAdvanceDelay);
     emit(
       state.copyWith(
-        liveTranscript: transcript,
-        comparisonResult: liveComparison,
-        clearComparisonResult: liveComparison == null,
+        selectedTargetIndex: state.selectedTargetIndex + 1,
+        phase: RecitationPracticePhase.idle,
+        liveTranscript: '',
+        clearComparisonResult: true,
+        clearFailure: true,
       ),
     );
-  }
-
-  Future<void> _stopListeningInternal() async {
-    await _updateSubscription?.cancel();
-    _updateSubscription = null;
-    await _speechRecognition.stopListening();
+    await startSession();
   }
 
   @override
   Future<void> close() async {
-    await _stopListeningInternal();
-    await _speechRecognition.dispose();
+    await _audioVerification.cancel();
+    await _audioVerification.dispose();
     return super.close();
   }
 }

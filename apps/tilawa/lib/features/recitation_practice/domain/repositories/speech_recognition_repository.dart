@@ -11,9 +11,16 @@ abstract class SpeechRecognitionRepository {
 
   Stream<SpeechRecognitionUpdate> watchRecognitionUpdates();
 
-  Future<Either<Failure, void>> startListening();
+  Future<Either<Failure, void>> startListening({bool resetTranscript = true});
 
-  Future<Either<Failure, String>> stopListening();
+  Future<Either<Failure, String>> stopListening({
+    bool clearTranscript = true,
+    bool discardPendingLive = false,
+  });
+
+  Future<Either<Failure, void>> alignCommittedTranscript(
+    String sanitizedPrefix,
+  );
 
   Future<void> dispose();
 }

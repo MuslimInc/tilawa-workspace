@@ -242,12 +242,18 @@ class RecitationPracticePanel extends StatelessWidget {
                                 ? null
                                 : () => cubit.endSession(),
                             icon: const Icon(Icons.stop_rounded),
-                            label: Text(l10n.recitationPracticeEndSession),
+                            label: Text(l10n.recitationPracticeStop),
                           )
                         else if (isSessionComplete || state.failure != null)
                           FilledButton(
                             onPressed: cubit.closePanel,
                             child: Text(l10n.done),
+                          )
+                        else if (!state.isInitializing)
+                          FilledButton.icon(
+                            onPressed: cubit.startSession,
+                            icon: const Icon(Icons.mic_rounded),
+                            label: Text(l10n.recitationPracticeStart),
                           )
                         else if (state.isInitializing)
                           const SizedBox(

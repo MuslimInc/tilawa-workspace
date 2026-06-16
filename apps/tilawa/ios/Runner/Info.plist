@@ -31,7 +31,7 @@
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Tilawa uses the microphone to check your Quran recitation during practice.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>Tilawa uses speech recognition to compare your recitation with the Quran text.</string>
+	<string>Tilawa uses recitation audio analysis to compare your recitation with the selected Quran verse.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

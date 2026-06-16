@@ -95,5 +95,25 @@ void main() {
 
       expect(result.score, 0);
     });
+
+    test('rejects matches buried after too many leading words', () {
+      final result = aligner.compare(
+        targetWords: const <String>['اهدنا', 'الصراط', 'المستقيم'],
+        spokenWords: const <String>[
+          'يوم',
+          'اياك',
+          'نعبد',
+          'واياك',
+          'نستعين',
+          'اهدنا',
+          'الصراط',
+          'المستقيم',
+        ],
+        spokenText: 'يوم اياك نعبد واياك نستعين اهدنا الصراط المستقيم',
+        maxLeadingExtras: 1,
+      );
+
+      expect(result.score, lessThan(0.8));
+    });
   });
 }

@@ -79,6 +79,7 @@ dependencies:
   quran_image:
     path: ../../packages/quran_image
 
+  record: ^7.1.0
   rxdart: ^0.28.0
   sentry_flutter: ^9.21.0
   share_plus: ^13.1.0

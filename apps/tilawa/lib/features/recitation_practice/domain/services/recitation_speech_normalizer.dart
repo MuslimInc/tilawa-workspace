@@ -6,7 +6,9 @@ class RecitationSpeechNormalizer {
 
   final TextNormalizationService _textNormalizer;
 
-  static final RegExp _formatCharacters = RegExp(r'[\u200C-\u200F\uFEFF\u061C]');
+  static final RegExp _formatCharacters = RegExp(
+    r'[\u200C-\u200F\uFEFF\u061C]',
+  );
   static final RegExp _speechPunctuation = RegExp(
     r'[،؛؟!.,"«»٪٫٬\-–—:؛]',
   );
@@ -25,8 +27,7 @@ class RecitationSpeechNormalizer {
   /// Keeps Arabic script and drops Latin noise from ASR when locale is wrong.
   String sanitizeSpokenTranscript(String input) {
     var prepared = input;
-    for (final MapEntry<String, String> entry
-        in _speechReplacements.entries) {
+    for (final MapEntry<String, String> entry in _speechReplacements.entries) {
       prepared = prepared.replaceAll(entry.key, entry.value);
     }
 
@@ -41,8 +42,7 @@ class RecitationSpeechNormalizer {
     var result = _textNormalizer.normalise(input);
     result = _textNormalizer.removeDiacritics(result);
 
-    for (final MapEntry<String, String> entry
-        in _speechReplacements.entries) {
+    for (final MapEntry<String, String> entry in _speechReplacements.entries) {
       result = result.replaceAll(entry.key, entry.value);
     }
 
