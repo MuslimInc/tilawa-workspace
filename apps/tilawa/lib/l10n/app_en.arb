@@ -1127,9 +1127,9 @@
     "@signingIn": {
         "description": "Signing in progress text"
     },
-    "continueWithGoogle": "Continue with Google",
+    "continueWithGoogle": "Sign in with Google",
     "@continueWithGoogle": {
-        "description": "Continue with Google button text"
+        "description": "Sign in with Google button text (Google Identity branding)"
     },
     "googleSignInNotConfigured": "Google Sign-In not configured. Please contact support.",
     "@googleSignInNotConfigured": {

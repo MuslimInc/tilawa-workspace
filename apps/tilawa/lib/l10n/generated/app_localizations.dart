@@ -1544,10 +1544,10 @@ abstract class AppLocalizations {
   /// **'Signing in...'**
   String get signingIn;
 
-  /// Continue with Google button text
+  /// Sign in with Google button text (Google Identity branding)
   ///
   /// In en, this message translates to:
-  /// **'Continue with Google'**
+  /// **'Sign in with Google'**
   String get continueWithGoogle;
 
   /// Google Sign-In configuration error message

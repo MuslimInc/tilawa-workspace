@@ -842,7 +842,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get signingIn => 'جاري تسجيل الدخول...';
 
   @override
-  String get continueWithGoogle => 'المتابعة مع جوجل';
+  String get continueWithGoogle => 'تسجيل الدخول باستخدام Google';
 
   @override
   String get googleSignInNotConfigured =>

@@ -129,17 +129,20 @@ Widget previewTilawaSettingsGroup() {
           TilawaSettingsTile(
             icon: Icons.language,
             title: 'Language',
+            subtitle: 'Choose the app language and reading direction.',
             onTap: () {},
           ),
           TilawaSettingsSwitchTile(
             icon: Icons.dark_mode_outlined,
             title: 'Dark mode',
+            subtitle: 'Use the calmer dark palette for evening reading.',
             value: false,
             onChanged: (_) {},
           ),
           TilawaSettingsTile(
             icon: Icons.notifications_outlined,
             title: 'Notifications',
+            subtitle: 'Manage prayer, reading, and reminder alerts.',
             onTap: () {},
             showDivider: false,
           ),
@@ -165,11 +168,13 @@ Widget previewTilawaSettingsGroupDark() {
           TilawaSettingsTile(
             icon: Icons.language,
             title: 'Language',
+            subtitle: 'Choose the app language and reading direction.',
             onTap: () {},
           ),
           TilawaSettingsSwitchTile(
             icon: Icons.dark_mode_outlined,
             title: 'Dark mode',
+            subtitle: 'Use the calmer dark palette for evening reading.',
             value: false,
             onChanged: (_) {},
             showDivider: false,

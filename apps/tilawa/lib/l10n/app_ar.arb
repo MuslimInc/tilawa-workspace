@@ -911,9 +911,9 @@
     "@signingIn": {
         "description": "Signing in progress text"
     },
-    "continueWithGoogle": "المتابعة مع جوجل",
+    "continueWithGoogle": "تسجيل الدخول باستخدام Google",
     "@continueWithGoogle": {
-        "description": "Continue with Google button text"
+        "description": "Sign in with Google button text (Google Identity branding)"
     },
     "googleSignInNotConfigured": "تسجيل الدخول بجوجل غير مُعد. يرجى الاتصال بالدعم.",
     "@googleSignInNotConfigured": {

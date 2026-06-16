@@ -469,6 +469,78 @@ void main() {
         ],
       ),
     );
+
+    goldenTest(
+      'TilawaGoogleSignInButton',
+      fileName: 'atoms/tilawa_google_sign_in_button',
+      pumpBeforeTest: (tester) async {
+        await tester.pump(const Duration(milliseconds: 100));
+      },
+      builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
+        children: [
+          GoldenTestScenario(
+            name: 'Light',
+            child: TilawaPreviewWrapper(
+              child: TilawaGoogleSignInButton(
+                label: 'Sign in with Google',
+                appearance: GoogleSignInButtonAppearance.light,
+                onPressed: () {},
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Dark',
+            child: TilawaPreviewWrapper(
+              isDark: true,
+              child: TilawaGoogleSignInButton(
+                label: 'Sign in with Google',
+                appearance: GoogleSignInButtonAppearance.dark,
+                onPressed: () {},
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Neutral',
+            child: TilawaPreviewWrapper(
+              child: TilawaGoogleSignInButton(
+                label: 'Sign in with Google',
+                appearance: GoogleSignInButtonAppearance.neutral,
+                onPressed: () {},
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Loading',
+            child: const TilawaPreviewWrapper(
+              child: TilawaGoogleSignInButton(
+                label: 'Sign in with Google',
+                isLoading: true,
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Disabled',
+            child: const TilawaPreviewWrapper(
+              child: TilawaGoogleSignInButton(
+                label: 'Sign in with Google',
+                onPressed: null,
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'RTL Arabic',
+            child: TilawaPreviewWrapper(
+              isRTL: true,
+              child: TilawaGoogleSignInButton(
+                label: 'تسجيل الدخول باستخدام Google',
+                onPressed: () {},
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   });
 
   group('TilawaTextField Goldens', () {
