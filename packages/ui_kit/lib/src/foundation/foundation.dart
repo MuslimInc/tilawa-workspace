@@ -10,6 +10,7 @@ export 'design_tokens.dart';
 export 'semantic_tints.dart';
 export 'tilawa_fab_location.dart';
 export 'display_feature_insets.dart';
+export 'tilawa_bottom_action_inset.dart';
 export 'tilawa_bottom_sheet_actions.dart';
 export 'tilawa_bottom_sheet_scaffold.dart';
 export 'tilawa_bottom_sheet_title_row.dart';

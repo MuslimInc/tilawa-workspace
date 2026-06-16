@@ -12,20 +12,11 @@ class HomeDashboardContentSliver extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color sheetColor = context.scaffoldCanvasColor;
 
-    return SliverMainAxisGroup(
-      slivers: [
-        SliverToBoxAdapter(
-          child: _HomeDashboardSheetBody(
-            color: sheetColor,
-            child: child,
-          ),
-        ),
-        SliverFillRemaining(
-          hasScrollBody: true,
-          fillOverscroll: true,
-          child: ColoredBox(color: sheetColor),
-        ),
-      ],
+    return SliverToBoxAdapter(
+      child: _HomeDashboardSheetBody(
+        color: sheetColor,
+        child: child,
+      ),
     );
   }
 }

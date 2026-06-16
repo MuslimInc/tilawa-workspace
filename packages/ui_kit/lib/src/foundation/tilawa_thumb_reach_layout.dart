@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 
 import 'content_bounds.dart';
 import 'design_tokens.dart';
+import 'tilawa_bottom_action_inset.dart';
 
 /// Vertical split for one-handed primary actions (~72% content / ~28% chrome).
 ///
 /// Primary controls sit at the top of the lower band so they land near 72% of
-/// the viewport. A trailing [Spacer] keeps [actions] at intrinsic height — never
-/// stretched to fill the band (see [TilawaContentBounds] pitfall in action
-/// slots).
+/// the viewport, with [TilawaBottomActionInset] for tokenised spacing. A
+/// trailing [Spacer] keeps [actions] at intrinsic height — never stretched to
+/// fill the band (see [TilawaContentBounds] pitfall in action slots).
 class TilawaThumbReachLayout extends StatelessWidget {
   /// Creates a thumb-reach layout.
   const TilawaThumbReachLayout({
@@ -59,10 +60,6 @@ class TilawaThumbReachLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TilawaDesignTokens tokens = Theme.of(context).tokens;
-    final double maxActionWidth = TilawaContentBounds.resolveMaxWidth(
-      context,
-      actionMaxWidthKind,
-    );
 
     final Widget column = Column(
       children: <Widget>[
@@ -70,15 +67,10 @@ class TilawaThumbReachLayout extends StatelessWidget {
         Expanded(
           flex: actionFlex,
           child: SingleChildScrollView(
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: maxActionWidth),
-                  child: actions,
-                ),
-              ),
+            child: TilawaBottomActionInset(
+              top: tokens.spaceExtraLarge,
+              maxWidthKind: actionMaxWidthKind,
+              child: actions,
             ),
           ),
         ),
