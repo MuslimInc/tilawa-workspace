@@ -70,6 +70,12 @@ _Code health, architecture, tests — not user-visible features._
   **Next:** Single splash surface (`_BootGate` + `/splash`); profile cold start;
   re-budget background init.
 
+- [ ] **Android — re-enable Impeller when stable** `P2`  
+  Skia is the default (`EnableImpeller=false` in
+  [`AndroidManifest.xml`](../apps/tilawa/android/app/src/main/AndroidManifest.xml)).
+  Revisit when Flutter Impeller is stable for 604-page QCF fonts; follow the
+  checklist in [`quran_reader_architecture.md`](quran_reader_architecture.md#android-rendering-backend).
+
 - [ ] _Your next refactor_
 
 ---
