@@ -113,25 +113,19 @@ final class HomeDashboardRepositoryImpl implements HomeDashboardRepository {
       );
     }
 
-    final HomeNextPrayer? nextPrayer = await _loadNextPrayer(
+    final _HomePrayerSnapshot? prayerSnapshot = await _loadPrayerSnapshot(
       settings: settings,
       location: location,
       generatedAt: generatedAt,
     );
-    final HomePrayerDayBoundaries? prayerBoundaries =
-        await _loadPrayerBoundaries(
-          settings: settings,
-          location: location,
-          generatedAt: generatedAt,
-        );
 
     return HomeDashboard(
       generatedAt: generatedAt,
       displayName: displayName,
       photoUrl: photoUrl,
       locationLabel: location.label,
-      nextPrayer: nextPrayer,
-      prayerBoundaries: prayerBoundaries,
+      nextPrayer: prayerSnapshot?.nextPrayer,
+      prayerBoundaries: prayerSnapshot?.boundaries,
     );
   }
 
@@ -223,24 +217,7 @@ final class HomeDashboardRepositoryImpl implements HomeDashboardRepository {
     return localized ?? fallback;
   }
 
-  Future<HomePrayerDayBoundaries?> _loadPrayerBoundaries({
-    required PrayerSettingsEntity settings,
-    required _HomeLocation location,
-    required DateTime generatedAt,
-  }) async {
-    final Either<Failure, PrayerTimeEntity> result = await _getPrayerTimes(
-      latitude: location.latitude,
-      longitude: location.longitude,
-      date: generatedAt,
-      settings: settings,
-    );
-    return result.fold(
-      (_) => null,
-      HomePrayerDayBoundaries.fromPrayerTimes,
-    );
-  }
-
-  Future<HomeNextPrayer?> _loadNextPrayer({
+  Future<_HomePrayerSnapshot?> _loadPrayerSnapshot({
     required PrayerSettingsEntity settings,
     required _HomeLocation location,
     required DateTime generatedAt,
@@ -252,14 +229,20 @@ final class HomeDashboardRepositoryImpl implements HomeDashboardRepository {
       settings: settings,
     );
     return result.fold((_) => null, (prayerTimes) {
+      final HomePrayerDayBoundaries boundaries =
+          HomePrayerDayBoundaries.fromPrayerTimes(prayerTimes);
       final PrayerTimeItem? item = _nextPrayerFor(prayerTimes, generatedAt);
-      if (item == null) {
-        return null;
-      }
-      return HomeNextPrayer(
-        type: item.type,
-        time: item.time,
-        timeUntil: item.time.difference(generatedAt),
+      final HomeNextPrayer? nextPrayer = switch (item) {
+        null => null,
+        final prayer => HomeNextPrayer(
+          type: prayer.type,
+          time: prayer.time,
+          timeUntil: prayer.time.difference(generatedAt),
+        ),
+      };
+      return _HomePrayerSnapshot(
+        nextPrayer: nextPrayer,
+        boundaries: boundaries,
       );
     });
   }
@@ -287,6 +270,16 @@ final class _HomeLocation {
   final double latitude;
   final double longitude;
   final String? label;
+}
+
+final class _HomePrayerSnapshot {
+  const _HomePrayerSnapshot({
+    required this.nextPrayer,
+    required this.boundaries,
+  });
+
+  final HomeNextPrayer? nextPrayer;
+  final HomePrayerDayBoundaries boundaries;
 }
 
 final class _HomeUserProfile {
