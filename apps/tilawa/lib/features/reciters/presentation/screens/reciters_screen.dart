@@ -9,6 +9,7 @@ import 'package:quran_image/core/perf_logger.dart';
 import 'package:tilawa/core/bootstrap/app_startup_readiness.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/layout/list_scroll_bottom_padding.dart';
 import 'package:tilawa/features/downloads/presentation/screens/downloads_screen.dart';
 import 'package:tilawa/features/downloads/presentation/widgets/downloads_screen_scope.dart';
 import 'package:tilawa/features/reciters/presentation/scroll/reciters_alphabet_scrub_coordinator.dart';
@@ -1718,7 +1719,7 @@ class _ReciterListSliver extends StatelessWidget {
           context,
           constraints,
           top: tokens.spaceSmall,
-          bottom: tokens.spaceLarge,
+          bottom: listScrollBottomPadding(context),
           reserveScrollbarSpace: reserveScrollbarSpace,
           reserveScrollbarOnLeading: reserveScrollbarOnLeading,
         );
@@ -1836,7 +1837,7 @@ class _ReciterGridSliver extends StatelessWidget {
           context,
           constraints,
           top: tokens.spaceSmall,
-          bottom: tokens.spaceLarge,
+          bottom: listScrollBottomPadding(context),
           reserveScrollbarSpace: reserveScrollbarSpace,
           reserveScrollbarOnLeading: reserveScrollbarOnLeading,
         );

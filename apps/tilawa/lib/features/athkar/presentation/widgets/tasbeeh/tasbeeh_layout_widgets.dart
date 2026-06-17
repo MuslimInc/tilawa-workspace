@@ -37,27 +37,6 @@ class TasbeehContentBounds extends StatelessWidget {
   }
 }
 
-class TasbeehBottomActionArea extends StatelessWidget {
-  const TasbeehBottomActionArea({super.key, required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
-
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        tokens.spaceLarge,
-        tokens.spaceSmall,
-        tokens.spaceLarge,
-        tokens.spaceLarge,
-      ),
-      child: child,
-    );
-  }
-}
-
 class TasbeehShakeOnTrigger extends StatelessWidget {
   const TasbeehShakeOnTrigger({
     super.key,

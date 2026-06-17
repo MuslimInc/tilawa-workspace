@@ -19,39 +19,39 @@ Future<bool?> showSupportConfirmationSheet(
     builder: (BuildContext sheetContext) {
       return TilawaBottomSheetScaffold(
         topBar: TilawaBottomSheetTitleRow(title: l10n.supportConfirmationTitle),
+        footer: TilawaBottomSheetActions(
+          primaryLabel: l10n.supportConfirm,
+          onPrimary: () => Navigator.of(sheetContext).pop(true),
+          secondaryLabel: l10n.supportCancel,
+          onSecondary: () => Navigator.of(sheetContext).pop(false),
+        ),
         children: [
-          Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: tokens.spaceLarge,
-            ).copyWith(bottom: tokens.spaceLarge),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              spacing: tokens.spaceLarge,
-              children: [
-                IgnorePointer(
-                  child: SupportTierCard(
-                    product: product,
-                    selected: true,
-                    onTap: () {},
-                    compact: true,
+          Flexible(
+            child: SingleChildScrollView(
+              padding: TilawaBottomSheetScaffold.resolvedBodyPadding(
+                sheetContext,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: tokens.spaceLarge,
+                children: [
+                  IgnorePointer(
+                    child: SupportTierCard(
+                      product: product,
+                      selected: true,
+                      onTap: () {},
+                      compact: true,
+                    ),
                   ),
-                ),
-                Text(
-                  l10n.supportConfirmationBody,
-                  style: Theme.of(sheetContext).textTheme.bodyMedium?.copyWith(
-                    height: tokens.textHeightLoose,
+                  Text(
+                    l10n.supportConfirmationBody,
+                    style: Theme.of(sheetContext).textTheme.bodyMedium
+                        ?.copyWith(
+                          height: tokens.textHeightLoose,
+                        ),
                   ),
-                ),
-                TilawaButton(
-                  text: l10n.supportConfirm,
-                  onPressed: () => Navigator.of(sheetContext).pop(true),
-                ),
-                TilawaButton(
-                  text: l10n.supportCancel,
-                  variant: TilawaButtonVariant.ghost,
-                  onPressed: () => Navigator.of(sheetContext).pop(false),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],

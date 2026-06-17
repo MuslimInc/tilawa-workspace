@@ -83,7 +83,7 @@ Apple's lesson: **the color change is the divider; the artifact gets the single 
 - **Section dividers inside long lists:** prefer a **change in surface tier** (`surface` → `surfaceContainerLow`) over an explicit divider line. Falls back to a hairline only when tiers can't change.
 - **The reader page (Mushaf):** the **only** surface allowed a full layered shadow on its frame. Other screens may use the *strong* shadow token only on the player/nav float, never on lists.
 
-**Touch targets:** 44 dp minimum (`kTilawaMinInteractiveDimension`) — same as DESIGN §4. Brand-level: prefer **wide, generous** hit zones over packed grids. Density is the enemy of reverence.
+**Touch targets:** 48 dp minimum (`kTilawaMinInteractiveDimension`) — same as DESIGN §4. Brand-level: prefer **wide, generous** hit zones over packed grids. Density is the enemy of reverence.
 
 ### Rounding (height-aware)
 

@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/layout/list_scroll_bottom_padding.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -199,7 +200,7 @@ class _FavoritesListSliver extends StatelessWidget {
         tokens.spaceLarge,
         tokens.spaceSmall,
         tokens.spaceLarge,
-        120,
+        listScrollBottomPadding(context),
       ),
       sliver: SliverList.builder(
         itemCount: itemCount,

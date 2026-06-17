@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/shared/widgets/quran_player_widget.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/khatma_plan.dart';
@@ -18,6 +19,8 @@ class SmartKhatmaHubScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
+    final double fabBottomOffset =
+        QuranPlayerWidget.fabBottomOffset(context) + tokens.spaceLarge;
 
     return Scaffold(
       backgroundColor: context.scaffoldCanvasColor,
@@ -58,7 +61,7 @@ class SmartKhatmaHubScreen extends StatelessWidget {
       ),
       floatingActionButtonLocation: TilawaFabLocation.placement(
         TilawaFabPlacement.start,
-        bottomOffset: tokens.spaceLarge,
+        bottomOffset: fabBottomOffset,
       ),
     );
   }

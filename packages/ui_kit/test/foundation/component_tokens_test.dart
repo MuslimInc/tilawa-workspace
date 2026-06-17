@@ -7,6 +7,7 @@ import '../../lib/src/foundation/component_tokens/component_tokens_theme.dart';
 import '../../lib/src/foundation/component_tokens/molecules_tokens.dart';
 import '../../lib/src/foundation/component_tokens/organisms_tokens.dart';
 import '../../lib/src/foundation/component_tokens/token_lerp.dart';
+import '../../lib/src/foundation/design_tokens.dart';
 
 void main() {
   group('TilawaSectionTitleTokens', () {
@@ -610,7 +611,7 @@ void main() {
         tokens.bodyPadding,
         const EdgeInsets.fromLTRB(16, 12, 16, 24),
       );
-      expect(tokens.closeButtonSize, 40.0);
+      expect(tokens.closeButtonSize, kTilawaMinInteractiveDimension);
       expect(
         tokens.footerPadding,
         const EdgeInsets.fromLTRB(16, 12, 16, 16),

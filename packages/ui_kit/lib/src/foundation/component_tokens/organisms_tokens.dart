@@ -1683,7 +1683,7 @@ class TilawaBottomSheetScaffoldTokens {
       // close-button side mirrors in RTL.
       headerPadding: EdgeInsetsDirectional.fromSTEB(16, 8, 12, 12),
       bodyPadding: EdgeInsets.fromLTRB(16, 12, 16, 24),
-      closeButtonSize: 40,
+      closeButtonSize: kTilawaMinInteractiveDimension,
       footerPadding: EdgeInsets.fromLTRB(16, 12, 16, 16),
       footerActionGap: 12,
       footerTopBorderWidth: 0.5,

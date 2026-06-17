@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import 'design_tokens.dart';
+import 'shell_padding.dart';
 
 extension TilawaSafeAreaX on BuildContext {
   // ---------------------------------------------------------------------------
@@ -93,5 +94,17 @@ extension TilawaSafeAreaX on BuildContext {
     }
 
     return floatingBottomPadding;
+  }
+
+  /// Bottom padding for scroll content hosted in [TilawaAdaptiveShell] tabs.
+  ///
+  /// Returns `0` when not under [TilawaShellPadding] — use app-layer helpers
+  /// (e.g. mini-player footprint) on standalone routes.
+  double get shellHostedScrollBottomPadding {
+    final double shell = TilawaShellPadding.of(this);
+    if (shell <= 0) {
+      return 0;
+    }
+    return shell + theme.tokens.spaceLarge;
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/layout/list_scroll_bottom_padding.dart';
 import 'package:tilawa/shared/widgets/tilawa_back_button.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -139,7 +140,11 @@ class _TasbeehView extends StatelessWidget {
                       ),
                     ),
                     if (bottomActions != null)
-                      TasbeehBottomActionArea(child: bottomActions),
+                      TilawaBottomActionInset(
+                        top: Theme.of(context).tokens.spaceSmall,
+                        extraBottom: bottomActionExtraInset(context),
+                        child: bottomActions,
+                      ),
                   ],
                 ),
               ),
