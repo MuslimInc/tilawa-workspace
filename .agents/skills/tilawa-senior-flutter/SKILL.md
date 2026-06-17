@@ -44,7 +44,8 @@ boundaries.
 touching navigation.
 
 **Companion skill:** `flutter-apply-architecture-best-practices` (full Tilawa
-checklist for new features).
+checklist for new features). For UI work also load `tilawa-apply-ux-principles`,
+`tilawa-apply-ui-principles`, and run `tilawa-ui-ux-guard` before handoff.
 
 ## SOLID in practice
 

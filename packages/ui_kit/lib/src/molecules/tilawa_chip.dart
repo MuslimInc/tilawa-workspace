@@ -56,21 +56,21 @@ class TilawaChip extends StatelessWidget {
     final effectiveBorderColor =
         borderColor ?? componentTokens.defaultBorderColor;
 
-    final EdgeInsets resolvedChipPadding = (padding ?? componentTokens.padding)
-        .resolve(Directionality.of(context));
-    final TextStyle effectiveTextStyle =
-        textStyle ?? theme.textTheme.labelLarge ?? const TextStyle();
-    final double labelHeight =
-        (effectiveTextStyle.fontSize ?? 14) *
-        (effectiveTextStyle.height ?? 1.2);
-    final double visualHeight = resolvedChipPadding.vertical + labelHeight;
-
     final double resolvedRadius =
         borderRadius ??
         (onTap != null
             ? designTokens.resolveRadius(
                 family: TilawaRadiusFamily.pill,
-                height: visualHeight,
+                height: _chipPaintedHeight(
+                  context,
+                  chipTokens: componentTokens,
+                  theme: theme,
+                  padding: padding,
+                  iconSize: iconSize,
+                  icon: icon,
+                  showLabel: showLabel,
+                  textStyle: textStyle,
+                ),
               )
             : designTokens.resolveRadius(
                 family: TilawaRadiusFamily.decorative,
@@ -180,4 +180,29 @@ class TilawaChip extends StatelessWidget {
       ),
     );
   }
+}
+
+double _chipPaintedHeight(
+  BuildContext context, {
+  required TilawaChipTokens chipTokens,
+  required ThemeData theme,
+  EdgeInsetsGeometry? padding,
+  double? iconSize,
+  IconData? icon,
+  bool showLabel = true,
+  TextStyle? textStyle,
+}) {
+  final EdgeInsets resolvedPadding =
+      (padding ?? chipTokens.padding).resolve(Directionality.of(context));
+  final TextStyle effectiveTextStyle =
+      textStyle ?? theme.textTheme.labelLarge ?? const TextStyle(fontSize: 14);
+  final double lineHeight =
+      effectiveTextStyle.fontSize! * (effectiveTextStyle.height ?? 1.2);
+  final double iconDimension = iconSize ?? chipTokens.iconSize;
+  final double contentHeight = switch ((icon != null, showLabel)) {
+    (true, true) => iconDimension > lineHeight ? iconDimension : lineHeight,
+    (true, false) => iconDimension,
+    _ => lineHeight,
+  };
+  return resolvedPadding.vertical + contentHeight;
 }

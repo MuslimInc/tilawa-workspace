@@ -11,6 +11,7 @@ import 'package:tilawa_core/core.dart';
 
 import '../../domain/entities/home_dashboard.dart';
 import '../../domain/entities/home_prayer_day_boundaries.dart';
+import '../../domain/entities/home_prayer_slot.dart';
 import '../../domain/repositories/home_dashboard_repository.dart';
 
 typedef HomeDashboardNow = DateTime Function();
@@ -126,6 +127,7 @@ final class HomeDashboardRepositoryImpl implements HomeDashboardRepository {
       locationLabel: location.label,
       nextPrayer: prayerSnapshot?.nextPrayer,
       prayerBoundaries: prayerSnapshot?.boundaries,
+      todayPrayers: prayerSnapshot?.todayPrayers ?? const [],
     );
   }
 
@@ -240,9 +242,15 @@ final class HomeDashboardRepositoryImpl implements HomeDashboardRepository {
           timeUntil: prayer.time.difference(generatedAt),
         ),
       };
+      final List<HomePrayerSlot> todayPrayers = _todayPrayerSlots(
+        prayerTimes: prayerTimes,
+        now: generatedAt,
+        nextType: nextPrayer?.type,
+      );
       return _HomePrayerSnapshot(
         nextPrayer: nextPrayer,
         boundaries: boundaries,
+        todayPrayers: todayPrayers,
       );
     });
   }
@@ -257,6 +265,22 @@ final class HomeDashboardRepositoryImpl implements HomeDashboardRepository {
       type: PrayerType.fajr,
       time: prayerTimes.fajr.add(const Duration(days: 1)),
     );
+  }
+
+  List<HomePrayerSlot> _todayPrayerSlots({
+    required PrayerTimeEntity prayerTimes,
+    required DateTime now,
+    required PrayerType? nextType,
+  }) {
+    return [
+      for (final PrayerTimeItem prayer in prayerTimes.mainPrayers)
+        HomePrayerSlot(
+          type: prayer.type,
+          time: prayer.time,
+          isNext: prayer.type == nextType,
+          hasPassed: !prayer.time.isAfter(now),
+        ),
+    ];
   }
 }
 
@@ -276,10 +300,12 @@ final class _HomePrayerSnapshot {
   const _HomePrayerSnapshot({
     required this.nextPrayer,
     required this.boundaries,
+    required this.todayPrayers,
   });
 
   final HomeNextPrayer? nextPrayer;
   final HomePrayerDayBoundaries boundaries;
+  final List<HomePrayerSlot> todayPrayers;
 }
 
 final class _HomeUserProfile {

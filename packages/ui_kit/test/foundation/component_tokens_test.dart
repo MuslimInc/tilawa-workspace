@@ -171,7 +171,7 @@ void main() {
   group('TilawaIconActionButtonTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaIconActionButtonTokens.defaults();
-      expect(tokens.size, 48.0);
+      expect(tokens.size, kTilawaMinInteractiveDimension);
       expect(tokens.activeBackgroundOpacity, 0.12);
       expect(tokens.activeBorderOpacity, 0.35);
       expect(tokens.inactiveBorderOpacity, 0.26);
@@ -210,7 +210,7 @@ void main() {
   group('TilawaSearchFieldTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaSearchFieldTokens.defaults();
-      expect(tokens.height, 48.0);
+      expect(tokens.height, kTilawaMinInteractiveDimension);
       expect(tokens.backgroundColor, isA<Color>());
       expect(tokens.contentPadding, const EdgeInsets.symmetric(vertical: 12));
       expect(tokens.iconSize, 18.0);
@@ -996,7 +996,7 @@ void main() {
       expect(tokens.overlayBorderOpacity, 0.1);
       expect(tokens.shortWindowHeightBreakpoint, 760.0);
       expect(tokens.shortWindowPanelHeightFactor, 0.5);
-      expect(tokens.headerButtonSize, 48.0);
+      expect(tokens.headerButtonSize, kTilawaMinInteractiveDimension);
       expect(tokens.composerSurfaceColor, isA<Color>());
       expect(tokens.panelBorderColor, isA<Color>());
     });
@@ -1088,6 +1088,28 @@ void main() {
           second.composerSurfaceColor,
           0.5,
         ),
+      );
+    });
+  });
+
+  group('TilawaHomeDashboardCardTokens', () {
+    test('fromColorScheme uses primaryContainer and primary ink feedback', () {
+      final ColorScheme scheme = ColorScheme.fromSeed(
+        seedColor: AppColors.defaultPrimary,
+        primary: AppColors.defaultPrimary,
+        primaryContainer: AppColors.lightSchemePrimaryContainer,
+      );
+      final tokens = TilawaHomeDashboardCardTokens.fromColorScheme(scheme);
+
+      expect(tokens.backgroundColor, scheme.primaryContainer);
+      expect(tokens.backgroundColor, AppColors.lightSchemePrimaryContainer);
+      expect(
+        tokens.splashColor,
+        scheme.primary.withValues(alpha: 0.12),
+      );
+      expect(
+        tokens.highlightColor,
+        scheme.primary.withValues(alpha: 0.06),
       );
     });
   });

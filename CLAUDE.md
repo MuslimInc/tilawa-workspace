@@ -58,6 +58,11 @@ final scheme = theme.colorScheme;
 
 Localisation strings: `context.l10n` (extension on `BuildContext`).
 
+**UI / UX skills:** `tilawa-apply-ux-principles` (flows, placement),
+`tilawa-apply-ui-principles` (composition), `tilawa-ui-ux-guard` (review pass);
+visual tokens: `flutter-apply-tilawa-theming`. Canonical human specs: `DESIGN.md`,
+`docs/tilawa_brand.md`.
+
 ## Known pitfall — TilawaCard and interactive children
 
 `TilawaCard` places a `Positioned.fill` InkWell at **z=0** (background) and

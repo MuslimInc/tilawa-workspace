@@ -17,11 +17,11 @@ void main() {
       radiusSmall: 8.0,
       radiusMedium: 12.0,
       radiusLarge: 16.0,
-      radiusExtraLarge: 24.0,
-      radiusHero: 32.0,
+      radiusExtraLarge: 10.0,
+      radiusHero: 12.0,
       opacitySubtle: 0.1,
-      opacityShadow: 0.18,
-      opacityShadowStrong: 0.28,
+      opacityShadow: 0.05,
+      opacityShadowStrong: 0.08,
       opacityMedium: 0.3,
       opacityEmphasis: 0.7,
       opacityGlass: 0.8,
@@ -37,7 +37,6 @@ void main() {
       iconSizeLarge: 24.0,
       iconSizeLargePlus: 42.0,
       iconSizeExtraLarge: 44.0,
-      minInteractiveDimension: 48.0,
       textHeightLoose: 1.8,
       durationFast: Duration(milliseconds: 200),
       durationMedium: Duration(milliseconds: 400),
@@ -76,14 +75,17 @@ void main() {
         expect(light.radiusMedium, 12.0);
         expect(light.radiusLarge, 16.0);
         expect(light.radiusExtraLarge, 24.0);
+        expect(light.radiusHero, 28.0);
         expect(light.opacitySubtle, 0.1);
+        expect(light.opacityShadow, 0.05);
+        expect(light.opacityShadowStrong, 0.08);
         expect(light.opacityMedium, 0.3);
         expect(light.opacityEmphasis, 0.7);
         expect(light.opacityGlass, 0.8);
         expect(light.blurGlass, 12.0);
-        expect(light.blurShadow, 16.0);
-        expect(light.shadowOffsetSmall, const Offset(0, 2));
-        expect(light.shadowOffsetMedium, const Offset(0, 4));
+        expect(light.blurShadow, 20.0);
+        expect(light.shadowOffsetSmall, const Offset(0, 1));
+        expect(light.shadowOffsetMedium, const Offset(0, 6));
         expect(light.borderWidthThin, 0.5);
         expect(light.progressHeight, 3.0);
         expect(light.iconSizeExtraSmall, 12.0);
@@ -92,6 +94,10 @@ void main() {
         expect(light.iconSizeLarge, 24.0);
         expect(light.iconSizeLargePlus, 42.0);
         expect(light.iconSizeExtraLarge, 44.0);
+        expect(
+          light.minInteractiveDimension,
+          kTilawaMinInteractiveDimension,
+        );
         expect(light.textHeightLoose, 2.0);
         expect(light.durationFast, const Duration(milliseconds: 200));
         expect(light.durationMedium, const Duration(milliseconds: 400));
@@ -238,7 +244,6 @@ void main() {
           cardTightHeightThreshold: 145.0,
           iconSizeExtraSmall: 12,
           iconSizeExtraLarge: 44,
-          minInteractiveDimension: 48.0,
           textHeightLoose: 1.8,
           playerCollapsedHeight: 100.0,
           playerDismissThreshold: 80.0,
@@ -297,7 +302,6 @@ void main() {
           cardTightHeightThreshold: 160.0,
           iconSizeExtraSmall: 12,
           iconSizeExtraLarge: 44,
-          minInteractiveDimension: 48.0,
           textHeightLoose: 2.0,
           playerCollapsedHeight: 120.0,
           playerDismissThreshold: 100.0,
@@ -365,7 +369,6 @@ void main() {
           cardTightHeightThreshold: 160.0,
           iconSizeExtraSmall: 12,
           iconSizeExtraLarge: 44,
-          minInteractiveDimension: 48.0,
           textHeightLoose: 2.0,
           playerCollapsedHeight: 120.0,
           playerDismissThreshold: 100.0,
@@ -431,7 +434,6 @@ void main() {
           cardTightHeightThreshold: 145.0,
           iconSizeExtraSmall: 12,
           iconSizeExtraLarge: 44,
-          minInteractiveDimension: 48.0,
           textHeightLoose: 1.8,
           playerCollapsedHeight: 100.0,
           playerDismissThreshold: 80.0,
@@ -490,7 +492,6 @@ void main() {
           cardTightHeightThreshold: 160.0,
           iconSizeExtraSmall: 18,
           iconSizeExtraLarge: 72,
-          minInteractiveDimension: 48.0,
           textHeightLoose: 2.0,
           playerCollapsedHeight: 120.0,
           playerDismissThreshold: 100.0,
@@ -562,7 +563,6 @@ void main() {
           cardTightHeightThreshold: 145.0,
           iconSizeExtraSmall: 12,
           iconSizeExtraLarge: 44,
-          minInteractiveDimension: 48.0,
           textHeightLoose: 1.8,
           playerCollapsedHeight: 100.0,
           playerDismissThreshold: 80.0,
@@ -580,7 +580,7 @@ void main() {
         );
 
         final lerped = first.lerp(second, 0.5);
-        expect(lerped.shadowOffsetSmall.dy, closeTo(4.0, 0.01));
+        expect(lerped.shadowOffsetSmall.dy, closeTo(3.5, 0.01));
       });
 
       test(
@@ -619,7 +619,6 @@ void main() {
             iconSizeLarge: 24.0,
             iconSizeLargePlus: 42.0,
             iconSizeExtraLarge: 44.0,
-            minInteractiveDimension: 48.0,
             textHeightLoose: 1.8,
             durationFast: Duration(milliseconds: 200),
             durationMedium: Duration(milliseconds: 400),
@@ -678,7 +677,6 @@ void main() {
             iconSizeLarge: 40.0,
             iconSizeLargePlus: 56.0,
             iconSizeExtraLarge: 96.0,
-            minInteractiveDimension: 48.0,
             textHeightLoose: 2.0,
             durationFast: Duration(milliseconds: 300),
             durationMedium: Duration(milliseconds: 600),
@@ -754,6 +752,10 @@ void main() {
               builder: (context) {
                 expect(context.iconSizeExtraLarge, 44.0);
                 expect(context.iconSizeLargePlus, 42.0);
+                expect(
+                  context.minInteractiveDimension,
+                  kTilawaMinInteractiveDimension,
+                );
                 return const SizedBox.shrink();
               },
             ),
@@ -786,23 +788,65 @@ void main() {
     });
 
     group('TilawaRadiusResolverX', () {
-      test('resolveRadius returns family rules', () {
+      test('semantic radius aliases map to token caps', () {
+        final tokens = TilawaDesignTokens.light();
+        expect(tokens.radiusCard, 16.0);
+        expect(tokens.radiusSection, 16.0);
+        expect(tokens.radiusPill(48), 24.0);
+        expect(tokens.radiusIcon(44), 22.0);
+      });
+
+      test('resolveRadius returns fixed family tokens', () {
         final tokens = TilawaDesignTokens.light();
         expect(
           tokens.resolveRadius(family: TilawaRadiusFamily.card),
-          24.0,
+          16.0,
+        );
+        expect(
+          tokens.resolveRadius(family: TilawaRadiusFamily.pill),
+          22.0,
         );
         expect(
           tokens.resolveRadius(family: TilawaRadiusFamily.chrome),
           16.0,
         );
         expect(
-          tokens.resolveRadius(family: TilawaRadiusFamily.pill, height: 48),
-          24.0,
+          tokens.resolveRadius(family: TilawaRadiusFamily.section),
+          16.0,
         );
         expect(
           tokens.resolveRadius(family: TilawaRadiusFamily.hero),
-          32.0,
+          28.0,
+        );
+        expect(
+          tokens.resolveRadius(family: TilawaRadiusFamily.decorative),
+          12.0,
+        );
+        expect(
+          tokens.resolveRadius(
+            family: TilawaRadiusFamily.icon,
+            width: 40,
+            height: 40,
+          ),
+          20.0,
+        );
+      });
+
+      test('resolveRadius uses height for pill affordances', () {
+        final tokens = TilawaDesignTokens.light();
+        expect(
+          tokens.resolveRadius(
+            family: TilawaRadiusFamily.pill,
+            height: 44,
+          ),
+          22.0,
+        );
+        expect(
+          tokens.resolveRadius(
+            family: TilawaRadiusFamily.pill,
+            height: 32,
+          ),
+          16.0,
         );
       });
 
@@ -814,6 +858,17 @@ void main() {
         );
         expect(radii.containerRadius, 16.0);
         expect(radii.itemRadius, 12.0);
+      });
+
+      test('resolveSegmentedControlRadii uses pill track height when requested', () {
+        final tokens = TilawaDesignTokens.light();
+        final radii = tokens.resolveSegmentedControlRadii(
+          itemHeight: 32,
+          containerPadding: 4,
+          trackFamily: TilawaRadiusFamily.pill,
+        );
+        expect(radii.containerRadius, 20.0);
+        expect(radii.itemRadius, 16.0);
       });
     });
   });

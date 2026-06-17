@@ -36,14 +36,19 @@ class _HomeDashboardSheetBody extends StatelessWidget {
 
     return ColoredBox(
       color: color,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          tokens.spaceMedium,
-          tokens.spaceMedium,
-          tokens.spaceMedium,
-          TilawaShellPadding.of(context) + tokens.spaceLarge,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: MediaQuery.sizeOf(context).height,
         ),
-        child: child,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            tokens.spaceMedium,
+            tokens.spaceMedium,
+            tokens.spaceMedium,
+            TilawaShellPadding.of(context) + tokens.spaceMedium,
+          ),
+          child: child,
+        ),
       ),
     );
   }

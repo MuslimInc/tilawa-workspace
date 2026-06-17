@@ -78,8 +78,9 @@ Column(
 
 ### Touch targets
 
-Follow kit tokens (`minInteractiveDimension` = **44 dp**), not Material's
-default 48 dp, unless a documented exception exists.
+Follow kit tokens: `tokens.minInteractiveDimension` = **44 dp**
+(`kTilawaMinInteractiveDimension` in `design_tokens.dart`). Do not shrink
+tappable chrome below this floor.
 
 ## Catalog chrome
 
@@ -89,18 +90,13 @@ left-aligned title, and catalog search/filter tokens. See
 
 ## Widget tests and previews
 
-Disable runtime font fetching for CI stability:
+Use `AppTheme.getLightTheme` with project test helpers (see
+`test/features/home/presentation/screens/home_screen_test.dart`):
 
 ```dart
-setUpAll(() {
-  AppTheme.useGoogleFonts = false;
-});
-
 await tester.pumpWidget(
   MaterialApp(
-    theme: AppTheme.getLightTheme(
-      primaryPreset: PrimaryColorPreset.coral,
-    ),
+    theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
     home: Scaffold(body: widgetUnderTest),
@@ -125,3 +121,4 @@ not bare `ThemeData.light()`.
 - `flutter-fix-layout-issues` — overflow and unbounded constraints
 - `flutter-add-widget-test` — pumping widgets with `AppTheme`
 - `dart-run-static-analysis` — analyze + format before commit
+- `tilawa-apply-ui-principles` / `tilawa-apply-ux-principles` — composition and flows

@@ -25,16 +25,13 @@ abstract final class HomeDashboardHeroSliver {
   const HomeDashboardHeroSliver._();
 
   /// Greeting area inside the expanded app bar (below toolbar).
-  static const double _greetingBodyHeight = 56;
+  static const double _greetingBodyHeight = 60;
 
   /// Intrinsic prayer focus height (measured at default text scale).
-  static const double _metricsContentHeight = 112;
+  static const double _metricsContentHeight = 72;
 
   /// Overlap between the hero and the content sheet lip.
-  static const double sheetOverlap = 24;
-
-  /// Location row height in the hero footer (matches chip min height).
-  static const double _footerRowHeight = kTilawaMinInteractiveDimension;
+  static const double sheetOverlap = 16;
 
   /// Scroll distance where the hero transitions from expanded to pinned.
   static double collapseScrollExtent(BuildContext context) {
@@ -93,9 +90,8 @@ abstract final class HomeDashboardHeroSliver {
   static double _resolveHeroBodyHeight(BuildContext context) {
     final tokens = Theme.of(context).tokens;
     return _greetingBodyHeight +
-        tokens.spaceLarge +
+        tokens.spaceSmall +
         _resolveMetricsMaxHeight(context) +
-        _footerRowHeight +
         _resolveBottomInset(context);
   }
 
@@ -104,7 +100,7 @@ abstract final class HomeDashboardHeroSliver {
   }
 
   static double _resolveBottomInset(BuildContext context) {
-    return Theme.of(context).tokens.spaceLarge + sheetOverlap;
+    return Theme.of(context).tokens.spaceMedium + sheetOverlap;
   }
 }
 
@@ -567,7 +563,7 @@ class _HomeHeroExpandedBody extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(height: tokens.spaceLarge),
+        SizedBox(height: tokens.spaceSmall),
         metricsFooterSection,
       ],
     );
@@ -611,30 +607,23 @@ class _HomeHeroMetricsFooterSection extends StatelessWidget {
 
     return RepaintBoundary(
       child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: tokens.spaceMedium,
-          vertical: tokens.spaceSmall,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: tokens.spaceMedium,
-          children: [
-            ConstrainedBox(
-              constraints: const BoxConstraints(
-                minHeight: HomeDashboardHeroSliver._metricsContentHeight,
+        padding: EdgeInsets.symmetric(horizontal: tokens.spaceMedium),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minHeight: HomeDashboardHeroSliver._metricsContentHeight,
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: tokens.spaceSmall,
+            children: [
+              Expanded(child: metricsChild),
+              _HomeHeroPrayerFooter(
+                locationName: locationName,
+                isRefreshingLocation: isRefreshingLocation,
+                onRefreshLocation: onRefreshLocation,
               ),
-              child: Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: metricsChild,
-              ),
-            ),
-            _HomeHeroPrayerFooter(
-              locationName: locationName,
-              isRefreshingLocation: isRefreshingLocation,
-              onRefreshLocation: onRefreshLocation,
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -808,17 +797,38 @@ class _HomeHeroHeader extends StatelessWidget {
       alpha: heroTokens.footerForegroundOpacity,
     );
     final String? displayName = dashboard?.displayName;
+    final String dateLine = MaterialLocalizations.of(context).formatFullDate(
+      DateTime.now(),
+    );
 
     final Widget greeting = switch (displayName) {
-      null => Text(
-        context.l10n.homeGreeting,
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-        style: theme.textTheme.titleMedium?.copyWith(
-          color: secondary,
-          fontWeight: FontWeight.w600,
-          height: 1.2,
-        ),
+      null => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            context.l10n.homeGreeting,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: secondary,
+              fontWeight: FontWeight.w600,
+              height: 1.2,
+            ),
+          ),
+          SizedBox(height: tokens.spaceExtraSmall),
+          Text(
+            dateLine,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: onGradient.withValues(
+                alpha: heroTokens.tertiaryForegroundOpacity,
+              ),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ),
       final name => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -845,6 +855,18 @@ class _HomeHeroHeader extends StatelessWidget {
               color: secondary,
               fontWeight: FontWeight.w600,
               height: 1.1,
+            ),
+          ),
+          SizedBox(height: tokens.spaceExtraSmall),
+          Text(
+            dateLine,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: onGradient.withValues(
+                alpha: heroTokens.mutedForegroundOpacity,
+              ),
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
@@ -886,7 +908,7 @@ class _HomeHeroProfileMark extends StatelessWidget {
     final Color fillColor = onGradient.withValues(
       alpha: heroTokens.locationChipFillOpacity,
     );
-    final double avatarSize = tokens.spaceExtraLarge + tokens.spaceExtraSmall;
+    final double avatarSize = tokens.spaceExtraLarge;
 
     return Semantics(
       button: true,
@@ -1045,47 +1067,51 @@ class _HomeHeroNextPrayerFocus extends StatelessWidget {
           highlightColor: onGradient.withValues(
             alpha: heroTokens.locationChipHighlightOpacity,
           ),
-          child: Padding(
-            padding: EdgeInsets.only(top: tokens.spaceSmall),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  context.l10n.nextPrayer,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: tertiary,
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 0.2,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: tokens.spaceExtraSmall,
+            children: [
+              Text(
+                context.l10n.nextPrayer,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: tertiary,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.2,
+                ),
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                spacing: tokens.spaceSmall,
+                children: [
+                  Flexible(
+                    child: Text(
+                      prayerName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: secondary,
+                        fontWeight: FontWeight.w600,
+                        height: 1.1,
+                      ),
+                    ),
                   ),
-                ),
-                SizedBox(height: tokens.spaceSmall),
-                Text(
-                  prayerName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: secondary,
-                    fontWeight: FontWeight.w600,
-                    height: 1.1,
+                  Text(
+                    timeLabel,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: onGradient,
+                      fontWeight: FontWeight.w700,
+                      height: 1.0,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
                   ),
-                ),
-                SizedBox(height: tokens.spaceSmall),
-                Text(
-                  timeLabel,
-                  style: theme.textTheme.headlineLarge?.copyWith(
-                    color: onGradient,
-                    fontWeight: FontWeight.w700,
-                    height: 1.0,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
-                ),
-                SizedBox(height: tokens.spaceMedium),
-                _HomeHeroPrayerRemainingText(
-                  prayerTime: prayer.time,
-                  color: muted,
-                ),
-              ],
-            ),
+                ],
+              ),
+              _HomeHeroPrayerRemainingText(
+                prayerTime: prayer.time,
+                color: muted,
+              ),
+            ],
           ),
         ),
       ),
@@ -1113,7 +1139,7 @@ class _HomeHeroPrayerFooter extends StatelessWidget {
         );
 
     return Align(
-      alignment: AlignmentDirectional.centerStart,
+      alignment: AlignmentDirectional.topEnd,
       child: _HomeHeroLocationChip(
         locationLabel: locationLabel,
         isRefreshingLocation: isRefreshingLocation,

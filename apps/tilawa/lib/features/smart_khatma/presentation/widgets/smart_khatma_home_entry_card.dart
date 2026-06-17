@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/router/app_router_config.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_dashboard_card.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../bloc/khatma_plan_bloc.dart';
@@ -31,7 +32,7 @@ class SmartKhatmaHomeEntryCard extends StatelessWidget {
                         plan.todayTargetPages(DateTime.now()),
                     onOpenHub: () => _openHub(context),
                   ),
-          KhatmaPlanFailure(:final message) => TilawaCard(
+          KhatmaPlanFailure(:final message) => HomeDashboardCard(
             surface: TilawaCardSurface.raised,
             child: Text(
               message,
@@ -40,7 +41,7 @@ class SmartKhatmaHomeEntryCard extends StatelessWidget {
               ),
             ),
           ),
-          _ => const TilawaCard(
+          _ => const HomeDashboardCard(
             surface: TilawaCardSurface.raised,
             child: TilawaLoadingIndicator(centered: false),
           ),
@@ -68,7 +69,7 @@ class _KhatmaHomeEmptyEntry extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
 
-    return TilawaCard(
+    return HomeDashboardCard(
       surface: TilawaCardSurface.raised,
       onTap: onOpenHub,
       child: Row(
@@ -130,7 +131,7 @@ class _KhatmaHomeActiveEntry extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
 
-    return TilawaCard(
+    return HomeDashboardCard(
       surface: TilawaCardSurface.raised,
       onTap: onOpenHub,
       child: Row(

@@ -30,6 +30,10 @@ project design spec:
 **Living backlog (features / refactors):** [`docs/TODO.md`](docs/TODO.md).
 **Senior Flutter agent:** [`tilawa-senior-flutter`](.agents/skills/tilawa-senior-flutter/SKILL.md)
 (**TilawaAISeniorFlutter**) — clean architecture, SOLID, feature implementation.
+**UI / UX:** [`tilawa-apply-ux-principles`](.agents/skills/tilawa-apply-ux-principles/SKILL.md),
+[`tilawa-apply-ui-principles`](.agents/skills/tilawa-apply-ui-principles/SKILL.md),
+[`tilawa-ui-ux-guard`](.agents/skills/tilawa-ui-ux-guard/SKILL.md) (review pass);
+tokens: [`flutter-apply-tilawa-theming`](.agents/skills/flutter-apply-tilawa-theming/SKILL.md).
 **Startup / splash (P0):** [`docs/startup_splash_plan.md`](docs/startup_splash_plan.md).
 Optional **external reference** library (per-brand moodboards):
 [`design-md/`](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/design-md)

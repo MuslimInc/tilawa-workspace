@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/smart_khatma/smart_khatma.dart';
 import 'package:tilawa/router/app_router_config.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_dashboard_card.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/today_plan.dart';
@@ -48,7 +49,7 @@ class _TodayPlanLoadedCard extends StatelessWidget {
         plan.totalCount,
         plan.minutesRemaining,
       ),
-      child: TilawaCard(
+      child: HomeDashboardCard(
         surface: TilawaCardSurface.raised,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -341,7 +342,7 @@ class _TodayPlanLoadingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TilawaCard(
+    return HomeDashboardCard(
       surface: TilawaCardSurface.raised,
       child: const Center(
         child: TilawaLoadingIndicator(centered: false),
@@ -359,7 +360,7 @@ class _TodayPlanFailureCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return TilawaCard(
+    return HomeDashboardCard(
       surface: TilawaCardSurface.raised,
       child: Text(
         message,

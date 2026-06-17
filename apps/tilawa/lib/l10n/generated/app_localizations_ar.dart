@@ -82,7 +82,60 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get homeExploreTitle => 'استكشف';
+  String get homeExploreTitle => 'المزيد';
+
+  @override
+  String get homeTodayTitle => 'اليوم';
+
+  @override
+  String get homeTodaySubtitle => 'الصلاة والقرآن والذكر ليومك';
+
+  @override
+  String get homeAthkarRitualsTitle => 'أذكار سريعة';
+
+  @override
+  String get homePrayerStripTitle => 'مواقيت اليوم';
+
+  @override
+  String get homePrayerStripViewAll => 'عرض الكل';
+
+  @override
+  String get homeFeaturedRitualStart => 'اضغط للبدء';
+
+  @override
+  String get homeStartQuranTitle => 'افتح المصحف';
+
+  @override
+  String get homeStartQuranSubtitle => 'ابدأ قراءة القرآن اليوم';
+
+  @override
+  String get homeContinueQuranTitle => 'تابع القرآن';
+
+  @override
+  String get homeContinueQuranSubtitle => 'ارجع إلى آخر صفحة قرأتها';
+
+  @override
+  String homeQuranResumeSurahPage(String surah, int page) {
+    return '$surah · صفحة $page';
+  }
+
+  @override
+  String homeQuranResumePage(int page) {
+    return 'صفحة $page';
+  }
+
+  @override
+  String homeQuranResumeProgress(int percent) {
+    return '$percent٪ من المصحف';
+  }
+
+  @override
+  String homeContextualAthkarPrompt(String name) {
+    return 'وقت مناسب لـ $name';
+  }
+
+  @override
+  String get homeAthkarNowBadge => 'الآن';
 
   @override
   String get homeQuickQuran => 'القرآن';
@@ -91,16 +144,68 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeQuickReciters => 'القراء';
 
   @override
+  String get homeQuickRecitersSubtitle => 'تصفّح التلاوات';
+
+  @override
   String get homeQuickPrayer => 'الصلاة';
 
   @override
   String get homeQuickQibla => 'القبلة';
 
   @override
+  String get homeQuickQiblaSubtitle => 'اعرف اتجاه القبلة';
+
+  @override
+  String get homeQuickTasbeeh => 'المسبحة';
+
+  @override
+  String get homeQuickTasbeehSubtitle => 'عدّ الذكر بلمسة واحدة';
+
+  @override
   String get homeQuickAthkar => 'الأذكار';
 
   @override
   String get homeQuickSettings => 'الإعدادات';
+
+  @override
+  String get homePinnedAthkarTitle => 'أذكارك السريعة';
+
+  @override
+  String get homePinnedAthkarEdit => 'تعديل اختصارات الأذكار';
+
+  @override
+  String get homePinnedAthkarChoose => 'اختر الأذكار';
+
+  @override
+  String get homePinnedAthkarEmptyTitle => 'اختر أذكارك اليومية';
+
+  @override
+  String get homePinnedAthkarEmptyBody =>
+      'ثبّت حتى أربعة تصنيفات للوصول إليها من الصفحة الرئيسية بلمسة واحدة.';
+
+  @override
+  String get homePinnedAthkarPickerTitle => 'اختر الأذكار السريعة';
+
+  @override
+  String homePinnedAthkarPickerLimit(int count, int max) {
+    return 'تم اختيار $count من $max اختصارات';
+  }
+
+  @override
+  String homePinnedAthkarMoveUp(String name) {
+    return 'انقل $name للأعلى';
+  }
+
+  @override
+  String homePinnedAthkarMoveDown(String name) {
+    return 'انقل $name للأسفل';
+  }
+
+  @override
+  String get homeDailyInspirationTitle => 'إلهام اليوم';
+
+  @override
+  String get homeDailyInspirationSubtitle => 'آية ودعاء ليومك';
 
   @override
   String get homeDailyAyahLabel => 'الآية اليومية';
@@ -120,6 +225,34 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get homeDailyDuaReference => 'أبو داود';
+
+  @override
+  String get homeDailyAyahBody1 =>
+      'فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ';
+
+  @override
+  String get homeDailyAyahReference1 => 'القرآن ٢:١٥٢';
+
+  @override
+  String get homeDailyDuaBody1 =>
+      'رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ';
+
+  @override
+  String get homeDailyDuaReference1 => 'القرآن ٢:٢٠١';
+
+  @override
+  String get homeDailyAyahBody2 =>
+      'إِنَّ الصَّلَاةَ تَنْهَىٰ عَنِ الْفَحْشَاءِ وَالْمُنكَرِ';
+
+  @override
+  String get homeDailyAyahReference2 => 'القرآن ٢٩:٤٥';
+
+  @override
+  String get homeDailyDuaBody2 =>
+      'اللهم إني أسألك علماً نافعاً، ورزقاً طيباً، وعملاً متقبلاً';
+
+  @override
+  String get homeDailyDuaReference2 => 'ابن ماجه';
 
   @override
   String get khatmaEmptyTitle => 'ابدأ ختمة';

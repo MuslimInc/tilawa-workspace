@@ -149,17 +149,6 @@ class _TilawaCardShadow extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: borderRadius,
         boxShadow: [
-          // Ambient layer: tight, low-opacity — gives the card a "lifted off
-          // surface" feel at close range even when the directional shadow is subtle.
-          BoxShadow(
-            color: colorScheme.shadow.withValues(
-              alpha: designTokens.opacityShadow * 0.55,
-            ),
-            blurRadius: 2,
-            offset: const Offset(0, 1),
-          ),
-          // Directional layer: larger blur, slightly stronger — the main
-          // perceived depth cue from overhead ambient light.
           BoxShadow(
             color: colorScheme.shadow.withValues(
               alpha: designTokens.opacityShadow,

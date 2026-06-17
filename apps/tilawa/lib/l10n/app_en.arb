@@ -98,9 +98,82 @@
             }
         }
     },
-    "homeExploreTitle": "Explore",
+    "homeExploreTitle": "More",
     "@homeExploreTitle": {
-        "description": "Home quick actions section title"
+        "description": "Home section title for secondary destinations that are not bottom-nav tabs"
+    },
+    "homeTodayTitle": "Today",
+    "@homeTodayTitle": {
+        "description": "Home section title for daily actions"
+    },
+    "homeTodaySubtitle": "Prayer, Quran, and dhikr for your day",
+    "@homeTodaySubtitle": {
+        "description": "Home Today section supporting line"
+    },
+    "homeAthkarRitualsTitle": "Quick athkar",
+    "@homeAthkarRitualsTitle": {
+        "description": "Home subsection title for pinned athkar shortcuts"
+    },
+    "homePrayerStripTitle": "Today's prayer times",
+    "@homePrayerStripTitle": {
+        "description": "Home compact prayer schedule strip title"
+    },
+    "homePrayerStripViewAll": "View all",
+    "@homePrayerStripViewAll": {
+        "description": "Home prayer strip link to Prayer tab"
+    },
+    "homeFeaturedRitualStart": "Tap to begin",
+    "@homeFeaturedRitualStart": {
+        "description": "Home featured ritual card action hint"
+    },
+    "homeStartQuranTitle": "Open the Mushaf",
+    "@homeStartQuranTitle": {
+        "description": "Home Quran card title for first-time readers"
+    },
+    "homeStartQuranSubtitle": "Begin reading the Quran today",
+    "@homeStartQuranSubtitle": {
+        "description": "Home Quran card subtitle for first-time readers"
+    },
+    "homeContinueQuranTitle": "Continue Quran",
+    "@homeContinueQuranTitle": {
+        "description": "Home Today row title for opening the last-read Quran page"
+    },
+    "homeContinueQuranSubtitle": "Resume from your last read page",
+    "@homeContinueQuranSubtitle": {
+        "description": "Home Today row subtitle for opening the last-read Quran page"
+    },
+    "homeQuranResumeSurahPage": "{surah} · page {page}",
+    "@homeQuranResumeSurahPage": {
+        "description": "Home Quran resume subtitle with surah and page",
+        "placeholders": {
+            "surah": { "type": "String" },
+            "page": { "type": "int" }
+        }
+    },
+    "homeQuranResumePage": "Page {page}",
+    "@homeQuranResumePage": {
+        "description": "Home Quran resume subtitle with page only",
+        "placeholders": {
+            "page": { "type": "int" }
+        }
+    },
+    "homeQuranResumeProgress": "{percent}% of the Mushaf",
+    "@homeQuranResumeProgress": {
+        "description": "Home Quran resume progress label",
+        "placeholders": {
+            "percent": { "type": "int" }
+        }
+    },
+    "homeContextualAthkarPrompt": "A good moment for {name}",
+    "@homeContextualAthkarPrompt": {
+        "description": "Home contextual athkar banner prompt",
+        "placeholders": {
+            "name": { "type": "String" }
+        }
+    },
+    "homeAthkarNowBadge": "Now",
+    "@homeAthkarNowBadge": {
+        "description": "Badge on time-relevant athkar shortcut"
     },
     "homeQuickQuran": "Quran",
     "@homeQuickQuran": {
@@ -110,6 +183,10 @@
     "@homeQuickReciters": {
         "description": "Home quick action for reciters catalog"
     },
+    "homeQuickRecitersSubtitle": "Browse recitations",
+    "@homeQuickRecitersSubtitle": {
+        "description": "Home More row subtitle for reciters"
+    },
     "homeQuickPrayer": "Prayer",
     "@homeQuickPrayer": {
         "description": "Home quick action for prayer times"
@@ -118,6 +195,18 @@
     "@homeQuickQibla": {
         "description": "Home quick action for qibla"
     },
+    "homeQuickQiblaSubtitle": "Find prayer direction",
+    "@homeQuickQiblaSubtitle": {
+        "description": "Home More row subtitle for qibla"
+    },
+    "homeQuickTasbeeh": "Tasbeeh",
+    "@homeQuickTasbeeh": {
+        "description": "Home More row title for tasbeeh counter"
+    },
+    "homeQuickTasbeehSubtitle": "Count dhikr with one tap",
+    "@homeQuickTasbeehSubtitle": {
+        "description": "Home More row subtitle for tasbeeh counter"
+    },
     "homeQuickAthkar": "Athkar",
     "@homeQuickAthkar": {
         "description": "Home quick action for athkar"
@@ -125,6 +214,68 @@
     "homeQuickSettings": "Settings",
     "@homeQuickSettings": {
         "description": "Home quick action for settings"
+    },
+    "homePinnedAthkarTitle": "Quick athkar",
+    "@homePinnedAthkarTitle": {
+        "description": "Home section title for user-selected athkar shortcuts"
+    },
+    "homePinnedAthkarEdit": "Edit athkar shortcuts",
+    "@homePinnedAthkarEdit": {
+        "description": "Action label for editing Home athkar shortcuts"
+    },
+    "homePinnedAthkarChoose": "Choose athkar",
+    "@homePinnedAthkarChoose": {
+        "description": "CTA for choosing Home athkar shortcuts"
+    },
+    "homePinnedAthkarEmptyTitle": "Choose your daily athkar",
+    "@homePinnedAthkarEmptyTitle": {
+        "description": "Empty state title when no athkar shortcuts are pinned"
+    },
+    "homePinnedAthkarEmptyBody": "Pin up to four categories for one-tap access from Home.",
+    "@homePinnedAthkarEmptyBody": {
+        "description": "Empty state body for Home athkar shortcuts"
+    },
+    "homePinnedAthkarPickerTitle": "Choose quick athkar",
+    "@homePinnedAthkarPickerTitle": {
+        "description": "Bottom sheet title for choosing Home athkar shortcuts"
+    },
+    "homePinnedAthkarPickerLimit": "{count} of {max} shortcuts selected",
+    "@homePinnedAthkarPickerLimit": {
+        "description": "Selection count in the Home athkar shortcut picker",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            },
+            "max": {
+                "type": "int"
+            }
+        }
+    },
+    "homePinnedAthkarMoveUp": "Move {name} up",
+    "@homePinnedAthkarMoveUp": {
+        "description": "Tooltip for moving an athkar shortcut earlier",
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "homePinnedAthkarMoveDown": "Move {name} down",
+    "@homePinnedAthkarMoveDown": {
+        "description": "Tooltip for moving an athkar shortcut later",
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "homeDailyInspirationTitle": "Daily inspiration",
+    "@homeDailyInspirationTitle": {
+        "description": "Home section title for daily ayah and dua"
+    },
+    "homeDailyInspirationSubtitle": "A verse and supplication for your day",
+    "@homeDailyInspirationSubtitle": {
+        "description": "Home section subtitle under daily inspiration title"
     },
     "homeDailyAyahLabel": "Daily ayah",
     "@homeDailyAyahLabel": {
@@ -149,6 +300,38 @@
     "homeDailyDuaReference": "Abu Dawud",
     "@homeDailyDuaReference": {
         "description": "Home daily dua reference"
+    },
+    "homeDailyAyahBody1": "So remember Me; I will remember you. And be grateful to Me and do not deny Me.",
+    "@homeDailyAyahBody1": {
+        "description": "Home daily ayah body variant 1"
+    },
+    "homeDailyAyahReference1": "Quran 2:152",
+    "@homeDailyAyahReference1": {
+        "description": "Home daily ayah reference variant 1"
+    },
+    "homeDailyDuaBody1": "Our Lord, grant us good in this world and good in the Hereafter, and protect us from the Fire.",
+    "@homeDailyDuaBody1": {
+        "description": "Home daily dua body variant 1"
+    },
+    "homeDailyDuaReference1": "Quran 2:201",
+    "@homeDailyDuaReference1": {
+        "description": "Home daily dua reference variant 1"
+    },
+    "homeDailyAyahBody2": "Indeed, prayer prohibits immorality and wrongdoing.",
+    "@homeDailyAyahBody2": {
+        "description": "Home daily ayah body variant 2"
+    },
+    "homeDailyAyahReference2": "Quran 29:45",
+    "@homeDailyAyahReference2": {
+        "description": "Home daily ayah reference variant 2"
+    },
+    "homeDailyDuaBody2": "O Allah, I ask You for beneficial knowledge, wholesome provision, and accepted deeds.",
+    "@homeDailyDuaBody2": {
+        "description": "Home daily dua body variant 2"
+    },
+    "homeDailyDuaReference2": "Ibn Majah",
+    "@homeDailyDuaReference2": {
+        "description": "Home daily dua reference variant 2"
     },
     "khatmaEmptyTitle": "Start a Khatma",
     "@khatmaEmptyTitle": {

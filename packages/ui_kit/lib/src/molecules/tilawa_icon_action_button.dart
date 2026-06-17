@@ -92,7 +92,8 @@ class _TilawaIconActionButtonState extends State<TilawaIconActionButton>
     final effectiveIconSize = widget.iconSize ?? designTokens.iconSizeMedium;
     final effectiveBorderRadius = BorderRadius.circular(
       designTokens.resolveRadius(
-        family: TilawaRadiusFamily.pill,
+        family: TilawaRadiusFamily.icon,
+        width: effectiveSize,
         height: effectiveSize,
       ),
     );

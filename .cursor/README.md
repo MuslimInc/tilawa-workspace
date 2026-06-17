@@ -9,10 +9,20 @@ Rules in `.cursor/rules/` apply when this workspace is open in Cursor.
 | [clean-code-guard.mdc](rules/clean-code-guard.mdc) | `**/*.dart`, agent-requested | Guard pass for changed production code (Clean Code, SOLID, DRY/KISS/YAGNI, LLM failure modes) |
 | [test-guard.mdc](rules/test-guard.mdc) | `**/*_test.dart`, agent-requested | Guard pass for changed test code (mock abuse, bloat, implementation-detail asserts) |
 | [docs-guard.mdc](rules/docs-guard.mdc) | `**/*.md`, agent-requested | Guard pass for changed docs (verify symbols/samples vs source, catch drift) |
+| [tilawa-ui-ux-guard.mdc](rules/tilawa-ui-ux-guard.mdc) | `apps/tilawa/.../presentation/**`, agent-requested | Guard pass for UI/UX (hierarchy, flows, brand, placement, a11y) |
 
 **Senior Flutter persona:** skill [`tilawa-senior-flutter`](../.agents/skills/tilawa-senior-flutter/SKILL.md)
 (**TilawaAISeniorFlutter**) — clean architecture, SOLID, and verifiable feature
 implementation. Delegate PR fixes and feature work to this agent by name.
+
+**UI / UX skills:**
+
+| Skill | Use when |
+|-------|----------|
+| [`tilawa-apply-ux-principles`](../.agents/skills/tilawa-apply-ux-principles/SKILL.md) | Designing flows, home sections, shortcuts, pickers, placement |
+| [`tilawa-apply-ui-principles`](../.agents/skills/tilawa-apply-ui-principles/SKILL.md) | Composing screens, cards, grids, visual hierarchy |
+| [`tilawa-ui-ux-guard`](../.agents/skills/tilawa-ui-ux-guard/SKILL.md) | Reactive review before shipping presentation changes |
+| [`flutter-apply-tilawa-theming`](../.agents/skills/flutter-apply-tilawa-theming/SKILL.md) | Tokens, colors, spacing scale |
 
 **Confirm in Cursor:** Settings → Rules — all rules should appear;
 `karpathy-guidelines` is always on; the others activate by glob or when the

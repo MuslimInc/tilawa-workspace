@@ -50,7 +50,8 @@ class TilawaIconToggle extends StatelessWidget {
     final double effectiveRadius =
         borderRadius ??
         designTokens.resolveRadius(
-          family: TilawaRadiusFamily.pill,
+          family: TilawaRadiusFamily.icon,
+          width: designTokens.minInteractiveDimension,
           height: designTokens.minInteractiveDimension,
         );
     final Color background = value

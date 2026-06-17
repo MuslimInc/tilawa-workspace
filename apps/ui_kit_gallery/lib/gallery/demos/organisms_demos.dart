@@ -181,6 +181,24 @@ abstract final class OrganismsDemos {
     return const _AsyncContentDemo();
   }
 
+  static Widget heroSummaryCard(BuildContext context) {
+    return GalleryDemoFrame(
+      padding: EdgeInsets.zero,
+      child: TilawaHeroSummaryCard(
+        label: 'Pages read this week',
+        metric: '42',
+        badges: const [
+          TilawaHeroSummaryBadge(label: 'On track'),
+        ],
+        footer: const TilawaHeroSummaryProgress(
+          progress: 0.72,
+          label: 'Weekly goal',
+          valueLabel: '72%',
+        ),
+      ),
+    );
+  }
+
   static Future<void> _openSheet(BuildContext context) {
     return showTilawaModalBottomSheet<void>(
       context: context,

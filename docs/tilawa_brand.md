@@ -83,24 +83,28 @@ Apple's lesson: **the color change is the divider; the artifact gets the single 
 - **Section dividers inside long lists:** prefer a **change in surface tier** (`surface` → `surfaceContainerLow`) over an explicit divider line. Falls back to a hairline only when tiers can't change.
 - **The reader page (Mushaf):** the **only** surface allowed a full layered shadow on its frame. Other screens may use the *strong* shadow token only on the player/nav float, never on lists.
 
-**Touch targets:** 48 dp minimum (`kTilawaMinInteractiveDimension`) — same as DESIGN §4. Brand-level: prefer **wide, generous** hit zones over packed grids. Density is the enemy of reverence.
+**Touch targets:** 44 dp minimum (`kTilawaMinInteractiveDimension`) — same as DESIGN §4. Brand-level: prefer **wide, generous** hit zones over packed grids. Density is the enemy of reverence.
 
-### Rounding (height-aware)
+### Rounding (pill-soft, fixed tokens)
 
-A single radius token reads differently depending on the component's height: 24 dp on a 200 dp card is "rounded card," on a 44 dp pill is "almost circle," on a 24 dp hairline is "fully round capsule." The brand-doc intent is constant — *rounded enough to feel soft, not square; pill when small, card when large* — but the math depends on the geometry.
+Tilawa uses **generous pill-like corners** via fixed design tokens — no
+layout measurement at runtime (avoids extra rebuilds on cards and lists).
 
-Use **`tokens.resolveRadius(family: ..., height: ...)`** (see `TilawaRadiusResolverX` in `design_tokens.dart`) instead of reaching for a raw `radiusXxx` token. Roles:
+Use **`tokens.resolveRadius(family: ...)`** (see `TilawaRadiusResolverX` in
+`design_tokens.dart`) instead of raw `radiusXxx` literals:
 
-| Family | Rule | Examples |
+| Family | Token | Typical use |
 |---|---|---|
-| `card` | always `radiusExtraLarge` | Body cards, sheets, hero countdown card |
-| `pill` | `min(height / 2, radiusExtraLarge)` | Tappable chips, segmented control items, icon buttons — auto-pills when small, caps at the card family when tall |
-| `chrome` | `radiusLarge` | Sub-nav surrounds, search-field bars, segmented control container — visually nested inside a `card`-radius parent |
-| `decorative` | `radiusMedium` | Status dots, ambient ornament, hairline pills |
+| `card` / `pill` | `radiusExtraLarge` (24 dp) | Cards, buttons, chips, icon boxes |
+| `chrome` | `radiusLarge` (16 dp) | Search bars, segmented control tracks |
+| `hero` | `radiusHero` (28 dp) | Hub / dashboard summary groups |
+| `decorative` | `radiusMedium` (12 dp) | Small ornaments, passive chips |
 
-For inner elements nested inside a known outer container with known padding, prefer **`tokens.concentricInner(outerRadius, padding)`** — it preserves the parallel-curves rule (`innerRadius = outerRadius - padding`).
+For inner elements nested inside a known outer container with known padding,
+prefer **`tokens.concentricInner(outerRadius, padding)`**.
 
-**Anti-pattern:** hard-coding `borderRadius: tokens.radiusExtraLarge` in feature code. The intent is the family, not the token. Reach for `resolveRadius` so the math follows the geometry — and so a future token change ripples cleanly.
+**Anti-pattern:** hard-coding `borderRadius: tokens.radiusExtraLarge` in
+feature code — use the family via `resolveRadius` so token updates ripple.
 
 ---
 

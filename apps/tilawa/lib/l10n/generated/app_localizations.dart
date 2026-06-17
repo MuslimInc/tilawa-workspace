@@ -218,11 +218,101 @@ abstract class AppLocalizations {
   /// **'In {hours}h {minutes}m'**
   String homePrayerInHoursMinutes(int hours, int minutes);
 
-  /// Home quick actions section title
+  /// Home section title for secondary destinations that are not bottom-nav tabs
   ///
   /// In en, this message translates to:
-  /// **'Explore'**
+  /// **'More'**
   String get homeExploreTitle;
+
+  /// Home section title for daily actions
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get homeTodayTitle;
+
+  /// Home Today section supporting line
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer, Quran, and dhikr for your day'**
+  String get homeTodaySubtitle;
+
+  /// Home subsection title for pinned athkar shortcuts
+  ///
+  /// In en, this message translates to:
+  /// **'Quick athkar'**
+  String get homeAthkarRitualsTitle;
+
+  /// Home compact prayer schedule strip title
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s prayer times'**
+  String get homePrayerStripTitle;
+
+  /// Home prayer strip link to Prayer tab
+  ///
+  /// In en, this message translates to:
+  /// **'View all'**
+  String get homePrayerStripViewAll;
+
+  /// Home featured ritual card action hint
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to begin'**
+  String get homeFeaturedRitualStart;
+
+  /// Home Quran card title for first-time readers
+  ///
+  /// In en, this message translates to:
+  /// **'Open the Mushaf'**
+  String get homeStartQuranTitle;
+
+  /// Home Quran card subtitle for first-time readers
+  ///
+  /// In en, this message translates to:
+  /// **'Begin reading the Quran today'**
+  String get homeStartQuranSubtitle;
+
+  /// Home Today row title for opening the last-read Quran page
+  ///
+  /// In en, this message translates to:
+  /// **'Continue Quran'**
+  String get homeContinueQuranTitle;
+
+  /// Home Today row subtitle for opening the last-read Quran page
+  ///
+  /// In en, this message translates to:
+  /// **'Resume from your last read page'**
+  String get homeContinueQuranSubtitle;
+
+  /// Home Quran resume subtitle with surah and page
+  ///
+  /// In en, this message translates to:
+  /// **'{surah} · page {page}'**
+  String homeQuranResumeSurahPage(String surah, int page);
+
+  /// Home Quran resume subtitle with page only
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page}'**
+  String homeQuranResumePage(int page);
+
+  /// Home Quran resume progress label
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% of the Mushaf'**
+  String homeQuranResumeProgress(int percent);
+
+  /// Home contextual athkar banner prompt
+  ///
+  /// In en, this message translates to:
+  /// **'A good moment for {name}'**
+  String homeContextualAthkarPrompt(String name);
+
+  /// Badge on time-relevant athkar shortcut
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get homeAthkarNowBadge;
 
   /// Home quick action for Quran reader
   ///
@@ -236,6 +326,12 @@ abstract class AppLocalizations {
   /// **'Reciters'**
   String get homeQuickReciters;
 
+  /// Home More row subtitle for reciters
+  ///
+  /// In en, this message translates to:
+  /// **'Browse recitations'**
+  String get homeQuickRecitersSubtitle;
+
   /// Home quick action for prayer times
   ///
   /// In en, this message translates to:
@@ -248,6 +344,24 @@ abstract class AppLocalizations {
   /// **'Qibla'**
   String get homeQuickQibla;
 
+  /// Home More row subtitle for qibla
+  ///
+  /// In en, this message translates to:
+  /// **'Find prayer direction'**
+  String get homeQuickQiblaSubtitle;
+
+  /// Home More row title for tasbeeh counter
+  ///
+  /// In en, this message translates to:
+  /// **'Tasbeeh'**
+  String get homeQuickTasbeeh;
+
+  /// Home More row subtitle for tasbeeh counter
+  ///
+  /// In en, this message translates to:
+  /// **'Count dhikr with one tap'**
+  String get homeQuickTasbeehSubtitle;
+
   /// Home quick action for athkar
   ///
   /// In en, this message translates to:
@@ -259,6 +373,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Settings'**
   String get homeQuickSettings;
+
+  /// Home section title for user-selected athkar shortcuts
+  ///
+  /// In en, this message translates to:
+  /// **'Quick athkar'**
+  String get homePinnedAthkarTitle;
+
+  /// Action label for editing Home athkar shortcuts
+  ///
+  /// In en, this message translates to:
+  /// **'Edit athkar shortcuts'**
+  String get homePinnedAthkarEdit;
+
+  /// CTA for choosing Home athkar shortcuts
+  ///
+  /// In en, this message translates to:
+  /// **'Choose athkar'**
+  String get homePinnedAthkarChoose;
+
+  /// Empty state title when no athkar shortcuts are pinned
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your daily athkar'**
+  String get homePinnedAthkarEmptyTitle;
+
+  /// Empty state body for Home athkar shortcuts
+  ///
+  /// In en, this message translates to:
+  /// **'Pin up to four categories for one-tap access from Home.'**
+  String get homePinnedAthkarEmptyBody;
+
+  /// Bottom sheet title for choosing Home athkar shortcuts
+  ///
+  /// In en, this message translates to:
+  /// **'Choose quick athkar'**
+  String get homePinnedAthkarPickerTitle;
+
+  /// Selection count in the Home athkar shortcut picker
+  ///
+  /// In en, this message translates to:
+  /// **'{count} of {max} shortcuts selected'**
+  String homePinnedAthkarPickerLimit(int count, int max);
+
+  /// Tooltip for moving an athkar shortcut earlier
+  ///
+  /// In en, this message translates to:
+  /// **'Move {name} up'**
+  String homePinnedAthkarMoveUp(String name);
+
+  /// Tooltip for moving an athkar shortcut later
+  ///
+  /// In en, this message translates to:
+  /// **'Move {name} down'**
+  String homePinnedAthkarMoveDown(String name);
+
+  /// Home section title for daily ayah and dua
+  ///
+  /// In en, this message translates to:
+  /// **'Daily inspiration'**
+  String get homeDailyInspirationTitle;
+
+  /// Home section subtitle under daily inspiration title
+  ///
+  /// In en, this message translates to:
+  /// **'A verse and supplication for your day'**
+  String get homeDailyInspirationSubtitle;
 
   /// Home daily ayah card label
   ///
@@ -295,6 +475,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Abu Dawud'**
   String get homeDailyDuaReference;
+
+  /// Home daily ayah body variant 1
+  ///
+  /// In en, this message translates to:
+  /// **'So remember Me; I will remember you. And be grateful to Me and do not deny Me.'**
+  String get homeDailyAyahBody1;
+
+  /// Home daily ayah reference variant 1
+  ///
+  /// In en, this message translates to:
+  /// **'Quran 2:152'**
+  String get homeDailyAyahReference1;
+
+  /// Home daily dua body variant 1
+  ///
+  /// In en, this message translates to:
+  /// **'Our Lord, grant us good in this world and good in the Hereafter, and protect us from the Fire.'**
+  String get homeDailyDuaBody1;
+
+  /// Home daily dua reference variant 1
+  ///
+  /// In en, this message translates to:
+  /// **'Quran 2:201'**
+  String get homeDailyDuaReference1;
+
+  /// Home daily ayah body variant 2
+  ///
+  /// In en, this message translates to:
+  /// **'Indeed, prayer prohibits immorality and wrongdoing.'**
+  String get homeDailyAyahBody2;
+
+  /// Home daily ayah reference variant 2
+  ///
+  /// In en, this message translates to:
+  /// **'Quran 29:45'**
+  String get homeDailyAyahReference2;
+
+  /// Home daily dua body variant 2
+  ///
+  /// In en, this message translates to:
+  /// **'O Allah, I ask You for beneficial knowledge, wholesome provision, and accepted deeds.'**
+  String get homeDailyDuaBody2;
+
+  /// Home daily dua reference variant 2
+  ///
+  /// In en, this message translates to:
+  /// **'Ibn Majah'**
+  String get homeDailyDuaReference2;
 
   /// Title for the empty Smart Khatma card
   ///

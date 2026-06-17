@@ -82,7 +82,60 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get homeExploreTitle => 'Explore';
+  String get homeExploreTitle => 'More';
+
+  @override
+  String get homeTodayTitle => 'Today';
+
+  @override
+  String get homeTodaySubtitle => 'Prayer, Quran, and dhikr for your day';
+
+  @override
+  String get homeAthkarRitualsTitle => 'Quick athkar';
+
+  @override
+  String get homePrayerStripTitle => 'Today\'s prayer times';
+
+  @override
+  String get homePrayerStripViewAll => 'View all';
+
+  @override
+  String get homeFeaturedRitualStart => 'Tap to begin';
+
+  @override
+  String get homeStartQuranTitle => 'Open the Mushaf';
+
+  @override
+  String get homeStartQuranSubtitle => 'Begin reading the Quran today';
+
+  @override
+  String get homeContinueQuranTitle => 'Continue Quran';
+
+  @override
+  String get homeContinueQuranSubtitle => 'Resume from your last read page';
+
+  @override
+  String homeQuranResumeSurahPage(String surah, int page) {
+    return '$surah · page $page';
+  }
+
+  @override
+  String homeQuranResumePage(int page) {
+    return 'Page $page';
+  }
+
+  @override
+  String homeQuranResumeProgress(int percent) {
+    return '$percent% of the Mushaf';
+  }
+
+  @override
+  String homeContextualAthkarPrompt(String name) {
+    return 'A good moment for $name';
+  }
+
+  @override
+  String get homeAthkarNowBadge => 'Now';
 
   @override
   String get homeQuickQuran => 'Quran';
@@ -91,16 +144,69 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeQuickReciters => 'Reciters';
 
   @override
+  String get homeQuickRecitersSubtitle => 'Browse recitations';
+
+  @override
   String get homeQuickPrayer => 'Prayer';
 
   @override
   String get homeQuickQibla => 'Qibla';
 
   @override
+  String get homeQuickQiblaSubtitle => 'Find prayer direction';
+
+  @override
+  String get homeQuickTasbeeh => 'Tasbeeh';
+
+  @override
+  String get homeQuickTasbeehSubtitle => 'Count dhikr with one tap';
+
+  @override
   String get homeQuickAthkar => 'Athkar';
 
   @override
   String get homeQuickSettings => 'Settings';
+
+  @override
+  String get homePinnedAthkarTitle => 'Quick athkar';
+
+  @override
+  String get homePinnedAthkarEdit => 'Edit athkar shortcuts';
+
+  @override
+  String get homePinnedAthkarChoose => 'Choose athkar';
+
+  @override
+  String get homePinnedAthkarEmptyTitle => 'Choose your daily athkar';
+
+  @override
+  String get homePinnedAthkarEmptyBody =>
+      'Pin up to four categories for one-tap access from Home.';
+
+  @override
+  String get homePinnedAthkarPickerTitle => 'Choose quick athkar';
+
+  @override
+  String homePinnedAthkarPickerLimit(int count, int max) {
+    return '$count of $max shortcuts selected';
+  }
+
+  @override
+  String homePinnedAthkarMoveUp(String name) {
+    return 'Move $name up';
+  }
+
+  @override
+  String homePinnedAthkarMoveDown(String name) {
+    return 'Move $name down';
+  }
+
+  @override
+  String get homeDailyInspirationTitle => 'Daily inspiration';
+
+  @override
+  String get homeDailyInspirationSubtitle =>
+      'A verse and supplication for your day';
 
   @override
   String get homeDailyAyahLabel => 'Daily ayah';
@@ -121,6 +227,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeDailyDuaReference => 'Abu Dawud';
+
+  @override
+  String get homeDailyAyahBody1 =>
+      'So remember Me; I will remember you. And be grateful to Me and do not deny Me.';
+
+  @override
+  String get homeDailyAyahReference1 => 'Quran 2:152';
+
+  @override
+  String get homeDailyDuaBody1 =>
+      'Our Lord, grant us good in this world and good in the Hereafter, and protect us from the Fire.';
+
+  @override
+  String get homeDailyDuaReference1 => 'Quran 2:201';
+
+  @override
+  String get homeDailyAyahBody2 =>
+      'Indeed, prayer prohibits immorality and wrongdoing.';
+
+  @override
+  String get homeDailyAyahReference2 => 'Quran 29:45';
+
+  @override
+  String get homeDailyDuaBody2 =>
+      'O Allah, I ask You for beneficial knowledge, wholesome provision, and accepted deeds.';
+
+  @override
+  String get homeDailyDuaReference2 => 'Ibn Majah';
 
   @override
   String get khatmaEmptyTitle => 'Start a Khatma';

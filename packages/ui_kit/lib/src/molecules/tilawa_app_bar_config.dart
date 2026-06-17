@@ -71,7 +71,7 @@ abstract final class TilawaAppBarConfig {
       titleStyle,
       textScaler,
     );
-    return math.max(titleHeight, kMinInteractiveDimension);
+    return math.max(titleHeight, kTilawaMinInteractiveDimension);
   }
 
   /// Title-only catalog header (Settings, Favorites, Athkar).
@@ -115,7 +115,7 @@ abstract final class TilawaAppBarConfig {
       context,
     ).componentTokens.searchField.height;
     final double contentHeight =
-        searchHeight + tokens.spaceSmall + kMinInteractiveDimension;
+        searchHeight + tokens.spaceSmall + kTilawaMinInteractiveDimension;
     return catalogTitleAndContentHeight(
       context,
       contentHeight: contentHeight,
@@ -125,7 +125,7 @@ abstract final class TilawaAppBarConfig {
   /// Search (+ optional trailing control) without a title row.
   static double catalogSearchRowHeight(
     BuildContext context, {
-    double trailingMinHeight = kMinInteractiveDimension,
+    double trailingMinHeight = kTilawaMinInteractiveDimension,
   }) {
     final TilawaDesignTokens tokens = Theme.of(context).tokens;
     final double searchHeight = Theme.of(

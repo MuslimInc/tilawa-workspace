@@ -34,6 +34,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     required this.permissionBanner,
     required this.bottomSheetScaffold,
     required this.homeNextPrayerHero,
+    required this.homeDashboardCard,
   });
 
   final TilawaSectionTitleTokens sectionTitle;
@@ -62,6 +63,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
   final TilawaPermissionBannerTokens permissionBanner;
   final TilawaBottomSheetScaffoldTokens bottomSheetScaffold;
   final TilawaHomeNextPrayerHeroTokens homeNextPrayerHero;
+  final TilawaHomeDashboardCardTokens homeDashboardCard;
 
   /// Creates light theme component tokens.
   factory TilawaComponentTokens.light({ColorScheme? colorScheme}) =>
@@ -128,6 +130,9 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       permissionBanner: TilawaPermissionBannerTokens.defaults(),
       bottomSheetScaffold: TilawaBottomSheetScaffoldTokens.defaults(),
       homeNextPrayerHero: TilawaHomeNextPrayerHeroTokens.defaults(),
+      homeDashboardCard: TilawaHomeDashboardCardTokens.fromColorScheme(
+        effectiveColorScheme,
+      ),
     );
   }
 
@@ -159,6 +164,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     TilawaPermissionBannerTokens? permissionBanner,
     TilawaBottomSheetScaffoldTokens? bottomSheetScaffold,
     TilawaHomeNextPrayerHeroTokens? homeNextPrayerHero,
+    TilawaHomeDashboardCardTokens? homeDashboardCard,
   }) {
     return TilawaComponentTokens(
       sectionTitle: sectionTitle ?? this.sectionTitle,
@@ -187,6 +193,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       permissionBanner: permissionBanner ?? this.permissionBanner,
       bottomSheetScaffold: bottomSheetScaffold ?? this.bottomSheetScaffold,
       homeNextPrayerHero: homeNextPrayerHero ?? this.homeNextPrayerHero,
+      homeDashboardCard: homeDashboardCard ?? this.homeDashboardCard,
     );
   }
 
@@ -289,6 +296,11 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       homeNextPrayerHero: TilawaHomeNextPrayerHeroTokens.lerp(
         homeNextPrayerHero,
         other.homeNextPrayerHero,
+        t,
+      ),
+      homeDashboardCard: TilawaHomeDashboardCardTokens.lerp(
+        homeDashboardCard,
+        other.homeDashboardCard,
         t,
       ),
     );

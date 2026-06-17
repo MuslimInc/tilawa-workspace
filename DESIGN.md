@@ -99,7 +99,7 @@ Registered as a `ThemeExtension` on `ThemeData` (access: `Theme.of(context).exte
 | Space scale | 2, 4, 8, 12, 16, 24 |
 | Corner radii | 8, 12, 16, 24 |
 | Icon sizes | 12, 16, 20, 24, 42, 44 |
-| Min touch target | **48 dp** (`kTilawaMinInteractiveDimension`) |
+| Min touch target | **44 dp** (`kTilawaMinInteractiveDimension`) |
 | Durations | 200 ms / 400 ms / 600 ms (fast / medium / slow) |
 | Line height (loose) | 2.0 for dense Arabic-friendly layouts |
 
@@ -227,7 +227,7 @@ Implementation: `apps/tilawa/lib/features/tour_guide/` — see feature README.
 **Do**
 
 - Use `ColorScheme` and **design/component tokens** for color, space, type, and radii.
-- Respect **48 dp** minimum interactive sizes for in-app hit targets.
+- Respect **44 dp** minimum interactive sizes for in-app hit targets.
 - Cap wide layouts with **`TilawaContentBounds`** and the correct `TilawaContentKind`.
 - Use **`TilawaWindowSize`** for adaptive layout decisions.
 - Prefer **Material 3** widgets and kit components (`TilawaButton`, `TilawaIconActionButton`, etc.) for consistent state layers.
@@ -235,7 +235,7 @@ Implementation: `apps/tilawa/lib/features/tour_guide/` — see feature README.
 **Don’t**
 
 - Sprinkle raw hex or `Color(0xFF…)` in features; extend the theme or tokens if a new semantic is needed.
-- Rely on Flutter’s default **48 dp** minimum when Tilawa tokens specify **48 dp** — follow the kit.
+- Rely on Flutter’s default **48 dp** minimum when Tilawa tokens specify **44 dp** — follow the kit.
 - Assume **compact** VisualDensity; the kit is tuned for **comfortable** density.
 - Ignore **text scaler clamp** when auditing layouts (test at scale **1.4**).
 - Add support/donation UI only per **§9** entry-point policy — never on worship surfaces.
@@ -246,7 +246,7 @@ Implementation: `apps/tilawa/lib/features/tour_guide/` — see feature README.
 
 - [ ] Narrow: single column; bottom nav with icon + label where shell applies.
 - [ ] Medium / expanded: consider rails, split columns, and larger content caps via `resolveContentWidth`.
-- [ ] Touch targets ≥ **48 dp**; spacing from the 8-point grid (token scale).
+- [ ] Touch targets ≥ **44 dp**; spacing from the 8-point grid (token scale).
 - [ ] Contrast: body text vs surface ≥ **WCAG AA** where feasible; validate primary/onPrimary for custom colors (light theme clamps pathological primaries in `AppTheme._safePrimaryForLight`).
 
 ---

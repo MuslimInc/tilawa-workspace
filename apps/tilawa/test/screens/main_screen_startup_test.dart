@@ -26,6 +26,8 @@ import 'package:tilawa/features/reciters/presentation/bloc/alphabet_scrollbar/al
 import 'package:tilawa/features/reciters/presentation/bloc/reciters_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/reciters_tabs_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/cubit/favorites_cubit.dart';
+import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:tilawa/features/home/presentation/screens/home_screen.dart';
 import 'package:tilawa/features/prayer_times/domain/repositories/prayer_alerts_permission_onboarding_repository.dart';
 import 'package:tilawa/features/reciters/presentation/screens/reciters_screen.dart';
 import 'package:tilawa/features/reciters/presentation/tour/reciters_tour_launcher.dart';
@@ -41,6 +43,8 @@ import 'package:tilawa_core/presentation/bloc/internet_status/internet_status_bl
 import 'package:tilawa_core/presentation/bloc/internet_status/internet_status_state.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
+
+import '../support/home_screen_get_it_support.dart';
 
 class _MockGetFavoriteRecitersUseCase extends Mock
     implements GetFavoriteRecitersUseCase {}
@@ -72,6 +76,8 @@ class _MockAppReviewTriggerManager extends Mock
 
 class _MockSettingsCubit extends MockCubit<SettingsState>
     implements SettingsCubit {}
+
+class _MockAuthBloc extends MockCubit<AuthState> implements AuthBloc {}
 
 class _NoopRecitersTourLauncher implements RecitersTourLauncher {
   @override
@@ -169,6 +175,7 @@ void main() {
     getIt.registerSingleton<PrayerAlertsPermissionOnboardingRepository>(
       _CompletedPrayerAlertsPermissionOnboardingRepository(),
     );
+    registerHomeScreenScopeGetIt(getIt);
   });
 
   tearDown(() async {
@@ -208,6 +215,12 @@ void main() {
     getIt.registerSingleton<GetRecitersUseCase>(mockGetReciters);
     getIt.registerFactory<AlphabetScrollbarBloc>(AlphabetScrollbarBloc.new);
 
+    final mockAuthBloc = _MockAuthBloc();
+    when(
+      () => mockAuthBloc.state,
+    ).thenReturn(const AuthState.unauthenticated());
+    when(() => mockAuthBloc.stream).thenAnswer((_) => const Stream.empty());
+
     final router = GoRouter(
       initialLocation: '/',
       routes: [
@@ -234,6 +247,7 @@ void main() {
           value: mockPlayerBackgroundCubit,
         ),
         BlocProvider<AudioPlayerBloc>.value(value: mockAudioPlayerBloc),
+        BlocProvider<AuthBloc>.value(value: mockAuthBloc),
       ],
       child: ChangeNotifierProvider(
         create: (_) => QuranPlayerChromeNotifier(),
@@ -345,16 +359,16 @@ void main() {
   ) async {
     await tester.pumpWidget(buildTestApp());
 
-    expect(find.byType(RecitersScreen), findsNothing);
+    expect(find.byType(HomeScreen), findsNothing);
 
     await tester.pump(
       AppStartupReadiness.initialTabRouteSettleDelay -
           const Duration(milliseconds: 50),
     );
-    expect(find.byType(RecitersScreen), findsNothing);
+    expect(find.byType(HomeScreen), findsNothing);
   });
 
-  testWidgets('mounts initial reciters tab after settle delay gate', (
+  testWidgets('mounts initial home tab after settle delay gate', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(buildTestApp());
@@ -363,9 +377,9 @@ void main() {
       AppStartupReadiness.initialTabRouteSettleDelay +
           const Duration(milliseconds: 100),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
 
-    expect(find.byType(RecitersScreen), findsOneWidget);
+    expect(find.byType(HomeScreen), findsOneWidget);
   });
 
   testWidgets(
@@ -377,11 +391,11 @@ void main() {
         AppStartupReadiness.initialTabRouteSettleDelay +
             const Duration(milliseconds: 100),
       );
-      await tester.pump();
-      expect(find.byType(RecitersScreen), findsOneWidget);
+      await tester.pumpAndSettle();
+      expect(find.byType(HomeScreen), findsOneWidget);
 
       await tester.pump(const Duration(milliseconds: 300));
-      expect(find.byType(RecitersScreen), findsOneWidget);
+      expect(find.byType(HomeScreen), findsOneWidget);
     },
   );
 

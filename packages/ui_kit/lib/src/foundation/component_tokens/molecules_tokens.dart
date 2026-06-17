@@ -316,7 +316,7 @@ class TilawaIconActionButtonTokens {
   final double inactiveBorderOpacity;
 
   factory TilawaIconActionButtonTokens.defaults() {
-    // Size = Tilawa hit-target floor (kTilawaMinInteractiveDimension, 48 dp).
+    // Size = Tilawa hit-target floor (kTilawaMinInteractiveDimension, 44 dp).
     // At the floor; do not shrink further.
     return const TilawaIconActionButtonTokens(
       size: kTilawaMinInteractiveDimension,
@@ -468,8 +468,8 @@ class TilawaChipTokens {
       selectedShadowOpacity: 0.18,
       selectedShadowBlur: 12,
       selectionFontWeight: FontWeight.w700,
-      statusFontWeight: FontWeight.w900,
-      statusLetterSpacing: 0.5,
+      statusFontWeight: FontWeight.w600,
+      statusLetterSpacing: 0.25,
     );
   }
 
@@ -1475,6 +1475,53 @@ class TilawaHomeNextPrayerHeroTokens {
         b.footerForegroundOpacity,
         t,
       ),
+    );
+  }
+}
+
+/// Home dashboard card surface — a soft [ColorScheme.primaryContainer] wash so
+/// cards harmonize with the active primary (sage by default).
+@immutable
+class TilawaHomeDashboardCardTokens {
+  const TilawaHomeDashboardCardTokens({
+    required this.backgroundColor,
+    required this.splashColor,
+    required this.highlightColor,
+  });
+
+  final Color backgroundColor;
+  final Color splashColor;
+  final Color highlightColor;
+
+  factory TilawaHomeDashboardCardTokens.fromColorScheme(ColorScheme colorScheme) {
+    return TilawaHomeDashboardCardTokens(
+      backgroundColor: colorScheme.primaryContainer,
+      splashColor: colorScheme.primary.withValues(alpha: 0.12),
+      highlightColor: colorScheme.primary.withValues(alpha: 0.06),
+    );
+  }
+
+  TilawaHomeDashboardCardTokens copyWith({
+    Color? backgroundColor,
+    Color? splashColor,
+    Color? highlightColor,
+  }) {
+    return TilawaHomeDashboardCardTokens(
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+      splashColor: splashColor ?? this.splashColor,
+      highlightColor: highlightColor ?? this.highlightColor,
+    );
+  }
+
+  static TilawaHomeDashboardCardTokens lerp(
+    TilawaHomeDashboardCardTokens a,
+    TilawaHomeDashboardCardTokens b,
+    double t,
+  ) {
+    return TilawaHomeDashboardCardTokens(
+      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t)!,
+      splashColor: Color.lerp(a.splashColor, b.splashColor, t)!,
+      highlightColor: Color.lerp(a.highlightColor, b.highlightColor, t)!,
     );
   }
 }

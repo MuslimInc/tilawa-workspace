@@ -74,19 +74,102 @@
             }
         }
     },
-    "homeExploreTitle": "استكشف",
+    "homeExploreTitle": "المزيد",
+    "homeTodayTitle": "اليوم",
+    "homeTodaySubtitle": "الصلاة والقرآن والذكر ليومك",
+    "homeAthkarRitualsTitle": "أذكار سريعة",
+    "homePrayerStripTitle": "مواقيت اليوم",
+    "homePrayerStripViewAll": "عرض الكل",
+    "homeFeaturedRitualStart": "اضغط للبدء",
+    "homeStartQuranTitle": "افتح المصحف",
+    "homeStartQuranSubtitle": "ابدأ قراءة القرآن اليوم",
+    "homeContinueQuranTitle": "تابع القرآن",
+    "homeContinueQuranSubtitle": "ارجع إلى آخر صفحة قرأتها",
+    "homeQuranResumeSurahPage": "{surah} · صفحة {page}",
+    "@homeQuranResumeSurahPage": {
+        "placeholders": {
+            "surah": { "type": "String" },
+            "page": { "type": "int" }
+        }
+    },
+    "homeQuranResumePage": "صفحة {page}",
+    "@homeQuranResumePage": {
+        "placeholders": {
+            "page": { "type": "int" }
+        }
+    },
+    "homeQuranResumeProgress": "{percent}٪ من المصحف",
+    "@homeQuranResumeProgress": {
+        "placeholders": {
+            "percent": { "type": "int" }
+        }
+    },
+    "homeContextualAthkarPrompt": "وقت مناسب لـ {name}",
+    "@homeContextualAthkarPrompt": {
+        "placeholders": {
+            "name": { "type": "String" }
+        }
+    },
+    "homeAthkarNowBadge": "الآن",
     "homeQuickQuran": "القرآن",
     "homeQuickReciters": "القراء",
+    "homeQuickRecitersSubtitle": "تصفّح التلاوات",
     "homeQuickPrayer": "الصلاة",
     "homeQuickQibla": "القبلة",
+    "homeQuickQiblaSubtitle": "اعرف اتجاه القبلة",
+    "homeQuickTasbeeh": "المسبحة",
+    "homeQuickTasbeehSubtitle": "عدّ الذكر بلمسة واحدة",
     "homeQuickAthkar": "الأذكار",
     "homeQuickSettings": "الإعدادات",
+    "homePinnedAthkarTitle": "أذكارك السريعة",
+    "homePinnedAthkarEdit": "تعديل اختصارات الأذكار",
+    "homePinnedAthkarChoose": "اختر الأذكار",
+    "homePinnedAthkarEmptyTitle": "اختر أذكارك اليومية",
+    "homePinnedAthkarEmptyBody": "ثبّت حتى أربعة تصنيفات للوصول إليها من الصفحة الرئيسية بلمسة واحدة.",
+    "homePinnedAthkarPickerTitle": "اختر الأذكار السريعة",
+    "homePinnedAthkarPickerLimit": "تم اختيار {count} من {max} اختصارات",
+    "@homePinnedAthkarPickerLimit": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            },
+            "max": {
+                "type": "int"
+            }
+        }
+    },
+    "homePinnedAthkarMoveUp": "انقل {name} للأعلى",
+    "@homePinnedAthkarMoveUp": {
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "homePinnedAthkarMoveDown": "انقل {name} للأسفل",
+    "@homePinnedAthkarMoveDown": {
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "homeDailyInspirationTitle": "إلهام اليوم",
+    "homeDailyInspirationSubtitle": "آية ودعاء ليومك",
     "homeDailyAyahLabel": "الآية اليومية",
     "homeDailyAyahBody": "وَأَقِيمُوا الصَّلَاةَ وَآتُوا الزَّكَاةَ وَارْكَعُوا مَعَ الرَّاكِعِينَ",
     "homeDailyAyahReference": "القرآن ٢:٤٣",
     "homeDailyDuaLabel": "الدعاء اليومي",
     "homeDailyDuaBody": "اللهم أعني على ذكرك وشكرك وحسن عبادتك.",
     "homeDailyDuaReference": "أبو داود",
+    "homeDailyAyahBody1": "فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ",
+    "homeDailyAyahReference1": "القرآن ٢:١٥٢",
+    "homeDailyDuaBody1": "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ",
+    "homeDailyDuaReference1": "القرآن ٢:٢٠١",
+    "homeDailyAyahBody2": "إِنَّ الصَّلَاةَ تَنْهَىٰ عَنِ الْفَحْشَاءِ وَالْمُنكَرِ",
+    "homeDailyAyahReference2": "القرآن ٢٩:٤٥",
+    "homeDailyDuaBody2": "اللهم إني أسألك علماً نافعاً، ورزقاً طيباً، وعملاً متقبلاً",
+    "homeDailyDuaReference2": "ابن ماجه",
     "khatmaEmptyTitle": "ابدأ ختمة",
     "khatmaEmptySubtitle": "اختر خطة قراءة هادئة. سنعدّلها بلطف إذا انشغل يومك.",
     "khatmaDurationDays": "{days, plural, =1{يوم واحد} =2{يومان} other{{days} يومًا}}",

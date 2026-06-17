@@ -22,10 +22,10 @@ void main() {
         final TilawaDesignTokens? design = theme
             .extension<TilawaDesignTokens>();
         expect(design, isNotNull);
-        expect(design!.opacityShadow, 0.12);
-        expect(design.opacityShadowStrong, 0.28);
-        expect(design.shadowOffsetSmall, const Offset(0, 2));
-        expect(design.shadowOffsetMedium, const Offset(0, 4));
+        expect(design!.opacityShadow, 0.05);
+        expect(design.opacityShadowStrong, 0.08);
+        expect(design.shadowOffsetSmall, const Offset(0, 1));
+        expect(design.shadowOffsetMedium, const Offset(0, 6));
 
         expect(theme.extension<TilawaComponentTokens>(), isNotNull);
 

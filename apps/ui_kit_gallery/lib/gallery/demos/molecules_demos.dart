@@ -5,6 +5,23 @@ import 'demo_helpers.dart';
 
 /// Molecule-layer component demos.
 abstract final class MoleculesDemos {
+  static Widget appBar(BuildContext context) {
+    return Scaffold(
+      appBar: TilawaAppBar(
+        title: 'Feature screen',
+        actions: [
+          TilawaIconActionButton(
+            icon: Icons.search,
+            onTap: () {},
+          ),
+        ],
+      ),
+      body: const GalleryDemoFrame(
+        child: Text('Standard TilawaAppBar with framed toolbar actions.'),
+      ),
+    );
+  }
+
   static Widget alphabetScrollbar(BuildContext context) {
     return GalleryDemoFrame(
       child: SizedBox(
@@ -18,6 +35,31 @@ abstract final class MoleculesDemos {
           onPanEnd: (_) {},
         ),
       ),
+    );
+  }
+
+  static Widget catalogAppBar(BuildContext context) {
+    return Scaffold(
+      appBar: TilawaCatalogAppBar(
+        preferredHeight: TilawaAppBarConfig.catalogTitleAndSearchHeight(context),
+        title: 'Reciters',
+        automaticallyImplyLeading: true,
+        bottomContent: TilawaSearchField(
+          hintText: 'Search reciters',
+          variant: TilawaSearchFieldVariant.catalog,
+          onChanged: (_) {},
+        ),
+      ),
+      body: const GalleryDemoFrame(
+        child: Text('Catalog chrome with parchment surface and search row.'),
+      ),
+    );
+  }
+
+  static Widget catalogSettings(BuildContext context) {
+    return GalleryDemoFrame(
+      padding: EdgeInsets.zero,
+      child: _CatalogSettingsDemo(),
     );
   }
 
@@ -139,6 +181,28 @@ abstract final class MoleculesDemos {
     );
   }
 
+  static Widget navigationRow(BuildContext context) {
+    return GalleryDemoFrame(
+      child: TilawaHubNavigationGroup(
+        children: [
+          TilawaNavigationRow(
+            icon: Icons.menu_book_outlined,
+            title: 'Quran',
+            subtitle: 'Resume reading or browse surahs',
+            onTap: () {},
+          ),
+          TilawaNavigationRow(
+            icon: Icons.bookmark_outline,
+            title: 'Library',
+            subtitle: 'Bookmarks, playlists, and history',
+            onTap: () {},
+            showDivider: false,
+          ),
+        ],
+      ),
+    );
+  }
+
   static Widget permissionBanner(BuildContext context) {
     return GalleryDemoFrame(
       child: TilawaPermissionBanner(
@@ -146,6 +210,29 @@ abstract final class MoleculesDemos {
         actionLabel: 'Enable',
         onAction: () {},
       ),
+    );
+  }
+
+  static Widget primaryFab(BuildContext context) {
+    return Scaffold(
+      floatingActionButton: TilawaPrimaryFab(
+        icon: Icons.add,
+        heroTag: 'gallery_primary_fab',
+        label: 'Create',
+        onPressed: () {},
+      ),
+      floatingActionButtonLocation: TilawaFabLocation.placement(
+        TilawaFabPlacement.end,
+      ),
+      body: const GalleryDemoFrame(
+        child: Text('Primary FAB with token-backed placement helper.'),
+      ),
+    );
+  }
+
+  static Widget quickFilterBar(BuildContext context) {
+    return GalleryDemoFrame(
+      child: _QuickFilterBarDemo(),
     );
   }
 
@@ -317,6 +404,95 @@ class _SettingsSwitchDemo extends StatefulWidget {
 
   @override
   State<_SettingsSwitchDemo> createState() => _SettingsSwitchDemoState();
+}
+
+class _CatalogSettingsDemo extends StatefulWidget {
+  @override
+  State<_CatalogSettingsDemo> createState() => _CatalogSettingsDemoState();
+}
+
+class _CatalogSettingsDemoState extends State<_CatalogSettingsDemo> {
+  bool _notifications = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return TilawaCatalogSettingsBody(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TilawaCatalogSettingsSection(
+            title: 'Account',
+            topSpacing: 0,
+            children: [
+              TilawaCatalogSettingsProfileRow(
+                avatar: CircleAvatar(
+                  radius: 28,
+                  child: Icon(Icons.person_outline),
+                ),
+                title: 'Guest profile',
+                onTap: () {},
+              ),
+              TilawaCatalogSettingsLinkRow(
+                title: 'Sign in',
+                onTap: () {},
+              ),
+            ],
+          ),
+          TilawaCatalogSettingsSection(
+            title: 'Preferences',
+            children: [
+              TilawaCatalogSettingsSwitchRow(
+                title: 'Prayer reminders',
+                value: _notifications,
+                onChanged: (value) => setState(() => _notifications = value),
+              ),
+              TilawaCatalogSettingsLinkRow(
+                title: 'Language',
+                trailing: const Text('English'),
+                onTap: () {},
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuickFilterBarDemo extends StatefulWidget {
+  @override
+  State<_QuickFilterBarDemo> createState() => _QuickFilterBarDemoState();
+}
+
+class _QuickFilterBarDemoState extends State<_QuickFilterBarDemo> {
+  String _filter = 'all';
+
+  @override
+  Widget build(BuildContext context) {
+    return TilawaQuickFilterBar(
+      trailing: TextButton(onPressed: () {}, child: const Text('Clear')),
+      children: [
+        TilawaSelectionPill(
+          label: 'All',
+          selected: _filter == 'all',
+          style: TilawaSelectionPillStyle.catalog,
+          onTap: () => setState(() => _filter = 'all'),
+        ),
+        TilawaSelectionPill(
+          label: 'Recent',
+          selected: _filter == 'recent',
+          style: TilawaSelectionPillStyle.catalog,
+          onTap: () => setState(() => _filter = 'recent'),
+        ),
+        TilawaSelectionPill(
+          label: 'Bookmarked',
+          selected: _filter == 'bookmarked',
+          style: TilawaSelectionPillStyle.catalog,
+          onTap: () => setState(() => _filter = 'bookmarked'),
+        ),
+      ],
+    );
+  }
 }
 
 class _SettingsSwitchDemoState extends State<_SettingsSwitchDemo> {

@@ -1,5 +1,3 @@
-import 'package:equatable/equatable.dart';
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -23,6 +21,7 @@ import '../shared/widgets/quran_player_chrome.dart';
 import '../shared/widgets/quran_player_widget.dart';
 import 'cubit/main_screen_cubit.dart';
 import 'cubit/main_screen_state.dart';
+import 'app_shell_nav_destinations.dart';
 import 'widgets/main_bottom_overlay.dart';
 
 /// Persistent shell with bottom navigation and the Quran mini-player.
@@ -62,12 +61,7 @@ class _AppShellScreenState extends State<AppShellScreen> {
   late final ShellTabCoordinator _shellTabCoordinator;
   int _lastHandledIndex = 0;
   late final MainScreenCubit _mainScreenCubit;
-  DateTime? _lastRecitersNavTap;
   QuranPlayerChromeNotifier? _chromeNotifier;
-
-  static const Duration _recitersNavDoubleTapWindow = Duration(
-    milliseconds: 400,
-  );
 
   @override
   void initState() {
@@ -102,60 +96,24 @@ class _AppShellScreenState extends State<AppShellScreen> {
     );
   }
 
-  bool _isRecitersTabActive(MainScreenState state) {
-    return state.currentIndex == 1 && _isOnMainShell();
-  }
-
-  List<_NavDestination> _buildDestinations(BuildContext context) {
-    return [
-      _NavDestination(
-        index: 0,
-        icon: FluentIcons.home_24_regular,
-        activeIcon: FluentIcons.home_24_filled,
-        label: context.l10n.bottomNavHome,
-        identifier: 'home_tab',
-      ),
-      _NavDestination(
-        index: 2,
-        icon: FluentIcons.clock_24_regular,
-        activeIcon: FluentIcons.clock_24_filled,
-        label: context.l10n.bottomNavPrayer,
-        identifier: 'prayer_times_tab',
-      ),
-      _NavDestination(
-        label: context.l10n.bottomNavQuran,
-        icon: Icons.menu_book_rounded,
-        identifier: 'quran_last_read_nav',
-      ),
-      _NavDestination(
-        index: 3,
-        icon: FluentIcons.book_open_24_regular,
-        activeIcon: FluentIcons.book_open_24_filled,
-        svgPath: 'assets/icons/athkar_icon.svg',
-        label: context.l10n.bottomNavAthkar,
-      ),
-      _NavDestination(
-        index: 4,
-        icon: FluentIcons.settings_24_regular,
-        activeIcon: FluentIcons.settings_24_filled,
-        label: context.l10n.bottomNavSettings,
-        identifier: 'settings_tab',
-      ),
-    ];
+  List<AppShellNavDestination> _buildDestinations(BuildContext context) {
+    return buildPhoneShellNavDestinations(context.l10n);
   }
 
   int _selectedNavIndex(
     String location,
     MainScreenState state,
-    List<_NavDestination> destinations,
+    List<AppShellNavDestination> destinations,
   ) {
     final int? mapped = AppShellRoutePolicy.navIndexForLocation(location);
     if (mapped != null) {
-      final int mappedIndex = destinations.indexWhere((d) => d.index == mapped);
+      final int mappedIndex = destinations.indexWhere(
+        (d) => d.tabIndex == mapped,
+      );
       return mappedIndex < 0 ? 0 : mappedIndex;
     }
     final int stateIndex = destinations.indexWhere(
-      (d) => d.index == state.currentIndex,
+      (d) => d.tabIndex == state.currentIndex,
     );
     return stateIndex < 0 ? 0 : stateIndex;
   }
@@ -185,48 +143,18 @@ class _AppShellScreenState extends State<AppShellScreen> {
     _mainScreenCubit.selectTab(tabIndex, force: !onMainShell);
   }
 
-  void _onRecitersNavTap(BuildContext context, MainScreenState state) {
-    final bool inRecitersExperience = _isRecitersTabActive(state);
-
-    if (!inRecitersExperience) {
-      _lastRecitersNavTap = null;
-      if (!_isOnMainShell()) {
-        _ensureMainShellRoute(context);
-      }
-      _mainScreenCubit.selectTab(1, force: true);
-      return;
-    }
-
-    final DateTime now = DateTime.now();
-    final DateTime? previousTap = _lastRecitersNavTap;
-    _lastRecitersNavTap = now;
-
-    if (previousTap != null &&
-        now.difference(previousTap) <= _recitersNavDoubleTapWindow) {
-      _lastRecitersNavTap = null;
-      _mainScreenCubit.requestRecitersSearchFocus();
-    }
-  }
-
   void _onDestinationSelected(
     BuildContext context,
     int index,
-    MainScreenState state,
-    List<_NavDestination> destinations,
+    List<AppShellNavDestination> destinations,
   ) {
-    final _NavDestination destination = destinations[index];
-    if (destination.index == null) {
+    final AppShellNavDestination destination = destinations[index];
+    if (destination.isPushRoute) {
       const QuranLastReadRoute().push(context);
       return;
     }
 
-    if (destination.index == 1) {
-      _onRecitersNavTap(context, state);
-      return;
-    }
-
-    _lastRecitersNavTap = null;
-    _navigateToShellTab(context, destination.index!);
+    _navigateToShellTab(context, destination.tabIndex!);
   }
 
   @override
@@ -268,9 +196,8 @@ class _AppShellScreenState extends State<AppShellScreen> {
               final double bottomNavBarHeight =
                   QuranPlayerLayoutInsets.phoneShellBottomReserve(context);
 
-              final List<_NavDestination> navDestinations = _buildDestinations(
-                context,
-              );
+              final List<AppShellNavDestination> navDestinations =
+                  _buildDestinations(context);
               final List<TilawaNavDestination> adaptiveDestinations =
                   navDestinations
                       .map(
@@ -278,7 +205,7 @@ class _AppShellScreenState extends State<AppShellScreen> {
                           label: d.label,
                           icon: d.icon,
                           activeIcon: d.activeIcon,
-                          identifier: d.identifier,
+                          identifier: d.semanticsIdentifier,
                           iconBuilder: d.svgPath == null
                               ? null
                               : (
@@ -319,7 +246,6 @@ class _AppShellScreenState extends State<AppShellScreen> {
                 onDestinationSelected: (index) => _onDestinationSelected(
                   context,
                   index,
-                  state,
                   navDestinations,
                 ),
                 child: widget.child,
@@ -347,7 +273,7 @@ class _AppShellChrome extends StatelessWidget {
 
   final MainScreenState state;
   final List<TilawaNavDestination> adaptiveDestinations;
-  final List<_NavDestination> navDestinations;
+  final List<AppShellNavDestination> navDestinations;
   final double bottomNavBarHeight;
   final bool isKeyboardOpen;
   final _RouteBoundBottomNavVisibility bottomNavVisibility;
@@ -458,32 +384,4 @@ class _AppShellChrome extends StatelessWidget {
   ) {
     return false;
   }
-}
-
-@immutable
-class _NavDestination extends Equatable {
-  const _NavDestination({
-    required this.label,
-    required this.icon,
-    this.activeIcon,
-    this.svgPath,
-    this.index,
-    this.identifier,
-  });
-  final String label;
-  final IconData icon;
-  final IconData? activeIcon;
-  final String? svgPath;
-  final int? index;
-  final String? identifier;
-
-  @override
-  List<Object?> get props => [
-    label,
-    icon,
-    activeIcon,
-    svgPath,
-    index,
-    identifier,
-  ];
 }

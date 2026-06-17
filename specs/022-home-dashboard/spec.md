@@ -25,9 +25,10 @@ without deciding where to start.
    without user intent.
 4. **Given** Today Plan is available, **When** Home loads, **Then** it appears as
    the primary daily engagement module.
-5. **Given** the user taps quick actions, **When** they choose Quran, reciters,
-   prayer, qibla, athkar, or settings, **Then** the app routes to the matching
-   experience.
+5. **Given** the user uses Home secondary actions, **When** they choose Reciters,
+   Tasbeeh, or Qibla from the More row, **Then** the app routes to the matching
+   experience. Prayer, Quran, Athkar, and Settings remain in bottom navigation
+   only (not duplicated as Home launcher tiles).
 
 ## Requirements
 
@@ -38,6 +39,9 @@ without deciding where to start.
 - Home MUST remain useful when offline, anonymous, or missing location.
 - The UI MUST follow Tilawa design tokens, RTL, and minimum touch targets.
 - Reciters MUST remain reachable from Home and existing reciter routes.
+- Home MUST NOT duplicate primary bottom navigation destinations as large
+  shortcut tiles; use Home space for daily modules and non-tab secondary
+  destinations.
 - Bottom navigation MUST expose Home, Prayer, Quran, Athkar, and Settings.
 
 ## MVP Scope
@@ -46,7 +50,10 @@ without deciding where to start.
 - Saved/last-resolved prayer location chip.
 - Next prayer card with countdown.
 - Today Plan card.
-- Explore grid for Quran, reciters, prayer, qibla, athkar, and settings.
+- User-pickable Home athkar shortcuts above Explore, persisted locally. MVP
+  limit: 4 pinned athkar categories.
+- Compact secondary destinations for Reciters, Tasbeeh, and Qibla; Prayer, Quran,
+  Athkar, and Settings stay in the bottom navigation.
 - Calm daily ayah/dua content cards as non-interactive retention surfaces.
 
 ## Out of Scope

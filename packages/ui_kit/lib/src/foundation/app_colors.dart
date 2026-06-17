@@ -113,16 +113,10 @@ abstract final class AppColors {
   // cool. Do not mix warm and cool tones in adjacent light fills.
   // ---------------------------------------------------------------------------
 
-  /// App canvas / scaffold — cool porcelain (`#F4F5F7`, noon/Apple-style).
+  /// App canvas / scaffold — soft cool gray (`#F5F7F9`, Moneyloop-style).
   ///
-  /// Replaced the warm Chaptrs cream (`#F9F7F2`, 2026-06-11): the cream read
-  /// as dated paper next to white cards; a cool near-white gives the crisp
-  /// commercial feel and matches the slate ink family. Same lightness, so
-  /// every contrast pairing is unchanged.
-  ///
-  /// The page rests on this tone; cards, sheets, and app bars use
-  /// [lightSurface] (`#FFFFFF`) for quiet lift without heavy shadows.
-  static const Color lightCanvas = Color(0xFFF4F5F7);
+  /// Cards use [lightSurface] (`#FFFFFF`) for quiet lift with soft shadows.
+  static const Color lightCanvas = Color(0xFFF5F7F9);
 
   /// Alias for scaffold assembly — same as [lightCanvas].
   static const Color lightBackground = lightCanvas;
@@ -130,18 +124,17 @@ abstract final class AppColors {
   /// Raised cards, sheets, dialogs, and app bars on the porcelain canvas.
   static const Color lightSurface = Color(0xFFFFFFFF);
 
-  /// Primary ink on surfaces (`#0F172A`).
-  static const Color lightInk = Color(0xFF0F172A);
+  /// Primary ink on surfaces (`#1C2534`) — softened navy, not pure black.
+  static const Color lightInk = Color(0xFF1C2534);
 
-  /// Body / secondary labels (`#30343C`, cool slate — one family with
-  /// [lightInk] and the porcelain ramp; replaced warm `#33332E` 2026-06-11).
-  static const Color lightBody = Color(0xFF30343C);
+  /// Body / secondary labels (`#4A5260`).
+  static const Color lightBody = Color(0xFF4A5260);
 
-  /// Muted labels (`#5F6470`, cool slate; replaced warm `#62625B`).
-  static const Color lightMute = Color(0xFF5F6470);
+  /// Muted labels (`#6B7280`) — Moneyloop-soft but readable on white and chips.
+  static const Color lightMute = Color(0xFF6B7280);
 
-  /// Ash icons / hints (`#8F949E`, cool slate; replaced warm `#91918C`).
-  static const Color lightAsh = Color(0xFF8F949E);
+  /// Ash icons / hints (`#A0A8B5`).
+  static const Color lightAsh = Color(0xFFA0A8B5);
 
   /// Light upper container / idle chip — cool gray (`#E5E7EB`).
   ///

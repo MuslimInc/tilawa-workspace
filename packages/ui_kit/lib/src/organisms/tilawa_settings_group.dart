@@ -7,7 +7,7 @@ import '../molecules/tilawa_settings_group_row_style.dart';
 
 /// Visual style for [TilawaSettingsGroupPanel].
 enum TilawaSettingsGroupPanelStyle {
-  /// Settings sections — chrome radius, flat hairline panel.
+  /// Settings sections — [radiusSection], flat hairline panel.
   settings,
 
   /// Feature hub navigation — hero radius, flat surface card.
@@ -54,7 +54,7 @@ class TilawaSettingsGroupPanel extends StatelessWidget {
     final tokens = theme.componentTokens.settingsGroup;
     final designTokens = theme.tokens;
     final TilawaRadiusFamily radiusFamily = switch (style) {
-      TilawaSettingsGroupPanelStyle.settings => TilawaRadiusFamily.chrome,
+      TilawaSettingsGroupPanelStyle.settings => TilawaRadiusFamily.section,
       TilawaSettingsGroupPanelStyle.hub => TilawaRadiusFamily.hero,
     };
     final double groupRadius = designTokens.resolveRadius(

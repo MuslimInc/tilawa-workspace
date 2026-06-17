@@ -156,7 +156,9 @@ class SettingsProfileHeader extends StatelessWidget {
             color: Colors.transparent,
             child: InkWell(
               onTap: isGuest ? () => const LoginRoute().push(context) : null,
-              borderRadius: BorderRadius.circular(tokens.radiusLarge),
+              borderRadius: BorderRadius.circular(
+                tokens.resolveRadius(family: TilawaRadiusFamily.card),
+              ),
               child: Padding(
                 padding: EdgeInsets.fromLTRB(
                   tokens.spaceMedium,
@@ -347,6 +349,7 @@ class SettingsAccountActions extends StatelessWidget {
         }
 
         final tokens = context.tokens;
+        final colorScheme = Theme.of(context).colorScheme;
 
         return TilawaSettingsGroupHorizontalInset(
           child: Padding(
@@ -357,10 +360,9 @@ class SettingsAccountActions extends StatelessWidget {
               children: [
                 TilawaButton(
                   text: context.l10n.logout,
-                  // Medium emphasis — leaving the app must not outshout the
-                  // screen's content; filled primary is reserved for the most
-                  // desired action (DESIGN.md accent discipline).
-                  variant: TilawaButtonVariant.outline,
+                  variant: TilawaButtonVariant.primary,
+                  backgroundColor: colorScheme.onSurface,
+                  foregroundColor: colorScheme.surface,
                   isFullWidth: true,
                   onPressed: onLogout,
                 ),

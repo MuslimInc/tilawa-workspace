@@ -248,5 +248,25 @@ void main() {
       );
       expect(textWidget.style?.color, const Color(0xFF0D3933));
     });
+
+    testWidgets('medium button resolves pill radius from height', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          TilawaButton(
+            text: 'Save',
+            onPressed: _noop,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final TextButton button = tester.widget(find.byType(TextButton));
+      final OutlinedBorder? shape = button.style!.shape!.resolve(const {});
+      expect(shape, isA<RoundedRectangleBorder>());
+      final RoundedRectangleBorder rounded = shape! as RoundedRectangleBorder;
+      expect(rounded.borderRadius, BorderRadius.circular(24));
+    });
   });
 }

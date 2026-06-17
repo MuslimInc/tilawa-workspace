@@ -37,7 +37,7 @@ void main() {
     );
     final heroTokens = theme.componentTokens.homeNextPrayerHero;
     final appBar = tester.widget<SliverAppBar>(find.byType(SliverAppBar));
-    expect(appBar.expandedHeight, 280);
+    expect(appBar.expandedHeight, 176);
     expect(appBar.backgroundColor, heroTokens.gradientBottomEnd);
     expect(appBar.foregroundColor, heroTokens.foregroundColor);
 
@@ -50,7 +50,7 @@ void main() {
 
     expect(tester.takeException(), isNull);
 
-    const offsets = <double>[8, 40, 104, 169, 251, 297];
+    const offsets = <double>[8, 40, 72, 120, 160, 176];
     for (final offset in offsets) {
       controller.jumpTo(
         math.min(offset, controller.position.maxScrollExtent),

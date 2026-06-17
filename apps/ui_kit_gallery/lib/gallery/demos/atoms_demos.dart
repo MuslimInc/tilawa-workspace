@@ -252,6 +252,51 @@ abstract final class AtomsDemos {
     );
   }
 
+  static Widget checkbox(BuildContext context) {
+    return GalleryDemoFrame(
+      child: _CheckboxDemo(),
+    );
+  }
+
+  static Widget googleSignInButton(BuildContext context) {
+    return GalleryDemoFrame(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 16,
+        children: [
+          gallerySection('Appearances', [
+            const TilawaGoogleSignInButton(
+              label: 'Sign in with Google',
+              appearance: GoogleSignInButtonAppearance.light,
+            ),
+            const SizedBox(height: 12),
+            const TilawaGoogleSignInButton(
+              label: 'Sign in with Google',
+              appearance: GoogleSignInButtonAppearance.dark,
+            ),
+            const SizedBox(height: 12),
+            const TilawaGoogleSignInButton(
+              label: 'Sign in with Google',
+              appearance: GoogleSignInButtonAppearance.neutral,
+            ),
+          ]),
+          gallerySection('States', [
+            const TilawaGoogleSignInButton(
+              label: 'Sign in with Google',
+              onPressed: null,
+            ),
+            const SizedBox(height: 12),
+            const TilawaGoogleSignInButton(
+              label: 'Sign in with Google',
+              isLoading: true,
+              onPressed: _noop,
+            ),
+          ]),
+        ],
+      ),
+    );
+  }
+
   static Widget switchAtom(BuildContext context) {
     return GalleryDemoFrame(
       child: _SwitchDemo(),
@@ -280,6 +325,31 @@ abstract final class AtomsDemos {
           ),
         ],
       ),
+    );
+  }
+}
+
+void _noop() {}
+
+class _CheckboxDemo extends StatefulWidget {
+  @override
+  State<_CheckboxDemo> createState() => _CheckboxDemoState();
+}
+
+class _CheckboxDemoState extends State<_CheckboxDemo> {
+  bool _checked = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      spacing: 16,
+      children: [
+        TilawaCheckbox(
+          value: _checked,
+          onChanged: (value) => setState(() => _checked = value ?? false),
+        ),
+        Text(_checked ? 'Checked' : 'Unchecked'),
+      ],
     );
   }
 }
