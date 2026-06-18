@@ -252,10 +252,10 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   /// 145 — height threshold for tight card layout.
   final double cardTightHeightThreshold;
 
-  /// 72.0 — collapsed mini-player chrome height (matches [_create]).
+  /// 57.0 — collapsed mini-player chrome height (matches [_create]).
   final double playerCollapsedHeight;
 
-  /// 72.0 — dismiss gesture threshold aligned with [playerCollapsedHeight].
+  /// 57.0 — dismiss gesture threshold aligned with [playerCollapsedHeight].
   final double playerDismissThreshold;
 
   /// 200.0
@@ -346,8 +346,8 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       narrowCardWidthThreshold: 180.0,
       narrowCardHeightThreshold: 155.0,
       cardTightHeightThreshold: 145.0,
-      playerCollapsedHeight: 72.0,
-      playerDismissThreshold: 76.0,
+      playerCollapsedHeight: 57.0,
+      playerDismissThreshold: 57.0,
       playerMaxDismissOffset: 200.0,
       playerVelocityThreshold: 500.0,
       playerDismissVelocityThreshold: 300.0,

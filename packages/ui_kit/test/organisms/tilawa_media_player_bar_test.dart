@@ -40,6 +40,28 @@ void main() {
     });
   });
 
+  group('resolveTilawaMediaPlayerCollapsedBands', () {
+    test('bands sum to maxHeight exactly', () {
+      final bands = resolveTilawaMediaPlayerCollapsedBands(
+        maxHeight: 56,
+        rowHeight: 48,
+      );
+      expect(bands.topBand, 4);
+      expect(bands.bottomBand, 4);
+      expect(bands.topBand + 48 + bands.bottomBand, 56);
+    });
+
+    test('fits 56.5dp slot with 48dp row', () {
+      final bands = resolveTilawaMediaPlayerCollapsedBands(
+        maxHeight: 56.5,
+        rowHeight: 48,
+      );
+      expect(bands.topBand, 4);
+      expect(bands.bottomBand, 4.5);
+      expect(bands.topBand + 48 + bands.bottomBand, 56.5);
+    });
+  });
+
   group('TilawaMediaPlayerBar layout', () {
     testWidgets('shows play/pause and sleep timer only', (tester) async {
       await tester.pumpWidget(
@@ -64,6 +86,86 @@ void main() {
       expect(find.byTooltip('Next track'), findsNothing);
       expect(find.byTooltip('Sleep timer'), findsOneWidget);
       expect(find.byTooltip('Pause'), findsOneWidget);
+    });
+
+    testWidgets('shell pill layout fits 56dp inner height', (tester) async {
+      await tester.pumpWidget(
+        _themed(
+          const SizedBox(
+            height: 56,
+            width: 360,
+            child: TilawaMediaPlayerBar(
+              layoutWidth: 328,
+              title: 'Surah Al-Baqarah',
+              subtitle: 'Al-Minshawi',
+              progress: 0.35,
+              isPlaying: true,
+              canGoPrevious: true,
+              canGoNext: true,
+              isSleepTimerEnabled: false,
+              shellPillLayout: true,
+              pillBorderRadius: 28,
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('shell pill layout fits 56dp collapsed height', (tester) async {
+      final tokens = TilawaDesignTokens.light();
+      await tester.pumpWidget(
+        _themed(
+          SizedBox(
+            height: tokens.playerCollapsedHeight,
+            width: 360,
+            child: TilawaMediaPlayerBar(
+              layoutWidth: 328,
+              title: 'Surah Al-Baqarah',
+              subtitle: 'Al-Minshawi',
+              progress: 0.35,
+              isPlaying: true,
+              canGoPrevious: true,
+              canGoNext: true,
+              isSleepTimerEnabled: false,
+              shellPillLayout: true,
+              pillBorderRadius: tokens.radiusPill(tokens.playerCollapsedHeight),
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(
+        tester.getSize(find.byType(TilawaMediaPlayerBar)),
+        Size(360, tokens.playerCollapsedHeight),
+      );
+      expect(find.textContaining(' · '), findsOneWidget);
+    });
+
+    testWidgets('tight non-shell layout fits fractional collapsed height',
+        (tester) async {
+      await tester.pumpWidget(
+        _themed(
+          const SizedBox(
+            height: 56.5,
+            width: 360,
+            child: TilawaMediaPlayerBar(
+              layoutWidth: 328,
+              title: 'Surah Al-Baqarah',
+              subtitle: 'Al-Minshawi',
+              progress: 0.35,
+              isPlaying: true,
+              canGoPrevious: true,
+              canGoNext: true,
+              isSleepTimerEnabled: false,
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('transport tap does not fire bar onTap', (tester) async {

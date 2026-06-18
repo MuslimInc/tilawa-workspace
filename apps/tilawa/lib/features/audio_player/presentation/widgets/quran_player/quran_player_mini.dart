@@ -258,7 +258,11 @@ class _YtMusicMiniPlayerBody extends StatelessWidget {
             audioId: audio.id,
             artUri: audio.artUri,
             borderRadius: BorderRadius.circular(barTokens.artworkRadius),
-            size: Size.square(barTokens.artworkSize),
+            size: Size.square(
+              shellPillLayout
+                  ? kTilawaMediaPlayerBarShellArtworkSize
+                  : barTokens.artworkSize,
+            ),
           )
         : ClipRRect(
             borderRadius: BorderRadius.circular(barTokens.artworkRadius),
@@ -306,7 +310,9 @@ class _YtMusicMiniPlayerBody extends StatelessWidget {
                 ? shellTokens.bottomNavBackgroundColor
                 : null,
             contentPaddingOverride: shellPillLayout
-                ? const EdgeInsets.symmetric(horizontal: 12, vertical: 6)
+                ? EdgeInsets.symmetric(
+                    horizontal: shellTokens.bottomNavInternalPadding,
+                  )
                 : null,
             onTap: onTap,
             onSubtitleTap: onSubtitleTap,
