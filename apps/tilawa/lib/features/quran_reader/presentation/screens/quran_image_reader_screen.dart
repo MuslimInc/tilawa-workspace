@@ -52,6 +52,7 @@ class QuranImageReaderScreen extends StatefulWidget {
     required this.surahNumber,
     this.initialAyah,
     this.openPracticeOnLaunch = false,
+    this.onActiveSurahChanged,
   });
 
   /// Surah number to open (`1`–`114`), or `0` to use last-read.
@@ -62,6 +63,9 @@ class QuranImageReaderScreen extends StatefulWidget {
 
   /// Opens the recitation practice panel after the reader is ready.
   final bool openPracticeOnLaunch;
+
+  /// Notifies the host when the visible Mushaf page changes surah.
+  final ValueChanged<int>? onActiveSurahChanged;
 
   @override
   State<QuranImageReaderScreen> createState() => _QuranImageReaderScreenState();
@@ -319,6 +323,7 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen>
       surahNumber: pageData.first.surah,
       page: currentPage,
     );
+    widget.onActiveSurahChanged?.call(pageData.first.surah);
     final UpdateKhatmaProgressUseCase? updateKhatmaProgress =
         _updateKhatmaProgress;
     if (updateKhatmaProgress != null) {

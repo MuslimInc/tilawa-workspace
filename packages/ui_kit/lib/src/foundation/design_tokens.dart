@@ -124,23 +124,20 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   /// 8.0 — decorative chips, icon boxes, nested controls.
   final double radiusMedium;
 
-  /// 10.0 — chrome inside cards (segmented tracks, nested fields).
+  /// 20.0 — chrome tracks, search bars, nested fields.
   final double radiusLarge;
 
-  /// 24.0 — legacy cap; prefer [radiusCard] for content cards and
-  /// [radiusPill] for tappable affordances.
+  /// 24.0 — content cards and pill affordances (Behance lifestyle).
   final double radiusExtraLarge;
 
-  /// 12.0 — dashboard / hub summary groups only.
+  /// 28.0 — dashboard / hub summary groups only.
   final double radiusHero;
 
-  /// 16.0 — content cards ([TilawaCard], inspiration panels). Softer than pill
-  /// affordances so large cards do not read as oversized buttons.
-  double get radiusCard => radiusLarge;
+  /// 24.0 — content cards ([TilawaCard], featured panels).
+  double get radiusCard => radiusExtraLarge;
 
-  /// 16.0 — grouped settings panels ([TilawaSettingsGroupPanel]). Matches
-  /// [radiusCard] so list containers and content cards share one calm radius.
-  double get radiusSection => radiusLarge;
+  /// 24.0 — grouped settings panels ([TilawaSettingsGroupPanel]).
+  double get radiusSection => radiusExtraLarge;
 
   /// Full pill radius for a control of [height] (`height / 2`).
   double radiusPill(double height) => height / 2;
@@ -318,12 +315,12 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       spaceHuge: 48.0,
       radiusSmall: 8.0,
       radiusMedium: 12.0,
-      radiusLarge: 16.0,
+      radiusLarge: 20.0,
       radiusExtraLarge: 24.0,
       radiusHero: 28.0,
       opacitySubtle: 0.1,
-      opacityShadow: 0.05,
-      opacityShadowStrong: 0.08,
+      opacityShadow: 0.12,
+      opacityShadowStrong: 0.18,
       opacityMedium: 0.3,
       opacityEmphasis: 0.7,
       opacityGlass: 0.8,

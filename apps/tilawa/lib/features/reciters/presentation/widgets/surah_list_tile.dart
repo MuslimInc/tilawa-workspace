@@ -32,27 +32,13 @@ class SurahListTile extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
-    final double tileRadius = tokens.radiusLarge;
+    final double tileRadius = tokens.resolveRadius(family: TilawaRadiusFamily.card);
     // Leading badge size matches the reciter avatar (iconSizeLarge + spaceExtraLarge = 48dp).
     final double badgeSize = tokens.iconSizeLarge + tokens.spaceExtraLarge;
     final Color activeFill = ReciterCatalogChrome.activeFill(colorScheme);
     final Color activeOnFill = ReciterCatalogChrome.activeOnFill(colorScheme);
-    // Badge bg cycles through the same M3 container palette as the reciter avatar,
-    // keyed by surah index so adjacent rows are visually distinct.
-    final List<Color> badgePalette = [
-      colorScheme.primaryContainer,
-      colorScheme.secondaryContainer,
-      colorScheme.tertiaryContainer,
-      colorScheme.surfaceContainerHighest,
-    ];
-    final List<Color> badgeFgPalette = [
-      colorScheme.onPrimaryContainer,
-      colorScheme.onSecondaryContainer,
-      colorScheme.onTertiaryContainer,
-      colorScheme.onSurfaceVariant,
-    ];
-    final Color idleFill = badgePalette[index % badgePalette.length];
-    final Color idleFg = badgeFgPalette[index % badgeFgPalette.length];
+    final Color idleFill = ReciterCatalogChrome.idleFill(colorScheme);
+    final Color idleFg = colorScheme.primary;
 
     // Combine selectors to reduce overhead and subscription count
     final (bool isPlaying, bool isCurrentItem) = context
@@ -93,7 +79,7 @@ class SurahListTile extends StatelessWidget {
       ),
       button: true,
       child: TilawaCard(
-        surface: TilawaCardSurface.flat,
+        surface: TilawaCardSurface.raised,
         backgroundColor: isCurrentItem
             ? colorScheme.primaryContainer.withValues(
                 alpha: tokens.opacitySubtle * 2,
@@ -123,7 +109,7 @@ class SurahListTile extends StatelessWidget {
                 // keeps container colors soft across all four palette slots.
                 color: isCurrentItem
                     ? activeFill
-                    : idleFill.withValues(alpha: tokens.opacityEmphasis),
+                    : idleFill,
                 borderRadius: BorderRadius.circular(tokens.radiusLarge),
                 border: Border.all(
                   color: isCurrentItem
@@ -181,6 +167,18 @@ class SurahListTile extends StatelessWidget {
                 ],
               ),
             ),
+            if (surah.nameAr.isNotEmpty) ...[
+              SizedBox(width: tokens.spaceSmall),
+              Text(
+                surah.nameAr,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.primary,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
             // Trailing: download only — play state is shown on the leading badge.
             DownloadButton(
               url: surah.id,

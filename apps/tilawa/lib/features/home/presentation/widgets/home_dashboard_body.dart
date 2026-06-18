@@ -132,6 +132,12 @@ class _HomeMoreActions extends StatelessWidget {
         subtitle: context.l10n.homeQuickQiblaSubtitle,
         onTap: () => const QiblaRoute().push(context),
       ),
+      HomeShortcutEntry(
+        icon: FluentIcons.settings_24_regular,
+        title: context.l10n.settings,
+        subtitle: context.l10n.homeQuickSettingsSubtitle,
+        onTap: () => const SettingsRoute().push(context),
+      ),
     ];
 
     return HomeAdaptiveShortcuts(

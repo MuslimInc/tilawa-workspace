@@ -156,6 +156,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeQuickQiblaSubtitle => 'Find prayer direction';
 
   @override
+  String get homeQuickSettingsSubtitle => 'Theme, audio, and account';
+
+  @override
   String get homeQuickTasbeeh => 'Tasbeeh';
 
   @override
@@ -745,10 +748,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bottomNavPrayer => 'Prayer';
 
   @override
+  String get bottomNavQibla => 'Qibla';
+
+  @override
   String get bottomNavQuran => 'Quran';
 
   @override
-  String get bottomNavAthkar => 'Athkar';
+  String get bottomNavAthkar => 'Dhikr';
 
   @override
   String get bottomNavSettings => 'Settings';
@@ -1484,6 +1490,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get qiblaDirection => 'Qibla Direction';
 
   @override
+  String get qiblaFinderTitle => 'QIBLA FINDER';
+
+  @override
+  String get qiblaDeviceAngleLabel => 'Device\'s angle to qibla';
+
+  @override
+  String qiblaRotatePhoneLeft(int degrees) {
+    return 'Rotate the phone $degrees° to the left';
+  }
+
+  @override
+  String qiblaRotatePhoneRight(int degrees) {
+    return 'Rotate the phone $degrees° to the right';
+  }
+
+  @override
   String get locationServiceDisabled => 'Location Service Disabled';
 
   @override
@@ -1953,6 +1975,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get showTranslation => 'Show Translation';
 
   @override
+  String quranTranslationAttribution(
+    String translationName,
+    String sourceName,
+  ) {
+    return 'Translation: $translationName ($sourceName)';
+  }
+
+  @override
   String get showAyahNumbers => 'Show Ayah Numbers';
 
   @override
@@ -2121,10 +2151,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get quran => 'Quran';
 
   @override
+  String get quranHubTitle => 'QURAN';
+
+  @override
+  String get quranCatalogSectionTitle => 'Al Quran';
+
+  @override
+  String get quranOpenMushaf => 'Open Mushaf';
+
+  @override
+  String get quranSwitchToAyahList => 'Ayah list view';
+
+  @override
+  String get quranSwitchToMushaf => 'Mushaf view';
+
+  @override
   String get continueReadingQuran => 'Continue Reading Quran';
 
   @override
   String get surahIndex => 'Surah Index';
+
+  @override
+  String get hijriCalendarTitle => 'Islamic calendar';
+
+  @override
+  String get hijriCalendarOpenLabel => 'Open Islamic calendar';
+
+  @override
+  String get hijriCalendarPreviousMonth => 'Previous month';
+
+  @override
+  String get hijriCalendarNextMonth => 'Next month';
 
   @override
   String surahCountLabel(int count) {

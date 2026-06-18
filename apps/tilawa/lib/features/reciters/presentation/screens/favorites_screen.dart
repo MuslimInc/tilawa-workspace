@@ -50,6 +50,7 @@ class FavoritesScreen extends StatelessWidget {
               appBar: TilawaCatalogAppBar.titleOnly(
                 context,
                 title: context.l10n.favorites,
+                centerTitle: true,
               ),
               body: BlocBuilder<FavoritesCubit, FavoritesState>(
                 builder: (context, state) {

@@ -166,6 +166,12 @@ class _CatalogTitleRow extends StatelessWidget {
     }
 
     final double sideSlotWidth = tokens.minInteractiveDimension;
+    final Widget? trailing = spacedActions == null
+        ? null
+        : Row(
+            mainAxisSize: MainAxisSize.min,
+            children: spacedActions,
+          );
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -180,18 +186,10 @@ class _CatalogTitleRow extends StatelessWidget {
         Expanded(
           child: Center(child: title),
         ),
-        SizedBox(
-          width: sideSlotWidth,
-          child: Align(
-            alignment: AlignmentDirectional.centerEnd,
-            child: spacedActions == null
-                ? null
-                : Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: spacedActions,
-                  ),
-          ),
-        ),
+        if (trailing != null)
+          trailing
+        else
+          SizedBox(width: sideSlotWidth),
       ],
     );
   }

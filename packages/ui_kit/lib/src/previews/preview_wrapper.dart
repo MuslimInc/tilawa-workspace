@@ -46,7 +46,7 @@ class TilawaPreviewWrapper extends StatelessWidget {
       child: Theme(
         data: theme,
         child: Material(
-          color: Colors.transparent,
+          color: theme.scaffoldBackgroundColor,
           child: Directionality(
             textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
             child: Padding(padding: padding, child: child),

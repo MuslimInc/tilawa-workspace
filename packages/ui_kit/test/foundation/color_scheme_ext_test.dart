@@ -12,14 +12,11 @@ double _contrastRatio(Color a, Color b) {
 
 void main() {
   group('TilawaAccessibleAccents.primarySmallLabel', () {
-    test('brand sage reaches 4.5:1 small-text contrast on light surface', () {
+    test('brand brown small-label contrast on light surface', () {
       final ColorScheme scheme = AppTheme.getLightTheme(
         primaryColor: AppColors.defaultPrimary,
       ).colorScheme;
 
-      // The raw brand primary is below the small-text threshold by design …
-      expect(_contrastRatio(scheme.primary, scheme.surface), lessThan(4.5));
-      // … and the derived small-label tone clears it.
       expect(
         _contrastRatio(scheme.primarySmallLabel, scheme.surface),
         greaterThanOrEqualTo(4.5),

@@ -47,35 +47,27 @@ organisms/      TilawaMediaPlayerBar, TilawaSettingsGroup, …
 
 ## 2. Theme freeze — calm catalog chrome (light)
 
-Default primary: **Sage** `#219653` (`AppColors.defaultPrimary`), **brand-locked**
-for production. Legacy presets (coral, teal, gold, brown, purple) remain only
-for the dev/QA color picker (`--dart-define=TILAWA_SHOW_COLOR_PICKER=true`) and
-for deserialising previously-stored user choices — they are **not** the runtime
-brand. See the `AppColors` class docstring for the lock.
+Default primary: **Warm brown** `#8B5E3C` (`AppColors.defaultPrimary`), **brand-locked**
+for production per the [Behance lifestyle reference](https://www.behance.net/gallery/230050359/Islamic-App-Mobile-UIUX-Design-for-Muslim-Lifestyle).
+Legacy presets (coral, teal, sage, gold, purple) remain only for the dev/QA
+color picker and persisted user choices.
 
-**Accent usage (one-accent rule):** Sage (or the dev-picked primary) for **one**
-emphasis per screen — primary CTA, active bottom nav, hearts/favorites, progress
-fill, switch ON. **Not** for scaffold, app bars, search fields, filter chips, or
-list row chrome.
+**Accent usage (one-accent rule):** Brown primary for **one** emphasis per screen
+— primary CTA, active bottom nav, selected pills/segments, progress fill,
+switch ON. **Not** for scaffold fills (use parchment canvas).
 
-### Light neutral ramp (cool porcelain canvas + white cards, not primary-harmonized)
+### Light neutral ramp (warm parchment canvas + white cards)
 
 | `AppColors` | Hex | `ColorScheme` / usage |
 |-------------|-----|------------------------|
-| `lightCanvas` / `lightBackground` | `#F4F5F7` | Scaffold, `surfaceContainerLowest`, `surfaceContainer` |
-| `lightSurface` | `#FFFFFF` | Cards, sheets, dialogs, app bars (`surface`, `surfaceContainerLow`) |
-| `lightInk` | `#0F172A` | `onSurface` |
-| `lightBody` | `#30343C` | Secondary body |
-| `lightMute` | `#5F6470` | Muted labels (`onSurfaceVariant`) |
-| `lightAsh` | `#8F949E` | Hints / idle icons |
-| `lightSurfaceContainerHighBase` | `#E5E7EB` | Idle chips, search fill, `surfaceContainerHigh` |
-| `lightSurfaceContainerHighestBase` | `#DBDEE3` | Hairline tier (`surfaceContainerHighest`) |
-| `lightHairline` | `#DBDEE3` | `outlineVariant` |
+| `lightCanvas` / `lightBackground` | `#FFFBF5` | Scaffold, `surfaceContainerLowest` |
+| `lightSurface` | `#FFFFFF` | Cards, sheets, dialogs |
+| `lightInk` | `#30343C` | `onSurface` |
+| `lightMute` | `#78736E` | Muted labels (`onSurfaceVariant`) |
+| `lightSurfaceContainerHighBase` | `#F0E8DC` | Idle chips, `surfaceContainerHigh` |
+| `featuredGradientStart` / `End` | `#FFD28E` / `#FF9E44` | Last Read / hero gold cards |
 
-> The scaffold rests on the cool porcelain **canvas** (`#F4F5F7`); cards/sheets/app
-> bars lift with white **surface** (`#FFFFFF`) and a hairline outline rather than
-> heavy shadow. This is the inverse of a white-scaffold system — keep them
-> straight when reading `_refineLightColorScheme` in `app_theme.dart`.
+Featured cards use the gold gradient; standard cards use white + warm shadow.
 
 `AppTheme` sets **`surfaceTint` → transparent** on cards, dialogs, sheets, and
 app bars so Material 3 does not wash neutrals with the user primary.
@@ -108,7 +100,7 @@ Settings lists, Athkar, etc.).
 | Title | Left-aligned, `titleLarge` w700 |
 | Height | `TilawaAppBarConfig.catalogTitleOnlyHeight`, `catalogTitleAndSearchHeight`, `catalogTitleSearchAndFilterRowHeight` — **always** match `preferredHeight` to laid-out content (uses `TextPainter` + device-pixel ceil) |
 | Search | `TilawaSearchField` default variant **catalog**; wrap row in `TilawaSearchFieldSlot` only when **not** inside `TilawaCatalogAppBar.bottomContent` |
-| Filters | `TilawaSelectionPillStyle.catalog` — selected: `onSurface` fill + `surface` label; unselected: `surfaceContainerHigh` |
+| Filters | `TilawaSelectionPillStyle.catalog` — selected: `primary` fill + `onPrimary` label; unselected: `surfaceContainerHigh` |
 | Back | `automaticallyImplyLeading: true` on pushed routes; `onBackPressed: () => context.pop()` with GoRouter |
 
 **Back in title row:** `TilawaAppBarChrome.resolveCatalogRowLeading` /
@@ -124,7 +116,7 @@ Settings lists, Athkar, etc.).
 | Family | Catalog behaviour |
 |--------|-------------------|
 | `searchField` | Catalog variant: white `surface` fill + `outlineVariant` border — not `primaryContainer` |
-| `chip` / selection | Catalog pills: light = `onSurface` fill + `surface` label; dark = sage-washed `surfaceContainerHighest` lift + `onSurface` label (not a white pill) |
+| `chip` / selection | Catalog pills: light = `primary` fill + `onPrimary` label; dark = warm lifted `surfaceContainerHighest` + `onSurface` label |
 | `segmentedControl` | Neutral track; accent only on selected segment when product requires |
 
 Feature-specific neutral chrome (e.g. reciter details moshaf row) may use a

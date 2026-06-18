@@ -105,6 +105,12 @@ class _AppShellScreenState extends State<AppShellScreen> {
     MainScreenState state,
     List<AppShellNavDestination> destinations,
   ) {
+    if (location.startsWith('/quran-index')) {
+      final int quranNavIndex = destinations.indexWhere(
+        (d) => d.semanticsIdentifier == 'quran_index_nav',
+      );
+      return quranNavIndex < 0 ? 0 : quranNavIndex;
+    }
     final int? mapped = AppShellRoutePolicy.navIndexForLocation(location);
     if (mapped != null) {
       final int mappedIndex = destinations.indexWhere(
@@ -150,7 +156,7 @@ class _AppShellScreenState extends State<AppShellScreen> {
   ) {
     final AppShellNavDestination destination = destinations[index];
     if (destination.isPushRoute) {
-      const QuranLastReadRoute().push(context);
+      const QuranIndexRoute().push(context);
       return;
     }
 

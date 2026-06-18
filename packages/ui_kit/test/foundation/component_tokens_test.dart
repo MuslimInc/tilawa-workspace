@@ -700,13 +700,16 @@ void main() {
       );
       final tokens = TilawaAdaptiveShellTokens.fromColorScheme(scheme);
 
-      expect(tokens.bottomNavBackgroundColor, Colors.white);
+      expect(tokens.bottomNavBackgroundColor, AppColors.lightCanvas);
       expect(tokens.bottomNavShadowOpacity, 0);
       expect(tokens.bottomNavShadowBlur, 14);
       expect(tokens.bottomNavShadowOffset, const Offset(0, 4));
       expect(
         tokens.navButtonSelectedBackgroundColor,
-        Color.alphaBlend(scheme.primary.withValues(alpha: 0.10), Colors.white),
+        Color.alphaBlend(
+          scheme.primary.withValues(alpha: 0.10),
+          AppColors.lightCanvas,
+        ),
       );
       expect(
         tokens.sideRailIndicatorColor,
@@ -764,7 +767,7 @@ void main() {
           TilawaAdaptiveShellTokens.fromColorScheme(
             tealScheme,
           ).bottomNavBackgroundColor,
-          Colors.white,
+          AppColors.lightCanvas,
         );
       },
     );
@@ -1093,23 +1096,23 @@ void main() {
   });
 
   group('TilawaHomeDashboardCardTokens', () {
-    test('fromColorScheme uses primaryContainer and primary ink feedback', () {
+    test('fromColorScheme uses featured gold gradient stops', () {
       final ColorScheme scheme = ColorScheme.fromSeed(
         seedColor: AppColors.defaultPrimary,
         primary: AppColors.defaultPrimary,
-        primaryContainer: AppColors.lightSchemePrimaryContainer,
       );
       final tokens = TilawaHomeDashboardCardTokens.fromColorScheme(scheme);
 
-      expect(tokens.backgroundColor, scheme.primaryContainer);
-      expect(tokens.backgroundColor, AppColors.lightSchemePrimaryContainer);
+      expect(tokens.gradientStart, AppColors.featuredGradientStart);
+      expect(tokens.gradientEnd, AppColors.featuredGradientEnd);
+      expect(tokens.foregroundColor, AppColors.featuredGradientForeground);
       expect(
         tokens.splashColor,
-        scheme.primary.withValues(alpha: 0.12),
+        AppColors.primaryBrownDark.withValues(alpha: 0.12),
       );
       expect(
         tokens.highlightColor,
-        scheme.primary.withValues(alpha: 0.06),
+        AppColors.primaryBrownDark.withValues(alpha: 0.06),
       );
     });
   });
@@ -1232,7 +1235,7 @@ void main() {
                 );
                 expect(
                   accessed.adaptiveShell.bottomNavBackgroundColor,
-                  Colors.white,
+                  AppColors.lightCanvas,
                 );
                 expect(
                   accessed.adaptiveShell.bottomNavBackgroundColor,
@@ -1278,15 +1281,15 @@ void main() {
       );
     });
 
-    test('light catalog keeps inverted ink pill', () {
+    test('light catalog uses brown active pill', () {
       final ColorScheme light = ColorScheme.fromSeed(
         seedColor: AppColors.defaultPrimary,
         brightness: Brightness.light,
       );
       final TilawaChipTokens tokens = TilawaChipTokens.fromColorScheme(light);
 
-      expect(tokens.catalogSelectedBackgroundColor, light.onSurface);
-      expect(tokens.catalogSelectedForegroundColor, light.surface);
+      expect(tokens.catalogSelectedBackgroundColor, light.primary);
+      expect(tokens.catalogSelectedForegroundColor, light.onPrimary);
     });
   });
 

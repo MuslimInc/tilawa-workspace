@@ -200,13 +200,13 @@ abstract final class AppShellRoutePolicy {
         location.startsWith('/history')) {
       return 0;
     }
-    if (location.startsWith('/prayer') || location == '/qibla') {
+    if (location.startsWith('/qibla')) {
       return 2;
     }
     if (location.startsWith('/settings') ||
         location == '/support' ||
         location == '/premium') {
-      return 4;
+      return null;
     }
     return null;
   }

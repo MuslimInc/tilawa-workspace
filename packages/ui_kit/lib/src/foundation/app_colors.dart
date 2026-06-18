@@ -3,20 +3,18 @@ import 'package:flutter/material.dart';
 /// Centralized app color constants.
 ///
 /// The Tilawa palette is intentionally **small and calm**:
-/// one **brand-locked** accent ([primarySage] `#219653`), a quiet cool
-/// neutral surface ramp anchored on [lightSurfaceContainerHighBase]
-/// `#E5E7EB`, and a handful of semantic colors. Decorative tones, parallel
-/// "category hues", and most decorative gradients have been removed so the UI
-/// feels premium without competing with content. The launch flow keeps a
-/// dedicated brand gradient via [brandGradientTop] → [brandGradientBottom].
+/// one **brand-locked** warm-brown accent ([primaryBrown] `#8B5E3C`), a
+/// parchment neutral surface ramp anchored on [lightCanvas] `#FFFBF5`, and a
+/// handful of semantic colors. Featured surfaces (Last Read, surah headers)
+/// use the gold gradient [featuredGradientStart] → [featuredGradientEnd].
+/// The launch flow keeps a dedicated brand gradient via [brandGradientTop] →
+/// [brandGradientBottom].
 ///
-/// **Brand lock.** As of the Islamic-brand initiative, the runtime primary
-/// is fixed to Sage (`#219653`) for production builds. The other preset
-/// hexes (`primaryCoral`, `primaryTeal`, `primaryGold`, `primaryBrown`,
-/// `primaryPurple`) are retained for two reasons: (1) the in-Settings color
-/// picker remains available behind `--dart-define=TILAWA_SHOW_COLOR_PICKER=true`
-/// for dev/QA palette work, and (2) legacy persisted user choices still need
-/// to deserialize without throwing. The runtime override lives in
+/// **Brand lock.** Production builds fix the runtime primary to warm brown
+/// (`#8B5E3C`). Legacy preset hexes (`primaryCoral`, `primaryTeal`,
+/// `primarySage`, `primaryGold`, `primaryPurple`) remain for dev/QA picker
+/// (`--dart-define=TILAWA_SHOW_COLOR_PICKER=true`) and persisted user choices.
+/// The runtime override lives in
 /// `apps/tilawa/lib/features/theme/presentation/theme_state_material.dart`.
 ///
 /// All hex values used by `AppTheme` to assemble `ColorScheme` live here
@@ -53,8 +51,11 @@ abstract final class AppColors {
   /// Forest green theme option (dev/QA picker; not gold).
   static const Color primaryGold = Color(0xFF2D6B47);
 
-  /// Warm brown theme option.
-  static const Color primaryBrown = Color(0xFF7B5E3B);
+  /// Warm brown — the brand-locked mockup accent (`#8B5E3C`).
+  static const Color primaryBrown = Color(0xFF8B5E3C);
+
+  /// Pressed / strong brown for shadows and emphasis (`#6B4A2E`).
+  static const Color primaryBrownDark = Color(0xFF6B4A2E);
 
   /// Green alias retained for saved theme migration.
   static const Color primaryGreen = primarySage;
@@ -64,40 +65,62 @@ abstract final class AppColors {
 
   /// Default primary color used throughout the app.
   ///
-  /// Brand-locked to [primarySage] per the Islamic-brand initiative. See the
-  /// class-level docstring for how the legacy presets are still wired for
-  /// dev/QA and persistence-compatibility purposes.
-  static const Color defaultPrimary = primarySage;
+  /// Brand-locked to [primaryBrown] per the warm parchment visual system.
+  static const Color defaultPrimary = primaryBrown;
 
   /// Top stop for the brand launch gradient.
-  static const Color brandGradientTop = Color(0xFF447339);
+  static const Color brandGradientTop = Color(0xFFD9924A);
 
   /// Bottom stop for the brand launch gradient.
-  static const Color brandGradientBottom = defaultPrimary;
+  static const Color brandGradientBottom = primaryBrownDark;
 
-  /// Top-start stop for the Home hero **day** phase — morning sky (`#5BA3D4`).
-  static const Color homeNextPrayerGradientTop = Color(0xFF5BA3D4);
+  /// Featured-card gold gradient — top (`#FFD28E`).
+  static const Color featuredGradientStart = Color(0xFFFFD28E);
 
-  /// Bottom-end stop for the Home hero **day** phase — deep sky (`#143D61`).
-  static const Color homeNextPrayerGradientBottom = Color(0xFF143D61);
+  /// Featured-card gold gradient — bottom (`#FF9E44`).
+  static const Color featuredGradientEnd = Color(0xFFFF9E44);
 
-  /// Top-start stop for the Home hero **dusk** phase — sunset gold (`#D9924A`).
-  static const Color homeNextPrayerGradientDuskTop = Color(0xFFD9924A);
+  /// Foreground on featured gold gradients (`#4A2F1A`).
+  static const Color featuredGradientForeground = Color(0xFF4A2F1A);
 
-  /// Bottom-end stop for the Home hero **dusk** phase — warm plum (`#442232`).
-  static const Color homeNextPrayerGradientDuskBottom = Color(0xFF442232);
+  /// Surah header banner — top (`#F5EDE0`).
+  static const Color surahHeaderGradientTop = Color(0xFFF5EDE0);
 
-  /// Top-start stop for the Home hero **night** phase — twilight indigo (`#45588C`).
-  static const Color homeNextPrayerGradientNightTop = Color(0xFF45588C);
+  /// Surah header banner — bottom (`#EDE4D4`).
+  static const Color surahHeaderGradientBottom = Color(0xFFEDE4D4);
 
-  /// Bottom-end stop for the Home hero **night** phase — midnight navy (`#121A38`).
-  static const Color homeNextPrayerGradientNightBottom = Color(0xFF121A38);
+  /// Qibla compass radial glow (`#FFE4B5`).
+  static const Color qiblaCompassGlow = Color(0xFFFFE4B5);
 
-  /// Foreground on the Home next-prayer hero gradient (`#FFFFFF`).
-  static const Color homeNextPrayerGradientForeground = Color(0xFFFFFFFF);
+  /// Instruction chip fill on Qibla screen (`#FFF0E0`).
+  static const Color instructionChipFill = Color(0xFFFFF0E0);
 
-  /// Launch / splash canvas — matches adaptive icon background (`#219653`).
-  static const Color launchSplashBackground = primarySage;
+  /// Top-start stop for the Home hero **day** phase — matches featured gold.
+  static const Color homeNextPrayerGradientTop = featuredGradientStart;
+
+  /// Bottom-end stop for the Home hero **day** phase.
+  static const Color homeNextPrayerGradientBottom = featuredGradientEnd;
+
+  /// Foreground on the Home hero gold gradient (day/dusk).
+  static const Color homeNextPrayerGradientForeground = featuredGradientForeground;
+
+  /// Top-start stop for the Home hero **dusk** phase — deeper gold (`#FFB86A`).
+  static const Color homeNextPrayerGradientDuskTop = Color(0xFFFFB86A);
+
+  /// Bottom-end stop for the Home hero **dusk** phase (`#E88A3A`).
+  static const Color homeNextPrayerGradientDuskBottom = Color(0xFFE88A3A);
+
+  /// Top-start stop for the Home hero **night** phase — warm brown (`#8B5E3C`).
+  static const Color homeNextPrayerGradientNightTop = primaryBrown;
+
+  /// Bottom-end stop for the Home hero **night** phase.
+  static const Color homeNextPrayerGradientNightBottom = primaryBrownDark;
+
+  /// Foreground on the Home hero **night** gradient (`#FFFFFF`).
+  static const Color homeNextPrayerGradientNightForeground = Color(0xFFFFFFFF);
+
+  /// Launch / splash canvas — matches warm brand brown.
+  static const Color launchSplashBackground = primaryBrown;
 
   /// Wordmark and progress on launch surfaces (`#FFFFFF`).
   static const Color launchSplashForeground = Color(0xFFFFFFFF);
@@ -107,16 +130,14 @@ abstract final class AppColors {
   static const double launchSplashLogoSize = 288;
 
   // ---------------------------------------------------------------------------
-  // Light neutral ramp — cool porcelain canvas + white cards
-  // (#F4F5F7 / #FFFFFF / slate ink). One temperature family end-to-end:
-  // the ramp matches the slate [lightInk] / [lightOutline] that were always
-  // cool. Do not mix warm and cool tones in adjacent light fills.
+  // Light neutral ramp — warm parchment canvas + white cards
+  // (#FFFBF5 / #FFFFFF / warm ink). One temperature family end-to-end.
   // ---------------------------------------------------------------------------
 
-  /// App canvas / scaffold — soft cool gray (`#F5F7F9`, Moneyloop-style).
+  /// App canvas / scaffold — warm off-white parchment (`#FFFBF5`).
   ///
   /// Cards use [lightSurface] (`#FFFFFF`) for quiet lift with soft shadows.
-  static const Color lightCanvas = Color(0xFFF5F7F9);
+  static const Color lightCanvas = Color(0xFFFFFBF5);
 
   /// Alias for scaffold assembly — same as [lightCanvas].
   static const Color lightBackground = lightCanvas;
@@ -124,26 +145,23 @@ abstract final class AppColors {
   /// Raised cards, sheets, dialogs, and app bars on the porcelain canvas.
   static const Color lightSurface = Color(0xFFFFFFFF);
 
-  /// Primary ink on surfaces (`#1C2534`) — softened navy, not pure black.
-  static const Color lightInk = Color(0xFF1C2534);
+  /// Primary ink on surfaces (`#30343C`).
+  static const Color lightInk = Color(0xFF30343C);
 
-  /// Body / secondary labels (`#4A5260`).
-  static const Color lightBody = Color(0xFF4A5260);
+  /// Body / secondary labels (`#30343C`).
+  static const Color lightBody = Color(0xFF30343C);
 
-  /// Muted labels (`#6B7280`) — Moneyloop-soft but readable on white and chips.
-  static const Color lightMute = Color(0xFF6B7280);
+  /// Muted labels (`#78736E`) — warm grey-brown metadata.
+  static const Color lightMute = Color(0xFF78736E);
 
-  /// Ash icons / hints (`#A0A8B5`).
-  static const Color lightAsh = Color(0xFFA0A8B5);
+  /// Ash icons / hints (`#A89B8A`).
+  static const Color lightAsh = Color(0xFFA89B8A);
 
-  /// Light upper container / idle chip — cool gray (`#E5E7EB`).
-  ///
-  /// Same lightness as the legacy warm Pinterest `secondary-bg` (`#E5E5E0`),
-  /// hue moved to the cool family with the canvas (2026-06-11).
+  /// Light upper container / idle chip — warm beige (`#F0E8DC`).
   ///
   /// Mapped to [ColorScheme.surfaceContainerHigh] in [AppTheme] without
-  /// primary harmonization so unselected controls stay neutral gray.
-  static const Color lightSurfaceContainerHighBase = Color(0xFFE5E7EB);
+  /// primary harmonization so unselected controls stay neutral.
+  static const Color lightSurfaceContainerHighBase = Color(0xFFF0E8DC);
 
   /// Alias for catalog chips and docs (same as [lightSurfaceContainerHighBase]).
   static const Color catalogFilterUnselectedLight =
@@ -166,14 +184,14 @@ abstract final class AppColors {
   /// Section / list canvas tier — matches [lightCanvas].
   static const Color lightSurfaceContainer = lightCanvas;
 
-  /// Light top container tier — cool hairline (`#DBDEE3`).
-  static const Color lightSurfaceContainerHighestBase = Color(0xFFDBDEE3);
+  /// Light top container tier — warm hairline (`#E8DFD0`).
+  static const Color lightSurfaceContainerHighestBase = Color(0xFFE8DFD0);
 
-  /// Hairline dividers (`#DBDEE3`, cool family with the canvas).
-  static const Color lightHairline = Color(0xFFDBDEE3);
+  /// Hairline dividers (`#E8DFD0`, warm family with the canvas).
+  static const Color lightHairline = Color(0xFFE8DFD0);
 
-  /// Default outline for fields and dividers (`#D0D7DE`).
-  static const Color lightOutline = Color(0xFFD0D7DE);
+  /// Default outline for fields and dividers (`#D9CFC0`).
+  static const Color lightOutline = Color(0xFFD9CFC0);
 
   // ---------------------------------------------------------------------------
   // Dark neutral ramp.
@@ -210,11 +228,11 @@ abstract final class AppColors {
   /// Light [ColorScheme.onSecondary].
   static const Color lightSchemeOnSecondary = lightInk;
 
-  /// Light [ColorScheme.primaryContainer] for the default sage primary.
-  static const Color lightSchemePrimaryContainer = Color(0xFFDCEFE4);
+  /// Light [ColorScheme.primaryContainer] for the default brown primary.
+  static const Color lightSchemePrimaryContainer = Color(0xFFF5E6D8);
 
-  /// Light [ColorScheme.onPrimaryContainer] for the default sage primary.
-  static const Color lightSchemeOnPrimaryContainer = Color(0xFF0D3522);
+  /// Light [ColorScheme.onPrimaryContainer] for the default brown primary.
+  static const Color lightSchemeOnPrimaryContainer = Color(0xFF4A2F1A);
 
   /// Light [ColorScheme.secondaryContainer].
   static const Color lightSchemeSecondaryContainer = lightSurfaceContainer;
@@ -229,7 +247,7 @@ abstract final class AppColors {
   static const Color lightTertiaryContainer = lightSurfaceContainer;
   static const Color lightSurfaceContainerMid = lightSurfaceContainer;
   static const Color lightOutlineVariant = lightHairline;
-  static const Color lightShadow = lightInk;
+  static const Color lightShadow = primaryBrownDark;
 
   /// Legacy alias — use [lightSchemeSecondaryContainer] for scheme assembly.
   static const Color lightSecondaryContainer = lightSchemeSecondaryContainer;
@@ -239,7 +257,7 @@ abstract final class AppColors {
   // ---------------------------------------------------------------------------
 
   /// Lifted companion of [defaultPrimary] for contrast on dark surfaces.
-  static const Color darkDefaultPrimary = Color(0xFF8AD4A8);
+  static const Color darkDefaultPrimary = Color(0xFFD4A574);
 
   /// Historical reference: dark primary container paired with
   /// [darkDefaultPrimary]. [AppTheme] derives it from selected primary instead.
@@ -306,8 +324,8 @@ abstract final class AppColors {
   /// Brand secondary used by FlexColorScheme assembly only.
   static const Color brandSecondary = lightSchemeSecondary;
 
-  /// Brand tertiary used by FlexColorScheme assembly only.
-  static const Color brandTertiary = lightBody;
+  /// Brand tertiary (Mushaf gold) used by FlexColorScheme assembly only.
+  static const Color brandTertiary = featuredGradientEnd;
 }
 
 /// Fixed “studio” palette for the **share audio / reel composer** (dark

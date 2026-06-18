@@ -242,6 +242,14 @@ const List<GalleryWidgetCoverage> galleryWidgetManifest = [
     galleryId: 'tilawa_hero_summary_card',
   ),
   GalleryWidgetCoverage(
+    symbol: 'BehanceFeaturedCardPattern',
+    galleryId: 'behance_featured_card',
+  ),
+  GalleryWidgetCoverage(
+    symbol: 'BehanceInstructionChipPattern',
+    galleryId: 'behance_instruction_chip',
+  ),
+  GalleryWidgetCoverage(
     symbol: 'TilawaNavDestination',
     skipReason: 'Shell destination model; shown in adaptive shell demo',
   ),

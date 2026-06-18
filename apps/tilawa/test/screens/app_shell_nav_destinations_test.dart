@@ -4,7 +4,7 @@ import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa/screens/app_shell_nav_destinations.dart';
 
 void main() {
-  testWidgets('phone shell nav lists five items without reciters tab', (
+  testWidgets('phone shell nav lists four Behance-style items', (
     tester,
   ) async {
     late AppLocalizations l10n;
@@ -24,15 +24,14 @@ void main() {
 
     final destinations = buildPhoneShellNavDestinations(l10n);
 
-    expect(destinations, hasLength(5));
+    expect(destinations, hasLength(4));
     expect(
       destinations.map((d) => d.label).toList(),
       [
         l10n.bottomNavHome,
-        l10n.bottomNavPrayer,
         l10n.bottomNavQuran,
+        l10n.bottomNavQibla,
         l10n.bottomNavAthkar,
-        l10n.bottomNavSettings,
       ],
     );
 
@@ -52,10 +51,9 @@ void main() {
       destinations.map((d) => d.semanticsIdentifier).toList(),
       [
         'home_tab',
-        'prayer_times_tab',
-        'quran_last_read_nav',
+        'quran_index_nav',
+        'qibla_tab',
         'athkar_tab',
-        'settings_tab',
       ],
     );
   });

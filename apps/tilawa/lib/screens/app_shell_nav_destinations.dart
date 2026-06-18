@@ -22,7 +22,7 @@ class AppShellNavDestination extends Equatable {
 
   /// [MainTabViewport] index when this item selects a shell tab.
   ///
-  /// `null` means a pushed route (Quran last-read) instead of a tab switch.
+  /// `null` means a pushed route (Quran index) instead of a tab switch.
   final int? tabIndex;
 
   final String? semanticsIdentifier;
@@ -40,10 +40,10 @@ class AppShellNavDestination extends Equatable {
   ];
 }
 
-/// Builds the five visible phone shell nav items.
+/// Builds the four visible phone shell nav items (Behance lifestyle IA).
 ///
-/// Reciters (viewport index 1) is intentionally omitted — reach it from Home
-/// More or programmatic tab selection.
+/// Order: Home → Quran (index push) → Qibla → Athkar.
+/// Reciters (viewport index 1) and Settings (index 4) are reached from Home.
 List<AppShellNavDestination> buildPhoneShellNavDestinations(
   AppLocalizations l10n,
 ) {
@@ -56,16 +56,16 @@ List<AppShellNavDestination> buildPhoneShellNavDestinations(
       semanticsIdentifier: 'home_tab',
     ),
     AppShellNavDestination(
-      tabIndex: 2,
-      icon: FluentIcons.clock_24_regular,
-      activeIcon: FluentIcons.clock_24_filled,
-      label: l10n.bottomNavPrayer,
-      semanticsIdentifier: 'prayer_times_tab',
-    ),
-    AppShellNavDestination(
       label: l10n.bottomNavQuran,
       icon: Icons.menu_book_rounded,
-      semanticsIdentifier: 'quran_last_read_nav',
+      semanticsIdentifier: 'quran_index_nav',
+    ),
+    AppShellNavDestination(
+      tabIndex: 2,
+      icon: FluentIcons.compass_northwest_24_regular,
+      activeIcon: FluentIcons.compass_northwest_24_filled,
+      label: l10n.bottomNavQibla,
+      semanticsIdentifier: 'qibla_tab',
     ),
     AppShellNavDestination(
       tabIndex: 3,
@@ -75,18 +75,14 @@ List<AppShellNavDestination> buildPhoneShellNavDestinations(
       label: l10n.bottomNavAthkar,
       semanticsIdentifier: 'athkar_tab',
     ),
-    AppShellNavDestination(
-      tabIndex: 4,
-      icon: FluentIcons.settings_24_regular,
-      activeIcon: FluentIcons.settings_24_filled,
-      label: l10n.bottomNavSettings,
-      semanticsIdentifier: 'settings_tab',
-    ),
   ];
 }
 
 /// Viewport tab indices not exposed on the phone bottom bar.
 const int kAppShellRecitersTabIndex = 1;
 
+/// Settings remains a shell tab (index 4) but is not on the phone bottom bar.
+const int kAppShellSettingsTabIndex = 4;
+
 /// Tab indices that appear on the phone bottom bar (excluding push-only Quran).
-const Set<int> kPhoneShellNavTabIndices = {0, 2, 3, 4};
+const Set<int> kPhoneShellNavTabIndices = {0, 2, 3};

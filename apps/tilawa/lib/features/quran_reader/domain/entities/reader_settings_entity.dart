@@ -9,6 +9,9 @@ enum QuranFontType { uthmani, indopak, simple }
 /// Reading mode
 enum ReadingMode { surah, page, juz }
 
+/// Primary Quran reader presentation (Mushaf images vs Behance ayah list).
+enum QuranReaderViewMode { mushaf, ayahList }
+
 /// Entity representing reader settings
 @freezed
 abstract class ReaderSettingsEntity with _$ReaderSettingsEntity {
@@ -26,6 +29,7 @@ abstract class ReaderSettingsEntity with _$ReaderSettingsEntity {
     @Default(null) int? lastReadSurah,
     @Default(null) int? lastReadAyah,
     @Default(null) int? lastReadPage,
+    @Default(QuranReaderViewMode.mushaf) QuranReaderViewMode viewMode,
   }) = _ReaderSettingsEntity;
   const ReaderSettingsEntity._();
 

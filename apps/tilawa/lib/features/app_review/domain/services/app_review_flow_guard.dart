@@ -42,16 +42,11 @@ class AppReviewFlowGuard {
     _tabFlows.clear();
   }
 
-  /// Keeps tab-owned sacred flows aligned with [MainScreen] index.
+  /// Keeps tab-owned sacred flows aligned with [MainScreen] viewport index.
   void syncMainShellTab(int tabIndex) {
-    _tabFlows
-      ..remove(AppReviewBlockedFlow.prayer)
-      ..remove(AppReviewBlockedFlow.athkar);
-    switch (tabIndex) {
-      case 1:
-        _tabFlows.add(AppReviewBlockedFlow.prayer);
-      case 2:
-        _tabFlows.add(AppReviewBlockedFlow.athkar);
+    _tabFlows.remove(AppReviewBlockedFlow.athkar);
+    if (tabIndex == 3) {
+      _tabFlows.add(AppReviewBlockedFlow.athkar);
     }
   }
 }

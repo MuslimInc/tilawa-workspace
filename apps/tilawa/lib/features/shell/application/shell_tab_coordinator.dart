@@ -1,5 +1,5 @@
 import 'package:tilawa/features/app_review/domain/entities/app_review_prompt_moment.dart';
-import 'package:tilawa/features/app_review/domain/entities/app_review_signal.dart';
+import 'package:tilawa/screens/app_shell_nav_destinations.dart';
 
 import '../domain/shell_tab_effect.dart';
 
@@ -27,27 +27,18 @@ class ShellTabCoordinator {
       SyncMainShellTabEffect(nextIndex),
     ];
 
-    if (previousIndex == 2 && nextIndex != 2) {
-      effects.add(
-        const RecordAppReviewSignalEffect(
-          AppReviewSignal.prayerTimesTabVisited,
-        ),
-      );
-      if (nextIndex == 1) {
-        effects.add(
-          const TryAppReviewPromptEffect(
-            AppReviewPromptMoment.leftPrayerTimesTab,
-          ),
-        );
-      }
-    }
-
-    if (previousIndex == 3 && nextIndex == 1) {
+    if (previousIndex == 3 && nextIndex == kAppShellRecitersTabIndex) {
       effects.add(
         const TryAppReviewPromptEffect(
           AppReviewPromptMoment.returnedToRecitersTab,
         ),
       );
+    }
+
+    if (nextIndex == kAppShellRecitersTabIndex) {
+      effects.add(const MaybeTryLeftPrayerRecitersPromptEffect());
+    } else if (previousIndex != nextIndex) {
+      effects.add(const CancelLeftPrayerRecitersPromptEffect());
     }
 
     return effects;

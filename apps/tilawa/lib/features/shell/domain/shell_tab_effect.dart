@@ -33,3 +33,13 @@ final class TryAppReviewPromptEffect extends ShellTabEffect {
 final class StartAppReviewSessionEffect extends ShellTabEffect {
   const StartAppReviewSessionEffect();
 }
+
+/// Attempts [AppReviewPromptMoment.leftPrayerTimesTab] after a prayer visit.
+final class MaybeTryLeftPrayerRecitersPromptEffect extends ShellTabEffect {
+  const MaybeTryLeftPrayerRecitersPromptEffect();
+}
+
+/// Drops a pending post-prayer review prompt on non-reciters tab changes.
+final class CancelLeftPrayerRecitersPromptEffect extends ShellTabEffect {
+  const CancelLeftPrayerRecitersPromptEffect();
+}

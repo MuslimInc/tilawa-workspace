@@ -3,7 +3,7 @@
 Design system snapshot for **Tilawa UI Kit** (`packages/ui_kit`) and the **Tilawa app** (`apps/tilawa`). This document is for humans and coding agents. Implementation truth lives in code; update this file when tokens or theme behavior change in meaningful ways.
 
 **Companion:** `AGENTS.md` (how to build). This file is how the product should **look and feel**.
-**Brand intent layer:** [`docs/tilawa_brand.md`](docs/tilawa_brand.md) — names Tilawa's Islamic-brand roles on top of the tokens here (Mushaf gold, scholarly sage, parchment, hairline grammar). When intent and implementation conflict, this file wins on implementation; [`docs/tilawa_brand.md`](docs/tilawa_brand.md) wins on intent.
+**Brand intent layer:** [`docs/tilawa_brand.md`](docs/tilawa_brand.md) — Behance warm lifestyle reference (parchment, brown ink, gold featured cards). When intent and implementation conflict, this file wins on implementation; [`docs/tilawa_brand.md`](docs/tilawa_brand.md) wins on intent.
 **Voluntary support (monetization UX):** [`specs/016-support-tilawa/spec.md`](specs/016-support-tilawa/spec.md) — product ethics and entry points; [`packages/ui_kit/docs/support_visual_system.md`](packages/ui_kit/docs/support_visual_system.md) — support screen visuals.
 
 ---
@@ -11,7 +11,7 @@ Design system snapshot for **Tilawa UI Kit** (`packages/ui_kit`) and the **Tilaw
 ## 1. Visual theme and atmosphere
 
 - **Material 3** via **FlexColorScheme**: surfaces, containers, and component themes are assembled in `AppTheme` and refined with Tilawa-specific ramps (`AppColors`).
-- **Calm, content-first:** small palette, quiet neutrals, one **user-selectable primary** accent from **curated presets** (default **sage** `#219653`); optional **custom** primary appears **in the same primary-color list** in Settings and may be **soft-clamped in light mode** for contrast (see `AppTheme._safePrimaryForLight`). Surfaces are near-monochrome in light mode; dark mode uses a deep green-tinted neutral stack (with an optional **true-black / OLED** preset).
+- **Calm, content-first:** small palette, quiet warm neutrals, one **user-selectable primary** accent from **curated presets** (default **warm brown** `#8B5E3C`); optional **custom** primary appears **in the same primary-color list** in Settings and may be **soft-clamped in light mode** for contrast (see `AppTheme._safePrimaryForLight`). Surfaces are parchment cream in light mode; dark mode uses a deep green-tinted neutral stack (with an optional **true-black / OLED** preset).
 - **Readable for Arabic:** line-height token `textHeightLoose` supports dense script in readers and lists (see `TilawaDesignTokens`).
 - **Comfortable density:** `FlexColorScheme.comfortablePlatformDensity` (not compact VisualDensity).
 - **Premium depth:** layered shadows (`opacityShadow` / `opacityShadowStrong`), optional **glass** tokens (`blurGlass`, `opacityGlass`) for overlays and chrome — use consistently, not everywhere.
@@ -22,15 +22,15 @@ Design system snapshot for **Tilawa UI Kit** (`packages/ui_kit`) and the **Tilaw
 
 ### User-selectable primary (accent)
 
-Offered in app settings (`PrimaryColorPreset`). Default aligns with launch logo foreground and brand primary **sage** `#219653`. **Custom** hex is the last row in the primary-color sheet; extreme values may be adjusted in light theme for readability.
+Offered in app settings (`PrimaryColorPreset`). Default aligns with the warm mockup brown **#8B5E3C**. **Custom** hex is the last row in the primary-color sheet; extreme values may be adjusted in light theme for readability.
 
 | Preset | Hex (reference) | Notes |
 |--------|-----------------|--------|
 | Coral | `#E60023` | Accent option; use sparingly |
 | Teal | `#1AADC5` | Legacy Tilawa brand teal |
-| Sage (default) | `#219653` | Scholarly green; default app primary |
-| Forest (picker) | `#2D6B47` | Dev/QA preset; deep green, not gold |
-| Brown | `#7B5E3B` | Warm neutral accent |
+| Sage | `#219653` | Scholarly green; legacy preset |
+| Forest (picker) | `#2D6B47` | Dev/QA preset; deep green |
+| Brown (default) | `#8B5E3C` | Warm mockup brown; brand-locked |
 | Purple | `#7A5C89` | Muted purple |
 
 Additional constants exist in `AppColors` (e.g. gold) for Flex **secondary/tertiary** assembly or migration; product UI should use **`ColorScheme`**, not copy arbitrary hexes.
@@ -46,21 +46,22 @@ Additional constants exist in `AppColors` (e.g. gold) for Flex **secondary/terti
 Dark success/warning are brightness-tuned in `TilawaStatusColors` so status
 borders and icons clear WCAG 3:1 on green-tinted surfaces.
 
-### Neutral surfaces (light) — cool porcelain catalog chrome
+### Neutral surfaces (light) — warm parchment canvas
 
-Light surfaces are **not** primary-harmonized: idle controls stay cool neutral
-gray so sage/teal accents do not tint search fields or filter chips.
+Light surfaces use a **warm parchment** family — cream canvas, white cards, beige idle chips.
 
 | Token / role | Hex (base) | Notes |
 |--------------|------------|--------|
-| Canvas / scaffold | `#F4F5F7` | `lightCanvas` / `lightBackground` |
+| Canvas / scaffold | `#FFFBF5` | `lightCanvas` / `lightBackground` |
 | Surface (cards, sheets) | `#FFFFFF` | `lightSurface` |
-| Ink / onSurface | `#0F172A` | `lightInk` |
-| Body / mute / ash | `#30343C`, `#5F6470`, `#8F949E` | Secondary copy |
-| Container | `#F4F5F7` | `lightSurfaceContainer` (matches canvas) |
-| High (idle chips, search fill) | `#E5E7EB` | `lightSurfaceContainerHighBase` → `surfaceContainerHigh` |
-| Highest / hairline | `#DBDEE3` | Dividers, `outlineVariant` |
-| Outline (strong) | `#D0D7DE` | `lightOutline` |
+| Ink / onSurface | `#30343C` | `lightInk` |
+| Body / mute / ash | `#30343C`, `#78736E`, `#A89B8A` | Secondary copy |
+| Container | `#FFFBF5` | `lightSurfaceContainer` (matches canvas) |
+| High (idle chips, search fill) | `#F0E8DC` | `lightSurfaceContainerHighBase` → `surfaceContainerHigh` |
+| Highest / hairline | `#E8DFD0` | Dividers, `outlineVariant` |
+| Outline (strong) | `#D9CFC0` | `lightOutline` |
+
+Featured cards (Last Read) use gold gradient `#FFD28E` → `#FF9E44` via `AppColors.featuredGradientStart` / `featuredGradientEnd`.
 
 See [`packages/ui_kit/docs/design_system.md`](packages/ui_kit/docs/design_system.md) and [`specs/017-catalog-theme-freeze/spec.md`](specs/017-catalog-theme-freeze/spec.md).
 
@@ -138,7 +139,7 @@ List and catalog screens use **`TilawaCatalogAppBar`** (`packages/ui_kit/lib/src
 - **Title:** left-aligned, bold `titleLarge`.
 - **Heights:** `TilawaAppBarConfig.catalogTitleOnlyHeight`, `catalogTitleAndSearchHeight`, `catalogTitleSearchAndFilterRowHeight` — `preferredSize` must match laid-out content (device-pixel ceil).
 - **Search:** `TilawaSearchField` (default **catalog** variant); white `surface` fill and hairline border — not primary-tinted.
-- **Filters:** `TilawaSelectionPillStyle.catalog` — selected `onSurface` / unselected `surfaceContainerHigh`.
+- **Filters:** `TilawaSelectionPillStyle.catalog` — selected `primary` fill + `onPrimary` label; unselected `surfaceContainerHigh`.
 - **Back on pushed routes:** `automaticallyImplyLeading: true` and `onBackPressed: () => context.pop()` with GoRouter; compact leading via `TilawaAppBarChrome.resolveCatalogRowLeading`.
 
 **Accent discipline:** user primary is for CTAs, active nav, favorites, switch ON — **not** catalog search/chip/app-bar backgrounds.
@@ -293,6 +294,8 @@ Short prompts that align outputs with this repo:
 ## 14. External design references
 
 **Canonical for Tilawa:** this file (`DESIGN.md` at repo root) plus code in `packages/ui_kit`.
+
+**Primary external moodboard (2026):** [Behance — Islamic App Mobile UI/UX Design for Muslim Lifestyle](https://www.behance.net/gallery/230050359/Islamic-App-Mobile-UIUX-Design-for-Muslim-Lifestyle) — warm parchment, brown ink, gold featured cards. See [`docs/tilawa_brand.md`](docs/tilawa_brand.md).
 
 **Local library:** the `design-md/` directory is a snapshot of
 [VoltAgent/awesome-design-md](https://github.com/VoltAgent/awesome-design-md)

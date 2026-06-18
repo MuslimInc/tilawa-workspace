@@ -20,8 +20,8 @@ void main() {
       radiusExtraLarge: 10.0,
       radiusHero: 12.0,
       opacitySubtle: 0.1,
-      opacityShadow: 0.05,
-      opacityShadowStrong: 0.08,
+      opacityShadow: 0.12,
+      opacityShadowStrong: 0.18,
       opacityMedium: 0.3,
       opacityEmphasis: 0.7,
       opacityGlass: 0.8,
@@ -73,12 +73,12 @@ void main() {
         expect(light.spaceExtraLarge, 24.0);
         expect(light.radiusSmall, 8.0);
         expect(light.radiusMedium, 12.0);
-        expect(light.radiusLarge, 16.0);
+        expect(light.radiusLarge, 20.0);
         expect(light.radiusExtraLarge, 24.0);
         expect(light.radiusHero, 28.0);
         expect(light.opacitySubtle, 0.1);
-        expect(light.opacityShadow, 0.05);
-        expect(light.opacityShadowStrong, 0.08);
+        expect(light.opacityShadow, 0.12);
+        expect(light.opacityShadowStrong, 0.18);
         expect(light.opacityMedium, 0.3);
         expect(light.opacityEmphasis, 0.7);
         expect(light.opacityGlass, 0.8);
@@ -790,8 +790,8 @@ void main() {
     group('TilawaRadiusResolverX', () {
       test('semantic radius aliases map to token caps', () {
         final tokens = TilawaDesignTokens.light();
-        expect(tokens.radiusCard, 16.0);
-        expect(tokens.radiusSection, 16.0);
+        expect(tokens.radiusCard, 24.0);
+        expect(tokens.radiusSection, 24.0);
         expect(tokens.radiusPill(48), 24.0);
         expect(tokens.radiusIcon(44), 22.0);
       });
@@ -800,7 +800,7 @@ void main() {
         final tokens = TilawaDesignTokens.light();
         expect(
           tokens.resolveRadius(family: TilawaRadiusFamily.card),
-          16.0,
+          24.0,
         );
         expect(
           tokens.resolveRadius(family: TilawaRadiusFamily.pill),
@@ -808,11 +808,11 @@ void main() {
         );
         expect(
           tokens.resolveRadius(family: TilawaRadiusFamily.chrome),
-          16.0,
+          20.0,
         );
         expect(
           tokens.resolveRadius(family: TilawaRadiusFamily.section),
-          16.0,
+          24.0,
         );
         expect(
           tokens.resolveRadius(family: TilawaRadiusFamily.hero),
@@ -856,8 +856,8 @@ void main() {
           itemHeight: 32,
           containerPadding: 4,
         );
-        expect(radii.containerRadius, 16.0);
-        expect(radii.itemRadius, 12.0);
+        expect(radii.containerRadius, 20.0);
+        expect(radii.itemRadius, 16.0);
       });
 
       test('resolveSegmentedControlRadii uses pill track height when requested', () {

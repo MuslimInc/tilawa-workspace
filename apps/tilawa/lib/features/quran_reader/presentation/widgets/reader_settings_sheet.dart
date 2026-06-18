@@ -1,8 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'package:tilawa/core/extensions.dart';
+import '../cubit/quran_settings_cubit.dart';
+import '../../domain/constants/quran_translation_catalog.dart';
 import '../../domain/entities/entities.dart';
+
+Future<void> showReaderSettingsSheet({
+  required BuildContext context,
+  required QuranSettingsCubit settingsCubit,
+}) {
+  final ThemeData theme = Theme.of(context);
+
+  return showTilawaModalBottomSheet<void>(
+    context: context,
+    backgroundColor: theme.colorScheme.surface,
+    shape: TilawaBottomSheetScaffold.modalShape(context),
+    builder: (sheetContext) {
+      return BlocProvider<QuranSettingsCubit>.value(
+        value: settingsCubit,
+        child: BlocBuilder<QuranSettingsCubit, ReaderSettingsEntity>(
+          builder: (context, settings) {
+            return ReaderSettingsSheet(
+              settings: settings,
+              onSettingsChanged: settingsCubit.update,
+            );
+          },
+        ),
+      );
+    },
+  );
+}
 
 class ReaderSettingsSheet extends StatefulWidget {
   const ReaderSettingsSheet({
@@ -27,11 +56,23 @@ class _ReaderSettingsSheetState extends State<ReaderSettingsSheet> {
     _settings = widget.settings;
   }
 
+  @override
+  void didUpdateWidget(ReaderSettingsSheet oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.settings != widget.settings) {
+      _settings = widget.settings;
+    }
+  }
+
   void _updateSettings(ReaderSettingsEntity newSettings) {
     setState(() {
       _settings = newSettings;
     });
     widget.onSettingsChanged(newSettings);
+  }
+
+  void _close() {
+    Navigator.of(context).pop();
   }
 
   @override
@@ -40,137 +81,129 @@ class _ReaderSettingsSheetState extends State<ReaderSettingsSheet> {
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
 
-    return DraggableScrollableSheet(
-      initialChildSize: 0.6,
-      minChildSize: 0.4,
-      maxChildSize: 0.9,
-      expand: false,
-      builder: (context, scrollController) {
-        return Container(
-          decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius: BorderRadius.vertical(
-              top: Radius.circular(tokens.radiusExtraLarge),
-            ),
-            border: Border(
-              top: BorderSide(
-                color: colorScheme.outlineVariant.withValues(alpha: 0.35),
-                width: tokens.borderWidthThin,
-              ),
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: context.viewportHeight * 0.86,
+      ),
+      child: SafeArea(
+        top: false,
+        child: TilawaBottomSheetScaffold(
+          topBar: Text(
+            context.l10n.readerSettings,
+            style: theme.textTheme.titleLarge?.copyWith(
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.w800,
             ),
           ),
-          child: Column(
-            children: [
-              const TilawaSheetHandle(),
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                  tokens.spaceLarge,
-                  tokens.spaceSmall,
-                  tokens.spaceLarge,
-                  tokens.spaceMedium,
-                ),
-                child: Text(
-                  context.l10n.readerSettings,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    color: colorScheme.onSurface,
-                    fontWeight: FontWeight.w800,
+          betweenTopBarAndBody: const [TilawaDivider(height: 1)],
+          footer: TilawaBottomSheetActions(
+            primaryLabel: context.l10n.done,
+            onPrimary: _close,
+          ),
+          children: [
+            Flexible(
+              child: ListView(
+                shrinkWrap: true,
+                padding: TilawaBottomSheetScaffold.resolvedBodyPadding(context),
+                children: [
+                  _buildSectionTitle(context, context.l10n.fontSize),
+                  Slider(
+                    value: _settings.fontSize,
+                    min: 16,
+                    max: 40,
+                    divisions: 12,
+                    label: _settings.fontSize.round().toString(),
+                    onChanged: (value) {
+                      _updateSettings(_settings.copyWith(fontSize: value));
+                    },
                   ),
-                ),
+                  SizedBox(height: tokens.spaceLarge),
+                  _buildSectionTitle(context, context.l10n.lineHeight),
+                  Slider(
+                    value: _settings.lineHeight,
+                    min: 1.2,
+                    max: 2.5,
+                    divisions: 13,
+                    label: _settings.lineHeight.toStringAsFixed(1),
+                    onChanged: (value) {
+                      _updateSettings(_settings.copyWith(lineHeight: value));
+                    },
+                  ),
+                  SizedBox(height: tokens.spaceLarge),
+                  _buildSectionTitle(context, context.l10n.fontType),
+                  SegmentedButton<QuranFontType>(
+                    segments: QuranFontType.values.map((type) {
+                      return ButtonSegment(
+                        value: type,
+                        label: Text(type.displayName),
+                      );
+                    }).toList(),
+                    selected: {_settings.fontType},
+                    onSelectionChanged: (selection) {
+                      _updateSettings(
+                        _settings.copyWith(fontType: selection.first),
+                      );
+                    },
+                  ),
+                  SizedBox(height: tokens.spaceExtraLarge),
+                  _buildSectionTitle(context, context.l10n.displayOptions),
+                  TilawaCatalogSettingsSwitchRow(
+                    title: context.l10n.showTranslation,
+                    value: _settings.showTranslation,
+                    onChanged: (value) {
+                      _updateSettings(
+                        _settings.copyWith(showTranslation: value),
+                      );
+                    },
+                  ),
+                  if (_settings.showTranslation &&
+                      QuranTranslationCatalog.hasBundledTranslation(
+                        _settings.translationLanguage,
+                      ))
+                    Padding(
+                      padding: EdgeInsetsDirectional.fromSTEB(
+                        tokens.spaceMedium,
+                        0,
+                        tokens.spaceMedium,
+                        tokens.spaceSmall,
+                      ),
+                      child: Text(
+                        context.l10n.quranTranslationAttribution(
+                          QuranTranslationCatalog.translationName(
+                            _settings.translationLanguage,
+                          ),
+                          QuranTranslationCatalog.qulSourceName,
+                        ),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  TilawaCatalogSettingsSwitchRow(
+                    title: context.l10n.showAyahNumbers,
+                    value: _settings.showAyahNumbers,
+                    onChanged: (value) {
+                      _updateSettings(
+                        _settings.copyWith(showAyahNumbers: value),
+                      );
+                    },
+                  ),
+                  TilawaCatalogSettingsSwitchRow(
+                    title: context.l10n.showTransliteration,
+                    value: _settings.showTransliteration,
+                    onChanged: (value) {
+                      _updateSettings(
+                        _settings.copyWith(showTransliteration: value),
+                      );
+                    },
+                  ),
+                ],
               ),
-
-              const TilawaDivider(),
-
-              // Settings list
-              Expanded(
-                child: ListView(
-                  controller: scrollController,
-                  padding: EdgeInsets.all(tokens.spaceLarge),
-                  children: [
-                    // Font size
-                    _buildSectionTitle(context, context.l10n.fontSize),
-                    Slider(
-                      value: _settings.fontSize,
-                      min: 16,
-                      max: 40,
-                      divisions: 12,
-                      label: _settings.fontSize.round().toString(),
-                      onChanged: (value) {
-                        _updateSettings(_settings.copyWith(fontSize: value));
-                      },
-                    ),
-
-                    SizedBox(height: tokens.spaceLarge),
-
-                    // Line height
-                    _buildSectionTitle(context, context.l10n.lineHeight),
-                    Slider(
-                      value: _settings.lineHeight,
-                      min: 1.2,
-                      max: 2.5,
-                      divisions: 13,
-                      label: _settings.lineHeight.toStringAsFixed(1),
-                      onChanged: (value) {
-                        _updateSettings(_settings.copyWith(lineHeight: value));
-                      },
-                    ),
-
-                    SizedBox(height: tokens.spaceLarge),
-
-                    // Font type
-                    _buildSectionTitle(context, context.l10n.fontType),
-                    SegmentedButton<QuranFontType>(
-                      segments: QuranFontType.values.map((type) {
-                        return ButtonSegment(
-                          value: type,
-                          label: Text(type.displayName),
-                        );
-                      }).toList(),
-                      selected: {_settings.fontType},
-                      onSelectionChanged: (selection) {
-                        _updateSettings(
-                          _settings.copyWith(fontType: selection.first),
-                        );
-                      },
-                    ),
-
-                    SizedBox(height: tokens.spaceExtraLarge),
-
-                    // Display options
-                    _buildSectionTitle(context, context.l10n.displayOptions),
-                    SwitchListTile(
-                      title: Text(context.l10n.showTranslation),
-                      value: _settings.showTranslation,
-                      onChanged: (value) {
-                        _updateSettings(
-                          _settings.copyWith(showTranslation: value),
-                        );
-                      },
-                    ),
-                    SwitchListTile(
-                      title: Text(context.l10n.showAyahNumbers),
-                      value: _settings.showAyahNumbers,
-                      onChanged: (value) {
-                        _updateSettings(
-                          _settings.copyWith(showAyahNumbers: value),
-                        );
-                      },
-                    ),
-                    SwitchListTile(
-                      title: Text(context.l10n.showTransliteration),
-                      value: _settings.showTransliteration,
-                      onChanged: (value) {
-                        _updateSettings(
-                          _settings.copyWith(showTransliteration: value),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+            ),
+          ],
+        ),
+      ),
     );
   }
 

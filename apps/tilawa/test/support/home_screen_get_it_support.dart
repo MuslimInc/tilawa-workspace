@@ -1,23 +1,27 @@
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:get_it/get_it.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:tilawa/features/athkar/domain/entities/athkar_category.dart';
 import 'package:tilawa/features/athkar/domain/entities/athkar_item.dart';
 import 'package:tilawa/features/athkar/domain/entities/pinned_athkar_preference.dart';
 import 'package:tilawa/features/athkar/domain/repositories/athkar_repository.dart';
 import 'package:tilawa/features/athkar/domain/repositories/pinned_athkar_repository.dart';
+import 'package:tilawa/features/athkar/domain/usecases/get_athkar_by_category_use_case.dart';
 import 'package:tilawa/features/athkar/domain/usecases/get_athkar_categories_use_case.dart';
 import 'package:tilawa/features/athkar/domain/usecases/get_pinned_athkar_preference_use_case.dart';
 import 'package:tilawa/features/athkar/domain/usecases/save_pinned_athkar_category_ids_use_case.dart';
+import 'package:tilawa/features/athkar/presentation/cubit/athkar_cubit.dart';
+import 'package:tilawa/features/athkar/presentation/cubit/pinned_athkar_cubit.dart';
+import 'package:tilawa/features/auth/domain/entities/auth_result.dart';
+import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
+import 'package:tilawa/features/auth/domain/repositories/auth_repository.dart';
+import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.dart';
 import 'package:tilawa/features/home/domain/entities/home_layout_mode.dart';
 import 'package:tilawa/features/home/domain/repositories/home_layout_preference_repository.dart';
 import 'package:tilawa/features/home/domain/usecases/get_home_layout_mode_use_case.dart';
 import 'package:tilawa/features/home/domain/usecases/set_home_layout_mode_use_case.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_layout_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_quran_resume_cubit.dart';
-import 'package:tilawa/features/auth/domain/entities/auth_result.dart';
-import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
-import 'package:tilawa/features/auth/domain/repositories/auth_repository.dart';
-import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.dart';
 import 'package:tilawa/features/prayer_times/application/prayer_location_update_notifier.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/entities.dart';
 import 'package:tilawa/features/prayer_times/domain/repositories/prayer_times_repository.dart';
@@ -27,8 +31,11 @@ import 'package:tilawa/features/prayer_times/domain/usecases/get_prayer_times_us
 import 'package:tilawa/features/prayer_times/domain/usecases/load_prayer_settings_use_case.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/notify_prayer_location_updated_use_case.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/save_prayer_settings_use_case.dart';
+import 'package:tilawa/features/qibla/presentation/bloc/qibla_bloc.dart';
+import 'package:tilawa/features/quran_reader/domain/usecases/get_last_read_position_use_case.dart';
 import 'package:tilawa_core/core.dart';
-import 'package:tilawa_core/utils/typedefs.dart';
+
+class _MockQiblaBloc extends Mock implements QiblaBloc {}
 
 class _FakeAuthRepository implements AuthRepository {
   @override
@@ -140,9 +147,11 @@ class _FakePinnedAthkarRepository implements PinnedAthkarRepository {
   }
 }
 
-/// Minimal [GetIt] registrations so [HomeScreenScope] mounts in widget tests.
+/// Minimal [GetIt] registrations so main-tab scopes mount in widget tests.
 void registerHomeScreenScopeGetIt(GetIt getIt) {
+  registerFallbackValue(const CheckLocationService());
   final prayerRepository = _FakePrayerTimesRepository();
+  final athkarRepository = _FakeAthkarRepository();
 
   getIt.registerSingleton<PrayerLocationUpdateNotifier>(
     PrayerLocationUpdateNotifier(),
@@ -172,7 +181,7 @@ void registerHomeScreenScopeGetIt(GetIt getIt) {
   );
   getIt.registerFactory<PinnedAthkarCubit>(
     () => PinnedAthkarCubit(
-      GetAthkarCategoriesUseCase(_FakeAthkarRepository()),
+      GetAthkarCategoriesUseCase(athkarRepository),
       GetPinnedAthkarPreferenceUseCase(_FakePinnedAthkarRepository()),
       SavePinnedAthkarCategoryIdsUseCase(_FakePinnedAthkarRepository()),
     ),
@@ -183,6 +192,32 @@ void registerHomeScreenScopeGetIt(GetIt getIt) {
       SetHomeLayoutModeUseCase(_FakeHomeLayoutPreferenceRepository()),
     ),
   );
+  getIt.registerFactory<HomeQuranResumeCubit>(
+    () => HomeQuranResumeCubit(_FakeGetLastReadPositionUseCase()),
+  );
+  getIt.registerFactory<AthkarCubit>(
+    () => AthkarCubit(
+      GetAthkarCategoriesUseCase(athkarRepository),
+      GetAthkarByCategoryUseCase(athkarRepository),
+    ),
+  );
+  getIt.registerFactory<QiblaBloc>(() {
+    final mock = _MockQiblaBloc();
+    when(() => mock.close()).thenAnswer((_) async {});
+    when(() => mock.state).thenReturn(const QiblaState());
+    when(() => mock.stream).thenAnswer((_) => const Stream.empty());
+    when(() => mock.add(any())).thenReturn(null);
+    when(() => mock.isClosed).thenReturn(false);
+    return mock;
+  });
+}
+
+class _FakeGetLastReadPositionUseCase implements GetLastReadPositionUseCase {
+  @override
+  Future<Either<Failure, ({int? surahNumber, int? ayahNumber, int? page})>>
+  call() async {
+    return const Right((surahNumber: null, ayahNumber: null, page: null));
+  }
 }
 
 class _FakeHomeLayoutPreferenceRepository

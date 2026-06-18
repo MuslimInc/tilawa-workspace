@@ -94,7 +94,7 @@ class DeepLinkResolver {
         if (surahNumber != null && surahNumber >= 1 && surahNumber <= 114) {
           return QuranReaderRoute(surahNumber: surahNumber).location;
         }
-        return const QuranLastReadRoute().location;
+        return const QuranIndexRoute().location;
       case 'settings':
         return const SettingsRoute().location;
       case 'prayer':

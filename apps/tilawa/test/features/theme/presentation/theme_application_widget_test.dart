@@ -42,7 +42,7 @@ Widget _themedApp({
 
 void main() {
   group('theme application widget', () {
-    testWidgets('light theme exposes tokens and porcelain scaffold', (
+    testWidgets('light theme exposes tokens and parchment scaffold', (
       WidgetTester tester,
     ) async {
       const state = ThemeState(mode: AppThemeMode.light);

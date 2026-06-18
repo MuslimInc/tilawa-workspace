@@ -156,6 +156,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeQuickQiblaSubtitle => 'اعرف اتجاه القبلة';
 
   @override
+  String get homeQuickSettingsSubtitle => 'المظهر والصوت والحساب';
+
+  @override
   String get homeQuickTasbeeh => 'المسبحة';
 
   @override
@@ -745,10 +748,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get bottomNavPrayer => 'الصلاة';
 
   @override
+  String get bottomNavQibla => 'القبلة';
+
+  @override
   String get bottomNavQuran => 'القرآن';
 
   @override
-  String get bottomNavAthkar => 'الأذكار';
+  String get bottomNavAthkar => 'الذكر';
 
   @override
   String get bottomNavSettings => 'الإعدادات';
@@ -1478,6 +1484,22 @@ class AppLocalizationsAr extends AppLocalizations {
   String get qiblaDirection => 'اتجاه القبلة';
 
   @override
+  String get qiblaFinderTitle => 'محدد القبلة';
+
+  @override
+  String get qiblaDeviceAngleLabel => 'زاوية الجهاز نحو القبلة';
+
+  @override
+  String qiblaRotatePhoneLeft(int degrees) {
+    return 'أدر الهاتف $degrees° إلى اليسار';
+  }
+
+  @override
+  String qiblaRotatePhoneRight(int degrees) {
+    return 'أدر الهاتف $degrees° إلى اليمين';
+  }
+
+  @override
   String get locationServiceDisabled => 'خدمة الموقع معطلة';
 
   @override
@@ -1943,6 +1965,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get showTranslation => 'إظهار الترجمة';
 
   @override
+  String quranTranslationAttribution(
+    String translationName,
+    String sourceName,
+  ) {
+    return 'الترجمة: $translationName ($sourceName)';
+  }
+
+  @override
   String get showAyahNumbers => 'إظهار أرقام الآيات';
 
   @override
@@ -2110,10 +2140,37 @@ class AppLocalizationsAr extends AppLocalizations {
   String get quran => 'القرآن الكريم';
 
   @override
+  String get quranHubTitle => 'القرآن';
+
+  @override
+  String get quranCatalogSectionTitle => 'القرآن الكريم';
+
+  @override
+  String get quranOpenMushaf => 'فتح المصحف';
+
+  @override
+  String get quranSwitchToAyahList => 'عرض قائمة الآيات';
+
+  @override
+  String get quranSwitchToMushaf => 'عرض المصحف';
+
+  @override
   String get continueReadingQuran => 'متابعة قراءة القرآن';
 
   @override
   String get surahIndex => 'فهرس السور';
+
+  @override
+  String get hijriCalendarTitle => 'التقويم الهجري';
+
+  @override
+  String get hijriCalendarOpenLabel => 'فتح التقويم الهجري';
+
+  @override
+  String get hijriCalendarPreviousMonth => 'الشهر السابق';
+
+  @override
+  String get hijriCalendarNextMonth => 'الشهر التالي';
 
   @override
   String surahCountLabel(int count) {

@@ -86,7 +86,7 @@ class AppTheme {
       primaryContainer: primaryContainer,
       secondary: AppColors.lightSchemeSecondary,
       secondaryContainer: AppColors.lightSchemeSecondaryContainer,
-      tertiary: AppColors.lightBody,
+      tertiary: AppColors.brandTertiary,
       tertiaryContainer: AppColors.lightTertiaryContainer,
       appBarColor: AppColors.lightSurface,
       error: AppColors.error,
@@ -239,20 +239,19 @@ class AppTheme {
       surfaceTint: Colors.transparent,
       surfaceContainerLowest: AppColors.lightCanvas,
       surfaceContainerLow: AppColors.lightSurface,
-      // Cool porcelain canvas + white card ramp. Fixed hexes — not harmonized
-      // toward [primary] — so chrome stays porcelain / white / #E5E7EB /
-      // slate ink.
+      // Warm parchment canvas + white card ramp. Fixed hexes — not harmonized
+      // toward [primary] — so chrome stays parchment / white / warm beige.
       surfaceContainer: AppColors.lightCanvas,
       surfaceContainerHigh: AppColors.lightSurfaceContainerHighBase,
       surfaceContainerHighest: AppColors.lightSurfaceContainerHighestBase,
-      tertiary: AppColors.lightBody,
-      onTertiary: AppColors.lightSurface,
-      tertiaryContainer: AppColors.lightTertiaryContainer,
-      onTertiaryContainer: AppColors.lightInk,
+      tertiary: AppColors.brandTertiary,
+      onTertiary: AppColors.featuredGradientForeground,
+      tertiaryContainer: AppColors.instructionChipFill,
+      onTertiaryContainer: AppColors.lightSchemeOnPrimaryContainer,
       outline: AppColors.lightOutline,
       outlineVariant: AppColors.lightOutlineVariant,
-      shadow: AppColors.lightShadow.withValues(alpha: 0.12),
-      scrim: AppColors.lightShadow.withValues(alpha: 0.24),
+      shadow: AppColors.lightShadow.withValues(alpha: 0.14),
+      scrim: AppColors.lightShadow.withValues(alpha: 0.28),
     );
   }
 

@@ -26,28 +26,28 @@ void main() {
     expect(guard.isSacredFlowActive, isFalse);
   });
 
-  test('syncMainShellTab enters prayer tab flow', () {
-    guard.syncMainShellTab(1);
-    expect(guard.activeFlows, contains(AppReviewBlockedFlow.prayer));
-    expect(guard.activeFlows, isNot(contains(AppReviewBlockedFlow.athkar)));
+  test('syncMainShellTab enters athkar tab flow', () {
+    guard.syncMainShellTab(3);
+    expect(guard.activeFlows, contains(AppReviewBlockedFlow.athkar));
+    expect(guard.activeFlows, isNot(contains(AppReviewBlockedFlow.prayer)));
   });
 
-  test('syncMainShellTab enters athkar tab flow', () {
+  test('syncMainShellTab does not block qibla tab', () {
     guard.syncMainShellTab(2);
-    expect(guard.activeFlows, contains(AppReviewBlockedFlow.athkar));
+    expect(guard.isSacredFlowActive, isFalse);
   });
 
   test('syncMainShellTab clears tab flows for home tab', () {
     guard
-      ..syncMainShellTab(1)
+      ..syncMainShellTab(3)
       ..syncMainShellTab(0);
     expect(guard.isSacredFlowActive, isFalse);
   });
 
   test('syncMainShellTab clears tab flows for settings tab', () {
     guard
-      ..syncMainShellTab(1)
-      ..syncMainShellTab(3);
+      ..syncMainShellTab(3)
+      ..syncMainShellTab(4);
     expect(guard.isSacredFlowActive, isFalse);
   });
 
@@ -64,7 +64,7 @@ void main() {
   test(
     'nested scope exit does not unblock while tab sacred flow is active',
     () {
-      guard.syncMainShellTab(2);
+      guard.syncMainShellTab(3);
       guard.enter(AppReviewBlockedFlow.athkar);
       expect(guard.isSacredFlowActive, isTrue);
       guard.exit(AppReviewBlockedFlow.athkar);

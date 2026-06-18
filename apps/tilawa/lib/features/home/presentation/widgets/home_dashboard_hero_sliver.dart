@@ -14,8 +14,10 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../debug/home_hero_gradient_debug.dart';
 import '../../domain/entities/home_dashboard.dart';
 import '../../domain/entities/home_prayer_day_boundaries.dart';
+import '../../domain/home_hijri_date_formatter.dart';
 import '../../domain/home_hero_gradient_resolver.dart';
 import '../bloc/home_dashboard_bloc.dart';
+import 'home_hijri_calendar_sheet.dart';
 import '../bloc/home_dashboard_event.dart';
 import '../bloc/home_dashboard_state.dart';
 import 'home_sliver_app_debug_log.dart';
@@ -25,7 +27,7 @@ abstract final class HomeDashboardHeroSliver {
   const HomeDashboardHeroSliver._();
 
   /// Greeting area inside the expanded app bar (below toolbar).
-  static const double _greetingBodyHeight = 60;
+  static const double _greetingBodyHeight = 88;
 
   /// Intrinsic prayer focus height (measured at default text scale).
   static const double _metricsContentHeight = 72;
@@ -797,8 +799,49 @@ class _HomeHeroHeader extends StatelessWidget {
       alpha: heroTokens.footerForegroundOpacity,
     );
     final String? displayName = dashboard?.displayName;
-    final String dateLine = MaterialLocalizations.of(context).formatFullDate(
-      DateTime.now(),
+    final DateTime now = DateTime.now();
+    final String hijriDateLine = formatHomeHijriDate(
+      date: now,
+      languageCode: Localizations.localeOf(context).languageCode,
+    );
+    final String gregorianDateLine = MaterialLocalizations.of(
+      context,
+    ).formatFullDate(now);
+
+    final Widget dateLines = Semantics(
+      button: true,
+      label: context.l10n.hijriCalendarOpenLabel,
+      child: InkWell(
+        onTap: () => showHomeHijriCalendarSheet(context),
+        borderRadius: BorderRadius.circular(tokens.radiusSmall),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              hijriDateLine,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: onGradient,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(height: tokens.spaceExtraSmall),
+            Text(
+              gregorianDateLine,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: onGradient.withValues(
+                  alpha: heroTokens.mutedForegroundOpacity,
+                ),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
 
     final Widget greeting = switch (displayName) {
@@ -817,17 +860,7 @@ class _HomeHeroHeader extends StatelessWidget {
             ),
           ),
           SizedBox(height: tokens.spaceExtraSmall),
-          Text(
-            dateLine,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: onGradient.withValues(
-                alpha: heroTokens.tertiaryForegroundOpacity,
-              ),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          dateLines,
         ],
       ),
       final name => Column(
@@ -858,17 +891,7 @@ class _HomeHeroHeader extends StatelessWidget {
             ),
           ),
           SizedBox(height: tokens.spaceExtraSmall),
-          Text(
-            dateLine,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: onGradient.withValues(
-                alpha: heroTokens.mutedForegroundOpacity,
-              ),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          dateLines,
         ],
       ),
     };

@@ -117,6 +117,7 @@
     "homeQuickPrayer": "الصلاة",
     "homeQuickQibla": "القبلة",
     "homeQuickQiblaSubtitle": "اعرف اتجاه القبلة",
+    "homeQuickSettingsSubtitle": "المظهر والصوت والحساب",
     "homeQuickTasbeeh": "المسبحة",
     "homeQuickTasbeehSubtitle": "عدّ الذكر بلمسة واحدة",
     "homeQuickAthkar": "الأذكار",
@@ -676,8 +677,9 @@
     "noRecitersForQuery": "لا يوجد نتائج لـ «{query}»",
     "recitersClearSearch": "مسح البحث",
     "bottomNavPrayer": "الصلاة",
+    "bottomNavQibla": "القبلة",
     "bottomNavQuran": "القرآن",
-    "bottomNavAthkar": "الأذكار",
+    "bottomNavAthkar": "الذكر",
     "bottomNavSettings": "الإعدادات",
     "audioSettings": "الصوتيات",
     "@audioSettings": {
@@ -1700,6 +1702,32 @@
     "@qiblaDirection": {
         "description": "Qibla direction screen title"
     },
+    "qiblaFinderTitle": "محدد القبلة",
+    "@qiblaFinderTitle": {
+        "description": "Centered uppercase title on the Qibla compass screen"
+    },
+    "qiblaDeviceAngleLabel": "زاوية الجهاز نحو القبلة",
+    "@qiblaDeviceAngleLabel": {
+        "description": "Subtitle below the compass degree readout"
+    },
+    "qiblaRotatePhoneLeft": "أدر الهاتف {degrees}° إلى اليسار",
+    "@qiblaRotatePhoneLeft": {
+        "description": "Instruction when the user should rotate left to align with Qibla",
+        "placeholders": {
+            "degrees": {
+                "type": "int"
+            }
+        }
+    },
+    "qiblaRotatePhoneRight": "أدر الهاتف {degrees}° إلى اليمين",
+    "@qiblaRotatePhoneRight": {
+        "description": "Instruction when the user should rotate right to align with Qibla",
+        "placeholders": {
+            "degrees": {
+                "type": "int"
+            }
+        }
+    },
     "locationServiceDisabled": "خدمة الموقع معطلة",
     "@locationServiceDisabled": {
         "description": "Error title when location service is disabled"
@@ -2303,6 +2331,18 @@
     "@showTranslation": {
         "description": "Show translation toggle label"
     },
+    "quranTranslationAttribution": "الترجمة: {translationName} ({sourceName})",
+    "@quranTranslationAttribution": {
+        "description": "Attribution line for the bundled Quran translation shown in reader settings",
+        "placeholders": {
+            "translationName": {
+                "type": "String"
+            },
+            "sourceName": {
+                "type": "String"
+            }
+        }
+    },
     "showAyahNumbers": "إظهار أرقام الآيات",
     "@showAyahNumbers": {
         "description": "Show ayah numbers toggle label"
@@ -2535,6 +2575,26 @@
     "@quran": {
         "description": "Quran section title"
     },
+    "quranHubTitle": "القرآن",
+    "@quranHubTitle": {
+        "description": "Centered title on the Quran hub screen"
+    },
+    "quranCatalogSectionTitle": "القرآن الكريم",
+    "@quranCatalogSectionTitle": {
+        "description": "Section heading above Surah/Juz/Page pills on the Quran hub"
+    },
+    "quranOpenMushaf": "فتح المصحف",
+    "@quranOpenMushaf": {
+        "description": "Opens the page-based Mushaf reader from the surah detail screen"
+    },
+    "quranSwitchToAyahList": "عرض قائمة الآيات",
+    "@quranSwitchToAyahList": {
+        "description": "Switch Quran reader from Mushaf pages to the Behance-style ayah list"
+    },
+    "quranSwitchToMushaf": "عرض المصحف",
+    "@quranSwitchToMushaf": {
+        "description": "Switch Quran reader from ayah list back to Mushaf pages"
+    },
     "continueReadingQuran": "متابعة قراءة القرآن",
     "@continueReadingQuran": {
         "description": "Button to continue reading Quran from last page"
@@ -2542,6 +2602,22 @@
     "surahIndex": "فهرس السور",
     "@surahIndex": {
         "description": "Title of the surah index sheet"
+    },
+    "hijriCalendarTitle": "التقويم الهجري",
+    "@hijriCalendarTitle": {
+        "description": "Title for the Hijri month calendar bottom sheet"
+    },
+    "hijriCalendarOpenLabel": "فتح التقويم الهجري",
+    "@hijriCalendarOpenLabel": {
+        "description": "Accessibility label for tapping the home hero Hijri date"
+    },
+    "hijriCalendarPreviousMonth": "الشهر السابق",
+    "@hijriCalendarPreviousMonth": {
+        "description": "Navigate to the previous Hijri month in the calendar sheet"
+    },
+    "hijriCalendarNextMonth": "الشهر التالي",
+    "@hijriCalendarNextMonth": {
+        "description": "Navigate to the next Hijri month in the calendar sheet"
     },
     "surahCountLabel": "{count} سورة",
     "@surahCountLabel": {

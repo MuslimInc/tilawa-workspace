@@ -321,6 +321,20 @@ const List<GalleryEntry> galleryCatalog = [
     description: 'Dashboard summary card with badges and progress footer.',
     builder: OrganismsDemos.heroSummaryCard,
   ),
+  GalleryEntry(
+    id: 'behance_featured_card',
+    name: 'Behance Featured Card',
+    category: GalleryCategory.organisms,
+    description: 'Warm gold gradient Last Read dashboard card pattern.',
+    builder: OrganismsDemos.behanceFeaturedCard,
+  ),
+  GalleryEntry(
+    id: 'behance_instruction_chip',
+    name: 'Behance Instruction Chip',
+    category: GalleryCategory.organisms,
+    description: 'Qibla rotation hint chip on parchment tertiary fill.',
+    builder: OrganismsDemos.behanceInstructionChip,
+  ),
 
   // Foundation
   GalleryEntry(

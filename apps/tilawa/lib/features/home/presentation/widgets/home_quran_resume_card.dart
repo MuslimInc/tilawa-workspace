@@ -42,7 +42,7 @@ class HomeQuranResumeCard extends StatelessWidget {
     if (_isFreshStart(state)) {
       return context.l10n.homeStartQuranTitle;
     }
-    return context.l10n.homeContinueQuranTitle;
+    return context.l10n.lastRead;
   }
 
   bool _isFreshStart(HomeQuranResumeState state) {
@@ -116,60 +116,86 @@ class _HomeQuranResumeReadyCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
+    final cardTokens = theme.componentTokens.homeDashboardCard;
+    final Color foreground = cardTokens.foregroundColor;
+    final Color mutedForeground = foreground.withValues(alpha: 0.72);
 
     return Semantics(
       button: true,
       label: title,
       value: subtitle,
       child: HomeDashboardCard(
+        useFeaturedGradient: true,
         surface: TilawaCardSurface.raised,
         onTap: () => const QuranLastReadRoute().push(context),
-        child: Row(
-          spacing: tokens.spaceMedium,
+        child: Stack(
+          clipBehavior: Clip.none,
           children: [
-            _HomeQuranLeadingIcon(progress: showProgress ? progress : null),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: tokens.spaceExtraSmall,
-                children: [
-                  Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      color: colorScheme.onSurface,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  Text(
-                    subtitle,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  if (showProgress && progress != null)
-                    Text(
-                      context.l10n.homeQuranResumeProgress(
-                        (progress! * 100).round(),
+            Row(
+              spacing: tokens.spaceMedium,
+              children: [
+                _HomeQuranLeadingIcon(
+                  progress: showProgress ? progress : null,
+                  foreground: foreground,
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: tokens.spaceExtraSmall,
+                    children: [
+                      Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: foreground,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: colorScheme.primary,
-                        fontWeight: FontWeight.w600,
+                      Text(
+                        subtitle,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: mutedForeground,
+                        ),
                       ),
-                    ),
-                ],
-              ),
+                      if (showProgress && progress != null)
+                        Text(
+                          context.l10n.homeQuranResumeProgress(
+                            (progress! * 100).round(),
+                          ),
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: foreground,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Directionality.of(context) == TextDirection.rtl
+                      ? Icons.chevron_left_rounded
+                      : Icons.chevron_right_rounded,
+                  color: mutedForeground,
+                  size: tokens.iconSizeSmall,
+                ),
+              ],
             ),
-            Icon(
-              Directionality.of(context) == TextDirection.rtl
-                  ? Icons.chevron_left_rounded
-                  : Icons.chevron_right_rounded,
-              color: colorScheme.onSurfaceVariant,
-              size: tokens.iconSizeSmall,
+            PositionedDirectional(
+              end: -tokens.spaceSmall,
+              top: -tokens.spaceSmall,
+              bottom: -tokens.spaceSmall,
+              child: IgnorePointer(
+                child: Opacity(
+                  opacity: 0.22,
+                  child: Icon(
+                    Icons.mosque_rounded,
+                    size: tokens.spaceExtraLarge * 2,
+                    color: foreground,
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -179,15 +205,18 @@ class _HomeQuranResumeReadyCard extends StatelessWidget {
 }
 
 class _HomeQuranLeadingIcon extends StatelessWidget {
-  const _HomeQuranLeadingIcon({required this.progress});
+  const _HomeQuranLeadingIcon({
+    required this.progress,
+    required this.foreground,
+  });
 
   final double? progress;
+  final Color foreground;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
     final double ringSize = tokens.spaceExtraLarge + tokens.spaceMedium;
 
     if (progress == null) {
@@ -195,6 +224,7 @@ class _HomeQuranLeadingIcon extends StatelessWidget {
         icon: Icons.menu_book_rounded,
         variant: TilawaIconBoxVariant.tinted,
         semanticTint: TilawaSemanticTint.ink,
+        iconColor: foreground,
       );
     }
 
@@ -207,8 +237,8 @@ class _HomeQuranLeadingIcon extends StatelessWidget {
           TilawaLoadingIndicator(
             centered: false,
             value: progress,
-            backgroundColor: colorScheme.surfaceContainerHighest,
-            color: colorScheme.primary,
+            backgroundColor: foreground.withValues(alpha: 0.16),
+            color: foreground,
           ),
           TilawaIconBox(
             icon: Icons.menu_book_rounded,
@@ -216,6 +246,7 @@ class _HomeQuranLeadingIcon extends StatelessWidget {
             padding: tokens.spaceExtraSmall,
             variant: TilawaIconBoxVariant.tinted,
             semanticTint: TilawaSemanticTint.ink,
+            iconColor: foreground,
           ),
         ],
       ),

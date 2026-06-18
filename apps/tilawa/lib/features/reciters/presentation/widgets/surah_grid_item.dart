@@ -64,25 +64,11 @@ class SurahGridItem extends StatelessWidget {
       }
     }
 
-    // Shared palette — same as SurahListTile and ReciterCard avatar.
-    final List<Color> bgPalette = [
-      colorScheme.primaryContainer,
-      colorScheme.secondaryContainer,
-      colorScheme.tertiaryContainer,
-      colorScheme.surfaceContainerHighest,
-    ];
-    final List<Color> fgPalette = [
-      colorScheme.onPrimaryContainer,
-      colorScheme.onSecondaryContainer,
-      colorScheme.onTertiaryContainer,
-      colorScheme.onSurfaceVariant,
-    ];
-    final Color idleBg = bgPalette[index % bgPalette.length].withValues(
-      alpha: tokens.opacityEmphasis,
-    );
-    final Color idleFg = fgPalette[index % fgPalette.length];
     final Color activeFill = ReciterCatalogChrome.activeFill(colorScheme);
     final Color activeOnFill = ReciterCatalogChrome.activeOnFill(colorScheme);
+    final Color idleBg = ReciterCatalogChrome.idleFill(colorScheme);
+    final Color idleFg = colorScheme.primary;
+    final double tileRadius = tokens.resolveRadius(family: TilawaRadiusFamily.card);
     // Badge fills the full card width so the number reads as a strong hero element.
     // Height is square with the badge width to keep the visual centred.
     final double badgeSize = tokens.iconSizeLarge + tokens.spaceExtraLarge;
@@ -93,7 +79,7 @@ class SurahGridItem extends StatelessWidget {
       ),
       button: true,
       child: TilawaCard(
-        surface: TilawaCardSurface.flat,
+        surface: TilawaCardSurface.raised,
         backgroundColor: isCurrentItem
             ? colorScheme.primaryContainer.withValues(
                 alpha: tokens.opacitySubtle * 2,
@@ -103,7 +89,7 @@ class SurahGridItem extends StatelessWidget {
         borderWidth: isCurrentItem
             ? tokens.borderWidthThin * 4
             : tokens.borderWidthThin,
-        borderRadius: tokens.radiusLarge,
+        borderRadius: tileRadius,
         padding: EdgeInsets.all(tokens.spaceMedium),
         onTap: handleTap,
         // Vertical layout: badge (top) → name+subtitle (middle) → download (bottom-end).

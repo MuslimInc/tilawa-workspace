@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -61,6 +59,8 @@ class _QiblaScreenState extends State<QiblaScreen> {
   Widget build(BuildContext context) {
     final isLandscape =
         MediaQuery.orientationOf(context) == Orientation.landscape;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Stack(
       children: [
@@ -76,16 +76,23 @@ class _QiblaScreenState extends State<QiblaScreen> {
             ToastUtils.showToast(msg: context.l10n.qiblaCompassAccuracyPoor);
           },
           child: Scaffold(
-            appBar: TilawaCatalogAppBar.titleOnly(
-              context,
-              title: context.l10n.qiblaDirection,
+            appBar: TilawaCatalogAppBar(
+              preferredHeight: TilawaAppBarConfig.catalogTitleOnlyHeight(context),
+              centerTitle: true,
+              titleWidget: Text(
+                context.l10n.qiblaFinderTitle,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: colorScheme.primary,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.2,
+                ),
+              ),
             ),
             body: SafeArea(
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   return Stack(
                     children: [
-                      const Positioned.fill(child: _QiblaAmbientBackground()),
                       CustomScrollView(
                         slivers: [
                           SliverToBoxAdapter(
@@ -195,7 +202,7 @@ class _PortraitContent extends StatelessWidget {
             ),
           ),
         ),
-        const _TipText(bottomPadding: kPortraitTipBottomPadding),
+        const _QiblaInstructionFooter(bottomPadding: kPortraitTipBottomPadding),
       ],
     );
   }
@@ -212,7 +219,7 @@ class _LandscapeContent extends StatelessWidget {
         Expanded(flex: kLandscapeCompassFlex, child: _CompassArea()),
         Expanded(
           flex: kLandscapeTextFlex,
-          child: Center(child: _TipText()),
+          child: Center(child: _QiblaInstructionFooter()),
         ),
         const Spacer(),
       ],
@@ -316,96 +323,6 @@ class _QiblaUnavailableState extends StatelessWidget {
   }
 }
 
-class _QiblaAmbientBackground extends StatelessWidget {
-  const _QiblaAmbientBackground();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return ExcludeSemantics(
-      child: CustomPaint(
-        painter: _QiblaAmbientPainter(
-          colorScheme: theme.colorScheme,
-          tokens: theme.tokens,
-        ),
-      ),
-    );
-  }
-}
-
-class _QiblaAmbientPainter extends CustomPainter {
-  const _QiblaAmbientPainter({
-    required this.colorScheme,
-    required this.tokens,
-  });
-
-  final ColorScheme colorScheme;
-  final TilawaDesignTokens tokens;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height * 0.34);
-    final shortest = size.shortestSide;
-
-    final primaryStroke = Paint()
-      ..color = colorScheme.primary.withValues(
-        alpha: tokens.opacitySubtle * 0.5,
-      )
-      ..strokeWidth = tokens.borderWidthThin
-      ..style = PaintingStyle.stroke;
-    final tertiaryStroke = Paint()
-      ..color = colorScheme.tertiary.withValues(
-        alpha: tokens.opacitySubtle * 0.4,
-      )
-      ..strokeWidth = tokens.borderWidthThin
-      ..style = PaintingStyle.stroke;
-    final guideStroke = Paint()
-      ..color = colorScheme.outlineVariant.withValues(
-        alpha: tokens.opacitySubtle * 0.5,
-      )
-      ..strokeWidth = tokens.borderWidthThin
-      ..style = PaintingStyle.stroke;
-
-    for (final factor in <double>[0.58, 0.88]) {
-      final radius = shortest * factor;
-      final rect = Rect.fromCircle(center: center, radius: radius);
-      canvas.drawArc(
-        rect,
-        math.pi * 1.08,
-        math.pi * 0.84,
-        false,
-        primaryStroke,
-      );
-    }
-
-    final lowerCenter = Offset(size.width / 2, size.height * 0.72);
-    for (final factor in <double>[0.56]) {
-      final radius = shortest * factor;
-      final rect = Rect.fromCircle(center: lowerCenter, radius: radius);
-      canvas.drawArc(
-        rect,
-        math.pi * 1.18,
-        math.pi * 0.64,
-        false,
-        tertiaryStroke,
-      );
-    }
-
-    canvas.drawLine(
-      Offset(center.dx, tokens.spaceExtraLarge),
-      Offset(center.dx, size.height - tokens.spaceExtraLarge),
-      guideStroke,
-    );
-  }
-
-  @override
-  bool shouldRepaint(_QiblaAmbientPainter oldDelegate) {
-    return oldDelegate.colorScheme != colorScheme ||
-        oldDelegate.tokens != tokens;
-  }
-}
-
 class _QiblaCompassPanel extends StatelessWidget {
   const _QiblaCompassPanel({required this.direction});
 
@@ -413,58 +330,115 @@ class _QiblaCompassPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
+    final tokens = Theme.of(context).tokens;
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
+      padding: EdgeInsets.symmetric(horizontal: tokens.spaceMedium),
       child: Center(
         child: ConstrainedBox(
           constraints: BoxConstraints(
             maxWidth: tokens.contentMaxWidthForm * kQiblaPanelMaxWidthFactor,
           ),
-          child: TilawaGlassPanel(
-            padding: EdgeInsets.symmetric(
-              horizontal: tokens.spaceMedium,
-              vertical: tokens.spaceLarge,
-            ),
-            backgroundColor: colorScheme.surface.withValues(
-              alpha: tokens.opacityGlass,
-            ),
-            borderColor: colorScheme.primary.withValues(
-              alpha: tokens.opacitySubtle,
-            ),
-            child: QiblaCompassWidget(qiblaDirection: direction),
-          ),
+          child: QiblaCompassWidget(qiblaDirection: direction),
         ),
       ),
     );
   }
 }
 
-class _TipText extends StatelessWidget {
-  const _TipText({this.bottomPadding = kDefaultTipBottomPadding});
+class _QiblaInstructionFooter extends StatelessWidget {
+  const _QiblaInstructionFooter({this.bottomPadding = kDefaultTipBottomPadding});
 
+  final double bottomPadding;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocSelector<QiblaBloc, QiblaState, QiblaDirectionEntity?>(
+      selector: (state) =>
+          state.status == QiblaStatus.success ? state.direction : null,
+      builder: (context, direction) {
+        if (direction == null) {
+          return const SizedBox.shrink();
+        }
+
+        final l10n = context.l10n;
+        final String message;
+        if (direction.isAligned) {
+          message = l10n.qiblaCompassTip;
+        } else {
+          final ({int degrees, bool rotateLeft}) hint =
+              _qiblaRotationHint(direction);
+          message = hint.rotateLeft
+              ? l10n.qiblaRotatePhoneLeft(hint.degrees)
+              : l10n.qiblaRotatePhoneRight(hint.degrees);
+        }
+
+        return _QiblaInstructionChip(
+          message: message,
+          bottomPadding: bottomPadding,
+        );
+      },
+    );
+  }
+}
+
+({int degrees, bool rotateLeft}) _qiblaRotationHint(
+  QiblaDirectionEntity direction,
+) {
+  double delta = direction.qibla - direction.direction;
+  while (delta > 180) {
+    delta -= 360;
+  }
+  while (delta < -180) {
+    delta += 360;
+  }
+  final int degrees = delta.abs().round().clamp(1, 180);
+  return (degrees: degrees, rotateLeft: delta < 0);
+}
+
+class _QiblaInstructionChip extends StatelessWidget {
+  const _QiblaInstructionChip({
+    required this.message,
+    required this.bottomPadding,
+  });
+
+  final String message;
   final double bottomPadding;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final tokens = theme.tokens;
 
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: kTipHorizontalPadding,
         vertical: kTipVerticalPadding,
       ).copyWith(bottom: bottomPadding),
-      child: Text(
-        context.l10n.qiblaCompassTip,
-        textAlign: TextAlign.center,
-        style: theme.textTheme.titleMedium?.copyWith(
-          color: colorScheme.onSurface,
-          fontSize: kTipFontSize,
-          fontWeight: kTipFontWeight,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colorScheme.tertiaryContainer,
+          borderRadius: BorderRadius.circular(tokens.radiusLarge),
+          border: Border.all(
+            color: colorScheme.primary.withValues(alpha: tokens.opacitySubtle),
+            width: tokens.borderWidthThin,
+          ),
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: tokens.spaceLarge,
+            vertical: tokens.spaceMedium,
+          ),
+          child: Text(
+            message,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: colorScheme.onSurface,
+              fontSize: kTipFontSize,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
       ),
     );

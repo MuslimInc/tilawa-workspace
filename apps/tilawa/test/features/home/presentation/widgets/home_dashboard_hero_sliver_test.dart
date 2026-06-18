@@ -37,7 +37,7 @@ void main() {
     );
     final heroTokens = theme.componentTokens.homeNextPrayerHero;
     final appBar = tester.widget<SliverAppBar>(find.byType(SliverAppBar));
-    expect(appBar.expandedHeight, 176);
+    expect(appBar.expandedHeight, 204);
     expect(appBar.backgroundColor, heroTokens.gradientBottomEnd);
     expect(appBar.foregroundColor, heroTokens.foregroundColor);
 

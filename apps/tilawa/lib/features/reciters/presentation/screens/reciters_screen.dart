@@ -551,6 +551,7 @@ class _RecitersScreenState extends State<RecitersScreen>
         appBar: TilawaCatalogAppBar.titleOnly(
           context,
           title: context.l10n.reciters,
+          centerTitle: true,
           showBottomHairline: false,
           showElevationShadow: false,
         ),
@@ -762,6 +763,7 @@ class _RecitersScreenState extends State<RecitersScreen>
                     appBar: TilawaCatalogAppBar.titleOnly(
                       context,
                       title: context.l10n.reciters,
+                      centerTitle: true,
                       showBottomHairline: false,
                       showElevationShadow: false,
                     ),

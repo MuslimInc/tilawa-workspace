@@ -97,6 +97,7 @@ dependencies:
   url_launcher: ^6.3.2
   disk_space_plus: ^0.2.6
   speech_to_text: ^7.4.0
+  hijri: ^3.0.1
 
 dev_dependencies:
   bloc_lint: ^0.4.1
@@ -127,6 +128,7 @@ flutter:
     - assets/images/
     - assets/json/
     - assets/data/
+    - assets/data/translations/
     - assets/icons/
     - assets/audio/
     - assets/changelog/

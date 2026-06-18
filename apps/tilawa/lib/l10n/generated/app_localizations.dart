@@ -350,6 +350,12 @@ abstract class AppLocalizations {
   /// **'Find prayer direction'**
   String get homeQuickQiblaSubtitle;
 
+  /// Home More row subtitle for settings
+  ///
+  /// In en, this message translates to:
+  /// **'Theme, audio, and account'**
+  String get homeQuickSettingsSubtitle;
+
   /// Home More row title for tasbeeh counter
   ///
   /// In en, this message translates to:
@@ -1322,11 +1328,17 @@ abstract class AppLocalizations {
   /// **'Clear search'**
   String get recitersClearSearch;
 
-  /// Single-word label for the prayer times tab in the phone bottom navigation bar
+  /// Legacy shell label; prayer times opens from Home
   ///
   /// In en, this message translates to:
   /// **'Prayer'**
   String get bottomNavPrayer;
+
+  /// Single-word label for the Qibla tab in the phone bottom navigation bar
+  ///
+  /// In en, this message translates to:
+  /// **'Qibla'**
+  String get bottomNavQibla;
 
   /// Single-word label for the Quran tab in the phone bottom navigation bar
   ///
@@ -1334,10 +1346,10 @@ abstract class AppLocalizations {
   /// **'Quran'**
   String get bottomNavQuran;
 
-  /// Single-word label for the athkar tab in the phone bottom navigation bar
+  /// Single-word label for the dhikr tab in the phone bottom navigation bar (Behance lifestyle IA)
   ///
   /// In en, this message translates to:
-  /// **'Athkar'**
+  /// **'Dhikr'**
   String get bottomNavAthkar;
 
   /// Single-word label for the settings tab in the phone bottom navigation bar
@@ -2636,6 +2648,30 @@ abstract class AppLocalizations {
   /// **'Qibla Direction'**
   String get qiblaDirection;
 
+  /// Centered uppercase title on the Qibla compass screen (Behance reference)
+  ///
+  /// In en, this message translates to:
+  /// **'QIBLA FINDER'**
+  String get qiblaFinderTitle;
+
+  /// Subtitle below the compass degree readout
+  ///
+  /// In en, this message translates to:
+  /// **'Device\'s angle to qibla'**
+  String get qiblaDeviceAngleLabel;
+
+  /// Instruction when the user should rotate left to align with Qibla
+  ///
+  /// In en, this message translates to:
+  /// **'Rotate the phone {degrees}° to the left'**
+  String qiblaRotatePhoneLeft(int degrees);
+
+  /// Instruction when the user should rotate right to align with Qibla
+  ///
+  /// In en, this message translates to:
+  /// **'Rotate the phone {degrees}° to the right'**
+  String qiblaRotatePhoneRight(int degrees);
+
   /// Error title when location service is disabled
   ///
   /// In en, this message translates to:
@@ -3440,6 +3476,12 @@ abstract class AppLocalizations {
   /// **'Show Translation'**
   String get showTranslation;
 
+  /// Attribution line for the bundled Quran translation shown in reader settings
+  ///
+  /// In en, this message translates to:
+  /// **'Translation: {translationName} ({sourceName})'**
+  String quranTranslationAttribution(String translationName, String sourceName);
+
   /// Show ayah numbers toggle label
   ///
   /// In en, this message translates to:
@@ -3764,6 +3806,36 @@ abstract class AppLocalizations {
   /// **'Quran'**
   String get quran;
 
+  /// Centered uppercase title on the Quran hub screen (Behance reference)
+  ///
+  /// In en, this message translates to:
+  /// **'QURAN'**
+  String get quranHubTitle;
+
+  /// Section heading above Surah/Juz/Page pills on the Quran hub
+  ///
+  /// In en, this message translates to:
+  /// **'Al Quran'**
+  String get quranCatalogSectionTitle;
+
+  /// Opens the page-based Mushaf reader from the surah detail screen
+  ///
+  /// In en, this message translates to:
+  /// **'Open Mushaf'**
+  String get quranOpenMushaf;
+
+  /// Switch Quran reader from Mushaf pages to the Behance-style ayah list
+  ///
+  /// In en, this message translates to:
+  /// **'Ayah list view'**
+  String get quranSwitchToAyahList;
+
+  /// Switch Quran reader from ayah list back to Mushaf pages
+  ///
+  /// In en, this message translates to:
+  /// **'Mushaf view'**
+  String get quranSwitchToMushaf;
+
   /// Button to continue reading Quran from last page
   ///
   /// In en, this message translates to:
@@ -3775,6 +3847,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Surah Index'**
   String get surahIndex;
+
+  /// Title for the Hijri month calendar bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Islamic calendar'**
+  String get hijriCalendarTitle;
+
+  /// Accessibility label for tapping the home hero Hijri date
+  ///
+  /// In en, this message translates to:
+  /// **'Open Islamic calendar'**
+  String get hijriCalendarOpenLabel;
+
+  /// Navigate to the previous Hijri month in the calendar sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month'**
+  String get hijriCalendarPreviousMonth;
+
+  /// Navigate to the next Hijri month in the calendar sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Next month'**
+  String get hijriCalendarNextMonth;
 
   /// Surah count label in the index header
   ///

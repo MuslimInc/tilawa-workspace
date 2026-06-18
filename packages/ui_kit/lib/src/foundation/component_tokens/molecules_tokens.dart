@@ -368,13 +368,11 @@ class TilawaIconActionButtonTokens {
   }
 }
 
-/// Pinterest-style catalog filter selected colours (chips, tab indicators).
-///
-/// Light: inverted ink (`onSurface` fill, `surface` label). Dark: lifted
-/// green-gray tier with a subtle sage wash — not a full white pill.
+  /// Behance lifestyle filter: brown active pill + white label (light);
+  /// lifted warm tier on dark.
 Color catalogFilterSelectedBackground(ColorScheme colorScheme) {
   if (colorScheme.brightness == Brightness.light) {
-    return colorScheme.onSurface;
+    return colorScheme.primary;
   }
   return Color.alphaBlend(
     colorScheme.primary.withValues(alpha: 0.16),
@@ -384,7 +382,7 @@ Color catalogFilterSelectedBackground(ColorScheme colorScheme) {
 
 Color catalogFilterSelectedForeground(ColorScheme colorScheme) {
   return colorScheme.brightness == Brightness.light
-      ? colorScheme.surface
+      ? colorScheme.onPrimary
       : colorScheme.onSurface;
 }
 
@@ -488,7 +486,10 @@ class TilawaChipTokens {
   }
 
   static Color _selectionSelectedBackgroundColor(ColorScheme colorScheme) {
-    final blendAmount = colorScheme.brightness == Brightness.dark ? 0.12 : 0.10;
+    if (colorScheme.brightness == Brightness.light) {
+      return colorScheme.primary;
+    }
+    final blendAmount = 0.12;
     return Color.lerp(
       colorScheme.primaryContainer,
       colorScheme.primary,
@@ -688,7 +689,10 @@ class TilawaSegmentedControlTokens {
   }
 
   static Color _containerBackgroundColor(ColorScheme colorScheme) {
-    final blendAmount = colorScheme.brightness == Brightness.dark ? 0.18 : 0.30;
+    if (colorScheme.brightness == Brightness.light) {
+      return colorScheme.surfaceContainerHigh;
+    }
+    final blendAmount = 0.18;
     return Color.lerp(
       colorScheme.surface,
       colorScheme.surfaceContainer,
@@ -698,10 +702,7 @@ class TilawaSegmentedControlTokens {
 
   static Color _selectedBackgroundColor(ColorScheme colorScheme) {
     if (colorScheme.brightness == Brightness.light) {
-      return Color.alphaBlend(
-        colorScheme.onSurface.withValues(alpha: 0.08),
-        colorScheme.surfaceContainerHigh,
-      );
+      return colorScheme.primary;
     }
     return catalogFilterSelectedBackground(colorScheme);
   }
@@ -1293,8 +1294,8 @@ class TilawaPermissionBannerTokens {
 
 /// Component tokens for the Home next-prayer hero card gradient shell.
 ///
-/// Fixed brand greens — documented exception to runtime [ColorScheme] primary
-/// (same pattern as [AppShareComposerColors] for marketing-style surfaces).
+/// Warm gold / brown gradients per the Behance lifestyle reference — fixed
+/// brand stops in [AppColors], not runtime [ColorScheme] primary.
 @immutable
 class TilawaHomeNextPrayerHeroTokens {
   const TilawaHomeNextPrayerHeroTokens({
@@ -1383,7 +1384,7 @@ class TilawaHomeNextPrayerHeroTokens {
     return const TilawaHomeNextPrayerHeroTokens(
       gradientTopStart: AppColors.homeNextPrayerGradientNightTop,
       gradientBottomEnd: AppColors.homeNextPrayerGradientNightBottom,
-      foregroundColor: AppColors.homeNextPrayerGradientForeground,
+      foregroundColor: AppColors.homeNextPrayerGradientNightForeground,
       locationChipFillOpacity: 0.12,
       locationChipBorderOpacity: 0.24,
       locationChipSplashOpacity: 0.1,
@@ -1480,34 +1481,49 @@ class TilawaHomeNextPrayerHeroTokens {
 }
 
 /// Home dashboard card surface — a soft [ColorScheme.primaryContainer] wash so
-/// cards harmonize with the active primary (sage by default).
+/// Token-backed featured dashboard cards (Last Read, resume hubs).
+///
+/// Uses the warm gold gradient from [AppColors.featuredGradientStart] →
+/// [AppColors.featuredGradientEnd] with brown ink feedback ripples.
 @immutable
 class TilawaHomeDashboardCardTokens {
   const TilawaHomeDashboardCardTokens({
-    required this.backgroundColor,
+    required this.gradientStart,
+    required this.gradientEnd,
+    required this.foregroundColor,
     required this.splashColor,
     required this.highlightColor,
   });
 
-  final Color backgroundColor;
+  final Color gradientStart;
+  final Color gradientEnd;
+  final Color foregroundColor;
   final Color splashColor;
   final Color highlightColor;
 
-  factory TilawaHomeDashboardCardTokens.fromColorScheme(ColorScheme colorScheme) {
+  factory TilawaHomeDashboardCardTokens.fromColorScheme(
+    ColorScheme colorScheme,
+  ) {
     return TilawaHomeDashboardCardTokens(
-      backgroundColor: colorScheme.primaryContainer,
-      splashColor: colorScheme.primary.withValues(alpha: 0.12),
-      highlightColor: colorScheme.primary.withValues(alpha: 0.06),
+      gradientStart: AppColors.featuredGradientStart,
+      gradientEnd: AppColors.featuredGradientEnd,
+      foregroundColor: AppColors.featuredGradientForeground,
+      splashColor: AppColors.primaryBrownDark.withValues(alpha: 0.12),
+      highlightColor: AppColors.primaryBrownDark.withValues(alpha: 0.06),
     );
   }
 
   TilawaHomeDashboardCardTokens copyWith({
-    Color? backgroundColor,
+    Color? gradientStart,
+    Color? gradientEnd,
+    Color? foregroundColor,
     Color? splashColor,
     Color? highlightColor,
   }) {
     return TilawaHomeDashboardCardTokens(
-      backgroundColor: backgroundColor ?? this.backgroundColor,
+      gradientStart: gradientStart ?? this.gradientStart,
+      gradientEnd: gradientEnd ?? this.gradientEnd,
+      foregroundColor: foregroundColor ?? this.foregroundColor,
       splashColor: splashColor ?? this.splashColor,
       highlightColor: highlightColor ?? this.highlightColor,
     );
@@ -1519,7 +1535,9 @@ class TilawaHomeDashboardCardTokens {
     double t,
   ) {
     return TilawaHomeDashboardCardTokens(
-      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t)!,
+      gradientStart: Color.lerp(a.gradientStart, b.gradientStart, t)!,
+      gradientEnd: Color.lerp(a.gradientEnd, b.gradientEnd, t)!,
+      foregroundColor: Color.lerp(a.foregroundColor, b.foregroundColor, t)!,
       splashColor: Color.lerp(a.splashColor, b.splashColor, t)!,
       highlightColor: Color.lerp(a.highlightColor, b.highlightColor, t)!,
     );

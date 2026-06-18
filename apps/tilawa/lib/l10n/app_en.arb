@@ -199,6 +199,10 @@
     "@homeQuickQiblaSubtitle": {
         "description": "Home More row subtitle for qibla"
     },
+    "homeQuickSettingsSubtitle": "Theme, audio, and account",
+    "@homeQuickSettingsSubtitle": {
+        "description": "Home More row subtitle for settings"
+    },
     "homeQuickTasbeeh": "Tasbeeh",
     "@homeQuickTasbeeh": {
         "description": "Home More row title for tasbeeh counter"
@@ -990,15 +994,19 @@
     },
     "bottomNavPrayer": "Prayer",
     "@bottomNavPrayer": {
-        "description": "Single-word label for the prayer times tab in the phone bottom navigation bar"
+        "description": "Legacy shell label; prayer times opens from Home"
+    },
+    "bottomNavQibla": "Qibla",
+    "@bottomNavQibla": {
+        "description": "Single-word label for the Qibla tab in the phone bottom navigation bar"
     },
     "bottomNavQuran": "Quran",
     "@bottomNavQuran": {
         "description": "Single-word label for the Quran tab in the phone bottom navigation bar"
     },
-    "bottomNavAthkar": "Athkar",
+    "bottomNavAthkar": "Dhikr",
     "@bottomNavAthkar": {
-        "description": "Single-word label for the athkar tab in the phone bottom navigation bar"
+        "description": "Single-word label for the dhikr tab in the phone bottom navigation bar (Behance lifestyle IA)"
     },
     "bottomNavSettings": "Settings",
     "@bottomNavSettings": {
@@ -2025,6 +2033,32 @@
     "@qiblaDirection": {
         "description": "Qibla direction screen title"
     },
+    "qiblaFinderTitle": "QIBLA FINDER",
+    "@qiblaFinderTitle": {
+        "description": "Centered uppercase title on the Qibla compass screen (Behance reference)"
+    },
+    "qiblaDeviceAngleLabel": "Device's angle to qibla",
+    "@qiblaDeviceAngleLabel": {
+        "description": "Subtitle below the compass degree readout"
+    },
+    "qiblaRotatePhoneLeft": "Rotate the phone {degrees}° to the left",
+    "@qiblaRotatePhoneLeft": {
+        "description": "Instruction when the user should rotate left to align with Qibla",
+        "placeholders": {
+            "degrees": {
+                "type": "int"
+            }
+        }
+    },
+    "qiblaRotatePhoneRight": "Rotate the phone {degrees}° to the right",
+    "@qiblaRotatePhoneRight": {
+        "description": "Instruction when the user should rotate right to align with Qibla",
+        "placeholders": {
+            "degrees": {
+                "type": "int"
+            }
+        }
+    },
     "locationServiceDisabled": "Location Service Disabled",
     "@locationServiceDisabled": {
         "description": "Error title when location service is disabled"
@@ -2628,6 +2662,18 @@
     "@showTranslation": {
         "description": "Show translation toggle label"
     },
+    "quranTranslationAttribution": "Translation: {translationName} ({sourceName})",
+    "@quranTranslationAttribution": {
+        "description": "Attribution line for the bundled Quran translation shown in reader settings",
+        "placeholders": {
+            "translationName": {
+                "type": "String"
+            },
+            "sourceName": {
+                "type": "String"
+            }
+        }
+    },
     "showAyahNumbers": "Show Ayah Numbers",
     "@showAyahNumbers": {
         "description": "Show ayah numbers toggle label"
@@ -2860,6 +2906,26 @@
     "@quran": {
         "description": "Quran section title"
     },
+    "quranHubTitle": "QURAN",
+    "@quranHubTitle": {
+        "description": "Centered uppercase title on the Quran hub screen (Behance reference)"
+    },
+    "quranCatalogSectionTitle": "Al Quran",
+    "@quranCatalogSectionTitle": {
+        "description": "Section heading above Surah/Juz/Page pills on the Quran hub"
+    },
+    "quranOpenMushaf": "Open Mushaf",
+    "@quranOpenMushaf": {
+        "description": "Opens the page-based Mushaf reader from the surah detail screen"
+    },
+    "quranSwitchToAyahList": "Ayah list view",
+    "@quranSwitchToAyahList": {
+        "description": "Switch Quran reader from Mushaf pages to the Behance-style ayah list"
+    },
+    "quranSwitchToMushaf": "Mushaf view",
+    "@quranSwitchToMushaf": {
+        "description": "Switch Quran reader from ayah list back to Mushaf pages"
+    },
     "continueReadingQuran": "Continue Reading Quran",
     "@continueReadingQuran": {
         "description": "Button to continue reading Quran from last page"
@@ -2867,6 +2933,22 @@
     "surahIndex": "Surah Index",
     "@surahIndex": {
         "description": "Title of the surah index sheet"
+    },
+    "hijriCalendarTitle": "Islamic calendar",
+    "@hijriCalendarTitle": {
+        "description": "Title for the Hijri month calendar bottom sheet"
+    },
+    "hijriCalendarOpenLabel": "Open Islamic calendar",
+    "@hijriCalendarOpenLabel": {
+        "description": "Accessibility label for tapping the home hero Hijri date"
+    },
+    "hijriCalendarPreviousMonth": "Previous month",
+    "@hijriCalendarPreviousMonth": {
+        "description": "Navigate to the previous Hijri month in the calendar sheet"
+    },
+    "hijriCalendarNextMonth": "Next month",
+    "@hijriCalendarNextMonth": {
+        "description": "Navigate to the next Hijri month in the calendar sheet"
     },
     "surahCountLabel": "{count} Surahs",
     "@surahCountLabel": {

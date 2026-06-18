@@ -199,6 +199,94 @@ abstract final class OrganismsDemos {
     );
   }
 
+  static Widget behanceFeaturedCard(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final TilawaHomeDashboardCardTokens cardTokens =
+        theme.componentTokens.homeDashboardCard;
+    final TilawaDesignTokens tokens = theme.tokens;
+    final double radius = tokens.resolveRadius(family: TilawaRadiusFamily.hero);
+
+    return GalleryDemoFrame(
+      child: TilawaCard(
+        padding: EdgeInsets.zero,
+        backgroundColor: Colors.transparent,
+        borderRadius: radius,
+        borderWidth: 0,
+        surface: TilawaCardSurface.raised,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(radius),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: <Color>[
+                cardTokens.gradientStart,
+                cardTokens.gradientEnd,
+              ],
+            ),
+          ),
+          child: Padding(
+            padding: theme.componentTokens.card.padding,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Last Read',
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: cardTokens.foregroundColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                SizedBox(height: tokens.spaceSmall),
+                Text(
+                  'Surah Al-Baqarah',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: cardTokens.foregroundColor,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  static Widget behanceInstructionChip(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+    final TilawaDesignTokens tokens = theme.tokens;
+
+    return GalleryDemoFrame(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colorScheme.tertiaryContainer,
+          borderRadius: BorderRadius.circular(tokens.radiusLarge),
+          border: Border.all(
+            color: colorScheme.primary.withValues(alpha: tokens.opacitySubtle),
+            width: tokens.borderWidthThin,
+          ),
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: tokens.spaceLarge,
+            vertical: tokens.spaceMedium,
+          ),
+          child: Text(
+            'Rotate the phone 44° to the left',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   static Future<void> _openSheet(BuildContext context) {
     return showTilawaModalBottomSheet<void>(
       context: context,
@@ -328,12 +416,25 @@ class _AdaptiveShellDemoState extends State<_AdaptiveShellDemo> {
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),
         destinations: const [
-          TilawaNavDestination(label: 'Home', icon: Icons.home_outlined),
-          TilawaNavDestination(label: 'Quran', icon: Icons.menu_book_outlined),
-          TilawaNavDestination(label: 'Library', icon: Icons.bookmark_outline),
           TilawaNavDestination(
-            label: 'Settings',
-            icon: Icons.settings_outlined,
+            label: 'Home',
+            icon: Icons.home_outlined,
+            activeIcon: Icons.home_rounded,
+          ),
+          TilawaNavDestination(
+            label: 'Quran',
+            icon: Icons.menu_book_outlined,
+            activeIcon: Icons.menu_book_rounded,
+          ),
+          TilawaNavDestination(
+            label: 'Qibla',
+            icon: Icons.explore_outlined,
+            activeIcon: Icons.explore_rounded,
+          ),
+          TilawaNavDestination(
+            label: 'Athkar',
+            icon: Icons.auto_stories_outlined,
+            activeIcon: Icons.auto_stories_rounded,
           ),
         ],
         bottomPlayer: const SizedBox.shrink(),

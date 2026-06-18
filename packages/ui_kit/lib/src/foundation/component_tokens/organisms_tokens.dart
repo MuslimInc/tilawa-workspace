@@ -688,12 +688,12 @@ class TilawaAdaptiveShellTokens {
     );
   }
 
-  /// Light phone nav uses an opaque white bar so the floating pill reads
+  /// Light phone nav uses an opaque parchment bar so the floating pill reads
   /// clearly above cream or tinted scaffolds. Dark keeps a filled bar for
   /// contrast.
   static Color _bottomNavBackgroundColor(ColorScheme colorScheme) {
     if (colorScheme.brightness == Brightness.light) {
-      return Colors.white;
+      return AppColors.lightCanvas;
     }
     return Color.lerp(
           AppColors.darkSurfaceContainerHighBase,

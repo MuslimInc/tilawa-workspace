@@ -44,7 +44,7 @@ class PrayerTimesAppBar extends StatelessWidget {
     return TilawaSliverAppBar(
       surface: TilawaAppBarSurface.parchment,
       automaticallyImplyLeading: false,
-      centerTitle: false,
+      centerTitle: true,
       title: context.l10n.prayerTimes,
       actions: [
         Semantics(
