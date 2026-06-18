@@ -2,27 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/downloads/presentation/widgets/download_button.dart';
-import 'package:tilawa/features/surah/domain/entities/surah_entity.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../models/reciter_surah_list_item.dart';
 import '../reciter_semantics_ids.dart';
 import 'reciter_catalog_chrome.dart';
 
 class SurahGridItem extends StatelessWidget {
   const SurahGridItem({
     super.key,
-    required this.surah,
-    required this.index,
-    required this.reciterName,
-    required this.reciterId,
+    required this.item,
     required this.onTap,
   });
 
-  final SurahEntity surah;
-  final int index;
-  final String reciterName;
-  final int reciterId;
+  final ReciterSurahListItem item;
   final VoidCallback onTap;
 
   @override
@@ -31,7 +25,6 @@ class SurahGridItem extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final tokens = theme.tokens;
 
-    // Combine selectors to reduce overhead and subscription count
     final (bool isPlaying, bool isCurrentItem) = context
         .select<AudioPlayerBloc, (bool, bool)>((bloc) {
           final AudioEntity? currentAudio = bloc.state.currentAudio;
@@ -40,8 +33,8 @@ class SurahGridItem extends StatelessWidget {
 
           final bool isCurrent =
               shouldShowPlayer &&
-              (currentAudio?.id == surah.id ||
-                  currentAudio?.url == surah.audio.url);
+              (currentAudio?.id == item.audioId ||
+                  currentAudio?.url == item.audioUrl);
 
           final bool playing = isCurrent && (playbackState?.isPlaying ?? false);
 
@@ -71,14 +64,10 @@ class SurahGridItem extends StatelessWidget {
     final double tileRadius = tokens.resolveRadius(
       family: TilawaRadiusFamily.card,
     );
-    // Badge fills the full card width so the number reads as a strong hero element.
-    // Height is square with the badge width to keep the visual centred.
     final double badgeSize = tokens.iconSizeLarge + tokens.spaceExtraLarge;
 
     return Semantics(
-      identifier: ReciterSemanticsIds.surahRow(
-        surah.formattedId.isNotEmpty ? surah.formattedId : '${index + 1}',
-      ),
+      identifier: ReciterSemanticsIds.surahRow(item.semanticsKey),
       button: true,
       child: TilawaCard(
         surface: TilawaCardSurface.raised,
@@ -94,13 +83,10 @@ class SurahGridItem extends StatelessWidget {
         borderRadius: tileRadius,
         padding: EdgeInsets.all(tokens.spaceMedium),
         onTap: handleTap,
-        // Vertical layout: badge (top) → name+subtitle (middle) → download (bottom-end).
-        // Matches the list tile's token language while fitting the narrow grid column.
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Top row: coloured number badge (left) + play/pause state (right when active).
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,9 +115,7 @@ class SurahGridItem extends StatelessWidget {
                           size: tokens.iconSizeMedium,
                         )
                       : Text(
-                          surah.formattedId.isNotEmpty
-                              ? surah.formattedId
-                              : '${index + 1}',
+                          item.formattedNumber,
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: idleFg,
                             fontWeight: FontWeight.w700,
@@ -140,48 +124,29 @@ class SurahGridItem extends StatelessWidget {
                         ),
                 ),
                 DownloadButton(
-                  url: surah.id,
-                  surahTitle: surah.name,
-                  reciterName: reciterName,
-                  reciterId: reciterId,
+                  url: item.audioId,
+                  surahTitle: item.displayName,
+                  reciterName: item.reciterName,
+                  reciterId: item.reciterId,
                   catalogChrome: true,
-                  initialIsDownloaded: surah.isDownloaded,
-                  initialIsDownloading: surah.isDownloading,
-                  initialProgress: surah.downloadProgress,
+                  initialIsDownloaded: item.isDownloaded,
+                  initialIsDownloading: item.isDownloading,
+                  initialProgress: item.downloadProgress,
                   identifier: ReciterSemanticsIds.surahDownloadButton(
-                    surah.formattedId.isNotEmpty
-                        ? surah.formattedId
-                        : '${index + 1}',
+                    item.semanticsKey,
                   ),
                 ),
               ],
             ),
-            // Bottom: name + reciter — same type styles as list tile.
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              spacing: tokens.spaceExtraSmall,
-              children: [
-                Text(
-                  surah.name,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: colorScheme.onSurface,
-                    height: 1.2,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  surah.reciterName,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w500,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+            Text(
+              item.displayName,
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: colorScheme.onSurface,
+                height: 1.2,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),

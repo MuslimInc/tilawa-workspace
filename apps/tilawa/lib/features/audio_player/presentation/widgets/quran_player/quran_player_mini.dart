@@ -176,14 +176,18 @@ class _YtMusicMiniPlayer extends StatelessWidget {
     this.useHeroArtwork = false,
     required this.identityChromeOpacity,
     required this.onTap,
+    this.onSubtitleTap,
     required this.onClose,
+    this.shellPillLayout = false,
   });
 
   final AudioEntity audio;
   final bool useHeroArtwork;
   final double identityChromeOpacity;
   final VoidCallback onTap;
+  final VoidCallback? onSubtitleTap;
   final VoidCallback onClose;
+  final bool shellPillLayout;
 
   @override
   Widget build(BuildContext context) {
@@ -196,7 +200,9 @@ class _YtMusicMiniPlayer extends StatelessWidget {
           snapshot: snapshot,
           identityChromeOpacity: identityChromeOpacity,
           onTap: onTap,
+          onSubtitleTap: onSubtitleTap,
           onClose: onClose,
+          shellPillLayout: shellPillLayout,
         );
       },
     );
@@ -210,7 +216,9 @@ class _YtMusicMiniPlayerBody extends StatelessWidget {
     required this.snapshot,
     required this.identityChromeOpacity,
     required this.onTap,
+    this.onSubtitleTap,
     required this.onClose,
+    this.shellPillLayout = false,
   });
 
   final AudioEntity audio;
@@ -218,16 +226,19 @@ class _YtMusicMiniPlayerBody extends StatelessWidget {
   final _MiniPlayerSnapshot snapshot;
   final double identityChromeOpacity;
   final VoidCallback onTap;
+  final VoidCallback? onSubtitleTap;
   final VoidCallback onClose;
+  final bool shellPillLayout;
 
   @override
   Widget build(BuildContext context) {
     final barTokens = Theme.of(context).componentTokens.mediaPlayerBar;
+    final shellTokens = Theme.of(context).componentTokens.adaptiveShell;
     final theme = Theme.of(context);
-    final bool sleepTimerEnabled = context
-        .watch<SettingsCubit>()
-        .state
-        .isSleepTimerEnabled;
+    final designTokens = theme.tokens;
+    final bool sleepTimerEnabled = shellPillLayout
+        ? false
+        : context.watch<SettingsCubit>().state.isSleepTimerEnabled;
     final String subtitle = audio.artist ?? context.l10n.unknownReciter;
     final TextStyle titleStyle =
         (theme.textTheme.titleSmall ?? const TextStyle()).copyWith(
@@ -287,7 +298,18 @@ class _YtMusicMiniPlayerBody extends StatelessWidget {
             canGoNext: snapshot.canGoNext,
             isSleepTimerActive: snapshot.isSleepTimerActive,
             isSleepTimerEnabled: sleepTimerEnabled,
+            shellPillLayout: shellPillLayout,
+            pillBorderRadius: shellPillLayout
+                ? designTokens.radiusPill(constraints.maxHeight)
+                : null,
+            backgroundColorOverride: shellPillLayout
+                ? shellTokens.bottomNavBackgroundColor
+                : null,
+            contentPaddingOverride: shellPillLayout
+                ? const EdgeInsets.symmetric(horizontal: 12, vertical: 6)
+                : null,
             onTap: onTap,
+            onSubtitleTap: onSubtitleTap,
             onClose: onClose,
             playPauseSemanticIdentifier:
                 QuranPlayerSemanticsIds.miniPlayerPlayPause,

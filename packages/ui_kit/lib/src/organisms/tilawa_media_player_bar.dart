@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:tilawa_ui_kit/src/foundation/component_tokens.dart';
@@ -36,6 +38,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
     this.onNext,
     this.onSleepTimerTap,
     this.onTap,
+    this.onSubtitleTap,
     this.onClose,
     this.playPauseSemanticIdentifier,
     this.closeSemanticIdentifier,
@@ -47,6 +50,10 @@ class TilawaMediaPlayerBar extends StatelessWidget {
     this.pauseTooltip,
     this.nextTooltip,
     this.sleepTimerTooltip,
+    this.pillBorderRadius,
+    this.shellPillLayout = false,
+    this.contentPaddingOverride,
+    this.backgroundColorOverride,
   });
 
   final String title;
@@ -71,6 +78,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
   final VoidCallback? onNext;
   final VoidCallback? onSleepTimerTap;
   final VoidCallback? onTap;
+  final VoidCallback? onSubtitleTap;
   final VoidCallback? onClose;
 
   /// Optional [Semantics.identifier] for Maestro / accessibility on play-pause.
@@ -94,8 +102,27 @@ class TilawaMediaPlayerBar extends StatelessWidget {
   final String? nextTooltip;
   final String? sleepTimerTooltip;
 
+  /// When set, overrides [TilawaMediaPlayerBarTokens.borderRadius] for a
+  /// capsule-shaped shell mini player.
+  final double? pillBorderRadius;
+
+  /// Compact shell dock: smaller artwork padding, no sleep timer.
+  final bool shellPillLayout;
+
+  /// Optional override for [TilawaMediaPlayerBarTokens.contentPadding].
+  final EdgeInsetsGeometry? contentPaddingOverride;
+
+  /// Optional override for [TilawaMediaPlayerBarTokens.shellBackgroundColor].
+  final Color? backgroundColorOverride;
+
   @override
   Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) => _buildBar(context, constraints),
+    );
+  }
+
+  Widget _buildBar(BuildContext context, BoxConstraints constraints) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final designTokens = theme.tokens;
@@ -119,7 +146,37 @@ class TilawaMediaPlayerBar extends StatelessWidget {
           decoration: .none,
           decorationColor: Colors.transparent,
         );
-    final borderRadius = BorderRadius.circular(componentTokens.borderRadius);
+    final borderRadius = BorderRadius.circular(
+      pillBorderRadius ?? componentTokens.borderRadius,
+    );
+    final TextDirection direction = Directionality.of(context);
+    final EdgeInsets basePadding = (contentPaddingOverride ??
+            componentTokens.contentPadding)
+        .resolve(direction);
+    double verticalPadding = basePadding.top;
+    if (shellPillLayout) {
+      verticalPadding = 6;
+    } else if (constraints.hasBoundedHeight && constraints.maxHeight.isFinite) {
+      final double rowBudget =
+          constraints.maxHeight -
+          designTokens.progressHeight -
+          (verticalPadding * 2);
+      if (rowBudget < componentTokens.playPauseButtonSize) {
+        verticalPadding = math.max(
+          4,
+          (constraints.maxHeight -
+                  designTokens.progressHeight -
+                  componentTokens.playPauseButtonSize) /
+              2,
+        );
+      }
+    }
+    final EdgeInsetsGeometry contentPadding = EdgeInsets.fromLTRB(
+      basePadding.left,
+      verticalPadding,
+      basePadding.right,
+      verticalPadding,
+    );
     final String resolvedOpenPlayerLabel =
         openPlayerSemanticLabel ??
         (subtitle == null || subtitle!.isEmpty ? title : '$title, $subtitle');
@@ -128,19 +185,32 @@ class TilawaMediaPlayerBar extends StatelessWidget {
       context,
       layoutWidth: layoutWidth,
     );
-    final bool showSleepTimer = isSleepTimerEnabled;
-    final bool useCompactControls = tilawaMediaPlayerBarNeedsCompactControls(
-      maxWidth: resolvedLayoutWidth,
-      tokens: componentTokens,
-      showSleepTimer: showSleepTimer,
-    );
+    final bool tightHeight =
+        constraints.hasBoundedHeight &&
+        constraints.maxHeight.isFinite &&
+        constraints.maxHeight <
+            designTokens.progressHeight +
+                20 +
+                componentTokens.playPauseButtonSize;
+    final bool showSleepTimer =
+        isSleepTimerEnabled && !shellPillLayout && !tightHeight;
+    final bool useCompactControls =
+        shellPillLayout ||
+        tilawaMediaPlayerBarNeedsCompactControls(
+          maxWidth: resolvedLayoutWidth,
+          tokens: componentTokens,
+          showSleepTimer: showSleepTimer,
+        );
     final double artworkSize = useCompactControls
         ? kTilawaMediaPlayerBarCompactArtworkSize
         : componentTokens.artworkSize;
 
+    final VoidCallback? identityTap = onTap;
+    final bool usePillOutline = pillBorderRadius != null && pillBorderRadius! > 0;
+
     return Container(
       decoration: BoxDecoration(
-        color: componentTokens.shellBackgroundColor,
+        color: backgroundColorOverride ?? componentTokens.shellBackgroundColor,
         borderRadius: borderRadius,
         boxShadow: componentTokens.shadowOpacity == 0
             ? null
@@ -160,30 +230,39 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                   offset: designTokens.shadowOffsetMedium,
                 ),
               ],
-        border: Border(
-          top: BorderSide(
-            color: componentTokens.shellOutlineColor,
-            width: designTokens.borderWidthThin,
-          ),
-        ),
+        border: usePillOutline
+            ? Border.all(
+                color: componentTokens.shellOutlineColor,
+                width: designTokens.borderWidthThin,
+              )
+            : Border(
+                top: BorderSide(
+                  color: componentTokens.shellOutlineColor,
+                  width: designTokens.borderWidthThin,
+                ),
+              ),
       ),
       child: ClipRRect(
         borderRadius: borderRadius,
         child: Column(
           mainAxisSize: .min,
           children: [
-            // Progress Bar (Slim at top)
-            progressBarOverride ??
-                LinearProgressIndicator(
-                  value: progress,
-                  backgroundColor: componentTokens.progressTrackBackgroundColor,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    colorScheme.primary,
+            _ProgressTapTarget(
+              onTap: null,
+              semanticLabel: null,
+              child: progressBarOverride ??
+                  LinearProgressIndicator(
+                    value: progress,
+                    backgroundColor:
+                        componentTokens.progressTrackBackgroundColor,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      colorScheme.primary,
+                    ),
+                    minHeight: designTokens.progressHeight,
                   ),
-                  minHeight: designTokens.progressHeight,
-                ),
+            ),
             Padding(
-              padding: componentTokens.contentPadding.resolve(
+              padding: contentPadding.resolve(
                 Directionality.of(context),
               ),
               child: Row(
@@ -191,8 +270,8 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _OpenPlayerTapTarget(
-                      onTap: onTap,
-                      semanticLabel: onTap != null
+                      onTap: identityTap,
+                      semanticLabel: identityTap != null
                           ? resolvedOpenPlayerLabel
                           : null,
                       child: Opacity(
@@ -225,12 +304,16 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                                       ),
                                       if (subtitle != null &&
                                           subtitle!.isNotEmpty)
-                                        Text(
-                                          subtitle!,
-                                          style: subtitleStyle,
-                                          maxLines: 1,
-                                          overflow: .ellipsis,
-                                          textAlign: TextAlign.start,
+                                        _SubtitleTapTarget(
+                                          onTap: onSubtitleTap,
+                                          label: subtitle!,
+                                          child: Text(
+                                            subtitle!,
+                                            style: subtitleStyle,
+                                            maxLines: 1,
+                                            overflow: .ellipsis,
+                                            textAlign: TextAlign.start,
+                                          ),
                                         ),
                                     ],
                                   ),
@@ -319,6 +402,67 @@ double _tilawaMediaPlayerBarFullTransportWidth({
   final int controlCount = showSleepTimer ? 2 : 1;
   return controlCount * tokens.controlButtonSize +
       (controlCount - 1) * tokens.controlsGap;
+}
+
+/// Reciter / secondary line — optional separate action (e.g. open Reciters tab).
+class _SubtitleTapTarget extends StatelessWidget {
+  const _SubtitleTapTarget({
+    required this.onTap,
+    required this.label,
+    required this.child,
+  });
+
+  final VoidCallback? onTap;
+  final String label;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (onTap == null) {
+      return child;
+    }
+
+    return Semantics(
+      button: true,
+      label: label,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: .opaque,
+        child: child,
+      ),
+    );
+  }
+}
+
+/// Progress strip that can expand the full player when identity uses another
+/// action (e.g. shell mini metadata opens Reciters).
+class _ProgressTapTarget extends StatelessWidget {
+  const _ProgressTapTarget({
+    required this.onTap,
+    required this.semanticLabel,
+    required this.child,
+  });
+
+  final VoidCallback? onTap;
+  final String? semanticLabel;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (onTap == null) {
+      return child;
+    }
+
+    return Semantics(
+      button: true,
+      label: semanticLabel,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: .opaque,
+        child: child,
+      ),
+    );
+  }
 }
 
 /// Artwork + metadata strip that opens the full player when tapped.

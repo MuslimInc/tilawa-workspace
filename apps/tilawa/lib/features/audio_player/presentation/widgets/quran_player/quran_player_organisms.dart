@@ -96,7 +96,9 @@ class _MiniPlayerTransition extends StatelessWidget {
     required this.onHorizontalDragUpdate,
     required this.onHorizontalDragEnd,
     required this.onTap,
+    this.onSubtitleTap,
     required this.onClose,
+    this.shellPillLayout = false,
   });
 
   final double progress;
@@ -116,7 +118,9 @@ class _MiniPlayerTransition extends StatelessWidget {
   final GestureDragUpdateCallback onHorizontalDragUpdate;
   final GestureDragEndCallback onHorizontalDragEnd;
   final VoidCallback onTap;
+  final VoidCallback? onSubtitleTap;
   final VoidCallback onClose;
+  final bool shellPillLayout;
 
   @override
   Widget build(BuildContext context) {
@@ -142,7 +146,9 @@ class _MiniPlayerTransition extends StatelessWidget {
             useHeroArtwork: useHeroArtwork,
             identityChromeOpacity: identityChromeOpacity,
             onTap: onTap,
+            onSubtitleTap: onSubtitleTap,
             onClose: onClose,
+            shellPillLayout: shellPillLayout,
           ),
         ),
       ),
@@ -156,14 +162,18 @@ class _MiniPlayerOrganism extends StatelessWidget {
     this.useHeroArtwork = false,
     required this.identityChromeOpacity,
     required this.onTap,
+    this.onSubtitleTap,
     required this.onClose,
+    this.shellPillLayout = false,
   });
 
   final AudioEntity audio;
   final bool useHeroArtwork;
   final double identityChromeOpacity;
   final VoidCallback onTap;
+  final VoidCallback? onSubtitleTap;
   final VoidCallback onClose;
+  final bool shellPillLayout;
 
   @override
   Widget build(BuildContext context) {
@@ -174,7 +184,9 @@ class _MiniPlayerOrganism extends StatelessWidget {
         useHeroArtwork: useHeroArtwork,
         identityChromeOpacity: identityChromeOpacity,
         onTap: onTap,
+        onSubtitleTap: onSubtitleTap,
         onClose: onClose,
+        shellPillLayout: shellPillLayout,
       ),
     );
   }

@@ -346,7 +346,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       narrowCardWidthThreshold: 180.0,
       narrowCardHeightThreshold: 155.0,
       cardTightHeightThreshold: 145.0,
-      playerCollapsedHeight: 76.0,
+      playerCollapsedHeight: 72.0,
       playerDismissThreshold: 76.0,
       playerMaxDismissOffset: 200.0,
       playerVelocityThreshold: 500.0,

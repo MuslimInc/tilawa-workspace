@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa_core/entities/audio.dart';
+import 'package:tilawa_core/utils/surah_names.dart';
 import 'package:tilawa/features/surah/domain/entities/surah_entity.dart';
 import 'package:tilawa/features/surah/domain/mappers/surah_mapper.dart';
 
@@ -80,10 +81,7 @@ void main() {
         expect(surah.downloadId, 'd-2');
       });
 
-      test('nameAr argument does not currently affect the resulting entity', () {
-        // SurahMapper.create accepts nameAr for API symmetry but the underlying
-        // AudioEntity has no Arabic-name field, so nameAr is not surfaced.
-        // This test pins that behaviour so refactors are intentional.
+      test('stores nameAr in extras when surah number cannot be parsed', () {
         final surah = SurahMapper.create(
           id: 'a-3',
           name: 'En',
@@ -94,9 +92,23 @@ void main() {
         );
 
         expect(surah.nameEn, 'En');
-        // nameAr currently mirrors the reciter (artist) field, not the Arabic
-        // name passed to create(). Locked in to prevent silent regressions.
-        expect(surah.nameAr, 'r');
+        expect(surah.nameAr, 'العربية');
+        expect(surah.reciterName, 'r');
+      });
+
+      test('derives bilingual names from numeric id basename', () {
+        final surah = SurahMapper.create(
+          id: 'audio/002.mp3',
+          name: 'Al-Baqarah',
+          nameAr: 'البقرة',
+          reciterName: 'Abdul Basit',
+          url: 'https://example.com/002.mp3',
+          duration: Duration.zero,
+        );
+
+        expect(surah.nameEn, SurahNames.getEnglishSurahName(2));
+        expect(surah.nameAr, SurahNames.getArabicSurahName(2));
+        expect(surah.reciterName, 'Abdul Basit');
       });
     });
   });

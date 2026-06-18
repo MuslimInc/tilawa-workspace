@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa_core/entities/audio.dart';
+import 'package:tilawa_core/utils/surah_names.dart';
 import 'package:tilawa/features/surah/domain/entities/surah_entity.dart';
 
 void main() {
@@ -25,15 +26,16 @@ void main() {
 
         expect(surah.id, tAudio.id);
         expect(surah.name, tAudio.title);
-        expect(surah.nameEn, tAudio.title);
-        expect(surah.nameAr, tAudio.artist);
+        expect(surah.nameEn, SurahNames.getEnglishSurahName(1));
+        expect(surah.nameAr, SurahNames.getArabicSurahName(1));
         expect(surah.reciterName, tAudio.artist);
+        expect(surah.surahNumber, 1);
       },
     );
 
-    test('falls back to empty string when artist-derived fields are null', () {
+    test('falls back when artist and surah number are unavailable', () {
       const audioNoArtist = AudioEntity(
-        id: '001',
+        id: 'al-fatiha',
         title: 'Al-Fatiha',
         url: 'u',
         duration: Duration.zero,
@@ -42,6 +44,7 @@ void main() {
 
       expect(surah.nameAr, '');
       expect(surah.reciterName, '');
+      expect(surah.surahNumber, isNull);
     });
 
     group('formattedId', () {

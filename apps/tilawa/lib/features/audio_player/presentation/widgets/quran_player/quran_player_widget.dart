@@ -40,9 +40,9 @@ import 'package:tilawa/shared/models/position_data.dart';
 import 'package:tilawa/shared/widgets/quran_player_chrome.dart';
 import 'package:tilawa/shared/widgets/quran_player_debug_log.dart';
 import 'package:tilawa/shared/widgets/quran_player_expand_gesture_policy.dart';
+import 'package:tilawa/shared/widgets/quran_player_expand_physics.dart';
 import 'package:tilawa/shared/widgets/quran_player_expanded_stage_gesture_scope.dart';
 import 'package:tilawa/shared/widgets/quran_player_expanded_stage_layouts.dart';
-import 'package:tilawa/shared/widgets/quran_player_expand_physics.dart';
 import 'package:tilawa/shared/widgets/quran_player_hero.dart';
 import 'package:tilawa/shared/widgets/quran_player_morph_layer.dart';
 import 'package:tilawa/shared/widgets/quran_player_morph_layout.dart';
@@ -53,9 +53,9 @@ import 'package:tilawa/shared/widgets/quran_player_transport_controls.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-part 'quran_player_organisms.dart';
 part 'quran_player_controls.dart';
 part 'quran_player_mini.dart';
+part 'quran_player_organisms.dart';
 part 'quran_player_queue.dart';
 part 'quran_player_route_page.dart';
 
@@ -105,7 +105,9 @@ class QuranPlayerWidget extends StatefulWidget {
           .shellChrome;
       if (shell != null) {
         if (shell.bottomNavBarHeight > 0) {
-          return collapsedHeight(context);
+          return collapsedHeight(context) +
+              QuranPlayerLayoutInsets.phoneMiniPlayerTopPadding(context) +
+              QuranPlayerLayoutInsets.phoneMiniPlayerNavGap(context);
         }
         return QuranPlayerLayoutInsets.phoneFooterSlotHeight(
               context,
@@ -1261,53 +1263,62 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     );
   }
 
-  /// Mini player anchored in the shell footer column (TripGlide dock style).
+  /// Mini player anchored in the shell footer column (pill above bottom nav).
   Widget _buildShellFooterMini(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TilawaDesignTokens tokens = theme.tokens;
     final TilawaAdaptiveShellTokens shellTokens =
         theme.componentTokens.adaptiveShell;
-    final TilawaMediaPlayerBarTokens barTokens =
-        theme.componentTokens.mediaPlayerBar;
     final double bottomSpacing = _shellFooterBottomSpacing(context);
-    final Color playerSurface = barTokens.shellBackgroundColor;
-    final Color dockOutline = shellTokens.bottomNavOutlineColor;
+    final double gapAboveNav = widget.hostAbsorbsBottomSafeArea
+        ? shellTokens.bottomNavVerticalMargin
+        : 0;
+    final double pillRadius = tokens.radiusPill(_miniPlayerHeight);
+
+    Widget miniBar = DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(pillRadius),
+        boxShadow: shellTokens.bottomNavShadowOpacity > 0
+            ? [
+                BoxShadow(
+                  color: theme.colorScheme.shadow.withValues(
+                    alpha: shellTokens.bottomNavShadowOpacity,
+                  ),
+                  blurRadius: shellTokens.bottomNavShadowBlur,
+                  offset: shellTokens.bottomNavShadowOffset,
+                ),
+              ]
+            : null,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(pillRadius),
+        child: SizedBox(
+          height: _miniPlayerHeight,
+          width: double.infinity,
+          child: _buildPlayerTree(
+            context,
+            hostRect:
+                Offset.zero &
+                Size(MediaQuery.sizeOf(context).width, _miniPlayerHeight),
+            overlaySize: MediaQuery.sizeOf(context),
+            showMiniInTree: true,
+            miniAnchoredInFooter: true,
+          ),
+        ),
+      ),
+    );
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        DecoratedBox(
-          decoration: BoxDecoration(
-            color: playerSurface,
-            border: Border(
-              top: BorderSide(
-                color: dockOutline,
-                width: tokens.borderWidthThin,
-              ),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: theme.colorScheme.shadow.withValues(
-                  alpha: tokens.opacityShadow,
-                ),
-                blurRadius: tokens.blurShadow,
-                offset: Offset(0, -tokens.shadowOffsetSmall.dy),
-              ),
-            ],
+        Padding(
+          padding: EdgeInsets.fromLTRB(
+            shellTokens.bottomNavHorizontalMargin,
+            shellTokens.bottomNavInternalPadding,
+            shellTokens.bottomNavHorizontalMargin,
+            gapAboveNav,
           ),
-          child: SizedBox(
-            height: _miniPlayerHeight,
-            width: double.infinity,
-            child: _buildPlayerTree(
-              context,
-              hostRect:
-                  Offset.zero &
-                  Size(MediaQuery.sizeOf(context).width, _miniPlayerHeight),
-              overlaySize: MediaQuery.sizeOf(context),
-              showMiniInTree: true,
-              miniAnchoredInFooter: true,
-            ),
-          ),
+          child: miniBar,
         ),
         if (bottomSpacing > 0)
           ColoredBox(
@@ -1454,6 +1465,9 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
                 onHorizontalDragUpdate: _onHorizontalDragUpdate,
                 onHorizontalDragEnd: _onHorizontalDragEnd,
                 onTap: expand,
+                onSubtitleTap: () =>
+                    QuranPlayerShellNavigation.openRecitersTab(context),
+                shellPillLayout: true,
                 onClose: _dismissWithUndo,
               )
             : null;
@@ -1542,6 +1556,12 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
                       onHorizontalDragUpdate: _onHorizontalDragUpdate,
                       onHorizontalDragEnd: _onHorizontalDragEnd,
                       onTap: expand,
+                      onSubtitleTap: miniAnchoredInFooter
+                          ? () => QuranPlayerShellNavigation.openRecitersTab(
+                              context,
+                            )
+                          : null,
+                      shellPillLayout: miniAnchoredInFooter,
                       onClose: _dismissWithUndo,
                     ),
               ),

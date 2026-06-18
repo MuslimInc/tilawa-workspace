@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-
 import 'package:tilawa_core/entities/audio.dart';
+import 'package:tilawa_core/utils/surah_names.dart';
 
 part 'surah_entity.freezed.dart';
 part 'surah_entity.g.dart';
@@ -20,15 +20,39 @@ abstract class SurahEntity with _$SurahEntity {
   factory SurahEntity.fromJson(Map<String, dynamic> json) =>
       _$SurahEntityFromJson(json);
 
-  // Convenience getters for easy access to AudioEntity properties
+  /// Audio URL used as the download key and playback identity.
   String get id => audio.id;
+
+  /// Locale-aware surah title from the audio metadata (player display).
   String get name => audio.title;
-  String get nameAr =>
-      audio.artist ??
-      ''; // Assuming artist field might contain Arabic name or handled elsewhere
-  String get nameEn => audio.title;
+
+  /// English transliteration when [surahNumber] is known.
+  String get nameEn {
+    final int? number = surahNumber;
+    if (number != null) {
+      return SurahNames.getEnglishSurahName(number);
+    }
+    return audio.title;
+  }
+
+  /// Arabic surah title when [surahNumber] is known.
+  String get nameAr {
+    final int? number = surahNumber;
+    if (number != null) {
+      return SurahNames.getArabicSurahName(number);
+    }
+    final dynamic stored = audio.extras?['nameAr'];
+    if (stored is String && stored.isNotEmpty) {
+      return stored;
+    }
+    return '';
+  }
+
+  /// Reciter display name — sourced from [AudioEntity.artist] for downloads.
+  String get reciterName => audio.artist ?? '';
+
+  /// Padded surah index derived from the audio id (e.g. `001`).
   String get formattedId {
-    // try to extract numeric part from ID if extras are missing (e.g. in tests)
     try {
       final String basename = id.split('/').last.split('.').first;
       final int? num = int.tryParse(basename);
@@ -39,5 +63,22 @@ abstract class SurahEntity with _$SurahEntity {
     return '';
   }
 
-  String get reciterName => audio.artist ?? '';
+  /// Surah number from [AudioEntity.extras] or a numeric audio id basename.
+  int? get surahNumber {
+    final Map<String, dynamic>? extras = audio.extras;
+    if (extras != null) {
+      final dynamic raw = extras['surahId'];
+      if (raw is int) {
+        return raw;
+      }
+      if (raw is String) {
+        return int.tryParse(raw);
+      }
+    }
+    final String padded = formattedId;
+    if (padded.isEmpty) {
+      return null;
+    }
+    return int.tryParse(padded);
+  }
 }
