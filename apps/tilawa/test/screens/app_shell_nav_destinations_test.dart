@@ -4,7 +4,7 @@ import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa/screens/app_shell_nav_destinations.dart';
 
 void main() {
-  testWidgets('phone shell nav lists six TripGlide-style items', (
+  testWidgets('phone shell nav lists six Tilawa shell items', (
     tester,
   ) async {
     late AppLocalizations l10n;

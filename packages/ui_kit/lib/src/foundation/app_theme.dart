@@ -239,7 +239,7 @@ class AppTheme {
       surfaceTint: Colors.transparent,
       surfaceContainerLowest: AppColors.lightCanvas,
       surfaceContainerLow: AppColors.lightSurface,
-      // TripGlide neutral canvas + white card ramp.
+      // Warm parchment canvas + white card ramp.
       surfaceContainer: AppColors.lightCanvas,
       surfaceContainerHigh: AppColors.lightSurfaceContainerHighBase,
       surfaceContainerHighest: AppColors.lightSurfaceContainerHighestBase,

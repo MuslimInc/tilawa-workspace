@@ -548,28 +548,6 @@ class TilawaAdaptiveShellTokens {
     );
   }
 
-  static double _phoneBottomNavLayoutHeight({
-    required double navButtonMinHeight,
-    required double navButtonVerticalPadding,
-    required double navButtonIconSize,
-    required double navButtonSelectedCenterScale,
-    required double navButtonGap,
-    required double navButtonLabelFontSize,
-    required double navButtonSelectionContainerVerticalPadding,
-    required TextScaler textScaler,
-  }) {
-    const double labelLineHeight = 1.15;
-    final double labelBlock =
-        textScaler.scale(navButtonLabelFontSize) * labelLineHeight;
-    final double iconBlock = textScaler.scale(navButtonIconSize);
-    final double pillVerticalInset =
-        2 * navButtonSelectionContainerVerticalPadding;
-    return math.max(
-      textScaler.scale(navButtonMinHeight),
-      iconBlock + navButtonGap + labelBlock + pillVerticalInset,
-    );
-  }
-
   factory TilawaAdaptiveShellTokens.defaults() {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: AppColors.defaultPrimary,
@@ -686,10 +664,10 @@ class TilawaAdaptiveShellTokens {
   }
 
   /// Light phone nav uses an opaque white pill so the floating bar reads
-  /// clearly on the TripGlide canvas. Dark keeps a filled bar for contrast.
+  /// clearly on the parchment canvas. Dark keeps a filled bar for contrast.
   static Color _bottomNavBackgroundColor(ColorScheme colorScheme) {
     if (colorScheme.brightness == Brightness.light) {
-      return AppColors.tripGlideSurface;
+      return AppColors.lightSurface;
     }
     return Color.lerp(
           AppColors.darkSurfaceContainerHighBase,
@@ -704,7 +682,7 @@ class TilawaAdaptiveShellTokens {
     Color bottomNavBackgroundColor,
   ) {
     if (colorScheme.brightness == Brightness.light) {
-      return AppColors.tripGlideCanvasElevated;
+      return AppColors.lightSurfaceContainerHighBase;
     }
     final tintOpacity = 0.12;
     final base = bottomNavBackgroundColor.a == 0

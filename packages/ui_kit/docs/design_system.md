@@ -60,11 +60,11 @@ switch ON. **Not** for scaffold fills (use parchment canvas).
 
 | `AppColors` | Hex | `ColorScheme` / usage |
 |-------------|-----|------------------------|
-| `lightCanvas` / `lightBackground` | `#FFFBF5` | Scaffold, `surfaceContainerLowest` |
+| `lightCanvas` / `lightBackground` | `#F7F7F5` | Scaffold, `surfaceContainerLowest` |
 | `lightSurface` | `#FFFFFF` | Cards, sheets, dialogs |
 | `lightInk` | `#30343C` | `onSurface` |
 | `lightMute` | `#78736E` | Muted labels (`onSurfaceVariant`) |
-| `lightSurfaceContainerHighBase` | `#F0E8DC` | Idle chips, `surfaceContainerHigh` |
+| `lightSurfaceContainerHighBase` | `#EFEDE8` | Idle chips, `surfaceContainerHigh` |
 | `featuredGradientStart` / `End` | `#FFD28E` / `#FF9E44` | Last Read / hero gold cards |
 
 Featured cards use the gold gradient; standard cards use white + warm shadow.

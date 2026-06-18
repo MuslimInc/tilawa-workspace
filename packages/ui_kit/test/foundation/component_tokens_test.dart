@@ -697,7 +697,7 @@ void main() {
       expect(scaled, greaterThan(unit));
     });
 
-    test('fromColorScheme uses stable neutral light bottom nav chrome', () {
+    test('fromColorScheme uses stable warm light bottom nav chrome', () {
       const scheme = ColorScheme.light(
         primary: Color(0xFF006A60),
         primaryContainer: Color(0xFFD8F0EC),
@@ -706,13 +706,13 @@ void main() {
       );
       final tokens = TilawaAdaptiveShellTokens.fromColorScheme(scheme);
 
-      expect(tokens.bottomNavBackgroundColor, AppColors.tripGlideSurface);
+      expect(tokens.bottomNavBackgroundColor, AppColors.lightSurface);
       expect(tokens.bottomNavShadowOpacity, 0.04);
       expect(tokens.bottomNavShadowBlur, 8);
       expect(tokens.bottomNavShadowOffset, const Offset(0, 2));
       expect(
         tokens.navButtonSelectedBackgroundColor,
-        AppColors.tripGlideCanvasElevated,
+        AppColors.lightSurfaceContainerHighBase,
       );
       expect(
         tokens.sideRailIndicatorColor,
@@ -1103,23 +1103,23 @@ void main() {
   });
 
   group('TilawaHomeDashboardCardTokens', () {
-    test('fromColorScheme uses TripGlide neutral featured card stops', () {
+    test('fromColorScheme uses Tilawa warm featured card stops', () {
       final ColorScheme scheme = ColorScheme.fromSeed(
         seedColor: AppColors.defaultPrimary,
         primary: AppColors.defaultPrimary,
       );
       final tokens = TilawaHomeDashboardCardTokens.fromColorScheme(scheme);
 
-      expect(tokens.gradientStart, AppColors.tripGlideSurface);
-      expect(tokens.gradientEnd, AppColors.tripGlideSurface);
-      expect(tokens.foregroundColor, AppColors.tripGlideInk);
+      expect(tokens.gradientStart, AppColors.featuredGradientStart);
+      expect(tokens.gradientEnd, AppColors.featuredGradientEnd);
+      expect(tokens.foregroundColor, AppColors.featuredGradientForeground);
       expect(
         tokens.splashColor,
-        AppColors.tripGlideInk.withValues(alpha: 0.08),
+        AppColors.primaryBrown.withValues(alpha: 0.08),
       );
       expect(
         tokens.highlightColor,
-        AppColors.tripGlideInk.withValues(alpha: 0.04),
+        AppColors.primaryBrown.withValues(alpha: 0.04),
       );
       expect(tokens.travelSheetSurface, AppColors.homeTravelSheetSurface);
       expect(tokens.travelSearchFieldFill, AppColors.homeTravelSearchFill);

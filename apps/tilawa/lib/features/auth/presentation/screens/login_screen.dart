@@ -23,8 +23,8 @@ import '../bloc/auth_bloc.dart';
 import '../services/google_sign_in_interactive_launcher.dart';
 import '../services/login_auto_sign_in_scheduler.dart';
 
-/// Warm brown login canvas — distinct from the runtime sage primary.
-const Color _kLoginAccent = AppColors.tripGlideInk;
+/// Warm brown login canvas aligned with the brand-locked primary.
+const Color _kLoginAccent = AppColors.defaultPrimary;
 
 void _logGoogleSignInButton(String message) {
   logger.d('[GoogleSignInButton] $message');

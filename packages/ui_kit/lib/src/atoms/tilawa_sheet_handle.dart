@@ -53,7 +53,6 @@ class TilawaSheetHandle extends StatelessWidget {
     }
 
     final double pillHeight = height ?? componentTokens.height;
-    final double pillWidth = width ?? componentTokens.width;
     final BorderRadius borderRadius = BorderRadius.circular(
       designTokens.resolveRadius(
         family: TilawaRadiusFamily.pill,

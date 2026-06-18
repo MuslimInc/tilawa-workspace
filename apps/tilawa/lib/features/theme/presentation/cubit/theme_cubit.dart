@@ -15,14 +15,14 @@ enum PrimaryColorSource { preset, custom }
 /// Must stay in sync with [PrimaryColorPreset.defaultPreset.valueArgb]; the
 /// constructor uses a literal here because Dart constant-list initialisers
 /// can't call a non-trivial getter chain.
-const int _kDefaultPrimaryColorArgb = 0xFF212529;
+const int _kDefaultPrimaryColorArgb = 0xFF8B5E3C;
 
 class ThemeState extends Equatable {
   const ThemeState({
     required this.mode,
     this.primaryColorArgb = _kDefaultPrimaryColorArgb,
     this.primaryColorSource = PrimaryColorSource.preset,
-    this.primaryPresetId = 'ink',
+    this.primaryPresetId = 'brown',
     this.useSystemTheme = false,
     this.preset = AppThemePreset.defaultMode,
   });

@@ -20,7 +20,7 @@ brown + gold system.
 
 | Word | What it means in pixels |
 |---|---|
-| **Warm** | Parchment canvas (`#FFFBF5`), brown ink (`#8B5E3C`), gold featured cards (`#FFD28E`→`#FF9E44`). No cool porcelain, no sage-green chrome. |
+| **Warm** | Soft neutral canvas (`#F7F7F5`), brown ink (`#8B5E3C`), gold featured cards (`#FFD28E`→`#FF9E44`). No cool porcelain, no sage-green chrome. |
 | **Clear** | One primary accent per screen. Generous radius (20–24 dp cards). Readable metadata in warm grey-brown. |
 | **Faithful** | Arabic typography care (`textHeightLoose`), reverent reader surfaces, no stereotype chrome (mosques/crescents in app bars). |
 
@@ -44,7 +44,7 @@ brown + gold system.
 |---|---|---|
 | **Brown ink** | `colorScheme.primary` (`#8B5E3C`) | CTAs, active nav, selected pills/segments, link icons |
 | **Gold gilding** | `colorScheme.tertiary` / featured gradient stops | Hero cards, Last Read, surah header banners — not purchase buttons |
-| **Parchment** | `colorScheme.surfaceContainerLowest` (`#FFFBF5`) | Scaffold, canvas |
+| **Parchment** | `colorScheme.surfaceContainerLowest` (`#F7F7F5`) | Scaffold, canvas |
 | **Card white** | `colorScheme.surface` | List rows, settings tiles |
 | **Warm beige** | `colorScheme.surfaceContainerHigh` | Idle chips, search rests |
 | **Hairline** | `colorScheme.outlineVariant` | Dividers at `borderWidthThin` |

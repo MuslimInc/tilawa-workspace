@@ -52,14 +52,14 @@ Light surfaces use a **warm parchment** family — cream canvas, white cards, be
 
 | Token / role | Hex (base) | Notes |
 |--------------|------------|--------|
-| Canvas / scaffold | `#FFFBF5` | `lightCanvas` / `lightBackground` |
+| Canvas / scaffold | `#F7F7F5` | `lightCanvas` / `lightBackground` |
 | Surface (cards, sheets) | `#FFFFFF` | `lightSurface` |
 | Ink / onSurface | `#30343C` | `lightInk` |
 | Body / mute / ash | `#30343C`, `#78736E`, `#A89B8A` | Secondary copy |
-| Container | `#FFFBF5` | `lightSurfaceContainer` (matches canvas) |
-| High (idle chips, search fill) | `#F0E8DC` | `lightSurfaceContainerHighBase` → `surfaceContainerHigh` |
-| Highest / hairline | `#E8DFD0` | Dividers, `outlineVariant` |
-| Outline (strong) | `#D9CFC0` | `lightOutline` |
+| Container | `#F7F7F5` | `lightSurfaceContainer` (matches canvas) |
+| High (idle chips, search fill) | `#EFEDE8` | `lightSurfaceContainerHighBase` → `surfaceContainerHigh` |
+| Highest / hairline | `#E4E0D8` | Dividers, `outlineVariant` |
+| Outline (strong) | `#D5CEC3` | `lightOutline` |
 
 Featured cards (Last Read) use gold gradient `#FFD28E` → `#FF9E44` via `AppColors.featuredGradientStart` / `featuredGradientEnd`.
 

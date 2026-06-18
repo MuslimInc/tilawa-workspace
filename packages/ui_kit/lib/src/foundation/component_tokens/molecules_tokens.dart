@@ -1294,7 +1294,7 @@ class TilawaPermissionBannerTokens {
 
 /// Component tokens for the Home next-prayer hero card gradient shell.
 ///
-/// TripGlide neutral canvas — flat off-white stops in [AppColors].
+/// Warm parchment canvas — restrained stops in [AppColors].
 @immutable
 class TilawaHomeNextPrayerHeroTokens {
   const TilawaHomeNextPrayerHeroTokens({
@@ -1482,7 +1482,7 @@ class TilawaHomeNextPrayerHeroTokens {
 /// Home dashboard card surface — a soft [ColorScheme.primaryContainer] wash so
 /// Token-backed featured dashboard cards (Last Read, resume hubs).
 ///
-/// Uses TripGlide neutral surfaces for featured Home dashboard cards.
+/// Uses Tilawa warm brand surfaces for featured Home dashboard cards.
 @immutable
 class TilawaHomeDashboardCardTokens {
   const TilawaHomeDashboardCardTokens({
@@ -1531,11 +1531,11 @@ class TilawaHomeDashboardCardTokens {
     ColorScheme colorScheme,
   ) {
     return TilawaHomeDashboardCardTokens(
-      gradientStart: AppColors.tripGlideSurface,
-      gradientEnd: AppColors.tripGlideSurface,
-      foregroundColor: AppColors.tripGlideInk,
-      splashColor: AppColors.tripGlideInk.withValues(alpha: 0.08),
-      highlightColor: AppColors.tripGlideInk.withValues(alpha: 0.04),
+      gradientStart: AppColors.featuredGradientStart,
+      gradientEnd: AppColors.featuredGradientEnd,
+      foregroundColor: AppColors.featuredGradientForeground,
+      splashColor: AppColors.primaryBrown.withValues(alpha: 0.08),
+      highlightColor: AppColors.primaryBrown.withValues(alpha: 0.04),
       travelSheetSurface: AppColors.homeTravelSheetSurface,
       travelSearchFieldFill: AppColors.homeTravelSearchFill,
       travelSectionLinkColor: AppColors.homeTravelSectionLink,

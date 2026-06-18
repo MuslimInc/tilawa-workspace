@@ -9,7 +9,7 @@ import 'package:tilawa/features/theme/presentation/cubit/theme_cubit.dart';
 extension ThemeStateMaterial on ThemeState {
   /// The resolved primary color used to build [AppTheme].
   ///
-  /// Production builds force the brand-locked TripGlide ink accent (see
+  /// Production builds force the brand-locked warm brown accent (see
   /// `Env.kShowColorPicker` flag). Stored
   /// per-user state is preserved verbatim so dev/QA builds with
   /// `--dart-define=TILAWA_SHOW_COLOR_PICKER=true` can still preview the

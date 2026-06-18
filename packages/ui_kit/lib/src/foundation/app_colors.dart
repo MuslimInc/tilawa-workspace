@@ -3,9 +3,13 @@ import 'package:flutter/material.dart';
 /// Centralized app color constants.
 ///
 /// The Tilawa palette is intentionally **small and calm**:
-/// TripGlide neutral ink ([tripGlideInk] `#212529`), off-white canvas
-/// ([tripGlideCanvas] `#F4F6F8`), and white elevated surfaces (`#FFFFFF`).
-/// Legacy preset hexes remain for dev/QA color picker migration only.
+/// soft neutral canvas ([tripGlideCanvas] `#F7F7F5`), brown primary ink
+/// ([primaryBrown] `#8B5E3C`), neutral text ink ([tripGlideInk] `#30343C`),
+/// and restrained gold featured surfaces.
+///
+/// Some `tripGlide*` names remain as compatibility aliases for the current
+/// travel-inspired Home layout. Their values now resolve to Tilawa's warm
+/// brand palette.
 ///
 /// All hex values used by `AppTheme` to assemble `ColorScheme` live here
 /// so there is exactly one source of truth. Product widgets should read
@@ -55,41 +59,46 @@ abstract final class AppColors {
 
   /// Default primary color used throughout the app.
   ///
-  /// TripGlide neutral ink (`#212529`) for the travel-home visual system.
-  static const Color defaultPrimary = tripGlideInk;
+  /// Warm brown brand ink (`#8B5E3C`) for CTAs, active nav, and selected
+  /// controls.
+  static const Color defaultPrimary = primaryBrown;
 
-  /// TripGlide / travel-home ink — headings, active pills, icons (`#212529`).
-  static const Color tripGlideInk = Color(0xFF212529);
+  /// Warm neutral text ink for headings and body copy (`#30343C`).
+  ///
+  /// Compatibility alias retained for existing travel-inspired Home widgets.
+  static const Color tripGlideInk = Color(0xFF30343C);
 
-  /// TripGlide screen canvas — off-white (`#F4F6F8`).
-  static const Color tripGlideCanvas = Color(0xFFF4F6F8);
+  /// Soft neutral screen canvas (`#F7F7F5`).
+  ///
+  /// Compatibility alias retained for existing travel-inspired Home widgets.
+  static const Color tripGlideCanvas = Color(0xFFF7F7F5);
 
-  /// TripGlide elevated surfaces — cards, search (`#FFFFFF`).
+  /// Elevated surfaces — cards, search (`#FFFFFF`).
   static const Color tripGlideSurface = Color(0xFFFFFFFF);
 
-  /// TripGlide secondary copy (`#6C757D`).
-  static const Color tripGlideMuted = Color(0xFF6C757D);
+  /// Warm secondary copy (`#78736E`).
+  static const Color tripGlideMuted = Color(0xFF78736E);
 
-  /// Slightly deeper canvas for subtle destination headers (`#EEEFF1`).
-  static const Color tripGlideCanvasElevated = Color(0xFFEEEFF1);
+  /// Warm beige idle tier for chips, search rests, and header bands.
+  static const Color tripGlideCanvasElevated = Color(0xFFEFEDE8);
 
-  /// Neutral dusk hero canvas (`#E9EAEC`).
-  static const Color tripGlideCanvasDusk = Color(0xFFE9EAEC);
+  /// Warm hairline / highest surface tier.
+  static const Color tripGlideCanvasDusk = Color(0xFFE4E0D8);
 
-  /// Neutral night hero canvas (`#E3E6E8`).
-  static const Color tripGlideCanvasNight = Color(0xFFE3E6E8);
+  /// Deeper warm night/dim surface tier.
+  static const Color tripGlideCanvasNight = Color(0xFFD5CEC3);
 
   /// Top stop for the brand launch gradient.
   static const Color brandGradientTop = tripGlideCanvas;
 
   /// Bottom stop for the brand launch gradient.
-  static const Color brandGradientBottom = tripGlideInk;
+  static const Color brandGradientBottom = primaryBrown;
 
-  /// Featured-card surface — flat white (TripGlide cards).
-  static const Color featuredGradientStart = tripGlideSurface;
+  /// Featured-card gold surface — ceremonial, not paywall chrome.
+  static const Color featuredGradientStart = Color(0xFFFFD28E);
 
-  /// Featured-card surface lower stop — neutral grey band.
-  static const Color featuredGradientEnd = tripGlideCanvasElevated;
+  /// Featured-card gold surface lower stop.
+  static const Color featuredGradientEnd = Color(0xFFFF9E44);
 
   /// Foreground on featured / elevated cards.
   static const Color featuredGradientForeground = tripGlideInk;
@@ -106,16 +115,16 @@ abstract final class AppColors {
   /// Instruction chip fill — neutral canvas.
   static const Color instructionChipFill = tripGlideCanvas;
 
-  /// Travel-dashboard destination header tint — neutral grey (`#EEEFF1`).
+  /// Travel-layout destination header tint — warm beige.
   static const Color homeTravelDestinationTintNeutral = tripGlideCanvasElevated;
 
-  /// Off-white sheet on the Home travel dashboard (`#F4F6F8`).
+  /// Neutral sheet on the Home travel-inspired dashboard (`#F7F7F5`).
   static const Color homeTravelSheetSurface = tripGlideCanvas;
 
   /// White search field on the Home travel dashboard (`#FFFFFF`).
   static const Color homeTravelSearchFill = tripGlideSurface;
 
-  /// Neutral grey header bands for discover / carousel destination cards.
+  /// Warm header bands for discover / carousel destination cards.
   static const List<Color> homeTravelDestinationHeaderTints = <Color>[
     tripGlideCanvas,
     tripGlideCanvasElevated,
@@ -123,10 +132,10 @@ abstract final class AppColors {
   ];
 
   /// Icons on travel destination header bands.
-  static const Color homeTravelDestinationIcon = tripGlideInk;
+  static const Color homeTravelDestinationIcon = primaryBrown;
 
   /// Section links (See all) on the travel Home dashboard.
-  static const Color homeTravelSectionLink = tripGlideInk;
+  static const Color homeTravelSectionLink = primaryBrown;
 
   /// Top-start stop for the Home hero **day** phase — flat neutral canvas.
   static const Color homeNextPrayerGradientTop = tripGlideCanvas;
@@ -152,8 +161,8 @@ abstract final class AppColors {
   /// Foreground on the Home hero **night** canvas.
   static const Color homeNextPrayerGradientNightForeground = tripGlideInk;
 
-  /// Launch / splash canvas — TripGlide ink.
-  static const Color launchSplashBackground = tripGlideInk;
+  /// Launch / splash canvas — warm brown brand ink.
+  static const Color launchSplashBackground = primaryBrown;
 
   /// Wordmark and progress on launch surfaces (`#FFFFFF`).
   static const Color launchSplashForeground = Color(0xFFFFFFFF);
@@ -163,11 +172,11 @@ abstract final class AppColors {
   static const double launchSplashLogoSize = 288;
 
   // ---------------------------------------------------------------------------
-  // Light neutral ramp — TripGlide off-white canvas + white cards
-  // (#F4F6F8 / #FFFFFF / charcoal ink). One temperature family end-to-end.
+  // Light neutral ramp — soft neutral canvas + white cards
+  // (#F7F7F5 / #FFFFFF / warm neutral ink). One temperature family end-to-end.
   // ---------------------------------------------------------------------------
 
-  /// App canvas / scaffold — TripGlide off-white (`#F4F6F8`).
+  /// App canvas / scaffold — soft neutral (`#F7F7F5`).
   ///
   /// Cards use [lightSurface] (`#FFFFFF`) for quiet lift with soft shadows.
   static const Color lightCanvas = tripGlideCanvas;
@@ -178,19 +187,19 @@ abstract final class AppColors {
   /// Raised cards, sheets, dialogs, and app bars on the neutral canvas.
   static const Color lightSurface = tripGlideSurface;
 
-  /// Primary ink on surfaces (`#212529`).
+  /// Primary ink on surfaces (`#30343C`).
   static const Color lightInk = tripGlideInk;
 
-  /// Body / secondary labels (`#212529`).
+  /// Body / secondary labels (`#30343C`).
   static const Color lightBody = tripGlideInk;
 
-  /// Muted labels (`#6C757D`).
+  /// Muted labels (`#78736E`).
   static const Color lightMute = tripGlideMuted;
 
   /// Ash icons / hints — muted neutral.
   static const Color lightAsh = tripGlideMuted;
 
-  /// Light upper container / idle chip — neutral grey (`#EEEFF1`).
+  /// Light upper container / idle chip — quiet warm neutral (`#EFEDE8`).
   ///
   /// Mapped to [ColorScheme.surfaceContainerHigh] in [AppTheme] without
   /// primary harmonization so unselected controls stay neutral.
@@ -217,14 +226,14 @@ abstract final class AppColors {
   /// Section / list canvas tier — matches [lightCanvas].
   static const Color lightSurfaceContainer = lightCanvas;
 
-  /// Light top container tier — cool hairline (`#E9EAEC`).
+  /// Light top container tier — quiet warm hairline (`#E4E0D8`).
   static const Color lightSurfaceContainerHighestBase = tripGlideCanvasDusk;
 
-  /// Hairline dividers — cool neutral.
-  static const Color lightHairline = Color(0xFFE9EAEC);
+  /// Hairline dividers — warm neutral.
+  static const Color lightHairline = tripGlideCanvasDusk;
 
-  /// Default outline for fields and dividers (`#DEE2E6`).
-  static const Color lightOutline = Color(0xFFDEE2E6);
+  /// Default outline for fields and dividers (`#D5CEC3`).
+  static const Color lightOutline = tripGlideCanvasNight;
 
   // ---------------------------------------------------------------------------
   // Dark neutral ramp.
@@ -289,17 +298,17 @@ abstract final class AppColors {
   // AppTheme — dark Flex scheme refinement.
   // ---------------------------------------------------------------------------
 
-  /// Lifted companion of [defaultPrimary] for contrast on dark surfaces.
-  static const Color darkDefaultPrimary = Color(0xFFADB5BD);
+  /// Lifted warm companion of [defaultPrimary] for contrast on dark surfaces.
+  static const Color darkDefaultPrimary = Color(0xFFD6B08A);
 
   /// Historical reference: dark primary container paired with
   /// [darkDefaultPrimary]. [AppTheme] derives it from selected primary instead.
-  static const Color darkDefaultPrimaryContainer = Color(0xFF143E39);
+  static const Color darkDefaultPrimaryContainer = Color(0xFF3D2A1D);
 
   static const Color darkSecondary = Color(0xFF9DB5A8);
   static const Color darkSecondaryContainer = Color(0xFF2A3530);
-  static const Color darkTertiary = Color(0xFFB0B8B4);
-  static const Color darkTertiaryContainer = Color(0xFF3A3F3C);
+  static const Color darkTertiary = Color(0xFFD6B86A);
+  static const Color darkTertiaryContainer = Color(0xFF3D3015);
 
   // ---------------------------------------------------------------------------
   // True-black mode (OLED-friendly dark refinement).
@@ -358,7 +367,7 @@ abstract final class AppColors {
   static const Color brandSecondary = lightSchemeSecondary;
 
   /// Brand tertiary used by FlexColorScheme assembly only.
-  static const Color brandTertiary = tripGlideMuted;
+  static const Color brandTertiary = Color(0xFF8C681F);
 }
 
 /// Fixed “studio” palette for the **share audio / reel composer** (dark

@@ -81,7 +81,7 @@ void main() {
     });
 
     test(
-      'light TripGlide canvas: neutral scaffold, white cards, grey idle tier',
+      'light parchment canvas: warm scaffold, white cards, beige idle tier',
       () {
         final ThemeData theme = AppTheme.getLightTheme(
           primaryColor: AppColors.defaultPrimary,

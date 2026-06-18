@@ -29,14 +29,14 @@ enum PrimaryColorPreset {
 
   /// Default primary preset for fresh installs and corrupt-payload fallback.
   ///
-  /// Brand-locked to TripGlide ink (`#212529`) for the neutral travel-home
-  /// visual system (see `Env.kShowColorPicker`).
-  static const PrimaryColorPreset defaultPreset = PrimaryColorPreset.ink;
+  /// Brand-locked to warm brown (`#8B5E3C`) for the Tilawa parchment system
+  /// (see `Env.kShowColorPicker`).
+  static const PrimaryColorPreset defaultPreset = PrimaryColorPreset.brown;
 
   /// Alias for [defaultPreset]. Use this name at call sites whose intent is
   /// "I want the immutable brand color," so readers don't have to know that
   /// the default preset *is* the brand-locked preset.
-  static const PrimaryColorPreset brandLocked = PrimaryColorPreset.ink;
+  static const PrimaryColorPreset brandLocked = PrimaryColorPreset.brown;
 
   static PrimaryColorPreset? findById(String? id) {
     if (id == null) return null;
