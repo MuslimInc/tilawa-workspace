@@ -23,10 +23,10 @@ class TilawaSwitch extends StatelessWidget {
   final Color? activeTrackColor;
   final Color? activeThumbColor;
 
-  /// Visual bounds for [Switch.adaptive] inside the 44×44 dp hit box.
+  /// Visual bounds for [Switch.adaptive] inside the 48×48 dp hit box.
   final Size visualSlotSize;
 
-  /// When set, the parent row only reserves this height while the 44×44 dp hit
+  /// When set, the parent row only reserves this height while the 48×48 dp hit
   /// target overflows without expanding sibling rows (e.g. settings list rows).
   final double? layoutSlotHeight;
 

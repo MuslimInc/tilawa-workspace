@@ -6,7 +6,9 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 void main() {
   testWidgets('odd last item keeps standard cell width in RTL', (tester) async {
     const double viewportWidth = 360;
-    final theme = AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary);
+    final theme = AppTheme.getLightTheme(
+      primaryColor: AppColors.defaultPrimary,
+    );
     final double gap = theme.tokens.spaceMedium;
 
     await tester.pumpWidget(
@@ -47,7 +49,10 @@ void main() {
     expect(second.size.height, closeTo(third.size.height, 1));
 
     // Lone last tile aligns with the first column (right in RTL).
-    expect(third.localToGlobal(Offset.zero).dx, closeTo(first.localToGlobal(Offset.zero).dx, 1));
+    expect(
+      third.localToGlobal(Offset.zero).dx,
+      closeTo(first.localToGlobal(Offset.zero).dx, 1),
+    );
   });
 }
 

@@ -10,18 +10,25 @@ class HomeShortcutGridView extends StatelessWidget {
     super.key,
     required this.entries,
     this.columnCount,
+    this.travelStyle = false,
   });
 
   final List<HomeShortcutEntry> entries;
   final int? columnCount;
+  final bool travelStyle;
 
   @override
   Widget build(BuildContext context) {
     return HomeDashboardShortcutGrid(
       columnCount: columnCount,
+      tileHeight: travelStyle ? homeTravelGridTileHeight(context) : null,
       itemCount: entries.length,
       itemBuilder: (context, index) {
-        return HomeDashboardShortcutTile(entry: entries[index]);
+        return HomeDashboardShortcutTile(
+          entry: entries[index],
+          travelStyle: travelStyle,
+          travelTintIndex: index,
+        );
       },
     );
   }

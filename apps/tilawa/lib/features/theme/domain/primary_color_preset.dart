@@ -12,6 +12,7 @@ enum PrimaryColorPreset {
   sage(id: 'sage', value: AppColors.primarySage),
   gold(id: 'gold', value: AppColors.primaryGold),
   brown(id: 'brown', value: AppColors.primaryBrown),
+  ink(id: 'ink', value: AppColors.tripGlideInk),
   purple(id: 'purple', value: AppColors.primaryPurple);
 
   const PrimaryColorPreset({required this.id, required this.value});
@@ -28,14 +29,14 @@ enum PrimaryColorPreset {
 
   /// Default primary preset for fresh installs and corrupt-payload fallback.
   ///
-  /// Brand-locked to Brown so the user-visible accent matches the warm
-  /// parchment mockup (see `docs/tilawa_brand.md` and `Env.kShowColorPicker`).
-  static const PrimaryColorPreset defaultPreset = PrimaryColorPreset.brown;
+  /// Brand-locked to TripGlide ink (`#212529`) for the neutral travel-home
+  /// visual system (see `Env.kShowColorPicker`).
+  static const PrimaryColorPreset defaultPreset = PrimaryColorPreset.ink;
 
   /// Alias for [defaultPreset]. Use this name at call sites whose intent is
   /// "I want the immutable brand color," so readers don't have to know that
   /// the default preset *is* the brand-locked preset.
-  static const PrimaryColorPreset brandLocked = PrimaryColorPreset.brown;
+  static const PrimaryColorPreset brandLocked = PrimaryColorPreset.ink;
 
   static PrimaryColorPreset? findById(String? id) {
     if (id == null) return null;

@@ -25,6 +25,7 @@ class HomeAdaptiveShortcuts extends StatelessWidget {
       return HomeShortcutGridView(
         entries: gridEntries,
         columnCount: gridColumnCount,
+        travelStyle: true,
       );
     }
     return listChild;

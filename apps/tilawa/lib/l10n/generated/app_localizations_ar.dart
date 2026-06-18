@@ -82,7 +82,16 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get homeExploreTitle => 'المزيد';
+  String get homeExploreTitle => 'اكتشف';
+
+  @override
+  String get homeSearchHint => 'ابحث في السور أو الأجزاء أو الصفحة';
+
+  @override
+  String get homeFeaturedTitle => 'مختارة لك';
+
+  @override
+  String get homePrayerAlertsAction => 'أوقات الصلاة والتنبيهات';
 
   @override
   String get homeTodayTitle => 'اليوم';
@@ -1131,6 +1140,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get colorBrown => 'بني';
+
+  @override
+  String get colorInk => 'فحمي';
 
   @override
   String get colorPurple => 'أرجواني';

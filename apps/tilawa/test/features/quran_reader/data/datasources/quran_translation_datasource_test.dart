@@ -29,8 +29,7 @@ void main() {
       final String raw = await rootBundle.loadString(
         'assets/data/translations/en_sahih.json',
       );
-      final Map<String, dynamic> json =
-          jsonDecode(raw) as Map<String, dynamic>;
+      final Map<String, dynamic> json = jsonDecode(raw) as Map<String, dynamic>;
 
       expect(json['source'], 'qul.tarteel.ai');
       expect(json['name'], 'Saheeh International');
@@ -38,20 +37,22 @@ void main() {
     });
 
     test('returns all ayahs for a surah', () async {
-      final Map<int, String> translations = await dataSource.getSurahTranslations(
-        surahNumber: 1,
-        language: 'en',
-      );
+      final Map<int, String> translations = await dataSource
+          .getSurahTranslations(
+            surahNumber: 1,
+            language: 'en',
+          );
 
       expect(translations.length, 7);
       expect(translations[1], isNotNull);
     });
 
     test('returns empty map for unsupported languages', () async {
-      final Map<int, String> translations = await dataSource.getSurahTranslations(
-        surahNumber: 1,
-        language: 'fr',
-      );
+      final Map<int, String> translations = await dataSource
+          .getSurahTranslations(
+            surahNumber: 1,
+            language: 'fr',
+          );
 
       expect(translations, isEmpty);
     });

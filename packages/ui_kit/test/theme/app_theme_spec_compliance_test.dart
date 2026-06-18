@@ -22,10 +22,10 @@ void main() {
         final TilawaDesignTokens? design = theme
             .extension<TilawaDesignTokens>();
         expect(design, isNotNull);
-        expect(design!.opacityShadow, 0.12);
-        expect(design.opacityShadowStrong, 0.18);
+        expect(design!.opacityShadow, 0.04);
+        expect(design.opacityShadowStrong, 0.08);
         expect(design.shadowOffsetSmall, const Offset(0, 1));
-        expect(design.shadowOffsetMedium, const Offset(0, 6));
+        expect(design.shadowOffsetMedium, const Offset(0, 2));
 
         expect(theme.extension<TilawaComponentTokens>(), isNotNull);
 
@@ -81,7 +81,7 @@ void main() {
     });
 
     test(
-      'light warm canvas: parchment scaffold, white cards, warm beige idle tier',
+      'light TripGlide canvas: neutral scaffold, white cards, grey idle tier',
       () {
         final ThemeData theme = AppTheme.getLightTheme(
           primaryColor: AppColors.defaultPrimary,

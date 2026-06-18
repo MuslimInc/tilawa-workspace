@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/athkar/domain/pinned_athkar_display_order.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_card.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_section_link.dart';
+import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_featured_ritual_card.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_pinned_athkar_group.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -13,7 +15,14 @@ import '../cubit/pinned_athkar_cubit.dart';
 import '../cubit/pinned_athkar_state.dart';
 
 class PinnedAthkarHomeSection extends StatelessWidget {
-  const PinnedAthkarHomeSection({super.key});
+  const PinnedAthkarHomeSection({
+    super.key,
+    this.hideContextualFeatured = false,
+  });
+
+  /// When true, the contextual featured card is omitted (shown in
+  /// [HomeTodayFeaturedCarousel] instead).
+  final bool hideContextualFeatured;
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +56,7 @@ class PinnedAthkarHomeSection extends StatelessWidget {
               _PinnedAthkarQuickAccess(
                 categories: state.pinnedCategories,
                 onEdit: () => _showPinnedAthkarPicker(context),
+                hideContextualFeatured: hideContextualFeatured,
               ),
           ],
         );
@@ -84,6 +94,9 @@ class _PinnedAthkarSectionHeader extends StatelessWidget {
         Expanded(
           child: TilawaSectionTitle(title: context.l10n.homeAthkarRitualsTitle),
         ),
+        HomeSeeAllLink(
+          onPressed: () => const AthkarCategoriesRoute().push(context),
+        ),
         TilawaIconActionButton(
           icon: Icons.edit_outlined,
           onTap: onEdit,
@@ -100,10 +113,12 @@ class _PinnedAthkarQuickAccess extends StatelessWidget {
   const _PinnedAthkarQuickAccess({
     required this.categories,
     required this.onEdit,
+    this.hideContextualFeatured = false,
   });
 
   final List<AthkarCategory> categories;
   final VoidCallback onEdit;
+  final bool hideContextualFeatured;
 
   @override
   Widget build(BuildContext context) {
@@ -123,7 +138,7 @@ class _PinnedAthkarQuickAccess extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (featured != null) ...[
+        if (featured != null && !hideContextualFeatured) ...[
           HomeFeaturedRitualCard(
             category: featured,
             promptLabel: (title) =>

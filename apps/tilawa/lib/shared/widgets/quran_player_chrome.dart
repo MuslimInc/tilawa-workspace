@@ -5,6 +5,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../router/app_router.dart';
 import '../../router/shell_route_location.dart';
+import '../../screens/app_shell_nav_destinations.dart';
 
 /// Layout chrome published by [AppShellScreen] for the mini-player.
 @immutable
@@ -194,11 +195,12 @@ abstract final class AppShellRoutePolicy {
       return null;
     }
     if (location.startsWith('/reciter') ||
+        location.startsWith('/reciters') ||
         location.startsWith('/downloads') ||
         location.startsWith('/favorites') ||
         location.startsWith('/bookmarks') ||
         location.startsWith('/history')) {
-      return 0;
+      return kAppShellRecitersTabIndex;
     }
     if (location.startsWith('/qibla')) {
       return 2;
@@ -206,7 +208,7 @@ abstract final class AppShellRoutePolicy {
     if (location.startsWith('/settings') ||
         location == '/support' ||
         location == '/premium') {
-      return null;
+      return kAppShellSettingsTabIndex;
     }
     return null;
   }

@@ -66,7 +66,7 @@ class TilawaIconToggle extends StatelessWidget {
       toggled: value,
       label: semanticLabel,
       child: ConstrainedBox(
-        // fix: Accessibility — enforce Tilawa hit target (44 dp).
+        // fix: Accessibility — enforce Tilawa hit target (48 dp).
         constraints: BoxConstraints(
           minWidth: designTokens.minInteractiveDimension,
           minHeight: designTokens.minInteractiveDimension,

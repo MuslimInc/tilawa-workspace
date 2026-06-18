@@ -13,16 +13,23 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../core/utils/toast_utils.dart';
 import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import '../features/auth/presentation/bloc/auth_bloc.dart';
 import '../features/reciters/presentation/tour/reciters_tour_targets.dart';
 import '../features/tour_guide/presentation/widgets/tour_target.dart';
 import '../router/app_router.dart';
 import '../router/app_router_config.dart';
+import '../shared/widgets/profile_avatar.dart';
 import '../shared/widgets/quran_player_chrome.dart';
 import '../shared/widgets/quran_player_widget.dart';
+import 'app_shell_nav_destinations.dart';
 import 'cubit/main_screen_cubit.dart';
 import 'cubit/main_screen_state.dart';
-import 'app_shell_nav_destinations.dart';
 import 'widgets/main_bottom_overlay.dart';
+
+/// Flip to compare long-press bottom-nav selector patterns during UX review.
+const TilawaPhoneBottomNavLongPressMode _kPhoneBottomNavLongPressMode =
+    // TilawaPhoneBottomNavLongPressMode.radial;
+    TilawaPhoneBottomNavLongPressMode.verticalRight;
 
 /// Persistent shell with bottom navigation and the Quran mini-player.
 ///
@@ -100,6 +107,67 @@ class _AppShellScreenState extends State<AppShellScreen> {
     return buildPhoneShellNavDestinations(context.l10n);
   }
 
+  List<TilawaNavDestination> _mapAdaptiveDestinations(
+    BuildContext context,
+    List<AppShellNavDestination> destinations,
+  ) {
+    final AuthState authState = context.watch<AuthBloc>().state;
+    final String? photoUrl = switch (authState) {
+      AuthAuthenticated(:final user) => user.photoUrl,
+      _ => null,
+    };
+    final String? displayName = switch (authState) {
+      AuthAuthenticated(:final user) => user.displayName,
+      _ => null,
+    };
+    final TilawaAdaptiveShellTokens shellTokens = Theme.of(
+      context,
+    ).componentTokens.adaptiveShell;
+    const double profileAvatarSize = 28;
+
+    return destinations.map((AppShellNavDestination d) {
+      TilawaNavIconBuilder? iconBuilder;
+
+      if (d.usesProfileAvatar) {
+        iconBuilder =
+            (
+              BuildContext iconContext, {
+              required bool isSelected,
+              required Color color,
+            }) {
+              return ProfileAvatar(
+                photoUrl: photoUrl,
+                displayName: displayName,
+                size: profileAvatarSize,
+                fallbackStyle: ProfileAvatarFallbackStyle.initial,
+              );
+            };
+      } else if (d.svgPath != null) {
+        iconBuilder =
+            (
+              BuildContext iconContext, {
+              required bool isSelected,
+              required Color color,
+            }) {
+              return SvgPicture.asset(
+                d.svgPath!,
+                width: shellTokens.navButtonIconSize,
+                height: shellTokens.navButtonIconSize,
+                colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+              );
+            };
+      }
+
+      return TilawaNavDestination(
+        label: d.label,
+        icon: d.icon,
+        activeIcon: d.activeIcon,
+        identifier: d.semanticsIdentifier,
+        iconBuilder: iconBuilder,
+      );
+    }).toList();
+  }
+
   int _selectedNavIndex(
     String location,
     MainScreenState state,
@@ -163,6 +231,25 @@ class _AppShellScreenState extends State<AppShellScreen> {
     _navigateToShellTab(context, destination.tabIndex!);
   }
 
+  void _onAdjacentDestinationSelected(
+    BuildContext context,
+    TilawaNavAdjacentDirection direction,
+    List<AppShellNavDestination> destinations,
+    int currentNavIndex,
+  ) {
+    if (destinations.isEmpty) {
+      return;
+    }
+
+    final int delta = switch (direction) {
+      TilawaNavAdjacentDirection.next => 1,
+      TilawaNavAdjacentDirection.previous => -1,
+    };
+    final int nextIndex =
+        (currentNavIndex + delta + destinations.length) % destinations.length;
+    _onDestinationSelected(context, nextIndex, destinations);
+  }
+
   @override
   Widget build(BuildContext context) {
     PerfLogger.markBuild('AppShellScreen');
@@ -205,33 +292,7 @@ class _AppShellScreenState extends State<AppShellScreen> {
               final List<AppShellNavDestination> navDestinations =
                   _buildDestinations(context);
               final List<TilawaNavDestination> adaptiveDestinations =
-                  navDestinations
-                      .map(
-                        (d) => TilawaNavDestination(
-                          label: d.label,
-                          icon: d.icon,
-                          activeIcon: d.activeIcon,
-                          identifier: d.semanticsIdentifier,
-                          iconBuilder: d.svgPath == null
-                              ? null
-                              : (
-                                  context, {
-                                  required isSelected,
-                                  required color,
-                                }) {
-                                  return SvgPicture.asset(
-                                    d.svgPath!,
-                                    width: 22,
-                                    height: 22,
-                                    colorFilter: ColorFilter.mode(
-                                      color,
-                                      BlendMode.srcIn,
-                                    ),
-                                  );
-                                },
-                        ),
-                      )
-                      .toList();
+                  _mapAdaptiveDestinations(context, navDestinations);
 
               final String location =
                   QuranPlayerRoutePolicy.currentMatchedLocation();
@@ -254,6 +315,13 @@ class _AppShellScreenState extends State<AppShellScreen> {
                   index,
                   navDestinations,
                 ),
+                onAdjacentDestinationSelected: (direction) =>
+                    _onAdjacentDestinationSelected(
+                      context,
+                      direction,
+                      navDestinations,
+                      selectedIndex,
+                    ),
                 child: widget.child,
               );
             },
@@ -274,6 +342,7 @@ class _AppShellChrome extends StatelessWidget {
     required this.bottomNavVisibility,
     required this.selectedIndex,
     required this.onDestinationSelected,
+    required this.onAdjacentDestinationSelected,
     required this.child,
   });
 
@@ -285,6 +354,7 @@ class _AppShellChrome extends StatelessWidget {
   final _RouteBoundBottomNavVisibility bottomNavVisibility;
   final int selectedIndex;
   final ValueChanged<int> onDestinationSelected;
+  final ValueChanged<TilawaNavAdjacentDirection> onAdjacentDestinationSelected;
   final Widget child;
 
   @override
@@ -370,6 +440,8 @@ class _AppShellChrome extends StatelessWidget {
             destinations: adaptiveDestinations,
             selectedIndex: selectedIndex,
             onDestinationSelected: onDestinationSelected,
+            onAdjacentDestinationSelected: onAdjacentDestinationSelected,
+            phoneBottomNavLongPressMode: _kPhoneBottomNavLongPressMode,
             phoneBottomNavigationBarVisible: bottomNavVisibility,
             phoneFooterAboveNav: shellFooterPlayer,
             bottomPlayer: MainBottomOverlay(

@@ -50,7 +50,6 @@ class _MainTabViewportState extends State<MainTabViewport> {
         0 => HomeScreenScope(
           onOpenReciters: () => context.read<MainScreenCubit>().selectTab(1),
           onOpenPrayer: () => const PrayerTimesRoute().push(context),
-          onOpenSettings: () => const SettingsRoute().push(context),
         ),
         1 => const RecitersScreenScope(),
         2 => const QiblaScreenScope(),

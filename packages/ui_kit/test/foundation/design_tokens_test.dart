@@ -77,15 +77,15 @@ void main() {
         expect(light.radiusExtraLarge, 24.0);
         expect(light.radiusHero, 28.0);
         expect(light.opacitySubtle, 0.1);
-        expect(light.opacityShadow, 0.12);
-        expect(light.opacityShadowStrong, 0.18);
+        expect(light.opacityShadow, 0.04);
+        expect(light.opacityShadowStrong, 0.08);
         expect(light.opacityMedium, 0.3);
         expect(light.opacityEmphasis, 0.7);
         expect(light.opacityGlass, 0.8);
         expect(light.blurGlass, 12.0);
-        expect(light.blurShadow, 20.0);
+        expect(light.blurShadow, 8.0);
         expect(light.shadowOffsetSmall, const Offset(0, 1));
-        expect(light.shadowOffsetMedium, const Offset(0, 6));
+        expect(light.shadowOffsetMedium, const Offset(0, 2));
         expect(light.borderWidthThin, 0.5);
         expect(light.progressHeight, 3.0);
         expect(light.iconSizeExtraSmall, 12.0);
@@ -804,7 +804,7 @@ void main() {
         );
         expect(
           tokens.resolveRadius(family: TilawaRadiusFamily.pill),
-          22.0,
+          24.0,
         );
         expect(
           tokens.resolveRadius(family: TilawaRadiusFamily.chrome),
@@ -860,16 +860,19 @@ void main() {
         expect(radii.itemRadius, 16.0);
       });
 
-      test('resolveSegmentedControlRadii uses pill track height when requested', () {
-        final tokens = TilawaDesignTokens.light();
-        final radii = tokens.resolveSegmentedControlRadii(
-          itemHeight: 32,
-          containerPadding: 4,
-          trackFamily: TilawaRadiusFamily.pill,
-        );
-        expect(radii.containerRadius, 20.0);
-        expect(radii.itemRadius, 16.0);
-      });
+      test(
+        'resolveSegmentedControlRadii uses pill track height when requested',
+        () {
+          final tokens = TilawaDesignTokens.light();
+          final radii = tokens.resolveSegmentedControlRadii(
+            itemHeight: 32,
+            containerPadding: 4,
+            trackFamily: TilawaRadiusFamily.pill,
+          );
+          expect(radii.containerRadius, 20.0);
+          expect(radii.itemRadius, 16.0);
+        },
+      );
     });
   });
 }

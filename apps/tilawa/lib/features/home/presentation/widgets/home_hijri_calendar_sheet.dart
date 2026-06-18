@@ -261,9 +261,7 @@ class _HomeHijriCalendarSheetState extends State<HomeHijriCalendarSheet> {
       child: Center(
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: isToday
-                ? colorScheme.primary.withValues(alpha: 0.14)
-                : null,
+            color: isToday ? colorScheme.primary.withValues(alpha: 0.14) : null,
             shape: BoxShape.circle,
           ),
           child: Padding(

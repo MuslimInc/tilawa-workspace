@@ -98,9 +98,21 @@
             }
         }
     },
-    "homeExploreTitle": "More",
+    "homeExploreTitle": "Discover",
     "@homeExploreTitle": {
         "description": "Home section title for secondary destinations that are not bottom-nav tabs"
+    },
+    "homeSearchHint": "Search surahs, juz, or page",
+    "@homeSearchHint": {
+        "description": "Read-only Home search field hint; opens Quran index"
+    },
+    "homeFeaturedTitle": "Featured for you",
+    "@homeFeaturedTitle": {
+        "description": "Home horizontal carousel section title (travel-app popular row)"
+    },
+    "homePrayerAlertsAction": "Prayer times and alerts",
+    "@homePrayerAlertsAction": {
+        "description": "Hero notification control; opens Prayer tab"
     },
     "homeTodayTitle": "Today",
     "@homeTodayTitle": {
@@ -1545,6 +1557,10 @@
     "colorBrown": "Brown",
     "@colorBrown": {
         "description": "Brown color name"
+    },
+    "colorInk": "Charcoal",
+    "@colorInk": {
+        "description": "TripGlide charcoal primary preset name"
     },
     "colorPurple": "Purple",
     "@colorPurple": {

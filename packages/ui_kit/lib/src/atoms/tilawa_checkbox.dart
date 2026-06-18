@@ -23,7 +23,7 @@ class TilawaCheckbox extends StatelessWidget {
   final bool tristate;
   final Color? activeColor;
 
-  /// Visual bounds for [Checkbox.adaptive] inside the 44×44 dp hit box.
+  /// Visual bounds for [Checkbox.adaptive] inside the 48×48 dp hit box.
   final Size visualSlotSize;
 
   @override

@@ -15,7 +15,7 @@ void main() {
       );
     });
 
-    test('ink tint maps to warm beige fill and brown icon', () {
+    test('ink tint maps to neutral fill and charcoal icon', () {
       expect(
         lightScheme.semanticTintBackground(TilawaSemanticTint.ink),
         lightScheme.surfaceContainerHigh,

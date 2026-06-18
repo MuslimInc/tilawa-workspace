@@ -23,6 +23,8 @@ import 'package:tilawa/features/home/domain/repositories/home_layout_preference_
 import 'package:tilawa/features/home/domain/usecases/get_home_layout_mode_use_case.dart';
 import 'package:tilawa/features/home/domain/usecases/set_home_layout_mode_use_case.dart';
 import 'package:tilawa/features/home/presentation/screens/home_screen.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_dashboard_search_bar.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_today_featured_carousel.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_more_actions_group.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_shortcut_grid_view.dart';
 import 'package:tilawa/features/quran_reader/domain/usecases/get_last_read_position_use_case.dart';
@@ -93,7 +95,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('More section lists only non-bottom-nav destinations', (
+  testWidgets('Discover section lists only non-bottom-nav destinations', (
     tester,
   ) async {
     final bloc = HomeDashboardBloc(
@@ -108,9 +110,12 @@ void main() {
       await tester.pump(const Duration(milliseconds: 16));
     }
 
-    expect(find.text('More'), findsOneWidget);
+    expect(find.text('Discover'), findsOneWidget);
     expect(find.text('Today'), findsOneWidget);
-    expect(find.text('Continue Quran'), findsOneWidget);
+    expect(find.text('Featured for you'), findsOneWidget);
+    expect(find.text('Last Read'), findsOneWidget);
+    expect(find.byType(HomeTodayFeaturedCarousel), findsOneWidget);
+    expect(find.byType(HomeDashboardSearchBar), findsOneWidget);
     expect(find.text('Daily inspiration'), findsOneWidget);
     expect(find.text('Reciters'), findsOneWidget);
     expect(find.text('Browse recitations'), findsOneWidget);
@@ -126,7 +131,7 @@ void main() {
     expect(find.text('Settings'), findsNothing);
   });
 
-  testWidgets('More section renders localized labels in Arabic', (
+  testWidgets('Discover section renders localized labels in Arabic', (
     tester,
   ) async {
     final bloc = HomeDashboardBloc(
@@ -141,7 +146,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 16));
     }
 
-    expect(find.text('المزيد'), findsOneWidget);
+    expect(find.text('اكتشف'), findsOneWidget);
     expect(find.text('القراء'), findsOneWidget);
     expect(find.text('تصفّح التلاوات'), findsOneWidget);
   });
@@ -167,7 +172,7 @@ void main() {
     expect(find.text('Daily dua'), findsOneWidget);
   });
 
-  testWidgets('More row taps invoke reciters callback', (tester) async {
+  testWidgets('Discover row taps invoke reciters callback', (tester) async {
     var recitersTapped = false;
     final bloc = HomeDashboardBloc(
       GetHomeDashboardUseCase(_FakeHomeDashboardRepository()),
@@ -195,47 +200,50 @@ void main() {
     expect(recitersTapped, isTrue);
   });
 
-  testWidgets('layout toggle switches Explore shortcuts between list and grid', (
-    tester,
-  ) async {
-    final view = tester.view;
-    view.physicalSize = const Size(800, 1200);
-    view.devicePixelRatio = 1;
-    addTearDown(view.resetPhysicalSize);
-    addTearDown(view.resetDevicePixelRatio);
+  testWidgets(
+    'layout toggle switches Explore shortcuts between grid and list',
+    (
+      tester,
+    ) async {
+      final view = tester.view;
+      view.physicalSize = const Size(800, 1200);
+      view.devicePixelRatio = 1;
+      addTearDown(view.resetPhysicalSize);
+      addTearDown(view.resetDevicePixelRatio);
 
-    final bloc = HomeDashboardBloc(
-      GetHomeDashboardUseCase(_FakeHomeDashboardRepository()),
-      NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
-    )..add(const HomeDashboardStarted(localeIdentifier: 'en'));
-    addTearDown(bloc.close);
+      final bloc = HomeDashboardBloc(
+        GetHomeDashboardUseCase(_FakeHomeDashboardRepository()),
+        NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
+      )..add(const HomeDashboardStarted(localeIdentifier: 'en'));
+      addTearDown(bloc.close);
 
-    final layoutRepository = _FakeHomeLayoutPreferenceRepository();
+      final layoutRepository = _FakeHomeLayoutPreferenceRepository();
 
-    await tester.pumpWidget(
-      _HomeScreenHarness(
-        bloc: bloc,
-        locale: 'en',
-        layoutRepository: layoutRepository,
-      ),
-    );
-    await tester.pump();
-    for (var frame = 0; frame < 20; frame++) {
-      await tester.pump(const Duration(milliseconds: 16));
-    }
+      await tester.pumpWidget(
+        _HomeScreenHarness(
+          bloc: bloc,
+          locale: 'en',
+          layoutRepository: layoutRepository,
+        ),
+      );
+      await tester.pump();
+      for (var frame = 0; frame < 20; frame++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
 
-    expect(find.byType(HomeMoreActionsGroup), findsOneWidget);
-    expect(find.byType(HomeShortcutGridView), findsNothing);
+      expect(find.byType(HomeShortcutGridView), findsWidgets);
+      expect(find.byType(HomeMoreActionsGroup), findsNothing);
 
-    await tester.ensureVisible(find.byIcon(Icons.grid_view_rounded));
-    await tester.tap(find.byIcon(Icons.grid_view_rounded));
-    await tester.pump();
-    await tester.pump();
+      await tester.ensureVisible(find.byIcon(Icons.view_list_rounded));
+      await tester.tap(find.byIcon(Icons.view_list_rounded));
+      await tester.pump();
+      await tester.pump();
 
-    expect(find.byType(HomeShortcutGridView), findsWidgets);
-    expect(find.byType(HomeMoreActionsGroup), findsNothing);
-    expect(layoutRepository.mode.name, 'grid');
-  });
+      expect(find.byType(HomeMoreActionsGroup), findsOneWidget);
+      expect(find.byType(HomeShortcutGridView), findsNothing);
+      expect(layoutRepository.mode.name, 'list');
+    },
+  );
 }
 
 class _HomeScreenHarness extends StatelessWidget {
@@ -292,7 +300,6 @@ class _HomeScreenHarness extends StatelessWidget {
             return HomeScreen(
               onOpenReciters: onOpenReciters ?? () {},
               onOpenPrayer: () {},
-              onOpenSettings: () {},
             );
           },
         ),
@@ -373,7 +380,7 @@ class _FakeGetLastReadPosition implements GetLastReadPositionUseCase {
 
 class _FakeHomeLayoutPreferenceRepository
     implements HomeLayoutPreferenceRepository {
-  HomeLayoutMode mode = HomeLayoutMode.list;
+  HomeLayoutMode mode = HomeLayoutMode.grid;
 
   @override
   Future<HomeLayoutMode> getLayoutMode() async => mode;

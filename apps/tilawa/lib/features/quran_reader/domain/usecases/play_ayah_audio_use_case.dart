@@ -20,8 +20,7 @@ class PlayAyahAudioUseCase {
   }) {
     final String serverUrl = currentAudio?.url ?? '';
     final String reciterFolder = ReciterAudioCatalog.resolveFolder(serverUrl);
-    final String reciterName =
-        currentAudio?.artist ?? 'Mishary Rashid Alafasy';
+    final String reciterName = currentAudio?.artist ?? 'Mishary Rashid Alafasy';
     final String? reciterId = currentAudio?.extras?['reciterId'] as String?;
     final String? moshafId = currentAudio?.extras?['moshafId'] as String?;
 
@@ -42,8 +41,8 @@ class PlayAyahAudioUseCase {
       extras: <String, dynamic>{
         'surahId': ayah.surahNumber,
         'ayahNumber': ayah.numberInSurah,
-        if (reciterId != null) 'reciterId': reciterId,
-        if (moshafId != null) 'moshafId': moshafId,
+        'reciterId': ?reciterId,
+        'moshafId': ?moshafId,
       },
     );
 

@@ -186,10 +186,7 @@ class _CatalogTitleRow extends StatelessWidget {
         Expanded(
           child: Center(child: title),
         ),
-        if (trailing != null)
-          trailing
-        else
-          SizedBox(width: sideSlotWidth),
+        if (trailing != null) trailing else SizedBox(width: sideSlotWidth),
       ],
     );
   }

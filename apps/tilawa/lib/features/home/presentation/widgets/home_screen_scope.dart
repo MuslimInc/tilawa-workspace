@@ -32,13 +32,11 @@ class HomeScreenScope extends StatelessWidget {
     super.key,
     required this.onOpenReciters,
     required this.onOpenPrayer,
-    required this.onOpenSettings,
     this.child,
   });
 
   final VoidCallback onOpenReciters;
   final VoidCallback onOpenPrayer;
-  final VoidCallback onOpenSettings;
 
   /// When set (e.g. in widget tests), replaces [HomeScreen].
   final Widget? child;
@@ -92,7 +90,6 @@ class HomeScreenScope extends StatelessWidget {
           HomeScreen(
             onOpenReciters: onOpenReciters,
             onOpenPrayer: onOpenPrayer,
-            onOpenSettings: onOpenSettings,
           ),
     );
 

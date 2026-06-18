@@ -1261,36 +1261,63 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     );
   }
 
-  /// Mini player anchored in the shell footer column (YouTube Music style).
+  /// Mini player anchored in the shell footer column (TripGlide dock style).
   Widget _buildShellFooterMini(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final TilawaDesignTokens tokens = theme.tokens;
+    final TilawaAdaptiveShellTokens shellTokens =
+        theme.componentTokens.adaptiveShell;
+    final TilawaMediaPlayerBarTokens barTokens =
+        theme.componentTokens.mediaPlayerBar;
     final double bottomSpacing = _shellFooterBottomSpacing(context);
-    final Color playerChromeColor = Theme.of(
-      context,
-    ).componentTokens.mediaPlayerBar.shellBackgroundColor;
-    return ColoredBox(
-      color: playerChromeColor,
-      child: SizedBox(
-        height: _miniPlayerHeight + bottomSpacing,
-        width: double.infinity,
-        child: Column(
-          children: [
-            SizedBox(
-              height: _miniPlayerHeight,
-              width: double.infinity,
-              child: _buildPlayerTree(
-                context,
-                hostRect:
-                    Offset.zero &
-                    Size(MediaQuery.sizeOf(context).width, _miniPlayerHeight),
-                overlaySize: MediaQuery.sizeOf(context),
-                showMiniInTree: true,
-                miniAnchoredInFooter: true,
+    final Color playerSurface = barTokens.shellBackgroundColor;
+    final Color dockOutline = shellTokens.bottomNavOutlineColor;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: playerSurface,
+            border: Border(
+              top: BorderSide(
+                color: dockOutline,
+                width: tokens.borderWidthThin,
               ),
             ),
-            SizedBox(height: bottomSpacing),
-          ],
+            boxShadow: [
+              BoxShadow(
+                color: theme.colorScheme.shadow.withValues(
+                  alpha: tokens.opacityShadow,
+                ),
+                blurRadius: tokens.blurShadow,
+                offset: Offset(0, -tokens.shadowOffsetSmall.dy),
+              ),
+            ],
+          ),
+          child: SizedBox(
+            height: _miniPlayerHeight,
+            width: double.infinity,
+            child: _buildPlayerTree(
+              context,
+              hostRect:
+                  Offset.zero &
+                  Size(MediaQuery.sizeOf(context).width, _miniPlayerHeight),
+              overlaySize: MediaQuery.sizeOf(context),
+              showMiniInTree: true,
+              miniAnchoredInFooter: true,
+            ),
+          ),
         ),
-      ),
+        if (bottomSpacing > 0)
+          ColoredBox(
+            color: theme.scaffoldBackgroundColor,
+            child: SizedBox(
+              height: bottomSpacing,
+              width: double.infinity,
+            ),
+          ),
+      ],
     );
   }
 

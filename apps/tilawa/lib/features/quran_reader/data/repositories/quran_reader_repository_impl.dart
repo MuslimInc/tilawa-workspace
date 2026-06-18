@@ -155,11 +155,11 @@ class QuranReaderRepositoryImpl implements QuranReaderRepository {
     required SurahContentEntity surah,
     required String language,
   }) async {
-    final Map<int, String> translations =
-        await _translationDataSource.getSurahTranslations(
-      surahNumber: surah.number,
-      language: language,
-    );
+    final Map<int, String> translations = await _translationDataSource
+        .getSurahTranslations(
+          surahNumber: surah.number,
+          language: language,
+        );
     if (translations.isEmpty) {
       return surah;
     }

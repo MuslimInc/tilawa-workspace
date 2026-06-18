@@ -239,19 +239,18 @@ class AppTheme {
       surfaceTint: Colors.transparent,
       surfaceContainerLowest: AppColors.lightCanvas,
       surfaceContainerLow: AppColors.lightSurface,
-      // Warm parchment canvas + white card ramp. Fixed hexes — not harmonized
-      // toward [primary] — so chrome stays parchment / white / warm beige.
+      // TripGlide neutral canvas + white card ramp.
       surfaceContainer: AppColors.lightCanvas,
       surfaceContainerHigh: AppColors.lightSurfaceContainerHighBase,
       surfaceContainerHighest: AppColors.lightSurfaceContainerHighestBase,
       tertiary: AppColors.brandTertiary,
-      onTertiary: AppColors.featuredGradientForeground,
-      tertiaryContainer: AppColors.instructionChipFill,
-      onTertiaryContainer: AppColors.lightSchemeOnPrimaryContainer,
+      onTertiary: AppColors.tripGlideSurface,
+      tertiaryContainer: AppColors.tripGlideCanvasElevated,
+      onTertiaryContainer: AppColors.tripGlideInk,
       outline: AppColors.lightOutline,
       outlineVariant: AppColors.lightOutlineVariant,
-      shadow: AppColors.lightShadow.withValues(alpha: 0.14),
-      scrim: AppColors.lightShadow.withValues(alpha: 0.28),
+      shadow: AppColors.lightShadow.withValues(alpha: 0.06),
+      scrim: AppColors.lightShadow.withValues(alpha: 0.18),
     );
   }
 

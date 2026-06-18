@@ -77,7 +77,9 @@ class _QiblaScreenState extends State<QiblaScreen> {
           },
           child: Scaffold(
             appBar: TilawaCatalogAppBar(
-              preferredHeight: TilawaAppBarConfig.catalogTitleOnlyHeight(context),
+              preferredHeight: TilawaAppBarConfig.catalogTitleOnlyHeight(
+                context,
+              ),
               centerTitle: true,
               titleWidget: Text(
                 context.l10n.qiblaFinderTitle,
@@ -347,7 +349,9 @@ class _QiblaCompassPanel extends StatelessWidget {
 }
 
 class _QiblaInstructionFooter extends StatelessWidget {
-  const _QiblaInstructionFooter({this.bottomPadding = kDefaultTipBottomPadding});
+  const _QiblaInstructionFooter({
+    this.bottomPadding = kDefaultTipBottomPadding,
+  });
 
   final double bottomPadding;
 
@@ -366,8 +370,9 @@ class _QiblaInstructionFooter extends StatelessWidget {
         if (direction.isAligned) {
           message = l10n.qiblaCompassTip;
         } else {
-          final ({int degrees, bool rotateLeft}) hint =
-              _qiblaRotationHint(direction);
+          final ({int degrees, bool rotateLeft}) hint = _qiblaRotationHint(
+            direction,
+          );
           message = hint.rotateLeft
               ? l10n.qiblaRotatePhoneLeft(hint.degrees)
               : l10n.qiblaRotatePhoneRight(hint.degrees);

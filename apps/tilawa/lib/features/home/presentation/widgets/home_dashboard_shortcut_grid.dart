@@ -14,18 +14,20 @@ double homeShortcutGridTileHeight(BuildContext context) {
   final tokens = Theme.of(context).tokens;
   final textTheme = Theme.of(context).textTheme;
   final double iconExtent = tokens.iconSizeMedium + tokens.spaceMedium * 2;
-  final double titleLineHeight =
-      (textTheme.titleSmall?.fontSize ?? 14) * 1.25;
-  final double subtitleLineHeight =
-      (textTheme.bodySmall?.fontSize ?? 12) * 1.3;
+  final double titleLineHeight = (textTheme.titleSmall?.fontSize ?? 14) * 1.25;
+  final double subtitleLineHeight = (textTheme.bodySmall?.fontSize ?? 12) * 1.3;
   final double textBlockHeight =
-      titleLineHeight * 2 +
-      tokens.spaceExtraSmall +
-      subtitleLineHeight * 2;
+      titleLineHeight * 2 + tokens.spaceExtraSmall + subtitleLineHeight * 2;
   final double rowHeight = iconExtent > textBlockHeight
       ? iconExtent
       : textBlockHeight;
   return rowHeight + tokens.spaceSmall * 2;
+}
+
+/// Taller tile for travel-style destination cards in the discover grid.
+double homeTravelGridTileHeight(BuildContext context) {
+  final tokens = Theme.of(context).tokens;
+  return tokens.spaceExtraLarge * 6;
 }
 
 /// Responsive shortcut grid with stable LTR/RTL layout.
@@ -38,11 +40,13 @@ class HomeDashboardShortcutGrid extends StatelessWidget {
     required this.itemCount,
     required this.itemBuilder,
     this.columnCount,
+    this.tileHeight,
   });
 
   final int itemCount;
   final IndexedWidgetBuilder itemBuilder;
   final int? columnCount;
+  final double? tileHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +74,7 @@ class HomeDashboardShortcutGrid extends StatelessWidget {
               columns: columns,
               rowStart: rowStart,
               itemCount: itemCount,
-              tileHeight: homeShortcutGridTileHeight(context),
+              tileHeight: tileHeight ?? homeShortcutGridTileHeight(context),
               itemBuilder: itemBuilder,
             ),
           ),

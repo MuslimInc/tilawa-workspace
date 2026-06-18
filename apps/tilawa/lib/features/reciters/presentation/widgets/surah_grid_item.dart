@@ -68,7 +68,9 @@ class SurahGridItem extends StatelessWidget {
     final Color activeOnFill = ReciterCatalogChrome.activeOnFill(colorScheme);
     final Color idleBg = ReciterCatalogChrome.idleFill(colorScheme);
     final Color idleFg = colorScheme.primary;
-    final double tileRadius = tokens.resolveRadius(family: TilawaRadiusFamily.card);
+    final double tileRadius = tokens.resolveRadius(
+      family: TilawaRadiusFamily.card,
+    );
     // Badge fills the full card width so the number reads as a strong hero element.
     // Height is square with the badge width to keep the visual centred.
     final double badgeSize = tokens.iconSizeLarge + tokens.spaceExtraLarge;

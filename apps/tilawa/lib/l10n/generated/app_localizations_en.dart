@@ -82,7 +82,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get homeExploreTitle => 'More';
+  String get homeExploreTitle => 'Discover';
+
+  @override
+  String get homeSearchHint => 'Search surahs, juz, or page';
+
+  @override
+  String get homeFeaturedTitle => 'Featured for you';
+
+  @override
+  String get homePrayerAlertsAction => 'Prayer times and alerts';
 
   @override
   String get homeTodayTitle => 'Today';
@@ -1133,6 +1142,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get colorBrown => 'Brown';
+
+  @override
+  String get colorInk => 'Charcoal';
 
   @override
   String get colorPurple => 'Purple';

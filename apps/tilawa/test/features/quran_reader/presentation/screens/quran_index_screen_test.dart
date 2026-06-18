@@ -49,7 +49,8 @@ void main() {
     await tester.pumpWidget(
       _wrapQuranIndex(
         BlocProvider(
-          create: (_) => HomeQuranResumeCubit(_FakeGetLastReadPosition())..load(),
+          create: (_) =>
+              HomeQuranResumeCubit(_FakeGetLastReadPosition())..load(),
           child: const QuranIndexScreen(),
         ),
       ),

@@ -45,19 +45,19 @@ class PrayerTimesScreenScope extends StatelessWidget {
         child: _PrayerLocationSyncListener(
           child: BlocListener<LocalizationBloc, LocalizationState>(
             listener: (context, state) {
-            context.read<PrayerTimesBloc>().add(
-              PrayerTimesEvent.loadPrayerTimes(
-                localeIdentifier: state.locale.languageCode,
-              ),
-            );
-          },
-          child:
-              child ??
-              PrayerTimesScreen(
-                adhanPlayer: getIt<IAdhanAlarmPlayer>(),
-                fireTestNotification:
-                    getIt<FirePrayerTestNotificationUseCase>(),
-              ),
+              context.read<PrayerTimesBloc>().add(
+                PrayerTimesEvent.loadPrayerTimes(
+                  localeIdentifier: state.locale.languageCode,
+                ),
+              );
+            },
+            child:
+                child ??
+                PrayerTimesScreen(
+                  adhanPlayer: getIt<IAdhanAlarmPlayer>(),
+                  fireTestNotification:
+                      getIt<FirePrayerTestNotificationUseCase>(),
+                ),
           ),
         ),
       ),

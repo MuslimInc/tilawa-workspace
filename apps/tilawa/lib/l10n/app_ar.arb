@@ -74,7 +74,10 @@
             }
         }
     },
-    "homeExploreTitle": "المزيد",
+    "homeExploreTitle": "اكتشف",
+    "homeSearchHint": "ابحث في السور أو الأجزاء أو الصفحة",
+    "homeFeaturedTitle": "مختارة لك",
+    "homePrayerAlertsAction": "أوقات الصلاة والتنبيهات",
     "homeTodayTitle": "اليوم",
     "homeTodaySubtitle": "الصلاة والقرآن والذكر ليومك",
     "homeAthkarRitualsTitle": "أذكار سريعة",
@@ -1212,6 +1215,7 @@
         "description": "Green color name"
     },
     "colorBrown": "بني",
+    "colorInk": "فحمي",
     "@colorBrown": {
         "description": "Brown color name"
     },

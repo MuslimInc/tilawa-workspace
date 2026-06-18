@@ -100,7 +100,28 @@ Widget previewTilawaAdaptiveShell() {
 }
 
 @Preview(
-  name: 'TilawaBackdropImageLayer',
+  name: 'TilawaAdaptiveShell — vertical long press',
+  group: 'Organisms',
+  theme: organismsPreviewTheme,
+)
+Widget previewTilawaAdaptiveShellVerticalLongPress() {
+  return TilawaAdaptiveShell(
+    selectedIndex: 0,
+    phoneBottomNavLongPressMode:
+        TilawaPhoneBottomNavLongPressMode.verticalRight,
+    onDestinationSelected: (_) {},
+    destinations: const [
+      TilawaNavDestination(label: 'Home', icon: Icons.home_outlined),
+      TilawaNavDestination(label: 'Quran', icon: Icons.menu_book_outlined),
+      TilawaNavDestination(label: 'Library', icon: Icons.bookmark_outline),
+      TilawaNavDestination(label: 'Settings', icon: Icons.settings_outlined),
+    ],
+    bottomPlayer: const SizedBox.shrink(),
+    child: const Center(child: Text('Long-press nav for vertical stack')),
+  );
+}
+
+@Preview(
   group: 'Organisms',
   theme: organismsPreviewTheme,
 )

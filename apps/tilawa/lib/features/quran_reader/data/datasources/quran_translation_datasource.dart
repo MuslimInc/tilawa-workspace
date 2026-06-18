@@ -77,8 +77,9 @@ class QuranTranslationDataSourceImpl implements QuranTranslationDataSource {
       return const {};
     }
     await _ensureEnglishLoaded();
-    final Map<String, String>? ayahs =
-        _translationsForLanguage(language)?['$surahNumber'];
+    final Map<String, String>? ayahs = _translationsForLanguage(
+      language,
+    )?['$surahNumber'];
     if (ayahs == null) {
       return const {};
     }

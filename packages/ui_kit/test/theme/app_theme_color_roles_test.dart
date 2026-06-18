@@ -112,7 +112,7 @@ void main() {
     );
 
     test(
-      'light scaffold and surfaces use warm parchment canvas not primary',
+      'light scaffold and surfaces use TripGlide neutral canvas not primary',
       () {
         final theme = AppTheme.getLightTheme(
           primaryColor: AppColors.primaryCoral,
@@ -134,12 +134,12 @@ void main() {
       },
     );
 
-    test('default brown light theme matches brand ColorScheme roles', () {
+    test('default ink light theme matches brand ColorScheme roles', () {
       final scheme = AppTheme.getLightTheme(
         primaryColor: AppColors.defaultPrimary,
       ).colorScheme;
 
-      expect(scheme.primary, AppColors.primaryBrown);
+      expect(scheme.primary, AppColors.tripGlideInk);
       expect(scheme.onPrimary, AppColors.lightSchemeOnPrimary);
       expect(scheme.secondary, AppColors.catalogFilterUnselectedLight);
       expect(scheme.onSecondary, AppColors.lightSchemeOnSecondary);

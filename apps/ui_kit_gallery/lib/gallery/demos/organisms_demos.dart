@@ -254,6 +254,135 @@ abstract final class OrganismsDemos {
     );
   }
 
+  static Widget travelDashboardSheet(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+    final TilawaDesignTokens tokens = theme.tokens;
+    final TilawaHomeNextPrayerHeroTokens heroTokens =
+        theme.componentTokens.homeNextPrayerHero;
+    final TilawaHomeDashboardCardTokens dashboardTokens =
+        theme.componentTokens.homeDashboardCard;
+    const double sheetOverlap = 16;
+
+    return GalleryDemoFrame(
+      padding: EdgeInsets.zero,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(tokens.radiusLarge),
+        child: SizedBox(
+          height: 280,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: <Color>[
+                        heroTokens.gradientTopStart,
+                        heroTokens.gradientBottomEnd,
+                      ],
+                    ),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(tokens.spaceLarge),
+                    child: Align(
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        'Hero gradient',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: heroTokens.foregroundColor,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                top: 120,
+                child: Transform.translate(
+                  offset: const Offset(0, -sheetOverlap),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: dashboardTokens.travelSheetSurface,
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(tokens.radiusExtraLarge),
+                      ),
+                      boxShadow: <BoxShadow>[
+                        BoxShadow(
+                          color: colorScheme.shadow.withValues(
+                            alpha: tokens.opacityShadow,
+                          ),
+                          blurRadius: tokens.blurShadow,
+                          offset: Offset(
+                            0,
+                            tokens.shadowOffsetMedium.dy * -0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.all(tokens.spaceLarge),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        spacing: tokens.spaceMedium,
+                        children: [
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: dashboardTokens.travelSearchFieldFill,
+                              borderRadius: BorderRadius.circular(
+                                tokens.radiusExtraLarge,
+                              ),
+                            ),
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: tokens.spaceMedium,
+                                vertical: tokens.spaceSmall,
+                              ),
+                              child: Text(
+                                'Search surahs, juz, or page',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                          ),
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: dashboardTokens.destinationHeaderTint(0),
+                              borderRadius: BorderRadius.circular(
+                                tokens.radiusLarge,
+                              ),
+                            ),
+                            child: SizedBox(
+                              height: tokens.spaceExtraLarge * 2,
+                              child: Center(
+                                child: Icon(
+                                  Icons.explore_outlined,
+                                  color: dashboardTokens
+                                      .travelDestinationIconColor,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   static Widget behanceInstructionChip(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;

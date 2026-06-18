@@ -160,9 +160,11 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                   offset: designTokens.shadowOffsetMedium,
                 ),
               ],
-        border: Border.all(
-          color: componentTokens.shellOutlineColor,
-          width: designTokens.borderWidthThin,
+        border: Border(
+          top: BorderSide(
+            color: componentTokens.shellOutlineColor,
+            width: designTokens.borderWidthThin,
+          ),
         ),
       ),
       child: ClipRRect(

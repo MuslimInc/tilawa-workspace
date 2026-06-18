@@ -33,13 +33,14 @@ void main() {
     expect(find.text('Muhammad Kamel'), findsOneWidget);
 
     final theme = Theme.of(
-      tester.element(find.byType(CustomScrollView)),
+      tester.element(find.byType(SliverAppBar)),
     );
     final heroTokens = theme.componentTokens.homeNextPrayerHero;
     final appBar = tester.widget<SliverAppBar>(find.byType(SliverAppBar));
-    expect(appBar.expandedHeight, 204);
-    expect(appBar.backgroundColor, heroTokens.gradientBottomEnd);
-    expect(appBar.foregroundColor, heroTokens.foregroundColor);
+    expect(appBar.expandedHeight, 272);
+    expect(appBar.backgroundColor, AppColors.tripGlideCanvasElevated);
+    expect(appBar.foregroundColor, Colors.white);
+    expect(heroTokens.foregroundColor, Colors.white);
 
     final double collapseExtent = HomeDashboardHeroSliver.collapseScrollExtent(
       scrollContext,
@@ -136,7 +137,6 @@ class _HomeHeroHarness extends StatelessWidget {
                 context: context,
                 state: _homeDashboardState(locationLabel),
                 onOpenPrayer: () {},
-                onOpenSettings: () {},
               ),
               const SliverToBoxAdapter(
                 child: SizedBox(height: 1200),

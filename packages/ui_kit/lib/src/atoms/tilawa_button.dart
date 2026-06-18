@@ -60,12 +60,12 @@ enum TilawaButtonSize {
 ///
 /// All non-shrink-wrapped buttons are forced to ≥ 44×44
 /// ([kTilawaMinInteractiveDimension]) regardless of [size] — a `small`
-/// (32 dp visual) button still gets a 44 dp hit target via an outer
+/// (32 dp visual) button still gets a 48 dp hit target via an outer
 /// [ConstrainedBox]. [shrinkWrapTapTarget] is the **only** way to drop below
-/// 44 dp and is reserved for *inline text-link* actions where 44 dp would
+/// 48 dp and is reserved for *inline text-link* actions where 48 dp would
 /// break running text (think a "Learn more" link inside a paragraph). It must
 /// **not** be combined with an icon-only or control-style button — doing so
-/// ships a sub-target tappable control (WCAG 2.5.5 / the kit's own 44 dp law).
+/// ships a sub-target tappable control (WCAG 2.5.5 / the kit's own 48 dp law).
 /// This is asserted in debug builds.
 ///
 /// Optional [backgroundColor], [foregroundColor], and [borderColor] override
@@ -173,9 +173,9 @@ class TilawaButton extends StatelessWidget {
     final double resolvedRadius =
         borderRadius ??
         designTokens?.resolveRadius(
-              family: TilawaRadiusFamily.pill,
-              height: height,
-            ) ??
+          family: TilawaRadiusFamily.pill,
+          height: height,
+        ) ??
         height / 2;
     final EdgeInsetsGeometry resolvedPadding =
         padding ?? EdgeInsets.symmetric(horizontal: horizontalPadding);

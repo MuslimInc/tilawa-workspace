@@ -116,16 +116,15 @@ class _HomeQuranResumeReadyCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final cardTokens = theme.componentTokens.homeDashboardCard;
-    final Color foreground = cardTokens.foregroundColor;
-    final Color mutedForeground = foreground.withValues(alpha: 0.72);
+    final colorScheme = theme.colorScheme;
+    final Color foreground = colorScheme.onSurface;
+    final Color mutedForeground = colorScheme.onSurfaceVariant;
 
     return Semantics(
       button: true,
       label: title,
       value: subtitle,
       child: HomeDashboardCard(
-        useFeaturedGradient: true,
         surface: TilawaCardSurface.raised,
         onTap: () => const QuranLastReadRoute().push(context),
         child: Stack(

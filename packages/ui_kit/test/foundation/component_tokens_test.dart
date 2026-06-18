@@ -637,21 +637,23 @@ void main() {
   group('TilawaAdaptiveShellTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaAdaptiveShellTokens.defaults();
-      expect(tokens.phoneBottomNavBarBaseHeight, closeTo(80.0, 0.05));
-      expect(tokens.navButtonSelectionContainerVerticalPadding, 6.0);
-      expect(tokens.navButtonIconOnlyMinHeight, 40.0);
-      expect(tokens.navButtonIconOnlyVerticalPadding, 1.0);
+      expect(tokens.phoneBottomNavBarBaseHeight, closeTo(48.0, 0.1));
+      expect(tokens.navButtonSelectionContainerVerticalPadding, 4.0);
+      expect(tokens.navButtonIconOnlyMinHeight, 48.0);
+      expect(tokens.navButtonIconOnlyVerticalPadding, 4.0);
       expect(
         tokens.navButtonIconOnlySelectionContainerVerticalPadding,
-        2.0,
+        4.0,
       );
       expect(tokens.bottomNavIconOnlyVerticalMargin, 2.0);
       expect(
         tokens.phoneBottomNavIconOnlyLayoutHeight(TextScaler.linear(1)),
-        closeTo(40.0, 0.05),
+        closeTo(48.0, 0.05),
       );
-      expect(tokens.bottomNavHorizontalMargin, 0.0);
-      expect(tokens.navButtonMinHeight, 80.0);
+      expect(tokens.bottomNavHorizontalMargin, 16.0);
+      expect(tokens.bottomNavThumbSideMargin, 16.0);
+      expect(tokens.bottomNavBottomLift, 30.0);
+      expect(tokens.navButtonMinHeight, 52.0);
       expect(tokens.bottomNavBackgroundColor, isA<Color>());
       expect(tokens.navButtonSelectedBackgroundColor, isA<Color>());
     });
@@ -662,7 +664,7 @@ void main() {
       final scaled = tokens.phoneBottomNavLayoutHeight(
         TextScaler.linear(2),
       );
-      expect(unit, closeTo(80.0, 0.05));
+      expect(unit, closeTo(48.0, 0.1));
       expect(scaled, greaterThan(unit));
     });
 
@@ -673,7 +675,11 @@ void main() {
       expect(
         tokens.phoneBottomNavPaintedHeight(textScaler, systemInset),
         closeTo(
-          tokens.phoneBottomNavLayoutHeight(textScaler) + systemInset,
+          tokens.bottomNavVerticalMargin +
+              (2 * tokens.bottomNavInternalPadding) +
+              tokens.phoneBottomNavLayoutHeight(textScaler) +
+              systemInset +
+              tokens.bottomNavBottomLift,
           0.05,
         ),
       );
@@ -687,7 +693,7 @@ void main() {
       final scaled = tokens.phoneBottomNavIconOnlyLayoutHeight(
         TextScaler.linear(2),
       );
-      expect(unit, closeTo(40.0, 0.05));
+      expect(unit, closeTo(48.0, 0.05));
       expect(scaled, greaterThan(unit));
     });
 
@@ -700,16 +706,13 @@ void main() {
       );
       final tokens = TilawaAdaptiveShellTokens.fromColorScheme(scheme);
 
-      expect(tokens.bottomNavBackgroundColor, AppColors.lightCanvas);
-      expect(tokens.bottomNavShadowOpacity, 0);
-      expect(tokens.bottomNavShadowBlur, 14);
-      expect(tokens.bottomNavShadowOffset, const Offset(0, 4));
+      expect(tokens.bottomNavBackgroundColor, AppColors.tripGlideSurface);
+      expect(tokens.bottomNavShadowOpacity, 0.04);
+      expect(tokens.bottomNavShadowBlur, 8);
+      expect(tokens.bottomNavShadowOffset, const Offset(0, 2));
       expect(
         tokens.navButtonSelectedBackgroundColor,
-        Color.alphaBlend(
-          scheme.primary.withValues(alpha: 0.10),
-          AppColors.lightCanvas,
-        ),
+        AppColors.tripGlideCanvasElevated,
       );
       expect(
         tokens.sideRailIndicatorColor,
@@ -767,7 +770,7 @@ void main() {
           TilawaAdaptiveShellTokens.fromColorScheme(
             tealScheme,
           ).bottomNavBackgroundColor,
-          AppColors.lightCanvas,
+          AppColors.tripGlideSurface,
         );
       },
     );
@@ -789,7 +792,7 @@ void main() {
           0.32,
         ),
       );
-      expect(tokens.bottomNavShadowOpacity, 0);
+      expect(tokens.bottomNavShadowOpacity, 0.055);
       expect(tokens.bottomNavShadowBlur, 10);
       expect(tokens.bottomNavShadowOffset, const Offset(0, 2));
       expect(
@@ -824,7 +827,9 @@ void main() {
       const first = TilawaAdaptiveShellTokens(
         phoneBottomNavBarBaseHeight: 88.0,
         bottomNavHorizontalMargin: 16.0,
+        bottomNavThumbSideMargin: 8.0,
         bottomNavVerticalMargin: 4.0,
+        bottomNavBottomLift: 4.0,
         bottomNavIconOnlyVerticalMargin: 2.0,
         bottomNavInternalPadding: 8.0,
         bottomNavBorderWidth: 1.0,
@@ -862,7 +867,9 @@ void main() {
       const second = TilawaAdaptiveShellTokens(
         phoneBottomNavBarBaseHeight: 96.0,
         bottomNavHorizontalMargin: 20.0,
+        bottomNavThumbSideMargin: 14.0,
         bottomNavVerticalMargin: 8.0,
+        bottomNavBottomLift: 12.0,
         bottomNavIconOnlyVerticalMargin: 4.0,
         bottomNavInternalPadding: 12.0,
         bottomNavBorderWidth: 2.0,
@@ -1096,23 +1103,39 @@ void main() {
   });
 
   group('TilawaHomeDashboardCardTokens', () {
-    test('fromColorScheme uses featured gold gradient stops', () {
+    test('fromColorScheme uses TripGlide neutral featured card stops', () {
       final ColorScheme scheme = ColorScheme.fromSeed(
         seedColor: AppColors.defaultPrimary,
         primary: AppColors.defaultPrimary,
       );
       final tokens = TilawaHomeDashboardCardTokens.fromColorScheme(scheme);
 
-      expect(tokens.gradientStart, AppColors.featuredGradientStart);
-      expect(tokens.gradientEnd, AppColors.featuredGradientEnd);
-      expect(tokens.foregroundColor, AppColors.featuredGradientForeground);
+      expect(tokens.gradientStart, AppColors.tripGlideSurface);
+      expect(tokens.gradientEnd, AppColors.tripGlideSurface);
+      expect(tokens.foregroundColor, AppColors.tripGlideInk);
       expect(
         tokens.splashColor,
-        AppColors.primaryBrownDark.withValues(alpha: 0.12),
+        AppColors.tripGlideInk.withValues(alpha: 0.08),
       );
       expect(
         tokens.highlightColor,
-        AppColors.primaryBrownDark.withValues(alpha: 0.06),
+        AppColors.tripGlideInk.withValues(alpha: 0.04),
+      );
+      expect(tokens.travelSheetSurface, AppColors.homeTravelSheetSurface);
+      expect(tokens.travelSearchFieldFill, AppColors.homeTravelSearchFill);
+      expect(tokens.travelSectionLinkColor, AppColors.homeTravelSectionLink);
+      expect(
+        tokens.travelDestinationIconColor,
+        AppColors.homeTravelDestinationIcon,
+      );
+      expect(
+        tokens.travelDestinationHeaderTints,
+        AppColors.homeTravelDestinationHeaderTints,
+      );
+      expect(tokens.destinationHeaderTint(0), AppColors.tripGlideCanvas);
+      expect(
+        tokens.destinationHeaderTint(1),
+        AppColors.tripGlideCanvasElevated,
       );
     });
   });
@@ -1235,7 +1258,7 @@ void main() {
                 );
                 expect(
                   accessed.adaptiveShell.bottomNavBackgroundColor,
-                  AppColors.lightCanvas,
+                  AppColors.tripGlideSurface,
                 );
                 expect(
                   accessed.adaptiveShell.bottomNavBackgroundColor,
@@ -1244,15 +1267,6 @@ void main() {
                 expect(
                   accessed.adaptiveShell.navButtonSelectedBackgroundColor,
                   fromScheme.navButtonSelectedBackgroundColor,
-                );
-                expect(
-                  accessed.adaptiveShell.navButtonSelectedBackgroundColor,
-                  isNot(
-                    equals(
-                      TilawaAdaptiveShellTokens.defaults()
-                          .navButtonSelectedBackgroundColor,
-                    ),
-                  ),
                 );
                 return const SizedBox.shrink();
               },
@@ -1281,7 +1295,7 @@ void main() {
       );
     });
 
-    test('light catalog uses brown active pill', () {
+    test('light catalog uses ink active pill', () {
       final ColorScheme light = ColorScheme.fromSeed(
         seedColor: AppColors.defaultPrimary,
         brightness: Brightness.light,

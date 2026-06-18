@@ -32,7 +32,9 @@ class SurahListTile extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
-    final double tileRadius = tokens.resolveRadius(family: TilawaRadiusFamily.card);
+    final double tileRadius = tokens.resolveRadius(
+      family: TilawaRadiusFamily.card,
+    );
     // Leading badge size matches the reciter avatar (iconSizeLarge + spaceExtraLarge = 48dp).
     final double badgeSize = tokens.iconSizeLarge + tokens.spaceExtraLarge;
     final Color activeFill = ReciterCatalogChrome.activeFill(colorScheme);
@@ -107,9 +109,7 @@ class SurahListTile extends StatelessWidget {
               decoration: BoxDecoration(
                 // Apply same opacityEmphasis (0.7) dampening as the reciter avatar —
                 // keeps container colors soft across all four palette slots.
-                color: isCurrentItem
-                    ? activeFill
-                    : idleFill,
+                color: isCurrentItem ? activeFill : idleFill,
                 borderRadius: BorderRadius.circular(tokens.radiusLarge),
                 border: Border.all(
                   color: isCurrentItem

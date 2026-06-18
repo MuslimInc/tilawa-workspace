@@ -38,7 +38,7 @@ Color _expectedFeedbackBorder(ColorScheme scheme, TilawaFeedbackVariant v) {
 
 void main() {
   group('TilawaPermissionBanner', () {
-    testWidgets('action TextButton is at least 44×44 dp with semantics', (
+    testWidgets('action TextButton is at least 48×48 dp with semantics', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
@@ -53,8 +53,8 @@ void main() {
 
       final buttonFinder = find.widgetWithText(TextButton, 'Open settings');
       final size = tester.getSize(buttonFinder);
-      expect(size.width, greaterThanOrEqualTo(44));
-      expect(size.height, greaterThanOrEqualTo(44));
+      expect(size.width, greaterThanOrEqualTo(kTilawaMinInteractiveDimension));
+      expect(size.height, greaterThanOrEqualTo(kTilawaMinInteractiveDimension));
 
       final sem = tester.getSemantics(buttonFinder);
       expect(sem.flagsCollection.isButton, isTrue);
@@ -63,7 +63,7 @@ void main() {
   });
 
   group('TilawaMediaPlayerBar', () {
-    testWidgets('transport control hit targets are at least 44 dp', (
+    testWidgets('transport control hit targets are at least 48 dp', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
@@ -86,8 +86,14 @@ void main() {
 
       final theme = Theme.of(tester.element(find.byType(TilawaMediaPlayerBar)));
       final tokens = theme.componentTokens.mediaPlayerBar;
-      expect(tokens.controlButtonSize, greaterThanOrEqualTo(44));
-      expect(tokens.playPauseButtonSize, greaterThanOrEqualTo(44));
+      expect(
+        tokens.controlButtonSize,
+        greaterThanOrEqualTo(kTilawaMinInteractiveDimension),
+      );
+      expect(
+        tokens.playPauseButtonSize,
+        greaterThanOrEqualTo(kTilawaMinInteractiveDimension),
+      );
 
       final transportButtons = find.descendant(
         of: find.byType(TilawaMediaPlayerBar),
@@ -97,14 +103,20 @@ void main() {
 
       for (final element in transportButtons.evaluate()) {
         final box = element.renderObject! as RenderBox;
-        expect(box.size.width, greaterThanOrEqualTo(44));
-        expect(box.size.height, greaterThanOrEqualTo(44));
+        expect(
+          box.size.width,
+          greaterThanOrEqualTo(kTilawaMinInteractiveDimension),
+        );
+        expect(
+          box.size.height,
+          greaterThanOrEqualTo(kTilawaMinInteractiveDimension),
+        );
       }
     });
   });
 
   group('TilawaIconToggle', () {
-    testWidgets('render box is at least 44×44 dp when iconSize is small', (
+    testWidgets('render box is at least 48×48 dp when iconSize is small', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
@@ -123,8 +135,8 @@ void main() {
       final box =
           tester.renderObject(find.byType(TilawaIconToggle)) as RenderBox;
       expect(box.hasSize, isTrue);
-      expect(box.size.width, greaterThanOrEqualTo(44));
-      expect(box.size.height, greaterThanOrEqualTo(44));
+      expect(box.size.width, greaterThanOrEqualTo(kTilawaMinInteractiveDimension));
+      expect(box.size.height, greaterThanOrEqualTo(kTilawaMinInteractiveDimension));
 
       final sem = tester.getSemantics(find.byType(TilawaIconToggle));
       expect(sem.flagsCollection.isButton, isTrue);

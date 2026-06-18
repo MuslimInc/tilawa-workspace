@@ -23,6 +23,10 @@ void main() {
     'molecules/tilawa_alphabet_scrollbar.dart',
     'organisms/tilawa_media_player_bar.dart',
     'organisms/immersive_composer_scaffold.dart',
+    // Horizontal drag on the bottom-nav pill ends a long-press session when the
+    // finger leaves the thumb rail; `behavior: HitTestBehavior.opaque` keeps
+    // transparent padding inside the pill tappable.
+    'organisms/tilawa_adaptive_shell.dart',
     // The shared interaction primitive — its GestureDetector declares
     // `behavior: HitTestBehavior.opaque` and is the canonical place the rest of
     // the kit routes taps through (focus ring, press, haptics, state layers).

@@ -13,7 +13,6 @@ import '../bloc/home_dashboard_state.dart';
 import '../widgets/home_dashboard_body.dart';
 import '../widgets/home_dashboard_content_sliver.dart';
 import '../widgets/home_dashboard_hero_sliver.dart';
-import '../widgets/home_sliver_app_debug_log.dart';
 
 /// Main daily dashboard for the app shell.
 class HomeScreen extends StatelessWidget {
@@ -21,12 +20,10 @@ class HomeScreen extends StatelessWidget {
     super.key,
     required this.onOpenReciters,
     required this.onOpenPrayer,
-    required this.onOpenSettings,
   });
 
   final VoidCallback onOpenReciters;
   final VoidCallback onOpenPrayer;
-  final VoidCallback onOpenSettings;
 
   static const double _heroSnapThresholdFactor = 0.35;
   static const double _heroSnapTolerance = 0.5;
@@ -64,7 +61,6 @@ class HomeScreen extends StatelessWidget {
                     context: context,
                     state: state,
                     onOpenPrayer: onOpenPrayer,
-                    onOpenSettings: onOpenSettings,
                   ),
                   HomeDashboardContentSliver(
                     child: HomeDashboardBody(
@@ -87,21 +83,6 @@ class HomeScreen extends StatelessWidget {
   ) {
     if (notification.depth != 0) {
       return false;
-    }
-
-    if (notification is ScrollUpdateNotification) {
-      HomeSliverAppDebugLog.logThrottled(
-        'scroll',
-        'scroll_update',
-        hypothesisId: 'H5',
-        throttleValue: (notification.metrics.pixels / 16).round(),
-        data: {
-          'pixels': notification.metrics.pixels.toStringAsFixed(1),
-          'maxScrollExtent': notification.metrics.maxScrollExtent
-              .toStringAsFixed(1),
-          'axis': notification.metrics.axisDirection.name,
-        },
-      );
     }
 
     if (notification is ScrollEndNotification) {

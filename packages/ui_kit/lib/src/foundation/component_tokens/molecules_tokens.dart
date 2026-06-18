@@ -316,7 +316,7 @@ class TilawaIconActionButtonTokens {
   final double inactiveBorderOpacity;
 
   factory TilawaIconActionButtonTokens.defaults() {
-    // Size = Tilawa hit-target floor (kTilawaMinInteractiveDimension, 44 dp).
+    // Size = Tilawa hit-target floor (kTilawaMinInteractiveDimension, 48 dp).
     // At the floor; do not shrink further.
     return const TilawaIconActionButtonTokens(
       size: kTilawaMinInteractiveDimension,
@@ -368,8 +368,8 @@ class TilawaIconActionButtonTokens {
   }
 }
 
-  /// Behance lifestyle filter: brown active pill + white label (light);
-  /// lifted warm tier on dark.
+/// Behance lifestyle filter: brown active pill + white label (light);
+/// lifted warm tier on dark.
 Color catalogFilterSelectedBackground(ColorScheme colorScheme) {
   if (colorScheme.brightness == Brightness.light) {
     return colorScheme.primary;
@@ -830,7 +830,7 @@ class TilawaSeekBarTokens {
   final double inactiveTrackOpacity;
 
   factory TilawaSeekBarTokens.defaults() {
-    // fix: Accessibility — Tilawa 44 dp touch strip for seek interaction.
+    // fix: Accessibility — Tilawa 48 dp touch strip for seek interaction.
     return const TilawaSeekBarTokens(
       touchExtent: kTilawaMinInteractiveDimension,
       horizontalMargin: 16,
@@ -1294,8 +1294,7 @@ class TilawaPermissionBannerTokens {
 
 /// Component tokens for the Home next-prayer hero card gradient shell.
 ///
-/// Warm gold / brown gradients per the Behance lifestyle reference — fixed
-/// brand stops in [AppColors], not runtime [ColorScheme] primary.
+/// TripGlide neutral canvas — flat off-white stops in [AppColors].
 @immutable
 class TilawaHomeNextPrayerHeroTokens {
   const TilawaHomeNextPrayerHeroTokens({
@@ -1483,8 +1482,7 @@ class TilawaHomeNextPrayerHeroTokens {
 /// Home dashboard card surface — a soft [ColorScheme.primaryContainer] wash so
 /// Token-backed featured dashboard cards (Last Read, resume hubs).
 ///
-/// Uses the warm gold gradient from [AppColors.featuredGradientStart] →
-/// [AppColors.featuredGradientEnd] with brown ink feedback ripples.
+/// Uses TripGlide neutral surfaces for featured Home dashboard cards.
 @immutable
 class TilawaHomeDashboardCardTokens {
   const TilawaHomeDashboardCardTokens({
@@ -1493,6 +1491,11 @@ class TilawaHomeDashboardCardTokens {
     required this.foregroundColor,
     required this.splashColor,
     required this.highlightColor,
+    required this.travelSheetSurface,
+    required this.travelSearchFieldFill,
+    required this.travelSectionLinkColor,
+    required this.travelDestinationIconColor,
+    required this.travelDestinationHeaderTints,
   });
 
   final Color gradientStart;
@@ -1501,15 +1504,43 @@ class TilawaHomeDashboardCardTokens {
   final Color splashColor;
   final Color highlightColor;
 
+  /// White sheet panel overlapping the hero gradient.
+  final Color travelSheetSurface;
+
+  /// Warm rest fill for the read-only Home search field.
+  final Color travelSearchFieldFill;
+
+  /// Accent for section header links (See all).
+  final Color travelSectionLinkColor;
+
+  /// Icons on discover / carousel destination header bands.
+  final Color travelDestinationIconColor;
+
+  /// Warm tints for travel-style destination card headers.
+  final List<Color> travelDestinationHeaderTints;
+
+  Color destinationHeaderTint(int index) {
+    if (travelDestinationHeaderTints.isEmpty) {
+      return travelSearchFieldFill;
+    }
+    return travelDestinationHeaderTints[index.abs() %
+        travelDestinationHeaderTints.length];
+  }
+
   factory TilawaHomeDashboardCardTokens.fromColorScheme(
     ColorScheme colorScheme,
   ) {
     return TilawaHomeDashboardCardTokens(
-      gradientStart: AppColors.featuredGradientStart,
-      gradientEnd: AppColors.featuredGradientEnd,
-      foregroundColor: AppColors.featuredGradientForeground,
-      splashColor: AppColors.primaryBrownDark.withValues(alpha: 0.12),
-      highlightColor: AppColors.primaryBrownDark.withValues(alpha: 0.06),
+      gradientStart: AppColors.tripGlideSurface,
+      gradientEnd: AppColors.tripGlideSurface,
+      foregroundColor: AppColors.tripGlideInk,
+      splashColor: AppColors.tripGlideInk.withValues(alpha: 0.08),
+      highlightColor: AppColors.tripGlideInk.withValues(alpha: 0.04),
+      travelSheetSurface: AppColors.homeTravelSheetSurface,
+      travelSearchFieldFill: AppColors.homeTravelSearchFill,
+      travelSectionLinkColor: AppColors.homeTravelSectionLink,
+      travelDestinationIconColor: AppColors.homeTravelDestinationIcon,
+      travelDestinationHeaderTints: AppColors.homeTravelDestinationHeaderTints,
     );
   }
 
@@ -1519,6 +1550,11 @@ class TilawaHomeDashboardCardTokens {
     Color? foregroundColor,
     Color? splashColor,
     Color? highlightColor,
+    Color? travelSheetSurface,
+    Color? travelSearchFieldFill,
+    Color? travelSectionLinkColor,
+    Color? travelDestinationIconColor,
+    List<Color>? travelDestinationHeaderTints,
   }) {
     return TilawaHomeDashboardCardTokens(
       gradientStart: gradientStart ?? this.gradientStart,
@@ -1526,6 +1562,15 @@ class TilawaHomeDashboardCardTokens {
       foregroundColor: foregroundColor ?? this.foregroundColor,
       splashColor: splashColor ?? this.splashColor,
       highlightColor: highlightColor ?? this.highlightColor,
+      travelSheetSurface: travelSheetSurface ?? this.travelSheetSurface,
+      travelSearchFieldFill:
+          travelSearchFieldFill ?? this.travelSearchFieldFill,
+      travelSectionLinkColor:
+          travelSectionLinkColor ?? this.travelSectionLinkColor,
+      travelDestinationIconColor:
+          travelDestinationIconColor ?? this.travelDestinationIconColor,
+      travelDestinationHeaderTints:
+          travelDestinationHeaderTints ?? this.travelDestinationHeaderTints,
     );
   }
 
@@ -1540,6 +1585,27 @@ class TilawaHomeDashboardCardTokens {
       foregroundColor: Color.lerp(a.foregroundColor, b.foregroundColor, t)!,
       splashColor: Color.lerp(a.splashColor, b.splashColor, t)!,
       highlightColor: Color.lerp(a.highlightColor, b.highlightColor, t)!,
+      travelSheetSurface: Color.lerp(
+        a.travelSheetSurface,
+        b.travelSheetSurface,
+        t,
+      )!,
+      travelSearchFieldFill: Color.lerp(
+        a.travelSearchFieldFill,
+        b.travelSearchFieldFill,
+        t,
+      )!,
+      travelSectionLinkColor: Color.lerp(
+        a.travelSectionLinkColor,
+        b.travelSectionLinkColor,
+        t,
+      )!,
+      travelDestinationIconColor: Color.lerp(
+        a.travelDestinationIconColor,
+        b.travelDestinationIconColor,
+        t,
+      )!,
+      travelDestinationHeaderTints: a.travelDestinationHeaderTints,
     );
   }
 }

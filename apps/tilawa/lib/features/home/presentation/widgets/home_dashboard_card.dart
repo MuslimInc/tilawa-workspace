@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-/// Home dashboard surface — gold-gradient featured card with warm shadow.
+/// Home dashboard surface — white elevated card with thin shadow.
 class HomeDashboardCard extends StatelessWidget {
   const HomeDashboardCard({
     super.key,
@@ -19,7 +19,7 @@ class HomeDashboardCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
 
-  /// When true, paints the mockup gold gradient from dashboard card tokens.
+  /// When true, paints the TripGlide card surface from dashboard card tokens.
   final bool useFeaturedGradient;
   final Color? backgroundColor;
   final double? borderRadius;

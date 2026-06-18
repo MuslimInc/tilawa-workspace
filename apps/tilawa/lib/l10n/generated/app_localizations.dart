@@ -221,8 +221,26 @@ abstract class AppLocalizations {
   /// Home section title for secondary destinations that are not bottom-nav tabs
   ///
   /// In en, this message translates to:
-  /// **'More'**
+  /// **'Discover'**
   String get homeExploreTitle;
+
+  /// Read-only Home search field hint; opens Quran index
+  ///
+  /// In en, this message translates to:
+  /// **'Search surahs, juz, or page'**
+  String get homeSearchHint;
+
+  /// Home horizontal carousel section title (travel-app popular row)
+  ///
+  /// In en, this message translates to:
+  /// **'Featured for you'**
+  String get homeFeaturedTitle;
+
+  /// Hero notification control; opens Prayer tab
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer times and alerts'**
+  String get homePrayerAlertsAction;
 
   /// Home section title for daily actions
   ///
@@ -2035,6 +2053,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Brown'**
   String get colorBrown;
+
+  /// TripGlide charcoal primary preset name
+  ///
+  /// In en, this message translates to:
+  /// **'Charcoal'**
+  String get colorInk;
 
   /// Purple color name
   ///

@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 
 /// Tilawa minimum interactive (hit-target) dimension, in logical pixels.
 ///
-/// **44 dp** — matches iOS HIG minimum touch target and Tilawa's premium
-/// density goal. Slightly denser than Material's 48 dp default while staying
-/// within WCAG 2.5.5 (Target Size) Level AAA for the recommended size.
+/// **48 dp** — matches Material's minimum touch target and WCAG 2.5.5
+/// (Target Size) Level AAA for the recommended size.
 /// Single source of truth for hit targets across the design system.
 /// [TilawaDesignTokens.minInteractiveDimension] and
 /// `context.minInteractiveDimension` always resolve to this constant;
@@ -26,7 +25,7 @@ import 'package:flutter/material.dart';
 /// declare `behavior: HitTestBehavior.opaque` and update the allow-list,
 /// or use a Material primitive (`InkWell`, `IconButton`, `ListTile`)
 /// which already provides the hit-slop and ripple.
-const double kTilawaMinInteractiveDimension = 44.0;
+const double kTilawaMinInteractiveDimension = 48.0;
 
 /// Design tokens for the Tilawa UI Kit to avoid magic numbers
 /// and ensure consistency across components.
@@ -201,7 +200,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   final double iconSizeLargePlus;
 
   /// 44.0 — largest *glyph* size in the default ramp. Sits just below
-  /// [kTilawaMinInteractiveDimension] (44 dp) so a top-of-ramp icon fits
+  /// [kTilawaMinInteractiveDimension] (48 dp) so a top-of-ramp icon fits
   /// comfortably inside the minimum hit target with breathing room.
   /// Use [minInteractiveDimension] for layout limits on tappable chrome,
   /// not necessarily every decorative icon.
@@ -319,15 +318,15 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       radiusExtraLarge: 24.0,
       radiusHero: 28.0,
       opacitySubtle: 0.1,
-      opacityShadow: 0.12,
-      opacityShadowStrong: 0.18,
+      opacityShadow: 0.04,
+      opacityShadowStrong: 0.08,
       opacityMedium: 0.3,
       opacityEmphasis: 0.7,
       opacityGlass: 0.8,
       blurGlass: 12.0,
-      blurShadow: 20.0,
+      blurShadow: 8.0,
       shadowOffsetSmall: const Offset(0, 1),
-      shadowOffsetMedium: const Offset(0, 6),
+      shadowOffsetMedium: const Offset(0, 2),
       borderWidthThin: 0.5,
       progressHeight: 3.0,
       iconSizeExtraSmall: 12.0,
@@ -757,7 +756,7 @@ extension TilawaRadiusResolverX on TilawaDesignTokens {
   /// Returns the corner radius for [family].
   ///
   /// When [height] is omitted, [TilawaRadiusFamily.pill] falls back to a
-  /// 44 dp affordance pill (`minInteractiveDimension / 2`).
+  /// 48 dp affordance pill (`minInteractiveDimension / 2`).
   double resolveRadius({
     required TilawaRadiusFamily family,
     double height = 0,
@@ -765,9 +764,10 @@ extension TilawaRadiusResolverX on TilawaDesignTokens {
   }) {
     return switch (family) {
       TilawaRadiusFamily.card => radiusCard,
-      TilawaRadiusFamily.pill => height > 0
-          ? radiusPill(height)
-          : radiusPill(kTilawaMinInteractiveDimension),
+      TilawaRadiusFamily.pill =>
+        height > 0
+            ? radiusPill(height)
+            : radiusPill(kTilawaMinInteractiveDimension),
       TilawaRadiusFamily.chrome => radiusLarge,
       TilawaRadiusFamily.section => radiusSection,
       TilawaRadiusFamily.hero => radiusHero,
@@ -778,7 +778,10 @@ extension TilawaRadiusResolverX on TilawaDesignTokens {
     };
   }
 
-  double _resolvedIconDimension({required double width, required double height}) {
+  double _resolvedIconDimension({
+    required double width,
+    required double height,
+  }) {
     if (width > 0 && height > 0) {
       return width < height ? width : height;
     }

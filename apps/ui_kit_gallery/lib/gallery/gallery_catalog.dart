@@ -329,6 +329,14 @@ const List<GalleryEntry> galleryCatalog = [
     builder: OrganismsDemos.behanceFeaturedCard,
   ),
   GalleryEntry(
+    id: 'travel_dashboard_sheet',
+    name: 'Travel Dashboard Sheet',
+    category: GalleryCategory.organisms,
+    description:
+        'Ronas IT–style hero gradient with overlapping parchment content lip.',
+    builder: OrganismsDemos.travelDashboardSheet,
+  ),
+  GalleryEntry(
     id: 'behance_instruction_chip',
     name: 'Behance Instruction Chip',
     category: GalleryCategory.organisms,

@@ -21,12 +21,14 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(<AudioEntity>[]);
-    registerFallbackValue(const AudioEntity(
-      id: 'id',
-      title: 'title',
-      url: 'url',
-      duration: Duration.zero,
-    ));
+    registerFallbackValue(
+      const AudioEntity(
+        id: 'id',
+        title: 'title',
+        url: 'url',
+        duration: Duration.zero,
+      ),
+    );
   });
 
   setUp(() {
@@ -36,7 +38,11 @@ void main() {
 
   test('plays verse audio from everyayah for the active reciter', () async {
     when(
-      () => playFromQueue(any(), any(), initialPosition: any(named: 'initialPosition')),
+      () => playFromQueue(
+        any(),
+        any(),
+        initialPosition: any(named: 'initialPosition'),
+      ),
     ).thenAnswer((_) async => const Right(null));
 
     final result = await useCase(
@@ -53,9 +59,15 @@ void main() {
 
     expect(result, isA<Right<Object?, void>>());
 
-    final captured = verify(
-      () => playFromQueue(captureAny(), 0, initialPosition: any(named: 'initialPosition')),
-    ).captured.single as List<AudioEntity>;
+    final captured =
+        verify(
+              () => playFromQueue(
+                captureAny(),
+                0,
+                initialPosition: any(named: 'initialPosition'),
+              ),
+            ).captured.single
+            as List<AudioEntity>;
 
     expect(
       captured.single.url,
@@ -66,14 +78,24 @@ void main() {
 
   test('falls back to default reciter when no audio is active', () async {
     when(
-      () => playFromQueue(any(), any(), initialPosition: any(named: 'initialPosition')),
+      () => playFromQueue(
+        any(),
+        any(),
+        initialPosition: any(named: 'initialPosition'),
+      ),
     ).thenAnswer((_) async => const Right(null));
 
     await useCase(ayah: ayah);
 
-    final captured = verify(
-      () => playFromQueue(captureAny(), 0, initialPosition: any(named: 'initialPosition')),
-    ).captured.single as List<AudioEntity>;
+    final captured =
+        verify(
+              () => playFromQueue(
+                captureAny(),
+                0,
+                initialPosition: any(named: 'initialPosition'),
+              ),
+            ).captured.single
+            as List<AudioEntity>;
 
     expect(captured.single.url, contains('Alafasy_128kbps'));
   });

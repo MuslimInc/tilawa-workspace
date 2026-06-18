@@ -55,13 +55,13 @@ class QiblaCompassWidget extends StatelessWidget {
                         shape: BoxShape.circle,
                         gradient: RadialGradient(
                           colors: [
-                            AppColors.featuredGradientStart.withValues(
-                              alpha: tokens.opacityEmphasis,
-                            ),
-                            AppColors.qiblaCompassGlow.withValues(
+                            colorScheme.surface,
+                            colorScheme.surfaceContainerHigh.withValues(
                               alpha: tokens.opacityMedium,
                             ),
-                            AppColors.qiblaCompassGlow.withValues(alpha: 0),
+                            colorScheme.surfaceContainerHigh.withValues(
+                              alpha: 0,
+                            ),
                           ],
                           stops: const <double>[0.05, 0.45, 1],
                         ),
@@ -75,11 +75,11 @@ class QiblaCompassWidget extends StatelessWidget {
                       ),
                     ),
                     Positioned(
-                      top: (compassSize - dialSize) / 2 -
+                      top:
+                          (compassSize - dialSize) / 2 -
                           kQiblaBezelMarkerHeight +
                           tokens.spaceExtraSmall,
-                      left:
-                          (compassSize - kQiblaBezelMarkerWidth) / 2,
+                      left: (compassSize - kQiblaBezelMarkerWidth) / 2,
                       child: const _QiblaBezelMarker(),
                     ),
                     _CompassPivot(isAligned: isAligned),
@@ -237,9 +237,7 @@ class _CompassPivot extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: colorScheme.tertiary.withValues(
-              alpha: isAligned
-                  ? tokens.opacityEmphasis
-                  : tokens.opacitySubtle,
+              alpha: isAligned ? tokens.opacityEmphasis : tokens.opacitySubtle,
             ),
             blurRadius: tokens.blurShadow,
             spreadRadius: kCenterIndicatorShadowSpread,
@@ -266,8 +264,8 @@ class _AngleDisplay extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final Color valueColor = isAligned
-        ? colorScheme.tertiary
-        : AppColors.featuredGradientForeground;
+        ? colorScheme.primary
+        : colorScheme.onSurface;
 
     return Column(
       children: [
@@ -342,7 +340,7 @@ class _CompassText extends StatelessWidget {
   }
 }
 
-/// Gold gradient compass needle (Behance reference).
+/// Charcoal compass needle (TripGlide neutral).
 class _QiblaNeedle extends StatelessWidget {
   const _QiblaNeedle({required this.isAligned});
 
@@ -350,13 +348,15 @@ class _QiblaNeedle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
 
     return CustomPaint(
       size: const Size(kQiblaNeedleWidth, kQiblaNeedleHeight),
       painter: _QiblaNeedlePainter(
         isAligned: isAligned,
         tokens: tokens,
+        colorScheme: theme.colorScheme,
       ),
     );
   }
@@ -366,17 +366,21 @@ class _QiblaNeedlePainter extends CustomPainter {
   const _QiblaNeedlePainter({
     required this.isAligned,
     required this.tokens,
+    required this.colorScheme,
   });
 
   final bool isAligned;
   final TilawaDesignTokens tokens;
+  final ColorScheme colorScheme;
 
   @override
   void paint(Canvas canvas, Size size) {
     final Offset tip = Offset(size.width / 2, tokens.spaceExtraSmall);
     final Offset left = Offset(tokens.spaceExtraSmall, size.height * 0.7);
-    final Offset right =
-        Offset(size.width - tokens.spaceExtraSmall, size.height * 0.7);
+    final Offset right = Offset(
+      size.width - tokens.spaceExtraSmall,
+      size.height * 0.7,
+    );
 
     final Path needle = Path()
       ..moveTo(tip.dx, tip.dy)
@@ -387,12 +391,12 @@ class _QiblaNeedlePainter extends CustomPainter {
 
     final Rect shaderRect = Rect.fromLTWH(0, 0, size.width, size.height);
     final Paint fill = Paint()
-      ..shader = const LinearGradient(
+      ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [
-          AppColors.featuredGradientStart,
-          AppColors.featuredGradientEnd,
+          colorScheme.onSurface,
+          colorScheme.primary,
         ],
       ).createShader(shaderRect)
       ..style = PaintingStyle.fill;
@@ -403,7 +407,7 @@ class _QiblaNeedlePainter extends CustomPainter {
       canvas.drawPath(
         needle,
         Paint()
-          ..color = AppColors.featuredGradientEnd.withValues(
+          ..color = colorScheme.primary.withValues(
             alpha: tokens.opacityEmphasis,
           )
           ..style = PaintingStyle.stroke
@@ -438,13 +442,13 @@ class _CompassDialPainter extends CustomPainter {
         colors: [
           colorScheme.surface,
           Color.alphaBlend(
-            AppColors.surahHeaderGradientTop.withValues(
+            colorScheme.surfaceContainerHigh.withValues(
               alpha: tokens.opacityEmphasis,
             ),
             colorScheme.surface,
           ),
           Color.alphaBlend(
-            AppColors.qiblaCompassGlow.withValues(alpha: 0.45),
+            colorScheme.surfaceContainerHigh.withValues(alpha: 0.45),
             colorScheme.surfaceContainerLowest,
           ),
         ],

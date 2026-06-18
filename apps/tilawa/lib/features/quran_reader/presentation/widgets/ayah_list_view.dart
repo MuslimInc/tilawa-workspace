@@ -40,8 +40,9 @@ class AyahListView extends StatelessWidget {
               ayah: ayah,
               settings: settings,
               onPlay: onAyahPlay == null ? null : () => onAyahPlay!(ayah),
-              onBookmark:
-                  onAyahBookmark == null ? null : () => onAyahBookmark!(ayah),
+              onBookmark: onAyahBookmark == null
+                  ? null
+                  : () => onAyahBookmark!(ayah),
               onShare: onAyahShare == null ? null : () => onAyahShare!(ayah),
             );
           }, childCount: surah.ayahs.length),

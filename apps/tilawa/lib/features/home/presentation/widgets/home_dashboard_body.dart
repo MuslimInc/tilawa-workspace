@@ -9,6 +9,7 @@ import '../cubit/home_layout_cubit.dart';
 import '../cubit/home_layout_state.dart';
 import '../../domain/entities/home_layout_mode.dart';
 import 'home_adaptive_shortcuts.dart';
+import 'home_dashboard_search_bar.dart';
 import 'home_layout_toggle_button.dart';
 import 'home_daily_inspiration_section.dart';
 import 'home_more_actions_group.dart';
@@ -35,6 +36,11 @@ class HomeDashboardBody extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Transform.translate(
+              offset: Offset(0, -tokens.spaceLarge),
+              child: const HomeDashboardSearchBar(),
+            ),
+            SizedBox(height: tokens.spaceMedium),
             HomeTodaySection(onOpenPrayer: onOpenPrayer),
             SizedBox(height: tokens.spaceExtraLarge),
             _HomeDashboardSection(
@@ -131,12 +137,6 @@ class _HomeMoreActions extends StatelessWidget {
         title: context.l10n.homeQuickQibla,
         subtitle: context.l10n.homeQuickQiblaSubtitle,
         onTap: () => const QiblaRoute().push(context),
-      ),
-      HomeShortcutEntry(
-        icon: FluentIcons.settings_24_regular,
-        title: context.l10n.settings,
-        subtitle: context.l10n.homeQuickSettingsSubtitle,
-        onTap: () => const SettingsRoute().push(context),
       ),
     ];
 
