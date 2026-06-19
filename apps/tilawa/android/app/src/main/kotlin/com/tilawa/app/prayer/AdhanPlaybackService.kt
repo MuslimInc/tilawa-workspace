@@ -95,7 +95,12 @@ internal class AdhanPlaybackService : Service() {
             },
             object : ServiceActions {
                 override fun stopPlayback() {
-                    stopForeground(STOP_FOREGROUND_REMOVE)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        stopForeground(STOP_FOREGROUND_REMOVE)
+                    } else {
+                        @Suppress("DEPRECATION")
+                        stopForeground(true)
+                    }
                     stopSelf()
                 }
             },
@@ -484,11 +489,10 @@ internal class AdhanPlaybackService : Service() {
                     return if (resId != 0) localizedResources.getString(resId, *args) else key
                 }
             },
+            // ServiceActions is unused in the localization-only path; lifecycle is
+            // owned by the main `logic` lazy instance which holds the real callback.
             object : ServiceActions {
-                override fun stopPlayback() {
-                    stopForeground(STOP_FOREGROUND_REMOVE)
-                    stopSelf()
-                }
+                override fun stopPlayback() = Unit
             },
             analytics,
         )
