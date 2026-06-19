@@ -134,6 +134,18 @@
     "@homeTodaySubtitle": {
         "description": "Home Today section supporting line"
     },
+    "homeContinueTitle": "Continue",
+    "@homeContinueTitle": {
+        "description": "Home section title for resuming Quran — mirrors Spotify Jump back in"
+    },
+    "homeDailyPracticeTitle": "Daily Practice",
+    "@homeDailyPracticeTitle": {
+        "description": "Home section title for pinned athkar rituals"
+    },
+    "homeDailyPracticeSubtitle": "Your pinned adhkar and supplications",
+    "@homeDailyPracticeSubtitle": {
+        "description": "Home Daily Practice section supporting line"
+    },
     "homeAthkarRitualsTitle": "Quick athkar",
     "@homeAthkarRitualsTitle": {
         "description": "Home subsection title for pinned athkar shortcuts"
@@ -198,6 +210,10 @@
     "homeAthkarNowBadge": "Now",
     "@homeAthkarNowBadge": {
         "description": "Badge on time-relevant athkar shortcut"
+    },
+    "experimentalBadgeLabel": "Experimental",
+    "@experimentalBadgeLabel": {
+        "description": "Label for the experimental feature badge, shown on features that are in testing or preview"
     },
     "homeQuickQuran": "Quran",
     "@homeQuickQuran": {

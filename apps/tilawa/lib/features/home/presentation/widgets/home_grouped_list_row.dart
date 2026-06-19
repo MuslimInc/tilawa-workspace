@@ -12,6 +12,7 @@ class HomeGroupedListRow extends StatelessWidget {
     this.onLongPress,
     this.showChevron = true,
     this.semanticLabel,
+    this.trailingWidget,
   });
 
   final IconData icon;
@@ -21,6 +22,10 @@ class HomeGroupedListRow extends StatelessWidget {
   final VoidCallback? onLongPress;
   final bool showChevron;
   final String? semanticLabel;
+
+  /// Optional widget appended after the title column, replacing the chevron
+  /// when provided (e.g. a [TilawaExperimentalBadge]).
+  final Widget? trailingWidget;
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +89,9 @@ class HomeGroupedListRow extends StatelessWidget {
                       ],
                     ),
                   ),
-                  if (showChevron)
+                  if (trailingWidget != null)
+                    trailingWidget!
+                  else if (showChevron)
                     // Keep the right chevron in both LTR and RTL; this icon
                     // reads correctly in Arabic and avoids unwanted mirroring.
                     Icon(

@@ -11,12 +11,16 @@ class HomeMoreAction {
     this.subtitle,
     required this.icon,
     required this.onTap,
+    this.trailing,
   });
 
   final String label;
   final String? subtitle;
   final IconData icon;
   final VoidCallback onTap;
+
+  /// Optional widget replacing the default chevron (e.g. a badge).
+  final Widget? trailing;
 }
 
 /// Reciters and Qibla — destinations outside bottom navigation.
@@ -48,6 +52,7 @@ class HomeMoreActionsGroup extends StatelessWidget {
               title: actions[i].label,
               subtitle: actions[i].subtitle,
               onTap: actions[i].onTap,
+              trailingWidget: actions[i].trailing,
             ),
           ],
         ],

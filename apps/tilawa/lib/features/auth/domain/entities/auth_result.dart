@@ -21,7 +21,7 @@ abstract class AuthResult with _$AuthResult {
 
   /// The device has no Google accounts configured; sign-in cannot proceed
   /// without the user adding an account via device settings.
-  const factory AuthResult.noGoogleAccounts() = AuthNoGoogleAccounts;
+  const factory AuthResult.noGoogleAccounts() = AuthResultNoGoogleAccounts;
 
   factory AuthResult.fromJson(Map<String, dynamic> json) =>
       _$AuthResultFromJson(json);

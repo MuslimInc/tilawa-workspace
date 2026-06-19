@@ -1,17 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/features/athkar/domain/entities/athkar_category.dart';
+import 'package:tilawa/features/athkar/domain/pinned_athkar_display_order.dart';
+import 'package:tilawa/features/athkar/presentation/cubit/pinned_athkar_cubit.dart';
+import 'package:tilawa/features/athkar/presentation/cubit/pinned_athkar_state.dart';
 import 'package:tilawa/features/athkar/presentation/widgets/pinned_athkar_home_section.dart';
 import 'package:tilawa/features/today_plan/today_plan.dart';
-import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/entities/home_layout_mode.dart';
 import 'home_dashboard_section.dart';
+import 'home_featured_ritual_card.dart';
 import 'home_prayer_day_strip.dart';
-import 'home_section_link.dart';
-import 'home_today_featured_carousel.dart';
+import 'home_quran_resume_card.dart';
 
-/// Unified daily hub: prayer glance, Mushaf resume, rituals, and plans.
+/// Zone 1 — Continue: full-width Quran resume card.
+class HomeContinueSection extends StatelessWidget {
+  const HomeContinueSection({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return HomeDashboardSection(
+      title: context.l10n.homeContinueTitle,
+      child: const HomeQuranResumeCard(),
+    );
+  }
+}
+
+/// Zone 2 — Today: prayer strip + optional Today Plan.
 class HomeTodaySection extends StatelessWidget {
   const HomeTodaySection({
     super.key,
@@ -34,25 +51,83 @@ class HomeTodaySection extends StatelessWidget {
           subtitle: context.l10n.homeTodaySubtitle,
           child: HomePrayerDayStrip(onOpenPrayer: onOpenPrayer),
         ),
-        SizedBox(height: tokens.spaceLarge),
-        HomeDashboardSubsectionHeader(
-          title: context.l10n.homeFeaturedTitle,
-          trailing: HomeSeeAllLink(
-            onPressed: () => const QuranIndexRoute().push(context),
-          ),
-        ),
-        SizedBox(height: tokens.spaceMedium),
-        const HomeTodayFeaturedCarousel(),
-        SizedBox(height: tokens.spaceLarge),
-        PinnedAthkarHomeSection(
-          hideContextualFeatured: true,
-          layoutMode: layoutMode,
-        ),
         if (isTodayPlanEnabled()) ...[
-          SizedBox(height: tokens.spaceLarge),
+          SizedBox(height: tokens.spaceExtraLarge),
           const TodayPlanCard(),
         ],
       ],
+    );
+  }
+}
+
+/// Zone 3 — Daily Practice: contextual athkar card + pinned athkar grid/list.
+class HomeDailyPracticeSection extends StatelessWidget {
+  const HomeDailyPracticeSection({
+    super.key,
+    required this.layoutMode,
+  });
+
+  final HomeLayoutMode layoutMode;
+
+  @override
+  Widget build(BuildContext context) {
+    return HomeDashboardSection(
+      title: context.l10n.homeDailyPracticeTitle,
+      subtitle: context.l10n.homeDailyPracticeSubtitle,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _ContextualAthkarCard(),
+          PinnedAthkarHomeSection(
+            hideContextualFeatured: true,
+            layoutMode: layoutMode,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Contextual athkar card shown at the top of the Daily Practice section
+/// when a time-relevant pinned category exists. Hidden when none match.
+class _ContextualAthkarCard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final tokens = context.tokens;
+
+    return BlocBuilder<PinnedAthkarCubit, PinnedAthkarState>(
+      buildWhen: (previous, current) =>
+          previous.pinnedCategories != current.pinnedCategories ||
+          previous.status != current.status,
+      builder: (context, state) {
+        if (state.status != PinnedAthkarStatus.ready ||
+            state.pinnedCategories.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        final now = DateTime.now();
+        final AthkarCategory? featured = contextualAthkarCategory(
+          categories: orderPinnedAthkarForTime(
+            pinned: state.pinnedCategories,
+            now: now,
+          ),
+          now: now,
+        );
+
+        if (featured == null) return const SizedBox.shrink();
+
+        return Padding(
+          padding: EdgeInsets.only(bottom: tokens.spaceSmall),
+          child: HomeFeaturedRitualCard(
+            category: featured,
+            promptLabel: (title) =>
+                context.l10n.homeContextualAthkarPrompt(title),
+            nowBadgeLabel: context.l10n.homeAthkarNowBadge,
+            startLabel: context.l10n.homeFeaturedRitualStart,
+            layout: HomeFeaturedRitualCardLayout.row,
+          ),
+        );
+      },
     );
   }
 }

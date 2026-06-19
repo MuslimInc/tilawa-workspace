@@ -23,7 +23,6 @@ import 'package:tilawa/features/home/domain/repositories/home_layout_preference_
 import 'package:tilawa/features/home/domain/usecases/get_home_layout_mode_use_case.dart';
 import 'package:tilawa/features/home/domain/usecases/set_home_layout_mode_use_case.dart';
 import 'package:tilawa/features/home/presentation/screens/home_screen.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_today_featured_carousel.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_more_actions_group.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_pinned_athkar_grid.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_grouped_list_row.dart';
@@ -111,11 +110,11 @@ void main() {
       await tester.pump(const Duration(milliseconds: 16));
     }
 
-    expect(find.text('Discover'), findsOneWidget);
+    expect(find.text('Continue'), findsOneWidget);
     expect(find.text('Today'), findsOneWidget);
-    expect(find.text('Featured for you'), findsOneWidget);
+    expect(find.text('Daily Practice'), findsOneWidget);
+    expect(find.text('Discover'), findsOneWidget);
     expect(find.text('Last Read'), findsOneWidget);
-    expect(find.byType(HomeTodayFeaturedCarousel), findsOneWidget);
     expect(find.text('Search surahs, juz, or page'), findsNothing);
     expect(find.text('Daily inspiration'), findsOneWidget);
     expect(find.text('Reciters'), findsOneWidget);

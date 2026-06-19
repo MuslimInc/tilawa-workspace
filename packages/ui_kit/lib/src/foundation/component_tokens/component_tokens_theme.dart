@@ -35,6 +35,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     required this.bottomSheetScaffold,
     required this.homeNextPrayerHero,
     required this.homeDashboardCard,
+    required this.experimentalBadge,
   });
 
   final TilawaSectionTitleTokens sectionTitle;
@@ -64,6 +65,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
   final TilawaBottomSheetScaffoldTokens bottomSheetScaffold;
   final TilawaHomeNextPrayerHeroTokens homeNextPrayerHero;
   final TilawaHomeDashboardCardTokens homeDashboardCard;
+  final TilawaExperimentalBadgeTokens experimentalBadge;
 
   /// Creates light theme component tokens.
   factory TilawaComponentTokens.light({ColorScheme? colorScheme}) =>
@@ -133,6 +135,9 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       homeDashboardCard: TilawaHomeDashboardCardTokens.fromColorScheme(
         effectiveColorScheme,
       ),
+      experimentalBadge: TilawaExperimentalBadgeTokens.fromColorScheme(
+        effectiveColorScheme,
+      ),
     );
   }
 
@@ -165,6 +170,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     TilawaBottomSheetScaffoldTokens? bottomSheetScaffold,
     TilawaHomeNextPrayerHeroTokens? homeNextPrayerHero,
     TilawaHomeDashboardCardTokens? homeDashboardCard,
+    TilawaExperimentalBadgeTokens? experimentalBadge,
   }) {
     return TilawaComponentTokens(
       sectionTitle: sectionTitle ?? this.sectionTitle,
@@ -194,6 +200,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       bottomSheetScaffold: bottomSheetScaffold ?? this.bottomSheetScaffold,
       homeNextPrayerHero: homeNextPrayerHero ?? this.homeNextPrayerHero,
       homeDashboardCard: homeDashboardCard ?? this.homeDashboardCard,
+      experimentalBadge: experimentalBadge ?? this.experimentalBadge,
     );
   }
 
@@ -301,6 +308,11 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       homeDashboardCard: TilawaHomeDashboardCardTokens.lerp(
         homeDashboardCard,
         other.homeDashboardCard,
+        t,
+      ),
+      experimentalBadge: TilawaExperimentalBadgeTokens.lerp(
+        experimentalBadge,
+        other.experimentalBadge,
         t,
       ),
     );

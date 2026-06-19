@@ -22,3 +22,4 @@ export 'tilawa_segmented_control.dart';
 export 'tilawa_selection_tile.dart';
 export 'tilawa_settings_tile.dart';
 export 'tilawa_status_chip.dart';
+export 'tilawa_experimental_badge.dart';

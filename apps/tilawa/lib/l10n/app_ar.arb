@@ -83,6 +83,9 @@
     "homeFeaturedTitle": "مختارة لك",
     "homeTodayTitle": "اليوم",
     "homeTodaySubtitle": "الصلاة والقرآن والذكر ليومك",
+    "homeContinueTitle": "تابع",
+    "homeDailyPracticeTitle": "الممارسة اليومية",
+    "homeDailyPracticeSubtitle": "أذكارك المثبتة وأدعيتك",
     "homeAthkarRitualsTitle": "أذكار سريعة",
     "homePrayerStripTitle": "مواقيت اليوم",
     "homePrayerStripViewAll": "عرض الكل",
@@ -117,6 +120,7 @@
         }
     },
     "homeAthkarNowBadge": "الآن",
+    "experimentalBadgeLabel": "تجريبي",
     "homeQuickQuran": "القرآن",
     "homeQuickReciters": "القراء",
     "homeQuickRecitersSubtitle": "تصفّح التلاوات",

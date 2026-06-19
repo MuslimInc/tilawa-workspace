@@ -24,8 +24,8 @@ class PinnedAthkarHomeSection extends StatelessWidget {
     required this.layoutMode,
   });
 
-  /// When true, the contextual featured card is omitted (shown in
-  /// [HomeTodayFeaturedCarousel] instead).
+  /// When true, the contextual featured card is omitted (shown above this
+  /// widget in [HomeDailyPracticeSection] instead).
   final bool hideContextualFeatured;
   final HomeLayoutMode layoutMode;
 

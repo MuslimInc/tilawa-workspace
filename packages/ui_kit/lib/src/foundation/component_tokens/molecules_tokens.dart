@@ -1609,3 +1609,97 @@ class TilawaHomeDashboardCardTokens {
     );
   }
 }
+
+/// Component tokens for [TilawaExperimentalBadge].
+///
+/// Colors are derived from the caution semantic tint (warning hue) at reduced
+/// opacity so the badge reads as informational rather than urgent.
+@immutable
+class TilawaExperimentalBadgeTokens {
+  const TilawaExperimentalBadgeTokens({
+    required this.padding,
+    required this.backgroundColor,
+    required this.foregroundColor,
+    required this.borderColor,
+    required this.borderWidth,
+    required this.iconSize,
+    required this.iconGap,
+    required this.fontWeight,
+    required this.letterSpacing,
+  });
+
+  final EdgeInsetsGeometry padding;
+  final Color backgroundColor;
+  final Color foregroundColor;
+  final Color borderColor;
+  final double borderWidth;
+  final double iconSize;
+  final double iconGap;
+  final FontWeight fontWeight;
+  final double letterSpacing;
+
+  factory TilawaExperimentalBadgeTokens.fromColorScheme(
+    ColorScheme colorScheme,
+  ) {
+    final warning =
+        colorScheme.brightness == Brightness.dark
+            ? AppColors.warningDark
+            : AppColors.warning;
+    return TilawaExperimentalBadgeTokens(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      backgroundColor: Color.alphaBlend(
+        warning.withValues(alpha: 0.14),
+        colorScheme.surface,
+      ),
+      foregroundColor: warning,
+      borderColor: warning.withValues(alpha: 0.28),
+      borderWidth: 0.5,
+      iconSize: 12,
+      iconGap: 4,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0.4,
+    );
+  }
+
+  TilawaExperimentalBadgeTokens copyWith({
+    EdgeInsetsGeometry? padding,
+    Color? backgroundColor,
+    Color? foregroundColor,
+    Color? borderColor,
+    double? borderWidth,
+    double? iconSize,
+    double? iconGap,
+    FontWeight? fontWeight,
+    double? letterSpacing,
+  }) {
+    return TilawaExperimentalBadgeTokens(
+      padding: padding ?? this.padding,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+      foregroundColor: foregroundColor ?? this.foregroundColor,
+      borderColor: borderColor ?? this.borderColor,
+      borderWidth: borderWidth ?? this.borderWidth,
+      iconSize: iconSize ?? this.iconSize,
+      iconGap: iconGap ?? this.iconGap,
+      fontWeight: fontWeight ?? this.fontWeight,
+      letterSpacing: letterSpacing ?? this.letterSpacing,
+    );
+  }
+
+  static TilawaExperimentalBadgeTokens lerp(
+    TilawaExperimentalBadgeTokens a,
+    TilawaExperimentalBadgeTokens b,
+    double t,
+  ) {
+    return TilawaExperimentalBadgeTokens(
+      padding: EdgeInsetsGeometry.lerp(a.padding, b.padding, t)!,
+      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t)!,
+      foregroundColor: Color.lerp(a.foregroundColor, b.foregroundColor, t)!,
+      borderColor: Color.lerp(a.borderColor, b.borderColor, t)!,
+      borderWidth: lerpTokenDouble(a.borderWidth, b.borderWidth, t),
+      iconSize: lerpTokenDouble(a.iconSize, b.iconSize, t),
+      iconGap: lerpTokenDouble(a.iconGap, b.iconGap, t),
+      fontWeight: FontWeight.lerp(a.fontWeight, b.fontWeight, t)!,
+      letterSpacing: lerpTokenDouble(a.letterSpacing, b.letterSpacing, t),
+    );
+  }
+}

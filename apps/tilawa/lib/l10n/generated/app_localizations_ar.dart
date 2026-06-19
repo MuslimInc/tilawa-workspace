@@ -110,6 +110,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeTodaySubtitle => 'الصلاة والقرآن والذكر ليومك';
 
   @override
+  String get homeContinueTitle => 'تابع';
+
+  @override
+  String get homeDailyPracticeTitle => 'الممارسة اليومية';
+
+  @override
+  String get homeDailyPracticeSubtitle => 'أذكارك المثبتة وأدعيتك';
+
+  @override
   String get homeAthkarRitualsTitle => 'أذكار سريعة';
 
   @override
@@ -155,6 +164,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get homeAthkarNowBadge => 'الآن';
+
+  @override
+  String get experimentalBadgeLabel => 'تجريبي';
 
   @override
   String get homeQuickQuran => 'القرآن';

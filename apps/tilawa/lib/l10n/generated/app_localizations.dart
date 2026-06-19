@@ -272,6 +272,24 @@ abstract class AppLocalizations {
   /// **'Prayer, Quran, and dhikr for your day'**
   String get homeTodaySubtitle;
 
+  /// Home section title for resuming Quran — mirrors Spotify Jump back in
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get homeContinueTitle;
+
+  /// Home section title for pinned athkar rituals
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Practice'**
+  String get homeDailyPracticeTitle;
+
+  /// Home Daily Practice section supporting line
+  ///
+  /// In en, this message translates to:
+  /// **'Your pinned adhkar and supplications'**
+  String get homeDailyPracticeSubtitle;
+
   /// Home subsection title for pinned athkar shortcuts
   ///
   /// In en, this message translates to:
@@ -349,6 +367,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Now'**
   String get homeAthkarNowBadge;
+
+  /// Label for the experimental feature badge, shown on features that are in testing or preview
+  ///
+  /// In en, this message translates to:
+  /// **'Experimental'**
+  String get experimentalBadgeLabel;
 
   /// Home quick action for Quran reader
   ///
