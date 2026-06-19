@@ -28,6 +28,9 @@ class HomeScreen extends StatelessWidget {
   static const double _heroSnapThresholdFactor = 0.35;
   static const double _heroSnapTolerance = 0.5;
 
+  static const double _heroSnapThresholdFactor = 0.35;
+  static const double _heroSnapTolerance = 0.5;
+
   @override
   Widget build(BuildContext context) {
     final Color sheetColor = context.scaffoldCanvasColor;
