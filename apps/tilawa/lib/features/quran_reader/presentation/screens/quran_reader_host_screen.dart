@@ -10,6 +10,7 @@ import 'package:tilawa/features/quran_reader/presentation/cubit/quran_surah_cubi
 import 'package:tilawa/features/quran_reader/presentation/screens/quran_image_reader_screen.dart';
 import 'package:tilawa/features/quran_reader/presentation/screens/quran_surah_screen.dart';
 import 'package:tilawa/features/quran_reader/presentation/widgets/quran_reader_view_toggle.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Hosts the Mushaf image reader (default) and the Behance ayah-list reader.
 ///
@@ -38,12 +39,14 @@ class _QuranReaderHostScreenState extends State<QuranReaderHostScreen> {
   late int _activeSurah;
   int? _activeAyah;
   bool _ayahListVisited = false;
+  bool _isLoadingLastRead = false;
 
   @override
   void initState() {
     super.initState();
     _settingsCubit = getIt<QuranSettingsCubit>();
     unawaited(_settingsCubit.load());
+    _isLoadingLastRead = widget.surahNumber == 0;
     _activeSurah = widget.surahNumber > 0 ? widget.surahNumber : 1;
     _activeAyah = widget.initialAyah;
     if (widget.surahNumber == 0) {
@@ -53,17 +56,27 @@ class _QuranReaderHostScreenState extends State<QuranReaderHostScreen> {
 
   Future<void> _loadLastReadSurah() async {
     final result = await getIt<GetLastReadPositionUseCase>()();
-    result.fold((_) {}, (position) {
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        if (position.surahNumber != null) {
-          _activeSurah = position.surahNumber!;
+    result.fold(
+      (_) {
+        if (mounted) {
+          setState(() {
+            _isLoadingLastRead = false;
+          });
         }
-        _activeAyah = position.ayahNumber ?? _activeAyah;
-      });
-    });
+      },
+      (position) {
+        if (!mounted) {
+          return;
+        }
+        setState(() {
+          if (position.surahNumber != null) {
+            _activeSurah = position.surahNumber!;
+          }
+          _activeAyah = position.ayahNumber ?? _activeAyah;
+          _isLoadingLastRead = false;
+        });
+      },
+    );
   }
 
   Future<void> _switchToMushaf() {
@@ -84,6 +97,13 @@ class _QuranReaderHostScreenState extends State<QuranReaderHostScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoadingLastRead) {
+      return const Scaffold(
+        body: Center(
+          child: TilawaLoadingIndicator(),
+        ),
+      );
+    }
     return BlocProvider<QuranSettingsCubit>.value(
       value: _settingsCubit,
       child: BlocBuilder<QuranSettingsCubit, ReaderSettingsEntity>(
@@ -111,8 +131,8 @@ class _QuranReaderHostScreenState extends State<QuranReaderHostScreen> {
     // The view switch now lives in the reader's bottom navigation panel
     // (thumb-reachable) instead of the hard-to-reach top corner.
     return QuranImageReaderScreen(
-      surahNumber: widget.surahNumber,
-      initialAyah: widget.initialAyah,
+      surahNumber: _activeSurah,
+      initialAyah: _activeAyah,
       openPracticeOnLaunch: widget.openPracticeOnLaunch,
       onActiveSurahChanged: _onActiveSurahChanged,
       viewSwitchAction: QuranReaderViewToggle(
