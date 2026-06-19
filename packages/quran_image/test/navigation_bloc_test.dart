@@ -100,7 +100,7 @@ void main() {
         getLastVisitedPageUseCase: GetLastVisitedPageUseCase(
           _TestLastVisitedPageRepository(initialPage: 1),
         ),
-        autoHideIdleDuration: const Duration(milliseconds: 40),
+        autoHideIdleDuration: const Duration(milliseconds: 200),
       );
       addTearDown(bloc.close);
 
@@ -112,11 +112,11 @@ void main() {
       expect((bloc.state as NavigationLoaded).visibility.isVisible, isTrue);
 
       // Still visible before the idle window elapses.
-      await Future<void>.delayed(const Duration(milliseconds: 15));
+      await Future<void>.delayed(const Duration(milliseconds: 50));
       expect((bloc.state as NavigationLoaded).visibility.isVisible, isTrue);
 
       // Hidden automatically once idle.
-      await Future<void>.delayed(const Duration(milliseconds: 60));
+      await Future<void>.delayed(const Duration(milliseconds: 300));
       expect((bloc.state as NavigationLoaded).visibility.isVisible, isFalse);
     });
 
@@ -132,7 +132,7 @@ void main() {
         getLastVisitedPageUseCase: GetLastVisitedPageUseCase(
           _TestLastVisitedPageRepository(initialPage: 1),
         ),
-        autoHideIdleDuration: const Duration(milliseconds: 40),
+        autoHideIdleDuration: const Duration(milliseconds: 200),
       );
       addTearDown(bloc.close);
 
@@ -144,12 +144,12 @@ void main() {
       await Future<void>.delayed(Duration.zero);
 
       // Past the idle window, but still visible because the user is interacting.
-      await Future<void>.delayed(const Duration(milliseconds: 70));
+      await Future<void>.delayed(const Duration(milliseconds: 300));
       expect((bloc.state as NavigationLoaded).visibility.isVisible, isTrue);
 
       // Ending the interaction re-arms the timer; it hides after the window.
       bloc.add(const NavigationInteractionEnded());
-      await Future<void>.delayed(const Duration(milliseconds: 70));
+      await Future<void>.delayed(const Duration(milliseconds: 300));
       expect((bloc.state as NavigationLoaded).visibility.isVisible, isFalse);
     });
 

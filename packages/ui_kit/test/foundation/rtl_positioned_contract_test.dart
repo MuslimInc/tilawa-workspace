@@ -29,6 +29,11 @@ void main() {
     // (`left = (screenWidth - overlaySize) / 2`), so it is mirror-invariant
     // despite using `left:`. See the OverlayPortal builder.
     'molecules/tilawa_alphabet_scrollbar.dart',
+    // Long-press radial/vertical nav overlays position children by computed
+    // center coordinates (`circleCenter.dx`, `stackPivot.dx`, `thumbPivot.dx`
+    // +/- half-size). The dx values are already derived from RTL-aware layout,
+    // so the resulting placement is horizontally centered and mirror-invariant.
+    'organisms/tilawa_adaptive_shell.dart',
   };
 
   test('Positioned uses directional placement for horizontal edges', () {

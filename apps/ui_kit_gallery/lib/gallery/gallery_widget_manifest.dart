@@ -250,6 +250,10 @@ const List<GalleryWidgetCoverage> galleryWidgetManifest = [
     galleryId: 'behance_instruction_chip',
   ),
   GalleryWidgetCoverage(
+    symbol: 'TravelDashboardSheetPattern',
+    galleryId: 'travel_dashboard_sheet',
+  ),
+  GalleryWidgetCoverage(
     symbol: 'TilawaNavDestination',
     skipReason: 'Shell destination model; shown in adaptive shell demo',
   ),

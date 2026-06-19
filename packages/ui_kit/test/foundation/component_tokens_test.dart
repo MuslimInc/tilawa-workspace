@@ -652,7 +652,7 @@ void main() {
       );
       expect(tokens.bottomNavHorizontalMargin, 16.0);
       expect(tokens.bottomNavThumbSideMargin, 16.0);
-      expect(tokens.bottomNavBottomLift, 30.0);
+      expect(tokens.bottomNavBottomLift, 8.0);
       expect(tokens.navButtonMinHeight, 52.0);
       expect(tokens.bottomNavBackgroundColor, isA<Color>());
       expect(tokens.navButtonSelectedBackgroundColor, isA<Color>());

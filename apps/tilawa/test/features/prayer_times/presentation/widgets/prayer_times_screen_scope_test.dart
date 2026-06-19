@@ -3,6 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart' as mocktail;
 import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/features/app_review/domain/entities/app_review_signal.dart';
+import 'package:tilawa/features/app_review/domain/services/app_review_trigger_manager.dart';
+import 'package:tilawa/features/app_review/domain/services/prayer_times_app_review_coordinator.dart';
 import 'package:tilawa/features/localization/presentation/bloc/localization_bloc.dart';
 import 'package:tilawa/features/prayer_times/application/prayer_location_update_notifier.dart';
 import 'package:tilawa/features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
@@ -26,6 +29,12 @@ class _MockFirePrayerTestNotificationUseCase extends mocktail.Mock
     implements FirePrayerTestNotificationUseCase {}
 
 class _MockLocalizationBloc extends mocktail.Mock implements LocalizationBloc {}
+
+class _MockAppReviewTriggerManager extends mocktail.Mock
+    implements AppReviewTriggerManager {}
+
+class _MockPrayerTimesAppReviewCoordinator extends mocktail.Mock
+    implements PrayerTimesAppReviewCoordinator {}
 
 Widget wrapPrayerTimesScopeTest({required Widget home}) {
   final localizationBloc = _MockLocalizationBloc();
@@ -93,6 +102,26 @@ void main() {
     scopeGetIt().registerSingleton<PrayerLocationUpdateNotifier>(
       PrayerLocationUpdateNotifier(),
     );
+    scopeGetIt().registerSingleton<AppReviewTriggerManager>(
+      _MockAppReviewTriggerManager(),
+    );
+    scopeGetIt().registerSingleton<PrayerTimesAppReviewCoordinator>(
+      _MockPrayerTimesAppReviewCoordinator(),
+    );
+
+    mocktail
+        .when(
+          () => getIt<AppReviewTriggerManager>().recordSignal(
+            AppReviewSignal.prayerTimesTabVisited,
+          ),
+        )
+        .thenAnswer((_) async {});
+    mocktail
+        .when(
+          () => getIt<PrayerTimesAppReviewCoordinator>()
+              .onPrayerTimesScreenClosed(),
+        )
+        .thenAnswer((_) {});
   });
 
   tearDown(() async {

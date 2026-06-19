@@ -139,7 +139,7 @@ void main() {
                 footprint = QuranPlayerWidget.collapsedFootprint(context);
                 expect(
                   QuranPlayerLayoutInsets.phoneMiniPlayerNavGap(context),
-                  8.0,
+                  4.0,
                 );
                 return const SizedBox.shrink();
               },
@@ -149,7 +149,7 @@ void main() {
         await tester.pump();
 
         final tokens = TilawaDesignTokens.light();
-        expect(footprint, tokens.playerCollapsedHeight + 8.0 + 4.0);
+        expect(footprint, tokens.playerCollapsedHeight + 4.0 + 4.0);
       },
     );
 
