@@ -16,7 +16,13 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 ///
 /// Uses full-width cards on phones and a horizontal carousel on wider screens.
 class HomeTodayFeaturedCarousel extends StatelessWidget {
-  const HomeTodayFeaturedCarousel({super.key});
+  const HomeTodayFeaturedCarousel({
+    super.key,
+    @visibleForTesting this.nowOverride,
+  });
+
+  /// Overrides [DateTime.now()] for deterministic widget tests.
+  final DateTime? nowOverride;
 
   static double carouselCardWidth(BuildContext context) {
     final double viewport = MediaQuery.sizeOf(context).width;
@@ -43,6 +49,7 @@ class HomeTodayFeaturedCarousel extends StatelessWidget {
         final List<Widget> items = _FeaturedCarouselItems.build(
           context,
           pinnedState,
+          now: nowOverride ?? DateTime.now(),
         );
 
         return Semantics(
@@ -104,13 +111,18 @@ abstract final class _FeaturedCarouselItems {
 
   static List<Widget> build(
     BuildContext context,
-    PinnedAthkarState pinnedState,
-  ) {
+    PinnedAthkarState pinnedState, {
+    required DateTime now,
+  }) {
     final List<Widget> items = <Widget>[
       const HomeQuranResumeCard(),
     ];
 
-    final Widget? athkar = _contextualAthkarCard(context, pinnedState);
+    final Widget? athkar = _contextualAthkarCard(
+      context,
+      pinnedState,
+      now: now,
+    );
     if (athkar != null) {
       items.add(athkar);
     }
@@ -124,8 +136,9 @@ abstract final class _FeaturedCarouselItems {
 
   static Widget? _contextualAthkarCard(
     BuildContext context,
-    PinnedAthkarState state,
-  ) {
+    PinnedAthkarState state, {
+    required DateTime now,
+  }) {
     if (state.status != PinnedAthkarStatus.ready ||
         state.pinnedCategories.isEmpty) {
       return null;
@@ -134,9 +147,9 @@ abstract final class _FeaturedCarouselItems {
     final AthkarCategory? featured = contextualAthkarCategory(
       categories: orderPinnedAthkarForTime(
         pinned: state.pinnedCategories,
-        now: DateTime.now(),
+        now: now,
       ),
-      now: DateTime.now(),
+      now: now,
     );
     if (featured == null) {
       return null;

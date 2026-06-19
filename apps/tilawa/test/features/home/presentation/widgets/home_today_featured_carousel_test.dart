@@ -2,12 +2,15 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tilawa/features/athkar/domain/entities/athkar_category.dart';
+import 'package:tilawa/features/athkar/domain/entities/athkar_item.dart';
 import 'package:tilawa/features/athkar/domain/entities/pinned_athkar_preference.dart';
+import 'package:tilawa/features/athkar/domain/repositories/athkar_repository.dart';
 import 'package:tilawa/features/athkar/domain/repositories/pinned_athkar_repository.dart';
-import 'package:tilawa/features/athkar/presentation/cubit/pinned_athkar_cubit.dart';
 import 'package:tilawa/features/athkar/domain/usecases/get_athkar_categories_use_case.dart';
 import 'package:tilawa/features/athkar/domain/usecases/get_pinned_athkar_preference_use_case.dart';
 import 'package:tilawa/features/athkar/domain/usecases/save_pinned_athkar_category_ids_use_case.dart';
+import 'package:tilawa/features/athkar/presentation/cubit/pinned_athkar_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_quran_resume_cubit.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_quran_resume_card.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_today_featured_carousel.dart';
@@ -16,9 +19,6 @@ import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/utils/typedefs.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
-import 'package:tilawa/features/athkar/domain/entities/athkar_category.dart';
-import 'package:tilawa/features/athkar/domain/entities/athkar_item.dart';
-import 'package:tilawa/features/athkar/domain/repositories/athkar_repository.dart';
 
 void main() {
   testWidgets('uses full-width layout when only the Quran card is visible', (
@@ -52,7 +52,10 @@ void main() {
     addTearDown(view.resetDevicePixelRatio);
 
     await tester.pumpWidget(
-      _CarouselHarness(pinnedRepository: _DefaultPinnedAthkarRepository()),
+      _CarouselHarness(
+        pinnedRepository: _DefaultPinnedAthkarRepository(),
+        now: _morningNow,
+      ),
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
@@ -76,7 +79,10 @@ void main() {
     addTearDown(view.resetDevicePixelRatio);
 
     await tester.pumpWidget(
-      _CarouselHarness(pinnedRepository: _DefaultPinnedAthkarRepository()),
+      _CarouselHarness(
+        pinnedRepository: _DefaultPinnedAthkarRepository(),
+        now: _morningNow,
+      ),
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
@@ -103,10 +109,14 @@ void main() {
   });
 }
 
+/// Fixed morning time so contextualAthkarCategory always picks the morning card.
+final _morningNow = DateTime(2024, 1, 1, 9);
+
 class _CarouselHarness extends StatelessWidget {
-  const _CarouselHarness({required this.pinnedRepository});
+  const _CarouselHarness({required this.pinnedRepository, this.now});
 
   final PinnedAthkarRepository pinnedRepository;
+  final DateTime? now;
 
   @override
   Widget build(BuildContext context) {
@@ -129,7 +139,7 @@ class _CarouselHarness extends StatelessWidget {
                   HomeQuranResumeCubit(_FakeGetLastReadPosition())..load(),
             ),
           ],
-          child: const HomeTodayFeaturedCarousel(),
+          child: HomeTodayFeaturedCarousel(nowOverride: now),
         ),
       ),
     );
