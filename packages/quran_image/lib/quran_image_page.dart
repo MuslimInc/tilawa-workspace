@@ -5,7 +5,6 @@ import 'package:quran_image/core/utils/quran_image_utils.dart';
 import 'package:quran_image/domain/domain.dart';
 import 'package:quran_image/l10n/app_localizations.dart';
 import 'package:quran_image/page_mapping.dart';
-import 'package:quran_image/presentation/widgets/premium_bottom_bar.dart';
 import 'package:quran_image/presentation/widgets/widgets.dart';
 import 'package:quran_qcf/quran_qcf.dart'
     hide CalibratedSurahHeaderBannerLayoutPolicy, SurahHeaderBannerLayoutPolicy;
@@ -198,7 +197,7 @@ class _QuranImagePageState extends State<QuranImagePage> {
   // characteristic in the standard Hafs Mushaf layout.
   static const Map<int, int> _sparsePageLastLineIndex = {
     1: 10, // Fatihah: banner line 3, bismillah line 4, ayahs 5–10
-    2: 9,  // Baqarah opener: banner line 3, bismillah line 4, ayahs 5–9
+    2: 9, // Baqarah opener: banner line 3, bismillah line 4, ayahs 5–9
   };
 
   void _rebuildLineProviders() {
