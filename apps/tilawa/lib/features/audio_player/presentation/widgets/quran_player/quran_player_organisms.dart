@@ -1072,7 +1072,7 @@ class _PlayerReciterHistorySectionState
   }
 
   void _reloadHistory() {
-    final String? reciterId = widget.audio.extras?['reciterId'] as String?;
+    final String? reciterId = widget.audio.extras?[AudioExtrasKeys.reciterId] as String?;
     if (reciterId == null || reciterId.isEmpty) {
       _historyFuture = Future<List<HistoryEntity>>.value(
         const <HistoryEntity>[],

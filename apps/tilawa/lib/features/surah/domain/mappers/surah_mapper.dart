@@ -1,4 +1,6 @@
 import 'package:tilawa_core/entities/audio.dart';
+import 'package:tilawa_core/entities/audio_extras_keys.dart';
+
 import '../entities/surah_entity.dart';
 
 class SurahMapper {
@@ -29,9 +31,9 @@ class SurahMapper {
   }) {
     final int? surahNumber = _parseSurahNumberFromId(id);
     final Map<String, dynamic> extras = <String, dynamic>{
-      'surahId': ?surahNumber,
-      'nameAr': nameAr.isEmpty ? null : nameAr,
-    }..removeWhere((_, value) => value == null);
+      AudioExtrasKeys.surahId: ?surahNumber,
+      if (nameAr.isNotEmpty) AudioExtrasKeys.nameAr: nameAr,
+    };
 
     final audio = AudioEntity(
       id: id,

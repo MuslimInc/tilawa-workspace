@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tilawa_core/entities/audio.dart';
+import 'package:tilawa_core/entities/audio_extras_keys.dart';
 import 'package:tilawa_core/utils/surah_names.dart';
 
 part 'surah_entity.freezed.dart';
@@ -41,7 +42,7 @@ abstract class SurahEntity with _$SurahEntity {
     if (number != null) {
       return SurahNames.getArabicSurahName(number);
     }
-    final dynamic stored = audio.extras?['nameAr'];
+    final dynamic stored = audio.extras?[AudioExtrasKeys.nameAr];
     if (stored is String && stored.isNotEmpty) {
       return stored;
     }
@@ -67,7 +68,7 @@ abstract class SurahEntity with _$SurahEntity {
   int? get surahNumber {
     final Map<String, dynamic>? extras = audio.extras;
     if (extras != null) {
-      final dynamic raw = extras['surahId'];
+      final dynamic raw = extras[AudioExtrasKeys.surahId];
       if (raw is int) {
         return raw;
       }

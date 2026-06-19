@@ -2,6 +2,7 @@ import 'package:injectable/injectable.dart';
 import 'package:tilawa/features/audio_player/domain/usecases/audio_player_usecases.dart';
 import 'package:tilawa/features/share/domain/services/reciter_audio_catalog.dart';
 import 'package:tilawa_core/entities/audio.dart';
+import 'package:tilawa_core/entities/audio_extras_keys.dart';
 import 'package:tilawa_core/utils/surah_names.dart';
 import 'package:tilawa_core/utils/typedefs.dart';
 
@@ -21,8 +22,8 @@ class PlayAyahAudioUseCase {
     final String serverUrl = currentAudio?.url ?? '';
     final String reciterFolder = ReciterAudioCatalog.resolveFolder(serverUrl);
     final String reciterName = currentAudio?.artist ?? 'Mishary Rashid Alafasy';
-    final String? reciterId = currentAudio?.extras?['reciterId'] as String?;
-    final String? moshafId = currentAudio?.extras?['moshafId'] as String?;
+    final String? reciterId = currentAudio?.extras?[AudioExtrasKeys.reciterId] as String?;
+    final String? moshafId = currentAudio?.extras?[AudioExtrasKeys.moshafId] as String?;
 
     final String url = ReciterAudioCatalog.buildVerseAudioUrl(
       reciterFolder: reciterFolder,
@@ -39,10 +40,10 @@ class PlayAyahAudioUseCase {
       duration: Duration.zero,
       artist: reciterName,
       extras: <String, dynamic>{
-        'surahId': ayah.surahNumber,
-        'ayahNumber': ayah.numberInSurah,
-        'reciterId': ?reciterId,
-        'moshafId': ?moshafId,
+        AudioExtrasKeys.surahId: ayah.surahNumber,
+        AudioExtrasKeys.ayahNumber: ayah.numberInSurah,
+        AudioExtrasKeys.reciterId: ?reciterId,
+        AudioExtrasKeys.moshafId: ?moshafId,
       },
     );
 

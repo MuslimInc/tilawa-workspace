@@ -76,9 +76,7 @@ class HomeTravelDestinationCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  ...<Widget>[
-                    if (trailing case final Widget t) t,
-                  ],
+                  ?trailing,
                 ],
               ),
             );

@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/constants/analytics_constants.dart';
+import 'package:tilawa_core/entities/audio_extras_keys.dart';
 import 'package:tilawa_core/entities/moshaf_entity.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
@@ -397,7 +398,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   ) {
     HapticFeedback.lightImpact();
     final int surahIdx = state.surahList.indexWhere((s) {
-      final id = s.audio.extras?['surahId'];
+      final id = s.audio.extras?[AudioExtrasKeys.surahId];
       return id != null && id.toString() == history.surahId.toString();
     });
 

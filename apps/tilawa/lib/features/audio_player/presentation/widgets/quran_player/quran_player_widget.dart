@@ -51,6 +51,7 @@ import 'package:tilawa/shared/widgets/quran_player_queue_utils.dart';
 import 'package:tilawa/shared/widgets/quran_player_system_back.dart';
 import 'package:tilawa/shared/widgets/quran_player_transport_controls.dart';
 import 'package:tilawa_core/entities/audio.dart';
+import 'package:tilawa_core/entities/audio_extras_keys.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 part 'quran_player_controls.dart';
