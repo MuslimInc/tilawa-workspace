@@ -3,7 +3,7 @@
 Personal **features** and **refactors** to pick up later. Add a line whenever
 something comes to mind; check boxes when done.
 
-**Related (longer specs / gap analysis):**
+Related (longer specs / gap analysis):
 
 - [`missing_features.md`](missing_features.md) — competitor-style feature gaps
 - [`specs/002-product-growth-roadmap/spec.md`](../specs/002-product-growth-roadmap/spec.md) — roadmap spec
@@ -11,10 +11,10 @@ something comes to mind; check boxes when done.
 - [`release_notes.md`](release_notes.md) — Play Console copy per release
 - [`startup_splash_plan.md`](startup_splash_plan.md) — P0 splash-held startup (Noon/Amazon style)
 
-**Conventions**
+## Conventions
 
 | Prefix | Meaning |
-|--------|---------|
+| --- | --- |
 | `[ ]` | Not started |
 | `[~]` | In progress (optional) |
 | `[x]` | Done — move to **Done** with date |
@@ -26,39 +26,45 @@ something comes to mind; check boxes when done.
 
 _Add new product work here._
 
-- [ ] **Support — optional UI listen to verified stream** `P2`  
+- [ ] **Support — optional UI listen to verified stream** `P2`
   Consider `watchVerifiedPurchases` in Support bloc so background-only success
   can show thank-you without relying only on `purchaseSupportProduct` return.
 
-- [ ] **Premium → Support copy audit** `P1`  
-  Purge remaining user-facing “Premium” strings; align with
+- [ ] **Premium → Support copy audit** `P1`
+  Purge remaining user-facing "Premium" strings; align with
   [`specs/016-support-tilawa/spec.md`](../specs/016-support-tilawa/spec.md).
 
-- [ ] **Share — disable video reel; keep screenshot only** `P1`  
+- [ ] **Share — disable video reel; keep screenshot only** `P1`
   Disable or comment out the generate-video-reel flow; keep only custom surah/
   ayah **screenshot** sharing. Goal: reduce app size (e.g. drop or slim heavy
   video/ffmpeg dependencies where possible).
 
-- [ ] **Settings — Preferences screen** `P2`  
+- [ ] **Settings — Preferences screen** `P2`
   Add `settings.preferences` (or equivalent route): user can show/hide
   **alphabet index on Reciters**; move selected items from main Settings into
   Preferences for a cleaner layout.
 
-- [ ] **Prayer — change Adhan audio file** `P2`  
+- [ ] **Prayer — change Adhan audio file** `P2`
   Replace the default Adhan sound asset with the chosen production file; verify
   notification and foreground playback paths.
 
-- [ ] **Worship Tracker** `P1` — daily prayer/athkar/Quran log, streak, 14-day heatmap, shareable streak card  
+- [ ] **Worship Tracker** `P1` — daily prayer/athkar/Quran log, streak, 14-day heatmap, shareable streak card, fasting suggestions
   Full spec: [`specs/024-worship-tracker/spec.md`](../specs/024-worship-tracker/spec.md)
 
-- [ ] **Home screen widgets** `P1` — prayer times, next prayer countdown, hijri date (Android Glance + iOS WidgetKit)  
+- [ ] **Home screen widgets** `P1` — prayer times, next prayer countdown, hijri date (Android Glance + iOS WidgetKit)
   Full spec: [`specs/025-home-screen-widgets/spec.md`](../specs/025-home-screen-widgets/spec.md)
 
-- [ ] **Granular reminders** `P1` — configurable Duha, Tahajjud, Jumu'ah sunnah, white-days fasting with per-user offsets  
+- [ ] **Granular reminders** `P1` — 4 free types (morning/evening/Duha/white-days); Tahajjud + Jumu'ah + Quran goal in Support tier
   Full spec: [`specs/026-granular-reminders/spec.md`](../specs/026-granular-reminders/spec.md)
 
-- [ ] **Personal du'a collections** `P2` — user-created collections per loved one / intention, with daily reminders  
+- [ ] **Personal du'a collections** `P2` — user-created collections per loved one / intention, daily reminders; PDF booklet + unlimited in Support tier
   Full spec: [`specs/027-personal-dua-collections/spec.md`](../specs/027-personal-dua-collections/spec.md)
+
+- [ ] **Athkar swipe flow** `P2` — one-at-a-time recitation mode for any athkar category; tap to advance, progress indicator, completion screen
+  Full spec: [`specs/028-athkar-swipe-flow/spec.md`](../specs/028-athkar-swipe-flow/spec.md)
+
+- [ ] **Friday section** `P2` — Jumu'ah hub with Surah al-Kahf deep link, salawat, sunan, hour of acceptance; surfaces on home on Fridays
+  Full spec: [`specs/029-friday-section/spec.md`](../specs/029-friday-section/spec.md)
 
 - [ ] _Your next feature idea_
 
@@ -68,21 +74,21 @@ _Add new product work here._
 
 _Code health, architecture, tests — not user-visible features._
 
-- [ ] **Theme token harmonization (T4)** `P2`  
+- [ ] **Theme token harmonization (T4)** `P2`
   See backlog in [`missing_features.md`](missing_features.md#-post-release-maintainability-backlog).
 
-- [ ] **Firestore client bootstrap** `P1`  
+- [ ] **Firestore client bootstrap** `P1`
   Confirm production builds do not seed/write `subscription_plans` from the app
   (see [`google_play_pre_release_audit_2026-03-25.md`](../apps/tilawa/docs/reviews/25_mar_2026/google_play_pre_release_audit_2026-03-25.md)).
 
-- [~] **Startup — splash-held readiness (Noon / Amazon style)** `P0` ← **current focus**  
-  Full plan: [`startup_splash_plan.md`](startup_splash_plan.md).  
+- [~] **Startup — splash-held readiness (Noon / Amazon style)** `P0` ← **current focus**
+  Full plan: [`startup_splash_plan.md`](startup_splash_plan.md).
   **Done (Phase 1 MVP):** `AppStartupReadiness`, `SplashBloc` (migrated from cubit),
-  shell prep on splash for home; `MainScreenCubit` skips prep when already done.  
+  shell prep on splash for home; `MainScreenCubit` skips prep when already done.
   **Next:** Single splash surface (`_BootGate` + `/splash`); profile cold start;
   re-budget background init.
 
-- [ ] **Android — re-enable Impeller when stable** `P2`  
+- [ ] **Android — re-enable Impeller when stable** `P2`
   Skia is the default (`EnableImpeller=false` in
   [`AndroidManifest.xml`](../apps/tilawa/android/app/src/main/AndroidManifest.xml)).
   Revisit when Flutter Impeller is stable for 604-page QCF fonts; follow the
@@ -94,11 +100,11 @@ _Code health, architecture, tests — not user-visible features._
 
 ## Ops & release
 
-- [ ] **Tag hygiene** `P2`  
+- [ ] **Tag hygiene** `P2`
   Decide whether `v1.0.4+31` should include docs-only commits after the tag, or
   tag again on the next Play upload (`1.0.4+32`).
 
-- [ ] **Play Console**  
+- [ ] **Play Console**
   Keep three consumables active; license testers on closed/production as needed
   ([`support_play_products.md`](support_play_products.md)).
 
@@ -110,7 +116,11 @@ _Code health, architecture, tests — not user-visible features._
 
 _Quick captures — sort into sections above when ready._
 
-- 
+---
+
+## Known issues
+
+1. Make the app route only portrait except Quran Image Screen (should support portrait and landscape orientation).
 
 ---
 
@@ -125,9 +135,4 @@ _Move completed items here with date._
 
 ---
 
-*Last touched: 2026-05-23 (P0 startup splash plan)*
-
-
-Some issues need to be solved:
-
-1. Make the app route only portrait except Quran Image Screen (should be portrait up and oriantation).
+Last touched: 2026-06-20

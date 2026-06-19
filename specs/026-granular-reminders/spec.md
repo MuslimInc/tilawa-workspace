@@ -33,17 +33,35 @@ reminder type, with time either fixed or offset from the nearest prayer.
 
 ---
 
-## Reminder types (MVP)
+## Reminder types
+
+### Free tier (4 types — matches Athkar iOS free)
 
 | Reminder | Default trigger | Default time | Configurable? |
 |---|---|---|---|
 | Morning athkar | After Fajr | +30 min | Offset ±120 min |
 | Evening athkar | Before Maghrib | −30 min | Offset ±120 min |
 | Duha prayer | After Sunrise | +30 min | Offset ±60 min |
-| Jumu'ah sunnah | Before Dhuhr (Friday) | −30 min | Toggle only |
-| Tahajjud | Last third of night | Computed | Toggle only |
 | White-days fasting | 13th / 14th / 15th Hijri | 6:00 AM | Toggle only |
+
+Notification copy philosophy — **gentle nudge, never a storm**:
+
+- Morning: "Time for morning adhkar ☀️ — a few minutes to start the day right."
+- Evening: "Evening adhkar 🌙 — take a minute to remember Allah before Maghrib."
+- Duha: "Duha prayer — a blessed time for two rak'ahs."
+- White days: "White day fast 🌿 — great reward today."
+
+### Support tier (additional types)
+
+| Reminder | Default trigger | Default time | Configurable? |
+|---|---|---|---|
+| Jumu'ah sunnah | Before Dhuhr (Friday) | −30 min | Toggle only |
+| Tahajjud | Last third of night | Computed nightly | Toggle only |
 | Quran daily goal | Fixed time | 8:00 PM | User picks time |
+| Personal du'a collections | Per-collection setting | User-defined | Per collection |
+
+Tahajjud time is computed fresh each night from prayer data and varies — show
+"Tonight at 2:14 AM" in the settings row subtitle.
 
 ---
 

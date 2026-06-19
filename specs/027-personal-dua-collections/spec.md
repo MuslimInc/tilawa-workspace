@@ -2,7 +2,7 @@
 
 **Created**: 2026-06-20
 **Status**: Draft
-**Priority**: P2 — high emotional stickiness, low engineering cost
+**Priority**: P2 — high emotional stickiness, low engineering cost; candidate for Support tier gating
 
 ---
 
@@ -119,9 +119,19 @@ and a `collectionId` payload in the notification.
 ## Out of scope (MVP)
 
 - Sharing collections with other users
-- Importing/exporting collections as PDF (nice-to-have, post-MVP)
 - Cloud backup (defer to spec 008)
 - AI-generated du'a suggestions
+
+### Post-MVP (Support tier candidates)
+
+- **PDF booklet export**: user adds a dedication line ("For my mother's
+  recovery") and the app generates a personalised PDF of the collection's
+  du'as, ready to share via any platform. Reuses existing `ShareService`
+  infrastructure; requires a PDF rendering package (e.g. `pdf: ^3.x`).
+- **Unlimited collections**: free tier capped at 3 collections; Support
+  tier removes the cap. Matches Athkar iOS "Unlimited du'as" Pro feature.
+- **Voice tasbih inside collection**: recite a du'a aloud and the app
+  advances to the next item automatically (speech recognition). Support tier.
 
 ---
 

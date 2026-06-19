@@ -9,22 +9,26 @@ This document outlines features that are commonly found in Quran/Islamic apps bu
 
 | Spec | Feature | Priority |
 | --- | --- | --- |
-| [`024-worship-tracker`](../specs/024-worship-tracker/spec.md) | Daily prayer/athkar/Quran log + streak + heatmap | P1 |
+| [`024-worship-tracker`](../specs/024-worship-tracker/spec.md) | Daily prayer/athkar/Quran log + streak + heatmap + fasting suggestions | P1 |
 | [`025-home-screen-widgets`](../specs/025-home-screen-widgets/spec.md) | Prayer times, next prayer, hijri date widgets | P1 |
-| [`026-granular-reminders`](../specs/026-granular-reminders/spec.md) | Configurable Duha / Tahajjud / Jumu'ah / white-days reminders | P1 |
-| [`027-personal-dua-collections`](../specs/027-personal-dua-collections/spec.md) | User-created du'a collections with per-collection reminders | P2 |
+| [`026-granular-reminders`](../specs/026-granular-reminders/spec.md) | 4 free reminders (morning/evening/Duha/white-days); Tahajjud + Jumu'ah + Quran goal in Support tier | P1 |
+| [`027-personal-dua-collections`](../specs/027-personal-dua-collections/spec.md) | User-created du'a collections with daily reminders; PDF booklet + unlimited collections in Support tier | P2 |
+| [`028-athkar-swipe-flow`](../specs/028-athkar-swipe-flow/spec.md) | One-at-a-time recitation mode for athkar categories | P2 |
+| [`029-friday-section`](../specs/029-friday-section/spec.md) | Jumu'ah hub — Surah al-Kahf, salawat, sunan, hour of acceptance | P2 |
 
 ---
 
 ## ✅ Implemented Features
 
 ### Share Functionality
+
 **Description:** Share surah links, ayat, or audio clips via social media.
 *Status: Implemented in codebase.*
 
 ---
 
 ### Prayer Times
+
 **Description:** Display accurate prayer times based on user location with customizable calculation methods and Adhan notifications.
 *Status: Fully implemented and hardened. Version 1.0.0+24 resolved routing discrepancies and payload matching across all app states.*
 
@@ -33,24 +37,22 @@ This document outlines features that are commonly found in Quran/Islamic apps bu
 ## 🗂️ Post-Release Maintainability Backlog
 
 ### Theme Token Harmonization (T4)
+
 **Release decision:** GO for current release, no pre-release implementation required.
 
 **Why deferred:**
+
 - No blocker found in T4 audit.
 - Current theme behavior is release-viable.
 - Broad harmonization now would introduce avoidable visual churn.
 
 **Backlog items:**
-- [ ] Quran Image Reader fallback/error/loading colors:
-	make mode-aware and `ColorScheme`-derived if visual issues appear.
-- [ ] Share/Reel palette:
-	consolidate duplicated branded constants into one feature token source.
-- [ ] Share/Reel branding strategy:
-	keep branded identity unless product decides to harmonize with app primary.
-- [ ] Settings semantic icon colors:
-	decide whether they remain fixed semantic colors or become theme-derived tokens.
-- [ ] Overlay/scrim constants:
-	optional tokenization for consistency.
+
+- [ ] Quran Image Reader fallback/error/loading colors: make mode-aware and `ColorScheme`-derived if visual issues appear.
+- [ ] Share/Reel palette: consolidate duplicated branded constants into one feature token source.
+- [ ] Share/Reel branding strategy: keep branded identity unless product decides to harmonize with app primary.
+- [ ] Settings semantic icon colors: decide whether they remain fixed semantic colors or become theme-derived tokens.
+- [ ] Overlay/scrim constants: optional tokenization for consistency.
 
 **Note:** Remaining work is maintainability-focused backlog and not a release blocker.
 

@@ -57,13 +57,23 @@ turning worship into a game.
 ### Heatmap
 
 - 14-day rolling heatmap in the Today zone — free
-- Full 365-day annual heatmap behind Support tier
+- Full 365-day annual heatmap + 30-day wide view behind Support tier
 - Color intensity = completion percentage (0 → transparent, 100% → primary)
 
 ### Streak card
 
 - Shareable image: current streak count, username, date
 - Uses existing `ScreenshotService` + `ShareService` infrastructure
+
+### Fasting suggestions
+
+- When the tracker detects today is the 13th, 14th, or 15th of the Hijri month
+  (white days), surface a subtle nudge in the Today zone: "Today is a white day
+  — consider fasting"
+- When the user has logged fasting ≥ 3 times in the past 30 days, suggest Mondays
+  and Thursdays (sunnah fasts)
+- Suggestions are dismissible per-day and never shown as notifications (that is
+  handled by spec 026)
 
 ---
 
@@ -109,6 +119,7 @@ below the prayer strip. Tapping opens `WorshipLogSheet` modal.
 - Social comparison / leaderboard
 - Ramadan-specific mode (separate spec)
 - Apple Watch / widget — depends on spec 025
+- 365-day heatmap in free tier — Support tier only (matches Athkar iOS Pro gating)
 
 ---
 
@@ -120,11 +131,14 @@ below the prayer strip. Tapping opens `WorshipLogSheet` modal.
 2. Do we surface nawafil count to the home screen or keep it in the sheet only?
 3. How do we handle users who don't pray all 5 (e.g. new Muslims)? Consider
    a "personalise my tracker" step on first open.
+4. Should fasting suggestions appear only after the user has logged fasting at
+   least once, to avoid feeling presumptuous?
 
 ---
 
 ## References
 
-- Athkar iOS app: streak + 14/365 heatmap + shareable cards
+- Athkar iOS app: streak + 14-day free / 365-day Pro heatmap + shareable cards + fasting suggestions
 - Today Plan scaffold: `specs/021-today-plan/spec.md`
 - Feature flag: `AppLaunchConfig.todayPlanEnabled` (currently false)
+- Spec 026: granular reminders (white-days fasting notification handled there)
