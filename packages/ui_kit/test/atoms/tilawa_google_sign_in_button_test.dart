@@ -59,7 +59,7 @@ void main() {
     expect(material.elevation, 0);
     expect(shape.side.color, GoogleSignInButtonBrand.lightBorder);
     expect(shape.side.width, GoogleSignInButtonBrand.borderWidth);
-    expect(expectedRadius, theme.tokens.minInteractiveDimension / 2);
+    expect(expectedRadius, 24.0);
 
     final Text label = tester.widget(find.text('Sign in with Google'));
     expect(label.style?.fontFamily, 'Roboto');

@@ -3,8 +3,8 @@ import 'package:quran_image/core/di/dependency_injection.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:quran_image/core/utils/quran_image_utils.dart';
 import 'package:quran_image/domain/domain.dart';
+import 'package:quran_image/l10n/app_localizations.dart';
 import 'package:quran_image/page_mapping.dart';
-import 'package:quran_image/presentation/widgets/premium_bottom_bar.dart';
 import 'package:quran_image/presentation/widgets/widgets.dart';
 import 'package:quran_qcf/quran_qcf.dart'
     hide CalibratedSurahHeaderBannerLayoutPolicy, SurahHeaderBannerLayoutPolicy;
@@ -26,10 +26,12 @@ class QuranImagePage extends StatefulWidget {
   final int pageNumber;
   final SurahHeaderBannerLayoutPolicy surahHeaderLayoutPolicy;
   final ColorFilter? headerImageFilter;
+  final VoidCallback? onShowIndex;
 
   const QuranImagePage({
     super.key,
     required this.pageNumber,
+    this.onShowIndex,
     this.surahHeaderLayoutPolicy =
         const CalibratedSurahHeaderBannerLayoutPolicy(),
     this.headerImageFilter,
@@ -152,13 +154,51 @@ class _QuranImagePageState extends State<QuranImagePage> {
         : availableHeight;
 
     final lastLineIndex = SurahHeaderConstants.lastLineIndex.toDouble();
-    final yOffsets = List<double>.generate(
+
+    // Base grid: evenly distribute all 15 slots across the layout height.
+    final baseOffsets = List<double>.generate(
       SurahHeaderConstants.lineCount,
       (index) => (layoutHeight - lineHeight) / lastLineIndex * index,
       growable: false,
     );
-    return (layoutHeight: layoutHeight, yOffsets: yOffsets);
+
+    // Pages 1 & 2 use fewer than 15 line slots (Fatihah occupies ~slots 3–10,
+    // Baqarah opener ~slots 3–9). The base grid leaves a large blank region at
+    // the top because slots 0–2 are empty. Vertically centre the used content
+    // block so equal whitespace appears above and below — matching the Ayah app.
+    //
+    // We use a static last-used-line map rather than inspecting _lineProviders
+    // so the correct offset is applied on the very first build, before async
+    // image providers have been resolved.
+    if (!isLandscape) {
+      final lastUsed = _sparsePageLastLineIndex[widget.pageNumber];
+      if (lastUsed != null) {
+        final contentBottom = baseOffsets[lastUsed] + lineHeight;
+        final slack = layoutHeight - contentBottom;
+        if (slack > 0) {
+          final shift = slack / 2;
+          return (
+            layoutHeight: layoutHeight,
+            yOffsets: List<double>.generate(
+              SurahHeaderConstants.lineCount,
+              (i) => baseOffsets[i] + shift,
+              growable: false,
+            ),
+          );
+        }
+      }
+    }
+
+    return (layoutHeight: layoutHeight, yOffsets: baseOffsets);
   }
+
+  // Pages whose content block does not fill all 15 line slots, mapped to the
+  // index of their last used line slot (0-based). Only pages 1 and 2 have this
+  // characteristic in the standard Hafs Mushaf layout.
+  static const Map<int, int> _sparsePageLastLineIndex = {
+    1: 10, // Fatihah: banner line 3, bismillah line 4, ayahs 5–10
+    2: 9, // Baqarah opener: banner line 3, bismillah line 4, ayahs 5–9
+  };
 
   void _rebuildLineProviders() {
     _lineProviders = List<ImageProvider<Object>?>.generate(
@@ -192,7 +232,10 @@ class _QuranImagePageState extends State<QuranImagePage> {
 
     return Column(
       children: [
-        QuranAppBar(pageNumber: widget.pageNumber),
+        QuranAppBar(
+          pageNumber: widget.pageNumber,
+          onShowIndex: widget.onShowIndex,
+        ),
         Expanded(
           child: LayoutBuilder(
             builder: (context, constraints) {
@@ -235,7 +278,6 @@ class _QuranImagePageState extends State<QuranImagePage> {
             },
           ),
         ),
-        PremiumBottomBar(state: pageState),
       ],
     );
   }
@@ -243,33 +285,39 @@ class _QuranImagePageState extends State<QuranImagePage> {
 
 class QuranAppBar extends StatelessWidget {
   final int pageNumber;
+  final VoidCallback? onShowIndex;
 
-  const QuranAppBar({super.key, required this.pageNumber});
+  const QuranAppBar({super.key, required this.pageNumber, this.onShowIndex});
 
   @override
   Widget build(BuildContext context) {
     final pageInfo = QuranPageMapping.getPageInfo(pageNumber);
-
     final pageData = getPageData(pageNumber);
     final surahNumbers = pageData.map((e) => e.surah).toSet().toList();
     final surahNames = surahNumbers
         .map((s) => SurahNames.getSurahName(s, 'ar'))
-        .join(' ');
+        .join('  ');
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final textStyle = theme.textTheme.titleSmall?.copyWith(
-      color: theme.colorScheme.primary,
-      fontWeight: FontWeight.w600,
+    final primaryColor = theme.colorScheme.primary;
+    final textStyle = theme.textTheme.labelMedium?.copyWith(
+      color: primaryColor,
+      fontWeight: FontWeight.w700,
+      letterSpacing: 0.2,
     );
+    final indexLabel =
+        AppLocalizations.of(context)?.surahIndex ?? 'Surah index';
 
     return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: tokens.spaceSmall,
-        vertical: tokens.spaceTiny,
+      padding: EdgeInsets.only(
+        left: tokens.spaceSmall,
+        right: tokens.spaceSmall,
+        top: tokens.spaceExtraSmall,
+        bottom: tokens.spaceTiny,
       ),
       child: Row(
-        mainAxisAlignment: .spaceBetween,
         children: [
+          // Juz label (start / left in RTL = right side of page)
           Expanded(
             child: Text(
               _arabicJuzLabel(pageInfo.juzNumber),
@@ -278,7 +326,26 @@ class QuranAppBar extends StatelessWidget {
               style: textStyle,
             ),
           ),
-          Text(surahNames, overflow: TextOverflow.ellipsis, style: textStyle),
+          // Index button in the center
+          if (onShowIndex != null)
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
+              child: TilawaIconActionButton(
+                icon: Icons.format_list_bulleted_rounded,
+                tooltip: indexLabel,
+                semanticLabel: indexLabel,
+                onTap: onShowIndex!,
+              ),
+            ),
+          // Surah names (end / right in RTL = left side of page)
+          Expanded(
+            child: Text(
+              surahNames,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.end,
+              style: textStyle,
+            ),
+          ),
         ],
       ),
     );

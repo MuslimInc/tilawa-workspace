@@ -18,6 +18,11 @@ internal class MethodChannelLogic(
     private val battery: BatteryOptimizationsProxy,
     private val analytics: PrayerAnalytics? = null
 ) {
+    private fun persistNotificationLocation(locationName: String) {
+        if (locationName.isNotBlank()) {
+            storage.setLastNotificationLocationName(locationName)
+        }
+    }
     fun handleMethodCall(method: String, arguments: Map<String, Any?>?, result: MethodResultProxy) {
         val commonProps = mapOf(
             "notification_permission_granted" to scheduler.areNotificationsEnabled(),
@@ -31,6 +36,8 @@ internal class MethodChannelLogic(
                 val name = (arguments?.get("prayerName") as? String) ?: ""
                 val key = (arguments?.get("prayerKey") as? String) ?: name.lowercase()
                 val sound = (arguments?.get("sound") as? String) ?: (if (key == "fajr") "adhan_fajr" else "adhan")
+                val locationName = (arguments?.get("locationName") as? String).orEmpty()
+                val languageCode = (arguments?.get("languageCode") as? String).orEmpty()
                 
                 analytics?.logEvent(PrayerEvents.ADHAN_SCHEDULED, mapOf(
                     "prayer_name" to name,
@@ -43,7 +50,8 @@ internal class MethodChannelLogic(
                 if (id == null || triggerMs == null) {
                     result.error("BAD_ARGS", "id and triggerAtMillis required", null)
                 } else {
-                    val ok = scheduler.schedule(id, name, key, triggerMs, sound)
+                    persistNotificationLocation(locationName)
+                    val ok = scheduler.schedule(id, name, key, triggerMs, sound, locationName, languageCode)
                     if (ok) {
                         analytics?.logEvent(PrayerEvents.SCHEDULE_SUCCESS, commonProps + mapOf(
                             "prayer_name" to name,
@@ -82,9 +90,14 @@ internal class MethodChannelLogic(
                     val trigger = (entry["triggerAtMillis"] as? Number)?.toLong()
                         ?: return@mapNotNull null
                     val sound = (entry["sound"] as? String) ?: (if (key == "fajr") "adhan_fajr" else "adhan")
-                    AlarmMetadata(id, name, key, trigger, sound)
+                    val locationName = (entry["locationName"] as? String).orEmpty()
+                    val languageCode = (entry["languageCode"] as? String).orEmpty()
+                    AlarmMetadata(id, name, key, trigger, sound, locationName, languageCode)
                 }
                 bootReceiver.persistPendingAlarms(alarms)
+                alarms.firstOrNull { it.locationName.isNotBlank() }?.locationName?.let {
+                    persistNotificationLocation(it)
+                }
                 result.success(null)
             }
             "clearPendingAlarms" -> {
@@ -176,9 +189,12 @@ internal class MethodChannelLogic(
                 val key = (arguments?.get("prayerKey") as? String) ?: name.lowercase()
                 val sound = (arguments?.get("sound") as? String)
                     ?: (if (key == "fajr") "adhan_fajr" else "adhan")
+                val locationName = (arguments?.get("locationName") as? String).orEmpty()
+                val languageCode = (arguments?.get("languageCode") as? String).orEmpty()
                 if (id == null) {
                     result.error("BAD_ARGS", "id required", null)
                 } else {
+                    persistNotificationLocation(locationName)
                     val context = scheduler.getContext()
                     val triggerMs = System.currentTimeMillis()
                     val serviceIntent = Intent(context, AdhanPlaybackService::class.java).apply {
@@ -188,6 +204,12 @@ internal class MethodChannelLogic(
                         putExtra(AdhanScheduler.EXTRA_PRAYER_KEY, key)
                         putExtra(AdhanScheduler.EXTRA_SCHEDULED_MS, triggerMs)
                         putExtra(AdhanScheduler.EXTRA_SOUND, sound)
+                        if (locationName.isNotBlank()) {
+                            putExtra(AdhanScheduler.EXTRA_LOCATION_NAME, locationName)
+                        }
+                        if (languageCode.isNotBlank()) {
+                            putExtra(AdhanScheduler.EXTRA_LANGUAGE_CODE, languageCode)
+                        }
                         putExtra("receiver_time", triggerMs)
                     }
                     try {
@@ -245,6 +267,8 @@ internal class MethodChannelLogic(
                         "notification_id" to payload.notificationId,
                         "adhan_enabled" to true,
                         "is_adhan_playing" to true,
+                        "location_name" to payload.locationName,
+                        "language_code" to payload.languageCode,
                     ))
                 }
             }

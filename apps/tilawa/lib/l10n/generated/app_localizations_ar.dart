@@ -27,7 +27,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get west => 'غرب';
 
   @override
-  String get appTitle => 'تلاوة';
+  String get appTitle => 'أنا مسلم';
 
   @override
   String get reciters => 'القراء';
@@ -82,7 +82,79 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get homeExploreTitle => 'استكشف';
+  String get homeExploreTitle => 'اكتشف';
+
+  @override
+  String get homeExploreSubtitle => 'القراء والمسبحة والقبلة';
+
+  @override
+  String get homeExploreShowAsList => 'عرض كقائمة';
+
+  @override
+  String get homeExploreShowAsGrid => 'عرض كشبكة';
+
+  @override
+  String get homeDashboardLoadError =>
+      'تعذّر تحميل مواقيت الصلاة. تحقق من الاتصال وحاول مرة أخرى.';
+
+  @override
+  String get homeSearchHint => 'ابحث في السور أو الأجزاء أو الصفحة';
+
+  @override
+  String get homeFeaturedTitle => 'مختارة لك';
+
+  @override
+  String get homeTodayTitle => 'اليوم';
+
+  @override
+  String get homeTodaySubtitle => 'الصلاة والقرآن والذكر ليومك';
+
+  @override
+  String get homeAthkarRitualsTitle => 'أذكار سريعة';
+
+  @override
+  String get homePrayerStripTitle => 'مواقيت اليوم';
+
+  @override
+  String get homePrayerStripViewAll => 'عرض الكل';
+
+  @override
+  String get homeFeaturedRitualStart => 'اضغط للبدء';
+
+  @override
+  String get homeStartQuranTitle => 'افتح المصحف';
+
+  @override
+  String get homeStartQuranSubtitle => 'ابدأ قراءة القرآن اليوم';
+
+  @override
+  String get homeContinueQuranTitle => 'تابع القرآن';
+
+  @override
+  String get homeContinueQuranSubtitle => 'ارجع إلى آخر صفحة قرأتها';
+
+  @override
+  String homeQuranResumeSurahPage(String surah, int page) {
+    return '$surah · صفحة $page';
+  }
+
+  @override
+  String homeQuranResumePage(int page) {
+    return 'صفحة $page';
+  }
+
+  @override
+  String homeQuranResumeProgress(int percent) {
+    return '$percent٪ من المصحف';
+  }
+
+  @override
+  String homeContextualAthkarPrompt(String name) {
+    return 'وقت مناسب لـ $name';
+  }
+
+  @override
+  String get homeAthkarNowBadge => 'الآن';
 
   @override
   String get homeQuickQuran => 'القرآن';
@@ -91,16 +163,71 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeQuickReciters => 'القراء';
 
   @override
+  String get homeQuickRecitersSubtitle => 'تصفّح التلاوات';
+
+  @override
   String get homeQuickPrayer => 'الصلاة';
 
   @override
   String get homeQuickQibla => 'القبلة';
 
   @override
+  String get homeQuickQiblaSubtitle => 'اعرف اتجاه القبلة';
+
+  @override
+  String get homeQuickSettingsSubtitle => 'المظهر والصوت والحساب';
+
+  @override
+  String get homeQuickTasbeeh => 'المسبحة';
+
+  @override
+  String get homeQuickTasbeehSubtitle => 'عدّ الذكر بلمسة واحدة';
+
+  @override
   String get homeQuickAthkar => 'الأذكار';
 
   @override
   String get homeQuickSettings => 'الإعدادات';
+
+  @override
+  String get homePinnedAthkarTitle => 'أذكارك السريعة';
+
+  @override
+  String get homePinnedAthkarEdit => 'تعديل اختصارات الأذكار';
+
+  @override
+  String get homePinnedAthkarChoose => 'اختر الأذكار';
+
+  @override
+  String get homePinnedAthkarEmptyTitle => 'اختر أذكارك اليومية';
+
+  @override
+  String get homePinnedAthkarEmptyBody =>
+      'ثبّت حتى أربعة تصنيفات للوصول إليها من الصفحة الرئيسية بلمسة واحدة.';
+
+  @override
+  String get homePinnedAthkarPickerTitle => 'اختر الأذكار السريعة';
+
+  @override
+  String homePinnedAthkarPickerLimit(int count, int max) {
+    return 'تم اختيار $count من $max اختصارات';
+  }
+
+  @override
+  String homePinnedAthkarMoveUp(String name) {
+    return 'انقل $name للأعلى';
+  }
+
+  @override
+  String homePinnedAthkarMoveDown(String name) {
+    return 'انقل $name للأسفل';
+  }
+
+  @override
+  String get homeDailyInspirationTitle => 'إلهام اليوم';
+
+  @override
+  String get homeDailyInspirationSubtitle => 'آية ودعاء ليومك';
 
   @override
   String get homeDailyAyahLabel => 'الآية اليومية';
@@ -120,6 +247,34 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get homeDailyDuaReference => 'أبو داود';
+
+  @override
+  String get homeDailyAyahBody1 =>
+      'فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ';
+
+  @override
+  String get homeDailyAyahReference1 => 'القرآن ٢:١٥٢';
+
+  @override
+  String get homeDailyDuaBody1 =>
+      'رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ';
+
+  @override
+  String get homeDailyDuaReference1 => 'القرآن ٢:٢٠١';
+
+  @override
+  String get homeDailyAyahBody2 =>
+      'إِنَّ الصَّلَاةَ تَنْهَىٰ عَنِ الْفَحْشَاءِ وَالْمُنكَرِ';
+
+  @override
+  String get homeDailyAyahReference2 => 'القرآن ٢٩:٤٥';
+
+  @override
+  String get homeDailyDuaBody2 =>
+      'اللهم إني أسألك علماً نافعاً، ورزقاً طيباً، وعملاً متقبلاً';
+
+  @override
+  String get homeDailyDuaReference2 => 'ابن ماجه';
 
   @override
   String get khatmaEmptyTitle => 'ابدأ ختمة';
@@ -612,10 +767,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get bottomNavPrayer => 'الصلاة';
 
   @override
+  String get bottomNavQibla => 'القبلة';
+
+  @override
   String get bottomNavQuran => 'القرآن';
 
   @override
-  String get bottomNavAthkar => 'الأذكار';
+  String get bottomNavAthkar => 'الذكر';
 
   @override
   String get bottomNavSettings => 'الإعدادات';
@@ -863,6 +1021,10 @@ class AppLocalizationsAr extends AppLocalizations {
       'تعذر تسجيل الدخول باستخدام حساب طرف ثالث';
 
   @override
+  String get googleSignInNoAccountsOnDevice =>
+      'لم يتم العثور على حساب Google على هذا الجهاز. يرجى إضافة حساب Google في إعدادات الجهاز والمحاولة مرة أخرى.';
+
+  @override
   String get googleSignInFallbackTitle => 'تعذّر فتح تسجيل الدخول عبر Google';
 
   @override
@@ -992,6 +1154,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get colorBrown => 'بني';
+
+  @override
+  String get colorInk => 'فحمي';
 
   @override
   String get colorPurple => 'أرجواني';
@@ -1343,6 +1508,22 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get qiblaDirection => 'اتجاه القبلة';
+
+  @override
+  String get qiblaFinderTitle => 'محدد القبلة';
+
+  @override
+  String get qiblaDeviceAngleLabel => 'زاوية الجهاز نحو القبلة';
+
+  @override
+  String qiblaRotatePhoneLeft(int degrees) {
+    return 'أدر الهاتف $degrees° إلى اليسار';
+  }
+
+  @override
+  String qiblaRotatePhoneRight(int degrees) {
+    return 'أدر الهاتف $degrees° إلى اليمين';
+  }
 
   @override
   String get locationServiceDisabled => 'خدمة الموقع معطلة';
@@ -1810,6 +1991,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get showTranslation => 'إظهار الترجمة';
 
   @override
+  String quranTranslationAttribution(
+    String translationName,
+    String sourceName,
+  ) {
+    return 'الترجمة: $translationName ($sourceName)';
+  }
+
+  @override
   String get showAyahNumbers => 'إظهار أرقام الآيات';
 
   @override
@@ -1977,10 +2166,37 @@ class AppLocalizationsAr extends AppLocalizations {
   String get quran => 'القرآن الكريم';
 
   @override
+  String get quranHubTitle => 'القرآن';
+
+  @override
+  String get quranCatalogSectionTitle => 'القرآن الكريم';
+
+  @override
+  String get quranOpenMushaf => 'فتح المصحف';
+
+  @override
+  String get quranSwitchToAyahList => 'عرض قائمة الآيات';
+
+  @override
+  String get quranSwitchToMushaf => 'عرض المصحف';
+
+  @override
   String get continueReadingQuran => 'متابعة قراءة القرآن';
 
   @override
   String get surahIndex => 'فهرس السور';
+
+  @override
+  String get hijriCalendarTitle => 'التقويم الهجري';
+
+  @override
+  String get hijriCalendarOpenLabel => 'فتح التقويم الهجري';
+
+  @override
+  String get hijriCalendarPreviousMonth => 'الشهر السابق';
+
+  @override
+  String get hijriCalendarNextMonth => 'الشهر التالي';
 
   @override
   String surahCountLabel(int count) {
@@ -2398,6 +2614,22 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String prayerNotificationTitleWithLocation(
+    String prayerName,
+    String locationName,
+  ) {
+    return '$prayerName · $locationName';
+  }
+
+  @override
+  String prayerNotificationBodyWithLocation(
+    String prayerName,
+    String locationName,
+  ) {
+    return 'حان وقت $prayerName في $locationName';
+  }
+
+  @override
   String get prayerNotificationsChannelName => 'أوقات الصلاة';
 
   @override
@@ -2420,7 +2652,12 @@ class AppLocalizationsAr extends AppLocalizations {
       'تنبيهات صامتة لمواقيت الصلاة عند تشغيل الأذان محلياً';
 
   @override
-  String get adhanIsPlaying => 'الأذان يعمل الآن';
+  String get adhanIsPlaying => 'الأذان قيد التشغيل…';
+
+  @override
+  String adhanPlayingNotificationBodyWithLocation(String locationName) {
+    return 'الأذان قيد التشغيل في $locationName';
+  }
 
   @override
   String get stopAdhan => 'إيقاف الأذان';

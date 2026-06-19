@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../athkar_category_presentation.dart';
+
 class AthkarCategoryCard extends StatelessWidget {
   const AthkarCategoryCard({
     super.key,
@@ -18,7 +20,7 @@ class AthkarCategoryCard extends StatelessWidget {
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
 
-    final IconData iconData = _iconForName(icon);
+    final IconData iconData = athkarCategoryIcon(icon);
 
     return TilawaCard(
       onTap: onTap,
@@ -64,28 +66,5 @@ class AthkarCategoryCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  IconData _iconForName(String iconName) {
-    switch (iconName) {
-      case 'wb_sunny_rounded':
-        return Icons.wb_sunny_rounded;
-      case 'nights_stay_rounded':
-        return Icons.nights_stay_rounded;
-      case 'bedtime_rounded':
-        return Icons.bedtime_rounded;
-      case 'alarm_rounded':
-        return Icons.alarm_rounded;
-      case 'mosque_rounded':
-        return Icons.mosque_rounded;
-      case 'auto_stories_rounded':
-        return Icons.auto_stories_rounded;
-      case 'prayer_times_rounded':
-        return Icons.auto_awesome_rounded;
-      case 'tasbeeh':
-        return Icons.radio_button_checked_rounded;
-      default:
-        return Icons.bookmark_added_rounded;
-    }
   }
 }

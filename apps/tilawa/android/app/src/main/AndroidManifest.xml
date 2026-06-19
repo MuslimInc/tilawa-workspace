@@ -49,6 +49,10 @@
     <uses-permission android:name="android.permission.ACCESS_ADSERVICES_ATTRIBUTION" tools:node="remove" />
     <uses-permission android:name="android.permission.ACCESS_ADSERVICES_AD_ID" tools:node="remove" />
 
+    <!-- Workaround: disable Android 13+ predictive back until Flutter handles
+         invalid swipeEdge values without crashing (RangeError in
+         PredictiveBackEvent.fromMap). See flutter/flutter#186168.
+         Re-enable when fixed in our Flutter SDK. -->
     <application
         android:label="@string/app_name"
         android:name="${applicationName}"
@@ -56,7 +60,7 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:usesCleartextTraffic="false"
         android:extractNativeLibs="false"
-        android:enableOnBackInvokedCallback="true">
+        android:enableOnBackInvokedCallback="false">
         <activity
             android:name=".MainActivity"
             android:exported="true"

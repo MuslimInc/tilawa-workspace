@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/layout/list_scroll_bottom_padding.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -97,7 +98,9 @@ class _PremiumScreenState extends State<PremiumScreen> {
     final tokens = Theme.of(context).tokens;
 
     return SingleChildScrollView(
-      padding: EdgeInsets.all(tokens.spaceLarge).copyWith(bottom: 120),
+      padding: EdgeInsets.all(tokens.spaceLarge).copyWith(
+        bottom: listScrollBottomPadding(context),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/router/app_router_config.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_travel_destination_card.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_dashboard_card.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../bloc/khatma_plan_bloc.dart';
@@ -31,7 +33,7 @@ class SmartKhatmaHomeEntryCard extends StatelessWidget {
                         plan.todayTargetPages(DateTime.now()),
                     onOpenHub: () => _openHub(context),
                   ),
-          KhatmaPlanFailure(:final message) => TilawaCard(
+          KhatmaPlanFailure(:final message) => HomeDashboardCard(
             surface: TilawaCardSurface.raised,
             child: Text(
               message,
@@ -40,7 +42,7 @@ class SmartKhatmaHomeEntryCard extends StatelessWidget {
               ),
             ),
           ),
-          _ => const TilawaCard(
+          _ => const HomeDashboardCard(
             surface: TilawaCardSurface.raised,
             child: TilawaLoadingIndicator(centered: false),
           ),
@@ -68,45 +70,16 @@ class _KhatmaHomeEmptyEntry extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
 
-    return TilawaCard(
-      surface: TilawaCardSurface.raised,
+    return HomeTravelDestinationCard(
+      tintIndex: 2,
+      icon: Icons.auto_stories_outlined,
       onTap: onOpenHub,
-      child: Row(
-        children: [
-          TilawaIconBox(
-            icon: Icons.auto_stories_outlined,
-            variant: TilawaIconBoxVariant.tinted,
-            semanticTint: TilawaSemanticTint.ink,
-          ),
-          SizedBox(width: tokens.spaceMedium),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: tokens.spaceExtraSmall,
-              children: [
-                Text(
-                  context.l10n.khatmaEmptyTitle,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
-                Text(
-                  context.l10n.khatmaEmptySubtitle,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Icon(
-            Icons.chevron_right_rounded,
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ],
+      title: context.l10n.khatmaEmptyTitle,
+      subtitle: context.l10n.khatmaEmptySubtitle,
+      trailing: Icon(
+        Icons.chevron_right_rounded,
+        color: theme.colorScheme.onSurfaceVariant,
+        size: tokens.iconSizeSmall,
       ),
     );
   }
@@ -129,64 +102,32 @@ class _KhatmaHomeActiveEntry extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+    final String detail =
+        '${context.l10n.khatmaTodayGoal}: '
+        '${context.l10n.khatmaPagesShort(todayPages)} · $planProgress%';
 
-    return TilawaCard(
-      surface: TilawaCardSurface.raised,
+    return HomeTravelDestinationCard(
+      tintIndex: 2,
+      icon: Icons.auto_stories_outlined,
       onTap: onOpenHub,
-      child: Row(
+      title: context.l10n.khatmaProgressTitle,
+      subtitle: '$subtitle\n$detail',
+      trailing: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        spacing: tokens.spaceExtraSmall,
         children: [
-          TilawaIconBox(
-            icon: Icons.auto_stories_outlined,
-            variant: TilawaIconBoxVariant.tinted,
-            semanticTint: TilawaSemanticTint.scholar,
-          ),
-          SizedBox(width: tokens.spaceMedium),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: tokens.spaceExtraSmall,
-              children: [
-                Text(
-                  context.l10n.khatmaProgressTitle,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
-                Text(
-                  subtitle,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                Text(
-                  '${context.l10n.khatmaTodayGoal}: '
-                  '${context.l10n.khatmaPagesShort(todayPages)} · '
-                  '$planProgress%',
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
+          Text(
+            context.l10n.khatmaHomeViewPlan,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: colorScheme.primary,
+              fontWeight: FontWeight.w700,
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            spacing: tokens.spaceExtraSmall,
-            children: [
-              Text(
-                context.l10n.khatmaHomeViewPlan,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              Icon(
-                Icons.chevron_right_rounded,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ],
+          Icon(
+            Icons.chevron_right_rounded,
+            color: colorScheme.onSurfaceVariant,
+            size: tokens.iconSizeSmall,
           ),
         ],
       ),

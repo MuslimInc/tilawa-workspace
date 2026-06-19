@@ -342,6 +342,7 @@ String _localizedPresetName(BuildContext context, PrimaryColorPreset preset) {
     PrimaryColorPreset.sage => l10n.colorGreen,
     PrimaryColorPreset.gold => l10n.colorGold,
     PrimaryColorPreset.brown => l10n.colorBrown,
+    PrimaryColorPreset.ink => l10n.colorInk,
     PrimaryColorPreset.purple => l10n.colorPurple,
   };
 }

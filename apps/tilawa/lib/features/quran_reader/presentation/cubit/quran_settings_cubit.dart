@@ -33,4 +33,7 @@ class QuranSettingsCubit extends Cubit<ReaderSettingsEntity> {
 
   Future<void> toggleTranslation() =>
       update(state.copyWith(showTranslation: !state.showTranslation));
+
+  Future<void> setViewMode(QuranReaderViewMode viewMode) =>
+      update(state.copyWith(viewMode: viewMode));
 }

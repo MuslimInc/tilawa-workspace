@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">تلاوة</string>
-    <string name="adhan_is_playing">الأذان يعمل الآن…</string>
+    <string name="app_name">أنا مسلم</string>
+    <string name="adhan_notification_title">%1$s · %2$s</string>
+    <string name="adhan_notification_body">الأذان قيد التشغيل…</string>
+    <string name="adhan_notification_body_with_location">الأذان قيد التشغيل في %1$s</string>
+    <string name="adhan_is_playing">الأذان قيد التشغيل…</string>
     <string name="stop_adhan">إيقاف الأذان</string>
     <string name="prayer_fajr">الفجر</string>
     <string name="prayer_dhuhr">الظهر</string>

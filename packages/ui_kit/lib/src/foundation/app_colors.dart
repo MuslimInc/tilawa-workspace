@@ -3,21 +3,13 @@ import 'package:flutter/material.dart';
 /// Centralized app color constants.
 ///
 /// The Tilawa palette is intentionally **small and calm**:
-/// one **brand-locked** accent ([primarySage] `#219653`), a quiet cool
-/// neutral surface ramp anchored on [lightSurfaceContainerHighBase]
-/// `#E5E7EB`, and a handful of semantic colors. Decorative tones, parallel
-/// "category hues", and most decorative gradients have been removed so the UI
-/// feels premium without competing with content. The launch flow keeps a
-/// dedicated brand gradient via [brandGradientTop] → [brandGradientBottom].
+/// soft neutral canvas ([tripGlideCanvas] `#FAFAFA`), brown primary ink
+/// ([primaryBrown] `#8B5E3C`), neutral text ink ([tripGlideInk] `#30343C`),
+/// and restrained gold featured surfaces.
 ///
-/// **Brand lock.** As of the Islamic-brand initiative, the runtime primary
-/// is fixed to Sage (`#219653`) for production builds. The other preset
-/// hexes (`primaryCoral`, `primaryTeal`, `primaryGold`, `primaryBrown`,
-/// `primaryPurple`) are retained for two reasons: (1) the in-Settings color
-/// picker remains available behind `--dart-define=TILAWA_SHOW_COLOR_PICKER=true`
-/// for dev/QA palette work, and (2) legacy persisted user choices still need
-/// to deserialize without throwing. The runtime override lives in
-/// `apps/tilawa/lib/features/theme/presentation/theme_state_material.dart`.
+/// Some `tripGlide*` names remain as compatibility aliases for the current
+/// travel-inspired Home layout. Their values now resolve to Tilawa's warm
+/// brand palette.
 ///
 /// All hex values used by `AppTheme` to assemble `ColorScheme` live here
 /// so there is exactly one source of truth. Product widgets should read
@@ -53,8 +45,11 @@ abstract final class AppColors {
   /// Forest green theme option (dev/QA picker; not gold).
   static const Color primaryGold = Color(0xFF2D6B47);
 
-  /// Warm brown theme option.
-  static const Color primaryBrown = Color(0xFF7B5E3B);
+  /// Warm brown — the brand-locked mockup accent (`#8B5E3C`).
+  static const Color primaryBrown = Color(0xFF8B5E3C);
+
+  /// Pressed / strong brown for shadows and emphasis (`#6B4A2E`).
+  static const Color primaryBrownDark = Color(0xFF6B4A2E);
 
   /// Green alias retained for saved theme migration.
   static const Color primaryGreen = primarySage;
@@ -64,40 +59,110 @@ abstract final class AppColors {
 
   /// Default primary color used throughout the app.
   ///
-  /// Brand-locked to [primarySage] per the Islamic-brand initiative. See the
-  /// class-level docstring for how the legacy presets are still wired for
-  /// dev/QA and persistence-compatibility purposes.
-  static const Color defaultPrimary = primarySage;
+  /// Warm brown brand ink (`#8B5E3C`) for CTAs, active nav, and selected
+  /// controls.
+  static const Color defaultPrimary = primaryBrown;
+
+  /// Warm neutral text ink for headings and body copy (`#30343C`).
+  ///
+  /// Compatibility alias retained for existing travel-inspired Home widgets.
+  static const Color tripGlideInk = Color(0xFF30343C);
+
+  /// Soft neutral screen canvas (`#FAFAFA`).
+  ///
+  /// Compatibility alias retained for existing travel-inspired Home widgets.
+  static const Color tripGlideCanvas = Color(0xFFFAFAFA);
+
+  /// Elevated surfaces — cards, search (`#FFFFFF`).
+  static const Color tripGlideSurface = Color(0xFFFFFFFF);
+
+  /// Warm secondary copy (`#78736E`).
+  static const Color tripGlideMuted = Color(0xFF78736E);
+
+  /// Warm beige idle tier for chips, search rests, and header bands.
+  static const Color tripGlideCanvasElevated = Color(0xFFF1F1EF);
+
+  /// Warm hairline / highest surface tier.
+  static const Color tripGlideCanvasDusk = Color(0xFFE5E5E2);
+
+  /// Deeper warm night/dim surface tier.
+  static const Color tripGlideCanvasNight = Color(0xFFD6D6D1);
 
   /// Top stop for the brand launch gradient.
-  static const Color brandGradientTop = Color(0xFF447339);
+  static const Color brandGradientTop = tripGlideCanvas;
 
   /// Bottom stop for the brand launch gradient.
-  static const Color brandGradientBottom = defaultPrimary;
+  static const Color brandGradientBottom = primaryBrown;
 
-  /// Top-start stop for the Home hero **day** phase — morning sky (`#5BA3D4`).
-  static const Color homeNextPrayerGradientTop = Color(0xFF5BA3D4);
+  /// Featured-card gold surface — ceremonial, not paywall chrome.
+  static const Color featuredGradientStart = Color(0xFFFFD28E);
 
-  /// Bottom-end stop for the Home hero **day** phase — deep sky (`#143D61`).
-  static const Color homeNextPrayerGradientBottom = Color(0xFF143D61);
+  /// Featured-card gold surface lower stop.
+  static const Color featuredGradientEnd = Color(0xFFFF9E44);
 
-  /// Top-start stop for the Home hero **dusk** phase — sunset gold (`#D9924A`).
-  static const Color homeNextPrayerGradientDuskTop = Color(0xFFD9924A);
+  /// Foreground on featured / elevated cards.
+  static const Color featuredGradientForeground = tripGlideInk;
 
-  /// Bottom-end stop for the Home hero **dusk** phase — warm plum (`#442232`).
-  static const Color homeNextPrayerGradientDuskBottom = Color(0xFF442232);
+  /// Surah header banner — top neutral band.
+  static const Color surahHeaderGradientTop = tripGlideCanvasElevated;
 
-  /// Top-start stop for the Home hero **night** phase — twilight indigo (`#45588C`).
-  static const Color homeNextPrayerGradientNightTop = Color(0xFF45588C);
+  /// Surah header banner — bottom neutral band.
+  static const Color surahHeaderGradientBottom = tripGlideCanvas;
 
-  /// Bottom-end stop for the Home hero **night** phase — midnight navy (`#121A38`).
-  static const Color homeNextPrayerGradientNightBottom = Color(0xFF121A38);
+  /// Qibla compass radial glow — neutral grey.
+  static const Color qiblaCompassGlow = tripGlideCanvasElevated;
 
-  /// Foreground on the Home next-prayer hero gradient (`#FFFFFF`).
-  static const Color homeNextPrayerGradientForeground = Color(0xFFFFFFFF);
+  /// Instruction chip fill — neutral canvas.
+  static const Color instructionChipFill = tripGlideCanvas;
 
-  /// Launch / splash canvas — matches adaptive icon background (`#219653`).
-  static const Color launchSplashBackground = primarySage;
+  /// Travel-layout destination header tint — warm beige.
+  static const Color homeTravelDestinationTintNeutral = tripGlideCanvasElevated;
+
+  /// Neutral sheet on the Home travel-inspired dashboard (`#FAFAFA`).
+  static const Color homeTravelSheetSurface = tripGlideCanvas;
+
+  /// White search field on the Home travel dashboard (`#FFFFFF`).
+  static const Color homeTravelSearchFill = tripGlideSurface;
+
+  /// Warm header bands for discover / carousel destination cards.
+  static const List<Color> homeTravelDestinationHeaderTints = <Color>[
+    tripGlideCanvas,
+    tripGlideCanvasElevated,
+    tripGlideCanvasDusk,
+  ];
+
+  /// Icons on travel destination header bands.
+  static const Color homeTravelDestinationIcon = primaryBrown;
+
+  /// Section links (See all) on the travel Home dashboard.
+  static const Color homeTravelSectionLink = primaryBrown;
+
+  /// Top-start stop for the Home hero **day** phase — flat neutral canvas.
+  static const Color homeNextPrayerGradientTop = tripGlideCanvas;
+
+  /// Bottom-end stop for the Home hero **day** phase.
+  static const Color homeNextPrayerGradientBottom = tripGlideCanvas;
+
+  /// Foreground on the Home hero neutral canvas (day/dusk/night).
+  static const Color homeNextPrayerGradientForeground = tripGlideInk;
+
+  /// Top-start stop for the Home hero **dusk** phase.
+  static const Color homeNextPrayerGradientDuskTop = tripGlideCanvasDusk;
+
+  /// Bottom-end stop for the Home hero **dusk** phase.
+  static const Color homeNextPrayerGradientDuskBottom = tripGlideCanvasDusk;
+
+  /// Top-start stop for the Home hero **night** phase.
+  static const Color homeNextPrayerGradientNightTop = tripGlideCanvasNight;
+
+  /// Bottom-end stop for the Home hero **night** phase.
+  static const Color homeNextPrayerGradientNightBottom = tripGlideCanvasNight;
+
+  /// Foreground on the Home hero **night** canvas.
+  static const Color homeNextPrayerGradientNightForeground = tripGlideInk;
+
+  /// Launch / splash canvas — warm brown brand ink.
+  static const Color launchSplashBackground = primaryBrown;
 
   /// Wordmark and progress on launch surfaces (`#FFFFFF`).
   static const Color launchSplashForeground = Color(0xFFFFFFFF);
@@ -107,50 +172,38 @@ abstract final class AppColors {
   static const double launchSplashLogoSize = 288;
 
   // ---------------------------------------------------------------------------
-  // Light neutral ramp — cool porcelain canvas + white cards
-  // (#F4F5F7 / #FFFFFF / slate ink). One temperature family end-to-end:
-  // the ramp matches the slate [lightInk] / [lightOutline] that were always
-  // cool. Do not mix warm and cool tones in adjacent light fills.
+  // Light neutral ramp — soft neutral canvas + white cards
+  // (#FAFAFA / #FFFFFF / warm neutral ink). One temperature family end-to-end.
   // ---------------------------------------------------------------------------
 
-  /// App canvas / scaffold — cool porcelain (`#F4F5F7`, noon/Apple-style).
+  /// App canvas / scaffold — soft neutral (`#FAFAFA`).
   ///
-  /// Replaced the warm Chaptrs cream (`#F9F7F2`, 2026-06-11): the cream read
-  /// as dated paper next to white cards; a cool near-white gives the crisp
-  /// commercial feel and matches the slate ink family. Same lightness, so
-  /// every contrast pairing is unchanged.
-  ///
-  /// The page rests on this tone; cards, sheets, and app bars use
-  /// [lightSurface] (`#FFFFFF`) for quiet lift without heavy shadows.
-  static const Color lightCanvas = Color(0xFFF4F5F7);
+  /// Cards use [lightSurface] (`#FFFFFF`) for quiet lift with soft shadows.
+  static const Color lightCanvas = tripGlideCanvas;
 
   /// Alias for scaffold assembly — same as [lightCanvas].
   static const Color lightBackground = lightCanvas;
 
-  /// Raised cards, sheets, dialogs, and app bars on the porcelain canvas.
-  static const Color lightSurface = Color(0xFFFFFFFF);
+  /// Raised cards, sheets, dialogs, and app bars on the neutral canvas.
+  static const Color lightSurface = tripGlideSurface;
 
-  /// Primary ink on surfaces (`#0F172A`).
-  static const Color lightInk = Color(0xFF0F172A);
+  /// Primary ink on surfaces (`#30343C`).
+  static const Color lightInk = tripGlideInk;
 
-  /// Body / secondary labels (`#30343C`, cool slate — one family with
-  /// [lightInk] and the porcelain ramp; replaced warm `#33332E` 2026-06-11).
-  static const Color lightBody = Color(0xFF30343C);
+  /// Body / secondary labels (`#30343C`).
+  static const Color lightBody = tripGlideInk;
 
-  /// Muted labels (`#5F6470`, cool slate; replaced warm `#62625B`).
-  static const Color lightMute = Color(0xFF5F6470);
+  /// Muted labels (`#78736E`).
+  static const Color lightMute = tripGlideMuted;
 
-  /// Ash icons / hints (`#8F949E`, cool slate; replaced warm `#91918C`).
-  static const Color lightAsh = Color(0xFF8F949E);
+  /// Ash icons / hints — muted neutral.
+  static const Color lightAsh = tripGlideMuted;
 
-  /// Light upper container / idle chip — cool gray (`#E5E7EB`).
-  ///
-  /// Same lightness as the legacy warm Pinterest `secondary-bg` (`#E5E5E0`),
-  /// hue moved to the cool family with the canvas (2026-06-11).
+  /// Light upper container / idle chip — quiet neutral (`#F1F1EF`).
   ///
   /// Mapped to [ColorScheme.surfaceContainerHigh] in [AppTheme] without
-  /// primary harmonization so unselected controls stay neutral gray.
-  static const Color lightSurfaceContainerHighBase = Color(0xFFE5E7EB);
+  /// primary harmonization so unselected controls stay neutral.
+  static const Color lightSurfaceContainerHighBase = tripGlideCanvasElevated;
 
   /// Alias for catalog chips and docs (same as [lightSurfaceContainerHighBase]).
   static const Color catalogFilterUnselectedLight =
@@ -173,14 +226,14 @@ abstract final class AppColors {
   /// Section / list canvas tier — matches [lightCanvas].
   static const Color lightSurfaceContainer = lightCanvas;
 
-  /// Light top container tier — cool hairline (`#DBDEE3`).
-  static const Color lightSurfaceContainerHighestBase = Color(0xFFDBDEE3);
+  /// Light top container tier — quiet neutral hairline (`#E5E5E2`).
+  static const Color lightSurfaceContainerHighestBase = tripGlideCanvasDusk;
 
-  /// Hairline dividers (`#DBDEE3`, cool family with the canvas).
-  static const Color lightHairline = Color(0xFFDBDEE3);
+  /// Hairline dividers — warm neutral.
+  static const Color lightHairline = tripGlideCanvasDusk;
 
-  /// Default outline for fields and dividers (`#D0D7DE`).
-  static const Color lightOutline = Color(0xFFD0D7DE);
+  /// Default outline for fields and dividers (`#D6D6D1`).
+  static const Color lightOutline = tripGlideCanvasNight;
 
   // ---------------------------------------------------------------------------
   // Dark neutral ramp.
@@ -217,11 +270,11 @@ abstract final class AppColors {
   /// Light [ColorScheme.onSecondary].
   static const Color lightSchemeOnSecondary = lightInk;
 
-  /// Light [ColorScheme.primaryContainer] for the default sage primary.
-  static const Color lightSchemePrimaryContainer = Color(0xFFDCEFE4);
+  /// Light [ColorScheme.primaryContainer] for the default ink primary.
+  static const Color lightSchemePrimaryContainer = tripGlideCanvasElevated;
 
-  /// Light [ColorScheme.onPrimaryContainer] for the default sage primary.
-  static const Color lightSchemeOnPrimaryContainer = Color(0xFF0D3522);
+  /// Light [ColorScheme.onPrimaryContainer] for the default ink primary.
+  static const Color lightSchemeOnPrimaryContainer = tripGlideInk;
 
   /// Light [ColorScheme.secondaryContainer].
   static const Color lightSchemeSecondaryContainer = lightSurfaceContainer;
@@ -236,7 +289,7 @@ abstract final class AppColors {
   static const Color lightTertiaryContainer = lightSurfaceContainer;
   static const Color lightSurfaceContainerMid = lightSurfaceContainer;
   static const Color lightOutlineVariant = lightHairline;
-  static const Color lightShadow = lightInk;
+  static const Color lightShadow = tripGlideInk;
 
   /// Legacy alias — use [lightSchemeSecondaryContainer] for scheme assembly.
   static const Color lightSecondaryContainer = lightSchemeSecondaryContainer;
@@ -245,17 +298,17 @@ abstract final class AppColors {
   // AppTheme — dark Flex scheme refinement.
   // ---------------------------------------------------------------------------
 
-  /// Lifted companion of [defaultPrimary] for contrast on dark surfaces.
-  static const Color darkDefaultPrimary = Color(0xFF8AD4A8);
+  /// Lifted warm companion of [defaultPrimary] for contrast on dark surfaces.
+  static const Color darkDefaultPrimary = Color(0xFFD6B08A);
 
   /// Historical reference: dark primary container paired with
   /// [darkDefaultPrimary]. [AppTheme] derives it from selected primary instead.
-  static const Color darkDefaultPrimaryContainer = Color(0xFF143E39);
+  static const Color darkDefaultPrimaryContainer = Color(0xFF3D2A1D);
 
   static const Color darkSecondary = Color(0xFF9DB5A8);
   static const Color darkSecondaryContainer = Color(0xFF2A3530);
-  static const Color darkTertiary = Color(0xFFB0B8B4);
-  static const Color darkTertiaryContainer = Color(0xFF3A3F3C);
+  static const Color darkTertiary = Color(0xFFD6B86A);
+  static const Color darkTertiaryContainer = Color(0xFF3D3015);
 
   // ---------------------------------------------------------------------------
   // True-black mode (OLED-friendly dark refinement).
@@ -314,7 +367,7 @@ abstract final class AppColors {
   static const Color brandSecondary = lightSchemeSecondary;
 
   /// Brand tertiary used by FlexColorScheme assembly only.
-  static const Color brandTertiary = lightBody;
+  static const Color brandTertiary = Color(0xFF8C681F);
 }
 
 /// Fixed “studio” palette for the **share audio / reel composer** (dark

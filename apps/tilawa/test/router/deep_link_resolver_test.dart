@@ -33,12 +33,12 @@ void main() {
         ),
         const QuranReaderRoute(surahNumber: 2).location,
       );
-      // Out-of-range falls back to last-read.
+      // Out-of-range falls back to the Quran hub.
       expect(
         DeepLinkResolver.resolveLocation(
           const {'type': 'quran', 'surahNumber': '999'},
         ),
-        const QuranLastReadRoute().location,
+        const QuranIndexRoute().location,
       );
     });
 

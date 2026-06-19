@@ -137,7 +137,7 @@ abstract class AppLocalizations {
   /// The title of the application
   ///
   /// In en, this message translates to:
-  /// **'Tilawa'**
+  /// **'MeMuslim'**
   String get appTitle;
 
   /// Reciters section title
@@ -218,11 +218,137 @@ abstract class AppLocalizations {
   /// **'In {hours}h {minutes}m'**
   String homePrayerInHoursMinutes(int hours, int minutes);
 
-  /// Home quick actions section title
+  /// Home section title for secondary destinations that are not bottom-nav tabs
   ///
   /// In en, this message translates to:
-  /// **'Explore'**
+  /// **'Discover'**
   String get homeExploreTitle;
+
+  /// Home Discover section supporting line
+  ///
+  /// In en, this message translates to:
+  /// **'Reciters, Tasbeeh, and Qibla'**
+  String get homeExploreSubtitle;
+
+  /// Home dashboard layout toggle tooltip when grid is active
+  ///
+  /// In en, this message translates to:
+  /// **'Show as list'**
+  String get homeExploreShowAsList;
+
+  /// Home dashboard layout toggle tooltip when list is active
+  ///
+  /// In en, this message translates to:
+  /// **'Show as grid'**
+  String get homeExploreShowAsGrid;
+
+  /// Home hero message when dashboard data fails to load
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load prayer times. Check your connection and try again.'**
+  String get homeDashboardLoadError;
+
+  /// Read-only Home search field hint; opens Quran index
+  ///
+  /// In en, this message translates to:
+  /// **'Search surahs, juz, or page'**
+  String get homeSearchHint;
+
+  /// Home horizontal carousel section title (travel-app popular row)
+  ///
+  /// In en, this message translates to:
+  /// **'Featured for you'**
+  String get homeFeaturedTitle;
+
+  /// Home section title for daily actions
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get homeTodayTitle;
+
+  /// Home Today section supporting line
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer, Quran, and dhikr for your day'**
+  String get homeTodaySubtitle;
+
+  /// Home subsection title for pinned athkar shortcuts
+  ///
+  /// In en, this message translates to:
+  /// **'Quick athkar'**
+  String get homeAthkarRitualsTitle;
+
+  /// Home compact prayer schedule strip title
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s prayer times'**
+  String get homePrayerStripTitle;
+
+  /// Home prayer strip link to Prayer tab
+  ///
+  /// In en, this message translates to:
+  /// **'View all'**
+  String get homePrayerStripViewAll;
+
+  /// Home featured ritual card action hint
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to begin'**
+  String get homeFeaturedRitualStart;
+
+  /// Home Quran card title for first-time readers
+  ///
+  /// In en, this message translates to:
+  /// **'Open the Mushaf'**
+  String get homeStartQuranTitle;
+
+  /// Home Quran card subtitle for first-time readers
+  ///
+  /// In en, this message translates to:
+  /// **'Begin reading the Quran today'**
+  String get homeStartQuranSubtitle;
+
+  /// Home Today row title for opening the last-read Quran page
+  ///
+  /// In en, this message translates to:
+  /// **'Continue Quran'**
+  String get homeContinueQuranTitle;
+
+  /// Home Today row subtitle for opening the last-read Quran page
+  ///
+  /// In en, this message translates to:
+  /// **'Resume from your last read page'**
+  String get homeContinueQuranSubtitle;
+
+  /// Home Quran resume subtitle with surah and page
+  ///
+  /// In en, this message translates to:
+  /// **'{surah} · page {page}'**
+  String homeQuranResumeSurahPage(String surah, int page);
+
+  /// Home Quran resume subtitle with page only
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page}'**
+  String homeQuranResumePage(int page);
+
+  /// Home Quran resume progress label
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% of the Mushaf'**
+  String homeQuranResumeProgress(int percent);
+
+  /// Home contextual athkar banner prompt
+  ///
+  /// In en, this message translates to:
+  /// **'A good moment for {name}'**
+  String homeContextualAthkarPrompt(String name);
+
+  /// Badge on time-relevant athkar shortcut
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get homeAthkarNowBadge;
 
   /// Home quick action for Quran reader
   ///
@@ -236,6 +362,12 @@ abstract class AppLocalizations {
   /// **'Reciters'**
   String get homeQuickReciters;
 
+  /// Home More row subtitle for reciters
+  ///
+  /// In en, this message translates to:
+  /// **'Browse recitations'**
+  String get homeQuickRecitersSubtitle;
+
   /// Home quick action for prayer times
   ///
   /// In en, this message translates to:
@@ -248,6 +380,30 @@ abstract class AppLocalizations {
   /// **'Qibla'**
   String get homeQuickQibla;
 
+  /// Home More row subtitle for qibla
+  ///
+  /// In en, this message translates to:
+  /// **'Find prayer direction'**
+  String get homeQuickQiblaSubtitle;
+
+  /// Home More row subtitle for settings
+  ///
+  /// In en, this message translates to:
+  /// **'Theme, audio, and account'**
+  String get homeQuickSettingsSubtitle;
+
+  /// Home More row title for tasbeeh counter
+  ///
+  /// In en, this message translates to:
+  /// **'Tasbeeh'**
+  String get homeQuickTasbeeh;
+
+  /// Home More row subtitle for tasbeeh counter
+  ///
+  /// In en, this message translates to:
+  /// **'Count dhikr with one tap'**
+  String get homeQuickTasbeehSubtitle;
+
   /// Home quick action for athkar
   ///
   /// In en, this message translates to:
@@ -259,6 +415,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Settings'**
   String get homeQuickSettings;
+
+  /// Home section title for user-selected athkar shortcuts
+  ///
+  /// In en, this message translates to:
+  /// **'Quick athkar'**
+  String get homePinnedAthkarTitle;
+
+  /// Action label for editing Home athkar shortcuts
+  ///
+  /// In en, this message translates to:
+  /// **'Edit athkar shortcuts'**
+  String get homePinnedAthkarEdit;
+
+  /// CTA for choosing Home athkar shortcuts
+  ///
+  /// In en, this message translates to:
+  /// **'Choose athkar'**
+  String get homePinnedAthkarChoose;
+
+  /// Empty state title when no athkar shortcuts are pinned
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your daily athkar'**
+  String get homePinnedAthkarEmptyTitle;
+
+  /// Empty state body for Home athkar shortcuts
+  ///
+  /// In en, this message translates to:
+  /// **'Pin up to four categories for one-tap access from Home.'**
+  String get homePinnedAthkarEmptyBody;
+
+  /// Bottom sheet title for choosing Home athkar shortcuts
+  ///
+  /// In en, this message translates to:
+  /// **'Choose quick athkar'**
+  String get homePinnedAthkarPickerTitle;
+
+  /// Selection count in the Home athkar shortcut picker
+  ///
+  /// In en, this message translates to:
+  /// **'{count} of {max} shortcuts selected'**
+  String homePinnedAthkarPickerLimit(int count, int max);
+
+  /// Tooltip for moving an athkar shortcut earlier
+  ///
+  /// In en, this message translates to:
+  /// **'Move {name} up'**
+  String homePinnedAthkarMoveUp(String name);
+
+  /// Tooltip for moving an athkar shortcut later
+  ///
+  /// In en, this message translates to:
+  /// **'Move {name} down'**
+  String homePinnedAthkarMoveDown(String name);
+
+  /// Home section title for daily ayah and dua
+  ///
+  /// In en, this message translates to:
+  /// **'Daily inspiration'**
+  String get homeDailyInspirationTitle;
+
+  /// Home section subtitle under daily inspiration title
+  ///
+  /// In en, this message translates to:
+  /// **'A verse and supplication for your day'**
+  String get homeDailyInspirationSubtitle;
 
   /// Home daily ayah card label
   ///
@@ -295,6 +517,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Abu Dawud'**
   String get homeDailyDuaReference;
+
+  /// Home daily ayah body variant 1
+  ///
+  /// In en, this message translates to:
+  /// **'So remember Me; I will remember you. And be grateful to Me and do not deny Me.'**
+  String get homeDailyAyahBody1;
+
+  /// Home daily ayah reference variant 1
+  ///
+  /// In en, this message translates to:
+  /// **'Quran 2:152'**
+  String get homeDailyAyahReference1;
+
+  /// Home daily dua body variant 1
+  ///
+  /// In en, this message translates to:
+  /// **'Our Lord, grant us good in this world and good in the Hereafter, and protect us from the Fire.'**
+  String get homeDailyDuaBody1;
+
+  /// Home daily dua reference variant 1
+  ///
+  /// In en, this message translates to:
+  /// **'Quran 2:201'**
+  String get homeDailyDuaReference1;
+
+  /// Home daily ayah body variant 2
+  ///
+  /// In en, this message translates to:
+  /// **'Indeed, prayer prohibits immorality and wrongdoing.'**
+  String get homeDailyAyahBody2;
+
+  /// Home daily ayah reference variant 2
+  ///
+  /// In en, this message translates to:
+  /// **'Quran 29:45'**
+  String get homeDailyAyahReference2;
+
+  /// Home daily dua body variant 2
+  ///
+  /// In en, this message translates to:
+  /// **'O Allah, I ask You for beneficial knowledge, wholesome provision, and accepted deeds.'**
+  String get homeDailyDuaBody2;
+
+  /// Home daily dua reference variant 2
+  ///
+  /// In en, this message translates to:
+  /// **'Ibn Majah'**
+  String get homeDailyDuaReference2;
 
   /// Title for the empty Smart Khatma card
   ///
@@ -1094,11 +1364,17 @@ abstract class AppLocalizations {
   /// **'Clear search'**
   String get recitersClearSearch;
 
-  /// Single-word label for the prayer times tab in the phone bottom navigation bar
+  /// Legacy shell label; prayer times opens from Home
   ///
   /// In en, this message translates to:
   /// **'Prayer'**
   String get bottomNavPrayer;
+
+  /// Single-word label for the Qibla tab in the phone bottom navigation bar
+  ///
+  /// In en, this message translates to:
+  /// **'Qibla'**
+  String get bottomNavQibla;
 
   /// Single-word label for the Quran tab in the phone bottom navigation bar
   ///
@@ -1106,10 +1382,10 @@ abstract class AppLocalizations {
   /// **'Quran'**
   String get bottomNavQuran;
 
-  /// Single-word label for the athkar tab in the phone bottom navigation bar
+  /// Single-word label for the dhikr tab in the phone bottom navigation bar (Behance lifestyle IA)
   ///
   /// In en, this message translates to:
-  /// **'Athkar'**
+  /// **'Dhikr'**
   String get bottomNavAthkar;
 
   /// Single-word label for the settings tab in the phone bottom navigation bar
@@ -1580,6 +1856,12 @@ abstract class AppLocalizations {
   /// **'Unable to sign in with third-party account'**
   String get unableToSignInWithThirdPartyAccount;
 
+  /// Shown when the device has no Google accounts configured
+  ///
+  /// In en, this message translates to:
+  /// **'No Google account found on this device. Please add a Google account in your device settings and try again.'**
+  String get googleSignInNoAccountsOnDevice;
+
   /// Title when Google account picker fails to render on device
   ///
   /// In en, this message translates to:
@@ -1795,6 +2077,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Brown'**
   String get colorBrown;
+
+  /// TripGlide charcoal primary preset name
+  ///
+  /// In en, this message translates to:
+  /// **'Charcoal'**
+  String get colorInk;
 
   /// Purple color name
   ///
@@ -2407,6 +2695,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Qibla Direction'**
   String get qiblaDirection;
+
+  /// Centered uppercase title on the Qibla compass screen (Behance reference)
+  ///
+  /// In en, this message translates to:
+  /// **'QIBLA FINDER'**
+  String get qiblaFinderTitle;
+
+  /// Subtitle below the compass degree readout
+  ///
+  /// In en, this message translates to:
+  /// **'Device\'s angle to qibla'**
+  String get qiblaDeviceAngleLabel;
+
+  /// Instruction when the user should rotate left to align with Qibla
+  ///
+  /// In en, this message translates to:
+  /// **'Rotate the phone {degrees}° to the left'**
+  String qiblaRotatePhoneLeft(int degrees);
+
+  /// Instruction when the user should rotate right to align with Qibla
+  ///
+  /// In en, this message translates to:
+  /// **'Rotate the phone {degrees}° to the right'**
+  String qiblaRotatePhoneRight(int degrees);
 
   /// Error title when location service is disabled
   ///
@@ -3212,6 +3524,12 @@ abstract class AppLocalizations {
   /// **'Show Translation'**
   String get showTranslation;
 
+  /// Attribution line for the bundled Quran translation shown in reader settings
+  ///
+  /// In en, this message translates to:
+  /// **'Translation: {translationName} ({sourceName})'**
+  String quranTranslationAttribution(String translationName, String sourceName);
+
   /// Show ayah numbers toggle label
   ///
   /// In en, this message translates to:
@@ -3536,6 +3854,36 @@ abstract class AppLocalizations {
   /// **'Quran'**
   String get quran;
 
+  /// Centered uppercase title on the Quran hub screen (Behance reference)
+  ///
+  /// In en, this message translates to:
+  /// **'QURAN'**
+  String get quranHubTitle;
+
+  /// Section heading above Surah/Juz/Page pills on the Quran hub
+  ///
+  /// In en, this message translates to:
+  /// **'Al Quran'**
+  String get quranCatalogSectionTitle;
+
+  /// Opens the page-based Mushaf reader from the surah detail screen
+  ///
+  /// In en, this message translates to:
+  /// **'Open Mushaf'**
+  String get quranOpenMushaf;
+
+  /// Switch Quran reader from Mushaf pages to the Behance-style ayah list
+  ///
+  /// In en, this message translates to:
+  /// **'Ayah list view'**
+  String get quranSwitchToAyahList;
+
+  /// Switch Quran reader from ayah list back to Mushaf pages
+  ///
+  /// In en, this message translates to:
+  /// **'Mushaf view'**
+  String get quranSwitchToMushaf;
+
   /// Button to continue reading Quran from last page
   ///
   /// In en, this message translates to:
@@ -3547,6 +3895,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Surah Index'**
   String get surahIndex;
+
+  /// Title for the Hijri month calendar bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Islamic calendar'**
+  String get hijriCalendarTitle;
+
+  /// Accessibility label for tapping the home hero Hijri date
+  ///
+  /// In en, this message translates to:
+  /// **'Open Islamic calendar'**
+  String get hijriCalendarOpenLabel;
+
+  /// Navigate to the previous Hijri month in the calendar sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month'**
+  String get hijriCalendarPreviousMonth;
+
+  /// Navigate to the next Hijri month in the calendar sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Next month'**
+  String get hijriCalendarNextMonth;
 
   /// Surah count label in the index header
   ///
@@ -4262,6 +4634,24 @@ abstract class AppLocalizations {
   /// **'It is time for {prayerName}'**
   String prayerNotificationBody(String prayerName);
 
+  /// Title for prayer notifications when the user's location is known
+  ///
+  /// In en, this message translates to:
+  /// **'{prayerName} · {locationName}'**
+  String prayerNotificationTitleWithLocation(
+    String prayerName,
+    String locationName,
+  );
+
+  /// Body for prayer notifications when the user's location is known
+  ///
+  /// In en, this message translates to:
+  /// **'It is time for {prayerName} in {locationName}'**
+  String prayerNotificationBodyWithLocation(
+    String prayerName,
+    String locationName,
+  );
+
   /// Android notification channel name for default prayer reminders
   ///
   /// In en, this message translates to:
@@ -4301,8 +4691,14 @@ abstract class AppLocalizations {
   /// Text showing that Adhan audio is currently playing
   ///
   /// In en, this message translates to:
-  /// **'Adhan is playing'**
+  /// **'Adhan is playing…'**
   String get adhanIsPlaying;
+
+  /// Native adhan foreground notification body when location is known
+  ///
+  /// In en, this message translates to:
+  /// **'Adhan is playing for {locationName}'**
+  String adhanPlayingNotificationBodyWithLocation(String locationName);
 
   /// Button label to stop Adhan playback
   ///

@@ -5,6 +5,10 @@ import '../../../l10n/app_localizations.dart';
 import '../../core/perf_logger.dart';
 import '../../domain/domain.dart';
 
+/// Bottom bar matching the Ayah app layout:
+/// - Hizb label at the bottom-start (left in LTR / right in RTL)
+/// - Page number cartouche at the bottom-end (right in LTR / left in RTL)
+/// - No horizontal rules — clean, minimal
 class PremiumBottomBar extends StatelessWidget {
   final PageState state;
 
@@ -21,21 +25,39 @@ class PremiumBottomBar extends StatelessWidget {
         l10n?.page(state.displayPage.toString()) ?? 'Page ${state.displayPage}';
     final hizbLabel =
         l10n?.hizb(state.hizbNumber) ?? 'Hizb ${state.hizbNumber}';
+    final primaryColor = theme.colorScheme.primary;
 
     final bottomBar = Semantics(
       container: true,
       label: '$pageLabel, $hizbLabel',
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: tokens.spaceExtraLarge),
+        padding: EdgeInsets.only(
+          left: tokens.spaceSmall,
+          right: tokens.spaceSmall,
+          bottom: tokens.spaceExtraSmall,
+          top: tokens.spaceTiny,
+        ),
+        // Force LTR so hizb is always on the left and page number on the right,
+        // matching the Ayah app layout regardless of locale direction.
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Row(
-            spacing: tokens.spaceMedium,
-            mainAxisSize: .min,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              const Expanded(child: _MushafFooterRule(dotNearMedallion: true)),
-              _PageNumberMedallion(pageNumber: state.displayPage),
-              const Expanded(child: _MushafFooterRule(dotNearMedallion: false)),
+              // Hizb label — bottom left
+              Text(
+                hizbLabel,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: primaryColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              // Page number cartouche — bottom right
+              _PageNumberCartouche(
+                pageNumber: state.displayPage,
+                color: primaryColor,
+              ),
             ],
           ),
         ),
@@ -51,71 +73,32 @@ class PremiumBottomBar extends StatelessWidget {
   }
 }
 
-class _MushafFooterRule extends StatelessWidget {
-  const _MushafFooterRule({required this.dotNearMedallion});
-
-  final bool dotNearMedallion;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final color = theme.colorScheme.primary.withValues(
-      alpha: tokens.opacityMedium,
-    );
-
-    final divider = Expanded(
-      child: Divider(
-        height: tokens.spaceSmall,
-        thickness: tokens.borderWidthThin,
-        color: color,
-      ),
-    );
-    final dot = Container(
-      width: tokens.spaceExtraSmall,
-      height: tokens.spaceExtraSmall,
-      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-    );
-    final gap = SizedBox(width: tokens.spaceSmall);
-
-    return Row(
-      children: dotNearMedallion ? [divider, gap, dot] : [dot, gap, divider],
-    );
-  }
-}
-
-class _PageNumberMedallion extends StatelessWidget {
-  const _PageNumberMedallion({required this.pageNumber});
+/// Oval cartouche frame around the page number, matching Ayah app style.
+class _PageNumberCartouche extends StatelessWidget {
+  const _PageNumberCartouche({
+    required this.pageNumber,
+    required this.color,
+  });
 
   final int pageNumber;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
-
     return Container(
-      constraints: BoxConstraints(minWidth: tokens.iconSizeLargePlus),
-      padding: EdgeInsets.all(tokens.spaceSmall),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
       decoration: BoxDecoration(
-        color: colorScheme.surface.withValues(alpha: tokens.opacityGlass),
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: colorScheme.primary.withValues(alpha: tokens.opacityMedium),
-          width: tokens.borderWidthThin,
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.6), width: 1),
+        borderRadius: BorderRadius.circular(20),
+        color: color.withValues(alpha: 0.06),
       ),
-      child: Center(
-        child: Text(
-          _toEasternArabicDigits(pageNumber),
-          overflow: TextOverflow.ellipsis,
-          maxLines: 1,
-          textAlign: TextAlign.center,
-          style: theme.textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: colorScheme.primary,
-          ),
+      child: Text(
+        _toEasternArabicDigits(pageNumber),
+        style: theme.textTheme.labelMedium?.copyWith(
+          color: color,
+          fontWeight: FontWeight.w700,
+          height: 1.2,
         ),
       ),
     );

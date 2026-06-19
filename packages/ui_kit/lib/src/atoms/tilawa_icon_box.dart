@@ -72,9 +72,7 @@ class TilawaIconBox extends StatelessWidget {
       color: resolvedBackground,
       borderRadius: BorderRadius.circular(
         borderRadius ??
-            designTokens.resolveRadius(
-              family: TilawaRadiusFamily.decorative,
-            ),
+            designTokens.resolveRadius(family: TilawaRadiusFamily.decorative),
       ),
       border: isTinted
           ? null

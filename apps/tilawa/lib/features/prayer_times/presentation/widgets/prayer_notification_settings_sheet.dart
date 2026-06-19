@@ -44,20 +44,28 @@ class _PrayerNotificationSettingsSheetState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final bottomPadding = context.floatingBottomPadding;
+    final basePadding = TilawaBottomSheetScaffold.resolvedBodyPadding(context);
+    final scrollPadding = basePadding;
 
-    // We use context.select to listen only to the settings change
     final settings = context.select(
       (PrayerTimesBloc bloc) => bloc.state.settings,
     );
 
-    final basePadding = TilawaBottomSheetScaffold.resolvedBodyPadding(context);
-    final scrollPadding = basePadding.copyWith(
-      bottom: basePadding.bottom + bottomPadding,
-    );
-
     return TilawaBottomSheetScaffold(
-      topBar: _SheetHeader(onDone: _close, tokens: tokens, theme: theme),
+      topBar: Semantics(
+        identifier: PrayerNotificationSemanticsIds.notificationsSection,
+        header: true,
+        child: Text(
+          context.l10n.prayerNotifications,
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+      footer: TilawaBottomSheetActions(
+        primaryLabel: context.l10n.done,
+        onPrimary: _close,
+      ),
       betweenTopBarAndBody: const [Divider(height: 1)],
       children: [
         Flexible(
@@ -226,43 +234,6 @@ class _PrayerNotificationSettingsSheetState
 
 // Private helper widgets (reused from common patterns)
 
-class _SheetHeader extends StatelessWidget {
-  const _SheetHeader({
-    required this.onDone,
-    required this.tokens,
-    required this.theme,
-  });
-  final VoidCallback onDone;
-  final TilawaDesignTokens tokens;
-  final ThemeData theme;
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Semantics(
-          identifier: PrayerNotificationSemanticsIds.notificationsSection,
-          header: true,
-          child: Text(
-            context.l10n.prayerNotifications,
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ),
-        const Spacer(),
-        IconButton(
-          onPressed: onDone,
-          icon: const Icon(Icons.close),
-          style: IconButton.styleFrom(
-            backgroundColor: theme.colorScheme.surfaceContainerHighest,
-            foregroundColor: theme.colorScheme.onSurface,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _SettingsSwitch extends StatelessWidget {
   const _SettingsSwitch({
     required this.title,
@@ -276,18 +247,11 @@ class _SettingsSwitch extends StatelessWidget {
   final String? identifier;
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final Widget tile = SwitchListTile(
-      title: Text(
-        title,
-        style: theme.textTheme.bodyMedium?.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
-      ),
+    final Widget tile = TilawaSettingsSwitchTile(
+      title: title,
       value: value,
       onChanged: onChanged,
-      contentPadding: EdgeInsets.zero,
-      visualDensity: VisualDensity.compact,
+      showDivider: false,
     );
     if (identifier != null) {
       return Semantics(identifier: identifier, child: tile);

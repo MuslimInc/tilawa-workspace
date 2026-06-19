@@ -12,13 +12,21 @@ void main() {
       'TilawaMediaPlayerBar',
       fileName: 'organisms/tilawa_media_player_bar',
       builder: () => GoldenTestGroup(
-        scenarioConstraints: kUiKitGoldenScenarioConstraints,
+        // The bar uses LayoutBuilder in its height-sensitive layout.
+        // Alchemist wraps scenarios in a Table and probes intrinsic height,
+        // so fix the scenario height here to avoid LayoutBuilder intrinsic
+        // measurement failures.
+        scenarioConstraints: kUiKitGoldenScenarioConstraints.copyWith(
+          minHeight: 120,
+          maxHeight: 120,
+        ),
         children: [
           GoldenTestScenario(
             name: 'Playing default',
             child: const TilawaPreviewWrapper(
               child: SizedBox(
                 width: 360,
+                height: 120,
                 child: TilawaMediaPlayerBar(
                   layoutWidth: 360,
                   title: 'Surah Al-Fatiha',

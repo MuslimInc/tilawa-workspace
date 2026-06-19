@@ -39,8 +39,11 @@ internal class AdhanPlaybackService : Service() {
 
         private const val TAG = "AdhanPlaybackService"
         private const val FOREGROUND_NOTIFICATION_ID = 0x4144_4841 // 'ADHA'
-        private const val CHANNEL_ID = "com.tilawa.app.prayer_adhan"
-        private const val CHANNEL_NAME = "Prayer Times (Adhan)"
+        // Must match Flutter [PrayerNotificationConfig.silentAdhanChannelId].
+        // Native MediaPlayer owns audio; the FGS notification must stay silent
+        // so we never reuse the audible `com.tilawa.app.prayer_adhan` channel.
+        private const val CHANNEL_ID = "com.tilawa.app.prayer_adhan_silent"
+        private const val CHANNEL_NAME = "Prayer Times (Silent)"
         private const val WAKE_LOCK_TAG = "Tilawa::AdhanPlayback"
         private const val WAKE_LOCK_TIMEOUT_MS = 5L * 60L * 1000L
 
@@ -66,6 +69,8 @@ internal class AdhanPlaybackService : Service() {
         val sound: String,
         val scheduledMs: Long,
         val notificationId: Int,
+        val locationName: String = "",
+        val languageCode: String = "",
     )
 
     private var mediaPlayer: MediaPlayer? = null
@@ -82,10 +87,20 @@ internal class AdhanPlaybackService : Service() {
                     val resId = resources.getIdentifier(key, "string", packageName)
                     return if (resId != 0) getString(resId) else key
                 }
+
+                override fun formatString(key: String, vararg args: Any): String {
+                    val resId = resources.getIdentifier(key, "string", packageName)
+                    return if (resId != 0) getString(resId, *args) else key
+                }
             },
             object : ServiceActions {
                 override fun stopPlayback() {
-                    stopForeground(STOP_FOREGROUND_REMOVE)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        stopForeground(STOP_FOREGROUND_REMOVE)
+                    } else {
+                        @Suppress("DEPRECATION")
+                        stopForeground(true)
+                    }
                     stopSelf()
                 }
             },
@@ -160,22 +175,45 @@ internal class AdhanPlaybackService : Service() {
                     sound = action.sound
                 )
 
-                startPlayback(action.prayerName, action.prayerKey, action.sound, action.scheduledMs)
+                startPlayback(
+                    action.prayerName,
+                    action.prayerKey,
+                    action.sound,
+                    action.scheduledMs,
+                    action.locationName,
+                    action.languageCode,
+                )
             }
             PlaybackAction.NONE -> Unit
         }
         return START_NOT_STICKY
     }
 
-    private fun startPlayback(prayerName: String, prayerKey: String, sound: String, scheduledMs: Long) {
+    private fun startPlayback(
+        prayerName: String,
+        prayerKey: String,
+        sound: String,
+        scheduledMs: Long,
+        locationName: String = "",
+        languageCode: String = "",
+    ) {
         activePayload = ActiveAdhanPayload(
             prayerName = prayerName,
             prayerKey = prayerKey,
             sound = sound,
             scheduledMs = scheduledMs,
             notificationId = FOREGROUND_NOTIFICATION_ID,
+            locationName = locationName,
+            languageCode = languageCode,
         )
-        val notification = buildNotification(prayerName, prayerKey, FOREGROUND_NOTIFICATION_ID, scheduledMs)
+        val notification = buildNotification(
+            prayerName,
+            prayerKey,
+            FOREGROUND_NOTIFICATION_ID,
+            scheduledMs,
+            locationName,
+            languageCode,
+        )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startForeground(
                 FOREGROUND_NOTIFICATION_ID,
@@ -370,22 +408,17 @@ internal class AdhanPlaybackService : Service() {
         prayerName: String,
         prayerKey: String,
         notificationId: Int,
-        scheduledMs: Long
+        scheduledMs: Long,
+        locationName: String = "",
+        languageCode: String = "",
     ): Notification {
         val nm = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
-            nm.getNotificationChannel(CHANNEL_ID) == null
-        ) {
-            nm.createNotificationChannel(
-                NotificationChannel(
-                    CHANNEL_ID,
-                    CHANNEL_NAME,
-                    NotificationManager.IMPORTANCE_HIGH,
-                ).apply {
-                    setSound(null, null)
-                    enableVibration(false)
-                },
-            )
+        ensureSilentPlaybackChannel(nm)
+        val localizedLogic = localizedPlaybackLogic(languageCode)
+        val localizedResources =
+            NotificationLocaleHelper.localizedResources(this, languageCode)
+        val resolvedLocationName = locationName.ifBlank {
+            DefaultPrayerStorage(this).getLastNotificationLocationName().orEmpty()
         }
         val openIntent = PendingIntent.getActivity(
             this,
@@ -412,9 +445,9 @@ internal class AdhanPlaybackService : Service() {
             Intent(this, AdhanPlaybackService::class.java).apply { action = ACTION_STOP },
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
-        val title = logic.getNotificationTitle(prayerName)
+        val title = localizedLogic.getNotificationTitle(prayerName, resolvedLocationName)
 
-        val contentText = getString(R.string.adhan_is_playing)
+        val contentText = localizedLogic.getNotificationBody(resolvedLocationName)
 
         val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Notification.Builder(this, CHANNEL_ID)
@@ -434,11 +467,57 @@ internal class AdhanPlaybackService : Service() {
             .addAction(
                 Notification.Action.Builder(
                     null,
-                    getString(R.string.stop_adhan),
+                    localizedResources.getString(R.string.stop_adhan),
                     stopIntent,
                 ).build(),
             )
             .build()
+    }
+
+    private fun localizedPlaybackLogic(languageCode: String): PlaybackLogic {
+        val localizedResources =
+            NotificationLocaleHelper.localizedResources(this, languageCode)
+        return PlaybackLogic(
+            object : StringProvider {
+                override fun getString(key: String): String {
+                    val resId = localizedResources.getIdentifier(key, "string", packageName)
+                    return if (resId != 0) localizedResources.getString(resId) else key
+                }
+
+                override fun formatString(key: String, vararg args: Any): String {
+                    val resId = localizedResources.getIdentifier(key, "string", packageName)
+                    return if (resId != 0) localizedResources.getString(resId, *args) else key
+                }
+            },
+            // ServiceActions is unused in the localization-only path; lifecycle is
+            // owned by the main `logic` lazy instance which holds the real callback.
+            object : ServiceActions {
+                override fun stopPlayback() = Unit
+            },
+            analytics,
+        )
+    }
+
+    private fun ensureSilentPlaybackChannel(nm: NotificationManager) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            return
+        }
+        val existing = nm.getNotificationChannel(CHANNEL_ID)
+        if (existing != null && existing.sound != null) {
+            nm.deleteNotificationChannel(CHANNEL_ID)
+        }
+        if (nm.getNotificationChannel(CHANNEL_ID) == null) {
+            nm.createNotificationChannel(
+                NotificationChannel(
+                    CHANNEL_ID,
+                    CHANNEL_NAME,
+                    NotificationManager.IMPORTANCE_HIGH,
+                ).apply {
+                    setSound(null, null)
+                    enableVibration(false)
+                },
+            )
+        }
     }
 
     private fun acquireWakeLock() {

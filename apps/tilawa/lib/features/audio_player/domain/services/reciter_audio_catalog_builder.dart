@@ -1,5 +1,6 @@
 import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/entities/audio.dart';
+import 'package:tilawa_core/entities/audio_extras_keys.dart';
 import 'package:tilawa_core/entities/moshaf_entity.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/utils/surah_names.dart';
@@ -45,9 +46,9 @@ class ReciterAudioCatalogBuilder {
             album: moshaf.name,
             artist: reciter.name,
             extras: <String, Object>{
-              'reciterId': reciter.id,
-              'moshafId': moshaf.id,
-              'surahId': int.parse(surahId),
+              AudioExtrasKeys.reciterId: reciter.id,
+              AudioExtrasKeys.moshafId: moshaf.id,
+              AudioExtrasKeys.surahId: int.parse(surahId),
             },
           );
 

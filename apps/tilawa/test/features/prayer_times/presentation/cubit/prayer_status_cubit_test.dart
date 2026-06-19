@@ -225,6 +225,8 @@ class _FakeAdhanAlarmPlayer implements IAdhanAlarmPlayer {
     required String prayerName,
     required String prayerKey,
     String? sound,
+    String? locationName,
+    String? languageCode,
   }) async {
     return true;
   }
@@ -235,6 +237,8 @@ class _FakeAdhanAlarmPlayer implements IAdhanAlarmPlayer {
     required String prayerName,
     required String prayerKey,
     String? sound,
+    String? locationName,
+    String? languageCode,
   }) async => false;
 
   @override

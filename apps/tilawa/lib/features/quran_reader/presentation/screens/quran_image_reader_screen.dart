@@ -52,6 +52,8 @@ class QuranImageReaderScreen extends StatefulWidget {
     required this.surahNumber,
     this.initialAyah,
     this.openPracticeOnLaunch = false,
+    this.onActiveSurahChanged,
+    this.viewSwitchAction,
   });
 
   /// Surah number to open (`1`–`114`), or `0` to use last-read.
@@ -62,6 +64,13 @@ class QuranImageReaderScreen extends StatefulWidget {
 
   /// Opens the recitation practice panel after the reader is ready.
   final bool openPracticeOnLaunch;
+
+  /// Notifies the host when the visible Mushaf page changes surah.
+  final ValueChanged<int>? onActiveSurahChanged;
+
+  /// Host-supplied view-switch control rendered in the reader's bottom
+  /// navigation panel (thumb-reachable), replacing the old top-corner toggle.
+  final Widget? viewSwitchAction;
 
   @override
   State<QuranImageReaderScreen> createState() => _QuranImageReaderScreenState();
@@ -319,6 +328,7 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen>
       surahNumber: pageData.first.surah,
       page: currentPage,
     );
+    widget.onActiveSurahChanged?.call(pageData.first.surah);
     final UpdateKhatmaProgressUseCase? updateKhatmaProgress =
         _updateKhatmaProgress;
     if (updateKhatmaProgress != null) {
@@ -340,6 +350,7 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen>
         onShareRequested: _showShareOptions,
         onShowIndex: _showSurahIndex,
         onPageSettled: (page) => unawaited(_recordReadingProgress(page)),
+        viewSwitchAction: widget.viewSwitchAction,
       ),
     );
 
@@ -387,11 +398,13 @@ class _ReaderShell extends StatelessWidget {
     required this.onShareRequested,
     required this.onShowIndex,
     required this.onPageSettled,
+    this.viewSwitchAction,
   });
 
   final Future<void> Function(int currentPage) onShareRequested;
   final VoidCallback onShowIndex;
   final ValueChanged<int> onPageSettled;
+  final Widget? viewSwitchAction;
 
   @override
   Widget build(BuildContext context) {
@@ -418,13 +431,14 @@ class _ReaderShell extends StatelessWidget {
         builder: (context, state) {
           if (state is NavigationLoaded) {
             return QuranImageReader(
-              preferredSystemUiMode: SystemUiMode.edgeToEdge,
+              preferredSystemUiMode: SystemUiMode.immersiveSticky,
               restoreSystemUiMode: SystemUiMode.edgeToEdge,
               preferredOrientations: AppOrientationService.readerOrientations,
               restoreOrientations: AppOrientationService.defaultOrientations,
               restoreSystemUiOverlayStyle: AppSystemChromeStyle.defaultAppStyle,
               onShareRequested: onShareRequested,
               onShowIndex: onShowIndex,
+              viewSwitchAction: viewSwitchAction,
               headerImageFilter: Theme.of(
                 context,
               ).extension<QuranReaderTheme>()?.headerImageFilter,

@@ -123,7 +123,11 @@ void main() {
           success: (user) => expect(user.id, '123'),
           orElse: () => fail('Expected success'),
         );
-        verifyNever(mockGoogleSignIn.authenticate());
+        verifyNever(
+          mockGoogleSignIn.authenticate(
+            scopeHint: anyNamed('scopeHint'),
+          ),
+        );
       },
     );
 
@@ -184,7 +188,11 @@ void main() {
           success: (user) => expect(user.id, '123'),
           orElse: () => fail('Expected success'),
         );
-        verifyNever(mockGoogleSignIn.authenticate());
+        verifyNever(
+          mockGoogleSignIn.authenticate(
+            scopeHint: anyNamed('scopeHint'),
+          ),
+        );
       });
 
       test('signIn times out when the CM sheet never shows UI (app stays '
@@ -206,7 +214,11 @@ void main() {
           },
           orElse: () => fail('Expected timeout failure'),
         );
-        verifyNever(mockGoogleSignIn.authenticate());
+        verifyNever(
+          mockGoogleSignIn.authenticate(
+            scopeHint: anyNamed('scopeHint'),
+          ),
+        );
       });
 
       test('signIn keeps waiting on the CM sheet when GMS UI is visible '
@@ -231,18 +243,37 @@ void main() {
           success: (user) => expect(user.id, '123'),
           orElse: () => fail('Expected success'),
         );
-        verifyNever(mockGoogleSignIn.authenticate());
+        verifyNever(
+          mockGoogleSignIn.authenticate(
+            scopeHint: anyNamed('scopeHint'),
+          ),
+        );
       });
     });
 
     test(
-      'signIn returns cancelled when Credential Manager returns no account',
+      'signIn returns noGoogleAccounts when Credential Manager and account '
+      'chooser return no account',
       () async {
+        when(
+          mockGoogleSignIn.authenticate(
+            scopeHint: anyNamed('scopeHint'),
+          ),
+        ).thenThrow(
+          const GoogleSignInException(
+            code: GoogleSignInExceptionCode.canceled,
+          ),
+        );
+
         expect(
           await googleAuthProvider.signIn(),
-          const AuthResult.cancelled(),
+          const AuthResult.noGoogleAccounts(),
         );
-        verifyNever(mockGoogleSignIn.authenticate());
+        verify(
+          mockGoogleSignIn.authenticate(
+            scopeHint: anyNamed('scopeHint'),
+          ),
+        ).called(1);
       },
     );
 
@@ -263,6 +294,12 @@ void main() {
 
       setUp(() {
         GoogleAuthProviderImpl.useIosInteractiveSignInFallback = true;
+        googleAuthProvider = GoogleAuthProviderImpl(
+          mockFirebaseAuth,
+          mockGoogleSignIn,
+          platformPolicy,
+          GoogleSignInSessionTracker(),
+        );
       });
 
       tearDown(() {
@@ -273,7 +310,9 @@ void main() {
         'falls back to authenticate when lightweight returns no account',
         () async {
           when(
-            mockGoogleSignIn.authenticate(),
+            mockGoogleSignIn.authenticate(
+              scopeHint: anyNamed('scopeHint'),
+            ),
           ).thenAnswer((_) async => mockGoogleUser);
           stubFirebaseSignIn();
 
@@ -283,7 +322,11 @@ void main() {
             success: (user) => expect(user.id, '123'),
             orElse: () => fail('Expected success'),
           );
-          verify(mockGoogleSignIn.authenticate()).called(1);
+          verify(
+            mockGoogleSignIn.authenticate(
+              scopeHint: anyNamed('scopeHint'),
+            ),
+          ).called(1);
         },
       );
 
@@ -305,7 +348,11 @@ void main() {
             success: (user) => expect(user.id, '123'),
             orElse: () => fail('Expected success'),
           );
-          verifyNever(mockGoogleSignIn.authenticate());
+          verifyNever(
+            mockGoogleSignIn.authenticate(
+              scopeHint: anyNamed('scopeHint'),
+            ),
+          );
         },
       );
     });
@@ -318,6 +365,16 @@ void main() {
             reportAllExceptions: anyNamed('reportAllExceptions'),
           ),
         ).thenReturn(null);
+        when(
+          mockGoogleSignIn.authenticate(
+            scopeHint: anyNamed('scopeHint'),
+          ),
+        ).thenThrow(
+          const GoogleSignInException(
+            code: GoogleSignInExceptionCode.uiUnavailable,
+            description: 'Credential Manager unavailable',
+          ),
+        );
 
         final AuthResult result = await googleAuthProvider.signIn();
 
@@ -329,7 +386,11 @@ void main() {
             'ui-unavailable',
           ),
         );
-        verifyNever(mockGoogleSignIn.authenticate());
+        verify(
+          mockGoogleSignIn.authenticate(
+            scopeHint: anyNamed('scopeHint'),
+          ),
+        ).called(1);
       },
     );
 
@@ -357,7 +418,11 @@ void main() {
             'ui-unavailable',
           ),
         );
-        verifyNever(mockGoogleSignIn.authenticate());
+        verifyNever(
+          mockGoogleSignIn.authenticate(
+            scopeHint: anyNamed('scopeHint'),
+          ),
+        );
       },
     );
 
@@ -376,7 +441,11 @@ void main() {
           await googleAuthProvider.signIn(),
           const AuthResult.cancelled(),
         );
-        verifyNever(mockGoogleSignIn.authenticate());
+        verifyNever(
+          mockGoogleSignIn.authenticate(
+            scopeHint: anyNamed('scopeHint'),
+          ),
+        );
       },
     );
 
@@ -594,7 +663,9 @@ void main() {
             }
           });
           when(
-            mockGoogleSignIn.authenticate(),
+            mockGoogleSignIn.authenticate(
+              scopeHint: anyNamed('scopeHint'),
+            ),
           ).thenAnswer((_) async => mockGoogleUser);
           when(mockGoogleUser.authentication).thenReturn(mockGoogleAuth);
           when(mockGoogleAuth.idToken).thenReturn('fresh_token');

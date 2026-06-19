@@ -4,7 +4,10 @@ import 'package:provider/provider.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../router/app_router.dart';
+import '../../router/app_router_config.dart';
 import '../../router/shell_route_location.dart';
+import '../../screens/app_shell_nav_destinations.dart';
+import '../../screens/cubit/main_screen_cubit.dart';
 
 /// Layout chrome published by [AppShellScreen] for the mini-player.
 @immutable
@@ -194,19 +197,20 @@ abstract final class AppShellRoutePolicy {
       return null;
     }
     if (location.startsWith('/reciter') ||
+        location.startsWith('/reciters') ||
         location.startsWith('/downloads') ||
         location.startsWith('/favorites') ||
         location.startsWith('/bookmarks') ||
         location.startsWith('/history')) {
-      return 0;
+      return kAppShellRecitersTabIndex;
     }
-    if (location.startsWith('/prayer') || location == '/qibla') {
+    if (location.startsWith('/qibla')) {
       return 2;
     }
     if (location.startsWith('/settings') ||
         location == '/support' ||
         location == '/premium') {
-      return 4;
+      return kAppShellSettingsTabIndex;
     }
     return null;
   }
@@ -272,7 +276,8 @@ abstract final class QuranPlayerLayoutInsets {
     required double playerHeight,
     required bool hostAbsorbsBottomSafeArea,
   }) {
-    return playerHeight +
+    return phoneMiniPlayerTopPadding(context) +
+        playerHeight +
         phoneFooterBottomSpacing(
           context,
           hostAbsorbsBottomSafeArea: hostAbsorbsBottomSafeArea,
@@ -312,5 +317,39 @@ abstract final class QuranPlayerLayoutInsets {
       return 0;
     }
     return offShellBottomInset(context);
+  }
+
+  /// Gap between the shell mini player capsule and the bottom nav pill.
+  static double phoneMiniPlayerNavGap(BuildContext context) {
+    return Theme.of(
+      context,
+    ).componentTokens.adaptiveShell.bottomNavInternalPadding;
+  }
+
+  /// Breathing room above the shell mini player capsule.
+  static double phoneMiniPlayerTopPadding(BuildContext context) {
+    return Theme.of(
+      context,
+    ).componentTokens.adaptiveShell.bottomNavInternalPadding;
+  }
+}
+
+/// Shell navigation helpers for the global Quran mini player.
+abstract final class QuranPlayerShellNavigation {
+  /// Opens the Reciters main tab from the mini player metadata strip.
+  static void openRecitersTab(BuildContext context) {
+    final String location = QuranPlayerRoutePolicy.currentMatchedLocation();
+    final bool onMainShell = QuranPlayerRoutePolicy.isMainShell(location);
+    if (!onMainShell) {
+      try {
+        const HomeRoute().go(context);
+      } catch (_) {
+        AppRouter.router.go(const HomeRoute().location);
+      }
+    }
+    context.read<MainScreenCubit>().selectTab(
+      kAppShellRecitersTabIndex,
+      force: !onMainShell,
+    );
   }
 }

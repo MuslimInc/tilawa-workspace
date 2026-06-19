@@ -4,7 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa/features/quran_reader/presentation/screens/quran_image_reader_screen.dart';
+import 'package:tilawa/features/home/presentation/cubit/home_quran_resume_cubit.dart';
+import 'package:tilawa/features/quran_reader/presentation/screens/quran_reader_host_screen.dart';
+import 'package:tilawa/features/quran_reader/presentation/screens/quran_index_screen.dart';
 import 'package:tilawa/features/quran_reader/presentation/screens/quran_render_demo_screen.dart';
 import 'package:tilawa/features/support/presentation/bloc/support_bloc.dart';
 import 'package:tilawa/features/support/presentation/bloc/support_event.dart';
@@ -74,6 +76,7 @@ part 'app_router_config.g.dart';
       path: '/prayer-notification-status',
     ),
     TypedGoRoute<PrayerTimesRoute>(path: '/prayer-times'),
+    TypedGoRoute<QuranIndexRoute>(path: '/quran-index'),
     TypedGoRoute<QuranRenderDemoRoute>(path: '/render-demo'),
   ],
 )
@@ -460,7 +463,22 @@ class PrayerTimesRoute extends GoRouteData with $PrayerTimesRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return const PrayerTimesScreenScope();
+    return const AppReviewSacredFlowScope(
+      flow: AppReviewBlockedFlow.prayer,
+      child: PrayerTimesScreenScope(),
+    );
+  }
+}
+
+class QuranIndexRoute extends GoRouteData with $QuranIndexRoute {
+  const QuranIndexRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return BlocProvider(
+      create: (_) => getIt<HomeQuranResumeCubit>()..load(),
+      child: const QuranIndexScreen(),
+    );
   }
 }
 
@@ -472,7 +490,7 @@ class QuranLastReadRoute extends GoRouteData with $QuranLastReadRoute {
   Widget build(BuildContext context, GoRouterState state) {
     return const AppReviewSacredFlowScope(
       flow: AppReviewBlockedFlow.quranReading,
-      child: QuranImageReaderScreen(surahNumber: 0),
+      child: QuranReaderHostScreen(surahNumber: 0),
     );
   }
 }
@@ -488,7 +506,7 @@ class QuranReaderRoute extends GoRouteData with $QuranReaderRoute {
   Widget build(BuildContext context, GoRouterState state) {
     return AppReviewSacredFlowScope(
       flow: AppReviewBlockedFlow.quranReading,
-      child: QuranImageReaderScreen(
+      child: QuranReaderHostScreen(
         surahNumber: surahNumber,
         initialAyah: ayahNumber,
       ),

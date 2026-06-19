@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/features/qibla/domain/entities/qibla_direction_entity.dart';
 import 'package:tilawa/features/qibla/presentation/widgets/qibla_compass_widget.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
+import 'package:tilawa/shared/widgets/kaaba_icon.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 Widget _wrap(Widget child) {
@@ -47,6 +48,7 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(find.byType(QiblaCompassWidget), findsOneWidget);
+    expect(find.byType(KaabaIcon), findsOneWidget);
     expect(find.text('270°'), findsOneWidget);
   });
 }

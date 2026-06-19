@@ -181,6 +181,241 @@ abstract final class OrganismsDemos {
     return const _AsyncContentDemo();
   }
 
+  static Widget heroSummaryCard(BuildContext context) {
+    return GalleryDemoFrame(
+      padding: EdgeInsets.zero,
+      child: TilawaHeroSummaryCard(
+        label: 'Pages read this week',
+        metric: '42',
+        badges: const [
+          TilawaHeroSummaryBadge(label: 'On track'),
+        ],
+        footer: const TilawaHeroSummaryProgress(
+          progress: 0.72,
+          label: 'Weekly goal',
+          valueLabel: '72%',
+        ),
+      ),
+    );
+  }
+
+  static Widget behanceFeaturedCard(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final TilawaHomeDashboardCardTokens cardTokens =
+        theme.componentTokens.homeDashboardCard;
+    final TilawaDesignTokens tokens = theme.tokens;
+    final double radius = tokens.resolveRadius(family: TilawaRadiusFamily.hero);
+
+    return GalleryDemoFrame(
+      child: TilawaCard(
+        padding: EdgeInsets.zero,
+        backgroundColor: Colors.transparent,
+        borderRadius: radius,
+        borderWidth: 0,
+        surface: TilawaCardSurface.raised,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(radius),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: <Color>[
+                cardTokens.gradientStart,
+                cardTokens.gradientEnd,
+              ],
+            ),
+          ),
+          child: Padding(
+            padding: theme.componentTokens.card.padding,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Last Read',
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: cardTokens.foregroundColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                SizedBox(height: tokens.spaceSmall),
+                Text(
+                  'Surah Al-Baqarah',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: cardTokens.foregroundColor,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  static Widget travelDashboardSheet(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+    final TilawaDesignTokens tokens = theme.tokens;
+    final TilawaHomeNextPrayerHeroTokens heroTokens =
+        theme.componentTokens.homeNextPrayerHero;
+    final TilawaHomeDashboardCardTokens dashboardTokens =
+        theme.componentTokens.homeDashboardCard;
+    const double sheetOverlap = 16;
+
+    return GalleryDemoFrame(
+      padding: EdgeInsets.zero,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(tokens.radiusLarge),
+        child: SizedBox(
+          height: 280,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: <Color>[
+                        heroTokens.gradientTopStart,
+                        heroTokens.gradientBottomEnd,
+                      ],
+                    ),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(tokens.spaceLarge),
+                    child: Align(
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        'Hero gradient',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: heroTokens.foregroundColor,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                top: 120,
+                child: Transform.translate(
+                  offset: const Offset(0, -sheetOverlap),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: dashboardTokens.travelSheetSurface,
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(tokens.radiusExtraLarge),
+                      ),
+                      boxShadow: <BoxShadow>[
+                        BoxShadow(
+                          color: colorScheme.shadow.withValues(
+                            alpha: tokens.opacityShadow,
+                          ),
+                          blurRadius: tokens.blurShadow,
+                          offset: Offset(
+                            0,
+                            tokens.shadowOffsetMedium.dy * -0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.all(tokens.spaceLarge),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        spacing: tokens.spaceMedium,
+                        children: [
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: dashboardTokens.travelSearchFieldFill,
+                              borderRadius: BorderRadius.circular(
+                                tokens.radiusExtraLarge,
+                              ),
+                            ),
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: tokens.spaceMedium,
+                                vertical: tokens.spaceSmall,
+                              ),
+                              child: Text(
+                                'Search surahs, juz, or page',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                          ),
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: dashboardTokens.destinationHeaderTint(0),
+                              borderRadius: BorderRadius.circular(
+                                tokens.radiusLarge,
+                              ),
+                            ),
+                            child: SizedBox(
+                              height: tokens.spaceExtraLarge * 2,
+                              child: Center(
+                                child: Icon(
+                                  Icons.explore_outlined,
+                                  color: dashboardTokens
+                                      .travelDestinationIconColor,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  static Widget behanceInstructionChip(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+    final TilawaDesignTokens tokens = theme.tokens;
+
+    return GalleryDemoFrame(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colorScheme.tertiaryContainer,
+          borderRadius: BorderRadius.circular(tokens.radiusLarge),
+          border: Border.all(
+            color: colorScheme.primary.withValues(alpha: tokens.opacitySubtle),
+            width: tokens.borderWidthThin,
+          ),
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: tokens.spaceLarge,
+            vertical: tokens.spaceMedium,
+          ),
+          child: Text(
+            'Rotate the phone 44° to the left',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   static Future<void> _openSheet(BuildContext context) {
     return showTilawaModalBottomSheet<void>(
       context: context,
@@ -310,12 +545,25 @@ class _AdaptiveShellDemoState extends State<_AdaptiveShellDemo> {
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),
         destinations: const [
-          TilawaNavDestination(label: 'Home', icon: Icons.home_outlined),
-          TilawaNavDestination(label: 'Quran', icon: Icons.menu_book_outlined),
-          TilawaNavDestination(label: 'Library', icon: Icons.bookmark_outline),
           TilawaNavDestination(
-            label: 'Settings',
-            icon: Icons.settings_outlined,
+            label: 'Home',
+            icon: Icons.home_outlined,
+            activeIcon: Icons.home_rounded,
+          ),
+          TilawaNavDestination(
+            label: 'Quran',
+            icon: Icons.menu_book_outlined,
+            activeIcon: Icons.menu_book_rounded,
+          ),
+          TilawaNavDestination(
+            label: 'Qibla',
+            icon: Icons.explore_outlined,
+            activeIcon: Icons.explore_rounded,
+          ),
+          TilawaNavDestination(
+            label: 'Athkar',
+            icon: Icons.auto_stories_outlined,
+            activeIcon: Icons.auto_stories_rounded,
           ),
         ],
         bottomPlayer: const SizedBox.shrink(),

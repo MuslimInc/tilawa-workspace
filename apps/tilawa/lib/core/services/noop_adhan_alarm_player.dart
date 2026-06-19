@@ -25,6 +25,8 @@ class NoOpAdhanAlarmPlayer implements IAdhanAlarmPlayer {
     required String prayerName,
     required String prayerKey,
     String? sound,
+    String? locationName,
+    String? languageCode,
   }) async => false;
 
   @override
@@ -33,6 +35,8 @@ class NoOpAdhanAlarmPlayer implements IAdhanAlarmPlayer {
     required String prayerName,
     required String prayerKey,
     String? sound,
+    String? locationName,
+    String? languageCode,
   }) async => false;
 
   @override

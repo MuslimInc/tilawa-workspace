@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_dashboard_hero_sliver.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Home content canvas below the hero.
+///
+/// Travel-app lip: rounded top sheet overlapping the hero gradient with a soft
+/// shadow (Ronas IT–style panel; tokens only — no new palette).
 class HomeDashboardContentSliver extends StatelessWidget {
   const HomeDashboardContentSliver({super.key, required this.child});
 
@@ -10,22 +13,42 @@ class HomeDashboardContentSliver extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color sheetColor = context.scaffoldCanvasColor;
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+    final TilawaDesignTokens tokens = context.tokens;
+    final TilawaHomeDashboardCardTokens cardTokens =
+        theme.componentTokens.homeDashboardCard;
+    final Color sheetColor = cardTokens.travelSheetSurface;
+    final BorderRadius sheetRadius = BorderRadius.vertical(
+      top: Radius.circular(tokens.radiusExtraLarge),
+    );
 
-    return SliverMainAxisGroup(
-      slivers: [
-        SliverToBoxAdapter(
-          child: _HomeDashboardSheetBody(
+    return SliverToBoxAdapter(
+      child: Transform.translate(
+        offset: const Offset(0, -HomeDashboardHeroSliver.sheetOverlap),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
             color: sheetColor,
-            child: child,
+            borderRadius: sheetRadius,
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: colorScheme.shadow.withValues(
+                  alpha: tokens.opacityShadow,
+                ),
+                blurRadius: tokens.blurShadow,
+                offset: Offset(0, tokens.shadowOffsetMedium.dy * -0.5),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: sheetRadius,
+            child: _HomeDashboardSheetBody(
+              color: sheetColor,
+              child: child,
+            ),
           ),
         ),
-        SliverFillRemaining(
-          hasScrollBody: true,
-          fillOverscroll: true,
-          child: ColoredBox(color: sheetColor),
-        ),
-      ],
+      ),
     );
   }
 }
@@ -45,14 +68,19 @@ class _HomeDashboardSheetBody extends StatelessWidget {
 
     return ColoredBox(
       color: color,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          tokens.spaceMedium,
-          tokens.spaceMedium,
-          tokens.spaceMedium,
-          TilawaShellPadding.of(context) + tokens.spaceLarge,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: MediaQuery.sizeOf(context).height,
         ),
-        child: child,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            tokens.spaceMedium,
+            tokens.spaceMedium,
+            tokens.spaceMedium,
+            TilawaShellPadding.of(context) + tokens.spaceMedium,
+          ),
+          child: child,
+        ),
       ),
     );
   }

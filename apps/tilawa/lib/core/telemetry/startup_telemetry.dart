@@ -6,7 +6,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa_core/constants/analytics_constants.dart';
+import 'package:tilawa_core/services/application_metrics_service.dart';
 
 import '../logging/app_logger.dart';
 import 'startup_health_log_sink.dart';
@@ -221,6 +223,7 @@ abstract final class StartupTelemetry {
 
     logger.d('[StartupTelemetry] completed elapsed_ms=$elapsedMs');
 
+    _recordApplicationMetrics(elapsedMs);
     unawaited(_crashlyticsLog('startup_completed'));
     unawaited(
       _logAnalytics(
@@ -234,6 +237,37 @@ abstract final class StartupTelemetry {
       ),
     );
     unawaited(_writeHealthLog(payload));
+  }
+
+  static void _recordApplicationMetrics(int elapsedMs) {
+    if (!getIt.isRegistered<ApplicationMetricsService>()) {
+      return;
+    }
+
+    final ApplicationMetricsService metrics =
+        getIt<ApplicationMetricsService>();
+    final ApplicationMetricAttributes attributes = <String, Object>{
+      'phase': 'startup_completed',
+      'build_mode': _buildMode,
+    };
+
+    metrics.count('app.startup.completed', attributes: attributes);
+    metrics.distribution(
+      'app.startup.elapsed',
+      elapsedMs,
+      unit: ApplicationMetricUnit.millisecond,
+      attributes: attributes,
+    );
+  }
+
+  static String get _buildMode {
+    if (kReleaseMode) {
+      return 'release';
+    }
+    if (kProfileMode) {
+      return 'profile';
+    }
+    return 'debug';
   }
 
   static bool _shouldSkip() {

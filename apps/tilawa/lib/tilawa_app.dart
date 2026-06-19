@@ -21,7 +21,10 @@ import 'features/whats_new/whats_new.dart';
 import 'features/downloads/data/services/batch_download_manager.dart';
 import 'features/downloads/data/services/download_queue_manager.dart';
 import 'features/localization/presentation/bloc/localization_bloc.dart';
+import 'features/prayer_times/domain/usecases/load_prayer_settings_use_case.dart';
+import 'features/prayer_times/domain/usecases/schedule_prayer_notifications_use_case.dart';
 import 'features/theme/domain/entities/app_theme_preset.dart';
+import 'features/prayer_times/domain/entities/entities.dart';
 import 'features/theme/domain/primary_color_preset.dart';
 import 'features/theme/presentation/cubit/theme_cubit.dart';
 import 'features/theme/presentation/theme_state_material.dart';
@@ -187,6 +190,36 @@ class _PlayerApp extends StatelessWidget {
   static const double _kTextScaleClampMin = 1.0;
   static const double _kTextScaleClampMax = 1.4;
 
+  static Future<void> _reschedulePrayerNotificationsForLocaleChange() async {
+    try {
+      final LoadPrayerSettingsUseCase loadSettings =
+          getIt<LoadPrayerSettingsUseCase>();
+      final SchedulePrayerNotificationsUseCase scheduleNotifications =
+          getIt<SchedulePrayerNotificationsUseCase>();
+      final result = await loadSettings.call();
+      await result.fold(
+        (_) async {},
+        (PrayerSettingsEntity settings) async {
+          final double? latitude = settings.effectiveSchedulingLatitude;
+          final double? longitude = settings.effectiveSchedulingLongitude;
+          if (latitude == null || longitude == null) {
+            return;
+          }
+          await scheduleNotifications.call(
+            settings: settings,
+            latitude: latitude,
+            longitude: longitude,
+            forceReschedule: true,
+          );
+        },
+      );
+    } catch (e) {
+      logger.w(
+        '[TilawaApp] Failed to reschedule prayer notifications after locale change: $e',
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     PerfLogger.markBuild('PlayerAppMaterialRoot');
@@ -195,6 +228,7 @@ class _PlayerApp extends StatelessWidget {
         // Update download notification locale when app locale changes
         getIt<DownloadQueueManager>().locale = state.locale;
         getIt<BatchDownloadManager>().locale = state.locale;
+        unawaited(_reschedulePrayerNotificationsForLocaleChange());
       },
       child: BlocBuilder<LocalizationBloc, LocalizationState>(
         builder: (context, locState) {

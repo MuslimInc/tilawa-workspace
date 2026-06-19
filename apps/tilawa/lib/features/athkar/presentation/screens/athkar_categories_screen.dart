@@ -6,19 +6,11 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../router/app_router_config.dart';
 import '../../domain/entities/athkar_category.dart';
+import '../athkar_category_presentation.dart';
 import '../cubit/athkar_cubit.dart';
 import '../cubit/athkar_state.dart';
 import '../widgets/athkar_ambient_background.dart';
 import '../widgets/athkar_category_card.dart';
-
-String _localizedAthkarCategoryTitle(
-  BuildContext context,
-  AthkarCategory category,
-) {
-  if (context.isArabic) return category.nameAr;
-  final String english = category.nameEn.trim();
-  return english.isNotEmpty ? english : category.nameAr;
-}
 
 class AthkarCategoriesScreen extends StatelessWidget {
   const AthkarCategoriesScreen({super.key});
@@ -32,6 +24,7 @@ class AthkarCategoriesScreen extends StatelessWidget {
       appBar: TilawaCatalogAppBar.titleOnly(
         context,
         title: context.l10n.athkar,
+        centerTitle: true,
       ),
       floatingActionButton: TilawaPrimaryFab(
         heroTag: 'athkar_tasbeeh_fab',
@@ -72,7 +65,7 @@ class AthkarCategoriesScreen extends StatelessWidget {
               } else if (state is AthkarCategoriesLoaded) {
                 final double fabClearance =
                     fabBottomOffset +
-                    kMinInteractiveDimension +
+                    kTilawaMinInteractiveDimension +
                     (tokens.spaceLarge * 2);
 
                 return TilawaContentGrid(
@@ -90,12 +83,12 @@ class AthkarCategoriesScreen extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final AthkarCategory category = state.categories[index];
                     return AthkarCategoryCard(
-                      name: _localizedAthkarCategoryTitle(context, category),
+                      name: localizedAthkarCategoryTitle(context, category),
                       icon: category.icon,
                       onTap: () {
                         AthkarDetailsRoute(
                           categoryId: category.id,
-                          categoryName: _localizedAthkarCategoryTitle(
+                          categoryName: localizedAthkarCategoryTitle(
                             context,
                             category,
                           ),

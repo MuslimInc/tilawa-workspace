@@ -3,6 +3,7 @@ package com.tilawa.app.prayer
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import androidx.core.content.ContextCompat
 import io.mockk.*
 import org.junit.Test
 import org.junit.Assert.*
@@ -35,13 +36,40 @@ class MethodChannelLogicTest {
 
     @Test
     fun `scheduleAdhan success`() {
-        val args = mapOf("id" to 1, "triggerAtMillis" to 1000L, "prayerName" to "fajr", "prayerKey" to "fajr")
-        every { mockScheduler.schedule(1, "fajr", "fajr", 1000L, "adhan_fajr") } returns true
-        
+        val args = mapOf(
+            "id" to 1,
+            "triggerAtMillis" to 1000L,
+            "prayerName" to "fajr",
+            "prayerKey" to "fajr",
+            "locationName" to "Cairo",
+            "languageCode" to "ar",
+        )
+        every {
+            mockScheduler.schedule(1, "fajr", "fajr", 1000L, "adhan_fajr", "Cairo", "ar")
+        } returns true
+
         logic.handleMethodCall("scheduleAdhan", args, mockResult)
-        
-        verify { mockScheduler.schedule(1, "fajr", "fajr", 1000L, "adhan_fajr") }
+
+        verify {
+            mockScheduler.schedule(1, "fajr", "fajr", 1000L, "adhan_fajr", "Cairo", "ar")
+        }
+        verify { mockStorage.setLastNotificationLocationName("Cairo") }
         verify { mockResult.success(true) }
+    }
+
+    @Test
+    fun `scheduleAdhan persists location when provided`() {
+        val args = mapOf(
+            "id" to 2,
+            "triggerAtMillis" to 2000L,
+            "prayerName" to "dhuhr",
+            "locationName" to "Al Isaweyah",
+        )
+        every { mockScheduler.schedule(any(), any(), any(), any(), any(), any(), any()) } returns true
+
+        logic.handleMethodCall("scheduleAdhan", args, mockResult)
+
+        verify { mockStorage.setLastNotificationLocationName("Al Isaweyah") }
     }
 
     @Test
@@ -182,6 +210,104 @@ class MethodChannelLogicTest {
     }
 
     @Test
+    fun `persistPendingAlarms persists location from first alarm entry`() {
+        val alarms = listOf(
+            mapOf(
+                "id" to 1,
+                "name" to "fajr",
+                "key" to "fajr",
+                "triggerAtMillis" to 1000L,
+                "locationName" to "Cairo",
+                "languageCode" to "ar",
+            ),
+        )
+
+        logic.handleMethodCall("persistPendingAlarms", mapOf("alarms" to alarms), mockResult)
+
+        verify { mockBootReceiver.persistPendingAlarms(any()) }
+        verify { mockStorage.setLastNotificationLocationName("Cairo") }
+    }
+
+    @Test
+    fun `playAdhanNow starts service with location and language extras`() {
+        mockkStatic(ContextCompat::class)
+        try {
+            val context = mockk<Context>(relaxed = true)
+            val intentSlot = slot<Intent>()
+            every { mockScheduler.getContext() } returns context
+            every { context.packageName } returns "com.tilawa.app"
+            every {
+                ContextCompat.startForegroundService(context, capture(intentSlot))
+            } just Runs
+
+            val args = mapOf(
+                "id" to 2001,
+                "prayerName" to "fajr",
+                "prayerKey" to "fajr",
+                "locationName" to "Cairo",
+                "languageCode" to "ar",
+            )
+
+            logic.handleMethodCall("playAdhanNow", args, mockResult)
+
+            assertEquals(AdhanPlaybackService.ACTION_PLAY, intentSlot.captured.action)
+            assertEquals("Cairo", intentSlot.captured.getStringExtra(AdhanScheduler.EXTRA_LOCATION_NAME))
+            assertEquals("ar", intentSlot.captured.getStringExtra(AdhanScheduler.EXTRA_LANGUAGE_CODE))
+            verify { mockStorage.setLastNotificationLocationName("Cairo") }
+            verify { mockResult.success(true) }
+        } finally {
+            unmockkStatic(ContextCompat::class)
+        }
+    }
+
+    @Test
+    fun `playAdhanNow missing id returns error`() {
+        logic.handleMethodCall("playAdhanNow", mapOf("prayerName" to "fajr"), mockResult)
+        verify { mockResult.error("BAD_ARGS", "id required", null) }
+    }
+
+    @Test
+    fun `getActiveAdhanPayload includes location and language when present`() {
+        AdhanPlaybackService.setActivePayloadForTest(
+            AdhanPlaybackService.ActiveAdhanPayload(
+                prayerName = "fajr",
+                prayerKey = "fajr",
+                sound = "adhan_fajr",
+                scheduledMs = 1700000000000L,
+                notificationId = 12345,
+                locationName = "Cairo",
+                languageCode = "ar",
+            ),
+        )
+
+        val resultSlot = slot<Any>()
+        every { mockResult.success(capture(resultSlot)) } returns Unit
+
+        logic.handleMethodCall("getActiveAdhanPayload", null, mockResult)
+
+        @Suppress("UNCHECKED_CAST")
+        val captured = resultSlot.captured as Map<String, Any?>
+        assertEquals("Cairo", captured["location_name"])
+        assertEquals("ar", captured["language_code"])
+
+        AdhanPlaybackService.setActivePayloadForTest(null)
+    }
+
+    @Test
+    fun `markNeedsReschedule`() {
+        logic.handleMethodCall("markNeedsReschedule", null, mockResult)
+        verify { mockStorage.setNeedsReschedule(true) }
+        verify { mockResult.success(null) }
+    }
+
+    @Test
+    fun `isAdhanPlaying returns service running state`() {
+        AdhanPlaybackService.setActivePayloadForTest(null)
+        logic.handleMethodCall("isAdhanPlaying", null, mockResult)
+        verify { mockResult.success(false) }
+    }
+
+    @Test
     fun `unknown method`() {
         logic.handleMethodCall("unknown", null, mockResult)
         verify { mockResult.notImplemented() }
@@ -224,5 +350,109 @@ class MethodChannelLogicTest {
         assertEquals(true, captured["is_adhan_playing"])
 
         AdhanPlaybackService.setActivePayloadForTest(null)
+    }
+
+    @Test
+    fun `scheduleAdhan does not log success when scheduler returns false`() {
+        val args = mapOf("id" to 1, "triggerAtMillis" to 1000L, "prayerName" to "fajr")
+        every { mockScheduler.schedule(any(), any(), any(), any(), any(), any(), any()) } returns false
+
+        logic.handleMethodCall("scheduleAdhan", args, mockResult)
+
+        verify(exactly = 0) { mockAnalytics.logEvent(PrayerEvents.SCHEDULE_SUCCESS, any()) }
+        verify { mockResult.success(false) }
+    }
+
+    @Test
+    fun `setQALoggingEnabled toggles logger flag`() {
+        logic.handleMethodCall("setQALoggingEnabled", mapOf("enabled" to true), mockResult)
+        assertTrue(AdhanQALogger.isEnabled)
+        logic.handleMethodCall("setQALoggingEnabled", mapOf("enabled" to false), mockResult)
+        assertFalse(AdhanQALogger.isEnabled)
+        verify(exactly = 2) { mockResult.success(null) }
+    }
+
+    @Test
+    fun `logQAEvent forwards to logger`() {
+        val context = mockk<Context>(relaxed = true)
+        every { mockScheduler.getContext() } returns context
+
+        logic.handleMethodCall(
+            "logQAEvent",
+            mapOf("event" to "TEST_EVENT", "prayer" to "fajr", "details" to "details"),
+            mockResult,
+        )
+
+        verify { mockResult.success(null) }
+    }
+
+    @Test
+    fun `getQALogs returns stored logs`() {
+        val context = mockk<Context>(relaxed = true)
+        every { mockScheduler.getContext() } returns context
+
+        logic.handleMethodCall("getQALogs", null, mockResult)
+
+        verify { mockResult.success(any()) }
+    }
+
+    @Test
+    fun `clearQALogs clears stored logs`() {
+        val context = mockk<Context>(relaxed = true)
+        every { mockScheduler.getContext() } returns context
+
+        logic.handleMethodCall("clearQALogs", null, mockResult)
+
+        verify { mockResult.success(null) }
+    }
+
+    @Test
+    fun `playAdhanNow returns error when startForegroundService throws`() {
+        mockkStatic(ContextCompat::class)
+        try {
+            val context = mockk<Context>(relaxed = true)
+            every { mockScheduler.getContext() } returns context
+            every { context.packageName } returns "com.tilawa.app"
+            every {
+                ContextCompat.startForegroundService(any(), any())
+            } throws RuntimeException("start failed")
+
+            logic.handleMethodCall(
+                "playAdhanNow",
+                mapOf("id" to 1, "prayerName" to "fajr"),
+                mockResult,
+            )
+
+            verify { mockResult.error("PLAY_ADHAN_NOW_FAILED", any(), null) }
+        } finally {
+            unmockkStatic(ContextCompat::class)
+        }
+    }
+
+    @Test
+    fun `stopAdhan returns error when startService throws`() {
+        val context = mockk<Context>(relaxed = true)
+        every { mockScheduler.getContext() } returns context
+        every { context.packageName } returns "com.tilawa.app"
+        every { context.startService(any()) } throws RuntimeException("stop failed")
+
+        logic.handleMethodCall("stopAdhan", null, mockResult)
+
+        verify { mockResult.error("STOP_ADHAN_FAILED", any(), null) }
+    }
+
+    @Test
+    fun `testAdhanNotification returns false when schedule fails`() {
+        val context = mockk<Context>(relaxed = true)
+        every { mockScheduler.getContext() } returns context
+        every { mockScheduler.schedule(any(), any(), any(), any(), any()) } returns false
+
+        logic.handleMethodCall(
+            "testAdhanNotification",
+            mapOf("id" to 999, "name" to "qa_test"),
+            mockResult,
+        )
+
+        verify { mockResult.success(false) }
     }
 }

@@ -363,7 +363,9 @@ class TilawaAdaptiveShellTokens {
   const TilawaAdaptiveShellTokens({
     required this.phoneBottomNavBarBaseHeight,
     required this.bottomNavHorizontalMargin,
+    required this.bottomNavThumbSideMargin,
     required this.bottomNavVerticalMargin,
+    required this.bottomNavBottomLift,
     required this.bottomNavIconOnlyVerticalMargin,
     required this.bottomNavInternalPadding,
     required this.bottomNavBorderWidth,
@@ -405,12 +407,18 @@ class TilawaAdaptiveShellTokens {
   /// [TextScaler] so scroll padding tracks a11y text scaling.
   final double phoneBottomNavBarBaseHeight;
 
-  /// Horizontal inset of the phone bar from the screen edges (0 = full
-  /// width).
+  /// Horizontal inset on the side opposite the primary thumb (physical left when
+  /// holding the phone in the right hand).
   final double bottomNavHorizontalMargin;
+
+  /// Inset from the physical right edge — the natural right-thumb reach zone.
+  final double bottomNavThumbSideMargin;
   final double bottomNavVerticalMargin;
 
-  /// Top inset above the phone bar when it is **icon-only** (tighter strip).
+  /// Extra inset below the floating pill, above the system home indicator.
+  ///
+  /// Lifts the bar into a more comfortable thumb-reach zone on phones.
+  final double bottomNavBottomLift;
   final double bottomNavIconOnlyVerticalMargin;
   final double bottomNavInternalPadding;
 
@@ -487,31 +495,24 @@ class TilawaAdaptiveShellTokens {
   /// Pill vertical padding in icon-only phone nav (tighter than labeled).
   final double navButtonIconOnlySelectionContainerVerticalPadding;
 
-  /// Height of the phone bottom nav row for [textScaler] (icon column + one
-  /// label line), floored at [navButtonMinHeight].
+  /// Height of the phone bottom nav icon row for [textScaler].
   ///
-  /// This is the **content** height only. [BottomNavigationBar] also consumes
-  /// [MediaQuery.viewPadding] bottom inside its layout; use
-  /// [phoneBottomNavPaintedHeight] for the outer [SizedBox] and host reserves.
+  /// Phone shell uses icon-only destinations. Use [phoneBottomNavPaintedHeight]
+  /// for the full dock including margins and system inset.
   double phoneBottomNavLayoutHeight(TextScaler textScaler) =>
-      TilawaAdaptiveShellTokens._phoneBottomNavLayoutHeight(
-        navButtonMinHeight: navButtonMinHeight,
-        navButtonVerticalPadding: navButtonVerticalPadding,
-        navButtonIconSize: navButtonIconSize,
-        navButtonSelectedCenterScale: navButtonSelectedCenterScale,
-        navButtonGap: navButtonGap,
-        navButtonLabelFontSize: navButtonLabelFontSize,
-        navButtonSelectionContainerVerticalPadding:
-            navButtonSelectionContainerVerticalPadding,
-        textScaler: textScaler,
-      );
+      phoneBottomNavIconOnlyLayoutHeight(textScaler);
 
-  /// Total painted height of the phone bottom nav, including the system
-  /// navigation inset that Material subtracts inside [BottomNavigationBar].
+  /// Total painted height of the phone bottom nav dock, including outer
+  /// margins, inner padding, and the system navigation inset below the pill.
   double phoneBottomNavPaintedHeight(
     TextScaler textScaler,
     double systemBottomViewPadding,
-  ) => phoneBottomNavLayoutHeight(textScaler) + systemBottomViewPadding;
+  ) =>
+      bottomNavVerticalMargin +
+      (2 * bottomNavInternalPadding) +
+      phoneBottomNavLayoutHeight(textScaler) +
+      systemBottomViewPadding +
+      bottomNavBottomLift;
 
   /// Height of the phone bottom nav row in **icon-only** mode.
   ///
@@ -547,30 +548,6 @@ class TilawaAdaptiveShellTokens {
     );
   }
 
-  static double _phoneBottomNavLayoutHeight({
-    required double navButtonMinHeight,
-    required double navButtonVerticalPadding,
-    required double navButtonIconSize,
-    required double navButtonSelectedCenterScale,
-    required double navButtonGap,
-    required double navButtonLabelFontSize,
-    required double navButtonSelectionContainerVerticalPadding,
-    required TextScaler textScaler,
-  }) {
-    const double labelLineHeight = 1.15;
-    final double labelBlock =
-        textScaler.scale(navButtonLabelFontSize) * labelLineHeight;
-    final double iconBlock =
-        navButtonVerticalPadding * 2 +
-        textScaler.scale(navButtonIconSize) * navButtonSelectedCenterScale;
-    final double pillVerticalInset =
-        2 * navButtonSelectionContainerVerticalPadding;
-    return math.max(
-      navButtonMinHeight,
-      iconBlock + navButtonGap + labelBlock + pillVerticalInset,
-    );
-  }
-
   factory TilawaAdaptiveShellTokens.defaults() {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: AppColors.defaultPrimary,
@@ -584,43 +561,41 @@ class TilawaAdaptiveShellTokens {
     final bottomNavBackgroundColor = _bottomNavBackgroundColor(colorScheme);
     final shellChromeOutline = _shellChromeOutlineColor(colorScheme);
     final bool lightChrome = colorScheme.brightness == Brightness.light;
-    const double navButtonMinHeight = 80;
-    const double navButtonVerticalPadding = 6;
+    const double navButtonMinHeight = 52;
+    const double navButtonVerticalPadding = 4;
     const double navButtonIconSize = 22;
-    const double navButtonSelectedCenterScale = 1.1;
-    const double navButtonGap = 10;
-    const double navButtonLabelFontSize = 10;
-    const double navButtonSelectionContainerVerticalPadding = 6;
-    const double navButtonIconOnlyMinHeight = 40;
-    const double navButtonIconOnlyVerticalPadding = 1;
-    const double navButtonIconOnlySelectionContainerVerticalPadding = 2;
+    const double navButtonSelectedCenterScale = 1.0;
+    const double navButtonGap = 4;
+    const double navButtonLabelFontSize = 11;
+    const double navButtonSelectionContainerVerticalPadding = 4;
+    const double navButtonIconOnlyMinHeight = kTilawaMinInteractiveDimension;
+    const double navButtonIconOnlyVerticalPadding = 4;
+    const double navButtonIconOnlySelectionContainerVerticalPadding = 4;
     const TextScaler unitTextScaler = TextScaler.linear(1);
     final double phoneBottomNavBarBaseHeight =
-        TilawaAdaptiveShellTokens._phoneBottomNavLayoutHeight(
-          navButtonMinHeight: navButtonMinHeight,
-          navButtonVerticalPadding: navButtonVerticalPadding,
+        TilawaAdaptiveShellTokens._phoneBottomNavIconOnlyLayoutHeight(
+          navButtonIconOnlyMinHeight: navButtonIconOnlyMinHeight,
+          navButtonIconOnlyVerticalPadding: navButtonIconOnlyVerticalPadding,
+          navButtonIconOnlySelectionContainerVerticalPadding:
+              navButtonIconOnlySelectionContainerVerticalPadding,
           navButtonIconSize: navButtonIconSize,
           navButtonSelectedCenterScale: navButtonSelectedCenterScale,
-          navButtonGap: navButtonGap,
-          navButtonLabelFontSize: navButtonLabelFontSize,
-          navButtonSelectionContainerVerticalPadding:
-              navButtonSelectionContainerVerticalPadding,
           textScaler: unitTextScaler,
         );
     return TilawaAdaptiveShellTokens(
       phoneBottomNavBarBaseHeight: phoneBottomNavBarBaseHeight,
-      bottomNavHorizontalMargin: 0,
-      bottomNavVerticalMargin: 8,
+      bottomNavHorizontalMargin: 16,
+      bottomNavThumbSideMargin: 16,
+      bottomNavVerticalMargin: 4,
+      bottomNavBottomLift: 8,
       bottomNavIconOnlyVerticalMargin: 2,
-      bottomNavInternalPadding: 8,
-      bottomNavBorderWidth: 1,
-      bottomNavItemGap: 4,
+      bottomNavInternalPadding: 4,
+      bottomNavBorderWidth: lightChrome ? 0.5 : 1,
+      bottomNavItemGap: 8,
       bottomNavBackgroundColor: bottomNavBackgroundColor,
-      // Bottom nav uses a top hairline ([bottomNavOutlineColor]) against the
-      // footer slot (e.g. mini player), not a drop shadow.
-      bottomNavShadowOpacity: 0,
-      bottomNavShadowBlur: lightChrome ? 14 : 10,
-      bottomNavShadowOffset: Offset(0, lightChrome ? 4 : 2),
+      bottomNavShadowOpacity: lightChrome ? 0.04 : 0.055,
+      bottomNavShadowBlur: lightChrome ? 8 : 10,
+      bottomNavShadowOffset: const Offset(0, 2),
       bottomNavOutlineColor: _bottomNavOutlineColor(colorScheme),
       sideRailIndicatorColor: _sideRailIndicatorColor(colorScheme),
       sideRailBackgroundColor: _sideRailBackgroundColor(colorScheme),
@@ -688,12 +663,11 @@ class TilawaAdaptiveShellTokens {
     );
   }
 
-  /// Light phone nav uses an opaque white bar so the floating pill reads
-  /// clearly above cream or tinted scaffolds. Dark keeps a filled bar for
-  /// contrast.
+  /// Light phone nav uses an opaque white pill so the floating bar reads
+  /// clearly on the parchment canvas. Dark keeps a filled bar for contrast.
   static Color _bottomNavBackgroundColor(ColorScheme colorScheme) {
     if (colorScheme.brightness == Brightness.light) {
-      return Colors.white;
+      return AppColors.lightSurface;
     }
     return Color.lerp(
           AppColors.darkSurfaceContainerHighBase,
@@ -707,7 +681,10 @@ class TilawaAdaptiveShellTokens {
     ColorScheme colorScheme,
     Color bottomNavBackgroundColor,
   ) {
-    final tintOpacity = colorScheme.brightness == Brightness.dark ? 0.12 : 0.10;
+    if (colorScheme.brightness == Brightness.light) {
+      return AppColors.lightSurfaceContainerHighBase;
+    }
+    final tintOpacity = 0.12;
     final base = bottomNavBackgroundColor.a == 0
         ? colorScheme.surfaceContainerLow
         : bottomNavBackgroundColor;
@@ -720,7 +697,9 @@ class TilawaAdaptiveShellTokens {
   TilawaAdaptiveShellTokens copyWith({
     double? phoneBottomNavBarBaseHeight,
     double? bottomNavHorizontalMargin,
+    double? bottomNavThumbSideMargin,
     double? bottomNavVerticalMargin,
+    double? bottomNavBottomLift,
     double? bottomNavIconOnlyVerticalMargin,
     double? bottomNavInternalPadding,
     double? bottomNavBorderWidth,
@@ -760,8 +739,11 @@ class TilawaAdaptiveShellTokens {
           phoneBottomNavBarBaseHeight ?? this.phoneBottomNavBarBaseHeight,
       bottomNavHorizontalMargin:
           bottomNavHorizontalMargin ?? this.bottomNavHorizontalMargin,
+      bottomNavThumbSideMargin:
+          bottomNavThumbSideMargin ?? this.bottomNavThumbSideMargin,
       bottomNavVerticalMargin:
           bottomNavVerticalMargin ?? this.bottomNavVerticalMargin,
+      bottomNavBottomLift: bottomNavBottomLift ?? this.bottomNavBottomLift,
       bottomNavIconOnlyVerticalMargin:
           bottomNavIconOnlyVerticalMargin ??
           this.bottomNavIconOnlyVerticalMargin,
@@ -843,9 +825,19 @@ class TilawaAdaptiveShellTokens {
         b.bottomNavHorizontalMargin,
         t,
       ),
+      bottomNavThumbSideMargin: lerpTokenDouble(
+        a.bottomNavThumbSideMargin,
+        b.bottomNavThumbSideMargin,
+        t,
+      ),
       bottomNavVerticalMargin: lerpTokenDouble(
         a.bottomNavVerticalMargin,
         b.bottomNavVerticalMargin,
+        t,
+      ),
+      bottomNavBottomLift: lerpTokenDouble(
+        a.bottomNavBottomLift,
+        b.bottomNavBottomLift,
         t,
       ),
       bottomNavIconOnlyVerticalMargin: lerpTokenDouble(
@@ -1099,7 +1091,7 @@ class TilawaSettingsGroupTokens {
   ///
   /// Horizontal list insets stay on [tileContentPadding] /
   /// [switchTileContentPadding]; vertical is zero so row height is driven by
-  /// [ListTile.minTileHeight] (44 dp, [kTilawaMinInteractiveDimension]) in the
+  /// [ListTile.minTileHeight] (48 dp, [kTilawaMinInteractiveDimension]) in the
   /// settings tile widgets.
   factory TilawaSettingsGroupTokens.defaults() {
     return TilawaSettingsGroupTokens.fromColorScheme(
@@ -1683,7 +1675,7 @@ class TilawaBottomSheetScaffoldTokens {
       // close-button side mirrors in RTL.
       headerPadding: EdgeInsetsDirectional.fromSTEB(16, 8, 12, 12),
       bodyPadding: EdgeInsets.fromLTRB(16, 12, 16, 24),
-      closeButtonSize: 40,
+      closeButtonSize: kTilawaMinInteractiveDimension,
       footerPadding: EdgeInsets.fromLTRB(16, 12, 16, 16),
       footerActionGap: 12,
       footerTopBorderWidth: 0.5,

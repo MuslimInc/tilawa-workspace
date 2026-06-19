@@ -7,6 +7,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/entities/audio.dart';
+import 'package:tilawa_core/entities/audio_extras_keys.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
 
@@ -365,8 +366,8 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
         surahName: event.audio!.title,
         reciterName: event.audio!.artist,
         moshafName: extras?['moshafName'] as String?,
-        surahId: extras?['surahId']?.toString(),
-        reciterId: extras?['reciterId'] as String?,
+        surahId: extras?[AudioExtrasKeys.surahId]?.toString(),
+        reciterId: extras?[AudioExtrasKeys.reciterId] as String?,
       );
     }
 
@@ -968,9 +969,9 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     final Map<String, dynamic>? extras = audio.extras;
     if (extras == null) return;
 
-    final String? reciterId = extras['reciterId'] as String?;
-    final int? moshafId = extras['moshafId'] as int?;
-    final int? surahId = extras['surahId'] as int?;
+    final String? reciterId = extras[AudioExtrasKeys.reciterId] as String?;
+    final int? moshafId = extras[AudioExtrasKeys.moshafId] as int?;
+    final int? surahId = extras[AudioExtrasKeys.surahId] as int?;
 
     if (reciterId != null && moshafId != null && surahId != null) {
       // Determine Duration: Prefer audio entity, fallback to playback state

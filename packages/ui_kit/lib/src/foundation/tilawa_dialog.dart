@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../atoms/tilawa_button.dart';
 import 'design_tokens.dart';
-import 'tilawa_bottom_sheet_title_row.dart';
 
 /// Centered modal dialogs for Tilawa.
 ///
@@ -216,7 +215,7 @@ class _TilawaDialogContent extends StatelessWidget {
       children: [
         Padding(
           padding: EdgeInsetsDirectional.fromSTEB(inset, inset, inset, 0),
-          child: TilawaBottomSheetTitleRow(
+          child: _TilawaDialogTitleRow(
             title: title,
             trailingClose: trailingClose,
             onClose: onClose == null
@@ -277,6 +276,80 @@ class _TilawaDialogContent extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+class _TilawaDialogTitleRow extends StatelessWidget {
+  const _TilawaDialogTitleRow({
+    required this.title,
+    required this.trailingClose,
+    required this.onClose,
+  });
+
+  final String title;
+  final bool trailingClose;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: Text(
+            title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: theme.colorScheme.onSurface,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+        if (trailingClose) ...[
+          SizedBox(width: theme.tokens.spaceSmall),
+          _TilawaDialogCloseButton(onClose: onClose),
+        ],
+      ],
+    );
+  }
+}
+
+class _TilawaDialogCloseButton extends StatelessWidget {
+  const _TilawaDialogCloseButton({required this.onClose});
+
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+
+    return IconButton(
+      tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+      onPressed: onClose,
+      icon: const Icon(Icons.close_rounded),
+      iconSize: tokens.iconSizeSmall,
+      style: IconButton.styleFrom(
+        fixedSize: Size.square(tokens.minInteractiveDimension),
+        minimumSize: Size.square(tokens.minInteractiveDimension),
+        padding: EdgeInsets.zero,
+        foregroundColor: colorScheme.onSurfaceVariant,
+        backgroundColor: colorScheme.surfaceContainerHigh,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(
+            tokens.resolveRadius(
+              family: TilawaRadiusFamily.icon,
+              width: tokens.minInteractiveDimension,
+              height: tokens.minInteractiveDimension,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

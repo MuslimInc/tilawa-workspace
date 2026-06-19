@@ -4,11 +4,12 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../features/athkar/presentation/widgets/athkar_categories_screen_scope.dart';
 import '../../features/home/presentation/widgets/home_screen_scope.dart';
-import '../../features/prayer_times/presentation/widgets/prayer_times_screen_scope.dart';
+import '../../features/qibla/presentation/widgets/qibla_screen_scope.dart';
 import '../../features/reciters/presentation/screens/reciters_screen.dart'
     show RecitersRootBackScope;
 import '../../features/reciters/presentation/widgets/reciters_screen_scope.dart';
 import '../../features/settings/presentation/widgets/settings_screen_scope.dart';
+import '../../router/app_router_config.dart';
 import '../cubit/main_screen_cubit.dart';
 
 /// Lazily constructs and caches all main-tab screens, then manages the
@@ -48,12 +49,10 @@ class _MainTabViewportState extends State<MainTabViewport> {
       return switch (index) {
         0 => HomeScreenScope(
           onOpenReciters: () => context.read<MainScreenCubit>().selectTab(1),
-          onOpenPrayer: () => context.read<MainScreenCubit>().selectTab(2),
-          onOpenAthkar: () => context.read<MainScreenCubit>().selectTab(3),
-          onOpenSettings: () => context.read<MainScreenCubit>().selectTab(4),
+          onOpenPrayer: () => const PrayerTimesRoute().push(context),
         ),
         1 => const RecitersScreenScope(),
-        2 => const PrayerTimesScreenScope(),
+        2 => const QiblaScreenScope(),
         3 => const AthkarCategoriesScreenScope(),
         4 => const SettingsScreenScope(),
         _ => const SizedBox.shrink(),

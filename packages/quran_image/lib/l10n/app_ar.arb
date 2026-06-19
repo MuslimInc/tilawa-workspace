@@ -6,6 +6,7 @@
   "networkError": "يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.",
   "appTitle": "القرآن",
   "retry": "إعادة المحاولة",
+  "surahIndex": "فهرس السور",
   "juz": "الجزء {number}",
   "@juz": {
     "placeholders": {

@@ -28,6 +28,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get retry => 'إعادة المحاولة';
 
   @override
+  String get surahIndex => 'فهرس السور';
+
+  @override
   String juz(int number) {
     return 'الجزء $number';
   }

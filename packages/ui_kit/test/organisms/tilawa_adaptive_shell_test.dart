@@ -8,6 +8,9 @@ import '../../lib/src/foundation/design_tokens.dart';
 import '../../lib/src/organisms/tilawa_adaptive_shell.dart';
 import '../rtl_test_matrix.dart';
 
+const _bottomNavDockKey = Key('tilawa_bottom_nav_dock');
+const _bottomNavKey = Key('tilawa_bottom_nav_bar');
+
 const _destinations = <TilawaNavDestination>[
   TilawaNavDestination(label: 'Home', icon: Icons.home_outlined),
   TilawaNavDestination(label: 'Library', icon: Icons.library_books_outlined),
@@ -62,7 +65,7 @@ void main() {
       );
       // Narrow phone layout: Material bottom bar, no rail.
       expect(find.byType(NavigationRail), findsNothing);
-      expect(find.byType(BottomNavigationBar), findsOneWidget);
+      expect(find.byKey(_bottomNavKey), findsOneWidget);
     });
 
     testWidgets(
@@ -96,7 +99,7 @@ void main() {
         );
         await tester.pump();
 
-        expect(find.byType(BottomNavigationBar), findsOneWidget);
+        expect(find.byKey(_bottomNavKey), findsOneWidget);
         expect(tester.takeException(), isNull);
       },
     );
@@ -129,7 +132,7 @@ void main() {
         );
         await tester.pump();
 
-        expect(find.byType(BottomNavigationBar), findsNothing);
+        expect(find.byKey(_bottomNavKey), findsNothing);
       },
     );
 
@@ -167,7 +170,7 @@ void main() {
         );
         await tester.pump();
 
-        expect(find.byType(BottomNavigationBar), findsNothing);
+        expect(find.byKey(_bottomNavKey), findsNothing);
         expect(find.byKey(footerKey), findsOneWidget);
       },
     );
@@ -205,7 +208,7 @@ void main() {
 
         final Rect footerRect = tester.getRect(find.byKey(footerKey));
         final Rect bottomNavRect = tester.getRect(
-          find.byType(BottomNavigationBar),
+          find.byKey(_bottomNavDockKey),
         );
 
         expect(footerRect.bottom, bottomNavRect.top);
@@ -281,7 +284,7 @@ void main() {
 
       expect(bodyBottom, 0.0);
       expect(find.byType(NavigationRail), findsNothing);
-      expect(find.byType(BottomNavigationBar), findsOneWidget);
+      expect(find.byKey(_bottomNavKey), findsOneWidget);
     });
 
     testInBothDirections('medium window uses bottom nav', (
@@ -294,7 +297,7 @@ void main() {
         direction: direction,
       );
       expect(find.byType(NavigationRail), findsNothing);
-      expect(find.byType(BottomNavigationBar), findsOneWidget);
+      expect(find.byKey(_bottomNavKey), findsOneWidget);
     });
 
     testInBothDirections('expanded window uses bottom nav', (
@@ -307,7 +310,7 @@ void main() {
         direction: direction,
       );
       expect(find.byType(NavigationRail), findsNothing);
-      expect(find.byType(BottomNavigationBar), findsOneWidget);
+      expect(find.byKey(_bottomNavKey), findsOneWidget);
     });
 
     testInBothDirections('large window uses bottom nav', (
@@ -320,7 +323,7 @@ void main() {
         direction: direction,
       );
       expect(find.byType(NavigationRail), findsNothing);
-      expect(find.byType(BottomNavigationBar), findsOneWidget);
+      expect(find.byKey(_bottomNavKey), findsOneWidget);
     });
 
     testWidgets(
@@ -332,11 +335,9 @@ void main() {
           direction: TextDirection.ltr,
           selectedIndex: -1,
         );
-        expect(find.byType(BottomNavigationBar), findsOneWidget);
-        final BottomNavigationBar bar = tester.widget(
-          find.byType(BottomNavigationBar),
-        );
-        expect(bar.currentIndex, 0);
+        expect(find.byKey(_bottomNavKey), findsOneWidget);
+        expect(find.text('Home'), findsNothing);
+        expect(find.text('Library'), findsNothing);
       },
     );
   });
@@ -378,7 +379,7 @@ void main() {
     });
 
     testWidgets(
-      'narrow width shows text labels for all bottom nav destinations',
+      'narrow width exposes destination labels through semantics only',
       (tester) async {
         const destinations = <TilawaNavDestination>[
           TilawaNavDestination(label: 'Reciters', icon: Icons.person_outline),
@@ -412,17 +413,11 @@ void main() {
         );
         await tester.pump();
 
-        final BottomNavigationBar bar = tester.widget(
-          find.byType(BottomNavigationBar),
-        );
-        expect(bar.showSelectedLabels, isTrue);
-        expect(bar.showUnselectedLabels, isTrue);
-
-        expect(find.text('Reciters'), findsOneWidget);
-        expect(find.text('Prayer'), findsOneWidget);
-        expect(find.text('Quran'), findsOneWidget);
-        expect(find.text('Athkar'), findsOneWidget);
-        expect(find.text('Settings'), findsOneWidget);
+        expect(find.text('Reciters'), findsNothing);
+        expect(find.text('Prayer'), findsNothing);
+        expect(find.text('Quran'), findsNothing);
+        expect(find.text('Athkar'), findsNothing);
+        expect(find.text('Settings'), findsNothing);
 
         expect(
           tester.getSemantics(find.byIcon(Icons.person_outline)).label,
@@ -436,7 +431,7 @@ void main() {
     );
 
     testInBothDirections(
-      'narrow width shows Arabic destination labels on bottom nav',
+      'narrow width exposes Arabic destination labels through semantics only',
       (tester, direction) async {
         const destinations = <TilawaNavDestination>[
           TilawaNavDestination(label: 'القراء', icon: Icons.person_outline),
@@ -468,14 +463,8 @@ void main() {
         );
         await tester.pump();
 
-        final BottomNavigationBar bar = tester.widget(
-          find.byType(BottomNavigationBar),
-        );
-        expect(bar.showSelectedLabels, isTrue);
-        expect(bar.showUnselectedLabels, isTrue);
-
-        expect(find.text('الصلاة'), findsWidgets);
-        expect(find.text('القراء'), findsWidgets);
+        expect(find.text('الصلاة'), findsNothing);
+        expect(find.text('القراء'), findsNothing);
 
         expect(
           tester.getSemantics(find.byIcon(Icons.schedule)).label,
@@ -522,32 +511,641 @@ void main() {
 
         expect(tester.takeException(), isNull);
 
-        final BuildContext barContext = tester.element(
-          find.byType(BottomNavigationBar),
+        final BuildContext dockContext = tester.element(
+          find.byKey(_bottomNavDockKey),
         );
-        final tokens = Theme.of(barContext).componentTokens.adaptiveShell;
+        final tokens = Theme.of(dockContext).componentTokens.adaptiveShell;
         final double bottomBarTextScale = MediaQuery.textScalerOf(
-          barContext,
+          dockContext,
         ).scale(1.0).clamp(0.01, 1.0);
         final double expectedHeight = tokens.phoneBottomNavPaintedHeight(
           TextScaler.linear(bottomBarTextScale),
           systemInset,
         );
 
-        final SizedBox barSizedBox = tester.widget(
-          find.ancestor(
-            of: find.byType(BottomNavigationBar),
-            matching: find.byWidgetPredicate(
-              (widget) => widget is SizedBox && widget.height != null,
+        final Rect dockRect = tester.getRect(find.byKey(_bottomNavDockKey));
+        expect(dockRect.height, closeTo(expectedHeight, 1.0));
+
+        expect(find.byIcon(Icons.person_outline), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'bottom nav is centered and supports horizontal swipe between destinations',
+      (tester) async {
+        var selectedIndex = 0;
+        const destinations = <TilawaNavDestination>[
+          TilawaNavDestination(label: 'Home', icon: Icons.home_outlined),
+          TilawaNavDestination(label: 'Prayer', icon: Icons.schedule),
+          TilawaNavDestination(label: 'Settings', icon: Icons.settings),
+        ];
+
+        await tester.binding.setSurfaceSize(const Size(360, 800));
+        tester.view.physicalSize = const Size(360, 800);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        Future<void> pumpShell() {
+          return tester.pumpWidget(
+            _wrap(
+              direction: TextDirection.rtl,
+              child: TilawaAdaptiveShell(
+                destinations: destinations,
+                selectedIndex: selectedIndex,
+                onDestinationSelected: (index) {
+                  selectedIndex = index;
+                },
+                onAdjacentDestinationSelected: (direction) {
+                  final int delta = switch (direction) {
+                    TilawaNavAdjacentDirection.next => 1,
+                    TilawaNavAdjacentDirection.previous => -1,
+                  };
+                  selectedIndex =
+                      (selectedIndex + delta + destinations.length) %
+                      destinations.length;
+                },
+                bottomPlayer: const SizedBox.shrink(),
+                child: const ColoredBox(color: Color(0xFFEEEEEE)),
+              ),
+            ),
+          );
+        }
+
+        await pumpShell();
+        await tester.pump();
+
+        final Rect barRect = tester.getRect(
+          find.byKey(const Key('tilawa_bottom_nav_bar')),
+        );
+        expect(barRect.center.dx, closeTo(180, 24));
+
+        await tester.fling(
+          find.byKey(const Key('tilawa_bottom_nav_bar')),
+          const Offset(-300, 0),
+          1200,
+        );
+        await pumpShell();
+        await tester.pumpAndSettle();
+        expect(selectedIndex, 1);
+
+        await tester.fling(
+          find.byKey(const Key('tilawa_bottom_nav_bar')),
+          const Offset(300, 0),
+          1200,
+        );
+        await pumpShell();
+        await tester.pumpAndSettle();
+        expect(selectedIndex, 0);
+      },
+    );
+
+    testWidgets('long press opens radial selector and release commits focus', (
+      tester,
+    ) async {
+      var selectedIndex = 0;
+      const destinations = <TilawaNavDestination>[
+        TilawaNavDestination(label: 'Home', icon: Icons.home_outlined),
+        TilawaNavDestination(label: 'Prayer', icon: Icons.schedule),
+        TilawaNavDestination(label: 'Settings', icon: Icons.settings),
+      ];
+
+      await tester.binding.setSurfaceSize(const Size(360, 800));
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        _wrap(
+          direction: TextDirection.ltr,
+          child: TilawaAdaptiveShell(
+            destinations: destinations,
+            selectedIndex: selectedIndex,
+            onDestinationSelected: (index) => selectedIndex = index,
+            bottomPlayer: const SizedBox.shrink(),
+            child: const ColoredBox(color: Color(0xFFEEEEEE)),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final Finder homeIcon = find.byIcon(Icons.home_outlined);
+      expect(homeIcon, findsOneWidget);
+
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(homeIcon),
+      );
+      await tester.pump(const Duration(milliseconds: 600));
+      await tester.pump();
+
+      expect(find.byKey(const Key('tilawa_bottom_nav_radial')), findsOneWidget);
+
+      await gesture.up();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 450));
+
+      expect(find.byKey(const Key('tilawa_bottom_nav_radial')), findsNothing);
+      expect(selectedIndex, 0);
+    });
+
+    testWidgets(
+      'RTL radial arc mirrors bar order with home on physical right',
+      (
+        tester,
+      ) async {
+        const destinations = <TilawaNavDestination>[
+          TilawaNavDestination(label: 'Home', icon: Icons.home_outlined),
+          TilawaNavDestination(label: 'Prayer', icon: Icons.schedule),
+          TilawaNavDestination(label: 'Settings', icon: Icons.settings),
+        ];
+
+        await tester.binding.setSurfaceSize(const Size(360, 800));
+        tester.view.physicalSize = const Size(360, 800);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        await tester.pumpWidget(
+          _wrap(
+            direction: TextDirection.rtl,
+            child: TilawaAdaptiveShell(
+              destinations: destinations,
+              selectedIndex: 0,
+              onDestinationSelected: (_) {},
+              bottomPlayer: const SizedBox.shrink(),
+              child: const ColoredBox(color: Color(0xFFEEEEEE)),
             ),
           ),
         );
-        expect(barSizedBox.height, closeTo(expectedHeight, 0.05));
+        await tester.pump();
 
-        final Rect labelRect = tester.getRect(find.text('القراء').first);
-        expect(labelRect.height, greaterThan(8));
+        final TestGesture gesture = await tester.startGesture(
+          tester.getCenter(find.byIcon(Icons.home_outlined)),
+        );
+        await tester.pump(const Duration(milliseconds: 600));
+        await tester.pumpAndSettle();
+
+        final Finder radial = find.byKey(const Key('tilawa_bottom_nav_radial'));
+        expect(radial, findsOneWidget);
+
+        final double homeDx = tester
+            .getCenter(
+              find.descendant(
+                of: radial,
+                matching: find.byIcon(Icons.home_outlined),
+              ),
+            )
+            .dx;
+        final double prayerDx = tester
+            .getCenter(
+              find.descendant(
+                of: radial,
+                matching: find.byIcon(Icons.schedule),
+              ),
+            )
+            .dx;
+        final double settingsDx = tester
+            .getCenter(
+              find.descendant(
+                of: radial,
+                matching: find.byIcon(Icons.settings),
+              ),
+            )
+            .dx;
+
+        expect(homeDx, greaterThan(prayerDx));
+        expect(prayerDx, greaterThan(settingsDx));
+
+        await gesture.up();
+        await tester.pump();
       },
     );
+
+    testWidgets('vertical long press does not grow bottom nav dock height', (
+      tester,
+    ) async {
+      const destinations = <TilawaNavDestination>[
+        TilawaNavDestination(label: 'Home', icon: Icons.home_outlined),
+        TilawaNavDestination(label: 'Prayer', icon: Icons.schedule),
+        TilawaNavDestination(label: 'Quran', icon: Icons.menu_book_outlined),
+        TilawaNavDestination(label: 'Library', icon: Icons.bookmark_outline),
+        TilawaNavDestination(label: 'Qibla', icon: Icons.explore_outlined),
+        TilawaNavDestination(label: 'Settings', icon: Icons.settings_outlined),
+      ];
+
+      await tester.binding.setSurfaceSize(const Size(360, 800));
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        _wrap(
+          direction: TextDirection.rtl,
+          child: TilawaAdaptiveShell(
+            destinations: destinations,
+            selectedIndex: 0,
+            phoneBottomNavLongPressMode:
+                TilawaPhoneBottomNavLongPressMode.verticalRight,
+            onDestinationSelected: (_) {},
+            bottomPlayer: const SizedBox.shrink(),
+            child: const ColoredBox(color: Color(0xFFEEEEEE)),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final double idleDockHeight = tester
+          .getSize(find.byKey(_bottomNavDockKey))
+          .height;
+
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(find.byIcon(Icons.home_outlined)),
+      );
+      await tester.pump(const Duration(milliseconds: 600));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const Key('tilawa_bottom_nav_vertical')),
+        findsOneWidget,
+      );
+      expect(
+        tester.getSize(find.byKey(_bottomNavDockKey)).height,
+        closeTo(idleDockHeight, 1.0),
+      );
+
+      await gesture.up();
+      await tester.pump();
+    });
+
+    testWidgets('vertical long press stacks items on physical right', (
+      tester,
+    ) async {
+      const destinations = <TilawaNavDestination>[
+        TilawaNavDestination(label: 'Home', icon: Icons.home_outlined),
+        TilawaNavDestination(label: 'Prayer', icon: Icons.schedule),
+        TilawaNavDestination(label: 'Settings', icon: Icons.settings_outlined),
+      ];
+
+      await tester.binding.setSurfaceSize(const Size(360, 800));
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        _wrap(
+          direction: TextDirection.ltr,
+          child: TilawaAdaptiveShell(
+            destinations: destinations,
+            selectedIndex: 0,
+            phoneBottomNavLongPressMode:
+                TilawaPhoneBottomNavLongPressMode.verticalRight,
+            onDestinationSelected: (_) {},
+            bottomPlayer: const SizedBox.shrink(),
+            child: const ColoredBox(color: Color(0xFFEEEEEE)),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(find.byIcon(Icons.home_outlined)),
+      );
+      await tester.pump(const Duration(milliseconds: 600));
+      await tester.pumpAndSettle();
+
+      final Finder vertical = find.byKey(
+        const Key('tilawa_bottom_nav_vertical'),
+      );
+      expect(vertical, findsOneWidget);
+      expect(find.byKey(const Key('tilawa_bottom_nav_radial')), findsNothing);
+
+      final double homeDy = tester
+          .getCenter(
+            find.descendant(
+              of: vertical,
+              matching: find.byIcon(Icons.home_outlined),
+            ),
+          )
+          .dy;
+      final double settingsDy = tester
+          .getCenter(
+            find.descendant(
+              of: vertical,
+              matching: find.byIcon(Icons.settings_outlined),
+            ),
+          )
+          .dy;
+      final double homeDx = tester
+          .getCenter(
+            find.descendant(
+              of: vertical,
+              matching: find.byIcon(Icons.home_outlined),
+            ),
+          )
+          .dx;
+
+      expect(homeDy, greaterThan(settingsDy));
+      expect(homeDx, lessThan(140));
+
+      await gesture.up();
+      await tester.pump();
+    });
+
+    testWidgets(
+      'vertical long press on last index anchors last item at thumb',
+      (tester) async {
+        const destinations = <TilawaNavDestination>[
+          TilawaNavDestination(label: 'Home', icon: Icons.home_outlined),
+          TilawaNavDestination(label: 'Prayer', icon: Icons.schedule),
+          TilawaNavDestination(
+            label: 'Settings',
+            icon: Icons.settings_outlined,
+          ),
+        ];
+
+        await tester.binding.setSurfaceSize(const Size(360, 800));
+        tester.view.physicalSize = const Size(360, 800);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        await tester.pumpWidget(
+          _wrap(
+            direction: TextDirection.ltr,
+            child: TilawaAdaptiveShell(
+              destinations: destinations,
+              selectedIndex: 2,
+              phoneBottomNavLongPressMode:
+                  TilawaPhoneBottomNavLongPressMode.verticalRight,
+              onDestinationSelected: (_) {},
+              bottomPlayer: const SizedBox.shrink(),
+              child: const ColoredBox(color: Color(0xFFEEEEEE)),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        final TestGesture gesture = await tester.startGesture(
+          tester.getCenter(find.byIcon(Icons.settings_outlined)),
+        );
+        await tester.pump(const Duration(milliseconds: 600));
+        await tester.pumpAndSettle();
+
+        final Finder vertical = find.byKey(
+          const Key('tilawa_bottom_nav_vertical'),
+        );
+        expect(vertical, findsOneWidget);
+
+        final double homeDy = tester
+            .getCenter(
+              find.descendant(
+                of: vertical,
+                matching: find.byIcon(Icons.home_outlined),
+              ),
+            )
+            .dy;
+        final double settingsDy = tester
+            .getCenter(
+              find.descendant(
+                of: vertical,
+                matching: find.byIcon(Icons.settings_outlined),
+              ),
+            )
+            .dy;
+        final double settingsDx = tester
+            .getCenter(
+              find.descendant(
+                of: vertical,
+                matching: find.byIcon(Icons.settings_outlined),
+              ),
+            )
+            .dx;
+
+        expect(settingsDy, greaterThan(homeDy));
+        expect(settingsDx, greaterThan(180));
+
+        await gesture.up();
+        await tester.pump();
+      },
+    );
+
+    testWidgets(
+      'verticalRight mode uses radial selector for middle destinations',
+      (tester) async {
+        const destinations = <TilawaNavDestination>[
+          TilawaNavDestination(label: 'Home', icon: Icons.home_outlined),
+          TilawaNavDestination(label: 'Prayer', icon: Icons.schedule),
+          TilawaNavDestination(
+            label: 'Settings',
+            icon: Icons.settings_outlined,
+          ),
+        ];
+
+        await tester.binding.setSurfaceSize(const Size(360, 800));
+        tester.view.physicalSize = const Size(360, 800);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        await tester.pumpWidget(
+          _wrap(
+            direction: TextDirection.ltr,
+            child: TilawaAdaptiveShell(
+              destinations: destinations,
+              selectedIndex: 1,
+              phoneBottomNavLongPressMode:
+                  TilawaPhoneBottomNavLongPressMode.verticalRight,
+              onDestinationSelected: (_) {},
+              bottomPlayer: const SizedBox.shrink(),
+              child: const ColoredBox(color: Color(0xFFEEEEEE)),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        final TestGesture gesture = await tester.startGesture(
+          tester.getCenter(find.byIcon(Icons.schedule)),
+        );
+        await tester.pump(const Duration(milliseconds: 600));
+        await tester.pump();
+
+        expect(
+          find.byKey(const Key('tilawa_bottom_nav_radial')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('tilawa_bottom_nav_vertical')),
+          findsNothing,
+        );
+
+        await gesture.up();
+        await tester.pump();
+      },
+    );
+
+    testWidgets(
+      'RTL vertical long press on last index anchors last item at thumb',
+      (tester) async {
+        const destinations = <TilawaNavDestination>[
+          TilawaNavDestination(label: 'Home', icon: Icons.home_outlined),
+          TilawaNavDestination(label: 'Prayer', icon: Icons.schedule),
+          TilawaNavDestination(
+            label: 'Settings',
+            icon: Icons.settings_outlined,
+          ),
+        ];
+
+        await tester.binding.setSurfaceSize(const Size(360, 800));
+        tester.view.physicalSize = const Size(360, 800);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        await tester.pumpWidget(
+          _wrap(
+            direction: TextDirection.rtl,
+            child: TilawaAdaptiveShell(
+              destinations: destinations,
+              selectedIndex: 2,
+              phoneBottomNavLongPressMode:
+                  TilawaPhoneBottomNavLongPressMode.verticalRight,
+              onDestinationSelected: (_) {},
+              bottomPlayer: const SizedBox.shrink(),
+              child: const ColoredBox(color: Color(0xFFEEEEEE)),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        final TestGesture gesture = await tester.startGesture(
+          tester.getCenter(find.byIcon(Icons.settings_outlined)),
+        );
+        await tester.pump(const Duration(milliseconds: 600));
+        await tester.pumpAndSettle();
+
+        final Finder vertical = find.byKey(
+          const Key('tilawa_bottom_nav_vertical'),
+        );
+        expect(vertical, findsOneWidget);
+
+        final double homeDy = tester
+            .getCenter(
+              find.descendant(
+                of: vertical,
+                matching: find.byIcon(Icons.home_outlined),
+              ),
+            )
+            .dy;
+        final double settingsDy = tester
+            .getCenter(
+              find.descendant(
+                of: vertical,
+                matching: find.byIcon(Icons.settings_outlined),
+              ),
+            )
+            .dy;
+        final double settingsDx = tester
+            .getCenter(
+              find.descendant(
+                of: vertical,
+                matching: find.byIcon(Icons.settings_outlined),
+              ),
+            )
+            .dx;
+
+        expect(settingsDy, greaterThan(homeDy));
+        expect(settingsDx, lessThan(140));
+
+        await gesture.up();
+        await tester.pump();
+      },
+    );
+
+    testWidgets('RTL vertical stack keeps home above pressed home on right', (
+      tester,
+    ) async {
+      const destinations = <TilawaNavDestination>[
+        TilawaNavDestination(label: 'Home', icon: Icons.home_outlined),
+        TilawaNavDestination(label: 'Prayer', icon: Icons.schedule),
+        TilawaNavDestination(label: 'Settings', icon: Icons.settings_outlined),
+      ];
+
+      await tester.binding.setSurfaceSize(const Size(360, 800));
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        _wrap(
+          direction: TextDirection.rtl,
+          child: TilawaAdaptiveShell(
+            destinations: destinations,
+            selectedIndex: 0,
+            phoneBottomNavLongPressMode:
+                TilawaPhoneBottomNavLongPressMode.verticalRight,
+            onDestinationSelected: (_) {},
+            bottomPlayer: const SizedBox.shrink(),
+            child: const ColoredBox(color: Color(0xFFEEEEEE)),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(find.byIcon(Icons.home_outlined)),
+      );
+      await tester.pump(const Duration(milliseconds: 600));
+      await tester.pumpAndSettle();
+
+      final Finder vertical = find.byKey(
+        const Key('tilawa_bottom_nav_vertical'),
+      );
+      expect(vertical, findsOneWidget);
+
+      final double homeDy = tester
+          .getCenter(
+            find.descendant(
+              of: vertical,
+              matching: find.byIcon(Icons.home_outlined),
+            ),
+          )
+          .dy;
+      final double settingsDy = tester
+          .getCenter(
+            find.descendant(
+              of: vertical,
+              matching: find.byIcon(Icons.settings_outlined),
+            ),
+          )
+          .dy;
+      final double homeDx = tester
+          .getCenter(
+            find.descendant(
+              of: vertical,
+              matching: find.byIcon(Icons.home_outlined),
+            ),
+          )
+          .dx;
+
+      expect(homeDy, greaterThan(settingsDy));
+      expect(homeDx, greaterThan(180));
+
+      await gesture.up();
+      await tester.pump();
+    });
   });
 
   group('TilawaAdaptiveShell — bottomPlayer visibility', () {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/layout/list_scroll_bottom_padding.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/core/utils/file_size_formatter.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -413,7 +414,10 @@ class _DownloadsList extends StatelessWidget {
     return TilawaContentBounds(
       kind: TilawaContentKind.settings,
       child: ListView(
-        padding: EdgeInsets.only(top: tokens.spaceSmall, bottom: 120),
+        padding: EdgeInsets.only(
+          top: tokens.spaceSmall,
+          bottom: listScrollBottomPadding(context),
+        ),
         children: [
           for (int i = 0; i < downloadsByReciter.length; i++)
             Padding(
@@ -454,7 +458,10 @@ class _DownloadsSliverList extends StatelessWidget {
       child: TilawaContentBounds(
         kind: TilawaContentKind.settings,
         child: Padding(
-          padding: EdgeInsets.only(top: tokens.spaceSmall, bottom: 120),
+          padding: EdgeInsets.only(
+            top: tokens.spaceSmall,
+            bottom: listScrollBottomPadding(context),
+          ),
           child: Column(
             children: [
               for (int i = 0; i < downloadsByReciter.length; i++)

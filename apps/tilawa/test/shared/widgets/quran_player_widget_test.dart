@@ -34,7 +34,12 @@ Widget _wrap({
     child: ChangeNotifierProvider(
       create: (_) => QuranPlayerChromeNotifier(),
       child: MaterialApp.router(
-        theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+        theme: ThemeData(
+          extensions: [
+            TilawaDesignTokens.light(),
+            TilawaComponentTokens.light(),
+          ],
+        ),
         routerConfig: router,
       ),
     ),
@@ -112,7 +117,7 @@ void main() {
     });
 
     testWidgets(
-      'shell with bottom nav uses player height only for footprint',
+      'shell with bottom nav uses player height and mini-nav gap for footprint',
       (tester) async {
         late double footprint;
 
@@ -132,6 +137,10 @@ void main() {
                   ),
                 );
                 footprint = QuranPlayerWidget.collapsedFootprint(context);
+                expect(
+                  QuranPlayerLayoutInsets.phoneMiniPlayerNavGap(context),
+                  4.0,
+                );
                 return const SizedBox.shrink();
               },
             ),
@@ -140,7 +149,7 @@ void main() {
         await tester.pump();
 
         final tokens = TilawaDesignTokens.light();
-        expect(footprint, tokens.playerCollapsedHeight);
+        expect(footprint, tokens.playerCollapsedHeight + 4.0 + 4.0);
       },
     );
 

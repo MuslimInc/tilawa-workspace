@@ -29,6 +29,8 @@ internal class AdhanReceiver : BroadcastReceiver() {
         val prayerName = intent.getStringExtra(AdhanScheduler.EXTRA_PRAYER_NAME).orEmpty()
         val prayerKey = intent.getStringExtra(AdhanScheduler.EXTRA_PRAYER_KEY).orEmpty()
         val scheduledMs = intent.getLongExtra(AdhanScheduler.EXTRA_SCHEDULED_MS, 0L)
+        val locationName = intent.getStringExtra(AdhanScheduler.EXTRA_LOCATION_NAME).orEmpty()
+        val languageCode = intent.getStringExtra(AdhanScheduler.EXTRA_LANGUAGE_CODE).orEmpty()
         val triggerMs = System.currentTimeMillis()
         val deltaMs = if (scheduledMs > 0) triggerMs - scheduledMs else 0L
         
@@ -70,6 +72,12 @@ internal class AdhanReceiver : BroadcastReceiver() {
             putExtra(AdhanScheduler.EXTRA_PRAYER_KEY, prayerKey)
             putExtra(AdhanScheduler.EXTRA_SCHEDULED_MS, scheduledMs)
             putExtra(AdhanScheduler.EXTRA_SOUND, intent.getStringExtra(AdhanScheduler.EXTRA_SOUND) ?: "adhan")
+            if (locationName.isNotBlank()) {
+                putExtra(AdhanScheduler.EXTRA_LOCATION_NAME, locationName)
+            }
+            if (languageCode.isNotBlank()) {
+                putExtra(AdhanScheduler.EXTRA_LANGUAGE_CODE, languageCode)
+            }
             putExtra("receiver_time", triggerMs)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

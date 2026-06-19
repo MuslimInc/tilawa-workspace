@@ -134,6 +134,12 @@ abstract class AppLocalizations {
   /// **'Retry'**
   String get retry;
 
+  /// No description provided for @surahIndex.
+  ///
+  /// In en, this message translates to:
+  /// **'Surah index'**
+  String get surahIndex;
+
   /// No description provided for @juz.
   ///
   /// In en, this message translates to:

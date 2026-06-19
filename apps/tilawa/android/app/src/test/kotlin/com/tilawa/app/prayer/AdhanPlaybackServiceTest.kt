@@ -1,11 +1,16 @@
 package com.tilawa.app.prayer
 
+import android.app.Notification
+import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.media.AudioAttributes
 import android.media.MediaPlayer
+import android.media.RingtoneManager
 import android.os.Build
 import androidx.test.core.app.ApplicationProvider
+import com.tilawa.app.R
 import io.mockk.*
 import org.junit.Assert.*
 import org.junit.Before
@@ -20,6 +25,14 @@ import org.robolectric.shadows.ShadowService
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.S])
 class AdhanPlaybackServiceTest {
+
+    companion object {
+        /** Flutter audible adhan channel — must never host native FGS playback. */
+        private const val AUDIBLE_ADHAN_CHANNEL_ID = "com.tilawa.app.prayer_adhan"
+
+        /** Mirrors native [AdhanPlaybackService] silent foreground channel id. */
+        private const val NATIVE_FG_CHANNEL_ID = "com.tilawa.app.prayer_adhan_silent"
+    }
 
     private lateinit var context: Context
     private lateinit var shadowService: ShadowService
@@ -147,5 +160,240 @@ class AdhanPlaybackServiceTest {
         controller.destroy()
 
         assertNull(AdhanPlaybackService.activePayload)
+    }
+
+    @Test
+    fun `foreground notification body is adhan_is_playing while title is prayer name`() {
+        val intent = Intent(context, AdhanPlaybackService::class.java).apply {
+            action = AdhanPlaybackService.ACTION_PLAY
+            putExtra(AdhanScheduler.EXTRA_PRAYER_NAME, "fajr")
+            putExtra(AdhanScheduler.EXTRA_PRAYER_KEY, "fajr")
+            putExtra(AdhanScheduler.EXTRA_SCHEDULED_MS, System.currentTimeMillis())
+            putExtra(AdhanScheduler.EXTRA_SOUND, "adhan")
+        }
+
+        val controller = Robolectric.buildService(AdhanPlaybackService::class.java, intent)
+        service = controller.get()
+        shadowService = Shadows.shadowOf(service)
+        service.onStartCommand(intent, 0, 1)
+
+        val notification = shadowService.lastForegroundNotification
+        assertNotNull(notification)
+        assertEquals("Fajr", notification.extras.getCharSequence(Notification.EXTRA_TITLE))
+        assertEquals(
+            context.getString(R.string.adhan_notification_body),
+            notification.extras.getCharSequence(Notification.EXTRA_TEXT),
+        )
+    }
+
+    @Test
+    fun `foreground notification includes location in title and body`() {
+        val intent = Intent(context, AdhanPlaybackService::class.java).apply {
+            action = AdhanPlaybackService.ACTION_PLAY
+            putExtra(AdhanScheduler.EXTRA_PRAYER_NAME, "fajr")
+            putExtra(AdhanScheduler.EXTRA_PRAYER_KEY, "fajr")
+            putExtra(AdhanScheduler.EXTRA_SCHEDULED_MS, System.currentTimeMillis())
+            putExtra(AdhanScheduler.EXTRA_SOUND, "adhan")
+            putExtra(AdhanScheduler.EXTRA_LOCATION_NAME, "Cairo")
+        }
+
+        val controller = Robolectric.buildService(AdhanPlaybackService::class.java, intent)
+        service = controller.get()
+        shadowService = Shadows.shadowOf(service)
+        service.onStartCommand(intent, 0, 1)
+
+        val notification = shadowService.lastForegroundNotification
+        assertNotNull(notification)
+        assertEquals(
+            context.getString(R.string.adhan_notification_title, "Fajr", "Cairo"),
+            notification.extras.getCharSequence(Notification.EXTRA_TITLE),
+        )
+        assertEquals(
+            context.getString(R.string.adhan_notification_body_with_location, "Cairo"),
+            notification.extras.getCharSequence(Notification.EXTRA_TEXT),
+        )
+    }
+
+    @Test
+    fun `foreground notification uses Flutter language code instead of device locale`() {
+        val arabicResources = NotificationLocaleHelper.localizedResources(context, "ar")
+        val intent = Intent(context, AdhanPlaybackService::class.java).apply {
+            action = AdhanPlaybackService.ACTION_PLAY
+            putExtra(AdhanScheduler.EXTRA_PRAYER_NAME, "fajr")
+            putExtra(AdhanScheduler.EXTRA_PRAYER_KEY, "fajr")
+            putExtra(AdhanScheduler.EXTRA_SCHEDULED_MS, System.currentTimeMillis())
+            putExtra(AdhanScheduler.EXTRA_SOUND, "adhan")
+            putExtra(AdhanScheduler.EXTRA_LANGUAGE_CODE, "ar")
+        }
+
+        val controller = Robolectric.buildService(AdhanPlaybackService::class.java, intent)
+        service = controller.get()
+        shadowService = Shadows.shadowOf(service)
+        service.onStartCommand(intent, 0, 1)
+
+        val notification = shadowService.lastForegroundNotification
+        assertNotNull(notification)
+        val fajrResId = arabicResources.getIdentifier("prayer_fajr", "string", context.packageName)
+        val bodyResId = arabicResources.getIdentifier("adhan_notification_body", "string", context.packageName)
+        val stopResId = arabicResources.getIdentifier("stop_adhan", "string", context.packageName)
+        assertEquals(
+            arabicResources.getString(fajrResId),
+            notification.extras.getCharSequence(Notification.EXTRA_TITLE),
+        )
+        assertEquals(
+            arabicResources.getString(bodyResId),
+            notification.extras.getCharSequence(Notification.EXTRA_TEXT),
+        )
+        assertEquals(
+            arabicResources.getString(stopResId),
+            notification.actions?.first()?.title,
+        )
+    }
+
+    @Test
+    fun `foreground notification falls back to persisted location when intent extra is missing`() {
+        DefaultPrayerStorage(context).setLastNotificationLocationName("Cairo")
+
+        val intent = Intent(context, AdhanPlaybackService::class.java).apply {
+            action = AdhanPlaybackService.ACTION_PLAY
+            putExtra(AdhanScheduler.EXTRA_PRAYER_NAME, "fajr")
+            putExtra(AdhanScheduler.EXTRA_PRAYER_KEY, "fajr")
+            putExtra(AdhanScheduler.EXTRA_SCHEDULED_MS, System.currentTimeMillis())
+            putExtra(AdhanScheduler.EXTRA_SOUND, "adhan")
+        }
+
+        val controller = Robolectric.buildService(AdhanPlaybackService::class.java, intent)
+        service = controller.get()
+        shadowService = Shadows.shadowOf(service)
+        service.onStartCommand(intent, 0, 1)
+
+        val notification = shadowService.lastForegroundNotification
+        assertNotNull(notification)
+        assertEquals(
+            context.getString(R.string.adhan_notification_title, "Fajr", "Cairo"),
+            notification.extras.getCharSequence(Notification.EXTRA_TITLE),
+        )
+        assertEquals(
+            context.getString(R.string.adhan_notification_body_with_location, "Cairo"),
+            notification.extras.getCharSequence(Notification.EXTRA_TEXT),
+        )
+    }
+
+    @Test
+    fun `second ACTION_PLAY while already playing does not start MediaPlayer again`() {
+        val intent = Intent(context, AdhanPlaybackService::class.java).apply {
+            action = AdhanPlaybackService.ACTION_PLAY
+            putExtra(AdhanScheduler.EXTRA_PRAYER_NAME, "fajr")
+            putExtra(AdhanScheduler.EXTRA_PRAYER_KEY, "fajr")
+            putExtra(AdhanScheduler.EXTRA_SCHEDULED_MS, System.currentTimeMillis())
+            putExtra(AdhanScheduler.EXTRA_SOUND, "adhan")
+        }
+
+        val controller = Robolectric.buildService(AdhanPlaybackService::class.java, intent)
+        service = controller.get()
+        service.onStartCommand(intent, 0, 1)
+        service.onStartCommand(intent, 0, 2)
+
+        verify(exactly = 1) { anyConstructed<MediaPlayer>().start() }
+        verify {
+            anyConstructed<FirebasePrayerAnalytics>().logEvent(
+                PrayerEvents.DUPLICATE_GUARD,
+                any(),
+            )
+        }
+    }
+
+    @Test
+    fun `native playback uses silent channel when flutter already registered audible adhan channel`() {
+        val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val audibleSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+        nm.createNotificationChannel(
+            NotificationChannel(
+                AUDIBLE_ADHAN_CHANNEL_ID,
+                "Prayer Times (Adhan)",
+                NotificationManager.IMPORTANCE_HIGH,
+            ).apply {
+                setSound(
+                    audibleSound,
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_ALARM)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build(),
+                )
+            },
+        )
+
+        assertNotNull(
+            "Precondition: Flutter-side init should leave the audible channel with sound",
+            nm.getNotificationChannel(AUDIBLE_ADHAN_CHANNEL_ID)?.sound,
+        )
+
+        val intent = Intent(context, AdhanPlaybackService::class.java).apply {
+            action = AdhanPlaybackService.ACTION_PLAY
+            putExtra(AdhanScheduler.EXTRA_PRAYER_NAME, "fajr")
+            putExtra(AdhanScheduler.EXTRA_PRAYER_KEY, "fajr")
+            putExtra(AdhanScheduler.EXTRA_SCHEDULED_MS, System.currentTimeMillis())
+            putExtra(AdhanScheduler.EXTRA_SOUND, "adhan")
+        }
+        val controller = Robolectric.buildService(AdhanPlaybackService::class.java, intent)
+        service = controller.get()
+        shadowService = Shadows.shadowOf(service)
+        service.onStartCommand(intent, 0, 1)
+
+        val nativeChannel = nm.getNotificationChannel(NATIVE_FG_CHANNEL_ID)
+        assertNotNull(
+            "Native Adhan is playing notification must post on the silent channel",
+            nativeChannel,
+        )
+        assertNull(
+            "Native foreground channel must stay silent so only MediaPlayer plays adhan",
+            nativeChannel?.sound,
+        )
+        assertEquals(
+            NATIVE_FG_CHANNEL_ID,
+            shadowService.lastForegroundNotification?.channelId,
+        )
+    }
+
+    @Test
+    fun `startPlayback stops service when MediaPlayer prepare fails`() {
+        every { anyConstructed<MediaPlayer>().prepare() } throws RuntimeException("prepare failed")
+
+        val intent = Intent(context, AdhanPlaybackService::class.java).apply {
+            action = AdhanPlaybackService.ACTION_PLAY
+            putExtra(AdhanScheduler.EXTRA_PRAYER_NAME, "fajr")
+            putExtra(AdhanScheduler.EXTRA_PRAYER_KEY, "fajr")
+            putExtra(AdhanScheduler.EXTRA_SCHEDULED_MS, System.currentTimeMillis())
+            putExtra(AdhanScheduler.EXTRA_SOUND, "adhan")
+        }
+
+        val controller = Robolectric.buildService(AdhanPlaybackService::class.java, intent)
+        service = controller.get()
+        shadowService = Shadows.shadowOf(service)
+        service.onStartCommand(intent, 0, 1)
+
+        verify(exactly = 0) { anyConstructed<MediaPlayer>().start() }
+        verify { anyConstructed<FirebasePrayerAnalytics>().logEvent(PrayerEvents.PLAYBACK_FAILED, any()) }
+        assertTrue(shadowService.isStoppedBySelf)
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.P])
+    fun `startPlayback uses legacy startForeground on pre-Q devices`() {
+        val intent = Intent(context, AdhanPlaybackService::class.java).apply {
+            action = AdhanPlaybackService.ACTION_PLAY
+            putExtra(AdhanScheduler.EXTRA_PRAYER_NAME, "fajr")
+            putExtra(AdhanScheduler.EXTRA_PRAYER_KEY, "fajr")
+            putExtra(AdhanScheduler.EXTRA_SCHEDULED_MS, System.currentTimeMillis())
+            putExtra(AdhanScheduler.EXTRA_SOUND, "adhan")
+        }
+
+        val controller = Robolectric.buildService(AdhanPlaybackService::class.java, intent)
+        service = controller.get()
+        shadowService = Shadows.shadowOf(service)
+        service.onStartCommand(intent, 0, 1)
+
+        assertNotNull(shadowService.lastForegroundNotification)
+        verify { anyConstructed<MediaPlayer>().start() }
     }
 }

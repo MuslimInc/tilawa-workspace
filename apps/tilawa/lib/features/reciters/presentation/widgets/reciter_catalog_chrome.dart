@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-/// Neutral Pinterest chrome for Reciter details (white / #E5E7EB / black).
-///
-/// Brand [ColorScheme.primary] is reserved for global CTAs (bottom nav, hearts);
-/// surah rows and moshaf picker use these tokens instead.
+/// Warm Behance catalog chrome for reciter surah rows (parchment / brown).
 abstract final class ReciterCatalogChrome {
   static Color idleFill(ColorScheme scheme) => scheme.surfaceContainerHigh;
 
   static Color cardFill(ColorScheme scheme) => scheme.surface;
 
-  static Color activeFill(ColorScheme scheme) => scheme.onSurface;
+  static Color activeFill(ColorScheme scheme) => scheme.primary;
 
-  static Color activeOnFill(ColorScheme scheme) => scheme.surface;
+  static Color activeOnFill(ColorScheme scheme) => scheme.onPrimary;
 
   static Color hairline(ColorScheme scheme, TilawaDesignTokens tokens) =>
       scheme.outlineVariant.withValues(alpha: tokens.opacitySubtle);

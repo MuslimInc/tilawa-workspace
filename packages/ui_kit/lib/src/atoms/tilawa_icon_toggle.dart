@@ -50,7 +50,8 @@ class TilawaIconToggle extends StatelessWidget {
     final double effectiveRadius =
         borderRadius ??
         designTokens.resolveRadius(
-          family: TilawaRadiusFamily.pill,
+          family: TilawaRadiusFamily.icon,
+          width: designTokens.minInteractiveDimension,
           height: designTokens.minInteractiveDimension,
         );
     final Color background = value
@@ -65,7 +66,7 @@ class TilawaIconToggle extends StatelessWidget {
       toggled: value,
       label: semanticLabel,
       child: ConstrainedBox(
-        // fix: Accessibility — enforce Tilawa hit target (44 dp).
+        // fix: Accessibility — enforce Tilawa hit target (48 dp).
         constraints: BoxConstraints(
           minWidth: designTokens.minInteractiveDimension,
           minHeight: designTokens.minInteractiveDimension,

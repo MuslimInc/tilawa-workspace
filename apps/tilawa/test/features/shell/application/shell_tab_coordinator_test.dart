@@ -3,6 +3,7 @@ import 'package:tilawa/features/app_review/domain/entities/app_review_prompt_mom
 import 'package:tilawa/features/app_review/domain/entities/app_review_signal.dart';
 import 'package:tilawa/features/shell/application/shell_tab_coordinator.dart';
 import 'package:tilawa/features/shell/domain/shell_tab_effect.dart';
+import 'package:tilawa/screens/app_shell_nav_destinations.dart';
 
 void main() {
   late ShellTabCoordinator coordinator;
@@ -33,7 +34,7 @@ void main() {
       expect((effects.first as SyncMainShellTabEffect).tabIndex, 2);
     });
 
-    test('leaving prayer tab records signal', () {
+    test('leaving qibla tab does not record prayer visit signal', () {
       final List<ShellTabEffect> effects = coordinator.onTabChanged(
         previousIndex: 2,
         nextIndex: 3,
@@ -41,12 +42,22 @@ void main() {
 
       expect(
         effects,
-        contains(
-          const RecordAppReviewSignalEffect(
-            AppReviewSignal.prayerTimesTabVisited,
+        isNot(
+          contains(
+            const RecordAppReviewSignalEffect(
+              AppReviewSignal.prayerTimesTabVisited,
+            ),
           ),
         ),
       );
+    });
+
+    test('leaving qibla tab for reciters does not prompt review', () {
+      final List<ShellTabEffect> effects = coordinator.onTabChanged(
+        previousIndex: 2,
+        nextIndex: 1,
+      );
+
       expect(
         effects,
         isNot(
@@ -57,25 +68,19 @@ void main() {
           ),
         ),
       );
-    });
-
-    test('leaving prayer tab for reciters may prompt review', () {
-      final List<ShellTabEffect> effects = coordinator.onTabChanged(
-        previousIndex: 2,
-        nextIndex: 1,
-      );
-
       expect(
         effects,
-        contains(
-          const TryAppReviewPromptEffect(
-            AppReviewPromptMoment.leftPrayerTimesTab,
+        isNot(
+          contains(
+            const TryAppReviewPromptEffect(
+              AppReviewPromptMoment.returnedToRecitersTab,
+            ),
           ),
         ),
       );
     });
 
-    test('leaving prayer tab for home does not prompt review', () {
+    test('leaving qibla tab for home does not prompt review', () {
       final List<ShellTabEffect> effects = coordinator.onTabChanged(
         previousIndex: 2,
         nextIndex: 0,
@@ -96,7 +101,7 @@ void main() {
     test('athkar to reciters may prompt review', () {
       final List<ShellTabEffect> effects = coordinator.onTabChanged(
         previousIndex: 3,
-        nextIndex: 1,
+        nextIndex: kAppShellRecitersTabIndex,
       );
 
       expect(
@@ -106,6 +111,34 @@ void main() {
             AppReviewPromptMoment.returnedToRecitersTab,
           ),
         ),
+      );
+      expect(
+        effects,
+        contains(const MaybeTryLeftPrayerRecitersPromptEffect()),
+      );
+    });
+
+    test('reciters navigation may try post-prayer review', () {
+      final List<ShellTabEffect> effects = coordinator.onTabChanged(
+        previousIndex: 0,
+        nextIndex: kAppShellRecitersTabIndex,
+      );
+
+      expect(
+        effects,
+        contains(const MaybeTryLeftPrayerRecitersPromptEffect()),
+      );
+    });
+
+    test('leaving home for qibla cancels post-prayer review arm', () {
+      final List<ShellTabEffect> effects = coordinator.onTabChanged(
+        previousIndex: 0,
+        nextIndex: 2,
+      );
+
+      expect(
+        effects,
+        contains(const CancelLeftPrayerRecitersPromptEffect()),
       );
     });
 
@@ -127,14 +160,18 @@ void main() {
       );
     });
 
-    test('opening prayer tab does not schedule a deferred prayer load', () {
+    test('opening qibla tab cancels a pending post-prayer review arm', () {
       final List<ShellTabEffect> effects = coordinator.onTabChanged(
         previousIndex: 0,
         nextIndex: 2,
       );
 
       expect(effects, contains(isA<SyncMainShellTabEffect>()));
-      expect(effects, hasLength(1));
+      expect(
+        effects,
+        contains(const CancelLeftPrayerRecitersPromptEffect()),
+      );
+      expect(effects, hasLength(2));
     });
   });
 }

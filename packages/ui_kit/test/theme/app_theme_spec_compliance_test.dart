@@ -22,10 +22,10 @@ void main() {
         final TilawaDesignTokens? design = theme
             .extension<TilawaDesignTokens>();
         expect(design, isNotNull);
-        expect(design!.opacityShadow, 0.12);
-        expect(design.opacityShadowStrong, 0.28);
-        expect(design.shadowOffsetSmall, const Offset(0, 2));
-        expect(design.shadowOffsetMedium, const Offset(0, 4));
+        expect(design!.opacityShadow, 0.04);
+        expect(design.opacityShadowStrong, 0.08);
+        expect(design.shadowOffsetSmall, const Offset(0, 1));
+        expect(design.shadowOffsetMedium, const Offset(0, 2));
 
         expect(theme.extension<TilawaComponentTokens>(), isNotNull);
 
@@ -81,7 +81,7 @@ void main() {
     });
 
     test(
-      'light cool canvas: porcelain scaffold, white cards, #E5E7EB idle tier',
+      'light parchment canvas: warm scaffold, white cards, beige idle tier',
       () {
         final ThemeData theme = AppTheme.getLightTheme(
           primaryColor: AppColors.defaultPrimary,

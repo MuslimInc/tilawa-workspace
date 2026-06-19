@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../lib/src/foundation/app_colors.dart';
 import '../../lib/src/foundation/app_theme.dart';
 import '../../lib/src/foundation/component_tokens/component_tokens_theme.dart';
+import '../../lib/src/foundation/design_tokens.dart';
 import '../../lib/src/foundation/tilawa_bottom_sheet_actions.dart';
 import '../../lib/src/foundation/tilawa_bottom_sheet_scaffold.dart';
 import '../../lib/src/foundation/tilawa_bottom_sheet_title_row.dart';
@@ -113,6 +114,11 @@ void main() {
     await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();
     expect(find.text('Body'), findsOneWidget);
+    expect(find.byTooltip('Close'), findsOneWidget);
+    expect(
+      tester.getSize(find.byTooltip('Close')),
+      const Size.square(kTilawaMinInteractiveDimension),
+    );
 
     await tester.tap(find.byIcon(Icons.close_rounded));
     await tester.pumpAndSettle();

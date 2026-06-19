@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:tilawa_core/entities/audio.dart';
+import 'package:tilawa_core/entities/audio_extras_keys.dart';
 
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 
@@ -113,7 +114,7 @@ final class QuranPlayerQueueIndexCache {
     }
     final Map<String, int> map = <String, int>{};
     for (var i = 0; i < queue.length; i++) {
-      final Object? surahId = queue[i].extras?['surahId'];
+      final Object? surahId = queue[i].extras?[AudioExtrasKeys.surahId];
       if (surahId == null) {
         continue;
       }

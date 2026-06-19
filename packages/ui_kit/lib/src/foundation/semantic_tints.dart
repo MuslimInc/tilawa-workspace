@@ -35,7 +35,7 @@ extension TilawaSemanticTintColors on ColorScheme {
   /// Fill behind a tinted [TilawaIconBox].
   Color semanticTintBackground(TilawaSemanticTint tint) {
     return switch (tint) {
-      TilawaSemanticTint.ink => primaryContainer,
+      TilawaSemanticTint.ink => surfaceContainerHigh,
       TilawaSemanticTint.scholar => secondaryContainer,
       TilawaSemanticTint.gilding => tertiaryContainer,
       TilawaSemanticTint.parchment => surfaceContainerHigh,
@@ -54,7 +54,7 @@ extension TilawaSemanticTintColors on ColorScheme {
   /// Icon glyph colour on a tinted [TilawaIconBox].
   Color semanticTintForeground(TilawaSemanticTint tint) {
     return switch (tint) {
-      TilawaSemanticTint.ink => onPrimaryContainer,
+      TilawaSemanticTint.ink => primary,
       TilawaSemanticTint.scholar => onSecondaryContainer,
       TilawaSemanticTint.gilding => onTertiaryContainer,
       TilawaSemanticTint.parchment => onSurfaceVariant,

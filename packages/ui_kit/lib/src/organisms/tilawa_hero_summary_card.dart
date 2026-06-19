@@ -114,62 +114,65 @@ class TilawaHeroSummaryCard extends StatelessWidget {
       padding: EdgeInsetsDirectional.symmetric(
         horizontal: settingsTokens.groupHorizontalPadding,
       ),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(radius),
-          border: Border.all(
-            color: settingsTokens.groupContainerBorderColor,
-            width: settingsTokens.tileDividerThickness,
+      child: SizedBox(
+        width: double.infinity,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(radius),
+            border: Border.all(
+              color: settingsTokens.groupContainerBorderColor,
+              width: settingsTokens.tileDividerThickness,
+            ),
           ),
-        ),
-        child: Padding(
-          padding: resolvedPadding,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: tokens.spaceMedium,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                spacing: tokens.spaceSmall,
-                children: [
-                  Text(
-                    label,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w500,
+          child: Padding(
+            padding: resolvedPadding,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: tokens.spaceMedium,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  spacing: tokens.spaceSmall,
+                  children: [
+                    Text(
+                      label,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
-                  Text(
-                    metric,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      color: colorScheme.onSurface,
-                      fontWeight: FontWeight.w700,
-                      height: 1.15,
+                    Text(
+                      metric,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        color: colorScheme.onSurface,
+                        fontWeight: FontWeight.w700,
+                        height: 1.15,
+                      ),
                     ),
-                  ),
-                  if (badges.isNotEmpty)
-                    Wrap(
-                      alignment: WrapAlignment.center,
-                      spacing: tokens.spaceSmall,
-                      runSpacing: tokens.spaceSmall,
-                      children: [
-                        for (final badge in badges)
-                          _HeroSummaryBadgeChip(badge: badge),
-                      ],
-                    ),
-                ],
-              ),
-              if (footer != null) ...[
-                Divider(
-                  height: tokens.borderWidthThin,
-                  thickness: settingsTokens.tileDividerThickness,
-                  color: settingsTokens.selectionTileDividerColor,
+                    if (badges.isNotEmpty)
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        spacing: tokens.spaceSmall,
+                        runSpacing: tokens.spaceSmall,
+                        children: [
+                          for (final badge in badges)
+                            _HeroSummaryBadgeChip(badge: badge),
+                        ],
+                      ),
+                  ],
                 ),
-                footer!,
+                if (footer != null) ...[
+                  Divider(
+                    height: tokens.borderWidthThin,
+                    thickness: settingsTokens.tileDividerThickness,
+                    color: settingsTokens.selectionTileDividerColor,
+                  ),
+                  footer!,
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),

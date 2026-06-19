@@ -189,11 +189,15 @@ class _SearchFieldBody extends StatelessWidget {
     final effectiveFillColor =
         backgroundColor ??
         (isCatalog ? colorScheme.surface : componentTokens.backgroundColor);
+    final double fieldHeight = height ?? componentTokens.height;
     final effectiveBorderRadius =
         borderRadius ??
         BorderRadius.circular(
           isCatalog
-              ? tokens.resolveRadius(family: TilawaRadiusFamily.card)
+              ? tokens.resolveRadius(
+                  family: TilawaRadiusFamily.pill,
+                  height: fieldHeight,
+                )
               : tokens.resolveRadius(family: TilawaRadiusFamily.chrome),
         );
     final Color unfocusedBorder = isCatalog

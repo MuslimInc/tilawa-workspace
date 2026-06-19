@@ -1,4 +1,6 @@
 import 'package:tilawa_core/entities/audio.dart';
+import 'package:tilawa_core/entities/audio_extras_keys.dart';
+
 import '../entities/surah_entity.dart';
 
 class SurahMapper {
@@ -13,7 +15,7 @@ class SurahMapper {
     return SurahEntity(audio: audio);
   }
 
-  /// Create Surah from basic data
+  /// Create Surah from basic data.
   static SurahEntity create({
     required String id,
     required String name,
@@ -27,6 +29,12 @@ class SurahMapper {
     double downloadProgress = 0.0,
     String? downloadId,
   }) {
+    final int? surahNumber = _parseSurahNumberFromId(id);
+    final Map<String, dynamic> extras = <String, dynamic>{
+      AudioExtrasKeys.surahId: ?surahNumber,
+      if (nameAr.isNotEmpty) AudioExtrasKeys.nameAr: nameAr,
+    };
+
     final audio = AudioEntity(
       id: id,
       title: name,
@@ -35,6 +43,7 @@ class SurahMapper {
       url: url,
       duration: duration,
       artUri: artUri,
+      extras: extras.isEmpty ? null : extras,
     );
 
     return SurahEntity(
@@ -44,5 +53,14 @@ class SurahMapper {
       downloadProgress: downloadProgress,
       downloadId: downloadId,
     );
+  }
+
+  static int? _parseSurahNumberFromId(String id) {
+    try {
+      final String basename = id.split('/').last.split('.').first;
+      return int.tryParse(basename);
+    } catch (_) {
+      return null;
+    }
   }
 }

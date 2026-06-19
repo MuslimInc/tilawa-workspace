@@ -51,9 +51,22 @@ class MainScreen extends StatelessWidget {
           final double playerHeight = playerShouldShow && !isKeyboardOpen
               ? context.tokens.playerCollapsedHeight
               : 0;
+          final double miniNavGap = playerShouldShow && !isKeyboardOpen
+              ? Theme.of(
+                  context,
+                ).componentTokens.adaptiveShell.bottomNavVerticalMargin
+              : 0;
+          final double miniPlayerTopPadding =
+              playerShouldShow && !isKeyboardOpen
+              ? Theme.of(
+                  context,
+                ).componentTokens.adaptiveShell.bottomNavInternalPadding
+              : 0;
           final double contentBottomPadding = isKeyboardOpen
               ? 0
-              : (playerShouldShow ? playerHeight : 0);
+              : (playerShouldShow
+                    ? playerHeight + miniPlayerTopPadding + miniNavGap
+                    : 0);
 
           return state.isInitialTabMounted
               ? MainTabViewport(

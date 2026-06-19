@@ -4,6 +4,7 @@ import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa_core/config/language_config.dart';
 import 'package:tilawa_core/entities/audio.dart';
+import 'package:tilawa_core/entities/audio_extras_keys.dart';
 import 'package:tilawa_core/entities/moshaf_entity.dart';
 import 'package:tilawa_core/utils/surah_names.dart';
 import 'package:tilawa_core/utils/url_validator.dart';
@@ -45,9 +46,9 @@ class MoshafSurahAudioListBuilder {
             artist: reciterName,
             album: moshaf.name,
             extras: <String, dynamic>{
-              'reciterId': reciterId,
-              'moshafId': moshaf.id,
-              'surahId': surahNumber,
+              AudioExtrasKeys.reciterId: reciterId,
+              AudioExtrasKeys.moshafId: moshaf.id,
+              AudioExtrasKeys.surahId: surahNumber,
             },
           ),
         );

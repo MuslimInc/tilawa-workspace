@@ -51,7 +51,16 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
       child: SafeArea(
         top: false,
         child: TilawaBottomSheetScaffold(
-          topBar: _SheetHeader(onClose: _close, tokens: tokens, theme: theme),
+          topBar: Text(
+            context.l10n.prayerSettings,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          footer: TilawaBottomSheetActions(
+            primaryLabel: context.l10n.done,
+            onPrimary: _close,
+          ),
           betweenTopBarAndBody: const [TilawaDivider(height: 1)],
           children: [
             Flexible(
@@ -143,39 +152,6 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _SheetHeader extends StatelessWidget {
-  const _SheetHeader({
-    required this.onClose,
-    required this.tokens,
-    required this.theme,
-  });
-
-  final VoidCallback onClose;
-  final TilawaDesignTokens tokens;
-  final ThemeData theme;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Text(
-          context.l10n.prayerSettings,
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        const Spacer(),
-        TilawaButton(
-          text: context.l10n.done,
-          variant: TilawaButtonVariant.ghost,
-          size: TilawaButtonSize.small,
-          onPressed: onClose,
-        ),
-      ],
     );
   }
 }

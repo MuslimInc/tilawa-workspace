@@ -1,8 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/quran_reader/presentation/theme/quran_reader_theme.dart';
+import 'package:tilawa/features/quran_reader/presentation/widgets/surah_index_filter.dart';
+import 'package:tilawa/features/quran_reader/presentation/widgets/surah_index_tile.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// A bottom sheet widget that displays the Quran surah index.
@@ -44,7 +45,9 @@ class _SurahIndexSheetState extends State<SurahIndexSheet> {
   @override
   void initState() {
     super.initState();
-    _filteredSurahsNotifier.value = _computeFilteredSurahs();
+    _filteredSurahsNotifier.value = SurahIndexFilter.filteredSurahs(
+      _searchController.text,
+    );
     _searchFocusNode.addListener(_handleSearchFocusChange);
   }
 
@@ -59,13 +62,6 @@ class _SurahIndexSheetState extends State<SurahIndexSheet> {
     super.dispose();
   }
 
-  List<int> _computeFilteredSurahs() {
-    return [
-      for (int i = 1; i <= 114; i++)
-        if (_matchesSearch(i)) i,
-    ];
-  }
-
   void _handleSearchFocusChange() {
     if (!mounted) return;
 
@@ -78,34 +74,6 @@ class _SurahIndexSheetState extends State<SurahIndexSheet> {
     }
 
     setState(() {});
-  }
-
-  String _normalizeSearchText(String value) {
-    return value
-        .toLowerCase()
-        .trim()
-        .replaceAll(RegExp(r'[\u064B-\u065F\u0670\u06D6-\u06ED\u0640]'), '')
-        .replaceAll(RegExp(r'[^a-z0-9\u0600-\u06FF]+'), '');
-  }
-
-  /// Returns true if the [surahNumber] matches the current query.
-  bool _matchesSearch(int surahNumber) {
-    if (_searchController.text.isEmpty) return true;
-
-    final query = _searchController.text.toLowerCase();
-    final normalizedQuery = _normalizeSearchText(_searchController.text);
-    final name = getSurahName(surahNumber).toLowerCase();
-    final arabicName = getSurahNameArabic(surahNumber);
-    final englishName = getSurahNameEnglish(surahNumber);
-    final number = surahNumber.toString();
-
-    return name.contains(query) ||
-        arabicName.contains(query) ||
-        englishName.toLowerCase().contains(query) ||
-        _normalizeSearchText(name).contains(normalizedQuery) ||
-        _normalizeSearchText(arabicName).contains(normalizedQuery) ||
-        _normalizeSearchText(englishName).contains(normalizedQuery) ||
-        number == query;
   }
 
   @override
@@ -152,11 +120,13 @@ class _SurahIndexSheetState extends State<SurahIndexSheet> {
                 controller: _searchController,
                 focusNode: _searchFocusNode,
                 onChanged: (value) {
-                  _filteredSurahsNotifier.value = _computeFilteredSurahs();
+                  _filteredSurahsNotifier.value =
+                      SurahIndexFilter.filteredSurahs(value);
                 },
                 onClear: () {
                   _searchController.clear();
-                  _filteredSurahsNotifier.value = _computeFilteredSurahs();
+                  _filteredSurahsNotifier.value =
+                      SurahIndexFilter.filteredSurahs('');
                 },
               ),
               TilawaDivider(
@@ -339,7 +309,7 @@ class _IndexList extends StatelessWidget {
                   SizedBox(height: tokens.spaceExtraSmall),
               itemBuilder: (context, index) {
                 final surahNumber = filteredSurahs[index];
-                return _SurahTile(
+                return SurahIndexTile(
                   surahNumber: surahNumber,
                   onTap: () {
                     onSurahTapped?.call(surahNumber);
@@ -350,105 +320,6 @@ class _IndexList extends StatelessWidget {
             ),
           );
         },
-      ),
-    );
-  }
-}
-
-/// A single surah tile in the index list.
-class _SurahTile extends StatelessWidget {
-  const _SurahTile({required this.surahNumber, required this.onTap});
-
-  final int surahNumber;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final readerTheme = QuranReaderTheme.of(context);
-    final indexTheme = SurahIndexTheme.of(context);
-    final colorScheme = theme.colorScheme;
-    final tokens = theme.tokens;
-
-    final l10n = context.l10n;
-    final Color primaryColor = readerTheme.primaryColor;
-    final Color cardColor = colorScheme.surfaceContainerLow;
-    final Color borderColor = colorScheme.outlineVariant.withValues(
-      alpha: 0.64,
-    );
-
-    final arabicName = getSurahNameArabic(surahNumber);
-    final englishName = getSurahName(surahNumber);
-    final verseCount = getVerseCount(surahNumber);
-    final place = getPlaceOfRevelation(surahNumber);
-    final startPage = getPageNumber(surahNumber, 1);
-
-    return RepaintBoundary(
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(indexTheme.tileRadius),
-          splashColor: primaryColor.withValues(alpha: 0.08),
-          highlightColor: primaryColor.withValues(alpha: 0.04),
-          child: Container(
-            padding: indexTheme.tilePadding,
-            decoration: BoxDecoration(
-              color: cardColor,
-              borderRadius: BorderRadius.circular(indexTheme.tileRadius),
-              border: Border.all(
-                color: borderColor,
-                width: indexTheme.tileBorderWidth,
-              ),
-            ),
-            child: Row(
-              children: [
-                // Surah number badge
-                Container(
-                  width: indexTheme.tileNumberSize,
-                  height: indexTheme.tileNumberSize,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(
-                      indexTheme.tileNumberRadius,
-                    ),
-                  ),
-                  child: Text(
-                    '$surahNumber',
-                    style: readerTheme.pillPageTextStyle.copyWith(
-                      color: colorScheme.onPrimaryContainer,
-                      fontSize: indexTheme.tileNumberFontSize,
-                    ),
-                  ),
-                ),
-                SizedBox(width: tokens.spaceMedium),
-                // English name & meta
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        englishName,
-                        style: readerTheme.surahTileNameTextStyle,
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        '${l10n.ayahCountWithPlace(verseCount, place)} · ${l10n.page} $startPage',
-                        style: readerTheme.surahTileMetaTextStyle,
-                      ),
-                    ],
-                  ),
-                ),
-                // Arabic name
-                Text(
-                  arabicName,
-                  style: readerTheme.surahTileArabicNameTextStyle,
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

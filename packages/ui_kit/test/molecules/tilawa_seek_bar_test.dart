@@ -185,7 +185,7 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('touch strip height is at least 44dp with gesture handling', (
+    testWidgets('touch strip height is at least 48dp with gesture handling', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
@@ -203,7 +203,10 @@ void main() {
         of: seekFinder,
         matching: find.byType(Stack),
       );
-      expect(tester.getSize(stackFinder).height, greaterThanOrEqualTo(44));
+      expect(
+        tester.getSize(stackFinder).height,
+        greaterThanOrEqualTo(kTilawaMinInteractiveDimension),
+      );
 
       await tester.drag(find.byType(Slider).last, const Offset(24, 0));
       await tester.pump();

@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/constants/analytics_constants.dart';
+import 'package:tilawa_core/entities/audio_extras_keys.dart';
 import 'package:tilawa_core/entities/moshaf_entity.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
@@ -19,6 +20,7 @@ import '../bloc/reciter_details_bloc.dart';
 import '../bloc/reciter_download_bloc.dart';
 import '../tour/reciters_tour_launcher.dart';
 import '../tour/reciters_tour_targets.dart';
+import '../models/reciter_surah_list_item.dart';
 import '../widgets/download_all_button.dart';
 import '../widgets/moshaf_selector.dart';
 import '../widgets/reciter_details_app_bar.dart';
@@ -396,7 +398,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   ) {
     HapticFeedback.lightImpact();
     final int surahIdx = state.surahList.indexWhere((s) {
-      final id = s.audio.extras?['surahId'];
+      final id = s.audio.extras?[AudioExtrasKeys.surahId];
       return id != null && id.toString() == history.surahId.toString();
     });
 
@@ -581,37 +583,38 @@ class _ReciterDetailsContent extends StatelessWidget {
                 crossAxisCount: 2,
                 mainAxisSpacing: tokens.spaceSmall,
                 crossAxisSpacing: tokens.spaceSmall,
-                // badge(48) + gap(8) + name(2 lines≈40) + subtitle(16) + spacing(4) + padding(12×2)
+                // badge(48) + gap(8) + name(2 lines≈40) + padding(12×2)
                 mainAxisExtent:
                     tokens.iconSizeLarge +
                     tokens.spaceExtraLarge +
-                    tokens.spaceSmall +
                     tokens.spaceExtraLarge * 2 +
-                    tokens.spaceLarge +
                     tokens.spaceMedium * 2,
               ),
               delegate: SliverChildBuilderDelegate((context, index) {
                 final SurahEntity surah = filteredSurahs[index];
+                final ReciterSurahListItem item =
+                    ReciterSurahListItem.fromSurahEntity(
+                      surah,
+                      reciterId: reciter.id,
+                      reciterName: reciter.name,
+                      listIndex: index,
+                    );
                 final bool isPlaying =
-                    currentAudio?.id == surah.id ||
-                    (currentAudio != null &&
-                        currentAudio.url == surah.audio.url);
+                    currentAudio?.id == item.audioId ||
+                    (currentAudio != null && currentAudio.url == item.audioUrl);
                 final key = isPlaying ? playingSurahKey : null;
-                final Widget item = SurahGridItem(
+                final Widget gridItem = SurahGridItem(
                   key: key,
-                  surah: surah,
-                  index: index,
-                  reciterName: reciter.name,
-                  reciterId: reciter.id,
+                  item: item,
                   onTap: () => onPlaySurah(surah),
                 );
                 if (isPlaying) {
                   return TourTarget(
                     targetId: RecitersTourTargets.playingSurah,
-                    child: item,
+                    child: gridItem,
                   );
                 }
-                return item;
+                return gridItem;
               }, childCount: filteredSurahs.length),
             ),
           );
@@ -627,18 +630,22 @@ class _ReciterDetailsContent extends StatelessWidget {
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
               final SurahEntity surah = filteredSurahs[index];
+              final ReciterSurahListItem item =
+                  ReciterSurahListItem.fromSurahEntity(
+                    surah,
+                    reciterId: reciter.id,
+                    reciterName: reciter.name,
+                    listIndex: index,
+                  );
               final bool isPlaying =
-                  currentAudio?.id == surah.id ||
-                  (currentAudio != null && currentAudio.url == surah.audio.url);
+                  currentAudio?.id == item.audioId ||
+                  (currentAudio != null && currentAudio.url == item.audioUrl);
               final key = isPlaying ? playingSurahKey : null;
               final Widget tile = Padding(
                 padding: EdgeInsets.symmetric(vertical: tokens.spaceExtraSmall),
                 child: SurahListTile(
                   key: key,
-                  surah: surah,
-                  index: index,
-                  reciterName: reciter.name,
-                  reciterId: reciter.id,
+                  item: item,
                   onTap: () => onPlaySurah(surah),
                 ),
               );

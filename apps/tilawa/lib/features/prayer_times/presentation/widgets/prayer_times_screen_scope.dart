@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/features/app_review/domain/entities/app_review_signal.dart';
+import 'package:tilawa/features/app_review/domain/services/app_review_trigger_manager.dart';
+import 'package:tilawa/features/app_review/domain/services/prayer_times_app_review_coordinator.dart';
 import 'package:tilawa/features/localization/presentation/bloc/localization_bloc.dart';
 import 'package:tilawa/features/prayer_times/application/prayer_location_update_notifier.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/fire_prayer_test_notification_use_case.dart';
@@ -38,26 +41,57 @@ class PrayerTimesScreenScope extends StatelessWidget {
           create: (context) => getIt<PrayerPermissionsCubit>(),
         ),
       ],
-      child: _PrayerLocationSyncListener(
-        child: BlocListener<LocalizationBloc, LocalizationState>(
-          listener: (context, state) {
-            context.read<PrayerTimesBloc>().add(
-              PrayerTimesEvent.loadPrayerTimes(
-                localeIdentifier: state.locale.languageCode,
-              ),
-            );
-          },
-          child:
-              child ??
-              PrayerTimesScreen(
-                adhanPlayer: getIt<IAdhanAlarmPlayer>(),
-                fireTestNotification:
-                    getIt<FirePrayerTestNotificationUseCase>(),
-              ),
+      child: _PrayerTimesAppReviewLifecycle(
+        child: _PrayerLocationSyncListener(
+          child: BlocListener<LocalizationBloc, LocalizationState>(
+            listener: (context, state) {
+              context.read<PrayerTimesBloc>().add(
+                PrayerTimesEvent.loadPrayerTimes(
+                  localeIdentifier: state.locale.languageCode,
+                  forceReschedule: true,
+                ),
+              );
+            },
+            child:
+                child ??
+                PrayerTimesScreen(
+                  adhanPlayer: getIt<IAdhanAlarmPlayer>(),
+                  fireTestNotification:
+                      getIt<FirePrayerTestNotificationUseCase>(),
+                ),
+          ),
         ),
       ),
     );
   }
+}
+
+/// Records prayer-tab engagement when the user leaves prayer times.
+class _PrayerTimesAppReviewLifecycle extends StatefulWidget {
+  const _PrayerTimesAppReviewLifecycle({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_PrayerTimesAppReviewLifecycle> createState() =>
+      _PrayerTimesAppReviewLifecycleState();
+}
+
+class _PrayerTimesAppReviewLifecycleState
+    extends State<_PrayerTimesAppReviewLifecycle> {
+  @override
+  void dispose() {
+    unawaited(
+      getIt<AppReviewTriggerManager>().recordSignal(
+        AppReviewSignal.prayerTimesTabVisited,
+      ),
+    );
+    getIt<PrayerTimesAppReviewCoordinator>().onPrayerTimesScreenClosed();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 /// Reloads prayer times when another tab updates the saved scheduling location.

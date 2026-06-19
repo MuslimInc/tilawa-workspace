@@ -56,21 +56,21 @@ class TilawaChip extends StatelessWidget {
     final effectiveBorderColor =
         borderColor ?? componentTokens.defaultBorderColor;
 
-    final EdgeInsets resolvedChipPadding = (padding ?? componentTokens.padding)
-        .resolve(Directionality.of(context));
-    final TextStyle effectiveTextStyle =
-        textStyle ?? theme.textTheme.labelLarge ?? const TextStyle();
-    final double labelHeight =
-        (effectiveTextStyle.fontSize ?? 14) *
-        (effectiveTextStyle.height ?? 1.2);
-    final double visualHeight = resolvedChipPadding.vertical + labelHeight;
-
     final double resolvedRadius =
         borderRadius ??
         (onTap != null
             ? designTokens.resolveRadius(
                 family: TilawaRadiusFamily.pill,
-                height: visualHeight,
+                height: _chipPaintedHeight(
+                  context,
+                  chipTokens: componentTokens,
+                  theme: theme,
+                  padding: padding,
+                  iconSize: iconSize,
+                  icon: icon,
+                  showLabel: showLabel,
+                  textStyle: textStyle,
+                ),
               )
             : designTokens.resolveRadius(
                 family: TilawaRadiusFamily.decorative,
@@ -138,11 +138,11 @@ class TilawaChip extends StatelessWidget {
     }
 
     // fix: Accessibility — tappable chips paint at their intrinsic content
-    // size (so dense layouts stay dense) while reserving a 44 dp tap-area
+    // size (so dense layouts stay dense) while reserving a 48 dp tap-area
     // around the painted pill. The outer Center collapses unbounded parents
     // to the chip's intrinsic size; the Container's alignment lets the
     // painted Material keep that intrinsic size while the box itself extends
-    // to at least 44 dp for the hit target. Static (label) chips bypass this
+    // to at least 48 dp for the hit target. Static (label) chips bypass this
     // branch entirely.
     // Explicit button role / label avoids MergeSemantics (engine merge bugs).
     // Background is painted by the Container inside [content]; Material here
@@ -162,7 +162,7 @@ class TilawaChip extends StatelessWidget {
     // content (preventing the "fill grid cell" regression in unbounded
     // parents). Let the chip stretch horizontally when the parent provides
     // bounded width — that matches selection-pill and segmented-control
-    // grammars. The 44 dp minimum keeps the hit-target accessible.
+    // grammars. The 48 dp minimum keeps the hit-target accessible.
     return Semantics(
       button: true,
       label: label,
@@ -180,4 +180,30 @@ class TilawaChip extends StatelessWidget {
       ),
     );
   }
+}
+
+double _chipPaintedHeight(
+  BuildContext context, {
+  required TilawaChipTokens chipTokens,
+  required ThemeData theme,
+  EdgeInsetsGeometry? padding,
+  double? iconSize,
+  IconData? icon,
+  bool showLabel = true,
+  TextStyle? textStyle,
+}) {
+  final EdgeInsets resolvedPadding = (padding ?? chipTokens.padding).resolve(
+    Directionality.of(context),
+  );
+  final TextStyle effectiveTextStyle =
+      textStyle ?? theme.textTheme.labelLarge ?? const TextStyle(fontSize: 14);
+  final double lineHeight =
+      effectiveTextStyle.fontSize! * (effectiveTextStyle.height ?? 1.2);
+  final double iconDimension = iconSize ?? chipTokens.iconSize;
+  final double contentHeight = switch ((icon != null, showLabel)) {
+    (true, true) => iconDimension > lineHeight ? iconDimension : lineHeight,
+    (true, false) => iconDimension,
+    _ => lineHeight,
+  };
+  return resolvedPadding.vertical + contentHeight;
 }

@@ -20,17 +20,33 @@ import 'navigation_state.dart';
 class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   static bool _quranPerfOverlayFirstOpenLogged = false;
 
+  /// Default idle time the controls stay visible before auto-hiding so the page
+  /// is returned to a fully readable, unobstructed state. Reading is the
+  /// default; the controls are a transient layer summoned to navigate, then they
+  /// get out of the way on their own — no tap-to-dismiss required, no text left
+  /// covered. Overridable via the constructor for testing.
+  static const Duration defaultAutoHideIdleDuration = Duration(seconds: 4);
+
+  final Duration _autoHideIdleDuration;
+
   final PageRepository _pageRepository;
   final NavigationVisibilityRepository _visibilityRepository;
   final SaveLastVisitedPageUseCase _saveLastVisitedPageUseCase;
   final GetLastVisitedPageUseCase _getLastVisitedPageUseCase;
+
+  /// Pending auto-hide. Armed whenever the controls become visible and idle,
+  /// cancelled when they hide or the user starts interacting.
+  Timer? _autoHideTimer;
 
   NavigationBloc({
     PageRepository? pageRepository,
     NavigationVisibilityRepository? visibilityRepository,
     SaveLastVisitedPageUseCase? saveLastVisitedPageUseCase,
     GetLastVisitedPageUseCase? getLastVisitedPageUseCase,
-  }) : _pageRepository = pageRepository ?? sl<PageRepository>(),
+    Duration? autoHideIdleDuration,
+  }) : _autoHideIdleDuration =
+           autoHideIdleDuration ?? defaultAutoHideIdleDuration,
+       _pageRepository = pageRepository ?? sl<PageRepository>(),
        _visibilityRepository =
            visibilityRepository ?? sl<NavigationVisibilityRepository>(),
        _saveLastVisitedPageUseCase =
@@ -81,6 +97,26 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   // entirely: the repository call, emit, and timer call all happen on the
   // same event-loop turn as the BLoC event dispatch.
 
+  /// (Re)arms the auto-hide timer for a visibility snapshot. The controls hide
+  /// themselves after [_autoHideIdleDuration] of no interaction so the page is
+  /// left unobstructed. Does nothing while the user is actively interacting —
+  /// [_onInteractionEnded] re-arms it once the gesture finishes.
+  void _scheduleAutoHide(NavigationVisibility visibility) {
+    _autoHideTimer?.cancel();
+    if (!visibility.isVisible || visibility.isInteracting) {
+      return;
+    }
+    _autoHideTimer = Timer(_autoHideIdleDuration, () {
+      if (isClosed) return;
+      add(const NavigationHidden());
+    });
+  }
+
+  void _cancelAutoHide() {
+    _autoHideTimer?.cancel();
+    _autoHideTimer = null;
+  }
+
   void _onShown(NavigationShown event, Emitter<NavigationState> emit) {
     final currentState = state;
     if (currentState is NavigationLoaded) {
@@ -91,6 +127,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
           visibility: visibility,
         );
         emit(currentState.copyWith(visibility: visibility));
+        _scheduleAutoHide(visibility);
       });
     }
   }
@@ -99,6 +136,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     final currentState = state;
     if (currentState is NavigationLoaded) {
       final wasVisible = currentState.visibility.isVisible;
+      _cancelAutoHide();
       _visibilityRepository.hide().then((visibility) {
         _logQuranOverlayTransition(
           wasVisible: wasVisible,
@@ -114,6 +152,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     if (currentState is NavigationLoaded) {
       final wasVisible = currentState.visibility.isVisible;
       if (currentState.visibility.isVisible) {
+        _cancelAutoHide();
         _visibilityRepository.hide().then((visibility) {
           _logQuranOverlayTransition(
             wasVisible: wasVisible,
@@ -128,6 +167,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
             visibility: visibility,
           );
           emit(currentState.copyWith(visibility: visibility));
+          _scheduleAutoHide(visibility);
         });
       }
     }
@@ -156,6 +196,9 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   ) {
     final currentState = state;
     if (currentState is NavigationLoaded) {
+      // Hold the controls open while the user is scrubbing the slider or
+      // pressing the arrows.
+      _cancelAutoHide();
       _visibilityRepository.startInteraction().then((visibility) {
         emit(currentState.copyWith(visibility: visibility));
       });
@@ -170,6 +213,8 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     if (currentState is NavigationLoaded) {
       _visibilityRepository.endInteraction().then((visibility) {
         emit(currentState.copyWith(visibility: visibility));
+        // Restart the idle countdown now that the interaction is over.
+        _scheduleAutoHide(visibility);
       });
     }
   }
@@ -218,5 +263,11 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     Emitter<NavigationState> emit,
   ) async {
     await _onInitialized(const NavigationInitialized(), emit);
+  }
+
+  @override
+  Future<void> close() {
+    _cancelAutoHide();
+    return super.close();
   }
 }

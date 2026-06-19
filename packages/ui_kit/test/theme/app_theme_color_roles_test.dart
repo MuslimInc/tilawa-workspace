@@ -8,7 +8,7 @@ void main() {
   group('AppTheme color roles', () {
     const customAndroidGreen = Color(0xFF87CC23);
     const paletteCases = <String, Color>{
-      'default coral': AppColors.defaultPrimary,
+      'default brown': AppColors.defaultPrimary,
       'custom android green': customAndroidGreen,
       'muted gold': AppColors.primaryGold,
       'purple': AppColors.primaryPurple,
@@ -93,7 +93,7 @@ void main() {
     );
 
     test(
-      'light surfaceContainerHigh is Pinterest neutral for every preset',
+      'light surfaceContainerHigh is warm neutral for every preset',
       () {
         for (final entry in presetNoOpCases.entries) {
           final theme = AppTheme.getLightTheme(
@@ -112,7 +112,7 @@ void main() {
     );
 
     test(
-      'light scaffold and surfaces use cool porcelain canvas not primary',
+      'light scaffold and surfaces use parchment canvas not primary',
       () {
         final theme = AppTheme.getLightTheme(
           primaryColor: AppColors.primaryCoral,
@@ -134,12 +134,12 @@ void main() {
       },
     );
 
-    test('default sage light theme matches brand ColorScheme roles', () {
+    test('default brown light theme matches brand ColorScheme roles', () {
       final scheme = AppTheme.getLightTheme(
         primaryColor: AppColors.defaultPrimary,
       ).colorScheme;
 
-      expect(scheme.primary, AppColors.primarySage);
+      expect(scheme.primary, AppColors.defaultPrimary);
       expect(scheme.onPrimary, AppColors.lightSchemeOnPrimary);
       expect(scheme.secondary, AppColors.catalogFilterUnselectedLight);
       expect(scheme.onSecondary, AppColors.lightSchemeOnSecondary);

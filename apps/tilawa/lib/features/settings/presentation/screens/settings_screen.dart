@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/app_legal_urls.dart';
 import 'package:tilawa/core/telemetry/sentry_debug_verify_tile.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/layout/list_scroll_bottom_padding.dart';
 import 'package:tilawa/core/utils/legal_url_launcher.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -65,6 +66,7 @@ class SettingsScreen extends StatelessWidget {
             }
           },
           error: (message) => ToastUtils.showErrorToast(message),
+          noGoogleAccounts: () {},
         );
       },
       child: Scaffold(
@@ -75,7 +77,10 @@ class SettingsScreen extends StatelessWidget {
         ),
         body: TilawaCatalogSettingsBody(
           child: ListView(
-            padding: EdgeInsets.symmetric(vertical: tokens.spaceMedium),
+            padding: EdgeInsets.only(
+              top: tokens.spaceMedium,
+              bottom: listScrollBottomPadding(context),
+            ),
             children: [
               const SettingsProfileHeader(),
               const SettingsGuestAccountGroup(),

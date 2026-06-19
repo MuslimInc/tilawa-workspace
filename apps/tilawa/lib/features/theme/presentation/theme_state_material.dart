@@ -9,8 +9,8 @@ import 'package:tilawa/features/theme/presentation/cubit/theme_cubit.dart';
 extension ThemeStateMaterial on ThemeState {
   /// The resolved primary color used to build [AppTheme].
   ///
-  /// Production builds force the brand-locked Sage accent (see
-  /// `docs/tilawa_brand.md` §3 and the `Env.kShowColorPicker` flag). Stored
+  /// Production builds force the brand-locked warm brown accent (see
+  /// `Env.kShowColorPicker` flag). Stored
   /// per-user state is preserved verbatim so dev/QA builds with
   /// `--dart-define=TILAWA_SHOW_COLOR_PICKER=true` can still preview the
   /// picker without a one-way migration.

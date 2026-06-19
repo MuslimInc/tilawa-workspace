@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:tilawa_ui_kit/src/foundation/component_tokens.dart';
@@ -10,6 +12,27 @@ const double kTilawaMediaPlayerBarMinMetadataWidth = 96.0;
 
 /// Artwork size on compact layouts (slightly smaller to free metadata space).
 const double kTilawaMediaPlayerBarCompactArtworkSize = 40.0;
+
+/// Artwork size for the shell dock mini player (compact pill).
+const double kTilawaMediaPlayerBarShellArtworkSize = 32.0;
+
+/// Progress strip and matching bottom inset in the shell dock mini player.
+const double kTilawaMediaPlayerBarShellEdgeBandHeight = 4.0;
+
+/// Splits [maxHeight] around [rowHeight] into top/bottom bands (max [maxBand]).
+///
+/// [bottomBand] absorbs any sub-pixel slack so the three slices sum to
+/// [maxHeight] exactly.
+({double topBand, double bottomBand}) resolveTilawaMediaPlayerCollapsedBands({
+  required double maxHeight,
+  required double rowHeight,
+  double maxBand = kTilawaMediaPlayerBarShellEdgeBandHeight,
+}) {
+  final double slack = math.max(0, maxHeight - rowHeight);
+  final double topBand = math.min(maxBand, (slack / 2).floorToDouble());
+  final double bottomBand = math.max(0, maxHeight - rowHeight - topBand);
+  return (topBand: topBand, bottomBand: bottomBand);
+}
 
 /// Typical horizontal inset outside the bar in the mini-player shell
 /// ([TilawaDesignTokens.spaceLarge] × 2). Used when [layoutWidth] is null.
@@ -36,6 +59,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
     this.onNext,
     this.onSleepTimerTap,
     this.onTap,
+    this.onSubtitleTap,
     this.onClose,
     this.playPauseSemanticIdentifier,
     this.closeSemanticIdentifier,
@@ -47,6 +71,10 @@ class TilawaMediaPlayerBar extends StatelessWidget {
     this.pauseTooltip,
     this.nextTooltip,
     this.sleepTimerTooltip,
+    this.pillBorderRadius,
+    this.shellPillLayout = false,
+    this.contentPaddingOverride,
+    this.backgroundColorOverride,
   });
 
   final String title;
@@ -71,6 +99,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
   final VoidCallback? onNext;
   final VoidCallback? onSleepTimerTap;
   final VoidCallback? onTap;
+  final VoidCallback? onSubtitleTap;
   final VoidCallback? onClose;
 
   /// Optional [Semantics.identifier] for Maestro / accessibility on play-pause.
@@ -94,8 +123,27 @@ class TilawaMediaPlayerBar extends StatelessWidget {
   final String? nextTooltip;
   final String? sleepTimerTooltip;
 
+  /// When set, overrides [TilawaMediaPlayerBarTokens.borderRadius] for a
+  /// capsule-shaped shell mini player.
+  final double? pillBorderRadius;
+
+  /// Compact shell dock: smaller artwork padding, no sleep timer.
+  final bool shellPillLayout;
+
+  /// Optional override for [TilawaMediaPlayerBarTokens.contentPadding].
+  final EdgeInsetsGeometry? contentPaddingOverride;
+
+  /// Optional override for [TilawaMediaPlayerBarTokens.shellBackgroundColor].
+  final Color? backgroundColorOverride;
+
   @override
   Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) => _buildBar(context, constraints),
+    );
+  }
+
+  Widget _buildBar(BuildContext context, BoxConstraints constraints) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final designTokens = theme.tokens;
@@ -119,7 +167,40 @@ class TilawaMediaPlayerBar extends StatelessWidget {
           decoration: .none,
           decorationColor: Colors.transparent,
         );
-    final borderRadius = BorderRadius.circular(componentTokens.borderRadius);
+    final borderRadius = BorderRadius.circular(
+      pillBorderRadius ?? componentTokens.borderRadius,
+    );
+    final TextDirection direction = Directionality.of(context);
+    final EdgeInsets basePadding =
+        (contentPaddingOverride ?? componentTokens.contentPadding).resolve(
+          direction,
+        );
+    double verticalPaddingTop = basePadding.top;
+    double verticalPaddingBottom = basePadding.bottom;
+    if (!shellPillLayout &&
+        constraints.hasBoundedHeight &&
+        constraints.maxHeight.isFinite) {
+      final double rowBudget =
+          constraints.maxHeight -
+          designTokens.progressHeight -
+          (verticalPaddingTop * 2);
+      if (rowBudget < componentTokens.playPauseButtonSize) {
+        verticalPaddingTop = math.max(
+          4,
+          (constraints.maxHeight -
+                  designTokens.progressHeight -
+                  componentTokens.playPauseButtonSize) /
+              2,
+        );
+        verticalPaddingBottom = verticalPaddingTop;
+      }
+    }
+    final EdgeInsetsGeometry contentPadding = EdgeInsets.fromLTRB(
+      basePadding.left,
+      verticalPaddingTop,
+      basePadding.right,
+      verticalPaddingBottom,
+    );
     final String resolvedOpenPlayerLabel =
         openPlayerSemanticLabel ??
         (subtitle == null || subtitle!.isEmpty ? title : '$title, $subtitle');
@@ -128,19 +209,159 @@ class TilawaMediaPlayerBar extends StatelessWidget {
       context,
       layoutWidth: layoutWidth,
     );
-    final bool showSleepTimer = isSleepTimerEnabled;
-    final bool useCompactControls = tilawaMediaPlayerBarNeedsCompactControls(
-      maxWidth: resolvedLayoutWidth,
-      tokens: componentTokens,
-      showSleepTimer: showSleepTimer,
-    );
-    final double artworkSize = useCompactControls
+    final bool tightHeight =
+        constraints.hasBoundedHeight &&
+        constraints.maxHeight.isFinite &&
+        constraints.maxHeight <
+            designTokens.progressHeight +
+                20 +
+                componentTokens.playPauseButtonSize;
+    final bool showSleepTimer =
+        isSleepTimerEnabled && !shellPillLayout && !tightHeight;
+    final bool useCompactControls =
+        shellPillLayout ||
+        tilawaMediaPlayerBarNeedsCompactControls(
+          maxWidth: resolvedLayoutWidth,
+          tokens: componentTokens,
+          showSleepTimer: showSleepTimer,
+        );
+    final double artworkSize = shellPillLayout
+        ? kTilawaMediaPlayerBarShellArtworkSize
+        : useCompactControls
         ? kTilawaMediaPlayerBarCompactArtworkSize
         : componentTokens.artworkSize;
+    final bool useSingleLineMetadata = shellPillLayout || tightHeight;
 
-    return Container(
+    final double artworkInfoGap = shellPillLayout
+        ? designTokens.spaceExtraSmall
+        : componentTokens.artworkInfoGap;
+    final double infoControlsGap = shellPillLayout
+        ? designTokens.spaceExtraSmall
+        : componentTokens.infoControlsGap;
+
+    final VoidCallback? identityTap = onTap;
+    final bool usePillOutline =
+        pillBorderRadius != null && pillBorderRadius! > 0;
+    final double pillBorderInset = usePillOutline
+        ? designTokens.borderWidthThin * 2
+        : 0;
+
+    final Widget contentRow = Row(
+      spacing: infoControlsGap,
+      children: [
+        Expanded(
+          child: _OpenPlayerTapTarget(
+            onTap: identityTap,
+            semanticLabel: identityTap != null ? resolvedOpenPlayerLabel : null,
+            child: Opacity(
+              opacity: identityChromeOpacity.clamp(0.0, 1.0),
+              child: Row(
+                children: [
+                  _ArtworkTile(
+                    size: artworkSize,
+                    radius: componentTokens.artworkRadius,
+                    placeholderColor: componentTokens.artworkPlaceholderColor,
+                    artwork: artwork,
+                    defaultIconSize: componentTokens.defaultIconSize,
+                  ),
+                  SizedBox(width: artworkInfoGap),
+                  Expanded(
+                    child:
+                        titleSubtitle ??
+                        (useSingleLineMetadata &&
+                                subtitle != null &&
+                                subtitle!.isNotEmpty
+                            ? _CompactMetadataLine(
+                                title: title,
+                                subtitle: subtitle!,
+                                titleStyle: titleStyle,
+                                subtitleStyle: subtitleStyle,
+                                onSubtitleTap: onSubtitleTap,
+                              )
+                            : Column(
+                                crossAxisAlignment: .start,
+                                mainAxisAlignment: .center,
+                                spacing: componentTokens.infoGap,
+                                children: [
+                                  Text(
+                                    title,
+                                    style: titleStyle,
+                                    maxLines: 1,
+                                    overflow: .ellipsis,
+                                    textAlign: TextAlign.start,
+                                  ),
+                                  if (subtitle != null && subtitle!.isNotEmpty)
+                                    _SubtitleTapTarget(
+                                      onTap: onSubtitleTap,
+                                      label: subtitle!,
+                                      child: Text(
+                                        subtitle!,
+                                        style: subtitleStyle,
+                                        maxLines: 1,
+                                        overflow: .ellipsis,
+                                        textAlign: TextAlign.start,
+                                      ),
+                                    ),
+                                ],
+                              )),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        _TransportControls(
+          designTokens: designTokens,
+          componentTokens: componentTokens,
+          colorScheme: colorScheme,
+          disabledControlColor: disabledControlColor,
+          isPlaying: isPlaying,
+          canGoPrevious: canGoPrevious,
+          canGoNext: canGoNext,
+          isSleepTimerActive: isSleepTimerActive,
+          showSleepTimer: showSleepTimer,
+          compact: useCompactControls,
+          onPlayPause: onPlayPause,
+          onPrevious: onPrevious,
+          onNext: onNext,
+          onSleepTimerTap: onSleepTimerTap,
+          playPauseSemanticIdentifier: playPauseSemanticIdentifier,
+          previousTooltip: previousTooltip,
+          playTooltip: playTooltip,
+          pauseTooltip: pauseTooltip,
+          nextTooltip: nextTooltip,
+          sleepTimerTooltip: sleepTimerTooltip,
+        ),
+      ],
+    );
+
+    final bool useCollapsedBandLayout =
+        shellPillLayout ||
+        (constraints.hasBoundedHeight &&
+            constraints.maxHeight.isFinite &&
+            tightHeight);
+    final double? availableInnerHeight =
+        useCollapsedBandLayout &&
+            constraints.hasBoundedHeight &&
+            constraints.maxHeight.isFinite
+        ? math.max(0, constraints.maxHeight - pillBorderInset)
+        : null;
+    final ({double topBand, double bottomBand}) collapsedBands =
+        availableInnerHeight != null
+        ? resolveTilawaMediaPlayerCollapsedBands(
+            maxHeight: availableInnerHeight,
+            rowHeight: componentTokens.playPauseButtonSize,
+          )
+        : (
+            topBand: designTokens.progressHeight,
+            bottomBand: shellPillLayout
+                ? kTilawaMediaPlayerBarShellEdgeBandHeight
+                : 0.0,
+          );
+
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: componentTokens.shellBackgroundColor,
+        color: backgroundColorOverride ?? componentTokens.shellBackgroundColor,
         borderRadius: borderRadius,
         boxShadow: componentTokens.shadowOpacity == 0
             ? null
@@ -160,109 +381,68 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                   offset: designTokens.shadowOffsetMedium,
                 ),
               ],
-        border: Border.all(
-          color: componentTokens.shellOutlineColor,
-          width: designTokens.borderWidthThin,
-        ),
+        border: usePillOutline
+            ? Border.all(
+                color: componentTokens.shellOutlineColor,
+                width: designTokens.borderWidthThin,
+              )
+            : Border(
+                top: BorderSide(
+                  color: componentTokens.shellOutlineColor,
+                  width: designTokens.borderWidthThin,
+                ),
+              ),
       ),
       child: ClipRRect(
         borderRadius: borderRadius,
         child: Column(
-          mainAxisSize: .min,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // Progress Bar (Slim at top)
-            progressBarOverride ??
-                LinearProgressIndicator(
-                  value: progress,
-                  backgroundColor: componentTokens.progressTrackBackgroundColor,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    colorScheme.primary,
-                  ),
-                  minHeight: designTokens.progressHeight,
-                ),
-            Padding(
-              padding: componentTokens.contentPadding.resolve(
-                Directionality.of(context),
-              ),
-              child: Row(
-                spacing: componentTokens.infoControlsGap,
-                children: [
-                  Expanded(
-                    child: _OpenPlayerTapTarget(
-                      onTap: onTap,
-                      semanticLabel: onTap != null
-                          ? resolvedOpenPlayerLabel
-                          : null,
-                      child: Opacity(
-                        opacity: identityChromeOpacity.clamp(0.0, 1.0),
-                        child: Row(
-                          children: [
-                            _ArtworkTile(
-                              size: artworkSize,
-                              radius: componentTokens.artworkRadius,
-                              placeholderColor:
-                                  componentTokens.artworkPlaceholderColor,
-                              artwork: artwork,
-                              defaultIconSize: componentTokens.defaultIconSize,
+            SizedBox(
+              height: collapsedBands.topBand,
+              child: collapsedBands.topBand <= 0
+                  ? const SizedBox.shrink()
+                  : ClipRect(
+                      clipBehavior: Clip.hardEdge,
+                      child: _ProgressTapTarget(
+                        onTap: null,
+                        semanticLabel: null,
+                        child:
+                            progressBarOverride ??
+                            LinearProgressIndicator(
+                              value: progress,
+                              backgroundColor:
+                                  componentTokens.progressTrackBackgroundColor,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                colorScheme.primary,
+                              ),
+                              minHeight: collapsedBands.topBand,
                             ),
-                            SizedBox(width: componentTokens.artworkInfoGap),
-                            Expanded(
-                              child:
-                                  titleSubtitle ??
-                                  Column(
-                                    crossAxisAlignment: .start,
-                                    mainAxisAlignment: .center,
-                                    spacing: componentTokens.infoGap,
-                                    children: [
-                                      Text(
-                                        title,
-                                        style: titleStyle,
-                                        maxLines: 1,
-                                        overflow: .ellipsis,
-                                        textAlign: TextAlign.start,
-                                      ),
-                                      if (subtitle != null &&
-                                          subtitle!.isNotEmpty)
-                                        Text(
-                                          subtitle!,
-                                          style: subtitleStyle,
-                                          maxLines: 1,
-                                          overflow: .ellipsis,
-                                          textAlign: TextAlign.start,
-                                        ),
-                                    ],
-                                  ),
-                            ),
-                          ],
-                        ),
                       ),
                     ),
-                  ),
-                  _TransportControls(
-                    designTokens: designTokens,
-                    componentTokens: componentTokens,
-                    colorScheme: colorScheme,
-                    disabledControlColor: disabledControlColor,
-                    isPlaying: isPlaying,
-                    canGoPrevious: canGoPrevious,
-                    canGoNext: canGoNext,
-                    isSleepTimerActive: isSleepTimerActive,
-                    showSleepTimer: showSleepTimer,
-                    compact: useCompactControls,
-                    onPlayPause: onPlayPause,
-                    onPrevious: onPrevious,
-                    onNext: onNext,
-                    onSleepTimerTap: onSleepTimerTap,
-                    playPauseSemanticIdentifier: playPauseSemanticIdentifier,
-                    previousTooltip: previousTooltip,
-                    playTooltip: playTooltip,
-                    pauseTooltip: pauseTooltip,
-                    nextTooltip: nextTooltip,
-                    sleepTimerTooltip: sleepTimerTooltip,
-                  ),
-                ],
-              ),
             ),
+            if (useCollapsedBandLayout) ...[
+              Padding(
+                padding: EdgeInsetsDirectional.only(
+                  start: basePadding.resolve(direction).left,
+                  end: basePadding.resolve(direction).right,
+                ),
+                child: SizedBox(
+                  height: componentTokens.playPauseButtonSize,
+                  child: contentRow,
+                ),
+              ),
+              const Expanded(child: SizedBox.shrink()),
+            ] else
+              Padding(
+                padding: contentPadding.resolve(direction),
+                child: SizedBox(
+                  height: useSingleLineMetadata
+                      ? componentTokens.playPauseButtonSize
+                      : null,
+                  child: contentRow,
+                ),
+              ),
           ],
         ),
       ),
@@ -317,6 +497,117 @@ double _tilawaMediaPlayerBarFullTransportWidth({
   final int controlCount = showSleepTimer ? 2 : 1;
   return controlCount * tokens.controlButtonSize +
       (controlCount - 1) * tokens.controlsGap;
+}
+
+/// Single-line surah · reciter row for the compact shell mini player.
+class _CompactMetadataLine extends StatelessWidget {
+  const _CompactMetadataLine({
+    required this.title,
+    required this.subtitle,
+    required this.titleStyle,
+    required this.subtitleStyle,
+    this.onSubtitleTap,
+  });
+
+  final String title;
+  final String subtitle;
+  final TextStyle titleStyle;
+  final TextStyle subtitleStyle;
+  final VoidCallback? onSubtitleTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Flexible(
+          child: Text(
+            title,
+            style: titleStyle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        Text(
+          ' · ',
+          style: subtitleStyle,
+          maxLines: 1,
+        ),
+        Flexible(
+          child: _SubtitleTapTarget(
+            onTap: onSubtitleTap,
+            label: subtitle,
+            child: Text(
+              subtitle,
+              style: subtitleStyle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Reciter / secondary line — optional separate action (e.g. open Reciters tab).
+class _SubtitleTapTarget extends StatelessWidget {
+  const _SubtitleTapTarget({
+    required this.onTap,
+    required this.label,
+    required this.child,
+  });
+
+  final VoidCallback? onTap;
+  final String label;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (onTap == null) {
+      return child;
+    }
+
+    return Semantics(
+      button: true,
+      label: label,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: .opaque,
+        child: child,
+      ),
+    );
+  }
+}
+
+/// Progress strip that can expand the full player when identity uses another
+/// action (e.g. shell mini metadata opens Reciters).
+class _ProgressTapTarget extends StatelessWidget {
+  const _ProgressTapTarget({
+    required this.onTap,
+    required this.semanticLabel,
+    required this.child,
+  });
+
+  final VoidCallback? onTap;
+  final String? semanticLabel;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (onTap == null) {
+      return child;
+    }
+
+    return Semantics(
+      button: true,
+      label: semanticLabel,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: .opaque,
+        child: child,
+      ),
+    );
+  }
 }
 
 /// Artwork + metadata strip that opens the full player when tapped.

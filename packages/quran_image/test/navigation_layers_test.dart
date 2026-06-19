@@ -169,6 +169,85 @@ void main() {
     expect(interactionEnds, greaterThanOrEqualTo(0));
   });
 
+  testWidgets('panel renders the index button and trailing action in reach', (
+    tester,
+  ) async {
+    var indexPressed = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(size: Size(400, 800)),
+          child: Scaffold(
+            body: NavigationSliderOverlay(
+              screenWidth: 400,
+              committedPage: 20,
+              state: const PageState(
+                currentPage: 20,
+                totalPages: 604,
+                juzNumber: 2,
+                hizbNumber: 4,
+              ),
+              canGoToPreviousPage: true,
+              canGoToNextPage: true,
+              onPreviewPageChanged: (_) {},
+              onPageNavigationRequested: (_) {},
+              onPreviousPageRequested: () {},
+              onNextPageRequested: () {},
+              onInteractionStart: () {},
+              onInteractionEnd: () {},
+              onShowIndex: () => indexPressed++,
+              trailingAction: const Icon(Icons.view_list_rounded),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Index button (icon + label) and the host trailing action both render
+    // inside the panel — the thumb-reachable zone.
+    expect(find.byIcon(Icons.format_list_bulleted_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.view_list_rounded), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.format_list_bulleted_rounded));
+    await tester.pump();
+    expect(indexPressed, 1);
+  });
+
+  testWidgets('panel omits the action row when no actions are provided', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(size: Size(400, 800)),
+          child: Scaffold(
+            body: NavigationSliderOverlay(
+              screenWidth: 400,
+              committedPage: 20,
+              state: const PageState(
+                currentPage: 20,
+                totalPages: 604,
+                juzNumber: 2,
+                hizbNumber: 4,
+              ),
+              canGoToPreviousPage: true,
+              canGoToNextPage: true,
+              onPreviewPageChanged: (_) {},
+              onPageNavigationRequested: (_) {},
+              onPreviousPageRequested: () {},
+              onNextPageRequested: () {},
+              onInteractionStart: () {},
+              onInteractionEnd: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.format_list_bulleted_rounded), findsNothing);
+  });
+
   testWidgets('atom widgets render enabled and disabled states', (
     tester,
   ) async {

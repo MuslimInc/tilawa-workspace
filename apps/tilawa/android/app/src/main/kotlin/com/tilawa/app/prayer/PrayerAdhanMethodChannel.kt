@@ -48,8 +48,24 @@ internal object PrayerAdhanMethodChannel {
                     val nm = appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                     return nm.areNotificationsEnabled()
                 }
-                override fun schedule(id: Int, name: String, key: String, triggerMs: Long, sound: String) =
-                    AdhanScheduler.schedule(appContext, id, name, key, triggerMs, sound)
+                override fun schedule(
+                    id: Int,
+                    name: String,
+                    key: String,
+                    triggerMs: Long,
+                    sound: String,
+                    locationName: String,
+                    languageCode: String,
+                ) = AdhanScheduler.schedule(
+                    appContext,
+                    id,
+                    name,
+                    key,
+                    triggerMs,
+                    sound,
+                    locationName,
+                    languageCode,
+                )
                 override fun cancel(id: Int) =
                     AdhanScheduler.cancel(appContext, id)
                 override fun cancelAll() =

@@ -25,6 +25,7 @@ class QuranImageReader extends StatefulWidget {
     this.restoreSystemUiOverlayStyle,
     this.onShareRequested,
     this.onShowIndex,
+    this.viewSwitchAction,
     this.headerImageFilter,
   });
 
@@ -52,9 +53,13 @@ class QuranImageReader extends StatefulWidget {
   /// The host app is responsible for opening its share composer.
   final void Function(int currentPage)? onShareRequested;
 
-  /// Called when the user taps the surah index button in the navigation
-  /// overlay. The host app is responsible for showing its surah index UI.
+  /// Called when the user taps the surah index button in the bottom navigation
+  /// panel. The host app is responsible for showing its surah index UI.
   final void Function()? onShowIndex;
+
+  /// Optional host-supplied action (e.g. the Mushaf/ayah-list view switch)
+  /// rendered in the bottom navigation panel's action row, within thumb reach.
+  final Widget? viewSwitchAction;
 
   /// Optional filter for the Surah header images.
   final ColorFilter? headerImageFilter;
@@ -1138,6 +1143,7 @@ class _QuranImageReaderState extends State<QuranImageReader>
                   ? () => widget.onShareRequested!(_lastSettledPageIndex + 1)
                   : null,
               onShowIndex: widget.onShowIndex,
+              trailingAction: widget.viewSwitchAction,
             ),
           ],
         ),

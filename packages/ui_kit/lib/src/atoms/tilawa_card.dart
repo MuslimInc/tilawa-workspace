@@ -57,6 +57,7 @@ class TilawaCard extends StatelessWidget {
     this.onTap,
     this.splashColor,
     this.highlightColor,
+    this.expandHeight = false,
   });
 
   final Widget child;
@@ -71,6 +72,9 @@ class TilawaCard extends StatelessWidget {
   final VoidCallback? onTap;
   final Color? splashColor;
   final Color? highlightColor;
+
+  /// When true, expands to the maximum height offered by the parent.
+  final bool expandHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -118,6 +122,7 @@ class TilawaCard extends StatelessWidget {
 
     return SizedBox(
       width: double.infinity,
+      height: expandHeight ? double.infinity : null,
       child: hasShadow
           ? _TilawaCardShadow(
               borderRadius: borderRadiusValue,
@@ -149,17 +154,6 @@ class _TilawaCardShadow extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: borderRadius,
         boxShadow: [
-          // Ambient layer: tight, low-opacity — gives the card a "lifted off
-          // surface" feel at close range even when the directional shadow is subtle.
-          BoxShadow(
-            color: colorScheme.shadow.withValues(
-              alpha: designTokens.opacityShadow * 0.55,
-            ),
-            blurRadius: 2,
-            offset: const Offset(0, 1),
-          ),
-          // Directional layer: larger blur, slightly stronger — the main
-          // perceived depth cue from overhead ambient light.
           BoxShadow(
             color: colorScheme.shadow.withValues(
               alpha: designTokens.opacityShadow,

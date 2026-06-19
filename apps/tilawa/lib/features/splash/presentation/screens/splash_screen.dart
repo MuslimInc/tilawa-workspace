@@ -99,6 +99,7 @@ class _SplashScreenState extends State<SplashScreen> {
               await _showAuthErrorDialog(context, message);
               if (context.mounted) _goAndReset(const LoginRoute().location);
             },
+            noGoogleAccounts: () {},
           );
         },
         child: BlocListener<SplashBloc, SplashState>(

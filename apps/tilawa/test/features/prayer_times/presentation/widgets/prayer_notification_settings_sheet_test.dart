@@ -67,11 +67,11 @@ void main() {
       expect(find.text('Play Adhan'), findsOneWidget);
     });
 
-    testWidgets('renders close button', (tester) async {
+    testWidgets('renders footer Done button', (tester) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.close), findsOneWidget);
+      expect(find.text('Done'), findsOneWidget);
     });
   });
 }

@@ -43,4 +43,36 @@ class DefaultPrayerStorageTest {
         assertEquals("new_json", storage.getPendingAlarmsJson())
         assertFalse(cpsPrefs.contains("pending_alarms_json"))
     }
+
+    @Test
+    fun `test last notification location lifecycle`() {
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val storage = DefaultPrayerStorage(context)
+
+        assertNull(storage.getLastNotificationLocationName())
+
+        storage.setLastNotificationLocationName("Cairo")
+        assertEquals("Cairo", storage.getLastNotificationLocationName())
+
+        storage.setLastNotificationLocationName(null)
+        assertNull(storage.getLastNotificationLocationName())
+    }
+
+    @Test
+    fun `test active alarm id lifecycle`() {
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val storage = DefaultPrayerStorage(context)
+
+        assertTrue(storage.getActiveIds().isEmpty())
+
+        storage.addActiveId(10)
+        storage.addActiveId(20)
+        assertEquals(setOf(10, 20), storage.getActiveIds())
+
+        storage.removeActiveId(10)
+        assertEquals(setOf(20), storage.getActiveIds())
+
+        storage.clearActiveIds()
+        assertTrue(storage.getActiveIds().isEmpty())
+    }
 }

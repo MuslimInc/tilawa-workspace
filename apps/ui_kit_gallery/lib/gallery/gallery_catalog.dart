@@ -15,6 +15,13 @@ const List<GalleryEntry> galleryCatalog = [
     builder: AtomsDemos.button,
   ),
   GalleryEntry(
+    id: 'tilawa_checkbox',
+    name: 'TilawaCheckbox',
+    category: GalleryCategory.atoms,
+    description: '44×44 dp adaptive checkbox with compact visual slot.',
+    builder: AtomsDemos.checkbox,
+  ),
+  GalleryEntry(
     id: 'tilawa_card',
     name: 'TilawaCard',
     category: GalleryCategory.atoms,
@@ -37,6 +44,13 @@ const List<GalleryEntry> galleryCatalog = [
     name: 'TilawaErrorState',
     category: GalleryCategory.atoms,
     builder: AtomsDemos.errorState,
+  ),
+  GalleryEntry(
+    id: 'tilawa_google_sign_in_button',
+    name: 'TilawaGoogleSignInButton',
+    category: GalleryCategory.atoms,
+    description: 'Branded Sign in with Google control.',
+    builder: AtomsDemos.googleSignInButton,
   ),
   GalleryEntry(
     id: 'tilawa_illustrated_state',
@@ -86,7 +100,7 @@ const List<GalleryEntry> galleryCatalog = [
     id: 'tilawa_switch',
     name: 'TilawaSwitch',
     category: GalleryCategory.atoms,
-    description: '48×48 dp adaptive switch atom.',
+    description: '44×44 dp adaptive switch atom.',
     builder: AtomsDemos.switchAtom,
   ),
   GalleryEntry(
@@ -98,6 +112,13 @@ const List<GalleryEntry> galleryCatalog = [
 
   // Molecules
   GalleryEntry(
+    id: 'tilawa_app_bar',
+    name: 'TilawaAppBar',
+    category: GalleryCategory.molecules,
+    description: 'Standard feature scaffold app bar.',
+    builder: MoleculesDemos.appBar,
+  ),
+  GalleryEntry(
     id: 'tilawa_alphabet_scrollbar',
     name: 'TilawaAlphabetScrollbar',
     category: GalleryCategory.molecules,
@@ -108,6 +129,20 @@ const List<GalleryEntry> galleryCatalog = [
     name: 'TilawaChip',
     category: GalleryCategory.molecules,
     builder: MoleculesDemos.chip,
+  ),
+  GalleryEntry(
+    id: 'tilawa_catalog_app_bar',
+    name: 'TilawaCatalogAppBar',
+    category: GalleryCategory.molecules,
+    description: 'Parchment catalog header with optional search row.',
+    builder: MoleculesDemos.catalogAppBar,
+  ),
+  GalleryEntry(
+    id: 'tilawa_catalog_settings',
+    name: 'TilawaCatalogSettings',
+    category: GalleryCategory.molecules,
+    description: 'Flat Pinterest-style settings sections and rows.',
+    builder: MoleculesDemos.catalogSettings,
   ),
   GalleryEntry(
     id: 'tilawa_count_progress_ring',
@@ -146,10 +181,31 @@ const List<GalleryEntry> galleryCatalog = [
     builder: MoleculesDemos.metadataChip,
   ),
   GalleryEntry(
+    id: 'tilawa_navigation_row',
+    name: 'TilawaNavigationRow',
+    category: GalleryCategory.molecules,
+    description: 'Hub drill-down row inside TilawaHubNavigationGroup.',
+    builder: MoleculesDemos.navigationRow,
+  ),
+  GalleryEntry(
     id: 'tilawa_permission_banner',
     name: 'TilawaPermissionBanner',
     category: GalleryCategory.molecules,
     builder: MoleculesDemos.permissionBanner,
+  ),
+  GalleryEntry(
+    id: 'tilawa_primary_fab',
+    name: 'TilawaPrimaryFab',
+    category: GalleryCategory.molecules,
+    description: 'Primary floating action with TilawaFabLocation helper.',
+    builder: MoleculesDemos.primaryFab,
+  ),
+  GalleryEntry(
+    id: 'tilawa_quick_filter_bar',
+    name: 'TilawaQuickFilterBar',
+    category: GalleryCategory.molecules,
+    description: 'Horizontal catalog filter pill strip.',
+    builder: MoleculesDemos.quickFilterBar,
   ),
   GalleryEntry(
     id: 'tilawa_search_field',
@@ -258,6 +314,35 @@ const List<GalleryEntry> galleryCatalog = [
     description: 'Loading, empty, error, and content states with retry.',
     builder: OrganismsDemos.asyncContent,
   ),
+  GalleryEntry(
+    id: 'tilawa_hero_summary_card',
+    name: 'TilawaHeroSummaryCard',
+    category: GalleryCategory.organisms,
+    description: 'Dashboard summary card with badges and progress footer.',
+    builder: OrganismsDemos.heroSummaryCard,
+  ),
+  GalleryEntry(
+    id: 'behance_featured_card',
+    name: 'Behance Featured Card',
+    category: GalleryCategory.organisms,
+    description: 'Warm gold gradient Last Read dashboard card pattern.',
+    builder: OrganismsDemos.behanceFeaturedCard,
+  ),
+  GalleryEntry(
+    id: 'travel_dashboard_sheet',
+    name: 'Travel Dashboard Sheet',
+    category: GalleryCategory.organisms,
+    description:
+        'Ronas IT–style hero gradient with overlapping parchment content lip.',
+    builder: OrganismsDemos.travelDashboardSheet,
+  ),
+  GalleryEntry(
+    id: 'behance_instruction_chip',
+    name: 'Behance Instruction Chip',
+    category: GalleryCategory.organisms,
+    description: 'Qibla rotation hint chip on parchment tertiary fill.',
+    builder: OrganismsDemos.behanceInstructionChip,
+  ),
 
   // Foundation
   GalleryEntry(
@@ -274,6 +359,13 @@ const List<GalleryEntry> galleryCatalog = [
     category: GalleryCategory.foundation,
     description: 'Responsive grid with max cross-axis extent.',
     builder: FoundationDemos.contentGrid,
+  ),
+  GalleryEntry(
+    id: 'show_tilawa_dialog',
+    name: 'showTilawaDialog',
+    category: GalleryCategory.foundation,
+    description: 'Centered confirm and picker dialog presets.',
+    builder: FoundationDemos.dialog,
   ),
   GalleryEntry(
     id: 'show_tilawa_modal_bottom_sheet',

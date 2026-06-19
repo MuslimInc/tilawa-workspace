@@ -53,11 +53,12 @@ enum TilawaButtonSize {
 /// Supports multiple variants, sizes, and states (including loading and disabled).
 ///
 /// [TilawaButton] handles its own internal layout, including icons and
-/// loading indicators, while ensuring a minimum touch target of 48×48.
+/// loading indicators, while ensuring a minimum touch target of 44×44
+/// ([kTilawaMinInteractiveDimension]).
 ///
 /// ## Touch-target contract
 ///
-/// All non-shrink-wrapped buttons are forced to ≥ 48×48
+/// All non-shrink-wrapped buttons are forced to ≥ 44×44
 /// ([kTilawaMinInteractiveDimension]) regardless of [size] — a `small`
 /// (32 dp visual) button still gets a 48 dp hit target via an outer
 /// [ConstrainedBox]. [shrinkWrapTapTarget] is the **only** way to drop below
@@ -144,8 +145,8 @@ class TilawaButton extends StatelessWidget {
   /// Merged on top of the built-in label [TextStyle] (font size from [size]).
   final TextStyle? textStyle;
 
-  /// When true, skips the 48×48 minimum and uses a shrink-wrapped tap
-  /// target ([MaterialTapTargetSize.shrinkWrap]).
+  /// When true, skips the 44×44 minimum ([kTilawaMinInteractiveDimension])
+  /// and uses a shrink-wrapped tap target ([MaterialTapTargetSize.shrinkWrap]).
   final bool shrinkWrapTapTarget;
 
   /// Whether the button is effectively disabled.
@@ -168,10 +169,7 @@ class TilawaButton extends StatelessWidget {
     final (height, horizontalPadding, fontSize, iconSize) = _getDimensions();
 
     final designTokens = theme.extension<TilawaDesignTokens>();
-    // Buttons are tappable affordances → the `pill` radius family: a true
-    // pill when short, capped at the card radius when tall, so they never
-    // out-round adjacent cards (brand-doc §5; see [TilawaRadiusResolverX]).
-    // An explicit [borderRadius] still wins for one-off marketing surfaces.
+    // Buttons are tappable affordances → full pill (`height / 2`).
     final double resolvedRadius =
         borderRadius ??
         designTokens?.resolveRadius(

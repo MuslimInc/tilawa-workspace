@@ -6,6 +6,7 @@
   "networkError": "Please check your internet connection and try again.",
   "appTitle": "AlQuran",
   "retry": "Retry",
+  "surahIndex": "Surah index",
   "juz": "Juz {number}",
   "@juz": {
     "placeholders": {

@@ -1,30 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/downloads/presentation/widgets/download_button.dart';
-import 'package:tilawa/features/surah/domain/entities/surah_entity.dart';
-import 'package:tilawa/router/router.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../models/reciter_surah_list_item.dart';
 import '../reciter_semantics_ids.dart';
 import 'reciter_catalog_chrome.dart';
 
 class SurahListTile extends StatelessWidget {
   const SurahListTile({
     super.key,
-    required this.surah,
-    required this.index,
-    required this.reciterName,
-    required this.reciterId,
+    required this.item,
     required this.onTap,
   });
 
-  final SurahEntity surah;
-  final int index;
-  final String reciterName;
-  final int reciterId;
+  final ReciterSurahListItem item;
   final VoidCallback onTap;
 
   @override
@@ -32,29 +24,15 @@ class SurahListTile extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
-    final double tileRadius = tokens.radiusLarge;
-    // Leading badge size matches the reciter avatar (iconSizeLarge + spaceExtraLarge = 48dp).
+    final double tileRadius = tokens.resolveRadius(
+      family: TilawaRadiusFamily.card,
+    );
     final double badgeSize = tokens.iconSizeLarge + tokens.spaceExtraLarge;
     final Color activeFill = ReciterCatalogChrome.activeFill(colorScheme);
     final Color activeOnFill = ReciterCatalogChrome.activeOnFill(colorScheme);
-    // Badge bg cycles through the same M3 container palette as the reciter avatar,
-    // keyed by surah index so adjacent rows are visually distinct.
-    final List<Color> badgePalette = [
-      colorScheme.primaryContainer,
-      colorScheme.secondaryContainer,
-      colorScheme.tertiaryContainer,
-      colorScheme.surfaceContainerHighest,
-    ];
-    final List<Color> badgeFgPalette = [
-      colorScheme.onPrimaryContainer,
-      colorScheme.onSecondaryContainer,
-      colorScheme.onTertiaryContainer,
-      colorScheme.onSurfaceVariant,
-    ];
-    final Color idleFill = badgePalette[index % badgePalette.length];
-    final Color idleFg = badgeFgPalette[index % badgeFgPalette.length];
+    final Color idleFill = ReciterCatalogChrome.idleFill(colorScheme);
+    final Color idleFg = colorScheme.primary;
 
-    // Combine selectors to reduce overhead and subscription count
     final (bool isPlaying, bool isCurrentItem) = context
         .select<AudioPlayerBloc, (bool, bool)>((bloc) {
           final AudioEntity? currentAudio = bloc.state.currentAudio;
@@ -63,8 +41,8 @@ class SurahListTile extends StatelessWidget {
 
           final bool isCurrent =
               shouldShowPlayer &&
-              (currentAudio?.id == surah.id ||
-                  currentAudio?.url == surah.audio.url);
+              (currentAudio?.id == item.audioId ||
+                  currentAudio?.url == item.audioUrl);
 
           final bool playing = isCurrent && (playbackState?.isPlaying ?? false);
 
@@ -88,12 +66,10 @@ class SurahListTile extends StatelessWidget {
     }
 
     return Semantics(
-      identifier: ReciterSemanticsIds.surahRow(
-        surah.formattedId.isNotEmpty ? surah.formattedId : '${index + 1}',
-      ),
+      identifier: ReciterSemanticsIds.surahRow(item.semanticsKey),
       button: true,
       child: TilawaCard(
-        surface: TilawaCardSurface.flat,
+        surface: TilawaCardSurface.raised,
         backgroundColor: isCurrentItem
             ? colorScheme.primaryContainer.withValues(
                 alpha: tokens.opacitySubtle * 2,
@@ -112,18 +88,13 @@ class SurahListTile extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Leading: rounded-rect badge — same size & radius family as ReciterCard avatar.
             AnimatedContainer(
               duration: tokens.durationFast,
               width: badgeSize,
               height: badgeSize,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                // Apply same opacityEmphasis (0.7) dampening as the reciter avatar —
-                // keeps container colors soft across all four palette slots.
-                color: isCurrentItem
-                    ? activeFill
-                    : idleFill.withValues(alpha: tokens.opacityEmphasis),
+                color: isCurrentItem ? activeFill : idleFill,
                 borderRadius: BorderRadius.circular(tokens.radiusLarge),
                 border: Border.all(
                   color: isCurrentItem
@@ -141,9 +112,7 @@ class SurahListTile extends StatelessWidget {
                       size: tokens.iconSizeMedium,
                     )
                   : Text(
-                      surah.formattedId.isNotEmpty
-                          ? surah.formattedId
-                          : '${index + 1}',
+                      item.formattedNumber,
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: idleFg,
                         fontWeight: FontWeight.w700,
@@ -152,112 +121,34 @@ class SurahListTile extends StatelessWidget {
                     ),
             ),
             SizedBox(width: tokens.spaceMedium),
-            // Content block — mirrors ReciterCard's title+subtitle column.
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                spacing: tokens.spaceExtraSmall,
-                children: [
-                  Text(
-                    surah.name,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: colorScheme.onSurface,
-                      height: 1.2,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    surah.reciterName,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+              child: Text(
+                item.displayName,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: colorScheme.onSurface,
+                  height: 1.2,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-            // Trailing: download only — play state is shown on the leading badge.
             DownloadButton(
-              url: surah.id,
-              surahTitle: surah.name,
-              reciterName: reciterName,
-              reciterId: reciterId,
+              url: item.audioId,
+              surahTitle: item.displayName,
+              reciterName: item.reciterName,
+              reciterId: item.reciterId,
               catalogChrome: true,
-              initialIsDownloaded: surah.isDownloaded,
-              initialIsDownloading: surah.isDownloading,
-              initialProgress: surah.downloadProgress,
+              initialIsDownloaded: item.isDownloaded,
+              initialIsDownloading: item.isDownloading,
+              initialProgress: item.downloadProgress,
               identifier: ReciterSemanticsIds.surahDownloadButton(
-                surah.formattedId.isNotEmpty
-                    ? surah.formattedId
-                    : '${index + 1}',
+                item.semanticsKey,
               ),
             ),
           ],
         ),
       ),
-    );
-  }
-
-  void showSurahOptionsSheet(BuildContext context, SurahEntity surah) {
-    final ThemeData theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
-    final int surahNumber = int.tryParse(surah.formattedId) ?? (index + 1);
-
-    showTilawaModalBottomSheet<void>(
-      context: context,
-      backgroundColor: colorScheme.surface,
-      shape: TilawaBottomSheetScaffold.modalShape(context),
-      builder: (sheetContext) {
-        final bottomPadding = sheetContext.floatingBottomPadding;
-        return Padding(
-          padding: EdgeInsets.only(bottom: bottomPadding),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(height: tokens.spaceMedium),
-              const TilawaSheetHandle(),
-              Text(
-                surah.name,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              SizedBox(height: tokens.spaceSmall),
-              const TilawaDivider(),
-              ListTile(
-                leading: Icon(
-                  Icons.menu_book_rounded,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-                title: Text(context.l10n.quranReader),
-                subtitle: Text(context.l10n.continueReading),
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  QuranReaderRoute(surahNumber: surahNumber).push(context);
-                },
-              ),
-              ListTile(
-                leading: Icon(
-                  Icons.bookmark_outline_rounded,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-                title: Text(context.l10n.addBookmark),
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  const BookmarksRoute().push(context);
-                },
-              ),
-              SizedBox(height: tokens.spaceLarge),
-            ],
-          ),
-        );
-      },
     );
   }
 }

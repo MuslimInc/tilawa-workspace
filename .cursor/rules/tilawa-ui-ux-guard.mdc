@@ -1,0 +1,40 @@
+---
+description: Guard pass for generated or changed Tilawa UI/UX — hierarchy, flows, brand, placement policy, accessibility, kit components. Apply reactively after building or refactoring screens in apps/tilawa, on home dashboard work, or when the user asks to review UI/UX. Not for Dart logic (clean-code-guard) or tests (test-guard).
+globs: "apps/tilawa/lib/features/**/presentation/**/*.dart"
+alwaysApply: false
+---
+
+# tilawa-ui-ux-guard (Cursor rule)
+
+Quality gate for **presentation-layer** UI changes in Tilawa.
+
+Full skill (canonical source):
+[`.agents/skills/tilawa-ui-ux-guard/SKILL.md`](../../.agents/skills/tilawa-ui-ux-guard/SKILL.md).
+
+Companion skills:
+- [`tilawa-apply-ux-principles`](../../.agents/skills/tilawa-apply-ux-principles/SKILL.md) — flows, placement, states
+- [`tilawa-apply-ui-principles`](../../.agents/skills/tilawa-apply-ui-principles/SKILL.md) — composition, components
+- [`flutter-apply-tilawa-theming`](../../.agents/skills/flutter-apply-tilawa-theming/SKILL.md) — tokens and colors
+
+## Always check
+
+1. User goal and primary path (≤3 taps from shell for daily actions)
+2. Worship-surface placement — no support/tours/popups on reader, prayer, athkar counting
+3. **Home does not duplicate bottom-nav destinations** (Prayer, Athkar, Settings, etc.)
+4. One primary CTA per viewport; calm copy (no Premium/Unlock/exclamation marketing)
+5. Tokens only — no raw hex or magic spacing in features
+6. Empty, loading, and error states for lists and customizable sections
+7. `TilawaSectionTitle` + sibling `TilawaIconActionButton` for section edit (no fake trailing)
+8. `TilawaCard` sibling pattern when nested actions differ from card tap
+9. Touch targets ≥ 48 dp (`tokens.minInteractiveDimension`); RTL + text scale 1.4
+10. FAB/lists clear `QuranPlayerWidget.fabBottomOffset` when applicable
+
+## Findings format
+
+Use [review-report-template.md](../../.agents/skills/tilawa-ui-ux-guard/references/review-report-template.md):
+
+- **Critical** — placement violation, duplicated shell IA, broken path, data loss, a11y blocker
+- **Major** — hierarchy, missing states, brand/token break, obscured FAB
+- **Minor** — spacing or tone nit
+
+Run `dart analyze` and targeted `flutter test` — this rule is the judgement layer.

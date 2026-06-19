@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/layout/list_scroll_bottom_padding.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
+import 'package:tilawa/shared/widgets/quran_player_widget.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../features/playlists/domain/entities/playlist.dart';
@@ -28,6 +30,9 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
   @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = context.l10n;
+    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final double fabBottomOffset =
+        QuranPlayerWidget.fabBottomOffset(context) + tokens.spaceLarge;
 
     return Scaffold(
       appBar: TilawaCatalogAppBar(
@@ -137,8 +142,12 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
       floatingActionButton: TilawaPrimaryFab(
         heroTag: 'playlists_fab',
         icon: Icons.add,
-        placement: TilawaFabPlacement.end,
+        placement: TilawaFabPlacement.start,
         onPressed: () => _showCreatePlaylistDialog(context),
+      ),
+      floatingActionButtonLocation: TilawaFabLocation.placement(
+        TilawaFabPlacement.start,
+        bottomOffset: fabBottomOffset,
       ),
     );
   }
@@ -176,6 +185,9 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
           child: playlists.isEmpty
               ? _buildEmptyState(context, l10n)
               : ListView.builder(
+                  padding: EdgeInsets.only(
+                    bottom: listScrollBottomPadding(context),
+                  ),
                   itemCount: playlists.length,
                   itemBuilder: (context, index) {
                     final Playlist playlist = playlists[index];

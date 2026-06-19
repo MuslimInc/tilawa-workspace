@@ -603,7 +603,7 @@ class PageNavigationBarTheme extends ThemeExtension<PageNavigationBarTheme> {
     previewPillBorderAlphaDark: 0.34,
     previewPillShadowAlphaLight: 0.12,
     previewPillShadowAlphaDark: 0.28,
-    headerActionSize: 44.0,
+    headerActionSize: 48.0,
     actionButtonRadius: 14.0,
     actionButtonIconSize: 20.0,
     actionButtonBgAlphaLight: 0.1,

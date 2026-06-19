@@ -45,6 +45,27 @@ class AdhanReceiverTest {
     }
 
     @Test
+    fun `onReceive forwards location and language to playback service`() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val receiver = AdhanReceiver()
+        val intent = Intent("com.tilawa.app.prayer.ACTION_FIRE_ADHAN").apply {
+            putExtra(AdhanScheduler.EXTRA_NOTIFICATION_ID, 123)
+            putExtra(AdhanScheduler.EXTRA_PRAYER_NAME, "fajr")
+            putExtra(AdhanScheduler.EXTRA_PRAYER_KEY, "fajr")
+            putExtra(AdhanScheduler.EXTRA_LOCATION_NAME, "Cairo")
+            putExtra(AdhanScheduler.EXTRA_LANGUAGE_CODE, "ar")
+        }
+
+        receiver.onReceive(context, intent)
+
+        val shadowContext = Shadows.shadowOf(context as android.app.Application)
+        val nextService = shadowContext.nextStartedService
+        assertNotNull(nextService)
+        assertEquals("Cairo", nextService.getStringExtra(AdhanScheduler.EXTRA_LOCATION_NAME))
+        assertEquals("ar", nextService.getStringExtra(AdhanScheduler.EXTRA_LANGUAGE_CODE))
+    }
+
+    @Test
     fun `onReceive ignores unknown actions`() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val receiver = AdhanReceiver()

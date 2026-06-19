@@ -15,14 +15,14 @@ void main() {
       );
     });
 
-    test('ink tint maps to primary container pair', () {
+    test('ink tint maps to neutral fill and charcoal icon', () {
       expect(
         lightScheme.semanticTintBackground(TilawaSemanticTint.ink),
-        lightScheme.primaryContainer,
+        lightScheme.surfaceContainerHigh,
       );
       expect(
         lightScheme.semanticTintForeground(TilawaSemanticTint.ink),
-        lightScheme.onPrimaryContainer,
+        lightScheme.primary,
       );
     });
 

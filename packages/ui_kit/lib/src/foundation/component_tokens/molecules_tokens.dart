@@ -368,13 +368,11 @@ class TilawaIconActionButtonTokens {
   }
 }
 
-/// Pinterest-style catalog filter selected colours (chips, tab indicators).
-///
-/// Light: inverted ink (`onSurface` fill, `surface` label). Dark: lifted
-/// green-gray tier with a subtle sage wash — not a full white pill.
+/// Behance lifestyle filter: brown active pill + white label (light);
+/// lifted warm tier on dark.
 Color catalogFilterSelectedBackground(ColorScheme colorScheme) {
   if (colorScheme.brightness == Brightness.light) {
-    return colorScheme.onSurface;
+    return colorScheme.primary;
   }
   return Color.alphaBlend(
     colorScheme.primary.withValues(alpha: 0.16),
@@ -384,7 +382,7 @@ Color catalogFilterSelectedBackground(ColorScheme colorScheme) {
 
 Color catalogFilterSelectedForeground(ColorScheme colorScheme) {
   return colorScheme.brightness == Brightness.light
-      ? colorScheme.surface
+      ? colorScheme.onPrimary
       : colorScheme.onSurface;
 }
 
@@ -468,8 +466,8 @@ class TilawaChipTokens {
       selectedShadowOpacity: 0.18,
       selectedShadowBlur: 12,
       selectionFontWeight: FontWeight.w700,
-      statusFontWeight: FontWeight.w900,
-      statusLetterSpacing: 0.5,
+      statusFontWeight: FontWeight.w600,
+      statusLetterSpacing: 0.25,
     );
   }
 
@@ -488,7 +486,10 @@ class TilawaChipTokens {
   }
 
   static Color _selectionSelectedBackgroundColor(ColorScheme colorScheme) {
-    final blendAmount = colorScheme.brightness == Brightness.dark ? 0.12 : 0.10;
+    if (colorScheme.brightness == Brightness.light) {
+      return colorScheme.primary;
+    }
+    final blendAmount = 0.12;
     return Color.lerp(
       colorScheme.primaryContainer,
       colorScheme.primary,
@@ -688,7 +689,10 @@ class TilawaSegmentedControlTokens {
   }
 
   static Color _containerBackgroundColor(ColorScheme colorScheme) {
-    final blendAmount = colorScheme.brightness == Brightness.dark ? 0.18 : 0.30;
+    if (colorScheme.brightness == Brightness.light) {
+      return colorScheme.surfaceContainerHigh;
+    }
+    final blendAmount = 0.18;
     return Color.lerp(
       colorScheme.surface,
       colorScheme.surfaceContainer,
@@ -698,10 +702,7 @@ class TilawaSegmentedControlTokens {
 
   static Color _selectedBackgroundColor(ColorScheme colorScheme) {
     if (colorScheme.brightness == Brightness.light) {
-      return Color.alphaBlend(
-        colorScheme.onSurface.withValues(alpha: 0.08),
-        colorScheme.surfaceContainerHigh,
-      );
+      return colorScheme.primary;
     }
     return catalogFilterSelectedBackground(colorScheme);
   }
@@ -829,7 +830,7 @@ class TilawaSeekBarTokens {
   final double inactiveTrackOpacity;
 
   factory TilawaSeekBarTokens.defaults() {
-    // fix: Accessibility — Tilawa 44 dp touch strip for seek interaction.
+    // fix: Accessibility — Tilawa 48 dp touch strip for seek interaction.
     return const TilawaSeekBarTokens(
       touchExtent: kTilawaMinInteractiveDimension,
       horizontalMargin: 16,
@@ -1293,8 +1294,7 @@ class TilawaPermissionBannerTokens {
 
 /// Component tokens for the Home next-prayer hero card gradient shell.
 ///
-/// Fixed brand greens — documented exception to runtime [ColorScheme] primary
-/// (same pattern as [AppShareComposerColors] for marketing-style surfaces).
+/// Warm parchment canvas — restrained stops in [AppColors].
 @immutable
 class TilawaHomeNextPrayerHeroTokens {
   const TilawaHomeNextPrayerHeroTokens({
@@ -1383,7 +1383,7 @@ class TilawaHomeNextPrayerHeroTokens {
     return const TilawaHomeNextPrayerHeroTokens(
       gradientTopStart: AppColors.homeNextPrayerGradientNightTop,
       gradientBottomEnd: AppColors.homeNextPrayerGradientNightBottom,
-      foregroundColor: AppColors.homeNextPrayerGradientForeground,
+      foregroundColor: AppColors.homeNextPrayerGradientNightForeground,
       locationChipFillOpacity: 0.12,
       locationChipBorderOpacity: 0.24,
       locationChipSplashOpacity: 0.1,
@@ -1475,6 +1475,137 @@ class TilawaHomeNextPrayerHeroTokens {
         b.footerForegroundOpacity,
         t,
       ),
+    );
+  }
+}
+
+/// Home dashboard card surface — a soft [ColorScheme.primaryContainer] wash so
+/// Token-backed featured dashboard cards (Last Read, resume hubs).
+///
+/// Uses Tilawa warm brand surfaces for featured Home dashboard cards.
+@immutable
+class TilawaHomeDashboardCardTokens {
+  const TilawaHomeDashboardCardTokens({
+    required this.gradientStart,
+    required this.gradientEnd,
+    required this.foregroundColor,
+    required this.splashColor,
+    required this.highlightColor,
+    required this.travelSheetSurface,
+    required this.travelSearchFieldFill,
+    required this.travelSectionLinkColor,
+    required this.travelDestinationIconColor,
+    required this.travelDestinationHeaderTints,
+  });
+
+  final Color gradientStart;
+  final Color gradientEnd;
+  final Color foregroundColor;
+  final Color splashColor;
+  final Color highlightColor;
+
+  /// White sheet panel overlapping the hero gradient.
+  final Color travelSheetSurface;
+
+  /// Warm rest fill for the read-only Home search field.
+  final Color travelSearchFieldFill;
+
+  /// Accent for section header links (See all).
+  final Color travelSectionLinkColor;
+
+  /// Icons on discover / carousel destination header bands.
+  final Color travelDestinationIconColor;
+
+  /// Warm tints for travel-style destination card headers.
+  final List<Color> travelDestinationHeaderTints;
+
+  Color destinationHeaderTint(int index) {
+    if (travelDestinationHeaderTints.isEmpty) {
+      return travelSearchFieldFill;
+    }
+    return travelDestinationHeaderTints[index.abs() %
+        travelDestinationHeaderTints.length];
+  }
+
+  factory TilawaHomeDashboardCardTokens.fromColorScheme(
+    ColorScheme colorScheme,
+  ) {
+    return TilawaHomeDashboardCardTokens(
+      gradientStart: AppColors.featuredGradientStart,
+      gradientEnd: AppColors.featuredGradientEnd,
+      foregroundColor: AppColors.featuredGradientForeground,
+      splashColor: AppColors.primaryBrown.withValues(alpha: 0.08),
+      highlightColor: AppColors.primaryBrown.withValues(alpha: 0.04),
+      travelSheetSurface: AppColors.homeTravelSheetSurface,
+      travelSearchFieldFill: AppColors.homeTravelSearchFill,
+      travelSectionLinkColor: AppColors.homeTravelSectionLink,
+      travelDestinationIconColor: AppColors.homeTravelDestinationIcon,
+      travelDestinationHeaderTints: AppColors.homeTravelDestinationHeaderTints,
+    );
+  }
+
+  TilawaHomeDashboardCardTokens copyWith({
+    Color? gradientStart,
+    Color? gradientEnd,
+    Color? foregroundColor,
+    Color? splashColor,
+    Color? highlightColor,
+    Color? travelSheetSurface,
+    Color? travelSearchFieldFill,
+    Color? travelSectionLinkColor,
+    Color? travelDestinationIconColor,
+    List<Color>? travelDestinationHeaderTints,
+  }) {
+    return TilawaHomeDashboardCardTokens(
+      gradientStart: gradientStart ?? this.gradientStart,
+      gradientEnd: gradientEnd ?? this.gradientEnd,
+      foregroundColor: foregroundColor ?? this.foregroundColor,
+      splashColor: splashColor ?? this.splashColor,
+      highlightColor: highlightColor ?? this.highlightColor,
+      travelSheetSurface: travelSheetSurface ?? this.travelSheetSurface,
+      travelSearchFieldFill:
+          travelSearchFieldFill ?? this.travelSearchFieldFill,
+      travelSectionLinkColor:
+          travelSectionLinkColor ?? this.travelSectionLinkColor,
+      travelDestinationIconColor:
+          travelDestinationIconColor ?? this.travelDestinationIconColor,
+      travelDestinationHeaderTints:
+          travelDestinationHeaderTints ?? this.travelDestinationHeaderTints,
+    );
+  }
+
+  static TilawaHomeDashboardCardTokens lerp(
+    TilawaHomeDashboardCardTokens a,
+    TilawaHomeDashboardCardTokens b,
+    double t,
+  ) {
+    return TilawaHomeDashboardCardTokens(
+      gradientStart: Color.lerp(a.gradientStart, b.gradientStart, t)!,
+      gradientEnd: Color.lerp(a.gradientEnd, b.gradientEnd, t)!,
+      foregroundColor: Color.lerp(a.foregroundColor, b.foregroundColor, t)!,
+      splashColor: Color.lerp(a.splashColor, b.splashColor, t)!,
+      highlightColor: Color.lerp(a.highlightColor, b.highlightColor, t)!,
+      travelSheetSurface: Color.lerp(
+        a.travelSheetSurface,
+        b.travelSheetSurface,
+        t,
+      )!,
+      travelSearchFieldFill: Color.lerp(
+        a.travelSearchFieldFill,
+        b.travelSearchFieldFill,
+        t,
+      )!,
+      travelSectionLinkColor: Color.lerp(
+        a.travelSectionLinkColor,
+        b.travelSectionLinkColor,
+        t,
+      )!,
+      travelDestinationIconColor: Color.lerp(
+        a.travelDestinationIconColor,
+        b.travelDestinationIconColor,
+        t,
+      )!,
+      travelDestinationHeaderTints: a.travelDestinationHeaderTints,
     );
   }
 }

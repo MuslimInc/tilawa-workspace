@@ -4,6 +4,7 @@ library;
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tilawa_ui_kit/src/foundation/design_tokens.dart';
 
 /// Contract test: every `GestureDetector` in `packages/ui_kit/lib/src/` must
 /// either (a) sit in one of the allow-listed files below and use a bare
@@ -22,6 +23,10 @@ void main() {
     'molecules/tilawa_alphabet_scrollbar.dart',
     'organisms/tilawa_media_player_bar.dart',
     'organisms/immersive_composer_scaffold.dart',
+    // Horizontal drag on the bottom-nav pill ends a long-press session when the
+    // finger leaves the thumb rail; `behavior: HitTestBehavior.opaque` keeps
+    // transparent padding inside the pill tappable.
+    'organisms/tilawa_adaptive_shell.dart',
     // The shared interaction primitive — its GestureDetector declares
     // `behavior: HitTestBehavior.opaque` and is the canonical place the rest of
     // the kit routes taps through (focus ring, press, haptics, state layers).
@@ -70,4 +75,18 @@ void main() {
           '`specs/014-ergonomic-mobile-ux/spec.md` FR-006.',
     );
   });
+
+  test(
+    'minInteractiveDimension is centralized on kTilawaMinInteractiveDimension',
+    () {
+      expect(
+        TilawaDesignTokens.light().minInteractiveDimension,
+        kTilawaMinInteractiveDimension,
+      );
+      expect(
+        TilawaDesignTokens.dark().minInteractiveDimension,
+        kTilawaMinInteractiveDimension,
+      );
+    },
+  );
 }

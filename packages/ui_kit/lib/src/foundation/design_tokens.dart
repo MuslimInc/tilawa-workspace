@@ -2,15 +2,11 @@ import 'package:flutter/material.dart';
 
 /// Tilawa minimum interactive (hit-target) dimension, in logical pixels.
 ///
-/// **48 dp** — aligns with Material Design 3 and Flutter's
-/// `kMinInteractiveDimension`, and satisfies WCAG 2.5.5 (Target Size)
-/// at the Level AAA recommended size. Comfortably above the iOS HIG
-/// 44 pt floor, with extra margin for one-handed reach and broader
-/// accessibility (relevant for the wide age range of Quran-app users).
-/// Single source of truth for hit targets across the design system;
-/// consumed by [TilawaDesignTokens.minInteractiveDimension] and by every
-/// component-token factory (icon action button, search field, seek bar,
-/// alphabet scrollbar, media player controls, immersive composer).
+/// **48 dp** — matches Material's minimum touch target and WCAG 2.5.5
+/// (Target Size) Level AAA for the recommended size.
+/// Single source of truth for hit targets across the design system.
+/// [TilawaDesignTokens.minInteractiveDimension] and
+/// `context.minInteractiveDimension` always resolve to this constant;
 ///
 /// Use this (or `context.minInteractiveDimension` /
 /// `tokens.minInteractiveDimension`) instead of Flutter's
@@ -68,7 +64,6 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     required this.iconSizeLarge,
     required this.iconSizeLargePlus,
     required this.iconSizeExtraLarge,
-    required this.minInteractiveDimension,
     required this.textHeightLoose,
     required this.durationFast,
     required this.durationMedium,
@@ -122,20 +117,32 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   /// 48.0 — hero section separator (top-of-screen hero to first content group).
   final double spaceHuge;
 
-  /// 8.0
+  /// 6.0
   final double radiusSmall;
 
-  /// 12.0
+  /// 8.0 — decorative chips, icon boxes, nested controls.
   final double radiusMedium;
 
-  /// 16.0
+  /// 20.0 — chrome tracks, search bars, nested fields.
   final double radiusLarge;
 
-  /// 24.0
+  /// 24.0 — content cards and pill affordances (Behance lifestyle).
   final double radiusExtraLarge;
 
-  /// 32.0 — dashboard / hub summary cards only. Not for catalog or settings.
+  /// 28.0 — dashboard / hub summary groups only.
   final double radiusHero;
+
+  /// 24.0 — content cards ([TilawaCard], featured panels).
+  double get radiusCard => radiusExtraLarge;
+
+  /// 24.0 — grouped settings panels ([TilawaSettingsGroupPanel]).
+  double get radiusSection => radiusExtraLarge;
+
+  /// Full pill radius for a control of [height] (`height / 2`).
+  double radiusPill(double height) => height / 2;
+
+  /// Circular radius for a square icon control of [size] (`size / 2`).
+  double radiusIcon(double size) => size / 2;
 
   /// 0.1 — generic faint tint alpha for surface fills, painter strokes,
   /// and tinted backgrounds. Do not use as the alpha for `BoxShadow.color`
@@ -143,14 +150,11 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   /// calibrated for visible depth on real-device DPIs.
   final double opacitySubtle;
 
-  /// 0.18 — default alpha for `BoxShadow.color` on small/elevated surfaces
-  /// (cards, chips, search fields). Calibrated to remain visible at ~400 ppi
-  /// while staying soft enough not to look like a hard drop shadow.
+  /// 0.05 — default alpha for `BoxShadow.color` on raised cards and chips.
+  /// Calibrated for a soft Moneyloop-style lift (wide blur, low opacity).
   final double opacityShadow;
 
-  /// 0.28 — alpha for `BoxShadow.color` on hero/floating surfaces (glass
-  /// panels, floating bottom nav, raised app bars) where stronger depth
-  /// is desired.
+  /// 0.08 — alpha for `BoxShadow.color` on floating chrome (nav, FAB-adjacent).
   final double opacityShadowStrong;
 
   /// 0.3
@@ -202,12 +206,11 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   /// not necessarily every decorative icon.
   final double iconSizeExtraLarge;
 
-  /// Tilawa minimum interactive (hit-target) dimension. Defaults to
-  /// [kTilawaMinInteractiveDimension] (48 dp). Use this for *all* in-product
-  /// hit targets (cards, list rows, icon buttons, chips, settings tiles,
-  /// search-field height, player controls) instead of Flutter's
+  /// Tilawa minimum interactive (hit-target) dimension — always
+  /// [kTilawaMinInteractiveDimension]. Use this (or the top-level constant)
+  /// for *all* in-product hit targets instead of Flutter's
   /// `kMinInteractiveDimension`.
-  final double minInteractiveDimension;
+  double get minInteractiveDimension => kTilawaMinInteractiveDimension;
 
   /// 2.0 — relaxed line height for dense Arabic text.
   final double textHeightLoose;
@@ -249,10 +252,10 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   /// 145 — height threshold for tight card layout.
   final double cardTightHeightThreshold;
 
-  /// 72.0 — collapsed mini-player chrome height (matches [_create]).
+  /// 57.0 — collapsed mini-player chrome height (matches [_create]).
   final double playerCollapsedHeight;
 
-  /// 72.0 — dismiss gesture threshold aligned with [playerCollapsedHeight].
+  /// 57.0 — dismiss gesture threshold aligned with [playerCollapsedHeight].
   final double playerDismissThreshold;
 
   /// 200.0
@@ -311,19 +314,19 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       spaceHuge: 48.0,
       radiusSmall: 8.0,
       radiusMedium: 12.0,
-      radiusLarge: 16.0,
+      radiusLarge: 20.0,
       radiusExtraLarge: 24.0,
-      radiusHero: 32.0,
+      radiusHero: 28.0,
       opacitySubtle: 0.1,
-      opacityShadow: 0.12,
-      opacityShadowStrong: 0.28,
+      opacityShadow: 0.04,
+      opacityShadowStrong: 0.08,
       opacityMedium: 0.3,
       opacityEmphasis: 0.7,
       opacityGlass: 0.8,
       blurGlass: 12.0,
-      blurShadow: 16.0,
-      shadowOffsetSmall: const Offset(0, 2),
-      shadowOffsetMedium: const Offset(0, 4),
+      blurShadow: 8.0,
+      shadowOffsetSmall: const Offset(0, 1),
+      shadowOffsetMedium: const Offset(0, 2),
       borderWidthThin: 0.5,
       progressHeight: 3.0,
       iconSizeExtraSmall: 12.0,
@@ -332,7 +335,6 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       iconSizeLarge: 24.0,
       iconSizeLargePlus: 42.0,
       iconSizeExtraLarge: 44.0,
-      minInteractiveDimension: kTilawaMinInteractiveDimension,
       textHeightLoose: 2.0,
       durationFast: const Duration(milliseconds: 200),
       durationMedium: const Duration(milliseconds: 400),
@@ -344,8 +346,8 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       narrowCardWidthThreshold: 180.0,
       narrowCardHeightThreshold: 155.0,
       cardTightHeightThreshold: 145.0,
-      playerCollapsedHeight: 76.0,
-      playerDismissThreshold: 76.0,
+      playerCollapsedHeight: 57.0,
+      playerDismissThreshold: 57.0,
       playerMaxDismissOffset: 200.0,
       playerVelocityThreshold: 500.0,
       playerDismissVelocityThreshold: 300.0,
@@ -394,7 +396,6 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     double? iconSizeLarge,
     double? iconSizeLargePlus,
     double? iconSizeExtraLarge,
-    double? minInteractiveDimension,
     double? textHeightLoose,
     Duration? durationFast,
     Duration? durationMedium,
@@ -453,8 +454,6 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       iconSizeLarge: iconSizeLarge ?? this.iconSizeLarge,
       iconSizeLargePlus: iconSizeLargePlus ?? this.iconSizeLargePlus,
       iconSizeExtraLarge: iconSizeExtraLarge ?? this.iconSizeExtraLarge,
-      minInteractiveDimension:
-          minInteractiveDimension ?? this.minInteractiveDimension,
       textHeightLoose: textHeightLoose ?? this.textHeightLoose,
       durationFast: durationFast ?? this.durationFast,
       durationMedium: durationMedium ?? this.durationMedium,
@@ -558,11 +557,6 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       iconSizeExtraLarge: lerpDouble(
         iconSizeExtraLarge,
         other.iconSizeExtraLarge,
-        t,
-      )!,
-      minInteractiveDimension: lerpDouble(
-        minInteractiveDimension,
-        other.minInteractiveDimension,
         t,
       )!,
       textHeightLoose: lerpDouble(textHeightLoose, other.textHeightLoose, t)!,
@@ -724,79 +718,80 @@ extension TilawaConcentricRadiusX on TilawaDesignTokens {
   }
 }
 
-/// Brand-doc roles for rounded components. Each family carries a distinct
-/// rounding intent; the same numeric token reads differently at different
-/// component sizes, so [TilawaRadiusResolverX.resolveRadius] takes both the
-/// family and the component height into account.
+/// Brand-doc roles for rounded components. Each family maps to a fixed token
+/// cap — use [TilawaRadiusResolverX.resolveRadius] instead of raw `radiusXxx`
+/// literals so a future token change ripples cleanly.
 ///
 /// See `docs/tilawa_brand.md` §5 (Rhythm and elevation).
 enum TilawaRadiusFamily {
-  /// Containers that hold content (`TilawaCard`, sheets, body cards). Stays
-  /// at [TilawaDesignTokens.radiusExtraLarge] regardless of height, never
-  /// accidentally pills.
+  /// Containers that hold content (`TilawaCard`, sheets, body cards).
   card,
 
-  /// Tappable affordances at or near [kTilawaMinInteractiveDimension]
-  /// (chips, segmented control items, icon buttons). Becomes a true pill
-  /// (`height / 2`) when small, caps at [TilawaDesignTokens.radiusExtraLarge]
-  /// when tall.
+  /// Tappable affordances (chips, buttons, search fields). Resolves to
+  /// [TilawaDesignTokens.radiusPill] when [height] is provided.
   pill,
 
-  /// Chrome strips that sit inside cards — header bars, sub-nav surrounds,
-  /// segmented control containers. Uses [TilawaDesignTokens.radiusLarge] so
-  /// the chrome reads as nested inside a `card`-radius parent.
+  /// Chrome strips nested inside cards — standard search bars, segmented
+  /// tracks, nested text fields.
   chrome,
 
-  /// Dashboard / hub navigation groups ([TilawaHubNavigationGroup]). Uses
-  /// [TilawaDesignTokens.radiusHero] — warmer than catalog cards, not a pill.
+  /// Grouped settings panels ([TilawaSettingsGroupPanel]).
+  section,
+
+  /// Dashboard / hub navigation groups ([TilawaHubNavigationGroup]).
   hero,
 
-  /// Decorative or hairline elements (dividers, status dots, ambient
-  /// ornament). Uses [TilawaDesignTokens.radiusMedium] for subtle softness
-  /// without claiming container weight.
+  /// Decorative or hairline elements (status dots, icon rests in list rows).
   decorative,
+
+  /// Standalone square icon controls ([TilawaIconActionButton]).
+  icon,
 }
 
-/// Resolves a component's corner radius from its brand role and physical
-/// height.
+/// Resolves a component's corner radius from its brand role.
 ///
-/// Why this exists: a 24 dp radius reads as "rounded card" on a 200 dp tall
-/// container, as "almost circle" on a 44 dp tall pill, and as "fully round
-/// capsule" on a 24 dp tall hairline. Same token, three meanings. This
-/// extension keeps the brand-doc intent constant while letting the math
-/// follow the geometry.
+/// Pill and icon families derive from layout (`height / 2`, `size / 2`).
+/// Card, section, chrome, hero, and decorative map to fixed token caps.
 extension TilawaRadiusResolverX on TilawaDesignTokens {
-  /// Returns the radius a component should paint at, given its [family] and
-  /// physical [height] in logical pixels.
+  /// Returns the corner radius for [family].
   ///
-  /// - [TilawaRadiusFamily.card] → always [radiusExtraLarge].
-  /// - [TilawaRadiusFamily.pill] → `min(height / 2, radiusExtraLarge)`. Icon-
-  ///   only chips at 44 dp become 22 dp circles; wider tappable pills cap
-  ///   at the card-radius family so they never out-round the cards they sit
-  ///   beside.
-  /// - [TilawaRadiusFamily.chrome] → [radiusLarge]. Concentric inside cards.
-  /// - [TilawaRadiusFamily.decorative] → [radiusMedium].
-  ///
-  /// [height] is required for `pill` and ignored for the others, but kept in
-  /// the signature so call sites read uniformly. Pass `0` (or omit) for
-  /// non-pill families.
+  /// When [height] is omitted, [TilawaRadiusFamily.pill] falls back to a
+  /// 48 dp affordance pill (`minInteractiveDimension / 2`).
   double resolveRadius({
     required TilawaRadiusFamily family,
     double height = 0,
+    double width = 0,
   }) {
-    switch (family) {
-      case TilawaRadiusFamily.card:
-        return radiusExtraLarge;
-      case TilawaRadiusFamily.pill:
-        final double half = height / 2;
-        return half < radiusExtraLarge ? half : radiusExtraLarge;
-      case TilawaRadiusFamily.chrome:
-        return radiusLarge;
-      case TilawaRadiusFamily.hero:
-        return radiusHero;
-      case TilawaRadiusFamily.decorative:
-        return radiusMedium;
+    return switch (family) {
+      TilawaRadiusFamily.card => radiusCard,
+      TilawaRadiusFamily.pill =>
+        height > 0
+            ? radiusPill(height)
+            : radiusPill(kTilawaMinInteractiveDimension),
+      TilawaRadiusFamily.chrome => radiusLarge,
+      TilawaRadiusFamily.section => radiusSection,
+      TilawaRadiusFamily.hero => radiusHero,
+      TilawaRadiusFamily.decorative => radiusMedium,
+      TilawaRadiusFamily.icon => radiusIcon(
+        _resolvedIconDimension(width: width, height: height),
+      ),
+    };
+  }
+
+  double _resolvedIconDimension({
+    required double width,
+    required double height,
+  }) {
+    if (width > 0 && height > 0) {
+      return width < height ? width : height;
     }
+    if (width > 0) {
+      return width;
+    }
+    if (height > 0) {
+      return height;
+    }
+    return minInteractiveDimension;
   }
 }
 
@@ -814,17 +809,10 @@ extension TilawaSegmentedRadiusX on TilawaDesignTokens {
     required double containerPadding,
     TilawaRadiusFamily trackFamily = TilawaRadiusFamily.chrome,
   }) {
-    final double containerHeight = itemHeight + (containerPadding * 2);
-    final double containerRadius = switch (trackFamily) {
-      TilawaRadiusFamily.pill => resolveRadius(
-        family: TilawaRadiusFamily.pill,
-        height: containerHeight,
-      ),
-      TilawaRadiusFamily.card ||
-      TilawaRadiusFamily.chrome ||
-      TilawaRadiusFamily.decorative ||
-      TilawaRadiusFamily.hero => resolveRadius(family: trackFamily),
-    };
+    final double trackHeight = itemHeight + containerPadding * 2;
+    final double containerRadius = trackFamily == TilawaRadiusFamily.pill
+        ? resolveRadius(family: TilawaRadiusFamily.pill, height: trackHeight)
+        : resolveRadius(family: trackFamily);
     final double itemRadius = concentricInner(
       outerRadius: containerRadius,
       padding: containerPadding,

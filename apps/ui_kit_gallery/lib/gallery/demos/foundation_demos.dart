@@ -36,6 +36,7 @@ abstract final class FoundationDemos {
   static Widget contentGrid(BuildContext context) {
     return GalleryDemoFrame(
       padding: EdgeInsets.zero,
+      scrollable: false,
       child: TilawaContentGrid(
         targetItemExtent: 160,
         crossAxisSpacing: 12,
@@ -47,6 +48,30 @@ abstract final class FoundationDemos {
             child: Center(child: Text('Item ${index + 1}')),
           );
         },
+      ),
+    );
+  }
+
+  static Widget dialog(BuildContext context) {
+    return GalleryDemoFrame(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 12,
+        children: [
+          const Text(
+            'Centered confirm and picker dialogs with stacked actions.',
+          ),
+          TilawaButton(
+            text: 'Confirm dialog',
+            variant: TilawaButtonVariant.danger,
+            onPressed: () => _openConfirmDialog(context),
+          ),
+          TilawaButton(
+            text: 'Picker dialog',
+            variant: TilawaButtonVariant.outline,
+            onPressed: () => _openPickerDialog(context),
+          ),
+        ],
       ),
     );
   }
@@ -81,6 +106,35 @@ abstract final class FoundationDemos {
           ),
         ],
       ),
+    );
+  }
+
+  static Future<void> _openConfirmDialog(BuildContext context) {
+    return showTilawaConfirmDialog(
+      context: context,
+      title: 'Delete bookmark?',
+      message: 'This removes the bookmark from your saved list.',
+      confirmLabel: 'Delete',
+    );
+  }
+
+  static Future<void> _openPickerDialog(BuildContext context) {
+    return showTilawaPickerDialog<void>(
+      context: context,
+      title: 'Choose reciter',
+      bodyBuilder: (ctx) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final name in ['Abdul Basit', 'Al-Afasy', 'Al-Husary'])
+              TilawaSelectionTile(
+                title: name,
+                isSelected: name == 'Al-Afasy',
+                onTap: () => Navigator.pop(ctx),
+              ),
+          ],
+        );
+      },
     );
   }
 

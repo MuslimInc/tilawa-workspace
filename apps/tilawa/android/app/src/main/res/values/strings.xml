@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Tilawa</string>
+    <string name="app_name">MeMuslim</string>
+    <string name="adhan_notification_title">%1$s · %2$s</string>
+    <string name="adhan_notification_body">Adhan is playing…</string>
+    <string name="adhan_notification_body_with_location">Adhan is playing for %1$s</string>
     <string name="adhan_is_playing">Adhan is playing…</string>
     <string name="stop_adhan">Stop Adhan</string>
     <string name="prayer_fajr">Fajr</string>

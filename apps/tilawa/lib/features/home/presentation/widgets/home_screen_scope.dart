@@ -8,6 +8,9 @@ import 'package:tilawa/core/services/hive_readiness.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.dart';
+import 'package:tilawa/features/athkar/presentation/cubit/pinned_athkar_cubit.dart';
+import 'package:tilawa/features/home/presentation/cubit/home_layout_cubit.dart';
+import 'package:tilawa/features/home/presentation/cubit/home_quran_resume_cubit.dart';
 import 'package:tilawa/features/history/domain/repositories/history_repository.dart';
 import 'package:tilawa/features/home/home.dart';
 import 'package:tilawa/features/localization/presentation/bloc/localization_bloc.dart';
@@ -29,15 +32,11 @@ class HomeScreenScope extends StatelessWidget {
     super.key,
     required this.onOpenReciters,
     required this.onOpenPrayer,
-    required this.onOpenAthkar,
-    required this.onOpenSettings,
     this.child,
   });
 
   final VoidCallback onOpenReciters;
   final VoidCallback onOpenPrayer;
-  final VoidCallback onOpenAthkar;
-  final VoidCallback onOpenSettings;
 
   /// When set (e.g. in widget tests), replaces [HomeScreen].
   final Widget? child;
@@ -91,8 +90,6 @@ class HomeScreenScope extends StatelessWidget {
           HomeScreen(
             onOpenReciters: onOpenReciters,
             onOpenPrayer: onOpenPrayer,
-            onOpenAthkar: onOpenAthkar,
-            onOpenSettings: onOpenSettings,
           ),
     );
 
@@ -101,6 +98,9 @@ class HomeScreenScope extends StatelessWidget {
         BlocProvider(
           create: (_) => _createHomeDashboardBloc(localeIdentifier),
         ),
+        BlocProvider(create: (_) => getIt<PinnedAthkarCubit>()..load()),
+        BlocProvider(create: (_) => getIt<HomeQuranResumeCubit>()..load()),
+        BlocProvider(create: (_) => getIt<HomeLayoutCubit>()),
         if (isSmartKhatmaEnabled())
           BlocProvider(create: (_) => SmartKhatmaDependencies.bloc()),
         if (isTodayPlanEnabled())

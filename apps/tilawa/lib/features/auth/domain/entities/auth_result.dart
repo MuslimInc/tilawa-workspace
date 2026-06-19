@@ -19,6 +19,10 @@ abstract class AuthResult with _$AuthResult {
 
   const factory AuthResult.cancelled() = AuthCancelled;
 
+  /// The device has no Google accounts configured; sign-in cannot proceed
+  /// without the user adding an account via device settings.
+  const factory AuthResult.noGoogleAccounts() = AuthNoGoogleAccounts;
+
   factory AuthResult.fromJson(Map<String, dynamic> json) =>
       _$AuthResultFromJson(json);
 }

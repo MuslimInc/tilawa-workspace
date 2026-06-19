@@ -7,10 +7,15 @@ import '../datasources/datasources.dart';
 
 @LazySingleton(as: QuranReaderRepository)
 class QuranReaderRepositoryImpl implements QuranReaderRepository {
-  QuranReaderRepositoryImpl(this._quranDataSource, this._settingsDataSource);
+  QuranReaderRepositoryImpl(
+    this._quranDataSource,
+    this._settingsDataSource,
+    this._translationDataSource,
+  );
 
   final QuranDataSource _quranDataSource;
   final ReaderSettingsDataSource _settingsDataSource;
+  final QuranTranslationDataSource _translationDataSource;
 
   // In-memory cache for pages to offload logic from the Bloc
   final Map<int, QuranPageEntity> _pageCache = {};
@@ -18,7 +23,13 @@ class QuranReaderRepositoryImpl implements QuranReaderRepository {
 
   @override
   Future<SurahContentEntity> getSurahContent(int surahNumber) async {
-    return _quranDataSource.getSurahContent(surahNumber);
+    final SurahContentEntity surah = await _quranDataSource.getSurahContent(
+      surahNumber,
+    );
+    return _attachTranslations(
+      surah: surah,
+      language: (await _settingsDataSource.loadSettings()).translationLanguage,
+    );
   }
 
   @override
@@ -26,10 +37,24 @@ class QuranReaderRepositoryImpl implements QuranReaderRepository {
     required int surahNumber,
     required int ayahNumber,
   }) async {
-    return _quranDataSource.getAyah(
+    final AyahEntity? ayah = await _quranDataSource.getAyah(
       surahNumber: surahNumber,
       ayahNumber: ayahNumber,
     );
+    if (ayah == null) {
+      return null;
+    }
+    final String language =
+        (await _settingsDataSource.loadSettings()).translationLanguage;
+    final String? translation = await _translationDataSource.getTranslation(
+      surahNumber: surahNumber,
+      ayahNumber: ayahNumber,
+      language: language,
+    );
+    if (translation == null) {
+      return ayah;
+    }
+    return ayah.copyWith(translation: translation);
   }
 
   @override
@@ -73,16 +98,23 @@ class QuranReaderRepositoryImpl implements QuranReaderRepository {
     required int surahNumber,
     required int ayahNumber,
     required String language,
-  }) async {
-    return null;
+  }) {
+    return _translationDataSource.getTranslation(
+      surahNumber: surahNumber,
+      ayahNumber: ayahNumber,
+      language: language,
+    );
   }
 
   @override
   Future<Map<int, String>> getSurahTranslations({
     required int surahNumber,
     required String language,
-  }) async {
-    return {};
+  }) {
+    return _translationDataSource.getSurahTranslations(
+      surahNumber: surahNumber,
+      language: language,
+    );
   }
 
   @override
@@ -117,5 +149,30 @@ class QuranReaderRepositoryImpl implements QuranReaderRepository {
   @override
   int getStartPageForSurah(int surahNumber) {
     return getPageNumber(surahNumber, 1);
+  }
+
+  Future<SurahContentEntity> _attachTranslations({
+    required SurahContentEntity surah,
+    required String language,
+  }) async {
+    final Map<int, String> translations = await _translationDataSource
+        .getSurahTranslations(
+          surahNumber: surah.number,
+          language: language,
+        );
+    if (translations.isEmpty) {
+      return surah;
+    }
+    return surah.copyWith(
+      ayahs: surah.ayahs
+          .map((AyahEntity ayah) {
+            final String? translation = translations[ayah.numberInSurah];
+            if (translation == null) {
+              return ayah;
+            }
+            return ayah.copyWith(translation: translation);
+          })
+          .toList(growable: false),
+    );
   }
 }

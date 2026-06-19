@@ -8,7 +8,7 @@ deltas below are **intentional**—not accidental layout regressions.
 
 - **Light neutral ramp** — four swatches: porcelain canvas `#F4F5F7`, white surface, `#E5E7EB` container high, slate ink `#0F172A` labels.
 - **TilawaCatalogAppBar** — title-only and title+search on white parchment; dark title-only uses dark surface (not coral wash).
-- **`TilawaPreviewWrapper`** now uses **`AppColors.defaultPrimary` (coral)** — many atom/molecule goldens may shift accent tints from legacy teal; confirm only accent controls changed, not neutral chrome.
+- **`TilawaPreviewWrapper`** uses **`AppColors.defaultPrimary` (warm brown)** — many atom/molecule goldens may shift accent tints from legacy teal; confirm only accent controls changed, not neutral chrome.
 
 ## Atoms
 

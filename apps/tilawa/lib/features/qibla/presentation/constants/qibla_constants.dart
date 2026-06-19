@@ -12,13 +12,28 @@ import 'package:flutter/material.dart';
 // ===============================
 
 /// Compass widget size as a ratio of the available panel width.
-const double kCompassSizeRatio = 0.78;
+const double kCompassSizeRatio = 0.9;
 
 /// Dial size as a ratio of the available panel width.
-const double kDialSizeRatio = 0.58;
+const double kDialSizeRatio = 0.7;
 
-/// Qibla pointer icon size in logical pixels.
-const double kQiblaPointerIconSize = 72.0;
+/// Qibla pointer needle height in logical pixels.
+const double kQiblaNeedleHeight = 76.0;
+
+/// Qibla pointer needle width in logical pixels.
+const double kQiblaNeedleWidth = 26.0;
+
+/// Radius of dot degree markers on the compass dial.
+const double kCompassDotRadius = 2.0;
+
+/// Radius of cardinal dot markers on the compass dial.
+const double kCompassCardinalDotRadius = 3.0;
+
+/// Qibla bezel triangle marker width.
+const double kQiblaBezelMarkerWidth = 14.0;
+
+/// Qibla bezel triangle marker height.
+const double kQiblaBezelMarkerHeight = 10.0;
 
 /// Center indicator size offset added to design token spacing.
 const double kCenterIndicatorSizeOffset = 2.0;
@@ -62,10 +77,10 @@ const double kThickTickStrokeWidth = 2.0;
 // ===============================
 
 /// Font size for the angle display value.
-const double kAngleDisplayFontSize = 42.0;
+const double kAngleDisplayFontSize = 40.0;
 
 /// Font weight for angle display.
-const FontWeight kAngleDisplayFontWeight = FontWeight.w900;
+const FontWeight kAngleDisplayFontWeight = FontWeight.w700;
 
 /// Letter spacing for compass text labels.
 const double kCompassTextLetterSpacing = 0.0;

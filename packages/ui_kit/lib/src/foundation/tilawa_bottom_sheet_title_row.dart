@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../molecules/tilawa_icon_action_button.dart';
 import 'component_tokens.dart';
+import 'design_tokens.dart';
 
 /// Title row for [TilawaBottomSheetScaffold] with optional end-aligned close.
 class TilawaBottomSheetTitleRow extends StatelessWidget {
@@ -40,17 +40,56 @@ class TilawaBottomSheetTitleRow extends StatelessWidget {
           ),
         ),
         if (trailingClose) ...[
-          const SizedBox(width: 8),
-          TilawaIconActionButton(
-            icon: Icons.close_rounded,
-            onTap: onClose ?? () => Navigator.maybePop(context),
+          SizedBox(width: theme.tokens.spaceSmall),
+          _TilawaBottomSheetCloseButton(
+            onClose: onClose ?? () => Navigator.maybePop(context),
             semanticLabel: closeSemanticLabel,
-            tooltip: closeSemanticLabel,
             size: tokens.closeButtonSize,
-            iconSize: tokens.closeButtonSize * 0.55,
           ),
         ],
       ],
+    );
+  }
+}
+
+class _TilawaBottomSheetCloseButton extends StatelessWidget {
+  const _TilawaBottomSheetCloseButton({
+    required this.onClose,
+    required this.semanticLabel,
+    required this.size,
+  });
+
+  final VoidCallback onClose;
+  final String semanticLabel;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final designTokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+
+    return IconButton(
+      tooltip: semanticLabel,
+      onPressed: onClose,
+      icon: const Icon(Icons.close_rounded),
+      iconSize: designTokens.iconSizeSmall,
+      style: IconButton.styleFrom(
+        fixedSize: Size.square(size),
+        minimumSize: Size.square(size),
+        padding: EdgeInsets.zero,
+        foregroundColor: colorScheme.onSurfaceVariant,
+        backgroundColor: colorScheme.surfaceContainerHigh,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(
+            designTokens.resolveRadius(
+              family: TilawaRadiusFamily.icon,
+              width: size,
+              height: size,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

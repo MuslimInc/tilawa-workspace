@@ -7,6 +7,7 @@ import '../../lib/src/foundation/component_tokens/component_tokens_theme.dart';
 import '../../lib/src/foundation/component_tokens/molecules_tokens.dart';
 import '../../lib/src/foundation/component_tokens/organisms_tokens.dart';
 import '../../lib/src/foundation/component_tokens/token_lerp.dart';
+import '../../lib/src/foundation/design_tokens.dart';
 
 void main() {
   group('TilawaSectionTitleTokens', () {
@@ -170,7 +171,7 @@ void main() {
   group('TilawaIconActionButtonTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaIconActionButtonTokens.defaults();
-      expect(tokens.size, 48.0);
+      expect(tokens.size, kTilawaMinInteractiveDimension);
       expect(tokens.activeBackgroundOpacity, 0.12);
       expect(tokens.activeBorderOpacity, 0.35);
       expect(tokens.inactiveBorderOpacity, 0.26);
@@ -209,7 +210,7 @@ void main() {
   group('TilawaSearchFieldTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaSearchFieldTokens.defaults();
-      expect(tokens.height, 48.0);
+      expect(tokens.height, kTilawaMinInteractiveDimension);
       expect(tokens.backgroundColor, isA<Color>());
       expect(tokens.contentPadding, const EdgeInsets.symmetric(vertical: 12));
       expect(tokens.iconSize, 18.0);
@@ -610,7 +611,7 @@ void main() {
         tokens.bodyPadding,
         const EdgeInsets.fromLTRB(16, 12, 16, 24),
       );
-      expect(tokens.closeButtonSize, 40.0);
+      expect(tokens.closeButtonSize, kTilawaMinInteractiveDimension);
       expect(
         tokens.footerPadding,
         const EdgeInsets.fromLTRB(16, 12, 16, 16),
@@ -636,21 +637,23 @@ void main() {
   group('TilawaAdaptiveShellTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaAdaptiveShellTokens.defaults();
-      expect(tokens.phoneBottomNavBarBaseHeight, closeTo(80.0, 0.05));
-      expect(tokens.navButtonSelectionContainerVerticalPadding, 6.0);
-      expect(tokens.navButtonIconOnlyMinHeight, 40.0);
-      expect(tokens.navButtonIconOnlyVerticalPadding, 1.0);
+      expect(tokens.phoneBottomNavBarBaseHeight, closeTo(48.0, 0.1));
+      expect(tokens.navButtonSelectionContainerVerticalPadding, 4.0);
+      expect(tokens.navButtonIconOnlyMinHeight, 48.0);
+      expect(tokens.navButtonIconOnlyVerticalPadding, 4.0);
       expect(
         tokens.navButtonIconOnlySelectionContainerVerticalPadding,
-        2.0,
+        4.0,
       );
       expect(tokens.bottomNavIconOnlyVerticalMargin, 2.0);
       expect(
         tokens.phoneBottomNavIconOnlyLayoutHeight(TextScaler.linear(1)),
-        closeTo(40.0, 0.05),
+        closeTo(48.0, 0.05),
       );
-      expect(tokens.bottomNavHorizontalMargin, 0.0);
-      expect(tokens.navButtonMinHeight, 80.0);
+      expect(tokens.bottomNavHorizontalMargin, 16.0);
+      expect(tokens.bottomNavThumbSideMargin, 16.0);
+      expect(tokens.bottomNavBottomLift, 8.0);
+      expect(tokens.navButtonMinHeight, 52.0);
       expect(tokens.bottomNavBackgroundColor, isA<Color>());
       expect(tokens.navButtonSelectedBackgroundColor, isA<Color>());
     });
@@ -661,7 +664,7 @@ void main() {
       final scaled = tokens.phoneBottomNavLayoutHeight(
         TextScaler.linear(2),
       );
-      expect(unit, closeTo(80.0, 0.05));
+      expect(unit, closeTo(48.0, 0.1));
       expect(scaled, greaterThan(unit));
     });
 
@@ -672,7 +675,11 @@ void main() {
       expect(
         tokens.phoneBottomNavPaintedHeight(textScaler, systemInset),
         closeTo(
-          tokens.phoneBottomNavLayoutHeight(textScaler) + systemInset,
+          tokens.bottomNavVerticalMargin +
+              (2 * tokens.bottomNavInternalPadding) +
+              tokens.phoneBottomNavLayoutHeight(textScaler) +
+              systemInset +
+              tokens.bottomNavBottomLift,
           0.05,
         ),
       );
@@ -686,11 +693,11 @@ void main() {
       final scaled = tokens.phoneBottomNavIconOnlyLayoutHeight(
         TextScaler.linear(2),
       );
-      expect(unit, closeTo(40.0, 0.05));
+      expect(unit, closeTo(48.0, 0.05));
       expect(scaled, greaterThan(unit));
     });
 
-    test('fromColorScheme uses stable neutral light bottom nav chrome', () {
+    test('fromColorScheme uses stable warm light bottom nav chrome', () {
       const scheme = ColorScheme.light(
         primary: Color(0xFF006A60),
         primaryContainer: Color(0xFFD8F0EC),
@@ -699,13 +706,13 @@ void main() {
       );
       final tokens = TilawaAdaptiveShellTokens.fromColorScheme(scheme);
 
-      expect(tokens.bottomNavBackgroundColor, Colors.white);
-      expect(tokens.bottomNavShadowOpacity, 0);
-      expect(tokens.bottomNavShadowBlur, 14);
-      expect(tokens.bottomNavShadowOffset, const Offset(0, 4));
+      expect(tokens.bottomNavBackgroundColor, AppColors.lightSurface);
+      expect(tokens.bottomNavShadowOpacity, 0.04);
+      expect(tokens.bottomNavShadowBlur, 8);
+      expect(tokens.bottomNavShadowOffset, const Offset(0, 2));
       expect(
         tokens.navButtonSelectedBackgroundColor,
-        Color.alphaBlend(scheme.primary.withValues(alpha: 0.10), Colors.white),
+        AppColors.lightSurfaceContainerHighBase,
       );
       expect(
         tokens.sideRailIndicatorColor,
@@ -763,7 +770,7 @@ void main() {
           TilawaAdaptiveShellTokens.fromColorScheme(
             tealScheme,
           ).bottomNavBackgroundColor,
-          Colors.white,
+          AppColors.tripGlideSurface,
         );
       },
     );
@@ -785,7 +792,7 @@ void main() {
           0.32,
         ),
       );
-      expect(tokens.bottomNavShadowOpacity, 0);
+      expect(tokens.bottomNavShadowOpacity, 0.055);
       expect(tokens.bottomNavShadowBlur, 10);
       expect(tokens.bottomNavShadowOffset, const Offset(0, 2));
       expect(
@@ -820,7 +827,9 @@ void main() {
       const first = TilawaAdaptiveShellTokens(
         phoneBottomNavBarBaseHeight: 88.0,
         bottomNavHorizontalMargin: 16.0,
+        bottomNavThumbSideMargin: 8.0,
         bottomNavVerticalMargin: 4.0,
+        bottomNavBottomLift: 4.0,
         bottomNavIconOnlyVerticalMargin: 2.0,
         bottomNavInternalPadding: 8.0,
         bottomNavBorderWidth: 1.0,
@@ -858,7 +867,9 @@ void main() {
       const second = TilawaAdaptiveShellTokens(
         phoneBottomNavBarBaseHeight: 96.0,
         bottomNavHorizontalMargin: 20.0,
+        bottomNavThumbSideMargin: 14.0,
         bottomNavVerticalMargin: 8.0,
+        bottomNavBottomLift: 12.0,
         bottomNavIconOnlyVerticalMargin: 4.0,
         bottomNavInternalPadding: 12.0,
         bottomNavBorderWidth: 2.0,
@@ -995,7 +1006,7 @@ void main() {
       expect(tokens.overlayBorderOpacity, 0.1);
       expect(tokens.shortWindowHeightBreakpoint, 760.0);
       expect(tokens.shortWindowPanelHeightFactor, 0.5);
-      expect(tokens.headerButtonSize, 48.0);
+      expect(tokens.headerButtonSize, kTilawaMinInteractiveDimension);
       expect(tokens.composerSurfaceColor, isA<Color>());
       expect(tokens.panelBorderColor, isA<Color>());
     });
@@ -1087,6 +1098,44 @@ void main() {
           second.composerSurfaceColor,
           0.5,
         ),
+      );
+    });
+  });
+
+  group('TilawaHomeDashboardCardTokens', () {
+    test('fromColorScheme uses Tilawa warm featured card stops', () {
+      final ColorScheme scheme = ColorScheme.fromSeed(
+        seedColor: AppColors.defaultPrimary,
+        primary: AppColors.defaultPrimary,
+      );
+      final tokens = TilawaHomeDashboardCardTokens.fromColorScheme(scheme);
+
+      expect(tokens.gradientStart, AppColors.featuredGradientStart);
+      expect(tokens.gradientEnd, AppColors.featuredGradientEnd);
+      expect(tokens.foregroundColor, AppColors.featuredGradientForeground);
+      expect(
+        tokens.splashColor,
+        AppColors.primaryBrown.withValues(alpha: 0.08),
+      );
+      expect(
+        tokens.highlightColor,
+        AppColors.primaryBrown.withValues(alpha: 0.04),
+      );
+      expect(tokens.travelSheetSurface, AppColors.homeTravelSheetSurface);
+      expect(tokens.travelSearchFieldFill, AppColors.homeTravelSearchFill);
+      expect(tokens.travelSectionLinkColor, AppColors.homeTravelSectionLink);
+      expect(
+        tokens.travelDestinationIconColor,
+        AppColors.homeTravelDestinationIcon,
+      );
+      expect(
+        tokens.travelDestinationHeaderTints,
+        AppColors.homeTravelDestinationHeaderTints,
+      );
+      expect(tokens.destinationHeaderTint(0), AppColors.tripGlideCanvas);
+      expect(
+        tokens.destinationHeaderTint(1),
+        AppColors.tripGlideCanvasElevated,
       );
     });
   });
@@ -1209,7 +1258,7 @@ void main() {
                 );
                 expect(
                   accessed.adaptiveShell.bottomNavBackgroundColor,
-                  Colors.white,
+                  AppColors.tripGlideSurface,
                 );
                 expect(
                   accessed.adaptiveShell.bottomNavBackgroundColor,
@@ -1218,15 +1267,6 @@ void main() {
                 expect(
                   accessed.adaptiveShell.navButtonSelectedBackgroundColor,
                   fromScheme.navButtonSelectedBackgroundColor,
-                );
-                expect(
-                  accessed.adaptiveShell.navButtonSelectedBackgroundColor,
-                  isNot(
-                    equals(
-                      TilawaAdaptiveShellTokens.defaults()
-                          .navButtonSelectedBackgroundColor,
-                    ),
-                  ),
                 );
                 return const SizedBox.shrink();
               },
@@ -1255,15 +1295,15 @@ void main() {
       );
     });
 
-    test('light catalog keeps inverted ink pill', () {
+    test('light catalog uses ink active pill', () {
       final ColorScheme light = ColorScheme.fromSeed(
         seedColor: AppColors.defaultPrimary,
         brightness: Brightness.light,
       );
       final TilawaChipTokens tokens = TilawaChipTokens.fromColorScheme(light);
 
-      expect(tokens.catalogSelectedBackgroundColor, light.onSurface);
-      expect(tokens.catalogSelectedForegroundColor, light.surface);
+      expect(tokens.catalogSelectedBackgroundColor, light.primary);
+      expect(tokens.catalogSelectedForegroundColor, light.onPrimary);
     });
   });
 

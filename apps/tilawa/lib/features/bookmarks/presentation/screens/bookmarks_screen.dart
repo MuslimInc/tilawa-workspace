@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/layout/list_scroll_bottom_padding.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/features/bookmarks/presentation/widgets/bookmark_card.dart';
 import 'package:tilawa_core/entities/audio.dart';
@@ -176,13 +177,19 @@ class BookmarksScreen extends StatelessWidget {
       return _buildEmptyState(context, false);
     }
 
+    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+
     return ListView.separated(
-      padding: EdgeInsets.fromLTRB(16, 16, 16, 120),
+      padding: EdgeInsets.fromLTRB(
+        tokens.spaceLarge,
+        tokens.spaceLarge,
+        tokens.spaceLarge,
+        listScrollBottomPadding(context),
+      ),
       itemCount: bookmarks.length,
-      separatorBuilder: (context, index) => SizedBox(height: 8),
+      separatorBuilder: (context, index) => SizedBox(height: tokens.spaceSmall),
       itemBuilder: (context, index) {
         final BookmarkEntity bookmark = bookmarks[index];
-        final tokens = Theme.of(context).tokens;
         return Dismissible(
           key: ValueKey(bookmark.id),
           direction: DismissDirection.endToStart,

@@ -247,17 +247,20 @@ void main() {
       expect(cubit.state.recitersSearchFocusTick, 0);
     });
 
-    test('moves to tab 0 from another tab when requesting search focus', () {
-      final cubit = MainScreenCubit();
-      addTearDown(cubit.close);
+    test(
+      'moves to reciters tab from another tab when requesting search focus',
+      () {
+        final cubit = MainScreenCubit();
+        addTearDown(cubit.close);
 
-      cubit.selectTab(2);
-      cubit.requestRecitersSearchFocus();
+        cubit.selectTab(2);
+        cubit.requestRecitersSearchFocus();
 
-      expect(cubit.state.currentIndex, 0);
-      expect(cubit.state.builtTabIndexes, contains(0));
-      expect(cubit.state.recitersSearchFocusTick, 1);
-    });
+        expect(cubit.state.currentIndex, 1);
+        expect(cubit.state.builtTabIndexes, contains(1));
+        expect(cubit.state.recitersSearchFocusTick, 1);
+      },
+    );
   });
 
   // ── close (timer cancellation) ───────────────────────────────────────────

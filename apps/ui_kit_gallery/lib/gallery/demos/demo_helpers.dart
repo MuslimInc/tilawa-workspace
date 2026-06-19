@@ -8,6 +8,7 @@ class GalleryDemoFrame extends StatelessWidget {
     this.padding = const EdgeInsets.all(16),
     this.alignment = Alignment.topCenter,
     this.backgroundColor,
+    this.scrollable = true,
   });
 
   final Widget child;
@@ -15,13 +16,28 @@ class GalleryDemoFrame extends StatelessWidget {
   final Alignment alignment;
   final Color? backgroundColor;
 
+  /// When false, the child is given the scaffold body's bounded height.
+  ///
+  /// Use for demos that manage their own scrolling (e.g. [GridView]).
+  final bool scrollable;
+
   @override
   Widget build(BuildContext context) {
+    final color = backgroundColor ?? Theme.of(context).colorScheme.surface;
+    final content = Align(alignment: alignment, child: child);
+
+    if (!scrollable) {
+      return ColoredBox(
+        color: color,
+        child: Padding(padding: padding, child: content),
+      );
+    }
+
     return ColoredBox(
-      color: backgroundColor ?? Theme.of(context).colorScheme.surface,
+      color: color,
       child: SingleChildScrollView(
         padding: padding,
-        child: Align(alignment: alignment, child: child),
+        child: content,
       ),
     );
   }
