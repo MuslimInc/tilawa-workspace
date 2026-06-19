@@ -1271,7 +1271,7 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
         theme.componentTokens.adaptiveShell;
     final double bottomSpacing = _shellFooterBottomSpacing(context);
     final double gapAboveNav = widget.hostAbsorbsBottomSafeArea
-        ? shellTokens.bottomNavVerticalMargin
+        ? shellTokens.bottomNavInternalPadding
         : 0;
     final double pillRadius = tokens.radiusPill(_miniPlayerHeight);
 
