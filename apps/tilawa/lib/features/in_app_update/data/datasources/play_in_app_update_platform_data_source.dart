@@ -46,6 +46,13 @@ class PlayInAppUpdatePlatformDataSource
         ),
       );
     } catch (e) {
+      if (e is PlatformException && _isForegroundActivityUnavailable(e)) {
+        logger.d(
+          '[InAppUpdatePlatform] Update check skipped — no foreground activity. '
+          'Will retry on next app resume.',
+        );
+        return const Right(InAppUpdateAvailability.unavailable());
+      }
       if (e is PlatformException && _isUnsupportedPlayEnvironment(e)) {
         logger.d(
           '[InAppUpdatePlatform] In-app updates unavailable (${_installErrorCode(e)}). '
@@ -136,6 +143,9 @@ class PlayInAppUpdatePlatformDataSource
         .map((_) {});
     return _flexibleDownloadedStream!;
   }
+
+  bool _isForegroundActivityUnavailable(PlatformException error) =>
+      error.code == 'REQUIRE_FOREGROUND_ACTIVITY';
 
   bool _isUnsupportedPlayEnvironment(PlatformException error) {
     if (error.code != 'TASK_FAILURE') {

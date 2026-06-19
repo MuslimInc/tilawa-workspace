@@ -5,49 +5,49 @@ import 'package:tilawa/features/today_plan/today_plan.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../../domain/entities/home_layout_mode.dart';
+import 'home_dashboard_section.dart';
 import 'home_prayer_day_strip.dart';
 import 'home_section_link.dart';
 import 'home_today_featured_carousel.dart';
 
 /// Unified daily hub: prayer glance, Mushaf resume, rituals, and plans.
 class HomeTodaySection extends StatelessWidget {
-  const HomeTodaySection({super.key, required this.onOpenPrayer});
+  const HomeTodaySection({
+    super.key,
+    required this.onOpenPrayer,
+    required this.layoutMode,
+  });
 
   final VoidCallback onOpenPrayer;
+  final HomeLayoutMode layoutMode;
 
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
-    final theme = Theme.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        TilawaSectionTitle(title: context.l10n.homeTodayTitle),
-        SizedBox(height: tokens.spaceExtraSmall),
-        Text(
-          context.l10n.homeTodaySubtitle,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
+        HomeDashboardSection(
+          title: context.l10n.homeTodayTitle,
+          subtitle: context.l10n.homeTodaySubtitle,
+          child: HomePrayerDayStrip(onOpenPrayer: onOpenPrayer),
         ),
-        SizedBox(height: tokens.spaceMedium),
-        HomePrayerDayStrip(onOpenPrayer: onOpenPrayer),
         SizedBox(height: tokens.spaceLarge),
-        Row(
-          children: [
-            Expanded(
-              child: TilawaSectionTitle(title: context.l10n.homeFeaturedTitle),
-            ),
-            HomeSeeAllLink(
-              onPressed: () => const QuranIndexRoute().push(context),
-            ),
-          ],
+        HomeDashboardSubsectionHeader(
+          title: context.l10n.homeFeaturedTitle,
+          trailing: HomeSeeAllLink(
+            onPressed: () => const QuranIndexRoute().push(context),
+          ),
         ),
         SizedBox(height: tokens.spaceMedium),
         const HomeTodayFeaturedCarousel(),
         SizedBox(height: tokens.spaceLarge),
-        const PinnedAthkarHomeSection(hideContextualFeatured: true),
+        PinnedAthkarHomeSection(
+          hideContextualFeatured: true,
+          layoutMode: layoutMode,
+        ),
         if (isTodayPlanEnabled()) ...[
           SizedBox(height: tokens.spaceLarge),
           const TodayPlanCard(),

@@ -25,6 +25,7 @@ abstract final class SentryConfig {
     options.environment = kReleaseMode ? 'production' : 'development';
     options.debug = kDebugMode;
     options.enableLogs = kReleaseMode;
+    options.enableMetrics = true;
     options.autoInitializeNativeSdk = autoInitializeNativeSdk;
     options.beforeSend = CrashReportingContext.filterEmulatorsInRelease;
     options.beforeSendLog = CrashReportingContext.filterEmulatorLogsInRelease;

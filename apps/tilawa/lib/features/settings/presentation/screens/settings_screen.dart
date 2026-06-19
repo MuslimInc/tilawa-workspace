@@ -66,6 +66,7 @@ class SettingsScreen extends StatelessWidget {
             }
           },
           error: (message) => ToastUtils.showErrorToast(message),
+          noGoogleAccounts: () {},
         );
       },
       child: Scaffold(

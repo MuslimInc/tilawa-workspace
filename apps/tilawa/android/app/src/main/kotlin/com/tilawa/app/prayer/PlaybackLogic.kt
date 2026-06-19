@@ -2,7 +2,6 @@ package com.tilawa.app.prayer
 
 import android.content.Intent
 import android.media.AudioManager
-import android.util.Log
 
 internal class PlaybackLogic(
     private val strings: StringProvider,
@@ -21,13 +20,19 @@ internal class PlaybackLogic(
                 val sound = intent?.getStringExtra(AdhanScheduler.EXTRA_SOUND) ?: "adhan"
                 val scheduledMs = intent?.getLongExtra(AdhanScheduler.EXTRA_SCHEDULED_MS, 0L) ?: 0L
                 val receiverTime = intent?.getLongExtra("receiver_time", 0L) ?: 0L
+                val locationName =
+                    intent?.getStringExtra(AdhanScheduler.EXTRA_LOCATION_NAME).orEmpty()
+                val languageCode =
+                    intent?.getStringExtra(AdhanScheduler.EXTRA_LANGUAGE_CODE).orEmpty()
 
                 PlaybackAction.PLAY(
                     prayerName = name,
                     prayerKey = key,
                     sound = sound,
                     scheduledMs = scheduledMs,
-                    receiverTime = receiverTime
+                    receiverTime = receiverTime,
+                    locationName = locationName,
+                    languageCode = languageCode,
                 )
             }
             else -> PlaybackAction.NONE
@@ -35,9 +40,35 @@ internal class PlaybackLogic(
         return action
     }
 
-    fun getNotificationTitle(prayerName: String): String {
-        if (prayerName.isBlank()) return strings.getString("app_name")
-        
+    fun getNotificationTitle(prayerName: String, locationName: String = ""): String {
+        val prayerLabel = localizedPrayerLabel(prayerName)
+        if (prayerLabel.isBlank()) {
+            return strings.getString("app_name")
+        }
+        if (locationName.isBlank()) {
+            return prayerLabel
+        }
+        return strings.formatString(
+            "adhan_notification_title",
+            prayerLabel,
+            locationName,
+        )
+    }
+
+    fun getNotificationBody(locationName: String = ""): String {
+        return if (locationName.isBlank()) {
+            strings.getString("adhan_notification_body")
+        } else {
+            strings.formatString(
+                "adhan_notification_body_with_location",
+                locationName,
+            )
+        }
+    }
+
+    private fun localizedPrayerLabel(prayerName: String): String {
+        if (prayerName.isBlank()) return ""
+
         return when (prayerName.lowercase()) {
             "fajr" -> strings.getString("prayer_fajr")
             "dhuhr" -> strings.getString("prayer_dhuhr")
@@ -68,13 +99,16 @@ sealed class PlaybackAction {
         val prayerKey: String,
         val sound: String,
         val scheduledMs: Long,
-        val receiverTime: Long
+        val receiverTime: Long,
+        val locationName: String = "",
+        val languageCode: String = "",
     ) : PlaybackAction()
     object NONE : PlaybackAction()
 }
 
 interface StringProvider {
     fun getString(key: String): String
+    fun formatString(key: String, vararg args: Any): String
 }
 
 interface ServiceActions {

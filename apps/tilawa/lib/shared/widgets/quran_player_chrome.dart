@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -322,12 +321,16 @@ abstract final class QuranPlayerLayoutInsets {
 
   /// Gap between the shell mini player capsule and the bottom nav pill.
   static double phoneMiniPlayerNavGap(BuildContext context) {
-    return Theme.of(context).componentTokens.adaptiveShell.bottomNavVerticalMargin;
+    return Theme.of(
+      context,
+    ).componentTokens.adaptiveShell.bottomNavVerticalMargin;
   }
 
   /// Breathing room above the shell mini player capsule.
   static double phoneMiniPlayerTopPadding(BuildContext context) {
-    return Theme.of(context).componentTokens.adaptiveShell.bottomNavInternalPadding;
+    return Theme.of(
+      context,
+    ).componentTokens.adaptiveShell.bottomNavInternalPadding;
   }
 }
 

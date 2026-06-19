@@ -11,7 +11,7 @@ Design system snapshot for **Tilawa UI Kit** (`packages/ui_kit`) and the **Tilaw
 ## 1. Visual theme and atmosphere
 
 - **Material 3** via **FlexColorScheme**: surfaces, containers, and component themes are assembled in `AppTheme` and refined with Tilawa-specific ramps (`AppColors`).
-- **Calm, content-first:** small palette, quiet warm neutrals, one **user-selectable primary** accent from **curated presets** (default **warm brown** `#8B5E3C`); optional **custom** primary appears **in the same primary-color list** in Settings and may be **soft-clamped in light mode** for contrast (see `AppTheme._safePrimaryForLight`). Surfaces are parchment cream in light mode; dark mode uses a deep green-tinted neutral stack (with an optional **true-black / OLED** preset).
+- **Calm, content-first:** small palette, quiet warm neutrals, one **user-selectable primary** accent from **curated presets** (default **warm brown** `#8B5E3C`); optional **custom** primary appears **in the same primary-color list** in Settings and may be **soft-clamped in light mode** for contrast (see `AppTheme._safePrimaryForLight`). Surfaces use a soft near-white neutral canvas in light mode; dark mode uses a deep green-tinted neutral stack (with an optional **true-black / OLED** preset).
 - **Readable for Arabic:** line-height token `textHeightLoose` supports dense script in readers and lists (see `TilawaDesignTokens`).
 - **Comfortable density:** `FlexColorScheme.comfortablePlatformDensity` (not compact VisualDensity).
 - **Premium depth:** layered shadows (`opacityShadow` / `opacityShadowStrong`), optional **glass** tokens (`blurGlass`, `opacityGlass`) for overlays and chrome — use consistently, not everywhere.
@@ -46,20 +46,20 @@ Additional constants exist in `AppColors` (e.g. gold) for Flex **secondary/terti
 Dark success/warning are brightness-tuned in `TilawaStatusColors` so status
 borders and icons clear WCAG 3:1 on green-tinted surfaces.
 
-### Neutral surfaces (light) — warm parchment canvas
+### Neutral surfaces (light) — soft neutral canvas
 
-Light surfaces use a **warm parchment** family — cream canvas, white cards, beige idle chips.
+Light surfaces use a **soft neutral** family — near-white canvas, white cards, quiet neutral idle chips.
 
 | Token / role | Hex (base) | Notes |
 |--------------|------------|--------|
-| Canvas / scaffold | `#F7F7F5` | `lightCanvas` / `lightBackground` |
+| Canvas / scaffold | `#FAFAFA` | `lightCanvas` / `lightBackground` |
 | Surface (cards, sheets) | `#FFFFFF` | `lightSurface` |
 | Ink / onSurface | `#30343C` | `lightInk` |
 | Body / mute / ash | `#30343C`, `#78736E`, `#A89B8A` | Secondary copy |
-| Container | `#F7F7F5` | `lightSurfaceContainer` (matches canvas) |
-| High (idle chips, search fill) | `#EFEDE8` | `lightSurfaceContainerHighBase` → `surfaceContainerHigh` |
-| Highest / hairline | `#E4E0D8` | Dividers, `outlineVariant` |
-| Outline (strong) | `#D5CEC3` | `lightOutline` |
+| Container | `#FAFAFA` | `lightSurfaceContainer` (matches canvas) |
+| High (idle chips, search fill) | `#F1F1EF` | `lightSurfaceContainerHighBase` → `surfaceContainerHigh` |
+| Highest / hairline | `#E5E5E2` | Dividers, `outlineVariant` |
+| Outline (strong) | `#D6D6D1` | `lightOutline` |
 
 Featured cards (Last Read) use gold gradient `#FFD28E` → `#FF9E44` via `AppColors.featuredGradientStart` / `featuredGradientEnd`.
 

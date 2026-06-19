@@ -600,8 +600,7 @@ class _ReciterDetailsContent extends StatelessWidget {
                     );
                 final bool isPlaying =
                     currentAudio?.id == item.audioId ||
-                    (currentAudio != null &&
-                        currentAudio.url == item.audioUrl);
+                    (currentAudio != null && currentAudio.url == item.audioUrl);
                 final key = isPlaying ? playingSurahKey : null;
                 final Widget gridItem = SurahGridItem(
                   key: key,

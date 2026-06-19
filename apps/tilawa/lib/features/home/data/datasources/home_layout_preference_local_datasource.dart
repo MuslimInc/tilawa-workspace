@@ -24,7 +24,7 @@ class HomeLayoutPreferenceLocalDataSourceImpl
     );
     return HomeLayoutMode.values.firstWhere(
       (mode) => mode.name == raw,
-      orElse: () => HomeLayoutMode.grid,
+      orElse: () => HomeLayoutMode.list,
     );
   }
 

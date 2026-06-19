@@ -20,7 +20,7 @@ brown + gold system.
 
 | Word | What it means in pixels |
 |---|---|
-| **Warm** | Soft neutral canvas (`#F7F7F5`), brown ink (`#8B5E3C`), gold featured cards (`#FFD28E`→`#FF9E44`). No cool porcelain, no sage-green chrome. |
+| **Warm** | Soft neutral canvas (`#FAFAFA`), brown ink (`#8B5E3C`), gold featured cards (`#FFD28E`→`#FF9E44`). No cool porcelain, no sage-green chrome. |
 | **Clear** | One primary accent per screen. Generous radius (20–24 dp cards). Readable metadata in warm grey-brown. |
 | **Faithful** | Arabic typography care (`textHeightLoose`), reverent reader surfaces, no stereotype chrome (mosques/crescents in app bars). |
 
@@ -44,7 +44,7 @@ brown + gold system.
 |---|---|---|
 | **Brown ink** | `colorScheme.primary` (`#8B5E3C`) | CTAs, active nav, selected pills/segments, link icons |
 | **Gold gilding** | `colorScheme.tertiary` / featured gradient stops | Hero cards, Last Read, surah header banners — not purchase buttons |
-| **Parchment** | `colorScheme.surfaceContainerLowest` (`#F7F7F5`) | Scaffold, canvas |
+| **Canvas** | `colorScheme.surfaceContainerLowest` (`#FAFAFA`) | Scaffold, canvas |
 | **Card white** | `colorScheme.surface` | List rows, settings tiles |
 | **Warm beige** | `colorScheme.surfaceContainerHigh` | Idle chips, search rests |
 | **Hairline** | `colorScheme.outlineVariant` | Dividers at `borderWidthThin` |
@@ -69,11 +69,11 @@ brown + gold system.
 
 ## 5. Rhythm and elevation (Behance lifestyle)
 
-- **Cards:** white fill on parchment, **24 dp** radius (`radiusCard`), **warm
+- **Cards:** white fill on the neutral canvas, **24 dp** radius (`radiusCard`), **warm
   shadow** (`opacityShadow` / `opacityShadowStrong` on brown-tinted `shadow`).
 - **Featured cards:** gold linear gradient, no hairline border.
 - **Segmented controls / filter pills:** active = solid `primary` + `onPrimary`;
-  inactive = parchment/beige track + brown or `onSurface` text.
+  inactive = neutral track + brown or `onSurface` text.
 - **Floating chrome** (bottom nav, player): layered shadow tokens + optional glass.
 - **Reader page:** strongest shadow band reserved for Mushaf frame only.
 

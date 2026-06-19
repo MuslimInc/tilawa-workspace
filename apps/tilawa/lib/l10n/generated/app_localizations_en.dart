@@ -85,13 +85,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeExploreTitle => 'Discover';
 
   @override
+  String get homeExploreSubtitle => 'Reciters, Tasbeeh, and Qibla';
+
+  @override
+  String get homeExploreShowAsList => 'Show as list';
+
+  @override
+  String get homeExploreShowAsGrid => 'Show as grid';
+
+  @override
+  String get homeDashboardLoadError =>
+      'Could not load prayer times. Check your connection and try again.';
+
+  @override
   String get homeSearchHint => 'Search surahs, juz, or page';
 
   @override
   String get homeFeaturedTitle => 'Featured for you';
-
-  @override
-  String get homePrayerAlertsAction => 'Prayer times and alerts';
 
   @override
   String get homeTodayTitle => 'Today';
@@ -1010,6 +1020,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get unableToSignInWithThirdPartyAccount =>
       'Unable to sign in with third-party account';
+
+  @override
+  String get googleSignInNoAccountsOnDevice =>
+      'No Google account found on this device. Please add a Google account in your device settings and try again.';
 
   @override
   String get googleSignInFallbackTitle => 'Google sign-in could not open';
@@ -2609,6 +2623,22 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String prayerNotificationTitleWithLocation(
+    String prayerName,
+    String locationName,
+  ) {
+    return '$prayerName · $locationName';
+  }
+
+  @override
+  String prayerNotificationBodyWithLocation(
+    String prayerName,
+    String locationName,
+  ) {
+    return 'It is time for $prayerName in $locationName';
+  }
+
+  @override
   String get prayerNotificationsChannelName => 'Prayer Times';
 
   @override
@@ -2631,7 +2661,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'Silent prayer time reminders when Adhan plays natively';
 
   @override
-  String get adhanIsPlaying => 'Adhan is playing';
+  String get adhanIsPlaying => 'Adhan is playing…';
+
+  @override
+  String adhanPlayingNotificationBodyWithLocation(String locationName) {
+    return 'Adhan is playing for $locationName';
+  }
 
   @override
   String get stopAdhan => 'Stop Adhan';

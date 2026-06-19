@@ -85,13 +85,23 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeExploreTitle => 'اكتشف';
 
   @override
+  String get homeExploreSubtitle => 'القراء والمسبحة والقبلة';
+
+  @override
+  String get homeExploreShowAsList => 'عرض كقائمة';
+
+  @override
+  String get homeExploreShowAsGrid => 'عرض كشبكة';
+
+  @override
+  String get homeDashboardLoadError =>
+      'تعذّر تحميل مواقيت الصلاة. تحقق من الاتصال وحاول مرة أخرى.';
+
+  @override
   String get homeSearchHint => 'ابحث في السور أو الأجزاء أو الصفحة';
 
   @override
   String get homeFeaturedTitle => 'مختارة لك';
-
-  @override
-  String get homePrayerAlertsAction => 'أوقات الصلاة والتنبيهات';
 
   @override
   String get homeTodayTitle => 'اليوم';
@@ -1009,6 +1019,10 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get unableToSignInWithThirdPartyAccount =>
       'تعذر تسجيل الدخول باستخدام حساب طرف ثالث';
+
+  @override
+  String get googleSignInNoAccountsOnDevice =>
+      'لم يتم العثور على حساب Google على هذا الجهاز. يرجى إضافة حساب Google في إعدادات الجهاز والمحاولة مرة أخرى.';
 
   @override
   String get googleSignInFallbackTitle => 'تعذّر فتح تسجيل الدخول عبر Google';
@@ -2600,6 +2614,22 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String prayerNotificationTitleWithLocation(
+    String prayerName,
+    String locationName,
+  ) {
+    return '$prayerName · $locationName';
+  }
+
+  @override
+  String prayerNotificationBodyWithLocation(
+    String prayerName,
+    String locationName,
+  ) {
+    return 'حان وقت $prayerName في $locationName';
+  }
+
+  @override
   String get prayerNotificationsChannelName => 'أوقات الصلاة';
 
   @override
@@ -2622,7 +2652,12 @@ class AppLocalizationsAr extends AppLocalizations {
       'تنبيهات صامتة لمواقيت الصلاة عند تشغيل الأذان محلياً';
 
   @override
-  String get adhanIsPlaying => 'الأذان يعمل الآن';
+  String get adhanIsPlaying => 'الأذان قيد التشغيل…';
+
+  @override
+  String adhanPlayingNotificationBodyWithLocation(String locationName) {
+    return 'الأذان قيد التشغيل في $locationName';
+  }
 
   @override
   String get stopAdhan => 'إيقاف الأذان';

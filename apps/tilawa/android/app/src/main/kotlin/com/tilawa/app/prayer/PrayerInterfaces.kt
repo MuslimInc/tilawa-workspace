@@ -16,13 +16,24 @@ interface PrayerStorage {
     
     fun setNeedsReschedule(needs: Boolean)
     fun needsReschedule(): Boolean
+
+    fun setLastNotificationLocationName(name: String?)
+    fun getLastNotificationLocationName(): String?
 }
 
 /**
  * Interface for scheduling alarms.
  */
 interface PrayerAlarmManager {
-    fun scheduleExact(id: Int, name: String, key: String, triggerMs: Long, sound: String): Boolean
+    fun scheduleExact(
+        id: Int,
+        name: String,
+        key: String,
+        triggerMs: Long,
+        sound: String,
+        locationName: String = "",
+        languageCode: String = "",
+    ): Boolean
     fun cancel(id: Int)
     fun cancelAll(ids: Set<Int>)
     fun canScheduleExact(): Boolean
@@ -33,5 +44,7 @@ data class AlarmMetadata(
     val name: String,
     val key: String,
     val triggerMs: Long,
-    val sound: String
+    val sound: String,
+    val locationName: String = "",
+    val languageCode: String = "",
 )

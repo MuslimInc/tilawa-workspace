@@ -414,13 +414,13 @@ class _AppShellChrome extends StatelessWidget {
         builder: (context) {
           final bool showMiniPlayer =
               showPlayer && playerShouldShow && !isKeyboardOpen;
-          final TilawaAdaptiveShellTokens shellTokens =
-              Theme.of(context).componentTokens.adaptiveShell;
+          final TilawaAdaptiveShellTokens shellTokens = Theme.of(
+            context,
+          ).componentTokens.adaptiveShell;
           final double miniPlayerTopPadding = showMiniPlayer
               ? shellTokens.bottomNavInternalPadding
               : 0;
-          final double miniNavGap =
-              showMiniPlayer && navVisible
+          final double miniNavGap = showMiniPlayer && navVisible
               ? shellTokens.bottomNavVerticalMargin
               : 0;
 

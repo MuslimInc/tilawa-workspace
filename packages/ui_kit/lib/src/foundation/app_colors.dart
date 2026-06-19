@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 /// Centralized app color constants.
 ///
 /// The Tilawa palette is intentionally **small and calm**:
-/// soft neutral canvas ([tripGlideCanvas] `#F7F7F5`), brown primary ink
+/// soft neutral canvas ([tripGlideCanvas] `#FAFAFA`), brown primary ink
 /// ([primaryBrown] `#8B5E3C`), neutral text ink ([tripGlideInk] `#30343C`),
 /// and restrained gold featured surfaces.
 ///
@@ -68,10 +68,10 @@ abstract final class AppColors {
   /// Compatibility alias retained for existing travel-inspired Home widgets.
   static const Color tripGlideInk = Color(0xFF30343C);
 
-  /// Soft neutral screen canvas (`#F7F7F5`).
+  /// Soft neutral screen canvas (`#FAFAFA`).
   ///
   /// Compatibility alias retained for existing travel-inspired Home widgets.
-  static const Color tripGlideCanvas = Color(0xFFF7F7F5);
+  static const Color tripGlideCanvas = Color(0xFFFAFAFA);
 
   /// Elevated surfaces — cards, search (`#FFFFFF`).
   static const Color tripGlideSurface = Color(0xFFFFFFFF);
@@ -80,13 +80,13 @@ abstract final class AppColors {
   static const Color tripGlideMuted = Color(0xFF78736E);
 
   /// Warm beige idle tier for chips, search rests, and header bands.
-  static const Color tripGlideCanvasElevated = Color(0xFFEFEDE8);
+  static const Color tripGlideCanvasElevated = Color(0xFFF1F1EF);
 
   /// Warm hairline / highest surface tier.
-  static const Color tripGlideCanvasDusk = Color(0xFFE4E0D8);
+  static const Color tripGlideCanvasDusk = Color(0xFFE5E5E2);
 
   /// Deeper warm night/dim surface tier.
-  static const Color tripGlideCanvasNight = Color(0xFFD5CEC3);
+  static const Color tripGlideCanvasNight = Color(0xFFD6D6D1);
 
   /// Top stop for the brand launch gradient.
   static const Color brandGradientTop = tripGlideCanvas;
@@ -118,7 +118,7 @@ abstract final class AppColors {
   /// Travel-layout destination header tint — warm beige.
   static const Color homeTravelDestinationTintNeutral = tripGlideCanvasElevated;
 
-  /// Neutral sheet on the Home travel-inspired dashboard (`#F7F7F5`).
+  /// Neutral sheet on the Home travel-inspired dashboard (`#FAFAFA`).
   static const Color homeTravelSheetSurface = tripGlideCanvas;
 
   /// White search field on the Home travel dashboard (`#FFFFFF`).
@@ -173,10 +173,10 @@ abstract final class AppColors {
 
   // ---------------------------------------------------------------------------
   // Light neutral ramp — soft neutral canvas + white cards
-  // (#F7F7F5 / #FFFFFF / warm neutral ink). One temperature family end-to-end.
+  // (#FAFAFA / #FFFFFF / warm neutral ink). One temperature family end-to-end.
   // ---------------------------------------------------------------------------
 
-  /// App canvas / scaffold — soft neutral (`#F7F7F5`).
+  /// App canvas / scaffold — soft neutral (`#FAFAFA`).
   ///
   /// Cards use [lightSurface] (`#FFFFFF`) for quiet lift with soft shadows.
   static const Color lightCanvas = tripGlideCanvas;
@@ -199,7 +199,7 @@ abstract final class AppColors {
   /// Ash icons / hints — muted neutral.
   static const Color lightAsh = tripGlideMuted;
 
-  /// Light upper container / idle chip — quiet warm neutral (`#EFEDE8`).
+  /// Light upper container / idle chip — quiet neutral (`#F1F1EF`).
   ///
   /// Mapped to [ColorScheme.surfaceContainerHigh] in [AppTheme] without
   /// primary harmonization so unselected controls stay neutral.
@@ -226,13 +226,13 @@ abstract final class AppColors {
   /// Section / list canvas tier — matches [lightCanvas].
   static const Color lightSurfaceContainer = lightCanvas;
 
-  /// Light top container tier — quiet warm hairline (`#E4E0D8`).
+  /// Light top container tier — quiet neutral hairline (`#E5E5E2`).
   static const Color lightSurfaceContainerHighestBase = tripGlideCanvasDusk;
 
   /// Hairline dividers — warm neutral.
   static const Color lightHairline = tripGlideCanvasDusk;
 
-  /// Default outline for fields and dividers (`#D5CEC3`).
+  /// Default outline for fields and dividers (`#D6D6D1`).
   static const Color lightOutline = tripGlideCanvasNight;
 
   // ---------------------------------------------------------------------------

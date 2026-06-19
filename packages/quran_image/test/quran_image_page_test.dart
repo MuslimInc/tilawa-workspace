@@ -82,6 +82,33 @@ void main() {
     );
     expect(find.byType(Image).evaluate().length, greaterThanOrEqualTo(15));
   });
+
+  testWidgets('QuranImagePage exposes the surah index action in the header', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 3.0;
+    addTearDown(tester.view.reset);
+
+    var taps = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: QuranImagePage(
+            pageNumber: 1,
+            onShowIndex: () => taps++,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byTooltip('Surah index'));
+    await tester.pump();
+
+    expect(taps, 1);
+    expect(find.byIcon(Icons.format_list_bulleted_rounded), findsOneWidget);
+  });
 }
 
 class _ReadyQuranImageCacheRepository implements QuranImageCacheRepository {

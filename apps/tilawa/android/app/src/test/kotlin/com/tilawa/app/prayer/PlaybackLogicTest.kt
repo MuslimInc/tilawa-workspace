@@ -39,6 +39,8 @@ class PlaybackLogicTest {
         every { intent.getStringExtra(AdhanScheduler.EXTRA_PRAYER_NAME) } returns "fajr"
         every { intent.getStringExtra(AdhanScheduler.EXTRA_PRAYER_KEY) } returns "fajr"
         every { intent.getStringExtra(AdhanScheduler.EXTRA_SOUND) } returns "adhan_fajr"
+        every { intent.getStringExtra(AdhanScheduler.EXTRA_LOCATION_NAME) } returns "Cairo"
+        every { intent.getStringExtra(AdhanScheduler.EXTRA_LANGUAGE_CODE) } returns "ar"
         every { intent.getLongExtra(AdhanScheduler.EXTRA_SCHEDULED_MS, 0L) } returns 1000L
         every { intent.getLongExtra("receiver_time", 0L) } returns 1100L
         
@@ -47,6 +49,8 @@ class PlaybackLogicTest {
         assertEquals("adhan_fajr", action.sound)
         assertEquals(1000L, action.scheduledMs)
         assertEquals(1100L, action.receiverTime)
+        assertEquals("Cairo", action.locationName)
+        assertEquals("ar", action.languageCode)
     }
 
     @Test
@@ -69,6 +73,36 @@ class PlaybackLogicTest {
             every { mockStrings.getString("prayer_$name") } returns "$name Prayer"
             assertEquals("$name Prayer", logic.getNotificationTitle(name))
         }
+    }
+
+    @Test
+    fun `getNotificationTitle includes location when provided`() {
+        every { mockStrings.getString("prayer_fajr") } returns "Fajr"
+        every {
+            mockStrings.formatString("adhan_notification_title", "Fajr", "Cairo")
+        } returns "Fajr · Cairo"
+
+        assertEquals("Fajr · Cairo", logic.getNotificationTitle("fajr", "Cairo"))
+    }
+
+    @Test
+    fun `getNotificationBody uses location-specific copy when provided`() {
+        every {
+            mockStrings.formatString("adhan_notification_body_with_location", "Cairo")
+        } returns "Adhan is playing for Cairo"
+
+        assertEquals(
+            "Adhan is playing for Cairo",
+            logic.getNotificationBody("Cairo"),
+        )
+    }
+
+    @Test
+    fun `getNotificationBody falls back when location is blank`() {
+        every { mockStrings.getString("adhan_notification_body") } returns "Adhan is playing…"
+
+        assertEquals("Adhan is playing…", logic.getNotificationBody())
+        assertEquals("Adhan is playing…", logic.getNotificationBody(""))
     }
 
     @Test

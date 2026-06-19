@@ -7,7 +7,7 @@ import 'package:tilawa/features/home/presentation/cubit/home_layout_cubit.dart';
 
 class _FakeHomeLayoutPreferenceRepository
     implements HomeLayoutPreferenceRepository {
-  HomeLayoutMode mode = HomeLayoutMode.grid;
+  HomeLayoutMode mode = HomeLayoutMode.list;
 
   @override
   Future<HomeLayoutMode> getLayoutMode() async => mode;
@@ -47,14 +47,14 @@ void main() {
       final cubit = buildCubit();
       await pumpEventQueue();
 
+      expect(cubit.state.mode, HomeLayoutMode.list);
+
+      await cubit.toggleLayoutMode();
       expect(cubit.state.mode, HomeLayoutMode.grid);
+      expect(repository.mode, HomeLayoutMode.grid);
 
       await cubit.toggleLayoutMode();
       expect(cubit.state.mode, HomeLayoutMode.list);
-      expect(repository.mode, HomeLayoutMode.list);
-
-      await cubit.toggleLayoutMode();
-      expect(cubit.state.mode, HomeLayoutMode.grid);
 
       await cubit.close();
     });

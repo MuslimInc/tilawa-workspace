@@ -111,6 +111,8 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
     required String prayerName,
     required String prayerKey,
     String? sound,
+    String? locationName,
+    String? languageCode,
   }) async {
     if (!isSupported) {
       return false;
@@ -123,6 +125,10 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
             'prayerKey': prayerKey,
             'triggerAtMillis': scheduledTime.millisecondsSinceEpoch,
             'sound': sound,
+            if (locationName != null && locationName.isNotEmpty)
+              'locationName': locationName,
+            if (languageCode != null && languageCode.isNotEmpty)
+              'languageCode': languageCode,
           }) ??
           false;
       if (!ok) {
@@ -144,6 +150,8 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
     required String prayerName,
     required String prayerKey,
     String? sound,
+    String? locationName,
+    String? languageCode,
   }) async {
     if (!isSupported) {
       return false;
@@ -155,6 +163,10 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
             'prayerName': prayerName,
             'prayerKey': prayerKey,
             'sound': sound,
+            if (locationName != null && locationName.isNotEmpty)
+              'locationName': locationName,
+            if (languageCode != null && languageCode.isNotEmpty)
+              'languageCode': languageCode,
           }) ??
           false;
       return ok;
@@ -204,6 +216,10 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
                 'key': a.prayerKey,
                 'triggerAtMillis': a.triggerAt.millisecondsSinceEpoch,
                 'sound': a.sound,
+                if (a.locationName != null && a.locationName!.isNotEmpty)
+                  'locationName': a.locationName,
+                if (a.languageCode != null && a.languageCode!.isNotEmpty)
+                  'languageCode': a.languageCode,
               },
             )
             .toList(),

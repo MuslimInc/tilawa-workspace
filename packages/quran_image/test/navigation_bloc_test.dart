@@ -88,6 +88,71 @@ void main() {
       );
     });
 
+    test('auto-hides the controls after the idle window elapses', () async {
+      final bloc = NavigationBloc(
+        pageRepository: InMemoryPageRepository(),
+        visibilityRepository: _TestNavigationVisibilityRepository(
+          shouldAutoHideResult: true,
+        ),
+        saveLastVisitedPageUseCase: SaveLastVisitedPageUseCase(
+          _TestLastVisitedPageRepository(),
+        ),
+        getLastVisitedPageUseCase: GetLastVisitedPageUseCase(
+          _TestLastVisitedPageRepository(initialPage: 1),
+        ),
+        autoHideIdleDuration: const Duration(milliseconds: 40),
+      );
+      addTearDown(bloc.close);
+
+      bloc.add(const NavigationInitialized());
+      await Future<void>.delayed(Duration.zero);
+
+      bloc.add(const NavigationShown());
+      await Future<void>.delayed(Duration.zero);
+      expect((bloc.state as NavigationLoaded).visibility.isVisible, isTrue);
+
+      // Still visible before the idle window elapses.
+      await Future<void>.delayed(const Duration(milliseconds: 15));
+      expect((bloc.state as NavigationLoaded).visibility.isVisible, isTrue);
+
+      // Hidden automatically once idle.
+      await Future<void>.delayed(const Duration(milliseconds: 60));
+      expect((bloc.state as NavigationLoaded).visibility.isVisible, isFalse);
+    });
+
+    test('interaction defers auto-hide until the gesture ends', () async {
+      final bloc = NavigationBloc(
+        pageRepository: InMemoryPageRepository(),
+        visibilityRepository: _TestNavigationVisibilityRepository(
+          shouldAutoHideResult: true,
+        ),
+        saveLastVisitedPageUseCase: SaveLastVisitedPageUseCase(
+          _TestLastVisitedPageRepository(),
+        ),
+        getLastVisitedPageUseCase: GetLastVisitedPageUseCase(
+          _TestLastVisitedPageRepository(initialPage: 1),
+        ),
+        autoHideIdleDuration: const Duration(milliseconds: 40),
+      );
+      addTearDown(bloc.close);
+
+      bloc.add(const NavigationInitialized());
+      await Future<void>.delayed(Duration.zero);
+
+      bloc.add(const NavigationShown());
+      bloc.add(const NavigationInteractionStarted());
+      await Future<void>.delayed(Duration.zero);
+
+      // Past the idle window, but still visible because the user is interacting.
+      await Future<void>.delayed(const Duration(milliseconds: 70));
+      expect((bloc.state as NavigationLoaded).visibility.isVisible, isTrue);
+
+      // Ending the interaction re-arms the timer; it hides after the window.
+      bloc.add(const NavigationInteractionEnded());
+      await Future<void>.delayed(const Duration(milliseconds: 70));
+      expect((bloc.state as NavigationLoaded).visibility.isVisible, isFalse);
+    });
+
     test('updates current page and persists after debounce', () async {
       final lastVisitedRepository = _TestLastVisitedPageRepository();
       final bloc = NavigationBloc(

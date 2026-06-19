@@ -57,6 +57,7 @@ class TilawaCard extends StatelessWidget {
     this.onTap,
     this.splashColor,
     this.highlightColor,
+    this.expandHeight = false,
   });
 
   final Widget child;
@@ -71,6 +72,9 @@ class TilawaCard extends StatelessWidget {
   final VoidCallback? onTap;
   final Color? splashColor;
   final Color? highlightColor;
+
+  /// When true, expands to the maximum height offered by the parent.
+  final bool expandHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -118,6 +122,7 @@ class TilawaCard extends StatelessWidget {
 
     return SizedBox(
       width: double.infinity,
+      height: expandHeight ? double.infinity : null,
       child: hasShadow
           ? _TilawaCardShadow(
               borderRadius: borderRadiusValue,

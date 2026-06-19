@@ -89,6 +89,10 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
           logger.d('[GoogleSignIn] cancelled by user');
           emit(const AuthState.unauthenticated());
         },
+        noGoogleAccounts: () {
+          logger.d('[GoogleSignIn] no Google accounts on device');
+          emit(const AuthState.noGoogleAccounts());
+        },
       );
     } catch (error, stackTrace) {
       if (generation != _interactiveSignInGeneration) {

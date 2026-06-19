@@ -3,6 +3,7 @@ import 'package:quran_image/core/di/dependency_injection.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:quran_image/core/utils/quran_image_utils.dart';
 import 'package:quran_image/domain/domain.dart';
+import 'package:quran_image/l10n/app_localizations.dart';
 import 'package:quran_image/page_mapping.dart';
 import 'package:quran_image/presentation/widgets/premium_bottom_bar.dart';
 import 'package:quran_image/presentation/widgets/widgets.dart';
@@ -26,10 +27,12 @@ class QuranImagePage extends StatefulWidget {
   final int pageNumber;
   final SurahHeaderBannerLayoutPolicy surahHeaderLayoutPolicy;
   final ColorFilter? headerImageFilter;
+  final VoidCallback? onShowIndex;
 
   const QuranImagePage({
     super.key,
     required this.pageNumber,
+    this.onShowIndex,
     this.surahHeaderLayoutPolicy =
         const CalibratedSurahHeaderBannerLayoutPolicy(),
     this.headerImageFilter,
@@ -192,7 +195,10 @@ class _QuranImagePageState extends State<QuranImagePage> {
 
     return Column(
       children: [
-        QuranAppBar(pageNumber: widget.pageNumber),
+        QuranAppBar(
+          pageNumber: widget.pageNumber,
+          onShowIndex: widget.onShowIndex,
+        ),
         Expanded(
           child: LayoutBuilder(
             builder: (context, constraints) {
@@ -243,8 +249,9 @@ class _QuranImagePageState extends State<QuranImagePage> {
 
 class QuranAppBar extends StatelessWidget {
   final int pageNumber;
+  final VoidCallback? onShowIndex;
 
-  const QuranAppBar({super.key, required this.pageNumber});
+  const QuranAppBar({super.key, required this.pageNumber, this.onShowIndex});
 
   @override
   Widget build(BuildContext context) {
@@ -261,15 +268,26 @@ class QuranAppBar extends StatelessWidget {
       color: theme.colorScheme.primary,
       fontWeight: FontWeight.w600,
     );
+    final indexLabel =
+        AppLocalizations.of(context)?.surahIndex ?? 'Surah index';
 
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: tokens.spaceSmall,
-        vertical: tokens.spaceTiny,
+        vertical: tokens.spaceExtraSmall,
       ),
       child: Row(
         mainAxisAlignment: .spaceBetween,
         children: [
+          if (onShowIndex != null) ...[
+            TilawaIconActionButton(
+              icon: Icons.format_list_bulleted_rounded,
+              tooltip: indexLabel,
+              semanticLabel: indexLabel,
+              onTap: onShowIndex!,
+            ),
+            SizedBox(width: tokens.spaceSmall),
+          ],
           Expanded(
             child: Text(
               _arabicJuzLabel(pageInfo.juzNumber),
@@ -278,7 +296,14 @@ class QuranAppBar extends StatelessWidget {
               style: textStyle,
             ),
           ),
-          Text(surahNames, overflow: TextOverflow.ellipsis, style: textStyle),
+          Expanded(
+            child: Text(
+              surahNames,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.end,
+              style: textStyle,
+            ),
+          ),
         ],
       ),
     );

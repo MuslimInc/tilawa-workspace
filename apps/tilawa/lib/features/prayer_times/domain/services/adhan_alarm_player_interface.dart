@@ -37,6 +37,8 @@ abstract interface class IAdhanAlarmPlayer {
     required String prayerName,
     required String prayerKey,
     String? sound,
+    String? locationName,
+    String? languageCode,
   });
 
   /// Starts adhan playback immediately via the native foreground service,
@@ -47,6 +49,8 @@ abstract interface class IAdhanAlarmPlayer {
     required String prayerName,
     required String prayerKey,
     String? sound,
+    String? locationName,
+    String? languageCode,
   });
 
   /// Cancel a previously scheduled adhan by [id].
@@ -103,6 +107,8 @@ class PendingAdhanAlarm {
     required this.prayerKey,
     required this.triggerAt,
     this.sound,
+    this.locationName,
+    this.languageCode,
   });
 
   final int id;
@@ -110,4 +116,6 @@ class PendingAdhanAlarm {
   final String prayerKey;
   final DateTime triggerAt;
   final String? sound;
+  final String? locationName;
+  final String? languageCode;
 }

@@ -36,46 +36,70 @@ class HomeDashboardCard extends StatelessWidget {
     final double effectiveRadius =
         borderRadius ?? tokens.resolveRadius(family: TilawaRadiusFamily.hero);
 
-    if (!useFeaturedGradient) {
-      return TilawaCard(
-        padding: padding,
-        backgroundColor: backgroundColor ?? theme.colorScheme.surface,
-        borderRadius: effectiveRadius,
-        borderWidth: 0,
-        surface: surface,
-        onTap: onTap,
-        splashColor: splashColor,
-        highlightColor: highlightColor,
-        child: child,
-      );
-    }
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final bool stretchVertically =
+            constraints.hasBoundedHeight && constraints.maxHeight.isFinite;
+        final Widget content = stretchVertically
+            ? SizedBox(
+                height: double.infinity,
+                width: double.infinity,
+                child: child,
+              )
+            : child;
 
-    return TilawaCard(
-      padding: EdgeInsets.zero,
-      backgroundColor: Colors.transparent,
-      borderRadius: effectiveRadius,
-      borderWidth: 0,
-      surface: surface,
-      onTap: onTap,
-      splashColor: splashColor ?? cardTokens.splashColor,
-      highlightColor: highlightColor ?? cardTokens.highlightColor,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(effectiveRadius),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: <Color>[
-              cardTokens.gradientStart,
-              cardTokens.gradientEnd,
-            ],
-          ),
-        ),
-        child: Padding(
-          padding: padding ?? theme.componentTokens.card.padding,
-          child: child,
-        ),
-      ),
+        final Widget card = !useFeaturedGradient
+            ? TilawaCard(
+                padding: padding,
+                backgroundColor: backgroundColor ?? theme.colorScheme.surface,
+                borderRadius: effectiveRadius,
+                borderWidth: 0,
+                surface: surface,
+                onTap: onTap,
+                splashColor: splashColor,
+                highlightColor: highlightColor,
+                expandHeight: stretchVertically,
+                child: content,
+              )
+            : TilawaCard(
+                padding: EdgeInsets.zero,
+                backgroundColor: Colors.transparent,
+                borderRadius: effectiveRadius,
+                borderWidth: 0,
+                surface: surface,
+                onTap: onTap,
+                splashColor: splashColor ?? cardTokens.splashColor,
+                highlightColor: highlightColor ?? cardTokens.highlightColor,
+                expandHeight: stretchVertically,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(effectiveRadius),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: <Color>[
+                        cardTokens.gradientStart,
+                        cardTokens.gradientEnd,
+                      ],
+                    ),
+                  ),
+                  child: Padding(
+                    padding: padding ?? theme.componentTokens.card.padding,
+                    child: content,
+                  ),
+                ),
+              );
+
+        if (!stretchVertically) {
+          return card;
+        }
+
+        return SizedBox(
+          height: constraints.maxHeight,
+          width: double.infinity,
+          child: card,
+        );
+      },
     );
   }
 }

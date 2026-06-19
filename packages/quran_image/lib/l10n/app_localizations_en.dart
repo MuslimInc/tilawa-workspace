@@ -28,6 +28,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get retry => 'Retry';
 
   @override
+  String get surahIndex => 'Surah index';
+
+  @override
   String juz(int number) {
     return 'Juz $number';
   }

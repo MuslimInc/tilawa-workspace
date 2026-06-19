@@ -65,6 +65,16 @@ class DefaultPrayerStorage(private val context: Context) : PrayerStorage {
 
     override fun needsReschedule(): Boolean =
         dpsPrefs.getBoolean("needs_reschedule_after_boot", false)
+
+    override fun setLastNotificationLocationName(name: String?) {
+        cpsPrefs.edit {
+            if (name.isNullOrBlank()) remove("last_notification_location_name")
+            else putString("last_notification_location_name", name)
+        }
+    }
+
+    override fun getLastNotificationLocationName(): String? =
+        cpsPrefs.getString("last_notification_location_name", null)
 }
 
 class DefaultPrayerAlarmManager(private val context: Context) : PrayerAlarmManager {
@@ -76,10 +86,18 @@ class DefaultPrayerAlarmManager(private val context: Context) : PrayerAlarmManag
         if (isDebuggable) Log.d("AdhanScheduler", message)
     }
 
-    override fun scheduleExact(id: Int, name: String, key: String, triggerMs: Long, sound: String): Boolean {
+    override fun scheduleExact(
+        id: Int,
+        name: String,
+        key: String,
+        triggerMs: Long,
+        sound: String,
+        locationName: String,
+        languageCode: String,
+    ): Boolean {
         if (!canScheduleExact()) return false
-        
-        val pi = pendingIntent(id, name, key, triggerMs, sound)
+
+        val pi = pendingIntent(id, name, key, triggerMs, sound, locationName, languageCode)
         val showIntent = PendingIntent.getActivity(
             context,
             id,
@@ -127,6 +145,8 @@ class DefaultPrayerAlarmManager(private val context: Context) : PrayerAlarmManag
         prayerKey: String,
         triggerAtMillis: Long,
         sound: String,
+        locationName: String = "",
+        languageCode: String = "",
     ): PendingIntent {
         val intent = Intent(context, AdhanReceiver::class.java).apply {
             action = "com.tilawa.app.prayer.ACTION_FIRE_ADHAN"
@@ -135,6 +155,12 @@ class DefaultPrayerAlarmManager(private val context: Context) : PrayerAlarmManag
             putExtra(AdhanScheduler.EXTRA_PRAYER_KEY, prayerKey)
             putExtra(AdhanScheduler.EXTRA_SCHEDULED_MS, triggerAtMillis)
             putExtra(AdhanScheduler.EXTRA_SOUND, sound)
+            if (locationName.isNotBlank()) {
+                putExtra(AdhanScheduler.EXTRA_LOCATION_NAME, locationName)
+            }
+            if (languageCode.isNotBlank()) {
+                putExtra(AdhanScheduler.EXTRA_LANGUAGE_CODE, languageCode)
+            }
         }
         return PendingIntent.getBroadcast(context, notificationId, intent, piFlags())
     }

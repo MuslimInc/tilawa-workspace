@@ -224,6 +224,30 @@ abstract class AppLocalizations {
   /// **'Discover'**
   String get homeExploreTitle;
 
+  /// Home Discover section supporting line
+  ///
+  /// In en, this message translates to:
+  /// **'Reciters, Tasbeeh, and Qibla'**
+  String get homeExploreSubtitle;
+
+  /// Home dashboard layout toggle tooltip when grid is active
+  ///
+  /// In en, this message translates to:
+  /// **'Show as list'**
+  String get homeExploreShowAsList;
+
+  /// Home dashboard layout toggle tooltip when list is active
+  ///
+  /// In en, this message translates to:
+  /// **'Show as grid'**
+  String get homeExploreShowAsGrid;
+
+  /// Home hero message when dashboard data fails to load
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load prayer times. Check your connection and try again.'**
+  String get homeDashboardLoadError;
+
   /// Read-only Home search field hint; opens Quran index
   ///
   /// In en, this message translates to:
@@ -235,12 +259,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Featured for you'**
   String get homeFeaturedTitle;
-
-  /// Hero notification control; opens Prayer tab
-  ///
-  /// In en, this message translates to:
-  /// **'Prayer times and alerts'**
-  String get homePrayerAlertsAction;
 
   /// Home section title for daily actions
   ///
@@ -1837,6 +1855,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unable to sign in with third-party account'**
   String get unableToSignInWithThirdPartyAccount;
+
+  /// Shown when the device has no Google accounts configured
+  ///
+  /// In en, this message translates to:
+  /// **'No Google account found on this device. Please add a Google account in your device settings and try again.'**
+  String get googleSignInNoAccountsOnDevice;
 
   /// Title when Google account picker fails to render on device
   ///
@@ -4610,6 +4634,24 @@ abstract class AppLocalizations {
   /// **'It is time for {prayerName}'**
   String prayerNotificationBody(String prayerName);
 
+  /// Title for prayer notifications when the user's location is known
+  ///
+  /// In en, this message translates to:
+  /// **'{prayerName} · {locationName}'**
+  String prayerNotificationTitleWithLocation(
+    String prayerName,
+    String locationName,
+  );
+
+  /// Body for prayer notifications when the user's location is known
+  ///
+  /// In en, this message translates to:
+  /// **'It is time for {prayerName} in {locationName}'**
+  String prayerNotificationBodyWithLocation(
+    String prayerName,
+    String locationName,
+  );
+
   /// Android notification channel name for default prayer reminders
   ///
   /// In en, this message translates to:
@@ -4649,8 +4691,14 @@ abstract class AppLocalizations {
   /// Text showing that Adhan audio is currently playing
   ///
   /// In en, this message translates to:
-  /// **'Adhan is playing'**
+  /// **'Adhan is playing…'**
   String get adhanIsPlaying;
+
+  /// Native adhan foreground notification body when location is known
+  ///
+  /// In en, this message translates to:
+  /// **'Adhan is playing for {locationName}'**
+  String adhanPlayingNotificationBodyWithLocation(String locationName);
 
   /// Button label to stop Adhan playback
   ///

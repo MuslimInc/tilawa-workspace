@@ -7,7 +7,7 @@ import '../../domain/entities/home_layout_mode.dart';
 import '../cubit/home_layout_cubit.dart';
 import '../cubit/home_layout_state.dart';
 
-/// Switches Home shortcut surfaces between grouped list and card grid.
+/// Switches Home dashboard surfaces between grouped list and card grid.
 class HomeLayoutToggleButton extends StatelessWidget {
   const HomeLayoutToggleButton({super.key});
 
@@ -20,11 +20,11 @@ class HomeLayoutToggleButton extends StatelessWidget {
         return TilawaIconActionButton(
           icon: isGrid ? Icons.view_list_rounded : Icons.grid_view_rounded,
           tooltip: isGrid
-              ? context.l10n.tasbeehShowAsList
-              : context.l10n.tasbeehShowAsGrid,
+              ? context.l10n.homeExploreShowAsList
+              : context.l10n.homeExploreShowAsGrid,
           semanticLabel: isGrid
-              ? context.l10n.tasbeehShowAsList
-              : context.l10n.tasbeehShowAsGrid,
+              ? context.l10n.homeExploreShowAsList
+              : context.l10n.homeExploreShowAsGrid,
           onTap: () => context.read<HomeLayoutCubit>().toggleLayoutMode(),
         );
       },

@@ -27,6 +27,8 @@ internal object AdhanScheduler {
     const val EXTRA_NOTIFICATION_ID = "notification_id"
     const val EXTRA_SCHEDULED_MS = "scheduled_ms"
     const val EXTRA_SOUND = "sound"
+    const val EXTRA_LOCATION_NAME = "location_name"
+    const val EXTRA_LANGUAGE_CODE = "language_code"
 
     private var storage: PrayerStorage? = null
     private var alarmManager: PrayerAlarmManager? = null
@@ -79,6 +81,8 @@ internal object AdhanScheduler {
         prayerKey: String,
         triggerAtMillis: Long,
         sound: String,
+        locationName: String = "",
+        languageCode: String = "",
     ): Boolean {
         val am = getAlarmManager(context)
         val st = getStorage(context)
@@ -87,7 +91,16 @@ internal object AdhanScheduler {
             return false
         }
 
-        if (am.scheduleExact(notificationId, prayerName, prayerKey, triggerAtMillis, sound)) {
+        if (am.scheduleExact(
+                notificationId,
+                prayerName,
+                prayerKey,
+                triggerAtMillis,
+                sound,
+                locationName,
+                languageCode,
+            )
+        ) {
             st.addActiveId(notificationId)
             return true
         }
@@ -102,7 +115,7 @@ internal object AdhanScheduler {
     fun cancelAll(context: Context) {
         val am = getAlarmManager(context)
         val st = getStorage(context)
-        
+
         am.cancelAll(st.getActiveIds())
         st.clearActiveIds()
         st.setPendingAlarmsJson(null)

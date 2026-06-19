@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../lib/src/atoms/tilawa_button.dart';
 import '../../lib/src/foundation/app_colors.dart';
 import '../../lib/src/foundation/app_theme.dart';
+import '../../lib/src/foundation/design_tokens.dart';
 import '../../lib/src/foundation/tilawa_dialog.dart';
 
 Widget _host(void Function(BuildContext) onPressed) {
@@ -49,6 +50,11 @@ void main() {
     expect(find.text('Cancel'), findsOneWidget);
     // Close affordance from the title row.
     expect(find.byIcon(Icons.close_rounded), findsOneWidget);
+    expect(find.byTooltip('Close'), findsOneWidget);
+    expect(
+      tester.getSize(find.byTooltip('Close')),
+      const Size.square(kTilawaMinInteractiveDimension),
+    );
   });
 
   testWidgets(

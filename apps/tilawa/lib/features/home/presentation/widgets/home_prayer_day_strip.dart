@@ -17,6 +17,10 @@ class HomePrayerDayStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<HomeDashboardBloc, HomeDashboardState>(
       builder: (context, state) {
+        if (state is HomeDashboardLoading || state is HomeDashboardInitial) {
+          return const _HomePrayerDayStripSkeleton();
+        }
+
         final List<HomePrayerSlot> slots = switch (state) {
           HomeDashboardLoaded(:final dashboard) => dashboard.todayPrayers,
           _ => const [],
@@ -71,6 +75,45 @@ class HomePrayerDayStrip extends StatelessWidget {
       context,
     ).formatTimeOfDay(TimeOfDay.fromDateTime(slot.time));
     return '$name · $time';
+  }
+}
+
+class _HomePrayerDayStripSkeleton extends StatelessWidget {
+  const _HomePrayerDayStripSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = context.tokens;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final Color pillColor = colorScheme.surfaceContainerHighest;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: tokens.spaceSmall,
+      children: [
+        TilawaSectionTitle.overline(
+          title: context.l10n.homePrayerStripTitle,
+        ),
+        Semantics(
+          label: context.l10n.homePrayerStripTitle,
+          child: ExcludeSemantics(
+            child: TilawaQuickFilterBar(
+              children: List<Widget>.generate(
+                5,
+                (_) => TilawaSelectionPill(
+                  label: ' ',
+                  selected: false,
+                  style: TilawaSelectionPillStyle.catalog,
+                  elevatedWhenSelected: false,
+                  unselectedColor: pillColor,
+                  showLabel: false,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 

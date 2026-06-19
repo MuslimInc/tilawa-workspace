@@ -42,32 +42,9 @@ class HomeTravelDestinationCard extends StatelessWidget {
         padding: EdgeInsets.zero,
         borderRadius: radius,
         onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: headerTint,
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(radius),
-                ),
-              ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: tokens.spaceMedium,
-                  vertical: tokens.spaceMedium,
-                ),
-                child: Align(
-                  alignment: AlignmentDirectional.centerStart,
-                  child: Icon(
-                    icon,
-                    size: tokens.iconSizeLarge,
-                    color: cardTokens.travelDestinationIconColor,
-                  ),
-                ),
-              ),
-            ),
-            Padding(
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            final Widget body = Padding(
               padding: EdgeInsets.all(tokens.spaceMedium),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -87,9 +64,9 @@ class HomeTravelDestinationCard extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        if (subtitle case final String body)
+                        if (subtitle case final String bodyText)
                           Text(
-                            body,
+                            bodyText,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.bodySmall?.copyWith(
@@ -104,8 +81,40 @@ class HomeTravelDestinationCard extends StatelessWidget {
                   ],
                 ],
               ),
-            ),
-          ],
+            );
+            final bool stretchBody =
+                constraints.hasBoundedHeight && constraints.maxHeight.isFinite;
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: headerTint,
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(radius),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: tokens.spaceMedium,
+                      vertical: tokens.spaceMedium,
+                    ),
+                    child: Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: Icon(
+                        icon,
+                        size: tokens.iconSizeLarge,
+                        color: cardTokens.travelDestinationIconColor,
+                      ),
+                    ),
+                  ),
+                ),
+                if (stretchBody) Expanded(child: body) else body,
+              ],
+            );
+          },
         ),
       ),
     );

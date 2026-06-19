@@ -9,7 +9,7 @@ import '../cubit/home_layout_cubit.dart';
 import '../cubit/home_layout_state.dart';
 import '../../domain/entities/home_layout_mode.dart';
 import 'home_adaptive_shortcuts.dart';
-import 'home_dashboard_search_bar.dart';
+import 'home_dashboard_section.dart';
 import 'home_layout_toggle_button.dart';
 import 'home_daily_inspiration_section.dart';
 import 'home_more_actions_group.dart';
@@ -36,74 +36,29 @@ class HomeDashboardBody extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Transform.translate(
-              offset: Offset(0, -tokens.spaceLarge),
-              child: const HomeDashboardSearchBar(),
-            ),
-            SizedBox(height: tokens.spaceMedium),
-            HomeTodaySection(onOpenPrayer: onOpenPrayer),
-            SizedBox(height: tokens.spaceExtraLarge),
-            _HomeDashboardSection(
-              title: context.l10n.homeDailyInspirationTitle,
-              subtitle: context.l10n.homeDailyInspirationSubtitle,
-              child: const HomeDailyInspirationSection(),
+            HomeTodaySection(
+              onOpenPrayer: onOpenPrayer,
+              layoutMode: layoutState.mode,
             ),
             SizedBox(height: tokens.spaceExtraLarge),
-            _HomeDashboardSection(
+            HomeDashboardSection(
               title: context.l10n.homeExploreTitle,
+              subtitle: context.l10n.homeExploreSubtitle,
               trailing: const HomeLayoutToggleButton(),
               child: _HomeMoreActions(
                 layoutMode: layoutState.mode,
                 onOpenReciters: onOpenReciters,
               ),
             ),
+            SizedBox(height: tokens.spaceExtraLarge),
+            HomeDashboardSection(
+              title: context.l10n.homeDailyInspirationTitle,
+              subtitle: context.l10n.homeDailyInspirationSubtitle,
+              child: const HomeDailyInspirationSection(),
+            ),
           ],
         );
       },
-    );
-  }
-}
-
-/// Shared title → subtitle → content rhythm for Home dashboard zones.
-class _HomeDashboardSection extends StatelessWidget {
-  const _HomeDashboardSection({
-    required this.title,
-    this.subtitle,
-    this.trailing,
-    required this.child,
-  });
-
-  final String title;
-  final String? subtitle;
-  final Widget? trailing;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final tokens = context.tokens;
-    final theme = Theme.of(context);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          children: [
-            Expanded(child: TilawaSectionTitle(title: title)),
-            ?trailing,
-          ],
-        ),
-        if (subtitle != null) ...[
-          SizedBox(height: tokens.spaceExtraSmall),
-          Text(
-            subtitle!,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-        SizedBox(height: tokens.spaceMedium),
-        child,
-      ],
     );
   }
 }

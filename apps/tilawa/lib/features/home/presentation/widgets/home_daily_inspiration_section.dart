@@ -106,7 +106,9 @@ class _DailyInspirationRow extends StatelessWidget {
 
     final TextStyle bodyStyle = theme.textTheme.bodyMedium!.copyWith(
       color: colorScheme.onSurfaceVariant,
-      height: useArabicTypography ? tokens.textHeightLoose : 1.45,
+      height: useArabicTypography
+          ? tokens.textHeightLoose
+          : theme.textTheme.bodyMedium?.height,
       fontWeight: useArabicTypography ? FontWeight.w500 : FontWeight.w400,
     );
 

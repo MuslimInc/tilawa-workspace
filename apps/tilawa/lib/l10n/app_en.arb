@@ -102,6 +102,22 @@
     "@homeExploreTitle": {
         "description": "Home section title for secondary destinations that are not bottom-nav tabs"
     },
+    "homeExploreSubtitle": "Reciters, Tasbeeh, and Qibla",
+    "@homeExploreSubtitle": {
+        "description": "Home Discover section supporting line"
+    },
+    "homeExploreShowAsList": "Show as list",
+    "@homeExploreShowAsList": {
+        "description": "Home dashboard layout toggle tooltip when grid is active"
+    },
+    "homeExploreShowAsGrid": "Show as grid",
+    "@homeExploreShowAsGrid": {
+        "description": "Home dashboard layout toggle tooltip when list is active"
+    },
+    "homeDashboardLoadError": "Could not load prayer times. Check your connection and try again.",
+    "@homeDashboardLoadError": {
+        "description": "Home hero message when dashboard data fails to load"
+    },
     "homeSearchHint": "Search surahs, juz, or page",
     "@homeSearchHint": {
         "description": "Read-only Home search field hint; opens Quran index"
@@ -109,10 +125,6 @@
     "homeFeaturedTitle": "Featured for you",
     "@homeFeaturedTitle": {
         "description": "Home horizontal carousel section title (travel-app popular row)"
-    },
-    "homePrayerAlertsAction": "Prayer times and alerts",
-    "@homePrayerAlertsAction": {
-        "description": "Hero notification control; opens Prayer tab"
     },
     "homeTodayTitle": "Today",
     "@homeTodayTitle": {
@@ -1353,6 +1365,10 @@
     "unableToSignInWithThirdPartyAccount": "Unable to sign in with third-party account",
     "@unableToSignInWithThirdPartyAccount": {
         "description": "Error message shown when third-party sign-in fails"
+    },
+    "googleSignInNoAccountsOnDevice": "No Google account found on this device. Please add a Google account in your device settings and try again.",
+    "@googleSignInNoAccountsOnDevice": {
+        "description": "Shown when the device has no Google accounts configured"
     },
     "googleSignInFallbackTitle": "Google sign-in could not open",
     "@googleSignInFallbackTitle": {
@@ -3505,6 +3521,34 @@
             }
         }
     },
+    "prayerNotificationTitleWithLocation": "{prayerName} · {locationName}",
+    "@prayerNotificationTitleWithLocation": {
+        "description": "Title for prayer notifications when the user's location is known",
+        "placeholders": {
+            "prayerName": {
+                "type": "String",
+                "example": "Fajr"
+            },
+            "locationName": {
+                "type": "String",
+                "example": "Cairo"
+            }
+        }
+    },
+    "prayerNotificationBodyWithLocation": "It is time for {prayerName} in {locationName}",
+    "@prayerNotificationBodyWithLocation": {
+        "description": "Body for prayer notifications when the user's location is known",
+        "placeholders": {
+            "prayerName": {
+                "type": "String",
+                "example": "Fajr"
+            },
+            "locationName": {
+                "type": "String",
+                "example": "Cairo"
+            }
+        }
+    },
     "prayerNotificationsChannelName": "Prayer Times",
     "@prayerNotificationsChannelName": {
         "description": "Android notification channel name for default prayer reminders"
@@ -3529,9 +3573,19 @@
     "@prayerNotificationsSilentAdhanChannelDescription": {
         "description": "Android notification channel description for prayer reminders when adhan is handled natively"
     },
-    "adhanIsPlaying": "Adhan is playing",
+    "adhanIsPlaying": "Adhan is playing…",
     "@adhanIsPlaying": {
         "description": "Text showing that Adhan audio is currently playing"
+    },
+    "adhanPlayingNotificationBodyWithLocation": "Adhan is playing for {locationName}",
+    "@adhanPlayingNotificationBodyWithLocation": {
+        "description": "Native adhan foreground notification body when location is known",
+        "placeholders": {
+            "locationName": {
+                "type": "String",
+                "example": "Cairo"
+            }
+        }
     },
     "stopAdhan": "Stop Adhan",
     "@stopAdhan": {

@@ -17,6 +17,10 @@ import '../../domain/entities/auth_result.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/providers/auth_provider_interface.dart';
 
+class _NoGoogleAccountsException implements Exception {
+  const _NoGoogleAccountsException();
+}
+
 @LazySingleton(as: AuthProviderInterface)
 class GoogleAuthProviderImpl implements AuthProviderInterface {
   GoogleAuthProviderImpl(
@@ -126,6 +130,8 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
             details: e.details?.toString(),
           );
       }
+    } on _NoGoogleAccountsException {
+      return const AuthResult.noGoogleAccounts();
     } on FirebaseAuthException catch (e) {
       return AuthResult.failure(
         message: e.message ?? 'Authentication failed',
@@ -186,21 +192,54 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
     final Future<GoogleSignInAccount?>? lightweight = _googleSignIn
         .attemptLightweightAuthentication(reportAllExceptions: true);
     if (lightweight == null) {
-      throw const GoogleSignInException(
-        code: GoogleSignInExceptionCode.uiUnavailable,
-        description: 'Credential Manager sign-in is not supported',
-      );
+      // Plugin signals Credential Manager unavailable — fall through to the
+      // account-chooser dialog which offers "Add account".
+      return _authenticateOrThrowNoAccounts();
     }
-    final GoogleSignInAccount? account = await _waitForInteractiveUi(
-      lightweight,
-      stageTimeout: signInTimeout,
-    );
-    if (account == null) {
-      throw const GoogleSignInException(
-        code: GoogleSignInExceptionCode.canceled,
+    try {
+      final GoogleSignInAccount? account = await _waitForInteractiveUi(
+        lightweight,
+        stageTimeout: signInTimeout,
       );
+      if (account == null) {
+        // Credential Manager returned but yielded no account — treat as
+        // cancelled (e.g. user dismissed auto-sign-in hint without acting).
+        throw const GoogleSignInException(
+          code: GoogleSignInExceptionCode.canceled,
+        );
+      }
+      return account;
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled ||
+          e.code == GoogleSignInExceptionCode.interrupted) {
+        // CM sheet was dismissed with no account selected — could mean the
+        // device has no Google accounts. Fall through to authenticate() which
+        // offers an "Add account" option.
+        return _authenticateOrThrowNoAccounts();
+      }
+      rethrow;
     }
-    return account;
+  }
+
+  /// Attempts the button-flow account chooser. If [supportsAuthenticate] is
+  /// false, or the account chooser is also dismissed (both dialogs cancelled),
+  /// throws [_NoGoogleAccountsException] so the caller surfaces a
+  /// "no accounts on device" message.
+  Future<GoogleSignInAccount> _authenticateOrThrowNoAccounts() async {
+    if (!_googleSignIn.supportsAuthenticate()) {
+      throw const _NoGoogleAccountsException();
+    }
+    try {
+      return await _authenticateWithButtonFlow();
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled ||
+          e.code == GoogleSignInExceptionCode.interrupted) {
+        // Both the CM sheet and the account chooser were dismissed — the device
+        // most likely has no Google accounts configured.
+        throw const _NoGoogleAccountsException();
+      }
+      rethrow;
+    }
   }
 
   /// Waits for an interactive GMS sign-in [operation], capped at

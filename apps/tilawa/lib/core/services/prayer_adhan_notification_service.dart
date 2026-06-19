@@ -28,6 +28,7 @@ import '../../features/prayer_times/domain/entities/prayer_settings_entity.dart'
 import '../../features/prayer_times/domain/entities/prayer_time_entity.dart';
 import '../../features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
 import '../../features/prayer_times/domain/services/prayer_adhan_notification_service_interface.dart';
+import '../../features/prayer_times/presentation/formatters/prayer_location_label_formatter.dart';
 import '../config/notification_config.dart';
 import 'notification_permission_service.dart';
 import 'prayer_notification_config.dart';
@@ -53,8 +54,9 @@ class PrayerAdhanNotificationService
     this._navigationService,
     this._analytics,
     this._adhanPlayer,
-    this._notificationPermissionService,
-  );
+    this._notificationPermissionService, {
+    @ignoreParam @visibleForTesting this._isAndroidOverride,
+  });
 
   final SharedPreferencesAsync _prefs;
   final INotificationDispatcher _dispatcher;
@@ -62,6 +64,9 @@ class PrayerAdhanNotificationService
   final AnalyticsService _analytics;
   final IAdhanAlarmPlayer _adhanPlayer;
   final NotificationPermissionService _notificationPermissionService;
+  final bool? _isAndroidOverride;
+
+  bool get _isAndroid => _isAndroidOverride ?? Platform.isAndroid;
 
   bool _initialized = false;
 
@@ -161,7 +166,7 @@ class PrayerAdhanNotificationService
       });
       await _flushPendingTapBestEffort();
 
-      if (Platform.isAndroid) {
+      if (_isAndroid) {
         await _createAndroidChannels();
       }
 
@@ -288,9 +293,11 @@ class PrayerAdhanNotificationService
 
       // Dedup
       final String today = _todayDateKey();
+      final String languageCode = await _currentLanguageCode();
       final String currentFingerprint = _computeFingerprint(
         settings: settings,
         prayerTimesForDays: prayerTimesForDays,
+        languageCode: languageCode,
       );
       if (!effectiveForce) {
         final String? storedDate = await _prefs.getString(
@@ -322,6 +329,12 @@ class PrayerAdhanNotificationService
 
       final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
       final AppLocalizations l10n = await _localizations();
+      final String? notificationLocationLabel =
+          _resolveNotificationLocationLabel(
+            l10n,
+            settings,
+            prayerTimesForDays,
+          );
       final int dayCount =
           prayerTimesForDays.length < PrayerNotificationConfig.scheduleDaysAhead
           ? prayerTimesForDays.length
@@ -394,6 +407,8 @@ class PrayerAdhanNotificationService
                 scheduledTime: targetTime,
                 prayerName: prayer.name,
                 prayerKey: prayer.name.toLowerCase(),
+                locationName: notificationLocationLabel,
+                languageCode: languageCode,
               );
               if (adhanHandledNatively) {
                 logger.d(
@@ -408,6 +423,8 @@ class PrayerAdhanNotificationService
                     prayerName: prayer.name,
                     prayerKey: prayer.name.toLowerCase(),
                     triggerAt: targetTime,
+                    locationName: notificationLocationLabel,
+                    languageCode: languageCode,
                   ),
                 );
                 logger.d(
@@ -439,8 +456,16 @@ class PrayerAdhanNotificationService
             try {
               await _notifications.zonedSchedule(
                 id: notificationId,
-                title: _titleFor(l10n, prayer),
-                body: _bodyFor(l10n, prayer),
+                title: _titleFor(
+                  l10n,
+                  prayer,
+                  locationName: notificationLocationLabel,
+                ),
+                body: _bodyFor(
+                  l10n,
+                  prayer,
+                  locationName: notificationLocationLabel,
+                ),
                 scheduledDate: tzTarget,
                 notificationDetails: _detailsFor(
                   l10n,
@@ -631,7 +656,7 @@ class PrayerAdhanNotificationService
 
   @override
   Future<bool> canScheduleExactAlarms() async {
-    if (!Platform.isAndroid) {
+    if (!_isAndroid) {
       return true;
     }
     try {
@@ -652,7 +677,7 @@ class PrayerAdhanNotificationService
 
   @override
   Future<void> requestExactAlarmPermission() async {
-    if (!Platform.isAndroid) {
+    if (!_isAndroid) {
       return;
     }
     try {
@@ -696,6 +721,9 @@ class PrayerAdhanNotificationService
           ? PrayerNotificationConfig.adhanSoundRawName
           : 'default';
       final AppLocalizations l10n = await _localizations();
+      final String languageCode = await _currentLanguageCode();
+      final String? notificationLocationLabel =
+          await _locationLabelFromSavedSettings(l10n);
 
       bool adhanHandledNatively = false;
       if (playAdhan && _adhanPlayer.isSupported) {
@@ -708,6 +736,8 @@ class PrayerAdhanNotificationService
             scheduledTime: trigger,
             prayerName: prayer.name,
             prayerKey: prayer.name.toLowerCase(),
+            locationName: notificationLocationLabel,
+            languageCode: languageCode,
           );
         } catch (e) {
           logger.w(
@@ -722,6 +752,8 @@ class PrayerAdhanNotificationService
           id: testId,
           prayerName: prayer.name,
           prayerKey: prayer.name.toLowerCase(),
+          locationName: notificationLocationLabel,
+          languageCode: languageCode,
         );
       }
 
@@ -734,8 +766,12 @@ class PrayerAdhanNotificationService
       if (!adhanHandledNatively && !immediatePlayback) {
         await _notifications.show(
           id: testId,
-          title: _titleFor(l10n, prayer),
-          body: _bodyFor(l10n, prayer),
+          title: _titleFor(
+            l10n,
+            prayer,
+            locationName: notificationLocationLabel,
+          ),
+          body: _bodyFor(l10n, prayer, locationName: notificationLocationLabel),
           notificationDetails: _detailsFor(
             l10n,
             playAdhan,
@@ -799,11 +835,17 @@ class PrayerAdhanNotificationService
 
       bool nativeSuccess = false;
       if (_adhanPlayer.isSupported) {
+        final String languageCode = await _currentLanguageCode();
+        final AppLocalizations l10n = await _localizations();
+        final String? notificationLocationLabel =
+            await _locationLabelFromSavedSettings(l10n);
         nativeSuccess = await _adhanPlayer.scheduleAdhan(
           id: testId,
           scheduledTime: triggerAt,
           prayerName: 'DEBUG_ADHAN',
           prayerKey: 'debug',
+          locationName: notificationLocationLabel,
+          languageCode: languageCode,
         );
       }
 
@@ -1010,12 +1052,68 @@ class PrayerAdhanNotificationService
     };
   }
 
-  String _titleFor(AppLocalizations l10n, PrayerType prayer) {
-    return _localizedPrayerName(l10n, prayer);
+  String _titleFor(
+    AppLocalizations l10n,
+    PrayerType prayer, {
+    String? locationName,
+  }) {
+    final String prayerLabel = _localizedPrayerName(l10n, prayer);
+    if (locationName == null || locationName.isEmpty) {
+      return prayerLabel;
+    }
+    return l10n.prayerNotificationTitleWithLocation(prayerLabel, locationName);
   }
 
-  String _bodyFor(AppLocalizations l10n, PrayerType prayer) {
-    return l10n.prayerNotificationBody(_localizedPrayerName(l10n, prayer));
+  String _bodyFor(
+    AppLocalizations l10n,
+    PrayerType prayer, {
+    String? locationName,
+  }) {
+    final String prayerLabel = _localizedPrayerName(l10n, prayer);
+    if (locationName == null || locationName.isEmpty) {
+      return l10n.prayerNotificationBody(prayerLabel);
+    }
+    return l10n.prayerNotificationBodyWithLocation(
+      prayerLabel,
+      locationName,
+    );
+  }
+
+  String? _resolveNotificationLocationLabel(
+    AppLocalizations l10n,
+    PrayerSettingsEntity settings,
+    List<PrayerTimeEntity> prayerTimesForDays,
+  ) {
+    final String? fromSettings = _notificationLocationLabel(
+      l10n,
+      settings.effectiveSchedulingLocationName,
+    );
+    if (fromSettings != null) {
+      return fromSettings;
+    }
+
+    if (prayerTimesForDays.isEmpty) {
+      return null;
+    }
+
+    return _notificationLocationLabel(
+      l10n,
+      prayerTimesForDays.first.locationName,
+    );
+  }
+
+  String? _notificationLocationLabel(
+    AppLocalizations l10n,
+    String? locationName,
+  ) {
+    if (locationName == null || locationName.trim().isEmpty) {
+      return null;
+    }
+    final String label = PrayerLocationLabelFormatter.abbreviatedLocationLabel(
+      locationName: locationName,
+      l10n: l10n,
+    );
+    return label == l10n.unknownLocation ? null : label;
   }
 
   NotificationDetails _detailsFor(
@@ -1125,17 +1223,41 @@ class PrayerAdhanNotificationService
     await _prefs.remove(PrayerNotificationConfig.scheduledNotificationCountKey);
   }
 
-  Future<AppLocalizations> _localizations() async {
-    String languageCode = LanguageConfig.defaultLanguageCode;
+  Future<String?> _locationLabelFromSavedSettings(AppLocalizations l10n) async {
     try {
-      languageCode =
-          await _prefs.getString(LanguageConfig.languageKey) ?? languageCode;
+      final String? settingsJson = await _prefs.getString('prayer_settings');
+      if (settingsJson == null) {
+        return null;
+      }
+      final PrayerSettingsEntity settings = PrayerSettingsEntity.fromJson(
+        jsonDecode(settingsJson) as Map<String, dynamic>,
+      );
+      return _notificationLocationLabel(
+        l10n,
+        settings.effectiveSchedulingLocationName,
+      );
+    } catch (e) {
+      logger.w(
+        '${PrayerNotificationConfig.logTag} Failed to read saved location for test notification: $e',
+      );
+      return null;
+    }
+  }
+
+  Future<AppLocalizations> _localizations() async {
+    return lookupAppLocalizations(Locale(await _currentLanguageCode()));
+  }
+
+  Future<String> _currentLanguageCode() async {
+    try {
+      return await _prefs.getString(LanguageConfig.languageKey) ??
+          LanguageConfig.defaultLanguageCode;
     } catch (e) {
       logger.w(
         '${PrayerNotificationConfig.logTag} Failed to read locale preference: $e',
       );
+      return LanguageConfig.defaultLanguageCode;
     }
-    return lookupAppLocalizations(Locale(languageCode));
   }
 
   String _localizedPrayerName(AppLocalizations l10n, PrayerType prayer) {
@@ -1164,6 +1286,7 @@ class PrayerAdhanNotificationService
   String _computeFingerprint({
     required PrayerSettingsEntity settings,
     required List<PrayerTimeEntity> prayerTimesForDays,
+    required String languageCode,
   }) {
     final Map<String, dynamic> json = settings.toJson();
     final double lat = (prayerTimesForDays.first.latitude ?? 0).toDouble();
@@ -1173,6 +1296,8 @@ class PrayerAdhanNotificationService
       lat.toStringAsFixed(4),
       lon.toStringAsFixed(4),
       settings.calculationMethod.name,
+      languageCode,
+      settings.effectiveSchedulingLocationName ?? '',
     ].join('|');
     return fingerprint;
   }

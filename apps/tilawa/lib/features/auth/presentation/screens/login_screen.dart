@@ -37,6 +37,7 @@ String _authStateLabel(AuthState state) {
     authenticated: (_) => 'authenticated',
     unauthenticated: () => 'unauthenticated',
     error: (message) => 'error($message)',
+    noGoogleAccounts: () => 'noGoogleAccounts',
   );
 }
 
@@ -350,6 +351,9 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
               if (current is AuthError && previous is! AuthError) {
                 return true;
               }
+              if (current is AuthNoGoogleAccounts) {
+                return true;
+              }
               return current is AuthUnauthenticated && previous is AuthLoading;
             },
             listener: (context, state) {
@@ -380,6 +384,13 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                     msg: message.isNotEmpty
                         ? message
                         : context.l10n.unableToSignInWithThirdPartyAccount,
+                  );
+                },
+                noGoogleAccounts: () {
+                  _awaitingManualSignInResult = false;
+                  _clearSignInLaunchPending();
+                  ToastUtils.showToast(
+                    msg: context.l10n.googleSignInNoAccountsOnDevice,
                   );
                 },
               );

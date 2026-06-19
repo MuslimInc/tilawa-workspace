@@ -54,17 +54,17 @@ color picker and persisted user choices.
 
 **Accent usage (one-accent rule):** Brown primary for **one** emphasis per screen
 — primary CTA, active bottom nav, selected pills/segments, progress fill,
-switch ON. **Not** for scaffold fills (use parchment canvas).
+switch ON. **Not** for scaffold fills (use the neutral canvas).
 
-### Light neutral ramp (warm parchment canvas + white cards)
+### Light neutral ramp (soft neutral canvas + white cards)
 
 | `AppColors` | Hex | `ColorScheme` / usage |
 |-------------|-----|------------------------|
-| `lightCanvas` / `lightBackground` | `#F7F7F5` | Scaffold, `surfaceContainerLowest` |
+| `lightCanvas` / `lightBackground` | `#FAFAFA` | Scaffold, `surfaceContainerLowest` |
 | `lightSurface` | `#FFFFFF` | Cards, sheets, dialogs |
 | `lightInk` | `#30343C` | `onSurface` |
 | `lightMute` | `#78736E` | Muted labels (`onSurfaceVariant`) |
-| `lightSurfaceContainerHighBase` | `#EFEDE8` | Idle chips, `surfaceContainerHigh` |
+| `lightSurfaceContainerHighBase` | `#F1F1EF` | Idle chips, `surfaceContainerHigh` |
 | `featuredGradientStart` / `End` | `#FFD28E` / `#FF9E44` | Last Read / hero gold cards |
 
 Featured cards use the gold gradient; standard cards use white + warm shadow.

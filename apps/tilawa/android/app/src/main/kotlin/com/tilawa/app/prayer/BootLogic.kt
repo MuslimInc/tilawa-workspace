@@ -41,7 +41,9 @@ internal class BootLogic(
                             name,
                             key,
                             obj.getLong("trigger"),
-                            obj.optString("sound", "adhan")
+                            obj.optString("sound", "adhan"),
+                            obj.optString("location", ""),
+                            obj.optString("language", ""),
                         )
                     )
                 }
@@ -69,7 +71,15 @@ internal class BootLogic(
                     "ADHAN_AUDIT source=boot_rearm event=attempt prayerKey=${entry.key} prayerName=${entry.name} " +
                         "scheduledMs=${entry.trigger} notificationId=${entry.id} requestCode=${entry.id}"
                 )
-                val ok = scheduler.schedule(entry.id, entry.name, entry.key, entry.trigger, entry.sound)
+                val ok = scheduler.schedule(
+                    entry.id,
+                    entry.name,
+                    entry.key,
+                    entry.trigger,
+                    entry.sound,
+                    entry.locationName,
+                    entry.languageCode,
+                )
                 if (ok) {
                     analytics?.logEvent(PrayerEvents.SCHEDULE_SUCCESS, mapOf(
                         "prayer_name" to entry.name,
@@ -103,7 +113,9 @@ internal class BootLogic(
         val name: String,
         val key: String,
         val trigger: Long,
-        val sound: String
+        val sound: String,
+        val locationName: String,
+        val languageCode: String,
     )
 }
 
@@ -111,7 +123,15 @@ interface AdhanSchedulerProxy {
     fun getContext(): Context
     fun canScheduleExact(): Boolean
     fun areNotificationsEnabled(): Boolean
-    fun schedule(id: Int, name: String, key: String, triggerMs: Long, sound: String): Boolean
+    fun schedule(
+        id: Int,
+        name: String,
+        key: String,
+        triggerMs: Long,
+        sound: String,
+        locationName: String = "",
+        languageCode: String = "",
+    ): Boolean
 }
 
 interface WatchdogProxy {

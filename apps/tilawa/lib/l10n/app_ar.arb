@@ -75,9 +75,12 @@
         }
     },
     "homeExploreTitle": "اكتشف",
+    "homeExploreSubtitle": "القراء والمسبحة والقبلة",
+    "homeExploreShowAsList": "عرض كقائمة",
+    "homeExploreShowAsGrid": "عرض كشبكة",
+    "homeDashboardLoadError": "تعذّر تحميل مواقيت الصلاة. تحقق من الاتصال وحاول مرة أخرى.",
     "homeSearchHint": "ابحث في السور أو الأجزاء أو الصفحة",
     "homeFeaturedTitle": "مختارة لك",
-    "homePrayerAlertsAction": "أوقات الصلاة والتنبيهات",
     "homeTodayTitle": "اليوم",
     "homeTodaySubtitle": "الصلاة والقرآن والذكر ليومك",
     "homeAthkarRitualsTitle": "أذكار سريعة",
@@ -1013,6 +1016,10 @@
     "unableToSignInWithThirdPartyAccount": "تعذر تسجيل الدخول باستخدام حساب طرف ثالث",
     "@unableToSignInWithThirdPartyAccount": {
         "description": "Error message shown when third-party sign-in fails"
+    },
+    "googleSignInNoAccountsOnDevice": "لم يتم العثور على حساب Google على هذا الجهاز. يرجى إضافة حساب Google في إعدادات الجهاز والمحاولة مرة أخرى.",
+    "@googleSignInNoAccountsOnDevice": {
+        "description": "Shown when the device has no Google accounts configured"
     },
     "googleSignInFallbackTitle": "تعذّر فتح تسجيل الدخول عبر Google",
     "@googleSignInFallbackTitle": {
@@ -3117,6 +3124,34 @@
             }
         }
     },
+    "prayerNotificationTitleWithLocation": "{prayerName} · {locationName}",
+    "@prayerNotificationTitleWithLocation": {
+        "description": "Title for prayer notifications when the user's location is known",
+        "placeholders": {
+            "prayerName": {
+                "type": "String",
+                "example": "الفجر"
+            },
+            "locationName": {
+                "type": "String",
+                "example": "القاهرة"
+            }
+        }
+    },
+    "prayerNotificationBodyWithLocation": "حان وقت {prayerName} في {locationName}",
+    "@prayerNotificationBodyWithLocation": {
+        "description": "Body for prayer notifications when the user's location is known",
+        "placeholders": {
+            "prayerName": {
+                "type": "String",
+                "example": "الفجر"
+            },
+            "locationName": {
+                "type": "String",
+                "example": "القاهرة"
+            }
+        }
+    },
     "prayerNotificationsChannelName": "أوقات الصلاة",
     "@prayerNotificationsChannelName": {
         "description": "Android notification channel name for default prayer reminders"
@@ -3141,9 +3176,19 @@
     "@prayerNotificationsSilentAdhanChannelDescription": {
         "description": "Android notification channel description for prayer reminders when adhan is handled natively"
     },
-    "adhanIsPlaying": "الأذان يعمل الآن",
+    "adhanIsPlaying": "الأذان قيد التشغيل…",
     "@adhanIsPlaying": {
         "description": "Text showing that Adhan audio is currently playing"
+    },
+    "adhanPlayingNotificationBodyWithLocation": "الأذان قيد التشغيل في {locationName}",
+    "@adhanPlayingNotificationBodyWithLocation": {
+        "description": "Native adhan foreground notification body when location is known",
+        "placeholders": {
+            "locationName": {
+                "type": "String",
+                "example": "القاهرة"
+            }
+        }
     },
     "stopAdhan": "إيقاف الأذان",
     "@stopAdhan": {

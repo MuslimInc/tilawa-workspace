@@ -223,7 +223,7 @@ class _FakeGetLastReadPositionUseCase implements GetLastReadPositionUseCase {
 class _FakeHomeLayoutPreferenceRepository
     implements HomeLayoutPreferenceRepository {
   @override
-  Future<HomeLayoutMode> getLayoutMode() async => HomeLayoutMode.grid;
+  Future<HomeLayoutMode> getLayoutMode() async => HomeLayoutMode.list;
 
   @override
   Future<void> setLayoutMode(HomeLayoutMode mode) async {}

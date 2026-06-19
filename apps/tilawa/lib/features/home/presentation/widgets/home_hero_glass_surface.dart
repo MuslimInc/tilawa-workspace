@@ -26,8 +26,12 @@ class HomeHeroGlassSurface extends StatelessWidget {
         theme.componentTokens.homeNextPrayerHero;
     final BorderRadius resolvedRadius =
         borderRadius ?? BorderRadius.circular(tokens.radiusLarge);
-    final Color fill = heroTokens.foregroundColor.withValues(alpha: 0.14);
-    final Color border = heroTokens.foregroundColor.withValues(alpha: 0.24);
+    final Color fill = heroTokens.foregroundColor.withValues(
+      alpha: heroTokens.locationChipFillOpacity,
+    );
+    final Color border = heroTokens.foregroundColor.withValues(
+      alpha: heroTokens.locationChipBorderOpacity,
+    );
 
     final Widget panel = ClipRRect(
       borderRadius: resolvedRadius,

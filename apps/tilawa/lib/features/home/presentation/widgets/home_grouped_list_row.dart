@@ -85,10 +85,10 @@ class HomeGroupedListRow extends StatelessWidget {
                     ),
                   ),
                   if (showChevron)
+                    // Keep the right chevron in both LTR and RTL; this icon
+                    // reads correctly in Arabic and avoids unwanted mirroring.
                     Icon(
-                      Directionality.of(context) == TextDirection.rtl
-                          ? Icons.chevron_left_rounded
-                          : Icons.chevron_right_rounded,
+                      Icons.chevron_right_rounded,
                       size: tokens.iconSizeSmall,
                       color: colorScheme.onSurfaceVariant,
                     ),

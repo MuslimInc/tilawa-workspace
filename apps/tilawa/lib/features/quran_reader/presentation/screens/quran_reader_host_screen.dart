@@ -108,27 +108,17 @@ class _QuranReaderHostScreenState extends State<QuranReaderHostScreen> {
   }
 
   Widget _buildMushafLayer(ReaderSettingsEntity settings) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        QuranImageReaderScreen(
-          surahNumber: widget.surahNumber,
-          initialAyah: widget.initialAyah,
-          openPracticeOnLaunch: widget.openPracticeOnLaunch,
-          onActiveSurahChanged: _onActiveSurahChanged,
-        ),
-        Positioned(
-          top: 0,
-          right: 0,
-          child: SafeArea(
-            child: QuranReaderViewToggle(
-              currentMode: settings.viewMode,
-              onDarkBackground: true,
-              onPressed: _switchToAyahList,
-            ),
-          ),
-        ),
-      ],
+    // The view switch now lives in the reader's bottom navigation panel
+    // (thumb-reachable) instead of the hard-to-reach top corner.
+    return QuranImageReaderScreen(
+      surahNumber: widget.surahNumber,
+      initialAyah: widget.initialAyah,
+      openPracticeOnLaunch: widget.openPracticeOnLaunch,
+      onActiveSurahChanged: _onActiveSurahChanged,
+      viewSwitchAction: QuranReaderViewToggle(
+        currentMode: settings.viewMode,
+        onPressed: _switchToAyahList,
+      ),
     );
   }
 

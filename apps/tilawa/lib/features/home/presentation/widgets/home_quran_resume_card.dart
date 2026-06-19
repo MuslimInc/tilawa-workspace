@@ -172,10 +172,10 @@ class _HomeQuranResumeReadyCard extends StatelessWidget {
                     ],
                   ),
                 ),
+                // Keep the right chevron in both LTR and RTL; this icon
+                // reads correctly in Arabic and avoids unwanted mirroring.
                 Icon(
-                  Directionality.of(context) == TextDirection.rtl
-                      ? Icons.chevron_left_rounded
-                      : Icons.chevron_right_rounded,
+                  Icons.chevron_right_rounded,
                   color: mutedForeground,
                   size: tokens.iconSizeSmall,
                 ),
@@ -187,7 +187,7 @@ class _HomeQuranResumeReadyCard extends StatelessWidget {
               bottom: -tokens.spaceSmall,
               child: IgnorePointer(
                 child: Opacity(
-                  opacity: 0.22,
+                  opacity: tokens.opacitySubtle * 2,
                   child: Icon(
                     Icons.mosque_rounded,
                     size: tokens.spaceExtraLarge * 2,

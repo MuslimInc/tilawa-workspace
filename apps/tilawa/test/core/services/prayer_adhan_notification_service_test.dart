@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tilawa/core/config/notification_config.dart';
 import 'package:tilawa/core/navigation/notification_destination.dart';
 import 'package:tilawa/core/services/navigation_service.dart';
 import 'package:tilawa/core/services/notification_permission_service.dart';
@@ -15,6 +16,7 @@ import 'package:tilawa/features/prayer_times/domain/entities/entities.dart';
 import 'package:tilawa/features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
 import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa/router/app_router_config.dart';
+import 'package:tilawa_core/config/language_config.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 
@@ -23,6 +25,7 @@ import 'prayer_adhan_notification_service_test.mocks.dart';
 @GenerateMocks([
   INotificationDispatcher,
   FlutterLocalNotificationsPlugin,
+  AndroidFlutterLocalNotificationsPlugin,
   SharedPreferencesAsync,
   NavigationService,
   AnalyticsService,
@@ -35,6 +38,7 @@ void main() {
   late PrayerAdhanNotificationService service;
   late MockINotificationDispatcher mockDispatcher;
   late MockFlutterLocalNotificationsPlugin mockPlugin;
+  late MockAndroidFlutterLocalNotificationsPlugin mockAndroidPlugin;
   late MockSharedPreferencesAsync mockPrefs;
   late MockNavigationService mockNav;
   late MockAnalyticsService mockAnalytics;
@@ -103,6 +107,7 @@ void main() {
   setUp(() {
     mockDispatcher = MockINotificationDispatcher();
     mockPlugin = MockFlutterLocalNotificationsPlugin();
+    mockAndroidPlugin = MockAndroidFlutterLocalNotificationsPlugin();
     mockPrefs = MockSharedPreferencesAsync();
     mockNav = MockNavigationService();
     mockAnalytics = MockAnalyticsService();
@@ -110,6 +115,28 @@ void main() {
     mockNotificationPermissions = MockNotificationPermissionService();
 
     when(mockDispatcher.notificationsPlugin).thenReturn(mockPlugin);
+    when(
+      mockPlugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >(),
+    ).thenReturn(mockAndroidPlugin);
+    when(mockAndroidPlugin.createNotificationChannel(any)).thenAnswer(
+      (_) async {},
+    );
+    when(
+      mockAndroidPlugin.deleteNotificationChannel(
+        channelId: anyNamed('channelId'),
+      ),
+    ).thenAnswer((_) async {});
+    when(mockAndroidPlugin.canScheduleExactNotifications()).thenAnswer(
+      (_) async => true,
+    );
+    when(mockAndroidPlugin.requestExactAlarmsPermission()).thenAnswer(
+      (_) async {
+        return null;
+      },
+    );
     when(
       mockDispatcher.initialize(
         createHighImportanceChannel: anyNamed('createHighImportanceChannel'),
@@ -136,6 +163,9 @@ void main() {
     when(
       mockAdhanPlayer.pullPendingNotificationTapPayload(),
     ).thenAnswer((_) async => null);
+    when(
+      mockAdhanPlayer.flushPendingNotificationTap(),
+    ).thenAnswer((_) async {});
     when(mockAdhanPlayer.isSupported).thenReturn(false);
     when(mockNav.getCurrentLocation()).thenReturn(null);
     when(mockAdhanPlayer.cancelAllAdhans()).thenAnswer((_) async {});
@@ -156,7 +186,12 @@ void main() {
       mockAnalytics,
       mockAdhanPlayer,
       mockNotificationPermissions,
+      isAndroidOverride: true,
     );
+  });
+
+  tearDown(() {
+    NotificationConfig.enableLocalNotifications = true;
   });
 
   // Helper that initializes the service (required before calling schedule).
@@ -677,6 +712,8 @@ void main() {
             scheduledTime: anyNamed('scheduledTime'),
             prayerName: anyNamed('prayerName'),
             prayerKey: anyNamed('prayerKey'),
+            locationName: anyNamed('locationName'),
+            languageCode: anyNamed('languageCode'),
           ),
         ).thenAnswer((_) async => true);
 
@@ -716,6 +753,8 @@ void main() {
             scheduledTime: anyNamed('scheduledTime'),
             prayerName: anyNamed('prayerName'),
             prayerKey: anyNamed('prayerKey'),
+            locationName: anyNamed('locationName'),
+            languageCode: anyNamed('languageCode'),
           ),
         ).called(5);
       });
@@ -731,6 +770,8 @@ void main() {
               scheduledTime: anyNamed('scheduledTime'),
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
+              locationName: anyNamed('locationName'),
+              languageCode: anyNamed('languageCode'),
             ),
           ).thenAnswer((_) async => false);
 
@@ -1071,6 +1112,967 @@ void main() {
             ),
           ),
         ).called(1);
+      });
+    });
+
+    group('native adhan single playback regression', () {
+      /// Mirrors native [AdhanPlaybackService] silent foreground channel id.
+      const String nativeForegroundChannelId =
+          'com.tilawa.app.prayer_adhan_silent';
+
+      test(
+        'native foreground notification uses silent adhan channel not audible channel',
+        () {
+          expect(
+            PrayerNotificationConfig.silentAdhanChannelId,
+            nativeForegroundChannelId,
+          );
+          expect(
+            PrayerNotificationConfig.adhanChannelId,
+            isNot(equals(nativeForegroundChannelId)),
+            reason:
+                'Native MediaPlayer owns audio; FGS notification must not reuse '
+                'the audible adhan channel.',
+          );
+        },
+      );
+
+      test(
+        'fireTestNotification passes saved location to native adhan scheduling',
+        () async {
+          await initialize();
+          when(mockAdhanPlayer.isSupported).thenReturn(true);
+          when(
+            mockAdhanPlayer.scheduleAdhan(
+              id: anyNamed('id'),
+              scheduledTime: anyNamed('scheduledTime'),
+              prayerName: anyNamed('prayerName'),
+              prayerKey: anyNamed('prayerKey'),
+              locationName: anyNamed('locationName'),
+              languageCode: anyNamed('languageCode'),
+            ),
+          ).thenAnswer((_) async => true);
+
+          const PrayerSettingsEntity settings = PrayerSettingsEntity(
+            savedLocationName: 'Mohye El-Isawy, Al Isaweyah',
+          );
+          when(mockPrefs.getString('prayer_settings')).thenAnswer(
+            (_) async => jsonEncode(settings.toJson()),
+          );
+
+          await service.fireTestNotification(
+            prayer: PrayerType.fajr,
+            playAdhan: true,
+          );
+
+          verify(
+            mockAdhanPlayer.scheduleAdhan(
+              id: anyNamed('id'),
+              scheduledTime: anyNamed('scheduledTime'),
+              prayerName: anyNamed('prayerName'),
+              prayerKey: anyNamed('prayerKey'),
+              locationName: 'Al Isaweyah',
+              languageCode: anyNamed('languageCode'),
+            ),
+          ).called(1);
+        },
+      );
+
+      test(
+        'fireTestNotification does not also call playAdhanNow or show FLN when native schedule succeeds',
+        () async {
+          await initialize();
+          when(mockAdhanPlayer.isSupported).thenReturn(true);
+          when(
+            mockAdhanPlayer.scheduleAdhan(
+              id: anyNamed('id'),
+              scheduledTime: anyNamed('scheduledTime'),
+              prayerName: anyNamed('prayerName'),
+              prayerKey: anyNamed('prayerKey'),
+              locationName: anyNamed('locationName'),
+              languageCode: anyNamed('languageCode'),
+            ),
+          ).thenAnswer((_) async => true);
+
+          await service.fireTestNotification(
+            prayer: PrayerType.fajr,
+            playAdhan: true,
+          );
+
+          verify(
+            mockAdhanPlayer.scheduleAdhan(
+              id: anyNamed('id'),
+              scheduledTime: anyNamed('scheduledTime'),
+              prayerName: anyNamed('prayerName'),
+              prayerKey: anyNamed('prayerKey'),
+              locationName: anyNamed('locationName'),
+              languageCode: anyNamed('languageCode'),
+            ),
+          ).called(1);
+          verifyNever(
+            mockAdhanPlayer.playAdhanNow(
+              id: anyNamed('id'),
+              prayerName: anyNamed('prayerName'),
+              prayerKey: anyNamed('prayerKey'),
+              locationName: anyNamed('locationName'),
+              languageCode: anyNamed('languageCode'),
+            ),
+          );
+          verifyNever(
+            mockPlugin.show(
+              id: anyNamed('id'),
+              title: anyNamed('title'),
+              body: anyNamed('body'),
+              notificationDetails: anyNamed('notificationDetails'),
+              payload: anyNamed('payload'),
+            ),
+          );
+        },
+      );
+
+      test(
+        'fireTestNotification calls playAdhanNow only when native schedule fails',
+        () async {
+          await initialize();
+          when(mockAdhanPlayer.isSupported).thenReturn(true);
+          when(
+            mockAdhanPlayer.scheduleAdhan(
+              id: anyNamed('id'),
+              scheduledTime: anyNamed('scheduledTime'),
+              prayerName: anyNamed('prayerName'),
+              prayerKey: anyNamed('prayerKey'),
+              locationName: anyNamed('locationName'),
+              languageCode: anyNamed('languageCode'),
+            ),
+          ).thenAnswer((_) async => false);
+          when(
+            mockAdhanPlayer.playAdhanNow(
+              id: anyNamed('id'),
+              prayerName: anyNamed('prayerName'),
+              prayerKey: anyNamed('prayerKey'),
+              locationName: anyNamed('locationName'),
+              languageCode: anyNamed('languageCode'),
+            ),
+          ).thenAnswer((_) async => true);
+
+          await service.fireTestNotification(
+            prayer: PrayerType.fajr,
+            playAdhan: true,
+          );
+
+          verify(
+            mockAdhanPlayer.playAdhanNow(
+              id: anyNamed('id'),
+              prayerName: anyNamed('prayerName'),
+              prayerKey: anyNamed('prayerKey'),
+              locationName: anyNamed('locationName'),
+              languageCode: anyNamed('languageCode'),
+            ),
+          ).called(1);
+          verifyNever(
+            mockPlugin.show(
+              id: anyNamed('id'),
+              title: anyNamed('title'),
+              body: anyNamed('body'),
+              notificationDetails: anyNamed('notificationDetails'),
+              payload: anyNamed('payload'),
+            ),
+          );
+        },
+      );
+
+      test(
+        'native adhan scheduling success never schedules parallel audible FLN notifications',
+        () async {
+          await initialize();
+          when(mockAdhanPlayer.isSupported).thenReturn(true);
+          when(
+            mockAdhanPlayer.scheduleAdhan(
+              id: anyNamed('id'),
+              scheduledTime: anyNamed('scheduledTime'),
+              prayerName: anyNamed('prayerName'),
+              prayerKey: anyNamed('prayerKey'),
+              locationName: anyNamed('locationName'),
+              languageCode: anyNamed('languageCode'),
+            ),
+          ).thenAnswer((_) async => true);
+
+          final PrayerSettingsEntity adhanEnabled = allEnabled.copyWith(
+            fajrNotification: allEnabled.fajrNotification.copyWith(
+              mode: PrayerAlertMode.adhan,
+            ),
+            dhuhrNotification: allEnabled.dhuhrNotification.copyWith(
+              mode: PrayerAlertMode.adhan,
+            ),
+            asrNotification: allEnabled.asrNotification.copyWith(
+              mode: PrayerAlertMode.adhan,
+            ),
+            maghribNotification: allEnabled.maghribNotification.copyWith(
+              mode: PrayerAlertMode.adhan,
+            ),
+            ishaNotification: allEnabled.ishaNotification.copyWith(
+              mode: PrayerAlertMode.adhan,
+            ),
+          );
+
+          await service.schedulePrayerNotifications(
+            settings: adhanEnabled,
+            prayerTimesForDays: [buildFutureDay(0)],
+            forceReschedule: true,
+          );
+
+          verifyNever(
+            mockPlugin.zonedSchedule(
+              id: anyNamed('id'),
+              title: anyNamed('title'),
+              body: anyNamed('body'),
+              scheduledDate: anyNamed('scheduledDate'),
+              notificationDetails: anyNamed('notificationDetails'),
+              androidScheduleMode: anyNamed('androidScheduleMode'),
+              matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+              payload: anyNamed('payload'),
+            ),
+          );
+        },
+      );
+    });
+
+    group('notification locale', () {
+      test(
+        'passes Flutter-selected languageCode to native adhan scheduling',
+        () async {
+          await initialize();
+          when(mockAdhanPlayer.isSupported).thenReturn(true);
+          when(
+            mockPrefs.getString(LanguageConfig.languageKey),
+          ).thenAnswer((_) async => 'ar');
+          when(
+            mockAdhanPlayer.scheduleAdhan(
+              id: anyNamed('id'),
+              scheduledTime: anyNamed('scheduledTime'),
+              prayerName: anyNamed('prayerName'),
+              prayerKey: anyNamed('prayerKey'),
+              locationName: anyNamed('locationName'),
+              languageCode: anyNamed('languageCode'),
+            ),
+          ).thenAnswer((_) async => true);
+
+          final PrayerSettingsEntity playAdhan = allEnabled.copyWith(
+            fajrNotification: allEnabled.fajrNotification.copyWith(
+              mode: PrayerAlertMode.adhan,
+            ),
+          );
+
+          await service.schedulePrayerNotifications(
+            settings: playAdhan,
+            prayerTimesForDays: [buildFutureDay(0)],
+            forceReschedule: true,
+          );
+
+          verify(
+            mockAdhanPlayer.scheduleAdhan(
+              id: anyNamed('id'),
+              scheduledTime: anyNamed('scheduledTime'),
+              prayerName: anyNamed('prayerName'),
+              prayerKey: anyNamed('prayerKey'),
+              locationName: anyNamed('locationName'),
+              languageCode: 'ar',
+            ),
+          ).called(5);
+        },
+      );
+
+      test(
+        'falls back to prayer time location when settings location is missing',
+        () async {
+          await initialize();
+          when(mockAdhanPlayer.isSupported).thenReturn(true);
+          when(
+            mockAdhanPlayer.scheduleAdhan(
+              id: anyNamed('id'),
+              scheduledTime: anyNamed('scheduledTime'),
+              prayerName: anyNamed('prayerName'),
+              prayerKey: anyNamed('prayerKey'),
+              locationName: anyNamed('locationName'),
+              languageCode: anyNamed('languageCode'),
+            ),
+          ).thenAnswer((_) async => true);
+
+          final PrayerSettingsEntity playAdhan = allEnabled.copyWith(
+            fajrNotification: allEnabled.fajrNotification.copyWith(
+              mode: PrayerAlertMode.adhan,
+            ),
+          );
+          final PrayerTimeEntity day = buildFutureDay(0).copyWith(
+            locationName: 'Mohye El-Isawy, Al Isaweyah',
+          );
+
+          await service.schedulePrayerNotifications(
+            settings: playAdhan,
+            prayerTimesForDays: [day],
+            forceReschedule: true,
+          );
+
+          verify(
+            mockAdhanPlayer.scheduleAdhan(
+              id: anyNamed('id'),
+              scheduledTime: anyNamed('scheduledTime'),
+              prayerName: anyNamed('prayerName'),
+              prayerKey: anyNamed('prayerKey'),
+              locationName: 'Al Isaweyah',
+              languageCode: anyNamed('languageCode'),
+            ),
+          ).called(5);
+        },
+      );
+
+      test(
+        'location change invalidates dedup fingerprint and triggers reschedule',
+        () async {
+          final Map<String, String?> store = {};
+          when(mockPrefs.getString(any)).thenAnswer(
+            (inv) async => store[inv.positionalArguments[0] as String],
+          );
+          when(mockPrefs.setString(any, any)).thenAnswer((inv) async {
+            store[inv.positionalArguments[0] as String] =
+                inv.positionalArguments[1] as String;
+          });
+
+          await initialize();
+          when(mockAdhanPlayer.isSupported).thenReturn(false);
+
+          final List<PrayerTimeEntity> days = [buildFutureDay(1)];
+
+          await service.schedulePrayerNotifications(
+            settings: allEnabled,
+            prayerTimesForDays: days,
+          );
+          clearInteractions(mockPlugin);
+
+          await service.schedulePrayerNotifications(
+            settings: allEnabled.copyWith(savedLocationName: 'Cairo'),
+            prayerTimesForDays: days,
+          );
+
+          verify(
+            mockPlugin.zonedSchedule(
+              id: anyNamed('id'),
+              title: anyNamed('title'),
+              body: anyNamed('body'),
+              scheduledDate: anyNamed('scheduledDate'),
+              notificationDetails: anyNamed('notificationDetails'),
+              androidScheduleMode: anyNamed('androidScheduleMode'),
+              matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+              payload: anyNamed('payload'),
+            ),
+          ).called(5);
+        },
+      );
+
+      test(
+        'language change invalidates dedup fingerprint and triggers reschedule',
+        () async {
+          final Map<String, String?> store = {};
+          when(mockPrefs.getString(any)).thenAnswer(
+            (inv) async => store[inv.positionalArguments[0] as String],
+          );
+          when(mockPrefs.setString(any, any)).thenAnswer((inv) async {
+            store[inv.positionalArguments[0] as String] =
+                inv.positionalArguments[1] as String;
+          });
+
+          await initialize();
+          when(mockAdhanPlayer.isSupported).thenReturn(false);
+
+          final List<PrayerTimeEntity> days = [buildFutureDay(1)];
+
+          store[LanguageConfig.languageKey] = 'en';
+          await service.schedulePrayerNotifications(
+            settings: allEnabled,
+            prayerTimesForDays: days,
+          );
+          clearInteractions(mockPlugin);
+
+          store[LanguageConfig.languageKey] = 'ar';
+          await service.schedulePrayerNotifications(
+            settings: allEnabled,
+            prayerTimesForDays: days,
+          );
+
+          verify(
+            mockPlugin.zonedSchedule(
+              id: anyNamed('id'),
+              title: anyNamed('title'),
+              body: anyNamed('body'),
+              scheduledDate: anyNamed('scheduledDate'),
+              notificationDetails: anyNamed('notificationDetails'),
+              androidScheduleMode: anyNamed('androidScheduleMode'),
+              matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+              payload: anyNamed('payload'),
+            ),
+          ).called(5);
+        },
+      );
+    });
+
+    group('android platform paths', () {
+      test('initialize creates android notification channels', () async {
+        when(
+          mockPrefs.getInt(PrayerNotificationConfig.adhanChannelVersionKey),
+        ).thenAnswer((_) async => null);
+
+        await service.initialize();
+
+        verify(mockAndroidPlugin.createNotificationChannel(any)).called(3);
+        verify(
+          mockPrefs.setInt(
+            PrayerNotificationConfig.adhanChannelVersionKey,
+            PrayerNotificationConfig.adhanChannelVersion,
+          ),
+        ).called(1);
+      });
+
+      test('initialize upgrades adhan channel when version is stale', () async {
+        when(
+          mockPrefs.getInt(PrayerNotificationConfig.adhanChannelVersionKey),
+        ).thenAnswer((_) async => 0);
+
+        await service.initialize();
+
+        verify(
+          mockAndroidPlugin.deleteNotificationChannel(
+            channelId: PrayerNotificationConfig.adhanChannelId,
+          ),
+        ).called(1);
+      });
+
+      test('canScheduleExactAlarms delegates to android plugin', () async {
+        when(mockAndroidPlugin.canScheduleExactNotifications()).thenAnswer(
+          (_) async => false,
+        );
+
+        expect(await service.canScheduleExactAlarms(), isFalse);
+      });
+
+      test('canScheduleExactAlarms fails open when plugin throws', () async {
+        when(mockAndroidPlugin.canScheduleExactNotifications()).thenThrow(
+          Exception('plugin error'),
+        );
+
+        expect(await service.canScheduleExactAlarms(), isTrue);
+      });
+
+      test('requestExactAlarmPermission delegates to android plugin', () async {
+        await service.requestExactAlarmPermission();
+
+        verify(mockAndroidPlugin.requestExactAlarmsPermission()).called(1);
+      });
+
+      test('requestExactAlarmPermission swallows plugin errors', () async {
+        when(mockAndroidPlugin.requestExactAlarmsPermission()).thenThrow(
+          Exception('permission error'),
+        );
+
+        await expectLater(service.requestExactAlarmPermission(), completes);
+      });
+
+      test('uses inexact schedule mode when exact alarms are denied', () async {
+        await initialize();
+        when(mockAndroidPlugin.canScheduleExactNotifications()).thenAnswer(
+          (_) async => false,
+        );
+
+        await service.schedulePrayerNotifications(
+          settings: allEnabled,
+          prayerTimesForDays: [buildFutureDay(0)],
+          forceReschedule: true,
+        );
+
+        final captured = verify(
+          mockPlugin.zonedSchedule(
+            id: anyNamed('id'),
+            title: anyNamed('title'),
+            body: anyNamed('body'),
+            scheduledDate: anyNamed('scheduledDate'),
+            notificationDetails: anyNamed('notificationDetails'),
+            androidScheduleMode: captureAnyNamed('androidScheduleMode'),
+            matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+            payload: anyNamed('payload'),
+          ),
+        ).captured;
+
+        expect(
+          captured.first,
+          AndroidScheduleMode.inexact,
+        );
+      });
+    });
+
+    group('disabled notifications config', () {
+      test(
+        'initialize returns early when notifications are disabled',
+        () async {
+          NotificationConfig.enableLocalNotifications = false;
+
+          await service.initialize();
+
+          verifyNever(
+            mockDispatcher.initialize(
+              createHighImportanceChannel: anyNamed(
+                'createHighImportanceChannel',
+              ),
+            ),
+          );
+        },
+      );
+
+      test('schedulePrayerNotifications returns early when disabled', () async {
+        NotificationConfig.enableLocalNotifications = false;
+
+        await service.schedulePrayerNotifications(
+          settings: allEnabled,
+          prayerTimesForDays: [buildFutureDay(0)],
+        );
+
+        verifyNever(
+          mockPlugin.zonedSchedule(
+            id: anyNamed('id'),
+            title: anyNamed('title'),
+            body: anyNamed('body'),
+            scheduledDate: anyNamed('scheduledDate'),
+            notificationDetails: anyNamed('notificationDetails'),
+            androidScheduleMode: anyNamed('androidScheduleMode'),
+            matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+            payload: anyNamed('payload'),
+          ),
+        );
+      });
+
+      test(
+        'cancelAllPrayerNotifications returns early when disabled',
+        () async {
+          NotificationConfig.enableLocalNotifications = false;
+
+          await service.cancelAllPrayerNotifications();
+
+          verifyNever(mockPlugin.cancel(id: anyNamed('id')));
+        },
+      );
+    });
+
+    group('initialization edge cases', () {
+      test('flushes pending native tap on second initialize call', () async {
+        await service.initialize();
+        clearInteractions(mockAdhanPlayer);
+
+        await service.initialize();
+
+        verify(mockAdhanPlayer.flushPendingNotificationTap()).called(1);
+      });
+
+      test('timezone change forces next schedule to bypass dedup', () async {
+        final Map<String, String?> store = {};
+        when(mockPrefs.getString(any)).thenAnswer(
+          (inv) async => store[inv.positionalArguments[0] as String],
+        );
+        when(mockPrefs.setString(any, any)).thenAnswer((inv) async {
+          store[inv.positionalArguments[0] as String] =
+              inv.positionalArguments[1] as String;
+        });
+
+        store[PrayerNotificationConfig.lastTimezoneKey] = 'America/New_York';
+        await initialize();
+        clearInteractions(mockPlugin);
+
+        await service.schedulePrayerNotifications(
+          settings: allEnabled,
+          prayerTimesForDays: [buildFutureDay(1)],
+        );
+
+        verify(
+          mockPlugin.zonedSchedule(
+            id: anyNamed('id'),
+            title: anyNamed('title'),
+            body: anyNamed('body'),
+            scheduledDate: anyNamed('scheduledDate'),
+            notificationDetails: anyNamed('notificationDetails'),
+            androidScheduleMode: anyNamed('androidScheduleMode'),
+            matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+            payload: anyNamed('payload'),
+          ),
+        ).called(5);
+      });
+    });
+
+    group('scheduling resilience', () {
+      test('logs default-sound path for notification-only prayers', () async {
+        await initialize();
+        when(mockAdhanPlayer.isSupported).thenReturn(false);
+
+        final notificationOnly = allEnabled.copyWith(
+          fajrNotification: allEnabled.fajrNotification.copyWith(
+            mode: PrayerAlertMode.notification,
+          ),
+        );
+
+        await service.schedulePrayerNotifications(
+          settings: notificationOnly,
+          prayerTimesForDays: [buildFutureDay(0)],
+          forceReschedule: true,
+        );
+
+        verify(
+          mockPlugin.zonedSchedule(
+            id: anyNamed('id'),
+            title: anyNamed('title'),
+            body: anyNamed('body'),
+            scheduledDate: anyNamed('scheduledDate'),
+            notificationDetails: anyNamed('notificationDetails'),
+            androidScheduleMode: anyNamed('androidScheduleMode'),
+            matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+            payload: anyNamed('payload'),
+          ),
+        ).called(5);
+      });
+
+      test('continues when native adhan scheduling throws', () async {
+        await initialize();
+        when(mockAdhanPlayer.isSupported).thenReturn(true);
+        when(
+          mockAdhanPlayer.scheduleAdhan(
+            id: anyNamed('id'),
+            scheduledTime: anyNamed('scheduledTime'),
+            prayerName: anyNamed('prayerName'),
+            prayerKey: anyNamed('prayerKey'),
+            locationName: anyNamed('locationName'),
+            languageCode: anyNamed('languageCode'),
+          ),
+        ).thenThrow(Exception('native boom'));
+
+        final playAdhan = allEnabled.copyWith(
+          fajrNotification: allEnabled.fajrNotification.copyWith(
+            mode: PrayerAlertMode.adhan,
+          ),
+        );
+
+        await service.schedulePrayerNotifications(
+          settings: playAdhan,
+          prayerTimesForDays: [buildFutureDay(0)],
+          forceReschedule: true,
+        );
+
+        verify(
+          mockPlugin.zonedSchedule(
+            id: anyNamed('id'),
+            title: anyNamed('title'),
+            body: anyNamed('body'),
+            scheduledDate: anyNamed('scheduledDate'),
+            notificationDetails: anyNamed('notificationDetails'),
+            androidScheduleMode: anyNamed('androidScheduleMode'),
+            matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+            payload: anyNamed('payload'),
+          ),
+        ).called(5);
+      });
+
+      test('swallows persistPendingAlarms failures', () async {
+        await initialize();
+        when(mockAdhanPlayer.isSupported).thenReturn(true);
+        when(
+          mockAdhanPlayer.scheduleAdhan(
+            id: anyNamed('id'),
+            scheduledTime: anyNamed('scheduledTime'),
+            prayerName: anyNamed('prayerName'),
+            prayerKey: anyNamed('prayerKey'),
+            locationName: anyNamed('locationName'),
+            languageCode: anyNamed('languageCode'),
+          ),
+        ).thenAnswer((_) async => true);
+        when(mockAdhanPlayer.persistPendingAlarms(any)).thenThrow(
+          Exception('persist failed'),
+        );
+
+        await expectLater(
+          service.schedulePrayerNotifications(
+            settings: allEnabled.copyWith(
+              fajrNotification: allEnabled.fajrNotification.copyWith(
+                mode: PrayerAlertMode.adhan,
+              ),
+            ),
+            prayerTimesForDays: [buildFutureDay(0)],
+            forceReschedule: true,
+          ),
+          completes,
+        );
+      });
+
+      test(
+        'swallows cancelAllAdhans failure during cancelAllPrayerNotifications',
+        () async {
+          await initialize();
+          when(mockAdhanPlayer.cancelAllAdhans()).thenThrow(
+            Exception('cancel all failed'),
+          );
+
+          await expectLater(service.cancelAllPrayerNotifications(), completes);
+        },
+      );
+    });
+
+    group('debugScheduleTestAdhan', () {
+      test('schedules fallback FLN when native debug schedule fails', () async {
+        await initialize();
+        when(mockAdhanPlayer.isSupported).thenReturn(true);
+        when(mockAdhanPlayer.isIgnoringBatteryOptimizations()).thenAnswer(
+          (_) async => true,
+        );
+        when(
+          mockAdhanPlayer.scheduleAdhan(
+            id: anyNamed('id'),
+            scheduledTime: anyNamed('scheduledTime'),
+            prayerName: anyNamed('prayerName'),
+            prayerKey: anyNamed('prayerKey'),
+            locationName: anyNamed('locationName'),
+            languageCode: anyNamed('languageCode'),
+          ),
+        ).thenAnswer((_) async => false);
+
+        await service.debugScheduleTestAdhan();
+
+        verify(
+          mockPlugin.zonedSchedule(
+            id: PrayerNotificationConfig.debugManualTestId,
+            title: anyNamed('title'),
+            body: anyNamed('body'),
+            scheduledDate: anyNamed('scheduledDate'),
+            notificationDetails: anyNamed('notificationDetails'),
+            androidScheduleMode: anyNamed('androidScheduleMode'),
+            matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+            payload: anyNamed('payload'),
+          ),
+        ).called(1);
+      });
+
+      test(
+        'debugScheduleTestAdhan skips FLN when native schedule succeeds',
+        () async {
+          await initialize();
+          when(mockAdhanPlayer.isSupported).thenReturn(true);
+          when(mockAdhanPlayer.isIgnoringBatteryOptimizations()).thenAnswer(
+            (_) async => true,
+          );
+          when(
+            mockAdhanPlayer.scheduleAdhan(
+              id: anyNamed('id'),
+              scheduledTime: anyNamed('scheduledTime'),
+              prayerName: anyNamed('prayerName'),
+              prayerKey: anyNamed('prayerKey'),
+              locationName: anyNamed('locationName'),
+              languageCode: anyNamed('languageCode'),
+            ),
+          ).thenAnswer((_) async => true);
+
+          await service.debugScheduleTestAdhan();
+
+          verifyNever(
+            mockPlugin.zonedSchedule(
+              id: anyNamed('id'),
+              title: anyNamed('title'),
+              body: anyNamed('body'),
+              scheduledDate: anyNamed('scheduledDate'),
+              notificationDetails: anyNamed('notificationDetails'),
+              androidScheduleMode: anyNamed('androidScheduleMode'),
+              matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+              payload: anyNamed('payload'),
+            ),
+          );
+        },
+      );
+
+      test('returns early when notification permission is missing', () async {
+        await initialize();
+        when(
+          mockNotificationPermissions.isPermissionGranted(),
+        ).thenAnswer((_) async => false);
+
+        await service.debugScheduleTestAdhan();
+
+        verifyNever(
+          mockPlugin.zonedSchedule(
+            id: anyNamed('id'),
+            title: anyNamed('title'),
+            body: anyNamed('body'),
+            scheduledDate: anyNamed('scheduledDate'),
+            notificationDetails: anyNamed('notificationDetails'),
+            androidScheduleMode: anyNamed('androidScheduleMode'),
+            matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+            payload: anyNamed('payload'),
+          ),
+        );
+      });
+    });
+
+    group('fireTestNotification fallback', () {
+      test(
+        'shows FLN when native schedule and playAdhanNow both fail',
+        () async {
+          await initialize();
+          when(mockAdhanPlayer.isSupported).thenReturn(true);
+          when(
+            mockAdhanPlayer.scheduleAdhan(
+              id: anyNamed('id'),
+              scheduledTime: anyNamed('scheduledTime'),
+              prayerName: anyNamed('prayerName'),
+              prayerKey: anyNamed('prayerKey'),
+              locationName: anyNamed('locationName'),
+              languageCode: anyNamed('languageCode'),
+            ),
+          ).thenAnswer((_) async => false);
+          when(
+            mockAdhanPlayer.playAdhanNow(
+              id: anyNamed('id'),
+              prayerName: anyNamed('prayerName'),
+              prayerKey: anyNamed('prayerKey'),
+              locationName: anyNamed('locationName'),
+              languageCode: anyNamed('languageCode'),
+            ),
+          ).thenAnswer((_) async => false);
+
+          await service.fireTestNotification(
+            prayer: PrayerType.fajr,
+            playAdhan: true,
+          );
+
+          verify(
+            mockPlugin.show(
+              id: anyNamed('id'),
+              title: anyNamed('title'),
+              body: anyNamed('body'),
+              notificationDetails: anyNamed('notificationDetails'),
+              payload: anyNamed('payload'),
+            ),
+          ).called(1);
+        },
+      );
+
+      test(
+        'handles corrupt saved settings when resolving test location',
+        () async {
+          await initialize();
+          when(mockAdhanPlayer.isSupported).thenReturn(false);
+          when(mockPrefs.getString('prayer_settings')).thenAnswer(
+            (_) async => '{not-json',
+          );
+
+          await service.fireTestNotification(
+            prayer: PrayerType.fajr,
+            playAdhan: false,
+          );
+
+          verify(
+            mockPlugin.show(
+              id: anyNamed('id'),
+              title: anyNamed('title'),
+              body: anyNamed('body'),
+              notificationDetails: anyNamed('notificationDetails'),
+              payload: anyNamed('payload'),
+            ),
+          ).called(1);
+        },
+      );
+      test('uses default language when locale preference read fails', () async {
+        await initialize();
+        when(mockAdhanPlayer.isSupported).thenReturn(true);
+        when(mockPrefs.getString(LanguageConfig.languageKey)).thenThrow(
+          Exception('prefs unavailable'),
+        );
+        when(
+          mockAdhanPlayer.scheduleAdhan(
+            id: anyNamed('id'),
+            scheduledTime: anyNamed('scheduledTime'),
+            prayerName: anyNamed('prayerName'),
+            prayerKey: anyNamed('prayerKey'),
+            locationName: anyNamed('locationName'),
+            languageCode: anyNamed('languageCode'),
+          ),
+        ).thenAnswer((_) async => true);
+
+        await service.fireTestNotification(
+          prayer: PrayerType.fajr,
+          playAdhan: true,
+        );
+
+        verify(
+          mockAdhanPlayer.scheduleAdhan(
+            id: anyNamed('id'),
+            scheduledTime: anyNamed('scheduledTime'),
+            prayerName: anyNamed('prayerName'),
+            prayerKey: anyNamed('prayerKey'),
+            locationName: anyNamed('locationName'),
+            languageCode: LanguageConfig.defaultLanguageCode,
+          ),
+        ).called(1);
+      });
+    });
+
+    group('navigation deferral', () {
+      test('defers navigation when current route is splash', () async {
+        await initialize();
+        when(mockNav.getCurrentLocation()).thenReturn(
+          const SplashRoute().location,
+        );
+
+        final payload = jsonEncode({
+          PrayerNotificationConfig.payloadTypeKey:
+              PrayerNotificationConfig.payloadTypeValue,
+          PrayerNotificationConfig.payloadPrayerKey: 'fajr',
+          'prayer_name': 'fajr',
+          'prayer_key': 'fajr',
+          'scheduled_time_ms': DateTime.now().millisecondsSinceEpoch,
+          'notification_id': 2001,
+          'adhan_enabled': true,
+          'is_adhan_playing': true,
+        });
+
+        await service.handleNotificationResponse(
+          NotificationResponse(
+            notificationResponseType:
+                NotificationResponseType.selectedNotification,
+            payload: payload,
+          ),
+        );
+
+        verifyNever(mockNav.routeToDestination(any));
+      });
+
+      test('swallows navigation failures without rethrowing', () async {
+        await initialize();
+        when(mockNav.routeToDestination(any)).thenThrow(
+          Exception('navigation failed'),
+        );
+
+        final payload = jsonEncode({
+          PrayerNotificationConfig.payloadTypeKey:
+              PrayerNotificationConfig.payloadTypeValue,
+          PrayerNotificationConfig.payloadPrayerKey: 'fajr',
+          'prayer_name': 'fajr',
+          'prayer_key': 'fajr',
+          'scheduled_time_ms': DateTime.now().millisecondsSinceEpoch,
+          'notification_id': 2001,
+          'adhan_enabled': true,
+          'is_adhan_playing': true,
+        });
+
+        await expectLater(
+          service.handleNotificationResponse(
+            NotificationResponse(
+              notificationResponseType:
+                  NotificationResponseType.selectedNotification,
+              payload: payload,
+            ),
+          ),
+          completes,
+        );
       });
     });
   });

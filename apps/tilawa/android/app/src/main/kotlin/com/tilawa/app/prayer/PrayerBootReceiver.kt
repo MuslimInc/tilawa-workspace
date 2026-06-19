@@ -29,6 +29,8 @@ internal class PrayerBootReceiver : BroadcastReceiver() {
         private const val FIELD_KEY = "key"
         private const val FIELD_TRIGGER_MS = "trigger"
         private const val FIELD_SOUND = "sound"
+        private const val FIELD_LOCATION = "location"
+        private const val FIELD_LANGUAGE = "language"
 
         @JvmStatic
         fun persistPendingAlarms(
@@ -44,6 +46,12 @@ internal class PrayerBootReceiver : BroadcastReceiver() {
                         put(FIELD_KEY, it.key)
                         put(FIELD_TRIGGER_MS, it.triggerMs)
                         put(FIELD_SOUND, it.sound)
+                        if (it.locationName.isNotBlank()) {
+                            put(FIELD_LOCATION, it.locationName)
+                        }
+                        if (it.languageCode.isNotBlank()) {
+                            put(FIELD_LANGUAGE, it.languageCode)
+                        }
                     },
                 )
             }
@@ -94,8 +102,24 @@ internal class PrayerBootReceiver : BroadcastReceiver() {
                     val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                     return nm.areNotificationsEnabled()
                 }
-                override fun schedule(id: Int, name: String, key: String, triggerMs: Long, sound: String) =
-                    AdhanScheduler.schedule(context, id, name, key, triggerMs, sound)
+                override fun schedule(
+                    id: Int,
+                    name: String,
+                    key: String,
+                    triggerMs: Long,
+                    sound: String,
+                    locationName: String,
+                    languageCode: String,
+                ) = AdhanScheduler.schedule(
+                    context,
+                    id,
+                    name,
+                    key,
+                    triggerMs,
+                    sound,
+                    locationName,
+                    languageCode,
+                )
             },
             watchdog = object : WatchdogProxy {
                 override fun enqueuePeriodic() =

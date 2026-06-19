@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/athkar/domain/pinned_athkar_display_order.dart';
+import 'package:tilawa/features/home/domain/entities/home_layout_mode.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_card.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_dashboard_section.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_featured_ritual_card.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_pinned_athkar_grid.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_pinned_athkar_group.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_section_link.dart';
 import 'package:tilawa/router/app_router_config.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_featured_ritual_card.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_pinned_athkar_group.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/athkar_category.dart';
@@ -18,11 +21,13 @@ class PinnedAthkarHomeSection extends StatelessWidget {
   const PinnedAthkarHomeSection({
     super.key,
     this.hideContextualFeatured = false,
+    required this.layoutMode,
   });
 
   /// When true, the contextual featured card is omitted (shown in
   /// [HomeTodayFeaturedCarousel] instead).
   final bool hideContextualFeatured;
+  final HomeLayoutMode layoutMode;
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +62,7 @@ class PinnedAthkarHomeSection extends StatelessWidget {
                 categories: state.pinnedCategories,
                 onEdit: () => _showPinnedAthkarPicker(context),
                 hideContextualFeatured: hideContextualFeatured,
+                layoutMode: layoutMode,
               ),
           ],
         );
@@ -89,22 +95,23 @@ class _PinnedAthkarSectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: TilawaSectionTitle(title: context.l10n.homeAthkarRitualsTitle),
-        ),
-        HomeSeeAllLink(
-          onPressed: () => const AthkarCategoriesRoute().push(context),
-        ),
-        TilawaIconActionButton(
-          icon: Icons.edit_outlined,
-          onTap: onEdit,
-          backgroundColor: Colors.transparent,
-          tooltip: context.l10n.homePinnedAthkarEdit,
-          semanticLabel: context.l10n.homePinnedAthkarEdit,
-        ),
-      ],
+    return HomeDashboardSubsectionHeader(
+      title: context.l10n.homeAthkarRitualsTitle,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          HomeSeeAllLink(
+            onPressed: () => const AthkarCategoriesRoute().push(context),
+          ),
+          TilawaIconActionButton(
+            icon: Icons.edit_outlined,
+            onTap: onEdit,
+            backgroundColor: Colors.transparent,
+            tooltip: context.l10n.homePinnedAthkarEdit,
+            semanticLabel: context.l10n.homePinnedAthkarEdit,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -113,11 +120,13 @@ class _PinnedAthkarQuickAccess extends StatelessWidget {
   const _PinnedAthkarQuickAccess({
     required this.categories,
     required this.onEdit,
+    required this.layoutMode,
     this.hideContextualFeatured = false,
   });
 
   final List<AthkarCategory> categories;
   final VoidCallback onEdit;
+  final HomeLayoutMode layoutMode;
   final bool hideContextualFeatured;
 
   @override
@@ -149,10 +158,12 @@ class _PinnedAthkarQuickAccess extends StatelessWidget {
           SizedBox(height: context.tokens.spaceSmall),
         ],
         if (stripCategories.isNotEmpty)
-          HomePinnedAthkarGroup(
-            categories: stripCategories,
-            onLongPressCategory: (_) => onEdit(),
-          ),
+          layoutMode == HomeLayoutMode.grid
+              ? HomePinnedAthkarGrid(categories: stripCategories)
+              : HomePinnedAthkarGroup(
+                  categories: stripCategories,
+                  onLongPressCategory: (_) => onEdit(),
+                ),
       ],
     );
   }
@@ -323,16 +334,20 @@ class _PinnedAthkarPickerSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
-      color: colorScheme.onSurfaceVariant,
-    );
-    return Text(
-      context.l10n.homePinnedAthkarPickerLimit(
-        state.pinnedCategoryIds.length,
-        PinnedAthkarState.maxPinnedCategories,
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: TilawaStatusChip(
+        icon: Icons.check_rounded,
+        label: context.l10n.homePinnedAthkarPickerLimit(
+          state.pinnedCategoryIds.length,
+          PinnedAthkarState.maxPinnedCategories,
+        ),
+        backgroundColor: colorScheme.surfaceContainerHigh,
+        foregroundColor: colorScheme.onSurfaceVariant,
       ),
-      style: textStyle,
     );
   }
 }
@@ -352,30 +367,48 @@ class _PinnedAthkarPickerRow extends StatelessWidget {
     final selectedIndex = state.pinnedCategoryIds.indexOf(category.id);
     final bool selected = selectedIndex >= 0;
     final bool enabled = selected || state.canPinMore;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
 
-    return Row(
-      children: [
-        TilawaCheckbox(
-          value: selected,
-          onChanged: enabled ? (_) => _toggle(context) : null,
+    return InkWell(
+      onTap: enabled ? () => _toggle(context) : null,
+      child: Padding(
+        padding: EdgeInsetsDirectional.fromSTEB(
+          tokens.spaceSmall,
+          tokens.spaceSmall,
+          tokens.spaceSmall,
+          tokens.spaceSmall,
         ),
-        Expanded(
-          child: _PinnedAthkarPickerLabel(
-            title: title,
-            icon: athkarCategoryIcon(category.icon),
-            selected: selected,
-            enabled: enabled,
-            onTap: () => _toggle(context),
-          ),
+        child: Row(
+          spacing: tokens.spaceSmall,
+          children: [
+            TilawaCheckbox(
+              value: selected,
+              activeColor: theme.colorScheme.primary,
+              onChanged: enabled ? (_) => _toggle(context) : null,
+            ),
+            _PinnedAthkarPickerIcon(
+              icon: athkarCategoryIcon(category.icon),
+              selected: selected,
+              enabled: enabled,
+            ),
+            Expanded(
+              child: _PinnedAthkarPickerLabel(
+                title: title,
+                selected: selected,
+                enabled: enabled,
+              ),
+            ),
+            if (selected)
+              _PinnedAthkarPickerReorderMenu(
+                title: title,
+                selectedIndex: selectedIndex,
+                pinnedCount: state.pinnedCategoryIds.length,
+                onMove: (newIndex) => _move(context, selectedIndex, newIndex),
+              ),
+          ],
         ),
-        if (selected)
-          _PinnedAthkarPickerReorderControls(
-            title: title,
-            selectedIndex: selectedIndex,
-            pinnedCount: state.pinnedCategoryIds.length,
-            onMove: (newIndex) => _move(context, selectedIndex, newIndex),
-          ),
-      ],
+      ),
     );
   }
 
@@ -394,58 +427,62 @@ class _PinnedAthkarPickerRow extends StatelessWidget {
 class _PinnedAthkarPickerLabel extends StatelessWidget {
   const _PinnedAthkarPickerLabel({
     required this.title,
-    required this.icon,
     required this.selected,
     required this.enabled,
-    required this.onTap,
   });
 
   final String title;
+  final bool selected;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    return Text(
+      title,
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+      style: theme.textTheme.titleSmall?.copyWith(
+        color: enabled ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
+        fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+      ),
+    );
+  }
+}
+
+class _PinnedAthkarPickerIcon extends StatelessWidget {
+  const _PinnedAthkarPickerIcon({
+    required this.icon,
+    required this.selected,
+    required this.enabled,
+  });
+
   final IconData icon;
   final bool selected;
   final bool enabled;
-  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
-    return InkWell(
-      onTap: enabled ? onTap : null,
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: tokens.spaceMedium),
-        child: Row(
-          spacing: tokens.spaceSmall,
-          children: [
-            Icon(
-              icon,
-              color: selected
-                  ? colorScheme.primary
-                  : colorScheme.onSurfaceVariant,
-            ),
-            Expanded(
-              child: Text(
-                title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: enabled
-                      ? colorScheme.onSurface
-                      : colorScheme.onSurfaceVariant,
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+
+    return TilawaIconBox(
+      icon: icon,
+      size: tokens.iconSizeSmall,
+      padding: tokens.spaceExtraSmall,
+      variant: selected
+          ? TilawaIconBoxVariant.tinted
+          : TilawaIconBoxVariant.outline,
+      semanticTint: TilawaSemanticTint.ink,
+      iconColor: enabled ? null : colorScheme.onSurfaceVariant,
     );
   }
 }
 
-class _PinnedAthkarPickerReorderControls extends StatelessWidget {
-  const _PinnedAthkarPickerReorderControls({
+class _PinnedAthkarPickerReorderMenu extends StatelessWidget {
+  const _PinnedAthkarPickerReorderMenu({
     required this.title,
     required this.selectedIndex,
     required this.pinnedCount,
@@ -459,20 +496,35 @@ class _PinnedAthkarPickerReorderControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-          tooltip: context.l10n.homePinnedAthkarMoveUp(title),
-          onPressed: selectedIndex > 0 ? () => onMove(selectedIndex - 1) : null,
-          icon: const Icon(Icons.arrow_upward_rounded),
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+    final bool canMoveUp = selectedIndex > 0;
+    final bool canMoveDown = selectedIndex < pinnedCount - 1;
+
+    return PopupMenuButton<int>(
+      enabled: canMoveUp || canMoveDown,
+      tooltip: context.l10n.homePinnedAthkarEdit,
+      onSelected: onMove,
+      icon: Icon(
+        Icons.swap_vert_rounded,
+        size: tokens.iconSizeMedium,
+        color: (canMoveUp || canMoveDown)
+            ? colorScheme.onSurfaceVariant
+            : colorScheme.onSurfaceVariant.withValues(
+                alpha: 0.38,
+              ),
+      ),
+      itemBuilder: (context) => [
+        PopupMenuItem<int>(
+          value: selectedIndex - 1,
+          enabled: canMoveUp,
+          child: Text(context.l10n.homePinnedAthkarMoveUp(title)),
         ),
-        IconButton(
-          tooltip: context.l10n.homePinnedAthkarMoveDown(title),
-          onPressed: selectedIndex < pinnedCount - 1
-              ? () => onMove(selectedIndex + 1)
-              : null,
-          icon: const Icon(Icons.arrow_downward_rounded),
+        PopupMenuItem<int>(
+          value: selectedIndex + 1,
+          enabled: canMoveDown,
+          child: Text(context.l10n.homePinnedAthkarMoveDown(title)),
         ),
       ],
     );

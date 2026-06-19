@@ -3,6 +3,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../core/perf_logger.dart';
 import '../../../domain/domain.dart';
+import '../../../l10n/app_localizations.dart';
 import '../molecules/molecules.dart';
 
 /// Organism component for the navigation slider overlay.
@@ -26,6 +27,8 @@ class NavigationSliderOverlay extends StatelessWidget {
     required this.onNextPageRequested,
     required this.onInteractionStart,
     required this.onInteractionEnd,
+    this.onShowIndex,
+    this.trailingAction,
   });
 
   final double screenWidth;
@@ -40,6 +43,15 @@ class NavigationSliderOverlay extends StatelessWidget {
   final VoidCallback onInteractionStart;
   final VoidCallback onInteractionEnd;
 
+  /// Opens the surah index. Rendered as a button in the panel's bottom-anchored
+  /// action row so it lives in the comfortable one-handed thumb arc instead of
+  /// the hard-to-reach top corner.
+  final VoidCallback? onShowIndex;
+
+  /// Host-supplied action (e.g. the Mushaf/ayah-list view switch) placed at the
+  /// end of the action row, also within thumb reach.
+  final Widget? trailingAction;
+
   @override
   Widget build(BuildContext context) {
     PerfLogger.markBuild('NavigationSliderOverlay');
@@ -49,13 +61,13 @@ class NavigationSliderOverlay extends StatelessWidget {
     final componentTokens = theme.extension<TilawaComponentTokens>();
     final bottomInset = context.systemBottomSafeArea;
     final panelRadius = BorderRadius.circular(
-      tokens.radiusExtraLarge + tokens.spaceSmall,
+      tokens.radiusExtraLarge,
     );
     final panelPadding = EdgeInsets.fromLTRB(
-      tokens.spaceLarge,
       tokens.spaceMedium,
-      tokens.spaceLarge,
-      tokens.spaceLarge,
+      tokens.spaceExtraSmall,
+      tokens.spaceMedium,
+      tokens.spaceSmall,
     );
 
     return GestureDetector(
@@ -68,7 +80,7 @@ class NavigationSliderOverlay extends StatelessWidget {
           tokens.spaceLarge,
           0,
           tokens.spaceLarge,
-          bottomInset + tokens.spaceMedium,
+          bottomInset + tokens.spaceSmall,
         ),
         child: Center(
           child: ConstrainedBox(
@@ -78,6 +90,8 @@ class NavigationSliderOverlay extends StatelessWidget {
                 final content = Builder(
                   builder: (context) {
                     final sw = PerfLogger.startTimer();
+                    final hasActionRow =
+                        onShowIndex != null || trailingAction != null;
                     final content = Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -91,7 +105,7 @@ class NavigationSliderOverlay extends StatelessWidget {
                               onPageNavigationRequested(value.round()),
                           screenWidth: screenWidth,
                         ),
-                        SizedBox(height: tokens.spaceMedium),
+                        SizedBox(height: tokens.spaceSmall),
                         NavigationButtonGroup(
                           currentPage: state.displayPage,
                           totalPages: state.totalPages,
@@ -101,6 +115,13 @@ class NavigationSliderOverlay extends StatelessWidget {
                           onNext: canGoToNextPage ? onNextPageRequested : null,
                           screenWidth: screenWidth,
                         ),
+                        if (hasActionRow) ...[
+                          SizedBox(height: tokens.spaceSmall),
+                          _PanelActionRow(
+                            onShowIndex: onShowIndex,
+                            trailingAction: trailingAction,
+                          ),
+                        ],
                       ],
                     );
                     PerfLogger.logElapsed(
@@ -144,6 +165,92 @@ class NavigationSliderOverlay extends StatelessWidget {
                   child: Padding(padding: panelPadding, child: content),
                 );
               },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Bottom-anchored row inside the navigation panel holding the surah-index
+/// button and an optional host action (the view switch). Placed at the panel's
+/// lower edge — the most comfortable part of the one-handed thumb arc.
+class _PanelActionRow extends StatelessWidget {
+  const _PanelActionRow({
+    required this.onShowIndex,
+    required this.trailingAction,
+  });
+
+  final VoidCallback? onShowIndex;
+  final Widget? trailingAction;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+    final indexLabel =
+        AppLocalizations.of(context)?.surahIndex ?? 'Surah index';
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      spacing: tokens.spaceSmall,
+      children: [
+        if (onShowIndex != null)
+          _PanelIndexButton(label: indexLabel, onPressed: onShowIndex!)
+        else
+          const SizedBox.shrink(),
+        trailingAction ?? const SizedBox.shrink(),
+      ],
+    );
+  }
+}
+
+/// Labelled index button — icon + text so the now-primary "jump to surah"
+/// action reads clearly in the panel.
+class _PanelIndexButton extends StatelessWidget {
+  const _PanelIndexButton({required this.label, required this.onPressed});
+
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+    final radius = BorderRadius.circular(tokens.radiusLarge);
+
+    return Semantics(
+      button: true,
+      label: label,
+      child: Material(
+        color: colorScheme.primary.withValues(alpha: tokens.opacitySubtle),
+        borderRadius: radius,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: radius,
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: tokens.spaceMedium,
+              vertical: tokens.spaceSmall,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: tokens.spaceExtraSmall,
+              children: [
+                Icon(
+                  Icons.format_list_bulleted_rounded,
+                  size: tokens.iconSizeMedium,
+                  color: colorScheme.primary,
+                ),
+                Text(
+                  label,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.primary,
+                  ),
+                ),
+              ],
             ),
           ),
         ),

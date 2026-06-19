@@ -48,6 +48,7 @@ class PrayerTimesScreenScope extends StatelessWidget {
               context.read<PrayerTimesBloc>().add(
                 PrayerTimesEvent.loadPrayerTimes(
                   localeIdentifier: state.locale.languageCode,
+                  forceReschedule: true,
                 ),
               );
             },

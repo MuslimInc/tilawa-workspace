@@ -135,8 +135,14 @@ void main() {
       final box =
           tester.renderObject(find.byType(TilawaIconToggle)) as RenderBox;
       expect(box.hasSize, isTrue);
-      expect(box.size.width, greaterThanOrEqualTo(kTilawaMinInteractiveDimension));
-      expect(box.size.height, greaterThanOrEqualTo(kTilawaMinInteractiveDimension));
+      expect(
+        box.size.width,
+        greaterThanOrEqualTo(kTilawaMinInteractiveDimension),
+      );
+      expect(
+        box.size.height,
+        greaterThanOrEqualTo(kTilawaMinInteractiveDimension),
+      );
 
       final sem = tester.getSemantics(find.byType(TilawaIconToggle));
       expect(sem.flagsCollection.isButton, isTrue);

@@ -13,16 +13,21 @@ import 'package:tilawa/features/athkar/domain/usecases/get_athkar_categories_use
 import 'package:tilawa/features/athkar/domain/usecases/get_pinned_athkar_preference_use_case.dart';
 import 'package:tilawa/features/athkar/domain/usecases/save_pinned_athkar_category_ids_use_case.dart';
 import 'package:tilawa/features/athkar/presentation/cubit/pinned_athkar_cubit.dart';
+import 'package:tilawa/features/athkar/presentation/widgets/athkar_category_card.dart';
 import 'package:tilawa/features/athkar/presentation/widgets/pinned_athkar_home_section.dart';
+import 'package:tilawa/features/home/domain/entities/home_layout_mode.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_featured_ritual_card.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_grouped_list_row.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_pinned_athkar_grid.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/utils/typedefs.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 void main() {
-  testWidgets('shows default athkar shortcuts on Home', (tester) async {
+  testWidgets('shows default athkar shortcuts on Home in list mode', (
+    tester,
+  ) async {
     final cubit = PinnedAthkarCubit(
       GetAthkarCategoriesUseCase(_FakeAthkarRepository()),
       GetPinnedAthkarPreferenceUseCase(_FakePinnedAthkarRepository()),
@@ -30,7 +35,12 @@ void main() {
     )..load();
     addTearDown(cubit.close);
 
-    await tester.pumpWidget(_PinnedAthkarHarness(cubit: cubit));
+    await tester.pumpWidget(
+      _PinnedAthkarHarness(
+        cubit: cubit,
+        layoutMode: HomeLayoutMode.list,
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Quick athkar'), findsOneWidget);
@@ -38,6 +48,30 @@ void main() {
     expect(find.textContaining('Morning Athkar'), findsWidgets);
     expect(find.textContaining('Evening Athkar'), findsOneWidget);
     expect(find.byType(HomeGroupedListRow), findsOneWidget);
+    expect(find.byType(HomePinnedAthkarGrid), findsNothing);
+  });
+
+  testWidgets('shows pinned athkar shortcuts as a grid in grid mode', (
+    tester,
+  ) async {
+    final cubit = PinnedAthkarCubit(
+      GetAthkarCategoriesUseCase(_FakeAthkarRepository()),
+      GetPinnedAthkarPreferenceUseCase(_FakePinnedAthkarRepository()),
+      SavePinnedAthkarCategoryIdsUseCase(_FakePinnedAthkarRepository()),
+    )..load();
+    addTearDown(cubit.close);
+
+    await tester.pumpWidget(
+      _PinnedAthkarHarness(
+        cubit: cubit,
+        layoutMode: HomeLayoutMode.grid,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(HomePinnedAthkarGrid), findsOneWidget);
+    expect(find.byType(AthkarCategoryCard), findsOneWidget);
+    expect(find.byType(HomeGroupedListRow), findsNothing);
   });
 
   testWidgets('shows loading card before pinned athkar loads', (tester) async {
@@ -69,12 +103,43 @@ void main() {
     expect(find.text('Choose your daily athkar'), findsOneWidget);
     expect(find.text('Choose athkar'), findsOneWidget);
   });
+
+  testWidgets('picker shows compact selected count and reorder menu', (
+    tester,
+  ) async {
+    final cubit = PinnedAthkarCubit(
+      GetAthkarCategoriesUseCase(_FakeAthkarRepository()),
+      GetPinnedAthkarPreferenceUseCase(_FakePinnedAthkarRepository()),
+      SavePinnedAthkarCategoryIdsUseCase(_FakePinnedAthkarRepository()),
+    )..load();
+    addTearDown(cubit.close);
+
+    await tester.pumpWidget(_PinnedAthkarHarness(cubit: cubit));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Edit athkar shortcuts'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Choose quick athkar'), findsOneWidget);
+    expect(find.text('2 of 4 shortcuts selected'), findsOneWidget);
+    expect(
+      find.widgetWithText(TilawaStatusChip, '2 of 4 shortcuts selected'),
+      findsOneWidget,
+    );
+    expect(find.byIcon(Icons.swap_vert_rounded), findsWidgets);
+    expect(find.byIcon(Icons.arrow_upward_rounded), findsNothing);
+    expect(find.byIcon(Icons.arrow_downward_rounded), findsNothing);
+  });
 }
 
 class _PinnedAthkarHarness extends StatelessWidget {
-  const _PinnedAthkarHarness({required this.cubit});
+  const _PinnedAthkarHarness({
+    required this.cubit,
+    this.layoutMode = HomeLayoutMode.list,
+  });
 
   final PinnedAthkarCubit cubit;
+  final HomeLayoutMode layoutMode;
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +150,7 @@ class _PinnedAthkarHarness extends StatelessWidget {
       home: Scaffold(
         body: BlocProvider.value(
           value: cubit,
-          child: const PinnedAthkarHomeSection(),
+          child: PinnedAthkarHomeSection(layoutMode: layoutMode),
         ),
       ),
     );

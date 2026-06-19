@@ -8,4 +8,7 @@ abstract class AuthState with _$AuthState {
       AuthAuthenticated;
   const factory AuthState.unauthenticated() = AuthUnauthenticated;
   const factory AuthState.error({required String message}) = AuthError;
+
+  /// The device has no Google accounts configured.
+  const factory AuthState.noGoogleAccounts() = AuthNoGoogleAccounts;
 }

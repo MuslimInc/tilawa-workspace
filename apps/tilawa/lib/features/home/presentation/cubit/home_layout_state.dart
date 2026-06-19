@@ -3,7 +3,7 @@ import 'package:equatable/equatable.dart';
 import '../../domain/entities/home_layout_mode.dart';
 
 class HomeLayoutState extends Equatable {
-  const HomeLayoutState({this.mode = HomeLayoutMode.grid});
+  const HomeLayoutState({this.mode = HomeLayoutMode.list});
 
   final HomeLayoutMode mode;
 

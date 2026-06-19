@@ -21,7 +21,7 @@ class HomeLayoutCubit extends Cubit<HomeLayoutState> {
     final result = await _getLayoutMode(const NoParams());
     emit(
       state.copyWith(
-        mode: result.getOrElse(() => HomeLayoutMode.grid),
+        mode: result.getOrElse(() => HomeLayoutMode.list),
       ),
     );
   }

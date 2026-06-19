@@ -91,4 +91,50 @@ class PrayerBootReceiverTest {
         
         verify { PrayerNotificationsWatchdogScheduler.enqueuePeriodic(context) }
     }
+
+    @Test
+    fun `persistPendingAlarms stores location and language in JSON`() {
+        val triggerAt = System.currentTimeMillis() + 3600000
+        val entries = listOf(
+            AlarmMetadata(
+                id = 300,
+                name = "fajr",
+                key = "fajr",
+                triggerMs = triggerAt,
+                sound = "adhan_fajr",
+                locationName = "Cairo",
+                languageCode = "ar",
+            ),
+        )
+
+        PrayerBootReceiver.persistPendingAlarms(context, entries)
+
+        val raw = DefaultPrayerStorage(context).getPendingAlarmsJson()
+        assertNotNull(raw)
+        assertTrue(raw!!.contains("\"location\":\"Cairo\""))
+        assertTrue(raw.contains("\"language\":\"ar\""))
+    }
+
+    @Test
+    fun `onReceive ignores unknown actions`() {
+        every { PrayerNotificationsWatchdogScheduler.enqueuePeriodic(any()) } just Runs
+        every { PrayerNotificationsWatchdogScheduler.enqueueOneTime(any()) } just Runs
+
+        receiver.onReceive(context, Intent("com.example.UNKNOWN"))
+
+        verify(exactly = 0) { PrayerNotificationsWatchdogScheduler.enqueuePeriodic(any()) }
+    }
+
+    @Test
+    fun `clearPendingAlarms removes persisted JSON`() {
+        val triggerAt = System.currentTimeMillis() + 3600000
+        PrayerBootReceiver.persistPendingAlarms(
+            context,
+            listOf(AlarmMetadata(400, "fajr", "fajr", triggerAt, "adhan")),
+        )
+
+        PrayerBootReceiver.clearPendingAlarms(context)
+
+        assertNull(DefaultPrayerStorage(context).getPendingAlarmsJson())
+    }
 }

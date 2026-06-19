@@ -89,4 +89,87 @@ class BootLogicTest {
         // Should default to "adhan"
         verify { mockScheduler.schedule(2, "fajr", "fajr", 1500L, "adhan") }
     }
+
+    @Test
+    fun `reArmAlarms forwards location and language from JSON`() {
+        val json = """
+            [
+                {
+                    "id": 4,
+                    "name": "fajr",
+                    "key": "fajr",
+                    "trigger": 2500,
+                    "sound": "adhan_fajr",
+                    "location": "Cairo",
+                    "language": "ar"
+                }
+            ]
+        """.trimIndent()
+        every { mockStorage.getPendingAlarmsJson() } returns json
+
+        logic.reArmAlarms(1000L)
+
+        verify {
+            mockScheduler.schedule(
+                4,
+                "fajr",
+                "fajr",
+                2500L,
+                "adhan_fajr",
+                "Cairo",
+                "ar",
+            )
+        }
+    }
+
+    @Test
+    fun `reArmAlarms logs schedule failure when scheduler returns false`() {
+        val json = """[{"id": 2, "name": "dhuhr", "trigger": 1500}]"""
+        every { mockStorage.getPendingAlarmsJson() } returns json
+        every { mockScheduler.schedule(any(), any(), any(), any(), any(), any(), any()) } returns false
+        every { mockScheduler.canScheduleExact() } returns false
+        every { mockScheduler.areNotificationsEnabled() } returns true
+
+        logic.reArmAlarms(1000L)
+
+        verify { mockAnalytics.logEvent(PrayerEvents.SCHEDULE_FAILED, any()) }
+    }
+
+    @Test
+    fun `reArmAlarms logs analytics error when schedule throws`() {
+        val json = """[{"id": 2, "name": "dhuhr", "trigger": 1500}]"""
+        every { mockStorage.getPendingAlarmsJson() } returns json
+        every {
+            mockScheduler.schedule(any(), any(), any(), any(), any(), any(), any())
+        } throws RuntimeException("schedule boom")
+        every { mockScheduler.canScheduleExact() } returns true
+        every { mockScheduler.areNotificationsEnabled() } returns true
+
+        logic.reArmAlarms(1000L)
+
+        verify {
+            mockAnalytics.logError(
+                "Failed to schedule alarm during boot re-arm",
+                any(),
+                any(),
+            )
+        }
+    }
+
+    @Test
+    fun `reArmAlarms logs analytics error when JSON parse fails`() {
+        every { mockStorage.getPendingAlarmsJson() } returns "{ bad json"
+        every { mockScheduler.canScheduleExact() } returns true
+        every { mockScheduler.areNotificationsEnabled() } returns true
+
+        logic.reArmAlarms(1000L)
+
+        verify {
+            mockAnalytics.logError(
+                "Failed to parse pending alarms JSON",
+                any(),
+                any(),
+            )
+        }
+    }
 }

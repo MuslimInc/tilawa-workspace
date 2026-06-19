@@ -85,6 +85,27 @@ void main() {
       expect(result.isRight, isTrue);
     });
 
+    test('returns unavailable when no foreground activity', () async {
+      setMethodHandler((_) async {
+        throw PlatformException(
+          code: 'REQUIRE_FOREGROUND_ACTIVITY',
+          message: 'in_app_update requires a foreground activity',
+        );
+      });
+
+      final Either<Failure, InAppUpdateAvailability> result = await dataSource
+          .checkAvailability();
+
+      result.fold(
+        (_) => fail('expected Right'),
+        (InAppUpdateAvailability availability) {
+          expect(availability.updateAvailable, isFalse);
+          expect(availability.immediateUpdateAllowed, isFalse);
+          expect(availability.flexibleUpdateAllowed, isFalse);
+        },
+      );
+    });
+
     test('returns unavailable when app is not owned by Play', () async {
       setMethodHandler((_) async {
         throw PlatformException(

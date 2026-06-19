@@ -23,9 +23,10 @@ import 'package:tilawa/features/home/domain/repositories/home_layout_preference_
 import 'package:tilawa/features/home/domain/usecases/get_home_layout_mode_use_case.dart';
 import 'package:tilawa/features/home/domain/usecases/set_home_layout_mode_use_case.dart';
 import 'package:tilawa/features/home/presentation/screens/home_screen.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_dashboard_search_bar.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_today_featured_carousel.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_more_actions_group.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_pinned_athkar_grid.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_grouped_list_row.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_shortcut_grid_view.dart';
 import 'package:tilawa/features/quran_reader/domain/usecases/get_last_read_position_use_case.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_daily_inspiration_section.dart';
@@ -115,7 +116,7 @@ void main() {
     expect(find.text('Featured for you'), findsOneWidget);
     expect(find.text('Last Read'), findsOneWidget);
     expect(find.byType(HomeTodayFeaturedCarousel), findsOneWidget);
-    expect(find.byType(HomeDashboardSearchBar), findsOneWidget);
+    expect(find.text('Search surahs, juz, or page'), findsNothing);
     expect(find.text('Daily inspiration'), findsOneWidget);
     expect(find.text('Reciters'), findsOneWidget);
     expect(find.text('Browse recitations'), findsOneWidget);
@@ -129,6 +130,11 @@ void main() {
     expect(find.text('Quran'), findsNothing);
     expect(find.text('Athkar'), findsNothing);
     expect(find.text('Settings'), findsNothing);
+
+    expect(
+      tester.getTopLeft(find.text('Daily inspiration')).dy,
+      greaterThan(tester.getTopLeft(find.text('Discover')).dy),
+    );
   });
 
   testWidgets('Discover section renders localized labels in Arabic', (
@@ -201,7 +207,7 @@ void main() {
   });
 
   testWidgets(
-    'layout toggle switches Explore shortcuts between grid and list',
+    'Discover layout toggle switches dashboard sections between list and grid',
     (
       tester,
     ) async {
@@ -231,17 +237,28 @@ void main() {
         await tester.pump(const Duration(milliseconds: 16));
       }
 
-      expect(find.byType(HomeShortcutGridView), findsWidgets);
-      expect(find.byType(HomeMoreActionsGroup), findsNothing);
-
-      await tester.ensureVisible(find.byIcon(Icons.view_list_rounded));
-      await tester.tap(find.byIcon(Icons.view_list_rounded));
-      await tester.pump();
-      await tester.pump();
-
       expect(find.byType(HomeMoreActionsGroup), findsOneWidget);
       expect(find.byType(HomeShortcutGridView), findsNothing);
-      expect(layoutRepository.mode.name, 'list');
+      expect(find.byType(HomePinnedAthkarGrid), findsNothing);
+      expect(find.byType(HomeGroupedListRow), findsWidgets);
+
+      final toggleFinder = find.byIcon(Icons.grid_view_rounded);
+      expect(toggleFinder, findsOneWidget);
+      await tester.ensureVisible(toggleFinder);
+      await tester.pump();
+      expect(
+        tester.getTopLeft(toggleFinder).dy,
+        greaterThanOrEqualTo(tester.getTopLeft(find.text('Discover')).dy),
+      );
+
+      await tester.tap(toggleFinder);
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.byType(HomeShortcutGridView), findsOneWidget);
+      expect(find.byType(HomePinnedAthkarGrid), findsOneWidget);
+      expect(find.byType(HomeMoreActionsGroup), findsNothing);
+      expect(layoutRepository.mode.name, 'grid');
     },
   );
 }
@@ -380,7 +397,7 @@ class _FakeGetLastReadPosition implements GetLastReadPositionUseCase {
 
 class _FakeHomeLayoutPreferenceRepository
     implements HomeLayoutPreferenceRepository {
-  HomeLayoutMode mode = HomeLayoutMode.grid;
+  HomeLayoutMode mode = HomeLayoutMode.list;
 
   @override
   Future<HomeLayoutMode> getLayoutMode() async => mode;

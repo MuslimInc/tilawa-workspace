@@ -30,8 +30,8 @@ abstract final class HomeDashboardHeroSliver {
   /// Greeting area inside the expanded app bar (below toolbar).
   static const double _greetingBodyHeight = 92;
 
-  /// Frosted next-prayer card (padding + two text rows + countdown).
-  static const double _metricsContentHeight = 140;
+  /// Frosted next-prayer card (spaceMedium glass padding + rows + countdown).
+  static const double _metricsContentHeight = 148;
 
   /// Extra room for device font metrics / text-scale drift.
   static const double _metricsLayoutSlack = 4;
@@ -60,12 +60,10 @@ abstract final class HomeDashboardHeroSliver {
   }
 
   static double _resolveHeroBodyHeight(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
     final double textScale = MediaQuery.textScalerOf(
       context,
     ).scale(1).clamp(1.0, 1.3);
     return _greetingBodyHeight * textScale +
-        tokens.spaceSmall +
         _metricsContentHeight * textScale +
         _metricsLayoutSlack +
         _resolveBottomInset(context);
@@ -209,6 +207,7 @@ class _HomeDashboardHeroAppBarState extends State<_HomeDashboardHeroAppBar> {
     final bool metricsLoading =
         widget.state is! HomeDashboardLoaded &&
         widget.state is! HomeDashboardFailure;
+    final bool dashboardFailed = widget.state is HomeDashboardFailure;
     final String? locationName = dashboard?.locationLabel;
     final double heroBodyHeight =
         HomeDashboardHeroSliver._resolveHeroBodyHeight(
@@ -256,11 +255,21 @@ class _HomeDashboardHeroAppBarState extends State<_HomeDashboardHeroAppBar> {
           dashboard: dashboard,
           nextPrayer: nextPrayer,
           metricsLoading: metricsLoading,
+          dashboardFailed: dashboardFailed,
           locationName: locationName,
           isRefreshingLocation: isRefreshingLocation,
           onRefreshLocation: () {
             context.read<HomeDashboardBloc>().add(
               HomeDashboardLocationRefreshRequested(
+                localeIdentifier: Localizations.localeOf(
+                  context,
+                ).languageCode,
+              ),
+            );
+          },
+          onRetryDashboard: () {
+            context.read<HomeDashboardBloc>().add(
+              HomeDashboardRefreshRequested(
                 localeIdentifier: Localizations.localeOf(
                   context,
                 ).languageCode,
@@ -298,9 +307,11 @@ class _HomeHeroFlexibleSpace extends StatefulWidget {
     required this.dashboard,
     required this.nextPrayer,
     required this.metricsLoading,
+    required this.dashboardFailed,
     required this.locationName,
     required this.isRefreshingLocation,
     required this.onRefreshLocation,
+    required this.onRetryDashboard,
     required this.onOpenPrayer,
     required this.bottomInset,
     required this.heroBodyHeight,
@@ -311,9 +322,11 @@ class _HomeHeroFlexibleSpace extends StatefulWidget {
   final HomeDashboard? dashboard;
   final HomeNextPrayer? nextPrayer;
   final bool metricsLoading;
+  final bool dashboardFailed;
   final String? locationName;
   final bool isRefreshingLocation;
   final VoidCallback? onRefreshLocation;
+  final VoidCallback onRetryDashboard;
   final VoidCallback onOpenPrayer;
   final double bottomInset;
   final double heroBodyHeight;
@@ -333,6 +346,7 @@ class _HomeHeroFlexibleSpaceState extends State<_HomeHeroFlexibleSpace> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.nextPrayer != widget.nextPrayer ||
         oldWidget.metricsLoading != widget.metricsLoading ||
+        oldWidget.dashboardFailed != widget.dashboardFailed ||
         oldWidget.locationName != widget.locationName ||
         oldWidget.isRefreshingLocation != widget.isRefreshingLocation) {
       _metricsFooterSection = _buildMetricsFooterSection();
@@ -343,9 +357,11 @@ class _HomeHeroFlexibleSpaceState extends State<_HomeHeroFlexibleSpace> {
     return _HomeHeroMetricsFooterSection(
       nextPrayer: widget.nextPrayer,
       metricsLoading: widget.metricsLoading,
+      dashboardFailed: widget.dashboardFailed,
       locationName: widget.locationName,
       isRefreshingLocation: widget.isRefreshingLocation,
       onRefreshLocation: widget.onRefreshLocation,
+      onRetryDashboard: widget.onRetryDashboard,
       onOpenPrayer: widget.onOpenPrayer,
     );
   }
@@ -537,13 +553,11 @@ class _HomeHeroExpandedBody extends StatelessWidget {
                 alignment: AlignmentDirectional.centerStart,
                 child: _HomeHeroHeader(
                   dashboard: dashboard,
-                  onOpenPrayer: onOpenPrayer,
                 ),
               ),
             ),
           ),
         ),
-        SizedBox(height: tokens.spaceSmall),
         metricsFooterSection,
         SizedBox(height: bottomInset),
       ],
@@ -557,17 +571,21 @@ class _HomeHeroMetricsFooterSection extends StatelessWidget {
   const _HomeHeroMetricsFooterSection({
     required this.nextPrayer,
     required this.metricsLoading,
+    required this.dashboardFailed,
     required this.locationName,
     required this.isRefreshingLocation,
     required this.onRefreshLocation,
+    required this.onRetryDashboard,
     required this.onOpenPrayer,
   });
 
   final HomeNextPrayer? nextPrayer;
   final bool metricsLoading;
+  final bool dashboardFailed;
   final String? locationName;
   final bool isRefreshingLocation;
   final VoidCallback? onRefreshLocation;
+  final VoidCallback onRetryDashboard;
   final VoidCallback onOpenPrayer;
 
   @override
@@ -576,7 +594,12 @@ class _HomeHeroMetricsFooterSection extends StatelessWidget {
     final tokens = Theme.of(context).tokens;
     final Color onGradient = heroTokens.foregroundColor;
 
-    final Widget metricsChild = metricsLoading
+    final Widget metricsChild = dashboardFailed
+        ? _HomeHeroMetricsFailure(
+            onGradient: onGradient,
+            onRetry: onRetryDashboard,
+          )
+        : metricsLoading
         ? _HomeHeroMetricsSkeleton(onGradient: onGradient)
         : _HomeHeroNextPrayerFocus(
             nextPrayer: nextPrayer,
@@ -589,10 +612,10 @@ class _HomeHeroMetricsFooterSection extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: tokens.spaceMedium),
         child: HomeHeroGlassSurface(
-          onTap: onOpenPrayer,
+          onTap: dashboardFailed ? null : onOpenPrayer,
           padding: EdgeInsets.symmetric(
             horizontal: tokens.spaceMedium,
-            vertical: tokens.spaceSmall,
+            vertical: tokens.spaceMedium,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -777,11 +800,9 @@ class _HomeHeroCollapsedPrayerSummaryState
 class _HomeHeroHeader extends StatelessWidget {
   const _HomeHeroHeader({
     required this.dashboard,
-    required this.onOpenPrayer,
   });
 
   final HomeDashboard? dashboard;
-  final VoidCallback onOpenPrayer;
 
   @override
   Widget build(BuildContext context) {
@@ -892,54 +913,60 @@ class _HomeHeroHeader extends StatelessWidget {
       ),
     };
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(child: greeting),
-        _HomeHeroNotificationMark(onTap: onOpenPrayer),
-      ],
-    );
+    return greeting;
   }
 }
 
-class _HomeHeroNotificationMark extends StatelessWidget {
-  const _HomeHeroNotificationMark({required this.onTap});
+class _HomeHeroMetricsFailure extends StatelessWidget {
+  const _HomeHeroMetricsFailure({
+    required this.onGradient,
+    required this.onRetry,
+  });
 
-  final VoidCallback onTap;
+  final Color onGradient;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final heroTokens = theme.componentTokens.homeNextPrayerHero;
-    final Color onGradient = heroTokens.foregroundColor;
-    final double markSize = tokens.spaceExtraLarge;
 
-    return Semantics(
-      button: true,
-      label: context.l10n.homePrayerAlertsAction,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          minWidth: kTilawaMinInteractiveDimension,
-          minHeight: kTilawaMinInteractiveDimension,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: tokens.spaceSmall,
+      children: [
+        Text(
+          context.l10n.homeDashboardLoadError,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: onGradient.withValues(
+              alpha: heroTokens.footerForegroundOpacity,
+            ),
+          ),
         ),
-        child: Center(
-          child: HomeHeroGlassSurface(
-            borderRadius: BorderRadius.circular(markSize),
-            padding: EdgeInsets.all(tokens.spaceSmall),
-            onTap: onTap,
-            child: SizedBox(
-              width: markSize - tokens.spaceSmall,
-              height: markSize - tokens.spaceSmall,
-              child: Icon(
-                FluentIcons.alert_24_regular,
-                size: tokens.iconSizeMedium,
+        Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: TextButton(
+            onPressed: onRetry,
+            style: TextButton.styleFrom(
+              foregroundColor: onGradient,
+              padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
+              minimumSize: Size(
+                tokens.minInteractiveDimension,
+                tokens.minInteractiveDimension,
+              ),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(
+              context.l10n.retry,
+              style: theme.textTheme.labelLarge?.copyWith(
                 color: onGradient,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 }

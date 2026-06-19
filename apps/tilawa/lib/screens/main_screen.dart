@@ -52,16 +52,15 @@ class MainScreen extends StatelessWidget {
               ? context.tokens.playerCollapsedHeight
               : 0;
           final double miniNavGap = playerShouldShow && !isKeyboardOpen
-              ? Theme.of(context)
-                    .componentTokens
-                    .adaptiveShell
-                    .bottomNavVerticalMargin
+              ? Theme.of(
+                  context,
+                ).componentTokens.adaptiveShell.bottomNavVerticalMargin
               : 0;
-          final double miniPlayerTopPadding = playerShouldShow && !isKeyboardOpen
-              ? Theme.of(context)
-                    .componentTokens
-                    .adaptiveShell
-                    .bottomNavInternalPadding
+          final double miniPlayerTopPadding =
+              playerShouldShow && !isKeyboardOpen
+              ? Theme.of(
+                  context,
+                ).componentTokens.adaptiveShell.bottomNavInternalPadding
               : 0;
           final double contentBottomPadding = isKeyboardOpen
               ? 0

@@ -1,8 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../../../core/constants/surah_names.dart';
 import '../../../core/perf_logger.dart';
 import '../../../domain/domain.dart';
 import '../../bloc/bloc.dart';
@@ -20,6 +22,7 @@ class PremiumNavigationOverlay extends StatefulWidget {
     required this.onInteractionEnd,
     this.onShareRequested,
     this.onShowIndex,
+    this.trailingAction,
   });
 
   final ValueListenable<PageState?> previewStateListenable;
@@ -30,7 +33,14 @@ class PremiumNavigationOverlay extends StatefulWidget {
   final VoidCallback onInteractionStart;
   final VoidCallback onInteractionEnd;
   final VoidCallback? onShareRequested;
+
+  /// Opens the surah index, rendered inside the panel's thumb-reachable action
+  /// row instead of the top header.
   final VoidCallback? onShowIndex;
+
+  /// Host-supplied action (the Mushaf/ayah-list view switch) placed in the same
+  /// action row.
+  final Widget? trailingAction;
 
   @override
   State<PremiumNavigationOverlay> createState() =>
@@ -126,6 +136,7 @@ class _PremiumNavigationOverlayState extends State<PremiumNavigationOverlay>
                       onInteractionEnd: widget.onInteractionEnd,
                       onShareRequested: widget.onShareRequested,
                       onShowIndex: widget.onShowIndex,
+                      trailingAction: widget.trailingAction,
                     )
                   : const SizedBox.shrink(),
             ),
@@ -147,6 +158,7 @@ class _PremiumNavigationControls extends StatelessWidget {
     required this.onInteractionEnd,
     this.onShareRequested,
     this.onShowIndex,
+    this.trailingAction,
   });
 
   final ValueListenable<PageState?> previewStateListenable;
@@ -158,6 +170,7 @@ class _PremiumNavigationControls extends StatelessWidget {
   final VoidCallback onInteractionEnd;
   final VoidCallback? onShareRequested;
   final VoidCallback? onShowIndex;
+  final Widget? trailingAction;
 
   @override
   Widget build(BuildContext context) {
@@ -179,36 +192,16 @@ class _PremiumNavigationControls extends StatelessWidget {
             return Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                if (previewPageState != null)
+                  _SurahNamePill(pageNumber: previewPageState.displayPage),
+                if (previewPageState != null)
+                  SizedBox(height: Theme.of(context).tokens.spaceSmall),
                 RepaintBoundary(
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      final tokens = Theme.of(context).tokens;
                       return Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // Surah-index FAB, floating just above the page card.
-                          if (onShowIndex != null) ...[
-                            Padding(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: tokens.spaceLarge,
-                              ),
-                              child: Center(
-                                child: ConstrainedBox(
-                                  constraints: BoxConstraints(
-                                    maxWidth: tokens.contentMaxWidthForm,
-                                  ),
-                                  child: Align(
-                                    alignment: AlignmentDirectional.centerStart,
-                                    child: _PremiumIndexFab(
-                                      onTap: onShowIndex!,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: tokens.spaceSmall),
-                          ],
-
                           /// TODO[feature]: Disable this feature for now because it is not stable yet, and we want to focus on getting the core navigation experience right first. We can re-enable it once it's more polished.
                           // if (onShareRequested != null) ...[
                           //   Padding(
@@ -248,6 +241,8 @@ class _PremiumNavigationControls extends StatelessWidget {
                               onNextPageRequested: onNextPageRequested,
                               onInteractionStart: onInteractionStart,
                               onInteractionEnd: onInteractionEnd,
+                              onShowIndex: onShowIndex,
+                              trailingAction: trailingAction,
                             ),
                           ),
                         ],
@@ -270,42 +265,46 @@ class _PremiumNavigationControls extends StatelessWidget {
   }
 }
 
-/// Circular floating button that opens the host's surah index, sitting just
-/// above the page navigation card. Mirrors the bottom bar's button styling but
-/// adds elevation so it reads as a floating action.
-class _PremiumIndexFab extends StatelessWidget {
-  const _PremiumIndexFab({required this.onTap});
+/// Pill badge shown above the navigation panel while the user drags the slider.
+/// Displays the Arabic surah name(s) of the preview page so the user knows
+/// which surah they are navigating to without lifting their thumb.
+class _SurahNamePill extends StatelessWidget {
+  const _SurahNamePill({required this.pageNumber});
 
-  final VoidCallback onTap;
+  final int pageNumber;
 
   @override
   Widget build(BuildContext context) {
+    final pageData = getPageData(pageNumber);
+    final surahNumbers = pageData.map((e) => e.surah).toSet().toList();
+    final label = surahNumbers
+        .map((s) => SurahNames.getSurahName(s, 'ar'))
+        .join(' · ');
+
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
-    final double size = tokens.iconSizeExtraLarge;
+    final radius = BorderRadius.circular(tokens.radiusExtraLarge);
 
-    return Semantics(
-      button: true,
-      child: Material(
-        color: colorScheme.surfaceContainerLow,
-        elevation: 3,
-        shadowColor: Colors.black.withValues(alpha: tokens.opacityMedium),
-        shape: CircleBorder(
-          side: BorderSide(
+    return Center(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colorScheme.surface.withValues(alpha: tokens.opacityGlass),
+          borderRadius: radius,
+          border: Border.all(
             color: colorScheme.primary.withValues(alpha: tokens.opacityMedium),
-            width: tokens.borderWidthThin,
           ),
         ),
-        child: InkWell(
-          onTap: onTap,
-          customBorder: const CircleBorder(),
-          child: SizedBox(
-            width: size,
-            height: size,
-            child: Icon(
-              Icons.list_rounded,
-              size: tokens.iconSizeMedium,
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: tokens.spaceMedium,
+            vertical: tokens.spaceExtraSmall,
+          ),
+          child: Text(
+            label,
+            textDirection: TextDirection.rtl,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
               color: colorScheme.onSurface,
             ),
           ),

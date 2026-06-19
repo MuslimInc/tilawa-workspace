@@ -144,8 +144,9 @@ void main() {
       expect(find.textContaining(' · '), findsOneWidget);
     });
 
-    testWidgets('tight non-shell layout fits fractional collapsed height',
-        (tester) async {
+    testWidgets('tight non-shell layout fits fractional collapsed height', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         _themed(
           const SizedBox(
