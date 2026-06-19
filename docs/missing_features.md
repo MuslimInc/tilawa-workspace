@@ -1,9 +1,18 @@
-# Tilawa App - Missing Features
+# MeMuslim App - Missing Features
 
-This document outlines features that are commonly found in Quran/Islamic apps but are currently missing from Tilawa.
+This document outlines features that are commonly found in Quran/Islamic apps but are currently missing from MeMuslim (formerly Tilawa).
 
 **Active team backlog (features + refactors you update often):**
 [`TODO.md`](TODO.md).
+
+**New specs added 2026-06-20 (sourced from Athkar iOS competitive analysis):**
+
+| Spec | Feature | Priority |
+| --- | --- | --- |
+| [`024-worship-tracker`](../specs/024-worship-tracker/spec.md) | Daily prayer/athkar/Quran log + streak + heatmap | P1 |
+| [`025-home-screen-widgets`](../specs/025-home-screen-widgets/spec.md) | Prayer times, next prayer, hijri date widgets | P1 |
+| [`026-granular-reminders`](../specs/026-granular-reminders/spec.md) | Configurable Duha / Tahajjud / Jumu'ah / white-days reminders | P1 |
+| [`027-personal-dua-collections`](../specs/027-personal-dua-collections/spec.md) | User-created du'a collections with per-collection reminders | P2 |
 
 ---
 

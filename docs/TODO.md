@@ -48,6 +48,18 @@ _Add new product work here._
   Replace the default Adhan sound asset with the chosen production file; verify
   notification and foreground playback paths.
 
+- [ ] **Worship Tracker** `P1` — daily prayer/athkar/Quran log, streak, 14-day heatmap, shareable streak card  
+  Full spec: [`specs/024-worship-tracker/spec.md`](../specs/024-worship-tracker/spec.md)
+
+- [ ] **Home screen widgets** `P1` — prayer times, next prayer countdown, hijri date (Android Glance + iOS WidgetKit)  
+  Full spec: [`specs/025-home-screen-widgets/spec.md`](../specs/025-home-screen-widgets/spec.md)
+
+- [ ] **Granular reminders** `P1` — configurable Duha, Tahajjud, Jumu'ah sunnah, white-days fasting with per-user offsets  
+  Full spec: [`specs/026-granular-reminders/spec.md`](../specs/026-granular-reminders/spec.md)
+
+- [ ] **Personal du'a collections** `P2` — user-created collections per loved one / intention, with daily reminders  
+  Full spec: [`specs/027-personal-dua-collections/spec.md`](../specs/027-personal-dua-collections/spec.md)
+
 - [ ] _Your next feature idea_
 
 ---
