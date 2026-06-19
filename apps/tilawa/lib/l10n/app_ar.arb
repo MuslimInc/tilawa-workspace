@@ -144,6 +144,9 @@
     "khatmaResetTitle": "إعادة ضبط خطة الختمة؟",
     "khatmaResetMessage": "سيتم حذف خطة الختمة الحالية فقط. ستبقى آخر صفحة قرأتها والعلامات المرجعية محفوظة.",
     "khatmaContinueReading": "تابع القراءة",
+    "khatmaHubTitle": "ختمة ذكية",
+    "khatmaHomeViewPlan": "عرض الخطة",
+    "khatmaHubResetSubtitle": "يمسح الخطة الحالية فقط. علاماتك المرجعية تبقى محفوظة.",
     "todayPlanTitle": "خطة اليوم",
     "@todayPlanTitle": {
         "description": "Title for the daily Quran engagement plan card"

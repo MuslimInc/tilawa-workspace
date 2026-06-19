@@ -7,6 +7,8 @@ export 'content_bounds.dart';
 export 'tilawa_thumb_reach_layout.dart';
 export 'content_grid.dart';
 export 'design_tokens.dart';
+export 'semantic_tints.dart';
+export 'tilawa_fab_location.dart';
 export 'display_feature_insets.dart';
 export 'tilawa_bottom_sheet_actions.dart';
 export 'tilawa_bottom_sheet_scaffold.dart';

@@ -6,6 +6,39 @@ The Quran reader renders a 604-page mushaf using per-page QCF4 bitmap fonts. Eac
 
 ---
 
+## Android rendering backend
+
+**Policy:** Tilawa ships **Skia** on Android and keeps **Impeller disabled** until
+Flutter's Impeller backend is stable for our workload (604 per-page bitmap fonts,
+heavy glyph-atlas churn, verse-marker tessellation).
+
+Configuration: `apps/tilawa/android/app/src/main/AndroidManifest.xml`
+
+```xml
+<meta-data
+    android:name="io.flutter.embedding.android.EnableImpeller"
+    android:value="false" />
+```
+
+**Why:** On real devices we saw first-frame raster spikes (17–55 ms) from Impeller's
+lazy glyph-atlas build when switching pages/fonts. Warm-up mitigations help, but
+Skia is the safer default until Impeller behaviour is predictable across our
+device matrix.
+
+**Re-enable checklist (when revisiting):**
+
+1. Remove or set `EnableImpeller` to `true` in the manifest above.
+2. Cold-start and page-flip on mid-range Android (profile mode); compare raster
+   thread timings vs Skia baseline.
+3. Re-run glyph warm-up paths (`precacheTextGlyphs`, verse-marker warm-up) and
+   confirm no regression on orientation change.
+4. Check `adb logcat` for `Using the Impeller rendering backend`.
+
+Glyph warm-up and `PreparedQuranPage` pre-layout remain renderer-agnostic; they
+benefit both Skia and Impeller.
+
+---
+
 ## Stack
 
 ```
@@ -37,7 +70,7 @@ Result: user saw a spinner for 200–700 ms every time they opened the reader, e
 
 ### First-frame raster jank (~17–55 ms)
 
-Impeller builds its glyph atlas lazily — the first frame that paints a glyph for a given `(fontFamily, fontSize)` pays the GPU texture upload cost on the raster thread. With 604 per-page fonts, every new page triggered a ~17–21 ms raster spike.
+On Impeller (disabled on Android — see [Android rendering backend](#android-rendering-backend)), the engine builds its glyph atlas lazily — the first frame that paints a glyph for a given `(fontFamily, fontSize)` pays the GPU texture upload cost on the raster thread. With 604 per-page fonts, every new page triggered a ~17–21 ms raster spike. Skia has similar atlas work but behaved more predictably on our device matrix, which is why we default to Skia for now.
 
 ### `PageContent` build-time work
 
@@ -56,7 +89,7 @@ All on the UI thread, inside `build()`.
 |---|---|---|
 | `_LoadingView` visible | 200–700 ms | Async font + data init before reader shown |
 | `_isReaderPrepared` gate | 1–3 frames | Offstage prepare + callback round-trip |
-| First-frame glyph atlas | 17–55 ms raster | Impeller lazy atlas build on first paint |
+| First-frame glyph atlas | 17–55 ms raster | Lazy atlas build on first paint (Impeller; mitigated via warm-up; Skia on Android) |
 | `PageContent` build work | 3–8 ms UI | 15× `TextPainter.layout()` in `build()` |
 
 ---
@@ -73,7 +106,7 @@ In `QuranFontLoaderBloc._onInitialize`:
 ```
 loadFontsToEngine()       → font registered in engine
 ensureQuranDataLoaded()   → JSON data available
-warmInitialPage()         → glyph atlas pre-built in Impeller
+warmInitialPage()         → glyph atlas pre-built (off-screen warm-up)
 emit(success)             → reader shown
 ```
 
@@ -126,7 +159,7 @@ App cold start
   │
   ├── QuranFontService.warmInitialPage(p)
   │     └── precacheTextGlyphs() → PictureRecorder → picture.toImage()
-  │           └── Impeller builds glyph atlas on GPU (off-screen)
+  │           └── renderer builds glyph atlas on GPU (off-screen)
   │
   ├── emit(success)   ← bloc emits here
   │
@@ -179,7 +212,7 @@ Total RSS impact: ~5–10 MB for a 5-page window, well within budget.
 
 1. **No work in `build()`** — `PageContent` receives a complete `PreparedQuranPage` (pre-laid `TextPainter` blocks). `build()` iterates the blocks list and returns `QuranLine` widgets; no data access, no layout computation.
 
-2. **Glyph atlas pre-built** — `precacheTextGlyphs()` drives an off-screen `PictureRecorder → Canvas → picture.toImage()` pipeline that forces Impeller to run `LazyGlyphAtlas::CreateOrGetGlyphAtlas()` before the page is on-screen. The raster thread has nothing to build on first paint.
+2. **Glyph atlas pre-built** — `precacheTextGlyphs()` drives an off-screen `PictureRecorder → Canvas → picture.toImage()` pipeline that forces the active renderer (Skia on Android) to upload glyphs before the page is on-screen. The raster thread has nothing to build on first paint.
 
 3. **No async gap on mount** — `_preparedWindowNotifier` is initialised with the pre-computed window in `initState`. `QuranPageView`'s first `build()` already has a non-null `PreparedQuranPageWindow`. There is no frame where `PageContent` must fall back to on-demand computation.
 

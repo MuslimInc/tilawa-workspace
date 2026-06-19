@@ -33,18 +33,15 @@ class AthkarCategoriesScreen extends StatelessWidget {
         context,
         title: context.l10n.athkar,
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        // Unique tag prevents this FAB's default Hero from colliding with
-        // another screen's FAB during route transitions (e.g. the Athkar tab
-        // FAB flying into Reciter Details while the tab is offstage in the
-        // shell's IndexedStack).
+      floatingActionButton: TilawaPrimaryFab(
         heroTag: 'athkar_tasbeeh_fab',
+        icon: Icons.auto_awesome_rounded,
+        label: context.l10n.tasbeehCategory,
         onPressed: () => const TasbeehRoute().push(context),
-        icon: const Icon(Icons.auto_awesome_rounded),
-        label: Text(context.l10n.tasbeehCategory),
       ),
-      floatingActionButtonLocation: _StartFloatingActionButtonLocation(
-        offset: fabBottomOffset,
+      floatingActionButtonLocation: TilawaFabLocation.placement(
+        TilawaFabPlacement.start,
+        bottomOffset: fabBottomOffset,
       ),
       body: Stack(
         children: [
@@ -114,23 +111,5 @@ class AthkarCategoriesScreen extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-class _StartFloatingActionButtonLocation extends FloatingActionButtonLocation {
-  const _StartFloatingActionButtonLocation({required this.offset});
-
-  final double offset;
-
-  @override
-  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    final Offset base = FloatingActionButtonLocation.startFloat.getOffset(
-      scaffoldGeometry,
-    );
-    final double y =
-        scaffoldGeometry.scaffoldSize.height -
-        scaffoldGeometry.floatingActionButtonSize.height -
-        offset;
-    return Offset(base.dx, y);
   }
 }

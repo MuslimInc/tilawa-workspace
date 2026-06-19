@@ -1093,7 +1093,7 @@ void main() {
 
   group('TilawaHomeNextPrayerHeroTokens', () {
     test('defaults use centralized AppColors gradient stops', () {
-      final tokens = TilawaHomeNextPrayerHeroTokens.defaults();
+      final tokens = TilawaHomeNextPrayerHeroTokens.day();
 
       expect(tokens.gradientTopStart, AppColors.homeNextPrayerGradientTop);
       expect(tokens.gradientBottomEnd, AppColors.homeNextPrayerGradientBottom);
@@ -1104,6 +1104,17 @@ void main() {
       expect(
         tokens.backgroundGradient.colors,
         [tokens.gradientTopStart, tokens.gradientBottomEnd],
+      );
+    });
+
+    test('dusk and night palettes use dedicated AppColors stops', () {
+      final dusk = TilawaHomeNextPrayerHeroTokens.dusk();
+      final night = TilawaHomeNextPrayerHeroTokens.night();
+
+      expect(dusk.gradientTopStart, AppColors.homeNextPrayerGradientDuskTop);
+      expect(
+        night.gradientBottomEnd,
+        AppColors.homeNextPrayerGradientNightBottom,
       );
     });
   });

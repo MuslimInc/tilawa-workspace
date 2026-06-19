@@ -184,3 +184,35 @@ Widget previewTilawaSettingsGroupDark() {
     ),
   );
 }
+
+@Preview(
+  name: 'TilawaHeroSummaryCard',
+  group: 'Organisms',
+  theme: organismsPreviewTheme,
+)
+Widget previewTilawaHeroSummaryCard() {
+  return const Scaffold(
+    body: Center(
+      child: TilawaHeroSummaryCard(
+        label: 'Pages read this week',
+        metric: '42',
+        badges: [
+          TilawaHeroSummaryBadge(
+            label: '+3 today',
+            icon: Icons.trending_up,
+            tint: TilawaSemanticTint.ink,
+          ),
+          TilawaHeroSummaryBadge(
+            label: '6 day streak',
+            tint: TilawaSemanticTint.scholar,
+          ),
+        ],
+        footer: TilawaHeroSummaryProgress(
+          label: 'Weekly goal',
+          valueLabel: '72%',
+          progress: 0.72,
+        ),
+      ),
+    ),
+  );
+}

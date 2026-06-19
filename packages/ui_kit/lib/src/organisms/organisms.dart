@@ -5,3 +5,4 @@ export 'tilawa_player_background_layer.dart';
 export 'tilawa_settings_group.dart';
 export 'tilawa_share_footer_bar.dart';
 export 'tilawa_async_content.dart';
+export 'tilawa_hero_summary_card.dart';

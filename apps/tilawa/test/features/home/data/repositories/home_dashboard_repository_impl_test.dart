@@ -36,13 +36,50 @@ void main() {
         final dashboard = await repository.getDashboard();
 
         expect(dashboard.displayName, 'Muhammad');
+        expect(dashboard.photoUrl, isNull);
         expect(dashboard.locationLabel, 'Cairo');
         expect(dashboard.nextPrayer?.type, PrayerType.dhuhr);
         expect(dashboard.nextPrayer?.timeUntil, const Duration(hours: 2));
+        expect(dashboard.prayerBoundaries?.sunrise.hour, 5);
+        expect(dashboard.prayerBoundaries?.maghrib.hour, 18);
         expect(prayerRepository.currentLocationRequests, 0);
         expect(prayerRepository.permissionRequests, 0);
+        expect(prayerRepository.prayerTimesRequests, 1);
       },
     );
+
+    test('includes Firebase Auth photo URL when available', () async {
+      final prayerRepository = _FakePrayerTimesRepository(
+        settings: const PrayerSettingsEntity(
+          savedLatitude: 30.0444,
+          savedLongitude: 31.2357,
+          savedLocationName: 'Cairo',
+        ),
+      );
+      final repository = HomeDashboardRepositoryImpl(
+        getCurrentUser: GetCurrentUserUseCase(
+          _FakeAuthRepository(
+            UserEntity(
+              id: 'user-1',
+              email: 'user@example.test',
+              displayName: 'Muhammad',
+              photoUrl: 'https://example.test/avatar.jpg',
+              createdAt: DateTime(2026),
+            ),
+          ),
+        ),
+        loadPrayerSettings: LoadPrayerSettingsUseCase(prayerRepository),
+        getCurrentLocation: GetCurrentLocationUseCase(prayerRepository),
+        getLocationName: GetLocationNameUseCase(prayerRepository),
+        getPrayerTimes: GetPrayerTimesUseCase(prayerRepository),
+        savePrayerSettings: SavePrayerSettingsUseCase(prayerRepository),
+        now: () => DateTime(2026, 6, 15, 10),
+      );
+
+      final dashboard = await repository.getDashboard();
+
+      expect(dashboard.photoUrl, 'https://example.test/avatar.jpg');
+    });
 
     test(
       'localizes saved location label for the requested locale',
@@ -218,6 +255,7 @@ final class _FakePrayerTimesRepository implements PrayerTimesRepository {
   int currentLocationRequests = 0;
   int locationNameRequests = 0;
   int savedSettingsRequests = 0;
+  int prayerTimesRequests = 0;
   PrayerSettingsEntity? lastSavedSettings;
 
   @override
@@ -227,6 +265,7 @@ final class _FakePrayerTimesRepository implements PrayerTimesRepository {
     required DateTime date,
     required PrayerSettingsEntity settings,
   }) async {
+    prayerTimesRequests += 1;
     return PrayerTimeEntity(
       date: date,
       fajr: DateTime(date.year, date.month, date.day, 4),

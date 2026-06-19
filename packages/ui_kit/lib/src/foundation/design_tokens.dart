@@ -42,12 +42,14 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     required this.spaceMedium,
     required this.spaceLarge,
     required this.spaceExtraLarge,
+    required this.spaceSection,
     required this.spaceXXL,
     required this.spaceHuge,
     required this.radiusSmall,
     required this.radiusMedium,
     required this.radiusLarge,
     required this.radiusExtraLarge,
+    required this.radiusHero,
     required this.opacitySubtle,
     required this.opacityShadow,
     required this.opacityShadowStrong,
@@ -111,6 +113,9 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   /// 24.0
   final double spaceExtraLarge;
 
+  /// 20.0 — gap between a screen title and the first content block.
+  final double spaceSection;
+
   /// 32.0 — inter-section gap (Noon/Amazon card-to-section breathing room).
   final double spaceXXL;
 
@@ -128,6 +133,9 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
 
   /// 24.0
   final double radiusExtraLarge;
+
+  /// 32.0 — dashboard / hub summary cards only. Not for catalog or settings.
+  final double radiusHero;
 
   /// 0.1 — generic faint tint alpha for surface fills, painter strokes,
   /// and tinted backgrounds. Do not use as the alpha for `BoxShadow.color`
@@ -298,12 +306,14 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       spaceMedium: 12.0,
       spaceLarge: 16.0,
       spaceExtraLarge: 24.0,
+      spaceSection: 20.0,
       spaceXXL: 32.0,
       spaceHuge: 48.0,
       radiusSmall: 8.0,
       radiusMedium: 12.0,
       radiusLarge: 16.0,
       radiusExtraLarge: 24.0,
+      radiusHero: 32.0,
       opacitySubtle: 0.1,
       opacityShadow: 0.12,
       opacityShadowStrong: 0.28,
@@ -358,12 +368,14 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     double? spaceMedium,
     double? spaceLarge,
     double? spaceExtraLarge,
+    double? spaceSection,
     double? spaceXXL,
     double? spaceHuge,
     double? radiusSmall,
     double? radiusMedium,
     double? radiusLarge,
     double? radiusExtraLarge,
+    double? radiusHero,
     double? opacitySubtle,
     double? opacityShadow,
     double? opacityShadowStrong,
@@ -415,12 +427,14 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       spaceMedium: spaceMedium ?? this.spaceMedium,
       spaceLarge: spaceLarge ?? this.spaceLarge,
       spaceExtraLarge: spaceExtraLarge ?? this.spaceExtraLarge,
+      spaceSection: spaceSection ?? this.spaceSection,
       spaceXXL: spaceXXL ?? this.spaceXXL,
       spaceHuge: spaceHuge ?? this.spaceHuge,
       radiusSmall: radiusSmall ?? this.radiusSmall,
       radiusMedium: radiusMedium ?? this.radiusMedium,
       radiusLarge: radiusLarge ?? this.radiusLarge,
       radiusExtraLarge: radiusExtraLarge ?? this.radiusExtraLarge,
+      radiusHero: radiusHero ?? this.radiusHero,
       opacitySubtle: opacitySubtle ?? this.opacitySubtle,
       opacityShadow: opacityShadow ?? this.opacityShadow,
       opacityShadowStrong: opacityShadowStrong ?? this.opacityShadowStrong,
@@ -492,6 +506,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       spaceMedium: lerpDouble(spaceMedium, other.spaceMedium, t)!,
       spaceLarge: lerpDouble(spaceLarge, other.spaceLarge, t)!,
       spaceExtraLarge: lerpDouble(spaceExtraLarge, other.spaceExtraLarge, t)!,
+      spaceSection: lerpDouble(spaceSection, other.spaceSection, t)!,
       spaceXXL: lerpDouble(spaceXXL, other.spaceXXL, t)!,
       spaceHuge: lerpDouble(spaceHuge, other.spaceHuge, t)!,
       radiusSmall: lerpDouble(radiusSmall, other.radiusSmall, t)!,
@@ -502,6 +517,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
         other.radiusExtraLarge,
         t,
       )!,
+      radiusHero: lerpDouble(radiusHero, other.radiusHero, t)!,
       opacitySubtle: lerpDouble(opacitySubtle, other.opacitySubtle, t)!,
       opacityShadow: lerpDouble(opacityShadow, other.opacityShadow, t)!,
       opacityShadowStrong: lerpDouble(
@@ -661,6 +677,7 @@ extension TilawaDesignTokensX on ThemeData {
 }
 
 extension TilawaSpaceX on BuildContext {
+  double get spaceSection => Theme.of(this).tokens.spaceSection;
   double get spaceXXL => Theme.of(this).tokens.spaceXXL;
   double get spaceHuge => Theme.of(this).tokens.spaceHuge;
 }
@@ -730,6 +747,10 @@ enum TilawaRadiusFamily {
   /// the chrome reads as nested inside a `card`-radius parent.
   chrome,
 
+  /// Dashboard / hub navigation groups ([TilawaHubNavigationGroup]). Uses
+  /// [TilawaDesignTokens.radiusHero] — warmer than catalog cards, not a pill.
+  hero,
+
   /// Decorative or hairline elements (dividers, status dots, ambient
   /// ornament). Uses [TilawaDesignTokens.radiusMedium] for subtle softness
   /// without claiming container weight.
@@ -771,6 +792,8 @@ extension TilawaRadiusResolverX on TilawaDesignTokens {
         return half < radiusExtraLarge ? half : radiusExtraLarge;
       case TilawaRadiusFamily.chrome:
         return radiusLarge;
+      case TilawaRadiusFamily.hero:
+        return radiusHero;
       case TilawaRadiusFamily.decorative:
         return radiusMedium;
     }
@@ -799,7 +822,8 @@ extension TilawaSegmentedRadiusX on TilawaDesignTokens {
       ),
       TilawaRadiusFamily.card ||
       TilawaRadiusFamily.chrome ||
-      TilawaRadiusFamily.decorative => resolveRadius(family: trackFamily),
+      TilawaRadiusFamily.decorative ||
+      TilawaRadiusFamily.hero => resolveRadius(family: trackFamily),
     };
     final double itemRadius = concentricInner(
       outerRadius: containerRadius,

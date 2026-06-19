@@ -550,6 +550,8 @@ class _RecitersScreenState extends State<RecitersScreen>
         appBar: TilawaCatalogAppBar.titleOnly(
           context,
           title: context.l10n.reciters,
+          showBottomHairline: false,
+          showElevationShadow: false,
         ),
         body: Stack(
           fit: StackFit.expand,
@@ -759,6 +761,8 @@ class _RecitersScreenState extends State<RecitersScreen>
                     appBar: TilawaCatalogAppBar.titleOnly(
                       context,
                       title: context.l10n.reciters,
+                      showBottomHairline: false,
+                      showElevationShadow: false,
                     ),
                     body: SafeArea(
                       bottom: false,
@@ -1392,14 +1396,25 @@ class _RecitersPinnedTabBarContent extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final TilawaDesignTokens tokens = theme.tokens;
 
-    return Material(
+    return ColoredBox(
       color: theme.colorScheme.surface,
-      shape: TilawaAppBarChrome.bottomHairline(theme.colorScheme, tokens),
-      child: TilawaSearchFieldSlot(
-        padding: TilawaAppBarConfig.catalogChromePadding(tokens),
-        child: _RecitersHomeTabBar(
-          controller: headerChrome.tabController,
-          onTabSelected: headerChrome.onTabSelected,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: theme.colorScheme.outlineVariant.withValues(
+                alpha: tokens.opacitySubtle * 2.5,
+              ),
+              width: tokens.borderWidthThin,
+            ),
+          ),
+        ),
+        child: TilawaSearchFieldSlot(
+          padding: TilawaAppBarConfig.catalogChromePadding(tokens),
+          child: _RecitersHomeTabBar(
+            controller: headerChrome.tabController,
+            onTabSelected: headerChrome.onTabSelected,
+          ),
         ),
       ),
     );

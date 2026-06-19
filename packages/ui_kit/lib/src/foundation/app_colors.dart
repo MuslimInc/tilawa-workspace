@@ -75,11 +75,23 @@ abstract final class AppColors {
   /// Bottom stop for the brand launch gradient.
   static const Color brandGradientBottom = defaultPrimary;
 
-  /// Top-start stop for the Home next-prayer hero card gradient (`#67BD65`).
-  static const Color homeNextPrayerGradientTop = Color(0xFF67BD65);
+  /// Top-start stop for the Home hero **day** phase — morning sky (`#5BA3D4`).
+  static const Color homeNextPrayerGradientTop = Color(0xFF5BA3D4);
 
-  /// Bottom-end stop for the Home next-prayer hero card gradient (`#217C48`).
-  static const Color homeNextPrayerGradientBottom = Color(0xFF217C48);
+  /// Bottom-end stop for the Home hero **day** phase — deep sky (`#143D61`).
+  static const Color homeNextPrayerGradientBottom = Color(0xFF143D61);
+
+  /// Top-start stop for the Home hero **dusk** phase — sunset gold (`#D9924A`).
+  static const Color homeNextPrayerGradientDuskTop = Color(0xFFD9924A);
+
+  /// Bottom-end stop for the Home hero **dusk** phase — warm plum (`#442232`).
+  static const Color homeNextPrayerGradientDuskBottom = Color(0xFF442232);
+
+  /// Top-start stop for the Home hero **night** phase — twilight indigo (`#45588C`).
+  static const Color homeNextPrayerGradientNightTop = Color(0xFF45588C);
+
+  /// Bottom-end stop for the Home hero **night** phase — midnight navy (`#121A38`).
+  static const Color homeNextPrayerGradientNightBottom = Color(0xFF121A38);
 
   /// Foreground on the Home next-prayer hero gradient (`#FFFFFF`).
   static const Color homeNextPrayerGradientForeground = Color(0xFFFFFFFF);
