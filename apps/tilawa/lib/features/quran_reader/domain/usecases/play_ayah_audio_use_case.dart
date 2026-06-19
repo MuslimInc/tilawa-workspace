@@ -22,8 +22,12 @@ class PlayAyahAudioUseCase {
     final String serverUrl = currentAudio?.url ?? '';
     final String reciterFolder = ReciterAudioCatalog.resolveFolder(serverUrl);
     final String reciterName = currentAudio?.artist ?? 'Mishary Rashid Alafasy';
-    final String? reciterId = currentAudio?.extras?[AudioExtrasKeys.reciterId] as String?;
-    final String? moshafId = currentAudio?.extras?[AudioExtrasKeys.moshafId] as String?;
+    final String? reciterId = currentAudio?.extras.getString(
+      AudioExtrasKeys.reciterId,
+    );
+    final int? moshafId = currentAudio?.extras.getInt(
+      AudioExtrasKeys.moshafId,
+    );
 
     final String url = ReciterAudioCatalog.buildVerseAudioUrl(
       reciterFolder: reciterFolder,

@@ -114,11 +114,13 @@ final class QuranPlayerQueueIndexCache {
     }
     final Map<String, int> map = <String, int>{};
     for (var i = 0; i < queue.length; i++) {
-      final Object? surahId = queue[i].extras?[AudioExtrasKeys.surahId];
+      final String? surahId = queue[i].extras.getString(
+        AudioExtrasKeys.surahId,
+      );
       if (surahId == null) {
         continue;
       }
-      map.putIfAbsent(surahId.toString(), () => i);
+      map.putIfAbsent(surahId, () => i);
     }
     _cachedSurahGeneration = queueGeneration;
     _cachedSurahQueue = queue;

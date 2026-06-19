@@ -42,8 +42,8 @@ abstract class SurahEntity with _$SurahEntity {
     if (number != null) {
       return SurahNames.getArabicSurahName(number);
     }
-    final dynamic stored = audio.extras?[AudioExtrasKeys.nameAr];
-    if (stored is String && stored.isNotEmpty) {
+    final String? stored = audio.extras.getString(AudioExtrasKeys.nameAr);
+    if (stored != null && stored.isNotEmpty) {
       return stored;
     }
     return '';
@@ -66,15 +66,11 @@ abstract class SurahEntity with _$SurahEntity {
 
   /// Surah number from [AudioEntity.extras] or a numeric audio id basename.
   int? get surahNumber {
-    final Map<String, dynamic>? extras = audio.extras;
-    if (extras != null) {
-      final dynamic raw = extras[AudioExtrasKeys.surahId];
-      if (raw is int) {
-        return raw;
-      }
-      if (raw is String) {
-        return int.tryParse(raw);
-      }
+    final int? storedSurahNumber = audio.extras.getInt(
+      AudioExtrasKeys.surahId,
+    );
+    if (storedSurahNumber != null) {
+      return storedSurahNumber;
     }
     final String padded = formattedId;
     if (padded.isEmpty) {

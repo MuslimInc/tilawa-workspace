@@ -365,9 +365,9 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
         artist: event.audio!.artist,
         surahName: event.audio!.title,
         reciterName: event.audio!.artist,
-        moshafName: extras?['moshafName'] as String?,
-        surahId: extras?[AudioExtrasKeys.surahId]?.toString(),
-        reciterId: extras?[AudioExtrasKeys.reciterId] as String?,
+        moshafName: extras.getString(AudioExtrasKeys.moshafName),
+        surahId: extras.getString(AudioExtrasKeys.surahId),
+        reciterId: extras.getString(AudioExtrasKeys.reciterId),
       );
     }
 
@@ -969,9 +969,9 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     final Map<String, dynamic>? extras = audio.extras;
     if (extras == null) return;
 
-    final String? reciterId = extras[AudioExtrasKeys.reciterId] as String?;
-    final int? moshafId = extras[AudioExtrasKeys.moshafId] as int?;
-    final int? surahId = extras[AudioExtrasKeys.surahId] as int?;
+    final String? reciterId = extras.getString(AudioExtrasKeys.reciterId);
+    final int? moshafId = extras.getInt(AudioExtrasKeys.moshafId);
+    final int? surahId = extras.getInt(AudioExtrasKeys.surahId);
 
     if (reciterId != null && moshafId != null && surahId != null) {
       // Determine Duration: Prefer audio entity, fallback to playback state

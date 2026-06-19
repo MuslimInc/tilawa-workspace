@@ -398,8 +398,8 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   ) {
     HapticFeedback.lightImpact();
     final int surahIdx = state.surahList.indexWhere((s) {
-      final id = s.audio.extras?[AudioExtrasKeys.surahId];
-      return id != null && id.toString() == history.surahId.toString();
+      final String? surahId = s.audio.extras.getString(AudioExtrasKeys.surahId);
+      return surahId != null && surahId == history.surahId.toString();
     });
 
     if (surahIdx >= 0) {
