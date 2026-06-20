@@ -9,69 +9,53 @@ import 'package:tilawa/features/today_plan/today_plan.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../domain/entities/home_layout_mode.dart';
 import 'home_dashboard_section.dart';
 import 'home_featured_ritual_card.dart';
-import 'home_prayer_day_strip.dart';
 
-/// Zone 2 — Today: prayer strip + optional Today Plan.
+/// Zone 2 — Today: optional Today Plan only (prayer strip removed — hero owns
+/// the prayer context).
 class HomeTodaySection extends StatelessWidget {
-  const HomeTodaySection({
-    super.key,
-    required this.onOpenPrayer,
-    required this.layoutMode,
-  });
+  const HomeTodaySection({super.key, required this.onOpenPrayer});
 
   final VoidCallback onOpenPrayer;
-  final HomeLayoutMode layoutMode;
 
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
 
+    if (!isTodayPlanEnabled()) return const SizedBox.shrink();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        HomeDashboardSection(
-          title: context.l10n.homeTodayTitle,
-          subtitle: context.l10n.homeTodaySubtitle,
-          child: HomePrayerDayStrip(onOpenPrayer: onOpenPrayer),
-        ),
-        if (isTodayPlanEnabled()) ...[
-          SizedBox(height: tokens.spaceExtraLarge),
-          const TodayPlanCard(),
-        ],
+        const TodayPlanCard(),
+        SizedBox(height: tokens.spaceExtraLarge),
       ],
     );
   }
 }
 
-/// Zone 3 — Your rituals: contextual athkar inline + pinned athkar list/grid.
+/// Zone 3 — Your rituals: contextual athkar inline + pinned athkar list.
 ///
 /// The section title row carries the edit shortcut as trailing so there is no
 /// nested sub-header. Contextual athkar appears above the pinned list without
 /// any extra wrapper label.
 class HomeDailyPracticeSection extends StatelessWidget {
-  const HomeDailyPracticeSection({
-    super.key,
-    required this.layoutMode,
-  });
-
-  final HomeLayoutMode layoutMode;
+  const HomeDailyPracticeSection({super.key});
 
   @override
   Widget build(BuildContext context) {
     return HomeDashboardSection(
       title: context.l10n.homeAthkarRitualsTitle,
       trailing: _EditPinnedButton(),
+      contentSpacing: context.tokens.spaceSmall,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _ContextualAthkarCard(),
-          PinnedAthkarHomeSection(
+          const PinnedAthkarHomeSection(
             hideContextualFeatured: true,
             hideHeader: true,
-            layoutMode: layoutMode,
           ),
         ],
       ),
@@ -121,7 +105,7 @@ class _ContextualAthkarCard extends StatelessWidget {
         if (featured == null) return const SizedBox.shrink();
 
         return Padding(
-          padding: EdgeInsets.only(bottom: tokens.spaceSmall),
+          padding: EdgeInsets.only(bottom: tokens.spaceExtraSmall),
           child: HomeFeaturedRitualCard(
             category: featured,
             promptLabel: (title) =>

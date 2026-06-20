@@ -96,13 +96,13 @@ class HomeFeaturedRitualCard extends StatelessWidget {
               ),
             ),
             child: Padding(
-              padding: EdgeInsets.all(tokens.spaceMedium),
+              padding: EdgeInsets.all(tokens.spaceSmall),
               child: Row(
-                spacing: tokens.spaceMedium,
+                spacing: tokens.spaceSmall,
                 children: [
                   Container(
-                    width: tokens.spaceExtraLarge + tokens.spaceMedium,
-                    height: tokens.spaceExtraLarge + tokens.spaceMedium,
+                    width: tokens.spaceExtraLarge + tokens.spaceSmall,
+                    height: tokens.spaceExtraLarge + tokens.spaceSmall,
                     decoration: BoxDecoration(
                       color: colorScheme.primary,
                       borderRadius: BorderRadius.circular(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
+import '../foundation/tilawa_icons.dart';
 import '../foundation/design_tokens.dart';
 
 /// Circular athkar-style counter: bold count or done check — no progress ring.
@@ -13,7 +14,7 @@ class TilawaCountProgressRing extends StatelessWidget {
     required this.currentCount,
     required this.totalCount,
     required this.isDone,
-    this.doneIcon = Icons.check_rounded,
+    this.doneIcon = TilawaIcons.check,
     this.activeColor,
     this.doneColor,
     this.activeForegroundColor,

@@ -16,16 +16,9 @@ import '../widgets/home_dashboard_hero_sliver.dart';
 
 /// Main daily dashboard for the app shell.
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({
-    super.key,
-    required this.onOpenReciters,
-    required this.onOpenPrayer,
-    required this.onOpenQibla,
-  });
+  const HomeScreen({super.key, required this.onOpenPrayer});
 
-  final VoidCallback onOpenReciters;
   final VoidCallback onOpenPrayer;
-  final VoidCallback onOpenQibla;
 
   static const double _heroSnapThresholdFactor = 0.35;
   static const double _heroSnapTolerance = 0.5;
@@ -65,11 +58,7 @@ class HomeScreen extends StatelessWidget {
                     onOpenPrayer: onOpenPrayer,
                   ),
                   HomeDashboardContentSliver(
-                    child: HomeDashboardBody(
-                      onOpenReciters: onOpenReciters,
-                      onOpenPrayer: onOpenPrayer,
-                      onOpenQibla: onOpenQibla,
-                    ),
+                    child: HomeDashboardBody(onOpenPrayer: onOpenPrayer),
                   ),
                 ],
               );

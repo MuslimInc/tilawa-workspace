@@ -1,7 +1,9 @@
+import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:dartz_plus/dartz_plus.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:tilawa/features/athkar/domain/entities/athkar_category.dart';
 import 'package:tilawa/features/athkar/domain/entities/athkar_item.dart';
 import 'package:tilawa/features/athkar/domain/entities/pinned_athkar_preference.dart';
@@ -11,25 +13,17 @@ import 'package:tilawa/features/athkar/domain/usecases/get_athkar_categories_use
 import 'package:tilawa/features/athkar/domain/usecases/get_pinned_athkar_preference_use_case.dart';
 import 'package:tilawa/features/athkar/domain/usecases/save_pinned_athkar_category_ids_use_case.dart';
 import 'package:tilawa/features/athkar/presentation/cubit/pinned_athkar_cubit.dart';
+import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/home/domain/entities/home_dashboard.dart';
 import 'package:tilawa/features/home/domain/repositories/home_dashboard_repository.dart';
 import 'package:tilawa/features/home/domain/usecases/get_home_dashboard_use_case.dart';
 import 'package:tilawa/features/home/presentation/bloc/home_dashboard_bloc.dart';
 import 'package:tilawa/features/home/presentation/bloc/home_dashboard_event.dart';
-import 'package:tilawa/features/home/presentation/cubit/home_layout_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_quran_resume_cubit.dart';
-import 'package:tilawa/features/home/domain/entities/home_layout_mode.dart';
-import 'package:tilawa/features/home/domain/repositories/home_layout_preference_repository.dart';
-import 'package:tilawa/features/home/domain/usecases/get_home_layout_mode_use_case.dart';
-import 'package:tilawa/features/home/domain/usecases/set_home_layout_mode_use_case.dart';
 import 'package:tilawa/features/home/presentation/screens/home_screen.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_more_actions_group.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_pinned_athkar_grid.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_grouped_list_row.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_shortcut_grid_view.dart';
-import 'package:tilawa/features/quran_reader/domain/usecases/get_last_read_position_use_case.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_daily_inspiration_section.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_hero_sliver.dart';
+import 'package:tilawa/features/quran_reader/domain/usecases/get_last_read_position_use_case.dart';
 import 'package:tilawa/features/prayer_times/application/prayer_location_update_notifier.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/notify_prayer_location_updated_use_case.dart';
@@ -95,9 +89,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Discover section lists only non-bottom-nav destinations', (
-    tester,
-  ) async {
+  testWidgets('Home contains no Reciters or Qibla shortcuts', (tester) async {
     final bloc = HomeDashboardBloc(
       GetHomeDashboardUseCase(_FakeHomeDashboardRepository()),
       NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
@@ -110,58 +102,22 @@ void main() {
       await tester.pump(const Duration(milliseconds: 16));
     }
 
-    // Zone titles after restructure: no "Continue" or "Daily Practice" section
-    // labels; Quran resume card and daily inspiration are self-labelled content.
-    expect(find.text('Continue'), findsNothing);
-    expect(find.text('Daily Practice'), findsNothing);
-    expect(find.text('Daily inspiration'), findsNothing);
-    expect(find.text('Today'), findsOneWidget);
-    expect(find.text('Quick athkar'), findsOneWidget);
-    expect(find.text('Discover'), findsOneWidget);
-    expect(find.text('Last Read'), findsOneWidget);
-    expect(find.text('Search surahs, juz, or page'), findsNothing);
-    expect(find.text('Reciters'), findsOneWidget);
-    expect(find.text('Browse recitations'), findsOneWidget);
-    expect(find.text('Tasbeeh'), findsOneWidget);
-    expect(find.text('Count dhikr with one tap'), findsOneWidget);
-    expect(find.text('Qibla'), findsOneWidget);
-    expect(find.text('Find prayer direction'), findsOneWidget);
+    // Removed navigation shortcuts must not appear
+    expect(find.text('Reciters'), findsNothing);
+    expect(find.text('Browse recitations'), findsNothing);
+    expect(find.text('Qibla'), findsNothing);
+    expect(find.text('Find prayer direction'), findsNothing);
+    expect(find.text('Discover'), findsNothing);
+    expect(find.text('Explore'), findsNothing);
 
+    // Bottom-nav labels must not appear on Home
     expect(find.text('Home'), findsNothing);
     expect(find.text('Prayer'), findsNothing);
-    expect(find.text('Quran'), findsNothing);
     expect(find.text('Athkar'), findsNothing);
     expect(find.text('Settings'), findsNothing);
-
-    expect(
-      tester.getTopLeft(find.text('Daily ayah')).dy,
-      greaterThan(tester.getTopLeft(find.text('Discover')).dy),
-    );
   });
 
-  testWidgets('Discover section renders localized labels in Arabic', (
-    tester,
-  ) async {
-    final bloc = HomeDashboardBloc(
-      GetHomeDashboardUseCase(_FakeHomeDashboardRepository()),
-      NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
-    )..add(const HomeDashboardStarted(localeIdentifier: 'ar'));
-    addTearDown(bloc.close);
-
-    await tester.pumpWidget(_HomeScreenHarness(bloc: bloc, locale: 'ar'));
-    await tester.pump();
-    for (var frame = 0; frame < 30; frame++) {
-      await tester.pump(const Duration(milliseconds: 16));
-    }
-
-    expect(find.text('اكتشف'), findsOneWidget);
-    expect(find.text('القراء'), findsOneWidget);
-    expect(find.text('تصفّح التلاوات'), findsOneWidget);
-  });
-
-  testWidgets('Daily inspiration uses one grouped ayah and dua block', (
-    tester,
-  ) async {
+  testWidgets('Home contains no layout toggle button', (tester) async {
     final bloc = HomeDashboardBloc(
       GetHomeDashboardUseCase(_FakeHomeDashboardRepository()),
       NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
@@ -174,115 +130,109 @@ void main() {
       await tester.pump(const Duration(milliseconds: 16));
     }
 
-    // Section title removed — the card content is self-evident
-    expect(find.text('Daily inspiration'), findsNothing);
+    expect(find.byIcon(Icons.grid_view_rounded), findsNothing);
+    expect(find.byIcon(Icons.view_list_rounded), findsNothing);
+  });
+
+  testWidgets('Home contains no prayer day strip', (tester) async {
+    final bloc = HomeDashboardBloc(
+      GetHomeDashboardUseCase(_FakeHomeDashboardRepository()),
+      NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
+    )..add(const HomeDashboardStarted(localeIdentifier: 'en'));
+    addTearDown(bloc.close);
+
+    await tester.pumpWidget(_HomeScreenHarness(bloc: bloc, locale: 'en'));
+    await tester.pump();
+    for (var frame = 0; frame < 30; frame++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+
+    // The five-prayer pill strip was removed; hero owns prayer context
+    expect(find.text('View all'), findsNothing);
+    expect(find.text('عرض الكل'), findsNothing);
+  });
+
+  testWidgets('Daily ayah and dua block is present', (tester) async {
+    final bloc = HomeDashboardBloc(
+      GetHomeDashboardUseCase(_FakeHomeDashboardRepository()),
+      NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
+    )..add(const HomeDashboardStarted(localeIdentifier: 'en'));
+    addTearDown(bloc.close);
+
+    await tester.pumpWidget(_HomeScreenHarness(bloc: bloc, locale: 'en'));
+    await tester.pump();
+    for (var frame = 0; frame < 30; frame++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+
     expect(find.byType(HomeDailyInspirationSection), findsOneWidget);
     expect(find.text('Daily ayah'), findsOneWidget);
     expect(find.text('Daily dua'), findsOneWidget);
   });
 
-  testWidgets('Discover row taps invoke reciters callback', (tester) async {
-    var recitersTapped = false;
+  testWidgets('Quran module exposes reading and listening actions', (
+    tester,
+  ) async {
     final bloc = HomeDashboardBloc(
       GetHomeDashboardUseCase(_FakeHomeDashboardRepository()),
       NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
     )..add(const HomeDashboardStarted(localeIdentifier: 'en'));
     addTearDown(bloc.close);
 
-    await tester.pumpWidget(
-      _HomeScreenHarness(
-        bloc: bloc,
-        locale: 'en',
-        onOpenReciters: () => recitersTapped = true,
-      ),
-    );
+    await tester.pumpWidget(_HomeScreenHarness(bloc: bloc, locale: 'en'));
     await tester.pump();
     for (var frame = 0; frame < 30; frame++) {
       await tester.pump(const Duration(milliseconds: 16));
     }
 
-    await tester.ensureVisible(find.text('Reciters'));
-    await tester.pump();
-    await tester.tap(find.text('Reciters'));
-    await tester.pump();
-
-    expect(recitersTapped, isTrue);
+    expect(find.text('Continue Reading'), findsOneWidget);
+    expect(find.text('Continue Listening'), findsOneWidget);
   });
 
-  testWidgets(
-    'Discover layout toggle switches dashboard sections between list and grid',
-    (
-      tester,
-    ) async {
-      final view = tester.view;
-      view.physicalSize = const Size(800, 1200);
-      view.devicePixelRatio = 1;
-      addTearDown(view.resetPhysicalSize);
-      addTearDown(view.resetDevicePixelRatio);
+  testWidgets('Daily ayah appears below the Quran resume card', (
+    tester,
+  ) async {
+    final bloc = HomeDashboardBloc(
+      GetHomeDashboardUseCase(_FakeHomeDashboardRepository()),
+      NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
+    )..add(const HomeDashboardStarted(localeIdentifier: 'en'));
+    addTearDown(bloc.close);
 
-      final bloc = HomeDashboardBloc(
-        GetHomeDashboardUseCase(_FakeHomeDashboardRepository()),
-        NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
-      )..add(const HomeDashboardStarted(localeIdentifier: 'en'));
-      addTearDown(bloc.close);
+    await tester.pumpWidget(_HomeScreenHarness(bloc: bloc, locale: 'en'));
+    await tester.pump();
+    for (var frame = 0; frame < 30; frame++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
 
-      final layoutRepository = _FakeHomeLayoutPreferenceRepository();
+    await tester.ensureVisible(find.text('Daily ayah'));
+    await tester.pump();
 
-      await tester.pumpWidget(
-        _HomeScreenHarness(
-          bloc: bloc,
-          locale: 'en',
-          layoutRepository: layoutRepository,
-        ),
-      );
-      await tester.pump();
-      for (var frame = 0; frame < 20; frame++) {
-        await tester.pump(const Duration(milliseconds: 16));
-      }
-
-      expect(find.byType(HomeMoreActionsGroup), findsOneWidget);
-      expect(find.byType(HomeShortcutGridView), findsNothing);
-      expect(find.byType(HomePinnedAthkarGrid), findsNothing);
-      expect(find.byType(HomeGroupedListRow), findsWidgets);
-
-      final toggleFinder = find.byIcon(Icons.grid_view_rounded);
-      expect(toggleFinder, findsOneWidget);
-      await tester.ensureVisible(toggleFinder);
-      await tester.pump();
-      expect(
-        tester.getTopLeft(toggleFinder).dy,
-        greaterThanOrEqualTo(tester.getTopLeft(find.text('Discover')).dy),
-      );
-
-      await tester.tap(toggleFinder);
-      await tester.pump();
-      await tester.pump();
-
-      expect(find.byType(HomeShortcutGridView), findsOneWidget);
-      expect(find.byType(HomePinnedAthkarGrid), findsOneWidget);
-      expect(find.byType(HomeMoreActionsGroup), findsNothing);
-      expect(layoutRepository.mode.name, 'grid');
-    },
-  );
+    expect(
+      tester.getTopLeft(find.text('Daily ayah')).dy,
+      greaterThan(tester.getTopLeft(find.text('Continue Reading')).dy),
+    );
+  });
 }
 
+class _MockAudioPlayerBloc extends MockCubit<AudioPlayerState>
+    implements AudioPlayerBloc {}
+
 class _HomeScreenHarness extends StatelessWidget {
-  const _HomeScreenHarness({
-    required this.bloc,
-    this.locale = 'ar',
-    this.onOpenReciters,
-    this.onOpenQibla,
-    this.layoutRepository,
-  });
+  const _HomeScreenHarness({required this.bloc, this.locale = 'ar'});
 
   final HomeDashboardBloc bloc;
   final String locale;
-  final VoidCallback? onOpenReciters;
-  final VoidCallback? onOpenQibla;
-  final _FakeHomeLayoutPreferenceRepository? layoutRepository;
 
   @override
   Widget build(BuildContext context) {
+    final audioPlayerBloc = _MockAudioPlayerBloc();
+    when(() => audioPlayerBloc.state).thenReturn(
+      const AudioPlayerState(status: AudioPlayerStatus.initial),
+    );
+    when(() => audioPlayerBloc.stream).thenAnswer(
+      (_) => const Stream<AudioPlayerState>.empty(),
+    );
+
     return MaterialApp(
       locale: Locale(locale),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -294,37 +244,18 @@ class _HomeScreenHarness extends StatelessWidget {
           BlocProvider(
             create: (_) => PinnedAthkarCubit(
               GetAthkarCategoriesUseCase(_FakeAthkarRepository()),
-              GetPinnedAthkarPreferenceUseCase(
-                _FakePinnedAthkarRepository(),
-              ),
-              SavePinnedAthkarCategoryIdsUseCase(
-                _FakePinnedAthkarRepository(),
-              ),
+              GetPinnedAthkarPreferenceUseCase(_FakePinnedAthkarRepository()),
+              SavePinnedAthkarCategoryIdsUseCase(_FakePinnedAthkarRepository()),
             )..load(),
           ),
           BlocProvider(
             create: (_) =>
                 HomeQuranResumeCubit(_FakeGetLastReadPosition())..load(),
           ),
-          BlocProvider(
-            create: (_) {
-              final repository =
-                  layoutRepository ?? _FakeHomeLayoutPreferenceRepository();
-              return HomeLayoutCubit(
-                GetHomeLayoutModeUseCase(repository),
-                SetHomeLayoutModeUseCase(repository),
-              );
-            },
-          ),
+          BlocProvider<AudioPlayerBloc>.value(value: audioPlayerBloc),
         ],
         child: Builder(
-          builder: (context) {
-            return HomeScreen(
-              onOpenReciters: onOpenReciters ?? () {},
-              onOpenQibla: onOpenQibla ?? () {},
-              onOpenPrayer: () {},
-            );
-          },
+          builder: (context) => HomeScreen(onOpenPrayer: () {}),
         ),
       ),
     );
@@ -333,14 +264,12 @@ class _HomeScreenHarness extends StatelessWidget {
 
 class _FakeHomeDashboardRepository implements HomeDashboardRepository {
   @override
-  Future<HomeDashboard> getDashboard({String? localeIdentifier}) async {
-    return _dashboard;
-  }
+  Future<HomeDashboard> getDashboard({String? localeIdentifier}) async =>
+      _dashboard;
 
   @override
-  Future<HomeDashboard> refreshLocation({String? localeIdentifier}) async {
-    return _dashboard;
-  }
+  Future<HomeDashboard> refreshLocation({String? localeIdentifier}) async =>
+      _dashboard;
 }
 
 final HomeDashboard _dashboard = HomeDashboard(
@@ -374,9 +303,8 @@ class _FakeAthkarRepository implements AthkarRepository {
   }
 
   @override
-  ResultFuture<List<AthkarItem>> getAthkarByCategory(int categoryId) async {
-    return const Right([]);
-  }
+  ResultFuture<List<AthkarItem>> getAthkarByCategory(int categoryId) async =>
+      const Right([]);
 }
 
 class _FakePinnedAthkarRepository implements PinnedAthkarRepository {
@@ -388,9 +316,7 @@ class _FakePinnedAthkarRepository implements PinnedAthkarRepository {
   }
 
   @override
-  ResultVoid saveCategoryIds(List<int> categoryIds) async {
-    return const Right(null);
-  }
+  ResultVoid saveCategoryIds(List<int> categoryIds) async => const Right(null);
 }
 
 class _FakeGetLastReadPosition implements GetLastReadPositionUseCase {
@@ -398,18 +324,5 @@ class _FakeGetLastReadPosition implements GetLastReadPositionUseCase {
   Future<Either<Failure, ({int? surahNumber, int? ayahNumber, int? page})>>
   call() async {
     return const Right((surahNumber: 2, ayahNumber: 43, page: 42));
-  }
-}
-
-class _FakeHomeLayoutPreferenceRepository
-    implements HomeLayoutPreferenceRepository {
-  HomeLayoutMode mode = HomeLayoutMode.list;
-
-  @override
-  Future<HomeLayoutMode> getLayoutMode() async => mode;
-
-  @override
-  Future<void> setLayoutMode(HomeLayoutMode mode) async {
-    this.mode = mode;
   }
 }

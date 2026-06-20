@@ -589,12 +589,12 @@ class TilawaAdaptiveShellTokens {
       bottomNavVerticalMargin: 4,
       bottomNavBottomLift: 8,
       bottomNavIconOnlyVerticalMargin: 2,
-      bottomNavInternalPadding: 4,
+      bottomNavInternalPadding: 8,
       bottomNavBorderWidth: lightChrome ? 0.5 : 1,
       bottomNavItemGap: 8,
       bottomNavBackgroundColor: bottomNavBackgroundColor,
-      bottomNavShadowOpacity: lightChrome ? 0.04 : 0.055,
-      bottomNavShadowBlur: lightChrome ? 8 : 10,
+      bottomNavShadowOpacity: lightChrome ? 0.06 : 0.08,
+      bottomNavShadowBlur: lightChrome ? 12 : 14,
       bottomNavShadowOffset: const Offset(0, 2),
       bottomNavOutlineColor: _bottomNavOutlineColor(colorScheme),
       sideRailIndicatorColor: _sideRailIndicatorColor(colorScheme),
@@ -663,35 +663,23 @@ class TilawaAdaptiveShellTokens {
     );
   }
 
-  /// Light phone nav uses an opaque white pill so the floating bar reads
-  /// clearly on the parchment canvas. Dark keeps a filled bar for contrast.
+  /// Bottom nav floating pill background — a dark charcoal (`#212528`)
+  /// that grounds the navigation chrome in both light and dark themes.
   static Color _bottomNavBackgroundColor(ColorScheme colorScheme) {
-    if (colorScheme.brightness == Brightness.light) {
-      return AppColors.lightSurface;
-    }
-    return Color.lerp(
-          AppColors.darkSurfaceContainerHighBase,
-          AppColors.darkBackground,
-          0.32,
-        ) ??
-        AppColors.darkSurfaceContainerHighBase;
+    return AppColors.bottomNavBackground;
   }
 
+  /// Selected nav button background — a solid light circle on the dark
+  /// bottom nav bar for high-contrast iOS-style selection chrome.
   static Color _navButtonSelectedBackgroundColor(
     ColorScheme colorScheme,
     Color bottomNavBackgroundColor,
   ) {
-    if (colorScheme.brightness == Brightness.light) {
-      return AppColors.lightSurfaceContainerHighBase;
-    }
-    final tintOpacity = 0.12;
-    final base = bottomNavBackgroundColor.a == 0
-        ? colorScheme.surfaceContainerLow
-        : bottomNavBackgroundColor;
-    return Color.alphaBlend(
-      colorScheme.primary.withValues(alpha: tintOpacity),
-      base,
-    );
+    // Always use a solid light fill so the selected state pops on the
+    // dark (#212528) nav background, matching the reference design.
+    return colorScheme.brightness == Brightness.light
+        ? const Color(0xFFFFFFFF)
+        : const Color(0xFFE8E8E8);
   }
 
   TilawaAdaptiveShellTokens copyWith({

@@ -1,8 +1,8 @@
 import 'dart:math' as math;
 
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:tilawa_ui_kit/src/foundation/component_tokens.dart';
+import 'package:tilawa_ui_kit/src/foundation/tilawa_icons.dart';
 import 'package:tilawa_ui_kit/src/foundation/design_tokens.dart';
 
 /// Minimum horizontal space reserved for surah + reciter before the bar
@@ -672,7 +672,7 @@ class _ArtworkTile extends StatelessWidget {
         child: artwork == null
             ? Center(
                 child: Icon(
-                  FluentIcons.music_note_2_24_filled,
+                  TilawaIcons.musicNote,
                   color: Theme.of(context).colorScheme.onPrimaryContainer,
                   size: defaultIconSize,
                 ),
@@ -753,8 +753,8 @@ class _TransportControls extends StatelessWidget {
               size: componentTokens.controlButtonSize,
               tooltip: sleepTimerTooltip ?? 'Sleep timer',
               icon: isSleepTimerActive
-                  ? FluentIcons.timer_20_filled
-                  : FluentIcons.timer_20_regular,
+                  ? TilawaIcons.timerSmallFilled
+                  : TilawaIcons.timerSmall,
               iconSize: designTokens.iconSizeMedium,
               enabled: true,
               color: isSleepTimerActive
@@ -837,7 +837,7 @@ class _PlayPauseButton extends StatelessWidget {
             ? (pauseTooltip ?? 'Pause')
             : (playTooltip ?? 'Play'),
         icon: Icon(
-          isPlaying ? FluentIcons.pause_16_filled : FluentIcons.play_16_filled,
+          isPlaying ? TilawaIcons.pauseSmall : TilawaIcons.playSmall,
           color: colorScheme.onPrimary,
           size: iconSize,
         ),

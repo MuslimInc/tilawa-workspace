@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
+import '../foundation/tilawa_icons.dart';
 import '../foundation/design_tokens.dart';
 
 /// Visual treatment for [TilawaSearchField].
@@ -25,8 +26,8 @@ class TilawaSearchField extends StatelessWidget {
     this.height,
     this.textInputAction,
     this.scrollPadding,
-    this.prefixIcon = Icons.search_rounded,
-    this.clearIcon = Icons.clear_rounded,
+    this.prefixIcon = TilawaIcons.search,
+    this.clearIcon = TilawaIcons.dismiss,
     this.variant = TilawaSearchFieldVariant.catalog,
     this.backgroundColor,
     this.borderRadius,

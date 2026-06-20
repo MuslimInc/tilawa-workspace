@@ -1,8 +1,8 @@
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 
 import '../atoms/tilawa_switch.dart';
 import '../foundation/component_tokens.dart';
+import '../foundation/tilawa_icons.dart';
 import '../foundation/design_tokens.dart';
 import 'tilawa_settings_group_row_style.dart';
 
@@ -105,7 +105,7 @@ class TilawaCatalogSettingsLinkRow extends StatelessWidget {
               ],
               if (showChevron && onTap != null)
                 Icon(
-                  FluentIcons.chevron_right_20_regular,
+                  TilawaIcons.chevronRightSmall,
                   size: tokens.iconSizeMedium,
                   color: colorScheme.onSurface.withValues(
                     alpha: tokens.opacityEmphasis,
@@ -230,7 +230,7 @@ class TilawaCatalogSettingsProfileRow extends StatelessWidget {
               ),
               if (onTap != null)
                 Icon(
-                  FluentIcons.chevron_right_20_regular,
+                  TilawaIcons.chevronRightSmall,
                   size: tokens.iconSizeMedium,
                   color: colorScheme.onSurface.withValues(
                     alpha: tokens.opacityEmphasis,

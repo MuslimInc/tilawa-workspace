@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../foundation/tilawa_icons.dart';
+
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
 import '../foundation/safe_area_ext.dart';
@@ -413,7 +415,7 @@ class _TopAppBar extends StatelessWidget {
           children: [
             leading ??
                 _RoundHeaderButton(
-                  icon: Icons.close_rounded,
+                  icon: TilawaIcons.dismiss,
                   onPressed: onClose,
                 ),
             Expanded(

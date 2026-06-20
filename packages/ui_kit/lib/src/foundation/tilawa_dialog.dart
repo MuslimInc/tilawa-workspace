@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../atoms/tilawa_button.dart';
+import 'tilawa_icons.dart';
 import 'design_tokens.dart';
 
 /// Centered modal dialogs for Tilawa.
@@ -332,7 +333,7 @@ class _TilawaDialogCloseButton extends StatelessWidget {
     return IconButton(
       tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
       onPressed: onClose,
-      icon: const Icon(Icons.close_rounded),
+      icon: const Icon(TilawaIcons.dismiss),
       iconSize: tokens.iconSizeSmall,
       style: IconButton.styleFrom(
         fixedSize: Size.square(tokens.minInteractiveDimension),

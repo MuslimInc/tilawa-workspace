@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../features/athkar/presentation/widgets/athkar_categories_screen_scope.dart';
@@ -10,7 +9,6 @@ import '../../features/reciters/presentation/screens/reciters_screen.dart'
 import '../../features/reciters/presentation/widgets/reciters_screen_scope.dart';
 import '../../features/settings/presentation/widgets/settings_screen_scope.dart';
 import '../../router/app_router_config.dart';
-import '../cubit/main_screen_cubit.dart';
 
 /// Lazily constructs and caches all main-tab screens, then manages the
 /// [Offstage] / [TickerMode] stack so only the active tab renders.
@@ -48,8 +46,6 @@ class _MainTabViewportState extends State<MainTabViewport> {
     return _screenCache.putIfAbsent(index, () {
       return switch (index) {
         0 => HomeScreenScope(
-          onOpenReciters: () => context.read<MainScreenCubit>().selectTab(1),
-          onOpenQibla: () => context.read<MainScreenCubit>().selectTab(2),
           onOpenPrayer: () => const PrayerTimesRoute().push(context),
         ),
         1 => const RecitersScreenScope(),

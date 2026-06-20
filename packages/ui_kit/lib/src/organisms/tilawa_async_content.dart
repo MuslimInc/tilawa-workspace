@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../atoms/tilawa_empty_state.dart';
+import '../foundation/tilawa_icons.dart';
 import '../atoms/tilawa_error_state.dart';
 import '../atoms/tilawa_loading_indicator.dart';
 
@@ -25,10 +26,10 @@ class TilawaAsyncContent extends StatelessWidget {
     this.skeleton,
     this.onRetry,
     this.isRetrying = false,
-    this.emptyIcon = Icons.inbox_outlined,
+    this.emptyIcon = TilawaIcons.searchOff,
     this.emptyTitle = 'Nothing here yet',
     this.emptySubtitle,
-    this.errorIcon = Icons.error_outline,
+    this.errorIcon = TilawaIcons.errorOutline,
     this.errorTitle = 'Something went wrong',
     this.errorSubtitle,
     this.retryLabel = 'Try again',

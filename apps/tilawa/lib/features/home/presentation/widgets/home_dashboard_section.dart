@@ -8,12 +8,14 @@ class HomeDashboardSection extends StatelessWidget {
     required this.title,
     this.subtitle,
     this.trailing,
+    this.contentSpacing,
     required this.child,
   });
 
   final String title;
   final String? subtitle;
   final Widget? trailing;
+  final double? contentSpacing;
   final Widget child;
 
   @override
@@ -42,7 +44,7 @@ class HomeDashboardSection extends StatelessWidget {
             ),
           ),
         ],
-        SizedBox(height: tokens.spaceMedium),
+        SizedBox(height: contentSpacing ?? tokens.spaceMedium),
         child,
       ],
     );

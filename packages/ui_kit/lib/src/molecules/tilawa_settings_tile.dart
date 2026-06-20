@@ -1,8 +1,8 @@
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 
 import '../atoms/tilawa_switch.dart';
 import '../foundation/component_tokens.dart';
+import '../foundation/tilawa_icons.dart';
 import '../foundation/design_tokens.dart';
 import 'tilawa_settings_group_row_style.dart';
 
@@ -109,7 +109,7 @@ class TilawaSettingsTile extends StatelessWidget {
                   // Right chevron; ListTile still places trailing on the
                   // correct edge in RTL.
                   Icon(
-                    FluentIcons.chevron_right_20_regular,
+                    TilawaIcons.chevronRightSmall,
                     size: tokens.tileTrailingSize,
                     color: colorScheme.onSurfaceVariant.withValues(
                       alpha: tokens.tileTrailingOpacity,

@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/constants/home_layout_constants.dart';
@@ -10,7 +9,6 @@ abstract class HomeLayoutPreferenceLocalDataSource {
   Future<void> writeLayoutMode(HomeLayoutMode mode);
 }
 
-@LazySingleton(as: HomeLayoutPreferenceLocalDataSource)
 class HomeLayoutPreferenceLocalDataSourceImpl
     implements HomeLayoutPreferenceLocalDataSource {
   HomeLayoutPreferenceLocalDataSourceImpl(this._prefs);

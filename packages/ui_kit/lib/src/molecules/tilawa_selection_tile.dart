@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
+import '../foundation/tilawa_icons.dart';
 
 /// A standardized tile for selection lists in bottom sheets and dialogs.
 ///
@@ -70,7 +71,7 @@ class TilawaSelectionTile extends StatelessWidget {
                     Expanded(child: Text(title, style: textStyle)),
                     if (isSelected)
                       Icon(
-                        Icons.check_rounded,
+                        TilawaIcons.check,
                         color: colorScheme.onSurfaceVariant,
                         size: tokens.tileTrailingSize,
                       ),

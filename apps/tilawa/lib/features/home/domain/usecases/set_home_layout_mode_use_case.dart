@@ -1,12 +1,10 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
 
 import '../entities/home_layout_mode.dart';
 import '../repositories/home_layout_preference_repository.dart';
 
-@lazySingleton
 class SetHomeLayoutModeUseCase implements UseCase<void, HomeLayoutMode> {
   SetHomeLayoutModeUseCase(this._repository);
 

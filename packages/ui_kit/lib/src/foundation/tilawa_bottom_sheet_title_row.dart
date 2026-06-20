@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'component_tokens.dart';
+import 'tilawa_icons.dart';
 import 'design_tokens.dart';
 
 /// Title row for [TilawaBottomSheetScaffold] with optional end-aligned close.
@@ -72,7 +73,7 @@ class _TilawaBottomSheetCloseButton extends StatelessWidget {
     return IconButton(
       tooltip: semanticLabel,
       onPressed: onClose,
-      icon: const Icon(Icons.close_rounded),
+      icon: const Icon(TilawaIcons.dismiss),
       iconSize: designTokens.iconSizeSmall,
       style: IconButton.styleFrom(
         fixedSize: Size.square(size),

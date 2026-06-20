@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import 'package:tilawa/features/audio_player/presentation/player_presentation_controller.dart';
+import 'package:tilawa/features/audio_player/presentation/quran_player_presentation_entry.dart';
 import 'package:tilawa/features/home/domain/constants/quran_mushaf_constants.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_quran_resume_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_quran_resume_state.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa/router/app_router_config.dart';
+import 'package:tilawa_core/entities/entities.dart';
 import 'package:tilawa_core/utils/surah_names.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_card.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -21,28 +26,19 @@ class HomeQuranResumeCard extends StatelessWidget {
         return switch (state.status) {
           HomeQuranResumeStatus.loading ||
           HomeQuranResumeStatus.initial => const _HomeQuranResumeLoadingCard(),
-          HomeQuranResumeStatus.failure => _HomeQuranResumeReadyCard(
-            title: context.l10n.homeContinueQuranTitle,
-            subtitle: context.l10n.homeContinueQuranSubtitle,
+          HomeQuranResumeStatus.failure => _HomeQuranResumeAudioScope(
+            readingSubtitle: context.l10n.homeContinueQuranSubtitle,
             progress: null,
             showProgress: false,
           ),
-          HomeQuranResumeStatus.ready => _HomeQuranResumeReadyCard(
-            title: _resumeTitle(context, state),
-            subtitle: _resumeSubtitle(context, state),
+          HomeQuranResumeStatus.ready => _HomeQuranResumeAudioScope(
+            readingSubtitle: _resumeSubtitle(context, state),
             progress: state.progressFraction(QuranMushafConstants.pageCount),
             showProgress: _shouldShowProgress(state),
           ),
         };
       },
     );
-  }
-
-  String _resumeTitle(BuildContext context, HomeQuranResumeState state) {
-    if (_isFreshStart(state)) {
-      return context.l10n.homeStartQuranTitle;
-    }
-    return context.l10n.lastRead;
   }
 
   bool _isFreshStart(HomeQuranResumeState state) {
@@ -87,6 +83,49 @@ class HomeQuranResumeCard extends StatelessWidget {
   }
 }
 
+class _HomeQuranResumeAudioScope extends StatelessWidget {
+  const _HomeQuranResumeAudioScope({
+    required this.readingSubtitle,
+    required this.progress,
+    required this.showProgress,
+  });
+
+  final String readingSubtitle;
+  final double? progress;
+  final bool showProgress;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
+      buildWhen: (previous, current) =>
+          previous.currentAudio != current.currentAudio ||
+          previous.status != current.status ||
+          previous.dismissedAudioId != current.dismissedAudioId,
+      builder: (context, audioState) {
+        return _HomeQuranResumeReadyCard(
+          readingSubtitle: readingSubtitle,
+          listeningSubtitle: _listeningSubtitle(context, audioState),
+          progress: progress,
+          showProgress: showProgress,
+          hasActiveAudio: audioState.hasAudio,
+        );
+      },
+    );
+  }
+
+  String _listeningSubtitle(BuildContext context, AudioPlayerState state) {
+    final AudioEntity? audio = state.currentAudio;
+    if (audio == null) {
+      return context.l10n.todayPlanChooseReciter;
+    }
+    final String? reciterName = audio.artist;
+    if (reciterName == null || reciterName.isEmpty) {
+      return audio.title;
+    }
+    return context.l10n.todayPlanListeningSubtitle(audio.title, reciterName);
+  }
+}
+
 class _HomeQuranResumeLoadingCard extends StatelessWidget {
   const _HomeQuranResumeLoadingCard();
 
@@ -101,16 +140,18 @@ class _HomeQuranResumeLoadingCard extends StatelessWidget {
 
 class _HomeQuranResumeReadyCard extends StatelessWidget {
   const _HomeQuranResumeReadyCard({
-    required this.title,
-    required this.subtitle,
+    required this.readingSubtitle,
+    required this.listeningSubtitle,
     required this.progress,
     required this.showProgress,
+    required this.hasActiveAudio,
   });
 
-  final String title;
-  final String subtitle;
+  final String readingSubtitle;
+  final String listeningSubtitle;
   final double? progress;
   final bool showProgress;
+  final bool hasActiveAudio;
 
   @override
   Widget build(BuildContext context) {
@@ -118,107 +159,161 @@ class _HomeQuranResumeReadyCard extends StatelessWidget {
     final tokens = theme.tokens;
     final cardTokens = theme.componentTokens.homeDashboardCard;
     final Color foreground = cardTokens.foregroundColor;
-    final Color mutedForeground = foreground.withValues(alpha: 0.78);
-    final Color dimForeground = foreground.withValues(alpha: 0.45);
     final double radius = tokens.resolveRadius(family: TilawaRadiusFamily.hero);
 
-    return Semantics(
-      button: true,
-      label: title,
-      value: subtitle,
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(radius),
-        child: InkWell(
-          onTap: () => const QuranLastReadRoute().push(context),
+    return HomeDashboardCard(
+      surface: TilawaCardSurface.raised,
+      padding: EdgeInsets.zero,
+      borderRadius: radius,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: AlignmentDirectional.topStart,
+            end: AlignmentDirectional.bottomEnd,
+            colors: [cardTokens.gradientStart, cardTokens.gradientEnd],
+          ),
           borderRadius: BorderRadius.circular(radius),
-          splashColor: foreground.withValues(alpha: 0.10),
-          highlightColor: foreground.withValues(alpha: 0.06),
-          child: Ink(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: AlignmentDirectional.topStart,
-                end: AlignmentDirectional.bottomEnd,
-                colors: [cardTokens.gradientStart, cardTokens.gradientEnd],
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(tokens.spaceMedium),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: tokens.spaceSmall,
+            children: [
+              Text(
+                context.l10n.homeQuickQuran,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: foreground.withValues(alpha: 0.62),
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.4,
+                ),
               ),
-              borderRadius: BorderRadius.circular(radius),
-            ),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: tokens.spaceExtraLarge,
-                vertical: tokens.spaceLarge,
-              ),
-              child: Stack(
-                clipBehavior: Clip.none,
+              Row(
+                spacing: tokens.spaceSmall,
                 children: [
-                  // Decorative mosque silhouette — large, clipped by the card
-                  PositionedDirectional(
-                    end: -tokens.spaceExtraLarge * 0.5,
-                    top: 0,
-                    bottom: 0,
-                    child: IgnorePointer(
-                      child: Opacity(
-                        opacity: 0.13,
-                        child: Icon(
-                          Icons.mosque_rounded,
-                          size: tokens.spaceExtraLarge * 3,
-                          color: foreground,
-                        ),
-                      ),
+                  Expanded(
+                    child: _QuranResumeActionTile(
+                      icon: Icons.menu_book_rounded,
+                      title: context.l10n.continueReading,
+                      subtitle: readingSubtitle,
+                      foreground: foreground,
+                      progress: showProgress ? progress : null,
+                      onTap: () => const QuranLastReadRoute().push(context),
                     ),
                   ),
-                  Row(
-                    spacing: tokens.spaceMedium,
-                    children: [
-                      _HomeQuranLeadingIcon(
-                        progress: showProgress ? progress : null,
-                        foreground: foreground,
-                      ),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          spacing: tokens.spaceExtraSmall,
-                          children: [
-                            Text(
-                              title,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                color: dimForeground,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                            Text(
-                              subtitle,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                color: foreground,
-                                fontWeight: FontWeight.w800,
-                                height: 1.25,
-                              ),
-                            ),
-                            if (showProgress && progress != null)
-                              _ProgressBar(
-                                progress: progress!,
-                                foreground: foreground,
-                                label: context.l10n.homeQuranResumeProgress(
-                                  (progress! * 100).round(),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                      Icon(
-                        Icons.chevron_right_rounded,
-                        color: mutedForeground,
-                        size: tokens.iconSizeMedium,
-                      ),
-                    ],
+                  Expanded(
+                    child: _QuranResumeActionTile(
+                      icon: Icons.graphic_eq_rounded,
+                      title: context.l10n.continueListening,
+                      subtitle: listeningSubtitle,
+                      foreground: foreground,
+                      onTap: hasActiveAudio
+                          ? () => QuranPlayerPresentationEntry.openExpanded(
+                              presentation:
+                                  getIt<PlayerPresentationController>(),
+                              hasActiveAudio: hasActiveAudio,
+                            )
+                          : null,
+                    ),
                   ),
                 ],
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _QuranResumeActionTile extends StatelessWidget {
+  const _QuranResumeActionTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.foreground,
+    this.progress,
+    this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color foreground;
+  final double? progress;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final bool enabled = onTap != null;
+    final Color effectiveForeground = foreground.withValues(
+      alpha: enabled ? 1 : 0.48,
+    );
+    final double radius = tokens.resolveRadius(family: TilawaRadiusFamily.card);
+
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: title,
+      value: subtitle,
+      child: Material(
+        color: foreground.withValues(alpha: enabled ? 0.12 : 0.06),
+        borderRadius: BorderRadius.circular(radius),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(radius),
+          splashColor: foreground.withValues(alpha: 0.10),
+          highlightColor: foreground.withValues(alpha: 0.06),
+          child: Padding(
+            padding: EdgeInsets.all(tokens.spaceSmall),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: tokens.spaceExtraSmall,
+              children: [
+                Row(
+                  spacing: tokens.spaceSmall,
+                  children: [
+                    Icon(
+                      icon,
+                      color: effectiveForeground,
+                      size: tokens.iconSizeSmall,
+                    ),
+                    Expanded(
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: effectiveForeground,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Text(
+                  subtitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: effectiveForeground.withValues(alpha: 0.82),
+                    height: 1.2,
+                  ),
+                ),
+                if (progress != null)
+                  _ProgressBar(
+                    progress: progress!,
+                    foreground: effectiveForeground,
+                    label: context.l10n.homeQuranResumeProgress(
+                      (progress! * 100).round(),
+                    ),
+                  ),
+              ],
             ),
           ),
         ),
@@ -262,58 +357,6 @@ class _ProgressBar extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _HomeQuranLeadingIcon extends StatelessWidget {
-  const _HomeQuranLeadingIcon({
-    required this.progress,
-    required this.foreground,
-  });
-
-  final double? progress;
-  final Color foreground;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final double ringSize = tokens.spaceExtraLarge + tokens.spaceLarge;
-
-    if (progress == null) {
-      return TilawaIconBox(
-        icon: Icons.menu_book_rounded,
-        size: tokens.iconSizeLarge,
-        padding: tokens.spaceMedium,
-        variant: TilawaIconBoxVariant.tinted,
-        semanticTint: TilawaSemanticTint.ink,
-        iconColor: foreground,
-      );
-    }
-
-    return SizedBox(
-      width: ringSize,
-      height: ringSize,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          TilawaLoadingIndicator(
-            centered: false,
-            value: progress,
-            backgroundColor: foreground.withValues(alpha: 0.20),
-            color: foreground,
-          ),
-          TilawaIconBox(
-            icon: Icons.menu_book_rounded,
-            size: tokens.iconSizeMedium,
-            padding: tokens.spaceSmall,
-            variant: TilawaIconBoxVariant.tinted,
-            semanticTint: TilawaSemanticTint.ink,
-            iconColor: foreground,
-          ),
-        ],
-      ),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
+import '../foundation/tilawa_icons.dart';
 import '../foundation/design_tokens.dart';
 
 /// A short inline banner that surfaces a missing permission or capability and
@@ -17,7 +18,7 @@ class TilawaPermissionBanner extends StatelessWidget {
     required this.message,
     required this.actionLabel,
     required this.onAction,
-    this.icon = Icons.info_outline,
+    this.icon = TilawaIcons.info,
     this.backgroundColor,
     this.foregroundColor,
     this.padding,
@@ -32,6 +33,7 @@ class TilawaPermissionBanner extends StatelessWidget {
   final Color? foregroundColor;
   final EdgeInsetsGeometry? padding;
   final double? borderRadius;
+
 
   @override
   Widget build(BuildContext context) {

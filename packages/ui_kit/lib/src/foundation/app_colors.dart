@@ -209,6 +209,12 @@ abstract final class AppColors {
   static const Color catalogFilterUnselectedLight =
       lightSurfaceContainerHighBase;
 
+  /// Dark charcoal for bottom nav bar background (`#212528`).
+  ///
+  /// Used as the floating pill background in both light and dark themes
+  /// for a premium, grounded chrome that separates from the content canvas.
+  static const Color bottomNavBackground = Color(0xFF212528);
+
   /// Dark idle chip / upper container.
   ///
   /// Green-tinted to sit in the same family as the dark surface ramp

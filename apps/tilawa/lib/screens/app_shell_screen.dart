@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
@@ -120,9 +119,6 @@ class _AppShellScreenState extends State<AppShellScreen> {
       AuthAuthenticated(:final user) => user.displayName,
       _ => null,
     };
-    final TilawaAdaptiveShellTokens shellTokens = Theme.of(
-      context,
-    ).componentTokens.adaptiveShell;
     const double profileAvatarSize = 28;
 
     return destinations.map((AppShellNavDestination d) {
@@ -142,19 +138,14 @@ class _AppShellScreenState extends State<AppShellScreen> {
                 fallbackStyle: ProfileAvatarFallbackStyle.initial,
               );
             };
-      } else if (d.svgPath != null) {
+      } else if (d.iconBuilder != null) {
         iconBuilder =
             (
               BuildContext iconContext, {
               required bool isSelected,
               required Color color,
             }) {
-              return SvgPicture.asset(
-                d.svgPath!,
-                width: shellTokens.navButtonIconSize,
-                height: shellTokens.navButtonIconSize,
-                colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
-              );
+              return d.iconBuilder!(iconContext, color: color);
             };
       }
 

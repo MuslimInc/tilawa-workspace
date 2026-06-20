@@ -16,11 +16,6 @@ import 'package:tilawa/features/auth/domain/entities/auth_result.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/domain/repositories/auth_repository.dart';
 import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.dart';
-import 'package:tilawa/features/home/domain/entities/home_layout_mode.dart';
-import 'package:tilawa/features/home/domain/repositories/home_layout_preference_repository.dart';
-import 'package:tilawa/features/home/domain/usecases/get_home_layout_mode_use_case.dart';
-import 'package:tilawa/features/home/domain/usecases/set_home_layout_mode_use_case.dart';
-import 'package:tilawa/features/home/presentation/cubit/home_layout_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_quran_resume_cubit.dart';
 import 'package:tilawa/features/prayer_times/application/prayer_location_update_notifier.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/entities.dart';
@@ -186,12 +181,6 @@ void registerHomeScreenScopeGetIt(GetIt getIt) {
       SavePinnedAthkarCategoryIdsUseCase(_FakePinnedAthkarRepository()),
     ),
   );
-  getIt.registerFactory<HomeLayoutCubit>(
-    () => HomeLayoutCubit(
-      GetHomeLayoutModeUseCase(_FakeHomeLayoutPreferenceRepository()),
-      SetHomeLayoutModeUseCase(_FakeHomeLayoutPreferenceRepository()),
-    ),
-  );
   getIt.registerFactory<HomeQuranResumeCubit>(
     () => HomeQuranResumeCubit(_FakeGetLastReadPositionUseCase()),
   );
@@ -220,11 +209,3 @@ class _FakeGetLastReadPositionUseCase implements GetLastReadPositionUseCase {
   }
 }
 
-class _FakeHomeLayoutPreferenceRepository
-    implements HomeLayoutPreferenceRepository {
-  @override
-  Future<HomeLayoutMode> getLayoutMode() async => HomeLayoutMode.list;
-
-  @override
-  Future<void> setLayoutMode(HomeLayoutMode mode) async {}
-}

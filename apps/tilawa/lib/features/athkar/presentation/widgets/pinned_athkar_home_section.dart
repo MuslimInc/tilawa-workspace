@@ -22,7 +22,7 @@ class PinnedAthkarHomeSection extends StatelessWidget {
     super.key,
     this.hideContextualFeatured = false,
     this.hideHeader = false,
-    required this.layoutMode,
+    this.layoutMode = HomeLayoutMode.list,
   });
 
   /// When true, the contextual featured card is omitted (shown above this

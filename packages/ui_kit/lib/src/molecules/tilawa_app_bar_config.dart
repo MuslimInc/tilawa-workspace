@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
+import '../foundation/tilawa_icons.dart';
 
 /// Surface tier for [TilawaAppBar] / [TilawaSliverAppBar].
 ///
@@ -469,7 +470,7 @@ abstract final class TilawaAppBarChrome {
         resolved = edgePaddedLeadingIcon(
           context: context,
           icon: Icon(
-            Icons.menu_rounded,
+            TilawaIcons.menu,
             color: theme.colorScheme.onSurfaceVariant,
           ),
           onPressed: scaffold!.openDrawer,

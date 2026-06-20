@@ -29,6 +29,8 @@ flutter:
   uses-material-design: true
   assets:
     - assets/icons/google_g_logo.svg
+    - assets/icons/quran_icon.svg
+
   fonts:
     # Bundled IBM Plex Sans Arabic (SIL Open Font License 1.1) so the brand
     # typeface ships with the app instead of being fetched from

@@ -9,7 +9,6 @@ import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.dart';
 import 'package:tilawa/features/athkar/presentation/cubit/pinned_athkar_cubit.dart';
-import 'package:tilawa/features/home/presentation/cubit/home_layout_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_quran_resume_cubit.dart';
 import 'package:tilawa/features/history/domain/repositories/history_repository.dart';
 import 'package:tilawa/features/home/home.dart';
@@ -30,14 +29,10 @@ import 'package:tilawa_core/services/analytics_service.dart';
 class HomeScreenScope extends StatelessWidget {
   const HomeScreenScope({
     super.key,
-    required this.onOpenReciters,
-    required this.onOpenQibla,
     required this.onOpenPrayer,
     this.child,
   });
 
-  final VoidCallback onOpenReciters;
-  final VoidCallback onOpenQibla;
   final VoidCallback onOpenPrayer;
 
   /// When set (e.g. in widget tests), replaces [HomeScreen].
@@ -87,13 +82,7 @@ class HomeScreenScope extends StatelessWidget {
   Widget build(BuildContext context) {
     final localeIdentifier = Localizations.localeOf(context).languageCode;
     final Widget homeContent = _HomeLocalizationListener(
-      child:
-          child ??
-          HomeScreen(
-            onOpenReciters: onOpenReciters,
-            onOpenQibla: onOpenQibla,
-            onOpenPrayer: onOpenPrayer,
-          ),
+      child: child ?? HomeScreen(onOpenPrayer: onOpenPrayer),
     );
 
     return MultiBlocProvider(
@@ -103,7 +92,6 @@ class HomeScreenScope extends StatelessWidget {
         ),
         BlocProvider(create: (_) => getIt<PinnedAthkarCubit>()..load()),
         BlocProvider(create: (_) => getIt<HomeQuranResumeCubit>()..load()),
-        BlocProvider(create: (_) => getIt<HomeLayoutCubit>()),
         if (isSmartKhatmaEnabled())
           BlocProvider(create: (_) => SmartKhatmaDependencies.bloc()),
         if (isTodayPlanEnabled())

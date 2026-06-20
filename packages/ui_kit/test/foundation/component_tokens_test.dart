@@ -706,13 +706,13 @@ void main() {
       );
       final tokens = TilawaAdaptiveShellTokens.fromColorScheme(scheme);
 
-      expect(tokens.bottomNavBackgroundColor, AppColors.lightSurface);
-      expect(tokens.bottomNavShadowOpacity, 0.04);
-      expect(tokens.bottomNavShadowBlur, 8);
+      expect(tokens.bottomNavBackgroundColor, AppColors.bottomNavBackground);
+      expect(tokens.bottomNavShadowOpacity, 0.06);
+      expect(tokens.bottomNavShadowBlur, 12);
       expect(tokens.bottomNavShadowOffset, const Offset(0, 2));
       expect(
         tokens.navButtonSelectedBackgroundColor,
-        AppColors.lightSurfaceContainerHighBase,
+        const Color(0xFFFFFFFF),
       );
       expect(
         tokens.sideRailIndicatorColor,
@@ -770,7 +770,7 @@ void main() {
           TilawaAdaptiveShellTokens.fromColorScheme(
             tealScheme,
           ).bottomNavBackgroundColor,
-          AppColors.tripGlideSurface,
+          AppColors.bottomNavBackground,
         );
       },
     );
@@ -786,14 +786,10 @@ void main() {
 
       expect(
         tokens.bottomNavBackgroundColor,
-        Color.lerp(
-          AppColors.darkSurfaceContainerHighBase,
-          AppColors.darkBackground,
-          0.32,
-        ),
+        AppColors.bottomNavBackground,
       );
-      expect(tokens.bottomNavShadowOpacity, 0.055);
-      expect(tokens.bottomNavShadowBlur, 10);
+      expect(tokens.bottomNavShadowOpacity, 0.08);
+      expect(tokens.bottomNavShadowBlur, 14);
       expect(tokens.bottomNavShadowOffset, const Offset(0, 2));
       expect(
         tokens.bottomNavOutlineColor,
@@ -801,10 +797,7 @@ void main() {
       );
       expect(
         tokens.navButtonSelectedBackgroundColor,
-        Color.alphaBlend(
-          scheme.primary.withValues(alpha: 0.12),
-          tokens.bottomNavBackgroundColor,
-        ),
+        const Color(0xFFE8E8E8),
       );
     });
 
@@ -1258,7 +1251,7 @@ void main() {
                 );
                 expect(
                   accessed.adaptiveShell.bottomNavBackgroundColor,
-                  AppColors.tripGlideSurface,
+                  AppColors.bottomNavBackground,
                 );
                 expect(
                   accessed.adaptiveShell.bottomNavBackgroundColor,

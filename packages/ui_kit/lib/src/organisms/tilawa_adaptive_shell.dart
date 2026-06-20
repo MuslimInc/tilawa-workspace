@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../foundation/app_colors.dart';
 import '../foundation/component_tokens.dart';
 import '../foundation/content_bounds.dart';
 import '../foundation/design_tokens.dart';
@@ -270,13 +271,17 @@ class _BottomNavBarState extends State<_BottomNavBar>
     // Rise: 1.0 → _pulseScale over first half; Fall: _pulseScale → 1.0 over second half.
     _pulseAnimation = TweenSequence<double>([
       TweenSequenceItem(
-        tween: Tween(begin: 1.0, end: _pulseScale)
-            .chain(CurveTween(curve: Curves.easeOut)),
+        tween: Tween(
+          begin: 1.0,
+          end: _pulseScale,
+        ).chain(CurveTween(curve: Curves.easeOut)),
         weight: 50,
       ),
       TweenSequenceItem(
-        tween: Tween(begin: _pulseScale, end: 1.0)
-            .chain(CurveTween(curve: Curves.easeIn)),
+        tween: Tween(
+          begin: _pulseScale,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.easeIn)),
         weight: 50,
       ),
     ]).animate(_pulseController);
@@ -831,7 +836,7 @@ class _BottomNavBarState extends State<_BottomNavBar>
                             child: Padding(
                               padding: EdgeInsets.symmetric(
                                 horizontal: designTokens.spaceExtraSmall,
-                                vertical: tokens.bottomNavInternalPadding,
+                                vertical: designTokens.spaceExtraSmall,
                               ),
                               child: Stack(
                                 clipBehavior: Clip.none,
@@ -1288,8 +1293,15 @@ class _LongPressNavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color selectedFg = colorScheme.primary;
-    final Color unselectedFg = colorScheme.onSurfaceVariant;
+    final bool darkNavBg =
+        ThemeData.estimateBrightnessForColor(tokens.bottomNavBackgroundColor) ==
+        Brightness.dark;
+    final Color selectedFg = darkNavBg
+        ? AppColors.tripGlideInk
+        : colorScheme.primary;
+    final Color unselectedFg = darkNavBg
+        ? AppColors.tripGlideSurface
+        : colorScheme.onSurfaceVariant;
     final Color foreground = isFocused ? selectedFg : unselectedFg;
     final double scale = isFocused ? 1.12 : 0.94;
 
@@ -1368,8 +1380,10 @@ class _NavButton extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
+
   /// Non-null only when a programmatic index change just selected this item.
   final Animation<double>? pulseAnimation;
+
   /// Key placed on the [ScaleTransition] wrapper for test introspection.
   final Key? pulseKey;
 
@@ -1379,8 +1393,15 @@ class _NavButton extends StatelessWidget {
     final TilawaAdaptiveShellTokens tokens =
         theme.componentTokens.adaptiveShell;
     final ColorScheme colorScheme = theme.colorScheme;
-    final Color selectedFg = colorScheme.primary;
-    final Color unselectedFg = colorScheme.onSurfaceVariant;
+    final bool darkNavBg =
+        ThemeData.estimateBrightnessForColor(tokens.bottomNavBackgroundColor) ==
+        Brightness.dark;
+    final Color selectedFg = darkNavBg
+        ? AppColors.tripGlideInk
+        : colorScheme.primary;
+    final Color unselectedFg = darkNavBg
+        ? AppColors.tripGlideSurface
+        : colorScheme.onSurfaceVariant;
     final double hitSize = tokens.navButtonIconOnlyMinHeight;
 
     Widget iconWidget = destination.iconBuilder != null

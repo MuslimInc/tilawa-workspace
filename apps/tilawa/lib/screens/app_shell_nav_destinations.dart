@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// One phone bottom-navigation destination in [AppShellScreen].
 @immutable
@@ -10,7 +10,7 @@ class AppShellNavDestination extends Equatable {
     required this.label,
     required this.icon,
     this.activeIcon,
-    this.svgPath,
+    this.iconBuilder,
     this.tabIndex,
     this.semanticsIdentifier,
     this.usesProfileAvatar = false,
@@ -19,7 +19,14 @@ class AppShellNavDestination extends Equatable {
   final String label;
   final IconData icon;
   final IconData? activeIcon;
-  final String? svgPath;
+
+  /// Optional widget builder for non-font icons (e.g. custom SVGs).
+  ///
+  /// When provided, the shell uses this instead of the default [Icon]
+  /// widget. The builder receives the resolved foreground [color] based on
+  /// selection state.
+  final Widget Function(BuildContext context, {required Color color})?
+      iconBuilder;
 
   /// [MainTabViewport] index when this item selects a shell tab.
   ///
@@ -35,14 +42,14 @@ class AppShellNavDestination extends Equatable {
 
   @override
   List<Object?> get props => [
-    label,
-    icon,
-    activeIcon,
-    svgPath,
-    tabIndex,
-    semanticsIdentifier,
-    usesProfileAvatar,
-  ];
+        label,
+        icon,
+        activeIcon,
+        iconBuilder,
+        tabIndex,
+        semanticsIdentifier,
+        usesProfileAvatar,
+      ];
 }
 
 /// Builds the phone shell bottom bar (TripGlide icon-only IA).
@@ -54,43 +61,44 @@ List<AppShellNavDestination> buildPhoneShellNavDestinations(
   return [
     AppShellNavDestination(
       tabIndex: 0,
-      icon: FluentIcons.home_24_regular,
-      activeIcon: FluentIcons.home_24_filled,
+      icon: TilawaIcons.home,
+      activeIcon: TilawaIcons.homeActive,
       label: l10n.bottomNavHome,
       semanticsIdentifier: 'home_tab',
     ),
     AppShellNavDestination(
       label: l10n.bottomNavQuran,
-      icon: Icons.menu_book_rounded,
-      svgPath: 'assets/icons/quran_icon.svg',
+      icon: TilawaIcons.menuBook,
+      iconBuilder: (context, {required Color color}) {
+        return TilawaIcons.quran.svg(color: color);
+      },
       semanticsIdentifier: 'quran_index_nav',
     ),
     AppShellNavDestination(
       tabIndex: kAppShellRecitersTabIndex,
-      icon: FluentIcons.person_voice_24_regular,
-      activeIcon: FluentIcons.person_voice_24_filled,
+      icon: TilawaIcons.reciters,
+      activeIcon: TilawaIcons.recitersActive,
       label: l10n.bottomNavReciters,
       semanticsIdentifier: 'reciters_tab',
     ),
     AppShellNavDestination(
       tabIndex: 2,
-      icon: FluentIcons.compass_northwest_24_regular,
-      activeIcon: FluentIcons.compass_northwest_24_filled,
+      icon: TilawaIcons.qibla,
+      activeIcon: TilawaIcons.qiblaActive,
       label: l10n.bottomNavQibla,
       semanticsIdentifier: 'qibla_tab',
     ),
     AppShellNavDestination(
       tabIndex: 3,
-      icon: FluentIcons.book_open_24_regular,
-      activeIcon: FluentIcons.book_open_24_filled,
-      svgPath: 'assets/icons/athkar_icon.svg',
+      icon: TilawaIcons.athkar,
+      activeIcon: TilawaIcons.athkarActive,
       label: l10n.bottomNavAthkar,
       semanticsIdentifier: 'athkar_tab',
     ),
     AppShellNavDestination(
       tabIndex: kAppShellSettingsTabIndex,
-      icon: FluentIcons.person_24_regular,
-      activeIcon: FluentIcons.person_24_filled,
+      icon: TilawaIcons.profile,
+      activeIcon: TilawaIcons.profileActive,
       label: l10n.bottomNavSettings,
       semanticsIdentifier: 'settings_tab',
       usesProfileAvatar: true,

@@ -28,10 +28,10 @@ abstract final class HomeDashboardHeroSliver {
   const HomeDashboardHeroSliver._();
 
   /// Greeting area inside the expanded app bar (below toolbar).
-  static const double _greetingBodyHeight = 92;
+  static const double _greetingBodyHeight = 56;
 
-  /// Frosted next-prayer card (spaceMedium glass padding + rows + countdown).
-  static const double _metricsContentHeight = 148;
+  /// Frosted next-prayer card (compact glass padding + rows + countdown).
+  static const double _metricsContentHeight = 140;
 
   /// Extra room for device font metrics / text-scale drift.
   static const double _metricsLayoutSlack = 4;
@@ -77,7 +77,7 @@ abstract final class HomeDashboardHeroSliver {
   }
 
   static double _resolveBottomInset(BuildContext context) {
-    return Theme.of(context).tokens.spaceMedium + sheetOverlap;
+    return Theme.of(context).tokens.spaceSmall + sheetOverlap;
   }
 
   /// Pinned hero chrome when the wallpaper is fully hidden.
@@ -473,7 +473,6 @@ class _HomeHeroFlexibleSpaceState extends State<_HomeHeroFlexibleSpace> {
                             width: double.infinity,
                             child: _HomeHeroExpandedBody(
                               greetingOpacity: greetingOpacity,
-                              dashboard: widget.dashboard,
                               onOpenPrayer: widget.onOpenPrayer,
                               bottomInset: widget.bottomInset,
                               metricsFooterSection: _metricsFooterSection,
@@ -518,14 +517,12 @@ class _HomeHeroFlexibleSpaceState extends State<_HomeHeroFlexibleSpace> {
 class _HomeHeroExpandedBody extends StatelessWidget {
   const _HomeHeroExpandedBody({
     required this.greetingOpacity,
-    required this.dashboard,
     required this.onOpenPrayer,
     required this.bottomInset,
     required this.metricsFooterSection,
   });
 
   final double greetingOpacity;
-  final HomeDashboard? dashboard;
   final VoidCallback onOpenPrayer;
   final double bottomInset;
   final Widget metricsFooterSection;
@@ -551,9 +548,7 @@ class _HomeHeroExpandedBody extends StatelessWidget {
               ),
               child: Align(
                 alignment: AlignmentDirectional.centerStart,
-                child: _HomeHeroHeader(
-                  dashboard: dashboard,
-                ),
+                child: _HomeHeroHeader(),
               ),
             ),
           ),
@@ -615,7 +610,7 @@ class _HomeHeroMetricsFooterSection extends StatelessWidget {
           onTap: dashboardFailed ? null : onOpenPrayer,
           padding: EdgeInsets.symmetric(
             horizontal: tokens.spaceMedium,
-            vertical: tokens.spaceMedium,
+            vertical: tokens.spaceSmall,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -798,11 +793,7 @@ class _HomeHeroCollapsedPrayerSummaryState
 }
 
 class _HomeHeroHeader extends StatelessWidget {
-  const _HomeHeroHeader({
-    required this.dashboard,
-  });
-
-  final HomeDashboard? dashboard;
+  const _HomeHeroHeader();
 
   @override
   Widget build(BuildContext context) {
@@ -810,17 +801,13 @@ class _HomeHeroHeader extends StatelessWidget {
     final tokens = theme.tokens;
     final heroTokens = theme.componentTokens.homeNextPrayerHero;
     final Color onGradient = heroTokens.foregroundColor;
-    final String? displayName = dashboard?.displayName;
     final DateTime now = DateTime.now();
     final String hijriDateLine = formatHomeHijriDate(
       date: now,
       languageCode: Localizations.localeOf(context).languageCode,
     );
-    final String gregorianDateLine = MaterialLocalizations.of(
-      context,
-    ).formatFullDate(now);
 
-    final Widget dateLines = Semantics(
+    return Semantics(
       button: true,
       label: context.l10n.hijriCalendarOpenLabel,
       child: InkWell(
@@ -843,77 +830,10 @@ class _HomeHeroHeader extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            SizedBox(height: tokens.spaceExtraSmall),
-            Text(
-              gregorianDateLine,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: HomeHeroPhotoTheme.labelStyle(
-                theme.textTheme.bodySmall,
-                onGradient.withValues(
-                  alpha: heroTokens.mutedForegroundOpacity,
-                ),
-                tokens: tokens,
-              ),
-            ),
           ],
         ),
       ),
     );
-
-    final Widget greeting = switch (displayName) {
-      null => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            context.l10n.homeGreeting,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: HomeHeroPhotoTheme.titleStyle(
-              theme.textTheme.titleLarge,
-              onGradient,
-              tokens: tokens,
-            ),
-          ),
-          SizedBox(height: tokens.spaceExtraSmall),
-          dateLines,
-        ],
-      ),
-      final name => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            context.l10n.homeGreeting,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: HomeHeroPhotoTheme.labelStyle(
-              theme.textTheme.bodyMedium,
-              onGradient.withValues(
-                alpha: heroTokens.tertiaryForegroundOpacity,
-              ),
-              tokens: tokens,
-            ),
-          ),
-          SizedBox(height: tokens.spaceExtraSmall),
-          Text(
-            name,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: HomeHeroPhotoTheme.titleStyle(
-              theme.textTheme.titleLarge,
-              onGradient,
-              tokens: tokens,
-            ),
-          ),
-          SizedBox(height: tokens.spaceExtraSmall),
-          dateLines,
-        ],
-      ),
-    };
-
-    return greeting;
   }
 }
 
