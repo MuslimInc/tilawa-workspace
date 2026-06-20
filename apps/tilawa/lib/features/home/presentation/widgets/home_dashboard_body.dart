@@ -15,24 +15,27 @@ import 'home_daily_inspiration_section.dart';
 import 'home_layout_toggle_button.dart';
 import 'home_more_actions_group.dart';
 import 'home_shortcut_entry.dart';
+import 'home_quran_resume_card.dart';
 import 'home_today_section.dart';
 
-/// Scrollable Home body below the hero, organized into five clear zones:
+/// Scrollable Home body below the hero, organized into four visual groups:
 ///
-///   1. Continue  — full-width Quran resume
-///   2. Today     — prayer strip + Today Plan (if enabled)
-///   3. Daily Practice — contextual athkar + pinned rituals
-///   4. Discover  — shortcuts + Smart Khatma (if enabled, badged)
-///   5. Inspiration — daily ayah and dua
+///   1. Quran resume  — gold featured card, no section label
+///   2. Today         — prayer strip (overline only) + optional Today Plan
+///   3. Your rituals  — contextual athkar + pinned rituals under one title
+///   4. Discover      — shortcuts to secondary destinations
+///   [unlabelled]     — daily ayah and dua card at the bottom
 class HomeDashboardBody extends StatelessWidget {
   const HomeDashboardBody({
     super.key,
     required this.onOpenReciters,
     required this.onOpenPrayer,
+    required this.onOpenQibla,
   });
 
   final VoidCallback onOpenReciters;
   final VoidCallback onOpenPrayer;
+  final VoidCallback onOpenQibla;
 
   @override
   Widget build(BuildContext context) {
@@ -43,8 +46,8 @@ class HomeDashboardBody extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Zone 1 — Continue
-            const HomeContinueSection(),
+            // Zone 1 — Quran resume (no section title; the card speaks for itself)
+            const HomeQuranResumeCard(),
             SizedBox(height: tokens.spaceExtraLarge),
 
             // Zone 2 — Today
@@ -54,28 +57,24 @@ class HomeDashboardBody extends StatelessWidget {
             ),
             SizedBox(height: tokens.spaceExtraLarge),
 
-            // Zone 3 — Daily Practice
+            // Zone 3 — Your rituals
             HomeDailyPracticeSection(layoutMode: layoutState.mode),
             SizedBox(height: tokens.spaceExtraLarge),
 
             // Zone 4 — Discover
             HomeDashboardSection(
               title: context.l10n.homeExploreTitle,
-              subtitle: context.l10n.homeExploreSubtitle,
               trailing: const HomeLayoutToggleButton(),
               child: _DiscoverSection(
                 layoutMode: layoutState.mode,
                 onOpenReciters: onOpenReciters,
+                onOpenQibla: onOpenQibla,
               ),
             ),
             SizedBox(height: tokens.spaceExtraLarge),
 
-            // Zone 5 — Inspiration
-            HomeDashboardSection(
-              title: context.l10n.homeDailyInspirationTitle,
-              subtitle: context.l10n.homeDailyInspirationSubtitle,
-              child: const HomeDailyInspirationSection(),
-            ),
+            // Unlabelled — daily ayah and dua; the card content is self-evident
+            const HomeDailyInspirationSection(),
           ],
         );
       },
@@ -87,10 +86,12 @@ class _DiscoverSection extends StatelessWidget {
   const _DiscoverSection({
     required this.layoutMode,
     required this.onOpenReciters,
+    required this.onOpenQibla,
   });
 
   final HomeLayoutMode layoutMode;
   final VoidCallback onOpenReciters;
+  final VoidCallback onOpenQibla;
 
   @override
   Widget build(BuildContext context) {
@@ -107,6 +108,8 @@ class _DiscoverSection extends StatelessWidget {
               label: entry.shortcut.title,
               subtitle: entry.shortcut.subtitle,
               icon: entry.shortcut.icon,
+              iconBackgroundColor: entry.iconBackgroundColor,
+              iconColor: entry.iconColor,
               onTap: entry.shortcut.onTap,
               trailing: entry.trailing,
             ),
@@ -116,8 +119,11 @@ class _DiscoverSection extends StatelessWidget {
   }
 
   List<_DiscoverEntry> _buildEntries(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final entries = <_DiscoverEntry>[
       _DiscoverEntry(
+        iconBackgroundColor: colorScheme.primary.withValues(alpha: 0.13),
+        iconColor: colorScheme.primary,
         shortcut: HomeShortcutEntry(
           icon: FluentIcons.person_voice_24_regular,
           title: context.l10n.homeQuickReciters,
@@ -126,6 +132,10 @@ class _DiscoverSection extends StatelessWidget {
         ),
       ),
       _DiscoverEntry(
+        iconBackgroundColor: AppColors.featuredGradientStart.withValues(
+          alpha: 0.22,
+        ),
+        iconColor: AppColors.featuredGradientEnd,
         shortcut: HomeShortcutEntry(
           icon: FluentIcons.circle_hint_24_regular,
           title: context.l10n.homeQuickTasbeeh,
@@ -134,11 +144,13 @@ class _DiscoverSection extends StatelessWidget {
         ),
       ),
       _DiscoverEntry(
+        iconBackgroundColor: AppColors.success.withValues(alpha: 0.14),
+        iconColor: AppColors.success,
         shortcut: HomeShortcutEntry(
           icon: FluentIcons.compass_northwest_24_regular,
           title: context.l10n.homeQuickQibla,
           subtitle: context.l10n.homeQuickQiblaSubtitle,
-          onTap: () => const QiblaRoute().push(context),
+          onTap: onOpenQibla,
         ),
       ),
       if (isSmartKhatmaEnabled())
@@ -159,8 +171,15 @@ class _DiscoverSection extends StatelessWidget {
 }
 
 class _DiscoverEntry {
-  const _DiscoverEntry({required this.shortcut, this.trailing});
+  const _DiscoverEntry({
+    required this.shortcut,
+    this.trailing,
+    this.iconBackgroundColor,
+    this.iconColor,
+  });
 
   final HomeShortcutEntry shortcut;
   final Widget? trailing;
+  final Color? iconBackgroundColor;
+  final Color? iconColor;
 }

@@ -21,7 +21,7 @@ class TilawaCatalogAppBar extends StatelessWidget
     this.leading,
     this.actions,
     this.bottomContent,
-    this.automaticallyImplyLeading = false,
+    this.automaticallyImplyLeading = true,
     this.onBackPressed,
     this.showBottomHairline = TilawaAppBarConfig.showBottomHairline,
     this.showElevationShadow = TilawaAppBarConfig.showElevationShadow,

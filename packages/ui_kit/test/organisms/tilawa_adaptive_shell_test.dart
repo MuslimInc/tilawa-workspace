@@ -1231,4 +1231,209 @@ void main() {
       }
     });
   });
+
+  // ---------------------------------------------------------------------------
+  // Programmatic index-change attention animation
+  //
+  // CONTRACT: When the bottom nav's selected index changes through a prop update
+  // (not from inside the widget via onDestinationSelected), the newly selected
+  // icon plays a brief scale pulse (1.0 → peak → 1.0) so the user notices the
+  // change. User taps and the initial first-frame selection must NOT trigger
+  // this animation.
+  //
+  // Key used to find the ScaleTransition wrapper: Key('nav_pulse_<index>').
+  // ---------------------------------------------------------------------------
+  group('programmatic index-change attention animation', () {
+    testWidgets(
+      // CONTRACT: initial selection must not trigger the pulse animation.
+      'initial selected index does not trigger pulse animation',
+      (tester) async {
+        await _pumpDrivableShell(
+          tester,
+          size: const Size(400, 800),
+          initialIndex: 0,
+        );
+
+        final pulse = _findNavPulse(tester, 0);
+        expect(pulse, isNotNull, reason: 'pulse widget should exist');
+        // Animation must be idle at scale = 1.0 on first frame.
+        expect(
+          pulse!.scale.value,
+          closeTo(1.0, 0.001),
+          reason: 'no pulse on initial render',
+        );
+      },
+    );
+
+    testWidgets(
+      // CONTRACT: programmatic index change triggers the pulse mid-animation.
+      'programmatic index change triggers pulse on newly selected item',
+      (tester) async {
+        final drive = await _pumpDrivableShell(
+          tester,
+          size: const Size(400, 800),
+          initialIndex: 0,
+        );
+
+        // Programmatically move to index 1 (not via onDestinationSelected).
+        await drive(tester, 1);
+        // 30 ms into the animation — scale should be above 1.0 (rising phase).
+        await tester.pump(const Duration(milliseconds: 30));
+
+        final pulse = _findNavPulse(tester, 1);
+        expect(pulse, isNotNull);
+        expect(
+          pulse!.scale.value,
+          greaterThan(1.0),
+          reason: 'scale should be above 1.0 mid-pulse after programmatic change',
+        );
+      },
+    );
+
+    testWidgets(
+      // CONTRACT: user tap must NOT trigger the pulse animation.
+      'user tap on nav item does not trigger pulse animation',
+      (tester) async {
+        await _pumpDrivableShell(
+          tester,
+          size: const Size(400, 800),
+          initialIndex: 0,
+        );
+
+        // Simulate a real user tap on destination index 1.
+        await tester.tap(find.byKey(const Key('nav_button_1')));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 30));
+
+        final pulse = _findNavPulse(tester, 1);
+        expect(pulse, isNotNull);
+        expect(
+          pulse!.scale.value,
+          closeTo(1.0, 0.001),
+          reason: 'user tap must not trigger scale pulse',
+        );
+      },
+    );
+
+    testWidgets(
+      // CONTRACT: animation returns to 1.0 after completing.
+      'pulse animation returns to scale 1.0 after completing',
+      (tester) async {
+        final drive = await _pumpDrivableShell(
+          tester,
+          size: const Size(400, 800),
+          initialIndex: 0,
+        );
+
+        await drive(tester, 2);
+        // Let the full animation complete (> 300 ms total).
+        await tester.pump(const Duration(milliseconds: 350));
+
+        final pulse = _findNavPulse(tester, 2);
+        expect(pulse, isNotNull);
+        expect(
+          pulse!.scale.value,
+          closeTo(1.0, 0.001),
+          reason: 'scale must settle back to 1.0 after animation completes',
+        );
+      },
+    );
+
+    testWidgets(
+      // CONTRACT: existing onDestinationSelected still fires on user tap.
+      'user tap still fires onDestinationSelected callback',
+      (tester) async {
+        int? tappedIndex;
+        await _pumpDrivableShell(
+          tester,
+          size: const Size(400, 800),
+          initialIndex: 0,
+          onDestinationSelected: (i) => tappedIndex = i,
+        );
+
+        await tester.tap(find.byKey(const Key('nav_button_2')));
+        await tester.pump();
+
+        expect(tappedIndex, 2);
+      },
+    );
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Helpers for programmatic-index-change tests
+// ---------------------------------------------------------------------------
+
+/// A [ChangeNotifier] that drives [selectedIndex] on [TilawaAdaptiveShell]
+/// from outside the widget tree, simulating a programmatic tab change
+/// (e.g. MainScreenCubit.selectTab).
+class _NavShellController extends ChangeNotifier {
+  _NavShellController(int initialIndex) : _index = initialIndex;
+
+  int _index;
+  int get index => _index;
+  set index(int value) {
+    if (_index == value) return;
+    _index = value;
+    notifyListeners();
+  }
+}
+
+/// Pumps a [TilawaAdaptiveShell] driven by a [_NavShellController] and
+/// returns a drive function that changes the index programmatically
+/// (without going through [onDestinationSelected]).
+///
+/// The returned drive function signature is:
+///   `Future<void> Function(WidgetTester tester, int newIndex)`
+Future<Future<void> Function(WidgetTester, int)> _pumpDrivableShell(
+  WidgetTester tester, {
+  required Size size,
+  int initialIndex = 0,
+  ValueChanged<int>? onDestinationSelected,
+}) async {
+  await tester.binding.setSurfaceSize(size);
+  tester.view.physicalSize = size;
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(() => tester.binding.setSurfaceSize(null));
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
+
+  final controller = _NavShellController(initialIndex);
+  addTearDown(controller.dispose);
+
+  await tester.pumpWidget(
+    MaterialApp(
+      theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+      home: Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListenableBuilder(
+          listenable: controller,
+          builder: (context, _) => TilawaAdaptiveShell(
+            destinations: _destinations,
+            selectedIndex: controller.index,
+            onDestinationSelected: (i) {
+              onDestinationSelected?.call(i);
+              controller.index = i;
+            },
+            bottomPlayer: const SizedBox.shrink(),
+            child: const ColoredBox(color: Color(0xFFEEEEEE)),
+          ),
+        ),
+      ),
+    ),
+  );
+  await tester.pump();
+
+  return (WidgetTester t, int newIndex) async {
+    controller.index = newIndex;
+    await t.pump();
+  };
+}
+
+/// Finds the [ScaleTransition] for a given nav destination [index] using
+/// the key `Key('nav_pulse_<index>')`.  Returns `null` if not found.
+ScaleTransition? _findNavPulse(WidgetTester tester, int index) {
+  final finder = find.byKey(Key('nav_pulse_$index'));
+  if (finder.evaluate().isEmpty) return null;
+  return tester.widget<ScaleTransition>(finder);
 }

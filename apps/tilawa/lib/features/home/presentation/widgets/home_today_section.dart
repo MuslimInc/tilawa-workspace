@@ -13,20 +13,6 @@ import '../../domain/entities/home_layout_mode.dart';
 import 'home_dashboard_section.dart';
 import 'home_featured_ritual_card.dart';
 import 'home_prayer_day_strip.dart';
-import 'home_quran_resume_card.dart';
-
-/// Zone 1 — Continue: full-width Quran resume card.
-class HomeContinueSection extends StatelessWidget {
-  const HomeContinueSection({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return HomeDashboardSection(
-      title: context.l10n.homeContinueTitle,
-      child: const HomeQuranResumeCard(),
-    );
-  }
-}
 
 /// Zone 2 — Today: prayer strip + optional Today Plan.
 class HomeTodaySection extends StatelessWidget {
@@ -60,7 +46,11 @@ class HomeTodaySection extends StatelessWidget {
   }
 }
 
-/// Zone 3 — Daily Practice: contextual athkar card + pinned athkar grid/list.
+/// Zone 3 — Your rituals: contextual athkar inline + pinned athkar list/grid.
+///
+/// The section title row carries the edit shortcut as trailing so there is no
+/// nested sub-header. Contextual athkar appears above the pinned list without
+/// any extra wrapper label.
 class HomeDailyPracticeSection extends StatelessWidget {
   const HomeDailyPracticeSection({
     super.key,
@@ -72,18 +62,32 @@ class HomeDailyPracticeSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return HomeDashboardSection(
-      title: context.l10n.homeDailyPracticeTitle,
-      subtitle: context.l10n.homeDailyPracticeSubtitle,
+      title: context.l10n.homeAthkarRitualsTitle,
+      trailing: _EditPinnedButton(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _ContextualAthkarCard(),
           PinnedAthkarHomeSection(
             hideContextualFeatured: true,
+            hideHeader: true,
             layoutMode: layoutMode,
           ),
         ],
       ),
+    );
+  }
+}
+
+class _EditPinnedButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return TilawaIconActionButton(
+      icon: Icons.edit_outlined,
+      onTap: () => showPinnedAthkarPicker(context),
+      backgroundColor: Colors.transparent,
+      tooltip: context.l10n.homePinnedAthkarEdit,
+      semanticLabel: context.l10n.homePinnedAthkarEdit,
     );
   }
 }

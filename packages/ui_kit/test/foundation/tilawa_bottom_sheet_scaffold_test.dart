@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../lib/src/atoms/tilawa_button.dart';
+import '../../lib/src/atoms/tilawa_sheet_handle.dart';
 import '../../lib/src/foundation/app_colors.dart';
 import '../../lib/src/foundation/app_theme.dart';
 import '../../lib/src/foundation/component_tokens/component_tokens_theme.dart';
@@ -8,10 +10,44 @@ import '../../lib/src/foundation/design_tokens.dart';
 import '../../lib/src/foundation/tilawa_bottom_sheet_actions.dart';
 import '../../lib/src/foundation/tilawa_bottom_sheet_scaffold.dart';
 import '../../lib/src/foundation/tilawa_bottom_sheet_title_row.dart';
-import '../../lib/src/atoms/tilawa_button.dart';
-import '../../lib/src/atoms/tilawa_sheet_handle.dart';
 
 void main() {
+  const footerKey = Key('footer');
+
+  Future<EdgeInsets> pumpFooterPadding(
+    WidgetTester tester, {
+    EdgeInsets viewPadding = EdgeInsets.zero,
+    EdgeInsets viewInsets = EdgeInsets.zero,
+  }) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.getLightTheme(
+          primaryColor: AppColors.defaultPrimary,
+        ),
+        home: MediaQuery(
+          data: MediaQueryData(
+            viewPadding: viewPadding,
+            viewInsets: viewInsets,
+          ),
+          child: const TilawaBottomSheetScaffold(
+            footer: KeyedSubtree(
+              key: footerKey,
+              child: Text('Footer'),
+            ),
+            children: [Text('Body')],
+          ),
+        ),
+      ),
+    );
+
+    final footerPadding = tester.widget<Padding>(
+      find.byWidgetPredicate(
+        (widget) => widget is Padding && widget.child?.key == footerKey,
+      ),
+    );
+    return footerPadding.padding as EdgeInsets;
+  }
+
   testWidgets('lays out handle, optional topBar, between, and children', (
     tester,
   ) async {
@@ -228,6 +264,49 @@ void main() {
 
     expect(find.byType(Divider), findsNothing);
     expect(find.byType(DecoratedBox), findsWidgets);
+  });
+
+  testWidgets('footer keeps comfortable bottom spacing with zero safe area', (
+    tester,
+  ) async {
+    final padding = await pumpFooterPadding(tester);
+    final tokens = Theme.of(tester.element(find.byKey(footerKey))).tokens;
+
+    expect(padding.bottom, tokens.spaceHuge);
+  });
+
+  testWidgets('footer adds a buffer above the system bottom safe area', (
+    tester,
+  ) async {
+    const systemBottomSafeArea = 34.0;
+
+    final padding = await pumpFooterPadding(
+      tester,
+      viewPadding: const EdgeInsets.only(bottom: systemBottomSafeArea),
+    );
+    final tokens = Theme.of(tester.element(find.byKey(footerKey))).tokens;
+
+    expect(padding.bottom, systemBottomSafeArea + tokens.spaceExtraLarge);
+  });
+
+  testWidgets('footer clears the keyboard with the token footer buffer', (
+    tester,
+  ) async {
+    const keyboardInset = 300.0;
+
+    final padding = await pumpFooterPadding(
+      tester,
+      viewInsets: const EdgeInsets.only(bottom: keyboardInset),
+    );
+    final context = tester.element(find.byKey(footerKey));
+    final footerPadding =
+        Theme.of(
+          context,
+        ).componentTokens.bottomSheetScaffold.footerPadding.resolve(
+          Directionality.of(context),
+        );
+
+    expect(padding.bottom, keyboardInset + footerPadding.bottom);
   });
 
   testWidgets('resolvedBodyPadding matches token defaults', (tester) async {

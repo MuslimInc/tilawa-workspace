@@ -150,6 +150,193 @@ void main() {
     });
   });
 
+  group('TilawaCatalogAppBar constructor default automaticallyImplyLeading', () {
+    // These tests document the expected contract: when a TilawaCatalogAppBar
+    // is placed on a screen pushed onto the navigator stack, it must show a
+    // back button without callers having to opt in.  The failing tests below
+    // prove the current default (false) violates that contract.
+
+    testWidgets(
+      'shows back button on a pushed route when using default constructor',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: _lightTheme(),
+            home: Scaffold(
+              body: Builder(
+                builder: (context) {
+                  return ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (innerContext) {
+                            return Scaffold(
+                              appBar: TilawaCatalogAppBar(
+                                preferredHeight:
+                                    TilawaAppBarConfig.catalogTitleOnlyHeight(
+                                      innerContext,
+                                    ),
+                                title: 'Detail',
+                                // No automaticallyImplyLeading passed —
+                                // relies on the default.
+                              ),
+                              body: const SizedBox.shrink(),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                    child: const Text('push'),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(find.text('push'));
+        await tester.pumpAndSettle();
+
+        // Expect the back button — currently FAILS because the default is false.
+        expect(find.byType(BackButtonIcon), findsAtLeastNWidgets(1));
+      },
+    );
+
+    testWidgets(
+      'hides back button when automaticallyImplyLeading is explicitly false',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: _lightTheme(),
+            home: Scaffold(
+              body: Builder(
+                builder: (context) {
+                  return ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (innerContext) {
+                            return Scaffold(
+                              appBar: TilawaCatalogAppBar(
+                                preferredHeight:
+                                    TilawaAppBarConfig.catalogTitleOnlyHeight(
+                                      innerContext,
+                                    ),
+                                title: 'Detail',
+                                automaticallyImplyLeading: false,
+                              ),
+                              body: const SizedBox.shrink(),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                    child: const Text('push'),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(find.text('push'));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(BackButtonIcon), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'shows back button on root screen does not imply leading',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: _lightTheme(),
+            home: Builder(
+              builder: (context) {
+                return Scaffold(
+                  appBar: TilawaCatalogAppBar(
+                    preferredHeight:
+                        TilawaAppBarConfig.catalogTitleOnlyHeight(context),
+                    title: 'Home',
+                    // default automaticallyImplyLeading — root route, no back
+                  ),
+                  body: const SizedBox.shrink(),
+                );
+              },
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Root route: no back button even with automaticallyImplyLeading: true.
+        expect(find.byType(BackButtonIcon), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'default and titleOnly factory behave identically on a pushed route',
+      (WidgetTester tester) async {
+        // titleOnly already defaults to automaticallyImplyLeading: true.
+        // After the fix, the main constructor must match its behaviour.
+        for (final useFactory in [true, false]) {
+          await tester.pumpWidget(
+            MaterialApp(
+              theme: _lightTheme(),
+              home: Scaffold(
+                body: Builder(
+                  builder: (context) {
+                    return ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (innerContext) {
+                              final PreferredSizeWidget appBar = useFactory
+                                  ? TilawaCatalogAppBar.titleOnly(
+                                      innerContext,
+                                      title: 'Detail',
+                                    )
+                                  : TilawaCatalogAppBar(
+                                      preferredHeight:
+                                          TilawaAppBarConfig
+                                              .catalogTitleOnlyHeight(
+                                                innerContext,
+                                              ),
+                                      title: 'Detail',
+                                    );
+                              return Scaffold(
+                                appBar: appBar,
+                                body: const SizedBox.shrink(),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                      child: const Text('push'),
+                    );
+                  },
+                ),
+              ),
+            ),
+          );
+
+          await tester.tap(find.text('push'));
+          await tester.pumpAndSettle();
+
+          expect(
+            find.byType(BackButtonIcon),
+            findsAtLeastNWidgets(1),
+            reason: useFactory
+                ? 'titleOnly factory should show back button'
+                : 'main constructor should show back button (same as factory)',
+          );
+
+          await tester.pumpWidget(const SizedBox());
+        }
+      },
+    );
+  });
+
   group('TilawaCatalogAppBar.titleOnly defaults', () {
     testWidgets('shows back control on a pushed route by default', (
       WidgetTester tester,
@@ -189,6 +376,169 @@ void main() {
 
       expect(find.byType(BackButtonIcon), findsAtLeastNWidgets(1));
     });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Shell-tab safety contract
+  //
+  // INVARIANT: TilawaCatalogAppBar must never render a back button when it is
+  // the app bar of a *root* route — i.e. the initial page of a Navigator.
+  //
+  // WHY THIS IS SAFE with automaticallyImplyLeading: true
+  // -------------------------------------------------------
+  // resolveLeading() (tilawa_app_bar_config.dart) only adds the back control
+  // when ModalRoute.impliesAppBarDismissal is true.  Flutter sets that flag
+  // only when the route can be popped (canPop) AND it is not the first route
+  // in its navigator.  Root routes therefore always get impliesAppBarDismissal
+  // == false, so automaticallyImplyLeading: true has no effect on them.
+  //
+  // SCREENS COVERED BY THIS CONTRACT
+  // ----------------------------------
+  // Every bottom-navigation shell tab is a root route of its inner navigator:
+  //   - RecitersScreen   (TilawaCatalogAppBar.titleOnly, centerTitle: true)
+  //   - HomeScreen       (custom sliver, not TilawaCatalogAppBar)
+  //   - AthkarScreen     (TilawaCatalogAppBar)
+  //   - SettingsScreen   (TilawaCatalogAppBar — explicitly passes false, safe)
+  //
+  // IF A TEST IN THIS GROUP FAILS it means either:
+  //   (a) resolveLeading() changed its ModalRoute.impliesAppBarDismissal check,
+  //   (b) automaticallyImplyLeading default was set back to true in a way that
+  //       also affects the root-route path, or
+  //   (c) the harness accidentally wrapped the tab in a pushed route.
+  // Do not work around a failure here by tweaking the harness — fix the source.
+  // ---------------------------------------------------------------------------
+  group('TilawaCatalogAppBar shell-tab safety (root route, no back button)', () {
+    // Minimal harness: a Navigator whose sole initial route hosts the app bar.
+    // This reproduces the shell-tab scenario without any app-level route imports.
+    Widget buildShellTabHost({
+      required PreferredSizeWidget Function(BuildContext) appBarBuilder,
+    }) {
+      return MaterialApp(
+        theme: _lightTheme(),
+        home: Navigator(
+          onGenerateRoute: (settings) => MaterialPageRoute<void>(
+            settings: settings,
+            builder: (context) => Scaffold(
+              appBar: appBarBuilder(context),
+              body: const SizedBox.shrink(),
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets(
+      'titleOnly does not show a back button when it is the root route',
+      (WidgetTester tester) async {
+        // CONTRACT: root route → impliesAppBarDismissal == false → no back button,
+        // even though automaticallyImplyLeading defaults to true.
+        await tester.pumpWidget(
+          buildShellTabHost(
+            appBarBuilder: (context) => TilawaCatalogAppBar.titleOnly(
+              context,
+              title: 'Tab title',
+              centerTitle: true,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          find.byType(BackButtonIcon),
+          findsNothing,
+          reason:
+              'Root route: ModalRoute.impliesAppBarDismissal == false. '
+              'Back button must never appear on a shell tab.',
+        );
+      },
+    );
+
+    testWidgets(
+      'titleOnly shows a back button only when ModalRoute implies dismissal',
+      (WidgetTester tester) async {
+        // CONTRACT: back button is gated on ModalRoute.impliesAppBarDismissal,
+        // not on automaticallyImplyLeading alone.
+        // Phase 1 — root route (no back button).
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: _lightTheme(),
+            home: Builder(
+              builder: (context) => Scaffold(
+                appBar: TilawaCatalogAppBar.titleOnly(context, title: 'Tab'),
+                body: Builder(
+                  builder: (innerContext) => ElevatedButton(
+                    onPressed: () => Navigator.of(innerContext).push(
+                      MaterialPageRoute<void>(
+                        builder: (pushedContext) => Scaffold(
+                          appBar: TilawaCatalogAppBar.titleOnly(
+                            pushedContext,
+                            title: 'Detail',
+                          ),
+                          body: const SizedBox.shrink(),
+                        ),
+                      ),
+                    ),
+                    child: const Text('push'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          find.byType(BackButtonIcon),
+          findsNothing,
+          reason:
+              'Phase 1 — root route: impliesAppBarDismissal == false. '
+              'No back button.',
+        );
+
+        // Phase 2 — pushed route (back button must appear).
+        await tester.tap(find.text('push'));
+        await tester.pumpAndSettle();
+        expect(
+          find.byType(BackButtonIcon),
+          findsAtLeastNWidgets(1),
+          reason:
+              'Phase 2 — pushed route: impliesAppBarDismissal == true. '
+              'Back button must appear.',
+        );
+      },
+    );
+
+    testWidgets(
+      'RecitersScreen-shaped usage does not show a back button on a root tab',
+      (WidgetTester tester) async {
+        // CONTRACT: the exact TilawaCatalogAppBar.titleOnly configuration used
+        // by RecitersScreen must not render a back button when hosted at the
+        // root of a navigator (shell tab).  If this test fails, RecitersScreen
+        // will show a spurious back button on the Reciters tab.
+        await tester.pumpWidget(
+          buildShellTabHost(
+            appBarBuilder: (context) => TilawaCatalogAppBar.titleOnly(
+              context,
+              title: 'Reciters',
+              centerTitle: true,
+              showBottomHairline: false,
+              showElevationShadow: false,
+              // automaticallyImplyLeading omitted — relies on default (true).
+              // Root route → impliesAppBarDismissal == false → no back button.
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          find.byType(BackButtonIcon),
+          findsNothing,
+          reason:
+              'RecitersScreen is a root shell tab. '
+              'automaticallyImplyLeading: true must not add a back button '
+              'because ModalRoute.impliesAppBarDismissal is false on root routes.',
+        );
+      },
+    );
   });
 
   group('TilawaAppBarScope', () {

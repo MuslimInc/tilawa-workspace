@@ -20,10 +20,12 @@ class HomeScreen extends StatelessWidget {
     super.key,
     required this.onOpenReciters,
     required this.onOpenPrayer,
+    required this.onOpenQibla,
   });
 
   final VoidCallback onOpenReciters;
   final VoidCallback onOpenPrayer;
+  final VoidCallback onOpenQibla;
 
   static const double _heroSnapThresholdFactor = 0.35;
   static const double _heroSnapTolerance = 0.5;
@@ -66,6 +68,7 @@ class HomeScreen extends StatelessWidget {
                     child: HomeDashboardBody(
                       onOpenReciters: onOpenReciters,
                       onOpenPrayer: onOpenPrayer,
+                      onOpenQibla: onOpenQibla,
                     ),
                   ),
                 ],

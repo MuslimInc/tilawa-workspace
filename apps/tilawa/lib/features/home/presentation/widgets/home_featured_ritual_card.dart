@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:tilawa/features/athkar/domain/entities/athkar_category.dart';
 import 'package:tilawa/features/athkar/presentation/athkar_category_presentation.dart';
 import 'package:tilawa/router/app_router_config.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_dashboard_card.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_travel_destination_card.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -66,63 +65,97 @@ class HomeFeaturedRitualCard extends StatelessWidget {
       );
     }
 
+    final cardTokens = theme.componentTokens.homeDashboardCard;
+    final Color warmStart = cardTokens.gradientStart.withValues(alpha: 0.28);
+    final Color warmEnd = cardTokens.gradientEnd.withValues(alpha: 0.18);
+    final Color tintFg = colorScheme.onSurface;
+    final double radius = tokens.resolveRadius(family: TilawaRadiusFamily.card);
+
     return Semantics(
       button: true,
       label: prompt,
-      child: HomeDashboardCard(
-        surface: TilawaCardSurface.raised,
-        onTap: openDetails,
-        child: Row(
-          spacing: tokens.spaceMedium,
-          children: [
-            TilawaIconBox(
-              icon: athkarCategoryIcon(category.icon),
-              variant: TilawaIconBoxVariant.tinted,
-              backgroundColor: colorScheme.primary,
-              iconColor: colorScheme.onPrimary,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(radius),
+        child: InkWell(
+          onTap: openDetails,
+          borderRadius: BorderRadius.circular(radius),
+          splashColor: cardTokens.gradientEnd.withValues(alpha: 0.12),
+          highlightColor: cardTokens.gradientEnd.withValues(alpha: 0.06),
+          child: Ink(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: AlignmentDirectional.topStart,
+                end: AlignmentDirectional.bottomEnd,
+                colors: [warmStart, warmEnd],
+              ),
+              borderRadius: BorderRadius.circular(radius),
+              border: Border.all(
+                color: cardTokens.gradientEnd.withValues(alpha: 0.25),
+                width: tokens.borderWidthThin * 2,
+              ),
             ),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: tokens.spaceExtraSmall,
+            child: Padding(
+              padding: EdgeInsets.all(tokens.spaceMedium),
+              child: Row(
+                spacing: tokens.spaceMedium,
                 children: [
-                  Text(
-                    prompt,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: colorScheme.onSurface,
-                      fontWeight: FontWeight.w800,
+                  Container(
+                    width: tokens.spaceExtraLarge + tokens.spaceMedium,
+                    height: tokens.spaceExtraLarge + tokens.spaceMedium,
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary,
+                      borderRadius: BorderRadius.circular(
+                        tokens.resolveRadius(
+                          family: TilawaRadiusFamily.decorative,
+                        ),
+                      ),
+                    ),
+                    child: Icon(
+                      athkarCategoryIcon(category.icon),
+                      color: colorScheme.onPrimary,
+                      size: tokens.iconSizeMedium,
                     ),
                   ),
-                  Text(
-                    startLabel,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: tokens.spaceExtraSmall,
+                      children: [
+                        TilawaStatusChip(
+                          label: nowBadgeLabel,
+                          backgroundColor: colorScheme.primary,
+                          foregroundColor: colorScheme.onPrimary,
+                        ),
+                        Text(
+                          prompt,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            color: tintFg,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        Text(
+                          startLabel,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: tintFg.withValues(alpha: 0.72),
+                          ),
+                        ),
+                      ],
                     ),
+                  ),
+                  // Keep the right chevron in both LTR and RTL; this icon
+                  // reads correctly in Arabic and avoids unwanted mirroring.
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    size: tokens.iconSizeSmall,
+                    color: tintFg.withValues(alpha: 0.55),
                   ),
                 ],
               ),
             ),
-            Column(
-              spacing: tokens.spaceExtraSmall,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                TilawaStatusChip(
-                  label: nowBadgeLabel,
-                  backgroundColor: colorScheme.primary,
-                  foregroundColor: colorScheme.onPrimary,
-                ),
-                // Keep the right chevron in both LTR and RTL; this icon
-                // reads correctly in Arabic and avoids unwanted mirroring.
-                Icon(
-                  Icons.chevron_right_rounded,
-                  size: tokens.iconSizeSmall,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ],
-            ),
-          ],
+          ),
         ),
       ),
     );

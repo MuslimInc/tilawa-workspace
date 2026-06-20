@@ -110,13 +110,16 @@ void main() {
       await tester.pump(const Duration(milliseconds: 16));
     }
 
-    expect(find.text('Continue'), findsOneWidget);
+    // Zone titles after restructure: no "Continue" or "Daily Practice" section
+    // labels; Quran resume card and daily inspiration are self-labelled content.
+    expect(find.text('Continue'), findsNothing);
+    expect(find.text('Daily Practice'), findsNothing);
+    expect(find.text('Daily inspiration'), findsNothing);
     expect(find.text('Today'), findsOneWidget);
-    expect(find.text('Daily Practice'), findsOneWidget);
+    expect(find.text('Quick athkar'), findsOneWidget);
     expect(find.text('Discover'), findsOneWidget);
     expect(find.text('Last Read'), findsOneWidget);
     expect(find.text('Search surahs, juz, or page'), findsNothing);
-    expect(find.text('Daily inspiration'), findsOneWidget);
     expect(find.text('Reciters'), findsOneWidget);
     expect(find.text('Browse recitations'), findsOneWidget);
     expect(find.text('Tasbeeh'), findsOneWidget);
@@ -131,7 +134,7 @@ void main() {
     expect(find.text('Settings'), findsNothing);
 
     expect(
-      tester.getTopLeft(find.text('Daily inspiration')).dy,
+      tester.getTopLeft(find.text('Daily ayah')).dy,
       greaterThan(tester.getTopLeft(find.text('Discover')).dy),
     );
   });
@@ -171,7 +174,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 16));
     }
 
-    expect(find.text('Daily inspiration'), findsOneWidget);
+    // Section title removed — the card content is self-evident
+    expect(find.text('Daily inspiration'), findsNothing);
     expect(find.byType(HomeDailyInspirationSection), findsOneWidget);
     expect(find.text('Daily ayah'), findsOneWidget);
     expect(find.text('Daily dua'), findsOneWidget);
@@ -267,12 +271,14 @@ class _HomeScreenHarness extends StatelessWidget {
     required this.bloc,
     this.locale = 'ar',
     this.onOpenReciters,
+    this.onOpenQibla,
     this.layoutRepository,
   });
 
   final HomeDashboardBloc bloc;
   final String locale;
   final VoidCallback? onOpenReciters;
+  final VoidCallback? onOpenQibla;
   final _FakeHomeLayoutPreferenceRepository? layoutRepository;
 
   @override
@@ -315,6 +321,7 @@ class _HomeScreenHarness extends StatelessWidget {
           builder: (context) {
             return HomeScreen(
               onOpenReciters: onOpenReciters ?? () {},
+              onOpenQibla: onOpenQibla ?? () {},
               onOpenPrayer: () {},
             );
           },

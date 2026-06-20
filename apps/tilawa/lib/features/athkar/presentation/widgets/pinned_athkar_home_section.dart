@@ -21,12 +21,18 @@ class PinnedAthkarHomeSection extends StatelessWidget {
   const PinnedAthkarHomeSection({
     super.key,
     this.hideContextualFeatured = false,
+    this.hideHeader = false,
     required this.layoutMode,
   });
 
   /// When true, the contextual featured card is omitted (shown above this
   /// widget in [HomeDailyPracticeSection] instead).
   final bool hideContextualFeatured;
+
+  /// When true, the "Rituals" sub-header and edit button are omitted because
+  /// the parent section title row already carries the edit action.
+  final bool hideHeader;
+
   final HomeLayoutMode layoutMode;
 
   @override
@@ -49,18 +55,20 @@ class PinnedAthkarHomeSection extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _PinnedAthkarSectionHeader(
-              onEdit: () => _showPinnedAthkarPicker(context),
-            ),
-            SizedBox(height: context.tokens.spaceMedium),
+            if (!hideHeader) ...[
+              _PinnedAthkarSectionHeader(
+                onEdit: () => showPinnedAthkarPicker(context),
+              ),
+              SizedBox(height: context.tokens.spaceMedium),
+            ],
             if (state.pinnedCategories.isEmpty)
               _PinnedAthkarEmptyCard(
-                onChoose: () => _showPinnedAthkarPicker(context),
+                onChoose: () => showPinnedAthkarPicker(context),
               )
             else
               _PinnedAthkarQuickAccess(
                 categories: state.pinnedCategories,
-                onEdit: () => _showPinnedAthkarPicker(context),
+                onEdit: () => showPinnedAthkarPicker(context),
                 hideContextualFeatured: hideContextualFeatured,
                 layoutMode: layoutMode,
               ),
@@ -69,23 +77,23 @@ class PinnedAthkarHomeSection extends StatelessWidget {
       },
     );
   }
+}
 
-  Future<void> _showPinnedAthkarPicker(BuildContext context) {
-    final cubit = context.read<PinnedAthkarCubit>();
-    final colorScheme = Theme.of(context).colorScheme;
-    return showTilawaModalBottomSheet<void>(
-      context: context,
-      backgroundColor: colorScheme.surface,
-      shape: TilawaBottomSheetScaffold.modalShape(context),
-      sheetSemanticsLabel: context.l10n.homePinnedAthkarPickerTitle,
-      builder: (sheetContext) {
-        return BlocProvider.value(
-          value: cubit,
-          child: const _PinnedAthkarPickerSheet(),
-        );
-      },
-    );
-  }
+Future<void> showPinnedAthkarPicker(BuildContext context) {
+  final cubit = context.read<PinnedAthkarCubit>();
+  final colorScheme = Theme.of(context).colorScheme;
+  return showTilawaModalBottomSheet<void>(
+    context: context,
+    backgroundColor: colorScheme.surface,
+    shape: TilawaBottomSheetScaffold.modalShape(context),
+    sheetSemanticsLabel: context.l10n.homePinnedAthkarPickerTitle,
+    builder: (sheetContext) {
+      return BlocProvider.value(
+        value: cubit,
+        child: const _PinnedAthkarPickerSheet(),
+      );
+    },
+  );
 }
 
 class _PinnedAthkarSectionHeader extends StatelessWidget {

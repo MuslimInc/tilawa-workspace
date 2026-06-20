@@ -1641,10 +1641,9 @@ class TilawaExperimentalBadgeTokens {
   factory TilawaExperimentalBadgeTokens.fromColorScheme(
     ColorScheme colorScheme,
   ) {
-    final warning =
-        colorScheme.brightness == Brightness.dark
-            ? AppColors.warningDark
-            : AppColors.warning;
+    final warning = colorScheme.brightness == Brightness.dark
+        ? AppColors.warningDark
+        : AppColors.warning;
     return TilawaExperimentalBadgeTokens(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       backgroundColor: Color.alphaBlend(

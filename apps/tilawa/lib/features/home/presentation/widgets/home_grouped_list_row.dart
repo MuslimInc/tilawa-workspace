@@ -6,6 +6,9 @@ class HomeGroupedListRow extends StatelessWidget {
   const HomeGroupedListRow({
     super.key,
     required this.icon,
+    this.iconTint = TilawaSemanticTint.ink,
+    this.iconBackgroundColor,
+    this.iconColor,
     required this.title,
     this.subtitle,
     required this.onTap,
@@ -16,6 +19,17 @@ class HomeGroupedListRow extends StatelessWidget {
   });
 
   final IconData icon;
+
+  /// Semantic tint for the leading icon box. Used when [iconBackgroundColor]
+  /// and [iconColor] are not provided.
+  final TilawaSemanticTint iconTint;
+
+  /// Explicit icon box background color — overrides [iconTint] when set.
+  final Color? iconBackgroundColor;
+
+  /// Explicit icon glyph color — overrides [iconTint] when set.
+  final Color? iconColor;
+
   final String title;
   final String? subtitle;
   final VoidCallback onTap;
@@ -60,7 +74,9 @@ class HomeGroupedListRow extends StatelessWidget {
                     icon: icon,
                     size: tokens.iconSizeMedium,
                     variant: TilawaIconBoxVariant.tinted,
-                    semanticTint: TilawaSemanticTint.ink,
+                    semanticTint: iconTint,
+                    backgroundColor: iconBackgroundColor,
+                    iconColor: iconColor,
                   ),
                   Expanded(
                     child: Column(

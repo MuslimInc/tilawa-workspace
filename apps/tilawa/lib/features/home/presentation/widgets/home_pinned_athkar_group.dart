@@ -28,6 +28,17 @@ class HomePinnedAthkarGroup extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final Color dividerColor = colorScheme.outlineVariant;
 
+    // Four distinct icon colour pairs cycling through the available palette.
+    final List<(Color bg, Color fg)> tints = [
+      (colorScheme.primary.withValues(alpha: 0.13), colorScheme.primary),
+      (
+        AppColors.featuredGradientStart.withValues(alpha: 0.28),
+        AppColors.featuredGradientEnd,
+      ),
+      (AppColors.success.withValues(alpha: 0.14), AppColors.success),
+      (colorScheme.primary.withValues(alpha: 0.08), AppColors.brandTertiary),
+    ];
+
     return HomeDashboardCard(
       surface: TilawaCardSurface.flat,
       padding: EdgeInsets.zero,
@@ -42,6 +53,8 @@ class HomePinnedAthkarGroup extends StatelessWidget {
               ),
             _PinnedAthkarGroupRow(
               category: categories[i],
+              iconBackgroundColor: tints[i % tints.length].$1,
+              iconColor: tints[i % tints.length].$2,
               onLongPress: onLongPressCategory == null
                   ? null
                   : () => onLongPressCategory!(categories[i]),
@@ -56,10 +69,14 @@ class HomePinnedAthkarGroup extends StatelessWidget {
 class _PinnedAthkarGroupRow extends StatelessWidget {
   const _PinnedAthkarGroupRow({
     required this.category,
+    required this.iconBackgroundColor,
+    required this.iconColor,
     this.onLongPress,
   });
 
   final AthkarCategory category;
+  final Color iconBackgroundColor;
+  final Color iconColor;
   final VoidCallback? onLongPress;
 
   @override
@@ -68,6 +85,8 @@ class _PinnedAthkarGroupRow extends StatelessWidget {
 
     return HomeGroupedListRow(
       icon: athkarCategoryIcon(category.icon),
+      iconBackgroundColor: iconBackgroundColor,
+      iconColor: iconColor,
       title: title,
       onTap: () {
         AthkarDetailsRoute(

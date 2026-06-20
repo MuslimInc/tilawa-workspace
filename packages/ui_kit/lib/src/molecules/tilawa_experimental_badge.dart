@@ -39,7 +39,10 @@ class TilawaExperimentalBadge extends StatelessWidget {
         decoration: BoxDecoration(
           color: tokens.backgroundColor,
           borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: tokens.borderColor, width: tokens.borderWidth),
+          border: Border.all(
+            color: tokens.borderColor,
+            width: tokens.borderWidth,
+          ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

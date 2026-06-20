@@ -116,89 +116,152 @@ class _HomeQuranResumeReadyCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
-    final Color foreground = colorScheme.onSurface;
-    final Color mutedForeground = colorScheme.onSurfaceVariant;
+    final cardTokens = theme.componentTokens.homeDashboardCard;
+    final Color foreground = cardTokens.foregroundColor;
+    final Color mutedForeground = foreground.withValues(alpha: 0.78);
+    final Color dimForeground = foreground.withValues(alpha: 0.45);
+    final double radius = tokens.resolveRadius(family: TilawaRadiusFamily.hero);
 
     return Semantics(
       button: true,
       label: title,
       value: subtitle,
-      child: HomeDashboardCard(
-        surface: TilawaCardSurface.raised,
-        onTap: () => const QuranLastReadRoute().push(context),
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Row(
-              spacing: tokens.spaceMedium,
-              children: [
-                _HomeQuranLeadingIcon(
-                  progress: showProgress ? progress : null,
-                  foreground: foreground,
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: tokens.spaceExtraSmall,
-                    children: [
-                      Text(
-                        title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleSmall?.copyWith(
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(radius),
+        child: InkWell(
+          onTap: () => const QuranLastReadRoute().push(context),
+          borderRadius: BorderRadius.circular(radius),
+          splashColor: foreground.withValues(alpha: 0.10),
+          highlightColor: foreground.withValues(alpha: 0.06),
+          child: Ink(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: AlignmentDirectional.topStart,
+                end: AlignmentDirectional.bottomEnd,
+                colors: [cardTokens.gradientStart, cardTokens.gradientEnd],
+              ),
+              borderRadius: BorderRadius.circular(radius),
+            ),
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: tokens.spaceExtraLarge,
+                vertical: tokens.spaceLarge,
+              ),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  // Decorative mosque silhouette — large, clipped by the card
+                  PositionedDirectional(
+                    end: -tokens.spaceExtraLarge * 0.5,
+                    top: 0,
+                    bottom: 0,
+                    child: IgnorePointer(
+                      child: Opacity(
+                        opacity: 0.13,
+                        child: Icon(
+                          Icons.mosque_rounded,
+                          size: tokens.spaceExtraLarge * 3,
                           color: foreground,
-                          fontWeight: FontWeight.w700,
                         ),
                       ),
-                      Text(
-                        subtitle,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: mutedForeground,
+                    ),
+                  ),
+                  Row(
+                    spacing: tokens.spaceMedium,
+                    children: [
+                      _HomeQuranLeadingIcon(
+                        progress: showProgress ? progress : null,
+                        foreground: foreground,
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: tokens.spaceExtraSmall,
+                          children: [
+                            Text(
+                              title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.labelMedium?.copyWith(
+                                color: dimForeground,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            Text(
+                              subtitle,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: foreground,
+                                fontWeight: FontWeight.w800,
+                                height: 1.25,
+                              ),
+                            ),
+                            if (showProgress && progress != null)
+                              _ProgressBar(
+                                progress: progress!,
+                                foreground: foreground,
+                                label: context.l10n.homeQuranResumeProgress(
+                                  (progress! * 100).round(),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
-                      if (showProgress && progress != null)
-                        Text(
-                          context.l10n.homeQuranResumeProgress(
-                            (progress! * 100).round(),
-                          ),
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            color: foreground,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        color: mutedForeground,
+                        size: tokens.iconSizeMedium,
+                      ),
                     ],
                   ),
-                ),
-                // Keep the right chevron in both LTR and RTL; this icon
-                // reads correctly in Arabic and avoids unwanted mirroring.
-                Icon(
-                  Icons.chevron_right_rounded,
-                  color: mutedForeground,
-                  size: tokens.iconSizeSmall,
-                ),
-              ],
-            ),
-            PositionedDirectional(
-              end: -tokens.spaceSmall,
-              top: -tokens.spaceSmall,
-              bottom: -tokens.spaceSmall,
-              child: IgnorePointer(
-                child: Opacity(
-                  opacity: tokens.opacitySubtle * 2,
-                  child: Icon(
-                    Icons.mosque_rounded,
-                    size: tokens.spaceExtraLarge * 2,
-                    color: foreground,
-                  ),
-                ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+class _ProgressBar extends StatelessWidget {
+  const _ProgressBar({
+    required this.progress,
+    required this.foreground,
+    required this.label,
+  });
+
+  final double progress;
+  final Color foreground;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: tokens.spaceExtraSmall,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(tokens.radiusSmall),
+          child: LinearProgressIndicator(
+            value: progress,
+            backgroundColor: foreground.withValues(alpha: 0.20),
+            valueColor: AlwaysStoppedAnimation<Color>(foreground),
+            minHeight: 4,
+          ),
+        ),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: foreground.withValues(alpha: 0.78),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -216,11 +279,13 @@ class _HomeQuranLeadingIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final double ringSize = tokens.spaceExtraLarge + tokens.spaceMedium;
+    final double ringSize = tokens.spaceExtraLarge + tokens.spaceLarge;
 
     if (progress == null) {
       return TilawaIconBox(
         icon: Icons.menu_book_rounded,
+        size: tokens.iconSizeLarge,
+        padding: tokens.spaceMedium,
         variant: TilawaIconBoxVariant.tinted,
         semanticTint: TilawaSemanticTint.ink,
         iconColor: foreground,
@@ -236,13 +301,13 @@ class _HomeQuranLeadingIcon extends StatelessWidget {
           TilawaLoadingIndicator(
             centered: false,
             value: progress,
-            backgroundColor: foreground.withValues(alpha: 0.16),
+            backgroundColor: foreground.withValues(alpha: 0.20),
             color: foreground,
           ),
           TilawaIconBox(
             icon: Icons.menu_book_rounded,
-            size: tokens.iconSizeSmall,
-            padding: tokens.spaceExtraSmall,
+            size: tokens.iconSizeMedium,
+            padding: tokens.spaceSmall,
             variant: TilawaIconBoxVariant.tinted,
             semanticTint: TilawaSemanticTint.ink,
             iconColor: foreground,

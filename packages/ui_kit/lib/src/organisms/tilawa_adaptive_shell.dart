@@ -235,26 +235,76 @@ class _BottomNavBar extends StatefulWidget {
 }
 
 class _BottomNavBarState extends State<_BottomNavBar>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   static const double _longPressMinFocusDistance = 20;
+  // Pulse rises to this scale factor then returns to 1.0.
+  static const double _pulseScale = 1.06;
+  // Total pulse duration split evenly between rise and fall.
+  static const Duration _pulseDuration = Duration(milliseconds: 280);
 
   late final AnimationController _longPressController;
+  late final AnimationController _pulseController;
+  late final Animation<double> _pulseAnimation;
+
   int? _activePointer;
   int? _longPressOriginIndex;
   int? _longPressFocusedIndex;
   _VerticalStackAnchor? _verticalStackAnchor;
   final GlobalKey _navStackKey = GlobalKey();
 
+  // Index currently being pulsed; null when idle.
+  int? _pulsingIndex;
+  // Set to true for the frame where onDestinationSelected is called by this
+  // widget (user tap or long-press commit).  Cleared in didUpdateWidget so
+  // that prop-driven index changes don't fire the pulse.
+  bool _userInitiatedChange = false;
+
   @override
   void initState() {
     super.initState();
     _longPressController = AnimationController(vsync: this);
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: _pulseDuration,
+    );
+    // Rise: 1.0 → _pulseScale over first half; Fall: _pulseScale → 1.0 over second half.
+    _pulseAnimation = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween(begin: 1.0, end: _pulseScale)
+            .chain(CurveTween(curve: Curves.easeOut)),
+        weight: 50,
+      ),
+      TweenSequenceItem(
+        tween: Tween(begin: _pulseScale, end: 1.0)
+            .chain(CurveTween(curve: Curves.easeIn)),
+        weight: 50,
+      ),
+    ]).animate(_pulseController);
+  }
+
+  @override
+  void didUpdateWidget(_BottomNavBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final bool indexChanged = widget.selectedIndex != oldWidget.selectedIndex;
+    if (indexChanged && !_userInitiatedChange && widget.selectedIndex != null) {
+      _pulsingIndex = widget.selectedIndex;
+      _pulseController.forward(from: 0).then((_) {
+        if (mounted) setState(() => _pulsingIndex = null);
+      });
+    }
+    _userInitiatedChange = false;
   }
 
   @override
   void dispose() {
     _longPressController.dispose();
+    _pulseController.dispose();
     super.dispose();
+  }
+
+  void _notifyDestinationSelected(int index) {
+    _userInitiatedChange = true;
+    widget.onDestinationSelected(index);
   }
 
   bool get _isLongPressActive => _longPressOriginIndex != null;
@@ -814,14 +864,19 @@ class _BottomNavBarState extends State<_BottomNavBar>
                                         i++
                                       )
                                         _NavButton(
+                                          key: Key('nav_button_$i'),
                                           destination: widget.destinations[i],
                                           isSelected:
                                               hasSelection &&
                                               widget.selectedIndex == i,
                                           onTap: () =>
-                                              widget.onDestinationSelected(i),
+                                              _notifyDestinationSelected(i),
                                           onLongPress: () =>
                                               _startLongPressSession(i),
+                                          pulseAnimation: _pulsingIndex == i
+                                              ? _pulseAnimation
+                                              : null,
+                                          pulseKey: Key('nav_pulse_$i'),
                                         ),
                                     ],
                                   ),
@@ -1300,16 +1355,23 @@ class _LongPressNavItem extends StatelessWidget {
 
 class _NavButton extends StatelessWidget {
   const _NavButton({
+    super.key,
     required this.destination,
     required this.isSelected,
     required this.onTap,
     required this.onLongPress,
+    this.pulseAnimation,
+    this.pulseKey,
   });
 
   final TilawaNavDestination destination;
   final bool isSelected;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
+  /// Non-null only when a programmatic index change just selected this item.
+  final Animation<double>? pulseAnimation;
+  /// Key placed on the [ScaleTransition] wrapper for test introspection.
+  final Key? pulseKey;
 
   @override
   Widget build(BuildContext context) {
@@ -1321,7 +1383,7 @@ class _NavButton extends StatelessWidget {
     final Color unselectedFg = colorScheme.onSurfaceVariant;
     final double hitSize = tokens.navButtonIconOnlyMinHeight;
 
-    final Widget iconWidget = destination.iconBuilder != null
+    Widget iconWidget = destination.iconBuilder != null
         ? destination.iconBuilder!(
             context,
             isSelected: isSelected,
@@ -1334,6 +1396,23 @@ class _NavButton extends StatelessWidget {
             size: tokens.navButtonIconSize,
             color: isSelected ? selectedFg : unselectedFg,
           );
+
+    final Animation<double>? pulse = pulseAnimation;
+    if (pulse != null) {
+      iconWidget = ScaleTransition(
+        key: pulseKey,
+        scale: pulse,
+        child: iconWidget,
+      );
+    } else {
+      // Always emit the ScaleTransition node (at fixed scale 1.0) so tests
+      // can find it by key regardless of animation state.
+      iconWidget = ScaleTransition(
+        key: pulseKey,
+        scale: const AlwaysStoppedAnimation<double>(1.0),
+        child: iconWidget,
+      );
+    }
 
     return Semantics(
       button: true,

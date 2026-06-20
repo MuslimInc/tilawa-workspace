@@ -10,6 +10,8 @@ class HomeMoreAction {
     required this.label,
     this.subtitle,
     required this.icon,
+    this.iconBackgroundColor,
+    this.iconColor,
     required this.onTap,
     this.trailing,
   });
@@ -17,6 +19,13 @@ class HomeMoreAction {
   final String label;
   final String? subtitle;
   final IconData icon;
+
+  /// Explicit icon box background. When null, defaults to [TilawaSemanticTint.ink].
+  final Color? iconBackgroundColor;
+
+  /// Explicit icon glyph color. When null, defaults to [TilawaSemanticTint.ink].
+  final Color? iconColor;
+
   final VoidCallback onTap;
 
   /// Optional widget replacing the default chevron (e.g. a badge).
@@ -49,6 +58,8 @@ class HomeMoreActionsGroup extends StatelessWidget {
               ),
             HomeGroupedListRow(
               icon: actions[i].icon,
+              iconBackgroundColor: actions[i].iconBackgroundColor,
+              iconColor: actions[i].iconColor,
               title: actions[i].label,
               subtitle: actions[i].subtitle,
               onTap: actions[i].onTap,

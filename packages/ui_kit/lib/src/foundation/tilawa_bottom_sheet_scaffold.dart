@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../atoms/tilawa_sheet_handle.dart';
 import 'component_tokens.dart';
+import 'design_tokens.dart';
+import 'safe_area_ext.dart';
 
 /// Standard layout for modal bottom sheet content aligned with
 /// [TilawaBottomSheetScaffoldTokens].
@@ -47,7 +49,11 @@ class TilawaBottomSheetScaffold extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.componentTokens.bottomSheetScaffold;
     final direction = Directionality.of(context);
-    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    final footerPadding = tokens.footerPadding.resolve(direction);
+    final bottomPadding = _resolveFooterBottomPadding(
+      context,
+      footerPadding.bottom,
+    );
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -75,10 +81,9 @@ class TilawaBottomSheetScaffold extends StatelessWidget {
               ),
               child: SafeArea(
                 top: false,
+                bottom: false,
                 child: Padding(
-                  padding: tokens.footerPadding
-                      .resolve(direction)
-                      .add(EdgeInsets.only(bottom: bottomInset)),
+                  padding: footerPadding.copyWith(bottom: bottomPadding),
                   child: footer,
                 ),
               ),
@@ -102,4 +107,20 @@ class TilawaBottomSheetScaffold extends StatelessWidget {
     final g = Theme.of(context).componentTokens.bottomSheetScaffold.bodyPadding;
     return g.resolve(Directionality.of(context));
   }
+}
+
+double _resolveFooterBottomPadding(
+  BuildContext context,
+  double keyboardBuffer,
+) {
+  final spacing = Theme.of(context).tokens;
+  if (context.isKeyboardVisible) {
+    return context.keyboardInset + keyboardBuffer;
+  }
+
+  if (context.systemBottomSafeArea > 0) {
+    return context.systemBottomSafeArea + spacing.spaceExtraLarge;
+  }
+
+  return spacing.spaceHuge;
 }

@@ -9,7 +9,8 @@ Widget _wrap(
   ThemeData? theme,
 }) {
   return MaterialApp(
-    theme: theme ?? AppTheme.getLightTheme(primaryColor: const Color(0xFF8B5E3C)),
+    theme:
+        theme ?? AppTheme.getLightTheme(primaryColor: const Color(0xFF8B5E3C)),
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
     locale: locale,
