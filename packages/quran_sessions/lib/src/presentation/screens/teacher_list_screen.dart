@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../failure_ui/quran_sessions_failure_ui.dart';
 import '../blocs/teacher_list/teacher_list_bloc.dart';
 import '../blocs/teacher_list/teacher_list_event.dart';
 import '../blocs/teacher_list/teacher_list_state.dart';
 import '../widgets/teacher_card.dart';
 
 class TeacherListScreen extends StatefulWidget {
-  const TeacherListScreen({super.key});
+  const TeacherListScreen({super.key, this.onTeacherTapped});
+
+  /// Called when the user taps a teacher card. The host app is responsible
+  /// for navigating to [TeacherProfileScreen] with the given [teacherId].
+  final void Function(String teacherId)? onTeacherTapped;
 
   @override
   State<TeacherListScreen> createState() => _TeacherListScreenState();
@@ -49,7 +54,7 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
             specialization: activeSpecialization,
           ),
           TeacherListFailure(:final failure) => _ErrorView(
-            failure: failure.toString(),
+            message: failure.toLocalizedMessage(context),
             onRetry: _retry,
           ),
           TeacherListSuccess(
@@ -84,7 +89,7 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
       context.read<TeacherListBloc>().add(const LoadTeachersRequested());
 
   void _onTeacherTapped(String teacherId) {
-    // Navigation handled by host app router; package exposes route constants.
+    widget.onTeacherTapped?.call(teacherId);
   }
 }
 
@@ -102,8 +107,8 @@ class _EmptyView extends StatelessWidget {
 }
 
 class _ErrorView extends StatelessWidget {
-  const _ErrorView({required this.failure, required this.onRetry});
-  final String failure;
+  const _ErrorView({required this.message, required this.onRetry});
+  final String message;
   final VoidCallback onRetry;
 
   @override
@@ -112,7 +117,7 @@ class _ErrorView extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('Something went wrong'),
+          Text(message),
           const SizedBox(height: 12),
           ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
         ],

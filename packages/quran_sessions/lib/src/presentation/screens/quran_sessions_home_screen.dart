@@ -10,7 +10,16 @@ import '../widgets/teacher_card.dart';
 /// Feature entry point — shows a compact teacher list with a "See all" link
 /// and the user's next upcoming session (if any).
 class QuranSessionsHomeScreen extends StatefulWidget {
-  const QuranSessionsHomeScreen({super.key});
+  const QuranSessionsHomeScreen({
+    super.key,
+    this.onSeeAllTeachers,
+    this.onTeacherTapped,
+    this.onMySessions,
+  });
+
+  final VoidCallback? onSeeAllTeachers;
+  final void Function(String teacherId)? onTeacherTapped;
+  final VoidCallback? onMySessions;
 
   @override
   State<QuranSessionsHomeScreen> createState() =>
@@ -27,7 +36,16 @@ class _QuranSessionsHomeScreenState extends State<QuranSessionsHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Quran Sessions')),
+      appBar: AppBar(
+        title: const Text('تعلم قراءة القرآن'),
+        actions: [
+          if (widget.onMySessions != null)
+            TextButton(
+              onPressed: widget.onMySessions,
+              child: const Text('جلساتي'),
+            ),
+        ],
+      ),
       body: BlocBuilder<TeacherListBloc, TeacherListState>(
         builder: (context, state) => switch (state) {
           TeacherListInitial() || TeacherListLoading() => const Center(
@@ -48,12 +66,12 @@ class _QuranSessionsHomeScreenState extends State<QuranSessionsHomeScreen> {
               if (i < teachers.take(3).length) {
                 return TeacherCard(
                   teacher: teachers[i],
-                  onTap: () {},
+                  onTap: () => widget.onTeacherTapped?.call(teachers[i].id),
                 );
               }
               return TextButton(
-                onPressed: () {},
-                child: const Text('See all teachers →'),
+                onPressed: widget.onSeeAllTeachers,
+                child: const Text('عرض جميع المعلمين ←'),
               );
             },
           ),

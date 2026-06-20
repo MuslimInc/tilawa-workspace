@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../domain/entities/quran_booking.dart';
 import '../../domain/entities/session_call_type.dart';
 import '../failure_ui/quran_sessions_failure_ui.dart';
 import '../blocs/booking/booking_bloc.dart';
@@ -13,16 +14,23 @@ class BookingScreen extends StatefulWidget {
     super.key,
     required this.teacherId,
     this.preSelectedSlotId,
+    this.onBookingSuccess,
   });
 
   final String teacherId;
   final String? preSelectedSlotId;
+
+  /// Called after a booking is confirmed. When provided, the host app handles
+  /// navigation; otherwise the screen pops itself.
+  final void Function(QuranBooking booking)? onBookingSuccess;
 
   @override
   State<BookingScreen> createState() => _BookingScreenState();
 }
 
 class _BookingScreenState extends State<BookingScreen> {
+  bool _autoSelectedSlot = false;
+
   @override
   void initState() {
     super.initState();
@@ -39,14 +47,31 @@ class _BookingScreenState extends State<BookingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Book a Session')),
+      appBar: AppBar(title: const Text('احجز جلسة')),
       body: BlocConsumer<BookingBloc, BookingState>(
         listener: (context, state) {
+          // Auto-select the pre-selected slot the first time BookingSelecting loads.
+          if (!_autoSelectedSlot &&
+              widget.preSelectedSlotId != null &&
+              state is BookingSelecting) {
+            _autoSelectedSlot = true;
+            final slot = state.availableSlots
+                .where((s) => s.slotId == widget.preSelectedSlotId)
+                .firstOrNull;
+            if (slot != null) {
+              context.read<BookingBloc>().add(SlotSelected(slot));
+            }
+          }
+
           if (state is BookingSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Booking confirmed!')),
+              const SnackBar(content: Text('تم تأكيد الحجز!')),
             );
-            Navigator.of(context).pop();
+            if (widget.onBookingSuccess != null) {
+              widget.onBookingSuccess!(state.booking);
+            } else {
+              Navigator.of(context).pop();
+            }
           }
           if (state is BookingFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -66,7 +91,7 @@ class _BookingScreenState extends State<BookingScreen> {
               children: [
                 CircularProgressIndicator(),
                 SizedBox(height: 12),
-                Text('Confirming your booking…'),
+                Text('جارٍ تأكيد الحجز…'),
               ],
             ),
           ),
@@ -86,31 +111,41 @@ class _BookingScreenState extends State<BookingScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'Pick a time slot',
+                    'اختر موعداً',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 12),
-                  AvailabilitySlotPicker(
-                    slots: availableSlots,
-                    selectedSlotId: selectedSlot?.slotId,
-                    onSlotSelected: (slot) =>
-                        context.read<BookingBloc>().add(SlotSelected(slot)),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          AvailabilitySlotPicker(
+                            slots: availableSlots,
+                            selectedSlotId: selectedSlot?.slotId,
+                            initialSlotId: widget.preSelectedSlotId,
+                            onSlotSelected: (slot) =>
+                                context.read<BookingBloc>().add(SlotSelected(slot)),
+                          ),
+                          const SizedBox(height: 24),
+                          Text(
+                            'نوع الجلسة',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 8),
+                          _CallTypePicker(
+                            selected: selectedCallType,
+                            onChanged: (ct) =>
+                                context.read<BookingBloc>().add(CallTypeSelected(ct)),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Session type',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  _CallTypePicker(
-                    selected: selectedCallType,
-                    onChanged: (ct) =>
-                        context.read<BookingBloc>().add(CallTypeSelected(ct)),
-                  ),
-                  const Spacer(),
+                  const SizedBox(height: 16),
                   FilledButton(
                     onPressed: canSubmit ? _submit : null,
-                    child: const Text('Confirm Booking'),
+                    child: const Text('تأكيد الحجز'),
                   ),
                 ],
               ),
@@ -148,22 +183,29 @@ class _CallTypePicker extends StatelessWidget {
       segments: const [
         ButtonSegment(
           value: SessionCallType.externalMeeting,
-          label: Text('External'),
+          label: Text('رابط خارجي'),
           icon: Icon(Icons.link),
         ),
         ButtonSegment(
           value: SessionCallType.voiceCall,
-          label: Text('Voice'),
+          label: Text('صوتي'),
           icon: Icon(Icons.mic),
         ),
         ButtonSegment(
           value: SessionCallType.videoCall,
-          label: Text('Video'),
+          label: Text('مرئي'),
           icon: Icon(Icons.videocam),
         ),
       ],
       selected: {selected},
       onSelectionChanged: (s) => onChanged(s.first),
     );
+  }
+}
+
+extension<T> on Iterable<T> {
+  T? get firstOrNull {
+    final it = iterator;
+    return it.moveNext() ? it.current : null;
   }
 }

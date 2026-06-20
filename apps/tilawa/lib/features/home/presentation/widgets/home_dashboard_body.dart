@@ -6,6 +6,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'home_dashboard_section.dart';
 import 'home_prayer_carousel.dart';
 import 'home_quran_entry_grid.dart';
+import 'home_sessions_entry_card.dart';
 
 /// Home body — three focused sections below the prayer-time hero:
 ///
@@ -40,7 +41,11 @@ class HomeDashboardBody extends StatelessWidget {
         ),
         SizedBox(height: tokens.spaceLarge),
 
-        // Section 3 — Prayer times carousel (bleeds edge-to-edge via OverflowBox)
+        // Section 3 — Quran Sessions entry (experimental feature)
+        const HomeSessionsEntryCard(),
+        SizedBox(height: tokens.spaceLarge),
+
+        // Section 4 — Prayer times carousel (bleeds edge-to-edge via OverflowBox)
         HomeDashboardSection(
           title: context.l10n.homePrayerTimesAction,
           child: HomePrayerCarousel(onOpenPrayer: onOpenPrayer),

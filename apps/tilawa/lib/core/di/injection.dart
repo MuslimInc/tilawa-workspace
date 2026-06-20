@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
+import 'package:tilawa/features/quran_sessions/di/quran_sessions_mvp_module.dart';
 import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:tilawa_core/di/injection.module.dart';
 import 'package:tilawa_core/network/network_info.dart';
@@ -60,4 +61,7 @@ Future<void> configureDependencies({AppLaunchConfig? launchConfig}) async {
       'Run: melos run gen (from workspace root)',
     );
   }
+
+  // MVP feature: fake Quran Sessions repositories + BLoC factories.
+  QuranSessionsMvpModule.register(getIt);
 }

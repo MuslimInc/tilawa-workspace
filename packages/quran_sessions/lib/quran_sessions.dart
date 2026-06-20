@@ -83,8 +83,13 @@ export 'src/presentation/screens/teacher_profile_screen.dart';
 
 // ── Presentation: widgets ─────────────────────────────────────────────────────
 export 'src/presentation/widgets/availability_slot_picker.dart';
+export 'src/presentation/widgets/date_grouped_slot_picker.dart';
 export 'src/presentation/widgets/session_card.dart';
 export 'src/presentation/widgets/teacher_card.dart';
+export 'src/presentation/widgets/teacher_initials_avatar.dart';
+
+// ── Utils ─────────────────────────────────────────────────────────────────────
+export 'src/utils/specialization_labels.dart';
 
 // ── Presentation: failure UI extension ───────────────────────────────────────
 export 'src/presentation/failure_ui/quran_sessions_failure_ui.dart';

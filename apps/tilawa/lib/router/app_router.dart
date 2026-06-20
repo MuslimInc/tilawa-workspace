@@ -18,6 +18,7 @@ import 'package:tilawa_core/constants/app_strings.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../features/quran_sessions/router/quran_sessions_nav.dart';
 import 'app_router_config.dart';
 import 'app_navigator_keys.dart';
 import 'shell_route_location.dart';
@@ -194,6 +195,13 @@ class AppRouter {
       return const HomeRoute().location;
     }
 
+    if (segments.length >= 3 &&
+        segments[0] == 'sessions' &&
+        segments[1] == 'teachers' &&
+        segments[2].isEmpty) {
+      return const HomeRoute().location;
+    }
+
     if (segments.first == 'athkar' &&
         segments.length >= 2 &&
         segments[1] != 'tasbeeh' &&
@@ -297,7 +305,7 @@ class AppRouter {
             ? null
             : AppStrings.routerRestorationScopeId,
         redirect: redirect,
-        routes: $appRoutes,
+        routes: [...$appRoutes, ...quranSessionsRoutes],
         errorBuilder: errorBuilder,
         extraCodec: const AppRouterExtraCodec(),
         observers: _getObservers(),
