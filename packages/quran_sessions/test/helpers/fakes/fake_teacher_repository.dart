@@ -1,0 +1,78 @@
+import 'package:dartz_plus/dartz_plus.dart';
+
+import '../../../lib/src/domain/entities/quran_teacher.dart';
+import '../../../lib/src/domain/entities/session_review.dart';
+import '../../../lib/src/domain/entities/teacher_availability.dart';
+import '../../../lib/src/domain/failures/quran_sessions_failure.dart';
+import '../../../lib/src/domain/repositories/teacher_repository.dart';
+
+/// In-memory fake for [TeacherRepository].
+/// Seed [teachers], [availability], and [reviews] before each test.
+class FakeTeacherRepository implements TeacherRepository {
+  List<QuranTeacher> teachers = [];
+  List<TeacherAvailability> availability = [];
+  List<SessionReview> reviews = [];
+  QuranSessionsFailure? failWith;
+
+  @override
+  Future<Either<QuranSessionsFailure, TeacherPage>> getTeachers({
+    String? specialization,
+    String? language,
+    String? cursor,
+  }) async {
+    if (failWith != null) return Left(failWith!);
+    var result = teachers;
+    if (specialization != null) {
+      result = result
+          .where((t) => t.specializations.contains(specialization))
+          .toList();
+    }
+    return Right(TeacherPage(teachers: result, nextCursor: null));
+  }
+
+  @override
+  Future<Either<QuranSessionsFailure, QuranTeacher>> getTeacherById(
+    String teacherId,
+  ) async {
+    if (failWith != null) return Left(failWith!);
+    final match = teachers.where((t) => t.id == teacherId).firstOrNull;
+    if (match == null) return const Left(NotFoundFailure('QuranTeacher'));
+    return Right(match);
+  }
+
+  @override
+  Future<Either<QuranSessionsFailure, List<TeacherAvailability>>>
+  getAvailableSlots(
+    String teacherId, {
+    required DateTime from,
+    required DateTime to,
+  }) async {
+    if (failWith != null) return Left(failWith!);
+    return Right(
+      availability
+          .where(
+            (s) =>
+                s.teacherId == teacherId &&
+                s.startsAt.isAfter(from) &&
+                s.endsAt.isBefore(to),
+          )
+          .toList(),
+    );
+  }
+
+  @override
+  Future<Either<QuranSessionsFailure, List<SessionReview>>> getTeacherReviews(
+    String teacherId, {
+    String? cursor,
+  }) async {
+    if (failWith != null) return Left(failWith!);
+    return Right(reviews.where((r) => r.teacherId == teacherId).toList());
+  }
+}
+
+extension<T> on Iterable<T> {
+  T? get firstOrNull {
+    final it = iterator;
+    return it.moveNext() ? it.current : null;
+  }
+}

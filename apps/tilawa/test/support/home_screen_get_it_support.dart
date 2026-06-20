@@ -208,4 +208,3 @@ class _FakeGetLastReadPositionUseCase implements GetLastReadPositionUseCase {
     return const Right((surahNumber: null, ayahNumber: null, page: null));
   }
 }
-

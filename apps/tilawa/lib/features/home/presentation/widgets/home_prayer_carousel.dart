@@ -81,7 +81,8 @@ class _HomePrayerCarouselState extends State<HomePrayerCarousel>
   void _onDragEnd(DragEndDetails d, int count) {
     const double threshold = 50;
     final double velocity = d.primaryVelocity ?? 0;
-    final bool toNext = (_drag < -threshold || velocity < -500) && _index < count - 1;
+    final bool toNext =
+        (_drag < -threshold || velocity < -500) && _index < count - 1;
     final bool toPrev = (_drag > threshold || velocity > 500) && _index > 0;
 
     if (toNext || toPrev) {
@@ -114,8 +115,8 @@ class _HomePrayerCarouselState extends State<HomePrayerCarousel>
         HomeDashboardLoaded(:final HomeDashboard dashboard)
             when dashboard.todayPrayers.isNotEmpty =>
           _buildDeck(context, dashboard.todayPrayers),
-        HomeDashboardLoading() || HomeDashboardInitial() =>
-          _buildSkeleton(context),
+        HomeDashboardLoading() ||
+        HomeDashboardInitial() => _buildSkeleton(context),
         _ => const SizedBox.shrink(),
       },
     );
@@ -209,8 +210,8 @@ class _DeckStack extends StatelessWidget {
 
     // Progress for the peek card animation: 0 = at-rest peek, 1 = fully centered.
     final double peekProgress = showingPrev
-        ? (-dragT).clamp(0.0, 1.0)   // dragging right
-        : dragT.clamp(0.0, 1.0);      // dragging left
+        ? (-dragT).clamp(0.0, 1.0) // dragging right
+        : dragT.clamp(0.0, 1.0); // dragging left
 
     // Peek card resting offsets (right side by default, mirrored for prev).
     final double restX = showingPrev
@@ -235,8 +236,11 @@ class _DeckStack extends StatelessWidget {
                     ? Alignment.centerLeft
                     : Alignment.centerRight,
                 child: Opacity(
-                  opacity:
-                      _lerp(HomePrayerCarousel.peekOpacity, 1.0, peekProgress),
+                  opacity: _lerp(
+                    HomePrayerCarousel.peekOpacity,
+                    1.0,
+                    peekProgress,
+                  ),
                   child: SizedBox(
                     height: HomePrayerCarousel.cardHeight,
                     child: _PrayerCard(
@@ -339,7 +343,8 @@ class _PrayerCardState extends State<_PrayerCard> {
 
     return Semantics(
       button: true,
-      label: '${_prayerLabel(context, widget.slot.type)}, '
+      label:
+          '${_prayerLabel(context, widget.slot.type)}, '
           '${_fmtTime(context, widget.slot.time)}',
       child: GestureDetector(
         onTap: widget.onTap,
@@ -368,7 +373,10 @@ class _PrayerCardState extends State<_PrayerCard> {
                       ),
                       // Bottom scrim for text legibility
                       const Positioned(
-                        left: 0, right: 0, bottom: 0, height: 140,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        height: 140,
                         child: DecoratedBox(
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
@@ -593,20 +601,34 @@ final class _CardPalette {
 }
 
 _CardPalette _paletteFor(PrayerType type) => switch (type) {
-  PrayerType.fajr =>
-    const _CardPalette(topLeft: Color(0xFF0F1133), bottomRight: Color(0xFF2A2F7A)),
-  PrayerType.sunrise =>
-    const _CardPalette(topLeft: Color(0xFFB84C18), bottomRight: Color(0xFFF5A623)),
-  PrayerType.dhuhr =>
-    const _CardPalette(topLeft: Color(0xFF145E8A), bottomRight: Color(0xFF2F9DC8)),
-  PrayerType.asr =>
-    const _CardPalette(topLeft: Color(0xFF145238), bottomRight: Color(0xFF1E8B5E)),
-  PrayerType.maghrib =>
-    const _CardPalette(topLeft: Color(0xFF7A1F00), bottomRight: Color(0xFFCC4A08)),
-  PrayerType.isha =>
-    const _CardPalette(topLeft: Color(0xFF080E1C), bottomRight: Color(0xFF14243A)),
-  PrayerType.midnight || PrayerType.lastThird =>
-    const _CardPalette(topLeft: Color(0xFF060A12), bottomRight: Color(0xFF101828)),
+  PrayerType.fajr => const _CardPalette(
+    topLeft: Color(0xFF0F1133),
+    bottomRight: Color(0xFF2A2F7A),
+  ),
+  PrayerType.sunrise => const _CardPalette(
+    topLeft: Color(0xFFB84C18),
+    bottomRight: Color(0xFFF5A623),
+  ),
+  PrayerType.dhuhr => const _CardPalette(
+    topLeft: Color(0xFF145E8A),
+    bottomRight: Color(0xFF2F9DC8),
+  ),
+  PrayerType.asr => const _CardPalette(
+    topLeft: Color(0xFF145238),
+    bottomRight: Color(0xFF1E8B5E),
+  ),
+  PrayerType.maghrib => const _CardPalette(
+    topLeft: Color(0xFF7A1F00),
+    bottomRight: Color(0xFFCC4A08),
+  ),
+  PrayerType.isha => const _CardPalette(
+    topLeft: Color(0xFF080E1C),
+    bottomRight: Color(0xFF14243A),
+  ),
+  PrayerType.midnight || PrayerType.lastThird => const _CardPalette(
+    topLeft: Color(0xFF060A12),
+    bottomRight: Color(0xFF101828),
+  ),
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -614,19 +636,20 @@ _CardPalette _paletteFor(PrayerType type) => switch (type) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 String _prayerLabel(BuildContext context, PrayerType type) => switch (type) {
-  PrayerType.fajr      => context.l10n.fajr,
-  PrayerType.sunrise   => context.l10n.sunrise,
-  PrayerType.dhuhr     => context.l10n.dhuhr,
-  PrayerType.asr       => context.l10n.asr,
-  PrayerType.maghrib   => context.l10n.maghrib,
-  PrayerType.isha      => context.l10n.isha,
-  PrayerType.midnight  => context.l10n.midnight,
+  PrayerType.fajr => context.l10n.fajr,
+  PrayerType.sunrise => context.l10n.sunrise,
+  PrayerType.dhuhr => context.l10n.dhuhr,
+  PrayerType.asr => context.l10n.asr,
+  PrayerType.maghrib => context.l10n.maghrib,
+  PrayerType.isha => context.l10n.isha,
+  PrayerType.midnight => context.l10n.midnight,
   PrayerType.lastThird => context.l10n.lastThird,
 };
 
 String _fmtTime(BuildContext context, DateTime time) =>
-    MaterialLocalizations.of(context)
-        .formatTimeOfDay(TimeOfDay.fromDateTime(time));
+    MaterialLocalizations.of(
+      context,
+    ).formatTimeOfDay(TimeOfDay.fromDateTime(time));
 
 String _fmtCountdown(BuildContext context, Duration d) {
   if (d.inMinutes < 1) return context.l10n.homePrayerNow;

@@ -1285,7 +1285,8 @@ void main() {
         expect(
           pulse!.scale.value,
           greaterThan(1.0),
-          reason: 'scale should be above 1.0 mid-pulse after programmatic change',
+          reason:
+              'scale should be above 1.0 mid-pulse after programmatic change',
         );
       },
     );
