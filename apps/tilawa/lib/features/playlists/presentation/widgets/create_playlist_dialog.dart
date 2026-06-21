@@ -51,13 +51,10 @@ class _CreatePlaylistDialogState extends State<CreatePlaylistDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextFormField(
+              TilawaTextField(
                 controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: l10n.playlistName,
-                  hintText: l10n.playlistNameHint,
-                  border: const OutlineInputBorder(),
-                ),
+                label: l10n.playlistName,
+                hintText: l10n.playlistNameHint,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return l10n.playlistNameRequired;
@@ -67,13 +64,10 @@ class _CreatePlaylistDialogState extends State<CreatePlaylistDialog> {
                 textInputAction: TextInputAction.next,
               ),
               SizedBox(height: tokens.spaceLarge),
-              TextFormField(
+              TilawaTextField(
                 controller: _descriptionController,
-                decoration: InputDecoration(
-                  labelText: l10n.playlistDescription,
-                  hintText: l10n.playlistDescriptionHint,
-                  border: const OutlineInputBorder(),
-                ),
+                label: l10n.playlistDescription,
+                hintText: l10n.playlistDescriptionHint,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return l10n.playlistDescriptionRequired;

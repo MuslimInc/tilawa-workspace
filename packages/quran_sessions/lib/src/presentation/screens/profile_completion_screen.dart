@@ -10,7 +10,6 @@ import '../blocs/profile_completion/profile_completion_bloc.dart';
 import '../blocs/profile_completion/profile_completion_event.dart';
 import '../blocs/profile_completion/profile_completion_state.dart';
 import '../failure_ui/quran_sessions_failure_ui.dart';
-import '../widgets/quran_sessions_form_field_shell.dart';
 
 /// Gate screen shown before booking when the student's profile is incomplete.
 ///
@@ -329,7 +328,7 @@ class _DateOfBirthField extends StatelessWidget {
     final dateFmt = DateFormat('d MMMM y', 'ar');
     final hasValue = selected != null;
 
-    return QuranSessionsFormFieldShell(
+    return TilawaReadOnlyField(
       prefixIcon: Icons.calendar_today_outlined,
       errorText: errorText,
       semanticLabel: 'تاريخ الميلاد',

@@ -9,7 +9,6 @@ import '../blocs/teacher_application/teacher_application_bloc.dart';
 import '../blocs/teacher_application/teacher_application_event.dart';
 import '../blocs/teacher_application/teacher_application_state.dart';
 import '../failure_ui/quran_sessions_failure_ui.dart';
-import '../widgets/quran_sessions_form_field_shell.dart';
 
 /// Form screen for filling a teacher application (draft → pending).
 ///
@@ -246,18 +245,12 @@ class _FormBody extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: TextFormField(
+                  child: TilawaTextField(
                     controller: phoneController,
                     keyboardType: TextInputType.phone,
                     textDirection: TextDirection.ltr,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                    decoration: QuranSessionsFormFieldShell.decoration(
-                      context,
-                      hintText: PhoneNormalizer.hint(countryCode),
-                      // visiblePhoneError is null until the user has
-                      // touched the field or tapped submit.
-                      errorText: state.visiblePhoneError,
-                    ),
+                    hintText: PhoneNormalizer.hint(countryCode),
+                    errorText: state.visiblePhoneError,
                     onChanged: (v) =>
                         bloc.add(TeacherApplicationPhoneChanged(v.trim())),
                   ),
@@ -316,18 +309,14 @@ class _FormBody extends StatelessWidget {
           // ── Bio ──────────────────────────────────────────────────────────
           _SectionTitle('نبذة تعريفية *'),
           const SizedBox(height: 8),
-          TextFormField(
+          TilawaTextField(
             controller: bioController,
             minLines: 4,
             maxLines: 8,
             maxLength: 500,
             textAlignVertical: TextAlignVertical.top,
-            style: Theme.of(context).textTheme.bodyLarge,
-            decoration: QuranSessionsFormFieldShell.decoration(
-              context,
-              hintText: 'أخبر الطلاب عن خبرتك ومؤهلاتك وأسلوبك في التدريس…',
-              alignLabelWithHint: true,
-            ),
+            hintText:
+                'أخبر الطلاب عن خبرتك ومؤهلاتك وأسلوبك في التدريس…',
             onChanged: (v) => bloc.add(TeacherApplicationBioChanged(v)),
           ),
         ],

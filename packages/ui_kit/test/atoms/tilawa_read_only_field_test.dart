@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quran_sessions/src/presentation/widgets/quran_sessions_form_field_shell.dart';
-import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
+import 'package:tilawa_ui_kit/src/atoms/tilawa_read_only_field.dart';
+import 'package:tilawa_ui_kit/src/foundation/app_colors.dart';
+import 'package:tilawa_ui_kit/src/foundation/app_theme.dart';
+import 'package:tilawa_ui_kit/src/foundation/design_tokens.dart';
 
 Widget _wrap(Widget child, {TextDirection direction = TextDirection.ltr}) {
   return MaterialApp(
+    theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
     home: Directionality(
       textDirection: direction,
       child: Scaffold(body: Center(child: child)),
@@ -13,13 +16,14 @@ Widget _wrap(Widget child, {TextDirection direction = TextDirection.ltr}) {
 }
 
 void main() {
-  group('QuranSessionsFormFieldShell', () {
+  group('TilawaReadOnlyField', () {
     testWidgets('renders its child', (tester) async {
       await tester.pumpWidget(
         _wrap(
-          const QuranSessionsFormFieldShell(
+          TilawaReadOnlyField(
             prefixIcon: Icons.calendar_today_outlined,
-            child: Text('12 June 2000'),
+            onTap: () {},
+            child: const Text('12 June 2000'),
           ),
         ),
       );
@@ -31,7 +35,7 @@ void main() {
       var tapped = false;
       await tester.pumpWidget(
         _wrap(
-          QuranSessionsFormFieldShell(
+          TilawaReadOnlyField(
             prefixIcon: Icons.calendar_today_outlined,
             onTap: () => tapped = true,
             child: const Text('Pick a date'),
@@ -47,10 +51,11 @@ void main() {
     testWidgets('shows the error text', (tester) async {
       await tester.pumpWidget(
         _wrap(
-          const QuranSessionsFormFieldShell(
+          TilawaReadOnlyField(
             prefixIcon: Icons.calendar_today_outlined,
+            onTap: () {},
             errorText: 'Date is required',
-            child: Text('Pick a date'),
+            child: const Text('Pick a date'),
           ),
         ),
       );
@@ -62,7 +67,9 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        _wrap(const QuranSessionsFormFieldShell(child: Text('value'))),
+        _wrap(
+          TilawaReadOnlyField(onTap: () {}, child: const Text('value')),
+        ),
       );
 
       final decorator = tester.widget<InputDecorator>(
@@ -78,7 +85,7 @@ void main() {
     testWidgets('keeps a >= 48dp hit target', (tester) async {
       await tester.pumpWidget(
         _wrap(
-          QuranSessionsFormFieldShell(
+          TilawaReadOnlyField(
             onTap: () {},
             child: const Text('value'),
           ),
@@ -87,28 +94,6 @@ void main() {
 
       final size = tester.getSize(find.byType(InkWell));
       expect(size.height, greaterThanOrEqualTo(48.0));
-    });
-
-    testWidgets('the shared decoration matches the widget border radius', (
-      tester,
-    ) async {
-      late InputDecoration deco;
-      await tester.pumpWidget(
-        _wrap(
-          Builder(
-            builder: (context) {
-              deco = QuranSessionsFormFieldShell.decoration(context);
-              return const SizedBox.shrink();
-            },
-          ),
-        ),
-      );
-
-      final border = deco.border! as OutlineInputBorder;
-      final expected = TilawaDesignTokens.light().resolveRadius(
-        family: TilawaRadiusFamily.chrome,
-      );
-      expect(border.borderRadius, BorderRadius.circular(expected));
     });
   });
 }

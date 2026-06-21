@@ -304,12 +304,9 @@ class BookmarksScreen extends StatelessWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(context.l10n.editBookmarkLabel),
-        content: TextField(
+        content: TilawaTextField(
           controller: controller,
-          decoration: InputDecoration(
-            hintText: context.l10n.enterBookmarkLabel,
-            border: const OutlineInputBorder(),
-          ),
+          hintText: context.l10n.enterBookmarkLabel,
           autofocus: true,
         ),
         actions: [

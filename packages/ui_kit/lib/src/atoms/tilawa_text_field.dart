@@ -33,6 +33,8 @@ class TilawaTextField extends StatefulWidget {
     this.initialValue,
     this.maxLength,
     this.showCounter = false,
+    this.textDirection,
+    this.textAlignVertical,
     this.showPasswordTooltip,
     this.hidePasswordTooltip,
     this.clearTextTooltip,
@@ -134,6 +136,9 @@ class TilawaTextField extends StatefulWidget {
   /// Defaults to false to keep the UI minimal. When true, displays the
   /// default Flutter counter (e.g., "5/100").
   final bool showCounter;
+
+  final TextDirection? textDirection;
+  final TextAlignVertical? textAlignVertical;
 
   /// Tooltip text shown on the password reveal icon.
   final String? showPasswordTooltip;
@@ -260,6 +265,8 @@ class _TilawaTextFieldState extends State<TilawaTextField> {
         onFieldSubmitted: widget.onSubmitted,
         validator: widget.validator,
         autofocus: widget.autofocus,
+        textDirection: widget.textDirection,
+        textAlignVertical: widget.textAlignVertical,
         style: theme.textTheme.bodyLarge,
         maxLength: widget.maxLength,
         buildCounter: widget.showCounter

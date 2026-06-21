@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
+
 import '../../domain/entities/teacher_availability.dart';
 import '../failure_ui/quran_sessions_failure_ui.dart';
 import '../blocs/teacher_dashboard/teacher_dashboard_bloc.dart';
 import '../blocs/teacher_dashboard/teacher_dashboard_event.dart';
 import '../blocs/teacher_dashboard/teacher_dashboard_state.dart';
-import '../widgets/quran_sessions_form_field_shell.dart';
 import '../widgets/session_card.dart';
 
 class TeacherDashboardScreen extends StatefulWidget {
@@ -312,7 +313,7 @@ class _AddSlotSheetState extends State<_AddSlotSheet> {
           ),
           const SizedBox(height: 20),
           // Date picker row
-          QuranSessionsFormFieldShell(
+          TilawaReadOnlyField(
             prefixIcon: Icons.calendar_today_outlined,
             semanticLabel: 'تاريخ الموعد',
             onTap: () async {
@@ -331,7 +332,7 @@ class _AddSlotSheetState extends State<_AddSlotSheet> {
           ),
           const SizedBox(height: 12),
           // Time picker row
-          QuranSessionsFormFieldShell(
+          TilawaReadOnlyField(
             prefixIcon: Icons.access_time,
             semanticLabel: 'وقت الموعد',
             onTap: () async {
