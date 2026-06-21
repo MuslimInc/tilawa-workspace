@@ -251,6 +251,12 @@ abstract class QuranSessionsLocalizations {
   /// **'Sessions are not available in your country right now.'**
   String get marketNotEnabled;
 
+  /// No description provided for @marketCatalogEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Country and city options are not available yet. Please try again later or contact support.'**
+  String get marketCatalogEmpty;
+
   /// No description provided for @teacherNotInMarket.
   ///
   /// In en, this message translates to:
@@ -388,6 +394,126 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'An unexpected error occurred.'**
   String get unknownFailure;
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// No description provided for @profileCompletionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete profile'**
+  String get profileCompletionTitle;
+
+  /// No description provided for @profileCompletionSavedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Your profile was saved successfully.'**
+  String get profileCompletionSavedSuccess;
+
+  /// No description provided for @profileCompletionSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving your details…'**
+  String get profileCompletionSaving;
+
+  /// No description provided for @profileCompletionHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us about yourself'**
+  String get profileCompletionHeadline;
+
+  /// No description provided for @profileCompletionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We need this information to match you with the right teacher and show correct pricing for your region.'**
+  String get profileCompletionSubtitle;
+
+  /// No description provided for @profileFieldGender.
+  ///
+  /// In en, this message translates to:
+  /// **'Gender'**
+  String get profileFieldGender;
+
+  /// No description provided for @profileFieldDateOfBirth.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of birth'**
+  String get profileFieldDateOfBirth;
+
+  /// No description provided for @profileFieldCountry.
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get profileFieldCountry;
+
+  /// No description provided for @profileFieldCity.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get profileFieldCity;
+
+  /// No description provided for @profileFieldDisplayName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full name'**
+  String get profileFieldDisplayName;
+
+  /// No description provided for @profileCompletionSaveAndContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Save and continue'**
+  String get profileCompletionSaveAndContinue;
+
+  /// No description provided for @profileCompletionSelectDateOfBirth.
+  ///
+  /// In en, this message translates to:
+  /// **'Select date of birth'**
+  String get profileCompletionSelectDateOfBirth;
+
+  /// No description provided for @profileCompletionSelectCountry.
+  ///
+  /// In en, this message translates to:
+  /// **'Select country'**
+  String get profileCompletionSelectCountry;
+
+  /// No description provided for @profileCompletionSelectCity.
+  ///
+  /// In en, this message translates to:
+  /// **'Select city'**
+  String get profileCompletionSelectCity;
+
+  /// No description provided for @profileCompletionSelectCountryFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Select country first'**
+  String get profileCompletionSelectCountryFirst;
+
+  /// No description provided for @profileCompletionLoadingCities.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading cities…'**
+  String get profileCompletionLoadingCities;
+
+  /// No description provided for @profileGenderRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Gender is required.'**
+  String get profileGenderRequired;
+
+  /// No description provided for @profileCountryRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Country is required.'**
+  String get profileCountryRequired;
+
+  /// No description provided for @profileCityRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'City is required.'**
+  String get profileCityRequired;
 }
 
 class _QuranSessionsLocalizationsDelegate

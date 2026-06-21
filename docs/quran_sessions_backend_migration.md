@@ -34,7 +34,13 @@ flutter run --dart-define=TILAWA_QURAN_SESSIONS_BACKEND=firebase
 
 ## Seed data for Firebase dev
 
-1. Create `quran_session_market_configs/EG` + `cities/cairo` (see fake Egypt config).
+1. **Market configs (EG, SA, AE + cities):** from `apps/tilawa`:
+   ```sh
+   dart run lib/scripts/seed_market_configs.dart
+   ```
+   See [quran_sessions_market_config_sources.md](quran_sessions_market_config_sources.md).
+   **Note:** the client seed script cannot write to production Firestore (rules
+   deny client writes). Use the emulator, Firebase Console import, or Admin SDK.
 2. Create `quran_session_platform_config/global` with age thresholds.
 3. Seed verified `quran_teacher_profiles` + `availability` slots for booking tests.
 4. Sign in with Google — profile shell auto-created on first Quran Sessions entry.

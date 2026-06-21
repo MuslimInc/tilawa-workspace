@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quran_sessions/core/l10n_extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/quran_booking.dart';
@@ -247,35 +248,40 @@ class _EligibilityBlockedView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
     final scheme = Theme.of(context).colorScheme;
+    final tokens = Theme.of(context).tokens;
     final isProfileIncomplete = failure is ProfileIncompleteFailure;
     final isBlocked = failure is AccountBlockedFailure;
 
     return Padding(
-      padding: const EdgeInsets.all(32),
+      padding: EdgeInsets.all(tokens.spaceExtraLarge + tokens.spaceSmall),
       child: Column(
         mainAxisAlignment: .center,
         crossAxisAlignment: .stretch,
         children: [
-          Icon(
-            isProfileIncomplete
+          TilawaStateVisual(
+            icon: isProfileIncomplete
                 ? Icons.person_add_outlined
                 : isBlocked
                 ? Icons.block_outlined
                 : Icons.cancel_outlined,
-            size: 64,
-            color: isBlocked ? scheme.error : scheme.primary,
+            tone: isBlocked
+                ? TilawaStateVisualTone.error
+                : TilawaStateVisualTone.primary,
+            size: tokens.iconSizeExtraLarge + tokens.spaceExtraLarge,
+            iconColor: isBlocked ? scheme.error : scheme.primary,
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: tokens.spaceLarge + tokens.spaceSmall),
           Text(
             failure.toLocalizedMessage(context),
             style: Theme.of(context).textTheme.titleMedium,
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: tokens.spaceExtraLarge),
           if (isProfileIncomplete && onCompleteProfile != null)
             TilawaButton(
-              text: 'إكمال الملف الشخصي',
+              text: l10n.profileCompletionTitle,
               leadingIcon: const Icon(Icons.edit_outlined),
               onPressed: onCompleteProfile,
               isFullWidth: true,
@@ -283,7 +289,7 @@ class _EligibilityBlockedView extends StatelessWidget {
             )
           else if (!isBlocked) ...[
             TilawaButton(
-              text: 'إعادة المحاولة',
+              text: l10n.retry,
               onPressed: onRetry,
               isFullWidth: true,
               variant: TilawaButtonVariant.secondary,

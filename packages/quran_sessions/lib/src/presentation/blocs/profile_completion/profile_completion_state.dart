@@ -1,7 +1,9 @@
 import 'package:equatable/equatable.dart';
+import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../../domain/entities/market_config.dart';
+import '../../../domain/entities/market_city.dart';
+import '../../../domain/entities/market_country.dart';
 import '../../../domain/entities/user_profile.dart';
 import '../../../domain/failures/quran_sessions_failure.dart';
 import '../../forms/profile_completion_field_ids.dart';
@@ -21,195 +23,154 @@ final class ProfileCompletionLoading extends ProfileCompletionState {
   const ProfileCompletionLoading();
 }
 
-/// Profile + available markets loaded; user is editing fields.
+/// Profile + available countries loaded; user is editing fields.
 final class ProfileCompletionEditing extends ProfileCompletionState {
   const ProfileCompletionEditing({
     required this.userId,
-    required this.availableMarkets,
+    required this.availableCountries,
     required this.minimumStudentAgeYears,
+    this.availableCities = const [],
+    this.selectedCountry,
+    this.selectedCity,
+    this.isLoadingCities = false,
+    this.countryPickerLocked = false,
+    this.cityPickerLocked = false,
     this.selectedGender,
     this.selectedDateOfBirth,
     this.dobFailure,
-    this.selectedMarket,
-    this.selectedCity,
     this.submitAttempted = false,
     this.submitValidationAttempt = 0,
-    this.genderError,
-    this.dateOfBirthRequiredError,
-    this.countryError,
-    this.cityError,
   });
 
   final String userId;
-
-  /// All supported markets — used to populate the country picker.
-  final List<MarketConfig> availableMarkets;
-
-  /// Configured minimum student age (years), loaded from remote config via the
-  /// session policy. Drives both the date picker's `lastDate` and DOB
-  /// validation so the UI and domain can never drift.
+  final List<MarketCountry> availableCountries;
+  final List<MarketCity> availableCities;
   final int minimumStudentAgeYears;
 
+  final MarketCountry? selectedCountry;
+  final MarketCity? selectedCity;
+
+  /// True while cities for the selected country are being fetched.
+  final bool isLoadingCities;
+
+  /// When only one enabled country exists, the picker is read-only.
+  final bool countryPickerLocked;
+
+  /// When only one enabled city exists for the country, the picker is read-only.
+  final bool cityPickerLocked;
+
   final UserGender? selectedGender;
-
-  /// The validated date of birth. Null means not yet set OR most recent attempt
-  /// was invalid (in which case [dobFailure] is non-null).
   final DateTime? selectedDateOfBirth;
-
-  /// Non-null when the most recently attempted DOB was rejected by
-  /// [DobValidator]. The UI surfaces this as a field-level error message
-  /// via [QuranSessionsFailure.toLocalizedMessage].
   final QuranSessionsFailure? dobFailure;
-
-  /// The country the user has selected.
-  final MarketConfig? selectedMarket;
-
-  /// The city within [selectedMarket] the user has selected.
-  final CityConfig? selectedCity;
-
-  /// True after the user has tapped submit at least once.
   final bool submitAttempted;
-
-  /// Increments on each failed submit validation pass (drives scroll-to-error).
   final int submitValidationAttempt;
 
-  /// Submit-time gender error copy.
-  final String? genderError;
+  bool get hasGenderError => submitAttempted && selectedGender == null;
 
-  /// Submit-time required DOB error when no date is selected.
-  final String? dateOfBirthRequiredError;
+  bool get hasDateOfBirthRequiredError =>
+      submitAttempted && selectedDateOfBirth == null && dobFailure == null;
 
-  /// Submit-time country error copy.
-  final String? countryError;
+  bool get hasCountryError => submitAttempted && selectedCountry == null;
 
-  /// Submit-time city error copy.
-  final String? cityError;
-
-  /// Cities available for selection in the current [selectedMarket].
-  List<CityConfig> get availableCities =>
-      selectedMarket?.enabledCities ?? const [];
+  bool get hasCityError => submitAttempted && selectedCity == null;
 
   bool get canSubmit =>
       selectedGender != null &&
       selectedDateOfBirth != null &&
       dobFailure == null &&
-      selectedMarket != null &&
+      selectedCountry != null &&
       selectedCity != null &&
-      genderError == null &&
-      dateOfBirthRequiredError == null &&
-      countryError == null &&
-      cityError == null;
+      !isLoadingCities &&
+      !hasGenderError &&
+      !hasDateOfBirthRequiredError &&
+      !hasCountryError &&
+      !hasCityError;
 
-  String? get visibleGenderError => submitAttempted ? genderError : null;
+  String? genderErrorFor(QuranSessionsLocalizations l10n) =>
+      hasGenderError ? l10n.profileGenderRequired : null;
+
+  String? countryErrorFor(QuranSessionsLocalizations l10n) =>
+      hasCountryError ? l10n.profileCountryRequired : null;
+
+  String? cityErrorFor(QuranSessionsLocalizations l10n) =>
+      hasCityError ? l10n.profileCityRequired : null;
 
   String? visibleDateOfBirthError(
-    String Function(QuranSessionsFailure) localize,
+    QuranSessionsLocalizations l10n,
+    String Function(QuranSessionsFailure) localizeFailure,
   ) {
-    if (!submitAttempted) {
-      return null;
-    }
-    if (dobFailure != null) {
-      return localize(dobFailure!);
-    }
-    return dateOfBirthRequiredError;
+    if (!submitAttempted) return null;
+    if (dobFailure != null) return localizeFailure(dobFailure!);
+    if (hasDateOfBirthRequiredError) return l10n.dateOfBirthRequired;
+    return null;
   }
-
-  String? get visibleCountryError => submitAttempted ? countryError : null;
-
-  String? get visibleCityError => submitAttempted ? cityError : null;
 
   int get invalidFieldCount {
-    if (!submitAttempted || canSubmit) {
-      return 0;
-    }
-    return validationIssues.length;
+    if (!submitAttempted || canSubmit) return 0;
+    var count = 0;
+    if (hasGenderError) count++;
+    if (hasDateOfBirthRequiredError || dobFailure != null) count++;
+    if (hasCountryError) count++;
+    if (hasCityError) count++;
+    return count;
   }
 
-  /// Computes submit-time field errors without mutating user input.
-  ProfileCompletionEditing applySubmitValidation() {
-    final String? genderErr = selectedGender == null
-        ? ProfileCompletionValidationMessages.genderRequired
-        : null;
-    final String? dobRequiredErr =
-        selectedDateOfBirth == null && dobFailure == null
-        ? ProfileCompletionValidationMessages.dateOfBirthRequired
-        : null;
-    final String? countryErr = selectedMarket == null
-        ? ProfileCompletionValidationMessages.countryRequired
-        : null;
-    final String? cityErr = selectedCity == null
-        ? ProfileCompletionValidationMessages.cityRequired
-        : null;
-
-    return copyWith(
-      submitAttempted: true,
-      submitValidationAttempt: submitValidationAttempt + 1,
-      genderError: genderErr,
-      dateOfBirthRequiredError: dobRequiredErr,
-      countryError: countryErr,
-      cityError: cityErr,
-    );
-  }
+  ProfileCompletionEditing applySubmitValidation() => copyWith(
+    submitAttempted: true,
+    submitValidationAttempt: submitValidationAttempt + 1,
+  );
 
   ProfileCompletionEditing copyWith({
+    List<MarketCity>? availableCities,
+    MarketCountry? selectedCountry,
+    MarketCity? selectedCity,
+    bool clearCity = false,
+    bool? isLoadingCities,
+    bool? countryPickerLocked,
+    bool? cityPickerLocked,
     UserGender? selectedGender,
     DateTime? selectedDateOfBirth,
     QuranSessionsFailure? dobFailure,
     bool clearDob = false,
     bool clearDobFailure = false,
-    MarketConfig? selectedMarket,
-    CityConfig? selectedCity,
-    bool clearCity = false,
     bool? submitAttempted,
     int? submitValidationAttempt,
-    String? genderError,
-    bool clearGenderError = false,
-    String? dateOfBirthRequiredError,
-    bool clearDateOfBirthRequiredError = false,
-    String? countryError,
-    bool clearCountryError = false,
-    String? cityError,
-    bool clearCityError = false,
   }) => ProfileCompletionEditing(
     userId: userId,
-    availableMarkets: availableMarkets,
+    availableCountries: availableCountries,
     minimumStudentAgeYears: minimumStudentAgeYears,
+    availableCities: availableCities ?? this.availableCities,
+    selectedCountry: selectedCountry ?? this.selectedCountry,
+    selectedCity: clearCity ? null : (selectedCity ?? this.selectedCity),
+    isLoadingCities: isLoadingCities ?? this.isLoadingCities,
+    countryPickerLocked: countryPickerLocked ?? this.countryPickerLocked,
+    cityPickerLocked: cityPickerLocked ?? this.cityPickerLocked,
     selectedGender: selectedGender ?? this.selectedGender,
     selectedDateOfBirth: clearDob
         ? null
         : (selectedDateOfBirth ?? this.selectedDateOfBirth),
     dobFailure: clearDobFailure ? null : (dobFailure ?? this.dobFailure),
-    selectedMarket: selectedMarket ?? this.selectedMarket,
-    selectedCity: clearCity ? null : (selectedCity ?? this.selectedCity),
     submitAttempted: submitAttempted ?? this.submitAttempted,
     submitValidationAttempt:
         submitValidationAttempt ?? this.submitValidationAttempt,
-    genderError: clearGenderError ? null : (genderError ?? this.genderError),
-    dateOfBirthRequiredError: clearDateOfBirthRequiredError
-        ? null
-        : (dateOfBirthRequiredError ?? this.dateOfBirthRequiredError),
-    countryError: clearCountryError
-        ? null
-        : (countryError ?? this.countryError),
-    cityError: clearCityError ? null : (cityError ?? this.cityError),
   );
 
   @override
   List<Object?> get props => [
     userId,
-    availableMarkets,
+    availableCountries,
+    availableCities,
     minimumStudentAgeYears,
+    selectedCountry,
+    selectedCity,
+    isLoadingCities,
+    countryPickerLocked,
+    cityPickerLocked,
     selectedGender,
     selectedDateOfBirth,
     dobFailure,
-    selectedMarket,
-    selectedCity,
     submitAttempted,
     submitValidationAttempt,
-    genderError,
-    dateOfBirthRequiredError,
-    countryError,
-    cityError,
   ];
 }
 
@@ -236,37 +197,44 @@ final class ProfileCompletionFailure extends ProfileCompletionState {
 }
 
 extension ProfileCompletionEditingValidation on ProfileCompletionEditing {
-  List<TilawaFormFieldIssue> get validationIssues {
+  List<TilawaFormFieldIssue> validationIssues(
+    QuranSessionsLocalizations l10n,
+    String Function(QuranSessionsFailure) localizeFailure,
+  ) {
     final List<TilawaFormFieldIssue> issues = <TilawaFormFieldIssue>[];
+    final genderError = genderErrorFor(l10n);
     if (genderError != null) {
       issues.add(
         TilawaFormFieldIssue(
           fieldId: ProfileCompletionFieldIds.gender,
-          errorMessage: genderError!,
+          errorMessage: genderError,
         ),
       );
     }
-    if (dobFailure != null || dateOfBirthRequiredError != null) {
+    final dateOfBirthError = visibleDateOfBirthError(l10n, localizeFailure);
+    if (dateOfBirthError != null) {
       issues.add(
         TilawaFormFieldIssue(
           fieldId: ProfileCompletionFieldIds.dateOfBirth,
-          errorMessage: dateOfBirthRequiredError ?? 'تاريخ الميلاد غير صالح',
+          errorMessage: dateOfBirthError,
         ),
       );
     }
+    final countryError = countryErrorFor(l10n);
     if (countryError != null) {
       issues.add(
         TilawaFormFieldIssue(
           fieldId: ProfileCompletionFieldIds.country,
-          errorMessage: countryError!,
+          errorMessage: countryError,
         ),
       );
     }
+    final cityError = cityErrorFor(l10n);
     if (cityError != null) {
       issues.add(
         TilawaFormFieldIssue(
           fieldId: ProfileCompletionFieldIds.city,
-          errorMessage: cityError!,
+          errorMessage: cityError,
         ),
       );
     }

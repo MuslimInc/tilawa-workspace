@@ -98,6 +98,10 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get marketNotEnabled => 'خدمة الجلسات غير متاحة في دولتك حالياً.';
 
   @override
+  String get marketCatalogEmpty =>
+      'خيارات الدولة والمدينة غير متاحة حالياً. يُرجى المحاولة لاحقاً أو التواصل مع الدعم.';
+
+  @override
   String get teacherNotInMarket =>
       'هذا المعلم غير متاح في منطقتك. يرجى اختيار معلم آخر.';
 
@@ -178,4 +182,65 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
 
   @override
   String get unknownFailure => 'حدث خطأ غير متوقع.';
+
+  @override
+  String get retry => 'إعادة المحاولة';
+
+  @override
+  String get profileCompletionTitle => 'إكمال الملف الشخصي';
+
+  @override
+  String get profileCompletionSavedSuccess => 'تم حفظ ملفك الشخصي بنجاح';
+
+  @override
+  String get profileCompletionSaving => 'جارٍ حفظ البيانات…';
+
+  @override
+  String get profileCompletionHeadline => 'أخبرنا عن نفسك';
+
+  @override
+  String get profileCompletionSubtitle =>
+      'نحتاج إلى هذه المعلومات لمطابقتك مع المعلم المناسب وعرض الأسعار الصحيحة لمنطقتك.';
+
+  @override
+  String get profileFieldGender => 'الجنس';
+
+  @override
+  String get profileFieldDateOfBirth => 'تاريخ الميلاد';
+
+  @override
+  String get profileFieldCountry => 'الدولة';
+
+  @override
+  String get profileFieldCity => 'المدينة';
+
+  @override
+  String get profileFieldDisplayName => 'الاسم الكامل';
+
+  @override
+  String get profileCompletionSaveAndContinue => 'حفظ والمتابعة';
+
+  @override
+  String get profileCompletionSelectDateOfBirth => 'اختر تاريخ الميلاد';
+
+  @override
+  String get profileCompletionSelectCountry => 'اختر الدولة';
+
+  @override
+  String get profileCompletionSelectCity => 'اختر المدينة';
+
+  @override
+  String get profileCompletionSelectCountryFirst => 'اختر الدولة أولاً';
+
+  @override
+  String get profileCompletionLoadingCities => 'جاري تحميل المدن…';
+
+  @override
+  String get profileGenderRequired => 'الجنس مطلوب.';
+
+  @override
+  String get profileCountryRequired => 'الدولة مطلوبة.';
+
+  @override
+  String get profileCityRequired => 'المدينة مطلوبة.';
 }

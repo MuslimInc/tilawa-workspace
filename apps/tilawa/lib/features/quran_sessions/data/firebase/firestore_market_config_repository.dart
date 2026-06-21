@@ -4,69 +4,74 @@ import 'package:quran_sessions/quran_sessions.dart';
 import 'firestore_exception_mapper.dart';
 import 'firestore_paths.dart';
 
-/// Firestore document for `quran_session_market_configs/{countryCode}`.
-class FirestoreMarketConfigDto {
-  const FirestoreMarketConfigDto({
-    required this.countryCode,
-    required this.countryName,
-    required this.currencyCode,
-    required this.defaultCityId,
-    required this.isEnabled,
-    required this.minSessionPrice,
-    required this.maxSessionPrice,
-    required this.platformCommissionPercent,
-    this.minimumStudentAgeYears,
-    this.minimumTeacherAgeYears,
-    this.cities = const [],
-  });
+Map<String, dynamic> _countryDoc(MarketCountry country, MarketConfig config) =>
+    {
+      'countryCode': country.countryCode,
+      'countryName': country.countryName,
+      'countryNameAr': country.countryName,
+      'countryNameEn': country.countryNameEn,
+      'currencyCode': country.currencyCode,
+      'timezone': country.timezone,
+      'phoneCode': country.phoneCode,
+      'flagEmoji': country.flagEmoji,
+      'minimumStudentAgeYears': 3,
+      'minimumTeacherAgeYears': 18,
+      'isEnabled': country.isEnabled,
+      'sortOrder': country.sortOrder,
+      'defaultCityId': config.defaultCityId,
+      'minSessionPrice': config.minSessionPrice,
+      'maxSessionPrice': config.maxSessionPrice,
+      'platformCommissionPercent': config.platformCommissionPercent,
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
 
-  final String countryCode;
-  final String countryName;
-  final String currencyCode;
-  final String defaultCityId;
-  final bool isEnabled;
-  final double minSessionPrice;
-  final double maxSessionPrice;
-  final double platformCommissionPercent;
-  final int? minimumStudentAgeYears;
-  final int? minimumTeacherAgeYears;
-  final List<CityConfigDto> cities;
+Map<String, dynamic> _cityDoc(MarketCity city) => {
+  'cityId': city.cityId,
+  'cityName': city.cityName,
+  'cityNameAr': city.cityName,
+  'cityNameEn': city.cityNameEn,
+  'timezone': city.timezone,
+  'currencyCode': city.currencyCode,
+  'isEnabled': city.isEnabled,
+  'sortOrder': city.sortOrder,
+  'updatedAt': FieldValue.serverTimestamp(),
+};
 
-  factory FirestoreMarketConfigDto.fromDoc(
-    DocumentSnapshot<Map<String, dynamic>> doc,
-    List<CityConfigDto> cities,
-  ) {
-    final data = doc.data() ?? const {};
-    return FirestoreMarketConfigDto(
-      countryCode: data['countryCode'] as String? ?? doc.id,
-      countryName: data['countryName'] as String? ?? doc.id,
-      currencyCode: data['currencyCode'] as String? ?? 'USD',
-      defaultCityId: data['defaultCityId'] as String? ?? cities.first.cityId,
-      isEnabled: data['isEnabled'] as bool? ?? true,
-      minSessionPrice: (data['minSessionPrice'] as num?)?.toDouble() ?? 0,
-      maxSessionPrice: (data['maxSessionPrice'] as num?)?.toDouble() ?? 0,
-      platformCommissionPercent:
-          (data['platformCommissionPercent'] as num?)?.toDouble() ?? 0,
-      minimumStudentAgeYears: data['minimumStudentAgeYears'] as int?,
-      minimumTeacherAgeYears: data['minimumTeacherAgeYears'] as int?,
-      cities: cities,
-    );
-  }
+MarketCountryDto _countryFromDoc(
+  DocumentSnapshot<Map<String, dynamic>> doc,
+) {
+  final data = doc.data() ?? const {};
+  return MarketCountryDto(
+    countryCode: data['countryCode'] as String? ?? doc.id,
+    countryName:
+        data['countryNameAr'] as String? ??
+        data['countryName'] as String? ??
+        doc.id,
+    countryNameEn: data['countryNameEn'] as String?,
+    currencyCode: data['currencyCode'] as String? ?? 'USD',
+    timezone: data['timezone'] as String? ?? 'UTC',
+    phoneCode: data['phoneCode'] as String?,
+    flagEmoji: data['flagEmoji'] as String?,
+    isEnabled: data['isEnabled'] as bool? ?? false,
+    sortOrder: data['sortOrder'] as int? ?? 0,
+  );
+}
 
-  MarketConfigDto toTransportDto() => MarketConfigDto(
+MarketCityDto _cityFromDoc(
+  DocumentSnapshot<Map<String, dynamic>> doc,
+  String countryCode,
+) {
+  final data = doc.data() ?? const {};
+  return MarketCityDto(
+    cityId: data['cityId'] as String? ?? doc.id,
+    cityName:
+        data['cityNameAr'] as String? ?? data['cityName'] as String? ?? doc.id,
+    cityNameEn: data['cityNameEn'] as String?,
     countryCode: countryCode,
-    countryName: countryName,
-    currencyCode: currencyCode,
-    defaultCityId: defaultCityId.isNotEmpty
-        ? defaultCityId
-        : (cities.isNotEmpty ? cities.first.cityId : ''),
-    cities: cities,
-    isEnabled: isEnabled,
-    minSessionPrice: minSessionPrice,
-    maxSessionPrice: maxSessionPrice,
-    platformCommissionPercent: platformCommissionPercent,
-    minimumStudentAgeYears: minimumStudentAgeYears,
-    minimumTeacherAgeYears: minimumTeacherAgeYears,
+    timezone: data['timezone'] as String? ?? 'UTC',
+    currencyCode: data['currencyCode'] as String? ?? 'USD',
+    isEnabled: data['isEnabled'] as bool? ?? false,
+    sortOrder: data['sortOrder'] as int? ?? 0,
   );
 }
 
@@ -76,28 +81,42 @@ class FirestoreMarketConfigDataSource implements MarketConfigRemoteDataSource {
   final FirebaseFirestore _firestore;
 
   CollectionReference<Map<String, dynamic>> get _markets =>
-      _firestore.collection(
-        FirestoreQuranSessionsPaths.marketConfigs,
-      );
+      _firestore.collection(FirestoreQuranSessionsPaths.marketConfigs);
 
-  Future<List<CityConfigDto>> _loadCities(String countryCode) async {
-    final snapshot = await _markets
-        .doc(countryCode)
-        .collection(FirestoreQuranSessionsPaths.cities)
-        .get();
-    return snapshot.docs.map((doc) {
-      final data = doc.data();
-      return CityConfigDto(
-        cityId: data['cityId'] as String? ?? doc.id,
-        cityName: data['cityName'] as String? ?? doc.id,
-        countryCode: countryCode,
-        timezone: data['timezone'] as String? ?? 'UTC',
-        currencyCode: data['currencyCode'] as String? ?? 'USD',
-        isEnabled: data['isEnabled'] as bool? ?? true,
-        minSessionPrice: (data['minSessionPrice'] as num?)?.toDouble(),
-        maxSessionPrice: (data['maxSessionPrice'] as num?)?.toDouble(),
-      );
-    }).toList();
+  @override
+  Future<List<MarketCountryDto>> getSupportedCountries() async {
+    try {
+      final snapshot = await _markets
+          .where('isEnabled', isEqualTo: true)
+          .orderBy('sortOrder')
+          .get();
+      return snapshot.docs.map(_countryFromDoc).toList();
+    } on FirebaseException catch (e) {
+      throw mapFirebaseException(e);
+    }
+  }
+
+  @override
+  Future<List<MarketCityDto>> getCitiesByCountryCode(
+    String countryCode,
+  ) async {
+    try {
+      final countryDoc = await _markets.doc(countryCode).get();
+      if (!countryDoc.exists) {
+        throw NotFoundException('MarketCountry($countryCode)');
+      }
+      final snapshot = await _markets
+          .doc(countryCode)
+          .collection(FirestoreQuranSessionsPaths.cities)
+          .where('isEnabled', isEqualTo: true)
+          .orderBy('sortOrder')
+          .get();
+      return snapshot.docs
+          .map((doc) => _cityFromDoc(doc, countryCode))
+          .toList();
+    } on FirebaseException catch (e) {
+      throw mapFirebaseException(e);
+    }
   }
 
   @override
@@ -107,8 +126,43 @@ class FirestoreMarketConfigDataSource implements MarketConfigRemoteDataSource {
       if (!doc.exists) {
         throw NotFoundException('MarketConfig($countryCode)');
       }
-      final cities = await _loadCities(countryCode);
-      return FirestoreMarketConfigDto.fromDoc(doc, cities).toTransportDto();
+      final cities = await getCitiesByCountryCode(countryCode);
+      final data = doc.data() ?? const {};
+      return MarketConfigDto(
+        countryCode: data['countryCode'] as String? ?? doc.id,
+        countryName:
+            data['countryNameAr'] as String? ??
+            data['countryName'] as String? ??
+            doc.id,
+        countryNameEn: data['countryNameEn'] as String?,
+        currencyCode: data['currencyCode'] as String? ?? 'USD',
+        timezone: data['timezone'] as String?,
+        phoneCode: data['phoneCode'] as String?,
+        flagEmoji: data['flagEmoji'] as String?,
+        defaultCityId: data['defaultCityId'] as String? ?? cities.first.cityId,
+        cities: cities
+            .map(
+              (c) => CityConfigDto(
+                cityId: c.cityId,
+                cityName: c.cityName,
+                cityNameEn: c.cityNameEn,
+                countryCode: c.countryCode,
+                timezone: c.timezone,
+                currencyCode: c.currencyCode,
+                isEnabled: c.isEnabled,
+                sortOrder: c.sortOrder,
+              ),
+            )
+            .toList(),
+        isEnabled: data['isEnabled'] as bool? ?? true,
+        sortOrder: data['sortOrder'] as int? ?? 0,
+        minSessionPrice: (data['minSessionPrice'] as num?)?.toDouble() ?? 0,
+        maxSessionPrice: (data['maxSessionPrice'] as num?)?.toDouble() ?? 0,
+        platformCommissionPercent:
+            (data['platformCommissionPercent'] as num?)?.toDouble() ?? 0,
+        minimumStudentAgeYears: data['minimumStudentAgeYears'] as int?,
+        minimumTeacherAgeYears: data['minimumTeacherAgeYears'] as int?,
+      );
     } on FirebaseException catch (e) {
       throw mapFirebaseException(e);
     }
@@ -116,23 +170,16 @@ class FirestoreMarketConfigDataSource implements MarketConfigRemoteDataSource {
 
   @override
   Future<List<MarketConfigDto>> getSupportedMarkets() async {
-    try {
-      final snapshot = await _markets.get();
-      final markets = <MarketConfigDto>[];
-      for (final doc in snapshot.docs) {
-        final cities = await _loadCities(doc.id);
-        markets.add(
-          FirestoreMarketConfigDto.fromDoc(doc, cities).toTransportDto(),
-        );
-      }
-      return markets;
-    } on FirebaseException catch (e) {
-      throw mapFirebaseException(e);
+    final countries = await getSupportedCountries();
+    final markets = <MarketConfigDto>[];
+    for (final country in countries) {
+      markets.add(await getMarketConfig(country.countryCode));
     }
+    return markets;
   }
 
   @override
-  Future<CityConfigDto> getCityConfig(
+  Future<MarketCityDto> getCityConfig(
     String countryCode,
     String cityId,
   ) async {
@@ -145,19 +192,46 @@ class FirestoreMarketConfigDataSource implements MarketConfigRemoteDataSource {
       if (!doc.exists) {
         throw NotFoundException('CityConfig($countryCode/$cityId)');
       }
-      final data = doc.data() ?? const {};
-      return CityConfigDto(
-        cityId: data['cityId'] as String? ?? doc.id,
-        cityName: data['cityName'] as String? ?? doc.id,
-        countryCode: countryCode,
-        timezone: data['timezone'] as String? ?? 'UTC',
-        currencyCode: data['currencyCode'] as String? ?? 'USD',
-        isEnabled: data['isEnabled'] as bool? ?? true,
-        minSessionPrice: (data['minSessionPrice'] as num?)?.toDouble(),
-        maxSessionPrice: (data['maxSessionPrice'] as num?)?.toDouble(),
-      );
+      return _cityFromDoc(doc, countryCode);
     } on FirebaseException catch (e) {
       throw mapFirebaseException(e);
     }
+  }
+}
+
+/// One-time uploader for curated MVP markets into Firestore.
+///
+/// Run from a debug/admin entry point or `dart run tool/seed_market_configs.dart`.
+class FirestoreMarketConfigSeeder {
+  FirestoreMarketConfigSeeder(this._firestore);
+
+  final FirebaseFirestore _firestore;
+
+  Future<void> seedDefaultCatalog() async {
+    final batch = _firestore.batch();
+    final markets = _firestore.collection(
+      FirestoreQuranSessionsPaths.marketConfigs,
+    );
+
+    for (final country in DefaultMarketCatalog.enabledCountries) {
+      final config = DefaultMarketCatalog.marketConfigFor(country.countryCode);
+      final countryRef = markets.doc(country.countryCode);
+      batch.set(
+        countryRef,
+        _countryDoc(country, config),
+        SetOptions(merge: true),
+      );
+
+      for (final city in DefaultMarketCatalog.enabledCitiesFor(
+        country.countryCode,
+      )) {
+        final cityRef = countryRef
+            .collection(FirestoreQuranSessionsPaths.cities)
+            .doc(city.cityId);
+        batch.set(cityRef, _cityDoc(city), SetOptions(merge: true));
+      }
+    }
+
+    await batch.commit();
   }
 }

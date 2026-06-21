@@ -27,22 +27,41 @@ data under the nested map `quranSessionsProfile`:
 
 ### `quran_session_market_configs/{countryCode}`
 
-| Field | Type |
-|-------|------|
-| `countryCode`, `countryName`, `currencyCode` | string |
-| `defaultCityId` | string |
-| `minimumStudentAgeYears`, `minimumTeacherAgeYears` | int |
-| `minSessionPrice`, `maxSessionPrice` | number |
-| `platformCommissionPercent` | number |
-| `isEnabled` | bool |
+Document ID = ISO country code (e.g. `EG`). Direct lookup — do not scan all docs
+to resolve a single country.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `countryCode` | string | Same as document ID |
+| `countryName` / `countryNameAr` | string | Arabic display |
+| `countryNameEn` | string? | English |
+| `currencyCode` | string | ISO 4217 |
+| `timezone` | string | IANA |
+| `phoneCode` | string? | E.g. `+20` |
+| `flagEmoji` | string? | UI |
+| `defaultCityId` | string | |
+| `minimumStudentAgeYears`, `minimumTeacherAgeYears` | int | |
+| `minSessionPrice`, `maxSessionPrice` | number | |
+| `platformCommissionPercent` | number | |
+| `isEnabled` | bool | List queries filter `true` |
+| `sortOrder` | int | Ascending list order |
+| `updatedAt` | timestamp | |
 
 #### Subcollection `cities/{cityId}`
 
-| Field | Type |
-|-------|------|
-| `cityId`, `cityName`, `timezone`, `currencyCode` | string |
-| `isEnabled` | bool |
-| `minSessionPrice`, `maxSessionPrice` | number? |
+Document ID = stable slug (e.g. `cairo`).
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `cityId` | string | Same as document ID |
+| `cityName` / `cityNameAr` | string | Arabic |
+| `cityNameEn` | string? | English |
+| `timezone`, `currencyCode` | string | |
+| `isEnabled` | bool | |
+| `sortOrder` | int | |
+| `updatedAt` | timestamp | |
+
+Seed data: see [quran_sessions_market_config_sources.md](quran_sessions_market_config_sources.md).
 
 ### `quran_session_platform_config/global`
 
@@ -77,10 +96,26 @@ Scheduled sessions linked by `bookingId`.
 
 ## Required composite indexes
 
+Deploy from the repo root:
+
+```sh
+firebase deploy --only firestore:indexes
+```
+
+Or use the **Create index** link in the Firestore error log (fastest for a single index).
+
+Index definitions live in [`firestore.indexes.json`](../firestore.indexes.json).
+
+- `quran_session_market_configs`: `isEnabled` ASC, `sortOrder` ASC
+- `quran_session_market_configs/{country}/cities`: `isEnabled` ASC, `sortOrder` ASC
 - `quran_teacher_applications`: `userId` ASC, `updatedAt` DESC
 - `quran_sessions`: `studentId` ASC, `startsAt` DESC
+- `quran_sessions`: `teacherId` ASC, `startsAt` DESC
 - `quran_bookings`: `studentId` ASC, `createdAt` DESC
 - `quran_teacher_profiles`: `verificationStatus` ASC, `isActive` ASC, `displayName` ASC
+
+For query shapes, monitoring, and performance recommendations see
+[firestore_query_optimization.md](firestore_query_optimization.md).
 
 ## Security rules checklist
 

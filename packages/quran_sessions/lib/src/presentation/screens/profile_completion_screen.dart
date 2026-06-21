@@ -3,9 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:quran_sessions/core/l10n_extensions.dart';
+import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../domain/entities/market_config.dart';
+import '../../domain/entities/market_city.dart';
+import '../../domain/entities/market_country.dart';
 import '../../domain/entities/user_profile.dart';
 import '../../utils/dob_validator.dart';
 import '../blocs/profile_completion/profile_completion_bloc.dart';
@@ -62,8 +65,10 @@ class _ProfileCompletionScreenState extends State<ProfileCompletionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('إكمال الملف الشخصي')),
+      appBar: AppBar(title: Text(l10n.profileCompletionTitle)),
       body: BlocConsumer<ProfileCompletionBloc, ProfileCompletionState>(
         listenWhen: (ProfileCompletionState prev, ProfileCompletionState next) {
           if (_shouldScrollToValidationError(prev, next)) {
@@ -77,10 +82,16 @@ class _ProfileCompletionScreenState extends State<ProfileCompletionScreen> {
           if (state is ProfileCompletionEditing &&
               state.submitValidationAttempt > 0 &&
               !state.canSubmit) {
+            final loc = context.quranSessionsL10n;
             unawaited(
               _validationController.handleValidationFailure(
                 context,
-                TilawaFormValidationResult(issues: state.validationIssues),
+                TilawaFormValidationResult(
+                  issues: state.validationIssues(
+                    loc,
+                    (failure) => failure.toLocalizedMessage(context),
+                  ),
+                ),
               ),
             );
             return;
@@ -88,7 +99,7 @@ class _ProfileCompletionScreenState extends State<ProfileCompletionScreen> {
           if (state is ProfileCompletionSaved) {
             TilawaFeedback.showToast(
               context,
-              message: 'تم حفظ ملفك الشخصي بنجاح',
+              message: l10n.profileCompletionSavedSuccess,
               variant: TilawaFeedbackVariant.success,
             );
             Navigator.of(context).pop(true);
@@ -106,174 +117,68 @@ class _ProfileCompletionScreenState extends State<ProfileCompletionScreen> {
           ProfileCompletionLoading() => const Center(
             child: CircularProgressIndicator(),
           ),
-          ProfileCompletionSaving() => const Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 12),
-                Text('جارٍ حفظ البيانات…'),
-              ],
-            ),
+          ProfileCompletionSaving() => _SavingIndicator(
+            message: l10n.profileCompletionSaving,
           ),
           ProfileCompletionSaved() => const SizedBox.shrink(),
-          ProfileCompletionFailure(:final failure) => Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(failure.toLocalizedMessage(context)),
-                const SizedBox(height: 12),
-                ElevatedButton(
-                  onPressed: () => context.read<ProfileCompletionBloc>().add(
-                    ProfileLoadRequested(userId: widget.userId),
-                  ),
-                  child: const Text('إعادة المحاولة'),
-                ),
-              ],
+          ProfileCompletionFailure(:final failure) => _LoadFailureView(
+            message: failure.toLocalizedMessage(context),
+            retryLabel: l10n.retry,
+            onRetry: () => context.read<ProfileCompletionBloc>().add(
+              ProfileLoadRequested(userId: widget.userId),
             ),
           ),
           ProfileCompletionEditing(
             :final userId,
-            :final availableMarkets,
+            :final availableCountries,
             :final minimumStudentAgeYears,
             :final selectedGender,
             :final selectedDateOfBirth,
-            :final selectedMarket,
+            :final selectedCountry,
             :final selectedCity,
             :final availableCities,
+            :final isLoadingCities,
+            :final countryPickerLocked,
+            :final cityPickerLocked,
             :final submitAttempted,
             :final invalidFieldCount,
-            :final genderError,
-            :final countryError,
-            :final cityError,
           ) =>
             TilawaFormScreenScaffold(
               validationController: _validationController,
-              body: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Icon(
-                    Icons.person_outline_rounded,
-                    size: 64,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'أخبرنا عن نفسك',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'نحتاج إلى هذه المعلومات لمطابقتك مع المعلم المناسب '
-                    'وعرض الأسعار الصحيحة لمنطقتك.',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 32),
-                  TilawaFormFieldAnchor(
-                    fieldId: ProfileCompletionFieldIds.gender,
-                    semanticLabel: 'الجنس',
-                    order: 0,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          'الجنس',
-                          style: Theme.of(context).textTheme.titleSmall,
-                        ),
-                        const SizedBox(height: 8),
-                        _GenderPicker(
-                          selected: selectedGender,
-                          onChanged: (g) => context
-                              .read<ProfileCompletionBloc>()
-                              .add(GenderSelected(g)),
-                        ),
-                        TilawaFormSectionError(errorText: genderError),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  TilawaFormFieldAnchor(
-                    fieldId: ProfileCompletionFieldIds.dateOfBirth,
-                    semanticLabel: 'تاريخ الميلاد',
-                    order: 1,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          'تاريخ الميلاد',
-                          style: Theme.of(context).textTheme.titleSmall,
-                        ),
-                        const SizedBox(height: 8),
-                        _DateOfBirthField(
-                          selected: selectedDateOfBirth,
-                          minimumAgeYears: minimumStudentAgeYears,
-                          errorText: state.visibleDateOfBirthError(
-                            (failure) => failure.toLocalizedMessage(context),
-                          ),
-                          onChanged: (d) => context
-                              .read<ProfileCompletionBloc>()
-                              .add(DateOfBirthSet(d)),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  TilawaFormFieldAnchor(
-                    fieldId: ProfileCompletionFieldIds.country,
-                    semanticLabel: 'الدولة',
-                    order: 2,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          'الدولة',
-                          style: Theme.of(context).textTheme.titleSmall,
-                        ),
-                        const SizedBox(height: 8),
-                        _CountryPicker(
-                          markets: availableMarkets,
-                          selected: selectedMarket,
-                          errorText: countryError,
-                          onChanged: (m) => context
-                              .read<ProfileCompletionBloc>()
-                              .add(CountrySelected(m)),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  TilawaFormFieldAnchor(
-                    fieldId: ProfileCompletionFieldIds.city,
-                    semanticLabel: 'المدينة',
-                    order: 3,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          'المدينة',
-                          style: Theme.of(context).textTheme.titleSmall,
-                        ),
-                        const SizedBox(height: 8),
-                        _CityPicker(
-                          cities: availableCities,
-                          selected: selectedCity,
-                          countrySelected: selectedMarket != null,
-                          errorText: cityError,
-                          onChanged: (c) => context
-                              .read<ProfileCompletionBloc>()
-                              .add(CitySelected(c)),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              body: _ProfileCompletionFormBody(
+                l10n: l10n,
+                selectedGender: selectedGender,
+                selectedDateOfBirth: selectedDateOfBirth,
+                minimumStudentAgeYears: minimumStudentAgeYears,
+                dateOfBirthError: state.visibleDateOfBirthError(
+                  l10n,
+                  (failure) => failure.toLocalizedMessage(context),
+                ),
+                genderError: state.genderErrorFor(l10n),
+                countryError: state.countryErrorFor(l10n),
+                cityError: state.cityErrorFor(l10n),
+                availableCountries: availableCountries,
+                selectedCountry: selectedCountry,
+                countryPickerLocked: countryPickerLocked,
+                availableCities: availableCities,
+                selectedCity: selectedCity,
+                isLoadingCities: isLoadingCities,
+                cityPickerLocked: cityPickerLocked,
+                onGenderSelected: (gender) => context
+                    .read<ProfileCompletionBloc>()
+                    .add(GenderSelected(gender)),
+                onDateOfBirthSet: (date) => context
+                    .read<ProfileCompletionBloc>()
+                    .add(DateOfBirthSet(date)),
+                onCountrySelected: (country) => context
+                    .read<ProfileCompletionBloc>()
+                    .add(CountrySelected(country)),
+                onCitySelected: (city) => context
+                    .read<ProfileCompletionBloc>()
+                    .add(CitySelected(city)),
               ),
               footer: TilawaFormSubmitFooter(
-                buttonText: 'حفظ والمتابعة',
+                buttonText: l10n.profileCompletionSaveAndContinue,
                 invalidFieldCount: submitAttempted ? invalidFieldCount : null,
                 onPressed: () => context.read<ProfileCompletionBloc>().add(
                   ProfileSubmitted(userId: userId),
@@ -286,31 +191,269 @@ class _ProfileCompletionScreenState extends State<ProfileCompletionScreen> {
   }
 }
 
+class _SavingIndicator extends StatelessWidget {
+  const _SavingIndicator({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const CircularProgressIndicator(),
+          SizedBox(height: tokens.spaceMedium),
+          Text(message),
+        ],
+      ),
+    );
+  }
+}
+
+class _LoadFailureView extends StatelessWidget {
+  const _LoadFailureView({
+    required this.message,
+    required this.retryLabel,
+    required this.onRetry,
+  });
+
+  final String message;
+  final String retryLabel;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(message),
+          SizedBox(height: tokens.spaceMedium),
+          ElevatedButton(
+            onPressed: onRetry,
+            child: Text(retryLabel),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileCompletionFormBody extends StatelessWidget {
+  const _ProfileCompletionFormBody({
+    required this.l10n,
+    required this.selectedGender,
+    required this.selectedDateOfBirth,
+    required this.minimumStudentAgeYears,
+    required this.dateOfBirthError,
+    required this.genderError,
+    required this.countryError,
+    required this.cityError,
+    required this.availableCountries,
+    required this.selectedCountry,
+    required this.countryPickerLocked,
+    required this.availableCities,
+    required this.selectedCity,
+    required this.isLoadingCities,
+    required this.cityPickerLocked,
+    required this.onGenderSelected,
+    required this.onDateOfBirthSet,
+    required this.onCountrySelected,
+    required this.onCitySelected,
+  });
+
+  final QuranSessionsLocalizations l10n;
+  final UserGender? selectedGender;
+  final DateTime? selectedDateOfBirth;
+  final int minimumStudentAgeYears;
+  final String? dateOfBirthError;
+  final String? genderError;
+  final String? countryError;
+  final String? cityError;
+  final List<MarketCountry> availableCountries;
+  final MarketCountry? selectedCountry;
+  final bool countryPickerLocked;
+  final List<MarketCity> availableCities;
+  final MarketCity? selectedCity;
+  final bool isLoadingCities;
+  final bool cityPickerLocked;
+  final ValueChanged<UserGender> onGenderSelected;
+  final ValueChanged<DateTime> onDateOfBirthSet;
+  final ValueChanged<MarketCountry> onCountrySelected;
+  final ValueChanged<MarketCity> onCitySelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        TilawaStateVisual(
+          icon: Icons.person_outline_rounded,
+          size: tokens.iconSizeExtraLarge + tokens.spaceExtraLarge,
+        ),
+        SizedBox(height: tokens.spaceLarge),
+        Text(
+          l10n.profileCompletionHeadline,
+          style: theme.textTheme.headlineSmall,
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(height: tokens.spaceSmall),
+        Text(
+          l10n.profileCompletionSubtitle,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(height: tokens.spaceExtraLarge + tokens.spaceSmall),
+        TilawaFormFieldAnchor(
+          fieldId: ProfileCompletionFieldIds.gender,
+          semanticLabel: l10n.profileFieldGender,
+          order: 0,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                l10n.profileFieldGender,
+                style: theme.textTheme.titleSmall,
+              ),
+              SizedBox(height: tokens.spaceSmall),
+              _GenderPicker(
+                maleLabel: l10n.gender_male,
+                femaleLabel: l10n.gender_female,
+                selected: selectedGender,
+                onChanged: onGenderSelected,
+              ),
+              TilawaFormSectionError(errorText: genderError),
+            ],
+          ),
+        ),
+        SizedBox(height: tokens.spaceExtraLarge),
+        TilawaFormFieldAnchor(
+          fieldId: ProfileCompletionFieldIds.dateOfBirth,
+          semanticLabel: l10n.profileFieldDateOfBirth,
+          order: 1,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                l10n.profileFieldDateOfBirth,
+                style: theme.textTheme.titleSmall,
+              ),
+              SizedBox(height: tokens.spaceSmall),
+              _DateOfBirthField(
+                selected: selectedDateOfBirth,
+                minimumAgeYears: minimumStudentAgeYears,
+                errorText: dateOfBirthError,
+                fieldLabel: l10n.profileFieldDateOfBirth,
+                placeholder: l10n.profileCompletionSelectDateOfBirth,
+                onChanged: onDateOfBirthSet,
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: tokens.spaceExtraLarge),
+        TilawaFormFieldAnchor(
+          fieldId: ProfileCompletionFieldIds.country,
+          semanticLabel: l10n.profileFieldCountry,
+          order: 2,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                l10n.profileFieldCountry,
+                style: theme.textTheme.titleSmall,
+              ),
+              SizedBox(height: tokens.spaceSmall),
+              _CountryPicker(
+                countries: availableCountries,
+                selected: selectedCountry,
+                readOnly: countryPickerLocked,
+                errorText: countryError,
+                fieldLabel: l10n.profileFieldCountry,
+                placeholder: l10n.profileCompletionSelectCountry,
+                onChanged: onCountrySelected,
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: tokens.spaceExtraLarge),
+        TilawaFormFieldAnchor(
+          fieldId: ProfileCompletionFieldIds.city,
+          semanticLabel: l10n.profileFieldCity,
+          order: 3,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                l10n.profileFieldCity,
+                style: theme.textTheme.titleSmall,
+              ),
+              SizedBox(height: tokens.spaceSmall),
+              _CityPicker(
+                cities: availableCities,
+                selected: selectedCity,
+                countrySelected: selectedCountry != null,
+                isLoading: isLoadingCities,
+                readOnly: cityPickerLocked,
+                errorText: cityError,
+                fieldLabel: l10n.profileFieldCity,
+                loadingHint: l10n.profileCompletionLoadingCities,
+                selectCityHint: l10n.profileCompletionSelectCity,
+                selectCountryFirstHint:
+                    l10n.profileCompletionSelectCountryFirst,
+                onChanged: onCitySelected,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 // ── Gender picker ─────────────────────────────────────────────────────────────
 
 class _GenderPicker extends StatelessWidget {
-  const _GenderPicker({required this.selected, required this.onChanged});
+  const _GenderPicker({
+    required this.maleLabel,
+    required this.femaleLabel,
+    required this.selected,
+    required this.onChanged,
+  });
 
+  final String maleLabel;
+  final String femaleLabel;
   final UserGender? selected;
   final ValueChanged<UserGender> onChanged;
 
   @override
   Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+
     return Row(
       children: [
         Expanded(
           child: _GenderOption(
-            label: 'ذكر',
+            label: maleLabel,
             icon: Icons.male_rounded,
             gender: UserGender.male,
             isSelected: selected == UserGender.male,
             onTap: () => onChanged(UserGender.male),
           ),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: tokens.spaceMedium),
         Expanded(
           child: _GenderOption(
-            label: 'أنثى',
+            label: femaleLabel,
             icon: Icons.female_rounded,
             gender: UserGender.female,
             isSelected: selected == UserGender.female,
@@ -345,7 +488,7 @@ class _GenderOption extends StatelessWidget {
     final radius = tokens.resolveRadius(family: TilawaRadiusFamily.chrome);
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
+      duration: theme.componentTokens.immersiveComposer.transitionDuration,
       constraints: BoxConstraints(minHeight: tokens.minInteractiveDimension),
       decoration: BoxDecoration(
         color: isSelected
@@ -392,25 +535,30 @@ class _DateOfBirthField extends StatelessWidget {
     required this.selected,
     required this.minimumAgeYears,
     required this.onChanged,
+    required this.fieldLabel,
+    required this.placeholder,
     this.errorText,
   });
 
   final DateTime? selected;
   final int minimumAgeYears;
   final ValueChanged<DateTime> onChanged;
+  final String fieldLabel;
+  final String placeholder;
   final String? errorText;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final dateFmt = DateFormat('d MMMM y', 'ar');
+    final locale = Localizations.localeOf(context).toString();
+    final dateFmt = DateFormat.yMMMMd(locale);
     final hasValue = selected != null;
 
     return TilawaReadOnlyField(
       prefixIcon: Icons.calendar_today_outlined,
       errorText: errorText,
-      semanticLabel: 'تاريخ الميلاد',
+      semanticLabel: fieldLabel,
       onTap: () async {
         final firstDate = DobValidator.earliest;
         final lastDate = DobValidator.latestBirthDate(
@@ -424,12 +572,12 @@ class _DateOfBirthField extends StatelessWidget {
           initialDate: initialDate,
           firstDate: firstDate,
           lastDate: lastDate,
-          helpText: 'اختر تاريخ الميلاد',
+          helpText: placeholder,
         );
         if (picked != null) onChanged(picked);
       },
       child: Text(
-        hasValue ? dateFmt.format(selected!) : 'اختر تاريخ الميلاد',
+        hasValue ? dateFmt.format(selected!) : placeholder,
         style: theme.textTheme.bodyLarge?.copyWith(
           color: hasValue ? scheme.onSurface : scheme.onSurfaceVariant,
         ),
@@ -442,35 +590,65 @@ class _DateOfBirthField extends StatelessWidget {
 
 class _CountryPicker extends StatelessWidget {
   const _CountryPicker({
-    required this.markets,
+    required this.countries,
     required this.selected,
     required this.onChanged,
+    required this.fieldLabel,
+    required this.placeholder,
+    this.readOnly = false,
     this.errorText,
   });
 
-  final List<MarketConfig> markets;
-  final MarketConfig? selected;
-  final ValueChanged<MarketConfig> onChanged;
+  final List<MarketCountry> countries;
+  final MarketCountry? selected;
+  final ValueChanged<MarketCountry> onChanged;
+  final String fieldLabel;
+  final String placeholder;
+  final bool readOnly;
   final String? errorText;
 
   @override
   Widget build(BuildContext context) {
-    return TilawaDropdownField<MarketConfig>(
+    final label = selected == null ? placeholder : _countryLabel(selected!);
+
+    if (readOnly && selected != null) {
+      return TilawaDropdownField<MarketCountry>(
+        value: selected,
+        hintText: label,
+        semanticLabel: fieldLabel,
+        prefixIcon: Icons.public_outlined,
+        enabled: false,
+        errorText: errorText,
+        items: [
+          TilawaDropdownItem(value: selected!, label: label),
+        ],
+        onChanged: null,
+      );
+    }
+
+    return TilawaDropdownField<MarketCountry>(
       value: selected,
-      hintText: 'اختر الدولة',
-      semanticLabel: 'الدولة',
+      hintText: placeholder,
+      semanticLabel: fieldLabel,
       prefixIcon: Icons.public_outlined,
       errorText: errorText,
       items: [
-        for (final m in markets.where((m) => m.isEnabled))
-          TilawaDropdownItem(value: m, label: m.countryName),
+        for (final country in countries)
+          TilawaDropdownItem(
+            value: country,
+            label: _countryLabel(country),
+          ),
       ],
       onChanged: onChanged,
     );
   }
-}
 
-// ── City picker ───────────────────────────────────────────────────────────────
+  String _countryLabel(MarketCountry country) {
+    final flag = country.flagEmoji;
+    if (flag == null || flag.isEmpty) return country.countryName;
+    return '$flag ${country.countryName}';
+  }
+}
 
 class _CityPicker extends StatelessWidget {
   const _CityPicker({
@@ -478,26 +656,66 @@ class _CityPicker extends StatelessWidget {
     required this.selected,
     required this.countrySelected,
     required this.onChanged,
+    required this.fieldLabel,
+    required this.loadingHint,
+    required this.selectCityHint,
+    required this.selectCountryFirstHint,
+    this.isLoading = false,
+    this.readOnly = false,
     this.errorText,
   });
 
-  final List<CityConfig> cities;
-  final CityConfig? selected;
+  final List<MarketCity> cities;
+  final MarketCity? selected;
   final bool countrySelected;
-  final ValueChanged<CityConfig> onChanged;
+  final bool isLoading;
+  final bool readOnly;
+  final ValueChanged<MarketCity> onChanged;
+  final String fieldLabel;
+  final String loadingHint;
+  final String selectCityHint;
+  final String selectCountryFirstHint;
   final String? errorText;
 
   @override
   Widget build(BuildContext context) {
-    return TilawaDropdownField<CityConfig>(
+    if (isLoading) {
+      return TilawaDropdownField<MarketCity>(
+        value: null,
+        hintText: loadingHint,
+        semanticLabel: fieldLabel,
+        prefixIcon: Icons.location_city_outlined,
+        enabled: false,
+        items: const [],
+        onChanged: null,
+      );
+    }
+
+    if (readOnly && selected != null) {
+      return TilawaDropdownField<MarketCity>(
+        value: selected,
+        hintText: selected!.cityName,
+        semanticLabel: fieldLabel,
+        prefixIcon: Icons.location_city_outlined,
+        enabled: false,
+        errorText: errorText,
+        items: [
+          TilawaDropdownItem(value: selected!, label: selected!.cityName),
+        ],
+        onChanged: null,
+      );
+    }
+
+    return TilawaDropdownField<MarketCity>(
       value: selected,
-      hintText: countrySelected ? 'اختر المدينة' : 'اختر الدولة أولاً',
-      semanticLabel: 'المدينة',
+      hintText: countrySelected ? selectCityHint : selectCountryFirstHint,
+      semanticLabel: fieldLabel,
       prefixIcon: Icons.location_city_outlined,
       enabled: countrySelected,
       errorText: errorText,
       items: [
-        for (final c in cities) TilawaDropdownItem(value: c, label: c.cityName),
+        for (final city in cities)
+          TilawaDropdownItem(value: city, label: city.cityName),
       ],
       onChanged: countrySelected ? onChanged : null,
     );

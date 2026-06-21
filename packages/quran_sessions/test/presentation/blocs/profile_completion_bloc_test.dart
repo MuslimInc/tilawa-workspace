@@ -1,7 +1,9 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:checks/checks.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quran_sessions/src/domain/entities/market_config.dart';
+import 'package:quran_sessions/src/data/seed/default_market_catalog.dart';
+import 'package:quran_sessions/src/domain/entities/market_city.dart';
+import 'package:quran_sessions/src/domain/entities/market_country.dart';
 import 'package:quran_sessions/src/domain/entities/session_policy.dart';
 import 'package:quran_sessions/src/domain/entities/user_profile.dart';
 import 'package:quran_sessions/src/domain/failures/quran_sessions_failure.dart';
@@ -19,28 +21,15 @@ import '../../helpers/fakes/fake_user_profile_repository.dart';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-final _cairo = const CityConfig(
-  cityId: 'cairo',
-  cityName: 'القاهرة',
-  countryCode: 'EG',
-  timezone: 'Africa/Cairo',
-  currencyCode: 'EGP',
-  isEnabled: true,
-  minSessionPrice: 100,
-  maxSessionPrice: 2000,
+final _cairo = DefaultMarketCatalog.enabledCitiesFor('EG').firstWhere(
+  (c) => c.cityId == 'cairo',
 );
 
-final _egypt = MarketConfig(
-  countryCode: 'EG',
-  countryName: 'مصر',
-  currencyCode: 'EGP',
-  defaultCityId: 'cairo',
-  isEnabled: true,
-  minSessionPrice: 100,
-  maxSessionPrice: 2000,
-  platformCommissionPercent: 15,
-  cities: [_cairo],
+final _egypt = DefaultMarketCatalog.enabledCountries.firstWhere(
+  (c) => c.countryCode == 'EG',
 );
+
+final _egyptCities = DefaultMarketCatalog.enabledCitiesFor('EG');
 
 const _userId = 'student_1';
 
@@ -77,13 +66,16 @@ ProfileCompletionEditing _loadedEditing({
   int minimumStudentAgeYears = _minStudentAge,
 }) => ProfileCompletionEditing(
   userId: _userId,
-  availableMarkets: [_egypt],
+  availableCountries: [_egypt],
+  availableCities: _egyptCities,
   minimumStudentAgeYears: minimumStudentAgeYears,
   selectedGender: UserGender.male,
   selectedDateOfBirth: selectedDateOfBirth,
   dobFailure: dobFailure,
-  selectedMarket: _egypt,
+  selectedCountry: _egypt,
   selectedCity: _cairo,
+  countryPickerLocked: true,
+  cityPickerLocked: false,
 );
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
@@ -135,6 +127,59 @@ void main() {
     );
 
     blocTest<ProfileCompletionBloc, ProfileCompletionState>(
+      'loaded state includes countries from repository',
+      build: _makeBloc,
+      act: (b) => b.add(const ProfileLoadRequested(userId: _userId)),
+      verify: (b) {
+        final s = b.state as ProfileCompletionEditing;
+        check(s.availableCountries.length).equals(3);
+      },
+    );
+
+    blocTest<ProfileCompletionBloc, ProfileCompletionState>(
+      'auto-selects and locks country when only one is enabled',
+      build: () {
+        final mr = FakeMarketConfigRepository()..countriesOverride = [_egypt];
+        return _makeBloc(marketRepo: mr);
+      },
+      act: (b) => b.add(const ProfileLoadRequested(userId: _userId)),
+      verify: (b) {
+        final s = b.state as ProfileCompletionEditing;
+        check(s.selectedCountry?.countryCode).equals('EG');
+        check(s.countryPickerLocked).isTrue();
+        check(s.availableCities).isNotEmpty();
+      },
+    );
+
+    blocTest<ProfileCompletionBloc, ProfileCompletionState>(
+      'auto-selects and locks city when country has one city',
+      build: () {
+        final mr = FakeMarketConfigRepository()
+          ..countriesOverride = [_egypt]
+          ..citiesOverrideByCountry = {
+            'EG': [
+              const MarketCity(
+                cityId: 'cairo',
+                cityName: 'القاهرة',
+                countryCode: 'EG',
+                timezone: 'Africa/Cairo',
+                currencyCode: 'EGP',
+                isEnabled: true,
+                sortOrder: 10,
+              ),
+            ],
+          };
+        return _makeBloc(marketRepo: mr);
+      },
+      act: (b) => b.add(const ProfileLoadRequested(userId: _userId)),
+      verify: (b) {
+        final s = b.state as ProfileCompletionEditing;
+        check(s.selectedCity?.cityId).equals('cairo');
+        check(s.cityPickerLocked).isTrue();
+      },
+    );
+
+    blocTest<ProfileCompletionBloc, ProfileCompletionState>(
       'emits [Loading, Failure] when market repo fails',
       build: () {
         final mr = FakeMarketConfigRepository()
@@ -145,6 +190,24 @@ void main() {
       expect: () => [
         isA<ProfileCompletionLoading>(),
         isA<ProfileCompletionFailure>(),
+      ],
+    );
+
+    blocTest<ProfileCompletionBloc, ProfileCompletionState>(
+      'emits [Loading, Failure] when no countries are available',
+      build: () {
+        final mr = FakeMarketConfigRepository()
+          ..failWith = const MarketCatalogEmptyFailure();
+        return _makeBloc(marketRepo: mr);
+      },
+      act: (b) => b.add(const ProfileLoadRequested(userId: _userId)),
+      expect: () => [
+        isA<ProfileCompletionLoading>(),
+        isA<ProfileCompletionFailure>().having(
+          (s) => s.failure,
+          'failure',
+          isA<MarketCatalogEmptyFailure>(),
+        ),
       ],
     );
 
@@ -346,16 +409,17 @@ void main() {
       UserGender? gender = UserGender.male,
       DateTime? dob,
       QuranSessionsFailure? dobFailure,
-      MarketConfig? market,
-      CityConfig? city,
+      MarketCountry? country,
+      MarketCity? city,
     }) => ProfileCompletionEditing(
       userId: _userId,
-      availableMarkets: [_egypt],
+      availableCountries: [_egypt],
+      availableCities: _egyptCities,
       minimumStudentAgeYears: _minStudentAge,
       selectedGender: gender,
       selectedDateOfBirth: dob,
       dobFailure: dobFailure,
-      selectedMarket: market,
+      selectedCountry: country,
       selectedCity: city,
     );
 
@@ -364,14 +428,14 @@ void main() {
         editing(
           gender: null,
           dob: DateTime(2000),
-          market: _egypt,
+          country: _egypt,
           city: _cairo,
         ).canSubmit,
       ).isFalse();
     });
 
     test('false when no DOB', () {
-      check(editing(market: _egypt, city: _cairo).canSubmit).isFalse();
+      check(editing(country: _egypt, city: _cairo).canSubmit).isFalse();
     });
 
     test('false when dobFailure is set', () {
@@ -379,23 +443,23 @@ void main() {
         editing(
           dob: DateTime(2000),
           dobFailure: const FutureDateOfBirthFailure(),
-          market: _egypt,
+          country: _egypt,
           city: _cairo,
         ).canSubmit,
       ).isFalse();
     });
 
-    test('false when no market', () {
+    test('false when no country', () {
       check(editing(dob: DateTime(2000)).canSubmit).isFalse();
     });
 
     test('false when no city', () {
-      check(editing(dob: DateTime(2000), market: _egypt).canSubmit).isFalse();
+      check(editing(dob: DateTime(2000), country: _egypt).canSubmit).isFalse();
     });
 
     test('true when all fields valid', () {
       check(
-        editing(dob: DateTime(2000), market: _egypt, city: _cairo).canSubmit,
+        editing(dob: DateTime(2000), country: _egypt, city: _cairo).canSubmit,
       ).isTrue();
     });
   });
@@ -408,17 +472,18 @@ void main() {
       build: _makeBloc,
       seed: () => ProfileCompletionEditing(
         userId: _userId,
-        availableMarkets: [_egypt],
+        availableCountries: [_egypt],
+        availableCities: _egyptCities,
         minimumStudentAgeYears: _minStudentAge,
         selectedGender: UserGender.male,
-        selectedMarket: _egypt,
+        selectedCountry: _egypt,
         selectedCity: _cairo,
       ),
       act: (b) => b.add(ProfileSubmitted(userId: _userId)),
       verify: (b) {
         final s = b.state as ProfileCompletionEditing;
         check(s.submitAttempted).isTrue();
-        check(s.dateOfBirthRequiredError).isNotNull();
+        check(s.hasDateOfBirthRequiredError).isTrue();
         check(s.invalidFieldCount).equals(1);
       },
     );
@@ -428,12 +493,13 @@ void main() {
       build: _makeBloc,
       seed: () => ProfileCompletionEditing(
         userId: _userId,
-        availableMarkets: [_egypt],
+        availableCountries: [_egypt],
+        availableCities: _egyptCities,
         minimumStudentAgeYears: _minStudentAge,
         selectedGender: UserGender.male,
         selectedDateOfBirth: null,
         dobFailure: const FutureDateOfBirthFailure(),
-        selectedMarket: _egypt,
+        selectedCountry: _egypt,
         selectedCity: _cairo,
       ),
       act: (b) => b.add(ProfileSubmitted(userId: _userId)),
@@ -450,12 +516,13 @@ void main() {
       build: _makeBloc,
       seed: () => ProfileCompletionEditing(
         userId: _userId,
-        availableMarkets: [_egypt],
+        availableCountries: [_egypt],
+        availableCities: _egyptCities,
         minimumStudentAgeYears: _minStudentAge,
         selectedGender: UserGender.male,
         selectedDateOfBirth: null,
         dobFailure: const DateOfBirthTooRecentFailure(),
-        selectedMarket: _egypt,
+        selectedCountry: _egypt,
         selectedCity: _cairo,
       ),
       act: (b) => b.add(ProfileSubmitted(userId: _userId)),
@@ -471,17 +538,18 @@ void main() {
       build: _makeBloc,
       seed: () => ProfileCompletionEditing(
         userId: _userId,
-        availableMarkets: [_egypt],
+        availableCountries: [_egypt],
+        availableCities: _egyptCities,
         minimumStudentAgeYears: _minStudentAge,
         selectedDateOfBirth: DateTime(2000, 1, 1),
-        selectedMarket: _egypt,
+        selectedCountry: _egypt,
         selectedCity: _cairo,
       ),
       act: (b) => b.add(ProfileSubmitted(userId: _userId)),
       verify: (b) {
         final s = b.state as ProfileCompletionEditing;
         check(s.submitAttempted).isTrue();
-        check(s.genderError).isNotNull();
+        check(s.hasGenderError).isTrue();
       },
     );
 
@@ -490,7 +558,7 @@ void main() {
       build: _makeBloc,
       seed: () => ProfileCompletionEditing(
         userId: _userId,
-        availableMarkets: [_egypt],
+        availableCountries: [_egypt],
         minimumStudentAgeYears: _minStudentAge,
         selectedGender: UserGender.male,
         selectedDateOfBirth: DateTime(2000, 1, 1),
@@ -499,8 +567,8 @@ void main() {
       verify: (b) {
         final s = b.state as ProfileCompletionEditing;
         check(s.submitAttempted).isTrue();
-        check(s.countryError).isNotNull();
-        check(s.cityError).isNotNull();
+        check(s.hasCountryError).isTrue();
+        check(s.hasCityError).isTrue();
         check(s.invalidFieldCount).equals(2);
       },
     );
@@ -532,20 +600,30 @@ void main() {
     );
   });
 
-  // ── Country / City ──────────────────────────────────────────────────────────
-
   group('country and city selection', () {
+    test('city list empty until country selected', () {
+      final state = ProfileCompletionEditing(
+        userId: _userId,
+        availableCountries: [_egypt],
+        minimumStudentAgeYears: _minStudentAge,
+      );
+
+      check(state.selectedCountry).isNull();
+      check(state.availableCities).isEmpty();
+    });
+
     blocTest<ProfileCompletionBloc, ProfileCompletionState>(
-      'CountrySelected clears city',
+      'CountrySelected clears city then reloads cities',
       build: _makeBloc,
       seed: () => _loadedEditing(selectedDateOfBirth: DateTime(2000)),
       act: (b) => b.add(CountrySelected(_egypt)),
       expect: () => [
-        isA<ProfileCompletionEditing>().having(
-          (s) => s.selectedCity,
-          'selectedCity',
-          isNull,
-        ),
+        isA<ProfileCompletionEditing>()
+            .having((s) => s.selectedCity, 'selectedCity', isNull)
+            .having((s) => s.isLoadingCities, 'isLoadingCities', isTrue),
+        isA<ProfileCompletionEditing>()
+            .having((s) => s.isLoadingCities, 'isLoadingCities', isFalse)
+            .having((s) => s.availableCities, 'availableCities', isNotEmpty),
       ],
     );
 
@@ -554,12 +632,12 @@ void main() {
       build: _makeBloc,
       seed: () => ProfileCompletionEditing(
         userId: _userId,
-        availableMarkets: [_egypt],
+        availableCountries: [_egypt],
+        availableCities: _egyptCities,
         minimumStudentAgeYears: _minStudentAge,
         selectedGender: UserGender.male,
         selectedDateOfBirth: DateTime(2000),
-        selectedMarket: _egypt,
-        // no city pre-selected
+        selectedCountry: _egypt,
       ),
       act: (b) => b.add(CitySelected(_cairo)),
       expect: () => [

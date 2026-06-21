@@ -1,4 +1,5 @@
 import '../../domain/entities/market_config.dart';
+import '../dtos/market_country_dto.dart';
 import '../dtos/market_config_dto.dart';
 
 extension MarketConfigDtoMapper on MarketConfigDto {
@@ -25,5 +26,16 @@ extension CityConfigDtoMapper on CityConfigDto {
     isEnabled: isEnabled,
     minSessionPrice: minSessionPrice,
     maxSessionPrice: maxSessionPrice,
+  );
+
+  MarketCityDto toMarketCityDto() => MarketCityDto(
+    cityId: cityId,
+    cityName: cityName,
+    cityNameEn: cityNameEn,
+    countryCode: countryCode,
+    timezone: timezone,
+    currencyCode: currencyCode,
+    isEnabled: isEnabled,
+    sortOrder: sortOrder,
   );
 }

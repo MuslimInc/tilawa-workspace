@@ -16,8 +16,6 @@ export 'src/boundaries/scheduling/availability_provider.dart';
 export 'src/boundaries/scheduling/booking_policy.dart';
 export 'src/boundaries/scheduling/cancellation_policy.dart';
 export 'src/boundaries/scheduling/reschedule_policy.dart';
-// ── Data: typed exceptions (for datasource implementors) ─────────────────────
-export 'src/data/exceptions/remote_exception.dart';
 // ── Data: remote datasource contracts (host app implements these) ────────────
 export 'src/data/datasources/availability_remote_data_source.dart';
 export 'src/data/datasources/booking_remote_data_source.dart';
@@ -29,6 +27,7 @@ export 'src/data/datasources/teacher_profile_remote_data_source.dart';
 export 'src/data/datasources/teacher_remote_data_source.dart';
 export 'src/data/datasources/user_profile_remote_data_source.dart';
 export 'src/data/dtos/market_config_dto.dart';
+export 'src/data/dtos/market_country_dto.dart';
 export 'src/data/dtos/quran_booking_dto.dart';
 export 'src/data/dtos/quran_session_dto.dart';
 export 'src/data/dtos/quran_teacher_dto.dart';
@@ -38,10 +37,15 @@ export 'src/data/dtos/teacher_application_dto.dart';
 export 'src/data/dtos/teacher_availability_dto.dart';
 export 'src/data/dtos/teacher_profile_dto.dart';
 export 'src/data/dtos/user_profile_dto.dart';
+// ── Data: typed exceptions (for datasource implementors) ─────────────────────
+export 'src/data/exceptions/remote_exception.dart';
+export 'src/data/seed/default_market_catalog.dart';
 // ── Data: DI registration module ─────────────────────────────────────────────
 // Host app uses QuranSessionsModule.register() — never imports *Impl directly.
 export 'src/di/quran_sessions_module.dart';
+export 'src/domain/entities/market_city.dart';
 export 'src/domain/entities/market_config.dart';
+export 'src/domain/entities/market_country.dart';
 export 'src/domain/entities/quran_booking.dart';
 export 'src/domain/entities/quran_session.dart';
 export 'src/domain/entities/quran_teacher.dart';

@@ -1,6 +1,8 @@
 import 'package:dartz_plus/dartz_plus.dart';
 
+import '../entities/market_city.dart';
 import '../entities/market_config.dart';
+import '../entities/market_country.dart';
 import '../failures/quran_sessions_failure.dart';
 
 /// Read-only access to marketplace configuration controlled by the backend.
@@ -9,15 +11,27 @@ import '../failures/quran_sessions_failure.dart';
 /// This repository never accepts write operations — changes are made through
 /// the admin backend, not the app.
 abstract interface class MarketConfigRepository {
-  /// Returns the market configuration for [countryCode].
+  /// Enabled countries for profile completion, ordered by [MarketCountry.sortOrder].
+  Future<Either<QuranSessionsFailure, List<MarketCountry>>>
+  getSupportedCountries();
+
+  /// Enabled cities within [countryCode], ordered by [MarketCity.sortOrder].
+  ///
+  /// Uses direct subcollection lookup — does not scan global city lists.
+  Future<Either<QuranSessionsFailure, List<MarketCity>>> getCitiesByCountryCode(
+    String countryCode,
+  );
+
+  /// Returns the market configuration for [countryCode] via O(1) document id.
   ///
   /// Returns [NotFoundFailure] if no config exists for that country.
   Future<Either<QuranSessionsFailure, MarketConfig>> getMarketConfig(
     String countryCode,
   );
 
-  /// Returns all markets currently configured in the backend,
-  /// regardless of [MarketConfig.isEnabled].
+  /// Returns all markets currently configured in the backend.
+  ///
+  /// Prefer [getSupportedCountries] when only country metadata is needed.
   Future<Either<QuranSessionsFailure, List<MarketConfig>>>
   getSupportedMarkets();
 

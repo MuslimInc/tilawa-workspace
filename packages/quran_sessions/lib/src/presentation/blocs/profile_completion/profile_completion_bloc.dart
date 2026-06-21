@@ -2,7 +2,9 @@
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../domain/entities/market_config.dart';
+import '../../../domain/entities/market_city.dart';
+import '../../../domain/entities/market_country.dart';
+import '../../../domain/entities/user_profile.dart';
 import '../../../domain/usecases/complete_student_profile_usecase.dart';
 import '../../../domain/usecases/get_market_config_usecase.dart';
 import '../../../domain/usecases/get_session_policy_usecase.dart';
@@ -26,7 +28,7 @@ class ProfileCompletionBloc
     on<ProfileLoadRequested>(_onLoadRequested, transformer: restartable());
     on<GenderSelected>(_onGenderSelected, transformer: sequential());
     on<DateOfBirthSet>(_onDateOfBirthSet, transformer: sequential());
-    on<CountrySelected>(_onCountrySelected, transformer: sequential());
+    on<CountrySelected>(_onCountrySelected, transformer: restartable());
     on<CitySelected>(_onCitySelected, transformer: sequential());
     on<ProfileSubmitted>(_onSubmitted, transformer: droppable());
   }
@@ -42,21 +44,19 @@ class ProfileCompletionBloc
   ) async {
     emit(const ProfileCompletionLoading());
 
-    // Load profile, available markets, and the (remote-config-backed) safety
-    // policy in parallel.
     final profileFuture = _getUserProfile(event.userId);
-    final marketsFuture = _getMarketConfig.allMarkets();
+    final countriesFuture = _getMarketConfig.supportedCountries();
     final policyFuture = _getSessionPolicy();
     final profileResult = await profileFuture;
-    final marketsResult = await marketsFuture;
+    final countriesResult = await countriesFuture;
     final policyResult = await policyFuture;
 
     if (profileResult.isLeft) {
       profileResult.fold((f) => emit(ProfileCompletionFailure(f)), (_) {});
       return;
     }
-    if (marketsResult.isLeft) {
-      marketsResult.fold((f) => emit(ProfileCompletionFailure(f)), (_) {});
+    if (countriesResult.isLeft) {
+      countriesResult.fold((f) => emit(ProfileCompletionFailure(f)), (_) {});
       return;
     }
     if (policyResult.isLeft) {
@@ -65,41 +65,79 @@ class ProfileCompletionBloc
     }
 
     final profile = profileResult.fold((_) => throw StateError(''), (p) => p);
-    final markets = marketsResult.fold(
+    final countries = countriesResult.fold(
       (_) => throw StateError(''),
-      (ms) => ms,
+      (list) => list,
     );
     final policy = policyResult.fold((_) => throw StateError(''), (p) => p);
 
-    // Pre-select country/city if the profile already has them.
-    // For new profiles, auto-suggest the only enabled market (MVP: Egypt) as a
-    // convenience — the user still must explicitly pick a city and submit.
-    MarketConfig? preSelectedMarket;
-    CityConfig? preSelectedCity;
-    if (profile.countryCode != null) {
-      preSelectedMarket = markets
-          .where((m) => m.countryCode == profile.countryCode)
-          .firstOrNull;
-      if (preSelectedMarket != null && profile.cityId != null) {
-        preSelectedCity = preSelectedMarket.cityById(profile.cityId!);
-      }
-    } else {
-      final enabledMarkets = markets.where((m) => m.isEnabled).toList();
-      if (enabledMarkets.length == 1) {
-        preSelectedMarket = enabledMarkets.first;
-      }
-    }
+    final countryPickerLocked = countries.length == 1;
+    MarketCountry? selectedCountry = _resolveInitialCountry(profile, countries);
 
-    emit(
-      ProfileCompletionEditing(
-        userId: event.userId,
-        availableMarkets: markets,
-        minimumStudentAgeYears: policy.minimumStudentAgeYears,
-        selectedGender: profile.gender,
-        selectedDateOfBirth: profile.dateOfBirth,
-        selectedMarket: preSelectedMarket,
-        selectedCity: preSelectedCity,
-      ),
+    var editing = ProfileCompletionEditing(
+      userId: event.userId,
+      availableCountries: countries,
+      minimumStudentAgeYears: policy.minimumStudentAgeYears,
+      selectedGender: profile.gender,
+      selectedDateOfBirth: profile.dateOfBirth,
+      selectedCountry: selectedCountry,
+      countryPickerLocked: countryPickerLocked,
+      isLoadingCities: selectedCountry != null,
+    );
+    emit(editing);
+
+    if (selectedCountry != null) {
+      final citiesState = await _loadCitiesForCountry(
+        editing,
+        selectedCountry,
+        preselectedCityId: profile.cityId,
+      );
+      if (!isClosed) emit(citiesState);
+    }
+  }
+
+  MarketCountry? _resolveInitialCountry(
+    UserProfile profile,
+    List<MarketCountry> countries,
+  ) {
+    if (profile.countryCode != null) {
+      return countries
+          .where((c) => c.countryCode == profile.countryCode)
+          .firstOrNull;
+    }
+    if (countries.length == 1) return countries.first;
+    return null;
+  }
+
+  Future<ProfileCompletionState> _loadCitiesForCountry(
+    ProfileCompletionEditing current,
+    MarketCountry country, {
+    String? preselectedCityId,
+  }) async {
+    final citiesResult = await _getMarketConfig.citiesByCountry(
+      country.countryCode,
+    );
+    if (citiesResult.isLeft) {
+      return ProfileCompletionFailure(
+        citiesResult.fold((f) => f, (_) => throw StateError('')),
+      );
+    }
+    final cities = citiesResult.fold((_) => throw StateError(''), (c) => c);
+    final cityPickerLocked = cities.length == 1;
+    MarketCity? selectedCity;
+    if (preselectedCityId != null) {
+      selectedCity = cities
+          .where((c) => c.cityId == preselectedCityId)
+          .firstOrNull;
+    }
+    selectedCity ??= cityPickerLocked ? cities.firstOrNull : null;
+
+    return current.copyWith(
+      availableCities: cities,
+      selectedCountry: country,
+      selectedCity: selectedCity,
+      isLoadingCities: false,
+      cityPickerLocked: cityPickerLocked,
     );
   }
 
@@ -112,7 +150,6 @@ class ProfileCompletionBloc
     emit(
       current.copyWith(
         selectedGender: event.gender,
-        clearGenderError: true,
       ),
     );
   }
@@ -128,7 +165,6 @@ class ProfileCompletionBloc
       minimumAgeYears: current.minimumStudentAgeYears,
     );
     if (failure != null) {
-      // Clear the stored DOB and record the failure so the UI can show it.
       emit(current.copyWith(clearDob: true, dobFailure: failure));
       return;
     }
@@ -136,26 +172,36 @@ class ProfileCompletionBloc
       current.copyWith(
         selectedDateOfBirth: event.dateOfBirth,
         clearDobFailure: true,
-        clearDateOfBirthRequiredError: true,
       ),
     );
   }
 
-  void _onCountrySelected(
+  Future<void> _onCountrySelected(
     CountrySelected event,
     Emitter<ProfileCompletionState> emit,
-  ) {
+  ) async {
     final current = state;
     if (current is! ProfileCompletionEditing) return;
-    // Changing country clears the city selection.
+
     emit(
       current.copyWith(
-        selectedMarket: event.market,
+        selectedCountry: event.country,
         clearCity: true,
-        clearCountryError: true,
-        clearCityError: true,
+        availableCities: const [],
+        isLoadingCities: true,
+        cityPickerLocked: false,
       ),
     );
+
+    final updated = await _loadCitiesForCountry(
+      current.copyWith(
+        selectedCountry: event.country,
+        clearCity: true,
+        isLoadingCities: true,
+      ),
+      event.country,
+    );
+    emit(updated);
   }
 
   void _onCitySelected(
@@ -164,7 +210,7 @@ class ProfileCompletionBloc
   ) {
     final current = state;
     if (current is! ProfileCompletionEditing) return;
-    emit(current.copyWith(selectedCity: event.city, clearCityError: true));
+    emit(current.copyWith(selectedCity: event.city));
   }
 
   Future<void> _onSubmitted(
@@ -182,16 +228,19 @@ class ProfileCompletionBloc
 
     emit(const ProfileCompletionSaving());
 
+    final country = current.selectedCountry!;
+    final city = current.selectedCity!;
+
     final result = await _completeStudentProfile(
       userId: event.userId,
       gender: current.selectedGender!,
       dateOfBirth: current.selectedDateOfBirth!,
-      countryCode: current.selectedMarket!.countryCode,
-      countryName: current.selectedMarket!.countryName,
-      cityId: current.selectedCity!.cityId,
-      cityName: current.selectedCity!.cityName,
-      currencyCode: current.selectedCity!.currencyCode,
-      timezone: current.selectedCity!.timezone,
+      countryCode: country.countryCode,
+      countryName: country.countryName,
+      cityId: city.cityId,
+      cityName: city.cityName,
+      currencyCode: city.currencyCode,
+      timezone: city.timezone,
     );
 
     result.fold(

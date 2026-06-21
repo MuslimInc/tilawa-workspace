@@ -104,6 +104,10 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
       'Sessions are not available in your country right now.';
 
   @override
+  String get marketCatalogEmpty =>
+      'Country and city options are not available yet. Please try again later or contact support.';
+
+  @override
   String get teacherNotInMarket =>
       'This teacher is not available in your area. Please choose another.';
 
@@ -189,4 +193,66 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get unknownFailure => 'An unexpected error occurred.';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get profileCompletionTitle => 'Complete profile';
+
+  @override
+  String get profileCompletionSavedSuccess =>
+      'Your profile was saved successfully.';
+
+  @override
+  String get profileCompletionSaving => 'Saving your details…';
+
+  @override
+  String get profileCompletionHeadline => 'Tell us about yourself';
+
+  @override
+  String get profileCompletionSubtitle =>
+      'We need this information to match you with the right teacher and show correct pricing for your region.';
+
+  @override
+  String get profileFieldGender => 'Gender';
+
+  @override
+  String get profileFieldDateOfBirth => 'Date of birth';
+
+  @override
+  String get profileFieldCountry => 'Country';
+
+  @override
+  String get profileFieldCity => 'City';
+
+  @override
+  String get profileFieldDisplayName => 'Full name';
+
+  @override
+  String get profileCompletionSaveAndContinue => 'Save and continue';
+
+  @override
+  String get profileCompletionSelectDateOfBirth => 'Select date of birth';
+
+  @override
+  String get profileCompletionSelectCountry => 'Select country';
+
+  @override
+  String get profileCompletionSelectCity => 'Select city';
+
+  @override
+  String get profileCompletionSelectCountryFirst => 'Select country first';
+
+  @override
+  String get profileCompletionLoadingCities => 'Loading cities…';
+
+  @override
+  String get profileGenderRequired => 'Gender is required.';
+
+  @override
+  String get profileCountryRequired => 'Country is required.';
+
+  @override
+  String get profileCityRequired => 'City is required.';
 }

@@ -53,7 +53,7 @@ extension QuranSessionsFailureUi on QuranSessionsFailure {
 
       // ── Profile / eligibility ───────────────────────────────────────────────
       ProfileIncompleteFailure(missingFields: final fields) =>
-        '${loc.profileIncompletePrefix} ${loc.profileIncompleteFields(fields.map(_fieldAr).join(', '))}',
+        '${loc.profileIncompletePrefix} ${loc.profileIncompleteFields(fields.map((f) => _profileFieldLabel(loc, f)).join(', '))}',
 
       GenderNotAllowedFailure() => loc.profileIncompletePrefix,
 
@@ -73,6 +73,7 @@ extension QuranSessionsFailureUi on QuranSessionsFailure {
         loc.policyViolation(d, p),
 
       // ── Market / location ───────────────────────────────────────────────────
+      MarketCatalogEmptyFailure() => loc.marketCatalogEmpty,
       MarketNotEnabledFailure(cityId: final c) =>
         c != null ? loc.marketNotEnabledWithCity : loc.marketNotEnabled,
 
@@ -119,16 +120,17 @@ extension QuranSessionsFailureUi on QuranSessionsFailure {
   }
 }
 
-// ── Label helpers (Arabic) ────────────────────────────────────────────────────
+// ── Label helpers ─────────────────────────────────────────────────────────────
 
-String _fieldAr(String field) => switch (field) {
-  'gender' => 'الجنس',
-  'dateOfBirth' => 'تاريخ الميلاد',
-  'displayName' => 'الاسم الكامل',
-  'countryCode' => 'الدولة',
-  'cityId' => 'المدينة',
-  _ => field,
-};
+String _profileFieldLabel(QuranSessionsLocalizations loc, String field) =>
+    switch (field) {
+      'gender' => loc.profileFieldGender,
+      'dateOfBirth' => loc.profileFieldDateOfBirth,
+      'displayName' => loc.profileFieldDisplayName,
+      'countryCode' => loc.profileFieldCountry,
+      'cityId' => loc.profileFieldCity,
+      _ => field,
+    };
 
 String _restrictionReasonAr(String reason) => switch (reason) {
   'falseIdentity' => 'بيانات هوية مزيفة',

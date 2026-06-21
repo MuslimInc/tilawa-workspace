@@ -180,6 +180,13 @@ final class GuardianApprovalRequiredFailure extends QuranSessionsFailure {
   List<Object?> get props => [studentId];
 }
 
+/// No enabled countries or cities were returned from the market catalog.
+///
+/// Usually means Firestore was not seeded or every market is disabled.
+final class MarketCatalogEmptyFailure extends QuranSessionsFailure {
+  const MarketCatalogEmptyFailure();
+}
+
 /// The student's country/city market is not open for bookings.
 ///
 /// Emitted when [MarketConfig.isEnabled] or [CityConfig.isEnabled] is false.

@@ -41,6 +41,74 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Quran Sessions market config — read-only for authenticated clients;
+    // seed via admin tools (see FirestoreMarketConfigDataSource). Includes the
+    // per-country `cities` subcollection loaded by _loadCities().
+    match /quran_session_market_configs/{countryCode} {
+      allow read: if isSignedIn();
+      allow write: if false;
+
+      match /cities/{cityId} {
+        allow read: if isSignedIn();
+        allow write: if false;
+      }
+    }
+
+    // Quran Sessions platform policy — read-only for authenticated clients;
+    // seed via admin tools (see FirestoreSessionPolicyDataSource, global doc).
+    match /quran_session_platform_config/{configId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    // Quran Sessions write-bearing collections — SAFE SUBSET (Step 2).
+    // Owner-scoped reads only; all client writes denied until the high-integrity
+    // operations move to Cloud Functions (Admin SDK bypasses these rules).
+    // Full design + write model: docs/security/quran_sessions_firestore_rules_draft.md
+
+    // Teacher applications — applicant reads own; writes via admin/CF.
+    match /quran_teacher_applications/{applicationId} {
+      allow read: if isSignedIn()
+        && resource.data.userId == request.auth.uid;
+      allow write: if false;
+    }
+
+    // Teacher profiles — authenticated read (student browse); writes via admin/CF.
+    match /quran_teacher_profiles/{teacherId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+
+      // Pricing read by direct path (FirestoreTeacherDataSource); writes admin/CF.
+      match /pricing/{marketId} {
+        allow read: if isSignedIn();
+        allow write: if false;
+      }
+    }
+
+    // Availability is read both directly and via a collectionGroup query, so it
+    // needs a recursive-wildcard match (collection group queries are NOT covered
+    // by a nested subcollection rule). Writes (slot booking) via CF.
+    match /{path=**}/availability/{slotId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    // Bookings — student or teacher on the booking may read; writes via CF.
+    match /quran_bookings/{bookingId} {
+      allow read: if isSignedIn()
+        && (resource.data.studentId == request.auth.uid
+            || resource.data.teacherId == request.auth.uid);
+      allow write: if false;
+    }
+
+    // Sessions — student or teacher on the session may read; writes via CF.
+    match /quran_sessions/{sessionId} {
+      allow read: if isSignedIn()
+        && (resource.data.studentId == request.auth.uid
+            || resource.data.teacherId == request.auth.uid);
+      allow write: if false;
+    }
+
     // Support purchase ledger — written by verifySupportPurchase Cloud Function.
     match /support_purchases/{tokenHash} {
       allow read, write: if false;
