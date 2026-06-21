@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/teacher_availability.dart';
 import '../utils/teacher_availability_by_date.dart';
@@ -18,7 +19,7 @@ class DateGroupedSlotsLayout extends StatefulWidget {
   final List<TeacherAvailability> slots;
   final Widget? emptyChild;
   final DateTime? initialDay;
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   /// Builds the slot list/grid for [daySlots] on the selected tab.
   final Widget Function(
@@ -75,6 +76,7 @@ class _DateGroupedSlotsLayoutState extends State<DateGroupedSlotsLayout> {
     }
 
     final daySlots = _byDay[_selectedDay] ?? const [];
+    final tokens = Theme.of(context).tokens;
 
     return Padding(
       padding: widget.padding,
@@ -86,7 +88,7 @@ class _DateGroupedSlotsLayoutState extends State<DateGroupedSlotsLayout> {
             selected: _selectedDay,
             onDaySelected: (day) => setState(() => _selectedDay = day),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: tokens.spaceMedium),
           widget.slotsForDayBuilder(context, daySlots),
         ],
       ),

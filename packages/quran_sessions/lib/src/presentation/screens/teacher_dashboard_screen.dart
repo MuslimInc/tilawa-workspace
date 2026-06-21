@@ -166,21 +166,39 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                     )
                   else
                     SliverToBoxAdapter(
-                      child: DateGroupedSlotsLayout(
-                        slots: availability,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        slotsForDayBuilder: (context, daySlots) => Column(
-                          children: [
-                            for (final slot in daySlots)
-                              _SlotTile(
-                                slot: slot,
-                                timeOnly: true,
-                                isUpdating: isUpdatingAvailability,
-                                onRemove: () =>
-                                    _confirmRemoveSlot(context, slot),
+                      child: Builder(
+                        builder: (context) {
+                          final tokens = Theme.of(context).tokens;
+                          return DateGroupedSlotsLayout(
+                            slots: availability,
+                            padding: EdgeInsetsDirectional.only(
+                              start: tokens.spaceLarge,
+                              end: tokens.spaceLarge,
+                            ),
+                            slotsForDayBuilder: (context, daySlots) => Padding(
+                              padding: EdgeInsets.only(
+                                bottom:
+                                    tokens.spaceExtraLarge * 2 +
+                                    MediaQuery.paddingOf(context).bottom,
                               ),
-                          ],
-                        ),
+                              child: Column(
+                                children: [
+                                  for (var i = 0; i < daySlots.length; i++)
+                                    _SlotTile(
+                                      slot: daySlots[i],
+                                      timeOnly: true,
+                                      isUpdating: isUpdatingAvailability,
+                                      showDivider: i < daySlots.length - 1,
+                                      onRemove: () => _confirmRemoveSlot(
+                                        context,
+                                        daySlots[i],
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ),
                 ],
@@ -250,12 +268,14 @@ class _SlotTile extends StatelessWidget {
     required this.isUpdating,
     required this.onRemove,
     this.timeOnly = false,
+    this.showDivider = true,
   });
 
   final TeacherAvailability slot;
   final bool isUpdating;
   final bool timeOnly;
   final VoidCallback onRemove;
+  final bool showDivider;
 
   @override
   Widget build(BuildContext context) {
@@ -264,30 +284,37 @@ class _SlotTile extends StatelessWidget {
     final dateFmt = DateFormat('EEE d MMM، h:mm a', locale);
     final timeFmt = DateFormat('h:mm a', locale);
     final scheme = Theme.of(context).colorScheme;
+    final tokens = Theme.of(context).tokens;
+    final settingsTokens = Theme.of(context).componentTokens.settingsGroup;
 
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
+    return TilawaCompactListRow(
+      showDivider: showDivider,
       leading: Icon(
         slot.isBooked ? Icons.lock_outline : Icons.schedule,
+        size: settingsTokens.tileIconSize,
         color: slot.isBooked ? scheme.primary : scheme.onSurfaceVariant,
       ),
-      title: Text(
-        timeOnly
-            ? timeFmt.format(slot.startsAt.toLocal())
-            : dateFmt.format(slot.startsAt.toLocal()),
-      ),
-      subtitle: Text(
-        slot.isBooked ? l10n.slotBooked : l10n.slotAvailable,
-        style: TextStyle(
-          color: slot.isBooked ? scheme.primary : scheme.tertiary,
-          fontWeight: FontWeight.w500,
-        ),
+      title: timeOnly
+          ? timeFmt.format(slot.startsAt.toLocal())
+          : dateFmt.format(slot.startsAt.toLocal()),
+      subtitle: slot.isBooked ? l10n.slotBooked : l10n.slotAvailable,
+      subtitleStyle: TextStyle(
+        fontSize: settingsTokens.tileSubtitleFontSize,
+        fontWeight: FontWeight.w500,
+        color: slot.isBooked ? scheme.primary : scheme.tertiary,
+        height: 1.2,
       ),
       trailing: slot.isBooked
           ? null
           : IconButton(
               icon: const Icon(Icons.delete_outline),
               tooltip: l10n.deleteSlot,
+              visualDensity: VisualDensity.compact,
+              constraints: BoxConstraints.tightFor(
+                width: tokens.minInteractiveDimension,
+                height: tokens.minInteractiveDimension,
+              ),
+              padding: EdgeInsets.zero,
               onPressed: isUpdating ? null : onRemove,
             ),
     );

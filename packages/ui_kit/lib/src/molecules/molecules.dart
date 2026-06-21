@@ -8,6 +8,7 @@ export 'tilawa_navigation_row.dart';
 export 'tilawa_seek_bar.dart';
 export 'tilawa_selection_pill.dart';
 export 'tilawa_chip.dart';
+export 'tilawa_compact_list_row.dart';
 export 'tilawa_count_progress_ring.dart';
 export 'tilawa_feedback_strip.dart';
 export 'tilawa_glass_panel.dart';
