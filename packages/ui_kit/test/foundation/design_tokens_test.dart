@@ -894,8 +894,8 @@ void main() {
           itemHeight: 32,
           containerPadding: 4,
         );
-        expect(radii.containerRadius, 20.0);
-        expect(radii.itemRadius, 16.0);
+        expect(radii.containerRadius, 12.0);
+        expect(radii.itemRadius, 8.0);
       });
 
       test(

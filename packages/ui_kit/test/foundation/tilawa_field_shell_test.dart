@@ -15,21 +15,22 @@ Widget _wrap(Widget child) {
 
 void main() {
   group('TilawaFieldShell', () {
-    testWidgets('search shell is the sole OutlineInputBorder owner', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        _wrap(
-          TilawaSearchField(
-            hintText: 'Search',
-            onChanged: (_) {},
+    testWidgets(
+      'Reciters regression: catalog search has no nested OutlineInputBorder',
+      (tester) async {
+        await tester.pumpWidget(
+          _wrap(
+            TilawaSearchField(
+              hintText: 'Search',
+              onChanged: (_) {},
+            ),
           ),
-        ),
-      );
+        );
 
-      expect(find.byType(OutlineInputBorder), findsNothing);
-      expect(find.byType(TilawaFieldShell), findsOneWidget);
-    });
+        expect(find.byType(OutlineInputBorder), findsNothing);
+        expect(find.byType(TilawaFieldShell), findsOneWidget);
+      },
+    );
 
     testWidgets('decorator shell renders InputDecorator with child', (
       tester,

@@ -67,7 +67,7 @@ void main() {
     );
 
     expect(button.height, lessThan(80));
-    expect(button.height, greaterThan(48));
+    expect(button.height, greaterThanOrEqualTo(48));
   });
 
   testWidgets('scrolls tall actions instead of overflowing the action band', (

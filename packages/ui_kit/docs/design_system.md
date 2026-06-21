@@ -25,8 +25,8 @@ into feature code.
 ## 1. Architecture (scalable atomic design)
 
 ```
-foundation/     AppColors, AppTheme, TilawaDesignTokens, TilawaComponentTokens
-atoms/          TilawaButton, TilawaCard, TilawaTextField, …
+foundation/     AppColors, AppTheme, TilawaDesignTokens, TilawaInputStyle, …
+atoms/          TilawaButton, TilawaCard, TilawaTextField, TilawaReadOnlyField, …
 molecules/      TilawaSearchField, TilawaSelectionPill, TilawaCatalogAppBar, …
 organisms/      TilawaMediaPlayerBar, TilawaSettingsGroup, …
 ```
@@ -161,6 +161,7 @@ Previews and goldens set `AppTheme.useGoogleFonts = false` and
 
 | Spec | Topic |
 |------|--------|
+| [`docs/UI_KIT_INPUT_SYSTEM.md`](../../../docs/UI_KIT_INPUT_SYSTEM.md) | Input SSOT (`TilawaInputStyle`, `TilawaFieldShell`, kit atoms) |
 | [`specs/012-visual-simplification/`](../../../specs/012-visual-simplification/spec.md) | Calm palette, no decorative gradients |
 | [`specs/013-token-consistency-pass/`](../../../specs/013-token-consistency-pass/spec.md) | Motion/type/feedback token migration |
 | [`specs/017-catalog-theme-freeze/`](../../../specs/017-catalog-theme-freeze/spec.md) | Freeze acceptance criteria |
