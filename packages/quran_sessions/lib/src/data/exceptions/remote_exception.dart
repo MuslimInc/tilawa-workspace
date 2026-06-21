@@ -36,3 +36,15 @@ final class ConflictException extends RemoteException {
   final bool isSlotUnavailable;
   final String? slotId;
 }
+
+/// Caller lacks permission for the requested resource.
+final class PermissionDeniedException extends RemoteException {
+  const PermissionDeniedException();
+}
+
+/// Backend rejected the payload (HTTP 400 or equivalent).
+final class ValidationRemoteException extends RemoteException {
+  const ValidationRemoteException({required this.field, required this.code});
+  final String field;
+  final String code;
+}

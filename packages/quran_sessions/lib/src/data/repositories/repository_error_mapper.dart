@@ -17,6 +17,11 @@ QuranSessionsFailure mapRemoteException(Exception e) => switch (e) {
   ConflictException(isSlotUnavailable: true, :final slotId) =>
     SlotUnavailableFailure(slotId ?? ''),
   ConflictException() => const BookingConflictFailure(),
+  PermissionDeniedException() => const UnauthorizedFailure(),
+  ValidationRemoteException(:final field, :final code) => ValidationFailure(
+    field: field,
+    code: code,
+  ),
   HttpException(:final statusCode) when statusCode == 401 =>
     const UnauthorizedFailure(),
   HttpException(:final statusCode) when statusCode == 403 =>

@@ -10,3 +10,13 @@ extension TeacherAvailabilityDtoMapper on TeacherAvailabilityDto {
     isBooked: isBooked,
   );
 }
+
+extension TeacherAvailabilityDomainMapper on TeacherAvailability {
+  TeacherAvailabilityDto toDto() => TeacherAvailabilityDto(
+    slotId: slotId,
+    teacherId: teacherId,
+    startsAt: startsAt.toUtc().toIso8601String(),
+    endsAt: endsAt.toUtc().toIso8601String(),
+    isBooked: isBooked,
+  );
+}

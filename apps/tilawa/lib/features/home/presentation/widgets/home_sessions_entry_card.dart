@@ -5,8 +5,7 @@ import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-// MVP: hard-coded until real auth integration lands.
-const _mvpStudentId = 'student_mvp';
+import '../../../quran_sessions/presentation/quran_sessions_user.dart';
 
 /// Home dashboard card linking to the "تعلم قراءة القرآن الآن" feature.
 ///
@@ -19,7 +18,13 @@ class HomeSessionsEntryCard extends StatelessWidget {
   const HomeSessionsEntryCard({super.key});
 
   Future<void> _onTap(BuildContext context) async {
-    final result = await getIt<GetUserProfileUseCase>()(_mvpStudentId);
+    final userId = quranSessionsCurrentUserId(getIt);
+    if (userId == null) {
+      context.push('/login');
+      return;
+    }
+
+    final result = await getIt<GetUserProfileUseCase>()(userId);
     if (!context.mounted) return;
 
     final profile = result.fold((_) => null, (p) => p);

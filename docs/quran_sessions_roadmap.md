@@ -637,15 +637,15 @@ The app-level FCM infrastructure exists but is not wired to Quran Sessions event
 
 > The feature cannot go live without these.
 
-- [ ] **Real auth UID** — replace hardcoded `'student_mvp'` with `FirebaseAuth.instance.currentUser!.uid` everywhere (entry card, routes, BLoCs)
-- [ ] **`UserProfileRepositoryImpl`** — read/write `users/{uid}.quranSessionsProfile` in Firestore (dto + mapper + remote data source)
-- [ ] **Auto-create student profile** — on first Google Sign-In, write a `quranSessionsProfile` document with `role: student`, `profileCompleted: false`, `accountStatus: active`
-- [ ] **Firestore `UserProfileRemoteDataSource`** — interface + implementation
-- [ ] **`UserProfileDto`** — serialization model for the Firestore sub-document
-- [ ] **`MarketConfigRepositoryImpl`** — read `quran_session_market_configs/{countryCode}` from Firestore (pricing is backend-controlled, not in app)
-- [ ] **Real teacher data in Firestore** — remove fake teacher list, wire real data source; teacher pricing in `teachers/{id}/pricing/{marketId}`
+- [x] **Real auth UID** — `AuthSessionProvider` + `FirebaseAuthSessionProvider`; routes use `requireQuranSessionsUserId`
+- [x] **`UserProfileRepositoryImpl`** — read/write `users/{uid}.quranSessionsProfile` via `FirestoreUserProfileDataSource`
+- [x] **Auto-create student profile** — `getOrCreateProfile` writes shell with `profileCompleted: false`
+- [x] **Firestore `UserProfileRemoteDataSource`** — interface (package) + `FirestoreUserProfileDataSource` (host)
+- [x] **`UserProfileDto`** — transport model + `FirestoreUserProfileDto` (host)
+- [x] **`MarketConfigRepositoryImpl`** — read `quran_session_market_configs/{countryCode}` from Firestore
+- [~] **Real teacher data in Firestore** — datasource wired; seed data + admin approval still required
 - [ ] **External meeting link shown to student** — display `meetingLink` in My Sessions for confirmed sessions
-- [ ] **Production `QuranSessionsModule` complete** — register `UserProfileRepository`, `SessionPolicyRepository`, `ValidateBookingEligibilityUseCase`, `ProfileCompletionBloc`
+- [x] **Production `QuranSessionsModule` complete** — all repositories + use cases + BLoC registration via Firebase module
 - [ ] **Session strings in ARB** — move all hardcoded Arabic strings out of Dart files into `app_ar.arb`
 - [ ] **`ProfileCompletionBlocTest`** — zero test coverage on this critical gate
 - [ ] **`ValidateBookingEligibilityUseCase` tests** — core safety logic untested

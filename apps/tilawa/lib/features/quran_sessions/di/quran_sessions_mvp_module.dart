@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 
+import '../data/fake_auth_session_provider.dart';
 import '../data/fake_mvp_availability_provider.dart';
 import '../data/fake_mvp_booking_repository.dart';
 import '../data/fake_mvp_market_config_repository.dart';
@@ -20,109 +21,145 @@ class QuranSessionsMvpModule {
   static void register(GetIt sl) {
     final store = QuranSessionsMvpStore.instance;
 
-    // ── Repositories ────────────────────────────────────────────────────────
-    final teacherRepo = FakeMvpTeacherRepository(store);
-    final bookingRepo = FakeMvpBookingRepository(store);
-    final sessionRepo = FakeMvpSessionRepository(store);
-    final availabilityProvider = FakeMvpAvailabilityProvider(store);
-    final profileRepo = FakeMvpUserProfileRepository(store);
-    final policyRepo = FakeMvpSessionPolicyRepository(store);
-    final marketConfigRepo = FakeMvpMarketConfigRepository();
-
-    final applicationRepo = FakeMvpTeacherApplicationRepository(store);
-    final teacherProfileRepo = FakeMvpTeacherProfileRepository(store);
-
-    sl.registerLazySingleton<TeacherRepository>(() => teacherRepo);
-    sl.registerLazySingleton<BookingRepository>(() => bookingRepo);
-    sl.registerLazySingleton<SessionRepository>(() => sessionRepo);
-    sl.registerLazySingleton<AvailabilityProvider>(() => availabilityProvider);
-    sl.registerLazySingleton<UserProfileRepository>(() => profileRepo);
-    sl.registerLazySingleton<SessionPolicyRepository>(() => policyRepo);
-    sl.registerLazySingleton<MarketConfigRepository>(() => marketConfigRepo);
+    sl.registerLazySingleton<TeacherRepository>(
+      () => FakeMvpTeacherRepository(store),
+    );
+    sl.registerLazySingleton<AuthSessionProvider>(
+      () => const FakeAuthSessionProvider(userId: 'student_mvp'),
+    );
+    sl.registerLazySingleton<BookingRepository>(
+      () => FakeMvpBookingRepository(store, sl<AuthSessionProvider>()),
+    );
+    sl.registerLazySingleton<SessionRepository>(
+      () => FakeMvpSessionRepository(store),
+    );
+    sl.registerLazySingleton<AvailabilityProvider>(
+      () => FakeMvpAvailabilityProvider(store),
+    );
+    sl.registerLazySingleton<UserProfileRepository>(
+      () => FakeMvpUserProfileRepository(store),
+    );
+    sl.registerLazySingleton<SessionPolicyRepository>(
+      () => FakeMvpSessionPolicyRepository(store),
+    );
+    sl.registerLazySingleton<MarketConfigRepository>(
+      () => FakeMvpMarketConfigRepository(),
+    );
     sl.registerLazySingleton<TeacherApplicationRepository>(
-      () => applicationRepo,
+      () => FakeMvpTeacherApplicationRepository(store),
     );
     sl.registerLazySingleton<TeacherProfileRepository>(
-      () => teacherProfileRepo,
+      () => FakeMvpTeacherProfileRepository(store),
     );
 
-    // ── Use cases ────────────────────────────────────────────────────────────
-    sl.registerLazySingleton(() => GetTeachersUseCase(teacherRepo));
-    sl.registerLazySingleton(() => GetTeacherProfileUseCase(teacherRepo));
-    sl.registerLazySingleton(
-      () => GetTeacherAvailabilityUseCase(teacherRepo),
-    );
-    sl.registerLazySingleton(
-      () => GetStudentSessionsUseCase(sessionRepo),
-    );
-    sl.registerLazySingleton(
-      () => GetTeacherSessionsUseCase(sessionRepo),
-    );
-    sl.registerLazySingleton(() => CreateBookingUseCase(bookingRepo));
-    sl.registerLazySingleton(() => CancelBookingUseCase(bookingRepo));
-    sl.registerLazySingleton(() => SubmitReviewUseCase(bookingRepo));
+    registerUseCases(sl);
+    registerBlocs(sl);
+  }
 
-    // Profile + policy + market use cases
-    sl.registerLazySingleton(() => GetUserProfileUseCase(profileRepo));
+  /// Registers use cases assuming repositories are already in [sl].
+  static void registerUseCases(GetIt sl) {
     sl.registerLazySingleton(
-      () => CompleteStudentProfileUseCase(profileRepo, policyRepo),
+      () => GetTeachersUseCase(sl<TeacherRepository>()),
     );
     sl.registerLazySingleton(
-      () => CompleteTeacherProfileUseCase(profileRepo, policyRepo),
-    );
-    sl.registerLazySingleton(() => GetSessionPolicyUseCase(policyRepo));
-    sl.registerLazySingleton(
-      () => UpdateTeacherEligibilityPolicyUseCase(policyRepo),
-    );
-    sl.registerLazySingleton(() => BlockAccountUseCase(profileRepo));
-
-    // Teacher application use cases
-    sl.registerLazySingleton(
-      () => StartTeacherApplicationUseCase(applicationRepo),
+      () => GetTeacherProfileUseCase(sl<TeacherRepository>()),
     );
     sl.registerLazySingleton(
-      () => SaveTeacherApplicationDraftUseCase(applicationRepo),
+      () => GetTeacherAvailabilityUseCase(sl<TeacherRepository>()),
     );
     sl.registerLazySingleton(
-      () => SubmitTeacherApplicationUseCase(applicationRepo),
+      () => GetStudentSessionsUseCase(sl<SessionRepository>()),
     );
     sl.registerLazySingleton(
-      () => GetTeacherApplicationStatusUseCase(applicationRepo),
+      () => GetTeacherSessionsUseCase(sl<SessionRepository>()),
     );
     sl.registerLazySingleton(
-      () => ApproveTeacherApplicationUseCase(
-        applicationRepository: applicationRepo,
-        profileRepository: teacherProfileRepo,
+      () => CreateBookingUseCase(sl<BookingRepository>()),
+    );
+    sl.registerLazySingleton(
+      () => CancelBookingUseCase(sl<BookingRepository>()),
+    );
+    sl.registerLazySingleton(
+      () => SubmitReviewUseCase(sl<BookingRepository>()),
+    );
+    sl.registerLazySingleton(
+      () => GetUserProfileUseCase(sl<UserProfileRepository>()),
+    );
+    sl.registerLazySingleton(
+      () => CompleteStudentProfileUseCase(
+        sl<UserProfileRepository>(),
+        sl<SessionPolicyRepository>(),
       ),
     );
     sl.registerLazySingleton(
-      () => RejectTeacherApplicationUseCase(applicationRepo),
+      () => CompleteTeacherProfileUseCase(
+        sl<UserProfileRepository>(),
+        sl<SessionPolicyRepository>(),
+      ),
+    );
+    sl.registerLazySingleton(
+      () => GetSessionPolicyUseCase(sl<SessionPolicyRepository>()),
+    );
+    sl.registerLazySingleton(
+      () => UpdateTeacherEligibilityPolicyUseCase(
+        sl<SessionPolicyRepository>(),
+      ),
+    );
+    sl.registerLazySingleton(
+      () => BlockAccountUseCase(sl<UserProfileRepository>()),
+    );
+    sl.registerLazySingleton(
+      () => StartTeacherApplicationUseCase(sl<TeacherApplicationRepository>()),
+    );
+    sl.registerLazySingleton(
+      () => SaveTeacherApplicationDraftUseCase(
+        sl<TeacherApplicationRepository>(),
+      ),
+    );
+    sl.registerLazySingleton(
+      () => SubmitTeacherApplicationUseCase(sl<TeacherApplicationRepository>()),
+    );
+    sl.registerLazySingleton(
+      () => GetTeacherApplicationStatusUseCase(
+        sl<TeacherApplicationRepository>(),
+      ),
+    );
+    sl.registerLazySingleton(
+      () => ApproveTeacherApplicationUseCase(
+        applicationRepository: sl<TeacherApplicationRepository>(),
+        profileRepository: sl<TeacherProfileRepository>(),
+      ),
+    );
+    sl.registerLazySingleton(
+      () => RejectTeacherApplicationUseCase(sl<TeacherApplicationRepository>()),
     );
     sl.registerLazySingleton(
       () => SuspendTeacherProfileUseCase(
-        applicationRepository: applicationRepo,
-        profileRepository: teacherProfileRepo,
+        applicationRepository: sl<TeacherApplicationRepository>(),
+        profileRepository: sl<TeacherProfileRepository>(),
       ),
     );
     sl.registerLazySingleton(
       () => RevokeTeacherProfileUseCase(
-        applicationRepository: applicationRepo,
-        profileRepository: teacherProfileRepo,
+        applicationRepository: sl<TeacherApplicationRepository>(),
+        profileRepository: sl<TeacherProfileRepository>(),
       ),
     );
     sl.registerLazySingleton(
-      () => GetMarketConfigUseCase(marketConfigRepo),
+      () => GetMarketConfigUseCase(sl<MarketConfigRepository>()),
     );
     sl.registerLazySingleton(
       () => ValidateBookingEligibilityUseCase(
-        profileRepository: profileRepo,
-        policyRepository: policyRepo,
-        teacherRepository: teacherRepo,
-        marketConfigRepository: marketConfigRepo,
+        profileRepository: sl<UserProfileRepository>(),
+        policyRepository: sl<SessionPolicyRepository>(),
+        teacherRepository: sl<TeacherRepository>(),
+        marketConfigRepository: sl<MarketConfigRepository>(),
       ),
     );
+  }
 
-    // ── BLoC factories — new instance per call ───────────────────────────────
+  /// Registers BLoC factories — new instance per navigation.
+  static void registerBlocs(GetIt sl) {
     sl.registerFactory(
       () => TeacherApplicationBloc(
         startApplication: sl<StartTeacherApplicationUseCase>(),

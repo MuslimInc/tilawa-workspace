@@ -4,13 +4,11 @@ import 'package:quran_sessions/quran_sessions.dart';
 import 'quran_sessions_mvp_store.dart';
 
 /// Fake booking repository that persists bookings in [QuranSessionsMvpStore].
-///
-/// Creating a booking also creates a [QuranSession] so that [MySessionsScreen]
-/// shows the booking immediately.
 class FakeMvpBookingRepository implements BookingRepository {
-  FakeMvpBookingRepository(this._store);
+  FakeMvpBookingRepository(this._store, this._authSession);
 
   final QuranSessionsMvpStore _store;
+  final AuthSessionProvider _authSession;
 
   @override
   Future<Either<QuranSessionsFailure, QuranBooking>> createBooking({
@@ -37,10 +35,12 @@ class FakeMvpBookingRepository implements BookingRepository {
 
     final callType = _resolveCallType(requestedCallTypeId);
 
+    final studentId = _authSession.currentUserId ?? 'student_mvp';
+
     final booking = QuranBooking(
       id: 'booking_${_store.bookings.length + 1}',
       teacherId: teacherId,
-      studentId: 'student_mvp',
+      studentId: studentId,
       slotId: slotId,
       requestedCallType: callType,
       pricingType: SessionPricingType.free,
@@ -54,7 +54,7 @@ class FakeMvpBookingRepository implements BookingRepository {
       id: 'session_${_store.sessions.length + 1}',
       bookingId: booking.id,
       teacherId: teacherId,
-      studentId: 'student_mvp',
+      studentId: studentId,
       startsAt: slot.startsAt,
       endsAt: slot.endsAt,
       callType: callType,
@@ -124,12 +124,13 @@ class FakeMvpBookingRepository implements BookingRepository {
     required int rating,
     String? comment,
   }) async {
+    final studentId = _authSession.currentUserId ?? 'student_mvp';
     return Right(
       SessionReview(
         id: 'review_${DateTime.now().millisecondsSinceEpoch}',
         sessionId: sessionId,
         teacherId: 'teacher_1',
-        studentId: 'student_mvp',
+        studentId: studentId,
         rating: rating,
         comment: comment,
         createdAt: DateTime.now(),

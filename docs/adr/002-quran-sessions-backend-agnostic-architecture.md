@@ -46,9 +46,10 @@ implementations). All layers above that boundary depend only on abstractions.
    `firebase_auth`, `cloud_firestore`, `firebase_core`.
 
 2. **Firebase UID is never passed raw through use cases.**  
-   Current user identity is accessed through `UserProfileRepository` or a
-   dedicated `CurrentUserProvider` abstraction. Use cases receive a `userId`
-   string — they do not call `FirebaseAuth.instance.currentUser`.
+   Current user identity is accessed through [AuthSessionProvider]
+   (`packages/quran_sessions/lib/src/domain/providers/auth_session_provider.dart`)
+   or by passing a `userId` string from the presentation layer. Use cases do not
+   call `FirebaseAuth.instance.currentUser`.
 
 3. **Firestore document models are separate from domain entities.**  
    DTOs (e.g., `QuranTeacherDto`, `QuranBookingDto`) are mapped to domain
@@ -88,20 +89,20 @@ implementations). All layers above that boundary depend only on abstractions.
 
 ## How to replace the backend in the future
 
-1. Implement the datasource interfaces from `packages/quran_sessions/lib/src/data/datasources/`:
-   - `TeacherRemoteDataSource`
-   - `SessionRemoteDataSource`
-   - `BookingRemoteDataSource`
-   - (and any new interfaces added since this ADR)
+1. Implement the datasource interfaces exported from `packages/quran_sessions`
+   (see `quran_sessions.dart` data exports):
+   - `TeacherRemoteDataSource`, `SessionRemoteDataSource`, `BookingRemoteDataSource`
+   - `UserProfileRemoteDataSource`, `MarketConfigRemoteDataSource`
+   - `SessionPolicyRemoteDataSource`, `TeacherApplicationRemoteDataSource`
+   - `TeacherProfileRemoteDataSource`, `AvailabilityRemoteDataSource`
 
-2. Implement any repository interfaces not yet covered
-   (`MarketConfigRepository`, `SessionPolicyRepository`,
-   `UserProfileRepository`) in the new backend package.
+2. Provide an [AuthSessionProvider] implementation for the new auth backend.
 
-3. Update `QuranSessionsModule.register(...)` in the host app DI to inject
+3. Update `QuranSessionsFirebaseModule` (or equivalent) in the host app DI to inject
    the new implementations.
 
-4. Delete the Firebase implementation files. No other files change.
+4. Delete the Firebase implementation files under
+   `apps/tilawa/lib/features/quran_sessions/data/firebase/`. No other files change.
 
 ---
 

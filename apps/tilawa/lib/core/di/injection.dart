@@ -1,6 +1,8 @@
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
+import 'package:tilawa/features/quran_sessions/di/quran_sessions_backend_config.dart';
+import 'package:tilawa/features/quran_sessions/di/quran_sessions_firebase_module.dart';
 import 'package:tilawa/features/quran_sessions/di/quran_sessions_mvp_module.dart';
 import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:tilawa_core/di/injection.module.dart';
@@ -62,6 +64,14 @@ Future<void> configureDependencies({AppLaunchConfig? launchConfig}) async {
     );
   }
 
-  // MVP feature: fake Quran Sessions repositories + BLoC factories.
-  QuranSessionsMvpModule.register(getIt);
+  // Quran Sessions: fake (local) or Firestore backend.
+  final backendMode = quranSessionsBackendModeFromEnvironment(
+    firebaseInitEnabled: config.firebaseInit,
+  );
+  switch (backendMode) {
+    case QuranSessionsBackendMode.fake:
+      QuranSessionsMvpModule.register(getIt);
+    case QuranSessionsBackendMode.firebase:
+      QuranSessionsFirebaseModule.register(getIt);
+  }
 }
