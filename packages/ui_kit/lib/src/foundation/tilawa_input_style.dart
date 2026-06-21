@@ -76,8 +76,7 @@ class TilawaInputStyle {
   /// Standard content padding for form controls.
   EdgeInsetsGeometry formContentPadding({TextStyle? textStyle}) {
     final TextStyle? style = textStyle ?? textTheme.bodyLarge;
-    final double lineHeight =
-        (style?.fontSize ?? 16) * (style?.height ?? 1.5);
+    final double lineHeight = (style?.fontSize ?? 16) * (style?.height ?? 1.5);
     final double verticalPadding =
         ((tokens.minInteractiveDimension - lineHeight) / 2).clamp(
           tokens.spaceSmall,
@@ -259,8 +258,7 @@ class TilawaInputStyle {
     );
   }
 
-  EdgeInsetsGeometry get searchContentPadding =>
-      searchTokens!.contentPadding;
+  EdgeInsetsGeometry get searchContentPadding => searchTokens!.contentPadding;
 
   EdgeInsets get searchScrollPadding => searchTokens!.scrollPadding;
 }

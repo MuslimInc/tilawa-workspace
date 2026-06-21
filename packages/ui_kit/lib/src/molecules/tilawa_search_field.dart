@@ -230,8 +230,7 @@ class _SearchFieldBody extends StatelessWidget {
         scrollPadding: scrollPadding ?? inputStyle.searchScrollPadding,
         textAlignVertical: .center,
         style:
-            textStyle ??
-            inputStyle.searchTextStyle(isCatalogWeight: isCatalog),
+            textStyle ?? inputStyle.searchTextStyle(isCatalogWeight: isCatalog),
         decoration: inputStyle.borderlessDecoration(
           hintText: hintText,
           errorText: hasError ? errorText : null,

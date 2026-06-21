@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/qibla_direction_entity.dart';
@@ -73,7 +72,11 @@ class _QiblaScreenState extends State<QiblaScreen> {
             return !wasPoor && isPoor;
           },
           listener: (context, state) {
-            ToastUtils.showToast(msg: context.l10n.qiblaCompassAccuracyPoor);
+            TilawaFeedback.showToast(
+              context,
+              message: context.l10n.qiblaCompassAccuracyPoor,
+              variant: TilawaFeedbackVariant.warning,
+            );
           },
           child: Scaffold(
             appBar: TilawaCatalogAppBar(

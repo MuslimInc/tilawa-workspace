@@ -8,6 +8,7 @@ import '../../../domain/usecases/save_teacher_application_draft_usecase.dart';
 import '../../../domain/usecases/start_teacher_application_usecase.dart';
 import '../../../domain/usecases/submit_teacher_application_usecase.dart';
 import '../../../utils/phone_normalizer.dart';
+import '../../forms/teacher_application_field_ids.dart';
 import 'teacher_application_event.dart';
 import 'teacher_application_state.dart';
 
@@ -138,7 +139,9 @@ class TeacherApplicationBloc
         : null;
     // Only show required error if user already attempted to submit.
     final phoneError = current.phoneRaw.isEmpty
-        ? (current.submitAttempted ? 'رقم الهاتف مطلوب' : null)
+        ? (current.submitAttempted
+              ? TeacherApplicationValidationMessages.phoneRequired
+              : null)
         : _errorFor(current.phoneRaw, result);
     final updated = current.application.copyWith(
       phoneCountryCode: event.countryCode,
@@ -180,7 +183,12 @@ class TeacherApplicationBloc
       langs.add(event.language);
     }
     final updated = current.application.copyWith(teachingLanguages: langs);
-    emit(current.copyWith(application: updated));
+    emit(
+      current.copyWith(
+        application: updated,
+        clearTeachingLanguagesError: langs.isNotEmpty,
+      ),
+    );
     _autosave(updated);
   }
 
@@ -197,7 +205,12 @@ class TeacherApplicationBloc
       specs.add(event.specialization);
     }
     final updated = current.application.copyWith(specializations: specs);
-    emit(current.copyWith(application: updated));
+    emit(
+      current.copyWith(
+        application: updated,
+        clearSpecializationsError: specs.isNotEmpty,
+      ),
+    );
     _autosave(updated);
   }
 
@@ -208,7 +221,12 @@ class TeacherApplicationBloc
     final current = state;
     if (current is! TeacherApplicationEditing) return;
     final updated = current.application.copyWith(bio: event.bio);
-    emit(current.copyWith(application: updated));
+    emit(
+      current.copyWith(
+        application: updated,
+        clearBioError: event.bio.trim().isNotEmpty,
+      ),
+    );
     _autosave(updated);
   }
 
@@ -218,13 +236,8 @@ class TeacherApplicationBloc
   ) async {
     final current = state;
     if (current is! TeacherApplicationEditing) return;
-    // Mark submitAttempted so all errors become visible, then re-check.
-    var withAttempt = current.copyWith(submitAttempted: true);
-    // If phone was never touched, compute the required error now so the field
-    // shows feedback after the first submit attempt.
-    if (withAttempt.phoneRaw.isEmpty && withAttempt.phoneError == null) {
-      withAttempt = withAttempt.copyWith(phoneError: 'رقم الهاتف مطلوب');
-    }
+
+    final withAttempt = current.applySubmitValidation();
     emit(withAttempt);
     if (!withAttempt.canSubmit) return;
 
@@ -301,12 +314,15 @@ class TeacherApplicationBloc
   }
 
   String? _errorFor(String raw, PhoneValidationResult result) {
-    if (raw.isEmpty) return 'رقم الهاتف مطلوب';
+    if (raw.isEmpty) {
+      return TeacherApplicationValidationMessages.phoneRequired;
+    }
     return switch (result) {
       PhoneValidationResult.valid => null,
       PhoneValidationResult.countryMismatch =>
-        'رقم الهاتف لا يطابق الدولة المختارة',
-      PhoneValidationResult.invalid => 'رقم الهاتف غير صحيح',
+        TeacherApplicationValidationMessages.phoneCountryMismatch,
+      PhoneValidationResult.invalid =>
+        TeacherApplicationValidationMessages.phoneInvalid,
     };
   }
 }

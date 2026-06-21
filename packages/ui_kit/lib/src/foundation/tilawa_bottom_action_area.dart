@@ -49,8 +49,9 @@ class TilawaBottomActionArea extends StatelessWidget {
     final TilawaBottomSheetScaffoldTokens sheetTokens =
         theme.componentTokens.bottomSheetScaffold;
     final TextDirection direction = Directionality.of(context);
-    final EdgeInsets footerPadding =
-        sheetTokens.footerPadding.resolve(direction);
+    final EdgeInsets footerPadding = sheetTokens.footerPadding.resolve(
+      direction,
+    );
     final double side = horizontal ?? footerPadding.left;
     final double bottom =
         TilawaComfortableReachPadding.resolve(

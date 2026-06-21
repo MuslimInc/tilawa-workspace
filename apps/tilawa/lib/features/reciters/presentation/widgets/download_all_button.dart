@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/features/reciters/presentation/widgets/reciter_catalog_chrome.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -41,15 +40,21 @@ class DownloadAllButton extends StatelessWidget {
       listenWhen: (previous, current) => current.shouldShowError(previous),
       listener: (context, state) {
         if (state.isInsufficientStorage) {
-          ToastUtils.showErrorToast(
-            context.l10n.downloadLowStorageBlocked,
+          TilawaFeedback.showToast(
+            context,
+            message: context.l10n.downloadLowStorageBlocked,
+            variant: TilawaFeedbackVariant.error,
           );
           return;
         }
         final String message = state.isNetworkError
             ? context.l10n.networkError
             : state.errorMessage ?? context.l10n.networkError;
-        ToastUtils.showToast(msg: message);
+        TilawaFeedback.showToast(
+          context,
+          message: message,
+          variant: TilawaFeedbackVariant.error,
+        );
       },
       child: BlocBuilder<ReciterDownloadBloc, ReciterDownloadState>(
         builder: (context, state) {

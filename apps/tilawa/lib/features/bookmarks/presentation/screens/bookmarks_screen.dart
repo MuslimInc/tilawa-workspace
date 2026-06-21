@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/layout/list_scroll_bottom_padding.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/features/bookmarks/presentation/widgets/bookmark_card.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -58,16 +57,25 @@ class BookmarksScreen extends StatelessWidget {
           listener: (context, state) {
             state.whenOrNull(
               bookmarkCreated: (bookmark, _) {
-                ToastUtils.showSuccessToast(context.l10n.bookmarkAdded);
-              },
-              bookmarkDeleted: (_, _) {
-                ToastUtils.showSuccessToast(context.l10n.bookmarkDeleted);
+                TilawaFeedback.showToast(
+                  context,
+                  message: context.l10n.bookmarkAdded,
+                  variant: TilawaFeedbackVariant.success,
+                );
               },
               bookmarkUpdated: (_, _) {
-                ToastUtils.showSuccessToast(context.l10n.bookmarkUpdated);
+                TilawaFeedback.showToast(
+                  context,
+                  message: context.l10n.bookmarkUpdated,
+                  variant: TilawaFeedbackVariant.success,
+                );
               },
               error: (message) {
-                ToastUtils.showErrorToast(message);
+                TilawaFeedback.showToast(
+                  context,
+                  message: message,
+                  variant: TilawaFeedbackVariant.error,
+                );
               },
             );
           },

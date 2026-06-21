@@ -2,7 +2,6 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -65,7 +64,11 @@ class _SupportTilawaScreenState extends State<SupportTilawaScreen>
           }
           final String? message = failure.localizedMessage(context);
           if (message != null) {
-            ToastUtils.showErrorToast(message);
+            TilawaFeedback.showToast(
+              context,
+              message: message,
+              variant: TilawaFeedbackVariant.error,
+            );
           }
         },
         builder: (BuildContext context, SupportState state) {

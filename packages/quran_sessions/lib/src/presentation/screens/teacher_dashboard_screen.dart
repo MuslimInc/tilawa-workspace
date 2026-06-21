@@ -36,10 +36,10 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       body: BlocConsumer<TeacherDashboardBloc, TeacherDashboardState>(
         listener: (context, state) {
           if (state is TeacherDashboardSuccess && state.slotFailure != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.slotFailure!.toLocalizedMessage(context)),
-              ),
+            TilawaFeedback.showToast(
+              context,
+              message: state.slotFailure!.toLocalizedMessage(context),
+              variant: TilawaFeedbackVariant.error,
             );
           }
         },

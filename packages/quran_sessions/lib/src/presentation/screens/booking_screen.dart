@@ -92,8 +92,10 @@ class _BookingScreenState extends State<BookingScreen> {
           }
 
           if (state is BookingSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('تم تأكيد الحجز!')),
+            TilawaFeedback.showToast(
+              context,
+              message: 'تم تأكيد الحجز!',
+              variant: TilawaFeedbackVariant.success,
             );
             if (widget.onBookingSuccess != null) {
               widget.onBookingSuccess!(state.booking);
@@ -111,8 +113,10 @@ class _BookingScreenState extends State<BookingScreen> {
                 f is! AccountBlockedFailure &&
                 f is! TeacherNotVerifiedFailure &&
                 f is! GuardianApprovalRequiredFailure) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(f.toLocalizedMessage(context))),
+              TilawaFeedback.showToast(
+                context,
+                message: f.toLocalizedMessage(context),
+                variant: TilawaFeedbackVariant.error,
               );
             }
           }

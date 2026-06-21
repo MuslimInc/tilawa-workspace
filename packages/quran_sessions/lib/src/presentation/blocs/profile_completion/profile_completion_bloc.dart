@@ -109,7 +109,12 @@ class ProfileCompletionBloc
   ) {
     final current = state;
     if (current is! ProfileCompletionEditing) return;
-    emit(current.copyWith(selectedGender: event.gender));
+    emit(
+      current.copyWith(
+        selectedGender: event.gender,
+        clearGenderError: true,
+      ),
+    );
   }
 
   void _onDateOfBirthSet(
@@ -131,6 +136,7 @@ class ProfileCompletionBloc
       current.copyWith(
         selectedDateOfBirth: event.dateOfBirth,
         clearDobFailure: true,
+        clearDateOfBirthRequiredError: true,
       ),
     );
   }
@@ -143,7 +149,12 @@ class ProfileCompletionBloc
     if (current is! ProfileCompletionEditing) return;
     // Changing country clears the city selection.
     emit(
-      current.copyWith(selectedMarket: event.market, clearCity: true),
+      current.copyWith(
+        selectedMarket: event.market,
+        clearCity: true,
+        clearCountryError: true,
+        clearCityError: true,
+      ),
     );
   }
 
@@ -153,7 +164,7 @@ class ProfileCompletionBloc
   ) {
     final current = state;
     if (current is! ProfileCompletionEditing) return;
-    emit(current.copyWith(selectedCity: event.city));
+    emit(current.copyWith(selectedCity: event.city, clearCityError: true));
   }
 
   Future<void> _onSubmitted(
@@ -162,7 +173,12 @@ class ProfileCompletionBloc
   ) async {
     final current = state;
     if (current is! ProfileCompletionEditing) return;
-    if (!current.canSubmit) return;
+
+    final validated = current.applySubmitValidation();
+    if (!validated.canSubmit) {
+      emit(validated);
+      return;
+    }
 
     emit(const ProfileCompletionSaving());
 

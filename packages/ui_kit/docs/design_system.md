@@ -164,5 +164,6 @@ Previews and goldens set `AppTheme.useGoogleFonts = false` and
 | [`docs/UI_KIT_INPUT_SYSTEM.md`](../../../docs/UI_KIT_INPUT_SYSTEM.md) | Input SSOT (`TilawaInputStyle`, `TilawaFieldShell`, kit atoms) |
 | [`specs/012-visual-simplification/`](../../../specs/012-visual-simplification/spec.md) | Calm palette, no decorative gradients |
 | [`specs/013-token-consistency-pass/`](../../../specs/013-token-consistency-pass/spec.md) | Motion/type/feedback token migration |
+| [`feedback_system.md`](feedback_system.md) | Toast vs inline validation channel rules |
 | [`specs/017-catalog-theme-freeze/`](../../../specs/017-catalog-theme-freeze/spec.md) | Freeze acceptance criteria |
 | [`specs/006-ui-kit-expansion/ui-kit-inventory.md`](../../../specs/006-ui-kit-expansion/ui-kit-inventory.md) | Component inventory |

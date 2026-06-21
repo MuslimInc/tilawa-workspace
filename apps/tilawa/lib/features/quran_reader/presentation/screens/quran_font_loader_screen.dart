@@ -8,7 +8,6 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../bloc/quran_font_loader_bloc.dart';
 import '../bloc/quran_reader_bloc.dart';
 import '../theme/quran_reader_theme.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
 import 'quran_reader_screen.dart';
 
 /// Screen that ensures QCF4 fonts are downloaded and registered with the
@@ -208,7 +207,11 @@ class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
               error: (s) {
                 final String? message = s.failure.localizedMessage(context);
                 if (message != null) {
-                  ToastUtils.showErrorToast(message);
+                  TilawaFeedback.showToast(
+                    context,
+                    message: message,
+                    variant: TilawaFeedbackVariant.error,
+                  );
                 }
               },
             );

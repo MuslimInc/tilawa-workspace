@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/layout/list_scroll_bottom_padding.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/premium_status.dart';
@@ -43,25 +42,38 @@ class _PremiumScreenState extends State<PremiumScreen> {
                 loading: () {},
                 loaded: (status, plans, canDownload) {},
                 error: (message) {
-                  ToastUtils.showErrorToast(message);
+                  TilawaFeedback.showToast(
+                    context,
+                    message: message,
+                    variant: TilawaFeedbackVariant.error,
+                  );
                 },
                 purchaseSuccess: (message) {
-                  ToastUtils.showSuccessToast(message);
+                  TilawaFeedback.showToast(
+                    context,
+                    message: message,
+                    variant: TilawaFeedbackVariant.success,
+                  );
                 },
                 purchaseFailed: (message) {
-                  ToastUtils.showErrorToast(message);
+                  TilawaFeedback.showToast(
+                    context,
+                    message: message,
+                    variant: TilawaFeedbackVariant.error,
+                  );
                 },
                 trialStarted: (message) {
-                  ToastUtils.showSuccessToast(message);
+                  TilawaFeedback.showToast(
+                    context,
+                    message: message,
+                    variant: TilawaFeedbackVariant.success,
+                  );
                 },
                 trialNotEligible: (message) {
-                  // §3: not a CTA, not an error — informational. Vellum tier
-                  // is the quiet raised neutral, no second accent needed.
-                  ToastUtils.showToast(
-                    msg: message,
-                    backgroundColor: Theme.of(
-                      context,
-                    ).colorScheme.surfaceContainerHigh,
+                  TilawaFeedback.showToast(
+                    context,
+                    message: message,
+                    variant: TilawaFeedbackVariant.info,
                   );
                 },
               );

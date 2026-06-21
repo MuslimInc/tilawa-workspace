@@ -8,6 +8,7 @@ import 'package:quran_sessions/src/domain/usecases/get_teacher_application_statu
 import 'package:quran_sessions/src/domain/usecases/save_teacher_application_draft_usecase.dart';
 import 'package:quran_sessions/src/domain/usecases/start_teacher_application_usecase.dart';
 import 'package:quran_sessions/src/domain/usecases/submit_teacher_application_usecase.dart';
+import 'package:quran_sessions/src/presentation/forms/teacher_application_field_ids.dart';
 import 'package:quran_sessions/src/presentation/blocs/teacher_application/teacher_application_bloc.dart';
 import 'package:quran_sessions/src/presentation/blocs/teacher_application/teacher_application_event.dart';
 import 'package:quran_sessions/src/presentation/blocs/teacher_application/teacher_application_state.dart';
@@ -255,8 +256,12 @@ void main() {
       act: (b) => b.add(const TeacherApplicationPhoneCountryCodeChanged('KW')),
       verify: (b) {
         final s = b.state as TeacherApplicationEditing;
-        check(s.phoneError).equals('رقم الهاتف مطلوب');
-        check(s.visiblePhoneError).equals('رقم الهاتف مطلوب');
+        check(s.phoneError).equals(
+          TeacherApplicationValidationMessages.phoneRequired,
+        );
+        check(s.visiblePhoneError).equals(
+          TeacherApplicationValidationMessages.phoneRequired,
+        );
       },
     );
   });
@@ -277,8 +282,45 @@ void main() {
       verify: (b) {
         final s = b.state as TeacherApplicationEditing;
         check(s.submitAttempted).isTrue();
-        check(s.phoneError).equals('رقم الهاتف مطلوب');
-        check(s.visiblePhoneError).equals('رقم الهاتف مطلوب');
+        check(s.phoneError).equals(
+          TeacherApplicationValidationMessages.phoneRequired,
+        );
+        check(s.visiblePhoneError).equals(
+          TeacherApplicationValidationMessages.phoneRequired,
+        );
+      },
+    );
+
+    blocTest<TeacherApplicationBloc, TeacherApplicationState>(
+      'shows section errors for missing languages, specs, and bio on submit',
+      build: () {
+        final draft = _draft(phoneNumber: '+201012345678');
+        repo.application = draft;
+        // ignore: invalid_use_of_visible_for_testing_member
+        bloc.emit(
+          TeacherApplicationEditing(
+            application: draft.copyWith(
+              teachingLanguages: const <String>[],
+              specializations: const <String>[],
+              bio: '',
+            ),
+            phoneRaw: '01012345678',
+            phoneInteracted: true,
+          ),
+        );
+        return bloc;
+      },
+      act: (b) => b.add(const TeacherApplicationSubmitRequested()),
+      verify: (b) {
+        final s = b.state as TeacherApplicationEditing;
+        check(s.submitAttempted).isTrue();
+        check(s.visibleTeachingLanguagesError).isNotNull();
+        check(s.visibleSpecializationsError).isNotNull();
+        check(s.visibleBioError).isNotNull();
+        check(s.invalidFieldCount).equals(3);
+        check(s.validationIssues.first.fieldId).equals(
+          TeacherApplicationFieldIds.teachingLanguages,
+        );
       },
     );
 
@@ -292,7 +334,7 @@ void main() {
           TeacherApplicationEditing(
             application: draft,
             phoneRaw: '0101',
-            phoneError: 'رقم الهاتف غير صحيح',
+            phoneError: TeacherApplicationValidationMessages.phoneInvalid,
             phoneInteracted: true,
           ),
         );

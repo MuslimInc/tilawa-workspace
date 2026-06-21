@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/services/adhan_qa_service.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -286,11 +285,19 @@ class _QASectionState extends State<_QASection> {
     try {
       await _qaService.scheduleTestAdhan(delayMinutes: minutes);
       if (mounted) {
-        ToastUtils.showSuccessToast('Scheduled Adhan in $minutes minutes');
+        TilawaFeedback.showToast(
+          context,
+          message: 'Scheduled Adhan in $minutes minutes',
+          variant: TilawaFeedbackVariant.success,
+        );
       }
     } catch (e) {
       if (mounted) {
-        ToastUtils.showErrorToast('Failed: $e');
+        TilawaFeedback.showToast(
+          context,
+          message: 'Failed: $e',
+          variant: TilawaFeedbackVariant.error,
+        );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -302,11 +309,19 @@ class _QASectionState extends State<_QASection> {
     try {
       await _qaService.cancelTestAdhan();
       if (mounted) {
-        ToastUtils.showToast(msg: 'Cancelled test Adhan');
+        TilawaFeedback.showToast(
+          context,
+          message: 'Cancelled test Adhan',
+          variant: TilawaFeedbackVariant.info,
+        );
       }
     } catch (e) {
       if (mounted) {
-        ToastUtils.showErrorToast('Failed: $e');
+        TilawaFeedback.showToast(
+          context,
+          message: 'Failed: $e',
+          variant: TilawaFeedbackVariant.error,
+        );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

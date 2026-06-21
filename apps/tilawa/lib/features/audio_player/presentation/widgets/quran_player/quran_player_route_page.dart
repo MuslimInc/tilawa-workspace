@@ -26,7 +26,11 @@ class QuranPlayerExpandedPageContent extends StatelessWidget {
       listener: (context, state) {
         final String? message = state.failure?.localizedMessage(context);
         if (message != null) {
-          ToastUtils.showErrorToast(message);
+          TilawaFeedback.showToast(
+            context,
+            message: message,
+            variant: TilawaFeedbackVariant.error,
+          );
         }
       },
       buildWhen: QuranPlayerTransportControls.playerTreeBuildWhen,

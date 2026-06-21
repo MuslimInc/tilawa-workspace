@@ -44,7 +44,6 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_svg: ^2.2.3
-  fluttertoast: ^9.0.0
   freezed_annotation: ^3.1.0
   gap: ^3.0.1
   geolocator: ^14.0.2

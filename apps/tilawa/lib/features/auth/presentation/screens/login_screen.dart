@@ -10,7 +10,6 @@ import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/core/utils/legal_url_launcher.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_core/services/app_system_chrome_style.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -263,8 +262,10 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
               'launchInteractiveSignIn uiUnavailable reason=$reason',
             );
             _clearSignInLaunchPending();
-            ToastUtils.showToast(
-              msg: context.l10n.unableToSignInWithThirdPartyAccount,
+            TilawaFeedback.showToast(
+              context,
+              message: context.l10n.unableToSignInWithThirdPartyAccount,
+              variant: TilawaFeedbackVariant.error,
             );
           case GoogleSignInLaunchPlatformError(:final exception):
             _logGoogleSignInButton(
@@ -272,10 +273,12 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
               'reason=$reason',
             );
             _clearSignInLaunchPending();
-            ToastUtils.showToast(
-              msg:
+            TilawaFeedback.showToast(
+              context,
+              message:
                   exception.message ??
                   context.l10n.unableToSignInWithThirdPartyAccount,
+              variant: TilawaFeedbackVariant.error,
             );
         }
       });
@@ -380,17 +383,21 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                 error: (message) {
                   _awaitingManualSignInResult = false;
                   _clearSignInLaunchPending();
-                  ToastUtils.showToast(
-                    msg: message.isNotEmpty
+                  TilawaFeedback.showToast(
+                    context,
+                    message: message.isNotEmpty
                         ? message
                         : context.l10n.unableToSignInWithThirdPartyAccount,
+                    variant: TilawaFeedbackVariant.error,
                   );
                 },
                 noGoogleAccounts: () {
                   _awaitingManualSignInResult = false;
                   _clearSignInLaunchPending();
-                  ToastUtils.showToast(
-                    msg: context.l10n.googleSignInNoAccountsOnDevice,
+                  TilawaFeedback.showToast(
+                    context,
+                    message: context.l10n.googleSignInNoAccountsOnDevice,
+                    variant: TilawaFeedbackVariant.info,
                   );
                 },
               );

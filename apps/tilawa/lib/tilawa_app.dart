@@ -262,7 +262,7 @@ class _PlayerApp extends StatelessWidget {
                             maxScaleFactor: _kTextScaleClampMax,
                           ),
                     ),
-                    child: routedChild,
+                    child: TilawaFeedbackHost(child: routedChild),
                   );
                 },
                 theme: AppTheme.getLightTheme(

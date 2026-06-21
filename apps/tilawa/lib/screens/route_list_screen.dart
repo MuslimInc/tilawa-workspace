@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/services/prayer_notification_config.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/fire_prayer_test_notification_use_case.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -133,6 +132,10 @@ Future<void> _previewFajrAdhanNotification(BuildContext context) async {
     await PrayerNotificationStatusRoute($extra: payload).push(context);
   } catch (e) {
     if (!context.mounted) return;
-    ToastUtils.showErrorToast('Fajr adhan preview failed: $e');
+    TilawaFeedback.showToast(
+      context,
+      message: 'Fajr adhan preview failed: $e',
+      variant: TilawaFeedbackVariant.error,
+    );
   }
 }

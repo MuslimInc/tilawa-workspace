@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/layout/list_scroll_bottom_padding.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/shared/widgets/quran_player_widget.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -61,21 +60,34 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
         listener: (context, state) {
           state.whenOrNull(
             playlistUpdated: (playlist, playlists) {
-              ToastUtils.showSuccessToast(l10n.playlistUpdated);
+              TilawaFeedback.showToast(
+                context,
+                message: l10n.playlistUpdated,
+                variant: TilawaFeedbackVariant.success,
+              );
             },
             playlistDeleted: (playlistId, playlists) {
-              ToastUtils.showSuccessToast(l10n.playlistDeleted);
+              TilawaFeedback.showToast(
+                context,
+                message: l10n.playlistDeleted,
+                variant: TilawaFeedbackVariant.success,
+              );
             },
             favoriteToggled: (playlist, playlists) {
-              ToastUtils.showToast(
-                msg: playlist.isFavorite
+              TilawaFeedback.showToast(
+                context,
+                message: playlist.isFavorite
                     ? l10n.addedToFavorites
                     : l10n.removedFromFavorites,
-                backgroundColor: Theme.of(context).colorScheme.primary,
+                variant: TilawaFeedbackVariant.success,
               );
             },
             error: (message) {
-              ToastUtils.showErrorToast(message);
+              TilawaFeedback.showToast(
+                context,
+                message: message,
+                variant: TilawaFeedbackVariant.error,
+              );
             },
           );
         },
@@ -222,7 +234,11 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
   void _showEditPlaylistDialog(BuildContext context, Playlist playlist) {
     // TODO(username): Implement edit playlist dialog
     final AppLocalizations l10n = context.l10n;
-    ToastUtils.showToast(msg: l10n.editPlaylistComingSoon);
+    TilawaFeedback.showToast(
+      context,
+      message: l10n.editPlaylistComingSoon,
+      variant: TilawaFeedbackVariant.info,
+    );
   }
 
   void _showDeletePlaylistDialog(BuildContext context, dynamic playlist) {
@@ -257,12 +273,20 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
   void _navigateToPlaylistDetails(BuildContext context, Playlist playlist) {
     // TODO(username): Implement playlist details screen
     final AppLocalizations l10n = context.l10n;
-    ToastUtils.showToast(msg: l10n.playlistDetailsComingSoon);
+    TilawaFeedback.showToast(
+      context,
+      message: l10n.playlistDetailsComingSoon,
+      variant: TilawaFeedbackVariant.info,
+    );
   }
 
   void _playPlaylist(BuildContext context, Playlist playlist) {
     // TODO(username): Implement play playlist functionality
     final AppLocalizations l10n = context.l10n;
-    ToastUtils.showToast(msg: l10n.playPlaylistComingSoon);
+    TilawaFeedback.showToast(
+      context,
+      message: l10n.playPlaylistComingSoon,
+      variant: TilawaFeedbackVariant.info,
+    );
   }
 }

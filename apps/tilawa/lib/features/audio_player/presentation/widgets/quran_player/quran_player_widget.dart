@@ -18,7 +18,6 @@ import 'package:go_router/go_router.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/features/audio_player/domain/entities/player_background_configuration.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/audio_player/presentation/cubit/player_background_cubit.dart';
@@ -1404,7 +1403,11 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
         }
         final String? message = state.failure?.localizedMessage(context);
         if (message != null) {
-          ToastUtils.showErrorToast(message);
+          TilawaFeedback.showToast(
+            context,
+            message: message,
+            variant: TilawaFeedbackVariant.error,
+          );
         }
       },
       builder: (context, state) {

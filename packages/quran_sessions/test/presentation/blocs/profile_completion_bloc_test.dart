@@ -404,71 +404,89 @@ void main() {
 
   group('ProfileSubmitted', () {
     blocTest<ProfileCompletionBloc, ProfileCompletionState>(
-      'cannot complete profile without DOB — submit is a no-op',
-      build: _makeBloc,
-      seed: () => ProfileCompletionEditing(
-        userId: _userId,
-        availableMarkets: [_egypt],
-        minimumStudentAgeYears: _minStudentAge,
-        selectedGender: UserGender.male, // no DOB
-        selectedMarket: _egypt,
-        selectedCity: _cairo,
-      ),
-      act: (b) => b.add(ProfileSubmitted(userId: _userId)),
-      expect: () => [],
-    );
-
-    blocTest<ProfileCompletionBloc, ProfileCompletionState>(
-      'cannot complete profile with future DOB',
+      'cannot complete profile without DOB — emits submit validation errors',
       build: _makeBloc,
       seed: () => ProfileCompletionEditing(
         userId: _userId,
         availableMarkets: [_egypt],
         minimumStudentAgeYears: _minStudentAge,
         selectedGender: UserGender.male,
-        selectedDateOfBirth: null, // future rejected → cleared
+        selectedMarket: _egypt,
+        selectedCity: _cairo,
+      ),
+      act: (b) => b.add(ProfileSubmitted(userId: _userId)),
+      verify: (b) {
+        final s = b.state as ProfileCompletionEditing;
+        check(s.submitAttempted).isTrue();
+        check(s.dateOfBirthRequiredError).isNotNull();
+        check(s.invalidFieldCount).equals(1);
+      },
+    );
+
+    blocTest<ProfileCompletionBloc, ProfileCompletionState>(
+      'cannot complete profile with future DOB — emits submit validation errors',
+      build: _makeBloc,
+      seed: () => ProfileCompletionEditing(
+        userId: _userId,
+        availableMarkets: [_egypt],
+        minimumStudentAgeYears: _minStudentAge,
+        selectedGender: UserGender.male,
+        selectedDateOfBirth: null,
         dobFailure: const FutureDateOfBirthFailure(),
         selectedMarket: _egypt,
         selectedCity: _cairo,
       ),
       act: (b) => b.add(ProfileSubmitted(userId: _userId)),
-      expect: () => [],
+      verify: (b) {
+        final s = b.state as ProfileCompletionEditing;
+        check(s.submitAttempted).isTrue();
+        check(s.dobFailure).isNotNull();
+        check(s.invalidFieldCount).equals(1);
+      },
     );
 
     blocTest<ProfileCompletionBloc, ProfileCompletionState>(
-      'cannot complete profile with a too-young DOB',
+      'cannot complete profile with a too-young DOB — emits submit validation',
       build: _makeBloc,
       seed: () => ProfileCompletionEditing(
         userId: _userId,
         availableMarkets: [_egypt],
         minimumStudentAgeYears: _minStudentAge,
         selectedGender: UserGender.male,
-        selectedDateOfBirth: null, // too-young rejected → cleared
+        selectedDateOfBirth: null,
         dobFailure: const DateOfBirthTooRecentFailure(),
         selectedMarket: _egypt,
         selectedCity: _cairo,
       ),
       act: (b) => b.add(ProfileSubmitted(userId: _userId)),
-      expect: () => [],
+      verify: (b) {
+        final s = b.state as ProfileCompletionEditing;
+        check(s.submitAttempted).isTrue();
+        check(s.dobFailure).isNotNull();
+      },
     );
 
     blocTest<ProfileCompletionBloc, ProfileCompletionState>(
-      'cannot complete profile without gender',
+      'cannot complete profile without gender — emits submit validation errors',
       build: _makeBloc,
       seed: () => ProfileCompletionEditing(
         userId: _userId,
         availableMarkets: [_egypt],
         minimumStudentAgeYears: _minStudentAge,
-        selectedDateOfBirth: DateTime(2000, 1, 1), // no gender
+        selectedDateOfBirth: DateTime(2000, 1, 1),
         selectedMarket: _egypt,
         selectedCity: _cairo,
       ),
       act: (b) => b.add(ProfileSubmitted(userId: _userId)),
-      expect: () => [],
+      verify: (b) {
+        final s = b.state as ProfileCompletionEditing;
+        check(s.submitAttempted).isTrue();
+        check(s.genderError).isNotNull();
+      },
     );
 
     blocTest<ProfileCompletionBloc, ProfileCompletionState>(
-      'cannot complete profile without country/city',
+      'cannot complete profile without country/city — emits submit validation',
       build: _makeBloc,
       seed: () => ProfileCompletionEditing(
         userId: _userId,
@@ -476,10 +494,15 @@ void main() {
         minimumStudentAgeYears: _minStudentAge,
         selectedGender: UserGender.male,
         selectedDateOfBirth: DateTime(2000, 1, 1),
-        // no market, no city
       ),
       act: (b) => b.add(ProfileSubmitted(userId: _userId)),
-      expect: () => [],
+      verify: (b) {
+        final s = b.state as ProfileCompletionEditing;
+        check(s.submitAttempted).isTrue();
+        check(s.countryError).isNotNull();
+        check(s.cityError).isNotNull();
+        check(s.invalidFieldCount).equals(2);
+      },
     );
 
     blocTest<ProfileCompletionBloc, ProfileCompletionState>(

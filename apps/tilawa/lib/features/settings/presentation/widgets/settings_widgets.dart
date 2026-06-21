@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/app_legal_urls.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/legal_url_launcher.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/shared/widgets/profile_avatar.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -215,7 +214,11 @@ class SettingsRateAppTile extends StatelessWidget {
       listener: (context, state) {
         final message = state.failure?.localizedMessage(context);
         if (message != null) {
-          ToastUtils.showErrorToast(message);
+          TilawaFeedback.showToast(
+            context,
+            message: message,
+            variant: TilawaFeedbackVariant.error,
+          );
         }
       },
       builder: (context, state) {
@@ -271,7 +274,11 @@ class _SettingsShareAppTileState extends State<SettingsShareAppTile> {
       await widget.onShareRequested();
     } catch (_) {
       if (mounted) {
-        ToastUtils.showErrorToast(context.l10n.shareTilawaFailed);
+        TilawaFeedback.showToast(
+          context,
+          message: context.l10n.shareTilawaFailed,
+          variant: TilawaFeedbackVariant.error,
+        );
       }
     } finally {
       if (mounted) {

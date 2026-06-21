@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -5,6 +7,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../domain/entities/teacher_application.dart';
 import '../../utils/phone_normalizer.dart';
 import '../../utils/specialization_labels.dart';
+import '../forms/teacher_application_field_ids.dart';
 import '../blocs/teacher_application/teacher_application_bloc.dart';
 import '../blocs/teacher_application/teacher_application_event.dart';
 import '../blocs/teacher_application/teacher_application_state.dart';
@@ -77,10 +80,10 @@ class _TeacherApplicationScreenState extends State<TeacherApplicationScreen> {
             widget.onSubmitted();
           }
           if (state is TeacherApplicationFailureState) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.failure.toLocalizedMessage(context)),
-              ),
+            TilawaFeedback.showToast(
+              context,
+              message: state.failure.toLocalizedMessage(context),
+              variant: TilawaFeedbackVariant.error,
             );
             // Restore the previous state so the user can correct input.
             context.read<TeacherApplicationBloc>()
@@ -172,7 +175,7 @@ class _NotStartedView extends StatelessWidget {
 
 // ── Form body ─────────────────────────────────────────────────────────────────
 
-class _FormBody extends StatelessWidget {
+class _FormBody extends StatefulWidget {
   const _FormBody({
     required this.state,
     required this.phoneController,
@@ -184,6 +187,94 @@ class _FormBody extends StatelessWidget {
   final TextEditingController phoneController;
   final TextEditingController bioController;
   final void Function(TeacherApplicationEditing) onInit;
+
+  @override
+  State<_FormBody> createState() => _FormBodyState();
+}
+
+class _FormBodyState extends State<_FormBody> {
+  late final TilawaFormValidationController _validationController;
+  late final FocusNode _phoneFocusNode;
+  late final FocusNode _bioFocusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _validationController = TilawaFormValidationController();
+    _phoneFocusNode = FocusNode();
+    _bioFocusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    _validationController.dispose();
+    _phoneFocusNode.dispose();
+    _bioFocusNode.dispose();
+    super.dispose();
+  }
+
+  bool _shouldScrollToValidationError(
+    TeacherApplicationState previous,
+    TeacherApplicationState current,
+  ) {
+    if (current is! TeacherApplicationEditing) {
+      return false;
+    }
+    if (previous is! TeacherApplicationEditing) {
+      return current.submitValidationAttempt > 0;
+    }
+    return current.submitValidationAttempt > previous.submitValidationAttempt;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    widget.onInit(widget.state);
+    final bloc = context.read<TeacherApplicationBloc>();
+
+    return BlocListener<TeacherApplicationBloc, TeacherApplicationState>(
+      listenWhen: _shouldScrollToValidationError,
+      listener: (context, state) {
+        if (state is! TeacherApplicationEditing || state.canSubmit) {
+          return;
+        }
+        unawaited(
+          _validationController.handleValidationFailure(
+            context,
+            TilawaFormValidationResult(issues: state.validationIssues),
+          ),
+        );
+      },
+      child: _FormContent(
+        state: widget.state,
+        phoneController: widget.phoneController,
+        bioController: widget.bioController,
+        validationController: _validationController,
+        phoneFocusNode: _phoneFocusNode,
+        bioFocusNode: _bioFocusNode,
+        onSubmit: () => bloc.add(const TeacherApplicationSubmitRequested()),
+      ),
+    );
+  }
+}
+
+class _FormContent extends StatelessWidget {
+  const _FormContent({
+    required this.state,
+    required this.phoneController,
+    required this.bioController,
+    required this.validationController,
+    required this.phoneFocusNode,
+    required this.bioFocusNode,
+    required this.onSubmit,
+  });
+
+  final TeacherApplicationEditing state;
+  final TextEditingController phoneController;
+  final TextEditingController bioController;
+  final TilawaFormValidationController validationController;
+  final FocusNode phoneFocusNode;
+  final FocusNode bioFocusNode;
+  final VoidCallback onSubmit;
 
   static const _availableLanguages = [
     ('ar', 'العربية'),
@@ -207,60 +298,68 @@ class _FormBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    onInit(state);
     final bloc = context.read<TeacherApplicationBloc>();
     final application = state.application;
     final countryCode = application.phoneCountryCode ?? 'EG';
 
     return TilawaFormScreenScaffold(
+      validationController: validationController,
       bodyPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ── Phone ────────────────────────────────────────────────────────
-          _SectionTitle('رقم الهاتف *'),
-          const SizedBox(height: 4),
-          Text(
-            'مطلوب للتحقق من هويتك. يظهر للإدارة فقط.',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 8),
-          // Force LTR layout so the country picker stays on the left
-          // and the phone digits read left-to-right regardless of locale.
-          Directionality(
-            textDirection: TextDirection.ltr,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          TilawaFormFieldAnchor(
+            fieldId: TeacherApplicationFieldIds.phone,
+            semanticLabel: 'رقم الهاتف',
+            order: 0,
+            focusNode: phoneFocusNode,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SizedBox(
-                  width: 110,
-                  child: _CountryCodePicker(
-                    selected: countryCode,
-                    onChanged: (code) => bloc.add(
-                      TeacherApplicationPhoneCountryCodeChanged(code),
-                    ),
+                _SectionTitle('رقم الهاتف *'),
+                const SizedBox(height: 4),
+                Text(
+                  'مطلوب للتحقق من هويتك. يظهر للإدارة فقط.',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TilawaTextField(
-                    controller: phoneController,
-                    keyboardType: TextInputType.phone,
-                    textDirection: TextDirection.ltr,
-                    hintText: PhoneNormalizer.hint(countryCode),
-                    errorText: state.visiblePhoneError,
-                    onChanged: (v) =>
-                        bloc.add(TeacherApplicationPhoneChanged(v.trim())),
+                const SizedBox(height: 8),
+                Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: 110,
+                        child: _CountryCodePicker(
+                          selected: countryCode,
+                          onChanged: (code) => bloc.add(
+                            TeacherApplicationPhoneCountryCodeChanged(code),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: TilawaTextField(
+                          controller: phoneController,
+                          focusNode: phoneFocusNode,
+                          keyboardType: TextInputType.phone,
+                          textDirection: TextDirection.ltr,
+                          hintText: PhoneNormalizer.hint(countryCode),
+                          errorText: state.visiblePhoneError,
+                          onChanged: (v) => bloc.add(
+                            TeacherApplicationPhoneChanged(v.trim()),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 24),
-
-          // ── Contact method ───────────────────────────────────────────────
           _SectionTitle('طريقة التواصل المفضلة'),
           const SizedBox(height: 8),
           _ContactMethodPicker(
@@ -269,78 +368,101 @@ class _FormBody extends StatelessWidget {
                 bloc.add(TeacherApplicationContactMethodChanged(m)),
           ),
           const SizedBox(height: 24),
-
-          // ── Teaching languages ───────────────────────────────────────────
-          _SectionTitle('لغات التدريس * (اختر واحدة أو أكثر)'),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: _availableLanguages.map((entry) {
-              final (code, label) = entry;
-              final selected = application.teachingLanguages.contains(code);
-              return TilawaSelectionPill(
-                label: label,
-                selected: selected,
-                onTap: () => bloc.add(TeacherApplicationLanguageToggled(code)),
-              );
-            }).toList(),
+          TilawaFormFieldAnchor(
+            fieldId: TeacherApplicationFieldIds.teachingLanguages,
+            semanticLabel: 'لغات التدريس',
+            order: 1,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _SectionTitle('لغات التدريس * (اختر واحدة أو أكثر)'),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: _availableLanguages.map((entry) {
+                    final (code, label) = entry;
+                    final selected = application.teachingLanguages.contains(
+                      code,
+                    );
+                    return TilawaSelectionPill(
+                      label: label,
+                      selected: selected,
+                      onTap: () =>
+                          bloc.add(TeacherApplicationLanguageToggled(code)),
+                    );
+                  }).toList(),
+                ),
+                TilawaFormSectionError(
+                  errorText: state.visibleTeachingLanguagesError,
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 24),
-
-          // ── Specializations ──────────────────────────────────────────────
-          _SectionTitle('التخصصات * (اختر واحداً أو أكثر)'),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: _availableSpecializations.map((code) {
-              final selected = application.specializations.contains(code);
-              return TilawaSelectionPill(
-                label: SpecializationLabels.arabic(code),
-                selected: selected,
-                onTap: () =>
-                    bloc.add(TeacherApplicationSpecializationToggled(code)),
-              );
-            }).toList(),
+          TilawaFormFieldAnchor(
+            fieldId: TeacherApplicationFieldIds.specializations,
+            semanticLabel: 'التخصصات',
+            order: 2,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _SectionTitle('التخصصات * (اختر واحداً أو أكثر)'),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: _availableSpecializations.map((code) {
+                    final selected = application.specializations.contains(code);
+                    return TilawaSelectionPill(
+                      label: SpecializationLabels.arabic(code),
+                      selected: selected,
+                      onTap: () => bloc.add(
+                        TeacherApplicationSpecializationToggled(code),
+                      ),
+                    );
+                  }).toList(),
+                ),
+                TilawaFormSectionError(
+                  errorText: state.visibleSpecializationsError,
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 24),
-
-          // ── Bio ──────────────────────────────────────────────────────────
-          _SectionTitle('نبذة تعريفية *'),
-          const SizedBox(height: 8),
-          TilawaTextField(
-            controller: bioController,
-            minLines: 4,
-            maxLines: 8,
-            maxLength: 500,
-            textAlignVertical: TextAlignVertical.top,
-            hintText:
-                'أخبر الطلاب عن خبرتك ومؤهلاتك وأسلوبك في التدريس…',
-            onChanged: (v) => bloc.add(TeacherApplicationBioChanged(v)),
+          TilawaFormFieldAnchor(
+            fieldId: TeacherApplicationFieldIds.bio,
+            semanticLabel: 'النبذة التعريفية',
+            order: 3,
+            focusNode: bioFocusNode,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _SectionTitle('نبذة تعريفية *'),
+                const SizedBox(height: 8),
+                TilawaTextField(
+                  controller: bioController,
+                  focusNode: bioFocusNode,
+                  minLines: 4,
+                  maxLines: 8,
+                  maxLength: 500,
+                  textAlignVertical: TextAlignVertical.top,
+                  hintText: 'أخبر الطلاب عن خبرتك ومؤهلاتك وأسلوبك في التدريس…',
+                  errorText: state.visibleBioError,
+                  onChanged: (v) => bloc.add(TeacherApplicationBioChanged(v)),
+                ),
+              ],
+            ),
           ),
         ],
       ),
-      footer: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: 12,
-        children: [
-          TilawaButton(
-            text: 'إرسال الطلب للمراجعة',
-            onPressed: () =>
-                bloc.add(const TeacherApplicationSubmitRequested()),
-            isFullWidth: true,
-            size: TilawaButtonSize.large,
-          ),
-          if (!state.canSubmit)
-            Text(
-              'أكمل جميع الحقول المطلوبة (*) لتتمكن من الإرسال.',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
-            ),
-        ],
+      footer: TilawaFormSubmitFooter(
+        buttonText: 'إرسال الطلب للمراجعة',
+        invalidFieldCount: state.submitAttempted
+            ? state.invalidFieldCount
+            : null,
+        isLoading: state.isSaving,
+        onPressed: onSubmit,
       ),
     );
   }

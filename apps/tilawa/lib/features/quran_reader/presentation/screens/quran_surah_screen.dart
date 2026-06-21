@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/quran_reader/presentation/cubit/quran_settings_cubit.dart';
 import 'package:tilawa/features/quran_reader/presentation/cubit/quran_surah_cubit.dart';
@@ -108,7 +107,11 @@ class _QuranSurahScreenState extends State<QuranSurahScreen> {
   }
 
   void _bookmarkAyah(AyahEntity ayah) {
-    ToastUtils.showToast(msg: context.l10n.addBookmark);
+    TilawaFeedback.showToast(
+      context,
+      message: context.l10n.addBookmark,
+      variant: TilawaFeedbackVariant.info,
+    );
   }
 
   Future<void> _playAyah(AyahEntity ayah) async {
@@ -122,8 +125,10 @@ class _QuranSurahScreenState extends State<QuranSurahScreen> {
     }
 
     result.fold(
-      (failure) => ToastUtils.showToast(
-        msg: failure.message ?? context.l10n.error,
+      (failure) => TilawaFeedback.showToast(
+        context,
+        message: failure.message ?? context.l10n.error,
+        variant: TilawaFeedbackVariant.error,
       ),
       (_) {},
     );

@@ -1,8 +1,10 @@
 import 'package:equatable/equatable.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../domain/entities/market_config.dart';
 import '../../../domain/entities/user_profile.dart';
 import '../../../domain/failures/quran_sessions_failure.dart';
+import '../../forms/profile_completion_field_ids.dart';
 
 sealed class ProfileCompletionState extends Equatable {
   const ProfileCompletionState();
@@ -30,6 +32,12 @@ final class ProfileCompletionEditing extends ProfileCompletionState {
     this.dobFailure,
     this.selectedMarket,
     this.selectedCity,
+    this.submitAttempted = false,
+    this.submitValidationAttempt = 0,
+    this.genderError,
+    this.dateOfBirthRequiredError,
+    this.countryError,
+    this.cityError,
   });
 
   final String userId;
@@ -59,6 +67,24 @@ final class ProfileCompletionEditing extends ProfileCompletionState {
   /// The city within [selectedMarket] the user has selected.
   final CityConfig? selectedCity;
 
+  /// True after the user has tapped submit at least once.
+  final bool submitAttempted;
+
+  /// Increments on each failed submit validation pass (drives scroll-to-error).
+  final int submitValidationAttempt;
+
+  /// Submit-time gender error copy.
+  final String? genderError;
+
+  /// Submit-time required DOB error when no date is selected.
+  final String? dateOfBirthRequiredError;
+
+  /// Submit-time country error copy.
+  final String? countryError;
+
+  /// Submit-time city error copy.
+  final String? cityError;
+
   /// Cities available for selection in the current [selectedMarket].
   List<CityConfig> get availableCities =>
       selectedMarket?.enabledCities ?? const [];
@@ -68,7 +94,62 @@ final class ProfileCompletionEditing extends ProfileCompletionState {
       selectedDateOfBirth != null &&
       dobFailure == null &&
       selectedMarket != null &&
-      selectedCity != null;
+      selectedCity != null &&
+      genderError == null &&
+      dateOfBirthRequiredError == null &&
+      countryError == null &&
+      cityError == null;
+
+  String? get visibleGenderError => submitAttempted ? genderError : null;
+
+  String? visibleDateOfBirthError(
+    String Function(QuranSessionsFailure) localize,
+  ) {
+    if (!submitAttempted) {
+      return null;
+    }
+    if (dobFailure != null) {
+      return localize(dobFailure!);
+    }
+    return dateOfBirthRequiredError;
+  }
+
+  String? get visibleCountryError => submitAttempted ? countryError : null;
+
+  String? get visibleCityError => submitAttempted ? cityError : null;
+
+  int get invalidFieldCount {
+    if (!submitAttempted || canSubmit) {
+      return 0;
+    }
+    return validationIssues.length;
+  }
+
+  /// Computes submit-time field errors without mutating user input.
+  ProfileCompletionEditing applySubmitValidation() {
+    final String? genderErr = selectedGender == null
+        ? ProfileCompletionValidationMessages.genderRequired
+        : null;
+    final String? dobRequiredErr =
+        selectedDateOfBirth == null && dobFailure == null
+        ? ProfileCompletionValidationMessages.dateOfBirthRequired
+        : null;
+    final String? countryErr = selectedMarket == null
+        ? ProfileCompletionValidationMessages.countryRequired
+        : null;
+    final String? cityErr = selectedCity == null
+        ? ProfileCompletionValidationMessages.cityRequired
+        : null;
+
+    return copyWith(
+      submitAttempted: true,
+      submitValidationAttempt: submitValidationAttempt + 1,
+      genderError: genderErr,
+      dateOfBirthRequiredError: dobRequiredErr,
+      countryError: countryErr,
+      cityError: cityErr,
+    );
+  }
 
   ProfileCompletionEditing copyWith({
     UserGender? selectedGender,
@@ -79,6 +160,16 @@ final class ProfileCompletionEditing extends ProfileCompletionState {
     MarketConfig? selectedMarket,
     CityConfig? selectedCity,
     bool clearCity = false,
+    bool? submitAttempted,
+    int? submitValidationAttempt,
+    String? genderError,
+    bool clearGenderError = false,
+    String? dateOfBirthRequiredError,
+    bool clearDateOfBirthRequiredError = false,
+    String? countryError,
+    bool clearCountryError = false,
+    String? cityError,
+    bool clearCityError = false,
   }) => ProfileCompletionEditing(
     userId: userId,
     availableMarkets: availableMarkets,
@@ -90,6 +181,17 @@ final class ProfileCompletionEditing extends ProfileCompletionState {
     dobFailure: clearDobFailure ? null : (dobFailure ?? this.dobFailure),
     selectedMarket: selectedMarket ?? this.selectedMarket,
     selectedCity: clearCity ? null : (selectedCity ?? this.selectedCity),
+    submitAttempted: submitAttempted ?? this.submitAttempted,
+    submitValidationAttempt:
+        submitValidationAttempt ?? this.submitValidationAttempt,
+    genderError: clearGenderError ? null : (genderError ?? this.genderError),
+    dateOfBirthRequiredError: clearDateOfBirthRequiredError
+        ? null
+        : (dateOfBirthRequiredError ?? this.dateOfBirthRequiredError),
+    countryError: clearCountryError
+        ? null
+        : (countryError ?? this.countryError),
+    cityError: clearCityError ? null : (cityError ?? this.cityError),
   );
 
   @override
@@ -102,6 +204,12 @@ final class ProfileCompletionEditing extends ProfileCompletionState {
     dobFailure,
     selectedMarket,
     selectedCity,
+    submitAttempted,
+    submitValidationAttempt,
+    genderError,
+    dateOfBirthRequiredError,
+    countryError,
+    cityError,
   ];
 }
 
@@ -125,4 +233,43 @@ final class ProfileCompletionFailure extends ProfileCompletionState {
 
   @override
   List<Object?> get props => [failure];
+}
+
+extension ProfileCompletionEditingValidation on ProfileCompletionEditing {
+  List<TilawaFormFieldIssue> get validationIssues {
+    final List<TilawaFormFieldIssue> issues = <TilawaFormFieldIssue>[];
+    if (genderError != null) {
+      issues.add(
+        TilawaFormFieldIssue(
+          fieldId: ProfileCompletionFieldIds.gender,
+          errorMessage: genderError!,
+        ),
+      );
+    }
+    if (dobFailure != null || dateOfBirthRequiredError != null) {
+      issues.add(
+        TilawaFormFieldIssue(
+          fieldId: ProfileCompletionFieldIds.dateOfBirth,
+          errorMessage: dateOfBirthRequiredError ?? 'تاريخ الميلاد غير صالح',
+        ),
+      );
+    }
+    if (countryError != null) {
+      issues.add(
+        TilawaFormFieldIssue(
+          fieldId: ProfileCompletionFieldIds.country,
+          errorMessage: countryError!,
+        ),
+      );
+    }
+    if (cityError != null) {
+      issues.add(
+        TilawaFormFieldIssue(
+          fieldId: ProfileCompletionFieldIds.city,
+          errorMessage: cityError!,
+        ),
+      );
+    }
+    return issues;
+  }
 }

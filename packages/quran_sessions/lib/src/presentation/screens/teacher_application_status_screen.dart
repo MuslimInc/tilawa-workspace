@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/teacher_application.dart';
 import '../blocs/teacher_application/teacher_application_bloc.dart';
@@ -52,10 +53,10 @@ class _TeacherApplicationStatusScreenState
             widget.onApproved();
           }
           if (state is TeacherApplicationFailureState) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.failure.toLocalizedMessage(context)),
-              ),
+            TilawaFeedback.showToast(
+              context,
+              message: state.failure.toLocalizedMessage(context),
+              variant: TilawaFeedbackVariant.error,
             );
             context.read<TeacherApplicationBloc>()
             // ignore: invalid_use_of_visible_for_testing_member

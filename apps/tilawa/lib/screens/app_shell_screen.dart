@@ -10,7 +10,6 @@ import 'package:tilawa/features/shell/presentation/shell_tab_effect_dispatcher.d
 import 'package:tilawa_core/presentation/bloc/internet_status/internet_status_bloc.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../core/utils/toast_utils.dart';
 import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../features/auth/presentation/bloc/auth_bloc.dart';
 import '../features/reciters/presentation/tour/reciters_tour_targets.dart';
@@ -258,7 +257,11 @@ class _AppShellScreenState extends State<AppShellScreen> {
           if (state is PlayerBackgroundError) {
             final String? message = state.failure.localizedMessage(context);
             if (message != null) {
-              ToastUtils.showErrorToast(message);
+              TilawaFeedback.showToast(
+                context,
+                message: message,
+                variant: TilawaFeedbackVariant.error,
+              );
             }
           }
         },

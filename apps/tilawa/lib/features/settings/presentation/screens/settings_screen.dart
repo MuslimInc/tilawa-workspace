@@ -8,7 +8,6 @@ import 'package:tilawa/core/telemetry/sentry_debug_verify_tile.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/layout/list_scroll_bottom_padding.dart';
 import 'package:tilawa/core/utils/legal_url_launcher.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../core/di/injection.dart';
@@ -65,7 +64,11 @@ class SettingsScreen extends StatelessWidget {
               const LoginRoute().go(context);
             }
           },
-          error: (message) => ToastUtils.showErrorToast(message),
+          error: (message) => TilawaFeedback.showToast(
+            context,
+            message: message,
+            variant: TilawaFeedbackVariant.error,
+          ),
           noGoogleAccounts: () {},
         );
       },

@@ -16,7 +16,10 @@ void main() {
     });
 
     Widget wrap(Widget child) {
-      return MaterialApp(theme: theme, home: Scaffold(body: child));
+      return MaterialApp(
+        theme: theme,
+        home: Scaffold(body: child),
+      );
     }
 
     testWidgets('form decoration uses chrome radius and explicit borders', (
@@ -78,7 +81,8 @@ void main() {
         wrap(
           Builder(
             builder: (context) {
-              deco = context.inputStyle(role: TilawaInputRole.search)
+              deco = context
+                  .inputStyle(role: TilawaInputRole.search)
                   .borderlessDecoration(hintText: 'Search');
               return const SizedBox.shrink();
             },

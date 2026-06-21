@@ -39,8 +39,7 @@ abstract final class TilawaComfortableReachPadding {
 
     return switch (kind) {
       TilawaComfortableReachKind.floating => context.floatingBottomPadding,
-      TilawaComfortableReachKind.sheet ||
-      TilawaComfortableReachKind.screen =>
+      TilawaComfortableReachKind.sheet || TilawaComfortableReachKind.screen =>
         context.systemBottomSafeArea > 0
             ? context.systemBottomSafeArea + tokens.spaceExtraLarge
             : tokens.spaceHuge,

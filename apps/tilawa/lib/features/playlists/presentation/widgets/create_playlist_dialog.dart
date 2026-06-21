@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../bloc/playlists_bloc.dart';
@@ -37,10 +36,18 @@ class _CreatePlaylistDialogState extends State<CreatePlaylistDialog> {
         state.whenOrNull(
           playlistCreated: (playlist, playlists) {
             Navigator.of(context).pop();
-            ToastUtils.showSuccessToast(l10n.playlistCreated);
+            TilawaFeedback.showToast(
+              context,
+              message: l10n.playlistCreated,
+              variant: TilawaFeedbackVariant.success,
+            );
           },
           error: (message) {
-            ToastUtils.showErrorToast(message);
+            TilawaFeedback.showToast(
+              context,
+              message: message,
+              variant: TilawaFeedbackVariant.error,
+            );
           },
         );
       },

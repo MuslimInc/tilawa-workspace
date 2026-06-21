@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../failure_ui/quran_sessions_failure_ui.dart';
 import '../blocs/my_sessions/my_sessions_bloc.dart';
@@ -40,8 +41,10 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
       body: BlocConsumer<MySessionsBloc, MySessionsState>(
         listener: (context, state) {
           if (state is MySessionsSuccess && state.lastSubmittedReview != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('شكراً — تم إرسال تقييمك!')),
+            TilawaFeedback.showToast(
+              context,
+              message: 'شكراً — تم إرسال تقييمك!',
+              variant: TilawaFeedbackVariant.success,
             );
           }
         },
