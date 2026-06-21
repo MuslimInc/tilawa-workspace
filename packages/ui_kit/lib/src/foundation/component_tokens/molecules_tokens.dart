@@ -1611,6 +1611,177 @@ class TilawaHomeDashboardCardTokens {
   }
 }
 
+/// Token-backed surface for [TilawaCapabilityActionCard].
+///
+/// Subtle brand wash — not the featured gold dashboard gradient.
+@immutable
+class TilawaCapabilityActionCardTokens {
+  const TilawaCapabilityActionCardTokens({
+    required this.gradientStart,
+    required this.gradientEnd,
+    required this.borderColor,
+    required this.titleColor,
+    required this.subtitleColor,
+    required this.splashColor,
+    required this.highlightColor,
+    required this.contentPadding,
+    required this.outerPadding,
+    required this.leadingIconSize,
+    required this.trailingIconSize,
+    required this.trailingIconOpacity,
+    required this.titleSubtitleSpacing,
+    required this.badgeTopSpacing,
+    required this.rowGap,
+  });
+
+  final Color gradientStart;
+  final Color gradientEnd;
+  final Color borderColor;
+  final Color titleColor;
+  final Color subtitleColor;
+  final Color splashColor;
+  final Color highlightColor;
+  final EdgeInsetsGeometry contentPadding;
+  final EdgeInsetsGeometry outerPadding;
+  final double leadingIconSize;
+  final double trailingIconSize;
+  final double trailingIconOpacity;
+  final double titleSubtitleSpacing;
+  final double badgeTopSpacing;
+  final double rowGap;
+
+  factory TilawaCapabilityActionCardTokens.fromColorScheme(
+    ColorScheme colorScheme,
+  ) {
+    const double gradientPrimaryAlpha = 0.10;
+    const double gradientSecondaryAlpha = 0.14;
+    const double borderAlpha = 0.12;
+
+    return TilawaCapabilityActionCardTokens(
+      gradientStart: Color.alphaBlend(
+        colorScheme.primary.withValues(alpha: gradientPrimaryAlpha),
+        colorScheme.surface,
+      ),
+      gradientEnd: Color.alphaBlend(
+        colorScheme.secondary.withValues(alpha: gradientSecondaryAlpha),
+        colorScheme.surfaceContainerLow,
+      ),
+      borderColor: colorScheme.outlineVariant.withValues(alpha: borderAlpha),
+      titleColor: colorScheme.onSurface,
+      subtitleColor: colorScheme.onSurfaceVariant,
+      splashColor: colorScheme.primary.withValues(alpha: 0.08),
+      highlightColor: colorScheme.onSurface.withValues(alpha: 0.04),
+      contentPadding: const EdgeInsetsDirectional.fromSTEB(20, 20, 16, 20),
+      outerPadding: const EdgeInsetsDirectional.fromSTEB(12, 12, 12, 12),
+      leadingIconSize: 24,
+      trailingIconSize: 20,
+      trailingIconOpacity: 0.62,
+      titleSubtitleSpacing: 6,
+      badgeTopSpacing: 10,
+      rowGap: 14,
+    );
+  }
+
+  LinearGradient backgroundGradient({
+    AlignmentGeometry begin = AlignmentDirectional.topStart,
+    AlignmentGeometry end = AlignmentDirectional.bottomEnd,
+  }) {
+    return LinearGradient(
+      begin: begin,
+      end: end,
+      colors: <Color>[gradientStart, gradientEnd],
+    );
+  }
+
+  TilawaCapabilityActionCardTokens copyWith({
+    Color? gradientStart,
+    Color? gradientEnd,
+    Color? borderColor,
+    Color? titleColor,
+    Color? subtitleColor,
+    Color? splashColor,
+    Color? highlightColor,
+    EdgeInsetsGeometry? contentPadding,
+    EdgeInsetsGeometry? outerPadding,
+    double? leadingIconSize,
+    double? trailingIconSize,
+    double? trailingIconOpacity,
+    double? titleSubtitleSpacing,
+    double? badgeTopSpacing,
+    double? rowGap,
+  }) {
+    return TilawaCapabilityActionCardTokens(
+      gradientStart: gradientStart ?? this.gradientStart,
+      gradientEnd: gradientEnd ?? this.gradientEnd,
+      borderColor: borderColor ?? this.borderColor,
+      titleColor: titleColor ?? this.titleColor,
+      subtitleColor: subtitleColor ?? this.subtitleColor,
+      splashColor: splashColor ?? this.splashColor,
+      highlightColor: highlightColor ?? this.highlightColor,
+      contentPadding: contentPadding ?? this.contentPadding,
+      outerPadding: outerPadding ?? this.outerPadding,
+      leadingIconSize: leadingIconSize ?? this.leadingIconSize,
+      trailingIconSize: trailingIconSize ?? this.trailingIconSize,
+      trailingIconOpacity: trailingIconOpacity ?? this.trailingIconOpacity,
+      titleSubtitleSpacing: titleSubtitleSpacing ?? this.titleSubtitleSpacing,
+      badgeTopSpacing: badgeTopSpacing ?? this.badgeTopSpacing,
+      rowGap: rowGap ?? this.rowGap,
+    );
+  }
+
+  static TilawaCapabilityActionCardTokens lerp(
+    TilawaCapabilityActionCardTokens a,
+    TilawaCapabilityActionCardTokens b,
+    double t,
+  ) {
+    return TilawaCapabilityActionCardTokens(
+      gradientStart: Color.lerp(a.gradientStart, b.gradientStart, t)!,
+      gradientEnd: Color.lerp(a.gradientEnd, b.gradientEnd, t)!,
+      borderColor: Color.lerp(a.borderColor, b.borderColor, t)!,
+      titleColor: Color.lerp(a.titleColor, b.titleColor, t)!,
+      subtitleColor: Color.lerp(a.subtitleColor, b.subtitleColor, t)!,
+      splashColor: Color.lerp(a.splashColor, b.splashColor, t)!,
+      highlightColor: Color.lerp(a.highlightColor, b.highlightColor, t)!,
+      contentPadding: EdgeInsetsGeometry.lerp(
+        a.contentPadding,
+        b.contentPadding,
+        t,
+      )!,
+      outerPadding: EdgeInsetsGeometry.lerp(
+        a.outerPadding,
+        b.outerPadding,
+        t,
+      )!,
+      leadingIconSize: lerpTokenDouble(
+        a.leadingIconSize,
+        b.leadingIconSize,
+        t,
+      ),
+      trailingIconSize: lerpTokenDouble(
+        a.trailingIconSize,
+        b.trailingIconSize,
+        t,
+      ),
+      trailingIconOpacity: lerpTokenDouble(
+        a.trailingIconOpacity,
+        b.trailingIconOpacity,
+        t,
+      ),
+      titleSubtitleSpacing: lerpTokenDouble(
+        a.titleSubtitleSpacing,
+        b.titleSubtitleSpacing,
+        t,
+      ),
+      badgeTopSpacing: lerpTokenDouble(
+        a.badgeTopSpacing,
+        b.badgeTopSpacing,
+        t,
+      ),
+      rowGap: lerpTokenDouble(a.rowGap, b.rowGap, t),
+    );
+  }
+}
+
 /// Component tokens for [TilawaExperimentalBadge].
 ///
 /// Colors are derived from the caution semantic tint (warning hue) at reduced

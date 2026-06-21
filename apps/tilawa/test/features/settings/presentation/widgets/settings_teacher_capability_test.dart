@@ -4,6 +4,7 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:quran_sessions/quran_sessions.dart';
@@ -52,15 +53,49 @@ class _UnimplementedProfileRepository implements TeacherProfileRepository {
 Future<void> _pumpSettingsTeachingSection(
   WidgetTester tester,
   _MockAuthBloc authBloc,
-  TeacherCapability capability,
-) async {
+  TeacherCapability capability, {
+  GoRouter? router,
+  Locale? locale,
+  bool useSection = true,
+}) async {
   scopeGetIt().registerSingleton<GetCurrentUserTeacherCapabilityUseCase>(
     _StubTeacherCapabilityUseCase(capability),
   );
 
+  final Widget teachingSection = SettingsTeacherCapabilityScope(
+    child: Column(
+      children: [
+        const SettingsProfileHeader(),
+        if (useSection)
+          const SettingsTeachingOnMemuslimSection()
+        else
+          SettingsTeachingOnMemuslimTile(showDivider: false),
+      ],
+    ),
+  );
+
+  if (router != null) {
+    await tester.pumpWidget(
+      MaterialApp.router(
+        theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+        locale: locale,
+        localizationsDelegates: [
+          ...AppLocalizations.localizationsDelegates,
+          ...QuranSessionsLocalizations.localizationsDelegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        routerConfig: router,
+      ),
+    );
+    router.go('/');
+    await tester.pumpAndSettle();
+    return;
+  }
+
   await tester.pumpWidget(
     MaterialApp(
       theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+      locale: locale,
       localizationsDelegates: [
         ...AppLocalizations.localizationsDelegates,
         ...QuranSessionsLocalizations.localizationsDelegates,
@@ -68,14 +103,7 @@ Future<void> _pumpSettingsTeachingSection(
       supportedLocales: AppLocalizations.supportedLocales,
       home: BlocProvider<AuthBloc>.value(
         value: authBloc,
-        child: SettingsTeacherCapabilityScope(
-          child: Column(
-            children: [
-              const SettingsProfileHeader(),
-              SettingsTeachingOnMemuslimTile(showDivider: false),
-            ],
-          ),
-        ),
+        child: teachingSection,
       ),
     ),
   );
@@ -117,7 +145,7 @@ void main() {
     await resetScopeGetIt();
   });
 
-  testWidgets('approved active profile header shows verified badge', (
+  testWidgets('approved active profile header hides duplicate verified badge', (
     tester,
   ) async {
     await _pumpSettingsTeachingSection(
@@ -135,7 +163,7 @@ void main() {
     ).equals(0);
   });
 
-  testWidgets('approved active settings row shows dashboard CTA', (
+  testWidgets('approved active settings shows premium dashboard card', (
     tester,
   ) async {
     await _pumpSettingsTeachingSection(
@@ -147,31 +175,48 @@ void main() {
     final en = await QuranSessionsLocalizations.delegate.load(
       const Locale('en'),
     );
+    check(find.byType(TilawaCapabilityActionCard).evaluate().length).equals(1);
+    check(find.byType(TilawaSettingsTile).evaluate().isEmpty).isTrue();
+    check(find.text(en.teachingOnMemuslimTitle).evaluate().isEmpty).isTrue();
     check(find.text(en.teacherDashboard).evaluate().length).equals(1);
     check(
       find.text(en.manageYourAvailabilityAndSessions).evaluate().length,
     ).equals(1);
+    check(find.text(en.verifiedTeacher).evaluate().length).equals(1);
+    check(find.byType(TilawaVerifiedTeacherBadge).evaluate().length).equals(1);
   });
 
-  testWidgets('approved incomplete settings row shows complete profile CTA', (
+  testWidgets(
+    'approved incomplete settings shows premium complete profile card',
+    (
+      tester,
+    ) async {
+      await _pumpSettingsTeachingSection(
+        tester,
+        mockAuthBloc,
+        const TeacherCapability(
+          state: TeacherCapabilityState.approvedIncompleteProfile,
+        ),
+      );
+
+      final en = await QuranSessionsLocalizations.delegate.load(
+        const Locale('en'),
+      );
+      check(
+        find.byType(TilawaCapabilityActionCard).evaluate().length,
+      ).equals(1);
+      check(find.text(en.completeTeacherProfile).evaluate().length).equals(1);
+      check(find.text(en.teacherDashboard).evaluate().length).equals(0);
+      check(find.text(en.verifiedTeacher).evaluate().length).equals(1);
+      check(
+        find.byType(TilawaVerifiedTeacherBadge).evaluate().length,
+      ).equals(1);
+    },
+  );
+
+  testWidgets('none state shows apply tile not premium dashboard card', (
     tester,
   ) async {
-    await _pumpSettingsTeachingSection(
-      tester,
-      mockAuthBloc,
-      const TeacherCapability(
-        state: TeacherCapabilityState.approvedIncompleteProfile,
-      ),
-    );
-
-    final en = await QuranSessionsLocalizations.delegate.load(
-      const Locale('en'),
-    );
-    check(find.text(en.completeTeacherProfile).evaluate().length).equals(1);
-    check(find.text(en.teacherDashboard).evaluate().length).equals(0);
-  });
-
-  testWidgets('none state shows apply tile not dashboard', (tester) async {
     await _pumpSettingsTeachingSection(
       tester,
       mockAuthBloc,
@@ -181,10 +226,124 @@ void main() {
     final en = await QuranSessionsLocalizations.delegate.load(
       const Locale('en'),
     );
+    check(find.byType(TilawaCapabilityActionCard).evaluate().isEmpty).isTrue();
     check(find.text(en.teachingOnMemuslimApply).evaluate().isNotEmpty).isTrue();
     check(find.text(en.teacherDashboard).evaluate().length).equals(0);
     check(
       find.text(en.teachingOnMemuslimViewStatus).evaluate().length,
     ).equals(0);
+  });
+
+  testWidgets('approved active card tap opens teacher dashboard route', (
+    tester,
+  ) async {
+    final router = GoRouter(
+      initialLocation: '/',
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => BlocProvider<AuthBloc>.value(
+            value: mockAuthBloc,
+            child: SettingsTeacherCapabilityScope(
+              child: SettingsTeachingOnMemuslimTile(showDivider: false),
+            ),
+          ),
+        ),
+        GoRoute(
+          path: QuranSessionsRoutes.teacherDashboard,
+          builder: (context, state) =>
+              const Scaffold(key: Key('teacher_dashboard_screen')),
+        ),
+      ],
+    );
+
+    await _pumpSettingsTeachingSection(
+      tester,
+      mockAuthBloc,
+      const TeacherCapability(state: TeacherCapabilityState.approvedActive),
+      router: router,
+    );
+
+    await tester.tap(find.byType(TilawaCapabilityActionCard));
+    await tester.pumpAndSettle();
+
+    check(
+      find.byKey(const Key('teacher_dashboard_screen')).evaluate().length,
+    ).equals(1);
+  });
+
+  testWidgets(
+    'approved incomplete card tap opens complete teacher profile route',
+    (tester) async {
+      final router = GoRouter(
+        initialLocation: '/',
+        routes: [
+          GoRoute(
+            path: '/',
+            builder: (context, state) => BlocProvider<AuthBloc>.value(
+              value: mockAuthBloc,
+              child: SettingsTeacherCapabilityScope(
+                child: SettingsTeachingOnMemuslimTile(showDivider: false),
+              ),
+            ),
+          ),
+          GoRoute(
+            path: QuranSessionsRoutes.completeTeacherProfile,
+            builder: (context, state) =>
+                const Scaffold(key: Key('complete_teacher_profile_screen')),
+          ),
+        ],
+      );
+
+      await _pumpSettingsTeachingSection(
+        tester,
+        mockAuthBloc,
+        const TeacherCapability(
+          state: TeacherCapabilityState.approvedIncompleteProfile,
+        ),
+        router: router,
+      );
+
+      await tester.tap(find.byType(TilawaCapabilityActionCard));
+      await tester.pumpAndSettle();
+
+      check(
+        find
+            .byKey(const Key('complete_teacher_profile_screen'))
+            .evaluate()
+            .length,
+      ).equals(1);
+    },
+  );
+
+  testWidgets('Arabic premium card strings render without clipping', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(360, 720));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await _pumpSettingsTeachingSection(
+      tester,
+      mockAuthBloc,
+      const TeacherCapability(state: TeacherCapabilityState.approvedActive),
+      locale: const Locale('ar'),
+    );
+
+    final ar = await QuranSessionsLocalizations.delegate.load(
+      const Locale('ar'),
+    );
+
+    check(find.text(ar.teacherDashboard).evaluate().length).equals(1);
+    check(
+      find.text(ar.manageYourAvailabilityAndSessions).evaluate().length,
+    ).equals(1);
+    check(find.byType(TilawaVerifiedTeacherBadge).evaluate().length).equals(1);
+
+    final titleSize = tester.getSize(find.text(ar.teacherDashboard));
+    final subtitleSize = tester.getSize(
+      find.text(ar.manageYourAvailabilityAndSessions),
+    );
+    check(titleSize.height).isGreaterThan(0);
+    check(subtitleSize.height).isGreaterThan(0);
   });
 }

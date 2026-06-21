@@ -223,7 +223,8 @@ class _SettingsVerifiedTeacherBadge extends StatelessWidget {
     }
 
     final capability = SettingsTeacherCapabilityScope.maybeOf(context);
-    if (capability == null || !capability.showsVerifiedTeacherBadge) {
+    if (capability == null ||
+        !capability.showsVerifiedTeacherBadgeInProfileHeader) {
       return const SizedBox.shrink();
     }
 

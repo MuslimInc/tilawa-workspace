@@ -35,6 +35,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     required this.bottomSheetScaffold,
     required this.homeNextPrayerHero,
     required this.homeDashboardCard,
+    required this.capabilityActionCard,
     required this.experimentalBadge,
   });
 
@@ -65,6 +66,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
   final TilawaBottomSheetScaffoldTokens bottomSheetScaffold;
   final TilawaHomeNextPrayerHeroTokens homeNextPrayerHero;
   final TilawaHomeDashboardCardTokens homeDashboardCard;
+  final TilawaCapabilityActionCardTokens capabilityActionCard;
   final TilawaExperimentalBadgeTokens experimentalBadge;
 
   /// Creates light theme component tokens.
@@ -135,6 +137,9 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       homeDashboardCard: TilawaHomeDashboardCardTokens.fromColorScheme(
         effectiveColorScheme,
       ),
+      capabilityActionCard: TilawaCapabilityActionCardTokens.fromColorScheme(
+        effectiveColorScheme,
+      ),
       experimentalBadge: TilawaExperimentalBadgeTokens.fromColorScheme(
         effectiveColorScheme,
       ),
@@ -170,6 +175,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     TilawaBottomSheetScaffoldTokens? bottomSheetScaffold,
     TilawaHomeNextPrayerHeroTokens? homeNextPrayerHero,
     TilawaHomeDashboardCardTokens? homeDashboardCard,
+    TilawaCapabilityActionCardTokens? capabilityActionCard,
     TilawaExperimentalBadgeTokens? experimentalBadge,
   }) {
     return TilawaComponentTokens(
@@ -200,6 +206,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       bottomSheetScaffold: bottomSheetScaffold ?? this.bottomSheetScaffold,
       homeNextPrayerHero: homeNextPrayerHero ?? this.homeNextPrayerHero,
       homeDashboardCard: homeDashboardCard ?? this.homeDashboardCard,
+      capabilityActionCard: capabilityActionCard ?? this.capabilityActionCard,
       experimentalBadge: experimentalBadge ?? this.experimentalBadge,
     );
   }
@@ -308,6 +315,11 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       homeDashboardCard: TilawaHomeDashboardCardTokens.lerp(
         homeDashboardCard,
         other.homeDashboardCard,
+        t,
+      ),
+      capabilityActionCard: TilawaCapabilityActionCardTokens.lerp(
+        capabilityActionCard,
+        other.capabilityActionCard,
         t,
       ),
       experimentalBadge: TilawaExperimentalBadgeTokens.lerp(

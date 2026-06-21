@@ -34,6 +34,15 @@ class TeacherCapability extends Equatable {
       state == TeacherCapabilityState.approvedActive ||
       state == TeacherCapabilityState.approvedIncompleteProfile;
 
+  /// Approved teacher entry uses [TilawaCapabilityActionCard] in Settings;
+  /// verification belongs on that card, not duplicated under the avatar.
+  bool get showsPremiumSettingsCapabilityCard =>
+      state == TeacherCapabilityState.approvedActive ||
+      state == TeacherCapabilityState.approvedIncompleteProfile;
+
+  bool get showsVerifiedTeacherBadgeInProfileHeader =>
+      showsVerifiedTeacherBadge && !showsPremiumSettingsCapabilityCard;
+
   bool get canAccessTeacherDashboard =>
       state == TeacherCapabilityState.approvedActive;
 

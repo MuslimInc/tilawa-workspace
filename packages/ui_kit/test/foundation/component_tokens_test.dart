@@ -1133,6 +1133,37 @@ void main() {
     });
   });
 
+  group('TilawaCapabilityActionCardTokens', () {
+    test('fromColorScheme derives subtle brand gradient stops', () {
+      final ColorScheme scheme = ColorScheme.fromSeed(
+        seedColor: AppColors.defaultPrimary,
+        primary: AppColors.defaultPrimary,
+      );
+      final tokens = TilawaCapabilityActionCardTokens.fromColorScheme(scheme);
+
+      expect(
+        tokens.gradientStart,
+        Color.alphaBlend(
+          scheme.primary.withValues(alpha: 0.10),
+          scheme.surface,
+        ),
+      );
+      expect(
+        tokens.gradientEnd,
+        Color.alphaBlend(
+          scheme.secondary.withValues(alpha: 0.14),
+          scheme.surfaceContainerLow,
+        ),
+      );
+      expect(tokens.titleColor, scheme.onSurface);
+      expect(tokens.subtitleColor, scheme.onSurfaceVariant);
+      expect(
+        tokens.backgroundGradient().colors,
+        [tokens.gradientStart, tokens.gradientEnd],
+      );
+    });
+  });
+
   group('TilawaHomeNextPrayerHeroTokens', () {
     test('defaults use centralized AppColors gradient stops', () {
       final tokens = TilawaHomeNextPrayerHeroTokens.day();

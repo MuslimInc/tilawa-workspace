@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:quran_sessions/core/l10n_extensions.dart';
 import 'package:tilawa/core/app_legal_urls.dart';
 import 'package:tilawa/core/telemetry/sentry_debug_verify_tile.dart';
 import 'package:tilawa/core/extensions.dart';
@@ -94,14 +93,7 @@ class SettingsScreen extends StatelessWidget {
                 const SettingsGuestAccountGroup(),
                 if (!isGuest &&
                     quranSessionsFeatureConfig().showProfileTeacherEntry)
-                  TilawaSettingsGroup(
-                    title: context.quranSessionsL10n.teachingOnMemuslimTitle,
-                    leadingIcon: Icons.school_outlined,
-                    includeTopGap: isGuest,
-                    children: const [
-                      SettingsTeachingOnMemuslimTile(showDivider: false),
-                    ],
-                  ),
+                  const SettingsTeachingOnMemuslimSection(),
                 TilawaSettingsGroup(
                   title: l10n.settingsAppearance,
                   leadingIcon: FluentIcons.weather_moon_24_regular,

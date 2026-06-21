@@ -100,6 +100,9 @@ abstract final class TilawaIcons {
   static const IconData autoStories = Icons.auto_stories_rounded;
   static const IconData menuBook = Icons.menu_book_rounded;
 
+  /// Teacher capability / hifz dashboard entry points.
+  static const IconData teacherCapability = Icons.school_outlined;
+
   // ── Prayer times / Qibla ────────────────────────────────────────────────────
   static const IconData location = FluentIcons.location_24_regular;
   static const IconData locationOn = Icons.location_on_rounded;

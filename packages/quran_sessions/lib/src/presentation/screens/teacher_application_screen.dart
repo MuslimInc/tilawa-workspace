@@ -7,12 +7,12 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/teacher_application.dart';
 import '../../utils/phone_normalizer.dart';
-import '../forms/teacher_application_field_ids.dart';
-import '../forms/teacher_application_validation_l10n.dart';
 import '../blocs/teacher_application/teacher_application_bloc.dart';
 import '../blocs/teacher_application/teacher_application_event.dart';
 import '../blocs/teacher_application/teacher_application_state.dart';
 import '../failure_ui/quran_sessions_failure_ui.dart';
+import '../forms/teacher_application_field_ids.dart';
+import '../forms/teacher_application_validation_l10n.dart';
 
 /// Form screen for filling a teacher application (draft → pending).
 ///
@@ -271,8 +271,7 @@ class _FormBodyState extends State<_FormBody> {
                             issue.fieldId,
                             issue.errorMessage,
                           ) ??
-                          issue.errorMessage ??
-                          '',
+                          issue.errorMessage,
                     ),
                   )
                   .toList(),

@@ -1,4 +1,3 @@
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:quran_sessions/quran_sessions.dart';
@@ -9,11 +8,59 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'settings_teacher_capability_scope.dart';
 import 'settings_widgets.dart';
 
+/// Self-contained Settings block for teacher capability — no section header.
+///
+/// Premium approved states render a standalone [TilawaCapabilityActionCard].
+/// Other states keep a single-row [TilawaSettingsGroupPanel] without a title.
+class SettingsTeachingOnMemuslimSection extends StatelessWidget {
+  const SettingsTeachingOnMemuslimSection({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final config = quranSessionsFeatureConfig();
+    if (!config.showProfileTeacherEntry ||
+        SettingsTeacherCapabilityScope.isLoadingOf(context)) {
+      return const SizedBox.shrink();
+    }
+
+    final capability = SettingsTeacherCapabilityScope.maybeOf(context);
+    if (capability == null) {
+      return const SizedBox.shrink();
+    }
+
+    final tokens = Theme.of(context).tokens;
+    final tile = SettingsTeachingOnMemuslimTile(
+      showDivider: false,
+      standaloneLayout: true,
+    );
+
+    return Padding(
+      padding: EdgeInsetsDirectional.only(
+        top: tokens.spaceLarge,
+        bottom: tokens.spaceXXL,
+      ),
+      child: TilawaSettingsGroupHorizontalInset(
+        child: capability.showsPremiumSettingsCapabilityCard
+            ? tile
+            : TilawaSettingsGroupPanel(children: [tile]),
+      ),
+    );
+  }
+}
+
 /// Canonical Profile / Settings entry for teacher onboarding (Option D).
 class SettingsTeachingOnMemuslimTile extends StatelessWidget {
-  const SettingsTeachingOnMemuslimTile({super.key, this.showDivider = true});
+  const SettingsTeachingOnMemuslimTile({
+    super.key,
+    this.showDivider = true,
+    this.standaloneLayout = false,
+  });
 
   final bool showDivider;
+
+  /// When true, the premium card drops inner group margins so the section
+  /// inset controls horizontal alignment.
+  final bool standaloneLayout;
 
   @override
   Widget build(BuildContext context) {
@@ -31,13 +78,27 @@ class SettingsTeachingOnMemuslimTile extends StatelessWidget {
     final l10n = context.quranSessionsL10n;
     final analytics = quranSessionsAnalyticsCallbacks();
     final badgeLabel = capability.statusBadgeLabel(l10n);
+    final title = capability.teachingSectionActionTitle(l10n);
+    final subtitle = capability.teachingSectionSubtitle(l10n);
+
+    if (capability.showsPremiumSettingsCapabilityCard) {
+      return TilawaCapabilityActionCard(
+        title: title,
+        subtitle: subtitle ?? '',
+        leadingIcon: TilawaIcons.teacherCapability,
+        badgeLabel: badgeLabel,
+        onTap: () => _onTap(context, capability, analytics),
+        semanticLabel: subtitle == null ? title : '$title. $subtitle',
+        margin: standaloneLayout ? EdgeInsets.zero : null,
+      );
+    }
 
     return TilawaSettingsTile(
-      title: capability.teachingSectionActionTitle(l10n),
-      subtitle: capability.teachingSectionSubtitle(l10n),
+      title: title,
+      subtitle: subtitle,
       trailing: _TeachingSectionTrailing(
         badgeLabel: badgeLabel,
-        actionTitle: capability.teachingSectionActionTitle(l10n),
+        actionTitle: title,
       ),
       onTap: () => _onTap(context, capability, analytics),
       showDivider: showDivider,
@@ -95,7 +156,7 @@ class _TeachingSectionTrailing extends StatelessWidget {
         ),
         SizedBox(width: tokens.spaceSmall),
         Icon(
-          FluentIcons.chevron_right_20_regular,
+          TilawaIcons.chevronRightSmall,
           size: groupTokens.tileTrailingSize,
           color: theme.colorScheme.onSurfaceVariant.withValues(
             alpha: (groupTokens.tileTrailingOpacity * 1.35).clamp(0.45, 0.72),
