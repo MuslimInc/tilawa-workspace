@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:quran_image/l10n/quran_image_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../core/perf_logger.dart';
 import '../../../domain/domain.dart';
-import '../../../l10n/app_localizations.dart';
 import '../molecules/molecules.dart';
 
 /// Organism component for the navigation slider overlay.
@@ -188,8 +188,7 @@ class _PanelActionRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
-    final indexLabel =
-        AppLocalizations.of(context)?.surahIndex ?? 'Surah index';
+    final indexLabel = QuranImageLocalizations.of(context).surahIndex;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,

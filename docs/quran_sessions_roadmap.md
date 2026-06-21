@@ -94,8 +94,11 @@
 - ✅ `RejectTeacherApplicationUseCase` — 30-day re-application cooldown
 - ✅ `SuspendTeacherProfileUseCase`
 - ✅ `RevokeTeacherProfileUseCase` — permanent; no re-application
-- ✅ 11 typed teacher application/profile failures
-- 🚫 OTP phone verification — deferred to post-MVP (see ADR-003 §Deferred)
+- ✅ 12 typed teacher application/profile failures (incl. `InvalidPhoneForSelectedCountryFailure`)
+- ✅ `PhoneNormalizer` — country-aware phone validation (length + prefix rules for 15 countries);
+  rejects `01020030` for KW, `65012345` for EG, etc. Format-only — no network call.
+- 🚫 OTP phone verification — deferred to post-MVP (see ADR-003 §Deferred);
+  current validation is country-aware format checking only, not identity proof
 - ✅ Teacher application screen (`TeacherApplicationScreen`) — phone, languages, specializations, bio
 - ✅ Teacher application status screen (`TeacherApplicationStatusScreen`) — shows pending/approved/rejected/etc.
 - ✅ "أريد أن أصبح محفظًا" entry card on sessions home screen
@@ -553,6 +556,8 @@ The app-level FCM infrastructure exists but is not wired to Quran Sessions event
 - ✅ `TeacherDashboardBlocTest`
 - ✅ `TeacherListBlocTest`
 - ✅ `TeacherProfileBlocTest`
+- ✅ `TeacherApplicationBlocTest` — phone validation transitions, empty/whitespace/partial/invalid cases,
+  country-switch revalidation, submit gating, failure restore
 - ☐ `ProfileCompletionBlocTest` — not started
 - ☐ `ValidateBookingEligibilityUseCase` unit tests — use case untested
 
@@ -560,6 +565,8 @@ The app-level FCM infrastructure exists but is not wired to Quran Sessions event
 
 - ✅ `CreateBookingUseCaseTest`
 - ✅ `GetTeachersUseCaseTest`
+- ✅ `SubmitTeacherApplicationUseCaseTest` — null/empty/whitespace/non-E.164 phone, EG/KW/AE valid numbers,
+  incomplete fields, pending-app guard, repo failure
 - ☐ `CompleteStudentProfileUseCase` tests
 - ☐ `ValidateBookingEligibilityUseCase` tests (gender rules, child rules, etc.)
 
@@ -584,7 +591,13 @@ The app-level FCM infrastructure exists but is not wired to Quran Sessions event
 - ✅ `FakeAvailabilityProvider`
 - ✅ `FakeMarketConfigRepository` (Egypt/EGP; used in booking bloc tests)
 - ✅ `FakeCallProvider`, `FakePaymentProvider`
+- ✅ `FakeTeacherApplicationRepository` — all lifecycle methods; `submitFailure` override for failure-path tests
 - ✅ `fixtures.dart` — `makeTeacher` now includes default EGP market price; `makeProfile` accepts `countryCode`/`cityId`
+
+### Utility Tests
+
+- ✅ `PhoneNormalizerTest` — ~60 cases covering EG/KW/AE valid + invalid numbers, empty/whitespace/partial
+  input, E.164 normalization, country-switch revalidation, hint/formatGuide helpers
 
 ### Widget Tests
 

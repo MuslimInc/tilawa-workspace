@@ -1,6 +1,7 @@
-import '../../../l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
+
+import '../../../l10n/quran_image_localizations.dart';
 
 /// Atomic component for displaying the current page number.
 ///
@@ -22,7 +23,7 @@ class PageIndicatorText extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
-    final l10n = AppLocalizations.of(context);
+    final l10n = QuranImageLocalizations.of(context);
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -34,7 +35,7 @@ class PageIndicatorText extends StatelessWidget {
         borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
       ),
       child: Text(
-        l10n?.page(pageNumber.toString()) ?? 'Page $pageNumber',
+        l10n.page(pageNumber.toString()) ?? 'Page $pageNumber',
         style: theme.textTheme.labelLarge?.copyWith(
           fontWeight: FontWeight.w700,
           color: colorScheme.onSurface,

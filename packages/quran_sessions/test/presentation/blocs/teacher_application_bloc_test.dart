@@ -13,6 +13,7 @@ import 'package:quran_sessions/src/presentation/blocs/teacher_application/teache
 import 'package:quran_sessions/src/presentation/blocs/teacher_application/teacher_application_state.dart';
 
 import '../../helpers/fakes/fake_teacher_application_repository.dart';
+import '../../helpers/fakes/fake_teacher_profile_repository.dart';
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 
@@ -43,7 +44,10 @@ TeacherApplicationBloc _makeBloc(FakeTeacherApplicationRepository repo) =>
       saveDraft: SaveTeacherApplicationDraftUseCase(repo),
       submitApplication: SubmitTeacherApplicationUseCase(repo),
       getStatus: GetTeacherApplicationStatusUseCase(repo),
-      approveApplication: ApproveTeacherApplicationUseCase(repo),
+      approveApplication: ApproveTeacherApplicationUseCase(
+        applicationRepository: repo,
+        profileRepository: FakeTeacherProfileRepository(),
+      ),
     );
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
@@ -225,8 +229,7 @@ void main() {
         );
         return bloc;
       },
-      act: (b) =>
-          b.add(const TeacherApplicationPhoneCountryCodeChanged('KW')),
+      act: (b) => b.add(const TeacherApplicationPhoneCountryCodeChanged('KW')),
       verify: (b) {
         final s = b.state as TeacherApplicationEditing;
         check(s.phoneError).isNotNull();
@@ -249,8 +252,7 @@ void main() {
         );
         return bloc;
       },
-      act: (b) =>
-          b.add(const TeacherApplicationPhoneCountryCodeChanged('KW')),
+      act: (b) => b.add(const TeacherApplicationPhoneCountryCodeChanged('KW')),
       verify: (b) {
         final s = b.state as TeacherApplicationEditing;
         check(s.phoneError).equals('رقم الهاتف مطلوب');
@@ -326,7 +328,7 @@ void main() {
       },
       act: (b) => b.add(const TeacherApplicationSubmitRequested()),
       expect: () => [
-        isA<TeacherApplicationEditing>(),   // submitAttempted=true
+        isA<TeacherApplicationEditing>(), // submitAttempted=true
         isA<TeacherApplicationSubmitting>(),
         isA<TeacherApplicationStatusLoaded>(),
       ],

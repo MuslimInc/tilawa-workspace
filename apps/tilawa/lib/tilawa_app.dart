@@ -4,30 +4,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_image/core/perf_logger.dart';
-import 'package:quran_image/l10n/app_localizations.dart' as quran_image_l10n;
+import 'package:quran_image/l10n/quran_image_localizations.dart'
+    as quran_image_l10n;
+import 'package:quran_sessions/l10n/quran_sessions_localizations.dart'
+    as quran_sessions_l10n;
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/features/quran_reader/presentation/theme/quran_reader_theme.dart';
 import 'package:tilawa_core/constants/app_strings.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import 'core/di/injection.dart';
 import 'app/app_providers.dart';
 import 'app/default_route_system_ui_overlay.dart';
 import 'core/debug/device_preview_app_builder.dart';
+import 'core/di/injection.dart';
 import 'core/services/notification_startup_service.dart';
 import 'features/auth/data/services/google_sign_in_session_tracker.dart';
-import 'features/in_app_update/in_app_update.dart';
-import 'features/whats_new/whats_new.dart';
 import 'features/downloads/data/services/batch_download_manager.dart';
 import 'features/downloads/data/services/download_queue_manager.dart';
+import 'features/in_app_update/in_app_update.dart';
 import 'features/localization/presentation/bloc/localization_bloc.dart';
+import 'features/prayer_times/domain/entities/entities.dart';
 import 'features/prayer_times/domain/usecases/load_prayer_settings_use_case.dart';
 import 'features/prayer_times/domain/usecases/schedule_prayer_notifications_use_case.dart';
 import 'features/theme/domain/entities/app_theme_preset.dart';
-import 'features/prayer_times/domain/entities/entities.dart';
 import 'features/theme/domain/primary_color_preset.dart';
 import 'features/theme/presentation/cubit/theme_cubit.dart';
 import 'features/theme/presentation/theme_state_material.dart';
+import 'features/whats_new/whats_new.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'router/app_router.dart';
 import 'router/app_router_config.dart';
@@ -239,7 +242,7 @@ class _PlayerApp extends StatelessWidget {
               return MaterialApp.router(
                 title: AppStrings.appName,
                 onGenerateTitle: (context) =>
-                    AppLocalizations.of(context)!.appTitle,
+                    AppLocalizations.of(context).appTitle,
                 showPerformanceOverlay: false,
                 debugShowCheckedModeBanner: false,
                 // showPerformanceOverlay: kDebugMode || kProfileMode,
@@ -287,7 +290,8 @@ class _PlayerApp extends StatelessWidget {
                 supportedLocales: AppLocalizations.supportedLocales,
                 localizationsDelegates: const [
                   ...AppLocalizations.localizationsDelegates,
-                  quran_image_l10n.AppLocalizations.delegate,
+                  quran_image_l10n.QuranImageLocalizations.delegate,
+                  quran_sessions_l10n.QuranSessionsLocalizations.delegate,
                 ],
               );
             },

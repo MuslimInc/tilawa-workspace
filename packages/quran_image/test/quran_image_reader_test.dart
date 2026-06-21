@@ -8,7 +8,7 @@ import 'package:quran_image/core/di/dependency_injection.dart';
 import 'package:quran_image/data/repositories/in_memory_navigation_visibility_repository.dart';
 import 'package:quran_image/data/repositories/in_memory_page_repository.dart';
 import 'package:quran_image/domain/domain.dart';
-import 'package:quran_image/l10n/app_localizations.dart';
+import 'package:quran_image/l10n/quran_image_localizations.dart';
 import 'package:quran_image/presentation/bloc/navigation/navigation_bloc.dart';
 import 'package:quran_image/presentation/bloc/navigation/navigation_state.dart';
 import 'package:quran_image/presentation/widgets/organisms/navigation_slider_overlay.dart';
@@ -26,8 +26,8 @@ Future<void> _pumpReaderHarness(
 
   await tester.pumpWidget(
     MaterialApp(
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: QuranImageLocalizations.localizationsDelegates,
+      supportedLocales: QuranImageLocalizations.supportedLocales,
       locale: const Locale('en'),
       home: BlocProvider<NavigationBloc>.value(
         value: navigationBloc,
@@ -127,8 +127,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates:
+              QuranImageLocalizations.localizationsDelegates,
+          supportedLocales: QuranImageLocalizations.supportedLocales,
           locale: const Locale('en'),
           home: BlocProvider<NavigationBloc>.value(
             value: navigationBloc,
@@ -171,8 +172,8 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: QuranImageLocalizations.localizationsDelegates,
+        supportedLocales: QuranImageLocalizations.supportedLocales,
         locale: const Locale('en'),
         home: BlocProvider<NavigationBloc>.value(
           value: navigationBloc,

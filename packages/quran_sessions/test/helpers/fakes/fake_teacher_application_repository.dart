@@ -1,16 +1,14 @@
 import 'package:dartz_plus/dartz_plus.dart';
-
-import '../../../lib/src/domain/entities/teacher_application.dart';
-import '../../../lib/src/domain/failures/quran_sessions_failure.dart';
-import '../../../lib/src/domain/repositories/teacher_application_repository.dart';
+import 'package:quran_sessions/src/domain/entities/teacher_application.dart';
+import 'package:quran_sessions/src/domain/failures/quran_sessions_failure.dart';
+import 'package:quran_sessions/src/domain/repositories/teacher_application_repository.dart';
 
 /// In-memory fake for [TeacherApplicationRepository].
 ///
 /// Seed [application] before each test.
 /// Set [failWith] to simulate repository failures on any write operation.
 /// Set [submitFailure] to simulate a failure specifically on [submit].
-class FakeTeacherApplicationRepository
-    implements TeacherApplicationRepository {
+class FakeTeacherApplicationRepository implements TeacherApplicationRepository {
   TeacherApplication? application;
   QuranSessionsFailure? failWith;
   QuranSessionsFailure? submitFailure;

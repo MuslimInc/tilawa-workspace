@@ -49,19 +49,19 @@ abstract final class PhoneNormalizer {
   /// a different country (e.g. an Egyptian number with UAE selected).
   static const Map<String, (int min, int max)> _localDigits = {
     'EG': (10, 10), // +20 + 10 digits
-    'SA': (9, 9),   // +966 + 9 digits
-    'AE': (9, 9),   // +971 + 9 digits
-    'KW': (8, 8),   // +965 + 8 digits
-    'QA': (8, 8),   // +974 + 8 digits
-    'BH': (8, 8),   // +973 + 8 digits
-    'OM': (8, 8),   // +968 + 8 digits
-    'JO': (9, 9),   // +962 + 9 digits
+    'SA': (9, 9), // +966 + 9 digits
+    'AE': (9, 9), // +971 + 9 digits
+    'KW': (8, 8), // +965 + 8 digits
+    'QA': (8, 8), // +974 + 8 digits
+    'BH': (8, 8), // +973 + 8 digits
+    'OM': (8, 8), // +968 + 8 digits
+    'JO': (9, 9), // +962 + 9 digits
     'GB': (10, 11), // +44 + 10–11 digits
     'US': (10, 10), // +1 + 10 digits
     'CA': (10, 10), // +1 + 10 digits
     'PK': (10, 10), // +92 + 10 digits
     'IN': (10, 10), // +91 + 10 digits
-    'MY': (9, 10),  // +60 + 9–10 digits
+    'MY': (9, 10), // +60 + 9–10 digits
     'TR': (10, 10), // +90 + 10 digits
   };
 
@@ -71,18 +71,18 @@ abstract final class PhoneNormalizer {
   /// restricted (only length is checked).
   static const Map<String, List<String>> _localStartsWith = {
     'EG': ['10', '11', '12', '15'], // 010x, 011x, 012x, 015x
-    'SA': ['5'],                     // 05x
-    'AE': ['5'],                     // 05x
-    'KW': ['5', '6', '9'],          // 5x, 6x, 9x
+    'SA': ['5'], // 05x
+    'AE': ['5'], // 05x
+    'KW': ['5', '6', '9'], // 5x, 6x, 9x
     'QA': ['3', '4', '5', '6', '7'],
     'BH': ['3'],
     'OM': ['7', '9'],
     'JO': ['7', '6'],
     'GB': ['7', '1', '2', '3'],
-    'TR': ['5'],                     // 05x
-    'PK': ['3'],                     // 03x
+    'TR': ['5'], // 05x
+    'PK': ['3'], // 03x
     'IN': ['6', '7', '8', '9'],
-    'MY': ['1'],                     // 01x
+    'MY': ['1'], // 01x
   };
 
   static final _e164 = RegExp(r'^\+[1-9]\d{7,14}$');
@@ -147,17 +147,47 @@ abstract final class PhoneNormalizer {
     final candidate = '$dc$local';
     if (!_e164.hasMatch(candidate)) return PhoneValidationResult.invalid;
 
-    // The candidate is syntactically E.164 but may not be the right length
-    // for this country — treat that as a mismatch so the UI can be specific.
-    return _matchesCountry(candidate, countryCode)
-        ? PhoneValidationResult.valid
-        : PhoneValidationResult.countryMismatch;
+    if (_matchesCountry(candidate, countryCode)) {
+      return PhoneValidationResult.valid;
+    }
+
+    // If the local part already starts with a known prefix for the selected
+    // country, the user is typing a local number for this country that is just
+    // too short or too long — return invalid, not countryMismatch.  Without this
+    // guard a 10-digit Egyptian "010…" would be mis-identified as Malaysian
+    // because the 9 stripped digits happen to normalise to a valid MY number.
+    final selectedPrefixes = _localStartsWith[countryCode];
+    if (selectedPrefixes != null &&
+        selectedPrefixes.any((p) => local.startsWith(p))) {
+      return PhoneValidationResult.invalid;
+    }
+
+    // Local input may still indicate a different country when it begins with
+    // a national leading zero and the selected country does not use one.
+    final isOtherCountry =
+        cleaned.startsWith('0') &&
+        _looksLikeOtherCountryLocal(cleaned, countryCode);
+    return isOtherCountry
+        ? PhoneValidationResult.countryMismatch
+        : PhoneValidationResult.invalid;
+  }
+
+  static bool _looksLikeOtherCountryLocal(
+    String cleaned,
+    String selectedCountry,
+  ) {
+    for (final country in _stripLeadingZero) {
+      if (country == selectedCountry) continue;
+      if (normalize(cleaned, country) != null) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /// Returns the dial code for [countryCode], e.g. `'+20'` for `'EG'`.
   /// Returns an empty string for unknown codes.
-  static String dialCode(String countryCode) =>
-      _dialCodes[countryCode] ?? '';
+  static String dialCode(String countryCode) => _dialCodes[countryCode] ?? '';
 
   /// Short placeholder shown inside the text field (local format only).
   static String hint(String countryCode) => switch (countryCode) {
@@ -208,11 +238,9 @@ abstract final class PhoneNormalizer {
     if (dc == null) return false;
     if (!e164.startsWith(dc)) return false;
 
-    final rules = _localDigits[countryCode];
-    if (rules == null) return true; // unknown country: accept any length
+    final (minLen, maxLen) = _localDigits[countryCode]!;
     final localPart = e164.substring(dc.length); // digits after dial code
     final localLen = localPart.length;
-    final (minLen, maxLen) = rules;
     if (localLen < minLen || localLen > maxLen) return false;
 
     final prefixes = _localStartsWith[countryCode];

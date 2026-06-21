@@ -1,0 +1,7 @@
+arb-dir: lib/l10n
+template-arb-file: intl_en.arb
+output-localization-file: quran_sessions_localizations.dart
+output-class: QuranSessionsLocalizations
+untranslated-messages-file: untranslated_messages.txt
+output-dir: lib/l10n
+nullable-getter: false

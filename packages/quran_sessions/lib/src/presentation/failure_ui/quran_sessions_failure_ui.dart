@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 
 import '../../domain/failures/quran_sessions_failure.dart';
 
@@ -25,104 +26,91 @@ import '../../domain/failures/quran_sessions_failure.dart';
 /// Screens call: `state.failure.toLocalizedMessage(context)`
 /// Neither BLoCs nor states ever produce a String.
 extension QuranSessionsFailureUi on QuranSessionsFailure {
-  String toLocalizedMessage(BuildContext context) => switch (this) {
-    // ── Network / transport ─────────────────────────────────────────────────
-    NetworkFailure() => 'لا يوجد اتصال بالإنترنت.',
-    TimeoutFailure() => 'انتهت مهلة الطلب. يرجى المحاولة مجدداً.',
+  String toLocalizedMessage(BuildContext context) {
+    final loc = QuranSessionsLocalizations.of(context);
+    return switch (this) {
+      // ── Network / transport ─────────────────────────────────────────────────
+      NetworkFailure() => loc.errorNetwork,
+      TimeoutFailure() => loc.errorTimeout,
 
-    // ── Server / HTTP ───────────────────────────────────────────────────────
-    ServerFailure(statusCode: final c) when c == 401 =>
-      'انتهت الجلسة. يرجى تسجيل الدخول مجدداً.',
-    ServerFailure(statusCode: final c) when c == 403 =>
-      'ليس لديك صلاحية لتنفيذ هذا الإجراء.',
-    ServerFailure() => 'حدث خطأ في الخادم. يرجى المحاولة لاحقاً.',
-    UnauthorizedFailure() => 'غير مخوّل للقيام بهذا الإجراء.',
+      // ── Server / HTTP ───────────────────────────────────────────────────────
+      ServerFailure(statusCode: final c) when c == 401 =>
+        loc.errorSessionExpired,
+      ServerFailure(statusCode: final c) when c == 403 => loc.errorForbidden,
+      ServerFailure() => loc.errorServer,
+      UnauthorizedFailure() => loc.unauthorized,
 
-    // ── Domain / resource ───────────────────────────────────────────────────
-    NotFoundFailure(resourceType: final t) => '$t غير موجود.',
-    ValidationFailure(field: final f, code: final c) =>
-      'خطأ في التحقق: $f ($c).',
+      // ── Domain / resource ───────────────────────────────────────────────────
+      NotFoundFailure(resourceType: final t) => loc.notFound(t),
+      ValidationFailure(field: final f, code: final c) => loc.validationError(
+        c,
+        f,
+      ),
 
-    // ── Booking ─────────────────────────────────────────────────────────────
-    SlotUnavailableFailure() =>
-      'هذا الموعد لم يعد متاحاً. يرجى اختيار موعد آخر.',
-    BookingConflictFailure() => 'لديك جلسة أخرى في نفس الوقت.',
+      // ── Booking ─────────────────────────────────────────────────────────────
+      SlotUnavailableFailure() => loc.slotUnavailable,
+      BookingConflictFailure() => loc.bookingConflict,
 
-    // ── Profile / eligibility ───────────────────────────────────────────────
-    ProfileIncompleteFailure(missingFields: final fields) =>
-      'ملفك الشخصي غير مكتمل. '
-          'المعلومات المطلوبة: ${fields.map(_fieldAr).join('، ')}.',
+      // ── Profile / eligibility ───────────────────────────────────────────────
+      ProfileIncompleteFailure(missingFields: final fields) =>
+        '${loc.profileIncompletePrefix} ${loc.profileIncompleteFields(fields.map(_fieldAr).join(', '))}',
 
-    GenderNotAllowedFailure(
-      teacherGender: final tg,
-      studentGender: final sg,
-    ) =>
-      'لا يمكن الحجز: '
-          'هذا المعلم (${_genderAr(tg)}) لا يقبل الطلاب '
-          '${_genderAr(sg, asStudent: true)} وفق السياسة الحالية.',
+      GenderNotAllowedFailure() => loc.profileIncompletePrefix,
 
-    AgeNotAllowedFailure(studentAgeGroup: final ag) =>
-      ag == 'child'
-          ? 'هذا المعلم لا يقبل الطلاب الأطفال.'
-          : 'فئتك العمرية غير مقبولة لدى هذا المعلم.',
+      AgeNotAllowedFailure(studentAgeGroup: final ag) =>
+        ag == 'child' ? loc.ageNotAllowedChild : loc.ageNotAllowedOther,
 
-    TeacherNotVerifiedFailure() =>
-      'لم يتم توثيق هذا المعلم بعد ولا يمكن حجز جلسة معه.',
+      TeacherNotVerifiedFailure() => loc.teacherNotVerified,
 
-    AccountBlockedFailure(reason: final r) =>
-      r != null
-          ? 'حسابك موقوف بسبب: ${_restrictionReasonAr(r)}.'
-          : 'حسابك موقوف. يرجى التواصل مع الدعم.',
+      AccountBlockedFailure(reason: final r) =>
+        r != null
+            ? loc.accountBlockedWithReason(_restrictionReasonAr(r))
+            : loc.accountBlocked,
 
-    GuardianApprovalRequiredFailure() =>
-      'يتطلب الحجز لهذا الطالب موافقة وليّ الأمر أولاً.',
+      GuardianApprovalRequiredFailure() => loc.guardianApprovalRequired,
 
-    PolicyViolationFailure(policyName: final p, detail: final d) =>
-      'الحجز مرفوض لمخالفة سياسة "$p": $d.',
+      PolicyViolationFailure(policyName: final p, detail: final d) =>
+        loc.policyViolation(d, p),
 
-    // ── Market / location ───────────────────────────────────────────────────
-    MarketNotEnabledFailure(cityId: final c) =>
-      c != null
-          ? 'خدمة الجلسات غير متاحة في مدينتك حالياً. جرّب مدينة أخرى.'
-          : 'خدمة الجلسات غير متاحة في دولتك حالياً.',
+      // ── Market / location ───────────────────────────────────────────────────
+      MarketNotEnabledFailure(cityId: final c) =>
+        c != null ? loc.marketNotEnabledWithCity : loc.marketNotEnabled,
 
-    TeacherNotInMarketFailure() =>
-      'هذا المعلم غير متاح في منطقتك. يرجى اختيار معلم آخر.',
+      TeacherNotInMarketFailure() => loc.teacherNotInMarket,
 
-    // ── Teacher application ─────────────────────────────────────────────────
-    TeacherApplicationNotFoundFailure() => 'لم يتم العثور على طلب تسجيل كمعلم.',
-    TeacherApplicationAlreadyPendingFailure() =>
-      'لديك طلب معلم قيد المراجعة بالفعل.',
-    TeacherApplicationRejectedFailure() =>
-      'تم رفض طلبك. يمكنك إعادة التقديم بعد انتهاء فترة الانتظار.',
-    TeacherApplicationSuspendedFailure() => 'حسابك كمعلم موقوف مؤقتاً.',
-    TeacherApplicationRevokedFailure() => 'تم إلغاء حسابك كمعلم بشكل نهائي.',
-    TeacherPhoneNumberRequiredFailure() =>
-      'رقم الهاتف مطلوب لإتمام طلب التسجيل كمعلم.',
-    InvalidTeacherPhoneNumberFailure() =>
-      'رقم الهاتف غير صحيح. يرجى إدخال رقم بصيغة دولية صحيحة.',
-    PhoneCountryMismatchFailure() =>
-      'رقم الهاتف لا يطابق الدولة المختارة.',
-    TeacherApplicationIncompleteFailure(reason: final r) =>
-      'طلب التسجيل غير مكتمل: $r',
-    ReapplicationTooSoonFailure(cooldownEndsAt: final d) =>
-      'لا يمكنك إعادة التقديم قبل ${d.day}/${d.month}/${d.year}.',
+      // ── Teacher application ─────────────────────────────────────────────────
+      TeacherApplicationNotFoundFailure() => loc.teacherApplicationNotFound,
+      TeacherApplicationAlreadyPendingFailure() =>
+        loc.teacherApplicationAlreadyPending,
+      TeacherApplicationRejectedFailure() => loc.teacherApplicationRejected,
+      TeacherApplicationSuspendedFailure() => loc.teacherApplicationSuspended,
+      TeacherApplicationRevokedFailure() => loc.teacherApplicationRevoked,
+      TeacherPhoneNumberRequiredFailure() => loc.teacherPhoneRequired,
+      InvalidTeacherPhoneNumberFailure() => loc.invalidTeacherPhone,
+      InvalidPhoneForSelectedCountryFailure() =>
+        loc.invalidPhoneForSelectedCountry,
+      PhoneCountryMismatchFailure() => loc.phoneCountryMismatch,
+      TeacherApplicationIncompleteFailure(reason: final r) =>
+        loc.teacherApplicationIncomplete(r),
+      ReapplicationTooSoonFailure(cooldownEndsAt: final d) =>
+        loc.reapplicationTooSoon('${d.day}/${d.month}/${d.year}'),
 
-    // ── Teacher profile ─────────────────────────────────────────────────────
-    TeacherProfileNotApprovedFailure() => 'لم تتم الموافقة على ملف المعلم بعد.',
-    TeacherProfileNotActiveFailure() => 'ملف المعلم غير نشط حالياً.',
+      // ── Teacher profile ─────────────────────────────────────────────────────
+      TeacherProfileNotApprovedFailure() => loc.teacherProfileNotApproved,
+      TeacherProfileNotActiveFailure() => loc.teacherProfileNotActive,
 
-    // ── Payment ─────────────────────────────────────────────────────────────
-    PaymentDeclinedFailure() => 'تم رفض الدفع. يرجى استخدام طريقة دفع أخرى.',
-    PaymentCancelledFailure() => 'تم إلغاء عملية الدفع.',
-    PaymentProviderFailure() => 'تعذّرت معالجة الدفع. يرجى المحاولة مجدداً.',
+      // ── Payment ─────────────────────────────────────────────────────────────
+      PaymentDeclinedFailure() => loc.paymentDeclined,
+      PaymentCancelledFailure() => loc.paymentCancelled,
+      PaymentProviderFailure() => loc.paymentProviderFailure,
 
-    // ── Storage ─────────────────────────────────────────────────────────────
-    CacheFailure() => 'تعذّرت قراءة البيانات المحلية.',
+      // ── Storage ─────────────────────────────────────────────────────────────
+      CacheFailure() => loc.cacheFailure,
 
-    // ── Catch-all ───────────────────────────────────────────────────────────
-    UnknownFailure() => 'حدث خطأ غير متوقع.',
-  };
+      // ── Catch-all ───────────────────────────────────────────────────────────
+      UnknownFailure() => loc.unknownFailure,
+    };
+  }
 }
 
 // ── Label helpers (Arabic) ────────────────────────────────────────────────────
@@ -134,12 +122,6 @@ String _fieldAr(String field) => switch (field) {
   'countryCode' => 'الدولة',
   'cityId' => 'المدينة',
   _ => field,
-};
-
-String _genderAr(String gender, {bool asStudent = false}) => switch (gender) {
-  'male' => asStudent ? 'الذكور' : 'ذكر',
-  'female' => asStudent ? 'الإناث' : 'أنثى',
-  _ => gender,
 };
 
 String _restrictionReasonAr(String reason) => switch (reason) {

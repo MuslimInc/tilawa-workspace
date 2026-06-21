@@ -1,14 +1,14 @@
 import '../../domain/domain.dart';
-import '../../l10n/app_localizations.dart';
+import '../../l10n/quran_image_localizations.dart';
 
 // ---------------------------------------------------------------------------
 // AppMessage → localized String
 // ---------------------------------------------------------------------------
 
 /// Maps every [AppMessage] variant to the corresponding localized string
-/// from [AppLocalizations] using exhaustive pattern matching.
+/// from [QuranImageLocalizations] using exhaustive pattern matching.
 extension AppMessageL10n on AppMessage {
-  String localize(AppLocalizations l10n) => switch (this) {
+  String localize(QuranImageLocalizations l10n) => switch (this) {
     // Cache lifecycle
     PreparingQuranMessage() => l10n.preparingQuran,
     QuranReadyMessage() => l10n.quranReady,

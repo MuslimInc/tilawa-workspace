@@ -14,7 +14,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart'
 
 import 'core/di/dependency_injection.dart';
 import 'domain/entities/app_message.dart';
-import 'l10n/app_localizations.dart';
+import 'l10n/quran_image_localizations.dart';
 
 class QuranImageApp extends StatefulWidget {
   const QuranImageApp({super.key});
@@ -103,11 +103,12 @@ class _QuranImageAppState extends State<QuranImageApp> {
     final app = BlocProvider.value(
       value: bloc,
       child: MaterialApp(
-        onGenerateTitle: (context) =>
-            const AppTitleMessage().localize(AppLocalizations.of(context)!),
+        onGenerateTitle: (context) => const AppTitleMessage().localize(
+          QuranImageLocalizations.of(context),
+        ),
         debugShowCheckedModeBanner: false,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: QuranImageLocalizations.localizationsDelegates,
+        supportedLocales: QuranImageLocalizations.supportedLocales,
         locale: const Locale('ar'),
         theme: _appTheme,
         home: _isPreloaded
@@ -148,7 +149,7 @@ class _QuranReaderHome extends StatelessWidget {
         if (state is NavigationLoaded) {
           result = const QuranImageReader();
         } else if (state is NavigationError) {
-          final l10n = AppLocalizations.of(context)!;
+          final l10n = QuranImageLocalizations.of(context);
           result = Scaffold(
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             body: Center(

@@ -227,7 +227,7 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
         content: Text(
           AppLocalizations.of(
             dialogContext,
-          )!.deleteAllDownloadsConfirmation(reciterName),
+          ).deleteAllDownloadsConfirmation(reciterName),
         ),
         actions: [
           TilawaButton(

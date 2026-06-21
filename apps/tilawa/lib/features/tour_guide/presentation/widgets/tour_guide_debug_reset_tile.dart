@@ -14,7 +14,7 @@ class TourGuideDebugResetTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final AppLocalizations l10n = AppLocalizations.of(context);
 
     return TilawaSettingsTile(
       icon: FluentIcons.arrow_reset_24_regular,

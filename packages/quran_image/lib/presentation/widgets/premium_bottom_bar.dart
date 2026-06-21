@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../../l10n/app_localizations.dart';
+import '../../../l10n/quran_image_localizations.dart';
 import '../../core/perf_logger.dart';
 import '../../domain/domain.dart';
 
@@ -20,11 +20,10 @@ class PremiumBottomBar extends StatelessWidget {
     final sw = PerfLogger.startTimer();
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final l10n = AppLocalizations.of(context);
+    final l10n = QuranImageLocalizations.of(context);
     final pageLabel =
-        l10n?.page(state.displayPage.toString()) ?? 'Page ${state.displayPage}';
-    final hizbLabel =
-        l10n?.hizb(state.hizbNumber) ?? 'Hizb ${state.hizbNumber}';
+        l10n.page(state.displayPage.toString()) ?? 'Page ${state.displayPage}';
+    final hizbLabel = l10n.hizb(state.hizbNumber) ?? 'Hizb ${state.hizbNumber}';
     final primaryColor = theme.colorScheme.primary;
 
     final bottomBar = Semantics(

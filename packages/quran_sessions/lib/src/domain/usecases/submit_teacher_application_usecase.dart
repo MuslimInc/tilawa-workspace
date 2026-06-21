@@ -30,7 +30,8 @@ class SubmitTeacherApplicationUseCase {
       );
     }
 
-    if (application.phoneNumber == null || application.phoneNumber!.isEmpty) {
+    if (application.phoneNumber == null ||
+        application.phoneNumber!.trim().isEmpty) {
       return const Left(TeacherPhoneNumberRequiredFailure());
     }
 

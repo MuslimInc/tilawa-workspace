@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:quran_image/core/di/dependency_injection.dart';
 import 'package:quran_image/data/repositories/asset_verse_marker_repository.dart';
 import 'package:quran_image/domain/domain.dart';
-import 'package:quran_image/l10n/app_localizations.dart';
+import 'package:quran_image/l10n/quran_image_localizations.dart';
 import 'package:quran_image/preloading_screen.dart';
 
 void main() {
@@ -169,8 +169,8 @@ void main() {
 Widget _buildHarness(Widget child) {
   return MaterialApp(
     locale: const Locale('en'),
-    localizationsDelegates: AppLocalizations.localizationsDelegates,
-    supportedLocales: AppLocalizations.supportedLocales,
+    localizationsDelegates: QuranImageLocalizations.localizationsDelegates,
+    supportedLocales: QuranImageLocalizations.supportedLocales,
     home: child,
   );
 }

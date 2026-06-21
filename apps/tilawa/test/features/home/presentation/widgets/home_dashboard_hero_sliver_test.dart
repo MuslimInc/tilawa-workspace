@@ -28,7 +28,7 @@ void main() {
     final BuildContext scrollContext = tester.element(
       find.byType(CustomScrollView),
     );
-    final l10n = AppLocalizations.of(scrollContext)!;
+    final l10n = AppLocalizations.of(scrollContext);
     expect(find.text(l10n.homeGreeting), findsOneWidget);
     expect(find.text('Muhammad Kamel'), findsOneWidget);
 

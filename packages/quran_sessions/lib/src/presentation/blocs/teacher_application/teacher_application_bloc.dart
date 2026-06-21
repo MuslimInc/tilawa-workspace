@@ -259,23 +259,25 @@ class TeacherApplicationBloc
       reviewedBy: 'debug_admin',
     );
 
-    result.fold(
-      (failure) => emit(
+    // Avoid async lambdas inside fold — Either.fold does not await them,
+    // so any emit inside would fire after the handler completes.
+    final approveFailure = result.fold((f) => f, (_) => null);
+    if (approveFailure != null) {
+      emit(
         TeacherApplicationFailureState(
-          failure: failure,
+          failure: approveFailure,
           previousState: current.copyWith(isSimulatingApproval: false),
         ),
-      ),
-      (_) async {
-        // Reload to pick up the approved status from the repository.
-        final reloadResult = await _getStatus(current.application.userId);
-        reloadResult.fold(
-          (_) => emit(current.copyWith(isSimulatingApproval: false)),
-          (application) => emit(
-            TeacherApplicationStatusLoaded(application: application),
-          ),
-        );
-      },
+      );
+      return;
+    }
+
+    // Reload to pick up the approved status from the repository.
+    final reloadResult = await _getStatus(current.application.userId);
+    reloadResult.fold(
+      (_) => emit(current.copyWith(isSimulatingApproval: false)),
+      (application) =>
+          emit(TeacherApplicationStatusLoaded(application: application)),
     );
   }
 

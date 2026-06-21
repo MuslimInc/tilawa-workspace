@@ -59,7 +59,7 @@ void main() {
 
     final AppLocalizations l10n = AppLocalizations.of(
       tester.element(find.byType(QuranIndexScreen)),
-    )!;
+    );
 
     expect(find.text(l10n.quranHubTitle), findsOneWidget);
     expect(find.text(l10n.quranCatalogSectionTitle), findsOneWidget);

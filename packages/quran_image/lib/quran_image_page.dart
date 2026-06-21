@@ -3,7 +3,7 @@ import 'package:quran_image/core/di/dependency_injection.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:quran_image/core/utils/quran_image_utils.dart';
 import 'package:quran_image/domain/domain.dart';
-import 'package:quran_image/l10n/app_localizations.dart';
+import 'package:quran_image/l10n/quran_image_localizations.dart';
 import 'package:quran_image/page_mapping.dart';
 import 'package:quran_image/presentation/widgets/widgets.dart';
 import 'package:quran_qcf/quran_qcf.dart'
@@ -306,7 +306,7 @@ class QuranAppBar extends StatelessWidget {
       letterSpacing: 0.2,
     );
     final indexLabel =
-        AppLocalizations.of(context)?.surahIndex ?? 'Surah index';
+        QuranImageLocalizations.of(context).surahIndex ?? 'Surah index';
 
     return Padding(
       padding: EdgeInsets.only(

@@ -40,33 +40,45 @@ void main() {
 
   group('SubmitTeacherApplicationUseCase', () {
     group('phone validation', () {
-      test('returns TeacherPhoneNumberRequiredFailure when phone is null', () async {
-        final result = await useCase(_draft(phoneNumber: null));
-        check(result).isA<Left<QuranSessionsFailure, TeacherApplication>>();
-        final failure = (result as Left).value;
-        check(failure).isA<TeacherPhoneNumberRequiredFailure>();
-      });
+      test(
+        'returns TeacherPhoneNumberRequiredFailure when phone is null',
+        () async {
+          final result = await useCase(_draft(phoneNumber: null));
+          check(result).isA<Left<QuranSessionsFailure, TeacherApplication>>();
+          final failure = (result as Left).value;
+          check(failure).isA<TeacherPhoneNumberRequiredFailure>();
+        },
+      );
 
-      test('returns TeacherPhoneNumberRequiredFailure when phone is empty string', () async {
-        final result = await useCase(_draft(phoneNumber: ''));
-        check(result).isA<Left<QuranSessionsFailure, TeacherApplication>>();
-        final failure = (result as Left).value;
-        check(failure).isA<TeacherPhoneNumberRequiredFailure>();
-      });
+      test(
+        'returns TeacherPhoneNumberRequiredFailure when phone is empty string',
+        () async {
+          final result = await useCase(_draft(phoneNumber: ''));
+          check(result).isA<Left<QuranSessionsFailure, TeacherApplication>>();
+          final failure = (result as Left).value;
+          check(failure).isA<TeacherPhoneNumberRequiredFailure>();
+        },
+      );
 
-      test('returns InvalidTeacherPhoneNumberFailure for non-E.164 phone', () async {
-        final result = await useCase(_draft(phoneNumber: '01012345678'));
-        check(result).isA<Left<QuranSessionsFailure, TeacherApplication>>();
-        final failure = (result as Left).value;
-        check(failure).isA<InvalidTeacherPhoneNumberFailure>();
-      });
+      test(
+        'returns InvalidTeacherPhoneNumberFailure for non-E.164 phone',
+        () async {
+          final result = await useCase(_draft(phoneNumber: '01012345678'));
+          check(result).isA<Left<QuranSessionsFailure, TeacherApplication>>();
+          final failure = (result as Left).value;
+          check(failure).isA<InvalidTeacherPhoneNumberFailure>();
+        },
+      );
 
-      test('returns InvalidTeacherPhoneNumberFailure for whitespace-only phone', () async {
-        final result = await useCase(_draft(phoneNumber: '   '));
-        check(result).isA<Left<QuranSessionsFailure, TeacherApplication>>();
-        final failure = (result as Left).value;
-        check(failure).isA<TeacherPhoneNumberRequiredFailure>();
-      });
+      test(
+        'returns InvalidTeacherPhoneNumberFailure for whitespace-only phone',
+        () async {
+          final result = await useCase(_draft(phoneNumber: '   '));
+          check(result).isA<Left<QuranSessionsFailure, TeacherApplication>>();
+          final failure = (result as Left).value;
+          check(failure).isA<TeacherPhoneNumberRequiredFailure>();
+        },
+      );
 
       test('accepts valid E.164 Egyptian phone number', () async {
         repo.application = _draft(phoneNumber: '+201012345678');
@@ -92,48 +104,66 @@ void main() {
     });
 
     group('incomplete application', () {
-      test('returns TeacherApplicationIncompleteFailure when no languages', () async {
-        final app = _draft(phoneNumber: '+201012345678', teachingLanguages: []);
-        final result = await useCase(app);
-        check(result).isA<Left<QuranSessionsFailure, TeacherApplication>>();
-        final failure = (result as Left).value;
-        check(failure).isA<TeacherApplicationIncompleteFailure>();
-      });
+      test(
+        'returns TeacherApplicationIncompleteFailure when no languages',
+        () async {
+          final app = _draft(
+            phoneNumber: '+201012345678',
+            teachingLanguages: [],
+          );
+          final result = await useCase(app);
+          check(result).isA<Left<QuranSessionsFailure, TeacherApplication>>();
+          final failure = (result as Left).value;
+          check(failure).isA<TeacherApplicationIncompleteFailure>();
+        },
+      );
 
-      test('returns TeacherApplicationIncompleteFailure when no specializations', () async {
-        final app = _draft(phoneNumber: '+201012345678', specializations: []);
-        final result = await useCase(app);
-        check(result).isA<Left<QuranSessionsFailure, TeacherApplication>>();
-        final failure = (result as Left).value;
-        check(failure).isA<TeacherApplicationIncompleteFailure>();
-      });
+      test(
+        'returns TeacherApplicationIncompleteFailure when no specializations',
+        () async {
+          final app = _draft(phoneNumber: '+201012345678', specializations: []);
+          final result = await useCase(app);
+          check(result).isA<Left<QuranSessionsFailure, TeacherApplication>>();
+          final failure = (result as Left).value;
+          check(failure).isA<TeacherApplicationIncompleteFailure>();
+        },
+      );
 
-      test('returns TeacherApplicationIncompleteFailure when bio is null', () async {
-        final app = _draft(phoneNumber: '+201012345678', bio: null);
-        final result = await useCase(app);
-        check(result).isA<Left<QuranSessionsFailure, TeacherApplication>>();
-        final failure = (result as Left).value;
-        check(failure).isA<TeacherApplicationIncompleteFailure>();
-      });
+      test(
+        'returns TeacherApplicationIncompleteFailure when bio is null',
+        () async {
+          final app = _draft(phoneNumber: '+201012345678', bio: null);
+          final result = await useCase(app);
+          check(result).isA<Left<QuranSessionsFailure, TeacherApplication>>();
+          final failure = (result as Left).value;
+          check(failure).isA<TeacherApplicationIncompleteFailure>();
+        },
+      );
 
-      test('returns TeacherApplicationIncompleteFailure when bio is blank', () async {
-        final app = _draft(phoneNumber: '+201012345678', bio: '   ');
-        final result = await useCase(app);
-        check(result).isA<Left<QuranSessionsFailure, TeacherApplication>>();
-        final failure = (result as Left).value;
-        check(failure).isA<TeacherApplicationIncompleteFailure>();
-      });
+      test(
+        'returns TeacherApplicationIncompleteFailure when bio is blank',
+        () async {
+          final app = _draft(phoneNumber: '+201012345678', bio: '   ');
+          final result = await useCase(app);
+          check(result).isA<Left<QuranSessionsFailure, TeacherApplication>>();
+          final failure = (result as Left).value;
+          check(failure).isA<TeacherApplicationIncompleteFailure>();
+        },
+      );
     });
 
     group('successful submission', () {
-      test('advances application to pending when all fields are valid', () async {
-        final app = _draft(phoneNumber: '+201012345678');
-        repo.application = app;
-        final result = await useCase(app);
-        check(result).isA<Right<QuranSessionsFailure, TeacherApplication>>();
-        final submitted = (result as Right).value as TeacherApplication;
-        check(submitted.isPending).isTrue();
-      });
+      test(
+        'advances application to pending when all fields are valid',
+        () async {
+          final app = _draft(phoneNumber: '+201012345678');
+          repo.application = app;
+          final result = await useCase(app);
+          check(result).isA<Right<QuranSessionsFailure, TeacherApplication>>();
+          final submitted = (result as Right).value as TeacherApplication;
+          check(submitted.isPending).isTrue();
+        },
+      );
 
       test('repository receives the application to submit', () async {
         final app = _draft(phoneNumber: '+201012345678');
@@ -154,23 +184,26 @@ void main() {
     });
 
     group('non-draft application', () {
-      test('returns TeacherApplicationAlreadyPendingFailure for pending app', () async {
-        final app = TeacherApplication(
-          id: 'app_1',
-          userId: 'user_1',
-          status: TeacherApplicationStatus.pending,
-          phoneNumber: '+201012345678',
-          teachingLanguages: const ['ar'],
-          specializations: const ['tajweed'],
-          bio: 'bio',
-          createdAt: DateTime(2024),
-          updatedAt: DateTime(2024),
-        );
-        final result = await useCase(app);
-        check(result).isA<Left<QuranSessionsFailure, TeacherApplication>>();
-        final failure = (result as Left).value;
-        check(failure).isA<TeacherApplicationAlreadyPendingFailure>();
-      });
+      test(
+        'returns TeacherApplicationAlreadyPendingFailure for pending app',
+        () async {
+          final app = TeacherApplication(
+            id: 'app_1',
+            userId: 'user_1',
+            status: TeacherApplicationStatus.pending,
+            phoneNumber: '+201012345678',
+            teachingLanguages: const ['ar'],
+            specializations: const ['tajweed'],
+            bio: 'bio',
+            createdAt: DateTime(2024),
+            updatedAt: DateTime(2024),
+          );
+          final result = await useCase(app);
+          check(result).isA<Left<QuranSessionsFailure, TeacherApplication>>();
+          final failure = (result as Left).value;
+          check(failure).isA<TeacherApplicationAlreadyPendingFailure>();
+        },
+      );
     });
   });
 }
