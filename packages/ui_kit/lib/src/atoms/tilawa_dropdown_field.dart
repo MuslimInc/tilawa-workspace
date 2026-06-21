@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../foundation/design_tokens.dart';
+import '../foundation/tilawa_input_style.dart';
 
 /// A single option for a [TilawaDropdownField].
 @immutable
@@ -80,18 +81,16 @@ class TilawaDropdownField<T> extends StatelessWidget {
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
     final textStyle = theme.textTheme.bodyLarge;
-    final radius = tokens.resolveRadius(family: TilawaRadiusFamily.chrome);
+    final inputStyle = context.inputStyle();
     final isEnabled = enabled && onChanged != null;
-    final fieldDecoration = _fieldDecoration(
-      tokens: tokens,
-      colorScheme: colorScheme,
-      textStyle: textStyle,
-      radius: radius,
-      isEnabled: isEnabled,
+    final fieldDecoration = inputStyle.decoration(
       labelText: labelText,
       errorText: errorText,
-      prefixIcon: prefixIcon,
-      includePrefixInDecoration: items.length == 1,
+      prefixIcon: prefixIcon != null && items.length == 1
+          ? Icon(prefixIcon)
+          : null,
+      enabled: isEnabled,
+      textStyle: textStyle,
     );
 
     if (items.length == 1) {
@@ -143,6 +142,8 @@ class TilawaDropdownField<T> extends StatelessWidget {
           final double? menuWidth = constraints.maxWidth.isFinite
               ? constraints.maxWidth
               : null;
+
+          final double radius = inputStyle.borderRadius();
 
           final MenuStyle menuStyle = MenuStyle(
             alignment: AlignmentDirectional.bottomStart,
@@ -254,44 +255,6 @@ class TilawaDropdownField<T> extends StatelessWidget {
             ),
           );
         },
-      ),
-    );
-  }
-
-  static InputDecoration _fieldDecoration({
-    required TilawaDesignTokens tokens,
-    required ColorScheme colorScheme,
-    required TextStyle? textStyle,
-    required double radius,
-    required bool isEnabled,
-    String? labelText,
-    String? errorText,
-    IconData? prefixIcon,
-    bool includePrefixInDecoration = true,
-  }) {
-    final double lineHeight =
-        (textStyle?.fontSize ?? 16) * (textStyle?.height ?? 1.5);
-    final double verticalPadding =
-        ((tokens.minInteractiveDimension - lineHeight) / 2).clamp(
-          tokens.spaceSmall,
-          tokens.spaceLarge,
-        );
-
-    return InputDecoration(
-      labelText: labelText,
-      errorText: errorText,
-      enabled: isEnabled,
-      prefixIcon: prefixIcon == null || !includePrefixInDecoration
-          ? null
-          : Icon(prefixIcon),
-      filled: true,
-      fillColor: colorScheme.surface,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(radius),
-      ),
-      contentPadding: EdgeInsets.symmetric(
-        horizontal: tokens.spaceMedium,
-        vertical: verticalPadding,
       ),
     );
   }

@@ -367,9 +367,6 @@ class AppTheme {
         colorScheme.brightness == Brightness.dark
         ? TilawaDesignTokens.dark()
         : TilawaDesignTokens.light();
-    final double chromeRadius = designTokens.resolveRadius(
-      family: TilawaRadiusFamily.chrome,
-    );
     final double cardRadius = designTokens.resolveRadius(
       family: TilawaRadiusFamily.card,
     );
@@ -420,22 +417,14 @@ class AppTheme {
           ),
         ),
       ),
-      inputDecorationTheme: theme.inputDecorationTheme.copyWith(
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(chromeRadius),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(chromeRadius),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(chromeRadius),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(chromeRadius),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(chromeRadius),
-        ),
+      inputDecorationTheme: const InputDecorationTheme(
+        border: InputBorder.none,
+        enabledBorder: InputBorder.none,
+        focusedBorder: InputBorder.none,
+        disabledBorder: InputBorder.none,
+        errorBorder: InputBorder.none,
+        focusedErrorBorder: InputBorder.none,
+        filled: false,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: _buttonStyleWithKitShape(

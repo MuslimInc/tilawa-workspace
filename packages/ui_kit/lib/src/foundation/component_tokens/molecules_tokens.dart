@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../app_colors.dart';
-import '../design_tokens.dart' show kTilawaMinInteractiveDimension;
+import '../design_tokens.dart';
 import 'token_lerp.dart';
 
 @immutable
@@ -941,6 +941,9 @@ class TilawaSearchFieldTokens {
   }
 
   factory TilawaSearchFieldTokens.fromColorScheme(ColorScheme colorScheme) {
+    final TilawaDesignTokens tokens = colorScheme.brightness == Brightness.dark
+        ? TilawaDesignTokens.dark()
+        : TilawaDesignTokens.light();
     final backgroundColor = colorScheme.surface;
     const focusedBorderOpacity = 0.28;
     const unfocusedBorderOpacity = 0.26;
@@ -965,10 +968,8 @@ class TilawaSearchFieldTokens {
     return TilawaSearchFieldTokens(
       height: kTilawaMinInteractiveDimension,
       backgroundColor: backgroundColor,
-      contentPadding: const EdgeInsets.symmetric(vertical: 12),
-      scrollPadding: const EdgeInsets.all(
-        16,
-      ), // fix: Spacing & alignment — tokenized (2×8dp)
+      contentPadding: EdgeInsets.symmetric(vertical: tokens.spaceMedium),
+      scrollPadding: EdgeInsets.all(tokens.spaceLarge),
       iconSize: 18,
       focusedBorderOpacity: focusedBorderOpacity,
       unfocusedBorderOpacity: unfocusedBorderOpacity,

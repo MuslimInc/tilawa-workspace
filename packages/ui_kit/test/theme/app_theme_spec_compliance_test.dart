@@ -131,7 +131,7 @@ void main() {
       }
     });
 
-    test('card, dialog, and input decoration use semantic token radii', () {
+    test('card and dialog use semantic token radii; inputs are kit-owned', () {
       final ThemeData theme = AppTheme.getLightTheme(
         primaryColor: AppColors.defaultPrimary,
       );
@@ -150,14 +150,9 @@ void main() {
           theme.dialogTheme.shape! as RoundedRectangleBorder;
       expect(dialogShape.borderRadius, cardShape.borderRadius);
 
-      final OutlineInputBorder inputBorder =
-          theme.inputDecorationTheme.enabledBorder! as OutlineInputBorder;
-      expect(
-        inputBorder.borderRadius,
-        BorderRadius.circular(
-          tokens.resolveRadius(family: TilawaRadiusFamily.chrome),
-        ),
-      );
+      expect(theme.inputDecorationTheme.border, InputBorder.none);
+      expect(theme.inputDecorationTheme.enabledBorder, InputBorder.none);
+      expect(theme.inputDecorationTheme.focusedBorder, InputBorder.none);
     });
   });
 }
