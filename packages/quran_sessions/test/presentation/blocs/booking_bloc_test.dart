@@ -4,29 +4,57 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../../lib/src/domain/entities/quran_booking.dart';
 import '../../../lib/src/domain/entities/session_call_type.dart';
+import '../../../lib/src/domain/entities/user_profile.dart';
 import '../../../lib/src/domain/failures/quran_sessions_failure.dart';
 import '../../../lib/src/domain/usecases/create_booking_usecase.dart';
 import '../../../lib/src/domain/usecases/get_teacher_availability_usecase.dart';
+import '../../../lib/src/domain/usecases/validate_booking_eligibility_usecase.dart';
 import '../../../lib/src/presentation/blocs/booking/booking_bloc.dart';
 import '../../../lib/src/presentation/blocs/booking/booking_event.dart';
 import '../../../lib/src/presentation/blocs/booking/booking_state.dart';
 import '../../helpers/fakes/fake_booking_repository.dart';
+import '../../helpers/fakes/fake_market_config_repository.dart';
+import '../../helpers/fakes/fake_session_policy_repository.dart';
 import '../../helpers/fakes/fake_teacher_repository.dart';
+import '../../helpers/fakes/fake_user_profile_repository.dart';
 import '../../helpers/fixtures.dart';
 
 void main() {
   late FakeTeacherRepository teacherRepo;
   late FakeBookingRepository bookingRepo;
+  late FakeUserProfileRepository profileRepo;
+  late FakeSessionPolicyRepository policyRepo;
+  late FakeMarketConfigRepository marketConfigRepo;
   late BookingBloc bloc;
 
   final now = DateTime.now();
 
   setUp(() {
-    teacherRepo = FakeTeacherRepository();
+    teacherRepo = FakeTeacherRepository()
+      ..teachers = [makeTeacher(id: 'teacher_1')];
     bookingRepo = FakeBookingRepository();
+    // Profile is complete (has gender + DOB) so eligibility passes in all tests
+    // that focus on the booking flow rather than eligibility rules.
+    profileRepo = FakeUserProfileRepository(
+      profile: makeProfile(
+        userId: 'student_1',
+        gender: UserGender.male,
+        dateOfBirth: DateTime(1995, 6, 15),
+        countryCode: 'EG',
+        cityId: 'cairo',
+      ),
+    );
+    policyRepo = FakeSessionPolicyRepository();
+    marketConfigRepo = FakeMarketConfigRepository();
     bloc = BookingBloc(
       getAvailability: GetTeacherAvailabilityUseCase(teacherRepo),
       createBooking: CreateBookingUseCase(bookingRepo),
+      validateEligibility: ValidateBookingEligibilityUseCase(
+        profileRepository: profileRepo,
+        policyRepository: policyRepo,
+        teacherRepository: teacherRepo,
+        marketConfigRepository: marketConfigRepo,
+      ),
     );
   });
 
@@ -42,11 +70,13 @@ void main() {
       act: (b) => b.add(
         BookingScreenOpened(
           teacherId: 'teacher_1',
+          studentId: 'student_1',
           from: now,
           to: now.add(const Duration(days: 14)),
         ),
       ),
       expect: () => [
+        isA<BookingEligibilityChecking>(),
         isA<BookingSlotsLoading>(),
         isA<BookingSelecting>(),
       ],

@@ -25,4 +25,12 @@ abstract interface class TeacherRemoteDataSource {
     String teacherId, {
     String? cursor,
   });
+
+  /// Reads `teachers/{teacherId}/pricing/{countryCode}_{cityId}` from the
+  /// backend. Returns null when no pricing document exists for that market.
+  Future<SessionPriceDto?> resolveTeacherPrice(
+    String teacherId, {
+    required String countryCode,
+    required String cityId,
+  });
 }

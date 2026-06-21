@@ -36,9 +36,7 @@ class FakeMvpAvailabilityProvider implements AvailabilityProvider {
   ) async {
     // Prevent duplicate slots at the same time for the same teacher.
     final clash = _store.slots.any(
-      (s) =>
-          s.teacherId == slot.teacherId &&
-          s.startsAt == slot.startsAt,
+      (s) => s.teacherId == slot.teacherId && s.startsAt == slot.startsAt,
     );
     if (clash) {
       return const Left(

@@ -61,6 +61,15 @@ class FakeMvpTeacherRepository implements TeacherRepository {
   }) async {
     return const Right([]);
   }
+
+  @override
+  Future<Either<QuranSessionsFailure, SessionPrice?>> resolveTeacherPrice(
+    String teacherId, {
+    required String countryCode,
+    required String cityId,
+  }) async {
+    return Right(_store.resolvePrice(teacherId, countryCode, cityId));
+  }
 }
 
 extension<T> on Iterable<T> {

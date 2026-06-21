@@ -73,7 +73,10 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
               children: [
                 Text(failure.toLocalizedMessage(context)),
                 const SizedBox(height: 12),
-                ElevatedButton(onPressed: _reload, child: const Text('إعادة المحاولة')),
+                ElevatedButton(
+                  onPressed: _reload,
+                  child: const Text('إعادة المحاولة'),
+                ),
               ],
             ),
           ),
@@ -149,6 +152,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                         return _SlotTile(
                           slot: slot,
                           isUpdating: isUpdatingAvailability,
+                          onEdit: () => _showEditSlotSheet(slot),
                           onRemove: () =>
                               context.read<TeacherDashboardBloc>().add(
                                 AvailabilitySlotRemoved(slotId: slot.slotId),
@@ -180,6 +184,26 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       );
     }
   }
+
+  Future<void> _showEditSlotSheet(TeacherAvailability original) async {
+    final updated = await showModalBottomSheet<TeacherAvailability>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => _AddSlotSheet(
+        teacherId: widget.teacherId,
+        initialDate: original.startsAt,
+        initialTime: TimeOfDay(
+          hour: original.startsAt.hour,
+          minute: original.startsAt.minute,
+        ),
+      ),
+    );
+    if (updated != null && mounted) {
+      context.read<TeacherDashboardBloc>().add(
+        AvailabilitySlotEdited(original: original, updated: updated),
+      );
+    }
+  }
 }
 
 // ── Slot tile ─────────────────────────────────────────────────────────────────
@@ -188,11 +212,13 @@ class _SlotTile extends StatelessWidget {
   const _SlotTile({
     required this.slot,
     required this.isUpdating,
+    required this.onEdit,
     required this.onRemove,
   });
 
   final TeacherAvailability slot;
   final bool isUpdating;
+  final VoidCallback onEdit;
   final VoidCallback onRemove;
 
   @override
@@ -215,10 +241,20 @@ class _SlotTile extends StatelessWidget {
       ),
       trailing: slot.isBooked
           ? null
-          : IconButton(
-              icon: const Icon(Icons.delete_outline),
-              tooltip: 'حذف الموعد',
-              onPressed: isUpdating ? null : onRemove,
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.edit_outlined),
+                  tooltip: 'تعديل الموعد',
+                  onPressed: isUpdating ? null : onEdit,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline),
+                  tooltip: 'حذف الموعد',
+                  onPressed: isUpdating ? null : onRemove,
+                ),
+              ],
             ),
     );
   }
@@ -227,17 +263,31 @@ class _SlotTile extends StatelessWidget {
 // ── Add slot bottom sheet ─────────────────────────────────────────────────────
 
 class _AddSlotSheet extends StatefulWidget {
-  const _AddSlotSheet({required this.teacherId});
+  const _AddSlotSheet({
+    required this.teacherId,
+    this.initialDate,
+    this.initialTime,
+  });
 
   final String teacherId;
+  final DateTime? initialDate;
+  final TimeOfDay? initialTime;
 
   @override
   State<_AddSlotSheet> createState() => _AddSlotSheetState();
 }
 
 class _AddSlotSheetState extends State<_AddSlotSheet> {
-  DateTime _selectedDate = DateTime.now().add(const Duration(days: 1));
-  TimeOfDay _selectedTime = const TimeOfDay(hour: 9, minute: 0);
+  late DateTime _selectedDate;
+  late TimeOfDay _selectedTime;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDate =
+        widget.initialDate ?? DateTime.now().add(const Duration(days: 1));
+    _selectedTime = widget.initialTime ?? const TimeOfDay(hour: 9, minute: 0);
+  }
 
   @override
   Widget build(BuildContext context) {

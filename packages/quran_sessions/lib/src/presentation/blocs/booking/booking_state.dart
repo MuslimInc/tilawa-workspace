@@ -16,6 +16,11 @@ final class BookingInitial extends BookingState {
   const BookingInitial();
 }
 
+/// Eligibility is being validated before slot loading starts.
+final class BookingEligibilityChecking extends BookingState {
+  const BookingEligibilityChecking();
+}
+
 final class BookingSlotsLoading extends BookingState {
   const BookingSlotsLoading();
 }

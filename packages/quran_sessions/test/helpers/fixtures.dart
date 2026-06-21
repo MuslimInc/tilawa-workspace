@@ -2,9 +2,29 @@ import '../../lib/src/domain/entities/quran_booking.dart';
 import '../../lib/src/domain/entities/quran_session.dart';
 import '../../lib/src/domain/entities/quran_teacher.dart';
 import '../../lib/src/domain/entities/session_call_type.dart';
+import '../../lib/src/domain/entities/session_price.dart';
 import '../../lib/src/domain/entities/session_pricing_type.dart';
 import '../../lib/src/domain/entities/teacher_availability.dart';
 import '../../lib/src/domain/entities/teacher_verification_status.dart';
+import '../../lib/src/domain/entities/user_profile.dart';
+
+UserProfile makeProfile({
+  String userId = 'student_1',
+  UserRole role = UserRole.student,
+  AccountStatus accountStatus = AccountStatus.active,
+  UserGender? gender,
+  DateTime? dateOfBirth,
+  String? countryCode,
+  String? cityId,
+}) => UserProfile(
+  userId: userId,
+  role: role,
+  accountStatus: accountStatus,
+  gender: gender,
+  dateOfBirth: dateOfBirth,
+  countryCode: countryCode,
+  cityId: cityId,
+);
 
 QuranBooking makeBooking({
   String id = 'booking_1',
@@ -24,21 +44,33 @@ QuranBooking makeBooking({
   createdAt: createdAt ?? DateTime.now(),
 );
 
+/// Default market context used in fixtures: Egypt / Cairo / EGP.
+const _defaultMarketPrice = SessionPrice(
+  amount: 500,
+  currencyCode: 'EGP',
+  countryCode: 'EG',
+  cityId: 'cairo',
+);
+
 QuranTeacher makeTeacher({
   String id = 'teacher_1',
   String displayName = 'Sheikh Ahmed',
   TeacherVerificationStatus status = TeacherVerificationStatus.verified,
   List<String> specializations = const ['tajweed'],
   double rating = 4.8,
+  UserGender gender = UserGender.male,
+  SessionPricingType pricingType = SessionPricingType.fixedPerSession,
+  SessionPrice? price = _defaultMarketPrice,
 }) => QuranTeacher(
   id: id,
   displayName: displayName,
   bio: 'Experienced Quran teacher',
   avatarUrl: 'https://example.com/avatar.png',
+  gender: gender,
   verificationStatus: status,
   supportedCallTypes: const [SessionCallType.externalMeeting],
-  pricingType: SessionPricingType.fixedPerSession,
-  pricePerSessionUsd: 20.0,
+  pricingType: pricingType,
+  price: price,
   specializations: specializations,
   languages: const ['ar', 'en'],
   averageRating: rating,

@@ -106,8 +106,7 @@ class _DateGroupedSlotPickerState extends State<DateGroupedSlotPicker> {
     return map;
   }
 
-  static DateTime _dateOnly(DateTime dt) =>
-      DateTime(dt.year, dt.month, dt.day);
+  static DateTime _dateOnly(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
 
   static DateTime _today() {
     final n = DateTime.now();
@@ -166,7 +165,9 @@ class _DayTabBarState extends State<_DayTabBar> {
               duration: const Duration(milliseconds: 180),
               width: 56,
               decoration: BoxDecoration(
-                color: isSelected ? scheme.primary : scheme.surfaceContainerHighest,
+                color: isSelected
+                    ? scheme.primary
+                    : scheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -188,9 +189,7 @@ class _DayTabBarState extends State<_DayTabBar> {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: isSelected
-                          ? scheme.onPrimary
-                          : scheme.onSurface,
+                      color: isSelected ? scheme.onPrimary : scheme.onSurface,
                     ),
                   ),
                   Text(

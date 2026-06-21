@@ -6,11 +6,13 @@ import 'package:tilawa/core/di/injection.dart';
 
 import '../data/quran_sessions_mvp_store.dart';
 
+// MVP: the signed-in student is always 'student_mvp'.
+const _mvpStudentId = 'student_mvp';
+
 /// GoRouter route tree for the Quran Sessions MVP feature.
 ///
 /// All routes live outside the [AppShellRoute] shell so each screen manages
-/// its own [AppBar] and back navigation. The bottom navigation bar is
-/// intentionally hidden — this is a dedicated feature flow.
+/// its own [AppBar] and back navigation.
 List<RouteBase> get quranSessionsRoutes => [
   GoRoute(
     path: QuranSessionsRoutes.home,
@@ -23,6 +25,7 @@ List<RouteBase> get quranSessionsRoutes => [
           QuranSessionsRoutes.teacherProfile.replaceFirst(':teacherId', id),
         ),
         onMySessions: () => context.push(QuranSessionsRoutes.mySessions),
+        onBecomeTeacher: () => context.push(QuranSessionsRoutes.teacherApply),
       ),
     ),
   ),
@@ -45,14 +48,13 @@ List<RouteBase> get quranSessionsRoutes => [
       return BlocProvider(
         create: (_) {
           final now = DateTime.now();
-          return getIt<TeacherProfileBloc>()
-            ..add(
-              TeacherProfileRequested(
-                teacherId: teacherId,
-                availabilityFrom: now,
-                availabilityTo: now.add(const Duration(days: 14)),
-              ),
-            );
+          return getIt<TeacherProfileBloc>()..add(
+            TeacherProfileRequested(
+              teacherId: teacherId,
+              availabilityFrom: now,
+              availabilityTo: now.add(const Duration(days: 14)),
+            ),
+          );
         },
         child: TeacherProfileScreen(
           teacherId: teacherId,
@@ -73,13 +75,16 @@ List<RouteBase> get quranSessionsRoutes => [
         create: (_) => getIt<BookingBloc>(),
         child: BookingScreen(
           teacherId: teacherId,
+          studentId: _mvpStudentId,
           preSelectedSlotId: preSelectedSlotId,
           onBookingSuccess: (_) {
-            // Pop the booking screen, then replace the profile with My Sessions.
             context
               ..pop()
               ..pop()
               ..push(QuranSessionsRoutes.mySessions);
+          },
+          onCompleteProfile: () async {
+            await context.push(QuranSessionsRoutes.profileCompletion);
           },
         ),
       );
@@ -90,7 +95,7 @@ List<RouteBase> get quranSessionsRoutes => [
     builder: (context, state) => BlocProvider(
       create: (_) => getIt<MySessionsBloc>(),
       child: MySessionsScreen(
-        studentId: 'student_mvp',
+        studentId: _mvpStudentId,
         resolveTeacherName: QuranSessionsMvpStore.instance.resolveTeacherName,
       ),
     ),
@@ -98,13 +103,53 @@ List<RouteBase> get quranSessionsRoutes => [
   GoRoute(
     path: QuranSessionsRoutes.teacherDashboard,
     builder: (context, state) {
-      // For MVP: use teacher_1 as the demo teacher. In production this comes
-      // from the authenticated user's profile.
-      const teacherId = 'teacher_1';
+      // Use path param if provided (e.g. from admin view), otherwise fall back
+      // to the current MVP student who was just approved as a teacher.
+      final teacherId = state.pathParameters['teacherId'] ?? _mvpStudentId;
       return BlocProvider(
         create: (_) => getIt<TeacherDashboardBloc>(),
-        child: const TeacherDashboardScreen(teacherId: teacherId),
+        child: TeacherDashboardScreen(teacherId: teacherId),
       );
     },
+  ),
+  GoRoute(
+    path: QuranSessionsRoutes.profileCompletion,
+    builder: (context, state) => BlocProvider(
+      create: (_) => getIt<ProfileCompletionBloc>(),
+      child: const ProfileCompletionScreen(userId: _mvpStudentId),
+    ),
+  ),
+
+  // ── Teacher application flow ────────────────────────────────────────────────
+  GoRoute(
+    path: QuranSessionsRoutes.teacherApply,
+    builder: (context, state) => BlocProvider(
+      create: (_) => getIt<TeacherApplicationBloc>(),
+      child: TeacherApplicationScreen(
+        userId: _mvpStudentId,
+        onSubmitted: () {
+          // Replace the apply screen with the status screen.
+          context
+            ..pop()
+            ..push(QuranSessionsRoutes.teacherApplicationStatus);
+        },
+      ),
+    ),
+  ),
+
+  GoRoute(
+    path: QuranSessionsRoutes.teacherApplicationStatus,
+    builder: (context, state) => BlocProvider(
+      create: (_) => getIt<TeacherApplicationBloc>(),
+      child: TeacherApplicationStatusScreen(
+        userId: _mvpStudentId,
+        onApproved: () {
+          // Replace the status screen with the teacher dashboard.
+          context
+            ..pop()
+            ..push(QuranSessionsRoutes.teacherDashboard);
+        },
+      ),
+    ),
   ),
 ];

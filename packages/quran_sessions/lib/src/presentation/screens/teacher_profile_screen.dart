@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../domain/entities/quran_teacher.dart';
 import '../../domain/entities/session_pricing_type.dart';
+import '../../utils/price_formatter.dart';
 import '../../utils/specialization_labels.dart';
 import '../failure_ui/quran_sessions_failure_ui.dart';
 import '../blocs/teacher_profile/teacher_profile_bloc.dart';
@@ -115,8 +117,7 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
                           horizontal: 8,
                           vertical: 0,
                         ),
-                        materialTapTargetSize:
-                            MaterialTapTargetSize.shrinkWrap,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       );
                     }).toList(),
                   ),
@@ -174,15 +175,16 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
             ),
         },
       ),
-      floatingActionButton: BlocBuilder<TeacherProfileBloc, TeacherProfileState>(
-        builder: (context, state) => state is TeacherProfileSuccess
-            ? FloatingActionButton.extended(
-                label: const Text('احجز جلسة'),
-                icon: const Icon(Icons.calendar_today_outlined),
-                onPressed: () => _onBookTapped(null),
-              )
-            : const SizedBox.shrink(),
-      ),
+      floatingActionButton:
+          BlocBuilder<TeacherProfileBloc, TeacherProfileState>(
+            builder: (context, state) => state is TeacherProfileSuccess
+                ? FloatingActionButton.extended(
+                    label: const Text('احجز جلسة'),
+                    icon: const Icon(Icons.calendar_today_outlined),
+                    onPressed: () => _onBookTapped(null),
+                  )
+                : const SizedBox.shrink(),
+          ),
     );
   }
 
@@ -196,17 +198,16 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
 class _PricingRow extends StatelessWidget {
   const _PricingRow({required this.teacher});
 
-  final dynamic teacher; // QuranTeacher
+  final QuranTeacher teacher;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final isFree = teacher.pricingType == SessionPricingType.free;
-    final label = isFree
-        ? 'مجاني'
-        : teacher.pricePerSessionUsd != null
-            ? '\$${(teacher.pricePerSessionUsd as num).toStringAsFixed(0)} / جلسة'
-            : '';
+    final label = PriceFormatter.formatOrFree(
+      pricingType: teacher.pricingType,
+      price: teacher.price,
+    );
 
     if (label.isEmpty) return const SizedBox.shrink();
 
@@ -219,7 +220,9 @@ class _PricingRow extends StatelessWidget {
       child: Text(
         label,
         style: TextStyle(
-          color: isFree ? scheme.onSecondaryContainer : scheme.onPrimaryContainer,
+          color: isFree
+              ? scheme.onSecondaryContainer
+              : scheme.onPrimaryContainer,
           fontWeight: FontWeight.w700,
         ),
       ),

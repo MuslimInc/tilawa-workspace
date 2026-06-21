@@ -39,6 +39,17 @@ final class AvailabilitySlotRemoved extends TeacherDashboardEvent {
   List<Object?> get props => [slotId];
 }
 
+/// Teacher replaces an existing open slot with new time data.
+final class AvailabilitySlotEdited extends TeacherDashboardEvent {
+  const AvailabilitySlotEdited({required this.original, required this.updated});
+
+  final TeacherAvailability original;
+  final TeacherAvailability updated;
+
+  @override
+  List<Object?> get props => [original, updated];
+}
+
 /// Teacher updates availability window shown in the editor.
 final class AvailabilityUpdated extends TeacherDashboardEvent {
   const AvailabilityUpdated({

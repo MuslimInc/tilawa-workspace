@@ -1,6 +1,7 @@
 import 'package:dartz_plus/dartz_plus.dart';
 
 import '../../domain/entities/quran_teacher.dart';
+import '../../domain/entities/session_price.dart';
 import '../../domain/entities/session_review.dart';
 import '../../domain/entities/teacher_availability.dart';
 import '../../domain/failures/quran_sessions_failure.dart';
@@ -9,6 +10,7 @@ import '../datasources/teacher_remote_data_source.dart';
 import '../mappers/availability_mapper.dart';
 import '../mappers/review_mapper.dart';
 import '../mappers/teacher_mapper.dart';
+
 import 'repository_error_mapper.dart';
 
 class TeacherRepositoryImpl implements TeacherRepository {
@@ -78,6 +80,24 @@ class TeacherRepositoryImpl implements TeacherRepository {
     try {
       final dtos = await _remote.getTeacherReviews(teacherId, cursor: cursor);
       return Right(dtos.map((d) => d.toDomain()).toList());
+    } on Exception catch (e) {
+      return Left(mapRemoteException(e));
+    }
+  }
+
+  @override
+  Future<Either<QuranSessionsFailure, SessionPrice?>> resolveTeacherPrice(
+    String teacherId, {
+    required String countryCode,
+    required String cityId,
+  }) async {
+    try {
+      final dto = await _remote.resolveTeacherPrice(
+        teacherId,
+        countryCode: countryCode,
+        cityId: cityId,
+      );
+      return Right(dto?.toDomain());
     } on Exception catch (e) {
       return Left(mapRemoteException(e));
     }

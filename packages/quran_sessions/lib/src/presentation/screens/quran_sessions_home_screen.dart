@@ -15,11 +15,15 @@ class QuranSessionsHomeScreen extends StatefulWidget {
     this.onSeeAllTeachers,
     this.onTeacherTapped,
     this.onMySessions,
+    this.onBecomeTeacher,
   });
 
   final VoidCallback? onSeeAllTeachers;
   final void Function(String teacherId)? onTeacherTapped;
   final VoidCallback? onMySessions;
+
+  /// Called when user taps "أريد أن أصبح محفظًا".
+  final VoidCallback? onBecomeTeacher;
 
   @override
   State<QuranSessionsHomeScreen> createState() =>
@@ -59,23 +63,93 @@ class _QuranSessionsHomeScreenState extends State<QuranSessionsHomeScreen> {
           ),
           TeacherListSuccess(:final teachers) => ListView.builder(
             padding: const EdgeInsets.all(16),
-            // Show at most 3 teachers as a preview; "See all" navigates to
-            // TeacherListScreen.
-            itemCount: teachers.take(3).length + 1,
+            // Teachers preview (max 3) + "See all" + "Become a Teacher" card.
+            itemCount: teachers.take(3).length + 2,
             itemBuilder: (context, i) {
-              if (i < teachers.take(3).length) {
+              final preview = teachers.take(3).toList();
+              if (i < preview.length) {
                 return TeacherCard(
-                  teacher: teachers[i],
-                  onTap: () => widget.onTeacherTapped?.call(teachers[i].id),
+                  teacher: preview[i],
+                  onTap: () => widget.onTeacherTapped?.call(preview[i].id),
                 );
               }
-              return TextButton(
-                onPressed: widget.onSeeAllTeachers,
-                child: const Text('عرض جميع المعلمين ←'),
-              );
+              if (i == preview.length) {
+                return TextButton(
+                  onPressed: widget.onSeeAllTeachers,
+                  child: const Text('عرض جميع المعلمين ←'),
+                );
+              }
+              // "Become a Teacher" card at the bottom.
+              return _BecomeTeacherCard(onTap: widget.onBecomeTeacher);
             },
           ),
         },
+      ),
+    );
+  }
+}
+
+// ── Become a Teacher card ─────────────────────────────────────────────────────
+
+class _BecomeTeacherCard extends StatelessWidget {
+  const _BecomeTeacherCard({required this.onTap});
+
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 16, bottom: 8),
+      child: Card(
+        color: scheme.secondaryContainer,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.school_outlined,
+                  size: 36,
+                  color: scheme.onSecondaryContainer,
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'أريد أن أصبح محفظًا',
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              color: scheme.onSecondaryContainer,
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'انضم إلى نخبة المعلمين المعتمدين على تلاوة',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: scheme.onSecondaryContainer.withValues(
+                            alpha: 0.8,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  size: 16,
+                  color: scheme.onSecondaryContainer,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

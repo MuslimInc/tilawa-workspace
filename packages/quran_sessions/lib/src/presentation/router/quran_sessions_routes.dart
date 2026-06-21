@@ -9,4 +9,9 @@ abstract final class QuranSessionsRoutes {
   static const booking = '/sessions/teachers/:teacherId/book';
   static const mySessions = '/sessions/my';
   static const teacherDashboard = '/sessions/dashboard';
+  static const profileCompletion = '/sessions/profile/complete';
+
+  // ── Teacher application flow ────────────────────────────────────────────────
+  static const teacherApply = '/sessions/teacher/apply';
+  static const teacherApplicationStatus = '/sessions/teacher/status';
 }

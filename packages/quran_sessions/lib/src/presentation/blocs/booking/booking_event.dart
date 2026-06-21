@@ -10,20 +10,40 @@ sealed class BookingEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Screen mounted — load available slots for the teacher.
+/// Screen mounted — validate eligibility then load available slots.
 final class BookingScreenOpened extends BookingEvent {
   const BookingScreenOpened({
     required this.teacherId,
+    required this.studentId,
     required this.from,
     required this.to,
   });
 
   final String teacherId;
+  final String studentId;
   final DateTime from;
   final DateTime to;
 
   @override
-  List<Object?> get props => [teacherId, from, to];
+  List<Object?> get props => [teacherId, studentId, from, to];
+}
+
+/// Re-run eligibility check after the student completes their profile.
+final class BookingEligibilityRetried extends BookingEvent {
+  const BookingEligibilityRetried({
+    required this.teacherId,
+    required this.studentId,
+    required this.from,
+    required this.to,
+  });
+
+  final String teacherId;
+  final String studentId;
+  final DateTime from;
+  final DateTime to;
+
+  @override
+  List<Object?> get props => [teacherId, studentId, from, to];
 }
 
 /// User taps a time slot in the picker.

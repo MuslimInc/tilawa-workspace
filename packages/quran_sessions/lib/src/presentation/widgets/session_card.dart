@@ -107,12 +107,32 @@ class _StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (label, bg, fg) = switch (status) {
-      QuranSessionStatus.scheduled => ('مجدول', scheme.primaryContainer, scheme.onPrimaryContainer),
-      QuranSessionStatus.inProgress => ('جارٍ الآن', scheme.tertiaryContainer, scheme.onTertiaryContainer),
-      QuranSessionStatus.completed => ('مكتمل', scheme.secondaryContainer, scheme.onSecondaryContainer),
+      QuranSessionStatus.scheduled => (
+        'مجدول',
+        scheme.primaryContainer,
+        scheme.onPrimaryContainer,
+      ),
+      QuranSessionStatus.inProgress => (
+        'جارٍ الآن',
+        scheme.tertiaryContainer,
+        scheme.onTertiaryContainer,
+      ),
+      QuranSessionStatus.completed => (
+        'مكتمل',
+        scheme.secondaryContainer,
+        scheme.onSecondaryContainer,
+      ),
       QuranSessionStatus.cancelledByStudent ||
-      QuranSessionStatus.cancelledByTeacher => ('ملغى', scheme.errorContainer, scheme.onErrorContainer),
-      QuranSessionStatus.noShow => ('غائب', scheme.errorContainer, scheme.onErrorContainer),
+      QuranSessionStatus.cancelledByTeacher => (
+        'ملغى',
+        scheme.errorContainer,
+        scheme.onErrorContainer,
+      ),
+      QuranSessionStatus.noShow => (
+        'غائب',
+        scheme.errorContainer,
+        scheme.onErrorContainer,
+      ),
     };
 
     return Container(

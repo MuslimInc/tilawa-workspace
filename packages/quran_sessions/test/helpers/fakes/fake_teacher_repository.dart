@@ -1,6 +1,7 @@
 import 'package:dartz_plus/dartz_plus.dart';
 
 import '../../../lib/src/domain/entities/quran_teacher.dart';
+import '../../../lib/src/domain/entities/session_price.dart';
 import '../../../lib/src/domain/entities/session_review.dart';
 import '../../../lib/src/domain/entities/teacher_availability.dart';
 import '../../../lib/src/domain/failures/quran_sessions_failure.dart';
@@ -8,11 +9,15 @@ import '../../../lib/src/domain/repositories/teacher_repository.dart';
 
 /// In-memory fake for [TeacherRepository].
 /// Seed [teachers], [availability], and [reviews] before each test.
+/// Set [priceToReturn] to override what [resolveTeacherPrice] returns
+/// (default: returns the teacher's own [price] field, or null if not found).
 class FakeTeacherRepository implements TeacherRepository {
   List<QuranTeacher> teachers = [];
   List<TeacherAvailability> availability = [];
   List<SessionReview> reviews = [];
   QuranSessionsFailure? failWith;
+  // null means "derive from teacher.price"; set explicitly to test failures.
+  SessionPrice? Function(String teacherId)? priceResolver;
 
   @override
   Future<Either<QuranSessionsFailure, TeacherPage>> getTeachers({
@@ -67,6 +72,18 @@ class FakeTeacherRepository implements TeacherRepository {
   }) async {
     if (failWith != null) return Left(failWith!);
     return Right(reviews.where((r) => r.teacherId == teacherId).toList());
+  }
+
+  @override
+  Future<Either<QuranSessionsFailure, SessionPrice?>> resolveTeacherPrice(
+    String teacherId, {
+    required String countryCode,
+    required String cityId,
+  }) async {
+    if (failWith != null) return Left(failWith!);
+    if (priceResolver != null) return Right(priceResolver!(teacherId));
+    final match = teachers.where((t) => t.id == teacherId).firstOrNull;
+    return Right(match?.price);
   }
 }
 

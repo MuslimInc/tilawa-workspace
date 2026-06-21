@@ -101,6 +101,134 @@ final class BookingConflictFailure extends QuranSessionsFailure {
   const BookingConflictFailure();
 }
 
+// ── Profile / eligibility ─────────────────────────────────────────────────────
+
+/// The student's profile is missing required fields before booking can proceed.
+/// [missingFields] lists the machine-readable field names (e.g. 'gender').
+final class ProfileIncompleteFailure extends QuranSessionsFailure {
+  const ProfileIncompleteFailure({required this.missingFields});
+
+  final List<String> missingFields;
+
+  @override
+  List<Object?> get props => [missingFields];
+}
+
+/// The teacher's gender policy does not allow a student of [studentGender]
+/// to book with a teacher of [teacherGender].
+final class GenderNotAllowedFailure extends QuranSessionsFailure {
+  const GenderNotAllowedFailure({
+    required this.teacherGender,
+    required this.studentGender,
+  });
+
+  /// String representation of the teacher's gender (e.g. 'male' / 'female').
+  final String teacherGender;
+
+  /// String representation of the student's gender.
+  final String studentGender;
+
+  @override
+  List<Object?> get props => [teacherGender, studentGender];
+}
+
+/// The student's age group is not permitted by the teacher's eligibility policy.
+final class AgeNotAllowedFailure extends QuranSessionsFailure {
+  const AgeNotAllowedFailure({required this.studentAgeGroup});
+
+  /// 'child' or 'adult'
+  final String studentAgeGroup;
+
+  @override
+  List<Object?> get props => [studentAgeGroup];
+}
+
+/// The teacher has not been verified and cannot accept bookings.
+final class TeacherNotVerifiedFailure extends QuranSessionsFailure {
+  const TeacherNotVerifiedFailure({required this.teacherId});
+
+  final String teacherId;
+
+  @override
+  List<Object?> get props => [teacherId];
+}
+
+/// The account is suspended or blocked and cannot perform the requested action.
+final class AccountBlockedFailure extends QuranSessionsFailure {
+  const AccountBlockedFailure({
+    required this.accountId,
+    this.reason,
+  });
+
+  final String accountId;
+
+  /// Machine-readable reason string (mirrors [AccountRestrictionReason.name]).
+  final String? reason;
+
+  @override
+  List<Object?> get props => [accountId, reason];
+}
+
+/// A session involving a child student requires guardian approval before
+/// the booking can be confirmed.
+final class GuardianApprovalRequiredFailure extends QuranSessionsFailure {
+  const GuardianApprovalRequiredFailure({required this.studentId});
+
+  final String studentId;
+
+  @override
+  List<Object?> get props => [studentId];
+}
+
+/// The student's country/city market is not open for bookings.
+///
+/// Emitted when [MarketConfig.isEnabled] or [CityConfig.isEnabled] is false.
+final class MarketNotEnabledFailure extends QuranSessionsFailure {
+  const MarketNotEnabledFailure({
+    required this.countryCode,
+    this.cityId,
+  });
+
+  final String countryCode;
+  final String? cityId;
+
+  @override
+  List<Object?> get props => [countryCode, cityId];
+}
+
+/// The selected teacher does not have pricing configured for the student's
+/// market (country/city). The student must choose a different teacher.
+final class TeacherNotInMarketFailure extends QuranSessionsFailure {
+  const TeacherNotInMarketFailure({
+    required this.teacherId,
+    required this.countryCode,
+  });
+
+  final String teacherId;
+  final String countryCode;
+
+  @override
+  List<Object?> get props => [teacherId, countryCode];
+}
+
+/// A booking was rejected because it violates a platform safety or
+/// scheduling policy.
+final class PolicyViolationFailure extends QuranSessionsFailure {
+  const PolicyViolationFailure({
+    required this.policyName,
+    required this.detail,
+  });
+
+  /// Machine-readable policy identifier (e.g. 'gender_restriction').
+  final String policyName;
+
+  /// Machine-readable detail code (e.g. 'male_teacher_female_student').
+  final String detail;
+
+  @override
+  List<Object?> get props => [policyName, detail];
+}
+
 // ── Storage ───────────────────────────────────────────────────────────────────
 
 final class CacheFailure extends QuranSessionsFailure {
@@ -125,6 +253,97 @@ final class PaymentCancelledFailure extends QuranSessionsFailure {
 /// Mapped from [GatewayFailure] at the BLoC boundary.
 final class PaymentProviderFailure extends QuranSessionsFailure {
   const PaymentProviderFailure();
+}
+
+// ── Teacher application ───────────────────────────────────────────────────────
+
+/// No [TeacherApplication] exists for the given user.
+/// Callers should treat this as [TeacherApplicationStatus.none].
+final class TeacherApplicationNotFoundFailure extends QuranSessionsFailure {
+  const TeacherApplicationNotFoundFailure();
+}
+
+/// The user already has a pending or approved application and cannot start
+/// a new one.
+final class TeacherApplicationAlreadyPendingFailure
+    extends QuranSessionsFailure {
+  const TeacherApplicationAlreadyPendingFailure();
+}
+
+/// The application was rejected and cannot be resubmitted in its current state.
+final class TeacherApplicationRejectedFailure extends QuranSessionsFailure {
+  const TeacherApplicationRejectedFailure();
+}
+
+/// The teacher's application is suspended — no bookings can be accepted.
+final class TeacherApplicationSuspendedFailure extends QuranSessionsFailure {
+  const TeacherApplicationSuspendedFailure();
+}
+
+/// The teacher's application has been permanently revoked.
+final class TeacherApplicationRevokedFailure extends QuranSessionsFailure {
+  const TeacherApplicationRevokedFailure();
+}
+
+/// A phone number is required before a teacher application can be submitted.
+final class TeacherPhoneNumberRequiredFailure extends QuranSessionsFailure {
+  const TeacherPhoneNumberRequiredFailure();
+}
+
+/// The provided phone number does not conform to E.164 format.
+final class InvalidTeacherPhoneNumberFailure extends QuranSessionsFailure {
+  const InvalidTeacherPhoneNumberFailure();
+}
+
+/// The provided phone number is valid E.164 but does not belong to the
+/// country the applicant selected (e.g. an Egyptian number with UAE selected).
+final class PhoneCountryMismatchFailure extends QuranSessionsFailure {
+  const PhoneCountryMismatchFailure();
+}
+
+/// The phone number is syntactically plausible but violates the rules for
+/// the selected country (wrong prefix, wrong length, or mismatched dial code).
+final class InvalidPhoneForSelectedCountryFailure extends QuranSessionsFailure {
+  const InvalidPhoneForSelectedCountryFailure();
+}
+
+/// The application is missing required fields and cannot advance to pending.
+final class TeacherApplicationIncompleteFailure extends QuranSessionsFailure {
+  const TeacherApplicationIncompleteFailure({required this.reason});
+
+  final String reason;
+
+  @override
+  List<Object?> get props => [reason];
+}
+
+/// A re-application was attempted before the cooldown period expired.
+/// [cooldownEndsAt] indicates when re-application becomes available.
+final class ReapplicationTooSoonFailure extends QuranSessionsFailure {
+  const ReapplicationTooSoonFailure({required this.cooldownEndsAt});
+
+  final DateTime cooldownEndsAt;
+
+  @override
+  List<Object?> get props => [cooldownEndsAt];
+}
+
+// ── Teacher profile ───────────────────────────────────────────────────────────
+
+/// No approved [TeacherProfile] exists for the given user.
+/// The teacher's application may still be pending or rejected.
+final class TeacherProfileNotApprovedFailure extends QuranSessionsFailure {
+  const TeacherProfileNotApprovedFailure();
+}
+
+/// The [TeacherProfile] exists but [TeacherProfile.isActive] is false.
+final class TeacherProfileNotActiveFailure extends QuranSessionsFailure {
+  const TeacherProfileNotActiveFailure({required this.profileId});
+
+  final String profileId;
+
+  @override
+  List<Object?> get props => [profileId];
 }
 
 // ── Catch-all ─────────────────────────────────────────────────────────────────

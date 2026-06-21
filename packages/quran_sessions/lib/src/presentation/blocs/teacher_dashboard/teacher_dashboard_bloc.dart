@@ -22,6 +22,7 @@ class TeacherDashboardBloc
     );
     on<AvailabilityUpdated>(_onAvailabilityUpdated, transformer: sequential());
     on<AvailabilitySlotAdded>(_onSlotAdded, transformer: sequential());
+    on<AvailabilitySlotEdited>(_onSlotEdited, transformer: sequential());
     on<AvailabilitySlotRemoved>(_onSlotRemoved, transformer: sequential());
   }
 
@@ -131,6 +132,55 @@ class TeacherDashboardBloc
           clearSlotFailure: true,
         ),
       ),
+    );
+  }
+
+  Future<void> _onSlotEdited(
+    AvailabilitySlotEdited event,
+    Emitter<TeacherDashboardState> emit,
+  ) async {
+    final current = state;
+    if (current is! TeacherDashboardSuccess) return;
+
+    emit(
+      current.copyWith(isUpdatingAvailability: true, clearSlotFailure: true),
+    );
+
+    // Remove the old slot then publish the replacement.
+    final removeResult = await _availabilityProvider.withdrawSlot(
+      event.original.slotId,
+    );
+    if (removeResult.isLeft) {
+      removeResult.fold(
+        (f) => emit(
+          current.copyWith(isUpdatingAvailability: false, slotFailure: f),
+        ),
+        (_) {},
+      );
+      return;
+    }
+
+    final addResult = await _availabilityProvider.publishSlot(event.updated);
+
+    addResult.fold(
+      (failure) => emit(
+        current.copyWith(
+          isUpdatingAvailability: false,
+          slotFailure: failure,
+        ),
+      ),
+      (_) {
+        final updated = current.availability.map((s) {
+          return s.slotId == event.original.slotId ? event.updated : s;
+        }).toList();
+        emit(
+          current.copyWith(
+            availability: updated,
+            isUpdatingAvailability: false,
+            clearSlotFailure: true,
+          ),
+        );
+      },
     );
   }
 

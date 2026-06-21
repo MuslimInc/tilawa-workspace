@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../domain/entities/quran_teacher.dart';
 import '../../domain/entities/session_pricing_type.dart';
+import '../../utils/price_formatter.dart';
 import '../../utils/specialization_labels.dart';
 import 'teacher_initials_avatar.dart';
 
@@ -103,21 +104,16 @@ class _PriceChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String label;
-    final Color bg;
-    final Color fg;
+    final priceLabel = PriceFormatter.formatOrFree(
+      pricingType: teacher.pricingType,
+      price: teacher.price,
+    );
+    if (priceLabel.isEmpty) return const SizedBox.shrink();
 
-    if (teacher.pricingType == SessionPricingType.free) {
-      label = 'مجاني';
-      bg = scheme.secondaryContainer;
-      fg = scheme.onSecondaryContainer;
-    } else if (teacher.pricePerSessionUsd != null) {
-      label = '\$${teacher.pricePerSessionUsd!.toStringAsFixed(0)}';
-      bg = scheme.primaryContainer;
-      fg = scheme.onPrimaryContainer;
-    } else {
-      return const SizedBox.shrink();
-    }
+    final isFree = teacher.pricingType == SessionPricingType.free;
+    final label = priceLabel;
+    final bg = isFree ? scheme.secondaryContainer : scheme.primaryContainer;
+    final fg = isFree ? scheme.onSecondaryContainer : scheme.onPrimaryContainer;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),

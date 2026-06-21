@@ -5,6 +5,14 @@ import 'package:quran_sessions/quran_sessions.dart';
 /// All fake repositories share this instance so that a booking created in
 /// [FakeMvpBookingRepository] is immediately visible in
 /// [FakeMvpSessionRepository].
+///
+/// Teacher pricing is stored per-market (country/city) rather than as a
+/// single hardcoded USD amount. This mirrors the production Firestore shape:
+///   `teachers/{id}/pricing/{marketId}`
+/// where `marketId` is `{countryCode}_{cityId}`.
+///
+/// EGP is used here because the only enabled MVP market is Egypt.
+/// It is NOT a global default — other markets will have their own currencies.
 class QuranSessionsMvpStore {
   QuranSessionsMvpStore._();
   static final QuranSessionsMvpStore instance = QuranSessionsMvpStore._();
@@ -14,7 +22,147 @@ class QuranSessionsMvpStore {
   final List<QuranBooking> bookings = [];
   final List<QuranSession> sessions = [];
 
+  // ── Teacher application & profile stores ──────────────────────────────────
+  // Keyed by userId. A TeacherProfile is created only after approval.
+  final Map<String, TeacherApplication> teacherApplications = {};
+  final Map<String, TeacherProfile> teacherProfiles = {};
+
+  // ── User profiles ──────────────────────────────────────────────────────────
+  // student_mvp starts with NO fields to exercise the full profile-completion
+  // gate (gender, DOB, country, city all required before booking).
+
+  final Map<String, UserProfile> profiles = _buildProfiles();
+
+  static Map<String, UserProfile> _buildProfiles() => {
+    'student_mvp': const UserProfile(
+      userId: 'student_mvp',
+      role: UserRole.student,
+      accountStatus: AccountStatus.active,
+      displayName: 'Tilawa User',
+      // No gender / DOB / country / city → profile gate fires on first entry.
+    ),
+    // Teachers are UserRole.student at the UserProfile level.
+    // Their teacher capability is represented by an approved TeacherProfile.
+    'teacher_1': const UserProfile(
+      userId: 'teacher_1',
+      role: UserRole.student,
+      accountStatus: AccountStatus.active,
+      displayName: 'الشيخ عبدالله الأحمدي',
+      gender: UserGender.male,
+      countryCode: 'EG',
+      cityId: 'cairo',
+    ),
+    'teacher_2': const UserProfile(
+      userId: 'teacher_2',
+      role: UserRole.student,
+      accountStatus: AccountStatus.active,
+      displayName: 'أ. فاطمة النووي',
+      gender: UserGender.female,
+      countryCode: 'EG',
+      cityId: 'cairo',
+    ),
+    'teacher_3': const UserProfile(
+      userId: 'teacher_3',
+      role: UserRole.student,
+      accountStatus: AccountStatus.active,
+      displayName: 'الشيخ ماهر الزياد',
+      gender: UserGender.male,
+      countryCode: 'EG',
+      cityId: 'cairo',
+    ),
+  };
+
+  // ── Safety & eligibility policies ─────────────────────────────────────────
+  // Global: both genders allowed; child threshold = 14.
+
+  QuranSessionSafetyPolicy globalSafetyPolicy =
+      const QuranSessionSafetyPolicy();
+
+  // Per-teacher eligibility:
+  //   teacher_1 (male) → accepts all genders
+  //   teacher_2 (female) → females only (strict)
+  //   teacher_3 (male) → accepts all genders, but not children
+  final Map<String, TeacherEligibilityPolicy> teacherEligibilityPolicies = {
+    'teacher_1': const TeacherEligibilityPolicy(
+      allowedStudentGender: TeacherAllowedStudentGender.both,
+      canTeachChildren: true,
+    ),
+    'teacher_2': const TeacherEligibilityPolicy(
+      allowedStudentGender: TeacherAllowedStudentGender.femaleOnly,
+      canTeachChildren: true,
+    ),
+    'teacher_3': const TeacherEligibilityPolicy(
+      allowedStudentGender: TeacherAllowedStudentGender.both,
+      canTeachChildren: false,
+    ),
+  };
+
+  // ── Per-market teacher pricing ─────────────────────────────────────────────
+  // Key: teacherId → marketId ('EG_cairo') → SessionPrice.
+  // teacher_2 is free → no entry (pricingType governs, not a price amount).
+
+  static const _egyptCairo = 'EG_cairo';
+  static const _egyptAlex = 'EG_alexandria';
+  static const _egyptGiza = 'EG_giza';
+
+  final Map<String, Map<String, SessionPrice>> teacherMarketPricing = {
+    'teacher_1': {
+      _egyptCairo: const SessionPrice(
+        amount: 600,
+        currencyCode: 'EGP',
+        countryCode: 'EG',
+        cityId: 'cairo',
+      ),
+      _egyptAlex: const SessionPrice(
+        amount: 500,
+        currencyCode: 'EGP',
+        countryCode: 'EG',
+        cityId: 'alexandria',
+      ),
+      _egyptGiza: const SessionPrice(
+        amount: 600,
+        currencyCode: 'EGP',
+        countryCode: 'EG',
+        cityId: 'giza',
+      ),
+    },
+    'teacher_3': {
+      _egyptCairo: const SessionPrice(
+        amount: 800,
+        currencyCode: 'EGP',
+        countryCode: 'EG',
+        cityId: 'cairo',
+      ),
+      _egyptAlex: const SessionPrice(
+        amount: 700,
+        currencyCode: 'EGP',
+        countryCode: 'EG',
+        cityId: 'alexandria',
+      ),
+      _egyptGiza: const SessionPrice(
+        amount: 800,
+        currencyCode: 'EGP',
+        countryCode: 'EG',
+        cityId: 'giza',
+      ),
+    },
+  };
+
+  /// Resolves the [SessionPrice] for [teacherId] in the given market.
+  /// Returns null if the teacher is free or has no pricing for that market.
+  SessionPrice? resolvePrice(
+    String teacherId,
+    String countryCode,
+    String cityId,
+  ) {
+    final marketId = '${countryCode}_$cityId';
+    return teacherMarketPricing[teacherId]?[marketId];
+  }
+
   // ── Fake teacher data ──────────────────────────────────────────────────────
+  // Prices here use the Egypt/Cairo market as the default display.
+  // In production, teachers are loaded with market context so the price
+  // is resolved per student market before reaching the UI.
 
   static List<QuranTeacher> _buildTeachers() => [
     const QuranTeacher(
@@ -25,10 +173,16 @@ class QuranSessionsMvpStore {
           'والقراءة الصحيحة. خبرة تزيد على خمس عشرة سنة في تدريس القرآن '
           'لكافة الأعمار عبر الإنترنت ووجهاً لوجه.',
       avatarUrl: '',
+      gender: UserGender.male,
       verificationStatus: TeacherVerificationStatus.verified,
       supportedCallTypes: [SessionCallType.externalMeeting],
       pricingType: SessionPricingType.fixedPerSession,
-      pricePerSessionUsd: 15,
+      price: SessionPrice(
+        amount: 600,
+        currencyCode: 'EGP',
+        countryCode: 'EG',
+        cityId: 'cairo',
+      ),
       specializations: ['tajweed', 'recitation', 'review'],
       languages: ['ar', 'en'],
       averageRating: 4.9,
@@ -43,10 +197,11 @@ class QuranSessionsMvpStore {
           'بالسند المتصل بالقراءة الحفص. أسلوبها محبب ومشجع يجعل الطفل '
           'يحب القرآن الكريم منذ الصغر.',
       avatarUrl: '',
+      gender: UserGender.female,
       verificationStatus: TeacherVerificationStatus.verified,
       supportedCallTypes: [SessionCallType.externalMeeting],
       pricingType: SessionPricingType.free,
-      pricePerSessionUsd: null,
+      price: null, // free teacher — no market price
       specializations: ['children', 'hifz'],
       languages: ['ar'],
       averageRating: 4.8,
@@ -61,10 +216,16 @@ class QuranSessionsMvpStore {
           'التجويد. يدرّس الحفظ والمراجعة وتصحيح التلاوة بأسلوب منهجي '
           'مبني على التكرار والتثبيت. متاح للطلاب الناطقين بالعربية والأردية.',
       avatarUrl: '',
+      gender: UserGender.male,
       verificationStatus: TeacherVerificationStatus.verified,
       supportedCallTypes: [SessionCallType.externalMeeting],
       pricingType: SessionPricingType.fixedPerSession,
-      pricePerSessionUsd: 20,
+      price: SessionPrice(
+        amount: 800,
+        currencyCode: 'EGP',
+        countryCode: 'EG',
+        cityId: 'cairo',
+      ),
       specializations: ['hifz', 'review', 'recitation', 'tajweed'],
       languages: ['ar', 'ur'],
       averageRating: 4.7,
@@ -74,7 +235,6 @@ class QuranSessionsMvpStore {
   ];
 
   // ── Fake availability slots ────────────────────────────────────────────────
-  // Each teacher has a slightly different schedule to feel realistic.
 
   static List<TeacherAvailability> _buildSlots() {
     final slots = <TeacherAvailability>[];
@@ -97,8 +257,7 @@ class QuranSessionsMvpStore {
       // Teacher 2: mornings only (family schedule)
       _addSlot(slots, 'teacher_2', day, 8, 0, dayOffset);
       _addSlot(slots, 'teacher_2', day, 10, 0, dayOffset);
-      if (day.weekday == DateTime.saturday ||
-          day.weekday == DateTime.sunday) {
+      if (day.weekday == DateTime.saturday || day.weekday == DateTime.sunday) {
         _addSlot(slots, 'teacher_2', day, 14, 0, dayOffset);
       }
 

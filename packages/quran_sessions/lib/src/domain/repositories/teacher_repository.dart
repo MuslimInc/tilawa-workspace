@@ -1,6 +1,7 @@
 import 'package:dartz_plus/dartz_plus.dart';
 
 import '../entities/quran_teacher.dart';
+import '../entities/session_price.dart';
 import '../entities/session_review.dart';
 import '../entities/teacher_availability.dart';
 import '../failures/quran_sessions_failure.dart';
@@ -33,6 +34,17 @@ abstract interface class TeacherRepository {
   Future<Either<QuranSessionsFailure, List<SessionReview>>> getTeacherReviews(
     String teacherId, {
     String? cursor,
+  });
+
+  /// Returns the market-resolved [SessionPrice] for [teacherId] in the given
+  /// country/city market, or [Right(null)] when the teacher is free or has no
+  /// pricing configured for that market.
+  ///
+  /// In production this reads `teachers/{id}/pricing/{countryCode}_{cityId}`.
+  Future<Either<QuranSessionsFailure, SessionPrice?>> resolveTeacherPrice(
+    String teacherId, {
+    required String countryCode,
+    required String cityId,
   });
 }
 

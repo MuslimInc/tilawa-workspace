@@ -1,14 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
+
+// MVP: hard-coded until real auth integration lands.
+const _mvpStudentId = 'student_mvp';
 
 /// Home dashboard card linking to the "تعلم قراءة القرآن الآن" feature.
 ///
 /// Displays an experimental badge to signal MVP status to users.
+///
+/// Checks [UserProfile.isComplete] before navigating. Incomplete profiles are
+/// redirected to [QuranSessionsRoutes.profileCompletion] first; on success the
+/// user continues to [QuranSessionsRoutes.home].
 class HomeSessionsEntryCard extends StatelessWidget {
   const HomeSessionsEntryCard({super.key});
+
+  Future<void> _onTap(BuildContext context) async {
+    final result = await getIt<GetUserProfileUseCase>()(_mvpStudentId);
+    if (!context.mounted) return;
+
+    final profile = result.fold((_) => null, (p) => p);
+    if (profile != null && profile.isComplete) {
+      context.push(QuranSessionsRoutes.home);
+      return;
+    }
+
+    // Profile is missing or incomplete — gate before entering sessions.
+    final completed = await context.push<bool>(
+      QuranSessionsRoutes.profileCompletion,
+    );
+    if (!context.mounted) return;
+    if (completed == true) {
+      context.push(QuranSessionsRoutes.home);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +45,7 @@ class HomeSessionsEntryCard extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return TilawaCard(
-      onTap: () => context.push(QuranSessionsRoutes.home),
+      onTap: () => _onTap(context),
       child: Padding(
         padding: EdgeInsets.all(tokens.spaceMedium),
         child: Row(

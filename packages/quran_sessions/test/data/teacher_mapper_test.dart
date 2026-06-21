@@ -3,20 +3,27 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../lib/src/data/dtos/quran_teacher_dto.dart';
 import '../../lib/src/data/mappers/teacher_mapper.dart';
+import '../../lib/src/domain/entities/session_pricing_type.dart';
 import '../../lib/src/domain/entities/teacher_verification_status.dart';
 
 void main() {
   group('QuranTeacherDtoMapper', () {
-    test('maps verified teacher correctly', () {
+    test('maps verified teacher with market price correctly', () {
       final dto = QuranTeacherDto(
         id: 'teacher_1',
         displayName: 'Sheikh Ahmed',
         bio: 'Bio',
         avatarUrl: 'https://example.com/avatar.png',
+        gender: 'male',
         verificationStatus: 'verified',
         supportedCallTypes: ['external_meeting'],
         pricingType: 'fixed_per_session',
-        pricePerSessionUsd: 20.0,
+        marketPrice: const SessionPriceDto(
+          amount: 600,
+          currencyCode: 'EGP',
+          countryCode: 'EG',
+          cityId: 'cairo',
+        ),
         specializations: ['tajweed'],
         languages: ['ar'],
         averageRating: 4.9,
@@ -31,19 +38,23 @@ void main() {
         entity.verificationStatus,
       ).equals(TeacherVerificationStatus.verified);
       check(entity.isVerified).isTrue();
-      check(entity.pricePerSessionUsd).equals(20.0);
+      check(entity.price).isNotNull();
+      check(entity.price!.amount).equals(600);
+      check(entity.price!.currencyCode).equals('EGP');
+      check(entity.pricingType).equals(SessionPricingType.fixedPerSession);
     });
 
-    test('falls back to pending for unknown verification status', () {
+    test('maps free teacher with no market price', () {
       final dto = QuranTeacherDto(
         id: 't',
         displayName: 'X',
         bio: '',
         avatarUrl: '',
+        gender: 'male',
         verificationStatus: 'unknown_status',
         supportedCallTypes: [],
         pricingType: 'free',
-        pricePerSessionUsd: null,
+        marketPrice: null,
         specializations: [],
         languages: [],
         averageRating: 0,
@@ -51,9 +62,13 @@ void main() {
         totalSessionsCompleted: 0,
       );
 
+      final entity = dto.toDomain();
+
       check(
-        dto.toDomain().verificationStatus,
+        entity.verificationStatus,
       ).equals(TeacherVerificationStatus.pending);
+      check(entity.pricingType).equals(SessionPricingType.free);
+      check(entity.price).isNull();
     });
   });
 }
