@@ -1,18 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quran_sessions/core/l10n_extensions.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../failure_ui/quran_sessions_failure_ui.dart';
 import '../blocs/teacher_list/teacher_list_bloc.dart';
 import '../blocs/teacher_list/teacher_list_event.dart';
 import '../blocs/teacher_list/teacher_list_state.dart';
+import '../config/quran_sessions_feature_config.dart';
+import '../widgets/quran_sessions_student_empty_state.dart';
 import '../widgets/teacher_card.dart';
 
 class TeacherListScreen extends StatefulWidget {
-  const TeacherListScreen({super.key, this.onTeacherTapped});
+  const TeacherListScreen({
+    super.key,
+    required this.featureConfig,
+    this.onTeacherTapped,
+    this.onNotifyInterest,
+    this.onChangeCity,
+    this.onTeacherApplyEntry,
+    this.onEmptyStateSeen,
+  });
 
-  /// Called when the user taps a teacher card. The host app is responsible
-  /// for navigating to [TeacherProfileScreen] with the given [teacherId].
+  final QuranSessionsFeatureConfig featureConfig;
   final void Function(String teacherId)? onTeacherTapped;
+  final VoidCallback? onNotifyInterest;
+  final VoidCallback? onChangeCity;
+  final VoidCallback? onTeacherApplyEntry;
+  final VoidCallback? onEmptyStateSeen;
 
   @override
   State<TeacherListScreen> createState() => _TeacherListScreenState();
@@ -41,18 +56,38 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
     }
   }
 
+  void _onNotifyInterest() {
+    widget.onNotifyInterest?.call();
+    if (!mounted) return;
+    TilawaFeedback.showToast(
+      context,
+      message: context.quranSessionsL10n.notifyInterestSubmitted,
+      variant: TilawaFeedbackVariant.success,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Find a Teacher')),
+      appBar: AppBar(title: Text(l10n.teacherListTitle)),
       body: BlocBuilder<TeacherListBloc, TeacherListState>(
         builder: (context, state) => switch (state) {
           TeacherListInitial() || TeacherListLoading() => const Center(
             child: CircularProgressIndicator(),
           ),
-          TeacherListEmpty(:final activeSpecialization) => _EmptyView(
-            specialization: activeSpecialization,
-          ),
+          TeacherListEmpty(:final activeSpecialization) =>
+            activeSpecialization != null
+                ? _FilteredEmptyView(specialization: activeSpecialization)
+                : QuranSessionsStudentEmptyState(
+                    featureConfig: widget.featureConfig,
+                    showTeacherApplyEntry: true,
+                    onNotifyInterest: _onNotifyInterest,
+                    onChangeCity: widget.onChangeCity,
+                    onTeacherApplyEntry: widget.onTeacherApplyEntry,
+                    onEmptyStateSeen: widget.onEmptyStateSeen,
+                  ),
           TeacherListFailure(:final failure) => _ErrorView(
             message: failure.toLocalizedMessage(context),
             onRetry: _retry,
@@ -68,9 +103,11 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
                 itemCount: teachers.length + (isLoadingMore ? 1 : 0),
                 itemBuilder: (context, i) {
                   if (i == teachers.length) {
-                    return const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      child: Center(child: CircularProgressIndicator()),
+                    return Padding(
+                      padding: EdgeInsets.symmetric(
+                        vertical: context.tokens.spaceMedium,
+                      ),
+                      child: const Center(child: CircularProgressIndicator()),
                     );
                   }
                   return TeacherCard(
@@ -93,16 +130,21 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
   }
 }
 
-class _EmptyView extends StatelessWidget {
-  const _EmptyView({this.specialization});
-  final String? specialization;
+class _FilteredEmptyView extends StatelessWidget {
+  const _FilteredEmptyView({required this.specialization});
+
+  final String specialization;
 
   @override
   Widget build(BuildContext context) {
-    final label = specialization != null
-        ? 'No teachers found for "$specialization"'
-        : 'No teachers available right now';
-    return Center(child: Text(label));
+    final l10n = context.quranSessionsL10n;
+    return Center(
+      child: TilawaIllustratedState(
+        icon: Icons.search_off_outlined,
+        title: l10n.noTeachersForSpecialization(specialization),
+        semanticLabel: l10n.noTeachersForSpecialization(specialization),
+      ),
+    );
   }
 }
 
@@ -113,14 +155,16 @@ class _ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(message),
-          const SizedBox(height: 12),
-          ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
-        ],
+      child: TilawaIllustratedState(
+        icon: Icons.error_outline,
+        title: message,
+        primaryAction: TilawaButton(
+          text: l10n.retry,
+          onPressed: onRetry,
+        ),
       ),
     );
   }

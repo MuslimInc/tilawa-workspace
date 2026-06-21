@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:quran_sessions/core/l10n_extensions.dart';
+import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/quran_session.dart';
@@ -25,10 +27,12 @@ class SessionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final dateFmt = DateFormat('EEEE، d MMMM y', 'ar');
-    final timeFmt = DateFormat('h:mm a', 'ar');
+    final locale = Localizations.localeOf(context).languageCode;
+    final dateFmt = DateFormat('EEEE، d MMMM y', locale);
+    final timeFmt = DateFormat('h:mm a', locale);
     final localStart = session.startsAt.toLocal();
 
     return Card(
@@ -64,7 +68,11 @@ class SessionCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                _StatusBadge(status: session.status, scheme: scheme),
+                _StatusBadge(
+                  status: session.status,
+                  scheme: scheme,
+                  l10n: l10n,
+                ),
               ],
             ),
             if (onJoin != null || onCancel != null) ...[
@@ -78,13 +86,13 @@ class SessionCard extends StatelessWidget {
                         foregroundColor: scheme.error,
                       ),
                       onPressed: onCancel,
-                      child: const Text('إلغاء'),
+                      child: Text(l10n.cancel),
                     ),
                   if (onJoin != null) ...[
                     const SizedBox(width: 8),
                     FilledButton.tonal(
                       onPressed: onJoin,
-                      child: const Text('انضمام'),
+                      child: Text(l10n.joinSession),
                     ),
                   ],
                 ],
@@ -100,37 +108,42 @@ class SessionCard extends StatelessWidget {
 // ── Status badge ──────────────────────────────────────────────────────────────
 
 class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.status, required this.scheme});
+  const _StatusBadge({
+    required this.status,
+    required this.scheme,
+    required this.l10n,
+  });
 
   final QuranSessionStatus status;
   final ColorScheme scheme;
+  final QuranSessionsLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
     final (label, bg, fg) = switch (status) {
       QuranSessionStatus.scheduled => (
-        'مجدول',
+        l10n.sessionStatusScheduled,
         scheme.primaryContainer,
         scheme.onPrimaryContainer,
       ),
       QuranSessionStatus.inProgress => (
-        'جارٍ الآن',
+        l10n.sessionStatusInProgress,
         scheme.tertiaryContainer,
         scheme.onTertiaryContainer,
       ),
       QuranSessionStatus.completed => (
-        'مكتمل',
+        l10n.sessionStatusCompleted,
         scheme.secondaryContainer,
         scheme.onSecondaryContainer,
       ),
       QuranSessionStatus.cancelledByStudent ||
       QuranSessionStatus.cancelledByTeacher => (
-        'ملغى',
+        l10n.sessionStatusCancelled,
         scheme.errorContainer,
         scheme.onErrorContainer,
       ),
       QuranSessionStatus.noShow => (
-        'غائب',
+        l10n.sessionStatusNoShow,
         scheme.errorContainer,
         scheme.onErrorContainer,
       ),

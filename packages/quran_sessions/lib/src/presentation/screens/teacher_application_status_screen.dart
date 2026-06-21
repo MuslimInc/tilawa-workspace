@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:quran_sessions/core/l10n_extensions.dart';
+import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/teacher_application.dart';
@@ -44,8 +46,10 @@ class _TeacherApplicationStatusScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('حالة طلب التسجيل')),
+      appBar: AppBar(title: Text(l10n.applicationStatusTitle)),
       body: BlocConsumer<TeacherApplicationBloc, TeacherApplicationState>(
         listener: (context, state) {
           if (state is TeacherApplicationStatusLoaded &&
@@ -76,7 +80,7 @@ class _TeacherApplicationStatusScreenState
               application: application,
               isSimulatingApproval: isSimulatingApproval,
             ),
-          _ => const Center(child: Text('حالة غير معروفة')),
+          _ => Center(child: Text(l10n.unknownStatus)),
         },
       ),
     );
@@ -132,7 +136,8 @@ class _StatusCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final (icon, color, title, subtitle) = _content(status, scheme);
+    final l10n = context.quranSessionsL10n;
+    final (icon, color, title, subtitle) = _content(status, scheme, l10n);
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -169,41 +174,42 @@ class _StatusCard extends StatelessWidget {
   (IconData, Color, String, String) _content(
     TeacherApplicationStatus status,
     ColorScheme scheme,
+    QuranSessionsLocalizations l10n,
   ) => switch (status) {
     TeacherApplicationStatus.pending => (
       Icons.hourglass_top_rounded,
       scheme.primary,
-      'طلبك قيد المراجعة',
-      'يقوم فريق تلاوة بمراجعة طلبك. سنتواصل معك قريبًا.',
+      l10n.applicationStatusPendingTitle,
+      l10n.applicationStatusPendingSubtitle,
     ),
     TeacherApplicationStatus.approved => (
       Icons.verified_rounded,
       Colors.green,
-      'تهانينا! تمت الموافقة',
-      'أصبحت محفظًا معتمدًا على منصة تلاوة.',
+      l10n.applicationStatusApprovedTitle,
+      l10n.applicationStatusApprovedSubtitle,
     ),
     TeacherApplicationStatus.rejected => (
       Icons.cancel_outlined,
       scheme.error,
-      'لم تتم الموافقة على الطلب',
-      'يمكنك إعادة التقديم بعد مراجعة ملاحظات الفريق.',
+      l10n.applicationStatusRejectedTitle,
+      l10n.applicationStatusRejectedSubtitle,
     ),
     TeacherApplicationStatus.suspended => (
       Icons.pause_circle_outline,
       Colors.orange,
-      'الحساب موقوف مؤقتًا',
-      'تواصل مع الدعم للاستفسار عن سبب التوقف.',
+      l10n.applicationStatusSuspendedTitle,
+      l10n.applicationStatusSuspendedSubtitle,
     ),
     TeacherApplicationStatus.revoked => (
       Icons.block,
       scheme.error,
-      'تم إلغاء الحساب',
-      'لا يمكنك التقديم مجددًا. تواصل مع الدعم للمزيد.',
+      l10n.applicationStatusRevokedTitle,
+      l10n.applicationStatusRevokedSubtitle,
     ),
     _ => (
       Icons.help_outline,
       scheme.onSurfaceVariant,
-      'حالة غير معروفة',
+      l10n.unknownStatus,
       '',
     ),
   };
@@ -218,24 +224,26 @@ class _MetaSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateFmt = DateFormat('d MMMM y، h:mm a', 'ar');
+    final l10n = context.quranSessionsL10n;
+    final locale = Localizations.localeOf(context).languageCode;
+    final dateFmt = DateFormat('d MMMM y، h:mm a', locale);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (application.submittedAt != null)
           _MetaRow(
-            label: 'تاريخ الإرسال',
+            label: l10n.submittedAtLabel,
             value: dateFmt.format(application.submittedAt!),
           ),
         if (application.reviewedAt != null)
           _MetaRow(
-            label: 'تاريخ المراجعة',
+            label: l10n.reviewedAtLabel,
             value: dateFmt.format(application.reviewedAt!),
           ),
         if (application.rejectionReason != null)
           _MetaRow(
-            label: 'السبب',
+            label: l10n.reasonLabel,
             value: application.rejectionReason!,
           ),
       ],
@@ -251,13 +259,15 @@ class _MetaRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '$label: ',
+            l10n.labelWithColon(label),
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w600,
             ),
@@ -288,6 +298,7 @@ class _DebugApprovalBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
     final scheme = Theme.of(context).colorScheme;
 
     return Container(
@@ -305,7 +316,7 @@ class _DebugApprovalBanner extends StatelessWidget {
               const Icon(Icons.bug_report, color: Colors.amber, size: 20),
               const SizedBox(width: 8),
               Text(
-                'وضع التطوير',
+                l10n.debugModeTitle,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   color: Colors.amber.shade800,
                   fontWeight: FontWeight.w700,
@@ -315,8 +326,7 @@ class _DebugApprovalBanner extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'هذا الزر للاختبار الداخلي فقط ولا يظهر في نسخة الإنتاج. '
-            'يحاكي موافقة المشرف دون الحاجة إلى واجهة إدارة.',
+            l10n.debugApprovalDescription,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: scheme.onSurfaceVariant,
             ),
@@ -326,7 +336,7 @@ class _DebugApprovalBanner extends StatelessWidget {
               ? const Center(child: CircularProgressIndicator())
               : OutlinedButton.icon(
                   icon: const Icon(Icons.check_circle_outline),
-                  label: const Text('محاكاة موافقة المشرف'),
+                  label: Text(l10n.simulateAdminApproval),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.amber.shade800,
                     side: const BorderSide(color: Colors.amber),

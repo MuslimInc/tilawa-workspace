@@ -243,4 +243,438 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
 
   @override
   String get profileCityRequired => 'المدينة مطلوبة.';
+
+  @override
+  String get quranSessionsHomeTitle => 'تعلم قراءة القرآن';
+
+  @override
+  String get mySessionsTitle => 'جلساتي';
+
+  @override
+  String get noTeachersAvailableYet => 'لا يوجد معلمون متاحون بعد';
+
+  @override
+  String get seeAllTeachers => 'عرض جميع المعلمين ←';
+
+  @override
+  String get becomeTeacherCardTitle => 'أريد أن أصبح محفظًا';
+
+  @override
+  String get becomeTeacherCardSubtitle =>
+      'انضم إلى نخبة المعلمين المعتمدين على تلاوة';
+
+  @override
+  String get teacherListTitle => 'ابحث عن معلم';
+
+  @override
+  String noTeachersForSpecialization(String specialization) {
+    return 'لم يتم العثور على معلمين لـ \"$specialization\"';
+  }
+
+  @override
+  String get noTeachersAvailableRightNow => 'لا يوجد معلمون متاحون حالياً';
+
+  @override
+  String get bookSessionTitle => 'احجز جلسة';
+
+  @override
+  String get bookingConfirmed => 'تم تأكيد الحجز!';
+
+  @override
+  String get checkingEligibility => 'جارٍ التحقق من أهليتك…';
+
+  @override
+  String get confirmingBooking => 'جارٍ تأكيد الحجز…';
+
+  @override
+  String get selectSlot => 'اختر موعداً';
+
+  @override
+  String get sessionType => 'نوع الجلسة';
+
+  @override
+  String get confirmBooking => 'تأكيد الحجز';
+
+  @override
+  String get callTypeExternalMeeting => 'رابط خارجي';
+
+  @override
+  String get callTypeVoice => 'صوتي';
+
+  @override
+  String get callTypeVideo => 'مرئي';
+
+  @override
+  String get reviewSubmittedThanks => 'شكراً — تم إرسال تقييمك!';
+
+  @override
+  String upcomingSessionsSection(int count) {
+    return 'القادمة ($count)';
+  }
+
+  @override
+  String get noUpcomingSessions => 'لا توجد جلسات قادمة';
+
+  @override
+  String pastSessionsSection(int count) {
+    return 'السابقة ($count)';
+  }
+
+  @override
+  String get noPastSessions => 'لا توجد جلسات سابقة';
+
+  @override
+  String get cancelSessionDialogTitle => 'إلغاء الجلسة؟';
+
+  @override
+  String get cancelSessionDialogMessage => 'لا يمكن التراجع عن هذا الإجراء.';
+
+  @override
+  String get keepSession => 'بقاء';
+
+  @override
+  String get cancelSessionAction => 'إلغاء الجلسة';
+
+  @override
+  String get noSessionsYet => 'لا توجد جلسات بعد';
+
+  @override
+  String get bookFirstSessionHint =>
+      'احجز جلستك الأولى مع أحد معلمينا المعتمدين';
+
+  @override
+  String get teacherProfileTitle => 'ملف المعلم';
+
+  @override
+  String teacherRatingReviews(String rating, int count) {
+    return '$rating · $count تقييم';
+  }
+
+  @override
+  String get availableSlots => 'المواعيد المتاحة';
+
+  @override
+  String get reviewsSection => 'التقييمات';
+
+  @override
+  String get noReviewsYet => 'لا توجد تقييمات بعد';
+
+  @override
+  String get bookSessionAction => 'احجز جلسة';
+
+  @override
+  String get sessionStatusScheduled => 'مجدول';
+
+  @override
+  String get sessionStatusInProgress => 'جارٍ الآن';
+
+  @override
+  String get sessionStatusCompleted => 'مكتمل';
+
+  @override
+  String get sessionStatusCancelled => 'ملغى';
+
+  @override
+  String get sessionStatusNoShow => 'غائب';
+
+  @override
+  String get cancel => 'إلغاء';
+
+  @override
+  String get joinSession => 'انضمام';
+
+  @override
+  String get noSlotsAvailable => 'لا توجد مواعيد متاحة';
+
+  @override
+  String get noSlotsAvailableThisDay => 'لا توجد مواعيد متاحة في هذا اليوم';
+
+  @override
+  String get teacherDashboardTitle => 'لوحة المعلم';
+
+  @override
+  String get noSessionsOrSlotsYet => 'لا توجد جلسات أو مواعيد بعد';
+
+  @override
+  String get addAvailableSlot => 'أضف موعداً متاحاً';
+
+  @override
+  String openSlotsSection(int count) {
+    return 'المواعيد المفتوحة ($count)';
+  }
+
+  @override
+  String get addSlot => 'أضف موعداً';
+
+  @override
+  String get noOpenSlots => 'لا توجد مواعيد مفتوحة';
+
+  @override
+  String get slotBooked => 'محجوز';
+
+  @override
+  String get slotAvailable => 'متاح';
+
+  @override
+  String get editSlot => 'تعديل الموعد';
+
+  @override
+  String get deleteSlot => 'حذف الموعد';
+
+  @override
+  String get addNewSlot => 'إضافة موعد جديد';
+
+  @override
+  String get slotDate => 'تاريخ الموعد';
+
+  @override
+  String get slotTime => 'وقت الموعد';
+
+  @override
+  String get addSlotButton => 'إضافة الموعد';
+
+  @override
+  String get teacherApplicationTitle => 'طلب تسجيل كمحفظ';
+
+  @override
+  String get submittingApplication => 'جارٍ إرسال الطلب…';
+
+  @override
+  String get becomeTeacherOnTilawa => 'أصبح محفظًا على تلاوة';
+
+  @override
+  String get becomeTeacherApplicationIntro =>
+      'انضم إلى نخبة المعلمين المعتمدين وساعد الطلاب في رحلتهم مع القرآن الكريم.';
+
+  @override
+  String get startApplication => 'ابدأ طلب التسجيل';
+
+  @override
+  String get phoneNumber => 'رقم الهاتف';
+
+  @override
+  String get phoneNumberRequiredHint =>
+      'مطلوب للتحقق من هويتك. يظهر للإدارة فقط.';
+
+  @override
+  String get preferredContactMethod => 'طريقة التواصل المفضلة';
+
+  @override
+  String get teachingLanguages => 'لغات التدريس';
+
+  @override
+  String get teachingLanguagesSelect => 'لغات التدريس * (اختر واحدة أو أكثر)';
+
+  @override
+  String get specializations => 'التخصصات';
+
+  @override
+  String get specializationsSelect => 'التخصصات * (اختر واحداً أو أكثر)';
+
+  @override
+  String get bio => 'النبذة التعريفية';
+
+  @override
+  String get bioSectionTitle => 'نبذة تعريفية *';
+
+  @override
+  String get bioHint => 'أخبر الطلاب عن خبرتك ومؤهلاتك وأسلوبك في التدريس…';
+
+  @override
+  String get submitApplicationForReview => 'إرسال الطلب للمراجعة';
+
+  @override
+  String get countryCode => 'رمز الدولة';
+
+  @override
+  String get contactWhatsapp => 'واتساب';
+
+  @override
+  String get contactPhone => 'هاتف';
+
+  @override
+  String get contactEmail => 'بريد إلكتروني';
+
+  @override
+  String get teachingLanguage_ar => 'العربية';
+
+  @override
+  String get teachingLanguage_en => 'الإنجليزية';
+
+  @override
+  String get teachingLanguage_ur => 'الأردية';
+
+  @override
+  String get teachingLanguage_fr => 'الفرنسية';
+
+  @override
+  String get teachingLanguage_tr => 'التركية';
+
+  @override
+  String get teachingLanguage_ms => 'الملايوية';
+
+  @override
+  String get specialization_tajweed => 'تجويد';
+
+  @override
+  String get specialization_recitation => 'تلاوة';
+
+  @override
+  String get specialization_hifz => 'حفظ';
+
+  @override
+  String get specialization_review => 'مراجعة';
+
+  @override
+  String get specialization_children => 'تعليم الأطفال';
+
+  @override
+  String get specialization_qaida => 'القاعدة النورانية';
+
+  @override
+  String get specialization_tafsir => 'تفسير';
+
+  @override
+  String get specialization_arabic => 'اللغة العربية';
+
+  @override
+  String get applicationStatusTitle => 'حالة طلب التسجيل';
+
+  @override
+  String get unknownStatus => 'حالة غير معروفة';
+
+  @override
+  String get applicationStatusPendingTitle => 'طلبك قيد المراجعة';
+
+  @override
+  String get applicationStatusPendingSubtitle =>
+      'يقوم فريق تلاوة بمراجعة طلبك. سنتواصل معك قريبًا.';
+
+  @override
+  String get applicationStatusApprovedTitle => 'تهانينا! تمت الموافقة';
+
+  @override
+  String get applicationStatusApprovedSubtitle =>
+      'أصبحت محفظًا معتمدًا على منصة تلاوة.';
+
+  @override
+  String get applicationStatusRejectedTitle => 'لم تتم الموافقة على الطلب';
+
+  @override
+  String get applicationStatusRejectedSubtitle =>
+      'يمكنك إعادة التقديم بعد مراجعة ملاحظات الفريق.';
+
+  @override
+  String get applicationStatusSuspendedTitle => 'الحساب موقوف مؤقتًا';
+
+  @override
+  String get applicationStatusSuspendedSubtitle =>
+      'تواصل مع الدعم للاستفسار عن سبب التوقف.';
+
+  @override
+  String get applicationStatusRevokedTitle => 'تم إلغاء الحساب';
+
+  @override
+  String get applicationStatusRevokedSubtitle =>
+      'لا يمكنك التقديم مجددًا. تواصل مع الدعم للمزيد.';
+
+  @override
+  String get submittedAtLabel => 'تاريخ الإرسال';
+
+  @override
+  String get reviewedAtLabel => 'تاريخ المراجعة';
+
+  @override
+  String get reasonLabel => 'السبب';
+
+  @override
+  String labelWithColon(String label) {
+    return '$label:';
+  }
+
+  @override
+  String get debugModeTitle => 'وضع التطوير';
+
+  @override
+  String get debugApprovalDescription =>
+      'هذا الزر للاختبار الداخلي فقط ولا يظهر في نسخة الإنتاج. يحاكي موافقة المشرف دون الحاجة إلى واجهة إدارة.';
+
+  @override
+  String get simulateAdminApproval => 'محاكاة موافقة المشرف';
+
+  @override
+  String get priceFree => 'مجاني';
+
+  @override
+  String pricePerSession(String amount) {
+    return '$amount / جلسة';
+  }
+
+  @override
+  String get teachingOnMemuslimTitle => 'التدريس على MeMuslim';
+
+  @override
+  String get teachingOnMemuslimApply => 'التقديم كمحفظ';
+
+  @override
+  String get teachingOnMemuslimContinue => 'متابعة الطلب';
+
+  @override
+  String get teachingOnMemuslimViewStatus => 'عرض حالة الطلب';
+
+  @override
+  String get teachingOnMemuslimOpenDashboard => 'فتح لوحة المعلم';
+
+  @override
+  String get teachingOnMemuslimNotAppliedSubtitle =>
+      'قدّم طلبك للانضمام كمحفظ معتمد بعد مراجعة الفريق.';
+
+  @override
+  String get teachingOnMemuslimPendingSubtitle =>
+      'طلبك قيد المراجعة. سنتواصل معك قريبًا.';
+
+  @override
+  String get teachingOnMemuslimApprovedSubtitle =>
+      'تمت الموافقة على طلبك. يمكنك إدارة جلساتك من لوحة المعلم.';
+
+  @override
+  String get teachingOnMemuslimRejectedSubtitle =>
+      'لم تتم الموافقة على الطلب. يمكنك عرض التفاصيل وإعادة التقديم عند السماح.';
+
+  @override
+  String get teachingOnMemuslimSuspendedSubtitle =>
+      'حسابك كمعلم موقوف مؤقتًا. تواصل مع الدعم للاستفسار.';
+
+  @override
+  String get teachingOnMemuslimRevokedSubtitle =>
+      'تم إلغاء حسابك كمعلم. تواصل مع الدعم للمزيد.';
+
+  @override
+  String get sessionsEmptyTitle => 'لا يوجد معلمون في منطقتك بعد';
+
+  @override
+  String get sessionsEmptySubtitle =>
+      'نضيف محفظين معتمدين تدريجيًا. سجّل اهتمامك لنبلغك عند توفر معلم.';
+
+  @override
+  String get sessionsEmptyNotifyMe => 'أبلغني عند التوفر';
+
+  @override
+  String get sessionsEmptyChangeCity => 'تغيير المدينة';
+
+  @override
+  String get sessionsEmptyInterestedTeaching => 'هل ترغب في تدريس القرآن؟';
+
+  @override
+  String get sessionsEmptyJoinAsTeacher => 'انضم كمحفظ';
+
+  @override
+  String get notifyInterestSubmitted => 'سنبلغك عند توفر معلمين في منطقتك.';
+
+  @override
+  String get teacherApplicationDisabled => 'التقديم كمحفظ غير متاح حاليًا.';
+
+  @override
+  String get bookingDisabledNoSupply =>
+      'الحجز غير متاح حتى يتوفر معلمون معتمدون في منطقتك.';
 }

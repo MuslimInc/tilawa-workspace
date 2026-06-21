@@ -177,6 +177,9 @@ class FirestoreTeacherApplicationDataSource
         if (current.status == 'pending' || current.status == 'approved') {
           throw const ConflictException();
         }
+        if (current.status == 'draft') {
+          return current.toTransportDto();
+        }
         if (current.status == 'rejected') {
           final rejectedAt = current.reviewedAt;
           if (rejectedAt != null) {

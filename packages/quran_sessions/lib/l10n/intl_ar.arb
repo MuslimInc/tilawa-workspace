@@ -68,5 +68,191 @@
     "profileCompletionLoadingCities": "جاري تحميل المدن…",
     "profileGenderRequired": "الجنس مطلوب.",
     "profileCountryRequired": "الدولة مطلوبة.",
-    "profileCityRequired": "المدينة مطلوبة."
+    "profileCityRequired": "المدينة مطلوبة.",
+    "quranSessionsHomeTitle": "تعلم قراءة القرآن",
+    "mySessionsTitle": "جلساتي",
+    "noTeachersAvailableYet": "لا يوجد معلمون متاحون بعد",
+    "seeAllTeachers": "عرض جميع المعلمين ←",
+    "becomeTeacherCardTitle": "أريد أن أصبح محفظًا",
+    "becomeTeacherCardSubtitle": "انضم إلى نخبة المعلمين المعتمدين على تلاوة",
+    "teacherListTitle": "ابحث عن معلم",
+    "noTeachersForSpecialization": "لم يتم العثور على معلمين لـ \"{specialization}\"",
+  "@noTeachersForSpecialization": {
+    "placeholders": {
+      "specialization": {
+        "type": "String"
+      }
+    }
+  },
+    "noTeachersAvailableRightNow": "لا يوجد معلمون متاحون حالياً",
+    "bookSessionTitle": "احجز جلسة",
+    "bookingConfirmed": "تم تأكيد الحجز!",
+    "checkingEligibility": "جارٍ التحقق من أهليتك…",
+    "confirmingBooking": "جارٍ تأكيد الحجز…",
+    "selectSlot": "اختر موعداً",
+    "sessionType": "نوع الجلسة",
+    "confirmBooking": "تأكيد الحجز",
+    "callTypeExternalMeeting": "رابط خارجي",
+    "callTypeVoice": "صوتي",
+    "callTypeVideo": "مرئي",
+    "reviewSubmittedThanks": "شكراً — تم إرسال تقييمك!",
+    "upcomingSessionsSection": "القادمة ({count})",
+  "@upcomingSessionsSection": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+    "noUpcomingSessions": "لا توجد جلسات قادمة",
+    "pastSessionsSection": "السابقة ({count})",
+  "@pastSessionsSection": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+    "noPastSessions": "لا توجد جلسات سابقة",
+    "cancelSessionDialogTitle": "إلغاء الجلسة؟",
+    "cancelSessionDialogMessage": "لا يمكن التراجع عن هذا الإجراء.",
+    "keepSession": "بقاء",
+    "cancelSessionAction": "إلغاء الجلسة",
+    "noSessionsYet": "لا توجد جلسات بعد",
+    "bookFirstSessionHint": "احجز جلستك الأولى مع أحد معلمينا المعتمدين",
+    "teacherProfileTitle": "ملف المعلم",
+    "teacherRatingReviews": "{rating} · {count} تقييم",
+  "@teacherRatingReviews": {
+    "placeholders": {
+      "rating": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+    "availableSlots": "المواعيد المتاحة",
+    "reviewsSection": "التقييمات",
+    "noReviewsYet": "لا توجد تقييمات بعد",
+    "bookSessionAction": "احجز جلسة",
+    "sessionStatusScheduled": "مجدول",
+    "sessionStatusInProgress": "جارٍ الآن",
+    "sessionStatusCompleted": "مكتمل",
+    "sessionStatusCancelled": "ملغى",
+    "sessionStatusNoShow": "غائب",
+    "cancel": "إلغاء",
+    "joinSession": "انضمام",
+    "noSlotsAvailable": "لا توجد مواعيد متاحة",
+    "noSlotsAvailableThisDay": "لا توجد مواعيد متاحة في هذا اليوم",
+    "teacherDashboardTitle": "لوحة المعلم",
+    "noSessionsOrSlotsYet": "لا توجد جلسات أو مواعيد بعد",
+    "addAvailableSlot": "أضف موعداً متاحاً",
+    "openSlotsSection": "المواعيد المفتوحة ({count})",
+  "@openSlotsSection": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+    "addSlot": "أضف موعداً",
+    "noOpenSlots": "لا توجد مواعيد مفتوحة",
+    "slotBooked": "محجوز",
+    "slotAvailable": "متاح",
+    "editSlot": "تعديل الموعد",
+    "deleteSlot": "حذف الموعد",
+    "addNewSlot": "إضافة موعد جديد",
+    "slotDate": "تاريخ الموعد",
+    "slotTime": "وقت الموعد",
+    "addSlotButton": "إضافة الموعد",
+    "teacherApplicationTitle": "طلب تسجيل كمحفظ",
+    "submittingApplication": "جارٍ إرسال الطلب…",
+    "becomeTeacherOnTilawa": "أصبح محفظًا على تلاوة",
+    "becomeTeacherApplicationIntro": "انضم إلى نخبة المعلمين المعتمدين وساعد الطلاب في رحلتهم مع القرآن الكريم.",
+    "startApplication": "ابدأ طلب التسجيل",
+    "phoneNumber": "رقم الهاتف",
+    "phoneNumberRequiredHint": "مطلوب للتحقق من هويتك. يظهر للإدارة فقط.",
+    "preferredContactMethod": "طريقة التواصل المفضلة",
+    "teachingLanguages": "لغات التدريس",
+    "teachingLanguagesSelect": "لغات التدريس * (اختر واحدة أو أكثر)",
+    "specializations": "التخصصات",
+    "specializationsSelect": "التخصصات * (اختر واحداً أو أكثر)",
+    "bio": "النبذة التعريفية",
+    "bioSectionTitle": "نبذة تعريفية *",
+    "bioHint": "أخبر الطلاب عن خبرتك ومؤهلاتك وأسلوبك في التدريس…",
+    "submitApplicationForReview": "إرسال الطلب للمراجعة",
+    "countryCode": "رمز الدولة",
+    "contactWhatsapp": "واتساب",
+    "contactPhone": "هاتف",
+    "contactEmail": "بريد إلكتروني",
+    "teachingLanguage_ar": "العربية",
+    "teachingLanguage_en": "الإنجليزية",
+    "teachingLanguage_ur": "الأردية",
+    "teachingLanguage_fr": "الفرنسية",
+    "teachingLanguage_tr": "التركية",
+    "teachingLanguage_ms": "الملايوية",
+    "specialization_tajweed": "تجويد",
+    "specialization_recitation": "تلاوة",
+    "specialization_hifz": "حفظ",
+    "specialization_review": "مراجعة",
+    "specialization_children": "تعليم الأطفال",
+    "specialization_qaida": "القاعدة النورانية",
+    "specialization_tafsir": "تفسير",
+    "specialization_arabic": "اللغة العربية",
+    "applicationStatusTitle": "حالة طلب التسجيل",
+    "unknownStatus": "حالة غير معروفة",
+    "applicationStatusPendingTitle": "طلبك قيد المراجعة",
+    "applicationStatusPendingSubtitle": "يقوم فريق تلاوة بمراجعة طلبك. سنتواصل معك قريبًا.",
+    "applicationStatusApprovedTitle": "تهانينا! تمت الموافقة",
+    "applicationStatusApprovedSubtitle": "أصبحت محفظًا معتمدًا على منصة تلاوة.",
+    "applicationStatusRejectedTitle": "لم تتم الموافقة على الطلب",
+    "applicationStatusRejectedSubtitle": "يمكنك إعادة التقديم بعد مراجعة ملاحظات الفريق.",
+    "applicationStatusSuspendedTitle": "الحساب موقوف مؤقتًا",
+    "applicationStatusSuspendedSubtitle": "تواصل مع الدعم للاستفسار عن سبب التوقف.",
+    "applicationStatusRevokedTitle": "تم إلغاء الحساب",
+    "applicationStatusRevokedSubtitle": "لا يمكنك التقديم مجددًا. تواصل مع الدعم للمزيد.",
+    "submittedAtLabel": "تاريخ الإرسال",
+    "reviewedAtLabel": "تاريخ المراجعة",
+    "reasonLabel": "السبب",
+    "labelWithColon": "{label}:",
+  "@labelWithColon": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+    "debugModeTitle": "وضع التطوير",
+    "debugApprovalDescription": "هذا الزر للاختبار الداخلي فقط ولا يظهر في نسخة الإنتاج. يحاكي موافقة المشرف دون الحاجة إلى واجهة إدارة.",
+    "simulateAdminApproval": "محاكاة موافقة المشرف",
+    "priceFree": "مجاني",
+    "pricePerSession": "{amount} / جلسة",
+  "@pricePerSession": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+    "teachingOnMemuslimTitle": "التدريس على MeMuslim",
+    "teachingOnMemuslimApply": "التقديم كمحفظ",
+    "teachingOnMemuslimContinue": "متابعة الطلب",
+    "teachingOnMemuslimViewStatus": "عرض حالة الطلب",
+    "teachingOnMemuslimOpenDashboard": "فتح لوحة المعلم",
+    "teachingOnMemuslimNotAppliedSubtitle": "قدّم طلبك للانضمام كمحفظ معتمد بعد مراجعة الفريق.",
+    "teachingOnMemuslimPendingSubtitle": "طلبك قيد المراجعة. سنتواصل معك قريبًا.",
+    "teachingOnMemuslimApprovedSubtitle": "تمت الموافقة على طلبك. يمكنك إدارة جلساتك من لوحة المعلم.",
+    "teachingOnMemuslimRejectedSubtitle": "لم تتم الموافقة على الطلب. يمكنك عرض التفاصيل وإعادة التقديم عند السماح.",
+    "teachingOnMemuslimSuspendedSubtitle": "حسابك كمعلم موقوف مؤقتًا. تواصل مع الدعم للاستفسار.",
+    "teachingOnMemuslimRevokedSubtitle": "تم إلغاء حسابك كمعلم. تواصل مع الدعم للمزيد.",
+    "sessionsEmptyTitle": "لا يوجد معلمون في منطقتك بعد",
+    "sessionsEmptySubtitle": "نضيف محفظين معتمدين تدريجيًا. سجّل اهتمامك لنبلغك عند توفر معلم.",
+    "sessionsEmptyNotifyMe": "أبلغني عند التوفر",
+    "sessionsEmptyChangeCity": "تغيير المدينة",
+    "sessionsEmptyInterestedTeaching": "هل ترغب في تدريس القرآن؟",
+    "sessionsEmptyJoinAsTeacher": "انضم كمحفظ",
+    "notifyInterestSubmitted": "سنبلغك عند توفر معلمين في منطقتك.",
+    "teacherApplicationDisabled": "التقديم كمحفظ غير متاح حاليًا.",
+    "bookingDisabledNoSupply": "الحجز غير متاح حتى يتوفر معلمون معتمدون في منطقتك."
 }

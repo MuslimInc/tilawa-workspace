@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quran_sessions/core/l10n_extensions.dart';
 
 import '../../domain/entities/quran_teacher.dart';
 import '../../domain/entities/session_pricing_type.dart';
 import '../../utils/price_formatter.dart';
-import '../../utils/specialization_labels.dart';
 import '../failure_ui/quran_sessions_failure_ui.dart';
 import '../blocs/teacher_profile/teacher_profile_bloc.dart';
 import '../blocs/teacher_profile/teacher_profile_event.dart';
@@ -17,6 +17,7 @@ class TeacherProfileScreen extends StatefulWidget {
     super.key,
     required this.teacherId,
     this.onBookTapped,
+    this.bookingEnabled = true,
   });
 
   final String teacherId;
@@ -24,6 +25,9 @@ class TeacherProfileScreen extends StatefulWidget {
   /// Called when the user initiates a booking. The host app navigates to
   /// [BookingScreen] with [teacherId] and the optional pre-selected [slotId].
   final void Function(String teacherId, String? slotId)? onBookTapped;
+
+  /// When false, hides booking actions (marketplace booking not yet enabled).
+  final bool bookingEnabled;
 
   @override
   State<TeacherProfileScreen> createState() => _TeacherProfileScreenState();
@@ -47,8 +51,10 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('ملف المعلم')),
+      appBar: AppBar(title: Text(l10n.teacherProfileTitle)),
       body: BlocBuilder<TeacherProfileBloc, TeacherProfileState>(
         builder: (context, state) => switch (state) {
           TeacherProfileInitial() || TeacherProfileLoading() => const Center(
@@ -94,7 +100,10 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        '${teacher.averageRating.toStringAsFixed(1)} · ${teacher.totalReviews} تقييم',
+                        l10n.teacherRatingReviews(
+                          teacher.averageRating.toStringAsFixed(1),
+                          teacher.totalReviews,
+                        ),
                       ),
                     ],
                   ),
@@ -111,7 +120,7 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
                     runSpacing: 6,
                     children: teacher.specializations.map((code) {
                       return Chip(
-                        label: Text(SpecializationLabels.arabic(code)),
+                        label: Text(l10n.specializationLabel(code)),
                         padding: EdgeInsets.zero,
                         labelPadding: const EdgeInsets.symmetric(
                           horizontal: 8,
@@ -129,7 +138,7 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
                 Row(
                   children: [
                     Text(
-                      'المواعيد المتاحة',
+                      l10n.availableSlots,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     if (isLoadingAvailability) ...[
@@ -155,12 +164,12 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
 
                 // ── Reviews ──────────────────────────────────────────────
                 Text(
-                  'التقييمات',
+                  l10n.reviewsSection,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 8),
                 if (reviews.isEmpty)
-                  const Text('لا توجد تقييمات بعد')
+                  Text(l10n.noReviewsYet)
                 else
                   ...reviews.map(
                     (r) => ListTile(
@@ -176,15 +185,17 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
         },
       ),
       floatingActionButton:
-          BlocBuilder<TeacherProfileBloc, TeacherProfileState>(
-            builder: (context, state) => state is TeacherProfileSuccess
-                ? FloatingActionButton.extended(
-                    label: const Text('احجز جلسة'),
-                    icon: const Icon(Icons.calendar_today_outlined),
-                    onPressed: () => _onBookTapped(null),
-                  )
-                : const SizedBox.shrink(),
-          ),
+          widget.bookingEnabled && widget.onBookTapped != null
+              ? BlocBuilder<TeacherProfileBloc, TeacherProfileState>(
+                  builder: (context, state) => state is TeacherProfileSuccess
+                      ? FloatingActionButton.extended(
+                          label: Text(l10n.bookSessionAction),
+                          icon: const Icon(Icons.calendar_today_outlined),
+                          onPressed: () => _onBookTapped(null),
+                        )
+                      : const SizedBox.shrink(),
+                )
+              : null,
     );
   }
 
@@ -205,6 +216,7 @@ class _PricingRow extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final isFree = teacher.pricingType == SessionPricingType.free;
     final label = PriceFormatter.formatOrFree(
+      l10n: context.quranSessionsL10n,
       pricingType: teacher.pricingType,
       price: teacher.price,
     );

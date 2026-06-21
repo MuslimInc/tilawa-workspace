@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:quran_sessions/core/l10n_extensions.dart';
 
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -31,8 +32,10 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('لوحة المعلم')),
+      appBar: AppBar(title: Text(l10n.teacherDashboardTitle)),
       body: BlocConsumer<TeacherDashboardBloc, TeacherDashboardState>(
         listener: (context, state) {
           if (state is TeacherDashboardSuccess && state.slotFailure != null) {
@@ -57,13 +60,13 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'لا توجد جلسات أو مواعيد بعد',
+                  l10n.noSessionsOrSlotsYet,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton.icon(
                   icon: const Icon(Icons.add),
-                  label: const Text('أضف موعداً متاحاً'),
+                  label: Text(l10n.addAvailableSlot),
                   onPressed: _showAddSlotSheet,
                 ),
               ],
@@ -77,7 +80,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                 const SizedBox(height: 12),
                 ElevatedButton(
                   onPressed: _reload,
-                  child: const Text('إعادة المحاولة'),
+                  child: Text(l10n.retry),
                 ),
               ],
             ),
@@ -93,13 +96,13 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                 slivers: [
                   // ── Upcoming sessions ──────────────────────────────────
                   _SectionHeader(
-                    title: 'الجلسات القادمة (${upcomingSessions.length})',
+                    title: l10n.upcomingSessionsSection(upcomingSessions.length),
                   ),
                   if (upcomingSessions.isEmpty)
-                    const SliverToBoxAdapter(
+                    SliverToBoxAdapter(
                       child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
-                        child: Text('لا توجد جلسات قادمة'),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(l10n.noUpcomingSessions),
                       ),
                     )
                   else
@@ -116,7 +119,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                       child: Row(
                         children: [
                           Text(
-                            'المواعيد المفتوحة (${availability.length})',
+                            l10n.openSlotsSection(availability.length),
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                           if (isUpdatingAvailability) ...[
@@ -130,7 +133,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                           const Spacer(),
                           IconButton(
                             icon: const Icon(Icons.add),
-                            tooltip: 'أضف موعداً',
+                            tooltip: l10n.addSlot,
                             onPressed: isUpdatingAvailability
                                 ? null
                                 : _showAddSlotSheet,
@@ -140,10 +143,10 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                     ),
                   ),
                   if (availability.isEmpty)
-                    const SliverToBoxAdapter(
+                    SliverToBoxAdapter(
                       child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
-                        child: Text('لا توجد مواعيد مفتوحة'),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(l10n.noOpenSlots),
                       ),
                     )
                   else
@@ -225,7 +228,9 @@ class _SlotTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateFmt = DateFormat('EEE d MMM، h:mm a', 'ar');
+    final l10n = context.quranSessionsL10n;
+    final locale = Localizations.localeOf(context).languageCode;
+    final dateFmt = DateFormat('EEE d MMM، h:mm a', locale);
     final scheme = Theme.of(context).colorScheme;
 
     return ListTile(
@@ -235,7 +240,7 @@ class _SlotTile extends StatelessWidget {
       ),
       title: Text(dateFmt.format(slot.startsAt.toLocal())),
       subtitle: Text(
-        slot.isBooked ? 'محجوز' : 'متاح',
+        slot.isBooked ? l10n.slotBooked : l10n.slotAvailable,
         style: TextStyle(
           color: slot.isBooked ? scheme.primary : scheme.tertiary,
           fontWeight: FontWeight.w500,
@@ -248,12 +253,12 @@ class _SlotTile extends StatelessWidget {
               children: [
                 IconButton(
                   icon: const Icon(Icons.edit_outlined),
-                  tooltip: 'تعديل الموعد',
+                  tooltip: l10n.editSlot,
                   onPressed: isUpdating ? null : onEdit,
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete_outline),
-                  tooltip: 'حذف الموعد',
+                  tooltip: l10n.deleteSlot,
                   onPressed: isUpdating ? null : onRemove,
                 ),
               ],
@@ -293,7 +298,9 @@ class _AddSlotSheetState extends State<_AddSlotSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final dateFmt = DateFormat('EEEE، d MMMM y', 'ar');
+    final l10n = context.quranSessionsL10n;
+    final locale = Localizations.localeOf(context).languageCode;
+    final dateFmt = DateFormat('EEEE، d MMMM y', locale);
     final scheme = Theme.of(context).colorScheme;
 
     return Padding(
@@ -308,14 +315,14 @@ class _AddSlotSheetState extends State<_AddSlotSheet> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'إضافة موعد جديد',
+            l10n.addNewSlot,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 20),
           // Date picker row
           TilawaReadOnlyField(
             prefixIcon: Icons.calendar_today_outlined,
-            semanticLabel: 'تاريخ الموعد',
+            semanticLabel: l10n.slotDate,
             onTap: () async {
               final picked = await showDatePicker(
                 context: context,
@@ -334,7 +341,7 @@ class _AddSlotSheetState extends State<_AddSlotSheet> {
           // Time picker row
           TilawaReadOnlyField(
             prefixIcon: Icons.access_time,
-            semanticLabel: 'وقت الموعد',
+            semanticLabel: l10n.slotTime,
             onTap: () async {
               final picked = await showTimePicker(
                 context: context,
@@ -350,13 +357,13 @@ class _AddSlotSheetState extends State<_AddSlotSheet> {
           const SizedBox(height: 24),
           FilledButton(
             onPressed: _confirm,
-            child: const Text('إضافة الموعد'),
+            child: Text(l10n.addSlotButton),
           ),
           const SizedBox(height: 8),
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'إلغاء',
+              l10n.cancel,
               style: TextStyle(color: scheme.onSurfaceVariant),
             ),
           ),

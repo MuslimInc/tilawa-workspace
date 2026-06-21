@@ -115,6 +115,16 @@ class TeacherApplication extends Equatable {
   bool get isSuspended => status == TeacherApplicationStatus.suspended;
   bool get isRevoked => status == TeacherApplicationStatus.revoked;
 
+  /// Whether the user may see "apply / continue apply" entry points.
+  bool get canStartOrContinueApply =>
+      status == TeacherApplicationStatus.none ||
+      status == TeacherApplicationStatus.draft ||
+      status == TeacherApplicationStatus.rejected;
+
+  /// Whether the user may open the teacher dashboard.
+  bool get canAccessTeacherDashboard =>
+      status == TeacherApplicationStatus.approved;
+
   /// True if the application has a submittable phone number (format only; no OTP).
   bool get hasValidPhone {
     final p = phoneNumber;

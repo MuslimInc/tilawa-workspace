@@ -16,6 +16,10 @@ import 'package:flutter/foundation.dart';
 /// Example: `--dart-define=TILAWA_LAUNCH_RECITATION_PRACTICE_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_SMART_KHATMA_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_TODAY_PLAN_ENABLED=true`
+/// Example: `--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_ENABLED=true`
+/// Example: `--dart-define=TILAWA_LAUNCH_TEACHER_APPLICATION_ENABLED=true`
+/// Example: `--dart-define=TILAWA_LAUNCH_TEACHER_APPLICATION_DISCOVERABILITY=profileAndEmptyState`
+/// Example: `--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED=true`
 @immutable
 class AppLaunchConfig extends Equatable {
   const AppLaunchConfig({
@@ -48,6 +52,10 @@ class AppLaunchConfig extends Equatable {
     this.smartKhatmaEnabled = false,
     this.todayPlanEnabled = false,
     this.notificationPermissionRequest = true,
+    this.quranSessionsEnabled = true,
+    this.teacherApplicationEnabled = false,
+    this.teacherApplicationDiscoverability = 'profileAndEmptyState',
+    this.quranSessionsBookingEnabled = false,
   });
 
   factory AppLaunchConfig.fromEnvironment() {
@@ -168,6 +176,22 @@ class AppLaunchConfig extends Equatable {
         'TILAWA_LAUNCH_NOTIFICATION_PERMISSION_REQUEST',
         defaultValue: true,
       ),
+      quranSessionsEnabled: bool.fromEnvironment(
+        'TILAWA_LAUNCH_QURAN_SESSIONS_ENABLED',
+        defaultValue: true,
+      ),
+      teacherApplicationEnabled: bool.fromEnvironment(
+        'TILAWA_LAUNCH_TEACHER_APPLICATION_ENABLED',
+        defaultValue: true,
+      ),
+      teacherApplicationDiscoverability: String.fromEnvironment(
+        'TILAWA_LAUNCH_TEACHER_APPLICATION_DISCOVERABILITY',
+        defaultValue: 'profileAndEmptyState',
+      ),
+      quranSessionsBookingEnabled: bool.fromEnvironment(
+        'TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED',
+        defaultValue: false,
+      ),
     );
   }
 
@@ -200,6 +224,12 @@ class AppLaunchConfig extends Equatable {
   final bool smartKhatmaEnabled;
   final bool todayPlanEnabled;
   final bool notificationPermissionRequest;
+  final bool quranSessionsEnabled;
+  final bool teacherApplicationEnabled;
+
+  /// One of: `none`, `profileOnly`, `profileAndEmptyState`.
+  final String teacherApplicationDiscoverability;
+  final bool quranSessionsBookingEnabled;
 
   @override
   List<Object?> get props => [
@@ -232,5 +262,9 @@ class AppLaunchConfig extends Equatable {
     smartKhatmaEnabled,
     todayPlanEnabled,
     notificationPermissionRequest,
+    quranSessionsEnabled,
+    teacherApplicationEnabled,
+    teacherApplicationDiscoverability,
+    quranSessionsBookingEnabled,
   ];
 }

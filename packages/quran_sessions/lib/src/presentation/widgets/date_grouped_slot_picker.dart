@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:quran_sessions/core/l10n_extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/teacher_availability.dart';
@@ -69,10 +70,12 @@ class _DateGroupedSlotPickerState extends State<DateGroupedSlotPicker> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+
     if (_days.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.all(24),
-        child: Center(child: Text('لا توجد مواعيد متاحة')),
+      return Padding(
+        padding: const EdgeInsets.all(24),
+        child: Center(child: Text(l10n.noSlotsAvailable)),
       );
     }
 
@@ -149,9 +152,10 @@ class _DayTabBarState extends State<_DayTabBar> {
     final dayRadius = tokens.resolveRadius(
       family: TilawaRadiusFamily.selection,
     );
-    final weekdayFmt = DateFormat('EEE', 'ar');
-    final dayFmt = DateFormat('d', 'ar');
-    final monthFmt = DateFormat('MMM', 'ar');
+    final locale = Localizations.localeOf(context).languageCode;
+    final weekdayFmt = DateFormat('EEE', locale);
+    final dayFmt = DateFormat('d', locale);
+    final monthFmt = DateFormat('MMM', locale);
 
     return SizedBox(
       height: 72,
@@ -232,17 +236,19 @@ class _TimeGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
     final available = slots.where((s) => !s.isBooked).toList()
       ..sort((a, b) => a.startsAt.compareTo(b.startsAt));
 
     if (available.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 12),
-        child: Center(child: Text('لا توجد مواعيد متاحة في هذا اليوم')),
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Center(child: Text(l10n.noSlotsAvailableThisDay)),
       );
     }
 
-    final timeFmt = DateFormat('h:mm a', 'ar');
+    final locale = Localizations.localeOf(context).languageCode;
+    final timeFmt = DateFormat('h:mm a', locale);
 
     return Wrap(
       spacing: 8,

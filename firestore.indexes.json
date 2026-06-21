@@ -49,6 +49,14 @@
       ]
     },
     {
+      "collectionGroup": "quran_teacher_applications",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "submittedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "quran_teacher_profiles",
       "queryScope": "COLLECTION",
       "fields": [

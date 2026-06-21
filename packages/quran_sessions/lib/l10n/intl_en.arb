@@ -68,5 +68,191 @@
     "profileCompletionLoadingCities": "Loading cities…",
     "profileGenderRequired": "Gender is required.",
     "profileCountryRequired": "Country is required.",
-    "profileCityRequired": "City is required."
+    "profileCityRequired": "City is required.",
+    "quranSessionsHomeTitle": "Learn Quran recitation",
+    "mySessionsTitle": "My sessions",
+    "noTeachersAvailableYet": "No teachers available yet",
+    "seeAllTeachers": "See all teachers →",
+    "becomeTeacherCardTitle": "I want to become a teacher",
+    "becomeTeacherCardSubtitle": "Join Tilawa's certified teachers",
+    "teacherListTitle": "Find a teacher",
+    "noTeachersForSpecialization": "No teachers found for \"{specialization}\"",
+    "@noTeachersForSpecialization": {
+        "placeholders": {
+            "specialization": {
+                "type": "String"
+            }
+        }
+    },
+    "noTeachersAvailableRightNow": "No teachers available right now",
+    "bookSessionTitle": "Book a session",
+    "bookingConfirmed": "Booking confirmed!",
+    "checkingEligibility": "Checking your eligibility…",
+    "confirmingBooking": "Confirming booking…",
+    "selectSlot": "Choose a time",
+    "sessionType": "Session type",
+    "confirmBooking": "Confirm booking",
+    "callTypeExternalMeeting": "External link",
+    "callTypeVoice": "Voice",
+    "callTypeVideo": "Video",
+    "reviewSubmittedThanks": "Thank you — your review was submitted!",
+    "upcomingSessionsSection": "Upcoming ({count})",
+    "@upcomingSessionsSection": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "noUpcomingSessions": "No upcoming sessions",
+    "pastSessionsSection": "Past ({count})",
+    "@pastSessionsSection": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "noPastSessions": "No past sessions",
+    "cancelSessionDialogTitle": "Cancel session?",
+    "cancelSessionDialogMessage": "This action cannot be undone.",
+    "keepSession": "Keep session",
+    "cancelSessionAction": "Cancel session",
+    "noSessionsYet": "No sessions yet",
+    "bookFirstSessionHint": "Book your first session with one of our certified teachers",
+    "teacherProfileTitle": "Teacher profile",
+    "teacherRatingReviews": "{rating} · {count} reviews",
+    "@teacherRatingReviews": {
+        "placeholders": {
+            "rating": {
+                "type": "String"
+            },
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "availableSlots": "Available slots",
+    "reviewsSection": "Reviews",
+    "noReviewsYet": "No reviews yet",
+    "bookSessionAction": "Book a session",
+    "sessionStatusScheduled": "Scheduled",
+    "sessionStatusInProgress": "In progress",
+    "sessionStatusCompleted": "Completed",
+    "sessionStatusCancelled": "Cancelled",
+    "sessionStatusNoShow": "No-show",
+    "cancel": "Cancel",
+    "joinSession": "Join",
+    "noSlotsAvailable": "No slots available",
+    "noSlotsAvailableThisDay": "No slots available on this day",
+    "teacherDashboardTitle": "Teacher dashboard",
+    "noSessionsOrSlotsYet": "No sessions or slots yet",
+    "addAvailableSlot": "Add available slot",
+    "openSlotsSection": "Open slots ({count})",
+    "@openSlotsSection": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "addSlot": "Add slot",
+    "noOpenSlots": "No open slots",
+    "slotBooked": "Booked",
+    "slotAvailable": "Available",
+    "editSlot": "Edit slot",
+    "deleteSlot": "Delete slot",
+    "addNewSlot": "Add new slot",
+    "slotDate": "Slot date",
+    "slotTime": "Slot time",
+    "addSlotButton": "Add slot",
+    "teacherApplicationTitle": "Teacher application",
+    "submittingApplication": "Submitting application…",
+    "becomeTeacherOnTilawa": "Become a teacher on Tilawa",
+    "becomeTeacherApplicationIntro": "Join our certified teachers and help students on their Quran journey.",
+    "startApplication": "Start application",
+    "phoneNumber": "Phone number",
+    "phoneNumberRequiredHint": "Required for identity verification. Visible to admin only.",
+    "preferredContactMethod": "Preferred contact method",
+    "teachingLanguages": "Teaching languages",
+    "teachingLanguagesSelect": "Teaching languages * (select one or more)",
+    "specializations": "Specializations",
+    "specializationsSelect": "Specializations * (select one or more)",
+    "bio": "Bio",
+    "bioSectionTitle": "Bio *",
+    "bioHint": "Tell students about your experience, qualifications, and teaching style…",
+    "submitApplicationForReview": "Submit application for review",
+    "countryCode": "Country code",
+    "contactWhatsapp": "WhatsApp",
+    "contactPhone": "Phone",
+    "contactEmail": "Email",
+    "teachingLanguage_ar": "Arabic",
+    "teachingLanguage_en": "English",
+    "teachingLanguage_ur": "Urdu",
+    "teachingLanguage_fr": "French",
+    "teachingLanguage_tr": "Turkish",
+    "teachingLanguage_ms": "Malay",
+    "specialization_tajweed": "Tajweed",
+    "specialization_recitation": "Recitation",
+    "specialization_hifz": "Memorisation",
+    "specialization_review": "Review",
+    "specialization_children": "Children",
+    "specialization_qaida": "Qaida",
+    "specialization_tafsir": "Tafsir",
+    "specialization_arabic": "Arabic",
+    "applicationStatusTitle": "Application status",
+    "unknownStatus": "Unknown status",
+    "applicationStatusPendingTitle": "Your application is under review",
+    "applicationStatusPendingSubtitle": "The Tilawa team is reviewing your application. We will contact you soon.",
+    "applicationStatusApprovedTitle": "Congratulations! Approved",
+    "applicationStatusApprovedSubtitle": "You are now a certified teacher on Tilawa.",
+    "applicationStatusRejectedTitle": "Application not approved",
+    "applicationStatusRejectedSubtitle": "You may reapply after reviewing the team's feedback.",
+    "applicationStatusSuspendedTitle": "Account temporarily suspended",
+    "applicationStatusSuspendedSubtitle": "Contact support to ask about the suspension.",
+    "applicationStatusRevokedTitle": "Account revoked",
+    "applicationStatusRevokedSubtitle": "You cannot apply again. Contact support for more information.",
+    "submittedAtLabel": "Submitted",
+    "reviewedAtLabel": "Reviewed",
+    "reasonLabel": "Reason",
+    "labelWithColon": "{label}:",
+    "@labelWithColon": {
+        "placeholders": {
+            "label": {
+                "type": "String"
+            }
+        }
+    },
+    "debugModeTitle": "Development mode",
+    "debugApprovalDescription": "This button is for internal testing only and does not appear in production. It simulates admin approval without an admin interface.",
+    "simulateAdminApproval": "Simulate admin approval",
+    "priceFree": "Free",
+    "pricePerSession": "{amount} / session",
+    "@pricePerSession": {
+        "placeholders": {
+            "amount": {
+                "type": "String"
+            }
+        }
+    },
+    "teachingOnMemuslimTitle": "Teaching on MeMuslim",
+    "teachingOnMemuslimApply": "Apply as a teacher",
+    "teachingOnMemuslimContinue": "Continue application",
+    "teachingOnMemuslimViewStatus": "View application status",
+    "teachingOnMemuslimOpenDashboard": "Open teacher dashboard",
+    "teachingOnMemuslimNotAppliedSubtitle": "Apply to join our verified teacher community after team review.",
+    "teachingOnMemuslimPendingSubtitle": "Your application is under review. We will contact you soon.",
+    "teachingOnMemuslimApprovedSubtitle": "Your application was approved. Manage sessions from the teacher dashboard.",
+    "teachingOnMemuslimRejectedSubtitle": "Your application was not approved. View details and reapply when allowed.",
+    "teachingOnMemuslimSuspendedSubtitle": "Your teacher account is temporarily suspended. Contact support.",
+    "teachingOnMemuslimRevokedSubtitle": "Your teacher account was revoked. Contact support for details.",
+    "sessionsEmptyTitle": "No teachers in your area yet",
+    "sessionsEmptySubtitle": "We are adding verified teachers gradually. Register interest to get notified.",
+    "sessionsEmptyNotifyMe": "Notify me when available",
+    "sessionsEmptyChangeCity": "Change city",
+    "sessionsEmptyInterestedTeaching": "Interested in teaching Quran?",
+    "sessionsEmptyJoinAsTeacher": "Join as a teacher",
+    "notifyInterestSubmitted": "We will notify you when teachers are available in your area.",
+    "teacherApplicationDisabled": "Teacher applications are not available right now.",
+    "bookingDisabledNoSupply": "Booking is unavailable until verified teachers exist in your area."
 }

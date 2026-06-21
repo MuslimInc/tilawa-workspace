@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:quran_sessions/core/l10n_extensions.dart';
 import 'package:tilawa/core/app_legal_urls.dart';
 import 'package:tilawa/core/telemetry/sentry_debug_verify_tile.dart';
 import 'package:tilawa/core/extensions.dart';
@@ -25,6 +26,8 @@ import '../../../home/presentation/widgets/home_hero_phase_debug_tile.dart';
 import '../../../tour_guide/presentation/widgets/tour_guide_debug_reset_tile.dart';
 import '../cubit/settings_cubit.dart';
 import '../formatters/settings_share_text_formatter.dart';
+import '../../../quran_sessions/quran_sessions_feature_flags.dart';
+import '../widgets/settings_teaching_on_memuslim_tile.dart';
 import '../widgets/settings_picker_sheets.dart';
 import '../widgets/settings_widgets.dart';
 
@@ -87,6 +90,15 @@ class SettingsScreen extends StatelessWidget {
             children: [
               const SettingsProfileHeader(),
               const SettingsGuestAccountGroup(),
+              if (!isGuest && quranSessionsFeatureConfig().showProfileTeacherEntry)
+                TilawaSettingsGroup(
+                  title: context.quranSessionsL10n.teachingOnMemuslimTitle,
+                  leadingIcon: Icons.school_outlined,
+                  includeTopGap: isGuest,
+                  children: const [
+                    SettingsTeachingOnMemuslimTile(showDivider: false),
+                  ],
+                ),
               TilawaSettingsGroup(
                 title: l10n.settingsAppearance,
                 leadingIcon: FluentIcons.weather_moon_24_regular,

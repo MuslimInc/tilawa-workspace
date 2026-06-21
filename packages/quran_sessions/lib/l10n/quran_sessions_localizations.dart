@@ -514,6 +514,810 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'City is required.'**
   String get profileCityRequired;
+
+  /// No description provided for @quranSessionsHomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Learn Quran recitation'**
+  String get quranSessionsHomeTitle;
+
+  /// No description provided for @mySessionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My sessions'**
+  String get mySessionsTitle;
+
+  /// No description provided for @noTeachersAvailableYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No teachers available yet'**
+  String get noTeachersAvailableYet;
+
+  /// No description provided for @seeAllTeachers.
+  ///
+  /// In en, this message translates to:
+  /// **'See all teachers →'**
+  String get seeAllTeachers;
+
+  /// No description provided for @becomeTeacherCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'I want to become a teacher'**
+  String get becomeTeacherCardTitle;
+
+  /// No description provided for @becomeTeacherCardSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join Tilawa\'s certified teachers'**
+  String get becomeTeacherCardSubtitle;
+
+  /// No description provided for @teacherListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a teacher'**
+  String get teacherListTitle;
+
+  /// No description provided for @noTeachersForSpecialization.
+  ///
+  /// In en, this message translates to:
+  /// **'No teachers found for \"{specialization}\"'**
+  String noTeachersForSpecialization(String specialization);
+
+  /// No description provided for @noTeachersAvailableRightNow.
+  ///
+  /// In en, this message translates to:
+  /// **'No teachers available right now'**
+  String get noTeachersAvailableRightNow;
+
+  /// No description provided for @bookSessionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Book a session'**
+  String get bookSessionTitle;
+
+  /// No description provided for @bookingConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking confirmed!'**
+  String get bookingConfirmed;
+
+  /// No description provided for @checkingEligibility.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking your eligibility…'**
+  String get checkingEligibility;
+
+  /// No description provided for @confirmingBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirming booking…'**
+  String get confirmingBooking;
+
+  /// No description provided for @selectSlot.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a time'**
+  String get selectSlot;
+
+  /// No description provided for @sessionType.
+  ///
+  /// In en, this message translates to:
+  /// **'Session type'**
+  String get sessionType;
+
+  /// No description provided for @confirmBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm booking'**
+  String get confirmBooking;
+
+  /// No description provided for @callTypeExternalMeeting.
+  ///
+  /// In en, this message translates to:
+  /// **'External link'**
+  String get callTypeExternalMeeting;
+
+  /// No description provided for @callTypeVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice'**
+  String get callTypeVoice;
+
+  /// No description provided for @callTypeVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Video'**
+  String get callTypeVideo;
+
+  /// No description provided for @reviewSubmittedThanks.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you — your review was submitted!'**
+  String get reviewSubmittedThanks;
+
+  /// No description provided for @upcomingSessionsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming ({count})'**
+  String upcomingSessionsSection(int count);
+
+  /// No description provided for @noUpcomingSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'No upcoming sessions'**
+  String get noUpcomingSessions;
+
+  /// No description provided for @pastSessionsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Past ({count})'**
+  String pastSessionsSection(int count);
+
+  /// No description provided for @noPastSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'No past sessions'**
+  String get noPastSessions;
+
+  /// No description provided for @cancelSessionDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel session?'**
+  String get cancelSessionDialogTitle;
+
+  /// No description provided for @cancelSessionDialogMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This action cannot be undone.'**
+  String get cancelSessionDialogMessage;
+
+  /// No description provided for @keepSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep session'**
+  String get keepSession;
+
+  /// No description provided for @cancelSessionAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel session'**
+  String get cancelSessionAction;
+
+  /// No description provided for @noSessionsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No sessions yet'**
+  String get noSessionsYet;
+
+  /// No description provided for @bookFirstSessionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Book your first session with one of our certified teachers'**
+  String get bookFirstSessionHint;
+
+  /// No description provided for @teacherProfileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher profile'**
+  String get teacherProfileTitle;
+
+  /// No description provided for @teacherRatingReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'{rating} · {count} reviews'**
+  String teacherRatingReviews(String rating, int count);
+
+  /// No description provided for @availableSlots.
+  ///
+  /// In en, this message translates to:
+  /// **'Available slots'**
+  String get availableSlots;
+
+  /// No description provided for @reviewsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviews'**
+  String get reviewsSection;
+
+  /// No description provided for @noReviewsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No reviews yet'**
+  String get noReviewsYet;
+
+  /// No description provided for @bookSessionAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Book a session'**
+  String get bookSessionAction;
+
+  /// No description provided for @sessionStatusScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled'**
+  String get sessionStatusScheduled;
+
+  /// No description provided for @sessionStatusInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get sessionStatusInProgress;
+
+  /// No description provided for @sessionStatusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get sessionStatusCompleted;
+
+  /// No description provided for @sessionStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get sessionStatusCancelled;
+
+  /// No description provided for @sessionStatusNoShow.
+  ///
+  /// In en, this message translates to:
+  /// **'No-show'**
+  String get sessionStatusNoShow;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @joinSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Join'**
+  String get joinSession;
+
+  /// No description provided for @noSlotsAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No slots available'**
+  String get noSlotsAvailable;
+
+  /// No description provided for @noSlotsAvailableThisDay.
+  ///
+  /// In en, this message translates to:
+  /// **'No slots available on this day'**
+  String get noSlotsAvailableThisDay;
+
+  /// No description provided for @teacherDashboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher dashboard'**
+  String get teacherDashboardTitle;
+
+  /// No description provided for @noSessionsOrSlotsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No sessions or slots yet'**
+  String get noSessionsOrSlotsYet;
+
+  /// No description provided for @addAvailableSlot.
+  ///
+  /// In en, this message translates to:
+  /// **'Add available slot'**
+  String get addAvailableSlot;
+
+  /// No description provided for @openSlotsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Open slots ({count})'**
+  String openSlotsSection(int count);
+
+  /// No description provided for @addSlot.
+  ///
+  /// In en, this message translates to:
+  /// **'Add slot'**
+  String get addSlot;
+
+  /// No description provided for @noOpenSlots.
+  ///
+  /// In en, this message translates to:
+  /// **'No open slots'**
+  String get noOpenSlots;
+
+  /// No description provided for @slotBooked.
+  ///
+  /// In en, this message translates to:
+  /// **'Booked'**
+  String get slotBooked;
+
+  /// No description provided for @slotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get slotAvailable;
+
+  /// No description provided for @editSlot.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit slot'**
+  String get editSlot;
+
+  /// No description provided for @deleteSlot.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete slot'**
+  String get deleteSlot;
+
+  /// No description provided for @addNewSlot.
+  ///
+  /// In en, this message translates to:
+  /// **'Add new slot'**
+  String get addNewSlot;
+
+  /// No description provided for @slotDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Slot date'**
+  String get slotDate;
+
+  /// No description provided for @slotTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Slot time'**
+  String get slotTime;
+
+  /// No description provided for @addSlotButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add slot'**
+  String get addSlotButton;
+
+  /// No description provided for @teacherApplicationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher application'**
+  String get teacherApplicationTitle;
+
+  /// No description provided for @submittingApplication.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitting application…'**
+  String get submittingApplication;
+
+  /// No description provided for @becomeTeacherOnTilawa.
+  ///
+  /// In en, this message translates to:
+  /// **'Become a teacher on Tilawa'**
+  String get becomeTeacherOnTilawa;
+
+  /// No description provided for @becomeTeacherApplicationIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Join our certified teachers and help students on their Quran journey.'**
+  String get becomeTeacherApplicationIntro;
+
+  /// No description provided for @startApplication.
+  ///
+  /// In en, this message translates to:
+  /// **'Start application'**
+  String get startApplication;
+
+  /// No description provided for @phoneNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number'**
+  String get phoneNumber;
+
+  /// No description provided for @phoneNumberRequiredHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Required for identity verification. Visible to admin only.'**
+  String get phoneNumberRequiredHint;
+
+  /// No description provided for @preferredContactMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferred contact method'**
+  String get preferredContactMethod;
+
+  /// No description provided for @teachingLanguages.
+  ///
+  /// In en, this message translates to:
+  /// **'Teaching languages'**
+  String get teachingLanguages;
+
+  /// No description provided for @teachingLanguagesSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Teaching languages * (select one or more)'**
+  String get teachingLanguagesSelect;
+
+  /// No description provided for @specializations.
+  ///
+  /// In en, this message translates to:
+  /// **'Specializations'**
+  String get specializations;
+
+  /// No description provided for @specializationsSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Specializations * (select one or more)'**
+  String get specializationsSelect;
+
+  /// No description provided for @bio.
+  ///
+  /// In en, this message translates to:
+  /// **'Bio'**
+  String get bio;
+
+  /// No description provided for @bioSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bio *'**
+  String get bioSectionTitle;
+
+  /// No description provided for @bioHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell students about your experience, qualifications, and teaching style…'**
+  String get bioHint;
+
+  /// No description provided for @submitApplicationForReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit application for review'**
+  String get submitApplicationForReview;
+
+  /// No description provided for @countryCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Country code'**
+  String get countryCode;
+
+  /// No description provided for @contactWhatsapp.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp'**
+  String get contactWhatsapp;
+
+  /// No description provided for @contactPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get contactPhone;
+
+  /// No description provided for @contactEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get contactEmail;
+
+  /// No description provided for @teachingLanguage_ar.
+  ///
+  /// In en, this message translates to:
+  /// **'Arabic'**
+  String get teachingLanguage_ar;
+
+  /// No description provided for @teachingLanguage_en.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get teachingLanguage_en;
+
+  /// No description provided for @teachingLanguage_ur.
+  ///
+  /// In en, this message translates to:
+  /// **'Urdu'**
+  String get teachingLanguage_ur;
+
+  /// No description provided for @teachingLanguage_fr.
+  ///
+  /// In en, this message translates to:
+  /// **'French'**
+  String get teachingLanguage_fr;
+
+  /// No description provided for @teachingLanguage_tr.
+  ///
+  /// In en, this message translates to:
+  /// **'Turkish'**
+  String get teachingLanguage_tr;
+
+  /// No description provided for @teachingLanguage_ms.
+  ///
+  /// In en, this message translates to:
+  /// **'Malay'**
+  String get teachingLanguage_ms;
+
+  /// No description provided for @specialization_tajweed.
+  ///
+  /// In en, this message translates to:
+  /// **'Tajweed'**
+  String get specialization_tajweed;
+
+  /// No description provided for @specialization_recitation.
+  ///
+  /// In en, this message translates to:
+  /// **'Recitation'**
+  String get specialization_recitation;
+
+  /// No description provided for @specialization_hifz.
+  ///
+  /// In en, this message translates to:
+  /// **'Memorisation'**
+  String get specialization_hifz;
+
+  /// No description provided for @specialization_review.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get specialization_review;
+
+  /// No description provided for @specialization_children.
+  ///
+  /// In en, this message translates to:
+  /// **'Children'**
+  String get specialization_children;
+
+  /// No description provided for @specialization_qaida.
+  ///
+  /// In en, this message translates to:
+  /// **'Qaida'**
+  String get specialization_qaida;
+
+  /// No description provided for @specialization_tafsir.
+  ///
+  /// In en, this message translates to:
+  /// **'Tafsir'**
+  String get specialization_tafsir;
+
+  /// No description provided for @specialization_arabic.
+  ///
+  /// In en, this message translates to:
+  /// **'Arabic'**
+  String get specialization_arabic;
+
+  /// No description provided for @applicationStatusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Application status'**
+  String get applicationStatusTitle;
+
+  /// No description provided for @unknownStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown status'**
+  String get unknownStatus;
+
+  /// No description provided for @applicationStatusPendingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your application is under review'**
+  String get applicationStatusPendingTitle;
+
+  /// No description provided for @applicationStatusPendingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The Tilawa team is reviewing your application. We will contact you soon.'**
+  String get applicationStatusPendingSubtitle;
+
+  /// No description provided for @applicationStatusApprovedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Congratulations! Approved'**
+  String get applicationStatusApprovedTitle;
+
+  /// No description provided for @applicationStatusApprovedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You are now a certified teacher on Tilawa.'**
+  String get applicationStatusApprovedSubtitle;
+
+  /// No description provided for @applicationStatusRejectedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Application not approved'**
+  String get applicationStatusRejectedTitle;
+
+  /// No description provided for @applicationStatusRejectedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You may reapply after reviewing the team\'s feedback.'**
+  String get applicationStatusRejectedSubtitle;
+
+  /// No description provided for @applicationStatusSuspendedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account temporarily suspended'**
+  String get applicationStatusSuspendedTitle;
+
+  /// No description provided for @applicationStatusSuspendedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact support to ask about the suspension.'**
+  String get applicationStatusSuspendedSubtitle;
+
+  /// No description provided for @applicationStatusRevokedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account revoked'**
+  String get applicationStatusRevokedTitle;
+
+  /// No description provided for @applicationStatusRevokedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You cannot apply again. Contact support for more information.'**
+  String get applicationStatusRevokedSubtitle;
+
+  /// No description provided for @submittedAtLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted'**
+  String get submittedAtLabel;
+
+  /// No description provided for @reviewedAtLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewed'**
+  String get reviewedAtLabel;
+
+  /// No description provided for @reasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get reasonLabel;
+
+  /// No description provided for @labelWithColon.
+  ///
+  /// In en, this message translates to:
+  /// **'{label}:'**
+  String labelWithColon(String label);
+
+  /// No description provided for @debugModeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Development mode'**
+  String get debugModeTitle;
+
+  /// No description provided for @debugApprovalDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'This button is for internal testing only and does not appear in production. It simulates admin approval without an admin interface.'**
+  String get debugApprovalDescription;
+
+  /// No description provided for @simulateAdminApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Simulate admin approval'**
+  String get simulateAdminApproval;
+
+  /// No description provided for @priceFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get priceFree;
+
+  /// No description provided for @pricePerSession.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} / session'**
+  String pricePerSession(String amount);
+
+  /// No description provided for @teachingOnMemuslimTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Teaching on MeMuslim'**
+  String get teachingOnMemuslimTitle;
+
+  /// No description provided for @teachingOnMemuslimApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply as a teacher'**
+  String get teachingOnMemuslimApply;
+
+  /// No description provided for @teachingOnMemuslimContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue application'**
+  String get teachingOnMemuslimContinue;
+
+  /// No description provided for @teachingOnMemuslimViewStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'View application status'**
+  String get teachingOnMemuslimViewStatus;
+
+  /// No description provided for @teachingOnMemuslimOpenDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Open teacher dashboard'**
+  String get teachingOnMemuslimOpenDashboard;
+
+  /// No description provided for @teachingOnMemuslimNotAppliedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply to join our verified teacher community after team review.'**
+  String get teachingOnMemuslimNotAppliedSubtitle;
+
+  /// No description provided for @teachingOnMemuslimPendingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your application is under review. We will contact you soon.'**
+  String get teachingOnMemuslimPendingSubtitle;
+
+  /// No description provided for @teachingOnMemuslimApprovedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your application was approved. Manage sessions from the teacher dashboard.'**
+  String get teachingOnMemuslimApprovedSubtitle;
+
+  /// No description provided for @teachingOnMemuslimRejectedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your application was not approved. View details and reapply when allowed.'**
+  String get teachingOnMemuslimRejectedSubtitle;
+
+  /// No description provided for @teachingOnMemuslimSuspendedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your teacher account is temporarily suspended. Contact support.'**
+  String get teachingOnMemuslimSuspendedSubtitle;
+
+  /// No description provided for @teachingOnMemuslimRevokedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your teacher account was revoked. Contact support for details.'**
+  String get teachingOnMemuslimRevokedSubtitle;
+
+  /// No description provided for @sessionsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No teachers in your area yet'**
+  String get sessionsEmptyTitle;
+
+  /// No description provided for @sessionsEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We are adding verified teachers gradually. Register interest to get notified.'**
+  String get sessionsEmptySubtitle;
+
+  /// No description provided for @sessionsEmptyNotifyMe.
+  ///
+  /// In en, this message translates to:
+  /// **'Notify me when available'**
+  String get sessionsEmptyNotifyMe;
+
+  /// No description provided for @sessionsEmptyChangeCity.
+  ///
+  /// In en, this message translates to:
+  /// **'Change city'**
+  String get sessionsEmptyChangeCity;
+
+  /// No description provided for @sessionsEmptyInterestedTeaching.
+  ///
+  /// In en, this message translates to:
+  /// **'Interested in teaching Quran?'**
+  String get sessionsEmptyInterestedTeaching;
+
+  /// No description provided for @sessionsEmptyJoinAsTeacher.
+  ///
+  /// In en, this message translates to:
+  /// **'Join as a teacher'**
+  String get sessionsEmptyJoinAsTeacher;
+
+  /// No description provided for @notifyInterestSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'We will notify you when teachers are available in your area.'**
+  String get notifyInterestSubmitted;
+
+  /// No description provided for @teacherApplicationDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher applications are not available right now.'**
+  String get teacherApplicationDisabled;
+
+  /// No description provided for @bookingDisabledNoSupply.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking is unavailable until verified teachers exist in your area.'**
+  String get bookingDisabledNoSupply;
 }
 
 class _QuranSessionsLocalizationsDelegate

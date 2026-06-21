@@ -1,3 +1,5 @@
+import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
+
 import '../domain/entities/session_price.dart';
 import '../domain/entities/session_pricing_type.dart';
 
@@ -6,31 +8,20 @@ import '../domain/entities/session_pricing_type.dart';
 /// Currency symbols and formatting rules are market-specific.
 /// This class never performs exchange-rate conversion — it formats
 /// the amount as-is in the given [SessionPrice.currencyCode].
-///
-/// Usage:
-/// ```dart
-/// Text(PriceFormatter.format(teacher.price)); // '600 ج.م. / جلسة'
-/// Text(PriceFormatter.formatOrFree(teacher));  // 'مجاني' or '600 ج.م. / جلسة'
-/// ```
 abstract final class PriceFormatter {
   /// Formats a [SessionPrice] as a localised string.
-  ///
-  /// e.g. 600 EGP → '600 ج.م.'
-  ///       15 USD → '15 $'
-  static String format(SessionPrice price) =>
-      '${_formatAmount(price.amount, price.currencyCode)} / جلسة';
+  static String format(SessionPrice price, QuranSessionsLocalizations l10n) =>
+      l10n.pricePerSession(_formatAmount(price.amount, price.currencyCode));
 
-  /// Returns 'مجاني' for free [pricingType], or [format] otherwise.
-  ///
-  /// Pass [pricingType] from [QuranTeacher.pricingType] and [price] from
-  /// [QuranTeacher.price].
+  /// Returns the free label for [pricingType], or [format] otherwise.
   static String formatOrFree({
     required SessionPricingType pricingType,
     SessionPrice? price,
+    required QuranSessionsLocalizations l10n,
   }) {
-    if (pricingType == SessionPricingType.free) return 'مجاني';
+    if (pricingType == SessionPricingType.free) return l10n.priceFree;
     if (price == null) return '';
-    return format(price);
+    return format(price, l10n);
   }
 
   static String _formatAmount(double amount, String currencyCode) {

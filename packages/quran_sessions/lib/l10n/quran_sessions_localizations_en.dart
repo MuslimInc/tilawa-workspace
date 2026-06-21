@@ -255,4 +255,442 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get profileCityRequired => 'City is required.';
+
+  @override
+  String get quranSessionsHomeTitle => 'Learn Quran recitation';
+
+  @override
+  String get mySessionsTitle => 'My sessions';
+
+  @override
+  String get noTeachersAvailableYet => 'No teachers available yet';
+
+  @override
+  String get seeAllTeachers => 'See all teachers →';
+
+  @override
+  String get becomeTeacherCardTitle => 'I want to become a teacher';
+
+  @override
+  String get becomeTeacherCardSubtitle => 'Join Tilawa\'s certified teachers';
+
+  @override
+  String get teacherListTitle => 'Find a teacher';
+
+  @override
+  String noTeachersForSpecialization(String specialization) {
+    return 'No teachers found for \"$specialization\"';
+  }
+
+  @override
+  String get noTeachersAvailableRightNow => 'No teachers available right now';
+
+  @override
+  String get bookSessionTitle => 'Book a session';
+
+  @override
+  String get bookingConfirmed => 'Booking confirmed!';
+
+  @override
+  String get checkingEligibility => 'Checking your eligibility…';
+
+  @override
+  String get confirmingBooking => 'Confirming booking…';
+
+  @override
+  String get selectSlot => 'Choose a time';
+
+  @override
+  String get sessionType => 'Session type';
+
+  @override
+  String get confirmBooking => 'Confirm booking';
+
+  @override
+  String get callTypeExternalMeeting => 'External link';
+
+  @override
+  String get callTypeVoice => 'Voice';
+
+  @override
+  String get callTypeVideo => 'Video';
+
+  @override
+  String get reviewSubmittedThanks => 'Thank you — your review was submitted!';
+
+  @override
+  String upcomingSessionsSection(int count) {
+    return 'Upcoming ($count)';
+  }
+
+  @override
+  String get noUpcomingSessions => 'No upcoming sessions';
+
+  @override
+  String pastSessionsSection(int count) {
+    return 'Past ($count)';
+  }
+
+  @override
+  String get noPastSessions => 'No past sessions';
+
+  @override
+  String get cancelSessionDialogTitle => 'Cancel session?';
+
+  @override
+  String get cancelSessionDialogMessage => 'This action cannot be undone.';
+
+  @override
+  String get keepSession => 'Keep session';
+
+  @override
+  String get cancelSessionAction => 'Cancel session';
+
+  @override
+  String get noSessionsYet => 'No sessions yet';
+
+  @override
+  String get bookFirstSessionHint =>
+      'Book your first session with one of our certified teachers';
+
+  @override
+  String get teacherProfileTitle => 'Teacher profile';
+
+  @override
+  String teacherRatingReviews(String rating, int count) {
+    return '$rating · $count reviews';
+  }
+
+  @override
+  String get availableSlots => 'Available slots';
+
+  @override
+  String get reviewsSection => 'Reviews';
+
+  @override
+  String get noReviewsYet => 'No reviews yet';
+
+  @override
+  String get bookSessionAction => 'Book a session';
+
+  @override
+  String get sessionStatusScheduled => 'Scheduled';
+
+  @override
+  String get sessionStatusInProgress => 'In progress';
+
+  @override
+  String get sessionStatusCompleted => 'Completed';
+
+  @override
+  String get sessionStatusCancelled => 'Cancelled';
+
+  @override
+  String get sessionStatusNoShow => 'No-show';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get joinSession => 'Join';
+
+  @override
+  String get noSlotsAvailable => 'No slots available';
+
+  @override
+  String get noSlotsAvailableThisDay => 'No slots available on this day';
+
+  @override
+  String get teacherDashboardTitle => 'Teacher dashboard';
+
+  @override
+  String get noSessionsOrSlotsYet => 'No sessions or slots yet';
+
+  @override
+  String get addAvailableSlot => 'Add available slot';
+
+  @override
+  String openSlotsSection(int count) {
+    return 'Open slots ($count)';
+  }
+
+  @override
+  String get addSlot => 'Add slot';
+
+  @override
+  String get noOpenSlots => 'No open slots';
+
+  @override
+  String get slotBooked => 'Booked';
+
+  @override
+  String get slotAvailable => 'Available';
+
+  @override
+  String get editSlot => 'Edit slot';
+
+  @override
+  String get deleteSlot => 'Delete slot';
+
+  @override
+  String get addNewSlot => 'Add new slot';
+
+  @override
+  String get slotDate => 'Slot date';
+
+  @override
+  String get slotTime => 'Slot time';
+
+  @override
+  String get addSlotButton => 'Add slot';
+
+  @override
+  String get teacherApplicationTitle => 'Teacher application';
+
+  @override
+  String get submittingApplication => 'Submitting application…';
+
+  @override
+  String get becomeTeacherOnTilawa => 'Become a teacher on Tilawa';
+
+  @override
+  String get becomeTeacherApplicationIntro =>
+      'Join our certified teachers and help students on their Quran journey.';
+
+  @override
+  String get startApplication => 'Start application';
+
+  @override
+  String get phoneNumber => 'Phone number';
+
+  @override
+  String get phoneNumberRequiredHint =>
+      'Required for identity verification. Visible to admin only.';
+
+  @override
+  String get preferredContactMethod => 'Preferred contact method';
+
+  @override
+  String get teachingLanguages => 'Teaching languages';
+
+  @override
+  String get teachingLanguagesSelect =>
+      'Teaching languages * (select one or more)';
+
+  @override
+  String get specializations => 'Specializations';
+
+  @override
+  String get specializationsSelect => 'Specializations * (select one or more)';
+
+  @override
+  String get bio => 'Bio';
+
+  @override
+  String get bioSectionTitle => 'Bio *';
+
+  @override
+  String get bioHint =>
+      'Tell students about your experience, qualifications, and teaching style…';
+
+  @override
+  String get submitApplicationForReview => 'Submit application for review';
+
+  @override
+  String get countryCode => 'Country code';
+
+  @override
+  String get contactWhatsapp => 'WhatsApp';
+
+  @override
+  String get contactPhone => 'Phone';
+
+  @override
+  String get contactEmail => 'Email';
+
+  @override
+  String get teachingLanguage_ar => 'Arabic';
+
+  @override
+  String get teachingLanguage_en => 'English';
+
+  @override
+  String get teachingLanguage_ur => 'Urdu';
+
+  @override
+  String get teachingLanguage_fr => 'French';
+
+  @override
+  String get teachingLanguage_tr => 'Turkish';
+
+  @override
+  String get teachingLanguage_ms => 'Malay';
+
+  @override
+  String get specialization_tajweed => 'Tajweed';
+
+  @override
+  String get specialization_recitation => 'Recitation';
+
+  @override
+  String get specialization_hifz => 'Memorisation';
+
+  @override
+  String get specialization_review => 'Review';
+
+  @override
+  String get specialization_children => 'Children';
+
+  @override
+  String get specialization_qaida => 'Qaida';
+
+  @override
+  String get specialization_tafsir => 'Tafsir';
+
+  @override
+  String get specialization_arabic => 'Arabic';
+
+  @override
+  String get applicationStatusTitle => 'Application status';
+
+  @override
+  String get unknownStatus => 'Unknown status';
+
+  @override
+  String get applicationStatusPendingTitle =>
+      'Your application is under review';
+
+  @override
+  String get applicationStatusPendingSubtitle =>
+      'The Tilawa team is reviewing your application. We will contact you soon.';
+
+  @override
+  String get applicationStatusApprovedTitle => 'Congratulations! Approved';
+
+  @override
+  String get applicationStatusApprovedSubtitle =>
+      'You are now a certified teacher on Tilawa.';
+
+  @override
+  String get applicationStatusRejectedTitle => 'Application not approved';
+
+  @override
+  String get applicationStatusRejectedSubtitle =>
+      'You may reapply after reviewing the team\'s feedback.';
+
+  @override
+  String get applicationStatusSuspendedTitle => 'Account temporarily suspended';
+
+  @override
+  String get applicationStatusSuspendedSubtitle =>
+      'Contact support to ask about the suspension.';
+
+  @override
+  String get applicationStatusRevokedTitle => 'Account revoked';
+
+  @override
+  String get applicationStatusRevokedSubtitle =>
+      'You cannot apply again. Contact support for more information.';
+
+  @override
+  String get submittedAtLabel => 'Submitted';
+
+  @override
+  String get reviewedAtLabel => 'Reviewed';
+
+  @override
+  String get reasonLabel => 'Reason';
+
+  @override
+  String labelWithColon(String label) {
+    return '$label:';
+  }
+
+  @override
+  String get debugModeTitle => 'Development mode';
+
+  @override
+  String get debugApprovalDescription =>
+      'This button is for internal testing only and does not appear in production. It simulates admin approval without an admin interface.';
+
+  @override
+  String get simulateAdminApproval => 'Simulate admin approval';
+
+  @override
+  String get priceFree => 'Free';
+
+  @override
+  String pricePerSession(String amount) {
+    return '$amount / session';
+  }
+
+  @override
+  String get teachingOnMemuslimTitle => 'Teaching on MeMuslim';
+
+  @override
+  String get teachingOnMemuslimApply => 'Apply as a teacher';
+
+  @override
+  String get teachingOnMemuslimContinue => 'Continue application';
+
+  @override
+  String get teachingOnMemuslimViewStatus => 'View application status';
+
+  @override
+  String get teachingOnMemuslimOpenDashboard => 'Open teacher dashboard';
+
+  @override
+  String get teachingOnMemuslimNotAppliedSubtitle =>
+      'Apply to join our verified teacher community after team review.';
+
+  @override
+  String get teachingOnMemuslimPendingSubtitle =>
+      'Your application is under review. We will contact you soon.';
+
+  @override
+  String get teachingOnMemuslimApprovedSubtitle =>
+      'Your application was approved. Manage sessions from the teacher dashboard.';
+
+  @override
+  String get teachingOnMemuslimRejectedSubtitle =>
+      'Your application was not approved. View details and reapply when allowed.';
+
+  @override
+  String get teachingOnMemuslimSuspendedSubtitle =>
+      'Your teacher account is temporarily suspended. Contact support.';
+
+  @override
+  String get teachingOnMemuslimRevokedSubtitle =>
+      'Your teacher account was revoked. Contact support for details.';
+
+  @override
+  String get sessionsEmptyTitle => 'No teachers in your area yet';
+
+  @override
+  String get sessionsEmptySubtitle =>
+      'We are adding verified teachers gradually. Register interest to get notified.';
+
+  @override
+  String get sessionsEmptyNotifyMe => 'Notify me when available';
+
+  @override
+  String get sessionsEmptyChangeCity => 'Change city';
+
+  @override
+  String get sessionsEmptyInterestedTeaching => 'Interested in teaching Quran?';
+
+  @override
+  String get sessionsEmptyJoinAsTeacher => 'Join as a teacher';
+
+  @override
+  String get notifyInterestSubmitted =>
+      'We will notify you when teachers are available in your area.';
+
+  @override
+  String get teacherApplicationDisabled =>
+      'Teacher applications are not available right now.';
+
+  @override
+  String get bookingDisabledNoSupply =>
+      'Booking is unavailable until verified teachers exist in your area.';
 }

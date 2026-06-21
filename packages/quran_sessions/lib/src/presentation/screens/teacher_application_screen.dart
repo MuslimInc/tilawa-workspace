@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quran_sessions/core/l10n_extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/teacher_application.dart';
 import '../../utils/phone_normalizer.dart';
-import '../../utils/specialization_labels.dart';
 import '../forms/teacher_application_field_ids.dart';
 import '../blocs/teacher_application/teacher_application_bloc.dart';
 import '../blocs/teacher_application/teacher_application_event.dart';
@@ -71,8 +71,10 @@ class _TeacherApplicationScreenState extends State<TeacherApplicationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('طلب تسجيل كمحفظ')),
+      appBar: AppBar(title: Text(l10n.teacherApplicationTitle)),
       body: BlocConsumer<TeacherApplicationBloc, TeacherApplicationState>(
         listener: (context, state) {
           if (state is TeacherApplicationStatusLoaded &&
@@ -101,13 +103,13 @@ class _TeacherApplicationScreenState extends State<TeacherApplicationScreen> {
               TeacherApplicationStartRequested(userId: userId),
             ),
           ),
-          TeacherApplicationSubmitting() => const Center(
+          TeacherApplicationSubmitting() => Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 12),
-                Text('جارٍ إرسال الطلب…'),
+                const CircularProgressIndicator(),
+                const SizedBox(height: 12),
+                Text(l10n.submittingApplication),
               ],
             ),
           ),
@@ -133,6 +135,7 @@ class _NotStartedView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
     final scheme = Theme.of(context).colorScheme;
 
     return Padding(
@@ -147,13 +150,13 @@ class _NotStartedView extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            'أصبح محفظًا على تلاوة',
+            l10n.becomeTeacherOnTilawa,
             style: Theme.of(context).textTheme.headlineSmall,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 12),
           Text(
-            'انضم إلى نخبة المعلمين المعتمدين وساعد الطلاب في رحلتهم مع القرآن الكريم.',
+            l10n.becomeTeacherApplicationIntro,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: scheme.onSurfaceVariant,
             ),
@@ -161,7 +164,7 @@ class _NotStartedView extends StatelessWidget {
           ),
           const SizedBox(height: 40),
           TilawaButton(
-            text: 'ابدأ طلب التسجيل',
+            text: l10n.startApplication,
             leadingIcon: const Icon(Icons.arrow_forward),
             onPressed: onStart,
             isFullWidth: true,
@@ -276,14 +279,7 @@ class _FormContent extends StatelessWidget {
   final FocusNode bioFocusNode;
   final VoidCallback onSubmit;
 
-  static const _availableLanguages = [
-    ('ar', 'العربية'),
-    ('en', 'الإنجليزية'),
-    ('ur', 'الأردية'),
-    ('fr', 'الفرنسية'),
-    ('tr', 'التركية'),
-    ('ms', 'الملايوية'),
-  ];
+  static const _availableLanguages = ['ar', 'en', 'ur', 'fr', 'tr', 'ms'];
 
   static const _availableSpecializations = [
     'tajweed',
@@ -298,6 +294,7 @@ class _FormContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
     final bloc = context.read<TeacherApplicationBloc>();
     final application = state.application;
     final countryCode = application.phoneCountryCode ?? 'EG';
@@ -310,16 +307,16 @@ class _FormContent extends StatelessWidget {
         children: [
           TilawaFormFieldAnchor(
             fieldId: TeacherApplicationFieldIds.phone,
-            semanticLabel: 'رقم الهاتف',
+            semanticLabel: l10n.phoneNumber,
             order: 0,
             focusNode: phoneFocusNode,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _SectionTitle('رقم الهاتف *'),
+                _SectionTitle('${l10n.phoneNumber} *'),
                 const SizedBox(height: 4),
                 Text(
-                  'مطلوب للتحقق من هويتك. يظهر للإدارة فقط.',
+                  l10n.phoneNumberRequiredHint,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
@@ -360,7 +357,7 @@ class _FormContent extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          _SectionTitle('طريقة التواصل المفضلة'),
+          _SectionTitle(l10n.preferredContactMethod),
           const SizedBox(height: 8),
           _ContactMethodPicker(
             selected: application.preferredContactMethod,
@@ -370,23 +367,22 @@ class _FormContent extends StatelessWidget {
           const SizedBox(height: 24),
           TilawaFormFieldAnchor(
             fieldId: TeacherApplicationFieldIds.teachingLanguages,
-            semanticLabel: 'لغات التدريس',
+            semanticLabel: l10n.teachingLanguages,
             order: 1,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _SectionTitle('لغات التدريس * (اختر واحدة أو أكثر)'),
+                _SectionTitle(l10n.teachingLanguagesSelect),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
-                  children: _availableLanguages.map((entry) {
-                    final (code, label) = entry;
+                  children: _availableLanguages.map((code) {
                     final selected = application.teachingLanguages.contains(
                       code,
                     );
                     return TilawaSelectionPill(
-                      label: label,
+                      label: l10n.teachingLanguageLabel(code),
                       selected: selected,
                       onTap: () =>
                           bloc.add(TeacherApplicationLanguageToggled(code)),
@@ -402,12 +398,12 @@ class _FormContent extends StatelessWidget {
           const SizedBox(height: 24),
           TilawaFormFieldAnchor(
             fieldId: TeacherApplicationFieldIds.specializations,
-            semanticLabel: 'التخصصات',
+            semanticLabel: l10n.specializations,
             order: 2,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _SectionTitle('التخصصات * (اختر واحداً أو أكثر)'),
+                _SectionTitle(l10n.specializationsSelect),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
@@ -415,7 +411,7 @@ class _FormContent extends StatelessWidget {
                   children: _availableSpecializations.map((code) {
                     final selected = application.specializations.contains(code);
                     return TilawaSelectionPill(
-                      label: SpecializationLabels.arabic(code),
+                      label: l10n.specializationLabel(code),
                       selected: selected,
                       onTap: () => bloc.add(
                         TeacherApplicationSpecializationToggled(code),
@@ -432,13 +428,13 @@ class _FormContent extends StatelessWidget {
           const SizedBox(height: 24),
           TilawaFormFieldAnchor(
             fieldId: TeacherApplicationFieldIds.bio,
-            semanticLabel: 'النبذة التعريفية',
+            semanticLabel: l10n.bio,
             order: 3,
             focusNode: bioFocusNode,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _SectionTitle('نبذة تعريفية *'),
+                _SectionTitle(l10n.bioSectionTitle),
                 const SizedBox(height: 8),
                 TilawaTextField(
                   controller: bioController,
@@ -447,7 +443,7 @@ class _FormContent extends StatelessWidget {
                   maxLines: 8,
                   maxLength: 500,
                   textAlignVertical: TextAlignVertical.top,
-                  hintText: 'أخبر الطلاب عن خبرتك ومؤهلاتك وأسلوبك في التدريس…',
+                  hintText: l10n.bioHint,
                   errorText: state.visibleBioError,
                   onChanged: (v) => bloc.add(TeacherApplicationBioChanged(v)),
                 ),
@@ -457,7 +453,7 @@ class _FormContent extends StatelessWidget {
         ],
       ),
       footer: TilawaFormSubmitFooter(
-        buttonText: 'إرسال الطلب للمراجعة',
+        buttonText: l10n.submitApplicationForReview,
         invalidFieldCount: state.submitAttempted
             ? state.invalidFieldCount
             : null,
@@ -496,9 +492,11 @@ class _CountryCodePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+
     return TilawaDropdownField<String>(
       value: selected,
-      semanticLabel: 'رمز الدولة',
+      semanticLabel: l10n.countryCode,
       items: [
         for (final e in _options) TilawaDropdownItem(value: e.$1, label: e.$2),
       ],
@@ -517,23 +515,19 @@ class _ContactMethodPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+
     return Wrap(
       spacing: 8,
       children: PreferredContactMethod.values.map((m) {
         return TilawaSelectionPill(
-          label: _label(m),
+          label: l10n.preferredContactMethodLabel(m),
           selected: selected == m,
           onTap: () => onChanged(m),
         );
       }).toList(),
     );
   }
-
-  String _label(PreferredContactMethod m) => switch (m) {
-    PreferredContactMethod.whatsapp => 'واتساب',
-    PreferredContactMethod.phone => 'هاتف',
-    PreferredContactMethod.email => 'بريد إلكتروني',
-  };
 }
 
 // ── Section title ─────────────────────────────────────────────────────────────

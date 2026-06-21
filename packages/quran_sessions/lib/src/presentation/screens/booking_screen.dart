@@ -75,8 +75,10 @@ class _BookingScreenState extends State<BookingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('احجز جلسة')),
+      appBar: AppBar(title: Text(l10n.bookSessionTitle)),
       body: BlocConsumer<BookingBloc, BookingState>(
         listener: (context, state) {
           // Auto-select the pre-selected slot the first time BookingSelecting loads.
@@ -95,7 +97,7 @@ class _BookingScreenState extends State<BookingScreen> {
           if (state is BookingSuccess) {
             TilawaFeedback.showToast(
               context,
-              message: 'تم تأكيد الحجز!',
+              message: l10n.bookingConfirmed,
               variant: TilawaFeedbackVariant.success,
             );
             if (widget.onBookingSuccess != null) {
@@ -123,26 +125,26 @@ class _BookingScreenState extends State<BookingScreen> {
           }
         },
         builder: (context, state) => switch (state) {
-          BookingInitial() || BookingEligibilityChecking() => const Center(
+          BookingInitial() || BookingEligibilityChecking() => Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 12),
-                Text('جارٍ التحقق من أهليتك…'),
+                const CircularProgressIndicator(),
+                const SizedBox(height: 12),
+                Text(l10n.checkingEligibility),
               ],
             ),
           ),
           BookingSlotsLoading() => const Center(
             child: CircularProgressIndicator(),
           ),
-          BookingSubmitting() => const Center(
+          BookingSubmitting() => Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 12),
-                Text('جارٍ تأكيد الحجز…'),
+                const CircularProgressIndicator(),
+                const SizedBox(height: 12),
+                Text(l10n.confirmingBooking),
               ],
             ),
           ),
@@ -169,7 +171,7 @@ class _BookingScreenState extends State<BookingScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'اختر موعداً',
+                    l10n.selectSlot,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 12),
@@ -188,7 +190,7 @@ class _BookingScreenState extends State<BookingScreen> {
                           ),
                           const SizedBox(height: 24),
                           Text(
-                            'نوع الجلسة',
+                            l10n.sessionType,
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                           const SizedBox(height: 8),
@@ -204,7 +206,7 @@ class _BookingScreenState extends State<BookingScreen> {
                   ),
                   const SizedBox(height: 16),
                   TilawaButton(
-                    text: 'تأكيد الحجز',
+                    text: l10n.confirmBooking,
                     onPressed: canSubmit ? _submit : null,
                     isFullWidth: true,
                     size: TilawaButtonSize.large,
@@ -311,19 +313,21 @@ class _CallTypePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+
     return TilawaSegmentedControl<SessionCallType>(
-      segments: const [
+      segments: [
         TilawaSegment(
           value: SessionCallType.externalMeeting,
-          label: 'رابط خارجي',
+          label: l10n.callTypeExternalMeeting,
         ),
         TilawaSegment(
           value: SessionCallType.voiceCall,
-          label: 'صوتي',
+          label: l10n.callTypeVoice,
         ),
         TilawaSegment(
           value: SessionCallType.videoCall,
-          label: 'مرئي',
+          label: l10n.callTypeVideo,
         ),
       ],
       selectedValue: selected,

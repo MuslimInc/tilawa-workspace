@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quran_sessions/core/l10n_extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../failure_ui/quran_sessions_failure_ui.dart';
@@ -36,14 +37,16 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('جلساتي')),
+      appBar: AppBar(title: Text(l10n.mySessionsTitle)),
       body: BlocConsumer<MySessionsBloc, MySessionsState>(
         listener: (context, state) {
           if (state is MySessionsSuccess && state.lastSubmittedReview != null) {
             TilawaFeedback.showToast(
               context,
-              message: 'شكراً — تم إرسال تقييمك!',
+              message: l10n.reviewSubmittedThanks,
               variant: TilawaFeedbackVariant.success,
             );
           }
@@ -63,7 +66,7 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
                 const SizedBox(height: 12),
                 ElevatedButton(
                   onPressed: _reload,
-                  child: const Text('إعادة المحاولة'),
+                  child: Text(l10n.retry),
                 ),
               ],
             ),
@@ -72,12 +75,14 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
             onRefresh: () async => _reload(),
             child: CustomScrollView(
               slivers: [
-                _SectionHeader(title: 'القادمة (${upcoming.length})'),
+                _SectionHeader(
+                  title: l10n.upcomingSessionsSection(upcoming.length),
+                ),
                 if (upcoming.isEmpty)
-                  const SliverToBoxAdapter(
+                  SliverToBoxAdapter(
                     child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Text('لا توجد جلسات قادمة'),
+                      padding: const EdgeInsets.all(16),
+                      child: Text(l10n.noUpcomingSessions),
                     ),
                   )
                 else
@@ -97,12 +102,12 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
                       );
                     },
                   ),
-                _SectionHeader(title: 'السابقة (${past.length})'),
+                _SectionHeader(title: l10n.pastSessionsSection(past.length)),
                 if (past.isEmpty)
-                  const SliverToBoxAdapter(
+                  SliverToBoxAdapter(
                     child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Text('لا توجد جلسات سابقة'),
+                      padding: const EdgeInsets.all(16),
+                      child: Text(l10n.noPastSessions),
                     ),
                   )
                 else
@@ -131,19 +136,20 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
   );
 
   Future<void> _confirmCancel(String bookingId) async {
+    final l10n = context.quranSessionsL10n;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('إلغاء الجلسة؟'),
-        content: const Text('لا يمكن التراجع عن هذا الإجراء.'),
+        title: Text(l10n.cancelSessionDialogTitle),
+        content: Text(l10n.cancelSessionDialogMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('بقاء'),
+            child: Text(l10n.keepSession),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('إلغاء الجلسة'),
+            child: Text(l10n.cancelSessionAction),
           ),
         ],
       ),
@@ -176,6 +182,8 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+
     return Padding(
       padding: const EdgeInsets.all(32),
       child: Column(
@@ -188,12 +196,12 @@ class _EmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'لا توجد جلسات بعد',
+            l10n.noSessionsYet,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
           Text(
-            'احجز جلستك الأولى مع أحد معلمينا المعتمدين',
+            l10n.bookFirstSessionHint,
             style: Theme.of(context).textTheme.bodySmall,
             textAlign: TextAlign.center,
           ),

@@ -77,6 +77,23 @@ class AnalyticsEvents {
   static const String khatmaDashboardViewed = 'khatma_dashboard_viewed';
   static const String khatmaContinueReading = 'khatma_continue_reading';
   static const String khatmaReset = 'khatma_reset';
+
+  // Quran Sessions
+  static const String teacherApplyEntrySeen = 'teacher_apply_entry_seen';
+  static const String teacherApplyStarted = 'teacher_apply_started';
+  static const String teacherApplicationSubmitted =
+      'teacher_application_submitted';
+  static const String teacherApplicationStatusViewed =
+      'teacher_application_status_viewed';
+  static const String teacherApplicationApproved =
+      'teacher_application_approved';
+  static const String teacherApplicationRejected =
+      'teacher_application_rejected';
+  static const String teacherDashboardOpened = 'teacher_dashboard_opened';
+  static const String quranSessionsEmptyStateSeen =
+      'quran_sessions_empty_state_seen';
+  static const String quranSessionsNotifyInterestSubmitted =
+      'quran_sessions_notify_interest_submitted';
 }
 
 class AnalyticsParams {

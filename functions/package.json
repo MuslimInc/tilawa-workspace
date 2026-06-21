@@ -8,7 +8,9 @@
     "serve": "npm run build && firebase emulators:start --only functions",
     "deploy": "firebase deploy --only functions",
     "seed:market-configs": "ts-node scripts/seedMarketConfigs.ts",
-    "seed:market-configs:apply": "ts-node scripts/seedMarketConfigs.ts --apply"
+    "seed:market-configs:apply": "ts-node scripts/seedMarketConfigs.ts --apply",
+    "admin:list-pending-applications": "ts-node scripts/listPendingTeacherApplications.ts",
+    "admin:review-teacher-application": "ts-node scripts/reviewTeacherApplicationAdmin.ts"
   },
   "engines": {
     "node": "22"

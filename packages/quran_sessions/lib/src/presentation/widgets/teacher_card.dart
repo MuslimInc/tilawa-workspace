@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:quran_sessions/core/l10n_extensions.dart';
 
 import '../../domain/entities/quran_teacher.dart';
 import '../../domain/entities/session_pricing_type.dart';
 import '../../utils/price_formatter.dart';
-import '../../utils/specialization_labels.dart';
 import 'teacher_initials_avatar.dart';
 
 /// Compact card showing teacher avatar, name, specializations, rating, and price.
@@ -105,6 +105,7 @@ class _PriceChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final priceLabel = PriceFormatter.formatOrFree(
+      l10n: context.quranSessionsL10n,
       pricingType: teacher.pricingType,
       price: teacher.price,
     );
@@ -142,6 +143,7 @@ class _SpecializationChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
     final visible = specs.take(3).toList();
     if (visible.isEmpty) return const SizedBox.shrink();
 
@@ -156,7 +158,7 @@ class _SpecializationChips extends StatelessWidget {
             borderRadius: BorderRadius.circular(4),
           ),
           child: Text(
-            SpecializationLabels.arabic(code),
+            l10n.specializationLabel(code),
             style: TextStyle(
               fontSize: 10,
               color: Theme.of(context).colorScheme.onSurfaceVariant,

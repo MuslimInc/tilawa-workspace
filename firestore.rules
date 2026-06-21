@@ -12,6 +12,15 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.admin == true;
+    }
+
+    function incomingUnchanged(field) {
+      return !(field in request.resource.data)
+        || request.resource.data[field] == resource.data[field];
+    }
+
     // Remote in-app update policy (see InAppUpdateConfigDataSourceImpl).
     match /app_config/in_app_update {
       allow read: if true;
@@ -66,14 +75,31 @@ service cloud.firestore {
     // operations move to Cloud Functions (Admin SDK bypasses these rules).
     // Full design + write model: docs/security/quran_sessions_firestore_rules_draft.md
 
-    // Teacher applications — applicant reads own; writes via admin/CF.
+    // Teacher applications — applicant CRUD on own draft; moderation via CF.
+    // Write model: docs/security/quran_sessions_teacher_application_write_model.md
     match /quran_teacher_applications/{applicationId} {
-      allow read: if isSignedIn()
-        && resource.data.userId == request.auth.uid;
-      allow write: if false;
+      allow read: if isAdmin()
+        || (isSignedIn() && resource.data.userId == request.auth.uid);
+
+      allow create: if isSignedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'draft'
+        && !('reviewedBy' in request.resource.data)
+        && !('reviewedAt' in request.resource.data);
+
+      allow update: if isSignedIn()
+        && resource.data.userId == request.auth.uid
+        && resource.data.status == 'draft'
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status in ['draft', 'pending']
+        && incomingUnchanged('userId')
+        && !('reviewedBy' in request.resource.data)
+        && !('reviewedAt' in request.resource.data);
+
+      allow delete: if false;
     }
 
-    // Teacher profiles — authenticated read (student browse); writes via admin/CF.
+    // Teacher profiles — browse reads; creation/trust fields via admin CF only.
     match /quran_teacher_profiles/{teacherId} {
       allow read: if isSignedIn();
       allow write: if false;

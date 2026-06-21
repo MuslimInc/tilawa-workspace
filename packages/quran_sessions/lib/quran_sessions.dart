@@ -120,6 +120,8 @@ export 'src/presentation/blocs/teacher_profile/teacher_profile_bloc.dart';
 export 'src/presentation/blocs/teacher_profile/teacher_profile_event.dart';
 export 'src/presentation/blocs/teacher_profile/teacher_profile_state.dart';
 // ── Presentation: failure UI extension ───────────────────────────────────────
+export 'src/presentation/config/quran_sessions_analytics_callbacks.dart';
+export 'src/presentation/config/quran_sessions_feature_config.dart';
 export 'src/presentation/failure_ui/quran_sessions_failure_ui.dart';
 // ── Presentation: router ──────────────────────────────────────────────────────
 export 'src/presentation/router/quran_sessions_routes.dart';
@@ -136,6 +138,7 @@ export 'src/presentation/screens/teacher_profile_screen.dart';
 // ── Presentation: widgets ─────────────────────────────────────────────────────
 export 'src/presentation/widgets/availability_slot_picker.dart';
 export 'src/presentation/widgets/date_grouped_slot_picker.dart';
+export 'src/presentation/widgets/quran_sessions_student_empty_state.dart';
 export 'src/presentation/widgets/session_card.dart';
 export 'src/presentation/widgets/teacher_card.dart';
 export 'src/presentation/widgets/teacher_initials_avatar.dart';

@@ -104,6 +104,12 @@
 - ✅ "أريد أن أصبح محفظًا" entry card on sessions home screen
 - ✅ Debug simulate-approval button (kDebugMode only — tree-shaken in release)
 - ✅ Routes: `/sessions/teacher/apply`, `/sessions/teacher/status`
+- ✅ Option D hybrid IA — Profile canonical teaching entry + empty-state secondary CTA ([ADR-004](adr/004-teacher-application-intake-vs-marketplace-activation.md))
+- ✅ Feature flags: `quranSessionsEnabled`, `teacherApplicationEnabled`, discoverability enum, `quranSessionsBookingEnabled`
+- ✅ MVO admin scripts: list pending + review application (`functions/scripts/`)
+- ✅ Cloud Function: `reviewTeacherApplication` (admin claim)
+- ✅ Firestore applicant write rules (draft → pending)
+- 🚫 Admin application review screen — deferred (MVO scripts + CF sufficient for beta)
 - ✅ `TeacherApplicationBloc` — events-based, handles draft/submit/simulate-approval
 - ✅ Dashboard edit slot: `AvailabilitySlotEdited` event + UI edit button
 - 🚫 Admin application review screen — deferred (no admin UI)
