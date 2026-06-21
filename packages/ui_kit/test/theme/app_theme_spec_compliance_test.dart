@@ -110,5 +110,54 @@ void main() {
       expect(search.backgroundColor, isNot(theme.colorScheme.primary));
       expect(search.backgroundColor, isNot(theme.colorScheme.primaryContainer));
     });
+
+    test('Material button themes use kit pill shape from tokens', () {
+      final ThemeData theme = AppTheme.getLightTheme(
+        primaryColor: AppColors.defaultPrimary,
+      );
+      final TilawaDesignTokens tokens = theme.extension<TilawaDesignTokens>()!;
+      final BorderRadius expected = BorderRadius.circular(
+        tokens.buttonBorderRadius(),
+      );
+
+      for (final ButtonStyle? style in [
+        theme.elevatedButtonTheme.style,
+        theme.filledButtonTheme.style,
+        theme.outlinedButtonTheme.style,
+        theme.textButtonTheme.style,
+      ]) {
+        final OutlinedBorder shape = style!.shape!.resolve(const {})!;
+        expect((shape as RoundedRectangleBorder).borderRadius, expected);
+      }
+    });
+
+    test('card, dialog, and input decoration use semantic token radii', () {
+      final ThemeData theme = AppTheme.getLightTheme(
+        primaryColor: AppColors.defaultPrimary,
+      );
+      final TilawaDesignTokens tokens = theme.extension<TilawaDesignTokens>()!;
+
+      final RoundedRectangleBorder cardShape =
+          theme.cardTheme.shape! as RoundedRectangleBorder;
+      expect(
+        cardShape.borderRadius,
+        BorderRadius.circular(
+          tokens.resolveRadius(family: TilawaRadiusFamily.card),
+        ),
+      );
+
+      final RoundedRectangleBorder dialogShape =
+          theme.dialogTheme.shape! as RoundedRectangleBorder;
+      expect(dialogShape.borderRadius, cardShape.borderRadius);
+
+      final OutlineInputBorder inputBorder =
+          theme.inputDecorationTheme.enabledBorder! as OutlineInputBorder;
+      expect(
+        inputBorder.borderRadius,
+        BorderRadius.circular(
+          tokens.resolveRadius(family: TilawaRadiusFamily.chrome),
+        ),
+      );
+    });
   });
 }

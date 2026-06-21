@@ -108,6 +108,20 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
       'This teacher is not available in your area. Please choose another.';
 
   @override
+  String get dateOfBirthRequired => 'Date of birth is required.';
+
+  @override
+  String get futureDateOfBirth => 'Date of birth cannot be in the future.';
+
+  @override
+  String get dateOfBirthTooRecent =>
+      'Your age is not eligible for this feature yet.';
+
+  @override
+  String get invalidDateOfBirth =>
+      'Date of birth is not valid. Please enter a valid date.';
+
+  @override
   String get teacherApplicationNotFound => 'No teacher application was found.';
 
   @override

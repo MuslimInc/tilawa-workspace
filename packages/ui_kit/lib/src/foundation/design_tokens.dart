@@ -88,6 +88,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     required this.stateLayerPressed,
     required this.stateLayerFocused,
     required this.focusRingWidth,
+    required this.dropdownMenuGap,
   });
 
   /// 2.0
@@ -296,6 +297,9 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   /// here so component-level focus styling is consistent.
   final double focusRingWidth;
 
+  /// 4.0 — vertical gap between a closed dropdown field and its menu panel.
+  final double dropdownMenuGap;
+
   /// Default values for light/dark theme.
   factory TilawaDesignTokens.light() => TilawaDesignTokens._create();
 
@@ -359,6 +363,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       stateLayerPressed: 0.12,
       stateLayerFocused: 0.12,
       focusRingWidth: 2.0,
+      dropdownMenuGap: 4.0,
     );
   }
 
@@ -420,6 +425,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     double? stateLayerPressed,
     double? stateLayerFocused,
     double? focusRingWidth,
+    double? dropdownMenuGap,
   }) {
     return TilawaDesignTokens(
       spaceTiny: spaceTiny ?? this.spaceTiny,
@@ -492,6 +498,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       stateLayerPressed: stateLayerPressed ?? this.stateLayerPressed,
       stateLayerFocused: stateLayerFocused ?? this.stateLayerFocused,
       focusRingWidth: focusRingWidth ?? this.focusRingWidth,
+      dropdownMenuGap: dropdownMenuGap ?? this.dropdownMenuGap,
     );
   }
 
@@ -655,6 +662,11 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
         t,
       )!,
       focusRingWidth: lerpDouble(focusRingWidth, other.focusRingWidth, t)!,
+      dropdownMenuGap: lerpDouble(
+        dropdownMenuGap,
+        other.dropdownMenuGap,
+        t,
+      )!,
     );
   }
 
@@ -746,6 +758,12 @@ enum TilawaRadiusFamily {
 
   /// Standalone square icon controls ([TilawaIconActionButton]).
   icon,
+
+  /// Standard compact chips.
+  chip,
+
+  /// Standard selection cards/chips (e.g. Gender option).
+  selection,
 }
 
 /// Resolves a component's corner radius from its brand role.
@@ -763,19 +781,53 @@ extension TilawaRadiusResolverX on TilawaDesignTokens {
     double width = 0,
   }) {
     return switch (family) {
-      TilawaRadiusFamily.card => radiusCard,
+      TilawaRadiusFamily.card => radiusMedium,
       TilawaRadiusFamily.pill =>
         height > 0
             ? radiusPill(height)
             : radiusPill(kTilawaMinInteractiveDimension),
-      TilawaRadiusFamily.chrome => radiusLarge,
-      TilawaRadiusFamily.section => radiusSection,
-      TilawaRadiusFamily.hero => radiusHero,
+      TilawaRadiusFamily.chrome => radiusMedium,
+      TilawaRadiusFamily.section => radiusMedium,
+      TilawaRadiusFamily.hero => radiusLarge,
       TilawaRadiusFamily.decorative => radiusMedium,
       TilawaRadiusFamily.icon => radiusIcon(
         _resolvedIconDimension(width: width, height: height),
       ),
+      TilawaRadiusFamily.chip => radiusSmall,
+      TilawaRadiusFamily.selection => radiusMedium,
     };
+  }
+
+  /// Corner radius for tappable buttons at [height].
+  ///
+  /// All kit and Material buttons (primary, secondary, outline, danger) share
+  /// this pill radius — only color semantics differ.
+  double buttonBorderRadius({double height = kTilawaMinInteractiveDimension}) =>
+      resolveRadius(family: TilawaRadiusFamily.pill, height: height);
+
+  /// Standard [RoundedRectangleBorder] for buttons at [height].
+  RoundedRectangleBorder buttonShape({
+    double height = kTilawaMinInteractiveDimension,
+  }) => RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(buttonBorderRadius(height: height)),
+  );
+
+  /// Baseline [ButtonStyle] for Material [FilledButton], [OutlinedButton],
+  /// [ElevatedButton], and [TextButton].
+  ///
+  /// Applies the kit pill shape and 48×48 dp minimum touch target. Pass
+  /// [base] from a [ThemeData] button theme to preserve Flex/M3 colors while
+  /// overriding shape.
+  ButtonStyle materialButtonStyle({
+    ButtonStyle? base,
+    double height = kTilawaMinInteractiveDimension,
+  }) {
+    return (base ?? const ButtonStyle()).copyWith(
+      minimumSize: WidgetStatePropertyAll(
+        Size(kTilawaMinInteractiveDimension, height),
+      ),
+      shape: WidgetStatePropertyAll(buttonShape(height: height)),
+    );
   }
 
   double _resolvedIconDimension({

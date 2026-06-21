@@ -255,6 +255,32 @@ final class PaymentProviderFailure extends QuranSessionsFailure {
   const PaymentProviderFailure();
 }
 
+// ── Date of birth ─────────────────────────────────────────────────────────────
+
+/// No date of birth was provided. DOB is a required profile field.
+final class DateOfBirthRequiredFailure extends QuranSessionsFailure {
+  const DateOfBirthRequiredFailure();
+}
+
+/// The provided date of birth is in the future.
+/// DOB must be ≤ today (date-only comparison).
+final class FutureDateOfBirthFailure extends QuranSessionsFailure {
+  const FutureDateOfBirthFailure();
+}
+
+/// The provided date of birth is more recent than the MVP eligibility cutoff.
+/// Temporary safety rule: DOB must be on or before 2022-01-01 — users born
+/// after that date are too young to use the feature for now.
+final class DateOfBirthTooRecentFailure extends QuranSessionsFailure {
+  const DateOfBirthTooRecentFailure();
+}
+
+/// The provided date of birth is not a realistic/valid value.
+/// MVP rule: DOB must not be before 1900-01-01.
+final class InvalidDateOfBirthFailure extends QuranSessionsFailure {
+  const InvalidDateOfBirthFailure();
+}
+
 // ── Teacher application ───────────────────────────────────────────────────────
 
 /// No [TeacherApplication] exists for the given user.

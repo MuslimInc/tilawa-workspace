@@ -60,6 +60,8 @@ class TeacherEligibilityPolicy extends Equatable {
 class QuranSessionSafetyPolicy extends Equatable {
   const QuranSessionSafetyPolicy({
     this.childAgeThreshold = 14,
+    this.minimumStudentAgeYears = 3,
+    this.minimumTeacherAgeYears = 18,
     this.globalAllowMaleTeacherFemaleStudent = true,
     this.globalAllowFemaleTeacherMaleStudent = true,
     this.videoCallAllowedForChildren = false,
@@ -69,6 +71,21 @@ class QuranSessionSafetyPolicy extends Equatable {
 
   /// Age (years) below which a student is considered a child.
   final int childAgeThreshold;
+
+  /// Minimum age (years) a student must be to complete their profile.
+  ///
+  /// Sourced from remote configuration
+  /// (`quran_sessions.minimum_student_age_years`). The latest acceptable
+  /// student birth date is `today - minimumStudentAgeYears`. There is no
+  /// hardcoded date — changing the remote value changes the limit at runtime.
+  final int minimumStudentAgeYears;
+
+  /// Minimum age (years) a teacher must be to complete their profile.
+  ///
+  /// Sourced from remote configuration
+  /// (`quran_sessions.minimum_teacher_age_years`). The latest acceptable
+  /// teacher birth date is `today - minimumTeacherAgeYears`.
+  final int minimumTeacherAgeYears;
 
   /// Whether any male teacher may teach a female student
   /// (can be overridden at teacher level to be more restrictive).
@@ -116,6 +133,8 @@ class QuranSessionSafetyPolicy extends Equatable {
   @override
   List<Object?> get props => [
     childAgeThreshold,
+    minimumStudentAgeYears,
+    minimumTeacherAgeYears,
     globalAllowMaleTeacherFemaleStudent,
     globalAllowFemaleTeacherMaleStudent,
     videoCallAllowedForChildren,

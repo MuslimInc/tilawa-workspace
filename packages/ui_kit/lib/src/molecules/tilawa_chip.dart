@@ -60,7 +60,7 @@ class TilawaChip extends StatelessWidget {
         borderRadius ??
         (onTap != null
             ? designTokens.resolveRadius(
-                family: TilawaRadiusFamily.pill,
+                family: TilawaRadiusFamily.chip,
                 height: _chipPaintedHeight(
                   context,
                   chipTokens: componentTokens,
@@ -96,17 +96,15 @@ class TilawaChip extends StatelessWidget {
             color: effectiveForeground,
           ),
         if (showLabel || icon == null)
-          Flexible(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style:
-                  textStyle ??
-                  theme.textTheme.labelLarge?.copyWith(
-                    color: effectiveForeground,
-                  ),
-            ),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style:
+                textStyle ??
+                theme.textTheme.labelLarge?.copyWith(
+                  color: effectiveForeground,
+                ),
           ),
       ],
     );
@@ -158,24 +156,24 @@ class TilawaChip extends StatelessWidget {
       ),
     );
 
-    // Collapse only the height axis so the chip never grows taller than its
-    // content (preventing the "fill grid cell" regression in unbounded
-    // parents). Let the chip stretch horizontally when the parent provides
-    // bounded width — that matches selection-pill and segmented-control
-    // grammars. The 48 dp minimum keeps the hit-target accessible.
+    // Shrink-wrap both axes so chips stay compact inside [Wrap] and other
+    // loose parents. The 48 dp minimum keeps the hit-target accessible.
     return Semantics(
       button: true,
       label: label,
       selected: semanticsSelected,
-      child: Align(
-        alignment: Alignment.center,
-        heightFactor: 1,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minWidth: kTilawaMinInteractiveDimension,
-            minHeight: kTilawaMinInteractiveDimension,
+      child: ExcludeSemantics(
+        child: Align(
+          alignment: Alignment.center,
+          widthFactor: 1,
+          heightFactor: 1,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minWidth: kTilawaMinInteractiveDimension,
+              minHeight: kTilawaMinInteractiveDimension,
+            ),
+            child: paintedChip,
           ),
-          child: paintedChip,
         ),
       ),
     );

@@ -1,8 +1,8 @@
 import 'package:dartz_plus/dartz_plus.dart';
 
-import '../../../lib/src/domain/entities/quran_session.dart';
-import '../../../lib/src/domain/repositories/session_repository.dart';
-import '../../../lib/src/domain/failures/quran_sessions_failure.dart';
+import 'package:quran_sessions/src/domain/entities/quran_session.dart';
+import 'package:quran_sessions/src/domain/failures/quran_sessions_failure.dart';
+import 'package:quran_sessions/src/domain/repositories/session_repository.dart';
 
 class FakeSessionRepository implements SessionRepository {
   List<QuranSession> sessions = [];

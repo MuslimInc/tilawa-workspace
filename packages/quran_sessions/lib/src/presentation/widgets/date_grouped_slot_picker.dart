@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/teacher_availability.dart';
 
@@ -142,7 +143,12 @@ class _DayTabBarState extends State<_DayTabBar> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final tokens = theme.tokens;
+    final dayRadius = tokens.resolveRadius(
+      family: TilawaRadiusFamily.selection,
+    );
     final weekdayFmt = DateFormat('EEE', 'ar');
     final dayFmt = DateFormat('d', 'ar');
     final monthFmt = DateFormat('MMM', 'ar');
@@ -168,7 +174,7 @@ class _DayTabBarState extends State<_DayTabBar> {
                 color: isSelected
                     ? scheme.primary
                     : scheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(dayRadius),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -237,22 +243,16 @@ class _TimeGrid extends StatelessWidget {
     }
 
     final timeFmt = DateFormat('h:mm a', 'ar');
-    final scheme = Theme.of(context).colorScheme;
 
     return Wrap(
       spacing: 8,
       runSpacing: 8,
       children: available.map((slot) {
         final isSelected = slot.slotId == selectedSlotId;
-        return ChoiceChip(
-          label: Text(timeFmt.format(slot.startsAt.toLocal())),
+        return TilawaSelectionPill(
+          label: timeFmt.format(slot.startsAt.toLocal()),
           selected: isSelected,
-          selectedColor: scheme.primary,
-          labelStyle: TextStyle(
-            color: isSelected ? scheme.onPrimary : scheme.onSurface,
-            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
-          ),
-          onSelected: (_) => onSlotSelected(slot),
+          onTap: () => onSlotSelected(slot),
         );
       }).toList(),
     );

@@ -78,6 +78,12 @@ extension QuranSessionsFailureUi on QuranSessionsFailure {
 
       TeacherNotInMarketFailure() => loc.teacherNotInMarket,
 
+      // ── Date of birth ───────────────────────────────────────────────────────
+      DateOfBirthRequiredFailure() => loc.dateOfBirthRequired,
+      FutureDateOfBirthFailure() => loc.futureDateOfBirth,
+      DateOfBirthTooRecentFailure() => loc.dateOfBirthTooRecent,
+      InvalidDateOfBirthFailure() => loc.invalidDateOfBirth,
+
       // ── Teacher application ─────────────────────────────────────────────────
       TeacherApplicationNotFoundFailure() => loc.teacherApplicationNotFound,
       TeacherApplicationAlreadyPendingFailure() =>

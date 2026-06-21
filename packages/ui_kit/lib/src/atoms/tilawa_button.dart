@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../foundation/design_tokens.dart';
@@ -44,7 +46,8 @@ enum TilawaButtonSize {
   /// Standard height for most mobile interactions.
   medium,
 
-  /// Large height for prominent CTA buttons.
+  /// Prominent CTA — same 48 dp height as [medium]; wider horizontal padding
+  /// and larger label typography provide emphasis.
   large,
 }
 
@@ -53,12 +56,12 @@ enum TilawaButtonSize {
 /// Supports multiple variants, sizes, and states (including loading and disabled).
 ///
 /// [TilawaButton] handles its own internal layout, including icons and
-/// loading indicators, while ensuring a minimum touch target of 44×44
+/// loading indicators, while ensuring a minimum touch target of 48×48
 /// ([kTilawaMinInteractiveDimension]).
 ///
 /// ## Touch-target contract
 ///
-/// All non-shrink-wrapped buttons are forced to ≥ 44×44
+/// All non-shrink-wrapped buttons are forced to ≥ 48×48
 /// ([kTilawaMinInteractiveDimension]) regardless of [size] — a `small`
 /// (32 dp visual) button still gets a 48 dp hit target via an outer
 /// [ConstrainedBox]. [shrinkWrapTapTarget] is the **only** way to drop below
@@ -145,7 +148,7 @@ class TilawaButton extends StatelessWidget {
   /// Merged on top of the built-in label [TextStyle] (font size from [size]).
   final TextStyle? textStyle;
 
-  /// When true, skips the 44×44 minimum ([kTilawaMinInteractiveDimension])
+  /// When true, skips the 48×48 minimum ([kTilawaMinInteractiveDimension])
   /// and uses a shrink-wrapped tap target ([MaterialTapTargetSize.shrinkWrap]).
   final bool shrinkWrapTapTarget;
 
@@ -169,24 +172,27 @@ class TilawaButton extends StatelessWidget {
     final (height, horizontalPadding, fontSize, iconSize) = _getDimensions();
 
     final designTokens = theme.extension<TilawaDesignTokens>();
-    // Buttons are tappable affordances → full pill (`height / 2`).
+    // All full-size buttons share the pill shape; inline text-link actions
+    // (shrinkWrapTapTarget) use the small decorative radius.
     final double resolvedRadius =
         borderRadius ??
-        designTokens?.resolveRadius(
-          family: TilawaRadiusFamily.pill,
-          height: height,
-        ) ??
-        height / 2;
+        (shrinkWrapTapTarget
+            ? (designTokens?.radiusSmall ?? 8.0)
+            : designTokens?.buttonBorderRadius(height: height) ?? height / 2);
     final EdgeInsetsGeometry resolvedPadding =
         padding ?? EdgeInsets.symmetric(horizontal: horizontalPadding);
 
     final Color overlayBase = resolvedFg;
 
+    final double resolvedMinHeight = shrinkWrapTapTarget
+        ? 0
+        : math.max(height, kTilawaMinInteractiveDimension);
+
     final buttonStyle = ButtonStyle(
       minimumSize: WidgetStateProperty.all(
         Size(
           isFullWidth ? double.infinity : 0,
-          shrinkWrapTapTarget ? 0 : height,
+          resolvedMinHeight,
         ),
       ),
       padding: WidgetStateProperty.all(resolvedPadding),
@@ -262,7 +268,10 @@ class TilawaButton extends StatelessWidget {
     final Widget sizedButton = shrinkWrapTapTarget
         ? textButton
         : ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
+            constraints: const BoxConstraints(
+              minHeight: kTilawaMinInteractiveDimension,
+              minWidth: kTilawaMinInteractiveDimension,
+            ),
             child: textButton,
           );
 
@@ -306,7 +315,7 @@ class TilawaButton extends StatelessWidget {
     return switch (size) {
       TilawaButtonSize.small => (32.0, 12.0, 12.0, 16.0),
       TilawaButtonSize.medium => (48.0, 16.0, 14.0, 20.0),
-      TilawaButtonSize.large => (56.0, 24.0, 16.0, 24.0),
+      TilawaButtonSize.large => (48.0, 24.0, 16.0, 24.0),
     };
   }
 }

@@ -1,6 +1,6 @@
 import 'package:dartz_plus/dartz_plus.dart';
 
-import '../../../lib/src/boundaries/payment/payment_provider.dart';
+import 'package:quran_sessions/src/boundaries/payment/payment_provider.dart';
 
 /// Returns a deterministic reference string; never contacts a payment gateway.
 class FakePaymentProvider implements PaymentProvider {

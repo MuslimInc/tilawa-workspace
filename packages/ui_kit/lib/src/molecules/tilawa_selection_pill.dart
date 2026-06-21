@@ -77,6 +77,9 @@ class TilawaSelectionPill extends StatelessWidget {
       semanticsSelected: selected,
       backgroundColor: background,
       foregroundColor: foreground,
+      borderRadius: designTokens.resolveRadius(
+        family: TilawaRadiusFamily.selection,
+      ),
       borderColor: selected
           ? background
           : (isCatalog

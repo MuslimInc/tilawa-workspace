@@ -7,6 +7,7 @@ import '../failure_ui/quran_sessions_failure_ui.dart';
 import '../blocs/teacher_dashboard/teacher_dashboard_bloc.dart';
 import '../blocs/teacher_dashboard/teacher_dashboard_event.dart';
 import '../blocs/teacher_dashboard/teacher_dashboard_state.dart';
+import '../widgets/quran_sessions_form_field_shell.dart';
 import '../widgets/session_card.dart';
 
 class TeacherDashboardScreen extends StatefulWidget {
@@ -311,10 +312,10 @@ class _AddSlotSheetState extends State<_AddSlotSheet> {
           ),
           const SizedBox(height: 20),
           // Date picker row
-          OutlinedButton.icon(
-            icon: const Icon(Icons.calendar_today_outlined),
-            label: Text(dateFmt.format(_selectedDate)),
-            onPressed: () async {
+          QuranSessionsFormFieldShell(
+            prefixIcon: Icons.calendar_today_outlined,
+            semanticLabel: 'تاريخ الموعد',
+            onTap: () async {
               final picked = await showDatePicker(
                 context: context,
                 initialDate: _selectedDate,
@@ -323,19 +324,27 @@ class _AddSlotSheetState extends State<_AddSlotSheet> {
               );
               if (picked != null) setState(() => _selectedDate = picked);
             },
+            child: Text(
+              dateFmt.format(_selectedDate),
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
           ),
           const SizedBox(height: 12),
           // Time picker row
-          OutlinedButton.icon(
-            icon: const Icon(Icons.access_time),
-            label: Text(_selectedTime.format(context)),
-            onPressed: () async {
+          QuranSessionsFormFieldShell(
+            prefixIcon: Icons.access_time,
+            semanticLabel: 'وقت الموعد',
+            onTap: () async {
               final picked = await showTimePicker(
                 context: context,
                 initialTime: _selectedTime,
               );
               if (picked != null) setState(() => _selectedTime = picked);
             },
+            child: Text(
+              _selectedTime.format(context),
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
           ),
           const SizedBox(height: 24),
           FilledButton(

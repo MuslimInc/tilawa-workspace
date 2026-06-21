@@ -24,8 +24,10 @@ final class ProfileCompletionEditing extends ProfileCompletionState {
   const ProfileCompletionEditing({
     required this.userId,
     required this.availableMarkets,
+    required this.minimumStudentAgeYears,
     this.selectedGender,
     this.selectedDateOfBirth,
+    this.dobFailure,
     this.selectedMarket,
     this.selectedCity,
   });
@@ -35,8 +37,21 @@ final class ProfileCompletionEditing extends ProfileCompletionState {
   /// All supported markets — used to populate the country picker.
   final List<MarketConfig> availableMarkets;
 
+  /// Configured minimum student age (years), loaded from remote config via the
+  /// session policy. Drives both the date picker's `lastDate` and DOB
+  /// validation so the UI and domain can never drift.
+  final int minimumStudentAgeYears;
+
   final UserGender? selectedGender;
+
+  /// The validated date of birth. Null means not yet set OR most recent attempt
+  /// was invalid (in which case [dobFailure] is non-null).
   final DateTime? selectedDateOfBirth;
+
+  /// Non-null when the most recently attempted DOB was rejected by
+  /// [DobValidator]. The UI surfaces this as a field-level error message
+  /// via [QuranSessionsFailure.toLocalizedMessage].
+  final QuranSessionsFailure? dobFailure;
 
   /// The country the user has selected.
   final MarketConfig? selectedMarket;
@@ -51,20 +66,28 @@ final class ProfileCompletionEditing extends ProfileCompletionState {
   bool get canSubmit =>
       selectedGender != null &&
       selectedDateOfBirth != null &&
+      dobFailure == null &&
       selectedMarket != null &&
       selectedCity != null;
 
   ProfileCompletionEditing copyWith({
     UserGender? selectedGender,
     DateTime? selectedDateOfBirth,
+    QuranSessionsFailure? dobFailure,
+    bool clearDob = false,
+    bool clearDobFailure = false,
     MarketConfig? selectedMarket,
     CityConfig? selectedCity,
     bool clearCity = false,
   }) => ProfileCompletionEditing(
     userId: userId,
     availableMarkets: availableMarkets,
+    minimumStudentAgeYears: minimumStudentAgeYears,
     selectedGender: selectedGender ?? this.selectedGender,
-    selectedDateOfBirth: selectedDateOfBirth ?? this.selectedDateOfBirth,
+    selectedDateOfBirth: clearDob
+        ? null
+        : (selectedDateOfBirth ?? this.selectedDateOfBirth),
+    dobFailure: clearDobFailure ? null : (dobFailure ?? this.dobFailure),
     selectedMarket: selectedMarket ?? this.selectedMarket,
     selectedCity: clearCity ? null : (selectedCity ?? this.selectedCity),
   );
@@ -73,8 +96,10 @@ final class ProfileCompletionEditing extends ProfileCompletionState {
   List<Object?> get props => [
     userId,
     availableMarkets,
+    minimumStudentAgeYears,
     selectedGender,
     selectedDateOfBirth,
+    dobFailure,
     selectedMarket,
     selectedCity,
   ];

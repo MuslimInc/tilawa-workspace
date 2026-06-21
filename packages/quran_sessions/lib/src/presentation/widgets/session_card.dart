@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/quran_session.dart';
 
@@ -135,11 +136,16 @@ class _StatusBadge extends StatelessWidget {
       ),
     };
 
+    final tokens = Theme.of(context).tokens;
+    final badgeRadius = tokens.resolveRadius(
+      family: TilawaRadiusFamily.chip,
+    );
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(badgeRadius),
       ),
       child: Text(
         label,

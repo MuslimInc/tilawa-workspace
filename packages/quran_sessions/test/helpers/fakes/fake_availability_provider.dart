@@ -1,8 +1,8 @@
 import 'package:dartz_plus/dartz_plus.dart';
 
-import '../../../lib/src/boundaries/scheduling/availability_provider.dart';
-import '../../../lib/src/domain/entities/teacher_availability.dart';
-import '../../../lib/src/domain/failures/quran_sessions_failure.dart';
+import 'package:quran_sessions/src/boundaries/scheduling/availability_provider.dart';
+import 'package:quran_sessions/src/domain/entities/teacher_availability.dart';
+import 'package:quran_sessions/src/domain/failures/quran_sessions_failure.dart';
 
 class FakeAvailabilityProvider implements AvailabilityProvider {
   final List<TeacherAvailability> published = [];

@@ -223,12 +223,6 @@ class _QuranImagePageState extends State<QuranImagePage> {
   @override
   Widget build(BuildContext context) {
     PerfLogger.markBuild('QuranImagePage');
-    final pageInfo = QuranPageMapping.getPageInfo(widget.pageNumber);
-    final pageState = PageState.initial().copyWith(
-      currentPage: widget.pageNumber,
-      juzNumber: pageInfo.juzNumber,
-      hizbNumber: pageInfo.hizbNumber,
-    );
 
     return Column(
       children: [
@@ -305,8 +299,7 @@ class QuranAppBar extends StatelessWidget {
       fontWeight: FontWeight.w700,
       letterSpacing: 0.2,
     );
-    final indexLabel =
-        QuranImageLocalizations.of(context).surahIndex ?? 'Surah index';
+    final indexLabel = QuranImageLocalizations.of(context).surahIndex;
 
     return Padding(
       padding: EdgeInsets.only(

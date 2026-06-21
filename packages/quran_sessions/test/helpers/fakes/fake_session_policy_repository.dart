@@ -1,8 +1,8 @@
 import 'package:dartz_plus/dartz_plus.dart';
 
-import '../../../lib/src/domain/entities/session_policy.dart';
-import '../../../lib/src/domain/failures/quran_sessions_failure.dart';
-import '../../../lib/src/domain/repositories/session_policy_repository.dart';
+import 'package:quran_sessions/src/domain/entities/session_policy.dart';
+import 'package:quran_sessions/src/domain/failures/quran_sessions_failure.dart';
+import 'package:quran_sessions/src/domain/repositories/session_policy_repository.dart';
 
 class FakeSessionPolicyRepository implements SessionPolicyRepository {
   QuranSessionSafetyPolicy globalPolicy = const QuranSessionSafetyPolicy();

@@ -65,10 +65,10 @@ class QuranSessionsMvpModule {
     // Profile + policy + market use cases
     sl.registerLazySingleton(() => GetUserProfileUseCase(profileRepo));
     sl.registerLazySingleton(
-      () => CompleteStudentProfileUseCase(profileRepo),
+      () => CompleteStudentProfileUseCase(profileRepo, policyRepo),
     );
     sl.registerLazySingleton(
-      () => CompleteTeacherProfileUseCase(profileRepo),
+      () => CompleteTeacherProfileUseCase(profileRepo, policyRepo),
     );
     sl.registerLazySingleton(() => GetSessionPolicyUseCase(policyRepo));
     sl.registerLazySingleton(
@@ -165,6 +165,7 @@ class QuranSessionsMvpModule {
         getUserProfile: sl<GetUserProfileUseCase>(),
         completeStudentProfile: sl<CompleteStudentProfileUseCase>(),
         getMarketConfig: sl<GetMarketConfigUseCase>(),
+        getSessionPolicy: sl<GetSessionPolicyUseCase>(),
       ),
     );
   }

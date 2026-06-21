@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tilawa_ui_kit/src/foundation/component_tokens.dart';
+import 'package:tilawa_ui_kit/src/foundation/design_tokens.dart';
 
 import '../../lib/src/atoms/tilawa_button.dart';
 
 void _noop() {}
 
 Widget _app(Widget child) {
+  final ColorScheme colorScheme = ColorScheme.fromSeed(seedColor: Colors.teal);
   return MaterialApp(
     theme: ThemeData(
-      colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+      colorScheme: colorScheme,
+      extensions: [
+        TilawaDesignTokens.light(),
+        TilawaComponentTokens.light(colorScheme: colorScheme),
+      ],
     ),
     home: Scaffold(body: child),
   );
@@ -267,6 +274,102 @@ void main() {
       expect(shape, isA<RoundedRectangleBorder>());
       final RoundedRectangleBorder rounded = shape! as RoundedRectangleBorder;
       expect(rounded.borderRadius, BorderRadius.circular(24));
+    });
+
+    testWidgets('dangerOutline uses the same pill radius as primary', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          Column(
+            children: [
+              TilawaButton(
+                text: 'Logout',
+                variant: TilawaButtonVariant.primary,
+                onPressed: _noop,
+              ),
+              TilawaButton(
+                text: 'Delete account',
+                variant: TilawaButtonVariant.dangerOutline,
+                onPressed: _noop,
+              ),
+            ],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final List<TextButton> buttons = tester
+          .widgetList<TextButton>(find.byType(TextButton))
+          .toList();
+      expect(buttons.length, 2);
+
+      final RoundedRectangleBorder primaryShape =
+          buttons[0].style!.shape!.resolve(const {})! as RoundedRectangleBorder;
+      final RoundedRectangleBorder dangerShape =
+          buttons[1].style!.shape!.resolve(const {})! as RoundedRectangleBorder;
+
+      expect(dangerShape.borderRadius, primaryShape.borderRadius);
+      expect(dangerShape.borderRadius, BorderRadius.circular(24));
+    });
+
+    testWidgets('outline and secondary variants use pill radius', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          TilawaButton(
+            text: 'Continue',
+            variant: TilawaButtonVariant.outline,
+            onPressed: _noop,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final TextButton button = tester.widget(find.byType(TextButton));
+      final RoundedRectangleBorder shape =
+          button.style!.shape!.resolve(const {})! as RoundedRectangleBorder;
+      expect(shape.borderRadius, BorderRadius.circular(24));
+    });
+
+    testWidgets('small size still enforces at least 48dp height', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          TilawaButton(
+            text: 'Save',
+            size: TilawaButtonSize.small,
+            onPressed: _noop,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final Size size = tester.getSize(find.byType(TilawaButton));
+      expect(size.height, greaterThanOrEqualTo(48));
+    });
+
+    testWidgets('large size matches 48dp min interactive height', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          TilawaButton(
+            text: 'Save and continue',
+            size: TilawaButtonSize.large,
+            onPressed: _noop,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final TextButton button = tester.widget(find.byType(TextButton));
+      expect(
+        button.style!.minimumSize!.resolve(const {})!.height,
+        kTilawaMinInteractiveDimension,
+      );
     });
   });
 }

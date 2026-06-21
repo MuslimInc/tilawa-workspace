@@ -102,6 +102,20 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
       'هذا المعلم غير متاح في منطقتك. يرجى اختيار معلم آخر.';
 
   @override
+  String get dateOfBirthRequired => 'تاريخ الميلاد مطلوب.';
+
+  @override
+  String get futureDateOfBirth => 'لا يمكن اختيار تاريخ ميلاد في المستقبل.';
+
+  @override
+  String get dateOfBirthTooRecent =>
+      'العمر غير مناسب لاستخدام هذه الميزة حاليًا.';
+
+  @override
+  String get invalidDateOfBirth =>
+      'تاريخ الميلاد غير صالح. يرجى إدخال تاريخ صحيح.';
+
+  @override
   String get teacherApplicationNotFound => 'لم يتم العثور على طلب تسجيل كمعلم.';
 
   @override

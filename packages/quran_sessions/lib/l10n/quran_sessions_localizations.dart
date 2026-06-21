@@ -257,6 +257,30 @@ abstract class QuranSessionsLocalizations {
   /// **'This teacher is not available in your area. Please choose another.'**
   String get teacherNotInMarket;
 
+  /// No description provided for @dateOfBirthRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of birth is required.'**
+  String get dateOfBirthRequired;
+
+  /// No description provided for @futureDateOfBirth.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of birth cannot be in the future.'**
+  String get futureDateOfBirth;
+
+  /// No description provided for @dateOfBirthTooRecent.
+  ///
+  /// In en, this message translates to:
+  /// **'Your age is not eligible for this feature yet.'**
+  String get dateOfBirthTooRecent;
+
+  /// No description provided for @invalidDateOfBirth.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of birth is not valid. Please enter a valid date.'**
+  String get invalidDateOfBirth;
+
   /// No description provided for @teacherApplicationNotFound.
   ///
   /// In en, this message translates to:

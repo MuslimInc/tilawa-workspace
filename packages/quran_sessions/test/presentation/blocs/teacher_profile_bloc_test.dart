@@ -2,12 +2,12 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:checks/checks.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../../lib/src/domain/failures/quran_sessions_failure.dart';
-import '../../../lib/src/domain/usecases/get_teacher_availability_usecase.dart';
-import '../../../lib/src/domain/usecases/get_teacher_profile_usecase.dart';
-import '../../../lib/src/presentation/blocs/teacher_profile/teacher_profile_bloc.dart';
-import '../../../lib/src/presentation/blocs/teacher_profile/teacher_profile_event.dart';
-import '../../../lib/src/presentation/blocs/teacher_profile/teacher_profile_state.dart';
+import 'package:quran_sessions/src/domain/failures/quran_sessions_failure.dart';
+import 'package:quran_sessions/src/domain/usecases/get_teacher_availability_usecase.dart';
+import 'package:quran_sessions/src/domain/usecases/get_teacher_profile_usecase.dart';
+import 'package:quran_sessions/src/presentation/blocs/teacher_profile/teacher_profile_bloc.dart';
+import 'package:quran_sessions/src/presentation/blocs/teacher_profile/teacher_profile_event.dart';
+import 'package:quran_sessions/src/presentation/blocs/teacher_profile/teacher_profile_state.dart';
 import '../../helpers/fakes/fake_teacher_repository.dart';
 import '../../helpers/fixtures.dart';
 

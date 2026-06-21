@@ -21,9 +21,8 @@ class PremiumBottomBar extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final l10n = QuranImageLocalizations.of(context);
-    final pageLabel =
-        l10n.page(state.displayPage.toString()) ?? 'Page ${state.displayPage}';
-    final hizbLabel = l10n.hizb(state.hizbNumber) ?? 'Hizb ${state.hizbNumber}';
+    final pageLabel = l10n.page(state.displayPage.toString());
+    final hizbLabel = l10n.hizb(state.hizbNumber);
     final primaryColor = theme.colorScheme.primary;
 
     final bottomBar = Semantics(

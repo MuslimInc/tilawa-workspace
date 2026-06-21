@@ -1,12 +1,12 @@
-import '../../lib/src/domain/entities/quran_booking.dart';
-import '../../lib/src/domain/entities/quran_session.dart';
-import '../../lib/src/domain/entities/quran_teacher.dart';
-import '../../lib/src/domain/entities/session_call_type.dart';
-import '../../lib/src/domain/entities/session_price.dart';
-import '../../lib/src/domain/entities/session_pricing_type.dart';
-import '../../lib/src/domain/entities/teacher_availability.dart';
-import '../../lib/src/domain/entities/teacher_verification_status.dart';
-import '../../lib/src/domain/entities/user_profile.dart';
+import 'package:quran_sessions/src/domain/entities/quran_booking.dart';
+import 'package:quran_sessions/src/domain/entities/quran_session.dart';
+import 'package:quran_sessions/src/domain/entities/quran_teacher.dart';
+import 'package:quran_sessions/src/domain/entities/session_call_type.dart';
+import 'package:quran_sessions/src/domain/entities/session_price.dart';
+import 'package:quran_sessions/src/domain/entities/session_pricing_type.dart';
+import 'package:quran_sessions/src/domain/entities/teacher_availability.dart';
+import 'package:quran_sessions/src/domain/entities/teacher_verification_status.dart';
+import 'package:quran_sessions/src/domain/entities/user_profile.dart';
 
 UserProfile makeProfile({
   String userId = 'student_1',

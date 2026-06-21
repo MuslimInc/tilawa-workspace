@@ -107,11 +107,27 @@ class UserProfile extends Equatable {
   ];
 
   /// Derives age group from [dateOfBirth] and the global [childAgeThreshold].
+  ///
+  /// A null DOB is treated as adult (safe default — no child restriction).
+  /// Age is calculated using calendar years: the birthday must have passed in
+  /// the current year for the year to be counted.  This avoids the ±1 error
+  /// produced by the naive `inDays ~/ 365` approximation near leap-year
+  /// boundaries.  Age == threshold is classified as adult.
   UserAgeGroup ageGroup(int childAgeThreshold) {
     final dob = dateOfBirth;
-    if (dob == null) return UserAgeGroup.adult; // treat unknown as adult
-    final age = DateTime.now().difference(dob).inDays ~/ 365;
+    if (dob == null) return UserAgeGroup.adult;
+    final today = DateTime.now();
+    final age = _calendarAge(dob, today);
     return age < childAgeThreshold ? UserAgeGroup.child : UserAgeGroup.adult;
+  }
+
+  static int _calendarAge(DateTime dob, DateTime today) {
+    var age = today.year - dob.year;
+    final birthdayPassedThisYear =
+        today.month > dob.month ||
+        (today.month == dob.month && today.day >= dob.day);
+    if (!birthdayPassedThisYear) age--;
+    return age;
   }
 
   bool get isActive => accountStatus == AccountStatus.active;

@@ -1,8 +1,7 @@
 import 'package:dartz_plus/dartz_plus.dart';
-
-import '../../../lib/src/domain/entities/user_profile.dart';
-import '../../../lib/src/domain/failures/quran_sessions_failure.dart';
-import '../../../lib/src/domain/repositories/user_profile_repository.dart';
+import 'package:quran_sessions/src/domain/entities/user_profile.dart';
+import 'package:quran_sessions/src/domain/failures/quran_sessions_failure.dart';
+import 'package:quran_sessions/src/domain/repositories/user_profile_repository.dart';
 
 class FakeUserProfileRepository implements UserProfileRepository {
   FakeUserProfileRepository({UserProfile? profile})

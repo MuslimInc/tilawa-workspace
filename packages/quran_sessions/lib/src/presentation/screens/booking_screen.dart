@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/quran_booking.dart';
 import '../../domain/entities/session_call_type.dart';
@@ -197,9 +198,11 @@ class _BookingScreenState extends State<BookingScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  FilledButton(
+                  TilawaButton(
+                    text: 'تأكيد الحجز',
                     onPressed: canSubmit ? _submit : null,
-                    child: const Text('تأكيد الحجز'),
+                    isFullWidth: true,
+                    size: TilawaButtonSize.large,
                   ),
                 ],
               ),
@@ -247,7 +250,8 @@ class _EligibilityBlockedView extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(32),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: .center,
+        crossAxisAlignment: .stretch,
         children: [
           Icon(
             isProfileIncomplete
@@ -266,15 +270,19 @@ class _EligibilityBlockedView extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           if (isProfileIncomplete && onCompleteProfile != null)
-            FilledButton.icon(
-              icon: const Icon(Icons.edit_outlined),
-              label: const Text('إكمال الملف الشخصي'),
+            TilawaButton(
+              text: 'إكمال الملف الشخصي',
+              leadingIcon: const Icon(Icons.edit_outlined),
               onPressed: onCompleteProfile,
+              isFullWidth: true,
+              size: TilawaButtonSize.large,
             )
           else if (!isBlocked) ...[
-            ElevatedButton(
+            TilawaButton(
+              text: 'إعادة المحاولة',
               onPressed: onRetry,
-              child: const Text('إعادة المحاولة'),
+              isFullWidth: true,
+              variant: TilawaButtonVariant.secondary,
             ),
           ],
         ],
@@ -293,26 +301,23 @@ class _CallTypePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SegmentedButton<SessionCallType>(
+    return TilawaSegmentedControl<SessionCallType>(
       segments: const [
-        ButtonSegment(
+        TilawaSegment(
           value: SessionCallType.externalMeeting,
-          label: Text('رابط خارجي'),
-          icon: Icon(Icons.link),
+          label: 'رابط خارجي',
         ),
-        ButtonSegment(
+        TilawaSegment(
           value: SessionCallType.voiceCall,
-          label: Text('صوتي'),
-          icon: Icon(Icons.mic),
+          label: 'صوتي',
         ),
-        ButtonSegment(
+        TilawaSegment(
           value: SessionCallType.videoCall,
-          label: Text('مرئي'),
-          icon: Icon(Icons.videocam),
+          label: 'مرئي',
         ),
       ],
-      selected: {selected},
-      onSelectionChanged: (s) => onChanged(s.first),
+      selectedValue: selected,
+      onValueChanged: onChanged,
     );
   }
 }

@@ -1,9 +1,9 @@
 import 'package:checks/checks.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../lib/src/domain/entities/quran_booking.dart';
-import '../../lib/src/domain/failures/quran_sessions_failure.dart';
-import '../../lib/src/domain/usecases/create_booking_usecase.dart';
+import 'package:quran_sessions/src/domain/entities/quran_booking.dart';
+import 'package:quran_sessions/src/domain/failures/quran_sessions_failure.dart';
+import 'package:quran_sessions/src/domain/usecases/create_booking_usecase.dart';
 import '../helpers/fakes/fake_booking_repository.dart';
 
 void main() {

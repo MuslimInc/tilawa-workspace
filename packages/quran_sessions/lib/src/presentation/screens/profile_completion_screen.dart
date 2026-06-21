@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/market_config.dart';
 import '../../domain/entities/user_profile.dart';
-import '../failure_ui/quran_sessions_failure_ui.dart';
+import '../../utils/dob_validator.dart';
 import '../blocs/profile_completion/profile_completion_bloc.dart';
 import '../blocs/profile_completion/profile_completion_event.dart';
 import '../blocs/profile_completion/profile_completion_state.dart';
+import '../failure_ui/quran_sessions_failure_ui.dart';
+import '../widgets/quran_sessions_form_field_shell.dart';
 
 /// Gate screen shown before booking when the student's profile is incomplete.
 ///
@@ -87,8 +90,10 @@ class _ProfileCompletionScreenState extends State<ProfileCompletionScreen> {
           ProfileCompletionEditing(
             :final userId,
             :final availableMarkets,
+            :final minimumStudentAgeYears,
             :final selectedGender,
             :final selectedDateOfBirth,
+            :final dobFailure,
             :final selectedMarket,
             :final selectedCity,
             :final availableCities,
@@ -144,6 +149,8 @@ class _ProfileCompletionScreenState extends State<ProfileCompletionScreen> {
                   const SizedBox(height: 8),
                   _DateOfBirthField(
                     selected: selectedDateOfBirth,
+                    minimumAgeYears: minimumStudentAgeYears,
+                    errorText: dobFailure?.toLocalizedMessage(context),
                     onChanged: (d) => context.read<ProfileCompletionBloc>().add(
                       DateOfBirthSet(d),
                     ),
@@ -182,13 +189,15 @@ class _ProfileCompletionScreenState extends State<ProfileCompletionScreen> {
                   const SizedBox(height: 40),
 
                   // ── Submit ─────────────────────────────────────────────
-                  FilledButton(
+                  TilawaButton(
+                    text: 'حفظ والمتابعة',
                     onPressed: canSubmit
                         ? () => context.read<ProfileCompletionBloc>().add(
                             ProfileSubmitted(userId: userId),
                           )
                         : null,
-                    child: const Text('حفظ والمتابعة'),
+                    isFullWidth: true,
+                    size: TilawaButtonSize.large,
                   ),
                 ],
               ),
@@ -252,35 +261,41 @@ class _GenderOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final tokens = theme.tokens;
+    // Same chrome radius as the form fields so the whole form shares one shape.
+    final radius = tokens.resolveRadius(family: TilawaRadiusFamily.chrome);
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 180),
+      constraints: BoxConstraints(minHeight: tokens.minInteractiveDimension),
       decoration: BoxDecoration(
         color: isSelected
             ? scheme.primaryContainer
             : scheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(radius),
         border: Border.all(
           color: isSelected ? scheme.primary : Colors.transparent,
-          width: 2,
+          width: theme.componentTokens.card.borderWidth,
         ),
       ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(radius),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20),
+          padding: EdgeInsets.symmetric(vertical: tokens.spaceLarge),
           child: Column(
             children: [
               Icon(
                 icon,
-                size: 32,
+                size: tokens.iconSizeLarge,
                 color: isSelected ? scheme.primary : scheme.onSurfaceVariant,
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: tokens.spaceSmall),
               Text(
                 label,
-                style: TextStyle(
+                style: theme.textTheme.bodyLarge?.copyWith(
                   color: isSelected ? scheme.primary : scheme.onSurfaceVariant,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
                 ),
@@ -296,38 +311,57 @@ class _GenderOption extends StatelessWidget {
 // ── Date of birth field ───────────────────────────────────────────────────────
 
 class _DateOfBirthField extends StatelessWidget {
-  const _DateOfBirthField({required this.selected, required this.onChanged});
+  const _DateOfBirthField({
+    required this.selected,
+    required this.minimumAgeYears,
+    required this.onChanged,
+    this.errorText,
+  });
 
   final DateTime? selected;
+
+  /// Configured minimum age — the picker's `lastDate` is `today - this`, the
+  /// same rule the domain validator applies.
+  final int minimumAgeYears;
   final ValueChanged<DateTime> onChanged;
+  final String? errorText;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final dateFmt = DateFormat('d MMMM y', 'ar');
+    final hasValue = selected != null;
 
-    return OutlinedButton.icon(
-      icon: const Icon(Icons.calendar_today_outlined),
-      label: Text(
-        selected != null ? dateFmt.format(selected!) : 'اختر تاريخ الميلاد',
-        style: TextStyle(
-          color: selected != null ? scheme.onSurface : scheme.onSurfaceVariant,
-        ),
-      ),
-      onPressed: () async {
-        final now = DateTime.now();
+    return QuranSessionsFormFieldShell(
+      prefixIcon: Icons.calendar_today_outlined,
+      errorText: errorText,
+      semanticLabel: 'تاريخ الميلاد',
+      onTap: () async {
+        final firstDate = DobValidator.earliest;
+        // Same rule as the domain validator: latest birth date = today - minAge.
+        final lastDate = DobValidator.latestBirthDate(
+          minimumAgeYears: minimumAgeYears,
+        );
+        // initialDate must never fall outside [firstDate, lastDate]; clamp an
+        // existing (possibly invalid) selection safely into range.
+        var initialDate = selected ?? lastDate;
+        if (initialDate.isAfter(lastDate)) initialDate = lastDate;
+        if (initialDate.isBefore(firstDate)) initialDate = firstDate;
         final picked = await showDatePicker(
           context: context,
-          initialDate: selected ?? DateTime(now.year - 20, now.month, now.day),
-          firstDate: DateTime(1930),
-          lastDate: now,
+          initialDate: initialDate,
+          firstDate: firstDate,
+          lastDate: lastDate,
           helpText: 'اختر تاريخ الميلاد',
         );
         if (picked != null) onChanged(picked);
       },
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.all(16),
-        alignment: AlignmentDirectional.centerStart,
+      child: Text(
+        hasValue ? dateFmt.format(selected!) : 'اختر تاريخ الميلاد',
+        style: theme.textTheme.bodyLarge?.copyWith(
+          color: hasValue ? scheme.onSurface : scheme.onSurfaceVariant,
+        ),
       ),
     );
   }
@@ -348,33 +382,16 @@ class _CountryPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-
-    return DropdownButtonFormField<MarketConfig>(
-      initialValue: selected,
-      hint: Text(
-        'اختر الدولة',
-        style: TextStyle(color: scheme.onSurfaceVariant),
-      ),
-      decoration: InputDecoration(
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
-      ),
-      items: markets
-          .where((m) => m.isEnabled)
-          .map(
-            (m) => DropdownMenuItem<MarketConfig>(
-              value: m,
-              child: Text(m.countryName),
-            ),
-          )
-          .toList(),
-      onChanged: (m) {
-        if (m != null) onChanged(m);
-      },
+    return TilawaDropdownField<MarketConfig>(
+      value: selected,
+      hintText: 'اختر الدولة',
+      semanticLabel: 'الدولة',
+      prefixIcon: Icons.public_outlined,
+      items: [
+        for (final m in markets.where((m) => m.isEnabled))
+          TilawaDropdownItem(value: m, label: m.countryName),
+      ],
+      onChanged: onChanged,
     );
   }
 }
@@ -396,34 +413,16 @@ class _CityPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-
-    return DropdownButtonFormField<CityConfig>(
-      initialValue: selected,
-      hint: Text(
-        countrySelected ? 'اختر المدينة' : 'اختر الدولة أولاً',
-        style: TextStyle(color: scheme.onSurfaceVariant),
-      ),
-      decoration: InputDecoration(
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
-      ),
-      items: cities
-          .map(
-            (c) => DropdownMenuItem<CityConfig>(
-              value: c,
-              child: Text(c.cityName),
-            ),
-          )
-          .toList(),
-      onChanged: countrySelected
-          ? (c) {
-              if (c != null) onChanged(c);
-            }
-          : null,
+    return TilawaDropdownField<CityConfig>(
+      value: selected,
+      hintText: countrySelected ? 'اختر المدينة' : 'اختر الدولة أولاً',
+      semanticLabel: 'المدينة',
+      prefixIcon: Icons.location_city_outlined,
+      enabled: countrySelected,
+      items: [
+        for (final c in cities) TilawaDropdownItem(value: c, label: c.cityName),
+      ],
+      onChanged: countrySelected ? onChanged : null,
     );
   }
 }

@@ -35,7 +35,7 @@ class PageIndicatorText extends StatelessWidget {
         borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
       ),
       child: Text(
-        l10n.page(pageNumber.toString()) ?? 'Page $pageNumber',
+        l10n.page(pageNumber.toString()),
         style: theme.textTheme.labelLarge?.copyWith(
           fontWeight: FontWeight.w700,
           color: colorScheme.onSurface,

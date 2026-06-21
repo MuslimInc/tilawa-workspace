@@ -61,6 +61,7 @@ void main() {
       stateLayerPressed: 0.12,
       stateLayerFocused: 0.12,
       focusRingWidth: 2.0,
+      dropdownMenuGap: 4.0,
     );
 
     group('factory constructors', () {
@@ -109,6 +110,7 @@ void main() {
         expect(light.narrowCardWidthThreshold, 180.0);
         expect(light.narrowCardHeightThreshold, 155.0);
         expect(light.cardTightHeightThreshold, 145.0);
+        expect(light.dropdownMenuGap, 4.0);
       });
 
       test('dark() returns same as light()', () {
@@ -258,6 +260,7 @@ void main() {
           stateLayerPressed: 0.12,
           stateLayerFocused: 0.12,
           focusRingWidth: 2.0,
+          dropdownMenuGap: 4.0,
         );
         const second = TilawaDesignTokens(
           spaceTiny: 4.0,
@@ -316,6 +319,7 @@ void main() {
           stateLayerPressed: 0.20,
           stateLayerFocused: 0.20,
           focusRingWidth: 3.0,
+          dropdownMenuGap: 6.0,
         );
 
         final lerped = first.lerp(second, 0);
@@ -383,6 +387,7 @@ void main() {
           stateLayerPressed: 0.20,
           stateLayerFocused: 0.20,
           focusRingWidth: 3.0,
+          dropdownMenuGap: 6.0,
         );
 
         final lerped = first.lerp(second, 1);
@@ -448,6 +453,7 @@ void main() {
           stateLayerPressed: 0.12,
           stateLayerFocused: 0.12,
           focusRingWidth: 2.0,
+          dropdownMenuGap: 4.0,
         );
         const second = TilawaDesignTokens(
           spaceTiny: 4.0,
@@ -506,6 +512,7 @@ void main() {
           stateLayerPressed: 0.20,
           stateLayerFocused: 0.20,
           focusRingWidth: 3.0,
+          dropdownMenuGap: 6.0,
         );
 
         final lerped = first.lerp(second, 0.5);
@@ -577,6 +584,7 @@ void main() {
           stateLayerPressed: 0.12,
           stateLayerFocused: 0.12,
           focusRingWidth: 2.0,
+          dropdownMenuGap: 4.0,
         );
 
         final lerped = first.lerp(second, 0.5);
@@ -643,6 +651,7 @@ void main() {
             stateLayerPressed: 0.12,
             stateLayerFocused: 0.12,
             focusRingWidth: 2.0,
+            dropdownMenuGap: 4.0,
           );
           const second = TilawaDesignTokens(
             spaceTiny: 4.0,
@@ -701,6 +710,7 @@ void main() {
             stateLayerPressed: 0.20,
             stateLayerFocused: 0.20,
             focusRingWidth: 3.0,
+            dropdownMenuGap: 6.0,
           );
 
           final lerped = first.lerp(second, 0.3);
@@ -800,7 +810,7 @@ void main() {
         final tokens = TilawaDesignTokens.light();
         expect(
           tokens.resolveRadius(family: TilawaRadiusFamily.card),
-          24.0,
+          12.0,
         );
         expect(
           tokens.resolveRadius(family: TilawaRadiusFamily.pill),
@@ -808,15 +818,15 @@ void main() {
         );
         expect(
           tokens.resolveRadius(family: TilawaRadiusFamily.chrome),
-          20.0,
+          12.0,
         );
         expect(
           tokens.resolveRadius(family: TilawaRadiusFamily.section),
-          24.0,
+          12.0,
         );
         expect(
           tokens.resolveRadius(family: TilawaRadiusFamily.hero),
-          28.0,
+          20.0,
         );
         expect(
           tokens.resolveRadius(family: TilawaRadiusFamily.decorative),
@@ -829,6 +839,14 @@ void main() {
             height: 40,
           ),
           20.0,
+        );
+        expect(
+          tokens.resolveRadius(family: TilawaRadiusFamily.chip),
+          8.0,
+        );
+        expect(
+          tokens.resolveRadius(family: TilawaRadiusFamily.selection),
+          12.0,
         );
       });
 
@@ -848,6 +866,26 @@ void main() {
           ),
           16.0,
         );
+      });
+
+      test('buttonBorderRadius and buttonShape use pill family', () {
+        final tokens = TilawaDesignTokens.light();
+        expect(tokens.buttonBorderRadius(), 24.0);
+        expect(tokens.buttonBorderRadius(height: 56), 28.0);
+        expect(
+          tokens.buttonShape(height: 48).borderRadius,
+          BorderRadius.circular(24),
+        );
+      });
+
+      test('materialButtonStyle applies pill shape and min touch target', () {
+        final tokens = TilawaDesignTokens.light();
+        final style = tokens.materialButtonStyle();
+        final shape = style.shape!.resolve(const {})! as RoundedRectangleBorder;
+        final size = style.minimumSize!.resolve(const {});
+
+        expect(shape.borderRadius, BorderRadius.circular(24));
+        expect(size, const Size(48, 48));
       });
 
       test('resolveSegmentedControlRadii uses chrome track by default', () {

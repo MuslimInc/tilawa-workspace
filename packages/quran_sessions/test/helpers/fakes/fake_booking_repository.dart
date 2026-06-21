@@ -1,11 +1,11 @@
 import 'package:dartz_plus/dartz_plus.dart';
 
-import '../../../lib/src/domain/entities/quran_booking.dart';
-import '../../../lib/src/domain/entities/session_call_type.dart';
-import '../../../lib/src/domain/entities/session_pricing_type.dart';
-import '../../../lib/src/domain/entities/session_review.dart';
-import '../../../lib/src/domain/repositories/booking_repository.dart';
-import '../../../lib/src/domain/failures/quran_sessions_failure.dart';
+import 'package:quran_sessions/src/domain/entities/quran_booking.dart';
+import 'package:quran_sessions/src/domain/entities/session_call_type.dart';
+import 'package:quran_sessions/src/domain/entities/session_pricing_type.dart';
+import 'package:quran_sessions/src/domain/entities/session_review.dart';
+import 'package:quran_sessions/src/domain/failures/quran_sessions_failure.dart';
+import 'package:quran_sessions/src/domain/repositories/booking_repository.dart';
 
 class FakeBookingRepository implements BookingRepository {
   final List<QuranBooking> bookings = [];

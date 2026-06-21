@@ -1,5 +1,5 @@
-import '../../../lib/src/boundaries/call/call_provider.dart';
-import '../../../lib/src/boundaries/call/call_room.dart';
+import 'package:quran_sessions/src/boundaries/call/call_provider.dart';
+import 'package:quran_sessions/src/boundaries/call/call_room.dart';
 
 /// Records calls for assertion in tests; never throws.
 class FakeCallProvider implements CallProvider {

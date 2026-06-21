@@ -1,11 +1,11 @@
 import 'package:dartz_plus/dartz_plus.dart';
 
-import '../../../lib/src/domain/entities/quran_teacher.dart';
-import '../../../lib/src/domain/entities/session_price.dart';
-import '../../../lib/src/domain/entities/session_review.dart';
-import '../../../lib/src/domain/entities/teacher_availability.dart';
-import '../../../lib/src/domain/failures/quran_sessions_failure.dart';
-import '../../../lib/src/domain/repositories/teacher_repository.dart';
+import 'package:quran_sessions/src/domain/entities/quran_teacher.dart';
+import 'package:quran_sessions/src/domain/entities/session_price.dart';
+import 'package:quran_sessions/src/domain/entities/session_review.dart';
+import 'package:quran_sessions/src/domain/entities/teacher_availability.dart';
+import 'package:quran_sessions/src/domain/failures/quran_sessions_failure.dart';
+import 'package:quran_sessions/src/domain/repositories/teacher_repository.dart';
 
 /// In-memory fake for [TeacherRepository].
 /// Seed [teachers], [availability], and [reviews] before each test.

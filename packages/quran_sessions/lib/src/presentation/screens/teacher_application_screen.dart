@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/teacher_application.dart';
 import '../../utils/phone_normalizer.dart';
@@ -8,6 +9,7 @@ import '../blocs/teacher_application/teacher_application_bloc.dart';
 import '../blocs/teacher_application/teacher_application_event.dart';
 import '../blocs/teacher_application/teacher_application_state.dart';
 import '../failure_ui/quran_sessions_failure_ui.dart';
+import '../widgets/quran_sessions_form_field_shell.dart';
 
 /// Form screen for filling a teacher application (draft → pending).
 ///
@@ -156,10 +158,12 @@ class _NotStartedView extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 40),
-          FilledButton.icon(
-            icon: const Icon(Icons.arrow_forward),
-            label: const Text('ابدأ طلب التسجيل'),
+          TilawaButton(
+            text: 'ابدأ طلب التسجيل',
+            leadingIcon: const Icon(Icons.arrow_forward),
             onPressed: onStart,
+            isFullWidth: true,
+            size: TilawaButtonSize.large,
           ),
         ],
       ),
@@ -246,16 +250,13 @@ class _FormBody extends StatelessWidget {
                     controller: phoneController,
                     keyboardType: TextInputType.phone,
                     textDirection: TextDirection.ltr,
-                    decoration: InputDecoration(
+                    style: Theme.of(context).textTheme.bodyLarge,
+                    decoration: QuranSessionsFormFieldShell.decoration(
+                      context,
                       hintText: PhoneNormalizer.hint(countryCode),
                       // visiblePhoneError is null until the user has
                       // touched the field or tapped submit.
                       errorText: state.visiblePhoneError,
-                      border: const OutlineInputBorder(),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 14,
-                      ),
                     ),
                     onChanged: (v) =>
                         bloc.add(TeacherApplicationPhoneChanged(v.trim())),
@@ -285,11 +286,10 @@ class _FormBody extends StatelessWidget {
             children: _availableLanguages.map((entry) {
               final (code, label) = entry;
               final selected = application.teachingLanguages.contains(code);
-              return FilterChip(
-                label: Text(label),
+              return TilawaSelectionPill(
+                label: label,
                 selected: selected,
-                onSelected: (_) =>
-                    bloc.add(TeacherApplicationLanguageToggled(code)),
+                onTap: () => bloc.add(TeacherApplicationLanguageToggled(code)),
               );
             }).toList(),
           ),
@@ -303,10 +303,10 @@ class _FormBody extends StatelessWidget {
             runSpacing: 8,
             children: _availableSpecializations.map((code) {
               final selected = application.specializations.contains(code);
-              return FilterChip(
-                label: Text(SpecializationLabels.arabic(code)),
+              return TilawaSelectionPill(
+                label: SpecializationLabels.arabic(code),
                 selected: selected,
-                onSelected: (_) =>
+                onTap: () =>
                     bloc.add(TeacherApplicationSpecializationToggled(code)),
               );
             }).toList(),
@@ -322,14 +322,11 @@ class _FormBody extends StatelessWidget {
             maxLines: 8,
             maxLength: 500,
             textAlignVertical: TextAlignVertical.top,
-            decoration: const InputDecoration(
+            style: Theme.of(context).textTheme.bodyLarge,
+            decoration: QuranSessionsFormFieldShell.decoration(
+              context,
               hintText: 'أخبر الطلاب عن خبرتك ومؤهلاتك وأسلوبك في التدريس…',
               alignLabelWithHint: true,
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 12,
-              ),
             ),
             onChanged: (v) => bloc.add(TeacherApplicationBioChanged(v)),
           ),
@@ -338,13 +335,12 @@ class _FormBody extends StatelessWidget {
           // ── Submit ───────────────────────────────────────────────────────
           // Always dispatch so the BLoC can set submitAttempted=true
           // and reveal validation errors even before canSubmit is true.
-          FilledButton(
+          TilawaButton(
+            text: 'إرسال الطلب للمراجعة',
             onPressed: () =>
                 bloc.add(const TeacherApplicationSubmitRequested()),
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-            ),
-            child: const Text('إرسال الطلب للمراجعة'),
+            isFullWidth: true,
+            size: TilawaButtonSize.large,
           ),
           const SizedBox(height: 12),
           if (!state.canSubmit)
@@ -389,24 +385,13 @@ class _CountryCodePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButtonFormField<String>(
-      initialValue: selected,
-      decoration: InputDecoration(
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 10,
-          vertical: 14,
-        ),
-      ),
-      isExpanded: true,
-      items: _options
-          .map((e) => DropdownMenuItem(value: e.$1, child: Text(e.$2)))
-          .toList(),
-      onChanged: (v) {
-        if (v != null) onChanged(v);
-      },
+    return TilawaDropdownField<String>(
+      value: selected,
+      semanticLabel: 'رمز الدولة',
+      items: [
+        for (final e in _options) TilawaDropdownItem(value: e.$1, label: e.$2),
+      ],
+      onChanged: onChanged,
     );
   }
 }
@@ -424,10 +409,10 @@ class _ContactMethodPicker extends StatelessWidget {
     return Wrap(
       spacing: 8,
       children: PreferredContactMethod.values.map((m) {
-        return ChoiceChip(
-          label: Text(_label(m)),
+        return TilawaSelectionPill(
+          label: _label(m),
           selected: selected == m,
-          onSelected: (_) => onChanged(m),
+          onTap: () => onChanged(m),
         );
       }).toList(),
     );
