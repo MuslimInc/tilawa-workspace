@@ -99,9 +99,8 @@ class _ProfileCompletionScreenState extends State<ProfileCompletionScreen> {
             :final availableCities,
             :final canSubmit,
           ) =>
-            SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(
+            TilawaFormScreenScaffold(
+              body: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // ── Header ─────────────────────────────────────────────
@@ -186,20 +185,17 @@ class _ProfileCompletionScreenState extends State<ProfileCompletionScreen> {
                       CitySelected(c),
                     ),
                   ),
-                  const SizedBox(height: 40),
-
-                  // ── Submit ─────────────────────────────────────────────
-                  TilawaButton(
-                    text: 'حفظ والمتابعة',
-                    onPressed: canSubmit
-                        ? () => context.read<ProfileCompletionBloc>().add(
-                            ProfileSubmitted(userId: userId),
-                          )
-                        : null,
-                    isFullWidth: true,
-                    size: TilawaButtonSize.large,
-                  ),
                 ],
+              ),
+              footer: TilawaButton(
+                text: 'حفظ والمتابعة',
+                onPressed: canSubmit
+                    ? () => context.read<ProfileCompletionBloc>().add(
+                        ProfileSubmitted(userId: userId),
+                      )
+                    : null,
+                isFullWidth: true,
+                size: TilawaButtonSize.large,
               ),
             ),
         },

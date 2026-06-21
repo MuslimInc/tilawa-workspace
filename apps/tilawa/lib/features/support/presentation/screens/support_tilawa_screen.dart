@@ -128,14 +128,14 @@ class _SupportBody extends StatelessWidget {
     final bool hasTier = state.selectedProductId != null;
 
     return TilawaCatalogSettingsBody(
-      child: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(
+      child: TilawaFormScreenScaffold(
+        bodyPadding: EdgeInsets.fromLTRB(
           tokens.spaceLarge,
           tokens.spaceMedium,
           tokens.spaceLarge,
-          tokens.spaceExtraLarge,
+          tokens.spaceLarge,
         ),
-        child: Column(
+        body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           spacing: tokens.spaceLarge,
           children: [
@@ -153,19 +153,20 @@ class _SupportBody extends StatelessWidget {
                 SupportEvent.tierSelected(id),
               ),
             ),
-            AnimatedOpacity(
-              opacity: hasTier ? 1 : 0.5,
-              duration: tokens.durationFast,
-              child: TilawaButton(
-                text: l10n.supportContinueWithPlay,
-                isLoading: purchasing,
-                onPressed: !hasTier || purchasing
-                    ? null
-                    : () => _onContinue(context, state),
-              ),
-            ),
             const SupportFooterSection(),
           ],
+        ),
+        footer: AnimatedOpacity(
+          opacity: hasTier ? 1 : 0.5,
+          duration: tokens.durationFast,
+          child: TilawaButton(
+            text: l10n.supportContinueWithPlay,
+            isLoading: purchasing,
+            onPressed: !hasTier || purchasing
+                ? null
+                : () => _onContinue(context, state),
+            isFullWidth: true,
+          ),
         ),
       ),
     );

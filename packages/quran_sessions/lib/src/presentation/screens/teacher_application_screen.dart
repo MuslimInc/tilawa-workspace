@@ -213,9 +213,9 @@ class _FormBody extends StatelessWidget {
     final application = state.application;
     final countryCode = application.phoneCountryCode ?? 'EG';
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-      child: Column(
+    return TilawaFormScreenScaffold(
+      bodyPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // ── Phone ────────────────────────────────────────────────────────
@@ -330,11 +330,12 @@ class _FormBody extends StatelessWidget {
             ),
             onChanged: (v) => bloc.add(TeacherApplicationBioChanged(v)),
           ),
-          const SizedBox(height: 32),
-
-          // ── Submit ───────────────────────────────────────────────────────
-          // Always dispatch so the BLoC can set submitAttempted=true
-          // and reveal validation errors even before canSubmit is true.
+        ],
+      ),
+      footer: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 12,
+        children: [
           TilawaButton(
             text: 'إرسال الطلب للمراجعة',
             onPressed: () =>
@@ -342,7 +343,6 @@ class _FormBody extends StatelessWidget {
             isFullWidth: true,
             size: TilawaButtonSize.large,
           ),
-          const SizedBox(height: 12),
           if (!state.canSubmit)
             Text(
               'أكمل جميع الحقول المطلوبة (*) لتتمكن من الإرسال.',
