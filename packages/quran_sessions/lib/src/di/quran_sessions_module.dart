@@ -1,6 +1,7 @@
 import '../data/datasources/availability_remote_data_source.dart';
 import '../data/datasources/booking_remote_data_source.dart';
 import '../data/datasources/market_config_remote_data_source.dart';
+import '../data/datasources/schedule_remote_data_source.dart';
 import '../data/datasources/session_policy_remote_data_source.dart';
 import '../data/datasources/session_remote_data_source.dart';
 import '../data/datasources/teacher_application_remote_data_source.dart';
@@ -10,6 +11,7 @@ import '../data/datasources/user_profile_remote_data_source.dart';
 import '../data/providers/remote_availability_provider.dart';
 import '../data/repositories/booking_repository_impl.dart';
 import '../data/repositories/market_config_repository_impl.dart';
+import '../data/repositories/schedule_repository_impl.dart';
 import '../data/repositories/session_policy_repository_impl.dart';
 import '../data/repositories/session_repository_impl.dart';
 import '../data/repositories/teacher_application_repository_impl.dart';
@@ -19,6 +21,7 @@ import '../data/repositories/user_profile_repository_impl.dart';
 import '../boundaries/scheduling/availability_provider.dart';
 import '../domain/repositories/booking_repository.dart';
 import '../domain/repositories/market_config_repository.dart';
+import '../domain/repositories/schedule_repository.dart';
 import '../domain/repositories/session_policy_repository.dart';
 import '../domain/repositories/session_repository.dart';
 import '../domain/repositories/teacher_application_repository.dart';
@@ -74,6 +77,7 @@ class QuranSessionsModule {
     required TeacherApplicationRemoteDataSource teacherApplicationDataSource,
     required TeacherProfileRemoteDataSource teacherProfileDataSource,
     required AvailabilityRemoteDataSource availabilityDataSource,
+    required ScheduleRemoteDataSource scheduleDataSource,
   }) {
     final teacherRepo = TeacherRepositoryImpl(teacherDataSource);
     final sessionRepo = SessionRepositoryImpl(sessionDataSource);
@@ -90,6 +94,7 @@ class QuranSessionsModule {
     final availabilityProvider = RemoteAvailabilityProvider(
       availabilityDataSource,
     );
+    final scheduleRepo = ScheduleRepositoryImpl(scheduleDataSource);
 
     registerSingleton<TeacherRepository>(teacherRepo);
     registerSingleton<SessionRepository>(sessionRepo);
@@ -100,6 +105,7 @@ class QuranSessionsModule {
     registerSingleton<TeacherApplicationRepository>(applicationRepo);
     registerSingleton<TeacherProfileRepository>(teacherProfileRepo);
     registerSingleton<AvailabilityProvider>(availabilityProvider);
+    registerSingleton<ScheduleRepository>(scheduleRepo);
 
     registerSingleton(GetTeachersUseCase(teacherRepo));
     registerSingleton(GetTeacherProfileUseCase(teacherRepo));

@@ -1,5 +1,11 @@
 {
   "dart.flutterSdkPath": ".fvm/versions/3.44.2",
+  "dart.analysisExcludedFolders": [
+    "build",
+    "**/build",
+    ".dart_tool",
+    "**/.dart_tool"
+  ],
   "cSpell.words": [
     "Athkar",
     "Configurator",

@@ -445,6 +445,139 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get addSlotButton => 'Add slot';
 
   @override
+  String get availabilityTitle => 'Working hours';
+
+  @override
+  String get availabilityTabHours => 'Hours';
+
+  @override
+  String get availabilityTabOverrides => 'Overrides';
+
+  @override
+  String get availabilityUseSameHours => 'Use same hours for all days';
+
+  @override
+  String get availabilityTimezone => 'Timezone';
+
+  @override
+  String get availabilitySessionLength => 'Session length';
+
+  @override
+  String availabilityDurationMinutes(int count) {
+    return '$count min';
+  }
+
+  @override
+  String get availabilityHoursRow => 'Hours';
+
+  @override
+  String get availabilityDayClosed => 'Closed';
+
+  @override
+  String get availabilityAddRange => 'Add range';
+
+  @override
+  String get availabilityEditRange => 'Edit range';
+
+  @override
+  String get availabilityRemoveRange => 'Remove';
+
+  @override
+  String get availabilitySave => 'Save';
+
+  @override
+  String get availabilitySavedToast => 'Schedule saved';
+
+  @override
+  String get availabilityUnsavedChanges => 'Unsaved changes';
+
+  @override
+  String get availabilityLoadError => 'Couldn\'t load your schedule';
+
+  @override
+  String get availabilityStartTime => 'Start time';
+
+  @override
+  String get availabilityEndTime => 'End time';
+
+  @override
+  String get availabilityUseTheseTimes => 'Use these times';
+
+  @override
+  String get availabilityRangeInvalid => 'End time must be after start time';
+
+  @override
+  String get availabilityRangeOverlap => 'This range overlaps another';
+
+  @override
+  String get availabilityOverridesEmpty => 'No date overrides yet';
+
+  @override
+  String get availabilityOverridesEmptyHint =>
+      'Block a day off or add special hours for a specific date.';
+
+  @override
+  String get availabilityAddOverride => 'Add date override';
+
+  @override
+  String get availabilityOverrideUnavailable => 'Unavailable (day off)';
+
+  @override
+  String get availabilityOverrideCustom => 'Custom hours';
+
+  @override
+  String get availabilityOverrideDate => 'Date';
+
+  @override
+  String get availabilitySetupHeadline =>
+      'Set your hours once and students can book automatically';
+
+  @override
+  String get availabilitySetupCta => 'Set up weekly schedule';
+
+  @override
+  String get availabilitySetupBenefitRecurring => 'No manual repetition';
+
+  @override
+  String get availabilitySetupBenefitTimezone => 'Timezone-aware';
+
+  @override
+  String get availabilitySetupBenefitSelfBooking => 'Students book themselves';
+
+  @override
+  String get availabilityTimezonePickerTitle => 'Choose timezone';
+
+  @override
+  String get availabilityDiscardChanges => 'Discard changes?';
+
+  @override
+  String get availabilityDiscardConfirm => 'Discard';
+
+  @override
+  String get availabilityKeepEditing => 'Keep editing';
+
+  @override
+  String get weekdaySaturday => 'Saturday';
+
+  @override
+  String get weekdaySunday => 'Sunday';
+
+  @override
+  String get weekdayMonday => 'Monday';
+
+  @override
+  String get weekdayTuesday => 'Tuesday';
+
+  @override
+  String get weekdayWednesday => 'Wednesday';
+
+  @override
+  String get weekdayThursday => 'Thursday';
+
+  @override
+  String get weekdayFriday => 'Friday';
+
+  @override
   String get teacherApplicationTitle => 'Teacher application';
 
   @override

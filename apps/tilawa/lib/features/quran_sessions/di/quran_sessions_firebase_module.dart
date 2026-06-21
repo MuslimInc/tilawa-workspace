@@ -7,6 +7,7 @@ import '../data/firebase/firebase_auth_session_provider.dart';
 import '../data/firebase/firestore_availability_repository.dart';
 import '../data/firebase/firestore_booking_repository.dart';
 import '../data/firebase/firestore_market_config_repository.dart';
+import '../data/firebase/firestore_schedule_repository.dart';
 import '../data/firebase/firestore_session_policy_repository.dart';
 import '../data/firebase/firestore_session_repository.dart';
 import '../data/firebase/firestore_teacher_application_repository.dart';
@@ -40,6 +41,7 @@ class QuranSessionsFirebaseModule {
       ),
       teacherProfileDataSource: FirestoreTeacherProfileDataSource(firestore),
       availabilityDataSource: FirestoreAvailabilityDataSource(firestore),
+      scheduleDataSource: FirestoreScheduleDataSource(firestore),
     );
 
     QuranSessionsMvpModule.registerBlocs(sl);

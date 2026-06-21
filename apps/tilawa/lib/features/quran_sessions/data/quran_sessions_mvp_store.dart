@@ -22,6 +22,12 @@ class QuranSessionsMvpStore {
   final List<QuranBooking> bookings = [];
   final List<QuranSession> sessions = [];
 
+  // ── Recurring availability (rules, not generated slots) ────────────────────
+  // Keyed by teacherId. Populated by the weekly availability editor; consumed
+  // by SlotGenerator to derive bookable slots on demand.
+  final Map<String, WeeklySchedule> schedules = {};
+  final Map<String, Map<String, AvailabilityOverride>> overrides = {};
+
   // ── Teacher application & profile stores ──────────────────────────────────
   // Keyed by userId. A TeacherProfile is created only after approval.
   final Map<String, TeacherApplication> teacherApplications = {};

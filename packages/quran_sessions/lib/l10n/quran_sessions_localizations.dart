@@ -869,6 +869,264 @@ abstract class QuranSessionsLocalizations {
   /// **'Add slot'**
   String get addSlotButton;
 
+  /// No description provided for @availabilityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Working hours'**
+  String get availabilityTitle;
+
+  /// No description provided for @availabilityTabHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Hours'**
+  String get availabilityTabHours;
+
+  /// No description provided for @availabilityTabOverrides.
+  ///
+  /// In en, this message translates to:
+  /// **'Overrides'**
+  String get availabilityTabOverrides;
+
+  /// No description provided for @availabilityUseSameHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Use same hours for all days'**
+  String get availabilityUseSameHours;
+
+  /// No description provided for @availabilityTimezone.
+  ///
+  /// In en, this message translates to:
+  /// **'Timezone'**
+  String get availabilityTimezone;
+
+  /// No description provided for @availabilitySessionLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Session length'**
+  String get availabilitySessionLength;
+
+  /// No description provided for @availabilityDurationMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} min'**
+  String availabilityDurationMinutes(int count);
+
+  /// No description provided for @availabilityHoursRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Hours'**
+  String get availabilityHoursRow;
+
+  /// No description provided for @availabilityDayClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get availabilityDayClosed;
+
+  /// No description provided for @availabilityAddRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Add range'**
+  String get availabilityAddRange;
+
+  /// No description provided for @availabilityEditRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit range'**
+  String get availabilityEditRange;
+
+  /// No description provided for @availabilityRemoveRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get availabilityRemoveRange;
+
+  /// No description provided for @availabilitySave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get availabilitySave;
+
+  /// No description provided for @availabilitySavedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule saved'**
+  String get availabilitySavedToast;
+
+  /// No description provided for @availabilityUnsavedChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved changes'**
+  String get availabilityUnsavedChanges;
+
+  /// No description provided for @availabilityLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load your schedule'**
+  String get availabilityLoadError;
+
+  /// No description provided for @availabilityStartTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Start time'**
+  String get availabilityStartTime;
+
+  /// No description provided for @availabilityEndTime.
+  ///
+  /// In en, this message translates to:
+  /// **'End time'**
+  String get availabilityEndTime;
+
+  /// No description provided for @availabilityUseTheseTimes.
+  ///
+  /// In en, this message translates to:
+  /// **'Use these times'**
+  String get availabilityUseTheseTimes;
+
+  /// No description provided for @availabilityRangeInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'End time must be after start time'**
+  String get availabilityRangeInvalid;
+
+  /// No description provided for @availabilityRangeOverlap.
+  ///
+  /// In en, this message translates to:
+  /// **'This range overlaps another'**
+  String get availabilityRangeOverlap;
+
+  /// No description provided for @availabilityOverridesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No date overrides yet'**
+  String get availabilityOverridesEmpty;
+
+  /// No description provided for @availabilityOverridesEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Block a day off or add special hours for a specific date.'**
+  String get availabilityOverridesEmptyHint;
+
+  /// No description provided for @availabilityAddOverride.
+  ///
+  /// In en, this message translates to:
+  /// **'Add date override'**
+  String get availabilityAddOverride;
+
+  /// No description provided for @availabilityOverrideUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable (day off)'**
+  String get availabilityOverrideUnavailable;
+
+  /// No description provided for @availabilityOverrideCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom hours'**
+  String get availabilityOverrideCustom;
+
+  /// No description provided for @availabilityOverrideDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get availabilityOverrideDate;
+
+  /// No description provided for @availabilitySetupHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Set your hours once and students can book automatically'**
+  String get availabilitySetupHeadline;
+
+  /// No description provided for @availabilitySetupCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up weekly schedule'**
+  String get availabilitySetupCta;
+
+  /// No description provided for @availabilitySetupBenefitRecurring.
+  ///
+  /// In en, this message translates to:
+  /// **'No manual repetition'**
+  String get availabilitySetupBenefitRecurring;
+
+  /// No description provided for @availabilitySetupBenefitTimezone.
+  ///
+  /// In en, this message translates to:
+  /// **'Timezone-aware'**
+  String get availabilitySetupBenefitTimezone;
+
+  /// No description provided for @availabilitySetupBenefitSelfBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Students book themselves'**
+  String get availabilitySetupBenefitSelfBooking;
+
+  /// No description provided for @availabilityTimezonePickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose timezone'**
+  String get availabilityTimezonePickerTitle;
+
+  /// No description provided for @availabilityDiscardChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard changes?'**
+  String get availabilityDiscardChanges;
+
+  /// No description provided for @availabilityDiscardConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get availabilityDiscardConfirm;
+
+  /// No description provided for @availabilityKeepEditing.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get availabilityKeepEditing;
+
+  /// No description provided for @weekdaySaturday.
+  ///
+  /// In en, this message translates to:
+  /// **'Saturday'**
+  String get weekdaySaturday;
+
+  /// No description provided for @weekdaySunday.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunday'**
+  String get weekdaySunday;
+
+  /// No description provided for @weekdayMonday.
+  ///
+  /// In en, this message translates to:
+  /// **'Monday'**
+  String get weekdayMonday;
+
+  /// No description provided for @weekdayTuesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Tuesday'**
+  String get weekdayTuesday;
+
+  /// No description provided for @weekdayWednesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Wednesday'**
+  String get weekdayWednesday;
+
+  /// No description provided for @weekdayThursday.
+  ///
+  /// In en, this message translates to:
+  /// **'Thursday'**
+  String get weekdayThursday;
+
+  /// No description provided for @weekdayFriday.
+  ///
+  /// In en, this message translates to:
+  /// **'Friday'**
+  String get weekdayFriday;
+
   /// No description provided for @teacherApplicationTitle.
   ///
   /// In en, this message translates to:

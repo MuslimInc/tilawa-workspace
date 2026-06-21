@@ -13,9 +13,17 @@ import '../blocs/teacher_dashboard/teacher_dashboard_state.dart';
 import '../widgets/session_card.dart';
 
 class TeacherDashboardScreen extends StatefulWidget {
-  const TeacherDashboardScreen({super.key, required this.teacherId});
+  const TeacherDashboardScreen({
+    super.key,
+    required this.teacherId,
+    this.onManageSchedule,
+  });
 
   final String teacherId;
+
+  /// Opens the recurring weekly availability editor. Wired by the host router;
+  /// when null the schedule entry points are hidden.
+  final VoidCallback? onManageSchedule;
 
   @override
   State<TeacherDashboardScreen> createState() => _TeacherDashboardScreenState();
@@ -35,7 +43,17 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     final l10n = context.quranSessionsL10n;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.teacherDashboardTitle)),
+      appBar: AppBar(
+        title: Text(l10n.teacherDashboardTitle),
+        actions: [
+          if (widget.onManageSchedule != null)
+            IconButton(
+              icon: const Icon(Icons.edit_calendar_outlined),
+              tooltip: l10n.availabilityTitle,
+              onPressed: widget.onManageSchedule,
+            ),
+        ],
+      ),
       body: BlocConsumer<TeacherDashboardBloc, TeacherDashboardState>(
         listener: (context, state) {
           if (state is TeacherDashboardSuccess && state.slotFailure != null) {
@@ -50,26 +68,21 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           TeacherDashboardInitial() || TeacherDashboardLoading() =>
             const Center(child: CircularProgressIndicator()),
           TeacherDashboardEmpty() => Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.calendar_today_outlined,
-                  size: 64,
-                  color: Theme.of(context).colorScheme.outlineVariant,
+            child: Padding(
+              padding: EdgeInsets.all(Theme.of(context).tokens.spaceLarge),
+              child: TilawaEmptyState(
+                icon: Icons.event_available_outlined,
+                title: l10n.availabilitySetupHeadline,
+                subtitle:
+                    '${l10n.availabilitySetupBenefitRecurring}  ·  '
+                    '${l10n.availabilitySetupBenefitTimezone}  ·  '
+                    '${l10n.availabilitySetupBenefitSelfBooking}',
+                action: TilawaButton(
+                  text: l10n.availabilitySetupCta,
+                  leadingIcon: const Icon(Icons.calendar_month_outlined),
+                  onPressed: widget.onManageSchedule,
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  l10n.noSessionsOrSlotsYet,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.add),
-                  label: Text(l10n.addAvailableSlot),
-                  onPressed: _showAddSlotSheet,
-                ),
-              ],
+              ),
             ),
           ),
           TeacherDashboardFailure(:final failure) => Center(
@@ -133,13 +146,12 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                             ),
                           ],
                           const Spacer(),
-                          IconButton(
-                            icon: const Icon(Icons.add),
-                            tooltip: l10n.addSlot,
-                            onPressed: isUpdatingAvailability
-                                ? null
-                                : _showAddSlotSheet,
-                          ),
+                          if (widget.onManageSchedule != null)
+                            TextButton.icon(
+                              icon: const Icon(Icons.edit_calendar_outlined),
+                              label: Text(l10n.availabilityTitle),
+                              onPressed: widget.onManageSchedule,
+                            ),
                         ],
                       ),
                     ),
@@ -159,7 +171,6 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                         return _SlotTile(
                           slot: slot,
                           isUpdating: isUpdatingAvailability,
-                          onEdit: () => _showEditSlotSheet(slot),
                           onRemove: () =>
                               context.read<TeacherDashboardBloc>().add(
                                 AvailabilitySlotRemoved(slotId: slot.slotId),
@@ -178,39 +189,6 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
   void _reload() => context.read<TeacherDashboardBloc>().add(
     TeacherDashboardLoadRequested(teacherId: widget.teacherId),
   );
-
-  Future<void> _showAddSlotSheet() async {
-    final slot = await showModalBottomSheet<TeacherAvailability>(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) => _AddSlotSheet(teacherId: widget.teacherId),
-    );
-    if (slot != null && mounted) {
-      context.read<TeacherDashboardBloc>().add(
-        AvailabilitySlotAdded(slot: slot),
-      );
-    }
-  }
-
-  Future<void> _showEditSlotSheet(TeacherAvailability original) async {
-    final updated = await showModalBottomSheet<TeacherAvailability>(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) => _AddSlotSheet(
-        teacherId: widget.teacherId,
-        initialDate: original.startsAt,
-        initialTime: TimeOfDay(
-          hour: original.startsAt.hour,
-          minute: original.startsAt.minute,
-        ),
-      ),
-    );
-    if (updated != null && mounted) {
-      context.read<TeacherDashboardBloc>().add(
-        AvailabilitySlotEdited(original: original, updated: updated),
-      );
-    }
-  }
 }
 
 // ── Slot tile ─────────────────────────────────────────────────────────────────
@@ -219,13 +197,11 @@ class _SlotTile extends StatelessWidget {
   const _SlotTile({
     required this.slot,
     required this.isUpdating,
-    required this.onEdit,
     required this.onRemove,
   });
 
   final TeacherAvailability slot;
   final bool isUpdating;
-  final VoidCallback onEdit;
   final VoidCallback onRemove;
 
   @override
@@ -250,148 +226,12 @@ class _SlotTile extends StatelessWidget {
       ),
       trailing: slot.isBooked
           ? null
-          : Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.edit_outlined),
-                  tooltip: l10n.editSlot,
-                  onPressed: isUpdating ? null : onEdit,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete_outline),
-                  tooltip: l10n.deleteSlot,
-                  onPressed: isUpdating ? null : onRemove,
-                ),
-              ],
+          : IconButton(
+              icon: const Icon(Icons.delete_outline),
+              tooltip: l10n.deleteSlot,
+              onPressed: isUpdating ? null : onRemove,
             ),
     );
-  }
-}
-
-// ── Add slot bottom sheet ─────────────────────────────────────────────────────
-
-class _AddSlotSheet extends StatefulWidget {
-  const _AddSlotSheet({
-    required this.teacherId,
-    this.initialDate,
-    this.initialTime,
-  });
-
-  final String teacherId;
-  final DateTime? initialDate;
-  final TimeOfDay? initialTime;
-
-  @override
-  State<_AddSlotSheet> createState() => _AddSlotSheetState();
-}
-
-class _AddSlotSheetState extends State<_AddSlotSheet> {
-  late DateTime _selectedDate;
-  late TimeOfDay _selectedTime;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedDate =
-        widget.initialDate ?? DateTime.now().add(const Duration(days: 1));
-    _selectedTime = widget.initialTime ?? const TimeOfDay(hour: 9, minute: 0);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.quranSessionsL10n;
-    final locale = Localizations.localeOf(context).languageCode;
-    final dateFmt = DateFormat('EEEE، d MMMM y', locale);
-    final scheme = Theme.of(context).colorScheme;
-
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 24,
-        right: 24,
-        top: 24,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            l10n.addNewSlot,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 20),
-          // Date picker row
-          TilawaReadOnlyField(
-            prefixIcon: Icons.calendar_today_outlined,
-            semanticLabel: l10n.slotDate,
-            onTap: () async {
-              final picked = await showDatePicker(
-                context: context,
-                initialDate: _selectedDate,
-                firstDate: DateTime.now(),
-                lastDate: DateTime.now().add(const Duration(days: 90)),
-              );
-              if (picked != null) setState(() => _selectedDate = picked);
-            },
-            child: Text(
-              dateFmt.format(_selectedDate),
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-          ),
-          const SizedBox(height: 12),
-          // Time picker row
-          TilawaReadOnlyField(
-            prefixIcon: Icons.access_time,
-            semanticLabel: l10n.slotTime,
-            onTap: () async {
-              final picked = await showTimePicker(
-                context: context,
-                initialTime: _selectedTime,
-              );
-              if (picked != null) setState(() => _selectedTime = picked);
-            },
-            child: Text(
-              _selectedTime.format(context),
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-          ),
-          const SizedBox(height: 24),
-          FilledButton(
-            onPressed: _confirm,
-            child: Text(l10n.addSlotButton),
-          ),
-          const SizedBox(height: 8),
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              l10n.cancel,
-              style: TextStyle(color: scheme.onSurfaceVariant),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _confirm() {
-    final start = DateTime(
-      _selectedDate.year,
-      _selectedDate.month,
-      _selectedDate.day,
-      _selectedTime.hour,
-      _selectedTime.minute,
-    );
-
-    final slot = TeacherAvailability(
-      slotId: 'teacher_slot_${DateTime.now().millisecondsSinceEpoch}',
-      teacherId: widget.teacherId,
-      startsAt: start,
-      endsAt: start.add(const Duration(hours: 1)),
-      isBooked: false,
-    );
-
-    Navigator.pop(context, slot);
   }
 }
 

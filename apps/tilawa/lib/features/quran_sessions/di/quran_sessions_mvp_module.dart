@@ -5,6 +5,7 @@ import '../data/fake_auth_session_provider.dart';
 import '../data/fake_mvp_availability_provider.dart';
 import '../data/fake_mvp_booking_repository.dart';
 import '../data/fake_mvp_market_config_repository.dart';
+import '../data/fake_mvp_schedule_repository.dart';
 import '../data/fake_mvp_session_policy_repository.dart';
 import '../data/fake_mvp_session_repository.dart';
 import '../data/fake_mvp_teacher_application_repository.dart';
@@ -50,6 +51,9 @@ class QuranSessionsMvpModule {
     );
     sl.registerLazySingleton<TeacherProfileRepository>(
       () => FakeMvpTeacherProfileRepository(store),
+    );
+    sl.registerLazySingleton<ScheduleRepository>(
+      () => FakeMvpScheduleRepository(store),
     );
 
     registerUseCases(sl);
@@ -206,6 +210,9 @@ class QuranSessionsMvpModule {
         getAvailability: sl<GetTeacherAvailabilityUseCase>(),
         availabilityProvider: sl<AvailabilityProvider>(),
       ),
+    );
+    sl.registerFactory(
+      () => AvailabilityCubit(repository: sl<ScheduleRepository>()),
     );
     sl.registerFactory(
       () => ProfileCompletionBloc(

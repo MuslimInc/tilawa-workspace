@@ -434,6 +434,140 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get addSlotButton => 'إضافة الموعد';
 
   @override
+  String get availabilityTitle => 'ساعات العمل';
+
+  @override
+  String get availabilityTabHours => 'الساعات';
+
+  @override
+  String get availabilityTabOverrides => 'الاستثناءات';
+
+  @override
+  String get availabilityUseSameHours => 'استخدام نفس الساعات لكل الأيام';
+
+  @override
+  String get availabilityTimezone => 'المنطقة الزمنية';
+
+  @override
+  String get availabilitySessionLength => 'مدة الحصة';
+
+  @override
+  String availabilityDurationMinutes(int count) {
+    return '$count دقيقة';
+  }
+
+  @override
+  String get availabilityHoursRow => 'الساعات';
+
+  @override
+  String get availabilityDayClosed => 'مغلق';
+
+  @override
+  String get availabilityAddRange => 'إضافة فترة';
+
+  @override
+  String get availabilityEditRange => 'تعديل الفترة';
+
+  @override
+  String get availabilityRemoveRange => 'حذف';
+
+  @override
+  String get availabilitySave => 'حفظ';
+
+  @override
+  String get availabilitySavedToast => 'تم حفظ الجدول';
+
+  @override
+  String get availabilityUnsavedChanges => 'تغييرات غير محفوظة';
+
+  @override
+  String get availabilityLoadError => 'تعذّر تحميل جدولك';
+
+  @override
+  String get availabilityStartTime => 'وقت البدء';
+
+  @override
+  String get availabilityEndTime => 'وقت الانتهاء';
+
+  @override
+  String get availabilityUseTheseTimes => 'استخدام هذه الأوقات';
+
+  @override
+  String get availabilityRangeInvalid =>
+      'يجب أن يكون وقت الانتهاء بعد وقت البدء';
+
+  @override
+  String get availabilityRangeOverlap => 'تتداخل هذه الفترة مع فترة أخرى';
+
+  @override
+  String get availabilityOverridesEmpty => 'لا توجد استثناءات بعد';
+
+  @override
+  String get availabilityOverridesEmptyHint =>
+      'احجب يوماً كإجازة أو أضف ساعات خاصة لتاريخ محدد.';
+
+  @override
+  String get availabilityAddOverride => 'إضافة استثناء';
+
+  @override
+  String get availabilityOverrideUnavailable => 'غير متاح (إجازة)';
+
+  @override
+  String get availabilityOverrideCustom => 'ساعات مخصّصة';
+
+  @override
+  String get availabilityOverrideDate => 'التاريخ';
+
+  @override
+  String get availabilitySetupHeadline =>
+      'حدد أوقاتك مرة واحدة وسيتمكن الطلاب من الحجز تلقائيًا';
+
+  @override
+  String get availabilitySetupCta => 'إعداد الجدول الأسبوعي';
+
+  @override
+  String get availabilitySetupBenefitRecurring => 'لا تكرار يدوي';
+
+  @override
+  String get availabilitySetupBenefitTimezone => 'مراعاة المناطق الزمنية';
+
+  @override
+  String get availabilitySetupBenefitSelfBooking => 'يحجز الطلاب بأنفسهم';
+
+  @override
+  String get availabilityTimezonePickerTitle => 'اختر المنطقة الزمنية';
+
+  @override
+  String get availabilityDiscardChanges => 'تجاهل التغييرات؟';
+
+  @override
+  String get availabilityDiscardConfirm => 'تجاهل';
+
+  @override
+  String get availabilityKeepEditing => 'متابعة التعديل';
+
+  @override
+  String get weekdaySaturday => 'السبت';
+
+  @override
+  String get weekdaySunday => 'الأحد';
+
+  @override
+  String get weekdayMonday => 'الإثنين';
+
+  @override
+  String get weekdayTuesday => 'الثلاثاء';
+
+  @override
+  String get weekdayWednesday => 'الأربعاء';
+
+  @override
+  String get weekdayThursday => 'الخميس';
+
+  @override
+  String get weekdayFriday => 'الجمعة';
+
+  @override
   String get teacherApplicationTitle => 'طلب تسجيل كمحفظ';
 
   @override

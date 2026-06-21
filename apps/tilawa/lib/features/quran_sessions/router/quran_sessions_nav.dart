@@ -159,7 +159,20 @@ List<RouteBase> get quranSessionsRoutes => [
     builder: (context, state) => _TeacherDashboardGate(
       childBuilder: (teacherId) => BlocProvider(
         create: (_) => getIt<TeacherDashboardBloc>(),
-        child: TeacherDashboardScreen(teacherId: teacherId),
+        child: TeacherDashboardScreen(
+          teacherId: teacherId,
+          onManageSchedule: () =>
+              context.push(QuranSessionsRoutes.availability),
+        ),
+      ),
+    ),
+  ),
+  GoRoute(
+    path: QuranSessionsRoutes.availability,
+    builder: (context, state) => _TeacherDashboardGate(
+      childBuilder: (teacherId) => BlocProvider(
+        create: (_) => getIt<AvailabilityCubit>(),
+        child: WeeklyAvailabilityScreen(teacherId: teacherId),
       ),
     ),
   ),

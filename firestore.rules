@@ -27,6 +27,17 @@ service cloud.firestore {
         && resource.data.verificationStatus == 'verified';
     }
 
+    // Authorizes the teacher who owns the availability at {teacherId}.
+    // Availability is keyed by the teacher's uid, so isOwner covers the normal
+    // case; the second clause also allows keying by profile-doc id. exists()
+    // guards the get() so a missing parent doc denies instead of erroring.
+    function canEditTeacherAvailability(teacherId) {
+      return isOwner(teacherId)
+        || (isSignedIn()
+            && exists(/databases/$(database)/documents/quran_teacher_profiles/$(teacherId))
+            && get(/databases/$(database)/documents/quran_teacher_profiles/$(teacherId)).data.userId == request.auth.uid);
+    }
+
     function teacherProfileTrustFieldsUnchanged() {
       return incomingUnchanged('userId')
         && incomingUnchanged('verificationStatus')
@@ -150,6 +161,21 @@ service cloud.firestore {
       match /pricing/{marketId} {
         allow read: if isSignedIn();
         allow write: if false;
+      }
+
+      // Recurring weekly availability rules. Owner edits from the weekly editor;
+      // any signed-in user reads (students derive bookable slots client-side).
+      // Generated slots are never stored, so there is nothing booking-bearing
+      // here — bookings/holds remain CF-only below.
+      match /availability_config/{docId} {
+        allow read: if isSignedIn();
+        allow write: if canEditTeacherAvailability(teacherId);
+      }
+
+      // Dated overrides (vacations / busy / custom hours) — same ownership model.
+      match /availability_overrides/{dateKey} {
+        allow read: if isSignedIn();
+        allow write: if canEditTeacherAvailability(teacherId);
       }
     }
 

@@ -19,6 +19,7 @@ export 'src/boundaries/scheduling/reschedule_policy.dart';
 // ── Data: remote datasource contracts (host app implements these) ────────────
 export 'src/data/datasources/availability_remote_data_source.dart';
 export 'src/data/datasources/booking_remote_data_source.dart';
+export 'src/data/datasources/schedule_remote_data_source.dart';
 export 'src/data/datasources/market_config_remote_data_source.dart';
 export 'src/data/datasources/session_policy_remote_data_source.dart';
 export 'src/data/datasources/session_remote_data_source.dart';
@@ -35,6 +36,8 @@ export 'src/data/dtos/session_policy_dto.dart';
 export 'src/data/dtos/session_review_dto.dart';
 export 'src/data/dtos/teacher_application_dto.dart';
 export 'src/data/dtos/teacher_availability_dto.dart';
+export 'src/data/dtos/weekly_schedule_dto.dart';
+export 'src/data/dtos/availability_override_dto.dart';
 export 'src/data/dtos/teacher_profile_dto.dart';
 export 'src/data/dtos/user_profile_dto.dart';
 // ── Data: typed exceptions (for datasource implementors) ─────────────────────
@@ -43,6 +46,9 @@ export 'src/data/seed/default_market_catalog.dart';
 // ── Data: DI registration module ─────────────────────────────────────────────
 // Host app uses QuranSessionsModule.register() — never imports *Impl directly.
 export 'src/di/quran_sessions_module.dart';
+export 'src/domain/entities/availability_override.dart';
+export 'src/domain/entities/generated_slot.dart';
+export 'src/domain/entities/local_time.dart';
 export 'src/domain/entities/market_city.dart';
 export 'src/domain/entities/market_config.dart';
 export 'src/domain/entities/market_country.dart';
@@ -59,13 +65,21 @@ export 'src/domain/entities/teacher_capability.dart';
 export 'src/domain/entities/teacher_availability.dart';
 export 'src/domain/entities/teacher_profile.dart';
 export 'src/domain/entities/teacher_verification_status.dart';
+export 'src/domain/entities/scheduling_policy.dart';
+export 'src/domain/entities/slot_duration.dart';
+export 'src/domain/entities/time_range.dart';
+export 'src/domain/entities/weekday.dart';
+export 'src/domain/entities/weekly_schedule.dart';
 export 'src/domain/entities/user_profile.dart';
+// ── Domain: services ──────────────────────────────────────────────────────────
+export 'src/domain/services/slot_generator.dart';
 // ── Domain: failure types ─────────────────────────────────────────────────────
 export 'src/domain/failures/quran_sessions_failure.dart';
 // ── Domain: repository interfaces ────────────────────────────────────────────
 export 'src/domain/providers/auth_session_provider.dart';
 export 'src/domain/repositories/booking_repository.dart';
 export 'src/domain/repositories/market_config_repository.dart';
+export 'src/domain/repositories/schedule_repository.dart';
 export 'src/domain/repositories/session_policy_repository.dart';
 export 'src/domain/repositories/session_repository.dart';
 export 'src/domain/repositories/teacher_application_repository.dart';
@@ -103,6 +117,11 @@ export 'src/domain/usecases/submit_teacher_application_usecase.dart';
 export 'src/domain/usecases/suspend_teacher_profile_usecase.dart';
 export 'src/domain/usecases/update_teacher_eligibility_policy_usecase.dart';
 export 'src/domain/usecases/validate_booking_eligibility_usecase.dart';
+export 'src/presentation/blocs/availability/availability_cubit.dart';
+export 'src/presentation/blocs/availability/availability_state.dart';
+export 'src/presentation/screens/weekly_availability_screen.dart';
+export 'src/presentation/widgets/availability_override_sheet.dart';
+export 'src/presentation/widgets/time_range_editor_sheet.dart';
 export 'src/presentation/blocs/booking/booking_bloc.dart';
 export 'src/presentation/blocs/booking/booking_event.dart';
 export 'src/presentation/blocs/booking/booking_state.dart';
