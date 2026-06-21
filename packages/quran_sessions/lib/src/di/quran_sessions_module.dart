@@ -34,6 +34,7 @@ import '../domain/usecases/create_booking_usecase.dart';
 import '../domain/usecases/get_market_config_usecase.dart';
 import '../domain/usecases/get_session_policy_usecase.dart';
 import '../domain/usecases/get_student_sessions_usecase.dart';
+import '../domain/usecases/get_current_user_teacher_capability_usecase.dart';
 import '../domain/usecases/get_teacher_application_status_usecase.dart';
 import '../domain/usecases/get_teacher_availability_usecase.dart';
 import '../domain/usecases/get_teacher_profile_usecase.dart';
@@ -43,6 +44,7 @@ import '../domain/usecases/get_user_profile_usecase.dart';
 import '../domain/usecases/reject_teacher_application_usecase.dart';
 import '../domain/usecases/revoke_teacher_profile_usecase.dart';
 import '../domain/usecases/save_teacher_application_draft_usecase.dart';
+import '../domain/usecases/save_teacher_public_profile_usecase.dart';
 import '../domain/usecases/start_teacher_application_usecase.dart';
 import '../domain/usecases/submit_review_usecase.dart';
 import '../domain/usecases/submit_teacher_application_usecase.dart';
@@ -117,6 +119,15 @@ class QuranSessionsModule {
     registerSingleton(SaveTeacherApplicationDraftUseCase(applicationRepo));
     registerSingleton(SubmitTeacherApplicationUseCase(applicationRepo));
     registerSingleton(GetTeacherApplicationStatusUseCase(applicationRepo));
+    registerSingleton(
+      GetCurrentUserTeacherCapabilityUseCase(
+        applicationRepository: applicationRepo,
+        profileRepository: teacherProfileRepo,
+      ),
+    );
+    registerSingleton(
+      SaveTeacherPublicProfileUseCase(teacherProfileRepo),
+    );
     registerSingleton(
       ApproveTeacherApplicationUseCase(
         applicationRepository: applicationRepo,

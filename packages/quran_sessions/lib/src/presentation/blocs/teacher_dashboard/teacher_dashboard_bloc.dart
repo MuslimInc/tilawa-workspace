@@ -46,14 +46,14 @@ class TeacherDashboardBloc
     );
 
     // Surface the first failure encountered.
-    if (sessionsResult.isLeft) {
+    if (sessionsResult.isLeft()) {
       sessionsResult.fold(
         (f) => emit(TeacherDashboardFailure(f)),
         (_) {},
       );
       return;
     }
-    if (availResult.isLeft) {
+    if (availResult.isLeft()) {
       availResult.fold(
         (f) => emit(TeacherDashboardFailure(f)),
         (_) {},
@@ -150,7 +150,7 @@ class TeacherDashboardBloc
     final removeResult = await _availabilityProvider.withdrawSlot(
       event.original.slotId,
     );
-    if (removeResult.isLeft) {
+    if (removeResult.isLeft()) {
       removeResult.fold(
         (f) => emit(
           current.copyWith(isUpdatingAvailability: false, slotFailure: f),

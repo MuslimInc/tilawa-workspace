@@ -50,7 +50,7 @@ void main() {
       targetCount: 33,
     );
 
-    expect(result.isRight, true);
+    expect(result.isRight(), true);
     result.fold((_) => fail('Expected Right result'), (item) {
       expect(item.text, 'Subhan Allah');
       expect(item.count, 0);
@@ -65,7 +65,7 @@ void main() {
       targetCount: 33,
     );
 
-    expect(result.isLeft, true);
+    expect(result.isLeft(), true);
     result.fold(
       (failure) => expect(failure, isA<ValidationFailure>()),
       (_) => fail('Expected Left result'),
@@ -83,7 +83,7 @@ void main() {
 
     final result = await repository.incrementCount(id);
 
-    expect(result.isRight, true);
+    expect(result.isRight(), true);
     result.fold((_) => fail('Expected Right result'), (item) {
       expect(item.count, 1);
       expect(item.targetReachedNotified, false);
@@ -104,7 +104,7 @@ void main() {
 
     final result = await repository.resetCount(id);
 
-    expect(result.isRight, true);
+    expect(result.isRight(), true);
     result.fold((_) => fail('Expected Right result'), (item) {
       expect(item.count, 0);
       expect(item.targetReachedNotified, false);
@@ -147,7 +147,7 @@ void main() {
 
     final result = await repository.setTargetCount(dhikrId: id, targetCount: 7);
 
-    expect(result.isRight, true);
+    expect(result.isRight(), true);
     result.fold(
       (_) => fail('Expected Right result'),
       (item) => expect(item.targetCount, 7),
@@ -166,7 +166,7 @@ void main() {
     final deleteResult = await repository.deleteDhikr(id);
     final all = await repository.getSavedDhikr();
 
-    expect(deleteResult.isRight, true);
+    expect(deleteResult.isRight(), true);
     all.fold(
       (_) => fail('Expected items list to load'),
       (items) => expect(items.where((e) => e.id == id), isEmpty),

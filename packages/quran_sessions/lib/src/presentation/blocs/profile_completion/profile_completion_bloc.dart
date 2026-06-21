@@ -51,15 +51,15 @@ class ProfileCompletionBloc
     final countriesResult = await countriesFuture;
     final policyResult = await policyFuture;
 
-    if (profileResult.isLeft) {
+    if (profileResult.isLeft()) {
       profileResult.fold((f) => emit(ProfileCompletionFailure(f)), (_) {});
       return;
     }
-    if (countriesResult.isLeft) {
+    if (countriesResult.isLeft()) {
       countriesResult.fold((f) => emit(ProfileCompletionFailure(f)), (_) {});
       return;
     }
-    if (policyResult.isLeft) {
+    if (policyResult.isLeft()) {
       policyResult.fold((f) => emit(ProfileCompletionFailure(f)), (_) {});
       return;
     }
@@ -117,7 +117,7 @@ class ProfileCompletionBloc
     final citiesResult = await _getMarketConfig.citiesByCountry(
       country.countryCode,
     );
-    if (citiesResult.isLeft) {
+    if (citiesResult.isLeft()) {
       return ProfileCompletionFailure(
         citiesResult.fold((f) => f, (_) => throw StateError('')),
       );

@@ -631,13 +631,42 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get teachingOnMemuslimApply => 'Apply as a teacher';
 
   @override
-  String get teachingOnMemuslimContinue => 'Continue application';
+  String get teachingOnMemuslimContinueDraft => 'Continue registration';
 
   @override
   String get teachingOnMemuslimViewStatus => 'View application status';
 
   @override
+  String get teachingOnMemuslimTeacherDashboard => 'Teacher dashboard';
+
+  @override
   String get teachingOnMemuslimOpenDashboard => 'Open teacher dashboard';
+
+  @override
+  String get teachingOnMemuslimManageScheduleSubtitle =>
+      'Manage your schedule and sessions from here.';
+
+  @override
+  String get teachingOnMemuslimReapplySubtitle =>
+      'View details or reapply when allowed.';
+
+  @override
+  String get verifiedTeacherBadge => 'Verified Teacher';
+
+  @override
+  String get teacherCapabilityStatusDraft => 'Draft';
+
+  @override
+  String get teacherCapabilityStatusPending => 'Under review';
+
+  @override
+  String get teacherCapabilityStatusRejected => 'Rejected';
+
+  @override
+  String get teacherCapabilityStatusSuspended => 'Suspended';
+
+  @override
+  String get teacherCapabilityStatusRevoked => 'Accreditation revoked';
 
   @override
   String get teachingOnMemuslimNotAppliedSubtitle =>
@@ -693,4 +722,93 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   @override
   String get bookingDisabledNoSupply =>
       'Booking is unavailable until verified teachers exist in your area.';
+
+  @override
+  String get completeTeacherProfileTitle => 'Complete teacher profile';
+
+  @override
+  String get completeTeacherProfileSubtitle =>
+      'Add the public details students see before opening your dashboard.';
+
+  @override
+  String get completeTeacherProfileFirstMessage =>
+      'Complete your teacher profile before opening the dashboard.';
+
+  @override
+  String get teacherDashboard => 'Teacher dashboard';
+
+  @override
+  String get openTeacherDashboard => 'Open teacher dashboard';
+
+  @override
+  String get completeTeacherProfile => 'Complete teacher profile';
+
+  @override
+  String get teacherPublicNameLabel => 'Full teacher name';
+
+  @override
+  String get teacherPublicNameHelper =>
+      'Your real full name as students see it in the marketplace. It may differ from your account name.';
+
+  @override
+  String get teacherPublicNameRequired => 'Full teacher name is required.';
+
+  @override
+  String get teacherPublicNameInvalid =>
+      'Enter a valid full name (at least 3 characters, or two words).';
+
+  @override
+  String get teacherPublicNamePlaceholderNotAllowed =>
+      'Choose your real full name — generic placeholders like \"Quran Teacher\" are not allowed.';
+
+  @override
+  String get teacherProfileHiddenUntilComplete =>
+      'Your profile stays hidden from students until all required public fields are complete.';
+
+  @override
+  String get publicTeacherName => 'Full teacher name';
+
+  @override
+  String get visibleToStudents => 'Your full name shown to students';
+
+  @override
+  String get realNameRequiredForTeachers =>
+      'Teachers must use a real public name that students can recognize.';
+
+  @override
+  String get teachingLanguagesRequired =>
+      'Select at least one teaching language.';
+
+  @override
+  String get specializationsRequired => 'Select at least one specialization.';
+
+  @override
+  String get bioRequired => 'Bio is required.';
+
+  @override
+  String get teacherProfileUnavailableTitle => 'Teacher profile unavailable';
+
+  @override
+  String get teacherProfileUnavailableSubtitle =>
+      'This teacher has not finished their public profile yet.';
+
+  @override
+  String get verifiedTeacher => 'Verified teacher';
+
+  @override
+  String get quranTeacherFallbackName => 'Quran Teacher';
+
+  @override
+  String get teacherProfileIncomplete =>
+      'Your teacher profile is missing required public fields.';
+
+  @override
+  String get teacherProfileIncompleteAction => 'Complete profile';
+
+  @override
+  String get manageYourAvailabilityAndSessions =>
+      'Manage your schedule and sessions from here.';
+
+  @override
+  String get noAvailabilityYet => 'No availability published yet.';
 }

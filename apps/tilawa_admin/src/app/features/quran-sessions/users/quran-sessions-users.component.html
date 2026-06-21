@@ -1,0 +1,102 @@
+<div class="px-4 sm:px-6 lg:px-8">
+  <app-page-header
+    title="Quran Sessions Users"
+    subtitle="Users with a Quran Sessions profile — non-destructive moderation only."
+  />
+
+  <div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <input [(ngModel)]="searchQuery" placeholder="Search name, email, UID" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm" />
+    <input [(ngModel)]="countryFilter" placeholder="Country" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm" />
+    <input [(ngModel)]="cityFilter" placeholder="City" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm" />
+    <select [(ngModel)]="genderFilter" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm">
+      <option value="">All genders</option>
+      @for (gender of genders; track gender) {
+        <option [value]="gender">{{ gender }}</option>
+      }
+    </select>
+    <select [(ngModel)]="profileCompletedFilter" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm">
+      <option value="">Profile completion</option>
+      <option value="true">Completed</option>
+      <option value="false">Incomplete</option>
+    </select>
+    <select [(ngModel)]="statusFilter" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm">
+      <option value="">All statuses</option>
+      @for (status of accountStatuses; track status) {
+        <option [value]="status">{{ status }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="mt-4">
+    <button type="button" (click)="reload()" class="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white">Apply filters</button>
+  </div>
+
+  <div class="mt-8">
+    @if (loadState() === 'loading') {
+      <p class="text-center text-gray-500 py-8">Loading users…</p>
+    } @else if (loadState() === 'error') {
+      <p class="text-center text-red-600 py-8">{{ errorMessage() }}</p>
+    } @else if (items().length === 0) {
+      <p class="text-center text-gray-500 py-8">No Quran Sessions users found.</p>
+    } @else {
+      <div class="overflow-x-auto shadow ring-1 ring-black/5 sm:rounded-lg">
+        <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
+          <thead class="bg-gray-50 dark:bg-gray-800">
+            <tr>
+              <th class="px-3 py-3 text-left text-sm font-semibold">UID</th>
+              <th class="px-3 py-3 text-left text-sm font-semibold">Display name</th>
+              <th class="px-3 py-3 text-left text-sm font-semibold">Email</th>
+              <th class="px-3 py-3 text-left text-sm font-semibold">Photo</th>
+              <th class="px-3 py-3 text-left text-sm font-semibold">QS profile status</th>
+              <th class="px-3 py-3 text-right text-sm font-semibold">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200 bg-white dark:bg-gray-900 dark:divide-gray-800">
+            @for (user of items(); track user.userId) {
+              <tr>
+                <td class="px-3 py-4 text-sm font-mono text-xs">{{ user.userId }}</td>
+                <td class="px-3 py-4 text-sm">{{ user.displayName }}</td>
+                <td class="px-3 py-4 text-sm">
+                  <span>{{ user.email }}</span>
+                  @if (user.hasDuplicateEmail) {
+                    <span class="ml-2 inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/40 dark:text-amber-300" title="This email appears on multiple UIDs in the loaded page">
+                      Duplicate email
+                    </span>
+                  }
+                </td>
+                <td class="px-3 py-4 text-sm">
+                  @if (user.photoUrl) {
+                    <img [src]="user.photoUrl" alt="" class="h-8 w-8 rounded-full object-cover" />
+                  } @else {
+                    <span class="text-gray-400">—</span>
+                  }
+                </td>
+                <td class="px-3 py-4 text-sm"><app-status-chip [label]="user.accountStatus" [status]="user.accountStatus" /></td>
+                <td class="px-3 py-4 text-right text-sm">
+                  @if (user.accountStatus !== 'suspended' && user.accountStatus !== 'blocked') {
+                    <button type="button" (click)="openSuspend(user.userId)" class="text-orange-600">Suspend access</button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (canLoadMore()) {
+        <div class="mt-4 text-center">
+          <button type="button" (click)="loadMore()" class="rounded-md border px-4 py-2 text-sm">Load more</button>
+        </div>
+      }
+    }
+  </div>
+
+  <app-reject-reason-dialog
+    [isOpen]="suspendOpen"
+    title="Suspend user access"
+    message="This sets the Quran Sessions account status to suspended via a server action."
+    confirmLabel="Suspend"
+    [loading]="isActionLoading()"
+    (submit)="onSuspend($event)"
+    (cancel)="suspendOpen = false"
+  />
+</div>

@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../rules/teacher_profile_completeness.dart';
 import 'teacher_verification_status.dart';
 import 'user_profile.dart' show UserGender;
 
@@ -25,6 +26,8 @@ class TeacherProfile extends Equatable {
     required this.averageRating,
     required this.reviewCount,
     required this.isActive,
+    required this.profileCompleteness,
+    required this.isPubliclyVisible,
     required this.createdAt,
     required this.updatedAt,
     this.avatarUrl,
@@ -60,6 +63,12 @@ class TeacherProfile extends Equatable {
   /// False when the teacher has temporarily deactivated their profile.
   final bool isActive;
 
+  /// Required public fields + verification status (ignores [isActive]).
+  final TeacherProfileCompletenessStatus profileCompleteness;
+
+  /// True when [profileCompleteness] is complete and [isActive] is true.
+  final bool isPubliclyVisible;
+
   /// When non-null, only students of this gender may book.
   /// Null means no gender restriction.
   final UserGender? allowedStudentGender;
@@ -75,8 +84,18 @@ class TeacherProfile extends Equatable {
   bool get isVerified =>
       verificationStatus == TeacherVerificationStatus.verified;
 
+  /// Whether required public marketplace fields are present (ignores [isActive]).
+  bool get isPublicProfileFieldsComplete =>
+      profileCompleteness == TeacherProfileCompletenessStatus.complete;
+
+  /// Whether all required public marketplace fields are present.
+  ///
+  /// Optional fields (avatar, availability, pricing) do not block completion.
+  bool get isPublicProfileComplete => isPubliclyVisible;
+
   /// True when this teacher can accept new bookings.
-  bool get canAcceptBookings => isActive && isVerified;
+  bool get canAcceptBookings =>
+      isActive && isVerified && isPublicProfileComplete;
 
   TeacherProfile copyWith({
     String? displayName,
@@ -88,6 +107,8 @@ class TeacherProfile extends Equatable {
     double? averageRating,
     int? reviewCount,
     bool? isActive,
+    TeacherProfileCompletenessStatus? profileCompleteness,
+    bool? isPubliclyVisible,
     UserGender? allowedStudentGender,
     bool? canTeachChildren,
     DateTime? updatedAt,
@@ -103,6 +124,8 @@ class TeacherProfile extends Equatable {
     averageRating: averageRating ?? this.averageRating,
     reviewCount: reviewCount ?? this.reviewCount,
     isActive: isActive ?? this.isActive,
+    profileCompleteness: profileCompleteness ?? this.profileCompleteness,
+    isPubliclyVisible: isPubliclyVisible ?? this.isPubliclyVisible,
     allowedStudentGender: allowedStudentGender ?? this.allowedStudentGender,
     canTeachChildren: canTeachChildren ?? this.canTeachChildren,
     createdAt: createdAt,
@@ -122,6 +145,8 @@ class TeacherProfile extends Equatable {
     averageRating,
     reviewCount,
     isActive,
+    profileCompleteness,
+    isPubliclyVisible,
     allowedStudentGender,
     canTeachChildren,
     createdAt,

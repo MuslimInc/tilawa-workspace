@@ -22,7 +22,7 @@ class CompleteTeacherProfileUseCase {
     required DateTime dateOfBirth,
   }) async {
     final policyResult = await _policyRepository.getGlobalPolicy();
-    if (policyResult.isLeft) {
+    if (policyResult.isLeft()) {
       return policyResult.fold(Left.new, (_) => throw StateError(''));
     }
     final policy = policyResult.fold((_) => throw StateError(''), (p) => p);
@@ -34,7 +34,7 @@ class CompleteTeacherProfileUseCase {
     if (dobFailure != null) return Left(dobFailure);
 
     final profileResult = await _repository.getProfile(userId);
-    if (profileResult.isLeft) return profileResult.map((p) => p);
+    if (profileResult.isLeft()) return profileResult.map((p) => p);
     final profile = profileResult.fold((_) => throw StateError(''), (p) => p);
     final updated = profile.copyWith(gender: gender, dateOfBirth: dateOfBirth);
     return _repository.updateProfile(updated);

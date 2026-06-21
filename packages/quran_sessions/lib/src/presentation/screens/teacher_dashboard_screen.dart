@@ -96,7 +96,9 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                 slivers: [
                   // ── Upcoming sessions ──────────────────────────────────
                   _SectionHeader(
-                    title: l10n.upcomingSessionsSection(upcomingSessions.length),
+                    title: l10n.upcomingSessionsSection(
+                      upcomingSessions.length,
+                    ),
                   ),
                   if (upcomingSessions.isEmpty)
                     SliverToBoxAdapter(

@@ -6,7 +6,6 @@ import { NotificationModalComponent } from './components/notification-modal/noti
 import { SendNotificationUseCase } from '../../core/domain/usecases/send-notification.usecase';
 import { NotificationEntity, NotificationTargetType } from '../../core/domain/entities/notification.entity';
 import { NOTIFICATION_REPOSITORY } from '../../core/domain/repositories/notification.repository';
-import { NotificationRepositoryImpl } from '../../core/data/repositories/notification.repository.impl';
 
 @Component({
   selector: 'app-users',

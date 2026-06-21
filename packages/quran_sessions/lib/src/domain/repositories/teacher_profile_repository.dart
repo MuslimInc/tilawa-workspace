@@ -27,6 +27,15 @@ abstract interface class TeacherProfileRepository {
     TeacherProfile profile,
   );
 
+  /// Updates only client-writable public marketplace fields.
+  ///
+  /// Omits server-owned trust fields (`profileCompleteness`,
+  /// `isPubliclyVisible`, `verificationStatus`, etc.) so Firestore rules allow
+  /// verified owners to save from the app.
+  Future<Either<QuranSessionsFailure, TeacherProfile>> updatePublicProfile(
+    TeacherProfile profile,
+  );
+
   /// Deactivates the profile without revoking the underlying application.
   Future<Either<QuranSessionsFailure, TeacherProfile>> deactivate(String id);
 

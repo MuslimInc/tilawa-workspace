@@ -14,7 +14,8 @@ dependencies:
     sdk: flutter
 
   equatable: ^2.0.8
-  dartz_plus: ^0.3.0
+  dartz_plus:
+    path: ../dartz_plus
   flutter_bloc: ^9.1.1
   bloc_concurrency: ^0.3.0
   intl: ^0.20.2

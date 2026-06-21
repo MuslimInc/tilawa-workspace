@@ -1211,11 +1211,11 @@ abstract class QuranSessionsLocalizations {
   /// **'Apply as a teacher'**
   String get teachingOnMemuslimApply;
 
-  /// No description provided for @teachingOnMemuslimContinue.
+  /// No description provided for @teachingOnMemuslimContinueDraft.
   ///
   /// In en, this message translates to:
-  /// **'Continue application'**
-  String get teachingOnMemuslimContinue;
+  /// **'Continue registration'**
+  String get teachingOnMemuslimContinueDraft;
 
   /// No description provided for @teachingOnMemuslimViewStatus.
   ///
@@ -1223,11 +1223,65 @@ abstract class QuranSessionsLocalizations {
   /// **'View application status'**
   String get teachingOnMemuslimViewStatus;
 
+  /// No description provided for @teachingOnMemuslimTeacherDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher dashboard'**
+  String get teachingOnMemuslimTeacherDashboard;
+
   /// No description provided for @teachingOnMemuslimOpenDashboard.
   ///
   /// In en, this message translates to:
   /// **'Open teacher dashboard'**
   String get teachingOnMemuslimOpenDashboard;
+
+  /// No description provided for @teachingOnMemuslimManageScheduleSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your schedule and sessions from here.'**
+  String get teachingOnMemuslimManageScheduleSubtitle;
+
+  /// No description provided for @teachingOnMemuslimReapplySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View details or reapply when allowed.'**
+  String get teachingOnMemuslimReapplySubtitle;
+
+  /// No description provided for @verifiedTeacherBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified Teacher'**
+  String get verifiedTeacherBadge;
+
+  /// No description provided for @teacherCapabilityStatusDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get teacherCapabilityStatusDraft;
+
+  /// No description provided for @teacherCapabilityStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Under review'**
+  String get teacherCapabilityStatusPending;
+
+  /// No description provided for @teacherCapabilityStatusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get teacherCapabilityStatusRejected;
+
+  /// No description provided for @teacherCapabilityStatusSuspended.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspended'**
+  String get teacherCapabilityStatusSuspended;
+
+  /// No description provided for @teacherCapabilityStatusRevoked.
+  ///
+  /// In en, this message translates to:
+  /// **'Accreditation revoked'**
+  String get teacherCapabilityStatusRevoked;
 
   /// No description provided for @teachingOnMemuslimNotAppliedSubtitle.
   ///
@@ -1318,6 +1372,162 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'Booking is unavailable until verified teachers exist in your area.'**
   String get bookingDisabledNoSupply;
+
+  /// No description provided for @completeTeacherProfileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete teacher profile'**
+  String get completeTeacherProfileTitle;
+
+  /// No description provided for @completeTeacherProfileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the public details students see before opening your dashboard.'**
+  String get completeTeacherProfileSubtitle;
+
+  /// No description provided for @completeTeacherProfileFirstMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your teacher profile before opening the dashboard.'**
+  String get completeTeacherProfileFirstMessage;
+
+  /// No description provided for @teacherDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher dashboard'**
+  String get teacherDashboard;
+
+  /// No description provided for @openTeacherDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Open teacher dashboard'**
+  String get openTeacherDashboard;
+
+  /// No description provided for @completeTeacherProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete teacher profile'**
+  String get completeTeacherProfile;
+
+  /// No description provided for @teacherPublicNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Full teacher name'**
+  String get teacherPublicNameLabel;
+
+  /// No description provided for @teacherPublicNameHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Your real full name as students see it in the marketplace. It may differ from your account name.'**
+  String get teacherPublicNameHelper;
+
+  /// No description provided for @teacherPublicNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Full teacher name is required.'**
+  String get teacherPublicNameRequired;
+
+  /// No description provided for @teacherPublicNameInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid full name (at least 3 characters, or two words).'**
+  String get teacherPublicNameInvalid;
+
+  /// No description provided for @teacherPublicNamePlaceholderNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your real full name — generic placeholders like \"Quran Teacher\" are not allowed.'**
+  String get teacherPublicNamePlaceholderNotAllowed;
+
+  /// No description provided for @teacherProfileHiddenUntilComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Your profile stays hidden from students until all required public fields are complete.'**
+  String get teacherProfileHiddenUntilComplete;
+
+  /// No description provided for @publicTeacherName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full teacher name'**
+  String get publicTeacherName;
+
+  /// No description provided for @visibleToStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'Your full name shown to students'**
+  String get visibleToStudents;
+
+  /// No description provided for @realNameRequiredForTeachers.
+  ///
+  /// In en, this message translates to:
+  /// **'Teachers must use a real public name that students can recognize.'**
+  String get realNameRequiredForTeachers;
+
+  /// No description provided for @teachingLanguagesRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Select at least one teaching language.'**
+  String get teachingLanguagesRequired;
+
+  /// No description provided for @specializationsRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Select at least one specialization.'**
+  String get specializationsRequired;
+
+  /// No description provided for @bioRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Bio is required.'**
+  String get bioRequired;
+
+  /// No description provided for @teacherProfileUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher profile unavailable'**
+  String get teacherProfileUnavailableTitle;
+
+  /// No description provided for @teacherProfileUnavailableSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This teacher has not finished their public profile yet.'**
+  String get teacherProfileUnavailableSubtitle;
+
+  /// No description provided for @verifiedTeacher.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified teacher'**
+  String get verifiedTeacher;
+
+  /// No description provided for @quranTeacherFallbackName.
+  ///
+  /// In en, this message translates to:
+  /// **'Quran Teacher'**
+  String get quranTeacherFallbackName;
+
+  /// No description provided for @teacherProfileIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Your teacher profile is missing required public fields.'**
+  String get teacherProfileIncomplete;
+
+  /// No description provided for @teacherProfileIncompleteAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete profile'**
+  String get teacherProfileIncompleteAction;
+
+  /// No description provided for @manageYourAvailabilityAndSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your schedule and sessions from here.'**
+  String get manageYourAvailabilityAndSessions;
+
+  /// No description provided for @noAvailabilityYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No availability published yet.'**
+  String get noAvailabilityYet;
 }
 
 class _QuranSessionsLocalizationsDelegate

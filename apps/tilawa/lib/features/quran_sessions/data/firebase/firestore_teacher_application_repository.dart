@@ -14,6 +14,8 @@ class FirestoreTeacherApplicationDto {
     this.phoneNumber,
     this.phoneCountryCode,
     this.preferredContactMethod,
+    this.publicDisplayName,
+    this.teacherDisplayName,
     this.teachingLanguages = const [],
     this.specializations = const [],
     this.bio,
@@ -29,6 +31,8 @@ class FirestoreTeacherApplicationDto {
   final String? phoneNumber;
   final String? phoneCountryCode;
   final String? preferredContactMethod;
+  final String? publicDisplayName;
+  final String? teacherDisplayName;
   final List<String> teachingLanguages;
   final List<String> specializations;
   final String? bio;
@@ -50,6 +54,8 @@ class FirestoreTeacherApplicationDto {
       phoneNumber: data['phoneNumber'] as String?,
       phoneCountryCode: data['phoneCountryCode'] as String?,
       preferredContactMethod: data['preferredContactMethod'] as String?,
+      publicDisplayName: data['publicDisplayName'] as String?,
+      teacherDisplayName: data['teacherDisplayName'] as String?,
       teachingLanguages: List<String>.from(
         data['teachingLanguages'] as List? ?? const [],
       ),
@@ -73,6 +79,8 @@ class FirestoreTeacherApplicationDto {
     phoneNumber: phoneNumber,
     phoneCountryCode: phoneCountryCode,
     preferredContactMethod: preferredContactMethod,
+    publicDisplayName: publicDisplayName,
+    teacherDisplayName: teacherDisplayName,
     teachingLanguages: teachingLanguages,
     specializations: specializations,
     bio: bio,
@@ -91,6 +99,8 @@ class FirestoreTeacherApplicationDto {
     if (phoneCountryCode != null) 'phoneCountryCode': phoneCountryCode,
     if (preferredContactMethod != null)
       'preferredContactMethod': preferredContactMethod,
+    if (publicDisplayName != null) 'publicDisplayName': publicDisplayName,
+    if (teacherDisplayName != null) 'teacherDisplayName': teacherDisplayName,
     'teachingLanguages': teachingLanguages,
     'specializations': specializations,
     if (bio != null) 'bio': bio,
@@ -111,6 +121,8 @@ class FirestoreTeacherApplicationDto {
     phoneNumber: dto.phoneNumber,
     phoneCountryCode: dto.phoneCountryCode,
     preferredContactMethod: dto.preferredContactMethod,
+    publicDisplayName: dto.publicDisplayName,
+    teacherDisplayName: dto.teacherDisplayName,
     teachingLanguages: dto.teachingLanguages,
     specializations: dto.specializations,
     bio: dto.bio,
@@ -241,6 +253,8 @@ class FirestoreTeacherApplicationDataSource
           phoneNumber: application.phoneNumber,
           phoneCountryCode: application.phoneCountryCode,
           preferredContactMethod: application.preferredContactMethod,
+          publicDisplayName: application.publicDisplayName,
+          teacherDisplayName: application.teacherDisplayName,
           teachingLanguages: application.teachingLanguages,
           specializations: application.specializations,
           bio: application.bio,

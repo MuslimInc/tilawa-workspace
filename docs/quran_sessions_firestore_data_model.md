@@ -74,9 +74,21 @@ Global safety policy (mirrors `QuranSessionSafetyPolicy`):
 
 Private onboarding data. **Phone number lives here only** — never on public teacher profile.
 
+| Field | Type | Notes |
+|-------|------|-------|
+| `publicDisplayName` | string? | Intended public marketplace name (never from bio) |
+| `teacherDisplayName` | string? | Teacher-preferred label |
+| `status`, `userId`, `bio`, … | | See application lifecycle docs |
+
 ### `quran_teacher_profiles/{teacherId}`
 
 Public teacher projection after admin approval.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `profileCompleteness` | string | `complete` \| `incomplete` |
+| `isPubliclyVisible` | bool | Public discovery gate |
+| `displayName`, `publicBio`, `userId`, … | | See teacher profile entity |
 
 #### Subcollection `availability/{slotId}`
 
@@ -112,7 +124,10 @@ Index definitions live in [`firestore.indexes.json`](../firestore.indexes.json).
 - `quran_sessions`: `studentId` ASC, `startsAt` DESC
 - `quran_sessions`: `teacherId` ASC, `startsAt` DESC
 - `quran_bookings`: `studentId` ASC, `createdAt` DESC
-- `quran_teacher_profiles`: `verificationStatus` ASC, `isActive` ASC, `displayName` ASC
+- `quran_teacher_profiles`: `verificationStatus` ASC, `isActive` ASC, `displayName` ASC (legacy list)
+- `quran_teacher_profiles`: `verificationStatus` ASC, `isActive` ASC, `profileCompleteness` ASC, `isPubliclyVisible` ASC (public discovery)
+
+Migration: [`docs/admin/teacher_profile_migration.md`](admin/teacher_profile_migration.md).
 
 For query shapes, monitoring, and performance recommendations see
 [firestore_query_optimization.md](firestore_query_optimization.md).

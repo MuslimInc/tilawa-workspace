@@ -82,7 +82,7 @@ void main() {
       final Either<Failure, InAppUpdateAvailability> result = await dataSource
           .checkAvailability();
 
-      expect(result.isRight, isTrue);
+      expect(result.isRight(), isTrue);
     });
 
     test('returns unavailable when no foreground activity', () async {
@@ -156,7 +156,7 @@ void main() {
       final Either<Failure, InAppUpdateAvailability> result = await dataSource
           .checkAvailability();
 
-      expect(result.isLeft, isTrue);
+      expect(result.isLeft(), isTrue);
       result.fold(
         (Failure failure) => expect(failure, isA<InAppUpdateFailure>()),
         (_) => fail('expected Left'),
@@ -180,7 +180,7 @@ void main() {
         final Either<Failure, InAppUpdateAvailability> result = await dataSource
             .checkAvailability();
 
-        expect(result.isRight, isTrue);
+        expect(result.isRight(), isTrue);
         result.fold((_) => fail('expected Right'), (
           InAppUpdateAvailability availability,
         ) {
@@ -197,7 +197,7 @@ void main() {
       final Either<Failure, InAppUpdateAvailability> result = await dataSource
           .checkAvailability();
 
-      expect(result.isLeft, isTrue);
+      expect(result.isLeft(), isTrue);
     });
 
     test(
@@ -207,29 +207,29 @@ void main() {
           expect(call.method, 'performImmediateUpdate');
           return null;
         });
-        expect((await dataSource.performImmediateUpdate()).isRight, isTrue);
+        expect((await dataSource.performImmediateUpdate()).isRight(), isTrue);
 
         setMethodHandler((_) async {
           throw PlatformException(code: 'USER_DENIED_UPDATE');
         });
-        expect((await dataSource.performImmediateUpdate()).isRight, isTrue);
+        expect((await dataSource.performImmediateUpdate()).isRight(), isTrue);
 
         setMethodHandler((_) async {
           throw PlatformException(code: 'IN_APP_UPDATE_FAILED');
         });
         final Either<Failure, void> failed = await dataSource
             .performImmediateUpdate();
-        expect(failed.isLeft, isTrue);
+        expect(failed.isLeft(), isTrue);
 
         setMethodHandler((_) async {
           throw PlatformException(code: 'UNKNOWN');
         });
-        expect((await dataSource.performImmediateUpdate()).isLeft, isTrue);
+        expect((await dataSource.performImmediateUpdate()).isLeft(), isTrue);
 
         setMethodHandler((_) async {
           throw Exception('boom');
         });
-        expect((await dataSource.performImmediateUpdate()).isLeft, isTrue);
+        expect((await dataSource.performImmediateUpdate()).isLeft(), isTrue);
       },
     );
 
@@ -238,17 +238,17 @@ void main() {
         expect(call.method, 'openAppStoreListing');
         return null;
       });
-      expect((await dataSource.openAppStoreListing()).isRight, isTrue);
+      expect((await dataSource.openAppStoreListing()).isRight(), isTrue);
 
       setMethodHandler((_) async {
         throw PlatformException(code: 'OPEN_STORE_FAILED');
       });
-      expect((await dataSource.openAppStoreListing()).isLeft, isTrue);
+      expect((await dataSource.openAppStoreListing()).isLeft(), isTrue);
 
       setMethodHandler((_) async {
         throw Exception('boom');
       });
-      expect((await dataSource.openAppStoreListing()).isLeft, isTrue);
+      expect((await dataSource.openAppStoreListing()).isLeft(), isTrue);
     });
 
     test(
@@ -274,12 +274,12 @@ void main() {
         setMethodHandler((_) async {
           throw PlatformException(code: 'UNKNOWN');
         });
-        expect((await dataSource.startFlexibleUpdate()).isLeft, isTrue);
+        expect((await dataSource.startFlexibleUpdate()).isLeft(), isTrue);
 
         setMethodHandler((_) async {
           throw Exception('boom');
         });
-        expect((await dataSource.startFlexibleUpdate()).isLeft, isTrue);
+        expect((await dataSource.startFlexibleUpdate()).isLeft(), isTrue);
       },
     );
 
@@ -288,17 +288,17 @@ void main() {
         expect(call.method, 'completeFlexibleUpdate');
         return null;
       });
-      expect((await dataSource.completeFlexibleUpdate()).isRight, isTrue);
+      expect((await dataSource.completeFlexibleUpdate()).isRight(), isTrue);
 
       setMethodHandler((_) async {
         throw PlatformException(code: 'IN_APP_UPDATE_FAILED');
       });
-      expect((await dataSource.completeFlexibleUpdate()).isLeft, isTrue);
+      expect((await dataSource.completeFlexibleUpdate()).isLeft(), isTrue);
 
       setMethodHandler((_) async {
         throw Exception('boom');
       });
-      expect((await dataSource.completeFlexibleUpdate()).isLeft, isTrue);
+      expect((await dataSource.completeFlexibleUpdate()).isLeft(), isTrue);
     });
 
     test(

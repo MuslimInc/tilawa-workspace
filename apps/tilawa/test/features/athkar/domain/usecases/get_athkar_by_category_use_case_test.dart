@@ -46,7 +46,7 @@ void main() {
     final Either<Failure, List<AthkarItem>> result = await useCase(tCategoryId);
 
     // Assert
-    expect(result.isRight, true);
+    expect(result.isRight(), true);
     result.fold(
       (_) => fail('Should be Right'),
       (items) => expect(items, tAthkarItems),

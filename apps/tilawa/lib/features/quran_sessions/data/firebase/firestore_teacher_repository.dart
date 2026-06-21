@@ -17,9 +17,12 @@ class FirestoreTeacherDataSource implements TeacherRemoteDataSource {
     SessionPriceDto? marketPrice,
   }) {
     final data = doc.data() ?? const {};
+    final rawDisplayName = data['displayName'] as String? ?? '';
     return QuranTeacherDto(
       id: doc.id,
-      displayName: data['displayName'] as String? ?? '',
+      displayName: TeacherProfileDisplayNameResolver.resolveStored(
+        displayName: rawDisplayName,
+      ),
       bio: data['publicBio'] as String? ?? '',
       avatarUrl: data['avatarUrl'] as String? ?? '',
       gender: data['gender'] as String? ?? 'male',
@@ -47,8 +50,8 @@ class FirestoreTeacherDataSource implements TeacherRemoteDataSource {
   }) async {
     try {
       Query<Map<String, dynamic>> query = _profiles
-          .where('verificationStatus', isEqualTo: 'verified')
-          .where('isActive', isEqualTo: true)
+          .where('profileCompleteness', isEqualTo: 'complete')
+          .where('isPubliclyVisible', isEqualTo: true)
           .orderBy('displayName')
           .limit(20);
       if (cursor != null && cursor.isNotEmpty) {
@@ -59,6 +62,9 @@ class FirestoreTeacherDataSource implements TeacherRemoteDataSource {
       }
       final snapshot = await query.get();
       var teachers = snapshot.docs.map((d) => _mapProfile(d)).toList();
+      teachers = teachers
+          .where((t) => ValidateTeacherPublicName.isValid(t.displayName))
+          .toList();
       if (specialization != null && specialization.isNotEmpty) {
         teachers = teachers
             .where((t) => t.specializations.contains(specialization))

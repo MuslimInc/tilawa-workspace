@@ -435,7 +435,7 @@ void main() {
 
       final Either<Failure, void> result = await repository.play();
 
-      expect(result.isRight, true);
+      expect(result.isRight(), true);
       verify(mockAudioHandler.play()).called(1);
     });
 
@@ -444,7 +444,7 @@ void main() {
 
       final Either<Failure, void> result = await repository.pause();
 
-      expect(result.isRight, true);
+      expect(result.isRight(), true);
       verify(mockAudioHandler.pause()).called(1);
     });
 
@@ -455,7 +455,7 @@ void main() {
 
       final Either<Failure, void> result = await repository.play();
 
-      expect(result.isRight, true);
+      expect(result.isRight(), true);
     });
 
     test('pause swallows abort errors as success', () async {
@@ -463,7 +463,7 @@ void main() {
 
       final Either<Failure, void> result = await repository.pause();
 
-      expect(result.isRight, true);
+      expect(result.isRight(), true);
     });
 
     test('play returns Left for non-interrupted failures', () async {
@@ -471,7 +471,7 @@ void main() {
 
       final Either<Failure, void> result = await repository.play();
 
-      expect(result.isLeft, true);
+      expect(result.isLeft(), true);
     });
 
     test('stop calls audioHandler.stop and returns Right', () async {
@@ -479,7 +479,7 @@ void main() {
 
       final Either<Failure, void> result = await repository.stop();
 
-      expect(result.isRight, true);
+      expect(result.isRight(), true);
       verify(mockAudioHandler.stop()).called(1);
     });
 
@@ -492,7 +492,7 @@ void main() {
           const Duration(seconds: 45),
         );
 
-        expect(result.isRight, true);
+        expect(result.isRight(), true);
         verify(mockAudioHandler.seek(const Duration(seconds: 45))).called(1);
       },
     );
@@ -502,7 +502,7 @@ void main() {
 
       final Either<Failure, void> result = await repository.next();
 
-      expect(result.isRight, true);
+      expect(result.isRight(), true);
       verify(mockAudioHandler.skipToNext()).called(1);
     });
 
@@ -513,7 +513,7 @@ void main() {
 
         final Either<Failure, void> result = await repository.previous();
 
-        expect(result.isRight, true);
+        expect(result.isRight(), true);
         verify(mockAudioHandler.skipToPrevious()).called(1);
       },
     );
@@ -527,7 +527,7 @@ void main() {
           3,
         );
 
-        expect(result.isRight, true);
+        expect(result.isRight(), true);
         verify(mockAudioHandler.skipToQueueItem(3)).called(1);
       },
     );
@@ -539,7 +539,7 @@ void main() {
 
       final Either<Failure, void> result = await repository.setVolume(0.5);
 
-      expect(result.isRight, true);
+      expect(result.isRight(), true);
       verify(mockAudioHandler.setVolume(0.5)).called(1);
     });
 
@@ -548,7 +548,7 @@ void main() {
 
       final Either<Failure, void> result = await repository.setSpeed(1.5);
 
-      expect(result.isRight, true);
+      expect(result.isRight(), true);
       verify(mockAudioHandler.setSpeed(1.5)).called(1);
     });
 
@@ -559,7 +559,7 @@ void main() {
         AudioRepeatMode.none,
       );
 
-      expect(result.isRight, true);
+      expect(result.isRight(), true);
       verify(
         mockAudioHandler.setRepeatMode(
           audio_service.AudioServiceRepeatMode.none,
@@ -574,7 +574,7 @@ void main() {
         AudioRepeatMode.one,
       );
 
-      expect(result.isRight, true);
+      expect(result.isRight(), true);
       verify(
         mockAudioHandler.setRepeatMode(
           audio_service.AudioServiceRepeatMode.one,
@@ -589,7 +589,7 @@ void main() {
         AudioRepeatMode.all,
       );
 
-      expect(result.isRight, true);
+      expect(result.isRight(), true);
       verify(
         mockAudioHandler.setRepeatMode(
           audio_service.AudioServiceRepeatMode.all,
@@ -604,7 +604,7 @@ void main() {
         AudioShuffleMode.none,
       );
 
-      expect(result.isRight, true);
+      expect(result.isRight(), true);
       verify(
         mockAudioHandler.setShuffleMode(
           audio_service.AudioServiceShuffleMode.none,
@@ -619,7 +619,7 @@ void main() {
         AudioShuffleMode.all,
       );
 
-      expect(result.isRight, true);
+      expect(result.isRight(), true);
       verify(
         mockAudioHandler.setShuffleMode(
           audio_service.AudioServiceShuffleMode.all,
@@ -648,7 +648,7 @@ void main() {
           testAudioEntity,
         );
 
-        expect(result.isRight, true);
+        expect(result.isRight(), true);
         verify(mockAudioHandler.addQueueItem(any)).called(1);
       },
     );
@@ -662,7 +662,7 @@ void main() {
           testAudioEntity,
         );
 
-        expect(result.isRight, true);
+        expect(result.isRight(), true);
         verify(mockAudioHandler.removeQueueItem(any)).called(1);
       },
     );
@@ -672,7 +672,7 @@ void main() {
 
       final Either<Failure, void> result = await repository.moveQueueItem(0, 2);
 
-      expect(result.isRight, true);
+      expect(result.isRight(), true);
       verify(mockAudioHandler.moveQueueItem(0, 2)).called(1);
     });
 
@@ -683,7 +683,7 @@ void main() {
         testAudioEntity,
       ]);
 
-      expect(result.isRight, true);
+      expect(result.isRight(), true);
       verify(mockAudioHandler.updateQueue(any)).called(1);
     });
 
@@ -694,7 +694,7 @@ void main() {
         testAudioEntity,
       ], 0);
 
-      expect(result.isRight, true);
+      expect(result.isRight(), true);
       verify(mockAudioHandler.playFromQueue(any, 0)).called(1);
     });
 
@@ -779,7 +779,7 @@ void main() {
         final Either<Failure, void> result = await repository
             .loadAudioPlayerData();
 
-        expect(result.isRight, true);
+        expect(result.isRight(), true);
         verify(mockAudioHandler.loadAudioPlayerData()).called(1);
       },
     );
@@ -796,7 +796,7 @@ void main() {
         final Either<Failure, void> result = await repository
             .loadAudioPlayerData(restorePlayback: false);
 
-        expect(result.isRight, true);
+        expect(result.isRight(), true);
         verify(
           mockAudioHandler.loadAudioPlayerData(restorePlayback: false),
         ).called(1);

@@ -4,28 +4,31 @@ import 'package:test/test.dart';
 
 void main() {
   group('QuranSessionsFeatureConfig', () {
-    test('showEmptyStateTeacherEntry requires apply enabled and discoverability', () {
-      const enabled = QuranSessionsFeatureConfig(
-        teacherApplicationEnabled: true,
-        teacherApplicationDiscoverability:
-            TeacherApplicationDiscoverability.profileAndEmptyState,
-      );
-      check(enabled.showEmptyStateTeacherEntry).isTrue();
-      check(enabled.showProfileTeacherEntry).isTrue();
+    test(
+      'showEmptyStateTeacherEntry requires apply enabled and discoverability',
+      () {
+        const enabled = QuranSessionsFeatureConfig(
+          teacherApplicationEnabled: true,
+          teacherApplicationDiscoverability:
+              TeacherApplicationDiscoverability.profileAndEmptyState,
+        );
+        check(enabled.showEmptyStateTeacherEntry).isTrue();
+        check(enabled.showProfileTeacherEntry).isTrue();
 
-      const profileOnly = QuranSessionsFeatureConfig(
-        teacherApplicationEnabled: true,
-        teacherApplicationDiscoverability:
-            TeacherApplicationDiscoverability.profileOnly,
-      );
-      check(profileOnly.showEmptyStateTeacherEntry).isFalse();
-      check(profileOnly.showProfileTeacherEntry).isTrue();
+        const profileOnly = QuranSessionsFeatureConfig(
+          teacherApplicationEnabled: true,
+          teacherApplicationDiscoverability:
+              TeacherApplicationDiscoverability.profileOnly,
+        );
+        check(profileOnly.showEmptyStateTeacherEntry).isFalse();
+        check(profileOnly.showProfileTeacherEntry).isTrue();
 
-      const disabled = QuranSessionsFeatureConfig(
-        teacherApplicationEnabled: false,
-      );
-      check(disabled.showProfileTeacherEntry).isFalse();
-    });
+        const disabled = QuranSessionsFeatureConfig(
+          teacherApplicationEnabled: false,
+        );
+        check(disabled.showProfileTeacherEntry).isFalse();
+      },
+    );
   });
 
   group('TeacherApplication eligibility helpers', () {

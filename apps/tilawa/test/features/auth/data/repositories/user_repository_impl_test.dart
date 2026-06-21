@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:checks/checks.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -23,6 +24,17 @@ void main() {
       photoUrl: 'http://example.com/photo.jpg',
       createdAt: DateTime.now(),
     );
+
+    test('saveUserData uses auth uid as document id', () async {
+      await userRepository.saveUserData(tUser);
+
+      final docSnapshot = await fakeFirestore
+          .collection('users')
+          .doc(tUser.id)
+          .get();
+      check(docSnapshot.exists).isTrue();
+      check(docSnapshot.id).equals(tUser.id);
+    });
 
     test('saveUserData should save user data to firestore', () async {
       // Act

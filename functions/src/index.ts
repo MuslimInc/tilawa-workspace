@@ -2,6 +2,9 @@ export { verifySupportPurchase } from "./verifySupportPurchase";
 export { crashlyticsToGithubIssue } from "./crashlyticsToGithubIssue";
 export { verifyRecitationAudio } from "./verifyRecitationAudio";
 export { reviewTeacherApplication } from "./reviewTeacherApplication";
+export { moderateTeacherProfile } from "./moderateTeacherProfile";
+export { moderateQuranSessionsUser } from "./moderateQuranSessionsUser";
+export { syncTeacherProfileVisibility } from "./syncTeacherProfileVisibility";
 
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { initializeApp } from "firebase-admin/app";

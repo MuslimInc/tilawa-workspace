@@ -747,5 +747,65 @@ void main() {
         ],
       ),
     );
+
+    goldenTest(
+      'TilawaProfileAvatar',
+      fileName: 'molecules/tilawa_profile_avatar',
+      builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
+        children: [
+          GoldenTestScenario(
+            name: 'Person fallback large',
+            child: const TilawaPreviewWrapper(
+              child: Center(
+                child: TilawaProfileAvatar(size: 72),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Initial fallback nav',
+            child: const TilawaPreviewWrapper(
+              child: Center(
+                child: TilawaProfileAvatar(
+                  size: 28,
+                  displayName: 'Ahmad',
+                  fallbackStyle: TilawaProfileAvatarFallbackStyle.initial,
+                ),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Empty name safe fallback',
+            child: const TilawaPreviewWrapper(
+              child: Center(
+                child: TilawaProfileAvatar(
+                  size: 28,
+                  fallbackStyle: TilawaProfileAvatarFallbackStyle.initial,
+                ),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'With verified badge',
+            child: TilawaPreviewWrapper(
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 8,
+                  children: const [
+                    TilawaProfileAvatar(
+                      size: 72,
+                      displayName: 'Ahmad Ali',
+                      fallbackStyle: TilawaProfileAvatarFallbackStyle.initial,
+                    ),
+                    TilawaVerifiedTeacherBadge(label: 'Verified Teacher'),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   });
 }

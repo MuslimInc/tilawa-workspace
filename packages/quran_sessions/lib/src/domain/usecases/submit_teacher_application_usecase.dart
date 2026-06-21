@@ -3,6 +3,7 @@ import 'package:dartz_plus/dartz_plus.dart';
 import '../entities/teacher_application.dart';
 import '../failures/quran_sessions_failure.dart';
 import '../repositories/teacher_application_repository.dart';
+import '../value_objects/teacher_public_name.dart';
 
 /// Advances a draft application to `pending`, triggering admin review.
 ///
@@ -37,6 +38,13 @@ class SubmitTeacherApplicationUseCase {
 
     if (!application.hasValidPhone) {
       return const Left(InvalidTeacherPhoneNumberFailure());
+    }
+
+    final nameFailure = ValidateTeacherPublicName.failureFor(
+      application.publicDisplayName,
+    );
+    if (nameFailure != null) {
+      return Left(nameFailure);
     }
 
     final missing = application.missingSubmissionFields;

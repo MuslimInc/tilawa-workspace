@@ -11,6 +11,7 @@ import '../helpers/fakes/fake_teacher_application_repository.dart';
 
 TeacherApplication _draft({
   String? phoneNumber,
+  String? publicDisplayName = 'Ustad Ahmad',
   List<String> teachingLanguages = const ['ar'],
   List<String> specializations = const ['tajweed'],
   String? bio = 'test bio',
@@ -20,6 +21,7 @@ TeacherApplication _draft({
   status: TeacherApplicationStatus.draft,
   phoneNumber: phoneNumber,
   phoneCountryCode: 'EG',
+  publicDisplayName: publicDisplayName,
   teachingLanguages: teachingLanguages,
   specializations: specializations,
   bio: bio,
@@ -100,6 +102,41 @@ void main() {
         repo.application = app;
         final result = await useCase(app);
         check(result).isA<Right<QuranSessionsFailure, TeacherApplication>>();
+      });
+    });
+
+    group('public display name validation', () {
+      test(
+        'returns ValidationFailure when publicDisplayName missing',
+        () async {
+          final result = await useCase(
+            _draft(phoneNumber: '+201012345678', publicDisplayName: null),
+          );
+          check(result).isA<Left<QuranSessionsFailure, TeacherApplication>>();
+          final failure = (result as Left).value;
+          check(failure).isA<ValidationFailure>();
+        },
+      );
+
+      test('returns ValidationFailure for whitespace-only name', () async {
+        final result = await useCase(
+          _draft(phoneNumber: '+201012345678', publicDisplayName: '   '),
+        );
+        check(result).isA<Left<QuranSessionsFailure, TeacherApplication>>();
+        final failure = (result as Left).value;
+        check(failure).isA<ValidationFailure>();
+      });
+
+      test('returns ValidationFailure for placeholder name', () async {
+        final result = await useCase(
+          _draft(
+            phoneNumber: '+201012345678',
+            publicDisplayName: 'Quran Teacher',
+          ),
+        );
+        check(result).isA<Left<QuranSessionsFailure, TeacherApplication>>();
+        final failure = (result as Left).value;
+        check(failure).isA<ValidationFailure>();
       });
     });
 

@@ -141,7 +141,7 @@ void main() {
         InAppUpdateAction.performImmediate,
       );
 
-      expect(result.isLeft, isTrue);
+      expect(result.isLeft(), isTrue);
     });
 
     test('prompts for flexible restart after successful download', () async {

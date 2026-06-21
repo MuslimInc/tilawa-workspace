@@ -7,10 +7,15 @@
     "build:watch": "tsc --watch",
     "serve": "npm run build && firebase emulators:start --only functions",
     "deploy": "firebase deploy --only functions",
-    "seed:market-configs": "ts-node scripts/seedMarketConfigs.ts",
-    "seed:market-configs:apply": "ts-node scripts/seedMarketConfigs.ts --apply",
-    "admin:list-pending-applications": "ts-node scripts/listPendingTeacherApplications.ts",
-    "admin:review-teacher-application": "ts-node scripts/reviewTeacherApplicationAdmin.ts"
+    "seed:market-configs": "ts-node --project tsconfig.scripts.json scripts/seedMarketConfigs.ts",
+    "seed:market-configs:apply": "ts-node --project tsconfig.scripts.json scripts/seedMarketConfigs.ts --apply",
+    "admin:list-pending-applications": "ts-node --project tsconfig.scripts.json scripts/listPendingTeacherApplications.ts",
+    "admin:review-teacher-application": "ts-node --project tsconfig.scripts.json scripts/reviewTeacherApplicationAdmin.ts",
+    "admin:create-user": "ts-node --project tsconfig.scripts.json scripts/createAdminUser.ts",
+    "admin:audit-duplicate-emails": "ts-node --project tsconfig.scripts.json scripts/auditDuplicateUserEmails.ts",
+    "test": "node -r ts-node/register --test test/auditDuplicateUserEmails.test.ts",
+    "admin:backfill-teacher-profiles": "ts-node --project tsconfig.scripts.json scripts/backfillTeacherProfiles.ts",
+    "admin:audit-duplicate-users": "ts-node --project tsconfig.scripts.json scripts/auditDuplicateUsers.ts"
   },
   "engines": {
     "node": "22"
@@ -21,6 +26,7 @@
     "googleapis": "^144.0.0"
   },
   "devDependencies": {
+    "@types/node": "^22.13.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.0"
   }

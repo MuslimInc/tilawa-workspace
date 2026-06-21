@@ -11,6 +11,7 @@ extension TeacherApplicationDtoMapper on TeacherApplicationDto {
     preferredContactMethod: preferredContactMethod == null
         ? null
         : _mapContactMethod(preferredContactMethod!),
+    publicDisplayName: publicDisplayName,
     teachingLanguages: teachingLanguages,
     specializations: specializations,
     bio: bio,
@@ -31,6 +32,7 @@ extension TeacherApplicationDomainMapper on TeacherApplication {
     phoneNumber: phoneNumber,
     phoneCountryCode: phoneCountryCode,
     preferredContactMethod: preferredContactMethod?.name,
+    publicDisplayName: publicDisplayName,
     teachingLanguages: teachingLanguages,
     specializations: specializations,
     bio: bio,

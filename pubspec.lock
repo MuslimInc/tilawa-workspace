@@ -457,14 +457,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.7"
-  dartz_plus:
-    dependency: transitive
-    description:
-      name: dartz_plus
-      sha256: "3a64934dc88050006dd42d31901feae6676eb252cc265042c602bf1dd0828a6c"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.3.0"
   dbus:
     dependency: transitive
     description:

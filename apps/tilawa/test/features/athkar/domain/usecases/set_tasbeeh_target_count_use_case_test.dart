@@ -35,7 +35,7 @@ void main() {
         ),
       );
 
-      expect(result.isLeft, isTrue);
+      expect(result.isLeft(), isTrue);
       result.fold(
         (f) => expect(f, isA<CacheFailure>()),
         (_) => fail('Expected Left result'),

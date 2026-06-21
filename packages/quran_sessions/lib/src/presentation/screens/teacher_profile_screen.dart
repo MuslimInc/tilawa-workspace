@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_sessions/core/l10n_extensions.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/quran_teacher.dart';
 import '../../domain/entities/session_pricing_type.dart';
+import '../../domain/entities/session_review.dart';
+import '../../domain/entities/teacher_availability.dart';
 import '../../utils/price_formatter.dart';
+import '../../domain/value_objects/teacher_public_name.dart';
 import '../failure_ui/quran_sessions_failure_ui.dart';
 import '../blocs/teacher_profile/teacher_profile_bloc.dart';
 import '../blocs/teacher_profile/teacher_profile_event.dart';
@@ -34,8 +38,6 @@ class TeacherProfileScreen extends StatefulWidget {
 }
 
 class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
-  String? _selectedSlotId;
-
   @override
   void initState() {
     super.initState();
@@ -69,138 +71,215 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
             :final reviews,
             :final isLoadingAvailability,
           ) =>
-            ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                // ── Hero ────────────────────────────────────────────────
-                Center(
-                  child: TeacherInitialsAvatar(
-                    displayName: teacher.displayName,
-                    radius: 44,
-                    avatarUrl: teacher.avatarUrl,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Center(
-                  child: Text(
-                    teacher.displayName,
-                    style: Theme.of(context).textTheme.titleLarge,
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Center(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.star_rounded,
-                        size: 16,
-                        color: Theme.of(context).colorScheme.tertiary,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        l10n.teacherRatingReviews(
-                          teacher.averageRating.toStringAsFixed(1),
-                          teacher.totalReviews,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // ── Pricing ──────────────────────────────────────────────
-                Center(child: _PricingRow(teacher: teacher)),
-                const SizedBox(height: 10),
-                // ── Specializations ──────────────────────────────────────
-                if (teacher.specializations.isNotEmpty)
-                  Wrap(
-                    alignment: WrapAlignment.center,
-                    spacing: 6,
-                    runSpacing: 6,
-                    children: teacher.specializations.map((code) {
-                      return Chip(
-                        label: Text(l10n.specializationLabel(code)),
-                        padding: EdgeInsets.zero,
-                        labelPadding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 0,
-                        ),
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      );
-                    }).toList(),
-                  ),
-                const SizedBox(height: 12),
-                Text(teacher.bio),
-                const Divider(height: 32),
-
-                // ── Availability ─────────────────────────────────────────
-                Row(
-                  children: [
-                    Text(
-                      l10n.availableSlots,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    if (isLoadingAvailability) ...[
-                      const SizedBox(width: 8),
-                      const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: 12),
-                AvailabilitySlotPicker(
-                  slots: availability,
-                  selectedSlotId: _selectedSlotId,
-                  onSlotSelected: (slot) {
-                    setState(() => _selectedSlotId = slot.slotId);
-                    _onBookTapped(slot.slotId);
-                  },
-                ),
-                const Divider(height: 32),
-
-                // ── Reviews ──────────────────────────────────────────────
-                Text(
-                  l10n.reviewsSection,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                if (reviews.isEmpty)
-                  Text(l10n.noReviewsYet)
-                else
-                  ...reviews.map(
-                    (r) => ListTile(
-                      leading: Text('${r.rating}★'),
-                      title: Text(r.comment ?? ''),
-                      dense: true,
-                    ),
-                  ),
-                // Extra space for FAB
-                const SizedBox(height: 80),
-              ],
-            ),
+            _isTeacherMarketplaceVisible(teacher)
+                ? _TeacherProfileBody(
+                    teacher: teacher,
+                    availability: availability,
+                    reviews: reviews,
+                    isLoadingAvailability: isLoadingAvailability,
+                    bookingEnabled: widget.bookingEnabled,
+                    onBookTapped: widget.onBookTapped == null
+                        ? null
+                        : (slotId) => _onBookTapped(slotId),
+                    teacherId: widget.teacherId,
+                  )
+                : _TeacherProfileUnavailableBody(),
         },
       ),
-      floatingActionButton:
-          widget.bookingEnabled && widget.onBookTapped != null
-              ? BlocBuilder<TeacherProfileBloc, TeacherProfileState>(
-                  builder: (context, state) => state is TeacherProfileSuccess
-                      ? FloatingActionButton.extended(
-                          label: Text(l10n.bookSessionAction),
-                          icon: const Icon(Icons.calendar_today_outlined),
-                          onPressed: () => _onBookTapped(null),
-                        )
-                      : const SizedBox.shrink(),
-                )
-              : null,
+      floatingActionButton: widget.bookingEnabled && widget.onBookTapped != null
+          ? BlocBuilder<TeacherProfileBloc, TeacherProfileState>(
+              builder: (context, state) =>
+                  state is TeacherProfileSuccess &&
+                      _isTeacherMarketplaceVisible(state.teacher)
+                  ? FloatingActionButton.extended(
+                      label: Text(l10n.bookSessionAction),
+                      icon: const Icon(Icons.calendar_today_outlined),
+                      onPressed: () => _onBookTapped(null),
+                    )
+                  : const SizedBox.shrink(),
+            )
+          : null,
     );
   }
 
   void _onBookTapped(String? preSelectedSlotId) {
     widget.onBookTapped?.call(widget.teacherId, preSelectedSlotId);
+  }
+}
+
+bool _isTeacherMarketplaceVisible(QuranTeacher teacher) {
+  return ValidateTeacherPublicName.isValid(teacher.displayName) &&
+      teacher.bio.trim().isNotEmpty &&
+      teacher.isVerified;
+}
+
+class _TeacherProfileUnavailableBody extends StatelessWidget {
+  const _TeacherProfileUnavailableBody();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+    final tokens = Theme.of(context).tokens;
+
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.all(tokens.spaceLarge),
+        child: TilawaEmptyState(
+          icon: Icons.person_off_outlined,
+          title: l10n.teacherProfileUnavailableTitle,
+          subtitle: l10n.teacherProfileUnavailableSubtitle,
+        ),
+      ),
+    );
+  }
+}
+
+class _TeacherProfileBody extends StatefulWidget {
+  const _TeacherProfileBody({
+    required this.teacher,
+    required this.availability,
+    required this.reviews,
+    required this.isLoadingAvailability,
+    required this.bookingEnabled,
+    required this.teacherId,
+    this.onBookTapped,
+  });
+
+  final QuranTeacher teacher;
+  final List<TeacherAvailability> availability;
+  final List<SessionReview> reviews;
+  final bool isLoadingAvailability;
+  final bool bookingEnabled;
+  final String teacherId;
+  final void Function(String? slotId)? onBookTapped;
+
+  @override
+  State<_TeacherProfileBody> createState() => _TeacherProfileBodyState();
+}
+
+class _TeacherProfileBodyState extends State<_TeacherProfileBody> {
+  String? _selectedSlotId;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+    final tokens = Theme.of(context).tokens;
+    final displayName = widget.teacher.displayName.trim();
+    final bio = widget.teacher.bio.trim();
+
+    return ListView(
+      padding: EdgeInsets.all(tokens.spaceMedium),
+      children: [
+        Center(
+          child: TeacherInitialsAvatar(
+            displayName: displayName,
+            radius: 44,
+            avatarUrl: widget.teacher.avatarUrl,
+          ),
+        ),
+        SizedBox(height: tokens.spaceMedium),
+        Center(
+          child: Text(
+            displayName,
+            style: Theme.of(context).textTheme.titleLarge,
+            textAlign: TextAlign.center,
+          ),
+        ),
+        SizedBox(height: tokens.spaceExtraSmall),
+        Center(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.star_rounded,
+                size: 16,
+                color: Theme.of(context).colorScheme.tertiary,
+              ),
+              SizedBox(width: tokens.spaceExtraSmall),
+              Text(
+                l10n.teacherRatingReviews(
+                  widget.teacher.averageRating.toStringAsFixed(1),
+                  widget.teacher.totalReviews,
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: tokens.spaceSmall),
+        Center(child: _PricingRow(teacher: widget.teacher)),
+        if (widget.teacher.specializations.isNotEmpty) ...[
+          SizedBox(height: tokens.spaceSmall),
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: tokens.spaceSmall,
+            runSpacing: tokens.spaceSmall,
+            children: widget.teacher.specializations.map((code) {
+              return TilawaStatusChip(label: l10n.specializationLabel(code));
+            }).toList(),
+          ),
+        ],
+        if (bio.isNotEmpty) ...[
+          SizedBox(height: tokens.spaceMedium),
+          Text(bio, textDirection: TextDirection.ltr),
+        ],
+        Divider(height: tokens.spaceExtraLarge),
+        Row(
+          children: [
+            Text(
+              l10n.availableSlots,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            if (widget.isLoadingAvailability) ...[
+              SizedBox(width: tokens.spaceSmall),
+              const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ],
+          ],
+        ),
+        SizedBox(height: tokens.spaceMedium),
+        if (widget.availability.isEmpty && !widget.isLoadingAvailability)
+          Text(
+            l10n.noAvailabilityYet,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          )
+        else
+          AvailabilitySlotPicker(
+            slots: widget.availability,
+            selectedSlotId: _selectedSlotId,
+            onSlotSelected: (slot) {
+              setState(() => _selectedSlotId = slot.slotId);
+              widget.onBookTapped?.call(slot.slotId);
+            },
+          ),
+        Divider(height: tokens.spaceExtraLarge),
+        Text(
+          l10n.reviewsSection,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        SizedBox(height: tokens.spaceSmall),
+        if (widget.reviews.isEmpty)
+          Text(
+            l10n.noReviewsYet,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          )
+        else
+          ...widget.reviews.map(
+            (r) => ListTile(
+              leading: Text('${r.rating}★'),
+              title: Text(r.comment ?? ''),
+              dense: true,
+            ),
+          ),
+        SizedBox(height: tokens.spaceExtraLarge * 2),
+      ],
+    );
   }
 }
 

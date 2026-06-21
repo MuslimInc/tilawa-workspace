@@ -44,7 +44,7 @@ void main() {
 
     final Either<Failure, ActivePlaybackSnapshot?> result = await useCase();
 
-    expect(result.isRight, isTrue);
+    expect(result.isRight(), isTrue);
     result.fold(
       (_) => fail('expected Right'),
       (value) => expect(value, isNull),
@@ -61,7 +61,7 @@ void main() {
 
     final Either<Failure, ActivePlaybackSnapshot?> result = await useCase();
 
-    expect(result.isRight, isTrue);
+    expect(result.isRight(), isTrue);
     result.fold(
       (_) => fail('expected Right'),
       (value) => expect(value, snapshot),

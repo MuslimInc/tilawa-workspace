@@ -61,6 +61,8 @@ class TeacherApplication extends Equatable {
     this.phoneNumber,
     this.phoneCountryCode,
     this.preferredContactMethod,
+    this.publicDisplayName,
+    this.teacherDisplayName,
     this.teachingLanguages = const [],
     this.specializations = const [],
     this.bio,
@@ -73,6 +75,12 @@ class TeacherApplication extends Equatable {
   final String id;
   final String userId;
   final TeacherApplicationStatus status;
+
+  /// Public marketplace name chosen during application (private until approved).
+  final String? publicDisplayName;
+
+  /// Teacher-preferred display label; may differ from [publicDisplayName].
+  final String? teacherDisplayName;
 
   /// E.164 phone number, e.g. `+201234567890`. Mandatory before submission.
   final String? phoneNumber;
@@ -136,6 +144,8 @@ class TeacherApplication extends Equatable {
   /// Fields still required before the application can be submitted.
   List<String> get missingSubmissionFields => [
     if (phoneNumber == null || !hasValidPhone) 'phoneNumber',
+    if (publicDisplayName == null || publicDisplayName!.trim().isEmpty)
+      'publicDisplayName',
     if (teachingLanguages.isEmpty) 'teachingLanguages',
     if (specializations.isEmpty) 'specializations',
     if (bio == null || bio!.trim().isEmpty) 'bio',
@@ -148,6 +158,8 @@ class TeacherApplication extends Equatable {
     String? phoneNumber,
     String? phoneCountryCode,
     PreferredContactMethod? preferredContactMethod,
+    String? publicDisplayName,
+    String? teacherDisplayName,
     List<String>? teachingLanguages,
     List<String>? specializations,
     String? bio,
@@ -164,6 +176,8 @@ class TeacherApplication extends Equatable {
     phoneCountryCode: phoneCountryCode ?? this.phoneCountryCode,
     preferredContactMethod:
         preferredContactMethod ?? this.preferredContactMethod,
+    publicDisplayName: publicDisplayName ?? this.publicDisplayName,
+    teacherDisplayName: teacherDisplayName ?? this.teacherDisplayName,
     teachingLanguages: teachingLanguages ?? this.teachingLanguages,
     specializations: specializations ?? this.specializations,
     bio: bio ?? this.bio,
@@ -180,6 +194,8 @@ class TeacherApplication extends Equatable {
     id,
     userId,
     status,
+    publicDisplayName,
+    teacherDisplayName,
     phoneNumber,
     phoneCountryCode,
     preferredContactMethod,

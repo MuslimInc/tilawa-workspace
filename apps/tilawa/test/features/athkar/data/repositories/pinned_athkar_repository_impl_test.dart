@@ -16,7 +16,7 @@ void main() {
     test('returns curated defaults before the user customizes pins', () async {
       final result = await repository.getPreference();
 
-      expect(result.isRight, isTrue);
+      expect(result.isRight(), isTrue);
       final preference = result.getOrElse(
         () => throw StateError('Expected preference'),
       );
@@ -30,7 +30,7 @@ void main() {
     test('sanitizes and persists user-selected category IDs', () async {
       final result = await repository.saveCategoryIds([1, 2, 2, -1, 3, 4, 5]);
 
-      expect(result.isRight, isTrue);
+      expect(result.isRight(), isTrue);
       expect(dataSource.writtenCategoryIds, [1, 2, 3, 4]);
     });
   });

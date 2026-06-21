@@ -53,6 +53,13 @@ class FakeMvpTeacherProfileRepository implements TeacherProfileRepository {
   }
 
   @override
+  Future<Either<QuranSessionsFailure, TeacherProfile>> updatePublicProfile(
+    TeacherProfile profile,
+  ) async {
+    return updateProfile(profile);
+  }
+
+  @override
   Future<Either<QuranSessionsFailure, TeacherProfile>> deactivate(
     String id,
   ) async {

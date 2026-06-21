@@ -41,7 +41,7 @@ void main() {
 
       final result = await useCase(const NoParams());
 
-      expect(result.isLeft, isTrue);
+      expect(result.isLeft(), isTrue);
       result.fold(
         (f) => expect(f, const CacheFailure('storage broken')),
         (_) => fail('Expected Left result'),

@@ -42,7 +42,7 @@ void main() {
         requestedCallTypeId: 'external_meeting',
       );
 
-      expect(result.isLeft, isTrue);
+      expect(result.isLeft(), isTrue);
     });
   });
 }

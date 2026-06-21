@@ -95,8 +95,7 @@ class _QuranSessionsHomeScreenState extends State<QuranSessionsHomeScreen> {
             onTeacherApplyEntry: widget.onBecomeTeacher != null
                 ? _onTeacherApplyTapped
                 : null,
-            onEmptyStateSeen:
-                widget.analytics?.onQuranSessionsEmptyStateSeen,
+            onEmptyStateSeen: widget.analytics?.onQuranSessionsEmptyStateSeen,
           ),
           TeacherListFailure(:final failure) => Center(
             child: Text(failure.toLocalizedMessage(context)),

@@ -169,7 +169,7 @@ class _AppShellScreenState extends State<AppShellScreen> {
       );
       return quranNavIndex < 0 ? 0 : quranNavIndex;
     }
-    final int? mapped = AppShellRoutePolicy.navIndexForLocation(location);
+    final int? mapped = AppShellRoutePolicy.tabIndexForLocation(location);
     if (mapped != null) {
       final int mappedIndex = destinations.indexWhere(
         (d) => d.tabIndex == mapped,

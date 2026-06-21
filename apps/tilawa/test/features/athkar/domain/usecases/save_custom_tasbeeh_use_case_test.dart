@@ -88,7 +88,7 @@ void main() {
       ),
     );
 
-    expect(result.isRight, true);
+    expect(result.isRight(), true);
     result.fold((_) => fail('Expected Right result'), (item) {
       expect(item.text, 'La ilaha illa Allah');
       expect(item.targetCount, 99);
@@ -104,7 +104,7 @@ void main() {
     );
     final result = await getUseCase(const NoParams());
 
-    expect(result.isRight, true);
+    expect(result.isRight(), true);
     result.fold(
       (_) => fail('Expected Right result'),
       (items) => expect(items.length, 1),

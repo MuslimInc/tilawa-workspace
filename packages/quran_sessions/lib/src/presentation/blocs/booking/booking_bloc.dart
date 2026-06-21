@@ -63,7 +63,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
       studentId: studentId,
     );
 
-    if (eligibility.isLeft) {
+    if (eligibility.isLeft()) {
       eligibility.fold((f) => emit(BookingFailure(f)), (_) {});
       return;
     }

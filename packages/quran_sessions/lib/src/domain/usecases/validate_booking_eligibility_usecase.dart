@@ -39,7 +39,7 @@ class ValidateBookingEligibilityUseCase {
   }) async {
     // ── 1. Student profile ─────────────────────────────────────────────────
     final studentResult = await _profileRepo.getProfile(studentId);
-    if (studentResult.isLeft) return studentResult.map((_) {});
+    if (studentResult.isLeft()) return studentResult.map((_) {});
 
     final student = studentResult.fold((_) => throw StateError(''), (p) => p);
 
@@ -62,7 +62,7 @@ class ValidateBookingEligibilityUseCase {
     final marketResult = await _marketRepo.getMarketConfig(
       student.countryCode!,
     );
-    if (marketResult.isLeft) return marketResult.map((_) {});
+    if (marketResult.isLeft()) return marketResult.map((_) {});
 
     final market = marketResult.fold((_) => throw StateError(''), (m) => m);
 
@@ -84,7 +84,7 @@ class ValidateBookingEligibilityUseCase {
 
     // ── 3. Teacher ─────────────────────────────────────────────────────────
     final teacherResult = await _teacherRepo.getTeacherById(teacherId);
-    if (teacherResult.isLeft) return teacherResult.map((_) {});
+    if (teacherResult.isLeft()) return teacherResult.map((_) {});
 
     final teacher = teacherResult.fold((_) => throw StateError(''), (t) => t);
 
@@ -101,7 +101,7 @@ class ValidateBookingEligibilityUseCase {
         countryCode: student.countryCode!,
         cityId: student.cityId!,
       );
-      if (priceResult.isLeft) return priceResult.map((_) {});
+      if (priceResult.isLeft()) return priceResult.map((_) {});
       final resolvedPrice = priceResult.fold(
         (_) => throw StateError(''),
         (p) => p,
@@ -118,7 +118,7 @@ class ValidateBookingEligibilityUseCase {
 
     // ── 4. Global safety policy ────────────────────────────────────────────
     final policyResult = await _policyRepo.getGlobalPolicy();
-    if (policyResult.isLeft) return policyResult.map((_) {});
+    if (policyResult.isLeft()) return policyResult.map((_) {});
 
     final policy = policyResult.fold((_) => throw StateError(''), (p) => p);
 
@@ -126,7 +126,7 @@ class ValidateBookingEligibilityUseCase {
     final teacherPolicyResult = await _policyRepo.getTeacherEligibilityPolicy(
       teacherId,
     );
-    if (teacherPolicyResult.isLeft) return teacherPolicyResult.map((_) {});
+    if (teacherPolicyResult.isLeft()) return teacherPolicyResult.map((_) {});
 
     final teacherPolicy = teacherPolicyResult.fold(
       (_) => throw StateError(''),

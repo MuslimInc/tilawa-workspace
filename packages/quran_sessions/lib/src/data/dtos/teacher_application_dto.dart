@@ -8,6 +8,8 @@ class TeacherApplicationDto {
     this.phoneNumber,
     this.phoneCountryCode,
     this.preferredContactMethod,
+    this.publicDisplayName,
+    this.teacherDisplayName,
     this.teachingLanguages = const [],
     this.specializations = const [],
     this.bio,
@@ -20,6 +22,13 @@ class TeacherApplicationDto {
   final String id;
   final String userId;
   final String status;
+
+  /// Public marketplace name captured on the application (never from bio).
+  final String? publicDisplayName;
+
+  /// Teacher-preferred display label; may differ from [publicDisplayName].
+  final String? teacherDisplayName;
+
   final String? phoneNumber;
   final String? phoneCountryCode;
   final String? preferredContactMethod;

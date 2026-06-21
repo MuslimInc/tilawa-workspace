@@ -1,11 +1,12 @@
 import 'package:dartz_plus/dartz_plus.dart';
 
-import '../entities/teacher_application.dart';
 import '../entities/teacher_profile.dart';
 import '../entities/teacher_verification_status.dart';
 import '../failures/quran_sessions_failure.dart';
 import '../repositories/teacher_application_repository.dart';
 import '../repositories/teacher_profile_repository.dart';
+import '../rules/teacher_profile_completeness.dart';
+import '../value_objects/teacher_public_name.dart';
 
 /// Admin use case: approves a pending [TeacherApplication] and creates the
 /// corresponding public [TeacherProfile].
@@ -30,28 +31,36 @@ class ApproveTeacherApplicationUseCase {
       reviewedBy: reviewedBy,
     );
 
-    if (approveResult.isLeft) {
+    if (approveResult.isLeft()) {
       return approveResult.map((_) => throw StateError('unreachable'));
     }
     final application = approveResult.fold(
       (_) => throw StateError(''),
       (a) => a,
     );
+
+    final displayName =
+        ValidateTeacherPublicName.normalize(application.publicDisplayName) ??
+        '';
     final now = DateTime.now();
     final profile = TeacherProfile(
       id: application.id,
       userId: application.userId,
-      displayName: '',
-      publicBio: application.bio,
+      displayName: displayName,
+      publicBio: application.bio?.trim(),
       verificationStatus: TeacherVerificationStatus.verified,
       teachingLanguages: application.teachingLanguages,
       specializations: application.specializations,
       averageRating: 0,
       reviewCount: 0,
       isActive: true,
+      profileCompleteness: TeacherProfileCompletenessStatus.incomplete,
+      isPubliclyVisible: false,
       createdAt: now,
       updatedAt: now,
     );
-    return _profiles.createProfile(profile);
+    return _profiles.createProfile(
+      TeacherProfileCompleteness.withComputedVisibility(profile),
+    );
   }
 }

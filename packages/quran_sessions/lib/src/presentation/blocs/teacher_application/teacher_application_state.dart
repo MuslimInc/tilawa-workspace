@@ -3,7 +3,9 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../domain/entities/teacher_application.dart';
 import '../../../domain/failures/quran_sessions_failure.dart';
+import '../../../domain/value_objects/teacher_public_name.dart';
 import '../../forms/teacher_application_field_ids.dart';
+import '../../forms/teacher_application_validation_l10n.dart';
 
 sealed class TeacherApplicationState extends Equatable {
   const TeacherApplicationState();
@@ -35,66 +37,66 @@ final class TeacherApplicationEditing extends TeacherApplicationState {
   const TeacherApplicationEditing({
     required this.application,
     this.phoneRaw = '',
-    this.phoneError,
+    this.publicDisplayNameRaw = '',
+    this.prefillPublicDisplayName,
+    this.phoneErrorCode,
+    this.publicDisplayNameErrorCode,
     this.phoneInteracted = false,
+    this.publicDisplayNameInteracted = false,
     this.submitAttempted = false,
     this.submitValidationAttempt = 0,
     this.isSaving = false,
-    this.teachingLanguagesError,
-    this.specializationsError,
-    this.bioError,
+    this.teachingLanguagesErrorCode,
+    this.specializationsErrorCode,
+    this.bioErrorCode,
   });
 
   final TeacherApplication application;
 
   /// Raw text typed by the user — shown verbatim in the text field.
-  /// The BLoC normalizes this to E.164 and stores it in [application.phoneNumber].
   final String phoneRaw;
 
-  /// Non-null when the phone number has a validation error.
-  /// Only surfaced in the UI when [phoneInteracted] or [submitAttempted].
-  final String? phoneError;
+  /// Raw public name typed by the user.
+  final String publicDisplayNameRaw;
 
-  /// True after the user has touched the phone field at least once.
+  /// Suggested name from the signed-in user profile when draft has none saved.
+  final String? prefillPublicDisplayName;
+
+  final String? phoneErrorCode;
+  final String? publicDisplayNameErrorCode;
   final bool phoneInteracted;
-
-  /// True after the user has tapped "Submit" at least once.
+  final bool publicDisplayNameInteracted;
   final bool submitAttempted;
-
-  /// Increments on each failed submit validation pass (drives scroll-to-error).
   final int submitValidationAttempt;
-
-  /// True while autosave is in flight — disables submit but not field editing.
   final bool isSaving;
+  final String? teachingLanguagesErrorCode;
+  final String? specializationsErrorCode;
+  final String? bioErrorCode;
 
-  /// Submit-time teaching languages error copy.
-  final String? teachingLanguagesError;
+  String? get visiblePhoneErrorCode =>
+      (phoneInteracted || submitAttempted) ? phoneErrorCode : null;
 
-  /// Submit-time specializations error copy.
-  final String? specializationsError;
+  String? get visiblePublicDisplayNameErrorCode =>
+      (publicDisplayNameInteracted || submitAttempted)
+      ? publicDisplayNameErrorCode
+      : null;
 
-  /// Submit-time bio error copy.
-  final String? bioError;
+  String? get visibleTeachingLanguagesErrorCode =>
+      submitAttempted ? teachingLanguagesErrorCode : null;
 
-  /// The error to show in the UI — null until the user has interacted.
-  String? get visiblePhoneError =>
-      (phoneInteracted || submitAttempted) ? phoneError : null;
+  String? get visibleSpecializationsErrorCode =>
+      submitAttempted ? specializationsErrorCode : null;
 
-  String? get visibleTeachingLanguagesError =>
-      submitAttempted ? teachingLanguagesError : null;
-
-  String? get visibleSpecializationsError =>
-      submitAttempted ? specializationsError : null;
-
-  String? get visibleBioError => submitAttempted ? bioError : null;
+  String? get visibleBioErrorCode => submitAttempted ? bioErrorCode : null;
 
   bool get canSubmit =>
       !isSaving &&
       application.isReadyToSubmit &&
-      phoneError == null &&
-      teachingLanguagesError == null &&
-      specializationsError == null &&
-      bioError == null;
+      phoneErrorCode == null &&
+      publicDisplayNameErrorCode == null &&
+      teachingLanguagesErrorCode == null &&
+      specializationsErrorCode == null &&
+      bioErrorCode == null;
 
   int get invalidFieldCount {
     if (!submitAttempted || canSubmit) {
@@ -104,75 +106,104 @@ final class TeacherApplicationEditing extends TeacherApplicationState {
   }
 
   TeacherApplicationEditing applySubmitValidation() {
+    final nameToValidate = publicDisplayNameRaw.isNotEmpty
+        ? publicDisplayNameRaw
+        : (application.publicDisplayName ?? '');
     final String? phoneErr = phoneRaw.isEmpty
-        ? TeacherApplicationValidationMessages.phoneRequired
-        : phoneError;
+        ? TeacherApplicationValidationCodes.phoneRequired
+        : phoneErrorCode;
+    final publicNameFailure = ValidateTeacherPublicName.failureFor(
+      nameToValidate,
+    );
+    final String? publicNameErr = publicNameFailure?.code;
     final String? languagesErr = application.teachingLanguages.isEmpty
-        ? TeacherApplicationValidationMessages.teachingLanguagesRequired
+        ? TeacherApplicationValidationCodes.teachingLanguagesRequired
         : null;
     final String? specsErr = application.specializations.isEmpty
-        ? TeacherApplicationValidationMessages.specializationsRequired
+        ? TeacherApplicationValidationCodes.specializationsRequired
         : null;
     final String? bioErr =
         application.bio == null || application.bio!.trim().isEmpty
-        ? TeacherApplicationValidationMessages.bioRequired
+        ? TeacherApplicationValidationCodes.bioRequired
         : null;
 
     return copyWith(
       submitAttempted: true,
       submitValidationAttempt: submitValidationAttempt + 1,
-      phoneError: phoneErr,
-      teachingLanguagesError: languagesErr,
-      specializationsError: specsErr,
-      bioError: bioErr,
+      phoneErrorCode: phoneErr,
+      publicDisplayNameErrorCode: publicNameErr,
+      teachingLanguagesErrorCode: languagesErr,
+      specializationsErrorCode: specsErr,
+      bioErrorCode: bioErr,
     );
   }
 
   TeacherApplicationEditing copyWith({
     TeacherApplication? application,
     String? phoneRaw,
-    String? phoneError,
-    bool clearPhoneError = false,
+    String? publicDisplayNameRaw,
+    String? prefillPublicDisplayName,
+    String? phoneErrorCode,
+    bool clearPhoneErrorCode = false,
+    String? publicDisplayNameErrorCode,
+    bool clearPublicDisplayNameErrorCode = false,
     bool? phoneInteracted,
+    bool? publicDisplayNameInteracted,
     bool? submitAttempted,
     int? submitValidationAttempt,
     bool? isSaving,
-    String? teachingLanguagesError,
-    bool clearTeachingLanguagesError = false,
-    String? specializationsError,
-    bool clearSpecializationsError = false,
-    String? bioError,
-    bool clearBioError = false,
+    String? teachingLanguagesErrorCode,
+    bool clearTeachingLanguagesErrorCode = false,
+    String? specializationsErrorCode,
+    bool clearSpecializationsErrorCode = false,
+    String? bioErrorCode,
+    bool clearBioErrorCode = false,
   }) => TeacherApplicationEditing(
     application: application ?? this.application,
     phoneRaw: phoneRaw ?? this.phoneRaw,
-    phoneError: clearPhoneError ? null : (phoneError ?? this.phoneError),
+    publicDisplayNameRaw: publicDisplayNameRaw ?? this.publicDisplayNameRaw,
+    prefillPublicDisplayName:
+        prefillPublicDisplayName ?? this.prefillPublicDisplayName,
+    phoneErrorCode: clearPhoneErrorCode
+        ? null
+        : (phoneErrorCode ?? this.phoneErrorCode),
+    publicDisplayNameErrorCode: clearPublicDisplayNameErrorCode
+        ? null
+        : (publicDisplayNameErrorCode ?? this.publicDisplayNameErrorCode),
     phoneInteracted: phoneInteracted ?? this.phoneInteracted,
+    publicDisplayNameInteracted:
+        publicDisplayNameInteracted ?? this.publicDisplayNameInteracted,
     submitAttempted: submitAttempted ?? this.submitAttempted,
     submitValidationAttempt:
         submitValidationAttempt ?? this.submitValidationAttempt,
     isSaving: isSaving ?? this.isSaving,
-    teachingLanguagesError: clearTeachingLanguagesError
+    teachingLanguagesErrorCode: clearTeachingLanguagesErrorCode
         ? null
-        : (teachingLanguagesError ?? this.teachingLanguagesError),
-    specializationsError: clearSpecializationsError
+        : (teachingLanguagesErrorCode ?? this.teachingLanguagesErrorCode),
+    specializationsErrorCode: clearSpecializationsErrorCode
         ? null
-        : (specializationsError ?? this.specializationsError),
-    bioError: clearBioError ? null : (bioError ?? this.bioError),
+        : (specializationsErrorCode ?? this.specializationsErrorCode),
+    bioErrorCode: clearBioErrorCode
+        ? null
+        : (bioErrorCode ?? this.bioErrorCode),
   );
 
   @override
   List<Object?> get props => [
     application,
     phoneRaw,
-    phoneError,
+    publicDisplayNameRaw,
+    prefillPublicDisplayName,
+    phoneErrorCode,
+    publicDisplayNameErrorCode,
     phoneInteracted,
+    publicDisplayNameInteracted,
     submitAttempted,
     submitValidationAttempt,
     isSaving,
-    teachingLanguagesError,
-    specializationsError,
-    bioError,
+    teachingLanguagesErrorCode,
+    specializationsErrorCode,
+    bioErrorCode,
   ];
 }
 
@@ -187,8 +218,6 @@ final class TeacherApplicationSubmitting extends TeacherApplicationState {
 }
 
 /// Application has a known status — shows the status screen.
-///
-/// Covers: pending, approved, rejected, suspended, revoked.
 final class TeacherApplicationStatusLoaded extends TeacherApplicationState {
   const TeacherApplicationStatusLoaded({
     required this.application,
@@ -196,8 +225,6 @@ final class TeacherApplicationStatusLoaded extends TeacherApplicationState {
   });
 
   final TeacherApplication application;
-
-  /// True while the debug "Simulate Approval" call is in flight.
   final bool isSimulatingApproval;
 
   TeacherApplicationStatusLoaded copyWith({
@@ -221,8 +248,6 @@ final class TeacherApplicationFailureState extends TeacherApplicationState {
   });
 
   final QuranSessionsFailure failure;
-
-  /// The state the BLoC was in before the failure, restored after the snackbar.
   final TeacherApplicationState previousState;
 
   @override
@@ -232,35 +257,43 @@ final class TeacherApplicationFailureState extends TeacherApplicationState {
 extension TeacherApplicationEditingValidation on TeacherApplicationEditing {
   List<TilawaFormFieldIssue> get validationIssues {
     final List<TilawaFormFieldIssue> issues = <TilawaFormFieldIssue>[];
-    if (phoneError != null) {
+    if (phoneErrorCode != null) {
       issues.add(
         TilawaFormFieldIssue(
           fieldId: TeacherApplicationFieldIds.phone,
-          errorMessage: phoneError!,
+          errorMessage: phoneErrorCode!,
         ),
       );
     }
-    if (teachingLanguagesError != null) {
+    if (publicDisplayNameErrorCode != null) {
+      issues.add(
+        TilawaFormFieldIssue(
+          fieldId: TeacherApplicationFieldIds.publicDisplayName,
+          errorMessage: publicDisplayNameErrorCode!,
+        ),
+      );
+    }
+    if (teachingLanguagesErrorCode != null) {
       issues.add(
         TilawaFormFieldIssue(
           fieldId: TeacherApplicationFieldIds.teachingLanguages,
-          errorMessage: teachingLanguagesError!,
+          errorMessage: teachingLanguagesErrorCode!,
         ),
       );
     }
-    if (specializationsError != null) {
+    if (specializationsErrorCode != null) {
       issues.add(
         TilawaFormFieldIssue(
           fieldId: TeacherApplicationFieldIds.specializations,
-          errorMessage: specializationsError!,
+          errorMessage: specializationsErrorCode!,
         ),
       );
     }
-    if (bioError != null) {
+    if (bioErrorCode != null) {
       issues.add(
         TilawaFormFieldIssue(
           fieldId: TeacherApplicationFieldIds.bio,
-          errorMessage: bioError!,
+          errorMessage: bioErrorCode!,
         ),
       );
     }

@@ -7,20 +7,24 @@ import 'package:quran_sessions/src/domain/usecases/approve_teacher_application_u
 import 'package:quran_sessions/src/domain/usecases/get_teacher_application_status_usecase.dart';
 import 'package:quran_sessions/src/domain/usecases/save_teacher_application_draft_usecase.dart';
 import 'package:quran_sessions/src/domain/usecases/start_teacher_application_usecase.dart';
+import 'package:quran_sessions/src/domain/usecases/get_user_profile_usecase.dart';
 import 'package:quran_sessions/src/domain/usecases/submit_teacher_application_usecase.dart';
 import 'package:quran_sessions/src/presentation/forms/teacher_application_field_ids.dart';
+import 'package:quran_sessions/src/presentation/forms/teacher_application_validation_l10n.dart';
 import 'package:quran_sessions/src/presentation/blocs/teacher_application/teacher_application_bloc.dart';
 import 'package:quran_sessions/src/presentation/blocs/teacher_application/teacher_application_event.dart';
 import 'package:quran_sessions/src/presentation/blocs/teacher_application/teacher_application_state.dart';
 
 import '../../helpers/fakes/fake_teacher_application_repository.dart';
 import '../../helpers/fakes/fake_teacher_profile_repository.dart';
+import '../../helpers/fakes/fake_user_profile_repository.dart';
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 
 TeacherApplication _draft({
   String? phoneNumber,
   String phoneCountryCode = 'EG',
+  String publicDisplayName = 'Ustad Ahmad',
   List<String> teachingLanguages = const ['ar'],
   List<String> specializations = const ['tajweed'],
   String? bio = 'test bio',
@@ -30,6 +34,7 @@ TeacherApplication _draft({
   status: TeacherApplicationStatus.draft,
   phoneNumber: phoneNumber,
   phoneCountryCode: phoneCountryCode,
+  publicDisplayName: publicDisplayName,
   teachingLanguages: teachingLanguages,
   specializations: specializations,
   bio: bio,
@@ -49,6 +54,7 @@ TeacherApplicationBloc _makeBloc(FakeTeacherApplicationRepository repo) =>
         applicationRepository: repo,
         profileRepository: FakeTeacherProfileRepository(),
       ),
+      getUserProfile: GetUserProfileUseCase(FakeUserProfileRepository()),
     );
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
@@ -105,7 +111,7 @@ void main() {
     });
 
     blocTest<TeacherApplicationBloc, TeacherApplicationState>(
-      'valid Egyptian number clears phoneError',
+      'valid Egyptian number clears phoneErrorCode',
       build: () => bloc,
       act: (b) => b.add(const TeacherApplicationPhoneChanged('01012345678')),
       expect: () => [
@@ -113,14 +119,14 @@ void main() {
       ],
       verify: (b) {
         final s = b.state as TeacherApplicationEditing;
-        check(s.phoneError).isNull();
+        check(s.phoneErrorCode).isNull();
         check(s.application.phoneNumber).equals('+201012345678');
         check(s.phoneInteracted).isTrue();
       },
     );
 
     blocTest<TeacherApplicationBloc, TeacherApplicationState>(
-      'valid Kuwait number clears phoneError',
+      'valid Kuwait number clears phoneErrorCode',
       build: () {
         final draft = _draft(phoneCountryCode: 'KW');
         repo.application = draft;
@@ -131,24 +137,24 @@ void main() {
       act: (b) => b.add(const TeacherApplicationPhoneChanged('65012345')),
       verify: (b) {
         final s = b.state as TeacherApplicationEditing;
-        check(s.phoneError).isNull();
+        check(s.phoneErrorCode).isNull();
         check(s.application.phoneNumber).equals('+96565012345');
       },
     );
 
     blocTest<TeacherApplicationBloc, TeacherApplicationState>(
-      'invalid Egyptian number sets phoneError',
+      'invalid Egyptian number sets phoneErrorCode',
       build: () => bloc,
       act: (b) => b.add(const TeacherApplicationPhoneChanged('0101234')),
       verify: (b) {
         final s = b.state as TeacherApplicationEditing;
-        check(s.phoneError).isNotNull();
+        check(s.phoneErrorCode).isNotNull();
         check(s.application.phoneNumber).isNull();
       },
     );
 
     blocTest<TeacherApplicationBloc, TeacherApplicationState>(
-      '01020030 with KW country sets phoneError (invalid KW prefix)',
+      '01020030 with KW country sets phoneErrorCode (invalid KW prefix)',
       build: () {
         final draft = _draft(phoneCountryCode: 'KW');
         repo.application = draft;
@@ -159,19 +165,21 @@ void main() {
       act: (b) => b.add(const TeacherApplicationPhoneChanged('01020030')),
       verify: (b) {
         final s = b.state as TeacherApplicationEditing;
-        check(s.phoneError).isNotNull();
+        check(s.phoneErrorCode).isNotNull();
         check(s.application.phoneNumber).isNull();
       },
     );
 
     blocTest<TeacherApplicationBloc, TeacherApplicationState>(
-      'empty phone sets required phoneError',
+      'empty phone sets required phoneErrorCode',
       build: () => bloc,
       act: (b) => b.add(const TeacherApplicationPhoneChanged('')),
       verify: (b) {
         final s = b.state as TeacherApplicationEditing;
-        check(s.phoneError).isNotNull();
-        check(s.phoneError).equals('رقم الهاتف مطلوب');
+        check(s.phoneErrorCode).isNotNull();
+        check(
+          s.phoneErrorCode,
+        ).equals(TeacherApplicationValidationCodes.phoneRequired);
       },
     );
 
@@ -182,31 +190,33 @@ void main() {
       act: (b) => b.add(const TeacherApplicationPhoneChanged('')),
       verify: (b) {
         final s = b.state as TeacherApplicationEditing;
-        check(s.phoneError).equals('رقم الهاتف مطلوب');
+        check(
+          s.phoneErrorCode,
+        ).equals(TeacherApplicationValidationCodes.phoneRequired);
       },
     );
 
     blocTest<TeacherApplicationBloc, TeacherApplicationState>(
-      'visiblePhoneError is null before field interaction',
+      'visiblePhoneErrorCode is null before field interaction',
       build: () => bloc,
       // No action — check initial state
       act: (_) {},
       verify: (b) {
         final s = b.state as TeacherApplicationEditing;
-        check(s.visiblePhoneError).isNull();
+        check(s.visiblePhoneErrorCode).isNull();
         check(s.phoneInteracted).isFalse();
         check(s.submitAttempted).isFalse();
       },
     );
 
     blocTest<TeacherApplicationBloc, TeacherApplicationState>(
-      'visiblePhoneError is shown after field interaction',
+      'visiblePhoneErrorCode is shown after field interaction',
       build: () => bloc,
       act: (b) => b.add(const TeacherApplicationPhoneChanged('bad')),
       verify: (b) {
         final s = b.state as TeacherApplicationEditing;
         check(s.phoneInteracted).isTrue();
-        check(s.visiblePhoneError).isNotNull();
+        check(s.visiblePhoneErrorCode).isNotNull();
       },
     );
   });
@@ -224,7 +234,7 @@ void main() {
           TeacherApplicationEditing(
             application: draft,
             phoneRaw: '01012345678',
-            phoneError: null,
+            phoneErrorCode: null,
             phoneInteracted: true,
           ),
         );
@@ -233,7 +243,7 @@ void main() {
       act: (b) => b.add(const TeacherApplicationPhoneCountryCodeChanged('KW')),
       verify: (b) {
         final s = b.state as TeacherApplicationEditing;
-        check(s.phoneError).isNotNull();
+        check(s.phoneErrorCode).isNotNull();
         check(s.application.phoneNumber).isNull();
       },
     );
@@ -256,11 +266,11 @@ void main() {
       act: (b) => b.add(const TeacherApplicationPhoneCountryCodeChanged('KW')),
       verify: (b) {
         final s = b.state as TeacherApplicationEditing;
-        check(s.phoneError).equals(
-          TeacherApplicationValidationMessages.phoneRequired,
+        check(s.phoneErrorCode).equals(
+          TeacherApplicationValidationCodes.phoneRequired,
         );
-        check(s.visiblePhoneError).equals(
-          TeacherApplicationValidationMessages.phoneRequired,
+        check(s.visiblePhoneErrorCode).equals(
+          TeacherApplicationValidationCodes.phoneRequired,
         );
       },
     );
@@ -282,11 +292,11 @@ void main() {
       verify: (b) {
         final s = b.state as TeacherApplicationEditing;
         check(s.submitAttempted).isTrue();
-        check(s.phoneError).equals(
-          TeacherApplicationValidationMessages.phoneRequired,
+        check(s.phoneErrorCode).equals(
+          TeacherApplicationValidationCodes.phoneRequired,
         );
-        check(s.visiblePhoneError).equals(
-          TeacherApplicationValidationMessages.phoneRequired,
+        check(s.visiblePhoneErrorCode).equals(
+          TeacherApplicationValidationCodes.phoneRequired,
         );
       },
     );
@@ -314,9 +324,9 @@ void main() {
       verify: (b) {
         final s = b.state as TeacherApplicationEditing;
         check(s.submitAttempted).isTrue();
-        check(s.visibleTeachingLanguagesError).isNotNull();
-        check(s.visibleSpecializationsError).isNotNull();
-        check(s.visibleBioError).isNotNull();
+        check(s.visibleTeachingLanguagesErrorCode).isNotNull();
+        check(s.visibleSpecializationsErrorCode).isNotNull();
+        check(s.visibleBioErrorCode).isNotNull();
         check(s.invalidFieldCount).equals(3);
         check(s.validationIssues.first.fieldId).equals(
           TeacherApplicationFieldIds.teachingLanguages,
@@ -334,7 +344,7 @@ void main() {
           TeacherApplicationEditing(
             application: draft,
             phoneRaw: '0101',
-            phoneError: TeacherApplicationValidationMessages.phoneInvalid,
+            phoneErrorCode: TeacherApplicationValidationCodes.phoneInvalid,
             phoneInteracted: true,
           ),
         );
@@ -362,7 +372,7 @@ void main() {
           TeacherApplicationEditing(
             application: draft,
             phoneRaw: '01012345678',
-            phoneError: null,
+            phoneErrorCode: null,
             phoneInteracted: true,
           ),
         );
@@ -391,7 +401,7 @@ void main() {
           TeacherApplicationEditing(
             application: draft,
             phoneRaw: '01012345678',
-            phoneError: null,
+            phoneErrorCode: null,
             phoneInteracted: true,
           ),
         );

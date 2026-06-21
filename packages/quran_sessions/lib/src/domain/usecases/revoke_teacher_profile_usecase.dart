@@ -31,7 +31,7 @@ class RevokeTeacherProfileUseCase {
       reviewedBy: reviewedBy,
       reason: reason,
     );
-    if (revokeResult.isLeft) {
+    if (revokeResult.isLeft()) {
       return revokeResult.map((_) => throw StateError('unreachable'));
     }
     return _profiles.deactivate(profileId);

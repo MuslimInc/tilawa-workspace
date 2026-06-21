@@ -38,7 +38,7 @@ void main() {
 
         final result = await repo.getSupportedCountries();
 
-        check(result.isLeft).isTrue();
+        check(result.isLeft()).isTrue();
         result.fold(
           (failure) => check(failure).isA<MarketCatalogEmptyFailure>(),
           (_) => fail('expected Left'),
@@ -53,7 +53,7 @@ void main() {
 
         final result = await repo.getCitiesByCountryCode('EG');
 
-        check(result.isLeft).isTrue();
+        check(result.isLeft()).isTrue();
         result.fold(
           (failure) => check(failure).isA<MarketCatalogEmptyFailure>(),
           (_) => fail('expected Left'),

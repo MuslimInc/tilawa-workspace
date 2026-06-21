@@ -15,6 +15,8 @@ class FirestoreTeacherProfileDto {
     required this.averageRating,
     required this.reviewCount,
     required this.isActive,
+    required this.profileCompleteness,
+    required this.isPubliclyVisible,
     required this.createdAt,
     required this.updatedAt,
     this.avatarUrl,
@@ -34,6 +36,8 @@ class FirestoreTeacherProfileDto {
   final double averageRating;
   final int reviewCount;
   final bool isActive;
+  final String profileCompleteness;
+  final bool isPubliclyVisible;
   final String? allowedStudentGender;
   final bool canTeachChildren;
   final DateTime createdAt;
@@ -59,6 +63,9 @@ class FirestoreTeacherProfileDto {
       averageRating: (data['averageRating'] as num?)?.toDouble() ?? 0,
       reviewCount: data['reviewCount'] as int? ?? 0,
       isActive: data['isActive'] as bool? ?? false,
+      profileCompleteness:
+          data['profileCompleteness'] as String? ?? 'incomplete',
+      isPubliclyVisible: data['isPubliclyVisible'] as bool? ?? false,
       allowedStudentGender: data['allowedStudentGender'] as String?,
       canTeachChildren: data['canTeachChildren'] as bool? ?? true,
       createdAt: readRequiredDateTime(data['createdAt']),
@@ -78,6 +85,8 @@ class FirestoreTeacherProfileDto {
     averageRating: averageRating,
     reviewCount: reviewCount,
     isActive: isActive,
+    profileCompleteness: profileCompleteness,
+    isPubliclyVisible: isPubliclyVisible,
     allowedStudentGender: allowedStudentGender,
     canTeachChildren: canTeachChildren,
     createdAt: createdAt,
@@ -95,6 +104,8 @@ class FirestoreTeacherProfileDto {
     'averageRating': averageRating,
     'reviewCount': reviewCount,
     'isActive': isActive,
+    'profileCompleteness': profileCompleteness,
+    'isPubliclyVisible': isPubliclyVisible,
     if (allowedStudentGender != null)
       'allowedStudentGender': allowedStudentGender,
     'canTeachChildren': canTeachChildren,
@@ -115,6 +126,8 @@ class FirestoreTeacherProfileDto {
         averageRating: dto.averageRating,
         reviewCount: dto.reviewCount,
         isActive: dto.isActive,
+        profileCompleteness: dto.profileCompleteness,
+        isPubliclyVisible: dto.isPubliclyVisible,
         allowedStudentGender: dto.allowedStudentGender,
         canTeachChildren: dto.canTeachChildren,
         createdAt: dto.createdAt,
@@ -182,6 +195,8 @@ class FirestoreTeacherProfileDataSource
           averageRating: profile.averageRating,
           reviewCount: profile.reviewCount,
           isActive: profile.isActive,
+          profileCompleteness: profile.profileCompleteness,
+          isPubliclyVisible: profile.isPubliclyVisible,
           allowedStudentGender: profile.allowedStudentGender,
           canTeachChildren: profile.canTeachChildren,
           createdAt: now,
@@ -205,6 +220,34 @@ class FirestoreTeacherProfileDataSource
         ...dto.toMap(),
         'updatedAt': writeDateTime(now),
       }, SetOptions(merge: true));
+      final updated = await _collection.doc(profile.id).get();
+      return FirestoreTeacherProfileDto.fromDoc(updated).toTransportDto();
+    } on FirebaseException catch (e) {
+      throw mapFirebaseException(e);
+    }
+  }
+
+  /// Writes only fields a verified profile owner may edit client-side.
+  ///
+  /// Trust fields (`profileCompleteness`, `isPubliclyVisible`, etc.) are
+  /// recomputed by the `syncTeacherProfileVisibility` Cloud Function trigger.
+  @override
+  Future<TeacherProfileDto> updatePublicProfile(
+    TeacherProfileDto profile,
+  ) async {
+    try {
+      final now = DateTime.now();
+      final payload = <String, dynamic>{
+        'displayName': profile.displayName,
+        'publicBio': profile.publicBio,
+        'teachingLanguages': profile.teachingLanguages,
+        'specializations': profile.specializations,
+        'updatedAt': writeDateTime(now),
+      };
+      if (profile.avatarUrl != null) {
+        payload['avatarUrl'] = profile.avatarUrl;
+      }
+      await _collection.doc(profile.id).set(payload, SetOptions(merge: true));
       final updated = await _collection.doc(profile.id).get();
       return FirestoreTeacherProfileDto.fromDoc(updated).toTransportDto();
     } on FirebaseException catch (e) {

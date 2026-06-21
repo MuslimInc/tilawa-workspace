@@ -32,7 +32,7 @@ class SuspendTeacherProfileUseCase {
       reviewedBy: reviewedBy,
       reason: reason,
     );
-    if (suspendResult.isLeft) {
+    if (suspendResult.isLeft()) {
       return suspendResult.map((_) => throw StateError('unreachable'));
     }
     return _profiles.deactivate(profileId);

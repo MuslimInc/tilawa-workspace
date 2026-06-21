@@ -27,7 +27,7 @@ void main() {
       _FakeChangelogRepository(),
     )();
 
-    expect(result.isRight, isTrue);
+    expect(result.isRight(), isTrue);
     expect(result.fold((_) => null, (r) => r.id), '2.0.8+52');
   });
 }

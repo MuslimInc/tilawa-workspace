@@ -617,13 +617,42 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get teachingOnMemuslimApply => 'التقديم كمحفظ';
 
   @override
-  String get teachingOnMemuslimContinue => 'متابعة الطلب';
+  String get teachingOnMemuslimContinueDraft => 'استكمال طلب التسجيل';
 
   @override
   String get teachingOnMemuslimViewStatus => 'عرض حالة الطلب';
 
   @override
+  String get teachingOnMemuslimTeacherDashboard => 'لوحة تحكم المحفظ';
+
+  @override
   String get teachingOnMemuslimOpenDashboard => 'فتح لوحة المعلم';
+
+  @override
+  String get teachingOnMemuslimManageScheduleSubtitle =>
+      'يمكنك إدارة مواعيدك وجلساتك من هنا';
+
+  @override
+  String get teachingOnMemuslimReapplySubtitle =>
+      'اعرض التفاصيل أو أعد التقديم عند السماح.';
+
+  @override
+  String get verifiedTeacherBadge => 'محفظ معتمد';
+
+  @override
+  String get teacherCapabilityStatusDraft => 'مسودة';
+
+  @override
+  String get teacherCapabilityStatusPending => 'قيد المراجعة';
+
+  @override
+  String get teacherCapabilityStatusRejected => 'مرفوض';
+
+  @override
+  String get teacherCapabilityStatusSuspended => 'موقوف';
+
+  @override
+  String get teacherCapabilityStatusRevoked => 'تم إلغاء الاعتماد';
 
   @override
   String get teachingOnMemuslimNotAppliedSubtitle =>
@@ -677,4 +706,92 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   @override
   String get bookingDisabledNoSupply =>
       'الحجز غير متاح حتى يتوفر معلمون معتمدون في منطقتك.';
+
+  @override
+  String get completeTeacherProfileTitle => 'إكمال ملف المحفظ';
+
+  @override
+  String get completeTeacherProfileSubtitle =>
+      'أضف البيانات العامة التي يراها الطلاب قبل فتح لوحة التحكم.';
+
+  @override
+  String get completeTeacherProfileFirstMessage =>
+      'أكمل ملف المحفظ قبل فتح لوحة التحكم.';
+
+  @override
+  String get teacherDashboard => 'لوحة تحكم المحفظ';
+
+  @override
+  String get openTeacherDashboard => 'فتح لوحة تحكم المحفظ';
+
+  @override
+  String get completeTeacherProfile => 'أكمل ملف المعلم';
+
+  @override
+  String get teacherPublicNameLabel => 'الاسم الحقيقي للمعلم';
+
+  @override
+  String get teacherPublicNameHelper =>
+      'الاسم الحقيقي / اسم المعلم الظاهر للطلاب في السوق. قد يختلف عن اسم حسابك.';
+
+  @override
+  String get teacherPublicNameRequired => 'الاسم الحقيقي للمعلم مطلوب.';
+
+  @override
+  String get teacherPublicNameInvalid =>
+      'أدخل اسمًا حقيقيًا صالحًا (3 أحرف على الأقل، أو كلمتين).';
+
+  @override
+  String get teacherPublicNamePlaceholderNotAllowed =>
+      'اختر اسمك الحقيقي الكامل — الأسماء العامة مثل «محفظ قرآن» غير مسموحة.';
+
+  @override
+  String get teacherProfileHiddenUntilComplete =>
+      'يبقى ملفك مخفيًا عن الطلاب حتى تكتمل جميع الحقول العامة المطلوبة.';
+
+  @override
+  String get publicTeacherName => 'الاسم الحقيقي للمعلم';
+
+  @override
+  String get visibleToStudents => 'اسمك الكامل الظاهر للطلاب';
+
+  @override
+  String get realNameRequiredForTeachers =>
+      'يجب على المعلمين استخدام اسم علني حقيقي يتعرّف عليه الطلاب.';
+
+  @override
+  String get teachingLanguagesRequired => 'اختر لغة تدريس واحدة على الأقل.';
+
+  @override
+  String get specializationsRequired => 'اختر تخصصًا واحدًا على الأقل.';
+
+  @override
+  String get bioRequired => 'النبذة التعريفية مطلوبة.';
+
+  @override
+  String get teacherProfileUnavailableTitle => 'ملف المعلم غير متاح';
+
+  @override
+  String get teacherProfileUnavailableSubtitle =>
+      'لم يكمل هذا المعلم ملفه العام بعد.';
+
+  @override
+  String get verifiedTeacher => 'محفظ معتمد';
+
+  @override
+  String get quranTeacherFallbackName => 'محفظ قرآن';
+
+  @override
+  String get teacherProfileIncomplete =>
+      'ملف المحفظ العام ناقص بعض الحقول المطلوبة.';
+
+  @override
+  String get teacherProfileIncompleteAction => 'إكمال الملف';
+
+  @override
+  String get manageYourAvailabilityAndSessions =>
+      'يمكنك إدارة مواعيدك وجلساتك من هنا';
+
+  @override
+  String get noAvailabilityYet => 'لم تُنشر أي مواعيد بعد.';
 }

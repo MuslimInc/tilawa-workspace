@@ -10,6 +10,9 @@
  */
 import { initializeApp } from "firebase-admin/app";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
+import {
+  buildApprovedTeacherProfile,
+} from "../src/quranSessions/teacherProfileApproval";
 
 initializeApp();
 
@@ -71,21 +74,10 @@ async function main(): Promise<void> {
   );
 
   if (action === "approve") {
+    const userSnap = await db.collection("users").doc(app.userId).get();
+    const userData = userSnap.data() ?? {};
     await db.collection("quran_teacher_profiles").doc(applicationId).set(
-      {
-        userId: app.userId,
-        displayName: "",
-        publicBio: app.bio ?? "",
-        teachingLanguages: app.teachingLanguages ?? [],
-        specializations: app.specializations ?? [],
-        verificationStatus: "verified",
-        isActive: true,
-        averageRating: 0,
-        reviewCount: 0,
-        totalSessionsCompleted: 0,
-        createdAt: now,
-        updatedAt: now,
-      },
+      buildApprovedTeacherProfile({ app, user: userData, now }),
       { merge: true },
     );
   }
@@ -94,7 +86,10 @@ async function main(): Promise<void> {
     await db
       .collection("quran_teacher_profiles")
       .doc(applicationId)
-      .set({ isActive: false, updatedAt: now }, { merge: true });
+      .set(
+        { isActive: false, isPubliclyVisible: false, updatedAt: now },
+        { merge: true },
+      );
   }
 
   console.log(`Application ${applicationId} → ${nextStatus}`);

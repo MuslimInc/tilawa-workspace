@@ -21,7 +21,8 @@ dependencies:
   coverage: ^1.15.0
   cupertino_icons: ^1.0.8
   device_info_plus: ^13.1.0
-  dartz_plus: ^0.3.0
+  dartz_plus:
+    path: ../../packages/dartz_plus
   dio: ^5.9.0
   equatable: ^2.0.8
   fake_async: ^1.3.3

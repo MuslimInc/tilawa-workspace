@@ -48,4 +48,11 @@ class FakeTeacherProfileRepository implements TeacherProfileRepository {
   ) async {
     return Right(profile);
   }
+
+  @override
+  Future<Either<QuranSessionsFailure, TeacherProfile>> updatePublicProfile(
+    TeacherProfile profile,
+  ) async {
+    return Right(profile);
+  }
 }

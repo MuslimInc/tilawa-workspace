@@ -64,6 +64,16 @@
         { "fieldPath": "isActive", "order": "ASCENDING" },
         { "fieldPath": "displayName", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "quran_teacher_profiles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "verificationStatus", "order": "ASCENDING" },
+        { "fieldPath": "isActive", "order": "ASCENDING" },
+        { "fieldPath": "profileCompleteness", "order": "ASCENDING" },
+        { "fieldPath": "isPubliclyVisible", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

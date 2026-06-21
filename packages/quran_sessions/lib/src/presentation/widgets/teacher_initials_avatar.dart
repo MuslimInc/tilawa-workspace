@@ -33,29 +33,42 @@ class TeacherInitialsAvatar extends StatelessWidget {
     return CircleAvatar(
       radius: radius,
       backgroundColor: color,
-      child: Text(
-        initials,
-        style: TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.w700,
-          fontSize: radius * 0.65,
-        ),
-      ),
+      child: initials.isEmpty
+          ? Icon(Icons.person, color: Colors.white, size: radius * 0.9)
+          : Text(
+              initials,
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: radius * 0.65,
+              ),
+            ),
     );
   }
 
   // ── Helpers ────────────────────────────────────────────────────────────────
 
   static String _initials(String name) {
-    final words = name.trim().split(RegExp(r'\s+'));
-    if (words.isEmpty) return '؟';
-    if (words.length == 1) return words[0].characters.first;
-    // Use first characters of first and last word, skip common prefixes.
-    final skip = {'الشيخ', 'أ.', 'د.', 'أ', 'د'};
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) return '';
+
+    final words = trimmed
+        .split(RegExp(r'\s+'))
+        .where((word) => word.isNotEmpty)
+        .toList();
+    if (words.isEmpty) return '';
+
+    String firstChar(String word) {
+      final chars = word.characters;
+      return chars.isEmpty ? '' : chars.first;
+    }
+
+    if (words.length == 1) return firstChar(words[0]);
+    const skip = {'الشيخ', 'أ.', 'د.', 'أ', 'د'};
     final meaningful = words.where((w) => !skip.contains(w)).toList();
-    if (meaningful.isEmpty) return words.first.characters.first;
-    if (meaningful.length == 1) return meaningful[0].characters.first;
-    return '${meaningful[0].characters.first}${meaningful[1].characters.first}';
+    if (meaningful.isEmpty) return firstChar(words.first);
+    if (meaningful.length == 1) return firstChar(meaningful[0]);
+    return '${firstChar(meaningful[0])}${firstChar(meaningful[1])}';
   }
 
   static final List<Color> _palette = [

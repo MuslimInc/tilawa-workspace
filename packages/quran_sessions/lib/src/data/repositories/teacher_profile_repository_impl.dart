@@ -61,6 +61,18 @@ class TeacherProfileRepositoryImpl implements TeacherProfileRepository {
   }
 
   @override
+  Future<Either<QuranSessionsFailure, TeacherProfile>> updatePublicProfile(
+    TeacherProfile profile,
+  ) async {
+    try {
+      final dto = await _remote.updatePublicProfile(profile.toDto());
+      return Right(dto.toDomain());
+    } on Exception catch (e) {
+      return Left(mapRemoteException(e));
+    }
+  }
+
+  @override
   Future<Either<QuranSessionsFailure, TeacherProfile>> deactivate(
     String id,
   ) async {

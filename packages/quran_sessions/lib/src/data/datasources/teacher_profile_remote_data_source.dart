@@ -9,6 +9,9 @@ abstract interface class TeacherProfileRemoteDataSource {
 
   Future<TeacherProfileDto> update(TeacherProfileDto profile);
 
+  /// Writes only Firestore-rule-allowed public profile fields.
+  Future<TeacherProfileDto> updatePublicProfile(TeacherProfileDto profile);
+
   Future<TeacherProfileDto> deactivate(String id);
 
   Future<TeacherProfileDto> reactivate(String id);

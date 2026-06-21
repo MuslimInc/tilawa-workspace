@@ -2,6 +2,8 @@ import 'package:flutter/widgets.dart';
 import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 
 import '../../domain/failures/quran_sessions_failure.dart';
+import '../../domain/value_objects/teacher_public_name.dart';
+import '../forms/teacher_application_validation_l10n.dart';
 
 /// Extension that converts a typed [QuranSessionsFailure] into a
 /// user-facing, localised message.
@@ -42,10 +44,12 @@ extension QuranSessionsFailureUi on QuranSessionsFailure {
 
       // ── Domain / resource ───────────────────────────────────────────────────
       NotFoundFailure(resourceType: final t) => loc.notFound(t),
-      ValidationFailure(field: final f, code: final c) => loc.validationError(
-        c,
-        f,
-      ),
+      ValidationFailure(field: final f, code: final c) =>
+        f == ValidateTeacherPublicName.field
+            ? loc.messageForPublicNameFailure(
+                ValidationFailure(field: f, code: c),
+              )
+            : loc.validationError(c, f),
 
       // ── Booking ─────────────────────────────────────────────────────────────
       SlotUnavailableFailure() => loc.slotUnavailable,
@@ -127,6 +131,7 @@ String _profileFieldLabel(QuranSessionsLocalizations loc, String field) =>
       'gender' => loc.profileFieldGender,
       'dateOfBirth' => loc.profileFieldDateOfBirth,
       'displayName' => loc.profileFieldDisplayName,
+      ValidateTeacherPublicName.field => loc.publicTeacherName,
       'countryCode' => loc.profileFieldCountry,
       'cityId' => loc.profileFieldCity,
       _ => field,

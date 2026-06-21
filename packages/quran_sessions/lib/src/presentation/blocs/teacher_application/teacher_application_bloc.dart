@@ -4,11 +4,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../domain/entities/teacher_application.dart';
 import '../../../domain/usecases/approve_teacher_application_usecase.dart';
 import '../../../domain/usecases/get_teacher_application_status_usecase.dart';
+import '../../../domain/usecases/get_user_profile_usecase.dart';
 import '../../../domain/usecases/save_teacher_application_draft_usecase.dart';
 import '../../../domain/usecases/start_teacher_application_usecase.dart';
 import '../../../domain/usecases/submit_teacher_application_usecase.dart';
+import '../../../domain/value_objects/teacher_public_name.dart';
 import '../../../utils/phone_normalizer.dart';
-import '../../forms/teacher_application_field_ids.dart';
+import '../../forms/teacher_application_validation_l10n.dart';
 import 'teacher_application_event.dart';
 import 'teacher_application_state.dart';
 
@@ -20,6 +22,7 @@ class TeacherApplicationBloc
     required this._submitApplication,
     required this._getStatus,
     required this._approveApplication,
+    required this._getUserProfile,
   }) : super(const TeacherApplicationInitial()) {
     on<TeacherApplicationLoadRequested>(
       _onLoadRequested,
@@ -28,6 +31,10 @@ class TeacherApplicationBloc
     on<TeacherApplicationStartRequested>(
       _onStartRequested,
       transformer: droppable(),
+    );
+    on<TeacherApplicationPublicDisplayNameChanged>(
+      _onPublicDisplayNameChanged,
+      transformer: sequential(),
     );
     on<TeacherApplicationPhoneChanged>(
       _onPhoneChanged,
@@ -65,6 +72,7 @@ class TeacherApplicationBloc
   final SubmitTeacherApplicationUseCase _submitApplication;
   final GetTeacherApplicationStatusUseCase _getStatus;
   final ApproveTeacherApplicationUseCase _approveApplication;
+  final GetUserProfileUseCase _getUserProfile;
 
   Future<void> _onLoadRequested(
     TeacherApplicationLoadRequested event,
@@ -72,12 +80,11 @@ class TeacherApplicationBloc
   ) async {
     emit(const TeacherApplicationLoading());
     final result = await _getStatus(event.userId);
-    result.fold(
-      (failure) {
-        // TeacherApplicationNotFoundFailure = no application yet
+    await result.fold(
+      (failure) async {
         emit(TeacherApplicationNotStarted(userId: event.userId));
       },
-      (application) => _emitForApplication(application, emit),
+      (application) async => _emitForApplication(application, emit),
     );
   }
 
@@ -87,16 +94,43 @@ class TeacherApplicationBloc
   ) async {
     emit(const TeacherApplicationLoading());
     final result = await _startApplication(event.userId);
-    result.fold(
-      (failure) => emit(
-        TeacherApplicationFailureState(
-          failure: failure,
-          previousState: TeacherApplicationNotStarted(userId: event.userId),
-        ),
-      ),
-      (application) =>
-          emit(TeacherApplicationEditing(application: application)),
+    await result.fold(
+      (failure) async {
+        emit(
+          TeacherApplicationFailureState(
+            failure: failure,
+            previousState: TeacherApplicationNotStarted(userId: event.userId),
+          ),
+        );
+      },
+      (application) async => _emitForApplication(application, emit),
     );
+  }
+
+  void _onPublicDisplayNameChanged(
+    TeacherApplicationPublicDisplayNameChanged event,
+    Emitter<TeacherApplicationState> emit,
+  ) {
+    final current = state;
+    if (current is! TeacherApplicationEditing) return;
+
+    final failure = ValidateTeacherPublicName.failureFor(
+      event.publicDisplayName,
+    );
+    final normalized = ValidateTeacherPublicName.normalize(
+      event.publicDisplayName,
+    );
+    final updated = current.application.copyWith(publicDisplayName: normalized);
+    emit(
+      current.copyWith(
+        application: updated,
+        publicDisplayNameRaw: event.publicDisplayName,
+        publicDisplayNameErrorCode: failure?.code,
+        clearPublicDisplayNameErrorCode: failure == null,
+        publicDisplayNameInteracted: true,
+      ),
+    );
+    _autosave(updated);
   }
 
   void _onPhoneChanged(
@@ -110,14 +144,14 @@ class TeacherApplicationBloc
     final normalized = result == PhoneValidationResult.valid
         ? PhoneNormalizer.normalize(event.phone, countryCode)
         : null;
-    final phoneError = _errorFor(event.phone, result);
+    final phoneError = _phoneErrorCodeFor(event.phone, result);
     final updated = current.application.copyWith(phoneNumber: normalized);
     emit(
       current.copyWith(
         application: updated,
         phoneRaw: event.phone,
-        phoneError: phoneError,
-        clearPhoneError: phoneError == null,
+        phoneErrorCode: phoneError,
+        clearPhoneErrorCode: phoneError == null,
         phoneInteracted: true,
       ),
     );
@@ -130,19 +164,17 @@ class TeacherApplicationBloc
   ) {
     final current = state;
     if (current is! TeacherApplicationEditing) return;
-    // Re-validate the existing raw input against the new country code.
     final result = current.phoneRaw.isEmpty
         ? PhoneValidationResult.invalid
         : PhoneNormalizer.validate(current.phoneRaw, event.countryCode);
     final normalized = result == PhoneValidationResult.valid
         ? PhoneNormalizer.normalize(current.phoneRaw, event.countryCode)
         : null;
-    // Only show required error if user already attempted to submit.
     final phoneError = current.phoneRaw.isEmpty
         ? (current.submitAttempted
-              ? TeacherApplicationValidationMessages.phoneRequired
+              ? TeacherApplicationValidationCodes.phoneRequired
               : null)
-        : _errorFor(current.phoneRaw, result);
+        : _phoneErrorCodeFor(current.phoneRaw, result);
     final updated = current.application.copyWith(
       phoneCountryCode: event.countryCode,
       phoneNumber: normalized,
@@ -150,8 +182,8 @@ class TeacherApplicationBloc
     emit(
       current.copyWith(
         application: updated,
-        phoneError: phoneError,
-        clearPhoneError: phoneError == null,
+        phoneErrorCode: phoneError,
+        clearPhoneErrorCode: phoneError == null,
       ),
     );
     _autosave(updated);
@@ -186,7 +218,7 @@ class TeacherApplicationBloc
     emit(
       current.copyWith(
         application: updated,
-        clearTeachingLanguagesError: langs.isNotEmpty,
+        clearTeachingLanguagesErrorCode: langs.isNotEmpty,
       ),
     );
     _autosave(updated);
@@ -208,7 +240,7 @@ class TeacherApplicationBloc
     emit(
       current.copyWith(
         application: updated,
-        clearSpecializationsError: specs.isNotEmpty,
+        clearSpecializationsErrorCode: specs.isNotEmpty,
       ),
     );
     _autosave(updated);
@@ -224,7 +256,7 @@ class TeacherApplicationBloc
     emit(
       current.copyWith(
         application: updated,
-        clearBioError: event.bio.trim().isNotEmpty,
+        clearBioErrorCode: event.bio.trim().isNotEmpty,
       ),
     );
     _autosave(updated);
@@ -272,8 +304,6 @@ class TeacherApplicationBloc
       reviewedBy: 'debug_admin',
     );
 
-    // Avoid async lambdas inside fold — Either.fold does not await them,
-    // so any emit inside would fire after the handler completes.
     final approveFailure = result.fold((f) => f, (_) => null);
     if (approveFailure != null) {
       emit(
@@ -285,7 +315,6 @@ class TeacherApplicationBloc
       return;
     }
 
-    // Reload to pick up the approved status from the repository.
     final reloadResult = await _getStatus(current.application.userId);
     reloadResult.fold(
       (_) => emit(current.copyWith(isSimulatingApproval: false)),
@@ -294,35 +323,52 @@ class TeacherApplicationBloc
     );
   }
 
-  // ── Helpers ──────────────────────────────────────────────────────────────────
-
-  void _emitForApplication(
+  Future<void> _emitForApplication(
     TeacherApplication application,
     Emitter<TeacherApplicationState> emit,
-  ) {
+  ) async {
     if (application.isDraft) {
-      emit(TeacherApplicationEditing(application: application));
+      final prefill = await _loadPrefillPublicName(application.userId);
+      emit(
+        TeacherApplicationEditing(
+          application: application,
+          phoneRaw: application.phoneNumber ?? '',
+          publicDisplayNameRaw:
+              application.publicDisplayName?.trim().isNotEmpty == true
+              ? application.publicDisplayName!.trim()
+              : (prefill ?? ''),
+          prefillPublicDisplayName: prefill,
+        ),
+      );
     } else {
       emit(TeacherApplicationStatusLoaded(application: application));
     }
   }
 
-  /// Fire-and-forget autosave for draft fields — UI does not await this.
+  Future<String?> _loadPrefillPublicName(String userId) async {
+    final result = await _getUserProfile(userId);
+    return result.fold((_) => null, (profile) {
+      final name = profile.displayName?.trim();
+      if (name == null || name.isEmpty) return null;
+      return name;
+    });
+  }
+
   void _autosave(TeacherApplication draft) {
     if (!draft.isDraft) return;
     _saveDraft(draft).ignore();
   }
 
-  String? _errorFor(String raw, PhoneValidationResult result) {
+  String? _phoneErrorCodeFor(String raw, PhoneValidationResult result) {
     if (raw.isEmpty) {
-      return TeacherApplicationValidationMessages.phoneRequired;
+      return TeacherApplicationValidationCodes.phoneRequired;
     }
     return switch (result) {
       PhoneValidationResult.valid => null,
       PhoneValidationResult.countryMismatch =>
-        TeacherApplicationValidationMessages.phoneCountryMismatch,
+        TeacherApplicationValidationCodes.phoneCountryMismatch,
       PhoneValidationResult.invalid =>
-        TeacherApplicationValidationMessages.phoneInvalid,
+        TeacherApplicationValidationCodes.phoneInvalid,
     };
   }
 }

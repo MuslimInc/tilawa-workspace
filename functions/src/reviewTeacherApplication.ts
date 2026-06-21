@@ -1,8 +1,6 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
-import { initializeApp } from "firebase-admin/app";
-
-initializeApp();
+import { buildApprovedTeacherProfile } from "./quranSessions/teacherProfileApproval";
 
 type ReviewAction = "approve" | "reject" | "suspend" | "revoke";
 
@@ -65,22 +63,11 @@ export const reviewTeacherApplication = onCall(
     );
 
     if (action === "approve") {
+      const userSnap = await db.collection("users").doc(app.userId).get();
+      const userData = userSnap.data() ?? {};
       const profileRef = db.collection("quran_teacher_profiles").doc(applicationId);
       await profileRef.set(
-        {
-          userId: app.userId,
-          displayName: "",
-          publicBio: app.bio ?? "",
-          teachingLanguages: app.teachingLanguages ?? [],
-          specializations: app.specializations ?? [],
-          verificationStatus: "verified",
-          isActive: true,
-          averageRating: 0,
-          reviewCount: 0,
-          totalSessionsCompleted: 0,
-          createdAt: now,
-          updatedAt: now,
-        },
+        buildApprovedTeacherProfile({ app, user: userData, now }),
         { merge: true },
       );
     }
@@ -88,7 +75,11 @@ export const reviewTeacherApplication = onCall(
     if (action === "suspend" || action === "revoke") {
       const profileRef = db.collection("quran_teacher_profiles").doc(applicationId);
       await profileRef.set(
-        { isActive: false, updatedAt: now },
+        {
+          isActive: false,
+          isPubliclyVisible: false,
+          updatedAt: now,
+        },
         { merge: true },
       );
     }

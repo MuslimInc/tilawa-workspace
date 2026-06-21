@@ -21,6 +21,37 @@ service cloud.firestore {
         || request.resource.data[field] == resource.data[field];
     }
 
+    function isVerifiedTeacherProfileOwner() {
+      return isSignedIn()
+        && resource.data.userId == request.auth.uid
+        && resource.data.verificationStatus == 'verified';
+    }
+
+    function teacherProfileTrustFieldsUnchanged() {
+      return incomingUnchanged('userId')
+        && incomingUnchanged('verificationStatus')
+        && incomingUnchanged('isActive')
+        && incomingUnchanged('isPubliclyVisible')
+        && incomingUnchanged('profileCompleteness')
+        && incomingUnchanged('averageRating')
+        && incomingUnchanged('reviewCount')
+        && incomingUnchanged('totalSessionsCompleted')
+        && incomingUnchanged('teacherStatus')
+        && incomingUnchanged('createdAt');
+    }
+
+    function applicationModerationFieldsUnchanged() {
+      return incomingUnchanged('reviewedBy')
+        && incomingUnchanged('reviewedAt');
+    }
+
+    function clientCannotSelfApproveApplication() {
+      return request.resource.data.status != 'approved'
+        && request.resource.data.status != 'rejected'
+        && request.resource.data.status != 'suspended'
+        && request.resource.data.status != 'revoked';
+    }
+
     // Remote in-app update policy (see InAppUpdateConfigDataSourceImpl).
     match /app_config/in_app_update {
       allow read: if true;
@@ -84,6 +115,7 @@ service cloud.firestore {
       allow create: if isSignedIn()
         && request.resource.data.userId == request.auth.uid
         && request.resource.data.status == 'draft'
+        && clientCannotSelfApproveApplication()
         && !('reviewedBy' in request.resource.data)
         && !('reviewedAt' in request.resource.data);
 
@@ -92,17 +124,27 @@ service cloud.firestore {
         && resource.data.status == 'draft'
         && request.resource.data.userId == request.auth.uid
         && request.resource.data.status in ['draft', 'pending']
+        && clientCannotSelfApproveApplication()
         && incomingUnchanged('userId')
-        && !('reviewedBy' in request.resource.data)
-        && !('reviewedAt' in request.resource.data);
+        && applicationModerationFieldsUnchanged();
 
       allow delete: if false;
     }
 
-    // Teacher profiles — browse reads; creation/trust fields via admin CF only.
+    // Teacher profiles — public browse reads only when isPubliclyVisible;
+    // owner reads own profile; trust fields CF-only.
     match /quran_teacher_profiles/{teacherId} {
-      allow read: if isSignedIn();
-      allow write: if false;
+      allow read: if isAdmin()
+        || (isSignedIn() && resource.data.userId == request.auth.uid)
+        || (isSignedIn() && resource.data.isPubliclyVisible == true);
+
+      allow create: if false;
+
+      // Verified owner may edit public marketplace fields only.
+      allow update: if isVerifiedTeacherProfileOwner()
+        && teacherProfileTrustFieldsUnchanged();
+
+      allow delete: if false;
 
       // Pricing read by direct path (FirestoreTeacherDataSource); writes admin/CF.
       match /pricing/{marketId} {
@@ -146,7 +188,9 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
-      allow read, write: if isOwner(userId);
+      allow get: if isAdmin() || isOwner(userId);
+      allow list: if isAdmin();
+      allow write: if isOwner(userId);
 
       match /fcm_tokens/{tokenId} {
         allow read, write: if isOwner(userId);

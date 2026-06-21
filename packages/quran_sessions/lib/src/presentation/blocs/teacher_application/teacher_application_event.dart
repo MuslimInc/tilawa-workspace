@@ -29,6 +29,17 @@ final class TeacherApplicationStartRequested extends TeacherApplicationEvent {
   List<Object?> get props => [userId];
 }
 
+/// Public teacher name field changed.
+final class TeacherApplicationPublicDisplayNameChanged
+    extends TeacherApplicationEvent {
+  const TeacherApplicationPublicDisplayNameChanged(this.publicDisplayName);
+
+  final String publicDisplayName;
+
+  @override
+  List<Object?> get props => [publicDisplayName];
+}
+
 /// Phone number field changed.
 final class TeacherApplicationPhoneChanged extends TeacherApplicationEvent {
   const TeacherApplicationPhoneChanged(this.phone);

@@ -125,6 +125,15 @@ class QuranSessionsMvpModule {
       ),
     );
     sl.registerLazySingleton(
+      () => GetCurrentUserTeacherCapabilityUseCase(
+        applicationRepository: sl<TeacherApplicationRepository>(),
+        profileRepository: sl<TeacherProfileRepository>(),
+      ),
+    );
+    sl.registerLazySingleton(
+      () => SaveTeacherPublicProfileUseCase(sl<TeacherProfileRepository>()),
+    );
+    sl.registerLazySingleton(
       () => ApproveTeacherApplicationUseCase(
         applicationRepository: sl<TeacherApplicationRepository>(),
         profileRepository: sl<TeacherProfileRepository>(),
@@ -167,6 +176,7 @@ class QuranSessionsMvpModule {
         submitApplication: sl<SubmitTeacherApplicationUseCase>(),
         getStatus: sl<GetTeacherApplicationStatusUseCase>(),
         approveApplication: sl<ApproveTeacherApplicationUseCase>(),
+        getUserProfile: sl<GetUserProfileUseCase>(),
       ),
     );
     sl.registerFactory(() => TeacherListBloc(sl<GetTeachersUseCase>()));

@@ -9,6 +9,8 @@ class TeacherProfileDto {
     required this.averageRating,
     required this.reviewCount,
     required this.isActive,
+    required this.profileCompleteness,
+    required this.isPubliclyVisible,
     required this.createdAt,
     required this.updatedAt,
     this.avatarUrl,
@@ -28,6 +30,8 @@ class TeacherProfileDto {
   final double averageRating;
   final int reviewCount;
   final bool isActive;
+  final String profileCompleteness;
+  final bool isPubliclyVisible;
   final String? allowedStudentGender;
   final bool canTeachChildren;
   final DateTime createdAt;

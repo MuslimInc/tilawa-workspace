@@ -7,6 +7,7 @@ import 'package:tilawa/features/quran_sessions/data/firebase/firestore_booking_r
 import 'package:tilawa/features/quran_sessions/data/firebase/firestore_market_config_repository.dart';
 import 'package:tilawa/features/quran_sessions/data/firebase/firestore_paths.dart';
 import 'package:tilawa/features/quran_sessions/data/firebase/firestore_user_profile_repository.dart';
+import 'package:tilawa/features/quran_sessions/data/firebase/firestore_teacher_application_repository.dart';
 
 class _FakeAuthSessionProvider implements AuthSessionProvider {
   _FakeAuthSessionProvider(this._uid);
@@ -33,22 +34,36 @@ void main() {
     test(
       'creates quranSessionsProfile shell when user doc is missing',
       () async {
-        final dto = await dataSource.getOrCreateProfile('uid_test');
+        const authUid = 'auth_uid_from_provider';
+        final dto = await dataSource.getOrCreateProfile(authUid);
 
-        check(dto.userId).equals('uid_test');
+        check(dto.userId).equals(authUid);
         check(dto.role).equals('student');
         check(dto.gender).isNull();
 
         final doc = await firestore
             .collection(FirestoreQuranSessionsPaths.users)
-            .doc('uid_test')
+            .doc(authUid)
             .get();
         check(doc.exists).isTrue();
+        check(doc.id).equals(authUid);
         check(
           doc.data()![FirestoreQuranSessionsPaths.quranSessionsProfileField],
         ).isNotNull();
       },
     );
+
+    test('login sync merge does not create duplicate user docs', () async {
+      const authUid = 'auth_uid_merge';
+      await dataSource.getOrCreateProfile(authUid);
+      await dataSource.getOrCreateProfile(authUid);
+
+      final snapshot = await firestore
+          .collection(FirestoreQuranSessionsPaths.users)
+          .get();
+      check(snapshot.docs.length).equals(1);
+      check(snapshot.docs.single.id).equals(authUid);
+    });
 
     test('persists completed profile fields', () async {
       await dataSource.getOrCreateProfile('uid_test');
@@ -180,6 +195,34 @@ void main() {
         () => dataSource.getCityConfig('EG', 'unknown'),
         throwsA(isA<NotFoundException>()),
       );
+    });
+  });
+
+  group('FirestoreTeacherApplicationDataSource', () {
+    late FakeFirebaseFirestore firestore;
+    late FirestoreTeacherApplicationDataSource dataSource;
+
+    setUp(() async {
+      firestore = FakeFirebaseFirestore();
+      dataSource = FirestoreTeacherApplicationDataSource(firestore);
+      await firestore
+          .collection(FirestoreQuranSessionsPaths.teacherApplications)
+          .doc('app_owner')
+          .set({
+            'userId': 'uid_owner',
+            'status': 'pending',
+            'teachingLanguages': <String>[],
+            'specializations': <String>[],
+            'createdAt': Timestamp.fromDate(DateTime.utc(2024, 1, 1)),
+            'updatedAt': Timestamp.fromDate(DateTime.utc(2024, 1, 2)),
+          });
+    });
+
+    test('loads application by userId for owner lookup query', () async {
+      final dto = await dataSource.getByUserId('uid_owner');
+
+      check(dto.userId).equals('uid_owner');
+      check(dto.status).equals('pending');
     });
   });
 }
