@@ -35,6 +35,27 @@ class GeneratedSlot extends Equatable {
     return '${teacherId}_$stamp';
   }
 
+  /// Parses the UTC start instant encoded in a deterministic [slotId].
+  static DateTime? parseStartUtc({
+    required String teacherId,
+    required String slotId,
+  }) {
+    final prefix = '${teacherId}_';
+    if (!slotId.startsWith(prefix)) return null;
+    final stamp = slotId.substring(prefix.length);
+    final match = RegExp(
+      r'^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})Z$',
+    ).firstMatch(stamp);
+    if (match == null) return null;
+    return DateTime.utc(
+      int.parse(match.group(1)!),
+      int.parse(match.group(2)!),
+      int.parse(match.group(3)!),
+      int.parse(match.group(4)!),
+      int.parse(match.group(5)!),
+    );
+  }
+
   @override
   List<Object?> get props => [slotId, teacherId, startUtc, endUtc];
 }

@@ -10,6 +10,7 @@ import '../failure_ui/quran_sessions_failure_ui.dart';
 import '../blocs/teacher_dashboard/teacher_dashboard_bloc.dart';
 import '../blocs/teacher_dashboard/teacher_dashboard_event.dart';
 import '../blocs/teacher_dashboard/teacher_dashboard_state.dart';
+import '../widgets/date_grouped_slots_layout.dart';
 import '../widgets/session_card.dart';
 
 class TeacherDashboardScreen extends StatefulWidget {
@@ -164,19 +165,23 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                       ),
                     )
                   else
-                    SliverList.builder(
-                      itemCount: availability.length,
-                      itemBuilder: (_, i) {
-                        final slot = availability[i];
-                        return _SlotTile(
-                          slot: slot,
-                          isUpdating: isUpdatingAvailability,
-                          onRemove: () =>
-                              context.read<TeacherDashboardBloc>().add(
-                                AvailabilitySlotRemoved(slotId: slot.slotId),
+                    SliverToBoxAdapter(
+                      child: DateGroupedSlotsLayout(
+                        slots: availability,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        slotsForDayBuilder: (context, daySlots) => Column(
+                          children: [
+                            for (final slot in daySlots)
+                              _SlotTile(
+                                slot: slot,
+                                timeOnly: true,
+                                isUpdating: isUpdatingAvailability,
+                                onRemove: () =>
+                                    _confirmRemoveSlot(context, slot),
                               ),
-                        );
-                      },
+                          ],
+                        ),
+                      ),
                     ),
                 ],
               ),
@@ -189,6 +194,52 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
   void _reload() => context.read<TeacherDashboardBloc>().add(
     TeacherDashboardLoadRequested(teacherId: widget.teacherId),
   );
+
+  Future<void> _confirmRemoveSlot(
+    BuildContext context,
+    TeacherAvailability slot,
+  ) async {
+    final l10n = context.quranSessionsL10n;
+    final locale = Localizations.localeOf(context).languageCode;
+    final dateFmt = DateFormat('EEE d MMM', locale);
+    final timeFmt = DateFormat('h:mm a', locale);
+    final localStart = slot.startsAt.toLocal();
+    final confirmed = await showTilawaFormDialog<bool>(
+      context: context,
+      title: l10n.deleteSlotConfirmTitle,
+      primaryLabel: l10n.deleteSlotConfirm,
+      primaryVariant: TilawaButtonVariant.danger,
+      secondaryLabel: l10n.cancel,
+      onPrimary: (dialogContext) => Navigator.of(dialogContext).pop(true),
+      onSecondary: (dialogContext) => Navigator.of(dialogContext).pop(false),
+      onClose: (dialogContext) => Navigator.of(dialogContext).pop(false),
+      bodyBuilder: (dialogContext) => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${l10n.slotDate}: ${dateFmt.format(localStart)}',
+            style: Theme.of(dialogContext).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '${l10n.slotTime}: ${timeFmt.format(localStart)}',
+            style: Theme.of(dialogContext).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            l10n.deleteSlotConfirmMessage,
+            style: Theme.of(dialogContext).textTheme.bodyLarge,
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    context.read<TeacherDashboardBloc>().add(
+      AvailabilitySlotRemoved(teacherId: widget.teacherId, slot: slot),
+    );
+  }
 }
 
 // ── Slot tile ─────────────────────────────────────────────────────────────────
@@ -198,10 +249,12 @@ class _SlotTile extends StatelessWidget {
     required this.slot,
     required this.isUpdating,
     required this.onRemove,
+    this.timeOnly = false,
   });
 
   final TeacherAvailability slot;
   final bool isUpdating;
+  final bool timeOnly;
   final VoidCallback onRemove;
 
   @override
@@ -209,14 +262,20 @@ class _SlotTile extends StatelessWidget {
     final l10n = context.quranSessionsL10n;
     final locale = Localizations.localeOf(context).languageCode;
     final dateFmt = DateFormat('EEE d MMM، h:mm a', locale);
+    final timeFmt = DateFormat('h:mm a', locale);
     final scheme = Theme.of(context).colorScheme;
 
     return ListTile(
+      contentPadding: EdgeInsets.zero,
       leading: Icon(
         slot.isBooked ? Icons.lock_outline : Icons.schedule,
         color: slot.isBooked ? scheme.primary : scheme.onSurfaceVariant,
       ),
-      title: Text(dateFmt.format(slot.startsAt.toLocal())),
+      title: Text(
+        timeOnly
+            ? timeFmt.format(slot.startsAt.toLocal())
+            : dateFmt.format(slot.startsAt.toLocal()),
+      ),
       subtitle: Text(
         slot.isBooked ? l10n.slotBooked : l10n.slotAvailable,
         style: TextStyle(

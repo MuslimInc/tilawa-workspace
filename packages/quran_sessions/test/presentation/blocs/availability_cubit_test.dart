@@ -56,8 +56,15 @@ class _FakeScheduleRepository implements ScheduleRepository {
 void main() {
   late _FakeScheduleRepository repo;
 
-  AvailabilityCubit build() =>
-      AvailabilityCubit(repository: repo, defaultTimezone: 'Africa/Cairo');
+  AvailabilityCubit build() => AvailabilityCubit(
+    getSchedule: GetWeeklyScheduleUseCase(repo),
+    saveSchedule: SaveWeeklyScheduleUseCase(
+      repo,
+      const WeeklyScheduleValidator(),
+    ),
+    repository: repo,
+    defaultTimezone: 'Africa/Cairo',
+  );
 
   setUp(() => repo = _FakeScheduleRepository());
 
@@ -204,6 +211,50 @@ void main() {
       check(cubit.state.isDirty).isTrue();
       check(cubit.state.saveTick).equals(0);
     });
+
+    test('does not save when there are no unsaved changes', () async {
+      final cubit = build();
+      await cubit.load('teacher_1');
+
+      await cubit.save();
+
+      check(repo.saveCount).equals(0);
+      check(cubit.state.saveTick).equals(0);
+    });
+
+    test('rejects invalid draft without calling repository', () async {
+      repo.schedule = WeeklySchedule(
+        teacherId: 'teacher_1',
+        timezone: 'Africa/Cairo',
+        slotDuration: SlotDuration.thirty,
+        rules: {
+          Weekday.saturday: const [
+            TimeRange(start: LocalTime(9, 0), end: LocalTime(17, 0)),
+          ],
+        },
+      );
+      final cubit = build();
+      await cubit.load('teacher_1');
+      cubit.toggleDay(Weekday.saturday, false);
+
+      await cubit.save();
+
+      check(repo.saveCount).equals(0);
+      check(cubit.state.failure).isA<ValidationFailure>();
+      check(cubit.state.isDirty).isTrue();
+    });
+
+    test('ignores duplicate save while already saving', () async {
+      final cubit = build();
+      await cubit.load('teacher_1');
+      cubit.toggleDay(Weekday.saturday, true);
+
+      final first = cubit.save();
+      await cubit.save();
+      await first;
+
+      check(repo.saveCount).equals(1);
+    });
   });
 
   group('overrides', () {
@@ -224,6 +275,99 @@ void main() {
 
       await cubit.removeOverride('2026-06-30');
       check(cubit.state.overrides).isEmpty();
+      check(cubit.state.overrideRemoveTick).equals(1);
     });
+
+    test('addOverrides persists a vacation date range', () async {
+      final cubit = build();
+      await cubit.load('teacher_1');
+
+      await cubit.addOverrides([
+        for (var day = 24; day <= 26; day++)
+          AvailabilityOverride(
+            date: DateTime(2026, 6, day),
+            type: OverrideType.unavailable,
+            reason: 'vacation',
+          ),
+      ]);
+
+      check(cubit.state.overrides).length.equals(3);
+      check(repo.overrides).length.equals(3);
+
+      await cubit.removeOverrides(['2026-06-24', '2026-06-25', '2026-06-26']);
+      check(cubit.state.overrides).isEmpty();
+      check(cubit.state.overrideRemoveTick).equals(1);
+    });
+
+    test(
+      'addOverrides rejects overlapping vacation without persisting',
+      () async {
+        repo.overrides.add(
+          AvailabilityOverride(
+            date: DateTime(2026, 6, 25),
+            type: OverrideType.unavailable,
+            reason: 'vacation',
+          ),
+        );
+        final cubit = build();
+        await cubit.load('teacher_1');
+
+        await cubit.addOverrides([
+          for (var day = 24; day <= 26; day++)
+            AvailabilityOverride(
+              date: DateTime(2026, 6, day),
+              type: OverrideType.unavailable,
+              reason: 'vacation',
+            ),
+        ]);
+
+        check(cubit.state.overrides).length.equals(1);
+        check(repo.overrides).length.equals(1);
+        check(cubit.state.failure).isA<ValidationFailure>();
+        check(cubit.state.isOverridesBusy).isFalse();
+      },
+    );
+
+    test('addOverrides increments overrideAddTick on success', () async {
+      final cubit = build();
+      await cubit.load('teacher_1');
+
+      await cubit.addOverrides([
+        AvailabilityOverride(
+          date: DateTime(2026, 6, 30),
+          type: OverrideType.unavailable,
+          reason: 'vacation',
+        ),
+      ]);
+
+      check(cubit.state.overrideAddTick).equals(1);
+      check(cubit.state.isOverridesBusy).isFalse();
+    });
+
+    test(
+      'addOverrides allows custom hours on vacation-blocked dates',
+      () async {
+        repo.overrides.add(
+          AvailabilityOverride(
+            date: DateTime(2026, 6, 25),
+            type: OverrideType.unavailable,
+            reason: 'vacation',
+          ),
+        );
+        final cubit = build();
+        await cubit.load('teacher_1');
+
+        await cubit.addOverrides([
+          AvailabilityOverride(
+            date: DateTime(2026, 6, 25),
+            type: OverrideType.custom,
+          ),
+        ]);
+
+        check(cubit.state.overrides).length.equals(1);
+        check(cubit.state.overrides.single.type).equals(OverrideType.custom);
+        check(cubit.state.failure).isNull();
+      },
+    );
   });
 }

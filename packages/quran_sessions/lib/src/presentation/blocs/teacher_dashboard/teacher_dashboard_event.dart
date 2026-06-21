@@ -31,12 +31,16 @@ final class AvailabilitySlotAdded extends TeacherDashboardEvent {
 
 /// Teacher removes an open slot that has no confirmed booking.
 final class AvailabilitySlotRemoved extends TeacherDashboardEvent {
-  const AvailabilitySlotRemoved({required this.slotId});
+  const AvailabilitySlotRemoved({
+    required this.teacherId,
+    required this.slot,
+  });
 
-  final String slotId;
+  final String teacherId;
+  final TeacherAvailability slot;
 
   @override
-  List<Object?> get props => [slotId];
+  List<Object?> get props => [teacherId, slot];
 }
 
 /// Teacher replaces an existing open slot with new time data.

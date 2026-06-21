@@ -2,30 +2,37 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:checks/checks.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:quran_sessions/src/domain/failures/quran_sessions_failure.dart';
-import 'package:quran_sessions/src/domain/usecases/get_teacher_availability_usecase.dart';
-import 'package:quran_sessions/src/domain/usecases/get_teacher_sessions_usecase.dart';
-import 'package:quran_sessions/src/presentation/blocs/teacher_dashboard/teacher_dashboard_bloc.dart';
-import 'package:quran_sessions/src/presentation/blocs/teacher_dashboard/teacher_dashboard_event.dart';
-import 'package:quran_sessions/src/presentation/blocs/teacher_dashboard/teacher_dashboard_state.dart';
+import 'package:quran_sessions/quran_sessions.dart';
+import '../../helpers/availability_test_helpers.dart';
 import '../../helpers/fakes/fake_availability_provider.dart';
 import '../../helpers/fakes/fake_session_repository.dart';
-import '../../helpers/fakes/fake_teacher_repository.dart';
 import '../../helpers/fixtures.dart';
+import 'package:timezone/data/latest.dart' as tz_data;
 
 void main() {
   late FakeSessionRepository sessionRepo;
-  late FakeTeacherRepository teacherRepo;
+  late FakeScheduleRepository scheduleRepo;
   late FakeAvailabilityProvider availabilityProvider;
+  late BlockGeneratedSlotUseCase blockGeneratedSlot;
   late TeacherDashboardBloc bloc;
+
+  final fixedNow = DateTime.utc(2026, 1, 9);
+
+  setUpAll(tz_data.initializeTimeZones);
 
   setUp(() {
     sessionRepo = FakeSessionRepository();
-    teacherRepo = FakeTeacherRepository();
+    scheduleRepo = FakeScheduleRepository();
     availabilityProvider = FakeAvailabilityProvider();
+    blockGeneratedSlot = BlockGeneratedSlotUseCase(scheduleRepo);
     bloc = TeacherDashboardBloc(
       getTeacherSessions: GetTeacherSessionsUseCase(sessionRepo),
-      getAvailability: GetTeacherAvailabilityUseCase(teacherRepo),
+      getAvailability: buildGetTeacherAvailabilityUseCase(
+        scheduleRepository: scheduleRepo,
+        sessionRepository: sessionRepo,
+        now: () => fixedNow,
+      ),
+      blockGeneratedSlot: blockGeneratedSlot,
       availabilityProvider: availabilityProvider,
     );
   });
@@ -34,7 +41,7 @@ void main() {
 
   group('TeacherDashboardBloc', () {
     blocTest<TeacherDashboardBloc, TeacherDashboardState>(
-      'emits [Loading, Empty] when no sessions or slots',
+      'emits [Loading, Empty] when no sessions or generated slots',
       build: () => bloc,
       act: (b) => b.add(
         const TeacherDashboardLoadRequested(teacherId: 'teacher_1'),
@@ -46,7 +53,7 @@ void main() {
     );
 
     blocTest<TeacherDashboardBloc, TeacherDashboardState>(
-      'emits [Loading, Success] when sessions and slots are present',
+      'emits [Loading, Success] when sessions and generated slots are present',
       build: () {
         sessionRepo.sessions = [
           makeSession(
@@ -55,9 +62,7 @@ void main() {
             startsAt: DateTime.now().add(const Duration(hours: 2)),
           ),
         ];
-        teacherRepo.availability = [
-          makeSlot(teacherId: 'teacher_1'),
-        ];
+        scheduleRepo.schedule = makeWeeklySchedule();
         return bloc;
       },
       act: (b) => b.add(
@@ -70,7 +75,7 @@ void main() {
       verify: (b) {
         final state = b.state as TeacherDashboardSuccess;
         check(state.upcomingSessions).length.equals(1);
-        check(state.availability).length.equals(1);
+        check(state.availability).isNotEmpty();
       },
     );
 
@@ -98,8 +103,8 @@ void main() {
       ),
       act: (b) => b.add(AvailabilitySlotAdded(slot: makeSlot())),
       expect: () => [
-        isA<TeacherDashboardSuccess>(), // isUpdatingAvailability = true
-        isA<TeacherDashboardSuccess>(), // slot appended
+        isA<TeacherDashboardSuccess>(),
+        isA<TeacherDashboardSuccess>(),
       ],
       verify: (b) {
         final state = b.state as TeacherDashboardSuccess;
@@ -109,7 +114,55 @@ void main() {
     );
 
     blocTest<TeacherDashboardBloc, TeacherDashboardState>(
-      'AvailabilitySlotRemoved removes matching slot',
+      'AvailabilitySlotRemoved blocks generated slot and refreshes list',
+      build: () {
+        scheduleRepo.schedule = makeWeeklySchedule();
+        return bloc;
+      },
+      seed: () => TeacherDashboardSuccess(
+        upcomingSessions: const [],
+        availability: [
+          TeacherAvailability(
+            slotId: GeneratedSlot.deterministicId(
+              'teacher_1',
+              DateTime.utc(2026, 1, 10, 7, 0),
+            ),
+            teacherId: 'teacher_1',
+            startsAt: DateTime.utc(2026, 1, 10, 7, 0),
+            endsAt: DateTime.utc(2026, 1, 10, 7, 30),
+            isBooked: false,
+          ),
+        ],
+      ),
+      act: (b) => b.add(
+        AvailabilitySlotRemoved(
+          teacherId: 'teacher_1',
+          slot: TeacherAvailability(
+            slotId: GeneratedSlot.deterministicId(
+              'teacher_1',
+              DateTime.utc(2026, 1, 10, 7, 0),
+            ),
+            teacherId: 'teacher_1',
+            startsAt: DateTime.utc(2026, 1, 10, 7, 0),
+            endsAt: DateTime.utc(2026, 1, 10, 7, 30),
+            isBooked: false,
+          ),
+        ),
+      ),
+      expect: () => [
+        isA<TeacherDashboardSuccess>(),
+        isA<TeacherDashboardSuccess>(),
+      ],
+      verify: (b) {
+        final state = b.state as TeacherDashboardSuccess;
+        check(scheduleRepo.overrides).length.equals(1);
+        check(state.isUpdatingAvailability).isFalse();
+        check(state.slotFailure).isNull();
+      },
+    );
+
+    blocTest<TeacherDashboardBloc, TeacherDashboardState>(
+      'AvailabilitySlotRemoved removes legacy slot via provider',
       build: () => bloc,
       seed: () => TeacherDashboardSuccess(
         upcomingSessions: const [],
@@ -118,7 +171,12 @@ void main() {
           makeSlot(slotId: 'slot_2'),
         ],
       ),
-      act: (b) => b.add(const AvailabilitySlotRemoved(slotId: 'slot_1')),
+      act: (b) => b.add(
+        AvailabilitySlotRemoved(
+          teacherId: 'teacher_1',
+          slot: makeSlot(slotId: 'slot_1'),
+        ),
+      ),
       expect: () => [
         isA<TeacherDashboardSuccess>(),
         isA<TeacherDashboardSuccess>(),

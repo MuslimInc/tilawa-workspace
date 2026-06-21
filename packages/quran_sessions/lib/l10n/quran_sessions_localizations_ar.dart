@@ -422,6 +422,16 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get deleteSlot => 'حذف الموعد';
 
   @override
+  String get deleteSlotConfirmTitle => 'إزالة هذا الموعد؟';
+
+  @override
+  String get deleteSlotConfirmMessage =>
+      'لن يتمكن الطلاب من حجز هذا الوقت. يمكنك استعادته لاحقاً من ساعات العمل.';
+
+  @override
+  String get deleteSlotConfirm => 'إزالة الموعد';
+
+  @override
   String get addNewSlot => 'إضافة موعد جديد';
 
   @override
@@ -478,6 +488,26 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get availabilitySavedToast => 'تم حفظ الجدول';
 
   @override
+  String get availabilityOverrideRemovedToast => 'تم حذف الاستثناء';
+
+  @override
+  String get availabilityOverrideAddedToast => 'تمت إضافة الاستثناء';
+
+  @override
+  String get availabilityDeleteVacationTitle => 'حذف الإجازة؟';
+
+  @override
+  String get availabilityDeleteVacationMessage =>
+      'ستصبح هذه التواريخ متاحة للطلاب للحجز مرة أخرى.';
+
+  @override
+  String get availabilityDeleteVacationConfirm => 'حذف الإجازة';
+
+  @override
+  String get availabilityVacationOverlapError =>
+      'تتداخل هذه التواريخ مع إجازة موجودة. عدّل الفترة أو احذف الإجازة الحالية أولاً.';
+
+  @override
   String get availabilityUnsavedChanges => 'تغييرات غير محفوظة';
 
   @override
@@ -500,6 +530,10 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get availabilityRangeOverlap => 'تتداخل هذه الفترة مع فترة أخرى';
 
   @override
+  String get availabilityNoOpenDaysError =>
+      'اختر يوماً واحداً على الأقل مع ساعات عمل';
+
+  @override
   String get availabilityOverridesEmpty => 'لا توجد استثناءات بعد';
 
   @override
@@ -517,6 +551,16 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
 
   @override
   String get availabilityOverrideDate => 'التاريخ';
+
+  @override
+  String get availabilityOverrideStartDate => 'من';
+
+  @override
+  String get availabilityOverrideEndDate => 'إلى';
+
+  @override
+  String get availabilityOverrideEndDateInvalid =>
+      'يجب أن يكون تاريخ الانتهاء في نفس يوم البدء أو بعده';
 
   @override
   String get availabilitySetupHeadline =>

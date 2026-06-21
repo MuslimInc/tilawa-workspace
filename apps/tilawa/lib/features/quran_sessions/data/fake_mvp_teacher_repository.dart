@@ -42,16 +42,9 @@ class FakeMvpTeacherRepository implements TeacherRepository {
     required DateTime from,
     required DateTime to,
   }) async {
-    final result = _store.slots
-        .where(
-          (s) =>
-              s.teacherId == teacherId &&
-              s.startsAt.isAfter(from) &&
-              s.startsAt.isBefore(to) &&
-              !s.isBooked,
-        )
-        .toList();
-    return Right(result);
+    // Legacy stored slots are deprecated — student booking reads generated
+    // availability via [GetTeacherAvailabilityUseCase].
+    return const Right([]);
   }
 
   @override

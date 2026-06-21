@@ -16,14 +16,12 @@ class FirestoreBookingDataSource implements BookingRemoteDataSource {
   CollectionReference<Map<String, dynamic>> get _sessions =>
       _firestore.collection(FirestoreQuranSessionsPaths.sessions);
 
-  DocumentReference<Map<String, dynamic>> _slotRef(
-    String teacherId,
-    String slotId,
-  ) => _firestore
-      .collection(FirestoreQuranSessionsPaths.teacherProfiles)
-      .doc(teacherId)
-      .collection(FirestoreQuranSessionsPaths.availability)
-      .doc(slotId);
+  DocumentReference<Map<String, dynamic>> _scheduleRef(String teacherId) =>
+      _firestore
+          .collection(FirestoreQuranSessionsPaths.teacherProfiles)
+          .doc(teacherId)
+          .collection(FirestoreQuranSessionsPaths.availabilityConfig)
+          .doc(FirestoreQuranSessionsPaths.scheduleDoc);
 
   String _requireStudentId() {
     final studentId = _authSession.currentUserId;
@@ -42,31 +40,38 @@ class FirestoreBookingDataSource implements BookingRemoteDataSource {
     String? studentNote,
   }) async {
     final studentId = _requireStudentId();
+    final slotStart = GeneratedSlot.parseStartUtc(
+      teacherId: teacherId,
+      slotId: slotId,
+    );
+    if (slotStart == null) {
+      throw ConflictException(isSlotUnavailable: true, slotId: slotId);
+    }
+
     try {
+      // Client-side slot validation happens in [CreateBookingUseCase]. This
+      // transaction only guards double booking by slot id until a Cloud
+      // Function validates weekly schedule rules server-side.
+      final existing = await _bookings
+          .where('slotId', isEqualTo: slotId)
+          .where('status', whereIn: ['confirmed', 'pending'])
+          .limit(1)
+          .get();
+      if (existing.docs.isNotEmpty) {
+        throw ConflictException(isSlotUnavailable: true, slotId: slotId);
+      }
+
+      final scheduleSnap = await _scheduleRef(teacherId).get();
+      final durationMinutes =
+          scheduleSnap.data()?['slot_duration_minutes'] as int? ?? 30;
+      final startsAt = slotStart.toUtc();
+      final endsAt = startsAt.add(Duration(minutes: durationMinutes));
+      final now = DateTime.now();
+
       final bookingRef = _bookings.doc();
       final sessionRef = _sessions.doc();
-      final slotRef = _slotRef(teacherId, slotId);
 
-      final result = await _firestore.runTransaction((transaction) async {
-        final slotSnap = await transaction.get(slotRef);
-        if (!slotSnap.exists) {
-          throw ConflictException(isSlotUnavailable: true, slotId: slotId);
-        }
-        final slotData = slotSnap.data() ?? const {};
-        if (slotData['isBooked'] as bool? ?? false) {
-          throw ConflictException(isSlotUnavailable: true, slotId: slotId);
-        }
-
-        final startsAt = readRequiredDateTime(slotData['startsAt']);
-        final endsAt = readRequiredDateTime(slotData['endsAt']);
-        final now = DateTime.now();
-
-        transaction.update(slotRef, {
-          'isBooked': true,
-          'status': 'booked',
-          'updatedAt': writeDateTime(now),
-        });
-
+      await _firestore.runTransaction((transaction) async {
         transaction.set(bookingRef, {
           'studentId': studentId,
           'teacherId': teacherId,
@@ -94,25 +99,19 @@ class FirestoreBookingDataSource implements BookingRemoteDataSource {
           'createdAt': writeDateTime(now),
           'updatedAt': writeDateTime(now),
         });
-
-        return (
-          bookingId: bookingRef.id,
-          sessionId: sessionRef.id,
-          startsAt: startsAt,
-        );
       });
 
       return QuranBookingDto(
-        id: result.bookingId,
+        id: bookingRef.id,
         teacherId: teacherId,
         studentId: studentId,
         slotId: slotId,
         requestedCallType: _mapCallTypeId(requestedCallTypeId),
         pricingType: 'free',
         status: 'confirmed',
-        createdAt: DateTime.now().toUtc().toIso8601String(),
+        createdAt: now.toUtc().toIso8601String(),
         paymentReference: paymentReference,
-        sessionId: result.sessionId,
+        sessionId: sessionRef.id,
         studentNote: studentNote,
       );
     } on FirebaseException catch (e) {
@@ -141,25 +140,18 @@ class FirestoreBookingDataSource implements BookingRemoteDataSource {
       }, SetOptions(merge: true));
 
       final teacherId = data['teacherId'] as String? ?? '';
-      final slotId = data['slotId'] as String? ?? '';
-      if (teacherId.isNotEmpty && slotId.isNotEmpty) {
-        await _slotRef(teacherId, slotId).set({
-          'isBooked': false,
-          'status': 'open',
-          'updatedAt': writeDateTime(now),
-        }, SetOptions(merge: true));
+      if (teacherId.isNotEmpty) {
+        await _sessions.where('bookingId', isEqualTo: bookingId).get().then((
+          snapshot,
+        ) async {
+          for (final doc in snapshot.docs) {
+            await doc.reference.set({
+              'status': 'cancelled_by_student',
+              'updatedAt': writeDateTime(now),
+            }, SetOptions(merge: true));
+          }
+        });
       }
-
-      await _sessions.where('bookingId', isEqualTo: bookingId).get().then((
-        snapshot,
-      ) async {
-        for (final doc in snapshot.docs) {
-          await doc.reference.set({
-            'status': 'cancelled_by_student',
-            'updatedAt': writeDateTime(now),
-          }, SetOptions(merge: true));
-        }
-      });
 
       return _mapBooking(bookingSnap.id, {
         ...data,

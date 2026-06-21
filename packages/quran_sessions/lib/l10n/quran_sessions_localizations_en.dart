@@ -433,6 +433,16 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get deleteSlot => 'Delete slot';
 
   @override
+  String get deleteSlotConfirmTitle => 'Remove this slot?';
+
+  @override
+  String get deleteSlotConfirmMessage =>
+      'Students will no longer be able to book this time. You can restore it later from working hours.';
+
+  @override
+  String get deleteSlotConfirm => 'Remove slot';
+
+  @override
   String get addNewSlot => 'Add new slot';
 
   @override
@@ -489,6 +499,26 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get availabilitySavedToast => 'Schedule saved';
 
   @override
+  String get availabilityOverrideRemovedToast => 'Date override removed';
+
+  @override
+  String get availabilityOverrideAddedToast => 'Date override added';
+
+  @override
+  String get availabilityDeleteVacationTitle => 'Delete vacation?';
+
+  @override
+  String get availabilityDeleteVacationMessage =>
+      'These dates will become available for students to book again.';
+
+  @override
+  String get availabilityDeleteVacationConfirm => 'Delete vacation';
+
+  @override
+  String get availabilityVacationOverlapError =>
+      'These dates overlap an existing vacation. Adjust the range or remove the existing vacation first.';
+
+  @override
   String get availabilityUnsavedChanges => 'Unsaved changes';
 
   @override
@@ -510,6 +540,10 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get availabilityRangeOverlap => 'This range overlaps another';
 
   @override
+  String get availabilityNoOpenDaysError =>
+      'Select at least one day with working hours';
+
+  @override
   String get availabilityOverridesEmpty => 'No date overrides yet';
 
   @override
@@ -527,6 +561,16 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get availabilityOverrideDate => 'Date';
+
+  @override
+  String get availabilityOverrideStartDate => 'From';
+
+  @override
+  String get availabilityOverrideEndDate => 'To';
+
+  @override
+  String get availabilityOverrideEndDateInvalid =>
+      'End date must be on or after start date';
 
   @override
   String get availabilitySetupHeadline =>

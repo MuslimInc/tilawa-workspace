@@ -1874,3 +1874,223 @@ class TilawaExperimentalBadgeTokens {
     );
   }
 }
+
+/// Component tokens for [TilawaCupertinoWheelPicker] and
+/// [TilawaPickerSegmentCard].
+@immutable
+class TilawaCupertinoWheelPickerTokens {
+  const TilawaCupertinoWheelPickerTokens({
+    required this.pickerHeight,
+    required this.segmentGap,
+    required this.segmentPadding,
+    required this.segmentBorderRadius,
+    required this.segmentSelectedBorderWidth,
+    required this.segmentSelectedBackgroundColor,
+    required this.segmentUnselectedBackgroundColor,
+    required this.segmentSelectedBorderColor,
+    required this.segmentUnselectedBorderColor,
+    required this.segmentLabelColor,
+    required this.segmentSelectedValueColor,
+    required this.segmentUnselectedValueColor,
+    required this.segmentLabelValueGap,
+    required this.selectionOverlayColor,
+    required this.selectionOverlayRadius,
+    required this.selectionOverlayHorizontalMargin,
+    required this.wheelTopSpacing,
+    required this.pickerBackgroundColor,
+  });
+
+  final double pickerHeight;
+  final double segmentGap;
+  final EdgeInsetsGeometry segmentPadding;
+  final double segmentBorderRadius;
+  final double segmentSelectedBorderWidth;
+  final Color segmentSelectedBackgroundColor;
+  final Color segmentUnselectedBackgroundColor;
+  final Color segmentSelectedBorderColor;
+  final Color segmentUnselectedBorderColor;
+  final Color segmentLabelColor;
+  final Color segmentSelectedValueColor;
+  final Color segmentUnselectedValueColor;
+  final double segmentLabelValueGap;
+  final Color selectionOverlayColor;
+  final double selectionOverlayRadius;
+  final double selectionOverlayHorizontalMargin;
+  final double wheelTopSpacing;
+  final Color pickerBackgroundColor;
+
+  factory TilawaCupertinoWheelPickerTokens.fromColorScheme(
+    ColorScheme colorScheme,
+  ) {
+    final design = colorScheme.brightness == Brightness.dark
+        ? TilawaDesignTokens.dark()
+        : TilawaDesignTokens.light();
+    return TilawaCupertinoWheelPickerTokens(
+      pickerHeight: 200,
+      segmentGap: design.spaceSmall,
+      segmentPadding: EdgeInsets.symmetric(
+        vertical: design.spaceMedium,
+        horizontal: design.spaceMedium,
+      ),
+      segmentBorderRadius: design.radiusLarge,
+      segmentSelectedBorderWidth: 1.5,
+      segmentSelectedBackgroundColor: colorScheme.primaryContainer,
+      segmentUnselectedBackgroundColor: colorScheme.surfaceContainerHighest,
+      segmentSelectedBorderColor: colorScheme.primary,
+      segmentUnselectedBorderColor: colorScheme.primary.withValues(alpha: 0),
+      segmentLabelColor: colorScheme.onSurfaceVariant,
+      segmentSelectedValueColor: colorScheme.primary,
+      segmentUnselectedValueColor: colorScheme.onSurface,
+      segmentLabelValueGap: design.spaceTiny,
+      selectionOverlayColor: colorScheme.onSurface.withValues(
+        alpha: colorScheme.brightness == Brightness.dark ? 0.14 : 0.08,
+      ),
+      selectionOverlayRadius: design.radiusMedium,
+      selectionOverlayHorizontalMargin: design.spaceSmall,
+      wheelTopSpacing: design.spaceSmall,
+      pickerBackgroundColor: colorScheme.surface,
+    );
+  }
+
+  TilawaCupertinoWheelPickerTokens copyWith({
+    double? pickerHeight,
+    double? segmentGap,
+    EdgeInsetsGeometry? segmentPadding,
+    double? segmentBorderRadius,
+    double? segmentSelectedBorderWidth,
+    Color? segmentSelectedBackgroundColor,
+    Color? segmentUnselectedBackgroundColor,
+    Color? segmentSelectedBorderColor,
+    Color? segmentUnselectedBorderColor,
+    Color? segmentLabelColor,
+    Color? segmentSelectedValueColor,
+    Color? segmentUnselectedValueColor,
+    double? segmentLabelValueGap,
+    Color? selectionOverlayColor,
+    double? selectionOverlayRadius,
+    double? selectionOverlayHorizontalMargin,
+    double? wheelTopSpacing,
+    Color? pickerBackgroundColor,
+  }) {
+    return TilawaCupertinoWheelPickerTokens(
+      pickerHeight: pickerHeight ?? this.pickerHeight,
+      segmentGap: segmentGap ?? this.segmentGap,
+      segmentPadding: segmentPadding ?? this.segmentPadding,
+      segmentBorderRadius: segmentBorderRadius ?? this.segmentBorderRadius,
+      segmentSelectedBorderWidth:
+          segmentSelectedBorderWidth ?? this.segmentSelectedBorderWidth,
+      segmentSelectedBackgroundColor:
+          segmentSelectedBackgroundColor ?? this.segmentSelectedBackgroundColor,
+      segmentUnselectedBackgroundColor:
+          segmentUnselectedBackgroundColor ??
+          this.segmentUnselectedBackgroundColor,
+      segmentSelectedBorderColor:
+          segmentSelectedBorderColor ?? this.segmentSelectedBorderColor,
+      segmentUnselectedBorderColor:
+          segmentUnselectedBorderColor ?? this.segmentUnselectedBorderColor,
+      segmentLabelColor: segmentLabelColor ?? this.segmentLabelColor,
+      segmentSelectedValueColor:
+          segmentSelectedValueColor ?? this.segmentSelectedValueColor,
+      segmentUnselectedValueColor:
+          segmentUnselectedValueColor ?? this.segmentUnselectedValueColor,
+      segmentLabelValueGap: segmentLabelValueGap ?? this.segmentLabelValueGap,
+      selectionOverlayColor:
+          selectionOverlayColor ?? this.selectionOverlayColor,
+      selectionOverlayRadius:
+          selectionOverlayRadius ?? this.selectionOverlayRadius,
+      selectionOverlayHorizontalMargin:
+          selectionOverlayHorizontalMargin ??
+          this.selectionOverlayHorizontalMargin,
+      wheelTopSpacing: wheelTopSpacing ?? this.wheelTopSpacing,
+      pickerBackgroundColor:
+          pickerBackgroundColor ?? this.pickerBackgroundColor,
+    );
+  }
+
+  static TilawaCupertinoWheelPickerTokens lerp(
+    TilawaCupertinoWheelPickerTokens a,
+    TilawaCupertinoWheelPickerTokens b,
+    double t,
+  ) {
+    return TilawaCupertinoWheelPickerTokens(
+      pickerHeight: lerpTokenDouble(a.pickerHeight, b.pickerHeight, t),
+      segmentGap: lerpTokenDouble(a.segmentGap, b.segmentGap, t),
+      segmentPadding: EdgeInsetsGeometry.lerp(
+        a.segmentPadding,
+        b.segmentPadding,
+        t,
+      )!,
+      segmentBorderRadius: lerpTokenDouble(
+        a.segmentBorderRadius,
+        b.segmentBorderRadius,
+        t,
+      ),
+      segmentSelectedBorderWidth: lerpTokenDouble(
+        a.segmentSelectedBorderWidth,
+        b.segmentSelectedBorderWidth,
+        t,
+      ),
+      segmentSelectedBackgroundColor: Color.lerp(
+        a.segmentSelectedBackgroundColor,
+        b.segmentSelectedBackgroundColor,
+        t,
+      )!,
+      segmentUnselectedBackgroundColor: Color.lerp(
+        a.segmentUnselectedBackgroundColor,
+        b.segmentUnselectedBackgroundColor,
+        t,
+      )!,
+      segmentSelectedBorderColor: Color.lerp(
+        a.segmentSelectedBorderColor,
+        b.segmentSelectedBorderColor,
+        t,
+      )!,
+      segmentUnselectedBorderColor: Color.lerp(
+        a.segmentUnselectedBorderColor,
+        b.segmentUnselectedBorderColor,
+        t,
+      )!,
+      segmentLabelColor: Color.lerp(
+        a.segmentLabelColor,
+        b.segmentLabelColor,
+        t,
+      )!,
+      segmentSelectedValueColor: Color.lerp(
+        a.segmentSelectedValueColor,
+        b.segmentSelectedValueColor,
+        t,
+      )!,
+      segmentUnselectedValueColor: Color.lerp(
+        a.segmentUnselectedValueColor,
+        b.segmentUnselectedValueColor,
+        t,
+      )!,
+      segmentLabelValueGap: lerpTokenDouble(
+        a.segmentLabelValueGap,
+        b.segmentLabelValueGap,
+        t,
+      ),
+      selectionOverlayColor: Color.lerp(
+        a.selectionOverlayColor,
+        b.selectionOverlayColor,
+        t,
+      )!,
+      selectionOverlayRadius: lerpTokenDouble(
+        a.selectionOverlayRadius,
+        b.selectionOverlayRadius,
+        t,
+      ),
+      selectionOverlayHorizontalMargin: lerpTokenDouble(
+        a.selectionOverlayHorizontalMargin,
+        b.selectionOverlayHorizontalMargin,
+        t,
+      ),
+      wheelTopSpacing: lerpTokenDouble(a.wheelTopSpacing, b.wheelTopSpacing, t),
+      pickerBackgroundColor: Color.lerp(
+        a.pickerBackgroundColor,
+        b.pickerBackgroundColor,
+        t,
+      )!,
+    );
+  }
+}

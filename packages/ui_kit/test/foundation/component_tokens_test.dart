@@ -599,6 +599,20 @@ void main() {
     });
   });
 
+  group('TilawaCupertinoWheelPickerTokens', () {
+    test('fromColorScheme creates expected picker height', () {
+      final colorScheme = ColorScheme.fromSeed(
+        seedColor: AppColors.defaultPrimary,
+      );
+      final tokens = TilawaCupertinoWheelPickerTokens.fromColorScheme(
+        colorScheme,
+      );
+      expect(tokens.pickerHeight, 200.0);
+      expect(tokens.segmentSelectedBorderWidth, 1.5);
+      expect(tokens.selectionOverlayColor.a, lessThan(1.0));
+    });
+  });
+
   group('TilawaBottomSheetScaffoldTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaBottomSheetScaffoldTokens.defaults();

@@ -2,6 +2,8 @@ import 'package:flutter/widgets.dart';
 import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 
 import '../../domain/failures/quran_sessions_failure.dart';
+import '../../domain/services/vacation_override_validator.dart';
+import '../../domain/services/weekly_schedule_validator.dart';
 import '../../domain/value_objects/teacher_public_name.dart';
 import '../forms/teacher_application_validation_l10n.dart';
 
@@ -45,7 +47,19 @@ extension QuranSessionsFailureUi on QuranSessionsFailure {
       // ── Domain / resource ───────────────────────────────────────────────────
       NotFoundFailure(resourceType: final t) => loc.notFound(t),
       ValidationFailure(field: final f, code: final c) =>
-        f == ValidateTeacherPublicName.field
+        f == VacationOverrideValidator.field &&
+                c == VacationOverrideValidator.overlapsExistingCode
+            ? loc.availabilityVacationOverlapError
+            : f == WeeklyScheduleValidator.field &&
+                  c == WeeklyScheduleValidator.invalidRangeCode
+            ? loc.availabilityRangeInvalid
+            : f == WeeklyScheduleValidator.field &&
+                  c == WeeklyScheduleValidator.overlappingRangesCode
+            ? loc.availabilityRangeOverlap
+            : f == WeeklyScheduleValidator.field &&
+                  c == WeeklyScheduleValidator.noOpenDaysCode
+            ? loc.availabilityNoOpenDaysError
+            : f == ValidateTeacherPublicName.field
             ? loc.messageForPublicNameFailure(
                 ValidationFailure(field: f, code: c),
               )

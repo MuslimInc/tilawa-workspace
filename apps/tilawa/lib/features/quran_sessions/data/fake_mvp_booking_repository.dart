@@ -1,9 +1,8 @@
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:tilawa/features/quran_sessions/data/quran_sessions_mvp_store.dart';
 
-import 'quran_sessions_mvp_store.dart';
-
-/// Fake booking repository that persists bookings in [QuranSessionsMvpStore].
+/// MVP booking repository backed by generated weekly availability.
 class FakeMvpBookingRepository implements BookingRepository {
   FakeMvpBookingRepository(this._store, this._authSession);
 
@@ -18,23 +17,29 @@ class FakeMvpBookingRepository implements BookingRepository {
     String? paymentReference,
     String? studentNote,
   }) async {
-    // Mark the slot as booked.
-    final slotIdx = _store.slots.indexWhere((s) => s.slotId == slotId);
-    if (slotIdx == -1) return const Left(SlotUnavailableFailure('unknown'));
-    final slot = _store.slots[slotIdx];
-    if (slot.isBooked) return Left(SlotUnavailableFailure(slotId));
-
-    // Replace with booked version.
-    _store.slots[slotIdx] = TeacherAvailability(
-      slotId: slot.slotId,
-      teacherId: slot.teacherId,
-      startsAt: slot.startsAt,
-      endsAt: slot.endsAt,
-      isBooked: true,
+    final startUtc = GeneratedSlot.parseStartUtc(
+      teacherId: teacherId,
+      slotId: slotId,
     );
+    if (startUtc == null) {
+      return Left(SlotUnavailableFailure(slotId));
+    }
+
+    final schedule = _store.schedules[teacherId];
+    final durationMinutes = schedule?.slotDuration.minutes ?? 30;
+    final endUtc = startUtc.add(Duration(minutes: durationMinutes));
+
+    final hasConflict = _store.sessions.any(
+      (session) =>
+          session.teacherId == teacherId &&
+          _blocksSlot(session.status) &&
+          session.startsAt.toUtc() == startUtc,
+    );
+    if (hasConflict) {
+      return Left(SlotUnavailableFailure(slotId));
+    }
 
     final callType = _resolveCallType(requestedCallTypeId);
-
     final studentId = _authSession.currentUserId ?? 'student_mvp';
 
     final booking = QuranBooking(
@@ -55,8 +60,8 @@ class FakeMvpBookingRepository implements BookingRepository {
       bookingId: booking.id,
       teacherId: teacherId,
       studentId: studentId,
-      startsAt: slot.startsAt,
-      endsAt: slot.endsAt,
+      startsAt: startUtc,
+      endsAt: endUtc,
       callType: callType,
       status: QuranSessionStatus.scheduled,
       meetingLink: 'https://meet.example.com/room/${booking.id}',
@@ -92,8 +97,6 @@ class FakeMvpBookingRepository implements BookingRepository {
       studentNote: old.studentNote,
     );
     _store.bookings[idx] = updated;
-
-    // Remove corresponding session.
     _store.sessions.removeWhere((s) => s.bookingId == bookingId);
 
     return Right(updated);
@@ -137,6 +140,11 @@ class FakeMvpBookingRepository implements BookingRepository {
       ),
     );
   }
+
+  static bool _blocksSlot(QuranSessionStatus status) => switch (status) {
+    QuranSessionStatus.scheduled || QuranSessionStatus.inProgress => true,
+    _ => false,
+  };
 
   static SessionCallType _resolveCallType(String id) => switch (id) {
     'voiceCall' => SessionCallType.voiceCall,

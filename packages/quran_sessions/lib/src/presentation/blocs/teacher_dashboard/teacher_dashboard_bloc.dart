@@ -2,10 +2,13 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../boundaries/scheduling/availability_provider.dart';
+import '../../../domain/entities/generated_slot.dart';
 import '../../../domain/entities/quran_session.dart';
 import '../../../domain/entities/teacher_availability.dart';
+import '../../../domain/usecases/block_generated_slot_usecase.dart';
 import '../../../domain/usecases/get_teacher_availability_usecase.dart';
 import '../../../domain/usecases/get_teacher_sessions_usecase.dart';
+import '../../../domain/services/teacher_availability_sort.dart';
 import 'teacher_dashboard_event.dart';
 import 'teacher_dashboard_state.dart';
 
@@ -14,6 +17,7 @@ class TeacherDashboardBloc
   TeacherDashboardBloc({
     required this._getTeacherSessions,
     required this._getAvailability,
+    required this._blockGeneratedSlot,
     required this._availabilityProvider,
   }) : super(const TeacherDashboardInitial()) {
     on<TeacherDashboardLoadRequested>(
@@ -28,6 +32,7 @@ class TeacherDashboardBloc
 
   final GetTeacherSessionsUseCase _getTeacherSessions;
   final GetTeacherAvailabilityUseCase _getAvailability;
+  final BlockGeneratedSlotUseCase _blockGeneratedSlot;
   final AvailabilityProvider _availabilityProvider;
 
   Future<void> _onLoadRequested(
@@ -127,7 +132,10 @@ class TeacherDashboardBloc
       ),
       (_) => emit(
         current.copyWith(
-          availability: [...current.availability, event.slot],
+          availability: sortTeacherAvailabilityByStart([
+            ...current.availability,
+            event.slot,
+          ]),
           isUpdatingAvailability: false,
           clearSlotFailure: true,
         ),
@@ -170,9 +178,11 @@ class TeacherDashboardBloc
         ),
       ),
       (_) {
-        final updated = current.availability.map((s) {
-          return s.slotId == event.original.slotId ? event.updated : s;
-        }).toList();
+        final updated = sortTeacherAvailabilityByStart(
+          current.availability.map((s) {
+            return s.slotId == event.original.slotId ? event.updated : s;
+          }).toList(),
+        );
         emit(
           current.copyWith(
             availability: updated,
@@ -195,24 +205,64 @@ class TeacherDashboardBloc
       current.copyWith(isUpdatingAvailability: true, clearSlotFailure: true),
     );
 
-    final result = await _availabilityProvider.withdrawSlot(event.slotId);
+    final isGenerated =
+        GeneratedSlot.parseStartUtc(
+          teacherId: event.teacherId,
+          slotId: event.slot.slotId,
+        ) !=
+        null;
 
-    result.fold(
-      (failure) => emit(
+    final result = isGenerated
+        ? await _blockGeneratedSlot(
+            teacherId: event.teacherId,
+            slotStartUtc: event.slot.startsAt,
+            slotEndUtc: event.slot.endsAt,
+          )
+        : await _availabilityProvider.withdrawSlot(event.slot.slotId);
+
+    await result.fold(
+      (failure) async => emit(
         current.copyWith(
           isUpdatingAvailability: false,
           slotFailure: failure,
         ),
       ),
-      (_) => emit(
-        current.copyWith(
-          availability: current.availability
-              .where((s) => s.slotId != event.slotId)
-              .toList(),
-          isUpdatingAvailability: false,
-          clearSlotFailure: true,
-        ),
-      ),
+      (_) async {
+        if (isGenerated) {
+          final now = DateTime.now();
+          final availResult = await _getAvailability(
+            event.teacherId,
+            from: now,
+            to: now.add(const Duration(days: 14)),
+          );
+          availResult.fold(
+            (failure) => emit(
+              current.copyWith(
+                isUpdatingAvailability: false,
+                slotFailure: failure,
+              ),
+            ),
+            (slots) => emit(
+              current.copyWith(
+                availability: slots,
+                isUpdatingAvailability: false,
+                clearSlotFailure: true,
+              ),
+            ),
+          );
+          return;
+        }
+
+        emit(
+          current.copyWith(
+            availability: current.availability
+                .where((slot) => slot.slotId != event.slot.slotId)
+                .toList(),
+            isUpdatingAvailability: false,
+            clearSlotFailure: true,
+          ),
+        );
+      },
     );
   }
 }

@@ -54,6 +54,11 @@ import '../domain/usecases/submit_teacher_application_usecase.dart';
 import '../domain/usecases/suspend_teacher_profile_usecase.dart';
 import '../domain/usecases/update_teacher_eligibility_policy_usecase.dart';
 import '../domain/usecases/validate_booking_eligibility_usecase.dart';
+import '../domain/usecases/block_generated_slot_usecase.dart';
+import '../domain/usecases/get_weekly_schedule_usecase.dart';
+import '../domain/usecases/save_weekly_schedule_usecase.dart';
+import '../domain/services/weekly_schedule_validator.dart';
+import '../domain/services/slot_generator.dart';
 
 /// Registration helper for the `quran_sessions` package.
 ///
@@ -109,10 +114,19 @@ class QuranSessionsModule {
 
     registerSingleton(GetTeachersUseCase(teacherRepo));
     registerSingleton(GetTeacherProfileUseCase(teacherRepo));
-    registerSingleton(GetTeacherAvailabilityUseCase(teacherRepo));
+    const slotGenerator = SlotGenerator();
+    registerSingleton(slotGenerator);
+    final getTeacherAvailability = GetTeacherAvailabilityUseCase(
+      scheduleRepository: scheduleRepo,
+      sessionRepository: sessionRepo,
+      slotGenerator: slotGenerator,
+    );
+    registerSingleton(getTeacherAvailability);
     registerSingleton(GetTeacherSessionsUseCase(sessionRepo));
     registerSingleton(GetStudentSessionsUseCase(sessionRepo));
-    registerSingleton(CreateBookingUseCase(bookingRepo));
+    registerSingleton(
+      CreateBookingUseCase(bookingRepo, getTeacherAvailability),
+    );
     registerSingleton(CancelBookingUseCase(bookingRepo));
     registerSingleton(SubmitReviewUseCase(bookingRepo));
     registerSingleton(GetUserProfileUseCase(profileRepo));
@@ -162,5 +176,12 @@ class QuranSessionsModule {
         marketConfigRepository: marketConfigRepo,
       ),
     );
+    const scheduleValidator = WeeklyScheduleValidator();
+    registerSingleton(scheduleValidator);
+    registerSingleton(GetWeeklyScheduleUseCase(scheduleRepo));
+    registerSingleton(
+      SaveWeeklyScheduleUseCase(scheduleRepo, scheduleValidator),
+    );
+    registerSingleton(BlockGeneratedSlotUseCase(scheduleRepo));
   }
 }

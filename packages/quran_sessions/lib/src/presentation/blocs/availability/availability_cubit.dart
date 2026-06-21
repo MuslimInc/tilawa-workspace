@@ -6,7 +6,11 @@ import '../../../domain/entities/slot_duration.dart';
 import '../../../domain/entities/time_range.dart';
 import '../../../domain/entities/weekday.dart';
 import '../../../domain/entities/weekly_schedule.dart';
+import '../../../domain/failures/quran_sessions_failure.dart';
 import '../../../domain/repositories/schedule_repository.dart';
+import '../../../domain/services/vacation_override_validator.dart';
+import '../../../domain/usecases/get_weekly_schedule_usecase.dart';
+import '../../../domain/usecases/save_weekly_schedule_usecase.dart';
 import 'availability_state.dart';
 
 /// Drives the weekly availability editor. Edits mutate an in-memory [draft];
@@ -14,15 +18,19 @@ import 'availability_state.dart';
 /// separate, immediately-persisted concern.
 class AvailabilityCubit extends Cubit<AvailabilityState> {
   AvailabilityCubit({
+    required this._getSchedule,
+    required this._saveSchedule,
     required ScheduleRepository repository,
-    this.defaultTimezone = 'Africa/Cairo',
+    this._defaultTimezone = 'Africa/Cairo',
+    this._vacationValidator = const VacationOverrideValidator(),
   }) : _repo = repository,
        super(AvailabilityState.loading(''));
 
+  final GetWeeklyScheduleUseCase _getSchedule;
+  final SaveWeeklyScheduleUseCase _saveSchedule;
   final ScheduleRepository _repo;
-
-  /// IANA zone used as the default when a teacher has no saved schedule yet.
-  final String defaultTimezone;
+  final String _defaultTimezone;
+  final VacationOverrideValidator _vacationValidator;
 
   /// Default hours applied when a closed day is switched on.
   static const _defaultRange = TimeRange(
@@ -33,20 +41,17 @@ class AvailabilityCubit extends Cubit<AvailabilityState> {
   Future<void> load(String teacherId) async {
     emit(AvailabilityState.loading(teacherId));
 
-    final scheduleResult = await _repo.getSchedule(teacherId);
+    final scheduleResult = await _getSchedule(
+      teacherId,
+      defaultTimezone: _defaultTimezone,
+    );
     final overridesResult = await _repo.getOverrides(teacherId);
 
     await scheduleResult.fold(
       (failure) async => emit(
         state.copyWith(status: AvailabilityStatus.error, failure: failure),
       ),
-      (schedule) async {
-        final baseline =
-            schedule ??
-            WeeklySchedule.empty(
-              teacherId: teacherId,
-              timezone: defaultTimezone,
-            );
+      (baseline) async {
         final overrides = overridesResult.fold(
           (_) => <AvailabilityOverride>[],
           (value) => value,
@@ -117,22 +122,22 @@ class AvailabilityCubit extends Cubit<AvailabilityState> {
   // ── Persistence ────────────────────────────────────────────────────────────
 
   Future<void> save() async {
-    if (state.isSaving) return;
+    if (state.isSaving || !state.isDirty) return;
     emit(state.copyWith(isSaving: true, clearFailure: true));
 
-    final toSave = state.draft.copyWith(
-      version: state.baseline.version + 1,
-      updatedAt: DateTime.now(),
+    final result = await _saveSchedule(
+      draft: state.draft,
+      baseline: state.baseline,
     );
-    final result = await _repo.saveSchedule(toSave);
 
     result.fold(
       (failure) => emit(state.copyWith(isSaving: false, failure: failure)),
-      (_) => emit(
+      (synced) => emit(
         state.copyWith(
           isSaving: false,
-          baseline: toSave,
-          draft: toSave,
+          baseline: synced,
+          draft: synced,
+          useSameHoursForAllDays: _looksUniform(synced),
           saveTick: state.saveTick + 1,
           clearFailure: true,
         ),
@@ -153,35 +158,99 @@ class AvailabilityCubit extends Cubit<AvailabilityState> {
   // ── Overrides (persist immediately) ────────────────────────────────────────
 
   Future<void> addOverride(AvailabilityOverride override) async {
-    final result = await _repo.saveOverride(state.teacherId, override);
-    result.fold(
-      (failure) => emit(state.copyWith(failure: failure)),
-      (_) {
-        final next = [
-          ...state.overrides.where((o) => o.dateKey != override.dateKey),
-          override,
-        ]..sort((a, b) => a.date.compareTo(b.date));
-        emit(state.copyWith(overrides: next, clearFailure: true));
-      },
+    await addOverrides([override]);
+  }
+
+  Future<void> addOverrides(List<AvailabilityOverride> overrides) async {
+    if (overrides.isEmpty || state.isOverridesBusy) return;
+
+    final vacationConflict = _findVacationConflict(overrides);
+    if (vacationConflict != null) {
+      emit(state.copyWith(failure: vacationConflict));
+      return;
+    }
+
+    emit(state.copyWith(isOverridesBusy: true, clearFailure: true));
+
+    for (final override in overrides) {
+      final result = await _repo.saveOverride(state.teacherId, override);
+      final failure = result.fold((f) => f, (_) => null);
+      if (failure != null) {
+        emit(state.copyWith(isOverridesBusy: false, failure: failure));
+        return;
+      }
+    }
+
+    final byKey = {for (final o in state.overrides) o.dateKey: o};
+    for (final override in overrides) {
+      byKey[override.dateKey] = override;
+    }
+    final next = byKey.values.toList()
+      ..sort((a, b) => a.date.compareTo(b.date));
+    emit(
+      state.copyWith(
+        overrides: next,
+        isOverridesBusy: false,
+        overrideAddTick: state.overrideAddTick + 1,
+        clearFailure: true,
+      ),
     );
   }
 
   Future<void> removeOverride(String dateKey) async {
-    final result = await _repo.removeOverride(state.teacherId, dateKey);
-    result.fold(
-      (failure) => emit(state.copyWith(failure: failure)),
-      (_) => emit(
-        state.copyWith(
-          overrides: state.overrides
-              .where((o) => o.dateKey != dateKey)
-              .toList(),
-          clearFailure: true,
-        ),
+    await removeOverrides([dateKey]);
+  }
+
+  Future<void> removeOverrides(Iterable<String> dateKeys) async {
+    final keys = dateKeys.toList();
+    if (keys.isEmpty || state.isOverridesBusy) return;
+
+    emit(state.copyWith(isOverridesBusy: true, clearFailure: true));
+
+    for (final dateKey in keys) {
+      final result = await _repo.removeOverride(state.teacherId, dateKey);
+      final failure = result.fold((f) => f, (_) => null);
+      if (failure != null) {
+        emit(state.copyWith(isOverridesBusy: false, failure: failure));
+        return;
+      }
+    }
+
+    emit(
+      state.copyWith(
+        overrides: state.overrides
+            .where((o) => !keys.contains(o.dateKey))
+            .toList(),
+        isOverridesBusy: false,
+        overrideRemoveTick: state.overrideRemoveTick + 1,
+        clearFailure: true,
       ),
     );
   }
 
   // ── Internals ──────────────────────────────────────────────────────────────
+
+  ValidationFailure? _findVacationConflict(
+    List<AvailabilityOverride> proposed,
+  ) {
+    final vacations = proposed
+        .where((override) => override.type == OverrideType.unavailable)
+        .toList();
+    if (vacations.isEmpty) return null;
+
+    final dates = vacations.map((override) => override.date).toList()..sort();
+    final overlap = _vacationValidator.findFirstOverlappingVacationDay(
+      startDate: dates.first,
+      endDate: dates.last,
+      existingOverrides: state.overrides,
+    );
+    if (overlap == null) return null;
+
+    return const ValidationFailure(
+      field: VacationOverrideValidator.field,
+      code: VacationOverrideValidator.overlapsExistingCode,
+    );
+  }
 
   void _setDayRanges(Weekday day, List<TimeRange> ranges) {
     if (state.useSameHoursForAllDays) {

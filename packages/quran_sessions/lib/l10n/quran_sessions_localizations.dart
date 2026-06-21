@@ -845,6 +845,24 @@ abstract class QuranSessionsLocalizations {
   /// **'Delete slot'**
   String get deleteSlot;
 
+  /// No description provided for @deleteSlotConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this slot?'**
+  String get deleteSlotConfirmTitle;
+
+  /// No description provided for @deleteSlotConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Students will no longer be able to book this time. You can restore it later from working hours.'**
+  String get deleteSlotConfirmMessage;
+
+  /// No description provided for @deleteSlotConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove slot'**
+  String get deleteSlotConfirm;
+
   /// No description provided for @addNewSlot.
   ///
   /// In en, this message translates to:
@@ -953,6 +971,42 @@ abstract class QuranSessionsLocalizations {
   /// **'Schedule saved'**
   String get availabilitySavedToast;
 
+  /// No description provided for @availabilityOverrideRemovedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Date override removed'**
+  String get availabilityOverrideRemovedToast;
+
+  /// No description provided for @availabilityOverrideAddedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Date override added'**
+  String get availabilityOverrideAddedToast;
+
+  /// No description provided for @availabilityDeleteVacationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete vacation?'**
+  String get availabilityDeleteVacationTitle;
+
+  /// No description provided for @availabilityDeleteVacationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'These dates will become available for students to book again.'**
+  String get availabilityDeleteVacationMessage;
+
+  /// No description provided for @availabilityDeleteVacationConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete vacation'**
+  String get availabilityDeleteVacationConfirm;
+
+  /// No description provided for @availabilityVacationOverlapError.
+  ///
+  /// In en, this message translates to:
+  /// **'These dates overlap an existing vacation. Adjust the range or remove the existing vacation first.'**
+  String get availabilityVacationOverlapError;
+
   /// No description provided for @availabilityUnsavedChanges.
   ///
   /// In en, this message translates to:
@@ -995,6 +1049,12 @@ abstract class QuranSessionsLocalizations {
   /// **'This range overlaps another'**
   String get availabilityRangeOverlap;
 
+  /// No description provided for @availabilityNoOpenDaysError.
+  ///
+  /// In en, this message translates to:
+  /// **'Select at least one day with working hours'**
+  String get availabilityNoOpenDaysError;
+
   /// No description provided for @availabilityOverridesEmpty.
   ///
   /// In en, this message translates to:
@@ -1030,6 +1090,24 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'Date'**
   String get availabilityOverrideDate;
+
+  /// No description provided for @availabilityOverrideStartDate.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get availabilityOverrideStartDate;
+
+  /// No description provided for @availabilityOverrideEndDate.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get availabilityOverrideEndDate;
+
+  /// No description provided for @availabilityOverrideEndDateInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'End date must be on or after start date'**
+  String get availabilityOverrideEndDateInvalid;
 
   /// No description provided for @availabilitySetupHeadline.
   ///

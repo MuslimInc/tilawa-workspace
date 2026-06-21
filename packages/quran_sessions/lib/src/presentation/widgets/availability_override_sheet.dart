@@ -5,40 +5,70 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../domain/entities/availability_override.dart';
 import '../../domain/entities/local_time.dart';
 import '../../domain/entities/time_range.dart';
+import '../../domain/services/vacation_override_validator.dart';
 import 'time_range_editor_sheet.dart';
 
 /// Opens the dated-override editor (vacation / busy / custom hours) and returns
-/// the configured [AvailabilityOverride], or `null` if dismissed.
-Future<AvailabilityOverride?> showOverrideEditorSheet(BuildContext context) {
-  return showTilawaModalBottomSheet<AvailabilityOverride>(
+/// one [AvailabilityOverride] per calendar day in the chosen range, or `null`
+/// if dismissed.
+Future<List<AvailabilityOverride>?> showOverrideEditorSheet(
+  BuildContext context, {
+  required List<AvailabilityOverride> existingOverrides,
+}) {
+  return showTilawaModalBottomSheet<List<AvailabilityOverride>>(
     context: context,
     backgroundColor: Theme.of(context).colorScheme.surface,
     shape: TilawaBottomSheetScaffold.modalShape(context),
-    builder: (_) => const _OverrideEditorSheet(),
+    builder: (_) => _OverrideEditorSheet(
+      existingOverrides: existingOverrides,
+    ),
   );
 }
 
 class _OverrideEditorSheet extends StatefulWidget {
-  const _OverrideEditorSheet();
+  const _OverrideEditorSheet({required this.existingOverrides});
+
+  final List<AvailabilityOverride> existingOverrides;
 
   @override
   State<_OverrideEditorSheet> createState() => _OverrideEditorSheetState();
 }
 
 class _OverrideEditorSheetState extends State<_OverrideEditorSheet> {
-  DateTime _date = DateTime.now().add(const Duration(days: 1));
+  static const _validator = VacationOverrideValidator();
+
+  DateTime _startDate = DateTime.now().add(const Duration(days: 1));
+  DateTime _endDate = DateTime.now().add(const Duration(days: 1));
   OverrideType _type = OverrideType.unavailable;
   final List<TimeRange> _ranges = [
     const TimeRange(start: LocalTime(9, 0), end: LocalTime(17, 0)),
   ];
 
-  bool get _canSave => _type == OverrideType.unavailable || _ranges.isNotEmpty;
+  bool get _hasValidDateRange => _validator.hasValidDateRange(
+    startDate: _startDate,
+    endDate: _endDate,
+  );
+
+  bool get _hasVacationOverlap =>
+      _type == OverrideType.unavailable &&
+      _validator.findFirstOverlappingVacationDay(
+            startDate: _startDate,
+            endDate: _endDate,
+            existingOverrides: widget.existingOverrides,
+          ) !=
+          null;
+
+  bool get _canSave =>
+      _hasValidDateRange &&
+      !_hasVacationOverlap &&
+      (_type == OverrideType.unavailable || _ranges.isNotEmpty);
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
     final tokens = Theme.of(context).tokens;
     final material = MaterialLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
 
     return ConstrainedBox(
       constraints: BoxConstraints(
@@ -59,33 +89,35 @@ class _OverrideEditorSheetState extends State<_OverrideEditorSheet> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    TilawaReadOnlyField(
-                      prefixIcon: Icons.calendar_today_outlined,
-                      semanticLabel: l10n.availabilityOverrideDate,
-                      onTap: _pickDate,
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              l10n.availabilityOverrideDate,
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
-                                  ),
-                            ),
-                          ),
-                          Text(
-                            material.formatMediumDate(_date),
-                            style: Theme.of(context).textTheme.bodyLarge
-                                ?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                          ),
-                        ],
-                      ),
+                    _DateField(
+                      label: l10n.availabilityOverrideStartDate,
+                      formattedDate: material.formatMediumDate(_startDate),
+                      onTap: () => _pickDate(isStart: true),
                     ),
+                    SizedBox(height: tokens.spaceMedium),
+                    _DateField(
+                      label: l10n.availabilityOverrideEndDate,
+                      formattedDate: material.formatMediumDate(_endDate),
+                      onTap: () => _pickDate(isStart: false),
+                    ),
+                    if (!_hasValidDateRange) ...[
+                      SizedBox(height: tokens.spaceSmall),
+                      Text(
+                        l10n.availabilityOverrideEndDateInvalid,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: scheme.error,
+                        ),
+                      ),
+                    ],
+                    if (_hasVacationOverlap) ...[
+                      SizedBox(height: tokens.spaceSmall),
+                      Text(
+                        l10n.availabilityVacationOverlapError,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: scheme.error,
+                        ),
+                      ),
+                    ],
                     SizedBox(height: tokens.spaceMedium),
                     Row(
                       children: [
@@ -137,15 +169,25 @@ class _OverrideEditorSheetState extends State<_OverrideEditorSheet> {
     );
   }
 
-  Future<void> _pickDate() async {
+  Future<void> _pickDate({required bool isStart}) async {
     final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
     final picked = await showDatePicker(
       context: context,
-      initialDate: _date,
-      firstDate: DateTime(now.year, now.month, now.day),
-      lastDate: now.add(const Duration(days: 365)),
+      initialDate: isStart ? _startDate : _endDate,
+      firstDate: today,
+      lastDate: today.add(const Duration(days: 365)),
     );
-    if (picked != null) setState(() => _date = picked);
+    if (picked == null) return;
+
+    setState(() {
+      if (isStart) {
+        _startDate = picked;
+        if (_endDate.isBefore(_startDate)) _endDate = _startDate;
+      } else {
+        _endDate = picked;
+      }
+    });
   }
 
   Future<void> _addRange() async {
@@ -167,13 +209,71 @@ class _OverrideEditorSheetState extends State<_OverrideEditorSheet> {
   }
 
   void _save() {
-    Navigator.of(context).pop(
-      AvailabilityOverride(
-        date: _date,
-        type: _type,
-        intervals: _type == OverrideType.custom
-            ? List.unmodifiable(_ranges)
-            : const [],
+    if (!_canSave) return;
+
+    final overrides = _type == OverrideType.unavailable
+        ? _validator.expandVacationRange(
+            startDate: _startDate,
+            endDate: _endDate,
+          )
+        : _expandCustomOverrides();
+
+    Navigator.of(context).pop(overrides);
+  }
+
+  List<AvailabilityOverride> _expandCustomOverrides() {
+    final overrides = <AvailabilityOverride>[];
+    var day = DateTime(_startDate.year, _startDate.month, _startDate.day);
+    final last = DateTime(_endDate.year, _endDate.month, _endDate.day);
+
+    while (!day.isAfter(last)) {
+      overrides.add(
+        AvailabilityOverride(
+          date: day,
+          type: OverrideType.custom,
+          intervals: List.unmodifiable(_ranges),
+        ),
+      );
+      day = day.add(const Duration(days: 1));
+    }
+    return overrides;
+  }
+}
+
+class _DateField extends StatelessWidget {
+  const _DateField({
+    required this.label,
+    required this.formattedDate,
+    required this.onTap,
+  });
+
+  final String label;
+  final String formattedDate;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return TilawaReadOnlyField(
+      prefixIcon: Icons.calendar_today_outlined,
+      semanticLabel: label,
+      onTap: onTap,
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          Text(
+            formattedDate,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }

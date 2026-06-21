@@ -69,7 +69,11 @@ class QuranSessionsMvpModule {
       () => GetTeacherProfileUseCase(sl<TeacherRepository>()),
     );
     sl.registerLazySingleton(
-      () => GetTeacherAvailabilityUseCase(sl<TeacherRepository>()),
+      () => GetTeacherAvailabilityUseCase(
+        scheduleRepository: sl<ScheduleRepository>(),
+        sessionRepository: sl<SessionRepository>(),
+        slotGenerator: const SlotGenerator(),
+      ),
     );
     sl.registerLazySingleton(
       () => GetStudentSessionsUseCase(sl<SessionRepository>()),
@@ -78,7 +82,10 @@ class QuranSessionsMvpModule {
       () => GetTeacherSessionsUseCase(sl<SessionRepository>()),
     );
     sl.registerLazySingleton(
-      () => CreateBookingUseCase(sl<BookingRepository>()),
+      () => CreateBookingUseCase(
+        sl<BookingRepository>(),
+        sl<GetTeacherAvailabilityUseCase>(),
+      ),
     );
     sl.registerLazySingleton(
       () => CancelBookingUseCase(sl<BookingRepository>()),
@@ -169,6 +176,19 @@ class QuranSessionsMvpModule {
         marketConfigRepository: sl<MarketConfigRepository>(),
       ),
     );
+    sl.registerLazySingleton(() => const WeeklyScheduleValidator());
+    sl.registerLazySingleton(
+      () => GetWeeklyScheduleUseCase(sl<ScheduleRepository>()),
+    );
+    sl.registerLazySingleton(
+      () => SaveWeeklyScheduleUseCase(
+        sl<ScheduleRepository>(),
+        sl<WeeklyScheduleValidator>(),
+      ),
+    );
+    sl.registerLazySingleton(
+      () => BlockGeneratedSlotUseCase(sl<ScheduleRepository>()),
+    );
   }
 
   /// Registers BLoC factories — new instance per navigation.
@@ -208,11 +228,16 @@ class QuranSessionsMvpModule {
       () => TeacherDashboardBloc(
         getTeacherSessions: sl<GetTeacherSessionsUseCase>(),
         getAvailability: sl<GetTeacherAvailabilityUseCase>(),
+        blockGeneratedSlot: sl<BlockGeneratedSlotUseCase>(),
         availabilityProvider: sl<AvailabilityProvider>(),
       ),
     );
     sl.registerFactory(
-      () => AvailabilityCubit(repository: sl<ScheduleRepository>()),
+      () => AvailabilityCubit(
+        getSchedule: sl<GetWeeklyScheduleUseCase>(),
+        saveSchedule: sl<SaveWeeklyScheduleUseCase>(),
+        repository: sl<ScheduleRepository>(),
+      ),
     );
     sl.registerFactory(
       () => ProfileCompletionBloc(

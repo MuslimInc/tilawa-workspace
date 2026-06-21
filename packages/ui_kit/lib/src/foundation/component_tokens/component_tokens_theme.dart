@@ -37,6 +37,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     required this.homeDashboardCard,
     required this.capabilityActionCard,
     required this.experimentalBadge,
+    required this.cupertinoWheelPicker,
   });
 
   final TilawaSectionTitleTokens sectionTitle;
@@ -68,6 +69,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
   final TilawaHomeDashboardCardTokens homeDashboardCard;
   final TilawaCapabilityActionCardTokens capabilityActionCard;
   final TilawaExperimentalBadgeTokens experimentalBadge;
+  final TilawaCupertinoWheelPickerTokens cupertinoWheelPicker;
 
   /// Creates light theme component tokens.
   factory TilawaComponentTokens.light({ColorScheme? colorScheme}) =>
@@ -143,6 +145,9 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       experimentalBadge: TilawaExperimentalBadgeTokens.fromColorScheme(
         effectiveColorScheme,
       ),
+      cupertinoWheelPicker: TilawaCupertinoWheelPickerTokens.fromColorScheme(
+        effectiveColorScheme,
+      ),
     );
   }
 
@@ -177,6 +182,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     TilawaHomeDashboardCardTokens? homeDashboardCard,
     TilawaCapabilityActionCardTokens? capabilityActionCard,
     TilawaExperimentalBadgeTokens? experimentalBadge,
+    TilawaCupertinoWheelPickerTokens? cupertinoWheelPicker,
   }) {
     return TilawaComponentTokens(
       sectionTitle: sectionTitle ?? this.sectionTitle,
@@ -208,6 +214,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       homeDashboardCard: homeDashboardCard ?? this.homeDashboardCard,
       capabilityActionCard: capabilityActionCard ?? this.capabilityActionCard,
       experimentalBadge: experimentalBadge ?? this.experimentalBadge,
+      cupertinoWheelPicker: cupertinoWheelPicker ?? this.cupertinoWheelPicker,
     );
   }
 
@@ -325,6 +332,11 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       experimentalBadge: TilawaExperimentalBadgeTokens.lerp(
         experimentalBadge,
         other.experimentalBadge,
+        t,
+      ),
+      cupertinoWheelPicker: TilawaCupertinoWheelPickerTokens.lerp(
+        cupertinoWheelPicker,
+        other.cupertinoWheelPicker,
         t,
       ),
     );

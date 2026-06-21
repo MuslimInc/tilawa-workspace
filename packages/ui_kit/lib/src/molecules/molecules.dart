@@ -21,6 +21,8 @@ export 'tilawa_catalog_settings.dart';
 export 'tilawa_section_header.dart';
 export 'tilawa_segmented_control.dart';
 export 'tilawa_selection_tile.dart';
+export 'tilawa_cupertino_wheel_picker.dart';
+export 'tilawa_picker_segment_card.dart';
 export 'tilawa_settings_tile.dart';
 export 'tilawa_status_chip.dart';
 export 'tilawa_experimental_badge.dart';

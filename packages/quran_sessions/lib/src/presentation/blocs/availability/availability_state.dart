@@ -20,8 +20,11 @@ class AvailabilityState extends Equatable {
     this.overrides = const [],
     this.useSameHoursForAllDays = false,
     this.isSaving = false,
+    this.isOverridesBusy = false,
     this.failure,
     this.saveTick = 0,
+    this.overrideAddTick = 0,
+    this.overrideRemoveTick = 0,
   });
 
   factory AvailabilityState.loading(String teacherId) => AvailabilityState(
@@ -39,11 +42,20 @@ class AvailabilityState extends Equatable {
   final bool useSameHoursForAllDays;
   final bool isSaving;
 
+  /// True while an override add/remove request is in flight.
+  final bool isOverridesBusy;
+
   /// Set when a load or save fails; the screen shows it then it is cleared.
   final QuranSessionsFailure? failure;
 
   /// Increments on each successful save so the screen can fire a success toast.
   final int saveTick;
+
+  /// Increments on each successful override add for a success toast.
+  final int overrideAddTick;
+
+  /// Increments on each successful override removal for a success toast.
+  final int overrideRemoveTick;
 
   /// True when [draft] differs from [baseline] — there are unsaved edits.
   bool get isDirty => draft != baseline;
@@ -56,9 +68,12 @@ class AvailabilityState extends Equatable {
     List<AvailabilityOverride>? overrides,
     bool? useSameHoursForAllDays,
     bool? isSaving,
+    bool? isOverridesBusy,
     QuranSessionsFailure? failure,
     bool clearFailure = false,
     int? saveTick,
+    int? overrideAddTick,
+    int? overrideRemoveTick,
   }) => AvailabilityState(
     status: status ?? this.status,
     teacherId: teacherId ?? this.teacherId,
@@ -68,8 +83,11 @@ class AvailabilityState extends Equatable {
     useSameHoursForAllDays:
         useSameHoursForAllDays ?? this.useSameHoursForAllDays,
     isSaving: isSaving ?? this.isSaving,
+    isOverridesBusy: isOverridesBusy ?? this.isOverridesBusy,
     failure: clearFailure ? null : (failure ?? this.failure),
     saveTick: saveTick ?? this.saveTick,
+    overrideAddTick: overrideAddTick ?? this.overrideAddTick,
+    overrideRemoveTick: overrideRemoveTick ?? this.overrideRemoveTick,
   );
 
   @override
@@ -81,7 +99,10 @@ class AvailabilityState extends Equatable {
     overrides,
     useSameHoursForAllDays,
     isSaving,
+    isOverridesBusy,
     failure,
     saveTick,
+    overrideAddTick,
+    overrideRemoveTick,
   ];
 }

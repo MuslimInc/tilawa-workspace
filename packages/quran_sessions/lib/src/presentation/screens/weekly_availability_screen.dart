@@ -5,13 +5,15 @@ import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/availability_override.dart';
+import '../../domain/entities/availability_override_group.dart';
 import '../../domain/entities/slot_duration.dart';
-import '../../domain/entities/time_range.dart';
 import '../../domain/entities/weekday.dart';
 import '../blocs/availability/availability_cubit.dart';
 import '../blocs/availability/availability_state.dart';
 import '../failure_ui/quran_sessions_failure_ui.dart';
+import '../widgets/availability_day_hours_row.dart';
 import '../widgets/availability_override_sheet.dart';
+import '../widgets/availability_vacation_dialogs.dart';
 import '../widgets/time_range_editor_sheet.dart';
 
 /// MENA-first curated IANA zones offered in the timezone picker.
@@ -57,6 +59,10 @@ class _WeeklyAvailabilityScreenState extends State<WeeklyAvailabilityScreen>
     vsync: this,
   )..addListener(_onTabChanged);
 
+  int _heardSaveTick = 0;
+  int _heardOverrideAddTick = 0;
+  int _heardOverrideRemoveTick = 0;
+
   @override
   void initState() {
     super.initState();
@@ -92,12 +98,34 @@ class _WeeklyAvailabilityScreenState extends State<WeeklyAvailabilityScreen>
       ),
       body: BlocConsumer<AvailabilityCubit, AvailabilityState>(
         listenWhen: (prev, curr) =>
-            prev.saveTick != curr.saveTick || prev.failure != curr.failure,
+            prev.saveTick != curr.saveTick ||
+            prev.overrideAddTick != curr.overrideAddTick ||
+            prev.overrideRemoveTick != curr.overrideRemoveTick ||
+            prev.failure != curr.failure,
         listener: (context, state) {
-          if (state.saveTick > 0 && state.failure == null) {
+          if (state.saveTick > _heardSaveTick && state.failure == null) {
+            _heardSaveTick = state.saveTick;
             TilawaFeedback.showToast(
               context,
               message: l10n.availabilitySavedToast,
+              variant: TilawaFeedbackVariant.success,
+            );
+          }
+          if (state.overrideAddTick > _heardOverrideAddTick &&
+              state.failure == null) {
+            _heardOverrideAddTick = state.overrideAddTick;
+            TilawaFeedback.showToast(
+              context,
+              message: l10n.availabilityOverrideAddedToast,
+              variant: TilawaFeedbackVariant.success,
+            );
+          }
+          if (state.overrideRemoveTick > _heardOverrideRemoveTick &&
+              state.failure == null) {
+            _heardOverrideRemoveTick = state.overrideRemoveTick;
+            TilawaFeedback.showToast(
+              context,
+              message: l10n.availabilityOverrideRemovedToast,
               variant: TilawaFeedbackVariant.success,
             );
           }
@@ -185,7 +213,7 @@ class _WeeklyAvailabilityScreenState extends State<WeeklyAvailabilityScreen>
                 child: TilawaButton(
                   text: l10n.availabilitySave,
                   isLoading: state.isSaving,
-                  onPressed: state.isSaving
+                  onPressed: state.isSaving || !state.isDirty
                       ? null
                       : () => context.read<AvailabilityCubit>().save(),
                 ),
@@ -284,17 +312,26 @@ class _HoursTab extends StatelessWidget {
             ),
           )
         else if (state.useSameHoursForAllDays)
-          _DayHoursRow(
+          AvailabilityDayHoursRow(
             label: l10n.availabilityHoursRow,
             ranges: draft.rangesFor(openDays.first),
-            day: openDays.first,
+            onAddRange: () => _addRange(context, openDays.first),
+            onEditRange: (index) => _editRange(context, openDays.first, index),
+            onRemoveRange: (index) =>
+                context.read<AvailabilityCubit>().removeRange(
+                  openDays.first,
+                  index,
+                ),
           )
         else
           for (final day in openDays) ...[
-            _DayHoursRow(
+            AvailabilityDayHoursRow(
               label: _weekdayLabel(l10n, day),
               ranges: draft.rangesFor(day),
-              day: day,
+              onAddRange: () => _addRange(context, day),
+              onEditRange: (index) => _editRange(context, day, index),
+              onRemoveRange: (index) =>
+                  context.read<AvailabilityCubit>().removeRange(day, index),
             ),
             SizedBox(height: tokens.spaceSmall),
           ],
@@ -304,24 +341,64 @@ class _HoursTab extends StatelessWidget {
 
   Future<void> _pickTimezone(BuildContext context) async {
     final cubit = context.read<AvailabilityCubit>();
-    final selected = await showModalBottomSheet<String>(
+    final scheme = Theme.of(context).colorScheme;
+    final selected = await showTilawaModalBottomSheet<String>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => _TimezonePickerSheet(current: state.draft.timezone),
+      backgroundColor: scheme.surface,
+      shape: TilawaBottomSheetScaffold.modalShape(context),
+      builder: (sheetContext) {
+        final maxHeight = MediaQuery.sizeOf(sheetContext).height * 0.75;
+        return ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: maxHeight),
+          child: _TimezonePickerSheet(current: state.draft.timezone),
+        );
+      },
     );
     if (selected != null) cubit.setTimezone(selected);
   }
 
   Future<void> _pickDuration(BuildContext context) async {
     final cubit = context.read<AvailabilityCubit>();
-    final selected = await showModalBottomSheet<SlotDuration>(
+    final scheme = Theme.of(context).colorScheme;
+    final selected = await showTilawaModalBottomSheet<SlotDuration>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => _DurationPickerSheet(current: state.draft.slotDuration),
+      backgroundColor: scheme.surface,
+      shape: TilawaBottomSheetScaffold.modalShape(context),
+      builder: (sheetContext) {
+        final maxHeight = MediaQuery.sizeOf(sheetContext).height * 0.75;
+        return ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: maxHeight),
+          child: _DurationPickerSheet(current: state.draft.slotDuration),
+        );
+      },
     );
     if (selected != null) cubit.setDuration(selected);
+  }
+
+  Future<void> _addRange(BuildContext context, Weekday day) async {
+    final cubit = context.read<AvailabilityCubit>();
+    final ranges = state.draft.rangesFor(day);
+    final range = await showTimeRangeEditorSheet(context, existing: ranges);
+    if (range != null) cubit.addRange(day, range);
+  }
+
+  Future<void> _editRange(
+    BuildContext context,
+    Weekday day,
+    int index,
+  ) async {
+    final cubit = context.read<AvailabilityCubit>();
+    final ranges = state.draft.rangesFor(day);
+    final others = [
+      for (var i = 0; i < ranges.length; i++)
+        if (i != index) ranges[i],
+    ];
+    final range = await showTimeRangeEditorSheet(
+      context,
+      initial: ranges[index],
+      existing: others,
+    );
+    if (range != null) cubit.updateRange(day, index, range);
   }
 }
 
@@ -440,154 +517,7 @@ class _PickerRow extends StatelessWidget {
   }
 }
 
-// ── Day hours row ─────────────────────────────────────────────────────────────
-
-class _DayHoursRow extends StatelessWidget {
-  const _DayHoursRow({
-    required this.label,
-    required this.ranges,
-    required this.day,
-  });
-
-  final String label;
-  final List<TimeRange> ranges;
-  final Weekday day;
-
-  @override
-  Widget build(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
-    final cubit = context.read<AvailabilityCubit>();
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: tokens.spaceHuge * 1.6,
-          child: Padding(
-            padding: EdgeInsets.only(top: tokens.spaceSmall),
-            child: Text(
-              label,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
-            ),
-          ),
-        ),
-        Expanded(
-          child: Wrap(
-            spacing: tokens.spaceSmall,
-            runSpacing: tokens.spaceSmall,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              for (var i = 0; i < ranges.length; i++)
-                _RangePill(
-                  range: ranges[i],
-                  onTap: () => _editRange(context, i),
-                  onRemove: () => cubit.removeRange(day, i),
-                ),
-              _AddRangeButton(onTap: () => _addRange(context)),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Future<void> _addRange(BuildContext context) async {
-    final cubit = context.read<AvailabilityCubit>();
-    final range = await showTimeRangeEditorSheet(context, existing: ranges);
-    if (range != null) cubit.addRange(day, range);
-  }
-
-  Future<void> _editRange(BuildContext context, int index) async {
-    final cubit = context.read<AvailabilityCubit>();
-    final others = [
-      for (var i = 0; i < ranges.length; i++)
-        if (i != index) ranges[i],
-    ];
-    final range = await showTimeRangeEditorSheet(
-      context,
-      initial: ranges[index],
-      existing: others,
-    );
-    if (range != null) cubit.updateRange(day, index, range);
-  }
-}
-
-class _RangePill extends StatelessWidget {
-  const _RangePill({
-    required this.range,
-    required this.onTap,
-    required this.onRemove,
-  });
-
-  final TimeRange range;
-  final VoidCallback onTap;
-  final VoidCallback onRemove;
-
-  @override
-  Widget build(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
-    final scheme = Theme.of(context).colorScheme;
-    final material = MaterialLocalizations.of(context);
-    final use24 = MediaQuery.of(context).alwaysUse24HourFormat;
-    String fmt(int h, int m) => material.formatTimeOfDay(
-      TimeOfDay(hour: h % 24, minute: m),
-      alwaysUse24HourFormat: use24,
-    );
-
-    return Material(
-      color: scheme.surfaceContainerHighest,
-      borderRadius: BorderRadius.circular(tokens.radiusMedium),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(tokens.radiusMedium),
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: tokens.spaceMedium,
-            vertical: tokens.spaceSmall,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '${fmt(range.start.hour, range.start.minute)} '
-                '- ${fmt(range.end.hour, range.end.minute)}',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              SizedBox(width: tokens.spaceSmall),
-              InkWell(
-                onTap: onRemove,
-                customBorder: const CircleBorder(),
-                child: Icon(Icons.close, size: tokens.iconSizeSmall),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _AddRangeButton extends StatelessWidget {
-  const _AddRangeButton({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
-    final scheme = Theme.of(context).colorScheme;
-    return IconButton(
-      onPressed: onTap,
-      tooltip: context.quranSessionsL10n.availabilityAddRange,
-      icon: Icon(Icons.add_circle_outline, color: scheme.primary),
-      iconSize: tokens.iconSizeLarge,
-    );
-  }
-}
-
-// ── Overrides tab ─────────────────────────────────────────────────────────────
+// ── Day chips (Sat → Fri) ─────────────────────────────────────────────────────
 
 class _OverridesTab extends StatelessWidget {
   const _OverridesTab({required this.state});
@@ -598,8 +528,9 @@ class _OverridesTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
     final tokens = Theme.of(context).tokens;
-    final cubit = context.read<AvailabilityCubit>();
     final material = MaterialLocalizations.of(context);
+
+    final groups = groupAvailabilityOverrides(state.overrides);
 
     return Column(
       children: [
@@ -614,29 +545,40 @@ class _OverridesTab extends StatelessWidget {
                 )
               : ListView.separated(
                   padding: EdgeInsets.all(tokens.spaceLarge),
-                  itemCount: state.overrides.length,
+                  itemCount: groups.length,
                   separatorBuilder: (_, _) =>
                       SizedBox(height: tokens.spaceSmall),
                   itemBuilder: (context, index) {
-                    final override = state.overrides[index];
+                    final group = groups[index];
+                    final title = group.isSingleDay
+                        ? material.formatMediumDate(group.start)
+                        : '${material.formatMediumDate(group.start)} – '
+                              '${material.formatMediumDate(group.end)}';
                     return _OverrideTile(
-                      title: material.formatMediumDate(override.date),
-                      subtitle: override.type == OverrideType.unavailable
+                      title: title,
+                      subtitle: group.type == OverrideType.unavailable
                           ? l10n.availabilityOverrideUnavailable
                           : l10n.availabilityOverrideCustom,
-                      onRemove: () => cubit.removeOverride(override.dateKey),
+                      isBusy: state.isOverridesBusy,
+                      onRemove: () => _removeOverrideGroup(
+                        context,
+                        group: group,
+                      ),
                     );
                   },
                 ),
         ),
-        Padding(
-          padding: EdgeInsets.all(tokens.spaceLarge),
+        TilawaBottomActionArea(
+          showTopBorder: false,
           child: TilawaButton(
             text: l10n.availabilityAddOverride,
             isFullWidth: true,
             variant: TilawaButtonVariant.secondary,
             leadingIcon: const Icon(Icons.add),
-            onPressed: () => _addOverride(context),
+            isLoading: state.isOverridesBusy,
+            onPressed: state.isOverridesBusy
+                ? null
+                : () => _addOverride(context),
           ),
         ),
       ],
@@ -645,8 +587,23 @@ class _OverridesTab extends StatelessWidget {
 
   Future<void> _addOverride(BuildContext context) async {
     final cubit = context.read<AvailabilityCubit>();
-    final override = await showOverrideEditorSheet(context);
-    if (override != null) cubit.addOverride(override);
+    final overrides = await showOverrideEditorSheet(
+      context,
+      existingOverrides: state.overrides,
+    );
+    if (overrides != null) await cubit.addOverrides(overrides);
+  }
+
+  Future<void> _removeOverrideGroup(
+    BuildContext context, {
+    required AvailabilityOverrideGroup group,
+  }) async {
+    if (group.type == OverrideType.unavailable) {
+      final confirmed = await showDeleteVacationConfirmDialog(context);
+      if (!confirmed || !context.mounted) return;
+    }
+
+    await context.read<AvailabilityCubit>().removeOverrides(group.dateKeys);
   }
 }
 
@@ -655,11 +612,13 @@ class _OverrideTile extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.onRemove,
+    this.isBusy = false,
   });
 
   final String title;
   final String subtitle;
   final VoidCallback onRemove;
+  final bool isBusy;
 
   @override
   Widget build(BuildContext context) {
@@ -681,8 +640,17 @@ class _OverrideTile extends StatelessWidget {
             ),
           ),
           IconButton(
-            onPressed: onRemove,
-            icon: const Icon(Icons.delete_outline),
+            onPressed: isBusy ? null : onRemove,
+            icon: isBusy
+                ? SizedBox(
+                    width: Theme.of(context).tokens.iconSizeSmall,
+                    height: Theme.of(context).tokens.iconSizeSmall,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  )
+                : const Icon(Icons.delete_outline),
             tooltip: context.quranSessionsL10n.availabilityRemoveRange,
           ),
         ],
@@ -709,14 +677,21 @@ class _TimezonePickerSheet extends StatelessWidget {
         title: l10n.availabilityTimezonePickerTitle,
       ),
       children: [
-        for (final tz in options)
-          ListTile(
-            title: Text(tz),
-            trailing: tz == current
-                ? Icon(Icons.check, color: scheme.primary)
-                : null,
-            onTap: () => Navigator.of(context).pop(tz),
+        Expanded(
+          child: ListView.builder(
+            itemCount: options.length,
+            itemBuilder: (context, index) {
+              final tz = options[index];
+              return ListTile(
+                title: Text(tz),
+                trailing: tz == current
+                    ? Icon(Icons.check, color: scheme.primary)
+                    : null,
+                onTap: () => Navigator.of(context).pop(tz),
+              );
+            },
           ),
+        ),
       ],
     );
   }
@@ -737,14 +712,21 @@ class _DurationPickerSheet extends StatelessWidget {
     return TilawaBottomSheetScaffold(
       topBar: TilawaBottomSheetTitleRow(title: l10n.availabilitySessionLength),
       children: [
-        for (final duration in SlotDuration.presets)
-          ListTile(
-            title: Text(l10n.availabilityDurationMinutes(duration.minutes)),
-            trailing: duration == current
-                ? Icon(Icons.check, color: scheme.primary)
-                : null,
-            onTap: () => Navigator.of(context).pop(duration),
+        Expanded(
+          child: ListView.builder(
+            itemCount: SlotDuration.presets.length,
+            itemBuilder: (context, index) {
+              final duration = SlotDuration.presets[index];
+              return ListTile(
+                title: Text(l10n.availabilityDurationMinutes(duration.minutes)),
+                trailing: duration == current
+                    ? Icon(Icons.check, color: scheme.primary)
+                    : null,
+                onTap: () => Navigator.of(context).pop(duration),
+              );
+            },
           ),
+        ),
       ],
     );
   }

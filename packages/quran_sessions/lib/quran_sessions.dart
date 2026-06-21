@@ -72,7 +72,10 @@ export 'src/domain/entities/weekday.dart';
 export 'src/domain/entities/weekly_schedule.dart';
 export 'src/domain/entities/user_profile.dart';
 // ── Domain: services ──────────────────────────────────────────────────────────
+export 'src/domain/services/booked_slot_starts.dart';
+export 'src/domain/services/day_interval_editor.dart';
 export 'src/domain/services/slot_generator.dart';
+export 'src/domain/services/weekly_schedule_validator.dart';
 // ── Domain: failure types ─────────────────────────────────────────────────────
 export 'src/domain/failures/quran_sessions_failure.dart';
 // ── Domain: repository interfaces ────────────────────────────────────────────
@@ -90,6 +93,7 @@ export 'src/domain/repositories/user_profile_repository.dart';
 // ── Domain: use cases ─────────────────────────────────────────────────────────
 export 'src/domain/usecases/approve_teacher_application_usecase.dart';
 export 'src/domain/usecases/block_account_usecase.dart';
+export 'src/domain/usecases/block_generated_slot_usecase.dart';
 export 'src/domain/usecases/cancel_booking_usecase.dart';
 export 'src/domain/usecases/complete_student_profile_usecase.dart';
 export 'src/domain/usecases/complete_teacher_profile_usecase.dart';
@@ -100,6 +104,7 @@ export 'src/domain/usecases/get_student_sessions_usecase.dart';
 export 'src/domain/usecases/get_current_user_teacher_capability_usecase.dart';
 export 'src/domain/usecases/get_teacher_application_status_usecase.dart';
 export 'src/domain/usecases/get_teacher_availability_usecase.dart';
+export 'src/domain/usecases/get_weekly_schedule_usecase.dart';
 export 'src/domain/usecases/get_teacher_profile_usecase.dart';
 export 'src/domain/usecases/get_teacher_sessions_usecase.dart';
 export 'src/domain/usecases/get_teachers_usecase.dart';
@@ -108,6 +113,7 @@ export 'src/domain/usecases/reject_teacher_application_usecase.dart';
 export 'src/domain/usecases/revoke_teacher_profile_usecase.dart';
 export 'src/domain/usecases/save_teacher_application_draft_usecase.dart';
 export 'src/domain/usecases/save_teacher_public_profile_usecase.dart';
+export 'src/domain/usecases/save_weekly_schedule_usecase.dart';
 export 'src/domain/rules/teacher_profile_completeness.dart';
 export 'src/domain/teacher_profile_display_name_resolver.dart';
 export 'src/domain/value_objects/teacher_public_name.dart';
@@ -120,6 +126,7 @@ export 'src/domain/usecases/validate_booking_eligibility_usecase.dart';
 export 'src/presentation/blocs/availability/availability_cubit.dart';
 export 'src/presentation/blocs/availability/availability_state.dart';
 export 'src/presentation/screens/weekly_availability_screen.dart';
+export 'src/presentation/widgets/availability_day_hours_row.dart';
 export 'src/presentation/widgets/availability_override_sheet.dart';
 export 'src/presentation/widgets/time_range_editor_sheet.dart';
 export 'src/presentation/blocs/booking/booking_bloc.dart';
