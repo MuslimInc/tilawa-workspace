@@ -54,6 +54,19 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
   }
 
   @override
+  Future<Either<QuranSessionsFailure, AvailabilityOverride?>> getOverrideByDate(
+    String teacherId,
+    String dateKey,
+  ) async {
+    try {
+      final dto = await _remote.getOverrideByDate(teacherId, dateKey);
+      return Right(dto?.toDomain());
+    } on Exception catch (e) {
+      return Left(mapRemoteException(e));
+    }
+  }
+
+  @override
   Future<Either<QuranSessionsFailure, void>> saveOverride(
     String teacherId,
     AvailabilityOverride override,

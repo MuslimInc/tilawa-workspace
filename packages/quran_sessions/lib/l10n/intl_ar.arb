@@ -195,6 +195,7 @@
     "deleteSlotConfirmTitle": "إزالة هذا الموعد؟",
     "deleteSlotConfirmMessage": "لن يتمكن الطلاب من حجز هذا الوقت. يمكنك استعادته لاحقاً من ساعات العمل.",
     "deleteSlotConfirm": "إزالة الموعد",
+    "deleteSlotSuccess": "تمت إزالة الموعد",
     "addNewSlot": "إضافة موعد جديد",
     "slotDate": "تاريخ الموعد",
     "slotTime": "وقت الموعد",

@@ -15,6 +15,7 @@ void main() {
   late FakeScheduleRepository scheduleRepo;
   late FakeAvailabilityProvider availabilityProvider;
   late BlockGeneratedSlotUseCase blockGeneratedSlot;
+  late SpyGetTeacherAvailabilityUseCase spyGetAvailability;
   late TeacherDashboardBloc bloc;
 
   final fixedNow = DateTime.utc(2026, 1, 9);
@@ -26,13 +27,14 @@ void main() {
     scheduleRepo = FakeScheduleRepository();
     availabilityProvider = FakeAvailabilityProvider();
     blockGeneratedSlot = BlockGeneratedSlotUseCase(scheduleRepo);
+    spyGetAvailability = SpyGetTeacherAvailabilityUseCase(
+      scheduleRepository: scheduleRepo,
+      sessionRepository: sessionRepo,
+      now: () => fixedNow,
+    );
     bloc = TeacherDashboardBloc(
       getTeacherSessions: GetTeacherSessionsUseCase(sessionRepo),
-      getAvailability: buildGetTeacherAvailabilityUseCase(
-        scheduleRepository: scheduleRepo,
-        sessionRepository: sessionRepo,
-        now: () => fixedNow,
-      ),
+      getAvailability: spyGetAvailability,
       blockGeneratedSlot: blockGeneratedSlot,
       availabilityProvider: availabilityProvider,
       cancelSession: buildCancelSessionViaServerUseCase(),
@@ -118,7 +120,7 @@ void main() {
     );
 
     blocTest<TeacherDashboardBloc, TeacherDashboardState>(
-      'AvailabilitySlotRemoved blocks generated slot and refreshes list',
+      'AvailabilitySlotRemoved blocks generated slot without refetch',
       build: () {
         scheduleRepo.schedule = makeWeeklySchedule();
         return bloc;
@@ -159,15 +161,24 @@ void main() {
       ],
       verify: (b) {
         final state = b.state as TeacherDashboardSuccess;
+        check(spyGetAvailability.callCount).equals(0);
         check(scheduleRepo.overrides).length.equals(1);
-        check(state.isUpdatingAvailability).isFalse();
+        check(state.availability).isEmpty();
+        check(state.deletingSlotIds).isEmpty();
+        check(state.slotDeleteSucceeded).isTrue();
         check(state.slotFailure).isNull();
       },
     );
 
     blocTest<TeacherDashboardBloc, TeacherDashboardState>(
       'AvailabilitySlotRemoved removes legacy slot via provider',
-      build: () => bloc,
+      build: () {
+        availabilityProvider.published.addAll([
+          makeSlot(slotId: 'slot_1'),
+          makeSlot(slotId: 'slot_2'),
+        ]);
+        return bloc;
+      },
       seed: () => TeacherDashboardSuccess(
         upcomingSessions: const [],
         availability: [
@@ -189,6 +200,272 @@ void main() {
         final state = b.state as TeacherDashboardSuccess;
         check(state.availability).length.equals(1);
         check(state.availability.first.slotId).equals('slot_2');
+      },
+    );
+
+    blocTest<TeacherDashboardBloc, TeacherDashboardState>(
+      'AvailabilitySlotRemoved on last window day drops slot and updates count',
+      build: () {
+        scheduleRepo.schedule = makeWeeklySchedule();
+        return bloc;
+      },
+      act: (b) async {
+        b.add(const TeacherDashboardLoadRequested(teacherId: 'teacher_1'));
+        await b.stream.firstWhere((s) => s is TeacherDashboardSuccess);
+        final before = b.state as TeacherDashboardSuccess;
+        final countBefore = before.availability.length;
+        final days =
+            before.availability
+                .map((s) {
+                  final local = s.startsAt.toLocal();
+                  return DateTime(local.year, local.month, local.day);
+                })
+                .toSet()
+                .toList()
+              ..sort();
+        final lastDay = days.last;
+        final target = before.availability.firstWhere((s) {
+          final local = s.startsAt.toLocal();
+          return DateTime(local.year, local.month, local.day) == lastDay;
+        });
+        b.add(
+          AvailabilitySlotRemoved(teacherId: 'teacher_1', slot: target),
+        );
+        await b.stream.firstWhere((s) {
+          if (s is! TeacherDashboardSuccess) return false;
+          return s.deletingSlotIds.isEmpty && s.slotDeleteSucceeded;
+        });
+        final after = b.state as TeacherDashboardSuccess;
+        check(after.availability.length).equals(countBefore - 1);
+        check(
+          after.availability.any((s) => s.slotId == target.slotId),
+        ).isFalse();
+      },
+      expect: () => [
+        isA<TeacherDashboardLoading>(),
+        isA<TeacherDashboardSuccess>(),
+        isA<TeacherDashboardSuccess>(),
+        isA<TeacherDashboardSuccess>(),
+      ],
+      verify: (b) {
+        final state = b.state as TeacherDashboardSuccess;
+        check(scheduleRepo.overrides).isNotEmpty();
+        check(state.slotFailure).isNull();
+      },
+    );
+
+    blocTest<TeacherDashboardBloc, TeacherDashboardState>(
+      'AvailabilitySlotRemoved on middle day does not remove other days',
+      build: () {
+        scheduleRepo.schedule = makeWeeklySchedule(
+          rules: {
+            Weekday.saturday: const [
+              TimeRange(start: LocalTime(9, 0), end: LocalTime(12, 0)),
+            ],
+            Weekday.sunday: const [
+              TimeRange(start: LocalTime(9, 0), end: LocalTime(12, 0)),
+            ],
+          },
+        );
+        return bloc;
+      },
+      act: (b) async {
+        b.add(const TeacherDashboardLoadRequested(teacherId: 'teacher_1'));
+        await b.stream.firstWhere((s) => s is TeacherDashboardSuccess);
+        final before = b.state as TeacherDashboardSuccess;
+        final saturdaySlot = before.availability.firstWhere(
+          (s) => s.startsAt.toUtc().weekday == DateTime.saturday,
+        );
+        b.add(
+          AvailabilitySlotRemoved(
+            teacherId: 'teacher_1',
+            slot: saturdaySlot,
+          ),
+        );
+        await b.stream.firstWhere((s) {
+          if (s is! TeacherDashboardSuccess) return false;
+          return s.deletingSlotIds.isEmpty && s.slotDeleteSucceeded;
+        });
+      },
+      expect: () => [
+        isA<TeacherDashboardLoading>(),
+        isA<TeacherDashboardSuccess>(),
+        isA<TeacherDashboardSuccess>(),
+        isA<TeacherDashboardSuccess>(),
+      ],
+      verify: (b) {
+        final after = b.state as TeacherDashboardSuccess;
+        check(
+          after.availability.any(
+            (s) => s.startsAt.toUtc().weekday == DateTime.sunday,
+          ),
+        ).isTrue();
+      },
+    );
+
+    blocTest<TeacherDashboardBloc, TeacherDashboardState>(
+      'AvailabilitySlotRemoved blocks booked legacy slot',
+      build: () {
+        availabilityProvider.published.add(
+          makeSlot(slotId: 'booked_slot', isBooked: true),
+        );
+        return bloc;
+      },
+      seed: () => TeacherDashboardSuccess(
+        upcomingSessions: const [],
+        availability: [makeSlot(slotId: 'booked_slot', isBooked: true)],
+      ),
+      act: (b) => b.add(
+        AvailabilitySlotRemoved(
+          teacherId: 'teacher_1',
+          slot: makeSlot(slotId: 'booked_slot', isBooked: true),
+        ),
+      ),
+      expect: () => [isA<TeacherDashboardSuccess>()],
+      verify: (b) {
+        final state = b.state as TeacherDashboardSuccess;
+        check(state.availability).length.equals(1);
+        check(state.slotFailure).isA<SlotUnavailableFailure>();
+        check(availabilityProvider.withdrawn).isEmpty();
+      },
+    );
+
+    blocTest<TeacherDashboardBloc, TeacherDashboardState>(
+      'AvailabilitySlotRemoved on generated failure keeps slot',
+      build: () {
+        scheduleRepo.schedule = makeWeeklySchedule();
+        scheduleRepo.failWith = const NetworkFailure();
+        return bloc;
+      },
+      seed: () => TeacherDashboardSuccess(
+        upcomingSessions: const [],
+        availability: [
+          TeacherAvailability(
+            slotId: GeneratedSlot.deterministicId(
+              'teacher_1',
+              DateTime.utc(2026, 1, 10, 7, 0),
+            ),
+            teacherId: 'teacher_1',
+            startsAt: DateTime.utc(2026, 1, 10, 7, 0),
+            endsAt: DateTime.utc(2026, 1, 10, 7, 30),
+            isBooked: false,
+          ),
+        ],
+      ),
+      act: (b) => b.add(
+        AvailabilitySlotRemoved(
+          teacherId: 'teacher_1',
+          slot: TeacherAvailability(
+            slotId: GeneratedSlot.deterministicId(
+              'teacher_1',
+              DateTime.utc(2026, 1, 10, 7, 0),
+            ),
+            teacherId: 'teacher_1',
+            startsAt: DateTime.utc(2026, 1, 10, 7, 0),
+            endsAt: DateTime.utc(2026, 1, 10, 7, 30),
+            isBooked: false,
+          ),
+        ),
+      ),
+      expect: () => [
+        isA<TeacherDashboardSuccess>(),
+        isA<TeacherDashboardSuccess>(),
+      ],
+      verify: (b) {
+        final state = b.state as TeacherDashboardSuccess;
+        check(spyGetAvailability.callCount).equals(0);
+        check(state.availability).length.equals(1);
+        check(state.slotFailure).isA<NetworkFailure>();
+        check(state.slotDeleteSucceeded).isFalse();
+      },
+    );
+
+    blocTest<TeacherDashboardBloc, TeacherDashboardState>(
+      'AvailabilitySlotRemoved ignores duplicate delete for same slot',
+      build: () {
+        scheduleRepo.schedule = makeWeeklySchedule();
+        return bloc;
+      },
+      seed: () {
+        final slot = TeacherAvailability(
+          slotId: GeneratedSlot.deterministicId(
+            'teacher_1',
+            DateTime.utc(2026, 1, 10, 7, 0),
+          ),
+          teacherId: 'teacher_1',
+          startsAt: DateTime.utc(2026, 1, 10, 7, 0),
+          endsAt: DateTime.utc(2026, 1, 10, 7, 30),
+          isBooked: false,
+        );
+        return TeacherDashboardSuccess(
+          upcomingSessions: const [],
+          availability: [slot],
+          deletingSlotIds: {slot.slotId},
+        );
+      },
+      act: (b) => b.add(
+        AvailabilitySlotRemoved(
+          teacherId: 'teacher_1',
+          slot: TeacherAvailability(
+            slotId: GeneratedSlot.deterministicId(
+              'teacher_1',
+              DateTime.utc(2026, 1, 10, 7, 0),
+            ),
+            teacherId: 'teacher_1',
+            startsAt: DateTime.utc(2026, 1, 10, 7, 0),
+            endsAt: DateTime.utc(2026, 1, 10, 7, 30),
+            isBooked: false,
+          ),
+        ),
+      ),
+      expect: () => <TeacherDashboardState>[],
+      verify: (_) {
+        check(scheduleRepo.getOverrideByDateCallCount).equals(0);
+      },
+    );
+
+    blocTest<TeacherDashboardBloc, TeacherDashboardState>(
+      'AvailabilitySlotRemoved blocks booked generated slot',
+      build: () {
+        scheduleRepo.schedule = makeWeeklySchedule();
+        return bloc;
+      },
+      seed: () => TeacherDashboardSuccess(
+        upcomingSessions: const [],
+        availability: [
+          TeacherAvailability(
+            slotId: GeneratedSlot.deterministicId(
+              'teacher_1',
+              DateTime.utc(2026, 1, 10, 7, 0),
+            ),
+            teacherId: 'teacher_1',
+            startsAt: DateTime.utc(2026, 1, 10, 7, 0),
+            endsAt: DateTime.utc(2026, 1, 10, 7, 30),
+            isBooked: true,
+          ),
+        ],
+      ),
+      act: (b) => b.add(
+        AvailabilitySlotRemoved(
+          teacherId: 'teacher_1',
+          slot: TeacherAvailability(
+            slotId: GeneratedSlot.deterministicId(
+              'teacher_1',
+              DateTime.utc(2026, 1, 10, 7, 0),
+            ),
+            teacherId: 'teacher_1',
+            startsAt: DateTime.utc(2026, 1, 10, 7, 0),
+            endsAt: DateTime.utc(2026, 1, 10, 7, 30),
+            isBooked: true,
+          ),
+        ),
+      ),
+      expect: () => [isA<TeacherDashboardSuccess>()],
+      verify: (b) {
+        final state = b.state as TeacherDashboardSuccess;
+        check(state.availability).length.equals(1);
+        check(state.slotFailure).isA<SlotUnavailableFailure>();
+        check(scheduleRepo.getOverrideByDateCallCount).equals(0);
       },
     );
   });

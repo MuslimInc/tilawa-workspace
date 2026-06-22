@@ -8,6 +8,9 @@ class FakeScheduleRepository implements ScheduleRepository {
   WeeklySchedule? schedule;
   final List<AvailabilityOverride> overrides = [];
   QuranSessionsFailure? failWith;
+  int getOverridesCallCount = 0;
+  int getOverrideByDateCallCount = 0;
+  bool? lastGetOverridesHadDateBounds;
 
   @override
   Future<Either<QuranSessionsFailure, WeeklySchedule?>> getSchedule(
@@ -32,8 +35,32 @@ class FakeScheduleRepository implements ScheduleRepository {
     DateTime? from,
     DateTime? to,
   }) async {
+    getOverridesCallCount++;
+    lastGetOverridesHadDateBounds = from != null || to != null;
     if (failWith != null) return Left(failWith!);
-    return Right(List.of(overrides));
+    final fromDate = from == null
+        ? null
+        : DateTime(from.year, from.month, from.day);
+    final toDate = to == null ? null : DateTime(to.year, to.month, to.day);
+    final filtered = overrides.where((o) {
+      if (fromDate != null && o.date.isBefore(fromDate)) return false;
+      if (toDate != null && !o.date.isBefore(toDate)) return false;
+      return true;
+    }).toList();
+    return Right(filtered);
+  }
+
+  @override
+  Future<Either<QuranSessionsFailure, AvailabilityOverride?>> getOverrideByDate(
+    String teacherId,
+    String dateKey,
+  ) async {
+    getOverrideByDateCallCount++;
+    if (failWith != null) return Left(failWith!);
+    for (final override in overrides) {
+      if (override.dateKey == dateKey) return Right(override);
+    }
+    return const Right(null);
   }
 
   @override
@@ -68,6 +95,27 @@ GetTeacherAvailabilityUseCase buildGetTeacherAvailabilityUseCase({
   sessionRepository: sessionRepository,
   now: now,
 );
+
+/// Wraps [GetTeacherAvailabilityUseCase] to count [call] invocations in tests.
+class SpyGetTeacherAvailabilityUseCase extends GetTeacherAvailabilityUseCase {
+  SpyGetTeacherAvailabilityUseCase({
+    required super.scheduleRepository,
+    required super.sessionRepository,
+    super.now,
+  });
+
+  int callCount = 0;
+
+  @override
+  Future<Either<QuranSessionsFailure, List<TeacherAvailability>>> call(
+    String teacherId, {
+    required DateTime from,
+    required DateTime to,
+  }) async {
+    callCount++;
+    return super.call(teacherId, from: from, to: to);
+  }
+}
 
 WeeklySchedule makeWeeklySchedule({
   String teacherId = 'teacher_1',

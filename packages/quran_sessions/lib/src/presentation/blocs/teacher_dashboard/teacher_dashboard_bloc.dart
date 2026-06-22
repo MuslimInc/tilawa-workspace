@@ -5,6 +5,7 @@ import '../../../boundaries/scheduling/availability_provider.dart';
 import '../../../domain/entities/generated_slot.dart';
 import '../../../domain/entities/quran_session.dart';
 import '../../../domain/entities/teacher_availability.dart';
+import '../../../domain/failures/quran_sessions_failure.dart';
 import '../../../domain/usecases/block_generated_slot_usecase.dart';
 import '../../../domain/usecases/cancel_session_via_server_usecase.dart';
 import '../../../domain/usecases/complete_session_via_server_usecase.dart';
@@ -212,9 +213,17 @@ class TeacherDashboardBloc
     final current = state;
     if (current is! TeacherDashboardSuccess) return;
 
-    emit(
-      current.copyWith(isUpdatingAvailability: true, clearSlotFailure: true),
-    );
+    if (current.deletingSlotIds.contains(event.slot.slotId)) return;
+
+    if (event.slot.isBooked) {
+      emit(
+        current.copyWith(
+          slotFailure: SlotUnavailableFailure(event.slot.slotId),
+          clearSlotDeleteSuccess: true,
+        ),
+      );
+      return;
+    }
 
     final isGenerated =
         GeneratedSlot.parseStartUtc(
@@ -222,6 +231,18 @@ class TeacherDashboardBloc
           slotId: event.slot.slotId,
         ) !=
         null;
+
+    final deletingSlotIds = {
+      ...current.deletingSlotIds,
+      event.slot.slotId,
+    };
+    emit(
+      current.copyWith(
+        deletingSlotIds: deletingSlotIds,
+        clearSlotFailure: true,
+        clearSlotDeleteSuccess: true,
+      ),
+    );
 
     final result = isGenerated
         ? await _blockGeneratedSlot(
@@ -231,49 +252,23 @@ class TeacherDashboardBloc
           )
         : await _availabilityProvider.withdrawSlot(event.slot.slotId);
 
-    await result.fold(
-      (failure) async => emit(
+    result.fold(
+      (failure) => emit(
         current.copyWith(
-          isUpdatingAvailability: false,
+          deletingSlotIds: deletingSlotIds.difference({event.slot.slotId}),
           slotFailure: failure,
         ),
       ),
-      (_) async {
-        if (isGenerated) {
-          final now = DateTime.now();
-          final availResult = await _getAvailability(
-            event.teacherId,
-            from: now,
-            to: now.add(const Duration(days: 14)),
-          );
-          availResult.fold(
-            (failure) => emit(
-              current.copyWith(
-                isUpdatingAvailability: false,
-                slotFailure: failure,
-              ),
-            ),
-            (slots) => emit(
-              current.copyWith(
-                availability: slots,
-                isUpdatingAvailability: false,
-                clearSlotFailure: true,
-              ),
-            ),
-          );
-          return;
-        }
-
-        emit(
-          current.copyWith(
-            availability: current.availability
-                .where((slot) => slot.slotId != event.slot.slotId)
-                .toList(),
-            isUpdatingAvailability: false,
-            clearSlotFailure: true,
-          ),
-        );
-      },
+      (_) => emit(
+        current.copyWith(
+          availability: current.availability
+              .where((slot) => slot.slotId != event.slot.slotId)
+              .toList(),
+          deletingSlotIds: deletingSlotIds.difference({event.slot.slotId}),
+          slotDeleteSucceeded: true,
+          clearSlotFailure: true,
+        ),
+      ),
     );
   }
 

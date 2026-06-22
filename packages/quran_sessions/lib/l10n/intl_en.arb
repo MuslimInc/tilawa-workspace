@@ -195,6 +195,7 @@
     "deleteSlotConfirmTitle": "Remove this slot?",
     "deleteSlotConfirmMessage": "Students will no longer be able to book this time. You can restore it later from working hours.",
     "deleteSlotConfirm": "Remove slot",
+    "deleteSlotSuccess": "Slot removed",
     "addNewSlot": "Add new slot",
     "slotDate": "Slot date",
     "slotTime": "Slot time",

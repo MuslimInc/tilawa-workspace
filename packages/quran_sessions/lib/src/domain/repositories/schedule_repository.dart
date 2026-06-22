@@ -25,6 +25,12 @@ abstract interface class ScheduleRepository {
     DateTime? to,
   });
 
+  /// Single override for [dateKey] (`yyyy-MM-dd`), or `null` when absent.
+  Future<Either<QuranSessionsFailure, AvailabilityOverride?>> getOverrideByDate(
+    String teacherId,
+    String dateKey,
+  );
+
   /// Creates or replaces a single dated override.
   Future<Either<QuranSessionsFailure, void>> saveOverride(
     String teacherId,

@@ -49,9 +49,11 @@ class _DateGroupedSlotsLayoutState extends State<DateGroupedSlotsLayout> {
     super.didUpdateWidget(old);
     if (old.slots != widget.slots) {
       _applySlots(widget.slots);
-      if (!_days.contains(_selectedDay)) {
-        setState(() => _selectedDay = _pickInitialDay());
-      }
+      setState(() {
+        if (!_days.contains(_selectedDay)) {
+          _selectedDay = _pickInitialDay();
+        }
+      });
     }
   }
 

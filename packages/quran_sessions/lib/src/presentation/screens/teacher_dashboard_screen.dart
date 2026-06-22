@@ -57,12 +57,20 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       ),
       body: BlocConsumer<TeacherDashboardBloc, TeacherDashboardState>(
         listener: (context, state) {
-          if (state is TeacherDashboardSuccess && state.slotFailure != null) {
-            TilawaFeedback.showToast(
-              context,
-              message: state.slotFailure!.toLocalizedMessage(context),
-              variant: TilawaFeedbackVariant.error,
-            );
+          if (state is TeacherDashboardSuccess) {
+            if (state.slotFailure != null) {
+              TilawaFeedback.showToast(
+                context,
+                message: state.slotFailure!.toLocalizedMessage(context),
+                variant: TilawaFeedbackVariant.error,
+              );
+            } else if (state.slotDeleteSucceeded) {
+              TilawaFeedback.showToast(
+                context,
+                message: context.quranSessionsL10n.deleteSlotSuccess,
+                variant: TilawaFeedbackVariant.success,
+              );
+            }
           }
         },
         builder: (context, state) => switch (state) {
@@ -103,6 +111,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
             :final upcomingSessions,
             :final availability,
             :final isUpdatingAvailability,
+            :final deletingSlotIds,
           ) =>
             RefreshIndicator(
               onRefresh: () async => _reload(),
@@ -187,7 +196,9 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                                     _SlotTile(
                                       slot: daySlots[i],
                                       timeOnly: true,
-                                      isUpdating: isUpdatingAvailability,
+                                      isDeleting: deletingSlotIds.contains(
+                                        daySlots[i].slotId,
+                                      ),
                                       showDivider: i < daySlots.length - 1,
                                       onRemove: () => _confirmRemoveSlot(
                                         context,
@@ -265,14 +276,14 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
 class _SlotTile extends StatelessWidget {
   const _SlotTile({
     required this.slot,
-    required this.isUpdating,
+    required this.isDeleting,
     required this.onRemove,
     this.timeOnly = false,
     this.showDivider = true,
   });
 
   final TeacherAvailability slot;
-  final bool isUpdating;
+  final bool isDeleting;
   final bool timeOnly;
   final VoidCallback onRemove;
   final bool showDivider;
@@ -306,17 +317,61 @@ class _SlotTile extends StatelessWidget {
       ),
       trailing: slot.isBooked
           ? null
-          : IconButton(
-              icon: const Icon(Icons.delete_outline),
-              tooltip: l10n.deleteSlot,
-              visualDensity: VisualDensity.compact,
-              constraints: BoxConstraints.tightFor(
-                width: tokens.minInteractiveDimension,
-                height: tokens.minInteractiveDimension,
-              ),
-              padding: EdgeInsets.zero,
-              onPressed: isUpdating ? null : onRemove,
+          : _DeleteSlotTrailing(
+              isDeleting: isDeleting,
+              onRemove: onRemove,
+              deleteTooltip: l10n.deleteSlot,
+              minInteractiveDimension: tokens.minInteractiveDimension,
+              iconSizeSmall: tokens.iconSizeSmall,
+              spinnerColor: scheme.onSurfaceVariant,
             ),
+    );
+  }
+}
+
+class _DeleteSlotTrailing extends StatelessWidget {
+  const _DeleteSlotTrailing({
+    required this.isDeleting,
+    required this.onRemove,
+    required this.deleteTooltip,
+    required this.minInteractiveDimension,
+    required this.iconSizeSmall,
+    required this.spinnerColor,
+  });
+
+  final bool isDeleting;
+  final VoidCallback onRemove;
+  final String deleteTooltip;
+  final double minInteractiveDimension;
+  final double iconSizeSmall;
+  final Color spinnerColor;
+
+  static const _visualDensity = VisualDensity.compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: isDeleting
+          ? SizedBox.square(
+              dimension: iconSizeSmall,
+              child: TilawaLoadingIndicator(
+                centered: false,
+                strokeWidth: 2,
+                color: spinnerColor,
+              ),
+            )
+          : const Icon(Icons.delete_outline),
+      tooltip: isDeleting ? null : deleteTooltip,
+      onPressed: isDeleting ? null : onRemove,
+      style: isDeleting
+          ? IconButton.styleFrom(disabledForegroundColor: spinnerColor)
+          : null,
+      visualDensity: _visualDensity,
+      constraints: BoxConstraints.tightFor(
+        width: minInteractiveDimension,
+        height: minInteractiveDimension,
+      ),
+      padding: EdgeInsets.zero,
     );
   }
 }

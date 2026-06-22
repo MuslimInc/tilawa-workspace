@@ -116,6 +116,41 @@ void main() {
       );
     });
 
+    test(
+      'applies override on last calendar day of availability window',
+      () async {
+        scheduleRepo.schedule = makeWeeklySchedule();
+        final windowFrom = DateTime.utc(2026, 1, 10);
+        // Same calendar day as [windowTo] — repository `to` is exclusive on dates.
+        final windowTo = DateTime.utc(2026, 1, 17, 15, 0);
+        scheduleRepo.overrides.add(
+          AvailabilityOverride(
+            date: DateTime(2026, 1, 17),
+            type: OverrideType.unavailable,
+            reason: 'blocked_last_day',
+          ),
+        );
+
+        final result = await useCase(
+          'teacher_1',
+          from: windowFrom,
+          to: windowTo,
+        );
+
+        result.fold(
+          (_) => fail('expected Right'),
+          (slots) {
+            check(
+              slots.any((slot) {
+                final utc = slot.startsAt.toUtc();
+                return utc.year == 2026 && utc.month == 1 && utc.day == 17;
+              }),
+            ).isFalse();
+          },
+        );
+      },
+    );
+
     test('converts teacher timezone to UTC slot instants', () async {
       scheduleRepo.schedule = makeWeeklySchedule(
         timezone: 'America/New_York',

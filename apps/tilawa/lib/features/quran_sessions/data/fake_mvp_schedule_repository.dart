@@ -48,6 +48,15 @@ class FakeMvpScheduleRepository implements ScheduleRepository {
   }
 
   @override
+  Future<Either<QuranSessionsFailure, AvailabilityOverride?>> getOverrideByDate(
+    String teacherId,
+    String dateKey,
+  ) async {
+    final override = _store.overrides[teacherId]?[dateKey];
+    return Right(override);
+  }
+
+  @override
   Future<Either<QuranSessionsFailure, void>> saveOverride(
     String teacherId,
     AvailabilityOverride override,

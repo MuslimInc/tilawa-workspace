@@ -38,10 +38,15 @@ class GetTeacherAvailabilityUseCase {
       return const Right([]);
     }
 
+    // Repository `to` is exclusive on calendar date keys. Extend by one local
+    // day so overrides on the last day touched by [to] are still fetched.
+    final overrideQueryTo = DateTime(to.year, to.month, to.day).add(
+      const Duration(days: 1),
+    );
     final overridesResult = await _scheduleRepository.getOverrides(
       teacherId,
       from: from,
-      to: to,
+      to: overrideQueryTo,
     );
     if (overridesResult.isLeft()) {
       return overridesResult.map((_) => throw StateError('unreachable'));

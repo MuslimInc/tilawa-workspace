@@ -499,6 +499,9 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get deleteSlotConfirm => 'إزالة الموعد';
 
   @override
+  String get deleteSlotSuccess => 'تمت إزالة الموعد';
+
+  @override
   String get addNewSlot => 'إضافة موعد جديد';
 
   @override

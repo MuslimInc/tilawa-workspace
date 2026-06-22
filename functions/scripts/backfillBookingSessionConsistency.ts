@@ -8,7 +8,8 @@
 import { initializeApp } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 
-initializeApp();
+const PROJECT_ID = process.env.FIREBASE_PROJECT_ID ?? "quran-playera-app";
+initializeApp({ projectId: PROJECT_ID });
 
 const dryRun = !process.argv.includes("--apply");
 

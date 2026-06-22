@@ -41,21 +41,17 @@ class BlockGeneratedSlotUseCase {
         '${calendarDate.month.toString().padLeft(2, '0')}-'
         '${calendarDate.day.toString().padLeft(2, '0')}';
 
-    final overridesResult = await _scheduleRepository.getOverrides(teacherId);
-    if (overridesResult.isLeft()) {
-      return overridesResult.map((_) => throw StateError('unreachable'));
+    final overrideResult = await _scheduleRepository.getOverrideByDate(
+      teacherId,
+      dateKey,
+    );
+    if (overrideResult.isLeft()) {
+      return overrideResult.map((_) => throw StateError('unreachable'));
     }
-    final overrides = overridesResult.fold(
+    final existingOverride = overrideResult.fold(
       (_) => throw StateError('unreachable'),
       (value) => value,
     );
-    AvailabilityOverride? existingOverride;
-    for (final override in overrides) {
-      if (override.dateKey == dateKey) {
-        existingOverride = override;
-        break;
-      }
-    }
 
     final baseIntervals = switch (existingOverride?.type) {
       OverrideType.custom => existingOverride!.intervals,

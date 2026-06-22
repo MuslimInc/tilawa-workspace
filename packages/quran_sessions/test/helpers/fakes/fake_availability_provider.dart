@@ -39,6 +39,19 @@ class FakeAvailabilityProvider implements AvailabilityProvider {
     String slotId,
   ) async {
     if (shouldFail) return const Left(UnknownFailure());
+    TeacherAvailability? match;
+    for (final slot in published) {
+      if (slot.slotId == slotId) {
+        match = slot;
+        break;
+      }
+    }
+    if (match == null) {
+      return Left(NotFoundFailure('TeacherAvailability($slotId)'));
+    }
+    if (match.isBooked) {
+      return Left(SlotUnavailableFailure(slotId));
+    }
     withdrawn.add(slotId);
     published.removeWhere((s) => s.slotId == slotId);
     return const Right(null);

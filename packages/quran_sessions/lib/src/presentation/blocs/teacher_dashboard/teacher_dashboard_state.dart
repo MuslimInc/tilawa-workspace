@@ -24,39 +24,56 @@ final class TeacherDashboardSuccess extends TeacherDashboardState {
     required this.upcomingSessions,
     required this.availability,
     this.isUpdatingAvailability = false,
+    this.deletingSlotIds = const {},
     this.slotFailure,
+    this.slotDeleteSucceeded = false,
   });
 
   final List<QuranSession> upcomingSessions;
   final List<TeacherAvailability> availability;
 
-  /// True while a slot add/remove is in flight — disables the availability editor.
+  /// True while a slot add/edit is in flight — disables the availability editor.
   final bool isUpdatingAvailability;
+
+  /// Slot IDs currently being removed — per-slot loading on the dashboard.
+  final Set<String> deletingSlotIds;
 
   /// Set when a publishSlot or withdrawSlot call fails; cleared on next success.
   /// UI should show a transient error (snackbar) and leave the list intact.
   final QuranSessionsFailure? slotFailure;
+
+  /// Set after a slot delete succeeds; UI shows a success toast once.
+  final bool slotDeleteSucceeded;
 
   @override
   List<Object?> get props => [
     upcomingSessions,
     availability,
     isUpdatingAvailability,
+    deletingSlotIds,
     slotFailure,
+    slotDeleteSucceeded,
   ];
 
   TeacherDashboardSuccess copyWith({
     List<QuranSession>? upcomingSessions,
     List<TeacherAvailability>? availability,
     bool? isUpdatingAvailability,
+    Set<String>? deletingSlotIds,
     QuranSessionsFailure? slotFailure,
+    bool? slotDeleteSucceeded,
     bool clearSlotFailure = false,
+    bool clearSlotDeleteSuccess = false,
   }) => TeacherDashboardSuccess(
     upcomingSessions: upcomingSessions ?? this.upcomingSessions,
     availability: availability ?? this.availability,
     isUpdatingAvailability:
         isUpdatingAvailability ?? this.isUpdatingAvailability,
+    deletingSlotIds: deletingSlotIds ?? this.deletingSlotIds,
     slotFailure: clearSlotFailure ? null : (slotFailure ?? this.slotFailure),
+    slotDeleteSucceeded: clearSlotDeleteSuccess
+        ? false
+        : (slotDeleteSucceeded ?? this.slotDeleteSucceeded),
   );
 }
 

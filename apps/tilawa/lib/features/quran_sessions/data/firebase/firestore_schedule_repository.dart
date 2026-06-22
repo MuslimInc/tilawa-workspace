@@ -103,6 +103,26 @@ class FirestoreScheduleDataSource implements ScheduleRemoteDataSource {
   }
 
   @override
+  Future<AvailabilityOverrideDto?> getOverrideByDate(
+    String teacherId,
+    String dateKey,
+  ) async {
+    try {
+      final doc = await _overrides(teacherId).doc(dateKey).get();
+      if (!doc.exists) return null;
+      final data = doc.data() ?? const {};
+      return AvailabilityOverrideDto(
+        date: data['date'] as String? ?? doc.id,
+        type: data['type'] as String? ?? 'unavailable',
+        intervals: _readIntervals(data['intervals']),
+        reason: data['reason'] as String?,
+      );
+    } on FirebaseException catch (e) {
+      throw mapFirebaseException(e);
+    }
+  }
+
+  @override
   Future<void> saveOverride(
     String teacherId,
     AvailabilityOverrideDto override,

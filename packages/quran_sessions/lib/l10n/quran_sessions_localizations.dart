@@ -983,6 +983,12 @@ abstract class QuranSessionsLocalizations {
   /// **'Remove slot'**
   String get deleteSlotConfirm;
 
+  /// No description provided for @deleteSlotSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Slot removed'**
+  String get deleteSlotSuccess;
+
   /// No description provided for @addNewSlot.
   ///
   /// In en, this message translates to:

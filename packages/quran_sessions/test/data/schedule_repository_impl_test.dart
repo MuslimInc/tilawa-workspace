@@ -29,6 +29,12 @@ class _FakeScheduleRemoteDataSource implements ScheduleRemoteDataSource {
   }) async => const [];
 
   @override
+  Future<AvailabilityOverrideDto?> getOverrideByDate(
+    String teacherId,
+    String dateKey,
+  ) async => null;
+
+  @override
   Future<void> saveOverride(
     String teacherId,
     AvailabilityOverrideDto override,

@@ -33,6 +33,17 @@ class _FakeScheduleRepository implements ScheduleRepository {
   }) async => Right(List.of(overrides));
 
   @override
+  Future<Either<QuranSessionsFailure, AvailabilityOverride?>> getOverrideByDate(
+    String teacherId,
+    String dateKey,
+  ) async {
+    for (final override in overrides) {
+      if (override.dateKey == dateKey) return Right(override);
+    }
+    return const Right(null);
+  }
+
+  @override
   Future<Either<QuranSessionsFailure, void>> saveOverride(
     String teacherId,
     AvailabilityOverride override,

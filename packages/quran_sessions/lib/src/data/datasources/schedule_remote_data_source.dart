@@ -22,6 +22,12 @@ abstract interface class ScheduleRemoteDataSource {
     DateTime? to,
   });
 
+  /// Returns the override for [dateKey] (`yyyy-MM-dd`), or `null` when absent.
+  Future<AvailabilityOverrideDto?> getOverrideByDate(
+    String teacherId,
+    String dateKey,
+  );
+
   /// Creates or replaces a single dated override.
   Future<void> saveOverride(String teacherId, AvailabilityOverrideDto override);
 
