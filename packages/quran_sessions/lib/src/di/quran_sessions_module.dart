@@ -139,7 +139,7 @@ class QuranSessionsModule {
     registerSingleton(SaveTeacherApplicationDraftUseCase(applicationRepo));
     registerSingleton(SubmitTeacherApplicationUseCase(applicationRepo));
     registerSingleton(GetTeacherApplicationStatusUseCase(applicationRepo));
-    registerSingleton(
+    registerSingleton<GetCurrentUserTeacherCapabilityUseCase>(
       GetCurrentUserTeacherCapabilityUseCase(
         applicationRepository: applicationRepo,
         profileRepository: teacherProfileRepo,

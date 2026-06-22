@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:tilawa/core/di/get_it_idempotent.dart';
 
 import '../data/fake_auth_session_provider.dart';
 import '../data/fake_mvp_availability_provider.dart';
@@ -24,45 +25,45 @@ class QuranSessionsMvpModule {
   static void register(GetIt sl) {
     final store = QuranSessionsMvpStore.instance;
 
-    sl.registerLazySingleton<TeacherRepository>(
+    sl.registerLazySingletonIfAbsent<TeacherRepository>(
       () => FakeMvpTeacherRepository(store),
     );
-    sl.registerLazySingleton<AuthSessionProvider>(
+    sl.registerLazySingletonIfAbsent<AuthSessionProvider>(
       () => const FakeAuthSessionProvider(userId: 'student_mvp'),
     );
-    sl.registerLazySingleton<BookingRepository>(
+    sl.registerLazySingletonIfAbsent<BookingRepository>(
       () => FakeMvpBookingRepository(store, sl<AuthSessionProvider>()),
     );
-    sl.registerLazySingleton<SessionRepository>(
+    sl.registerLazySingletonIfAbsent<SessionRepository>(
       () => FakeMvpSessionRepository(store),
     );
-    sl.registerLazySingleton<AvailabilityProvider>(
+    sl.registerLazySingletonIfAbsent<AvailabilityProvider>(
       () => FakeMvpAvailabilityProvider(store),
     );
-    sl.registerLazySingleton<UserProfileRepository>(
+    sl.registerLazySingletonIfAbsent<UserProfileRepository>(
       () => FakeMvpUserProfileRepository(store),
     );
-    sl.registerLazySingleton<SessionPolicyRepository>(
+    sl.registerLazySingletonIfAbsent<SessionPolicyRepository>(
       () => FakeMvpSessionPolicyRepository(store),
     );
-    sl.registerLazySingleton<MarketConfigRepository>(
+    sl.registerLazySingletonIfAbsent<MarketConfigRepository>(
       () => FakeMvpMarketConfigRepository(),
     );
-    sl.registerLazySingleton<TeacherApplicationRepository>(
+    sl.registerLazySingletonIfAbsent<TeacherApplicationRepository>(
       () => FakeMvpTeacherApplicationRepository(store),
     );
-    sl.registerLazySingleton<TeacherProfileRepository>(
+    sl.registerLazySingletonIfAbsent<TeacherProfileRepository>(
       () => FakeMvpTeacherProfileRepository(store),
     );
-    sl.registerLazySingleton<ScheduleRepository>(
+    sl.registerLazySingletonIfAbsent<ScheduleRepository>(
       () => FakeMvpScheduleRepository(store),
     );
 
     final lifecycle = FakeMvpSessionLifecycleStack.instance;
-    sl.registerLazySingleton<SessionCommandGateway>(
+    sl.registerLazySingletonIfAbsent<SessionCommandGateway>(
       () => lifecycle.commandGateway,
     );
-    sl.registerLazySingleton<SessionMutationGateway>(
+    sl.registerLazySingletonIfAbsent<SessionMutationGateway>(
       () => lifecycle.mutationGateway,
     );
 
@@ -82,113 +83,113 @@ class QuranSessionsMvpModule {
 
   /// Registers use cases assuming repositories are already in [sl].
   static void registerUseCases(GetIt sl) {
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent(
       () => GetTeachersUseCase(sl<TeacherRepository>()),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent(
       () => GetTeacherProfileUseCase(sl<TeacherRepository>()),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent(
       () => GetTeacherAvailabilityUseCase(
         scheduleRepository: sl<ScheduleRepository>(),
         sessionRepository: sl<SessionRepository>(),
         slotGenerator: const SlotGenerator(),
       ),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent(
       () => GetStudentSessionsUseCase(sl<SessionRepository>()),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent(
       () => GetTeacherSessionsUseCase(sl<SessionRepository>()),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent(
       () => CreateBookingUseCase(
         sl<BookingRepository>(),
         sl<GetTeacherAvailabilityUseCase>(),
       ),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent(
       () => CancelBookingUseCase(sl<BookingRepository>()),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent(
       () => SubmitReviewUseCase(sl<BookingRepository>()),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent(
       () => GetUserProfileUseCase(sl<UserProfileRepository>()),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent(
       () => CompleteStudentProfileUseCase(
         sl<UserProfileRepository>(),
         sl<SessionPolicyRepository>(),
       ),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent(
       () => CompleteTeacherProfileUseCase(
         sl<UserProfileRepository>(),
         sl<SessionPolicyRepository>(),
       ),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent(
       () => GetSessionPolicyUseCase(sl<SessionPolicyRepository>()),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent(
       () => UpdateTeacherEligibilityPolicyUseCase(
         sl<SessionPolicyRepository>(),
       ),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent(
       () => BlockAccountUseCase(sl<UserProfileRepository>()),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent(
       () => StartTeacherApplicationUseCase(sl<TeacherApplicationRepository>()),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent(
       () => SaveTeacherApplicationDraftUseCase(
         sl<TeacherApplicationRepository>(),
       ),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent(
       () => SubmitTeacherApplicationUseCase(sl<TeacherApplicationRepository>()),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent(
       () => GetTeacherApplicationStatusUseCase(
         sl<TeacherApplicationRepository>(),
       ),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent<GetCurrentUserTeacherCapabilityUseCase>(
       () => GetCurrentUserTeacherCapabilityUseCase(
         applicationRepository: sl<TeacherApplicationRepository>(),
         profileRepository: sl<TeacherProfileRepository>(),
       ),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent(
       () => SaveTeacherPublicProfileUseCase(sl<TeacherProfileRepository>()),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent(
       () => ApproveTeacherApplicationUseCase(
         applicationRepository: sl<TeacherApplicationRepository>(),
         profileRepository: sl<TeacherProfileRepository>(),
       ),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent(
       () => RejectTeacherApplicationUseCase(sl<TeacherApplicationRepository>()),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent(
       () => SuspendTeacherProfileUseCase(
         applicationRepository: sl<TeacherApplicationRepository>(),
         profileRepository: sl<TeacherProfileRepository>(),
       ),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent(
       () => RevokeTeacherProfileUseCase(
         applicationRepository: sl<TeacherApplicationRepository>(),
         profileRepository: sl<TeacherProfileRepository>(),
       ),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent(
       () => GetMarketConfigUseCase(sl<MarketConfigRepository>()),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent(
       () => ValidateBookingEligibilityUseCase(
         profileRepository: sl<UserProfileRepository>(),
         policyRepository: sl<SessionPolicyRepository>(),
@@ -196,24 +197,24 @@ class QuranSessionsMvpModule {
         marketConfigRepository: sl<MarketConfigRepository>(),
       ),
     );
-    sl.registerLazySingleton(() => const WeeklyScheduleValidator());
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent(() => const WeeklyScheduleValidator());
+    sl.registerLazySingletonIfAbsent(
       () => GetWeeklyScheduleUseCase(sl<ScheduleRepository>()),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent(
       () => SaveWeeklyScheduleUseCase(
         sl<ScheduleRepository>(),
         sl<WeeklyScheduleValidator>(),
       ),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent(
       () => BlockGeneratedSlotUseCase(sl<ScheduleRepository>()),
     );
   }
 
   /// Registers BLoC factories — new instance per navigation.
   static void registerBlocs(GetIt sl) {
-    sl.registerFactory(
+    sl.registerFactoryIfAbsent(
       () => TeacherApplicationBloc(
         startApplication: sl<StartTeacherApplicationUseCase>(),
         saveDraft: sl<SaveTeacherApplicationDraftUseCase>(),
@@ -223,21 +224,21 @@ class QuranSessionsMvpModule {
         getUserProfile: sl<GetUserProfileUseCase>(),
       ),
     );
-    sl.registerFactory(() => TeacherListBloc(sl<GetTeachersUseCase>()));
-    sl.registerFactory(
+    sl.registerFactoryIfAbsent(() => TeacherListBloc(sl<GetTeachersUseCase>()));
+    sl.registerFactoryIfAbsent(
       () => TeacherProfileBloc(
         getProfile: sl<GetTeacherProfileUseCase>(),
         getAvailability: sl<GetTeacherAvailabilityUseCase>(),
       ),
     );
-    sl.registerFactory(
+    sl.registerFactoryIfAbsent(
       () => BookingBloc(
         getAvailability: sl<GetTeacherAvailabilityUseCase>(),
         submitBooking: sl<SubmitSessionBookingUseCase>(),
         validateEligibility: sl<ValidateBookingEligibilityUseCase>(),
       ),
     );
-    sl.registerFactory(
+    sl.registerFactoryIfAbsent(
       () => MySessionsBloc(
         getStudentSessions: sl<GetStudentSessionsUseCase>(),
         cancelSession: sl<CancelSessionViaServerUseCase>(),
@@ -245,7 +246,7 @@ class QuranSessionsMvpModule {
         studentId: sl<AuthSessionProvider>().currentUserId ?? 'student_mvp',
       ),
     );
-    sl.registerFactory(
+    sl.registerFactoryIfAbsent(
       () => TeacherDashboardBloc(
         getTeacherSessions: sl<GetTeacherSessionsUseCase>(),
         getAvailability: sl<GetTeacherAvailabilityUseCase>(),
@@ -256,26 +257,26 @@ class QuranSessionsMvpModule {
         teacherId: sl<AuthSessionProvider>().currentUserId ?? 'teacher_mvp',
       ),
     );
-    sl.registerFactory(
+    sl.registerFactoryIfAbsent(
       () => RescheduleBloc(
         getAvailability: sl<GetTeacherAvailabilityUseCase>(),
         requestReschedule: sl<RequestSessionRescheduleViaServerUseCase>(),
       ),
     );
-    sl.registerFactory(
+    sl.registerFactoryIfAbsent(
       () => SessionDetailBloc(
         aggregateRepository: sl<SessionAggregateRepository>(),
         getTimeline: sl<GetSessionTimelineUseCase>(),
       ),
     );
-    sl.registerFactory(
+    sl.registerFactoryIfAbsent(
       () => AvailabilityCubit(
         getSchedule: sl<GetWeeklyScheduleUseCase>(),
         saveSchedule: sl<SaveWeeklyScheduleUseCase>(),
         repository: sl<ScheduleRepository>(),
       ),
     );
-    sl.registerFactory(
+    sl.registerFactoryIfAbsent(
       () => ProfileCompletionBloc(
         getUserProfile: sl<GetUserProfileUseCase>(),
         completeStudentProfile: sl<CompleteStudentProfileUseCase>(),

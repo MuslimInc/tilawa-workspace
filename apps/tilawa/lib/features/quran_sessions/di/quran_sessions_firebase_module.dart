@@ -3,6 +3,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:tilawa/core/di/get_it_idempotent.dart';
 
 import '../data/firebase/firebase_auth_session_provider.dart';
 import '../data/firebase/firebase_audit_repository.dart';
@@ -32,8 +33,8 @@ class QuranSessionsFirebaseModule {
     final functions = FirebaseFunctions.instanceFor(region: 'us-central1');
     final authSession = FirebaseAuthSessionProvider(FirebaseAuth.instance);
 
-    sl.registerLazySingleton<AuthSessionProvider>(() => authSession);
-    sl.registerLazySingleton<SessionCommandGateway>(
+    sl.registerLazySingletonIfAbsent<AuthSessionProvider>(() => authSession);
+    sl.registerLazySingletonIfAbsent<SessionCommandGateway>(
       () => FirebaseSessionCommandGateway(functions),
     );
 
@@ -41,35 +42,30 @@ class QuranSessionsFirebaseModule {
       firestore,
       functions,
     );
-    sl.registerLazySingleton<SessionMutationGateway>(() => mutationGateway);
+    sl.registerLazySingletonIfAbsent<SessionMutationGateway>(
+      () => mutationGateway,
+    );
 
     final aggregateRepository = FirebaseSessionAggregateRepository(
       firestore,
       mutationGateway: mutationGateway,
     );
-    sl.registerLazySingleton<SessionAggregateRepository>(
-      () => aggregateRepository,
-    );
-    sl.registerLazySingleton<AuditRepository>(
-      () => FirebaseAuditRepository(firestore),
-    );
-    sl.registerLazySingleton<SessionNotificationGateway>(
-      () => FirebaseSessionNotificationGateway(firestore),
-    );
+    final auditRepository = FirebaseAuditRepository(firestore);
+    final notificationGateway = FirebaseSessionNotificationGateway(firestore);
 
     QuranSessionsLifecycleModule.register(
       sl,
       aggregateRepository: aggregateRepository,
-      auditRepository: sl<AuditRepository>(),
+      auditRepository: auditRepository,
       commandGateway: sl<SessionCommandGateway>(),
-      notificationGateway: sl<SessionNotificationGateway>(),
+      notificationGateway: notificationGateway,
       mutationGateway: mutationGateway,
       authSession: authSession,
     );
 
     QuranSessionsModule.register(
       <T extends Object>(T instance, {String? instanceName}) {
-        sl.registerSingleton<T>(instance, instanceName: instanceName);
+        sl.registerSingletonOnce<T>(instance, instanceName: instanceName);
       },
       teacherDataSource: FirestoreTeacherDataSource(firestore),
       sessionDataSource: FirestoreSessionDataSource(firestore),

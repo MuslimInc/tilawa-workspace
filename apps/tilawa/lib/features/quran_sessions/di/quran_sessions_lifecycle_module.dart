@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:tilawa/core/di/get_it_idempotent.dart';
 
 /// Registers lifecycle domain services and use cases.
 class QuranSessionsLifecycleModule {
@@ -20,27 +21,31 @@ class QuranSessionsLifecycleModule {
     const bookingIntegrityValidator = BookingIntegrityValidator();
     const noShowPolicy = NoShowPolicy();
 
-    sl.registerLazySingleton<SessionLifecycleGuard>(() => lifecycleGuard);
-    sl.registerLazySingleton<ConfigurableCancellationPolicy>(
+    sl.registerLazySingletonIfAbsent<SessionLifecycleGuard>(
+      () => lifecycleGuard,
+    );
+    sl.registerLazySingletonIfAbsent<ConfigurableCancellationPolicy>(
       () => cancellationPolicy,
     );
-    sl.registerLazySingleton<ConfigurableReschedulePolicy>(
+    sl.registerLazySingletonIfAbsent<ConfigurableReschedulePolicy>(
       () => reschedulePolicy,
     );
-    sl.registerLazySingleton<BookingIntegrityValidator>(
+    sl.registerLazySingletonIfAbsent<BookingIntegrityValidator>(
       () => bookingIntegrityValidator,
     );
-    sl.registerLazySingleton<NoShowPolicy>(() => noShowPolicy);
+    sl.registerLazySingletonIfAbsent<NoShowPolicy>(() => noShowPolicy);
 
-    sl.registerLazySingleton<SessionAggregateRepository>(
+    sl.registerLazySingletonIfAbsent<SessionAggregateRepository>(
       () => aggregateRepository,
     );
-    sl.registerLazySingleton<AuditRepository>(() => auditRepository);
-    sl.registerLazySingleton<SessionNotificationGateway>(
+    sl.registerLazySingletonIfAbsent<AuditRepository>(
+      () => auditRepository,
+    );
+    sl.registerLazySingletonIfAbsent<SessionNotificationGateway>(
       () => notificationGateway,
     );
 
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent<CancelSessionUseCase>(
       () => CancelSessionUseCase(
         aggregateRepository: sl<SessionAggregateRepository>(),
         lifecycleGuard: sl<SessionLifecycleGuard>(),
@@ -50,7 +55,7 @@ class QuranSessionsLifecycleModule {
         auditRepository: sl<AuditRepository>(),
       ),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent<RequestRescheduleUseCase>(
       () => RequestRescheduleUseCase(
         aggregateRepository: sl<SessionAggregateRepository>(),
         lifecycleGuard: sl<SessionLifecycleGuard>(),
@@ -59,7 +64,7 @@ class QuranSessionsLifecycleModule {
         auditRepository: sl<AuditRepository>(),
       ),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent<ConfirmRescheduleUseCase>(
       () => ConfirmRescheduleUseCase(
         aggregateRepository: sl<SessionAggregateRepository>(),
         lifecycleGuard: sl<SessionLifecycleGuard>(),
@@ -68,14 +73,14 @@ class QuranSessionsLifecycleModule {
         auditRepository: sl<AuditRepository>(),
       ),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent<CompleteSessionUseCase>(
       () => CompleteSessionUseCase(
         aggregateRepository: sl<SessionAggregateRepository>(),
         lifecycleGuard: sl<SessionLifecycleGuard>(),
         auditRepository: sl<AuditRepository>(),
       ),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent<MarkNoShowUseCase>(
       () => MarkNoShowUseCase(
         aggregateRepository: sl<SessionAggregateRepository>(),
         lifecycleGuard: sl<SessionLifecycleGuard>(),
@@ -84,39 +89,41 @@ class QuranSessionsLifecycleModule {
         auditRepository: sl<AuditRepository>(),
       ),
     );
-    sl.registerLazySingleton(
+    sl.registerLazySingletonIfAbsent<GetSessionTimelineUseCase>(
       () => GetSessionTimelineUseCase(sl<AuditRepository>()),
     );
 
     if (mutationGateway != null && authSession != null) {
-      sl.registerLazySingleton<SessionMutationGateway>(
+      sl.registerLazySingletonIfAbsent<SessionMutationGateway>(
         () => mutationGateway,
       );
-      sl.registerLazySingleton(
+      sl.registerLazySingletonIfAbsent<SubmitSessionBookingUseCase>(
         () => SubmitSessionBookingUseCase(
           mutationGateway: mutationGateway,
           getAvailability: sl<GetTeacherAvailabilityUseCase>(),
           authSession: authSession,
         ),
       );
-      sl.registerLazySingleton(
+      sl.registerLazySingletonIfAbsent<
+        RequestSessionRescheduleViaServerUseCase
+      >(
         () => RequestSessionRescheduleViaServerUseCase(
           aggregateRepository: sl<SessionAggregateRepository>(),
           reschedulePolicy: sl<ConfigurableReschedulePolicy>(),
           mutationGateway: mutationGateway,
         ),
       );
-      sl.registerLazySingleton(
+      sl.registerLazySingletonIfAbsent<RespondToRescheduleRequestUseCase>(
         () => RespondToRescheduleRequestUseCase(
           mutationGateway: mutationGateway,
         ),
       );
-      sl.registerLazySingleton(
+      sl.registerLazySingletonIfAbsent<CancelSessionViaServerUseCase>(
         () => CancelSessionViaServerUseCase(
           cancelSession: sl<CancelSessionUseCase>(),
         ),
       );
-      sl.registerLazySingleton(
+      sl.registerLazySingletonIfAbsent<CompleteSessionViaServerUseCase>(
         () => CompleteSessionViaServerUseCase(
           mutationGateway: mutationGateway,
         ),
