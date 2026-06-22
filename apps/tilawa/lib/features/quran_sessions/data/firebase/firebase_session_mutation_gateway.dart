@@ -42,6 +42,8 @@ class FirebaseSessionMutationGateway implements SessionMutationGateway {
         'pricingType': _pricingTypeToCf(pricingType),
         'paymentReference': paymentReference,
         'studentNote': studentNote,
+        'idempotencyKey':
+            '$studentId:$slotId:${startsAt.toUtc().toIso8601String()}',
       });
       final bookingId = response.data['bookingId'] as String? ?? '';
       return _loadAggregate(bookingId);

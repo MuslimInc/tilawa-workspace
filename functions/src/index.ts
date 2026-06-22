@@ -17,6 +17,10 @@ export {
   openSessionDispute,
   resolveSessionDispute,
 } from "./quranSessions/sessionDisputeCallables";
+export {
+  reportSessionConcern,
+  resolveSessionReport,
+} from "./quranSessions/sessionReportCallables";
 export { expirePendingReservations } from "./quranSessions/expirePendingReservations";
 export { deliverSessionNotification } from "./quranSessions/deliverSessionNotification";
 export { sessionReminders } from "./quranSessions/sessionReminders";

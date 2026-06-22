@@ -1,30 +1,20 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
-import { getFirestore, FieldValue } from "firebase-admin/firestore";
+import { getFirestore } from "firebase-admin/firestore";
 
 import {
-  appendAuditEvent,
-  sessionRefForBooking,
-  writeAggregateLifecycle,
-} from "./aggregateWriteService";
+  issueCompensationRecord,
+  type CompensationType,
+} from "./financialLedgerService";
 import {
   buildOperationKey,
   runIdempotentOperation,
 } from "./idempotencyService";
 import { enqueueSessionNotification } from "./notificationOutboxService";
-import { financialExecutionStatus } from "./paymentProviderStatus";
 import { requireAdmin } from "./sessionAuth";
-import { validateTransition } from "./sessionLifecycleGuard";
-import type { LifecycleStatus } from "./sessionLifecycleService";
 
 interface IssueSessionCompensationRequest {
   bookingId: string;
-  compensationType:
-    | "restore_credit"
-    | "wallet_credit"
-    | "payment_refund"
-    | "replacement_session"
-    | "extend_subscription"
-    | "manual_review";
+  compensationType: CompensationType | "payment_refund";
   amountUsd?: number;
   reason: string;
   idempotencyKey?: string;
@@ -44,6 +34,7 @@ export const issueSessionCompensation = onCall(
         "Use approveSessionRefund for payment refunds.",
       );
     }
+    const compensationType: CompensationType = data.compensationType;
 
     const db = getFirestore();
     const bookingRef = db.collection("quran_bookings").doc(data.bookingId);
@@ -52,7 +43,6 @@ export const issueSessionCompensation = onCall(
       data.bookingId,
       data.idempotencyKey ?? data.compensationType,
     );
-    const executionStatus = financialExecutionStatus();
 
     const { result, replayed } = await runIdempotentOperation(
       {
@@ -67,70 +57,29 @@ export const issueSessionCompensation = onCall(
           throw new HttpsError("not-found", "Booking not found.");
         }
         const booking = bookingSnap.data() ?? {};
-        const currentStatus = booking.lifecycleStatus as LifecycleStatus | undefined;
 
-        const guard = validateTransition({
-          currentStatus: currentStatus ?? null,
-          action: "issue_compensation",
-          actor: "admin",
-          reason: data.reason,
-        });
-
-        const sessionRef = sessionRefForBooking(db, booking);
-        const compensationRef = db.collection("quran_session_compensations").doc();
-
-        writeAggregateLifecycle(
+        const ledger = issueCompensationRecord({
           tx,
-          { bookingRef, sessionRef },
-          guard.to,
-          {
-            lastCompensationId: compensationRef.id,
-            compensationExecutionStatus: executionStatus,
-          },
-          { compensationExecutionStatus: executionStatus },
-        );
-
-        tx.set(compensationRef, {
-          compensationId: compensationRef.id,
-          aggregateId: booking.aggregateId ?? data.bookingId,
+          db,
+          bookingRef,
+          booking,
           bookingId: data.bookingId,
-          sessionId: booking.sessionId ?? null,
-          type: data.compensationType,
-          status: executionStatus,
-          policyRuleId: "admin_manual",
-          amountUsd: data.amountUsd ?? null,
-          issuedByActorId: uid,
-          issuedByRole: "admin",
+          compensationType,
           reason: data.reason,
-          createdAt: FieldValue.serverTimestamp(),
-          completedAt:
-            executionStatus === "executed"
-              ? FieldValue.serverTimestamp()
-              : null,
-        });
-
-        appendAuditEvent(tx, db, {
-          aggregateId: booking.aggregateId ?? data.bookingId,
-          bookingId: data.bookingId,
-          sessionId: booking.sessionId ?? null,
-          compensationId: compensationRef.id,
+          amountUsd: data.amountUsd ?? null,
           actorId: uid,
           actorRole: "admin",
-          action: "issue_compensation",
-          previousStatus: currentStatus ?? null,
-          newStatus: guard.to,
-          reason: data.reason,
-          compensationExecutionStatus: executionStatus,
-          source: "adminPanel",
+          auditAction: "issue_compensation",
+          auditSource: "adminPanel",
         });
 
         return {
           bookingId: data.bookingId,
-          compensationId: compensationRef.id,
-          lifecycleStatus: guard.to,
-          studentId: (booking.studentId as string | undefined) ?? "",
-          sessionId: (booking.sessionId as string | undefined) ?? "",
-          compensationExecutionStatus: executionStatus,
+          compensationId: ledger.compensationId,
+          lifecycleStatus: ledger.lifecycleStatus,
+          studentId: ledger.studentId,
+          sessionId: ledger.sessionId,
+          compensationExecutionStatus: ledger.compensationExecutionStatus,
         };
       },
     );

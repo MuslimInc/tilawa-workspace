@@ -7,7 +7,15 @@ export type LifecycleErrorCode =
   | "slot_unavailable"
   | "late_student_cancellation_blocked"
   | "not_participant"
-  | "payment_provider_unavailable";
+  | "payment_provider_unavailable"
+  // Booking eligibility (server-side parity with ValidateBookingEligibilityUseCase).
+  | "account_blocked"
+  | "profile_incomplete"
+  | "market_not_enabled"
+  | "teacher_not_verified"
+  | "gender_not_allowed"
+  | "age_not_allowed"
+  | "guardian_approval_required";
 
 export function lifecycleError(
   code: LifecycleErrorCode,

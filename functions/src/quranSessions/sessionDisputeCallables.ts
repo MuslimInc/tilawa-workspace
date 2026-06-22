@@ -7,6 +7,10 @@ import {
   writeAggregateLifecycle,
 } from "./aggregateWriteService";
 import {
+  issueCompensationRecord,
+  issueRefundRecord,
+} from "./financialLedgerService";
+import {
   disputeStatusForResolution,
   initialDisputeRecord,
 } from "./disputeTypes";
@@ -186,7 +190,7 @@ export const resolveSessionDispute = onCall(
       data.idempotencyKey,
     );
 
-    return runIdempotentOperation(
+    const { result, replayed } = await runIdempotentOperation(
       {
         db,
         operationKey,
@@ -214,30 +218,43 @@ export const resolveSessionDispute = onCall(
           });
         }
 
-        const sessionRef = sessionRefForBooking(db, booking);
         const disputeStatus = disputeStatusForResolution(data.resolution);
+        let refundResult: ReturnType<typeof issueRefundRecord> | null = null;
+        let compensationResult: ReturnType<typeof issueCompensationRecord> | null =
+          null;
         let nextLifecycle: LifecycleStatus = "disputed";
 
         if (data.resolution === "with_compensation") {
-          const guard = validateTransition({
-            currentStatus,
-            action: "issue_compensation",
-            actor: "admin",
+          compensationResult = issueCompensationRecord({
+            tx,
+            db,
+            bookingRef,
+            booking,
+            bookingId: data.bookingId,
+            compensationType: "manual_review",
             reason: data.reason,
+            actorId: uid,
+            actorRole: "admin",
+            auditAction: "resolve_dispute_compensation",
+            auditSource: "adminPanel",
+            disputeId: data.disputeId,
           });
-          nextLifecycle = guard.to;
+          nextLifecycle = compensationResult.lifecycleStatus;
         } else if (data.resolution === "favor_student") {
-          const guard = validateTransition({
-            currentStatus,
-            action: "issue_refund",
-            actor: "admin",
+          refundResult = issueRefundRecord({
+            tx,
+            db,
+            bookingRef,
+            booking,
+            bookingId: data.bookingId,
             reason: data.reason,
+            actorId: uid,
+            actorRole: "admin",
+            auditAction: "resolve_dispute_refund",
+            auditSource: "adminPanel",
+            disputeId: data.disputeId,
           });
-          nextLifecycle = guard.to;
-        }
-
-        if (nextLifecycle !== "disputed") {
-          writeAggregateLifecycle(tx, { bookingRef, sessionRef }, nextLifecycle);
+          nextLifecycle = refundResult.lifecycleStatus;
         }
 
         tx.set(
@@ -248,6 +265,8 @@ export const resolveSessionDispute = onCall(
             resolvedByUserId: uid,
             resolvedAt: new Date(),
             updatedAt: new Date(),
+            refundId: refundResult?.refundId ?? null,
+            compensationId: compensationResult?.compensationId ?? null,
           },
           { merge: true },
         );
@@ -258,28 +277,78 @@ export const resolveSessionDispute = onCall(
           { merge: true },
         );
 
-        appendAuditEvent(tx, db, {
-          aggregateId: booking.aggregateId ?? data.bookingId,
-          bookingId: data.bookingId,
-          sessionId: booking.sessionId ?? null,
-          disputeId: data.disputeId,
-          actorId: uid,
-          actorRole: "admin",
-          action: "resolve_dispute",
-          previousStatus: currentStatus,
-          newStatus: nextLifecycle,
-          reason: data.reason,
-          resolution: data.resolution,
-          source: "adminPanel",
-        });
+        if (
+          data.resolution !== "favor_student" &&
+          data.resolution !== "with_compensation"
+        ) {
+          appendAuditEvent(tx, db, {
+            aggregateId: booking.aggregateId ?? data.bookingId,
+            bookingId: data.bookingId,
+            sessionId: booking.sessionId ?? null,
+            disputeId: data.disputeId,
+            actorId: uid,
+            actorRole: "admin",
+            action: "resolve_dispute",
+            previousStatus: currentStatus,
+            newStatus: nextLifecycle,
+            reason: data.reason,
+            resolution: data.resolution,
+            source: "adminPanel",
+          });
+        }
 
         return {
           bookingId: data.bookingId,
           disputeId: data.disputeId,
           disputeStatus,
           lifecycleStatus: nextLifecycle,
+          resolution: data.resolution,
+          refundId: refundResult?.refundId ?? null,
+          refundExecutionStatus: refundResult?.refundExecutionStatus ?? null,
+          compensationId: compensationResult?.compensationId ?? null,
+          compensationExecutionStatus:
+            compensationResult?.compensationExecutionStatus ?? null,
+          studentId: (booking.studentId as string | undefined) ?? "",
+          sessionId: (booking.sessionId as string | undefined) ?? "",
         };
       },
-    ).then(({ result }) => result);
+    );
+
+    if (!replayed) {
+      const sessionId = result.sessionId;
+      if (result.resolution === "favor_student" && result.studentId && sessionId) {
+        await enqueueSessionNotification(db, {
+          sessionId,
+          aggregateId: data.bookingId,
+          kind: "refundApproved",
+          recipientUserIds: [result.studentId],
+          payload: {
+            reason: data.reason,
+            refundExecutionStatus: result.refundExecutionStatus,
+            disputeId: data.disputeId,
+          },
+        });
+      }
+      if (
+        result.resolution === "with_compensation" &&
+        result.studentId &&
+        sessionId
+      ) {
+        await enqueueSessionNotification(db, {
+          sessionId,
+          aggregateId: data.bookingId,
+          kind: "compensationIssued",
+          recipientUserIds: [result.studentId],
+          payload: {
+            compensationType: "manual_review",
+            reason: data.reason,
+            compensationExecutionStatus: result.compensationExecutionStatus,
+            disputeId: data.disputeId,
+          },
+        });
+      }
+    }
+
+    return result;
   },
 );

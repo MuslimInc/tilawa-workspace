@@ -19,7 +19,7 @@ export interface SessionDisputeRecord {
   reason: string;
   openedByUserId: string;
   openedByRole: string;
-  evidenceMetadata?: Record<string, unknown>;
+  evidenceMetadata: Record<string, unknown> | null;
   resolutionReason?: string;
   resolvedByUserId?: string;
   createdAt: FirebaseFirestore.FieldValue;
@@ -46,7 +46,7 @@ export function initialDisputeRecord(input: {
     reason: input.reason,
     openedByUserId: input.openedByUserId,
     openedByRole: input.openedByRole,
-    evidenceMetadata: input.evidenceMetadata,
+    evidenceMetadata: input.evidenceMetadata ?? null,
     createdAt: FieldValue.serverTimestamp(),
     updatedAt: FieldValue.serverTimestamp(),
   };

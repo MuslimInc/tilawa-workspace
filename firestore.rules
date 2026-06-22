@@ -230,6 +230,43 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Refund ledger — readable by booking participants/admins; CF writes only.
+    match /quran_session_refunds/{refundId} {
+      allow read: if isSignedIn()
+        && (isAdmin()
+            || exists(/databases/$(database)/documents/quran_bookings/$(resource.data.bookingId))
+              && (
+                get(/databases/$(database)/documents/quran_bookings/$(resource.data.bookingId)).data.studentId == request.auth.uid
+                || get(/databases/$(database)/documents/quran_bookings/$(resource.data.bookingId)).data.teacherId == request.auth.uid
+              ));
+      allow write: if false;
+    }
+
+    // Disputes — readable by booking participants/admins; CF writes only.
+    match /quran_session_disputes/{disputeId} {
+      allow read: if isSignedIn()
+        && (isAdmin()
+            || exists(/databases/$(database)/documents/quran_bookings/$(resource.data.bookingId))
+              && (
+                get(/databases/$(database)/documents/quran_bookings/$(resource.data.bookingId)).data.studentId == request.auth.uid
+                || get(/databases/$(database)/documents/quran_bookings/$(resource.data.bookingId)).data.teacherId == request.auth.uid
+              ));
+      allow write: if false;
+    }
+
+    // Abuse / safety reports — admin and the reporter may read (NOT the reported
+    // party); CF writes only.
+    match /quran_session_reports/{reportId} {
+      allow read: if isSignedIn()
+        && (isAdmin() || resource.data.reporterUserId == request.auth.uid);
+      allow write: if false;
+    }
+
+    // Idempotency operation markers — backend-only internal dedupe ledger.
+    match /quran_session_operations/{operationId} {
+      allow read, write: if false;
+    }
+
     // Notification outbox and slot locks are backend-managed only.
     match /quran_session_notifications/{notificationId} {
       allow read, write: if false;
@@ -267,10 +304,32 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    function quranSessionsProfileModerationUnchanged() {
+      let beforeProfile = 'quranSessionsProfile' in resource.data
+        ? resource.data.quranSessionsProfile
+        : {};
+      let afterProfile = 'quranSessionsProfile' in request.resource.data
+        ? request.resource.data.quranSessionsProfile
+        : {};
+      return afterProfile.get('accountStatus', 'active')
+          == beforeProfile.get('accountStatus', 'active')
+        && afterProfile.get('restrictionReason', null)
+          == beforeProfile.get('restrictionReason', null);
+    }
+
+    function quranSessionsProfileModerationSafeOnCreate() {
+      return !('quranSessionsProfile' in request.resource.data)
+        || request.resource.data.quranSessionsProfile.get('accountStatus', 'active') == 'active';
+    }
+
     match /users/{userId} {
       allow get: if isAdmin() || isOwner(userId);
       allow list: if isAdmin();
-      allow write: if isOwner(userId);
+      allow create: if isOwner(userId)
+        && quranSessionsProfileModerationSafeOnCreate();
+      allow update: if isAdmin()
+        || (isOwner(userId) && quranSessionsProfileModerationUnchanged());
+      allow delete: if false;
 
       match /fcm_tokens/{tokenId} {
         allow read, write: if isOwner(userId);
