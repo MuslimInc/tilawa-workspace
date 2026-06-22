@@ -56,6 +56,7 @@ class AppLaunchConfig extends Equatable {
     this.teacherApplicationEnabled = false,
     this.teacherApplicationDiscoverability = 'profileAndEmptyState',
     this.quranSessionsBookingEnabled = false,
+    this.genUiAssistantEnabled = false,
   });
 
   factory AppLaunchConfig.fromEnvironment() {
@@ -192,6 +193,10 @@ class AppLaunchConfig extends Equatable {
         'TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED',
         defaultValue: false,
       ),
+      genUiAssistantEnabled: bool.fromEnvironment(
+        'TILAWA_LAUNCH_GENUI_ASSISTANT_ENABLED',
+        defaultValue: false,
+      ),
     );
   }
 
@@ -231,6 +236,14 @@ class AppLaunchConfig extends Equatable {
   final String teacherApplicationDiscoverability;
   final bool quranSessionsBookingEnabled;
 
+  /// Gates the AI-generated dynamic UI surface (Smart Quran Plan / MeMuslim
+  /// Assistant). Defaults to **false** — when off, no GenUI dependencies are
+  /// registered and no AI-driven UI is reachable. The whole feature is a
+  /// kill-switch away from being inert.
+  ///
+  /// Example: `--dart-define=TILAWA_LAUNCH_GENUI_ASSISTANT_ENABLED=true`
+  final bool genUiAssistantEnabled;
+
   @override
   List<Object?> get props => [
     resetLaunchState,
@@ -266,5 +279,6 @@ class AppLaunchConfig extends Equatable {
     teacherApplicationEnabled,
     teacherApplicationDiscoverability,
     quranSessionsBookingEnabled,
+    genUiAssistantEnabled,
   ];
 }

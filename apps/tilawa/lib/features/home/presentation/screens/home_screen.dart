@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa/features/athkar/presentation/cubit/pinned_athkar_cubit.dart';
+import 'package:tilawa/features/home/presentation/cubit/home_athkar_compact_cubit.dart';
+import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_cubit.dart';
+import 'package:tilawa/features/home/presentation/cubit/home_primary_action_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_quran_resume_cubit.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -34,13 +36,23 @@ class HomeScreen extends StatelessWidget {
         edgeOffset: topInset + kToolbarHeight,
         onRefresh: () async {
           final String locale = Localizations.localeOf(context).languageCode;
-          final pinnedAthkarCubit = context.read<PinnedAthkarCubit>();
           final quranResumeCubit = context.read<HomeQuranResumeCubit>();
+          final listeningResumeCubit = context.read<HomeListeningResumeCubit>();
+          final athkarCompactCubit = context.read<HomeAthkarCompactCubit>();
+          final primaryActionCubit = context.read<HomePrimaryActionCubit>();
           context.read<HomeDashboardBloc>().add(
             HomeDashboardRefreshRequested(localeIdentifier: locale),
           );
-          await pinnedAthkarCubit.load();
-          await quranResumeCubit.load();
+          await Future.wait([
+            quranResumeCubit.load(),
+            listeningResumeCubit.load(),
+            athkarCompactCubit.load(),
+          ]);
+          primaryActionCubit.recompute(
+            quran: quranResumeCubit.state,
+            listening: listeningResumeCubit.state,
+            athkar: athkarCompactCubit.state,
+          );
         },
         child: NotificationListener<ScrollNotification>(
           onNotification: (notification) =>

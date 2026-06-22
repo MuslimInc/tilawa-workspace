@@ -2,6 +2,7 @@ import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
+import 'package:tilawa/features/genui_assistant/di/genui_assistant_module.dart';
 import 'package:tilawa/features/quran_sessions/di/quran_sessions_backend_config.dart';
 import 'package:tilawa/features/quran_sessions/di/quran_sessions_firebase_module.dart';
 import 'package:tilawa/features/quran_sessions/di/quran_sessions_mvp_module.dart';
@@ -73,6 +74,7 @@ Future<void> configureDependencies({AppLaunchConfig? launchConfig}) async {
   }
 
   _registerQuranSessionsIfNeeded(config);
+  GenUiAssistantModule.register(getIt, config: config);
 }
 
 void _registerQuranSessionsIfNeeded(AppLaunchConfig config) {

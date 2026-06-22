@@ -6,6 +6,7 @@ import 'package:mockito/mockito.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
 import 'package:tilawa_core/utils/typedefs.dart';
+import 'package:tilawa/features/athkar/data/datasources/athkar_daily_progress_local_datasource.dart';
 import 'package:tilawa/features/athkar/domain/entities/athkar_category.dart';
 import 'package:tilawa/features/athkar/domain/entities/athkar_item.dart';
 import 'package:tilawa/features/athkar/domain/usecases/get_athkar_by_category_use_case.dart';
@@ -31,7 +32,11 @@ void main() {
 
     mockGetCategories = MockGetAthkarCategoriesUseCase();
     mockGetAthkarByCategory = MockGetAthkarByCategoryUseCase();
-    cubit = AthkarCubit(mockGetCategories, mockGetAthkarByCategory);
+    cubit = AthkarCubit(
+      mockGetCategories,
+      mockGetAthkarByCategory,
+      _FakeAthkarDailyProgressLocalDataSource(),
+    );
   });
 
   tearDown(() {
@@ -165,4 +170,20 @@ void main() {
       );
     });
   });
+}
+
+class _FakeAthkarDailyProgressLocalDataSource
+    implements AthkarDailyProgressLocalDataSource {
+  @override
+  Future<Map<int, int>> loadCounts({
+    required int categoryId,
+    required String dateKey,
+  }) async => const {};
+
+  @override
+  Future<void> saveCounts({
+    required int categoryId,
+    required String dateKey,
+    required Map<int, int> remainingCounts,
+  }) async {}
 }

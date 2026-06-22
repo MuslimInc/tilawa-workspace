@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tilawa/features/home/domain/home_hijri_date_formatter.dart';
 import 'package:tilawa/features/home/domain/entities/home_dashboard.dart';
 import 'package:tilawa/features/home/presentation/bloc/home_dashboard_state.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_hero_sliver.dart';
@@ -29,16 +30,26 @@ void main() {
       find.byType(CustomScrollView),
     );
     final l10n = AppLocalizations.of(scrollContext);
-    expect(find.text(l10n.homeGreeting), findsOneWidget);
-    expect(find.text('Muhammad Kamel'), findsOneWidget);
+    final String hijriDateLine = formatHomeHijriDate(
+      date: DateTime.now(),
+      languageCode: 'ar',
+    );
+    expect(find.text(hijriDateLine), findsOneWidget);
+    expect(find.text(l10n.nextPrayer), findsOneWidget);
 
     final theme = Theme.of(
       tester.element(find.byType(SliverAppBar)),
     );
     final heroTokens = theme.componentTokens.homeNextPrayerHero;
     final appBar = tester.widget<SliverAppBar>(find.byType(SliverAppBar));
-    expect(appBar.expandedHeight, 272);
-    expect(appBar.backgroundColor, AppColors.tripGlideCanvasElevated);
+    final double expectedExpandedHeight =
+        HomeDashboardHeroSliver.collapseScrollExtent(scrollContext) +
+        kToolbarHeight;
+    expect(appBar.expandedHeight, expectedExpandedHeight);
+    expect(
+      appBar.backgroundColor,
+      HomeDashboardHeroSliver.collapsedBarColor(heroTokens),
+    );
     expect(appBar.foregroundColor, Colors.white);
     expect(heroTokens.foregroundColor, Colors.white);
 
@@ -96,7 +107,9 @@ void main() {
             return false;
           }
           final shape = widget.shape;
-          return shape is RoundedRectangleBorder && shape.side.width > 0;
+          return shape is RoundedRectangleBorder &&
+              shape.side.width > 0 &&
+              shape.borderRadius != BorderRadius.zero;
         },
       ),
     );

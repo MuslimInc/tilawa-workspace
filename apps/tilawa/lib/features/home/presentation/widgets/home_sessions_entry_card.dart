@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:quran_sessions/quran_sessions.dart';
-import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../../quran_sessions/presentation/quran_sessions_user.dart';
+import 'home_dashboard_footer.dart';
 
 /// Home dashboard card linking to the "تعلم قراءة القرآن الآن" feature.
 ///
@@ -18,29 +15,7 @@ class HomeSessionsEntryCard extends StatelessWidget {
   const HomeSessionsEntryCard({super.key});
 
   Future<void> _onTap(BuildContext context) async {
-    final userId = quranSessionsCurrentUserId(getIt);
-    if (userId == null) {
-      context.push('/login');
-      return;
-    }
-
-    final result = await getIt<GetUserProfileUseCase>()(userId);
-    if (!context.mounted) return;
-
-    final profile = result.fold((_) => null, (p) => p);
-    if (profile != null && profile.isComplete) {
-      context.push(QuranSessionsRoutes.home);
-      return;
-    }
-
-    // Profile is missing or incomplete — gate before entering sessions.
-    final completed = await context.push<bool>(
-      QuranSessionsRoutes.profileCompletion,
-    );
-    if (!context.mounted) return;
-    if (completed == true) {
-      context.push(QuranSessionsRoutes.home);
-    }
+    await openHomeQuranSessions(context);
   }
 
   @override
@@ -57,8 +32,8 @@ class HomeSessionsEntryCard extends StatelessWidget {
           children: [
             // Icon container
             Container(
-              width: 48,
-              height: 48,
+              width: tokens.minInteractiveDimension,
+              height: tokens.minInteractiveDimension,
               decoration: BoxDecoration(
                 color: colorScheme.primaryContainer,
                 borderRadius: BorderRadius.circular(tokens.radiusMedium),
@@ -66,7 +41,7 @@ class HomeSessionsEntryCard extends StatelessWidget {
               child: Icon(
                 Icons.menu_book_rounded,
                 color: colorScheme.onPrimaryContainer,
-                size: 24,
+                size: tokens.iconSizeMedium,
               ),
             ),
             SizedBox(width: tokens.spaceMedium),
@@ -79,7 +54,7 @@ class HomeSessionsEntryCard extends StatelessWidget {
                     children: [
                       Flexible(
                         child: Text(
-                          'تعلم قراءة القرآن الآن',
+                          context.l10n.homeSessionsTitle,
                           style: theme.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
@@ -93,7 +68,7 @@ class HomeSessionsEntryCard extends StatelessWidget {
                   ),
                   SizedBox(height: tokens.spaceExtraSmall),
                   Text(
-                    'احجز جلسات مع معلمين معتمدين',
+                    context.l10n.homeSessionsSubtitle,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),

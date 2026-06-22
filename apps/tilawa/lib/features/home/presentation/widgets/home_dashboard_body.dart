@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa/features/athkar/presentation/widgets/pinned_athkar_home_section.dart';
+import 'package:tilawa/features/today_plan/today_plan.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../cubit/home_primary_action_cubit.dart';
+import '../cubit/home_primary_action_state.dart';
+import 'home_athkar_compact_card.dart';
+import 'home_daily_ayah_card.dart';
+import 'home_dashboard_footer.dart';
 import 'home_dashboard_section.dart';
-import 'home_prayer_carousel.dart';
-import 'home_quran_entry_grid.dart';
-import 'home_sessions_entry_card.dart';
+import 'home_listening_resume_row.dart';
+import 'home_primary_action_zone.dart';
 
-/// Home body — three focused sections below the prayer-time hero:
-///
-///   1. Quran entry  — Reciters tab + Quran image reader
-///   2. Quick athkar — user-pinned athkar categories
-///   3. Prayer link  — compact anchor to the full prayer-times screen
+/// Home body — primary action, today content, and utility footer.
 class HomeDashboardBody extends StatelessWidget {
   const HomeDashboardBody({super.key, required this.onOpenPrayer});
 
@@ -25,46 +26,45 @@ class HomeDashboardBody extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Section 1 — Quran entry points
-        HomeDashboardSection(
-          title: context.l10n.homeQuickQuran,
-          child: const HomeQuranEntryGrid(),
-        ),
+        const HomePrimaryActionZone(),
         SizedBox(height: tokens.spaceLarge),
-
-        // Section 2 — Quick athkar pick
+        if (isTodayPlanEnabled()) ...[
+          const TodayPlanCard(),
+          SizedBox(height: tokens.spaceLarge),
+        ],
         HomeDashboardSection(
-          title: context.l10n.homeAthkarRitualsTitle,
-          trailing: _EditPinnedButton(),
-          contentSpacing: tokens.spaceSmall,
-          child: const PinnedAthkarHomeSection(hideHeader: true),
+          title: context.l10n.homeTodayTitle,
+          contentSpacing: tokens.spaceMedium,
+          child: const HomeDailyAyahCard(),
         ),
+        SizedBox(height: tokens.spaceExtraLarge),
+        const HomeAthkarCompactCard(),
         SizedBox(height: tokens.spaceLarge),
-
-        // Section 3 — Quran Sessions entry (experimental feature)
-        const HomeSessionsEntryCard(),
-        SizedBox(height: tokens.spaceLarge),
-
-        // Section 4 — Prayer times carousel (bleeds edge-to-edge via OverflowBox)
-        HomeDashboardSection(
-          title: context.l10n.homePrayerTimesAction,
-          child: HomePrayerCarousel(onOpenPrayer: onOpenPrayer),
-        ),
-        SizedBox(height: tokens.spaceMedium),
+        const _ConditionalListeningRow(),
+        const HomeDashboardFooter(),
       ],
     );
   }
 }
 
-class _EditPinnedButton extends StatelessWidget {
+class _ConditionalListeningRow extends StatelessWidget {
+  const _ConditionalListeningRow();
+
   @override
   Widget build(BuildContext context) {
-    return TilawaIconActionButton(
-      icon: Icons.edit_outlined,
-      onTap: () => showPinnedAthkarPicker(context),
-      backgroundColor: Colors.transparent,
-      tooltip: context.l10n.homePinnedAthkarEdit,
-      semanticLabel: context.l10n.homePinnedAthkarEdit,
+    return BlocBuilder<HomePrimaryActionCubit, HomePrimaryActionState>(
+      builder: (context, primaryState) {
+        if (primaryState.kind == HomePrimaryActionKind.listening) {
+          return const SizedBox.shrink();
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const HomeListeningResumeRow(),
+            SizedBox(height: context.tokens.spaceLarge),
+          ],
+        );
+      },
     );
   }
 }

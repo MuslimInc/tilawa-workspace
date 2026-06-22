@@ -102,9 +102,17 @@
     "@homeExploreTitle": {
         "description": "Home section title for secondary destinations that are not bottom-nav tabs"
     },
-    "homeExploreSubtitle": "Reciters, Tasbeeh, and Qibla",
+    "homeExploreSubtitle": "Prayer times and Quran teaching",
     "@homeExploreSubtitle": {
-        "description": "Home Discover section supporting line"
+        "description": "Home essentials section supporting line — features not in the tab bar"
+    },
+    "homeSessionsTitle": "Learn Quran recitation",
+    "@homeSessionsTitle": {
+        "description": "Home card title for Quran teaching sessions"
+    },
+    "homeSessionsSubtitle": "Book sessions with certified teachers",
+    "@homeSessionsSubtitle": {
+        "description": "Home card subtitle for Quran teaching sessions"
     },
     "homeExploreShowAsList": "Show as list",
     "@homeExploreShowAsList": {
@@ -129,6 +137,55 @@
     "homeTodayTitle": "Today",
     "@homeTodayTitle": {
         "description": "Home section title for daily actions"
+    },
+    "homeYoursTitle": "Yours",
+    "@homeYoursTitle": {
+        "description": "Home section title for personalized resume content"
+    },
+    "homeListeningResumeSubtitle": "Continue · {reciter} · {surah}",
+    "@homeListeningResumeSubtitle": {
+        "description": "Home continue listening row subtitle",
+        "placeholders": {
+            "reciter": { "type": "String" },
+            "surah": { "type": "String" }
+        }
+    },
+    "homeAthkarDone": "Done",
+    "@homeAthkarDone": {
+        "description": "Athkar compact card completed state"
+    },
+    "homeAthkarRemaining": "{count} remaining",
+    "@homeAthkarRemaining": {
+        "description": "Athkar compact card in-progress state",
+        "placeholders": {
+            "count": { "type": "int" }
+        }
+    },
+    "homeAthkarNotStarted": "Not started",
+    "@homeAthkarNotStarted": {
+        "description": "Athkar compact card untouched state"
+    },
+    "homeQuranStreakDays": "Day {days} streak",
+    "@homeQuranStreakDays": {
+        "description": "Quran progress card streak label",
+        "placeholders": {
+            "days": { "type": "int" }
+        }
+    },
+    "homeQuranGoalProgress": "{percent}% of today's goal",
+    "@homeQuranGoalProgress": {
+        "description": "Quran progress card daily goal label",
+        "placeholders": {
+            "percent": { "type": "int" }
+        }
+    },
+    "homeDailyAyahBookmark": "Bookmark",
+    "@homeDailyAyahBookmark": {
+        "description": "Daily ayah sheet bookmark action"
+    },
+    "homeDailyAyahShare": "Share",
+    "@homeDailyAyahShare": {
+        "description": "Daily ayah sheet share action"
     },
     "homeTodaySubtitle": "Prayer, Quran, and dhikr for your day",
     "@homeTodaySubtitle": {

@@ -11,6 +11,9 @@ final class HomeQuranResumeState extends Equatable {
     this.ayahNumber,
     this.page,
     this.failure,
+    this.streakDays,
+    this.goalProgress,
+    this.hasActiveKhatmaPlan = false,
   });
 
   final HomeQuranResumeStatus status;
@@ -18,6 +21,9 @@ final class HomeQuranResumeState extends Equatable {
   final int? ayahNumber;
   final int? page;
   final Failure? failure;
+  final int? streakDays;
+  final double? goalProgress;
+  final bool hasActiveKhatmaPlan;
 
   bool get hasResumePosition => surahNumber != null || page != null;
 
@@ -35,8 +41,12 @@ final class HomeQuranResumeState extends Equatable {
     int? ayahNumber,
     int? page,
     Failure? failure,
+    int? streakDays,
+    double? goalProgress,
+    bool? hasActiveKhatmaPlan,
     bool clearFailure = false,
     bool clearPosition = false,
+    bool clearGoalProgress = false,
   }) {
     return HomeQuranResumeState(
       status: status ?? this.status,
@@ -44,6 +54,11 @@ final class HomeQuranResumeState extends Equatable {
       ayahNumber: clearPosition ? null : ayahNumber ?? this.ayahNumber,
       page: clearPosition ? null : page ?? this.page,
       failure: clearFailure ? null : failure ?? this.failure,
+      streakDays: streakDays ?? this.streakDays,
+      goalProgress: clearGoalProgress
+          ? null
+          : goalProgress ?? this.goalProgress,
+      hasActiveKhatmaPlan: hasActiveKhatmaPlan ?? this.hasActiveKhatmaPlan,
     );
   }
 
@@ -54,5 +69,8 @@ final class HomeQuranResumeState extends Equatable {
     ayahNumber,
     page,
     failure,
+    streakDays,
+    goalProgress,
+    hasActiveKhatmaPlan,
   ];
 }

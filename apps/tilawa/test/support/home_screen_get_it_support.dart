@@ -1,6 +1,7 @@
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:tilawa/features/athkar/data/datasources/athkar_daily_progress_local_datasource.dart';
 import 'package:tilawa/features/athkar/domain/entities/athkar_category.dart';
 import 'package:tilawa/features/athkar/domain/entities/athkar_item.dart';
 import 'package:tilawa/features/athkar/domain/entities/pinned_athkar_preference.dart';
@@ -16,6 +17,10 @@ import 'package:tilawa/features/auth/domain/entities/auth_result.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/domain/repositories/auth_repository.dart';
 import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.dart';
+import 'package:tilawa/features/history/domain/entities/history_entity.dart';
+import 'package:tilawa/features/history/domain/repositories/history_repository.dart';
+import 'package:tilawa/features/home/presentation/cubit/home_athkar_compact_cubit.dart';
+import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_quran_resume_cubit.dart';
 import 'package:tilawa/features/prayer_times/application/prayer_location_update_notifier.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/entities.dart';
@@ -182,12 +187,26 @@ void registerHomeScreenScopeGetIt(GetIt getIt) {
     ),
   );
   getIt.registerFactory<HomeQuranResumeCubit>(
-    () => HomeQuranResumeCubit(_FakeGetLastReadPositionUseCase()),
+    () => HomeQuranResumeCubit(
+      _FakeGetLastReadPositionUseCase(),
+      _FakeHistoryRepository(),
+    ),
+  );
+  getIt.registerFactory<HomeListeningResumeCubit>(
+    () => HomeListeningResumeCubit(_FakeHistoryRepository()),
+  );
+  getIt.registerFactory<HomeAthkarCompactCubit>(
+    () => HomeAthkarCompactCubit(
+      GetAthkarCategoriesUseCase(athkarRepository),
+      GetAthkarByCategoryUseCase(athkarRepository),
+      _FakeAthkarDailyProgressLocalDataSource(),
+    ),
   );
   getIt.registerFactory<AthkarCubit>(
     () => AthkarCubit(
       GetAthkarCategoriesUseCase(athkarRepository),
       GetAthkarByCategoryUseCase(athkarRepository),
+      _FakeAthkarDailyProgressLocalDataSource(),
     ),
   );
   getIt.registerFactory<QiblaBloc>(() {
@@ -207,4 +226,93 @@ class _FakeGetLastReadPositionUseCase implements GetLastReadPositionUseCase {
   call() async {
     return const Right((surahNumber: null, ayahNumber: null, page: null));
   }
+}
+
+class _FakeHistoryRepository implements HistoryRepository {
+  @override
+  Future<List<HistoryEntity>> getRecentHistory({int limit = 20}) async => [];
+
+  @override
+  Future<List<HistoryEntity>> getAllHistory() async => [];
+
+  @override
+  Future<HistoryEntity> addOrUpdateHistory({
+    required int surahId,
+    required String surahName,
+    required String surahNameEn,
+    required String reciterId,
+    required String reciterName,
+    required int moshafId,
+    required String moshafName,
+    required int lastPositionMs,
+    required int durationMs,
+    required String audioUrl,
+    String? artworkUrl,
+    bool completed = false,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> deleteAllHistory() async {}
+
+  @override
+  Future<void> deleteHistory(String id) async {}
+
+  @override
+  Future<HistoryEntity?> getHistoryById(String id) async => null;
+
+  @override
+  Future<List<HistoryEntity>> getHistoryByDateRange({
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async => [];
+
+  @override
+  Future<List<HistoryEntity>> getHistoryByReciter(String reciterId) async => [];
+
+  @override
+  Future<HistoryEntity?> updateLastPosition({
+    required String id,
+    required int lastPositionMs,
+    bool? completed,
+  }) async => null;
+
+  @override
+  Future<void> deleteHistoryOlderThan(DateTime date) async {}
+
+  @override
+  Future<List<HistoryEntity>> searchHistory(String query) async => [];
+
+  @override
+  Future<int> getHistoryCount() async => 0;
+
+  @override
+  Future<int> getTotalListeningTime() async => 0;
+
+  @override
+  Future<List<HistoryEntity>> getMostPlayedSurahs({int limit = 10}) async => [];
+
+  @override
+  Future<bool> hasBeenPlayed({
+    required int surahId,
+    required String reciterId,
+    required int moshafId,
+  }) async => false;
+}
+
+class _FakeAthkarDailyProgressLocalDataSource
+    implements AthkarDailyProgressLocalDataSource {
+  @override
+  Future<Map<int, int>> loadCounts({
+    required int categoryId,
+    required String dateKey,
+  }) async => const {};
+
+  @override
+  Future<void> saveCounts({
+    required int categoryId,
+    required String dateKey,
+    required Map<int, int> remainingCounts,
+  }) async {}
 }

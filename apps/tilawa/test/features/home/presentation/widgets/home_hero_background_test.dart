@@ -4,7 +4,9 @@ import 'package:tilawa/features/home/presentation/widgets/home_hero_background.d
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 void main() {
-  testWidgets('renders Kaaba wallpaper on hero background', (tester) async {
+  testWidgets('renders prayer-period gradient without photo asset', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
@@ -22,6 +24,7 @@ void main() {
     await tester.pump();
 
     expect(find.byType(HomeHeroBackground), findsOneWidget);
-    expect(find.byType(Image), findsOneWidget);
+    expect(find.byType(Image), findsNothing);
+    expect(find.byType(DecoratedBox), findsWidgets);
   });
 }
