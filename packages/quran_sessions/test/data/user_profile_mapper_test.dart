@@ -41,6 +41,7 @@ void main() {
         createdAt: _t0,
         updatedAt: _t0,
         phoneNumber: '+201234567890',
+        publicDisplayName: 'Ustadha Fatima',
         teachingLanguages: const ['ar'],
         specializations: const ['tajweed'],
         bio: 'bio',

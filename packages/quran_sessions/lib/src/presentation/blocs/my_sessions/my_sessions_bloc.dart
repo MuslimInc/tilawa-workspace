@@ -1,17 +1,19 @@
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../domain/usecases/cancel_booking_usecase.dart';
+import '../../../domain/usecases/cancel_session_via_server_usecase.dart';
 import '../../../domain/usecases/get_student_sessions_usecase.dart';
 import '../../../domain/usecases/submit_review_usecase.dart';
+import '../../../domain/value_objects/actor_role.dart';
 import 'my_sessions_event.dart';
 import 'my_sessions_state.dart';
 
 class MySessionsBloc extends Bloc<MySessionsEvent, MySessionsState> {
   MySessionsBloc({
     required this._getStudentSessions,
-    required this._cancelBooking,
+    required this._cancelSession,
     required this._submitReview,
+    required this._studentId,
   }) : super(const MySessionsInitial()) {
     on<MySessionsLoadRequested>(_onLoadRequested, transformer: restartable());
     on<SessionCancelled>(_onSessionCancelled, transformer: sequential());
@@ -20,8 +22,9 @@ class MySessionsBloc extends Bloc<MySessionsEvent, MySessionsState> {
   }
 
   final GetStudentSessionsUseCase _getStudentSessions;
-  final CancelBookingUseCase _cancelBooking;
+  final CancelSessionViaServerUseCase _cancelSession;
   final SubmitReviewUseCase _submitReview;
+  final String _studentId;
 
   Future<void> _onLoadRequested(
     MySessionsLoadRequested event,
@@ -60,12 +63,23 @@ class MySessionsBloc extends Bloc<MySessionsEvent, MySessionsState> {
 
     emit(current.copyWith(cancellationInProgress: event.bookingId));
 
-    final result = await _cancelBooking(event.bookingId, reason: event.reason);
+    final result = await _cancelSession(
+      bookingId: event.bookingId,
+      actorId: _studentId,
+      actorRole: ActorRole.student,
+      reason: event.reason,
+    );
 
     result.fold(
-      (failure) => emit(current.clearCancellation()),
+      (failure) => emit(
+        current
+            .copyWith(
+              clearCancellationFailure: true,
+              cancellationFailure: failure,
+            )
+            .clearCancellation(),
+      ),
       (_) {
-        // Remove the cancelled session from upcoming list.
         emit(
           current
               .copyWith(
@@ -82,11 +96,7 @@ class MySessionsBloc extends Bloc<MySessionsEvent, MySessionsState> {
   void _onJoinRequested(
     SessionJoinRequested event,
     Emitter<MySessionsState> emit,
-  ) {
-    // Navigation to the call screen is handled by the UI layer via a
-    // BlocListener reacting to this event; no state change needed here.
-    // The CallProvider is invoked directly from the screen.
-  }
+  ) {}
 
   Future<void> _onReviewSubmitted(
     ReviewSubmitted event,
@@ -102,7 +112,7 @@ class MySessionsBloc extends Bloc<MySessionsEvent, MySessionsState> {
     );
 
     result.fold(
-      (_) => null, // silently ignore — do not block UI on review failure
+      (_) => null,
       (review) => emit(current.copyWith(lastSubmittedReview: review)),
     );
   }

@@ -5,6 +5,9 @@ import {
   TeacherProfile,
 } from '../../domain/entities/teacher-profile.entity';
 import { QuranSessionsUser } from '../../domain/entities/quran-sessions-user.entity';
+import { AdminSessionSummary } from '../../domain/entities/admin-session-summary.entity';
+import { SessionCompensationSummary } from '../../domain/entities/session-compensation-summary.entity';
+import { SessionTimelineEvent } from '../../domain/entities/session-timeline-event.entity';
 import {
   computeMissingPublicProfileFields,
   resolveApplicationPublicDisplayName,
@@ -63,6 +66,62 @@ export interface QuranSessionsUserListItemVm {
   readonly photoUrl: string | null;
   readonly accountStatus: string;
   readonly hasDuplicateEmail: boolean;
+}
+
+export interface AdminSessionListItemVm {
+  readonly id: string;
+  readonly sessionId: string | null;
+  readonly studentId: string;
+  readonly teacherId: string;
+  readonly startsAt: Date;
+  readonly lifecycleStatus: string;
+  readonly callType: string;
+  readonly pricingType: string;
+  readonly countryCode: string;
+  readonly cityId: string;
+}
+
+export interface AdminSessionDetailVm {
+  readonly id: string;
+  readonly aggregateId: string;
+  readonly sessionId: string | null;
+  readonly studentId: string;
+  readonly teacherId: string;
+  readonly slotId: string;
+  readonly startsAt: Date;
+  readonly endsAt: Date | null;
+  readonly lifecycleStatus: string;
+  readonly callType: string;
+  readonly pricingType: string;
+  readonly countryCode: string;
+  readonly cityId: string;
+  readonly paymentStatus: string;
+  readonly amountPaidUsd: string;
+  readonly cancellationReason: string | null;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+}
+
+export interface SessionTimelineEventVm {
+  readonly id: string;
+  readonly action: string;
+  readonly actorRole: string;
+  readonly actorId: string;
+  readonly previousStatus: string;
+  readonly newStatus: string;
+  readonly reason: string;
+  readonly source: string;
+  readonly timestamp: Date;
+}
+
+export interface SessionCompensationVm {
+  readonly id: string;
+  readonly type: string;
+  readonly status: string;
+  readonly amountUsd: string;
+  readonly issuedByRole: string;
+  readonly createdAt: Date;
+  readonly completedAt: Date | null;
 }
 
 export class QuranSessionsViewModelMapper {
@@ -137,6 +196,76 @@ export class QuranSessionsViewModelMapper {
       photoUrl: user.avatarUrl,
       accountStatus: user.accountStatus,
       hasDuplicateEmail,
+    };
+  }
+
+  static toSessionListItem(session: AdminSessionSummary): AdminSessionListItemVm {
+    return {
+      id: session.id,
+      sessionId: session.sessionId,
+      studentId: session.studentId,
+      teacherId: session.teacherId,
+      startsAt: session.startsAt,
+      lifecycleStatus: session.lifecycleStatus,
+      callType: session.callType,
+      pricingType: session.pricingType,
+      countryCode: session.countryCode ?? '—',
+      cityId: session.cityId ?? '—',
+    };
+  }
+
+  static toSessionDetail(session: AdminSessionSummary): AdminSessionDetailVm {
+    return {
+      id: session.id,
+      aggregateId: session.aggregateId,
+      sessionId: session.sessionId,
+      studentId: session.studentId,
+      teacherId: session.teacherId,
+      slotId: session.slotId,
+      startsAt: session.startsAt,
+      endsAt: session.endsAt,
+      lifecycleStatus: session.lifecycleStatus,
+      callType: session.callType,
+      pricingType: session.pricingType,
+      countryCode: session.countryCode ?? '—',
+      cityId: session.cityId ?? '—',
+      paymentStatus: session.paymentStatus ?? '—',
+      amountPaidUsd:
+        session.amountPaidUsd == null ? '—' : session.amountPaidUsd.toFixed(2),
+      cancellationReason: session.cancellationReason,
+      createdAt: session.createdAt,
+      updatedAt: session.updatedAt,
+    };
+  }
+
+  static toTimelineEvent(event: SessionTimelineEvent): SessionTimelineEventVm {
+    return {
+      id: event.id,
+      action: event.action,
+      actorRole: event.actorRole,
+      actorId: event.actorId,
+      previousStatus: event.previousStatus ?? '—',
+      newStatus: event.newStatus,
+      reason: event.reason ?? '—',
+      source: event.source,
+      timestamp: event.timestamp,
+    };
+  }
+
+  static toCompensation(
+    compensation: SessionCompensationSummary,
+  ): SessionCompensationVm {
+    return {
+      id: compensation.id,
+      type: compensation.type,
+      status: compensation.status,
+      amountUsd:
+        compensation.amountUsd == null
+          ? '—'
+          : compensation.amountUsd.toFixed(2),
+      issuedByRole: compensation.issuedByRole,
+      createdAt: compensation.createdAt,
+      completedAt: compensation.completedAt,
     };
   }
 }

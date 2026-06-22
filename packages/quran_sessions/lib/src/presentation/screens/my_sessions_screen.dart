@@ -1,26 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:quran_sessions/core/l10n_extensions.dart';
+import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
-
-import '../failure_ui/quran_sessions_failure_ui.dart';
-import '../blocs/my_sessions/my_sessions_bloc.dart';
-import '../blocs/my_sessions/my_sessions_event.dart';
-import '../blocs/my_sessions/my_sessions_state.dart';
-import '../widgets/session_card.dart';
 
 class MySessionsScreen extends StatefulWidget {
   const MySessionsScreen({
     super.key,
     required this.studentId,
     this.resolveTeacherName,
+    this.onRescheduleRequested,
+    this.onSessionDetailRequested,
   });
 
   final String studentId;
 
-  /// Optional callback to resolve a teacher's display name from their ID.
-  /// When provided, teacher names are shown on session cards.
   final String? Function(String teacherId)? resolveTeacherName;
+
+  final void Function({
+    required String bookingId,
+    required String teacherId,
+    required String studentId,
+  })?
+  onRescheduleRequested;
+
+  final void Function(String bookingId)? onSessionDetailRequested;
 
   @override
   State<MySessionsScreen> createState() => _MySessionsScreenState();
@@ -48,6 +51,13 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
               context,
               message: l10n.reviewSubmittedThanks,
               variant: TilawaFeedbackVariant.success,
+            );
+          }
+          if (state is MySessionsSuccess && state.cancellationFailure != null) {
+            TilawaFeedback.showToast(
+              context,
+              message: state.cancellationFailure!.toLocalizedMessage(context),
+              variant: TilawaFeedbackVariant.error,
             );
           }
         },
@@ -90,15 +100,41 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
                     itemCount: upcoming.length,
                     itemBuilder: (context, i) {
                       final session = upcoming[i];
-                      return SessionCard(
-                        session: session,
-                        teacherName: widget.resolveTeacherName?.call(
-                          session.teacherId,
-                        ),
-                        onJoin: () => context.read<MySessionsBloc>().add(
-                          SessionJoinRequested(sessionId: session.id),
-                        ),
-                        onCancel: () => _confirmCancel(session.bookingId),
+                      return Column(
+                        children: [
+                          SessionCard(
+                            session: session,
+                            teacherName: widget.resolveTeacherName?.call(
+                              session.teacherId,
+                            ),
+                            onJoin: () => context.read<MySessionsBloc>().add(
+                              SessionJoinRequested(sessionId: session.id),
+                            ),
+                            onCancel: () => _confirmCancel(session),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              TextButton(
+                                onPressed: () =>
+                                    widget.onSessionDetailRequested?.call(
+                                      session.bookingId,
+                                    ),
+                                child: Text(l10n.viewSessionDetails),
+                              ),
+                              if (widget.onRescheduleRequested != null)
+                                TextButton(
+                                  onPressed: () =>
+                                      widget.onRescheduleRequested!(
+                                        bookingId: session.bookingId,
+                                        teacherId: session.teacherId,
+                                        studentId: widget.studentId,
+                                      ),
+                                  child: Text(l10n.rescheduleAction),
+                                ),
+                            ],
+                          ),
+                        ],
                       );
                     },
                   ),
@@ -135,28 +171,15 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
     MySessionsLoadRequested(studentId: widget.studentId),
   );
 
-  Future<void> _confirmCancel(String bookingId) async {
-    final l10n = context.quranSessionsL10n;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.cancelSessionDialogTitle),
-        content: Text(l10n.cancelSessionDialogMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.keepSession),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.cancelSessionAction),
-          ),
-        ],
-      ),
+  Future<void> _confirmCancel(QuranSession session) async {
+    final reason = await showCancelSessionSheet(
+      context,
+      sessionStartsAt: session.startsAt,
+      pricingType: SessionPricingType.free,
     );
-    if (confirmed == true && mounted) {
+    if (reason != null && mounted) {
       context.read<MySessionsBloc>().add(
-        SessionCancelled(bookingId: bookingId, reason: 'Student cancelled'),
+        SessionCancelled(bookingId: session.bookingId, reason: reason),
       );
     }
   }

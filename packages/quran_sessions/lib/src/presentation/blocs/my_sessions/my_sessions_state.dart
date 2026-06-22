@@ -24,6 +24,7 @@ final class MySessionsSuccess extends MySessionsState {
     required this.upcoming,
     required this.past,
     this.cancellationInProgress,
+    this.cancellationFailure,
     this.lastSubmittedReview,
   });
 
@@ -33,6 +34,9 @@ final class MySessionsSuccess extends MySessionsState {
   /// ID of the booking currently being cancelled; drives a per-row spinner.
   final String? cancellationInProgress;
 
+  /// Set when cancellation fails so UI can show feedback.
+  final QuranSessionsFailure? cancellationFailure;
+
   /// Set after a review is submitted so the UI can show a confirmation snack.
   final SessionReview? lastSubmittedReview;
 
@@ -41,6 +45,7 @@ final class MySessionsSuccess extends MySessionsState {
     upcoming,
     past,
     cancellationInProgress,
+    cancellationFailure,
     lastSubmittedReview,
   ];
 
@@ -48,16 +53,21 @@ final class MySessionsSuccess extends MySessionsState {
     List<QuranSession>? upcoming,
     List<QuranSession>? past,
     String? cancellationInProgress,
+    QuranSessionsFailure? cancellationFailure,
+    bool clearCancellationFailure = false,
     SessionReview? lastSubmittedReview,
   }) => MySessionsSuccess(
     upcoming: upcoming ?? this.upcoming,
     past: past ?? this.past,
     cancellationInProgress:
         cancellationInProgress ?? this.cancellationInProgress,
+    cancellationFailure: clearCancellationFailure
+        ? null
+        : cancellationFailure ?? this.cancellationFailure,
     lastSubmittedReview: lastSubmittedReview ?? this.lastSubmittedReview,
   );
 
-  /// Returns a copy with [cancellationInProgress] cleared.
+  /// Returns a copy with cancellation fields cleared.
   MySessionsSuccess clearCancellation() => MySessionsSuccess(
     upcoming: upcoming,
     past: past,

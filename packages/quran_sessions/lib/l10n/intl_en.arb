@@ -118,6 +118,36 @@
     "cancelSessionDialogMessage": "This action cannot be undone.",
     "keepSession": "Keep session",
     "cancelSessionAction": "Cancel session",
+    "cancelReasonLabel": "Reason for cancellation",
+    "cancelReasonHint": "Tell us why you need to cancel (required)",
+    "cancelReasonRequired": "Please enter at least 3 characters.",
+    "cancelPolicyBlockedNotice": "Cancellation is not allowed this close to the session start time.",
+    "cancelPolicyFree": "This is a free session. No refund applies.",
+    "cancelPolicyFullRefund": "You will receive a full refund if you cancel now.",
+    "cancelPolicyPartialRefund": "A partial refund may apply based on our cancellation policy.",
+    "cancelPolicyNoRefund": "No refund applies for cancellations at this time.",
+    "rescheduleSessionTitle": "Reschedule session",
+    "rescheduleReasonLabel": "Reason for rescheduling",
+    "rescheduleReasonHint": "Briefly explain why you need a new time",
+    "rescheduleSubmitAction": "Request reschedule",
+    "rescheduleRequestSubmitted": "Reschedule request sent. Waiting for confirmation.",
+    "rescheduleAction": "Reschedule",
+    "sessionDetailTitle": "Session details",
+    "sessionTimelineTitle": "Activity timeline",
+    "sessionTimelineEmpty": "No activity recorded yet.",
+    "sessionStatusLabel": "Status: {status}",
+    "@sessionStatusLabel": {
+        "placeholders": {
+            "status": { "type": "String" }
+        }
+    },
+    "sessionStartsAtLabel": "Starts: {when}",
+    "@sessionStartsAtLabel": {
+        "placeholders": {
+            "when": { "type": "String" }
+        }
+    },
+    "viewSessionDetails": "View details",
     "noSessionsYet": "No sessions yet",
     "bookFirstSessionHint": "Book your first session with one of our certified teachers",
     "teacherProfileTitle": "Teacher profile",

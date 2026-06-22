@@ -683,6 +683,126 @@ abstract class QuranSessionsLocalizations {
   /// **'Cancel session'**
   String get cancelSessionAction;
 
+  /// No description provided for @cancelReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for cancellation'**
+  String get cancelReasonLabel;
+
+  /// No description provided for @cancelReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us why you need to cancel (required)'**
+  String get cancelReasonHint;
+
+  /// No description provided for @cancelReasonRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter at least 3 characters.'**
+  String get cancelReasonRequired;
+
+  /// No description provided for @cancelPolicyBlockedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancellation is not allowed this close to the session start time.'**
+  String get cancelPolicyBlockedNotice;
+
+  /// No description provided for @cancelPolicyFree.
+  ///
+  /// In en, this message translates to:
+  /// **'This is a free session. No refund applies.'**
+  String get cancelPolicyFree;
+
+  /// No description provided for @cancelPolicyFullRefund.
+  ///
+  /// In en, this message translates to:
+  /// **'You will receive a full refund if you cancel now.'**
+  String get cancelPolicyFullRefund;
+
+  /// No description provided for @cancelPolicyPartialRefund.
+  ///
+  /// In en, this message translates to:
+  /// **'A partial refund may apply based on our cancellation policy.'**
+  String get cancelPolicyPartialRefund;
+
+  /// No description provided for @cancelPolicyNoRefund.
+  ///
+  /// In en, this message translates to:
+  /// **'No refund applies for cancellations at this time.'**
+  String get cancelPolicyNoRefund;
+
+  /// No description provided for @rescheduleSessionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reschedule session'**
+  String get rescheduleSessionTitle;
+
+  /// No description provided for @rescheduleReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for rescheduling'**
+  String get rescheduleReasonLabel;
+
+  /// No description provided for @rescheduleReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Briefly explain why you need a new time'**
+  String get rescheduleReasonHint;
+
+  /// No description provided for @rescheduleSubmitAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Request reschedule'**
+  String get rescheduleSubmitAction;
+
+  /// No description provided for @rescheduleRequestSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Reschedule request sent. Waiting for confirmation.'**
+  String get rescheduleRequestSubmitted;
+
+  /// No description provided for @rescheduleAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Reschedule'**
+  String get rescheduleAction;
+
+  /// No description provided for @sessionDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session details'**
+  String get sessionDetailTitle;
+
+  /// No description provided for @sessionTimelineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity timeline'**
+  String get sessionTimelineTitle;
+
+  /// No description provided for @sessionTimelineEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No activity recorded yet.'**
+  String get sessionTimelineEmpty;
+
+  /// No description provided for @sessionStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Status: {status}'**
+  String sessionStatusLabel(String status);
+
+  /// No description provided for @sessionStartsAtLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts: {when}'**
+  String sessionStartsAtLabel(String when);
+
+  /// No description provided for @viewSessionDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'View details'**
+  String get viewSessionDetails;
+
   /// No description provided for @noSessionsYet.
   ///
   /// In en, this message translates to:

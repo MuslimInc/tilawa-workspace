@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 
+import 'legacy_status_lifecycle_mapper.dart';
 import 'session_call_type.dart';
+import 'session_lifecycle_status.dart';
 import 'session_pricing_type.dart';
 
 /// Lifecycle of a booking request.
@@ -24,6 +26,7 @@ class QuranBooking extends Equatable {
     required this.pricingType,
     required this.status,
     required this.createdAt,
+    this.lifecycleStatus,
     this.amountPaidUsd,
     this.paymentReference,
     this.sessionId,
@@ -38,6 +41,7 @@ class QuranBooking extends Equatable {
   final SessionPricingType pricingType;
   final BookingStatus status;
   final DateTime createdAt;
+  final SessionLifecycleStatus? lifecycleStatus;
 
   /// Null for free sessions.
   final double? amountPaidUsd;
@@ -50,6 +54,10 @@ class QuranBooking extends Equatable {
 
   final String? studentNote;
 
+  /// Canonical lifecycle status with backwards-compatible fallback.
+  SessionLifecycleStatus get effectiveLifecycleStatus =>
+      lifecycleStatus ?? status.toLifecycleStatus();
+
   @override
   List<Object?> get props => [
     id,
@@ -60,6 +68,7 @@ class QuranBooking extends Equatable {
     pricingType,
     status,
     createdAt,
+    lifecycleStatus,
     amountPaidUsd,
     paymentReference,
     sessionId,

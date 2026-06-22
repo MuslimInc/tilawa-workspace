@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 
+import 'legacy_status_lifecycle_mapper.dart';
 import 'session_call_type.dart';
+import 'session_lifecycle_status.dart';
 
 /// The canonical state of a booked/active/completed session.
 enum QuranSessionStatus {
@@ -23,6 +25,7 @@ class QuranSession extends Equatable {
     required this.endsAt,
     required this.callType,
     required this.status,
+    this.lifecycleStatus,
     this.meetingLink,
     this.callRoomId,
     this.notes,
@@ -36,6 +39,7 @@ class QuranSession extends Equatable {
   final DateTime endsAt;
   final SessionCallType callType;
   final QuranSessionStatus status;
+  final SessionLifecycleStatus? lifecycleStatus;
 
   /// Populated for [SessionCallType.externalMeeting].
   final String? meetingLink;
@@ -44,6 +48,10 @@ class QuranSession extends Equatable {
   final String? callRoomId;
 
   final String? notes;
+
+  /// Canonical lifecycle status with backwards-compatible fallback.
+  SessionLifecycleStatus get effectiveLifecycleStatus =>
+      lifecycleStatus ?? status.toLifecycleStatus();
 
   bool get isUpcoming => startsAt.isAfter(DateTime.now());
 
@@ -57,6 +65,7 @@ class QuranSession extends Equatable {
     endsAt,
     callType,
     status,
+    lifecycleStatus,
     meetingLink,
     callRoomId,
     notes,

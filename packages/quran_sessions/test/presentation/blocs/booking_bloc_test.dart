@@ -1,3 +1,4 @@
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:checks/checks.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -6,7 +7,6 @@ import 'package:quran_sessions/src/domain/entities/quran_booking.dart';
 import 'package:quran_sessions/src/domain/entities/session_call_type.dart';
 import 'package:quran_sessions/src/domain/entities/user_profile.dart';
 import 'package:quran_sessions/src/domain/failures/quran_sessions_failure.dart';
-import 'package:quran_sessions/src/domain/usecases/create_booking_usecase.dart';
 import 'package:quran_sessions/src/domain/usecases/get_teacher_availability_usecase.dart';
 import 'package:quran_sessions/src/domain/usecases/validate_booking_eligibility_usecase.dart';
 import 'package:quran_sessions/src/presentation/blocs/booking/booking_bloc.dart';
@@ -19,6 +19,8 @@ import '../../helpers/fakes/fake_session_policy_repository.dart';
 import '../../helpers/fakes/fake_session_repository.dart';
 import '../../helpers/fakes/fake_teacher_repository.dart';
 import '../../helpers/fakes/fake_user_profile_repository.dart';
+import '../../helpers/fakes/fake_session_mutation_gateway.dart';
+import '../../helpers/lifecycle_test_helpers.dart';
 import '../../helpers/fixtures.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 
@@ -31,6 +33,7 @@ void main() {
   late FakeSessionPolicyRepository policyRepo;
   late FakeMarketConfigRepository marketConfigRepo;
   late GetTeacherAvailabilityUseCase getAvailability;
+  late FakeSessionMutationGateway mutationGateway;
   late BookingBloc bloc;
   late TeacherAvailability generatedSlot;
 
@@ -62,9 +65,13 @@ void main() {
       sessionRepository: sessionRepo,
       now: () => fixedNow,
     );
+    mutationGateway = FakeSessionMutationGateway();
     bloc = BookingBloc(
       getAvailability: getAvailability,
-      createBooking: CreateBookingUseCase(bookingRepo, getAvailability),
+      submitBooking: buildSubmitSessionBookingUseCase(
+        getAvailability: getAvailability,
+        mutationGateway: mutationGateway,
+      ),
       validateEligibility: ValidateBookingEligibilityUseCase(
         profileRepository: profileRepo,
         policyRepository: policyRepo,
@@ -180,7 +187,9 @@ void main() {
     blocTest<BookingBloc, BookingState>(
       'BookingSubmitted emits [Submitting, Failure] on repository error',
       build: () {
-        bookingRepo.failWith = const ServerFailure(statusCode: 500);
+        mutationGateway.onCreate =
+            ({required teacherId, required studentId, required slotId}) async =>
+                const Left(ServerFailure(statusCode: 500));
         return bloc;
       },
       act: (b) => b.add(

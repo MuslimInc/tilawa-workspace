@@ -150,6 +150,49 @@ List<RouteBase> get quranSessionsRoutes => [
         child: MySessionsScreen(
           studentId: studentId,
           resolveTeacherName: _resolveTeacherName,
+          onSessionDetailRequested: (bookingId) => context.push(
+            QuranSessionsRoutes.sessionDetail.replaceFirst(
+              ':bookingId',
+              bookingId,
+            ),
+          ),
+          onRescheduleRequested:
+              ({
+                required bookingId,
+                required teacherId,
+                required studentId,
+              }) => context.push(
+                QuranSessionsRoutes.rescheduleSession.replaceFirst(
+                  ':bookingId',
+                  bookingId,
+                ),
+                extra: {'teacherId': teacherId, 'actorId': studentId},
+              ),
+        ),
+      );
+    },
+  ),
+  GoRoute(
+    path: QuranSessionsRoutes.sessionDetail,
+    builder: (context, state) {
+      final bookingId = state.pathParameters['bookingId']!;
+      return BlocProvider(
+        create: (_) => getIt<SessionDetailBloc>(),
+        child: SessionDetailScreen(bookingId: bookingId),
+      );
+    },
+  ),
+  GoRoute(
+    path: QuranSessionsRoutes.rescheduleSession,
+    builder: (context, state) {
+      final bookingId = state.pathParameters['bookingId']!;
+      final extra = state.extra as Map<String, String>? ?? const {};
+      return BlocProvider(
+        create: (_) => getIt<RescheduleBloc>(),
+        child: RescheduleSessionScreen(
+          bookingId: bookingId,
+          teacherId: extra['teacherId'] ?? '',
+          actorId: extra['actorId'] ?? requireQuranSessionsUserId(getIt),
         ),
       );
     },

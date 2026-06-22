@@ -4,14 +4,16 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:quran_sessions/src/domain/entities/quran_session.dart';
 import 'package:quran_sessions/src/domain/failures/quran_sessions_failure.dart';
-import 'package:quran_sessions/src/domain/usecases/cancel_booking_usecase.dart';
 import 'package:quran_sessions/src/domain/usecases/get_student_sessions_usecase.dart';
 import 'package:quran_sessions/src/domain/usecases/submit_review_usecase.dart';
 import 'package:quran_sessions/src/presentation/blocs/my_sessions/my_sessions_bloc.dart';
 import 'package:quran_sessions/src/presentation/blocs/my_sessions/my_sessions_event.dart';
 import 'package:quran_sessions/src/presentation/blocs/my_sessions/my_sessions_state.dart';
 import '../../helpers/fakes/fake_booking_repository.dart';
+import '../../helpers/fakes/fake_session_aggregate_repository.dart';
 import '../../helpers/fakes/fake_session_repository.dart';
+import '../../helpers/fixtures/session_aggregate_fixtures.dart';
+import '../../helpers/lifecycle_test_helpers.dart';
 import '../../helpers/fixtures.dart' show makeBooking, makeSession;
 
 void main() {
@@ -19,13 +21,19 @@ void main() {
   late FakeBookingRepository bookingRepo;
   late MySessionsBloc bloc;
 
+  late FakeSessionAggregateRepository aggregateRepo;
+
   setUp(() {
     sessionRepo = FakeSessionRepository();
     bookingRepo = FakeBookingRepository();
+    aggregateRepo = FakeSessionAggregateRepository();
     bloc = MySessionsBloc(
       getStudentSessions: GetStudentSessionsUseCase(sessionRepo),
-      cancelBooking: CancelBookingUseCase(bookingRepo),
+      cancelSession: buildCancelSessionViaServerUseCase(
+        repository: aggregateRepo,
+      ),
       submitReview: SubmitReviewUseCase(bookingRepo),
+      studentId: 'student_1',
     );
   });
 
@@ -91,9 +99,10 @@ void main() {
     blocTest<MySessionsBloc, MySessionsState>(
       'SessionCancelled removes session from upcoming list',
       build: () {
-        // Seed a booking with id matching the session's bookingId so the
-        // fake repository's cancelBooking succeeds and the BLoC removes the row.
-        bookingRepo.bookings.add(makeBooking(id: 'booking_1'));
+        aggregateRepo.store['booking_1'] = makeAggregate(
+          id: 'booking_1',
+          startsAt: DateTime.now().add(const Duration(days: 2)),
+        );
         return bloc;
       },
       seed: () => MySessionsSuccess(

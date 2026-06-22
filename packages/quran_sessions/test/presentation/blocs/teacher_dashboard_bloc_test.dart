@@ -6,6 +6,7 @@ import 'package:quran_sessions/quran_sessions.dart';
 import '../../helpers/availability_test_helpers.dart';
 import '../../helpers/fakes/fake_availability_provider.dart';
 import '../../helpers/fakes/fake_session_repository.dart';
+import '../../helpers/lifecycle_test_helpers.dart';
 import '../../helpers/fixtures.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 
@@ -34,6 +35,9 @@ void main() {
       ),
       blockGeneratedSlot: blockGeneratedSlot,
       availabilityProvider: availabilityProvider,
+      cancelSession: buildCancelSessionViaServerUseCase(),
+      completeSession: buildCompleteSessionViaServerUseCase(),
+      teacherId: 'teacher_1',
     );
   });
 

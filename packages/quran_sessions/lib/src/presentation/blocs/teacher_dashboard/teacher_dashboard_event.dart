@@ -69,3 +69,27 @@ final class AvailabilityUpdated extends TeacherDashboardEvent {
   @override
   List<Object?> get props => [teacherId, from, to];
 }
+
+/// Teacher cancels an upcoming session.
+final class TeacherSessionCancelled extends TeacherDashboardEvent {
+  const TeacherSessionCancelled({
+    required this.bookingId,
+    required this.reason,
+  });
+
+  final String bookingId;
+  final String reason;
+
+  @override
+  List<Object?> get props => [bookingId, reason];
+}
+
+/// Teacher marks session complete after it ends.
+final class TeacherSessionCompleted extends TeacherDashboardEvent {
+  const TeacherSessionCompleted({required this.sessionId});
+
+  final String sessionId;
+
+  @override
+  List<Object?> get props => [sessionId];
+}

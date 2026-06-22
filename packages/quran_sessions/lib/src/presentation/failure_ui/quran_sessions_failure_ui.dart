@@ -68,6 +68,16 @@ extension QuranSessionsFailureUi on QuranSessionsFailure {
       // ── Booking ─────────────────────────────────────────────────────────────
       SlotUnavailableFailure() => loc.slotUnavailable,
       BookingConflictFailure() => loc.bookingConflict,
+      InvalidTransitionFailure(action: final action) => loc.validationError(
+        'invalid_transition',
+        action,
+      ),
+      UnauthorizedActorFailure(action: final action, actorRole: final actor) =>
+        loc.validationError('unauthorized_actor', '$action:$actor'),
+      ReasonRequiredFailure(action: final action) => loc.validationError(
+        'reason_required',
+        action,
+      ),
 
       // ── Profile / eligibility ───────────────────────────────────────────────
       ProfileIncompleteFailure(missingFields: final fields) =>

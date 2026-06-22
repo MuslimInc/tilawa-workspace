@@ -13,7 +13,9 @@
     "admin:review-teacher-application": "ts-node --project tsconfig.scripts.json scripts/reviewTeacherApplicationAdmin.ts",
     "admin:create-user": "ts-node --project tsconfig.scripts.json scripts/createAdminUser.ts",
     "admin:audit-duplicate-emails": "ts-node --project tsconfig.scripts.json scripts/auditDuplicateUserEmails.ts",
-    "test": "node -r ts-node/register --test test/auditDuplicateUserEmails.test.ts",
+    "quran-sessions:backfill-lifecycle": "ts-node --project tsconfig.scripts.json scripts/backfillLifecycleStatus.ts",
+    "test": "node -r ts-node/register --test test/**/*.test.ts",
+    "test:integration": "echo 'Integration tests not yet configured for functions'",
     "admin:backfill-teacher-profiles": "ts-node --project tsconfig.scripts.json scripts/backfillTeacherProfiles.ts",
     "admin:audit-duplicate-users": "ts-node --project tsconfig.scripts.json scripts/auditDuplicateUsers.ts"
   },

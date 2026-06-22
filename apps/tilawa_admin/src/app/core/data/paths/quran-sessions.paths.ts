@@ -5,6 +5,9 @@ export abstract class QuranSessionsPaths {
   static readonly teacherProfiles = 'quran_teacher_profiles';
   static readonly bookings = 'quran_bookings';
   static readonly sessions = 'quran_sessions';
+  static readonly sessionEvents = 'quran_session_events';
+  static readonly sessionCompensations = 'quran_session_compensations';
+  static readonly rescheduleRequests = 'quran_reschedule_requests';
   static readonly quranSessionsProfileField = 'quranSessionsProfile';
 }
 

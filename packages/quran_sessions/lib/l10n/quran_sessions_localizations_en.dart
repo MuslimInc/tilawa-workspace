@@ -347,6 +347,75 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get cancelSessionAction => 'Cancel session';
 
   @override
+  String get cancelReasonLabel => 'Reason for cancellation';
+
+  @override
+  String get cancelReasonHint => 'Tell us why you need to cancel (required)';
+
+  @override
+  String get cancelReasonRequired => 'Please enter at least 3 characters.';
+
+  @override
+  String get cancelPolicyBlockedNotice =>
+      'Cancellation is not allowed this close to the session start time.';
+
+  @override
+  String get cancelPolicyFree => 'This is a free session. No refund applies.';
+
+  @override
+  String get cancelPolicyFullRefund =>
+      'You will receive a full refund if you cancel now.';
+
+  @override
+  String get cancelPolicyPartialRefund =>
+      'A partial refund may apply based on our cancellation policy.';
+
+  @override
+  String get cancelPolicyNoRefund =>
+      'No refund applies for cancellations at this time.';
+
+  @override
+  String get rescheduleSessionTitle => 'Reschedule session';
+
+  @override
+  String get rescheduleReasonLabel => 'Reason for rescheduling';
+
+  @override
+  String get rescheduleReasonHint => 'Briefly explain why you need a new time';
+
+  @override
+  String get rescheduleSubmitAction => 'Request reschedule';
+
+  @override
+  String get rescheduleRequestSubmitted =>
+      'Reschedule request sent. Waiting for confirmation.';
+
+  @override
+  String get rescheduleAction => 'Reschedule';
+
+  @override
+  String get sessionDetailTitle => 'Session details';
+
+  @override
+  String get sessionTimelineTitle => 'Activity timeline';
+
+  @override
+  String get sessionTimelineEmpty => 'No activity recorded yet.';
+
+  @override
+  String sessionStatusLabel(String status) {
+    return 'Status: $status';
+  }
+
+  @override
+  String sessionStartsAtLabel(String when) {
+    return 'Starts: $when';
+  }
+
+  @override
+  String get viewSessionDetails => 'View details';
+
+  @override
   String get noSessionsYet => 'No sessions yet';
 
   @override

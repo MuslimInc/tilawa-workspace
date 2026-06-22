@@ -9,6 +9,8 @@ import { TeacherApplicationsComponent } from './features/quran-sessions/teacher-
 import { TeacherApplicationDetailComponent } from './features/quran-sessions/teacher-application-detail/teacher-application-detail.component';
 import { TeachersComponent } from './features/quran-sessions/teachers/teachers.component';
 import { QuranSessionsUsersComponent } from './features/quran-sessions/users/quran-sessions-users.component';
+import { SessionsComponent } from './features/quran-sessions/sessions/sessions.component';
+import { SessionDetailComponent } from './features/quran-sessions/session-detail/session-detail.component';
 import { adminGuard, authGuard, guestGuard } from './core/auth/auth.guard';
 
 export const routes: Routes = [
@@ -33,6 +35,11 @@ export const routes: Routes = [
       },
       { path: 'quran-sessions/teachers', component: TeachersComponent },
       { path: 'quran-sessions/users', component: QuranSessionsUsersComponent },
+      { path: 'quran-sessions/sessions', component: SessionsComponent },
+      {
+        path: 'quran-sessions/sessions/:id',
+        component: SessionDetailComponent,
+      },
     ],
   },
   { path: '**', redirectTo: '' },

@@ -118,6 +118,36 @@
     "cancelSessionDialogMessage": "لا يمكن التراجع عن هذا الإجراء.",
     "keepSession": "بقاء",
     "cancelSessionAction": "إلغاء الجلسة",
+    "cancelReasonLabel": "سبب الإلغاء",
+    "cancelReasonHint": "أخبرنا لماذا تحتاج إلى الإلغاء (مطلوب)",
+    "cancelReasonRequired": "يرجى إدخال 3 أحرف على الأقل.",
+    "cancelPolicyBlockedNotice": "لا يُسمح بالإلغاء قرب موعد بدء الجلسة.",
+    "cancelPolicyFree": "هذه جلسة مجانية. لا يوجد استرداد.",
+    "cancelPolicyFullRefund": "ستحصل على استرداد كامل إذا ألغيت الآن.",
+    "cancelPolicyPartialRefund": "قد ينطبق استرداد جزئي وفق سياسة الإلغاء.",
+    "cancelPolicyNoRefund": "لا ينطبق استرداد للإلغاء في هذا الوقت.",
+    "rescheduleSessionTitle": "إعادة جدولة الجلسة",
+    "rescheduleReasonLabel": "سبب إعادة الجدولة",
+    "rescheduleReasonHint": "اشرح باختصار لماذا تحتاج وقتاً جديداً",
+    "rescheduleSubmitAction": "طلب إعادة الجدولة",
+    "rescheduleRequestSubmitted": "تم إرسال طلب إعادة الجدولة. بانتظار التأكيد.",
+    "rescheduleAction": "إعادة الجدولة",
+    "sessionDetailTitle": "تفاصيل الجلسة",
+    "sessionTimelineTitle": "سجل النشاط",
+    "sessionTimelineEmpty": "لا يوجد نشاط مسجل بعد.",
+    "sessionStatusLabel": "الحالة: {status}",
+    "@sessionStatusLabel": {
+        "placeholders": {
+            "status": { "type": "String" }
+        }
+    },
+    "sessionStartsAtLabel": "تبدأ: {when}",
+    "@sessionStartsAtLabel": {
+        "placeholders": {
+            "when": { "type": "String" }
+        }
+    },
+    "viewSessionDetails": "عرض التفاصيل",
     "noSessionsYet": "لا توجد جلسات بعد",
     "bookFirstSessionHint": "احجز جلستك الأولى مع أحد معلمينا المعتمدين",
     "teacherProfileTitle": "ملف المعلم",

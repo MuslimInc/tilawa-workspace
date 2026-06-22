@@ -101,6 +101,50 @@ final class BookingConflictFailure extends QuranSessionsFailure {
   const BookingConflictFailure();
 }
 
+/// The requested lifecycle action is not valid for the current status.
+final class InvalidTransitionFailure extends QuranSessionsFailure {
+  const InvalidTransitionFailure({
+    required this.action,
+    required this.actorRole,
+    this.currentStatus,
+    this.reasonCode,
+  });
+
+  final String action;
+  final String actorRole;
+  final String? currentStatus;
+  final String? reasonCode;
+
+  @override
+  List<Object?> get props => [action, actorRole, currentStatus, reasonCode];
+}
+
+/// The actor role is not authorized to execute the lifecycle action.
+final class UnauthorizedActorFailure extends QuranSessionsFailure {
+  const UnauthorizedActorFailure({
+    required this.action,
+    required this.actorRole,
+    required this.allowedActorRoles,
+  });
+
+  final String action;
+  final String actorRole;
+  final List<String> allowedActorRoles;
+
+  @override
+  List<Object?> get props => [action, actorRole, allowedActorRoles];
+}
+
+/// The lifecycle action requires a non-empty reason.
+final class ReasonRequiredFailure extends QuranSessionsFailure {
+  const ReasonRequiredFailure({required this.action});
+
+  final String action;
+
+  @override
+  List<Object?> get props => [action];
+}
+
 // ── Profile / eligibility ─────────────────────────────────────────────────────
 
 /// The student's profile is missing required fields before booking can proceed.

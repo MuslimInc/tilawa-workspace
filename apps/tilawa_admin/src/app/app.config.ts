@@ -20,6 +20,12 @@ import { AUTH_SESSION_REPOSITORY } from './core/domain/repositories/auth-session
 import { FirebaseAuthSessionRepository } from './core/data/repositories/firebase-auth-session.repository';
 import { MODERATION_GATEWAY } from './core/domain/repositories/moderation.gateway';
 import { FirebaseModerationGateway } from './core/data/repositories/firebase-moderation.gateway';
+import { SESSION_READ_REPOSITORY } from './core/domain/repositories/session-read.repository';
+import { FirebaseSessionReadRepository } from './core/data/repositories/firebase-session-read.repository';
+import { SESSION_AUDIT_REPOSITORY } from './core/domain/repositories/session-audit.repository';
+import { FirebaseSessionAuditRepository } from './core/data/repositories/firebase-session-audit.repository';
+import { SESSION_MODERATION_GATEWAY } from './core/domain/repositories/session-moderation.gateway';
+import { FirebaseSessionModerationGateway } from './core/data/repositories/firebase-session-moderation.gateway';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -48,5 +54,17 @@ export const appConfig: ApplicationConfig = {
     },
     { provide: AUTH_SESSION_REPOSITORY, useClass: FirebaseAuthSessionRepository },
     { provide: MODERATION_GATEWAY, useClass: FirebaseModerationGateway },
+    {
+      provide: SESSION_READ_REPOSITORY,
+      useClass: FirebaseSessionReadRepository,
+    },
+    {
+      provide: SESSION_AUDIT_REPOSITORY,
+      useClass: FirebaseSessionAuditRepository,
+    },
+    {
+      provide: SESSION_MODERATION_GATEWAY,
+      useClass: FirebaseSessionModerationGateway,
+    },
   ],
 };

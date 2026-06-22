@@ -12,7 +12,9 @@ import '../data/fake_mvp_teacher_application_repository.dart';
 import '../data/fake_mvp_teacher_profile_repository.dart';
 import '../data/fake_mvp_teacher_repository.dart';
 import '../data/fake_mvp_user_profile_repository.dart';
+import '../data/fake_mvp_session_lifecycle.dart';
 import '../data/quran_sessions_mvp_store.dart';
+import 'quran_sessions_lifecycle_module.dart';
 
 /// Wires fake MVP repositories, boundaries, use cases, and BLoC factories
 /// into [GetIt]. Call once after [configureDependencies].
@@ -54,6 +56,24 @@ class QuranSessionsMvpModule {
     );
     sl.registerLazySingleton<ScheduleRepository>(
       () => FakeMvpScheduleRepository(store),
+    );
+
+    final lifecycle = FakeMvpSessionLifecycleStack.instance;
+    sl.registerLazySingleton<SessionCommandGateway>(
+      () => lifecycle.commandGateway,
+    );
+    sl.registerLazySingleton<SessionMutationGateway>(
+      () => lifecycle.mutationGateway,
+    );
+
+    QuranSessionsLifecycleModule.register(
+      sl,
+      aggregateRepository: lifecycle.aggregateRepository,
+      auditRepository: lifecycle.auditRepository,
+      commandGateway: lifecycle.commandGateway,
+      notificationGateway: lifecycle.notificationGateway,
+      mutationGateway: lifecycle.mutationGateway,
+      authSession: sl<AuthSessionProvider>(),
     );
 
     registerUseCases(sl);
@@ -213,15 +233,16 @@ class QuranSessionsMvpModule {
     sl.registerFactory(
       () => BookingBloc(
         getAvailability: sl<GetTeacherAvailabilityUseCase>(),
-        createBooking: sl<CreateBookingUseCase>(),
+        submitBooking: sl<SubmitSessionBookingUseCase>(),
         validateEligibility: sl<ValidateBookingEligibilityUseCase>(),
       ),
     );
     sl.registerFactory(
       () => MySessionsBloc(
         getStudentSessions: sl<GetStudentSessionsUseCase>(),
-        cancelBooking: sl<CancelBookingUseCase>(),
+        cancelSession: sl<CancelSessionViaServerUseCase>(),
         submitReview: sl<SubmitReviewUseCase>(),
+        studentId: sl<AuthSessionProvider>().currentUserId ?? 'student_mvp',
       ),
     );
     sl.registerFactory(
@@ -230,6 +251,21 @@ class QuranSessionsMvpModule {
         getAvailability: sl<GetTeacherAvailabilityUseCase>(),
         blockGeneratedSlot: sl<BlockGeneratedSlotUseCase>(),
         availabilityProvider: sl<AvailabilityProvider>(),
+        cancelSession: sl<CancelSessionViaServerUseCase>(),
+        completeSession: sl<CompleteSessionViaServerUseCase>(),
+        teacherId: sl<AuthSessionProvider>().currentUserId ?? 'teacher_mvp',
+      ),
+    );
+    sl.registerFactory(
+      () => RescheduleBloc(
+        getAvailability: sl<GetTeacherAvailabilityUseCase>(),
+        requestReschedule: sl<RequestSessionRescheduleViaServerUseCase>(),
+      ),
+    );
+    sl.registerFactory(
+      () => SessionDetailBloc(
+        aggregateRepository: sl<SessionAggregateRepository>(),
+        getTimeline: sl<GetSessionTimelineUseCase>(),
       ),
     );
     sl.registerFactory(

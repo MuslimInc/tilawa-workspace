@@ -1,8 +1,8 @@
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../domain/usecases/create_booking_usecase.dart';
 import '../../../domain/usecases/get_teacher_availability_usecase.dart';
+import '../../../domain/usecases/submit_session_booking_usecase.dart';
 import '../../../domain/usecases/validate_booking_eligibility_usecase.dart';
 import 'booking_event.dart';
 import 'booking_state.dart';
@@ -10,7 +10,7 @@ import 'booking_state.dart';
 class BookingBloc extends Bloc<BookingEvent, BookingState> {
   BookingBloc({
     required this._getAvailability,
-    required this._createBooking,
+    required this._submitBooking,
     required this._validateEligibility,
   }) : super(const BookingInitial()) {
     on<BookingScreenOpened>(_onScreenOpened, transformer: restartable());
@@ -24,7 +24,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
   }
 
   final GetTeacherAvailabilityUseCase _getAvailability;
-  final CreateBookingUseCase _createBooking;
+  final SubmitSessionBookingUseCase _submitBooking;
   final ValidateBookingEligibilityUseCase _validateEligibility;
 
   Future<void> _onScreenOpened(
@@ -101,10 +101,10 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
   ) async {
     emit(const BookingSubmitting());
 
-    final result = await _createBooking(
+    final result = await _submitBooking(
       teacherId: event.teacherId,
       slotId: event.slotId,
-      requestedCallTypeId: event.callType.name,
+      callType: event.callType,
       paymentReference: event.paymentReference,
       studentNote: event.note,
     );

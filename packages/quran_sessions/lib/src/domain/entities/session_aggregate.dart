@@ -1,0 +1,82 @@
+import 'package:equatable/equatable.dart';
+
+import 'session_lifecycle_status.dart';
+import 'session_pricing_type.dart';
+
+/// Canonical booking+session aggregate used by lifecycle use cases.
+class SessionAggregate extends Equatable {
+  const SessionAggregate({
+    required this.id,
+    required this.teacherId,
+    required this.studentId,
+    required this.slotId,
+    required this.startsAt,
+    required this.pricingType,
+    required this.lifecycleStatus,
+    required this.createdAt,
+    required this.updatedAt,
+    this.rescheduleCount = 0,
+    this.cancellationReason,
+    this.lastActionReason,
+    this.paymentReference,
+  });
+
+  final String id;
+  final String teacherId;
+  final String studentId;
+  final String slotId;
+  final DateTime startsAt;
+  final SessionPricingType pricingType;
+  final SessionLifecycleStatus lifecycleStatus;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final int rescheduleCount;
+  final String? cancellationReason;
+  final String? lastActionReason;
+  final String? paymentReference;
+
+  bool get isPaid => pricingType == SessionPricingType.fixedPerSession;
+
+  SessionAggregate copyWith({
+    SessionLifecycleStatus? lifecycleStatus,
+    DateTime? startsAt,
+    DateTime? updatedAt,
+    int? rescheduleCount,
+    String? cancellationReason,
+    String? lastActionReason,
+    String? paymentReference,
+  }) {
+    return SessionAggregate(
+      id: id,
+      teacherId: teacherId,
+      studentId: studentId,
+      slotId: slotId,
+      startsAt: startsAt ?? this.startsAt,
+      pricingType: pricingType,
+      lifecycleStatus: lifecycleStatus ?? this.lifecycleStatus,
+      createdAt: createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rescheduleCount: rescheduleCount ?? this.rescheduleCount,
+      cancellationReason: cancellationReason ?? this.cancellationReason,
+      lastActionReason: lastActionReason ?? this.lastActionReason,
+      paymentReference: paymentReference ?? this.paymentReference,
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+    id,
+    teacherId,
+    studentId,
+    slotId,
+    startsAt,
+    pricingType,
+    lifecycleStatus,
+    createdAt,
+    updatedAt,
+    rescheduleCount,
+    cancellationReason,
+    lastActionReason,
+    paymentReference,
+  ];
+}

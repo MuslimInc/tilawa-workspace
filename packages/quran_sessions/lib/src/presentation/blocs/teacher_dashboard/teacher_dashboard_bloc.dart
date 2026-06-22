@@ -6,9 +6,12 @@ import '../../../domain/entities/generated_slot.dart';
 import '../../../domain/entities/quran_session.dart';
 import '../../../domain/entities/teacher_availability.dart';
 import '../../../domain/usecases/block_generated_slot_usecase.dart';
+import '../../../domain/usecases/cancel_session_via_server_usecase.dart';
+import '../../../domain/usecases/complete_session_via_server_usecase.dart';
 import '../../../domain/usecases/get_teacher_availability_usecase.dart';
 import '../../../domain/usecases/get_teacher_sessions_usecase.dart';
 import '../../../domain/services/teacher_availability_sort.dart';
+import '../../../domain/value_objects/actor_role.dart';
 import 'teacher_dashboard_event.dart';
 import 'teacher_dashboard_state.dart';
 
@@ -19,6 +22,9 @@ class TeacherDashboardBloc
     required this._getAvailability,
     required this._blockGeneratedSlot,
     required this._availabilityProvider,
+    required this._cancelSession,
+    required this._completeSession,
+    required this._teacherId,
   }) : super(const TeacherDashboardInitial()) {
     on<TeacherDashboardLoadRequested>(
       _onLoadRequested,
@@ -28,12 +34,17 @@ class TeacherDashboardBloc
     on<AvailabilitySlotAdded>(_onSlotAdded, transformer: sequential());
     on<AvailabilitySlotEdited>(_onSlotEdited, transformer: sequential());
     on<AvailabilitySlotRemoved>(_onSlotRemoved, transformer: sequential());
+    on<TeacherSessionCancelled>(_onSessionCancelled, transformer: sequential());
+    on<TeacherSessionCompleted>(_onSessionCompleted, transformer: sequential());
   }
 
   final GetTeacherSessionsUseCase _getTeacherSessions;
   final GetTeacherAvailabilityUseCase _getAvailability;
   final BlockGeneratedSlotUseCase _blockGeneratedSlot;
   final AvailabilityProvider _availabilityProvider;
+  final CancelSessionViaServerUseCase _cancelSession;
+  final CompleteSessionViaServerUseCase _completeSession;
+  final String _teacherId;
 
   Future<void> _onLoadRequested(
     TeacherDashboardLoadRequested event,
@@ -263,6 +274,44 @@ class TeacherDashboardBloc
           ),
         );
       },
+    );
+  }
+
+  Future<void> _onSessionCancelled(
+    TeacherSessionCancelled event,
+    Emitter<TeacherDashboardState> emit,
+  ) async {
+    final current = state;
+    if (current is! TeacherDashboardSuccess) return;
+
+    final result = await _cancelSession(
+      bookingId: event.bookingId,
+      actorId: _teacherId,
+      actorRole: ActorRole.teacher,
+      reason: event.reason,
+    );
+
+    result.fold(
+      (_) => null,
+      (_) {
+        emit(
+          current.copyWith(
+            upcomingSessions: current.upcomingSessions
+                .where((s) => s.bookingId != event.bookingId)
+                .toList(),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _onSessionCompleted(
+    TeacherSessionCompleted event,
+    Emitter<TeacherDashboardState> emit,
+  ) async {
+    await _completeSession(
+      sessionId: event.sessionId,
+      actorRole: ActorRole.teacher,
     );
   }
 }

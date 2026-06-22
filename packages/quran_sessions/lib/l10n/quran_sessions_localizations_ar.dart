@@ -336,6 +336,73 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get cancelSessionAction => 'إلغاء الجلسة';
 
   @override
+  String get cancelReasonLabel => 'سبب الإلغاء';
+
+  @override
+  String get cancelReasonHint => 'أخبرنا لماذا تحتاج إلى الإلغاء (مطلوب)';
+
+  @override
+  String get cancelReasonRequired => 'يرجى إدخال 3 أحرف على الأقل.';
+
+  @override
+  String get cancelPolicyBlockedNotice =>
+      'لا يُسمح بالإلغاء قرب موعد بدء الجلسة.';
+
+  @override
+  String get cancelPolicyFree => 'هذه جلسة مجانية. لا يوجد استرداد.';
+
+  @override
+  String get cancelPolicyFullRefund => 'ستحصل على استرداد كامل إذا ألغيت الآن.';
+
+  @override
+  String get cancelPolicyPartialRefund =>
+      'قد ينطبق استرداد جزئي وفق سياسة الإلغاء.';
+
+  @override
+  String get cancelPolicyNoRefund => 'لا ينطبق استرداد للإلغاء في هذا الوقت.';
+
+  @override
+  String get rescheduleSessionTitle => 'إعادة جدولة الجلسة';
+
+  @override
+  String get rescheduleReasonLabel => 'سبب إعادة الجدولة';
+
+  @override
+  String get rescheduleReasonHint => 'اشرح باختصار لماذا تحتاج وقتاً جديداً';
+
+  @override
+  String get rescheduleSubmitAction => 'طلب إعادة الجدولة';
+
+  @override
+  String get rescheduleRequestSubmitted =>
+      'تم إرسال طلب إعادة الجدولة. بانتظار التأكيد.';
+
+  @override
+  String get rescheduleAction => 'إعادة الجدولة';
+
+  @override
+  String get sessionDetailTitle => 'تفاصيل الجلسة';
+
+  @override
+  String get sessionTimelineTitle => 'سجل النشاط';
+
+  @override
+  String get sessionTimelineEmpty => 'لا يوجد نشاط مسجل بعد.';
+
+  @override
+  String sessionStatusLabel(String status) {
+    return 'الحالة: $status';
+  }
+
+  @override
+  String sessionStartsAtLabel(String when) {
+    return 'تبدأ: $when';
+  }
+
+  @override
+  String get viewSessionDetails => 'عرض التفاصيل';
+
+  @override
   String get noSessionsYet => 'لا توجد جلسات بعد';
 
   @override

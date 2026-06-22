@@ -5,6 +5,16 @@ export { reviewTeacherApplication } from "./reviewTeacherApplication";
 export { moderateTeacherProfile } from "./moderateTeacherProfile";
 export { moderateQuranSessionsUser } from "./moderateQuranSessionsUser";
 export { syncTeacherProfileVisibility } from "./syncTeacherProfileVisibility";
+export { createSessionBooking } from "./quranSessions/createSessionBooking";
+export { cancelSessionBooking } from "./quranSessions/cancelSessionBooking";
+export { requestSessionReschedule } from "./quranSessions/requestSessionReschedule";
+export { confirmSessionReschedule } from "./quranSessions/confirmSessionReschedule";
+export { markSessionNoShow } from "./quranSessions/markSessionNoShow";
+export { completeSession } from "./quranSessions/completeSession";
+export { issueSessionCompensation } from "./quranSessions/issueSessionCompensation";
+export { expirePendingReservations } from "./quranSessions/expirePendingReservations";
+export { deliverSessionNotification } from "./quranSessions/deliverSessionNotification";
+export { sessionReminders } from "./quranSessions/sessionReminders";
 
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { initializeApp } from "firebase-admin/app";
