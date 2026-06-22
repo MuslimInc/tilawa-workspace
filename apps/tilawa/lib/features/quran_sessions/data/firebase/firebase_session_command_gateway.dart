@@ -1,11 +1,8 @@
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 
 class FirebaseSessionCommandGateway implements SessionCommandGateway {
-  FirebaseSessionCommandGateway(this._functions);
-
-  final FirebaseFunctions _functions;
+  const FirebaseSessionCommandGateway();
 
   @override
   Future<Either<QuranSessionsFailure, void>> capturePayment({
@@ -45,17 +42,12 @@ class FirebaseSessionCommandGateway implements SessionCommandGateway {
     required double fraction,
     required String reason,
   }) async {
-    try {
-      final callable = _functions.httpsCallable('issueSessionCompensation');
-      await callable.call<Map<String, dynamic>>({
-        'bookingId': sessionId,
-        'compensationType': 'payment_refund',
-        'reason': reason,
-      });
-      return const Right(null);
-    } on FirebaseFunctionsException catch (_) {
-      return const Left(PaymentProviderFailure());
-    }
+    return const Left(
+      PolicyViolationFailure(
+        policyName: 'payment_refund',
+        detail: 'refund_requires_admin_approve_session_refund',
+      ),
+    );
   }
 
   @override

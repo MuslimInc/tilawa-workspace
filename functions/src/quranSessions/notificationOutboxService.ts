@@ -11,6 +11,8 @@ export type SessionNotificationKind =
   | "rescheduleConfirmed"
   | "noShowMarked"
   | "compensationIssued"
+  | "refundApproved"
+  | "disputeOpened"
   | "reminder";
 
 export interface EnqueueSessionNotificationInput {
@@ -112,6 +114,21 @@ export function buildNotificationCopy(
         title: "Compensation issued",
         body: "Compensation was applied to your session.",
         actionType: "quran_session_compensation",
+      };
+    case "refundApproved":
+      return {
+        title: "Refund approved",
+        body:
+          payload.refundExecutionStatus === "manual_pending"
+            ? "Your refund was approved and is pending manual processing."
+            : "Your refund was approved.",
+        actionType: "quran_session_refund",
+      };
+    case "disputeOpened":
+      return {
+        title: "Session dispute opened",
+        body: "A dispute was opened for your session and is under review.",
+        actionType: "quran_session_dispute",
       };
     case "reminder": {
       const hours =

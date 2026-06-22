@@ -26,6 +26,19 @@ export interface SessionModerationGateway {
   confirmSessionReschedule(requestId: string, accept: boolean): Promise<void>;
 
   approveSessionRefund(bookingId: string, reason: string): Promise<void>;
+
+  openSessionDispute(
+    bookingId: string,
+    reason: string,
+    evidenceMetadata?: Record<string, unknown>,
+  ): Promise<void>;
+
+  resolveSessionDispute(
+    bookingId: string,
+    disputeId: string,
+    resolution: import('../entities/session-moderation.types').DisputeResolution,
+    reason: string,
+  ): Promise<void>;
 }
 
 export const SESSION_MODERATION_GATEWAY = new InjectionToken<SessionModerationGateway>(

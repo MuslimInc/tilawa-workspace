@@ -6,4 +6,13 @@ export type NoShowClassification =
 export type SessionCompensationType =
   | 'restore_credit'
   | 'wallet_credit'
-  | 'payment_refund';
+  | 'replacement_session'
+  | 'extend_subscription'
+  | 'manual_review';
+
+export type DisputeResolution =
+  | 'favor_student'
+  | 'favor_teacher'
+  | 'with_compensation'
+  | 'rejected'
+  | 'closed';

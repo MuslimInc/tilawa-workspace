@@ -54,6 +54,11 @@
       <p class="mt-4 text-sm text-red-600 dark:text-red-400">{{ actionError() }}</p>
     }
 
+    <p class="mt-4 text-sm text-amber-700 dark:text-amber-300">
+      Payment provider not live — refunds and compensation execute as
+      <strong>manual_pending</strong> until configured.
+    </p>
+
     <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
       <div class="lg:col-span-1 bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
         <p class="text-lg font-semibold text-gray-900 dark:text-white">Summary</p>

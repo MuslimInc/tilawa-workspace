@@ -12,6 +12,11 @@ export { confirmSessionReschedule } from "./quranSessions/confirmSessionReschedu
 export { markSessionNoShow } from "./quranSessions/markSessionNoShow";
 export { completeSession } from "./quranSessions/completeSession";
 export { issueSessionCompensation } from "./quranSessions/issueSessionCompensation";
+export { approveSessionRefund } from "./quranSessions/approveSessionRefund";
+export {
+  openSessionDispute,
+  resolveSessionDispute,
+} from "./quranSessions/sessionDisputeCallables";
 export { expirePendingReservations } from "./quranSessions/expirePendingReservations";
 export { deliverSessionNotification } from "./quranSessions/deliverSessionNotification";
 export { sessionReminders } from "./quranSessions/sessionReminders";

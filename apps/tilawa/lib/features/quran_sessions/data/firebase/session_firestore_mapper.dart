@@ -8,6 +8,17 @@ DateTime readFirestoreDateTime(Object? raw) {
   throw FormatException('Unsupported Firestore datetime: $raw');
 }
 
+SessionLifecycleStatus parseLifecycleStatus(String raw) {
+  final normalized = raw.replaceAllMapped(
+    RegExp(r'_([a-z])'),
+    (match) => match.group(1)!.toUpperCase(),
+  );
+  return SessionLifecycleStatus.values.firstWhere(
+    (s) => s.name == raw || s.name == normalized,
+    orElse: () => SessionLifecycleStatus.scheduled,
+  );
+}
+
 SessionAggregate mapBookingDocToAggregate(
   String bookingId,
   Map<String, dynamic> data,
@@ -15,10 +26,7 @@ SessionAggregate mapBookingDocToAggregate(
   final lifecycleRaw = data['lifecycleStatus'] as String?;
   final lifecycleStatus = lifecycleRaw == null
       ? SessionLifecycleStatus.scheduled
-      : SessionLifecycleStatus.values.firstWhere(
-          (s) => s.name == lifecycleRaw,
-          orElse: () => SessionLifecycleStatus.scheduled,
-        );
+      : parseLifecycleStatus(lifecycleRaw);
   final pricingRaw = data['pricingType'] as String? ?? 'free';
   final pricingType = SessionPricingType.values.firstWhere(
     (p) => p.name == pricingRaw || _legacyPricing(p, pricingRaw),
@@ -84,12 +92,7 @@ SessionAuditEvent mapEventDocToAuditEvent(Map<String, dynamic> data) {
   );
 }
 
-SessionLifecycleStatus _parseLifecycle(String raw) {
-  return SessionLifecycleStatus.values.firstWhere(
-    (s) => s.name == raw,
-    orElse: () => SessionLifecycleStatus.scheduled,
-  );
-}
+SessionLifecycleStatus _parseLifecycle(String raw) => parseLifecycleStatus(raw);
 
 String _snakeToCamel(String raw) {
   final parts = raw.split('_');

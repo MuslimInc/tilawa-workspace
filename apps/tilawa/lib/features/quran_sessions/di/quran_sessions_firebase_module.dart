@@ -35,7 +35,7 @@ class QuranSessionsFirebaseModule {
 
     sl.registerLazySingletonIfAbsent<AuthSessionProvider>(() => authSession);
     sl.registerLazySingletonIfAbsent<SessionCommandGateway>(
-      () => FirebaseSessionCommandGateway(functions),
+      () => const FirebaseSessionCommandGateway(),
     );
 
     final mutationGateway = FirebaseSessionMutationGateway(

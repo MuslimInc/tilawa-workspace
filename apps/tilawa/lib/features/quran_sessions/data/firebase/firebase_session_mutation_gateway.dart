@@ -171,10 +171,12 @@ class FirebaseSessionMutationGateway implements SessionMutationGateway {
     required ActorRole actorRole,
     required String reason,
   }) async {
+    final classification = _classificationForActor(actorRole);
     try {
       final callable = _functions.httpsCallable('markSessionNoShow');
       await callable.call<Map<String, dynamic>>({
         'sessionId': sessionId,
+        'classification': classification,
         'actorRole': _actorRoleToCf(actorRole),
         'reason': reason,
       });
@@ -219,6 +221,13 @@ class FirebaseSessionMutationGateway implements SessionMutationGateway {
     ActorRole.teacher => 'teacher',
     ActorRole.admin => 'admin',
     ActorRole.system => 'system',
+  };
+
+  String _classificationForActor(ActorRole role) => switch (role) {
+    ActorRole.teacher => 'student_no_show',
+    ActorRole.student => 'student_no_show',
+    ActorRole.admin => 'teacher_no_show',
+    ActorRole.system => 'both_no_show',
   };
 }
 

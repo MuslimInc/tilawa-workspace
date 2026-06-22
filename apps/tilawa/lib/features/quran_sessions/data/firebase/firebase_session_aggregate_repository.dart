@@ -93,7 +93,7 @@ class FirebaseSessionAggregateRepository implements SessionAggregateRepository {
     try {
       Query<Map<String, dynamic>> query = _bookings.where(
         'lifecycleStatus',
-        isEqualTo: status.name,
+        isEqualTo: _lifecycleToFirestore(status),
       );
       if (startsBefore != null) {
         query = query.where(
@@ -123,6 +123,13 @@ class FirebaseSessionAggregateRepository implements SessionAggregateRepository {
     _ => ActorRole.student,
   };
 
+  String _lifecycleToFirestore(SessionLifecycleStatus status) {
+    return status.name.replaceAllMapped(
+      RegExp(r'([A-Z])'),
+      (match) => '_${match.group(1)!.toLowerCase()}',
+    );
+  }
+
   Map<String, dynamic> _toFirestore(SessionAggregate aggregate) => {
     'bookingId': aggregate.id,
     'aggregateId': aggregate.id,
@@ -131,7 +138,7 @@ class FirebaseSessionAggregateRepository implements SessionAggregateRepository {
     'slotId': aggregate.slotId,
     'startsAt': Timestamp.fromDate(aggregate.startsAt.toUtc()),
     'pricingType': aggregate.pricingType.name,
-    'lifecycleStatus': aggregate.lifecycleStatus.name,
+    'lifecycleStatus': _lifecycleToFirestore(aggregate.lifecycleStatus),
     'rescheduleCount': aggregate.rescheduleCount,
     'cancellationReason': aggregate.cancellationReason,
     'lastActionReason': aggregate.lastActionReason,

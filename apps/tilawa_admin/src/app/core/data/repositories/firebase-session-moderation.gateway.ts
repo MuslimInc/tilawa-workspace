@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 
 import {
+  DisputeResolution,
   NoShowClassification,
   SessionCompensationType,
 } from '../../domain/entities/session-moderation.types';
@@ -61,6 +62,32 @@ export class FirebaseSessionModerationGateway implements SessionModerationGatewa
   async approveSessionRefund(bookingId: string, reason: string): Promise<void> {
     await this.invokeCallable('approveSessionRefund', {
       bookingId,
+      reason,
+    });
+  }
+
+  async openSessionDispute(
+    bookingId: string,
+    reason: string,
+    evidenceMetadata?: Record<string, unknown>,
+  ): Promise<void> {
+    await this.invokeCallable('openSessionDispute', {
+      bookingId,
+      reason,
+      evidenceMetadata,
+    });
+  }
+
+  async resolveSessionDispute(
+    bookingId: string,
+    disputeId: string,
+    resolution: DisputeResolution,
+    reason: string,
+  ): Promise<void> {
+    await this.invokeCallable('resolveSessionDispute', {
+      bookingId,
+      disputeId,
+      resolution,
       reason,
     });
   }

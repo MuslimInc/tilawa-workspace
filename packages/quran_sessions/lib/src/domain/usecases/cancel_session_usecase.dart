@@ -68,16 +68,9 @@ class CancelSessionUseCase {
       pricingType: aggregate.pricingType,
     );
     if (policy.isLeft()) return policy.map((_) => throw StateError('noop'));
-    final decision = policy.fold((_) => throw StateError('noop'), (r) => r);
 
-    if (aggregate.isPaid && decision.refundFraction > 0) {
-      final refund = await _commandGateway.refundPayment(
-        sessionId: sessionId,
-        fraction: decision.refundFraction,
-        reason: reason,
-      );
-      if (refund.isLeft()) return refund.map((_) => throw StateError('noop'));
-    }
+    // Refunds are admin-approved via approveSessionRefund (manual_pending until
+    // payment provider is configured). Cancellation proceeds without auto-refund.
 
     await _commandGateway.releaseSlot(slotId: aggregate.slotId);
 

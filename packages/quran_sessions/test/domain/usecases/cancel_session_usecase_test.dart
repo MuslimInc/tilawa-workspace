@@ -36,7 +36,7 @@ void main() {
       );
     });
 
-    test('student early cancel refunds paid session', () async {
+    test('student early cancel completes without automated refund', () async {
       final result = await useCase(
         sessionId: 'session_1',
         actorRole: ActorRole.student,
@@ -52,7 +52,7 @@ void main() {
       );
       check(
         commandGateway.calls.any((call) => call.startsWith('refund:')),
-      ).isTrue();
+      ).isFalse();
     });
 
     test('teacher cancel transitions to cancelledByTeacher', () async {

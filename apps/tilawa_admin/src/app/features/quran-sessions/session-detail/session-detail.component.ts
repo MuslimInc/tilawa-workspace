@@ -64,7 +64,9 @@ export class SessionDetailComponent implements OnInit {
   readonly compensationTypes: SessionCompensationType[] = [
     'restore_credit',
     'wallet_credit',
-    'payment_refund',
+    'replacement_session',
+    'extend_subscription',
+    'manual_review',
   ];
 
   private bookingId = '';

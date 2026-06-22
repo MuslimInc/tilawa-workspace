@@ -1,128 +1,158 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
-import { getFirestore } from "firebase-admin/firestore";
-import { legacyStatusForLifecycle, nowServer, LifecycleStatus } from "./sessionLifecycleService";
-import { enqueueSessionNotification } from "./notificationOutboxService";
+import { getFirestore, Timestamp } from "firebase-admin/firestore";
+
+import {
+  appendAuditEvent,
+  sessionRefForBooking,
+  writeAggregateLifecycle,
+} from "./aggregateWriteService";
+import {
+  buildOperationKey,
+  runIdempotentOperation,
+} from "./idempotencyService";
 import { recordTerminalTransition } from "./metricsAggregationService";
+import { enqueueSessionNotification } from "./notificationOutboxService";
+import { isAdmin, requireAuthenticatedUid, resolveActorRole } from "./sessionAuth";
+import { cancelActionForRole, validateTransition } from "./sessionLifecycleGuard";
+import type { LifecycleStatus } from "./sessionLifecycleService";
+import type { ActorRole } from "./sessionLifecycleGuard";
 
 interface CancelSessionBookingRequest {
   bookingId: string;
   reason: string;
-  actorRole?: "student" | "teacher" | "admin" | "system";
-}
-
-function cancellationStatus(role: string): LifecycleStatus {
-  switch (role) {
-    case "teacher":
-      return "cancelled_by_teacher";
-    case "admin":
-    case "system":
-      return "cancelled_by_admin";
-    default:
-      return "cancelled_by_student";
-  }
+  actorRole?: ActorRole;
+  idempotencyKey?: string;
 }
 
 export const cancelSessionBooking = onCall(
   { enforceAppCheck: false },
   async (request) => {
-    if (!request.auth?.uid) {
-      throw new HttpsError("unauthenticated", "Authentication required.");
-    }
+    requireAuthenticatedUid(request);
     const data = request.data as CancelSessionBookingRequest;
-    if (!data.bookingId || !data.reason) {
+    if (!data.bookingId || !data.reason?.trim()) {
       throw new HttpsError("invalid-argument", "bookingId and reason required.");
-    }
-    const role = data.actorRole ?? "student";
-    if (role === "admin" && !request.auth.token.admin) {
-      throw new HttpsError("permission-denied", "Admin access required.");
     }
 
     const db = getFirestore();
     const bookingRef = db.collection("quran_bookings").doc(data.bookingId);
-    const now = nowServer();
-    const lifecycleStatus = cancellationStatus(role);
+    const bookingSnap = await bookingRef.get();
+    if (!bookingSnap.exists) {
+      throw new HttpsError("not-found", "Booking not found.");
+    }
+    const booking = bookingSnap.data() ?? {};
+    const participants = {
+      studentId: (booking.studentId as string) ?? "",
+      teacherId: (booking.teacherId as string) ?? "",
+    };
 
-    let teacherId = "";
-    let studentId = "";
-    let sessionId = "";
+    const claimedRole = data.actorRole ?? "student";
+    if (claimedRole === "admin" && !isAdmin(request)) {
+      throw new HttpsError("permission-denied", "Admin access required.");
+    }
+    const actor = isAdmin(request) && claimedRole === "admin"
+      ? "admin"
+      : resolveActorRole(request, claimedRole, participants);
+    const action = cancelActionForRole(actor);
 
-    await db.runTransaction(async (tx) => {
-      const bookingSnap = await tx.get(bookingRef);
-      if (!bookingSnap.exists) {
-        throw new HttpsError("not-found", "Booking not found.");
-      }
-      const booking = bookingSnap.data() ?? {};
-      teacherId = (booking.teacherId as string | undefined) ?? "";
-      studentId = (booking.studentId as string | undefined) ?? "";
-      sessionId = (booking.sessionId as string | undefined) ?? "";
-      tx.set(
-        bookingRef,
-        {
-          lifecycleStatus,
-          status: legacyStatusForLifecycle(lifecycleStatus),
-          cancellationReason: data.reason,
-          cancelledAt: now,
-          cancelledByActorId: request.auth?.uid,
-          cancelledByRole: role,
-          updatedAt: now,
-        },
-        { merge: true },
-      );
+    const operationKey = buildOperationKey(
+      "cancel_session",
+      data.bookingId,
+      data.idempotencyKey,
+    );
 
-      if (sessionId) {
-        tx.set(
-          db.collection("quran_sessions").doc(sessionId),
-          {
-            lifecycleStatus,
-            status:
-              lifecycleStatus === "cancelled_by_student"
-                ? "cancelled_by_student"
-                : "cancelled_by_teacher",
-            updatedAt: now,
-          },
-          { merge: true },
-        );
-      }
-      const slotId = booking.slotId as string | undefined;
-      if (slotId) {
-        tx.delete(db.collection("quran_slot_locks").doc(slotId));
-      }
-      tx.set(db.collection("quran_session_events").doc(), {
-        aggregateId: booking.aggregateId ?? data.bookingId,
-        bookingId: data.bookingId,
-        sessionId: booking.sessionId ?? null,
-        actorId: request.auth?.uid ?? "system",
-        actorRole: role,
+    const startsAtRaw = booking.startsAt;
+    const sessionStartsAt =
+      startsAtRaw instanceof Timestamp
+        ? startsAtRaw.toDate()
+        : typeof startsAtRaw === "string"
+          ? new Date(startsAtRaw)
+          : undefined;
+
+    const { result, replayed } = await runIdempotentOperation(
+      {
+        db,
+        operationKey,
+        actorId: request.auth!.uid,
         action: "cancel_session",
-        previousStatus: booking.lifecycleStatus ?? null,
-        newStatus: lifecycleStatus,
-        reason: data.reason,
-        source: role === "admin" ? "adminPanel" : "mobileApp",
-        timestamp: now,
-      });
-    });
+      },
+      async (tx) => {
+        const freshSnap = await tx.get(bookingRef);
+        const fresh = freshSnap.data() ?? {};
+        const currentStatus = fresh.lifecycleStatus as LifecycleStatus | undefined;
 
-    if (teacherId && studentId && sessionId) {
-      if (lifecycleStatus === "cancelled_by_teacher") {
+        const guard = validateTransition({
+          currentStatus: currentStatus ?? null,
+          action,
+          actor,
+          reason: data.reason,
+          sessionStartsAt,
+        });
+
+        const sessionRef = sessionRefForBooking(db, fresh);
+        writeAggregateLifecycle(
+          tx,
+          { bookingRef, sessionRef },
+          guard.to,
+          {
+            cancellationReason: data.reason,
+            cancelledAt: new Date(),
+            cancelledByActorId: request.auth?.uid,
+            cancelledByRole: actor,
+          },
+        );
+
+        const slotId = fresh.slotId as string | undefined;
+        if (slotId) {
+          tx.delete(db.collection("quran_slot_locks").doc(slotId));
+        }
+
+        appendAuditEvent(tx, db, {
+          aggregateId: fresh.aggregateId ?? data.bookingId,
+          bookingId: data.bookingId,
+          sessionId: fresh.sessionId ?? null,
+          actorId: request.auth?.uid ?? "system",
+          actorRole: actor,
+          action: "cancel_session",
+          previousStatus: currentStatus ?? null,
+          newStatus: guard.to,
+          reason: data.reason,
+          source: actor === "admin" ? "adminPanel" : "mobileApp",
+        });
+
+        return {
+          bookingId: data.bookingId,
+          lifecycleStatus: guard.to,
+          sessionId: (fresh.sessionId as string | undefined) ?? "",
+          teacherId: (fresh.teacherId as string | undefined) ?? "",
+          studentId: (fresh.studentId as string | undefined) ?? "",
+        };
+      },
+    );
+
+    if (!replayed && result.sessionId) {
+      if (result.lifecycleStatus === "cancelled_by_teacher") {
         await recordTerminalTransition(db, {
           type: "cancelled_by_teacher",
-          teacherId,
+          teacherId: result.teacherId,
         });
-      } else if (lifecycleStatus === "cancelled_by_student") {
+      } else if (result.lifecycleStatus === "cancelled_by_student") {
         await recordTerminalTransition(db, {
           type: "cancelled_by_student",
-          studentId,
+          studentId: result.studentId,
         });
       }
       await enqueueSessionNotification(db, {
-        sessionId,
+        sessionId: result.sessionId,
         aggregateId: data.bookingId,
         kind: "cancellation",
-        recipientUserIds: [teacherId, studentId],
-        payload: { reason: data.reason, actorRole: role },
+        recipientUserIds: [result.teacherId, result.studentId],
+        payload: { reason: data.reason, actorRole: actor },
       });
     }
 
-    return { bookingId: data.bookingId, lifecycleStatus };
+    return {
+      bookingId: result.bookingId,
+      lifecycleStatus: result.lifecycleStatus,
+    };
   },
 );

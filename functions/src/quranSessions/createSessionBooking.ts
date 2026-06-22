@@ -1,8 +1,22 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
-import { legacyStatusForLifecycle, nowServer } from "./sessionLifecycleService";
-import { enqueueSessionNotification } from "./notificationOutboxService";
+
+import {
+  appendAuditEvent,
+} from "./aggregateWriteService";
+import { lifecycleError } from "./lifecycleErrors";
 import { recordTerminalTransition } from "./metricsAggregationService";
+import { enqueueSessionNotification } from "./notificationOutboxService";
+import {
+  assertPaidBookingAllowed,
+  PAYMENT_PROVIDER_ENABLED,
+} from "./paymentProviderStatus";
+import { requireAuthenticatedUid } from "./sessionAuth";
+import { validateTransition } from "./sessionLifecycleGuard";
+import {
+  legacyStatusForLifecycle,
+  nowServer,
+} from "./sessionLifecycleService";
 
 interface CreateSessionBookingRequest {
   teacherId: string;
@@ -18,16 +32,34 @@ interface CreateSessionBookingRequest {
 export const createSessionBooking = onCall(
   { enforceAppCheck: false },
   async (request) => {
-    if (!request.auth?.uid) {
-      throw new HttpsError("unauthenticated", "Authentication required.");
-    }
+    const studentId = requireAuthenticatedUid(request);
     const data = request.data as CreateSessionBookingRequest;
     if (!data.teacherId || !data.slotId || !data.startsAt || !data.endsAt) {
       throw new HttpsError("invalid-argument", "Missing required fields.");
     }
 
+    try {
+      assertPaidBookingAllowed(data.pricingType);
+    } catch {
+      throw lifecycleError(
+        "payment_provider_unavailable",
+        "Paid bookings are disabled until payment provider is configured.",
+        { pricingType: data.pricingType },
+      );
+    }
+
+    if (
+      data.pricingType !== "free" &&
+      !data.paymentReference?.trim() &&
+      PAYMENT_PROVIDER_ENABLED
+    ) {
+      throw new HttpsError(
+        "invalid-argument",
+        "paymentReference required for paid bookings.",
+      );
+    }
+
     const db = getFirestore();
-    const studentId = request.auth.uid;
     const startsAt = Timestamp.fromDate(new Date(data.startsAt));
     const endsAt = Timestamp.fromDate(new Date(data.endsAt));
 
@@ -35,7 +67,21 @@ export const createSessionBooking = onCall(
     const sessionRef = db.collection("quran_sessions").doc();
     const lockRef = db.collection("quran_slot_locks").doc(data.slotId);
     const now = nowServer();
-    const lifecycleStatus = data.pricingType === "free" ? "scheduled" : "pending_payment";
+
+    const isFree = data.pricingType === "free";
+    const bookingAction = isFree ? "confirm_free_booking" : "initiate_payment";
+    const draftGuard = validateTransition({
+      currentStatus: null,
+      action: "create_draft",
+      actor: "student",
+    });
+    const nextGuard = validateTransition({
+      currentStatus: draftGuard.to,
+      action: bookingAction,
+      actor: isFree ? "student" : "student",
+    });
+    const lifecycleStatus = nextGuard.to;
+    const sessionLifecycleStatus = lifecycleStatus;
 
     await db.runTransaction(async (tx) => {
       const lockSnap = await tx.get(lockRef);
@@ -83,13 +129,13 @@ export const createSessionBooking = onCall(
         startsAt,
         endsAt,
         callType: data.callType,
-        lifecycleStatus: lifecycleStatus === "pending_payment" ? "scheduled" : lifecycleStatus,
-        status: "scheduled",
+        lifecycleStatus: sessionLifecycleStatus,
+        status: legacyStatusForLifecycle(sessionLifecycleStatus),
         createdAt: now,
         updatedAt: now,
       });
 
-      tx.set(db.collection("quran_session_events").doc(), {
+      appendAuditEvent(tx, db, {
         aggregateId: bookingRef.id,
         bookingId: bookingRef.id,
         sessionId: sessionRef.id,
@@ -99,7 +145,6 @@ export const createSessionBooking = onCall(
         previousStatus: null,
         newStatus: lifecycleStatus,
         source: "mobileApp",
-        timestamp: now,
       });
     });
 

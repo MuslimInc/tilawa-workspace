@@ -11,55 +11,47 @@ import {
   runIdempotentOperation,
 } from "./idempotencyService";
 import { enqueueSessionNotification } from "./notificationOutboxService";
-import { financialExecutionStatus } from "./paymentProviderStatus";
+import {
+  financialExecutionStatus,
+  PAYMENT_PROVIDER_ENABLED,
+} from "./paymentProviderStatus";
 import { requireAdmin } from "./sessionAuth";
 import { validateTransition } from "./sessionLifecycleGuard";
 import type { LifecycleStatus } from "./sessionLifecycleService";
 
-interface IssueSessionCompensationRequest {
+interface ApproveSessionRefundRequest {
   bookingId: string;
-  compensationType:
-    | "restore_credit"
-    | "wallet_credit"
-    | "payment_refund"
-    | "replacement_session"
-    | "extend_subscription"
-    | "manual_review";
-  amountUsd?: number;
   reason: string;
+  amountUsd?: number;
   idempotencyKey?: string;
 }
 
-export const issueSessionCompensation = onCall(
+export const approveSessionRefund = onCall(
   { enforceAppCheck: false },
   async (request) => {
-    const uid = requireAdmin(request);
-    const data = request.data as IssueSessionCompensationRequest;
-    if (!data.bookingId || !data.compensationType || !data.reason?.trim()) {
-      throw new HttpsError("invalid-argument", "Missing required fields.");
-    }
-    if (data.compensationType === "payment_refund") {
+    const data = request.data as ApproveSessionRefundRequest;
+    if (!data.bookingId || !data.reason?.trim()) {
       throw new HttpsError(
         "invalid-argument",
-        "Use approveSessionRefund for payment refunds.",
+        "bookingId and reason required.",
       );
     }
 
+    const uid = requireAdmin(request);
     const db = getFirestore();
     const bookingRef = db.collection("quran_bookings").doc(data.bookingId);
     const operationKey = buildOperationKey(
-      "issue_compensation",
+      "approve_refund",
       data.bookingId,
-      data.idempotencyKey ?? data.compensationType,
+      data.idempotencyKey,
     );
-    const executionStatus = financialExecutionStatus();
 
     const { result, replayed } = await runIdempotentOperation(
       {
         db,
         operationKey,
         actorId: uid,
-        action: "issue_compensation",
+        action: "approve_refund",
       },
       async (tx) => {
         const bookingSnap = await tx.get(bookingRef);
@@ -71,37 +63,41 @@ export const issueSessionCompensation = onCall(
 
         const guard = validateTransition({
           currentStatus: currentStatus ?? null,
-          action: "issue_compensation",
+          action: "issue_refund",
           actor: "admin",
           reason: data.reason,
         });
 
         const sessionRef = sessionRefForBooking(db, booking);
-        const compensationRef = db.collection("quran_session_compensations").doc();
+        const refundRef = db.collection("quran_session_refunds").doc();
+        const executionStatus = financialExecutionStatus();
 
         writeAggregateLifecycle(
           tx,
           { bookingRef, sessionRef },
           guard.to,
           {
-            lastCompensationId: compensationRef.id,
-            compensationExecutionStatus: executionStatus,
+            refundId: refundRef.id,
+            refundExecutionStatus: executionStatus,
+            refundReason: data.reason,
           },
-          { compensationExecutionStatus: executionStatus },
+          {
+            refundId: refundRef.id,
+            refundExecutionStatus: executionStatus,
+          },
         );
 
-        tx.set(compensationRef, {
-          compensationId: compensationRef.id,
+        tx.set(refundRef, {
+          refundId: refundRef.id,
           aggregateId: booking.aggregateId ?? data.bookingId,
           bookingId: data.bookingId,
           sessionId: booking.sessionId ?? null,
-          type: data.compensationType,
-          status: executionStatus,
-          policyRuleId: "admin_manual",
-          amountUsd: data.amountUsd ?? null,
-          issuedByActorId: uid,
-          issuedByRole: "admin",
+          amountUsd: data.amountUsd ?? booking.amountPaidUsd ?? null,
           reason: data.reason,
+          status: executionStatus,
+          paymentProviderEnabled: PAYMENT_PROVIDER_ENABLED,
+          approvedByActorId: uid,
+          approvedByRole: "admin",
           createdAt: FieldValue.serverTimestamp(),
           completedAt:
             executionStatus === "executed"
@@ -113,47 +109,45 @@ export const issueSessionCompensation = onCall(
           aggregateId: booking.aggregateId ?? data.bookingId,
           bookingId: data.bookingId,
           sessionId: booking.sessionId ?? null,
-          compensationId: compensationRef.id,
+          refundId: refundRef.id,
           actorId: uid,
           actorRole: "admin",
-          action: "issue_compensation",
+          action: "approve_refund",
           previousStatus: currentStatus ?? null,
           newStatus: guard.to,
           reason: data.reason,
-          compensationExecutionStatus: executionStatus,
+          refundExecutionStatus: executionStatus,
           source: "adminPanel",
         });
 
         return {
           bookingId: data.bookingId,
-          compensationId: compensationRef.id,
+          refundId: refundRef.id,
           lifecycleStatus: guard.to,
-          studentId: (booking.studentId as string | undefined) ?? "",
-          sessionId: (booking.sessionId as string | undefined) ?? "",
-          compensationExecutionStatus: executionStatus,
+          refundExecutionStatus: executionStatus,
         };
       },
     );
 
-    if (!replayed && result.studentId && result.sessionId) {
-      await enqueueSessionNotification(db, {
-        sessionId: result.sessionId,
-        aggregateId: data.bookingId,
-        kind: "compensationIssued",
-        recipientUserIds: [result.studentId],
-        payload: {
-          compensationType: data.compensationType,
-          amountUsd: data.amountUsd ?? null,
-          reason: data.reason,
-          compensationExecutionStatus: result.compensationExecutionStatus,
-        },
-      });
+    if (!replayed) {
+      const bookingSnap = await bookingRef.get();
+      const booking = bookingSnap.data() ?? {};
+      const studentId = (booking.studentId as string | undefined) ?? "";
+      const sessionId = (booking.sessionId as string | undefined) ?? "";
+      if (studentId && sessionId) {
+        await enqueueSessionNotification(db, {
+          sessionId,
+          aggregateId: (booking.aggregateId as string) ?? data.bookingId,
+          kind: "refundApproved",
+          recipientUserIds: [studentId],
+          payload: {
+            reason: data.reason,
+            refundExecutionStatus: result.refundExecutionStatus,
+          },
+        });
+      }
     }
 
-    return {
-      bookingId: result.bookingId,
-      compensationId: result.compensationId,
-      compensationExecutionStatus: result.compensationExecutionStatus,
-    };
+    return result;
   },
 );
