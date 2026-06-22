@@ -191,13 +191,13 @@
     "slotBooked": "Booked",
     "slotAvailable": "Available",
     "editSlot": "Edit slot",
-    "deleteSlot": "Delete slot",
-    "deleteSlotConfirmTitle": "Remove this slot?",
-    "deleteSlotConfirmMessage": "Students will no longer be able to book this time. You can restore it later from working hours.",
-    "deleteSlotConfirm": "Remove slot",
-    "deleteSlotSuccess": "Slot removed",
+    "deleteSlot": "Block this time",
+    "deleteSlotConfirmTitle": "Block this time?",
+    "deleteSlotConfirmMessage": "Students will no longer be able to book this time. Tap Undo on the snackbar to restore it.",
+    "deleteSlotConfirm": "Block time",
+    "deleteSlotSuccess": "Time blocked",
     "deleteSlotUndo": "Undo",
-    "deleteSlotRemovedSnackBar": "Removed {time}",
+    "deleteSlotRemovedSnackBar": "Blocked {time}",
     "@deleteSlotRemovedSnackBar": {
         "placeholders": {
             "time": {
@@ -205,11 +205,34 @@
             }
         }
     },
+    "deleteSlotRemovedSnackBarWithPending": "Blocked {time} ({count} pending)",
+    "@deleteSlotRemovedSnackBarWithPending": {
+        "placeholders": {
+            "time": {
+                "type": "String"
+            },
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "deleteSlotRefreshDiscarded": "{count, plural, =1{1 pending block was discarded — slots restored} other{{count} pending blocks were discarded — slots restored}}",
+    "@deleteSlotRefreshDiscarded": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
     "addNewSlot": "Add new slot",
     "slotDate": "Slot date",
     "slotTime": "Slot time",
     "addSlotButton": "Add slot",
-    "availabilityTitle": "Working hours",
+    "availabilityTitle": "Weekly availability",
+    "availabilityRecurringBanner": "This is your recurring weekly availability. It is used to generate bookable times for future days.",
+    "bookableTimesSectionTitle": "Bookable times — next 14 days",
+    "bookableTimesSectionSubtext": "Generated from your weekly availability, minus exceptions and bookings.",
+    "editWeeklyTemplate": "Edit weekly template",
     "availabilityTabHours": "Hours",
     "availabilityTabOverrides": "Overrides",
     "availabilityUseSameHours": "Use same hours for all days",

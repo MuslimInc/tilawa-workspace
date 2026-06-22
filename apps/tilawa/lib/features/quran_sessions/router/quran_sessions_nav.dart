@@ -214,7 +214,7 @@ List<RouteBase> get quranSessionsRoutes => [
     path: QuranSessionsRoutes.availability,
     builder: (context, state) => _TeacherDashboardGate(
       childBuilder: (teacherId) => BlocProvider(
-        create: (_) => getIt<AvailabilityCubit>(),
+        create: (_) => getIt<AvailabilityCubit>()..load(teacherId),
         child: WeeklyAvailabilityScreen(teacherId: teacherId),
       ),
     ),

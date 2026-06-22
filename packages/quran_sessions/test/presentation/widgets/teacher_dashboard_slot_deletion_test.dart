@@ -65,7 +65,11 @@ class _SlotDeletionHarnessState extends State<_SlotDeletionHarness> {
         if (pending == null) return;
 
         _lastUndoSnackSlotId = undoId;
-        _showDeleteUndoToast(context, pending.snapshot);
+        _showDeleteUndoToast(
+          context,
+          pending.snapshot,
+          pendingDeleteCount: state.pendingDeletes.length,
+        );
       },
       builder: (context, state) {
         if (state is! TeacherDashboardSuccess) {
@@ -102,16 +106,23 @@ class _SlotDeletionHarnessState extends State<_SlotDeletionHarness> {
 
   void _showDeleteUndoToast(
     BuildContext context,
-    TeacherAvailability slot,
-  ) {
+    TeacherAvailability slot, {
+    required int pendingDeleteCount,
+  }) {
     final l10n = context.quranSessionsL10n;
     final locale = Localizations.localeOf(context).languageCode;
     final timeFmt = DateFormat('EEE d MMM، h:mm a', locale);
     final timeLabel = timeFmt.format(slot.startsAt.toLocal());
+    final message = pendingDeleteCount > 1
+        ? l10n.deleteSlotRemovedSnackBarWithPending(
+            timeLabel,
+            pendingDeleteCount,
+          )
+        : l10n.deleteSlotRemovedSnackBar(timeLabel);
 
     TilawaFeedback.showActionable(
       context,
-      message: l10n.deleteSlotRemovedSnackBar(timeLabel),
+      message: message,
       variant: TilawaFeedbackVariant.success,
       duration: _undoSnackDuration,
       dedupeKey: 'teacher-dashboard-slot-undo',

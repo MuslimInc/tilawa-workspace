@@ -321,6 +321,58 @@ void main() {
       expect(find.text('Bookmark deleted'), findsNothing);
     });
 
+    testWidgets('dismiss by dedupeKey removes active actionable toast', (
+      tester,
+    ) async {
+      const dedupeKey = 'test-undo';
+
+      await pumpHost(
+        tester,
+        child: Builder(
+          builder: (context) {
+            return Column(
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    TilawaFeedback.showActionable(
+                      context,
+                      message: 'Slot removed',
+                      variant: TilawaFeedbackVariant.success,
+                      dedupeKey: dedupeKey,
+                      actions: <TilawaFeedbackAction>[
+                        TilawaFeedbackAction(
+                          label: 'Undo',
+                          onPressed: () {},
+                        ),
+                      ],
+                    );
+                  },
+                  child: const Text('Show'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    TilawaFeedback.dismiss(context, dedupeKey: dedupeKey);
+                  },
+                  child: const Text('Dismiss'),
+                ),
+              ],
+            );
+          },
+        ),
+      );
+
+      await tester.tap(find.text('Show'));
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('Slot removed'), findsOneWidget);
+
+      await tester.tap(find.text('Dismiss'));
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Slot removed'), findsNothing);
+    });
+
     testWidgets('stays visible when duration is null', (tester) async {
       await pumpHost(
         tester,

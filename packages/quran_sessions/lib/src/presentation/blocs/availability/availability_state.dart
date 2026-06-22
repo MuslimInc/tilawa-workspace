@@ -1,8 +1,11 @@
 import 'package:equatable/equatable.dart';
 
 import '../../../domain/entities/availability_override.dart';
+import '../../../domain/entities/time_range.dart';
+import '../../../domain/entities/weekday.dart';
 import '../../../domain/entities/weekly_schedule.dart';
 import '../../../domain/failures/quran_sessions_failure.dart';
+import '../../../domain/services/weekly_schedule_validator.dart';
 
 enum AvailabilityStatus { loading, ready, error }
 
@@ -59,6 +62,21 @@ class AvailabilityState extends Equatable {
 
   /// True when [draft] differs from [baseline] — there are unsaved edits.
   bool get isDirty => draft != baseline;
+
+  /// Open weekdays derived from [draft] rules — single source of truth for chips.
+  Set<Weekday> get selectedWeekdays => draft.openDays.toSet();
+
+  /// Per-weekday intervals in [draft]; empty list means closed.
+  Map<Weekday, List<TimeRange>> get availabilitySlots => {
+    for (final day in Weekday.values) day: draft.rangesFor(day),
+  };
+
+  /// Whether [draft] passes domain validation and can be persisted.
+  bool get isDraftValid =>
+      const WeeklyScheduleValidator().validate(draft) == null;
+
+  /// Whether the save action is enabled in the hours tab footer.
+  bool get saveEnabled => !isSaving && isDirty && isDraftValid;
 
   AvailabilityState copyWith({
     AvailabilityStatus? status,

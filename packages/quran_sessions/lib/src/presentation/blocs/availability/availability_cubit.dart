@@ -31,6 +31,7 @@ class AvailabilityCubit extends Cubit<AvailabilityState> {
   final ScheduleRepository _repo;
   final String _defaultTimezone;
   final VacationOverrideValidator _vacationValidator;
+  int _loadGeneration = 0;
 
   /// Default hours applied when a closed day is switched on.
   static const _defaultRange = TimeRange(
@@ -39,6 +40,7 @@ class AvailabilityCubit extends Cubit<AvailabilityState> {
   );
 
   Future<void> load(String teacherId) async {
+    final generation = ++_loadGeneration;
     emit(AvailabilityState.loading(teacherId));
 
     final scheduleResult = await _getSchedule(
@@ -47,25 +49,33 @@ class AvailabilityCubit extends Cubit<AvailabilityState> {
     );
     final overridesResult = await _repo.getOverrides(teacherId);
 
+    if (generation != _loadGeneration) {
+      return;
+    }
+
     await scheduleResult.fold(
-      (failure) async => emit(
-        state.copyWith(status: AvailabilityStatus.error, failure: failure),
-      ),
+      (failure) async {
+        if (generation != _loadGeneration) return;
+        emit(
+          state.copyWith(status: AvailabilityStatus.error, failure: failure),
+        );
+      },
       (baseline) async {
+        if (generation != _loadGeneration) return;
         final overrides = overridesResult.fold(
           (_) => <AvailabilityOverride>[],
           (value) => value,
         );
-        emit(
-          AvailabilityState(
-            status: AvailabilityStatus.ready,
-            teacherId: teacherId,
-            baseline: baseline,
-            draft: baseline,
-            overrides: overrides,
-            useSameHoursForAllDays: _looksUniform(baseline),
-          ),
+        final persisted = baseline.detached();
+        final ready = AvailabilityState(
+          status: AvailabilityStatus.ready,
+          teacherId: teacherId,
+          baseline: persisted,
+          draft: persisted.detached(),
+          overrides: overrides,
+          useSameHoursForAllDays: _looksUniform(persisted),
         );
+        emit(ready);
       },
     );
   }
@@ -122,37 +132,41 @@ class AvailabilityCubit extends Cubit<AvailabilityState> {
   // ── Persistence ────────────────────────────────────────────────────────────
 
   Future<void> save() async {
-    if (state.isSaving || !state.isDirty) return;
+    if (state.isSaving || !state.isDirty || !state.isDraftValid) return;
     emit(state.copyWith(isSaving: true, clearFailure: true));
 
+    final normalizedDraft = state.draft.detached();
     final result = await _saveSchedule(
-      draft: state.draft,
+      draft: normalizedDraft,
       baseline: state.baseline,
     );
 
     result.fold(
-      (failure) => emit(state.copyWith(isSaving: false, failure: failure)),
-      (synced) => emit(
-        state.copyWith(
+      (failure) {
+        emit(state.copyWith(isSaving: false, failure: failure));
+      },
+      (synced) {
+        final persisted = synced.detached();
+        final saved = state.copyWith(
           isSaving: false,
-          baseline: synced,
-          draft: synced,
-          useSameHoursForAllDays: _looksUniform(synced),
+          baseline: persisted,
+          draft: persisted.detached(),
+          useSameHoursForAllDays: _looksUniform(persisted),
           saveTick: state.saveTick + 1,
           clearFailure: true,
-        ),
-      ),
+        );
+        emit(saved);
+      },
     );
   }
 
   /// Discards unsaved edits, reverting the draft to the saved baseline.
   void discardChanges() {
-    emit(
-      state.copyWith(
-        draft: state.baseline,
-        useSameHoursForAllDays: _looksUniform(state.baseline),
-      ),
+    final reverted = state.copyWith(
+      draft: state.baseline.detached(),
+      useSameHoursForAllDays: _looksUniform(state.baseline),
     );
+    emit(reverted);
   }
 
   // ── Overrides (persist immediately) ────────────────────────────────────────
@@ -264,7 +278,9 @@ class AvailabilityCubit extends Cubit<AvailabilityState> {
     }
   }
 
-  void _emitDraft(WeeklySchedule next) => emit(state.copyWith(draft: next));
+  void _emitDraft(WeeklySchedule next) {
+    emit(state.copyWith(draft: next));
+  }
 
   List<TimeRange> _rangesForNewlyOpenDay() =>
       state.useSameHoursForAllDays ? _unifiedRanges() : const [_defaultRange];

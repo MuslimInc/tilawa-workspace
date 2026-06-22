@@ -64,6 +64,13 @@ class WeeklySchedule extends Equatable {
   /// True when no day has any availability.
   bool get isEmpty => Weekday.values.every((d) => rangesFor(d).isEmpty);
 
+  /// Deep-copies [rules] so draft edits cannot mutate a shared [baseline].
+  WeeklySchedule detached() => copyWith(
+    rules: {
+      for (final day in Weekday.values) day: List.unmodifiable(rangesFor(day)),
+    },
+  );
+
   WeeklySchedule copyWith({
     String? teacherId,
     String? timezone,

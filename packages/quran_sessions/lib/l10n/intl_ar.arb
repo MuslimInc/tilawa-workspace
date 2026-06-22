@@ -191,13 +191,13 @@
     "slotBooked": "محجوز",
     "slotAvailable": "متاح",
     "editSlot": "تعديل الموعد",
-    "deleteSlot": "حذف الموعد",
-    "deleteSlotConfirmTitle": "إزالة هذا الموعد؟",
-    "deleteSlotConfirmMessage": "لن يتمكن الطلاب من حجز هذا الوقت. يمكنك استعادته لاحقاً من ساعات العمل.",
-    "deleteSlotConfirm": "إزالة الموعد",
-    "deleteSlotSuccess": "تمت إزالة الموعد",
+    "deleteSlot": "حجب هذا الوقت",
+    "deleteSlotConfirmTitle": "حجب هذا الوقت؟",
+    "deleteSlotConfirmMessage": "لن يتمكن الطلاب من حجز هذا الوقت. اضغط تراجع في الإشعار لاستعادته.",
+    "deleteSlotConfirm": "حجب الوقت",
+    "deleteSlotSuccess": "تم حجب الوقت",
     "deleteSlotUndo": "تراجع",
-    "deleteSlotRemovedSnackBar": "تمت إزالة {time}",
+    "deleteSlotRemovedSnackBar": "تم حجب {time}",
     "@deleteSlotRemovedSnackBar": {
         "placeholders": {
             "time": {
@@ -205,11 +205,34 @@
             }
         }
     },
+    "deleteSlotRemovedSnackBarWithPending": "تم حجب {time} ({count} قيد الانتظار)",
+    "@deleteSlotRemovedSnackBarWithPending": {
+        "placeholders": {
+            "time": {
+                "type": "String"
+            },
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "deleteSlotRefreshDiscarded": "{count, plural, =1{تم إلغاء حجب واحد قيد الانتظار — تمت استعادة المواعيد} other{تم إلغاء {count} عمليات حجب قيد الانتظار — تمت استعادة المواعيد}}",
+    "@deleteSlotRefreshDiscarded": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
     "addNewSlot": "إضافة موعد جديد",
     "slotDate": "تاريخ الموعد",
     "slotTime": "وقت الموعد",
     "addSlotButton": "إضافة الموعد",
-    "availabilityTitle": "ساعات العمل",
+    "availabilityTitle": "التوفر الأسبوعي",
+    "availabilityRecurringBanner": "هذا توفرك الأسبوعي المتكرر. يُستخدم لإنشاء المواعيد القابلة للحجز في الأيام القادمة.",
+    "bookableTimesSectionTitle": "المواعيد المتاحة خلال 14 يوم",
+    "bookableTimesSectionSubtext": "يتم إنشاء هذه المواعيد من توفرك الأسبوعي مع استبعاد الاستثناءات والحجوزات.",
+    "editWeeklyTemplate": "تعديل الجدول الأسبوعي",
     "availabilityTabHours": "الساعات",
     "availabilityTabOverrides": "الاستثناءات",
     "availabilityUseSameHours": "استخدام نفس الساعات لكل الأيام",

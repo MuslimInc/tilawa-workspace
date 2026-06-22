@@ -17,11 +17,12 @@ class GetWeeklyScheduleUseCase {
     final result = await _repository.getSchedule(teacherId);
     return result.map(
       (schedule) =>
-          schedule ??
-          WeeklySchedule.empty(
-            teacherId: teacherId,
-            timezone: defaultTimezone,
-          ),
+          (schedule ??
+                  WeeklySchedule.empty(
+                    teacherId: teacherId,
+                    timezone: defaultTimezone,
+                  ))
+              .detached(),
     );
   }
 }

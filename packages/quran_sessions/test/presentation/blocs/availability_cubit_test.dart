@@ -246,13 +246,17 @@ void main() {
       );
       final cubit = build();
       await cubit.load('teacher_1');
-      cubit.toggleDay(Weekday.saturday, false);
+      cubit.addRange(
+        Weekday.saturday,
+        const TimeRange(start: LocalTime(16, 0), end: LocalTime(10, 0)),
+      );
 
       await cubit.save();
 
       check(repo.saveCount).equals(0);
-      check(cubit.state.failure).isA<ValidationFailure>();
+      check(cubit.state.saveEnabled).isFalse();
       check(cubit.state.isDirty).isTrue();
+      check(cubit.state.failure).isNull();
     });
 
     test('ignores duplicate save while already saving', () async {
@@ -380,5 +384,147 @@ void main() {
         check(cubit.state.failure).isNull();
       },
     );
+  });
+
+  group('working hours regression', () {
+    WeeklySchedule uniformSevenDaySchedule() => WeeklySchedule(
+      teacherId: 'teacher_1',
+      timezone: 'Africa/Cairo',
+      slotDuration: SlotDuration.thirty,
+      rules: {
+        for (final day in Weekday.values)
+          day: const [TimeRange(start: LocalTime(9, 0), end: LocalTime(17, 0))],
+      },
+    );
+
+    test(
+      'delete all slots then reopen shows no stale selected days',
+      () async {
+        repo.schedule = uniformSevenDaySchedule();
+        final cubit = build();
+        await cubit.load('teacher_1');
+        for (final day in Weekday.values) {
+          cubit.toggleDay(day, false);
+        }
+        await cubit.save();
+        await cubit.load('teacher_1');
+
+        check(cubit.state.draft.openDays).isEmpty();
+        check(cubit.state.baseline.openDays).isEmpty();
+        check(cubit.state.isDirty).isFalse();
+      },
+    );
+
+    test('delete all then add valid slot enables save', () async {
+      repo.schedule = uniformSevenDaySchedule();
+      final cubit = build();
+      await cubit.load('teacher_1');
+      for (final day in Weekday.values) {
+        cubit.toggleDay(day, false);
+      }
+      await cubit.save();
+      await cubit.load('teacher_1');
+
+      cubit.toggleDay(Weekday.monday, true);
+      check(cubit.state.isDirty).isTrue();
+      check(cubit.state.draft.isOpenOn(Weekday.monday)).isTrue();
+    });
+
+    test('reopen weekdays match backend schedule', () async {
+      repo.schedule = WeeklySchedule(
+        teacherId: 'teacher_1',
+        timezone: 'Africa/Cairo',
+        slotDuration: SlotDuration.thirty,
+        rules: {
+          Weekday.tuesday: const [
+            TimeRange(start: LocalTime(10, 0), end: LocalTime(14, 0)),
+          ],
+          Weekday.thursday: const [
+            TimeRange(start: LocalTime(18, 0), end: LocalTime(20, 0)),
+          ],
+        },
+      );
+      final cubit = build();
+      await cubit.load('teacher_1');
+      cubit.toggleDay(Weekday.tuesday, false);
+
+      await cubit.load('teacher_1');
+
+      check(cubit.state.draft.isOpenOn(Weekday.tuesday)).isTrue();
+      check(cubit.state.draft.isOpenOn(Weekday.thursday)).isTrue();
+      check(cubit.state.draft.isOpenOn(Weekday.monday)).isFalse();
+      check(cubit.state.isDirty).isFalse();
+    });
+
+    test(
+      'add slot after empty marks dirty without unrelated field change',
+      () async {
+        final cubit = build();
+        await cubit.load('teacher_1');
+        cubit.toggleDay(Weekday.wednesday, true);
+        cubit.addRange(
+          Weekday.wednesday,
+          const TimeRange(start: LocalTime(18, 0), end: LocalTime(20, 0)),
+        );
+
+        check(cubit.state.isDirty).isTrue();
+        check(cubit.state.draft.rangesFor(Weekday.wednesday)).length.equals(2);
+      },
+    );
+
+    test('overlapping draft ranges disable save until fixed', () async {
+      final cubit = build();
+      await cubit.load('teacher_1');
+      cubit.toggleDay(Weekday.monday, true);
+      cubit.addRange(
+        Weekday.monday,
+        const TimeRange(start: LocalTime(9, 0), end: LocalTime(12, 0)),
+      );
+      cubit.addRange(
+        Weekday.monday,
+        const TimeRange(start: LocalTime(10, 0), end: LocalTime(14, 0)),
+      );
+
+      check(cubit.state.isDirty).isTrue();
+      check(cubit.state.isDraftValid).isFalse();
+      check(cubit.state.saveEnabled).isFalse();
+    });
+
+    test('cancel after edits resets draft to baseline', () async {
+      repo.schedule = uniformSevenDaySchedule();
+      final cubit = build();
+      await cubit.load('teacher_1');
+      cubit.toggleDay(Weekday.saturday, false);
+      check(cubit.state.isDirty).isTrue();
+
+      cubit.discardChanges();
+
+      check(cubit.state.isDirty).isFalse();
+      check(cubit.state.draft).equals(cubit.state.baseline);
+      check(cubit.state.draft.isOpenOn(Weekday.saturday)).isTrue();
+    });
+
+    test('load keeps baseline isolated from draft edits', () async {
+      repo.schedule = uniformSevenDaySchedule();
+      final cubit = build();
+      await cubit.load('teacher_1');
+      cubit.toggleDay(Weekday.saturday, false);
+
+      check(cubit.state.baseline.isOpenOn(Weekday.saturday)).isTrue();
+      check(cubit.state.draft.isOpenOn(Weekday.saturday)).isFalse();
+    });
+
+    test('reload discards unsaved local edits', () async {
+      repo.schedule = uniformSevenDaySchedule();
+      final cubit = build();
+      await cubit.load('teacher_1');
+      cubit.toggleDay(Weekday.saturday, false);
+      check(cubit.state.isDirty).isTrue();
+
+      await cubit.load('teacher_1');
+
+      check(cubit.state.draft.isOpenOn(Weekday.saturday)).isTrue();
+      check(cubit.state.isDirty).isFalse();
+    });
   });
 }

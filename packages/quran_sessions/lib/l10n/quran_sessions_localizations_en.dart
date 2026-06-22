@@ -499,27 +499,43 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get editSlot => 'Edit slot';
 
   @override
-  String get deleteSlot => 'Delete slot';
+  String get deleteSlot => 'Block this time';
 
   @override
-  String get deleteSlotConfirmTitle => 'Remove this slot?';
+  String get deleteSlotConfirmTitle => 'Block this time?';
 
   @override
   String get deleteSlotConfirmMessage =>
-      'Students will no longer be able to book this time. You can restore it later from working hours.';
+      'Students will no longer be able to book this time. Tap Undo on the snackbar to restore it.';
 
   @override
-  String get deleteSlotConfirm => 'Remove slot';
+  String get deleteSlotConfirm => 'Block time';
 
   @override
-  String get deleteSlotSuccess => 'Slot removed';
+  String get deleteSlotSuccess => 'Time blocked';
 
   @override
   String get deleteSlotUndo => 'Undo';
 
   @override
   String deleteSlotRemovedSnackBar(String time) {
-    return 'Removed $time';
+    return 'Blocked $time';
+  }
+
+  @override
+  String deleteSlotRemovedSnackBarWithPending(String time, int count) {
+    return 'Blocked $time ($count pending)';
+  }
+
+  @override
+  String deleteSlotRefreshDiscarded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pending blocks were discarded — slots restored',
+      one: '1 pending block was discarded — slots restored',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -535,7 +551,21 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get addSlotButton => 'Add slot';
 
   @override
-  String get availabilityTitle => 'Working hours';
+  String get availabilityTitle => 'Weekly availability';
+
+  @override
+  String get availabilityRecurringBanner =>
+      'This is your recurring weekly availability. It is used to generate bookable times for future days.';
+
+  @override
+  String get bookableTimesSectionTitle => 'Bookable times — next 14 days';
+
+  @override
+  String get bookableTimesSectionSubtext =>
+      'Generated from your weekly availability, minus exceptions and bookings.';
+
+  @override
+  String get editWeeklyTemplate => 'Edit weekly template';
 
   @override
   String get availabilityTabHours => 'Hours';

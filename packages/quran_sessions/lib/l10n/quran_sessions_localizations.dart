@@ -962,31 +962,31 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @deleteSlot.
   ///
   /// In en, this message translates to:
-  /// **'Delete slot'**
+  /// **'Block this time'**
   String get deleteSlot;
 
   /// No description provided for @deleteSlotConfirmTitle.
   ///
   /// In en, this message translates to:
-  /// **'Remove this slot?'**
+  /// **'Block this time?'**
   String get deleteSlotConfirmTitle;
 
   /// No description provided for @deleteSlotConfirmMessage.
   ///
   /// In en, this message translates to:
-  /// **'Students will no longer be able to book this time. You can restore it later from working hours.'**
+  /// **'Students will no longer be able to book this time. Tap Undo on the snackbar to restore it.'**
   String get deleteSlotConfirmMessage;
 
   /// No description provided for @deleteSlotConfirm.
   ///
   /// In en, this message translates to:
-  /// **'Remove slot'**
+  /// **'Block time'**
   String get deleteSlotConfirm;
 
   /// No description provided for @deleteSlotSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Slot removed'**
+  /// **'Time blocked'**
   String get deleteSlotSuccess;
 
   /// No description provided for @deleteSlotUndo.
@@ -998,8 +998,20 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @deleteSlotRemovedSnackBar.
   ///
   /// In en, this message translates to:
-  /// **'Removed {time}'**
+  /// **'Blocked {time}'**
   String deleteSlotRemovedSnackBar(String time);
+
+  /// No description provided for @deleteSlotRemovedSnackBarWithPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked {time} ({count} pending)'**
+  String deleteSlotRemovedSnackBarWithPending(String time, int count);
+
+  /// No description provided for @deleteSlotRefreshDiscarded.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 pending block was discarded — slots restored} other{{count} pending blocks were discarded — slots restored}}'**
+  String deleteSlotRefreshDiscarded(int count);
 
   /// No description provided for @addNewSlot.
   ///
@@ -1028,8 +1040,32 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @availabilityTitle.
   ///
   /// In en, this message translates to:
-  /// **'Working hours'**
+  /// **'Weekly availability'**
   String get availabilityTitle;
+
+  /// No description provided for @availabilityRecurringBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'This is your recurring weekly availability. It is used to generate bookable times for future days.'**
+  String get availabilityRecurringBanner;
+
+  /// No description provided for @bookableTimesSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookable times — next 14 days'**
+  String get bookableTimesSectionTitle;
+
+  /// No description provided for @bookableTimesSectionSubtext.
+  ///
+  /// In en, this message translates to:
+  /// **'Generated from your weekly availability, minus exceptions and bookings.'**
+  String get bookableTimesSectionSubtext;
+
+  /// No description provided for @editWeeklyTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit weekly template'**
+  String get editWeeklyTemplate;
 
   /// No description provided for @availabilityTabHours.
   ///

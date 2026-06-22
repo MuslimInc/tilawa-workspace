@@ -63,12 +63,6 @@ class _WeeklyAvailabilityScreenState extends State<WeeklyAvailabilityScreen>
   int _heardOverrideAddTick = 0;
   int _heardOverrideRemoveTick = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    context.read<AvailabilityCubit>().load(widget.teacherId);
-  }
-
   void _onTabChanged() {
     if (!_tabController.indexIsChanging) setState(() {});
   }
@@ -84,85 +78,124 @@ class _WeeklyAvailabilityScreenState extends State<WeeklyAvailabilityScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
+    final state = context.watch<AvailabilityCubit>().state;
+    final canPop = state.status != AvailabilityStatus.ready || !state.isDirty;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.availabilityTitle),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: [
-            Tab(text: l10n.availabilityTabHours),
-            Tab(text: l10n.availabilityTabOverrides),
-          ],
-        ),
-      ),
-      body: BlocConsumer<AvailabilityCubit, AvailabilityState>(
-        listenWhen: (prev, curr) =>
-            prev.saveTick != curr.saveTick ||
-            prev.overrideAddTick != curr.overrideAddTick ||
-            prev.overrideRemoveTick != curr.overrideRemoveTick ||
-            prev.failure != curr.failure,
-        listener: (context, state) {
-          if (state.saveTick > _heardSaveTick && state.failure == null) {
-            _heardSaveTick = state.saveTick;
-            TilawaFeedback.showToast(
-              context,
-              message: l10n.availabilitySavedToast,
-              variant: TilawaFeedbackVariant.success,
-            );
-          }
-          if (state.overrideAddTick > _heardOverrideAddTick &&
-              state.failure == null) {
-            _heardOverrideAddTick = state.overrideAddTick;
-            TilawaFeedback.showToast(
-              context,
-              message: l10n.availabilityOverrideAddedToast,
-              variant: TilawaFeedbackVariant.success,
-            );
-          }
-          if (state.overrideRemoveTick > _heardOverrideRemoveTick &&
-              state.failure == null) {
-            _heardOverrideRemoveTick = state.overrideRemoveTick;
-            TilawaFeedback.showToast(
-              context,
-              message: l10n.availabilityOverrideRemovedToast,
-              variant: TilawaFeedbackVariant.success,
-            );
-          }
-          if (state.failure != null) {
-            TilawaFeedback.showToast(
-              context,
-              message: state.failure!.toLocalizedMessage(context),
-              variant: TilawaFeedbackVariant.error,
-            );
-          }
-        },
-        builder: (context, state) => switch (state.status) {
-          AvailabilityStatus.loading => const Center(
-            child: CircularProgressIndicator(),
-          ),
-          AvailabilityStatus.error => Center(
-            child: TilawaEmptyState(
-              icon: Icons.error_outline,
-              title: l10n.availabilityLoadError,
-              action: TilawaButton(
-                text: l10n.retry,
-                onPressed: () =>
-                    context.read<AvailabilityCubit>().load(widget.teacherId),
-              ),
-            ),
-          ),
-          AvailabilityStatus.ready => TabBarView(
+    return PopScope(
+      canPop: canPop,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        final current = context.read<AvailabilityCubit>().state;
+        if (!current.isDirty) {
+          if (context.mounted) Navigator.of(context).pop();
+          return;
+        }
+        final discard = await _confirmDiscard(context);
+        if (discard && context.mounted) {
+          context.read<AvailabilityCubit>().discardChanges();
+          Navigator.of(context).pop();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(l10n.availabilityTitle),
+          bottom: TabBar(
             controller: _tabController,
-            children: [
-              _HoursTab(state: state),
-              _OverridesTab(state: state),
+            tabs: [
+              Tab(text: l10n.availabilityTabHours),
+              Tab(text: l10n.availabilityTabOverrides),
             ],
           ),
-        },
+        ),
+        body: BlocConsumer<AvailabilityCubit, AvailabilityState>(
+          listenWhen: (prev, curr) =>
+              prev.saveTick != curr.saveTick ||
+              prev.overrideAddTick != curr.overrideAddTick ||
+              prev.overrideRemoveTick != curr.overrideRemoveTick ||
+              prev.failure != curr.failure,
+          listener: (context, state) {
+            if (state.saveTick > _heardSaveTick && state.failure == null) {
+              _heardSaveTick = state.saveTick;
+              TilawaFeedback.showToast(
+                context,
+                message: l10n.availabilitySavedToast,
+                variant: TilawaFeedbackVariant.success,
+              );
+            }
+            if (state.overrideAddTick > _heardOverrideAddTick &&
+                state.failure == null) {
+              _heardOverrideAddTick = state.overrideAddTick;
+              TilawaFeedback.showToast(
+                context,
+                message: l10n.availabilityOverrideAddedToast,
+                variant: TilawaFeedbackVariant.success,
+              );
+            }
+            if (state.overrideRemoveTick > _heardOverrideRemoveTick &&
+                state.failure == null) {
+              _heardOverrideRemoveTick = state.overrideRemoveTick;
+              TilawaFeedback.showToast(
+                context,
+                message: l10n.availabilityOverrideRemovedToast,
+                variant: TilawaFeedbackVariant.success,
+              );
+            }
+            if (state.failure != null) {
+              TilawaFeedback.showToast(
+                context,
+                message: state.failure!.toLocalizedMessage(context),
+                variant: TilawaFeedbackVariant.error,
+              );
+            }
+          },
+          builder: (context, state) => switch (state.status) {
+            AvailabilityStatus.loading => const Center(
+              child: CircularProgressIndicator(),
+            ),
+            AvailabilityStatus.error => Center(
+              child: TilawaEmptyState(
+                icon: Icons.error_outline,
+                title: l10n.availabilityLoadError,
+                action: TilawaButton(
+                  text: l10n.retry,
+                  onPressed: () =>
+                      context.read<AvailabilityCubit>().load(widget.teacherId),
+                ),
+              ),
+            ),
+            AvailabilityStatus.ready => TabBarView(
+              controller: _tabController,
+              children: [
+                _HoursTab(state: state),
+                _OverridesTab(state: state),
+              ],
+            ),
+          },
+        ),
+        bottomNavigationBar: _buildFooter(context),
       ),
-      bottomNavigationBar: _buildFooter(context),
     );
+  }
+
+  Future<bool> _confirmDiscard(BuildContext context) async {
+    final l10n = context.quranSessionsL10n;
+    final discard = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.availabilityDiscardChanges),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.availabilityKeepEditing),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(l10n.availabilityDiscardConfirm),
+          ),
+        ],
+      ),
+    );
+    return discard == true;
   }
 
   Widget? _buildFooter(BuildContext context) {
@@ -213,9 +246,9 @@ class _WeeklyAvailabilityScreenState extends State<WeeklyAvailabilityScreen>
                 child: TilawaButton(
                   text: l10n.availabilitySave,
                   isLoading: state.isSaving,
-                  onPressed: state.isSaving || !state.isDirty
-                      ? null
-                      : () => context.read<AvailabilityCubit>().save(),
+                  onPressed: state.saveEnabled
+                      ? () => context.read<AvailabilityCubit>().save()
+                      : null,
                 ),
               ),
             ],
@@ -230,24 +263,11 @@ class _WeeklyAvailabilityScreenState extends State<WeeklyAvailabilityScreen>
       Navigator.of(context).pop();
       return;
     }
-    final l10n = context.quranSessionsL10n;
-    final discard = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.availabilityDiscardChanges),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(l10n.availabilityKeepEditing),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(l10n.availabilityDiscardConfirm),
-          ),
-        ],
-      ),
-    );
-    if (discard == true && context.mounted) Navigator.of(context).pop();
+    final discard = await _confirmDiscard(context);
+    if (discard && context.mounted) {
+      context.read<AvailabilityCubit>().discardChanges();
+      Navigator.of(context).pop();
+    }
   }
 }
 
@@ -274,6 +294,8 @@ class _HoursTab extends StatelessWidget {
         tokens.spaceXXL,
       ),
       children: [
+        _RecurringAvailabilityBanner(message: l10n.availabilityRecurringBanner),
+        SizedBox(height: tokens.spaceLarge),
         _DayChips(state: state),
         SizedBox(height: tokens.spaceLarge),
         const TilawaDivider(),
@@ -403,6 +425,46 @@ class _HoursTab extends StatelessWidget {
 }
 
 // ── Day chips (Sat → Fri) ─────────────────────────────────────────────────────
+
+class _RecurringAvailabilityBanner extends StatelessWidget {
+  const _RecurringAvailabilityBanner({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final tokens = Theme.of(context).tokens;
+    final bannerTokens = Theme.of(context).componentTokens.permissionBanner;
+
+    return Container(
+      padding: bannerTokens.padding,
+      decoration: BoxDecoration(
+        color: scheme.tertiaryContainer,
+        borderRadius: BorderRadius.circular(tokens.radiusMedium),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.info_outline,
+            size: tokens.iconSizeSmall,
+            color: scheme.onTertiaryContainer,
+          ),
+          SizedBox(width: tokens.spaceSmall),
+          Expanded(
+            child: Text(
+              message,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: scheme.onTertiaryContainer,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class _DayChips extends StatelessWidget {
   const _DayChips({required this.state});

@@ -15,11 +15,9 @@ class WeeklyScheduleValidator {
   static const noOpenDaysCode = 'no_open_days';
 
   /// Returns a [ValidationFailure] when [schedule] cannot be saved, or `null`.
+  ///
+  /// An all-closed schedule is valid — teachers may clear recurring hours.
   ValidationFailure? validate(WeeklySchedule schedule) {
-    if (schedule.isEmpty) {
-      return const ValidationFailure(field: field, code: noOpenDaysCode);
-    }
-
     for (final day in Weekday.values) {
       final ranges = schedule.rangesFor(day);
       for (final range in ranges) {

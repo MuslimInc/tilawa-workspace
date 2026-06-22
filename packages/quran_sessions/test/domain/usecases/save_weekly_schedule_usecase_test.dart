@@ -93,10 +93,37 @@ void main() {
       );
     });
 
-    test('does not persist invalid draft', () async {
+    test('persists an all-closed draft', () async {
+      final baselineSchedule = baseline().withDay(
+        Weekday.saturday,
+        const [TimeRange(start: LocalTime(9, 0), end: LocalTime(17, 0))],
+      );
+      repo.schedule = baselineSchedule;
+
       final result = await saveSchedule(
         draft: baseline(),
-        baseline: baseline(),
+        baseline: baselineSchedule,
+      );
+
+      check(repo.saveCount).equals(1);
+      check(result.isRight()).isTrue();
+      result.fold(
+        (_) => fail('expected Right'),
+        (synced) => check(synced.isEmpty).isTrue(),
+      );
+    });
+
+    test('does not persist invalid range', () async {
+      final baselineSchedule = baseline();
+      repo.schedule = baselineSchedule;
+      final invalid = baselineSchedule.withDay(
+        Weekday.monday,
+        const [TimeRange(start: LocalTime(17, 0), end: LocalTime(9, 0))],
+      );
+
+      final result = await saveSchedule(
+        draft: invalid,
+        baseline: baselineSchedule,
       );
 
       check(repo.saveCount).equals(0);

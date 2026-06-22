@@ -46,7 +46,7 @@ extension WeeklyScheduleDtoMapper on WeeklyScheduleDto {
       ),
       version: version,
       updatedAt: updatedAt == null ? null : DateTime.parse(updatedAt!),
-    );
+    ).detached();
   }
 }
 

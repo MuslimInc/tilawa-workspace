@@ -43,6 +43,11 @@ class TeacherDashboardBloc
     this._commitDelay = const Duration(seconds: 5),
   }) : _commitTimerFactory = commitTimerFactory ?? _defaultCommitTimerFactory,
        super(const TeacherDashboardInitial()) {
+    // Concurrency: destructive slot deletes use [sequential] — every tap is
+    // processed in order; duplicate slot ids are no-oped in the handler.
+    // [droppable] would drop rapid deletes; [restartable] could cancel in-flight
+    // deletes and is unsafe here. Load uses [restartable] to supersede stale
+    // fetches; it replaces optimistic pending deletes on completion.
     on<TeacherDashboardLoadRequested>(
       _onLoadRequested,
       transformer: restartable(),
@@ -75,6 +80,24 @@ class TeacherDashboardBloc
 
   static const _availabilityHorizon = Duration(days: 14);
 
+  void _cancelPendingCommitTimers(TeacherDashboardSuccess success) {
+    for (final pending in success.pendingDeletes.values) {
+      pending.cancelTimer();
+    }
+  }
+
+  String? _undoableAfterRemovingPending(
+    TeacherDashboardSuccess current,
+    String committedSlotId,
+    Map<String, PendingSlotDelete> remainingPending,
+  ) {
+    if (current.undoableSlotId != committedSlotId) {
+      return current.undoableSlotId;
+    }
+    if (remainingPending.isEmpty) return null;
+    return remainingPending.values.last.slotId;
+  }
+
   @override
   Future<void> close() {
     final current = state;
@@ -91,7 +114,33 @@ class TeacherDashboardBloc
     TeacherDashboardLoadRequested event,
     Emitter<TeacherDashboardState> emit,
   ) async {
-    emit(const TeacherDashboardLoading());
+    final priorSuccess = state;
+    var discardedPendingCount = 0;
+    if (priorSuccess is TeacherDashboardSuccess) {
+      discardedPendingCount = priorSuccess.pendingDeletes.length;
+      _cancelPendingCommitTimers(priorSuccess);
+
+      var availability = priorSuccess.availability;
+      if (discardedPendingCount > 0) {
+        availability = sortTeacherAvailabilityByStart([
+          ...availability,
+          ...priorSuccess.pendingDeletes.values.map((p) => p.snapshot),
+        ]);
+      }
+
+      emit(
+        priorSuccess.copyWith(
+          availability: availability,
+          pendingDeletes: const {},
+          clearUndoableSlotId: true,
+          isRefreshing: true,
+          clearSlotFailure: true,
+          clearRefreshDiscardedPendingCount: true,
+        ),
+      );
+    } else {
+      emit(const TeacherDashboardLoading());
+    }
 
     final now = DateTime.now();
 
@@ -132,6 +181,9 @@ class TeacherDashboardBloc
             sessions.where((s) => s.startsAt.isAfter(now)).toList()
               ..sort((a, b) => a.startsAt.compareTo(b.startsAt)),
         availability: slots,
+        refreshDiscardedPendingCount: discardedPendingCount > 0
+            ? discardedPendingCount
+            : null,
       ),
     );
   }
@@ -253,7 +305,9 @@ class TeacherDashboardBloc
     final current = state;
     if (current is! TeacherDashboardSuccess) return;
 
-    if (current.pendingDeletes.containsKey(event.slot.slotId)) return;
+    if (current.pendingDeletes.containsKey(event.slot.slotId)) {
+      return;
+    }
 
     if (event.slot.isBooked) {
       emit(
@@ -304,7 +358,9 @@ class TeacherDashboardBloc
     if (current is! TeacherDashboardSuccess) return;
 
     final pending = current.pendingDeletes[event.slotId];
-    if (pending == null) return;
+    if (pending == null) {
+      return;
+    }
 
     pending.cancelTimer();
 
@@ -333,6 +389,12 @@ class TeacherDashboardBloc
     CommitPendingSlotDelete event,
     Emitter<TeacherDashboardState> emit,
   ) async {
+    final current = state;
+    if (current is! TeacherDashboardSuccess ||
+        !current.pendingDeletes.containsKey(event.slotId)) {
+      return;
+    }
+
     await _commitPendingSlotDelete(event.slotId, emit: emit);
   }
 
@@ -344,7 +406,9 @@ class TeacherDashboardBloc
     if (current is! TeacherDashboardSuccess) return;
 
     final pending = current.pendingDeletes[slotId];
-    if (pending == null) return;
+    if (pending == null) {
+      return;
+    }
 
     final Either<QuranSessionsFailure, void> result;
     if (pending.isGenerated) {
@@ -384,13 +448,16 @@ class TeacherDashboardBloc
     final pendingDeletes = Map<String, PendingSlotDelete>.from(
       current.pendingDeletes,
     )..remove(slotId);
+    final nextUndoable = _undoableAfterRemovingPending(
+      current,
+      slotId,
+      pendingDeletes,
+    );
     emit(
       current.copyWith(
         pendingDeletes: pendingDeletes,
-        undoableSlotId: current.undoableSlotId == slotId
-            ? null
-            : current.undoableSlotId,
-        clearUndoableSlotId: current.undoableSlotId == slotId,
+        undoableSlotId: nextUndoable,
+        clearUndoableSlotId: nextUndoable == null,
         clearSlotFailure: true,
       ),
     );
@@ -424,15 +491,18 @@ class TeacherDashboardBloc
     final pendingDeletes = Map<String, PendingSlotDelete>.from(
       current.pendingDeletes,
     )..remove(pending.slotId);
+    final nextUndoable = _undoableAfterRemovingPending(
+      current,
+      pending.slotId,
+      pendingDeletes,
+    );
 
     availResult.fold(
       (failure) => emit(
         current.copyWith(
           pendingDeletes: pendingDeletes,
-          undoableSlotId: current.undoableSlotId == pending.slotId
-              ? null
-              : current.undoableSlotId,
-          clearUndoableSlotId: current.undoableSlotId == pending.slotId,
+          undoableSlotId: nextUndoable,
+          clearUndoableSlotId: nextUndoable == null,
           slotFailure: failure,
         ),
       ),
@@ -440,10 +510,8 @@ class TeacherDashboardBloc
         current.copyWith(
           availability: slots,
           pendingDeletes: pendingDeletes,
-          undoableSlotId: current.undoableSlotId == pending.slotId
-              ? null
-              : current.undoableSlotId,
-          clearUndoableSlotId: current.undoableSlotId == pending.slotId,
+          undoableSlotId: nextUndoable,
+          clearUndoableSlotId: nextUndoable == null,
           slotFailure: SlotUnavailableFailure(pending.snapshot.slotId),
         ),
       ),
@@ -459,6 +527,11 @@ class TeacherDashboardBloc
     final pendingDeletes = Map<String, PendingSlotDelete>.from(
       current.pendingDeletes,
     )..remove(pending.slotId);
+    final nextUndoable = _undoableAfterRemovingPending(
+      current,
+      pending.slotId,
+      pendingDeletes,
+    );
 
     emit(
       current.copyWith(
@@ -467,10 +540,8 @@ class TeacherDashboardBloc
           pending.snapshot,
         ]),
         pendingDeletes: pendingDeletes,
-        undoableSlotId: current.undoableSlotId == pending.slotId
-            ? null
-            : current.undoableSlotId,
-        clearUndoableSlotId: current.undoableSlotId == pending.slotId,
+        undoableSlotId: nextUndoable,
+        clearUndoableSlotId: nextUndoable == null,
         slotFailure: failure,
       ),
     );

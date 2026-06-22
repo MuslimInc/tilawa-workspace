@@ -45,4 +45,10 @@ abstract final class TilawaFeedback {
       dedupeKey: dedupeKey,
     );
   }
+
+  /// Dismisses the active toast when [dedupeKey] matches, or any active toast
+  /// when [dedupeKey] is null.
+  static void dismiss(BuildContext context, {String? dedupeKey}) {
+    TilawaFeedbackScope.of(context).dismiss(dedupeKey: dedupeKey);
+  }
 }

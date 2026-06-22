@@ -486,27 +486,43 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get editSlot => 'تعديل الموعد';
 
   @override
-  String get deleteSlot => 'حذف الموعد';
+  String get deleteSlot => 'حجب هذا الوقت';
 
   @override
-  String get deleteSlotConfirmTitle => 'إزالة هذا الموعد؟';
+  String get deleteSlotConfirmTitle => 'حجب هذا الوقت؟';
 
   @override
   String get deleteSlotConfirmMessage =>
-      'لن يتمكن الطلاب من حجز هذا الوقت. يمكنك استعادته لاحقاً من ساعات العمل.';
+      'لن يتمكن الطلاب من حجز هذا الوقت. اضغط تراجع في الإشعار لاستعادته.';
 
   @override
-  String get deleteSlotConfirm => 'إزالة الموعد';
+  String get deleteSlotConfirm => 'حجب الوقت';
 
   @override
-  String get deleteSlotSuccess => 'تمت إزالة الموعد';
+  String get deleteSlotSuccess => 'تم حجب الوقت';
 
   @override
   String get deleteSlotUndo => 'تراجع';
 
   @override
   String deleteSlotRemovedSnackBar(String time) {
-    return 'تمت إزالة $time';
+    return 'تم حجب $time';
+  }
+
+  @override
+  String deleteSlotRemovedSnackBarWithPending(String time, int count) {
+    return 'تم حجب $time ($count قيد الانتظار)';
+  }
+
+  @override
+  String deleteSlotRefreshDiscarded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم إلغاء $count عمليات حجب قيد الانتظار — تمت استعادة المواعيد',
+      one: 'تم إلغاء حجب واحد قيد الانتظار — تمت استعادة المواعيد',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -522,7 +538,21 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get addSlotButton => 'إضافة الموعد';
 
   @override
-  String get availabilityTitle => 'ساعات العمل';
+  String get availabilityTitle => 'التوفر الأسبوعي';
+
+  @override
+  String get availabilityRecurringBanner =>
+      'هذا توفرك الأسبوعي المتكرر. يُستخدم لإنشاء المواعيد القابلة للحجز في الأيام القادمة.';
+
+  @override
+  String get bookableTimesSectionTitle => 'المواعيد المتاحة خلال 14 يوم';
+
+  @override
+  String get bookableTimesSectionSubtext =>
+      'يتم إنشاء هذه المواعيد من توفرك الأسبوعي مع استبعاد الاستثناءات والحجوزات.';
+
+  @override
+  String get editWeeklyTemplate => 'تعديل الجدول الأسبوعي';
 
   @override
   String get availabilityTabHours => 'الساعات';

@@ -62,6 +62,10 @@ abstract class TilawaFeedbackController {
     required List<TilawaFeedbackAction> actions,
     String? dedupeKey,
   });
+
+  /// Dismisses the active toast when [dedupeKey] matches, or any active toast
+  /// when [dedupeKey] is null. Queued toasts with the same key are removed.
+  void dismiss({String? dedupeKey});
 }
 
 /// Inherited lookup for [TilawaFeedbackController].
@@ -186,6 +190,22 @@ class _TilawaFeedbackHostState extends State<TilawaFeedbackHost>
         dedupeKey: dedupeKey,
       ),
     );
+  }
+
+  @override
+  void dismiss({String? dedupeKey}) {
+    if (dedupeKey != null) {
+      _queue.removeWhere((_TilawaToastRequest r) => r.dedupeKey == dedupeKey);
+    }
+
+    final _TilawaToastRequest? active = _active;
+    if (active == null) {
+      return;
+    }
+
+    if (dedupeKey == null || active.dedupeKey == dedupeKey) {
+      unawaited(_dismissActive());
+    }
   }
 
   void _enqueue(_TilawaToastRequest request) {

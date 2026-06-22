@@ -25,16 +25,14 @@ void main() {
       check(validator.validate(scheduleWith())).isNull();
     });
 
-    test('rejects when no day is open', () {
-      final failure = validator.validate(
-        scheduleWith(
-          rules: {for (final day in Weekday.values) day: const <TimeRange>[]},
+    test('accepts an all-closed schedule', () {
+      check(
+        validator.validate(
+          scheduleWith(
+            rules: {for (final day in Weekday.values) day: const <TimeRange>[]},
+          ),
         ),
-      );
-
-      check(failure).isA<ValidationFailure>();
-      check(failure!.field).equals(WeeklyScheduleValidator.field);
-      check(failure.code).equals(WeeklyScheduleValidator.noOpenDaysCode);
+      ).isNull();
     });
 
     test('rejects invalid start/end times', () {

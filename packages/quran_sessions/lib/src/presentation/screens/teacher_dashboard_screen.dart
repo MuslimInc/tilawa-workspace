@@ -23,8 +23,9 @@ class TeacherDashboardScreen extends StatefulWidget {
   final String teacherId;
 
   /// Opens the recurring weekly availability editor. Wired by the host router;
-  /// when null the schedule entry points are hidden.
-  final VoidCallback? onManageSchedule;
+  /// when null the schedule entry points are hidden. When the returned future
+  /// completes, the dashboard reloads so newly saved working hours appear.
+  final Future<void> Function()? onManageSchedule;
 
   @override
   State<TeacherDashboardScreen> createState() => _TeacherDashboardScreenState();
@@ -32,9 +33,11 @@ class TeacherDashboardScreen extends StatefulWidget {
 
 class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
   String? _lastUndoSnackSlotId;
+  int? _lastAnnouncedDiscardedCount;
   final Set<String> _enterAnimatedSlotIds = {};
 
   static const _undoSnackDuration = Duration(seconds: 4);
+  static const _slotUndoDedupeKey = 'teacher-dashboard-slot-undo';
 
   @override
   void initState() {
@@ -56,7 +59,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
             IconButton(
               icon: const Icon(Icons.edit_calendar_outlined),
               tooltip: l10n.availabilityTitle,
-              onPressed: widget.onManageSchedule,
+              onPressed: _openManageSchedule,
             ),
         ],
       ),
@@ -75,18 +78,44 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
             );
           }
 
+          final discarded = state.refreshDiscardedPendingCount;
+          if (discarded != null &&
+              discarded > 0 &&
+              discarded != _lastAnnouncedDiscardedCount) {
+            _dismissSlotUndoToast(context);
+            _lastUndoSnackSlotId = null;
+            _lastAnnouncedDiscardedCount = discarded;
+            TilawaFeedback.showToast(
+              context,
+              message: context.quranSessionsL10n.deleteSlotRefreshDiscarded(
+                discarded,
+              ),
+              variant: TilawaFeedbackVariant.info,
+              dedupeKey: 'teacher-dashboard-slot-refresh-discarded',
+            );
+          }
+
           final undoId = state.undoableSlotId;
           if (undoId == null) {
+            if (_lastUndoSnackSlotId != null) {
+              _dismissSlotUndoToast(context);
+            }
             _lastUndoSnackSlotId = null;
             return;
           }
-          if (undoId == _lastUndoSnackSlotId) return;
+          if (undoId == _lastUndoSnackSlotId) {
+            return;
+          }
 
           final pending = state.pendingDeletes[undoId];
           if (pending == null) return;
 
           _lastUndoSnackSlotId = undoId;
-          _showDeleteUndoToast(context, pending.snapshot);
+          _showDeleteUndoToast(
+            context,
+            pending.snapshot,
+            pendingDeleteCount: state.pendingDeletes.length,
+          );
         },
         builder: (context, state) => switch (state) {
           TeacherDashboardInitial() || TeacherDashboardLoading() =>
@@ -104,7 +133,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                 action: TilawaButton(
                   text: l10n.availabilitySetupCta,
                   leadingIcon: const Icon(Icons.calendar_month_outlined),
-                  onPressed: widget.onManageSchedule,
+                  onPressed: _openManageSchedule,
                 ),
               ),
             ),
@@ -151,31 +180,59 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                           SessionCard(session: upcomingSessions[i]),
                     ),
 
-                  // ── Open slots ─────────────────────────────────────────
+                  // ── Bookable times ─────────────────────────────────────
+                  if (widget.onManageSchedule != null)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+                        child: Align(
+                          alignment: AlignmentDirectional.centerEnd,
+                          child: TextButton.icon(
+                            icon: const Icon(Icons.edit_calendar_outlined),
+                            label: Text(l10n.editWeeklyTemplate),
+                            onPressed: _openManageSchedule,
+                          ),
+                        ),
+                      ),
+                    ),
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
-                      child: Row(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            l10n.openSlotsSection(availability.length),
-                            style: Theme.of(context).textTheme.titleMedium,
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  l10n.bookableTimesSectionTitle,
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.titleMedium,
+                                ),
+                              ),
+                              if (isUpdatingAvailability) ...[
+                                const SizedBox(width: 8),
+                                const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
-                          if (isUpdatingAvailability) ...[
-                            const SizedBox(width: 8),
-                            const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
-                          ],
-                          const Spacer(),
-                          if (widget.onManageSchedule != null)
-                            TextButton.icon(
-                              icon: const Icon(Icons.edit_calendar_outlined),
-                              label: Text(l10n.availabilityTitle),
-                              onPressed: widget.onManageSchedule,
-                            ),
+                          const SizedBox(height: 4),
+                          Text(
+                            l10n.bookableTimesSectionSubtext,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
+                          ),
                         ],
                       ),
                     ),
@@ -236,9 +293,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       slot: slot,
       timeOnly: true,
       showDivider: showDivider,
-      onRemove: () => context.read<TeacherDashboardBloc>().add(
-        AvailabilitySlotRemoved(teacherId: widget.teacherId, slot: slot),
-      ),
+      onRemove: () => _confirmAndBlockSlot(context, slot),
     );
 
     if (!_enterAnimatedSlotIds.contains(slot.slotId)) return tile;
@@ -256,19 +311,26 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
 
   void _showDeleteUndoToast(
     BuildContext context,
-    TeacherAvailability slot,
-  ) {
+    TeacherAvailability slot, {
+    required int pendingDeleteCount,
+  }) {
     final l10n = context.quranSessionsL10n;
     final locale = Localizations.localeOf(context).languageCode;
     final timeFmt = DateFormat('EEE d MMM، h:mm a', locale);
     final timeLabel = timeFmt.format(slot.startsAt.toLocal());
+    final message = pendingDeleteCount > 1
+        ? l10n.deleteSlotRemovedSnackBarWithPending(
+            timeLabel,
+            pendingDeleteCount,
+          )
+        : l10n.deleteSlotRemovedSnackBar(timeLabel);
 
     TilawaFeedback.showActionable(
       context,
-      message: l10n.deleteSlotRemovedSnackBar(timeLabel),
+      message: message,
       variant: TilawaFeedbackVariant.success,
       duration: _undoSnackDuration,
-      dedupeKey: 'teacher-dashboard-slot-undo',
+      dedupeKey: _slotUndoDedupeKey,
       actions: <TilawaFeedbackAction>[
         TilawaFeedbackAction(
           label: l10n.deleteSlotUndo,
@@ -288,9 +350,58 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     );
   }
 
-  void _reload() => context.read<TeacherDashboardBloc>().add(
-    TeacherDashboardLoadRequested(teacherId: widget.teacherId),
-  );
+  void _dismissSlotUndoToast(BuildContext context) {
+    TilawaFeedback.dismiss(context, dedupeKey: _slotUndoDedupeKey);
+  }
+
+  Future<void> _confirmAndBlockSlot(
+    BuildContext context,
+    TeacherAvailability slot,
+  ) async {
+    final l10n = context.quranSessionsL10n;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.deleteSlotConfirmTitle),
+        content: Text(l10n.deleteSlotConfirmMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(l10n.deleteSlotConfirm),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    context.read<TeacherDashboardBloc>().add(
+      AvailabilitySlotRemoved(teacherId: widget.teacherId, slot: slot),
+    );
+  }
+
+  Future<void> _openManageSchedule() async {
+    final openEditor = widget.onManageSchedule;
+    if (openEditor == null) return;
+    await openEditor();
+    if (!mounted) return;
+    await _reload();
+  }
+
+  Future<void> _reload() async {
+    final bloc = context.read<TeacherDashboardBloc>();
+    final softRefresh = bloc.state is TeacherDashboardSuccess;
+    bloc.add(TeacherDashboardLoadRequested(teacherId: widget.teacherId));
+    if (softRefresh) {
+      await bloc.stream.firstWhere(
+        (s) => s is TeacherDashboardSuccess && !s.isRefreshing,
+      );
+    } else {
+      await bloc.stream.firstWhere((s) => s is! TeacherDashboardLoading);
+    }
+  }
 }
 
 // ── Enter animation (undo restore only; removal is instant) ───────────────────
@@ -381,9 +492,9 @@ class _SlotTile extends StatelessWidget {
       ),
       trailing: slot.isBooked
           ? null
-          : _DeleteSlotTrailing(
+          : _BlockSlotTrailing(
               onRemove: onRemove,
-              deleteTooltip: l10n.deleteSlot,
+              blockTooltip: l10n.deleteSlot,
               minInteractiveDimension: tokens.minInteractiveDimension,
               iconSizeSmall: tokens.iconSizeSmall,
             ),
@@ -391,16 +502,16 @@ class _SlotTile extends StatelessWidget {
   }
 }
 
-class _DeleteSlotTrailing extends StatelessWidget {
-  const _DeleteSlotTrailing({
+class _BlockSlotTrailing extends StatelessWidget {
+  const _BlockSlotTrailing({
     required this.onRemove,
-    required this.deleteTooltip,
+    required this.blockTooltip,
     required this.minInteractiveDimension,
     required this.iconSizeSmall,
   });
 
   final VoidCallback onRemove;
-  final String deleteTooltip;
+  final String blockTooltip;
   final double minInteractiveDimension;
   final double iconSizeSmall;
 
@@ -409,8 +520,8 @@ class _DeleteSlotTrailing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: const Icon(Icons.delete_outline),
-      tooltip: deleteTooltip,
+      icon: const Icon(Icons.block_outlined),
+      tooltip: blockTooltip,
       onPressed: onRemove,
       visualDensity: _visualDensity,
       constraints: BoxConstraints.tightFor(

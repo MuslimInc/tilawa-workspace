@@ -47,9 +47,11 @@ final class TeacherDashboardSuccess extends TeacherDashboardState {
     required this.upcomingSessions,
     required this.availability,
     this.isUpdatingAvailability = false,
+    this.isRefreshing = false,
     this.pendingDeletes = const {},
     this.undoableSlotId,
     this.slotFailure,
+    this.refreshDiscardedPendingCount,
   });
 
   final List<QuranSession> upcomingSessions;
@@ -57,6 +59,9 @@ final class TeacherDashboardSuccess extends TeacherDashboardState {
 
   /// True while a slot add/edit is in flight — disables the availability editor.
   final bool isUpdatingAvailability;
+
+  /// Pull-to-refresh in flight — keeps list visible (no full-screen loader).
+  final bool isRefreshing;
 
   /// Slots removed from UI awaiting deferred network commit.
   final Map<String, PendingSlotDelete> pendingDeletes;
@@ -68,35 +73,47 @@ final class TeacherDashboardSuccess extends TeacherDashboardState {
   /// UI should show a transient error (snackbar) and leave the list intact.
   final QuranSessionsFailure? slotFailure;
 
+  /// One-shot: pending optimistic deletes discarded on refresh (for UI toast).
+  final int? refreshDiscardedPendingCount;
+
   @override
   List<Object?> get props => [
     upcomingSessions,
     availability,
     isUpdatingAvailability,
+    isRefreshing,
     pendingDeletes,
     undoableSlotId,
     slotFailure,
+    refreshDiscardedPendingCount,
   ];
 
   TeacherDashboardSuccess copyWith({
     List<QuranSession>? upcomingSessions,
     List<TeacherAvailability>? availability,
     bool? isUpdatingAvailability,
+    bool? isRefreshing,
     Map<String, PendingSlotDelete>? pendingDeletes,
     String? undoableSlotId,
     QuranSessionsFailure? slotFailure,
+    int? refreshDiscardedPendingCount,
     bool clearSlotFailure = false,
     bool clearUndoableSlotId = false,
+    bool clearRefreshDiscardedPendingCount = false,
   }) => TeacherDashboardSuccess(
     upcomingSessions: upcomingSessions ?? this.upcomingSessions,
     availability: availability ?? this.availability,
     isUpdatingAvailability:
         isUpdatingAvailability ?? this.isUpdatingAvailability,
+    isRefreshing: isRefreshing ?? this.isRefreshing,
     pendingDeletes: pendingDeletes ?? this.pendingDeletes,
     undoableSlotId: clearUndoableSlotId
         ? null
         : (undoableSlotId ?? this.undoableSlotId),
     slotFailure: clearSlotFailure ? null : (slotFailure ?? this.slotFailure),
+    refreshDiscardedPendingCount: clearRefreshDiscardedPendingCount
+        ? null
+        : (refreshDiscardedPendingCount ?? this.refreshDiscardedPendingCount),
   );
 }
 

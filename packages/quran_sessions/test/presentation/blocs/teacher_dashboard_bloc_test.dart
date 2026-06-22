@@ -14,12 +14,16 @@ import 'package:timezone/data/latest.dart' as tz_data;
 class FakeCommitTimers {
   final List<({Duration delay, void Function() onFire})> scheduled = [];
   int factoryCallCount = 0;
+  int cancelCallCount = 0;
 
   CommitTimerFactory createFactory() {
     return (delay, onFire) {
       factoryCallCount++;
       scheduled.add((delay: delay, onFire: onFire));
-      return () => scheduled.removeWhere((e) => e.onFire == onFire);
+      return () {
+        cancelCallCount++;
+        scheduled.removeWhere((e) => e.onFire == onFire);
+      };
     };
   }
 
@@ -994,6 +998,255 @@ void main() {
           check(state.pendingDeletes).length.equals(1);
           check(state.pendingDeletes).containsKey(slots[0].slotId);
           check(state.undoableSlotId).isNull();
+        },
+      );
+    });
+
+    group('delete slot concurrency', () {
+      blocTest<TeacherDashboardBloc, TeacherDashboardState>(
+        'sequential transformer processes burst deletes without dropping',
+        build: () {
+          scheduleRepo.schedule = makeWeeklySchedule();
+          return buildBloc();
+        },
+        seed: () => TeacherDashboardSuccess(
+          upcomingSessions: const [],
+          availability: threeDistinctGeneratedSlots(),
+        ),
+        act: (b) {
+          final slots = threeDistinctGeneratedSlots();
+          for (final slot in slots) {
+            b.add(AvailabilitySlotRemoved(teacherId: 'teacher_1', slot: slot));
+          }
+        },
+        expect: () => List<Matcher>.filled(3, isA<TeacherDashboardSuccess>()),
+        verify: (b) {
+          final state = b.state as TeacherDashboardSuccess;
+          check(state.availability).isEmpty();
+          check(state.pendingDeletes).length.equals(3);
+          check(fakeTimers.factoryCallCount).equals(3);
+        },
+      );
+
+      blocTest<TeacherDashboardBloc, TeacherDashboardState>(
+        'reload during pending deletes clears optimistic pending state',
+        build: () {
+          scheduleRepo.schedule = makeWeeklySchedule();
+          return buildBloc();
+        },
+        seed: () {
+          final slots = threeDistinctGeneratedSlots();
+          return TeacherDashboardSuccess(
+            upcomingSessions: const [],
+            availability: slots,
+            pendingDeletes: {
+              slots[0].slotId: PendingSlotDelete(
+                snapshot: slots[0],
+                isGenerated: true,
+                teacherId: 'teacher_1',
+                cancelTimer: testCommitTimerFactory(
+                  const Duration(days: 365),
+                  () {},
+                ),
+              ),
+            },
+            undoableSlotId: slots[0].slotId,
+          );
+        },
+        act: (b) async {
+          b.add(const TeacherDashboardLoadRequested(teacherId: 'teacher_1'));
+          await b.stream.firstWhere((s) => s is TeacherDashboardSuccess);
+        },
+        expect: () => [
+          isA<TeacherDashboardSuccess>().having(
+            (s) => s.isRefreshing,
+            'isRefreshing',
+            isTrue,
+          ),
+          isA<TeacherDashboardSuccess>().having(
+            (s) => s.isRefreshing,
+            'isRefreshing',
+            isFalse,
+          ),
+        ],
+        verify: (b) {
+          final state = b.state as TeacherDashboardSuccess;
+          check(state.pendingDeletes).isEmpty();
+          check(state.undoableSlotId).isNull();
+          check(state.availability).isNotEmpty();
+          check(state.refreshDiscardedPendingCount).equals(1);
+        },
+      );
+
+      blocTest<TeacherDashboardBloc, TeacherDashboardState>(
+        'refresh during pending deletes cancels timers and skips orphan commits',
+        build: () {
+          scheduleRepo.schedule = makeWeeklySchedule();
+          return buildBloc();
+        },
+        seed: () {
+          final slots = threeDistinctGeneratedSlots();
+          return TeacherDashboardSuccess(
+            upcomingSessions: const [],
+            availability: [slots[2]],
+          );
+        },
+        act: (b) async {
+          final slots = threeDistinctGeneratedSlots();
+          b.add(
+            AvailabilitySlotRemoved(teacherId: 'teacher_1', slot: slots[0]),
+          );
+          b.add(
+            AvailabilitySlotRemoved(teacherId: 'teacher_1', slot: slots[1]),
+          );
+          await b.stream.firstWhere((s) {
+            return s is TeacherDashboardSuccess && s.pendingDeletes.length == 2;
+          });
+          check(fakeTimers.scheduled).length.equals(2);
+
+          b.add(const TeacherDashboardLoadRequested(teacherId: 'teacher_1'));
+          await b.stream.firstWhere((s) => s is TeacherDashboardSuccess);
+
+          check(fakeTimers.cancelCallCount).equals(2);
+          check(fakeTimers.scheduled).isEmpty();
+          check(scheduleRepo.overrides).isEmpty();
+
+          fakeTimers.fireAll();
+          await Future<void>.delayed(Duration.zero);
+
+          check(scheduleRepo.overrides).isEmpty();
+        },
+        expect: () => [
+          isA<TeacherDashboardSuccess>(),
+          isA<TeacherDashboardSuccess>(),
+          isA<TeacherDashboardSuccess>().having(
+            (s) => s.isRefreshing,
+            'isRefreshing',
+            isTrue,
+          ),
+          isA<TeacherDashboardSuccess>().having(
+            (s) => s.isRefreshing,
+            'isRefreshing',
+            isFalse,
+          ),
+        ],
+        verify: (b) {
+          final state = b.state as TeacherDashboardSuccess;
+          check(state.pendingDeletes).isEmpty();
+          check(state.undoableSlotId).isNull();
+          check(scheduleRepo.overrides).isEmpty();
+        },
+      );
+
+      blocTest<TeacherDashboardBloc, TeacherDashboardState>(
+        'commit after slot removed from pendingDeletes is skipped',
+        build: () {
+          scheduleRepo.schedule = makeWeeklySchedule();
+          return buildBloc();
+        },
+        seed: () => const TeacherDashboardSuccess(
+          upcomingSessions: [],
+          availability: [],
+          pendingDeletes: {},
+        ),
+        act: (b) async {
+          b.add(CommitPendingSlotDelete(slotId: generatedSlot().slotId));
+          await Future<void>.delayed(Duration.zero);
+        },
+        expect: () => <Matcher>[],
+        verify: (_) {
+          check(scheduleRepo.overrides).isEmpty();
+          check(availabilityProvider.withdrawn).isEmpty();
+        },
+      );
+
+      blocTest<TeacherDashboardBloc, TeacherDashboardState>(
+        'commit of older pending delete keeps latest undoable slot',
+        build: () {
+          scheduleRepo.schedule = makeWeeklySchedule();
+          return buildBloc();
+        },
+        seed: () {
+          final slots = threeDistinctGeneratedSlots().take(2).toList();
+          return TeacherDashboardSuccess(
+            upcomingSessions: const [],
+            availability: slots,
+          );
+        },
+        act: (b) async {
+          final slots = threeDistinctGeneratedSlots().take(2).toList();
+          b.add(
+            AvailabilitySlotRemoved(teacherId: 'teacher_1', slot: slots[0]),
+          );
+          b.add(
+            AvailabilitySlotRemoved(teacherId: 'teacher_1', slot: slots[1]),
+          );
+          await b.stream.firstWhere((s) {
+            return s is TeacherDashboardSuccess && s.pendingDeletes.length == 2;
+          });
+          b.add(CommitPendingSlotDelete(slotId: slots[0].slotId));
+          await b.stream.firstWhere((s) {
+            return s is TeacherDashboardSuccess &&
+                !s.pendingDeletes.containsKey(slots[0].slotId);
+          });
+        },
+        expect: () => [
+          isA<TeacherDashboardSuccess>(),
+          isA<TeacherDashboardSuccess>(),
+          isA<TeacherDashboardSuccess>(),
+        ],
+        verify: (b) {
+          final state = b.state as TeacherDashboardSuccess;
+          final slots = threeDistinctGeneratedSlots().take(2).toList();
+          check(state.pendingDeletes).containsKey(slots[1].slotId);
+          check(state.undoableSlotId).equals(slots[1].slotId);
+          check(scheduleRepo.overrides).length.equals(1);
+        },
+      );
+
+      blocTest<TeacherDashboardBloc, TeacherDashboardState>(
+        'undo and delete events process sequentially in arrival order',
+        build: () {
+          scheduleRepo.schedule = makeWeeklySchedule();
+          return buildBloc();
+        },
+        seed: () {
+          final slots = threeDistinctGeneratedSlots().take(2).toList();
+          return TeacherDashboardSuccess(
+            upcomingSessions: const [],
+            availability: slots,
+          );
+        },
+        act: (b) async {
+          final slots = threeDistinctGeneratedSlots().take(2).toList();
+          b.add(
+            AvailabilitySlotRemoved(teacherId: 'teacher_1', slot: slots[0]),
+          );
+          await b.stream.firstWhere((s) {
+            return s is TeacherDashboardSuccess && s.pendingDeletes.length == 1;
+          });
+          b.add(
+            AvailabilitySlotRemoved(teacherId: 'teacher_1', slot: slots[1]),
+          );
+          await b.stream.firstWhere((s) {
+            return s is TeacherDashboardSuccess && s.pendingDeletes.length == 2;
+          });
+          b.add(AvailabilitySlotDeleteUndone(slotId: slots[1].slotId));
+          await b.stream.firstWhere((s) {
+            return s is TeacherDashboardSuccess &&
+                s.availability.any((s) => s.slotId == slots[1].slotId);
+          });
+        },
+        expect: () => [
+          isA<TeacherDashboardSuccess>(),
+          isA<TeacherDashboardSuccess>(),
+          isA<TeacherDashboardSuccess>(),
+        ],
+        verify: (b) {
+          final state = b.state as TeacherDashboardSuccess;
+          final slots = threeDistinctGeneratedSlots().take(2).toList();
+          check(state.availability.single.slotId).equals(slots[1].slotId);
+          check(state.pendingDeletes).containsKey(slots[0].slotId);
         },
       );
     });
