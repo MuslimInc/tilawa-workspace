@@ -85,6 +85,8 @@ class TilawaChip extends StatelessWidget {
     );
 
     // The visible chip body — sized to its content via Row(mainAxisSize: min).
+    // Label is [Flexible] so ellipsis works when the chip sits in a bounded
+    // parent (e.g. equal-width override type columns).
     final Widget chipRow = Row(
       mainAxisSize: MainAxisSize.min,
       spacing: componentTokens.contentGap,
@@ -96,15 +98,17 @@ class TilawaChip extends StatelessWidget {
             color: effectiveForeground,
           ),
         if (showLabel || icon == null)
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style:
-                textStyle ??
-                theme.textTheme.labelLarge?.copyWith(
-                  color: effectiveForeground,
-                ),
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style:
+                  textStyle ??
+                  theme.textTheme.labelLarge?.copyWith(
+                    color: effectiveForeground,
+                  ),
+            ),
           ),
       ],
     );

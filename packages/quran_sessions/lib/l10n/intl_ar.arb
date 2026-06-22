@@ -232,6 +232,30 @@
     "availabilityRecurringBanner": "هذا توفرك الأسبوعي المتكرر. يُستخدم لإنشاء المواعيد القابلة للحجز في الأيام القادمة.",
     "bookableTimesSectionTitle": "المواعيد المتاحة خلال 14 يوم",
     "bookableTimesSectionSubtext": "يتم إنشاء هذه المواعيد من توفرك الأسبوعي مع استبعاد الاستثناءات والحجوزات.",
+    "bookableTimesThisWeekSectionTitle": "هذا الأسبوع",
+    "bookableTimesNextWeekSectionTitle": "الأسبوع القادم",
+    "bookableTimesWeekScopedTitle": "المواعيد القابلة للحجز",
+    "bookableTimesSelectedDayCaption": "عرض مواعيد {dayLabel}",
+    "@bookableTimesSelectedDayCaption": {
+        "placeholders": {
+            "dayLabel": {
+                "type": "String"
+            }
+        }
+    },
+    "bookableTimesEmptyThisWeek": "لا توجد مواعيد قابلة للحجز هذا الأسبوع.",
+    "bookableTimesEmptyNextWeek": "لا توجد مواعيد قابلة للحجز الأسبوع القادم.",
+    "bookableTimesEmptyThisWeekTitle": "لا توجد مواعيد قابلة للحجز هذا الأسبوع",
+    "bookableTimesEmptyThisWeekSubtitle": "الأيام المفتوحة في جدولك الأسبوعي تتحول إلى مواعيد هنا. عدّل ساعاتك أو راجع الاستثناءات إن كنت تتوقع مواعيد.",
+    "bookableTimesEmptyNextWeekTitle": "لا توجد مواعيد قابلة للحجز الأسبوع القادم",
+    "bookableTimesEmptyNextWeekSubtitle": "يُبنى الأسبوع القادم من توفرك الأسبوعي المتكرر. راجع جدولك لإضافة أيام أو تعديلها.",
+    "bookableTimesEmptyHorizonTitle": "لا توجد مواعيد قابلة للحجز خلال 14 يومًا",
+    "bookableTimesEmptyHorizonSubtitle": "حدد توفرك الأسبوعي المتكرر وستظهر المواعيد تلقائيًا للأيام المفتوحة.",
+    "upcomingSessionsEmptyTitle": "لا توجد جلسات قادمة",
+    "upcomingSessionsEmptySubtitle": "ستظهر الحجوزات المؤكدة هنا عندما يحجز الطلاب موعدًا معك.",
+    "fridayReviewBannerMessage": "راجع توفرك للأسبوع القادم. يحجز الطلاب من جدولك الأسبوعي.",
+    "fridayReviewBannerAction": "مراجعة",
+    "fridayReviewBannerDismiss": "تجاهل",
     "editWeeklyTemplate": "تعديل الجدول الأسبوعي",
     "availabilityTabHours": "الساعات",
     "availabilityTabOverrides": "الاستثناءات",

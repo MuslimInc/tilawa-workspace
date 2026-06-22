@@ -137,6 +137,72 @@ void main() {
     );
 
     goldenTest(
+      'TilawaChip constrained columns',
+      fileName: 'molecules/tilawa_chip_constrained',
+      builder: () => GoldenTestGroup(
+        scenarioConstraints: const BoxConstraints(
+          minWidth: 360,
+          maxWidth: 360,
+          minHeight: 72,
+          maxHeight: 72,
+        ),
+        children: [
+          GoldenTestScenario(
+            name: 'Override type row light',
+            child: TilawaPreviewWrapper(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TilawaChip(
+                        label: 'Unavailable (day off)',
+                        onTap: () {},
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TilawaChip(
+                        label: 'Custom hours',
+                        onTap: () {},
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Override type row dark',
+            child: TilawaPreviewWrapper(
+              isDark: true,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TilawaChip(
+                        label: 'Unavailable (day off)',
+                        onTap: () {},
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TilawaChip(
+                        label: 'Custom hours',
+                        onTap: () {},
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
       'TilawaMetadataChip',
       fileName: 'molecules/tilawa_metadata_chip',
       builder: () => GoldenTestGroup(

@@ -18,9 +18,21 @@ class SettingsTeachingOnMemuslimSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final config = quranSessionsFeatureConfig();
-    if (!config.showProfileTeacherEntry ||
-        SettingsTeacherCapabilityScope.isLoadingOf(context)) {
+    if (!config.showProfileTeacherEntry) {
       return const SizedBox.shrink();
+    }
+
+    if (SettingsTeacherCapabilityScope.isLoadingOf(context)) {
+      final tokens = Theme.of(context).tokens;
+      return Padding(
+        padding: EdgeInsetsDirectional.only(
+          top: tokens.spaceLarge,
+          bottom: tokens.spaceXXL,
+        ),
+        child: const TilawaSettingsGroupHorizontalInset(
+          child: TilawaCapabilityActionCardSkeleton(margin: EdgeInsets.zero),
+        ),
+      );
     }
 
     final capability = SettingsTeacherCapabilityScope.maybeOf(context);
@@ -65,9 +77,14 @@ class SettingsTeachingOnMemuslimTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final config = quranSessionsFeatureConfig();
-    if (!config.showProfileTeacherEntry ||
-        SettingsTeacherCapabilityScope.isLoadingOf(context)) {
+    if (!config.showProfileTeacherEntry) {
       return const SizedBox.shrink();
+    }
+
+    if (SettingsTeacherCapabilityScope.isLoadingOf(context)) {
+      return TilawaCapabilityActionCardSkeleton(
+        margin: standaloneLayout ? EdgeInsets.zero : null,
+      );
     }
 
     final capability = SettingsTeacherCapabilityScope.maybeOf(context);

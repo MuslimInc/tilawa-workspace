@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../../domain/entities/market_scheduling_config.dart';
 import '../../../domain/entities/quran_session.dart';
 import '../../../domain/entities/teacher_availability.dart';
 import '../../../domain/failures/quran_sessions_failure.dart';
@@ -46,6 +47,14 @@ final class TeacherDashboardSuccess extends TeacherDashboardState {
   const TeacherDashboardSuccess({
     required this.upcomingSessions,
     required this.availability,
+    required this.schedulingConfig,
+    required this.thisWeekAvailability,
+    required this.nextWeekAvailability,
+    required this.showFridayReviewBanner,
+    required this.teacherTimezone,
+    this.fridayReviewNextWeekKey,
+    this.dismissedFridayReminderWeekKey,
+    this.marketCountryCode,
     this.isUpdatingAvailability = false,
     this.isRefreshing = false,
     this.pendingDeletes = const {},
@@ -56,6 +65,22 @@ final class TeacherDashboardSuccess extends TeacherDashboardState {
 
   final List<QuranSession> upcomingSessions;
   final List<TeacherAvailability> availability;
+
+  /// Resolved admin scheduling policy for this teacher's market.
+  final MarketSchedulingConfig schedulingConfig;
+
+  /// Bookable slots in the current Sat→Fri week (when week-scoped UX on).
+  final List<TeacherAvailability> thisWeekAvailability;
+
+  /// Bookable slots in the following week.
+  final List<TeacherAvailability> nextWeekAvailability;
+
+  /// In-app Friday review nudge when next week has zero projected slots.
+  final bool showFridayReviewBanner;
+  final String? fridayReviewNextWeekKey;
+  final String? dismissedFridayReminderWeekKey;
+  final String teacherTimezone;
+  final String? marketCountryCode;
 
   /// True while a slot add/edit is in flight — disables the availability editor.
   final bool isUpdatingAvailability;
@@ -76,10 +101,20 @@ final class TeacherDashboardSuccess extends TeacherDashboardState {
   /// One-shot: pending optimistic deletes discarded on refresh (for UI toast).
   final int? refreshDiscardedPendingCount;
 
+  bool get weekScopedDashboard => schedulingConfig.weekScopedDashboardEnabled;
+
   @override
   List<Object?> get props => [
     upcomingSessions,
     availability,
+    schedulingConfig,
+    thisWeekAvailability,
+    nextWeekAvailability,
+    showFridayReviewBanner,
+    fridayReviewNextWeekKey,
+    dismissedFridayReminderWeekKey,
+    teacherTimezone,
+    marketCountryCode,
     isUpdatingAvailability,
     isRefreshing,
     pendingDeletes,
@@ -91,6 +126,14 @@ final class TeacherDashboardSuccess extends TeacherDashboardState {
   TeacherDashboardSuccess copyWith({
     List<QuranSession>? upcomingSessions,
     List<TeacherAvailability>? availability,
+    MarketSchedulingConfig? schedulingConfig,
+    List<TeacherAvailability>? thisWeekAvailability,
+    List<TeacherAvailability>? nextWeekAvailability,
+    bool? showFridayReviewBanner,
+    String? fridayReviewNextWeekKey,
+    String? dismissedFridayReminderWeekKey,
+    String? teacherTimezone,
+    String? marketCountryCode,
     bool? isUpdatingAvailability,
     bool? isRefreshing,
     Map<String, PendingSlotDelete>? pendingDeletes,
@@ -100,9 +143,25 @@ final class TeacherDashboardSuccess extends TeacherDashboardState {
     bool clearSlotFailure = false,
     bool clearUndoableSlotId = false,
     bool clearRefreshDiscardedPendingCount = false,
+    bool clearFridayReviewNextWeekKey = false,
+    bool clearDismissedFridayReminderWeekKey = false,
   }) => TeacherDashboardSuccess(
     upcomingSessions: upcomingSessions ?? this.upcomingSessions,
     availability: availability ?? this.availability,
+    schedulingConfig: schedulingConfig ?? this.schedulingConfig,
+    thisWeekAvailability: thisWeekAvailability ?? this.thisWeekAvailability,
+    nextWeekAvailability: nextWeekAvailability ?? this.nextWeekAvailability,
+    showFridayReviewBanner:
+        showFridayReviewBanner ?? this.showFridayReviewBanner,
+    fridayReviewNextWeekKey: clearFridayReviewNextWeekKey
+        ? null
+        : (fridayReviewNextWeekKey ?? this.fridayReviewNextWeekKey),
+    dismissedFridayReminderWeekKey: clearDismissedFridayReminderWeekKey
+        ? null
+        : (dismissedFridayReminderWeekKey ??
+              this.dismissedFridayReminderWeekKey),
+    teacherTimezone: teacherTimezone ?? this.teacherTimezone,
+    marketCountryCode: marketCountryCode ?? this.marketCountryCode,
     isUpdatingAvailability:
         isUpdatingAvailability ?? this.isUpdatingAvailability,
     isRefreshing: isRefreshing ?? this.isRefreshing,

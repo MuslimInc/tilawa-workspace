@@ -56,16 +56,17 @@ void main() {
   final fixedNow = DateTime.utc(2026, 1, 9);
 
   TeacherDashboardBloc buildBloc() {
-    return TeacherDashboardBloc(
-      getTeacherSessions: GetTeacherSessionsUseCase(sessionRepo),
+    return buildTestTeacherDashboardBloc(
+      sessionRepo: sessionRepo,
       getAvailability: spyGetAvailability,
       blockGeneratedSlot: blockGeneratedSlot,
       availabilityProvider: availabilityProvider,
       cancelSession: buildCancelSessionViaServerUseCase(),
       completeSession: buildCompleteSessionViaServerUseCase(),
-      teacherId: 'teacher_1',
+      scheduleRepo: scheduleRepo,
       commitTimerFactory: fakeTimers.createFactory(),
       commitDelay: const Duration(days: 365),
+      now: () => fixedNow,
     );
   }
 
@@ -183,8 +184,18 @@ void main() {
 
         check(editorOpened).isTrue();
         expect(find.text(l10n.availabilitySetupHeadline), findsNothing);
-        expect(find.text(l10n.noOpenSlots), findsNothing);
-        expect(find.text(l10n.bookableTimesSectionTitle), findsOneWidget);
+        expect(
+          find.text(l10n.bookableTimesWeekScopedTitle),
+          findsOneWidget,
+        );
+        expect(
+          find.text(l10n.bookableTimesThisWeekSectionTitle),
+          findsOneWidget,
+        );
+        expect(
+          find.text(l10n.bookableTimesNextWeekSectionTitle),
+          findsOneWidget,
+        );
 
         final state = bloc.state as TeacherDashboardSuccess;
         check(state.availability).isNotEmpty();
@@ -220,12 +231,51 @@ void main() {
         tester.element(find.byType(TeacherDashboardScreen)),
       );
 
-      await tester.tap(find.byIcon(Icons.edit_calendar_outlined).first);
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AppBar),
+          matching: find.byIcon(Icons.edit_calendar_outlined),
+        ),
+      );
       await tester.pumpAndSettle();
 
       final state = bloc.state as TeacherDashboardSuccess;
       check(state.availability.length).isGreaterThan(initialCount);
-      expect(find.text(l10n.bookableTimesSectionTitle), findsOneWidget);
+      expect(find.text(l10n.bookableTimesWeekScopedTitle), findsOneWidget);
+    });
+
+    testWidgets('edit weekly template uses app bar icon not section header', (
+      tester,
+    ) async {
+      scheduleRepo.schedule = makeWeeklySchedule();
+      final bloc = buildBloc();
+
+      await _pumpDashboard(
+        tester,
+        bloc: bloc,
+        onManageSchedule: () async {},
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(TilawaPrimaryFab), findsNothing);
+      expect(
+        find.descendant(
+          of: find.byType(AppBar),
+          matching: find.byIcon(Icons.edit_calendar_outlined),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.text(
+            QuranSessionsLocalizations.of(
+              tester.element(find.byType(TeacherDashboardScreen)),
+            ).bookableTimesWeekScopedTitle,
+          ),
+          matching: find.byIcon(Icons.edit_calendar_outlined),
+        ),
+        findsNothing,
+      );
     });
   });
 }

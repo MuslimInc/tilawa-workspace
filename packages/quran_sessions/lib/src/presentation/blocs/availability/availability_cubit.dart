@@ -184,13 +184,13 @@ class AvailabilityCubit extends Cubit<AvailabilityState> {
       return;
     }
 
-    emit(state.copyWith(isOverridesBusy: true, clearFailure: true));
+    emit(state.copyWith(isAddingOverride: true, clearFailure: true));
 
     for (final override in overrides) {
       final result = await _repo.saveOverride(state.teacherId, override);
       final failure = result.fold((f) => f, (_) => null);
       if (failure != null) {
-        emit(state.copyWith(isOverridesBusy: false, failure: failure));
+        emit(state.copyWith(isAddingOverride: false, failure: failure));
         return;
       }
     }
@@ -204,7 +204,7 @@ class AvailabilityCubit extends Cubit<AvailabilityState> {
     emit(
       state.copyWith(
         overrides: next,
-        isOverridesBusy: false,
+        isAddingOverride: false,
         overrideAddTick: state.overrideAddTick + 1,
         clearFailure: true,
       ),
@@ -219,13 +219,23 @@ class AvailabilityCubit extends Cubit<AvailabilityState> {
     final keys = dateKeys.toList();
     if (keys.isEmpty || state.isOverridesBusy) return;
 
-    emit(state.copyWith(isOverridesBusy: true, clearFailure: true));
+    emit(
+      state.copyWith(
+        removingOverrideDateKeys: keys.toSet(),
+        clearFailure: true,
+      ),
+    );
 
     for (final dateKey in keys) {
       final result = await _repo.removeOverride(state.teacherId, dateKey);
       final failure = result.fold((f) => f, (_) => null);
       if (failure != null) {
-        emit(state.copyWith(isOverridesBusy: false, failure: failure));
+        emit(
+          state.copyWith(
+            clearRemovingOverrideDateKeys: true,
+            failure: failure,
+          ),
+        );
         return;
       }
     }
@@ -235,7 +245,7 @@ class AvailabilityCubit extends Cubit<AvailabilityState> {
         overrides: state.overrides
             .where((o) => !keys.contains(o.dateKey))
             .toList(),
-        isOverridesBusy: false,
+        clearRemovingOverrideDateKeys: true,
         overrideRemoveTick: state.overrideRemoveTick + 1,
         clearFailure: true,
       ),

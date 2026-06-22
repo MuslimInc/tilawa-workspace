@@ -91,6 +91,16 @@ final class AvailabilityUpdated extends TeacherDashboardEvent {
   List<Object?> get props => [teacherId, from, to];
 }
 
+/// Teacher dismissed the Friday review in-app banner for the current cycle.
+final class FridayReviewBannerDismissed extends TeacherDashboardEvent {
+  const FridayReviewBannerDismissed({required this.teacherId});
+
+  final String teacherId;
+
+  @override
+  List<Object?> get props => [teacherId];
+}
+
 /// Teacher cancels an upcoming session.
 final class TeacherSessionCancelled extends TeacherDashboardEvent {
   const TeacherSessionCancelled({

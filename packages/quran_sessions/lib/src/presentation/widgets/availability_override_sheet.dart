@@ -6,6 +6,7 @@ import '../../domain/entities/availability_override.dart';
 import '../../domain/entities/local_time.dart';
 import '../../domain/entities/time_range.dart';
 import '../../domain/services/vacation_override_validator.dart';
+import 'availability_day_hours_row.dart';
 import 'time_range_editor_sheet.dart';
 
 /// Opens the dated-override editor (vacation / busy / custom hours) and returns
@@ -143,19 +144,20 @@ class _OverrideEditorSheetState extends State<_OverrideEditorSheet> {
                     ),
                     if (_type == OverrideType.custom) ...[
                       SizedBox(height: tokens.spaceMedium),
-                      for (var i = 0; i < _ranges.length; i++)
-                        _CustomRangeRow(
-                          range: _ranges[i],
-                          onEdit: () => _editRange(i),
-                          onRemove: () => setState(() => _ranges.removeAt(i)),
-                        ),
-                      Align(
-                        alignment: AlignmentDirectional.centerStart,
-                        child: TextButton.icon(
-                          onPressed: _addRange,
-                          icon: const Icon(Icons.add),
-                          label: Text(l10n.availabilityAddRange),
-                        ),
+                      Wrap(
+                        spacing: tokens.spaceSmall,
+                        runSpacing: tokens.spaceSmall,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          for (var i = 0; i < _ranges.length; i++)
+                            AvailabilityRangePill(
+                              range: _ranges[i],
+                              onTap: () => _editRange(i),
+                              onRemove: () =>
+                                  setState(() => _ranges.removeAt(i)),
+                            ),
+                          AvailabilityAddRangeButton(onTap: _addRange),
+                        ],
                       ),
                     ],
                     SizedBox(height: tokens.spaceSmall),
@@ -299,38 +301,6 @@ class _TypeChip extends StatelessWidget {
       backgroundColor: selected ? scheme.primary : scheme.surface,
       foregroundColor: selected ? scheme.onPrimary : scheme.onSurfaceVariant,
       borderColor: selected ? scheme.primary : scheme.outlineVariant,
-    );
-  }
-}
-
-class _CustomRangeRow extends StatelessWidget {
-  const _CustomRangeRow({
-    required this.range,
-    required this.onEdit,
-    required this.onRemove,
-  });
-
-  final TimeRange range;
-  final VoidCallback onEdit;
-  final VoidCallback onRemove;
-
-  @override
-  Widget build(BuildContext context) {
-    final material = MaterialLocalizations.of(context);
-    final use24 = MediaQuery.of(context).alwaysUse24HourFormat;
-    String fmt(LocalTime t) => material.formatTimeOfDay(
-      TimeOfDay(hour: t.hour % 24, minute: t.minute),
-      alwaysUse24HourFormat: use24,
-    );
-
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      onTap: onEdit,
-      title: Text('${fmt(range.start)} - ${fmt(range.end)}'),
-      trailing: IconButton(
-        onPressed: onRemove,
-        icon: const Icon(Icons.close),
-      ),
     );
   }
 }

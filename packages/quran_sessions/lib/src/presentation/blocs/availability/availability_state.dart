@@ -23,7 +23,8 @@ class AvailabilityState extends Equatable {
     this.overrides = const [],
     this.useSameHoursForAllDays = false,
     this.isSaving = false,
-    this.isOverridesBusy = false,
+    this.isAddingOverride = false,
+    this.removingOverrideDateKeys = const {},
     this.failure,
     this.saveTick = 0,
     this.overrideAddTick = 0,
@@ -45,8 +46,19 @@ class AvailabilityState extends Equatable {
   final bool useSameHoursForAllDays;
   final bool isSaving;
 
-  /// True while an override add/remove request is in flight.
-  final bool isOverridesBusy;
+  /// True while an override add request is in flight.
+  final bool isAddingOverride;
+
+  /// Date keys currently being removed (scoped per override group).
+  final Set<String> removingOverrideDateKeys;
+
+  /// True while any override mutation is in flight.
+  bool get isOverridesBusy =>
+      isAddingOverride || removingOverrideDateKeys.isNotEmpty;
+
+  /// Whether [dateKeys] belong to the override group being removed.
+  bool isRemovingOverrideGroup(Iterable<String> dateKeys) =>
+      dateKeys.any(removingOverrideDateKeys.contains);
 
   /// Set when a load or save fails; the screen shows it then it is cleared.
   final QuranSessionsFailure? failure;
@@ -86,7 +98,9 @@ class AvailabilityState extends Equatable {
     List<AvailabilityOverride>? overrides,
     bool? useSameHoursForAllDays,
     bool? isSaving,
-    bool? isOverridesBusy,
+    bool? isAddingOverride,
+    Set<String>? removingOverrideDateKeys,
+    bool clearRemovingOverrideDateKeys = false,
     QuranSessionsFailure? failure,
     bool clearFailure = false,
     int? saveTick,
@@ -101,7 +115,10 @@ class AvailabilityState extends Equatable {
     useSameHoursForAllDays:
         useSameHoursForAllDays ?? this.useSameHoursForAllDays,
     isSaving: isSaving ?? this.isSaving,
-    isOverridesBusy: isOverridesBusy ?? this.isOverridesBusy,
+    isAddingOverride: isAddingOverride ?? this.isAddingOverride,
+    removingOverrideDateKeys: clearRemovingOverrideDateKeys
+        ? const {}
+        : (removingOverrideDateKeys ?? this.removingOverrideDateKeys),
     failure: clearFailure ? null : (failure ?? this.failure),
     saveTick: saveTick ?? this.saveTick,
     overrideAddTick: overrideAddTick ?? this.overrideAddTick,
@@ -117,7 +134,8 @@ class AvailabilityState extends Equatable {
     overrides,
     useSameHoursForAllDays,
     isSaving,
-    isOverridesBusy,
+    isAddingOverride,
+    removingOverrideDateKeys,
     failure,
     saveTick,
     overrideAddTick,

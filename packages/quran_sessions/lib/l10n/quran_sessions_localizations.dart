@@ -1061,6 +1061,108 @@ abstract class QuranSessionsLocalizations {
   /// **'Generated from your weekly availability, minus exceptions and bookings.'**
   String get bookableTimesSectionSubtext;
 
+  /// No description provided for @bookableTimesThisWeekSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get bookableTimesThisWeekSectionTitle;
+
+  /// No description provided for @bookableTimesNextWeekSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Next week'**
+  String get bookableTimesNextWeekSectionTitle;
+
+  /// No description provided for @bookableTimesWeekScopedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookable times'**
+  String get bookableTimesWeekScopedTitle;
+
+  /// No description provided for @bookableTimesSelectedDayCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing times for {dayLabel}'**
+  String bookableTimesSelectedDayCaption(String dayLabel);
+
+  /// No description provided for @bookableTimesEmptyThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'No bookable times this week.'**
+  String get bookableTimesEmptyThisWeek;
+
+  /// No description provided for @bookableTimesEmptyNextWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'No bookable times next week.'**
+  String get bookableTimesEmptyNextWeek;
+
+  /// No description provided for @bookableTimesEmptyThisWeekTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No bookable times this week'**
+  String get bookableTimesEmptyThisWeekTitle;
+
+  /// No description provided for @bookableTimesEmptyThisWeekSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Open days in your weekly template become slots here. Adjust your hours or check exceptions if you expected times.'**
+  String get bookableTimesEmptyThisWeekSubtitle;
+
+  /// No description provided for @bookableTimesEmptyNextWeekTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No bookable times next week'**
+  String get bookableTimesEmptyNextWeekTitle;
+
+  /// No description provided for @bookableTimesEmptyNextWeekSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Next week is built from your recurring weekly availability. Review your template to add or change days.'**
+  String get bookableTimesEmptyNextWeekSubtitle;
+
+  /// No description provided for @bookableTimesEmptyHorizonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No bookable times in the next 14 days'**
+  String get bookableTimesEmptyHorizonTitle;
+
+  /// No description provided for @bookableTimesEmptyHorizonSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set your recurring weekly availability and open days will appear here automatically.'**
+  String get bookableTimesEmptyHorizonSubtitle;
+
+  /// No description provided for @upcomingSessionsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No upcoming sessions'**
+  String get upcomingSessionsEmptyTitle;
+
+  /// No description provided for @upcomingSessionsEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed bookings will appear here when students reserve a time with you.'**
+  String get upcomingSessionsEmptySubtitle;
+
+  /// No description provided for @fridayReviewBannerMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Review next week\'s availability. Students book from your weekly template.'**
+  String get fridayReviewBannerMessage;
+
+  /// No description provided for @fridayReviewBannerAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get fridayReviewBannerAction;
+
+  /// No description provided for @fridayReviewBannerDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get fridayReviewBannerDismiss;
+
   /// No description provided for @editWeeklyTemplate.
   ///
   /// In en, this message translates to:

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../atoms/tilawa_icon_box.dart';
@@ -41,6 +43,543 @@ class TilawaCapabilityActionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final cardTokens = theme.componentTokens.capabilityActionCard;
+    final String resolvedSemanticLabel = semanticLabel ?? '$title. $subtitle';
+    final _CapabilityActionCardLayoutProfile profile =
+        _CapabilityActionCardLayoutProfile(
+          showBadge: badgeLabel != null,
+        );
+    return _CapabilityActionCardLayout(
+      profile: profile,
+      title: title,
+      subtitle: subtitle,
+      badgeLabel: badgeLabel,
+      margin: margin,
+      builder: (context, metrics) {
+        return _CapabilityActionCardFrame(
+          useGradient: useGradient,
+          margin: EdgeInsets.zero,
+          semanticLabel: resolvedSemanticLabel,
+          isButton: true,
+          onTap: onTap,
+          bodyHeight: metrics.bodyHeight,
+          child: _CapabilityActionCardBody(
+            metrics: metrics,
+            cardTokens: cardTokens,
+            leading: TilawaIconBox(
+              icon: leadingIcon,
+              size: cardTokens.leadingIconSize,
+              variant: TilawaIconBoxVariant.tinted,
+              semanticTint: leadingIconSemanticTint,
+            ),
+            copy: _CapabilityActionCardCopy(
+              title: title,
+              subtitle: subtitle,
+              badgeLabel: badgeLabel,
+              cardTokens: cardTokens,
+            ),
+            trailing: Padding(
+              padding: EdgeInsets.only(top: theme.tokens.spaceTiny),
+              child: Icon(
+                trailingIcon ?? TilawaIcons.chevronRightSmall,
+                size: cardTokens.trailingIconSize,
+                color: colorScheme.onSurfaceVariant.withValues(
+                  alpha: cardTokens.trailingIconOpacity,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Skeleton placeholder matching [TilawaCapabilityActionCard] layout.
+///
+/// Use while capability metadata is loading so Settings keeps stable chrome.
+class TilawaCapabilityActionCardSkeleton extends StatefulWidget {
+  const TilawaCapabilityActionCardSkeleton({
+    super.key,
+    this.showBadge = true,
+    this.titleLines = 1,
+    this.subtitleLines = 1,
+    this.useGradient = true,
+    this.margin,
+    this.semanticLabel = 'Loading',
+    this.animate = true,
+    this.mirrorTitle,
+    this.mirrorSubtitle,
+    this.mirrorBadgeLabel,
+  });
+
+  /// Mirrors the verified-teacher badge row on the loaded card.
+  final bool showBadge;
+
+  /// Placeholder title line count — keep in sync with loaded card copy.
+  final int titleLines;
+
+  /// Placeholder subtitle line count — keep in sync with loaded card copy.
+  final int subtitleLines;
+  final bool useGradient;
+  final EdgeInsetsGeometry? margin;
+  final String semanticLabel;
+
+  /// When set with [mirrorSubtitle], sizes the skeleton to match a loaded card
+  /// carrying the same copy.
+  final String? mirrorTitle;
+  final String? mirrorSubtitle;
+  final String? mirrorBadgeLabel;
+
+  /// When false, bones render as static blocks (also off under reduced motion).
+  final bool animate;
+
+  @override
+  State<TilawaCapabilityActionCardSkeleton> createState() =>
+      _TilawaCapabilityActionCardSkeletonState();
+}
+
+class _TilawaCapabilityActionCardSkeletonState
+    extends State<TilawaCapabilityActionCardSkeleton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _shimmerController;
+
+  @override
+  void initState() {
+    super.initState();
+    _shimmerController = AnimationController(vsync: this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final tokens = Theme.of(context).tokens;
+    _shimmerController.duration = tokens.durationSlow;
+    _syncAnimation();
+  }
+
+  @override
+  void didUpdateWidget(covariant TilawaCapabilityActionCardSkeleton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.animate != widget.animate) {
+      _syncAnimation();
+    }
+  }
+
+  void _syncAnimation() {
+    final bool shouldAnimate =
+        widget.animate && !MediaQuery.disableAnimationsOf(context);
+    if (!shouldAnimate) {
+      _shimmerController.stop();
+      _shimmerController.value = 0;
+      return;
+    }
+    if (!_shimmerController.isAnimating) {
+      _shimmerController.repeat();
+    }
+  }
+
+  @override
+  void dispose() {
+    _shimmerController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cardTokens = theme.componentTokens.capabilityActionCard;
+    final bool shouldAnimate =
+        widget.animate && !MediaQuery.disableAnimationsOf(context);
+    final _CapabilityActionCardLayoutProfile profile =
+        _CapabilityActionCardLayoutProfile(
+          titleLines: widget.titleLines,
+          subtitleLines: widget.subtitleLines,
+          showBadge: widget.showBadge || widget.mirrorBadgeLabel != null,
+        );
+    return _CapabilityActionCardLayout(
+      profile: profile,
+      title: widget.mirrorTitle,
+      subtitle: widget.mirrorSubtitle,
+      badgeLabel: widget.mirrorBadgeLabel,
+      margin: widget.margin,
+      builder: (context, metrics) {
+        return _CapabilityActionCardFrame(
+          useGradient: widget.useGradient,
+          margin: EdgeInsets.zero,
+          semanticLabel: widget.semanticLabel,
+          isButton: false,
+          bodyHeight: metrics.bodyHeight,
+          child: _CapabilityActionCardBody(
+            metrics: metrics,
+            cardTokens: cardTokens,
+            leading: _CapabilityActionCardSkeletonBone(
+              width: metrics.leadingExtent,
+              height: metrics.leadingExtent,
+              borderRadius: theme.tokens.resolveRadius(
+                family: TilawaRadiusFamily.decorative,
+              ),
+              shimmer: shouldAnimate ? _shimmerController : null,
+            ),
+            copy: _CapabilityActionCardSkeletonCopy(
+              metrics: metrics,
+              profile: profile,
+              shimmer: shouldAnimate ? _shimmerController : null,
+            ),
+            trailing: Padding(
+              padding: EdgeInsets.only(top: theme.tokens.spaceTiny),
+              child: _CapabilityActionCardSkeletonBone(
+                width: cardTokens.trailingIconSize,
+                height: cardTokens.trailingIconSize,
+                borderRadius: theme.tokens.radiusSmall,
+                shimmer: shouldAnimate ? _shimmerController : null,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _CapabilityActionCardLayout extends StatelessWidget {
+  const _CapabilityActionCardLayout({
+    required this.profile,
+    required this.builder,
+    this.title,
+    this.subtitle,
+    this.badgeLabel,
+    this.margin,
+  });
+
+  final _CapabilityActionCardLayoutProfile profile;
+  final String? title;
+  final String? subtitle;
+  final String? badgeLabel;
+  final EdgeInsetsGeometry? margin;
+  final Widget Function(
+    BuildContext context,
+    _CapabilityActionCardLayoutMetrics metrics,
+  )
+  builder;
+
+  @override
+  Widget build(BuildContext context) {
+    final cardTokens = Theme.of(context).componentTokens.capabilityActionCard;
+    final resolvedMargin = margin ?? cardTokens.outerPadding;
+
+    return Padding(
+      padding: resolvedMargin,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final metrics = _CapabilityActionCardLayoutMetrics.resolve(
+            context,
+            cardTokens: cardTokens,
+            profile: profile,
+            copyMaxWidth: _CapabilityActionCardLayoutMetrics.copyMaxWidth(
+              context,
+              bodyWidth: constraints.maxWidth,
+              cardTokens: cardTokens,
+            ),
+            title: title,
+            subtitle: subtitle,
+            badgeLabel: badgeLabel,
+          );
+          return builder(context, metrics);
+        },
+      ),
+    );
+  }
+}
+
+@immutable
+class _CapabilityActionCardLayoutProfile {
+  const _CapabilityActionCardLayoutProfile({
+    this.titleLines = 1,
+    this.subtitleLines = 1,
+    this.showBadge = true,
+  });
+
+  final int titleLines;
+  final int subtitleLines;
+  final bool showBadge;
+}
+
+@immutable
+class _CapabilityActionCardLayoutMetrics {
+  const _CapabilityActionCardLayoutMetrics({
+    required this.titleBlockHeight,
+    required this.subtitleBlockHeight,
+    required this.badgeHeight,
+    required this.copyColumnHeight,
+    required this.leadingExtent,
+    required this.bodyHeight,
+  });
+
+  final double titleBlockHeight;
+  final double subtitleBlockHeight;
+  final double badgeHeight;
+  final double copyColumnHeight;
+  final double leadingExtent;
+  final double bodyHeight;
+
+  factory _CapabilityActionCardLayoutMetrics.resolve(
+    BuildContext context, {
+    required TilawaCapabilityActionCardTokens cardTokens,
+    required _CapabilityActionCardLayoutProfile profile,
+    required double copyMaxWidth,
+    String? title,
+    String? subtitle,
+    String? badgeLabel,
+  }) {
+    final theme = Theme.of(context);
+    final chipTokens = theme.componentTokens.chip;
+    final iconBoxTokens = theme.componentTokens.iconBox;
+    final designTokens = theme.tokens;
+
+    final TextStyle titleStyle = theme.textTheme.titleMedium!.copyWith(
+      fontWeight: FontWeight.w600,
+      height: 1.25,
+    );
+    final TextStyle subtitleStyle = theme.textTheme.bodySmall!.copyWith(
+      fontWeight: FontWeight.w400,
+      height: 1.4,
+    );
+    final TextStyle badgeStyle = theme.textTheme.labelSmall!.copyWith(
+      fontWeight: chipTokens.statusFontWeight,
+      letterSpacing: chipTokens.statusLetterSpacing,
+    );
+
+    double textLineHeight(TextStyle style) {
+      final TextPainter painter = TextPainter(
+        text: TextSpan(text: 'Hg', style: style),
+        textDirection: Directionality.of(context),
+        maxLines: 1,
+      )..layout();
+      return painter.height;
+    }
+
+    double measureTextBlockHeight({
+      required String value,
+      required TextStyle style,
+      required int maxLines,
+    }) {
+      final TextPainter painter = TextPainter(
+        text: TextSpan(text: value, style: style),
+        textDirection: Directionality.of(context),
+        maxLines: maxLines,
+      )..layout(maxWidth: copyMaxWidth);
+      return painter.height;
+    }
+
+    final double titleBlockHeight = title == null
+        ? textLineHeight(titleStyle) * profile.titleLines
+        : measureTextBlockHeight(
+            value: title,
+            style: titleStyle,
+            maxLines: 2,
+          );
+    final double subtitleBlockHeight = subtitle == null
+        ? textLineHeight(subtitleStyle) * profile.subtitleLines
+        : measureTextBlockHeight(
+            value: subtitle,
+            style: subtitleStyle,
+            maxLines: 3,
+          );
+    final EdgeInsets badgePadding = chipTokens.inlinePadding.resolve(
+      Directionality.of(context),
+    );
+    final double badgeLabelHeight = badgeLabel == null
+        ? textLineHeight(badgeStyle)
+        : measureTextBlockHeight(
+            value: badgeLabel,
+            style: badgeStyle,
+            maxLines: 1,
+          );
+    final double badgeHeight = profile.showBadge
+        ? badgePadding.vertical +
+              math.max(chipTokens.inlineIconSize, badgeLabelHeight)
+        : 0;
+
+    final double rawCopyColumnHeight =
+        titleBlockHeight +
+        cardTokens.titleSubtitleSpacing +
+        subtitleBlockHeight +
+        (profile.showBadge ? cardTokens.badgeTopSpacing + badgeHeight : 0);
+    final double copyColumnHeight = rawCopyColumnHeight.ceilToDouble() + 1;
+
+    final double leadingExtent =
+        cardTokens.leadingIconSize + iconBoxTokens.padding * 2;
+    final double chevronExtent =
+        cardTokens.trailingIconSize + designTokens.spaceTiny;
+    final double bodyHeight = math.max(
+      leadingExtent,
+      math.max(copyColumnHeight, chevronExtent),
+    );
+
+    return _CapabilityActionCardLayoutMetrics(
+      titleBlockHeight: titleBlockHeight,
+      subtitleBlockHeight: subtitleBlockHeight,
+      badgeHeight: badgeHeight,
+      copyColumnHeight: copyColumnHeight,
+      leadingExtent: leadingExtent,
+      bodyHeight: bodyHeight,
+    );
+  }
+
+  static double copyMaxWidth(
+    BuildContext context, {
+    required double bodyWidth,
+    required TilawaCapabilityActionCardTokens cardTokens,
+  }) {
+    final iconBoxTokens = Theme.of(context).componentTokens.iconBox;
+    final EdgeInsets contentPadding = cardTokens.contentPadding.resolve(
+      Directionality.of(context),
+    );
+    final double leadingExtent =
+        cardTokens.leadingIconSize + iconBoxTokens.padding * 2;
+
+    return math.max(
+      0,
+      bodyWidth -
+          contentPadding.horizontal -
+          leadingExtent -
+          cardTokens.rowGap -
+          cardTokens.trailingIconSize,
+    );
+  }
+}
+
+class _CapabilityActionCardBody extends StatelessWidget {
+  const _CapabilityActionCardBody({
+    required this.metrics,
+    required this.cardTokens,
+    required this.leading,
+    required this.copy,
+    required this.trailing,
+  });
+
+  final _CapabilityActionCardLayoutMetrics metrics;
+  final TilawaCapabilityActionCardTokens cardTokens;
+  final Widget leading;
+  final Widget copy;
+  final Widget trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    final row = Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: cardTokens.rowGap,
+      children: [
+        leading,
+        Expanded(
+          child: SizedBox(
+            height: metrics.copyColumnHeight,
+            child: copy,
+          ),
+        ),
+        trailing,
+      ],
+    );
+
+    return Padding(
+      padding: cardTokens.contentPadding,
+      child: SizedBox(height: metrics.bodyHeight, child: row),
+    );
+  }
+}
+
+class _CapabilityActionCardSkeletonCopy extends StatelessWidget {
+  const _CapabilityActionCardSkeletonCopy({
+    required this.metrics,
+    required this.profile,
+    required this.shimmer,
+  });
+
+  final _CapabilityActionCardLayoutMetrics metrics;
+  final _CapabilityActionCardLayoutProfile profile;
+  final Animation<double>? shimmer;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cardTokens = theme.componentTokens.capabilityActionCard;
+    final designTokens = theme.tokens;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (profile.titleLines == 1)
+          _CapabilityActionCardSkeletonBone(
+            width: double.infinity,
+            height: metrics.titleBlockHeight,
+            borderRadius: designTokens.radiusSmall,
+            shimmer: shimmer,
+          )
+        else
+          for (int index = 0; index < profile.titleLines; index++)
+            _CapabilityActionCardSkeletonBone(
+              width: double.infinity,
+              height: metrics.titleBlockHeight / profile.titleLines,
+              borderRadius: designTokens.radiusSmall,
+              shimmer: shimmer,
+            ),
+        SizedBox(height: cardTokens.titleSubtitleSpacing),
+        if (profile.subtitleLines == 1)
+          _CapabilityActionCardSkeletonBone(
+            width: double.infinity,
+            height: metrics.subtitleBlockHeight,
+            borderRadius: designTokens.radiusSmall,
+            shimmer: shimmer,
+          )
+        else
+          for (int index = 0; index < profile.subtitleLines; index++)
+            _CapabilityActionCardSkeletonBone(
+              width: double.infinity,
+              height: metrics.subtitleBlockHeight / profile.subtitleLines,
+              borderRadius: designTokens.radiusSmall,
+              shimmer: shimmer,
+            ),
+        if (profile.showBadge) ...[
+          SizedBox(height: cardTokens.badgeTopSpacing),
+          _CapabilityActionCardSkeletonBone(
+            width: 128,
+            height: metrics.badgeHeight,
+            borderRadius: designTokens.resolveRadius(
+              family: TilawaRadiusFamily.chip,
+              height: metrics.badgeHeight,
+            ),
+            shimmer: shimmer,
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _CapabilityActionCardFrame extends StatelessWidget {
+  const _CapabilityActionCardFrame({
+    required this.child,
+    required this.useGradient,
+    required this.semanticLabel,
+    required this.isButton,
+    required this.bodyHeight,
+    this.margin,
+    this.onTap,
+  });
+
+  final Widget child;
+  final bool useGradient;
+  final EdgeInsetsGeometry? margin;
+  final String semanticLabel;
+  final bool isButton;
+  final double bodyHeight;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final designTokens = theme.tokens;
     final cardTokens = theme.componentTokens.capabilityActionCard;
     final settingsTokens = theme.componentTokens.settingsGroup;
@@ -49,97 +588,164 @@ class TilawaCapabilityActionCard extends StatelessWidget {
     );
     final BorderRadius borderRadius = BorderRadius.circular(radius);
     final EdgeInsetsGeometry resolvedMargin = margin ?? cardTokens.outerPadding;
-    final String resolvedSemanticLabel = semanticLabel ?? '$title. $subtitle';
+    final EdgeInsets resolvedContentPadding = cardTokens.contentPadding.resolve(
+      Directionality.of(context),
+    );
+    final double resolvedBodyMinHeight = math.max(
+      designTokens.minInteractiveDimension,
+      resolvedContentPadding.vertical + bodyHeight,
+    );
+
+    final Widget surface = Material(
+      color: useGradient ? null : colorScheme.surface,
+      elevation: 0,
+      shadowColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: borderRadius,
+        side: BorderSide(
+          color: cardTokens.borderColor,
+          width: settingsTokens.tileDividerThickness,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: onTap == null
+          ? _CapabilityActionCardSurfaceFill(
+              useGradient: useGradient,
+              borderRadius: borderRadius,
+              cardTokens: cardTokens,
+              minHeight: resolvedBodyMinHeight,
+              child: child,
+            )
+          : InkWell(
+              onTap: onTap,
+              borderRadius: borderRadius,
+              splashColor: cardTokens.splashColor,
+              highlightColor: cardTokens.highlightColor,
+              child: _CapabilityActionCardSurfaceFill(
+                useGradient: useGradient,
+                borderRadius: borderRadius,
+                cardTokens: cardTokens,
+                minHeight: resolvedBodyMinHeight,
+                child: child,
+              ),
+            ),
+    );
+
+    final Widget framed = SizedBox(
+      width: double.infinity,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: borderRadius,
+          boxShadow: [
+            BoxShadow(
+              color: colorScheme.shadow.withValues(
+                alpha: designTokens.opacityShadow,
+              ),
+              blurRadius: designTokens.blurShadow,
+              offset: designTokens.shadowOffsetMedium,
+            ),
+          ],
+        ),
+        child: surface,
+      ),
+    );
 
     return Padding(
       padding: resolvedMargin,
       child: Semantics(
-        button: true,
-        label: resolvedSemanticLabel,
-        child: SizedBox(
-          width: double.infinity,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
+        button: isButton,
+        label: semanticLabel,
+        liveRegion: !isButton,
+        child: isButton ? framed : ExcludeSemantics(child: framed),
+      ),
+    );
+  }
+}
+
+class _CapabilityActionCardSurfaceFill extends StatelessWidget {
+  const _CapabilityActionCardSurfaceFill({
+    required this.useGradient,
+    required this.borderRadius,
+    required this.cardTokens,
+    required this.minHeight,
+    required this.child,
+  });
+
+  final bool useGradient;
+  final BorderRadius borderRadius;
+  final TilawaCapabilityActionCardTokens cardTokens;
+  final double minHeight;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Ink(
+      decoration: useGradient
+          ? BoxDecoration(
+              gradient: cardTokens.backgroundGradient(),
               borderRadius: borderRadius,
-              boxShadow: [
-                BoxShadow(
-                  color: colorScheme.shadow.withValues(
-                    alpha: designTokens.opacityShadow,
-                  ),
-                  blurRadius: designTokens.blurShadow,
-                  offset: designTokens.shadowOffsetMedium,
-                ),
-              ],
-            ),
-            child: Material(
-              color: useGradient ? null : colorScheme.surface,
-              elevation: 0,
-              shadowColor: Colors.transparent,
-              shape: RoundedRectangleBorder(
-                borderRadius: borderRadius,
-                side: BorderSide(
-                  color: cardTokens.borderColor,
-                  width: settingsTokens.tileDividerThickness,
-                ),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: InkWell(
-                onTap: onTap,
-                splashColor: cardTokens.splashColor,
-                highlightColor: cardTokens.highlightColor,
-                child: Ink(
-                  decoration: useGradient
-                      ? BoxDecoration(
-                          gradient: cardTokens.backgroundGradient(),
-                          borderRadius: borderRadius,
-                        )
-                      : null,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: designTokens.minInteractiveDimension,
-                    ),
-                    child: Padding(
-                      padding: cardTokens.contentPadding,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        spacing: cardTokens.rowGap,
-                        children: [
-                          TilawaIconBox(
-                            icon: leadingIcon,
-                            size: cardTokens.leadingIconSize,
-                            variant: TilawaIconBoxVariant.tinted,
-                            semanticTint: leadingIconSemanticTint,
-                          ),
-                          Expanded(
-                            child: _CapabilityActionCardCopy(
-                              title: title,
-                              subtitle: subtitle,
-                              badgeLabel: badgeLabel,
-                              cardTokens: cardTokens,
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(
-                              top: designTokens.spaceTiny,
-                            ),
-                            child: Icon(
-                              trailingIcon ?? TilawaIcons.chevronRightSmall,
-                              size: cardTokens.trailingIconSize,
-                              color: colorScheme.onSurfaceVariant.withValues(
-                                alpha: cardTokens.trailingIconOpacity,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
+            )
+          : null,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: minHeight),
+        child: child,
+      ),
+    );
+  }
+}
+
+class _CapabilityActionCardSkeletonBone extends StatelessWidget {
+  const _CapabilityActionCardSkeletonBone({
+    this.width,
+    required this.height,
+    required this.borderRadius,
+    this.shimmer,
+  });
+
+  final double? width;
+  final double height;
+  final double borderRadius;
+  final Animation<double>? shimmer;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final baseColor = colorScheme.onSurface.withValues(alpha: 0.08);
+    final highlightColor = colorScheme.onSurface.withValues(alpha: 0.16);
+
+    final Widget bone = RepaintBoundary(
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: baseColor,
+          borderRadius: BorderRadius.circular(borderRadius),
         ),
       ),
+    );
+
+    if (shimmer == null) {
+      return bone;
+    }
+
+    return AnimatedBuilder(
+      animation: shimmer!,
+      builder: (context, child) {
+        return ShaderMask(
+          blendMode: BlendMode.srcATop,
+          shaderCallback: (bounds) {
+            final double slide = -1 + (shimmer!.value * 2);
+            return LinearGradient(
+              begin: Alignment(slide - 0.3, 0),
+              end: Alignment(slide + 0.3, 0),
+              colors: <Color>[baseColor, highlightColor, baseColor],
+              stops: const <double>[0.35, 0.5, 0.65],
+            ).createShader(bounds);
+          },
+          child: child,
+        );
+      },
+      child: bone,
     );
   }
 }

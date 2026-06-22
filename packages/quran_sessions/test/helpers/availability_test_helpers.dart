@@ -2,6 +2,7 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 
 import 'fakes/fake_session_repository.dart';
+import 'fakes/fake_user_profile_repository.dart';
 
 /// In-memory [ScheduleRepository] for tests.
 class FakeScheduleRepository implements ScheduleRepository {
@@ -84,6 +85,108 @@ class FakeScheduleRepository implements ScheduleRepository {
     overrides.removeWhere((o) => o.dateKey == dateKey);
     return const Right(null);
   }
+}
+
+/// In-memory scheduling policy config for tests.
+class FakeMarketSchedulingConfigRepository
+    implements MarketSchedulingConfigRepository {
+  MarketSchedulingConfig global = MarketSchedulingConfig.defaults;
+  final Map<String, MarketSchedulingConfig> marketOverrides = {};
+
+  @override
+  Future<Either<QuranSessionsFailure, MarketSchedulingConfig>>
+  getGlobal() async {
+    return Right(global);
+  }
+
+  @override
+  Future<Either<QuranSessionsFailure, MarketSchedulingConfig>> getForMarket(
+    String countryCode,
+  ) async {
+    final override = marketOverrides[countryCode];
+    if (override == null) {
+      return Left(NotFoundFailure('MarketSchedulingConfig($countryCode)'));
+    }
+    return Right(override);
+  }
+}
+
+/// Minimal [TeacherDashboardSuccess] for bloc/widget tests.
+TeacherDashboardSuccess seedTeacherDashboardSuccess({
+  List<QuranSession> upcomingSessions = const [],
+  List<TeacherAvailability> availability = const [],
+  MarketSchedulingConfig schedulingConfig = MarketSchedulingConfig.defaults,
+  List<TeacherAvailability>? thisWeekAvailability,
+  List<TeacherAvailability>? nextWeekAvailability,
+  bool showFridayReviewBanner = false,
+  String? fridayReviewNextWeekKey,
+  String? dismissedFridayReminderWeekKey,
+  String teacherTimezone = 'Africa/Cairo',
+  String? marketCountryCode,
+  bool isUpdatingAvailability = false,
+  bool isRefreshing = false,
+  Map<String, PendingSlotDelete> pendingDeletes = const {},
+  String? undoableSlotId,
+  QuranSessionsFailure? slotFailure,
+  int? refreshDiscardedPendingCount,
+}) {
+  return TeacherDashboardSuccess(
+    upcomingSessions: upcomingSessions,
+    availability: availability,
+    schedulingConfig: schedulingConfig,
+    thisWeekAvailability: thisWeekAvailability ?? availability,
+    nextWeekAvailability: nextWeekAvailability ?? const [],
+    showFridayReviewBanner: showFridayReviewBanner,
+    fridayReviewNextWeekKey: fridayReviewNextWeekKey,
+    dismissedFridayReminderWeekKey: dismissedFridayReminderWeekKey,
+    teacherTimezone: teacherTimezone,
+    marketCountryCode: marketCountryCode,
+    isUpdatingAvailability: isUpdatingAvailability,
+    isRefreshing: isRefreshing,
+    pendingDeletes: pendingDeletes,
+    undoableSlotId: undoableSlotId,
+    slotFailure: slotFailure,
+    refreshDiscardedPendingCount: refreshDiscardedPendingCount,
+  );
+}
+
+/// Builds a [TeacherDashboardBloc] with in-memory scheduling policy deps.
+TeacherDashboardBloc buildTestTeacherDashboardBloc({
+  required FakeSessionRepository sessionRepo,
+  required GetTeacherAvailabilityUseCase getAvailability,
+  required BlockGeneratedSlotUseCase blockGeneratedSlot,
+  required AvailabilityProvider availabilityProvider,
+  required CancelSessionViaServerUseCase cancelSession,
+  required CompleteSessionViaServerUseCase completeSession,
+  required FakeScheduleRepository scheduleRepo,
+  FakeMarketSchedulingConfigRepository? schedulingConfigRepo,
+  FakeUserProfileRepository? userProfileRepo,
+  InMemoryFridayReviewReminderStore? fridayReminderStore,
+  CommitTimerFactory? commitTimerFactory,
+  Duration commitDelay = const Duration(days: 365),
+  DateTime Function()? now,
+  String teacherId = 'teacher_1',
+}) {
+  final configRepo =
+      schedulingConfigRepo ?? FakeMarketSchedulingConfigRepository();
+  final profiles = userProfileRepo ?? FakeUserProfileRepository();
+  final reminders = fridayReminderStore ?? InMemoryFridayReviewReminderStore();
+  return TeacherDashboardBloc(
+    getTeacherSessions: GetTeacherSessionsUseCase(sessionRepo),
+    getAvailability: getAvailability,
+    blockGeneratedSlot: blockGeneratedSlot,
+    availabilityProvider: availabilityProvider,
+    cancelSession: cancelSession,
+    completeSession: completeSession,
+    getMarketSchedulingConfig: GetMarketSchedulingConfigUseCase(configRepo),
+    getUserProfile: GetUserProfileUseCase(profiles),
+    getWeeklySchedule: GetWeeklyScheduleUseCase(scheduleRepo),
+    fridayReviewReminderStore: reminders,
+    teacherId: teacherId,
+    commitTimerFactory: commitTimerFactory,
+    commitDelay: commitDelay,
+    now: now,
+  );
 }
 
 GetTeacherAvailabilityUseCase buildGetTeacherAvailabilityUseCase({

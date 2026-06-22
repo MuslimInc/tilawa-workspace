@@ -232,6 +232,30 @@
     "availabilityRecurringBanner": "This is your recurring weekly availability. It is used to generate bookable times for future days.",
     "bookableTimesSectionTitle": "Bookable times — next 14 days",
     "bookableTimesSectionSubtext": "Generated from your weekly availability, minus exceptions and bookings.",
+    "bookableTimesThisWeekSectionTitle": "This week",
+    "bookableTimesNextWeekSectionTitle": "Next week",
+    "bookableTimesWeekScopedTitle": "Bookable times",
+    "bookableTimesSelectedDayCaption": "Showing times for {dayLabel}",
+    "@bookableTimesSelectedDayCaption": {
+        "placeholders": {
+            "dayLabel": {
+                "type": "String"
+            }
+        }
+    },
+    "bookableTimesEmptyThisWeek": "No bookable times this week.",
+    "bookableTimesEmptyNextWeek": "No bookable times next week.",
+    "bookableTimesEmptyThisWeekTitle": "No bookable times this week",
+    "bookableTimesEmptyThisWeekSubtitle": "Open days in your weekly template become slots here. Adjust your hours or check exceptions if you expected times.",
+    "bookableTimesEmptyNextWeekTitle": "No bookable times next week",
+    "bookableTimesEmptyNextWeekSubtitle": "Next week is built from your recurring weekly availability. Review your template to add or change days.",
+    "bookableTimesEmptyHorizonTitle": "No bookable times in the next 14 days",
+    "bookableTimesEmptyHorizonSubtitle": "Set your recurring weekly availability and open days will appear here automatically.",
+    "upcomingSessionsEmptyTitle": "No upcoming sessions",
+    "upcomingSessionsEmptySubtitle": "Confirmed bookings will appear here when students reserve a time with you.",
+    "fridayReviewBannerMessage": "Review next week's availability. Students book from your weekly template.",
+    "fridayReviewBannerAction": "Review",
+    "fridayReviewBannerDismiss": "Dismiss",
     "editWeeklyTemplate": "Edit weekly template",
     "availabilityTabHours": "Hours",
     "availabilityTabOverrides": "Overrides",

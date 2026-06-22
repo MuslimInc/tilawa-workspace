@@ -1435,10 +1435,6 @@ class _RecitersHomeTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
-    final ColorScheme colorScheme = theme.colorScheme;
-    final chipTokens = theme.componentTokens.chip;
     final int favoriteCount = context.select<FavoritesCubit, int>((cubit) {
       final FavoritesState favoritesState = cubit.state;
       return favoritesState is FavoritesLoaded
@@ -1446,56 +1442,22 @@ class _RecitersHomeTabBar extends StatelessWidget {
           : 0;
     });
 
-    return Row(
-      spacing: tokens.spaceSmall,
-      children: [
-        Expanded(
-          child: SizedBox(
-            height: kTextTabBarHeight,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHigh,
-                borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
-              ),
-              child: TabBar(
-                controller: controller,
-                onTap: onTabSelected,
-                splashBorderRadius: BorderRadius.circular(
-                  tokens.radiusExtraLarge,
-                ),
-                dividerColor: Colors.transparent,
-                indicatorSize: TabBarIndicatorSize.tab,
-                indicatorPadding: EdgeInsets.all(tokens.spaceExtraSmall),
-                indicator: BoxDecoration(
-                  color: chipTokens.catalogSelectedBackgroundColor,
-                  borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
-                ),
-                labelColor: chipTokens.catalogSelectedForegroundColor,
-                unselectedLabelColor: colorScheme.onSurfaceVariant,
-                labelStyle: theme.textTheme.labelLarge?.copyWith(
-                  fontWeight: chipTokens.selectionFontWeight,
-                ),
-                unselectedLabelStyle: theme.textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-                tabs: [
-                  _RecitersTab(
-                    label: Text(context.l10n.reciters),
-                    identifier: ReciterSemanticsIds.recitersTab,
-                  ),
-                  _RecitersTab(
-                    label: _FavoritesTabLabel(count: favoriteCount),
-                    identifier: ReciterSemanticsIds.recitersFavoritesToggle,
-                    tourTargetId: RecitersTourTargets.favoritesToggle,
-                  ),
-                  _RecitersTab(
-                    label: Text(context.l10n.downloads),
-                    identifier: ReciterSemanticsIds.recitersViewDownloads,
-                  ),
-                ],
-              ),
-            ),
-          ),
+    return TilawaTabBar(
+      controller: controller,
+      onTap: onTabSelected,
+      tabs: [
+        _RecitersTab(
+          label: Text(context.l10n.reciters),
+          identifier: ReciterSemanticsIds.recitersTab,
+        ),
+        _RecitersTab(
+          label: _FavoritesTabLabel(count: favoriteCount),
+          identifier: ReciterSemanticsIds.recitersFavoritesToggle,
+          tourTargetId: RecitersTourTargets.favoritesToggle,
+        ),
+        _RecitersTab(
+          label: Text(context.l10n.downloads),
+          identifier: ReciterSemanticsIds.recitersViewDownloads,
         ),
       ],
     );

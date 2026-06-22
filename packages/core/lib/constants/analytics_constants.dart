@@ -94,6 +94,17 @@ class AnalyticsEvents {
       'quran_sessions_empty_state_seen';
   static const String quranSessionsNotifyInterestSubmitted =
       'quran_sessions_notify_interest_submitted';
+
+  // Scheduling experiment (Phase 1)
+  static const String weekViewOpened = 'week_view_opened';
+  static const String fridayReviewBannerShown = 'friday_review_banner_shown';
+  static const String fridayReviewBannerTapped = 'friday_review_banner_tapped';
+  static const String fridayReviewBannerDismissed =
+      'friday_review_banner_dismissed';
+  static const String weeklyTemplateOpened = 'weekly_template_opened';
+  static const String weeklyTemplateSaved = 'weekly_template_saved';
+  static const String bookingLostDueToNoAvailability =
+      'booking_lost_due_to_no_availability';
 }
 
 class AnalyticsParams {

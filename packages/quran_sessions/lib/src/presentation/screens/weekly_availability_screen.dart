@@ -10,6 +10,7 @@ import '../../domain/entities/slot_duration.dart';
 import '../../domain/entities/weekday.dart';
 import '../blocs/availability/availability_cubit.dart';
 import '../blocs/availability/availability_state.dart';
+import '../config/quran_sessions_scheduling_analytics_callbacks.dart';
 import '../failure_ui/quran_sessions_failure_ui.dart';
 import '../widgets/availability_day_hours_row.dart';
 import '../widgets/availability_override_sheet.dart';
@@ -43,9 +44,20 @@ const _timezoneOptions = <String>[
 /// hours per day (or shared across days) and dated overrides; bookable slots
 /// are generated from these rules rather than entered one at a time.
 class WeeklyAvailabilityScreen extends StatefulWidget {
-  const WeeklyAvailabilityScreen({super.key, required this.teacherId});
+  const WeeklyAvailabilityScreen({
+    super.key,
+    required this.teacherId,
+    this.schedulingAnalytics,
+    this.resolveSchedulingAnalyticsBase,
+  });
 
   final String teacherId;
+
+  /// Scheduling experiment analytics — wired by the host app.
+  final QuranSessionsSchedulingAnalyticsCallbacks? schedulingAnalytics;
+
+  /// Resolves scheduling_mode, policy_version, and market_code for analytics.
+  final Future<Map<String, Object>> Function()? resolveSchedulingAnalyticsBase;
 
   @override
   State<WeeklyAvailabilityScreen> createState() =>
@@ -62,6 +74,22 @@ class _WeeklyAvailabilityScreenState extends State<WeeklyAvailabilityScreen>
   int _heardSaveTick = 0;
   int _heardOverrideAddTick = 0;
   int _heardOverrideRemoveTick = 0;
+  AvailabilityState? _beforeSaveSnapshot;
+  Map<String, Object> _schedulingAnalyticsBase = const {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSchedulingAnalyticsBase();
+  }
+
+  Future<void> _loadSchedulingAnalyticsBase() async {
+    final resolver = widget.resolveSchedulingAnalyticsBase;
+    if (resolver == null) return;
+    final base = await resolver();
+    if (!mounted) return;
+    setState(() => _schedulingAnalyticsBase = base);
+  }
 
   void _onTabChanged() {
     if (!_tabController.indexIsChanging) setState(() {});
@@ -78,8 +106,10 @@ class _WeeklyAvailabilityScreenState extends State<WeeklyAvailabilityScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
+    final tokens = Theme.of(context).tokens;
     final state = context.watch<AvailabilityCubit>().state;
     final canPop = state.status != AvailabilityStatus.ready || !state.isDirty;
+    final double tabBarBottomExtent = tokens.spaceSmall * 2 + kTextTabBarHeight;
 
     return PopScope(
       canPop: canPop,
@@ -97,25 +127,53 @@ class _WeeklyAvailabilityScreenState extends State<WeeklyAvailabilityScreen>
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(l10n.availabilityTitle),
-          bottom: TabBar(
-            controller: _tabController,
-            tabs: [
-              Tab(text: l10n.availabilityTabHours),
-              Tab(text: l10n.availabilityTabOverrides),
-            ],
+        appBar: TilawaAppBar(
+          title: l10n.availabilityTitle,
+          bottom: PreferredSize(
+            preferredSize: Size.fromHeight(tabBarBottomExtent),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                tokens.spaceLarge,
+                tokens.spaceSmall,
+                tokens.spaceLarge,
+                tokens.spaceSmall,
+              ),
+              child: TilawaTabBar(
+                controller: _tabController,
+                tabs: [
+                  Tab(text: l10n.availabilityTabHours),
+                  Tab(text: l10n.availabilityTabOverrides),
+                ],
+              ),
+            ),
           ),
         ),
         body: BlocConsumer<AvailabilityCubit, AvailabilityState>(
-          listenWhen: (prev, curr) =>
-              prev.saveTick != curr.saveTick ||
-              prev.overrideAddTick != curr.overrideAddTick ||
-              prev.overrideRemoveTick != curr.overrideRemoveTick ||
-              prev.failure != curr.failure,
+          listenWhen: (prev, curr) {
+            if (!prev.isSaving && curr.isSaving) {
+              _beforeSaveSnapshot = prev;
+            }
+            return prev.saveTick != curr.saveTick ||
+                prev.overrideAddTick != curr.overrideAddTick ||
+                prev.overrideRemoveTick != curr.overrideRemoveTick ||
+                prev.failure != curr.failure;
+          },
           listener: (context, state) {
             if (state.saveTick > _heardSaveTick && state.failure == null) {
               _heardSaveTick = state.saveTick;
+              final before = _beforeSaveSnapshot;
+              widget.schedulingAnalytics?.onWeeklyTemplateSaved?.call({
+                ..._schedulingAnalyticsBase,
+                'days_open': state.baseline.openDays.length,
+                'duration_changed':
+                    before != null &&
+                    before.baseline.slotDuration != before.draft.slotDuration,
+                if (before != null)
+                  'open_day_count_change':
+                      state.baseline.openDays.length -
+                      before.baseline.openDays.length,
+              });
+              _beforeSaveSnapshot = null;
               TilawaFeedback.showToast(
                 context,
                 message: l10n.availabilitySavedToast,
@@ -621,7 +679,8 @@ class _OverridesTab extends StatelessWidget {
                       subtitle: group.type == OverrideType.unavailable
                           ? l10n.availabilityOverrideUnavailable
                           : l10n.availabilityOverrideCustom,
-                      isBusy: state.isOverridesBusy,
+                      isRemoving: state.isRemovingOverrideGroup(group.dateKeys),
+                      interactionsBlocked: state.isOverridesBusy,
                       onRemove: () => _removeOverrideGroup(
                         context,
                         group: group,
@@ -637,7 +696,7 @@ class _OverridesTab extends StatelessWidget {
             isFullWidth: true,
             variant: TilawaButtonVariant.secondary,
             leadingIcon: const Icon(Icons.add),
-            isLoading: state.isOverridesBusy,
+            isLoading: state.isAddingOverride,
             onPressed: state.isOverridesBusy
                 ? null
                 : () => _addOverride(context),
@@ -674,16 +733,21 @@ class _OverrideTile extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.onRemove,
-    this.isBusy = false,
+    this.isRemoving = false,
+    this.interactionsBlocked = false,
   });
 
   final String title;
   final String subtitle;
   final VoidCallback onRemove;
-  final bool isBusy;
+  final bool isRemoving;
+  final bool interactionsBlocked;
 
   @override
   Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+    final scheme = Theme.of(context).colorScheme;
+
     return TilawaCard(
       child: Row(
         children: [
@@ -695,21 +759,21 @@ class _OverrideTile extends StatelessWidget {
                 Text(
                   subtitle,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    color: scheme.onSurfaceVariant,
                   ),
                 ),
               ],
             ),
           ),
           IconButton(
-            onPressed: isBusy ? null : onRemove,
-            icon: isBusy
+            onPressed: interactionsBlocked ? null : onRemove,
+            icon: isRemoving
                 ? SizedBox(
-                    width: Theme.of(context).tokens.iconSizeSmall,
-                    height: Theme.of(context).tokens.iconSizeSmall,
+                    width: tokens.iconSizeSmall,
+                    height: tokens.iconSizeSmall,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: Theme.of(context).colorScheme.primary,
+                      color: scheme.primary,
                     ),
                   )
                 : const Icon(Icons.delete_outline),

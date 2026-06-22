@@ -6,6 +6,7 @@ import 'package:quran_sessions/src/domain/entities/teacher_availability.dart';
 import 'package:quran_sessions/src/domain/entities/quran_booking.dart';
 import 'package:quran_sessions/src/domain/entities/session_call_type.dart';
 import 'package:quran_sessions/src/domain/entities/user_profile.dart';
+import 'package:quran_sessions/src/domain/entities/weekly_schedule.dart';
 import 'package:quran_sessions/src/domain/failures/quran_sessions_failure.dart';
 import 'package:quran_sessions/src/domain/usecases/get_teacher_availability_usecase.dart';
 import 'package:quran_sessions/src/domain/usecases/validate_booking_eligibility_usecase.dart';
@@ -94,6 +95,8 @@ void main() {
   tearDown(() => bloc.close());
 
   group('BookingBloc', () {
+    final bookingLostEvents = <Map<String, Object>>[];
+
     blocTest<BookingBloc, BookingState>(
       'emits [SlotsLoading, Selecting] when generated slots are available',
       build: () => bloc,
@@ -114,6 +117,57 @@ void main() {
         final state = b.state as BookingSelecting;
         check(state.availableSlots).isNotEmpty();
         check(state.canSubmit).isFalse();
+      },
+    );
+
+    blocTest<BookingBloc, BookingState>(
+      'fires onBookingLostDueToNoAvailability when no unbooked slots',
+      build: () {
+        bookingLostEvents.clear();
+        scheduleRepo.schedule = WeeklySchedule.empty(
+          teacherId: 'teacher_1',
+          timezone: 'Africa/Cairo',
+        );
+        final emptyAvailability = buildGetTeacherAvailabilityUseCase(
+          scheduleRepository: scheduleRepo,
+          sessionRepository: sessionRepo,
+          now: () => fixedNow,
+        );
+        return BookingBloc(
+          getAvailability: emptyAvailability,
+          submitBooking: buildSubmitSessionBookingUseCase(
+            getAvailability: emptyAvailability,
+            mutationGateway: mutationGateway,
+          ),
+          validateEligibility: ValidateBookingEligibilityUseCase(
+            profileRepository: profileRepo,
+            policyRepository: policyRepo,
+            teacherRepository: teacherRepo,
+            marketConfigRepository: marketConfigRepo,
+          ),
+          onBookingLostDueToNoAvailability: bookingLostEvents.add,
+          resolveMarketCode: (_) async => 'EG',
+        );
+      },
+      act: (b) => b.add(
+        BookingScreenOpened(
+          teacherId: 'teacher_1',
+          studentId: 'student_1',
+          from: windowFrom,
+          to: windowTo,
+        ),
+      ),
+      expect: () => [
+        isA<BookingEligibilityChecking>(),
+        isA<BookingSlotsLoading>(),
+        isA<BookingSelecting>(),
+      ],
+      verify: (b) {
+        final state = b.state as BookingSelecting;
+        check(state.availableSlots).isEmpty();
+        check(bookingLostEvents.length).equals(1);
+        check(bookingLostEvents.single['teacher_id']).equals('teacher_1');
+        check(bookingLostEvents.single['market_code']).equals('EG');
       },
     );
 

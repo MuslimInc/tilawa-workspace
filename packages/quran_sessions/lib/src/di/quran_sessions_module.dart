@@ -1,6 +1,7 @@
 import '../data/datasources/availability_remote_data_source.dart';
 import '../data/datasources/booking_remote_data_source.dart';
 import '../data/datasources/market_config_remote_data_source.dart';
+import '../data/datasources/market_scheduling_config_remote_data_source.dart';
 import '../data/datasources/schedule_remote_data_source.dart';
 import '../data/datasources/session_policy_remote_data_source.dart';
 import '../data/datasources/session_remote_data_source.dart';
@@ -11,6 +12,7 @@ import '../data/datasources/user_profile_remote_data_source.dart';
 import '../data/providers/remote_availability_provider.dart';
 import '../data/repositories/booking_repository_impl.dart';
 import '../data/repositories/market_config_repository_impl.dart';
+import '../data/repositories/market_scheduling_config_repository_impl.dart';
 import '../data/repositories/schedule_repository_impl.dart';
 import '../data/repositories/session_policy_repository_impl.dart';
 import '../data/repositories/session_repository_impl.dart';
@@ -19,8 +21,11 @@ import '../data/repositories/teacher_profile_repository_impl.dart';
 import '../data/repositories/teacher_repository_impl.dart';
 import '../data/repositories/user_profile_repository_impl.dart';
 import '../boundaries/scheduling/availability_provider.dart';
+import '../boundaries/scheduling/friday_review_reminder_store.dart';
+import '../data/stores/in_memory_friday_review_reminder_store.dart';
 import '../domain/repositories/booking_repository.dart';
 import '../domain/repositories/market_config_repository.dart';
+import '../domain/repositories/market_scheduling_config_repository.dart';
 import '../domain/repositories/schedule_repository.dart';
 import '../domain/repositories/session_policy_repository.dart';
 import '../domain/repositories/session_repository.dart';
@@ -39,6 +44,7 @@ import '../domain/usecases/get_session_policy_usecase.dart';
 import '../domain/usecases/get_student_sessions_usecase.dart';
 import '../domain/usecases/get_current_user_teacher_capability_usecase.dart';
 import '../domain/usecases/get_teacher_application_status_usecase.dart';
+import '../domain/usecases/get_market_scheduling_config_usecase.dart';
 import '../domain/usecases/get_teacher_availability_usecase.dart';
 import '../domain/usecases/get_teacher_profile_usecase.dart';
 import '../domain/usecases/get_teacher_sessions_usecase.dart';
@@ -78,17 +84,23 @@ class QuranSessionsModule {
     required BookingRemoteDataSource bookingDataSource,
     required UserProfileRemoteDataSource userProfileDataSource,
     required MarketConfigRemoteDataSource marketConfigDataSource,
+    required MarketSchedulingConfigRemoteDataSource
+    marketSchedulingConfigDataSource,
     required SessionPolicyRemoteDataSource sessionPolicyDataSource,
     required TeacherApplicationRemoteDataSource teacherApplicationDataSource,
     required TeacherProfileRemoteDataSource teacherProfileDataSource,
     required AvailabilityRemoteDataSource availabilityDataSource,
     required ScheduleRemoteDataSource scheduleDataSource,
+    FridayReviewReminderStore? fridayReviewReminderStore,
   }) {
     final teacherRepo = TeacherRepositoryImpl(teacherDataSource);
     final sessionRepo = SessionRepositoryImpl(sessionDataSource);
     final bookingRepo = BookingRepositoryImpl(bookingDataSource);
     final profileRepo = UserProfileRepositoryImpl(userProfileDataSource);
     final marketConfigRepo = MarketConfigRepositoryImpl(marketConfigDataSource);
+    final marketSchedulingConfigRepo = MarketSchedulingConfigRepositoryImpl(
+      marketSchedulingConfigDataSource,
+    );
     final policyRepo = SessionPolicyRepositoryImpl(sessionPolicyDataSource);
     final applicationRepo = TeacherApplicationRepositoryImpl(
       teacherApplicationDataSource,
@@ -106,6 +118,9 @@ class QuranSessionsModule {
     registerSingleton<BookingRepository>(bookingRepo);
     registerSingleton<UserProfileRepository>(profileRepo);
     registerSingleton<MarketConfigRepository>(marketConfigRepo);
+    registerSingleton<MarketSchedulingConfigRepository>(
+      marketSchedulingConfigRepo,
+    );
     registerSingleton<SessionPolicyRepository>(policyRepo);
     registerSingleton<TeacherApplicationRepository>(applicationRepo);
     registerSingleton<TeacherProfileRepository>(teacherProfileRepo);
@@ -168,6 +183,12 @@ class QuranSessionsModule {
       ),
     );
     registerSingleton(GetMarketConfigUseCase(marketConfigRepo));
+    registerSingleton(
+      GetMarketSchedulingConfigUseCase(marketSchedulingConfigRepo),
+    );
+    registerSingleton<FridayReviewReminderStore>(
+      fridayReviewReminderStore ?? InMemoryFridayReviewReminderStore(),
+    );
     registerSingleton(
       ValidateBookingEligibilityUseCase(
         profileRepository: profileRepo,

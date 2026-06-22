@@ -3,6 +3,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/di/get_it_idempotent.dart';
 
 import '../data/firebase/firebase_auth_session_provider.dart';
@@ -14,6 +15,7 @@ import '../data/firebase/firebase_session_notification_gateway.dart';
 import '../data/firebase/firestore_availability_repository.dart';
 import '../data/firebase/firestore_booking_repository.dart';
 import '../data/firebase/firestore_market_config_repository.dart';
+import '../data/firebase/firestore_market_scheduling_config_data_source.dart';
 import '../data/firebase/firestore_schedule_repository.dart';
 import '../data/firebase/firestore_session_policy_repository.dart';
 import '../data/firebase/firestore_session_repository.dart';
@@ -21,6 +23,7 @@ import '../data/firebase/firestore_teacher_application_repository.dart';
 import '../data/firebase/firestore_teacher_profile_repository.dart';
 import '../data/firebase/firestore_teacher_repository.dart';
 import '../data/firebase/firestore_user_profile_repository.dart';
+import '../data/shared_preferences_friday_review_reminder_store.dart';
 import 'quran_sessions_lifecycle_module.dart';
 import 'quran_sessions_mvp_module.dart';
 
@@ -76,6 +79,8 @@ class QuranSessionsFirebaseModule {
       ),
       userProfileDataSource: FirestoreUserProfileDataSource(firestore),
       marketConfigDataSource: FirestoreMarketConfigDataSource(firestore),
+      marketSchedulingConfigDataSource:
+          FirestoreMarketSchedulingConfigDataSource(firestore),
       sessionPolicyDataSource: FirestoreSessionPolicyDataSource(firestore),
       teacherApplicationDataSource: FirestoreTeacherApplicationDataSource(
         firestore,
@@ -83,6 +88,9 @@ class QuranSessionsFirebaseModule {
       teacherProfileDataSource: FirestoreTeacherProfileDataSource(firestore),
       availabilityDataSource: FirestoreAvailabilityDataSource(firestore),
       scheduleDataSource: FirestoreScheduleDataSource(firestore),
+      fridayReviewReminderStore: SharedPreferencesFridayReviewReminderStore(
+        sl<SharedPreferencesAsync>(),
+      ),
     );
 
     QuranSessionsMvpModule.registerBlocs(sl);

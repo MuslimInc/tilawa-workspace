@@ -1,6 +1,7 @@
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../domain/entities/teacher_availability.dart';
 import '../../../domain/usecases/get_teacher_availability_usecase.dart';
 import '../../../domain/usecases/submit_session_booking_usecase.dart';
 import '../../../domain/usecases/validate_booking_eligibility_usecase.dart';
@@ -12,6 +13,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     required this._getAvailability,
     required this._submitBooking,
     required this._validateEligibility,
+    this.onBookingLostDueToNoAvailability,
+    this.resolveMarketCode,
   }) : super(const BookingInitial()) {
     on<BookingScreenOpened>(_onScreenOpened, transformer: restartable());
     on<BookingEligibilityRetried>(
@@ -26,6 +29,13 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
   final GetTeacherAvailabilityUseCase _getAvailability;
   final SubmitSessionBookingUseCase _submitBooking;
   final ValidateBookingEligibilityUseCase _validateEligibility;
+
+  /// Fired when eligibility passes but no unbooked slots exist in the window.
+  final void Function(Map<String, Object> parameters)?
+  onBookingLostDueToNoAvailability;
+
+  /// Optional teacher market code for analytics segmentation.
+  final Future<String?> Function(String teacherId)? resolveMarketCode;
 
   Future<void> _onScreenOpened(
     BookingScreenOpened event,
@@ -72,15 +82,45 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
 
     final result = await _getAvailability(teacherId, from: from, to: to);
 
-    result.fold(
-      (failure) => emit(BookingFailure(failure)),
-      (slots) => emit(
-        BookingSelecting(
-          teacherId: teacherId,
-          availableSlots: slots.where((s) => !s.isBooked).toList(),
-        ),
+    if (result.isLeft()) {
+      result.fold((failure) => emit(BookingFailure(failure)), (_) {});
+      return;
+    }
+
+    final slots = result.fold(
+      (_) => const <TeacherAvailability>[],
+      (value) => value,
+    );
+    final available = slots.where((s) => !s.isBooked).toList();
+    if (available.isEmpty) {
+      await _emitBookingLost(
+        teacherId: teacherId,
+        from: from,
+        to: to,
+      );
+    }
+    emit(
+      BookingSelecting(
+        teacherId: teacherId,
+        availableSlots: available,
       ),
     );
+  }
+
+  Future<void> _emitBookingLost({
+    required String teacherId,
+    required DateTime from,
+    required DateTime to,
+  }) async {
+    final callback = onBookingLostDueToNoAvailability;
+    if (callback == null) return;
+    final marketCode = await resolveMarketCode?.call(teacherId);
+    callback({
+      'teacher_id': teacherId,
+      'requested_from': from.toUtc().toIso8601String(),
+      'requested_to': to.toUtc().toIso8601String(),
+      'market_code': ?marketCode,
+    });
   }
 
   void _onSlotSelected(SlotSelected event, Emitter<BookingState> emit) {

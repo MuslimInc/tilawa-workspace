@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:quran_sessions/quran_sessions.dart';
 import '../../helpers/availability_test_helpers.dart';
+import '../../helpers/fakes/fake_user_profile_repository.dart';
 import '../../helpers/fakes/fake_availability_provider.dart';
 import '../../helpers/fakes/fake_session_repository.dart';
 import '../../helpers/lifecycle_test_helpers.dart';
@@ -39,6 +40,9 @@ class FakeCommitTimers {
 void main() {
   late FakeSessionRepository sessionRepo;
   late FakeScheduleRepository scheduleRepo;
+  late FakeMarketSchedulingConfigRepository schedulingConfigRepo;
+  late FakeUserProfileRepository userProfileRepo;
+  late InMemoryFridayReviewReminderStore fridayReminderStore;
   late FakeAvailabilityProvider availabilityProvider;
   late BlockGeneratedSlotUseCase blockGeneratedSlot;
   late SpyGetTeacherAvailabilityUseCase spyGetAvailability;
@@ -50,16 +54,20 @@ void main() {
   TeacherDashboardBloc buildBloc({
     Duration commitDelay = const Duration(days: 365),
   }) {
-    return TeacherDashboardBloc(
-      getTeacherSessions: GetTeacherSessionsUseCase(sessionRepo),
+    return buildTestTeacherDashboardBloc(
+      sessionRepo: sessionRepo,
       getAvailability: spyGetAvailability,
       blockGeneratedSlot: blockGeneratedSlot,
       availabilityProvider: availabilityProvider,
       cancelSession: buildCancelSessionViaServerUseCase(),
       completeSession: buildCompleteSessionViaServerUseCase(),
-      teacherId: 'teacher_1',
+      scheduleRepo: scheduleRepo,
+      schedulingConfigRepo: schedulingConfigRepo,
+      userProfileRepo: userProfileRepo,
+      fridayReminderStore: fridayReminderStore,
       commitTimerFactory: testCommitTimerFactory,
       commitDelay: commitDelay,
+      now: () => fixedNow,
     );
   }
 
@@ -68,6 +76,9 @@ void main() {
   setUp(() {
     sessionRepo = FakeSessionRepository();
     scheduleRepo = FakeScheduleRepository();
+    schedulingConfigRepo = FakeMarketSchedulingConfigRepository();
+    userProfileRepo = FakeUserProfileRepository();
+    fridayReminderStore = InMemoryFridayReviewReminderStore();
     availabilityProvider = FakeAvailabilityProvider();
     blockGeneratedSlot = BlockGeneratedSlotUseCase(scheduleRepo);
     spyGetAvailability = SpyGetTeacherAvailabilityUseCase(
@@ -156,7 +167,7 @@ void main() {
     blocTest<TeacherDashboardBloc, TeacherDashboardState>(
       'AvailabilitySlotAdded appends slot to availability list',
       build: () => buildBloc(),
-      seed: () => TeacherDashboardSuccess(
+      seed: () => seedTeacherDashboardSuccess(
         upcomingSessions: const [],
         availability: const [],
       ),
@@ -177,7 +188,7 @@ void main() {
       final slot = generatedSlot();
       final testBloc = buildBloc();
       testBloc.emit(
-        TeacherDashboardSuccess(
+        seedTeacherDashboardSuccess(
           upcomingSessions: const [],
           availability: [slot],
         ),
@@ -202,7 +213,7 @@ void main() {
       },
       seed: () {
         final slot = generatedSlot();
-        return TeacherDashboardSuccess(
+        return seedTeacherDashboardSuccess(
           upcomingSessions: const [],
           availability: [slot],
         );
@@ -229,7 +240,7 @@ void main() {
       },
       seed: () {
         final slot = generatedSlot();
-        return TeacherDashboardSuccess(
+        return seedTeacherDashboardSuccess(
           upcomingSessions: const [],
           availability: [slot],
         );
@@ -270,7 +281,7 @@ void main() {
       },
       seed: () {
         final slot = generatedSlot();
-        return TeacherDashboardSuccess(
+        return seedTeacherDashboardSuccess(
           upcomingSessions: const [],
           availability: [slot],
         );
@@ -308,7 +319,7 @@ void main() {
       },
       seed: () {
         final slot = generatedSlot();
-        return TeacherDashboardSuccess(
+        return seedTeacherDashboardSuccess(
           upcomingSessions: const [],
           availability: [slot],
         );
@@ -346,7 +357,7 @@ void main() {
         ]);
         return buildBloc();
       },
-      seed: () => TeacherDashboardSuccess(
+      seed: () => seedTeacherDashboardSuccess(
         upcomingSessions: const [],
         availability: [
           makeSlot(slotId: 'slot_1'),
@@ -388,7 +399,7 @@ void main() {
       },
       seed: () {
         final slot = generatedSlot();
-        return TeacherDashboardSuccess(
+        return seedTeacherDashboardSuccess(
           upcomingSessions: const [],
           availability: [slot],
         );
@@ -434,7 +445,7 @@ void main() {
       },
       seed: () {
         final slot = generatedSlot();
-        return TeacherDashboardSuccess(
+        return seedTeacherDashboardSuccess(
           upcomingSessions: const [],
           availability: [slot],
         );
@@ -625,7 +636,7 @@ void main() {
         );
         return buildBloc();
       },
-      seed: () => TeacherDashboardSuccess(
+      seed: () => seedTeacherDashboardSuccess(
         upcomingSessions: const [],
         availability: [makeSlot(slotId: 'booked_slot', isBooked: true)],
       ),
@@ -653,7 +664,7 @@ void main() {
       },
       seed: () {
         final slot = generatedSlot();
-        return TeacherDashboardSuccess(
+        return seedTeacherDashboardSuccess(
           upcomingSessions: const [],
           availability: [slot],
         );
@@ -680,7 +691,7 @@ void main() {
       },
       seed: () {
         final slot = generatedSlot();
-        return TeacherDashboardSuccess(
+        return seedTeacherDashboardSuccess(
           upcomingSessions: const [],
           availability: [
             TeacherAvailability(
@@ -733,7 +744,7 @@ void main() {
           scheduleRepo.schedule = makeWeeklySchedule();
           return buildBloc();
         },
-        seed: () => TeacherDashboardSuccess(
+        seed: () => seedTeacherDashboardSuccess(
           upcomingSessions: const [],
           availability: threeDistinctGeneratedSlots(),
         ),
@@ -770,7 +781,7 @@ void main() {
           scheduleRepo.schedule = makeWeeklySchedule();
           return buildBloc();
         },
-        seed: () => TeacherDashboardSuccess(
+        seed: () => seedTeacherDashboardSuccess(
           upcomingSessions: const [],
           availability: threeDistinctGeneratedSlots(),
         ),
@@ -809,7 +820,7 @@ void main() {
         final testBloc = buildBloc();
         final slots = threeDistinctGeneratedSlots();
         testBloc.emit(
-          TeacherDashboardSuccess(
+          seedTeacherDashboardSuccess(
             upcomingSessions: const [],
             availability: slots,
           ),
@@ -864,7 +875,7 @@ void main() {
         final testBloc = buildBloc();
         final slots = threeDistinctGeneratedSlots();
         testBloc.emit(
-          TeacherDashboardSuccess(
+          seedTeacherDashboardSuccess(
             upcomingSessions: const [],
             availability: slots,
           ),
@@ -919,7 +930,7 @@ void main() {
         },
         seed: () {
           final slots = threeDistinctGeneratedSlots();
-          return TeacherDashboardSuccess(
+          return seedTeacherDashboardSuccess(
             upcomingSessions: const [],
             availability: slots.take(2).toList(),
           );
@@ -963,7 +974,7 @@ void main() {
         },
         seed: () {
           final slots = threeDistinctGeneratedSlots().take(2).toList();
-          return TeacherDashboardSuccess(
+          return seedTeacherDashboardSuccess(
             upcomingSessions: const [],
             availability: slots,
           );
@@ -1009,7 +1020,7 @@ void main() {
           scheduleRepo.schedule = makeWeeklySchedule();
           return buildBloc();
         },
-        seed: () => TeacherDashboardSuccess(
+        seed: () => seedTeacherDashboardSuccess(
           upcomingSessions: const [],
           availability: threeDistinctGeneratedSlots(),
         ),
@@ -1036,7 +1047,7 @@ void main() {
         },
         seed: () {
           final slots = threeDistinctGeneratedSlots();
-          return TeacherDashboardSuccess(
+          return seedTeacherDashboardSuccess(
             upcomingSessions: const [],
             availability: slots,
             pendingDeletes: {
@@ -1086,7 +1097,7 @@ void main() {
         },
         seed: () {
           final slots = threeDistinctGeneratedSlots();
-          return TeacherDashboardSuccess(
+          return seedTeacherDashboardSuccess(
             upcomingSessions: const [],
             availability: [slots[2]],
           );
@@ -1144,7 +1155,7 @@ void main() {
           scheduleRepo.schedule = makeWeeklySchedule();
           return buildBloc();
         },
-        seed: () => const TeacherDashboardSuccess(
+        seed: () => seedTeacherDashboardSuccess(
           upcomingSessions: [],
           availability: [],
           pendingDeletes: {},
@@ -1168,7 +1179,7 @@ void main() {
         },
         seed: () {
           final slots = threeDistinctGeneratedSlots().take(2).toList();
-          return TeacherDashboardSuccess(
+          return seedTeacherDashboardSuccess(
             upcomingSessions: const [],
             availability: slots,
           );
@@ -1212,7 +1223,7 @@ void main() {
         },
         seed: () {
           final slots = threeDistinctGeneratedSlots().take(2).toList();
-          return TeacherDashboardSuccess(
+          return seedTeacherDashboardSuccess(
             upcomingSessions: const [],
             availability: slots,
           );
@@ -1256,7 +1267,7 @@ void main() {
       final slot = generatedSlot();
       final testBloc = buildBloc();
       testBloc.emit(
-        TeacherDashboardSuccess(
+        seedTeacherDashboardSuccess(
           upcomingSessions: const [],
           availability: const [],
           pendingDeletes: {

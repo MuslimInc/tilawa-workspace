@@ -552,6 +552,69 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
       'يتم إنشاء هذه المواعيد من توفرك الأسبوعي مع استبعاد الاستثناءات والحجوزات.';
 
   @override
+  String get bookableTimesThisWeekSectionTitle => 'هذا الأسبوع';
+
+  @override
+  String get bookableTimesNextWeekSectionTitle => 'الأسبوع القادم';
+
+  @override
+  String get bookableTimesWeekScopedTitle => 'المواعيد القابلة للحجز';
+
+  @override
+  String bookableTimesSelectedDayCaption(String dayLabel) {
+    return 'عرض مواعيد $dayLabel';
+  }
+
+  @override
+  String get bookableTimesEmptyThisWeek =>
+      'لا توجد مواعيد قابلة للحجز هذا الأسبوع.';
+
+  @override
+  String get bookableTimesEmptyNextWeek =>
+      'لا توجد مواعيد قابلة للحجز الأسبوع القادم.';
+
+  @override
+  String get bookableTimesEmptyThisWeekTitle =>
+      'لا توجد مواعيد قابلة للحجز هذا الأسبوع';
+
+  @override
+  String get bookableTimesEmptyThisWeekSubtitle =>
+      'الأيام المفتوحة في جدولك الأسبوعي تتحول إلى مواعيد هنا. عدّل ساعاتك أو راجع الاستثناءات إن كنت تتوقع مواعيد.';
+
+  @override
+  String get bookableTimesEmptyNextWeekTitle =>
+      'لا توجد مواعيد قابلة للحجز الأسبوع القادم';
+
+  @override
+  String get bookableTimesEmptyNextWeekSubtitle =>
+      'يُبنى الأسبوع القادم من توفرك الأسبوعي المتكرر. راجع جدولك لإضافة أيام أو تعديلها.';
+
+  @override
+  String get bookableTimesEmptyHorizonTitle =>
+      'لا توجد مواعيد قابلة للحجز خلال 14 يومًا';
+
+  @override
+  String get bookableTimesEmptyHorizonSubtitle =>
+      'حدد توفرك الأسبوعي المتكرر وستظهر المواعيد تلقائيًا للأيام المفتوحة.';
+
+  @override
+  String get upcomingSessionsEmptyTitle => 'لا توجد جلسات قادمة';
+
+  @override
+  String get upcomingSessionsEmptySubtitle =>
+      'ستظهر الحجوزات المؤكدة هنا عندما يحجز الطلاب موعدًا معك.';
+
+  @override
+  String get fridayReviewBannerMessage =>
+      'راجع توفرك للأسبوع القادم. يحجز الطلاب من جدولك الأسبوعي.';
+
+  @override
+  String get fridayReviewBannerAction => 'مراجعة';
+
+  @override
+  String get fridayReviewBannerDismiss => 'تجاهل';
+
+  @override
   String get editWeeklyTemplate => 'تعديل الجدول الأسبوعي';
 
   @override

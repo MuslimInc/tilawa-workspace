@@ -10,6 +10,10 @@ import '../foundation/tilawa_interaction_feedback.dart';
 /// consistently with the Tilawa design system. Use for 2-5 options where
 /// only one can be selected at a time.
 ///
+/// For section tabs tied to a [TabController] / [TabBarView], use
+/// [TilawaTabBar] instead. Do not use Material [SegmentedButton] in product
+/// UI — it is not part of the Tilawa atomic kit.
+///
 /// The control consists of a rounded container with segmented buttons inside.
 /// The selected segment has a distinct background color and shadow.
 class TilawaSegmentedControl<T> extends StatelessWidget {

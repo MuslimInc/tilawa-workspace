@@ -14,12 +14,21 @@ class DateGroupedSlotsLayout extends StatefulWidget {
     this.emptyChild,
     this.initialDay,
     this.padding = EdgeInsets.zero,
+    this.belowTabsBuilder,
+    this.onSelectedDayChanged,
   });
 
   final List<TeacherAvailability> slots;
   final Widget? emptyChild;
   final DateTime? initialDay;
   final EdgeInsetsGeometry padding;
+
+  /// Optional caption or helper row under the day chips (e.g. selected day).
+  final Widget Function(BuildContext context, DateTime selectedDay)?
+  belowTabsBuilder;
+
+  /// Called when the user picks a different day tab.
+  final ValueChanged<DateTime>? onSelectedDayChanged;
 
   /// Builds the slot list/grid for [daySlots] on the selected tab.
   final Widget Function(
@@ -42,6 +51,9 @@ class _DateGroupedSlotsLayoutState extends State<DateGroupedSlotsLayout> {
     super.initState();
     _applySlots(widget.slots);
     _selectedDay = _pickInitialDay();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onSelectedDayChanged?.call(_selectedDay);
+    });
   }
 
   @override
@@ -88,8 +100,15 @@ class _DateGroupedSlotsLayoutState extends State<DateGroupedSlotsLayout> {
           DateGroupedDayTabBar(
             days: _days,
             selected: _selectedDay,
-            onDaySelected: (day) => setState(() => _selectedDay = day),
+            onDaySelected: (day) {
+              setState(() => _selectedDay = day);
+              widget.onSelectedDayChanged?.call(day);
+            },
           ),
+          if (widget.belowTabsBuilder != null) ...[
+            SizedBox(height: tokens.spaceSmall),
+            widget.belowTabsBuilder!(context, _selectedDay),
+          ],
           SizedBox(height: tokens.spaceMedium),
           widget.slotsForDayBuilder(context, daySlots),
         ],

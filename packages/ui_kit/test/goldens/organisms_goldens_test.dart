@@ -171,6 +171,85 @@ void main() {
     );
 
     goldenTest(
+      'TilawaCapabilityActionCard',
+      fileName: 'organisms/tilawa_capability_action_card',
+      builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints.copyWith(
+          minHeight: 168,
+          maxHeight: 168,
+        ),
+        children: [
+          GoldenTestScenario(
+            name: 'Loaded light',
+            child: TilawaPreviewWrapper(
+              child: SizedBox(
+                width: 360,
+                child: TilawaCapabilityActionCard(
+                  title: 'Teacher dashboard',
+                  subtitle: 'Manage your schedule and sessions from here.',
+                  leadingIcon: TilawaIcons.teacherCapability,
+                  badgeLabel: 'Verified teacher',
+                  onTap: () {},
+                  margin: EdgeInsets.zero,
+                ),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Skeleton light',
+            child: TilawaPreviewWrapper(
+              child: SizedBox(
+                width: 360,
+                child: TilawaCapabilityActionCardSkeleton(
+                  margin: EdgeInsets.zero,
+                  animate: false,
+                  mirrorTitle: 'Teacher dashboard',
+                  mirrorSubtitle:
+                      'Manage your schedule and sessions from here.',
+                  mirrorBadgeLabel: 'Verified teacher',
+                ),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Loaded dark',
+            child: TilawaPreviewWrapper(
+              isDark: true,
+              child: SizedBox(
+                width: 360,
+                child: TilawaCapabilityActionCard(
+                  title: 'Teacher dashboard',
+                  subtitle: 'Manage your schedule and sessions from here.',
+                  leadingIcon: TilawaIcons.teacherCapability,
+                  badgeLabel: 'Verified teacher',
+                  onTap: () {},
+                  margin: EdgeInsets.zero,
+                ),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Skeleton dark',
+            child: TilawaPreviewWrapper(
+              isDark: true,
+              child: SizedBox(
+                width: 360,
+                child: TilawaCapabilityActionCardSkeleton(
+                  margin: EdgeInsets.zero,
+                  animate: false,
+                  mirrorTitle: 'Teacher dashboard',
+                  mirrorSubtitle:
+                      'Manage your schedule and sessions from here.',
+                  mirrorBadgeLabel: 'Verified teacher',
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
       'TilawaShareFooterBar',
       fileName: 'organisms/tilawa_share_footer_bar',
       builder: () => GoldenTestGroup(

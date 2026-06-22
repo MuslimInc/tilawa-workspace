@@ -3,33 +3,40 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+const String _kCapabilityCardTitle = 'Teacher dashboard';
+const String _kCapabilityCardSubtitle =
+    'Manage your schedule and sessions from here.';
+const String _kCapabilityCardBadge = 'Verified teacher';
+
+Widget _capabilityCardFixture({VoidCallback? onTap}) {
+  return TilawaCapabilityActionCard(
+    title: _kCapabilityCardTitle,
+    subtitle: _kCapabilityCardSubtitle,
+    leadingIcon: TilawaIcons.teacherCapability,
+    badgeLabel: _kCapabilityCardBadge,
+    onTap: onTap ?? () {},
+    margin: EdgeInsets.zero,
+  );
+}
+
+Widget _capabilityCardSkeletonFixture() {
+  return const TilawaCapabilityActionCardSkeleton(
+    margin: EdgeInsets.zero,
+    animate: false,
+    mirrorTitle: _kCapabilityCardTitle,
+    mirrorSubtitle: _kCapabilityCardSubtitle,
+    mirrorBadgeLabel: _kCapabilityCardBadge,
+  );
+}
+
 Widget _wrap({
   required Widget child,
   required Brightness brightness,
   TextDirection textDirection = TextDirection.ltr,
 }) {
-  final ColorScheme colorScheme = ColorScheme.fromSeed(
-    seedColor: AppColors.defaultPrimary,
-    brightness: brightness,
-  );
-
   return MaterialApp(
-    theme: ThemeData(
-      colorScheme: colorScheme,
-      brightness: brightness,
-      extensions: [
-        TilawaDesignTokens.light(),
-        TilawaComponentTokens.light(colorScheme: colorScheme),
-      ],
-    ),
-    darkTheme: ThemeData(
-      colorScheme: colorScheme,
-      brightness: brightness,
-      extensions: [
-        TilawaDesignTokens.dark(),
-        TilawaComponentTokens.dark(colorScheme: colorScheme),
-      ],
-    ),
+    theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+    darkTheme: AppTheme.getDarkTheme(primaryColor: AppColors.defaultPrimary),
     themeMode: brightness == Brightness.dark ? ThemeMode.dark : ThemeMode.light,
     home: Directionality(
       textDirection: textDirection,
@@ -146,7 +153,105 @@ void main() {
       check(subtitleStyle?.color).isNotNull();
       check(titleStyle!.color != subtitleStyle!.color).isTrue();
     });
+    testWidgets('matches skeleton height for canonical badge layout', (
+      WidgetTester tester,
+    ) async {
+      await tester.binding.setSurfaceSize(const Size(360, 800));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      await tester.pumpWidget(
+        _wrap(
+          brightness: Brightness.light,
+          child: SizedBox(
+            width: 360,
+            child: KeyedSubtree(
+              key: _kCardProbeKey,
+              child: _capabilityCardFixture(),
+            ),
+          ),
+        ),
+      );
+      final double cardHeight = tester
+          .getSize(find.byKey(_kCardProbeKey))
+          .height;
+
+      await tester.pumpWidget(
+        _wrap(
+          brightness: Brightness.light,
+          child: SizedBox(
+            width: 360,
+            child: KeyedSubtree(
+              key: _kSkeletonProbeKey,
+              child: _capabilityCardSkeletonFixture(),
+            ),
+          ),
+        ),
+      );
+      final double skeletonHeight = tester
+          .getSize(find.byKey(_kSkeletonProbeKey))
+          .height;
+
+      check(cardHeight).equals(skeletonHeight);
+    });
+  });
+
+  group('TilawaCapabilityActionCardSkeleton', () {
+    testWidgets('renders placeholder bones and loading semantics', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        _wrap(
+          brightness: Brightness.light,
+          child: const TilawaCapabilityActionCardSkeleton(),
+        ),
+      );
+
+      check(
+        find.byType(TilawaCapabilityActionCardSkeleton).evaluate().length,
+      ).equals(1);
+      check(find.byType(InkWell).evaluate().isEmpty).isTrue();
+      check(find.bySemanticsLabel('Loading').evaluate().length).equals(1);
+    });
+
+    testWidgets('meets minimum tap target height', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          brightness: Brightness.light,
+          child: const TilawaCapabilityActionCardSkeleton(),
+        ),
+      );
+
+      final Size cardSize = tester.getSize(
+        find.byType(TilawaCapabilityActionCardSkeleton),
+      );
+      check(cardSize.height >= kTilawaMinInteractiveDimension).isTrue();
+    });
+
+    testWidgets('hides badge bone when showBadge is false', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        _wrap(
+          brightness: Brightness.light,
+          child: const TilawaCapabilityActionCardSkeleton(showBadge: true),
+        ),
+      );
+      final int withBadge = find.byType(RepaintBoundary).evaluate().length;
+
+      await tester.pumpWidget(
+        _wrap(
+          brightness: Brightness.light,
+          child: const TilawaCapabilityActionCardSkeleton(showBadge: false),
+        ),
+      );
+      final int withoutBadge = find.byType(RepaintBoundary).evaluate().length;
+
+      check(withoutBadge).isLessThan(withBadge);
+    });
   });
 }
 
 void _noop() {}
+
+const Key _kCardProbeKey = Key('capability_card_probe');
+const Key _kSkeletonProbeKey = Key('capability_card_skeleton_probe');

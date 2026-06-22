@@ -565,6 +565,65 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
       'Generated from your weekly availability, minus exceptions and bookings.';
 
   @override
+  String get bookableTimesThisWeekSectionTitle => 'This week';
+
+  @override
+  String get bookableTimesNextWeekSectionTitle => 'Next week';
+
+  @override
+  String get bookableTimesWeekScopedTitle => 'Bookable times';
+
+  @override
+  String bookableTimesSelectedDayCaption(String dayLabel) {
+    return 'Showing times for $dayLabel';
+  }
+
+  @override
+  String get bookableTimesEmptyThisWeek => 'No bookable times this week.';
+
+  @override
+  String get bookableTimesEmptyNextWeek => 'No bookable times next week.';
+
+  @override
+  String get bookableTimesEmptyThisWeekTitle => 'No bookable times this week';
+
+  @override
+  String get bookableTimesEmptyThisWeekSubtitle =>
+      'Open days in your weekly template become slots here. Adjust your hours or check exceptions if you expected times.';
+
+  @override
+  String get bookableTimesEmptyNextWeekTitle => 'No bookable times next week';
+
+  @override
+  String get bookableTimesEmptyNextWeekSubtitle =>
+      'Next week is built from your recurring weekly availability. Review your template to add or change days.';
+
+  @override
+  String get bookableTimesEmptyHorizonTitle =>
+      'No bookable times in the next 14 days';
+
+  @override
+  String get bookableTimesEmptyHorizonSubtitle =>
+      'Set your recurring weekly availability and open days will appear here automatically.';
+
+  @override
+  String get upcomingSessionsEmptyTitle => 'No upcoming sessions';
+
+  @override
+  String get upcomingSessionsEmptySubtitle =>
+      'Confirmed bookings will appear here when students reserve a time with you.';
+
+  @override
+  String get fridayReviewBannerMessage =>
+      'Review next week\'s availability. Students book from your weekly template.';
+
+  @override
+  String get fridayReviewBannerAction => 'Review';
+
+  @override
+  String get fridayReviewBannerDismiss => 'Dismiss';
+
+  @override
   String get editWeeklyTemplate => 'Edit weekly template';
 
   @override

@@ -5,6 +5,7 @@ import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/features/quran_sessions/presentation/quran_sessions_analytics.dart';
+import 'package:tilawa/features/quran_sessions/presentation/quran_sessions_scheduling_analytics.dart';
 import 'package:tilawa/features/quran_sessions/presentation/quran_sessions_user.dart';
 import 'package:tilawa/features/quran_sessions/quran_sessions_feature_flags.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -206,6 +207,7 @@ List<RouteBase> get quranSessionsRoutes => [
           teacherId: teacherId,
           onManageSchedule: () =>
               context.push(QuranSessionsRoutes.availability),
+          schedulingAnalytics: quranSessionsSchedulingAnalyticsCallbacks(),
         ),
       ),
     ),
@@ -215,7 +217,12 @@ List<RouteBase> get quranSessionsRoutes => [
     builder: (context, state) => _TeacherDashboardGate(
       childBuilder: (teacherId) => BlocProvider(
         create: (_) => getIt<AvailabilityCubit>()..load(teacherId),
-        child: WeeklyAvailabilityScreen(teacherId: teacherId),
+        child: WeeklyAvailabilityScreen(
+          teacherId: teacherId,
+          schedulingAnalytics: quranSessionsSchedulingAnalyticsCallbacks(),
+          resolveSchedulingAnalyticsBase: () =>
+              resolveTeacherSchedulingAnalyticsBase(teacherId),
+        ),
       ),
     ),
   ),

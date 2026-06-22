@@ -15,6 +15,7 @@ import '../data/fake_mvp_teacher_repository.dart';
 import '../data/fake_mvp_user_profile_repository.dart';
 import '../data/fake_mvp_session_lifecycle.dart';
 import '../data/quran_sessions_mvp_store.dart';
+import '../presentation/quran_sessions_scheduling_analytics.dart';
 import 'quran_sessions_lifecycle_module.dart';
 
 /// Wires fake MVP repositories, boundaries, use cases, and BLoC factories
@@ -57,6 +58,15 @@ class QuranSessionsMvpModule {
     );
     sl.registerLazySingletonIfAbsent<ScheduleRepository>(
       () => FakeMvpScheduleRepository(store),
+    );
+
+    sl.registerLazySingletonIfAbsent<MarketSchedulingConfigRepository>(
+      () => MarketSchedulingConfigRepositoryImpl(
+        const CatalogMarketSchedulingConfigRemoteDataSource(),
+      ),
+    );
+    sl.registerLazySingletonIfAbsent<FridayReviewReminderStore>(
+      () => InMemoryFridayReviewReminderStore(),
     );
 
     final lifecycle = FakeMvpSessionLifecycleStack.instance;
@@ -208,6 +218,11 @@ class QuranSessionsMvpModule {
       ),
     );
     sl.registerLazySingletonIfAbsent(
+      () => GetMarketSchedulingConfigUseCase(
+        sl<MarketSchedulingConfigRepository>(),
+      ),
+    );
+    sl.registerLazySingletonIfAbsent(
       () => BlockGeneratedSlotUseCase(sl<ScheduleRepository>()),
     );
   }
@@ -232,11 +247,20 @@ class QuranSessionsMvpModule {
       ),
     );
     sl.registerFactoryIfAbsent(
-      () => BookingBloc(
-        getAvailability: sl<GetTeacherAvailabilityUseCase>(),
-        submitBooking: sl<SubmitSessionBookingUseCase>(),
-        validateEligibility: sl<ValidateBookingEligibilityUseCase>(),
-      ),
+      () {
+        final schedulingAnalytics = quranSessionsSchedulingAnalyticsCallbacks();
+        return BookingBloc(
+          getAvailability: sl<GetTeacherAvailabilityUseCase>(),
+          submitBooking: sl<SubmitSessionBookingUseCase>(),
+          validateEligibility: sl<ValidateBookingEligibilityUseCase>(),
+          onBookingLostDueToNoAvailability:
+              schedulingAnalytics.onBookingLostDueToNoAvailability,
+          resolveMarketCode: (teacherId) async {
+            final profile = await sl<GetUserProfileUseCase>()(teacherId);
+            return profile.fold((_) => null, (value) => value.countryCode);
+          },
+        );
+      },
     );
     sl.registerFactoryIfAbsent(
       () => MySessionsBloc(
@@ -254,6 +278,10 @@ class QuranSessionsMvpModule {
         availabilityProvider: sl<AvailabilityProvider>(),
         cancelSession: sl<CancelSessionViaServerUseCase>(),
         completeSession: sl<CompleteSessionViaServerUseCase>(),
+        getMarketSchedulingConfig: sl<GetMarketSchedulingConfigUseCase>(),
+        getUserProfile: sl<GetUserProfileUseCase>(),
+        getWeeklySchedule: sl<GetWeeklyScheduleUseCase>(),
+        fridayReviewReminderStore: sl<FridayReviewReminderStore>(),
         teacherId: sl<AuthSessionProvider>().currentUserId ?? 'teacher_mvp',
       ),
     );

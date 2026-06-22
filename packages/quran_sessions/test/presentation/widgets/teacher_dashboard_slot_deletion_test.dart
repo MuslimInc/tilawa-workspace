@@ -200,19 +200,20 @@ void main() {
     required List<TeacherAvailability> availability,
   }) {
     scheduleRepo.schedule = makeWeeklySchedule();
-    final bloc = TeacherDashboardBloc(
-      getTeacherSessions: GetTeacherSessionsUseCase(sessionRepo),
+    final bloc = buildTestTeacherDashboardBloc(
+      sessionRepo: sessionRepo,
       getAvailability: spyGetAvailability,
       blockGeneratedSlot: blockGeneratedSlot,
       availabilityProvider: availabilityProvider,
       cancelSession: buildCancelSessionViaServerUseCase(),
       completeSession: buildCompleteSessionViaServerUseCase(),
-      teacherId: 'teacher_1',
+      scheduleRepo: scheduleRepo,
       commitTimerFactory: fakeTimers.createFactory(),
       commitDelay: const Duration(days: 365),
+      now: () => DateTime.utc(2026, 1, 9),
     );
     bloc.emit(
-      TeacherDashboardSuccess(
+      seedTeacherDashboardSuccess(
         upcomingSessions: const [],
         availability: availability,
       ),

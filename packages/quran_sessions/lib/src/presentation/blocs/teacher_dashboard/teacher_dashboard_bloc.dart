@@ -5,17 +5,24 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../boundaries/scheduling/availability_provider.dart';
+import '../../../boundaries/scheduling/friday_review_reminder_store.dart';
 import '../../../domain/entities/generated_slot.dart';
+import '../../../domain/entities/market_scheduling_config.dart';
 import '../../../domain/entities/quran_session.dart';
 import '../../../domain/entities/teacher_availability.dart';
 import '../../../domain/failures/quran_sessions_failure.dart';
 import '../../../domain/services/booked_slot_starts.dart';
+import '../../../domain/services/scheduling_policy_resolver.dart';
 import '../../../domain/services/teacher_availability_sort.dart';
+import '../../../domain/services/week_calendar.dart';
 import '../../../domain/usecases/block_generated_slot_usecase.dart';
 import '../../../domain/usecases/cancel_session_via_server_usecase.dart';
 import '../../../domain/usecases/complete_session_via_server_usecase.dart';
+import '../../../domain/usecases/get_market_scheduling_config_usecase.dart';
 import '../../../domain/usecases/get_teacher_availability_usecase.dart';
 import '../../../domain/usecases/get_teacher_sessions_usecase.dart';
+import '../../../domain/usecases/get_user_profile_usecase.dart';
+import '../../../domain/usecases/get_weekly_schedule_usecase.dart';
 import '../../../domain/value_objects/actor_role.dart';
 import 'teacher_dashboard_event.dart';
 import 'teacher_dashboard_state.dart';
@@ -38,10 +45,21 @@ class TeacherDashboardBloc
     required this._availabilityProvider,
     required this._cancelSession,
     required this._completeSession,
+    required this._getMarketSchedulingConfig,
+    required this._getUserProfile,
+    required this._getWeeklySchedule,
+    required this._fridayReviewReminderStore,
     required this._teacherId,
+    SchedulingPolicyResolver? schedulingPolicyResolver,
+    WeekCalendar? weekCalendar,
     CommitTimerFactory? commitTimerFactory,
+    DateTime Function()? now,
     this._commitDelay = const Duration(seconds: 5),
-  }) : _commitTimerFactory = commitTimerFactory ?? _defaultCommitTimerFactory,
+  }) : _schedulingPolicyResolver =
+           schedulingPolicyResolver ?? const SchedulingPolicyResolver(),
+       _weekCalendar = weekCalendar ?? const WeekCalendar(),
+       _now = now ?? DateTime.now,
+       _commitTimerFactory = commitTimerFactory ?? _defaultCommitTimerFactory,
        super(const TeacherDashboardInitial()) {
     // Concurrency: destructive slot deletes use [sequential] — every tap is
     // processed in order; duplicate slot ids are no-oped in the handler.
@@ -64,6 +82,10 @@ class TeacherDashboardBloc
       _onCommitPendingSlotDelete,
       transformer: sequential(),
     );
+    on<FridayReviewBannerDismissed>(
+      _onFridayReviewBannerDismissed,
+      transformer: sequential(),
+    );
     on<TeacherSessionCancelled>(_onSessionCancelled, transformer: sequential());
     on<TeacherSessionCompleted>(_onSessionCompleted, transformer: sequential());
   }
@@ -74,11 +96,18 @@ class TeacherDashboardBloc
   final AvailabilityProvider _availabilityProvider;
   final CancelSessionViaServerUseCase _cancelSession;
   final CompleteSessionViaServerUseCase _completeSession;
+  final GetMarketSchedulingConfigUseCase _getMarketSchedulingConfig;
+  final GetUserProfileUseCase _getUserProfile;
+  final GetWeeklyScheduleUseCase _getWeeklySchedule;
+  final FridayReviewReminderStore _fridayReviewReminderStore;
+  final SchedulingPolicyResolver _schedulingPolicyResolver;
+  final WeekCalendar _weekCalendar;
+  final DateTime Function() _now;
   final String _teacherId;
   final CommitTimerFactory _commitTimerFactory;
   final Duration _commitDelay;
 
-  static const _availabilityHorizon = Duration(days: 14);
+  static const _dashboardHorizonDays = 14;
 
   void _cancelPendingCommitTimers(TeacherDashboardSuccess success) {
     for (final pending in success.pendingDeletes.values) {
@@ -142,13 +171,37 @@ class TeacherDashboardBloc
       emit(const TeacherDashboardLoading());
     }
 
-    final now = DateTime.now();
+    final now = _now();
+
+    final profileResult = await _getUserProfile(event.teacherId);
+    final marketCountryCode = profileResult.fold(
+      (_) => null,
+      (profile) => profile.countryCode,
+    );
+    final schedulingConfig = await _getMarketSchedulingConfig(
+      countryCode: marketCountryCode,
+    );
+
+    final scheduleResult = await _getWeeklySchedule(
+      event.teacherId,
+      defaultTimezone: 'Asia/Riyadh',
+    );
+    final teacherTimezone = scheduleResult.fold(
+      (_) => 'Asia/Riyadh',
+      (schedule) => schedule.timezone,
+    );
+
+    final horizonDays =
+        schedulingConfig.bookingHorizonDays < _dashboardHorizonDays
+        ? schedulingConfig.bookingHorizonDays
+        : _dashboardHorizonDays;
+    final horizon = Duration(days: horizonDays);
 
     final sessionsResult = await _getTeacherSessions(event.teacherId);
     final availResult = await _getAvailability(
       event.teacherId,
       from: now,
-      to: now.add(_availabilityHorizon),
+      to: now.add(horizon),
     );
 
     // Surface the first failure encountered.
@@ -175,15 +228,179 @@ class TeacherDashboardBloc
       return;
     }
 
+    final presentation = await _buildPresentation(
+      teacherId: event.teacherId,
+      schedulingConfig: schedulingConfig,
+      teacherTimezone: teacherTimezone,
+      marketCountryCode: marketCountryCode,
+      availability: slots,
+      pendingDeletes: const {},
+      dismissedFridayReminderWeekKey: null,
+      now: now,
+    );
+
     emit(
       TeacherDashboardSuccess(
         upcomingSessions:
             sessions.where((s) => s.startsAt.isAfter(now)).toList()
               ..sort((a, b) => a.startsAt.compareTo(b.startsAt)),
         availability: slots,
+        schedulingConfig: schedulingConfig,
+        thisWeekAvailability: presentation.thisWeekAvailability,
+        nextWeekAvailability: presentation.nextWeekAvailability,
+        showFridayReviewBanner: presentation.showFridayReviewBanner,
+        fridayReviewNextWeekKey: presentation.fridayReviewNextWeekKey,
+        dismissedFridayReminderWeekKey:
+            presentation.dismissedFridayReminderWeekKey,
+        teacherTimezone: teacherTimezone,
+        marketCountryCode: marketCountryCode,
         refreshDiscardedPendingCount: discardedPendingCount > 0
             ? discardedPendingCount
             : null,
+      ),
+    );
+  }
+
+  Future<
+    ({
+      List<TeacherAvailability> thisWeekAvailability,
+      List<TeacherAvailability> nextWeekAvailability,
+      bool showFridayReviewBanner,
+      String? fridayReviewNextWeekKey,
+      String? dismissedFridayReminderWeekKey,
+    })
+  >
+  _buildPresentation({
+    required String teacherId,
+    required MarketSchedulingConfig schedulingConfig,
+    required String teacherTimezone,
+    required String? marketCountryCode,
+    required List<TeacherAvailability> availability,
+    required Map<String, PendingSlotDelete> pendingDeletes,
+    required String? dismissedFridayReminderWeekKey,
+    required DateTime now,
+  }) async {
+    final visibleSlots = availability
+        .where((slot) => !pendingDeletes.containsKey(slot.slotId))
+        .toList();
+    final partition = _schedulingPolicyResolver.partitionBookableSlots(
+      config: schedulingConfig,
+      slots: visibleSlots,
+      now: now,
+      timezone: teacherTimezone,
+    );
+
+    final nextWeekKey = _schedulingPolicyResolver.nextWeekKey(
+      config: schedulingConfig,
+      now: now,
+      timezone: teacherTimezone,
+    );
+
+    final storeDismissed = await _fridayReviewReminderStore.isDismissed(
+      teacherId: teacherId,
+      nextWeekKey: nextWeekKey,
+    );
+    final dismissedKey =
+        storeDismissed || dismissedFridayReminderWeekKey == nextWeekKey
+        ? nextWeekKey
+        : dismissedFridayReminderWeekKey;
+
+    final bannerDecision = _schedulingPolicyResolver.evaluateFridayBanner(
+      config: schedulingConfig,
+      now: now,
+      timezone: teacherTimezone,
+      nextWeekSlotCount: partition.nextWeek.length,
+      isDismissedForNextWeek: dismissedKey == nextWeekKey,
+    );
+
+    final showBanner = bannerDecision is FridayReviewBannerVisible;
+    final bannerWeekKey = showBanner ? (bannerDecision).nextWeekKey : null;
+
+    return (
+      thisWeekAvailability: partition.thisWeek,
+      nextWeekAvailability: partition.nextWeek,
+      showFridayReviewBanner: showBanner,
+      fridayReviewNextWeekKey: bannerWeekKey,
+      dismissedFridayReminderWeekKey: dismissedKey,
+    );
+  }
+
+  TeacherDashboardSuccess _applyAvailability(
+    TeacherDashboardSuccess current,
+    List<TeacherAvailability> availability, {
+    Map<String, PendingSlotDelete>? pendingDeletes,
+    String? dismissedFridayReminderWeekKey,
+  }) {
+    final effectivePending = pendingDeletes ?? current.pendingDeletes;
+    final partition = _schedulingPolicyResolver.partitionBookableSlots(
+      config: current.schedulingConfig,
+      slots: availability
+          .where(
+            (slot) => !effectivePending.containsKey(slot.slotId),
+          )
+          .toList(),
+      now: _now(),
+      timezone: current.teacherTimezone,
+    );
+
+    final nextWeekKey = _schedulingPolicyResolver.nextWeekKey(
+      config: current.schedulingConfig,
+      now: _now(),
+      timezone: current.teacherTimezone,
+    );
+    final dismissedKey =
+        dismissedFridayReminderWeekKey ??
+        current.dismissedFridayReminderWeekKey;
+    final bannerDecision = _schedulingPolicyResolver.evaluateFridayBanner(
+      config: current.schedulingConfig,
+      now: _now(),
+      timezone: current.teacherTimezone,
+      nextWeekSlotCount: partition.nextWeek.length,
+      isDismissedForNextWeek: dismissedKey == nextWeekKey,
+    );
+    final showBanner = bannerDecision is FridayReviewBannerVisible;
+
+    return current.copyWith(
+      availability: availability,
+      thisWeekAvailability: partition.thisWeek,
+      nextWeekAvailability: partition.nextWeek,
+      showFridayReviewBanner: showBanner,
+      fridayReviewNextWeekKey: showBanner ? (bannerDecision).nextWeekKey : null,
+      clearFridayReviewNextWeekKey: !showBanner,
+      dismissedFridayReminderWeekKey: dismissedKey,
+    );
+  }
+
+  Future<void> _onFridayReviewBannerDismissed(
+    FridayReviewBannerDismissed event,
+    Emitter<TeacherDashboardState> emit,
+  ) async {
+    final current = state;
+    if (current is! TeacherDashboardSuccess) return;
+
+    final nextWeekKey =
+        current.fridayReviewNextWeekKey ??
+        _schedulingPolicyResolver.nextWeekKey(
+          config: current.schedulingConfig,
+          now: _now(),
+          timezone: current.teacherTimezone,
+        );
+
+    final until = _weekCalendar.saturdayAfterFriday(
+      now: _now(),
+      timezone: current.teacherTimezone,
+    );
+    await _fridayReviewReminderStore.dismiss(
+      teacherId: event.teacherId,
+      nextWeekKey: nextWeekKey,
+      until: until,
+    );
+
+    emit(
+      current.copyWith(
+        showFridayReviewBanner: false,
+        dismissedFridayReminderWeekKey: nextWeekKey,
+        clearFridayReviewNextWeekKey: true,
       ),
     );
   }
@@ -206,9 +423,9 @@ class TeacherDashboardBloc
     result.fold(
       (_) => emit(current.copyWith(isUpdatingAvailability: false)),
       (slots) => emit(
-        current.copyWith(
-          availability: slots,
-          isUpdatingAvailability: false,
+        _applyAvailability(
+          current.copyWith(isUpdatingAvailability: false),
+          slots,
         ),
       ),
     );
@@ -235,13 +452,15 @@ class TeacherDashboardBloc
         ),
       ),
       (_) => emit(
-        current.copyWith(
-          availability: sortTeacherAvailabilityByStart([
+        _applyAvailability(
+          current.copyWith(
+            isUpdatingAvailability: false,
+            clearSlotFailure: true,
+          ),
+          sortTeacherAvailabilityByStart([
             ...current.availability,
             event.slot,
           ]),
-          isUpdatingAvailability: false,
-          clearSlotFailure: true,
         ),
       ),
     );
@@ -288,10 +507,12 @@ class TeacherDashboardBloc
           }).toList(),
         );
         emit(
-          current.copyWith(
-            availability: updated,
-            isUpdatingAvailability: false,
-            clearSlotFailure: true,
+          _applyAvailability(
+            current.copyWith(
+              isUpdatingAvailability: false,
+              clearSlotFailure: true,
+            ),
+            updated,
           ),
         );
       },
@@ -339,13 +560,14 @@ class TeacherDashboardBloc
     );
 
     emit(
-      current.copyWith(
-        availability: current.availability
-            .where((slot) => slot.slotId != slotId)
-            .toList(),
+      _applyAvailability(
+        current.copyWith(
+          pendingDeletes: {...current.pendingDeletes, slotId: pending},
+          undoableSlotId: slotId,
+          clearSlotFailure: true,
+        ),
+        current.availability.where((slot) => slot.slotId != slotId).toList(),
         pendingDeletes: {...current.pendingDeletes, slotId: pending},
-        undoableSlotId: slotId,
-        clearSlotFailure: true,
       ),
     );
   }
@@ -373,14 +595,17 @@ class TeacherDashboardBloc
     )..remove(event.slotId);
 
     emit(
-      current.copyWith(
-        availability: restored,
+      _applyAvailability(
+        current.copyWith(
+          pendingDeletes: pendingDeletes,
+          undoableSlotId: current.undoableSlotId == event.slotId
+              ? null
+              : current.undoableSlotId,
+          clearUndoableSlotId: current.undoableSlotId == event.slotId,
+          clearSlotFailure: true,
+        ),
+        restored,
         pendingDeletes: pendingDeletes,
-        undoableSlotId: current.undoableSlotId == event.slotId
-            ? null
-            : current.undoableSlotId,
-        clearUndoableSlotId: current.undoableSlotId == event.slotId,
-        clearSlotFailure: true,
       ),
     );
   }
@@ -482,10 +707,14 @@ class TeacherDashboardBloc
     Emitter<TeacherDashboardState> emit,
   ) async {
     final now = DateTime.now();
+    final horizonDays =
+        current.schedulingConfig.bookingHorizonDays < _dashboardHorizonDays
+        ? current.schedulingConfig.bookingHorizonDays
+        : _dashboardHorizonDays;
     final availResult = await _getAvailability(
       pending.teacherId,
       from: now,
-      to: now.add(_availabilityHorizon),
+      to: now.add(Duration(days: horizonDays)),
     );
 
     final pendingDeletes = Map<String, PendingSlotDelete>.from(
@@ -507,12 +736,15 @@ class TeacherDashboardBloc
         ),
       ),
       (slots) => emit(
-        current.copyWith(
-          availability: slots,
+        _applyAvailability(
+          current.copyWith(
+            pendingDeletes: pendingDeletes,
+            undoableSlotId: nextUndoable,
+            clearUndoableSlotId: nextUndoable == null,
+            slotFailure: SlotUnavailableFailure(pending.snapshot.slotId),
+          ),
+          slots,
           pendingDeletes: pendingDeletes,
-          undoableSlotId: nextUndoable,
-          clearUndoableSlotId: nextUndoable == null,
-          slotFailure: SlotUnavailableFailure(pending.snapshot.slotId),
         ),
       ),
     );
@@ -534,15 +766,18 @@ class TeacherDashboardBloc
     );
 
     emit(
-      current.copyWith(
-        availability: sortTeacherAvailabilityByStart([
+      _applyAvailability(
+        current.copyWith(
+          pendingDeletes: pendingDeletes,
+          undoableSlotId: nextUndoable,
+          clearUndoableSlotId: nextUndoable == null,
+          slotFailure: failure,
+        ),
+        sortTeacherAvailabilityByStart([
           ...current.availability,
           pending.snapshot,
         ]),
         pendingDeletes: pendingDeletes,
-        undoableSlotId: nextUndoable,
-        clearUndoableSlotId: nextUndoable == null,
-        slotFailure: failure,
       ),
     );
   }
