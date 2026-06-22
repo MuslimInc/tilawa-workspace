@@ -88,6 +88,8 @@ void main() {
       expect(tokens.spinnerSize, 18.0);
       expect(tokens.spinnerStrokeWidth, 2.2);
       expect(tokens.contentGap, 8.0);
+      expect(tokens.leadingSlotSize, 24.0);
+      expect(tokens.toastMessageMaxLines, 2);
     });
 
     test('copyWith updates padding and numeric values', () {
@@ -107,6 +109,8 @@ void main() {
         spinnerSize: 16.0,
         spinnerStrokeWidth: 2.0,
         contentGap: 8.0,
+        leadingSlotSize: 22.0,
+        toastMessageMaxLines: 2,
         infoAccentOpacity: 0.3,
         successAccentOpacity: 0.5,
         warningAccentOpacity: 0.5,
@@ -117,6 +121,8 @@ void main() {
         spinnerSize: 20.0,
         spinnerStrokeWidth: 3.0,
         contentGap: 12.0,
+        leadingSlotSize: 26.0,
+        toastMessageMaxLines: 2,
         infoAccentOpacity: 0.4,
         successAccentOpacity: 0.6,
         warningAccentOpacity: 0.6,

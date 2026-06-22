@@ -29,8 +29,10 @@ double? computeDateGroupedDayTabBarScrollTarget({
 
   final itemLeading = horizontalPadding + index * (chipWidth + separatorWidth);
   final itemCenter = itemLeading + chipWidth / 2;
-  final centeredOffset =
-      (itemCenter - viewportWidth * alignment).clamp(0.0, maxScrollExtent);
+  final centeredOffset = (itemCenter - viewportWidth * alignment).clamp(
+    0.0,
+    maxScrollExtent,
+  );
 
   if ((currentOffset - centeredOffset).abs() < 1) {
     return null;
@@ -189,45 +191,45 @@ class _DateGroupedDayTabBarState extends State<DateGroupedDayTabBar> {
                 duration: const Duration(milliseconds: 180),
                 width: kDateGroupedDayTabChipWidth,
                 decoration: BoxDecoration(
-                color: isSelected
-                    ? scheme.primary
-                    : scheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(dayRadius),
+                  color: isSelected
+                      ? scheme.primary
+                      : scheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(dayRadius),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      weekdayFmt.format(day),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: isSelected
+                            ? scheme.onPrimary
+                            : scheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      dayFmt.format(day),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: isSelected ? scheme.onPrimary : scheme.onSurface,
+                      ),
+                    ),
+                    Text(
+                      monthFmt.format(day),
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: isSelected
+                            ? scheme.onPrimary.withValues(alpha: 0.8)
+                            : scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    weekdayFmt.format(day),
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: isSelected
-                          ? scheme.onPrimary
-                          : scheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    dayFmt.format(day),
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: isSelected ? scheme.onPrimary : scheme.onSurface,
-                    ),
-                  ),
-                  Text(
-                    monthFmt.format(day),
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: isSelected
-                          ? scheme.onPrimary.withValues(alpha: 0.8)
-                          : scheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
             ),
           );
         },

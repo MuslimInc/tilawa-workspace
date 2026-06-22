@@ -1,23 +1,26 @@
 import 'package:flutter/material.dart';
 
 import '../molecules/tilawa_feedback_strip.dart';
+import 'tilawa_feedback.dart';
 import 'tilawa_feedback_action.dart';
 import 'tilawa_feedback_host.dart';
 
-/// App-wide transient and persistent feedback entry points.
-abstract final class TilawaFeedback {
-  /// Shows a calm, auto-dismissing toast above bottom chrome.
-  ///
-  /// [message] must already be localized by the caller.
+/// Feedback helpers for layers that only hold a [GlobalKey] navigator reference.
+abstract final class TilawaFeedbackService {
+  /// Shows a toast when [navigatorKey] resolves to a mounted context.
   static void showToast(
-    BuildContext context, {
+    GlobalKey<NavigatorState> navigatorKey, {
     required String message,
     required TilawaFeedbackVariant variant,
     Duration duration = kTilawaToastDuration,
     String? dedupeKey,
   }) {
-    TilawaFeedbackScope.of(context).showToast(
-      context: context,
+    final BuildContext? context = navigatorKey.currentContext;
+    if (context == null) {
+      return;
+    }
+    TilawaFeedback.showToast(
+      context,
       message: message,
       variant: variant,
       duration: duration,
@@ -25,19 +28,21 @@ abstract final class TilawaFeedback {
     );
   }
 
-  /// Shows a toast with one or more trailing actions.
-  ///
-  /// Pass [duration] as `null` to keep the toast until the user acts.
+  /// Shows an actionable toast when [navigatorKey] resolves to a mounted context.
   static void showActionable(
-    BuildContext context, {
+    GlobalKey<NavigatorState> navigatorKey, {
     required String message,
     required TilawaFeedbackVariant variant,
     Duration? duration = kTilawaUndoToastDuration,
     required List<TilawaFeedbackAction> actions,
     String? dedupeKey,
   }) {
-    TilawaFeedbackScope.of(context).showActionable(
-      context: context,
+    final BuildContext? context = navigatorKey.currentContext;
+    if (context == null) {
+      return;
+    }
+    TilawaFeedback.showActionable(
+      context,
       message: message,
       variant: variant,
       duration: duration,

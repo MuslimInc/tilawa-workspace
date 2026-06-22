@@ -5,12 +5,13 @@ import 'package:injectable/injectable.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/router/app_router.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/in_app_update_action.dart';
 import 'in_app_update_prompt_presenter.dart';
 
 @LazySingleton(as: InAppUpdatePromptPresenter)
-class InAppUpdateSnackBarPresenter implements InAppUpdatePromptPresenter {
+class InAppUpdateFeedbackPresenter implements InAppUpdatePromptPresenter {
   @override
   void showPrompt(
     InAppUpdateAction action, {
@@ -33,49 +34,32 @@ class InAppUpdateSnackBarPresenter implements InAppUpdatePromptPresenter {
     InAppUpdateAction action, {
     required Future<void> Function() onConfirm,
   }) {
-    final ScaffoldMessengerState? messenger = ScaffoldMessenger.maybeOf(
-      context,
-    );
     final AppLocalizations l10n = context.l10n;
     final ({String message, String actionLabel}) copy = _promptCopyFor(
       action,
       l10n,
     );
-    switch (action) {
-      case InAppUpdateAction.offerRequiredStoreUpdate:
-        messenger?.showMaterialBanner(
-          MaterialBanner(
-            content: Text(copy.message),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  messenger.hideCurrentMaterialBanner();
-                  unawaited(onConfirm());
-                },
-                child: Text(copy.actionLabel),
-              ),
-            ],
-          ),
-        );
-      case InAppUpdateAction.promptFlexibleRestart:
-      case InAppUpdateAction.offerOptionalImmediate:
-        messenger?.showSnackBar(
-          SnackBar(
-            content: Text(copy.message),
-            action: SnackBarAction(
-              label: copy.actionLabel,
-              onPressed: () {
-                unawaited(onConfirm());
-              },
-            ),
-            duration: durationFor(action),
-          ),
-        );
-      case InAppUpdateAction.performImmediate:
-      case InAppUpdateAction.startFlexible:
-      case InAppUpdateAction.none:
-        break;
+    if (copy.message.isEmpty) {
+      return;
     }
+
+    TilawaFeedback.showActionable(
+      context,
+      message: copy.message,
+      variant: switch (action) {
+        InAppUpdateAction.offerRequiredStoreUpdate =>
+          TilawaFeedbackVariant.warning,
+        _ => TilawaFeedbackVariant.info,
+      },
+      duration: durationFor(action),
+      dedupeKey: 'in-app-update-${action.name}',
+      actions: <TilawaFeedbackAction>[
+        TilawaFeedbackAction(
+          label: copy.actionLabel,
+          onPressed: () => unawaited(onConfirm()),
+        ),
+      ],
+    );
   }
 
   static ({String message, String actionLabel}) _promptCopyFor(
@@ -100,14 +84,15 @@ class InAppUpdateSnackBarPresenter implements InAppUpdatePromptPresenter {
   }
 
   @visibleForTesting
-  static const Duration snackBarPromptDuration = Duration(minutes: 5);
+  static const Duration promptDuration = Duration(minutes: 5);
 
   @visibleForTesting
-  static Duration durationFor(InAppUpdateAction action) {
+  static Duration? durationFor(InAppUpdateAction action) {
     return switch (action) {
+      InAppUpdateAction.offerRequiredStoreUpdate => null,
       InAppUpdateAction.promptFlexibleRestart ||
-      InAppUpdateAction.offerOptionalImmediate => snackBarPromptDuration,
-      _ => snackBarPromptDuration,
+      InAppUpdateAction.offerOptionalImmediate => promptDuration,
+      _ => promptDuration,
     };
   }
 

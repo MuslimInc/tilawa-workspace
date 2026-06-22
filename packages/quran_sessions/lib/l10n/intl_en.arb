@@ -196,6 +196,15 @@
     "deleteSlotConfirmMessage": "Students will no longer be able to book this time. You can restore it later from working hours.",
     "deleteSlotConfirm": "Remove slot",
     "deleteSlotSuccess": "Slot removed",
+    "deleteSlotUndo": "Undo",
+    "deleteSlotRemovedSnackBar": "Removed {time}",
+    "@deleteSlotRemovedSnackBar": {
+        "placeholders": {
+            "time": {
+                "type": "String"
+            }
+        }
+    },
     "addNewSlot": "Add new slot",
     "slotDate": "Slot date",
     "slotTime": "Slot time",

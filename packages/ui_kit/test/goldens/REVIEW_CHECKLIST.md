@@ -9,6 +9,10 @@ deltas below are **intentional**—not accidental layout regressions.
 - **Light neutral ramp** — four swatches: porcelain canvas `#F4F5F7`, white surface, `#E5E7EB` container high, slate ink `#0F172A` labels.
 - **TilawaCatalogAppBar** — title-only and title+search on white parchment; dark title-only uses dark surface (not coral wash).
 - **`TilawaPreviewWrapper`** uses **`AppColors.defaultPrimary` (warm brown)** — many atom/molecule goldens may shift accent tints from legacy teal; confirm only accent controls changed, not neutral chrome.
+- **TilawaToast variants (light/dark)** — four semantic states on `surfaceContainerHigh` with variant icon, border tint, and shadow; no inverse SnackBar surface.
+- **TilawaToast actionable** — Undo / Retry / Dismiss / two-action rows; trailing `TextButton` at ≥48dp; persistent update copy uses warning variant.
+- **TilawaToast layout** — RTL Arabic undo + long message wrap (2-line ellipsis); text scale 1.4 with long English + action must not overflow.
+- **TilawaToast edge cases** — long English body ellipsized to 2 lines; persistent long English + action; **short icon vs short spinner** share same reserved height (`leadingSlotSize` 24dp).
 
 ## Atoms
 

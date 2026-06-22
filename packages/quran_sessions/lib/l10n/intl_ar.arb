@@ -196,6 +196,15 @@
     "deleteSlotConfirmMessage": "لن يتمكن الطلاب من حجز هذا الوقت. يمكنك استعادته لاحقاً من ساعات العمل.",
     "deleteSlotConfirm": "إزالة الموعد",
     "deleteSlotSuccess": "تمت إزالة الموعد",
+    "deleteSlotUndo": "تراجع",
+    "deleteSlotRemovedSnackBar": "تمت إزالة {time}",
+    "@deleteSlotRemovedSnackBar": {
+        "placeholders": {
+            "time": {
+                "type": "String"
+            }
+        }
+    },
     "addNewSlot": "إضافة موعد جديد",
     "slotDate": "تاريخ الموعد",
     "slotTime": "وقت الموعد",

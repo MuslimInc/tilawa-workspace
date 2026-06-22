@@ -31,6 +31,11 @@ class TeacherDashboardScreen extends StatefulWidget {
 }
 
 class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
+  String? _lastUndoSnackSlotId;
+  final Set<String> _enterAnimatedSlotIds = {};
+
+  static const _undoSnackDuration = Duration(seconds: 4);
+
   @override
   void initState() {
     super.initState();
@@ -57,21 +62,31 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       ),
       body: BlocConsumer<TeacherDashboardBloc, TeacherDashboardState>(
         listener: (context, state) {
-          if (state is TeacherDashboardSuccess) {
-            if (state.slotFailure != null) {
-              TilawaFeedback.showToast(
-                context,
-                message: state.slotFailure!.toLocalizedMessage(context),
-                variant: TilawaFeedbackVariant.error,
-              );
-            } else if (state.slotDeleteSucceeded) {
-              TilawaFeedback.showToast(
-                context,
-                message: context.quranSessionsL10n.deleteSlotSuccess,
-                variant: TilawaFeedbackVariant.success,
-              );
-            }
+          if (state is! TeacherDashboardSuccess) {
+            _lastUndoSnackSlotId = null;
+            return;
           }
+
+          if (state.slotFailure != null) {
+            TilawaFeedback.showToast(
+              context,
+              message: state.slotFailure!.toLocalizedMessage(context),
+              variant: TilawaFeedbackVariant.error,
+            );
+          }
+
+          final undoId = state.undoableSlotId;
+          if (undoId == null) {
+            _lastUndoSnackSlotId = null;
+            return;
+          }
+          if (undoId == _lastUndoSnackSlotId) return;
+
+          final pending = state.pendingDeletes[undoId];
+          if (pending == null) return;
+
+          _lastUndoSnackSlotId = undoId;
+          _showDeleteUndoToast(context, pending.snapshot);
         },
         builder: (context, state) => switch (state) {
           TeacherDashboardInitial() || TeacherDashboardLoading() =>
@@ -111,7 +126,6 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
             :final upcomingSessions,
             :final availability,
             :final isUpdatingAvailability,
-            :final deletingSlotIds,
           ) =>
             RefreshIndicator(
               onRefresh: () async => _reload(),
@@ -193,17 +207,10 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                               child: Column(
                                 children: [
                                   for (var i = 0; i < daySlots.length; i++)
-                                    _SlotTile(
-                                      slot: daySlots[i],
-                                      timeOnly: true,
-                                      isDeleting: deletingSlotIds.contains(
-                                        daySlots[i].slotId,
-                                      ),
+                                    _buildSlotTile(
+                                      context,
+                                      daySlots[i],
                                       showDivider: i < daySlots.length - 1,
-                                      onRemove: () => _confirmRemoveSlot(
-                                        context,
-                                        daySlots[i],
-                                      ),
                                     ),
                                 ],
                               ),
@@ -220,53 +227,112 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     );
   }
 
+  Widget _buildSlotTile(
+    BuildContext context,
+    TeacherAvailability slot, {
+    required bool showDivider,
+  }) {
+    final tile = _SlotTile(
+      slot: slot,
+      timeOnly: true,
+      showDivider: showDivider,
+      onRemove: () => context.read<TeacherDashboardBloc>().add(
+        AvailabilitySlotRemoved(teacherId: widget.teacherId, slot: slot),
+      ),
+    );
+
+    if (!_enterAnimatedSlotIds.contains(slot.slotId)) return tile;
+
+    return _EnterAnimatedSlotTile(
+      key: ValueKey('enter-${slot.slotId}'),
+      onComplete: () {
+        if (mounted) {
+          setState(() => _enterAnimatedSlotIds.remove(slot.slotId));
+        }
+      },
+      child: tile,
+    );
+  }
+
+  void _showDeleteUndoToast(
+    BuildContext context,
+    TeacherAvailability slot,
+  ) {
+    final l10n = context.quranSessionsL10n;
+    final locale = Localizations.localeOf(context).languageCode;
+    final timeFmt = DateFormat('EEE d MMM، h:mm a', locale);
+    final timeLabel = timeFmt.format(slot.startsAt.toLocal());
+
+    TilawaFeedback.showActionable(
+      context,
+      message: l10n.deleteSlotRemovedSnackBar(timeLabel),
+      variant: TilawaFeedbackVariant.success,
+      duration: _undoSnackDuration,
+      dedupeKey: 'teacher-dashboard-slot-undo',
+      actions: <TilawaFeedbackAction>[
+        TilawaFeedbackAction(
+          label: l10n.deleteSlotUndo,
+          onPressed: () {
+            final current = context.read<TeacherDashboardBloc>().state;
+            if (current is! TeacherDashboardSuccess) return;
+            final undoId = current.undoableSlotId;
+            if (undoId == null) return;
+
+            setState(() => _enterAnimatedSlotIds.add(undoId));
+            context.read<TeacherDashboardBloc>().add(
+              AvailabilitySlotDeleteUndone(slotId: undoId),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
   void _reload() => context.read<TeacherDashboardBloc>().add(
     TeacherDashboardLoadRequested(teacherId: widget.teacherId),
   );
+}
 
-  Future<void> _confirmRemoveSlot(
-    BuildContext context,
-    TeacherAvailability slot,
-  ) async {
-    final l10n = context.quranSessionsL10n;
-    final locale = Localizations.localeOf(context).languageCode;
-    final dateFmt = DateFormat('EEE d MMM', locale);
-    final timeFmt = DateFormat('h:mm a', locale);
-    final localStart = slot.startsAt.toLocal();
-    final confirmed = await showTilawaFormDialog<bool>(
-      context: context,
-      title: l10n.deleteSlotConfirmTitle,
-      primaryLabel: l10n.deleteSlotConfirm,
-      primaryVariant: TilawaButtonVariant.danger,
-      secondaryLabel: l10n.cancel,
-      onPrimary: (dialogContext) => Navigator.of(dialogContext).pop(true),
-      onSecondary: (dialogContext) => Navigator.of(dialogContext).pop(false),
-      onClose: (dialogContext) => Navigator.of(dialogContext).pop(false),
-      bodyBuilder: (dialogContext) => Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '${l10n.slotDate}: ${dateFmt.format(localStart)}',
-            style: Theme.of(dialogContext).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '${l10n.slotTime}: ${timeFmt.format(localStart)}',
-            style: Theme.of(dialogContext).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            l10n.deleteSlotConfirmMessage,
-            style: Theme.of(dialogContext).textTheme.bodyLarge,
-          ),
-        ],
+// ── Enter animation (undo restore only; removal is instant) ───────────────────
+
+class _EnterAnimatedSlotTile extends StatefulWidget {
+  const _EnterAnimatedSlotTile({
+    super.key,
+    required this.child,
+    required this.onComplete,
+  });
+
+  final Widget child;
+  final VoidCallback onComplete;
+
+  @override
+  State<_EnterAnimatedSlotTile> createState() => _EnterAnimatedSlotTileState();
+}
+
+class _EnterAnimatedSlotTileState extends State<_EnterAnimatedSlotTile>
+    with SingleTickerProviderStateMixin {
+  static const _duration = Duration(milliseconds: 200);
+
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: _duration,
+  )..forward().whenComplete(widget.onComplete);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _controller,
+      child: SizeTransition(
+        sizeFactor: CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+        alignment: Alignment.topCenter,
+        child: widget.child,
       ),
-    );
-    if (confirmed != true || !context.mounted) return;
-
-    context.read<TeacherDashboardBloc>().add(
-      AvailabilitySlotRemoved(teacherId: widget.teacherId, slot: slot),
     );
   }
 }
@@ -276,14 +342,12 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
 class _SlotTile extends StatelessWidget {
   const _SlotTile({
     required this.slot,
-    required this.isDeleting,
     required this.onRemove,
     this.timeOnly = false,
     this.showDivider = true,
   });
 
   final TeacherAvailability slot;
-  final bool isDeleting;
   final bool timeOnly;
   final VoidCallback onRemove;
   final bool showDivider;
@@ -318,12 +382,10 @@ class _SlotTile extends StatelessWidget {
       trailing: slot.isBooked
           ? null
           : _DeleteSlotTrailing(
-              isDeleting: isDeleting,
               onRemove: onRemove,
               deleteTooltip: l10n.deleteSlot,
               minInteractiveDimension: tokens.minInteractiveDimension,
               iconSizeSmall: tokens.iconSizeSmall,
-              spinnerColor: scheme.onSurfaceVariant,
             ),
     );
   }
@@ -331,41 +393,25 @@ class _SlotTile extends StatelessWidget {
 
 class _DeleteSlotTrailing extends StatelessWidget {
   const _DeleteSlotTrailing({
-    required this.isDeleting,
     required this.onRemove,
     required this.deleteTooltip,
     required this.minInteractiveDimension,
     required this.iconSizeSmall,
-    required this.spinnerColor,
   });
 
-  final bool isDeleting;
   final VoidCallback onRemove;
   final String deleteTooltip;
   final double minInteractiveDimension;
   final double iconSizeSmall;
-  final Color spinnerColor;
 
   static const _visualDensity = VisualDensity.compact;
 
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: isDeleting
-          ? SizedBox.square(
-              dimension: iconSizeSmall,
-              child: TilawaLoadingIndicator(
-                centered: false,
-                strokeWidth: 2,
-                color: spinnerColor,
-              ),
-            )
-          : const Icon(Icons.delete_outline),
-      tooltip: isDeleting ? null : deleteTooltip,
-      onPressed: isDeleting ? null : onRemove,
-      style: isDeleting
-          ? IconButton.styleFrom(disabledForegroundColor: spinnerColor)
-          : null,
+      icon: const Icon(Icons.delete_outline),
+      tooltip: deleteTooltip,
+      onPressed: onRemove,
       visualDensity: _visualDensity,
       constraints: BoxConstraints.tightFor(
         width: minInteractiveDimension,

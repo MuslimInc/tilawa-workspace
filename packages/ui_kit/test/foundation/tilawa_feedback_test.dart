@@ -5,11 +5,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa_ui_kit/src/foundation/app_colors.dart';
 import 'package:tilawa_ui_kit/src/foundation/app_theme.dart';
 import 'package:tilawa_ui_kit/src/foundation/tilawa_bottom_action_area.dart';
+import 'package:tilawa_ui_kit/src/foundation/design_tokens.dart';
 import 'package:tilawa_ui_kit/src/foundation/tilawa_feedback.dart';
+import 'package:tilawa_ui_kit/src/foundation/tilawa_feedback_action.dart';
 import 'package:tilawa_ui_kit/src/foundation/tilawa_feedback_host.dart';
 import 'package:tilawa_ui_kit/src/foundation/tilawa_feedback_insets.dart';
+import 'package:tilawa_ui_kit/src/foundation/tilawa_feedback_style.dart';
 import 'package:tilawa_ui_kit/src/foundation/tilawa_interaction_feedback.dart';
 import 'package:tilawa_ui_kit/src/molecules/tilawa_feedback_strip.dart';
+
+import '../goldens/golden_toast_fixtures.dart';
 
 void main() {
   final ThemeData theme = AppTheme.getLightTheme(
@@ -137,8 +142,12 @@ void main() {
       );
 
       final List<Widget> children = row.children;
-      check(children.first).isA<Icon>();
-      check(children.last).isA<Expanded>();
+      check(children.first.runtimeType.toString()).equals('_LeadingSlot');
+      check(children[1]).isA<Expanded>();
+      expect(
+        find.descendant(of: rowFinder, matching: find.byType(Icon)),
+        findsOneWidget,
+      );
     });
 
     testWidgets('auto dismisses after duration elapses', (tester) async {
@@ -254,6 +263,264 @@ void main() {
       );
       check(messageSem.flagsCollection.isLiveRegion).isTrue();
       handle.dispose();
+    });
+  });
+
+  group('TilawaFeedback.showActionable', () {
+    testWidgets('renders undo action with minimum touch target', (
+      tester,
+    ) async {
+      var undone = false;
+
+      await pumpHost(
+        tester,
+        child: Builder(
+          builder: (context) {
+            return ElevatedButton(
+              onPressed: () {
+                TilawaFeedback.showActionable(
+                  context,
+                  message: 'Bookmark deleted',
+                  variant: TilawaFeedbackVariant.success,
+                  actions: <TilawaFeedbackAction>[
+                    TilawaFeedbackAction(
+                      label: 'Undo',
+                      onPressed: () => undone = true,
+                    ),
+                  ],
+                );
+              },
+              child: const Text('Delete'),
+            );
+          },
+        ),
+      );
+
+      await tester.tap(find.text('Delete'));
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('Bookmark deleted'), findsOneWidget);
+      expect(find.text('Undo'), findsOneWidget);
+
+      final TextButton undoButton = tester.widget(
+        find.widgetWithText(TextButton, 'Undo'),
+      );
+      check(undoButton.style?.minimumSize?.resolve({})).equals(
+        const Size(
+          kTilawaMinInteractiveDimension,
+          kTilawaMinInteractiveDimension,
+        ),
+      );
+
+      await tester.tap(find.text('Undo'));
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      check(undone).isTrue();
+      expect(find.text('Bookmark deleted'), findsNothing);
+    });
+
+    testWidgets('stays visible when duration is null', (tester) async {
+      await pumpHost(
+        tester,
+        child: Builder(
+          builder: (context) {
+            return ElevatedButton(
+              onPressed: () {
+                TilawaFeedback.showActionable(
+                  context,
+                  message: 'Required update',
+                  variant: TilawaFeedbackVariant.warning,
+                  duration: null,
+                  actions: <TilawaFeedbackAction>[
+                    TilawaFeedbackAction(
+                      label: 'Update',
+                      onPressed: () {},
+                    ),
+                  ],
+                );
+              },
+              child: const Text('Show persistent'),
+            );
+          },
+        ),
+      );
+
+      await tester.tap(find.text('Show persistent'));
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('Required update'), findsOneWidget);
+
+      await tester.pump(const Duration(seconds: 10));
+      await tester.pump();
+
+      expect(find.text('Required update'), findsOneWidget);
+    });
+
+    testWidgets('dedupes identical dedupeKey while active', (tester) async {
+      await pumpHost(
+        tester,
+        child: Builder(
+          builder: (context) {
+            return Column(
+              children: <Widget>[
+                ElevatedButton(
+                  onPressed: () {
+                    TilawaFeedback.showToast(
+                      context,
+                      message: 'First',
+                      variant: TilawaFeedbackVariant.info,
+                      dedupeKey: 'same-key',
+                    );
+                  },
+                  child: const Text('First'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    TilawaFeedback.showToast(
+                      context,
+                      message: 'Second',
+                      variant: TilawaFeedbackVariant.info,
+                      dedupeKey: 'same-key',
+                    );
+                  },
+                  child: const Text('Second'),
+                ),
+              ],
+            );
+          },
+        ),
+      );
+
+      await tester.tap(find.text('First'));
+      await tester.pump();
+      await tester.pump();
+
+      expect(
+        find.descendant(
+          of: find.byType(TilawaFeedbackStrip),
+          matching: find.text('First'),
+        ),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.text('Second'));
+      await tester.pump();
+
+      expect(
+        find.descendant(
+          of: find.byType(TilawaFeedbackStrip),
+          matching: find.text('First'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(TilawaFeedbackStrip),
+          matching: find.text('Second'),
+        ),
+        findsNothing,
+      );
+    });
+
+    testWidgets('clamps toast message to two lines with ellipsis', (
+      tester,
+    ) async {
+      await pumpHost(
+        tester,
+        child: Builder(
+          builder: (context) {
+            return goldenToastPreview(
+              child: goldenToast(
+                variant: TilawaFeedbackVariant.info,
+                message: kGoldenToastLongEnglishMessage,
+              ),
+            );
+          },
+        ),
+      );
+
+      final Text message = tester.widget<Text>(
+        find.descendant(
+          of: find.byType(TilawaFeedbackStrip),
+          matching: find.byType(Text),
+        ),
+      );
+      check(message.maxLines).equals(2);
+      check(message.overflow).equals(TextOverflow.ellipsis);
+    });
+
+    testWidgets('keeps full message in semantics when visually ellipsized', (
+      tester,
+    ) async {
+      await pumpHost(
+        tester,
+        child: Builder(
+          builder: (context) {
+            return goldenToastPreview(
+              child: goldenToast(
+                variant: TilawaFeedbackVariant.info,
+                message: kGoldenToastLongEnglishMessage,
+              ),
+            );
+          },
+        ),
+      );
+
+      final SemanticsHandle handle = tester.ensureSemantics();
+      final SemanticsNode node = tester.getSemantics(
+        find.descendant(
+          of: find.byType(TilawaFeedbackStrip),
+          matching: find.byType(Text),
+        ),
+      );
+      check(node.label).contains(kGoldenToastLongEnglishMessage);
+      handle.dispose();
+    });
+
+    testWidgets('spinner and icon toasts share reserved content height', (
+      tester,
+    ) async {
+      Future<double> toastContentHeight(Widget toast) async {
+        await pumpHost(
+          tester,
+          child: Builder(
+            builder: (context) => goldenToastPreview(child: toast),
+          ),
+        );
+        final Rect bounds = tester.getRect(find.byType(TilawaFeedbackStrip));
+        return bounds.height;
+      }
+
+      final double iconHeight = await toastContentHeight(
+        goldenToast(
+          variant: TilawaFeedbackVariant.info,
+          message: 'Saved',
+        ),
+      );
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+
+      final double spinnerHeight = await toastContentHeight(
+        Builder(
+          builder: (context) {
+            final TilawaFeedbackStyle style = TilawaFeedbackStyle.forVariant(
+              context,
+              TilawaFeedbackVariant.info,
+            );
+            return goldenToastSpinnerStrip(
+              message: 'Saved',
+              backgroundColor: style.backgroundColor,
+              foregroundColor: style.foregroundColor,
+            );
+          },
+        ),
+      );
+
+      check(spinnerHeight).equals(iconHeight);
     });
   });
 }

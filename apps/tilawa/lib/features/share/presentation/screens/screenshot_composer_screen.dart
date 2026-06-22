@@ -92,10 +92,10 @@ class _ScreenshotComposerScreenState extends State<ScreenshotComposerScreen> {
       listener: (context, state) {
         if (!mounted) return;
         if (state.status == ShareStatus.idle && state.content == null) {
-          _showInfoSnackBar(context, context.l10n.shareReadyTitle);
+          _showInfoToast(context, context.l10n.shareReadyTitle);
         } else if (state.status == ShareStatus.error &&
             state.errorMessage != null) {
-          _showErrorSnackBar(context, state.errorMessage!);
+          _showErrorToast(context, state.errorMessage!);
         }
       },
       child: BlocBuilder<ShareCubit, ShareState>(
@@ -238,14 +238,14 @@ class _ScreenshotComposerScreenState extends State<ScreenshotComposerScreen> {
       if (!context.mounted) return;
       final exportedPath = cubit.state.lastSaveExportPath;
       if (exportedPath == null) return;
-      _showInfoSnackBar(
+      _showInfoToast(
         context,
         '${l10n.save} ${l10n.completed}: ${exportedPath.split('/').last}',
       );
     } catch (e) {
       if (!context.mounted) return;
       final msg = e.toString().replaceFirst(RegExp(r'^[\w]+:\s*'), '');
-      _showErrorSnackBar(context, msg);
+      _showErrorToast(context, msg);
     } finally {
       if (mounted) {
         setState(() => _isSavingPreparedContent = false);
@@ -253,7 +253,7 @@ class _ScreenshotComposerScreenState extends State<ScreenshotComposerScreen> {
     }
   }
 
-  void _showInfoSnackBar(BuildContext context, String message) {
+  void _showInfoToast(BuildContext context, String message) {
     TilawaFeedback.showToast(
       context,
       message: message,
@@ -261,7 +261,7 @@ class _ScreenshotComposerScreenState extends State<ScreenshotComposerScreen> {
     );
   }
 
-  void _showErrorSnackBar(BuildContext context, String message) {
+  void _showErrorToast(BuildContext context, String message) {
     TilawaFeedback.showToast(
       context,
       message: message,

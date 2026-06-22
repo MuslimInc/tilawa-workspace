@@ -157,6 +157,8 @@ class TilawaFeedbackStripTokens {
     required this.spinnerSize,
     required this.spinnerStrokeWidth,
     required this.contentGap,
+    required this.leadingSlotSize,
+    required this.toastMessageMaxLines,
     required this.infoAccentOpacity,
     required this.successAccentOpacity,
     required this.warningAccentOpacity,
@@ -167,6 +169,12 @@ class TilawaFeedbackStripTokens {
   final double spinnerSize;
   final double spinnerStrokeWidth;
   final double contentGap;
+
+  /// Square box for the leading icon or spinner so toast height stays stable.
+  final double leadingSlotSize;
+
+  /// Maximum visible message lines on [TilawaToast].
+  final int toastMessageMaxLines;
 
   /// Border-accent alphas per [TilawaFeedbackVariant]. Error is strongest so
   /// the most urgent strip reads loudest; info is a quiet outline tint.
@@ -181,6 +189,8 @@ class TilawaFeedbackStripTokens {
       spinnerSize: 18,
       spinnerStrokeWidth: 2.2,
       contentGap: 8,
+      leadingSlotSize: 24,
+      toastMessageMaxLines: 2,
       infoAccentOpacity: 0.35,
       successAccentOpacity: 0.55,
       warningAccentOpacity: 0.55,
@@ -193,6 +203,8 @@ class TilawaFeedbackStripTokens {
     double? spinnerSize,
     double? spinnerStrokeWidth,
     double? contentGap,
+    double? leadingSlotSize,
+    int? toastMessageMaxLines,
     double? infoAccentOpacity,
     double? successAccentOpacity,
     double? warningAccentOpacity,
@@ -203,6 +215,8 @@ class TilawaFeedbackStripTokens {
       spinnerSize: spinnerSize ?? this.spinnerSize,
       spinnerStrokeWidth: spinnerStrokeWidth ?? this.spinnerStrokeWidth,
       contentGap: contentGap ?? this.contentGap,
+      leadingSlotSize: leadingSlotSize ?? this.leadingSlotSize,
+      toastMessageMaxLines: toastMessageMaxLines ?? this.toastMessageMaxLines,
       infoAccentOpacity: infoAccentOpacity ?? this.infoAccentOpacity,
       successAccentOpacity: successAccentOpacity ?? this.successAccentOpacity,
       warningAccentOpacity: warningAccentOpacity ?? this.warningAccentOpacity,
@@ -224,6 +238,14 @@ class TilawaFeedbackStripTokens {
         t,
       ),
       contentGap: lerpTokenDouble(a.contentGap, b.contentGap, t),
+      leadingSlotSize: lerpTokenDouble(
+        a.leadingSlotSize,
+        b.leadingSlotSize,
+        t,
+      ),
+      toastMessageMaxLines: t < 0.5
+          ? a.toastMessageMaxLines
+          : b.toastMessageMaxLines,
       infoAccentOpacity: lerpTokenDouble(
         a.infoAccentOpacity,
         b.infoAccentOpacity,

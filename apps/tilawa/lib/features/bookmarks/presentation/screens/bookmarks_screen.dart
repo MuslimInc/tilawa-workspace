@@ -235,32 +235,33 @@ class BookmarksScreen extends StatelessWidget {
   void _onBookmarkDismissed(BuildContext context, BookmarkEntity bookmark) {
     final BookmarksBloc bloc = context.read<BookmarksBloc>();
     bloc.add(DeleteBookmarkEvent(id: bookmark.id));
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.bookmarkDeleted),
-          action: SnackBarAction(
-            label: context.l10n.undo,
-            onPressed: () => bloc.add(
-              CreateBookmarkEvent(
-                surahId: bookmark.surahId,
-                surahName: bookmark.surahName,
-                surahNameEn: bookmark.surahNameEn,
-                reciterId: bookmark.reciterId,
-                reciterName: bookmark.reciterName,
-                moshafId: bookmark.moshafId,
-                moshafName: bookmark.moshafName,
-                positionMs: bookmark.positionMs,
-                durationMs: bookmark.durationMs,
-                audioUrl: bookmark.audioUrl,
-                label: bookmark.label,
-                artworkUrl: bookmark.artworkUrl,
-              ),
+    TilawaFeedback.showActionable(
+      context,
+      message: context.l10n.bookmarkDeleted,
+      variant: TilawaFeedbackVariant.success,
+      dedupeKey: 'bookmark-undo-${bookmark.id}',
+      actions: <TilawaFeedbackAction>[
+        TilawaFeedbackAction(
+          label: context.l10n.undo,
+          onPressed: () => bloc.add(
+            CreateBookmarkEvent(
+              surahId: bookmark.surahId,
+              surahName: bookmark.surahName,
+              surahNameEn: bookmark.surahNameEn,
+              reciterId: bookmark.reciterId,
+              reciterName: bookmark.reciterName,
+              moshafId: bookmark.moshafId,
+              moshafName: bookmark.moshafName,
+              positionMs: bookmark.positionMs,
+              durationMs: bookmark.durationMs,
+              audioUrl: bookmark.audioUrl,
+              label: bookmark.label,
+              artworkUrl: bookmark.artworkUrl,
             ),
           ),
         ),
-      );
+      ],
+    );
   }
 
   Widget _buildEmptyState(BuildContext context, bool isSearching) {

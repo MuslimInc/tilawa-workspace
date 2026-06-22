@@ -25,8 +25,10 @@ class TourGuideDebugResetTile extends StatelessWidget {
         if (!context.mounted) {
           return;
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.tourDebugResetDone)),
+        TilawaFeedback.showToast(
+          context,
+          message: l10n.tourDebugResetDone,
+          variant: TilawaFeedbackVariant.success,
         );
       },
     );

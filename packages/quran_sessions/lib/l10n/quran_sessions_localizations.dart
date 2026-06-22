@@ -989,6 +989,18 @@ abstract class QuranSessionsLocalizations {
   /// **'Slot removed'**
   String get deleteSlotSuccess;
 
+  /// No description provided for @deleteSlotUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get deleteSlotUndo;
+
+  /// No description provided for @deleteSlotRemovedSnackBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed {time}'**
+  String deleteSlotRemovedSnackBar(String time);
+
   /// No description provided for @addNewSlot.
   ///
   /// In en, this message translates to:

@@ -29,7 +29,8 @@ final class AvailabilitySlotAdded extends TeacherDashboardEvent {
   List<Object?> get props => [slot];
 }
 
-/// Teacher removes an open slot that has no confirmed booking.
+/// Teacher removes an open slot — UI updates immediately; network commit
+/// is deferred until the commit timer fires.
 final class AvailabilitySlotRemoved extends TeacherDashboardEvent {
   const AvailabilitySlotRemoved({
     required this.teacherId,
@@ -41,6 +42,26 @@ final class AvailabilitySlotRemoved extends TeacherDashboardEvent {
 
   @override
   List<Object?> get props => [teacherId, slot];
+}
+
+/// Restores a slot removed optimistically before its deferred commit fires.
+final class AvailabilitySlotDeleteUndone extends TeacherDashboardEvent {
+  const AvailabilitySlotDeleteUndone({required this.slotId});
+
+  final String slotId;
+
+  @override
+  List<Object?> get props => [slotId];
+}
+
+/// Internal: deferred-commit timer fired for [slotId].
+final class CommitPendingSlotDelete extends TeacherDashboardEvent {
+  const CommitPendingSlotDelete({required this.slotId});
+
+  final String slotId;
+
+  @override
+  List<Object?> get props => [slotId];
 }
 
 /// Teacher replaces an existing open slot with new time data.

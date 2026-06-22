@@ -6,12 +6,16 @@ import 'package:flutter/semantics.dart';
 import '../molecules/tilawa_feedback_strip.dart';
 import 'design_tokens.dart';
 import 'tilawa_comfortable_reach_padding.dart';
+import 'tilawa_feedback_action.dart';
 import 'tilawa_feedback_insets.dart';
 import 'tilawa_interaction_feedback.dart';
 import 'tilawa_toast.dart';
 
 /// Default visible lifetime for a toast before auto-dismiss.
 const Duration kTilawaToastDuration = Duration(seconds: 3);
+
+/// Default undo / actionable toast lifetime before auto-dismiss.
+const Duration kTilawaUndoToastDuration = Duration(seconds: 4);
 
 @immutable
 class _TilawaToastRequest {
@@ -20,12 +24,20 @@ class _TilawaToastRequest {
     required this.variant,
     required this.duration,
     required this.bottomObstruction,
+    this.actions = const <TilawaFeedbackAction>[],
+    this.dedupeKey,
   });
 
   final String message;
   final TilawaFeedbackVariant variant;
-  final Duration duration;
+  final Duration? duration;
   final double bottomObstruction;
+  final List<TilawaFeedbackAction> actions;
+  final String? dedupeKey;
+
+  bool get isPersistent => duration == null;
+
+  String get identity => dedupeKey ?? message;
 }
 
 /// Host state surfaced to [TilawaFeedback.showToast].
@@ -36,6 +48,19 @@ abstract class TilawaFeedbackController {
     required String message,
     required TilawaFeedbackVariant variant,
     Duration duration = kTilawaToastDuration,
+    String? dedupeKey,
+  });
+
+  /// Enqueues a toast with optional trailing actions.
+  ///
+  /// Pass [duration] as `null` to keep the toast visible until an action fires.
+  void showActionable({
+    required BuildContext context,
+    required String message,
+    required TilawaFeedbackVariant variant,
+    Duration? duration = kTilawaUndoToastDuration,
+    required List<TilawaFeedbackAction> actions,
+    String? dedupeKey,
   });
 }
 
@@ -125,22 +150,74 @@ class _TilawaFeedbackHostState extends State<TilawaFeedbackHost>
     required String message,
     required TilawaFeedbackVariant variant,
     Duration duration = kTilawaToastDuration,
+    String? dedupeKey,
   }) {
-    final _TilawaToastRequest request = _TilawaToastRequest(
-      message: message,
-      variant: variant,
-      duration: duration,
-      bottomObstruction: TilawaFeedbackInsets.maybeBottomObstruction(
-        context,
+    _enqueue(
+      _TilawaToastRequest(
+        message: message,
+        variant: variant,
+        duration: duration,
+        bottomObstruction: TilawaFeedbackInsets.maybeBottomObstruction(
+          context,
+        ),
+        dedupeKey: dedupeKey ?? message,
       ),
     );
+  }
+
+  @override
+  void showActionable({
+    required BuildContext context,
+    required String message,
+    required TilawaFeedbackVariant variant,
+    Duration? duration = kTilawaUndoToastDuration,
+    required List<TilawaFeedbackAction> actions,
+    String? dedupeKey,
+  }) {
+    _enqueue(
+      _TilawaToastRequest(
+        message: message,
+        variant: variant,
+        duration: duration,
+        bottomObstruction: TilawaFeedbackInsets.maybeBottomObstruction(
+          context,
+        ),
+        actions: actions,
+        dedupeKey: dedupeKey,
+      ),
+    );
+  }
+
+  void _enqueue(_TilawaToastRequest request) {
+    final String? dedupeKey = request.dedupeKey;
+    if (dedupeKey != null) {
+      if (_active?.dedupeKey == dedupeKey) {
+        if (request.actions.isNotEmpty) {
+          unawaited(_replaceActive(request));
+        }
+        return;
+      }
+      if (_queue.any((_TilawaToastRequest r) => r.dedupeKey == dedupeKey)) {
+        return;
+      }
+    }
 
     if (_active == null) {
-      _present(request);
+      unawaited(_present(request));
       return;
     }
 
     _queue.add(request);
+  }
+
+  Future<void> _replaceActive(_TilawaToastRequest request) async {
+    _dismissTimer?.cancel();
+    await _animationController.reverse(from: 1);
+    if (!mounted) {
+      return;
+    }
+    setState(() => _active = null);
+    await _present(request);
   }
 
   Future<void> _present(_TilawaToastRequest request) async {
@@ -165,9 +242,17 @@ class _TilawaFeedbackHostState extends State<TilawaFeedbackHost>
       Directionality.of(context),
     );
 
-    _dismissTimer = Timer(request.duration, () {
-      unawaited(_dismissActive());
-    });
+    final Duration? duration = request.duration;
+    if (duration != null) {
+      _dismissTimer = Timer(duration, () {
+        unawaited(_dismissActive());
+      });
+    }
+  }
+
+  void _onActionPressed(TilawaFeedbackAction action) {
+    action.onPressed();
+    unawaited(_dismissActive());
   }
 
   Future<void> _dismissActive() async {
@@ -232,9 +317,11 @@ class _TilawaFeedbackHostState extends State<TilawaFeedbackHost>
                   child: SlideTransition(
                     position: _slideAnimation,
                     child: TilawaToast(
-                      key: ValueKey<String>(active.message),
+                      key: ValueKey<String>(active.identity),
                       variant: active.variant,
                       message: active.message,
+                      actions: active.actions,
+                      onActionPressed: _onActionPressed,
                     ),
                   ),
                 ),

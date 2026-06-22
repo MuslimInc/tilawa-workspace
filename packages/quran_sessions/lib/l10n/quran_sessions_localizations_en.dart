@@ -515,6 +515,14 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get deleteSlotSuccess => 'Slot removed';
 
   @override
+  String get deleteSlotUndo => 'Undo';
+
+  @override
+  String deleteSlotRemovedSnackBar(String time) {
+    return 'Removed $time';
+  }
+
+  @override
   String get addNewSlot => 'Add new slot';
 
   @override

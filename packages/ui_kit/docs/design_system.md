@@ -132,6 +132,7 @@ duplicate hex.
 | Colour roles | `test/theme/app_theme_color_roles_test.dart` | Contrast, cool neutral ramp, preset no-op on surfaces |
 | DESIGN compliance | `test/theme/app_theme_spec_compliance_test.dart` | M3 extensions, transparent elevation tint, app bar = `surface` |
 | Goldens | `test/goldens/` | Visual regression (Alchemist); default primary in `TilawaPreviewWrapper` |
+| Toast goldens | `test/goldens/tilawa_toast_goldens_test.dart` | `TilawaToast` variants, actionable, layout, edge cases |
 | Review checklist | `test/goldens/REVIEW_CHECKLIST.md` | Human sign-off after `--update-goldens` |
 
 Regenerate goldens only when visuals intentionally change:

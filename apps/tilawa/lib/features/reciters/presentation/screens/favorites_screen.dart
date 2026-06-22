@@ -29,19 +29,18 @@ class FavoritesScreen extends StatelessWidget {
             final FavoritesCubit cubit = context.read<FavoritesCubit>();
             // Swipe-removal is destructive and the card is already gone —
             // offer undo instead of a passive toast.
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(
-                  content: Text(
-                    context.l10n.reciterRemovedFromFavorites(reciter.name),
-                  ),
-                  action: SnackBarAction(
-                    label: context.l10n.undo,
-                    onPressed: () => cubit.toggleFavorite(reciter),
-                  ),
+            TilawaFeedback.showActionable(
+              context,
+              message: context.l10n.reciterRemovedFromFavorites(reciter.name),
+              variant: TilawaFeedbackVariant.success,
+              dedupeKey: 'favorite-undo-${reciter.id}',
+              actions: <TilawaFeedbackAction>[
+                TilawaFeedbackAction(
+                  label: context.l10n.undo,
+                  onPressed: () => cubit.toggleFavorite(reciter),
                 ),
-              );
+              ],
+            );
           }
         },
         child: Stack(
