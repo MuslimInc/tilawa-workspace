@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa/features/auth/data/services/pending_session_revoke_store.dart';
 import 'package:tilawa/features/auth/domain/repositories/auth_repository.dart';
 import 'package:tilawa/features/auth/domain/services/session_revoked_notifier.dart';
 import 'package:tilawa/features/auth/domain/usecases/check_session_validity_use_case.dart';
@@ -52,6 +53,11 @@ class SessionValidityCubit extends Cubit<SessionValidityState> {
   Future<void> checkOnResume() async {
     final user = _authRepository.currentUser;
     if (user == null || state.revoked || _handlingRevocation) {
+      return;
+    }
+
+    if (await PendingSessionRevokeStore.consume()) {
+      _sessionRevokedNotifier.notifySessionRevoked();
       return;
     }
 

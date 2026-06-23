@@ -1,8 +1,91 @@
 # Single Active Device — FCM Token Storage & Session Invalidation
 
-**Status:** Design (pre-implementation)  
+**Status:** Implemented (P0 Free Beta) — Phase 3 complete 2026-06-23  
 **Scope:** Whole Tilawa app auth + notifications; Quran Sessions CF enforcement  
 **Product rule:** One active device per user/teacher. New login → new token active; old devices lose access + notifications.
+
+### Phase completion
+
+| Phase | Scope | Status | Owner |
+|-------|--------|--------|-------|
+| **1** | Architecture + `registerActiveDevice`, epoch guards, FCM targeting | ✅ Complete | Automated |
+| **2** | CI JDK21 emulator job, integration/rules tests, background `session_revoked`, QA runbook | ✅ Complete | Automated |
+| **3** | Coverage gap closure (90%+), widget/cubit tests, checklist + Go/No-Go | ✅ Complete | Automated |
+| **Go** | Two-device manual QA T2/T5/T6/T7/T8 | ⏸ Pending | **Manual QA** |
+
+### Implementation status
+
+| Area | Status | Tests |
+|------|--------|-------|
+| `registerActiveDevice` CF + embedded `session` / `notifications` | ✅ Shipped | `registerActiveDevice.test.ts`, `registerActiveDevice.integration.test.ts`, `fcmTokenMigration.test.ts` |
+| CF epoch guards on Quran Sessions callables | ✅ Shipped | `sessionAuthCallable.test.ts`, `sessionAuthHelpers.test.ts`, integration epoch tests |
+| Client register + epoch cache | ✅ Shipped | `register_active_device_use_case_test.dart`, `sync_device_token_use_case_test.dart` |
+| FCM `session_revoked` foreground | ✅ Shipped | `notifications_repository_impl_test.dart`, `fcm_session_revoked_message_test.dart` |
+| FCM `session_revoked` background → resume sign-out | ✅ Shipped | `pending_session_revoke_store_test.dart`, `firebase_messaging_background_handler_test.dart`, `SessionValidityCubit` |
+| `SessionValidityCubit` + resume epoch check | ✅ Shipped | `session_validity_cubit_test.dart` |
+| GoRouter `/sessions/*` guard | ✅ Shipped | `quran_sessions_session_guard_test.dart` |
+| Rules lockdown (`fcm_tokens` write deny) | ✅ Deployed | `activeDevice.rules.test.ts` (CI) |
+| `sendPushToUsers` → single `activeFcmToken` | ✅ Shipped | `fcmTokenService.test.ts`, `fcmTokenService.sendPush.test.ts` |
+| FCM token migration script | ✅ Applied staging | `fcmTokenMigration.test.ts` |
+| App Check on `registerActiveDevice` | ⏸ Deferred P1 | Client activates App Check; CF `enforceAppCheck: false` — **do not enable globally without flag** |
+| Two-device manual QA T2/T5/T6/T7/T8 | ⏸ User | `docs/qa/single_active_device_qa.md` |
+
+**CI:** `.github/workflows/pr-checks.yml` job `functions-emulator-tests` (JDK 21, `npm run test:integration` + `test:rules`). Flutter: `flutter test test/features/auth test/features/notifications/data test/router/quran_sessions_session_guard_test.dart`.
+
+### Coverage (affected paths, 2026-06-23)
+
+Measured with `flutter test --coverage` (Flutter) and `npx c8` + emulator integration (Functions). Target: **90–100%**.
+
+| File | Lines % | Target met |
+|------|---------|------------|
+| `session_validity_cubit.dart` | 96.7% | Y |
+| `register_active_device_use_case.dart` | 100% | Y |
+| `quran_sessions_session_guard.dart` | 100% | Y |
+| `pending_session_revoke_store.dart` | 100% | Y |
+| `fcm_session_revoked_message.dart` | 100% | Y |
+| `session_revoked_navigation_listener.dart` | 96.9% | Y |
+| `persistBackgroundSessionRevokeIfNeeded` (`app_startup.dart`) | 100% | Y |
+| `fcmTokenService.ts` | 98.8% | Y |
+| `sessionAuth.ts` | 95.5% | Y |
+| `registerActiveDevice.ts` (unit validation + emulator integration) | 93.5% | Y |
+
+### Test matrix T1–T10
+
+| Scenario | Automated | Manual |
+|----------|-----------|--------|
+| T1 Fresh login same device | ✅ `registerActiveDevice.integration.test.ts` | — |
+| T2 Login second device | — | ⬜ User |
+| T3 Token refresh same device | ✅ integration + use-case tests | — |
+| T4 Sign out voluntary | ✅ signOut integration + use-case | — |
+| T5 A offline at B login | — | ⬜ User |
+| T6 A mid-session booking | ✅ epoch integration + GoRouter guard | ⬜ User |
+| T7 Teacher approval push | ✅ `sendPushToUsers` unit test | ⬜ User |
+| T8 Re-login same device after B | — | ⬜ User |
+| T9 Delete account | ✅ existing auth tests (out of scope wallet) | — |
+| T10 Invalid FCM token | ✅ `clearInvalidActiveFcmTokens` tests | — |
+
+### Free Beta Go/No-Go
+
+| Criterion | Verdict |
+|-----------|---------|
+| Automated unit + integration + rules tests green | ✅ Go |
+| Coverage ≥90% on affected paths | ✅ Go |
+| App Check **not** enabled globally (P1 flag) | ✅ Go (deferred) |
+| Two-device manual QA T2/T5/T6/T7/T8 signed off | ⏸ **Conditional Go** — ship after manual sign-off |
+
+**Overall:** **Conditional Go** — automated gate passed; manual two-device QA required before production Free Beta.
+
+### Manual QA sign-off
+
+| Scenario | Tester | Date | Pass |
+|----------|--------|------|------|
+| T2 | | | ⬜ |
+| T5 | | | ⬜ |
+| T6 | | | ⬜ |
+| T7 | | | ⬜ |
+| T8 | | | ⬜ |
+
+**Recorder:** _______________
 
 ---
 

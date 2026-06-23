@@ -6,6 +6,11 @@ import {
   planDeviceRegistration,
   readServerSessionEpoch,
 } from "../src/quranSessions/sessionRegistration";
+import {
+  deleteLegacyFcmTokens,
+  parseDevicePlatform,
+  registerActiveDevice,
+} from "../src/registerActiveDevice";
 
 test("planDeviceRegistration bumps epoch on new device", () => {
   const plan = planDeviceRegistration(
@@ -66,4 +71,147 @@ test("assertClientSessionEpoch rejects stale epoch", () => {
 
 test("assertClientSessionEpoch accepts matching epoch", () => {
   assert.doesNotThrow(() => assertClientSessionEpoch(2, 2));
+});
+
+test("parseDevicePlatform accepts known platforms", () => {
+  assert.equal(parseDevicePlatform("android"), "android");
+  assert.equal(parseDevicePlatform("ios"), "ios");
+  assert.equal(parseDevicePlatform("web"), "web");
+  assert.equal(parseDevicePlatform("desktop"), null);
+});
+
+test("deleteLegacyFcmTokens removes all legacy docs", async () => {
+  const deletes: string[] = [];
+  const userRef = {
+    firestore: {
+      batch() {
+        const ops: Array<() => void> = [];
+        return {
+          delete(ref: { path: string }) {
+            ops.push(() => deletes.push(ref.path));
+          },
+          async commit() {
+            for (const op of ops) {
+              op();
+            }
+          },
+        };
+      },
+    },
+    collection(name: string) {
+      return {
+        async get() {
+          return {
+            empty: false,
+            docs: [
+              { ref: { path: `users/u1/${name}/tok-a` } },
+              { ref: { path: `users/u1/${name}/tok-b` } },
+            ],
+          };
+        },
+      };
+    },
+  } as unknown as FirebaseFirestore.DocumentReference;
+
+  await deleteLegacyFcmTokens(userRef);
+
+  assert.deepEqual(deletes, [
+    "users/u1/fcm_tokens/tok-a",
+    "users/u1/fcm_tokens/tok-b",
+  ]);
+});
+
+test("deleteLegacyFcmTokens is no-op when subcollection empty", async () => {
+  let committed = false;
+  const userRef = {
+    firestore: {
+      batch() {
+        return {
+          delete() {},
+          async commit() {
+            committed = true;
+          },
+        };
+      },
+    },
+    collection() {
+      return {
+        async get() {
+          return { empty: true, docs: [] };
+        },
+      };
+    },
+  } as unknown as FirebaseFirestore.DocumentReference;
+
+  await deleteLegacyFcmTokens(userRef);
+
+  assert.equal(committed, false);
+});
+
+interface CallableLike {
+  run(req: {
+    data: unknown;
+    auth?: { uid: string };
+  }): Promise<{ epoch: number; activeDeviceId: string }>;
+}
+
+const callable = registerActiveDevice as unknown as CallableLike;
+
+test("registerActiveDevice rejects unauthenticated callers", async () => {
+  await assert.rejects(
+    () =>
+      callable.run({
+        data: {
+          deviceId: "device-a",
+          fcmToken: "tok-a",
+          platform: "android",
+        },
+      }),
+    (error: { code?: string }) => error.code === "unauthenticated",
+  );
+});
+
+test("registerActiveDevice rejects missing deviceId", async () => {
+  await assert.rejects(
+    () =>
+      callable.run({
+        auth: { uid: "user_1" },
+        data: {
+          deviceId: "",
+          fcmToken: "tok-a",
+          platform: "android",
+        },
+      }),
+    (error: { code?: string }) => error.code === "invalid-argument",
+  );
+});
+
+test("registerActiveDevice rejects missing fcmToken", async () => {
+  await assert.rejects(
+    () =>
+      callable.run({
+        auth: { uid: "user_1" },
+        data: {
+          deviceId: "device-a",
+          fcmToken: "",
+          platform: "android",
+        },
+      }),
+    (error: { code?: string }) => error.code === "invalid-argument",
+  );
+});
+
+test("registerActiveDevice rejects invalid platform", async () => {
+  await assert.rejects(
+    () =>
+      callable.run({
+        auth: { uid: "user_1" },
+        data: {
+          deviceId: "device-a",
+          fcmToken: "tok-a",
+          platform: "desktop",
+        },
+      }),
+    (error: { code?: string }) => error.code === "invalid-argument",
+  );
 });

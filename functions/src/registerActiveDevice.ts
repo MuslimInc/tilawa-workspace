@@ -26,14 +26,14 @@ interface RegisterActiveDeviceResponse {
   activeDeviceId: string;
 }
 
-function parsePlatform(value: unknown): DevicePlatform | null {
+export function parseDevicePlatform(value: unknown): DevicePlatform | null {
   if (value === "android" || value === "ios" || value === "web") {
     return value;
   }
   return null;
 }
 
-async function deleteLegacyFcmTokens(
+export async function deleteLegacyFcmTokens(
   userRef: FirebaseFirestore.DocumentReference,
 ): Promise<void> {
   const tokensSnap = await userRef.collection("fcm_tokens").get();
@@ -94,7 +94,7 @@ export const registerActiveDevice = onCall(
     const data = request.data as RegisterActiveDeviceRequest;
     const deviceId = data.deviceId?.trim() ?? "";
     const fcmToken = data.fcmToken?.trim() ?? "";
-    const platform = parsePlatform(data.platform);
+    const platform = parseDevicePlatform(data.platform);
     const signOut = data.signOut === true;
 
     if (!signOut) {

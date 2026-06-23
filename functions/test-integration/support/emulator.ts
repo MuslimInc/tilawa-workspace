@@ -22,6 +22,34 @@ export function db(): Firestore {
   return getFirestore();
 }
 
+/** Default epoch for integration callers after single-active-device guards. */
+export const DEFAULT_SESSION_EPOCH = 1;
+
+/** Seeds `users/{uid}.session` so callable epoch guards accept requests. */
+export async function seedUserSession(
+  uid: string,
+  epoch = DEFAULT_SESSION_EPOCH,
+  activeDeviceId = "integration-device",
+): Promise<void> {
+  await db()
+    .collection("users")
+    .doc(uid)
+    .set(
+      {
+        session: { epoch, activeDeviceId },
+      },
+      { merge: true },
+    );
+}
+
+/** Adds `sessionEpoch` to callable request payloads. */
+export function withSessionEpoch<T extends Record<string, unknown>>(
+  data: T,
+  epoch = DEFAULT_SESSION_EPOCH,
+): T & { sessionEpoch: number } {
+  return { ...data, sessionEpoch: epoch };
+}
+
 /** Wipes all documents between tests via the emulator's REST clear endpoint. */
 export async function clearFirestore(): Promise<void> {
   const host = process.env.FIRESTORE_EMULATOR_HOST;

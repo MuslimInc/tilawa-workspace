@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:tilawa/features/auth/data/services/pending_session_revoke_store.dart';
+import 'package:tilawa/features/notifications/data/fcm_session_revoked_message.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -73,6 +75,19 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     '[AppLaunch] source=firebaseMessagingBackgroundHandler: Start in (${DateTime.now()})',
   );
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await persistBackgroundSessionRevokeIfNeeded(
+    Map<String, dynamic>.from(message.data),
+  );
+}
+
+/// Marks [PendingSessionRevokeStore] when a background FCM revokes the session.
+@visibleForTesting
+Future<void> persistBackgroundSessionRevokeIfNeeded(
+  Map<String, dynamic> data,
+) async {
+  if (isSessionRevokedFcmMessage(data)) {
+    await PendingSessionRevokeStore.mark();
+  }
 }
 
 @visibleForTesting

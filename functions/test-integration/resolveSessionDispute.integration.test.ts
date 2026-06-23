@@ -5,7 +5,12 @@ import {
   openSessionDispute,
   resolveSessionDispute,
 } from "../src/quranSessions/sessionDisputeCallables";
-import { clearFirestore, db } from "./support/emulator";
+import {
+  clearFirestore,
+  db,
+  seedUserSession,
+  withSessionEpoch,
+} from "./support/emulator";
 
 interface CallableLike<T> {
   run(req: {
@@ -31,6 +36,7 @@ const resolveDispute = resolveSessionDispute as unknown as CallableLike<{
 }>;
 
 async function seedDisputedBooking(): Promise<string> {
+  await seedUserSession("student1");
   await db().collection("quran_bookings").doc("booking1").set({
     bookingId: "booking1",
     aggregateId: "booking1",
@@ -50,7 +56,7 @@ async function seedDisputedBooking(): Promise<string> {
   });
 
   const opened = await openDispute.run({
-    data: { bookingId: "booking1", reason: "quality issue" },
+    data: withSessionEpoch({ bookingId: "booking1", reason: "quality issue" }),
     auth: { uid: "student1", token: {} },
   });
   return opened.disputeId;

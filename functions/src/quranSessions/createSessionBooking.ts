@@ -282,15 +282,22 @@ export const createSessionBooking = onCall(
           source: "mobileApp",
         });
 
-        return {
+        const bookingResult: CreateBookingResult = {
           bookingId: bookingRef.id,
           sessionId: sessionRef.id,
           lifecycleStatus,
           status: legacyStatusForLifecycle(lifecycleStatus),
-          paymentReference,
-          clientConfirmToken,
-          paymentIntentId,
-        } satisfies CreateBookingResult;
+        };
+        if (paymentReference !== undefined) {
+          bookingResult.paymentReference = paymentReference;
+        }
+        if (clientConfirmToken !== undefined) {
+          bookingResult.clientConfirmToken = clientConfirmToken;
+        }
+        if (paymentIntentId !== undefined) {
+          bookingResult.paymentIntentId = paymentIntentId;
+        }
+        return bookingResult;
       },
     );
 

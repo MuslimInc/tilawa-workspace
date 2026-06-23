@@ -3,7 +3,12 @@ import assert from "node:assert/strict";
 import { Timestamp } from "firebase-admin/firestore";
 
 import { createSessionBooking } from "../src/quranSessions/createSessionBooking";
-import { clearFirestore, db } from "./support/emulator";
+import {
+  clearFirestore,
+  db,
+  seedUserSession,
+  withSessionEpoch,
+} from "./support/emulator";
 
 interface BookingResult {
   bookingId: string;
@@ -59,7 +64,7 @@ async function seedCompleteStudent(
 }
 
 function bookingData(overrides: Record<string, unknown> = {}): Record<string, unknown> {
-  return {
+  return withSessionEpoch({
     teacherId: "teacher1",
     slotId: "slot1",
     startsAt: new Date(Date.now() + 86_400_000).toISOString(),
@@ -67,7 +72,7 @@ function bookingData(overrides: Record<string, unknown> = {}): Record<string, un
     callType: "externalMeeting",
     pricingType: "free",
     ...overrides,
-  };
+  });
 }
 
 function codeOf(error: unknown): string | undefined {
@@ -78,6 +83,7 @@ test("integration: free booking with a verified teacher is scheduled", async () 
   await clearFirestore();
   await seedVerifiedTeacher("teacher1");
   await seedCompleteStudent("student1");
+  await seedUserSession("student1");
 
   const res = await booking.run({
     data: bookingData(),
@@ -102,6 +108,7 @@ test("integration: an unverified teacher is rejected server-side", async () => {
   await clearFirestore();
   await seedVerifiedTeacher("teacher1", { verificationStatus: "pending" });
   await seedCompleteStudent("student1");
+  await seedUserSession("student1");
 
   await assert.rejects(
     booking.run({ data: bookingData(), auth: { uid: "student1", token: {} } }),
@@ -113,6 +120,7 @@ test("integration: a disallowed gender combination is rejected server-side", asy
   await clearFirestore();
   await seedVerifiedTeacher("teacher1", { allowedStudentGender: "maleOnly" });
   await seedCompleteStudent("student1", { gender: "female" });
+  await seedUserSession("student1");
 
   await assert.rejects(
     booking.run({ data: bookingData(), auth: { uid: "student1", token: {} } }),
@@ -124,6 +132,7 @@ test("integration: a paid teacher cannot be booked 'free' while payments are dis
   await clearFirestore();
   await seedVerifiedTeacher("teacher1");
   await seedCompleteStudent("student1");
+  await seedUserSession("student1");
   // A pricing doc for the student's market makes the teacher server-side "paid",
   // regardless of the client-sent pricingType.
   await db()
@@ -147,6 +156,8 @@ test("integration: double-booking the same slot is rejected", async () => {
   await seedVerifiedTeacher("teacher1");
   await seedCompleteStudent("student1");
   await seedCompleteStudent("student2");
+  await seedUserSession("student1");
+  await seedUserSession("student2");
 
   await booking.run({ data: bookingData(), auth: { uid: "student1", token: {} } });
 
@@ -160,6 +171,7 @@ test("integration: replay with same idempotency key returns same booking", async
   await clearFirestore();
   await seedVerifiedTeacher("teacher1");
   await seedCompleteStudent("student1");
+  await seedUserSession("student1");
 
   const data = bookingData({ idempotencyKey: "idem-booking-1" });
   const auth = { uid: "student1", token: {} };
@@ -186,6 +198,8 @@ test("integration: different idempotency key on same slot is blocked by lock", a
   await seedVerifiedTeacher("teacher1");
   await seedCompleteStudent("student1");
   await seedCompleteStudent("student2");
+  await seedUserSession("student1");
+  await seedUserSession("student2");
 
   await booking.run({
     data: bookingData({ idempotencyKey: "idem-a" }),

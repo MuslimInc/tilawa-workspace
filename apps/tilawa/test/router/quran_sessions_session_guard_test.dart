@@ -152,6 +152,23 @@ void main() {
       expect(result, isNull);
     });
 
+    testWidgets('returns null when blocs are not mounted', (tester) async {
+      final state = FakeGoRouterState(QuranSessionsRoutes.home);
+
+      late String? result;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) {
+              result = quranSessionsSessionRedirect(context, state);
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+      expect(result, isNull);
+    });
+
     testWidgets('does not redirect login route (loop guard)', (tester) async {
       whenListen(
         mockSessionCubit,

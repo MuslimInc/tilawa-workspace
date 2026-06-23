@@ -153,6 +153,66 @@ void main() {
     verify(() => mockCache.clearSession()).called(1);
   });
 
+  test('returns unexpected failure when device identity throws', () async {
+    when(() => mockTokenService.getToken()).thenAnswer((_) async => tToken);
+    when(() => mockIdentity.getDeviceId()).thenThrow(Exception('fid failed'));
+
+    final result = await useCase(tUserId);
+
+    expect(result.isLeft(), isTrue);
+    result.fold((failure) {
+      expect(failure, isA<UnexpectedFailure>());
+    }, (_) => fail('expected Left'));
+  });
+
+  test(
+    'clearActiveDeviceOnSignOut falls back to device identity when cache empty',
+    () async {
+      when(() => mockCache.getActiveDeviceId()).thenAnswer((_) async => null);
+      when(() => mockIdentity.getDeviceId()).thenAnswer((_) async => 'fid_2');
+      when(
+        () => mockRemote.registerActiveDevice(
+          deviceId: 'fid_2',
+          fcmToken: '',
+          platform: 'android',
+          signOut: true,
+        ),
+      ).thenAnswer(
+        (_) async =>
+            const SessionRegistration(epoch: 2, activeDeviceId: 'fid_2'),
+      );
+      when(() => mockCache.clearSession()).thenAnswer((_) async {});
+
+      final result = await useCase.clearActiveDeviceOnSignOut(tUserId);
+
+      expect(result.isRight(), isTrue);
+      verify(() => mockCache.clearSession()).called(1);
+    },
+  );
+
+  test(
+    'clearActiveDeviceOnSignOut clears local session when remote throws',
+    () async {
+      when(
+        () => mockCache.getActiveDeviceId(),
+      ).thenAnswer((_) async => 'device_1');
+      when(
+        () => mockRemote.registerActiveDevice(
+          deviceId: any(named: 'deviceId'),
+          fcmToken: any(named: 'fcmToken'),
+          platform: any(named: 'platform'),
+          signOut: true,
+        ),
+      ).thenThrow(Exception('network'));
+      when(() => mockCache.clearSession()).thenAnswer((_) async {});
+
+      final result = await useCase.clearActiveDeviceOnSignOut(tUserId);
+
+      expect(result.isRight(), isTrue);
+      verify(() => mockCache.clearSession()).called(1);
+    },
+  );
+
   test(
     'token refresh on same device updates cache without epoch change',
     () async {

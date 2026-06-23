@@ -12,6 +12,7 @@ import '../../presentation/services/fcm_notification_handler_service.dart';
 import '../../../settings/domain/services/teacher_capability_refresh_notifier.dart';
 import '../../../auth/domain/services/session_revoked_notifier.dart';
 import '../datasources/notifications_remote_data_source.dart';
+import '../fcm_session_revoked_message.dart';
 
 @LazySingleton(as: NotificationsRepository)
 class NotificationsRepositoryImpl implements NotificationsRepository {
@@ -104,7 +105,7 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
       final String status = message.data['status']?.toString() ?? '';
       _teacherCapabilityRefreshNotifier.notifyApplicationReviewed(status);
     }
-    if (type == 'session_revoked') {
+    if (isSessionRevokedFcmMessage(message.data)) {
       _sessionRevokedNotifier.notifySessionRevoked();
     }
     _handler.showForegroundNotification(message);

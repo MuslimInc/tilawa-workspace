@@ -2,6 +2,8 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tilawa/features/auth/data/services/pending_session_revoke_store.dart';
 import 'package:tilawa/features/auth/domain/repositories/auth_repository.dart';
 import 'package:tilawa/features/auth/domain/services/session_revoked_notifier.dart';
 import 'package:tilawa/features/auth/domain/usecases/check_session_validity_use_case.dart';
@@ -49,6 +51,27 @@ void main() {
     mockCheckValidity,
     mockSignOut,
     sessionRevokedNotifier,
+  );
+
+  blocTest<SessionValidityCubit, SessionValidityState>(
+    'checkOnResume signs out when background session_revoked flag is set',
+    build: buildCubit,
+    setUp: () {
+      SharedPreferences.setMockInitialValues({
+        PendingSessionRevokeStore.key: true,
+      });
+    },
+    act: (cubit) async {
+      await cubit.checkOnResume();
+      await Future<void>.delayed(Duration.zero);
+    },
+    expect: () => [
+      const SessionValidityState(revoked: true, isChecking: false),
+    ],
+    verify: (_) {
+      verify(() => mockSignOut()).called(1);
+      verifyNever(() => mockCheckValidity(any()));
+    },
   );
 
   blocTest<SessionValidityCubit, SessionValidityState>(
@@ -134,6 +157,24 @@ void main() {
       verifyNever(() => mockSignOut());
     },
   );
+
+  test('close cancels session revoked subscription', () async {
+    final cubit = buildCubit();
+    await cubit.close();
+
+    sessionRevokedNotifier.notifySessionRevoked();
+    await Future<void>.delayed(Duration.zero);
+
+    verifyNever(() => mockSignOut());
+  });
+
+  test('SessionValidityState copyWith updates revoked flag', () {
+    const state = SessionValidityState(isChecking: true);
+    final updated = state.copyWith(revoked: true, isChecking: false);
+
+    expect(updated.revoked, isTrue);
+    expect(updated.isChecking, isFalse);
+  });
 
   test('revoked cubit ignores subsequent resume checks', () async {
     final cubit = buildCubit();
