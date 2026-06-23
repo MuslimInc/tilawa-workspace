@@ -11,7 +11,7 @@
 
 | Layer | Count | Path |
 |-------|-------|------|
-| Package unit/widget | **88** | `packages/quran_sessions/test/` |
+| Package unit/widget | **67** `*_test.dart` (+ 21 helpers/fixtures) | `packages/quran_sessions/test/` |
 | App integration/unit | **7** | `apps/tilawa/test/features/quran_sessions/` |
 | App settings (teacher capability) | **2** | `apps/tilawa/test/features/settings/...` |
 | Admin Angular | **2** | `apps/tilawa_admin/.../*.spec.ts` |

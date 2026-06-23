@@ -2,6 +2,7 @@
 
 **Product:** MeMuslim / أنا مسلم — Quran Sessions  
 **Audit date:** 2026-06-23  
+**Lineage:** Folder created by prior agents (8a14d307, 5c9e586b); **this pass updated** README gaps + sprint decisions + refreshed code verification (no new files)  
 **Scope:** Read-only codebase audit vs `specs/031`, `specs/032`, `specs/030`  
 **Method:** Specs read first; every claim verified against source (no `flutter test` / deploy run)
 
@@ -49,7 +50,7 @@ Quran Sessions has **strong domain + backend** (~80% architecture) but **incompl
 | E2E user journeys | 48% |
 | **Free Beta readiness** | **~56%** |
 
-**What works today (verified):** browse teachers, profile gate, eligibility UI, teacher apply/status, weekly availability, teacher dashboard (auth-aware), admin approve applications + session list, `createSessionBooking` CF with idempotency, Firestore CF-only writes, package l10n AR/EN, 88 Dart + 9 CF unit test files.
+**What works today (verified):** browse teachers, profile gate, eligibility UI, teacher apply/status, weekly availability, teacher dashboard (auth-aware `_TeacherDashboardGate`), admin approve applications + session list, `createSessionBooking` CF with idempotency, Firestore CF-only writes, package l10n AR/EN, **67** Dart `*_test.dart` files in package + **7** app + **9** CF unit test files.
 
 **What blocks real sessions:** no `meeting_link` on session doc at booking; join handler empty; booking + teacher-apply flags default **off**; mobile report/dispute UI missing; admin reports/disputes queues missing; eligibility use case has **0** dedicated unit tests; staging smoke 10/10 not evidenced.
 
@@ -60,6 +61,140 @@ Quran Sessions has **strong domain + backend** (~80% architecture) but **incompl
 ## Completion % by layer
 
 See [implementation-status.md](./implementation-status.md) for P0 story mapping (44 P0 stories from `032`).
+
+---
+
+## Top 10 — implemented (verified in code)
+
+| # | Item | Evidence |
+|---|------|----------|
+| 1 | Profile gate + Firestore profile | `home_sessions_entry_card.dart`, `firestore_user_profile_repository.dart` |
+| 2 | Real auth UID (production Firebase module) | `firebase_auth_session_provider.dart`, `requireQuranSessionsUserId` |
+| 3 | Teacher list pagination + Firestore | `TeacherListBloc`, `FirestoreTeacherDataSource` |
+| 4 | Booking eligibility domain + inline UI | `ValidateBookingEligibilityUseCase`, `booking_screen.dart` |
+| 5 | `createSessionBooking` CF + idempotency + slot lock | `createSessionBooking.ts`, `idempotencyService.ts` |
+| 6 | Firestore CF-only writes on bookings/sessions | `firestore.rules` L191–206 |
+| 7 | Teacher application + admin approve | `teacher_application_screen.dart`, `reviewTeacherApplication.ts`, admin UI |
+| 8 | Weekly availability + overrides | `weekly_availability_screen.dart`, `availability_override_sheet.dart` |
+| 9 | Teacher dashboard auth-aware | `_TeacherDashboardGate` in `quran_sessions_nav.dart` |
+| 10 | Lifecycle guards + policy unit tests | `session_lifecycle_guard.dart`, 67 package test files |
+
+---
+
+## Top 10 — missing or broken
+
+| # | Item | Stories | Evidence |
+|---|------|---------|----------|
+| 1 | `meeting_link` not written at booking | US-052 | `createSessionBooking.ts` L177–190 — no field |
+| 2 | Join handler no-op | US-008, US-031 | `my_sessions_bloc.dart` L96–99 empty `_onJoinRequested` |
+| 3 | Session detail — no join/cancel/report | US-014, US-015 | `session_detail_screen.dart` — timeline only |
+| 4 | Mobile report concern UI | US-015 | CF `reportSessionConcern` only |
+| 5 | Admin reports queue (A-10) | US-040 | No route in `sidebar.component.html` |
+| 6 | Admin disputes queue (A-11) | US-041 | CF exists; no admin route |
+| 7 | `ValidateBookingEligibilityUseCase` dedicated tests | US-061 | No `validate_booking_eligibility_usecase_test.dart` |
+| 8 | ≥5 verified EG teachers seeded | US-034 | Ops — no staging supply evidenced |
+| 9 | Booking + teacher-apply flags default off | US-058 | `app_launch_config.dart` defaults `false` |
+| 10 | Staging smoke 10/10 + Play internal | US-065, US-068 | Checklist in `032`; not evidenced in repo |
+
+---
+
+## Top 10 — risks
+
+| # | Risk | Severity | Mitigation |
+|---|------|----------|------------|
+| 1 | Student books but cannot join | 🔴 Critical | Sprint 5: US-052 + join UI |
+| 2 | Eligibility logic untested (12-case matrix) | 🔴 Safety | US-061 before closed Beta |
+| 3 | Safety report with no mobile entry | 🔴 Safety | US-015 + A-10 in Sprint 5 |
+| 4 | `enforceAppCheck: false` on all session CFs | ⚠️ Prod | Enable before public rollout (Sprint 7) |
+| 5 | FCM delivery unproven on device | 🟡 Ops | Staging device test US-055 |
+| 6 | Dual `status` + `lifecycleStatus` fields | 🟡 Data | US-060 backfill before prod flag on |
+| 7 | Cancel reason min 3 vs spec 20 chars | 🟡 Policy | `cancel_session_sheet.dart` L110 |
+| 8 | No teacher supply → empty marketplace | 🔴 Beta | US-034 seed before flag on |
+| 9 | Roadmap doc stale misleads team | 🟡 Process | Use `033` + `032` as canonical |
+| 10 | Booking flag on without smoke green | 🔴 Ops | US-065 gate before cohort |
+
+---
+
+## Top 10 — tests missing (P0 / high value)
+
+| # | Gap | Story | Priority |
+|---|-----|-------|----------|
+| 1 | `validate_booking_eligibility_usecase_test.dart` | US-061 | P0 |
+| 2 | `session_detail_screen_test.dart` (join CTA) | US-062 | P0 |
+| 3 | `booking_screen_test.dart` | US-062 | P1 |
+| 4 | `MySessionsBloc` join / CallProvider path | US-008 | P0 |
+| 5 | `SessionDetailBloc` test file | — | P1 |
+| 6 | `RescheduleBloc` test file | US-011 | P1 |
+| 7 | CF integration: `meeting_link` non-null assert | US-052 | P0 |
+| 8 | Dedicated Firestore rules suite for quran collections | US-047 | P1 |
+| 9 | Widget test for report concern sheet (not built) | US-015 | P0 |
+| 10 | E2E smoke script evidence in CI artifact | US-065 | P0 |
+
+---
+
+## Free Beta blockers (Must fix before Free Beta)
+
+| # | Blocker | Stories | Class |
+|---|---------|---------|-------|
+| 1 | `meeting_link` + join journey | US-052, US-008, US-031 | Must fix |
+| 2 | Session detail actions | US-014 | Must fix |
+| 3 | Booking + apply flags on staging | US-058, US-006 | Must fix |
+| 4 | Teacher supply ≥5 | US-034 | Must fix |
+| 5 | Eligibility unit tests | US-061 | Must fix |
+| 6 | Report mobile + admin queue | US-015, US-040 | Must fix |
+| 7 | Admin disputes queue | US-041 | Must fix |
+| 8 | Staging smoke 10/10 | US-065 | Must fix |
+| 9 | FCM confirm + T-24h on device | US-009, US-013, US-055 | Should fix (treat as blocker for closed Beta) |
+| 10 | Rollback drill | US-072 | Must fix before public rollout |
+
+**True blocker count: 10** (items 1–2 collapse to one join journey for users).
+
+Detail: [free-beta-gap-analysis.md](./free-beta-gap-analysis.md), [go-no-go-summary.md](./go-no-go-summary.md).
+
+---
+
+## Paid Sessions blockers (correctly postponed)
+
+| Item | Status | Evidence |
+|------|--------|----------|
+| Payment checkout UI (US-P01) | ⏸️ Postponed | No payment sheet in app |
+| PSP integration Tap/Stripe (US-P02) | ⏸️ | `DisabledPaymentProvider`, `PAYMENT_PROVIDER_ENABLED=false` |
+| Automated refunds (US-P03) | ⏸️ | `approveSessionRefund` blocked in Beta |
+| Teacher pricing editor (US-P04) | ⏸️ | No T-12 screen |
+| Earnings/payout dashboard (US-P05) | ⏸️ | No T-10 |
+| Admin financial ledger UI A-12 (US-P06) | ⏸️ | No ledger route |
+| Subscription packages (US-P07) | ⏸️ | Entity only |
+| In-app Agora/WebRTC (US-P08) | ⏸️ | `ExternalMeetingCallProvider` sufficient for Beta |
+| Paid teacher booking in CF | ✅ Blocked | Smoke #10 `payment_provider_unavailable` |
+
+**Paid verdict: No-Go** — correct; do not unblock until Free Beta metrics pass.
+
+---
+
+## Continuation point
+
+Prior agents (8a14d307, 5c9e586b) created this audit folder **2026-06-23**. This pass **refreshed** findings against live code — key deltas vs stale `docs/quran_sessions_roadmap.md`:
+
+- `ProfileCompletionBloc` tests **exist** (`profile_completion_bloc_test.dart`, ~653 lines)
+- Teacher dashboard uses **auth UID** via `_TeacherDashboardGate` (not hardcoded `teacher_1` in prod routes)
+- `student_mvp` remains only in **fake MVP module** for dev (`quran_sessions_mvp_module.dart`)
+
+**Resume from:** Sprint 5 in `specs/032-quran-session-delivery-plan/sprint-plan.md` — join + staging flags + supply + eligibility tests.
+
+---
+
+## Go / No-Go table
+
+| Milestone | Verdict | Condition to flip |
+|-----------|---------|-------------------|
+| Free Beta — code complete | **NO-GO** | US-052 + join + session detail actions |
+| Free Beta — staging validation | **CONDITIONAL** | After Sprint 5 code + US-034 seed |
+| Free Beta — closed cohort (20 users) | **NO-GO** | Sprint 5–7 exit criteria |
+| Free Beta — Play staged rollout | **NO-GO** | US-069 success (Sprint 8) |
+| Production GA | **NO-GO** | L10n, guardian, filters deferred per `032` |
+| Paid Sessions | **NO-GO** | Postponed — PSP off ✅ |
+
+**Gates passed:** 6/17 · **Partial:** 5/17 · **Failed:** 6/17 (see [go-no-go-summary.md](./go-no-go-summary.md)).
 
 ---
 

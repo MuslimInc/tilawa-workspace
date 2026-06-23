@@ -3,7 +3,26 @@
 **Sprint:** 5 (per `specs/032-quran-session-delivery-plan/sprint-plan.md`)  
 **Name:** Session join + notifications + booking on staging  
 **Duration:** 2 weeks (solo/small team)  
-**Audit date:** 2026-06-23
+**Audit date:** 2026-06-23 (refreshed same day)
+
+---
+
+## Sprint priority decisions
+
+Answers: *Sprint 0 vs security-first vs teacher vs student booking vs availability perf vs admin vs delay reports/disputes vs disable paid.*
+
+| Option | Verdict | Rationale |
+|--------|---------|-----------|
+| **Sprint 0** (scope freeze, architecture) | ✅ **Done** | `030`–`033` specs delivered; no more planning sprints |
+| **Security-first** (App Check, rules hardening, audit export) | **Defer to Sprint 7** prod gate | Eligibility tests (US-061) + join path deliver more Beta user value now; App Check `enforceAppCheck: false` is **Should fix** before public, not before internal |
+| **Teacher flows first** | **Parallel / mostly done** | Apply, availability, dashboard ✅; remaining work is **ops seed** (US-034) + meeting URL on profiles — not new teacher screens |
+| **Student booking + join first** | ✅ **YES — Sprint 5 focus** | Highest user happiness; unblocks book→join→complete; items US-052, US-008, US-006, US-058 |
+| **Availability perf** | **No — Sprint 7+** | `availability_operations_perf_test.dart` exists; US-066 manual matrix not launch-blocking; optimize after join works |
+| **Admin build-out** | **Split Sprint 5–6** | Reports queue (A-10) **in Sprint 5** with mobile report — US-015 is P0 safety; disputes admin (A-11) **Sprint 6**; session actions panel polish ongoing |
+| **Delay reports/disputes** | **No for reports** / **Yes for disputes mobile** | Cannot ship closed Beta without report path; dispute **mobile** modal (S-13) can lag if admin A-11 + CF triage exists |
+| **Disable paid** | ✅ **Already correct** | `DisabledPaymentProvider`, `paymentProviderStatus.ts`, CF smoke #10 — keep off entire Free Beta |
+
+**Recommended sequencing:** Student join journey → eligibility tests → staging flags + teacher supply → report (mobile + admin) → FCM device proof → smoke → disputes admin → rollback drill → Play internal.
 
 ---
 
