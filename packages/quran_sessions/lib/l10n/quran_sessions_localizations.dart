@@ -2140,6 +2140,102 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'No availability published yet.'**
   String get noAvailabilityYet;
+
+  /// No description provided for @reportConcernAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a concern'**
+  String get reportConcernAction;
+
+  /// No description provided for @reportConcernTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a safety concern'**
+  String get reportConcernTitle;
+
+  /// No description provided for @reportConcernSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us what happened. Our team reviews reports promptly.'**
+  String get reportConcernSubtitle;
+
+  /// No description provided for @reportConcernCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get reportConcernCategory;
+
+  /// No description provided for @reportConcernDescriptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get reportConcernDescriptionLabel;
+
+  /// No description provided for @reportConcernDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe what happened (at least 20 characters)'**
+  String get reportConcernDescriptionHint;
+
+  /// No description provided for @reportConcernDescriptionTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Please provide at least 20 characters.'**
+  String get reportConcernDescriptionTooShort;
+
+  /// No description provided for @reportConcernCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get reportConcernCancel;
+
+  /// No description provided for @reportConcernSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit report'**
+  String get reportConcernSubmit;
+
+  /// No description provided for @reportConcernSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Your report was submitted. Our team will review it.'**
+  String get reportConcernSubmitted;
+
+  /// No description provided for @reportCategorySafetyConcern.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety concern'**
+  String get reportCategorySafetyConcern;
+
+  /// No description provided for @reportCategoryAbuseOrHarassment.
+  ///
+  /// In en, this message translates to:
+  /// **'Abuse or harassment'**
+  String get reportCategoryAbuseOrHarassment;
+
+  /// No description provided for @reportCategoryInappropriateContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Inappropriate content'**
+  String get reportCategoryInappropriateContent;
+
+  /// No description provided for @reportCategoryChildSafety.
+  ///
+  /// In en, this message translates to:
+  /// **'Child safety'**
+  String get reportCategoryChildSafety;
+
+  /// No description provided for @reportCategoryFraudOrScam.
+  ///
+  /// In en, this message translates to:
+  /// **'Fraud or scam'**
+  String get reportCategoryFraudOrScam;
+
+  /// No description provided for @reportCategoryOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get reportCategoryOther;
 }
 
 class _QuranSessionsLocalizationsDelegate

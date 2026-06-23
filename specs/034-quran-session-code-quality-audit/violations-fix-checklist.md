@@ -218,7 +218,16 @@ These three terms are **not interchangeable**. Use each for its job.
 | 5 | `[x] Fixed` | CF integration parity | integration test | meetingLink asserted |
 | 8 | `[x] Fixed` | `validate_booking_eligibility_usecase_test.dart` | 11 cases | all pass |
 
-**Still open (same sprint):** 6, 7, 9, 10.
+**Still open (same sprint):** 11, 12, 20.
+
+### Fix log (batch 2 — 2026-06-23)
+
+| Order | Status | Fixed in | Tests | Verification |
+|-------|--------|----------|-------|--------------|
+| 6 | `[x] Fixed` | `app_launch_config.dart` (`TILAWA_DISTRIBUTION` staging defaults) | `app_launch_staging_flags_test.dart` | `dart analyze` |
+| 7 | `[x] Fixed` | `functions/scripts/seedStagingTeachers.ts`, `package.json` scripts | — | `npm run seed:staging-teachers` dry-run |
+| 9 | `[x] Fixed` | `report_concern_sheet.dart`, `SessionMutationGateway.reportSessionConcern`, `session_detail_*` | `report_concern_sheet_test.dart` | `flutter test` |
+| 10 | `[x] Fixed` | `tilawa_admin` reports list + detail routes | — | manual admin QA |
 
 | Metric | Value |
 |--------|-------|

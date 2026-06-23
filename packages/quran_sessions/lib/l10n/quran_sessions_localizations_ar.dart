@@ -1143,4 +1143,54 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
 
   @override
   String get noAvailabilityYet => 'لم تُنشر أي مواعيد بعد.';
+
+  @override
+  String get reportConcernAction => 'الإبلاغ عن مخاوف';
+
+  @override
+  String get reportConcernTitle => 'الإبلاغ عن مخاوف تتعلق بالسلامة';
+
+  @override
+  String get reportConcernSubtitle =>
+      'أخبرنا بما حدث. سيقوم فريقنا بمراجعة البلاغات بسرعة.';
+
+  @override
+  String get reportConcernCategory => 'الفئة';
+
+  @override
+  String get reportConcernDescriptionLabel => 'الوصف';
+
+  @override
+  String get reportConcernDescriptionHint => 'صف ما حدث (20 حرفاً على الأقل)';
+
+  @override
+  String get reportConcernDescriptionTooShort =>
+      'يُرجى كتابة 20 حرفاً على الأقل.';
+
+  @override
+  String get reportConcernCancel => 'إلغاء';
+
+  @override
+  String get reportConcernSubmit => 'إرسال البلاغ';
+
+  @override
+  String get reportConcernSubmitted => 'تم إرسال بلاغك. سيراجعه فريقنا.';
+
+  @override
+  String get reportCategorySafetyConcern => 'مخاوف تتعلق بالسلامة';
+
+  @override
+  String get reportCategoryAbuseOrHarassment => 'إساءة أو تحرش';
+
+  @override
+  String get reportCategoryInappropriateContent => 'محتوى غير لائق';
+
+  @override
+  String get reportCategoryChildSafety => 'سلامة الأطفال';
+
+  @override
+  String get reportCategoryFraudOrScam => 'احتيال';
+
+  @override
+  String get reportCategoryOther => 'أخرى';
 }

@@ -439,5 +439,21 @@
     "teacherProfileIncomplete": "Your teacher profile is missing required public fields.",
     "teacherProfileIncompleteAction": "Complete profile",
     "manageYourAvailabilityAndSessions": "Manage your schedule and sessions from here.",
-    "noAvailabilityYet": "No availability published yet."
+    "noAvailabilityYet": "No availability published yet.",
+    "reportConcernAction": "Report a concern",
+    "reportConcernTitle": "Report a safety concern",
+    "reportConcernSubtitle": "Tell us what happened. Our team reviews reports promptly.",
+    "reportConcernCategory": "Category",
+    "reportConcernDescriptionLabel": "Description",
+    "reportConcernDescriptionHint": "Describe what happened (at least 20 characters)",
+    "reportConcernDescriptionTooShort": "Please provide at least 20 characters.",
+    "reportConcernCancel": "Cancel",
+    "reportConcernSubmit": "Submit report",
+    "reportConcernSubmitted": "Your report was submitted. Our team will review it.",
+    "reportCategorySafetyConcern": "Safety concern",
+    "reportCategoryAbuseOrHarassment": "Abuse or harassment",
+    "reportCategoryInappropriateContent": "Inappropriate content",
+    "reportCategoryChildSafety": "Child safety",
+    "reportCategoryFraudOrScam": "Fraud or scam",
+    "reportCategoryOther": "Other"
 }

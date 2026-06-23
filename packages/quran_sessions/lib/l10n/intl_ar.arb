@@ -432,5 +432,21 @@
     "teacherProfileIncomplete": "ملف المحفظ العام ناقص بعض الحقول المطلوبة.",
     "teacherProfileIncompleteAction": "إكمال الملف",
     "manageYourAvailabilityAndSessions": "يمكنك إدارة مواعيدك وجلساتك من هنا",
-    "noAvailabilityYet": "لم تُنشر أي مواعيد بعد."
+    "noAvailabilityYet": "لم تُنشر أي مواعيد بعد.",
+    "reportConcernAction": "الإبلاغ عن مخاوف",
+    "reportConcernTitle": "الإبلاغ عن مخاوف تتعلق بالسلامة",
+    "reportConcernSubtitle": "أخبرنا بما حدث. سيقوم فريقنا بمراجعة البلاغات بسرعة.",
+    "reportConcernCategory": "الفئة",
+    "reportConcernDescriptionLabel": "الوصف",
+    "reportConcernDescriptionHint": "صف ما حدث (20 حرفاً على الأقل)",
+    "reportConcernDescriptionTooShort": "يُرجى كتابة 20 حرفاً على الأقل.",
+    "reportConcernCancel": "إلغاء",
+    "reportConcernSubmit": "إرسال البلاغ",
+    "reportConcernSubmitted": "تم إرسال بلاغك. سيراجعه فريقنا.",
+    "reportCategorySafetyConcern": "مخاوف تتعلق بالسلامة",
+    "reportCategoryAbuseOrHarassment": "إساءة أو تحرش",
+    "reportCategoryInappropriateContent": "محتوى غير لائق",
+    "reportCategoryChildSafety": "سلامة الأطفال",
+    "reportCategoryFraudOrScam": "احتيال",
+    "reportCategoryOther": "أخرى"
 }

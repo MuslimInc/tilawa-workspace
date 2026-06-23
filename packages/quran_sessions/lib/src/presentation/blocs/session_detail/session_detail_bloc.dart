@@ -6,6 +6,7 @@ import '../../../domain/entities/session_lifecycle_status.dart';
 import '../../../domain/failures/quran_sessions_failure.dart';
 import '../../../domain/repositories/session_aggregate_repository.dart';
 import '../../../domain/usecases/get_session_timeline_usecase.dart';
+import '../../../domain/usecases/report_session_concern_usecase.dart';
 import 'session_detail_event.dart';
 import 'session_detail_state.dart';
 
@@ -14,6 +15,7 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
     required this._aggregateRepository,
     required this._getTimeline,
     this._callProvider,
+    this._reportConcern,
   }) : super(const SessionDetailInitial()) {
     on<SessionDetailLoadRequested>(
       _onLoadRequested,
@@ -23,11 +25,20 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
       _onJoinRequested,
       transformer: sequential(),
     );
+    on<SessionDetailReportSubmitted>(
+      _onReportSubmitted,
+      transformer: sequential(),
+    );
+    on<SessionDetailReportAcknowledged>(
+      _onReportAcknowledged,
+      transformer: sequential(),
+    );
   }
 
   final SessionAggregateRepository _aggregateRepository;
   final GetSessionTimelineUseCase _getTimeline;
   final CallProvider? _callProvider;
+  final ReportSessionConcernUseCase? _reportConcern;
 
   Future<void> _onLoadRequested(
     SessionDetailLoadRequested event,
@@ -90,5 +101,55 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
         );
       }
     }
+  }
+
+  Future<void> _onReportSubmitted(
+    SessionDetailReportSubmitted event,
+    Emitter<SessionDetailState> emit,
+  ) async {
+    final useCase = _reportConcern;
+    final current = state;
+    if (useCase == null || current is! SessionDetailSuccess) return;
+
+    emit(
+      current.copyWith(
+        reportInProgress: true,
+        clearReportFailure: true,
+        clearReportSubmitted: true,
+      ),
+    );
+
+    final result = await useCase(
+      category: event.category,
+      description: event.description,
+      bookingId: current.aggregate.id,
+    );
+
+    final after = state;
+    if (after is! SessionDetailSuccess) return;
+
+    result.fold(
+      (failure) => emit(
+        after.copyWith(
+          reportFailure: failure,
+          clearReportInProgress: true,
+        ),
+      ),
+      (_) => emit(
+        after.copyWith(
+          reportSubmitted: true,
+          clearReportInProgress: true,
+        ),
+      ),
+    );
+  }
+
+  void _onReportAcknowledged(
+    SessionDetailReportAcknowledged event,
+    Emitter<SessionDetailState> emit,
+  ) {
+    final current = state;
+    if (current is! SessionDetailSuccess) return;
+    emit(current.copyWith(clearReportSubmitted: true));
   }
 }

@@ -1157,4 +1157,56 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get noAvailabilityYet => 'No availability published yet.';
+
+  @override
+  String get reportConcernAction => 'Report a concern';
+
+  @override
+  String get reportConcernTitle => 'Report a safety concern';
+
+  @override
+  String get reportConcernSubtitle =>
+      'Tell us what happened. Our team reviews reports promptly.';
+
+  @override
+  String get reportConcernCategory => 'Category';
+
+  @override
+  String get reportConcernDescriptionLabel => 'Description';
+
+  @override
+  String get reportConcernDescriptionHint =>
+      'Describe what happened (at least 20 characters)';
+
+  @override
+  String get reportConcernDescriptionTooShort =>
+      'Please provide at least 20 characters.';
+
+  @override
+  String get reportConcernCancel => 'Cancel';
+
+  @override
+  String get reportConcernSubmit => 'Submit report';
+
+  @override
+  String get reportConcernSubmitted =>
+      'Your report was submitted. Our team will review it.';
+
+  @override
+  String get reportCategorySafetyConcern => 'Safety concern';
+
+  @override
+  String get reportCategoryAbuseOrHarassment => 'Abuse or harassment';
+
+  @override
+  String get reportCategoryInappropriateContent => 'Inappropriate content';
+
+  @override
+  String get reportCategoryChildSafety => 'Child safety';
+
+  @override
+  String get reportCategoryFraudOrScam => 'Fraud or scam';
+
+  @override
+  String get reportCategoryOther => 'Other';
 }

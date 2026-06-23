@@ -111,4 +111,15 @@ class FakeSessionMutationGateway implements SessionMutationGateway {
     required ActorRole actorRole,
     required String reason,
   }) async => Left(NotFoundFailure('stub'));
+
+  @override
+  Future<Either<QuranSessionsFailure, SessionReportResult>>
+  reportSessionConcern({
+    required SessionReportCategory category,
+    required String description,
+    String? bookingId,
+  }) async {
+    calls.add('report:${category.cfValue}');
+    return const Right(SessionReportResult(reportId: 'report_fake_1'));
+  }
 }

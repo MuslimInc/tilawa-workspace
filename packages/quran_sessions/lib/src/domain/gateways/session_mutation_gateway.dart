@@ -3,6 +3,7 @@ import 'package:dartz_plus/dartz_plus.dart';
 import '../entities/session_aggregate.dart';
 import '../entities/session_call_type.dart';
 import '../entities/session_pricing_type.dart';
+import '../entities/session_report_category.dart';
 import '../failures/quran_sessions_failure.dart';
 import '../value_objects/actor_role.dart';
 
@@ -54,6 +55,19 @@ abstract interface class SessionMutationGateway {
     required ActorRole actorRole,
     required String reason,
   });
+
+  Future<Either<QuranSessionsFailure, SessionReportResult>>
+  reportSessionConcern({
+    required SessionReportCategory category,
+    required String description,
+    String? bookingId,
+  });
+}
+
+class SessionReportResult {
+  const SessionReportResult({required this.reportId});
+
+  final String reportId;
 }
 
 class RescheduleRequestResult {

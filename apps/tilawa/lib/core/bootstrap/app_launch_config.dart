@@ -20,6 +20,18 @@ import 'package:flutter/foundation.dart';
 /// Example: `--dart-define=TILAWA_LAUNCH_TEACHER_APPLICATION_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_TEACHER_APPLICATION_DISCOVERABILITY=profileAndEmptyState`
 /// Example: `--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED=true`
+///
+/// Staging / pre-production builds default Quran Sessions beta flags ON via
+/// [quranSessionsStagingFlagsDefaultEnabled] (everything except
+/// `play_production`). Override per flag with `TILAWA_LAUNCH_*` dart-defines.
+bool quranSessionsStagingFlagsDefaultEnabled() {
+  const distribution = String.fromEnvironment(
+    'TILAWA_DISTRIBUTION',
+    defaultValue: 'local',
+  );
+  return distribution != 'play_production';
+}
+
 @immutable
 class AppLaunchConfig extends Equatable {
   const AppLaunchConfig({
@@ -60,7 +72,12 @@ class AppLaunchConfig extends Equatable {
   });
 
   factory AppLaunchConfig.fromEnvironment() {
-    return const AppLaunchConfig(
+    const distribution = String.fromEnvironment(
+      'TILAWA_DISTRIBUTION',
+      defaultValue: 'local',
+    );
+    const stagingFlagsOn = distribution != 'play_production';
+    return AppLaunchConfig(
       resetLaunchState: bool.fromEnvironment(
         'TILAWA_LAUNCH_RESET_LAUNCH_STATE',
         defaultValue: true,
@@ -183,7 +200,7 @@ class AppLaunchConfig extends Equatable {
       ),
       teacherApplicationEnabled: bool.fromEnvironment(
         'TILAWA_LAUNCH_TEACHER_APPLICATION_ENABLED',
-        defaultValue: true,
+        defaultValue: stagingFlagsOn,
       ),
       teacherApplicationDiscoverability: String.fromEnvironment(
         'TILAWA_LAUNCH_TEACHER_APPLICATION_DISCOVERABILITY',
@@ -191,7 +208,7 @@ class AppLaunchConfig extends Equatable {
       ),
       quranSessionsBookingEnabled: bool.fromEnvironment(
         'TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED',
-        defaultValue: false,
+        defaultValue: stagingFlagsOn,
       ),
       genUiAssistantEnabled: bool.fromEnvironment(
         'TILAWA_LAUNCH_GENUI_ASSISTANT_ENABLED',

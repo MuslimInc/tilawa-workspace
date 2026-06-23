@@ -26,6 +26,8 @@ import { SESSION_AUDIT_REPOSITORY } from './core/domain/repositories/session-aud
 import { FirebaseSessionAuditRepository } from './core/data/repositories/firebase-session-audit.repository';
 import { SESSION_MODERATION_GATEWAY } from './core/domain/repositories/session-moderation.gateway';
 import { FirebaseSessionModerationGateway } from './core/data/repositories/firebase-session-moderation.gateway';
+import { SESSION_REPORT_READ_REPOSITORY } from './core/domain/repositories/session-report-read.repository';
+import { FirebaseSessionReportReadRepository } from './core/data/repositories/firebase-session-report-read.repository';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -65,6 +67,10 @@ export const appConfig: ApplicationConfig = {
     {
       provide: SESSION_MODERATION_GATEWAY,
       useClass: FirebaseSessionModerationGateway,
+    },
+    {
+      provide: SESSION_REPORT_READ_REPOSITORY,
+      useClass: FirebaseSessionReportReadRepository,
     },
   ],
 };

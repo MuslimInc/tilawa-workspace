@@ -8,6 +8,7 @@ export abstract class QuranSessionsPaths {
   static readonly sessionEvents = 'quran_session_events';
   static readonly sessionCompensations = 'quran_session_compensations';
   static readonly rescheduleRequests = 'quran_reschedule_requests';
+  static readonly sessionReports = 'quran_session_reports';
   static readonly quranSessionsProfileField = 'quranSessionsProfile';
 }
 

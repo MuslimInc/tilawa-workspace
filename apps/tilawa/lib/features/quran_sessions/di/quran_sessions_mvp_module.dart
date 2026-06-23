@@ -308,6 +308,9 @@ class QuranSessionsMvpModule {
         aggregateRepository: sl<SessionAggregateRepository>(),
         getTimeline: sl<GetSessionTimelineUseCase>(),
         callProvider: sl<CallProvider>(),
+        reportConcern: sl.isRegistered<ReportSessionConcernUseCase>()
+            ? sl<ReportSessionConcernUseCase>()
+            : null,
       ),
     );
     sl.registerFactoryIfAbsent(

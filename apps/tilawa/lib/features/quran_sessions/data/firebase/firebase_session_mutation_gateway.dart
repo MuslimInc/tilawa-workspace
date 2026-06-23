@@ -192,6 +192,38 @@ class FirebaseSessionMutationGateway implements SessionMutationGateway {
     }
   }
 
+  @override
+  Future<Either<QuranSessionsFailure, SessionReportResult>>
+  reportSessionConcern({
+    required SessionReportCategory category,
+    required String description,
+    String? bookingId,
+  }) async {
+    try {
+      final callable = _functions.httpsCallable('reportSessionConcern');
+      final response = await callable.call<Map<String, dynamic>>({
+        'category': category.cfValue,
+        'description': description,
+        'bookingId': ?bookingId,
+      });
+      final reportId = response.data['reportId'] as String? ?? '';
+      if (reportId.isEmpty) {
+        return const Left(UnknownFailure());
+      }
+      return Right(SessionReportResult(reportId: reportId));
+    } on FirebaseFunctionsException catch (e) {
+      if (e.code == 'not-found') {
+        return Left(NotFoundFailure('Booking($bookingId)'));
+      }
+      if (e.code == 'permission-denied' || e.code == 'unauthenticated') {
+        return const Left(UnauthorizedFailure());
+      }
+      return const Left(UnknownFailure());
+    } on FirebaseException catch (e) {
+      return Left(mapFirebaseExceptionToFailure(e));
+    }
+  }
+
   Future<Either<QuranSessionsFailure, SessionAggregate>> _loadAggregate(
     String bookingId,
   ) async {

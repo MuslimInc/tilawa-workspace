@@ -26,12 +26,18 @@ final class SessionDetailSuccess extends SessionDetailState {
     required this.timeline,
     this.joinInProgress = false,
     this.joinFailure,
+    this.reportInProgress = false,
+    this.reportFailure,
+    this.reportSubmitted = false,
   });
 
   final SessionAggregate aggregate;
   final List<SessionAuditEvent> timeline;
   final bool joinInProgress;
   final QuranSessionsFailure? joinFailure;
+  final bool reportInProgress;
+  final QuranSessionsFailure? reportFailure;
+  final bool reportSubmitted;
 
   bool get canJoin =>
       aggregate.sessionId != null && aggregate.lifecycleStatus.canJoinSession;
@@ -43,6 +49,12 @@ final class SessionDetailSuccess extends SessionDetailState {
     bool clearJoinInProgress = false,
     QuranSessionsFailure? joinFailure,
     bool clearJoinFailure = false,
+    bool? reportInProgress,
+    bool clearReportInProgress = false,
+    QuranSessionsFailure? reportFailure,
+    bool clearReportFailure = false,
+    bool? reportSubmitted,
+    bool clearReportSubmitted = false,
   }) {
     return SessionDetailSuccess(
       aggregate: aggregate ?? this.aggregate,
@@ -51,6 +63,15 @@ final class SessionDetailSuccess extends SessionDetailState {
           ? false
           : joinInProgress ?? this.joinInProgress,
       joinFailure: clearJoinFailure ? null : joinFailure ?? this.joinFailure,
+      reportInProgress: clearReportInProgress
+          ? false
+          : reportInProgress ?? this.reportInProgress,
+      reportFailure: clearReportFailure
+          ? null
+          : reportFailure ?? this.reportFailure,
+      reportSubmitted: clearReportSubmitted
+          ? false
+          : reportSubmitted ?? this.reportSubmitted,
     );
   }
 
@@ -60,6 +81,9 @@ final class SessionDetailSuccess extends SessionDetailState {
     timeline,
     joinInProgress,
     joinFailure,
+    reportInProgress,
+    reportFailure,
+    reportSubmitted,
   ];
 }
 

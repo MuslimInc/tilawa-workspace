@@ -36,6 +36,23 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
               variant: TilawaFeedbackVariant.error,
             );
           }
+          if (state is SessionDetailSuccess && state.reportFailure != null) {
+            TilawaFeedback.showToast(
+              context,
+              message: state.reportFailure!.toLocalizedMessage(context),
+              variant: TilawaFeedbackVariant.error,
+            );
+          }
+          if (state is SessionDetailSuccess && state.reportSubmitted) {
+            TilawaFeedback.showToast(
+              context,
+              message: l10n.reportConcernSubmitted,
+              variant: TilawaFeedbackVariant.success,
+            );
+            context.read<SessionDetailBloc>().add(
+              const SessionDetailReportAcknowledged(),
+            );
+          }
         },
         builder: (context, state) => switch (state) {
           SessionDetailInitial() || SessionDetailLoading() => const Center(
@@ -82,6 +99,11 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
                         : Text(l10n.joinSession),
                   ),
                 ],
+                const SizedBox(height: 12),
+                OutlinedButton(
+                  onPressed: () => _submitReport(context),
+                  child: Text(l10n.reportConcernAction),
+                ),
                 const SizedBox(height: 24),
                 Text(
                   l10n.sessionTimelineTitle,
@@ -108,6 +130,17 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
               ],
             ),
         },
+      ),
+    );
+  }
+
+  Future<void> _submitReport(BuildContext context) async {
+    final input = await showReportConcernSheet(context);
+    if (input == null || !context.mounted) return;
+    context.read<SessionDetailBloc>().add(
+      SessionDetailReportSubmitted(
+        category: input.category,
+        description: input.description,
       ),
     );
   }

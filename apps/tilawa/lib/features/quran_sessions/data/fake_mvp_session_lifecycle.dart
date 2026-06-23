@@ -304,4 +304,14 @@ class _FakeMutationGateway implements SessionMutationGateway {
     _stack.aggregates[key] = updated;
     return Right(updated);
   }
+
+  @override
+  Future<Either<QuranSessionsFailure, SessionReportResult>>
+  reportSessionConcern({
+    required SessionReportCategory category,
+    required String description,
+    String? bookingId,
+  }) async {
+    return const Right(SessionReportResult(reportId: 'report_mvp_1'));
+  }
 }

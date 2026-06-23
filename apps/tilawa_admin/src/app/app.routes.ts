@@ -11,6 +11,8 @@ import { TeachersComponent } from './features/quran-sessions/teachers/teachers.c
 import { QuranSessionsUsersComponent } from './features/quran-sessions/users/quran-sessions-users.component';
 import { SessionsComponent } from './features/quran-sessions/sessions/sessions.component';
 import { SessionDetailComponent } from './features/quran-sessions/session-detail/session-detail.component';
+import { SessionReportsComponent } from './features/quran-sessions/session-reports/session-reports.component';
+import { SessionReportDetailComponent } from './features/quran-sessions/session-report-detail/session-report-detail.component';
 import { adminGuard, authGuard, guestGuard } from './core/auth/auth.guard';
 
 export const routes: Routes = [
@@ -39,6 +41,11 @@ export const routes: Routes = [
       {
         path: 'quran-sessions/sessions/:id',
         component: SessionDetailComponent,
+      },
+      { path: 'quran-sessions/reports', component: SessionReportsComponent },
+      {
+        path: 'quran-sessions/reports/:id',
+        component: SessionReportDetailComponent,
       },
     ],
   },
