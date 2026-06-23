@@ -116,7 +116,10 @@ class QuranSessionsModule {
     final availabilityProvider = RemoteAvailabilityProvider(
       availabilityDataSource,
     );
-    final scheduleRepo = ScheduleRepositoryImpl(scheduleDataSource);
+    final scheduleRepo = ScheduleRepositoryImpl(
+      scheduleDataSource,
+      teacherProfiles: teacherProfileRepo,
+    );
     final walletRepo = WalletRepositoryImpl(walletDataSource);
 
     registerSingleton<TeacherRepository>(teacherRepo);

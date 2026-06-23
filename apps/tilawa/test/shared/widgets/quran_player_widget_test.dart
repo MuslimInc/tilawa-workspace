@@ -137,9 +137,12 @@ void main() {
                   ),
                 );
                 footprint = QuranPlayerWidget.collapsedFootprint(context);
+                final shellTokens = Theme.of(
+                  context,
+                ).componentTokens.adaptiveShell;
                 expect(
                   QuranPlayerLayoutInsets.phoneMiniPlayerNavGap(context),
-                  4.0,
+                  shellTokens.bottomNavVerticalMargin,
                 );
                 return const SizedBox.shrink();
               },
@@ -149,7 +152,13 @@ void main() {
         await tester.pump();
 
         final tokens = TilawaDesignTokens.light();
-        expect(footprint, tokens.playerCollapsedHeight + 4.0 + 4.0);
+        final shellTokens = TilawaComponentTokens.light().adaptiveShell;
+        expect(
+          footprint,
+          tokens.playerCollapsedHeight +
+              shellTokens.bottomNavInternalPadding +
+              shellTokens.bottomNavVerticalMargin,
+        );
       },
     );
 

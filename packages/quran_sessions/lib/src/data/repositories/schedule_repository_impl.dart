@@ -4,23 +4,64 @@ import '../../domain/entities/availability_override.dart';
 import '../../domain/entities/weekly_schedule.dart';
 import '../../domain/failures/quran_sessions_failure.dart';
 import '../../domain/repositories/schedule_repository.dart';
+import '../../domain/repositories/teacher_profile_repository.dart';
 import '../datasources/schedule_remote_data_source.dart';
+import '../dtos/availability_override_dto.dart';
+import '../dtos/weekly_schedule_dto.dart';
 import '../mappers/schedule_mapper.dart';
 import 'repository_error_mapper.dart';
 
 /// [ScheduleRepository] backed by a [ScheduleRemoteDataSource]. Maps DTOs to
 /// domain entities and remote exceptions to [QuranSessionsFailure].
 class ScheduleRepositoryImpl implements ScheduleRepository {
-  const ScheduleRepositoryImpl(this._remote);
+  const ScheduleRepositoryImpl(
+    this._remote, {
+    this._teacherProfiles,
+  });
 
   final ScheduleRemoteDataSource _remote;
+  final TeacherProfileRepository? _teacherProfiles;
+
+  Future<String?> _legacyOwnerUserId(String teacherProfileId) async {
+    final profiles = _teacherProfiles;
+    if (profiles == null) return null;
+    final profileResult = await profiles.getProfileById(teacherProfileId);
+    return profileResult.fold((_) => null, (profile) {
+      final userId = profile.userId;
+      return userId == teacherProfileId ? null : userId;
+    });
+  }
+
+  Future<WeeklyScheduleDto?> _loadScheduleDto(String teacherProfileId) async {
+    final primary = await _remote.getSchedule(teacherProfileId);
+    if (primary != null) return primary;
+    final legacyUserId = await _legacyOwnerUserId(teacherProfileId);
+    if (legacyUserId == null) return null;
+    return _remote.getSchedule(legacyUserId);
+  }
+
+  Future<List<AvailabilityOverrideDto>> _loadOverrides(
+    String teacherProfileId, {
+    DateTime? from,
+    DateTime? to,
+  }) async {
+    final primary = await _remote.getOverrides(
+      teacherProfileId,
+      from: from,
+      to: to,
+    );
+    if (primary.isNotEmpty) return primary;
+    final legacyUserId = await _legacyOwnerUserId(teacherProfileId);
+    if (legacyUserId == null) return primary;
+    return _remote.getOverrides(legacyUserId, from: from, to: to);
+  }
 
   @override
   Future<Either<QuranSessionsFailure, WeeklySchedule?>> getSchedule(
     String teacherId,
   ) async {
     try {
-      final dto = await _remote.getSchedule(teacherId);
+      final dto = await _loadScheduleDto(teacherId);
       return Right(dto?.toDomain());
     } on Exception catch (e) {
       return Left(mapRemoteException(e));
@@ -46,7 +87,7 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
     DateTime? to,
   }) async {
     try {
-      final dtos = await _remote.getOverrides(teacherId, from: from, to: to);
+      final dtos = await _loadOverrides(teacherId, from: from, to: to);
       return Right(dtos.map((d) => d.toDomain()).toList());
     } on Exception catch (e) {
       return Left(mapRemoteException(e));
@@ -60,7 +101,11 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
   ) async {
     try {
       final dto = await _remote.getOverrideByDate(teacherId, dateKey);
-      return Right(dto?.toDomain());
+      if (dto != null) return Right(dto.toDomain());
+      final legacyUserId = await _legacyOwnerUserId(teacherId);
+      if (legacyUserId == null) return const Right(null);
+      final legacyDto = await _remote.getOverrideByDate(legacyUserId, dateKey);
+      return Right(legacyDto?.toDomain());
     } on Exception catch (e) {
       return Left(mapRemoteException(e));
     }

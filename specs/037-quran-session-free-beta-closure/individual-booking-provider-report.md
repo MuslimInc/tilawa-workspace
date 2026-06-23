@@ -56,11 +56,13 @@ See `docs/quran_sessions_group_sessions.md`.
 
 ## 7. Tests added
 
-- `test/domain/usecases/join_session_usecase_test.dart`
-- `test/domain/usecases/submit_session_booking_usecase_test.dart`
+- `test/domain/usecases/join_session_usecase_test.dart` — external, mock, lifecycle, non-participant, teacher, missing link
+- `test/domain/usecases/submit_session_booking_usecase_test.dart` — disabled mode, success, slot taken
 - `test/boundaries/routing_session_call_provider_test.dart` — agora/webrtc rejected when not wired
 - Updated `my_sessions_bloc_test.dart` join path
-- Functions integration: voice/mock metadata, group rejected, agora hint rejected
+- Functions integration: external/voice/video mock metadata, group rejected, agora/webrtc hint rejected, stale epoch, participants/audit
+
+**Full readiness audit:** [experimental-production-readiness-report.md](./experimental-production-readiness-report.md)
 
 ## 7b. Manual QA runbook
 
@@ -80,8 +82,8 @@ Target: 90%+ on touched Dart paths after full suite + `dart run coverage` if req
 ## 9. Blockers
 
 - Real RTC needs token-issuing Cloud Function + SDK deps (out of Free Beta scope)
-- `TilawaSegmentedControl` has no per-segment disabled state — disabled modes omitted from control when `SessionModePolicy.externalOnly`
-- **Stub alignment (2026-06-23):** `AgoraCallProvider` / `WebRtcCallProvider` now implement `SessionCallProvider`; `RoutingSessionCallProvider` rejects agora/webrtc unless explicitly wired (no mock fallback)
+- Manual QA B1–B5 on staging — see [experimental-production-readiness-report.md](./experimental-production-readiness-report.md) §18–19
+- **Stub alignment (2026-06-23):** `AgoraCallProvider` / `WebRtcCallProvider` implement `SessionCallProvider`; `RoutingSessionCallProvider` rejects agora/webrtc unless explicitly wired (no mock fallback)
 
 ## 10. Free Beta Go/No-Go — individual booking
 

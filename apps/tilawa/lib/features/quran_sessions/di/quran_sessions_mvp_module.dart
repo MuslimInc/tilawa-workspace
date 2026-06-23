@@ -320,6 +320,7 @@ class QuranSessionsMvpModule {
         getUserProfile: sl<GetUserProfileUseCase>(),
         getWeeklySchedule: sl<GetWeeklyScheduleUseCase>(),
         fridayReviewReminderStore: sl<FridayReviewReminderStore>(),
+        teacherProfileRepository: sl<TeacherProfileRepository>(),
         teacherId: sl<AuthSessionProvider>().currentUserId ?? 'teacher_mvp',
       ),
     );

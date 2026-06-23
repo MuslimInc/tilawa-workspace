@@ -37,10 +37,8 @@ No Agora/WebRTC/`url_launcher` imports below `boundaries/call/`.
 client hints `agora` / `webrtc` → `unsupported_call_provider`.
 `joinToken` is always `null` for mock; field reserved for RTC.
 
-**Gap (document, do not fix in this eval):** `AgoraCallProvider` and
-`WebRtcCallProvider` implement legacy `CallProvider` (`joinSession(sessionId)`),
-not `SessionCallProvider` (`join(CallJoinRequest)`). Production wiring should
-add `SessionCallProvider` adapters (or refactor stubs) before SDK work.
+**Gap (resolved 2026-06-23):** Stubs now implement `SessionCallProvider` + `CallJoinRequest`.
+See [experimental-production-readiness-report.md](./experimental-production-readiness-report.md).
 
 ---
 

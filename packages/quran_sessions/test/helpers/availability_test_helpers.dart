@@ -2,6 +2,7 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 
 import 'fakes/fake_session_repository.dart';
+import 'fakes/fake_teacher_profile_repository.dart';
 import 'fakes/fake_user_profile_repository.dart';
 
 /// In-memory [ScheduleRepository] for tests.
@@ -161,6 +162,7 @@ TeacherDashboardBloc buildTestTeacherDashboardBloc({
   required FakeScheduleRepository scheduleRepo,
   FakeMarketSchedulingConfigRepository? schedulingConfigRepo,
   FakeUserProfileRepository? userProfileRepo,
+  FakeTeacherProfileRepository? teacherProfileRepo,
   InMemoryFridayReviewReminderStore? fridayReminderStore,
   CommitTimerFactory? commitTimerFactory,
   Duration commitDelay = const Duration(days: 365),
@@ -170,6 +172,7 @@ TeacherDashboardBloc buildTestTeacherDashboardBloc({
   final configRepo =
       schedulingConfigRepo ?? FakeMarketSchedulingConfigRepository();
   final profiles = userProfileRepo ?? FakeUserProfileRepository();
+  final teacherProfiles = teacherProfileRepo ?? FakeTeacherProfileRepository();
   final reminders = fridayReminderStore ?? InMemoryFridayReviewReminderStore();
   return TeacherDashboardBloc(
     getTeacherSessions: GetTeacherSessionsUseCase(sessionRepo),
@@ -182,6 +185,7 @@ TeacherDashboardBloc buildTestTeacherDashboardBloc({
     getUserProfile: GetUserProfileUseCase(profiles),
     getWeeklySchedule: GetWeeklyScheduleUseCase(scheduleRepo),
     fridayReviewReminderStore: reminders,
+    teacherProfileRepository: teacherProfiles,
     teacherId: teacherId,
     commitTimerFactory: commitTimerFactory,
     commitDelay: commitDelay,

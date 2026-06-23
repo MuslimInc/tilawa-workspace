@@ -10,6 +10,7 @@ import '../../../domain/entities/generated_slot.dart';
 import '../../../domain/entities/market_scheduling_config.dart';
 import '../../../domain/entities/quran_session.dart';
 import '../../../domain/entities/teacher_availability.dart';
+import '../../../domain/entities/user_profile.dart';
 import '../../../domain/failures/quran_sessions_failure.dart';
 import '../../../domain/services/booked_slot_starts.dart';
 import '../../../domain/services/scheduling_policy_resolver.dart';
@@ -18,6 +19,7 @@ import '../../../domain/services/week_calendar.dart';
 import '../../../domain/usecases/block_generated_slot_usecase.dart';
 import '../../../domain/usecases/cancel_session_via_server_usecase.dart';
 import '../../../domain/usecases/complete_session_via_server_usecase.dart';
+import '../../../domain/repositories/teacher_profile_repository.dart';
 import '../../../domain/usecases/get_market_scheduling_config_usecase.dart';
 import '../../../domain/usecases/get_teacher_availability_usecase.dart';
 import '../../../domain/usecases/get_teacher_sessions_usecase.dart';
@@ -49,6 +51,7 @@ class TeacherDashboardBloc
     required this._getUserProfile,
     required this._getWeeklySchedule,
     required this._fridayReviewReminderStore,
+    required this._teacherProfileRepository,
     required this._teacherId,
     SchedulingPolicyResolver? schedulingPolicyResolver,
     WeekCalendar? weekCalendar,
@@ -100,6 +103,7 @@ class TeacherDashboardBloc
   final GetUserProfileUseCase _getUserProfile;
   final GetWeeklyScheduleUseCase _getWeeklySchedule;
   final FridayReviewReminderStore _fridayReviewReminderStore;
+  final TeacherProfileRepository _teacherProfileRepository;
   final SchedulingPolicyResolver _schedulingPolicyResolver;
   final WeekCalendar _weekCalendar;
   final DateTime Function() _now;
@@ -173,7 +177,7 @@ class TeacherDashboardBloc
 
     final now = _now();
 
-    final profileResult = await _getUserProfile(event.teacherId);
+    final profileResult = await _resolveOwnerUserProfile(event.teacherId);
     final marketCountryCode = profileResult.fold(
       (_) => null,
       (profile) => profile.countryCode,
@@ -818,5 +822,21 @@ class TeacherDashboardBloc
       sessionId: event.sessionId,
       actorRole: ActorRole.teacher,
     );
+  }
+
+  Future<Either<QuranSessionsFailure, UserProfile>> _resolveOwnerUserProfile(
+    String teacherProfileId,
+  ) async {
+    final teacherProfileResult = await _teacherProfileRepository.getProfileById(
+      teacherProfileId,
+    );
+    final ownerUserId = teacherProfileResult.fold(
+      (_) => null,
+      (profile) => profile.userId,
+    );
+    if (ownerUserId != null && ownerUserId.isNotEmpty) {
+      return _getUserProfile(ownerUserId);
+    }
+    return _getUserProfile(teacherProfileId);
   }
 }

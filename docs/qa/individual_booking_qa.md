@@ -115,6 +115,7 @@ flutter test test/domain/usecases/join_session_usecase_test.dart
 flutter test test/boundaries/call_provider_test.dart
 flutter test test/boundaries/routing_session_call_provider_test.dart
 flutter test test/presentation/screens/booking_screen_test.dart
+flutter test test/presentation/blocs/my_sessions_bloc_test.dart
 ```
 
 ```sh
@@ -124,4 +125,8 @@ cd functions
 npm run test:integration -- test-integration/createSessionBooking.integration.test.ts
 ```
 
-Integration tests cover: mock voice metadata, group rejected, agora/webrtc client hint rejected.
+Integration tests cover: external + mock voice/video metadata, group rejected,
+agora/webrtc client hints rejected, stale session epoch on booking, participants
+and audit events, idempotency + notification outbox.
+
+**Readiness report:** [experimental-production-readiness-report.md](../../specs/037-quran-session-free-beta-closure/experimental-production-readiness-report.md)

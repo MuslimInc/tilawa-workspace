@@ -6,6 +6,7 @@ import 'package:timezone/data/latest.dart' as tz_data;
 import '../../helpers/availability_test_helpers.dart';
 import '../../helpers/fakes/fake_session_repository.dart';
 import '../../helpers/fakes/fake_session_mutation_gateway.dart';
+import '../../helpers/fixtures.dart' show makeSession;
 
 void main() {
   late FakeScheduleRepository scheduleRepo;
@@ -55,6 +56,56 @@ void main() {
     check(result.isLeft()).isTrue();
     result.fold(
       (f) => check(f).isA<UnsupportedSessionModeFailure>(),
+      (_) => fail('expected Left'),
+    );
+    check(mutationGateway.calls.isEmpty).isTrue();
+  });
+
+  test('individual external booking succeeds when slot available', () async {
+    submitBooking = SubmitSessionBookingUseCase(
+      mutationGateway: mutationGateway,
+      getAvailability: buildGetTeacherAvailabilityUseCase(
+        scheduleRepository: scheduleRepo,
+        sessionRepository: sessionRepo,
+        now: () => fixedNow,
+      ),
+      authSession: _FakeAuthSession('student_1'),
+    );
+
+    final result = await submitBooking(
+      teacherId: 'teacher_1',
+      slotId: generatedSlot.slotId,
+      callType: SessionCallType.externalMeeting,
+    );
+
+    check(result.isRight()).isTrue();
+    check(mutationGateway.calls).length.equals(1);
+    result.fold(
+      (_) => fail('expected Right'),
+      (outcome) => check(
+        outcome.aggregate.lifecycleStatus,
+      ).equals(SessionLifecycleStatus.scheduled),
+    );
+  });
+
+  test('rejects booking when slot already taken', () async {
+    sessionRepo.sessions = [
+      makeSession(
+        id: 'existing',
+        studentId: 'other',
+        startsAt: generatedSlot.startsAt,
+      ),
+    ];
+
+    final result = await submitBooking(
+      teacherId: 'teacher_1',
+      slotId: generatedSlot.slotId,
+      callType: SessionCallType.externalMeeting,
+    );
+
+    check(result.isLeft()).isTrue();
+    result.fold(
+      (f) => check(f).isA<SlotUnavailableFailure>(),
       (_) => fail('expected Left'),
     );
     check(mutationGateway.calls.isEmpty).isTrue();

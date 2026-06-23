@@ -71,6 +71,10 @@ class TeacherCapability extends Equatable {
       state == TeacherCapabilityState.approvedInactive &&
       application?.status == TeacherApplicationStatus.approved;
 
+  /// Firestore `quran_teacher_profiles/{id}` key used for schedule, sessions,
+  /// and student-facing teacher routes. Distinct from [profile.userId].
+  String? get teacherProfileId => profile?.id ?? application?.id;
+
   @override
   List<Object?> get props => [state, application, profile];
 }

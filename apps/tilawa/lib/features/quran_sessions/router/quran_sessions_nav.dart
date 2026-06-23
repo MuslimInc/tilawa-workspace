@@ -459,6 +459,7 @@ class _TeacherDashboardGate extends StatefulWidget {
 class _TeacherDashboardGateState extends State<_TeacherDashboardGate> {
   bool _allowed = false;
   bool _checking = true;
+  String? _teacherProfileId;
 
   @override
   void initState() {
@@ -479,10 +480,23 @@ class _TeacherDashboardGateState extends State<_TeacherDashboardGate> {
     );
 
     if (capability.canAccessTeacherDashboard) {
+      final teacherProfileId = capability.teacherProfileId;
+      if (teacherProfileId == null) {
+        setState(() => _checking = false);
+        navigateForTeacherCapability(
+          context,
+          capability,
+          analytics: quranSessionsAnalyticsCallbacks(),
+          showBlockedMessage: capability.shouldCompleteTeacherProfile,
+          replace: true,
+        );
+        return;
+      }
       quranSessionsAnalyticsCallbacks().onTeacherDashboardOpened?.call();
       setState(() {
         _allowed = true;
         _checking = false;
+        _teacherProfileId = teacherProfileId;
       });
       return;
     }
@@ -499,13 +513,12 @@ class _TeacherDashboardGateState extends State<_TeacherDashboardGate> {
 
   @override
   Widget build(BuildContext context) {
-    if (_checking || !_allowed) {
+    if (_checking || !_allowed || _teacherProfileId == null) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
     }
 
-    final userId = requireQuranSessionsUserId(getIt);
-    return widget.childBuilder(userId);
+    return widget.childBuilder(_teacherProfileId!);
   }
 }

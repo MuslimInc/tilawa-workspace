@@ -83,6 +83,72 @@ void main() {
       (_) => fail('expected Left'),
     );
   });
+
+  test('rejects join when caller is not a participant', () async {
+    sessionRepo.sessions = [
+      makeSession(id: 'session_1', studentId: 'other_student'),
+    ];
+
+    final result = await joinSession(sessionId: 'session_1');
+
+    check(result.isLeft()).isTrue();
+    result.fold(
+      (f) => check(f).isA<UnauthorizedFailure>(),
+      (_) => fail('expected Left'),
+    );
+  });
+
+  test('teacher joins with teacher role metadata', () async {
+    sessionRepo.sessions = [
+      makeSession(id: 'session_1', studentId: 'student_1'),
+    ];
+    joinSession = JoinSessionUseCase(
+      sessionRepository: sessionRepo,
+      callProvider: routingProvider,
+      authSession: _FakeAuthSession('teacher_1'),
+    );
+
+    final result = await joinSession(sessionId: 'session_1');
+
+    check(result.isRight()).isTrue();
+    check(launchedUrl).equals('https://meet.example.com/room');
+  });
+
+  test('external join fails when meeting link missing', () async {
+    sessionRepo.sessions = [
+      QuranSession(
+        id: 'session_no_link',
+        bookingId: 'booking_1',
+        teacherId: 'teacher_1',
+        studentId: 'student_1',
+        startsAt: DateTime.now().add(const Duration(hours: 1)),
+        endsAt: DateTime.now().add(const Duration(hours: 2)),
+        callType: SessionCallType.externalMeeting,
+        status: QuranSessionStatus.scheduled,
+        callProviderKind: SessionCallProviderKind.external,
+      ),
+    ];
+    routingProvider = RoutingSessionCallProvider(
+      external: ExternalMeetingCallProvider(
+        getMeetingUrl: (_) async => '',
+        urlLauncher: (url) async => launchedUrl = url,
+      ),
+      mock: MockSessionCallProvider(onJoin: (request) => lastJoin = request),
+    );
+    joinSession = JoinSessionUseCase(
+      sessionRepository: sessionRepo,
+      callProvider: routingProvider,
+      authSession: _FakeAuthSession('student_1'),
+    );
+
+    final result = await joinSession(sessionId: 'session_no_link');
+
+    check(result.isLeft()).isTrue();
+    result.fold(
+      (f) => check(f).isA<MeetingLinkUnavailableFailure>(),
+      (_) => fail('expected Left'),
+    );
+  });
 }
 
 class _FakeAuthSession implements AuthSessionProvider {

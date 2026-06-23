@@ -261,3 +261,107 @@ test("integration: different idempotency key on same slot is blocked by lock", a
     (e) => (e as { code?: string })?.code === "already-exists",
   );
 });
+
+test("integration: stale session epoch rejects booking", async () => {
+  await clearFirestore();
+  await seedVerifiedTeacher("teacher1");
+  await seedCompleteStudent("student1");
+  await db().collection("users").doc("student1").set({
+    session: { epoch: 2, activeDeviceId: "device-b" },
+  });
+
+  await assert.rejects(
+    booking.run({
+      data: withSessionEpoch(bookingData(), 1),
+      auth: { uid: "student1", token: {} },
+    }),
+    (e) => (e as { code?: string })?.code === "failed-precondition",
+  );
+});
+
+test("integration: video booking stores mock call provider metadata", async () => {
+  await clearFirestore();
+  await seedVerifiedTeacher("teacher1");
+  await seedCompleteStudent("student1");
+  await seedUserSession("student1");
+
+  const res = await booking.run({
+    data: bookingData({ callType: "videoCall" }),
+    auth: { uid: "student1", token: {} },
+  });
+
+  const sessionDoc = await db().collection("quran_sessions").doc(res.sessionId).get();
+  assert.equal(sessionDoc.get("callProvider"), "mock");
+  assert.equal(sessionDoc.get("providerSessionId"), res.sessionId);
+  assert.equal(sessionDoc.get("callType"), "videoCall");
+  assert.equal(sessionDoc.get("joinToken"), null);
+});
+
+test("integration: client webrtc provider hint is rejected", async () => {
+  await clearFirestore();
+  await seedVerifiedTeacher("teacher1");
+  await seedCompleteStudent("student1");
+  await seedUserSession("student1");
+
+  await assert.rejects(
+    booking.run({
+      data: bookingData({ callProvider: "webrtc" }),
+      auth: { uid: "student1", token: {} },
+    }),
+    (e) => codeOf(e) === "unsupported_call_provider",
+  );
+});
+
+test("integration: unsupported call type is rejected", async () => {
+  await clearFirestore();
+  await seedVerifiedTeacher("teacher1");
+  await seedCompleteStudent("student1");
+  await seedUserSession("student1");
+
+  await assert.rejects(
+    booking.run({
+      data: bookingData({ callType: "hologramCall" }),
+      auth: { uid: "student1", token: {} },
+    }),
+    (e) => codeOf(e) === "unsupported_session_mode",
+  );
+});
+
+test("integration: booking persists participants and audit event", async () => {
+  await clearFirestore();
+  await seedVerifiedTeacher("teacher1");
+  await seedCompleteStudent("student1");
+  await seedUserSession("student1");
+
+  const res = await booking.run({
+    data: bookingData(),
+    auth: { uid: "student1", token: {} },
+  });
+
+  const sessionDoc = await db().collection("quran_sessions").doc(res.sessionId).get();
+  const participants = sessionDoc.get("participants") as Array<{
+    userId: string;
+    role: string;
+  }>;
+  assert.equal(participants.length, 2);
+  assert.deepEqual(
+    participants.map((p) => p.role).sort(),
+    ["student", "teacher"],
+  );
+  assert.equal(
+    participants.find((p) => p.role === "student")?.userId,
+    "student1",
+  );
+  assert.equal(
+    participants.find((p) => p.role === "teacher")?.userId,
+    "teacher1",
+  );
+
+  const events = await db()
+    .collection("quran_session_events")
+    .where("sessionId", "==", res.sessionId)
+    .get();
+  assert.equal(events.size, 1);
+  assert.equal(events.docs[0].get("action"), "create_booking");
+  assert.equal(events.docs[0].get("actorId"), "student1");
+});

@@ -337,7 +337,7 @@ abstract final class QuranPlayerLayoutInsets {
   static double phoneMiniPlayerNavGap(BuildContext context) {
     return Theme.of(
       context,
-    ).componentTokens.adaptiveShell.bottomNavInternalPadding;
+    ).componentTokens.adaptiveShell.bottomNavVerticalMargin;
   }
 
   /// Breathing room above the shell mini player capsule.
