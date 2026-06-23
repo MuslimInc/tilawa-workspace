@@ -56,8 +56,8 @@ class JoinSessionUseCase {
       );
     }
 
-    final participantRole = role ??
-        await _resolveParticipantRole(userId: userId, session: session);
+    final participantRole =
+        role ?? await _resolveParticipantRole(userId: userId, session: session);
 
     if (participantRole == null) {
       return const Left(UnauthorizedFailure());
@@ -79,6 +79,12 @@ class JoinSessionUseCase {
     } on MeetingLinkUnavailableFailure catch (e) {
       return Left(e);
     } on CallProviderUnavailableFailure catch (e) {
+      return Left(e);
+    } on RtcPermissionDeniedFailure catch (e) {
+      return Left(e);
+    } on RtcCallJoinFailure catch (e) {
+      return Left(e);
+    } on WebRtcSignalingUnavailableFailure catch (e) {
       return Left(e);
     } on ExternalMeetingLaunchFailure catch (e) {
       return Left(e);
@@ -103,9 +109,8 @@ class JoinSessionUseCase {
     );
     return profileResult.fold(
       (_) => null,
-      (profile) => profile.userId == userId
-          ? SessionParticipantRole.teacher
-          : null,
+      (profile) =>
+          profile.userId == userId ? SessionParticipantRole.teacher : null,
     );
   }
 }

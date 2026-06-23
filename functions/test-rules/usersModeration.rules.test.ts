@@ -100,7 +100,7 @@ test("rules: admin can update moderation fields", async () => {
   );
 });
 
-test("rules: owner can update allowed profile fields", async () => {
+test("rules: owner cannot change eligibility fields after set", async () => {
   await testEnv.clearFirestore();
   await testEnv.withSecurityRulesDisabled(async (context) => {
     const adminDb = context.firestore();
@@ -115,13 +115,62 @@ test("rules: owner can update allowed profile fields", async () => {
   });
 
   const ownerDb = testEnv.authenticatedContext("student1").firestore();
-  await assertSucceeds(
+  await assertFails(
     updateDoc(doc(ownerDb, "users/student1"), {
       quranSessionsProfile: {
         accountStatus: "active",
         gender: "male",
         countryCode: "EG",
         cityId: "alexandria",
+      },
+    }),
+  );
+});
+
+test("rules: owner can set eligibility fields on first profile write", async () => {
+  await testEnv.clearFirestore();
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    const adminDb = context.firestore();
+    await setDoc(doc(adminDb, "users/student1"), {
+      displayName: "Student",
+    });
+  });
+
+  const ownerDb = testEnv.authenticatedContext("student1").firestore();
+  await assertSucceeds(
+    updateDoc(doc(ownerDb, "users/student1"), {
+      quranSessionsProfile: {
+        accountStatus: "active",
+        gender: "male",
+        countryCode: "EG",
+        cityId: "cairo",
+      },
+    }),
+  );
+});
+
+test("rules: owner cannot spoof gender after initial set", async () => {
+  await testEnv.clearFirestore();
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    const adminDb = context.firestore();
+    await setDoc(doc(adminDb, "users/student1"), {
+      quranSessionsProfile: {
+        accountStatus: "active",
+        gender: "male",
+        countryCode: "EG",
+        cityId: "cairo",
+      },
+    });
+  });
+
+  const ownerDb = testEnv.authenticatedContext("student1").firestore();
+  await assertFails(
+    updateDoc(doc(ownerDb, "users/student1"), {
+      quranSessionsProfile: {
+        accountStatus: "active",
+        gender: "female",
+        countryCode: "EG",
+        cityId: "cairo",
       },
     }),
   );

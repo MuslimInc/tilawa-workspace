@@ -102,6 +102,21 @@
     "sessionModeExternalDisabled": "Your teacher has not added a meeting link yet. Choose voice or video.",
     "meetingLinkUnavailable": "This teacher has not set up a meeting link for external sessions. Choose voice or video, or try again later.",
     "callProviderUnavailable": "This session cannot be joined from the app right now.",
+    "rtcPermissionDenied": "Microphone or camera access is required to join this session. Enable {permission} in Settings and try again.",
+    "@rtcPermissionDenied": {
+        "placeholders": {
+            "permission": {
+                "type": "String"
+            }
+        }
+    },
+    "rtcCallJoinFailed": "Could not connect to the voice or video call. Try again in a moment.",
+    "webrtcSignalingUnavailable": "In-app WebRTC calls are not available yet. Choose voice with Agora or an external meeting link.",
+    "inAppCallShellTitle": "Session call",
+    "inAppCallShellBody": "You are connected to this session's call room. End the call when your lesson finishes.",
+    "inAppCallShellEndCall": "Leave call",
+    "inAppCallShellMute": "Mute microphone",
+    "inAppCallShellUnmute": "Unmute microphone",
     "externalMeetingJoinTitle": "Join outside Tilawa?",
     "externalMeetingJoinBody": "You'll briefly leave Tilawa to join your session in Google Meet, Zoom, or your browser. Come back here anytime — your session details stay open.",
     "externalMeetingJoinOpen": "Open",

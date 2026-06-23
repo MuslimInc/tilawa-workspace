@@ -35,7 +35,8 @@ SubmitSessionBookingUseCase buildSubmitSessionBookingUseCase({
     mutationGateway: mutationGateway ?? FakeSessionMutationGateway(),
     getAvailability: getAvailability,
     authSession: _FakeAuthSession(studentId),
-    teacherProfiles: teacherProfiles ??
+    teacherProfiles:
+        teacherProfiles ??
         FakeTeacherProfileRepository(
           profile: TeacherProfile(
             id: 'teacher_1',

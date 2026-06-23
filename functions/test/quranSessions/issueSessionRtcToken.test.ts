@@ -1,0 +1,220 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+
+import {
+  agoraUidForFirebaseUser,
+  buildAgoraRtcToken,
+} from "../../src/quranSessions/agoraTokenService";
+import { issueSessionRtcTokenForRequest } from "../../src/quranSessions/issueSessionRtcTokenService";
+
+const TEST_CREDENTIALS = {
+  appId: "test-agora-app-id",
+  appCertificate: "test-agora-app-cert",
+};
+
+function createDb(docs: Record<string, Record<string, unknown>>) {
+  return {
+    collection(name: string) {
+      return {
+        doc(id: string) {
+          return {
+            async get() {
+              const data = docs[`${name}/${id}`];
+              return {
+                exists: data != null,
+                data: () => data,
+              };
+            },
+          };
+        },
+      };
+    },
+  } as unknown as FirebaseFirestore.Firestore;
+}
+
+function authRequest(
+  uid: string,
+  options: {
+    admin?: boolean;
+    data?: Record<string, unknown>;
+  } = {},
+) {
+  return {
+    auth: {
+      uid,
+      token: options.admin ? { admin: true } : {},
+    },
+    data: { sessionEpoch: 1, ...options.data },
+  } as never;
+}
+
+function agoraSessionDocs(
+  overrides: {
+    sessionId?: string;
+    bookingId?: string;
+    lifecycleStatus?: string;
+    callProvider?: string;
+    studentId?: string;
+    teacherId?: string;
+    teacherUserId?: string;
+    providerSessionId?: string;
+    includeBooking?: boolean;
+  } = {},
+) {
+  const sessionId = overrides.sessionId ?? "session_1";
+  const bookingId = overrides.bookingId ?? "booking_1";
+  const studentId = overrides.studentId ?? "student_1";
+  const teacherId = overrides.teacherId ?? "teacher_profile_1";
+  const docs: Record<string, Record<string, unknown>> = {
+    [`quran_sessions/${sessionId}`]: {
+      callProvider: overrides.callProvider ?? "agora",
+      lifecycleStatus: overrides.lifecycleStatus ?? "scheduled",
+      bookingId,
+      providerSessionId: overrides.providerSessionId,
+    },
+    [`quran_teacher_profiles/${teacherId}`]: {
+      userId: overrides.teacherUserId ?? "teacher_auth_1",
+    },
+    [`users/${studentId}`]: { session: { epoch: 1 } },
+    [`users/${overrides.teacherUserId ?? "teacher_auth_1"}`]: {
+      session: { epoch: 1 },
+    },
+  };
+  if (overrides.includeBooking !== false) {
+    docs[`quran_bookings/${bookingId}`] = {
+      studentId,
+      teacherId,
+    };
+  }
+  docs["users/stranger_1"] = { session: { epoch: 1 } };
+  return { sessionId, bookingId, studentId, docs };
+}
+
+test("issueSessionRtcTokenForRequest rejects non-participant callers", async () => {
+  const { sessionId, docs } = agoraSessionDocs();
+  const db = createDb(docs);
+
+  await assert.rejects(
+    () =>
+      issueSessionRtcTokenForRequest(
+        authRequest("stranger_1", { data: { sessionId } }),
+        { db, readCredentials: () => TEST_CREDENTIALS },
+      ),
+    (error: { code?: string; details?: { code?: string } }) =>
+      error.code === "permission-denied" &&
+      error.details?.code === "not_participant",
+  );
+});
+
+test("issueSessionRtcTokenForRequest rejects non-joinable lifecycle", async () => {
+  const { sessionId, docs } = agoraSessionDocs({
+    lifecycleStatus: "completed",
+  });
+  const db = createDb(docs);
+
+  await assert.rejects(
+    () =>
+      issueSessionRtcTokenForRequest(
+        authRequest("student_1", { data: { sessionId } }),
+        { db, readCredentials: () => TEST_CREDENTIALS },
+      ),
+    (error: { details?: { code?: string; reasonCode?: string } }) =>
+      error.details?.code === "invalid_transition" &&
+      error.details?.reasonCode === "join_not_allowed",
+  );
+});
+
+test("issueSessionRtcTokenForRequest rejects non-agora sessions", async () => {
+  const { sessionId, docs } = agoraSessionDocs({ callProvider: "mock" });
+  const db = createDb(docs);
+
+  await assert.rejects(
+    () =>
+      issueSessionRtcTokenForRequest(
+        authRequest("student_1", { data: { sessionId } }),
+        { db, readCredentials: () => TEST_CREDENTIALS },
+      ),
+    (error: { details?: { code?: string } }) =>
+      error.details?.code === "unsupported_call_provider",
+  );
+});
+
+test("issueSessionRtcTokenForRequest rejects missing booking", async () => {
+  const { sessionId, docs } = agoraSessionDocs({ includeBooking: false });
+  const db = createDb(docs);
+
+  await assert.rejects(
+    () =>
+      issueSessionRtcTokenForRequest(
+        authRequest("student_1", { data: { sessionId } }),
+        { db, readCredentials: () => TEST_CREDENTIALS },
+      ),
+    (error: { code?: string }) => error.code === "not-found",
+  );
+});
+
+test("issueSessionRtcTokenForRequest returns Agora credentials for participant", async () => {
+  const { sessionId, docs } = agoraSessionDocs({
+    providerSessionId: "agora_channel_1",
+  });
+  const db = createDb(docs);
+  const uid = "student_1";
+  const agoraUid = agoraUidForFirebaseUser(uid);
+
+  const result = await issueSessionRtcTokenForRequest(
+    authRequest(uid, { data: { sessionId } }),
+    { db, readCredentials: () => TEST_CREDENTIALS },
+  );
+
+  assert.equal(result.callProvider, "agora");
+  assert.equal(result.channelId, "agora_channel_1");
+  assert.equal(result.uid, agoraUid);
+  assert.equal(result.appId, TEST_CREDENTIALS.appId);
+  assert.equal(
+    result.token,
+    buildAgoraRtcToken({
+      credentials: TEST_CREDENTIALS,
+      channelName: "agora_channel_1",
+      uid: agoraUid,
+    }),
+  );
+});
+
+test("issueSessionRtcTokenForRequest allows teacher auth uid via profile mapping", async () => {
+  const { sessionId, docs } = agoraSessionDocs();
+  const db = createDb(docs);
+
+  const result = await issueSessionRtcTokenForRequest(
+    authRequest("teacher_auth_1", { data: { sessionId } }),
+    { db, readCredentials: () => TEST_CREDENTIALS },
+  );
+
+  assert.equal(result.uid, agoraUidForFirebaseUser("teacher_auth_1"));
+  assert.equal(result.channelId, sessionId);
+});
+
+test("issueSessionRtcTokenForRequest allows admin without epoch bypassing participant check", async () => {
+  const { sessionId, docs } = agoraSessionDocs();
+  const db = createDb(docs);
+  const adminUid = "admin_support_1";
+
+  const result = await issueSessionRtcTokenForRequest(
+    authRequest(adminUid, {
+      admin: true,
+      data: { sessionId },
+    }),
+    { db, readCredentials: () => TEST_CREDENTIALS },
+  );
+
+  assert.equal(result.callProvider, "agora");
+  assert.equal(result.uid, agoraUidForFirebaseUser(adminUid));
+  assert.equal(result.channelId, sessionId);
+  assert.equal(
+    result.token,
+    buildAgoraRtcToken({
+      credentials: TEST_CREDENTIALS,
+      channelName: sessionId,
+      uid: agoraUidForFirebaseUser(adminUid),
+    }),
+  );
+});

@@ -2,7 +2,6 @@
 // ── Localization helpers ─────────────────────────────────────────────────────
 export 'core/l10n_extensions.dart';
 // ── Boundaries: call ──────────────────────────────────────────────────────────
-export 'src/boundaries/call/agora_call_provider.dart';
 export 'src/boundaries/call/call_provider.dart';
 export 'src/boundaries/call/call_room.dart';
 export 'src/boundaries/call/call_token_provider.dart';
@@ -10,7 +9,6 @@ export 'src/boundaries/call/external_meeting_call_provider.dart';
 export 'src/boundaries/call/mock_session_call_provider.dart';
 export 'src/boundaries/call/routing_session_call_provider.dart';
 export 'src/boundaries/call/session_call_provider.dart';
-export 'src/boundaries/call/web_rtc_call_provider.dart';
 // ── Boundaries: payment ───────────────────────────────────────────────────────
 export 'src/boundaries/payment/payment_provider.dart';
 export 'src/boundaries/payment/session_payment_confirmation.dart';
@@ -82,6 +80,7 @@ export 'src/domain/entities/session_aggregate.dart';
 export 'src/domain/entities/session_booking_outcome.dart';
 export 'src/domain/entities/session_booking_type.dart';
 export 'src/domain/entities/call_join_request.dart';
+export 'src/domain/entities/rtc_join_credentials.dart';
 export 'src/domain/entities/session_call_provider_kind.dart';
 export 'src/domain/entities/session_participant.dart';
 export 'src/domain/entities/session_participant_role.dart';
@@ -240,6 +239,7 @@ export 'src/presentation/failure_ui/quran_sessions_failure_ui.dart';
 // ── Presentation: router ──────────────────────────────────────────────────────
 export 'src/presentation/teacher_capability/teacher_capability_presentation.dart';
 export 'src/presentation/router/quran_sessions_routes.dart';
+export 'src/presentation/screens/in_app_call_shell_screen.dart';
 export 'src/presentation/screens/booking_screen.dart';
 export 'src/presentation/screens/my_sessions_screen.dart';
 export 'src/presentation/screens/wallet_screen.dart';

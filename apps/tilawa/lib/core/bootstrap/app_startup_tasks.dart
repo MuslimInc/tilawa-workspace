@@ -140,8 +140,7 @@ class AppStartupTasks {
   /// flow already maps to a localized "purchase verification failed".
   Future<void> _activateAppCheck() async {
     if (kDebugMode) {
-      // Quran Sessions callables use enforceAppCheck: false. Skipping activation
-      // in debug avoids debug-token rate limits spamming every callable request.
+      // Skipping activation in debug avoids debug-token rate limits on callable requests.
       return;
     }
     try {

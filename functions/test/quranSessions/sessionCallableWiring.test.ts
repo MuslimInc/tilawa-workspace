@@ -1,0 +1,73 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
+const SRC_ROOT = join(__dirname, "../../src");
+
+/** Stable-scope session callables (see security-safety-checklist App Check table). */
+const STABLE_SESSION_CALLABLE_FILES = [
+  "quranSessions/createSessionBooking.ts",
+  "quranSessions/cancelSessionBooking.ts",
+  "quranSessions/requestSessionReschedule.ts",
+  "quranSessions/confirmSessionReschedule.ts",
+  "quranSessions/completeSession.ts",
+  "quranSessions/markSessionNoShow.ts",
+  "quranSessions/sessionDisputeCallables.ts",
+  "quranSessions/sessionReportCallables.ts",
+  "quranSessions/issueSessionRtcToken.ts",
+  "registerActiveDevice.ts",
+] as const;
+
+/** Wallet/payment batch — must stay on explicit enforceAppCheck: false. */
+const EXCLUDED_CALLABLE_FILES = [
+  "quranSessions/walletCallables.ts",
+  "quranSessions/confirmBookingPayment.ts",
+  "quranSessions/issueSessionCompensation.ts",
+  "quranSessions/approveSessionRefund.ts",
+] as const;
+
+const IMPORT_PATTERN =
+  /import\s*{[^}]*sessionCallableHttpsOptions[^}]*}\s*from\s*["'][^"']*sessionCallableOptions["']/;
+
+test("stable session callables import and pass sessionCallableHttpsOptions", () => {
+  for (const relPath of STABLE_SESSION_CALLABLE_FILES) {
+    const source = readFileSync(join(SRC_ROOT, relPath), "utf8");
+    assert.match(
+      source,
+      IMPORT_PATTERN,
+      `${relPath} must import sessionCallableHttpsOptions`,
+    );
+    const onCallMatches = source.match(/onCall\(\s*sessionCallableHttpsOptions,/g);
+    assert.ok(
+      onCallMatches && onCallMatches.length >= 1,
+      `${relPath} must pass sessionCallableHttpsOptions to onCall`,
+    );
+  }
+});
+
+test("stable batch covers exactly twelve onCall exports", () => {
+  let count = 0;
+  for (const relPath of STABLE_SESSION_CALLABLE_FILES) {
+    const source = readFileSync(join(SRC_ROOT, relPath), "utf8");
+    const matches = source.match(/onCall\(\s*sessionCallableHttpsOptions,/g);
+    count += matches?.length ?? 0;
+  }
+  assert.equal(count, 12, "expected 12 stable-scope session callables");
+});
+
+test("wallet/payment callables remain excluded from shared App Check options", () => {
+  for (const relPath of EXCLUDED_CALLABLE_FILES) {
+    const source = readFileSync(join(SRC_ROOT, relPath), "utf8");
+    assert.doesNotMatch(
+      source,
+      IMPORT_PATTERN,
+      `${relPath} must not import sessionCallableHttpsOptions`,
+    );
+    assert.match(
+      source,
+      /enforceAppCheck:\s*false/,
+      `${relPath} must keep enforceAppCheck: false`,
+    );
+  }
+});

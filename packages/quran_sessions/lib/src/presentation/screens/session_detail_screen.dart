@@ -4,9 +4,17 @@ import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 class SessionDetailScreen extends StatefulWidget {
-  const SessionDetailScreen({super.key, required this.bookingId});
+  const SessionDetailScreen({
+    super.key,
+    required this.bookingId,
+    this.onLeaveCall,
+    this.onSetMicrophoneMuted,
+  });
 
   final String bookingId;
+  final Future<void> Function(String sessionId)? onLeaveCall;
+  final Future<void> Function(String sessionId, {required bool muted})?
+  onSetMicrophoneMuted;
 
   @override
   State<SessionDetailScreen> createState() => _SessionDetailScreenState();
@@ -34,7 +42,8 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
                 previous is SessionDetailSuccess &&
                 (previous.canJoin != current.canJoin ||
                     previous.canOpenDispute != current.canOpenDispute ||
-                    previous.canOpenMeetingAgain != current.canOpenMeetingAgain ||
+                    previous.canOpenMeetingAgain !=
+                        current.canOpenMeetingAgain ||
                     previous.joinInProgress != current.joinInProgress)),
         builder: (context, state) {
           if (state is! SessionDetailSuccess) {
@@ -43,99 +52,151 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
           return _SessionDetailFooter(state: state);
         },
       ),
-      body: BlocConsumer<SessionDetailBloc, SessionDetailState>(
-        listener: (context, state) {
-          if (state is SessionDetailSuccess && state.joinFailure != null) {
-            final failure = state.joinFailure!;
-            TilawaFeedback.showToast(
-              context,
-              message: failure.toLocalizedMessage(context),
-              variant: TilawaFeedbackVariant.error,
-            );
-          }
-          if (state is SessionDetailSuccess && state.reportFailure != null) {
-            TilawaFeedback.showToast(
-              context,
-              message: state.reportFailure!.toLocalizedMessage(context),
-              variant: TilawaFeedbackVariant.error,
-            );
-          }
-          if (state is SessionDetailSuccess && state.reportSubmitted) {
-            TilawaFeedback.showToast(
-              context,
-              message: l10n.reportConcernSubmitted,
-              variant: TilawaFeedbackVariant.success,
-            );
-            context.read<SessionDetailBloc>().add(
-              const SessionDetailReportAcknowledged(),
-            );
-          }
-          if (state is SessionDetailSuccess && state.disputeFailure != null) {
-            TilawaFeedback.showToast(
-              context,
-              message: state.disputeFailure!.toLocalizedMessage(context),
-              variant: TilawaFeedbackVariant.error,
-            );
-          }
-          if (state is SessionDetailSuccess && state.disputeSubmitted) {
-            TilawaFeedback.showToast(
-              context,
-              message: l10n.openDisputeSubmitted,
-              variant: TilawaFeedbackVariant.success,
-            );
-            context.read<SessionDetailBloc>().add(
-              const SessionDetailDisputeAcknowledged(),
-            );
-          }
-        },
-        builder: (context, state) => switch (state) {
-          SessionDetailInitial() || SessionDetailLoading() => const Center(
-            child: CircularProgressIndicator(),
-          ),
-          SessionDetailFailure(:final failure) => Center(
-            child: Text(failure.toLocalizedMessage(context)),
-          ),
-          SessionDetailSuccess(:final aggregate, :final timeline) => ListView(
-            padding: EdgeInsets.all(Theme.of(context).tokens.spaceLarge),
-            children: [
-              Text(
-                l10n.sessionStatusLabel(aggregate.lifecycleStatus.name),
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              SizedBox(height: Theme.of(context).tokens.spaceSmall),
-              Text(
-                l10n.sessionStartsAtLabel(
-                  MaterialLocalizations.of(
-                    context,
-                  ).formatFullDate(aggregate.startsAt.toLocal()),
-                ),
-              ),
-              SizedBox(height: Theme.of(context).tokens.spaceExtraLarge),
-              Text(
-                l10n.sessionTimelineTitle,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              SizedBox(height: Theme.of(context).tokens.spaceSmall),
-              if (timeline.isEmpty)
-                Text(l10n.sessionTimelineEmpty)
-              else
-                ...timeline.map(
-                  (event) => ListTile(
-                    title: Text(event.action.name),
-                    subtitle: Text(
-                      event.reason ??
-                          '${event.previousStatus.name} → ${event.newStatus.name}',
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<SessionDetailBloc, SessionDetailState>(
+            listenWhen: (previous, current) =>
+                previous is SessionDetailSuccess &&
+                current is SessionDetailSuccess &&
+                previous.joinInProgress &&
+                !current.joinInProgress,
+            listener: (context, state) {
+              if (state is! SessionDetailSuccess) return;
+
+              if (state.joinFailure != null) {
+                TilawaFeedback.showToast(
+                  context,
+                  message: state.joinFailure!.toLocalizedMessage(context),
+                  variant: TilawaFeedbackVariant.error,
+                );
+                return;
+              }
+
+              if (!state.isExternalMeeting &&
+                  state.aggregate.sessionId != null) {
+                final sessionId = state.aggregate.sessionId!;
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    settings: const RouteSettings(name: 'in_app_call_shell'),
+                    builder: (_) => InAppCallShellScreen(
+                      sessionId: sessionId,
+                      onLeaveCall: () async {
+                        await widget.onLeaveCall?.call(sessionId);
+                      },
+                      onSetMicrophoneMuted:
+                          widget.onSetMicrophoneMuted != null &&
+                              state.supportsInAppMicrophoneMute
+                          ? ({required bool muted}) async {
+                              await widget.onSetMicrophoneMuted!(
+                                sessionId,
+                                muted: muted,
+                              );
+                            }
+                          : null,
                     ),
-                    trailing: Text(
-                      MaterialLocalizations.of(context).formatShortDate(
-                        event.createdAt.toLocal(),
+                  ),
+                );
+              }
+            },
+          ),
+          BlocListener<SessionDetailBloc, SessionDetailState>(
+            listenWhen: (previous, current) =>
+                current is SessionDetailSuccess &&
+                ((previous is! SessionDetailSuccess) ||
+                    previous.reportFailure != current.reportFailure ||
+                    previous.reportSubmitted != current.reportSubmitted ||
+                    previous.disputeFailure != current.disputeFailure ||
+                    previous.disputeSubmitted != current.disputeSubmitted),
+            listener: (context, state) {
+              if (state is SessionDetailSuccess &&
+                  state.reportFailure != null) {
+                TilawaFeedback.showToast(
+                  context,
+                  message: state.reportFailure!.toLocalizedMessage(context),
+                  variant: TilawaFeedbackVariant.error,
+                );
+              }
+              if (state is SessionDetailSuccess && state.reportSubmitted) {
+                TilawaFeedback.showToast(
+                  context,
+                  message: l10n.reportConcernSubmitted,
+                  variant: TilawaFeedbackVariant.success,
+                );
+                context.read<SessionDetailBloc>().add(
+                  const SessionDetailReportAcknowledged(),
+                );
+              }
+              if (state is SessionDetailSuccess &&
+                  state.disputeFailure != null) {
+                TilawaFeedback.showToast(
+                  context,
+                  message: state.disputeFailure!.toLocalizedMessage(context),
+                  variant: TilawaFeedbackVariant.error,
+                );
+              }
+              if (state is SessionDetailSuccess && state.disputeSubmitted) {
+                TilawaFeedback.showToast(
+                  context,
+                  message: l10n.openDisputeSubmitted,
+                  variant: TilawaFeedbackVariant.success,
+                );
+                context.read<SessionDetailBloc>().add(
+                  const SessionDetailDisputeAcknowledged(),
+                );
+              }
+            },
+          ),
+        ],
+        child: BlocBuilder<SessionDetailBloc, SessionDetailState>(
+          builder: (context, state) => switch (state) {
+            SessionDetailInitial() || SessionDetailLoading() => const Center(
+              child: CircularProgressIndicator(),
+            ),
+            SessionDetailFailure(:final failure) => Center(
+              child: Text(failure.toLocalizedMessage(context)),
+            ),
+            SessionDetailSuccess(:final aggregate, :final timeline) => ListView(
+              padding: EdgeInsets.all(Theme.of(context).tokens.spaceLarge),
+              children: [
+                Text(
+                  l10n.sessionStatusLabel(aggregate.lifecycleStatus.name),
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                SizedBox(height: Theme.of(context).tokens.spaceSmall),
+                Text(
+                  l10n.sessionStartsAtLabel(
+                    MaterialLocalizations.of(
+                      context,
+                    ).formatFullDate(aggregate.startsAt.toLocal()),
+                  ),
+                ),
+                SizedBox(height: Theme.of(context).tokens.spaceExtraLarge),
+                Text(
+                  l10n.sessionTimelineTitle,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                SizedBox(height: Theme.of(context).tokens.spaceSmall),
+                if (timeline.isEmpty)
+                  Text(l10n.sessionTimelineEmpty)
+                else
+                  ...timeline.map(
+                    (event) => ListTile(
+                      title: Text(event.action.name),
+                      subtitle: Text(
+                        event.reason ??
+                            '${event.previousStatus.name} → ${event.newStatus.name}',
+                      ),
+                      trailing: Text(
+                        MaterialLocalizations.of(context).formatShortDate(
+                          event.createdAt.toLocal(),
+                        ),
                       ),
                     ),
                   ),
-                ),
-            ],
-          ),
-        },
+              ],
+            ),
+          },
+        ),
       ),
     );
   }

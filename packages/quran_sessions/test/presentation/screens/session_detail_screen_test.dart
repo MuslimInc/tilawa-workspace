@@ -28,6 +28,83 @@ class _RecordingSessionDetailBloc extends SessionDetailBloc {
   }
 }
 
+class _JoinNavigationTestBloc extends SessionDetailBloc {
+  _JoinNavigationTestBloc({required SessionDetailSuccess seed})
+    : super(
+        aggregateRepository: FakeSessionAggregateRepository(),
+        getTimeline: GetSessionTimelineUseCase(FakeAuditRepository()),
+      ) {
+    emit(seed);
+  }
+
+  @override
+  void add(SessionDetailEvent event) {
+    if (event is SessionDetailLoadRequested) {
+      return;
+    }
+    if (event is SessionDetailJoinRequested) {
+      final current = state;
+      if (current is! SessionDetailSuccess) {
+        return;
+      }
+      emit(current.copyWith(joinInProgress: true));
+      emit(current.copyWith(joinInProgress: false, clearJoinFailure: true));
+      return;
+    }
+    super.add(event);
+  }
+}
+
+Future<void> _pumpSessionDetailScreen(
+  WidgetTester tester, {
+  required SessionDetailBloc bloc,
+  Future<void> Function(String sessionId)? onLeaveCall,
+  Future<void> Function(String sessionId, {required bool muted})?
+  onSetMicrophoneMuted,
+}) async {
+  tester.view.physicalSize = const Size(390, 640);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(() {
+    tester.view.resetPhysicalSize();
+    tester.view.resetDevicePixelRatio();
+  });
+
+  await tester.pumpWidget(
+    MaterialApp(
+      theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+      localizationsDelegates: const [
+        QuranSessionsLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      supportedLocales: QuranSessionsLocalizations.supportedLocales,
+      home: BlocProvider<SessionDetailBloc>.value(
+        value: bloc,
+        child: SessionDetailScreen(
+          bookingId: 'session_1',
+          onLeaveCall: onLeaveCall,
+          onSetMicrophoneMuted: onSetMicrophoneMuted,
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
+SessionDetailSuccess _inAppJoinSeed({
+  SessionCallProviderKind callProviderKind = SessionCallProviderKind.mock,
+}) {
+  final aggregate = makeAggregate(
+    status: SessionLifecycleStatus.confirmed,
+  ).copyWith(sessionId: 'session_1');
+
+  return SessionDetailSuccess(
+    aggregate: aggregate,
+    timeline: const [],
+    callProviderKind: callProviderKind,
+  );
+}
+
 void main() {
   testWidgets('pre-join sheet shows Open and Copy URL buttons', (
     tester,
@@ -209,5 +286,52 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Open meeting again'), findsOneWidget);
+  });
+
+  testWidgets(
+    'mock in-app join hides mute even when nav wires mute callback',
+    (tester) async {
+      final bloc = _JoinNavigationTestBloc(seed: _inAppJoinSeed());
+
+      await _pumpSessionDetailScreen(
+        tester,
+        bloc: bloc,
+        onSetMicrophoneMuted: (_, {required muted}) async {},
+      );
+
+      await tester.tap(find.text('Join'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Leave call'), findsOneWidget);
+      expect(find.text('Mute microphone'), findsNothing);
+    },
+  );
+
+  testWidgets('agora in-app join wires mute callback to call shell', (
+    tester,
+  ) async {
+    final muteEvents = <String>[];
+    final bloc = _JoinNavigationTestBloc(
+      seed: _inAppJoinSeed(callProviderKind: SessionCallProviderKind.agora),
+    );
+
+    await _pumpSessionDetailScreen(
+      tester,
+      bloc: bloc,
+      onSetMicrophoneMuted: (sessionId, {required bool muted}) async {
+        muteEvents.add('$sessionId:${muted ? 'mute' : 'unmute'}');
+      },
+    );
+
+    await tester.tap(find.text('Join'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Mute microphone'), findsOneWidget);
+
+    await tester.tap(find.text('Mute microphone'));
+    await tester.pumpAndSettle();
+
+    expect(muteEvents, ['session_1:mute']);
+    expect(find.text('Unmute microphone'), findsOneWidget);
   });
 }

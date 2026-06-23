@@ -209,9 +209,6 @@ abstract final class AppShellRoutePolicy {
         location.startsWith('/history')) {
       return kAppShellRecitersTabIndex;
     }
-    if (location.startsWith('/qibla')) {
-      return 2;
-    }
     if (_isProfileShellRoute(location)) {
       return kAppShellSettingsTabIndex;
     }

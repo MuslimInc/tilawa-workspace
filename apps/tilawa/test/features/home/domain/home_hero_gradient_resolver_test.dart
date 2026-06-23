@@ -53,36 +53,78 @@ void main() {
       );
     });
 
-    test('returns night palette before sunrise', () {
+    test('returns night palette before pre-sunrise ease window', () {
       final tokens = HomeHeroGradientResolver.resolve(
-        now: DateTime(2026, 6, 15, 4, 30),
+        now: DateTime(2026, 6, 15, 1),
         boundaries: boundaries,
       );
 
       expect(tokens.gradientTopStart, AppColors.homeNextPrayerGradientNightTop);
     });
 
-    test('blends from night to day across sunrise', () {
+    test('eases from night toward pre-dawn before the light window', () {
       final TilawaHomeNextPrayerHeroTokens night =
           TilawaHomeNextPrayerHeroTokens.night();
-      final TilawaHomeNextPrayerHeroTokens day =
-          TilawaHomeNextPrayerHeroTokens.day();
-      final TilawaHomeNextPrayerHeroTokens atQuarterBlend =
+      final TilawaHomeNextPrayerHeroTokens preDawn =
+          TilawaHomeNextPrayerHeroTokens.preDawn();
+      final DateTime lightWindowStart = boundaries.fajr.subtract(
+        HomeHeroGradientResolver.preSunriseFajrLead,
+      );
+      final DateTime nightEaseStart = lightWindowStart.subtract(
+        HomeHeroGradientResolver.preSunriseNightEaseDuration,
+      );
+      final DateTime now = nightEaseStart.add(const Duration(minutes: 30));
+      final TilawaHomeNextPrayerHeroTokens atBlend =
           HomeHeroGradientResolver.resolve(
-            now: boundaries.sunrise.add(const Duration(minutes: 11)),
+            now: now,
             boundaries: boundaries,
           );
       final TilawaHomeNextPrayerHeroTokens expected =
-          TilawaHomeNextPrayerHeroTokens.lerp(night, day, 11 / 45);
+          TilawaHomeNextPrayerHeroTokens.lerp(
+            night,
+            preDawn,
+            0.5,
+          );
 
-      expect(
-        atQuarterBlend.gradientTopStart,
-        expected.gradientTopStart,
+      expect(atBlend.gradientTopStart, expected.gradientTopStart);
+      expect(atBlend.gradientBottomEnd, expected.gradientBottomEnd);
+    });
+
+    test('blends from pre-dawn toward day during Fajr pre-sunrise window', () {
+      final TilawaHomeNextPrayerHeroTokens preDawn =
+          TilawaHomeNextPrayerHeroTokens.preDawn();
+      final TilawaHomeNextPrayerHeroTokens day =
+          TilawaHomeNextPrayerHeroTokens.day();
+      final DateTime lightWindowStart = boundaries.fajr.subtract(
+        HomeHeroGradientResolver.preSunriseFajrLead,
       );
-      expect(
-        atQuarterBlend.gradientBottomEnd,
-        expected.gradientBottomEnd,
+      final DateTime now = DateTime(2026, 6, 15, 4, 30);
+      final TilawaHomeNextPrayerHeroTokens atBlend =
+          HomeHeroGradientResolver.resolve(
+            now: now,
+            boundaries: boundaries,
+          );
+      final Duration elapsed = now.difference(lightWindowStart);
+      final Duration window = boundaries.sunrise.difference(lightWindowStart);
+      final TilawaHomeNextPrayerHeroTokens expected =
+          TilawaHomeNextPrayerHeroTokens.lerp(
+            preDawn,
+            day,
+            elapsed.inMilliseconds / window.inMilliseconds,
+          );
+
+      expect(atBlend.gradientTopStart, expected.gradientTopStart);
+      expect(atBlend.gradientBottomEnd, expected.gradientBottomEnd);
+    });
+
+    test('returns full day palette at sunrise after pre-sunrise ramp', () {
+      final tokens = HomeHeroGradientResolver.resolve(
+        now: boundaries.sunrise,
+        boundaries: boundaries,
       );
+
+      expect(tokens.gradientTopStart, AppColors.homeNextPrayerGradientTop);
+      expect(tokens.gradientBottomEnd, AppColors.homeNextPrayerGradientBottom);
     });
 
     test('blends from day to dusk across Maghrib with shorter window', () {
@@ -110,16 +152,19 @@ void main() {
       final tokens = HomeHeroGradientResolver.resolve(
         now: DateTime(2026, 6, 15, 12),
         boundaries: null,
-        debugPhaseOverride: HomeHeroDayPhase.night,
+        debugPhaseOverride: HomeHeroDayPhase.preDawn,
       );
 
-      expect(tokens.gradientTopStart, AppColors.homeNextPrayerGradientNightTop);
+      expect(
+        tokens.gradientTopStart,
+        AppColors.homeNextPrayerGradientPreDawnTop,
+      );
     });
 
-    test('isBlendingAt is true inside sunrise blend window', () {
+    test('isBlendingAt is true inside pre-sunrise window', () {
       expect(
         HomeHeroGradientResolver.isBlendingAt(
-          now: boundaries.sunrise.add(const Duration(minutes: 10)),
+          now: DateTime(2026, 6, 15, 4, 30),
           boundaries: boundaries,
         ),
         isTrue,
@@ -154,6 +199,20 @@ void main() {
           boundaries: boundaries,
         ),
         boundaries.maghrib.difference(now),
+      );
+    });
+
+    test('pre-dawn tokens stay lighter than night tokens', () {
+      final preDawn = TilawaHomeNextPrayerHeroTokens.preDawn();
+      final night = TilawaHomeNextPrayerHeroTokens.night();
+
+      expect(
+        preDawn.gradientTopStart.computeLuminance(),
+        greaterThan(night.gradientTopStart.computeLuminance()),
+      );
+      expect(
+        preDawn.gradientBottomEnd.computeLuminance(),
+        greaterThan(night.gradientBottomEnd.computeLuminance()),
       );
     });
   });

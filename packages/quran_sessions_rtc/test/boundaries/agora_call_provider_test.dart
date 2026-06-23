@@ -1,0 +1,230 @@
+import 'package:checks/checks.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:quran_sessions/quran_sessions.dart';
+import 'package:quran_sessions_rtc/quran_sessions_rtc.dart';
+
+void main() {
+  group('AgoraCallProvider', () {
+    late _RecordingTokenProvider tokenProvider;
+    late _FakeAgoraRtcJoinGateway joinGateway;
+    late AgoraRtcEnginePool enginePool;
+
+    AgoraCallProvider buildProvider() {
+      return AgoraCallProvider(
+        appId: 'fallback-app-id',
+        tokenProvider: tokenProvider,
+        resolveUserId: () async => 'user_42',
+        permissionGate: const _GrantAllPermissionGate(),
+        enginePool: enginePool,
+        joinGateway: joinGateway,
+      );
+    }
+
+    setUp(() {
+      tokenProvider = _RecordingTokenProvider();
+      joinGateway = _FakeAgoraRtcJoinGateway();
+      enginePool = AgoraRtcEnginePool();
+    });
+
+    test('rejects non-agora join requests', () async {
+      final provider = buildProvider();
+
+      await expectLater(
+        provider.join(
+          const CallJoinRequest(
+            sessionId: 'session_1',
+            role: SessionParticipantRole.student,
+            callType: SessionCallType.voiceCall,
+            providerKind: SessionCallProviderKind.webrtc,
+          ),
+        ),
+        throwsA(isA<CallProviderUnavailableFailure>()),
+      );
+    });
+
+    test('uses server-issued uid verbatim when joining channel', () async {
+      tokenProvider.credentials = const RtcJoinCredentials(
+        token: 'rtc-token',
+        channelId: 'channel-9',
+        uid: 918273,
+        appId: 'cf-app-id',
+      );
+
+      final provider = buildProvider();
+      final room = await provider.join(
+        const CallJoinRequest(
+          sessionId: 'session_1',
+          role: SessionParticipantRole.student,
+          callType: SessionCallType.voiceCall,
+          providerKind: SessionCallProviderKind.agora,
+        ),
+      );
+
+      check(joinGateway.lastParams?.uid).equals(918273);
+      check(joinGateway.lastParams?.channelId).equals('channel-9');
+      check(joinGateway.lastParams?.token).equals('rtc-token');
+      check(joinGateway.lastParams?.appId).equals('cf-app-id');
+      check(room.extraData!['agoraUid']).equals(918273);
+      check(enginePool.sessionFor('session_1')).isNotNull();
+    });
+
+    test('passes session and user id to token provider', () async {
+      final provider = buildProvider();
+
+      await provider.join(
+        const CallJoinRequest(
+          sessionId: 'session_abc',
+          role: SessionParticipantRole.teacher,
+          callType: SessionCallType.voiceCall,
+          providerKind: SessionCallProviderKind.agora,
+        ),
+      );
+
+      check(tokenProvider.lastSessionId).equals('session_abc');
+      check(tokenProvider.lastUserId).equals('user_42');
+    });
+
+    test('does not remember session when join gateway fails', () async {
+      joinGateway.shouldFail = true;
+      final provider = buildProvider();
+
+      await expectLater(
+        provider.join(
+          const CallJoinRequest(
+            sessionId: 'session_1',
+            role: SessionParticipantRole.student,
+            callType: SessionCallType.voiceCall,
+            providerKind: SessionCallProviderKind.agora,
+          ),
+        ),
+        throwsA(isA<RtcCallJoinFailure>()),
+      );
+
+      check(enginePool.sessionFor('session_1')).isNull();
+    });
+
+    test('leaveSession releases pooled handle', () async {
+      final provider = buildProvider();
+      await provider.join(
+        const CallJoinRequest(
+          sessionId: 'session_1',
+          role: SessionParticipantRole.student,
+          callType: SessionCallType.voiceCall,
+          providerKind: SessionCallProviderKind.agora,
+        ),
+      );
+
+      await provider.leaveSession('session_1');
+
+      check(joinGateway.lastHandle!.released).equals(true);
+      check(enginePool.sessionFor('session_1')).isNull();
+    });
+
+    test('setMicrophoneMuted forwards mute state to active handle', () async {
+      final provider = buildProvider();
+      await provider.join(
+        const CallJoinRequest(
+          sessionId: 'session_1',
+          role: SessionParticipantRole.student,
+          callType: SessionCallType.voiceCall,
+          providerKind: SessionCallProviderKind.agora,
+        ),
+      );
+
+      await provider.setMicrophoneMuted('session_1', muted: true);
+
+      check(joinGateway.lastHandle!.microphoneMuted).equals(true);
+    });
+  });
+
+  group('LiveAgoraRtcJoinGateway', () {
+    test('releases engine when join runner fails', () async {
+      var releaseCount = 0;
+      final gateway = LiveAgoraRtcJoinGateway(
+        joinRunner: (_, params) async {
+          check(params.uid).equals(424242);
+          throw const RtcCallJoinFailure(reasonCode: 'join_failed');
+        },
+        releaseEngine: (_) async {
+          releaseCount++;
+        },
+      );
+
+      await expectLater(
+        gateway.join(
+          const AgoraRtcJoinParams(
+            appId: 'app',
+            token: 'tok',
+            channelId: 'ch',
+            uid: 424242,
+            enableVideo: false,
+          ),
+        ),
+        throwsA(isA<RtcCallJoinFailure>()),
+      );
+
+      check(releaseCount).equals(1);
+    });
+  });
+}
+
+class _GrantAllPermissionGate extends RtcPermissionGate {
+  const _GrantAllPermissionGate();
+
+  @override
+  Future<void> ensureGranted({required bool needsCamera}) async {}
+}
+
+class _RecordingTokenProvider implements CallTokenProvider {
+  RtcJoinCredentials credentials = const RtcJoinCredentials(
+    token: 'rtc-token',
+    channelId: 'channel-1',
+    uid: 1001,
+    appId: 'app-id',
+  );
+
+  String? lastSessionId;
+  String? lastUserId;
+
+  @override
+  Future<RtcJoinCredentials> fetchCredentials({
+    required String sessionId,
+    required String userId,
+  }) async {
+    lastSessionId = sessionId;
+    lastUserId = userId;
+    return credentials;
+  }
+}
+
+class _FakeAgoraRtcJoinGateway implements AgoraRtcJoinGateway {
+  AgoraRtcJoinParams? lastParams;
+  _FakeAgoraRtcSessionHandle? lastHandle;
+  bool shouldFail = false;
+
+  @override
+  Future<AgoraRtcSessionHandle> join(AgoraRtcJoinParams params) async {
+    lastParams = params;
+    if (shouldFail) {
+      throw const RtcCallJoinFailure(reasonCode: 'join_failed');
+    }
+    final handle = _FakeAgoraRtcSessionHandle();
+    lastHandle = handle;
+    return handle;
+  }
+}
+
+class _FakeAgoraRtcSessionHandle implements AgoraRtcSessionHandle {
+  bool released = false;
+  bool? microphoneMuted;
+
+  @override
+  Future<void> leaveAndRelease() async {
+    released = true;
+  }
+
+  @override
+  Future<void> setMicrophoneMuted(bool muted) async {
+    microphoneMuted = muted;
+  }
+}

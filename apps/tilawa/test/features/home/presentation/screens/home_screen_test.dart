@@ -94,7 +94,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Home contains no Reciters or Qibla shortcuts', (tester) async {
+  testWidgets('Home avoids bottom-nav duplicate shortcuts', (tester) async {
     final bloc = HomeDashboardBloc(
       GetHomeDashboardUseCase(_FakeHomeDashboardRepository()),
       NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
@@ -109,18 +109,16 @@ void main() {
 
     expect(find.text('Reciters'), findsNothing);
     expect(find.text('Browse recitations'), findsNothing);
-    expect(find.text('Qibla'), findsNothing);
-    expect(find.text('Find prayer direction'), findsNothing);
     expect(find.text('Quick athkar'), findsNothing);
-    expect(find.text('Explore'), findsNothing);
-    expect(find.text('Discover'), findsNothing);
     expect(find.text("Today's prayer times"), findsNothing);
     expect(find.text('View all'), findsNothing);
 
     expect(find.text('Home'), findsNothing);
-    expect(find.text('Prayer'), findsNothing);
-    expect(find.text('Athkar'), findsNothing);
     expect(find.text('Settings'), findsNothing);
+
+    expect(find.text('Discover'), findsOneWidget);
+    expect(find.text('Athkar'), findsWidgets);
+    expect(find.text('Qibla'), findsWidgets);
   });
 
   testWidgets('Home contains no layout toggle button', (tester) async {
@@ -140,7 +138,7 @@ void main() {
     expect(find.byIcon(Icons.view_list_rounded), findsNothing);
   });
 
-  testWidgets('Home shows today ayah, primary action, and footer links', (
+  testWidgets('Home shows today ayah, primary action, and feature hub', (
     tester,
   ) async {
     final bloc = HomeDashboardBloc(
@@ -159,8 +157,9 @@ void main() {
     expect(find.text('Yours'), findsNothing);
     expect(find.byType(HomeDailyAyahCard), findsOneWidget);
     expect(find.byType(HomePrimaryActionCard), findsOneWidget);
-    expect(find.text('Learn Quran recitation'), findsOneWidget);
-    expect(find.text('Tasbeeh'), findsOneWidget);
+    expect(find.text('Discover'), findsOneWidget);
+    expect(find.text('Tasbeeh'), findsWidgets);
+    expect(find.text('Bookmarks'), findsOneWidget);
   });
 }
 

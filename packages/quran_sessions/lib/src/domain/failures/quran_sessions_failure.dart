@@ -126,6 +126,31 @@ final class CallProviderUnavailableFailure extends QuranSessionsFailure {
   const CallProviderUnavailableFailure();
 }
 
+/// Mic or camera permission denied before joining an in-app RTC call.
+final class RtcPermissionDeniedFailure extends QuranSessionsFailure {
+  const RtcPermissionDeniedFailure({required this.permission});
+
+  final String permission;
+
+  @override
+  List<Object?> get props => [permission];
+}
+
+/// Agora/WebRTC join failed after provider routing (token, SDK, network).
+final class RtcCallJoinFailure extends QuranSessionsFailure {
+  const RtcCallJoinFailure({required this.reasonCode});
+
+  final String reasonCode;
+
+  @override
+  List<Object?> get props => [reasonCode];
+}
+
+/// WebRTC signaling/TURN infrastructure is not deployed yet.
+final class WebRtcSignalingUnavailableFailure extends QuranSessionsFailure {
+  const WebRtcSignalingUnavailableFailure();
+}
+
 /// External meeting URL could not be opened in another app.
 final class ExternalMeetingLaunchFailure extends QuranSessionsFailure {
   const ExternalMeetingLaunchFailure({this.linkCopiedToClipboard = false});

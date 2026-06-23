@@ -4,6 +4,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 /// Prayer-period phases for the home hero atmospheric gradient.
 enum HomeHeroDayPhase {
   day,
+  preDawn,
   dusk,
   night,
 }
@@ -15,13 +16,26 @@ abstract final class HomeHeroGradientResolver {
   /// Cross-fade duration at sunrise and Isha boundaries.
   static const Duration blendDuration = Duration(minutes: 45);
 
+  /// Pre-sunrise light window — Fajr-adjacent cool mist into day cream.
+  static const Duration preSunriseLightDuration = Duration(minutes: 150);
+
+  /// Night eases into pre-dawn mist before the light window opens.
+  static const Duration preSunriseNightEaseDuration = Duration(hours: 1);
+
+  /// Hours before Fajr when the light window may open (whichever is earlier).
+  static const Duration preSunriseFajrLead = Duration(hours: 2);
+
   /// Shorter Maghrib blend to avoid muddy blue→gold RGB midpoints.
   static const Duration maghribBlendDuration = Duration(minutes: 25);
+
+  /// Back-compat alias for tests referencing the old pre-dawn constant.
+  static const Duration preDawnBlendDuration = preSunriseLightDuration;
 
   /// Returns hero tokens for a steady-state [phase].
   static TilawaHomeNextPrayerHeroTokens tokensForPhase(HomeHeroDayPhase phase) {
     return switch (phase) {
       HomeHeroDayPhase.day => TilawaHomeNextPrayerHeroTokens.day(),
+      HomeHeroDayPhase.preDawn => TilawaHomeNextPrayerHeroTokens.preDawn(),
       HomeHeroDayPhase.dusk => TilawaHomeNextPrayerHeroTokens.dusk(),
       HomeHeroDayPhase.night => TilawaHomeNextPrayerHeroTokens.night(),
     };
@@ -41,6 +55,10 @@ abstract final class HomeHeroGradientResolver {
       return TilawaHomeNextPrayerHeroTokens.day();
     }
 
+    if (now.isBefore(boundaries.sunrise)) {
+      return _resolvePreSunrise(now: now, boundaries: boundaries);
+    }
+
     final TilawaHomeNextPrayerHeroTokens day = tokensForPhase(
       HomeHeroDayPhase.day,
     );
@@ -50,16 +68,6 @@ abstract final class HomeHeroGradientResolver {
     final TilawaHomeNextPrayerHeroTokens night = tokensForPhase(
       HomeHeroDayPhase.night,
     );
-
-    final TilawaHomeNextPrayerHeroTokens? sunriseBlend = _blendAcross(
-      now: now,
-      boundary: boundaries.sunrise,
-      from: night,
-      to: day,
-    );
-    if (sunriseBlend != null) {
-      return sunriseBlend;
-    }
 
     final TilawaHomeNextPrayerHeroTokens? maghribBlend = _blendAcross(
       now: now,
@@ -86,6 +94,7 @@ abstract final class HomeHeroGradientResolver {
       HomeHeroDayPhase.day => day,
       HomeHeroDayPhase.dusk => dusk,
       HomeHeroDayPhase.night => night,
+      HomeHeroDayPhase.preDawn => TilawaHomeNextPrayerHeroTokens.preDawn(),
     };
   }
 
@@ -124,12 +133,12 @@ abstract final class HomeHeroGradientResolver {
     return null;
   }
 
-  /// Whether [now] falls inside a sunrise, Maghrib, or Isha blend window.
+  /// Whether [now] falls inside a hero gradient blend window.
   static bool isBlendingAt({
     required DateTime now,
     required HomePrayerDayBoundaries boundaries,
   }) {
-    return _isInBlendWindow(now, boundaries.sunrise, blendDuration) ||
+    return _isInPreSunriseBlend(now, boundaries) ||
         _isInBlendWindow(
           now,
           boundaries.maghrib,
@@ -165,6 +174,56 @@ abstract final class HomeHeroGradientResolver {
     return untilBoundary;
   }
 
+  static TilawaHomeNextPrayerHeroTokens _resolvePreSunrise({
+    required DateTime now,
+    required HomePrayerDayBoundaries boundaries,
+  }) {
+    final TilawaHomeNextPrayerHeroTokens preDawn =
+        TilawaHomeNextPrayerHeroTokens.preDawn();
+    final TilawaHomeNextPrayerHeroTokens day =
+        TilawaHomeNextPrayerHeroTokens.day();
+    final TilawaHomeNextPrayerHeroTokens night =
+        TilawaHomeNextPrayerHeroTokens.night();
+
+    final DateTime lightWindowStart = _earlier(
+      boundaries.fajr.subtract(preSunriseFajrLead),
+      boundaries.sunrise.subtract(preSunriseLightDuration),
+    );
+
+    if (!now.isBefore(lightWindowStart)) {
+      final Duration window = boundaries.sunrise.difference(lightWindowStart);
+      final double t = window <= Duration.zero
+          ? 1
+          : now.difference(lightWindowStart).inMilliseconds /
+                window.inMilliseconds;
+      return TilawaHomeNextPrayerHeroTokens.lerp(
+        preDawn,
+        day,
+        t.clamp(0.0, 1.0),
+      );
+    }
+
+    final DateTime nightEaseStart =
+        lightWindowStart.subtract(preSunriseNightEaseDuration);
+    if (!now.isBefore(nightEaseStart)) {
+      final Duration easeWindow =
+          lightWindowStart.difference(nightEaseStart);
+      final double t = now.difference(nightEaseStart).inMilliseconds /
+          easeWindow.inMilliseconds;
+      return TilawaHomeNextPrayerHeroTokens.lerp(
+        night,
+        preDawn,
+        t.clamp(0.0, 1.0),
+      );
+    }
+
+    return night;
+  }
+
+  static DateTime _earlier(DateTime a, DateTime b) {
+    return a.isBefore(b) ? a : b;
+  }
+
   static bool _isNight(DateTime now, HomePrayerDayBoundaries boundaries) {
     return !now.isBefore(boundaries.isha) || now.isBefore(boundaries.sunrise);
   }
@@ -179,6 +238,23 @@ abstract final class HomeHeroGradientResolver {
     Duration duration,
   ) {
     return !now.isBefore(boundary) && now.isBefore(boundary.add(duration));
+  }
+
+  static bool _isInPreSunriseBlend(
+    DateTime now,
+    HomePrayerDayBoundaries boundaries,
+  ) {
+    if (!now.isBefore(boundaries.sunrise)) {
+      return false;
+    }
+
+    final DateTime lightWindowStart = _earlier(
+      boundaries.fajr.subtract(preSunriseFajrLead),
+      boundaries.sunrise.subtract(preSunriseLightDuration),
+    );
+    final DateTime nightEaseStart =
+        lightWindowStart.subtract(preSunriseNightEaseDuration);
+    return !now.isBefore(nightEaseStart);
   }
 
   static TilawaHomeNextPrayerHeroTokens? _blendAcross({

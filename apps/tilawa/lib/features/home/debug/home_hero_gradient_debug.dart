@@ -11,11 +11,12 @@ abstract final class HomeHeroGradientDebug {
   static final ValueNotifier<HomeHeroDayPhase?> phaseOverride =
       ValueNotifier<HomeHeroDayPhase?>(null);
 
-  /// Cycles Auto → Day → Dusk → Night → Auto.
+  /// Cycles Auto → Day → Pre-dawn → Dusk → Night → Auto.
   static void cyclePhase() {
     phaseOverride.value = switch (phaseOverride.value) {
       null => HomeHeroDayPhase.day,
-      HomeHeroDayPhase.day => HomeHeroDayPhase.dusk,
+      HomeHeroDayPhase.day => HomeHeroDayPhase.preDawn,
+      HomeHeroDayPhase.preDawn => HomeHeroDayPhase.dusk,
       HomeHeroDayPhase.dusk => HomeHeroDayPhase.night,
       HomeHeroDayPhase.night => null,
     };
@@ -25,6 +26,7 @@ abstract final class HomeHeroGradientDebug {
     return switch (phase) {
       null => 'Auto (prayer times)',
       HomeHeroDayPhase.day => 'Day',
+      HomeHeroDayPhase.preDawn => 'Pre-dawn',
       HomeHeroDayPhase.dusk => 'Dusk',
       HomeHeroDayPhase.night => 'Night',
     };

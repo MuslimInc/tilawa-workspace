@@ -98,17 +98,19 @@ void main() {
       );
     });
 
-    test('athkar to reciters may prompt review', () {
+    test('athkar tab removal no longer prompts returnedToRecitersTab', () {
       final List<ShellTabEffect> effects = coordinator.onTabChanged(
-        previousIndex: 3,
+        previousIndex: 0,
         nextIndex: kAppShellRecitersTabIndex,
       );
 
       expect(
         effects,
-        contains(
-          const TryAppReviewPromptEffect(
-            AppReviewPromptMoment.returnedToRecitersTab,
+        isNot(
+          contains(
+            const TryAppReviewPromptEffect(
+              AppReviewPromptMoment.returnedToRecitersTab,
+            ),
           ),
         ),
       );

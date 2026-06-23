@@ -233,7 +233,16 @@ List<RouteBase> get quranSessionsRoutes => [
       final bookingId = state.pathParameters['bookingId']!;
       return BlocProvider(
         create: (_) => getIt<SessionDetailBloc>(),
-        child: SessionDetailScreen(bookingId: bookingId),
+        child: SessionDetailScreen(
+          bookingId: bookingId,
+          onLeaveCall: (sessionId) =>
+              getIt<SessionCallProvider>().leaveSession(sessionId),
+          onSetMicrophoneMuted: (sessionId, {required muted}) =>
+              getIt<SessionCallProvider>().setMicrophoneMuted(
+                sessionId,
+                muted: muted,
+              ),
+        ),
       );
     },
   ),

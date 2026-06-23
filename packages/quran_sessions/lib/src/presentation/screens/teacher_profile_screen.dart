@@ -232,8 +232,9 @@ class _TeacherProfileBodyState extends State<_TeacherProfileBody> {
             }).toList(),
           ),
         ],
-        if (widget.teacher.supportedCallTypes
-            .contains(SessionCallType.externalMeeting)) ...[
+        if (widget.teacher.supportedCallTypes.contains(
+          SessionCallType.externalMeeting,
+        )) ...[
           SizedBox(height: tokens.spaceSmall),
           Center(
             child: TilawaStatusChip(

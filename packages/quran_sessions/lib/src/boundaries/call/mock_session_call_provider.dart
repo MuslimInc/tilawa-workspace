@@ -31,4 +31,10 @@ class MockSessionCallProvider implements SessionCallProvider {
 
   @override
   Future<void> endSession(String sessionId) async {}
+
+  @override
+  Future<void> setMicrophoneMuted(
+    String sessionId, {
+    required bool muted,
+  }) async {}
 }

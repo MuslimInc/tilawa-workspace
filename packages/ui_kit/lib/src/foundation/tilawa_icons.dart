@@ -40,6 +40,13 @@ abstract final class TilawaIcons {
   static const IconData qiblaActive = FluentIcons.compass_northwest_24_filled;
   static const IconData athkar = FluentIcons.book_open_24_regular;
   static const IconData athkarActive = FluentIcons.book_open_24_filled;
+
+  /// Stylized misbaha (prayer beads) artwork for Home quick actions.
+  ///
+  /// Multi-color SVG — use [TilawaSvgIcon.colored] so bead hues are preserved.
+  static const TilawaSvgIcon athkarMisbaha = TilawaSvgIcon(
+    'packages/tilawa_ui_kit/assets/icons/athkar_misbaha_icon.svg',
+  );
   static const IconData profile = FluentIcons.person_24_regular;
   static const IconData profileActive = FluentIcons.person_24_filled;
 
@@ -282,6 +289,28 @@ class TilawaSvgIcon {
           colorFilter: effectiveColor != null
               ? ColorFilter.mode(effectiveColor, BlendMode.srcIn)
               : null,
+          semanticsLabel: semanticsLabel,
+        );
+      },
+    );
+  }
+
+  /// Renders the SVG at [size] without applying a monochrome tint.
+  ///
+  /// Use for multi-color artwork such as [TilawaIcons.athkarMisbaha].
+  Widget colored({
+    double? size,
+    String? semanticsLabel,
+  }) {
+    return Builder(
+      builder: (context) {
+        final iconTheme = IconTheme.of(context);
+        final effectiveSize = size ?? iconTheme.size ?? 24;
+
+        return SvgPicture.asset(
+          assetPath,
+          width: effectiveSize,
+          height: effectiveSize,
           semanticsLabel: semanticsLabel,
         );
       },

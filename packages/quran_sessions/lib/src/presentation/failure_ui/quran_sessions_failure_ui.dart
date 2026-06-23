@@ -64,8 +64,7 @@ extension QuranSessionsFailureUi on QuranSessionsFailure {
             ? loc.messageForPublicNameFailure(
                 ValidationFailure(field: f, code: c),
               )
-            : f == ValidateExternalMeetingUrl.field &&
-                  c == 'invalid_url'
+            : f == ValidateExternalMeetingUrl.field && c == 'invalid_url'
             ? loc.teacherExternalMeetingUrlInvalid
             : loc.validationError(c, f),
 
@@ -76,6 +75,11 @@ extension QuranSessionsFailureUi on QuranSessionsFailure {
       UnsupportedSessionModeFailure() => loc.unsupportedSessionMode,
       MeetingLinkUnavailableFailure() => loc.meetingLinkUnavailable,
       CallProviderUnavailableFailure() => loc.callProviderUnavailable,
+      RtcPermissionDeniedFailure(:final permission) => loc.rtcPermissionDenied(
+        permission,
+      ),
+      RtcCallJoinFailure() => loc.rtcCallJoinFailed,
+      WebRtcSignalingUnavailableFailure() => loc.webrtcSignalingUnavailable,
       ExternalMeetingLaunchFailure(linkCopiedToClipboard: true) =>
         loc.externalMeetingLinkCopied,
       ExternalMeetingLaunchFailure() => loc.externalMeetingLaunchFailed,

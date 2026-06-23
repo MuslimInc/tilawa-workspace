@@ -11,4 +11,12 @@ abstract interface class SessionCallProvider {
   Future<void> leaveSession(String sessionId);
 
   Future<void> endSession(String sessionId);
+
+  /// Mutes or unmutes the local microphone for an active in-app call.
+  ///
+  /// No-op for external/mock providers until a session is joined in-app.
+  Future<void> setMicrophoneMuted(
+    String sessionId, {
+    required bool muted,
+  });
 }

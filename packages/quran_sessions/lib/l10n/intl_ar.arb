@@ -102,6 +102,21 @@
     "sessionModeExternalDisabled": "لم يضف المعلم رابط الاجتماع بعد. اختر الصوت أو الفيديو.",
     "meetingLinkUnavailable": "لم يُعدّ المعلم رابط اجتماع للجلسات الخارجية بعد. اختر الصوت أو الفيديو، أو حاول لاحقًا.",
     "callProviderUnavailable": "لا يمكن الانضمام إلى هذه الجلسة من التطبيق حاليًا.",
+    "rtcPermissionDenied": "يلزم الوصول إلى الميكروفون أو الكاميرا للانضمام. فعّل {permission} من الإعدادات ثم أعد المحاولة.",
+    "@rtcPermissionDenied": {
+        "placeholders": {
+            "permission": {
+                "type": "String"
+            }
+        }
+    },
+    "rtcCallJoinFailed": "تعذّر الاتصال بمكالمة الصوت أو الفيديو. حاول مرة أخرى بعد قليل.",
+    "webrtcSignalingUnavailable": "مكالمات WebRTC داخل التطبيق غير متاحة بعد. اختر الصوت عبر Agora أو رابط اجتماع خارجي.",
+    "inAppCallShellTitle": "مكالمة الجلسة",
+    "inAppCallShellBody": "أنت متصل بغرفة هذه الجلسة. أنهِ المكالمة عند انتهاء الدرس.",
+    "inAppCallShellEndCall": "مغادرة المكالمة",
+    "inAppCallShellMute": "كتم الميكroفون",
+    "inAppCallShellUnmute": "إلغاء كتم الميكروفون",
     "externalMeetingJoinTitle": "الانضمام خارج تلاوة؟",
     "externalMeetingJoinBody": "ستغادر تلاوة مؤقتًا للانضمام إلى جلستك عبر Google Meet أو Zoom أو المتصفح. يمكنك العودة هنا في أي وقت — تفاصيل جلستك تبقى مفتوحة.",
     "externalMeetingJoinOpen": "فتح",

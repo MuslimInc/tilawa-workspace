@@ -7,7 +7,7 @@ import 'package:tilawa/core/bootstrap/startup_blur_shader_warmup.dart';
 import 'package:tilawa/core/telemetry/startup_perf_log.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-/// Frosted glass panel for readable hero chrome over photography.
+/// Frosted glass panel for readable hero metrics on the neutral canvas.
 class HomeHeroGlassSurface extends StatelessWidget {
   const HomeHeroGlassSurface({
     super.key,
@@ -25,17 +25,12 @@ class HomeHeroGlassSurface extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
     final TilawaDesignTokens tokens = theme.tokens;
-    final TilawaHomeNextPrayerHeroTokens heroTokens =
-        theme.componentTokens.homeNextPrayerHero;
     final BorderRadius resolvedRadius =
         borderRadius ?? BorderRadius.circular(tokens.radiusLarge);
-    final Color fill = heroTokens.foregroundColor.withValues(
-      alpha: heroTokens.locationChipFillOpacity,
-    );
-    final Color border = heroTokens.foregroundColor.withValues(
-      alpha: heroTokens.locationChipBorderOpacity,
-    );
+    final Color fill = colorScheme.surface.withValues(alpha: 0.90);
+    final Color border = colorScheme.outlineVariant.withValues(alpha: 0.48);
 
     final Widget decoratedChild = DecoratedBox(
       decoration: BoxDecoration(
@@ -52,14 +47,33 @@ class HomeHeroGlassSurface extends StatelessWidget {
       ),
     );
 
-    final Widget frostedPanel = ClipRRect(
-      borderRadius: resolvedRadius,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(
-          sigmaX: tokens.blurGlass,
-          sigmaY: tokens.blurGlass,
+    final Widget frostedPanel = DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: resolvedRadius,
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: colorScheme.shadow.withValues(
+              alpha: tokens.opacityShadowStrong,
+            ),
+            blurRadius: tokens.blurShadow * 1.35,
+            offset: Offset(0, tokens.shadowOffsetMedium.dy),
+          ),
+          BoxShadow(
+            color: colorScheme.primary.withValues(alpha: 0.04),
+            blurRadius: tokens.blurShadow * 0.6,
+            offset: Offset(0, tokens.shadowOffsetSmall.dy),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: resolvedRadius,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(
+            sigmaX: tokens.blurGlass * 1.1,
+            sigmaY: tokens.blurGlass * 1.1,
+          ),
+          child: decoratedChild,
         ),
-        child: decoratedChild,
       ),
     );
 
@@ -80,12 +94,8 @@ class HomeHeroGlassSurface extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: resolvedRadius,
-        splashColor: heroTokens.foregroundColor.withValues(
-          alpha: heroTokens.locationChipSplashOpacity,
-        ),
-        highlightColor: heroTokens.foregroundColor.withValues(
-          alpha: heroTokens.locationChipHighlightOpacity,
-        ),
+        splashColor: colorScheme.primary.withValues(alpha: 0.08),
+        highlightColor: colorScheme.primary.withValues(alpha: 0.04),
         child: panel,
       ),
     );

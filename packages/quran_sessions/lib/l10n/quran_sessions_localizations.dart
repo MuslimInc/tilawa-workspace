@@ -671,6 +671,54 @@ abstract class QuranSessionsLocalizations {
   /// **'This session cannot be joined from the app right now.'**
   String get callProviderUnavailable;
 
+  /// No description provided for @rtcPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone or camera access is required to join this session. Enable {permission} in Settings and try again.'**
+  String rtcPermissionDenied(String permission);
+
+  /// No description provided for @rtcCallJoinFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not connect to the voice or video call. Try again in a moment.'**
+  String get rtcCallJoinFailed;
+
+  /// No description provided for @webrtcSignalingUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'In-app WebRTC calls are not available yet. Choose voice with Agora or an external meeting link.'**
+  String get webrtcSignalingUnavailable;
+
+  /// No description provided for @inAppCallShellTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session call'**
+  String get inAppCallShellTitle;
+
+  /// No description provided for @inAppCallShellBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You are connected to this session\'s call room. End the call when your lesson finishes.'**
+  String get inAppCallShellBody;
+
+  /// No description provided for @inAppCallShellEndCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave call'**
+  String get inAppCallShellEndCall;
+
+  /// No description provided for @inAppCallShellMute.
+  ///
+  /// In en, this message translates to:
+  /// **'Mute microphone'**
+  String get inAppCallShellMute;
+
+  /// No description provided for @inAppCallShellUnmute.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmute microphone'**
+  String get inAppCallShellUnmute;
+
   /// No description provided for @externalMeetingJoinTitle.
   ///
   /// In en, this message translates to:

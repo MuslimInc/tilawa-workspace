@@ -344,6 +344,35 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
       'This session cannot be joined from the app right now.';
 
   @override
+  String rtcPermissionDenied(String permission) {
+    return 'Microphone or camera access is required to join this session. Enable $permission in Settings and try again.';
+  }
+
+  @override
+  String get rtcCallJoinFailed =>
+      'Could not connect to the voice or video call. Try again in a moment.';
+
+  @override
+  String get webrtcSignalingUnavailable =>
+      'In-app WebRTC calls are not available yet. Choose voice with Agora or an external meeting link.';
+
+  @override
+  String get inAppCallShellTitle => 'Session call';
+
+  @override
+  String get inAppCallShellBody =>
+      'You are connected to this session\'s call room. End the call when your lesson finishes.';
+
+  @override
+  String get inAppCallShellEndCall => 'Leave call';
+
+  @override
+  String get inAppCallShellMute => 'Mute microphone';
+
+  @override
+  String get inAppCallShellUnmute => 'Unmute microphone';
+
+  @override
   String get externalMeetingJoinTitle => 'Join outside Tilawa?';
 
   @override

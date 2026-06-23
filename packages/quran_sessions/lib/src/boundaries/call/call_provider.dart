@@ -2,11 +2,9 @@ import 'call_room.dart';
 
 /// Abstracts in-app voice/video call initiation.
 ///
-/// MVP: injected as [ExternalMeetingCallProvider] (just opens a URL).
-/// V2:  injected as [AgoraCallProvider].
-/// V3:  injected as [WebRtcCallProvider].
-///
-/// This package never imports Agora, WebRTC, or any call SDK directly.
+/// MVP: [ExternalMeetingCallProvider] opens a URL.
+/// Production RTC: register Agora/WebRTC implementations from
+/// `quran_sessions_rtc` in [RoutingSessionCallProvider] via DI.
 abstract interface class CallProvider {
   /// Joins or creates a call room for the given [sessionId].
   Future<CallRoom> joinSession(String sessionId);

@@ -4,8 +4,8 @@ import 'package:quran_sessions/quran_sessions.dart';
 
 void main() {
   group('SessionModePolicy', () {
-    test('withoutExternalMeeting enables mock voice when externalOnly', () {
-      final effective = SessionModePolicy.externalOnly.withoutExternalMeeting();
+    test('withoutExternalMeeting keeps mock voice and video on freeBeta', () {
+      final effective = SessionModePolicy.freeBeta.withoutExternalMeeting();
 
       check(effective.isEnabled(SessionCallType.externalMeeting)).isFalse();
       check(effective.isEnabled(SessionCallType.voiceCall)).isTrue();

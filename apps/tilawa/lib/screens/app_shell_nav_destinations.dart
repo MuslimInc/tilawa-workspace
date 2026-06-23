@@ -52,9 +52,7 @@ class AppShellNavDestination extends Equatable {
   ];
 }
 
-/// Builds the phone shell bottom bar (TripGlide icon-only IA).
-///
-/// Order: Home → Quran (index push) → Reciters → Qibla → Athkar → Settings (profile).
+/// Builds the phone shell bottom bar (Home → Quran reader → Reciters → Settings).
 List<AppShellNavDestination> buildPhoneShellNavDestinations(
   AppLocalizations l10n,
 ) {
@@ -82,20 +80,6 @@ List<AppShellNavDestination> buildPhoneShellNavDestinations(
       semanticsIdentifier: 'reciters_tab',
     ),
     AppShellNavDestination(
-      tabIndex: 2,
-      icon: TilawaIcons.qibla,
-      activeIcon: TilawaIcons.qiblaActive,
-      label: l10n.bottomNavQibla,
-      semanticsIdentifier: 'qibla_tab',
-    ),
-    AppShellNavDestination(
-      tabIndex: 3,
-      icon: TilawaIcons.athkar,
-      activeIcon: TilawaIcons.athkarActive,
-      label: l10n.bottomNavAthkar,
-      semanticsIdentifier: 'athkar_tab',
-    ),
-    AppShellNavDestination(
       tabIndex: kAppShellSettingsTabIndex,
       icon: TilawaIcons.profile,
       activeIcon: TilawaIcons.profileActive,
@@ -109,8 +93,8 @@ List<AppShellNavDestination> buildPhoneShellNavDestinations(
 /// Reciters main-tab index in [MainTabViewport].
 const int kAppShellRecitersTabIndex = 1;
 
-/// Settings shell tab (index 4), shown on the phone bottom bar as profile.
-const int kAppShellSettingsTabIndex = 4;
+/// Settings shell tab (index 2), shown on the phone bottom bar as profile.
+const int kAppShellSettingsTabIndex = 2;
 
 /// Tab indices that appear on the phone bottom bar (excluding push-only Quran).
-const Set<int> kPhoneShellNavTabIndices = {0, 1, 2, 3, 4};
+const Set<int> kPhoneShellNavTabIndices = {0, 1, 2};

@@ -7,7 +7,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/get_it_idempotent.dart';
 import 'package:tilawa/features/auth/domain/services/callable_session_payload_builder.dart';
-import 'package:tilawa/features/quran_sessions/data/external_meeting_url_launcher.dart';
 
 import '../data/firebase/firebase_auth_session_provider.dart';
 import '../data/firebase/firebase_audit_repository.dart';
@@ -33,6 +32,7 @@ import '../data/disabled_payment_provider.dart';
 import '../data/sandbox_payment_provider.dart';
 import 'quran_sessions_lifecycle_module.dart';
 import 'quran_sessions_mvp_module.dart';
+import 'quran_sessions_rtc_module.dart';
 
 /// Wires Firestore-backed Quran Sessions repositories via [QuranSessionsModule].
 class QuranSessionsFirebaseModule {
@@ -124,22 +124,10 @@ class QuranSessionsFirebaseModule {
       );
     }
 
+    QuranSessionsRtcModule.register(sl, config);
+
     sl.registerLazySingletonIfAbsent<SessionCallProvider>(
-      () => RoutingSessionCallProvider(
-        external: ExternalMeetingCallProvider(
-          getMeetingUrl: (sessionId) async {
-            final result = await sl<SessionRepository>().getSessionById(
-              sessionId,
-            );
-            return result.fold(
-              (_) => '',
-              (session) => session.joinUrl ?? '',
-            );
-          },
-          urlLauncher: launchExternalMeetingUrl,
-        ),
-        mock: const MockSessionCallProvider(),
-      ),
+      () => QuranSessionsRtcModule.buildRoutingProvider(sl, config),
     );
 
     sl.registerLazySingletonIfAbsent<CallProvider>(

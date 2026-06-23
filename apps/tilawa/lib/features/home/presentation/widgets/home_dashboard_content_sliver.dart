@@ -23,9 +23,11 @@ class HomeDashboardContentSliver extends StatelessWidget {
       top: Radius.circular(tokens.radiusExtraLarge),
     );
 
+    final double sheetLift = HomeDashboardHeroSliver.sheetOverlap - tokens.spaceMedium;
+
     return SliverToBoxAdapter(
       child: Transform.translate(
-        offset: const Offset(0, -HomeDashboardHeroSliver.sheetOverlap),
+        offset: Offset(0, -sheetLift),
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: sheetColor,

@@ -81,6 +81,8 @@ dependencies:
     path: ../../packages/quran_image
   quran_sessions:
     path: ../../packages/quran_sessions
+  quran_sessions_rtc:
+    path: ../../packages/quran_sessions_rtc
 
   record: ^7.1.0
   rxdart: ^0.28.0

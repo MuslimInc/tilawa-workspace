@@ -1,38 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:quran_sessions/quran_sessions.dart';
-import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/features/quran_sessions/quran_sessions_feature_flags.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../../quran_sessions/presentation/quran_sessions_user.dart';
+export 'open_home_quran_sessions.dart';
 
-/// Opens Quran Sessions when the profile is complete, otherwise gates first.
-Future<void> openHomeQuranSessions(BuildContext context) async {
-  final userId = quranSessionsCurrentUserId(getIt);
-  if (userId == null) {
-    context.push('/login');
-    return;
-  }
-
-  final result = await getIt<GetUserProfileUseCase>()(userId);
-  if (!context.mounted) return;
-
-  final profile = result.fold((_) => null, (p) => p);
-  if (profile != null && profile.isComplete) {
-    context.push(QuranSessionsRoutes.home);
-    return;
-  }
-
-  final completed = await context.push<bool>(
-    QuranSessionsRoutes.profileCompletion,
-  );
-  if (!context.mounted) return;
-  if (completed == true) {
-    context.push(QuranSessionsRoutes.home);
-  }
-}
+import 'open_home_quran_sessions.dart';
 
 /// Minimal utility footer for Home destinations outside the bottom nav.
 class HomeDashboardFooter extends StatelessWidget {
@@ -41,6 +15,7 @@ class HomeDashboardFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
+    final sessionsEnabled = quranSessionsFeatureConfig().quranSessionsEnabled;
 
     return Padding(
       padding: EdgeInsets.only(top: tokens.spaceLarge),
@@ -53,11 +28,12 @@ class HomeDashboardFooter extends StatelessWidget {
             label: context.l10n.homeQuickTasbeeh,
             onTap: () => const TasbeehRoute().push(context),
           ),
-          _FooterLink(
-            icon: Icons.menu_book_rounded,
-            label: context.l10n.homeSessionsTitle,
-            onTap: () => openHomeQuranSessions(context),
-          ),
+          if (sessionsEnabled)
+            _FooterLink(
+              icon: Icons.menu_book_rounded,
+              label: context.l10n.homeSessionsTitle,
+              onTap: () => openHomeQuranSessions(context),
+            ),
         ],
       ),
     );

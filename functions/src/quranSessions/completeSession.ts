@@ -16,9 +16,11 @@ import {
   requireValidSessionEpochUnlessAdmin,
   resolveActorRole,
 } from "./sessionAuth";
+import { resolveTeacherProfileUserId } from "./teacherProfileUserId";
 import { validateTransition } from "./sessionLifecycleGuard";
 import type { LifecycleStatus } from "./sessionLifecycleService";
 import type { ActorRole } from "./sessionLifecycleGuard";
+import { sessionCallableHttpsOptions } from "./sessionCallableOptions";
 
 interface CompleteSessionRequest {
   sessionId: string;
@@ -27,7 +29,7 @@ interface CompleteSessionRequest {
 }
 
 export const completeSession = onCall(
-  { enforceAppCheck: false },
+  sessionCallableHttpsOptions,
   async (request) => {
     const uid = requireAuthenticatedUid(request);
     await requireValidSessionEpochUnlessAdmin(request, uid);
@@ -55,9 +57,13 @@ export const completeSession = onCall(
       teacherId: (booking.teacherId as string) ?? "",
     };
 
+    const teacherUserId = await resolveTeacherProfileUserId(
+      db,
+      participants.teacherId,
+    );
     const actor = isAdmin(request)
       ? ("admin" as const)
-      : resolveActorRole(request, data.actorRole, participants);
+      : resolveActorRole(request, data.actorRole, participants, teacherUserId);
     const guardActor =
       actor === "admin" ? "system" : actor;
 

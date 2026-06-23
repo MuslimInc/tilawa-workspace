@@ -33,11 +33,13 @@ class QuranSessionsFeatureConfig extends Equatable {
   final bool quranSessionsBookingEnabled;
 
   bool get showProfileTeacherEntry =>
+      quranSessionsEnabled &&
       teacherApplicationEnabled &&
       teacherApplicationDiscoverability !=
           TeacherApplicationDiscoverability.none;
 
   bool get showEmptyStateTeacherEntry =>
+      quranSessionsEnabled &&
       teacherApplicationEnabled &&
       teacherApplicationDiscoverability ==
           TeacherApplicationDiscoverability.profileAndEmptyState;

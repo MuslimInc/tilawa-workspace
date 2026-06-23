@@ -231,7 +231,8 @@ class _BookingScreenState extends State<BookingScreen> {
                           SizedBox(height: Theme.of(context).tokens.spaceSmall),
                           _CallTypePicker(
                             hostPolicy: widget.sessionModePolicy,
-                            teacherExternalMeetingUrl: teacherExternalMeetingUrl,
+                            teacherExternalMeetingUrl:
+                                teacherExternalMeetingUrl,
                             selected: selectedCallType,
                             onChanged: (ct) => context.read<BookingBloc>().add(
                               CallTypeSelected(ct),
@@ -427,7 +428,8 @@ class _CallTypePicker extends StatelessWidget {
     final enabledSegments = segments
         .where((segment) => segment.enabled)
         .toList();
-    final effectiveSelected = policy.isEnabled(selected) &&
+    final effectiveSelected =
+        policy.isEnabled(selected) &&
             (selected != SessionCallType.externalMeeting ||
                 _hasExternalMeetingUrl)
         ? selected

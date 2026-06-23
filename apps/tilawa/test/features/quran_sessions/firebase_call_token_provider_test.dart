@@ -1,0 +1,142 @@
+import 'package:checks/checks.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:quran_sessions/quran_sessions.dart';
+import 'package:tilawa/features/auth/domain/services/callable_session_payload_builder.dart';
+import 'package:tilawa/features/auth/domain/services/session_epoch_provider.dart';
+import 'package:tilawa/features/quran_sessions/data/firebase/firebase_call_token_provider.dart';
+
+class _FakePayloadBuilder extends CallableSessionPayloadBuilder {
+  _FakePayloadBuilder() : super(_FakeEpochProvider());
+}
+
+class _FakeEpochProvider implements SessionEpochProvider {
+  @override
+  Future<int> getSessionEpoch() async => 7;
+}
+
+FirebaseCallTokenProvider _provider({
+  required Future<Map<String, dynamic>> Function(Map<String, dynamic> payload)
+  invoke,
+}) {
+  return FirebaseCallTokenProvider(
+    _FakePayloadBuilder(),
+    issueSessionRtcTokenInvoker: invoke,
+  );
+}
+
+void main() {
+  group('FirebaseCallTokenProvider', () {
+    test('maps valid callable payload to RtcJoinCredentials', () async {
+      final provider = _provider(
+        invoke: (payload) async {
+          check(payload['sessionId']).equals('session_1');
+          check(payload['sessionEpoch']).equals(7);
+          return {
+            'token': ' rtc-token ',
+            'channelId': ' channel-1 ',
+            'uid': 918273,
+            'appId': ' app-id ',
+          };
+        },
+      );
+
+      final credentials = await provider.fetchCredentials(
+        sessionId: 'session_1',
+        userId: 'user_1',
+      );
+
+      check(credentials.token).equals('rtc-token');
+      check(credentials.channelId).equals('channel-1');
+      check(credentials.uid).equals(918273);
+      check(credentials.appId).equals('app-id');
+    });
+
+    test('rejects missing or blank token', () async {
+      final provider = _provider(
+        invoke: (_) async => {
+          'token': ' ',
+          'channelId': 'channel-1',
+          'uid': 1,
+          'appId': 'app-id',
+        },
+      );
+
+      await expectLater(
+        provider.fetchCredentials(sessionId: 's1', userId: 'u1'),
+        throwsA(
+          isA<RtcCallJoinFailure>().having(
+            (failure) => failure.reasonCode,
+            'reasonCode',
+            'invalid_token_response',
+          ),
+        ),
+      );
+    });
+
+    test('rejects missing or blank channel id', () async {
+      final provider = _provider(
+        invoke: (_) async => {
+          'token': 'token',
+          'channelId': '',
+          'uid': 1,
+          'appId': 'app-id',
+        },
+      );
+
+      await expectLater(
+        provider.fetchCredentials(sessionId: 's1', userId: 'u1'),
+        throwsA(
+          isA<RtcCallJoinFailure>().having(
+            (failure) => failure.reasonCode,
+            'reasonCode',
+            'invalid_channel_response',
+          ),
+        ),
+      );
+    });
+
+    test('rejects non-numeric uid', () async {
+      final provider = _provider(
+        invoke: (_) async => {
+          'token': 'token',
+          'channelId': 'channel-1',
+          'uid': 'not-a-number',
+          'appId': 'app-id',
+        },
+      );
+
+      await expectLater(
+        provider.fetchCredentials(sessionId: 's1', userId: 'u1'),
+        throwsA(
+          isA<RtcCallJoinFailure>().having(
+            (failure) => failure.reasonCode,
+            'reasonCode',
+            'invalid_uid_response',
+          ),
+        ),
+      );
+    });
+
+    test('rejects missing or blank app id', () async {
+      final provider = _provider(
+        invoke: (_) async => {
+          'token': 'token',
+          'channelId': 'channel-1',
+          'uid': 1,
+          'appId': '',
+        },
+      );
+
+      await expectLater(
+        provider.fetchCredentials(sessionId: 's1', userId: 'u1'),
+        throwsA(
+          isA<RtcCallJoinFailure>().having(
+            (failure) => failure.reasonCode,
+            'reasonCode',
+            'invalid_app_id_response',
+          ),
+        ),
+      );
+    });
+  });
+}

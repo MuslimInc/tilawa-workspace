@@ -333,6 +333,35 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
       'لا يمكن الانضمام إلى هذه الجلسة من التطبيق حاليًا.';
 
   @override
+  String rtcPermissionDenied(String permission) {
+    return 'يلزم الوصول إلى الميكروفون أو الكاميرا للانضمام. فعّل $permission من الإعدادات ثم أعد المحاولة.';
+  }
+
+  @override
+  String get rtcCallJoinFailed =>
+      'تعذّر الاتصال بمكالمة الصوت أو الفيديو. حاول مرة أخرى بعد قليل.';
+
+  @override
+  String get webrtcSignalingUnavailable =>
+      'مكالمات WebRTC داخل التطبيق غير متاحة بعد. اختر الصوت عبر Agora أو رابط اجتماع خارجي.';
+
+  @override
+  String get inAppCallShellTitle => 'مكالمة الجلسة';
+
+  @override
+  String get inAppCallShellBody =>
+      'أنت متصل بغرفة هذه الجلسة. أنهِ المكالمة عند انتهاء الدرس.';
+
+  @override
+  String get inAppCallShellEndCall => 'مغادرة المكالمة';
+
+  @override
+  String get inAppCallShellMute => 'كتم الميكroفون';
+
+  @override
+  String get inAppCallShellUnmute => 'إلغاء كتم الميكروفون';
+
+  @override
   String get externalMeetingJoinTitle => 'الانضمام خارج تلاوة؟';
 
   @override

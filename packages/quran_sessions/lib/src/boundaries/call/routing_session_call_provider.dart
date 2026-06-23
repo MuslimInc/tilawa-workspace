@@ -47,6 +47,17 @@ class RoutingSessionCallProvider implements SessionCallProvider {
     await agora?.endSession(sessionId);
     await webrtc?.endSession(sessionId);
   }
+
+  @override
+  Future<void> setMicrophoneMuted(
+    String sessionId, {
+    required bool muted,
+  }) async {
+    await external.setMicrophoneMuted(sessionId, muted: muted);
+    await mock.setMicrophoneMuted(sessionId, muted: muted);
+    await agora?.setMicrophoneMuted(sessionId, muted: muted);
+    await webrtc?.setMicrophoneMuted(sessionId, muted: muted);
+  }
 }
 
 /// Adapts [SessionCallProvider] to legacy [CallProvider] (student join).

@@ -19,21 +19,14 @@ typedef OpenExternalMeetingUrl = Future<void> Function(String url);
 
 class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
   SessionDetailBloc({
-    required SessionAggregateRepository aggregateRepository,
-    required GetSessionTimelineUseCase getTimeline,
-    SessionRepository? sessionRepository,
-    JoinSessionUseCase? joinSession,
-    OpenExternalMeetingUrl? openExternalMeetingUrl,
-    ReportSessionConcernUseCase? reportConcern,
-    OpenSessionDisputeUseCase? openDispute,
-  }) : _aggregateRepository = aggregateRepository,
-       _getTimeline = getTimeline,
-       _sessionRepository = sessionRepository,
-       _joinSession = joinSession,
-       _openExternalMeetingUrl = openExternalMeetingUrl,
-       _reportConcern = reportConcern,
-       _openDispute = openDispute,
-       super(const SessionDetailInitial()) {
+    required this._aggregateRepository,
+    required this._getTimeline,
+    this._sessionRepository,
+    this._joinSession,
+    this._openExternalMeetingUrl,
+    this._reportConcern,
+    this._openDispute,
+  }) : super(const SessionDetailInitial()) {
     on<SessionDetailLoadRequested>(
       _onLoadRequested,
       transformer: restartable(),
@@ -98,7 +91,7 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
       (events) => events,
     );
 
-    final externalMeetingJoinUrl = await _loadExternalMeetingJoinUrl(
+    final callContext = await _loadSessionCallContext(
       sessionId: aggregate.sessionId,
     );
 
@@ -106,27 +99,38 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
       SessionDetailSuccess(
         aggregate: aggregate,
         timeline: timeline,
-        externalMeetingJoinUrl: externalMeetingJoinUrl,
+        externalMeetingJoinUrl: callContext.externalMeetingJoinUrl,
+        callProviderKind: callContext.callProviderKind,
       ),
     );
   }
 
-  Future<String?> _loadExternalMeetingJoinUrl({required String? sessionId}) async {
+  Future<
+    ({
+      String? externalMeetingJoinUrl,
+      SessionCallProviderKind? callProviderKind,
+    })
+  >
+  _loadSessionCallContext({required String? sessionId}) async {
     final repository = _sessionRepository;
     if (repository == null || sessionId == null || sessionId.isEmpty) {
-      return null;
+      return (externalMeetingJoinUrl: null, callProviderKind: null);
     }
 
     final sessionResult = await repository.getSessionById(sessionId);
     return sessionResult.fold(
-      (_) => null,
+      (_) => (externalMeetingJoinUrl: null, callProviderKind: null),
       (session) {
-        if (session.callType != SessionCallType.externalMeeting ||
-            session.callProviderKind != SessionCallProviderKind.external) {
-          return null;
+        String? externalMeetingJoinUrl;
+        if (session.callType == SessionCallType.externalMeeting &&
+            session.callProviderKind == SessionCallProviderKind.external) {
+          final url = session.joinUrl?.trim();
+          externalMeetingJoinUrl = (url?.isNotEmpty ?? false) ? url : null;
         }
-        final url = session.joinUrl?.trim();
-        return (url?.isNotEmpty ?? false) ? url : null;
+        return (
+          externalMeetingJoinUrl: externalMeetingJoinUrl,
+          callProviderKind: session.callProviderKind,
+        );
       },
     );
   }

@@ -9,8 +9,8 @@ import '../cubit/home_primary_action_cubit.dart';
 import '../cubit/home_primary_action_state.dart';
 import 'home_athkar_compact_card.dart';
 import 'home_daily_ayah_card.dart';
-import 'home_dashboard_footer.dart';
 import 'home_dashboard_section.dart';
+import 'home_features_hub.dart';
 import 'home_listening_resume_row.dart';
 import 'home_primary_action_zone.dart';
 
@@ -32,7 +32,9 @@ class HomeDashboardBody extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SizedBox(height: tokens.spaceLarge),
+              SizedBox(height: tokens.spaceMedium),
+              HomeFeaturesHub(onOpenPrayer: onOpenPrayer),
+              SizedBox(height: tokens.spaceExtraLarge),
               if (isTodayPlanEnabled()) ...[
                 const TodayPlanCard(),
                 SizedBox(height: tokens.spaceLarge),
@@ -46,7 +48,6 @@ class HomeDashboardBody extends StatelessWidget {
               const HomeAthkarCompactCard(),
               SizedBox(height: tokens.spaceLarge),
               const _ConditionalListeningRow(),
-              const HomeDashboardFooter(),
             ],
           ),
         ),

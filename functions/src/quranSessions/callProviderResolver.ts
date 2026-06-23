@@ -4,8 +4,8 @@ import { lifecycleError } from "./lifecycleErrors";
 /**
  * Resolves call provider metadata when a booking is created.
  *
- * Free Beta: external meetings use teacher/platform URL; voice/video use mock
- * until Agora/WebRTC are enabled server-side.
+ * Free Beta default: external + mock. When platform config enables Agora or
+ * WebRTC, voice/video bookings lock to the highest-priority enabled RTC provider.
  */
 export type SessionCallProviderKind =
   | "external"
@@ -26,10 +26,23 @@ const ALLOWED_CALL_TYPES = new Set([
   "videoCall",
 ]);
 
+const ALL_CALL_PROVIDERS = new Set<SessionCallProviderKind>([
+  "external",
+  "mock",
+  "agora",
+  "webrtc",
+]);
+
 const FREE_BETA_PROVIDERS = new Set<SessionCallProviderKind>([
   "external",
   "mock",
 ]);
+
+const RTC_PROVIDER_PRIORITY: SessionCallProviderKind[] = [
+  "agora",
+  "webrtc",
+  "mock",
+];
 
 export function assertValidCallType(callType: string): void {
   if (!ALLOWED_CALL_TYPES.has(callType)) {
@@ -48,10 +61,6 @@ export function resolveCallProviderForBooking(params: {
 
   assertValidCallType(callType);
 
-  if (params.clientCallProvider === "agora" || params.clientCallProvider === "webrtc") {
-    throw new Error("unsupported_call_provider");
-  }
-
   if (callType === "externalMeeting") {
     const meetingLink = resolveMeetingLink(
       callType,
@@ -66,34 +75,80 @@ export function resolveCallProviderForBooking(params: {
     };
   }
 
-  const enabledRtc = parseEnabledRtcProviders(platformConfig.enabledCallProviders);
-
-  if (!enabledRtc.has("mock")) {
-    throw new Error("unsupported_call_provider");
-  }
+  const enabledProviders = parseEnabledCallProviders(
+    platformConfig.enabledCallProviders,
+  );
+  const rtcProviders = rtcProvidersFromEnabled(enabledProviders);
+  const callProvider = resolveRtcProviderForBooking({
+    enabledRtcProviders: rtcProviders,
+    clientCallProvider: params.clientCallProvider,
+  });
 
   return {
-    callProvider: "mock",
+    callProvider,
     providerSessionId: sessionId,
     meetingLink: null,
     joinToken: null,
   };
 }
 
-function parseEnabledRtcProviders(raw: unknown): Set<SessionCallProviderKind> {
+export function parseEnabledCallProviders(raw: unknown): Set<SessionCallProviderKind> {
   if (raw === undefined || raw === null) {
     return FREE_BETA_PROVIDERS;
   }
   if (!Array.isArray(raw)) {
     throw new Error("invalid_enabled_call_providers");
   }
-  return new Set(
-    raw.filter(
-      (provider): provider is SessionCallProviderKind =>
-        typeof provider === "string"
-        && FREE_BETA_PROVIDERS.has(provider as SessionCallProviderKind),
-    ),
+  const parsed = raw.filter(
+    (provider): provider is SessionCallProviderKind =>
+      typeof provider === "string"
+      && ALL_CALL_PROVIDERS.has(provider as SessionCallProviderKind),
   );
+  if (parsed.length === 0) {
+    throw new Error("invalid_enabled_call_providers");
+  }
+  return new Set(parsed);
+}
+
+function rtcProvidersFromEnabled(
+  enabled: Set<SessionCallProviderKind>,
+): Set<SessionCallProviderKind> {
+  return new Set(
+    [...enabled].filter((provider) => provider !== "external"),
+  );
+}
+
+export function resolveRtcProviderForBooking(params: {
+  enabledRtcProviders: Set<SessionCallProviderKind>;
+  clientCallProvider?: string;
+}): SessionCallProviderKind {
+  const { enabledRtcProviders, clientCallProvider } = params;
+
+  if (enabledRtcProviders.size === 0) {
+    throw new Error("unsupported_call_provider");
+  }
+
+  if (clientCallProvider != null && clientCallProvider.trim() !== "") {
+    const requested = clientCallProvider.trim() as SessionCallProviderKind;
+    if (requested === "external") {
+      throw new Error("unsupported_call_provider");
+    }
+    if (!ALL_CALL_PROVIDERS.has(requested)) {
+      throw new Error("unsupported_call_provider");
+    }
+    if (!enabledRtcProviders.has(requested)) {
+      throw new Error("unsupported_call_provider");
+    }
+    return requested;
+  }
+
+  for (const provider of RTC_PROVIDER_PRIORITY) {
+    if (enabledRtcProviders.has(provider)) {
+      return provider;
+    }
+  }
+
+  throw new Error("unsupported_call_provider");
 }
 
 /** Maps resolver failures to lifecycle-safe HttpsError codes. */
@@ -105,7 +160,7 @@ export function mapCallProviderResolverError(
   if (message === "unsupported_call_provider") {
     throw lifecycleErrorFromCode(
       "unsupported_call_provider",
-      "Call provider is not enabled for Free Beta.",
+      "Call provider is not enabled for this platform configuration.",
       clientCallProvider == null ? undefined : { callProvider: clientCallProvider },
     );
   }

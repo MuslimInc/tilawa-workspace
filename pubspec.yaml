@@ -17,12 +17,16 @@ workspace:
   - packages/compass
   - packages/in_app_update
   - packages/quran_sessions
+  - packages/quran_sessions_rtc
 
 dev_dependencies:
   sentry_dart_plugin: ^3.4.0
   melos: ^8.0.0
   bloc_lint: ^0.4.1
   bloc_tools: ^0.1.0-dev.24
+
+dependency_overrides:
+  ffi: ^2.1.4
 
 melos:
   command:

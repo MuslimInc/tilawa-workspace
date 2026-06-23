@@ -52,12 +52,15 @@ void main() {
   });
 
   group('launchExternalMeetingUrl', () {
-    test('throws MeetingLinkUnavailableFailure for URL without scheme', () async {
-      await expectLater(
-        launchExternalMeetingUrl('meet.google.com/room'),
-        throwsA(isA<MeetingLinkUnavailableFailure>()),
-      );
-    });
+    test(
+      'throws MeetingLinkUnavailableFailure for URL without scheme',
+      () async {
+        await expectLater(
+          launchExternalMeetingUrl('meet.google.com/room'),
+          throwsA(isA<MeetingLinkUnavailableFailure>()),
+        );
+      },
+    );
 
     test('opens valid https URL even when canLaunchUrl is false', () async {
       fakeLauncher = _FakeUrlLauncher(canLaunchResult: false);
@@ -72,15 +75,18 @@ void main() {
       );
     });
 
-    test('throws ExternalMeetingLaunchFailure when launchUrl returns false', () async {
-      fakeLauncher = _FakeUrlLauncher(launchUrlResult: false);
-      UrlLauncherPlatform.instance = fakeLauncher;
+    test(
+      'throws ExternalMeetingLaunchFailure when launchUrl returns false',
+      () async {
+        fakeLauncher = _FakeUrlLauncher(launchUrlResult: false);
+        UrlLauncherPlatform.instance = fakeLauncher;
 
-      await expectLater(
-        launchExternalMeetingUrl('https://meet.google.com/fiy-jjux-mpq'),
-        throwsA(isA<ExternalMeetingLaunchFailure>()),
-      );
-    });
+        await expectLater(
+          launchExternalMeetingUrl('https://meet.google.com/fiy-jjux-mpq'),
+          throwsA(isA<ExternalMeetingLaunchFailure>()),
+        );
+      },
+    );
 
     test('throws ExternalMeetingLaunchFailure when launchUrl throws', () async {
       fakeLauncher = _FakeUrlLauncher(launchUrlThrows: true);

@@ -27,6 +27,15 @@ void main() {
           teacherApplicationEnabled: false,
         );
         check(disabled.showProfileTeacherEntry).isFalse();
+
+        const killSwitch = QuranSessionsFeatureConfig(
+          quranSessionsEnabled: false,
+          teacherApplicationEnabled: true,
+          teacherApplicationDiscoverability:
+              TeacherApplicationDiscoverability.profileAndEmptyState,
+        );
+        check(killSwitch.showProfileTeacherEntry).isFalse();
+        check(killSwitch.showEmptyStateTeacherEntry).isFalse();
       },
     );
   });

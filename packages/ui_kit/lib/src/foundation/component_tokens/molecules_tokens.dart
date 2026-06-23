@@ -1317,7 +1317,7 @@ class TilawaPermissionBannerTokens {
 
 /// Component tokens for the Home next-prayer hero card gradient shell.
 ///
-/// Warm parchment canvas — restrained stops in [AppColors].
+/// Phase-aware Islamic palette — restrained stops in [AppColors].
 @immutable
 class TilawaHomeNextPrayerHeroTokens {
   const TilawaHomeNextPrayerHeroTokens({
@@ -1401,7 +1401,23 @@ class TilawaHomeNextPrayerHeroTokens {
     );
   }
 
-  /// Night hero gradient (Isha through pre-sunrise).
+  /// Pre-dawn hero gradient (cool mist before sunrise — always light).
+  factory TilawaHomeNextPrayerHeroTokens.preDawn() {
+    return const TilawaHomeNextPrayerHeroTokens(
+      gradientTopStart: AppColors.homeNextPrayerGradientPreDawnTop,
+      gradientBottomEnd: AppColors.homeNextPrayerGradientPreDawnBottom,
+      foregroundColor: AppColors.homeNextPrayerGradientForeground,
+      locationChipFillOpacity: 0.10,
+      locationChipBorderOpacity: 0.22,
+      locationChipSplashOpacity: 0.08,
+      locationChipHighlightOpacity: 0.04,
+      mutedForegroundOpacity: 0.68,
+      tertiaryForegroundOpacity: 0.60,
+      footerForegroundOpacity: 0.90,
+    );
+  }
+
+  /// Night hero gradient (Isha through deep night before pre-dawn ease).
   factory TilawaHomeNextPrayerHeroTokens.night() {
     return const TilawaHomeNextPrayerHeroTokens(
       gradientTopStart: AppColors.homeNextPrayerGradientNightTop,

@@ -101,13 +101,33 @@ void main() {
 
       check(agoraJoined).isTrue();
     });
+
+    test('forwards setMicrophoneMuted to registered agora provider', () async {
+      bool? mutedValue;
+      final wired = RoutingSessionCallProvider(
+        external: router.external,
+        mock: router.mock,
+        agora: _RecordingProvider(
+          onJoin: () {},
+          onMute: (muted) => mutedValue = muted,
+        ),
+      );
+
+      await wired.setMicrophoneMuted('session_agora', muted: true);
+
+      check(mutedValue).equals(true);
+    });
   });
 }
 
 class _RecordingProvider implements SessionCallProvider {
-  const _RecordingProvider({required this.onJoin});
+  const _RecordingProvider({
+    required this.onJoin,
+    this.onMute,
+  });
 
   final void Function() onJoin;
+  final void Function(bool muted)? onMute;
 
   @override
   Future<CallRoom> join(CallJoinRequest request) async {
@@ -120,4 +140,12 @@ class _RecordingProvider implements SessionCallProvider {
 
   @override
   Future<void> endSession(String sessionId) async {}
+
+  @override
+  Future<void> setMicrophoneMuted(
+    String sessionId, {
+    required bool muted,
+  }) async {
+    onMute?.call(muted);
+  }
 }

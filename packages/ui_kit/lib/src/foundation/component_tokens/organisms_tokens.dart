@@ -407,17 +407,15 @@ class TilawaAdaptiveShellTokens {
   /// [TextScaler] so scroll padding tracks a11y text scaling.
   final double phoneBottomNavBarBaseHeight;
 
-  /// Horizontal inset on the side opposite the primary thumb (physical left when
-  /// holding the phone in the right hand).
+  /// Legacy horizontal inset kept for long-press thumb anchoring; the painted bar
+  /// is edge-to-edge (no side margin).
   final double bottomNavHorizontalMargin;
 
   /// Inset from the physical right edge — the natural right-thumb reach zone.
   final double bottomNavThumbSideMargin;
   final double bottomNavVerticalMargin;
 
-  /// Extra inset below the floating pill, above the system home indicator.
-  ///
-  /// Lifts the bar into a more comfortable thumb-reach zone on phones.
+  /// Legacy lift token; standard bottom nav is flush with the screen bottom.
   final double bottomNavBottomLift;
   final double bottomNavIconOnlyVerticalMargin;
   final double bottomNavInternalPadding;
@@ -425,25 +423,19 @@ class TilawaAdaptiveShellTokens {
   final double bottomNavBorderWidth;
   final double bottomNavItemGap;
 
-  /// Stable neutral elevated chrome for the phone bottom nav container.
-  ///
-  /// Light mode uses [Colors.white] so the floating bar reads as a clean chip on
-  /// the cream scaffold. Dark mode lerps [AppColors.darkSurfaceContainerHighBase]
-  /// toward [AppColors.darkBackground] so it stays separate from
-  /// primary-harmonized [ColorScheme] tiers.
+  /// Surface fill for the phone bottom nav bar ([ColorScheme.surface]).
   final Color bottomNavBackgroundColor;
 
-  /// Alpha for the soft shadow under the floating bottom nav (uses
-  /// [ColorScheme.shadow]). Kept low so elevation reads without a hazy band.
+  /// Reserved for legacy floating chrome; standard bottom nav has no shadow.
   final double bottomNavShadowOpacity;
 
-  /// Blur radius for the floating bottom nav shadow.
+  /// Reserved for legacy floating chrome; standard bottom nav has no shadow.
   final double bottomNavShadowBlur;
 
-  /// Offset for the floating bottom nav shadow.
+  /// Reserved for legacy floating chrome; standard bottom nav has no shadow.
   final Offset bottomNavShadowOffset;
 
-  /// [RoundedRectangleBorder.side] for the floating bottom nav ([TilawaDesignTokens.opacitySubtle] on [ColorScheme.outlineVariant]).
+  /// Hairline for long-press selector chips ([ColorScheme.outlineVariant]).
   final Color bottomNavOutlineColor;
 
   /// [NavigationRail.indicatorColor]: primary tint over [ColorScheme.surfaceContainerHigh].
@@ -502,17 +494,15 @@ class TilawaAdaptiveShellTokens {
   double phoneBottomNavLayoutHeight(TextScaler textScaler) =>
       phoneBottomNavIconOnlyLayoutHeight(textScaler);
 
-  /// Total painted height of the phone bottom nav dock, including outer
-  /// margins, inner padding, and the system navigation inset below the pill.
+  /// Total painted height of the phone bottom nav dock, including inner
+  /// padding and the system navigation inset below the bar.
   double phoneBottomNavPaintedHeight(
     TextScaler textScaler,
     double systemBottomViewPadding,
   ) =>
-      bottomNavVerticalMargin +
       (2 * bottomNavInternalPadding) +
       phoneBottomNavLayoutHeight(textScaler) +
-      systemBottomViewPadding +
-      bottomNavBottomLift;
+      systemBottomViewPadding;
 
   /// Height of the phone bottom nav row in **icon-only** mode.
   ///
@@ -584,18 +574,18 @@ class TilawaAdaptiveShellTokens {
         );
     return TilawaAdaptiveShellTokens(
       phoneBottomNavBarBaseHeight: phoneBottomNavBarBaseHeight,
-      bottomNavHorizontalMargin: 16,
+      bottomNavHorizontalMargin: 0,
       bottomNavThumbSideMargin: 16,
-      bottomNavVerticalMargin: 4,
-      bottomNavBottomLift: 4,
+      bottomNavVerticalMargin: 0,
+      bottomNavBottomLift: 0,
       bottomNavIconOnlyVerticalMargin: 2,
       bottomNavInternalPadding: 8,
       bottomNavBorderWidth: lightChrome ? 0.5 : 1,
       bottomNavItemGap: 8,
       bottomNavBackgroundColor: bottomNavBackgroundColor,
-      bottomNavShadowOpacity: lightChrome ? 0.04 : 0.06,
-      bottomNavShadowBlur: lightChrome ? 8 : 10,
-      bottomNavShadowOffset: const Offset(0, 1),
+      bottomNavShadowOpacity: 0,
+      bottomNavShadowBlur: 0,
+      bottomNavShadowOffset: Offset.zero,
       bottomNavOutlineColor: _bottomNavOutlineColor(colorScheme),
       sideRailIndicatorColor: _sideRailIndicatorColor(colorScheme),
       sideRailBackgroundColor: _sideRailBackgroundColor(colorScheme),
@@ -663,23 +653,12 @@ class TilawaAdaptiveShellTokens {
     );
   }
 
-  /// Bottom nav floating pill background — a dark charcoal (`#212528`)
-  /// that grounds the navigation chrome in both light and dark themes.
+  /// Bottom nav bar background — matches sheet/footer chrome ([ColorScheme.surface]).
   static Color _bottomNavBackgroundColor(ColorScheme colorScheme) {
-    if (colorScheme.brightness == Brightness.light) {
-      return Color.alphaBlend(
-        colorScheme.surface.withValues(alpha: 0.72),
-        AppColors.tripGlideCanvas,
-      );
-    }
-    return Color.alphaBlend(
-      AppColors.darkBackground.withValues(alpha: 0.88),
-      colorScheme.surfaceContainerHigh,
-    );
+    return colorScheme.surface;
   }
 
-  /// Selected nav button background — a solid light circle on the dark
-  /// bottom nav bar for high-contrast iOS-style selection chrome.
+  /// Selected nav button background on the surface bar.
   static Color _navButtonSelectedBackgroundColor(
     ColorScheme colorScheme,
     Color bottomNavBackgroundColor,

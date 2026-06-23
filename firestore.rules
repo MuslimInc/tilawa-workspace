@@ -321,6 +321,26 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    function quranSessionsProfileEligibilityFieldUnchanged(field) {
+      let beforeProfile = 'quranSessionsProfile' in resource.data
+        ? resource.data.quranSessionsProfile
+        : {};
+      let afterProfile = 'quranSessionsProfile' in request.resource.data
+        ? request.resource.data.quranSessionsProfile
+        : {};
+      return !(field in beforeProfile && beforeProfile[field] != null)
+        || afterProfile.get(field, null) == beforeProfile.get(field, null);
+    }
+
+    function quranSessionsProfileEligibilityUnchanged() {
+      return quranSessionsProfileEligibilityFieldUnchanged('gender')
+        && quranSessionsProfileEligibilityFieldUnchanged('dateOfBirth')
+        && quranSessionsProfileEligibilityFieldUnchanged('countryCode')
+        && quranSessionsProfileEligibilityFieldUnchanged('cityId')
+        && quranSessionsProfileEligibilityFieldUnchanged('guardianId')
+        && quranSessionsProfileEligibilityFieldUnchanged('role');
+    }
+
     function quranSessionsProfileModerationUnchanged() {
       let beforeProfile = 'quranSessionsProfile' in resource.data
         ? resource.data.quranSessionsProfile
@@ -354,6 +374,7 @@ service cloud.firestore {
       allow update: if isAdmin()
         || (isOwner(userId)
             && quranSessionsProfileModerationUnchanged()
+            && quranSessionsProfileEligibilityUnchanged()
             && sessionFieldsUnchanged());
       allow delete: if false;
 

@@ -1,8 +1,9 @@
 import 'package:equatable/equatable.dart';
 
 import '../../../domain/entities/session_aggregate.dart';
-import '../../../domain/entities/session_lifecycle_status.dart';
 import '../../../domain/entities/session_audit_event.dart';
+import '../../../domain/entities/session_call_provider_kind.dart';
+import '../../../domain/entities/session_lifecycle_status.dart';
 import '../../../domain/failures/quran_sessions_failure.dart';
 
 sealed class SessionDetailState extends Equatable {
@@ -25,6 +26,7 @@ final class SessionDetailSuccess extends SessionDetailState {
     required this.aggregate,
     required this.timeline,
     this.externalMeetingJoinUrl,
+    this.callProviderKind,
     this.hasOpenedExternalMeeting = false,
     this.joinInProgress = false,
     this.joinFailure,
@@ -39,6 +41,7 @@ final class SessionDetailSuccess extends SessionDetailState {
   final SessionAggregate aggregate;
   final List<SessionAuditEvent> timeline;
   final String? externalMeetingJoinUrl;
+  final SessionCallProviderKind? callProviderKind;
   final bool hasOpenedExternalMeeting;
   final bool joinInProgress;
   final QuranSessionsFailure? joinFailure;
@@ -59,11 +62,17 @@ final class SessionDetailSuccess extends SessionDetailState {
 
   bool get isExternalMeeting => externalMeetingJoinUrl != null;
 
+  bool get supportsInAppMicrophoneMute =>
+      callProviderKind == SessionCallProviderKind.agora ||
+      callProviderKind == SessionCallProviderKind.webrtc;
+
   SessionDetailSuccess copyWith({
     SessionAggregate? aggregate,
     List<SessionAuditEvent>? timeline,
     String? externalMeetingJoinUrl,
     bool clearExternalMeetingJoinUrl = false,
+    SessionCallProviderKind? callProviderKind,
+    bool clearCallProviderKind = false,
     bool? hasOpenedExternalMeeting,
     bool? joinInProgress,
     bool clearJoinInProgress = false,
@@ -88,6 +97,9 @@ final class SessionDetailSuccess extends SessionDetailState {
       externalMeetingJoinUrl: clearExternalMeetingJoinUrl
           ? null
           : externalMeetingJoinUrl ?? this.externalMeetingJoinUrl,
+      callProviderKind: clearCallProviderKind
+          ? null
+          : callProviderKind ?? this.callProviderKind,
       hasOpenedExternalMeeting:
           hasOpenedExternalMeeting ?? this.hasOpenedExternalMeeting,
       joinInProgress: clearJoinInProgress
@@ -120,6 +132,7 @@ final class SessionDetailSuccess extends SessionDetailState {
     aggregate,
     timeline,
     externalMeetingJoinUrl,
+    callProviderKind,
     hasOpenedExternalMeeting,
     joinInProgress,
     joinFailure,

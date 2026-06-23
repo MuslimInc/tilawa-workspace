@@ -88,7 +88,8 @@ void main() {
     check(result.isRight()).isTrue();
     check(profiles.lastUpdatedPublicProfile?.id).equals(profileId);
     check(profiles.lastUpdatedPublicProfile?.userId).equals('uid_teacher');
-    check(profiles.lastUpdatedPublicProfile?.externalMeetingUrl)
-        .equals('https://meet.google.com/fiy-jjux-mab');
+    check(
+      profiles.lastUpdatedPublicProfile?.externalMeetingUrl,
+    ).equals('https://meet.google.com/fiy-jjux-mab');
   });
 }

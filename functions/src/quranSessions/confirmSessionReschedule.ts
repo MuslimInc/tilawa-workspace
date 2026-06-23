@@ -11,10 +11,12 @@ import {
   runIdempotentOperation,
 } from "./idempotencyService";
 import { isAdmin, requireAuthenticatedUid, requireValidSessionEpochUnlessAdmin, resolveActorRole } from "./sessionAuth";
+import { resolveTeacherProfileUserId } from "./teacherProfileUserId";
 import { validateTransition } from "./sessionLifecycleGuard";
 import type { LifecycleStatus } from "./sessionLifecycleService";
 import { nowServer } from "./sessionLifecycleService";
 import type { ActorRole } from "./sessionLifecycleGuard";
+import { sessionCallableHttpsOptions } from "./sessionCallableOptions";
 
 interface ConfirmSessionRescheduleRequest {
   requestId: string;
@@ -24,7 +26,7 @@ interface ConfirmSessionRescheduleRequest {
 }
 
 export const confirmSessionReschedule = onCall(
-  { enforceAppCheck: false },
+  sessionCallableHttpsOptions,
   async (request) => {
     const uid = requireAuthenticatedUid(request);
     await requireValidSessionEpochUnlessAdmin(request, uid);
@@ -56,9 +58,13 @@ export const confirmSessionReschedule = onCall(
     if (claimedRole === "admin" && !isAdmin(request)) {
       throw new HttpsError("permission-denied", "Admin access required.");
     }
+    const teacherUserId = await resolveTeacherProfileUserId(
+      db,
+      participants.teacherId,
+    );
     const actor = isAdmin(request) && claimedRole === "admin"
       ? "admin"
-      : resolveActorRole(request, claimedRole, participants);
+      : resolveActorRole(request, claimedRole, participants, teacherUserId);
     const guardActor =
       actor === "admin" ? "system" : actor;
 

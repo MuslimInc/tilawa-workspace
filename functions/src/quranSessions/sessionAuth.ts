@@ -70,12 +70,21 @@ export async function requireValidSessionEpochUnlessAdmin(
   await requireValidSessionEpoch(request, uid);
 }
 
+function teacherAuthUid(
+  participants: BookingParticipants,
+  teacherUserId?: string,
+): string {
+  return teacherUserId ?? participants.teacherId;
+}
+
 export function resolveActorRole(
   request: CallableRequest<unknown>,
   claimedRole: ActorRole | undefined,
   participants: BookingParticipants,
+  teacherUserId?: string,
 ): ActorRole {
   const uid = requireAuthenticatedUid(request);
+  const teacherUid = teacherAuthUid(participants, teacherUserId);
 
   if (isAdmin(request)) {
     return claimedRole === "system" ? "system" : "admin";
@@ -90,7 +99,7 @@ export function resolveActorRole(
     return "student";
   }
 
-  if (uid === participants.teacherId) {
+  if (uid === teacherUid) {
     if (claimedRole != null && claimedRole !== "teacher") {
       throw lifecycleError("unauthorized_actor", "Teacher cannot act as another role.", {
         actorRole: claimedRole,
@@ -107,15 +116,17 @@ export function resolveActorRole(
 export function requireParticipantOrAdmin(
   request: CallableRequest<unknown>,
   participants: BookingParticipants,
+  teacherUserId?: string,
 ): { uid: string; actor: ActorRole } {
   const uid = requireAuthenticatedUid(request);
+  const teacherUid = teacherAuthUid(participants, teacherUserId);
   if (isAdmin(request)) {
     return { uid, actor: "admin" };
   }
   if (uid === participants.studentId) {
     return { uid, actor: "student" };
   }
-  if (uid === participants.teacherId) {
+  if (uid === teacherUid) {
     return { uid, actor: "teacher" };
   }
   throw lifecycleError("not_participant", "Caller is not a session participant.", {

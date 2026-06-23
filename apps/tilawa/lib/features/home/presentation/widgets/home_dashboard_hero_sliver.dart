@@ -94,19 +94,34 @@ abstract final class HomeDashboardHeroSliver {
   }
 
   static double _resolveBottomInset(BuildContext context) {
-    return Theme.of(context).tokens.spaceSmall + sheetOverlap;
+    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    return tokens.spaceMedium + sheetOverlap;
   }
 
   /// Pinned hero chrome when the expanded gradient is fully collapsed.
   ///
-  /// Uses the prayer-period tint when it differs from the flat canvas; otherwise
-  /// a slightly elevated neutral so the bar reads above white content cards.
-  static Color collapsedBarColor(TilawaHomeNextPrayerHeroTokens heroTokens) {
-    final Color phaseTint = heroTokens.gradientBottomEnd;
-    if (phaseTint != AppColors.tripGlideCanvas) {
-      return phaseTint;
+  /// Blends phase stops so the bar matches the expanded ramp — never a flat
+  /// dark forest block on light pre-dawn/day phases.
+  static Color collapsedBarColor(
+    TilawaHomeNextPrayerHeroTokens heroTokens,
+    ColorScheme colorScheme,
+  ) {
+    final Color top = heroTokens.gradientTopStart;
+    final Color bottom = heroTokens.gradientBottomEnd;
+    final bool flatLightCanvas =
+        top == bottom && bottom.computeLuminance() > 0.82;
+    if (flatLightCanvas) {
+      return colorScheme.surfaceContainerHigh;
     }
-    return AppColors.tripGlideCanvasElevated;
+
+    if (top.computeLuminance() > 0.72) {
+      return Color.lerp(top, bottom, 0.32)!;
+    }
+
+    if (bottom.computeLuminance() < 0.35) {
+      return Color.lerp(bottom, top, 0.55)!;
+    }
+    return Color.lerp(top, bottom, 0.58)!;
   }
 }
 
@@ -250,11 +265,12 @@ class _HomeDashboardHeroAppBarState extends State<_HomeDashboardHeroAppBar> {
       Theme.of(context),
       heroTokens,
     );
-    final Color collapsedBarColor = HomeDashboardHeroSliver.collapsedBarColor(
-      heroTokens,
-    );
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final Color collapsedBarColor = HomeDashboardHeroSliver.collapsedBarColor(
+      heroTokens,
+      colorScheme,
+    );
 
     return Theme(
       data: heroTheme,
@@ -264,7 +280,10 @@ class _HomeDashboardHeroAppBarState extends State<_HomeDashboardHeroAppBar> {
         expandedHeight: expandedHeight,
         backgroundColor: collapsedBarColor,
         surfaceTintColor: Colors.transparent,
-        foregroundColor: heroTokens.foregroundColor,
+        foregroundColor: HomeHeroPhotoTheme.collapsedToolbarForeground(
+          collapsedBarColor: collapsedBarColor,
+          heroTokens: heroTokens,
+        ),
         automaticallyImplyLeading: false,
         centerTitle: false,
         elevation: TilawaAppBarChrome.elevation(enabled: false),
@@ -272,7 +291,7 @@ class _HomeDashboardHeroAppBarState extends State<_HomeDashboardHeroAppBar> {
           enabled: false,
         ),
         shape: TilawaAppBarChrome.bottomHairline(colorScheme, tokens),
-        systemOverlayStyle: SystemUiOverlayStyle.light,
+        systemOverlayStyle: HomeHeroBackground.systemOverlayStyle(heroTokens),
         flexibleSpace: _HomeHeroFlexibleSpace(
           topInset: topInset,
           expandedHeight: expandedHeight,
@@ -436,12 +455,12 @@ class _HomeHeroFlexibleSpaceState extends State<_HomeHeroFlexibleSpace> {
             t > _expandedFadeStart && expandedOpacity > 0 ? expandedOpacity : 0;
         final double expandedReveal = Curves.easeInOutCubic.transform(t);
         final double collapsedBarReveal = 1 - expandedReveal;
-        final Color canvasColor = context.scaffoldCanvasColor;
+        final ColorScheme colorScheme = theme.colorScheme;
+        final Color canvasColor = AppColors.homeTravelSheetSurface;
         final Color collapsedBarColor =
-            HomeDashboardHeroSliver.collapsedBarColor(heroTokens);
-        final SystemUiOverlayStyle overlayStyle = collapsedBarReveal > 0.55
-            ? SystemUiOverlayStyle.dark
-            : SystemUiOverlayStyle.light;
+            HomeDashboardHeroSliver.collapsedBarColor(heroTokens, colorScheme);
+        final SystemUiOverlayStyle overlayStyle =
+            HomeHeroBackground.systemOverlayStyle(heroTokens);
 
         return AnnotatedRegion<SystemUiOverlayStyle>(
           value: overlayStyle,
@@ -614,20 +633,26 @@ class _HomeHeroMetricsFooterSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final heroTokens = Theme.of(context).componentTokens.homeNextPrayerHero;
+    final colorScheme = Theme.of(context).colorScheme;
     final tokens = Theme.of(context).tokens;
-    final Color onGradient = heroTokens.foregroundColor;
+    final Color cardInk = HomeHeroPhotoTheme.glassCardInk(colorScheme);
+    final Color cardMuted = HomeHeroPhotoTheme.glassCardMuted(colorScheme);
 
     final Widget metricsChild = dashboardFailed
         ? _HomeHeroMetricsFailure(
-            onGradient: onGradient,
+            cardInk: cardInk,
+            cardMuted: cardMuted,
             onRetry: onRetryDashboard,
           )
         : metricsLoading
-        ? _HomeHeroMetricsSkeleton(onGradient: onGradient)
+        ? _HomeHeroMetricsSkeleton(
+            cardInk: cardInk,
+            cardMuted: cardMuted,
+          )
         : _HomeHeroNextPrayerFocus(
             nextPrayer: nextPrayer,
-            onGradient: onGradient,
+            cardInk: cardInk,
+            cardMuted: cardMuted,
             onOpenPrayer: onOpenPrayer,
             showEyebrow: false,
           );
@@ -654,9 +679,7 @@ class _HomeHeroMetricsFooterSection extends StatelessWidget {
                       context.l10n.nextPrayer,
                       style: HomeHeroPhotoTheme.labelStyle(
                         Theme.of(context).textTheme.labelMedium,
-                        onGradient.withValues(
-                          alpha: heroTokens.tertiaryForegroundOpacity,
-                        ),
+                        cardMuted,
                         tokens: tokens,
                         fontWeight: FontWeight.w600,
                       ),
@@ -694,22 +717,20 @@ class _HomeHeroCollapsedToolbar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final heroTokens = theme.componentTokens.homeNextPrayerHero;
-    final Color foreground = Color.lerp(
-      AppColors.tripGlideInk,
-      heroTokens.foregroundColor,
-      expandedReveal,
-    )!;
-    final TextStyle? summaryStyle = expandedReveal > 0.5
-        ? HomeHeroPhotoTheme.titleStyle(
-            theme.textTheme.titleSmall,
-            foreground,
-            tokens: theme.tokens,
-          )
-        : theme.textTheme.titleSmall?.copyWith(
-            color: foreground,
-            fontWeight: FontWeight.w700,
-            height: 1.1,
-          );
+    final Color collapsedBarColor = HomeDashboardHeroSliver.collapsedBarColor(
+      heroTokens,
+      theme.colorScheme,
+    );
+    final Color foreground = HomeHeroPhotoTheme.collapsedToolbarForeground(
+      collapsedBarColor: collapsedBarColor,
+      heroTokens: heroTokens,
+    );
+    final TextStyle? summaryStyle = HomeHeroPhotoTheme.titleStyle(
+      theme.textTheme.titleSmall,
+      foreground,
+      tokens: theme.tokens,
+      fontWeight: FontWeight.w700,
+    );
 
     return switch (nextPrayer) {
       null => Text(
@@ -829,7 +850,6 @@ class _HomeHeroHeader extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final heroTokens = theme.componentTokens.homeNextPrayerHero;
-    final Color onGradient = heroTokens.foregroundColor;
     final DateTime now = DateTime.now();
     final String hijriDateLine = formatHomeHijriDate(
       date: now,
@@ -852,8 +872,9 @@ class _HomeHeroHeader extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: HomeHeroPhotoTheme.labelStyle(
                 theme.textTheme.bodyMedium,
-                onGradient.withValues(
-                  alpha: heroTokens.footerForegroundOpacity,
+                HomeHeroPhotoTheme.heroChromeMuted(
+                  heroTokens,
+                  opacity: heroTokens.footerForegroundOpacity,
                 ),
                 tokens: tokens,
                 fontWeight: FontWeight.w600,
@@ -868,18 +889,19 @@ class _HomeHeroHeader extends StatelessWidget {
 
 class _HomeHeroMetricsFailure extends StatelessWidget {
   const _HomeHeroMetricsFailure({
-    required this.onGradient,
+    required this.cardInk,
+    required this.cardMuted,
     required this.onRetry,
   });
 
-  final Color onGradient;
+  final Color cardInk;
+  final Color cardMuted;
   final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final heroTokens = theme.componentTokens.homeNextPrayerHero;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -887,18 +909,14 @@ class _HomeHeroMetricsFailure extends StatelessWidget {
       children: [
         Text(
           context.l10n.homeDashboardLoadError,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: onGradient.withValues(
-              alpha: heroTokens.footerForegroundOpacity,
-            ),
-          ),
+          style: theme.textTheme.bodyMedium?.copyWith(color: cardMuted),
         ),
         Align(
           alignment: AlignmentDirectional.centerStart,
           child: TextButton(
             onPressed: onRetry,
             style: TextButton.styleFrom(
-              foregroundColor: onGradient,
+              foregroundColor: cardInk,
               padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
               minimumSize: Size(
                 tokens.minInteractiveDimension,
@@ -909,7 +927,7 @@ class _HomeHeroMetricsFailure extends StatelessWidget {
             child: Text(
               context.l10n.retry,
               style: theme.textTheme.labelLarge?.copyWith(
-                color: onGradient,
+                color: cardInk,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -921,15 +939,18 @@ class _HomeHeroMetricsFailure extends StatelessWidget {
 }
 
 class _HomeHeroMetricsSkeleton extends StatelessWidget {
-  const _HomeHeroMetricsSkeleton({required this.onGradient});
+  const _HomeHeroMetricsSkeleton({
+    required this.cardInk,
+    required this.cardMuted,
+  });
 
-  final Color onGradient;
+  final Color cardInk;
+  final Color cardMuted;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final heroTokens = theme.componentTokens.homeNextPrayerHero;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -938,15 +959,11 @@ class _HomeHeroMetricsSkeleton extends StatelessWidget {
         TilawaLoadingIndicator(
           centered: false,
           strokeWidth: 2,
-          color: onGradient,
+          color: cardInk,
         ),
         Text(
           context.l10n.homeNextPrayerUnavailable,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: onGradient.withValues(
-              alpha: heroTokens.mutedForegroundOpacity,
-            ),
-          ),
+          style: theme.textTheme.bodyMedium?.copyWith(color: cardMuted),
         ),
       ],
     );
@@ -956,13 +973,15 @@ class _HomeHeroMetricsSkeleton extends StatelessWidget {
 class _HomeHeroNextPrayerFocus extends StatelessWidget {
   const _HomeHeroNextPrayerFocus({
     required this.nextPrayer,
-    required this.onGradient,
+    required this.cardInk,
+    required this.cardMuted,
     required this.onOpenPrayer,
     this.showEyebrow = true,
   });
 
   final HomeNextPrayer? nextPrayer;
-  final Color onGradient;
+  final Color cardInk;
+  final Color cardMuted;
   final VoidCallback onOpenPrayer;
   final bool showEyebrow;
 
@@ -970,14 +989,13 @@ class _HomeHeroNextPrayerFocus extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final heroTokens = theme.componentTokens.homeNextPrayerHero;
 
     if (nextPrayer == null) {
       return Text(
         context.l10n.homeNextPrayerUnavailable,
         style: HomeHeroPhotoTheme.titleStyle(
           theme.textTheme.titleMedium,
-          onGradient.withValues(alpha: heroTokens.footerForegroundOpacity),
+          cardMuted,
           tokens: tokens,
           fontWeight: FontWeight.w600,
         ),
@@ -999,9 +1017,7 @@ class _HomeHeroNextPrayerFocus extends StatelessWidget {
             context.l10n.nextPrayer,
             style: HomeHeroPhotoTheme.labelStyle(
               theme.textTheme.labelSmall,
-              onGradient.withValues(
-                alpha: heroTokens.tertiaryForegroundOpacity,
-              ),
+              cardMuted,
               tokens: tokens,
             ),
           ),
@@ -1017,9 +1033,7 @@ class _HomeHeroNextPrayerFocus extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: HomeHeroPhotoTheme.titleStyle(
                   theme.textTheme.titleMedium,
-                  onGradient.withValues(
-                    alpha: heroTokens.footerForegroundOpacity,
-                  ),
+                  cardInk,
                   tokens: tokens,
                   fontWeight: FontWeight.w600,
                 ),
@@ -1030,7 +1044,7 @@ class _HomeHeroNextPrayerFocus extends StatelessWidget {
               style:
                   HomeHeroPhotoTheme.titleStyle(
                     theme.textTheme.titleLarge,
-                    onGradient,
+                    cardInk,
                     tokens: tokens,
                   )?.copyWith(
                     fontFeatures: const [FontFeature.tabularFigures()],
@@ -1041,9 +1055,7 @@ class _HomeHeroNextPrayerFocus extends StatelessWidget {
         ),
         _HomeHeroPrayerRemainingText(
           prayerTime: prayer.time,
-          color: onGradient.withValues(
-            alpha: heroTokens.mutedForegroundOpacity,
-          ),
+          color: cardMuted,
         ),
       ],
     );
@@ -1062,12 +1074,8 @@ class _HomeHeroNextPrayerFocus extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onOpenPrayer,
-          splashColor: onGradient.withValues(
-            alpha: heroTokens.locationChipSplashOpacity,
-          ),
-          highlightColor: onGradient.withValues(
-            alpha: heroTokens.locationChipHighlightOpacity,
-          ),
+          splashColor: cardInk.withValues(alpha: 0.08),
+          highlightColor: cardInk.withValues(alpha: 0.04),
           child: content,
         ),
       ),
@@ -1120,16 +1128,17 @@ class _HomeHeroLocationChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final heroTokens = theme.componentTokens.homeNextPrayerHero;
+    final colorScheme = theme.colorScheme;
     final chipTokens = theme.componentTokens.chip;
-    final Color onGradient = heroTokens.foregroundColor;
+    final Color chipInk = HomeHeroPhotoTheme.glassCardInk(colorScheme);
+    final Color chipMuted = HomeHeroPhotoTheme.glassCardMuted(colorScheme);
 
     final TextStyle textStyle =
         theme.textTheme.labelMedium?.copyWith(
-          color: onGradient,
+          color: chipInk,
           fontWeight: FontWeight.w600,
         ) ??
-        TextStyle(color: onGradient, fontWeight: FontWeight.w600);
+        TextStyle(color: chipInk, fontWeight: FontWeight.w600);
 
     final double iconSize = chipTokens.inlineIconSize;
     final BorderRadius chipRadius = BorderRadius.circular(
@@ -1142,9 +1151,7 @@ class _HomeHeroLocationChip extends StatelessWidget {
     final RoundedRectangleBorder shape = RoundedRectangleBorder(
       borderRadius: chipRadius,
       side: BorderSide(
-        color: onGradient.withValues(
-          alpha: heroTokens.locationChipBorderOpacity,
-        ),
+        color: chipMuted.withValues(alpha: 0.45),
         width: tokens.borderWidthThin,
       ),
     );
@@ -1158,20 +1165,14 @@ class _HomeHeroLocationChip extends StatelessWidget {
       );
 
       return Material(
-        color: onGradient.withValues(
-          alpha: heroTokens.locationChipFillOpacity,
-        ),
+        color: colorScheme.surfaceContainerHigh.withValues(alpha: 0.72),
         shape: shape,
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: isRefreshingLocation ? null : onRefreshLocation,
           customBorder: shape,
-          splashColor: onGradient.withValues(
-            alpha: heroTokens.locationChipSplashOpacity,
-          ),
-          highlightColor: onGradient.withValues(
-            alpha: heroTokens.locationChipHighlightOpacity,
-          ),
+          splashColor: chipInk.withValues(alpha: 0.08),
+          highlightColor: chipInk.withValues(alpha: 0.04),
           child: ConstrainedBox(
             constraints: const BoxConstraints(
               minWidth: kTilawaMinInteractiveDimension,
@@ -1190,14 +1191,14 @@ class _HomeHeroLocationChip extends StatelessWidget {
                       child: TilawaLoadingIndicator(
                         centered: false,
                         strokeWidth: 2,
-                        color: onGradient,
+                        color: chipInk,
                       ),
                     )
                   else
                     Icon(
                       FluentIcons.location_24_regular,
                       size: iconSize,
-                      color: onGradient,
+                      color: chipInk,
                     ),
                   if (maxLabelWidth != null)
                     ConstrainedBox(

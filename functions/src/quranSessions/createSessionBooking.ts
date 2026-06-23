@@ -33,6 +33,7 @@ import {
   legacyStatusForLifecycle,
   nowServer,
 } from "./sessionLifecycleService";
+import { sessionCallableHttpsOptions } from "./sessionCallableOptions";
 
 interface CreateSessionBookingRequest {
   teacherId: string;
@@ -124,7 +125,7 @@ async function runPostBookingSideEffects(
 }
 
 export const createSessionBooking = onCall(
-  { enforceAppCheck: false },
+  sessionCallableHttpsOptions,
   async (request) => {
     try {
       return await handleCreateSessionBooking(request);

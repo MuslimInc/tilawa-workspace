@@ -59,4 +59,10 @@ class ExternalMeetingCallProvider implements SessionCallProvider, CallProvider {
   Future<void> endSession(String sessionId) async {
     // Nothing to do — teacher ends the call in the external app.
   }
+
+  @override
+  Future<void> setMicrophoneMuted(
+    String sessionId, {
+    required bool muted,
+  }) async {}
 }

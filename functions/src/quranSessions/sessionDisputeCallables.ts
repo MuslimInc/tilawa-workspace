@@ -24,6 +24,7 @@ import { resolveTeacherProfileUserId } from "./teacherProfileUserId";
 import { requireAdmin, requireParticipantOrAdmin, requireValidSessionEpochUnlessAdmin } from "./sessionAuth";
 import { validateTransition } from "./sessionLifecycleGuard";
 import type { LifecycleStatus } from "./sessionLifecycleService";
+import { sessionCallableHttpsOptions } from "./sessionCallableOptions";
 
 interface OpenSessionDisputeRequest {
   bookingId: string;
@@ -33,7 +34,7 @@ interface OpenSessionDisputeRequest {
 }
 
 export const openSessionDispute = onCall(
-  { enforceAppCheck: false },
+  sessionCallableHttpsOptions,
   async (request) => {
     const data = request.data as OpenSessionDisputeRequest;
     if (!data.bookingId || !data.reason?.trim()) {
@@ -54,7 +55,15 @@ export const openSessionDispute = onCall(
       studentId: (booking.studentId as string) ?? "",
       teacherId: (booking.teacherId as string) ?? "",
     };
-    const { uid, actor } = requireParticipantOrAdmin(request, participants);
+    const teacherUserId = await resolveTeacherProfileUserId(
+      db,
+      participants.teacherId,
+    );
+    const { uid, actor } = requireParticipantOrAdmin(
+      request,
+      participants,
+      teacherUserId,
+    );
     await requireValidSessionEpochUnlessAdmin(request, uid);
 
     const operationKey = buildOperationKey(
@@ -168,7 +177,7 @@ interface ResolveSessionDisputeRequest {
 }
 
 export const resolveSessionDispute = onCall(
-  { enforceAppCheck: false },
+  sessionCallableHttpsOptions,
   async (request) => {
     const data = request.data as ResolveSessionDisputeRequest;
     if (

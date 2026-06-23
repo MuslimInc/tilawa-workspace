@@ -1,4 +1,3 @@
-import 'package:tilawa/features/app_review/domain/entities/app_review_prompt_moment.dart';
 import 'package:tilawa/screens/app_shell_nav_destinations.dart';
 
 import '../domain/shell_tab_effect.dart';
@@ -26,14 +25,6 @@ class ShellTabCoordinator {
     final List<ShellTabEffect> effects = <ShellTabEffect>[
       SyncMainShellTabEffect(nextIndex),
     ];
-
-    if (previousIndex == 3 && nextIndex == kAppShellRecitersTabIndex) {
-      effects.add(
-        const TryAppReviewPromptEffect(
-          AppReviewPromptMoment.returnedToRecitersTab,
-        ),
-      );
-    }
 
     if (nextIndex == kAppShellRecitersTabIndex) {
       effects.add(const MaybeTryLeftPrayerRecitersPromptEffect());

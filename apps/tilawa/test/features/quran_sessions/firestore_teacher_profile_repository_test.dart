@@ -98,8 +98,9 @@ void main() {
           .collection(FirestoreQuranSessionsPaths.teacherProfiles)
           .doc('app_1')
           .get();
-      check(doc.data()!['externalMeetingUrl'])
-          .equals('https://meet.google.com/room-1');
+      check(
+        doc.data()!['externalMeetingUrl'],
+      ).equals('https://meet.google.com/room-1');
     });
   });
 }

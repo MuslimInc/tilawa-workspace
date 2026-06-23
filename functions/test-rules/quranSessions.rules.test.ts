@@ -215,3 +215,80 @@ test("rules: verified teacher owner can update externalMeetingUrl", async () => 
   const snap = await getDoc(doc(teacherDb, "quran_teacher_profiles/teacher1"));
   assert.equal(snap.data()?.externalMeetingUrl, "https://meet.google.com/teacher-room");
 });
+
+test("rules: client cannot create or mutate quran_bookings", async () => {
+  await testEnv.clearFirestore();
+  await seedSlotLock();
+
+  const studentDb = testEnv.authenticatedContext("student2").firestore();
+  await assertFails(
+    setDoc(doc(studentDb, "quran_bookings/booking_new"), {
+      bookingId: "booking_new",
+      aggregateId: "booking_new",
+      sessionId: "session_new",
+      teacherId: "teacher1",
+      studentId: "student2",
+      startsAt: new Date("2026-01-11T07:00:00.000Z"),
+      endsAt: new Date("2026-01-11T07:30:00.000Z"),
+      lifecycleStatus: "scheduled",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }),
+  );
+  await assertFails(
+    setDoc(
+      doc(studentDb, "quran_bookings/booking1"),
+      { lifecycleStatus: "cancelledByStudent" },
+      { merge: true },
+    ),
+  );
+});
+
+test("rules: client cannot create or mutate quran_sessions", async () => {
+  await testEnv.clearFirestore();
+  await seedSlotLock();
+
+  const studentDb = testEnv.authenticatedContext("student2").firestore();
+  await assertFails(
+    setDoc(doc(studentDb, "quran_sessions/session_new"), {
+      sessionId: "session_new",
+      bookingId: "booking_new",
+      aggregateId: "booking_new",
+      teacherId: "teacher1",
+      studentId: "student2",
+      startsAt: new Date("2026-01-11T07:00:00.000Z"),
+      endsAt: new Date("2026-01-11T07:30:00.000Z"),
+      lifecycleStatus: "scheduled",
+      callType: "externalMeeting",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }),
+  );
+  await assertFails(
+    setDoc(
+      doc(studentDb, "quran_sessions/session1"),
+      { callProvider: "agora" },
+      { merge: true },
+    ),
+  );
+});
+
+test("rules: client cannot write quran_session_events", async () => {
+  await testEnv.clearFirestore();
+  await seedSlotLock();
+
+  const studentDb = testEnv.authenticatedContext("student2").firestore();
+  await assertFails(
+    setDoc(doc(studentDb, "quran_session_events/event_new"), {
+      bookingId: "booking1",
+      aggregateId: "booking1",
+      sessionId: "session1",
+      actorId: "student2",
+      actorRole: "student",
+      action: "join_session",
+      previousStatus: "scheduled",
+      newStatus: "inProgress",
+      timestamp: new Date(),
+    }),
+  );
+});

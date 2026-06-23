@@ -48,10 +48,13 @@ void main() {
     expect(appBar.expandedHeight, expectedExpandedHeight);
     expect(
       appBar.backgroundColor,
-      HomeDashboardHeroSliver.collapsedBarColor(heroTokens),
+      HomeDashboardHeroSliver.collapsedBarColor(
+        heroTokens,
+        theme.colorScheme,
+      ),
     );
-    expect(appBar.foregroundColor, Colors.white);
-    expect(heroTokens.foregroundColor, Colors.white);
+    expect(appBar.foregroundColor, AppColors.tripGlideInk);
+    expect(heroTokens.foregroundColor, AppColors.tripGlideInk);
 
     final double collapseExtent = HomeDashboardHeroSliver.collapseScrollExtent(
       scrollContext,

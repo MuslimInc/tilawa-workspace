@@ -11,7 +11,7 @@ void main() {
     // (isMainShell(currentMatchedLocation())) and is covered by widget
     // behavior rather than this pure-logic test.
     test('non-Reciters tabs can never exit the app', () {
-      for (final int tabIndex in <int>[1, 2, 3]) {
+      for (final int tabIndex in <int>[1, 2]) {
         expect(
           RecitersRootBackScope.canExitApp(tabIndex),
           isFalse,
