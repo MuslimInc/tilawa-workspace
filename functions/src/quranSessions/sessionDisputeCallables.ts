@@ -219,13 +219,15 @@ export const resolveSessionDispute = onCall(
         }
 
         const disputeStatus = disputeStatusForResolution(data.resolution);
-        let refundResult: ReturnType<typeof issueRefundRecord> | null = null;
-        let compensationResult: ReturnType<typeof issueCompensationRecord> | null =
+        let refundResult: Awaited<ReturnType<typeof issueRefundRecord>> | null =
           null;
+        let compensationResult: Awaited<
+          ReturnType<typeof issueCompensationRecord>
+        > | null = null;
         let nextLifecycle: LifecycleStatus = "disputed";
 
         if (data.resolution === "with_compensation") {
-          compensationResult = issueCompensationRecord({
+          compensationResult = await issueCompensationRecord({
             tx,
             db,
             bookingRef,
@@ -241,7 +243,7 @@ export const resolveSessionDispute = onCall(
           });
           nextLifecycle = compensationResult.lifecycleStatus;
         } else if (data.resolution === "favor_student") {
-          refundResult = issueRefundRecord({
+          refundResult = await issueRefundRecord({
             tx,
             db,
             bookingRef,

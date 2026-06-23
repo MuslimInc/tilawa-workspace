@@ -218,7 +218,18 @@ These three terms are **not interchangeable**. Use each for its job.
 | 5 | `[x] Fixed` | CF integration parity | integration test | meetingLink asserted |
 | 8 | `[x] Fixed` | `validate_booking_eligibility_usecase_test.dart` | 11 cases | all pass |
 
-**Still open (same sprint):** 11, 12, 20.
+**Still open (same sprint):** 12, 20 (manual E2E).
+
+### Fix log (batch 4 — Sprint 035 staging validation, 2026-06-23)
+
+| Order | Status | Fixed in | Tests | Verification |
+|-------|--------|----------|-------|--------------|
+| 11 | `[x] Fixed` | `tilawa_admin` disputes list + detail (read-only); sidebar + routes | — | `ng build` pass |
+| 20 | `[x] Partial` | `lifecycleErrors.ts` (`meeting_link_required`); smoke script | `npm test` 49/49 | `quran-sessions:staging-smoke` **12/12** |
+
+**Sprint 035 gaps:** manual 16-step device loop not run; `seed:staging-teachers:apply` not executed; dispute **resolution** UI intentionally omitted (financial ledger).
+
+**Still open:** 12, 20 (manual mobile E2E evidence).
 
 ### Fix log (batch 2 — 2026-06-23)
 

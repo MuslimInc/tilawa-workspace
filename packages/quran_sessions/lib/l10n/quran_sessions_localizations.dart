@@ -2290,6 +2290,108 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'Other'**
   String get reportCategoryOther;
+
+  /// No description provided for @walletTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My wallet'**
+  String get walletTitle;
+
+  /// No description provided for @walletAvailableBalanceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Available balance'**
+  String get walletAvailableBalanceLabel;
+
+  /// No description provided for @walletHeldBalanceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'On hold: {amount}'**
+  String walletHeldBalanceLabel(String amount);
+
+  /// No description provided for @walletTransactionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction history'**
+  String get walletTransactionsTitle;
+
+  /// No description provided for @walletEmptyState.
+  ///
+  /// In en, this message translates to:
+  /// **'Credits appear when refunds are processed.'**
+  String get walletEmptyState;
+
+  /// No description provided for @walletFrozenMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet temporarily unavailable — contact support.'**
+  String get walletFrozenMessage;
+
+  /// No description provided for @walletTransactionTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{type}'**
+  String walletTransactionTypeLabel(String type);
+
+  /// No description provided for @walletTransactionTypeRefund.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund'**
+  String get walletTransactionTypeRefund;
+
+  /// No description provided for @walletTransactionTypeCompensation.
+  ///
+  /// In en, this message translates to:
+  /// **'Compensation'**
+  String get walletTransactionTypeCompensation;
+
+  /// No description provided for @walletTransactionTypeAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin credit'**
+  String get walletTransactionTypeAdmin;
+
+  /// No description provided for @walletTransactionTypePromo.
+  ///
+  /// In en, this message translates to:
+  /// **'Promotional credit'**
+  String get walletTransactionTypePromo;
+
+  /// No description provided for @walletTransactionTypeBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Session payment'**
+  String get walletTransactionTypeBooking;
+
+  /// No description provided for @walletTransactionTypeHold.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold'**
+  String get walletTransactionTypeHold;
+
+  /// No description provided for @walletTransactionTypeHoldRelease.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold released'**
+  String get walletTransactionTypeHoldRelease;
+
+  /// No description provided for @walletTransactionTypeReversal.
+  ///
+  /// In en, this message translates to:
+  /// **'Reversal'**
+  String get walletTransactionTypeReversal;
+
+  /// No description provided for @walletTransactionTypeExpiry.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired credit'**
+  String get walletTransactionTypeExpiry;
+
+  /// No description provided for @walletEntryAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet'**
+  String get walletEntryAction;
 }
 
 class _QuranSessionsLocalizationsDelegate

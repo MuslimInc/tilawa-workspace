@@ -23,7 +23,7 @@ export {
 } from "./quranSessions/sessionReportCallables";
 export { expirePendingReservations } from "./quranSessions/expirePendingReservations";
 export { deliverSessionNotification } from "./quranSessions/deliverSessionNotification";
-export { sessionReminders } from "./quranSessions/sessionReminders";
+export { getWallet, postWalletCredit } from "./quranSessions/walletCallables";
 
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { initializeApp } from "firebase-admin/app";

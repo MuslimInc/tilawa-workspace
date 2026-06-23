@@ -11,6 +11,8 @@ import {
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { StatusChipComponent } from '../../../shared/components/status-chip/status-chip.component';
 import { RejectReasonDialogComponent } from '../../../shared/components/reject-reason-dialog/reject-reason-dialog.component';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { StatusLabelPipe } from '../../../core/i18n/status-label.pipe';
 
 @Component({
   selector: 'app-quran-sessions-users',
@@ -21,6 +23,8 @@ import { RejectReasonDialogComponent } from '../../../shared/components/reject-r
     PageHeaderComponent,
     StatusChipComponent,
     RejectReasonDialogComponent,
+    TranslatePipe,
+    StatusLabelPipe,
   ],
   templateUrl: './quran-sessions-users.component.html',
 })

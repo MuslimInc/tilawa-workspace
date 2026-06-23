@@ -1220,4 +1220,60 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
 
   @override
   String get reportCategoryOther => 'أخرى';
+
+  @override
+  String get walletTitle => 'محفظتي';
+
+  @override
+  String get walletAvailableBalanceLabel => 'الرصيد المتاح';
+
+  @override
+  String walletHeldBalanceLabel(String amount) {
+    return 'محجوز: $amount';
+  }
+
+  @override
+  String get walletTransactionsTitle => 'سجل المعاملات';
+
+  @override
+  String get walletEmptyState => 'تظهر الأرصدة عند معالجة الاستردادات.';
+
+  @override
+  String get walletFrozenMessage =>
+      'المحفظة غير متاحة مؤقتًا — تواصل مع الدعم.';
+
+  @override
+  String walletTransactionTypeLabel(String type) {
+    return '$type';
+  }
+
+  @override
+  String get walletTransactionTypeRefund => 'استرداد';
+
+  @override
+  String get walletTransactionTypeCompensation => 'تعويض';
+
+  @override
+  String get walletTransactionTypeAdmin => 'رصيد إداري';
+
+  @override
+  String get walletTransactionTypePromo => 'رصيد ترويجي';
+
+  @override
+  String get walletTransactionTypeBooking => 'دفع جلسة';
+
+  @override
+  String get walletTransactionTypeHold => 'حجز';
+
+  @override
+  String get walletTransactionTypeHoldRelease => 'إلغاء حجز';
+
+  @override
+  String get walletTransactionTypeReversal => 'عكس معاملة';
+
+  @override
+  String get walletTransactionTypeExpiry => 'رصيد منتهٍ';
+
+  @override
+  String get walletEntryAction => 'المحفظة';
 }

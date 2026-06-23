@@ -7,6 +7,8 @@ import { SessionReportsFacade } from '../../../core/application/facades/session-
 import { SessionReportFilters } from '../../../core/domain/entities/session-report-summary.entity';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { StatusChipComponent } from '../../../shared/components/status-chip/status-chip.component';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { StatusLabelPipe } from '../../../core/i18n/status-label.pipe';
 
 @Component({
   selector: 'app-session-reports',
@@ -17,6 +19,8 @@ import { StatusChipComponent } from '../../../shared/components/status-chip/stat
     RouterLink,
     PageHeaderComponent,
     StatusChipComponent,
+    TranslatePipe,
+    StatusLabelPipe,
   ],
   templateUrl: './session-reports.component.html',
 })

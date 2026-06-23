@@ -39,6 +39,7 @@ export 'src/data/datasources/teacher_application_remote_data_source.dart';
 export 'src/data/datasources/teacher_profile_remote_data_source.dart';
 export 'src/data/datasources/teacher_remote_data_source.dart';
 export 'src/data/datasources/user_profile_remote_data_source.dart';
+export 'src/data/datasources/wallet_remote_data_source.dart';
 export 'src/data/dtos/market_config_dto.dart';
 export 'src/data/dtos/market_scheduling_config_dto.dart';
 export 'src/data/dtos/market_country_dto.dart';
@@ -53,6 +54,7 @@ export 'src/data/dtos/weekly_schedule_dto.dart';
 export 'src/data/dtos/availability_override_dto.dart';
 export 'src/data/dtos/teacher_profile_dto.dart';
 export 'src/data/dtos/user_profile_dto.dart';
+export 'src/data/dtos/wallet_dto.dart';
 // ── Data: typed exceptions (for datasource implementors) ─────────────────────
 export 'src/data/exceptions/remote_exception.dart';
 export 'src/data/seed/default_market_catalog.dart';
@@ -90,6 +92,8 @@ export 'src/domain/entities/time_range.dart';
 export 'src/domain/entities/weekday.dart';
 export 'src/domain/entities/weekly_schedule.dart';
 export 'src/domain/entities/user_profile.dart';
+export 'src/domain/entities/user_wallet.dart';
+export 'src/domain/entities/wallet_transaction.dart';
 // ── Domain: services ──────────────────────────────────────────────────────────
 export 'src/domain/services/booked_slot_starts.dart';
 export 'src/domain/services/day_interval_editor.dart';
@@ -111,6 +115,7 @@ export 'src/domain/repositories/teacher_profile_repository.dart';
 export 'src/domain/repositories/teacher_repository.dart'
     show TeacherRepository, TeacherPage;
 export 'src/domain/repositories/user_profile_repository.dart';
+export 'src/domain/repositories/wallet_repository.dart';
 // ── Domain: use cases ─────────────────────────────────────────────────────────
 export 'src/domain/usecases/approve_teacher_application_usecase.dart';
 export 'src/domain/usecases/block_account_usecase.dart';
@@ -147,6 +152,7 @@ export 'src/domain/usecases/get_teacher_profile_usecase.dart';
 export 'src/domain/usecases/get_teacher_sessions_usecase.dart';
 export 'src/domain/usecases/get_teachers_usecase.dart';
 export 'src/domain/usecases/get_user_profile_usecase.dart';
+export 'src/domain/usecases/get_wallet_snapshot_usecase.dart';
 export 'src/domain/usecases/reject_teacher_application_usecase.dart';
 export 'src/domain/usecases/revoke_teacher_profile_usecase.dart';
 export 'src/domain/usecases/save_teacher_application_draft_usecase.dart';
@@ -189,6 +195,9 @@ export 'src/presentation/blocs/booking/booking_state.dart';
 export 'src/presentation/blocs/my_sessions/my_sessions_bloc.dart';
 export 'src/presentation/blocs/my_sessions/my_sessions_event.dart';
 export 'src/presentation/blocs/my_sessions/my_sessions_state.dart';
+export 'src/presentation/blocs/wallet/wallet_bloc.dart';
+export 'src/presentation/blocs/wallet/wallet_event.dart';
+export 'src/presentation/blocs/wallet/wallet_state.dart';
 export 'src/presentation/blocs/profile_completion/profile_completion_bloc.dart';
 export 'src/presentation/blocs/profile_completion/profile_completion_event.dart';
 export 'src/presentation/blocs/profile_completion/profile_completion_state.dart';
@@ -215,6 +224,7 @@ export 'src/presentation/teacher_capability/teacher_capability_presentation.dart
 export 'src/presentation/router/quran_sessions_routes.dart';
 export 'src/presentation/screens/booking_screen.dart';
 export 'src/presentation/screens/my_sessions_screen.dart';
+export 'src/presentation/screens/wallet_screen.dart';
 export 'src/presentation/blocs/reschedule/reschedule_bloc.dart';
 export 'src/presentation/blocs/reschedule/reschedule_event.dart';
 export 'src/presentation/blocs/reschedule/reschedule_state.dart';

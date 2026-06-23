@@ -13,6 +13,9 @@ import { SessionsComponent } from './features/quran-sessions/sessions/sessions.c
 import { SessionDetailComponent } from './features/quran-sessions/session-detail/session-detail.component';
 import { SessionReportsComponent } from './features/quran-sessions/session-reports/session-reports.component';
 import { SessionReportDetailComponent } from './features/quran-sessions/session-report-detail/session-report-detail.component';
+import { SessionDisputesComponent } from './features/quran-sessions/session-disputes/session-disputes.component';
+import { SessionDisputeDetailComponent } from './features/quran-sessions/session-dispute-detail/session-dispute-detail.component';
+import { UserWalletsComponent } from './features/quran-sessions/user-wallets/user-wallets.component';
 import { adminGuard, authGuard, guestGuard } from './core/auth/auth.guard';
 
 export const routes: Routes = [
@@ -47,6 +50,16 @@ export const routes: Routes = [
         path: 'quran-sessions/reports/:id',
         component: SessionReportDetailComponent,
       },
+      { path: 'quran-sessions/disputes', component: SessionDisputesComponent },
+      {
+        path: 'quran-sessions/disputes/:id',
+        component: SessionDisputeDetailComponent,
+      },
+      {
+        path: 'quran-sessions/wallets/:userId',
+        component: UserWalletsComponent,
+      },
+      { path: 'quran-sessions/wallets', component: UserWalletsComponent },
     ],
   },
   { path: '**', redirectTo: '' },

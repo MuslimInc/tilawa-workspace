@@ -50,7 +50,7 @@ export const approveSessionRefund = onCall(
         }
         const booking = bookingSnap.data() ?? {};
 
-        const ledger = issueRefundRecord({
+        const ledger = await issueRefundRecord({
           tx,
           db,
           bookingRef,

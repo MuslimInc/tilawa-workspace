@@ -25,6 +25,7 @@ import '../data/firebase/firestore_teacher_application_repository.dart';
 import '../data/firebase/firestore_teacher_profile_repository.dart';
 import '../data/firebase/firestore_teacher_repository.dart';
 import '../data/firebase/firestore_user_profile_repository.dart';
+import '../data/firebase/firestore_wallet_data_source.dart';
 import '../data/shared_preferences_friday_review_reminder_store.dart';
 import 'quran_sessions_lifecycle_module.dart';
 import 'quran_sessions_mvp_module.dart';
@@ -90,6 +91,7 @@ class QuranSessionsFirebaseModule {
       teacherProfileDataSource: FirestoreTeacherProfileDataSource(firestore),
       availabilityDataSource: FirestoreAvailabilityDataSource(firestore),
       scheduleDataSource: FirestoreScheduleDataSource(firestore),
+      walletDataSource: FirestoreWalletDataSource(firestore),
       fridayReviewReminderStore: SharedPreferencesFridayReviewReminderStore(
         sl<SharedPreferencesAsync>(),
       ),

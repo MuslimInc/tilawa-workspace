@@ -355,5 +355,18 @@ service cloud.firestore {
         allow update, delete: if false;
       }
     }
+
+    // Wallet — owner read; admin read; CF writes only.
+    match /user_wallets/{walletId} {
+      allow read: if isAdmin()
+        || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow write: if false;
+    }
+
+    match /wallet_transactions/{transactionId} {
+      allow read: if isAdmin()
+        || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow write: if false;
+    }
   }
 }

@@ -5,18 +5,20 @@ import { UserService } from '../../core/services/user.service';
 import { NotificationModalComponent } from './components/notification-modal/notification-modal.component';
 import { SendNotificationUseCase } from '../../core/domain/usecases/send-notification.usecase';
 import { NotificationEntity, NotificationTargetType } from '../../core/domain/entities/notification.entity';
-import { NOTIFICATION_REPOSITORY } from '../../core/domain/repositories/notification.repository';
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
+import { I18nService } from '../../core/i18n/i18n.service';
 
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [CommonModule, FormsModule, NotificationModalComponent],
+  imports: [CommonModule, FormsModule, NotificationModalComponent, TranslatePipe],
   templateUrl: './users.component.html',
   styleUrl: './users.css'
 })
 export class UsersComponent {
   private userService = inject(UserService);
   private sendNotificationUseCase = inject(SendNotificationUseCase);
+  private readonly i18n = inject(I18nService);
 
   users$ = this.userService.getUsers();
   
@@ -52,14 +54,16 @@ export class UsersComponent {
     this.notificationTargetType = type;
     
     if (type === 'all') {
-      this.notificationTargetSummary = 'All Users';
-      this.selectedUserIds.clear(); // We don't need a specific set if targetType='all'
+      this.notificationTargetSummary = this.i18n.t('notifications_targetAll');
+      this.selectedUserIds.clear();
     } else if (type === 'single' && singleUserId) {
-      this.notificationTargetSummary = 'Single User';
+      this.notificationTargetSummary = this.i18n.t('notifications_targetSingle');
       this.selectedUserIds.clear();
       this.selectedUserIds.add(singleUserId);
     } else if (type === 'selected') {
-      this.notificationTargetSummary = `${this.selectedUserIds.size} Selected User(s)`;
+      this.notificationTargetSummary = this.i18n.t('notifications_targetSelected', {
+        count: String(this.selectedUserIds.size),
+      });
     }
     
     this.isModalOpen = true;
@@ -84,7 +88,7 @@ export class UsersComponent {
       this.selectedUserIds.clear();
     } catch (error) {
       console.error('Failed to send notification:', error);
-      alert('Failed to trigger notification. See console for details.');
+      alert(this.i18n.t('appUsers_sendFailed'));
     }
   }
 }

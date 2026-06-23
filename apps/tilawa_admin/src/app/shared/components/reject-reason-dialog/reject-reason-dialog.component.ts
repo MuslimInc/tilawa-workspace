@@ -1,11 +1,12 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 
 @Component({
   selector: 'app-reject-reason-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   template: `
     @if (isOpen) {
       <div class="fixed inset-0 z-50 overflow-y-auto">
@@ -18,11 +19,11 @@ import { FormsModule } from '@angular/forms';
               rows="4"
               [(ngModel)]="reason"
               class="mt-4 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white"
-              placeholder="Enter reason…"
+              [placeholder]="'dialogs_enterReason' | t"
             ></textarea>
             <div class="mt-6 flex justify-end gap-3">
               <button type="button" (click)="cancel.emit()" class="rounded-md border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm text-gray-700 dark:text-gray-200">
-                Cancel
+                {{ 'common_cancel' | t }}
               </button>
               <button
                 type="button"

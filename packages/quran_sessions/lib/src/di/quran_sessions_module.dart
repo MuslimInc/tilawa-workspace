@@ -9,6 +9,7 @@ import '../data/datasources/teacher_application_remote_data_source.dart';
 import '../data/datasources/teacher_profile_remote_data_source.dart';
 import '../data/datasources/teacher_remote_data_source.dart';
 import '../data/datasources/user_profile_remote_data_source.dart';
+import '../data/datasources/wallet_remote_data_source.dart';
 import '../data/providers/remote_availability_provider.dart';
 import '../data/repositories/booking_repository_impl.dart';
 import '../data/repositories/market_config_repository_impl.dart';
@@ -20,6 +21,7 @@ import '../data/repositories/teacher_application_repository_impl.dart';
 import '../data/repositories/teacher_profile_repository_impl.dart';
 import '../data/repositories/teacher_repository_impl.dart';
 import '../data/repositories/user_profile_repository_impl.dart';
+import '../data/repositories/wallet_repository_impl.dart';
 import '../boundaries/scheduling/availability_provider.dart';
 import '../boundaries/scheduling/friday_review_reminder_store.dart';
 import '../data/stores/in_memory_friday_review_reminder_store.dart';
@@ -33,6 +35,7 @@ import '../domain/repositories/teacher_application_repository.dart';
 import '../domain/repositories/teacher_profile_repository.dart';
 import '../domain/repositories/teacher_repository.dart';
 import '../domain/repositories/user_profile_repository.dart';
+import '../domain/repositories/wallet_repository.dart';
 import '../domain/usecases/approve_teacher_application_usecase.dart';
 import '../domain/usecases/block_account_usecase.dart';
 import '../domain/usecases/cancel_booking_usecase.dart';
@@ -50,6 +53,7 @@ import '../domain/usecases/get_teacher_profile_usecase.dart';
 import '../domain/usecases/get_teacher_sessions_usecase.dart';
 import '../domain/usecases/get_teachers_usecase.dart';
 import '../domain/usecases/get_user_profile_usecase.dart';
+import '../domain/usecases/get_wallet_snapshot_usecase.dart';
 import '../domain/usecases/reject_teacher_application_usecase.dart';
 import '../domain/usecases/revoke_teacher_profile_usecase.dart';
 import '../domain/usecases/save_teacher_application_draft_usecase.dart';
@@ -91,6 +95,7 @@ class QuranSessionsModule {
     required TeacherProfileRemoteDataSource teacherProfileDataSource,
     required AvailabilityRemoteDataSource availabilityDataSource,
     required ScheduleRemoteDataSource scheduleDataSource,
+    required WalletRemoteDataSource walletDataSource,
     FridayReviewReminderStore? fridayReviewReminderStore,
   }) {
     final teacherRepo = TeacherRepositoryImpl(teacherDataSource);
@@ -112,6 +117,7 @@ class QuranSessionsModule {
       availabilityDataSource,
     );
     final scheduleRepo = ScheduleRepositoryImpl(scheduleDataSource);
+    final walletRepo = WalletRepositoryImpl(walletDataSource);
 
     registerSingleton<TeacherRepository>(teacherRepo);
     registerSingleton<SessionRepository>(sessionRepo);
@@ -126,6 +132,7 @@ class QuranSessionsModule {
     registerSingleton<TeacherProfileRepository>(teacherProfileRepo);
     registerSingleton<AvailabilityProvider>(availabilityProvider);
     registerSingleton<ScheduleRepository>(scheduleRepo);
+    registerSingleton<WalletRepository>(walletRepo);
 
     registerSingleton(GetTeachersUseCase(teacherRepo));
     registerSingleton(GetTeacherProfileUseCase(teacherRepo));
@@ -145,6 +152,7 @@ class QuranSessionsModule {
     registerSingleton(CancelBookingUseCase(bookingRepo));
     registerSingleton(SubmitReviewUseCase(bookingRepo));
     registerSingleton(GetUserProfileUseCase(profileRepo));
+    registerSingleton(GetWalletSnapshotUseCase(walletRepo));
     registerSingleton(CompleteStudentProfileUseCase(profileRepo, policyRepo));
     registerSingleton(CompleteTeacherProfileUseCase(profileRepo, policyRepo));
     registerSingleton(GetSessionPolicyUseCase(policyRepo));

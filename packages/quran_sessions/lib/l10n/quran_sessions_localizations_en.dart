@@ -1240,4 +1240,60 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get reportCategoryOther => 'Other';
+
+  @override
+  String get walletTitle => 'My wallet';
+
+  @override
+  String get walletAvailableBalanceLabel => 'Available balance';
+
+  @override
+  String walletHeldBalanceLabel(String amount) {
+    return 'On hold: $amount';
+  }
+
+  @override
+  String get walletTransactionsTitle => 'Transaction history';
+
+  @override
+  String get walletEmptyState => 'Credits appear when refunds are processed.';
+
+  @override
+  String get walletFrozenMessage =>
+      'Wallet temporarily unavailable — contact support.';
+
+  @override
+  String walletTransactionTypeLabel(String type) {
+    return '$type';
+  }
+
+  @override
+  String get walletTransactionTypeRefund => 'Refund';
+
+  @override
+  String get walletTransactionTypeCompensation => 'Compensation';
+
+  @override
+  String get walletTransactionTypeAdmin => 'Admin credit';
+
+  @override
+  String get walletTransactionTypePromo => 'Promotional credit';
+
+  @override
+  String get walletTransactionTypeBooking => 'Session payment';
+
+  @override
+  String get walletTransactionTypeHold => 'Hold';
+
+  @override
+  String get walletTransactionTypeHoldRelease => 'Hold released';
+
+  @override
+  String get walletTransactionTypeReversal => 'Reversal';
+
+  @override
+  String get walletTransactionTypeExpiry => 'Expired credit';
+
+  @override
+  String get walletEntryAction => 'Wallet';
 }

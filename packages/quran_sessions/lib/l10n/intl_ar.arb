@@ -457,5 +457,36 @@
     "reportCategoryInappropriateContent": "محتوى غير لائق",
     "reportCategoryChildSafety": "سلامة الأطفال",
     "reportCategoryFraudOrScam": "احتيال",
-    "reportCategoryOther": "أخرى"
+    "reportCategoryOther": "أخرى",
+    "walletTitle": "محفظتي",
+    "walletAvailableBalanceLabel": "الرصيد المتاح",
+    "walletHeldBalanceLabel": "محجوز: {amount}",
+    "@walletHeldBalanceLabel": {
+        "placeholders": {
+            "amount": {
+                "type": "String"
+            }
+        }
+    },
+    "walletTransactionsTitle": "سجل المعاملات",
+    "walletEmptyState": "تظهر الأرصدة عند معالجة الاستردادات.",
+    "walletFrozenMessage": "المحفظة غير متاحة مؤقتًا — تواصل مع الدعم.",
+    "walletTransactionTypeLabel": "{type}",
+    "@walletTransactionTypeLabel": {
+        "placeholders": {
+            "type": {
+                "type": "String"
+            }
+        }
+    },
+    "walletTransactionTypeRefund": "استرداد",
+    "walletTransactionTypeCompensation": "تعويض",
+    "walletTransactionTypeAdmin": "رصيد إداري",
+    "walletTransactionTypePromo": "رصيد ترويجي",
+    "walletTransactionTypeBooking": "دفع جلسة",
+    "walletTransactionTypeHold": "حجز",
+    "walletTransactionTypeHoldRelease": "إلغاء حجز",
+    "walletTransactionTypeReversal": "عكس معاملة",
+    "walletTransactionTypeExpiry": "رصيد منتهٍ",
+    "walletEntryAction": "المحفظة"
 }

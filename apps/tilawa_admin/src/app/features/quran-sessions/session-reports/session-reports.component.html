@@ -1,7 +1,7 @@
 <div class="px-4 sm:px-6 lg:px-8">
   <app-page-header
-    title="Session Reports"
-    subtitle="Safety and abuse reports filed by students, teachers, and guardians."
+    [title]="'reports_title' | t"
+    [subtitle]="'reports_subtitle' | t"
   />
 
   <div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -9,49 +9,49 @@
       type="search"
       [(ngModel)]="searchQuery"
       (keyup.enter)="reload()"
-      placeholder="Search description, user id, booking id"
+      [placeholder]="'reports_searchPlaceholder' | t"
       class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm"
     />
     <select [(ngModel)]="statusFilter" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm">
-      <option value="">All statuses</option>
+      <option value="">{{ 'common_allStatuses' | t }}</option>
       @for (status of statusOptions; track status) {
-        <option [value]="status">{{ status }}</option>
+        <option [value]="status">{{ status | statusLabel }}</option>
       }
     </select>
     <select [(ngModel)]="severityFilter" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm">
-      <option value="">All severities</option>
+      <option value="">{{ 'common_allSeverities' | t }}</option>
       @for (severity of severityOptions; track severity) {
-        <option [value]="severity">{{ severity }}</option>
+        <option [value]="severity">{{ severity | statusLabel }}</option>
       }
     </select>
-    <input [(ngModel)]="categoryFilter" placeholder="Category" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm" />
+    <input [(ngModel)]="categoryFilter" [placeholder]="'reports_categoryPlaceholder' | t" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm" />
   </div>
 
   <div class="mt-4">
     <button type="button" (click)="reload()" class="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">
-      Apply filters
+      {{ 'common_applyFilters' | t }}
     </button>
   </div>
 
   <div class="mt-8 flow-root">
     @if (loadState() === 'loading') {
-      <p class="text-center text-gray-500 dark:text-gray-400 py-8">Loading reports…</p>
+      <p class="text-center text-gray-500 dark:text-gray-400 py-8">{{ 'reports_loading' | t }}</p>
     } @else if (loadState() === 'error') {
       <p class="text-center text-red-600 dark:text-red-400 py-8">{{ errorMessage() }}</p>
     } @else if (items().length === 0) {
-      <p class="text-center text-gray-500 dark:text-gray-400 py-8">No reports found.</p>
+      <p class="text-center text-gray-500 dark:text-gray-400 py-8">{{ 'reports_empty' | t }}</p>
     } @else {
       <div class="overflow-x-auto shadow ring-1 ring-black/5 sm:rounded-lg dark:ring-white/10">
         <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-800">
             <tr>
-              <th class="px-3 py-3 text-left text-sm font-semibold">Category</th>
-              <th class="px-3 py-3 text-left text-sm font-semibold">Severity</th>
-              <th class="px-3 py-3 text-left text-sm font-semibold">Status</th>
-              <th class="px-3 py-3 text-left text-sm font-semibold">Reporter</th>
-              <th class="px-3 py-3 text-left text-sm font-semibold">Preview</th>
-              <th class="px-3 py-3 text-left text-sm font-semibold">Filed</th>
-              <th class="px-3 py-3 text-right text-sm font-semibold">Actions</th>
+              <th class="px-3 py-3 text-start text-sm font-semibold">{{ 'common_category' | t }}</th>
+              <th class="px-3 py-3 text-start text-sm font-semibold">{{ 'common_severity' | t }}</th>
+              <th class="px-3 py-3 text-start text-sm font-semibold">{{ 'common_status' | t }}</th>
+              <th class="px-3 py-3 text-start text-sm font-semibold">{{ 'common_reporter' | t }}</th>
+              <th class="px-3 py-3 text-start text-sm font-semibold">{{ 'common_preview' | t }}</th>
+              <th class="px-3 py-3 text-start text-sm font-semibold">{{ 'common_filed' | t }}</th>
+              <th class="px-3 py-3 text-end text-sm font-semibold">{{ 'common_actions' | t }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200 bg-white dark:bg-gray-900 dark:divide-gray-800">
@@ -59,17 +59,17 @@
               <tr>
                 <td class="px-3 py-4 text-sm">{{ item.category }}</td>
                 <td class="px-3 py-4 text-sm">
-                  <app-status-chip [label]="item.severity" [status]="item.severity" />
+                  <app-status-chip [label]="item.severity | statusLabel" [status]="item.severity" />
                 </td>
                 <td class="px-3 py-4 text-sm">
-                  <app-status-chip [label]="item.status" [status]="item.status" />
+                  <app-status-chip [label]="item.status | statusLabel" [status]="item.status" />
                 </td>
                 <td class="px-3 py-4 text-sm font-mono text-xs">{{ item.reporterUserId }}</td>
                 <td class="px-3 py-4 text-sm max-w-xs truncate">{{ item.descriptionPreview }}</td>
                 <td class="px-3 py-4 text-sm">{{ item.createdAt | date:'medium' }}</td>
-                <td class="px-3 py-4 text-right text-sm">
+                <td class="px-3 py-4 text-end text-sm">
                   <a [routerLink]="['/quran-sessions/reports', item.id]" class="text-blue-600 hover:text-blue-800 dark:text-blue-400">
-                    View
+                    {{ 'common_view' | t }}
                   </a>
                 </td>
               </tr>
@@ -81,7 +81,7 @@
       @if (canLoadMore()) {
         <div class="mt-4 text-center">
           <button type="button" (click)="loadMore()" class="rounded-md border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm">
-            Load more
+            {{ 'common_loadMore' | t }}
           </button>
         </div>
       }

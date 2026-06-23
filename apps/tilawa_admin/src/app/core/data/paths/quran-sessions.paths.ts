@@ -9,6 +9,9 @@ export abstract class QuranSessionsPaths {
   static readonly sessionCompensations = 'quran_session_compensations';
   static readonly rescheduleRequests = 'quran_reschedule_requests';
   static readonly sessionReports = 'quran_session_reports';
+  static readonly sessionDisputes = 'quran_session_disputes';
+  static readonly userWallets = 'user_wallets';
+  static readonly walletTransactions = 'wallet_transactions';
   static readonly quranSessionsProfileField = 'quranSessionsProfile';
 }
 

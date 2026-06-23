@@ -1,21 +1,21 @@
 <div class="px-4 sm:px-6 lg:px-8">
   <div class="mb-4">
     <a routerLink="/quran-sessions/teacher-applications" class="text-sm text-blue-600 dark:text-blue-400">
-      ← Back to applications
+      {{ 'teacherApplications_backToList' | t }}
     </a>
   </div>
 
   @if (loadState() === 'loading') {
-    <p class="text-gray-500 dark:text-gray-400">Loading application…</p>
+    <p class="text-gray-500 dark:text-gray-400">{{ 'teacherApplications_loadingDetail' | t }}</p>
   } @else if (loadState() === 'error') {
     <p class="text-red-600 dark:text-red-400">{{ errorMessage() }}</p>
   } @else if (detail(); as app) {
-    <app-page-header title="Application Details" [subtitle]="app.publicDisplayName">
+    <app-page-header [title]="'teacherApplications_detailTitle' | t" [subtitle]="app.publicDisplayName">
       <div actions class="flex flex-wrap gap-2">
-        <button type="button" (click)="openApprove()" class="rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white">Approve</button>
-        <button type="button" (click)="openReject()" class="rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white">Reject</button>
-        <button type="button" (click)="openSuspend()" class="rounded-md bg-orange-600 px-3 py-2 text-sm font-semibold text-white">Suspend</button>
-        <button type="button" (click)="openRevoke()" class="rounded-md bg-gray-700 px-3 py-2 text-sm font-semibold text-white">Revoke</button>
+        <button type="button" (click)="openApprove()" class="rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white">{{ 'teacherApplications_approve' | t }}</button>
+        <button type="button" (click)="openReject()" class="rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white">{{ 'teacherApplications_reject' | t }}</button>
+        <button type="button" (click)="openSuspend()" class="rounded-md bg-orange-600 px-3 py-2 text-sm font-semibold text-white">{{ 'teacherApplications_suspend' | t }}</button>
+        <button type="button" (click)="openRevoke()" class="rounded-md bg-gray-700 px-3 py-2 text-sm font-semibold text-white">{{ 'teacherApplications_revoke' | t }}</button>
       </div>
     </app-page-header>
 
@@ -33,26 +33,26 @@
           </div>
         }
         <p class="mt-4 text-lg font-semibold text-gray-900 dark:text-white">{{ app.publicDisplayName }}</p>
-        <p class="text-sm text-gray-500 dark:text-gray-400">Account: {{ app.accountDisplayName }}</p>
-        <app-status-chip class="mt-2" [label]="app.status" [status]="app.status" />
+        <p class="text-sm text-gray-500 dark:text-gray-400">{{ 'teacherApplications_accountLabel' | t:{ name: app.accountDisplayName } }}</p>
+        <app-status-chip class="mt-2" [label]="app.status | statusLabel" [status]="app.status" />
       </div>
 
       <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
         <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div><dt class="text-sm text-gray-500">User ID</dt><dd class="text-sm font-medium">{{ app.userId }}</dd></div>
-          <div><dt class="text-sm text-gray-500">Email</dt><dd class="text-sm font-medium">{{ app.email }}</dd></div>
-          <div><dt class="text-sm text-gray-500">Phone</dt><dd class="text-sm font-medium">{{ app.phoneNumber ?? '—' }}</dd></div>
-          <div><dt class="text-sm text-gray-500">Gender</dt><dd class="text-sm font-medium">{{ app.gender ?? '—' }}</dd></div>
-          <div><dt class="text-sm text-gray-500">Country</dt><dd class="text-sm font-medium">{{ app.country }}</dd></div>
-          <div><dt class="text-sm text-gray-500">City</dt><dd class="text-sm font-medium">{{ app.city }}</dd></div>
-          <div><dt class="text-sm text-gray-500">Contact method</dt><dd class="text-sm font-medium">{{ app.contactMethod ?? '—' }}</dd></div>
-          <div><dt class="text-sm text-gray-500">Languages</dt><dd class="text-sm font-medium">{{ app.languages.join(', ') || '—' }}</dd></div>
-          <div><dt class="text-sm text-gray-500">Specializations</dt><dd class="text-sm font-medium">{{ app.specializations.join(', ') || '—' }}</dd></div>
-          <div><dt class="text-sm text-gray-500">Submitted</dt><dd class="text-sm font-medium">{{ app.submittedAt | date:'medium' }}</dd></div>
-          <div><dt class="text-sm text-gray-500">Reviewed</dt><dd class="text-sm font-medium">{{ app.reviewedAt | date:'medium' }}</dd></div>
-          <div><dt class="text-sm text-gray-500">Reviewed by</dt><dd class="text-sm font-medium">{{ app.reviewedBy ?? '—' }}</dd></div>
-          <div class="sm:col-span-2"><dt class="text-sm text-gray-500">Bio</dt><dd class="text-sm font-medium mt-1">{{ app.bio ?? '—' }}</dd></div>
-          <div class="sm:col-span-2"><dt class="text-sm text-gray-500">Rejection reason</dt><dd class="text-sm font-medium mt-1">{{ app.rejectionReason ?? '—' }}</dd></div>
+          <div><dt class="text-sm text-gray-500">{{ 'teacherApplications_userId' | t }}</dt><dd class="text-sm font-medium">{{ app.userId }}</dd></div>
+          <div><dt class="text-sm text-gray-500">{{ 'common_email' | t }}</dt><dd class="text-sm font-medium">{{ app.email }}</dd></div>
+          <div><dt class="text-sm text-gray-500">{{ 'common_phone' | t }}</dt><dd class="text-sm font-medium">{{ app.phoneNumber ?? ('common_none' | t) }}</dd></div>
+          <div><dt class="text-sm text-gray-500">{{ 'teacherApplications_gender' | t }}</dt><dd class="text-sm font-medium">{{ app.gender ?? ('common_none' | t) }}</dd></div>
+          <div><dt class="text-sm text-gray-500">{{ 'common_country' | t }}</dt><dd class="text-sm font-medium">{{ app.country }}</dd></div>
+          <div><dt class="text-sm text-gray-500">{{ 'common_city' | t }}</dt><dd class="text-sm font-medium">{{ app.city }}</dd></div>
+          <div><dt class="text-sm text-gray-500">{{ 'teacherApplications_contactMethod' | t }}</dt><dd class="text-sm font-medium">{{ app.contactMethod ?? ('common_none' | t) }}</dd></div>
+          <div><dt class="text-sm text-gray-500">{{ 'teacherApplications_languages' | t }}</dt><dd class="text-sm font-medium">{{ app.languages.join(', ') || ('common_none' | t) }}</dd></div>
+          <div><dt class="text-sm text-gray-500">{{ 'teacherApplications_specializations' | t }}</dt><dd class="text-sm font-medium">{{ app.specializations.join(', ') || ('common_none' | t) }}</dd></div>
+          <div><dt class="text-sm text-gray-500">{{ 'teacherApplications_submitted' | t }}</dt><dd class="text-sm font-medium">{{ app.submittedAt | date:'medium' }}</dd></div>
+          <div><dt class="text-sm text-gray-500">{{ 'teacherApplications_reviewed' | t }}</dt><dd class="text-sm font-medium">{{ app.reviewedAt | date:'medium' }}</dd></div>
+          <div><dt class="text-sm text-gray-500">{{ 'teacherApplications_reviewedBy' | t }}</dt><dd class="text-sm font-medium">{{ app.reviewedBy ?? ('common_none' | t) }}</dd></div>
+          <div class="sm:col-span-2"><dt class="text-sm text-gray-500">{{ 'teacherApplications_bio' | t }}</dt><dd class="text-sm font-medium mt-1">{{ app.bio ?? ('common_none' | t) }}</dd></div>
+          <div class="sm:col-span-2"><dt class="text-sm text-gray-500">{{ 'teacherApplications_rejectionReason' | t }}</dt><dd class="text-sm font-medium mt-1">{{ app.rejectionReason ?? ('common_none' | t) }}</dd></div>
         </dl>
       </div>
     </div>
@@ -60,9 +60,9 @@
 
   <app-confirm-dialog
     [isOpen]="confirmOpen()"
-    title="Approve application"
-    message="This will create a verified teacher profile."
-    confirmLabel="Approve"
+    [title]="'teacherApplications_approveTitle' | t"
+    [message]="'teacherApplications_approveMessage' | t"
+    [confirmLabel]="'teacherApplications_approve' | t"
     [loading]="isActionLoading()"
     (confirm)="onConfirmApprove()"
     (cancel)="confirmOpen.set(false)"
@@ -70,9 +70,9 @@
 
   <app-reject-reason-dialog
     [isOpen]="rejectOpen()"
-    title="Moderation reason"
-    message="Provide a reason for this moderation action."
-    confirmLabel="Submit"
+    [title]="'teacherApplications_moderationTitle' | t"
+    [message]="'teacherApplications_moderationMessage' | t"
+    [confirmLabel]="'common_submit' | t"
     [loading]="isActionLoading()"
     (submit)="onSubmitReason($event)"
     (cancel)="rejectOpen.set(false)"

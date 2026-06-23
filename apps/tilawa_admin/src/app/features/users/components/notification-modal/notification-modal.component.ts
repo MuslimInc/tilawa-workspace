@@ -1,11 +1,12 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '../../../../core/i18n/translate.pipe';
 
 @Component({
   selector: 'app-notification-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   template: `
     @if (isOpen) {
       <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
@@ -23,48 +24,48 @@ import { FormsModule } from '@angular/forms';
               </div>
               <div class="mt-3 text-center sm:mt-5">
                 <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white" id="modal-title">
-                  Send Push Notification
+                  {{ 'notifications_title' | t }}
                 </h3>
                 <div class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                  You are sending a notification to <span class="font-bold text-gray-900 dark:text-white">{{ targetSummary }}</span>.
+                  {{ 'notifications_targetPrefix' | t }} <span class="font-bold text-gray-900 dark:text-white">{{ targetSummary }}</span>.
                 </div>
               </div>
             </div>
 
             <div class="mt-5 space-y-4">
               <div>
-                <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Notification Title</label>
+                <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ 'notifications_notificationTitle' | t }}</label>
                 <div class="mt-1">
-                  <input type="text" id="title" [(ngModel)]="notificationTitle" class="p-3 shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" placeholder="e.g., New Feature Alert!">
+                  <input type="text" id="title" [(ngModel)]="notificationTitle" class="p-3 shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" [placeholder]="'notifications_titlePlaceholder' | t">
                 </div>
               </div>
 
               <div>
-                <label for="action" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Deep Link Action</label>
+                <label for="action" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ 'notifications_deepLinkAction' | t }}</label>
                 <select id="action" [(ngModel)]="actionType" class="mt-1 p-3 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                  <option value="home">Home Screen</option>
-                  <option value="reciter">Reciter Details</option>
-                  <option value="athkar">Athkar Screen</option>
-                  <option value="quran">Quran Reader</option>
-                  <option value="settings">Settings</option>
+                  <option value="home">{{ 'notifications_homeScreen' | t }}</option>
+                  <option value="reciter">{{ 'notifications_reciterDetails' | t }}</option>
+                  <option value="athkar">{{ 'notifications_athkarScreen' | t }}</option>
+                  <option value="quran">{{ 'notifications_quranReader' | t }}</option>
+                  <option value="settings">{{ 'notifications_settings' | t }}</option>
                 </select>
               </div>
 
               @if (actionType === 'reciter' || actionType === 'quran') {
                 <div>
                   <label for="actionData" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {{ actionType === 'reciter' ? 'Reciter ID' : 'Surah Number' }}
+                    {{ actionType === 'reciter' ? ('notifications_reciterId' | t) : ('notifications_surahNumber' | t) }}
                   </label>
                   <div class="mt-1">
-                    <input type="text" id="actionData" [(ngModel)]="actionData" class="p-3 shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" [placeholder]="actionType === 'reciter' ? 'e.g., 7' : 'e.g., 2'">
+                    <input type="text" id="actionData" [(ngModel)]="actionData" class="p-3 shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" [placeholder]="actionType === 'reciter' ? ('notifications_reciterIdPlaceholder' | t) : ('notifications_surahNumberPlaceholder' | t)">
                   </div>
                 </div>
               }
 
               <div>
-                <label for="body" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Message Body</label>
+                <label for="body" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ 'notifications_messageBody' | t }}</label>
                 <div class="mt-1">
-                  <textarea id="body" rows="3" [(ngModel)]="notificationBody" class="p-3 shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" placeholder="Describe the notification..."></textarea>
+                  <textarea id="body" rows="3" [(ngModel)]="notificationBody" class="p-3 shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" [placeholder]="'notifications_bodyPlaceholder' | t"></textarea>
                 </div>
               </div>
             </div>
@@ -74,10 +75,10 @@ import { FormsModule } from '@angular/forms';
                 (click)="onSend()"
                 [disabled]="!notificationTitle.trim() || !notificationBody.trim() || ((actionType === 'reciter' || actionType === 'quran') && !actionData.trim())"
                 class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed">
-                Send Notification
+                {{ 'notifications_send' | t }}
               </button>
               <button type="button" (click)="close.emit()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600">
-                Cancel
+                {{ 'common_cancel' | t }}
               </button>
             </div>
           </div>

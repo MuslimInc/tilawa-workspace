@@ -11,6 +11,8 @@ abstract final class FirestoreQuranSessionsPaths {
   static const availabilityOverrides = 'availability_overrides';
   static const bookings = 'quran_bookings';
   static const sessions = 'quran_sessions';
+  static const userWallets = 'user_wallets';
+  static const walletTransactions = 'wallet_transactions';
   static const platformConfig = 'quran_session_platform_config';
   static const globalPolicyDoc = 'global';
   static const quranSessionsProfileField = 'quranSessionsProfile';

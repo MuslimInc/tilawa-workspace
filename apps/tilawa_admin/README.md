@@ -1,6 +1,49 @@
-# TilawaAdmin
+# Tilawa Admin
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.3.
+Angular admin panel for Tilawa. Supports **English** and **Arabic** with runtime language switching.
+
+## Localization
+
+Translations use the [Application Resource Bundle (ARB)](https://github.com/google/app-resource-bundle) format — same convention as the Flutter apps in this monorepo.
+
+- Source files: `l10n/app_en.arb` and `l10n/app_ar.arb`
+- Runtime load: `I18nService` fetches `/l10n/app_{lang}.arb` at startup and on language change
+- Message IDs: `section_subkey` (letters, numbers, underscores only — no dots)
+- Template: `{{ 'sidebar_wallets' | t }}`
+- Interpolation: `{{ 'disputes_detailTitle' | t: { id: item.id } }}` (ARB `{param}` syntax; legacy `{{param}}` still works in `t()`)
+- Status enums: `{{ item.status | statusLabel }}` (maps `status_*` keys)
+- Language switcher: header (admin layout) and login screen
+- Preference key: `localStorage` → `tilawa-admin-lang` (`en` | `ar`)
+- Default: browser language if Arabic, otherwise English
+- RTL: sets `document.documentElement.dir` and `lang` when Arabic is active
+
+### Adding strings
+
+1. Add the message ID and English text to `l10n/app_en.arb`
+2. Add the same message ID and Arabic text to `l10n/app_ar.arb`
+3. For placeholders, use `{name}` in the string and add an `@messageId` metadata block:
+
+```json
+"disputes_detailTitle": "Dispute {id}",
+"@disputes_detailTitle": {
+  "description": "Dispute detail page title",
+  "placeholders": {
+    "id": { "type": "String", "example": "abc123" }
+  }
+}
+```
+
+4. Import `TranslatePipe` in the standalone component and use `| t` in the template.
+
+### Migrating from nested JSON
+
+If you have legacy nested JSON, run the one-time helper:
+
+```bash
+node scripts/flatten-json-to-arb.mjs --input path/to/en.json --locale en --output l10n/app_en.arb
+```
+
+Core services: `src/app/core/i18n/i18n.service.ts`, `translate.pipe.ts`, `status-label.pipe.ts`.
 
 ## Development server
 

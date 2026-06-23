@@ -1,10 +1,11 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 
 @Component({
   selector: 'app-confirm-dialog',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   template: `
     @if (isOpen) {
       <div class="fixed inset-0 z-50 overflow-y-auto">
@@ -15,7 +16,7 @@ import { CommonModule } from '@angular/common';
             <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">{{ message }}</p>
             <div class="mt-6 flex justify-end gap-3">
               <button type="button" (click)="cancel.emit()" class="rounded-md border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm text-gray-700 dark:text-gray-200">
-                Cancel
+                {{ 'common_cancel' | t }}
               </button>
               <button type="button" (click)="confirm.emit()" [disabled]="loading" class="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-50">
                 {{ confirmLabel }}

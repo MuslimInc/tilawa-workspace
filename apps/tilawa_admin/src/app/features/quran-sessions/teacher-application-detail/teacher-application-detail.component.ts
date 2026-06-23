@@ -8,6 +8,8 @@ import { PageHeaderComponent } from '../../../shared/components/page-header/page
 import { StatusChipComponent } from '../../../shared/components/status-chip/status-chip.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { RejectReasonDialogComponent } from '../../../shared/components/reject-reason-dialog/reject-reason-dialog.component';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { StatusLabelPipe } from '../../../core/i18n/status-label.pipe';
 
 @Component({
   selector: 'app-teacher-application-detail',
@@ -19,6 +21,8 @@ import { RejectReasonDialogComponent } from '../../../shared/components/reject-r
     StatusChipComponent,
     ConfirmDialogComponent,
     RejectReasonDialogComponent,
+    TranslatePipe,
+    StatusLabelPipe,
   ],
   templateUrl: './teacher-application-detail.component.html',
 })

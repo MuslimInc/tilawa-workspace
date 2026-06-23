@@ -4,11 +4,13 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { SessionReportsFacade } from '../../../core/application/facades/session-reports.facade';
 import { StatusChipComponent } from '../../../shared/components/status-chip/status-chip.component';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { StatusLabelPipe } from '../../../core/i18n/status-label.pipe';
 
 @Component({
   selector: 'app-session-report-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, StatusChipComponent],
+  imports: [CommonModule, RouterLink, StatusChipComponent, TranslatePipe, StatusLabelPipe],
   templateUrl: './session-report-detail.component.html',
 })
 export class SessionReportDetailComponent implements OnInit {

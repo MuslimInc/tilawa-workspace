@@ -1,7 +1,7 @@
 <div class="px-4 sm:px-6 lg:px-8">
   <app-page-header
-    title="Teacher Applications"
-    subtitle="Review and moderate teacher onboarding applications."
+    [title]="'teacherApplications_title' | t"
+    [subtitle]="'teacherApplications_subtitle' | t"
   />
 
   <div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
@@ -9,45 +9,45 @@
       type="search"
       [(ngModel)]="searchQuery"
       (keyup.enter)="reload()"
-      placeholder="Search name, email, phone, UID"
+      [placeholder]="'teacherApplications_searchPlaceholder' | t"
       class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm"
     />
     <select [(ngModel)]="statusFilter" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm">
-      <option value="">All statuses</option>
+      <option value="">{{ 'common_allStatuses' | t }}</option>
       @for (status of statusOptions; track status) {
-        <option [value]="status">{{ status }}</option>
+        <option [value]="status">{{ status | statusLabel }}</option>
       }
     </select>
-    <input [(ngModel)]="countryFilter" placeholder="Country" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm" />
-    <input [(ngModel)]="cityFilter" placeholder="City" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm" />
-    <input [(ngModel)]="specializationFilter" placeholder="Specialization" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm" />
+    <input [(ngModel)]="countryFilter" [placeholder]="'common_country' | t" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm" />
+    <input [(ngModel)]="cityFilter" [placeholder]="'common_city' | t" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm" />
+    <input [(ngModel)]="specializationFilter" [placeholder]="'common_specialization' | t" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm" />
   </div>
 
   <div class="mt-4">
     <button type="button" (click)="reload()" class="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">
-      Apply filters
+      {{ 'common_applyFilters' | t }}
     </button>
   </div>
 
   <div class="mt-8 flow-root">
     @if (loadState() === 'loading') {
-      <p class="text-center text-gray-500 dark:text-gray-400 py-8">Loading applications…</p>
+      <p class="text-center text-gray-500 dark:text-gray-400 py-8">{{ 'teacherApplications_loading' | t }}</p>
     } @else if (loadState() === 'error') {
       <p class="text-center text-red-600 dark:text-red-400 py-8">{{ errorMessage() }}</p>
     } @else if (items().length === 0) {
-      <p class="text-center text-gray-500 dark:text-gray-400 py-8">No applications found.</p>
+      <p class="text-center text-gray-500 dark:text-gray-400 py-8">{{ 'teacherApplications_empty' | t }}</p>
     } @else {
       <div class="overflow-x-auto shadow ring-1 ring-black/5 sm:rounded-lg dark:ring-white/10">
         <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-800">
             <tr>
-              <th class="px-3 py-3 text-left text-sm font-semibold">Public name</th>
-              <th class="px-3 py-3 text-left text-sm font-semibold">Account name</th>
-              <th class="px-3 py-3 text-left text-sm font-semibold">Email</th>
-              <th class="px-3 py-3 text-left text-sm font-semibold">Phone</th>
-              <th class="px-3 py-3 text-left text-sm font-semibold">Status</th>
-              <th class="px-3 py-3 text-left text-sm font-semibold">Submitted</th>
-              <th class="px-3 py-3 text-right text-sm font-semibold">Review actions</th>
+              <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'teacherApplications_publicName' | t }}</th>
+              <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'teacherApplications_accountName' | t }}</th>
+              <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'common_email' | t }}</th>
+              <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'common_phone' | t }}</th>
+              <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'common_status' | t }}</th>
+              <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'teacherApplications_submitted' | t }}</th>
+              <th class="px-3 py-3 text-right text-sm font-semibold">{{ 'teacherApplications_reviewActions' | t }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200 bg-white dark:bg-gray-900 dark:divide-gray-800">
@@ -56,17 +56,17 @@
                 <td class="px-3 py-4 text-sm">{{ item.publicDisplayName }}</td>
                 <td class="px-3 py-4 text-sm">{{ item.accountDisplayName }}</td>
                 <td class="px-3 py-4 text-sm">{{ item.email }}</td>
-                <td class="px-3 py-4 text-sm">{{ item.phoneNumber ?? '—' }}</td>
+                <td class="px-3 py-4 text-sm">{{ item.phoneNumber ?? ('common_none' | t) }}</td>
                 <td class="px-3 py-4 text-sm">
-                  <app-status-chip [label]="item.status" [status]="item.status" />
+                  <app-status-chip [label]="item.status | statusLabel" [status]="item.status" />
                 </td>
                 <td class="px-3 py-4 text-sm">{{ item.submittedAt | date:'medium' }}</td>
                 <td class="px-3 py-4 text-right text-sm space-x-3">
                   <a [routerLink]="['/quran-sessions/teacher-applications', item.id]" class="text-blue-600 hover:text-blue-800 dark:text-blue-400">
-                    Review
+                    {{ 'teacherApplications_review' | t }}
                   </a>
                   @if (item.canReview) {
-                    <span class="text-xs text-amber-700 dark:text-amber-400">Pending review</span>
+                    <span class="text-xs text-amber-700 dark:text-amber-400">{{ 'teacherApplications_pendingReview' | t }}</span>
                   }
                 </td>
               </tr>
@@ -78,7 +78,7 @@
       @if (canLoadMore()) {
         <div class="mt-4 text-center">
           <button type="button" (click)="loadMore()" class="rounded-md border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm">
-            Load more
+            {{ 'common_loadMore' | t }}
           </button>
         </div>
       }

@@ -13,6 +13,7 @@ import '../data/fake_mvp_teacher_application_repository.dart';
 import '../data/fake_mvp_teacher_profile_repository.dart';
 import '../data/fake_mvp_teacher_repository.dart';
 import '../data/fake_mvp_user_profile_repository.dart';
+import '../data/fake_mvp_wallet_repository.dart';
 import '../data/fake_mvp_session_lifecycle.dart';
 import '../data/quran_sessions_mvp_store.dart';
 import '../presentation/quran_sessions_scheduling_analytics.dart';
@@ -58,6 +59,9 @@ class QuranSessionsMvpModule {
     );
     sl.registerLazySingletonIfAbsent<ScheduleRepository>(
       () => FakeMvpScheduleRepository(store),
+    );
+    sl.registerLazySingletonIfAbsent<WalletRepository>(
+      () => const FakeMvpWalletRepository(),
     );
 
     sl.registerLazySingletonIfAbsent<MarketSchedulingConfigRepository>(
@@ -137,6 +141,9 @@ class QuranSessionsMvpModule {
     );
     sl.registerLazySingletonIfAbsent(
       () => GetUserProfileUseCase(sl<UserProfileRepository>()),
+    );
+    sl.registerLazySingletonIfAbsent(
+      () => GetWalletSnapshotUseCase(sl<WalletRepository>()),
     );
     sl.registerLazySingletonIfAbsent(
       () => CompleteStudentProfileUseCase(
@@ -322,6 +329,9 @@ class QuranSessionsMvpModule {
         saveSchedule: sl<SaveWeeklyScheduleUseCase>(),
         repository: sl<ScheduleRepository>(),
       ),
+    );
+    sl.registerFactoryIfAbsent(
+      () => WalletBloc(getWalletSnapshot: sl<GetWalletSnapshotUseCase>()),
     );
     sl.registerFactoryIfAbsent(
       () => ProfileCompletionBloc(

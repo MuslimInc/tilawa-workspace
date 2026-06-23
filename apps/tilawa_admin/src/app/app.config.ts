@@ -1,5 +1,7 @@
-import { ApplicationConfig, provideZonelessChangeDetection } from '@angular/core';
+import { APP_INITIALIZER, ApplicationConfig, provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
+import { I18nService } from './core/i18n/i18n.service';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
 import { browserLocalPersistence, setPersistence } from 'firebase/auth';
@@ -28,10 +30,25 @@ import { SESSION_MODERATION_GATEWAY } from './core/domain/repositories/session-m
 import { FirebaseSessionModerationGateway } from './core/data/repositories/firebase-session-moderation.gateway';
 import { SESSION_REPORT_READ_REPOSITORY } from './core/domain/repositories/session-report-read.repository';
 import { FirebaseSessionReportReadRepository } from './core/data/repositories/firebase-session-report-read.repository';
+import { SESSION_DISPUTE_READ_REPOSITORY } from './core/domain/repositories/session-dispute-read.repository';
+import { FirebaseSessionDisputeReadRepository } from './core/data/repositories/firebase-session-dispute-read.repository';
+import { WALLET_READ_REPOSITORY } from './core/domain/repositories/wallet-read.repository';
+import { FirebaseWalletReadRepository } from './core/data/repositories/firebase-wallet-read.repository';
+
+function initializeI18n(i18n: I18nService): () => Promise<void> {
+  return () => i18n.initialize();
+}
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZonelessChangeDetection(),
+    provideHttpClient(),
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeI18n,
+      deps: [I18nService],
+      multi: true,
+    },
     provideRouter(routes),
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideAuth(() => {
@@ -71,6 +88,14 @@ export const appConfig: ApplicationConfig = {
     {
       provide: SESSION_REPORT_READ_REPOSITORY,
       useClass: FirebaseSessionReportReadRepository,
+    },
+    {
+      provide: SESSION_DISPUTE_READ_REPOSITORY,
+      useClass: FirebaseSessionDisputeReadRepository,
+    },
+    {
+      provide: WALLET_READ_REPOSITORY,
+      useClass: FirebaseWalletReadRepository,
     },
   ],
 };

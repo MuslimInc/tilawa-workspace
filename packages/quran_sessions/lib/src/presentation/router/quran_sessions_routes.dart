@@ -8,6 +8,7 @@ abstract final class QuranSessionsRoutes {
   static const teacherProfile = '/sessions/teachers/:teacherId';
   static const booking = '/sessions/teachers/:teacherId/book';
   static const mySessions = '/sessions/my';
+  static const wallet = '/sessions/wallet';
   static const sessionDetail = '/sessions/detail/:bookingId';
   static const rescheduleSession = '/sessions/reschedule/:bookingId';
   static const teacherDashboard = '/sessions/dashboard';

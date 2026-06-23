@@ -1,0 +1,107 @@
+<app-page-header
+  [title]="'wallets_title' | t"
+  [subtitle]="'wallets_subtitle' | t"
+></app-page-header>
+
+<section class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 mb-6">
+  <form class="flex flex-col gap-3 sm:flex-row sm:items-end" (ngSubmit)="loadWallet()">
+    <label class="flex-1 text-sm">
+      <span class="block mb-1 text-gray-600 dark:text-gray-300">{{ 'wallets_userIdLabel' | t }}</span>
+      <input
+        class="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 px-3 py-2"
+        name="userId"
+        [(ngModel)]="userIdQuery"
+        [placeholder]="'wallets_userIdPlaceholder' | t"
+        required
+      />
+    </label>
+    <button
+      type="submit"
+      class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+    >
+      {{ 'wallets_loadWallet' | t }}
+    </button>
+  </form>
+</section>
+
+@if (loadState() === 'loading') {
+  <p class="text-sm text-gray-500">{{ 'wallets_loading' | t }}</p>
+}
+
+@if (loadState() === 'error') {
+  <p class="text-sm text-red-600">{{ errorMessage() }}</p>
+}
+
+@if (loadState() === 'success') {
+  @if (detail(); as walletDetail) {
+    <section class="grid gap-4 md:grid-cols-3 mb-6">
+      <div class="rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+        <p class="text-xs uppercase tracking-wide text-gray-500">{{ 'wallets_available' | t }}</p>
+        <p class="text-2xl font-semibold">
+          {{ walletDetail.wallet?.availableBalance ?? 0 | number: '1.2-2' }}
+          {{ walletDetail.wallet?.currency ?? 'EGP' }}
+        </p>
+      </div>
+      <div class="rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+        <p class="text-xs uppercase tracking-wide text-gray-500">{{ 'wallets_held' | t }}</p>
+        <p class="text-2xl font-semibold">
+          {{ walletDetail.wallet?.heldBalance ?? 0 | number: '1.2-2' }}
+          {{ walletDetail.wallet?.currency ?? 'EGP' }}
+        </p>
+      </div>
+      <div class="rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+        <p class="text-xs uppercase tracking-wide text-gray-500">{{ 'common_status' | t }}</p>
+        <app-status-chip
+          [label]="(walletDetail.wallet?.status ?? 'none') | statusLabel"
+          [status]="walletDetail.wallet?.status ?? 'none'"
+        />
+      </div>
+    </section>
+
+    <h2 class="text-lg font-semibold mb-3">{{ 'wallets_transactions' | t }}</h2>
+
+    @if (walletDetail.transactions.length === 0) {
+      <p class="text-sm text-gray-500">{{ 'wallets_noTransactions' | t }}</p>
+    } @else {
+      <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800">
+        <table class="min-w-full text-sm">
+          <thead class="bg-gray-50 dark:bg-gray-950 text-start">
+            <tr>
+              <th class="px-4 py-3">{{ 'common_date' | t }}</th>
+              <th class="px-4 py-3">{{ 'common_type' | t }}</th>
+              <th class="px-4 py-3">{{ 'common_description' | t }}</th>
+              <th class="px-4 py-3">{{ 'common_amount' | t }}</th>
+              <th class="px-4 py-3">{{ 'common_balanceAfter' | t }}</th>
+              <th class="px-4 py-3">{{ 'common_source' | t }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (txn of walletDetail.transactions; track txn.id) {
+              <tr class="border-t border-gray-100 dark:border-gray-800">
+                <td class="px-4 py-3 whitespace-nowrap">{{ txn.createdAt | date: 'medium' }}</td>
+                <td class="px-4 py-3">{{ txn.type }}</td>
+                <td class="px-4 py-3">{{ txn.description }}</td>
+                <td class="px-4 py-3">
+                  {{ txn.direction === 'credit' ? '+' : '-' }}{{ txn.amount | number: '1.2-2' }}
+                  {{ txn.currency }}
+                </td>
+                <td class="px-4 py-3">
+                  @if (txn.balanceAfter != null) {
+                    {{ txn.balanceAfter | number: '1.2-2' }}
+                  } @else {
+                    {{ 'common_none' | t }}
+                  }
+                </td>
+                <td class="px-4 py-3 font-mono text-xs">{{ txn.sourceId ?? ('common_none' | t) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+}
+
+<p class="mt-6 text-xs text-gray-500">
+  {{ 'wallets_phaseNote' | t }}
+</p>

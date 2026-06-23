@@ -1,50 +1,50 @@
 <div class="px-4 sm:px-6 lg:px-8">
   <app-page-header
-    title="Teachers"
-    subtitle="Public teacher profiles — no phone numbers or private moderation notes."
+    [title]="'teachers_title' | t"
+    [subtitle]="'teachers_subtitle' | t"
   />
 
   <div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-    <input [(ngModel)]="searchQuery" placeholder="Search name or UID" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm" />
+    <input [(ngModel)]="searchQuery" [placeholder]="'teachers_searchPlaceholder' | t" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm" />
     <select [(ngModel)]="activeFilter" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm">
-      <option value="">All active states</option>
-      <option value="true">Active</option>
-      <option value="false">Inactive</option>
+      <option value="">{{ 'common_allActiveStates' | t }}</option>
+      <option value="true">{{ 'status_active' | t }}</option>
+      <option value="false">{{ 'status_inactive' | t }}</option>
     </select>
     <select [(ngModel)]="verificationFilter" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm">
-      <option value="">All verification</option>
-      <option value="verified">Verified</option>
-      <option value="pending">Pending</option>
-      <option value="rejected">Rejected</option>
+      <option value="">{{ 'common_allVerification' | t }}</option>
+      <option value="verified">{{ 'status_verified' | t }}</option>
+      <option value="pending">{{ 'status_pending' | t }}</option>
+      <option value="rejected">{{ 'status_rejected' | t }}</option>
     </select>
-    <input [(ngModel)]="languageFilter" placeholder="Language" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm" />
-    <input [(ngModel)]="specializationFilter" placeholder="Specialization" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm" />
+    <input [(ngModel)]="languageFilter" [placeholder]="'common_language' | t" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm" />
+    <input [(ngModel)]="specializationFilter" [placeholder]="'common_specialization' | t" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm" />
   </div>
 
   <div class="mt-4">
-    <button type="button" (click)="reload()" class="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white">Apply filters</button>
+    <button type="button" (click)="reload()" class="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white">{{ 'common_applyFilters' | t }}</button>
   </div>
 
   <div class="mt-8">
     @if (loadState() === 'loading') {
-      <p class="text-center text-gray-500 py-8">Loading teachers…</p>
+      <p class="text-center text-gray-500 py-8">{{ 'teachers_loading' | t }}</p>
     } @else if (loadState() === 'error') {
       <p class="text-center text-red-600 py-8">{{ errorMessage() }}</p>
     } @else if (items().length === 0) {
-      <p class="text-center text-gray-500 py-8">No teachers found.</p>
+      <p class="text-center text-gray-500 py-8">{{ 'teachers_empty' | t }}</p>
     } @else {
       <div class="overflow-x-auto shadow ring-1 ring-black/5 sm:rounded-lg">
         <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-800">
             <tr>
-              <th class="px-3 py-3 text-left text-sm font-semibold">Display name</th>
-              <th class="px-3 py-3 text-left text-sm font-semibold">User ID</th>
-              <th class="px-3 py-3 text-left text-sm font-semibold">Active</th>
-              <th class="px-3 py-3 text-left text-sm font-semibold">Verification</th>
-              <th class="px-3 py-3 text-left text-sm font-semibold">Completeness</th>
-              <th class="px-3 py-3 text-left text-sm font-semibold">Publicly visible</th>
-              <th class="px-3 py-3 text-left text-sm font-semibold">Missing fields</th>
-              <th class="px-3 py-3 text-right text-sm font-semibold">Actions</th>
+              <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'teachers_displayName' | t }}</th>
+              <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'teachers_userId' | t }}</th>
+              <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'teachers_active' | t }}</th>
+              <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'teachers_verification' | t }}</th>
+              <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'teachers_completeness' | t }}</th>
+              <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'teachers_publiclyVisible' | t }}</th>
+              <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'teachers_missingFields' | t }}</th>
+              <th class="px-3 py-3 text-right text-sm font-semibold">{{ 'common_actions' | t }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200 bg-white dark:bg-gray-900 dark:divide-gray-800">
@@ -52,15 +52,15 @@
               <tr>
                 <td class="px-3 py-4 text-sm">{{ teacher.displayName }}</td>
                 <td class="px-3 py-4 text-sm font-mono text-xs">{{ teacher.userId }}</td>
-                <td class="px-3 py-4 text-sm">{{ teacher.isActive ? 'Yes' : 'No' }}</td>
-                <td class="px-3 py-4 text-sm"><app-status-chip [label]="teacher.verificationStatus" [status]="teacher.verificationStatus" /></td>
+                <td class="px-3 py-4 text-sm">{{ teacher.isActive ? ('common_yes' | t) : ('common_no' | t) }}</td>
+                <td class="px-3 py-4 text-sm"><app-status-chip [label]="teacher.verificationStatus | statusLabel" [status]="teacher.verificationStatus" /></td>
                 <td class="px-3 py-4 text-sm">
-                  <app-status-chip [label]="teacher.profileCompleteness" [status]="teacher.profileCompleteness" />
+                  <app-status-chip [label]="teacher.profileCompleteness | statusLabel" [status]="teacher.profileCompleteness" />
                 </td>
-                <td class="px-3 py-4 text-sm">{{ teacher.isPubliclyVisible ? 'Yes' : 'No' }}</td>
+                <td class="px-3 py-4 text-sm">{{ teacher.isPubliclyVisible ? ('common_yes' | t) : ('common_no' | t) }}</td>
                 <td class="px-3 py-4 text-sm">
                   @if (teacher.missingFields.length === 0) {
-                    <span class="text-green-700 dark:text-green-400">None</span>
+                    <span class="text-green-700 dark:text-green-400">{{ 'status_none' | t }}</span>
                   } @else {
                     <span class="text-amber-700 dark:text-amber-400" [title]="teacher.missingFields.join(', ')">
                       {{ teacher.missingFields.join(', ') }}
@@ -69,9 +69,9 @@
                 </td>
                 <td class="px-3 py-4 text-right text-sm space-x-2">
                   @if (teacher.isActive) {
-                    <button type="button" (click)="openModeration(teacher.id, TeacherProfileModerationAction.Deactivate)" class="text-orange-600">Deactivate</button>
+                    <button type="button" (click)="openModeration(teacher.id, TeacherProfileModerationAction.Deactivate)" class="text-orange-600">{{ 'teachers_deactivate' | t }}</button>
                   } @else {
-                    <button type="button" (click)="openModeration(teacher.id, TeacherProfileModerationAction.Activate)" class="text-green-600">Activate</button>
+                    <button type="button" (click)="openModeration(teacher.id, TeacherProfileModerationAction.Activate)" class="text-green-600">{{ 'teachers_activate' | t }}</button>
                   }
                 </td>
               </tr>
@@ -81,7 +81,7 @@
       </div>
       @if (canLoadMore()) {
         <div class="mt-4 text-center">
-          <button type="button" (click)="loadMore()" class="rounded-md border px-4 py-2 text-sm">Load more</button>
+          <button type="button" (click)="loadMore()" class="rounded-md border px-4 py-2 text-sm">{{ 'common_loadMore' | t }}</button>
         </div>
       }
     }
@@ -89,9 +89,9 @@
 
   <app-confirm-dialog
     [isOpen]="confirmOpen"
-    title="Update teacher status"
-    message="This updates the teacher profile active state via a server-controlled action."
-    confirmLabel="Confirm"
+    [title]="'teachers_confirmTitle' | t"
+    [message]="'teachers_confirmMessage' | t"
+    [confirmLabel]="'common_confirm' | t"
     [loading]="isActionLoading()"
     (confirm)="onConfirmModeration()"
     (cancel)="confirmOpen = false"

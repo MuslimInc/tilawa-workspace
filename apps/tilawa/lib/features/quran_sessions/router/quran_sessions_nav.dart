@@ -55,6 +55,7 @@ List<RouteBase> get quranSessionsRoutes => [
           QuranSessionsRoutes.teacherProfile.replaceFirst(':teacherId', id),
         ),
         onMySessions: () => context.push(QuranSessionsRoutes.mySessions),
+        onWallet: () => context.push(QuranSessionsRoutes.wallet),
         onBecomeTeacher: () => _openTeacherApply(context),
         onChangeCity: () => _openProfileCompletion(context),
       ),
@@ -170,6 +171,16 @@ List<RouteBase> get quranSessionsRoutes => [
                 extra: {'teacherId': teacherId, 'actorId': studentId},
               ),
         ),
+      );
+    },
+  ),
+  GoRoute(
+    path: QuranSessionsRoutes.wallet,
+    builder: (context, state) {
+      final studentId = requireQuranSessionsUserId(getIt);
+      return BlocProvider(
+        create: (_) => getIt<WalletBloc>(),
+        child: WalletScreen(userId: studentId),
       );
     },
   ),
@@ -347,6 +358,7 @@ class _QuranSessionsHomeRoute extends StatefulWidget {
     required this.onSeeAllTeachers,
     required this.onTeacherTapped,
     required this.onMySessions,
+    required this.onWallet,
     required this.onBecomeTeacher,
     required this.onChangeCity,
   });
@@ -354,6 +366,7 @@ class _QuranSessionsHomeRoute extends StatefulWidget {
   final VoidCallback onSeeAllTeachers;
   final void Function(String teacherId) onTeacherTapped;
   final VoidCallback onMySessions;
+  final VoidCallback onWallet;
   final VoidCallback onBecomeTeacher;
   final VoidCallback onChangeCity;
 
@@ -395,6 +408,7 @@ class _QuranSessionsHomeRouteState extends State<_QuranSessionsHomeRoute> {
       onSeeAllTeachers: widget.onSeeAllTeachers,
       onTeacherTapped: widget.onTeacherTapped,
       onMySessions: widget.onMySessions,
+      onWallet: widget.onWallet,
       onBecomeTeacher: widget.onBecomeTeacher,
       onChangeCity: widget.onChangeCity,
       showTeacherApplyEntry: _showTeacherApplyEntry,

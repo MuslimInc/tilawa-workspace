@@ -21,6 +21,7 @@ class QuranSessionsHomeScreen extends StatefulWidget {
     this.onSeeAllTeachers,
     this.onTeacherTapped,
     this.onMySessions,
+    this.onWallet,
     this.onBecomeTeacher,
     this.onNotifyInterest,
     this.onChangeCity,
@@ -32,6 +33,7 @@ class QuranSessionsHomeScreen extends StatefulWidget {
   final VoidCallback? onSeeAllTeachers;
   final void Function(String teacherId)? onTeacherTapped;
   final VoidCallback? onMySessions;
+  final VoidCallback? onWallet;
   final VoidCallback? onBecomeTeacher;
   final VoidCallback? onNotifyInterest;
   final VoidCallback? onChangeCity;
@@ -75,6 +77,11 @@ class _QuranSessionsHomeScreenState extends State<QuranSessionsHomeScreen> {
       appBar: AppBar(
         title: Text(l10n.quranSessionsHomeTitle),
         actions: [
+          if (widget.onWallet != null)
+            TextButton(
+              onPressed: widget.onWallet,
+              child: Text(l10n.walletEntryAction),
+            ),
           if (widget.onMySessions != null)
             TextButton(
               onPressed: widget.onMySessions,

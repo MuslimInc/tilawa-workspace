@@ -15,7 +15,8 @@ export type LifecycleErrorCode =
   | "teacher_not_verified"
   | "gender_not_allowed"
   | "age_not_allowed"
-  | "guardian_approval_required";
+  | "guardian_approval_required"
+  | "meeting_link_required";
 
 export function lifecycleError(
   code: LifecycleErrorCode,

@@ -16,6 +16,12 @@ import {
 } from "./paymentProviderStatus";
 import { validateTransition } from "./sessionLifecycleGuard";
 import type { LifecycleStatus } from "./sessionLifecycleService";
+import {
+  compensationWalletIdempotencyKey,
+  DEFAULT_WALLET_CURRENCY,
+  postWalletCreditInTransaction,
+  refundWalletIdempotencyKey,
+} from "./walletService";
 
 export type CompensationType =
   | "restore_credit"
@@ -45,6 +51,7 @@ export interface IssueRefundRecordResult {
   lifecycleStatus: LifecycleStatus;
   studentId: string;
   sessionId: string;
+  walletTransactionId: string | null;
 }
 
 export interface IssueCompensationRecordInput {
@@ -69,15 +76,105 @@ export interface IssueCompensationRecordResult {
   lifecycleStatus: LifecycleStatus;
   studentId: string;
   sessionId: string;
+  walletTransactionId: string | null;
+}
+
+async function maybePostRefundWalletCredit(
+  input: IssueRefundRecordInput,
+  refundId: string,
+  executionStatus: FinancialExecutionStatus,
+): Promise<string | null> {
+  if (executionStatus !== "executed") {
+    return null;
+  }
+
+  const studentId = input.booking.studentId as string | undefined;
+  if (!studentId) {
+    return null;
+  }
+
+  const amount =
+    input.amountUsd ??
+    (input.booking.amountPaidUsd as number | undefined) ??
+    0;
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return null;
+  }
+
+  const credit = await postWalletCreditInTransaction({
+    tx: input.tx,
+    db: input.db,
+    userId: studentId,
+    amount,
+    currency: DEFAULT_WALLET_CURRENCY,
+    idempotencyKey: refundWalletIdempotencyKey(refundId),
+    type: "refund_credit",
+    sourceType: "refund",
+    sourceId: refundId,
+    description: input.reason,
+    actorId: input.actorId,
+    actorRole: input.actorRole,
+    metadata: {
+      bookingId: input.bookingId,
+      disputeId: input.disputeId ?? null,
+    },
+  });
+
+  return credit.transactionId;
+}
+
+async function maybePostCompensationWalletCredit(
+  input: IssueCompensationRecordInput,
+  compensationId: string,
+  executionStatus: FinancialExecutionStatus,
+): Promise<string | null> {
+  if (executionStatus !== "executed" || input.compensationType !== "wallet_credit") {
+    return null;
+  }
+
+  const studentId = input.booking.studentId as string | undefined;
+  if (!studentId) {
+    return null;
+  }
+
+  const amount =
+    input.amountUsd ??
+    (input.booking.amountPaidUsd as number | undefined) ??
+    0;
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return null;
+  }
+
+  const credit = await postWalletCreditInTransaction({
+    tx: input.tx,
+    db: input.db,
+    userId: studentId,
+    amount,
+    currency: DEFAULT_WALLET_CURRENCY,
+    idempotencyKey: compensationWalletIdempotencyKey(compensationId),
+    type: "compensation_credit",
+    sourceType: "compensation",
+    sourceId: compensationId,
+    description: input.reason,
+    actorId: input.actorId,
+    actorRole: input.actorRole,
+    metadata: {
+      bookingId: input.bookingId,
+      disputeId: input.disputeId ?? null,
+      compensationType: input.compensationType,
+    },
+  });
+
+  return credit.transactionId;
 }
 
 /**
  * Records a refund ledger entry, updates aggregate lifecycle to refunded, and
  * appends audit. Caller must run inside an idempotent transaction.
  */
-export function issueRefundRecord(
+export async function issueRefundRecord(
   input: IssueRefundRecordInput,
-): IssueRefundRecordResult {
+): Promise<IssueRefundRecordResult> {
   const currentStatus = input.booking.lifecycleStatus as
     | LifecycleStatus
     | undefined;
@@ -91,6 +188,15 @@ export function issueRefundRecord(
   const sessionRef = sessionRefForBooking(input.db, input.booking);
   const refundRef = input.db.collection("quran_session_refunds").doc();
   const executionStatus = financialExecutionStatus();
+  const refundAmount =
+    input.amountUsd ??
+    (input.booking.amountPaidUsd as number | undefined) ??
+    null;
+  const walletTransactionId = await maybePostRefundWalletCredit(
+    input,
+    refundRef.id,
+    executionStatus,
+  );
 
   writeAggregateLifecycle(
     input.tx,
@@ -113,9 +219,13 @@ export function issueRefundRecord(
     bookingId: input.bookingId,
     sessionId: input.booking.sessionId ?? null,
     disputeId: input.disputeId ?? null,
-    amountUsd: input.amountUsd ?? input.booking.amountPaidUsd ?? null,
+    amountUsd: refundAmount,
+    amount: refundAmount,
+    currency: DEFAULT_WALLET_CURRENCY,
     reason: input.reason,
     status: executionStatus,
+    destination: "wallet",
+    walletTransactionId,
     paymentProviderEnabled: PAYMENT_PROVIDER_ENABLED,
     approvedByActorId: input.actorId,
     approvedByRole: input.actorRole,
@@ -146,6 +256,7 @@ export function issueRefundRecord(
     lifecycleStatus: guard.to,
     studentId: (input.booking.studentId as string | undefined) ?? "",
     sessionId: (input.booking.sessionId as string | undefined) ?? "",
+    walletTransactionId,
   };
 }
 
@@ -153,9 +264,9 @@ export function issueRefundRecord(
  * Records a compensation ledger entry, updates aggregate lifecycle to
  * compensated, and appends audit. Caller must run inside an idempotent tx.
  */
-export function issueCompensationRecord(
+export async function issueCompensationRecord(
   input: IssueCompensationRecordInput,
-): IssueCompensationRecordResult {
+): Promise<IssueCompensationRecordResult> {
   const currentStatus = input.booking.lifecycleStatus as
     | LifecycleStatus
     | undefined;
@@ -169,6 +280,15 @@ export function issueCompensationRecord(
   const sessionRef = sessionRefForBooking(input.db, input.booking);
   const compensationRef = input.db.collection("quran_session_compensations").doc();
   const executionStatus = financialExecutionStatus();
+  const compensationAmount =
+    input.amountUsd ??
+    (input.booking.amountPaidUsd as number | undefined) ??
+    null;
+  const walletTransactionId = await maybePostCompensationWalletCredit(
+    input,
+    compensationRef.id,
+    executionStatus,
+  );
 
   writeAggregateLifecycle(
     input.tx,
@@ -190,7 +310,10 @@ export function issueCompensationRecord(
     type: input.compensationType,
     status: executionStatus,
     policyRuleId: input.disputeId ? "dispute_resolution" : "admin_manual",
-    amountUsd: input.amountUsd ?? null,
+    amountUsd: compensationAmount,
+    amount: compensationAmount,
+    currency: DEFAULT_WALLET_CURRENCY,
+    walletTransactionId,
     issuedByActorId: input.actorId,
     issuedByRole: input.actorRole,
     reason: input.reason,
@@ -221,5 +344,6 @@ export function issueCompensationRecord(
     lifecycleStatus: guard.to,
     studentId: (input.booking.studentId as string | undefined) ?? "",
     sessionId: (input.booking.sessionId as string | undefined) ?? "",
+    walletTransactionId,
   };
 }

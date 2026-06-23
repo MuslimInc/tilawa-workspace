@@ -8,6 +8,8 @@ import { AdminSessionFilters } from '../../../core/domain/entities/admin-session
 import { SessionLifecycleStatus } from '../../../core/domain/entities/session-lifecycle-status.enum';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { StatusChipComponent } from '../../../shared/components/status-chip/status-chip.component';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { StatusLabelPipe } from '../../../core/i18n/status-label.pipe';
 
 @Component({
   selector: 'app-sessions',
@@ -18,6 +20,8 @@ import { StatusChipComponent } from '../../../shared/components/status-chip/stat
     RouterLink,
     PageHeaderComponent,
     StatusChipComponent,
+    TranslatePipe,
+    StatusLabelPipe,
   ],
   templateUrl: './sessions.component.html',
 })

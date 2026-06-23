@@ -115,6 +115,14 @@
         { "fieldPath": "profileCompleteness", "order": "ASCENDING" },
         { "fieldPath": "isPubliclyVisible", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "wallet_transactions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

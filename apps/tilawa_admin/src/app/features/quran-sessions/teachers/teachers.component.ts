@@ -9,6 +9,8 @@ import { TeacherProfileModerationAction } from '../../../core/domain/entities/mo
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { StatusChipComponent } from '../../../shared/components/status-chip/status-chip.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { StatusLabelPipe } from '../../../core/i18n/status-label.pipe';
 
 @Component({
   selector: 'app-teachers',
@@ -19,6 +21,8 @@ import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialo
     PageHeaderComponent,
     StatusChipComponent,
     ConfirmDialogComponent,
+    TranslatePipe,
+    StatusLabelPipe,
   ],
   templateUrl: './teachers.component.html',
 })

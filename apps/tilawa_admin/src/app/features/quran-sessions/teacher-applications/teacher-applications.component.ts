@@ -8,6 +8,8 @@ import { TeacherApplicationStatus } from '../../../core/domain/entities/teacher-
 import { TeacherApplicationFilters } from '../../../core/domain/entities/teacher-application.entity';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { StatusChipComponent } from '../../../shared/components/status-chip/status-chip.component';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { StatusLabelPipe } from '../../../core/i18n/status-label.pipe';
 
 @Component({
   selector: 'app-teacher-applications',
@@ -18,6 +20,8 @@ import { StatusChipComponent } from '../../../shared/components/status-chip/stat
     RouterLink,
     PageHeaderComponent,
     StatusChipComponent,
+    TranslatePipe,
+    StatusLabelPipe,
   ],
   templateUrl: './teacher-applications.component.html',
 })

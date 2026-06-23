@@ -58,7 +58,7 @@ export const issueSessionCompensation = onCall(
         }
         const booking = bookingSnap.data() ?? {};
 
-        const ledger = issueCompensationRecord({
+        const ledger = await issueCompensationRecord({
           tx,
           db,
           bookingRef,

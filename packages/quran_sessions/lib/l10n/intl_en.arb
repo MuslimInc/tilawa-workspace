@@ -464,5 +464,36 @@
     "reportCategoryInappropriateContent": "Inappropriate content",
     "reportCategoryChildSafety": "Child safety",
     "reportCategoryFraudOrScam": "Fraud or scam",
-    "reportCategoryOther": "Other"
+    "reportCategoryOther": "Other",
+    "walletTitle": "My wallet",
+    "walletAvailableBalanceLabel": "Available balance",
+    "walletHeldBalanceLabel": "On hold: {amount}",
+    "@walletHeldBalanceLabel": {
+        "placeholders": {
+            "amount": {
+                "type": "String"
+            }
+        }
+    },
+    "walletTransactionsTitle": "Transaction history",
+    "walletEmptyState": "Credits appear when refunds are processed.",
+    "walletFrozenMessage": "Wallet temporarily unavailable — contact support.",
+    "walletTransactionTypeLabel": "{type}",
+    "@walletTransactionTypeLabel": {
+        "placeholders": {
+            "type": {
+                "type": "String"
+            }
+        }
+    },
+    "walletTransactionTypeRefund": "Refund",
+    "walletTransactionTypeCompensation": "Compensation",
+    "walletTransactionTypeAdmin": "Admin credit",
+    "walletTransactionTypePromo": "Promotional credit",
+    "walletTransactionTypeBooking": "Session payment",
+    "walletTransactionTypeHold": "Hold",
+    "walletTransactionTypeHoldRelease": "Hold released",
+    "walletTransactionTypeReversal": "Reversal",
+    "walletTransactionTypeExpiry": "Expired credit",
+    "walletEntryAction": "Wallet"
 }
