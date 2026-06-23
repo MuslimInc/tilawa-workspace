@@ -20,6 +20,7 @@ import 'package:tilawa/features/localization/domain/usecases/get_current_languag
 import 'package:tilawa/features/localization/domain/usecases/set_language_use_case.dart';
 import 'package:tilawa/features/localization/presentation/bloc/localization_bloc.dart';
 import 'package:tilawa/features/reciters/domain/usecases/clear_favorite_reciters_use_case.dart';
+import '../helpers/noop_sync_user_language_preference_use_case.dart';
 import 'package:tilawa/features/reciters/domain/usecases/get_favorite_reciters_use_case.dart';
 import 'package:tilawa/features/reciters/domain/usecases/get_reciters_use_case.dart';
 import 'package:tilawa/features/reciters/domain/usecases/toggle_favorite_reciter_use_case.dart';
@@ -246,6 +247,7 @@ void main() {
             mockGetLanguage,
             mockSetLanguage,
             mockGetReciters,
+            noopSyncUserLanguagePreferenceUseCase(),
           ),
         ),
         BlocProvider<PlayerBackgroundCubit>.value(
@@ -341,6 +343,7 @@ void main() {
             mockGetLanguage,
             mockSetLanguage,
             mockGetReciters,
+            noopSyncUserLanguagePreferenceUseCase(),
           ),
         ),
         BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:tilawa/features/auth/domain/services/callable_session_payload_builder.dart';
 
 import 'firestore_exception_mapper.dart';
 import 'firestore_paths.dart';
@@ -10,11 +11,13 @@ class FirestoreBookingDataSource implements BookingRemoteDataSource {
     this._firestore,
     this._authSession,
     this._functions,
+    this._sessionPayloadBuilder,
   );
 
   final FirebaseFirestore _firestore;
   final AuthSessionProvider _authSession;
   final FirebaseFunctions _functions;
+  final CallableSessionPayloadBuilder _sessionPayloadBuilder;
 
   CollectionReference<Map<String, dynamic>> get _bookings =>
       _firestore.collection(FirestoreQuranSessionsPaths.bookings);
@@ -59,16 +62,18 @@ class FirestoreBookingDataSource implements BookingRemoteDataSource {
       final endsAt = startsAt.add(Duration(minutes: durationMinutes));
 
       final callable = _functions.httpsCallable('createSessionBooking');
-      final response = await callable.call<Map<String, dynamic>>({
-        'teacherId': teacherId,
-        'slotId': slotId,
-        'startsAt': startsAt.toIso8601String(),
-        'endsAt': endsAt.toIso8601String(),
-        'callType': requestedCallTypeId,
-        'pricingType': paymentReference == null ? 'free' : 'fixedPerSession',
-        'paymentReference': paymentReference,
-        'studentNote': studentNote,
-      });
+      final response = await callable.call<Map<String, dynamic>>(
+        await _sessionPayloadBuilder.withSessionEpoch({
+          'teacherId': teacherId,
+          'slotId': slotId,
+          'startsAt': startsAt.toIso8601String(),
+          'endsAt': endsAt.toIso8601String(),
+          'callType': requestedCallTypeId,
+          'pricingType': paymentReference == null ? 'free' : 'fixedPerSession',
+          'paymentReference': paymentReference,
+          'studentNote': studentNote,
+        }),
+      );
       final payload = response.data;
       final bookingId = payload['bookingId'] as String? ?? '';
       final sessionId = payload['sessionId'] as String?;
@@ -103,11 +108,13 @@ class FirestoreBookingDataSource implements BookingRemoteDataSource {
   }) async {
     try {
       final callable = _functions.httpsCallable('cancelSessionBooking');
-      await callable.call<Map<String, dynamic>>({
-        'bookingId': bookingId,
-        'reason': reason,
-        'actorRole': 'student',
-      });
+      await callable.call<Map<String, dynamic>>(
+        await _sessionPayloadBuilder.withSessionEpoch({
+          'bookingId': bookingId,
+          'reason': reason,
+          'actorRole': 'student',
+        }),
+      );
       final bookingSnap = await _bookings.doc(bookingId).get();
       if (!bookingSnap.exists) {
         throw NotFoundException('QuranBooking($bookingId)');
@@ -135,14 +142,16 @@ class FirestoreBookingDataSource implements BookingRemoteDataSource {
       }
       final data = doc.data() ?? const {};
       final callable = _functions.httpsCallable('requestSessionReschedule');
-      await callable.call<Map<String, dynamic>>({
-        'bookingId': bookingId,
-        'newSlotId': newSlotId,
-        'newStartsAt': readRequiredDateTime(
-          data['startsAt'],
-        ).toUtc().toIso8601String(),
-        'reason': 'requested_by_student',
-      });
+      await callable.call<Map<String, dynamic>>(
+        await _sessionPayloadBuilder.withSessionEpoch({
+          'bookingId': bookingId,
+          'newSlotId': newSlotId,
+          'newStartsAt': readRequiredDateTime(
+            data['startsAt'],
+          ).toUtc().toIso8601String(),
+          'reason': 'requested_by_student',
+        }),
+      );
       final refreshed = await _bookings.doc(bookingId).get();
       return _mapBooking(refreshed.id, refreshed.data() ?? const {});
     } on FirebaseFunctionsException catch (e) {

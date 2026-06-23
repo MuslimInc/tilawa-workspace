@@ -3719,5 +3719,17 @@
                 "type": "int"
             }
         }
+    },
+    "authSignedInElsewhereTitle": "تم تسجيل الدخول من جهاز آخر",
+    "@authSignedInElsewhereTitle": {
+        "description": "Title when another device took over the active session"
+    },
+    "authSignedInElsewhereBody": "تم فتح حسابك على جهاز آخر. سجّل الدخول مرة أخرى للمتابعة على هذا الجهاز.",
+    "@authSignedInElsewhereBody": {
+        "description": "Body when another device took over the active session"
+    },
+    "authSignedInElsewhereAction": "تسجيل الدخول مجدداً",
+    "@authSignedInElsewhereAction": {
+        "description": "Primary action after session revoked on this device"
     }
 }

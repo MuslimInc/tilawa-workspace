@@ -64,6 +64,16 @@ void main() {
     );
   });
 
+  tearDown(() {
+    GoogleAuthProviderImpl.debugCredentialUiDismissedStream = null;
+    binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+  });
+
+  Future<void> simulateCredentialManagerUiShown() async {
+    binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    await Future<void>.delayed(const Duration(milliseconds: 60));
+  }
+
   group('GoogleAuthProviderImpl', () {
     test('signIn should return success when login successful', () async {
       // Arrange
@@ -252,8 +262,93 @@ void main() {
     });
 
     test(
-      'signIn returns noGoogleAccounts when Credential Manager and account '
-      'chooser return no account',
+      'signIn returns noGoogleAccounts when CM is unavailable and account '
+      'chooser is dismissed',
+      () async {
+        when(
+          mockGoogleSignIn.attemptLightweightAuthentication(
+            reportAllExceptions: anyNamed('reportAllExceptions'),
+          ),
+        ).thenReturn(null);
+        when(
+          mockGoogleSignIn.authenticate(
+            scopeHint: anyNamed('scopeHint'),
+          ),
+        ).thenThrow(
+          const GoogleSignInException(
+            code: GoogleSignInExceptionCode.canceled,
+          ),
+        );
+
+        expect(
+          await googleAuthProvider.signIn(),
+          const AuthResult.noGoogleAccounts(),
+        );
+        verify(
+          mockGoogleSignIn.authenticate(
+            scopeHint: anyNamed('scopeHint'),
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
+      'signIn returns uiUnavailable when CM plugin is null and '
+      'authenticate is unsupported',
+      () async {
+        when(mockGoogleSignIn.supportsAuthenticate()).thenReturn(false);
+        when(
+          mockGoogleSignIn.attemptLightweightAuthentication(
+            reportAllExceptions: anyNamed('reportAllExceptions'),
+          ),
+        ).thenReturn(null);
+
+        final AuthResult result = await googleAuthProvider.signIn();
+
+        expect(
+          result,
+          isA<AuthFailure>().having(
+            (AuthFailure f) => f.code,
+            'code',
+            'ui-unavailable',
+          ),
+        );
+        verifyNever(
+          mockGoogleSignIn.authenticate(
+            scopeHint: anyNamed('scopeHint'),
+          ),
+        );
+      },
+    );
+
+    test(
+      'signIn returns cancelled when CM sheet completes with no account '
+      'after UI was shown',
+      () async {
+        when(
+          mockGoogleSignIn.attemptLightweightAuthentication(
+            reportAllExceptions: anyNamed('reportAllExceptions'),
+          ),
+        ).thenAnswer((_) async {
+          await simulateCredentialManagerUiShown();
+          return null;
+        });
+
+        expect(
+          await googleAuthProvider.signIn(),
+          const AuthResult.cancelled(),
+        );
+        verifyNever(
+          mockGoogleSignIn.authenticate(
+            scopeHint: anyNamed('scopeHint'),
+          ),
+        );
+      },
+    );
+
+    test(
+      'signIn falls back to authenticate when CM returns no account without '
+      'showing UI',
       () async {
         when(
           mockGoogleSignIn.authenticate(
@@ -268,6 +363,211 @@ void main() {
         expect(
           await googleAuthProvider.signIn(),
           const AuthResult.noGoogleAccounts(),
+        );
+        verify(
+          mockGoogleSignIn.authenticate(
+            scopeHint: anyNamed('scopeHint'),
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
+      'signIn falls back to authenticate when CM reports framework error '
+      'without showing UI',
+      () async {
+        when(
+          mockGoogleSignIn.attemptLightweightAuthentication(
+            reportAllExceptions: anyNamed('reportAllExceptions'),
+          ),
+        ).thenAnswer(
+          (_) => Future<GoogleSignInAccount?>.error(
+            const GoogleSignInException(
+              code: GoogleSignInExceptionCode.canceled,
+            ),
+          ),
+        );
+        when(
+          mockGoogleSignIn.authenticate(
+            scopeHint: anyNamed('scopeHint'),
+          ),
+        ).thenAnswer((_) async => mockGoogleUser);
+        when(mockGoogleUser.authentication).thenReturn(mockGoogleAuth);
+        when(mockGoogleAuth.idToken).thenReturn('token');
+        when(
+          mockFirebaseAuth.signInWithCredential(any),
+        ).thenAnswer((_) async => mockUserCredential);
+        when(mockUserCredential.user).thenReturn(mockFirebaseUser);
+        when(mockFirebaseUser.uid).thenReturn('123');
+        when(mockFirebaseUser.email).thenReturn('test@example.com');
+        when(mockFirebaseUser.displayName).thenReturn('Test User');
+        when(mockFirebaseUser.photoURL).thenReturn('url');
+        when(mockFirebaseUser.metadata).thenReturn(UserMetadata(0, 0));
+
+        final AuthResult result = await googleAuthProvider.signIn();
+
+        result.maybeWhen(
+          success: (user) => expect(user.id, '123'),
+          orElse: () => fail('Expected success'),
+        );
+        verify(
+          mockGoogleSignIn.authenticate(
+            scopeHint: anyNamed('scopeHint'),
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
+      'signIn falls back to authenticate when CM reports interrupted '
+      'without showing UI',
+      () async {
+        when(
+          mockGoogleSignIn.attemptLightweightAuthentication(
+            reportAllExceptions: anyNamed('reportAllExceptions'),
+          ),
+        ).thenAnswer(
+          (_) => Future<GoogleSignInAccount?>.error(
+            const GoogleSignInException(
+              code: GoogleSignInExceptionCode.interrupted,
+            ),
+          ),
+        );
+        when(
+          mockGoogleSignIn.authenticate(
+            scopeHint: anyNamed('scopeHint'),
+          ),
+        ).thenAnswer((_) async => mockGoogleUser);
+        when(mockGoogleUser.authentication).thenReturn(mockGoogleAuth);
+        when(mockGoogleAuth.idToken).thenReturn('token');
+        when(
+          mockFirebaseAuth.signInWithCredential(any),
+        ).thenAnswer((_) async => mockUserCredential);
+        when(mockUserCredential.user).thenReturn(mockFirebaseUser);
+        when(mockFirebaseUser.uid).thenReturn('123');
+        when(mockFirebaseUser.email).thenReturn('test@example.com');
+        when(mockFirebaseUser.displayName).thenReturn('Test User');
+        when(mockFirebaseUser.photoURL).thenReturn('url');
+        when(mockFirebaseUser.metadata).thenReturn(UserMetadata(0, 0));
+
+        final AuthResult result = await googleAuthProvider.signIn();
+
+        result.maybeWhen(
+          success: (user) => expect(user.id, '123'),
+          orElse: () => fail('Expected success'),
+        );
+        verify(
+          mockGoogleSignIn.authenticate(
+            scopeHint: anyNamed('scopeHint'),
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
+      'signIn falls back to authenticate when CM reports unknownError '
+      'without showing UI',
+      () async {
+        when(
+          mockGoogleSignIn.attemptLightweightAuthentication(
+            reportAllExceptions: anyNamed('reportAllExceptions'),
+          ),
+        ).thenAnswer(
+          (_) => Future<GoogleSignInAccount?>.error(
+            const GoogleSignInException(
+              code: GoogleSignInExceptionCode.unknownError,
+              description: 'GetCredentialResponse error',
+            ),
+          ),
+        );
+        when(
+          mockGoogleSignIn.authenticate(
+            scopeHint: anyNamed('scopeHint'),
+          ),
+        ).thenAnswer((_) async => mockGoogleUser);
+        when(mockGoogleUser.authentication).thenReturn(mockGoogleAuth);
+        when(mockGoogleAuth.idToken).thenReturn('token');
+        when(
+          mockFirebaseAuth.signInWithCredential(any),
+        ).thenAnswer((_) async => mockUserCredential);
+        when(mockUserCredential.user).thenReturn(mockFirebaseUser);
+        when(mockFirebaseUser.uid).thenReturn('123');
+        when(mockFirebaseUser.email).thenReturn('test@example.com');
+        when(mockFirebaseUser.displayName).thenReturn('Test User');
+        when(mockFirebaseUser.photoURL).thenReturn('url');
+        when(mockFirebaseUser.metadata).thenReturn(UserMetadata(0, 0));
+
+        final AuthResult result = await googleAuthProvider.signIn();
+
+        result.maybeWhen(
+          success: (user) => expect(user.id, '123'),
+          orElse: () => fail('Expected success'),
+        );
+        verify(
+          mockGoogleSignIn.authenticate(
+            scopeHint: anyNamed('scopeHint'),
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
+      'signIn returns cancelled when CM sheet reports async cancellation '
+      'after UI was shown',
+      () async {
+        when(
+          mockGoogleSignIn.attemptLightweightAuthentication(
+            reportAllExceptions: anyNamed('reportAllExceptions'),
+          ),
+        ).thenAnswer((_) async {
+          await simulateCredentialManagerUiShown();
+          throw const GoogleSignInException(
+            code: GoogleSignInExceptionCode.canceled,
+          );
+        });
+
+        expect(
+          await googleAuthProvider.signIn(),
+          const AuthResult.cancelled(),
+        );
+        verifyNever(
+          mockGoogleSignIn.authenticate(
+            scopeHint: anyNamed('scopeHint'),
+          ),
+        );
+      },
+    );
+
+    test(
+      'signIn falls back to authenticate when CM plugin is unavailable',
+      () async {
+        when(
+          mockGoogleSignIn.attemptLightweightAuthentication(
+            reportAllExceptions: anyNamed('reportAllExceptions'),
+          ),
+        ).thenReturn(null);
+        when(
+          mockGoogleSignIn.authenticate(
+            scopeHint: anyNamed('scopeHint'),
+          ),
+        ).thenAnswer((_) async => mockGoogleUser);
+        when(mockGoogleUser.authentication).thenReturn(mockGoogleAuth);
+        when(mockGoogleAuth.idToken).thenReturn('token');
+        when(
+          mockFirebaseAuth.signInWithCredential(any),
+        ).thenAnswer((_) async => mockUserCredential);
+        when(mockUserCredential.user).thenReturn(mockFirebaseUser);
+        when(mockFirebaseUser.uid).thenReturn('123');
+        when(mockFirebaseUser.email).thenReturn('test@example.com');
+        when(mockFirebaseUser.displayName).thenReturn('Test User');
+        when(mockFirebaseUser.photoURL).thenReturn('url');
+        when(mockFirebaseUser.metadata).thenReturn(UserMetadata(0, 0));
+
+        final AuthResult result = await googleAuthProvider.signIn();
+
+        result.maybeWhen(
+          success: (user) => expect(user.id, '123'),
+          orElse: () => fail('Expected success'),
         );
         verify(
           mockGoogleSignIn.authenticate(
@@ -433,9 +733,12 @@ void main() {
           mockGoogleSignIn.attemptLightweightAuthentication(
             reportAllExceptions: anyNamed('reportAllExceptions'),
           ),
-        ).thenThrow(
-          const GoogleSignInException(code: GoogleSignInExceptionCode.canceled),
-        );
+        ).thenAnswer((_) async {
+          await simulateCredentialManagerUiShown();
+          throw const GoogleSignInException(
+            code: GoogleSignInExceptionCode.canceled,
+          );
+        });
 
         expect(
           await googleAuthProvider.signIn(),
@@ -446,6 +749,40 @@ void main() {
             scopeHint: anyNamed('scopeHint'),
           ),
         );
+      },
+    );
+
+    test(
+      'signIn treats native credential UI dismissal as user cancel',
+      () async {
+        final StreamController<void> dismissEvents =
+            StreamController<void>.broadcast();
+        GoogleAuthProviderImpl.debugCredentialUiDismissedStream =
+            dismissEvents.stream;
+        when(
+          mockGoogleSignIn.attemptLightweightAuthentication(
+            reportAllExceptions: anyNamed('reportAllExceptions'),
+          ),
+        ).thenAnswer((_) async {
+          // HiddenActivity teardown follows a real pause; lifecycle alone is
+          // the primary CM visibility signal — dismiss stream supplements it.
+          await simulateCredentialManagerUiShown();
+          dismissEvents.add(null);
+          throw const GoogleSignInException(
+            code: GoogleSignInExceptionCode.canceled,
+          );
+        });
+
+        expect(
+          await googleAuthProvider.signIn(),
+          const AuthResult.cancelled(),
+        );
+        verifyNever(
+          mockGoogleSignIn.authenticate(
+            scopeHint: anyNamed('scopeHint'),
+          ),
+        );
+        await dismissEvents.close();
       },
     );
 
@@ -468,18 +805,24 @@ void main() {
       GoogleSignInExceptionCode.canceled,
       GoogleSignInExceptionCode.interrupted,
     ]) {
-      test('signIn should return cancelled for ${code.name}', () async {
-        when(
-          mockGoogleSignIn.attemptLightweightAuthentication(
-            reportAllExceptions: anyNamed('reportAllExceptions'),
-          ),
-        ).thenThrow(GoogleSignInException(code: code));
+      test(
+        'signIn should return cancelled for ${code.name} after CM UI shown',
+        () async {
+          when(
+            mockGoogleSignIn.attemptLightweightAuthentication(
+              reportAllExceptions: anyNamed('reportAllExceptions'),
+            ),
+          ).thenAnswer((_) async {
+            await simulateCredentialManagerUiShown();
+            throw GoogleSignInException(code: code);
+          });
 
-        expect(
-          await googleAuthProvider.signIn(),
-          const AuthResult.cancelled(),
-        );
-      });
+          expect(
+            await googleAuthProvider.signIn(),
+            const AuthResult.cancelled(),
+          );
+        },
+      );
     }
 
     test('signIn should return failure for uiUnavailable', () async {

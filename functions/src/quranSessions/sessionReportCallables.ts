@@ -19,6 +19,7 @@ import {
   isAdmin,
   requireAdmin,
   requireAuthenticatedUid,
+  requireValidSessionEpochUnlessAdmin,
 } from "./sessionAuth";
 
 interface ReportSessionConcernRequest {
@@ -47,6 +48,7 @@ export const reportSessionConcern = onCall(
   { enforceAppCheck: false },
   async (request) => {
     const uid = requireAuthenticatedUid(request);
+    await requireValidSessionEpochUnlessAdmin(request, uid);
     const data = request.data as ReportSessionConcernRequest;
 
     if (!isValidReportCategory(data.category)) {

@@ -364,7 +364,8 @@ linter:
   melos run gen
   ```
 
-  Equivalent: `dart run build_runner build --workspace`. To stop a stuck watch:
+  Runs `melos run gen:l10n` then `dart run build_runner build --workspace`.
+  L10n only: `melos run gen:l10n`. To stop a stuck watch:
   `melos run build_runner:stop`.
 
 ## Testing

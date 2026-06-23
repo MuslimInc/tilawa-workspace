@@ -15,7 +15,7 @@ import {
   paymentTransactionIdForConfirm,
 } from "./payment/sandboxPaymentProvider";
 import { resolvePaymentProvider } from "./payment/paymentProviderRegistry";
-import { requireAuthenticatedUid } from "./sessionAuth";
+import { requireAuthenticatedUid, requireValidSessionEpoch } from "./sessionAuth";
 import { validateTransition } from "./sessionLifecycleGuard";
 import { legacyStatusForLifecycle } from "./sessionLifecycleService";
 import type { BookingPaymentSnapshot } from "./payment/types";
@@ -40,6 +40,7 @@ export const confirmBookingPayment = onCall(
   { enforceAppCheck: false },
   async (request) => {
     const studentId = requireAuthenticatedUid(request);
+    await requireValidSessionEpoch(request, studentId);
     const data = request.data as ConfirmBookingPaymentRequest;
 
     if (!data.bookingId?.trim() || !data.paymentReference?.trim()) {

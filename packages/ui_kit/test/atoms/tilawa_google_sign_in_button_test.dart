@@ -113,7 +113,7 @@ void main() {
     expect(find.text('Sign in with Google'), findsOneWidget);
   });
 
-  testWidgets('shows loading indicator instead of label when loading', (
+  testWidgets('shows loading indicator while keeping label mounted', (
     WidgetTester tester,
   ) async {
     await pumpButton(
@@ -124,6 +124,12 @@ void main() {
     );
 
     expect(find.byType(TilawaLoadingIndicator), findsOneWidget);
-    expect(find.text('Sign in with Google'), findsNothing);
+    final Opacity opacity = tester.widget<Opacity>(
+      find.descendant(
+        of: find.byType(TilawaGoogleSignInButton),
+        matching: find.byType(Opacity),
+      ),
+    );
+    expect(opacity.opacity, 0);
   });
 }

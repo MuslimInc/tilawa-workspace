@@ -10,6 +10,7 @@ import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tilawa/features/quran_sessions/data/fake_auth_session_provider.dart';
+import 'package:tilawa/features/settings/domain/services/teacher_capability_refresh_notifier.dart';
 import 'package:tilawa/features/settings/presentation/widgets/settings_teacher_capability_scope.dart';
 import 'package:tilawa/features/settings/presentation/widgets/settings_teaching_on_memuslim_tile.dart';
 import 'package:tilawa/features/settings/presentation/widgets/settings_widgets.dart';
@@ -76,6 +77,9 @@ void main() {
     );
     scopeGetIt().registerSingleton<AuthSessionProvider>(
       const FakeAuthSessionProvider(userId: 'user_1'),
+    );
+    scopeGetIt().registerSingleton<TeacherCapabilityRefreshNotifier>(
+      TeacherCapabilityRefreshNotifier(),
     );
   });
 

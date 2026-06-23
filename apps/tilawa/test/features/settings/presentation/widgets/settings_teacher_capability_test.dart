@@ -12,6 +12,7 @@ import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tilawa/features/quran_sessions/data/fake_auth_session_provider.dart';
+import 'package:tilawa/features/settings/domain/services/teacher_capability_refresh_notifier.dart';
 import 'package:tilawa/features/settings/presentation/widgets/settings_teacher_capability_scope.dart';
 import 'package:tilawa/features/settings/presentation/widgets/settings_teaching_on_memuslim_tile.dart';
 import 'package:tilawa/features/settings/presentation/widgets/settings_widgets.dart';
@@ -159,6 +160,9 @@ void main() {
     );
     scopeGetIt().registerSingleton<AuthSessionProvider>(
       const FakeAuthSessionProvider(userId: 'user_1'),
+    );
+    scopeGetIt().registerSingleton<TeacherCapabilityRefreshNotifier>(
+      TeacherCapabilityRefreshNotifier(),
     );
   });
 
@@ -411,5 +415,62 @@ void main() {
 
     check(useCase.callCount).equals(2);
     check(find.text(en.teacherDashboard).evaluate().length).equals(1);
+  });
+
+  testWidgets('silent refresh keeps capability card visible', (tester) async {
+    final useCase = _SequenceTeacherCapabilityUseCase([
+      const TeacherCapability(state: TeacherCapabilityState.approvedActive),
+      const TeacherCapability(state: TeacherCapabilityState.approvedActive),
+    ]);
+    scopeGetIt().registerSingleton<GetCurrentUserTeacherCapabilityUseCase>(
+      useCase,
+    );
+
+    final en = await QuranSessionsLocalizations.delegate.load(
+      const Locale('en'),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+        localizationsDelegates: [
+          ...AppLocalizations.localizationsDelegates,
+          ...QuranSessionsLocalizations.localizationsDelegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: BlocProvider<AuthBloc>.value(
+          value: mockAuthBloc,
+          child: SettingsTeacherCapabilityScope(
+            child: SettingsTeachingOnMemuslimTile(showDivider: false),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    check(find.byType(TilawaCapabilityActionCard).evaluate().length).equals(1);
+    check(
+      find.byType(TilawaCapabilityActionCardSkeleton).evaluate().isEmpty,
+    ).isTrue();
+    check(find.text(en.teacherDashboard).evaluate().length).equals(1);
+
+    SettingsTeacherCapabilityScope.refreshOf(
+      tester.element(find.byType(SettingsTeachingOnMemuslimTile)),
+    );
+    await tester.pump();
+
+    check(find.byType(TilawaCapabilityActionCard).evaluate().length).equals(1);
+    check(
+      find.byType(TilawaCapabilityActionCardSkeleton).evaluate().isEmpty,
+    ).isTrue();
+    check(find.text(en.teacherDashboard).evaluate().length).equals(1);
+
+    await tester.pumpAndSettle();
+
+    check(useCase.callCount).equals(2);
+    check(find.byType(TilawaCapabilityActionCard).evaluate().length).equals(1);
+    check(
+      find.byType(TilawaCapabilityActionCardSkeleton).evaluate().isEmpty,
+    ).isTrue();
   });
 }

@@ -5455,6 +5455,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} of {total} passed'**
   String recitationPracticeCompletedCount(int count, int total);
+
+  /// Title when another device took over the active session
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in on another device'**
+  String get authSignedInElsewhereTitle;
+
+  /// Body when another device took over the active session
+  ///
+  /// In en, this message translates to:
+  /// **'Your account was opened on another device. Sign in again to continue on this device.'**
+  String get authSignedInElsewhereBody;
+
+  /// Primary action after session revoked on this device
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again'**
+  String get authSignedInElsewhereAction;
 }
 
 class _AppLocalizationsDelegate

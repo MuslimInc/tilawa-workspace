@@ -2,16 +2,22 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:tilawa/features/auth/domain/services/callable_session_payload_builder.dart';
 
 import 'firestore_exception_mapper.dart';
 import 'firestore_paths.dart';
 import 'session_firestore_mapper.dart';
 
 class FirebaseSessionMutationGateway implements SessionMutationGateway {
-  FirebaseSessionMutationGateway(this._firestore, this._functions);
+  FirebaseSessionMutationGateway(
+    this._firestore,
+    this._functions,
+    this._sessionPayloadBuilder,
+  );
 
   final FirebaseFirestore _firestore;
   final FirebaseFunctions _functions;
+  final CallableSessionPayloadBuilder _sessionPayloadBuilder;
 
   CollectionReference<Map<String, dynamic>> get _bookings =>
       _firestore.collection(FirestoreQuranSessionsPaths.bookings);
@@ -33,18 +39,20 @@ class FirebaseSessionMutationGateway implements SessionMutationGateway {
   }) async {
     try {
       final callable = _functions.httpsCallable('createSessionBooking');
-      final response = await callable.call<Map<String, dynamic>>({
-        'teacherId': teacherId,
-        'slotId': slotId,
-        'startsAt': startsAt.toUtc().toIso8601String(),
-        'endsAt': endsAt.toUtc().toIso8601String(),
-        'callType': _callTypeToCf(callType),
-        'pricingType': _pricingTypeToCf(pricingType),
-        'paymentReference': paymentReference,
-        'studentNote': studentNote,
-        'idempotencyKey':
-            '$studentId:$slotId:${startsAt.toUtc().toIso8601String()}',
-      });
+      final response = await callable.call<Map<String, dynamic>>(
+        await _sessionPayloadBuilder.withSessionEpoch({
+          'teacherId': teacherId,
+          'slotId': slotId,
+          'startsAt': startsAt.toUtc().toIso8601String(),
+          'endsAt': endsAt.toUtc().toIso8601String(),
+          'callType': _callTypeToCf(callType),
+          'pricingType': _pricingTypeToCf(pricingType),
+          'paymentReference': paymentReference,
+          'studentNote': studentNote,
+          'idempotencyKey':
+              '$studentId:$slotId:${startsAt.toUtc().toIso8601String()}',
+        }),
+      );
       final bookingId = response.data['bookingId'] as String? ?? '';
       final clientConfirmToken = response.data['clientConfirmToken'] as String?;
       final paymentRef =
@@ -82,11 +90,13 @@ class FirebaseSessionMutationGateway implements SessionMutationGateway {
   }) async {
     try {
       final callable = _functions.httpsCallable('cancelSessionBooking');
-      await callable.call<Map<String, dynamic>>({
-        'bookingId': bookingId,
-        'reason': reason,
-        'actorRole': _actorRoleToCf(actorRole),
-      });
+      await callable.call<Map<String, dynamic>>(
+        await _sessionPayloadBuilder.withSessionEpoch({
+          'bookingId': bookingId,
+          'reason': reason,
+          'actorRole': _actorRoleToCf(actorRole),
+        }),
+      );
       return _loadAggregate(bookingId);
     } on FirebaseFunctionsException catch (e) {
       if (e.code == 'not-found') {
@@ -109,13 +119,15 @@ class FirebaseSessionMutationGateway implements SessionMutationGateway {
   }) async {
     try {
       final callable = _functions.httpsCallable('requestSessionReschedule');
-      final response = await callable.call<Map<String, dynamic>>({
-        'bookingId': bookingId,
-        'newSlotId': newSlotId,
-        'newStartsAt': newStartsAt.toUtc().toIso8601String(),
-        'reason': reason,
-        'actorRole': _actorRoleToCf(actorRole),
-      });
+      final response = await callable.call<Map<String, dynamic>>(
+        await _sessionPayloadBuilder.withSessionEpoch({
+          'bookingId': bookingId,
+          'newSlotId': newSlotId,
+          'newStartsAt': newStartsAt.toUtc().toIso8601String(),
+          'reason': reason,
+          'actorRole': _actorRoleToCf(actorRole),
+        }),
+      );
       final requestId = response.data['requestId'] as String? ?? '';
       final aggregate = await _loadAggregate(bookingId);
       return aggregate.map(
@@ -142,11 +154,13 @@ class FirebaseSessionMutationGateway implements SessionMutationGateway {
   }) async {
     try {
       final callable = _functions.httpsCallable('confirmSessionReschedule');
-      await callable.call<Map<String, dynamic>>({
-        'requestId': requestId,
-        'accept': accept,
-        'actorRole': _actorRoleToCf(actorRole),
-      });
+      await callable.call<Map<String, dynamic>>(
+        await _sessionPayloadBuilder.withSessionEpoch({
+          'requestId': requestId,
+          'accept': accept,
+          'actorRole': _actorRoleToCf(actorRole),
+        }),
+      );
       final requestDoc = await _firestore
           .collection('quran_reschedule_requests')
           .doc(requestId)
@@ -170,10 +184,12 @@ class FirebaseSessionMutationGateway implements SessionMutationGateway {
   }) async {
     try {
       final callable = _functions.httpsCallable('completeSession');
-      await callable.call<Map<String, dynamic>>({
-        'sessionId': sessionId,
-        'actorRole': _actorRoleToCf(actorRole),
-      });
+      await callable.call<Map<String, dynamic>>(
+        await _sessionPayloadBuilder.withSessionEpoch({
+          'sessionId': sessionId,
+          'actorRole': _actorRoleToCf(actorRole),
+        }),
+      );
       final sessionDoc = await _sessions.doc(sessionId).get();
       final bookingId = sessionDoc.data()?['bookingId'] as String? ?? sessionId;
       return _loadAggregate(bookingId);
@@ -193,12 +209,14 @@ class FirebaseSessionMutationGateway implements SessionMutationGateway {
     final classification = _classificationForActor(actorRole);
     try {
       final callable = _functions.httpsCallable('markSessionNoShow');
-      await callable.call<Map<String, dynamic>>({
-        'sessionId': sessionId,
-        'classification': classification,
-        'actorRole': _actorRoleToCf(actorRole),
-        'reason': reason,
-      });
+      await callable.call<Map<String, dynamic>>(
+        await _sessionPayloadBuilder.withSessionEpoch({
+          'sessionId': sessionId,
+          'classification': classification,
+          'actorRole': _actorRoleToCf(actorRole),
+          'reason': reason,
+        }),
+      );
       final sessionDoc = await _sessions.doc(sessionId).get();
       final bookingId = sessionDoc.data()?['bookingId'] as String? ?? sessionId;
       return _loadAggregate(bookingId);
@@ -218,11 +236,13 @@ class FirebaseSessionMutationGateway implements SessionMutationGateway {
   }) async {
     try {
       final callable = _functions.httpsCallable('reportSessionConcern');
-      final response = await callable.call<Map<String, dynamic>>({
-        'category': category.cfValue,
-        'description': description,
-        'bookingId': ?bookingId,
-      });
+      final response = await callable.call<Map<String, dynamic>>(
+        await _sessionPayloadBuilder.withSessionEpoch({
+          'category': category.cfValue,
+          'description': description,
+          'bookingId': ?bookingId,
+        }),
+      );
       final reportId = response.data['reportId'] as String? ?? '';
       if (reportId.isEmpty) {
         return const Left(UnknownFailure());

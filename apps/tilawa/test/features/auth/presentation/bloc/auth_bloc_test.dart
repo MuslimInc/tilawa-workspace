@@ -13,7 +13,10 @@ import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.d
 import 'package:tilawa/features/auth/domain/usecases/sign_in_with_google_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/sign_out.dart';
 import 'package:tilawa/features/auth/domain/usecases/sync_device_token_use_case.dart';
+import 'package:tilawa/features/auth/domain/usecases/sync_user_language_preference_use_case.dart';
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:tilawa/features/localization/domain/usecases/get_current_language_use_case.dart';
+import 'package:tilawa_core/config/language_config.dart';
 
 import 'package:tilawa_core/errors/failures.dart';
 
@@ -26,6 +29,8 @@ import 'auth_bloc_test.mocks.dart';
   DeleteAccount,
   GetCurrentUserUseCase,
   SyncDeviceTokenUseCase,
+  GetCurrentLanguageUseCase,
+  SyncUserLanguagePreferenceUseCase,
 ])
 void main() {
   late AuthBloc authBloc;
@@ -34,11 +39,16 @@ void main() {
   late MockDeleteAccount mockDeleteAccount;
   late MockGetCurrentUserUseCase mockGetCurrentUserUseCase;
   late MockSyncDeviceTokenUseCase mockSyncDeviceTokenUseCase;
+  late MockGetCurrentLanguageUseCase mockGetCurrentLanguageUseCase;
+  late MockSyncUserLanguagePreferenceUseCase mockSyncUserLanguagePreference;
   late AccountDeletionFlowTracker accountDeletionFlowTracker;
 
   setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
     provideDummy<Either<Failure, void>>(const Right(null));
+    provideDummy<Either<Failure, String>>(
+      Right(LanguageConfig.defaultLanguageCode),
+    );
     await initializeHydratedStorageForTest();
   });
 
@@ -59,7 +69,16 @@ void main() {
     mockDeleteAccount = MockDeleteAccount();
     mockGetCurrentUserUseCase = MockGetCurrentUserUseCase();
     mockSyncDeviceTokenUseCase = MockSyncDeviceTokenUseCase();
+    mockGetCurrentLanguageUseCase = MockGetCurrentLanguageUseCase();
+    mockSyncUserLanguagePreference = MockSyncUserLanguagePreferenceUseCase();
     accountDeletionFlowTracker = AccountDeletionFlowTracker();
+
+    when(
+      mockGetCurrentLanguageUseCase(),
+    ).thenAnswer((_) async => Right(LanguageConfig.defaultLanguageCode));
+    when(
+      mockSyncUserLanguagePreference(any),
+    ).thenAnswer((_) async {});
 
     authBloc = AuthBloc(
       mockSignInWithGoogleUseCase,
@@ -67,6 +86,8 @@ void main() {
       mockDeleteAccount,
       mockGetCurrentUserUseCase,
       mockSyncDeviceTokenUseCase,
+      mockGetCurrentLanguageUseCase,
+      mockSyncUserLanguagePreference,
       accountDeletionFlowTracker,
     );
   });
@@ -92,6 +113,10 @@ void main() {
         verify: (_) {
           verify(mockGetCurrentUserUseCase()).called(1);
           verify(mockSyncDeviceTokenUseCase(tUser.id)).called(1);
+          verify(mockGetCurrentLanguageUseCase()).called(1);
+          verify(
+            mockSyncUserLanguagePreference(LanguageConfig.defaultLanguageCode),
+          ).called(1);
         },
       );
 
@@ -127,6 +152,10 @@ void main() {
         verify: (_) {
           verify(mockSignInWithGoogleUseCase()).called(1);
           verify(mockSyncDeviceTokenUseCase(tUser.id)).called(1);
+          verify(mockGetCurrentLanguageUseCase()).called(1);
+          verify(
+            mockSyncUserLanguagePreference(LanguageConfig.defaultLanguageCode),
+          ).called(1);
         },
       );
 

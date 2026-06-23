@@ -20,7 +20,7 @@ workspace:
 
 dev_dependencies:
   sentry_dart_plugin: ^3.4.0
-  melos: ^7.8.2
+  melos: ^8.0.0
   bloc_lint: ^0.4.1
   bloc_tools: ^0.1.0-dev.24
 
@@ -33,8 +33,8 @@ melos:
     # -- Analysis & Formatting -----------------------------------------
     analyze:
       description: Run static analysis across all packages.
-      run: dart analyze --fatal-infos
       exec:
+        command: dart analyze --fatal-infos
         concurrency: 1
       packageFilters:
         ignore:
@@ -42,15 +42,24 @@ melos:
 
     format:
       description: Check Dart formatting across all packages.
-      run: dart format --set-exit-if-changed .
+      exec:
+        command: sh -c '([ ! -d lib ] || dart format --set-exit-if-changed lib) && ([ ! -d test ] || dart format --set-exit-if-changed test) && ([ ! -d bin ] || dart format --set-exit-if-changed bin) && ([ ! -d tool ] || dart format --set-exit-if-changed tool)'
 
     format:fix:
       description: Auto-fix Dart formatting across all packages.
-      run: dart format .
+      exec:
+        command: sh -c '([ ! -d lib ] || dart format lib) && ([ ! -d test ] || dart format test) && ([ ! -d bin ] || dart format bin) && ([ ! -d tool ] || dart format tool)'
 
     fix:
       description: Apply dart fix suggestions across all packages.
-      run: melos exec -- "dart fix --apply"
+      exec:
+        command: dart fix --apply
+
+    fix:format:
+      description: Apply dart fix suggestions then auto-format across all packages.
+      run: |
+        melos run fix
+        melos run format:fix
 
     lint:
       description: Run analyze + format check (CI gate).
@@ -65,20 +74,31 @@ melos:
     # -- Testing -------------------------------------------------------
     test:
       description: Run all tests across all packages.
-      run: melos exec -- "flutter test"
+      exec:
+        command: flutter test
       packageFilters:
         dirExists: test
 
     test:coverage:
       description: Run tests with coverage across all packages.
-      run: melos exec -- "flutter test --coverage"
+      exec:
+        command: flutter test --coverage
       packageFilters:
         dirExists: test
 
     # -- Code Generation -----------------------------------------------
+    gen:l10n:
+      description: Generate Flutter localizations for packages with l10n.yaml.
+      run: |
+        (cd apps/tilawa && flutter gen-l10n)
+        (cd packages/quran_image && flutter gen-l10n)
+        (cd packages/quran_sessions && flutter gen-l10n)
+
     gen:
-      description: Run build_runner for all workspace packages (one shared build).
-      run: dart run build_runner build --workspace
+      description: Run l10n generation then build_runner for the workspace.
+      run: |
+        melos run gen:l10n
+        dart run build_runner build --workspace
 
     build_runner:
       description: Alias for gen.

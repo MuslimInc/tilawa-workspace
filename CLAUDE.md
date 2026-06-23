@@ -107,7 +107,7 @@ Existing examples of the sibling pattern:
 Run from the workspace root (or `apps/tilawa/` for app-only commands):
 
 ```sh
-melos run gen                         # codegen (build_runner --workspace)
+melos run gen                         # l10n + build_runner (--workspace)
 flutter test                          # all tests (from apps/tilawa)
 flutter test test/features/athkar     # single feature
 dart analyze                          # static analysis

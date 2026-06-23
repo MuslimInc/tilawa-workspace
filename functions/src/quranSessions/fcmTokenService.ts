@@ -1,25 +1,37 @@
+import { FieldValue } from "firebase-admin/firestore";
 import { getMessaging, MulticastMessage } from "firebase-admin/messaging";
 
-export async function collectFcmTokens(
+export interface UserFcmToken {
+  userId: string;
+  token: string;
+}
+
+export async function getActiveFcmToken(
+  db: FirebaseFirestore.Firestore,
+  userId: string,
+): Promise<string | null> {
+  const snap = await db.collection("users").doc(userId).get();
+  const token = snap.data()?.notifications?.activeFcmToken;
+  return typeof token === "string" && token.length > 0 ? token : null;
+}
+
+export async function collectActiveFcmTokens(
   db: FirebaseFirestore.Firestore,
   userIds: string[],
-): Promise<string[]> {
-  const tokens: string[] = [];
+): Promise<UserFcmToken[]> {
+  const tokens: UserFcmToken[] = [];
   const batchSize = 10;
 
   for (let i = 0; i < userIds.length; i += batchSize) {
     const batch = userIds.slice(i, i + batchSize);
     const snapshots = await Promise.all(
-      batch.map((userId) =>
-        db.collection("users").doc(userId).collection("fcm_tokens").get(),
-      ),
+      batch.map((userId) => db.collection("users").doc(userId).get()),
     );
-    for (const snapshot of snapshots) {
-      for (const doc of snapshot.docs) {
-        const token = doc.data().token as string | undefined;
-        if (token) {
-          tokens.push(token);
-        }
+    for (let index = 0; index < snapshots.length; index += 1) {
+      const snap = snapshots[index];
+      const token = snap.data()?.notifications?.activeFcmToken;
+      if (typeof token === "string" && token.length > 0) {
+        tokens.push({ userId: batch[index], token });
       }
     }
   }
@@ -27,13 +39,21 @@ export async function collectFcmTokens(
   return tokens;
 }
 
-export async function cleanupInvalidFcmTokens(
+/** @deprecated Use [collectActiveFcmTokens]. */
+export async function collectFcmTokens(
   db: FirebaseFirestore.Firestore,
-  tokens: string[],
-  response: { responses: Array<{ success: boolean; error?: { code: string } }> },
   userIds: string[],
+): Promise<string[]> {
+  const entries = await collectActiveFcmTokens(db, userIds);
+  return entries.map((entry) => entry.token);
+}
+
+export async function clearInvalidActiveFcmTokens(
+  db: FirebaseFirestore.Firestore,
+  entries: UserFcmToken[],
+  response: { responses: Array<{ success: boolean; error?: { code: string } }> },
 ): Promise<void> {
-  const invalidTokens: string[] = [];
+  const invalidByUser = new Map<string, string>();
 
   response.responses.forEach((resp, index) => {
     if (
@@ -42,29 +62,51 @@ export async function cleanupInvalidFcmTokens(
       (resp.error.code === "messaging/invalid-registration-token" ||
         resp.error.code === "messaging/registration-token-not-registered")
     ) {
-      invalidTokens.push(tokens[index]);
+      const entry = entries[index];
+      if (entry) {
+        invalidByUser.set(entry.userId, entry.token);
+      }
     }
   });
 
-  if (invalidTokens.length === 0) {
+  if (invalidByUser.size === 0) {
     return;
   }
 
-  const deletePromises: Promise<FirebaseFirestore.WriteResult>[] = [];
-  for (const userId of userIds) {
-    for (const token of invalidTokens) {
-      deletePromises.push(
-        db
-          .collection("users")
-          .doc(userId)
-          .collection("fcm_tokens")
-          .doc(token)
-          .delete(),
-      );
-    }
+  const batch = db.batch();
+  for (const [userId, token] of invalidByUser) {
+    const userRef = db.collection("users").doc(userId);
+    batch.set(
+      userRef,
+      {
+        notifications: {
+          activeFcmToken: FieldValue.delete(),
+          tokenUpdatedAt: FieldValue.delete(),
+        },
+      },
+      { merge: true },
+    );
+    // Legacy cleanup if token doc still exists.
+    batch.delete(userRef.collection("fcm_tokens").doc(token));
   }
+  await batch.commit();
+}
 
-  await Promise.all(deletePromises);
+/** @deprecated Use [clearInvalidActiveFcmTokens]. */
+export async function cleanupInvalidFcmTokens(
+  db: FirebaseFirestore.Firestore,
+  tokens: string[],
+  response: { responses: Array<{ success: boolean; error?: { code: string } }> },
+  userIds: string[],
+): Promise<void> {
+  const entries: UserFcmToken[] = [];
+  for (let i = 0; i < tokens.length; i += 1) {
+    entries.push({
+      userId: userIds[Math.min(i, userIds.length - 1)] ?? "",
+      token: tokens[i],
+    });
+  }
+  await clearInvalidActiveFcmTokens(db, entries, response);
 }
 
 export interface PushDeliveryResult {
@@ -80,11 +122,12 @@ export async function sendPushToUsers(
   actionType: string,
   actionData?: Record<string, string>,
 ): Promise<PushDeliveryResult> {
-  const tokens = await collectFcmTokens(db, userIds);
-  if (tokens.length === 0) {
+  const entries = await collectActiveFcmTokens(db, userIds);
+  if (entries.length === 0) {
     throw new Error("No FCM tokens found");
   }
 
+  const tokens = entries.map((entry) => entry.token);
   const dataPayload: Record<string, string> = {
     title,
     body,
@@ -108,7 +151,7 @@ export async function sendPushToUsers(
   };
 
   const response = await getMessaging().sendEachForMulticast(message);
-  await cleanupInvalidFcmTokens(db, tokens, response, userIds);
+  await clearInvalidActiveFcmTokens(db, entries, response);
 
   return {
     successCount: response.successCount,

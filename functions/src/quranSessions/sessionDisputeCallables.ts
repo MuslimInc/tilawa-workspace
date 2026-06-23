@@ -20,7 +20,7 @@ import {
 } from "./idempotencyService";
 import { lifecycleError } from "./lifecycleErrors";
 import { enqueueSessionNotification } from "./notificationOutboxService";
-import { requireAdmin, requireParticipantOrAdmin } from "./sessionAuth";
+import { requireAdmin, requireParticipantOrAdmin, requireValidSessionEpochUnlessAdmin } from "./sessionAuth";
 import { validateTransition } from "./sessionLifecycleGuard";
 import type { LifecycleStatus } from "./sessionLifecycleService";
 
@@ -54,6 +54,7 @@ export const openSessionDispute = onCall(
       teacherId: (booking.teacherId as string) ?? "",
     };
     const { uid, actor } = requireParticipantOrAdmin(request, participants);
+    await requireValidSessionEpochUnlessAdmin(request, uid);
 
     const operationKey = buildOperationKey(
       "open_dispute",

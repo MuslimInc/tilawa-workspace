@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/features/settings/presentation/widgets/settings_teacher_capability_scope.dart';
 import 'package:tilawa/features/quran_sessions/presentation/quran_sessions_analytics.dart';
 import 'package:tilawa/features/quran_sessions/presentation/quran_sessions_scheduling_analytics.dart';
 import 'package:tilawa/features/quran_sessions/presentation/quran_sessions_user.dart';
@@ -34,6 +35,7 @@ Future<void> navigateAfterTeacherApproval(
       );
     },
     (capability) {
+      SettingsTeacherCapabilityScope.refreshOf(context);
       navigateForTeacherCapability(
         context,
         capability,
@@ -485,11 +487,13 @@ class _TeacherDashboardGateState extends State<_TeacherDashboardGate> {
       return;
     }
 
+    setState(() => _checking = false);
     navigateForTeacherCapability(
       context,
       capability,
       analytics: quranSessionsAnalyticsCallbacks(),
       showBlockedMessage: capability.shouldCompleteTeacherProfile,
+      replace: true,
     );
   }
 

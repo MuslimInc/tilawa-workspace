@@ -10,7 +10,7 @@ import {
   buildOperationKey,
   runIdempotentOperation,
 } from "./idempotencyService";
-import { isAdmin, requireAuthenticatedUid, resolveActorRole } from "./sessionAuth";
+import { isAdmin, requireAuthenticatedUid, requireValidSessionEpochUnlessAdmin, resolveActorRole } from "./sessionAuth";
 import { validateTransition } from "./sessionLifecycleGuard";
 import type { LifecycleStatus } from "./sessionLifecycleService";
 import { nowServer } from "./sessionLifecycleService";
@@ -26,7 +26,8 @@ interface ConfirmSessionRescheduleRequest {
 export const confirmSessionReschedule = onCall(
   { enforceAppCheck: false },
   async (request) => {
-    requireAuthenticatedUid(request);
+    const uid = requireAuthenticatedUid(request);
+    await requireValidSessionEpochUnlessAdmin(request, uid);
     const data = request.data as ConfirmSessionRescheduleRequest;
     if (!data.requestId) {
       throw new HttpsError("invalid-argument", "requestId required.");

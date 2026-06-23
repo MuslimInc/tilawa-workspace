@@ -12,7 +12,7 @@ import {
 } from "./idempotencyService";
 import { recordTerminalTransition } from "./metricsAggregationService";
 import { enqueueSessionNotification } from "./notificationOutboxService";
-import { isAdmin, requireAuthenticatedUid, resolveActorRole } from "./sessionAuth";
+import { isAdmin, requireAuthenticatedUid, requireValidSessionEpochUnlessAdmin, resolveActorRole } from "./sessionAuth";
 import { cancelActionForRole, validateTransition } from "./sessionLifecycleGuard";
 import type { LifecycleStatus } from "./sessionLifecycleService";
 import type { ActorRole } from "./sessionLifecycleGuard";
@@ -27,7 +27,8 @@ interface CancelSessionBookingRequest {
 export const cancelSessionBooking = onCall(
   { enforceAppCheck: false },
   async (request) => {
-    requireAuthenticatedUid(request);
+    const uid = requireAuthenticatedUid(request);
+    await requireValidSessionEpochUnlessAdmin(request, uid);
     const data = request.data as CancelSessionBookingRequest;
     if (!data.bookingId || !data.reason?.trim()) {
       throw new HttpsError("invalid-argument", "bookingId and reason required.");

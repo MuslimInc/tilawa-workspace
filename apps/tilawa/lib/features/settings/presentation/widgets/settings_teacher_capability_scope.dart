@@ -1,56 +1,65 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_sessions/quran_sessions.dart';
-import 'package:tilawa/core/di/injection.dart';
-import 'package:tilawa/features/quran_sessions/presentation/quran_sessions_user.dart';
-import 'package:tilawa/features/quran_sessions/quran_sessions_feature_flags.dart';
+
+import '../cubit/teacher_capability_cubit.dart';
 
 /// Loads [TeacherCapability] for Settings profile + teaching section.
 ///
 /// Refreshes when the settings route becomes visible again (e.g. after popping
-/// back from teacher application status) and when the app resumes.
-class SettingsTeacherCapabilityScope extends StatefulWidget {
+/// back from teacher application status), when the app resumes, and when an FCM
+/// `teacher_application_reviewed` push arrives while this scope is mounted.
+class SettingsTeacherCapabilityScope extends StatelessWidget {
   const SettingsTeacherCapabilityScope({super.key, required this.child});
 
   final Widget child;
 
   static TeacherCapability? maybeOf(BuildContext context) {
-    return context
-        .dependOnInheritedWidgetOfExactType<_InheritedTeacherCapability>()
-        ?.capability;
+    return context.select(
+      (TeacherCapabilityCubit cubit) => cubit.state.capability,
+    );
   }
 
   static bool isLoadingOf(BuildContext context) {
-    return context
-            .dependOnInheritedWidgetOfExactType<_InheritedTeacherCapability>()
-            ?.isLoading ??
-        false;
+    return context.select(
+      (TeacherCapabilityCubit cubit) => cubit.state.isLoading,
+    );
   }
 
   /// Reloads capability from Firestore (e.g. after admin approval).
   static void refreshOf(BuildContext context) {
-    context
-        .findAncestorStateOfType<_SettingsTeacherCapabilityScopeState>()
-        ?.refresh();
+    context.read<TeacherCapabilityCubit>().refresh();
   }
 
   @override
-  State<SettingsTeacherCapabilityScope> createState() =>
-      _SettingsTeacherCapabilityScopeState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => TeacherCapabilityCubit()..load(),
+      child: _SettingsTeacherCapabilityLifecycleListener(child: child),
+    );
+  }
 }
 
-class _SettingsTeacherCapabilityScopeState
-    extends State<SettingsTeacherCapabilityScope>
+/// Observes app resume and route visibility; delegates refresh to the cubit.
+class _SettingsTeacherCapabilityLifecycleListener extends StatefulWidget {
+  const _SettingsTeacherCapabilityLifecycleListener({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_SettingsTeacherCapabilityLifecycleListener> createState() =>
+      _SettingsTeacherCapabilityLifecycleListenerState();
+}
+
+class _SettingsTeacherCapabilityLifecycleListenerState
+    extends State<_SettingsTeacherCapabilityLifecycleListener>
     with WidgetsBindingObserver {
-  TeacherCapability? _capability;
-  bool _loading = true;
-  bool _hasLoaded = false;
   bool _wasRouteCurrent = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _load();
   }
 
   @override
@@ -62,7 +71,7 @@ class _SettingsTeacherCapabilityScopeState
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      refresh();
+      context.read<TeacherCapabilityCubit>().refresh();
     }
   }
 
@@ -70,69 +79,19 @@ class _SettingsTeacherCapabilityScopeState
   void didChangeDependencies() {
     super.didChangeDependencies();
     final isCurrent = ModalRoute.of(context)?.isCurrent ?? false;
-    if (isCurrent && _hasLoaded && !_wasRouteCurrent) {
-      refresh();
+    final cubit = context.read<TeacherCapabilityCubit>();
+    if (isCurrent && cubit.state.hasLoaded && !_wasRouteCurrent) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final stillCurrent = ModalRoute.of(context)?.isCurrent ?? false;
+        if (stillCurrent) {
+          context.read<TeacherCapabilityCubit>().refresh();
+        }
+      });
     }
     _wasRouteCurrent = isCurrent;
   }
 
-  void refresh() => _load();
-
-  Future<void> _load() async {
-    final config = quranSessionsFeatureConfig();
-    if (!config.showProfileTeacherEntry) {
-      if (mounted) {
-        setState(() => _loading = false);
-      }
-      return;
-    }
-
-    final userId = quranSessionsCurrentUserId(getIt);
-    if (userId == null) {
-      if (mounted) {
-        setState(() => _loading = false);
-      }
-      return;
-    }
-
-    final result = await getIt<GetCurrentUserTeacherCapabilityUseCase>()(
-      userId,
-    );
-    if (!mounted) return;
-
-    setState(() {
-      _loading = false;
-      _hasLoaded = true;
-      _capability = result.fold(
-        (_) => const TeacherCapability(state: TeacherCapabilityState.none),
-        (capability) => capability,
-      );
-    });
-  }
-
   @override
-  Widget build(BuildContext context) {
-    return _InheritedTeacherCapability(
-      capability: _capability,
-      isLoading: _loading,
-      child: widget.child,
-    );
-  }
-}
-
-class _InheritedTeacherCapability extends InheritedWidget {
-  const _InheritedTeacherCapability({
-    required this.capability,
-    required this.isLoading,
-    required super.child,
-  });
-
-  final TeacherCapability? capability;
-  final bool isLoading;
-
-  @override
-  bool updateShouldNotify(_InheritedTeacherCapability oldWidget) {
-    return oldWidget.capability != capability ||
-        oldWidget.isLoading != isLoading;
-  }
+  Widget build(BuildContext context) => widget.child;
 }

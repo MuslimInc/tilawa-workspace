@@ -38,13 +38,15 @@ class TeacherCapability extends Equatable {
   /// verification belongs on that card, not duplicated under the avatar.
   bool get showsPremiumSettingsCapabilityCard =>
       state == TeacherCapabilityState.approvedActive ||
-      state == TeacherCapabilityState.approvedIncompleteProfile;
+      state == TeacherCapabilityState.approvedIncompleteProfile ||
+      routesApprovedInactiveToTeacherFlows;
 
   bool get showsVerifiedTeacherBadgeInProfileHeader =>
       showsVerifiedTeacherBadge && !showsPremiumSettingsCapabilityCard;
 
   bool get canAccessTeacherDashboard =>
-      state == TeacherCapabilityState.approvedActive;
+      state == TeacherCapabilityState.approvedActive ||
+      routesApprovedInactiveToTeacherFlows;
 
   bool get shouldCompleteTeacherProfile =>
       state == TeacherCapabilityState.approvedIncompleteProfile;
@@ -58,9 +60,16 @@ class TeacherCapability extends Equatable {
   bool get shouldShowApplicationStatus =>
       state == TeacherCapabilityState.pending ||
       state == TeacherCapabilityState.rejected ||
-      state == TeacherCapabilityState.approvedInactive ||
+      (state == TeacherCapabilityState.approvedInactive &&
+          !routesApprovedInactiveToTeacherFlows) ||
       state == TeacherCapabilityState.suspended ||
       state == TeacherCapabilityState.revoked;
+
+  /// Approved application with deactivated profile — route to teacher flows,
+  /// not the status dead-end loop.
+  bool get routesApprovedInactiveToTeacherFlows =>
+      state == TeacherCapabilityState.approvedInactive &&
+      application?.status == TeacherApplicationStatus.approved;
 
   @override
   List<Object?> get props => [state, application, profile];

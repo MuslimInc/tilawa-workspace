@@ -1,6 +1,9 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
+import { logger } from "firebase-functions/v2";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { buildApprovedTeacherProfile } from "./quranSessions/teacherProfileApproval";
+import { sendPushToUsers } from "./quranSessions/fcmTokenService";
+import { buildTeacherApplicationReviewNotificationCopy } from "./quranSessions/teacherApplicationReviewNotification";
 
 type ReviewAction = "approve" | "reject" | "suspend" | "revoke";
 
@@ -62,14 +65,28 @@ export const reviewTeacherApplication = onCall(
       { merge: true },
     );
 
+    let applicantUserData: Record<string, unknown> | undefined;
     if (action === "approve") {
       const userSnap = await db.collection("users").doc(app.userId).get();
       const userData = userSnap.data() ?? {};
+      applicantUserData = userData;
       const profileRef = db.collection("quran_teacher_profiles").doc(applicationId);
-      await profileRef.set(
-        buildApprovedTeacherProfile({ app, user: userData, now }),
-        { merge: true },
-      );
+      const existingProfile = (await profileRef.get()).data();
+      const approvedProfile = buildApprovedTeacherProfile({
+        app,
+        user: userData,
+        now,
+      });
+
+      if (existingProfile?.isActive === false) {
+        logger.warn("Re-activating deactivated teacher profile on approve", {
+          applicationId,
+          userId: app.userId,
+        });
+      }
+
+      // merge: true still overwrites isActive — approvedProfile always sets true.
+      await profileRef.set(approvedProfile, { merge: true });
     }
 
     if (action === "suspend" || action === "revoke") {
@@ -82,6 +99,37 @@ export const reviewTeacherApplication = onCall(
         },
         { merge: true },
       );
+    }
+
+    const applicantUserId = app.userId as string | undefined;
+    if (applicantUserId) {
+      try {
+        if (!applicantUserData) {
+          const userSnap = await db.collection("users").doc(applicantUserId).get();
+          applicantUserData = userSnap.data();
+        }
+        const copy = buildTeacherApplicationReviewNotificationCopy(
+          nextStatus,
+          applicantUserData,
+        );
+        await sendPushToUsers(
+          db,
+          [applicantUserId],
+          copy.title,
+          copy.body,
+          copy.actionType,
+          {
+            applicationId,
+            status: nextStatus,
+          },
+        );
+      } catch (error) {
+        logger.warn("Teacher application review push skipped", {
+          applicationId,
+          userId: applicantUserId,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
     }
 
     return { applicationId, status: nextStatus };

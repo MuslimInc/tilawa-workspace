@@ -1,0 +1,152 @@
+import 'package:checks/checks.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:tilawa/features/auth/domain/entities/auth_result.dart';
+import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
+import 'package:tilawa/features/auth/domain/repositories/auth_repository.dart';
+import 'package:tilawa/features/auth/domain/services/google_sign_in_launch_readiness_store.dart';
+import 'package:tilawa/features/auth/domain/usecases/prewarm_google_sign_in_launch_use_case.dart';
+import 'package:tilawa/features/auth/domain/usecases/prepare_google_sign_in_use_case.dart';
+import 'package:tilawa/features/auth/domain/usecases/resolve_google_sign_in_launch_use_case.dart';
+import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:tilawa/features/auth/presentation/cubit/login_google_sign_in_cubit.dart';
+import 'package:tilawa/features/auth/presentation/services/login_auth_bloc_transition_handler.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
+
+class _NoopAuthRepository implements AuthRepository {
+  @override
+  Stream<UserEntity?> get authStateChanges => const Stream.empty();
+
+  @override
+  UserEntity? get currentUser => null;
+
+  @override
+  Future<void> deleteAccount() async {}
+
+  @override
+  Future<void> prepareGoogleSignIn() async {}
+
+  @override
+  Future<AuthResult> signInWithGoogle() async => const AuthResult.cancelled();
+
+  @override
+  Future<void> signOut() async {}
+}
+
+void main() {
+  final UserEntity user = UserEntity(
+    id: '1',
+    email: 'a@b.com',
+    displayName: 'User',
+    createdAt: DateTime.utc(2024),
+  );
+
+  late LoginGoogleSignInCubit cubit;
+  final List<String> logs = <String>[];
+  int navigateCount = 0;
+  final List<(String message, TilawaFeedbackVariant variant)> toasts =
+      <(String, TilawaFeedbackVariant)>[];
+
+  const LoginAuthBlocTransitionMessages messages =
+      LoginAuthBlocTransitionMessages(
+        authErrorFallback: 'fallback',
+        noGoogleAccounts: 'no accounts',
+      );
+
+  setUp(() {
+    final GoogleSignInLaunchReadinessStore store =
+        GoogleSignInLaunchReadinessStore();
+    cubit = LoginGoogleSignInCubit(
+      PrewarmGoogleSignInLaunchUseCase(
+        PrepareGoogleSignInUseCase(_NoopAuthRepository()),
+        store,
+      ),
+      ResolveGoogleSignInLaunchUseCase(store),
+    );
+    logs.clear();
+    navigateCount = 0;
+    toasts.clear();
+  });
+
+  tearDown(() async {
+    await cubit.close();
+  });
+
+  void handle(AuthState state, {bool shouldSkipAutoSignIn = false}) {
+    handleLoginAuthBlocTransition(
+      state: state,
+      launchCubit: cubit,
+      shouldSkipAutoSignIn: shouldSkipAutoSignIn,
+      messages: messages,
+      onNavigateToHome: () => navigateCount++,
+      showToast: (String message, TilawaFeedbackVariant variant) {
+        toasts.add((message, variant));
+      },
+      log: logs.add,
+    );
+  }
+
+  group('handleLoginAuthBlocTransition', () {
+    test('authenticated clears launch state and navigates home', () {
+      cubit.emit(const LoginGoogleSignInState(isLaunchPending: true));
+
+      handle(AuthState.authenticated(user: user));
+
+      check(cubit.state.isLaunchPending).isFalse();
+      check(navigateCount).equals(1);
+      check(logs.single).contains('authenticated');
+    });
+
+    test('unauthenticated clears pending launch', () {
+      cubit.emit(const LoginGoogleSignInState(isLaunchPending: true));
+
+      handle(const AuthState.unauthenticated());
+
+      check(cubit.state.isLaunchPending).isFalse();
+      check(navigateCount).equals(0);
+    });
+
+    test('unauthenticated with skip policy notifies manual cancel', () {
+      cubit.emit(
+        const LoginGoogleSignInState(
+          isLaunchPending: true,
+          awaitingManualResult: true,
+        ),
+      );
+
+      handle(const AuthState.unauthenticated(), shouldSkipAutoSignIn: true);
+
+      check(cubit.state.awaitingManualResult).isFalse();
+    });
+
+    test('error shows message toast and clears launch pending', () {
+      cubit.emit(const LoginGoogleSignInState(isLaunchPending: true));
+
+      handle(const AuthState.error(message: 'Network down'));
+
+      check(cubit.state.isLaunchPending).isFalse();
+      check(toasts.single.$1).equals('Network down');
+      check(toasts.single.$2).equals(TilawaFeedbackVariant.error);
+    });
+
+    test('error uses fallback when message empty', () {
+      handle(const AuthState.error(message: ''));
+
+      check(toasts.single.$1).equals('fallback');
+    });
+
+    test('noGoogleAccounts shows info toast', () {
+      handle(const AuthState.noGoogleAccounts());
+
+      check(toasts.single.$1).equals('no accounts');
+      check(toasts.single.$2).equals(TilawaFeedbackVariant.info);
+    });
+
+    test('initial and loading are no-ops', () {
+      handle(const AuthState.initial());
+      handle(const AuthState.loading());
+
+      check(navigateCount).equals(0);
+      check(toasts).isEmpty();
+    });
+  });
+}

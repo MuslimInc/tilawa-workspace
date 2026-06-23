@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:developer' as developer;
 import 'dart:ui';
 
 import 'package:dartz_plus/dartz_plus.dart';
@@ -9,6 +11,7 @@ import 'package:tilawa_core/config/language_config.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import '../../domain/usecases/get_current_language_use_case.dart';
 import '../../domain/usecases/set_language_use_case.dart';
+import '../../../auth/domain/usecases/sync_user_language_preference_use_case.dart';
 import '../../../reciters/domain/usecases/get_reciters_use_case.dart';
 
 part 'localization_event.dart';
@@ -21,6 +24,7 @@ class LocalizationBloc
     this._getCurrentLanguageUseCase,
     this._setLanguageUseCase,
     this._getRecitersUseCase,
+    this._syncUserLanguagePreferenceUseCase,
   ) : super(
         LocalizationState(locale: Locale(LanguageConfig.defaultLanguageCode)),
       ) {
@@ -33,6 +37,7 @@ class LocalizationBloc
   final GetCurrentLanguageUseCase _getCurrentLanguageUseCase;
   final SetLanguageUseCase _setLanguageUseCase;
   final GetRecitersUseCase _getRecitersUseCase;
+  final SyncUserLanguagePreferenceUseCase _syncUserLanguagePreferenceUseCase;
 
   @override
   LocalizationState? fromJson(Map<String, dynamic> json) {
@@ -78,6 +83,7 @@ class LocalizationBloc
         if (languageCode != state.locale.languageCode) {
           emit(LocalizationState(locale: Locale(languageCode)));
         }
+        _fireAndForgetLanguageSync(languageCode);
       },
     );
   }
@@ -89,7 +95,23 @@ class LocalizationBloc
     // Save to SharedPreferences so other parts of the app can read it
     await _setLanguageUseCase(event.locale.languageCode);
     _getRecitersUseCase.invalidateCache();
+    _fireAndForgetLanguageSync(event.locale.languageCode);
     // Update the bloc state (which will also be persisted to HydratedStorage)
     emit(LocalizationState(locale: event.locale));
+  }
+
+  void _fireAndForgetLanguageSync(String languageCode) {
+    unawaited(
+      _syncUserLanguagePreferenceUseCase(languageCode).catchError(
+        (Object error, StackTrace stackTrace) {
+          developer.log(
+            'Failed to sync language preference',
+            name: 'LocalizationBloc',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        },
+      ),
+    );
   }
 }

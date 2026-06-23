@@ -119,12 +119,15 @@ void main() {
     });
 
     test('maps approved inactive when fields complete but inactive', () {
-      check(
-        TeacherCapabilityResolver.resolve(
-          application: _application(TeacherApplicationStatus.approved),
-          profile: _profile(isActive: false),
-        ).state,
-      ).equals(TeacherCapabilityState.approvedInactive);
+      final capability = TeacherCapabilityResolver.resolve(
+        application: _application(TeacherApplicationStatus.approved),
+        profile: _profile(isActive: false),
+      );
+
+      check(capability.state).equals(TeacherCapabilityState.approvedInactive);
+      check(capability.routesApprovedInactiveToTeacherFlows).isTrue();
+      check(capability.shouldShowApplicationStatus).isFalse();
+      check(capability.canAccessTeacherDashboard).isTrue();
     });
 
     test('maps approved incomplete when verification pending', () {

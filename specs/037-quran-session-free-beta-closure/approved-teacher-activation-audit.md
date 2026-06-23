@@ -380,3 +380,64 @@ Implemented:
 - `TeacherApplicationStatusScreen` — **متابعة** CTA on approved state
 - `navigateAfterTeacherApproval()` — shared post-approval navigation helper
 - `functions/scripts/backfillApprovedTeacherActivation.ts` — backfill approved profiles with `isActive != true`
+
+---
+
+## Phase D — Prevention
+
+### Root cause (staging `a1sYAAaBHg5aq1uwya0o`)
+
+Approved application + complete profile + **`isActive: false`**. Not missing profile, not stale Settings cache alone.
+
+**Most likely:** `moderateTeacherProfile` **deactivate** after approve — toggles `isActive` without changing application `status`. Application stays `approved`; resolver yields `approvedInactive`.
+
+**Also possible (not staging case):** legacy approve before `isActive` field; re-approve without profile merge would leave old value — **current** `buildApprovedTeacherProfile` + `merge: true` overwrites `isActive: true`.
+
+### CF hardening
+
+`functions/src/reviewTeacherApplication.ts` on **approve**:
+
+- Build profile via `buildApprovedTeacherProfile` (always `isActive: true`, recomputed `isPubliclyVisible`)
+- Read existing profile; **warn** when re-activating `isActive: false` doc
+- `merge: true` still overwrites `isActive` from approved payload
+
+`functions/test/quranSessions/teacherProfileApproval.test.ts` — unit tests for `buildApprovedTeacherProfile` + visibility recompute.
+
+### Phase B completion — `approvedInactive` routing
+
+`TeacherCapability.routesApprovedInactiveToTeacherFlows` — approved application + inactive profile routes to teacher flows, not status dead-end.
+
+`teacher_capability_presentation.dart`:
+
+- `approvedInactive` + approved app + complete fields → **لوحة تحكم المحفظ** / `teacherDashboard`
+- Incomplete fields → `completeTeacherProfile` (resolver edge; defensive)
+- Non-approved application status → `applicationStatus` unchanged
+
+`shouldShowApplicationStatus` excludes routed `approvedInactive` cases.
+
+`navigateAfterTeacherApproval()` — calls `SettingsTeacherCapabilityScope.refreshOf(context)` after resolve (no-op outside settings tree; settings tab still refreshes on route resume).
+
+### Tests run
+
+```sh
+cd functions && npm test -- test/quranSessions/teacherProfileApproval.test.ts
+cd packages/quran_sessions && flutter test test/presentation/teacher_capability_presentation_test.dart test/domain/teacher_capability_resolver_test.dart
+cd apps/tilawa && flutter test test/features/settings/presentation/widgets/settings_teacher_capability_test.dart
+dart analyze  # touched Dart packages
+```
+
+### Manual E2E (still recommended)
+
+1. Pending teacher → Settings shows pending row.
+2. Admin approve → status screen **متابعة** → dashboard or complete-profile (not status loop).
+3. Pop to Settings without kill-app → row shows dashboard title (resume/route refresh).
+
+**Deactivate edge:** admin `moderateTeacherProfile` deactivate → Settings shows dashboard CTA (not view-status); dashboard guards block marketplace actions until re-activated.
+
+### Realtime Settings update (Phase E — 2026-06-23)
+
+**Mechanism (cost-safe):** FCM push from `reviewTeacherApplication` (`actionType: teacher_application_reviewed`, data: `applicationId`, `status`). Foreground handler calls `TeacherCapabilityRefreshNotifier` → `TeacherCapabilityCubit.refresh()` once per distinct status (deduped). **No Firestore `snapshots()` listener** — avoids continuous read billing while Settings is open.
+
+**Fallbacks (infrequent reads only):** existing app-resume + settings-route-reentry silent refresh; capability use case still skips profile fetch for `draft`/`pending`.
+
+**Savings vs listener:** mounted Settings with listener ≈ 1 billed doc read per moderation event anyway, but listener also bills on reconnect/metadata churn; FCM is push-priced and triggers exactly one targeted `.get()` per admin action.

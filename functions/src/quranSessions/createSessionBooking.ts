@@ -20,7 +20,7 @@ import {
   resolvePaymentProvider,
 } from "./payment/paymentProviderRegistry";
 import { assertPaidBookingAllowed } from "./paymentProviderStatus";
-import { requireAuthenticatedUid } from "./sessionAuth";
+import { requireAuthenticatedUid, requireValidSessionEpoch } from "./sessionAuth";
 import { validateTransition } from "./sessionLifecycleGuard";
 import { resolveMeetingLink } from "./meetingLinkResolver";
 import {
@@ -62,6 +62,7 @@ export const createSessionBooking = onCall(
   { enforceAppCheck: false },
   async (request) => {
     const studentId = requireAuthenticatedUid(request);
+    await requireValidSessionEpoch(request, studentId);
     const data = request.data as CreateSessionBookingRequest;
     if (!data.teacherId || !data.slotId || !data.startsAt || !data.endsAt) {
       throw new HttpsError("invalid-argument", "Missing required fields.");

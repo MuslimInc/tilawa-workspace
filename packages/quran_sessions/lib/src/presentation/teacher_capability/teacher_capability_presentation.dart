@@ -22,9 +22,14 @@ extension TeacherCapabilityPresentation on TeacherCapability {
         TeacherCapabilityState.approvedActive => l10n.teacherDashboard,
         TeacherCapabilityState.approvedIncompleteProfile =>
           l10n.completeTeacherProfile,
+        TeacherCapabilityState.approvedInactive =>
+          routesApprovedInactiveToTeacherFlows
+              ? (profile?.isPublicProfileFieldsComplete ?? false
+                    ? l10n.teacherDashboard
+                    : l10n.completeTeacherProfile)
+              : l10n.teachingOnMemuslimViewStatus,
         TeacherCapabilityState.pending ||
         TeacherCapabilityState.rejected ||
-        TeacherCapabilityState.approvedInactive ||
         TeacherCapabilityState.suspended ||
         TeacherCapabilityState.revoked => l10n.teachingOnMemuslimViewStatus,
       };
@@ -37,6 +42,11 @@ extension TeacherCapabilityPresentation on TeacherCapability {
       l10n.manageYourAvailabilityAndSessions,
     TeacherCapabilityState.approvedIncompleteProfile =>
       l10n.completeTeacherProfileSubtitle,
+    TeacherCapabilityState.approvedInactive
+        when routesApprovedInactiveToTeacherFlows =>
+      profile?.isPublicProfileFieldsComplete ?? false
+          ? l10n.manageYourAvailabilityAndSessions
+          : l10n.completeTeacherProfileSubtitle,
     TeacherCapabilityState.rejected =>
       canStartOrContinueApply
           ? l10n.teachingOnMemuslimReapplySubtitle
@@ -66,9 +76,14 @@ extension TeacherCapabilityNavigation on TeacherCapability {
       TeacherCapabilityNavigationTarget.teacherDashboard,
     TeacherCapabilityState.approvedIncompleteProfile =>
       TeacherCapabilityNavigationTarget.completeTeacherProfile,
+    TeacherCapabilityState.approvedInactive =>
+      routesApprovedInactiveToTeacherFlows
+          ? (profile?.isPublicProfileFieldsComplete ?? false
+                ? TeacherCapabilityNavigationTarget.teacherDashboard
+                : TeacherCapabilityNavigationTarget.completeTeacherProfile)
+          : TeacherCapabilityNavigationTarget.applicationStatus,
     TeacherCapabilityState.pending ||
     TeacherCapabilityState.rejected ||
-    TeacherCapabilityState.approvedInactive ||
     TeacherCapabilityState.suspended ||
     TeacherCapabilityState.revoked =>
       TeacherCapabilityNavigationTarget.applicationStatus,

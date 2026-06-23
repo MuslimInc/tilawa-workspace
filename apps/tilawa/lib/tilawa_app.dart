@@ -18,6 +18,7 @@ import 'app/default_route_system_ui_overlay.dart';
 import 'core/debug/device_preview_app_builder.dart';
 import 'core/di/injection.dart';
 import 'core/services/notification_startup_service.dart';
+import 'features/auth/presentation/cubit/session_validity_cubit.dart';
 import 'features/auth/data/services/google_sign_in_session_tracker.dart';
 import 'features/downloads/data/services/batch_download_manager.dart';
 import 'features/downloads/data/services/download_queue_manager.dart';
@@ -53,6 +54,8 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
 
   late final NotificationStartupService _notificationStartupService =
       getIt<NotificationStartupService>();
+  late final SessionValidityCubit _sessionValidityCubit =
+      getIt<SessionValidityCubit>();
 
   @override
   void initState() {
@@ -107,6 +110,7 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
       logger.d('[QuranPlayerApp] App resumed - checking for notification');
       _resumeDebounceTimer = Timer(const Duration(milliseconds: 100), () {
         unawaited(_notificationStartupService.handleAppResume());
+        unawaited(_sessionValidityCubit.checkOnResume());
         _scheduleUpdateCheck(
           delay: _resumeUpdateCheckDelay,
           reason: 'app-resumed',

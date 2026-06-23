@@ -4,11 +4,35 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:quran_sessions/src/domain/entities/teacher_application.dart';
 import 'package:quran_sessions/src/domain/entities/teacher_capability.dart';
+import 'package:quran_sessions/src/domain/entities/teacher_profile.dart';
+import 'package:quran_sessions/src/domain/entities/teacher_verification_status.dart';
+import 'package:quran_sessions/src/domain/rules/teacher_profile_completeness.dart';
 import 'package:quran_sessions/src/presentation/teacher_capability/teacher_capability_presentation.dart';
 
+TeacherProfile _completeInactiveProfile() =>
+    TeacherProfileCompleteness.withComputedVisibility(
+      TeacherProfile(
+        id: 'app_1',
+        userId: 'user_1',
+        displayName: 'Ustad Ahmad',
+        publicBio: 'Experienced teacher',
+        verificationStatus: TeacherVerificationStatus.verified,
+        teachingLanguages: const ['ar'],
+        specializations: const ['tajweed'],
+        averageRating: 0,
+        reviewCount: 0,
+        isActive: false,
+        profileCompleteness: TeacherProfileCompletenessStatus.complete,
+        isPubliclyVisible: false,
+        createdAt: DateTime(2024),
+        updatedAt: DateTime(2024),
+      ),
+    );
+
 TeacherCapability _capability(
-  TeacherCapabilityState state,
-) => TeacherCapability(
+  TeacherCapabilityState state, {
+  TeacherProfile? profile,
+}) => TeacherCapability(
   state: state,
   application: state == TeacherCapabilityState.none
       ? null
@@ -32,6 +56,7 @@ TeacherCapability _capability(
           createdAt: DateTime(2024),
           updatedAt: DateTime(2024),
         ),
+  profile: profile,
 );
 
 void main() {
@@ -113,5 +138,25 @@ void main() {
         capability.navigationTarget,
       ).equals(TeacherCapabilityNavigationTarget.apply);
     });
+
+    test(
+      'approved inactive with approved application routes to dashboard',
+      () {
+        final capability = _capability(
+          TeacherCapabilityState.approvedInactive,
+          profile: _completeInactiveProfile(),
+        );
+
+        check(
+          capability.teachingSectionActionTitle(en),
+        ).equals(en.teacherDashboard);
+        check(capability.navigationTarget).equals(
+          TeacherCapabilityNavigationTarget.teacherDashboard,
+        );
+        check(capability.routesApprovedInactiveToTeacherFlows).isTrue();
+        check(capability.shouldShowApplicationStatus).isFalse();
+        check(capability.canAccessTeacherDashboard).isTrue();
+      },
+    );
   });
 }

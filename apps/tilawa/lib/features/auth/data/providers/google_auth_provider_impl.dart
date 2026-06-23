@@ -7,18 +7,52 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
-
 import 'package:tilawa/core/logging/app_logger.dart';
 
-import '../services/android_sign_in_platform_policy.dart';
-import '../services/google_sign_in_android_resume_bridge.dart';
-import '../services/google_sign_in_session_tracker.dart';
 import '../../domain/entities/auth_result.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/providers/auth_provider_interface.dart';
+import '../services/android_sign_in_platform_policy.dart';
+import '../services/google_sign_in_android_resume_bridge.dart';
+import '../services/google_sign_in_session_tracker.dart';
 
 class _NoGoogleAccountsException implements Exception {
   const _NoGoogleAccountsException();
+}
+
+/// Tracks whether Credential Manager UI (bottom sheet / [HiddenActivity])
+/// became visible during an interactive attempt.
+class _CredentialManagerUiTracker {
+  bool uiWasShown = false;
+  bool _lifecycleLeftResumed = false;
+  StreamSubscription<void>? _dismissSub;
+  Timer? _pollTimer;
+
+  void start({Stream<void>? credentialUiDismissed}) {
+    if (credentialUiDismissed != null) {
+      _dismissSub = credentialUiDismissed.listen((_) {
+        // HiddenActivity can tear down on framework errors without a visible
+        // sheet; only treat dismissal as user-visible when lifecycle paused.
+        if (_lifecycleLeftResumed) {
+          uiWasShown = true;
+        }
+      });
+    }
+    _pollTimer = Timer.periodic(const Duration(milliseconds: 50), (_) {
+      final AppLifecycleState? state = SchedulerBinding.instance.lifecycleState;
+      if (state != null && state != AppLifecycleState.resumed) {
+        _lifecycleLeftResumed = true;
+        uiWasShown = true;
+      }
+    });
+  }
+
+  Future<void> finish() async {
+    // Native HiddenActivity teardown can arrive after the CM future completes.
+    await Future<void>.delayed(const Duration(milliseconds: 150));
+    await _dismissSub?.cancel();
+    _pollTimer?.cancel();
+  }
 }
 
 @LazySingleton(as: AuthProviderInterface)
@@ -45,6 +79,10 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
   /// the session is treated as hung instead of waiting the full timeout.
   @visibleForTesting
   static Duration transsionUiProbeDelay = const Duration(seconds: 6);
+
+  /// Test override for [GoogleSignInAndroidResumeBridge.onCredentialUiDismissed].
+  @visibleForTesting
+  static Stream<void>? debugCredentialUiDismissedStream;
 
   final FirebaseAuth _firebaseAuth;
   final GoogleSignIn _googleSignIn;
@@ -189,53 +227,104 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
   }
 
   Future<GoogleSignInAccount> _tryCredentialManagerSignIn() async {
-    final Future<GoogleSignInAccount?>? lightweight = _googleSignIn
-        .attemptLightweightAuthentication(reportAllExceptions: true);
-    if (lightweight == null) {
-      // Plugin signals Credential Manager unavailable — fall through to the
-      // account-chooser dialog which offers "Add account".
-      return _authenticateOrThrowNoAccounts();
-    }
+    final _CredentialManagerUiTracker uiTracker = _CredentialManagerUiTracker()
+      ..start(
+        credentialUiDismissed: _credentialUiDismissedStream(),
+      );
+
     try {
+      final Future<GoogleSignInAccount?>? lightweight = _googleSignIn
+          .attemptLightweightAuthentication(reportAllExceptions: true);
+      if (lightweight == null) {
+        await uiTracker.finish();
+        // Plugin signals Credential Manager unavailable — fall through to the
+        // account-chooser dialog which offers "Add account".
+        return _authenticateOrThrowNoAccounts();
+      }
+
       final GoogleSignInAccount? account = await _waitForInteractiveUi(
         lightweight,
         stageTimeout: signInTimeout,
       );
-      if (account == null) {
-        // Credential Manager returned but yielded no account — treat as
-        // cancelled (e.g. user dismissed auto-sign-in hint without acting).
+      await uiTracker.finish();
+
+      if (account != null) {
+        return account;
+      }
+
+      if (uiTracker.uiWasShown) {
         throw const GoogleSignInException(
           code: GoogleSignInExceptionCode.canceled,
         );
       }
-      return account;
-    } on GoogleSignInException catch (e) {
-      if (e.code == GoogleSignInExceptionCode.canceled ||
-          e.code == GoogleSignInExceptionCode.interrupted) {
-        // CM sheet was dismissed with no account selected — could mean the
-        // device has no Google accounts. Fall through to authenticate() which
-        // offers an "Add account" option.
+      logger.i(
+        '[GoogleSignIn] CM returned no account without UI → legacy chooser',
+      );
+      return _authenticateOrThrowNoAccounts();
+    } on GoogleSignInException catch (error) {
+      await uiTracker.finish();
+      if (_shouldFallbackToLegacyAfterCmFailure(
+        error,
+        uiTracker.uiWasShown,
+      )) {
+        logger.i(
+          '[GoogleSignIn] CM failed to present (${error.code.name}) → '
+          'legacy chooser',
+        );
         return _authenticateOrThrowNoAccounts();
       }
       rethrow;
     }
   }
 
-  /// Attempts the button-flow account chooser. If [supportsAuthenticate] is
-  /// false, or the account chooser is also dismissed (both dialogs cancelled),
-  /// throws [_NoGoogleAccountsException] so the caller surfaces a
-  /// "no accounts on device" message.
+  Stream<void>? _credentialUiDismissedStream() {
+    final Stream<void>? override =
+        GoogleAuthProviderImpl.debugCredentialUiDismissedStream;
+    if (override != null) {
+      return override;
+    }
+    if (!Platform.isAndroid) {
+      return null;
+    }
+    return GoogleSignInAndroidResumeBridge.instance.onCredentialUiDismissed;
+  }
+
+  bool _shouldFallbackToLegacyAfterCmFailure(
+    GoogleSignInException error,
+    bool cmUiWasShown,
+  ) {
+    if (cmUiWasShown) {
+      return false;
+    }
+    switch (error.code) {
+      case GoogleSignInExceptionCode.canceled:
+      case GoogleSignInExceptionCode.interrupted:
+      case GoogleSignInExceptionCode.unknownError:
+        return true;
+      case GoogleSignInExceptionCode.uiUnavailable:
+      case GoogleSignInExceptionCode.clientConfigurationError:
+      case GoogleSignInExceptionCode.providerConfigurationError:
+      case GoogleSignInExceptionCode.userMismatch:
+        return false;
+    }
+  }
+
+  /// Legacy account chooser when Credential Manager cannot be presented
+  /// ([attemptLightweightAuthentication] returns null). If the chooser is also
+  /// dismissed, throws [_NoGoogleAccountsException].
   Future<GoogleSignInAccount> _authenticateOrThrowNoAccounts() async {
     if (!_googleSignIn.supportsAuthenticate()) {
-      throw const _NoGoogleAccountsException();
+      throw const GoogleSignInException(
+        code: GoogleSignInExceptionCode.uiUnavailable,
+        description: 'Interactive Google Sign-In is not supported',
+      );
     }
     try {
       return await _authenticateWithButtonFlow();
     } on GoogleSignInException catch (e) {
       if (e.code == GoogleSignInExceptionCode.canceled ||
           e.code == GoogleSignInExceptionCode.interrupted) {
-        // Both the CM sheet and the account chooser were dismissed — the device
-        // most likely has no Google accounts configured.
+        // CM was unavailable and the legacy chooser was also dismissed.
         throw const _NoGoogleAccountsException();
       }
       rethrow;

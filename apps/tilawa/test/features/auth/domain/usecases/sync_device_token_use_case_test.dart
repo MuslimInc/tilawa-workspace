@@ -1,125 +1,57 @@
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:tilawa/features/auth/domain/entities/session_registration.dart';
+import 'package:tilawa/features/auth/domain/usecases/register_active_device_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/sync_device_token_use_case.dart';
+import 'package:tilawa_core/errors/failures.dart';
 
-import '../../helpers/auth_mock_helper.mocks.dart';
+class MockRegisterActiveDeviceUseCase extends Mock
+    implements RegisterActiveDeviceUseCase {}
 
 void main() {
   late SyncDeviceTokenUseCase useCase;
-  late MockUserRepository mockUserRepository;
-  late MockDeviceTokenService mockDeviceTokenService;
-  late MockTokenSyncCache mockTokenSyncCache;
-
-  setUp(() {
-    mockUserRepository = MockUserRepository();
-    mockDeviceTokenService = MockDeviceTokenService();
-    mockTokenSyncCache = MockTokenSyncCache();
-    useCase = SyncDeviceTokenUseCase(
-      mockUserRepository,
-      mockDeviceTokenService,
-      mockTokenSyncCache,
-    );
-  });
+  late MockRegisterActiveDeviceUseCase mockRegister;
 
   const tUserId = 'user_123';
-  const tToken = 'fcm_token_abc';
-
-  test(
-    'should get token from service and save it to repository if it exists',
-    () async {
-      // Arrange
-      when(mockDeviceTokenService.getToken()).thenAnswer((_) async => tToken);
-      when(
-        mockTokenSyncCache.getLastSyncedToken(),
-      ).thenAnswer((_) async => null);
-      when(
-        mockTokenSyncCache.getLastSyncedUserId(),
-      ).thenAnswer((_) async => null);
-      when(
-        mockUserRepository.saveDeviceToken(any, any),
-      ).thenAnswer((_) async => Future.value());
-      when(mockTokenSyncCache.saveSync(any, any)).thenAnswer((_) async {});
-
-      // Act
-      await useCase(tUserId);
-
-      // Assert
-      verify(mockDeviceTokenService.getToken()).called(1);
-      verify(mockUserRepository.saveDeviceToken(tUserId, tToken)).called(1);
-      verify(mockTokenSyncCache.saveSync(tToken, tUserId)).called(1);
-    },
+  const tRegistration = SessionRegistration(
+    epoch: 1,
+    activeDeviceId: 'device_1',
   );
 
-  test('should not call repository if token is null', () async {
-    // Arrange
-    when(mockDeviceTokenService.getToken()).thenAnswer((_) async => null);
+  setUp(() {
+    mockRegister = MockRegisterActiveDeviceUseCase();
+    useCase = SyncDeviceTokenUseCase(mockRegister);
+  });
 
-    // Act
+  test('delegates registration to RegisterActiveDeviceUseCase', () async {
+    when(
+      () => mockRegister(tUserId),
+    ).thenAnswer((_) async => const Right(tRegistration));
+
     await useCase(tUserId);
 
-    // Assert
-    verify(mockDeviceTokenService.getToken()).called(1);
-    verifyNever(mockUserRepository.saveDeviceToken(any, any));
+    verify(() => mockRegister(tUserId)).called(1);
+  });
+
+  test('swallows register failures without throwing', () async {
+    when(() => mockRegister(tUserId)).thenAnswer(
+      (_) async => Left(Failure.serverError('failed')),
+    );
+
+    await expectLater(useCase(tUserId), completes);
   });
 
   test(
-    'should remove previous synced token when token ownership changes',
+    'removeCurrentTokenForUser clears active device via register use case',
     () async {
-      when(mockDeviceTokenService.getToken()).thenAnswer((_) async => tToken);
       when(
-        mockTokenSyncCache.getLastSyncedToken(),
-      ).thenAnswer((_) async => 'old_token');
-      when(
-        mockTokenSyncCache.getLastSyncedUserId(),
-      ).thenAnswer((_) async => 'old_user');
-      when(
-        mockUserRepository.deleteDeviceToken(any, any),
-      ).thenAnswer((_) async {});
-      when(
-        mockUserRepository.saveDeviceToken(any, any),
-      ).thenAnswer((_) async {});
-      when(mockTokenSyncCache.saveSync(any, any)).thenAnswer((_) async {});
-
-      await useCase(tUserId);
-
-      verify(
-        mockUserRepository.deleteDeviceToken('old_user', 'old_token'),
-      ).called(1);
-      verify(mockUserRepository.saveDeviceToken(tUserId, tToken)).called(1);
-    },
-  );
-
-  test('should fail silently if getting token throws exception', () async {
-    // Arrange
-    when(mockDeviceTokenService.getToken()).thenThrow(Exception('Failed'));
-
-    // Act
-    await useCase(tUserId);
-
-    // Assert
-    verify(mockDeviceTokenService.getToken()).called(1);
-    verifyNever(mockUserRepository.saveDeviceToken(any, any));
-  });
-
-  test(
-    'removeCurrentTokenForUser clears cache when getToken throws',
-    () async {
-      when(mockDeviceTokenService.getToken()).thenThrow(
-        Exception('[firebase_messaging/apns-token-not-set]'),
-      );
-      when(
-        mockTokenSyncCache.getLastSyncedToken(),
-      ).thenAnswer((_) async => null);
-      when(
-        mockTokenSyncCache.getLastSyncedUserId(),
-      ).thenAnswer((_) async => null);
-      when(mockTokenSyncCache.clearSync()).thenAnswer((_) async {});
+        () => mockRegister.clearActiveDeviceOnSignOut(tUserId),
+      ).thenAnswer((_) async => const Right(null));
 
       await useCase.removeCurrentTokenForUser(tUserId);
 
-      verify(mockDeviceTokenService.getToken()).called(1);
-      verifyNever(mockUserRepository.deleteDeviceToken(any, any));
-      verify(mockTokenSyncCache.clearSync()).called(1);
+      verify(() => mockRegister.clearActiveDeviceOnSignOut(tUserId)).called(1);
     },
   );
 }

@@ -3099,4 +3099,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String recitationPracticeCompletedCount(int count, int total) {
     return '$count of $total passed';
   }
+
+  @override
+  String get authSignedInElsewhereTitle => 'Signed in on another device';
+
+  @override
+  String get authSignedInElsewhereBody =>
+      'Your account was opened on another device. Sign in again to continue on this device.';
+
+  @override
+  String get authSignedInElsewhereAction => 'Sign in again';
 }

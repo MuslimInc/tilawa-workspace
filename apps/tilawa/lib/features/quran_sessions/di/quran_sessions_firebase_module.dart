@@ -6,6 +6,7 @@ import 'package:quran_sessions/quran_sessions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/get_it_idempotent.dart';
+import 'package:tilawa/features/auth/domain/services/callable_session_payload_builder.dart';
 import 'package:tilawa/core/utils/legal_url_launcher.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -55,6 +56,7 @@ class QuranSessionsFirebaseModule {
     final mutationGateway = FirebaseSessionMutationGateway(
       firestore,
       functions,
+      sl<CallableSessionPayloadBuilder>(),
     );
     sl.registerLazySingletonIfAbsent<SessionMutationGateway>(
       () => mutationGateway,
@@ -87,6 +89,7 @@ class QuranSessionsFirebaseModule {
         firestore,
         authSession,
         functions,
+        sl<CallableSessionPayloadBuilder>(),
       ),
       userProfileDataSource: FirestoreUserProfileDataSource(firestore),
       marketConfigDataSource: FirestoreMarketConfigDataSource(firestore),
@@ -106,7 +109,10 @@ class QuranSessionsFirebaseModule {
     );
 
     if (config.quranSessionsPaidBookingSandboxEnabled) {
-      final sandbox = SandboxPaymentProvider(functions);
+      final sandbox = SandboxPaymentProvider(
+        functions,
+        sl<CallableSessionPayloadBuilder>(),
+      );
       sl.registerLazySingletonIfAbsent<PaymentProvider>(() => sandbox);
       sl.registerLazySingletonIfAbsent<SessionPaymentConfirmation>(
         () => sandbox,

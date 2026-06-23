@@ -4,11 +4,22 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:tilawa/features/auth/domain/services/callable_session_payload_builder.dart';
+import 'package:tilawa/features/auth/domain/services/session_epoch_provider.dart';
 import 'package:tilawa/features/quran_sessions/data/firebase/firestore_booking_repository.dart';
 import 'package:tilawa/features/quran_sessions/data/firebase/firestore_market_config_repository.dart';
 import 'package:tilawa/features/quran_sessions/data/firebase/firestore_paths.dart';
 import 'package:tilawa/features/quran_sessions/data/firebase/firestore_user_profile_repository.dart';
 import 'package:tilawa/features/quran_sessions/data/firebase/firestore_teacher_application_repository.dart';
+
+class _FakePayloadBuilder extends CallableSessionPayloadBuilder {
+  _FakePayloadBuilder() : super(_FakeEpochProvider());
+}
+
+class _FakeEpochProvider implements SessionEpochProvider {
+  @override
+  Future<int> getSessionEpoch() async => 0;
+}
 
 class _FakeAuthSessionProvider implements AuthSessionProvider {
   _FakeAuthSessionProvider(this._uid);
@@ -111,6 +122,7 @@ void main() {
           firestore,
           _FakeAuthSessionProvider('student_uid'),
           FirebaseFunctions.instanceFor(region: 'us-central1'),
+          _FakePayloadBuilder(),
         );
 
         expect(

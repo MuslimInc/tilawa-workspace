@@ -1,6 +1,11 @@
 import { HttpsError, CallableRequest } from "firebase-functions/v2/https";
+import { getFirestore } from "firebase-admin/firestore";
 
 import { lifecycleError } from "./lifecycleErrors";
+import {
+  assertClientSessionEpoch,
+  readServerSessionEpoch,
+} from "./sessionRegistration";
 import type { ActorRole } from "./sessionLifecycleGuard";
 
 export interface BookingParticipants {
@@ -18,6 +23,26 @@ export function requireAuthenticatedUid(
   return uid;
 }
 
+export async function requireValidSessionEpoch(
+  request: CallableRequest<unknown>,
+  uid: string,
+): Promise<void> {
+  const data = request.data as Record<string, unknown> | undefined;
+  const db = getFirestore();
+  const userSnap = await db.collection("users").doc(uid).get();
+  const serverEpoch = readServerSessionEpoch(userSnap.data());
+
+  try {
+    assertClientSessionEpoch(data?.sessionEpoch, serverEpoch);
+  } catch (error) {
+    const code =
+      error instanceof Error && error.message === "session_epoch_required"
+        ? "Session epoch required."
+        : "Session revoked on another device.";
+    throw new HttpsError("failed-precondition", code);
+  }
+}
+
 export function requireAdmin(request: CallableRequest<unknown>): string {
   const uid = requireAuthenticatedUid(request);
   if (!request.auth?.token?.admin) {
@@ -30,6 +55,16 @@ export function requireAdmin(request: CallableRequest<unknown>): string {
 
 export function isAdmin(request: CallableRequest<unknown>): boolean {
   return request.auth?.token?.admin === true;
+}
+
+export async function requireValidSessionEpochUnlessAdmin(
+  request: CallableRequest<unknown>,
+  uid: string,
+): Promise<void> {
+  if (isAdmin(request)) {
+    return;
+  }
+  await requireValidSessionEpoch(request, uid);
 }
 
 export function resolveActorRole(

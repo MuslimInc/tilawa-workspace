@@ -10,7 +10,7 @@ import {
   buildOperationKey,
   runIdempotentOperation,
 } from "./idempotencyService";
-import { requireAuthenticatedUid, resolveActorRole } from "./sessionAuth";
+import { requireAuthenticatedUid, requireValidSessionEpochUnlessAdmin, resolveActorRole } from "./sessionAuth";
 import { validateTransition } from "./sessionLifecycleGuard";
 import type { LifecycleStatus } from "./sessionLifecycleService";
 import { nowServer } from "./sessionLifecycleService";
@@ -27,7 +27,8 @@ interface RequestSessionRescheduleRequest {
 export const requestSessionReschedule = onCall(
   { enforceAppCheck: false },
   async (request) => {
-    requireAuthenticatedUid(request);
+    const uid = requireAuthenticatedUid(request);
+    await requireValidSessionEpochUnlessAdmin(request, uid);
     const data = request.data as RequestSessionRescheduleRequest;
     if (!data.bookingId || !data.newSlotId || !data.reason?.trim()) {
       throw new HttpsError("invalid-argument", "Missing required fields.");

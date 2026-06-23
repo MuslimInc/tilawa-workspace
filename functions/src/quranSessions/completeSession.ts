@@ -13,6 +13,7 @@ import { recordTerminalTransition } from "./metricsAggregationService";
 import {
   isAdmin,
   requireAuthenticatedUid,
+  requireValidSessionEpochUnlessAdmin,
   resolveActorRole,
 } from "./sessionAuth";
 import { validateTransition } from "./sessionLifecycleGuard";
@@ -28,7 +29,8 @@ interface CompleteSessionRequest {
 export const completeSession = onCall(
   { enforceAppCheck: false },
   async (request) => {
-    requireAuthenticatedUid(request);
+    const uid = requireAuthenticatedUid(request);
+    await requireValidSessionEpochUnlessAdmin(request, uid);
     const data = request.data as CompleteSessionRequest;
     if (!data.sessionId) {
       throw new HttpsError("invalid-argument", "sessionId required.");

@@ -3079,4 +3079,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String recitationPracticeCompletedCount(int count, int total) {
     return '$count من $total ناجحة';
   }
+
+  @override
+  String get authSignedInElsewhereTitle => 'تم تسجيل الدخول من جهاز آخر';
+
+  @override
+  String get authSignedInElsewhereBody =>
+      'تم فتح حسابك على جهاز آخر. سجّل الدخول مرة أخرى للمتابعة على هذا الجهاز.';
+
+  @override
+  String get authSignedInElsewhereAction => 'تسجيل الدخول مجدداً';
 }

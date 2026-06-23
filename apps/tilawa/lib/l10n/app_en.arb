@@ -4153,5 +4153,17 @@
                 "type": "int"
             }
         }
+    },
+    "authSignedInElsewhereTitle": "Signed in on another device",
+    "@authSignedInElsewhereTitle": {
+        "description": "Title when another device took over the active session"
+    },
+    "authSignedInElsewhereBody": "Your account was opened on another device. Sign in again to continue on this device.",
+    "@authSignedInElsewhereBody": {
+        "description": "Body when another device took over the active session"
+    },
+    "authSignedInElsewhereAction": "Sign in again",
+    "@authSignedInElsewhereAction": {
+        "description": "Primary action after session revoked on this device"
     }
 }

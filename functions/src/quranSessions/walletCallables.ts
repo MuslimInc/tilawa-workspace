@@ -16,6 +16,7 @@ import {
 import {
   requireAdmin,
   requireAuthenticatedUid,
+  requireValidSessionEpochUnlessAdmin,
 } from "./sessionAuth";
 
 interface PostWalletCreditRequest {
@@ -48,6 +49,7 @@ export const getWallet = onCall(
   { enforceAppCheck: false },
   async (request) => {
     const callerUid = requireAuthenticatedUid(request);
+    await requireValidSessionEpochUnlessAdmin(request, callerUid);
     const data = (request.data ?? {}) as GetWalletRequest;
     const isAdmin = request.auth?.token?.admin === true;
     const targetUserId = data.userId?.trim() || callerUid;

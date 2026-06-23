@@ -37,6 +37,13 @@ class LanguageConfig {
     };
   }
 
+  /// Normalizes app locale to `ar` | `en` for Firebase push copy.
+  static String normalizeForPushNotifications(String languageCode) {
+    return languageCode == arabicLanguageCode
+        ? arabicLanguageCode
+        : englishLanguageCode;
+  }
+
   /// Get supported language codes
   static List<String> getSupportedLanguageCodes() => supportedLanguageCodes;
 

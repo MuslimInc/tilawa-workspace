@@ -14,6 +14,7 @@ import { enqueueSessionNotification } from "./notificationOutboxService";
 import {
   isAdmin,
   requireAuthenticatedUid,
+  requireValidSessionEpochUnlessAdmin,
   resolveActorRole,
 } from "./sessionAuth";
 import {
@@ -62,7 +63,8 @@ function resolveClassification(
 export const markSessionNoShow = onCall(
   { enforceAppCheck: false },
   async (request) => {
-    requireAuthenticatedUid(request);
+    const uid = requireAuthenticatedUid(request);
+    await requireValidSessionEpochUnlessAdmin(request, uid);
     const data = request.data as MarkSessionNoShowRequest;
     if (!data.sessionId) {
       throw new HttpsError("invalid-argument", "sessionId required.");

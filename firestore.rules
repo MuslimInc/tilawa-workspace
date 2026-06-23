@@ -322,17 +322,27 @@ service cloud.firestore {
         || request.resource.data.quranSessionsProfile.get('accountStatus', 'active') == 'active';
     }
 
+    function sessionFieldsUnchanged() {
+      let before = resource.data;
+      let after = request.resource.data;
+      return after.get('session', {}) == before.get('session', {})
+          && after.get('notifications', {}) == before.get('notifications', {});
+    }
+
     match /users/{userId} {
       allow get: if isAdmin() || isOwner(userId);
       allow list: if isAdmin();
       allow create: if isOwner(userId)
         && quranSessionsProfileModerationSafeOnCreate();
       allow update: if isAdmin()
-        || (isOwner(userId) && quranSessionsProfileModerationUnchanged());
+        || (isOwner(userId)
+            && quranSessionsProfileModerationUnchanged()
+            && sessionFieldsUnchanged());
       allow delete: if false;
 
       match /fcm_tokens/{tokenId} {
-        allow read, write: if isOwner(userId);
+        allow read: if isOwner(userId);
+        allow write: if false;
       }
 
       match /favorites/{favoriteDoc}/items/{itemId} {
