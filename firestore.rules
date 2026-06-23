@@ -368,5 +368,16 @@ service cloud.firestore {
         || (isSignedIn() && resource.data.userId == request.auth.uid);
       allow write: if false;
     }
+
+    // Payment intents / transactions — CF writes only; admin read.
+    match /quran_payment_intents/{paymentIntentId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /quran_payment_transactions/{paymentTransactionId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
   }
 }

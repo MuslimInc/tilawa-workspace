@@ -36,6 +36,9 @@ class TeacherApplicationStatusScreen extends StatefulWidget {
 
 class _TeacherApplicationStatusScreenState
     extends State<TeacherApplicationStatusScreen> {
+  TeacherApplicationState? _previousBlocState;
+  var _approvedNavigationHandled = false;
+
   @override
   void initState() {
     super.initState();
@@ -44,44 +47,82 @@ class _TeacherApplicationStatusScreenState
     );
   }
 
+  bool _shouldNavigateOnApproval(
+    TeacherApplicationState state,
+    TeacherApplicationState? previous,
+  ) {
+    if (_approvedNavigationHandled) return false;
+    if (state is! TeacherApplicationStatusLoaded ||
+        !state.application.isApproved) {
+      return false;
+    }
+
+    // Only navigate when approval happens during this visit (pending → approved
+    // or debug simulate), not when reopening an already-approved application.
+    final transitionedFromPending =
+        previous is TeacherApplicationStatusLoaded &&
+        previous.application.isPending;
+    final finishedDebugSimulation =
+        previous is TeacherApplicationStatusLoaded &&
+        previous.isSimulatingApproval;
+
+    return transitionedFromPending || finishedDebugSimulation;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.applicationStatusTitle)),
-      body: BlocConsumer<TeacherApplicationBloc, TeacherApplicationState>(
-        listener: (context, state) {
-          if (state is TeacherApplicationStatusLoaded &&
-              state.application.isApproved) {
-            widget.onApproved();
-          }
-          if (state is TeacherApplicationFailureState) {
-            TilawaFeedback.showToast(
-              context,
-              message: state.failure.toLocalizedMessage(context),
-              variant: TilawaFeedbackVariant.error,
-            );
-            context.read<TeacherApplicationBloc>()
-            // ignore: invalid_use_of_visible_for_testing_member
-            .emit(state.previousState);
-          }
-        },
-        builder: (context, state) => switch (state) {
-          TeacherApplicationInitial() ||
-          TeacherApplicationLoading() => const Center(
-            child: CircularProgressIndicator(),
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<TeacherApplicationBloc, TeacherApplicationState>(
+            listenWhen: (_, current) =>
+                current is TeacherApplicationFailureState,
+            listener: (context, state) {
+              if (state is! TeacherApplicationFailureState) return;
+              TilawaFeedback.showToast(
+                context,
+                message: state.failure.toLocalizedMessage(context),
+                variant: TilawaFeedbackVariant.error,
+              );
+              context.read<TeacherApplicationBloc>()
+              // ignore: invalid_use_of_visible_for_testing_member
+              .emit(state.previousState);
+            },
           ),
-          TeacherApplicationStatusLoaded(
-            :final application,
-            :final isSimulatingApproval,
-          ) =>
-            _StatusBody(
-              application: application,
-              isSimulatingApproval: isSimulatingApproval,
-            ),
-          _ => Center(child: Text(l10n.unknownStatus)),
-        },
+        ],
+        child: BlocConsumer<TeacherApplicationBloc, TeacherApplicationState>(
+          listenWhen: (previous, current) =>
+              _shouldNavigateOnApproval(current, previous),
+          listener: (context, state) {
+            if (!_shouldNavigateOnApproval(state, _previousBlocState)) {
+              return;
+            }
+            _approvedNavigationHandled = true;
+            widget.onApproved();
+          },
+          builder: (context, state) {
+            _previousBlocState = state;
+            return switch (state) {
+              TeacherApplicationInitial() ||
+              TeacherApplicationLoading() => const Center(
+                child: CircularProgressIndicator(),
+              ),
+              TeacherApplicationStatusLoaded(
+                :final application,
+                :final isSimulatingApproval,
+              ) =>
+                _StatusBody(
+                  application: application,
+                  isSimulatingApproval: isSimulatingApproval,
+                  onApprovedContinue: widget.onApproved,
+                ),
+              _ => Center(child: Text(l10n.unknownStatus)),
+            };
+          },
+        ),
       ),
     );
   }
@@ -93,13 +134,17 @@ class _StatusBody extends StatelessWidget {
   const _StatusBody({
     required this.application,
     required this.isSimulatingApproval,
+    required this.onApprovedContinue,
   });
 
   final TeacherApplication application;
   final bool isSimulatingApproval;
+  final VoidCallback onApprovedContinue;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -108,6 +153,13 @@ class _StatusBody extends StatelessWidget {
           _StatusCard(status: application.status),
           const SizedBox(height: 24),
           _MetaSection(application: application),
+          if (application.isApproved) ...[
+            const SizedBox(height: 24),
+            FilledButton(
+              onPressed: onApprovedContinue,
+              child: Text(l10n.applicationStatusApprovedContinue),
+            ),
+          ],
 
           // ── DEBUG: Simulate Approval ─────────────────────────────────────
           // This block is completely absent in release builds.

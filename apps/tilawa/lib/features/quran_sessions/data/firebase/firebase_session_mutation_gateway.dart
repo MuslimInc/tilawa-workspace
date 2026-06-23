@@ -20,7 +20,7 @@ class FirebaseSessionMutationGateway implements SessionMutationGateway {
       _firestore.collection(FirestoreQuranSessionsPaths.sessions);
 
   @override
-  Future<Either<QuranSessionsFailure, SessionAggregate>> createBooking({
+  Future<Either<QuranSessionsFailure, SessionBookingOutcome>> createBooking({
     required String teacherId,
     required String studentId,
     required String slotId,
@@ -46,10 +46,27 @@ class FirebaseSessionMutationGateway implements SessionMutationGateway {
             '$studentId:$slotId:${startsAt.toUtc().toIso8601String()}',
       });
       final bookingId = response.data['bookingId'] as String? ?? '';
-      return _loadAggregate(bookingId);
+      final clientConfirmToken = response.data['clientConfirmToken'] as String?;
+      final paymentRef =
+          response.data['paymentReference'] as String? ?? paymentReference;
+      final aggregateResult = await _loadAggregate(bookingId);
+      return aggregateResult.map(
+        (aggregate) => SessionBookingOutcome(
+          aggregate: aggregate,
+          clientConfirmToken: clientConfirmToken,
+          paymentReference: paymentRef ?? aggregate.paymentReference,
+        ),
+      );
     } on FirebaseFunctionsException catch (e) {
       if (e.code == 'already-exists') {
         return Left(SlotUnavailableFailure(slotId));
+      }
+      if (e.code == 'failed-precondition') {
+        final details = e.details;
+        if (details is Map &&
+            details['code'] == 'payment_provider_unavailable') {
+          return const Left(PaymentProviderFailure());
+        }
       }
       return const Left(UnknownFailure());
     } on FirebaseException catch (e) {

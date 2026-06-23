@@ -4,7 +4,10 @@ import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/features/quran_sessions/presentation/quran_sessions_user.dart';
 import 'package:tilawa/features/quran_sessions/quran_sessions_feature_flags.dart';
 
-/// Loads [TeacherCapability] once for Settings profile + teaching section.
+/// Loads [TeacherCapability] for Settings profile + teaching section.
+///
+/// Refreshes when the settings route becomes visible again (e.g. after popping
+/// back from teacher application status) and when the app resumes.
 class SettingsTeacherCapabilityScope extends StatefulWidget {
   const SettingsTeacherCapabilityScope({super.key, required this.child});
 
@@ -23,21 +26,57 @@ class SettingsTeacherCapabilityScope extends StatefulWidget {
         false;
   }
 
+  /// Reloads capability from Firestore (e.g. after admin approval).
+  static void refreshOf(BuildContext context) {
+    context
+        .findAncestorStateOfType<_SettingsTeacherCapabilityScopeState>()
+        ?.refresh();
+  }
+
   @override
   State<SettingsTeacherCapabilityScope> createState() =>
       _SettingsTeacherCapabilityScopeState();
 }
 
 class _SettingsTeacherCapabilityScopeState
-    extends State<SettingsTeacherCapabilityScope> {
+    extends State<SettingsTeacherCapabilityScope>
+    with WidgetsBindingObserver {
   TeacherCapability? _capability;
   bool _loading = true;
+  bool _hasLoaded = false;
+  bool _wasRouteCurrent = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _load();
   }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      refresh();
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final isCurrent = ModalRoute.of(context)?.isCurrent ?? false;
+    if (isCurrent && _hasLoaded && !_wasRouteCurrent) {
+      refresh();
+    }
+    _wasRouteCurrent = isCurrent;
+  }
+
+  void refresh() => _load();
 
   Future<void> _load() async {
     final config = quranSessionsFeatureConfig();
@@ -63,6 +102,7 @@ class _SettingsTeacherCapabilityScopeState
 
     setState(() {
       _loading = false;
+      _hasLoaded = true;
       _capability = result.fold(
         (_) => const TeacherCapability(state: TeacherCapabilityState.none),
         (capability) => capability,

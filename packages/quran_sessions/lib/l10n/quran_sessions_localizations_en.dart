@@ -918,6 +918,9 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
       'You are now a certified teacher on Tilawa.';
 
   @override
+  String get applicationStatusApprovedContinue => 'Continue';
+
+  @override
   String get applicationStatusRejectedTitle => 'Application not approved';
 
   @override
@@ -1296,4 +1299,22 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get walletEntryAction => 'Wallet';
+
+  @override
+  String get paymentCheckoutTitle => 'Confirm payment';
+
+  @override
+  String paymentCheckoutAmount(String amount) {
+    return 'Total: $amount';
+  }
+
+  @override
+  String get paymentCheckoutAmountPending => 'Session price (sandbox)';
+
+  @override
+  String get paymentCheckoutRefundToWalletNotice =>
+      'If you cancel or we approve a refund, the amount is added to your Tilawa wallet as credit. Wallet credit is not automatically returned to your card.';
+
+  @override
+  String get paymentCheckoutConfirm => 'Confirm payment (sandbox)';
 }

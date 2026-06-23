@@ -24,6 +24,7 @@ export {
 export { expirePendingReservations } from "./quranSessions/expirePendingReservations";
 export { deliverSessionNotification } from "./quranSessions/deliverSessionNotification";
 export { getWallet, postWalletCredit } from "./quranSessions/walletCallables";
+export { confirmBookingPayment } from "./quranSessions/confirmBookingPayment";
 
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { initializeApp } from "firebase-admin/app";

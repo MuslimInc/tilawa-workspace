@@ -1,6 +1,7 @@
 import 'package:dartz_plus/dartz_plus.dart';
 
 import '../entities/session_aggregate.dart';
+import '../entities/session_booking_outcome.dart';
 import '../entities/session_call_type.dart';
 import '../entities/session_pricing_type.dart';
 import '../entities/session_report_category.dart';
@@ -12,7 +13,7 @@ import '../value_objects/actor_role.dart';
 /// Host apps implement this gateway; domain use cases delegate persistence
 /// side effects here instead of writing Firestore directly.
 abstract interface class SessionMutationGateway {
-  Future<Either<QuranSessionsFailure, SessionAggregate>> createBooking({
+  Future<Either<QuranSessionsFailure, SessionBookingOutcome>> createBooking({
     required String teacherId,
     required String studentId,
     required String slotId,

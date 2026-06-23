@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_sessions/core/l10n_extensions.dart';
@@ -11,6 +13,7 @@ import '../blocs/booking/booking_event.dart';
 import '../blocs/booking/booking_state.dart';
 import '../failure_ui/quran_sessions_failure_ui.dart';
 import '../widgets/availability_slot_picker.dart';
+import '../widgets/payment_checkout_sheet.dart';
 
 class BookingScreen extends StatefulWidget {
   const BookingScreen({
@@ -126,6 +129,9 @@ class _BookingScreenState extends State<BookingScreen> {
               Navigator.of(context).pop();
             }
           }
+          if (state is BookingPaymentRequired) {
+            unawaited(_showPaymentCheckout(context, state));
+          }
           if (state is BookingFailure) {
             // Only show a snackbar for non-eligibility failures — eligibility
             // failures are rendered inline so the user can act on them.
@@ -167,6 +173,9 @@ class _BookingScreenState extends State<BookingScreen> {
                 Text(l10n.confirmingBooking),
               ],
             ),
+          ),
+          BookingPaymentRequired() => const Center(
+            child: CircularProgressIndicator(),
           ),
           BookingFailure(:final failure) => _EligibilityBlockedView(
             failure: failure,
@@ -245,6 +254,33 @@ class _BookingScreenState extends State<BookingScreen> {
         slotId: slot.slotId,
         callType: state.selectedCallType,
       ),
+    );
+  }
+
+  Future<void> _showPaymentCheckout(
+    BuildContext context,
+    BookingPaymentRequired state,
+  ) async {
+    final l10n = context.quranSessionsL10n;
+    final bloc = context.read<BookingBloc>();
+
+    await PaymentCheckoutSheet.show(
+      context,
+      amountLabel: l10n.paymentCheckoutAmountPending,
+      onConfirm: () async {
+        bloc.add(BookingConfirmPayment(state.outcome));
+        final next = await bloc.stream.firstWhere(
+          (s) => s is BookingSuccess || s is BookingFailure,
+        );
+        if (next is BookingFailure && context.mounted) {
+          TilawaFeedback.showToast(
+            context,
+            message: next.failure.toLocalizedMessage(context),
+            variant: TilawaFeedbackVariant.error,
+          );
+        }
+        return next is BookingSuccess;
+      },
     );
   }
 }

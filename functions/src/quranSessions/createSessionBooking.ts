@@ -13,10 +13,13 @@ import {
 import { lifecycleError } from "./lifecycleErrors";
 import { recordTerminalTransition } from "./metricsAggregationService";
 import { enqueueSessionNotification } from "./notificationOutboxService";
+import { isPaymentProviderEnabled } from "./payment/envGate";
 import {
-  assertPaidBookingAllowed,
-  PAYMENT_PROVIDER_ENABLED,
-} from "./paymentProviderStatus";
+  computePlatformFee,
+  computeTeacherAmount,
+  resolvePaymentProvider,
+} from "./payment/paymentProviderRegistry";
+import { assertPaidBookingAllowed } from "./paymentProviderStatus";
 import { requireAuthenticatedUid } from "./sessionAuth";
 import { validateTransition } from "./sessionLifecycleGuard";
 import { resolveMeetingLink } from "./meetingLinkResolver";
@@ -42,6 +45,9 @@ interface CreateBookingResult {
   sessionId: string;
   lifecycleStatus: string;
   status: string;
+  paymentReference?: string;
+  clientConfirmToken?: string;
+  paymentIntentId?: string;
 }
 
 function defaultCreateBookingIdempotencyKey(
@@ -83,12 +89,12 @@ export const createSessionBooking = onCall(
 
     if (
       pricing.isPaid &&
-      !data.paymentReference?.trim() &&
-      PAYMENT_PROVIDER_ENABLED
+      data.paymentReference?.trim() &&
+      !isPaymentProviderEnabled()
     ) {
       throw new HttpsError(
         "invalid-argument",
-        "paymentReference required for paid bookings.",
+        "paymentReference not accepted when payment provider is disabled.",
       );
     }
 
@@ -140,6 +146,7 @@ export const createSessionBooking = onCall(
         });
         const lifecycleStatus = nextGuard.to;
         const sessionLifecycleStatus = lifecycleStatus;
+        const paymentStatus = isFree ? "not_required" : "pending";
 
         const lockSnap = await tx.get(lockRef);
         if (lockSnap.exists) {
@@ -189,7 +196,9 @@ export const createSessionBooking = onCall(
           priceAmount: pricing.amount,
           priceCurrency: pricing.currencyCode,
           amountPaidUsd: null,
-          paymentReference: data.paymentReference ?? null,
+          paymentStatus,
+          paymentProvider: isFree ? "none" : resolvePaymentProvider().kind,
+          paymentReference: null,
           studentNote: data.studentNote ?? null,
           lifecycleStatus,
           status: legacyStatusForLifecycle(lifecycleStatus),
@@ -209,9 +218,56 @@ export const createSessionBooking = onCall(
           lifecycleStatus: sessionLifecycleStatus,
           status: legacyStatusForLifecycle(sessionLifecycleStatus),
           meetingLink,
+          paymentReference: null,
           createdAt: now,
           updatedAt: now,
         });
+
+        let paymentReference: string | undefined;
+        let clientConfirmToken: string | undefined;
+        let paymentIntentId: string | undefined;
+
+        if (!isFree) {
+          const provider = resolvePaymentProvider();
+          const platformFee = computePlatformFee(pricing.amount);
+          const tax = 0;
+          const teacherAmount = computeTeacherAmount(
+            pricing.amount,
+            platformFee,
+            tax,
+          );
+          const intent = await provider.createPaymentIntent({
+            db,
+            tx,
+            bookingId: bookingRef.id,
+            aggregateId: bookingRef.id,
+            studentId,
+            amount: pricing.amount,
+            currency: pricing.currencyCode,
+            platformFee,
+            teacherAmount,
+            tax,
+            idempotencyKey,
+            expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+          });
+          paymentReference = intent.paymentReference;
+          clientConfirmToken = intent.clientConfirmToken;
+          paymentIntentId = intent.paymentIntentId;
+
+          tx.set(
+            bookingRef,
+            {
+              paymentReference: intent.paymentReference,
+              providerTransactionId: intent.providerIntentId,
+            },
+            { merge: true },
+          );
+          tx.set(
+            sessionRef,
+            { paymentReference: intent.paymentReference },
+            { merge: true },
+          );
+        }
 
         appendAuditEvent(tx, db, {
           aggregateId: bookingRef.id,
@@ -230,6 +286,9 @@ export const createSessionBooking = onCall(
           sessionId: sessionRef.id,
           lifecycleStatus,
           status: legacyStatusForLifecycle(lifecycleStatus),
+          paymentReference,
+          clientConfirmToken,
+          paymentIntentId,
         } satisfies CreateBookingResult;
       },
     );

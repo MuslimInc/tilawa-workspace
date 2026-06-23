@@ -11,7 +11,7 @@ import {
 } from "./aggregateWriteService";
 import {
   financialExecutionStatus,
-  PAYMENT_PROVIDER_ENABLED,
+  isPaymentProviderEnabled,
   type FinancialExecutionStatus,
 } from "./paymentProviderStatus";
 import { validateTransition } from "./sessionLifecycleGuard";
@@ -226,7 +226,7 @@ export async function issueRefundRecord(
     status: executionStatus,
     destination: "wallet",
     walletTransactionId,
-    paymentProviderEnabled: PAYMENT_PROVIDER_ENABLED,
+    paymentProviderEnabled: isPaymentProviderEnabled(),
     approvedByActorId: input.actorId,
     approvedByRole: input.actorRole,
     createdAt: FieldValue.serverTimestamp(),

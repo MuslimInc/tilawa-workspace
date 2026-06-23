@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../domain/entities/session_booking_outcome.dart';
 import '../../../domain/entities/session_call_type.dart';
 import '../../../domain/entities/teacher_availability.dart';
 
@@ -91,4 +92,14 @@ final class BookingSubmitted extends BookingEvent {
     paymentReference,
     note,
   ];
+}
+
+/// User confirmed sandbox/PSP checkout for a pending payment booking.
+final class BookingConfirmPayment extends BookingEvent {
+  const BookingConfirmPayment(this.outcome);
+
+  final SessionBookingOutcome outcome;
+
+  @override
+  List<Object?> get props => [outcome];
 }

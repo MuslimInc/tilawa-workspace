@@ -1,12 +1,11 @@
 import 'package:dartz_plus/dartz_plus.dart';
 
 import '../entities/generated_slot.dart';
-import '../entities/quran_booking.dart';
+import '../entities/session_booking_outcome.dart';
 import '../entities/session_call_type.dart';
 import '../entities/session_pricing_type.dart';
 import '../failures/quran_sessions_failure.dart';
 import '../gateways/session_mutation_gateway.dart';
-import '../mappers/session_aggregate_mapper.dart';
 import '../providers/auth_session_provider.dart';
 import 'get_teacher_availability_usecase.dart';
 
@@ -24,7 +23,7 @@ class SubmitSessionBookingUseCase {
   final AuthSessionProvider _authSession;
   final int defaultSlotDurationMinutes;
 
-  Future<Either<QuranSessionsFailure, QuranBooking>> call({
+  Future<Either<QuranSessionsFailure, SessionBookingOutcome>> call({
     required String teacherId,
     required String slotId,
     required SessionCallType callType,
@@ -80,6 +79,12 @@ class SubmitSessionBookingUseCase {
       paymentReference: paymentReference,
       studentNote: studentNote,
     );
-    return created.map(aggregateToQuranBooking);
+    return created.map(
+      (outcome) => SessionBookingOutcome(
+        aggregate: outcome.aggregate,
+        clientConfirmToken: outcome.clientConfirmToken,
+        paymentReference: outcome.paymentReference,
+      ),
+    );
   }
 }

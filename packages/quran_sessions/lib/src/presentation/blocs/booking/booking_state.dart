@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import '../../../domain/entities/quran_booking.dart';
+import '../../../domain/entities/session_booking_outcome.dart';
 import '../../../domain/entities/session_call_type.dart';
 import '../../../domain/entities/teacher_availability.dart';
 import '../../../domain/failures/quran_sessions_failure.dart';
@@ -73,6 +74,16 @@ final class BookingSuccess extends BookingState {
 
   @override
   List<Object?> get props => [booking];
+}
+
+/// Paid booking created server-side; awaiting sandbox/PSP confirmation.
+final class BookingPaymentRequired extends BookingState {
+  const BookingPaymentRequired(this.outcome);
+
+  final SessionBookingOutcome outcome;
+
+  @override
+  List<Object?> get props => [outcome];
 }
 
 final class BookingFailure extends BookingState {

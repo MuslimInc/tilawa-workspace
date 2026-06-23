@@ -89,6 +89,6 @@ void _registerQuranSessionsIfNeeded(AppLaunchConfig config) {
     case QuranSessionsBackendMode.fake:
       QuranSessionsMvpModule.register(getIt);
     case QuranSessionsBackendMode.firebase:
-      QuranSessionsFirebaseModule.register(getIt);
+      QuranSessionsFirebaseModule.register(getIt, launchConfig: config);
   }
 }

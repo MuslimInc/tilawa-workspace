@@ -22,6 +22,9 @@ import {
   resolveSessionReport,
 } from "../src/quranSessions/sessionReportCallables";
 import { approveSessionRefund } from "../src/quranSessions/approveSessionRefund";
+import { confirmBookingPayment } from "../src/quranSessions/confirmBookingPayment";
+import { isPaymentProviderEnabled } from "../src/quranSessions/payment/envGate";
+import { resetPaymentProviderCache } from "../src/quranSessions/payment/paymentProviderRegistry";
 
 const PROJECT_ID = process.env.FIREBASE_PROJECT_ID ?? "quran-playera-app";
 
@@ -112,6 +115,8 @@ async function main(): Promise<void> {
     bookingId: string;
     sessionId: string;
     lifecycleStatus: string;
+    paymentReference?: string;
+    clientConfirmToken?: string;
   }>(createSessionBooking);
   const cancelBooking = asCallable<{ bookingId: string }>(cancelSessionBooking);
   const markNoShow = asCallable<{ sessionId: string }>(markSessionNoShow);
@@ -125,6 +130,11 @@ async function main(): Promise<void> {
   const approveRefund = asCallable<{ refundExecutionStatus: string }>(
     approveSessionRefund,
   );
+  const confirmPayment = asCallable<{
+    bookingId: string;
+    lifecycleStatus: string;
+    paymentStatus: string;
+  }>(confirmBookingPayment);
 
   const runId = Date.now();
   const teacherId = `smoke_teacher_${runId}`;
@@ -421,40 +431,93 @@ async function main(): Promise<void> {
     record("reports can be filed and resolved", false, String(e));
   }
 
-  // Paid booking blocked
-  try {
-    await db
-      .collection("quran_teacher_profiles")
-      .doc(teacherId)
-      .collection("pricing")
-      .doc("EG_cairo")
-      .set({ amount: 10, currencyCode: "USD" });
-    await createBooking.run({
-      data: {
-        teacherId,
-        slotId: `smoke_paid_${runId}`,
-        startsAt,
-        endsAt,
-        callType: "voiceCall",
-        pricingType: "free",
-        idempotencyKey: `smoke-paid-${runId}`,
-      },
-      auth: { uid: studentId, token: {} },
-    });
-    record("no paid booking exposed", false, "paid booking should be rejected");
-  } catch (e) {
-    record(
-      "no paid booking exposed",
-      codeOf(e) === "payment_provider_unavailable",
-      `code=${codeOf(e)}`,
-    );
-    // Remove paid pricing so later smoke bookings stay free.
-    await db
-      .collection("quran_teacher_profiles")
-      .doc(teacherId)
-      .collection("pricing")
-      .doc("EG_cairo")
-      .delete();
+  // Paid booking blocked (default — provider off)
+  const paidSandboxSmoke = process.env.STAGING_SMOKE_PAID_SANDBOX === "true";
+  if (paidSandboxSmoke && isPaymentProviderEnabled()) {
+    resetPaymentProviderCache();
+    const paidSlot = `smoke_paid_ok_${runId}`;
+    try {
+      await db
+        .collection("quran_teacher_profiles")
+        .doc(teacherId)
+        .collection("pricing")
+        .doc("EG_cairo")
+        .set({ amount: 10, currencyCode: "EGP" });
+      const pending = await createBooking.run({
+        data: {
+          teacherId,
+          slotId: paidSlot,
+          startsAt,
+          endsAt,
+          callType: "voiceCall",
+          pricingType: "fixedPerSession",
+          idempotencyKey: `smoke-paid-ok-${runId}`,
+        },
+        auth: { uid: studentId, token: {} },
+      });
+      const confirmed = await confirmPayment.run({
+        data: {
+          bookingId: pending.bookingId,
+          paymentReference: pending.paymentReference,
+          clientConfirmToken: pending.clientConfirmToken,
+          idempotencyKey: `smoke-confirm-${runId}`,
+        },
+        auth: { uid: studentId, token: {} },
+      });
+      const bookingDoc = await db
+        .collection("quran_bookings")
+        .doc(pending.bookingId)
+        .get();
+      record(
+        "sandbox paid book and confirm",
+        pending.lifecycleStatus === "pending_payment"
+          && confirmed.lifecycleStatus === "scheduled"
+          && bookingDoc.get("paymentStatus") === "captured",
+        `pending=${pending.lifecycleStatus} confirmed=${confirmed.lifecycleStatus}`,
+      );
+      await db
+        .collection("quran_teacher_profiles")
+        .doc(teacherId)
+        .collection("pricing")
+        .doc("EG_cairo")
+        .delete();
+    } catch (e) {
+      record("sandbox paid book and confirm", false, String(e));
+    }
+  } else {
+    try {
+      await db
+        .collection("quran_teacher_profiles")
+        .doc(teacherId)
+        .collection("pricing")
+        .doc("EG_cairo")
+        .set({ amount: 10, currencyCode: "USD" });
+      await createBooking.run({
+        data: {
+          teacherId,
+          slotId: `smoke_paid_${runId}`,
+          startsAt,
+          endsAt,
+          callType: "voiceCall",
+          pricingType: "free",
+          idempotencyKey: `smoke-paid-${runId}`,
+        },
+        auth: { uid: studentId, token: {} },
+      });
+      record("no paid booking exposed", false, "paid booking should be rejected");
+    } catch (e) {
+      record(
+        "no paid booking exposed",
+        codeOf(e) === "payment_provider_unavailable",
+        `code=${codeOf(e)}`,
+      );
+      await db
+        .collection("quran_teacher_profiles")
+        .doc(teacherId)
+        .collection("pricing")
+        .doc("EG_cairo")
+        .delete();
+    }
   }
 
   // Duplicate refund idempotent

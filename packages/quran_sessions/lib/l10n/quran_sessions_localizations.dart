@@ -1721,6 +1721,12 @@ abstract class QuranSessionsLocalizations {
   /// **'You are now a certified teacher on Tilawa.'**
   String get applicationStatusApprovedSubtitle;
 
+  /// No description provided for @applicationStatusApprovedContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get applicationStatusApprovedContinue;
+
   /// No description provided for @applicationStatusRejectedTitle.
   ///
   /// In en, this message translates to:
@@ -2392,6 +2398,36 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'Wallet'**
   String get walletEntryAction;
+
+  /// No description provided for @paymentCheckoutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm payment'**
+  String get paymentCheckoutTitle;
+
+  /// No description provided for @paymentCheckoutAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Total: {amount}'**
+  String paymentCheckoutAmount(String amount);
+
+  /// No description provided for @paymentCheckoutAmountPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Session price (sandbox)'**
+  String get paymentCheckoutAmountPending;
+
+  /// No description provided for @paymentCheckoutRefundToWalletNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'If you cancel or we approve a refund, the amount is added to your Tilawa wallet as credit. Wallet credit is not automatically returned to your card.'**
+  String get paymentCheckoutRefundToWalletNotice;
+
+  /// No description provided for @paymentCheckoutConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm payment (sandbox)'**
+  String get paymentCheckoutConfirm;
 }
 
 class _QuranSessionsLocalizationsDelegate

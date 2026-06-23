@@ -155,7 +155,7 @@ class _FakeMutationGateway implements SessionMutationGateway {
   final FakeMvpSessionLifecycleStack _stack;
 
   @override
-  Future<Either<QuranSessionsFailure, SessionAggregate>> createBooking({
+  Future<Either<QuranSessionsFailure, SessionBookingOutcome>> createBooking({
     required String teacherId,
     required String studentId,
     required String slotId,
@@ -180,7 +180,7 @@ class _FakeMutationGateway implements SessionMutationGateway {
       paymentReference: paymentReference,
     );
     _stack.aggregates[id] = aggregate;
-    return Right(aggregate);
+    return Right(SessionBookingOutcome(aggregate: aggregate));
   }
 
   @override

@@ -349,6 +349,7 @@
     "applicationStatusPendingSubtitle": "يقوم فريق تلاوة بمراجعة طلبك. سنتواصل معك قريبًا.",
     "applicationStatusApprovedTitle": "تهانينا! تمت الموافقة",
     "applicationStatusApprovedSubtitle": "أصبحت محفظًا معتمدًا على منصة تلاوة.",
+    "applicationStatusApprovedContinue": "متابعة",
     "applicationStatusRejectedTitle": "لم تتم الموافقة على الطلب",
     "applicationStatusRejectedSubtitle": "يمكنك إعادة التقديم بعد مراجعة ملاحظات الفريق.",
     "applicationStatusSuspendedTitle": "الحساب موقوف مؤقتًا",
@@ -488,5 +489,17 @@
     "walletTransactionTypeHoldRelease": "إلغاء حجز",
     "walletTransactionTypeReversal": "عكس معاملة",
     "walletTransactionTypeExpiry": "رصيد منتهٍ",
-    "walletEntryAction": "المحفظة"
+    "walletEntryAction": "المحفظة",
+    "paymentCheckoutTitle": "تأكيد الدفع",
+    "paymentCheckoutAmount": "الإجمالي: {amount}",
+    "@paymentCheckoutAmount": {
+        "placeholders": {
+            "amount": {
+                "type": "String"
+            }
+        }
+    },
+    "paymentCheckoutAmountPending": "سعر الجلسة (تجريبي)",
+    "paymentCheckoutRefundToWalletNotice": "عند الإلغاء أو الموافقة على استرداد، يُضاف المبلغ إلى محفظة تلاوة كرصيد. لا يُعاد الرصيد تلقائيًا إلى بطاقتك.",
+    "paymentCheckoutConfirm": "تأكيد الدفع (تجريبي)"
 }

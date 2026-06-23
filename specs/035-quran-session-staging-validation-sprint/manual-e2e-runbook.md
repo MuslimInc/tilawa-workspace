@@ -39,6 +39,17 @@ firebase deploy --only functions:getWallet,functions:postWalletCredit,functions:
 firebase deploy --only firestore:rules,firestore:indexes
 ```
 
+### Verify wallet deploy (after CF deploy)
+
+| Check | How | Expected |
+|-------|-----|----------|
+| Functions exist | `firebase functions:list` → filter `getWallet`, `postWalletCredit` | Both in `us-central1`, status Active |
+| getWallet | Firebase Console → Functions → `getWallet` → Test (student auth uid) | `{ balanceUsd, transactions[] }` or empty wallet |
+| postWalletCredit | Console test with **admin** custom claim | Wallet doc + `wallet_transactions` entry |
+| Rules deny client write | Firestore rules simulator: student write `user_wallets/{uid}` | **Denied** |
+
+**Phase 1 note (2026-06-23):** `getWallet` + `postWalletCredit` deployed to `quran-playera-app`; smoke 12/12; rules/indexes deployed.
+
 ---
 
 ## Admin URLs (local default `http://localhost:4200`)

@@ -14,19 +14,60 @@ import '../data/quran_sessions_mvp_store.dart';
 import '../di/quran_sessions_backend_config.dart';
 
 /// Routes teacher flows based on resolved [TeacherCapability].
+Future<void> navigateAfterTeacherApproval(
+  BuildContext context, {
+  required String userId,
+  required QuranSessionsAnalyticsCallbacks analytics,
+  bool showBlockedMessage = false,
+  bool replace = false,
+}) async {
+  analytics.onTeacherApplicationApproved?.call();
+  final capabilityResult =
+      await getIt<GetCurrentUserTeacherCapabilityUseCase>()(userId);
+  if (!context.mounted) return;
+  capabilityResult.fold(
+    (failure) {
+      TilawaFeedback.showToast(
+        context,
+        message: failure.toLocalizedMessage(context),
+        variant: TilawaFeedbackVariant.error,
+      );
+    },
+    (capability) {
+      navigateForTeacherCapability(
+        context,
+        capability,
+        analytics: analytics,
+        showBlockedMessage:
+            showBlockedMessage || capability.shouldCompleteTeacherProfile,
+        replace: replace,
+      );
+    },
+  );
+}
+
 void navigateForTeacherCapability(
   BuildContext context,
   TeacherCapability capability, {
   required QuranSessionsAnalyticsCallbacks analytics,
   bool showBlockedMessage = false,
+  bool replace = false,
 }) {
+  void navigate(String route) {
+    if (replace) {
+      context.pushReplacement(route);
+    } else {
+      context.push(route);
+    }
+  }
+
   switch (capability.navigationTarget) {
     case TeacherCapabilityNavigationTarget.apply:
       analytics.onTeacherApplyStarted?.call();
-      context.push(QuranSessionsRoutes.teacherApply);
+      navigate(QuranSessionsRoutes.teacherApply);
     case TeacherCapabilityNavigationTarget.applicationStatus:
       analytics.onTeacherApplicationStatusViewed?.call();
-      context.push(QuranSessionsRoutes.teacherApplicationStatus);
+      navigate(QuranSessionsRoutes.teacherApplicationStatus);
     case TeacherCapabilityNavigationTarget.completeTeacherProfile:
       if (showBlockedMessage) {
         TilawaFeedback.showToast(
@@ -35,10 +76,10 @@ void navigateForTeacherCapability(
           variant: TilawaFeedbackVariant.info,
         );
       }
-      context.push(QuranSessionsRoutes.completeTeacherProfile);
+      navigate(QuranSessionsRoutes.completeTeacherProfile);
     case TeacherCapabilityNavigationTarget.teacherDashboard:
       analytics.onTeacherDashboardOpened?.call();
-      context.push(QuranSessionsRoutes.teacherDashboard);
+      navigate(QuranSessionsRoutes.teacherDashboard);
   }
 }
 
@@ -301,24 +342,12 @@ List<RouteBase> get quranSessionsRoutes => [
         create: (_) => getIt<TeacherApplicationBloc>(),
         child: TeacherApplicationStatusScreen(
           userId: userId,
-          onApproved: () async {
-            analytics.onTeacherApplicationApproved?.call();
-            final capabilityResult =
-                await getIt<GetCurrentUserTeacherCapabilityUseCase>()(userId);
-            if (!context.mounted) return;
-            capabilityResult.fold(
-              (_) => context.push(QuranSessionsRoutes.teacherApplicationStatus),
-              (capability) {
-                context.pop();
-                navigateForTeacherCapability(
-                  context,
-                  capability,
-                  analytics: analytics,
-                  showBlockedMessage: capability.shouldCompleteTeacherProfile,
-                );
-              },
-            );
-          },
+          onApproved: () => navigateAfterTeacherApproval(
+            context,
+            userId: userId,
+            analytics: analytics,
+            replace: true,
+          ),
         ),
       );
     },

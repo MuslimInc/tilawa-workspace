@@ -54,10 +54,15 @@ export class I18nService {
 
   private async load(language: AppLanguage): Promise<void> {
     this.ready.set(false);
-    const arb = await firstValueFrom(
-      this.http.get<Record<string, unknown>>(`/l10n/app_${language}.arb`),
-    );
-    this.translations = this.parseArb(arb);
+    try {
+      const arb = await firstValueFrom(
+        this.http.get<Record<string, unknown>>(`/l10n/app_${language}.arb`),
+      );
+      this.translations = this.parseArb(arb);
+    } catch (error) {
+      console.error(`Failed to load l10n for ${language}`, error);
+      this.translations = {};
+    }
     this.ready.set(true);
   }
 

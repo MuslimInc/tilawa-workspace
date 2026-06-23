@@ -356,6 +356,7 @@
     "applicationStatusPendingSubtitle": "The Tilawa team is reviewing your application. We will contact you soon.",
     "applicationStatusApprovedTitle": "Congratulations! Approved",
     "applicationStatusApprovedSubtitle": "You are now a certified teacher on Tilawa.",
+    "applicationStatusApprovedContinue": "Continue",
     "applicationStatusRejectedTitle": "Application not approved",
     "applicationStatusRejectedSubtitle": "You may reapply after reviewing the team's feedback.",
     "applicationStatusSuspendedTitle": "Account temporarily suspended",
@@ -495,5 +496,17 @@
     "walletTransactionTypeHoldRelease": "Hold released",
     "walletTransactionTypeReversal": "Reversal",
     "walletTransactionTypeExpiry": "Expired credit",
-    "walletEntryAction": "Wallet"
+    "walletEntryAction": "Wallet",
+    "paymentCheckoutTitle": "Confirm payment",
+    "paymentCheckoutAmount": "Total: {amount}",
+    "@paymentCheckoutAmount": {
+        "placeholders": {
+            "amount": {
+                "type": "String"
+            }
+        }
+    },
+    "paymentCheckoutAmountPending": "Session price (sandbox)",
+    "paymentCheckoutRefundToWalletNotice": "If you cancel or we approve a refund, the amount is added to your Tilawa wallet as credit. Wallet credit is not automatically returned to your card.",
+    "paymentCheckoutConfirm": "Confirm payment (sandbox)"
 }

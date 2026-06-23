@@ -20,6 +20,7 @@ import 'package:flutter/foundation.dart';
 /// Example: `--dart-define=TILAWA_LAUNCH_TEACHER_APPLICATION_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_TEACHER_APPLICATION_DISCOVERABILITY=profileAndEmptyState`
 /// Example: `--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED=true`
+/// Example: `--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_PAID_BOOKING_SANDBOX_ENABLED=true`
 ///
 /// Staging / pre-production builds default Quran Sessions beta flags ON via
 /// [quranSessionsStagingFlagsDefaultEnabled] (everything except
@@ -68,6 +69,7 @@ class AppLaunchConfig extends Equatable {
     this.teacherApplicationEnabled = false,
     this.teacherApplicationDiscoverability = 'profileAndEmptyState',
     this.quranSessionsBookingEnabled = false,
+    this.quranSessionsPaidBookingSandboxEnabled = false,
     this.genUiAssistantEnabled = false,
   });
 
@@ -210,6 +212,10 @@ class AppLaunchConfig extends Equatable {
         'TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED',
         defaultValue: stagingFlagsOn,
       ),
+      quranSessionsPaidBookingSandboxEnabled: bool.fromEnvironment(
+        'TILAWA_LAUNCH_QURAN_SESSIONS_PAID_BOOKING_SANDBOX_ENABLED',
+        defaultValue: false,
+      ),
       genUiAssistantEnabled: bool.fromEnvironment(
         'TILAWA_LAUNCH_GENUI_ASSISTANT_ENABLED',
         defaultValue: false,
@@ -252,6 +258,10 @@ class AppLaunchConfig extends Equatable {
   /// One of: `none`, `profileOnly`, `profileAndEmptyState`.
   final String teacherApplicationDiscoverability;
   final bool quranSessionsBookingEnabled;
+
+  /// Staging-only sandbox PSP checkout (requires CF
+  /// `QURAN_SESSIONS_PAYMENT_PROVIDER_ENABLED=true`). Default **false**.
+  final bool quranSessionsPaidBookingSandboxEnabled;
 
   /// Gates the AI-generated dynamic UI surface (Smart Quran Plan / MeMuslim
   /// Assistant). Defaults to **false** — when off, no GenUI dependencies are
@@ -296,6 +306,7 @@ class AppLaunchConfig extends Equatable {
     teacherApplicationEnabled,
     teacherApplicationDiscoverability,
     quranSessionsBookingEnabled,
+    quranSessionsPaidBookingSandboxEnabled,
     genUiAssistantEnabled,
   ];
 }

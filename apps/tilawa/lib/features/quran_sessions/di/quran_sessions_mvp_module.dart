@@ -271,6 +271,9 @@ class QuranSessionsMvpModule {
           getAvailability: sl<GetTeacherAvailabilityUseCase>(),
           submitBooking: sl<SubmitSessionBookingUseCase>(),
           validateEligibility: sl<ValidateBookingEligibilityUseCase>(),
+          paymentConfirmation: sl.isRegistered<SessionPaymentConfirmation>()
+              ? sl<SessionPaymentConfirmation>()
+              : null,
           onBookingLostDueToNoAvailability:
               schedulingAnalytics.onBookingLostDueToNoAvailability,
           resolveMarketCode: (teacherId) async {

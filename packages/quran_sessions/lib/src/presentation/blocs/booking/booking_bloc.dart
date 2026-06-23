@@ -3,6 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../domain/entities/teacher_availability.dart';
 import '../../../domain/usecases/get_teacher_availability_usecase.dart';
+import '../../../boundaries/payment/session_payment_confirmation.dart';
+import '../../../domain/entities/session_lifecycle_status.dart';
+import '../../../domain/failures/quran_sessions_failure.dart';
+import '../../../domain/mappers/session_aggregate_mapper.dart';
 import '../../../domain/usecases/submit_session_booking_usecase.dart';
 import '../../../domain/usecases/validate_booking_eligibility_usecase.dart';
 import 'booking_event.dart';
@@ -15,6 +19,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     required this._validateEligibility,
     this.onBookingLostDueToNoAvailability,
     this.resolveMarketCode,
+    this._paymentConfirmation,
   }) : super(const BookingInitial()) {
     on<BookingScreenOpened>(_onScreenOpened, transformer: restartable());
     on<BookingEligibilityRetried>(
@@ -24,11 +29,13 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     on<SlotSelected>(_onSlotSelected, transformer: sequential());
     on<CallTypeSelected>(_onCallTypeSelected, transformer: sequential());
     on<BookingSubmitted>(_onSubmitted, transformer: droppable());
+    on<BookingConfirmPayment>(_onConfirmPayment, transformer: droppable());
   }
 
   final GetTeacherAvailabilityUseCase _getAvailability;
   final SubmitSessionBookingUseCase _submitBooking;
   final ValidateBookingEligibilityUseCase _validateEligibility;
+  final SessionPaymentConfirmation? _paymentConfirmation;
 
   /// Fired when eligibility passes but no unbooked slots exist in the window.
   final void Function(Map<String, Object> parameters)?
@@ -151,7 +158,52 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
 
     result.fold(
       (failure) => emit(BookingFailure(failure)),
-      (booking) => emit(BookingSuccess(booking)),
+      (outcome) {
+        if (outcome.requiresPaymentConfirmation) {
+          emit(BookingPaymentRequired(outcome));
+          return;
+        }
+        emit(BookingSuccess(aggregateToQuranBooking(outcome.aggregate)));
+      },
     );
+  }
+
+  Future<void> _onConfirmPayment(
+    BookingConfirmPayment event,
+    Emitter<BookingState> emit,
+  ) async {
+    final confirmation = _paymentConfirmation;
+    if (confirmation == null) {
+      emit(const BookingFailure(PaymentProviderFailure()));
+      return;
+    }
+    final token = event.outcome.clientConfirmToken;
+    final paymentReference = event.outcome.paymentReference;
+    if (token == null ||
+        token.isEmpty ||
+        paymentReference == null ||
+        paymentReference.isEmpty) {
+      emit(const BookingFailure(PaymentProviderFailure()));
+      return;
+    }
+
+    emit(const BookingSubmitting());
+    final result = await confirmation.confirm(
+      bookingId: event.outcome.aggregate.id,
+      paymentReference: paymentReference,
+      clientConfirmToken: token,
+    );
+    result.fold((failure) => emit(BookingFailure(failure)), (_) {
+      emit(
+        BookingSuccess(
+          aggregateToQuranBooking(
+            event.outcome.aggregate.copyWith(
+              lifecycleStatus: SessionLifecycleStatus.scheduled,
+              paymentReference: paymentReference,
+            ),
+          ),
+        ),
+      );
+    });
   }
 }

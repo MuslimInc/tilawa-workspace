@@ -10,6 +10,7 @@ export 'src/boundaries/call/external_meeting_call_provider.dart';
 export 'src/boundaries/call/web_rtc_call_provider.dart';
 // ── Boundaries: payment ───────────────────────────────────────────────────────
 export 'src/boundaries/payment/payment_provider.dart';
+export 'src/boundaries/payment/session_payment_confirmation.dart';
 export 'src/boundaries/payment/teacher_payout_provider.dart';
 // ── Boundaries: scheduling ────────────────────────────────────────────────────
 export 'src/boundaries/scheduling/availability_provider.dart';
@@ -72,6 +73,7 @@ export 'src/domain/entities/compensation_record.dart';
 export 'src/domain/entities/quran_booking.dart';
 export 'src/domain/entities/quran_session.dart';
 export 'src/domain/entities/session_aggregate.dart';
+export 'src/domain/entities/session_booking_outcome.dart';
 export 'src/domain/entities/session_audit_event.dart';
 export 'src/domain/entities/quran_teacher.dart';
 export 'src/domain/entities/session_call_type.dart';
@@ -235,6 +237,7 @@ export 'src/presentation/screens/reschedule_session_screen.dart';
 export 'src/presentation/screens/session_detail_screen.dart';
 export 'src/presentation/widgets/cancel_session_sheet.dart';
 export 'src/presentation/widgets/open_dispute_sheet.dart';
+export 'src/presentation/widgets/payment_checkout_sheet.dart';
 export 'src/presentation/widgets/report_concern_sheet.dart';
 export 'src/presentation/screens/profile_completion_screen.dart';
 export 'src/presentation/screens/quran_sessions_home_screen.dart';

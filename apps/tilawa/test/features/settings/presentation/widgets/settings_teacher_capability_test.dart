@@ -39,6 +39,27 @@ class _StubTeacherCapabilityUseCase
   ) async => Right(_capability);
 }
 
+class _SequenceTeacherCapabilityUseCase
+    extends GetCurrentUserTeacherCapabilityUseCase {
+  _SequenceTeacherCapabilityUseCase(this._capabilities)
+    : super(
+        applicationRepository: _UnimplementedApplicationRepository(),
+        profileRepository: _UnimplementedProfileRepository(),
+      );
+
+  final List<TeacherCapability> _capabilities;
+  var callCount = 0;
+
+  @override
+  Future<Either<QuranSessionsFailure, TeacherCapability>> call(
+    String userId,
+  ) async {
+    final index = callCount.clamp(0, _capabilities.length - 1);
+    callCount++;
+    return Right(_capabilities[index]);
+  }
+}
+
 class _UnimplementedApplicationRepository
     implements TeacherApplicationRepository {
   @override
@@ -345,5 +366,50 @@ void main() {
     );
     check(titleSize.height).isGreaterThan(0);
     check(subtitleSize.height).isGreaterThan(0);
+  });
+
+  testWidgets('refreshOf reloads capability from Firestore', (tester) async {
+    final useCase = _SequenceTeacherCapabilityUseCase([
+      const TeacherCapability(state: TeacherCapabilityState.pending),
+      const TeacherCapability(state: TeacherCapabilityState.approvedActive),
+    ]);
+    scopeGetIt().registerSingleton<GetCurrentUserTeacherCapabilityUseCase>(
+      useCase,
+    );
+
+    final en = await QuranSessionsLocalizations.delegate.load(
+      const Locale('en'),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+        localizationsDelegates: [
+          ...AppLocalizations.localizationsDelegates,
+          ...QuranSessionsLocalizations.localizationsDelegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: BlocProvider<AuthBloc>.value(
+          value: mockAuthBloc,
+          child: SettingsTeacherCapabilityScope(
+            child: SettingsTeachingOnMemuslimTile(showDivider: false),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    check(find.text(en.teachingOnMemuslimViewStatus).evaluate().length).equals(
+      1,
+    );
+    check(useCase.callCount).equals(1);
+
+    SettingsTeacherCapabilityScope.refreshOf(
+      tester.element(find.byType(SettingsTeachingOnMemuslimTile)),
+    );
+    await tester.pumpAndSettle();
+
+    check(useCase.callCount).equals(2);
+    check(find.text(en.teacherDashboard).evaluate().length).equals(1);
   });
 }

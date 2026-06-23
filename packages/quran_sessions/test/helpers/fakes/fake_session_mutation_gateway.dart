@@ -5,7 +5,7 @@ class FakeSessionMutationGateway implements SessionMutationGateway {
   FakeSessionMutationGateway({this.onCreate});
 
   final List<String> calls = [];
-  Future<Either<QuranSessionsFailure, SessionAggregate>> Function({
+  Future<Either<QuranSessionsFailure, SessionBookingOutcome>> Function({
     required String teacherId,
     required String studentId,
     required String slotId,
@@ -13,7 +13,7 @@ class FakeSessionMutationGateway implements SessionMutationGateway {
   onCreate;
 
   @override
-  Future<Either<QuranSessionsFailure, SessionAggregate>> createBooking({
+  Future<Either<QuranSessionsFailure, SessionBookingOutcome>> createBooking({
     required String teacherId,
     required String studentId,
     required String slotId,
@@ -33,17 +33,19 @@ class FakeSessionMutationGateway implements SessionMutationGateway {
       );
     }
     return Right(
-      SessionAggregate(
-        id: 'booking_1',
-        teacherId: teacherId,
-        studentId: studentId,
-        slotId: slotId,
-        startsAt: startsAt,
-        pricingType: pricingType,
-        lifecycleStatus: SessionLifecycleStatus.scheduled,
-        createdAt: DateTime.now().toUtc(),
-        updatedAt: DateTime.now().toUtc(),
-        paymentReference: paymentReference,
+      SessionBookingOutcome(
+        aggregate: SessionAggregate(
+          id: 'booking_1',
+          teacherId: teacherId,
+          studentId: studentId,
+          slotId: slotId,
+          startsAt: startsAt,
+          pricingType: pricingType,
+          lifecycleStatus: SessionLifecycleStatus.scheduled,
+          createdAt: DateTime.now().toUtc(),
+          updatedAt: DateTime.now().toUtc(),
+          paymentReference: paymentReference,
+        ),
       ),
     );
   }

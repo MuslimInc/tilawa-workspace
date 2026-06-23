@@ -907,6 +907,9 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
       'أصبحت محفظًا معتمدًا على منصة تلاوة.';
 
   @override
+  String get applicationStatusApprovedContinue => 'متابعة';
+
+  @override
   String get applicationStatusRejectedTitle => 'لم تتم الموافقة على الطلب';
 
   @override
@@ -1276,4 +1279,22 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
 
   @override
   String get walletEntryAction => 'المحفظة';
+
+  @override
+  String get paymentCheckoutTitle => 'تأكيد الدفع';
+
+  @override
+  String paymentCheckoutAmount(String amount) {
+    return 'الإجمالي: $amount';
+  }
+
+  @override
+  String get paymentCheckoutAmountPending => 'سعر الجلسة (تجريبي)';
+
+  @override
+  String get paymentCheckoutRefundToWalletNotice =>
+      'عند الإلغاء أو الموافقة على استرداد، يُضاف المبلغ إلى محفظة تلاوة كرصيد. لا يُعاد الرصيد تلقائيًا إلى بطاقتك.';
+
+  @override
+  String get paymentCheckoutConfirm => 'تأكيد الدفع (تجريبي)';
 }

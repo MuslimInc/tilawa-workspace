@@ -3,15 +3,17 @@
  *
  * Paid bookings, automated refunds, and teacher payouts stay disabled until a
  * real provider is wired. Refunds/compensations record manual_pending execution.
+ *
+ * Default: **false** — paid booking blocked in prod/default env.
  */
-export const PAYMENT_PROVIDER_ENABLED =
-  process.env.QURAN_SESSIONS_PAYMENT_PROVIDER_ENABLED === "true";
+export { isPaymentProviderEnabled } from "./payment/envGate";
+import { isPaymentProviderEnabled } from "./payment/envGate";
 
 export function assertPaidBookingAllowed(pricingType: string): void {
   if (pricingType === "free") {
     return;
   }
-  if (!PAYMENT_PROVIDER_ENABLED) {
+  if (!isPaymentProviderEnabled()) {
     throw new Error("payment_provider_unavailable");
   }
 }
@@ -19,5 +21,5 @@ export function assertPaidBookingAllowed(pricingType: string): void {
 export type FinancialExecutionStatus = "manual_pending" | "executed" | "failed";
 
 export function financialExecutionStatus(): FinancialExecutionStatus {
-  return PAYMENT_PROVIDER_ENABLED ? "executed" : "manual_pending";
+  return isPaymentProviderEnabled() ? "executed" : "manual_pending";
 }

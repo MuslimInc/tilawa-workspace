@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/get_it_idempotent.dart';
 import 'package:tilawa/core/utils/legal_url_launcher.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -27,6 +28,8 @@ import '../data/firebase/firestore_teacher_repository.dart';
 import '../data/firebase/firestore_user_profile_repository.dart';
 import '../data/firebase/firestore_wallet_data_source.dart';
 import '../data/shared_preferences_friday_review_reminder_store.dart';
+import '../data/disabled_payment_provider.dart';
+import '../data/sandbox_payment_provider.dart';
 import 'quran_sessions_lifecycle_module.dart';
 import 'quran_sessions_mvp_module.dart';
 
@@ -34,7 +37,12 @@ import 'quran_sessions_mvp_module.dart';
 class QuranSessionsFirebaseModule {
   QuranSessionsFirebaseModule._();
 
-  static void register(GetIt sl) {
+  static void register(GetIt sl, {AppLaunchConfig? launchConfig}) {
+    final config =
+        launchConfig ??
+        (sl.isRegistered<AppLaunchConfig>()
+            ? sl<AppLaunchConfig>()
+            : AppLaunchConfig.fromEnvironment());
     final firestore = FirebaseFirestore.instance;
     final functions = FirebaseFunctions.instanceFor(region: 'us-central1');
     final authSession = FirebaseAuthSessionProvider(FirebaseAuth.instance);
@@ -96,6 +104,18 @@ class QuranSessionsFirebaseModule {
         sl<SharedPreferencesAsync>(),
       ),
     );
+
+    if (config.quranSessionsPaidBookingSandboxEnabled) {
+      final sandbox = SandboxPaymentProvider(functions);
+      sl.registerLazySingletonIfAbsent<PaymentProvider>(() => sandbox);
+      sl.registerLazySingletonIfAbsent<SessionPaymentConfirmation>(
+        () => sandbox,
+      );
+    } else {
+      sl.registerLazySingletonIfAbsent<PaymentProvider>(
+        () => const DisabledPaymentProvider(),
+      );
+    }
 
     sl.registerLazySingletonIfAbsent<CallProvider>(
       () => ExternalMeetingCallProvider(
