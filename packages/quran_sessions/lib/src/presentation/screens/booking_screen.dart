@@ -79,6 +79,26 @@ class _BookingScreenState extends State<BookingScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.bookSessionTitle)),
+      bottomNavigationBar: BlocBuilder<BookingBloc, BookingState>(
+        buildWhen: (previous, current) =>
+            previous is BookingSelecting != current is BookingSelecting ||
+            (previous is BookingSelecting &&
+                current is BookingSelecting &&
+                previous.canSubmit != current.canSubmit),
+        builder: (context, state) {
+          if (state is! BookingSelecting) {
+            return const SizedBox.shrink();
+          }
+          return TilawaBottomActionArea(
+            child: TilawaButton(
+              text: l10n.confirmBooking,
+              onPressed: state.canSubmit ? () => _submit(context) : null,
+              isFullWidth: true,
+              size: TilawaButtonSize.large,
+            ),
+          );
+        },
+      ),
       body: BlocConsumer<BookingBloc, BookingState>(
         listener: (context, state) {
           // Auto-select the pre-selected slot the first time BookingSelecting loads.
@@ -163,10 +183,9 @@ class _BookingScreenState extends State<BookingScreen> {
             :final availableSlots,
             :final selectedSlot,
             :final selectedCallType,
-            :final canSubmit,
           ) =>
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(Theme.of(context).tokens.spaceLarge),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -174,7 +193,7 @@ class _BookingScreenState extends State<BookingScreen> {
                     l10n.selectSlot,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: Theme.of(context).tokens.spaceMedium),
                   Expanded(
                     child: SingleChildScrollView(
                       child: Column(
@@ -188,12 +207,14 @@ class _BookingScreenState extends State<BookingScreen> {
                                 .read<BookingBloc>()
                                 .add(SlotSelected(slot)),
                           ),
-                          const SizedBox(height: 24),
+                          SizedBox(
+                            height: Theme.of(context).tokens.spaceExtraLarge,
+                          ),
                           Text(
                             l10n.sessionType,
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: Theme.of(context).tokens.spaceSmall),
                           _CallTypePicker(
                             selected: selectedCallType,
                             onChanged: (ct) => context.read<BookingBloc>().add(
@@ -204,13 +225,6 @@ class _BookingScreenState extends State<BookingScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  TilawaButton(
-                    text: l10n.confirmBooking,
-                    onPressed: canSubmit ? _submit : null,
-                    isFullWidth: true,
-                    size: TilawaButtonSize.large,
-                  ),
                 ],
               ),
             ),
@@ -219,7 +233,7 @@ class _BookingScreenState extends State<BookingScreen> {
     );
   }
 
-  void _submit() {
+  void _submit(BuildContext context) {
     final state = context.read<BookingBloc>().state;
     if (state is! BookingSelecting) return;
     final slot = state.selectedSlot;

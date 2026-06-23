@@ -229,6 +229,22 @@ These three terms are **not interchangeable**. Use each for its job.
 | 9 | `[x] Fixed` | `report_concern_sheet.dart`, `SessionMutationGateway.reportSessionConcern`, `session_detail_*` | `report_concern_sheet_test.dart` | `flutter test` |
 | 10 | `[x] Fixed` | `tilawa_admin` reports list + detail routes | — | manual admin QA |
 
+### Fix log (batch 3 — bottom CTA comfortable reach, 2026-06-23)
+
+Cross-ref: [`bottom-cta-comfortable-reach-audit.md`](bottom-cta-comfortable-reach-audit.md)
+
+| Item | Status | Fixed in | Tests |
+|------|--------|----------|-------|
+| Report concern sheet kit footer | `[x]` | `report_concern_sheet.dart` | `report_concern_sheet_test.dart` |
+| Cancel sheet destructive hierarchy | `[x]` | `cancel_session_sheet.dart` | `cancel_session_sheet_test.dart` |
+| Booking sticky confirm CTA | `[x]` | `booking_screen.dart` | `booking_screen_test.dart` |
+| Session detail sticky Join/Report | `[x]` | `session_detail_screen.dart` | `session_detail_screen_test.dart` |
+| Reschedule keyboard-safe footer | `[x]` | `reschedule_session_screen.dart` | — |
+| Dispute minimal sheet + CF wire | `[x]` | `open_dispute_sheet.dart`, `OpenSessionDisputeUseCase`, gateway | — |
+| Teacher profile FAB → bottom CTA | `[x]` | `teacher_profile_screen.dart` | — |
+
+**P0 bottom-CTA remaining:** 1 (booking confirmation route — product gap, P2 in audit table)
+
 | Metric | Value |
 |--------|-------|
 | **Row count** | 45 |

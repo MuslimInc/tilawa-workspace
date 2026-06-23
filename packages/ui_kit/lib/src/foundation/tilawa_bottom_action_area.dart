@@ -77,33 +77,41 @@ class TilawaBottomActionArea extends StatelessWidget {
       );
     }
 
-    return Material(
-      color: theme.colorScheme.surface,
-      child: DecoratedBox(
-        decoration: showTopBorder
-            ? BoxDecoration(
-                border: Border(
-                  top: BorderSide(
-                    color: theme.colorScheme.outlineVariant,
-                    width: sheetTokens.footerTopBorderWidth,
-                  ),
+    // [Column] with [MainAxisSize.min] prevents [Material] from expanding to
+    // fill [Scaffold.bottomNavigationBar]'s loose max-height constraint.
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Material(
+          color: theme.colorScheme.surface,
+          child: DecoratedBox(
+            decoration: showTopBorder
+                ? BoxDecoration(
+                    border: Border(
+                      top: BorderSide(
+                        color: theme.colorScheme.outlineVariant,
+                        width: sheetTokens.footerTopBorderWidth,
+                      ),
+                    ),
+                  )
+                : const BoxDecoration(),
+            child: SafeArea(
+              top: false,
+              bottom: false,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  side,
+                  top + footerPadding.top,
+                  side,
+                  bottom,
                 ),
-              )
-            : const BoxDecoration(),
-        child: SafeArea(
-          top: false,
-          bottom: false,
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(
-              side,
-              top + footerPadding.top,
-              side,
-              bottom,
+                child: content,
+              ),
             ),
-            child: content,
           ),
         ),
-      ),
+      ],
     );
   }
 }

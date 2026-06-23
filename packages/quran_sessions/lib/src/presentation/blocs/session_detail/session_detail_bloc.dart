@@ -6,6 +6,7 @@ import '../../../domain/entities/session_lifecycle_status.dart';
 import '../../../domain/failures/quran_sessions_failure.dart';
 import '../../../domain/repositories/session_aggregate_repository.dart';
 import '../../../domain/usecases/get_session_timeline_usecase.dart';
+import '../../../domain/usecases/open_session_dispute_usecase.dart';
 import '../../../domain/usecases/report_session_concern_usecase.dart';
 import 'session_detail_event.dart';
 import 'session_detail_state.dart';
@@ -16,6 +17,7 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
     required this._getTimeline,
     this._callProvider,
     this._reportConcern,
+    this._openDispute,
   }) : super(const SessionDetailInitial()) {
     on<SessionDetailLoadRequested>(
       _onLoadRequested,
@@ -33,12 +35,21 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
       _onReportAcknowledged,
       transformer: sequential(),
     );
+    on<SessionDetailDisputeSubmitted>(
+      _onDisputeSubmitted,
+      transformer: sequential(),
+    );
+    on<SessionDetailDisputeAcknowledged>(
+      _onDisputeAcknowledged,
+      transformer: sequential(),
+    );
   }
 
   final SessionAggregateRepository _aggregateRepository;
   final GetSessionTimelineUseCase _getTimeline;
   final CallProvider? _callProvider;
   final ReportSessionConcernUseCase? _reportConcern;
+  final OpenSessionDisputeUseCase? _openDispute;
 
   Future<void> _onLoadRequested(
     SessionDetailLoadRequested event,
@@ -151,5 +162,57 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
     final current = state;
     if (current is! SessionDetailSuccess) return;
     emit(current.copyWith(clearReportSubmitted: true));
+  }
+
+  Future<void> _onDisputeSubmitted(
+    SessionDetailDisputeSubmitted event,
+    Emitter<SessionDetailState> emit,
+  ) async {
+    final useCase = _openDispute;
+    final current = state;
+    if (useCase == null || current is! SessionDetailSuccess) return;
+
+    emit(
+      current.copyWith(
+        disputeInProgress: true,
+        clearDisputeFailure: true,
+        clearDisputeSubmitted: true,
+      ),
+    );
+
+    final result = await useCase(
+      bookingId: current.aggregate.id,
+      reason: event.reason,
+    );
+
+    final after = state;
+    if (after is! SessionDetailSuccess) return;
+
+    result.fold(
+      (failure) => emit(
+        after.copyWith(
+          disputeFailure: failure,
+          clearDisputeInProgress: true,
+        ),
+      ),
+      (disputeId) => emit(
+        after.copyWith(
+          disputeSubmitted: true,
+          clearDisputeInProgress: true,
+          aggregate: after.aggregate.copyWith(
+            lifecycleStatus: SessionLifecycleStatus.disputed,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _onDisputeAcknowledged(
+    SessionDetailDisputeAcknowledged event,
+    Emitter<SessionDetailState> emit,
+  ) {
+    final current = state;
+    if (current is! SessionDetailSuccess) return;
+    emit(current.copyWith(clearDisputeSubmitted: true));
   }
 }

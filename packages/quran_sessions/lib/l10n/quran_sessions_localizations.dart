@@ -2201,6 +2201,60 @@ abstract class QuranSessionsLocalizations {
   /// **'Your report was submitted. Our team will review it.'**
   String get reportConcernSubmitted;
 
+  /// No description provided for @openDisputeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a dispute'**
+  String get openDisputeAction;
+
+  /// No description provided for @openDisputeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a dispute'**
+  String get openDisputeTitle;
+
+  /// No description provided for @openDisputeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us what went wrong. Our team will review your case.'**
+  String get openDisputeSubtitle;
+
+  /// No description provided for @openDisputeReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get openDisputeReasonLabel;
+
+  /// No description provided for @openDisputeReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the issue (at least 3 characters)'**
+  String get openDisputeReasonHint;
+
+  /// No description provided for @openDisputeReasonTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Please provide at least 3 characters.'**
+  String get openDisputeReasonTooShort;
+
+  /// No description provided for @openDisputeCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get openDisputeCancel;
+
+  /// No description provided for @openDisputeSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit dispute'**
+  String get openDisputeSubmit;
+
+  /// No description provided for @openDisputeSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Your dispute was submitted. Our team will review it.'**
+  String get openDisputeSubmitted;
+
   /// No description provided for @reportCategorySafetyConcern.
   ///
   /// In en, this message translates to:

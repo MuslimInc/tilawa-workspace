@@ -59,4 +59,16 @@ extension SessionLifecycleStatusX on SessionLifecycleStatus {
     SessionLifecycleStatus.rescheduled => true,
     _ => false,
   };
+
+  /// True when a participant may open a post-session dispute case.
+  bool get canOpenDispute => switch (this) {
+    SessionLifecycleStatus.completed ||
+    SessionLifecycleStatus.cancelledByStudent ||
+    SessionLifecycleStatus.cancelledByTeacher ||
+    SessionLifecycleStatus.cancelledByAdmin ||
+    SessionLifecycleStatus.teacherNoShow ||
+    SessionLifecycleStatus.studentNoShow ||
+    SessionLifecycleStatus.bothNoShow => true,
+    _ => false,
+  };
 }

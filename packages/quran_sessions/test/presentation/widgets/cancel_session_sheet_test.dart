@@ -20,7 +20,11 @@ void main() {
           builder: (context) {
             return Scaffold(
               body: ElevatedButton(
-                onPressed: () => showReportConcernSheet(context),
+                onPressed: () => showCancelSessionSheet(
+                  context,
+                  sessionStartsAt: DateTime.utc(2026, 7, 1, 10),
+                  pricingType: SessionPricingType.free,
+                ),
                 child: const Text('open'),
               ),
             );
@@ -33,27 +37,24 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('report concern sheet uses kit scaffold footer', (
+  testWidgets('cancel sheet uses kit scaffold with keep as primary', (
     tester,
   ) async {
     await pumpSheet(tester);
 
     expect(find.byType(TilawaBottomSheetScaffold), findsOneWidget);
-    expect(find.text('Submit report'), findsOneWidget);
+    expect(find.text('Keep session'), findsOneWidget);
+    expect(find.text('Cancel session'), findsOneWidget);
   });
 
-  testWidgets('report concern sheet requires 20 character description', (
+  testWidgets('cancel sheet requires reason before confirming cancel', (
     tester,
   ) async {
     await pumpSheet(tester);
 
-    await tester.enterText(find.byType(TextField), 'too short');
-    await tester.tap(find.text('Submit report'));
+    await tester.tap(find.text('Cancel session'));
     await tester.pump();
 
-    expect(
-      find.text('Please provide at least 20 characters.'),
-      findsOneWidget,
-    );
+    expect(find.text('Please enter at least 3 characters.'), findsOneWidget);
   });
 }

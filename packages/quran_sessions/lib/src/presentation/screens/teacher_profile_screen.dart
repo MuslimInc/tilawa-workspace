@@ -38,6 +38,8 @@ class TeacherProfileScreen extends StatefulWidget {
 }
 
 class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
+  String? _selectedSlotId;
+
   @override
   void initState() {
     super.initState();
@@ -57,6 +59,25 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.teacherProfileTitle)),
+      bottomNavigationBar: widget.bookingEnabled && widget.onBookTapped != null
+          ? BlocBuilder<TeacherProfileBloc, TeacherProfileState>(
+              builder: (context, state) {
+                if (state is! TeacherProfileSuccess ||
+                    !_isTeacherMarketplaceVisible(state.teacher)) {
+                  return const SizedBox.shrink();
+                }
+                return TilawaBottomActionArea(
+                  child: TilawaButton(
+                    text: l10n.bookSessionAction,
+                    leadingIcon: const Icon(Icons.calendar_today_outlined),
+                    isFullWidth: true,
+                    size: TilawaButtonSize.large,
+                    onPressed: () => _onBookTapped(_selectedSlotId),
+                  ),
+                );
+              },
+            )
+          : null,
       body: BlocBuilder<TeacherProfileBloc, TeacherProfileState>(
         builder: (context, state) => switch (state) {
           TeacherProfileInitial() || TeacherProfileLoading() => const Center(
@@ -81,24 +102,14 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
                     onBookTapped: widget.onBookTapped == null
                         ? null
                         : (slotId) => _onBookTapped(slotId),
+                    onSlotSelected: (slotId) =>
+                        setState(() => _selectedSlotId = slotId),
+                    selectedSlotId: _selectedSlotId,
                     teacherId: widget.teacherId,
                   )
                 : _TeacherProfileUnavailableBody(),
         },
       ),
-      floatingActionButton: widget.bookingEnabled && widget.onBookTapped != null
-          ? BlocBuilder<TeacherProfileBloc, TeacherProfileState>(
-              builder: (context, state) =>
-                  state is TeacherProfileSuccess &&
-                      _isTeacherMarketplaceVisible(state.teacher)
-                  ? FloatingActionButton.extended(
-                      label: Text(l10n.bookSessionAction),
-                      icon: const Icon(Icons.calendar_today_outlined),
-                      onPressed: () => _onBookTapped(null),
-                    )
-                  : const SizedBox.shrink(),
-            )
-          : null,
     );
   }
 
@@ -143,6 +154,8 @@ class _TeacherProfileBody extends StatefulWidget {
     required this.bookingEnabled,
     required this.teacherId,
     this.onBookTapped,
+    this.onSlotSelected,
+    this.selectedSlotId,
   });
 
   final QuranTeacher teacher;
@@ -152,14 +165,14 @@ class _TeacherProfileBody extends StatefulWidget {
   final bool bookingEnabled;
   final String teacherId;
   final void Function(String? slotId)? onBookTapped;
+  final ValueChanged<String>? onSlotSelected;
+  final String? selectedSlotId;
 
   @override
   State<_TeacherProfileBody> createState() => _TeacherProfileBodyState();
 }
 
 class _TeacherProfileBodyState extends State<_TeacherProfileBody> {
-  String? _selectedSlotId;
-
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
@@ -250,9 +263,9 @@ class _TeacherProfileBodyState extends State<_TeacherProfileBody> {
         else
           AvailabilitySlotPicker(
             slots: widget.availability,
-            selectedSlotId: _selectedSlotId,
+            selectedSlotId: widget.selectedSlotId,
             onSlotSelected: (slot) {
-              setState(() => _selectedSlotId = slot.slotId);
+              widget.onSlotSelected?.call(slot.slotId);
               widget.onBookTapped?.call(slot.slotId);
             },
           ),

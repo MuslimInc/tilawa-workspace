@@ -1193,6 +1193,37 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
       'Your report was submitted. Our team will review it.';
 
   @override
+  String get openDisputeAction => 'Open a dispute';
+
+  @override
+  String get openDisputeTitle => 'Open a dispute';
+
+  @override
+  String get openDisputeSubtitle =>
+      'Tell us what went wrong. Our team will review your case.';
+
+  @override
+  String get openDisputeReasonLabel => 'Reason';
+
+  @override
+  String get openDisputeReasonHint =>
+      'Describe the issue (at least 3 characters)';
+
+  @override
+  String get openDisputeReasonTooShort =>
+      'Please provide at least 3 characters.';
+
+  @override
+  String get openDisputeCancel => 'Cancel';
+
+  @override
+  String get openDisputeSubmit => 'Submit dispute';
+
+  @override
+  String get openDisputeSubmitted =>
+      'Your dispute was submitted. Our team will review it.';
+
+  @override
   String get reportCategorySafetyConcern => 'Safety concern';
 
   @override

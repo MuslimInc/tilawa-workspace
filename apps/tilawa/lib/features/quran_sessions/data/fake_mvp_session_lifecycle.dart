@@ -314,4 +314,30 @@ class _FakeMutationGateway implements SessionMutationGateway {
   }) async {
     return const Right(SessionReportResult(reportId: 'report_mvp_1'));
   }
+
+  @override
+  Future<Either<QuranSessionsFailure, SessionDisputeResult>>
+  openSessionDispute({
+    required String bookingId,
+    required String reason,
+  }) async {
+    SessionAggregate? found;
+    String? key;
+    for (final entry in _stack.aggregates.entries) {
+      if (entry.key == bookingId || entry.value.id == bookingId) {
+        found = entry.value;
+        key = entry.key;
+        break;
+      }
+    }
+    if (found == null || key == null) {
+      return Left(NotFoundFailure('SessionAggregate($bookingId)'));
+    }
+    final updated = found.copyWith(
+      lifecycleStatus: SessionLifecycleStatus.disputed,
+      updatedAt: DateTime.now().toUtc(),
+    );
+    _stack.aggregates[key] = updated;
+    return const Right(SessionDisputeResult(disputeId: 'dispute_mvp_1'));
+  }
 }

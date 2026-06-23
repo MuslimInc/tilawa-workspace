@@ -27,6 +27,21 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.sessionDetailTitle)),
+      bottomNavigationBar: BlocBuilder<SessionDetailBloc, SessionDetailState>(
+        buildWhen: (previous, current) =>
+            previous.runtimeType != current.runtimeType ||
+            (current is SessionDetailSuccess &&
+                previous is SessionDetailSuccess &&
+                (previous.canJoin != current.canJoin ||
+                    previous.canOpenDispute != current.canOpenDispute ||
+                    previous.joinInProgress != current.joinInProgress)),
+        builder: (context, state) {
+          if (state is! SessionDetailSuccess) {
+            return const SizedBox.shrink();
+          }
+          return _SessionDetailFooter(state: state);
+        },
+      ),
       body: BlocConsumer<SessionDetailBloc, SessionDetailState>(
         listener: (context, state) {
           if (state is SessionDetailSuccess && state.joinFailure != null) {
@@ -53,6 +68,23 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
               const SessionDetailReportAcknowledged(),
             );
           }
+          if (state is SessionDetailSuccess && state.disputeFailure != null) {
+            TilawaFeedback.showToast(
+              context,
+              message: state.disputeFailure!.toLocalizedMessage(context),
+              variant: TilawaFeedbackVariant.error,
+            );
+          }
+          if (state is SessionDetailSuccess && state.disputeSubmitted) {
+            TilawaFeedback.showToast(
+              context,
+              message: l10n.openDisputeSubmitted,
+              variant: TilawaFeedbackVariant.success,
+            );
+            context.read<SessionDetailBloc>().add(
+              const SessionDetailDisputeAcknowledged(),
+            );
+          }
         },
         builder: (context, state) => switch (state) {
           SessionDetailInitial() || SessionDetailLoading() => const Center(
@@ -61,75 +93,97 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
           SessionDetailFailure(:final failure) => Center(
             child: Text(failure.toLocalizedMessage(context)),
           ),
-          SessionDetailSuccess(
-            :final aggregate,
-            :final timeline,
-            :final canJoin,
-            :final joinInProgress,
-          ) =>
-            ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                Text(
-                  l10n.sessionStatusLabel(aggregate.lifecycleStatus.name),
-                  style: Theme.of(context).textTheme.titleMedium,
+          SessionDetailSuccess(:final aggregate, :final timeline) => ListView(
+            padding: EdgeInsets.all(Theme.of(context).tokens.spaceLarge),
+            children: [
+              Text(
+                l10n.sessionStatusLabel(aggregate.lifecycleStatus.name),
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              SizedBox(height: Theme.of(context).tokens.spaceSmall),
+              Text(
+                l10n.sessionStartsAtLabel(
+                  MaterialLocalizations.of(
+                    context,
+                  ).formatFullDate(aggregate.startsAt.toLocal()),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  l10n.sessionStartsAtLabel(
-                    MaterialLocalizations.of(
-                      context,
-                    ).formatFullDate(aggregate.startsAt.toLocal()),
-                  ),
-                ),
-                if (canJoin) ...[
-                  const SizedBox(height: 16),
-                  FilledButton(
-                    onPressed: joinInProgress
-                        ? null
-                        : () => context.read<SessionDetailBloc>().add(
-                            const SessionDetailJoinRequested(),
-                          ),
-                    child: joinInProgress
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Text(l10n.joinSession),
-                  ),
-                ],
-                const SizedBox(height: 12),
-                OutlinedButton(
-                  onPressed: () => _submitReport(context),
-                  child: Text(l10n.reportConcernAction),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  l10n.sessionTimelineTitle,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                if (timeline.isEmpty)
-                  Text(l10n.sessionTimelineEmpty)
-                else
-                  ...timeline.map(
-                    (event) => ListTile(
-                      title: Text(event.action.name),
-                      subtitle: Text(
-                        event.reason ??
-                            '${event.previousStatus.name} → ${event.newStatus.name}',
-                      ),
-                      trailing: Text(
-                        MaterialLocalizations.of(context).formatShortDate(
-                          event.createdAt.toLocal(),
-                        ),
+              ),
+              SizedBox(height: Theme.of(context).tokens.spaceExtraLarge),
+              Text(
+                l10n.sessionTimelineTitle,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              SizedBox(height: Theme.of(context).tokens.spaceSmall),
+              if (timeline.isEmpty)
+                Text(l10n.sessionTimelineEmpty)
+              else
+                ...timeline.map(
+                  (event) => ListTile(
+                    title: Text(event.action.name),
+                    subtitle: Text(
+                      event.reason ??
+                          '${event.previousStatus.name} → ${event.newStatus.name}',
+                    ),
+                    trailing: Text(
+                      MaterialLocalizations.of(context).formatShortDate(
+                        event.createdAt.toLocal(),
                       ),
                     ),
                   ),
-              ],
-            ),
+                ),
+            ],
+          ),
         },
+      ),
+    );
+  }
+}
+
+class _SessionDetailFooter extends StatelessWidget {
+  const _SessionDetailFooter({required this.state});
+
+  final SessionDetailSuccess state;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+    final tokens = Theme.of(context).tokens;
+
+    return TilawaBottomActionArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: tokens.spaceSmall,
+        children: [
+          if (state.canJoin)
+            TilawaButton(
+              text: l10n.joinSession,
+              isFullWidth: true,
+              size: TilawaButtonSize.large,
+              isLoading: state.joinInProgress,
+              onPressed: state.joinInProgress
+                  ? null
+                  : () => context.read<SessionDetailBloc>().add(
+                      const SessionDetailJoinRequested(),
+                    ),
+            ),
+          TilawaButton(
+            text: l10n.reportConcernAction,
+            variant: TilawaButtonVariant.outline,
+            isFullWidth: true,
+            onPressed: () => _submitReport(context),
+          ),
+          if (state.canOpenDispute)
+            TilawaButton(
+              text: l10n.openDisputeAction,
+              variant: TilawaButtonVariant.secondary,
+              isFullWidth: true,
+              isLoading: state.disputeInProgress,
+              onPressed: state.disputeInProgress
+                  ? null
+                  : () => _submitDispute(context),
+            ),
+        ],
       ),
     );
   }
@@ -142,6 +196,14 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
         category: input.category,
         description: input.description,
       ),
+    );
+  }
+
+  Future<void> _submitDispute(BuildContext context) async {
+    final reason = await showOpenDisputeSheet(context);
+    if (reason == null || !context.mounted) return;
+    context.read<SessionDetailBloc>().add(
+      SessionDetailDisputeSubmitted(reason: reason),
     );
   }
 }

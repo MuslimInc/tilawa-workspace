@@ -62,6 +62,18 @@ abstract interface class SessionMutationGateway {
     required String description,
     String? bookingId,
   });
+
+  Future<Either<QuranSessionsFailure, SessionDisputeResult>>
+  openSessionDispute({
+    required String bookingId,
+    required String reason,
+  });
+}
+
+class SessionDisputeResult {
+  const SessionDisputeResult({required this.disputeId});
+
+  final String disputeId;
 }
 
 class SessionReportResult {

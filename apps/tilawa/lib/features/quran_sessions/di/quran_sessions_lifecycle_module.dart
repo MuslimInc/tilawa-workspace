@@ -131,6 +131,9 @@ class QuranSessionsLifecycleModule {
       sl.registerLazySingletonIfAbsent<ReportSessionConcernUseCase>(
         () => ReportSessionConcernUseCase(gateway: mutationGateway),
       );
+      sl.registerLazySingletonIfAbsent<OpenSessionDisputeUseCase>(
+        () => OpenSessionDisputeUseCase(gateway: mutationGateway),
+      );
     }
   }
 }

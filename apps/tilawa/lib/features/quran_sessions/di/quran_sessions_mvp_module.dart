@@ -311,6 +311,9 @@ class QuranSessionsMvpModule {
         reportConcern: sl.isRegistered<ReportSessionConcernUseCase>()
             ? sl<ReportSessionConcernUseCase>()
             : null,
+        openDispute: sl.isRegistered<OpenSessionDisputeUseCase>()
+            ? sl<OpenSessionDisputeUseCase>()
+            : null,
       ),
     );
     sl.registerFactoryIfAbsent(

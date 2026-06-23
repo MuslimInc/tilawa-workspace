@@ -41,6 +41,7 @@ class _RescheduleSessionScreenState extends State<RescheduleSessionScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.rescheduleSessionTitle)),
+      resizeToAvoidBottomInset: true,
       body: BlocConsumer<RescheduleBloc, RescheduleState>(
         listener: (context, state) {
           if (state is RescheduleSuccess) {
@@ -62,6 +63,7 @@ class _RescheduleSessionScreenState extends State<RescheduleSessionScreen> {
             child: Text(failure.toLocalizedMessage(context)),
           ),
           RescheduleSelecting(:final availableSlots) => Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
                 child: DateGroupedSlotPicker(
@@ -72,30 +74,32 @@ class _RescheduleSessionScreenState extends State<RescheduleSessionScreen> {
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: TextField(
-                  decoration: InputDecoration(
-                    labelText: l10n.rescheduleReasonLabel,
-                    hintText: l10n.rescheduleReasonHint,
-                  ),
-                  onChanged: (value) => context.read<RescheduleBloc>().add(
-                    RescheduleReasonChanged(value),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: FilledButton(
-                  onPressed: state.canSubmit
-                      ? () => context.read<RescheduleBloc>().add(
-                          RescheduleSubmitted(
-                            bookingId: widget.bookingId,
-                            actorId: widget.actorId,
-                          ),
-                        )
-                      : null,
-                  child: Text(l10n.rescheduleSubmitAction),
+              TilawaBottomActionArea(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  spacing: Theme.of(context).tokens.spaceSmall,
+                  children: [
+                    TextField(
+                      decoration: InputDecoration(
+                        labelText: l10n.rescheduleReasonLabel,
+                        hintText: l10n.rescheduleReasonHint,
+                      ),
+                      onChanged: (value) => context.read<RescheduleBloc>().add(
+                        RescheduleReasonChanged(value),
+                      ),
+                    ),
+                    TilawaFormSubmitFooter(
+                      buttonText: l10n.rescheduleSubmitAction,
+                      onPressed: state.canSubmit
+                          ? () => context.read<RescheduleBloc>().add(
+                              RescheduleSubmitted(
+                                bookingId: widget.bookingId,
+                                actorId: widget.actorId,
+                              ),
+                            )
+                          : () {},
+                    ),
+                  ],
                 ),
               ),
             ],

@@ -29,6 +29,9 @@ final class SessionDetailSuccess extends SessionDetailState {
     this.reportInProgress = false,
     this.reportFailure,
     this.reportSubmitted = false,
+    this.disputeInProgress = false,
+    this.disputeFailure,
+    this.disputeSubmitted = false,
   });
 
   final SessionAggregate aggregate;
@@ -38,9 +41,14 @@ final class SessionDetailSuccess extends SessionDetailState {
   final bool reportInProgress;
   final QuranSessionsFailure? reportFailure;
   final bool reportSubmitted;
+  final bool disputeInProgress;
+  final QuranSessionsFailure? disputeFailure;
+  final bool disputeSubmitted;
 
   bool get canJoin =>
       aggregate.sessionId != null && aggregate.lifecycleStatus.canJoinSession;
+
+  bool get canOpenDispute => aggregate.lifecycleStatus.canOpenDispute;
 
   SessionDetailSuccess copyWith({
     SessionAggregate? aggregate,
@@ -55,6 +63,12 @@ final class SessionDetailSuccess extends SessionDetailState {
     bool clearReportFailure = false,
     bool? reportSubmitted,
     bool clearReportSubmitted = false,
+    bool? disputeInProgress,
+    bool clearDisputeInProgress = false,
+    QuranSessionsFailure? disputeFailure,
+    bool clearDisputeFailure = false,
+    bool? disputeSubmitted,
+    bool clearDisputeSubmitted = false,
   }) {
     return SessionDetailSuccess(
       aggregate: aggregate ?? this.aggregate,
@@ -72,6 +86,15 @@ final class SessionDetailSuccess extends SessionDetailState {
       reportSubmitted: clearReportSubmitted
           ? false
           : reportSubmitted ?? this.reportSubmitted,
+      disputeInProgress: clearDisputeInProgress
+          ? false
+          : disputeInProgress ?? this.disputeInProgress,
+      disputeFailure: clearDisputeFailure
+          ? null
+          : disputeFailure ?? this.disputeFailure,
+      disputeSubmitted: clearDisputeSubmitted
+          ? false
+          : disputeSubmitted ?? this.disputeSubmitted,
     );
   }
 
@@ -84,6 +107,9 @@ final class SessionDetailSuccess extends SessionDetailState {
     reportInProgress,
     reportFailure,
     reportSubmitted,
+    disputeInProgress,
+    disputeFailure,
+    disputeSubmitted,
   ];
 }
 

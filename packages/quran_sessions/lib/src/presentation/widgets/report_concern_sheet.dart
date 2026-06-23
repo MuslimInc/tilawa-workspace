@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Bottom sheet for filing a session safety / abuse report.
 Future<({SessionReportCategory category, String description})?>
 showReportConcernSheet(
   BuildContext context,
 ) {
-  return showModalBottomSheet<
+  return showTilawaModalBottomSheet<
     ({SessionReportCategory category, String description})
   >(
     context: context,
-    isScrollControlled: true,
-    builder: (ctx) => const _ReportConcernSheetBody(),
+    backgroundColor: Theme.of(context).colorScheme.surface,
+    shape: TilawaBottomSheetScaffold.modalShape(context),
+    builder: (_) => const _ReportConcernSheetBody(),
   );
 }
 
@@ -37,66 +39,62 @@ class _ReportConcernSheetBodyState extends State<_ReportConcernSheetBody> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
-    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    final tokens = Theme.of(context).tokens;
 
-    return Padding(
-      padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomInset),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * 0.85,
+      ),
+      child: TilawaBottomSheetScaffold(
+        topBar: TilawaBottomSheetTitleRow(title: l10n.reportConcernTitle),
+        footer: TilawaBottomSheetActions(
+          primaryLabel: l10n.reportConcernSubmit,
+          onPrimary: _submit,
+          secondaryLabel: l10n.reportConcernCancel,
+          onSecondary: () => Navigator.pop(context),
+        ),
         children: [
-          Text(
-            l10n.reportConcernTitle,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 8),
-          Text(l10n.reportConcernSubtitle),
-          const SizedBox(height: 16),
-          DropdownButtonFormField<SessionReportCategory>(
-            initialValue: _category,
-            decoration: InputDecoration(labelText: l10n.reportConcernCategory),
-            items: SessionReportCategory.values
-                .map(
-                  (category) => DropdownMenuItem(
-                    value: category,
-                    child: Text(_categoryLabel(l10n, category)),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: TilawaBottomSheetScaffold.resolvedBodyPadding(context),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(l10n.reportConcernSubtitle),
+                  SizedBox(height: tokens.spaceLarge),
+                  DropdownButtonFormField<SessionReportCategory>(
+                    initialValue: _category,
+                    decoration: InputDecoration(
+                      labelText: l10n.reportConcernCategory,
+                    ),
+                    items: SessionReportCategory.values
+                        .map(
+                          (category) => DropdownMenuItem(
+                            value: category,
+                            child: Text(_categoryLabel(l10n, category)),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() => _category = value);
+                      }
+                    },
                   ),
-                )
-                .toList(),
-            onChanged: (value) {
-              if (value != null) {
-                setState(() => _category = value);
-              }
-            },
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _controller,
-            maxLines: 4,
-            decoration: InputDecoration(
-              labelText: l10n.reportConcernDescriptionLabel,
-              hintText: l10n.reportConcernDescriptionHint,
-              errorText: _error,
+                  SizedBox(height: tokens.spaceMedium),
+                  TextField(
+                    controller: _controller,
+                    maxLines: 4,
+                    decoration: InputDecoration(
+                      labelText: l10n.reportConcernDescriptionLabel,
+                      hintText: l10n.reportConcernDescriptionHint,
+                      errorText: _error,
+                    ),
+                    onChanged: (_) => setState(() => _error = null),
+                  ),
+                ],
+              ),
             ),
-            onChanged: (_) => setState(() => _error = null),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(l10n.reportConcernCancel),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: FilledButton(
-                  onPressed: _submit,
-                  child: Text(l10n.reportConcernSubmit),
-                ),
-              ),
-            ],
           ),
         ],
       ),

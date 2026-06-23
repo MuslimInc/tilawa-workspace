@@ -122,4 +122,14 @@ class FakeSessionMutationGateway implements SessionMutationGateway {
     calls.add('report:${category.cfValue}');
     return const Right(SessionReportResult(reportId: 'report_fake_1'));
   }
+
+  @override
+  Future<Either<QuranSessionsFailure, SessionDisputeResult>>
+  openSessionDispute({
+    required String bookingId,
+    required String reason,
+  }) async {
+    calls.add('dispute:$bookingId');
+    return const Right(SessionDisputeResult(disputeId: 'dispute_fake_1'));
+  }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Bottom sheet collecting a mandatory cancellation reason and policy copy.
 Future<String?> showCancelSessionSheet(
@@ -17,10 +18,11 @@ Future<String?> showCancelSessionSheet(
   );
   final policyMessage = _policyMessage(l10n, policyKey);
 
-  return showModalBottomSheet<String>(
+  return showTilawaModalBottomSheet<String>(
     context: context,
-    isScrollControlled: true,
-    builder: (ctx) => _CancelSessionSheetBody(policyMessage: policyMessage),
+    backgroundColor: Theme.of(context).colorScheme.surface,
+    shape: TilawaBottomSheetScaffold.modalShape(context),
+    builder: (_) => _CancelSessionSheetBody(policyMessage: policyMessage),
   );
 }
 
@@ -57,48 +59,45 @@ class _CancelSessionSheetBodyState extends State<_CancelSessionSheetBody> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
-    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    final tokens = Theme.of(context).tokens;
 
-    return Padding(
-      padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomInset),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * 0.85,
+      ),
+      child: TilawaBottomSheetScaffold(
+        topBar: TilawaBottomSheetTitleRow(
+          title: l10n.cancelSessionDialogTitle,
+        ),
+        footer: TilawaBottomSheetActions(
+          primaryLabel: l10n.keepSession,
+          onPrimary: () => Navigator.pop(context),
+          secondaryLabel: l10n.cancelSessionAction,
+          onSecondary: _submit,
+          secondaryVariant: TilawaButtonVariant.dangerOutline,
+        ),
         children: [
-          Text(
-            l10n.cancelSessionDialogTitle,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 8),
-          Text(widget.policyMessage),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _controller,
-            maxLines: 3,
-            decoration: InputDecoration(
-              labelText: l10n.cancelReasonLabel,
-              hintText: l10n.cancelReasonHint,
-              errorText: _error,
+          Expanded(
+            child: SingleChildScrollView(
+              padding: TilawaBottomSheetScaffold.resolvedBodyPadding(context),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(widget.policyMessage),
+                  SizedBox(height: tokens.spaceLarge),
+                  TextField(
+                    controller: _controller,
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      labelText: l10n.cancelReasonLabel,
+                      hintText: l10n.cancelReasonHint,
+                      errorText: _error,
+                    ),
+                    onChanged: (_) => setState(() => _error = null),
+                  ),
+                ],
+              ),
             ),
-            onChanged: (_) => setState(() => _error = null),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(l10n.keepSession),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: FilledButton(
-                  onPressed: _submit,
-                  child: Text(l10n.cancelSessionAction),
-                ),
-              ),
-            ],
           ),
         ],
       ),

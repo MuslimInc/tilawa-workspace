@@ -58,6 +58,39 @@ void main() {
 
       expect(find.byType(DecoratedBox), findsWidgets);
     });
+
+    testWidgets('does not expand to fill scaffold bottomNavigationBar slot', (
+      tester,
+    ) async {
+      const Key bodyKey = Key('body');
+      const Key actionKey = Key('action');
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: Scaffold(
+            bottomNavigationBar: TilawaBottomActionArea(
+              child: const SizedBox(key: actionKey, height: 48),
+            ),
+            body: const SizedBox(key: bodyKey, height: 200),
+          ),
+        ),
+      );
+
+      final RenderBox bodyBox = tester.renderObject<RenderBox>(
+        find.byKey(bodyKey),
+      );
+      final RenderBox actionBox = tester.renderObject<RenderBox>(
+        find.byKey(actionKey),
+      );
+
+      expect(bodyBox.size.height, 200);
+      expect(actionBox.size.height, 48);
+      expect(
+        tester.getTopLeft(find.byKey(actionKey)).dy,
+        greaterThan(200),
+      );
+    });
   });
 
   group('TilawaFormScreenScaffold', () {

@@ -41,3 +41,18 @@ final class SessionDetailReportSubmitted extends SessionDetailEvent {
 final class SessionDetailReportAcknowledged extends SessionDetailEvent {
   const SessionDetailReportAcknowledged();
 }
+
+/// User submits a dispute from session detail.
+final class SessionDetailDisputeSubmitted extends SessionDetailEvent {
+  const SessionDetailDisputeSubmitted({required this.reason});
+
+  final String reason;
+
+  @override
+  List<Object?> get props => [reason];
+}
+
+/// Clears one-shot dispute success UI after toast.
+final class SessionDetailDisputeAcknowledged extends SessionDetailEvent {
+  const SessionDetailDisputeAcknowledged();
+}
