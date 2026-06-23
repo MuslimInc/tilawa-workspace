@@ -10,6 +10,7 @@ import 'package:tilawa/features/auth/domain/services/callable_session_payload_bu
 
 import '../data/firebase/firebase_auth_session_provider.dart';
 import '../data/firebase/firebase_audit_repository.dart';
+import '../data/firebase/firebase_reschedule_request_repository.dart';
 import '../data/firebase/firebase_session_aggregate_repository.dart';
 import '../data/firebase/firebase_session_command_gateway.dart';
 import '../data/firebase/firebase_session_mutation_gateway.dart';
@@ -68,6 +69,18 @@ class QuranSessionsFirebaseModule {
     );
     final auditRepository = FirebaseAuditRepository(firestore);
     final notificationGateway = FirebaseSessionNotificationGateway(firestore);
+    final rescheduleRequestRepository = FirebaseRescheduleRequestRepository(
+      firestore,
+    );
+
+    sl.registerLazySingletonIfAbsent<RescheduleRequestRepository>(
+      () => rescheduleRequestRepository,
+    );
+    sl.registerLazySingletonIfAbsent<GetPendingRescheduleRequestUseCase>(
+      () => GetPendingRescheduleRequestUseCase(
+        repository: rescheduleRequestRepository,
+      ),
+    );
 
     QuranSessionsLifecycleModule.register(
       sl,

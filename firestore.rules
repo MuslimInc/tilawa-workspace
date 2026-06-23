@@ -290,7 +290,8 @@ service cloud.firestore {
     match /quran_reschedule_requests/{requestId} {
       allow read: if isSignedIn()
         && (isAdmin()
-            || resource.data.requestedByUserId == request.auth.uid);
+            || resource.data.requestedByUserId == request.auth.uid
+            || isBookingParticipant(resource.data.bookingId));
       allow write: if false;
     }
 

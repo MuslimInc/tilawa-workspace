@@ -163,6 +163,28 @@
     "rescheduleReasonHint": "Briefly explain why you need a new time",
     "rescheduleSubmitAction": "Request reschedule",
     "rescheduleRequestSubmitted": "Reschedule request sent. Waiting for confirmation.",
+    "rescheduleAwaitingCounterparty": "Waiting for the other participant to confirm your new time.",
+    "reschedulePendingTitle": "Reschedule request",
+    "reschedulePendingProposedTime": "Proposed time: {dateTime}",
+    "@reschedulePendingProposedTime": {
+        "placeholders": {
+            "dateTime": {
+                "type": "String"
+            }
+        }
+    },
+    "reschedulePendingReason": "Reason: {reason}",
+    "@reschedulePendingReason": {
+        "placeholders": {
+            "reason": {
+                "type": "String"
+            }
+        }
+    },
+    "rescheduleAcceptAction": "Accept new time",
+    "rescheduleRejectAction": "Keep current time",
+    "rescheduleAcceptedToast": "Reschedule accepted. Session time updated.",
+    "rescheduleRejectedToast": "Reschedule declined. Original time kept.",
     "rescheduleAction": "Reschedule",
     "sessionDetailTitle": "Session details",
     "sessionTimelineTitle": "Activity timeline",

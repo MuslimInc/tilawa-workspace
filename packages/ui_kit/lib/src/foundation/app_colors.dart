@@ -131,6 +131,18 @@ abstract final class AppColors {
     tripGlideCanvasDusk,
   ];
 
+  /// Soft beige tints for Home feature category grid tiles (Talabat-style).
+  static const List<Color> homeFeatureCategoryTileTints = <Color>[
+    tripGlideCanvasElevated,
+    tripGlideCanvas,
+    tripGlideCanvasDusk,
+    tripGlideSurface,
+    tripGlideCanvasElevated,
+    tripGlideCanvas,
+    tripGlideCanvasDusk,
+    tripGlideSurface,
+  ];
+
   /// Icons on travel destination header bands.
   static const Color homeTravelDestinationIcon = primaryBrown;
 

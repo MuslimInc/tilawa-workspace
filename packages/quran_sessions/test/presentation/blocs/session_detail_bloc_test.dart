@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 
 import '../../helpers/fakes/fake_audit_repository.dart';
+import '../../helpers/fakes/fake_reschedule_request_repository.dart';
 import '../../helpers/fakes/fake_session_aggregate_repository.dart';
 import '../../helpers/fakes/fake_session_mutation_gateway.dart';
 import '../../helpers/fakes/fake_session_repository.dart';
@@ -29,11 +30,15 @@ void main() {
   late FakeSessionRepository sessionRepository;
   late FakeSessionMutationGateway mutationGateway;
   late FakeTeacherProfileRepository teacherProfiles;
+  late FakeRescheduleRequestRepository rescheduleRequests;
 
   SessionDetailBloc buildBloc({
     JoinSessionUseCase? joinSession,
     ReportSessionConcernUseCase? reportConcern,
     OpenSessionDisputeUseCase? openDispute,
+    GetPendingRescheduleRequestUseCase? getPendingReschedule,
+    RespondToRescheduleRequestUseCase? respondToReschedule,
+    AuthSessionProvider? authSession,
   }) {
     return SessionDetailBloc(
       aggregateRepository: aggregateRepository,
@@ -42,6 +47,10 @@ void main() {
       joinSession: joinSession,
       reportConcern: reportConcern,
       openDispute: openDispute,
+      getPendingReschedule: getPendingReschedule,
+      respondToReschedule: respondToReschedule,
+      authSession: authSession,
+      teacherProfileRepository: teacherProfiles,
     );
   }
 
@@ -75,6 +84,7 @@ void main() {
       ];
     mutationGateway = FakeSessionMutationGateway();
     teacherProfiles = FakeTeacherProfileRepository();
+    rescheduleRequests = FakeRescheduleRequestRepository();
   });
 
   blocTest<SessionDetailBloc, SessionDetailState>(
@@ -302,6 +312,242 @@ void main() {
       verify: (_) {
         check(mutationGateway.calls).contains('dispute:booking_1');
       },
+    );
+
+    blocTest<SessionDetailBloc, SessionDetailState>(
+      'loads pending reschedule for counterparty when lifecycle is rescheduled',
+      build: () => buildBloc(
+        getPendingReschedule: GetPendingRescheduleRequestUseCase(
+          repository: rescheduleRequests,
+        ),
+        authSession: _FakeAuthSession('teacher_user'),
+      ),
+      setUp: () {
+        aggregateRepository.store['booking_1'] = makeAggregate(
+          id: 'booking_1',
+          status: SessionLifecycleStatus.rescheduled,
+        );
+        rescheduleRequests.pendingByBooking['booking_1'] =
+            PendingRescheduleRequest(
+              requestId: 'req_1',
+              bookingId: 'booking_1',
+              requestedByUserId: 'student_1',
+              requestedByRole: ActorRole.student,
+              reason: 'Need a later time tomorrow.',
+              newStartsAt: DateTime.utc(2026, 7, 2, 14),
+              status: 'pending',
+            );
+        teacherProfiles.seed(
+          makeTeacherProfile(id: 'teacher_1', userId: 'teacher_user'),
+        );
+      },
+      act: (bloc) => bloc.add(
+        const SessionDetailLoadRequested(bookingId: 'booking_1'),
+      ),
+      expect: () => [
+        const SessionDetailLoading(),
+        isA<SessionDetailSuccess>()
+            .having((s) => s.canRespondToReschedule, 'canRespond', isTrue)
+            .having(
+              (s) => s.isAwaitingRescheduleCounterparty,
+              'isAwaiting',
+              isFalse,
+            )
+            .having(
+              (s) => s.pendingRescheduleRequest?.requestId,
+              'requestId',
+              'req_1',
+            ),
+      ],
+    );
+
+    blocTest<SessionDetailBloc, SessionDetailState>(
+      'accepting reschedule calls confirmSessionReschedule and updates aggregate',
+      build: () => buildBloc(
+        respondToReschedule: RespondToRescheduleRequestUseCase(
+          mutationGateway: mutationGateway,
+        ),
+        authSession: _FakeAuthSession('teacher_user'),
+      ),
+      seed: () => SessionDetailSuccess(
+        aggregate: makeAggregate(
+          id: 'booking_1',
+          status: SessionLifecycleStatus.rescheduled,
+        ),
+        timeline: const [],
+        pendingRescheduleRequest: PendingRescheduleRequest(
+          requestId: 'req_1',
+          bookingId: 'booking_1',
+          requestedByUserId: 'student_1',
+          requestedByRole: ActorRole.student,
+          reason: 'Conflict with work.',
+          newStartsAt: DateTime.utc(2026, 7, 2, 14),
+          status: 'pending',
+        ),
+        canRespondToReschedule: true,
+      ),
+      setUp: () {
+        teacherProfiles.seed(
+          makeTeacherProfile(id: 'teacher_1', userId: 'teacher_user'),
+        );
+      },
+      act: (bloc) => bloc.add(
+        const SessionDetailRescheduleRespondSubmitted(accept: true),
+      ),
+      expect: () => [
+        isA<SessionDetailSuccess>().having(
+          (s) => s.rescheduleRespondInProgress,
+          'inProgress',
+          isTrue,
+        ),
+        isA<SessionDetailSuccess>()
+            .having(
+              (s) => s.aggregate.lifecycleStatus,
+              'lifecycleStatus',
+              SessionLifecycleStatus.scheduled,
+            )
+            .having(
+              (s) => s.rescheduleRespondAccepted,
+              'accepted',
+              isTrue,
+            )
+            .having(
+              (s) => s.pendingRescheduleRequest,
+              'pending cleared',
+              isNull,
+            ),
+      ],
+      verify: (_) {
+        check(
+          mutationGateway.calls,
+        ).contains('confirmReschedule:req_1:true');
+      },
+    );
+
+    blocTest<SessionDetailBloc, SessionDetailState>(
+      'rejecting reschedule calls confirmSessionReschedule with accept false',
+      build: () => buildBloc(
+        respondToReschedule: RespondToRescheduleRequestUseCase(
+          mutationGateway: mutationGateway,
+        ),
+        authSession: _FakeAuthSession('teacher_user'),
+      ),
+      seed: () => SessionDetailSuccess(
+        aggregate: makeAggregate(
+          id: 'booking_1',
+          status: SessionLifecycleStatus.rescheduled,
+        ),
+        timeline: const [],
+        pendingRescheduleRequest: PendingRescheduleRequest(
+          requestId: 'req_1',
+          bookingId: 'booking_1',
+          requestedByUserId: 'student_1',
+          requestedByRole: ActorRole.student,
+          reason: 'Conflict with work.',
+          newStartsAt: DateTime.utc(2026, 7, 2, 14),
+          status: 'pending',
+        ),
+        canRespondToReschedule: true,
+      ),
+      setUp: () {
+        teacherProfiles.seed(
+          makeTeacherProfile(id: 'teacher_1', userId: 'teacher_user'),
+        );
+      },
+      act: (bloc) => bloc.add(
+        const SessionDetailRescheduleRespondSubmitted(accept: false),
+      ),
+      expect: () => [
+        isA<SessionDetailSuccess>().having(
+          (s) => s.rescheduleRespondInProgress,
+          'inProgress',
+          isTrue,
+        ),
+        isA<SessionDetailSuccess>()
+            .having(
+              (s) => s.aggregate.lifecycleStatus,
+              'lifecycleStatus',
+              SessionLifecycleStatus.scheduled,
+            )
+            .having(
+              (s) => s.rescheduleRespondAccepted,
+              'accepted',
+              isFalse,
+            )
+            .having(
+              (s) => s.pendingRescheduleRequest,
+              'pending cleared',
+              isNull,
+            ),
+      ],
+      verify: (_) {
+        check(
+          mutationGateway.calls,
+        ).contains('confirmReschedule:req_1:false');
+      },
+    );
+
+    blocTest<SessionDetailBloc, SessionDetailState>(
+      'reschedule respond failure surfaces rescheduleRespondFailure',
+      build: () {
+        mutationGateway.failConfirmRescheduleWith = const ServerFailure(
+          statusCode: 500,
+        );
+        return buildBloc(
+          respondToReschedule: RespondToRescheduleRequestUseCase(
+            mutationGateway: mutationGateway,
+          ),
+          authSession: _FakeAuthSession('teacher_user'),
+        );
+      },
+      seed: () => SessionDetailSuccess(
+        aggregate: makeAggregate(
+          id: 'booking_1',
+          status: SessionLifecycleStatus.rescheduled,
+        ),
+        timeline: const [],
+        pendingRescheduleRequest: PendingRescheduleRequest(
+          requestId: 'req_1',
+          bookingId: 'booking_1',
+          requestedByUserId: 'student_1',
+          requestedByRole: ActorRole.student,
+          reason: 'Conflict with work.',
+          newStartsAt: DateTime.utc(2026, 7, 2, 14),
+          status: 'pending',
+        ),
+        canRespondToReschedule: true,
+      ),
+      setUp: () {
+        teacherProfiles.seed(
+          makeTeacherProfile(id: 'teacher_1', userId: 'teacher_user'),
+        );
+      },
+      act: (bloc) => bloc.add(
+        const SessionDetailRescheduleRespondSubmitted(accept: true),
+      ),
+      expect: () => [
+        isA<SessionDetailSuccess>().having(
+          (s) => s.rescheduleRespondInProgress,
+          'inProgress',
+          isTrue,
+        ),
+        isA<SessionDetailSuccess>()
+            .having(
+              (s) => s.rescheduleRespondFailure,
+              'failure',
+              isA<ServerFailure>(),
+            )
+            .having(
+              (s) => s.rescheduleRespondInProgress,
+              'inProgress cleared',
+              isFalse,
+            )
+            .having(
+              (s) => s.pendingRescheduleRequest?.requestId,
+              'pending kept',
+              'req_1',
+            ),
+      ],
     );
   });
 }

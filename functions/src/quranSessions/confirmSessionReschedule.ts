@@ -10,7 +10,13 @@ import {
   buildOperationKey,
   runIdempotentOperation,
 } from "./idempotencyService";
-import { isAdmin, requireAuthenticatedUid, requireValidSessionEpochUnlessAdmin, resolveActorRole } from "./sessionAuth";
+import {
+  assertRescheduleCounterpartyOnly,
+  isAdmin,
+  requireAuthenticatedUid,
+  requireValidSessionEpochUnlessAdmin,
+  resolveActorRole,
+} from "./sessionAuth";
 import { resolveTeacherProfileUserId } from "./teacherProfileUserId";
 import { validateTransition } from "./sessionLifecycleGuard";
 import type { LifecycleStatus } from "./sessionLifecycleService";
@@ -42,6 +48,10 @@ export const confirmSessionReschedule = onCall(
       throw new HttpsError("not-found", "Request not found.");
     }
     const reqData = reqSnap.data() ?? {};
+    assertRescheduleCounterpartyOnly(
+      uid,
+      reqData.requestedByUserId as string | undefined,
+    );
     const bookingId = reqData.bookingId as string;
     const bookingRef = db.collection("quran_bookings").doc(bookingId);
     const bookingSnap = await bookingRef.get();

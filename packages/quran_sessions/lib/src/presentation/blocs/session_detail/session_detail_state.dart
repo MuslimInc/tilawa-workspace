@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import '../../../domain/entities/session_aggregate.dart';
 import '../../../domain/entities/session_audit_event.dart';
 import '../../../domain/entities/session_call_provider_kind.dart';
+import '../../../domain/entities/pending_reschedule_request.dart';
 import '../../../domain/entities/session_lifecycle_status.dart';
 import '../../../domain/failures/quran_sessions_failure.dart';
 
@@ -36,6 +37,12 @@ final class SessionDetailSuccess extends SessionDetailState {
     this.disputeInProgress = false,
     this.disputeFailure,
     this.disputeSubmitted = false,
+    this.pendingRescheduleRequest,
+    this.canRespondToReschedule = false,
+    this.isAwaitingRescheduleCounterparty = false,
+    this.rescheduleRespondInProgress = false,
+    this.rescheduleRespondFailure,
+    this.rescheduleRespondAccepted,
   });
 
   final SessionAggregate aggregate;
@@ -51,6 +58,14 @@ final class SessionDetailSuccess extends SessionDetailState {
   final bool disputeInProgress;
   final QuranSessionsFailure? disputeFailure;
   final bool disputeSubmitted;
+  final PendingRescheduleRequest? pendingRescheduleRequest;
+  final bool canRespondToReschedule;
+  final bool isAwaitingRescheduleCounterparty;
+  final bool rescheduleRespondInProgress;
+  final QuranSessionsFailure? rescheduleRespondFailure;
+
+  /// `true` accepted, `false` rejected, `null` not yet responded.
+  final bool? rescheduleRespondAccepted;
 
   bool get canJoin =>
       aggregate.sessionId != null && aggregate.lifecycleStatus.canJoinSession;
@@ -90,6 +105,16 @@ final class SessionDetailSuccess extends SessionDetailState {
     bool clearDisputeFailure = false,
     bool? disputeSubmitted,
     bool clearDisputeSubmitted = false,
+    PendingRescheduleRequest? pendingRescheduleRequest,
+    bool clearPendingRescheduleRequest = false,
+    bool? canRespondToReschedule,
+    bool? isAwaitingRescheduleCounterparty,
+    bool? rescheduleRespondInProgress,
+    bool clearRescheduleRespondInProgress = false,
+    QuranSessionsFailure? rescheduleRespondFailure,
+    bool clearRescheduleRespondFailure = false,
+    bool? rescheduleRespondAccepted,
+    bool clearRescheduleRespondAccepted = false,
   }) {
     return SessionDetailSuccess(
       aggregate: aggregate ?? this.aggregate,
@@ -124,6 +149,23 @@ final class SessionDetailSuccess extends SessionDetailState {
       disputeSubmitted: clearDisputeSubmitted
           ? false
           : disputeSubmitted ?? this.disputeSubmitted,
+      pendingRescheduleRequest: clearPendingRescheduleRequest
+          ? null
+          : pendingRescheduleRequest ?? this.pendingRescheduleRequest,
+      canRespondToReschedule:
+          canRespondToReschedule ?? this.canRespondToReschedule,
+      isAwaitingRescheduleCounterparty:
+          isAwaitingRescheduleCounterparty ??
+          this.isAwaitingRescheduleCounterparty,
+      rescheduleRespondInProgress: clearRescheduleRespondInProgress
+          ? false
+          : rescheduleRespondInProgress ?? this.rescheduleRespondInProgress,
+      rescheduleRespondFailure: clearRescheduleRespondFailure
+          ? null
+          : rescheduleRespondFailure ?? this.rescheduleRespondFailure,
+      rescheduleRespondAccepted: clearRescheduleRespondAccepted
+          ? null
+          : rescheduleRespondAccepted ?? this.rescheduleRespondAccepted,
     );
   }
 
@@ -142,6 +184,12 @@ final class SessionDetailSuccess extends SessionDetailState {
     disputeInProgress,
     disputeFailure,
     disputeSubmitted,
+    pendingRescheduleRequest,
+    canRespondToReschedule,
+    isAwaitingRescheduleCounterparty,
+    rescheduleRespondInProgress,
+    rescheduleRespondFailure,
+    rescheduleRespondAccepted,
   ];
 }
 

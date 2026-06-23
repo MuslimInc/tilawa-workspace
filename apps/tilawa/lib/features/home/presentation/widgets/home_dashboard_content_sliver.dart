@@ -4,8 +4,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Home content canvas below the hero.
 ///
-/// Travel-app lip: rounded top sheet overlapping the hero gradient with a soft
-/// shadow (Ronas IT–style panel; tokens only — no new palette).
+/// Flat sheet — the hero owns the wavy branded-to-content transition.
 class HomeDashboardContentSliver extends StatelessWidget {
   const HomeDashboardContentSliver({super.key, required this.child});
 
@@ -19,35 +18,31 @@ class HomeDashboardContentSliver extends StatelessWidget {
     final TilawaHomeDashboardCardTokens cardTokens =
         theme.componentTokens.homeDashboardCard;
     final Color sheetColor = cardTokens.travelSheetSurface;
-    final BorderRadius sheetRadius = BorderRadius.vertical(
-      top: Radius.circular(tokens.radiusExtraLarge),
+    final double waveAmplitude = cardTokens.headerWaveAmplitude;
+    final double heroWaveOverlap = HomeDashboardHeroSliver.heroWaveOverlap(
+      waveAmplitude,
     );
-
-    final double sheetLift = HomeDashboardHeroSliver.sheetOverlap - tokens.spaceMedium;
 
     return SliverToBoxAdapter(
       child: Transform.translate(
-        offset: Offset(0, -sheetLift),
+        offset: Offset(0, -heroWaveOverlap),
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: sheetColor,
-            borderRadius: sheetRadius,
             boxShadow: <BoxShadow>[
               BoxShadow(
                 color: colorScheme.shadow.withValues(
-                  alpha: tokens.opacityShadow,
+                  alpha: tokens.opacityShadow * 0.35,
                 ),
-                blurRadius: tokens.blurShadow,
-                offset: Offset(0, tokens.shadowOffsetMedium.dy * -0.5),
+                blurRadius: tokens.blurShadow * 0.5,
+                offset: Offset(0, tokens.shadowOffsetSmall.dy * -0.25),
               ),
             ],
           ),
-          child: ClipRRect(
-            borderRadius: sheetRadius,
-            child: _HomeDashboardSheetBody(
-              color: sheetColor,
-              child: child,
-            ),
+          child: _HomeDashboardSheetBody(
+            color: sheetColor,
+            topPadding: waveAmplitude * 0.15,
+            child: child,
           ),
         ),
       ),
@@ -58,10 +53,12 @@ class HomeDashboardContentSliver extends StatelessWidget {
 class _HomeDashboardSheetBody extends StatelessWidget {
   const _HomeDashboardSheetBody({
     required this.color,
+    required this.topPadding,
     required this.child,
   });
 
   final Color color;
+  final double topPadding;
   final Widget child;
 
   @override
@@ -77,7 +74,7 @@ class _HomeDashboardSheetBody extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.fromLTRB(
             tokens.spaceMedium,
-            tokens.spaceMedium,
+            topPadding,
             tokens.spaceMedium,
             TilawaShellPadding.of(context) + tokens.spaceMedium,
           ),

@@ -307,6 +307,79 @@ void main() {
     },
   );
 
+  testWidgets(
+    'counterparty sees pending reschedule banner and accept dispatches',
+    (tester) async {
+      final bloc = _RecordingSessionDetailBloc(
+        seed: SessionDetailSuccess(
+          aggregate: makeAggregate(
+            status: SessionLifecycleStatus.rescheduled,
+          ),
+          timeline: const [],
+          pendingRescheduleRequest: PendingRescheduleRequest(
+            requestId: 'req_1',
+            bookingId: 'booking_1',
+            requestedByUserId: 'student_1',
+            requestedByRole: ActorRole.student,
+            reason: 'Conflict with work.',
+            newStartsAt: DateTime.utc(2026, 7, 2, 14),
+            status: 'pending',
+          ),
+          canRespondToReschedule: true,
+        ),
+      );
+
+      await _pumpSessionDetailScreen(tester, bloc: bloc);
+
+      expect(find.text('Reschedule request'), findsOneWidget);
+      expect(find.text('Accept new time'), findsOneWidget);
+
+      await tester.tap(find.text('Accept new time'));
+      await tester.pump();
+
+      final respondEvents = bloc.recordedEvents
+          .whereType<SessionDetailRescheduleRespondSubmitted>()
+          .toList();
+      expect(respondEvents, hasLength(1));
+      expect(respondEvents.single.accept, isTrue);
+    },
+  );
+
+  testWidgets(
+    'requester sees awaiting copy without respond actions on detail',
+    (tester) async {
+      final bloc = _RecordingSessionDetailBloc(
+        seed: SessionDetailSuccess(
+          aggregate: makeAggregate(
+            status: SessionLifecycleStatus.rescheduled,
+          ),
+          timeline: const [],
+          pendingRescheduleRequest: PendingRescheduleRequest(
+            requestId: 'req_1',
+            bookingId: 'booking_1',
+            requestedByUserId: 'student_1',
+            requestedByRole: ActorRole.student,
+            reason: 'Need tomorrow afternoon.',
+            newStartsAt: DateTime.utc(2026, 7, 2, 14),
+            status: 'pending',
+          ),
+          isAwaitingRescheduleCounterparty: true,
+        ),
+      );
+
+      await _pumpSessionDetailScreen(tester, bloc: bloc);
+
+      expect(
+        find.text(
+          'Waiting for the other participant to confirm your new time.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Accept new time'), findsNothing);
+      expect(find.text('Keep current time'), findsNothing);
+    },
+  );
+
   testWidgets('agora in-app join wires mute callback to call shell', (
     tester,
   ) async {

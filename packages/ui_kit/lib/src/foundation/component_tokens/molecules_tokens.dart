@@ -1535,6 +1535,8 @@ class TilawaHomeDashboardCardTokens {
     required this.travelSectionLinkColor,
     required this.travelDestinationIconColor,
     required this.travelDestinationHeaderTints,
+    required this.headerWaveAmplitude,
+    required this.featureCategoryTileTints,
   });
 
   final Color gradientStart;
@@ -1558,12 +1560,26 @@ class TilawaHomeDashboardCardTokens {
   /// Warm tints for travel-style destination card headers.
   final List<Color> travelDestinationHeaderTints;
 
+  /// Scallop height for the Home hero-to-sheet wave transition.
+  final double headerWaveAmplitude;
+
+  /// Beige tile fills for the Home feature category grid.
+  final List<Color> featureCategoryTileTints;
+
   Color destinationHeaderTint(int index) {
     if (travelDestinationHeaderTints.isEmpty) {
       return travelSearchFieldFill;
     }
     return travelDestinationHeaderTints[index.abs() %
         travelDestinationHeaderTints.length];
+  }
+
+  Color featureCategoryTileTint(int index) {
+    if (featureCategoryTileTints.isEmpty) {
+      return travelSearchFieldFill;
+    }
+    return featureCategoryTileTints[index.abs() %
+        featureCategoryTileTints.length];
   }
 
   factory TilawaHomeDashboardCardTokens.fromColorScheme(
@@ -1580,6 +1596,8 @@ class TilawaHomeDashboardCardTokens {
       travelSectionLinkColor: AppColors.homeTravelSectionLink,
       travelDestinationIconColor: AppColors.homeTravelDestinationIcon,
       travelDestinationHeaderTints: AppColors.homeTravelDestinationHeaderTints,
+      headerWaveAmplitude: 14,
+      featureCategoryTileTints: AppColors.homeFeatureCategoryTileTints,
     );
   }
 
@@ -1594,6 +1612,8 @@ class TilawaHomeDashboardCardTokens {
     Color? travelSectionLinkColor,
     Color? travelDestinationIconColor,
     List<Color>? travelDestinationHeaderTints,
+    double? headerWaveAmplitude,
+    List<Color>? featureCategoryTileTints,
   }) {
     return TilawaHomeDashboardCardTokens(
       gradientStart: gradientStart ?? this.gradientStart,
@@ -1610,6 +1630,9 @@ class TilawaHomeDashboardCardTokens {
           travelDestinationIconColor ?? this.travelDestinationIconColor,
       travelDestinationHeaderTints:
           travelDestinationHeaderTints ?? this.travelDestinationHeaderTints,
+      headerWaveAmplitude: headerWaveAmplitude ?? this.headerWaveAmplitude,
+      featureCategoryTileTints:
+          featureCategoryTileTints ?? this.featureCategoryTileTints,
     );
   }
 
@@ -1645,6 +1668,12 @@ class TilawaHomeDashboardCardTokens {
         t,
       )!,
       travelDestinationHeaderTints: a.travelDestinationHeaderTints,
+      headerWaveAmplitude: lerpTokenDouble(
+        a.headerWaveAmplitude,
+        b.headerWaveAmplitude,
+        t,
+      ),
+      featureCategoryTileTints: a.featureCategoryTileTints,
     );
   }
 }

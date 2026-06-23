@@ -26,7 +26,9 @@ import 'package:tilawa/features/home/presentation/widgets/home_primary_action_zo
 import 'package:tilawa/features/home/presentation/cubit/home_quran_resume_cubit.dart';
 import 'package:tilawa/features/home/presentation/screens/home_screen.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_hero_sliver.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_daily_ayah_card.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_discover_carousel.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_features_hub.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_travel_destination_card.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_primary_action_card.dart';
 import 'package:tilawa/features/quran_reader/domain/usecases/get_last_read_position_use_case.dart';
 import 'package:tilawa/features/prayer_times/application/prayer_location_update_notifier.dart';
@@ -107,7 +109,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 16));
     }
 
-    expect(find.text('Reciters'), findsNothing);
+    expect(find.text('Reciters'), findsOneWidget);
     expect(find.text('Browse recitations'), findsNothing);
     expect(find.text('Quick athkar'), findsNothing);
     expect(find.text("Today's prayer times"), findsNothing);
@@ -138,7 +140,7 @@ void main() {
     expect(find.byIcon(Icons.view_list_rounded), findsNothing);
   });
 
-  testWidgets('Home shows today ayah, primary action, and feature hub', (
+  testWidgets('Home shows carousel, primary action, and feature grid', (
     tester,
   ) async {
     final bloc = HomeDashboardBloc(
@@ -155,9 +157,12 @@ void main() {
 
     expect(find.text('Today'), findsOneWidget);
     expect(find.text('Yours'), findsNothing);
-    expect(find.byType(HomeDailyAyahCard), findsOneWidget);
+    expect(find.byType(HomeDiscoverCarousel), findsOneWidget);
+    expect(find.byType(HomeTravelDestinationCard), findsWidgets);
     expect(find.byType(HomePrimaryActionCard), findsOneWidget);
+    expect(find.byType(HomeFeaturesHub), findsOneWidget);
     expect(find.text('Discover'), findsOneWidget);
+    expect(find.text('Featured for you'), findsOneWidget);
     expect(find.text('Tasbeeh'), findsWidgets);
     expect(find.text('Bookmarks'), findsOneWidget);
   });

@@ -203,12 +203,13 @@ abstract final class HomeHeroGradientResolver {
       );
     }
 
-    final DateTime nightEaseStart =
-        lightWindowStart.subtract(preSunriseNightEaseDuration);
+    final DateTime nightEaseStart = lightWindowStart.subtract(
+      preSunriseNightEaseDuration,
+    );
     if (!now.isBefore(nightEaseStart)) {
-      final Duration easeWindow =
-          lightWindowStart.difference(nightEaseStart);
-      final double t = now.difference(nightEaseStart).inMilliseconds /
+      final Duration easeWindow = lightWindowStart.difference(nightEaseStart);
+      final double t =
+          now.difference(nightEaseStart).inMilliseconds /
           easeWindow.inMilliseconds;
       return TilawaHomeNextPrayerHeroTokens.lerp(
         night,
@@ -252,8 +253,9 @@ abstract final class HomeHeroGradientResolver {
       boundaries.fajr.subtract(preSunriseFajrLead),
       boundaries.sunrise.subtract(preSunriseLightDuration),
     );
-    final DateTime nightEaseStart =
-        lightWindowStart.subtract(preSunriseNightEaseDuration);
+    final DateTime nightEaseStart = lightWindowStart.subtract(
+      preSunriseNightEaseDuration,
+    );
     return !now.isBefore(nightEaseStart);
   }
 

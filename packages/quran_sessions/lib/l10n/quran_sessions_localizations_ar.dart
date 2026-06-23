@@ -469,6 +469,37 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
       'تم إرسال طلب إعادة الجدولة. بانتظار التأكيد.';
 
   @override
+  String get rescheduleAwaitingCounterparty =>
+      'بانتظار تأكيد الطرف الآخر للوقت الجديد.';
+
+  @override
+  String get reschedulePendingTitle => 'طلب إعادة جدولة';
+
+  @override
+  String reschedulePendingProposedTime(String dateTime) {
+    return 'الوقت المقترح: $dateTime';
+  }
+
+  @override
+  String reschedulePendingReason(String reason) {
+    return 'السبب: $reason';
+  }
+
+  @override
+  String get rescheduleAcceptAction => 'قبول الوقت الجديد';
+
+  @override
+  String get rescheduleRejectAction => 'الإبقاء على الوقت الحالي';
+
+  @override
+  String get rescheduleAcceptedToast =>
+      'تم قبول إعادة الجدولة وتحديث وقت الجلسة.';
+
+  @override
+  String get rescheduleRejectedToast =>
+      'تم رفض إعادة الجدولة والإبقاء على الوقت الأصلي.';
+
+  @override
   String get rescheduleAction => 'إعادة الجدولة';
 
   @override

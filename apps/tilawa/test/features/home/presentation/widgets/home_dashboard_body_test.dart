@@ -11,11 +11,14 @@ import 'package:tilawa/features/home/presentation/cubit/home_primary_action_cubi
 import 'package:tilawa/features/home/presentation/cubit/home_primary_action_state.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_quran_resume_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_quran_resume_state.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_athkar_compact_card.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_body.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_daily_ayah_card.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_discover_carousel.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_features_hub.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_primary_action_card.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
+import 'package:tilawa/screens/cubit/main_screen_cubit.dart';
+import 'package:tilawa/screens/cubit/main_screen_state.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 class _MockHomeQuranResumeCubit extends MockCubit<HomeQuranResumeState>
@@ -30,8 +33,11 @@ class _MockHomeAthkarCompactCubit extends MockCubit<HomeAthkarCompactState>
 class _MockHomePrimaryActionCubit extends MockCubit<HomePrimaryActionState>
     implements HomePrimaryActionCubit {}
 
+class _MockMainScreenCubit extends MockCubit<MainScreenState>
+    implements MainScreenCubit {}
+
 void main() {
-  testWidgets('shows primary action, feature hub, and today ayah', (
+  testWidgets('shows primary action, grid, carousel, and today athkar', (
     tester,
   ) async {
     final quranCubit = _MockHomeQuranResumeCubit();
@@ -52,6 +58,10 @@ void main() {
     when(() => primaryCubit.state).thenReturn(const HomePrimaryActionState());
     when(() => primaryCubit.stream).thenAnswer((_) => const Stream.empty());
 
+    final mainScreenCubit = _MockMainScreenCubit();
+    when(() => mainScreenCubit.state).thenReturn(const MainScreenState());
+    when(() => mainScreenCubit.stream).thenAnswer((_) => const Stream.empty());
+
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
@@ -70,6 +80,7 @@ void main() {
                 BlocProvider<HomePrimaryActionCubit>.value(
                   value: primaryCubit,
                 ),
+                BlocProvider<MainScreenCubit>.value(value: mainScreenCubit),
               ],
               child: HomeDashboardBody(onOpenPrayer: () {}),
             ),
@@ -85,14 +96,13 @@ void main() {
 
     expect(find.text(l10n.homeTodayTitle), findsOneWidget);
     expect(find.text(l10n.homeYoursTitle), findsNothing);
-    expect(find.byType(HomeDailyAyahCard), findsOneWidget);
+    expect(find.byType(HomeAthkarCompactCard), findsOneWidget);
     expect(find.byType(HomePrimaryActionCard), findsOneWidget);
     expect(find.byType(HomeFeaturesHub), findsOneWidget);
+    expect(find.byType(HomeDiscoverCarousel), findsOneWidget);
     expect(find.text(l10n.homeExploreTitle), findsOneWidget);
-    expect(find.text(l10n.homeQuickAthkar), findsWidgets);
-    expect(find.text(l10n.homeQuickQibla), findsWidgets);
-    expect(find.text(l10n.homeQuickTasbeeh), findsWidgets);
-    expect(find.text(l10n.bookmarks), findsOneWidget);
+    expect(find.text(l10n.homeQuickAthkar), findsOneWidget);
+    expect(find.text(l10n.homeFeaturedTitle), findsOneWidget);
 
     expect(find.text(l10n.homePrayerStripTitle), findsNothing);
     expect(find.text(l10n.homePrayerStripViewAll), findsNothing);

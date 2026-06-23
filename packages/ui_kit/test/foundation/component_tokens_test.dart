@@ -1149,7 +1149,16 @@ void main() {
         tokens.travelDestinationHeaderTints,
         AppColors.homeTravelDestinationHeaderTints,
       );
+      expect(tokens.headerWaveAmplitude, 14);
+      expect(
+        tokens.featureCategoryTileTints,
+        AppColors.homeFeatureCategoryTileTints,
+      );
       expect(tokens.destinationHeaderTint(0), AppColors.tripGlideCanvas);
+      expect(
+        tokens.featureCategoryTileTint(0),
+        AppColors.tripGlideCanvasElevated,
+      );
       expect(
         tokens.destinationHeaderTint(1),
         AppColors.tripGlideCanvasElevated,

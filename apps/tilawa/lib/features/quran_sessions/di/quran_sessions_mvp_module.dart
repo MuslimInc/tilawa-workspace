@@ -353,6 +353,20 @@ class QuranSessionsMvpModule {
         openDispute: sl.isRegistered<OpenSessionDisputeUseCase>()
             ? sl<OpenSessionDisputeUseCase>()
             : null,
+        getPendingReschedule:
+            sl.isRegistered<GetPendingRescheduleRequestUseCase>()
+            ? sl<GetPendingRescheduleRequestUseCase>()
+            : null,
+        respondToReschedule:
+            sl.isRegistered<RespondToRescheduleRequestUseCase>()
+            ? sl<RespondToRescheduleRequestUseCase>()
+            : null,
+        authSession: sl.isRegistered<AuthSessionProvider>()
+            ? sl<AuthSessionProvider>()
+            : null,
+        teacherProfileRepository: sl.isRegistered<TeacherProfileRepository>()
+            ? sl<TeacherProfileRepository>()
+            : null,
       ),
     );
     sl.registerFactoryIfAbsent(

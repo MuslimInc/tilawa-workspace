@@ -911,6 +911,54 @@ abstract class QuranSessionsLocalizations {
   /// **'Reschedule request sent. Waiting for confirmation.'**
   String get rescheduleRequestSubmitted;
 
+  /// No description provided for @rescheduleAwaitingCounterparty.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the other participant to confirm your new time.'**
+  String get rescheduleAwaitingCounterparty;
+
+  /// No description provided for @reschedulePendingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reschedule request'**
+  String get reschedulePendingTitle;
+
+  /// No description provided for @reschedulePendingProposedTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Proposed time: {dateTime}'**
+  String reschedulePendingProposedTime(String dateTime);
+
+  /// No description provided for @reschedulePendingReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason: {reason}'**
+  String reschedulePendingReason(String reason);
+
+  /// No description provided for @rescheduleAcceptAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept new time'**
+  String get rescheduleAcceptAction;
+
+  /// No description provided for @rescheduleRejectAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep current time'**
+  String get rescheduleRejectAction;
+
+  /// No description provided for @rescheduleAcceptedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Reschedule accepted. Session time updated.'**
+  String get rescheduleAcceptedToast;
+
+  /// No description provided for @rescheduleRejectedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Reschedule declined. Original time kept.'**
+  String get rescheduleRejectedToast;
+
   /// No description provided for @rescheduleAction.
   ///
   /// In en, this message translates to:

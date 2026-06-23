@@ -273,6 +273,67 @@ test("rules: client cannot create or mutate quran_sessions", async () => {
   );
 });
 
+async function seedRescheduleRequest(): Promise<void> {
+  await seedSlotLock();
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    const adminDb = context.firestore();
+    await setDoc(doc(adminDb, "quran_reschedule_requests/req1"), {
+      bookingId: "booking1",
+      requestedByUserId: "student2",
+      requestedByRole: "student",
+      reason: "Need a later slot.",
+      newStartsAt: new Date("2026-01-11T09:00:00.000Z"),
+      status: "pending",
+      createdAt: new Date(),
+    });
+  });
+}
+
+test("rules: booking participant can read quran_reschedule_requests", async () => {
+  await testEnv.clearFirestore();
+  await seedRescheduleRequest();
+
+  const studentDb = testEnv.authenticatedContext("student2").firestore();
+  await assertSucceeds(
+    getDoc(doc(studentDb, "quran_reschedule_requests/req1")),
+  );
+  await assertSucceeds(
+    getDocs(
+      query(
+        collection(studentDb, "quran_reschedule_requests"),
+        where("bookingId", "==", "booking1"),
+        where("status", "==", "pending"),
+        orderBy("createdAt", "desc"),
+      ),
+    ),
+  );
+
+  const teacherDb = testEnv.authenticatedContext("uid_teacher").firestore();
+  await assertSucceeds(
+    getDoc(doc(teacherDb, "quran_reschedule_requests/req1")),
+  );
+});
+
+test("rules: non-participant cannot read quran_reschedule_requests", async () => {
+  await testEnv.clearFirestore();
+  await seedRescheduleRequest();
+
+  const outsiderDb = testEnv.authenticatedContext("student1").firestore();
+  await assertFails(
+    getDoc(doc(outsiderDb, "quran_reschedule_requests/req1")),
+  );
+  await assertFails(
+    getDocs(
+      query(
+        collection(outsiderDb, "quran_reschedule_requests"),
+        where("bookingId", "==", "booking1"),
+        where("status", "==", "pending"),
+        orderBy("createdAt", "desc"),
+      ),
+    ),
+  );
+});
+
 test("rules: client cannot write quran_session_events", async () => {
   await testEnv.clearFirestore();
   await seedSlotLock();

@@ -482,6 +482,37 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
       'Reschedule request sent. Waiting for confirmation.';
 
   @override
+  String get rescheduleAwaitingCounterparty =>
+      'Waiting for the other participant to confirm your new time.';
+
+  @override
+  String get reschedulePendingTitle => 'Reschedule request';
+
+  @override
+  String reschedulePendingProposedTime(String dateTime) {
+    return 'Proposed time: $dateTime';
+  }
+
+  @override
+  String reschedulePendingReason(String reason) {
+    return 'Reason: $reason';
+  }
+
+  @override
+  String get rescheduleAcceptAction => 'Accept new time';
+
+  @override
+  String get rescheduleRejectAction => 'Keep current time';
+
+  @override
+  String get rescheduleAcceptedToast =>
+      'Reschedule accepted. Session time updated.';
+
+  @override
+  String get rescheduleRejectedToast =>
+      'Reschedule declined. Original time kept.';
+
+  @override
   String get rescheduleAction => 'Reschedule';
 
   @override

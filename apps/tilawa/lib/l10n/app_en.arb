@@ -65,6 +65,10 @@
     "@homeLocationUnavailable": {
         "description": "Fallback Home location chip text when prayer location is not available"
     },
+    "homeHeroLocationContext": "Praying in",
+    "@homeHeroLocationContext": {
+        "description": "Talabat-style context label above the prayer location in the Home hero header"
+    },
     "homeNextPrayerUnavailable": "Set your location to see the next prayer.",
     "@homeNextPrayerUnavailable": {
         "description": "Home next prayer fallback when no prayer time can be calculated"
@@ -102,9 +106,29 @@
     "@homeExploreTitle": {
         "description": "Home section title for secondary destinations that are not bottom-nav tabs"
     },
-    "homeExploreSubtitle": "Prayer times and Quran teaching",
+    "homeExploreSubtitle": "Everyday tools at a glance",
     "@homeExploreSubtitle": {
-        "description": "Home essentials section supporting line — features not in the tab bar"
+        "description": "Home feature category grid supporting line"
+    },
+    "homeKhatmaCarouselSubtitle": "Track your reading plan",
+    "@homeKhatmaCarouselSubtitle": {
+        "description": "Home carousel subtitle for Smart Khatma promo card"
+    },
+    "homeSupportCarouselSubtitle": "Help keep Tilawa free for everyone",
+    "@homeSupportCarouselSubtitle": {
+        "description": "Home carousel subtitle for Support Tilawa promo card"
+    },
+    "homeHistoryCarouselSubtitle": "Pick up where you left off",
+    "@homeHistoryCarouselSubtitle": {
+        "description": "Home carousel subtitle for listening history card"
+    },
+    "homeFavoritesCarouselSubtitle": "Saved recitations and surahs",
+    "@homeFavoritesCarouselSubtitle": {
+        "description": "Home carousel subtitle for favorites card"
+    },
+    "homeDownloadsCarouselSubtitle": "Listen offline anytime",
+    "@homeDownloadsCarouselSubtitle": {
+        "description": "Home carousel subtitle for downloads card"
     },
     "homeSessionsTitle": "Learn Quran recitation",
     "@homeSessionsTitle": {

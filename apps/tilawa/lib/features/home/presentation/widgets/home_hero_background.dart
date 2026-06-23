@@ -2,16 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import 'home_dashboard_hero_sliver.dart';
+import 'home_hero_photo_theme.dart';
 
-/// Prayer-period gradient hero surface with a soft sheet handoff (no photo).
+/// Prayer-period gradient hero surface with optional bottom wave clip.
 class HomeHeroBackground extends StatelessWidget {
   const HomeHeroBackground({
     super.key,
     required this.heroTokens,
+    this.waveAmplitude = 0,
   });
 
   final TilawaHomeNextPrayerHeroTokens heroTokens;
+
+  /// Scallop depth at the hero bottom; 0 keeps a flat edge.
+  final double waveAmplitude;
 
   /// Status bar icon brightness from hero gradient luminance.
   static SystemUiOverlayStyle systemOverlayStyle(
@@ -32,72 +36,75 @@ class HomeHeroBackground extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
     final TilawaDesignTokens tokens = theme.tokens;
-    final Color sheetColor = AppColors.homeTravelSheetSurface;
     final bool lightPhase =
         heroTokens.gradientBottomEnd.computeLuminance() > 0.45;
+    final Color patternInk = HomeHeroPhotoTheme.heroChromeInk(heroTokens);
+
+    final Widget gradientStack = Stack(
+      fit: StackFit.expand,
+      children: [
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: _resolveBackgroundGradient(heroTokens),
+          ),
+        ),
+        if (lightPhase)
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                center: AlignmentDirectional.topCenter,
+                radius: 1.05,
+                colors: <Color>[
+                  AppColors.featuredGradientStart.withValues(alpha: 0.11),
+                  Colors.transparent,
+                ],
+                stops: const <double>[0, 0.78],
+              ),
+            ),
+          ),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: AlignmentDirectional.topCenter,
+              end: AlignmentDirectional.bottomCenter,
+              colors: <Color>[
+                colorScheme.shadow.withValues(
+                  alpha: lightPhase ? 0.015 : 0.03,
+                ),
+                Colors.transparent,
+                colorScheme.shadow.withValues(
+                  alpha: lightPhase ? 0.025 : 0.05,
+                ),
+              ],
+              stops: const <double>[0, 0.45, 1],
+            ),
+          ),
+        ),
+        PositionedDirectional(
+          end: -tokens.spaceExtraLarge,
+          top: tokens.spaceLarge,
+          child: IgnorePointer(
+            child: Icon(
+              Icons.mosque_outlined,
+              size: tokens.iconSizeExtraLarge * 2.2,
+              color: patternInk.withValues(alpha: lightPhase ? 0.06 : 0.10),
+            ),
+          ),
+        ),
+      ],
+    );
+
+    if (waveAmplitude <= 0) {
+      return RepaintBoundary(child: gradientStack);
+    }
 
     return RepaintBoundary(
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: _resolveBackgroundGradient(heroTokens),
-            ),
-          ),
-          if (lightPhase)
-            DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: AlignmentDirectional.topCenter,
-                  radius: 1.05,
-                  colors: <Color>[
-                    AppColors.featuredGradientStart.withValues(alpha: 0.11),
-                    Colors.transparent,
-                  ],
-                  stops: const <double>[0, 0.78],
-                ),
-              ),
-            ),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: AlignmentDirectional.topCenter,
-                end: AlignmentDirectional.bottomCenter,
-                colors: <Color>[
-                  colorScheme.shadow.withValues(alpha: lightPhase ? 0.015 : 0.03),
-                  Colors.transparent,
-                  colorScheme.shadow.withValues(alpha: lightPhase ? 0.025 : 0.05),
-                ],
-                stops: const <double>[0, 0.45, 1],
-              ),
-            ),
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            height:
-                HomeDashboardHeroSliver.sheetOverlap +
-                tokens.spaceLarge +
-                tokens.spaceMedium,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: <Color>[
-                    sheetColor.withValues(alpha: 0),
-                    sheetColor.withValues(alpha: 0),
-                    sheetColor.withValues(alpha: 0.55),
-                    sheetColor,
-                  ],
-                  stops: const <double>[0, 0.38, 0.78, 1],
-                ),
-              ),
-            ),
-          ),
-        ],
+      child: ClipPath(
+        clipper: TilawaWaveClipper(
+          amplitude: waveAmplitude,
+          edge: TilawaWaveEdge.bottom,
+        ),
+        child: gradientStack,
       ),
     );
   }

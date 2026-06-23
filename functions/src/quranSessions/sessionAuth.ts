@@ -77,6 +77,19 @@ function teacherAuthUid(
   return teacherUserId ?? participants.teacherId;
 }
 
+/** Blocks requester from accepting/rejecting own reschedule (incl. admin). */
+export function assertRescheduleCounterpartyOnly(
+  responderUid: string,
+  requestedByUserId: string | undefined,
+): void {
+  if (requestedByUserId && responderUid === requestedByUserId) {
+    throw new HttpsError(
+      "permission-denied",
+      "Requester cannot respond to their own reschedule request.",
+    );
+  }
+}
+
 export function resolveActorRole(
   request: CallableRequest<unknown>,
   claimedRole: ActorRole | undefined,

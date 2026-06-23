@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../widgets/pending_reschedule_banner.dart';
+
 class SessionDetailScreen extends StatefulWidget {
   const SessionDetailScreen({
     super.key,
@@ -146,6 +148,40 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
               }
             },
           ),
+          BlocListener<SessionDetailBloc, SessionDetailState>(
+            listenWhen: (previous, current) =>
+                current is SessionDetailSuccess &&
+                ((previous is! SessionDetailSuccess) ||
+                    previous.rescheduleRespondFailure !=
+                        current.rescheduleRespondFailure ||
+                    previous.rescheduleRespondAccepted !=
+                        current.rescheduleRespondAccepted),
+            listener: (context, state) {
+              if (state is! SessionDetailSuccess) return;
+              if (state.rescheduleRespondFailure != null) {
+                TilawaFeedback.showToast(
+                  context,
+                  message: state.rescheduleRespondFailure!.toLocalizedMessage(
+                    context,
+                  ),
+                  variant: TilawaFeedbackVariant.error,
+                );
+              }
+              final accepted = state.rescheduleRespondAccepted;
+              if (accepted != null) {
+                TilawaFeedback.showToast(
+                  context,
+                  message: accepted
+                      ? l10n.rescheduleAcceptedToast
+                      : l10n.rescheduleRejectedToast,
+                  variant: TilawaFeedbackVariant.success,
+                );
+                context.read<SessionDetailBloc>().add(
+                  const SessionDetailRescheduleRespondAcknowledged(),
+                );
+              }
+            },
+          ),
         ],
         child: BlocBuilder<SessionDetailBloc, SessionDetailState>(
           builder: (context, state) => switch (state) {
@@ -155,46 +191,77 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
             SessionDetailFailure(:final failure) => Center(
               child: Text(failure.toLocalizedMessage(context)),
             ),
-            SessionDetailSuccess(:final aggregate, :final timeline) => ListView(
-              padding: EdgeInsets.all(Theme.of(context).tokens.spaceLarge),
-              children: [
-                Text(
-                  l10n.sessionStatusLabel(aggregate.lifecycleStatus.name),
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                SizedBox(height: Theme.of(context).tokens.spaceSmall),
-                Text(
-                  l10n.sessionStartsAtLabel(
-                    MaterialLocalizations.of(
-                      context,
-                    ).formatFullDate(aggregate.startsAt.toLocal()),
-                  ),
-                ),
-                SizedBox(height: Theme.of(context).tokens.spaceExtraLarge),
-                Text(
-                  l10n.sessionTimelineTitle,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                SizedBox(height: Theme.of(context).tokens.spaceSmall),
-                if (timeline.isEmpty)
-                  Text(l10n.sessionTimelineEmpty)
-                else
-                  ...timeline.map(
-                    (event) => ListTile(
-                      title: Text(event.action.name),
-                      subtitle: Text(
-                        event.reason ??
-                            '${event.previousStatus.name} → ${event.newStatus.name}',
+            SessionDetailSuccess(
+              :final aggregate,
+              :final timeline,
+              :final pendingRescheduleRequest,
+              :final canRespondToReschedule,
+              :final isAwaitingRescheduleCounterparty,
+              :final rescheduleRespondInProgress,
+            ) =>
+              ListView(
+                padding: EdgeInsets.all(Theme.of(context).tokens.spaceLarge),
+                children: [
+                  if (pendingRescheduleRequest != null)
+                    Padding(
+                      padding: EdgeInsets.only(
+                        bottom: Theme.of(context).tokens.spaceLarge,
                       ),
-                      trailing: Text(
-                        MaterialLocalizations.of(context).formatShortDate(
-                          event.createdAt.toLocal(),
+                      child: PendingRescheduleBanner(
+                        request: pendingRescheduleRequest,
+                        canRespond: canRespondToReschedule,
+                        isAwaitingCounterparty:
+                            isAwaitingRescheduleCounterparty,
+                        respondInProgress: rescheduleRespondInProgress,
+                        onAccept: () => context.read<SessionDetailBloc>().add(
+                          const SessionDetailRescheduleRespondSubmitted(
+                            accept: true,
+                          ),
+                        ),
+                        onReject: () => context.read<SessionDetailBloc>().add(
+                          const SessionDetailRescheduleRespondSubmitted(
+                            accept: false,
+                          ),
                         ),
                       ),
                     ),
+                  Text(
+                    l10n.sessionStatusLabel(aggregate.lifecycleStatus.name),
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
-              ],
-            ),
+                  SizedBox(height: Theme.of(context).tokens.spaceSmall),
+                  Text(
+                    l10n.sessionStartsAtLabel(
+                      MaterialLocalizations.of(
+                        context,
+                      ).formatFullDate(aggregate.startsAt.toLocal()),
+                    ),
+                  ),
+                  SizedBox(height: Theme.of(context).tokens.spaceExtraLarge),
+                  Text(
+                    l10n.sessionTimelineTitle,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  SizedBox(height: Theme.of(context).tokens.spaceSmall),
+                  if (timeline.isEmpty)
+                    Text(l10n.sessionTimelineEmpty)
+                  else
+                    ...timeline.map(
+                      (event) => ListTile(
+                        title: Text(event.action.name),
+                        subtitle: Text(
+                          event.reason ??
+                              '${event.previousStatus.name} → ${event.newStatus.name}',
+                        ),
+                        trailing: Text(
+                          MaterialLocalizations.of(context).formatShortDate(
+                            event.createdAt.toLocal(),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
           },
         ),
       ),

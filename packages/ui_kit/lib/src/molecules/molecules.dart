@@ -1,3 +1,5 @@
+export 'tilawa_wave_clipper.dart';
+export 'tilawa_feature_category_tile.dart';
 export 'tilawa_app_bar_config.dart';
 export 'tilawa_app_bar.dart';
 export 'tilawa_catalog_app_bar.dart';

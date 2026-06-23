@@ -35,7 +35,14 @@ void main() {
       languageCode: 'ar',
     );
     expect(find.text(hijriDateLine), findsOneWidget);
+    expect(find.text(l10n.homeHeroLocationContext), findsOneWidget);
     expect(find.text(l10n.nextPrayer), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (widget) => widget is ClipPath && widget.clipper is TilawaWaveClipper,
+      ),
+      findsOneWidget,
+    );
 
     final theme = Theme.of(
       tester.element(find.byType(SliverAppBar)),
@@ -82,7 +89,7 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
-  testWidgets('location chip hugs short labels instead of stretching', (
+  testWidgets('location context row shows city without stretching full width', (
     tester,
   ) async {
     final view = tester.view;
@@ -102,29 +109,48 @@ void main() {
     );
     await tester.pump();
 
-    final chipFinder = find.ancestor(
-      of: find.text('Abha'),
-      matching: find.byWidgetPredicate(
-        (widget) {
-          if (widget is! Material) {
-            return false;
-          }
-          final shape = widget.shape;
-          return shape is RoundedRectangleBorder &&
-              shape.side.width > 0 &&
-              shape.borderRadius != BorderRadius.zero;
-        },
-      ),
-    );
-    expect(chipFinder, findsOneWidget);
+    expect(find.text('Abha'), findsOneWidget);
 
-    final RenderBox chipBox = tester.renderObject(chipFinder);
+    final RenderBox locationBox = tester.renderObject<RenderBox>(
+      find.text('Abha'),
+    );
     final RenderBox viewportBox = tester.renderObject(
       find.byType(CustomScrollView),
     );
 
-    expect(chipBox.size.width, lessThan(viewportBox.size.width * 0.45));
-    expect(chipBox.size.height, kTilawaMinInteractiveDimension);
+    expect(locationBox.size.width, lessThan(viewportBox.size.width * 0.75));
+  });
+
+  testWidgets('collapsed toolbar keeps location and prayer summary', (
+    tester,
+  ) async {
+    final view = tester.view;
+    view.devicePixelRatio = 1;
+    view.physicalSize = const Size(360, 640);
+    addTearDown(view.resetDevicePixelRatio);
+    addTearDown(view.resetPhysicalSize);
+
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      _HomeHeroHarness(
+        controller: controller,
+        locationLabel: 'Cairo',
+      ),
+    );
+    await tester.pump();
+
+    final BuildContext scrollContext = tester.element(
+      find.byType(CustomScrollView),
+    );
+    final double collapseExtent = HomeDashboardHeroSliver.collapseScrollExtent(
+      scrollContext,
+    );
+    controller.jumpTo(collapseExtent);
+    await tester.pump();
+
+    expect(find.textContaining('Cairo ·'), findsOneWidget);
   });
 }
 
