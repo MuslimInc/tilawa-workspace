@@ -16,6 +16,8 @@ extension AppBootstrapperPhases on AppBootstrapper {
     );
     timeline.startPhase();
     WidgetsFlutterBinding.ensureInitialized();
+    StartupPerfLog.ensureFrameCounter();
+    StartupPerfLog.log('bootstrap_widgets_binding_ready');
     PerfLogger.instrumentationEnabled =
         _startupTasks.launchConfig.perfInstrumentation;
     if (_startupTasks.launchConfig.frameWatcher) {
@@ -36,8 +38,10 @@ extension AppBootstrapperPhases on AppBootstrapper {
     timeline.logTotal('=== TOTAL before runApp');
     LaunchFirstFrameGate.defer();
     firstFrameLog('runApp(BootGate) starting');
+    StartupPerfLog.log('bootstrap_run_app');
     run(_startupTasks.buildBootGate(coordinator.initAction));
     firstFrameLog('runApp(BootGate) returned');
+    StartupPerfLog.log('bootstrap_run_app_returned');
     timeline.logTotal('runApp called at');
 
     await ensureCriticalInitCompletes(coordinator);

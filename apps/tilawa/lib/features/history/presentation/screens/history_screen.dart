@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -255,7 +254,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   context.read<HistoryBloc>().add(
                     HistoryEvent.deleteHistory(item.id),
                   );
-                  ToastUtils.showSuccessToast(context.l10n.historyDeleted);
+                  TilawaFeedback.showToast(
+                    context,
+                    message: context.l10n.historyDeleted,
+                    variant: TilawaFeedbackVariant.success,
+                  );
                 },
                 child: HistoryCard(
                   history: item,

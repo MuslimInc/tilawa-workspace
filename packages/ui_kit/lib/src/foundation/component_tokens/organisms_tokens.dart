@@ -587,15 +587,15 @@ class TilawaAdaptiveShellTokens {
       bottomNavHorizontalMargin: 16,
       bottomNavThumbSideMargin: 16,
       bottomNavVerticalMargin: 4,
-      bottomNavBottomLift: 8,
+      bottomNavBottomLift: 4,
       bottomNavIconOnlyVerticalMargin: 2,
       bottomNavInternalPadding: 8,
       bottomNavBorderWidth: lightChrome ? 0.5 : 1,
       bottomNavItemGap: 8,
       bottomNavBackgroundColor: bottomNavBackgroundColor,
-      bottomNavShadowOpacity: lightChrome ? 0.06 : 0.08,
-      bottomNavShadowBlur: lightChrome ? 12 : 14,
-      bottomNavShadowOffset: const Offset(0, 2),
+      bottomNavShadowOpacity: lightChrome ? 0.04 : 0.06,
+      bottomNavShadowBlur: lightChrome ? 8 : 10,
+      bottomNavShadowOffset: const Offset(0, 1),
       bottomNavOutlineColor: _bottomNavOutlineColor(colorScheme),
       sideRailIndicatorColor: _sideRailIndicatorColor(colorScheme),
       sideRailBackgroundColor: _sideRailBackgroundColor(colorScheme),
@@ -666,7 +666,16 @@ class TilawaAdaptiveShellTokens {
   /// Bottom nav floating pill background — a dark charcoal (`#212528`)
   /// that grounds the navigation chrome in both light and dark themes.
   static Color _bottomNavBackgroundColor(ColorScheme colorScheme) {
-    return AppColors.bottomNavBackground;
+    if (colorScheme.brightness == Brightness.light) {
+      return Color.alphaBlend(
+        colorScheme.surface.withValues(alpha: 0.72),
+        AppColors.tripGlideCanvas,
+      );
+    }
+    return Color.alphaBlend(
+      AppColors.darkBackground.withValues(alpha: 0.88),
+      colorScheme.surfaceContainerHigh,
+    );
   }
 
   /// Selected nav button background — a solid light circle on the dark
@@ -675,11 +684,10 @@ class TilawaAdaptiveShellTokens {
     ColorScheme colorScheme,
     Color bottomNavBackgroundColor,
   ) {
-    // Always use a solid light fill so the selected state pops on the
-    // dark (#212528) nav background, matching the reference design.
-    return colorScheme.brightness == Brightness.light
-        ? const Color(0xFFFFFFFF)
-        : const Color(0xFFE8E8E8);
+    if (colorScheme.brightness == Brightness.light) {
+      return colorScheme.primaryContainer;
+    }
+    return colorScheme.surfaceContainerHighest;
   }
 
   TilawaAdaptiveShellTokens copyWith({

@@ -351,12 +351,25 @@ class AppTheme {
     return base.copyWith(minimumSize: _buttonMinimumTouchSize);
   }
 
+  /// Applies the kit pill shape to Material button themes.
+  static ButtonStyle? _buttonStyleWithKitShape(
+    ButtonStyle? base,
+    TilawaDesignTokens tokens,
+  ) => tokens.materialButtonStyle(base: base);
+
   static ThemeData _applySurfaceScale({
     required ThemeData theme,
     required ColorScheme colorScheme,
     required Color scaffoldBackgroundColor,
   }) {
     const Color componentSurfaceTint = Colors.transparent;
+    final TilawaDesignTokens designTokens =
+        colorScheme.brightness == Brightness.dark
+        ? TilawaDesignTokens.dark()
+        : TilawaDesignTokens.light();
+    final double cardRadius = designTokens.resolveRadius(
+      family: TilawaRadiusFamily.card,
+    );
 
     return theme.copyWith(
       colorScheme: colorScheme,
@@ -383,31 +396,59 @@ class AppTheme {
       cardTheme: theme.cardTheme.copyWith(
         color: colorScheme.surface,
         surfaceTintColor: componentSurfaceTint,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(cardRadius),
+        ),
       ),
       dialogTheme: theme.dialogTheme.copyWith(
         backgroundColor: colorScheme.surface,
         surfaceTintColor: componentSurfaceTint,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(cardRadius),
+        ),
       ),
       bottomSheetTheme: theme.bottomSheetTheme.copyWith(
         backgroundColor: colorScheme.surface,
         modalBackgroundColor: colorScheme.surface,
         surfaceTintColor: componentSurfaceTint,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(cardRadius),
+          ),
+        ),
+      ),
+      inputDecorationTheme: const InputDecorationTheme(
+        border: InputBorder.none,
+        enabledBorder: InputBorder.none,
+        focusedBorder: InputBorder.none,
+        disabledBorder: InputBorder.none,
+        errorBorder: InputBorder.none,
+        focusedErrorBorder: InputBorder.none,
+        filled: false,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
-        style: _buttonStyleWithMinTouchTarget(
+        style: _buttonStyleWithKitShape(
           theme.elevatedButtonTheme.style,
+          designTokens,
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
-        style: _buttonStyleWithMinTouchTarget(theme.filledButtonTheme.style),
+        style: _buttonStyleWithKitShape(
+          theme.filledButtonTheme.style,
+          designTokens,
+        ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
-        style: _buttonStyleWithMinTouchTarget(
+        style: _buttonStyleWithKitShape(
           theme.outlinedButtonTheme.style,
+          designTokens,
         ),
       ),
       textButtonTheme: TextButtonThemeData(
-        style: _buttonStyleWithMinTouchTarget(theme.textButtonTheme.style),
+        style: _buttonStyleWithKitShape(
+          theme.textButtonTheme.style,
+          designTokens,
+        ),
       ),
       iconButtonTheme: IconButtonThemeData(
         style: _buttonStyleWithMinTouchTarget(theme.iconButtonTheme.style),

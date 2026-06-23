@@ -1,0 +1,38 @@
+name: quran_sessions
+resolution: workspace
+description: >
+  Isolated package for Quran tutoring sessions — teacher discovery, booking,
+  scheduling, and call orchestration. No Firebase, Agora, or payment SDK imports.
+version: 0.0.1
+publish_to: none
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  equatable: ^2.0.8
+  dartz_plus:
+    path: ../dartz_plus
+  flutter_bloc: ^9.1.1
+  bloc_concurrency: ^0.3.0
+  intl: ^0.20.2
+  timezone: ^0.11.0
+  tilawa_ui_kit:
+    path: ../ui_kit
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  bloc_lint: ^0.4.1
+  flutter_localizations:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  checks: ^0.3.0
+  bloc_test: ^10.0.0
+
+flutter:
+  uses-material-design: true
+  generate: true

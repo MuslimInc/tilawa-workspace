@@ -1,13 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quran_image/domain/domain.dart';
-import 'package:quran_image/l10n/app_localizations_ar.dart';
-import 'package:quran_image/l10n/app_localizations_en.dart';
+import 'package:quran_image/l10n/quran_image_localizations_ar.dart';
+import 'package:quran_image/l10n/quran_image_localizations_en.dart';
 import 'package:quran_image/presentation/mappers/app_message_mapper.dart';
 
 void main() {
   group('AppMessageL10n', () {
     test('localizes every app message variant in English', () {
-      final l10n = AppLocalizationsEn();
+      final l10n = QuranImageLocalizationsEn();
 
       expect(
         const PreparingQuranMessage().localize(l10n),
@@ -42,7 +42,7 @@ void main() {
     });
 
     test('localizes messages in Arabic', () {
-      final l10n = AppLocalizationsAr();
+      final l10n = QuranImageLocalizationsAr();
 
       expect(const AppTitleMessage().localize(l10n), 'القرآن');
       expect(const RetryMessage().localize(l10n), 'إعادة المحاولة');

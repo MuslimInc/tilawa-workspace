@@ -3,7 +3,7 @@ import 'package:quran_image/core/di/dependency_injection.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:quran_image/core/utils/quran_image_utils.dart';
 import 'package:quran_image/domain/domain.dart';
-import 'package:quran_image/l10n/app_localizations.dart';
+import 'package:quran_image/l10n/quran_image_localizations.dart';
 import 'package:quran_image/page_mapping.dart';
 import 'package:quran_image/presentation/widgets/widgets.dart';
 import 'package:quran_qcf/quran_qcf.dart'
@@ -223,12 +223,6 @@ class _QuranImagePageState extends State<QuranImagePage> {
   @override
   Widget build(BuildContext context) {
     PerfLogger.markBuild('QuranImagePage');
-    final pageInfo = QuranPageMapping.getPageInfo(widget.pageNumber);
-    final pageState = PageState.initial().copyWith(
-      currentPage: widget.pageNumber,
-      juzNumber: pageInfo.juzNumber,
-      hizbNumber: pageInfo.hizbNumber,
-    );
 
     return Column(
       children: [
@@ -305,8 +299,7 @@ class QuranAppBar extends StatelessWidget {
       fontWeight: FontWeight.w700,
       letterSpacing: 0.2,
     );
-    final indexLabel =
-        AppLocalizations.of(context)?.surahIndex ?? 'Surah index';
+    final indexLabel = QuranImageLocalizations.of(context).surahIndex;
 
     return Padding(
       padding: EdgeInsets.only(

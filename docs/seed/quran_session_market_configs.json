@@ -1,0 +1,258 @@
+{
+  "EG": {
+    "countryCode": "EG",
+    "countryName": "مصر",
+    "countryNameAr": "مصر",
+    "countryNameEn": "Egypt",
+    "currencyCode": "EGP",
+    "timezone": "Africa/Cairo",
+    "phoneCode": "+20",
+    "flagEmoji": "🇪🇬",
+    "minimumStudentAgeYears": 3,
+    "minimumTeacherAgeYears": 18,
+    "defaultCityId": "cairo",
+    "minSessionPrice": 100,
+    "maxSessionPrice": 2000,
+    "platformCommissionPercent": 15,
+    "isEnabled": true,
+    "sortOrder": 10,
+    "__collections__": {
+      "cities": {
+        "cairo": {
+          "cityId": "cairo",
+          "cityName": "القاهرة",
+          "cityNameAr": "القاهرة",
+          "cityNameEn": "Cairo",
+          "timezone": "Africa/Cairo",
+          "currencyCode": "EGP",
+          "isEnabled": true,
+          "sortOrder": 10
+        },
+        "alexandria": {
+          "cityId": "alexandria",
+          "cityName": "الإسكندرية",
+          "cityNameAr": "الإسكندرية",
+          "cityNameEn": "Alexandria",
+          "timezone": "Africa/Cairo",
+          "currencyCode": "EGP",
+          "isEnabled": true,
+          "sortOrder": 20
+        },
+        "giza": {
+          "cityId": "giza",
+          "cityName": "الجيزة",
+          "cityNameAr": "الجيزة",
+          "cityNameEn": "Giza",
+          "timezone": "Africa/Cairo",
+          "currencyCode": "EGP",
+          "isEnabled": true,
+          "sortOrder": 30
+        },
+        "mansoura": {
+          "cityId": "mansoura",
+          "cityName": "المنصورة",
+          "cityNameAr": "المنصورة",
+          "cityNameEn": "Mansoura",
+          "timezone": "Africa/Cairo",
+          "currencyCode": "EGP",
+          "isEnabled": true,
+          "sortOrder": 40
+        },
+        "tanta": {
+          "cityId": "tanta",
+          "cityName": "طنطا",
+          "cityNameAr": "طنطا",
+          "cityNameEn": "Tanta",
+          "timezone": "Africa/Cairo",
+          "currencyCode": "EGP",
+          "isEnabled": true,
+          "sortOrder": 50
+        },
+        "minya": {
+          "cityId": "minya",
+          "cityName": "المنيا",
+          "cityNameAr": "المنيا",
+          "cityNameEn": "Minya",
+          "timezone": "Africa/Cairo",
+          "currencyCode": "EGP",
+          "isEnabled": true,
+          "sortOrder": 60
+        },
+        "assiut": {
+          "cityId": "assiut",
+          "cityName": "أسيوط",
+          "cityNameAr": "أسيوط",
+          "cityNameEn": "Assiut",
+          "timezone": "Africa/Cairo",
+          "currencyCode": "EGP",
+          "isEnabled": true,
+          "sortOrder": 70
+        },
+        "sohag": {
+          "cityId": "sohag",
+          "cityName": "سوهاج",
+          "cityNameAr": "سوهاج",
+          "cityNameEn": "Sohag",
+          "timezone": "Africa/Cairo",
+          "currencyCode": "EGP",
+          "isEnabled": true,
+          "sortOrder": 80
+        },
+        "aswan": {
+          "cityId": "aswan",
+          "cityName": "أسوان",
+          "cityNameAr": "أسوان",
+          "cityNameEn": "Aswan",
+          "timezone": "Africa/Cairo",
+          "currencyCode": "EGP",
+          "isEnabled": true,
+          "sortOrder": 90
+        },
+        "luxor": {
+          "cityId": "luxor",
+          "cityName": "الأقصر",
+          "cityNameAr": "الأقصر",
+          "cityNameEn": "Luxor",
+          "timezone": "Africa/Cairo",
+          "currencyCode": "EGP",
+          "isEnabled": true,
+          "sortOrder": 100
+        }
+      }
+    }
+  },
+  "SA": {
+    "countryCode": "SA",
+    "countryName": "السعودية",
+    "countryNameAr": "السعودية",
+    "countryNameEn": "Saudi Arabia",
+    "currencyCode": "SAR",
+    "timezone": "Asia/Riyadh",
+    "phoneCode": "+966",
+    "flagEmoji": "🇸🇦",
+    "minimumStudentAgeYears": 3,
+    "minimumTeacherAgeYears": 18,
+    "defaultCityId": "riyadh",
+    "minSessionPrice": 100,
+    "maxSessionPrice": 2000,
+    "platformCommissionPercent": 15,
+    "isEnabled": true,
+    "sortOrder": 20,
+    "__collections__": {
+      "cities": {
+        "riyadh": {
+          "cityId": "riyadh",
+          "cityName": "الرياض",
+          "cityNameAr": "الرياض",
+          "cityNameEn": "Riyadh",
+          "timezone": "Asia/Riyadh",
+          "currencyCode": "SAR",
+          "isEnabled": true,
+          "sortOrder": 10
+        },
+        "jeddah": {
+          "cityId": "jeddah",
+          "cityName": "جدة",
+          "cityNameAr": "جدة",
+          "cityNameEn": "Jeddah",
+          "timezone": "Asia/Riyadh",
+          "currencyCode": "SAR",
+          "isEnabled": true,
+          "sortOrder": 20
+        },
+        "makkah": {
+          "cityId": "makkah",
+          "cityName": "مكة",
+          "cityNameAr": "مكة",
+          "cityNameEn": "Makkah",
+          "timezone": "Asia/Riyadh",
+          "currencyCode": "SAR",
+          "isEnabled": true,
+          "sortOrder": 30
+        },
+        "madinah": {
+          "cityId": "madinah",
+          "cityName": "المدينة",
+          "cityNameAr": "المدينة",
+          "cityNameEn": "Madinah",
+          "timezone": "Asia/Riyadh",
+          "currencyCode": "SAR",
+          "isEnabled": true,
+          "sortOrder": 40
+        },
+        "dammam": {
+          "cityId": "dammam",
+          "cityName": "الدمام",
+          "cityNameAr": "الدمام",
+          "cityNameEn": "Dammam",
+          "timezone": "Asia/Riyadh",
+          "currencyCode": "SAR",
+          "isEnabled": true,
+          "sortOrder": 50
+        }
+      }
+    }
+  },
+  "AE": {
+    "countryCode": "AE",
+    "countryName": "الإمارات",
+    "countryNameAr": "الإمارات",
+    "countryNameEn": "United Arab Emirates",
+    "currencyCode": "AED",
+    "timezone": "Asia/Dubai",
+    "phoneCode": "+971",
+    "flagEmoji": "🇦🇪",
+    "minimumStudentAgeYears": 3,
+    "minimumTeacherAgeYears": 18,
+    "defaultCityId": "dubai",
+    "minSessionPrice": 100,
+    "maxSessionPrice": 2000,
+    "platformCommissionPercent": 15,
+    "isEnabled": true,
+    "sortOrder": 30,
+    "__collections__": {
+      "cities": {
+        "dubai": {
+          "cityId": "dubai",
+          "cityName": "دبي",
+          "cityNameAr": "دبي",
+          "cityNameEn": "Dubai",
+          "timezone": "Asia/Dubai",
+          "currencyCode": "AED",
+          "isEnabled": true,
+          "sortOrder": 10
+        },
+        "abu_dhabi": {
+          "cityId": "abu_dhabi",
+          "cityName": "أبوظبي",
+          "cityNameAr": "أبوظبي",
+          "cityNameEn": "Abu Dhabi",
+          "timezone": "Asia/Dubai",
+          "currencyCode": "AED",
+          "isEnabled": true,
+          "sortOrder": 20
+        },
+        "sharjah": {
+          "cityId": "sharjah",
+          "cityName": "الشارقة",
+          "cityNameAr": "الشارقة",
+          "cityNameEn": "Sharjah",
+          "timezone": "Asia/Dubai",
+          "currencyCode": "AED",
+          "isEnabled": true,
+          "sortOrder": 30
+        },
+        "ajman": {
+          "cityId": "ajman",
+          "cityName": "عجمان",
+          "cityNameAr": "عجمان",
+          "cityNameEn": "Ajman",
+          "timezone": "Asia/Dubai",
+          "currencyCode": "AED",
+          "isEnabled": true,
+          "sortOrder": 40
+        }
+      }
+    }
+  }
+}

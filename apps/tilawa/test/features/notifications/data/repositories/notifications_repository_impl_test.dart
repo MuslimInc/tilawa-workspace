@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -7,6 +8,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:tilawa/features/notifications/data/datasources/notifications_remote_data_source.dart';
 import 'package:tilawa/features/notifications/data/repositories/notifications_repository_impl.dart';
 import 'package:tilawa/features/notifications/presentation/services/fcm_notification_handler_service.dart';
+import 'package:tilawa/features/auth/domain/services/session_revoked_notifier.dart';
+import 'package:tilawa/features/settings/domain/services/teacher_capability_refresh_notifier.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 
 class MockNotificationsRemoteDataSource extends Mock
@@ -22,18 +25,36 @@ class MockFCMNotificationHandlerService extends Mock
 
 class MockLogger extends Mock implements Logger {}
 
+class MockTeacherCapabilityRefreshNotifier extends Mock
+    implements TeacherCapabilityRefreshNotifier {}
+
+class MockSessionRevokedNotifier extends Mock
+    implements SessionRevokedNotifier {}
+
+class _FallbackRemoteMessage extends Fake implements RemoteMessage {}
+
 void main() {
   late NotificationsRepositoryImpl repository;
   late MockNotificationsRemoteDataSource mockRemoteDataSource;
   late MockINotificationDispatcher mockDispatcher;
   late MockFCMNotificationHandlerService mockFcmHandlerService;
   late MockLogger mockLogger;
+  late MockTeacherCapabilityRefreshNotifier
+  mockTeacherCapabilityRefreshNotifier;
+  late MockSessionRevokedNotifier mockSessionRevokedNotifier;
+
+  setUpAll(() {
+    registerFallbackValue(_FallbackRemoteMessage());
+  });
 
   setUp(() {
     mockRemoteDataSource = MockNotificationsRemoteDataSource();
     mockDispatcher = MockINotificationDispatcher();
     mockFcmHandlerService = MockFCMNotificationHandlerService();
     mockLogger = MockLogger();
+    mockTeacherCapabilityRefreshNotifier =
+        MockTeacherCapabilityRefreshNotifier();
+    mockSessionRevokedNotifier = MockSessionRevokedNotifier();
 
     when(
       () => mockLogger.d(
@@ -53,6 +74,8 @@ void main() {
       mockDispatcher,
       mockFcmHandlerService,
       mockLogger,
+      mockTeacherCapabilityRefreshNotifier,
+      mockSessionRevokedNotifier,
     );
   });
 
@@ -266,6 +289,78 @@ void main() {
             handler: any(named: 'handler'),
           ),
         ).called(1);
+      },
+    );
+
+    test(
+      'teacher_application_reviewed foreground message notifies capability refresh',
+      () async {
+        final messageController = StreamController<RemoteMessage>.broadcast();
+        when(
+          () => mockRemoteDataSource.onMessage,
+        ).thenAnswer((_) => messageController.stream);
+        when(
+          () => mockRemoteDataSource.onMessageOpenedApp,
+        ).thenAnswer((_) => const Stream.empty());
+        when(
+          () => mockFcmHandlerService.showForegroundNotification(any()),
+        ).thenAnswer((_) async {});
+
+        await repository.initializeListeners();
+
+        messageController.add(
+          RemoteMessage(
+            data: const {
+              'actionType': 'teacher_application_reviewed',
+              'status': 'approved',
+              'applicationId': 'app_1',
+            },
+          ),
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        verify(
+          () => mockTeacherCapabilityRefreshNotifier.notifyApplicationReviewed(
+            'approved',
+          ),
+        ).called(1);
+        verify(
+          () => mockFcmHandlerService.showForegroundNotification(any()),
+        ).called(1);
+
+        await messageController.close();
+      },
+    );
+
+    test(
+      'session_revoked foreground message notifies session revoked',
+      () async {
+        final messageController = StreamController<RemoteMessage>.broadcast();
+        when(
+          () => mockRemoteDataSource.onMessage,
+        ).thenAnswer((_) => messageController.stream);
+        when(
+          () => mockRemoteDataSource.onMessageOpenedApp,
+        ).thenAnswer((_) => const Stream.empty());
+        when(
+          () => mockFcmHandlerService.showForegroundNotification(any()),
+        ).thenAnswer((_) async {});
+
+        await repository.initializeListeners();
+
+        messageController.add(
+          RemoteMessage(
+            data: const {
+              'actionType': 'session_revoked',
+            },
+          ),
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        verify(
+          () => mockSessionRevokedNotifier.notifySessionRevoked(),
+        ).called(1);
+        await messageController.close();
       },
     );
   });

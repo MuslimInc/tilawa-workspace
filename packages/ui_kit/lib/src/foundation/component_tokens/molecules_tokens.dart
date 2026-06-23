@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../app_colors.dart';
-import '../design_tokens.dart' show kTilawaMinInteractiveDimension;
+import '../design_tokens.dart';
 import 'token_lerp.dart';
 
 @immutable
@@ -157,6 +157,8 @@ class TilawaFeedbackStripTokens {
     required this.spinnerSize,
     required this.spinnerStrokeWidth,
     required this.contentGap,
+    required this.leadingSlotSize,
+    required this.toastMessageMaxLines,
     required this.infoAccentOpacity,
     required this.successAccentOpacity,
     required this.warningAccentOpacity,
@@ -167,6 +169,12 @@ class TilawaFeedbackStripTokens {
   final double spinnerSize;
   final double spinnerStrokeWidth;
   final double contentGap;
+
+  /// Square box for the leading icon or spinner so toast height stays stable.
+  final double leadingSlotSize;
+
+  /// Maximum visible message lines on [TilawaToast].
+  final int toastMessageMaxLines;
 
   /// Border-accent alphas per [TilawaFeedbackVariant]. Error is strongest so
   /// the most urgent strip reads loudest; info is a quiet outline tint.
@@ -181,6 +189,8 @@ class TilawaFeedbackStripTokens {
       spinnerSize: 18,
       spinnerStrokeWidth: 2.2,
       contentGap: 8,
+      leadingSlotSize: 24,
+      toastMessageMaxLines: 2,
       infoAccentOpacity: 0.35,
       successAccentOpacity: 0.55,
       warningAccentOpacity: 0.55,
@@ -193,6 +203,8 @@ class TilawaFeedbackStripTokens {
     double? spinnerSize,
     double? spinnerStrokeWidth,
     double? contentGap,
+    double? leadingSlotSize,
+    int? toastMessageMaxLines,
     double? infoAccentOpacity,
     double? successAccentOpacity,
     double? warningAccentOpacity,
@@ -203,6 +215,8 @@ class TilawaFeedbackStripTokens {
       spinnerSize: spinnerSize ?? this.spinnerSize,
       spinnerStrokeWidth: spinnerStrokeWidth ?? this.spinnerStrokeWidth,
       contentGap: contentGap ?? this.contentGap,
+      leadingSlotSize: leadingSlotSize ?? this.leadingSlotSize,
+      toastMessageMaxLines: toastMessageMaxLines ?? this.toastMessageMaxLines,
       infoAccentOpacity: infoAccentOpacity ?? this.infoAccentOpacity,
       successAccentOpacity: successAccentOpacity ?? this.successAccentOpacity,
       warningAccentOpacity: warningAccentOpacity ?? this.warningAccentOpacity,
@@ -224,6 +238,14 @@ class TilawaFeedbackStripTokens {
         t,
       ),
       contentGap: lerpTokenDouble(a.contentGap, b.contentGap, t),
+      leadingSlotSize: lerpTokenDouble(
+        a.leadingSlotSize,
+        b.leadingSlotSize,
+        t,
+      ),
+      toastMessageMaxLines: t < 0.5
+          ? a.toastMessageMaxLines
+          : b.toastMessageMaxLines,
       infoAccentOpacity: lerpTokenDouble(
         a.infoAccentOpacity,
         b.infoAccentOpacity,
@@ -941,6 +963,9 @@ class TilawaSearchFieldTokens {
   }
 
   factory TilawaSearchFieldTokens.fromColorScheme(ColorScheme colorScheme) {
+    final TilawaDesignTokens tokens = colorScheme.brightness == Brightness.dark
+        ? TilawaDesignTokens.dark()
+        : TilawaDesignTokens.light();
     final backgroundColor = colorScheme.surface;
     const focusedBorderOpacity = 0.28;
     const unfocusedBorderOpacity = 0.26;
@@ -965,10 +990,8 @@ class TilawaSearchFieldTokens {
     return TilawaSearchFieldTokens(
       height: kTilawaMinInteractiveDimension,
       backgroundColor: backgroundColor,
-      contentPadding: const EdgeInsets.symmetric(vertical: 12),
-      scrollPadding: const EdgeInsets.all(
-        16,
-      ), // fix: Spacing & alignment — tokenized (2×8dp)
+      contentPadding: EdgeInsets.symmetric(vertical: tokens.spaceMedium),
+      scrollPadding: EdgeInsets.all(tokens.spaceLarge),
       iconSize: 18,
       focusedBorderOpacity: focusedBorderOpacity,
       unfocusedBorderOpacity: unfocusedBorderOpacity,
@@ -1610,6 +1633,177 @@ class TilawaHomeDashboardCardTokens {
   }
 }
 
+/// Token-backed surface for [TilawaCapabilityActionCard].
+///
+/// Subtle brand wash — not the featured gold dashboard gradient.
+@immutable
+class TilawaCapabilityActionCardTokens {
+  const TilawaCapabilityActionCardTokens({
+    required this.gradientStart,
+    required this.gradientEnd,
+    required this.borderColor,
+    required this.titleColor,
+    required this.subtitleColor,
+    required this.splashColor,
+    required this.highlightColor,
+    required this.contentPadding,
+    required this.outerPadding,
+    required this.leadingIconSize,
+    required this.trailingIconSize,
+    required this.trailingIconOpacity,
+    required this.titleSubtitleSpacing,
+    required this.badgeTopSpacing,
+    required this.rowGap,
+  });
+
+  final Color gradientStart;
+  final Color gradientEnd;
+  final Color borderColor;
+  final Color titleColor;
+  final Color subtitleColor;
+  final Color splashColor;
+  final Color highlightColor;
+  final EdgeInsetsGeometry contentPadding;
+  final EdgeInsetsGeometry outerPadding;
+  final double leadingIconSize;
+  final double trailingIconSize;
+  final double trailingIconOpacity;
+  final double titleSubtitleSpacing;
+  final double badgeTopSpacing;
+  final double rowGap;
+
+  factory TilawaCapabilityActionCardTokens.fromColorScheme(
+    ColorScheme colorScheme,
+  ) {
+    const double gradientPrimaryAlpha = 0.10;
+    const double gradientSecondaryAlpha = 0.14;
+    const double borderAlpha = 0.12;
+
+    return TilawaCapabilityActionCardTokens(
+      gradientStart: Color.alphaBlend(
+        colorScheme.primary.withValues(alpha: gradientPrimaryAlpha),
+        colorScheme.surface,
+      ),
+      gradientEnd: Color.alphaBlend(
+        colorScheme.secondary.withValues(alpha: gradientSecondaryAlpha),
+        colorScheme.surfaceContainerLow,
+      ),
+      borderColor: colorScheme.outlineVariant.withValues(alpha: borderAlpha),
+      titleColor: colorScheme.onSurface,
+      subtitleColor: colorScheme.onSurfaceVariant,
+      splashColor: colorScheme.primary.withValues(alpha: 0.08),
+      highlightColor: colorScheme.onSurface.withValues(alpha: 0.04),
+      contentPadding: const EdgeInsetsDirectional.fromSTEB(20, 20, 16, 20),
+      outerPadding: const EdgeInsetsDirectional.fromSTEB(12, 12, 12, 12),
+      leadingIconSize: 24,
+      trailingIconSize: 20,
+      trailingIconOpacity: 0.62,
+      titleSubtitleSpacing: 6,
+      badgeTopSpacing: 10,
+      rowGap: 14,
+    );
+  }
+
+  LinearGradient backgroundGradient({
+    AlignmentGeometry begin = AlignmentDirectional.topStart,
+    AlignmentGeometry end = AlignmentDirectional.bottomEnd,
+  }) {
+    return LinearGradient(
+      begin: begin,
+      end: end,
+      colors: <Color>[gradientStart, gradientEnd],
+    );
+  }
+
+  TilawaCapabilityActionCardTokens copyWith({
+    Color? gradientStart,
+    Color? gradientEnd,
+    Color? borderColor,
+    Color? titleColor,
+    Color? subtitleColor,
+    Color? splashColor,
+    Color? highlightColor,
+    EdgeInsetsGeometry? contentPadding,
+    EdgeInsetsGeometry? outerPadding,
+    double? leadingIconSize,
+    double? trailingIconSize,
+    double? trailingIconOpacity,
+    double? titleSubtitleSpacing,
+    double? badgeTopSpacing,
+    double? rowGap,
+  }) {
+    return TilawaCapabilityActionCardTokens(
+      gradientStart: gradientStart ?? this.gradientStart,
+      gradientEnd: gradientEnd ?? this.gradientEnd,
+      borderColor: borderColor ?? this.borderColor,
+      titleColor: titleColor ?? this.titleColor,
+      subtitleColor: subtitleColor ?? this.subtitleColor,
+      splashColor: splashColor ?? this.splashColor,
+      highlightColor: highlightColor ?? this.highlightColor,
+      contentPadding: contentPadding ?? this.contentPadding,
+      outerPadding: outerPadding ?? this.outerPadding,
+      leadingIconSize: leadingIconSize ?? this.leadingIconSize,
+      trailingIconSize: trailingIconSize ?? this.trailingIconSize,
+      trailingIconOpacity: trailingIconOpacity ?? this.trailingIconOpacity,
+      titleSubtitleSpacing: titleSubtitleSpacing ?? this.titleSubtitleSpacing,
+      badgeTopSpacing: badgeTopSpacing ?? this.badgeTopSpacing,
+      rowGap: rowGap ?? this.rowGap,
+    );
+  }
+
+  static TilawaCapabilityActionCardTokens lerp(
+    TilawaCapabilityActionCardTokens a,
+    TilawaCapabilityActionCardTokens b,
+    double t,
+  ) {
+    return TilawaCapabilityActionCardTokens(
+      gradientStart: Color.lerp(a.gradientStart, b.gradientStart, t)!,
+      gradientEnd: Color.lerp(a.gradientEnd, b.gradientEnd, t)!,
+      borderColor: Color.lerp(a.borderColor, b.borderColor, t)!,
+      titleColor: Color.lerp(a.titleColor, b.titleColor, t)!,
+      subtitleColor: Color.lerp(a.subtitleColor, b.subtitleColor, t)!,
+      splashColor: Color.lerp(a.splashColor, b.splashColor, t)!,
+      highlightColor: Color.lerp(a.highlightColor, b.highlightColor, t)!,
+      contentPadding: EdgeInsetsGeometry.lerp(
+        a.contentPadding,
+        b.contentPadding,
+        t,
+      )!,
+      outerPadding: EdgeInsetsGeometry.lerp(
+        a.outerPadding,
+        b.outerPadding,
+        t,
+      )!,
+      leadingIconSize: lerpTokenDouble(
+        a.leadingIconSize,
+        b.leadingIconSize,
+        t,
+      ),
+      trailingIconSize: lerpTokenDouble(
+        a.trailingIconSize,
+        b.trailingIconSize,
+        t,
+      ),
+      trailingIconOpacity: lerpTokenDouble(
+        a.trailingIconOpacity,
+        b.trailingIconOpacity,
+        t,
+      ),
+      titleSubtitleSpacing: lerpTokenDouble(
+        a.titleSubtitleSpacing,
+        b.titleSubtitleSpacing,
+        t,
+      ),
+      badgeTopSpacing: lerpTokenDouble(
+        a.badgeTopSpacing,
+        b.badgeTopSpacing,
+        t,
+      ),
+      rowGap: lerpTokenDouble(a.rowGap, b.rowGap, t),
+    );
+  }
+}
+
 /// Component tokens for [TilawaExperimentalBadge].
 ///
 /// Colors are derived from the caution semantic tint (warning hue) at reduced
@@ -1699,6 +1893,226 @@ class TilawaExperimentalBadgeTokens {
       iconGap: lerpTokenDouble(a.iconGap, b.iconGap, t),
       fontWeight: FontWeight.lerp(a.fontWeight, b.fontWeight, t)!,
       letterSpacing: lerpTokenDouble(a.letterSpacing, b.letterSpacing, t),
+    );
+  }
+}
+
+/// Component tokens for [TilawaCupertinoWheelPicker] and
+/// [TilawaPickerSegmentCard].
+@immutable
+class TilawaCupertinoWheelPickerTokens {
+  const TilawaCupertinoWheelPickerTokens({
+    required this.pickerHeight,
+    required this.segmentGap,
+    required this.segmentPadding,
+    required this.segmentBorderRadius,
+    required this.segmentSelectedBorderWidth,
+    required this.segmentSelectedBackgroundColor,
+    required this.segmentUnselectedBackgroundColor,
+    required this.segmentSelectedBorderColor,
+    required this.segmentUnselectedBorderColor,
+    required this.segmentLabelColor,
+    required this.segmentSelectedValueColor,
+    required this.segmentUnselectedValueColor,
+    required this.segmentLabelValueGap,
+    required this.selectionOverlayColor,
+    required this.selectionOverlayRadius,
+    required this.selectionOverlayHorizontalMargin,
+    required this.wheelTopSpacing,
+    required this.pickerBackgroundColor,
+  });
+
+  final double pickerHeight;
+  final double segmentGap;
+  final EdgeInsetsGeometry segmentPadding;
+  final double segmentBorderRadius;
+  final double segmentSelectedBorderWidth;
+  final Color segmentSelectedBackgroundColor;
+  final Color segmentUnselectedBackgroundColor;
+  final Color segmentSelectedBorderColor;
+  final Color segmentUnselectedBorderColor;
+  final Color segmentLabelColor;
+  final Color segmentSelectedValueColor;
+  final Color segmentUnselectedValueColor;
+  final double segmentLabelValueGap;
+  final Color selectionOverlayColor;
+  final double selectionOverlayRadius;
+  final double selectionOverlayHorizontalMargin;
+  final double wheelTopSpacing;
+  final Color pickerBackgroundColor;
+
+  factory TilawaCupertinoWheelPickerTokens.fromColorScheme(
+    ColorScheme colorScheme,
+  ) {
+    final design = colorScheme.brightness == Brightness.dark
+        ? TilawaDesignTokens.dark()
+        : TilawaDesignTokens.light();
+    return TilawaCupertinoWheelPickerTokens(
+      pickerHeight: 200,
+      segmentGap: design.spaceSmall,
+      segmentPadding: EdgeInsets.symmetric(
+        vertical: design.spaceMedium,
+        horizontal: design.spaceMedium,
+      ),
+      segmentBorderRadius: design.radiusLarge,
+      segmentSelectedBorderWidth: 1.5,
+      segmentSelectedBackgroundColor: colorScheme.primaryContainer,
+      segmentUnselectedBackgroundColor: colorScheme.surfaceContainerHighest,
+      segmentSelectedBorderColor: colorScheme.primary,
+      segmentUnselectedBorderColor: colorScheme.primary.withValues(alpha: 0),
+      segmentLabelColor: colorScheme.onSurfaceVariant,
+      segmentSelectedValueColor: colorScheme.primary,
+      segmentUnselectedValueColor: colorScheme.onSurface,
+      segmentLabelValueGap: design.spaceTiny,
+      selectionOverlayColor: colorScheme.onSurface.withValues(
+        alpha: colorScheme.brightness == Brightness.dark ? 0.14 : 0.08,
+      ),
+      selectionOverlayRadius: design.radiusMedium,
+      selectionOverlayHorizontalMargin: design.spaceSmall,
+      wheelTopSpacing: design.spaceSmall,
+      pickerBackgroundColor: colorScheme.surface,
+    );
+  }
+
+  TilawaCupertinoWheelPickerTokens copyWith({
+    double? pickerHeight,
+    double? segmentGap,
+    EdgeInsetsGeometry? segmentPadding,
+    double? segmentBorderRadius,
+    double? segmentSelectedBorderWidth,
+    Color? segmentSelectedBackgroundColor,
+    Color? segmentUnselectedBackgroundColor,
+    Color? segmentSelectedBorderColor,
+    Color? segmentUnselectedBorderColor,
+    Color? segmentLabelColor,
+    Color? segmentSelectedValueColor,
+    Color? segmentUnselectedValueColor,
+    double? segmentLabelValueGap,
+    Color? selectionOverlayColor,
+    double? selectionOverlayRadius,
+    double? selectionOverlayHorizontalMargin,
+    double? wheelTopSpacing,
+    Color? pickerBackgroundColor,
+  }) {
+    return TilawaCupertinoWheelPickerTokens(
+      pickerHeight: pickerHeight ?? this.pickerHeight,
+      segmentGap: segmentGap ?? this.segmentGap,
+      segmentPadding: segmentPadding ?? this.segmentPadding,
+      segmentBorderRadius: segmentBorderRadius ?? this.segmentBorderRadius,
+      segmentSelectedBorderWidth:
+          segmentSelectedBorderWidth ?? this.segmentSelectedBorderWidth,
+      segmentSelectedBackgroundColor:
+          segmentSelectedBackgroundColor ?? this.segmentSelectedBackgroundColor,
+      segmentUnselectedBackgroundColor:
+          segmentUnselectedBackgroundColor ??
+          this.segmentUnselectedBackgroundColor,
+      segmentSelectedBorderColor:
+          segmentSelectedBorderColor ?? this.segmentSelectedBorderColor,
+      segmentUnselectedBorderColor:
+          segmentUnselectedBorderColor ?? this.segmentUnselectedBorderColor,
+      segmentLabelColor: segmentLabelColor ?? this.segmentLabelColor,
+      segmentSelectedValueColor:
+          segmentSelectedValueColor ?? this.segmentSelectedValueColor,
+      segmentUnselectedValueColor:
+          segmentUnselectedValueColor ?? this.segmentUnselectedValueColor,
+      segmentLabelValueGap: segmentLabelValueGap ?? this.segmentLabelValueGap,
+      selectionOverlayColor:
+          selectionOverlayColor ?? this.selectionOverlayColor,
+      selectionOverlayRadius:
+          selectionOverlayRadius ?? this.selectionOverlayRadius,
+      selectionOverlayHorizontalMargin:
+          selectionOverlayHorizontalMargin ??
+          this.selectionOverlayHorizontalMargin,
+      wheelTopSpacing: wheelTopSpacing ?? this.wheelTopSpacing,
+      pickerBackgroundColor:
+          pickerBackgroundColor ?? this.pickerBackgroundColor,
+    );
+  }
+
+  static TilawaCupertinoWheelPickerTokens lerp(
+    TilawaCupertinoWheelPickerTokens a,
+    TilawaCupertinoWheelPickerTokens b,
+    double t,
+  ) {
+    return TilawaCupertinoWheelPickerTokens(
+      pickerHeight: lerpTokenDouble(a.pickerHeight, b.pickerHeight, t),
+      segmentGap: lerpTokenDouble(a.segmentGap, b.segmentGap, t),
+      segmentPadding: EdgeInsetsGeometry.lerp(
+        a.segmentPadding,
+        b.segmentPadding,
+        t,
+      )!,
+      segmentBorderRadius: lerpTokenDouble(
+        a.segmentBorderRadius,
+        b.segmentBorderRadius,
+        t,
+      ),
+      segmentSelectedBorderWidth: lerpTokenDouble(
+        a.segmentSelectedBorderWidth,
+        b.segmentSelectedBorderWidth,
+        t,
+      ),
+      segmentSelectedBackgroundColor: Color.lerp(
+        a.segmentSelectedBackgroundColor,
+        b.segmentSelectedBackgroundColor,
+        t,
+      )!,
+      segmentUnselectedBackgroundColor: Color.lerp(
+        a.segmentUnselectedBackgroundColor,
+        b.segmentUnselectedBackgroundColor,
+        t,
+      )!,
+      segmentSelectedBorderColor: Color.lerp(
+        a.segmentSelectedBorderColor,
+        b.segmentSelectedBorderColor,
+        t,
+      )!,
+      segmentUnselectedBorderColor: Color.lerp(
+        a.segmentUnselectedBorderColor,
+        b.segmentUnselectedBorderColor,
+        t,
+      )!,
+      segmentLabelColor: Color.lerp(
+        a.segmentLabelColor,
+        b.segmentLabelColor,
+        t,
+      )!,
+      segmentSelectedValueColor: Color.lerp(
+        a.segmentSelectedValueColor,
+        b.segmentSelectedValueColor,
+        t,
+      )!,
+      segmentUnselectedValueColor: Color.lerp(
+        a.segmentUnselectedValueColor,
+        b.segmentUnselectedValueColor,
+        t,
+      )!,
+      segmentLabelValueGap: lerpTokenDouble(
+        a.segmentLabelValueGap,
+        b.segmentLabelValueGap,
+        t,
+      ),
+      selectionOverlayColor: Color.lerp(
+        a.selectionOverlayColor,
+        b.selectionOverlayColor,
+        t,
+      )!,
+      selectionOverlayRadius: lerpTokenDouble(
+        a.selectionOverlayRadius,
+        b.selectionOverlayRadius,
+        t,
+      ),
+      selectionOverlayHorizontalMargin: lerpTokenDouble(
+        a.selectionOverlayHorizontalMargin,
+        b.selectionOverlayHorizontalMargin,
+        t,
+      ),
+      wheelTopSpacing: lerpTokenDouble(a.wheelTopSpacing, b.wheelTopSpacing, t),
+      pickerBackgroundColor: Color.lerp(
+        a.pickerBackgroundColor,
+        b.pickerBackgroundColor,
+        t,
+      )!,
     );
   }
 }

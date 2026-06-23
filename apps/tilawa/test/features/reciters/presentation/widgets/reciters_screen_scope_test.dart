@@ -17,6 +17,7 @@ import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../../../../helpers/hydrated_bloc_test_helper.dart';
+import '../../../../helpers/noop_sync_user_language_preference_use_case.dart';
 import '../../../../support/screen_scope_test_support.dart';
 
 class _MockGetRecitersUseCase extends Mock implements GetRecitersUseCase {}
@@ -43,6 +44,7 @@ Widget _wrapRecitersScopeTest({required Widget home}) {
           getCurrentLanguage,
           setLanguage,
           getReciters,
+          noopSyncUserLanguagePreferenceUseCase(),
         ),
         child: home,
       ),

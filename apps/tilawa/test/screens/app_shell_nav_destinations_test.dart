@@ -15,7 +15,7 @@ void main() {
         supportedLocales: AppLocalizations.supportedLocales,
         home: Builder(
           builder: (context) {
-            l10n = AppLocalizations.of(context)!;
+            l10n = AppLocalizations.of(context);
             return const SizedBox.shrink();
           },
         ),

@@ -10,6 +10,7 @@ import '../../lib/src/foundation/design_tokens.dart';
 import '../../lib/src/foundation/tilawa_bottom_sheet_actions.dart';
 import '../../lib/src/foundation/tilawa_bottom_sheet_scaffold.dart';
 import '../../lib/src/foundation/tilawa_bottom_sheet_title_row.dart';
+import '../../lib/src/foundation/tilawa_icons.dart';
 
 void main() {
   const footerKey = Key('footer');
@@ -156,7 +157,7 @@ void main() {
       const Size.square(kTilawaMinInteractiveDimension),
     );
 
-    await tester.tap(find.byIcon(Icons.close_rounded));
+    await tester.tap(find.byIcon(TilawaIcons.dismiss));
     await tester.pumpAndSettle();
     expect(find.text('Body'), findsNothing);
   });

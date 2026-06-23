@@ -62,7 +62,7 @@ void main() {
 
     final Either<Failure, void> result = await useCase();
 
-    expect(result.isLeft, isTrue);
+    expect(result.isLeft(), isTrue);
     result.fold(
       (failure) => expect(failure, isA<ValidationFailure>()),
       (_) => fail('expected left'),
@@ -73,7 +73,7 @@ void main() {
   test('deletes app data before auth account', () async {
     final Either<Failure, void> result = await useCase();
 
-    expect(result.isRight, isTrue);
+    expect(result.isRight(), isTrue);
     verifyInOrder([
       mockSyncDeviceTokenUseCase.removeCurrentTokenForUser('user-1'),
       mockUserRepository.deleteUserData('user-1'),
@@ -92,7 +92,7 @@ void main() {
 
     final Either<Failure, void> result = await useCase();
 
-    expect(result.isLeft, isTrue);
+    expect(result.isLeft(), isTrue);
     result.fold(
       (failure) => expect(failure, isA<UserCancelledFailure>()),
       (_) => fail('expected left'),
@@ -102,7 +102,7 @@ void main() {
   Future<Failure> failureFor(Object error) async {
     when(mockAuthRepository.deleteAccount()).thenThrow(error);
     final Either<Failure, void> result = await useCase();
-    expect(result.isLeft, isTrue);
+    expect(result.isLeft(), isTrue);
     late final Failure captured;
     result.fold((failure) => captured = failure, (_) => fail('expected left'));
     return captured;

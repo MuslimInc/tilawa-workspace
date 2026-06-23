@@ -191,8 +191,13 @@ abstract final class AppShellRoutePolicy {
     return showsBottomNavigation(location) && !isAthkarContext(location);
   }
 
-  /// Highlights a main-shell tab for pushed routes inside the shell.
+  /// Maps a shell child route to the bottom-nav tab that should appear selected.
   static int? navIndexForLocation(String location) {
+    return tabIndexForLocation(location);
+  }
+
+  /// Canonical route → shell tab mapping for bottom-nav highlight state.
+  static int? tabIndexForLocation(String location) {
     if (location == '/' || location.isEmpty) {
       return null;
     }
@@ -207,12 +212,21 @@ abstract final class AppShellRoutePolicy {
     if (location.startsWith('/qibla')) {
       return 2;
     }
-    if (location.startsWith('/settings') ||
-        location == '/support' ||
-        location == '/premium') {
+    if (_isProfileShellRoute(location)) {
       return kAppShellSettingsTabIndex;
     }
     return null;
+  }
+
+  static bool _isProfileShellRoute(String location) {
+    return location.startsWith('/settings') ||
+        location.startsWith('/profile') ||
+        location.startsWith('/account') ||
+        location.startsWith('/sessions/dashboard') ||
+        location.startsWith('/sessions/teacher') ||
+        location.startsWith('/teacher/dashboard') ||
+        location == '/support' ||
+        location == '/premium';
   }
 }
 

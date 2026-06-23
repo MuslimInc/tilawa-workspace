@@ -14,7 +14,7 @@ import 'domain/entities/page_state.dart';
 import 'domain/entities/quran_image_cache_status.dart';
 import 'domain/usecases/get_last_visited_page.dart';
 import 'domain/usecases/prepare_quran_image_cache.dart';
-import 'l10n/app_localizations.dart';
+import 'l10n/quran_image_localizations.dart';
 import 'presentation/mappers/app_message_mapper.dart';
 
 /// Loading screen shown while the Quran image cache is being prepared
@@ -300,7 +300,7 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
   @override
   Widget build(BuildContext context) {
     final sw = PerfLogger.startTimer();
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = QuranImageLocalizations.of(context);
     final repo = sl<AssetVerseMarkerRepository>();
     final markerProgress = repo.preloadProgress;
     final progress = _cacheStatus.isReady

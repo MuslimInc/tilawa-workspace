@@ -178,7 +178,7 @@ void main() {
         delayedReadiness.release();
         final result = await loadFuture;
 
-        expect(result.isRight, isTrue);
+        expect(result.isRight(), isTrue);
         result.fold(
           (_) => fail('expected saved dhikr'),
           (items) {

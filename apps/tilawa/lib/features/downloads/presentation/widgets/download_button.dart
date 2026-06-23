@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -129,10 +128,18 @@ class DownloadButton extends StatelessWidget {
             orElse: () => false,
           );
           if (isNetworkError) {
-            ToastUtils.showToast(msg: context.l10n.networkError);
+            TilawaFeedback.showToast(
+              context,
+              message: context.l10n.networkError,
+              variant: TilawaFeedbackVariant.error,
+            );
             return;
           }
-          ToastUtils.showToast(msg: context.l10n.downloadLowStorageWarning);
+          TilawaFeedback.showToast(
+            context,
+            message: context.l10n.downloadLowStorageWarning,
+            variant: TilawaFeedbackVariant.warning,
+          );
         },
         buildWhen: (previous, current) =>
             current.hasSignificantProgressChange(previous),

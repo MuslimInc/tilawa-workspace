@@ -99,7 +99,7 @@ void main() {
 
       final result = await useCase();
 
-      expect(result.isRight, isTrue);
+      expect(result.isRight(), isTrue);
       expect(await repository.getActivePlan(), isNull);
     });
   });

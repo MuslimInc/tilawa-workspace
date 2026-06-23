@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../bloc/playlists_bloc.dart';
@@ -37,10 +36,18 @@ class _CreatePlaylistDialogState extends State<CreatePlaylistDialog> {
         state.whenOrNull(
           playlistCreated: (playlist, playlists) {
             Navigator.of(context).pop();
-            ToastUtils.showSuccessToast(l10n.playlistCreated);
+            TilawaFeedback.showToast(
+              context,
+              message: l10n.playlistCreated,
+              variant: TilawaFeedbackVariant.success,
+            );
           },
           error: (message) {
-            ToastUtils.showErrorToast(message);
+            TilawaFeedback.showToast(
+              context,
+              message: message,
+              variant: TilawaFeedbackVariant.error,
+            );
           },
         );
       },
@@ -51,13 +58,10 @@ class _CreatePlaylistDialogState extends State<CreatePlaylistDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextFormField(
+              TilawaTextField(
                 controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: l10n.playlistName,
-                  hintText: l10n.playlistNameHint,
-                  border: const OutlineInputBorder(),
-                ),
+                label: l10n.playlistName,
+                hintText: l10n.playlistNameHint,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return l10n.playlistNameRequired;
@@ -67,13 +71,10 @@ class _CreatePlaylistDialogState extends State<CreatePlaylistDialog> {
                 textInputAction: TextInputAction.next,
               ),
               SizedBox(height: tokens.spaceLarge),
-              TextFormField(
+              TilawaTextField(
                 controller: _descriptionController,
-                decoration: InputDecoration(
-                  labelText: l10n.playlistDescription,
-                  hintText: l10n.playlistDescriptionHint,
-                  border: const OutlineInputBorder(),
-                ),
+                label: l10n.playlistDescription,
+                hintText: l10n.playlistDescriptionHint,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return l10n.playlistDescriptionRequired;

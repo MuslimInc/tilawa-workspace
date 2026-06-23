@@ -7,7 +7,6 @@ import 'package:tilawa/core/bootstrap/launch_splash_canvas.dart';
 import 'package:tilawa/core/bootstrap/logo_height_log.dart';
 import 'package:tilawa/core/bootstrap/splash_launch_handoff.dart';
 import 'package:tilawa/core/di/injection.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa/core/extensions.dart';
@@ -108,7 +107,11 @@ class _SplashScreenState extends State<SplashScreen> {
               case SplashLoading():
                 break;
               case SplashNavigateToHome(:final timedOut) when timedOut:
-                ToastUtils.showToast(msg: context.l10n.splashSlowLoadingNotice);
+                TilawaFeedback.showToast(
+                  context,
+                  message: context.l10n.splashSlowLoadingNotice,
+                  variant: TilawaFeedbackVariant.warning,
+                );
                 _goAndReset(const HomeRoute().location);
               case SplashNavigateToHome():
                 _goAndReset(const HomeRoute().location);

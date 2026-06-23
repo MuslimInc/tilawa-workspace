@@ -21,5 +21,5 @@ class TourGuideLabels {
 }
 
 extension on BuildContext {
-  AppLocalizations get l10n => AppLocalizations.of(this)!;
+  AppLocalizations get l10n => AppLocalizations.of(this);
 }

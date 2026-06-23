@@ -58,7 +58,7 @@ void main() {
             .getCategories();
 
         // Assert
-        expect(result.isRight, true);
+        expect(result.isRight(), true);
         result.fold(
           (_) => fail('Should be Right'),
           (categories) => expect(categories, [tCategoryModel]),
@@ -85,7 +85,7 @@ void main() {
             .getCategories();
 
         // Assert
-        expect(result.isLeft, true);
+        expect(result.isLeft(), true);
         result.fold(
           (failure) => expect(failure, const ServerFailure('Exception: Error')),
           (_) => fail('Should be Left'),
@@ -110,7 +110,7 @@ void main() {
             .getAthkarByCategory(1);
 
         // Assert
-        expect(result.isRight, true);
+        expect(result.isRight(), true);
         result.fold(
           (_) => fail('Should be Right'),
           (items) => expect(items, [tItemModel]),
@@ -142,7 +142,7 @@ void main() {
             .getAthkarByCategory(1);
 
         // Assert
-        expect(result.isLeft, true);
+        expect(result.isLeft(), true);
         result.fold(
           (failure) => expect(failure, const ServerFailure('Exception: Error')),
           (_) => fail('Should be Left'),

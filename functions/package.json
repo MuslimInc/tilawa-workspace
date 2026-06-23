@@ -6,7 +6,28 @@
     "build": "tsc",
     "build:watch": "tsc --watch",
     "serve": "npm run build && firebase emulators:start --only functions",
-    "deploy": "firebase deploy --only functions"
+    "deploy": "firebase deploy --only functions",
+    "seed:market-configs": "ts-node --project tsconfig.scripts.json scripts/seedMarketConfigs.ts",
+    "seed:market-configs:apply": "ts-node --project tsconfig.scripts.json scripts/seedMarketConfigs.ts --apply",
+    "seed:staging-teachers": "ts-node --project tsconfig.scripts.json scripts/seedStagingTeachers.ts",
+    "seed:staging-teachers:apply": "ts-node --project tsconfig.scripts.json scripts/seedStagingTeachers.ts --apply",
+    "admin:list-pending-applications": "ts-node --project tsconfig.scripts.json scripts/listPendingTeacherApplications.ts",
+    "admin:review-teacher-application": "ts-node --project tsconfig.scripts.json scripts/reviewTeacherApplicationAdmin.ts",
+    "admin:create-user": "ts-node --project tsconfig.scripts.json scripts/createAdminUser.ts",
+    "admin:audit-duplicate-emails": "ts-node --project tsconfig.scripts.json scripts/auditDuplicateUserEmails.ts",
+    "quran-sessions:backfill-lifecycle": "ts-node --project tsconfig.scripts.json scripts/backfillLifecycleStatus.ts",
+    "quran-sessions:backfill-booking-session-consistency": "ts-node --project tsconfig.scripts.json scripts/backfillBookingSessionConsistency.ts",
+    "quran-sessions:staging-smoke": "ts-node --project tsconfig.scripts.json scripts/stagingFreeBetaSmoke.ts",
+    "quran-sessions:verify-teacher-activation": "ts-node --project tsconfig.scripts.json scripts/verifyTeacherActivation.ts",
+    "quran-sessions:backfill-approved-activation": "ts-node --project tsconfig.scripts.json scripts/backfillApprovedTeacherActivation.ts",
+    "migrate:fcm-tokens": "ts-node --project tsconfig.scripts.json scripts/migrateFcmTokensToActiveField.ts",
+    "migrate:fcm-tokens:apply": "ts-node --project tsconfig.scripts.json scripts/migrateFcmTokensToActiveField.ts --apply",
+    "test": "node -r ts-node/register --test test/**/*.test.ts",
+    "test:integration": "firebase emulators:exec --only firestore --project demo-tilawa \"$(command -v node) -r ts-node/register --test --test-concurrency=1 test-integration/*.test.ts\"",
+    "test:rules": "firebase emulators:exec --only firestore --project demo-tilawa-rules \"$(command -v node) -r ts-node/register --test --test-concurrency=1 test-rules/*.test.ts\"",
+    "test:emulator": "npm run test:integration && npm run test:rules",
+    "admin:backfill-teacher-profiles": "ts-node --project tsconfig.scripts.json scripts/backfillTeacherProfiles.ts",
+    "admin:audit-duplicate-users": "ts-node --project tsconfig.scripts.json scripts/auditDuplicateUsers.ts"
   },
   "engines": {
     "node": "22"
@@ -17,6 +38,10 @@
     "googleapis": "^144.0.0"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^4.0.1",
+    "@types/node": "^22.13.0",
+    "firebase": "^11.0.0",
+    "firebase-tools": "^14.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.0"
   }

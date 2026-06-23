@@ -35,7 +35,9 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     required this.bottomSheetScaffold,
     required this.homeNextPrayerHero,
     required this.homeDashboardCard,
+    required this.capabilityActionCard,
     required this.experimentalBadge,
+    required this.cupertinoWheelPicker,
   });
 
   final TilawaSectionTitleTokens sectionTitle;
@@ -65,7 +67,9 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
   final TilawaBottomSheetScaffoldTokens bottomSheetScaffold;
   final TilawaHomeNextPrayerHeroTokens homeNextPrayerHero;
   final TilawaHomeDashboardCardTokens homeDashboardCard;
+  final TilawaCapabilityActionCardTokens capabilityActionCard;
   final TilawaExperimentalBadgeTokens experimentalBadge;
+  final TilawaCupertinoWheelPickerTokens cupertinoWheelPicker;
 
   /// Creates light theme component tokens.
   factory TilawaComponentTokens.light({ColorScheme? colorScheme}) =>
@@ -135,7 +139,13 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       homeDashboardCard: TilawaHomeDashboardCardTokens.fromColorScheme(
         effectiveColorScheme,
       ),
+      capabilityActionCard: TilawaCapabilityActionCardTokens.fromColorScheme(
+        effectiveColorScheme,
+      ),
       experimentalBadge: TilawaExperimentalBadgeTokens.fromColorScheme(
+        effectiveColorScheme,
+      ),
+      cupertinoWheelPicker: TilawaCupertinoWheelPickerTokens.fromColorScheme(
         effectiveColorScheme,
       ),
     );
@@ -170,7 +180,9 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     TilawaBottomSheetScaffoldTokens? bottomSheetScaffold,
     TilawaHomeNextPrayerHeroTokens? homeNextPrayerHero,
     TilawaHomeDashboardCardTokens? homeDashboardCard,
+    TilawaCapabilityActionCardTokens? capabilityActionCard,
     TilawaExperimentalBadgeTokens? experimentalBadge,
+    TilawaCupertinoWheelPickerTokens? cupertinoWheelPicker,
   }) {
     return TilawaComponentTokens(
       sectionTitle: sectionTitle ?? this.sectionTitle,
@@ -200,7 +212,9 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       bottomSheetScaffold: bottomSheetScaffold ?? this.bottomSheetScaffold,
       homeNextPrayerHero: homeNextPrayerHero ?? this.homeNextPrayerHero,
       homeDashboardCard: homeDashboardCard ?? this.homeDashboardCard,
+      capabilityActionCard: capabilityActionCard ?? this.capabilityActionCard,
       experimentalBadge: experimentalBadge ?? this.experimentalBadge,
+      cupertinoWheelPicker: cupertinoWheelPicker ?? this.cupertinoWheelPicker,
     );
   }
 
@@ -310,9 +324,19 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
         other.homeDashboardCard,
         t,
       ),
+      capabilityActionCard: TilawaCapabilityActionCardTokens.lerp(
+        capabilityActionCard,
+        other.capabilityActionCard,
+        t,
+      ),
       experimentalBadge: TilawaExperimentalBadgeTokens.lerp(
         experimentalBadge,
         other.experimentalBadge,
+        t,
+      ),
+      cupertinoWheelPicker: TilawaCupertinoWheelPickerTokens.lerp(
+        cupertinoWheelPicker,
+        other.cupertinoWheelPicker,
         t,
       ),
     );

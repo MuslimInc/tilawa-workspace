@@ -12,6 +12,57 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.admin == true;
+    }
+
+    function incomingUnchanged(field) {
+      return !(field in request.resource.data)
+        || request.resource.data[field] == resource.data[field];
+    }
+
+    function isVerifiedTeacherProfileOwner() {
+      return isSignedIn()
+        && resource.data.userId == request.auth.uid
+        && resource.data.verificationStatus == 'verified';
+    }
+
+    // Authorizes the teacher who owns the availability at {teacherId}.
+    // Availability is keyed by the teacher's uid, so isOwner covers the normal
+    // case; the second clause also allows keying by profile-doc id. exists()
+    // guards the get() so a missing parent doc denies instead of erroring.
+    function canEditTeacherAvailability(teacherId) {
+      return isOwner(teacherId)
+        || (isSignedIn()
+            && exists(/databases/$(database)/documents/quran_teacher_profiles/$(teacherId))
+            && get(/databases/$(database)/documents/quran_teacher_profiles/$(teacherId)).data.userId == request.auth.uid);
+    }
+
+    function teacherProfileTrustFieldsUnchanged() {
+      return incomingUnchanged('userId')
+        && incomingUnchanged('verificationStatus')
+        && incomingUnchanged('isActive')
+        && incomingUnchanged('isPubliclyVisible')
+        && incomingUnchanged('profileCompleteness')
+        && incomingUnchanged('averageRating')
+        && incomingUnchanged('reviewCount')
+        && incomingUnchanged('totalSessionsCompleted')
+        && incomingUnchanged('teacherStatus')
+        && incomingUnchanged('createdAt');
+    }
+
+    function applicationModerationFieldsUnchanged() {
+      return incomingUnchanged('reviewedBy')
+        && incomingUnchanged('reviewedAt');
+    }
+
+    function clientCannotSelfApproveApplication() {
+      return request.resource.data.status != 'approved'
+        && request.resource.data.status != 'rejected'
+        && request.resource.data.status != 'suspended'
+        && request.resource.data.status != 'revoked';
+    }
+
     // Remote in-app update policy (see InAppUpdateConfigDataSourceImpl).
     match /app_config/in_app_update {
       allow read: if true;
@@ -41,6 +92,208 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Quran Sessions market config — read-only for authenticated clients;
+    // seed via admin tools (see FirestoreMarketConfigDataSource). Includes the
+    // per-country `cities` subcollection loaded by _loadCities().
+    match /quran_session_market_configs/{countryCode} {
+      allow read: if isSignedIn();
+      allow write: if false;
+
+      match /cities/{cityId} {
+        allow read: if isSignedIn();
+        allow write: if false;
+      }
+    }
+
+    // Quran Sessions platform policy — read-only for authenticated clients;
+    // seed via admin tools (see FirestoreSessionPolicyDataSource, global doc).
+    match /quran_session_platform_config/{configId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    // Quran Sessions write-bearing collections — SAFE SUBSET (Step 2).
+    // Owner-scoped reads only; all client writes denied until the high-integrity
+    // operations move to Cloud Functions (Admin SDK bypasses these rules).
+    // Full design + write model: docs/security/quran_sessions_firestore_rules_draft.md
+
+    // Teacher applications — applicant CRUD on own draft; moderation via CF.
+    // Write model: docs/security/quran_sessions_teacher_application_write_model.md
+    match /quran_teacher_applications/{applicationId} {
+      allow read: if isAdmin()
+        || (isSignedIn() && resource.data.userId == request.auth.uid);
+
+      allow create: if isSignedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'draft'
+        && clientCannotSelfApproveApplication()
+        && !('reviewedBy' in request.resource.data)
+        && !('reviewedAt' in request.resource.data);
+
+      allow update: if isSignedIn()
+        && resource.data.userId == request.auth.uid
+        && resource.data.status == 'draft'
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status in ['draft', 'pending']
+        && clientCannotSelfApproveApplication()
+        && incomingUnchanged('userId')
+        && applicationModerationFieldsUnchanged();
+
+      allow delete: if false;
+    }
+
+    // Teacher profiles — public browse reads only when isPubliclyVisible;
+    // owner reads own profile; trust fields CF-only.
+    match /quran_teacher_profiles/{teacherId} {
+      allow read: if isAdmin()
+        || (isSignedIn() && resource.data.userId == request.auth.uid)
+        || (isSignedIn() && resource.data.isPubliclyVisible == true);
+
+      allow create: if false;
+
+      // Verified owner may edit public marketplace fields only.
+      allow update: if isVerifiedTeacherProfileOwner()
+        && teacherProfileTrustFieldsUnchanged();
+
+      allow delete: if false;
+
+      // Pricing read by direct path (FirestoreTeacherDataSource); writes admin/CF.
+      match /pricing/{marketId} {
+        allow read: if isSignedIn();
+        allow write: if false;
+      }
+
+      // Recurring weekly availability rules. Owner edits from the weekly editor;
+      // any signed-in user reads (students derive bookable slots client-side).
+      // Generated slots are never stored, so there is nothing booking-bearing
+      // here — bookings/holds remain CF-only below.
+      match /availability_config/{docId} {
+        allow read: if isSignedIn();
+        allow write: if canEditTeacherAvailability(teacherId);
+      }
+
+      // Dated overrides (vacations / busy / custom hours) — same ownership model.
+      match /availability_overrides/{dateKey} {
+        allow read: if isSignedIn();
+        allow write: if canEditTeacherAvailability(teacherId);
+      }
+    }
+
+    // Availability is read both directly and via a collectionGroup query, so it
+    // needs a recursive-wildcard match (collection group queries are NOT covered
+    // by a nested subcollection rule). Writes (slot booking) via CF.
+    match /{path=**}/availability/{slotId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    // Bookings — admin or participant read; writes via CF.
+    match /quran_bookings/{bookingId} {
+      allow read: if isAdmin()
+        || (isSignedIn()
+            && (resource.data.studentId == request.auth.uid
+                || resource.data.teacherId == request.auth.uid));
+      allow write: if false;
+    }
+
+    // Sessions — admin or participant read; writes via CF.
+    match /quran_sessions/{sessionId} {
+      allow read: if isAdmin()
+        || (isSignedIn()
+            && (resource.data.studentId == request.auth.uid
+                || resource.data.teacherId == request.auth.uid));
+      allow write: if false;
+    }
+
+    // Session audit timeline — participants and admins can read; CF writes only.
+    match /quran_session_events/{eventId} {
+      allow read: if isSignedIn()
+        && (isAdmin()
+            || resource.data.actorId == request.auth.uid
+            || exists(/databases/$(database)/documents/quran_bookings/$(resource.data.bookingId))
+              && (
+                get(/databases/$(database)/documents/quran_bookings/$(resource.data.bookingId)).data.studentId == request.auth.uid
+                || get(/databases/$(database)/documents/quran_bookings/$(resource.data.bookingId)).data.teacherId == request.auth.uid
+              ));
+      allow write: if false;
+    }
+
+    // Compensation records — readable by booking participants/admins; CF writes only.
+    match /quran_session_compensations/{compensationId} {
+      allow read: if isSignedIn()
+        && (isAdmin()
+            || exists(/databases/$(database)/documents/quran_bookings/$(resource.data.bookingId))
+              && (
+                get(/databases/$(database)/documents/quran_bookings/$(resource.data.bookingId)).data.studentId == request.auth.uid
+                || get(/databases/$(database)/documents/quran_bookings/$(resource.data.bookingId)).data.teacherId == request.auth.uid
+              ));
+      allow write: if false;
+    }
+
+    // Refund ledger — readable by booking participants/admins; CF writes only.
+    match /quran_session_refunds/{refundId} {
+      allow read: if isSignedIn()
+        && (isAdmin()
+            || exists(/databases/$(database)/documents/quran_bookings/$(resource.data.bookingId))
+              && (
+                get(/databases/$(database)/documents/quran_bookings/$(resource.data.bookingId)).data.studentId == request.auth.uid
+                || get(/databases/$(database)/documents/quran_bookings/$(resource.data.bookingId)).data.teacherId == request.auth.uid
+              ));
+      allow write: if false;
+    }
+
+    // Disputes — readable by booking participants/admins; CF writes only.
+    match /quran_session_disputes/{disputeId} {
+      allow read: if isSignedIn()
+        && (isAdmin()
+            || exists(/databases/$(database)/documents/quran_bookings/$(resource.data.bookingId))
+              && (
+                get(/databases/$(database)/documents/quran_bookings/$(resource.data.bookingId)).data.studentId == request.auth.uid
+                || get(/databases/$(database)/documents/quran_bookings/$(resource.data.bookingId)).data.teacherId == request.auth.uid
+              ));
+      allow write: if false;
+    }
+
+    // Abuse / safety reports — admin and the reporter may read (NOT the reported
+    // party); CF writes only.
+    match /quran_session_reports/{reportId} {
+      allow read: if isSignedIn()
+        && (isAdmin() || resource.data.reporterUserId == request.auth.uid);
+      allow write: if false;
+    }
+
+    // Idempotency operation markers — backend-only internal dedupe ledger.
+    match /quran_session_operations/{operationId} {
+      allow read, write: if false;
+    }
+
+    // Notification outbox and slot locks are backend-managed only.
+    match /quran_session_notifications/{notificationId} {
+      allow read, write: if false;
+    }
+
+    match /quran_reschedule_requests/{requestId} {
+      allow read: if isSignedIn()
+        && (isAdmin()
+            || resource.data.requestedByUserId == request.auth.uid);
+      allow write: if false;
+    }
+
+    match /quran_slot_locks/{lockId} {
+      allow read, write: if false;
+    }
+
+    // Denormalized session metrics — admin read only; CF writes only.
+    match /quran_teacher_metrics/{teacherId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /quran_student_metrics/{studentId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
     // Support purchase ledger — written by verifySupportPurchase Cloud Function.
     match /support_purchases/{tokenHash} {
       allow read, write: if false;
@@ -51,11 +304,45 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    function quranSessionsProfileModerationUnchanged() {
+      let beforeProfile = 'quranSessionsProfile' in resource.data
+        ? resource.data.quranSessionsProfile
+        : {};
+      let afterProfile = 'quranSessionsProfile' in request.resource.data
+        ? request.resource.data.quranSessionsProfile
+        : {};
+      return afterProfile.get('accountStatus', 'active')
+          == beforeProfile.get('accountStatus', 'active')
+        && afterProfile.get('restrictionReason', null)
+          == beforeProfile.get('restrictionReason', null);
+    }
+
+    function quranSessionsProfileModerationSafeOnCreate() {
+      return !('quranSessionsProfile' in request.resource.data)
+        || request.resource.data.quranSessionsProfile.get('accountStatus', 'active') == 'active';
+    }
+
+    function sessionFieldsUnchanged() {
+      let before = resource.data;
+      let after = request.resource.data;
+      return after.get('session', {}) == before.get('session', {})
+          && after.get('notifications', {}) == before.get('notifications', {});
+    }
+
     match /users/{userId} {
-      allow read, write: if isOwner(userId);
+      allow get: if isAdmin() || isOwner(userId);
+      allow list: if isAdmin();
+      allow create: if isOwner(userId)
+        && quranSessionsProfileModerationSafeOnCreate();
+      allow update: if isAdmin()
+        || (isOwner(userId)
+            && quranSessionsProfileModerationUnchanged()
+            && sessionFieldsUnchanged());
+      allow delete: if false;
 
       match /fcm_tokens/{tokenId} {
-        allow read, write: if isOwner(userId);
+        allow read: if isOwner(userId);
+        allow write: if false;
       }
 
       match /favorites/{favoriteDoc}/items/{itemId} {
@@ -77,6 +364,30 @@ service cloud.firestore {
         allow create: if isOwner(userId);
         allow update, delete: if false;
       }
+    }
+
+    // Wallet — owner read; admin read; CF writes only.
+    match /user_wallets/{walletId} {
+      allow read: if isAdmin()
+        || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow write: if false;
+    }
+
+    match /wallet_transactions/{transactionId} {
+      allow read: if isAdmin()
+        || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow write: if false;
+    }
+
+    // Payment intents / transactions — CF writes only; admin read.
+    match /quran_payment_intents/{paymentIntentId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /quran_payment_transactions/{paymentTransactionId} {
+      allow read: if isAdmin();
+      allow write: if false;
     }
   }
 }

@@ -85,7 +85,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeExploreTitle => 'اكتشف';
 
   @override
-  String get homeExploreSubtitle => 'القراء والمسبحة والقبلة';
+  String get homeExploreSubtitle => 'مواقيت الصلاة وتعلّم القرآن';
+
+  @override
+  String get homeSessionsTitle => 'تعلّم قراءة القرآن';
+
+  @override
+  String get homeSessionsSubtitle => 'احجز جلسات مع معلمين معتمدين';
 
   @override
   String get homeExploreShowAsList => 'عرض كقائمة';
@@ -105,6 +111,41 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get homeTodayTitle => 'اليوم';
+
+  @override
+  String get homeYoursTitle => 'خاصتك';
+
+  @override
+  String homeListeningResumeSubtitle(String reciter, String surah) {
+    return 'تابع · $reciter · $surah';
+  }
+
+  @override
+  String get homeAthkarDone => 'تم';
+
+  @override
+  String homeAthkarRemaining(int count) {
+    return 'متبقٍ $count';
+  }
+
+  @override
+  String get homeAthkarNotStarted => 'لم يبدأ';
+
+  @override
+  String homeQuranStreakDays(int days) {
+    return 'سلسلة $days أيام';
+  }
+
+  @override
+  String homeQuranGoalProgress(int percent) {
+    return '$percent% من هدف اليوم';
+  }
+
+  @override
+  String get homeDailyAyahBookmark => 'حفظ';
+
+  @override
+  String get homeDailyAyahShare => 'مشاركة';
 
   @override
   String get homeTodaySubtitle => 'الصلاة والقرآن والذكر ليومك';
@@ -3038,4 +3079,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String recitationPracticeCompletedCount(int count, int total) {
     return '$count من $total ناجحة';
   }
+
+  @override
+  String get authSignedInElsewhereTitle => 'تم تسجيل الدخول من جهاز آخر';
+
+  @override
+  String get authSignedInElsewhereBody => 'يرجى تسجيل الدخول مرة أخرى.';
+
+  @override
+  String get authSignedInElsewhereAction => 'تسجيل الدخول مجدداً';
 }

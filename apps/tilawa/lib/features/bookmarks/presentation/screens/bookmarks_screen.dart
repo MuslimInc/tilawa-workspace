@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/layout/list_scroll_bottom_padding.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/features/bookmarks/presentation/widgets/bookmark_card.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -58,16 +57,25 @@ class BookmarksScreen extends StatelessWidget {
           listener: (context, state) {
             state.whenOrNull(
               bookmarkCreated: (bookmark, _) {
-                ToastUtils.showSuccessToast(context.l10n.bookmarkAdded);
-              },
-              bookmarkDeleted: (_, _) {
-                ToastUtils.showSuccessToast(context.l10n.bookmarkDeleted);
+                TilawaFeedback.showToast(
+                  context,
+                  message: context.l10n.bookmarkAdded,
+                  variant: TilawaFeedbackVariant.success,
+                );
               },
               bookmarkUpdated: (_, _) {
-                ToastUtils.showSuccessToast(context.l10n.bookmarkUpdated);
+                TilawaFeedback.showToast(
+                  context,
+                  message: context.l10n.bookmarkUpdated,
+                  variant: TilawaFeedbackVariant.success,
+                );
               },
               error: (message) {
-                ToastUtils.showErrorToast(message);
+                TilawaFeedback.showToast(
+                  context,
+                  message: message,
+                  variant: TilawaFeedbackVariant.error,
+                );
               },
             );
           },
@@ -227,32 +235,33 @@ class BookmarksScreen extends StatelessWidget {
   void _onBookmarkDismissed(BuildContext context, BookmarkEntity bookmark) {
     final BookmarksBloc bloc = context.read<BookmarksBloc>();
     bloc.add(DeleteBookmarkEvent(id: bookmark.id));
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.bookmarkDeleted),
-          action: SnackBarAction(
-            label: context.l10n.undo,
-            onPressed: () => bloc.add(
-              CreateBookmarkEvent(
-                surahId: bookmark.surahId,
-                surahName: bookmark.surahName,
-                surahNameEn: bookmark.surahNameEn,
-                reciterId: bookmark.reciterId,
-                reciterName: bookmark.reciterName,
-                moshafId: bookmark.moshafId,
-                moshafName: bookmark.moshafName,
-                positionMs: bookmark.positionMs,
-                durationMs: bookmark.durationMs,
-                audioUrl: bookmark.audioUrl,
-                label: bookmark.label,
-                artworkUrl: bookmark.artworkUrl,
-              ),
+    TilawaFeedback.showActionable(
+      context,
+      message: context.l10n.bookmarkDeleted,
+      variant: TilawaFeedbackVariant.success,
+      dedupeKey: 'bookmark-undo-${bookmark.id}',
+      actions: <TilawaFeedbackAction>[
+        TilawaFeedbackAction(
+          label: context.l10n.undo,
+          onPressed: () => bloc.add(
+            CreateBookmarkEvent(
+              surahId: bookmark.surahId,
+              surahName: bookmark.surahName,
+              surahNameEn: bookmark.surahNameEn,
+              reciterId: bookmark.reciterId,
+              reciterName: bookmark.reciterName,
+              moshafId: bookmark.moshafId,
+              moshafName: bookmark.moshafName,
+              positionMs: bookmark.positionMs,
+              durationMs: bookmark.durationMs,
+              audioUrl: bookmark.audioUrl,
+              label: bookmark.label,
+              artworkUrl: bookmark.artworkUrl,
             ),
           ),
         ),
-      );
+      ],
+    );
   }
 
   Widget _buildEmptyState(BuildContext context, bool isSearching) {
@@ -304,12 +313,9 @@ class BookmarksScreen extends StatelessWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(context.l10n.editBookmarkLabel),
-        content: TextField(
+        content: TilawaTextField(
           controller: controller,
-          decoration: InputDecoration(
-            hintText: context.l10n.enterBookmarkLabel,
-            border: const OutlineInputBorder(),
-          ),
+          hintText: context.l10n.enterBookmarkLabel,
           autofocus: true,
         ),
         actions: [

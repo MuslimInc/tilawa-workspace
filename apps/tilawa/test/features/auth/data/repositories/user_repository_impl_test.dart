@@ -1,18 +1,29 @@
-import 'dart:io';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:checks/checks.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 import 'package:tilawa/features/auth/data/repositories/user_repository_impl.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 
+import 'user_repository_impl_test.mocks.dart';
+
+@GenerateMocks([FirebaseAuth, User])
 void main() {
   late UserRepositoryImpl userRepository;
   late FakeFirebaseFirestore fakeFirestore;
+  late MockFirebaseAuth mockFirebaseAuth;
+  late MockUser mockUser;
 
   setUp(() {
     fakeFirestore = FakeFirebaseFirestore();
-    userRepository = UserRepositoryImpl(fakeFirestore);
+    mockFirebaseAuth = MockFirebaseAuth();
+    mockUser = MockUser();
+    when(mockFirebaseAuth.currentUser).thenReturn(mockUser);
+    when(mockUser.uid).thenReturn('123');
+    userRepository = UserRepositoryImpl(fakeFirestore, mockFirebaseAuth);
   });
 
   group('UserRepositoryImpl', () {
@@ -24,11 +35,20 @@ void main() {
       createdAt: DateTime.now(),
     );
 
-    test('saveUserData should save user data to firestore', () async {
-      // Act
+    test('saveUserData uses auth uid as document id', () async {
       await userRepository.saveUserData(tUser);
 
-      // Assert
+      final docSnapshot = await fakeFirestore
+          .collection('users')
+          .doc(tUser.id)
+          .get();
+      check(docSnapshot.exists).isTrue();
+      check(docSnapshot.id).equals(tUser.id);
+    });
+
+    test('saveUserData should save user data to firestore', () async {
+      await userRepository.saveUserData(tUser);
+
       final DocumentSnapshot<Map<String, dynamic>> docSnapshot =
           await fakeFirestore.collection('users').doc(tUser.id).get();
       expect(docSnapshot.exists, true);
@@ -39,16 +59,13 @@ void main() {
     });
 
     test('saveUserData should merge with existing data', () async {
-      // Arrange
       await fakeFirestore.collection('users').doc(tUser.id).set({
         'email': 'old@example.com',
         'existingField': 'value',
       });
 
-      // Act
       await userRepository.saveUserData(tUser);
 
-      // Assert
       final DocumentSnapshot<Map<String, dynamic>> docSnapshot =
           await fakeFirestore.collection('users').doc(tUser.id).get();
       expect(docSnapshot.data()!['email'], tUser.email);
@@ -56,33 +73,37 @@ void main() {
     });
 
     test(
-      'saveDeviceToken should save token to fcm_tokens sub-collection',
+      'syncLanguagePreference writes languageCode for signed-in user',
       () async {
-        // Act
-        await userRepository.saveDeviceToken('user_123', 'token_abc');
+        await userRepository.syncLanguagePreference('ar');
 
-        // Assert
-        final DocumentSnapshot<Map<String, dynamic>> docSnapshot =
-            await fakeFirestore
-                .collection('users')
-                .doc('user_123')
-                .collection('fcm_tokens')
-                .doc('token_abc')
-                .get();
-        expect(docSnapshot.exists, true);
-        expect(docSnapshot.data()!['token'], 'token_abc');
-        expect(
-          docSnapshot.data()!['platform'],
-          Platform.isAndroid ? 'android' : 'ios',
-        );
+        final docSnapshot = await fakeFirestore
+            .collection('users')
+            .doc('123')
+            .get();
+        expect(docSnapshot.data()!['languageCode'], 'ar');
       },
     );
 
+    test('syncLanguagePreference no-ops when signed out', () async {
+      when(mockFirebaseAuth.currentUser).thenReturn(null);
+
+      await userRepository.syncLanguagePreference('ar');
+
+      final docs = await fakeFirestore.collection('users').get();
+      expect(docs.docs, isEmpty);
+    });
+
     test(
-      'deleteUserData removes user doc and fcm token subcollection',
+      'deleteUserData removes user doc and legacy fcm token subcollection',
       () async {
         await userRepository.saveUserData(tUser);
-        await userRepository.saveDeviceToken(tUser.id, 'token_abc');
+        await fakeFirestore
+            .collection('users')
+            .doc(tUser.id)
+            .collection('fcm_tokens')
+            .doc('token_abc')
+            .set({'token': 'token_abc'});
 
         await userRepository.deleteUserData(tUser.id);
 

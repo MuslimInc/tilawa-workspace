@@ -137,6 +137,72 @@ void main() {
     );
 
     goldenTest(
+      'TilawaChip constrained columns',
+      fileName: 'molecules/tilawa_chip_constrained',
+      builder: () => GoldenTestGroup(
+        scenarioConstraints: const BoxConstraints(
+          minWidth: 360,
+          maxWidth: 360,
+          minHeight: 72,
+          maxHeight: 72,
+        ),
+        children: [
+          GoldenTestScenario(
+            name: 'Override type row light',
+            child: TilawaPreviewWrapper(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TilawaChip(
+                        label: 'Unavailable (day off)',
+                        onTap: () {},
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TilawaChip(
+                        label: 'Custom hours',
+                        onTap: () {},
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Override type row dark',
+            child: TilawaPreviewWrapper(
+              isDark: true,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TilawaChip(
+                        label: 'Unavailable (day off)',
+                        onTap: () {},
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TilawaChip(
+                        label: 'Custom hours',
+                        onTap: () {},
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
       'TilawaMetadataChip',
       fileName: 'molecules/tilawa_metadata_chip',
       builder: () => GoldenTestGroup(
@@ -741,6 +807,66 @@ void main() {
                 title: 'System Default',
                 isSelected: false,
                 onTap: () {},
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
+      'TilawaProfileAvatar',
+      fileName: 'molecules/tilawa_profile_avatar',
+      builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
+        children: [
+          GoldenTestScenario(
+            name: 'Person fallback large',
+            child: const TilawaPreviewWrapper(
+              child: Center(
+                child: TilawaProfileAvatar(size: 72),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Initial fallback nav',
+            child: const TilawaPreviewWrapper(
+              child: Center(
+                child: TilawaProfileAvatar(
+                  size: 28,
+                  displayName: 'Ahmad',
+                  fallbackStyle: TilawaProfileAvatarFallbackStyle.initial,
+                ),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Empty name safe fallback',
+            child: const TilawaPreviewWrapper(
+              child: Center(
+                child: TilawaProfileAvatar(
+                  size: 28,
+                  fallbackStyle: TilawaProfileAvatarFallbackStyle.initial,
+                ),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'With verified badge',
+            child: TilawaPreviewWrapper(
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 8,
+                  children: const [
+                    TilawaProfileAvatar(
+                      size: 72,
+                      displayName: 'Ahmad Ali',
+                      fallbackStyle: TilawaProfileAvatarFallbackStyle.initial,
+                    ),
+                    TilawaVerifiedTeacherBadge(label: 'Verified Teacher'),
+                  ],
+                ),
               ),
             ),
           ),

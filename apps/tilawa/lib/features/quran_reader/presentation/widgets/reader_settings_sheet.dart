@@ -131,19 +131,19 @@ class _ReaderSettingsSheetState extends State<ReaderSettingsSheet> {
                   ),
                   SizedBox(height: tokens.spaceLarge),
                   _buildSectionTitle(context, context.l10n.fontType),
-                  SegmentedButton<QuranFontType>(
-                    segments: QuranFontType.values.map((type) {
-                      return ButtonSegment(
-                        value: type,
-                        label: Text(type.displayName),
-                      );
-                    }).toList(),
-                    selected: {_settings.fontType},
-                    onSelectionChanged: (selection) {
-                      _updateSettings(
-                        _settings.copyWith(fontType: selection.first),
-                      );
+                  TilawaSegmentedControl<QuranFontType>(
+                    selectedValue: _settings.fontType,
+                    onValueChanged: (value) {
+                      _updateSettings(_settings.copyWith(fontType: value));
                     },
+                    segments: QuranFontType.values
+                        .map(
+                          (type) => TilawaSegment(
+                            value: type,
+                            label: type.displayName,
+                          ),
+                        )
+                        .toList(),
                   ),
                   SizedBox(height: tokens.spaceExtraLarge),
                   _buildSectionTitle(context, context.l10n.displayOptions),

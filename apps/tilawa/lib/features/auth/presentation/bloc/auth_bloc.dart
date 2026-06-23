@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -14,6 +16,8 @@ import '../../domain/usecases/get_current_user_use_case.dart';
 import '../../domain/usecases/sign_in_with_google_use_case.dart';
 import '../../domain/usecases/sign_out.dart';
 import '../../domain/usecases/sync_device_token_use_case.dart';
+import '../../domain/usecases/sync_user_language_preference_use_case.dart';
+import '../../../localization/domain/usecases/get_current_language_use_case.dart';
 import '../../debug/tilawa_gsignin_debug_log.dart';
 
 part 'auth_bloc.freezed.dart';
@@ -28,6 +32,8 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
     this._deleteAccount,
     this._getCurrentUser,
     this._syncDeviceToken,
+    this._getCurrentLanguage,
+    this._syncUserLanguagePreference,
     this._accountDeletionFlow,
   ) : super(const AuthState.initial()) {
     on<SignInWithGoogleEvent>(_onSignInWithGoogle);
@@ -44,6 +50,8 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
   final DeleteAccount _deleteAccount;
   final GetCurrentUserUseCase _getCurrentUser;
   final SyncDeviceTokenUseCase _syncDeviceToken;
+  final GetCurrentLanguageUseCase _getCurrentLanguage;
+  final SyncUserLanguagePreferenceUseCase _syncUserLanguagePreference;
   final AccountDeletionFlowTracker _accountDeletionFlow;
 
   Future<void> _onSignInWithGoogle(
@@ -71,6 +79,7 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
         success: (user) {
           _accountDeletionFlow.clearLoginAutoSignInSuppression();
           unawaited(_syncDeviceToken(user.id).catchError((_) {}));
+          unawaited(_syncLanguagePreferenceAfterAuth());
           emit(AuthState.authenticated(user: user));
         },
         failure: (message, code, details) {
@@ -190,10 +199,30 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
     final UserEntity? user = _getCurrentUser();
     if (user != null) {
       unawaited(_syncDeviceToken(user.id).catchError((_) {}));
+      unawaited(_syncLanguagePreferenceAfterAuth());
       emit(AuthState.authenticated(user: user));
     } else {
       emit(const AuthState.unauthenticated());
     }
+  }
+
+  Future<void> _syncLanguagePreferenceAfterAuth() async {
+    final Either<Failure, String> result = await _getCurrentLanguage();
+    await result.fold(
+      (_) async {},
+      (languageCode) async {
+        try {
+          await _syncUserLanguagePreference(languageCode);
+        } catch (error, stackTrace) {
+          developer.log(
+            'Failed to sync language preference',
+            name: 'AuthBloc',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        }
+      },
+    );
   }
 
   @override

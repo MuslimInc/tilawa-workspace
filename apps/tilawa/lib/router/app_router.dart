@@ -18,8 +18,10 @@ import 'package:tilawa_core/constants/app_strings.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../features/quran_sessions/router/quran_sessions_nav.dart';
 import 'app_router_config.dart';
 import 'app_navigator_keys.dart';
+import 'quran_sessions_session_guard.dart';
 import 'shell_route_location.dart';
 import 'json_type_registry.dart';
 
@@ -147,6 +149,11 @@ class AppRouter {
       return invalidRestoredRoute;
     }
 
+    final String? sessionGuard = quranSessionsSessionRedirect(context, state);
+    if (sessionGuard != null) {
+      return sessionGuard;
+    }
+
     // Presentation entry without active media is invalid (playback ≠ URL).
     // Guard with try-catch: during state restoration the BlocProvider ancestor
     // may not yet be mounted when GoRouter evaluates the first redirect.
@@ -191,6 +198,13 @@ class AppRouter {
 
     if (segments.first == 'quran-reader' &&
         (segments.length < 2 || segments[1].isEmpty)) {
+      return const HomeRoute().location;
+    }
+
+    if (segments.length >= 3 &&
+        segments[0] == 'sessions' &&
+        segments[1] == 'teachers' &&
+        segments[2].isEmpty) {
       return const HomeRoute().location;
     }
 
@@ -297,7 +311,7 @@ class AppRouter {
             ? null
             : AppStrings.routerRestorationScopeId,
         redirect: redirect,
-        routes: $appRoutes,
+        routes: [...$appRoutes, ...quranSessionsRoutes],
         errorBuilder: errorBuilder,
         extraCodec: const AppRouterExtraCodec(),
         observers: _getObservers(),

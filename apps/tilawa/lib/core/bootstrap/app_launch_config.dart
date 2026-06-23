@@ -16,6 +16,23 @@ import 'package:flutter/foundation.dart';
 /// Example: `--dart-define=TILAWA_LAUNCH_RECITATION_PRACTICE_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_SMART_KHATMA_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_TODAY_PLAN_ENABLED=true`
+/// Example: `--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_ENABLED=true`
+/// Example: `--dart-define=TILAWA_LAUNCH_TEACHER_APPLICATION_ENABLED=true`
+/// Example: `--dart-define=TILAWA_LAUNCH_TEACHER_APPLICATION_DISCOVERABILITY=profileAndEmptyState`
+/// Example: `--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED=true`
+/// Example: `--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_PAID_BOOKING_SANDBOX_ENABLED=true`
+///
+/// Staging / pre-production builds default Quran Sessions beta flags ON via
+/// [quranSessionsStagingFlagsDefaultEnabled] (everything except
+/// `play_production`). Override per flag with `TILAWA_LAUNCH_*` dart-defines.
+bool quranSessionsStagingFlagsDefaultEnabled() {
+  const distribution = String.fromEnvironment(
+    'TILAWA_DISTRIBUTION',
+    defaultValue: 'local',
+  );
+  return distribution != 'play_production';
+}
+
 @immutable
 class AppLaunchConfig extends Equatable {
   const AppLaunchConfig({
@@ -48,10 +65,21 @@ class AppLaunchConfig extends Equatable {
     this.smartKhatmaEnabled = false,
     this.todayPlanEnabled = false,
     this.notificationPermissionRequest = true,
+    this.quranSessionsEnabled = true,
+    this.teacherApplicationEnabled = false,
+    this.teacherApplicationDiscoverability = 'profileAndEmptyState',
+    this.quranSessionsBookingEnabled = false,
+    this.quranSessionsPaidBookingSandboxEnabled = false,
+    this.genUiAssistantEnabled = false,
   });
 
   factory AppLaunchConfig.fromEnvironment() {
-    return const AppLaunchConfig(
+    const distribution = String.fromEnvironment(
+      'TILAWA_DISTRIBUTION',
+      defaultValue: 'local',
+    );
+    const stagingFlagsOn = distribution != 'play_production';
+    return AppLaunchConfig(
       resetLaunchState: bool.fromEnvironment(
         'TILAWA_LAUNCH_RESET_LAUNCH_STATE',
         defaultValue: true,
@@ -168,6 +196,30 @@ class AppLaunchConfig extends Equatable {
         'TILAWA_LAUNCH_NOTIFICATION_PERMISSION_REQUEST',
         defaultValue: true,
       ),
+      quranSessionsEnabled: bool.fromEnvironment(
+        'TILAWA_LAUNCH_QURAN_SESSIONS_ENABLED',
+        defaultValue: true,
+      ),
+      teacherApplicationEnabled: bool.fromEnvironment(
+        'TILAWA_LAUNCH_TEACHER_APPLICATION_ENABLED',
+        defaultValue: stagingFlagsOn,
+      ),
+      teacherApplicationDiscoverability: String.fromEnvironment(
+        'TILAWA_LAUNCH_TEACHER_APPLICATION_DISCOVERABILITY',
+        defaultValue: 'profileAndEmptyState',
+      ),
+      quranSessionsBookingEnabled: bool.fromEnvironment(
+        'TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED',
+        defaultValue: stagingFlagsOn,
+      ),
+      quranSessionsPaidBookingSandboxEnabled: bool.fromEnvironment(
+        'TILAWA_LAUNCH_QURAN_SESSIONS_PAID_BOOKING_SANDBOX_ENABLED',
+        defaultValue: false,
+      ),
+      genUiAssistantEnabled: bool.fromEnvironment(
+        'TILAWA_LAUNCH_GENUI_ASSISTANT_ENABLED',
+        defaultValue: false,
+      ),
     );
   }
 
@@ -200,6 +252,24 @@ class AppLaunchConfig extends Equatable {
   final bool smartKhatmaEnabled;
   final bool todayPlanEnabled;
   final bool notificationPermissionRequest;
+  final bool quranSessionsEnabled;
+  final bool teacherApplicationEnabled;
+
+  /// One of: `none`, `profileOnly`, `profileAndEmptyState`.
+  final String teacherApplicationDiscoverability;
+  final bool quranSessionsBookingEnabled;
+
+  /// Staging-only sandbox PSP checkout (requires CF
+  /// `QURAN_SESSIONS_PAYMENT_PROVIDER_ENABLED=true`). Default **false**.
+  final bool quranSessionsPaidBookingSandboxEnabled;
+
+  /// Gates the AI-generated dynamic UI surface (Smart Quran Plan / MeMuslim
+  /// Assistant). Defaults to **false** — when off, no GenUI dependencies are
+  /// registered and no AI-driven UI is reachable. The whole feature is a
+  /// kill-switch away from being inert.
+  ///
+  /// Example: `--dart-define=TILAWA_LAUNCH_GENUI_ASSISTANT_ENABLED=true`
+  final bool genUiAssistantEnabled;
 
   @override
   List<Object?> get props => [
@@ -232,5 +302,11 @@ class AppLaunchConfig extends Equatable {
     smartKhatmaEnabled,
     todayPlanEnabled,
     notificationPermissionRequest,
+    quranSessionsEnabled,
+    teacherApplicationEnabled,
+    teacherApplicationDiscoverability,
+    quranSessionsBookingEnabled,
+    quranSessionsPaidBookingSandboxEnabled,
+    genUiAssistantEnabled,
   ];
 }

@@ -28,16 +28,19 @@ abstract final class HomeDashboardHeroSliver {
   const HomeDashboardHeroSliver._();
 
   /// Greeting area inside the expanded app bar (below toolbar).
-  static const double _greetingBodyHeight = 56;
+  static const double _greetingBodyHeight = 40;
 
-  /// Frosted next-prayer card (compact glass padding + rows + countdown).
-  static const double _metricsContentHeight = 140;
+  /// Prayer name/time row + countdown inside the frosted card (text-scaled).
+  ///
+  /// Measured ~42 dp at the default theme; extra headroom covers Android font
+  /// metric drift that previously overflowed the card by ~29 px.
+  static const double _metricsPrayerBlockHeight = 57;
 
-  /// Extra room for device font metrics / text-scale drift.
-  static const double _metricsLayoutSlack = 4;
+  /// Extra room for border width and sub-pixel layout drift.
+  static const double _metricsLayoutSlack = 15;
 
   /// Overlap between the hero and the content sheet lip.
-  static const double sheetOverlap = 16;
+  static const double sheetOverlap = 12;
 
   /// Scroll distance where the hero transitions from expanded to pinned.
   static double collapseScrollExtent(BuildContext context) {
@@ -64,9 +67,23 @@ abstract final class HomeDashboardHeroSliver {
       context,
     ).scale(1).clamp(1.0, 1.3);
     return _greetingBodyHeight * textScale +
-        _metricsContentHeight * textScale +
-        _metricsLayoutSlack +
+        _resolveMetricsMaxHeight(context) +
         _resolveBottomInset(context);
+  }
+
+  /// Max height for the frosted next-prayer card in the expanded hero.
+  static double _resolveMetricsMaxHeight(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+    final double textScale = MediaQuery.textScalerOf(
+      context,
+    ).scale(1).clamp(1.0, 1.3);
+    final double fixedCardChrome =
+        tokens.spaceSmall * 2 +
+        tokens.minInteractiveDimension +
+        tokens.spaceSmall;
+    return fixedCardChrome +
+        _metricsPrayerBlockHeight * textScale +
+        _metricsLayoutSlack;
   }
 
   static double _resolveGreetingBodyHeight(BuildContext context) {
@@ -80,7 +97,7 @@ abstract final class HomeDashboardHeroSliver {
     return Theme.of(context).tokens.spaceSmall + sheetOverlap;
   }
 
-  /// Pinned hero chrome when the wallpaper is fully hidden.
+  /// Pinned hero chrome when the expanded gradient is fully collapsed.
   ///
   /// Uses the prayer-period tint when it differs from the flat canvas; otherwise
   /// a slightly elevated neutral so the bar reads above white content cards.
@@ -236,6 +253,8 @@ class _HomeDashboardHeroAppBarState extends State<_HomeDashboardHeroAppBar> {
     final Color collapsedBarColor = HomeDashboardHeroSliver.collapsedBarColor(
       heroTokens,
     );
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final TilawaDesignTokens tokens = Theme.of(context).tokens;
 
     return Theme(
       data: heroTheme,
@@ -248,6 +267,11 @@ class _HomeDashboardHeroAppBarState extends State<_HomeDashboardHeroAppBar> {
         foregroundColor: heroTokens.foregroundColor,
         automaticallyImplyLeading: false,
         centerTitle: false,
+        elevation: TilawaAppBarChrome.elevation(enabled: false),
+        scrolledUnderElevation: TilawaAppBarChrome.scrolledUnderElevation(
+          enabled: false,
+        ),
+        shape: TilawaAppBarChrome.bottomHairline(colorScheme, tokens),
         systemOverlayStyle: SystemUiOverlayStyle.light,
         flexibleSpace: _HomeHeroFlexibleSpace(
           topInset: topInset,
@@ -410,14 +434,14 @@ class _HomeHeroFlexibleSpaceState extends State<_HomeHeroFlexibleSpace> {
         );
         final double greetingOpacity =
             t > _expandedFadeStart && expandedOpacity > 0 ? expandedOpacity : 0;
-        final double wallpaperReveal = Curves.easeInOutCubic.transform(t);
-        final double collapsedBarReveal = 1 - wallpaperReveal;
+        final double expandedReveal = Curves.easeInOutCubic.transform(t);
+        final double collapsedBarReveal = 1 - expandedReveal;
         final Color canvasColor = context.scaffoldCanvasColor;
         final Color collapsedBarColor =
             HomeDashboardHeroSliver.collapsedBarColor(heroTokens);
-        final SystemUiOverlayStyle overlayStyle = wallpaperReveal > 0.5
-            ? SystemUiOverlayStyle.light
-            : SystemUiOverlayStyle.dark;
+        final SystemUiOverlayStyle overlayStyle = collapsedBarReveal > 0.55
+            ? SystemUiOverlayStyle.dark
+            : SystemUiOverlayStyle.light;
 
         return AnnotatedRegion<SystemUiOverlayStyle>(
           value: overlayStyle,
@@ -452,7 +476,7 @@ class _HomeHeroFlexibleSpaceState extends State<_HomeHeroFlexibleSpace> {
                 ),
               ),
               Opacity(
-                opacity: wallpaperReveal,
+                opacity: expandedReveal,
                 child: HomeHeroBackground(heroTokens: heroTokens),
               ),
               SafeArea(
@@ -500,7 +524,7 @@ class _HomeHeroFlexibleSpaceState extends State<_HomeHeroFlexibleSpace> {
                         child: _HomeHeroCollapsedToolbar(
                           nextPrayer: widget.nextPrayer,
                           onOpenPrayer: widget.onOpenPrayer,
-                          wallpaperReveal: wallpaperReveal,
+                          expandedReveal: expandedReveal,
                         ),
                       ),
                     ),
@@ -530,6 +554,10 @@ class _HomeHeroExpandedBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
+    final double greetingHeight =
+        HomeDashboardHeroSliver._resolveGreetingBodyHeight(context);
+    final double metricsMaxHeight =
+        HomeDashboardHeroSliver._resolveMetricsMaxHeight(context);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -543,9 +571,7 @@ class _HomeHeroExpandedBody extends StatelessWidget {
               end: tokens.spaceMedium,
             ),
             child: SizedBox(
-              height: HomeDashboardHeroSliver._resolveGreetingBodyHeight(
-                context,
-              ),
+              height: greetingHeight,
               child: Align(
                 alignment: AlignmentDirectional.centerStart,
                 child: _HomeHeroHeader(),
@@ -553,7 +579,10 @@ class _HomeHeroExpandedBody extends StatelessWidget {
             ),
           ),
         ),
-        metricsFooterSection,
+        ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: metricsMaxHeight),
+          child: ClipRect(child: metricsFooterSection),
+        ),
         SizedBox(height: bottomInset),
       ],
     );
@@ -654,12 +683,12 @@ class _HomeHeroCollapsedToolbar extends StatelessWidget {
   const _HomeHeroCollapsedToolbar({
     required this.nextPrayer,
     required this.onOpenPrayer,
-    required this.wallpaperReveal,
+    required this.expandedReveal,
   });
 
   final HomeNextPrayer? nextPrayer;
   final VoidCallback onOpenPrayer;
-  final double wallpaperReveal;
+  final double expandedReveal;
 
   @override
   Widget build(BuildContext context) {
@@ -668,9 +697,9 @@ class _HomeHeroCollapsedToolbar extends StatelessWidget {
     final Color foreground = Color.lerp(
       AppColors.tripGlideInk,
       heroTokens.foregroundColor,
-      wallpaperReveal,
+      expandedReveal,
     )!;
-    final TextStyle? summaryStyle = wallpaperReveal > 0.5
+    final TextStyle? summaryStyle = expandedReveal > 0.5
         ? HomeHeroPhotoTheme.titleStyle(
             theme.textTheme.titleSmall,
             foreground,

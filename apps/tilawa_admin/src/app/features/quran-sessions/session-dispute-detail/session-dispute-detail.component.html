@@ -1,0 +1,100 @@
+<div class="px-4 sm:px-6 lg:px-8">
+  <p class="mb-4">
+    <a routerLink="/quran-sessions/disputes" class="text-sm text-blue-600 dark:text-blue-400">
+      {{ 'disputes_backToList' | t }}
+    </a>
+  </p>
+
+  @if (loadState() === 'loading') {
+    <p class="text-gray-500 dark:text-gray-400">{{ 'disputes_loadingDetail' | t }}</p>
+  } @else if (loadState() === 'error') {
+    <p class="text-red-600 dark:text-red-400">{{ errorMessage() }}</p>
+  } @else if (detail(); as item) {
+    <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">{{ 'disputes_detailTitle' | t: { id: item.id } }}</h1>
+
+    <p class="mt-2 text-sm text-amber-700 dark:text-amber-300">
+      {{ 'disputes_detailNotice' | t }}
+    </p>
+
+    <dl class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div>
+        <dt class="text-sm text-gray-500">{{ 'common_status' | t }}</dt>
+        <dd><app-status-chip [label]="item.status | statusLabel" [status]="item.status" /></dd>
+      </div>
+      <div>
+        <dt class="text-sm text-gray-500">{{ 'common_openedBy' | t }}</dt>
+        <dd class="text-sm font-mono">{{ item.openedByUserId }} ({{ item.openedByRole }})</dd>
+      </div>
+      <div>
+        <dt class="text-sm text-gray-500">{{ 'common_student' | t }}</dt>
+        <dd class="text-sm">
+          @if (item.studentId) {
+            <span class="font-mono">{{ item.studentId }}</span>
+            @if (item.studentName) {
+              <span class="text-gray-600 dark:text-gray-400"> — {{ item.studentName }}</span>
+            }
+          } @else {
+            {{ 'common_none' | t }}
+          }
+        </dd>
+      </div>
+      <div>
+        <dt class="text-sm text-gray-500">{{ 'common_teacher' | t }}</dt>
+        <dd class="text-sm">
+          @if (item.teacherId) {
+            <span class="font-mono">{{ item.teacherId }}</span>
+            @if (item.teacherName) {
+              <span class="text-gray-600 dark:text-gray-400"> — {{ item.teacherName }}</span>
+            }
+          } @else {
+            {{ 'common_none' | t }}
+          }
+        </dd>
+      </div>
+      <div>
+        <dt class="text-sm text-gray-500">{{ 'common_booking' | t }}</dt>
+        <dd class="text-sm">
+          @if (item.bookingId) {
+            <a [routerLink]="['/quran-sessions/sessions', item.bookingId]" class="text-blue-600 dark:text-blue-400 font-mono">
+              {{ item.bookingId }}
+            </a>
+          } @else {
+            {{ 'common_none' | t }}
+          }
+        </dd>
+      </div>
+      <div>
+        <dt class="text-sm text-gray-500">{{ 'common_session' | t }}</dt>
+        <dd class="text-sm font-mono">{{ item.sessionId ?? ('common_none' | t) }}</dd>
+      </div>
+      <div>
+        <dt class="text-sm text-gray-500">{{ 'common_opened' | t }}</dt>
+        <dd class="text-sm">{{ item.createdAt | date:'medium' }}</dd>
+      </div>
+      <div>
+        <dt class="text-sm text-gray-500">{{ 'common_updated' | t }}</dt>
+        <dd class="text-sm">{{ item.updatedAt ? (item.updatedAt | date:'medium') : ('common_none' | t) }}</dd>
+      </div>
+      <div>
+        <dt class="text-sm text-gray-500">{{ 'common_resolved' | t }}</dt>
+        <dd class="text-sm">{{ item.resolvedAt ? (item.resolvedAt | date:'medium') : ('common_none' | t) }}</dd>
+      </div>
+      <div>
+        <dt class="text-sm text-gray-500">{{ 'common_resolvedBy' | t }}</dt>
+        <dd class="text-sm font-mono">{{ item.resolvedByUserId ?? ('common_none' | t) }}</dd>
+      </div>
+    </dl>
+
+    <div class="mt-8">
+      <h2 class="text-lg font-medium text-gray-900 dark:text-white">{{ 'common_reason' | t }}</h2>
+      <p class="mt-2 whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">{{ item.reason }}</p>
+    </div>
+
+    @if (item.resolutionReason) {
+      <div class="mt-8">
+        <h2 class="text-lg font-medium text-gray-900 dark:text-white">{{ 'disputes_resolutionNotes' | t }}</h2>
+        <p class="mt-2 whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">{{ item.resolutionReason }}</p>
+      </div>
+    }
+  }
+</div>

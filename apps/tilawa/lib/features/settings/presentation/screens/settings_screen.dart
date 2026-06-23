@@ -8,7 +8,6 @@ import 'package:tilawa/core/telemetry/sentry_debug_verify_tile.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/layout/list_scroll_bottom_padding.dart';
 import 'package:tilawa/core/utils/legal_url_launcher.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../core/di/injection.dart';
@@ -26,6 +25,9 @@ import '../../../home/presentation/widgets/home_hero_phase_debug_tile.dart';
 import '../../../tour_guide/presentation/widgets/tour_guide_debug_reset_tile.dart';
 import '../cubit/settings_cubit.dart';
 import '../formatters/settings_share_text_formatter.dart';
+import '../../../quran_sessions/quran_sessions_feature_flags.dart';
+import '../widgets/settings_teacher_capability_scope.dart';
+import '../widgets/settings_teaching_on_memuslim_tile.dart';
 import '../widgets/settings_picker_sheets.dart';
 import '../widgets/settings_widgets.dart';
 
@@ -65,7 +67,11 @@ class SettingsScreen extends StatelessWidget {
               const LoginRoute().go(context);
             }
           },
-          error: (message) => ToastUtils.showErrorToast(message),
+          error: (message) => TilawaFeedback.showToast(
+            context,
+            message: message,
+            variant: TilawaFeedbackVariant.error,
+          ),
           noGoogleAccounts: () {},
         );
       },
@@ -76,203 +82,209 @@ class SettingsScreen extends StatelessWidget {
           automaticallyImplyLeading: false,
         ),
         body: TilawaCatalogSettingsBody(
-          child: ListView(
-            padding: EdgeInsets.only(
-              top: tokens.spaceMedium,
-              bottom: listScrollBottomPadding(context),
-            ),
-            children: [
-              const SettingsProfileHeader(),
-              const SettingsGuestAccountGroup(),
-              TilawaSettingsGroup(
-                title: l10n.settingsAppearance,
-                leadingIcon: FluentIcons.weather_moon_24_regular,
-                includeTopGap: isGuest,
-                children: [
-                  BlocBuilder<ThemeCubit, ThemeState>(
-                    builder: (context, state) {
-                      return TilawaSettingsTile(
-                        title: l10n.chooseTheme,
-                        trailing: settingsPickerTrailing(
-                          context,
-                          value: settingsThemeLabel(state, l10n),
-                        ),
-                        onTap: () => SettingsSheets.showThemePicker(context),
-                      );
-                    },
-                  ),
-                  if (Env.kShowColorPicker)
+          child: SettingsTeacherCapabilityScope(
+            child: ListView(
+              padding: EdgeInsets.only(
+                top: tokens.spaceMedium,
+                bottom: listScrollBottomPadding(context),
+              ),
+              children: [
+                const SettingsProfileHeader(),
+                const SettingsGuestAccountGroup(),
+                if (!isGuest &&
+                    quranSessionsFeatureConfig().showProfileTeacherEntry)
+                  const SettingsTeachingOnMemuslimSection(),
+                TilawaSettingsGroup(
+                  title: l10n.settingsAppearance,
+                  leadingIcon: FluentIcons.weather_moon_24_regular,
+                  includeTopGap: isGuest,
+                  children: [
                     BlocBuilder<ThemeCubit, ThemeState>(
                       builder: (context, state) {
                         return TilawaSettingsTile(
-                          title: l10n.primaryColor,
-                          trailing: settingsColorTrailing(
+                          title: l10n.chooseTheme,
+                          trailing: settingsPickerTrailing(
                             context,
-                            state.primaryColor,
+                            value: settingsThemeLabel(state, l10n),
                           ),
-                          onTap: () => SettingsSheets.showPrimaryColorPicker(
-                            context,
-                            currentColor: state.primaryColor,
-                            currentSource: state.primaryColorSource,
-                            currentPresetId: state.primaryPresetId,
-                          ),
+                          onTap: () => SettingsSheets.showThemePicker(context),
                         );
                       },
                     ),
-                  BlocBuilder<LocalizationBloc, LocalizationState>(
-                    builder: (context, state) {
-                      return TilawaSettingsTile(
-                        title: l10n.language,
-                        trailing: settingsPickerTrailing(
-                          context,
-                          value: settingsLanguageLabel(
-                            state.locale,
-                            l10n,
-                          ),
-                        ),
-                        onTap: () => SettingsSheets.showLanguagePicker(
-                          context,
-                          currentLocale: state.locale,
-                        ),
-                        showDivider: false,
-                      );
-                    },
-                  ),
-                ],
-              ),
-              TilawaSettingsGroup(
-                title: l10n.settingsRecitersSection,
-                leadingIcon: Icons.record_voice_over_rounded,
-                children: [
-                  BlocBuilder<SettingsCubit, SettingsState>(
-                    builder: (context, state) {
-                      return TilawaSettingsSwitchTile(
-                        title: l10n.showRecitersAlphabetIndex,
-                        value: state.showRecitersAlphabetIndex,
-                        onChanged: context
-                            .read<SettingsCubit>()
-                            .setShowRecitersAlphabetIndex,
-                        showDivider: false,
-                      );
-                    },
-                  ),
-                ],
-              ),
-              TilawaSettingsGroup(
-                title: l10n.settingsPlaybackAndStorage,
-                leadingIcon: FluentIcons.storage_24_regular,
-                children: [
-                  BlocBuilder<SettingsCubit, SettingsState>(
-                    builder: (context, state) {
-                      return TilawaSettingsSwitchTile(
-                        title: l10n.restorePlaybackState,
-                        value: state.restorePlaybackState,
-                        onChanged: context
-                            .read<SettingsCubit>()
-                            .toggleRestorePlaybackState,
-                      );
-                    },
-                  ),
-                  BlocBuilder<SettingsCubit, SettingsState>(
-                    builder: (context, state) {
-                      return TilawaSettingsSwitchTile(
-                        title: l10n.enableRecitationDuration,
-                        value: state.isSleepTimerEnabled,
-                        onChanged: context
-                            .read<SettingsCubit>()
-                            .toggleSleepTimerEnabled,
-                      );
-                    },
-                  ),
-                  TilawaSettingsTile(
-                    title: l10n.manageStorage,
-                    subtitle: l10n.manageStorageSubtitle,
-                    onTap: () => const DownloadsRoute().push(context),
-                  ),
-                  BlocBuilder<SettingsCubit, SettingsState>(
-                    builder: (context, state) {
-                      return TilawaSettingsTile(
-                        title: l10n.concurrentDownloads,
-                        subtitle: l10n.concurrentDownloadsSubtitle(
-                          state.maxConcurrentDownloads,
-                        ),
-                        trailing: settingsPickerTrailing(
-                          context,
-                          value: '${state.maxConcurrentDownloads}',
-                        ),
-                        onTap: () =>
-                            SettingsSheets.showConcurrentDownloadsPicker(
+                    if (Env.kShowColorPicker)
+                      BlocBuilder<ThemeCubit, ThemeState>(
+                        builder: (context, state) {
+                          return TilawaSettingsTile(
+                            title: l10n.primaryColor,
+                            trailing: settingsColorTrailing(
                               context,
-                              currentValue: state.maxConcurrentDownloads,
+                              state.primaryColor,
                             ),
-                        showDivider: false,
-                      );
-                    },
-                  ),
-                ],
-              ),
-              TilawaSettingsGroup(
-                title: l10n.settingsSupportSection,
-                leadingIcon: FluentIcons.person_support_24_regular,
-                children: [
-                  const SettingsRateAppTile(),
-                  TilawaSettingsTile(
-                    title: l10n.whatsNewSettingsTile,
-                    onTap: () =>
-                        getIt<WhatsNewCoordinator>().showFromSettings(),
-                  ),
-                  BlocBuilder<SettingsCubit, SettingsState>(
-                    builder: (context, state) {
-                      return SettingsShareAppTile(
-                        isLast: !supportTilawaEnabled,
-                        onShareRequested: () {
-                          final shareText = buildSettingsShareAppText(
-                            l10n,
-                            appInfo: state.appInfo,
-                          );
-                          return shareContent(
-                            ShareContent.text(text: shareText),
+                            onTap: () => SettingsSheets.showPrimaryColorPicker(
+                              context,
+                              currentColor: state.primaryColor,
+                              currentSource: state.primaryColorSource,
+                              currentPresetId: state.primaryPresetId,
+                            ),
                           );
                         },
-                      );
-                    },
-                  ),
-                  if (supportTilawaEnabled)
-                    TilawaSettingsTile(
-                      title: l10n.supportTilawa,
-                      subtitle: l10n.supportHelpKeepFree,
-                      onTap: () => const SupportRoute().push(context),
+                      ),
+                    BlocBuilder<LocalizationBloc, LocalizationState>(
+                      builder: (context, state) {
+                        return TilawaSettingsTile(
+                          title: l10n.language,
+                          trailing: settingsPickerTrailing(
+                            context,
+                            value: settingsLanguageLabel(
+                              state.locale,
+                              l10n,
+                            ),
+                          ),
+                          onTap: () => SettingsSheets.showLanguagePicker(
+                            context,
+                            currentLocale: state.locale,
+                          ),
+                          showDivider: false,
+                        );
+                      },
                     ),
-                  TilawaSettingsTile(
-                    title: l10n.privacyPolicy,
-                    onTap: () => openLegalUrl(AppLegalUrls.privacyPolicy),
-                    showDivider: false,
-                  ),
-                ],
-              ),
-              SettingsAccountActions(
-                onLogout: () => SettingsSheets.showLogoutConfirmation(context),
-                onDeleteAccount: () =>
-                    SettingsSheets.showDeleteAccountConfirmation(
-                      context,
-                    ),
-              ),
-              if (kDebugMode)
-                TilawaSettingsGroup(
-                  title: 'Developer',
-                  leadingIcon: FluentIcons.code_24_regular,
-                  children: [
-                    TilawaSettingsTile(
-                      title: 'Route list',
-                      onTap: () => const RouteListRoute().push(context),
-                    ),
-                    const SentryDebugVerifyTile(),
-                    const HomeHeroPhaseDebugTile(),
-                    const TourGuideDebugResetTile(isLast: true),
                   ],
                 ),
-              const SettingsVersionFooter(),
-            ],
+                TilawaSettingsGroup(
+                  title: l10n.settingsRecitersSection,
+                  leadingIcon: Icons.record_voice_over_rounded,
+                  children: [
+                    BlocBuilder<SettingsCubit, SettingsState>(
+                      builder: (context, state) {
+                        return TilawaSettingsSwitchTile(
+                          title: l10n.showRecitersAlphabetIndex,
+                          value: state.showRecitersAlphabetIndex,
+                          onChanged: context
+                              .read<SettingsCubit>()
+                              .setShowRecitersAlphabetIndex,
+                          showDivider: false,
+                        );
+                      },
+                    ),
+                  ],
+                ),
+                TilawaSettingsGroup(
+                  title: l10n.settingsPlaybackAndStorage,
+                  leadingIcon: FluentIcons.storage_24_regular,
+                  children: [
+                    BlocBuilder<SettingsCubit, SettingsState>(
+                      builder: (context, state) {
+                        return TilawaSettingsSwitchTile(
+                          title: l10n.restorePlaybackState,
+                          value: state.restorePlaybackState,
+                          onChanged: context
+                              .read<SettingsCubit>()
+                              .toggleRestorePlaybackState,
+                        );
+                      },
+                    ),
+                    BlocBuilder<SettingsCubit, SettingsState>(
+                      builder: (context, state) {
+                        return TilawaSettingsSwitchTile(
+                          title: l10n.enableRecitationDuration,
+                          value: state.isSleepTimerEnabled,
+                          onChanged: context
+                              .read<SettingsCubit>()
+                              .toggleSleepTimerEnabled,
+                        );
+                      },
+                    ),
+                    TilawaSettingsTile(
+                      title: l10n.manageStorage,
+                      subtitle: l10n.manageStorageSubtitle,
+                      onTap: () => const DownloadsRoute().push(context),
+                    ),
+                    BlocBuilder<SettingsCubit, SettingsState>(
+                      builder: (context, state) {
+                        return TilawaSettingsTile(
+                          title: l10n.concurrentDownloads,
+                          subtitle: l10n.concurrentDownloadsSubtitle(
+                            state.maxConcurrentDownloads,
+                          ),
+                          trailing: settingsPickerTrailing(
+                            context,
+                            value: '${state.maxConcurrentDownloads}',
+                          ),
+                          onTap: () =>
+                              SettingsSheets.showConcurrentDownloadsPicker(
+                                context,
+                                currentValue: state.maxConcurrentDownloads,
+                              ),
+                          showDivider: false,
+                        );
+                      },
+                    ),
+                  ],
+                ),
+                TilawaSettingsGroup(
+                  title: l10n.settingsSupportSection,
+                  leadingIcon: FluentIcons.person_support_24_regular,
+                  children: [
+                    const SettingsRateAppTile(),
+                    TilawaSettingsTile(
+                      title: l10n.whatsNewSettingsTile,
+                      onTap: () =>
+                          getIt<WhatsNewCoordinator>().showFromSettings(),
+                    ),
+                    BlocBuilder<SettingsCubit, SettingsState>(
+                      builder: (context, state) {
+                        return SettingsShareAppTile(
+                          isLast: !supportTilawaEnabled,
+                          onShareRequested: () {
+                            final shareText = buildSettingsShareAppText(
+                              l10n,
+                              appInfo: state.appInfo,
+                            );
+                            return shareContent(
+                              ShareContent.text(text: shareText),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                    if (supportTilawaEnabled)
+                      TilawaSettingsTile(
+                        title: l10n.supportTilawa,
+                        subtitle: l10n.supportHelpKeepFree,
+                        onTap: () => const SupportRoute().push(context),
+                      ),
+                    TilawaSettingsTile(
+                      title: l10n.privacyPolicy,
+                      onTap: () => openLegalUrl(AppLegalUrls.privacyPolicy),
+                      showDivider: false,
+                    ),
+                  ],
+                ),
+                SettingsAccountActions(
+                  onLogout: () =>
+                      SettingsSheets.showLogoutConfirmation(context),
+                  onDeleteAccount: () =>
+                      SettingsSheets.showDeleteAccountConfirmation(
+                        context,
+                      ),
+                ),
+                if (kDebugMode)
+                  TilawaSettingsGroup(
+                    title: 'Developer',
+                    leadingIcon: FluentIcons.code_24_regular,
+                    children: [
+                      TilawaSettingsTile(
+                        title: 'Route list',
+                        onTap: () => const RouteListRoute().push(context),
+                      ),
+                      const SentryDebugVerifyTile(),
+                      const HomeHeroPhaseDebugTile(),
+                      const TourGuideDebugResetTile(isLast: true),
+                    ],
+                  ),
+                const SettingsVersionFooter(),
+              ],
+            ),
           ),
         ),
       ),

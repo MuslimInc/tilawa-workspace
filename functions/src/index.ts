@@ -1,11 +1,41 @@
 export { verifySupportPurchase } from "./verifySupportPurchase";
 export { crashlyticsToGithubIssue } from "./crashlyticsToGithubIssue";
 export { verifyRecitationAudio } from "./verifyRecitationAudio";
+export { reviewTeacherApplication } from "./reviewTeacherApplication";
+export { registerActiveDevice } from "./registerActiveDevice";
+export { moderateTeacherProfile } from "./moderateTeacherProfile";
+export { moderateQuranSessionsUser } from "./moderateQuranSessionsUser";
+export { syncTeacherProfileVisibility } from "./syncTeacherProfileVisibility";
+export { createSessionBooking } from "./quranSessions/createSessionBooking";
+export { cancelSessionBooking } from "./quranSessions/cancelSessionBooking";
+export { requestSessionReschedule } from "./quranSessions/requestSessionReschedule";
+export { confirmSessionReschedule } from "./quranSessions/confirmSessionReschedule";
+export { markSessionNoShow } from "./quranSessions/markSessionNoShow";
+export { completeSession } from "./quranSessions/completeSession";
+export { issueSessionCompensation } from "./quranSessions/issueSessionCompensation";
+export { approveSessionRefund } from "./quranSessions/approveSessionRefund";
+export {
+  openSessionDispute,
+  resolveSessionDispute,
+} from "./quranSessions/sessionDisputeCallables";
+export {
+  reportSessionConcern,
+  resolveSessionReport,
+} from "./quranSessions/sessionReportCallables";
+export { expirePendingReservations } from "./quranSessions/expirePendingReservations";
+export { deliverSessionNotification } from "./quranSessions/deliverSessionNotification";
+export { getWallet, postWalletCredit } from "./quranSessions/walletCallables";
+export { confirmBookingPayment } from "./quranSessions/confirmBookingPayment";
 
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { initializeApp } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 import { getMessaging, MulticastMessage } from "firebase-admin/messaging";
+
+import {
+  clearInvalidActiveFcmTokens,
+  collectActiveFcmTokens,
+} from "./quranSessions/fcmTokenService";
 
 initializeApp();
 
@@ -44,12 +74,13 @@ export const sendNotification = onDocumentCreated(
         return;
       }
 
-      // 2. Collect all FCM tokens for target users
-      const tokens = await collectTokens(db, userIds);
-      if (tokens.length === 0) {
+      // 2. Collect active FCM tokens for target users
+      const tokenEntries = await collectActiveFcmTokens(db, userIds);
+      if (tokenEntries.length === 0) {
         await notificationRef.update({ status: "failed", error: "No FCM tokens found" });
         return;
       }
+      const tokens = tokenEntries.map((entry) => entry.token);
 
       // 3. Build and send FCM message
       const dataPayload: Record<string, string> = {
@@ -84,7 +115,7 @@ export const sendNotification = onDocumentCreated(
       const response = await getMessaging().sendEachForMulticast(message);
 
       // 4. Clean up invalid tokens
-      await cleanupInvalidTokens(db, tokens, response, userIds);
+      await clearInvalidActiveFcmTokens(db, tokenEntries, response);
 
       // 5. Update notification status
       await notificationRef.update({
@@ -115,78 +146,4 @@ async function resolveUserIds(
     return usersSnapshot.docs.map((doc) => doc.id);
   }
   return notification.targetUserIds;
-}
-
-/**
- * Collect all FCM tokens for a list of user IDs.
- * Returns a flat array of token strings.
- */
-async function collectTokens(
-  db: FirebaseFirestore.Firestore,
-  userIds: string[]
-): Promise<string[]> {
-  const tokens: string[] = [];
-
-  // Process in batches of 10 to avoid excessive parallel reads
-  const batchSize = 10;
-  for (let i = 0; i < userIds.length; i += batchSize) {
-    const batch = userIds.slice(i, i + batchSize);
-    const promises = batch.map((userId) =>
-      db.collection("users").doc(userId).collection("fcm_tokens").get()
-    );
-    const snapshots = await Promise.all(promises);
-    for (const snapshot of snapshots) {
-      for (const doc of snapshot.docs) {
-        const token = doc.data().token as string | undefined;
-        if (token) {
-          tokens.push(token);
-        }
-      }
-    }
-  }
-
-  return tokens;
-}
-
-/**
- * Remove tokens that FCM reports as invalid (unregistered).
- */
-async function cleanupInvalidTokens(
-  db: FirebaseFirestore.Firestore,
-  tokens: string[],
-  response: { responses: Array<{ success: boolean; error?: { code: string } }> },
-  userIds: string[]
-): Promise<void> {
-  const invalidTokens: string[] = [];
-
-  response.responses.forEach((resp, index) => {
-    if (
-      !resp.success &&
-      resp.error &&
-      (resp.error.code === "messaging/invalid-registration-token" ||
-        resp.error.code === "messaging/registration-token-not-registered")
-    ) {
-      invalidTokens.push(tokens[index]);
-    }
-  });
-
-  if (invalidTokens.length === 0) return;
-
-  // Delete invalid tokens from all target users
-  const deletePromises: Promise<FirebaseFirestore.WriteResult>[] = [];
-  for (const userId of userIds) {
-    for (const token of invalidTokens) {
-      deletePromises.push(
-        db
-          .collection("users")
-          .doc(userId)
-          .collection("fcm_tokens")
-          .doc(token)
-          .delete()
-      );
-    }
-  }
-
-  await Promise.all(deletePromises);
-  console.log(`Cleaned up ${invalidTokens.length} invalid token(s)`);
 }

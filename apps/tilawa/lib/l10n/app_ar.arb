@@ -75,13 +75,45 @@
         }
     },
     "homeExploreTitle": "اكتشف",
-    "homeExploreSubtitle": "القراء والمسبحة والقبلة",
+    "homeExploreSubtitle": "مواقيت الصلاة وتعلّم القرآن",
+    "homeSessionsTitle": "تعلّم قراءة القرآن",
+    "homeSessionsSubtitle": "احجز جلسات مع معلمين معتمدين",
     "homeExploreShowAsList": "عرض كقائمة",
     "homeExploreShowAsGrid": "عرض كشبكة",
     "homeDashboardLoadError": "تعذّر تحميل مواقيت الصلاة. تحقق من الاتصال وحاول مرة أخرى.",
     "homeSearchHint": "ابحث في السور أو الأجزاء أو الصفحة",
     "homeFeaturedTitle": "مختارة لك",
     "homeTodayTitle": "اليوم",
+    "homeYoursTitle": "خاصتك",
+    "homeListeningResumeSubtitle": "تابع · {reciter} · {surah}",
+    "@homeListeningResumeSubtitle": {
+        "placeholders": {
+            "reciter": { "type": "String" },
+            "surah": { "type": "String" }
+        }
+    },
+    "homeAthkarDone": "تم",
+    "homeAthkarRemaining": "متبقٍ {count}",
+    "@homeAthkarRemaining": {
+        "placeholders": {
+            "count": { "type": "int" }
+        }
+    },
+    "homeAthkarNotStarted": "لم يبدأ",
+    "homeQuranStreakDays": "سلسلة {days} أيام",
+    "@homeQuranStreakDays": {
+        "placeholders": {
+            "days": { "type": "int" }
+        }
+    },
+    "homeQuranGoalProgress": "{percent}% من هدف اليوم",
+    "@homeQuranGoalProgress": {
+        "placeholders": {
+            "percent": { "type": "int" }
+        }
+    },
+    "homeDailyAyahBookmark": "حفظ",
+    "homeDailyAyahShare": "مشاركة",
     "homeTodaySubtitle": "الصلاة والقرآن والذكر ليومك",
     "homeContinueTitle": "تابع",
     "homeDailyPracticeTitle": "الممارسة اليومية",
@@ -3687,5 +3719,17 @@
                 "type": "int"
             }
         }
+    },
+    "authSignedInElsewhereTitle": "تم تسجيل الدخول من جهاز آخر",
+    "@authSignedInElsewhereTitle": {
+        "description": "Title when another device took over the active session"
+    },
+    "authSignedInElsewhereBody": "يرجى تسجيل الدخول مرة أخرى.",
+    "@authSignedInElsewhereBody": {
+        "description": "Body when another device took over the active session"
+    },
+    "authSignedInElsewhereAction": "تسجيل الدخول مجدداً",
+    "@authSignedInElsewhereAction": {
+        "description": "Primary action after session revoked on this device"
     }
 }

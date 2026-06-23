@@ -185,7 +185,7 @@ void main() {
 
       final Either<Failure, void> result = await deletePlaylistUseCase('1');
 
-      expect(result.isLeft, isTrue);
+      expect(result.isLeft(), isTrue);
       result.fold(
         (f) {
           expect(f, isA<AudioFailure>());

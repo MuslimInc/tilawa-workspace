@@ -25,8 +25,8 @@ into feature code.
 ## 1. Architecture (scalable atomic design)
 
 ```
-foundation/     AppColors, AppTheme, TilawaDesignTokens, TilawaComponentTokens
-atoms/          TilawaButton, TilawaCard, TilawaTextField, …
+foundation/     AppColors, AppTheme, TilawaDesignTokens, TilawaInputStyle, …
+atoms/          TilawaButton, TilawaCard, TilawaTextField, TilawaReadOnlyField, …
 molecules/      TilawaSearchField, TilawaSelectionPill, TilawaCatalogAppBar, …
 organisms/      TilawaMediaPlayerBar, TilawaSettingsGroup, …
 ```
@@ -132,6 +132,7 @@ duplicate hex.
 | Colour roles | `test/theme/app_theme_color_roles_test.dart` | Contrast, cool neutral ramp, preset no-op on surfaces |
 | DESIGN compliance | `test/theme/app_theme_spec_compliance_test.dart` | M3 extensions, transparent elevation tint, app bar = `surface` |
 | Goldens | `test/goldens/` | Visual regression (Alchemist); default primary in `TilawaPreviewWrapper` |
+| Toast goldens | `test/goldens/tilawa_toast_goldens_test.dart` | `TilawaToast` variants, actionable, layout, edge cases |
 | Review checklist | `test/goldens/REVIEW_CHECKLIST.md` | Human sign-off after `--update-goldens` |
 
 Regenerate goldens only when visuals intentionally change:
@@ -161,7 +162,9 @@ Previews and goldens set `AppTheme.useGoogleFonts = false` and
 
 | Spec | Topic |
 |------|--------|
+| [`docs/UI_KIT_INPUT_SYSTEM.md`](../../../docs/UI_KIT_INPUT_SYSTEM.md) | Input SSOT (`TilawaInputStyle`, `TilawaFieldShell`, kit atoms) |
 | [`specs/012-visual-simplification/`](../../../specs/012-visual-simplification/spec.md) | Calm palette, no decorative gradients |
 | [`specs/013-token-consistency-pass/`](../../../specs/013-token-consistency-pass/spec.md) | Motion/type/feedback token migration |
+| [`feedback_system.md`](feedback_system.md) | Toast vs inline validation channel rules |
 | [`specs/017-catalog-theme-freeze/`](../../../specs/017-catalog-theme-freeze/spec.md) | Freeze acceptance criteria |
 | [`specs/006-ui-kit-expansion/ui-kit-inventory.md`](../../../specs/006-ui-kit-expansion/ui-kit-inventory.md) | Component inventory |

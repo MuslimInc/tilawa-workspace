@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -28,7 +29,27 @@ void main() {
       skipAutomaticSignIn: false,
     );
     when(mockGoogleSignIn.supportsAuthenticate()).thenReturn(true);
+    SignInUiSettleTiming.debugWaitForUiToSettle =
+        ({required bool skipAutomaticSignIn}) async {};
   });
+
+  tearDown(() {
+    SignInUiSettleTiming.debugWaitForUiToSettle = null;
+  });
+
+  Future<void> pumpUntil(
+    WidgetTester tester,
+    Future<void> work, {
+    int maxSteps = 20,
+    Duration step = const Duration(milliseconds: 50),
+  }) async {
+    var done = false;
+    work.whenComplete(() => done = true);
+    for (var i = 0; i < maxSteps && !done; i++) {
+      await tester.pump(step);
+    }
+    await work;
+  }
 
   test('checkReadiness returns ready when authenticate is supported', () async {
     final GoogleSignInLaunchReadiness result = await buildLauncher()
@@ -55,6 +76,10 @@ void main() {
         .checkReadiness();
 
     expect(result, isA<GoogleSignInLaunchPlatformError>());
+    final GoogleSignInLaunchPlatformError error =
+        result as GoogleSignInLaunchPlatformError;
+    expect(error.code, 'test');
+    expect(error.message, 'blocked');
   });
 
   test('checkReadiness returns platformError on unknown exceptions', () async {
@@ -77,5 +102,42 @@ void main() {
         SignInUiSettleTiming.defaultUiSettleDelay,
       );
     });
+    testWidgets('waitForUiToSettle uses frame pipeline when override unset', (
+      WidgetTester tester,
+    ) async {
+      SignInUiSettleTiming.debugWaitForUiToSettle = null;
+      await tester.pumpWidget(const MaterialApp(home: Scaffold()));
+
+      await pumpUntil(
+        tester,
+        SignInUiSettleTiming.waitForUiToSettle(skipAutomaticSignIn: false),
+      );
+    });
   });
+
+  test('runAfterUiSettled runs action after settle hook', () async {
+    var actionRan = false;
+
+    await buildLauncher().runAfterUiSettled(() async {
+      actionRan = true;
+    });
+
+    expect(actionRan, isTrue);
+  });
+
+  test(
+    'runAfterUiSettled logs Transsion policy when OEM defers auto sign-in',
+    () async {
+      platformPolicy = AndroidSignInPlatformPolicy.test(
+        skipAutomaticSignIn: true,
+      );
+      var actionRan = false;
+
+      await buildLauncher().runAfterUiSettled(() async {
+        actionRan = true;
+      });
+
+      expect(actionRan, isTrue);
+    },
+  );
 }

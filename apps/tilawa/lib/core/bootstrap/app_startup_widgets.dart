@@ -143,14 +143,13 @@ class _BootGateState extends State<_BootGate> {
   bool _ready = false;
   bool _handoffToAppStarted = false;
   Future<void>? _criticalInitFuture;
-  bool? _lastLoggedPainted;
-  bool? _lastLoggedShowSplash;
   Timer? _bootWatchdogTimer;
 
   @override
   void initState() {
     super.initState();
     firstFrameLog('BootGate initState');
+    StartupPerfLog.log('boot_gate_init');
     unawaited(StartupTelemetry.phase('boot_gate_start'));
     firstFrameLog('BootGate critical init scheduling');
     SplashLaunchHandoff.resetForNewLaunch();
@@ -237,6 +236,10 @@ class _BootGateState extends State<_BootGate> {
             ),
           );
           _bootWatchdogTimer?.cancel();
+          StartupPerfLog.log(
+            'boot_gate_ready',
+            detail: 'target=${plan.target.name} location=${plan.location}',
+          );
           setState(() {
             _ready = true;
           });
@@ -306,36 +309,83 @@ class _BootGateState extends State<_BootGate> {
       _loggedBootGateSplash = true;
       ColdStartNavigationMetrics.recordBootGateSplash();
     }
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Stack(
+        fit: StackFit.expand,
+        children: <Widget>[
+          if (_ready) widget.child else const SizedBox.shrink(),
+          _LaunchSplashOverlay(
+            ready: _ready,
+            backgroundColor: _launchBackground,
+            overlayStyle: _launchOverlayStyle,
+            wordmarkAsset: _appLogoAsset,
+            wordmarkBoxSize: _wordmarkBoxSize,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Listens to [SplashLaunchHandoff] locally so [TilawaApp] does not rebuild
+/// when the splash overlay is removed.
+class _LaunchSplashOverlay extends StatefulWidget {
+  const _LaunchSplashOverlay({
+    required this.ready,
+    required this.backgroundColor,
+    required this.overlayStyle,
+    required this.wordmarkAsset,
+    required this.wordmarkBoxSize,
+  });
+
+  final bool ready;
+  final Color backgroundColor;
+  final SystemUiOverlayStyle overlayStyle;
+  final String wordmarkAsset;
+  final double wordmarkBoxSize;
+
+  @override
+  State<_LaunchSplashOverlay> createState() => _LaunchSplashOverlayState();
+}
+
+class _LaunchSplashOverlayState extends State<_LaunchSplashOverlay> {
+  bool? _lastLoggedPainted;
+  bool? _lastLoggedShowSplash;
+
+  @override
+  Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
       valueListenable: SplashLaunchHandoff.splashRouteHasPainted,
       builder: (BuildContext context, bool painted, Widget? _) {
         if (_lastLoggedPainted != painted) {
           _lastLoggedPainted = painted;
+          StartupPerfLog.log(
+            'splash_route_painted',
+            detail: 'painted=$painted ready=${widget.ready}',
+          );
         }
-        final bool showSplash = !_ready || !painted;
+        final bool showSplash = !widget.ready || !painted;
         if (_lastLoggedShowSplash != showSplash) {
           _lastLoggedShowSplash = showSplash;
+          StartupPerfLog.log(
+            'splash_overlay',
+            detail: showSplash ? 'visible' : 'removed',
+          );
           firstFrameLog(
-            'BootGate stack: ready=$_ready painted=$painted '
+            'BootGate stack: ready=${widget.ready} painted=$painted '
             'showSplash=$showSplash (splash overlay '
             '${showSplash ? "visible" : "removed"})',
           );
         }
-        return Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            fit: StackFit.expand,
-            children: <Widget>[
-              if (_ready) widget.child else const SizedBox.shrink(),
-              if (showSplash)
-                _LaunchSplash(
-                  backgroundColor: _launchBackground,
-                  overlayStyle: _launchOverlayStyle,
-                  wordmarkAsset: _appLogoAsset,
-                  wordmarkBoxSize: _wordmarkBoxSize,
-                ),
-            ],
-          ),
+        if (!showSplash) {
+          return const SizedBox.shrink();
+        }
+        return _LaunchSplash(
+          backgroundColor: widget.backgroundColor,
+          overlayStyle: widget.overlayStyle,
+          wordmarkAsset: widget.wordmarkAsset,
+          wordmarkBoxSize: widget.wordmarkBoxSize,
         );
       },
     );
@@ -360,6 +410,9 @@ class _LaunchSplash extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     _paintLogCount++;
+    if (_paintLogCount == 1) {
+      StartupPerfLog.log('launch_splash_first_paint');
+    }
     final String paintLabel = _paintLogCount == 1
         ? 'first paint'
         : 'repaint #$_paintLogCount (often allowFirstFrame; same 288dp box)';

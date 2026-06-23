@@ -1,17 +1,17 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-/// How [ProfileAvatar] renders when no network photo is available.
-enum ProfileAvatarFallbackStyle {
-  personIcon,
-  initial,
-}
+export 'package:tilawa_ui_kit/src/molecules/tilawa_profile_avatar.dart'
+    show
+        TilawaProfileAvatar,
+        TilawaProfileAvatarFallbackStyle,
+        TilawaProfileAvatarImageBuilder;
 
-/// Circular profile image loaded from a remote URL (e.g. Firebase Auth photo).
-///
-/// Falls back to a person icon or an initial letter when the URL is empty or
-/// fails to load.
+typedef ProfileAvatarFallbackStyle = TilawaProfileAvatarFallbackStyle;
+
+/// App-facing profile avatar — delegates circular layout to [TilawaProfileAvatar]
+/// and uses [CachedNetworkImage] for remote photos.
 class ProfileAvatar extends StatelessWidget {
   const ProfileAvatar({
     super.key,
@@ -34,103 +34,24 @@ class ProfileAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final String resolvedUrl = photoUrl?.trim() ?? '';
-    final Color resolvedBackground =
-        backgroundColor ?? colorScheme.surfaceContainerHigh;
-    final Color resolvedForeground =
-        foregroundColor ?? colorScheme.onSurfaceVariant;
-
-    if (resolvedUrl.isEmpty) {
-      return _ProfileAvatarFallback(
-        displayName: displayName,
-        size: size,
-        backgroundColor: resolvedBackground,
-        foregroundColor: resolvedForeground,
-        fallbackStyle: fallbackStyle,
-        textStyle: textStyle,
-      );
-    }
-
-    return ClipOval(
-      child: SizedBox(
-        width: size,
-        height: size,
-        child: CachedNetworkImage(
-          imageUrl: resolvedUrl,
+    return TilawaProfileAvatar(
+      imageUrl: photoUrl,
+      displayName: displayName,
+      size: size,
+      backgroundColor: backgroundColor,
+      foregroundColor: foregroundColor,
+      fallbackStyle: fallbackStyle,
+      textStyle: textStyle,
+      imageBuilder: (context, {required imageUrl, required fallback}) {
+        return CachedNetworkImage(
+          imageUrl: imageUrl,
+          width: size,
+          height: size,
           fit: BoxFit.cover,
-          placeholder: (_, _) => _ProfileAvatarFallback(
-            displayName: displayName,
-            size: size,
-            backgroundColor: resolvedBackground,
-            foregroundColor: resolvedForeground,
-            fallbackStyle: fallbackStyle,
-            textStyle: textStyle,
-          ),
-          errorWidget: (_, _, _) => _ProfileAvatarFallback(
-            displayName: displayName,
-            size: size,
-            backgroundColor: resolvedBackground,
-            foregroundColor: resolvedForeground,
-            fallbackStyle: fallbackStyle,
-            textStyle: textStyle,
-          ),
-        ),
-      ),
+          placeholder: (_, _) => fallback,
+          errorWidget: (_, _, _) => fallback,
+        );
+      },
     );
-  }
-}
-
-class _ProfileAvatarFallback extends StatelessWidget {
-  const _ProfileAvatarFallback({
-    required this.displayName,
-    required this.size,
-    required this.backgroundColor,
-    required this.foregroundColor,
-    required this.fallbackStyle,
-    this.textStyle,
-  });
-
-  final String? displayName;
-  final double size;
-  final Color backgroundColor;
-  final Color foregroundColor;
-  final ProfileAvatarFallbackStyle fallbackStyle;
-  final TextStyle? textStyle;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return ColoredBox(
-      color: backgroundColor,
-      child: Center(
-        child: switch (fallbackStyle) {
-          ProfileAvatarFallbackStyle.personIcon => Icon(
-            FluentIcons.person_24_regular,
-            size: size * 0.5,
-            color: foregroundColor,
-          ),
-          ProfileAvatarFallbackStyle.initial => Text(
-            _initialFor(displayName),
-            style:
-                textStyle ??
-                theme.textTheme.titleMedium?.copyWith(
-                  color: foregroundColor,
-                  fontWeight: FontWeight.w800,
-                ),
-          ),
-        },
-      ),
-    );
-  }
-
-  String _initialFor(String? value) {
-    final String? name = value?.trim();
-    if (name == null || name.isEmpty) {
-      return 'T';
-    }
-    return name.characters.first.toUpperCase();
   }
 }

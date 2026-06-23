@@ -90,7 +90,7 @@ void main() {
             tReciterId,
           );
 
-      expect(result.isRight, isTrue);
+      expect(result.isRight(), isTrue);
       verify(() => mockLocal.saveFavoriteReciterId(tReciterId)).called(1);
       verifyNever(
         () => mockFavorites.getFavoriteReciterIds(userId: any(named: 'userId')),
@@ -128,7 +128,7 @@ void main() {
         final Either<Failure, void> result = await repository
             .toggleFavoriteReciter(tReciterId);
 
-        expect(result.isRight, isTrue);
+        expect(result.isRight(), isTrue);
         verify(() => mockLocal.saveFavoriteReciterId(tReciterId)).called(1);
       },
     );
@@ -157,7 +157,7 @@ void main() {
         final Either<Failure, void> result = await repository
             .toggleFavoriteReciter(tReciterId);
 
-        expect(result.isRight, isTrue);
+        expect(result.isRight(), isTrue);
         verify(() => mockLocal.saveFavoriteReciterId(tReciterId)).called(1);
         verify(
           () => mockFavorites.addFavoriteReciter(
@@ -189,7 +189,7 @@ void main() {
         final Either<Failure, void> result = await repository
             .toggleFavoriteReciter(tReciterId);
 
-        expect(result.isRight, isTrue);
+        expect(result.isRight(), isTrue);
         verify(() => mockLocal.removeFavoriteReciterId(tReciterId)).called(1);
         verify(
           () => mockFavorites.removeFavoriteReciter(
@@ -211,7 +211,7 @@ void main() {
       final Either<Failure, List<String>> result = await repository
           .getFavoriteReciterIds();
 
-      expect(result.isRight, isTrue);
+      expect(result.isRight(), isTrue);
       expect(result.getOrElse(() => []), ['7', '9']);
       verifyNever(
         () => mockFavorites.getFavoriteReciterIds(userId: any(named: 'userId')),
@@ -232,7 +232,7 @@ void main() {
         final Either<Failure, List<String>> result = await repository
             .getFavoriteReciterIds();
 
-        expect(result.isRight, isTrue);
+        expect(result.isRight(), isTrue);
         expect(result.getOrElse(() => []), ['7']);
         verify(() => mockLocal.getFavoriteReciterIds()).called(1);
       },

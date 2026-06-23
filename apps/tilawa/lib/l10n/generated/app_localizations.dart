@@ -67,8 +67,8 @@ abstract class AppLocalizations {
 
   final String localeName;
 
-  static AppLocalizations? of(BuildContext context) {
-    return Localizations.of<AppLocalizations>(context, AppLocalizations);
+  static AppLocalizations of(BuildContext context) {
+    return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
   }
 
   static const LocalizationsDelegate<AppLocalizations> delegate =
@@ -224,11 +224,23 @@ abstract class AppLocalizations {
   /// **'Discover'**
   String get homeExploreTitle;
 
-  /// Home Discover section supporting line
+  /// Home essentials section supporting line — features not in the tab bar
   ///
   /// In en, this message translates to:
-  /// **'Reciters, Tasbeeh, and Qibla'**
+  /// **'Prayer times and Quran teaching'**
   String get homeExploreSubtitle;
+
+  /// Home card title for Quran teaching sessions
+  ///
+  /// In en, this message translates to:
+  /// **'Learn Quran recitation'**
+  String get homeSessionsTitle;
+
+  /// Home card subtitle for Quran teaching sessions
+  ///
+  /// In en, this message translates to:
+  /// **'Book sessions with certified teachers'**
+  String get homeSessionsSubtitle;
 
   /// Home dashboard layout toggle tooltip when grid is active
   ///
@@ -265,6 +277,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Today'**
   String get homeTodayTitle;
+
+  /// Home section title for personalized resume content
+  ///
+  /// In en, this message translates to:
+  /// **'Yours'**
+  String get homeYoursTitle;
+
+  /// Home continue listening row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Continue · {reciter} · {surah}'**
+  String homeListeningResumeSubtitle(String reciter, String surah);
+
+  /// Athkar compact card completed state
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get homeAthkarDone;
+
+  /// Athkar compact card in-progress state
+  ///
+  /// In en, this message translates to:
+  /// **'{count} remaining'**
+  String homeAthkarRemaining(int count);
+
+  /// Athkar compact card untouched state
+  ///
+  /// In en, this message translates to:
+  /// **'Not started'**
+  String get homeAthkarNotStarted;
+
+  /// Quran progress card streak label
+  ///
+  /// In en, this message translates to:
+  /// **'Day {days} streak'**
+  String homeQuranStreakDays(int days);
+
+  /// Quran progress card daily goal label
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% of today\'s goal'**
+  String homeQuranGoalProgress(int percent);
+
+  /// Daily ayah sheet bookmark action
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmark'**
+  String get homeDailyAyahBookmark;
+
+  /// Daily ayah sheet share action
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get homeDailyAyahShare;
 
   /// Home Today section supporting line
   ///
@@ -5389,6 +5455,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} of {total} passed'**
   String recitationPracticeCompletedCount(int count, int total);
+
+  /// Title when another device took over the active session
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in on another device'**
+  String get authSignedInElsewhereTitle;
+
+  /// Body when another device took over the active session
+  ///
+  /// In en, this message translates to:
+  /// **'Your account was opened on another device. Sign in again to continue on this device.'**
+  String get authSignedInElsewhereBody;
+
+  /// Primary action after session revoked on this device
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again'**
+  String get authSignedInElsewhereAction;
 }
 
 class _AppLocalizationsDelegate

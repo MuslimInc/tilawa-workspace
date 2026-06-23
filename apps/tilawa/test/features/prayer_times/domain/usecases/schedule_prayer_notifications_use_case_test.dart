@@ -161,7 +161,7 @@ void main() {
         longitude: 31.0,
       );
 
-      expect(result.isLeft, isTrue);
+      expect(result.isLeft(), isTrue);
       verifyNever(
         mockService.schedulePrayerNotifications(
           settings: anyNamed('settings'),
@@ -188,7 +188,7 @@ void main() {
         longitude: 31.0,
       );
 
-      expect(result.isLeft, isTrue);
+      expect(result.isLeft(), isTrue);
     });
 
     test('returns Left and does not rethrow when service throws', () async {
@@ -217,7 +217,7 @@ void main() {
         longitude: 31.0,
       );
 
-      expect(result.isLeft, isTrue);
+      expect(result.isLeft(), isTrue);
     });
   });
 }

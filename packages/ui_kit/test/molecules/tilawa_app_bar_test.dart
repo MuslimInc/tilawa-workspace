@@ -256,8 +256,9 @@ void main() {
               builder: (context) {
                 return Scaffold(
                   appBar: TilawaCatalogAppBar(
-                    preferredHeight:
-                        TilawaAppBarConfig.catalogTitleOnlyHeight(context),
+                    preferredHeight: TilawaAppBarConfig.catalogTitleOnlyHeight(
+                      context,
+                    ),
                     title: 'Home',
                     // default automaticallyImplyLeading — root route, no back
                   ),
@@ -298,10 +299,9 @@ void main() {
                                     )
                                   : TilawaCatalogAppBar(
                                       preferredHeight:
-                                          TilawaAppBarConfig
-                                              .catalogTitleOnlyHeight(
-                                                innerContext,
-                                              ),
+                                          TilawaAppBarConfig.catalogTitleOnlyHeight(
+                                            innerContext,
+                                          ),
                                       title: 'Detail',
                                     );
                               return Scaffold(

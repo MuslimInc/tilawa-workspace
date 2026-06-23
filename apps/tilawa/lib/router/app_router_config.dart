@@ -22,6 +22,7 @@ import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/bookmarks/presentation/bloc/bookmarks_bloc.dart';
 import '../features/bookmarks/presentation/screens/bookmarks_screen.dart';
 import '../features/downloads/presentation/widgets/downloads_screen_scope.dart';
+import '../features/genui_assistant/genui_assistant.dart';
 import '../features/history/presentation/bloc/history_bloc.dart';
 import '../features/history/presentation/screens/history_screen.dart';
 import '../features/onboarding/presentation/screens/language_welcome_screen.dart';
@@ -78,6 +79,7 @@ part 'app_router_config.g.dart';
     TypedGoRoute<PrayerTimesRoute>(path: '/prayer-times'),
     TypedGoRoute<QuranIndexRoute>(path: '/quran-index'),
     TypedGoRoute<QuranRenderDemoRoute>(path: '/render-demo'),
+    TypedGoRoute<SmartQuranPlanRoute>(path: '/smart-quran-plan'),
   ],
 )
 class AppShellRoute extends ShellRouteData {
@@ -614,4 +616,37 @@ class QuranRenderDemoRoute extends GoRouteData with $QuranRenderDemoRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       const QuranRenderDemoScreen();
+}
+
+/// AI-generated Smart Quran Plan surface. Isolated, flag-gated, never the home
+/// screen. The route is always present but its dependencies are only registered
+/// when `genUiAssistantEnabled` is on; when off, [getIt] has nothing to resolve
+/// and the route degrades to a safe "unavailable" view.
+class SmartQuranPlanRoute extends GoRouteData with $SmartQuranPlanRoute {
+  const SmartQuranPlanRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    if (!getIt.isRegistered<GenUiAssistantCubit>() ||
+        !getIt.isRegistered<GenUiComponentRegistry>() ||
+        !getIt.isRegistered<GenUiActionDispatcher>() ||
+        !getIt.isRegistered<TrustedContentResolver>()) {
+      return Scaffold(
+        appBar: AppBar(),
+        body: Center(
+          child: Text(
+            GenUiStrings.surfaceUnavailable,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ),
+      );
+    }
+    return GenUiAssistantScreen(
+      cubit: getIt<GenUiAssistantCubit>(),
+      registry: getIt<GenUiComponentRegistry>(),
+      dispatcher: getIt<GenUiActionDispatcher>(),
+      content: getIt<TrustedContentResolver>(),
+      request: const GenUiSurfaceRequest(surface: 'smartQuranPlan'),
+    );
+  }
 }

@@ -146,49 +146,54 @@ class TilawaGoogleSignInButton extends StatelessWidget {
         GoogleSignInButtonBrand.logoSize +
         GoogleSignInButtonBrand.logoTextGap;
 
-    final Widget content = isLoading
-        ? Center(
-            child: SizedBox(
-              height: GoogleSignInButtonBrand.logoSize,
-              width: GoogleSignInButtonBrand.logoSize,
-              child: TilawaLoadingIndicator(
-                color: labelColor,
-                strokeWidth: 2,
-              ),
+    final Widget logoAndLabel = Stack(
+      alignment: Alignment.center,
+      children: <Widget>[
+        Padding(
+          padding: EdgeInsetsDirectional.only(
+            start: logoBand,
+            end: logoBand,
+          ),
+          child: Text(
+            label,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+            textAlign: TextAlign.center,
+            style: labelStyle,
+          ),
+        ),
+        PositionedDirectional(
+          start: GoogleSignInButtonBrand.horizontalPadding,
+          top: 0,
+          bottom: 0,
+          child: Center(
+            child: const _GoogleSignInLogo(),
+          ),
+        ),
+      ],
+    );
+
+    final Widget content = Stack(
+      alignment: Alignment.center,
+      children: <Widget>[
+        IgnorePointer(
+          ignoring: isLoading,
+          child: Opacity(
+            opacity: isLoading ? 0 : 1,
+            child: logoAndLabel,
+          ),
+        ),
+        if (isLoading)
+          SizedBox(
+            height: GoogleSignInButtonBrand.logoSize,
+            width: GoogleSignInButtonBrand.logoSize,
+            child: TilawaLoadingIndicator(
+              color: labelColor,
+              strokeWidth: 2,
             ),
-          )
-        : Stack(
-            alignment: Alignment.center,
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsetsDirectional.only(
-                  start: logoBand,
-                  end: logoBand,
-                ),
-                child: Text(
-                  label,
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                  textAlign: TextAlign.center,
-                  style: labelStyle,
-                ),
-              ),
-              PositionedDirectional(
-                start: GoogleSignInButtonBrand.horizontalPadding,
-                top: 0,
-                bottom: 0,
-                child: Center(
-                  child: SvgPicture.asset(
-                    GoogleSignInButtonBrand.logoAsset,
-                    package: GoogleSignInButtonBrand.logoPackage,
-                    width: GoogleSignInButtonBrand.logoSize,
-                    height: GoogleSignInButtonBrand.logoSize,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-            ],
-          );
+          ),
+      ],
+    );
 
     final Widget button = Material(
       color: fill,
@@ -211,13 +216,31 @@ class TilawaGoogleSignInButton extends StatelessWidget {
       ),
     );
 
-    return Semantics(
-      label: isLoading
-          ? '${semanticLabel ?? label}, Loading'
-          : (semanticLabel ?? label),
-      button: true,
-      enabled: !_isDisabled,
-      child: button,
+    return RepaintBoundary(
+      child: Semantics(
+        label: isLoading
+            ? '${semanticLabel ?? label}, Loading'
+            : (semanticLabel ?? label),
+        button: true,
+        enabled: !_isDisabled,
+        child: button,
+      ),
+    );
+  }
+}
+
+/// Cached multicolor G mark — kept mounted while loading toggles.
+class _GoogleSignInLogo extends StatelessWidget {
+  const _GoogleSignInLogo();
+
+  @override
+  Widget build(BuildContext context) {
+    return SvgPicture.asset(
+      GoogleSignInButtonBrand.logoAsset,
+      package: GoogleSignInButtonBrand.logoPackage,
+      width: GoogleSignInButtonBrand.logoSize,
+      height: GoogleSignInButtonBrand.logoSize,
+      fit: BoxFit.contain,
     );
   }
 }

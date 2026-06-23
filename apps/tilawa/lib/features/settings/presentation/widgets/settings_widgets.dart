@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/app_legal_urls.dart';
+import 'package:quran_sessions/core/l10n_extensions.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/legal_url_launcher.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/shared/widgets/profile_avatar.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -18,6 +18,8 @@ import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../theme/domain/app_theme_mode.dart';
 import '../../../theme/presentation/cubit/theme_cubit.dart';
 import '../cubit/settings_cubit.dart';
+import '../../../quran_sessions/quran_sessions_feature_flags.dart';
+import 'settings_teacher_capability_scope.dart';
 
 String settingsMemberSinceLabel(BuildContext context, DateTime createdAt) {
   final locale = Localizations.localeOf(context).toString();
@@ -169,7 +171,11 @@ class SettingsProfileHeader extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    ProfileAvatar(photoUrl: photoUrl, size: 72),
+                    ProfileAvatar(
+                      photoUrl: photoUrl,
+                      displayName: user?.displayName,
+                      size: 72,
+                    ),
                     SizedBox(height: tokens.spaceMedium),
                     Text(
                       title,
@@ -191,6 +197,9 @@ class SettingsProfileHeader extends StatelessWidget {
                         ),
                       ),
                     ],
+                    if (!isGuest &&
+                        quranSessionsFeatureConfig().showProfileTeacherEntry)
+                      _SettingsVerifiedTeacherBadge(isGuest: isGuest),
                   ],
                 ),
               ),
@@ -198,6 +207,34 @@ class SettingsProfileHeader extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _SettingsVerifiedTeacherBadge extends StatelessWidget {
+  const _SettingsVerifiedTeacherBadge({required this.isGuest});
+
+  final bool isGuest;
+
+  @override
+  Widget build(BuildContext context) {
+    if (isGuest || SettingsTeacherCapabilityScope.isLoadingOf(context)) {
+      return const SizedBox.shrink();
+    }
+
+    final capability = SettingsTeacherCapabilityScope.maybeOf(context);
+    if (capability == null ||
+        !capability.showsVerifiedTeacherBadgeInProfileHeader) {
+      return const SizedBox.shrink();
+    }
+
+    final tokens = Theme.of(context).tokens;
+
+    return Padding(
+      padding: EdgeInsets.only(top: tokens.spaceSmall),
+      child: TilawaVerifiedTeacherBadge(
+        label: context.quranSessionsL10n.verifiedTeacherBadge,
+      ),
     );
   }
 }
@@ -215,7 +252,11 @@ class SettingsRateAppTile extends StatelessWidget {
       listener: (context, state) {
         final message = state.failure?.localizedMessage(context);
         if (message != null) {
-          ToastUtils.showErrorToast(message);
+          TilawaFeedback.showToast(
+            context,
+            message: message,
+            variant: TilawaFeedbackVariant.error,
+          );
         }
       },
       builder: (context, state) {
@@ -271,7 +312,11 @@ class _SettingsShareAppTileState extends State<SettingsShareAppTile> {
       await widget.onShareRequested();
     } catch (_) {
       if (mounted) {
-        ToastUtils.showErrorToast(context.l10n.shareTilawaFailed);
+        TilawaFeedback.showToast(
+          context,
+          message: context.l10n.shareTilawaFailed,
+          variant: TilawaFeedbackVariant.error,
+        );
       }
     } finally {
       if (mounted) {

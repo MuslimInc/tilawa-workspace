@@ -14,7 +14,7 @@ class TourGuideDebugResetTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final AppLocalizations l10n = AppLocalizations.of(context);
 
     return TilawaSettingsTile(
       icon: FluentIcons.arrow_reset_24_regular,
@@ -25,8 +25,10 @@ class TourGuideDebugResetTile extends StatelessWidget {
         if (!context.mounted) {
           return;
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.tourDebugResetDone)),
+        TilawaFeedback.showToast(
+          context,
+          message: l10n.tourDebugResetDone,
+          variant: TilawaFeedbackVariant.success,
         );
       },
     );

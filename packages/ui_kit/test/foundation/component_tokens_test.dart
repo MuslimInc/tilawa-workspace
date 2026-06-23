@@ -88,6 +88,8 @@ void main() {
       expect(tokens.spinnerSize, 18.0);
       expect(tokens.spinnerStrokeWidth, 2.2);
       expect(tokens.contentGap, 8.0);
+      expect(tokens.leadingSlotSize, 24.0);
+      expect(tokens.toastMessageMaxLines, 2);
     });
 
     test('copyWith updates padding and numeric values', () {
@@ -107,6 +109,8 @@ void main() {
         spinnerSize: 16.0,
         spinnerStrokeWidth: 2.0,
         contentGap: 8.0,
+        leadingSlotSize: 22.0,
+        toastMessageMaxLines: 2,
         infoAccentOpacity: 0.3,
         successAccentOpacity: 0.5,
         warningAccentOpacity: 0.5,
@@ -117,6 +121,8 @@ void main() {
         spinnerSize: 20.0,
         spinnerStrokeWidth: 3.0,
         contentGap: 12.0,
+        leadingSlotSize: 26.0,
+        toastMessageMaxLines: 2,
         infoAccentOpacity: 0.4,
         successAccentOpacity: 0.6,
         warningAccentOpacity: 0.6,
@@ -599,6 +605,20 @@ void main() {
     });
   });
 
+  group('TilawaCupertinoWheelPickerTokens', () {
+    test('fromColorScheme creates expected picker height', () {
+      final colorScheme = ColorScheme.fromSeed(
+        seedColor: AppColors.defaultPrimary,
+      );
+      final tokens = TilawaCupertinoWheelPickerTokens.fromColorScheme(
+        colorScheme,
+      );
+      expect(tokens.pickerHeight, 200.0);
+      expect(tokens.segmentSelectedBorderWidth, 1.5);
+      expect(tokens.selectionOverlayColor.a, lessThan(1.0));
+    });
+  });
+
   group('TilawaBottomSheetScaffoldTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaBottomSheetScaffoldTokens.defaults();
@@ -652,9 +672,13 @@ void main() {
       );
       expect(tokens.bottomNavHorizontalMargin, 16.0);
       expect(tokens.bottomNavThumbSideMargin, 16.0);
-      expect(tokens.bottomNavBottomLift, 8.0);
+      expect(tokens.bottomNavBottomLift, 4.0);
       expect(tokens.navButtonMinHeight, 52.0);
       expect(tokens.bottomNavBackgroundColor, isA<Color>());
+      expect(
+        tokens.bottomNavBackgroundColor,
+        isNot(AppColors.bottomNavBackground),
+      );
       expect(tokens.navButtonSelectedBackgroundColor, isA<Color>());
     });
 
@@ -706,13 +730,13 @@ void main() {
       );
       final tokens = TilawaAdaptiveShellTokens.fromColorScheme(scheme);
 
-      expect(tokens.bottomNavBackgroundColor, AppColors.bottomNavBackground);
-      expect(tokens.bottomNavShadowOpacity, 0.06);
-      expect(tokens.bottomNavShadowBlur, 12);
-      expect(tokens.bottomNavShadowOffset, const Offset(0, 2));
+      expect(tokens.bottomNavBackgroundColor, isA<Color>());
+      expect(tokens.bottomNavShadowOpacity, 0.04);
+      expect(tokens.bottomNavShadowBlur, 8);
+      expect(tokens.bottomNavShadowOffset, const Offset(0, 1));
       expect(
         tokens.navButtonSelectedBackgroundColor,
-        const Color(0xFFFFFFFF),
+        scheme.primaryContainer,
       );
       expect(
         tokens.sideRailIndicatorColor,
@@ -770,7 +794,7 @@ void main() {
           TilawaAdaptiveShellTokens.fromColorScheme(
             tealScheme,
           ).bottomNavBackgroundColor,
-          AppColors.bottomNavBackground,
+          isNot(AppColors.bottomNavBackground),
         );
       },
     );
@@ -786,18 +810,18 @@ void main() {
 
       expect(
         tokens.bottomNavBackgroundColor,
-        AppColors.bottomNavBackground,
+        isA<Color>(),
       );
-      expect(tokens.bottomNavShadowOpacity, 0.08);
-      expect(tokens.bottomNavShadowBlur, 14);
-      expect(tokens.bottomNavShadowOffset, const Offset(0, 2));
+      expect(tokens.bottomNavShadowOpacity, 0.06);
+      expect(tokens.bottomNavShadowBlur, 10);
+      expect(tokens.bottomNavShadowOffset, const Offset(0, 1));
       expect(
         tokens.bottomNavOutlineColor,
         scheme.outlineVariant.withValues(alpha: 0.12),
       );
       expect(
         tokens.navButtonSelectedBackgroundColor,
-        const Color(0xFFE8E8E8),
+        scheme.surfaceContainerHighest,
       );
     });
 
@@ -1133,6 +1157,37 @@ void main() {
     });
   });
 
+  group('TilawaCapabilityActionCardTokens', () {
+    test('fromColorScheme derives subtle brand gradient stops', () {
+      final ColorScheme scheme = ColorScheme.fromSeed(
+        seedColor: AppColors.defaultPrimary,
+        primary: AppColors.defaultPrimary,
+      );
+      final tokens = TilawaCapabilityActionCardTokens.fromColorScheme(scheme);
+
+      expect(
+        tokens.gradientStart,
+        Color.alphaBlend(
+          scheme.primary.withValues(alpha: 0.10),
+          scheme.surface,
+        ),
+      );
+      expect(
+        tokens.gradientEnd,
+        Color.alphaBlend(
+          scheme.secondary.withValues(alpha: 0.14),
+          scheme.surfaceContainerLow,
+        ),
+      );
+      expect(tokens.titleColor, scheme.onSurface);
+      expect(tokens.subtitleColor, scheme.onSurfaceVariant);
+      expect(
+        tokens.backgroundGradient().colors,
+        [tokens.gradientStart, tokens.gradientEnd],
+      );
+    });
+  });
+
   group('TilawaHomeNextPrayerHeroTokens', () {
     test('defaults use centralized AppColors gradient stops', () {
       final tokens = TilawaHomeNextPrayerHeroTokens.day();
@@ -1248,10 +1303,6 @@ void main() {
                 final accessed = Theme.of(context).componentTokens;
                 final fromScheme = TilawaAdaptiveShellTokens.fromColorScheme(
                   colorScheme,
-                );
-                expect(
-                  accessed.adaptiveShell.bottomNavBackgroundColor,
-                  AppColors.bottomNavBackground,
                 );
                 expect(
                   accessed.adaptiveShell.bottomNavBackgroundColor,

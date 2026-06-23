@@ -1,16 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/app_legal_urls.dart';
 import 'package:tilawa/core/bootstrap/splash_launch_handoff.dart';
+import 'package:tilawa/core/widgets/deferred_after_first_frame.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/core/utils/legal_url_launcher.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_core/services/app_system_chrome_style.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -19,40 +18,60 @@ import '../../../../router/app_router_config.dart';
 import '../../application/account_deletion_flow_tracker.dart';
 import '../../data/services/android_sign_in_platform_policy.dart';
 import '../../data/services/google_sign_in_session_tracker.dart';
+import '../../domain/entities/google_sign_in_launch_readiness.dart';
+import '../../domain/gateways/google_sign_in_launch_gateway.dart';
+import '../../domain/usecases/resolve_google_sign_in_launch_use_case.dart';
 import '../bloc/auth_bloc.dart';
-import '../services/google_sign_in_interactive_launcher.dart';
+import '../cubit/login_google_sign_in_cubit.dart';
+import '../services/login_auth_state_diagnostics.dart';
 import '../services/login_auto_sign_in_scheduler.dart';
+import '../services/login_navigate_to_home_scheduler.dart';
+import '../services/login_sign_in_policy_warm_up.dart';
+import '../widgets/login_auth_bloc_listener.dart';
 
 /// Warm brown login canvas aligned with the brand-locked primary.
 const Color _kLoginAccent = AppColors.defaultPrimary;
+
+/// Cached on-primary for the login accent — avoids [AppTheme.getLightTheme] in
+/// [build].
+const Color _kLoginOnPrimary = AppColors.lightSchemeOnPrimary;
 
 void _logGoogleSignInButton(String message) {
   logger.d('[GoogleSignInButton] $message');
 }
 
-String _authStateLabel(AuthState state) {
-  return state.when(
-    initial: () => 'initial',
-    loading: () => 'loading',
-    authenticated: (_) => 'authenticated',
-    unauthenticated: () => 'unauthenticated',
-    error: (message) => 'error($message)',
-    noGoogleAccounts: () => 'noGoogleAccounts',
-  );
+GoogleSignInLaunchGateway? _resolveGoogleSignInLaunchGateway() {
+  if (!getIt.isRegistered<GoogleSignInLaunchGateway>()) {
+    return null;
+  }
+  return getIt<GoogleSignInLaunchGateway>();
 }
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  Widget build(BuildContext context) {
+    return BlocProvider<LoginGoogleSignInCubit>(
+      create: (_) =>
+          getIt<LoginGoogleSignInCubit>()
+            ..prewarm(gateway: _resolveGoogleSignInLaunchGateway()),
+      child: const _LoginScreenBody(),
+    );
+  }
 }
 
-class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
+class _LoginScreenBody extends StatefulWidget {
+  const _LoginScreenBody();
+
+  @override
+  State<_LoginScreenBody> createState() => _LoginScreenBodyState();
+}
+
+class _LoginScreenBodyState extends State<_LoginScreenBody>
+    with WidgetsBindingObserver {
   final LoginAutoSignInScheduler _autoSignInScheduler =
       LoginAutoSignInScheduler();
-  bool _signInLaunchPending = false;
-  bool _awaitingManualSignInResult = false;
   String? _lastLoggedAuthStateLabel;
   bool? _lastLoggedButtonEnabled;
 
@@ -83,15 +102,8 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       unawaited(_recoverLoginSurface(reason: 'lifecycleResumed'));
       _recoverStalledSignIn();
-      if (_isGoogleSignInSessionInFlight() && mounted) {
-        setState(() {});
-      }
       _scheduleAutoSignInWhenReady();
     }
-  }
-
-  bool _isManualSignInReason(String reason) {
-    return reason == 'manualTap';
   }
 
   void _recoverStalledSignIn() {
@@ -155,10 +167,10 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _warmUpSignInPolicy() {
-    if (!getIt.isRegistered<AndroidSignInPlatformPolicy>()) {
-      return Future<void>.value();
-    }
-    return getIt<AndroidSignInPlatformPolicy>().warmUp();
+    return warmUpLoginSignInPolicy(
+      isPolicyRegistered: getIt.isRegistered<AndroidSignInPlatformPolicy>(),
+      warmUp: () => getIt<AndroidSignInPlatformPolicy>().warmUp(),
+    );
   }
 
   bool _shouldSuppressLoginAutoSignInForAccountDeletion() {
@@ -182,120 +194,96 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
     return getIt<GoogleSignInSessionTracker>().inFlight;
   }
 
-  void _setSignInLaunchPending(bool value) {
-    if (_signInLaunchPending == value) {
-      return;
-    }
-    _signInLaunchPending = value;
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
-  void _clearSignInLaunchPending() {
-    _setSignInLaunchPending(false);
-  }
-
   void _maybeAutoSignIn() {
-    if (_shouldSuppressLoginAutoSignInForAccountDeletion()) {
-      _logGoogleSignInButton(
-        'maybeAutoSignIn skipped: account deletion flow',
-      );
+    final bool suppressForAccountDeletion =
+        _shouldSuppressLoginAutoSignInForAccountDeletion();
+    final AuthState authState = context.read<AuthBloc>().state;
+    final bool willDispatch = loginShouldAttemptAutoSignIn(
+      suppressForAccountDeletion: suppressForAccountDeletion,
+      authState: authState,
+    );
+    if (!willDispatch) {
+      if (suppressForAccountDeletion) {
+        _logGoogleSignInButton(
+          'maybeAutoSignIn skipped: account deletion flow',
+        );
+      }
       return;
     }
-    final AuthBloc authBloc = context.read<AuthBloc>();
-    final AuthState authState = authBloc.state;
-    final String stateLabel = _authStateLabel(authState);
-    final bool willDispatch =
-        authState is AuthInitial ||
-        authState is AuthUnauthenticated ||
-        authState is AuthError;
     _logGoogleSignInButton(
-      'maybeAutoSignIn authState=$stateLabel willDispatch=$willDispatch',
+      'maybeAutoSignIn authState=${loginAuthStateLabel(authState)} '
+      'willDispatch=$willDispatch',
     );
-    if (willDispatch) {
-      unawaited(_launchInteractiveSignIn(reason: 'auto'));
-    }
+    unawaited(
+      _launchInteractiveSignIn(trigger: GoogleSignInLaunchTrigger.auto),
+    );
   }
 
   Future<void> _onGoogleSignInPressed() async {
     final AuthBloc authBloc = context.read<AuthBloc>();
     _logGoogleSignInButton(
-      'manual tap authState=${_authStateLabel(authBloc.state)}',
+      'manual tap authState=${loginAuthStateLabel(authBloc.state)}',
     );
-    await _launchInteractiveSignIn(reason: 'manualTap');
+    await _launchInteractiveSignIn(trigger: GoogleSignInLaunchTrigger.manual);
   }
 
-  /// Defers sign-in until frames settle; checks [supportsAuthenticate] first.
-  Future<void> _launchInteractiveSignIn({required String reason}) async {
-    if (_signInLaunchPending) {
-      _logGoogleSignInButton(
-        'launchInteractiveSignIn skipped: already pending',
-      );
+  Future<void> _launchInteractiveSignIn({
+    required GoogleSignInLaunchTrigger trigger,
+  }) async {
+    final LoginGoogleSignInCubit launchCubit = context
+        .read<LoginGoogleSignInCubit>();
+    final LoginGoogleSignInAttempt? attempt = await launchCubit.attemptLaunch(
+      trigger: trigger,
+      gateway: _resolveGoogleSignInLaunchGateway(),
+    );
+
+    if (!mounted || attempt == null) {
       return;
     }
-    if (!getIt.isRegistered<GoogleSignInInteractiveLauncher>()) {
-      _setSignInLaunchPending(true);
-      _dispatchSignInWithGoogle(reason: reason);
-      return;
-    }
 
-    _setSignInLaunchPending(true);
-
-    final GoogleSignInInteractiveLauncher launcher =
-        getIt<GoogleSignInInteractiveLauncher>();
-
-    try {
-      await launcher.runAfterUiSettled(() async {
-        if (!mounted) {
-          return;
-        }
-        final GoogleSignInLaunchReadiness readiness = await launcher
-            .checkReadiness();
-        if (!mounted) {
-          return;
-        }
-        switch (readiness) {
-          case GoogleSignInLaunchReady():
-            _dispatchSignInWithGoogle(reason: reason);
-          case GoogleSignInLaunchUiUnavailable():
-            _logGoogleSignInButton(
-              'launchInteractiveSignIn uiUnavailable reason=$reason',
-            );
-            _clearSignInLaunchPending();
-            ToastUtils.showToast(
-              msg: context.l10n.unableToSignInWithThirdPartyAccount,
-            );
-          case GoogleSignInLaunchPlatformError(:final exception):
-            _logGoogleSignInButton(
-              'launchInteractiveSignIn platformError=${exception.code} '
-              'reason=$reason',
-            );
-            _clearSignInLaunchPending();
-            ToastUtils.showToast(
-              msg:
-                  exception.message ??
-                  context.l10n.unableToSignInWithThirdPartyAccount,
-            );
-        }
-      });
-    } catch (error, stackTrace) {
-      _clearSignInLaunchPending();
-      logger.w(
-        '[GoogleSignInButton] launchInteractiveSignIn failed',
-        error: error,
-        stackTrace: stackTrace,
-      );
+    switch (attempt) {
+      case LoginGoogleSignInAllowed(:final manual):
+        _dispatchSignInWithGoogle(manual: manual, trigger: trigger);
+      case LoginGoogleSignInRejected(:final readiness):
+        _showLaunchBlockedFeedback(readiness, trigger: trigger);
     }
   }
 
-  void _dispatchSignInWithGoogle({required String reason}) {
-    if (_isManualSignInReason(reason)) {
-      _awaitingManualSignInResult = true;
+  void _showLaunchBlockedFeedback(
+    GoogleSignInLaunchReadiness readiness, {
+    required GoogleSignInLaunchTrigger trigger,
+  }) {
+    switch (readiness) {
+      case GoogleSignInLaunchReady():
+        return;
+      case GoogleSignInLaunchUiUnavailable():
+        _logGoogleSignInButton(
+          'launchInteractiveSignIn uiUnavailable reason=$trigger',
+        );
+        TilawaFeedback.showToast(
+          context,
+          message: context.l10n.googleSignInFallbackBody,
+          variant: TilawaFeedbackVariant.error,
+        );
+      case GoogleSignInLaunchPlatformError(:final message):
+        _logGoogleSignInButton(
+          'launchInteractiveSignIn platformError reason=$trigger',
+        );
+        TilawaFeedback.showToast(
+          context,
+          message: message ?? context.l10n.unableToSignInWithThirdPartyAccount,
+          variant: TilawaFeedbackVariant.error,
+        );
     }
+  }
+
+  void _dispatchSignInWithGoogle({
+    required bool manual,
+    required GoogleSignInLaunchTrigger trigger,
+  }) {
     context.read<AuthBloc>().add(const SignInWithGoogleEvent());
     _logGoogleSignInButton(
-      'dispatched SignInWithGoogleEvent reason=$reason',
+      'dispatched SignInWithGoogleEvent reason=$trigger manual=$manual',
     );
   }
 
@@ -309,26 +297,23 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
   }
 
   void _logAuthStateIfChanged(AuthState state) {
-    final String label = _authStateLabel(state);
+    final String label = loginAuthStateLabel(state);
     if (_lastLoggedAuthStateLabel == label) {
       return;
     }
     _lastLoggedAuthStateLabel = label;
     _logGoogleSignInButton(
-      'authState=$label buttonEnabled=${state is! AuthLoading}',
+      'authState=$label buttonEnabled=${loginAuthButtonEnabled(state)}',
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
     final ColorScheme loginScheme = colorScheme.copyWith(
       primary: _kLoginAccent,
-      onPrimary: AppTheme.getLightTheme(
-        primaryColor: _kLoginAccent,
-      ).colorScheme.onPrimary,
+      onPrimary: _kLoginOnPrimary,
     );
     final SystemUiOverlayStyle overlayStyle =
         AppSystemChromeStyle.buildDefaultAppStyle(
@@ -342,149 +327,23 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: overlayStyle,
         child: Scaffold(
-          body: BlocConsumer<AuthBloc, AuthState>(
-            listenWhen: (AuthState previous, AuthState current) {
-              if (current is AuthAuthenticated &&
-                  previous is! AuthAuthenticated) {
-                return true;
-              }
-              if (current is AuthError && previous is! AuthError) {
-                return true;
-              }
-              if (current is AuthNoGoogleAccounts) {
-                return true;
-              }
-              return current is AuthUnauthenticated && previous is AuthLoading;
-            },
-            listener: (context, state) {
-              _logGoogleSignInButton(
-                'listener transition authState=${_authStateLabel(state)}',
-              );
-              state.when(
-                initial: () {},
-                loading: () {},
-                authenticated: (_) {
-                  _awaitingManualSignInResult = false;
-                  _clearSignInLaunchPending();
-                  _navigateToHome(context);
-                },
-                unauthenticated: () {
-                  _clearSignInLaunchPending();
-                  if (_awaitingManualSignInResult && _shouldSkipAutoSignIn()) {
-                    _logGoogleSignInButton(
-                      'manual sign-in cancelled (invisible picker / back)',
-                    );
-                    _awaitingManualSignInResult = false;
-                  }
-                },
-                error: (message) {
-                  _awaitingManualSignInResult = false;
-                  _clearSignInLaunchPending();
-                  ToastUtils.showToast(
-                    msg: message.isNotEmpty
-                        ? message
-                        : context.l10n.unableToSignInWithThirdPartyAccount,
-                  );
-                },
-                noGoogleAccounts: () {
-                  _awaitingManualSignInResult = false;
-                  _clearSignInLaunchPending();
-                  ToastUtils.showToast(
-                    msg: context.l10n.googleSignInNoAccountsOnDevice,
-                  );
-                },
-              );
-            },
-            builder: (context, state) {
-              _logAuthStateIfChanged(state);
-              final bool isLoading =
-                  state is AuthLoading ||
-                  _signInLaunchPending ||
-                  _isGoogleSignInSessionInFlight();
-              _logButtonStateIfChanged(isLoading);
-              return TilawaThumbReachLayout(
-                useSafeArea: true,
-                content: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: tokens.spaceLarge,
-                  ),
-                  child: TilawaContentBounds(
-                    kind: TilawaContentKind.form,
-                    alignment: Alignment.center,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: <Widget>[
-                        Center(
-                          child: Container(
-                            width:
-                                tokens.minInteractiveDimension * 2 +
-                                tokens.spaceExtraSmall,
-                            height:
-                                tokens.minInteractiveDimension * 2 +
-                                tokens.spaceExtraSmall,
-                            decoration: BoxDecoration(
-                              color: loginScheme.primary.withValues(
-                                alpha: tokens.opacitySubtle,
-                              ),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.auto_stories_rounded,
-                              size: tokens.minInteractiveDimension,
-                              color: loginScheme.primary,
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: tokens.spaceExtraLarge),
-                        Text(
-                          context.l10n.welcomeToApp,
-                          style: theme.textTheme.headlineLarge?.copyWith(
-                            color: colorScheme.onSurface,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        SizedBox(height: tokens.spaceMedium),
-                        Text(
-                          context.l10n.signInWithGoogleDescription,
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
+          body: LoginAuthBlocListener(
+            shouldSkipAutoSignIn: _shouldSkipAutoSignIn,
+            onNavigateToHome: () => _navigateToHome(context),
+            child: TilawaThumbReachLayout(
+              useSafeArea: true,
+              content: RepaintBoundary(
+                child: _LoginHeroContent(loginScheme: loginScheme),
+              ),
+              actions: DeferredAfterFirstFrame(
+                perfEvent: 'login_actions',
+                child: _LoginGoogleSignInActions(
+                  onPressed: _onGoogleSignInPressed,
+                  logButtonStateIfChanged: _logButtonStateIfChanged,
+                  logAuthStateIfChanged: _logAuthStateIfChanged,
                 ),
-                actions: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  spacing: tokens.spaceMedium,
-                  children: <Widget>[
-                    Listener(
-                      onPointerDown: (_) {
-                        _logGoogleSignInButton(
-                          'pointerDown on button (isLoading=$isLoading)',
-                        );
-                      },
-                      child: TilawaGoogleSignInButton(
-                        label: context.l10n.continueWithGoogle,
-                        semanticLabel: context.l10n.continueWithGoogle,
-                        appearance: GoogleSignInButtonAppearance.light,
-                        isLoading: isLoading,
-                        onPressed: isLoading
-                            ? null
-                            : () => unawaited(
-                                _onGoogleSignInPressed(),
-                              ),
-                      ),
-                    ),
-                    const _LoginLegalFooter(),
-                  ],
-                ),
-              );
-            },
+              ),
+            ),
           ),
         ),
       ),
@@ -492,13 +351,177 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
   }
 
   void _navigateToHome(BuildContext context) {
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      if (!context.mounted) {
-        return;
-      }
-      AppRouter.disableStateRestoration = false;
-      AppRouter.router.go(const HomeRoute().location);
-    });
+    scheduleLoginNavigateToHome(
+      isMounted: () => context.mounted,
+      navigate: () {
+        AppRouter.disableStateRestoration = false;
+        AppRouter.router.go(const HomeRoute().location);
+      },
+    );
+  }
+}
+
+class _LoginHeroContent extends StatelessWidget {
+  const _LoginHeroContent({required this.loginScheme});
+
+  final ColorScheme loginScheme;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final TilawaDesignTokens tokens = theme.tokens;
+    final ColorScheme colorScheme = theme.colorScheme;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
+      child: TilawaContentBounds(
+        kind: TilawaContentKind.form,
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Center(
+              child: Container(
+                width:
+                    tokens.minInteractiveDimension * 2 + tokens.spaceExtraSmall,
+                height:
+                    tokens.minInteractiveDimension * 2 + tokens.spaceExtraSmall,
+                decoration: BoxDecoration(
+                  color: loginScheme.primary.withValues(
+                    alpha: tokens.opacitySubtle,
+                  ),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.auto_stories_rounded,
+                  size: tokens.minInteractiveDimension,
+                  color: loginScheme.primary,
+                ),
+              ),
+            ),
+            SizedBox(height: tokens.spaceExtraLarge),
+            Text(
+              context.l10n.welcomeToApp,
+              style: theme.textTheme.headlineLarge?.copyWith(
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: tokens.spaceMedium),
+            Text(
+              context.l10n.signInWithGoogleDescription,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LoginGoogleSignInActions extends StatefulWidget {
+  const _LoginGoogleSignInActions({
+    required this.onPressed,
+    required this.logButtonStateIfChanged,
+    required this.logAuthStateIfChanged,
+  });
+
+  final Future<void> Function() onPressed;
+  final void Function(bool isLoading) logButtonStateIfChanged;
+  final void Function(AuthState state) logAuthStateIfChanged;
+
+  @override
+  State<_LoginGoogleSignInActions> createState() =>
+      _LoginGoogleSignInActionsState();
+}
+
+class _LoginGoogleSignInActionsState extends State<_LoginGoogleSignInActions>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed &&
+        _isGoogleSignInSessionInFlight()) {
+      setState(() {});
+    }
+  }
+
+  bool _isGoogleSignInSessionInFlight() {
+    if (!getIt.isRegistered<GoogleSignInSessionTracker>()) {
+      return false;
+    }
+    return getIt<GoogleSignInSessionTracker>().inFlight;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: tokens.spaceMedium,
+      children: <Widget>[
+        RepaintBoundary(
+          child: BlocBuilder<AuthBloc, AuthState>(
+            buildWhen: loginAuthAffectsGoogleSignInButtonLoading,
+            builder: (BuildContext context, AuthState authState) {
+              widget.logAuthStateIfChanged(authState);
+              return BlocBuilder<
+                LoginGoogleSignInCubit,
+                LoginGoogleSignInState
+              >(
+                buildWhen: loginLaunchAffectsGoogleSignInButtonLoading,
+                builder:
+                    (
+                      BuildContext context,
+                      LoginGoogleSignInState launchState,
+                    ) {
+                      final bool isLoading =
+                          authState is AuthLoading ||
+                          launchState.isLaunchPending ||
+                          _isGoogleSignInSessionInFlight();
+                      widget.logButtonStateIfChanged(isLoading);
+                      return Listener(
+                        onPointerDown: (_) {
+                          _logGoogleSignInButton(
+                            'pointerDown on button (isLoading=$isLoading)',
+                          );
+                        },
+                        child: TilawaGoogleSignInButton(
+                          label: context.l10n.continueWithGoogle,
+                          semanticLabel: context.l10n.continueWithGoogle,
+                          appearance: GoogleSignInButtonAppearance.light,
+                          isLoading: isLoading,
+                          onPressed: isLoading
+                              ? null
+                              : () => unawaited(widget.onPressed()),
+                        ),
+                      );
+                    },
+              );
+            },
+          ),
+        ),
+        const _LoginLegalFooter(),
+      ],
+    );
   }
 }
 

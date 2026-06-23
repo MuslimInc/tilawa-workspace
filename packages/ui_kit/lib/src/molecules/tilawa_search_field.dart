@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
+import '../foundation/tilawa_field_shell.dart';
 import '../foundation/tilawa_icons.dart';
 import '../foundation/design_tokens.dart';
+import '../foundation/tilawa_input_style.dart';
 
 /// Visual treatment for [TilawaSearchField].
 enum TilawaSearchFieldVariant {
@@ -183,70 +185,40 @@ class _SearchFieldBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final tokens = theme.tokens;
     final componentTokens = theme.componentTokens.searchField;
     final colorScheme = theme.colorScheme;
     final bool isCatalog = variant == TilawaSearchFieldVariant.catalog;
+    final double fieldHeight = height ?? componentTokens.height;
+    final inputStyle = context.inputStyle(
+      role: TilawaInputRole.search,
+      fieldHeight: fieldHeight,
+    );
     final effectiveFillColor =
         backgroundColor ??
         (isCatalog ? colorScheme.surface : componentTokens.backgroundColor);
-    final double fieldHeight = height ?? componentTokens.height;
     final effectiveBorderRadius =
         borderRadius ??
         BorderRadius.circular(
           isCatalog
-              ? tokens.resolveRadius(
-                  family: TilawaRadiusFamily.pill,
-                  height: fieldHeight,
-                )
-              : tokens.resolveRadius(family: TilawaRadiusFamily.chrome),
+              ? inputStyle.borderRadius(height: fieldHeight)
+              : theme.tokens.resolveRadius(family: TilawaRadiusFamily.chrome),
         );
-    final Color unfocusedBorder = isCatalog
-        ? colorScheme.outlineVariant.withValues(
-            alpha: tokens.opacityEmphasis,
-          )
-        : componentTokens.unfocusedBorderColor;
-    final Color focusedBorder = isCatalog
-        ? colorScheme.onSurface.withValues(alpha: tokens.opacitySubtle * 3)
-        : componentTokens.focusedBorderColor;
-    final Color prefixMuted = isCatalog
-        ? colorScheme.onSurfaceVariant.withValues(
-            alpha: tokens.opacityEmphasis,
-          )
-        : componentTokens.prefixIconMutedColor;
-    final Color prefixFocused = isCatalog
-        ? colorScheme.onSurfaceVariant
-        : componentTokens.prefixIconFocusedColor;
     final bool hasError = errorText != null && errorText!.trim().isNotEmpty;
-    final double? shellHeight = hasError
-        ? null
-        : (height ?? componentTokens.height);
+    final double? resolvedShellHeight = hasError ? null : fieldHeight;
 
-    return Container(
-      height: shellHeight,
-      constraints: hasError
+    return TilawaFieldShell.search(
+      style: inputStyle,
+      isFocused: isFocused,
+      hasError: hasError,
+      backgroundColor: effectiveFillColor,
+      showShadow: showShadow,
+      borderRadiusOverride: effectiveBorderRadius,
+      useCatalogBorderColors: isCatalog,
+      margin: margin,
+      shellHeight: resolvedShellHeight,
+      shellConstraints: hasError
           ? BoxConstraints(minHeight: componentTokens.height)
           : null,
-      margin: margin,
-      decoration: BoxDecoration(
-        color: effectiveFillColor,
-        borderRadius: effectiveBorderRadius,
-        border: Border.all(
-          color: hasError
-              ? colorScheme.error
-              : (isFocused ? focusedBorder : unfocusedBorder),
-          width: hasError ? 2 : 1,
-        ),
-        boxShadow: showShadow
-            ? [
-                BoxShadow(
-                  color: componentTokens.boxShadowColor,
-                  blurRadius: componentTokens.shadowBlur,
-                  offset: componentTokens.shadowOffset,
-                ),
-              ]
-            : null,
-      ),
       child: TextField(
         controller: controller,
         focusNode: focusNode,
@@ -255,42 +227,31 @@ class _SearchFieldBody extends StatelessWidget {
         onSubmitted: onSubmitted,
         onTapOutside: onTapOutside,
         textInputAction: textInputAction,
-        // fix: Spacing & alignment — tokenized scroll inset from component tokens
-        scrollPadding: scrollPadding ?? componentTokens.scrollPadding,
+        scrollPadding: scrollPadding ?? inputStyle.searchScrollPadding,
         textAlignVertical: .center,
         style:
-            textStyle ??
-            theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: isCatalog ? FontWeight.w400 : FontWeight.w600,
-            ),
-        decoration: InputDecoration(
-          isDense: true,
-          filled: false,
-          border: .none,
+            textStyle ?? inputStyle.searchTextStyle(isCatalogWeight: isCatalog),
+        decoration: inputStyle.borderlessDecoration(
           hintText: hintText,
           errorText: hasError ? errorText : null,
-          errorStyle:
-              errorStyle ??
-              theme.textTheme.bodySmall?.copyWith(
-                color: colorScheme.error,
-                fontWeight: FontWeight.w500,
-              ),
-          errorMaxLines: 3,
+          errorStyle: errorStyle ?? inputStyle.searchErrorStyle(),
           hintStyle:
               hintStyle ??
-              theme.textTheme.bodyMedium?.copyWith(
-                color: isCatalog
-                    ? colorScheme.onSurfaceVariant.withValues(
-                        alpha: tokens.opacityEmphasis,
-                      )
-                    : componentTokens.hintTextColor,
-                fontWeight: isCatalog ? FontWeight.w400 : FontWeight.w600,
-              ),
-          contentPadding: contentPadding ?? componentTokens.contentPadding,
+              (isCatalog
+                  ? inputStyle.searchHintStyle(isCatalogWeight: true)
+                  : theme.textTheme.bodyMedium?.copyWith(
+                      color: componentTokens.hintTextColor,
+                      fontWeight: FontWeight.w600,
+                    )),
+          contentPadding: contentPadding ?? inputStyle.searchContentPadding,
           prefixIcon: Icon(
             prefixIcon,
             size: componentTokens.iconSize,
-            color: isFocused ? prefixFocused : prefixMuted,
+            color: isCatalog
+                ? inputStyle.searchPrefixIconColor(isFocused: isFocused)
+                : (isFocused
+                      ? componentTokens.prefixIconFocusedColor
+                      : componentTokens.prefixIconMutedColor),
           ),
           suffixIcon: hasText && onClear != null
               ? IconButton(

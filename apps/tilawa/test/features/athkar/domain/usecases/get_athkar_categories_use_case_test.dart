@@ -49,7 +49,7 @@ void main() {
     );
 
     // Assert
-    expect(result.isRight, true);
+    expect(result.isRight(), true);
     result.fold(
       (_) => fail('Should be Right'),
       (categories) => expect(categories, tCategories),

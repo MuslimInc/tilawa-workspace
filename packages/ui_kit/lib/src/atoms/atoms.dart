@@ -14,4 +14,6 @@ export 'tilawa_sheet_handle.dart';
 export 'tilawa_state_visual.dart';
 export 'tilawa_checkbox.dart';
 export 'tilawa_switch.dart';
+export 'tilawa_dropdown_field.dart';
+export 'tilawa_read_only_field.dart';
 export 'tilawa_text_field.dart';

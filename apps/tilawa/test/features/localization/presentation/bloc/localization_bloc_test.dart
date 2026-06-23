@@ -6,12 +6,14 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa_core/config/language_config.dart';
 import 'package:tilawa_core/errors/failures.dart';
+import 'package:tilawa/features/auth/domain/usecases/sync_user_language_preference_use_case.dart';
 import 'package:tilawa/features/localization/domain/usecases/get_current_language_use_case.dart';
 import 'package:tilawa/features/localization/domain/usecases/set_language_use_case.dart';
 import 'package:tilawa/features/localization/presentation/bloc/localization_bloc.dart';
 import 'package:tilawa/features/reciters/domain/usecases/get_reciters_use_case.dart';
 
 import '../../../../helpers/hydrated_bloc_test_helper.dart';
+import '../../../../helpers/noop_sync_user_language_preference_use_case.dart';
 import 'localization_bloc_test.mocks.dart';
 
 // Provide dummy values for Either types
@@ -26,6 +28,7 @@ Either<Failure, void> provideDummyEitherFailureVoid() => const Right(null);
   GetCurrentLanguageUseCase,
   SetLanguageUseCase,
   GetRecitersUseCase,
+  SyncUserLanguagePreferenceUseCase,
 ])
 void main() {
   setUpAll(() async {
@@ -41,6 +44,8 @@ void main() {
     late MockGetCurrentLanguageUseCase mockGetCurrentLanguageUseCase;
     late MockSetLanguageUseCase mockSetLanguageUseCase;
     late MockGetRecitersUseCase mockGetRecitersUseCase;
+    late MockSyncUserLanguagePreferenceUseCase
+    mockSyncUserLanguagePreferenceUseCase;
 
     setUp(() {
       // Provide dummy values for Either types
@@ -52,6 +57,9 @@ void main() {
       mockGetCurrentLanguageUseCase = MockGetCurrentLanguageUseCase();
       mockSetLanguageUseCase = MockSetLanguageUseCase();
       mockGetRecitersUseCase = MockGetRecitersUseCase();
+      mockSyncUserLanguagePreferenceUseCase =
+          MockSyncUserLanguagePreferenceUseCase();
+      when(mockSyncUserLanguagePreferenceUseCase(any)).thenAnswer((_) async {});
 
       // Mock GetCurrentLanguageUseCase to return default language
       when(
@@ -67,6 +75,7 @@ void main() {
         mockGetCurrentLanguageUseCase,
         mockSetLanguageUseCase,
         mockGetRecitersUseCase,
+        mockSyncUserLanguagePreferenceUseCase,
       );
     });
 
@@ -106,6 +115,7 @@ void main() {
             mockGetCurrentLanguageUseCase,
             mockSetLanguageUseCase,
             mockGetRecitersUseCase,
+            mockSyncUserLanguagePreferenceUseCase,
           );
         },
         act: (bloc) async {
@@ -148,6 +158,7 @@ void main() {
             mockGetCurrentLanguageUseCase,
             mockSetLanguageUseCase,
             mockGetRecitersUseCase,
+            mockSyncUserLanguagePreferenceUseCase,
           );
         },
         act: (bloc) async {
@@ -188,6 +199,7 @@ void main() {
             mockGetCurrentLanguageUseCase,
             mockSetLanguageUseCase,
             mockGetRecitersUseCase,
+            mockSyncUserLanguagePreferenceUseCase,
           );
         },
         act: (bloc) async {
@@ -253,8 +265,8 @@ void main() {
         build: () => bloc,
         act: (bloc) => bloc.add(const ChangeLanguage(Locale('en'))),
         verify: (_) {
-          // Verify that SetLanguageUseCase was called with the new language
           verify(mockSetLanguageUseCase('en')).called(1);
+          verify(mockSyncUserLanguagePreferenceUseCase('en')).called(1);
         },
         expect: () => [const LocalizationState(locale: Locale('en'))],
       );
@@ -356,6 +368,7 @@ void main() {
           firstMockGetCurrentLanguageUseCase,
           firstMockSetLanguageUseCase,
           firstMockGetRecitersUseCase,
+          noopSyncUserLanguagePreferenceUseCase(),
         );
         firstBloc.add(const ChangeLanguage(Locale('en')));
 
@@ -382,6 +395,7 @@ void main() {
           newMockGetCurrentLanguageUseCase,
           newMockSetLanguageUseCase,
           newMockGetRecitersUseCase,
+          noopSyncUserLanguagePreferenceUseCase(),
         );
         await Future.delayed(const Duration(milliseconds: 200));
 

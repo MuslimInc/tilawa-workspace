@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../foundation/design_tokens.dart';
+import '../foundation/tilawa_input_style.dart';
 
 /// A design-system-compliant text input field.
 ///
@@ -33,6 +33,8 @@ class TilawaTextField extends StatefulWidget {
     this.initialValue,
     this.maxLength,
     this.showCounter = false,
+    this.textDirection,
+    this.textAlignVertical,
     this.showPasswordTooltip,
     this.hidePasswordTooltip,
     this.clearTextTooltip,
@@ -135,6 +137,9 @@ class TilawaTextField extends StatefulWidget {
   /// default Flutter counter (e.g., "5/100").
   final bool showCounter;
 
+  final TextDirection? textDirection;
+  final TextAlignVertical? textAlignVertical;
+
   /// Tooltip text shown on the password reveal icon.
   final String? showPasswordTooltip;
 
@@ -222,7 +227,7 @@ class _TilawaTextFieldState extends State<TilawaTextField> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final tokens = theme.tokens;
+    final inputStyle = context.inputStyle();
 
     final Widget? suffix = widget.isPassword
         ? IconButton(
@@ -260,6 +265,8 @@ class _TilawaTextFieldState extends State<TilawaTextField> {
         onFieldSubmitted: widget.onSubmitted,
         validator: widget.validator,
         autofocus: widget.autofocus,
+        textDirection: widget.textDirection,
+        textAlignVertical: widget.textAlignVertical,
         style: theme.textTheme.bodyLarge,
         maxLength: widget.maxLength,
         buildCounter: widget.showCounter
@@ -270,19 +277,15 @@ class _TilawaTextFieldState extends State<TilawaTextField> {
                 required isFocused,
                 maxLength,
               }) => const SizedBox.shrink(),
-        decoration: InputDecoration(
+        decoration: inputStyle.decoration(
           labelText: widget.label,
           hintText: widget.hintText,
           helperText: widget.helperText,
           errorText: widget.errorText,
           prefixIcon: widget.prefixIcon,
           suffixIcon: suffix,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(
-              tokens.resolveRadius(family: TilawaRadiusFamily.chrome),
-            ),
-          ),
-          contentPadding: EdgeInsets.all(tokens.spaceMedium),
+          enabled: widget.enabled,
+          textStyle: theme.textTheme.bodyLarge,
         ),
       ),
     );

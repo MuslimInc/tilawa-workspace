@@ -26,7 +26,7 @@ class AppShellNavDestination extends Equatable {
   /// widget. The builder receives the resolved foreground [color] based on
   /// selection state.
   final Widget Function(BuildContext context, {required Color color})?
-      iconBuilder;
+  iconBuilder;
 
   /// [MainTabViewport] index when this item selects a shell tab.
   ///
@@ -42,14 +42,14 @@ class AppShellNavDestination extends Equatable {
 
   @override
   List<Object?> get props => [
-        label,
-        icon,
-        activeIcon,
-        iconBuilder,
-        tabIndex,
-        semanticsIdentifier,
-        usesProfileAvatar,
-      ];
+    label,
+    icon,
+    activeIcon,
+    iconBuilder,
+    tabIndex,
+    semanticsIdentifier,
+    usesProfileAvatar,
+  ];
 }
 
 /// Builds the phone shell bottom bar (TripGlide icon-only IA).

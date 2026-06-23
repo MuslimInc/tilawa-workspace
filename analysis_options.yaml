@@ -38,7 +38,9 @@ analyzer:
     - "**/*.gen.dart"
     - "**/*.config.dart"
     - "**/*.mocks.dart"
-    - "build/**"
+    - build/**
+    - "**/build/**"
+    - "**/.dart_tool/**"
     - "lib/l10n/**"
     - "**/parse_json.dart"
     - "packages/quran_qcf/scratch/**"

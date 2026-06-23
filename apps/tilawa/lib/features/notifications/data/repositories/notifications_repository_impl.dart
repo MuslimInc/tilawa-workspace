@@ -9,7 +9,10 @@ import 'package:tilawa_core/services/interfaces/notification_dispatcher_interfac
 
 import '../../domain/repositories/notifications_repository.dart';
 import '../../presentation/services/fcm_notification_handler_service.dart';
+import '../../../settings/domain/services/teacher_capability_refresh_notifier.dart';
+import '../../../auth/domain/services/session_revoked_notifier.dart';
 import '../datasources/notifications_remote_data_source.dart';
+import '../fcm_session_revoked_message.dart';
 
 @LazySingleton(as: NotificationsRepository)
 class NotificationsRepositoryImpl implements NotificationsRepository {
@@ -18,12 +21,16 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
     this._dispatcher,
     this._handler,
     this._logger,
+    this._teacherCapabilityRefreshNotifier,
+    this._sessionRevokedNotifier,
   );
 
   final NotificationsRemoteDataSource _remoteDataSource;
   final INotificationDispatcher _dispatcher;
   final FCMNotificationHandlerService _handler;
   final Logger _logger;
+  final TeacherCapabilityRefreshNotifier _teacherCapabilityRefreshNotifier;
+  final SessionRevokedNotifier _sessionRevokedNotifier;
   bool _listenersInitialized = false;
 
   @override
@@ -67,9 +74,7 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
     _listenersInitialized = true;
 
     // 1. Listen for dynamic FCM events from RemoteDataSource
-    _remoteDataSource.onMessage.listen((RemoteMessage message) {
-      _handler.showForegroundNotification(message);
-    });
+    _remoteDataSource.onMessage.listen(_handleForegroundMessage);
 
     // 2. Listen for app opens from background state
     _remoteDataSource.onMessageOpenedApp.listen((RemoteMessage message) {
@@ -92,6 +97,18 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
       },
       handler: (response) => _handler.handleNotificationResponse(response),
     );
+  }
+
+  void _handleForegroundMessage(RemoteMessage message) {
+    final String? type = _normalizedType(message.data);
+    if (type == 'teacher_application_reviewed') {
+      final String status = message.data['status']?.toString() ?? '';
+      _teacherCapabilityRefreshNotifier.notifyApplicationReviewed(status);
+    }
+    if (isSessionRevokedFcmMessage(message.data)) {
+      _sessionRevokedNotifier.notifySessionRevoked();
+    }
+    _handler.showForegroundNotification(message);
   }
 
   bool _isFcmPayload(Map<String, dynamic> data) {

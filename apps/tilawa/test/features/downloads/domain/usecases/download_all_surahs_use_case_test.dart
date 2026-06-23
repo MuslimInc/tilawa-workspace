@@ -56,7 +56,7 @@ void main() {
     );
 
     // Assert
-    expect(result.isRight, true);
+    expect(result.isRight(), true);
     verify(mockDownloadsRepository.startDownloadBatch(any)).called(1);
     verifyNever(
       mockDownloadsRepository.startDownload(

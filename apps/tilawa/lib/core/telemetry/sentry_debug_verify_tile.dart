@@ -31,12 +31,11 @@ class SentryDebugVerifyTile extends StatelessWidget {
       if (!context.mounted) {
         return;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
+      TilawaFeedback.showToast(
+        context,
+        message:
             'Sentry is not initialized. Do a full restart (not hot restart).',
-          ),
-        ),
+        variant: TilawaFeedbackVariant.warning,
       );
       return;
     }
@@ -77,8 +76,12 @@ class SentryDebugVerifyTile extends StatelessWidget {
           'Structured logs are production-only; filter Issues by sentry.verify:true.';
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+    TilawaFeedback.showToast(
+      context,
+      message: message,
+      variant: eventId == SentryId.empty()
+          ? TilawaFeedbackVariant.warning
+          : TilawaFeedbackVariant.success,
     );
   }
 }

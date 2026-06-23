@@ -49,7 +49,7 @@ void main() {
 
       final result = await useCase();
 
-      expect(result.isLeft, isTrue);
+      expect(result.isLeft(), isTrue);
     });
   });
 }

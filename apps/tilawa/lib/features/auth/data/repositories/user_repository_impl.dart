@@ -1,6 +1,5 @@
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/user_entity.dart';
@@ -8,9 +7,10 @@ import '../../domain/repositories/user_repository.dart';
 
 @LazySingleton(as: UserRepository)
 class UserRepositoryImpl implements UserRepository {
-  UserRepositoryImpl(this._firestore);
+  UserRepositoryImpl(this._firestore, this._firebaseAuth);
 
   final FirebaseFirestore _firestore;
+  final FirebaseAuth _firebaseAuth;
 
   @override
   Future<void> saveUserData(UserEntity user) async {
@@ -18,8 +18,6 @@ class UserRepositoryImpl implements UserRepository {
         .collection('users')
         .doc(user.id);
 
-    // Check if user exists to avoid overwriting existing data that we might not have locally
-    // Or we can merge. For now, let's use set with SetOptions(merge: true) to update/create
     await userRef.set({
       'email': user.email,
       'displayName': user.displayName,
@@ -30,27 +28,16 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<void> saveDeviceToken(String userId, String token) async {
-    await _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('fcm_tokens')
-        .doc(token)
-        .set({
-          'token': token,
-          'createdAt': FieldValue.serverTimestamp(),
-          'platform': Platform.isAndroid ? 'android' : 'ios',
-        });
-  }
+  Future<void> syncLanguagePreference(String languageCode) async {
+    final String? userId = _firebaseAuth.currentUser?.uid;
+    if (userId == null) {
+      return;
+    }
 
-  @override
-  Future<void> deleteDeviceToken(String userId, String token) async {
-    await _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('fcm_tokens')
-        .doc(token)
-        .delete();
+    await _firestore.collection('users').doc(userId).set(
+      {'languageCode': languageCode},
+      SetOptions(merge: true),
+    );
   }
 
   @override

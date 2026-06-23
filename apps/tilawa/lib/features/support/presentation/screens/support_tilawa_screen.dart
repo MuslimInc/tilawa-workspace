@@ -2,7 +2,6 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -65,7 +64,11 @@ class _SupportTilawaScreenState extends State<SupportTilawaScreen>
           }
           final String? message = failure.localizedMessage(context);
           if (message != null) {
-            ToastUtils.showErrorToast(message);
+            TilawaFeedback.showToast(
+              context,
+              message: message,
+              variant: TilawaFeedbackVariant.error,
+            );
           }
         },
         builder: (BuildContext context, SupportState state) {
@@ -128,14 +131,14 @@ class _SupportBody extends StatelessWidget {
     final bool hasTier = state.selectedProductId != null;
 
     return TilawaCatalogSettingsBody(
-      child: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(
+      child: TilawaFormScreenScaffold(
+        bodyPadding: EdgeInsets.fromLTRB(
           tokens.spaceLarge,
           tokens.spaceMedium,
           tokens.spaceLarge,
-          tokens.spaceExtraLarge,
+          tokens.spaceLarge,
         ),
-        child: Column(
+        body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           spacing: tokens.spaceLarge,
           children: [
@@ -153,19 +156,20 @@ class _SupportBody extends StatelessWidget {
                 SupportEvent.tierSelected(id),
               ),
             ),
-            AnimatedOpacity(
-              opacity: hasTier ? 1 : 0.5,
-              duration: tokens.durationFast,
-              child: TilawaButton(
-                text: l10n.supportContinueWithPlay,
-                isLoading: purchasing,
-                onPressed: !hasTier || purchasing
-                    ? null
-                    : () => _onContinue(context, state),
-              ),
-            ),
             const SupportFooterSection(),
           ],
+        ),
+        footer: AnimatedOpacity(
+          opacity: hasTier ? 1 : 0.5,
+          duration: tokens.durationFast,
+          child: TilawaButton(
+            text: l10n.supportContinueWithPlay,
+            isLoading: purchasing,
+            onPressed: !hasTier || purchasing
+                ? null
+                : () => _onContinue(context, state),
+            isFullWidth: true,
+          ),
         ),
       ),
     );

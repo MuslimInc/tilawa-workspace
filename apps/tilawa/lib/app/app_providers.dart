@@ -5,7 +5,9 @@ import 'package:tilawa/core/di/injection.dart';
 import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../features/audio_player/presentation/cubit/player_background_cubit.dart';
 import '../features/auth/presentation/bloc/auth_bloc.dart';
+import '../features/auth/presentation/cubit/session_validity_cubit.dart';
 import '../features/auth/presentation/widgets/account_deletion_navigation_listener.dart';
+import '../features/auth/presentation/widgets/session_revoked_navigation_listener.dart';
 import '../features/localization/presentation/bloc/localization_bloc.dart';
 import '../features/settings/presentation/cubit/settings_cubit.dart';
 import '../features/theme/presentation/cubit/theme_cubit.dart';
@@ -35,6 +37,9 @@ class AppProviders {
     BlocProvider<AuthBloc>(
       create: (_) => getIt<AuthBloc>()..add(const CheckAuthStatusEvent()),
     ),
+    BlocProvider<SessionValidityCubit>(
+      create: (_) => getIt<SessionValidityCubit>(),
+    ),
   ];
 
   static Widget create({required Widget child}) {
@@ -42,7 +47,9 @@ class AppProviders {
       providers: providers,
       child: ChangeNotifierProvider<QuranPlayerChromeNotifier>(
         create: (_) => QuranPlayerChromeNotifier(),
-        child: AccountDeletionNavigationListener(child: child),
+        child: SessionRevokedNavigationListener(
+          child: AccountDeletionNavigationListener(child: child),
+        ),
       ),
     );
   }

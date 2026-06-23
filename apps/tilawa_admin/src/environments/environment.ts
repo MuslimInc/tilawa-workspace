@@ -8,5 +8,6 @@ export const environment = {
     messagingSenderId: "181575856185",
     appId: "1:181575856185:web:a70d1c264cf46898381de8",
     measurementId: "G-SB4J6TGRQL"
-  }
+  },
+  devAdminLogin: undefined as { email: string; password: string } | undefined,
 };

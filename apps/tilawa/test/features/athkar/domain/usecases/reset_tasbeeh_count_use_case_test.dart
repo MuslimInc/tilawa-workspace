@@ -33,7 +33,7 @@ void main() {
     test('returns CacheFailure when dhikr id does not exist', () async {
       final result = await useCase('missing');
 
-      expect(result.isLeft, isTrue);
+      expect(result.isLeft(), isTrue);
       result.fold(
         (f) => expect(f, isA<CacheFailure>()),
         (_) => fail('Expected Left result'),

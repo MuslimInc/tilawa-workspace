@@ -8,6 +8,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../core/bootstrap/first_frame_log.dart';
 import '../core/bootstrap/splash_launch_handoff.dart';
+import '../core/telemetry/startup_perf_log.dart';
 import '../router/app_router.dart';
 import '../shared/widgets/quran_player_chrome.dart';
 
@@ -211,6 +212,7 @@ class _DefaultRouteSystemUiOverlayState
     }
     _launchHandoffScheduled = true;
     firstFrameLog('TilawaApp scheduling routed first-frame handoff mark');
+    StartupPerfLog.log('routed_handoff_mark_scheduled');
     SchedulerBinding.instance.addPostFrameCallback((_) {
       _launchHandoffScheduled = false;
       if (!mounted || widget.child == null || _splashRouteHasPainted.value) {
@@ -219,9 +221,16 @@ class _DefaultRouteSystemUiOverlayState
           '(mounted=$mounted hasChild=${widget.child != null} '
           'painted=${_splashRouteHasPainted.value})',
         );
+        StartupPerfLog.log(
+          'routed_handoff_mark_skipped',
+          detail:
+              'mounted=$mounted hasChild=${widget.child != null} '
+              'painted=${_splashRouteHasPainted.value}',
+        );
         return;
       }
       firstFrameLog('TilawaApp routed first post-frame → mark handoff');
+      StartupPerfLog.log('routed_handoff_mark_fired');
       _markSplashRoutePainted();
       // Apply immediately so Android drops launch-theme light icons before the
       // next frame (NormalTheme no longer forces windowLightStatusBar=false).
@@ -239,6 +248,7 @@ class _DefaultRouteSystemUiOverlayState
     if (!_loggedFirstBuild) {
       _loggedFirstBuild = true;
       firstFrameLog('TilawaApp DefaultRouteSystemUiOverlay first build');
+      StartupPerfLog.log('default_route_overlay_first_build');
     }
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: _overlayStyleForBuild(context),

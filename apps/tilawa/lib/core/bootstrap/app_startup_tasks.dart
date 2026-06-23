@@ -1001,7 +1001,7 @@ class AppStartupTasks {
             longitude: longitude,
             forceReschedule: forceReschedule,
           );
-          if (forceReschedule && scheduleResult.isLeft) {
+          if (forceReschedule && scheduleResult.isLeft()) {
             await adhanPlayer.markNeedsReschedule();
           }
         },

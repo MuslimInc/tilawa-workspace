@@ -1,11 +1,13 @@
 import 'dart:async';
 
-import 'package:flutter/services.dart';
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/mockito.dart';
+import 'package:tilawa_core/config/language_config.dart';
+import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa/core/bootstrap/splash_launch_handoff.dart';
 import 'package:tilawa/features/auth/application/account_deletion_flow_tracker.dart';
 import 'package:tilawa/features/auth/data/services/android_sign_in_platform_policy.dart';
@@ -13,6 +15,13 @@ import 'package:tilawa/features/auth/data/services/google_sign_in_session_tracke
 import 'package:tilawa/features/auth/domain/entities/auth_result.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:tilawa/features/auth/domain/gateways/google_sign_in_launch_gateway.dart';
+import 'package:tilawa/features/auth/domain/repositories/auth_repository.dart';
+import 'package:tilawa/features/auth/domain/services/google_sign_in_launch_readiness_store.dart';
+import 'package:tilawa/features/auth/domain/usecases/prewarm_google_sign_in_launch_use_case.dart';
+import 'package:tilawa/features/auth/domain/usecases/prepare_google_sign_in_use_case.dart';
+import 'package:tilawa/features/auth/domain/usecases/resolve_google_sign_in_launch_use_case.dart';
+import 'package:tilawa/features/auth/presentation/cubit/login_google_sign_in_cubit.dart';
 import 'package:tilawa/features/auth/presentation/screens/login_screen.dart';
 import 'package:tilawa/features/auth/presentation/services/google_sign_in_interactive_launcher.dart';
 import 'package:tilawa/features/theme/domain/primary_color_preset.dart';
@@ -44,6 +53,34 @@ class TestGoogleSignInInteractiveLauncher
   }
 }
 
+class _NoopPrepareGoogleSignInUseCase extends PrepareGoogleSignInUseCase {
+  _NoopPrepareGoogleSignInUseCase()
+    : super(_ThrowingAuthRepositoryForPrepare());
+
+  @override
+  Future<void> call() async {}
+}
+
+class _ThrowingAuthRepositoryForPrepare implements AuthRepository {
+  @override
+  Stream<UserEntity?> get authStateChanges => const Stream.empty();
+
+  @override
+  UserEntity? get currentUser => null;
+
+  @override
+  Future<void> deleteAccount() async {}
+
+  @override
+  Future<void> prepareGoogleSignIn() async {}
+
+  @override
+  Future<AuthResult> signInWithGoogle() async => const AuthResult.cancelled();
+
+  @override
+  Future<void> signOut() async {}
+}
+
 void main() {
   final TestWidgetsFlutterBinding binding =
       TestWidgetsFlutterBinding.ensureInitialized();
@@ -54,6 +91,8 @@ void main() {
   late MockDeleteAccount mockDeleteAccount;
   late MockGetCurrentUserUseCase mockGetCurrentUserUseCase;
   late MockSyncDeviceTokenUseCase mockSyncDeviceTokenUseCase;
+  late MockGetCurrentLanguageUseCase mockGetCurrentLanguageUseCase;
+  late MockSyncUserLanguagePreferenceUseCase mockSyncUserLanguagePreference;
   late AccountDeletionFlowTracker accountDeletionFlowTracker;
   late GoogleSignInSessionTracker sessionTracker;
   late TestGoogleSignInInteractiveLauncher testLauncher;
@@ -67,6 +106,10 @@ void main() {
   );
 
   setUpAll(() async {
+    provideDummy<Either<Failure, void>>(const Right(null));
+    provideDummy<Either<Failure, String>>(
+      Right(LanguageConfig.defaultLanguageCode),
+    );
     await initializeHydratedStorageForTest();
   });
 
@@ -75,18 +118,25 @@ void main() {
   });
 
   setUp(() async {
+    TilawaInteractionFeedback.enabled = false;
     await getIt.reset();
     mockSignInWithGoogleUseCase = MockSignInWithGoogleUseCase();
     mockSignOut = MockSignOut();
     mockDeleteAccount = MockDeleteAccount();
     mockGetCurrentUserUseCase = MockGetCurrentUserUseCase();
     mockSyncDeviceTokenUseCase = MockSyncDeviceTokenUseCase();
+    mockGetCurrentLanguageUseCase = MockGetCurrentLanguageUseCase();
+    mockSyncUserLanguagePreference = MockSyncUserLanguagePreferenceUseCase();
     accountDeletionFlowTracker = AccountDeletionFlowTracker();
     sessionTracker = GoogleSignInSessionTracker();
     testLauncher = TestGoogleSignInInteractiveLauncher();
 
     when(mockGetCurrentUserUseCase()).thenReturn(null);
     when(mockSyncDeviceTokenUseCase(any)).thenAnswer((_) async {});
+    when(
+      mockGetCurrentLanguageUseCase(),
+    ).thenAnswer((_) async => Right(LanguageConfig.defaultLanguageCode));
+    when(mockSyncUserLanguagePreference(any)).thenAnswer((_) async {});
 
     authBloc = AuthBloc(
       mockSignInWithGoogleUseCase,
@@ -94,10 +144,26 @@ void main() {
       mockDeleteAccount,
       mockGetCurrentUserUseCase,
       mockSyncDeviceTokenUseCase,
+      mockGetCurrentLanguageUseCase,
+      mockSyncUserLanguagePreference,
       accountDeletionFlowTracker,
     );
 
-    getIt.registerSingleton<GoogleSignInInteractiveLauncher>(testLauncher);
+    getIt.registerSingleton<GoogleSignInLaunchGateway>(testLauncher);
+    getIt.registerSingleton<GoogleSignInLaunchReadinessStore>(
+      GoogleSignInLaunchReadinessStore(),
+    );
+    getIt.registerFactory<LoginGoogleSignInCubit>(
+      () => LoginGoogleSignInCubit(
+        PrewarmGoogleSignInLaunchUseCase(
+          _NoopPrepareGoogleSignInUseCase(),
+          getIt<GoogleSignInLaunchReadinessStore>(),
+        ),
+        ResolveGoogleSignInLaunchUseCase(
+          getIt<GoogleSignInLaunchReadinessStore>(),
+        ),
+      ),
+    );
     getIt.registerSingleton<AndroidSignInPlatformPolicy>(
       AndroidSignInPlatformPolicy.test(skipAutomaticSignIn: true),
     );
@@ -124,6 +190,9 @@ void main() {
         supportedLocales: AppLocalizations.supportedLocales,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         locale: const Locale('en'),
+        builder: (BuildContext context, Widget? child) {
+          return TilawaFeedbackHost(child: child!);
+        },
         home: BlocProvider<AuthBloc>.value(
           value: authBloc,
           child: const LoginScreen(),
@@ -155,6 +224,26 @@ void main() {
     );
   }
 
+  Future<void> completeSignInAndPump(
+    WidgetTester tester,
+    Completer<AuthResult> completer,
+    AuthResult result,
+  ) async {
+    completer.complete(result);
+    for (var i = 0; i < 40; i++) {
+      await tester.pump(const Duration(milliseconds: 16));
+      final bool authSettled = result.when(
+        success: (_) => authBloc.state is AuthAuthenticated,
+        failure: (_, _, _) => authBloc.state is AuthError,
+        cancelled: () => authBloc.state is AuthUnauthenticated,
+        noGoogleAccounts: () => authBloc.state is AuthNoGoogleAccounts,
+      );
+      if (authSettled) {
+        return;
+      }
+    }
+  }
+
   group('LoginScreen', () {
     testWidgets('renders welcome copy and the Google sign-in button', (
       WidgetTester tester,
@@ -183,7 +272,7 @@ void main() {
         await tester.tap(googleButtonFinder());
         await tester.pump();
 
-        expect(testLauncher.settledInvocations, 1);
+        expect(testLauncher.settledInvocations, 0);
         verify(mockSignInWithGoogleUseCase()).called(1);
         expect(isGoogleButtonLoading(tester), isTrue);
 
@@ -198,8 +287,9 @@ void main() {
     testWidgets('clears pending loading when readiness is a platform error', (
       WidgetTester tester,
     ) async {
-      testLauncher.readiness = GoogleSignInLaunchPlatformError(
-        PlatformException(code: 'test', message: 'blocked'),
+      testLauncher.readiness = const GoogleSignInLaunchPlatformError(
+        code: 'test',
+        message: 'blocked',
       );
 
       await pumpLoginScreen(tester);
@@ -210,12 +300,72 @@ void main() {
 
       verifyNever(mockSignInWithGoogleUseCase());
       expect(isGoogleButtonLoading(tester), isFalse);
+      expect(find.text('blocked'), findsOneWidget);
+    });
+
+    testWidgets('prewarms readiness into store on screen create', (
+      WidgetTester tester,
+    ) async {
+      final GoogleSignInLaunchReadinessStore store =
+          GoogleSignInLaunchReadinessStore();
+      getIt.unregister<GoogleSignInLaunchReadinessStore>();
+      getIt.registerSingleton<GoogleSignInLaunchReadinessStore>(store);
+      testLauncher.readiness = const GoogleSignInLaunchUiUnavailable();
+
+      await pumpLoginScreen(tester);
+      await pumpLoginInitFrames(tester);
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(store.cached, isA<GoogleSignInLaunchUiUnavailable>());
+    });
+
+    testWidgets('manual tap uses cached readiness without UI settle', (
+      WidgetTester tester,
+    ) async {
+      when(
+        mockSignInWithGoogleUseCase(),
+      ).thenAnswer((_) async => const AuthResult.cancelled());
+
+      await pumpLoginScreen(tester);
+      await pumpLoginInitFrames(tester);
+      await tester.pump(const Duration(milliseconds: 100));
+
+      testLauncher.readiness = const GoogleSignInLaunchUiUnavailable();
+      expect(
+        getIt<GoogleSignInLaunchReadinessStore>().cached,
+        isA<GoogleSignInLaunchReady>(),
+      );
+
+      await tester.tap(googleButtonFinder());
+      await tester.pump();
+
+      expect(testLauncher.settledInvocations, 0);
+      verify(mockSignInWithGoogleUseCase()).called(1);
+    });
+
+    testWidgets('shows fallback toast when platform error has no message', (
+      WidgetTester tester,
+    ) async {
+      testLauncher.readiness = const GoogleSignInLaunchPlatformError(
+        code: 'test',
+      );
+
+      await pumpLoginScreen(tester);
+      await pumpLoginInitFrames(tester);
+
+      await tester.tap(googleButtonFinder());
+      await tester.pump();
+
+      expect(
+        find.text('Unable to sign in with third-party account'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('dispatches sign-in when the interactive launcher is missing', (
       WidgetTester tester,
     ) async {
-      getIt.unregister<GoogleSignInInteractiveLauncher>();
+      getIt.unregister<GoogleSignInLaunchGateway>();
 
       await pumpLoginScreen(tester);
       await pumpLoginInitFrames(tester);
@@ -258,6 +408,10 @@ void main() {
       expect(
         tester.widget<TilawaGoogleSignInButton>(googleButtonFinder()).onPressed,
         isNotNull,
+      );
+      expect(
+        find.textContaining('Update Google Play Services'),
+        findsOneWidget,
       );
     });
 
@@ -321,6 +475,86 @@ void main() {
       await pumpLoginInitFrames(tester);
 
       verifyNever(mockSignInWithGoogleUseCase());
+    });
+
+    testWidgets('shows no toast when manual sign-in is cancelled', (
+      WidgetTester tester,
+    ) async {
+      final Completer<AuthResult> signInCompleter = Completer<AuthResult>();
+      when(
+        mockSignInWithGoogleUseCase(),
+      ).thenAnswer((_) => signInCompleter.future);
+
+      await pumpLoginScreen(tester);
+      await pumpLoginInitFrames(tester);
+
+      await tester.tap(googleButtonFinder());
+      await tester.pump();
+
+      expect(authBloc.state, isA<AuthLoading>());
+
+      signInCompleter.complete(const AuthResult.cancelled());
+      await tester.pump();
+      await tester.pump();
+
+      expect(authBloc.state, isA<AuthUnauthenticated>());
+      expect(
+        find.textContaining('No Google account found on this device'),
+        findsNothing,
+      );
+      expect(
+        find.text('Unable to sign in with third-party account'),
+        findsNothing,
+      );
+    });
+
+    testWidgets(
+      'surfaces noGoogleAccounts when CM is unavailable and chooser dismissed',
+      (
+        WidgetTester tester,
+      ) async {
+        final Completer<AuthResult> signInCompleter = Completer<AuthResult>();
+        when(
+          mockSignInWithGoogleUseCase(),
+        ).thenAnswer((_) => signInCompleter.future);
+
+        await pumpLoginScreen(tester);
+        await pumpLoginInitFrames(tester);
+
+        await tester.tap(googleButtonFinder());
+        await tester.pump();
+
+        await completeSignInAndPump(
+          tester,
+          signInCompleter,
+          const AuthResult.noGoogleAccounts(),
+        );
+
+        expect(authBloc.state, isA<AuthNoGoogleAccounts>());
+      },
+    );
+
+    testWidgets('shows auth error toast when sign-in returns failure', (
+      WidgetTester tester,
+    ) async {
+      final Completer<AuthResult> signInCompleter = Completer<AuthResult>();
+      when(
+        mockSignInWithGoogleUseCase(),
+      ).thenAnswer((_) => signInCompleter.future);
+
+      await pumpLoginScreen(tester);
+      await pumpLoginInitFrames(tester);
+
+      await tester.tap(googleButtonFinder());
+      await tester.pump();
+
+      await completeSignInAndPump(
+        tester,
+        signInCompleter,
+        const AuthResult.failure(message: 'Network down'),
+      );
+
+      expect(authBloc.state, isA<AuthError>());
     });
 
     testWidgets('marks splash handoff painted when still false on init', (

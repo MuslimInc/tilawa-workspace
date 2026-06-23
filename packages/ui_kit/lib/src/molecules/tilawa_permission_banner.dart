@@ -34,7 +34,6 @@ class TilawaPermissionBanner extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final double? borderRadius;
 
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

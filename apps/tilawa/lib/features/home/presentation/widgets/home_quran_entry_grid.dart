@@ -58,6 +58,10 @@ class _QuranEntryTile extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
+    final TextStyle subtitleStyle = theme.textTheme.bodySmall!.copyWith(
+      color: colorScheme.onSurfaceVariant,
+      height: 1.3,
+    );
 
     return HomeDashboardCard(
       surface: TilawaCardSurface.raised,
@@ -83,17 +87,26 @@ class _QuranEntryTile extends StatelessWidget {
               fontWeight: FontWeight.w700,
             ),
           ),
-          Text(
-            subtitle,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-              height: 1.3,
+          SizedBox(
+            height: _homeQuranEntrySubtitleBlockHeight(subtitleStyle),
+            width: double.infinity,
+            child: Text(
+              subtitle,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: subtitleStyle,
             ),
           ),
         ],
       ),
     );
   }
+}
+
+/// Fixed two-line subtitle block height (no [IntrinsicHeight] — expensive and
+/// incompatible with [HomeDashboardCard]'s [LayoutBuilder]).
+double _homeQuranEntrySubtitleBlockHeight(TextStyle style) {
+  final double fontSize = style.fontSize ?? 12;
+  final double lineHeight = style.height ?? 1.3;
+  return fontSize * lineHeight * 2;
 }

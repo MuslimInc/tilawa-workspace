@@ -77,6 +77,34 @@ class AnalyticsEvents {
   static const String khatmaDashboardViewed = 'khatma_dashboard_viewed';
   static const String khatmaContinueReading = 'khatma_continue_reading';
   static const String khatmaReset = 'khatma_reset';
+
+  // Quran Sessions
+  static const String teacherApplyEntrySeen = 'teacher_apply_entry_seen';
+  static const String teacherApplyStarted = 'teacher_apply_started';
+  static const String teacherApplicationSubmitted =
+      'teacher_application_submitted';
+  static const String teacherApplicationStatusViewed =
+      'teacher_application_status_viewed';
+  static const String teacherApplicationApproved =
+      'teacher_application_approved';
+  static const String teacherApplicationRejected =
+      'teacher_application_rejected';
+  static const String teacherDashboardOpened = 'teacher_dashboard_opened';
+  static const String quranSessionsEmptyStateSeen =
+      'quran_sessions_empty_state_seen';
+  static const String quranSessionsNotifyInterestSubmitted =
+      'quran_sessions_notify_interest_submitted';
+
+  // Scheduling experiment (Phase 1)
+  static const String weekViewOpened = 'week_view_opened';
+  static const String fridayReviewBannerShown = 'friday_review_banner_shown';
+  static const String fridayReviewBannerTapped = 'friday_review_banner_tapped';
+  static const String fridayReviewBannerDismissed =
+      'friday_review_banner_dismissed';
+  static const String weeklyTemplateOpened = 'weekly_template_opened';
+  static const String weeklyTemplateSaved = 'weekly_template_saved';
+  static const String bookingLostDueToNoAvailability =
+      'booking_lost_due_to_no_availability';
 }
 
 class AnalyticsParams {

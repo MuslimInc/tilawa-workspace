@@ -1,14 +1,14 @@
 <div class="space-y-6 animate-fade-in">
   <div class="flex items-center justify-between">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">Reciters Management</h1>
-      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Manage all Qaris and their associated audio files.</p>
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">{{ 'reciters_title' | t }}</h1>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ 'reciters_subtitle' | t }}</p>
     </div>
     <button class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
       <svg class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
       </svg>
-      Add Reciter
+      {{ 'reciters_addReciter' | t }}
     </button>
   </div>
   
@@ -16,7 +16,7 @@
     <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
     </svg>
-    <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">Reciters Module</h3>
-    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Content loading...</p>
+    <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">{{ 'reciters_moduleTitle' | t }}</h3>
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ 'reciters_contentLoading' | t }}</p>
   </div>
 </div>
