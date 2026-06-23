@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
+import '../telemetry/startup_perf_log.dart';
 import '../telemetry/startup_telemetry.dart';
 import 'first_frame_log.dart';
 
@@ -38,6 +39,7 @@ abstract final class LaunchFirstFrameGate {
     WidgetsFlutterBinding.ensureInitialized();
     WidgetsBinding.instance.deferFirstFrame();
     firstFrameLog('deferFirstFrame enabled (frames held until release)');
+    StartupPerfLog.log('first_frame_defer');
     _releaseFailsafeTimer = Timer(releaseFailsafeTimeout, () {
       if (_released) {
         return;
@@ -45,6 +47,10 @@ abstract final class LaunchFirstFrameGate {
       firstFrameLog(
         'FAILSAFE: first frame still deferred after '
         '${releaseFailsafeTimeout.inSeconds}s — forcing release',
+      );
+      StartupPerfLog.log(
+        'first_frame_release_failsafe',
+        detail: 'timeout_s=${releaseFailsafeTimeout.inSeconds}',
       );
       unawaited(
         StartupTelemetry.failure(
@@ -73,6 +79,7 @@ abstract final class LaunchFirstFrameGate {
     if (_deferred) {
       WidgetsBinding.instance.allowFirstFrame();
       firstFrameLog('allowFirstFrame called (first Flutter frame may paint)');
+      StartupPerfLog.log('first_frame_release');
     } else {
       firstFrameLog('allowFirstFrame skipped (defer was not used)');
     }
@@ -92,10 +99,13 @@ abstract final class LaunchFirstFrameGate {
   /// Schedules [release] after the first frame containing [child] is built.
   static void scheduleReleaseAfterFirstFrame() {
     firstFrameLog('scheduleReleaseAfterFirstFrame registered');
+    StartupPerfLog.log('first_frame_release_scheduled');
     SchedulerBinding.instance.scheduleFrameCallback((_) {
       firstFrameLog('frame callback: BootGate splash scheduled to build');
+      StartupPerfLog.log('first_frame_boot_gate_build_scheduled');
       SchedulerBinding.instance.addPostFrameCallback((_) {
         firstFrameLog('post-frame callback: BootGate splash built');
+        StartupPerfLog.log('first_frame_boot_gate_built');
         release();
       });
     });

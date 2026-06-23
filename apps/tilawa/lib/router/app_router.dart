@@ -21,6 +21,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../features/quran_sessions/router/quran_sessions_nav.dart';
 import 'app_router_config.dart';
 import 'app_navigator_keys.dart';
+import 'quran_sessions_session_guard.dart';
 import 'shell_route_location.dart';
 import 'json_type_registry.dart';
 
@@ -146,6 +147,11 @@ class AppRouter {
     final String? invalidRestoredRoute = _redirectInvalidRestoredPath(state);
     if (invalidRestoredRoute != null) {
       return invalidRestoredRoute;
+    }
+
+    final String? sessionGuard = quranSessionsSessionRedirect(context, state);
+    if (sessionGuard != null) {
+      return sessionGuard;
     }
 
     // Presentation entry without active media is invalid (playback ≠ URL).

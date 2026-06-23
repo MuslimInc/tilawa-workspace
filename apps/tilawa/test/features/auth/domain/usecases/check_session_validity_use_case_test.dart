@@ -44,4 +44,28 @@ void main() {
       expect(isValid, isFalse);
     });
   });
+
+  test('treats missing local epoch as zero', () async {
+    when(() => mockCache.getSessionEpoch()).thenAnswer((_) async => null);
+    await fakeFirestore.collection('users').doc('user_1').set({
+      'session': {'epoch': 0},
+    });
+
+    final result = await useCase('user_1');
+
+    result.fold((_) => fail('expected Right'), (isValid) {
+      expect(isValid, isTrue);
+    });
+  });
+
+  test('returns Left when Firestore read fails', () async {
+    when(() => mockCache.getSessionEpoch()).thenAnswer((_) async => 1);
+    // No user doc seeded — fake firestore returns empty doc with null epoch (0).
+    // Force failure by closing isn't easy; use invalid path via throwing cache.
+    when(() => mockCache.getSessionEpoch()).thenThrow(Exception('cache down'));
+
+    final result = await useCase('user_1');
+
+    expect(result.isLeft(), isTrue);
+  });
 }

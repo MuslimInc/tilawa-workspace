@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/di/injection.dart';
@@ -58,6 +59,10 @@ class HomeScreenScope extends StatelessWidget {
     )..add(HomeDashboardStarted(localeIdentifier: localeIdentifier));
   }
 
+  static void _deferToNextFrame(VoidCallback action) {
+    SchedulerBinding.instance.addPostFrameCallback((_) => action());
+  }
+
   static TodayPlanBloc _createTodayPlanBloc() {
     final localDataSource = SharedPreferencesTodayPlanLocalDataSource(
       getIt<SharedPreferencesAsync>(),
@@ -94,9 +99,29 @@ class HomeScreenScope extends StatelessWidget {
         BlocProvider(
           create: (_) => _createHomeDashboardBloc(localeIdentifier),
         ),
-        BlocProvider(create: (_) => getIt<HomeQuranResumeCubit>()..load()),
-        BlocProvider(create: (_) => getIt<HomeListeningResumeCubit>()..load()),
-        BlocProvider(create: (_) => getIt<HomeAthkarCompactCubit>()..load()),
+        BlocProvider(
+          create: (_) {
+            final HomeQuranResumeCubit cubit = getIt<HomeQuranResumeCubit>();
+            _deferToNextFrame(cubit.load);
+            return cubit;
+          },
+        ),
+        BlocProvider(
+          create: (_) {
+            final HomeListeningResumeCubit cubit =
+                getIt<HomeListeningResumeCubit>();
+            _deferToNextFrame(cubit.load);
+            return cubit;
+          },
+        ),
+        BlocProvider(
+          create: (_) {
+            final HomeAthkarCompactCubit cubit =
+                getIt<HomeAthkarCompactCubit>();
+            _deferToNextFrame(cubit.load);
+            return cubit;
+          },
+        ),
         BlocProvider(create: (_) => HomePrimaryActionCubit()),
         if (isSmartKhatmaEnabled())
           BlocProvider(create: (_) => SmartKhatmaDependencies.bloc()),

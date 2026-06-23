@@ -18,6 +18,7 @@ import 'package:tilawa/core/bootstrap/logo_height_log.dart';
 import 'package:tilawa/core/bootstrap/launch_first_frame_gate.dart';
 import 'package:tilawa/core/bootstrap/splash_launch_handoff.dart';
 import 'package:tilawa/core/telemetry/startup_telemetry.dart';
+import 'package:tilawa/core/telemetry/startup_perf_log.dart';
 import 'package:tilawa/core/bootstrap/critical_init_coordinator.dart';
 import 'package:tilawa/core/bootstrap/launch_timeline.dart';
 import 'package:tilawa/core/debug/device_preview_app_builder.dart';

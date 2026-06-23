@@ -77,5 +77,6 @@ test("buildSessionRevokedNotificationCopy localizes by user languageCode", () =>
 
   assert.equal(enCopy.title, "Signed in on another device");
   assert.equal(arCopy.title, "تم تسجيل الدخول من جهاز آخر");
+  assert.equal(arCopy.body, "يرجى تسجيل الدخول مرة أخرى.");
   assert.notEqual(enCopy.body, arCopy.body);
 });

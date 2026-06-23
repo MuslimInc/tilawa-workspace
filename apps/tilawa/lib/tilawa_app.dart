@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,12 +10,14 @@ import 'package:quran_image/l10n/quran_image_localizations.dart'
 import 'package:quran_sessions/l10n/quran_sessions_localizations.dart'
     as quran_sessions_l10n;
 import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:tilawa/core/telemetry/startup_perf_log.dart';
 import 'package:tilawa/features/quran_reader/presentation/theme/quran_reader_theme.dart';
 import 'package:tilawa_core/constants/app_strings.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'app/app_providers.dart';
 import 'app/default_route_system_ui_overlay.dart';
+import 'core/bootstrap/startup_blur_shader_warmup.dart';
 import 'core/debug/device_preview_app_builder.dart';
 import 'core/di/injection.dart';
 import 'core/services/notification_startup_service.dart';
@@ -60,11 +63,14 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    StartupPerfLog.log('tilawa_app_init');
     WidgetsBinding.instance.addObserver(this);
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      logger.d(
-        'ROUTER_READY navigatorContext=${AppRouter.navigatorKey.currentContext != null} '
-        'location=${AppRouter.router.routerDelegate.currentConfiguration.uri}',
+      StartupPerfLog.log(
+        'tilawa_app_first_post_frame',
+        detail:
+            'navigator_ready=${AppRouter.navigatorKey.currentContext != null} '
+            'location=${AppRouter.router.routerDelegate.currentConfiguration.uri}',
       );
       // handleAppStartup must run before consume: consume clears
       // pendingStartupNotificationLaunch / pendingColdStartLocation, which
@@ -237,71 +243,128 @@ class _PlayerApp extends StatelessWidget {
         getIt<BatchDownloadManager>().locale = state.locale;
         unawaited(_reschedulePrayerNotificationsForLocaleChange());
       },
-      child: BlocBuilder<LocalizationBloc, LocalizationState>(
-        builder: (context, locState) {
+      child: BlocSelector<LocalizationBloc, LocalizationState, Locale>(
+        selector: (LocalizationState state) => state.locale,
+        builder: (BuildContext context, Locale locale) {
           PerfLogger.markBuild('LocalizationBlocBuilder');
-          return BlocBuilder<ThemeCubit, ThemeState>(
-            builder: (context, themeState) {
+          return BlocSelector<ThemeCubit, ThemeState, _AppThemeSnapshot>(
+            selector: _AppThemeSnapshot.from,
+            builder: (BuildContext context, _AppThemeSnapshot themeSnapshot) {
               PerfLogger.markBuild('ThemeBlocBuilder');
-              return MaterialApp.router(
-                title: AppStrings.appName,
-                onGenerateTitle: (context) =>
-                    AppLocalizations.of(context).appTitle,
-                showPerformanceOverlay: false,
-                debugShowCheckedModeBanner: false,
-                // showPerformanceOverlay: kDebugMode || kProfileMode,
-                // checkerboardRasterCacheImages: kDebugMode || kProfileMode,
-                builder: (context, child) {
-                  final app = applyDevicePreviewAppBuilder(context, child);
-                  final routedChild = DefaultRouteSystemUiOverlay(
-                    child: app,
-                  );
-                  return MediaQuery(
-                    data: MediaQuery.of(context).copyWith(
-                      textScaler:
-                          MediaQuery.textScalerOf(
-                            context,
-                          ).clamp(
-                            minScaleFactor: _kTextScaleClampMin,
-                            maxScaleFactor: _kTextScaleClampMax,
-                          ),
-                    ),
-                    child: TilawaFeedbackHost(child: routedChild),
-                  );
-                },
-                theme: AppTheme.getLightTheme(
-                  primaryColor: themeState.primaryColor,
-                  extensions: [QuranReaderTheme.light],
-                ),
-                darkTheme: AppTheme.getDarkTheme(
-                  primaryColor: themeState.primaryColor,
-                  isDefaultPreset:
-                      themeState.primaryColorSource ==
-                          PrimaryColorSource.preset &&
-                      themeState.primaryPresetId ==
-                          PrimaryColorPreset.defaultPreset.id,
-                  darkIsTrueBlack:
-                      themeState.preset == AppThemePreset.trueBlack,
-                  extensions: [QuranReaderTheme.dark],
-                ),
-                themeMode: themeState.themeMode,
-                routerConfig: AppRouter.router,
-                // Disable restoration when launched from notification
-                restorationScopeId: AppRouter.disableStateRestoration
-                    ? null
-                    : AppStrings.restorationScopeId,
-                locale: locState.locale,
-                supportedLocales: AppLocalizations.supportedLocales,
-                localizationsDelegates: const [
-                  ...AppLocalizations.localizationsDelegates,
-                  quran_image_l10n.QuranImageLocalizations.delegate,
-                  quran_sessions_l10n.QuranSessionsLocalizations.delegate,
-                ],
+              return _ThemedMaterialApp(
+                locale: locale,
+                themeSnapshot: themeSnapshot,
+                textScaleClampMin: _kTextScaleClampMin,
+                textScaleClampMax: _kTextScaleClampMax,
               );
             },
           );
         },
       ),
+    );
+  }
+}
+
+@immutable
+class _AppThemeSnapshot extends Equatable {
+  const _AppThemeSnapshot({
+    required this.themeMode,
+    required this.primaryColor,
+    required this.isDefaultPreset,
+    required this.darkIsTrueBlack,
+  });
+
+  factory _AppThemeSnapshot.from(ThemeState state) {
+    return _AppThemeSnapshot(
+      themeMode: state.themeMode,
+      primaryColor: state.primaryColor,
+      isDefaultPreset:
+          state.primaryColorSource == PrimaryColorSource.preset &&
+          state.primaryPresetId == PrimaryColorPreset.defaultPreset.id,
+      darkIsTrueBlack: state.preset == AppThemePreset.trueBlack,
+    );
+  }
+
+  final ThemeMode themeMode;
+  final Color primaryColor;
+  final bool isDefaultPreset;
+  final bool darkIsTrueBlack;
+
+  @override
+  List<Object?> get props => <Object?>[
+    themeMode,
+    primaryColor,
+    isDefaultPreset,
+    darkIsTrueBlack,
+  ];
+}
+
+class _ThemedMaterialApp extends StatelessWidget {
+  const _ThemedMaterialApp({
+    required this.locale,
+    required this.themeSnapshot,
+    required this.textScaleClampMin,
+    required this.textScaleClampMax,
+  });
+
+  static bool _loggedMaterialAppBuilder = false;
+
+  final Locale locale;
+  final _AppThemeSnapshot themeSnapshot;
+  final double textScaleClampMin;
+  final double textScaleClampMax;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp.router(
+      title: AppStrings.appName,
+      onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
+      showPerformanceOverlay: false,
+      debugShowCheckedModeBanner: false,
+      builder: (context, child) {
+        if (!_loggedMaterialAppBuilder) {
+          _loggedMaterialAppBuilder = true;
+          StartupPerfLog.log('material_app_builder_first');
+        }
+        StartupBlurShaderWarmup.scheduleOnce(
+          resolveOverlay: () => AppRouter.navigatorKey.currentState?.overlay,
+        );
+        final app = applyDevicePreviewAppBuilder(context, child);
+        final routedChild = DefaultRouteSystemUiOverlay(
+          child: app,
+        );
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: MediaQuery.textScalerOf(context).clamp(
+              minScaleFactor: textScaleClampMin,
+              maxScaleFactor: textScaleClampMax,
+            ),
+          ),
+          child: TilawaFeedbackHost(child: routedChild),
+        );
+      },
+      theme: AppTheme.getLightTheme(
+        primaryColor: themeSnapshot.primaryColor,
+        extensions: const [QuranReaderTheme.light],
+      ),
+      darkTheme: AppTheme.getDarkTheme(
+        primaryColor: themeSnapshot.primaryColor,
+        isDefaultPreset: themeSnapshot.isDefaultPreset,
+        darkIsTrueBlack: themeSnapshot.darkIsTrueBlack,
+        extensions: const [QuranReaderTheme.dark],
+      ),
+      themeMode: themeSnapshot.themeMode,
+      routerConfig: AppRouter.router,
+      restorationScopeId: AppRouter.disableStateRestoration
+          ? null
+          : AppStrings.restorationScopeId,
+      locale: locale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: const [
+        ...AppLocalizations.localizationsDelegates,
+        quran_image_l10n.QuranImageLocalizations.delegate,
+        quran_sessions_l10n.QuranSessionsLocalizations.delegate,
+      ],
     );
   }
 }

@@ -9,6 +9,8 @@
 import { initializeApp } from "firebase-admin/app";
 import { FieldValue, getFirestore, Timestamp } from "firebase-admin/firestore";
 
+import { decideFcmTokenMigration } from "../src/migration/fcmTokenMigration";
+
 const APPLY = process.argv.includes("--apply");
 
 function parseUserId(): string | undefined {
@@ -65,46 +67,32 @@ async function main(): Promise<void> {
   for (const userDoc of userDocs) {
     const userId = userDoc.id;
     const userData = userDoc.data() ?? {};
-    const existingToken = userData.notifications?.activeFcmToken;
-    if (typeof existingToken === "string" && existingToken.length > 0) {
-      rows.push({
-        userId,
-        selectedToken: existingToken,
-        platform: userData.notifications?.platform ?? null,
-        legacyDocCount: 0,
-        action: "skip",
-        reason: "embedded_token_already_set",
-      });
-      continue;
-    }
-
     const tokensSnap = await userDoc.ref.collection("fcm_tokens").get();
-    if (tokensSnap.empty) {
-      rows.push({
-        userId,
-        selectedToken: null,
-        platform: null,
-        legacyDocCount: 0,
-        action: "skip",
-        reason: "no_legacy_tokens",
-      });
-      continue;
-    }
-
-    const newest = [...tokensSnap.docs].sort(
-      (a, b) => tokenCreatedAtMillis(b.data()) - tokenCreatedAtMillis(a.data()),
-    )[0];
-    const token = String(newest.data().token ?? newest.id);
-    const platform = String(newest.data().platform ?? "android");
+    const decision = decideFcmTokenMigration({
+      existingActiveToken: userData.notifications?.activeFcmToken,
+      legacyDocs: tokensSnap.docs.map((doc) => ({
+        id: doc.id,
+        token: doc.data().token,
+        platform: doc.data().platform,
+        createdAtMillis: tokenCreatedAtMillis(doc.data()),
+      })),
+    });
 
     rows.push({
       userId,
-      selectedToken: token,
-      platform,
-      legacyDocCount: tokensSnap.size,
-      action: "set",
-      reason: "newest_legacy_token",
+      selectedToken: decision.selectedToken,
+      platform: decision.platform,
+      legacyDocCount: decision.legacyDocCount,
+      action: decision.action,
+      reason: decision.reason,
     });
+
+    if (decision.action !== "set") {
+      continue;
+    }
+
+    const token = decision.selectedToken!;
+    const platform = decision.platform ?? "android";
 
     if (APPLY) {
       const batch = db.batch();

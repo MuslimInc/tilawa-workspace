@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import 'package:tilawa/core/telemetry/startup_perf_log.dart';
 import 'package:tilawa/core/telemetry/startup_telemetry.dart';
 
 import 'first_frame_log.dart';
@@ -19,16 +20,23 @@ abstract final class SplashLaunchHandoff {
   static void resetForNewLaunch() {
     splashRouteHasPainted.value = false;
     firstFrameLog('handoff reset (splashRouteHasPainted=false)');
+    StartupPerfLog.log('splash_handoff_reset');
   }
 
   /// Called when the routed app has completed its first frame.
   static void markSplashRoutePainted() {
     if (splashRouteHasPainted.value) {
       firstFrameLog('handoff mark skipped (already painted)');
+      StartupPerfLog.log(
+        'splash_handoff_mark_skipped',
+        detail: 'already_painted',
+      );
       return;
     }
     splashRouteHasPainted.value = true;
     firstFrameLog('handoff complete (splashRouteHasPainted=true)');
+    StartupPerfLog.log('splash_handoff_marked');
+    StartupPerfLog.log('startup_completed');
     unawaited(StartupTelemetry.phase('first_route_painted'));
     unawaited(StartupTelemetry.completed());
   }

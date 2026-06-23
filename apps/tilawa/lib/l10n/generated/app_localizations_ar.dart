@@ -3084,8 +3084,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get authSignedInElsewhereTitle => 'تم تسجيل الدخول من جهاز آخر';
 
   @override
-  String get authSignedInElsewhereBody =>
-      'تم فتح حسابك على جهاز آخر. سجّل الدخول مرة أخرى للمتابعة على هذا الجهاز.';
+  String get authSignedInElsewhereBody => 'يرجى تسجيل الدخول مرة أخرى.';
 
   @override
   String get authSignedInElsewhereAction => 'تسجيل الدخول مجدداً';

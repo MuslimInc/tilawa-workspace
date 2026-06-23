@@ -18,45 +18,47 @@ class HomeHeroBackground extends StatelessWidget {
     final TilawaDesignTokens tokens = Theme.of(context).tokens;
     final Color canvasColor = context.scaffoldCanvasColor;
 
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        DecoratedBox(
-          decoration: BoxDecoration(gradient: heroTokens.backgroundGradient),
-        ),
-        DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: AlignmentDirectional.topCenter,
-              end: AlignmentDirectional.bottomCenter,
-              colors: <Color>[
-                Colors.black.withValues(alpha: 0.06),
-                Colors.transparent,
-                Colors.black.withValues(alpha: 0.08),
-              ],
-              stops: const <double>[0, 0.45, 1],
-            ),
+    return RepaintBoundary(
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          DecoratedBox(
+            decoration: BoxDecoration(gradient: heroTokens.backgroundGradient),
           ),
-        ),
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          height: HomeDashboardHeroSliver.sheetOverlap + tokens.spaceLarge,
-          child: DecoratedBox(
+          DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  canvasColor.withValues(alpha: 0),
-                  canvasColor,
+                begin: AlignmentDirectional.topCenter,
+                end: AlignmentDirectional.bottomCenter,
+                colors: <Color>[
+                  Colors.black.withValues(alpha: 0.06),
+                  Colors.transparent,
+                  Colors.black.withValues(alpha: 0.08),
                 ],
+                stops: const <double>[0, 0.45, 1],
               ),
             ),
           ),
-        ),
-      ],
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: HomeDashboardHeroSliver.sheetOverlap + tokens.spaceLarge,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    canvasColor.withValues(alpha: 0),
+                    canvasColor,
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

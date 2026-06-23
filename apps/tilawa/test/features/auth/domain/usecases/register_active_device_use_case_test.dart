@@ -129,4 +129,54 @@ void main() {
       expect(failure, isA<ServerFailure>());
     }, (_) => fail('expected Left'));
   });
+
+  test('clearActiveDeviceOnSignOut clears local session cache', () async {
+    when(
+      () => mockCache.getActiveDeviceId(),
+    ).thenAnswer((_) async => 'device_1');
+    when(
+      () => mockRemote.registerActiveDevice(
+        deviceId: any(named: 'deviceId'),
+        fcmToken: any(named: 'fcmToken'),
+        platform: any(named: 'platform'),
+        signOut: true,
+      ),
+    ).thenAnswer(
+      (_) async =>
+          const SessionRegistration(epoch: 2, activeDeviceId: 'device_1'),
+    );
+    when(() => mockCache.clearSession()).thenAnswer((_) async {});
+
+    final result = await useCase.clearActiveDeviceOnSignOut(tUserId);
+
+    expect(result.isRight(), isTrue);
+    verify(() => mockCache.clearSession()).called(1);
+  });
+
+  test(
+    'token refresh on same device updates cache without epoch change',
+    () async {
+      when(
+        () => mockTokenService.getToken(),
+      ).thenAnswer((_) async => 'fcm_new');
+      when(
+        () => mockRemote.registerActiveDevice(
+          deviceId: 'device_1',
+          fcmToken: 'fcm_new',
+          platform: 'android',
+          appVersion: any(named: 'appVersion'),
+          signOut: false,
+        ),
+      ).thenAnswer(
+        (_) async =>
+            const SessionRegistration(epoch: 5, activeDeviceId: 'device_1'),
+      );
+
+      final result = await useCase(tUserId);
+
+      expect(result.isRight(), isTrue);
+      verify(() => mockCache.saveSessionEpoch(5)).called(1);
+      verify(() => mockCache.saveSync('fcm_new', tUserId)).called(1);
+    },
+  );
 }

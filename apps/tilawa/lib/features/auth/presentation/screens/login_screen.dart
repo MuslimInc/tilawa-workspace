@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/app_legal_urls.dart';
 import 'package:tilawa/core/bootstrap/splash_launch_handoff.dart';
+import 'package:tilawa/core/widgets/deferred_after_first_frame.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
@@ -334,10 +335,13 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
               content: RepaintBoundary(
                 child: _LoginHeroContent(loginScheme: loginScheme),
               ),
-              actions: _LoginGoogleSignInActions(
-                onPressed: _onGoogleSignInPressed,
-                logButtonStateIfChanged: _logButtonStateIfChanged,
-                logAuthStateIfChanged: _logAuthStateIfChanged,
+              actions: DeferredAfterFirstFrame(
+                perfEvent: 'login_actions',
+                child: _LoginGoogleSignInActions(
+                  onPressed: _onGoogleSignInPressed,
+                  logButtonStateIfChanged: _logButtonStateIfChanged,
+                  logAuthStateIfChanged: _logAuthStateIfChanged,
+                ),
               ),
             ),
           ),

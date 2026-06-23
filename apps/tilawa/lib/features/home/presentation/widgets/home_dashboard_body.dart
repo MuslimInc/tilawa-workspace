@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/widgets/deferred_after_first_frame.dart';
 import 'package:tilawa/features/today_plan/today_plan.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -27,21 +28,28 @@ class HomeDashboardBody extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const HomePrimaryActionZone(),
-        SizedBox(height: tokens.spaceLarge),
-        if (isTodayPlanEnabled()) ...[
-          const TodayPlanCard(),
-          SizedBox(height: tokens.spaceLarge),
-        ],
-        HomeDashboardSection(
-          title: context.l10n.homeTodayTitle,
-          contentSpacing: tokens.spaceMedium,
-          child: const HomeDailyAyahCard(),
+        DeferredAfterFirstFrame(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(height: tokens.spaceLarge),
+              if (isTodayPlanEnabled()) ...[
+                const TodayPlanCard(),
+                SizedBox(height: tokens.spaceLarge),
+              ],
+              HomeDashboardSection(
+                title: context.l10n.homeTodayTitle,
+                contentSpacing: tokens.spaceMedium,
+                child: const HomeDailyAyahCard(),
+              ),
+              SizedBox(height: tokens.spaceExtraLarge),
+              const HomeAthkarCompactCard(),
+              SizedBox(height: tokens.spaceLarge),
+              const _ConditionalListeningRow(),
+              const HomeDashboardFooter(),
+            ],
+          ),
         ),
-        SizedBox(height: tokens.spaceExtraLarge),
-        const HomeAthkarCompactCard(),
-        SizedBox(height: tokens.spaceLarge),
-        const _ConditionalListeningRow(),
-        const HomeDashboardFooter(),
       ],
     );
   }

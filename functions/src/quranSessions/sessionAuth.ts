@@ -26,9 +26,9 @@ export function requireAuthenticatedUid(
 export async function requireValidSessionEpoch(
   request: CallableRequest<unknown>,
   uid: string,
+  db: FirebaseFirestore.Firestore = getFirestore(),
 ): Promise<void> {
   const data = request.data as Record<string, unknown> | undefined;
-  const db = getFirestore();
   const userSnap = await db.collection("users").doc(uid).get();
   const serverEpoch = readServerSessionEpoch(userSnap.data());
 

@@ -12,8 +12,7 @@ export function buildSessionRevokedNotificationCopy(
   if (locale === "ar") {
     return {
       title: "تم تسجيل الدخول من جهاز آخر",
-      body:
-        "تم فتح حسابك على جهاز آخر. سجّل الدخول مرة أخرى للمتابعة على هذا الجهاز.",
+      body: "يرجى تسجيل الدخول مرة أخرى.",
     };
   }
 

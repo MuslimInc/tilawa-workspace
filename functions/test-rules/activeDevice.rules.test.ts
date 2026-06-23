@@ -89,6 +89,37 @@ test("rules: owner cannot write fcm_tokens subcollection", async () => {
   );
 });
 
+test("rules: owner cannot change session.activeDeviceId", async () => {
+  await testEnv.clearFirestore();
+  await seedUser();
+
+  const ownerDb = testEnv.authenticatedContext("student1").firestore();
+  await assertFails(
+    updateDoc(doc(ownerDb, "users/student1"), {
+      session: {
+        epoch: 1,
+        activeDeviceId: "device-spoofed",
+      },
+    }),
+  );
+});
+
+test("rules: owner cannot change session.registeredAt", async () => {
+  await testEnv.clearFirestore();
+  await seedUser();
+
+  const ownerDb = testEnv.authenticatedContext("student1").firestore();
+  await assertFails(
+    updateDoc(doc(ownerDb, "users/student1"), {
+      session: {
+        epoch: 1,
+        activeDeviceId: "device-a",
+        registeredAt: new Date(),
+      },
+    }),
+  );
+});
+
 test("rules: owner can read own session epoch", async () => {
   await testEnv.clearFirestore();
   await seedUser();
