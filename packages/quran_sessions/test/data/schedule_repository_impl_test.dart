@@ -163,6 +163,7 @@ void main() {
         (schedule) {
           check(schedule).isNotNull();
           check(schedule!.isEmpty).isFalse();
+          check(schedule.teacherId).equals(profileId);
         },
       );
     });

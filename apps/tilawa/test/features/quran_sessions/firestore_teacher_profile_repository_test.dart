@@ -72,5 +72,34 @@ void main() {
       check(data['isPubliclyVisible']).equals(false);
       check(data['verificationStatus']).equals('verified');
     });
+
+    test('writes externalMeetingUrl when provided', () async {
+      await dataSource.updatePublicProfile(
+        TeacherProfileDto(
+          id: 'app_1',
+          userId: 'uid_teacher',
+          displayName: 'Ustad Ahmad',
+          publicBio: 'Tajweed specialist.',
+          teachingLanguages: const ['ar'],
+          specializations: const ['tajweed'],
+          verificationStatus: 'verified',
+          averageRating: 0,
+          reviewCount: 0,
+          isActive: true,
+          profileCompleteness: 'complete',
+          isPubliclyVisible: true,
+          externalMeetingUrl: 'https://meet.google.com/room-1',
+          createdAt: DateTime.utc(2024, 1, 1),
+          updatedAt: DateTime.utc(2024, 1, 2),
+        ),
+      );
+
+      final doc = await firestore
+          .collection(FirestoreQuranSessionsPaths.teacherProfiles)
+          .doc('app_1')
+          .get();
+      check(doc.data()!['externalMeetingUrl'])
+          .equals('https://meet.google.com/room-1');
+    });
   });
 }

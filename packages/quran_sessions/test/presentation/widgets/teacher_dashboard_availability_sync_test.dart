@@ -11,6 +11,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 
 import '../../helpers/availability_test_helpers.dart';
+import '../../helpers/fakes/fake_booked_slot_lock_repository.dart';
 import '../../helpers/fakes/fake_availability_provider.dart';
 import '../../helpers/fakes/fake_session_repository.dart';
 import '../../helpers/lifecycle_test_helpers.dart';
@@ -82,7 +83,7 @@ void main() {
     blockGeneratedSlot = BlockGeneratedSlotUseCase(scheduleRepo);
     spyGetAvailability = SpyGetTeacherAvailabilityUseCase(
       scheduleRepository: scheduleRepo,
-      sessionRepository: sessionRepo,
+      bookedSlotLocks: FakeBookedSlotLockRepository(),
       now: () => fixedNow,
     );
     fakeTimers = FakeCommitTimers();

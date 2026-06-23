@@ -19,7 +19,9 @@ export type LifecycleErrorCode =
   | "meeting_link_required"
   | "group_booking_not_supported"
   | "unsupported_session_mode"
-  | "unsupported_call_provider";
+  | "unsupported_call_provider"
+  | "session_epoch_stale"
+  | "session_epoch_required";
 
 export function lifecycleError(
   code: LifecycleErrorCode,

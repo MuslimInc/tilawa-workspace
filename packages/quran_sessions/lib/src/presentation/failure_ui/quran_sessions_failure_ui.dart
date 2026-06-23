@@ -4,6 +4,7 @@ import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import '../../domain/failures/quran_sessions_failure.dart';
 import '../../domain/services/vacation_override_validator.dart';
 import '../../domain/services/weekly_schedule_validator.dart';
+import '../../domain/value_objects/external_meeting_url.dart';
 import '../../domain/value_objects/teacher_public_name.dart';
 import '../forms/teacher_application_validation_l10n.dart';
 
@@ -63,6 +64,9 @@ extension QuranSessionsFailureUi on QuranSessionsFailure {
             ? loc.messageForPublicNameFailure(
                 ValidationFailure(field: f, code: c),
               )
+            : f == ValidateExternalMeetingUrl.field &&
+                  c == 'invalid_url'
+            ? loc.teacherExternalMeetingUrlInvalid
             : loc.validationError(c, f),
 
       // ── Booking ─────────────────────────────────────────────────────────────

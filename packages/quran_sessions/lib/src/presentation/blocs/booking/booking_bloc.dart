@@ -2,6 +2,8 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../domain/entities/teacher_availability.dart';
+import '../../../domain/policies/session_mode_policy.dart';
+import '../../../domain/repositories/teacher_profile_repository.dart';
 import '../../../domain/usecases/get_teacher_availability_usecase.dart';
 import '../../../boundaries/payment/session_payment_confirmation.dart';
 import '../../../domain/entities/session_lifecycle_status.dart';
@@ -17,6 +19,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     required this._getAvailability,
     required this._submitBooking,
     required this._validateEligibility,
+    required this._teacherProfiles,
+    this.sessionModePolicy = SessionModePolicy.freeBeta,
     this.onBookingLostDueToNoAvailability,
     this.resolveMarketCode,
     this._paymentConfirmation,
@@ -35,6 +39,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
   final GetTeacherAvailabilityUseCase _getAvailability;
   final SubmitSessionBookingUseCase _submitBooking;
   final ValidateBookingEligibilityUseCase _validateEligibility;
+  final TeacherProfileRepository _teacherProfiles;
+  final SessionModePolicy sessionModePolicy;
   final SessionPaymentConfirmation? _paymentConfirmation;
 
   /// Fired when eligibility passes but no unbooked slots exist in the window.
@@ -87,6 +93,16 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
 
     emit(const BookingSlotsLoading());
 
+    final profileResult = await _teacherProfiles.getProfileById(teacherId);
+    final externalMeetingUrl = profileResult.fold(
+      (_) => null,
+      (profile) => profile.externalMeetingUrl,
+    );
+    final defaultCallType = SessionModePolicy.defaultCallType(
+      policy: sessionModePolicy,
+      externalMeetingUrl: externalMeetingUrl,
+    );
+
     final result = await _getAvailability(teacherId, from: from, to: to);
 
     if (result.isLeft()) {
@@ -110,6 +126,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
       BookingSelecting(
         teacherId: teacherId,
         availableSlots: available,
+        selectedCallType: defaultCallType,
+        teacherExternalMeetingUrl: externalMeetingUrl,
       ),
     );
   }

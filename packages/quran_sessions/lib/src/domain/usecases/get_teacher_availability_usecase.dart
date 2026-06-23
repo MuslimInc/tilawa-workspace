@@ -3,9 +3,8 @@ import 'package:dartz_plus/dartz_plus.dart';
 import '../entities/generated_slot.dart';
 import '../entities/teacher_availability.dart';
 import '../failures/quran_sessions_failure.dart';
+import '../repositories/booked_slot_lock_repository.dart';
 import '../repositories/schedule_repository.dart';
-import '../repositories/session_repository.dart';
-import '../services/booked_slot_starts.dart';
 import '../services/slot_generator.dart';
 import '../services/teacher_availability_sort.dart';
 
@@ -14,13 +13,13 @@ import '../services/teacher_availability_sort.dart';
 class GetTeacherAvailabilityUseCase {
   GetTeacherAvailabilityUseCase({
     required this._scheduleRepository,
-    required this._sessionRepository,
+    required this._bookedSlotLocks,
     this._slotGenerator = const SlotGenerator(),
     DateTime Function()? now,
   }) : _now = now ?? DateTime.now;
 
   final ScheduleRepository _scheduleRepository;
-  final SessionRepository _sessionRepository;
+  final BookedSlotLockRepository _bookedSlotLocks;
   final SlotGenerator _slotGenerator;
   final DateTime Function() _now;
 
@@ -56,13 +55,16 @@ class GetTeacherAvailabilityUseCase {
       (value) => value,
     );
 
-    final sessionsResult = await _sessionRepository.getTeacherSessions(
+    final bookedStartsResult = await _bookedSlotLocks.getActiveBookedStarts(
       teacherId,
+      windowStart: from,
+      windowEnd: to,
+      now: _now(),
     );
-    if (sessionsResult.isLeft()) {
-      return sessionsResult.map((_) => throw StateError('unreachable'));
+    if (bookedStartsResult.isLeft()) {
+      return bookedStartsResult.map((_) => throw StateError('unreachable'));
     }
-    final sessions = sessionsResult.fold(
+    final bookedStartsUtc = bookedStartsResult.fold(
       (_) => throw StateError('unreachable'),
       (value) => value,
     );
@@ -70,11 +72,7 @@ class GetTeacherAvailabilityUseCase {
     final generated = _slotGenerator.generate(
       schedule: schedule,
       overrides: overrides,
-      bookedStartsUtc: collectBookedSlotStarts(
-        sessions,
-        windowStart: from,
-        windowEnd: to,
-      ),
+      bookedStartsUtc: bookedStartsUtc,
       windowStart: from,
       windowEnd: to,
       now: _now(),

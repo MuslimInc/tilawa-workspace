@@ -1,11 +1,13 @@
 import 'package:dartz_plus/dartz_plus.dart';
 
 import '../entities/call_join_request.dart';
+import '../entities/quran_session.dart';
 import '../entities/session_lifecycle_status.dart';
 import '../entities/session_participant_role.dart';
 import '../failures/quran_sessions_failure.dart';
 import '../providers/auth_session_provider.dart';
 import '../repositories/session_repository.dart';
+import '../repositories/teacher_profile_repository.dart';
 import '../../boundaries/call/session_call_provider.dart';
 
 /// Joins a session through the injected [SessionCallProvider] gateway.
@@ -17,11 +19,13 @@ class JoinSessionUseCase {
     required this.sessionRepository,
     required this.callProvider,
     required this.authSession,
+    required this.teacherProfileRepository,
   });
 
   final SessionRepository sessionRepository;
   final SessionCallProvider callProvider;
   final AuthSessionProvider authSession;
+  final TeacherProfileRepository teacherProfileRepository;
 
   Future<Either<QuranSessionsFailure, void>> call({
     required String sessionId,
@@ -52,13 +56,8 @@ class JoinSessionUseCase {
       );
     }
 
-    final participantRole =
-        role ??
-        (userId == session.teacherId
-            ? SessionParticipantRole.teacher
-            : userId == session.studentId
-            ? SessionParticipantRole.student
-            : null);
+    final participantRole = role ??
+        await _resolveParticipantRole(userId: userId, session: session);
 
     if (participantRole == null) {
       return const Left(UnauthorizedFailure());
@@ -84,5 +83,27 @@ class JoinSessionUseCase {
     } on Object {
       return const Left(NetworkFailure());
     }
+  }
+
+  Future<SessionParticipantRole?> _resolveParticipantRole({
+    required String userId,
+    required QuranSession session,
+  }) async {
+    if (userId == session.studentId) {
+      return SessionParticipantRole.student;
+    }
+    if (userId == session.teacherId) {
+      return SessionParticipantRole.teacher;
+    }
+
+    final profileResult = await teacherProfileRepository.getProfileById(
+      session.teacherId,
+    );
+    return profileResult.fold(
+      (_) => null,
+      (profile) => profile.userId == userId
+          ? SessionParticipantRole.teacher
+          : null,
+    );
   }
 }

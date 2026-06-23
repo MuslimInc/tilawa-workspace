@@ -16,6 +16,7 @@ import '../data/fake_mvp_user_profile_repository.dart';
 import '../data/fake_mvp_wallet_repository.dart';
 import '../data/fake_mvp_session_lifecycle.dart';
 import '../data/quran_sessions_mvp_store.dart';
+import '../data/session_backed_booked_slot_lock_repository.dart';
 import '../presentation/quran_sessions_scheduling_analytics.dart';
 import 'quran_sessions_lifecycle_module.dart';
 
@@ -38,6 +39,9 @@ class QuranSessionsMvpModule {
     );
     sl.registerLazySingletonIfAbsent<SessionRepository>(
       () => FakeMvpSessionRepository(store),
+    );
+    sl.registerLazySingletonIfAbsent<BookedSlotLockRepository>(
+      () => SessionBackedBookedSlotLockRepository(sl<SessionRepository>()),
     );
     sl.registerLazySingletonIfAbsent<AvailabilityProvider>(
       () => FakeMvpAvailabilityProvider(store),
@@ -117,6 +121,7 @@ class QuranSessionsMvpModule {
         sessionRepository: sl<SessionRepository>(),
         callProvider: sl<SessionCallProvider>(),
         authSession: sl<AuthSessionProvider>(),
+        teacherProfileRepository: sl<TeacherProfileRepository>(),
       ),
     );
     registerBlocs(sl);
@@ -133,7 +138,7 @@ class QuranSessionsMvpModule {
     sl.registerLazySingletonIfAbsent(
       () => GetTeacherAvailabilityUseCase(
         scheduleRepository: sl<ScheduleRepository>(),
-        sessionRepository: sl<SessionRepository>(),
+        bookedSlotLocks: sl<BookedSlotLockRepository>(),
         slotGenerator: const SlotGenerator(),
       ),
     );
@@ -208,6 +213,9 @@ class QuranSessionsMvpModule {
     );
     sl.registerLazySingletonIfAbsent(
       () => SaveTeacherPublicProfileUseCase(sl<TeacherProfileRepository>()),
+    );
+    sl.registerLazySingletonIfAbsent(
+      () => UpdateTeacherMeetingLinkUseCase(sl<TeacherProfileRepository>()),
     );
     sl.registerLazySingletonIfAbsent(
       () => ApproveTeacherApplicationUseCase(
@@ -287,6 +295,7 @@ class QuranSessionsMvpModule {
           getAvailability: sl<GetTeacherAvailabilityUseCase>(),
           submitBooking: sl<SubmitSessionBookingUseCase>(),
           validateEligibility: sl<ValidateBookingEligibilityUseCase>(),
+          teacherProfiles: sl<TeacherProfileRepository>(),
           paymentConfirmation: sl.isRegistered<SessionPaymentConfirmation>()
               ? sl<SessionPaymentConfirmation>()
               : null,

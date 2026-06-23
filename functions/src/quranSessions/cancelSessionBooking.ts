@@ -12,6 +12,7 @@ import {
 } from "./idempotencyService";
 import { recordTerminalTransition } from "./metricsAggregationService";
 import { enqueueSessionNotification } from "./notificationOutboxService";
+import { resolveTeacherProfileUserId } from "./teacherProfileUserId";
 import { isAdmin, requireAuthenticatedUid, requireValidSessionEpochUnlessAdmin, resolveActorRole } from "./sessionAuth";
 import { cancelActionForRole, validateTransition } from "./sessionLifecycleGuard";
 import type { LifecycleStatus } from "./sessionLifecycleService";
@@ -146,7 +147,10 @@ export const cancelSessionBooking = onCall(
         sessionId: result.sessionId,
         aggregateId: data.bookingId,
         kind: "cancellation",
-        recipientUserIds: [result.teacherId, result.studentId],
+        recipientUserIds: [
+          await resolveTeacherProfileUserId(db, result.teacherId),
+          result.studentId,
+        ],
         payload: { reason: data.reason, actorRole: actor },
       });
     }

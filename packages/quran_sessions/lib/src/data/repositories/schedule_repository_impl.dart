@@ -32,12 +32,30 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
     });
   }
 
+  WeeklyScheduleDto _canonicalizeDto(
+    WeeklyScheduleDto dto,
+    String teacherProfileId,
+  ) => WeeklyScheduleDto(
+    teacherId: teacherProfileId,
+    timezone: dto.timezone,
+    slotDurationMinutes: dto.slotDurationMinutes,
+    minNoticeMinutes: dto.minNoticeMinutes,
+    maxHorizonDays: dto.maxHorizonDays,
+    bufferBeforeMinutes: dto.bufferBeforeMinutes,
+    bufferAfterMinutes: dto.bufferAfterMinutes,
+    weeklyRules: dto.weeklyRules,
+    version: dto.version,
+    updatedAt: dto.updatedAt,
+  );
+
   Future<WeeklyScheduleDto?> _loadScheduleDto(String teacherProfileId) async {
     final primary = await _remote.getSchedule(teacherProfileId);
-    if (primary != null) return primary;
+    if (primary != null) return _canonicalizeDto(primary, teacherProfileId);
     final legacyUserId = await _legacyOwnerUserId(teacherProfileId);
     if (legacyUserId == null) return null;
-    return _remote.getSchedule(legacyUserId);
+    final legacy = await _remote.getSchedule(legacyUserId);
+    if (legacy == null) return null;
+    return _canonicalizeDto(legacy, teacherProfileId);
   }
 
   Future<List<AvailabilityOverrideDto>> _loadOverrides(

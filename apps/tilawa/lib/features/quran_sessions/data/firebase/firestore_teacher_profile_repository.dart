@@ -23,6 +23,7 @@ class FirestoreTeacherProfileDto {
     this.publicBio,
     this.allowedStudentGender,
     this.canTeachChildren = true,
+    this.externalMeetingUrl,
   });
 
   final String id;
@@ -40,6 +41,7 @@ class FirestoreTeacherProfileDto {
   final bool isPubliclyVisible;
   final String? allowedStudentGender;
   final bool canTeachChildren;
+  final String? externalMeetingUrl;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -68,6 +70,7 @@ class FirestoreTeacherProfileDto {
       isPubliclyVisible: data['isPubliclyVisible'] as bool? ?? false,
       allowedStudentGender: data['allowedStudentGender'] as String?,
       canTeachChildren: data['canTeachChildren'] as bool? ?? true,
+      externalMeetingUrl: data['externalMeetingUrl'] as String?,
       createdAt: readRequiredDateTime(data['createdAt']),
       updatedAt: readRequiredDateTime(data['updatedAt']),
     );
@@ -89,6 +92,7 @@ class FirestoreTeacherProfileDto {
     isPubliclyVisible: isPubliclyVisible,
     allowedStudentGender: allowedStudentGender,
     canTeachChildren: canTeachChildren,
+    externalMeetingUrl: externalMeetingUrl,
     createdAt: createdAt,
     updatedAt: updatedAt,
   );
@@ -109,6 +113,8 @@ class FirestoreTeacherProfileDto {
     if (allowedStudentGender != null)
       'allowedStudentGender': allowedStudentGender,
     'canTeachChildren': canTeachChildren,
+    if (externalMeetingUrl != null && externalMeetingUrl!.isNotEmpty)
+      'externalMeetingUrl': externalMeetingUrl,
     'createdAt': writeDateTime(createdAt),
     'updatedAt': writeDateTime(updatedAt),
   };
@@ -130,6 +136,7 @@ class FirestoreTeacherProfileDto {
         isPubliclyVisible: dto.isPubliclyVisible,
         allowedStudentGender: dto.allowedStudentGender,
         canTeachChildren: dto.canTeachChildren,
+        externalMeetingUrl: dto.externalMeetingUrl,
         createdAt: dto.createdAt,
         updatedAt: dto.updatedAt,
       );
@@ -199,6 +206,7 @@ class FirestoreTeacherProfileDataSource
           isPubliclyVisible: profile.isPubliclyVisible,
           allowedStudentGender: profile.allowedStudentGender,
           canTeachChildren: profile.canTeachChildren,
+          externalMeetingUrl: profile.externalMeetingUrl,
           createdAt: now,
           updatedAt: now,
         ),
@@ -244,6 +252,12 @@ class FirestoreTeacherProfileDataSource
         'specializations': profile.specializations,
         'updatedAt': writeDateTime(now),
       };
+      final trimmedMeetingUrl = profile.externalMeetingUrl?.trim();
+      if (trimmedMeetingUrl != null && trimmedMeetingUrl.isNotEmpty) {
+        payload['externalMeetingUrl'] = trimmedMeetingUrl;
+      } else {
+        payload['externalMeetingUrl'] = FieldValue.delete();
+      }
       if (profile.avatarUrl != null) {
         payload['avatarUrl'] = profile.avatarUrl;
       }

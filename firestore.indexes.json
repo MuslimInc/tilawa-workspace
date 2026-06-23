@@ -82,6 +82,14 @@
       ]
     },
     {
+      "collectionGroup": "quran_session_events",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "bookingId", "order": "ASCENDING" },
+        { "fieldPath": "timestamp", "order": "ASCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "quran_reschedule_requests",
       "queryScope": "COLLECTION",
       "fields": [

@@ -4,12 +4,11 @@ import 'package:quran_sessions/quran_sessions.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 
 import '../../helpers/availability_test_helpers.dart';
-import '../../helpers/fakes/fake_session_repository.dart';
-import '../../helpers/fixtures.dart';
+import '../../helpers/fakes/fake_booked_slot_lock_repository.dart';
 
 void main() {
   late FakeScheduleRepository scheduleRepo;
-  late FakeSessionRepository sessionRepo;
+  late FakeBookedSlotLockRepository bookedSlotLockRepo;
   late GetTeacherAvailabilityUseCase useCase;
 
   final fixedNow = DateTime.utc(2026, 1, 9);
@@ -20,10 +19,10 @@ void main() {
 
   setUp(() {
     scheduleRepo = FakeScheduleRepository();
-    sessionRepo = FakeSessionRepository();
+    bookedSlotLockRepo = FakeBookedSlotLockRepository();
     useCase = buildGetTeacherAvailabilityUseCase(
       scheduleRepository: scheduleRepo,
-      sessionRepository: sessionRepo,
+      bookedSlotLockRepository: bookedSlotLockRepo,
       now: () => fixedNow,
     );
   });
@@ -88,14 +87,12 @@ void main() {
       );
     });
 
-    test('removes slots already booked via teacher sessions', () async {
+    test('removes slots already booked via slot locks', () async {
       scheduleRepo.schedule = makeWeeklySchedule();
-      sessionRepo.sessions = [
-        makeSession(
-          teacherId: 'teacher_1',
-          startsAt: DateTime.utc(2026, 1, 10, 7, 0),
-        ),
-      ];
+      bookedSlotLockRepo.seedHardLock(
+        teacherId: 'teacher_1',
+        startUtc: DateTime.utc(2026, 1, 10, 7, 0),
+      );
 
       final result = await useCase(
         'teacher_1',

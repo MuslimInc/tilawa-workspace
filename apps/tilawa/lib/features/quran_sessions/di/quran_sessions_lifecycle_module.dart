@@ -102,6 +102,7 @@ class QuranSessionsLifecycleModule {
           mutationGateway: mutationGateway,
           getAvailability: sl<GetTeacherAvailabilityUseCase>(),
           authSession: authSession,
+          teacherProfiles: sl<TeacherProfileRepository>(),
         ),
       );
       sl.registerLazySingletonIfAbsent<

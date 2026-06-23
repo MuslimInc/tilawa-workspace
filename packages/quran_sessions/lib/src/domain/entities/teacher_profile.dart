@@ -34,6 +34,7 @@ class TeacherProfile extends Equatable {
     this.publicBio,
     this.allowedStudentGender,
     this.canTeachChildren = true,
+    this.externalMeetingUrl,
   });
 
   final String id;
@@ -76,6 +77,9 @@ class TeacherProfile extends Equatable {
   /// Whether the teacher accepts sessions with child students.
   final bool canTeachChildren;
 
+  /// External meeting URL (Zoom, Google Meet, etc.) for external bookings.
+  final String? externalMeetingUrl;
+
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -111,6 +115,8 @@ class TeacherProfile extends Equatable {
     bool? isPubliclyVisible,
     UserGender? allowedStudentGender,
     bool? canTeachChildren,
+    String? externalMeetingUrl,
+    bool clearExternalMeetingUrl = false,
     DateTime? updatedAt,
   }) => TeacherProfile(
     id: id,
@@ -128,6 +134,9 @@ class TeacherProfile extends Equatable {
     isPubliclyVisible: isPubliclyVisible ?? this.isPubliclyVisible,
     allowedStudentGender: allowedStudentGender ?? this.allowedStudentGender,
     canTeachChildren: canTeachChildren ?? this.canTeachChildren,
+    externalMeetingUrl: clearExternalMeetingUrl
+        ? null
+        : (externalMeetingUrl ?? this.externalMeetingUrl),
     createdAt: createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -149,6 +158,7 @@ class TeacherProfile extends Equatable {
     isPubliclyVisible,
     allowedStudentGender,
     canTeachChildren,
+    externalMeetingUrl,
     createdAt,
     updatedAt,
   ];

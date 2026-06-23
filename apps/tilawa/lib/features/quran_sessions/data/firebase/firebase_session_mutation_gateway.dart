@@ -1,11 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:dartz_plus/dartz_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/features/auth/domain/services/callable_session_payload_builder.dart';
 
 import 'firestore_exception_mapper.dart';
 import 'firestore_paths.dart';
+import 'firebase_callable_failure_mapper.dart';
 import 'session_firestore_mapper.dart';
 
 class FirebaseSessionMutationGateway implements SessionMutationGateway {
@@ -67,32 +70,20 @@ class FirebaseSessionMutationGateway implements SessionMutationGateway {
         ),
       );
     } on FirebaseFunctionsException catch (e) {
-      if (e.code == 'already-exists') {
-        return Left(SlotUnavailableFailure(slotId));
+      if (kDebugMode) {
+        logger.w(
+          'createSessionBooking failed: code=${e.code} '
+          'message=${e.message} details=${e.details}',
+        );
       }
-      if (e.code == 'failed-precondition') {
-        final details = e.details;
-        if (details is Map) {
-          final code = details['code'];
-          if (code == 'payment_provider_unavailable') {
-            return const Left(PaymentProviderFailure());
-          }
-          if (code == 'group_booking_not_supported') {
-            return const Left(GroupBookingNotSupportedFailure());
-          }
-          if (code == 'unsupported_session_mode') {
-            return Left(
-              UnsupportedSessionModeFailure(
-                callType: callType.name,
-              ),
-            );
-          }
-          if (code == 'unsupported_call_provider') {
-            return const Left(CallProviderUnavailableFailure());
-          }
-        }
-      }
-      return const Left(UnknownFailure());
+      return Left(
+        mapQuranSessionsCallableFailure(
+          e,
+          slotId: slotId,
+          teacherId: teacherId,
+          callType: callType,
+        ),
+      );
     } on FirebaseException catch (e) {
       return Left(mapFirebaseExceptionToFailure(e));
     }

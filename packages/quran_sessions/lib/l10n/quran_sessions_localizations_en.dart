@@ -332,8 +332,12 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
       'Video sessions are not available yet. Choose external link.';
 
   @override
+  String get sessionModeExternalDisabled =>
+      'Your teacher has not added a meeting link yet. Choose voice or video.';
+
+  @override
   String get meetingLinkUnavailable =>
-      'No meeting link is configured for this session.';
+      'This teacher has not set up a meeting link for external sessions. Choose voice or video, or try again later.';
 
   @override
   String get callProviderUnavailable =>
@@ -1129,6 +1133,33 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   @override
   String get teacherPublicNameHelper =>
       'Your real full name as students see it in the marketplace. It may differ from your account name.';
+
+  @override
+  String get teacherExternalMeetingUrlLabel => 'External meeting link';
+
+  @override
+  String get teacherExternalMeetingUrlHint =>
+      'https://meet.google.com/your-room';
+
+  @override
+  String get teacherExternalMeetingUrlHelper =>
+      'Students who book external sessions join via this HTTPS link (Google Meet, Zoom, Microsoft Teams).';
+
+  @override
+  String get teacherExternalMeetingUrlSaved => 'Meeting link saved';
+
+  @override
+  String get teacherExternalMeetingUrlSave => 'Save meeting link';
+
+  @override
+  String get teacherExternalMeetingUrlInvalid =>
+      'Enter a valid HTTPS meeting link (Google Meet, Zoom, or Teams).';
+
+  @override
+  String get teacherOffersExternalSessions => 'External sessions available';
+
+  @override
+  String get sessionMeetingLinkLabel => 'Meeting link';
 
   @override
   String get teacherPublicNameRequired => 'Full teacher name is required.';

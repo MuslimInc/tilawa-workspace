@@ -196,6 +196,7 @@ class _BookingScreenState extends State<BookingScreen> {
             :final availableSlots,
             :final selectedSlot,
             :final selectedCallType,
+            :final teacherExternalMeetingUrl,
           ) =>
             Padding(
               padding: EdgeInsets.all(Theme.of(context).tokens.spaceLarge),
@@ -229,7 +230,8 @@ class _BookingScreenState extends State<BookingScreen> {
                           ),
                           SizedBox(height: Theme.of(context).tokens.spaceSmall),
                           _CallTypePicker(
-                            policy: widget.sessionModePolicy,
+                            hostPolicy: widget.sessionModePolicy,
+                            teacherExternalMeetingUrl: teacherExternalMeetingUrl,
                             selected: selectedCallType,
                             onChanged: (ct) => context.read<BookingBloc>().add(
                               CallTypeSelected(ct),
@@ -362,28 +364,46 @@ class _EligibilityBlockedView extends StatelessWidget {
 
 class _CallTypePicker extends StatelessWidget {
   const _CallTypePicker({
-    required this.policy,
+    required this.hostPolicy,
+    required this.teacherExternalMeetingUrl,
     required this.selected,
     required this.onChanged,
   });
 
-  final SessionModePolicy policy;
+  final SessionModePolicy hostPolicy;
+  final String? teacherExternalMeetingUrl;
   final SessionCallType selected;
   final ValueChanged<SessionCallType> onChanged;
+
+  bool get _hasExternalMeetingUrl =>
+      SessionModePolicy.hasExternalMeetingUrl(teacherExternalMeetingUrl);
+
+  SessionModePolicy get _effectivePolicy =>
+      hostPolicy.forTeacherExternalMeetingUrl(teacherExternalMeetingUrl);
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
     final tokens = Theme.of(context).tokens;
     final scheme = Theme.of(context).colorScheme;
+    final policy = _effectivePolicy;
+    final externalMissing =
+        hostPolicy.isEnabled(SessionCallType.externalMeeting) &&
+        !_hasExternalMeetingUrl;
 
     final segments = [
       TilawaSegment(
         value: SessionCallType.externalMeeting,
         label: l10n.callTypeExternalMeeting,
-        enabled: policy.isEnabled(SessionCallType.externalMeeting),
-        semanticsHint: policy.isEnabled(SessionCallType.externalMeeting)
+        enabled:
+            hostPolicy.isEnabled(SessionCallType.externalMeeting) &&
+            _hasExternalMeetingUrl,
+        semanticsHint:
+            hostPolicy.isEnabled(SessionCallType.externalMeeting) &&
+                _hasExternalMeetingUrl
             ? null
+            : externalMissing
+            ? l10n.sessionModeExternalDisabled
             : l10n.unsupportedSessionMode,
       ),
       TilawaSegment(
@@ -407,9 +427,14 @@ class _CallTypePicker extends StatelessWidget {
     final enabledSegments = segments
         .where((segment) => segment.enabled)
         .toList();
-    final effectiveSelected = policy.isEnabled(selected)
+    final effectiveSelected = policy.isEnabled(selected) &&
+            (selected != SessionCallType.externalMeeting ||
+                _hasExternalMeetingUrl)
         ? selected
-        : enabledSegments.firstOrNull?.value ?? SessionCallType.externalMeeting;
+        : SessionModePolicy.defaultCallType(
+            policy: hostPolicy,
+            externalMeetingUrl: teacherExternalMeetingUrl,
+          );
 
     if (enabledSegments.isEmpty) {
       return Text(
@@ -441,6 +466,13 @@ class _CallTypePicker extends StatelessWidget {
   }
 
   String? _helperText(QuranSessionsLocalizations l10n, SessionCallType type) {
+    final externalMissing =
+        hostPolicy.isEnabled(SessionCallType.externalMeeting) &&
+        !_hasExternalMeetingUrl;
+    if (externalMissing) {
+      return l10n.sessionModeExternalDisabled;
+    }
+    final policy = _effectivePolicy;
     final voiceOff = !policy.isEnabled(SessionCallType.voiceCall);
     final videoOff = !policy.isEnabled(SessionCallType.videoCall);
     if (voiceOff || videoOff) {

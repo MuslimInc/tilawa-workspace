@@ -1,3 +1,6 @@
+import { resolveMeetingLink } from "./meetingLinkResolver";
+import { lifecycleError } from "./lifecycleErrors";
+
 /**
  * Resolves call provider metadata when a booking is created.
  *
@@ -50,7 +53,11 @@ export function resolveCallProviderForBooking(params: {
   }
 
   if (callType === "externalMeeting") {
-    const meetingLink = resolveExternalMeetingUrl(teacherProfile, platformConfig);
+    const meetingLink = resolveMeetingLink(
+      callType,
+      teacherProfile,
+      platformConfig,
+    );
     return {
       callProvider: "external",
       providerSessionId: null,
@@ -59,14 +66,7 @@ export function resolveCallProviderForBooking(params: {
     };
   }
 
-  const enabledRtc =
-    platformConfig.enabledCallProviders === undefined
-      ? FREE_BETA_PROVIDERS
-      : new Set(
-          (platformConfig.enabledCallProviders as string[]).filter((p) =>
-            FREE_BETA_PROVIDERS.has(p as SessionCallProviderKind),
-          ),
-        );
+  const enabledRtc = parseEnabledRtcProviders(platformConfig.enabledCallProviders);
 
   if (!enabledRtc.has("mock")) {
     throw new Error("unsupported_call_provider");
@@ -80,25 +80,56 @@ export function resolveCallProviderForBooking(params: {
   };
 }
 
-function resolveExternalMeetingUrl(
-  teacherProfile: Record<string, unknown>,
-  platformConfig: Record<string, unknown>,
-): string | null {
-  const teacherUrl =
-    typeof teacherProfile.externalMeetingUrl === "string"
-      ? teacherProfile.externalMeetingUrl.trim()
-      : "";
-  if (teacherUrl.length > 0) {
-    return teacherUrl;
+function parseEnabledRtcProviders(raw: unknown): Set<SessionCallProviderKind> {
+  if (raw === undefined || raw === null) {
+    return FREE_BETA_PROVIDERS;
   }
-
-  const platformUrl =
-    typeof platformConfig.defaultExternalMeetingUrl === "string"
-      ? platformConfig.defaultExternalMeetingUrl.trim()
-      : "";
-  if (platformUrl.length > 0) {
-    return platformUrl;
+  if (!Array.isArray(raw)) {
+    throw new Error("invalid_enabled_call_providers");
   }
+  return new Set(
+    raw.filter(
+      (provider): provider is SessionCallProviderKind =>
+        typeof provider === "string"
+        && FREE_BETA_PROVIDERS.has(provider as SessionCallProviderKind),
+    ),
+  );
+}
 
-  return null;
+/** Maps resolver failures to lifecycle-safe HttpsError codes. */
+export function mapCallProviderResolverError(
+  error: unknown,
+  clientCallProvider?: string,
+): never {
+  const message = error instanceof Error ? error.message : "";
+  if (message === "unsupported_call_provider") {
+    throw lifecycleErrorFromCode(
+      "unsupported_call_provider",
+      "Call provider is not enabled for Free Beta.",
+      clientCallProvider == null ? undefined : { callProvider: clientCallProvider },
+    );
+  }
+  if (message === "invalid_enabled_call_providers") {
+    throw lifecycleErrorFromCode(
+      "unsupported_call_provider",
+      "Call provider configuration is invalid.",
+      clientCallProvider == null ? undefined : { callProvider: clientCallProvider },
+    );
+  }
+  if (message.startsWith("unsupported_session_mode:")) {
+    throw lifecycleErrorFromCode(
+      "unsupported_session_mode",
+      "Unsupported session mode.",
+      { callType: message.split(":")[1] ?? "unknown" },
+    );
+  }
+  throw error;
+}
+
+function lifecycleErrorFromCode(
+  code: "unsupported_call_provider" | "unsupported_session_mode",
+  message: string,
+  details?: Record<string, unknown>,
+): never {
+  throw lifecycleError(code, message, details);
 }

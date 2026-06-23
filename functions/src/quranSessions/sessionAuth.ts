@@ -35,11 +35,14 @@ export async function requireValidSessionEpoch(
   try {
     assertClientSessionEpoch(data?.sessionEpoch, serverEpoch);
   } catch (error) {
-    const code =
-      error instanceof Error && error.message === "session_epoch_required"
+    const isRequired =
+      error instanceof Error && error.message === "session_epoch_required";
+    throw lifecycleError(
+      isRequired ? "session_epoch_required" : "session_epoch_stale",
+      isRequired
         ? "Session epoch required."
-        : "Session revoked on another device.";
-    throw new HttpsError("failed-precondition", code);
+        : "Session revoked on another device.",
+    );
   }
 }
 

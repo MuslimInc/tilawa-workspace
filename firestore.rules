@@ -32,10 +32,15 @@ service cloud.firestore {
     // case; the second clause also allows keying by profile-doc id. exists()
     // guards the get() so a missing parent doc denies instead of erroring.
     function canEditTeacherAvailability(teacherId) {
-      return isOwner(teacherId)
+      return ownsTeacherProfile(teacherId);
+    }
+
+    // Session/booking teacherId is the public profile doc id; owner is users/{userId}.
+    function ownsTeacherProfile(teacherProfileId) {
+      return isOwner(teacherProfileId)
         || (isSignedIn()
-            && exists(/databases/$(database)/documents/quran_teacher_profiles/$(teacherId))
-            && get(/databases/$(database)/documents/quran_teacher_profiles/$(teacherId)).data.userId == request.auth.uid);
+            && exists(/databases/$(database)/documents/quran_teacher_profiles/$(teacherProfileId))
+            && get(/databases/$(database)/documents/quran_teacher_profiles/$(teacherProfileId)).data.userId == request.auth.uid);
     }
 
     function teacherProfileTrustFieldsUnchanged() {
@@ -61,6 +66,24 @@ service cloud.firestore {
         && request.resource.data.status != 'rejected'
         && request.resource.data.status != 'suspended'
         && request.resource.data.status != 'revoked';
+    }
+
+    function isBookingParticipant(bookingId) {
+      return exists(/databases/$(database)/documents/quran_bookings/$(bookingId))
+        && (
+          get(/databases/$(database)/documents/quran_bookings/$(bookingId)).data.studentId == request.auth.uid
+          || ownsTeacherProfile(
+              get(/databases/$(database)/documents/quran_bookings/$(bookingId)).data.teacherId)
+        );
+    }
+
+    function isSessionParticipant(sessionId) {
+      return exists(/databases/$(database)/documents/quran_sessions/$(sessionId))
+        && (
+          get(/databases/$(database)/documents/quran_sessions/$(sessionId)).data.studentId == request.auth.uid
+          || ownsTeacherProfile(
+              get(/databases/$(database)/documents/quran_sessions/$(sessionId)).data.teacherId)
+        );
     }
 
     // Remote in-app update policy (see InAppUpdateConfigDataSourceImpl).
@@ -192,7 +215,7 @@ service cloud.firestore {
       allow read: if isAdmin()
         || (isSignedIn()
             && (resource.data.studentId == request.auth.uid
-                || resource.data.teacherId == request.auth.uid));
+                || ownsTeacherProfile(resource.data.teacherId)));
       allow write: if false;
     }
 
@@ -201,7 +224,7 @@ service cloud.firestore {
       allow read: if isAdmin()
         || (isSignedIn()
             && (resource.data.studentId == request.auth.uid
-                || resource.data.teacherId == request.auth.uid));
+                || ownsTeacherProfile(resource.data.teacherId)));
       allow write: if false;
     }
 
@@ -210,11 +233,12 @@ service cloud.firestore {
       allow read: if isSignedIn()
         && (isAdmin()
             || resource.data.actorId == request.auth.uid
-            || exists(/databases/$(database)/documents/quran_bookings/$(resource.data.bookingId))
-              && (
-                get(/databases/$(database)/documents/quran_bookings/$(resource.data.bookingId)).data.studentId == request.auth.uid
-                || get(/databases/$(database)/documents/quran_bookings/$(resource.data.bookingId)).data.teacherId == request.auth.uid
-              ));
+            || ('bookingId' in resource.data
+                && isBookingParticipant(resource.data.bookingId))
+            || ('aggregateId' in resource.data
+                && isBookingParticipant(resource.data.aggregateId))
+            || ('sessionId' in resource.data
+                && isSessionParticipant(resource.data.sessionId)));
       allow write: if false;
     }
 
@@ -222,11 +246,8 @@ service cloud.firestore {
     match /quran_session_compensations/{compensationId} {
       allow read: if isSignedIn()
         && (isAdmin()
-            || exists(/databases/$(database)/documents/quran_bookings/$(resource.data.bookingId))
-              && (
-                get(/databases/$(database)/documents/quran_bookings/$(resource.data.bookingId)).data.studentId == request.auth.uid
-                || get(/databases/$(database)/documents/quran_bookings/$(resource.data.bookingId)).data.teacherId == request.auth.uid
-              ));
+            || ('bookingId' in resource.data
+                && isBookingParticipant(resource.data.bookingId)));
       allow write: if false;
     }
 
@@ -234,11 +255,8 @@ service cloud.firestore {
     match /quran_session_refunds/{refundId} {
       allow read: if isSignedIn()
         && (isAdmin()
-            || exists(/databases/$(database)/documents/quran_bookings/$(resource.data.bookingId))
-              && (
-                get(/databases/$(database)/documents/quran_bookings/$(resource.data.bookingId)).data.studentId == request.auth.uid
-                || get(/databases/$(database)/documents/quran_bookings/$(resource.data.bookingId)).data.teacherId == request.auth.uid
-              ));
+            || ('bookingId' in resource.data
+                && isBookingParticipant(resource.data.bookingId)));
       allow write: if false;
     }
 
@@ -246,11 +264,8 @@ service cloud.firestore {
     match /quran_session_disputes/{disputeId} {
       allow read: if isSignedIn()
         && (isAdmin()
-            || exists(/databases/$(database)/documents/quran_bookings/$(resource.data.bookingId))
-              && (
-                get(/databases/$(database)/documents/quran_bookings/$(resource.data.bookingId)).data.studentId == request.auth.uid
-                || get(/databases/$(database)/documents/quran_bookings/$(resource.data.bookingId)).data.teacherId == request.auth.uid
-              ));
+            || ('bookingId' in resource.data
+                && isBookingParticipant(resource.data.bookingId)));
       allow write: if false;
     }
 
@@ -280,7 +295,9 @@ service cloud.firestore {
     }
 
     match /quran_slot_locks/{lockId} {
-      allow read, write: if false;
+      // Public occupancy markers for availability (teacherId + slotId only).
+      allow read: if isSignedIn();
+      allow write: if false;
     }
 
     // Denormalized session metrics — admin read only; CF writes only.

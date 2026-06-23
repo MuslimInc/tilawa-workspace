@@ -7,6 +7,7 @@ import 'package:quran_sessions/quran_sessions.dart';
 import '../../helpers/fakes/fake_booking_repository.dart';
 import '../../helpers/fakes/fake_session_aggregate_repository.dart';
 import '../../helpers/fakes/fake_session_repository.dart';
+import '../../helpers/fakes/fake_teacher_profile_repository.dart';
 import '../../helpers/fixtures/session_aggregate_fixtures.dart';
 import '../../helpers/lifecycle_test_helpers.dart';
 import '../../helpers/fixtures.dart' show makeBooking, makeSession;
@@ -31,6 +32,7 @@ void main() {
       sessionRepository: sessionRepo,
       callProvider: mockProvider,
       authSession: _FakeAuthSession('student_1'),
+      teacherProfileRepository: FakeTeacherProfileRepository(),
     );
     bloc = MySessionsBloc(
       getStudentSessions: GetStudentSessionsUseCase(sessionRepo),

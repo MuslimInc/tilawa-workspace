@@ -17,6 +17,7 @@ import '../data/firebase/firebase_session_command_gateway.dart';
 import '../data/firebase/firebase_session_mutation_gateway.dart';
 import '../data/firebase/firebase_session_notification_gateway.dart';
 import '../data/firebase/firestore_availability_repository.dart';
+import '../data/firebase/firestore_booked_slot_lock_data_source.dart';
 import '../data/firebase/firestore_booking_repository.dart';
 import '../data/firebase/firestore_market_config_repository.dart';
 import '../data/firebase/firestore_market_scheduling_config_data_source.dart';
@@ -101,6 +102,7 @@ class QuranSessionsFirebaseModule {
       ),
       teacherProfileDataSource: FirestoreTeacherProfileDataSource(firestore),
       availabilityDataSource: FirestoreAvailabilityDataSource(firestore),
+      bookedSlotLockDataSource: FirestoreBookedSlotLockDataSource(firestore),
       scheduleDataSource: FirestoreScheduleDataSource(firestore),
       walletDataSource: FirestoreWalletDataSource(firestore),
       fridayReviewReminderStore: SharedPreferencesFridayReviewReminderStore(
@@ -161,6 +163,7 @@ class QuranSessionsFirebaseModule {
         sessionRepository: sl<SessionRepository>(),
         callProvider: sl<SessionCallProvider>(),
         authSession: sl<AuthSessionProvider>(),
+        teacherProfileRepository: sl<TeacherProfileRepository>(),
       ),
     );
 

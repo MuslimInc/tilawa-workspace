@@ -28,6 +28,42 @@ class SessionModePolicy {
 
   bool isEnabled(SessionCallType type) => enabledCallTypes.contains(type);
 
+  /// True when [url] is a non-empty external meeting link.
+  static bool hasExternalMeetingUrl(String? url) =>
+      url != null && url.trim().isNotEmpty;
+
+  /// Disables external meeting when the teacher has no meeting URL.
+  SessionModePolicy withoutExternalMeeting() {
+    final next = Set<SessionCallType>.from(enabledCallTypes)
+      ..remove(SessionCallType.externalMeeting);
+    return SessionModePolicy(
+      enabledCallTypes: next,
+      voiceVideoUseMockProvider: voiceVideoUseMockProvider,
+    );
+  }
+
+  /// Host policy adjusted for whether the teacher configured a meeting URL.
+  SessionModePolicy forTeacherExternalMeetingUrl(String? url) =>
+      hasExternalMeetingUrl(url) ? this : withoutExternalMeeting();
+
+  /// Default booking call type for [policy] and teacher meeting URL.
+  static SessionCallType defaultCallType({
+    required SessionModePolicy policy,
+    required String? externalMeetingUrl,
+  }) {
+    final effective = policy.forTeacherExternalMeetingUrl(externalMeetingUrl);
+    if (effective.isEnabled(SessionCallType.externalMeeting)) {
+      return SessionCallType.externalMeeting;
+    }
+    if (effective.isEnabled(SessionCallType.voiceCall)) {
+      return SessionCallType.voiceCall;
+    }
+    if (effective.isEnabled(SessionCallType.videoCall)) {
+      return SessionCallType.videoCall;
+    }
+    return SessionCallType.externalMeeting;
+  }
+
   String? disabledReasonCode(SessionCallType type) {
     if (isEnabled(type)) return null;
     return switch (type) {

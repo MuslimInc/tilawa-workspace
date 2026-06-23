@@ -653,10 +653,16 @@ abstract class QuranSessionsLocalizations {
   /// **'Video sessions are not available yet. Choose external link.'**
   String get sessionModeVideoDisabled;
 
+  /// No description provided for @sessionModeExternalDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Your teacher has not added a meeting link yet. Choose voice or video.'**
+  String get sessionModeExternalDisabled;
+
   /// No description provided for @meetingLinkUnavailable.
   ///
   /// In en, this message translates to:
-  /// **'No meeting link is configured for this session.'**
+  /// **'This teacher has not set up a meeting link for external sessions. Choose voice or video, or try again later.'**
   String get meetingLinkUnavailable;
 
   /// No description provided for @callProviderUnavailable.
@@ -2086,6 +2092,54 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'Your real full name as students see it in the marketplace. It may differ from your account name.'**
   String get teacherPublicNameHelper;
+
+  /// No description provided for @teacherExternalMeetingUrlLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'External meeting link'**
+  String get teacherExternalMeetingUrlLabel;
+
+  /// No description provided for @teacherExternalMeetingUrlHint.
+  ///
+  /// In en, this message translates to:
+  /// **'https://meet.google.com/your-room'**
+  String get teacherExternalMeetingUrlHint;
+
+  /// No description provided for @teacherExternalMeetingUrlHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Students who book external sessions join via this HTTPS link (Google Meet, Zoom, Microsoft Teams).'**
+  String get teacherExternalMeetingUrlHelper;
+
+  /// No description provided for @teacherExternalMeetingUrlSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting link saved'**
+  String get teacherExternalMeetingUrlSaved;
+
+  /// No description provided for @teacherExternalMeetingUrlSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save meeting link'**
+  String get teacherExternalMeetingUrlSave;
+
+  /// No description provided for @teacherExternalMeetingUrlInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid HTTPS meeting link (Google Meet, Zoom, or Teams).'**
+  String get teacherExternalMeetingUrlInvalid;
+
+  /// No description provided for @teacherOffersExternalSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'External sessions available'**
+  String get teacherOffersExternalSessions;
+
+  /// No description provided for @sessionMeetingLinkLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting link'**
+  String get sessionMeetingLinkLabel;
 
   /// No description provided for @teacherPublicNameRequired.
   ///

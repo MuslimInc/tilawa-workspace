@@ -139,14 +139,15 @@ class AppStartupTasks {
   /// will reject the call with an `unauthenticated` error, which the support
   /// flow already maps to a localized "purchase verification failed".
   Future<void> _activateAppCheck() async {
+    if (kDebugMode) {
+      // Quran Sessions callables use enforceAppCheck: false. Skipping activation
+      // in debug avoids debug-token rate limits spamming every callable request.
+      return;
+    }
     try {
       await FirebaseAppCheck.instance.activate(
-        providerAndroid: kDebugMode
-            ? const AndroidDebugProvider()
-            : const AndroidPlayIntegrityProvider(),
-        providerApple: kDebugMode
-            ? const AppleDebugProvider()
-            : const AppleAppAttestWithDeviceCheckFallbackProvider(),
+        providerAndroid: const AndroidPlayIntegrityProvider(),
+        providerApple: const AppleAppAttestWithDeviceCheckFallbackProvider(),
       );
     } catch (e, st) {
       logger.e('App Check activation failed: $e', stackTrace: st);

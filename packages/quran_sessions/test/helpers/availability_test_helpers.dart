@@ -1,6 +1,7 @@
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 
+import 'fakes/fake_booked_slot_lock_repository.dart';
 import 'fakes/fake_session_repository.dart';
 import 'fakes/fake_teacher_profile_repository.dart';
 import 'fakes/fake_user_profile_repository.dart';
@@ -195,19 +196,32 @@ TeacherDashboardBloc buildTestTeacherDashboardBloc({
 
 GetTeacherAvailabilityUseCase buildGetTeacherAvailabilityUseCase({
   required FakeScheduleRepository scheduleRepository,
-  required FakeSessionRepository sessionRepository,
+  FakeBookedSlotLockRepository? bookedSlotLockRepository,
+  FakeSessionRepository? sessionRepository,
   DateTime Function()? now,
-}) => GetTeacherAvailabilityUseCase(
-  scheduleRepository: scheduleRepository,
-  sessionRepository: sessionRepository,
-  now: now,
-);
+}) {
+  final locks = bookedSlotLockRepository ?? FakeBookedSlotLockRepository();
+  if (bookedSlotLockRepository == null && sessionRepository != null) {
+    for (final session in sessionRepository.sessions) {
+      if (session.teacherId.isEmpty) continue;
+      locks.seedHardLock(
+        teacherId: session.teacherId,
+        startUtc: session.startsAt.toUtc(),
+      );
+    }
+  }
+  return GetTeacherAvailabilityUseCase(
+    scheduleRepository: scheduleRepository,
+    bookedSlotLocks: locks,
+    now: now,
+  );
+}
 
 /// Wraps [GetTeacherAvailabilityUseCase] to count [call] invocations in tests.
 class SpyGetTeacherAvailabilityUseCase extends GetTeacherAvailabilityUseCase {
   SpyGetTeacherAvailabilityUseCase({
     required super.scheduleRepository,
-    required super.sessionRepository,
+    required super.bookedSlotLocks,
     super.now,
   });
 

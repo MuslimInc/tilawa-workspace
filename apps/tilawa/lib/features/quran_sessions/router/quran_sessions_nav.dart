@@ -261,7 +261,18 @@ List<RouteBase> get quranSessionsRoutes => [
           teacherId: teacherId,
           onManageSchedule: () =>
               context.push(QuranSessionsRoutes.availability),
+          onSessionDetailRequested: (bookingId) => context.push(
+            QuranSessionsRoutes.sessionDetail.replaceFirst(
+              ':bookingId',
+              bookingId,
+            ),
+          ),
           schedulingAnalytics: quranSessionsSchedulingAnalyticsCallbacks(),
+          meetingUrlEditor: TeacherExternalMeetingUrlCard(
+            userId: requireQuranSessionsUserId(getIt),
+            getCapability: getIt<GetCurrentUserTeacherCapabilityUseCase>(),
+            updateMeetingLink: getIt<UpdateTeacherMeetingLinkUseCase>(),
+          ),
         ),
       ),
     ),

@@ -20,6 +20,7 @@ import {
 } from "./idempotencyService";
 import { lifecycleError } from "./lifecycleErrors";
 import { enqueueSessionNotification } from "./notificationOutboxService";
+import { resolveTeacherProfileUserId } from "./teacherProfileUserId";
 import { requireAdmin, requireParticipantOrAdmin, requireValidSessionEpochUnlessAdmin } from "./sessionAuth";
 import { validateTransition } from "./sessionLifecycleGuard";
 import type { LifecycleStatus } from "./sessionLifecycleService";
@@ -140,7 +141,10 @@ export const openSessionDispute = onCall(
           sessionId,
           aggregateId: (booking.aggregateId as string) ?? data.bookingId,
           kind: "disputeOpened",
-          recipientUserIds: [studentId, teacherId],
+          recipientUserIds: [
+            studentId,
+            await resolveTeacherProfileUserId(db, teacherId),
+          ],
           payload: { reason: data.reason },
         });
       }

@@ -11,6 +11,7 @@ import {
 } from "./idempotencyService";
 import { recordTerminalTransition } from "./metricsAggregationService";
 import { enqueueSessionNotification } from "./notificationOutboxService";
+import { resolveTeacherProfileUserId } from "./teacherProfileUserId";
 import {
   isAdmin,
   requireAuthenticatedUid,
@@ -159,11 +160,12 @@ export const markSessionNoShow = onCall(
               ? ({ type: "student_no_show", studentId } as const)
               : ({ type: "both_no_show", teacherId, studentId } as const);
         await recordTerminalTransition(db, metricsType);
+        const teacherUserId = await resolveTeacherProfileUserId(db, teacherId);
         await enqueueSessionNotification(db, {
           sessionId: data.sessionId,
           aggregateId: (session.aggregateId as string | undefined) ?? bookingId,
           kind: "noShowMarked",
-          recipientUserIds: [teacherId, studentId],
+          recipientUserIds: [teacherUserId, studentId],
           payload: { classification },
         });
       }

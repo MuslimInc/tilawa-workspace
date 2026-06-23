@@ -321,7 +321,12 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
       'الجلسات المرئية غير متاحة بعد. اختر الرابط الخارجي.';
 
   @override
-  String get meetingLinkUnavailable => 'لا يوجد رابط اجتماع لهذه الجلسة.';
+  String get sessionModeExternalDisabled =>
+      'لم يضف المعلم رابط الاجتماع بعد. اختر الصوت أو الفيديو.';
+
+  @override
+  String get meetingLinkUnavailable =>
+      'لم يُعدّ المعلم رابط اجتماع للجلسات الخارجية بعد. اختر الصوت أو الفيديو، أو حاول لاحقًا.';
 
   @override
   String get callProviderUnavailable =>
@@ -1115,6 +1120,33 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   @override
   String get teacherPublicNameHelper =>
       'الاسم الحقيقي / اسم المعلم الظاهر للطلاب في السوق. قد يختلف عن اسم حسابك.';
+
+  @override
+  String get teacherExternalMeetingUrlLabel => 'رابط الاجتماع الخارجي';
+
+  @override
+  String get teacherExternalMeetingUrlHint =>
+      'https://meet.google.com/your-room';
+
+  @override
+  String get teacherExternalMeetingUrlHelper =>
+      'الطلاب الذين يحجزون جلسات خارجية ينضمون عبر هذا الرابط الآمن (Google Meet أو Zoom أو Teams).';
+
+  @override
+  String get teacherExternalMeetingUrlSaved => 'تم حفظ رابط الاجتماع';
+
+  @override
+  String get teacherExternalMeetingUrlSave => 'حفظ رابط الاجتماع';
+
+  @override
+  String get teacherExternalMeetingUrlInvalid =>
+      'أدخل رابط اجتماع صالحًا يبدأ بـ https (Google Meet أو Zoom أو Teams).';
+
+  @override
+  String get teacherOffersExternalSessions => 'جلسات خارجية متاحة';
+
+  @override
+  String get sessionMeetingLinkLabel => 'رابط الاجتماع';
 
   @override
   String get teacherPublicNameRequired => 'الاسم الحقيقي للمعلم مطلوب.';

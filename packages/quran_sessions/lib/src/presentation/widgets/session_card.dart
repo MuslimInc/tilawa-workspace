@@ -13,6 +13,7 @@ class SessionCard extends StatelessWidget {
     super.key,
     required this.session,
     this.teacherName,
+    this.onTap,
     this.onJoin,
     this.onCancel,
   });
@@ -22,6 +23,7 @@ class SessionCard extends StatelessWidget {
   /// Optional resolved teacher name (fetched by host from store).
   final String? teacherName;
 
+  final VoidCallback? onTap;
   final VoidCallback? onJoin;
   final VoidCallback? onCancel;
 
@@ -37,68 +39,72 @@ class SessionCard extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (teacherName != null)
-                        Text(
-                          teacherName!,
-                          style: textTheme.titleSmall,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      Text(
-                        dateFmt.format(localStart),
-                        style: textTheme.bodyMedium,
-                      ),
-                      Text(
-                        timeFmt.format(localStart),
-                        style: textTheme.bodySmall?.copyWith(
-                          color: scheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                _StatusBadge(
-                  status: session.status,
-                  scheme: scheme,
-                  l10n: l10n,
-                ),
-              ],
-            ),
-            if (onJoin != null || onCancel != null) ...[
-              const SizedBox(height: 10),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  if (onCancel != null)
-                    TextButton(
-                      style: TextButton.styleFrom(
-                        foregroundColor: scheme.error,
-                      ),
-                      onPressed: onCancel,
-                      child: Text(l10n.cancel),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (teacherName != null)
+                          Text(
+                            teacherName!,
+                            style: textTheme.titleSmall,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        Text(
+                          dateFmt.format(localStart),
+                          style: textTheme.bodyMedium,
+                        ),
+                        Text(
+                          timeFmt.format(localStart),
+                          style: textTheme.bodySmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
                     ),
-                  if (onJoin != null) ...[
-                    const SizedBox(width: 8),
-                    FilledButton.tonal(
-                      onPressed: onJoin,
-                      child: Text(l10n.joinSession),
-                    ),
-                  ],
+                  ),
+                  _StatusBadge(
+                    status: session.status,
+                    scheme: scheme,
+                    l10n: l10n,
+                  ),
                 ],
               ),
+              if (onJoin != null || onCancel != null) ...[
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (onCancel != null)
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          foregroundColor: scheme.error,
+                        ),
+                        onPressed: onCancel,
+                        child: Text(l10n.cancel),
+                      ),
+                    if (onJoin != null) ...[
+                      const SizedBox(width: 8),
+                      FilledButton.tonal(
+                        onPressed: onJoin,
+                        child: Text(l10n.joinSession),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

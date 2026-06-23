@@ -1,6 +1,7 @@
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../domain/entities/session_audit_event.dart';
 import '../../../domain/usecases/get_session_timeline_usecase.dart';
 import '../../../domain/usecases/join_session_usecase.dart';
 import '../../../domain/usecases/open_session_dispute_usecase.dart';
@@ -69,13 +70,13 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
       (_) => throw StateError('noop'),
       (r) => r,
     );
-    final timelineResult = await _getTimeline(event.bookingId);
-    timelineResult.fold(
-      (failure) => emit(SessionDetailFailure(failure)),
-      (timeline) => emit(
-        SessionDetailSuccess(aggregate: aggregate, timeline: timeline),
-      ),
+    final timelineId = aggregate.sessionId ?? aggregate.id;
+    final timelineResult = await _getTimeline(timelineId);
+    final timeline = timelineResult.fold(
+      (_) => const <SessionAuditEvent>[],
+      (events) => events,
     );
+    emit(SessionDetailSuccess(aggregate: aggregate, timeline: timeline));
   }
 
   Future<void> _onJoinRequested(

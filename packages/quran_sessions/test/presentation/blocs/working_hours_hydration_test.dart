@@ -5,7 +5,7 @@ import 'package:quran_sessions/quran_sessions.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 
 import '../../helpers/availability_test_helpers.dart';
-import '../../helpers/fakes/fake_session_repository.dart';
+import '../../helpers/fakes/fake_booked_slot_lock_repository.dart';
 
 void _expectWeekdayInvariant(AvailabilityState state) {
   final selected = state.selectedWeekdays.toList()
@@ -187,7 +187,7 @@ void main() {
         final to = from.add(const Duration(days: 14));
         final availability = await GetTeacherAvailabilityUseCase(
           scheduleRepository: repo,
-          sessionRepository: FakeSessionRepository(),
+          bookedSlotLocks: FakeBookedSlotLockRepository(),
           now: () => from,
         )('teacher_1', from: from, to: to);
 

@@ -4,6 +4,7 @@ import 'package:quran_sessions/core/l10n_extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/quran_teacher.dart';
+import '../../domain/entities/session_call_type.dart';
 import '../../domain/entities/session_pricing_type.dart';
 import '../../domain/entities/session_review.dart';
 import '../../domain/entities/teacher_availability.dart';
@@ -229,6 +230,15 @@ class _TeacherProfileBodyState extends State<_TeacherProfileBody> {
             children: widget.teacher.specializations.map((code) {
               return TilawaStatusChip(label: l10n.specializationLabel(code));
             }).toList(),
+          ),
+        ],
+        if (widget.teacher.supportedCallTypes
+            .contains(SessionCallType.externalMeeting)) ...[
+          SizedBox(height: tokens.spaceSmall),
+          Center(
+            child: TilawaStatusChip(
+              label: l10n.teacherOffersExternalSessions,
+            ),
           ),
         ],
         if (bio.isNotEmpty) ...[

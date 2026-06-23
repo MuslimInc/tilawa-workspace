@@ -4,14 +4,15 @@ import 'package:quran_sessions/quran_sessions.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 
 import '../../helpers/availability_test_helpers.dart';
-import '../../helpers/fakes/fake_session_repository.dart';
+import '../../helpers/fakes/fake_booked_slot_lock_repository.dart';
 import '../../helpers/fakes/fake_session_mutation_gateway.dart';
-import '../../helpers/fixtures.dart' show makeSession;
+import '../../helpers/fakes/fake_teacher_profile_repository.dart';
 
 void main() {
   late FakeScheduleRepository scheduleRepo;
-  late FakeSessionRepository sessionRepo;
+  late FakeBookedSlotLockRepository bookedSlotLockRepo;
   late FakeSessionMutationGateway mutationGateway;
+  late FakeTeacherProfileRepository teacherProfiles;
   late SubmitSessionBookingUseCase submitBooking;
   late TeacherAvailability generatedSlot;
 
@@ -21,17 +22,23 @@ void main() {
 
   setUp(() async {
     scheduleRepo = FakeScheduleRepository()..schedule = makeWeeklySchedule();
-    sessionRepo = FakeSessionRepository();
+    bookedSlotLockRepo = FakeBookedSlotLockRepository();
     mutationGateway = FakeSessionMutationGateway();
+    teacherProfiles = FakeTeacherProfileRepository(
+      profile: _teacherProfile(
+        externalMeetingUrl: 'https://meet.example.com/room',
+      ),
+    );
     final getAvailability = buildGetTeacherAvailabilityUseCase(
       scheduleRepository: scheduleRepo,
-      sessionRepository: sessionRepo,
+      bookedSlotLockRepository: bookedSlotLockRepo,
       now: () => fixedNow,
     );
     submitBooking = SubmitSessionBookingUseCase(
       mutationGateway: mutationGateway,
       getAvailability: getAvailability,
       authSession: _FakeAuthSession('student_1'),
+      teacherProfiles: teacherProfiles,
       sessionModePolicy: SessionModePolicy.externalOnly,
     );
 
@@ -61,15 +68,45 @@ void main() {
     check(mutationGateway.calls.isEmpty).isTrue();
   });
 
+  test('rejects external booking when teacher has no meeting URL', () async {
+    teacherProfiles.seed(
+      _teacherProfile(externalMeetingUrl: null),
+    );
+    submitBooking = SubmitSessionBookingUseCase(
+      mutationGateway: mutationGateway,
+      getAvailability: buildGetTeacherAvailabilityUseCase(
+        scheduleRepository: scheduleRepo,
+        bookedSlotLockRepository: bookedSlotLockRepo,
+        now: () => fixedNow,
+      ),
+      authSession: _FakeAuthSession('student_1'),
+      teacherProfiles: teacherProfiles,
+    );
+
+    final result = await submitBooking(
+      teacherId: 'teacher_1',
+      slotId: generatedSlot.slotId,
+      callType: SessionCallType.externalMeeting,
+    );
+
+    check(result.isLeft()).isTrue();
+    result.fold(
+      (f) => check(f).isA<MeetingLinkUnavailableFailure>(),
+      (_) => fail('expected Left'),
+    );
+    check(mutationGateway.calls.isEmpty).isTrue();
+  });
+
   test('individual external booking succeeds when slot available', () async {
     submitBooking = SubmitSessionBookingUseCase(
       mutationGateway: mutationGateway,
       getAvailability: buildGetTeacherAvailabilityUseCase(
         scheduleRepository: scheduleRepo,
-        sessionRepository: sessionRepo,
+        bookedSlotLockRepository: bookedSlotLockRepo,
         now: () => fixedNow,
       ),
       authSession: _FakeAuthSession('student_1'),
+      teacherProfiles: teacherProfiles,
     );
 
     final result = await submitBooking(
@@ -89,13 +126,10 @@ void main() {
   });
 
   test('rejects booking when slot already taken', () async {
-    sessionRepo.sessions = [
-      makeSession(
-        id: 'existing',
-        studentId: 'other',
-        startsAt: generatedSlot.startsAt,
-      ),
-    ];
+    bookedSlotLockRepo.seedHardLock(
+      teacherId: 'teacher_1',
+      startUtc: generatedSlot.startsAt.toUtc(),
+    );
 
     final result = await submitBooking(
       teacherId: 'teacher_1',
@@ -122,3 +156,21 @@ class _FakeAuthSession implements AuthSessionProvider {
   @override
   Stream<String?> watchUserId() => Stream.value(userId);
 }
+
+TeacherProfile _teacherProfile({required String? externalMeetingUrl}) =>
+    TeacherProfile(
+      id: 'teacher_1',
+      userId: 'teacher_1',
+      displayName: 'Teacher',
+      verificationStatus: TeacherVerificationStatus.verified,
+      teachingLanguages: const ['ar'],
+      specializations: const ['tajweed'],
+      averageRating: 0,
+      reviewCount: 0,
+      isActive: true,
+      profileCompleteness: TeacherProfileCompletenessStatus.complete,
+      isPubliclyVisible: true,
+      externalMeetingUrl: externalMeetingUrl,
+      createdAt: DateTime.utc(2026, 1, 1),
+      updatedAt: DateTime.utc(2026, 1, 1),
+    );

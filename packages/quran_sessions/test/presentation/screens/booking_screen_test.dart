@@ -14,6 +14,7 @@ import '../../helpers/fakes/fake_session_policy_repository.dart';
 import '../../helpers/fakes/fake_session_repository.dart';
 import '../../helpers/fakes/fake_teacher_repository.dart';
 import '../../helpers/fakes/fake_user_profile_repository.dart';
+import '../../helpers/fakes/fake_teacher_profile_repository.dart';
 import '../../helpers/lifecycle_test_helpers.dart';
 
 class _SeededBookingBloc extends BookingBloc {
@@ -34,6 +35,24 @@ class _SeededBookingBloc extends BookingBloc {
           policyRepository: FakeSessionPolicyRepository(),
           teacherRepository: FakeTeacherRepository(),
           marketConfigRepository: FakeMarketConfigRepository(),
+        ),
+        teacherProfiles: FakeTeacherProfileRepository(
+          profile: TeacherProfile(
+            id: 'teacher_1',
+            userId: 'teacher_1',
+            displayName: 'Teacher',
+            verificationStatus: TeacherVerificationStatus.verified,
+            teachingLanguages: const ['ar'],
+            specializations: const ['tajweed'],
+            averageRating: 0,
+            reviewCount: 0,
+            isActive: true,
+            profileCompleteness: TeacherProfileCompletenessStatus.complete,
+            isPubliclyVisible: true,
+            externalMeetingUrl: 'https://meet.google.com/room',
+            createdAt: DateTime.utc(2024, 1, 1),
+            updatedAt: DateTime.utc(2024, 1, 2),
+          ),
         ),
       ) {
     emit(seed);
@@ -119,6 +138,7 @@ void main() {
               availableSlots: slots,
               selectedSlot: slots.first,
               selectedCallType: SessionCallType.externalMeeting,
+              teacherExternalMeetingUrl: 'https://meet.example.com/room',
             ),
           ),
           child: const BookingScreen(
@@ -149,6 +169,52 @@ void main() {
     expect(
       find.text(
         'Voice sessions are not available yet. Choose external link.',
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('teacher without meeting URL disables external and selects voice', (
+    tester,
+  ) async {
+    final slots = [_slot(1)];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+        localizationsDelegates: const [
+          QuranSessionsLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: QuranSessionsLocalizations.supportedLocales,
+        home: BlocProvider<BookingBloc>(
+          create: (_) => _SeededBookingBloc(
+            seed: BookingSelecting(
+              teacherId: 'teacher_1',
+              availableSlots: slots,
+              selectedSlot: slots.first,
+              selectedCallType: SessionCallType.voiceCall,
+              teacherExternalMeetingUrl: null,
+            ),
+          ),
+          child: const BookingScreen(
+            teacherId: 'teacher_1',
+            studentId: 'student_1',
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final externalSemantics = tester.getSemantics(find.text('External link'));
+    final voiceSemantics = tester.getSemantics(find.text('Voice'));
+    expect(externalSemantics.flagsCollection.isEnabled, Tristate.isFalse);
+    expect(voiceSemantics.flagsCollection.isSelected, Tristate.isTrue);
+
+    expect(
+      find.text(
+        'Your teacher has not added a meeting link yet. Choose voice or video.',
       ),
       findsOneWidget,
     );

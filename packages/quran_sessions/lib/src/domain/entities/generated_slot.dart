@@ -42,17 +42,22 @@ class GeneratedSlot extends Equatable {
   }) {
     final prefix = '${teacherId}_';
     if (!slotId.startsWith(prefix)) return null;
-    final stamp = slotId.substring(prefix.length);
+    return parseEncodedStartUtc(slotId);
+  }
+
+  /// Parses the UTC suffix from any deterministic slot id, regardless of
+  /// which teacher id prefix was used when the lock was created.
+  static DateTime? parseEncodedStartUtc(String slotId) {
     final match = RegExp(
-      r'^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})Z$',
-    ).firstMatch(stamp);
+      r'^(.+)_(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})Z$',
+    ).firstMatch(slotId);
     if (match == null) return null;
     return DateTime.utc(
-      int.parse(match.group(1)!),
       int.parse(match.group(2)!),
       int.parse(match.group(3)!),
       int.parse(match.group(4)!),
       int.parse(match.group(5)!),
+      int.parse(match.group(6)!),
     );
   }
 

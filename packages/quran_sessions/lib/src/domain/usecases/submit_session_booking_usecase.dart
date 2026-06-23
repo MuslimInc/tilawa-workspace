@@ -3,11 +3,12 @@ import 'package:dartz_plus/dartz_plus.dart';
 import '../entities/generated_slot.dart';
 import '../entities/session_booking_outcome.dart';
 import '../entities/session_call_type.dart';
-import '../policies/session_mode_policy.dart';
 import '../entities/session_pricing_type.dart';
 import '../failures/quran_sessions_failure.dart';
 import '../gateways/session_mutation_gateway.dart';
+import '../policies/session_mode_policy.dart';
 import '../providers/auth_session_provider.dart';
+import '../repositories/teacher_profile_repository.dart';
 import 'get_teacher_availability_usecase.dart';
 
 /// Creates a session booking via server orchestration after slot validation.
@@ -16,6 +17,7 @@ class SubmitSessionBookingUseCase {
     required this._mutationGateway,
     required this._getAvailability,
     required this._authSession,
+    required this._teacherProfiles,
     this.defaultSlotDurationMinutes = 30,
     this.sessionModePolicy = SessionModePolicy.freeBeta,
   });
@@ -23,6 +25,7 @@ class SubmitSessionBookingUseCase {
   final SessionMutationGateway _mutationGateway;
   final GetTeacherAvailabilityUseCase _getAvailability;
   final AuthSessionProvider _authSession;
+  final TeacherProfileRepository _teacherProfiles;
   final int defaultSlotDurationMinutes;
   final SessionModePolicy sessionModePolicy;
 
@@ -42,6 +45,20 @@ class SubmitSessionBookingUseCase {
       return Left(
         UnsupportedSessionModeFailure(callType: callType.name),
       );
+    }
+
+    if (callType == SessionCallType.externalMeeting) {
+      final profileResult = await _teacherProfiles.getProfileById(teacherId);
+      if (profileResult.isLeft()) {
+        return profileResult.map((_) => throw StateError('unreachable'));
+      }
+      final externalMeetingUrl = profileResult.fold(
+        (_) => throw StateError('unreachable'),
+        (profile) => profile.externalMeetingUrl,
+      );
+      if (!SessionModePolicy.hasExternalMeetingUrl(externalMeetingUrl)) {
+        return const Left(MeetingLinkUnavailableFailure());
+      }
     }
 
     final slotStart = GeneratedSlot.parseStartUtc(

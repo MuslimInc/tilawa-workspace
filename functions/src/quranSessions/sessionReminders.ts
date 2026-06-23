@@ -1,6 +1,7 @@
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
 import { enqueueSessionNotification } from "./notificationOutboxService";
+import { resolveTeacherProfileUserId } from "./teacherProfileUserId";
 import { processDueNotificationRetries } from "./deliverSessionNotification";
 
 export const DEFAULT_REMINDER_HOURS = [24, 1];
@@ -72,7 +73,10 @@ export async function enqueueDueSessionReminders(
         sessionId: doc.id,
         aggregateId,
         kind: "reminder",
-        recipientUserIds: [teacherId, studentId],
+        recipientUserIds: [
+          await resolveTeacherProfileUserId(db, teacherId),
+          studentId,
+        ],
         payload: { hoursBefore },
       });
 

@@ -1,4 +1,5 @@
 import '../data/datasources/availability_remote_data_source.dart';
+import '../data/datasources/booked_slot_lock_remote_data_source.dart';
 import '../data/datasources/booking_remote_data_source.dart';
 import '../data/datasources/market_config_remote_data_source.dart';
 import '../data/datasources/market_scheduling_config_remote_data_source.dart';
@@ -11,6 +12,7 @@ import '../data/datasources/teacher_remote_data_source.dart';
 import '../data/datasources/user_profile_remote_data_source.dart';
 import '../data/datasources/wallet_remote_data_source.dart';
 import '../data/providers/remote_availability_provider.dart';
+import '../data/repositories/booked_slot_lock_repository_impl.dart';
 import '../data/repositories/booking_repository_impl.dart';
 import '../data/repositories/market_config_repository_impl.dart';
 import '../data/repositories/market_scheduling_config_repository_impl.dart';
@@ -25,6 +27,7 @@ import '../data/repositories/wallet_repository_impl.dart';
 import '../boundaries/scheduling/availability_provider.dart';
 import '../boundaries/scheduling/friday_review_reminder_store.dart';
 import '../data/stores/in_memory_friday_review_reminder_store.dart';
+import '../domain/repositories/booked_slot_lock_repository.dart';
 import '../domain/repositories/booking_repository.dart';
 import '../domain/repositories/market_config_repository.dart';
 import '../domain/repositories/market_scheduling_config_repository.dart';
@@ -58,6 +61,7 @@ import '../domain/usecases/reject_teacher_application_usecase.dart';
 import '../domain/usecases/revoke_teacher_profile_usecase.dart';
 import '../domain/usecases/save_teacher_application_draft_usecase.dart';
 import '../domain/usecases/save_teacher_public_profile_usecase.dart';
+import '../domain/usecases/update_teacher_meeting_link_usecase.dart';
 import '../domain/usecases/start_teacher_application_usecase.dart';
 import '../domain/usecases/submit_review_usecase.dart';
 import '../domain/usecases/submit_teacher_application_usecase.dart';
@@ -94,6 +98,7 @@ class QuranSessionsModule {
     required TeacherApplicationRemoteDataSource teacherApplicationDataSource,
     required TeacherProfileRemoteDataSource teacherProfileDataSource,
     required AvailabilityRemoteDataSource availabilityDataSource,
+    required BookedSlotLockRemoteDataSource bookedSlotLockDataSource,
     required ScheduleRemoteDataSource scheduleDataSource,
     required WalletRemoteDataSource walletDataSource,
     FridayReviewReminderStore? fridayReviewReminderStore,
@@ -120,6 +125,10 @@ class QuranSessionsModule {
       scheduleDataSource,
       teacherProfiles: teacherProfileRepo,
     );
+    final bookedSlotLockRepo = BookedSlotLockRepositoryImpl(
+      bookedSlotLockDataSource,
+      teacherProfiles: teacherProfileRepo,
+    );
     final walletRepo = WalletRepositoryImpl(walletDataSource);
 
     registerSingleton<TeacherRepository>(teacherRepo);
@@ -135,6 +144,7 @@ class QuranSessionsModule {
     registerSingleton<TeacherProfileRepository>(teacherProfileRepo);
     registerSingleton<AvailabilityProvider>(availabilityProvider);
     registerSingleton<ScheduleRepository>(scheduleRepo);
+    registerSingleton<BookedSlotLockRepository>(bookedSlotLockRepo);
     registerSingleton<WalletRepository>(walletRepo);
 
     registerSingleton(GetTeachersUseCase(teacherRepo));
@@ -143,7 +153,7 @@ class QuranSessionsModule {
     registerSingleton(slotGenerator);
     final getTeacherAvailability = GetTeacherAvailabilityUseCase(
       scheduleRepository: scheduleRepo,
-      sessionRepository: sessionRepo,
+      bookedSlotLocks: bookedSlotLockRepo,
       slotGenerator: slotGenerator,
     );
     registerSingleton(getTeacherAvailability);
@@ -173,6 +183,9 @@ class QuranSessionsModule {
     );
     registerSingleton(
       SaveTeacherPublicProfileUseCase(teacherProfileRepo),
+    );
+    registerSingleton(
+      UpdateTeacherMeetingLinkUseCase(teacherProfileRepo),
     );
     registerSingleton(
       ApproveTeacherApplicationUseCase(

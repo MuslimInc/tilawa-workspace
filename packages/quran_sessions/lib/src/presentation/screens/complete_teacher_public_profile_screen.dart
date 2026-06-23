@@ -45,6 +45,7 @@ class _CompleteTeacherPublicProfileScreenState
 
   final _displayNameCtrl = TextEditingController();
   final _bioCtrl = TextEditingController();
+  final _meetingUrlCtrl = TextEditingController();
   final _languages = <String>{};
   final _specializations = <String>{};
 
@@ -63,6 +64,8 @@ class _CompleteTeacherPublicProfileScreenState
   void dispose() {
     _displayNameCtrl.dispose();
     _bioCtrl.dispose();
+    _meetingUrlCtrl.dispose();
+    _meetingUrlCtrl.dispose();
     super.dispose();
   }
 
@@ -88,6 +91,14 @@ class _CompleteTeacherPublicProfileScreenState
     }
     if (_bioCtrl.text.isEmpty && (profile.publicBio?.isNotEmpty ?? false)) {
       _bioCtrl.text = profile.publicBio!;
+    }
+    if (_meetingUrlCtrl.text.isEmpty &&
+        (profile.externalMeetingUrl?.isNotEmpty ?? false)) {
+      _meetingUrlCtrl.text = profile.externalMeetingUrl!;
+    }
+    if (_meetingUrlCtrl.text.isEmpty &&
+        (profile.externalMeetingUrl?.isNotEmpty ?? false)) {
+      _meetingUrlCtrl.text = profile.externalMeetingUrl!;
     }
     _languages
       ..clear()
@@ -134,6 +145,7 @@ class _CompleteTeacherPublicProfileScreenState
       publicBio: _bioCtrl.text,
       teachingLanguages: _languages.toList(),
       specializations: _specializations.toList(),
+      externalMeetingUrl: _meetingUrlCtrl.text,
     );
 
     if (!mounted) return;
@@ -213,6 +225,23 @@ class _CompleteTeacherPublicProfileScreenState
                     label: l10n.bioSectionTitle,
                     hintText: l10n.bioHint,
                     maxLines: 4,
+                  ),
+                  SizedBox(height: tokens.spaceMedium),
+                  TilawaTextField(
+                    controller: _meetingUrlCtrl,
+                    label: l10n.teacherExternalMeetingUrlLabel,
+                    hintText: l10n.teacherExternalMeetingUrlHint,
+                    helperText: l10n.teacherExternalMeetingUrlHelper,
+                    keyboardType: TextInputType.url,
+                  ),
+                  SizedBox(height: tokens.spaceLarge),
+                  TilawaTextField(
+                    controller: _meetingUrlCtrl,
+                    label: l10n.teacherExternalMeetingUrlLabel,
+                    hintText: l10n.teacherExternalMeetingUrlHint,
+                    helperText: l10n.teacherExternalMeetingUrlHelper,
+                    keyboardType: TextInputType.url,
+                    textInputAction: TextInputAction.done,
                   ),
                   SizedBox(height: tokens.spaceLarge),
                   Text(l10n.teachingLanguagesSelect),

@@ -33,6 +33,7 @@ async function seedVerifiedTeacher(
     .collection("quran_teacher_profiles")
     .doc(id)
     .set({
+      userId: "uid_teacher1",
       verificationStatus: "verified",
       gender: "male",
       allowedStudentGender: "both",
@@ -102,6 +103,26 @@ test("integration: free booking with a verified teacher is scheduled", async () 
   );
   const lock = await db().collection("quran_slot_locks").doc("slot1").get();
   assert.equal(lock.exists, true);
+});
+
+test("integration: booking notification targets teacher auth uid not profile id", async () => {
+  await clearFirestore();
+  await seedVerifiedTeacher("teacher1");
+  await seedCompleteStudent("student1");
+  await seedUserSession("student1");
+
+  const res = await booking.run({
+    data: bookingData(),
+    auth: { uid: "student1", token: {} },
+  });
+
+  const notifications = await db()
+    .collection("quran_session_notifications")
+    .where("aggregateId", "==", res.bookingId)
+    .get();
+  assert.equal(notifications.size, 1);
+  const recipients = notifications.docs[0].get("recipientUserIds") as string[];
+  assert.deepEqual(recipients.sort(), ["student1", "uid_teacher1"].sort());
 });
 
 test("integration: an unverified teacher is rejected server-side", async () => {
@@ -275,7 +296,127 @@ test("integration: stale session epoch rejects booking", async () => {
       data: withSessionEpoch(bookingData(), 1),
       auth: { uid: "student1", token: {} },
     }),
-    (e) => (e as { code?: string })?.code === "failed-precondition",
+    (e) => codeOf(e) === "session_epoch_stale",
+  );
+});
+
+test("integration: external booking without meeting URL is rejected", async () => {
+  await clearFirestore();
+  await seedVerifiedTeacher("teacher1", { externalMeetingUrl: "" });
+  await seedCompleteStudent("student1");
+  await seedUserSession("student1");
+
+  await assert.rejects(
+    booking.run({ data: bookingData(), auth: { uid: "student1", token: {} } }),
+    (e) => codeOf(e) === "meeting_link_required",
+  );
+});
+
+test("integration: external booking uses platform default meeting URL", async () => {
+  await clearFirestore();
+  await seedVerifiedTeacher("teacher1", { externalMeetingUrl: "" });
+  await seedCompleteStudent("student1");
+  await seedUserSession("student1");
+  await db()
+    .collection("quran_session_platform_config")
+    .doc("global")
+    .set({
+      defaultExternalMeetingUrl: "https://meet.example.com/platform-default",
+    });
+
+  const res = await booking.run({
+    data: bookingData(),
+    auth: { uid: "student1", token: {} },
+  });
+
+  const sessionDoc = await db().collection("quran_sessions").doc(res.sessionId).get();
+  assert.equal(
+    sessionDoc.get("meetingLink"),
+    "https://meet.example.com/platform-default",
+  );
+  assert.equal(sessionDoc.get("callProvider"), "external");
+});
+
+test("integration: external booking reads legacy teacher meeting_link field", async () => {
+  await clearFirestore();
+  await seedVerifiedTeacher("teacher1", {
+    externalMeetingUrl: "",
+    meeting_link: "https://meet.example.com/legacy-teacher-room",
+  });
+  await seedCompleteStudent("student1");
+  await seedUserSession("student1");
+
+  const res = await booking.run({
+    data: bookingData(),
+    auth: { uid: "student1", token: {} },
+  });
+
+  const sessionDoc = await db().collection("quran_sessions").doc(res.sessionId).get();
+  assert.equal(
+    sessionDoc.get("meetingLink"),
+    "https://meet.example.com/legacy-teacher-room",
+  );
+});
+
+test("integration: voice booking rejects malformed enabledCallProviders safely", async () => {
+  await clearFirestore();
+  await seedVerifiedTeacher("teacher1");
+  await seedCompleteStudent("student1");
+  await seedUserSession("student1");
+  await db()
+    .collection("quran_session_platform_config")
+    .doc("global")
+    .set({ enabledCallProviders: "external,mock" });
+
+  await assert.rejects(
+    booking.run({
+      data: bookingData({ callType: "voiceCall" }),
+      auth: { uid: "student1", token: {} },
+    }),
+    (e) => codeOf(e) === "unsupported_call_provider",
+  );
+});
+
+test("integration: production-shaped teacher profile external booking", async () => {
+  await clearFirestore();
+  const teacherId = "a1sYAAaBHg5aq1uwya0o";
+  await db()
+    .collection("quran_teacher_profiles")
+    .doc(teacherId)
+    .set({
+      userId: "uid_teacher_owner",
+      displayName: "Teacher Beta",
+      publicBio: "Teaching tajweed",
+      verificationStatus: "verified",
+      gender: "male",
+      allowedStudentGender: "both",
+      canTeachChildren: true,
+      requiresGuardianApprovalForChildren: false,
+      externalMeetingUrl: "https://meet.google.com/fiy-jjux-mab",
+      teachingLanguages: ["ar"],
+      specializations: ["tajweed"],
+      averageRating: 0,
+      reviewCount: 0,
+      isActive: true,
+      profileCompleteness: "complete",
+      isPubliclyVisible: true,
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
+    });
+  await seedCompleteStudent("student1");
+  await seedUserSession("student1");
+
+  const res = await booking.run({
+    data: bookingData({ teacherId }),
+    auth: { uid: "student1", token: {} },
+  });
+
+  assert.equal(res.lifecycleStatus, "scheduled");
+  const sessionDoc = await db().collection("quran_sessions").doc(res.sessionId).get();
+  assert.equal(sessionDoc.get("callProvider"), "external");
+  assert.equal(
+    sessionDoc.get("meetingLink"),
+    "https://meet.google.com/fiy-jjux-mab",
   );
 });
 

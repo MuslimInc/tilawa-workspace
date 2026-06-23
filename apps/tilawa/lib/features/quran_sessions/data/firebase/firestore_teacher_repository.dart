@@ -27,7 +27,9 @@ class FirestoreTeacherDataSource implements TeacherRemoteDataSource {
       avatarUrl: data['avatarUrl'] as String? ?? '',
       gender: data['gender'] as String? ?? 'male',
       verificationStatus: data['verificationStatus'] as String? ?? 'pending',
-      supportedCallTypes: const ['external_meeting'],
+      supportedCallTypes: _supportedCallTypes(
+        data['externalMeetingUrl'] as String?,
+      ),
       pricingType: marketPrice == null ? 'free' : 'fixed_per_session',
       marketPrice: marketPrice,
       specializations: List<String>.from(
@@ -40,6 +42,15 @@ class FirestoreTeacherDataSource implements TeacherRemoteDataSource {
       totalReviews: data['reviewCount'] as int? ?? 0,
       totalSessionsCompleted: data['totalSessionsCompleted'] as int? ?? 0,
     );
+  }
+
+  static List<String> _supportedCallTypes(String? externalMeetingUrl) {
+    final types = <String>['voice_call', 'video_call'];
+    final trimmed = externalMeetingUrl?.trim();
+    if (trimmed != null && trimmed.isNotEmpty) {
+      types.insert(0, 'external_meeting');
+    }
+    return types;
   }
 
   @override

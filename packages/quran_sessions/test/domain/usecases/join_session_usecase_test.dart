@@ -3,10 +3,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 
 import '../../helpers/fakes/fake_session_repository.dart';
-import '../../helpers/fixtures.dart' show makeSession;
+import '../../helpers/fakes/fake_teacher_profile_repository.dart';
+import '../../helpers/fixtures.dart' show makeSession, makeTeacherProfile;
 
 void main() {
   late FakeSessionRepository sessionRepo;
+  late FakeTeacherProfileRepository teacherProfiles;
   late JoinSessionUseCase joinSession;
   CallJoinRequest? lastJoin;
   String? launchedUrl;
@@ -14,6 +16,7 @@ void main() {
 
   setUp(() {
     sessionRepo = FakeSessionRepository();
+    teacherProfiles = FakeTeacherProfileRepository();
     lastJoin = null;
     launchedUrl = null;
     routingProvider = RoutingSessionCallProvider(
@@ -27,6 +30,7 @@ void main() {
       sessionRepository: sessionRepo,
       callProvider: routingProvider,
       authSession: _FakeAuthSession('student_1'),
+      teacherProfileRepository: teacherProfiles,
     );
     lastJoin = null;
   });
@@ -106,6 +110,7 @@ void main() {
       sessionRepository: sessionRepo,
       callProvider: routingProvider,
       authSession: _FakeAuthSession('teacher_1'),
+      teacherProfileRepository: teacherProfiles,
     );
 
     final result = await joinSession(sessionId: 'session_1');
@@ -113,6 +118,35 @@ void main() {
     check(result.isRight()).isTrue();
     check(launchedUrl).equals('https://meet.example.com/room');
   });
+
+  test(
+    'teacher joins when session teacherId is profile doc not auth uid',
+    () async {
+      const profileDocId = 'profile_doc_abc';
+      const authUid = 'firebase_uid_teacher';
+      teacherProfiles.seed(
+        makeTeacherProfile(id: profileDocId, userId: authUid),
+      );
+      sessionRepo.sessions = [
+        makeSession(
+          id: 'session_1',
+          studentId: 'student_1',
+          teacherId: profileDocId,
+        ),
+      ];
+      joinSession = JoinSessionUseCase(
+        sessionRepository: sessionRepo,
+        callProvider: routingProvider,
+        authSession: _FakeAuthSession(authUid),
+        teacherProfileRepository: teacherProfiles,
+      );
+
+      final result = await joinSession(sessionId: 'session_1');
+
+      check(result.isRight()).isTrue();
+      check(launchedUrl).equals('https://meet.example.com/room');
+    },
+  );
 
   test('external join fails when meeting link missing', () async {
     sessionRepo.sessions = [
@@ -139,6 +173,7 @@ void main() {
       sessionRepository: sessionRepo,
       callProvider: routingProvider,
       authSession: _FakeAuthSession('student_1'),
+      teacherProfileRepository: teacherProfiles,
     );
 
     final result = await joinSession(sessionId: 'session_no_link');
