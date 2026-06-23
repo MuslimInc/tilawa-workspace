@@ -34,6 +34,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
                 previous is SessionDetailSuccess &&
                 (previous.canJoin != current.canJoin ||
                     previous.canOpenDispute != current.canOpenDispute ||
+                    previous.canOpenMeetingAgain != current.canOpenMeetingAgain ||
                     previous.joinInProgress != current.joinInProgress)),
         builder: (context, state) {
           if (state is! SessionDetailSuccess) {
@@ -45,9 +46,10 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
       body: BlocConsumer<SessionDetailBloc, SessionDetailState>(
         listener: (context, state) {
           if (state is SessionDetailSuccess && state.joinFailure != null) {
+            final failure = state.joinFailure!;
             TilawaFeedback.showToast(
               context,
-              message: state.joinFailure!.toLocalizedMessage(context),
+              message: failure.toLocalizedMessage(context),
               variant: TilawaFeedbackVariant.error,
             );
           }
@@ -163,8 +165,18 @@ class _SessionDetailFooter extends StatelessWidget {
               isLoading: state.joinInProgress,
               onPressed: state.joinInProgress
                   ? null
+                  : () => _requestJoin(context),
+            ),
+          if (state.canOpenMeetingAgain)
+            TilawaButton(
+              text: l10n.externalMeetingJoinAgain,
+              variant: TilawaButtonVariant.outline,
+              isFullWidth: true,
+              isLoading: state.joinInProgress,
+              onPressed: state.joinInProgress
+                  ? null
                   : () => context.read<SessionDetailBloc>().add(
-                      const SessionDetailJoinRequested(),
+                      const SessionDetailOpenMeetingAgainRequested(),
                     ),
             ),
           TilawaButton(
@@ -186,6 +198,17 @@ class _SessionDetailFooter extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _requestJoin(BuildContext context) async {
+    if (state.isExternalMeeting) {
+      final confirmed = await showExternalMeetingJoinSheet(
+        context,
+        meetingUrl: state.externalMeetingJoinUrl!,
+      );
+      if (!confirmed || !context.mounted) return;
+    }
+    context.read<SessionDetailBloc>().add(const SessionDetailJoinRequested());
   }
 
   Future<void> _submitReport(BuildContext context) async {

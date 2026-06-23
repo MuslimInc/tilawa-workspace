@@ -7,8 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/get_it_idempotent.dart';
 import 'package:tilawa/features/auth/domain/services/callable_session_payload_builder.dart';
-import 'package:tilawa/core/utils/legal_url_launcher.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:tilawa/features/quran_sessions/data/external_meeting_url_launcher.dart';
 
 import '../data/firebase/firebase_auth_session_provider.dart';
 import '../data/firebase/firebase_audit_repository.dart';
@@ -137,18 +136,7 @@ class QuranSessionsFirebaseModule {
               (session) => session.joinUrl ?? '',
             );
           },
-          urlLauncher: (url) async {
-            final uri = Uri.tryParse(url);
-            if (uri == null) {
-              throw const MeetingLinkUnavailableFailure();
-            }
-            final opened = await canLaunchUrl(uri)
-                ? await launchUrl(uri, mode: LaunchMode.externalApplication)
-                : await openLegalUrl(url);
-            if (!opened) {
-              throw const MeetingLinkUnavailableFailure();
-            }
-          },
+          urlLauncher: launchExternalMeetingUrl,
         ),
         mock: const MockSessionCallProvider(),
       ),

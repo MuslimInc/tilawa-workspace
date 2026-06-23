@@ -24,6 +24,8 @@ final class SessionDetailSuccess extends SessionDetailState {
   const SessionDetailSuccess({
     required this.aggregate,
     required this.timeline,
+    this.externalMeetingJoinUrl,
+    this.hasOpenedExternalMeeting = false,
     this.joinInProgress = false,
     this.joinFailure,
     this.reportInProgress = false,
@@ -36,6 +38,8 @@ final class SessionDetailSuccess extends SessionDetailState {
 
   final SessionAggregate aggregate;
   final List<SessionAuditEvent> timeline;
+  final String? externalMeetingJoinUrl;
+  final bool hasOpenedExternalMeeting;
   final bool joinInProgress;
   final QuranSessionsFailure? joinFailure;
   final bool reportInProgress;
@@ -50,9 +54,17 @@ final class SessionDetailSuccess extends SessionDetailState {
 
   bool get canOpenDispute => aggregate.lifecycleStatus.canOpenDispute;
 
+  bool get canOpenMeetingAgain =>
+      externalMeetingJoinUrl != null && hasOpenedExternalMeeting;
+
+  bool get isExternalMeeting => externalMeetingJoinUrl != null;
+
   SessionDetailSuccess copyWith({
     SessionAggregate? aggregate,
     List<SessionAuditEvent>? timeline,
+    String? externalMeetingJoinUrl,
+    bool clearExternalMeetingJoinUrl = false,
+    bool? hasOpenedExternalMeeting,
     bool? joinInProgress,
     bool clearJoinInProgress = false,
     QuranSessionsFailure? joinFailure,
@@ -73,6 +85,11 @@ final class SessionDetailSuccess extends SessionDetailState {
     return SessionDetailSuccess(
       aggregate: aggregate ?? this.aggregate,
       timeline: timeline ?? this.timeline,
+      externalMeetingJoinUrl: clearExternalMeetingJoinUrl
+          ? null
+          : externalMeetingJoinUrl ?? this.externalMeetingJoinUrl,
+      hasOpenedExternalMeeting:
+          hasOpenedExternalMeeting ?? this.hasOpenedExternalMeeting,
       joinInProgress: clearJoinInProgress
           ? false
           : joinInProgress ?? this.joinInProgress,
@@ -102,6 +119,8 @@ final class SessionDetailSuccess extends SessionDetailState {
   List<Object?> get props => [
     aggregate,
     timeline,
+    externalMeetingJoinUrl,
+    hasOpenedExternalMeeting,
     joinInProgress,
     joinFailure,
     reportInProgress,

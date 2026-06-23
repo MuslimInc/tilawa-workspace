@@ -344,6 +344,33 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
       'This session cannot be joined from the app right now.';
 
   @override
+  String get externalMeetingJoinTitle => 'Join outside Tilawa?';
+
+  @override
+  String get externalMeetingJoinBody =>
+      'You\'ll briefly leave Tilawa to join your session in Google Meet, Zoom, or your browser. Come back here anytime — your session details stay open.';
+
+  @override
+  String get externalMeetingJoinOpen => 'Open';
+
+  @override
+  String get externalMeetingJoinCopy => 'Copy URL';
+
+  @override
+  String get externalMeetingJoinLinkCopied => 'Link copied';
+
+  @override
+  String get externalMeetingJoinAgain => 'Open meeting again';
+
+  @override
+  String get externalMeetingLaunchFailed =>
+      'Couldn\'t open the meeting link. Try again or copy the link.';
+
+  @override
+  String get externalMeetingLinkCopied =>
+      'Meeting link copied. Paste it in your browser to join.';
+
+  @override
   String get groupBookingNotSupported =>
       'Group sessions are not available in Free Beta.';
 

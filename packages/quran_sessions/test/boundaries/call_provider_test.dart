@@ -2,6 +2,7 @@ import 'package:checks/checks.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../lib/src/boundaries/call/external_meeting_call_provider.dart';
+import '../../lib/src/domain/failures/quran_sessions_failure.dart';
 import '../helpers/fakes/fake_call_provider.dart';
 
 void main() {
@@ -32,6 +33,32 @@ void main() {
       check(launchedUrl).equals('https://meet.example.com/room');
       check(room.meetingUrl).equals('https://meet.example.com/room');
       check(room.sessionId).equals('session_1');
+    });
+
+    test('propagates urlLauncher failures', () async {
+      final provider = ExternalMeetingCallProvider(
+        getMeetingUrl: (_) async => 'https://meet.example.com/room',
+        urlLauncher: (_) async {
+          throw const ExternalMeetingLaunchFailure(linkCopiedToClipboard: true);
+        },
+      );
+
+      await expectLater(
+        provider.joinSession('session_1'),
+        throwsA(isA<ExternalMeetingLaunchFailure>()),
+      );
+    });
+
+    test('throws when meeting URL is empty', () async {
+      final provider = ExternalMeetingCallProvider(
+        getMeetingUrl: (_) async => '',
+        urlLauncher: (_) async {},
+      );
+
+      await expectLater(
+        provider.joinSession('session_1'),
+        throwsA(isA<MeetingLinkUnavailableFailure>()),
+      );
     });
   });
 }

@@ -671,6 +671,54 @@ abstract class QuranSessionsLocalizations {
   /// **'This session cannot be joined from the app right now.'**
   String get callProviderUnavailable;
 
+  /// No description provided for @externalMeetingJoinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join outside Tilawa?'**
+  String get externalMeetingJoinTitle;
+
+  /// No description provided for @externalMeetingJoinBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll briefly leave Tilawa to join your session in Google Meet, Zoom, or your browser. Come back here anytime — your session details stay open.'**
+  String get externalMeetingJoinBody;
+
+  /// No description provided for @externalMeetingJoinOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get externalMeetingJoinOpen;
+
+  /// No description provided for @externalMeetingJoinCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy URL'**
+  String get externalMeetingJoinCopy;
+
+  /// No description provided for @externalMeetingJoinLinkCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied'**
+  String get externalMeetingJoinLinkCopied;
+
+  /// No description provided for @externalMeetingJoinAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Open meeting again'**
+  String get externalMeetingJoinAgain;
+
+  /// No description provided for @externalMeetingLaunchFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the meeting link. Try again or copy the link.'**
+  String get externalMeetingLaunchFailed;
+
+  /// No description provided for @externalMeetingLinkCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting link copied. Paste it in your browser to join.'**
+  String get externalMeetingLinkCopied;
+
   /// No description provided for @groupBookingNotSupported.
   ///
   /// In en, this message translates to:

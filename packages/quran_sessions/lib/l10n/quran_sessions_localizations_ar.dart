@@ -333,6 +333,33 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
       'لا يمكن الانضمام إلى هذه الجلسة من التطبيق حاليًا.';
 
   @override
+  String get externalMeetingJoinTitle => 'الانضمام خارج تلاوة؟';
+
+  @override
+  String get externalMeetingJoinBody =>
+      'ستغادر تلاوة مؤقتًا للانضمام إلى جلستك عبر Google Meet أو Zoom أو المتصفح. يمكنك العودة هنا في أي وقت — تفاصيل جلستك تبقى مفتوحة.';
+
+  @override
+  String get externalMeetingJoinOpen => 'فتح';
+
+  @override
+  String get externalMeetingJoinCopy => 'نسخ الرابط';
+
+  @override
+  String get externalMeetingJoinLinkCopied => 'تم نسخ الرابط';
+
+  @override
+  String get externalMeetingJoinAgain => 'فتح الاجتماع مرة أخرى';
+
+  @override
+  String get externalMeetingLaunchFailed =>
+      'تعذّر فتح رابط الاجتماع. حاول مرة أخرى أو انسخ الرابط.';
+
+  @override
+  String get externalMeetingLinkCopied =>
+      'تم نسخ رابط الاجتماع. الصقه في المتصفح للانضمام.';
+
+  @override
   String get groupBookingNotSupported =>
       'الجلسات الجماعية غير متاحة في النسخة التجريبية.';
 

@@ -80,6 +80,8 @@ class JoinSessionUseCase {
       return Left(e);
     } on CallProviderUnavailableFailure catch (e) {
       return Left(e);
+    } on ExternalMeetingLaunchFailure catch (e) {
+      return Left(e);
     } on Object {
       return const Left(NetworkFailure());
     }

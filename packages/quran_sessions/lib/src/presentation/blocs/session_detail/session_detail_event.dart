@@ -23,6 +23,11 @@ final class SessionDetailJoinRequested extends SessionDetailEvent {
   const SessionDetailJoinRequested();
 }
 
+/// Re-opens the external meeting link without re-running join validation.
+final class SessionDetailOpenMeetingAgainRequested extends SessionDetailEvent {
+  const SessionDetailOpenMeetingAgainRequested();
+}
+
 /// User submits a safety report from session detail.
 final class SessionDetailReportSubmitted extends SessionDetailEvent {
   const SessionDetailReportSubmitted({

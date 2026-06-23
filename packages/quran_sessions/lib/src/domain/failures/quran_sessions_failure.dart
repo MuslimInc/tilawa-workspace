@@ -126,6 +126,16 @@ final class CallProviderUnavailableFailure extends QuranSessionsFailure {
   const CallProviderUnavailableFailure();
 }
 
+/// External meeting URL could not be opened in another app.
+final class ExternalMeetingLaunchFailure extends QuranSessionsFailure {
+  const ExternalMeetingLaunchFailure({this.linkCopiedToClipboard = false});
+
+  final bool linkCopiedToClipboard;
+
+  @override
+  List<Object?> get props => [linkCopiedToClipboard];
+}
+
 /// The requested lifecycle action is not valid for the current status.
 final class InvalidTransitionFailure extends QuranSessionsFailure {
   const InvalidTransitionFailure({

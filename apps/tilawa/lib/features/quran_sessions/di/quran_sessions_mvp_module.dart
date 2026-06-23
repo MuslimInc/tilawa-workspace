@@ -15,6 +15,7 @@ import '../data/fake_mvp_teacher_repository.dart';
 import '../data/fake_mvp_user_profile_repository.dart';
 import '../data/fake_mvp_wallet_repository.dart';
 import '../data/fake_mvp_session_lifecycle.dart';
+import '../data/external_meeting_url_launcher.dart';
 import '../data/quran_sessions_mvp_store.dart';
 import '../data/session_backed_booked_slot_lock_repository.dart';
 import '../presentation/quran_sessions_scheduling_analytics.dart';
@@ -343,7 +344,9 @@ class QuranSessionsMvpModule {
       () => SessionDetailBloc(
         aggregateRepository: sl<SessionAggregateRepository>(),
         getTimeline: sl<GetSessionTimelineUseCase>(),
+        sessionRepository: sl<SessionRepository>(),
         joinSession: sl<JoinSessionUseCase>(),
+        openExternalMeetingUrl: launchExternalMeetingUrl,
         reportConcern: sl.isRegistered<ReportSessionConcernUseCase>()
             ? sl<ReportSessionConcernUseCase>()
             : null,

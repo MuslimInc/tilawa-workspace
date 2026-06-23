@@ -76,6 +76,9 @@ extension QuranSessionsFailureUi on QuranSessionsFailure {
       UnsupportedSessionModeFailure() => loc.unsupportedSessionMode,
       MeetingLinkUnavailableFailure() => loc.meetingLinkUnavailable,
       CallProviderUnavailableFailure() => loc.callProviderUnavailable,
+      ExternalMeetingLaunchFailure(linkCopiedToClipboard: true) =>
+        loc.externalMeetingLinkCopied,
+      ExternalMeetingLaunchFailure() => loc.externalMeetingLaunchFailed,
       InvalidTransitionFailure(action: final action) => loc.validationError(
         'invalid_transition',
         action,

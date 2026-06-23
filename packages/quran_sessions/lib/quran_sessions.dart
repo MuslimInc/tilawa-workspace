@@ -255,6 +255,7 @@ export 'src/presentation/widgets/cancel_session_sheet.dart';
 export 'src/presentation/widgets/open_dispute_sheet.dart';
 export 'src/presentation/widgets/payment_checkout_sheet.dart';
 export 'src/presentation/widgets/report_concern_sheet.dart';
+export 'src/presentation/widgets/external_meeting_join_sheet.dart';
 export 'src/presentation/screens/profile_completion_screen.dart';
 export 'src/presentation/screens/quran_sessions_home_screen.dart';
 // ── Presentation: screens ─────────────────────────────────────────────────────
