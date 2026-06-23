@@ -16,6 +16,9 @@ import '../foundation/tilawa_interaction_feedback.dart';
 ///
 /// The control consists of a rounded container with segmented buttons inside.
 /// The selected segment has a distinct background color and shadow.
+///
+/// Per-segment disable: set [TilawaSegment.enabled] to false. Disabled
+/// segments stay visible, use reduced opacity, and ignore taps.
 class TilawaSegmentedControl<T> extends StatelessWidget {
   /// Creates a segmented control.
   const TilawaSegmentedControl({
@@ -111,22 +114,25 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
         spacing: tokens.itemSpacing,
         children: segments.map((segment) {
           final isSelected = segment.value == selectedValue;
+          final segmentEnabled = enabled && segment.enabled;
           return Expanded(
             child: _SegmentButton(
               label: segment.label,
               isSelected: isSelected,
               onTap: () {
-                if (enabled && segment.value != selectedValue) {
+                if (!segmentEnabled) return;
+                if (segment.value != selectedValue) {
                   TilawaInteractionFeedback.trigger(TilawaHaptic.selection);
+                  onValueChanged(segment.value);
                 }
-                onValueChanged(segment.value);
               },
               selectedBackgroundColor: effectiveSelectedColor,
               selectedTextColor: effectiveSelectedTextColor,
               unselectedTextColor: effectiveUnselectedTextColor,
               tokens: tokens,
               itemRadius: effectiveItemRadius,
-              enabled: enabled,
+              enabled: segmentEnabled,
+              semanticsHint: segment.semanticsHint,
             ),
           );
         }).toList(),
@@ -139,14 +145,28 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
 @immutable
 class TilawaSegment<T> {
   /// Creates a segment.
-  const TilawaSegment({required this.value, required this.label});
+  const TilawaSegment({
+    required this.value,
+    required this.label,
+    this.enabled = true,
+    this.semanticsHint,
+  });
 
   /// The value associated with this segment.
   final T value;
 
   /// The text label to display.
   final String label;
+
+  /// When false, segment is visible but not selectable.
+  final bool enabled;
+
+  /// Optional accessibility hint when [enabled] is false (e.g. why unavailable).
+  final String? semanticsHint;
 }
+
+// Material 3 disabled content opacity (matches [TilawaButton]).
+const double _kDisabledSegmentOpacity = 0.38;
 
 class _SegmentButton extends StatelessWidget {
   const _SegmentButton({
@@ -159,6 +179,7 @@ class _SegmentButton extends StatelessWidget {
     required this.tokens,
     required this.itemRadius,
     required this.enabled,
+    this.semanticsHint,
   });
 
   final String label;
@@ -170,6 +191,7 @@ class _SegmentButton extends StatelessWidget {
   final TilawaSegmentedControlTokens tokens;
   final double itemRadius;
   final bool enabled;
+  final String? semanticsHint;
 
   @override
   Widget build(BuildContext context) {
@@ -184,7 +206,7 @@ class _SegmentButton extends StatelessWidget {
 
     final itemBorderRadius = BorderRadius.circular(itemRadius);
 
-    return Material(
+    final segment = Material(
       color: isSelected ? selectedBackgroundColor : Colors.transparent,
       borderRadius: itemBorderRadius,
       child: InkWell(
@@ -196,6 +218,7 @@ class _SegmentButton extends StatelessWidget {
           button: true,
           enabled: enabled,
           label: label,
+          hint: enabled ? null : semanticsHint,
           child: Container(
             padding: tokens.itemPadding,
             decoration: isSelected
@@ -206,5 +229,9 @@ class _SegmentButton extends StatelessWidget {
         ),
       ),
     );
+
+    if (enabled) return segment;
+
+    return Opacity(opacity: _kDisabledSegmentOpacity, child: segment);
   }
 }

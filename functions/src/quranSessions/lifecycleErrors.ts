@@ -16,7 +16,10 @@ export type LifecycleErrorCode =
   | "gender_not_allowed"
   | "age_not_allowed"
   | "guardian_approval_required"
-  | "meeting_link_required";
+  | "meeting_link_required"
+  | "group_booking_not_supported"
+  | "unsupported_session_mode"
+  | "unsupported_call_provider";
 
 export function lifecycleError(
   code: LifecycleErrorCode,

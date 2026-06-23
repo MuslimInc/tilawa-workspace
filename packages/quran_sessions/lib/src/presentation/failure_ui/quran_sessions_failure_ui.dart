@@ -68,6 +68,10 @@ extension QuranSessionsFailureUi on QuranSessionsFailure {
       // ── Booking ─────────────────────────────────────────────────────────────
       SlotUnavailableFailure() => loc.slotUnavailable,
       BookingConflictFailure() => loc.bookingConflict,
+      GroupBookingNotSupportedFailure() => loc.groupBookingNotSupported,
+      UnsupportedSessionModeFailure() => loc.unsupportedSessionMode,
+      MeetingLinkUnavailableFailure() => loc.meetingLinkUnavailable,
+      CallProviderUnavailableFailure() => loc.callProviderUnavailable,
       InvalidTransitionFailure(action: final action) => loc.validationError(
         'invalid_transition',
         action,

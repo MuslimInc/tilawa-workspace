@@ -1,6 +1,8 @@
+import '../../domain/entities/call_join_request.dart';
 import 'call_provider.dart';
 import 'call_room.dart';
 import 'call_token_provider.dart';
+import 'session_call_provider.dart';
 
 /// Placeholder for V2 Agora voice/video integration.
 ///
@@ -12,11 +14,16 @@ import 'call_token_provider.dart';
 /// 1. Add `agora_rtc_engine` to pubspec.yaml.
 /// 2. Replace the [UnimplementedError] bodies with real Agora SDK calls.
 /// 3. Use [CallTokenProvider] to fetch the RTC token before joining.
-class AgoraCallProvider implements CallProvider {
+class AgoraCallProvider implements SessionCallProvider, CallProvider {
   const AgoraCallProvider({required this.tokenProvider, required this.appId});
 
   final CallTokenProvider tokenProvider;
   final String appId;
+
+  @override
+  Future<CallRoom> join(CallJoinRequest request) => throw UnimplementedError(
+    'AgoraCallProvider.join — V2 not yet implemented',
+  );
 
   @override
   Future<CallRoom> joinSession(String sessionId) => throw UnimplementedError(

@@ -1,6 +1,8 @@
+import '../../domain/entities/call_join_request.dart';
 import 'call_provider.dart';
 import 'call_room.dart';
 import 'call_token_provider.dart';
+import 'session_call_provider.dart';
 
 /// Placeholder for V4 custom WebRTC integration.
 ///
@@ -11,7 +13,7 @@ import 'call_token_provider.dart';
 /// 1. Add `flutter_webrtc` (or equivalent) to pubspec.yaml.
 /// 2. Add signalling server integration (WebSocket / SFU).
 /// 3. Replace the [UnimplementedError] bodies.
-class WebRtcCallProvider implements CallProvider {
+class WebRtcCallProvider implements SessionCallProvider, CallProvider {
   const WebRtcCallProvider({
     required this.tokenProvider,
     required this.signalingServerUrl,
@@ -19,6 +21,11 @@ class WebRtcCallProvider implements CallProvider {
 
   final CallTokenProvider tokenProvider;
   final String signalingServerUrl;
+
+  @override
+  Future<CallRoom> join(CallJoinRequest request) => throw UnimplementedError(
+    'WebRtcCallProvider.join — V4 not yet implemented',
+  );
 
   @override
   Future<CallRoom> joinSession(String sessionId) => throw UnimplementedError(

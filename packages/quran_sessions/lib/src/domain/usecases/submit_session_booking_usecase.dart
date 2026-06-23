@@ -3,6 +3,7 @@ import 'package:dartz_plus/dartz_plus.dart';
 import '../entities/generated_slot.dart';
 import '../entities/session_booking_outcome.dart';
 import '../entities/session_call_type.dart';
+import '../policies/session_mode_policy.dart';
 import '../entities/session_pricing_type.dart';
 import '../failures/quran_sessions_failure.dart';
 import '../gateways/session_mutation_gateway.dart';
@@ -16,12 +17,14 @@ class SubmitSessionBookingUseCase {
     required this._getAvailability,
     required this._authSession,
     this.defaultSlotDurationMinutes = 30,
+    this.sessionModePolicy = SessionModePolicy.freeBeta,
   });
 
   final SessionMutationGateway _mutationGateway;
   final GetTeacherAvailabilityUseCase _getAvailability;
   final AuthSessionProvider _authSession;
   final int defaultSlotDurationMinutes;
+  final SessionModePolicy sessionModePolicy;
 
   Future<Either<QuranSessionsFailure, SessionBookingOutcome>> call({
     required String teacherId,
@@ -33,6 +36,12 @@ class SubmitSessionBookingUseCase {
     final studentId = _authSession.currentUserId;
     if (studentId == null || studentId.isEmpty) {
       return const Left(UnauthorizedFailure());
+    }
+
+    if (!sessionModePolicy.isEnabled(callType)) {
+      return Left(
+        UnsupportedSessionModeFailure(callType: callType.name),
+      );
     }
 
     final slotStart = GeneratedSlot.parseStartUtc(

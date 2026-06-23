@@ -22,7 +22,11 @@ import {
 import { assertPaidBookingAllowed } from "./paymentProviderStatus";
 import { requireAuthenticatedUid, requireValidSessionEpoch } from "./sessionAuth";
 import { validateTransition } from "./sessionLifecycleGuard";
-import { resolveMeetingLink } from "./meetingLinkResolver";
+import {
+  assertValidCallType,
+  resolveCallProviderForBooking,
+} from "./callProviderResolver";
+import { buildIndividualParticipants } from "./sessionParticipants";
 import {
   legacyStatusForLifecycle,
   nowServer,
@@ -34,6 +38,8 @@ interface CreateSessionBookingRequest {
   startsAt: string;
   endsAt: string;
   callType: "externalMeeting" | "voiceCall" | "videoCall";
+  bookingType?: "individual" | "group";
+  callProvider?: string;
   pricingType: "free" | "fixedPerSession" | "subscription";
   paymentReference?: string;
   studentNote?: string;
@@ -66,6 +72,25 @@ export const createSessionBooking = onCall(
     const data = request.data as CreateSessionBookingRequest;
     if (!data.teacherId || !data.slotId || !data.startsAt || !data.endsAt) {
       throw new HttpsError("invalid-argument", "Missing required fields.");
+    }
+
+    const bookingType = data.bookingType ?? "individual";
+    if (bookingType !== "individual") {
+      throw lifecycleError(
+        "group_booking_not_supported",
+        "Only individual 1:1 bookings are supported in Free Beta.",
+        { bookingType },
+      );
+    }
+
+    try {
+      assertValidCallType(data.callType);
+    } catch {
+      throw lifecycleError(
+        "unsupported_session_mode",
+        "Unsupported session mode.",
+        { callType: data.callType },
+      );
     }
 
     const db = getFirestore();
@@ -157,18 +182,44 @@ export const createSessionBooking = onCall(
         const teacherSnap = await tx.get(
           db.collection("quran_teacher_profiles").doc(data.teacherId),
         );
-        const meetingLink = resolveMeetingLink(
-          data.callType,
-          teacherSnap.data() ?? {},
-          platformConfig,
-        );
-        if (data.callType === "externalMeeting" && meetingLink == null) {
+        const teacherData = teacherSnap.data() ?? {};
+        let resolvedCall;
+        try {
+          resolvedCall = resolveCallProviderForBooking({
+            callType: data.callType,
+            sessionId: sessionRef.id,
+            teacherProfile: teacherData,
+            platformConfig,
+            clientCallProvider: data.callProvider,
+          });
+        } catch (e) {
+          const message = e instanceof Error ? e.message : "";
+          if (message === "unsupported_call_provider") {
+            throw lifecycleError(
+              "unsupported_call_provider",
+              "Call provider is not enabled for Free Beta.",
+              { callProvider: data.callProvider },
+            );
+          }
+          throw e;
+        }
+
+        if (
+          data.callType === "externalMeeting" &&
+          resolvedCall.meetingLink == null
+        ) {
           throw lifecycleError(
             "meeting_link_required",
             "Teacher has no external meeting URL configured.",
             { teacherId: data.teacherId },
           );
         }
+
+        const participants = buildIndividualParticipants(
+          data.teacherId,
+          studentId,
+        );
+        const meetingLink = resolvedCall.meetingLink;
 
         tx.set(lockRef, {
           lockId: data.slotId,
@@ -192,7 +243,9 @@ export const createSessionBooking = onCall(
           slotId: data.slotId,
           startsAt,
           endsAt,
+          bookingType,
           callType: data.callType,
+          callProvider: resolvedCall.callProvider,
           pricingType: serverPricingType,
           priceAmount: pricing.amount,
           priceCurrency: pricing.currencyCode,
@@ -215,7 +268,12 @@ export const createSessionBooking = onCall(
           teacherId: data.teacherId,
           startsAt,
           endsAt,
+          bookingType,
           callType: data.callType,
+          callProvider: resolvedCall.callProvider,
+          providerSessionId: resolvedCall.providerSessionId,
+          joinToken: resolvedCall.joinToken,
+          participants,
           lifecycleStatus: sessionLifecycleStatus,
           status: legacyStatusForLifecycle(sessionLifecycleStatus),
           meetingLink,

@@ -1,3 +1,5 @@
+import 'dart:ui' show Tristate;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -94,5 +96,61 @@ void main() {
     expect(find.text('Confirm booking'), findsOneWidget);
     expect(find.text('Choose a time'), findsOneWidget);
     expect(find.text('Session type'), findsOneWidget);
+  });
+
+  testWidgets('externalOnly policy shows disabled voice and video segments', (
+    tester,
+  ) async {
+    final slots = [_slot(1)];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+        localizationsDelegates: const [
+          QuranSessionsLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: QuranSessionsLocalizations.supportedLocales,
+        home: BlocProvider<BookingBloc>(
+          create: (_) => _SeededBookingBloc(
+            seed: BookingSelecting(
+              teacherId: 'teacher_1',
+              availableSlots: slots,
+              selectedSlot: slots.first,
+              selectedCallType: SessionCallType.externalMeeting,
+            ),
+          ),
+          child: const BookingScreen(
+            teacherId: 'teacher_1',
+            studentId: 'student_1',
+            sessionModePolicy: SessionModePolicy.externalOnly,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('External link'), findsOneWidget);
+    expect(find.text('Voice'), findsOneWidget);
+    expect(find.text('Video'), findsOneWidget);
+
+    final voiceSemantics = tester.getSemantics(find.text('Voice'));
+    final videoSemantics = tester.getSemantics(find.text('Video'));
+    expect(voiceSemantics.flagsCollection.isEnabled, Tristate.isFalse);
+    expect(videoSemantics.flagsCollection.isEnabled, Tristate.isFalse);
+
+    await tester.tap(find.text('Voice'));
+    await tester.pump();
+
+    final externalSemantics = tester.getSemantics(find.text('External link'));
+    expect(externalSemantics.flagsCollection.isSelected, Tristate.isTrue);
+
+    expect(
+      find.text(
+        'Voice sessions are not available yet. Choose external link.',
+      ),
+      findsOneWidget,
+    );
   });
 }

@@ -316,6 +316,37 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get callTypeVideo => 'Video';
 
   @override
+  String get sessionModeVoiceBetaNote =>
+      'Free Beta: voice uses a placeholder join until in-app RTC ships.';
+
+  @override
+  String get sessionModeVideoBetaNote =>
+      'Free Beta: video uses a placeholder join until in-app RTC ships.';
+
+  @override
+  String get sessionModeVoiceDisabled =>
+      'Voice sessions are not available yet. Choose external link.';
+
+  @override
+  String get sessionModeVideoDisabled =>
+      'Video sessions are not available yet. Choose external link.';
+
+  @override
+  String get meetingLinkUnavailable =>
+      'No meeting link is configured for this session.';
+
+  @override
+  String get callProviderUnavailable =>
+      'This session cannot be joined from the app right now.';
+
+  @override
+  String get groupBookingNotSupported =>
+      'Group sessions are not available in Free Beta.';
+
+  @override
+  String get unsupportedSessionMode => 'This session type is not supported.';
+
+  @override
   String get reviewSubmittedThanks => 'Thank you — your review was submitted!';
 
   @override

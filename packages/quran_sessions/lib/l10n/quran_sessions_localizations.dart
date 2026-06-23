@@ -629,6 +629,54 @@ abstract class QuranSessionsLocalizations {
   /// **'Video'**
   String get callTypeVideo;
 
+  /// No description provided for @sessionModeVoiceBetaNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Free Beta: voice uses a placeholder join until in-app RTC ships.'**
+  String get sessionModeVoiceBetaNote;
+
+  /// No description provided for @sessionModeVideoBetaNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Free Beta: video uses a placeholder join until in-app RTC ships.'**
+  String get sessionModeVideoBetaNote;
+
+  /// No description provided for @sessionModeVoiceDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice sessions are not available yet. Choose external link.'**
+  String get sessionModeVoiceDisabled;
+
+  /// No description provided for @sessionModeVideoDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Video sessions are not available yet. Choose external link.'**
+  String get sessionModeVideoDisabled;
+
+  /// No description provided for @meetingLinkUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No meeting link is configured for this session.'**
+  String get meetingLinkUnavailable;
+
+  /// No description provided for @callProviderUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This session cannot be joined from the app right now.'**
+  String get callProviderUnavailable;
+
+  /// No description provided for @groupBookingNotSupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Group sessions are not available in Free Beta.'**
+  String get groupBookingNotSupported;
+
+  /// No description provided for @unsupportedSessionMode.
+  ///
+  /// In en, this message translates to:
+  /// **'This session type is not supported.'**
+  String get unsupportedSessionMode;
+
   /// No description provided for @reviewSubmittedThanks.
   ///
   /// In en, this message translates to:

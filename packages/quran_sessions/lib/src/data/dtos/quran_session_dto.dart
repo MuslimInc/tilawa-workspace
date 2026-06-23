@@ -10,6 +10,11 @@ class QuranSessionDto {
     required this.status,
     this.meetingLink,
     this.callRoomId,
+    this.bookingType,
+    this.callProvider,
+    this.providerSessionId,
+    this.joinToken,
+    this.participants,
     this.notes,
   });
 
@@ -23,6 +28,11 @@ class QuranSessionDto {
   final String status;
   final String? meetingLink;
   final String? callRoomId;
+  final String? bookingType;
+  final String? callProvider;
+  final String? providerSessionId;
+  final String? joinToken;
+  final Object? participants;
   final String? notes;
 
   factory QuranSessionDto.fromJson(Map<String, dynamic> json) =>
@@ -37,6 +47,11 @@ class QuranSessionDto {
         status: json['status'] as String,
         meetingLink: json['meeting_link'] as String?,
         callRoomId: json['call_room_id'] as String?,
+        bookingType: json['booking_type'] as String?,
+        callProvider: json['call_provider'] as String?,
+        providerSessionId: json['provider_session_id'] as String?,
+        joinToken: json['join_token'] as String?,
+        participants: json['participants'],
         notes: json['notes'] as String?,
       );
 
@@ -51,6 +66,11 @@ class QuranSessionDto {
     'status': status,
     'meeting_link': meetingLink,
     'call_room_id': callRoomId,
+    'booking_type': bookingType,
+    'call_provider': callProvider,
+    'provider_session_id': providerSessionId,
+    'join_token': joinToken,
+    'participants': participants,
     'notes': notes,
   };
 }

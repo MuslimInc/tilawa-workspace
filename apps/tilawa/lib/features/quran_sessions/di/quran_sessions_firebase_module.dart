@@ -123,26 +123,44 @@ class QuranSessionsFirebaseModule {
       );
     }
 
+    sl.registerLazySingletonIfAbsent<SessionCallProvider>(
+      () => RoutingSessionCallProvider(
+        external: ExternalMeetingCallProvider(
+          getMeetingUrl: (sessionId) async {
+            final result = await sl<SessionRepository>().getSessionById(
+              sessionId,
+            );
+            return result.fold(
+              (_) => '',
+              (session) => session.joinUrl ?? '',
+            );
+          },
+          urlLauncher: (url) async {
+            final uri = Uri.tryParse(url);
+            if (uri == null) {
+              throw const MeetingLinkUnavailableFailure();
+            }
+            final opened = await canLaunchUrl(uri)
+                ? await launchUrl(uri, mode: LaunchMode.externalApplication)
+                : await openLegalUrl(url);
+            if (!opened) {
+              throw const MeetingLinkUnavailableFailure();
+            }
+          },
+        ),
+        mock: const MockSessionCallProvider(),
+      ),
+    );
+
     sl.registerLazySingletonIfAbsent<CallProvider>(
-      () => ExternalMeetingCallProvider(
-        getMeetingUrl: (sessionId) async {
-          final result = await sl<SessionRepository>().getSessionById(
-            sessionId,
-          );
-          return result.fold((_) => '', (session) => session.meetingLink ?? '');
-        },
-        urlLauncher: (url) async {
-          final uri = Uri.tryParse(url);
-          if (uri == null) {
-            throw StateError('Invalid meeting URL');
-          }
-          final opened = await canLaunchUrl(uri)
-              ? await launchUrl(uri, mode: LaunchMode.externalApplication)
-              : await openLegalUrl(url);
-          if (!opened) {
-            throw StateError('Cannot open meeting URL');
-          }
-        },
+      () => CallProviderAdapter(sl<SessionCallProvider>()),
+    );
+
+    sl.registerLazySingletonIfAbsent<JoinSessionUseCase>(
+      () => JoinSessionUseCase(
+        sessionRepository: sl<SessionRepository>(),
+        callProvider: sl<SessionCallProvider>(),
+        authSession: sl<AuthSessionProvider>(),
       ),
     );
 

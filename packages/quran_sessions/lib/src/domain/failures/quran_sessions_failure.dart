@@ -101,6 +101,31 @@ final class BookingConflictFailure extends QuranSessionsFailure {
   const BookingConflictFailure();
 }
 
+/// Group bookings are not supported in Free Beta.
+final class GroupBookingNotSupportedFailure extends QuranSessionsFailure {
+  const GroupBookingNotSupportedFailure();
+}
+
+/// The selected session mode is disabled for this market / release.
+final class UnsupportedSessionModeFailure extends QuranSessionsFailure {
+  const UnsupportedSessionModeFailure({required this.callType});
+
+  final String callType;
+
+  @override
+  List<Object?> get props => [callType];
+}
+
+/// No meeting link or call provider is configured for this session.
+final class MeetingLinkUnavailableFailure extends QuranSessionsFailure {
+  const MeetingLinkUnavailableFailure();
+}
+
+/// The configured call provider cannot handle this join request.
+final class CallProviderUnavailableFailure extends QuranSessionsFailure {
+  const CallProviderUnavailableFailure();
+}
+
 /// The requested lifecycle action is not valid for the current status.
 final class InvalidTransitionFailure extends QuranSessionsFailure {
   const InvalidTransitionFailure({

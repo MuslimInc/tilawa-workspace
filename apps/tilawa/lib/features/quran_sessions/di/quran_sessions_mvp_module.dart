@@ -92,15 +92,31 @@ class QuranSessionsMvpModule {
     );
 
     registerUseCases(sl);
+    sl.registerLazySingletonIfAbsent<SessionCallProvider>(
+      () => RoutingSessionCallProvider(
+        external: ExternalMeetingCallProvider(
+          getMeetingUrl: (sessionId) async {
+            final result = await sl<SessionRepository>().getSessionById(
+              sessionId,
+            );
+            return result.fold(
+              (_) => '',
+              (session) => session.joinUrl ?? '',
+            );
+          },
+          urlLauncher: (_) async {},
+        ),
+        mock: const MockSessionCallProvider(),
+      ),
+    );
     sl.registerLazySingletonIfAbsent<CallProvider>(
-      () => ExternalMeetingCallProvider(
-        getMeetingUrl: (sessionId) async {
-          final result = await sl<SessionRepository>().getSessionById(
-            sessionId,
-          );
-          return result.fold((_) => '', (session) => session.meetingLink ?? '');
-        },
-        urlLauncher: (_) async {},
+      () => CallProviderAdapter(sl<SessionCallProvider>()),
+    );
+    sl.registerLazySingletonIfAbsent<JoinSessionUseCase>(
+      () => JoinSessionUseCase(
+        sessionRepository: sl<SessionRepository>(),
+        callProvider: sl<SessionCallProvider>(),
+        authSession: sl<AuthSessionProvider>(),
       ),
     );
     registerBlocs(sl);
@@ -288,7 +304,7 @@ class QuranSessionsMvpModule {
         getStudentSessions: sl<GetStudentSessionsUseCase>(),
         cancelSession: sl<CancelSessionViaServerUseCase>(),
         submitReview: sl<SubmitReviewUseCase>(),
-        callProvider: sl<CallProvider>(),
+        joinSession: sl<JoinSessionUseCase>(),
         studentId: sl<AuthSessionProvider>().currentUserId ?? 'student_mvp',
       ),
     );
@@ -317,7 +333,7 @@ class QuranSessionsMvpModule {
       () => SessionDetailBloc(
         aggregateRepository: sl<SessionAggregateRepository>(),
         getTimeline: sl<GetSessionTimelineUseCase>(),
-        callProvider: sl<CallProvider>(),
+        joinSession: sl<JoinSessionUseCase>(),
         reportConcern: sl.isRegistered<ReportSessionConcernUseCase>()
             ? sl<ReportSessionConcernUseCase>()
             : null,

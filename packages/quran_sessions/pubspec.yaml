@@ -33,6 +33,7 @@ dev_dependencies:
   checks: ^0.3.0
   bloc_test: ^10.0.0
 
+  test: any
 flutter:
   uses-material-design: true
   generate: true

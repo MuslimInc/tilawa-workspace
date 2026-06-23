@@ -26,7 +26,12 @@ class FirestoreSessionDataSource implements SessionRemoteDataSource {
       callType: _mapCallType(data['callType'] as String?),
       status: _mapSessionStatus(data['status'] as String?),
       meetingLink: (data['meetingLink'] ?? data['meeting_link']) as String?,
-      callRoomId: data['callRoomId'] as String?,
+      callRoomId: (data['providerSessionId'] ?? data['callRoomId']) as String?,
+      bookingType: data['bookingType'] as String?,
+      callProvider: data['callProvider'] as String?,
+      providerSessionId: data['providerSessionId'] as String?,
+      joinToken: data['joinToken'] as String?,
+      participants: data['participants'],
       notes: data['notes'] as String?,
     );
   }

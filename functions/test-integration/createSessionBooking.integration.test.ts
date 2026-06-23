@@ -193,6 +193,53 @@ test("integration: replay with same idempotency key returns same booking", async
   assert.equal(notifications.size, 1);
 });
 
+test("integration: voice booking stores mock call provider metadata", async () => {
+  await clearFirestore();
+  await seedVerifiedTeacher("teacher1");
+  await seedCompleteStudent("student1");
+  await seedUserSession("student1");
+
+  const res = await booking.run({
+    data: bookingData({ callType: "voiceCall" }),
+    auth: { uid: "student1", token: {} },
+  });
+
+  const sessionDoc = await db().collection("quran_sessions").doc(res.sessionId).get();
+  assert.equal(sessionDoc.get("callProvider"), "mock");
+  assert.equal(sessionDoc.get("providerSessionId"), res.sessionId);
+  assert.equal(sessionDoc.get("callType"), "voiceCall");
+});
+
+test("integration: group booking is rejected", async () => {
+  await clearFirestore();
+  await seedVerifiedTeacher("teacher1");
+  await seedCompleteStudent("student1");
+  await seedUserSession("student1");
+
+  await assert.rejects(
+    booking.run({
+      data: bookingData({ bookingType: "group" }),
+      auth: { uid: "student1", token: {} },
+    }),
+    (e) => codeOf(e) === "group_booking_not_supported",
+  );
+});
+
+test("integration: client agora provider hint is rejected", async () => {
+  await clearFirestore();
+  await seedVerifiedTeacher("teacher1");
+  await seedCompleteStudent("student1");
+  await seedUserSession("student1");
+
+  await assert.rejects(
+    booking.run({
+      data: bookingData({ callProvider: "agora" }),
+      auth: { uid: "student1", token: {} },
+    }),
+    (e) => codeOf(e) === "unsupported_call_provider",
+  );
+});
+
 test("integration: different idempotency key on same slot is blocked by lock", async () => {
   await clearFirestore();
   await seedVerifiedTeacher("teacher1");

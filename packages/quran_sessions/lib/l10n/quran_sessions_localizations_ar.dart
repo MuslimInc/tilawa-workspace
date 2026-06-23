@@ -305,6 +305,36 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get callTypeVideo => 'مرئي';
 
   @override
+  String get sessionModeVoiceBetaNote =>
+      'النسخة التجريبية: الصوت يستخدم انضمامًا مؤقتًا حتى يتوفر الاتصال داخل التطبيق.';
+
+  @override
+  String get sessionModeVideoBetaNote =>
+      'النسخة التجريبية: الفيديو يستخدم انضمامًا مؤقتًا حتى يتوفر الاتصال داخل التطبيق.';
+
+  @override
+  String get sessionModeVoiceDisabled =>
+      'الجلسات الصوتية غير متاحة بعد. اختر الرابط الخارجي.';
+
+  @override
+  String get sessionModeVideoDisabled =>
+      'الجلسات المرئية غير متاحة بعد. اختر الرابط الخارجي.';
+
+  @override
+  String get meetingLinkUnavailable => 'لا يوجد رابط اجتماع لهذه الجلسة.';
+
+  @override
+  String get callProviderUnavailable =>
+      'لا يمكن الانضمام إلى هذه الجلسة من التطبيق حاليًا.';
+
+  @override
+  String get groupBookingNotSupported =>
+      'الجلسات الجماعية غير متاحة في النسخة التجريبية.';
+
+  @override
+  String get unsupportedSessionMode => 'نوع الجلسة غير مدعوم.';
+
+  @override
   String get reviewSubmittedThanks => 'شكراً — تم إرسال تقييمك!';
 
   @override

@@ -46,6 +46,7 @@ class FirebaseSessionMutationGateway implements SessionMutationGateway {
           'startsAt': startsAt.toUtc().toIso8601String(),
           'endsAt': endsAt.toUtc().toIso8601String(),
           'callType': _callTypeToCf(callType),
+          'bookingType': 'individual',
           'pricingType': _pricingTypeToCf(pricingType),
           'paymentReference': paymentReference,
           'studentNote': studentNote,
@@ -71,9 +72,24 @@ class FirebaseSessionMutationGateway implements SessionMutationGateway {
       }
       if (e.code == 'failed-precondition') {
         final details = e.details;
-        if (details is Map &&
-            details['code'] == 'payment_provider_unavailable') {
-          return const Left(PaymentProviderFailure());
+        if (details is Map) {
+          final code = details['code'];
+          if (code == 'payment_provider_unavailable') {
+            return const Left(PaymentProviderFailure());
+          }
+          if (code == 'group_booking_not_supported') {
+            return const Left(GroupBookingNotSupportedFailure());
+          }
+          if (code == 'unsupported_session_mode') {
+            return Left(
+              UnsupportedSessionModeFailure(
+                callType: callType.name,
+              ),
+            );
+          }
+          if (code == 'unsupported_call_provider') {
+            return const Left(CallProviderUnavailableFailure());
+          }
         }
       }
       return const Left(UnknownFailure());
