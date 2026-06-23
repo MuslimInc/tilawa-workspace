@@ -15,3 +15,8 @@ final class SessionDetailLoadRequested extends SessionDetailEvent {
   @override
   List<Object?> get props => [bookingId];
 }
+
+/// User taps join on session detail.
+final class SessionDetailJoinRequested extends SessionDetailEvent {
+  const SessionDetailJoinRequested();
+}

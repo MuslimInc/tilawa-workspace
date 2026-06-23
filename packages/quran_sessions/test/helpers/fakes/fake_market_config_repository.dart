@@ -41,11 +41,15 @@ class FakeMarketConfigRepository implements MarketConfigRepository {
     return _impl.getCitiesByCountryCode(countryCode);
   }
 
+  /// When set, [getMarketConfig] returns this value.
+  MarketConfig? marketConfigOverride;
+
   @override
   Future<Either<QuranSessionsFailure, MarketConfig>> getMarketConfig(
     String countryCode,
   ) async {
     if (failWith != null) return Left(failWith!);
+    if (marketConfigOverride != null) return Right(marketConfigOverride!);
     return _impl.getMarketConfig(countryCode);
   }
 

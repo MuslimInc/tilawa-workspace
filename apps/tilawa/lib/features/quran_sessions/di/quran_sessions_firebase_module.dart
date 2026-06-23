@@ -5,6 +5,8 @@ import 'package:get_it/get_it.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/di/get_it_idempotent.dart';
+import 'package:tilawa/core/utils/legal_url_launcher.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../data/firebase/firebase_auth_session_provider.dart';
 import '../data/firebase/firebase_audit_repository.dart';
@@ -90,6 +92,29 @@ class QuranSessionsFirebaseModule {
       scheduleDataSource: FirestoreScheduleDataSource(firestore),
       fridayReviewReminderStore: SharedPreferencesFridayReviewReminderStore(
         sl<SharedPreferencesAsync>(),
+      ),
+    );
+
+    sl.registerLazySingletonIfAbsent<CallProvider>(
+      () => ExternalMeetingCallProvider(
+        getMeetingUrl: (sessionId) async {
+          final result = await sl<SessionRepository>().getSessionById(
+            sessionId,
+          );
+          return result.fold((_) => '', (session) => session.meetingLink ?? '');
+        },
+        urlLauncher: (url) async {
+          final uri = Uri.tryParse(url);
+          if (uri == null) {
+            throw StateError('Invalid meeting URL');
+          }
+          final opened = await canLaunchUrl(uri)
+              ? await launchUrl(uri, mode: LaunchMode.externalApplication)
+              : await openLegalUrl(url);
+          if (!opened) {
+            throw StateError('Cannot open meeting URL');
+          }
+        },
       ),
     );
 

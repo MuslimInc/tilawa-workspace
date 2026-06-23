@@ -10,6 +10,7 @@ import 'package:quran_sessions/src/presentation/blocs/my_sessions/my_sessions_bl
 import 'package:quran_sessions/src/presentation/blocs/my_sessions/my_sessions_event.dart';
 import 'package:quran_sessions/src/presentation/blocs/my_sessions/my_sessions_state.dart';
 import '../../helpers/fakes/fake_booking_repository.dart';
+import '../../helpers/fakes/fake_call_provider.dart';
 import '../../helpers/fakes/fake_session_aggregate_repository.dart';
 import '../../helpers/fakes/fake_session_repository.dart';
 import '../../helpers/fixtures/session_aggregate_fixtures.dart';
@@ -22,17 +23,20 @@ void main() {
   late MySessionsBloc bloc;
 
   late FakeSessionAggregateRepository aggregateRepo;
+  late FakeCallProvider callProvider;
 
   setUp(() {
     sessionRepo = FakeSessionRepository();
     bookingRepo = FakeBookingRepository();
     aggregateRepo = FakeSessionAggregateRepository();
+    callProvider = FakeCallProvider();
     bloc = MySessionsBloc(
       getStudentSessions: GetStudentSessionsUseCase(sessionRepo),
       cancelSession: buildCancelSessionViaServerUseCase(
         repository: aggregateRepo,
       ),
       submitReview: SubmitReviewUseCase(bookingRepo),
+      callProvider: callProvider,
       studentId: 'student_1',
     );
   });
@@ -116,6 +120,20 @@ void main() {
         final state = b.state as MySessionsSuccess;
         check(state.upcoming).isEmpty();
         check(state.cancellationInProgress).isNull();
+      },
+    );
+
+    blocTest<MySessionsBloc, MySessionsState>(
+      'SessionJoinRequested invokes CallProvider',
+      build: () => bloc,
+      seed: () => MySessionsSuccess(
+        upcoming: [makeSession(id: 'session_join', studentId: 'student_1')],
+        past: const [],
+      ),
+      act: (b) => b.add(const SessionJoinRequested(sessionId: 'session_join')),
+      verify: (_) {
+        check(callProvider.joinedSessions.length).equals(1);
+        check(callProvider.joinedSessions.first).equals('session_join');
       },
     );
 

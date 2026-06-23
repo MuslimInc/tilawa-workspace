@@ -19,6 +19,7 @@ class SessionAggregate extends Equatable {
     this.cancellationReason,
     this.lastActionReason,
     this.paymentReference,
+    this.sessionId,
   });
 
   final String id;
@@ -35,6 +36,9 @@ class SessionAggregate extends Equatable {
   final String? lastActionReason;
   final String? paymentReference;
 
+  /// Linked operational session document id (from booking).
+  final String? sessionId;
+
   bool get isPaid => pricingType == SessionPricingType.fixedPerSession;
 
   SessionAggregate copyWith({
@@ -45,6 +49,7 @@ class SessionAggregate extends Equatable {
     String? cancellationReason,
     String? lastActionReason,
     String? paymentReference,
+    String? sessionId,
   }) {
     return SessionAggregate(
       id: id,
@@ -60,6 +65,7 @@ class SessionAggregate extends Equatable {
       cancellationReason: cancellationReason ?? this.cancellationReason,
       lastActionReason: lastActionReason ?? this.lastActionReason,
       paymentReference: paymentReference ?? this.paymentReference,
+      sessionId: sessionId ?? this.sessionId,
     );
   }
 
@@ -78,5 +84,6 @@ class SessionAggregate extends Equatable {
     cancellationReason,
     lastActionReason,
     paymentReference,
+    sessionId,
   ];
 }

@@ -207,6 +207,19 @@ These three terms are **not interchangeable**. Use each for its job.
 
 ## Metadata (agent return)
 
+### Fix log (batch 1 — 2026-06-23)
+
+| Order | Status | Fixed in | Tests | Verification |
+|-------|--------|----------|-------|--------------|
+| 1 | `[x] Fixed` | `createSessionBooking.ts`, `meetingLinkResolver.ts` | `meetingLinkResolver.test.ts`, integration | `npm test` pass |
+| 2 | `[x] Fixed` | `quran_sessions_firebase_module.dart`, `quran_sessions_mvp_module.dart` | — | `dart analyze` DI |
+| 3 | `[x] Fixed` | `my_sessions_bloc.dart` | `my_sessions_bloc_test.dart` | 6/6 pass |
+| 4 | `[x] Fixed` | `session_detail_screen.dart`, `session_detail_bloc.dart` | — | staging manual next |
+| 5 | `[x] Fixed` | CF integration parity | integration test | meetingLink asserted |
+| 8 | `[x] Fixed` | `validate_booking_eligibility_usecase_test.dart` | 11 cases | all pass |
+
+**Still open (same sprint):** 6, 7, 9, 10.
+
 | Metric | Value |
 |--------|-------|
 | **Row count** | 45 |

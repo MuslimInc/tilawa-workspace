@@ -50,4 +50,13 @@ extension SessionLifecycleStatusX on SessionLifecycleStatus {
   bool get isSlotBlocking =>
       phase == SessionLifecyclePhase.active ||
       this == SessionLifecycleStatus.pendingPayment;
+
+  /// True when the participant may open the meeting link / call room.
+  bool get canJoinSession => switch (this) {
+    SessionLifecycleStatus.scheduled ||
+    SessionLifecycleStatus.confirmed ||
+    SessionLifecycleStatus.inProgress ||
+    SessionLifecycleStatus.rescheduled => true,
+    _ => false,
+  };
 }

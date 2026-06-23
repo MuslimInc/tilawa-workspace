@@ -88,6 +88,17 @@ class QuranSessionsMvpModule {
     );
 
     registerUseCases(sl);
+    sl.registerLazySingletonIfAbsent<CallProvider>(
+      () => ExternalMeetingCallProvider(
+        getMeetingUrl: (sessionId) async {
+          final result = await sl<SessionRepository>().getSessionById(
+            sessionId,
+          );
+          return result.fold((_) => '', (session) => session.meetingLink ?? '');
+        },
+        urlLauncher: (_) async {},
+      ),
+    );
     registerBlocs(sl);
   }
 
@@ -267,6 +278,7 @@ class QuranSessionsMvpModule {
         getStudentSessions: sl<GetStudentSessionsUseCase>(),
         cancelSession: sl<CancelSessionViaServerUseCase>(),
         submitReview: sl<SubmitReviewUseCase>(),
+        callProvider: sl<CallProvider>(),
         studentId: sl<AuthSessionProvider>().currentUserId ?? 'student_mvp',
       ),
     );
@@ -295,6 +307,7 @@ class QuranSessionsMvpModule {
       () => SessionDetailBloc(
         aggregateRepository: sl<SessionAggregateRepository>(),
         getTimeline: sl<GetSessionTimelineUseCase>(),
+        callProvider: sl<CallProvider>(),
       ),
     );
     sl.registerFactoryIfAbsent(

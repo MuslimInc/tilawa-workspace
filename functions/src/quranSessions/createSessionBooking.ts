@@ -19,6 +19,7 @@ import {
 } from "./paymentProviderStatus";
 import { requireAuthenticatedUid } from "./sessionAuth";
 import { validateTransition } from "./sessionLifecycleGuard";
+import { resolveMeetingLink } from "./meetingLinkResolver";
 import {
   legacyStatusForLifecycle,
   nowServer,
@@ -104,6 +105,12 @@ export const createSessionBooking = onCall(
       idempotencyKey,
     );
 
+    const platformSnap = await db
+      .collection("quran_session_platform_config")
+      .doc("global")
+      .get();
+    const platformConfig = platformSnap.data() ?? {};
+
     const { result, replayed } = await runIdempotentOperation(
       {
         db,
@@ -137,6 +144,22 @@ export const createSessionBooking = onCall(
         const lockSnap = await tx.get(lockRef);
         if (lockSnap.exists) {
           throw new HttpsError("already-exists", "Slot unavailable.");
+        }
+
+        const teacherSnap = await tx.get(
+          db.collection("quran_teacher_profiles").doc(data.teacherId),
+        );
+        const meetingLink = resolveMeetingLink(
+          data.callType,
+          teacherSnap.data() ?? {},
+          platformConfig,
+        );
+        if (data.callType === "externalMeeting" && meetingLink == null) {
+          throw lifecycleError(
+            "meeting_link_required",
+            "Teacher has no external meeting URL configured.",
+            { teacherId: data.teacherId },
+          );
         }
 
         tx.set(lockRef, {
@@ -185,6 +208,7 @@ export const createSessionBooking = onCall(
           callType: data.callType,
           lifecycleStatus: sessionLifecycleStatus,
           status: legacyStatusForLifecycle(sessionLifecycleStatus),
+          meetingLink,
           createdAt: now,
           updatedAt: now,
         });

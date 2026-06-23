@@ -60,6 +60,13 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
               variant: TilawaFeedbackVariant.error,
             );
           }
+          if (state is MySessionsSuccess && state.joinFailure != null) {
+            TilawaFeedback.showToast(
+              context,
+              message: state.joinFailure!.toLocalizedMessage(context),
+              variant: TilawaFeedbackVariant.error,
+            );
+          }
         },
         builder: (context, state) => switch (state) {
           MySessionsInitial() || MySessionsLoading() => const Center(

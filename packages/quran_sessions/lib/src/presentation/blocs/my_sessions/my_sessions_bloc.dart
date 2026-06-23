@@ -1,6 +1,8 @@
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../boundaries/call/call_provider.dart';
+import '../../../domain/failures/quran_sessions_failure.dart';
 import '../../../domain/usecases/cancel_session_via_server_usecase.dart';
 import '../../../domain/usecases/get_student_sessions_usecase.dart';
 import '../../../domain/usecases/submit_review_usecase.dart';
@@ -13,6 +15,7 @@ class MySessionsBloc extends Bloc<MySessionsEvent, MySessionsState> {
     required this._getStudentSessions,
     required this._cancelSession,
     required this._submitReview,
+    required this._callProvider,
     required this._studentId,
   }) : super(const MySessionsInitial()) {
     on<MySessionsLoadRequested>(_onLoadRequested, transformer: restartable());
@@ -24,6 +27,7 @@ class MySessionsBloc extends Bloc<MySessionsEvent, MySessionsState> {
   final GetStudentSessionsUseCase _getStudentSessions;
   final CancelSessionViaServerUseCase _cancelSession;
   final SubmitReviewUseCase _submitReview;
+  final CallProvider _callProvider;
   final String _studentId;
 
   Future<void> _onLoadRequested(
@@ -93,10 +97,34 @@ class MySessionsBloc extends Bloc<MySessionsEvent, MySessionsState> {
     );
   }
 
-  void _onJoinRequested(
+  Future<void> _onJoinRequested(
     SessionJoinRequested event,
     Emitter<MySessionsState> emit,
-  ) {}
+  ) async {
+    final current = state;
+    if (current is! MySessionsSuccess) return;
+
+    emit(
+      current.copyWith(clearJoinFailure: true, joinInProgress: event.sessionId),
+    );
+
+    try {
+      await _callProvider.joinSession(event.sessionId);
+      emit((state as MySessionsSuccess).clearJoin());
+    } on Object catch (_) {
+      final after = state;
+      if (after is MySessionsSuccess) {
+        emit(
+          after
+              .copyWith(
+                joinFailure: const NetworkFailure(),
+                clearJoinInProgress: true,
+              )
+              .clearJoin(),
+        );
+      }
+    }
+  }
 
   Future<void> _onReviewSubmitted(
     ReviewSubmitted event,

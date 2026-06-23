@@ -47,6 +47,7 @@ SessionAggregate mapBookingDocToAggregate(
     cancellationReason: data['cancellationReason'] as String?,
     lastActionReason: data['lastActionReason'] as String?,
     paymentReference: data['paymentReference'] as String?,
+    sessionId: data['sessionId'] as String?,
   );
 }
 

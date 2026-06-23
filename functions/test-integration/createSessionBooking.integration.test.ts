@@ -33,6 +33,7 @@ async function seedVerifiedTeacher(
       allowedStudentGender: "both",
       canTeachChildren: true,
       requiresGuardianApprovalForChildren: false,
+      externalMeetingUrl: "https://meet.example.com/teacher-room",
       ...overrides,
     });
 }
@@ -88,6 +89,11 @@ test("integration: free booking with a verified teacher is scheduled", async () 
   assert.equal(bookingDoc.get("lifecycleStatus"), "scheduled");
   assert.equal(bookingDoc.get("pricingType"), "free");
   assert.equal(bookingDoc.get("studentId"), "student1");
+  const sessionDoc = await db().collection("quran_sessions").doc(res.sessionId).get();
+  assert.equal(
+    sessionDoc.get("meetingLink"),
+    "https://meet.example.com/teacher-room",
+  );
   const lock = await db().collection("quran_slot_locks").doc("slot1").get();
   assert.equal(lock.exists, true);
 });

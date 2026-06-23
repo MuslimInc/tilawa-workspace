@@ -26,6 +26,8 @@ final class MySessionsSuccess extends MySessionsState {
     this.cancellationInProgress,
     this.cancellationFailure,
     this.lastSubmittedReview,
+    this.joinInProgress,
+    this.joinFailure,
   });
 
   final List<QuranSession> upcoming;
@@ -40,6 +42,12 @@ final class MySessionsSuccess extends MySessionsState {
   /// Set after a review is submitted so the UI can show a confirmation snack.
   final SessionReview? lastSubmittedReview;
 
+  /// Session id currently launching the meeting link.
+  final String? joinInProgress;
+
+  /// Set when join fails so UI can show feedback.
+  final QuranSessionsFailure? joinFailure;
+
   @override
   List<Object?> get props => [
     upcoming,
@@ -47,6 +55,8 @@ final class MySessionsSuccess extends MySessionsState {
     cancellationInProgress,
     cancellationFailure,
     lastSubmittedReview,
+    joinInProgress,
+    joinFailure,
   ];
 
   MySessionsSuccess copyWith({
@@ -56,6 +66,10 @@ final class MySessionsSuccess extends MySessionsState {
     QuranSessionsFailure? cancellationFailure,
     bool clearCancellationFailure = false,
     SessionReview? lastSubmittedReview,
+    String? joinInProgress,
+    bool clearJoinInProgress = false,
+    QuranSessionsFailure? joinFailure,
+    bool clearJoinFailure = false,
   }) => MySessionsSuccess(
     upcoming: upcoming ?? this.upcoming,
     past: past ?? this.past,
@@ -65,12 +79,27 @@ final class MySessionsSuccess extends MySessionsState {
         ? null
         : cancellationFailure ?? this.cancellationFailure,
     lastSubmittedReview: lastSubmittedReview ?? this.lastSubmittedReview,
+    joinInProgress: clearJoinInProgress
+        ? null
+        : joinInProgress ?? this.joinInProgress,
+    joinFailure: clearJoinFailure ? null : joinFailure ?? this.joinFailure,
   );
 
   /// Returns a copy with cancellation fields cleared.
   MySessionsSuccess clearCancellation() => MySessionsSuccess(
     upcoming: upcoming,
     past: past,
+    lastSubmittedReview: lastSubmittedReview,
+    joinInProgress: joinInProgress,
+    joinFailure: joinFailure,
+  );
+
+  /// Returns a copy with join progress/failure cleared.
+  MySessionsSuccess clearJoin() => MySessionsSuccess(
+    upcoming: upcoming,
+    past: past,
+    cancellationInProgress: cancellationInProgress,
+    cancellationFailure: cancellationFailure,
     lastSubmittedReview: lastSubmittedReview,
   );
 }
