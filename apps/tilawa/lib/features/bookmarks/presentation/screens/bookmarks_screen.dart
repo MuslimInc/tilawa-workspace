@@ -22,7 +22,11 @@ class BookmarksScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double keyboardInset = context.keyboardInset;
+
     return Scaffold(
+      // Search lives in the app bar; inset the list instead of resizing.
+      resizeToAvoidBottomInset: false,
       appBar: TilawaCatalogAppBar(
         preferredHeight: TilawaAppBarConfig.catalogTitleAndSearchHeight(
           context,
@@ -39,6 +43,7 @@ class BookmarksScreen extends StatelessWidget {
           ),
         ],
         bottomContent: BookmarkSearchBar(
+          scrollPadding: EdgeInsets.only(bottom: keyboardInset + 24),
           onSearchChanged: (query) {
             context.read<BookmarksBloc>().add(
               SearchBookmarksEvent(query: query),
@@ -80,46 +85,55 @@ class BookmarksScreen extends StatelessWidget {
             );
           },
           builder: (context, state) {
-            return SafeArea(
-              child: Stack(
-                children: [
-                  state.when(
-                    initial: () => const TilawaLoadingIndicator(),
-                    loading: () => const TilawaLoadingIndicator(),
-                    loaded: (bookmarks, filteredBookmarks, searchQuery) =>
-                        Positioned.fill(
-                          child: _BookmarksList(
-                            bookmarks: filteredBookmarks,
-                            isSearching: searchQuery.isNotEmpty,
-                          ),
-                        ),
-                    bookmarkCreated: (_, bookmarks) => Positioned.fill(
-                      child: _BookmarksList(
-                        bookmarks: bookmarks,
-                        isSearching: false,
-                      ),
-                    ),
-                    bookmarkUpdated: (_, bookmarks) => Positioned.fill(
-                      child: _BookmarksList(
-                        bookmarks: bookmarks,
-                        isSearching: false,
-                      ),
-                    ),
-                    bookmarkDeleted: (_, bookmarks) => Positioned.fill(
-                      child: _BookmarksList(
-                        bookmarks: bookmarks,
-                        isSearching: false,
-                      ),
-                    ),
-                    error: (message) => Positioned.fill(
-                      child: _BookmarksErrorState(message: message),
-                    ),
+            return state.when(
+              initial: () => const _BookmarksLoadingBody(),
+              loading: () => const _BookmarksLoadingBody(),
+              loaded: (bookmarks, filteredBookmarks, searchQuery) =>
+                  _BookmarksList(
+                    bookmarks: filteredBookmarks,
+                    isSearching: searchQuery.isNotEmpty,
                   ),
-                ],
+              bookmarkCreated: (_, bookmarks) => _BookmarksList(
+                bookmarks: bookmarks,
+                isSearching: false,
               ),
+              bookmarkUpdated: (_, bookmarks) => _BookmarksList(
+                bookmarks: bookmarks,
+                isSearching: false,
+              ),
+              bookmarkDeleted: (_, bookmarks) => _BookmarksList(
+                bookmarks: bookmarks,
+                isSearching: false,
+              ),
+              error: (message) => _BookmarksErrorState(message: message),
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+double _bookmarksScrollBottomPadding(BuildContext context) {
+  if (context.isKeyboardVisible) {
+    // [TilawaAdaptiveShell] hides the mini player when the keyboard is open.
+    return Theme.of(context).tokens.spaceSmall;
+  }
+  return listScrollBottomPadding(context);
+}
+
+class _BookmarksLoadingBody extends StatelessWidget {
+  const _BookmarksLoadingBody();
+
+  @override
+  Widget build(BuildContext context) {
+    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+
+    return Align(
+      alignment: AlignmentDirectional.topCenter,
+      child: Padding(
+        padding: EdgeInsets.all(tokens.spaceLarge),
+        child: const TilawaLoadingIndicator(),
       ),
     );
   }
@@ -136,35 +150,60 @@ class _BookmarksList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final double bottomPadding = _bookmarksScrollBottomPadding(context);
+
     if (bookmarks.isEmpty) {
-      return _BookmarksEmptyState(isSearching: isSearching);
+      return CustomScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        slivers: [
+          SliverToBoxAdapter(
+            child: Align(
+              alignment: AlignmentDirectional.topCenter,
+              child: Padding(
+                padding: EdgeInsets.only(top: tokens.spaceLarge),
+                child: _BookmarksEmptyState(isSearching: isSearching),
+              ),
+            ),
+          ),
+          SliverPadding(
+            padding: EdgeInsets.only(bottom: bottomPadding),
+          ),
+        ],
+      );
     }
 
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
-
-    return ListView.separated(
-      padding: EdgeInsets.fromLTRB(
-        tokens.spaceLarge,
-        tokens.spaceLarge,
-        tokens.spaceLarge,
-        listScrollBottomPadding(context),
-      ),
-      itemCount: bookmarks.length,
-      separatorBuilder: (context, index) => SizedBox(height: tokens.spaceSmall),
-      itemBuilder: (context, index) {
-        final BookmarkEntity bookmark = bookmarks[index];
-        return Dismissible(
-          key: ValueKey(bookmark.id),
-          direction: DismissDirection.endToStart,
-          background: const _BookmarkDismissBackground(),
-          onDismissed: (_) => _onBookmarkDismissed(context, bookmark),
-          child: BookmarkCard(
-            bookmark: bookmark,
-            onTap: () => _playFromBookmark(context, bookmark),
-            onEdit: () => _showEditLabelDialog(context, bookmark),
+    return CustomScrollView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      slivers: [
+        SliverPadding(
+          padding: EdgeInsets.fromLTRB(
+            tokens.spaceLarge,
+            tokens.spaceLarge,
+            tokens.spaceLarge,
+            tokens.spaceLarge + bottomPadding,
           ),
-        );
-      },
+          sliver: SliverList.separated(
+            itemCount: bookmarks.length,
+            separatorBuilder: (context, index) =>
+                SizedBox(height: tokens.spaceSmall),
+            itemBuilder: (context, index) {
+              final BookmarkEntity bookmark = bookmarks[index];
+              return Dismissible(
+                key: ValueKey(bookmark.id),
+                direction: DismissDirection.endToStart,
+                background: const _BookmarkDismissBackground(),
+                onDismissed: (_) => _onBookmarkDismissed(context, bookmark),
+                child: BookmarkCard(
+                  bookmark: bookmark,
+                  onTap: () => _playFromBookmark(context, bookmark),
+                  onEdit: () => _showEditLabelDialog(context, bookmark),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
@@ -195,14 +234,35 @@ class _BookmarksErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TilawaErrorState(
-      icon: Icons.error_outline_rounded,
-      title: message,
-      retryLabel: context.l10n.retry,
-      onRetry: () {
-        context.read<BookmarksBloc>().add(const LoadBookmarksEvent());
-      },
-      iconColor: Theme.of(context).colorScheme.error,
+    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final double bottomPadding = _bookmarksScrollBottomPadding(context);
+
+    return CustomScrollView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      slivers: [
+        SliverToBoxAdapter(
+          child: Align(
+            alignment: AlignmentDirectional.topCenter,
+            child: Padding(
+              padding: EdgeInsets.only(top: tokens.spaceLarge),
+              child: TilawaErrorState(
+                icon: Icons.error_outline_rounded,
+                title: message,
+                retryLabel: context.l10n.retry,
+                onRetry: () {
+                  context.read<BookmarksBloc>().add(
+                    const LoadBookmarksEvent(),
+                  );
+                },
+                iconColor: Theme.of(context).colorScheme.error,
+              ),
+            ),
+          ),
+        ),
+        SliverPadding(
+          padding: EdgeInsets.only(bottom: bottomPadding),
+        ),
+      ],
     );
   }
 }

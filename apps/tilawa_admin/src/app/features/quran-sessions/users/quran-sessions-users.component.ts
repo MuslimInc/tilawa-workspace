@@ -14,6 +14,14 @@ import { RejectReasonDialogComponent } from '../../../shared/components/reject-r
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { StatusLabelPipe } from '../../../core/i18n/status-label.pipe';
 import { SortableThComponent } from '../../../shared/components/sortable-th/sortable-th.component';
+import { TilawaFilterBarComponent } from '../../../shared/components/tilawa-filter-bar/tilawa-filter-bar.component';
+import { TilawaDataTableComponent } from '../../../shared/components/tilawa-data-table/tilawa-data-table.component';
+import { TilawaLoadingStateComponent } from '../../../shared/components/tilawa-loading-state/tilawa-loading-state.component';
+import { TilawaErrorStateComponent } from '../../../shared/components/tilawa-error-state/tilawa-error-state.component';
+import { TilawaEmptyStateComponent } from '../../../shared/components/tilawa-empty-state/tilawa-empty-state.component';
+import { TilawaPaginationComponent } from '../../../shared/components/tilawa-pagination/tilawa-pagination.component';
+import { TilawaButtonComponent } from '../../../shared/components/tilawa-button/tilawa-button.component';
+import { TilawaAvatarComponent } from '../../../shared/components/tilawa-avatar/tilawa-avatar.component';
 import { SortRequest } from '../../../core/domain/entities/pagination.types';
 
 @Component({
@@ -28,6 +36,14 @@ import { SortRequest } from '../../../core/domain/entities/pagination.types';
     TranslatePipe,
     StatusLabelPipe,
     SortableThComponent,
+    TilawaFilterBarComponent,
+    TilawaDataTableComponent,
+    TilawaLoadingStateComponent,
+    TilawaErrorStateComponent,
+    TilawaEmptyStateComponent,
+    TilawaPaginationComponent,
+    TilawaButtonComponent,
+    TilawaAvatarComponent,
   ],
   templateUrl: './quran-sessions-users.component.html',
 })

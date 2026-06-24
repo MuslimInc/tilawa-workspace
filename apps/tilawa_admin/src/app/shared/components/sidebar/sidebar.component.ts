@@ -8,6 +8,7 @@ import { TranslatePipe } from '../../../core/i18n/translate.pipe';
   selector: 'app-sidebar',
   imports: [RouterLink, RouterLinkActive, TranslatePipe],
   templateUrl: './sidebar.component.html',
+  styleUrl: './sidebar.component.css',
 })
 export class SidebarComponent {
   private readonly authFacade = inject(AuthFacade);

@@ -65,7 +65,6 @@ class _CompleteTeacherPublicProfileScreenState
     _displayNameCtrl.dispose();
     _bioCtrl.dispose();
     _meetingUrlCtrl.dispose();
-    _meetingUrlCtrl.dispose();
     super.dispose();
   }
 
@@ -91,10 +90,6 @@ class _CompleteTeacherPublicProfileScreenState
     }
     if (_bioCtrl.text.isEmpty && (profile.publicBio?.isNotEmpty ?? false)) {
       _bioCtrl.text = profile.publicBio!;
-    }
-    if (_meetingUrlCtrl.text.isEmpty &&
-        (profile.externalMeetingUrl?.isNotEmpty ?? false)) {
-      _meetingUrlCtrl.text = profile.externalMeetingUrl!;
     }
     if (_meetingUrlCtrl.text.isEmpty &&
         (profile.externalMeetingUrl?.isNotEmpty ?? false)) {
@@ -207,11 +202,18 @@ class _CompleteTeacherPublicProfileScreenState
                     ),
                   ),
                   SizedBox(height: tokens.spaceLarge),
+                  _SectionTitle(l10n.teacherPublicNameLabel),
+                  SizedBox(height: tokens.spaceExtraSmall),
+                  Text(
+                    l10n.teacherPublicNameHelper,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                  SizedBox(height: tokens.spaceSmall),
                   TilawaTextField(
                     controller: _displayNameCtrl,
-                    label: l10n.teacherPublicNameLabel,
                     hintText: l10n.visibleToStudents,
-                    helperText: l10n.teacherPublicNameHelper,
                     errorText: _displayNameError,
                     onChanged: (_) {
                       if (_displayNameError != null) {
@@ -219,32 +221,35 @@ class _CompleteTeacherPublicProfileScreenState
                       }
                     },
                   ),
-                  SizedBox(height: tokens.spaceMedium),
+                  SizedBox(height: tokens.spaceLarge),
+                  _SectionTitle(l10n.bioSectionTitle),
+                  SizedBox(height: tokens.spaceSmall),
                   TilawaTextField(
                     controller: _bioCtrl,
-                    label: l10n.bioSectionTitle,
                     hintText: l10n.bioHint,
-                    maxLines: 4,
-                  ),
-                  SizedBox(height: tokens.spaceMedium),
-                  TilawaTextField(
-                    controller: _meetingUrlCtrl,
-                    label: l10n.teacherExternalMeetingUrlLabel,
-                    hintText: l10n.teacherExternalMeetingUrlHint,
-                    helperText: l10n.teacherExternalMeetingUrlHelper,
-                    keyboardType: TextInputType.url,
+                    minLines: 4,
+                    maxLines: 8,
+                    textAlignVertical: TextAlignVertical.top,
                   ),
                   SizedBox(height: tokens.spaceLarge),
+                  _SectionTitle(l10n.teacherExternalMeetingUrlLabel),
+                  SizedBox(height: tokens.spaceExtraSmall),
+                  Text(
+                    l10n.teacherExternalMeetingUrlHelper,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                  SizedBox(height: tokens.spaceSmall),
                   TilawaTextField(
                     controller: _meetingUrlCtrl,
-                    label: l10n.teacherExternalMeetingUrlLabel,
                     hintText: l10n.teacherExternalMeetingUrlHint,
-                    helperText: l10n.teacherExternalMeetingUrlHelper,
                     keyboardType: TextInputType.url,
                     textInputAction: TextInputAction.done,
+                    textAlignVertical: TextAlignVertical.top,
                   ),
                   SizedBox(height: tokens.spaceLarge),
-                  Text(l10n.teachingLanguagesSelect),
+                  _SectionTitle(l10n.teachingLanguagesSelect),
                   SizedBox(height: tokens.spaceSmall),
                   Wrap(
                     spacing: tokens.spaceSmall,
@@ -265,7 +270,7 @@ class _CompleteTeacherPublicProfileScreenState
                     }).toList(),
                   ),
                   SizedBox(height: tokens.spaceLarge),
-                  Text(l10n.specializationsSelect),
+                  _SectionTitle(l10n.specializationsSelect),
                   SizedBox(height: tokens.spaceSmall),
                   Wrap(
                     spacing: tokens.spaceSmall,
@@ -304,4 +309,18 @@ class _CompleteTeacherPublicProfileScreenState
             ),
     );
   }
+}
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Text(
+    text,
+    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+      fontWeight: FontWeight.w600,
+    ),
+  );
 }

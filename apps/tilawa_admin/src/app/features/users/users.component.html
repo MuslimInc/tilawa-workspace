@@ -1,133 +1,76 @@
-<div class="px-4 sm:px-6 lg:px-8">
-  <div class="sm:flex sm:items-center">
-    <div class="sm:flex-auto">
-      <h1 class="text-xl font-semibold leading-6 text-gray-900 dark:text-white">{{ 'appUsers_title' | t }}</h1>
-      <p class="mt-2 text-sm text-gray-700 dark:text-gray-300">{{ 'appUsers_subtitle' | t }}</p>
-    </div>
-
-    <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none space-x-3">
-      <button type="button"
-        (click)="openNotificationModal('selected')"
-        [disabled]="selectedUserIds.size === 0"
-        class="inline-flex items-center rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
+<div class="tilawa-page-stack">
+  <app-page-header [title]="'appUsers_title' | t" [subtitle]="'appUsers_subtitle' | t">
+    <div actions class="flex flex-wrap gap-2">
+      <app-tilawa-button variant="secondary" size="sm" [disabled]="selectedUserIds.size === 0 || notifyLoading()" [loading]="notifyLoading()" (click)="openNotificationModal('selected')">
         {{ 'appUsers_notifySelected' | t:{ count: selectedUserIds.size.toString() } }}
-      </button>
-      <button type="button"
-        (click)="openNotificationModal('all')"
-        class="block rounded-md bg-blue-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+      </app-tilawa-button>
+      <app-tilawa-button variant="primary" size="sm" [disabled]="notifyLoading()" [loading]="notifyLoading()" (click)="openNotificationModal('all')">
         {{ 'appUsers_notifyAll' | t }}
-      </button>
+      </app-tilawa-button>
     </div>
-  </div>
+  </app-page-header>
 
-  <div class="mt-8 flow-root">
-    <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-      <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-        <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg dark:ring-white/10">
-
-          @if (loadState() === 'loading' && users().length === 0) {
-            <div class="p-8 text-center text-gray-500 dark:text-gray-400">{{ 'appUsers_loading' | t }}</div>
-          } @else if (loadState() === 'error') {
-            <div class="p-8 text-center text-red-600">{{ errorMessage() }}</div>
-          } @else {
-            <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
-              <thead class="bg-gray-50 dark:bg-gray-800">
-                <tr>
-                  <th scope="col" class="relative px-7 sm:w-12 sm:px-6">
-                    <input type="checkbox"
-                      [checked]="isAllSelected(users().length)"
-                      (change)="toggleSelectAll(users())"
-                      class="absolute left-4 top-1/2 -mt-2 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700">
-                  </th>
-                  <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-white sm:pl-0">{{ 'appUsers_id' | t }}</th>
-                  <app-sortable-th
-                    [label]="'common_name' | t"
-                    field="displayName"
-                    [sort]="sort()"
-                    (sortChange)="onSortChange($event)"
-                  />
-                  <app-sortable-th
-                    [label]="'common_email' | t"
-                    field="email"
-                    [sort]="sort()"
-                    (sortChange)="onSortChange($event)"
-                  />
-                  <app-sortable-th
-                    [label]="'common_date' | t"
-                    field="createdAt"
-                    [sort]="sort()"
-                    (sortChange)="onSortChange($event)"
-                  />
-                  <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                    <span class="sr-only">{{ 'common_actions' | t }}</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-200 bg-white dark:bg-gray-900 dark:divide-gray-800">
-                @for (user of users(); track user.id) {
-                <tr [class.bg-blue-50]="selectedUserIds.has(user.id)" [class.dark:bg-blue-900]="selectedUserIds.has(user.id)">
-                  <td class="relative px-7 sm:w-12 sm:px-6">
-                    @if (selectedUserIds.has(user.id)) {
-                      <div class="absolute inset-y-0 left-0 w-0.5 bg-blue-600"></div>
-                    }
-                    <input type="checkbox"
-                      [checked]="selectedUserIds.has(user.id)"
-                      (change)="toggleSelection(user.id)"
-                      class="absolute left-4 top-1/2 -mt-2 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700">
-                  </td>
-                  <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 dark:text-white sm:pl-0">{{ user.id }}</td>
-                  <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900 dark:text-white">
-                    <div class="flex items-center">
-                      <div class="h-10 w-10 flex-shrink-0">
-                        @if (user.photoUrl) {
-                          <img class="h-10 w-10 rounded-full" [src]="user.photoUrl" alt="" />
-                        } @else {
-                          <div class="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                            <span class="text-gray-500 dark:text-gray-400 font-medium">{{ (user.displayName || 'U').charAt(0).toUpperCase() }}</span>
-                          </div>
-                        }
-                      </div>
-                      <div class="ml-4">
-                        <div class="font-medium text-gray-900 dark:text-white">{{ user.displayName || ('appUsers_notAvailable' | t) }}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">{{ user.email || ('appUsers_notAvailable' | t) }}</td>
-                  <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">
-                    @if (user.createdAt) {
-                      {{ user.createdAt | date:'medium' }}
-                    } @else {
-                      {{ 'appUsers_notAvailable' | t }}
-                    }
-                  </td>
-                  <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                    <button type="button" (click)="openNotificationModal('single', user.id)" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
-                      {{ 'appUsers_notify' | t }}<span class="sr-only">, {{ user.displayName }}</span>
-                    </button>
-                  </td>
-                </tr>
-                } @empty {
-                <tr>
-                   <td colspan="6" class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-center text-gray-500 dark:text-gray-400">{{ 'appUsers_empty' | t }}</td>
-                </tr>
-                }
-              </tbody>
-            </table>
-            @if (canLoadMore()) {
-              <div class="p-4 text-center">
-                <button type="button" (click)="loadMore()" class="rounded-md border px-4 py-2 text-sm">{{ 'common_loadMore' | t }}</button>
+  @if (loadState() === 'loading' && users().length === 0) {
+    <app-tilawa-loading-state [message]="'appUsers_loading' | t" />
+  } @else if (loadState() === 'error') {
+    <app-tilawa-error-state [message]="errorMessage() ?? 'Error'" [showRetry]="true" (retry)="reload()" />
+  } @else {
+    <app-tilawa-data-table>
+      <thead>
+        <tr>
+          <th scope="col" class="w-12">
+            <input
+              type="checkbox"
+              class="tilawa-checkbox"
+              [attr.aria-label]="'appUsers_id' | t"
+              [checked]="isAllSelected(users().length)"
+              (change)="toggleSelectAll(users())"
+            />
+          </th>
+          <th scope="col">{{ 'appUsers_id' | t }}</th>
+          <app-sortable-th [label]="'common_name' | t" field="displayName" [sort]="sort()" (sortChange)="onSortChange($event)" />
+          <app-sortable-th [label]="'common_email' | t" field="email" [sort]="sort()" (sortChange)="onSortChange($event)" />
+          <app-sortable-th [label]="'common_date' | t" field="createdAt" [sort]="sort()" (sortChange)="onSortChange($event)" />
+          <th scope="col" class="text-end">{{ 'common_actions' | t }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (user of users(); track user.id) {
+          <tr [class.is-selected]="selectedUserIds.has(user.id)">
+            <td>
+              <input type="checkbox" class="tilawa-checkbox" [checked]="selectedUserIds.has(user.id)" (change)="toggleSelection(user.id)" />
+            </td>
+            <td>{{ user.id }}</td>
+            <td>
+              <div class="flex items-center gap-3">
+                <app-tilawa-avatar
+                  [displayName]="user.displayName ?? ''"
+                  [email]="user.email"
+                  [photoUrl]="user.photoUrl"
+                />
+                <span>{{ user.displayName || ('appUsers_notAvailable' | t) }}</span>
               </div>
-            }
-          }
-        </div>
-      </div>
-    </div>
-  </div>
+            </td>
+            <td>{{ user.email || ('appUsers_notAvailable' | t) }}</td>
+            <td>@if (user.createdAt) { {{ user.createdAt | date:'medium' }} } @else { {{ 'appUsers_notAvailable' | t }} }</td>
+            <td class="text-end">
+              <app-tilawa-button variant="text" size="sm" [disabled]="notifyLoading()" [loading]="notifyLoading()" (click)="openNotificationModal('single', user.id)">
+                {{ 'appUsers_notify' | t }}
+              </app-tilawa-button>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6">
+              <app-tilawa-empty-state [title]="'appUsers_empty' | t" />
+            </td>
+          </tr>
+        }
+      </tbody>
+    </app-tilawa-data-table>
+
+    <app-tilawa-pagination [canLoadMore]="canLoadMore()" (loadMore)="loadMore()" />
+  }
 </div>
 
-<app-notification-modal
-  [isOpen]="isModalOpen"
-  [targetSummary]="notificationTargetSummary"
-  (send)="onSendNotification($event)"
-  (close)="isModalOpen = false">
-</app-notification-modal>
+<app-notification-modal [isOpen]="isModalOpen" [targetSummary]="notificationTargetSummary" [loading]="notifyLoading()" (send)="onSendNotification($event)" (close)="isModalOpen = false" />

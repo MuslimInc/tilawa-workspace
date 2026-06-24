@@ -12,13 +12,15 @@ import { environment } from '../../../../environments/environment';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { LanguageSwitcherComponent } from '../../../shared/components/language-switcher/language-switcher.component';
+import { TilawaButtonComponent } from '../../../shared/components/tilawa-button/tilawa-button.component';
+import { TilawaCardComponent } from '../../../shared/components/tilawa-card/tilawa-card.component';
 
 const defaultLogin = loadAdminLoginPreferences() ?? environment.devAdminLogin;
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe, LanguageSwitcherComponent],
+  imports: [CommonModule, FormsModule, TranslatePipe, LanguageSwitcherComponent, TilawaButtonComponent, TilawaCardComponent],
   templateUrl: './login.component.html',
 })
 export class LoginComponent {

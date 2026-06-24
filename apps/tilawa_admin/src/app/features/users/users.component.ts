@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NotificationModalComponent } from './components/notification-modal/notification-modal.component';
@@ -8,6 +8,14 @@ import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { TilawaUsersFacade } from '../../core/application/facades/tilawa-users.facade';
 import { SortableThComponent } from '../../shared/components/sortable-th/sortable-th.component';
+import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { TilawaButtonComponent } from '../../shared/components/tilawa-button/tilawa-button.component';
+import { TilawaDataTableComponent } from '../../shared/components/tilawa-data-table/tilawa-data-table.component';
+import { TilawaLoadingStateComponent } from '../../shared/components/tilawa-loading-state/tilawa-loading-state.component';
+import { TilawaErrorStateComponent } from '../../shared/components/tilawa-error-state/tilawa-error-state.component';
+import { TilawaEmptyStateComponent } from '../../shared/components/tilawa-empty-state/tilawa-empty-state.component';
+import { TilawaPaginationComponent } from '../../shared/components/tilawa-pagination/tilawa-pagination.component';
+import { TilawaAvatarComponent } from '../../shared/components/tilawa-avatar/tilawa-avatar.component';
 import { SortRequest } from '../../core/domain/entities/pagination.types';
 
 @Component({
@@ -19,9 +27,16 @@ import { SortRequest } from '../../core/domain/entities/pagination.types';
     NotificationModalComponent,
     TranslatePipe,
     SortableThComponent,
+    PageHeaderComponent,
+    TilawaButtonComponent,
+    TilawaDataTableComponent,
+    TilawaLoadingStateComponent,
+    TilawaErrorStateComponent,
+    TilawaEmptyStateComponent,
+    TilawaPaginationComponent,
+    TilawaAvatarComponent,
   ],
   templateUrl: './users.component.html',
-  styleUrl: './users.css'
 })
 export class UsersComponent implements OnInit {
   private readonly usersFacade = inject(TilawaUsersFacade);
@@ -37,6 +52,7 @@ export class UsersComponent implements OnInit {
   selectedUserIds = new Set<string>();
 
   isModalOpen = false;
+  readonly notifyLoading = signal(false);
   notificationTargetType: NotificationTargetType = 'all';
   notificationTargetSummary = '';
 
@@ -96,6 +112,7 @@ export class UsersComponent implements OnInit {
   }
 
   async onSendNotification(payload: { title: string; body: string; type: string; data?: string }) {
+    this.notifyLoading.set(true);
     try {
       const entity = new NotificationEntity(
         null,
@@ -115,6 +132,8 @@ export class UsersComponent implements OnInit {
     } catch (error) {
       console.error('Failed to send notification:', error);
       alert(this.i18n.t('appUsers_sendFailed'));
+    } finally {
+      this.notifyLoading.set(false);
     }
   }
 }

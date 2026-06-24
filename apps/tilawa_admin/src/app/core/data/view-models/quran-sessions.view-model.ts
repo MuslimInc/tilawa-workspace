@@ -57,6 +57,7 @@ export interface TeacherApplicationDetailVm {
 export interface TeacherListItemVm {
   readonly id: string;
   readonly displayName: string;
+  readonly avatarUrl: string | null;
   readonly userId: string;
   readonly isActive: boolean;
   readonly verificationStatus: string;
@@ -218,6 +219,7 @@ export class QuranSessionsViewModelMapper {
     return {
       id: profile.id,
       displayName: profile.displayName || '—',
+      avatarUrl: profile.avatarUrl,
       userId: profile.userId,
       isActive: profile.isActive,
       verificationStatus: profile.verificationStatus,

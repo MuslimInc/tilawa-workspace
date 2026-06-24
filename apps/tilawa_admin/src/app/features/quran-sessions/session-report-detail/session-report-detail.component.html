@@ -1,63 +1,65 @@
-<div class="px-4 sm:px-6 lg:px-8">
-  <p class="mb-4">
-    <a routerLink="/quran-sessions/reports" class="text-sm text-blue-600 dark:text-blue-400">
+<div class="space-y-6">
+  <div>
+    <a routerLink="/quran-sessions/reports" class="tilawa-link text-sm">
       {{ 'reports_backToList' | t }}
     </a>
-  </p>
+  </div>
 
   @if (loadState() === 'loading') {
-    <p class="text-gray-500 dark:text-gray-400">{{ 'reports_loadingDetail' | t }}</p>
+    <app-tilawa-loading-state [message]="'reports_loadingDetail' | t" />
   } @else if (loadState() === 'error') {
-    <p class="text-red-600 dark:text-red-400">{{ errorMessage() }}</p>
+    <app-tilawa-error-state [message]="errorMessage() ?? 'Error'" />
   } @else if (detail(); as item) {
-    <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">{{ 'reports_detailTitle' | t: { id: item.id } }}</h1>
+    <app-page-header [title]="'reports_detailTitle' | t: { id: item.id }" />
 
-    <dl class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-      <div>
-        <dt class="text-sm text-gray-500">{{ 'common_category' | t }}</dt>
-        <dd class="text-sm font-medium">{{ item.category }}</dd>
-      </div>
-      <div>
-        <dt class="text-sm text-gray-500">{{ 'common_status' | t }}</dt>
-        <dd><app-status-chip [label]="item.status | statusLabel" [status]="item.status" /></dd>
-      </div>
-      <div>
-        <dt class="text-sm text-gray-500">{{ 'common_severity' | t }}</dt>
-        <dd><app-status-chip [label]="item.severity | statusLabel" [status]="item.severity" /></dd>
-      </div>
-      <div>
-        <dt class="text-sm text-gray-500">{{ 'common_reporter' | t }}</dt>
-        <dd class="text-sm font-mono">{{ item.reporterUserId }} ({{ item.reporterRole }})</dd>
-      </div>
-      <div>
-        <dt class="text-sm text-gray-500">{{ 'common_reportedUser' | t }}</dt>
-        <dd class="text-sm font-mono">{{ item.reportedUserId ?? ('common_none' | t) }}</dd>
-      </div>
-      <div>
-        <dt class="text-sm text-gray-500">{{ 'common_booking' | t }}</dt>
-        <dd class="text-sm">
-          @if (item.bookingId) {
-            <a [routerLink]="['/quran-sessions/sessions', item.bookingId]" class="text-blue-600 dark:text-blue-400">
-              {{ item.bookingId }}
-            </a>
-          } @else {
-            {{ 'common_none' | t }}
-          }
-        </dd>
-      </div>
-      <div>
-        <dt class="text-sm text-gray-500">{{ 'common_filed' | t }}</dt>
-        <dd class="text-sm">{{ item.createdAt | date:'medium' }}</dd>
-      </div>
-      <div>
-        <dt class="text-sm text-gray-500">{{ 'common_updated' | t }}</dt>
-        <dd class="text-sm">{{ item.updatedAt ? (item.updatedAt | date:'medium') : ('common_none' | t) }}</dd>
-      </div>
-    </dl>
+    <app-tilawa-card>
+      <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <dt class="tilawa-detail-label">{{ 'common_category' | t }}</dt>
+          <dd class="tilawa-detail-value">{{ item.category }}</dd>
+        </div>
+        <div>
+          <dt class="tilawa-detail-label">{{ 'common_status' | t }}</dt>
+          <dd><app-status-chip [label]="item.status | statusLabel" [status]="item.status" /></dd>
+        </div>
+        <div>
+          <dt class="tilawa-detail-label">{{ 'common_severity' | t }}</dt>
+          <dd><app-status-chip [label]="item.severity | statusLabel" [status]="item.severity" [scholar]="true" /></dd>
+        </div>
+        <div>
+          <dt class="tilawa-detail-label">{{ 'common_reporter' | t }}</dt>
+          <dd class="tilawa-detail-value font-mono">{{ item.reporterUserId }} ({{ item.reporterRole }})</dd>
+        </div>
+        <div>
+          <dt class="tilawa-detail-label">{{ 'common_reportedUser' | t }}</dt>
+          <dd class="tilawa-detail-value font-mono">{{ item.reportedUserId ?? ('common_none' | t) }}</dd>
+        </div>
+        <div>
+          <dt class="tilawa-detail-label">{{ 'common_booking' | t }}</dt>
+          <dd class="tilawa-detail-value">
+            @if (item.bookingId) {
+              <a [routerLink]="['/quran-sessions/sessions', item.bookingId]" class="tilawa-link">
+                {{ item.bookingId }}
+              </a>
+            } @else {
+              {{ 'common_none' | t }}
+            }
+          </dd>
+        </div>
+        <div>
+          <dt class="tilawa-detail-label">{{ 'common_filed' | t }}</dt>
+          <dd class="tilawa-detail-value">{{ item.createdAt | date:'medium' }}</dd>
+        </div>
+        <div>
+          <dt class="tilawa-detail-label">{{ 'common_updated' | t }}</dt>
+          <dd class="tilawa-detail-value">{{ item.updatedAt ? (item.updatedAt | date:'medium') : ('common_none' | t) }}</dd>
+        </div>
+      </dl>
 
-    <div class="mt-8">
-      <h2 class="text-lg font-medium text-gray-900 dark:text-white">{{ 'common_description' | t }}</h2>
-      <p class="mt-2 whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">{{ item.description }}</p>
-    </div>
+      <div class="mt-6 border-t border-[var(--tilawa-outline-variant)] pt-6">
+        <h2 class="text-lg font-semibold text-[var(--tilawa-on-surface)]">{{ 'common_description' | t }}</h2>
+        <p class="mt-2 whitespace-pre-wrap text-sm text-[var(--tilawa-on-surface)]">{{ item.description }}</p>
+      </div>
+    </app-tilawa-card>
   }
 </div>

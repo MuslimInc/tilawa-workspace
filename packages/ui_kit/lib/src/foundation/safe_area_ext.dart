@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:ui' show FlutterView;
 
 import 'package:flutter/material.dart';
 
@@ -38,7 +39,20 @@ extension TilawaSafeAreaX on BuildContext {
 
   double get keyboardInset => systemViewInsets.bottom;
 
-  bool get isKeyboardVisible => keyboardInset > 0;
+  /// Keyboard obstruction height, including when a parent [Scaffold] strips
+  /// bottom [MediaQuery.viewInsets] after resizing its body.
+  double get effectiveKeyboardInset {
+    if (keyboardInset > 0) {
+      return keyboardInset;
+    }
+    final FlutterView? view = View.maybeOf(this);
+    if (view == null) {
+      return 0;
+    }
+    return view.viewInsets.bottom / view.devicePixelRatio;
+  }
+
+  bool get isKeyboardVisible => effectiveKeyboardInset > 0;
 
   // ---------------------------------------------------------------------------
   // Design-aware bottom spacing
@@ -67,7 +81,7 @@ extension TilawaSafeAreaX on BuildContext {
   /// - floating bottom padding when keyboard is hidden
   double get keyboardAwareBottomPadding {
     if (isKeyboardVisible) {
-      return keyboardInset + theme.tokens.spaceSmall;
+      return effectiveKeyboardInset + theme.tokens.spaceSmall;
     }
 
     return floatingBottomPadding;
@@ -86,7 +100,7 @@ extension TilawaSafeAreaX on BuildContext {
     final buffer = keyboardBuffer ?? theme.tokens.spaceSmall;
 
     if (isKeyboardVisible) {
-      return keyboardInset + buffer;
+      return effectiveKeyboardInset + buffer;
     }
 
     if (fallbackMinSpacing != null) {

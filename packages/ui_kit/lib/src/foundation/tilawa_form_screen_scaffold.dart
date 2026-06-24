@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import 'component_tokens.dart';
 import 'design_tokens.dart';
 import 'tilawa_bottom_action_area.dart';
+import 'tilawa_comfortable_reach_padding.dart';
 import 'tilawa_form_validation.dart';
 
 /// Full-screen form layout with a scrollable body and sticky bottom CTA.
@@ -43,11 +45,48 @@ class TilawaFormScreenScaffold extends StatelessWidget {
   /// Optional scroll-to-error coordinator for long forms.
   final TilawaFormValidationController? validationController;
 
+  /// Bottom scroll inset so the last field can clear the sticky [footer].
+  static double stickyFooterScrollClearance(
+    BuildContext context, {
+    double footerTop = 0,
+    double extraBottom = 0,
+  }) {
+    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final double comfortableBottom =
+        TilawaComfortableReachPadding.resolve(
+          context,
+          kind: TilawaComfortableReachKind.screen,
+          keyboardAware: false,
+        ) +
+        extraBottom;
+    final TextDirection direction = Directionality.of(context);
+    final EdgeInsets footerPadding = Theme.of(
+      context,
+    ).componentTokens.bottomSheetScaffold.footerPadding.resolve(direction);
+
+    return footerTop +
+        footerPadding.top +
+        tokens.minInteractiveDimension +
+        comfortableBottom +
+        tokens.spaceMedium;
+  }
+
   @override
   Widget build(BuildContext context) {
     final TilawaDesignTokens tokens = Theme.of(context).tokens;
     final ScrollController? scrollController =
         validationController?.scrollController;
+    final TextDirection direction = Directionality.of(context);
+    final EdgeInsets resolvedBodyPadding =
+        bodyPadding?.resolve(direction) ?? EdgeInsets.all(tokens.spaceLarge);
+    final double footerClearance = stickyFooterScrollClearance(
+      context,
+      footerTop: footerTop,
+      extraBottom: footerExtraBottom,
+    );
+    final EdgeInsets scrollPadding = resolvedBodyPadding.copyWith(
+      bottom: resolvedBodyPadding.bottom + footerClearance,
+    );
 
     Widget content = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -55,13 +94,15 @@ class TilawaFormScreenScaffold extends StatelessWidget {
         Expanded(
           child: SingleChildScrollView(
             controller: scrollController,
-            padding: bodyPadding ?? EdgeInsets.all(tokens.spaceLarge),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            padding: scrollPadding,
             child: body,
           ),
         ),
         TilawaBottomActionArea(
           top: footerTop,
           extraBottom: footerExtraBottom,
+          keyboardAware: false,
           child: footer,
         ),
       ],

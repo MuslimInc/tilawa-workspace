@@ -9,27 +9,65 @@ import { nextSortForField } from '../../utils/sortable-column.util';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <th [class]="alignClass">
+    <th [class]="alignClass" scope="col">
       <button
         type="button"
-        class="group inline-flex items-center gap-1 font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400"
+        class="tilawa-sort-btn"
+        [attr.aria-sort]="ariaSort"
         (click)="onClick()"
       >
         <span>{{ label }}</span>
-        @if (isActive) {
-          <span class="text-blue-600 dark:text-blue-400" aria-hidden="true">
-            {{ sort.direction === 'asc' ? '↑' : '↓' }}
-          </span>
-        } @else {
-          <span
-            class="text-gray-300 group-hover:text-gray-400 dark:text-gray-600 dark:group-hover:text-gray-500"
-            aria-hidden="true"
-          >
-            ↕
-          </span>
-        }
+        <span class="tilawa-sort-icon" aria-hidden="true">{{ sortIcon }}</span>
       </button>
     </th>
+  `,
+  styles: `
+    :host {
+      display: contents;
+    }
+
+    th {
+      vertical-align: middle;
+    }
+
+    .tilawa-sort-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--tilawa-space-2);
+      font-weight: 600;
+      line-height: 1.25;
+      color: var(--tilawa-on-surface);
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-size: inherit;
+      white-space: nowrap;
+    }
+
+    .tilawa-sort-btn:hover {
+      color: var(--tilawa-primary);
+    }
+
+    .tilawa-sort-btn:focus-visible {
+      outline: 2px solid var(--tilawa-primary);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+
+    .tilawa-sort-icon {
+      display: inline-flex;
+      align-items: center;
+      flex-shrink: 0;
+      font-size: 0.75rem;
+      line-height: 1;
+      color: var(--tilawa-ink-ash);
+    }
+
+    .tilawa-sort-btn:hover .tilawa-sort-icon,
+    .tilawa-sort-btn[aria-sort]:not([aria-sort='none']) .tilawa-sort-icon {
+      color: var(--tilawa-primary);
+    }
   `,
 })
 export class SortableThComponent {
@@ -44,11 +82,22 @@ export class SortableThComponent {
     return this.sort.field === this.field;
   }
 
+  get ariaSort(): 'ascending' | 'descending' | 'none' {
+    if (!this.isActive) {
+      return 'none';
+    }
+    return this.sort.direction === 'asc' ? 'ascending' : 'descending';
+  }
+
+  get sortIcon(): string {
+    if (!this.isActive) {
+      return '↕';
+    }
+    return this.sort.direction === 'asc' ? '↑' : '↓';
+  }
+
   get alignClass(): string {
-    const base = 'px-3 py-3 text-sm';
-    return this.align === 'right'
-      ? `${base} text-right`
-      : `${base} text-left`;
+    return this.align === 'right' ? 'text-end' : '';
   }
 
   onClick(): void {

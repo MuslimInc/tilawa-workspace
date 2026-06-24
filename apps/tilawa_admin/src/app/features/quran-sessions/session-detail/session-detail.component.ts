@@ -14,6 +14,11 @@ import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialo
 import { RejectReasonDialogComponent } from '../../../shared/components/reject-reason-dialog/reject-reason-dialog.component';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { StatusLabelPipe } from '../../../core/i18n/status-label.pipe';
+import { TilawaButtonComponent } from '../../../shared/components/tilawa-button/tilawa-button.component';
+import { TilawaCardComponent } from '../../../shared/components/tilawa-card/tilawa-card.component';
+import { TilawaDataTableComponent } from '../../../shared/components/tilawa-data-table/tilawa-data-table.component';
+import { TilawaLoadingStateComponent } from '../../../shared/components/tilawa-loading-state/tilawa-loading-state.component';
+import { TilawaErrorStateComponent } from '../../../shared/components/tilawa-error-state/tilawa-error-state.component';
 
 type PendingAction =
   | 'cancel'
@@ -35,6 +40,11 @@ type PendingAction =
     RejectReasonDialogComponent,
     TranslatePipe,
     StatusLabelPipe,
+    TilawaButtonComponent,
+    TilawaCardComponent,
+    TilawaDataTableComponent,
+    TilawaLoadingStateComponent,
+    TilawaErrorStateComponent,
   ],
   templateUrl: './session-detail.component.html',
 })

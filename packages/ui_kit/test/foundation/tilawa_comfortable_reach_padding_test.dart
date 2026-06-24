@@ -14,6 +14,7 @@ void main() {
   Future<double> pumpAndResolve(
     WidgetTester tester, {
     TilawaComfortableReachKind kind = TilawaComfortableReachKind.screen,
+    bool keyboardAware = true,
     double keyboardBuffer = 0,
     EdgeInsets viewPadding = EdgeInsets.zero,
     EdgeInsets viewInsets = EdgeInsets.zero,
@@ -32,6 +33,7 @@ void main() {
               resolved = TilawaComfortableReachPadding.resolve(
                 context,
                 kind: kind,
+                keyboardAware: keyboardAware,
                 keyboardBuffer: keyboardBuffer,
               );
               return const SizedBox.shrink();
@@ -91,6 +93,57 @@ void main() {
       );
 
       expect(resolved, keyboard + 16);
+    });
+
+    testWidgets(
+      'keyboard with keyboardAware false uses token buffer only',
+      (tester) async {
+        const double keyboard = 280;
+
+        final resolved = await pumpAndResolve(
+          tester,
+          viewInsets: const EdgeInsets.only(bottom: keyboard),
+          keyboardAware: false,
+        );
+
+        expect(resolved, tokens.spaceSmall);
+        expect(resolved, lessThan(keyboard));
+      },
+    );
+
+    testWidgets('resolveTransitioning interpolates while keyboard closes', (
+      tester,
+    ) async {
+      const double maxKeyboard = 300;
+      const double currentKeyboard = 150;
+
+      late double interpolated;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: MediaQuery(
+            data: const MediaQueryData(
+              viewInsets: EdgeInsets.only(bottom: currentKeyboard),
+            ),
+            child: Builder(
+              builder: (context) {
+                interpolated =
+                    TilawaComfortableReachPadding.resolveTransitioning(
+                      context,
+                      maxKeyboardInset: maxKeyboard,
+                    );
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        ),
+      );
+
+      final double open = tokens.spaceSmall;
+      final double closed = tokens.spaceHuge;
+      final double expected = open + (closed - open) * 0.5;
+
+      expect(interpolated, closeTo(expected, 0.01));
     });
   });
 }

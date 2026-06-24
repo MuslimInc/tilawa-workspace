@@ -88,6 +88,16 @@ class TilawaInputStyle {
     );
   }
 
+  /// Top-aligned padding for multiline fields with a floating label.
+  EdgeInsetsGeometry multilineContentPadding() {
+    return EdgeInsets.fromLTRB(
+      tokens.spaceMedium,
+      tokens.spaceMedium,
+      tokens.spaceMedium,
+      tokens.spaceSmall,
+    );
+  }
+
   /// Decoration for form fields and [InputDecorator] shells (single border owner).
   InputDecoration decoration({
     String? labelText,
@@ -132,6 +142,7 @@ class TilawaInputStyle {
       suffixIcon: suffixIcon,
       enabled: enabled,
       alignLabelWithHint: alignLabelWithHint,
+      hintMaxLines: alignLabelWithHint ? null : 1,
       filled: true,
       fillColor: colorScheme.surface,
       contentPadding:

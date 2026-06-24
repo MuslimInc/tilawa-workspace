@@ -35,6 +35,7 @@ class TilawaTextField extends StatefulWidget {
     this.showCounter = false,
     this.textDirection,
     this.textAlignVertical,
+    this.scrollPadding,
     this.showPasswordTooltip,
     this.hidePasswordTooltip,
     this.clearTextTooltip,
@@ -140,6 +141,9 @@ class TilawaTextField extends StatefulWidget {
   final TextDirection? textDirection;
   final TextAlignVertical? textAlignVertical;
 
+  /// Extra space to leave when scrolling this field into view above overlays.
+  final EdgeInsets? scrollPadding;
+
   /// Tooltip text shown on the password reveal icon.
   final String? showPasswordTooltip;
 
@@ -224,10 +228,14 @@ class _TilawaTextFieldState extends State<TilawaTextField> {
     });
   }
 
+  bool get _isMultiline =>
+      (widget.maxLines ?? 1) > 1 || (widget.minLines ?? 1) > 1;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final inputStyle = context.inputStyle();
+    final isMultiline = _isMultiline;
 
     final Widget? suffix = widget.isPassword
         ? IconButton(
@@ -266,7 +274,10 @@ class _TilawaTextFieldState extends State<TilawaTextField> {
         validator: widget.validator,
         autofocus: widget.autofocus,
         textDirection: widget.textDirection,
-        textAlignVertical: widget.textAlignVertical,
+        textAlignVertical:
+            widget.textAlignVertical ??
+            (isMultiline ? TextAlignVertical.top : null),
+        scrollPadding: widget.scrollPadding ?? const EdgeInsets.all(20),
         style: theme.textTheme.bodyLarge,
         maxLength: widget.maxLength,
         buildCounter: widget.showCounter
@@ -285,6 +296,10 @@ class _TilawaTextFieldState extends State<TilawaTextField> {
           prefixIcon: widget.prefixIcon,
           suffixIcon: suffix,
           enabled: widget.enabled,
+          alignLabelWithHint: isMultiline,
+          contentPadding: isMultiline
+              ? inputStyle.multilineContentPadding()
+              : null,
           textStyle: theme.textTheme.bodyLarge,
         ),
       ),

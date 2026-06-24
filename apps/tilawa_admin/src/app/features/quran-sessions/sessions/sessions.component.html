@@ -1,146 +1,122 @@
-<div class="px-4 sm:px-6 lg:px-8">
+<div class="tilawa-page-stack">
   <app-page-header
     [title]="'sessions_title' | t"
     [subtitle]="'sessions_subtitle' | t"
+    [hasActions]="false"
   />
 
-  <div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+  <app-tilawa-filter-bar (apply)="reload()">
     <input
       type="search"
+      class="tilawa-field"
       [(ngModel)]="searchQuery"
       (keyup.enter)="reload()"
       [placeholder]="'sessions_searchPlaceholder' | t"
-      class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm"
     />
-    <select
-      [(ngModel)]="statusFilter"
-      class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm"
-    >
+    <select class="tilawa-field" [(ngModel)]="statusFilter">
       <option value="">{{ 'common_allStatuses' | t }}</option>
       @for (status of statusOptions; track status) {
         <option [value]="status">{{ status | statusLabel }}</option>
       }
     </select>
     <input
+      class="tilawa-field"
       [(ngModel)]="teacherFilter"
       [placeholder]="'sessions_teacherUidPlaceholder' | t"
-      class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm"
     />
     <input
+      class="tilawa-field"
       [(ngModel)]="studentFilter"
       [placeholder]="'sessions_studentUidPlaceholder' | t"
-      class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm"
     />
     <input
+      class="tilawa-field"
       [(ngModel)]="countryFilter"
       [placeholder]="'sessions_countryCodePlaceholder' | t"
-      class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm"
     />
     <input
+      class="tilawa-field"
       [(ngModel)]="cityFilter"
       [placeholder]="'sessions_cityIdPlaceholder' | t"
-      class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm"
     />
-    <input
-      type="date"
-      [(ngModel)]="startsFrom"
-      class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm"
+    <input type="date" class="tilawa-field" [(ngModel)]="startsFrom" />
+    <input type="date" class="tilawa-field" [(ngModel)]="startsTo" />
+  </app-tilawa-filter-bar>
+
+  @if (loadState() === 'loading') {
+    <app-tilawa-loading-state [message]="'sessions_loading' | t" />
+  } @else if (loadState() === 'error') {
+    <app-tilawa-error-state
+      [message]="errorMessage() ?? 'Error'"
+      [showRetry]="true"
+      (retry)="reload()"
     />
-    <input
-      type="date"
-      [(ngModel)]="startsTo"
-      class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm"
+  } @else if (items().length === 0) {
+    <app-tilawa-empty-state
+      [title]="'sessions_empty' | t"
+      [description]="'sessions_subtitle' | t"
     />
-  </div>
-
-  <div class="mt-4">
-    <button
-      type="button"
-      (click)="reload()"
-      class="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500"
-    >
-      {{ 'common_applyFilters' | t }}
-    </button>
-  </div>
-
-  <div class="mt-8 flow-root">
-    @if (loadState() === 'loading') {
-      <p class="text-center text-gray-500 dark:text-gray-400 py-8">{{ 'sessions_loading' | t }}</p>
-    } @else if (loadState() === 'error') {
-      <p class="text-center text-red-600 dark:text-red-400 py-8">{{ errorMessage() }}</p>
-    } @else if (items().length === 0) {
-      <p class="text-center text-gray-500 dark:text-gray-400 py-8">{{ 'sessions_empty' | t }}</p>
-    } @else {
-      <div class="overflow-x-auto shadow ring-1 ring-black/5 sm:rounded-lg dark:ring-white/10">
-        <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
-          <thead class="bg-gray-50 dark:bg-gray-800">
-            <tr>
-              <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'common_booking' | t }}</th>
-              <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'common_session' | t }}</th>
-              <app-sortable-th
-                [label]="'sessions_starts' | t"
-                field="startsAt"
-                [sort]="sort()"
-                (sortChange)="onSortChange($event)"
+  } @else {
+    <app-tilawa-data-table>
+      <thead>
+        <tr>
+          <th scope="col">{{ 'common_booking' | t }}</th>
+          <th scope="col">{{ 'common_session' | t }}</th>
+          <app-sortable-th
+            [label]="'sessions_starts' | t"
+            field="startsAt"
+            [sort]="sort()"
+            (sortChange)="onSortChange($event)"
+          />
+          <th scope="col">{{ 'common_status' | t }}</th>
+          <th scope="col">{{ 'common_student' | t }}</th>
+          <th scope="col">{{ 'common_teacher' | t }}</th>
+          <th scope="col">{{ 'sessions_location' | t }}</th>
+          <app-sortable-th
+            [label]="'common_date' | t"
+            field="createdAt"
+            [sort]="sort()"
+            (sortChange)="onSortChange($event)"
+          />
+          <app-sortable-th
+            [label]="'common_updated' | t"
+            field="updatedAt"
+            [sort]="sort()"
+            (sortChange)="onSortChange($event)"
+          />
+          <th scope="col" class="text-end">{{ 'common_actions' | t }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of items(); track item.id) {
+          <tr>
+            <td class="font-mono text-xs">{{ item.id }}</td>
+            <td class="font-mono text-xs">{{ item.sessionId ?? ('common_none' | t) }}</td>
+            <td>{{ item.startsAt | date:'medium' }}</td>
+            <td>
+              <app-status-chip
+                [label]="item.lifecycleStatus | statusLabel"
+                [status]="item.lifecycleStatus"
               />
-              <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'common_status' | t }}</th>
-              <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'common_student' | t }}</th>
-              <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'common_teacher' | t }}</th>
-              <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'sessions_location' | t }}</th>
-              <app-sortable-th
-                [label]="'common_date' | t"
-                field="createdAt"
-                [sort]="sort()"
-                (sortChange)="onSortChange($event)"
-              />
-              <app-sortable-th
-                [label]="'common_updated' | t"
-                field="updatedAt"
-                [sort]="sort()"
-                (sortChange)="onSortChange($event)"
-              />
-              <th class="px-3 py-3 text-right text-sm font-semibold">{{ 'common_actions' | t }}</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200 bg-white dark:bg-gray-900 dark:divide-gray-800">
-            @for (item of items(); track item.id) {
-              <tr>
-                <td class="px-3 py-4 text-sm font-mono">{{ item.id }}</td>
-                <td class="px-3 py-4 text-sm font-mono">{{ item.sessionId ?? ('common_none' | t) }}</td>
-                <td class="px-3 py-4 text-sm">{{ item.startsAt | date:'medium' }}</td>
-                <td class="px-3 py-4 text-sm">
-                  <app-status-chip [label]="item.lifecycleStatus | statusLabel" [status]="item.lifecycleStatus" />
-                </td>
-                <td class="px-3 py-4 text-sm font-mono">{{ item.studentId }}</td>
-                <td class="px-3 py-4 text-sm font-mono">{{ item.teacherId }}</td>
-                <td class="px-3 py-4 text-sm">{{ item.countryCode }} / {{ item.cityId }}</td>
-                <td class="px-3 py-4 text-sm">{{ item.createdAt | date:'medium' }}</td>
-                <td class="px-3 py-4 text-sm">{{ item.updatedAt | date:'medium' }}</td>
-                <td class="px-3 py-4 text-right text-sm">
-                  <a
-                    [routerLink]="['/quran-sessions/sessions', item.id]"
-                    class="text-blue-600 hover:text-blue-800 dark:text-blue-400"
-                  >
-                    {{ 'common_view' | t }}
-                  </a>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
+            </td>
+            <td class="font-mono text-xs">{{ item.studentId }}</td>
+            <td class="font-mono text-xs">{{ item.teacherId }}</td>
+            <td>{{ item.countryCode }} / {{ item.cityId }}</td>
+            <td>{{ item.createdAt | date:'medium' }}</td>
+            <td>{{ item.updatedAt | date:'medium' }}</td>
+            <td class="text-end">
+              <a [routerLink]="['/quran-sessions/sessions', item.id]" class="tilawa-link">
+                {{ 'common_view' | t }}
+              </a>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </app-tilawa-data-table>
 
-      @if (canLoadMore()) {
-        <div class="mt-4 text-center">
-          <button
-            type="button"
-            (click)="loadMore()"
-            class="rounded-md border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm"
-          >
-            {{ 'common_loadMore' | t }}
-          </button>
-        </div>
-      }
-    }
-  </div>
+    <app-tilawa-pagination
+      [canLoadMore]="canLoadMore()"
+      (loadMore)="loadMore()"
+    />
+  }
 </div>
