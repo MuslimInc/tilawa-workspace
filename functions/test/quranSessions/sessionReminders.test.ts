@@ -6,6 +6,7 @@ import {
   reminderFieldKey,
   REMINDER_WINDOW_MINUTES,
 } from "../../src/quranSessions/sessionReminders";
+import { teacherUserIdFromDenormalizedSessionData } from "../../src/quranSessions/teacherProfileUserId";
 
 test("DEFAULT_REMINDER_HOURS includes 24h and 1h", () => {
   assert.deepEqual(DEFAULT_REMINDER_HOURS, [24, 1]);
@@ -29,4 +30,19 @@ test("computeReminderWindow centers on target start time", () => {
 test("reminderFieldKey encodes hours", () => {
   assert.equal(reminderFieldKey(24), "reminder24hEnqueued");
   assert.equal(reminderFieldKey(1), "reminder1hEnqueued");
+});
+
+test("teacherUserIdFromDenormalizedSessionData reads denormalized field", () => {
+  assert.equal(
+    teacherUserIdFromDenormalizedSessionData({ teacherUserId: "uid_teacher" }),
+    "uid_teacher",
+  );
+  assert.equal(
+    teacherUserIdFromDenormalizedSessionData({ teacherId: "profile_1" }),
+    undefined,
+  );
+  assert.equal(
+    teacherUserIdFromDenormalizedSessionData({ teacherUserId: "  " }),
+    undefined,
+  );
 });

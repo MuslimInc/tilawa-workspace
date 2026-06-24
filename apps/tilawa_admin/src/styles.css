@@ -74,6 +74,11 @@ body {
   font-size: 0.875rem;
 }
 
+.tilawa-table--pinned {
+  table-layout: fixed;
+  min-width: 56rem;
+}
+
 .tilawa-table thead {
   position: sticky;
   top: 0;
@@ -97,10 +102,6 @@ body {
   padding: 0.875rem 0.75rem;
   color: var(--tilawa-on-surface);
   border-bottom: 1px solid var(--tilawa-outline-variant);
-}
-
-.tilawa-table tbody tr:nth-child(even) {
-  background-color: rgb(241 241 239 / 0.35);
 }
 
 .tilawa-table tbody tr:hover {
@@ -135,6 +136,103 @@ body {
 
 .text-end {
   text-align: end;
+}
+
+.tilawa-table-pin {
+  position: sticky;
+  background-color: var(--tilawa-surface);
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.tilawa-table thead .tilawa-table-pin {
+  z-index: 3;
+  background-color: var(--tilawa-surface-high);
+}
+
+.tilawa-table tbody .tilawa-table-pin {
+  z-index: 1;
+}
+
+.tilawa-table tbody tr:hover .tilawa-table-pin {
+  background-color: rgb(139 94 60 / 0.04);
+}
+
+.tilawa-table tbody tr.is-selected .tilawa-table-pin {
+  background-color: rgb(139 94 60 / 0.08);
+}
+
+.tilawa-table-pin-edge {
+  border-inline-end: 1px solid var(--tilawa-outline-variant);
+  box-shadow: 4px 0 8px rgb(0 0 0 / 0.06);
+}
+
+.tilawa-table-leading {
+  inset-inline-start: 0;
+  z-index: 2;
+  width: var(--tilawa-pin-lead-width, 16rem);
+  min-width: var(--tilawa-pin-lead-width, 16rem);
+  max-width: var(--tilawa-pin-lead-width, 16rem);
+  white-space: normal;
+  vertical-align: top;
+  overflow: hidden;
+  padding: 0.5rem;
+}
+
+.tilawa-table thead th.tilawa-table-leading {
+  padding: var(--tilawa-space-3) 0.5rem;
+}
+
+.tilawa-table-leading-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.375rem;
+  min-width: 0;
+}
+
+.tilawa-table-leading-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tilawa-table-leading-label-row {
+  display: flex;
+  align-items: center;
+  gap: var(--tilawa-space-3);
+  min-width: 0;
+}
+
+.tilawa-table-leading-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.375rem;
+}
+
+.tilawa-table-leading-inner > app-tilawa-button,
+.tilawa-table-leading-actions > app-tilawa-button {
+  display: inline-flex;
+  max-width: 100%;
+}
+
+.tilawa-table--pinned th.tilawa-table-col-mono,
+.tilawa-table--pinned td.tilawa-table-col-mono,
+.tilawa-table-cell-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tilawa-table--pinned th.tilawa-table-col-mono,
+.tilawa-table--pinned td.tilawa-table-col-mono {
+  width: 9.5rem;
+  max-width: 9.5rem;
+}
+
+.tilawa-table-cell-truncate {
+  max-width: 9rem;
 }
 
 .tilawa-checkbox {

@@ -15,30 +15,44 @@
   } @else if (loadState() === 'error') {
     <app-tilawa-error-state [message]="errorMessage() ?? 'Error'" [showRetry]="true" (retry)="reload()" />
   } @else {
-    <app-tilawa-data-table>
+    <app-tilawa-data-table pinMode="select-leading">
       <thead>
         <tr>
-          <th scope="col" class="w-12">
-            <input
-              type="checkbox"
-              class="tilawa-checkbox"
-              [attr.aria-label]="'appUsers_id' | t"
-              [checked]="isAllSelected(users().length)"
-              (change)="toggleSelectAll(users())"
-            />
+          <th scope="col" class="tilawa-table-pin tilawa-table-leading tilawa-table-pin-edge">
+            <div class="tilawa-table-leading-inner">
+              <input
+                type="checkbox"
+                class="tilawa-checkbox"
+                [attr.aria-label]="'appUsers_id' | t"
+                [checked]="isAllSelected(users().length)"
+                (change)="toggleSelectAll(users())"
+              />
+              <span>{{ 'common_actions' | t }}</span>
+            </div>
           </th>
           <th scope="col">{{ 'appUsers_id' | t }}</th>
           <app-sortable-th [label]="'common_name' | t" field="displayName" [sort]="sort()" (sortChange)="onSortChange($event)" />
           <app-sortable-th [label]="'common_email' | t" field="email" [sort]="sort()" (sortChange)="onSortChange($event)" />
           <app-sortable-th [label]="'common_date' | t" field="createdAt" [sort]="sort()" (sortChange)="onSortChange($event)" />
-          <th scope="col" class="text-end">{{ 'common_actions' | t }}</th>
         </tr>
       </thead>
       <tbody>
         @for (user of users(); track user.id) {
           <tr [class.is-selected]="selectedUserIds.has(user.id)">
-            <td>
-              <input type="checkbox" class="tilawa-checkbox" [checked]="selectedUserIds.has(user.id)" (change)="toggleSelection(user.id)" />
+            <td class="tilawa-table-pin tilawa-table-leading tilawa-table-pin-edge">
+              <div class="tilawa-table-leading-inner">
+                <input type="checkbox" class="tilawa-checkbox" [checked]="selectedUserIds.has(user.id)" (change)="toggleSelection(user.id)" />
+                <div class="tilawa-table-leading-actions">
+                  <app-tilawa-button
+                    variant="primary"
+                    size="xs"
+                    [label]="'appUsers_notify' | t"
+                    [disabled]="notifyLoading()"
+                    [loading]="notifyLoading()"
+                    (click)="openNotificationModal('single', user.id)"
+                  />
+                </div>
+              </div>
             </td>
             <td>{{ user.id }}</td>
             <td>
@@ -53,15 +67,10 @@
             </td>
             <td>{{ user.email || ('appUsers_notAvailable' | t) }}</td>
             <td>@if (user.createdAt) { {{ user.createdAt | date:'medium' }} } @else { {{ 'appUsers_notAvailable' | t }} }</td>
-            <td class="text-end">
-              <app-tilawa-button variant="text" size="sm" [disabled]="notifyLoading()" [loading]="notifyLoading()" (click)="openNotificationModal('single', user.id)">
-                {{ 'appUsers_notify' | t }}
-              </app-tilawa-button>
-            </td>
           </tr>
         } @empty {
           <tr>
-            <td colspan="6">
+            <td colspan="5">
               <app-tilawa-empty-state [title]="'appUsers_empty' | t" />
             </td>
           </tr>

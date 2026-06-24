@@ -27,38 +27,62 @@
   } @else if (items().length === 0) {
     <app-tilawa-empty-state [title]="'quranSessionsUsers_empty' | t" />
   } @else {
-    <app-tilawa-data-table>
+    <app-tilawa-data-table pinMode="leading" leadingSize="wide">
       <thead>
         <tr>
-          <th scope="col">{{ 'quranSessionsUsers_uid' | t }}</th>
-          <th scope="col">{{ 'quranSessionsUsers_displayName' | t }}</th>
+          <th scope="col" class="tilawa-table-pin tilawa-table-leading tilawa-table-pin-edge">
+            {{ 'quranSessionsUsers_displayName' | t }} · {{ 'common_actions' | t }}
+          </th>
+          <th scope="col" class="tilawa-table-col-mono">{{ 'quranSessionsUsers_uid' | t }}</th>
           <th scope="col">{{ 'common_email' | t }}</th>
-          <th scope="col">{{ 'quranSessionsUsers_photo' | t }}</th>
           <th scope="col">{{ 'quranSessionsUsers_qsProfileStatus' | t }}</th>
           <th scope="col">{{ 'quranSessionsUsers_teacherApplyAccess' | t }}</th>
           <app-sortable-th [label]="'common_updated' | t" field="quranSessionsProfile.updatedAt" [sort]="sort()" (sortChange)="onSortChange($event)" />
           <app-sortable-th [label]="'common_date' | t" field="quranSessionsProfile.createdAt" [sort]="sort()" (sortChange)="onSortChange($event)" />
-          <th scope="col" class="text-end">{{ 'common_actions' | t }}</th>
         </tr>
       </thead>
       <tbody>
         @for (user of items(); track user.userId) {
           <tr>
-            <td class="font-mono text-xs">{{ user.userId }}</td>
-            <td>{{ user.displayName }}</td>
+            <td class="tilawa-table-pin tilawa-table-leading tilawa-table-pin-edge">
+              <div class="tilawa-table-leading-inner">
+                <div class="tilawa-table-leading-label-row">
+                  <app-tilawa-avatar
+                    size="sm"
+                    [displayName]="user.displayName"
+                    [email]="user.email"
+                    [photoUrl]="user.photoUrl"
+                  />
+                  <span class="tilawa-table-leading-label truncate">{{ user.displayName }}</span>
+                </div>
+                <div class="tilawa-table-leading-actions">
+                  <app-tilawa-button
+                    variant="primary"
+                    size="xs"
+                    [label]="'quranSessionsUsers_teacherApplyFollowPolicy' | t"
+                    [loading]="isActionLoading() && pendingUserId === user.userId"
+                    [disabled]="isActionLoading()"
+                    (click)="cycleTeacherApplyAccess(user.userId, user.canApplyAsTeacher)"
+                  />
+                  @if (user.accountStatus !== 'suspended' && user.accountStatus !== 'blocked') {
+                    <app-tilawa-button
+                      variant="secondary"
+                      size="xs"
+                      [label]="'quranSessionsUsers_suspendAccess' | t"
+                      [loading]="isActionLoading() && pendingUserId === user.userId"
+                      [disabled]="isActionLoading()"
+                      (click)="openSuspend(user.userId)"
+                    />
+                  }
+                </div>
+              </div>
+            </td>
+            <td class="font-mono text-xs tilawa-table-col-mono" [title]="user.userId">{{ user.userId }}</td>
             <td>
               {{ user.email }}
               @if (user.hasDuplicateEmail) {
                 <app-status-chip class="ms-2" [label]="'quranSessionsUsers_duplicateEmail' | t" status="pending" />
               }
-            </td>
-            <td>
-              <app-tilawa-avatar
-                size="sm"
-                [displayName]="user.displayName"
-                [email]="user.email"
-                [photoUrl]="user.photoUrl"
-              />
             </td>
             <td><app-status-chip [label]="user.accountStatus | statusLabel" [status]="user.accountStatus" /></td>
             <td>
@@ -69,28 +93,6 @@
             </td>
             <td>@if (user.updatedAt) { {{ user.updatedAt | date:'medium' }} } @else { {{ 'common_none' | t }} }</td>
             <td>@if (user.createdAt) { {{ user.createdAt | date:'medium' }} } @else { {{ 'common_none' | t }} }</td>
-            <td class="text-end">
-              <app-tilawa-button
-                variant="text"
-                size="sm"
-                [loading]="isActionLoading() && pendingUserId === user.userId"
-                [disabled]="isActionLoading()"
-                (click)="cycleTeacherApplyAccess(user.userId, user.canApplyAsTeacher)"
-              >
-                {{ 'quranSessionsUsers_teacherApplyFollowPolicy' | t }}
-              </app-tilawa-button>
-              @if (user.accountStatus !== 'suspended' && user.accountStatus !== 'blocked') {
-                <app-tilawa-button
-                  variant="text"
-                  size="sm"
-                  [loading]="isActionLoading() && pendingUserId === user.userId"
-                  [disabled]="isActionLoading()"
-                  (click)="openSuspend(user.userId)"
-                >
-                  {{ 'quranSessionsUsers_suspendAccess' | t }}
-                </app-tilawa-button>
-              }
-            </td>
           </tr>
         }
       </tbody>

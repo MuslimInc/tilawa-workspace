@@ -53,6 +53,8 @@ class FirestoreTeacherDataSource implements TeacherRemoteDataSource {
     return types;
   }
 
+  static const _pageSize = 20;
+
   @override
   Future<({List<QuranTeacherDto> teachers, String? nextCursor})> getTeachers({
     String? specialization,
@@ -60,11 +62,22 @@ class FirestoreTeacherDataSource implements TeacherRemoteDataSource {
     String? cursor,
   }) async {
     try {
+      final hasSpecialization =
+          specialization != null && specialization.isNotEmpty;
+      final hasLanguage = language != null && language.isNotEmpty;
+
       Query<Map<String, dynamic>> query = _profiles
           .where('profileCompleteness', isEqualTo: 'complete')
-          .where('isPubliclyVisible', isEqualTo: true)
-          .orderBy('displayName')
-          .limit(20);
+          .where('isPubliclyVisible', isEqualTo: true);
+
+      // Firestore allows one array-contains per query — specialization wins.
+      if (hasSpecialization) {
+        query = query.where('specializations', arrayContains: specialization);
+      } else if (hasLanguage) {
+        query = query.where('teachingLanguages', arrayContains: language);
+      }
+
+      query = query.orderBy('displayName').limit(_pageSize);
       if (cursor != null && cursor.isNotEmpty) {
         final cursorDoc = await _profiles.doc(cursor).get();
         if (cursorDoc.exists) {
@@ -76,17 +89,15 @@ class FirestoreTeacherDataSource implements TeacherRemoteDataSource {
       teachers = teachers
           .where((t) => ValidateTeacherPublicName.isValid(t.displayName))
           .toList();
-      if (specialization != null && specialization.isNotEmpty) {
-        teachers = teachers
-            .where((t) => t.specializations.contains(specialization))
-            .toList();
-      }
-      if (language != null && language.isNotEmpty) {
+
+      // Secondary filter when both specialization and language are active.
+      if (hasSpecialization && hasLanguage) {
         teachers = teachers
             .where((t) => t.languages.contains(language))
             .toList();
       }
-      final nextCursor = snapshot.docs.length == 20
+
+      final nextCursor = snapshot.docs.length == _pageSize
           ? snapshot.docs.last.id
           : null;
       return (teachers: teachers, nextCursor: nextCursor);

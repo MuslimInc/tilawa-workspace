@@ -16,28 +16,43 @@
   } @else if (items().length === 0) {
     <app-tilawa-empty-state [title]="'disputes_empty' | t" />
   } @else {
-    <app-tilawa-data-table>
+    <app-tilawa-data-table pinMode="leading" leadingSize="compact">
       <thead>
         <tr>
+          <th scope="col" class="tilawa-table-pin tilawa-table-leading tilawa-table-pin-edge">
+            {{ 'common_booking' | t }} · {{ 'common_actions' | t }}
+          </th>
           <th scope="col">{{ 'common_status' | t }}</th>
           <th scope="col">{{ 'common_openedBy' | t }}</th>
-          <th scope="col">{{ 'common_booking' | t }}</th>
           <th scope="col">{{ 'common_reason' | t }}</th>
           <app-sortable-th [label]="'common_opened' | t" field="createdAt" [sort]="sort()" (sortChange)="onSortChange($event)" />
           <app-sortable-th [label]="'common_updated' | t" field="updatedAt" [sort]="sort()" (sortChange)="onSortChange($event)" />
-          <th scope="col" class="text-end">{{ 'common_actions' | t }}</th>
         </tr>
       </thead>
       <tbody>
         @for (item of items(); track item.id) {
           <tr>
+            <td class="tilawa-table-pin tilawa-table-leading tilawa-table-pin-edge">
+              <div class="tilawa-table-leading-inner">
+                <span class="tilawa-table-leading-label font-mono text-xs" [title]="item.bookingId">{{ item.bookingId }}</span>
+                <div class="tilawa-table-leading-actions">
+                  <app-tilawa-button
+                    variant="primary"
+                    size="xs"
+                    [label]="'common_view' | t"
+                    [link]="['/quran-sessions/disputes', item.id]"
+                  />
+                </div>
+              </div>
+            </td>
             <td><app-status-chip [label]="item.status | statusLabel" [status]="item.status" /></td>
-            <td class="font-mono text-xs">{{ item.openedByUserId }} <span class="text-[var(--tilawa-ink-muted)]">({{ item.openedByRole }})</span></td>
-            <td class="font-mono text-xs">{{ item.bookingId }}</td>
+            <td class="font-mono text-xs tilawa-table-cell-truncate" [title]="item.openedByUserId">
+              {{ item.openedByUserId }}
+              <span class="text-[var(--tilawa-ink-muted)]">({{ item.openedByRole }})</span>
+            </td>
             <td class="max-w-xs truncate">{{ item.reasonPreview }}</td>
             <td>{{ item.createdAt | date:'medium' }}</td>
             <td>@if (item.updatedAt) { {{ item.updatedAt | date:'medium' }} } @else { {{ 'common_none' | t }} }</td>
-            <td class="text-end"><a [routerLink]="['/quran-sessions/disputes', item.id]" class="tilawa-link">{{ 'common_view' | t }}</a></td>
           </tr>
         }
       </tbody>
