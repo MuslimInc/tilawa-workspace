@@ -14,6 +14,7 @@ enum HomeExploreFeature {
   bookmarks,
   quran,
   support,
+  sessions,
 }
 
 /// Resolved icon styling for a [HomeExploreFeature] category tile.
@@ -77,6 +78,10 @@ extension HomeExploreFeatureTileStyles on ColorScheme {
       HomeExploreFeature.support => HomeExploreFeatureTileStyle(
         iconForeground: success,
         semanticTint: TilawaSemanticTint.success,
+      ),
+      HomeExploreFeature.sessions => HomeExploreFeatureTileStyle(
+        iconForeground: tertiary,
+        semanticTint: TilawaSemanticTint.scholar,
       ),
     };
   }

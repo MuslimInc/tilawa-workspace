@@ -13,38 +13,43 @@ class _MockMainScreenCubit extends MockCubit<MainScreenState>
     implements MainScreenCubit {}
 
 void main() {
-  testWidgets('category grid tiles fit fixed height without overflow', (
-    tester,
-  ) async {
-    final mainScreenCubit = _MockMainScreenCubit();
-    when(() => mainScreenCubit.state).thenReturn(const MainScreenState());
-    when(() => mainScreenCubit.stream).thenAnswer((_) => const Stream.empty());
+  testWidgets(
+    'category grid tiles fit fixed height without overflow at 360dp',
+    (
+      tester,
+    ) async {
+      final mainScreenCubit = _MockMainScreenCubit();
+      when(() => mainScreenCubit.state).thenReturn(const MainScreenState());
+      when(
+        () => mainScreenCubit.stream,
+      ).thenAnswer((_) => const Stream.empty());
 
-    final view = tester.view;
-    view.devicePixelRatio = 1;
-    view.physicalSize = const Size(360, 640);
-    addTearDown(view.resetDevicePixelRatio);
-    addTearDown(view.resetPhysicalSize);
+      final view = tester.view;
+      view.devicePixelRatio = 1;
+      view.physicalSize = const Size(360, 640);
+      addTearDown(view.resetDevicePixelRatio);
+      addTearDown(view.resetPhysicalSize);
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
-        locale: const Locale('ar'),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(
-          body: SingleChildScrollView(
-            child: BlocProvider<MainScreenCubit>.value(
-              value: mainScreenCubit,
-              child: HomeFeaturesHub(onOpenPrayer: () {}),
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          locale: const Locale('ar'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: BlocProvider<MainScreenCubit>.value(
+                value: mainScreenCubit,
+                child: HomeFeaturesHub(onOpenPrayer: () {}),
+              ),
             ),
           ),
         ),
-      ),
-    );
-    await tester.pump();
+      );
+      await tester.pump();
 
-    expect(tester.takeException(), isNull);
-    expect(find.byType(TilawaFeatureCategoryTile), findsNWidgets(8));
-  });
+      expect(tester.takeException(), isNull);
+      expect(find.byType(TilawaFeatureCategoryTile), findsNWidgets(9));
+    },
+  );
 }
