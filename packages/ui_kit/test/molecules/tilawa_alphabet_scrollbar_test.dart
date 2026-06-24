@@ -1106,5 +1106,36 @@ void main() {
 
       expect(darkColor, isNot(equals(lightColor)));
     });
+
+    testWidgets('builds when resolved letter role has null fontSize', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            textTheme: const TextTheme(
+              labelMedium: TextStyle(),
+            ),
+            extensions: [
+              TilawaDesignTokens.light(),
+              TilawaComponentTokens.light(),
+            ],
+          ),
+          home: Scaffold(
+            body: TilawaAlphabetScrollbar(
+              letters: letters,
+              selectedLetter: null,
+              onLetterSelected: (_) {},
+              onPanUpdate: (_) {},
+              onPanStart: (_) {},
+              onPanEnd: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('ا'), findsOneWidget);
+    });
   });
 }

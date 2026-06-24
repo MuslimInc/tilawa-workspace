@@ -1,7 +1,10 @@
 import { onCall } from "firebase-functions/v2/https";
 import { FieldValue, getFirestore, Timestamp } from "firebase-admin/firestore";
 
-import { isChild } from "./bookingEligibilityService";
+import {
+  assertGuardianCanApproveChildBooking,
+  isChild,
+} from "./bookingEligibilityService";
 import { lifecycleError } from "./lifecycleErrors";
 import {
   requireAuthenticatedUid,
@@ -77,12 +80,11 @@ export const approveChildGuardianBooking = onCall(
       | Record<string, unknown>
       | undefined;
     const guardianDob = parseDate(guardianProfile?.dateOfBirth);
-    if (guardianDob != null && isChild(guardianDob, childAgeThreshold, now)) {
-      throw lifecycleError(
-        "guardian_approval_invalid",
-        "Guardian must be an adult account.",
-      );
-    }
+    assertGuardianCanApproveChildBooking(
+      guardianDob,
+      childAgeThreshold,
+      now,
+    );
 
     const approvedAt = Timestamp.now();
     await db.collection("users").doc(studentId).set(

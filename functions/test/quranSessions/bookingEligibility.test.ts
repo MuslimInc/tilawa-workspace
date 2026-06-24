@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import {
   assertBookingEligible,
+  assertGuardianCanApproveChildBooking,
   calendarAge,
   isChild,
   isGenderCombinationAllowed,
@@ -212,4 +213,33 @@ test("assertBookingEligible allows an eligible child (teacher teaches children, 
     NOW,
   );
   assert.equal(pricing.isPaid, false);
+});
+
+test("assertGuardianCanApproveChildBooking rejects missing guardian DOB", () => {
+  expectCode(
+    () => assertGuardianCanApproveChildBooking(null, 14, NOW),
+    "guardian_approval_invalid",
+  );
+});
+
+test("assertGuardianCanApproveChildBooking rejects child guardian DOB", () => {
+  expectCode(
+    () =>
+      assertGuardianCanApproveChildBooking(
+        new Date("2015-01-01Z"),
+        14,
+        NOW,
+      ),
+    "guardian_approval_invalid",
+  );
+});
+
+test("assertGuardianCanApproveChildBooking accepts adult guardian DOB", () => {
+  assert.doesNotThrow(() =>
+    assertGuardianCanApproveChildBooking(
+      new Date("1990-01-01Z"),
+      14,
+      NOW,
+    ),
+  );
 });

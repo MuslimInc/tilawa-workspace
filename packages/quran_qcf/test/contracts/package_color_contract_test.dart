@@ -16,6 +16,11 @@ void main() {
 
   final RegExp inlineHexPattern = RegExp(r'Color\(0x[0-9A-Fa-f]+\)');
 
+  test('libRelativePath normalizes Windows separators', () {
+    expect(_libRelativePath('lib/foo/bar.dart'), 'foo/bar.dart');
+    expect(_libRelativePath(r'lib\foo\bar.dart'), 'foo/bar.dart');
+  });
+
   test('lib avoids raw Colors.* and inline hex', () {
     final libRoot = Directory('lib');
     expect(libRoot.existsSync(), isTrue);
@@ -27,7 +32,7 @@ void main() {
         continue;
       }
 
-      final relativePath = entity.path.replaceFirst(RegExp(r'^lib/'), '');
+      final relativePath = _libRelativePath(entity.path);
       for (final prefix in allowlistedPathPrefixes) {
         if (relativePath.startsWith(prefix)) {
           continue;
@@ -50,4 +55,9 @@ void main() {
 
     expect(offenders, isEmpty, reason: offenders.join('\n'));
   });
+}
+
+String _libRelativePath(String entityPath) {
+  final normalizedPath = entityPath.replaceAll('\\', '/');
+  return normalizedPath.replaceFirst(RegExp(r'^lib/'), '');
 }

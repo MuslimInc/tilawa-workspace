@@ -419,7 +419,7 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
     final double letterFontSize = tilawaResolveTextRole(
       theme.textTheme,
       componentTokens.letterTextRole,
-    ).fontSize!;
+    ).fontSize ?? 13.0;
 
     return RepaintBoundary(
       child: _MaybeScrollbarSemantics(

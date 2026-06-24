@@ -87,6 +87,26 @@ export function isChild(
   return calendarAge(dob, now) < childAgeThreshold;
 }
 
+/** Guardian approvers must have a verified adult DOB (unlike generic isChild). */
+export function assertGuardianCanApproveChildBooking(
+  guardianDateOfBirth: Date | null,
+  childAgeThreshold: number,
+  now: Date,
+): void {
+  if (guardianDateOfBirth == null) {
+    throw lifecycleError(
+      "guardian_approval_invalid",
+      "Guardian profile must have a valid date of birth.",
+    );
+  }
+  if (isChild(guardianDateOfBirth, childAgeThreshold, now)) {
+    throw lifecycleError(
+      "guardian_approval_invalid",
+      "Guardian must be an adult account.",
+    );
+  }
+}
+
 /** Mirrors `QuranSessionSafetyPolicy.isGenderCombinationAllowed`. */
 export function isGenderCombinationAllowed(args: {
   teacherGender: Gender;

@@ -47,6 +47,10 @@ class AgoraRtcEnginePool {
     final engine = handle.engine;
     if (retainEngineOnRelease && engine != null) {
       await handle.leaveAndRelease(retainEngine: true);
+      final previous = _parkedEngine;
+      if (previous != null && previous != engine) {
+        await previous.release();
+      }
       parkEngine(engine, _readEngineAppId(handle) ?? '');
     } else {
       await handle.leaveAndRelease();
@@ -65,6 +69,10 @@ class AgoraRtcEnginePool {
       if (handle != null) {
         await handle.leaveAndRelease();
       }
+    }
+    final parked = _parkedEngine;
+    if (parked != null) {
+      await parked.release();
     }
     _parkedEngine = null;
     _parkedEngineAppId = null;

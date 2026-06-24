@@ -24,6 +24,11 @@ void main() {
 
   final RegExp inlineHexPattern = RegExp(r'Color\(0x[0-9A-Fa-f]+\)');
 
+  test('libRelativePath normalizes Windows separators', () {
+    expect(_libRelativePath('lib/foo/bar.dart'), 'foo/bar.dart');
+    expect(_libRelativePath(r'lib\foo\bar.dart'), 'foo/bar.dart');
+  });
+
   test('lib avoids raw Colors.* and inline hex outside allowlist', () {
     final libRoot = Directory('lib');
     expect(
@@ -40,7 +45,7 @@ void main() {
         continue;
       }
 
-      final relativePath = entity.path.replaceFirst(RegExp(r'^lib/'), '');
+      final relativePath = _libRelativePath(entity.path);
       if (_isAllowlisted(relativePath, allowlistedPathPrefixes)) {
         continue;
       }
@@ -63,6 +68,11 @@ void main() {
           'See docs/design/color_architecture.md.',
     );
   });
+}
+
+String _libRelativePath(String entityPath) {
+  final normalizedPath = entityPath.replaceAll('\\', '/');
+  return normalizedPath.replaceFirst(RegExp(r'^lib/'), '');
 }
 
 bool _isAllowlisted(String relativePath, List<String> prefixes) {

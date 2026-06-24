@@ -118,7 +118,7 @@ class BM25:
         if self.N == 0:
             return
         self.doc_lengths = [len(doc) for doc in self.corpus]
-        self.avgdl = sum(self.doc_lengths) / self.N
+        self.avgdl = (sum(self.doc_lengths) / self.N) or 1
 
         for doc in self.corpus:
             seen = set()
