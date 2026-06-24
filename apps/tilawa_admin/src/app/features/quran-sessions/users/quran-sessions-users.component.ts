@@ -13,6 +13,16 @@ import { StatusChipComponent } from '../../../shared/components/status-chip/stat
 import { RejectReasonDialogComponent } from '../../../shared/components/reject-reason-dialog/reject-reason-dialog.component';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { StatusLabelPipe } from '../../../core/i18n/status-label.pipe';
+import { SortableThComponent } from '../../../shared/components/sortable-th/sortable-th.component';
+import { TilawaFilterBarComponent } from '../../../shared/components/tilawa-filter-bar/tilawa-filter-bar.component';
+import { TilawaDataTableComponent } from '../../../shared/components/tilawa-data-table/tilawa-data-table.component';
+import { TilawaLoadingStateComponent } from '../../../shared/components/tilawa-loading-state/tilawa-loading-state.component';
+import { TilawaErrorStateComponent } from '../../../shared/components/tilawa-error-state/tilawa-error-state.component';
+import { TilawaEmptyStateComponent } from '../../../shared/components/tilawa-empty-state/tilawa-empty-state.component';
+import { TilawaPaginationComponent } from '../../../shared/components/tilawa-pagination/tilawa-pagination.component';
+import { TilawaButtonComponent } from '../../../shared/components/tilawa-button/tilawa-button.component';
+import { TilawaAvatarComponent } from '../../../shared/components/tilawa-avatar/tilawa-avatar.component';
+import { SortRequest } from '../../../core/domain/entities/pagination.types';
 
 @Component({
   selector: 'app-quran-sessions-users',
@@ -25,6 +35,15 @@ import { StatusLabelPipe } from '../../../core/i18n/status-label.pipe';
     RejectReasonDialogComponent,
     TranslatePipe,
     StatusLabelPipe,
+    SortableThComponent,
+    TilawaFilterBarComponent,
+    TilawaDataTableComponent,
+    TilawaLoadingStateComponent,
+    TilawaErrorStateComponent,
+    TilawaEmptyStateComponent,
+    TilawaPaginationComponent,
+    TilawaButtonComponent,
+    TilawaAvatarComponent,
   ],
   templateUrl: './quran-sessions-users.component.html',
 })
@@ -36,6 +55,7 @@ export class QuranSessionsUsersComponent implements OnInit {
   readonly errorMessage = this.facade.listErrorMessage;
   readonly canLoadMore = this.facade.canLoadMore;
   readonly isActionLoading = this.facade.isActionLoading;
+  readonly sort = this.facade.sort;
 
   searchQuery = '';
   countryFilter = '';
@@ -80,6 +100,10 @@ export class QuranSessionsUsersComponent implements OnInit {
     return this.facade.loadMore(this.buildFilters());
   }
 
+  onSortChange(sort: SortRequest): void {
+    void this.facade.changeSort(this.buildFilters(), sort);
+  }
+
   openSuspend(userId: string): void {
     this.pendingUserId = userId;
     this.suspendOpen = true;
@@ -89,5 +113,22 @@ export class QuranSessionsUsersComponent implements OnInit {
     await this.facade.suspendUser(this.pendingUserId, reason);
     this.suspendOpen = false;
     await this.reload();
+  }
+
+  async cycleTeacherApplyAccess(userId: string, current: boolean | null): Promise<void> {
+    this.pendingUserId = userId;
+    const next =
+      current === null ? true : current === true ? false : null;
+    await this.facade.setTeacherApplicationAccess(userId, next);
+  }
+
+  teacherApplyAccessLabel(value: boolean | null): string {
+    if (value === true) {
+      return 'quranSessionsUsers_teacherApplyAllowed';
+    }
+    if (value === false) {
+      return 'quranSessionsUsers_teacherApplyDenied';
+    }
+    return 'quranSessionsUsers_teacherApplyPolicy';
   }
 }

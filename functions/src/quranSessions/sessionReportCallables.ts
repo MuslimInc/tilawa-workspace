@@ -21,6 +21,8 @@ import {
   requireAuthenticatedUid,
   requireValidSessionEpochUnlessAdmin,
 } from "./sessionAuth";
+import { resolveTeacherProfileUserId } from "./teacherProfileUserId";
+import { sessionCallableHttpsOptions } from "./sessionCallableOptions";
 
 interface ReportSessionConcernRequest {
   category: ReportCategory;
@@ -45,7 +47,7 @@ function shortContentHash(category: string, description: string): string {
  * and surface to admins as a work queue.
  */
 export const reportSessionConcern = onCall(
-  { enforceAppCheck: false },
+  sessionCallableHttpsOptions,
   async (request) => {
     const uid = requireAuthenticatedUid(request);
     await requireValidSessionEpochUnlessAdmin(request, uid);
@@ -76,7 +78,10 @@ export const reportSessionConcern = onCall(
       }
       const booking = bookingSnap.data() ?? {};
       const studentId = (booking.studentId as string | undefined) ?? "";
-      const teacherId = (booking.teacherId as string | undefined) ?? "";
+      const teacherProfileId = (booking.teacherId as string | undefined) ?? "";
+      const teacherUserId = teacherProfileId
+        ? await resolveTeacherProfileUserId(db, teacherProfileId)
+        : "";
       bookingId = data.bookingId;
       sessionId = (booking.sessionId as string | undefined) ?? null;
       aggregateId = (booking.aggregateId as string | undefined) ?? data.bookingId;
@@ -85,7 +90,7 @@ export const reportSessionConcern = onCall(
         reporterRole = "admin";
       } else if (uid === studentId) {
         reporterRole = "student";
-      } else if (uid === teacherId) {
+      } else if (uid === teacherUserId) {
         reporterRole = "teacher";
       } else {
         // Allow a child's guardian to report on their behalf.
@@ -108,8 +113,8 @@ export const reportSessionConcern = onCall(
 
       // Default the reported party to the counterparty when not specified.
       if (!reportedUserId) {
-        if (uid === studentId) reportedUserId = teacherId || null;
-        else if (uid === teacherId) reportedUserId = studentId || null;
+        if (uid === studentId) reportedUserId = teacherUserId || null;
+        else if (uid === teacherUserId) reportedUserId = studentId || null;
       }
     }
 
@@ -168,7 +173,7 @@ interface ResolveSessionReportRequest {
 
 /** Admin-only: advances a report to under_review / resolved / dismissed. */
 export const resolveSessionReport = onCall(
-  { enforceAppCheck: false },
+  sessionCallableHttpsOptions,
   async (request) => {
     const uid = requireAdmin(request);
     const data = request.data as ResolveSessionReportRequest;

@@ -56,6 +56,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeLocationUnavailable => 'حدّد الموقع';
 
   @override
+  String get homeHeroLocationContext => 'الصلاة في';
+
+  @override
   String get homeNextPrayerUnavailable => 'حدّد موقعك لعرض الصلاة القادمة.';
 
   @override
@@ -85,7 +88,22 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeExploreTitle => 'اكتشف';
 
   @override
-  String get homeExploreSubtitle => 'مواقيت الصلاة وتعلّم القرآن';
+  String get homeExploreSubtitle => 'أدواتك اليومية بلمحة';
+
+  @override
+  String get homeKhatmaCarouselSubtitle => 'تابع خطة قراءتك';
+
+  @override
+  String get homeSupportCarouselSubtitle => 'ساهم في بقاء تلاوة مجانية للجميع';
+
+  @override
+  String get homeHistoryCarouselSubtitle => 'تابع من حيث توقفت';
+
+  @override
+  String get homeFavoritesCarouselSubtitle => 'تلاوات وسور محفوظة';
+
+  @override
+  String get homeDownloadsCarouselSubtitle => 'استمع دون اتصال';
 
   @override
   String get homeSessionsTitle => 'تعلّم قراءة القرآن';
@@ -1566,7 +1584,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get qiblaFinderTitle => 'محدد القبلة';
 
   @override
-  String get qiblaDeviceAngleLabel => 'زاوية الجهاز نحو القبلة';
+  String get qiblaDeviceAngleLabel => 'اتجاه القبلة من الشمال';
 
   @override
   String qiblaRotatePhoneLeft(int degrees) {

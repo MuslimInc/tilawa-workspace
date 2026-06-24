@@ -21,6 +21,20 @@
             "type": "dart",
             "program": "apps/tilawa/lib/main.dart",
             "flutterMode": "release"
+        },
+        {
+            "name": "Tilawa (Staging Agora)",
+            "request": "launch",
+            "type": "dart",
+            "program": "apps/tilawa/lib/main.dart",
+            "flutterMode": "release",
+            "toolArgs": [
+                "--dart-define=TILAWA_DISTRIBUTION=staging",
+                "--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_ENABLED=true",
+                "--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED=true",
+                "--dart-define=TILAWA_LAUNCH_ENABLED_CALL_PROVIDERS=external,mock,agora",
+                "--dart-define=TILAWA_LAUNCH_AGORA_APP_ID=aacd48a930944ecea29bec112f229eb9"
+            ]
         }
     ]
 }

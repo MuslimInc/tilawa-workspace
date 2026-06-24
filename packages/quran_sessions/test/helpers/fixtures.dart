@@ -5,8 +5,10 @@ import 'package:quran_sessions/src/domain/entities/session_call_type.dart';
 import 'package:quran_sessions/src/domain/entities/session_price.dart';
 import 'package:quran_sessions/src/domain/entities/session_pricing_type.dart';
 import 'package:quran_sessions/src/domain/entities/teacher_availability.dart';
+import 'package:quran_sessions/src/domain/entities/teacher_profile.dart';
 import 'package:quran_sessions/src/domain/entities/teacher_verification_status.dart';
 import 'package:quran_sessions/src/domain/entities/user_profile.dart';
+import 'package:quran_sessions/src/domain/rules/teacher_profile_completeness.dart';
 
 UserProfile makeProfile({
   String userId = 'student_1',
@@ -61,11 +63,12 @@ QuranTeacher makeTeacher({
   UserGender gender = UserGender.male,
   SessionPricingType pricingType = SessionPricingType.fixedPerSession,
   SessionPrice? price = _defaultMarketPrice,
+  String avatarUrl = 'https://example.com/avatar.png',
 }) => QuranTeacher(
   id: id,
   displayName: displayName,
   bio: 'Experienced Quran teacher',
-  avatarUrl: 'https://example.com/avatar.png',
+  avatarUrl: avatarUrl ?? 'https://example.com/avatar.png',
   gender: gender,
   verificationStatus: status,
   supportedCallTypes: const [SessionCallType.externalMeeting],
@@ -76,6 +79,28 @@ QuranTeacher makeTeacher({
   averageRating: rating,
   totalReviews: 42,
   totalSessionsCompleted: 120,
+);
+
+TeacherProfile makeTeacherProfile({
+  String id = 'teacher_1',
+  String userId = 'teacher_user_1',
+  String? externalMeetingUrl,
+}) => TeacherProfile(
+  id: id,
+  userId: userId,
+  displayName: 'Sheikh Ahmed',
+  publicBio: 'Experienced Quran teacher',
+  verificationStatus: TeacherVerificationStatus.verified,
+  teachingLanguages: const ['ar', 'en'],
+  specializations: const ['tajweed'],
+  averageRating: 4.8,
+  reviewCount: 42,
+  isActive: true,
+  profileCompleteness: TeacherProfileCompletenessStatus.complete,
+  isPubliclyVisible: true,
+  externalMeetingUrl: externalMeetingUrl,
+  createdAt: DateTime.utc(2024, 1, 1),
+  updatedAt: DateTime.utc(2024, 1, 2),
 );
 
 TeacherAvailability makeSlot({

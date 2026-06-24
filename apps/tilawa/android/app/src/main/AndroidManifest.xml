@@ -36,6 +36,15 @@
         <intent>
             <action android:name="androidx.credentials.CREDENTIAL_PROVIDER" />
         </intent>
+        <!-- Android 11+ package visibility for https/http links (e.g. Google Meet). -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="http" />
+        </intent>
     </queries>
 
     <!-- Location permissions for Qibla feature -->
@@ -43,6 +52,8 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
 
     <!-- Explicitly remove AD_ID permission added by Firebase Analytics since we don't use ads -->
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove" />

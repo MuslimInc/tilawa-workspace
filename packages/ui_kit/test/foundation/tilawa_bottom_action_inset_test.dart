@@ -50,9 +50,9 @@ void main() {
       child: const Text('Action'),
     );
 
-    expect(padding.left, tokens.spaceLarge);
+    expect(padding.left, tokens.bottomActionHorizontalInset);
     expect(padding.top, tokens.spaceExtraLarge);
-    expect(padding.right, tokens.spaceLarge);
+    expect(padding.right, tokens.bottomActionHorizontalInset);
   });
 
   testWidgets('uses floatingBottomPadding when system inset is present', (

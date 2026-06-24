@@ -25,23 +25,62 @@ class SessionRepositoryImpl implements SessionRepository {
   }
 
   @override
-  Future<Either<QuranSessionsFailure, List<QuranSession>>> getStudentSessions(
-    String studentId,
-  ) async {
+  Future<Either<QuranSessionsFailure, SessionPage>> getStudentUpcomingSessions(
+    String studentId, {
+    String? cursor,
+    int limit = kDefaultSessionPageSize,
+  }) async {
     try {
-      final dtos = await _remote.getStudentSessions(studentId);
-      return Right(dtos.map((d) => d.toDomain()).toList());
+      final page = await _remote.getStudentUpcomingSessions(
+        studentId,
+        cursor: cursor,
+        limit: limit,
+      );
+      return Right(
+        SessionPage(
+          sessions: page.sessions.map((d) => d.toDomain()).toList(),
+          nextCursor: page.nextCursor,
+        ),
+      );
     } on Exception catch (e) {
       return Left(mapRemoteException(e));
     }
   }
 
   @override
-  Future<Either<QuranSessionsFailure, List<QuranSession>>> getTeacherSessions(
-    String teacherId,
-  ) async {
+  Future<Either<QuranSessionsFailure, SessionPage>> getStudentPastSessions(
+    String studentId, {
+    String? cursor,
+    int limit = kDefaultSessionPageSize,
+  }) async {
     try {
-      final dtos = await _remote.getTeacherSessions(teacherId);
+      final page = await _remote.getStudentPastSessions(
+        studentId,
+        cursor: cursor,
+        limit: limit,
+      );
+      return Right(
+        SessionPage(
+          sessions: page.sessions.map((d) => d.toDomain()).toList(),
+          nextCursor: page.nextCursor,
+        ),
+      );
+    } on Exception catch (e) {
+      return Left(mapRemoteException(e));
+    }
+  }
+
+  @override
+  Future<Either<QuranSessionsFailure, List<QuranSession>>>
+  getTeacherUpcomingSessions(
+    String teacherId, {
+    int limit = kDefaultSessionPageSize,
+  }) async {
+    try {
+      final dtos = await _remote.getTeacherUpcomingSessions(
+        teacherId,
+        limit: limit,
+      );
       return Right(dtos.map((d) => d.toDomain()).toList());
     } on Exception catch (e) {
       return Left(mapRemoteException(e));

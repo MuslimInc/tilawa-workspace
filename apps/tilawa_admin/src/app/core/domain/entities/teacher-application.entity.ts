@@ -32,3 +32,14 @@ export interface TeacherApplicationFilters {
   readonly submittedTo?: Date | null;
   readonly search?: string | null;
 }
+
+export const TEACHER_APPLICATION_DEFAULT_SORT = {
+  field: 'updatedAt',
+  direction: 'desc',
+} as const;
+
+export const TEACHER_APPLICATION_SORT_FIELDS = [
+  'updatedAt',
+  'submittedAt',
+  'createdAt',
+] as const;

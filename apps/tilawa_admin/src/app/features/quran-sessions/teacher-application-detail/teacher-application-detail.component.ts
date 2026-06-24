@@ -4,12 +4,19 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { TeacherApplicationsFacade } from '../../../core/application/facades/teacher-applications.facade';
 import { ApplicationModerationAction } from '../../../core/domain/entities/moderation-action.enum';
+import { TeacherApplicationDetailVm } from '../../../core/data/view-models/quran-sessions.view-model';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { StatusChipComponent } from '../../../shared/components/status-chip/status-chip.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { RejectReasonDialogComponent } from '../../../shared/components/reject-reason-dialog/reject-reason-dialog.component';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { StatusLabelPipe } from '../../../core/i18n/status-label.pipe';
+import { TilawaAvatarComponent } from '../../../shared/components/tilawa-avatar/tilawa-avatar.component';
+import { resolveDetailAvatarDisplayName } from '../../../shared/utils/avatar.util';
+import { TilawaButtonComponent } from '../../../shared/components/tilawa-button/tilawa-button.component';
+import { TilawaCardComponent } from '../../../shared/components/tilawa-card/tilawa-card.component';
+import { TilawaLoadingStateComponent } from '../../../shared/components/tilawa-loading-state/tilawa-loading-state.component';
+import { TilawaErrorStateComponent } from '../../../shared/components/tilawa-error-state/tilawa-error-state.component';
 
 @Component({
   selector: 'app-teacher-application-detail',
@@ -23,6 +30,11 @@ import { StatusLabelPipe } from '../../../core/i18n/status-label.pipe';
     RejectReasonDialogComponent,
     TranslatePipe,
     StatusLabelPipe,
+    TilawaAvatarComponent,
+    TilawaButtonComponent,
+    TilawaCardComponent,
+    TilawaLoadingStateComponent,
+    TilawaErrorStateComponent,
   ],
   templateUrl: './teacher-application-detail.component.html',
 })
@@ -49,22 +61,43 @@ export class TeacherApplicationDetailComponent implements OnInit {
     }
   }
 
+  /** Skips em-dash placeholders so avatar initials resolve from account name or email. */
+  avatarDisplayName(app: TeacherApplicationDetailVm): string {
+    return resolveDetailAvatarDisplayName(
+      app.publicDisplayName,
+      app.accountDisplayName,
+      app.email,
+    );
+  }
+
   openApprove(): void {
+    if (this.isActionLoading()) {
+      return;
+    }
     this.pendingAction.set(ApplicationModerationAction.Approve);
     this.confirmOpen.set(true);
   }
 
   openReject(): void {
+    if (this.isActionLoading()) {
+      return;
+    }
     this.pendingAction.set(ApplicationModerationAction.Reject);
     this.rejectOpen.set(true);
   }
 
   openSuspend(): void {
+    if (this.isActionLoading()) {
+      return;
+    }
     this.pendingAction.set(ApplicationModerationAction.Suspend);
     this.rejectOpen.set(true);
   }
 
   openRevoke(): void {
+    if (this.isActionLoading()) {
+      return;
+    }
     this.pendingAction.set(ApplicationModerationAction.Revoke);
     this.rejectOpen.set(true);
   }

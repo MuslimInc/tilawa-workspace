@@ -113,6 +113,90 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('shell dock layout fits collapsed height at full width', (
+      tester,
+    ) async {
+      final tokens = TilawaDesignTokens.light();
+      await tester.pumpWidget(
+        _themed(
+          SizedBox(
+            height: tokens.playerCollapsedHeight,
+            width: 360,
+            child: TilawaMediaPlayerBar(
+              layoutWidth: 360,
+              title: 'Surah Al-Baqarah',
+              subtitle: 'Al-Minshawi',
+              progress: 0.35,
+              isPlaying: true,
+              canGoPrevious: true,
+              canGoNext: true,
+              isSleepTimerEnabled: false,
+              shellDockLayout: true,
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(
+        tester.getSize(find.byType(TilawaMediaPlayerBar)),
+        Size(360, tokens.playerCollapsedHeight),
+      );
+      expect(find.textContaining(' · '), findsNothing);
+      expect(find.text('Al-Minshawi'), findsOneWidget);
+    });
+
+    testWidgets('shell dock play/pause is flat icon not filled circle', (
+      tester,
+    ) async {
+      final tokens = TilawaDesignTokens.light();
+      await tester.pumpWidget(
+        _themed(
+          SizedBox(
+            height: tokens.playerCollapsedHeight,
+            width: 360,
+            child: TilawaMediaPlayerBar(
+              layoutWidth: 360,
+              title: 'Surah Al-Baqarah',
+              subtitle: 'Al-Minshawi',
+              progress: 0.35,
+              isPlaying: false,
+              canGoPrevious: true,
+              canGoNext: true,
+              isSleepTimerEnabled: false,
+              shellDockLayout: true,
+            ),
+          ),
+        ),
+      );
+
+      final pauseButton = find.byTooltip('Play');
+      expect(pauseButton, findsOneWidget);
+      expect(
+        find.ancestor(
+          of: pauseButton,
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is Container &&
+                widget.decoration is BoxDecoration &&
+                (widget.decoration! as BoxDecoration).shape == BoxShape.circle,
+          ),
+        ),
+        findsNothing,
+      );
+
+      final icon = tester.widget<Icon>(
+        find.descendant(of: pauseButton, matching: find.byType(Icon)),
+      );
+      expect(icon.size, tokens.iconSizeLarge);
+      expect(
+        icon.color,
+        Theme.of(
+          tester.element(find.byType(TilawaMediaPlayerBar)),
+        ).colorScheme.onSurface,
+      );
+    });
+
     testWidgets('shell pill layout fits 56dp collapsed height', (tester) async {
       final tokens = TilawaDesignTokens.light();
       await tester.pumpWidget(

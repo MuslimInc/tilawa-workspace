@@ -670,9 +670,9 @@ void main() {
         tokens.phoneBottomNavIconOnlyLayoutHeight(TextScaler.linear(1)),
         closeTo(48.0, 0.05),
       );
-      expect(tokens.bottomNavHorizontalMargin, 16.0);
+      expect(tokens.bottomNavHorizontalMargin, 0.0);
       expect(tokens.bottomNavThumbSideMargin, 16.0);
-      expect(tokens.bottomNavBottomLift, 4.0);
+      expect(tokens.bottomNavBottomLift, 0.0);
       expect(tokens.navButtonMinHeight, 52.0);
       expect(tokens.bottomNavBackgroundColor, isA<Color>());
       expect(
@@ -699,11 +699,9 @@ void main() {
       expect(
         tokens.phoneBottomNavPaintedHeight(textScaler, systemInset),
         closeTo(
-          tokens.bottomNavVerticalMargin +
-              (2 * tokens.bottomNavInternalPadding) +
+          (2 * tokens.bottomNavInternalPadding) +
               tokens.phoneBottomNavLayoutHeight(textScaler) +
-              systemInset +
-              tokens.bottomNavBottomLift,
+              systemInset,
           0.05,
         ),
       );
@@ -731,9 +729,10 @@ void main() {
       final tokens = TilawaAdaptiveShellTokens.fromColorScheme(scheme);
 
       expect(tokens.bottomNavBackgroundColor, isA<Color>());
-      expect(tokens.bottomNavShadowOpacity, 0.04);
-      expect(tokens.bottomNavShadowBlur, 8);
-      expect(tokens.bottomNavShadowOffset, const Offset(0, 1));
+      expect(tokens.bottomNavShadowOpacity, 0);
+      expect(tokens.bottomNavShadowBlur, 0);
+      expect(tokens.bottomNavShadowOffset, Offset.zero);
+      expect(tokens.bottomNavBackgroundColor, scheme.surface);
       expect(
         tokens.navButtonSelectedBackgroundColor,
         scheme.primaryContainer,
@@ -812,9 +811,10 @@ void main() {
         tokens.bottomNavBackgroundColor,
         isA<Color>(),
       );
-      expect(tokens.bottomNavShadowOpacity, 0.06);
-      expect(tokens.bottomNavShadowBlur, 10);
-      expect(tokens.bottomNavShadowOffset, const Offset(0, 1));
+      expect(tokens.bottomNavShadowOpacity, 0);
+      expect(tokens.bottomNavShadowBlur, 0);
+      expect(tokens.bottomNavShadowOffset, Offset.zero);
+      expect(tokens.bottomNavBackgroundColor, scheme.surface);
       expect(
         tokens.bottomNavOutlineColor,
         scheme.outlineVariant.withValues(alpha: 0.12),
@@ -1149,7 +1149,16 @@ void main() {
         tokens.travelDestinationHeaderTints,
         AppColors.homeTravelDestinationHeaderTints,
       );
+      expect(tokens.headerWaveAmplitude, 14);
+      expect(
+        tokens.featureCategoryTileTints,
+        AppColors.homeFeatureCategoryTileTints,
+      );
       expect(tokens.destinationHeaderTint(0), AppColors.tripGlideCanvas);
+      expect(
+        tokens.featureCategoryTileTint(0),
+        AppColors.tripGlideCanvasElevated,
+      );
       expect(
         tokens.destinationHeaderTint(1),
         AppColors.tripGlideCanvasElevated,
@@ -1207,11 +1216,16 @@ void main() {
     test('dusk and night palettes use dedicated AppColors stops', () {
       final dusk = TilawaHomeNextPrayerHeroTokens.dusk();
       final night = TilawaHomeNextPrayerHeroTokens.night();
+      final preDawn = TilawaHomeNextPrayerHeroTokens.preDawn();
 
       expect(dusk.gradientTopStart, AppColors.homeNextPrayerGradientDuskTop);
       expect(
         night.gradientBottomEnd,
         AppColors.homeNextPrayerGradientNightBottom,
+      );
+      expect(
+        preDawn.gradientTopStart,
+        AppColors.homeNextPrayerGradientPreDawnTop,
       );
     });
   });

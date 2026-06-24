@@ -25,6 +25,11 @@ export interface ModerationGateway {
     action: UserModerationAction,
     reason?: string,
   ): Promise<void>;
+
+  setUserTeacherApplicationAccess(
+    userId: string,
+    canApplyAsTeacher: boolean | null,
+  ): Promise<void>;
 }
 
 export const MODERATION_GATEWAY = new InjectionToken<ModerationGateway>(

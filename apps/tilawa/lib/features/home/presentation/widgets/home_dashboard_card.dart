@@ -56,8 +56,6 @@ class HomeDashboardCard extends StatelessWidget {
                 borderWidth: 0,
                 surface: surface,
                 onTap: onTap,
-                splashColor: splashColor,
-                highlightColor: highlightColor,
                 expandHeight: stretchVertically,
                 child: content,
               )
@@ -68,8 +66,6 @@ class HomeDashboardCard extends StatelessWidget {
                 borderWidth: 0,
                 surface: surface,
                 onTap: onTap,
-                splashColor: splashColor ?? cardTokens.splashColor,
-                highlightColor: highlightColor ?? cardTokens.highlightColor,
                 expandHeight: stretchVertically,
                 child: DecoratedBox(
                   decoration: BoxDecoration(

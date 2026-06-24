@@ -4,7 +4,12 @@ import {
   ListTeachersUseCase,
   ModerateTeacherProfileUseCase,
 } from '../../domain/usecases/teacher-profile.usecases';
-import { TeacherProfileFilters } from '../../domain/entities/teacher-profile.entity';
+import { TeacherProfileFilters, TEACHER_PROFILE_DEFAULT_SORT } from '../../domain/entities/teacher-profile.entity';
+import {
+  DEFAULT_PAGE_SIZE,
+  SortRequest,
+  sortsEqual,
+} from '../../domain/entities/pagination.types';
 import { TeacherProfileModerationAction } from '../../domain/entities/moderation-action.enum';
 import {
   TeacherListItemVm,
@@ -24,25 +29,37 @@ export class TeachersFacade {
   private readonly nextCursor = signal<string | null>(null);
   private readonly hasMore = signal(false);
   private readonly actionLoading = signal(false);
+  private readonly listSort = signal<SortRequest>(TEACHER_PROFILE_DEFAULT_SORT);
 
   readonly items = this.listItems.asReadonly();
   readonly listLoadState = this.listState.asReadonly();
   readonly listErrorMessage = this.listError.asReadonly();
   readonly canLoadMore = this.hasMore.asReadonly();
   readonly isActionLoading = this.actionLoading.asReadonly();
+  readonly sort = this.listSort.asReadonly();
 
   async loadList(
     filters: TeacherProfileFilters,
-    cursor: string | null = null,
-    append = false,
+    options?: {
+      cursor?: string | null;
+      append?: boolean;
+      sort?: SortRequest;
+    },
   ): Promise<void> {
+    const sort = options?.sort ?? this.listSort();
+    const sortChanged = !sortsEqual(sort, this.listSort());
+    const append = options?.append === true && !sortChanged;
+    const cursor = append ? (options?.cursor ?? this.nextCursor()) : null;
+
+    this.listSort.set(sort);
     this.listState.set('loading');
     this.listError.set(null);
 
     try {
       const page = await this.listUseCase.execute(filters, {
-        pageSize: 25,
+        pageSize: DEFAULT_PAGE_SIZE,
         cursor,
+        sort,
       });
 
       const mapped = page.items.map((profile) =>
@@ -65,7 +82,18 @@ export class TeachersFacade {
     if (!this.hasMore() || !this.nextCursor()) {
       return;
     }
-    await this.loadList(filters, this.nextCursor(), true);
+    await this.loadList(filters, {
+      cursor: this.nextCursor(),
+      append: true,
+      sort: this.listSort(),
+    });
+  }
+
+  async changeSort(
+    filters: TeacherProfileFilters,
+    sort: SortRequest,
+  ): Promise<void> {
+    await this.loadList(filters, { sort, append: false, cursor: null });
   }
 
   async moderateProfile(

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
+import '../foundation/design_tokens.dart';
 import '../foundation/tilawa_icons.dart';
+import '../foundation/tilawa_interactive_surface.dart';
 
 /// A standardized tile for selection lists in bottom sheets and dialogs.
 ///
@@ -42,6 +44,7 @@ class TilawaSelectionTile extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final tokens = theme.componentTokens.settingsGroup;
+    final designTokens = theme.tokens;
 
     final textStyle = theme.textTheme.bodyLarge?.copyWith(
       fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
@@ -50,18 +53,20 @@ class TilawaSelectionTile extends StatelessWidget {
 
     return Column(
       children: [
-        Material(
-          color: isSelected
-              ? tokens.selectionTileSelectedBackgroundColor
-              : Colors.transparent,
-          child: InkWell(
-            onTap: enabled ? onTap : null,
-            child: Semantics(
-              // fix: Accessibility — single-select list item state (child of InkWell avoids merge bugs)
-              selected: isSelected,
-              button: true,
-              enabled: enabled,
-              label: title,
+        TilawaInteractiveSurface(
+          onTap: onTap,
+          enabled: enabled,
+          // fix: Accessibility — single-select list item state.
+          selected: isSelected,
+          semanticLabel: title,
+          child: ColoredBox(
+            color: isSelected
+                ? tokens.selectionTileSelectedBackgroundColor
+                : Colors.transparent,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: designTokens.minInteractiveDimension,
+              ),
               child: Padding(
                 padding: tokens.tileContentPadding,
                 child: Row(
@@ -72,7 +77,7 @@ class TilawaSelectionTile extends StatelessWidget {
                     if (isSelected)
                       Icon(
                         TilawaIcons.check,
-                        color: colorScheme.onSurfaceVariant,
+                        color: colorScheme.primary,
                         size: tokens.tileTrailingSize,
                       ),
                   ],

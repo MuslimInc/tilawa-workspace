@@ -131,35 +131,56 @@ abstract final class AppColors {
     tripGlideCanvasDusk,
   ];
 
+  /// Soft beige tints for Home feature category grid tiles (Talabat-style).
+  static const List<Color> homeFeatureCategoryTileTints = <Color>[
+    tripGlideCanvasElevated,
+    tripGlideCanvas,
+    tripGlideCanvasDusk,
+    tripGlideSurface,
+    tripGlideCanvasElevated,
+    tripGlideCanvas,
+    tripGlideCanvasDusk,
+    tripGlideSurface,
+  ];
+
   /// Icons on travel destination header bands.
   static const Color homeTravelDestinationIcon = primaryBrown;
 
   /// Section links (See all) on the travel Home dashboard.
   static const Color homeTravelSectionLink = primaryBrown;
 
-  /// Top-start stop for the Home hero **day** phase — flat neutral canvas.
-  static const Color homeNextPrayerGradientTop = tripGlideCanvas;
+  /// Day hero top — warm ivory parchment with a soft gold cast.
+  static const Color homeNextPrayerGradientTop = Color(0xFFFCF8F0);
 
-  /// Bottom-end stop for the Home hero **day** phase.
-  static const Color homeNextPrayerGradientBottom = tripGlideCanvas;
+  /// Day hero mid — subtle gold warmth between parchment and sage mist.
+  static const Color homeNextPrayerGradientDayMid = Color(0xFFF5ECD8);
 
-  /// Foreground on the Home hero neutral canvas (day/dusk/night).
+  /// Day hero bottom — airy emerald mist (visible, never flat white).
+  static const Color homeNextPrayerGradientBottom = Color(0xFFD4E8DE);
+
+  /// Pre-dawn hero top — cool mist ivory (Fajr, not forest night).
+  static const Color homeNextPrayerGradientPreDawnTop = Color(0xFFF4F7F5);
+
+  /// Pre-dawn hero bottom — blue-grey sage haze easing into day cream.
+  static const Color homeNextPrayerGradientPreDawnBottom = Color(0xFFDBE9E3);
+
+  /// Foreground on the Home hero day/dusk/pre-dawn gradients.
   static const Color homeNextPrayerGradientForeground = tripGlideInk;
 
-  /// Top-start stop for the Home hero **dusk** phase.
-  static const Color homeNextPrayerGradientDuskTop = tripGlideCanvasDusk;
+  /// Dusk hero top — luminous gold cream (Maghrib warmth).
+  static const Color homeNextPrayerGradientDuskTop = Color(0xFFF8E8CC);
 
-  /// Bottom-end stop for the Home hero **dusk** phase.
-  static const Color homeNextPrayerGradientDuskBottom = tripGlideCanvasDusk;
+  /// Dusk hero bottom — amber gold with restrained teal depth.
+  static const Color homeNextPrayerGradientDuskBottom = Color(0xFFE4CFA0);
 
-  /// Top-start stop for the Home hero **night** phase.
-  static const Color homeNextPrayerGradientNightTop = tripGlideCanvasNight;
+  /// Night hero top — muted teal twilight (Isha through midnight).
+  static const Color homeNextPrayerGradientNightTop = Color(0xFF5E857C);
 
-  /// Bottom-end stop for the Home hero **night** phase.
-  static const Color homeNextPrayerGradientNightBottom = tripGlideCanvasNight;
+  /// Night hero bottom — deeper teal emerald with a visible ramp.
+  static const Color homeNextPrayerGradientNightBottom = Color(0xFF3F635A);
 
-  /// Foreground on the Home hero **night** canvas.
-  static const Color homeNextPrayerGradientNightForeground = tripGlideInk;
+  /// Foreground on the Home hero night gradient — warm cream ink.
+  static const Color homeNextPrayerGradientNightForeground = Color(0xFFF5F0E6);
 
   /// Launch / splash canvas — warm brown brand ink.
   static const Color launchSplashBackground = primaryBrown;

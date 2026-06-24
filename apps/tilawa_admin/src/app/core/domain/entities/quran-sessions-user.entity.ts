@@ -23,6 +23,7 @@ export interface QuranSessionsUser {
   readonly cityName: string | null;
   readonly profileCompleted: boolean;
   readonly accountStatus: QuranSessionsAccountStatus;
+  readonly canApplyAsTeacher: boolean | null;
   readonly createdAt: Date | null;
   readonly updatedAt: Date | null;
 }
@@ -35,3 +36,13 @@ export interface QuranSessionsUserFilters {
   readonly accountStatus?: QuranSessionsAccountStatus | null;
   readonly search?: string | null;
 }
+
+export const QS_USER_DEFAULT_SORT = {
+  field: 'quranSessionsProfile.updatedAt',
+  direction: 'desc',
+} as const;
+
+export const QS_USER_SORT_FIELDS = [
+  'quranSessionsProfile.updatedAt',
+  'quranSessionsProfile.createdAt',
+] as const;

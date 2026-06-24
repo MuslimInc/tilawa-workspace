@@ -36,7 +36,7 @@ void main() {
 
       expect(
         _navIndexForTab(kAppShellSettingsTabIndex, destinations),
-        5,
+        3,
       );
     });
 
@@ -50,7 +50,7 @@ void main() {
       );
 
       expect(tabIndex, kAppShellSettingsTabIndex);
-      expect(_navIndexForTab(tabIndex!, destinations), 5);
+      expect(_navIndexForTab(tabIndex!, destinations), 3);
     });
 
     testWidgets('profile nav item shows circular selection background', (

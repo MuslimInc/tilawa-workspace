@@ -27,3 +27,10 @@ export interface SessionReportFilters {
   category: string | null;
   search: string | null;
 }
+
+export const SESSION_REPORT_DEFAULT_SORT = {
+  field: 'createdAt',
+  direction: 'desc',
+} as const;
+
+export const SESSION_REPORT_SORT_FIELDS = ['createdAt', 'updatedAt'] as const;

@@ -23,15 +23,22 @@ final class MySessionsSuccess extends MySessionsState {
   const MySessionsSuccess({
     required this.upcoming,
     required this.past,
+    this.pastNextCursor,
+    this.isLoadingMorePast = false,
+    this.loadMorePastFailure,
     this.cancellationInProgress,
     this.cancellationFailure,
     this.lastSubmittedReview,
     this.joinInProgress,
     this.joinFailure,
+    this.joinCompletedSessionId,
   });
 
   final List<QuranSession> upcoming;
   final List<QuranSession> past;
+  final String? pastNextCursor;
+  final bool isLoadingMorePast;
+  final QuranSessionsFailure? loadMorePastFailure;
 
   /// ID of the booking currently being cancelled; drives a per-row spinner.
   final String? cancellationInProgress;
@@ -48,20 +55,32 @@ final class MySessionsSuccess extends MySessionsState {
   /// Set when join fails so UI can show feedback.
   final QuranSessionsFailure? joinFailure;
 
+  /// Set after a successful join so UI can navigate to the call shell.
+  final String? joinCompletedSessionId;
+
   @override
   List<Object?> get props => [
     upcoming,
     past,
+    pastNextCursor,
+    isLoadingMorePast,
+    loadMorePastFailure,
     cancellationInProgress,
     cancellationFailure,
     lastSubmittedReview,
     joinInProgress,
     joinFailure,
+    joinCompletedSessionId,
   ];
 
   MySessionsSuccess copyWith({
     List<QuranSession>? upcoming,
     List<QuranSession>? past,
+    String? pastNextCursor,
+    bool clearPastNextCursor = false,
+    bool? isLoadingMorePast,
+    QuranSessionsFailure? loadMorePastFailure,
+    bool clearLoadMorePastFailure = false,
     String? cancellationInProgress,
     QuranSessionsFailure? cancellationFailure,
     bool clearCancellationFailure = false,
@@ -70,9 +89,18 @@ final class MySessionsSuccess extends MySessionsState {
     bool clearJoinInProgress = false,
     QuranSessionsFailure? joinFailure,
     bool clearJoinFailure = false,
+    String? joinCompletedSessionId,
+    bool clearJoinCompletedSessionId = false,
   }) => MySessionsSuccess(
     upcoming: upcoming ?? this.upcoming,
     past: past ?? this.past,
+    pastNextCursor: clearPastNextCursor
+        ? null
+        : pastNextCursor ?? this.pastNextCursor,
+    isLoadingMorePast: isLoadingMorePast ?? this.isLoadingMorePast,
+    loadMorePastFailure: clearLoadMorePastFailure
+        ? null
+        : loadMorePastFailure ?? this.loadMorePastFailure,
     cancellationInProgress:
         cancellationInProgress ?? this.cancellationInProgress,
     cancellationFailure: clearCancellationFailure
@@ -83,6 +111,9 @@ final class MySessionsSuccess extends MySessionsState {
         ? null
         : joinInProgress ?? this.joinInProgress,
     joinFailure: clearJoinFailure ? null : joinFailure ?? this.joinFailure,
+    joinCompletedSessionId: clearJoinCompletedSessionId
+        ? null
+        : joinCompletedSessionId ?? this.joinCompletedSessionId,
   );
 
   /// Returns a copy with cancellation fields cleared.
@@ -92,6 +123,7 @@ final class MySessionsSuccess extends MySessionsState {
     lastSubmittedReview: lastSubmittedReview,
     joinInProgress: joinInProgress,
     joinFailure: joinFailure,
+    joinCompletedSessionId: joinCompletedSessionId,
   );
 
   /// Returns a copy with join progress/failure cleared.
@@ -101,6 +133,7 @@ final class MySessionsSuccess extends MySessionsState {
     cancellationInProgress: cancellationInProgress,
     cancellationFailure: cancellationFailure,
     lastSubmittedReview: lastSubmittedReview,
+    joinCompletedSessionId: joinCompletedSessionId,
   );
 }
 

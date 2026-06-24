@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../domain/policies/session_mode_policy.dart';
 import '../../../domain/entities/quran_booking.dart';
 import '../../../domain/entities/session_booking_outcome.dart';
 import '../../../domain/entities/session_call_type.dart';
@@ -32,13 +33,18 @@ final class BookingSelecting extends BookingState {
     required this.teacherId,
     required this.availableSlots,
     this.selectedSlot,
-    this.selectedCallType = SessionCallType.externalMeeting,
+    this.selectedCallType = SessionCallType.voiceCall,
+    this.teacherExternalMeetingUrl,
   });
 
   final String teacherId;
   final List<TeacherAvailability> availableSlots;
   final TeacherAvailability? selectedSlot;
   final SessionCallType selectedCallType;
+  final String? teacherExternalMeetingUrl;
+
+  bool get hasExternalMeetingUrl =>
+      SessionModePolicy.hasExternalMeetingUrl(teacherExternalMeetingUrl);
 
   bool get canSubmit => selectedSlot != null;
 
@@ -48,17 +54,21 @@ final class BookingSelecting extends BookingState {
     availableSlots,
     selectedSlot,
     selectedCallType,
+    teacherExternalMeetingUrl,
   ];
 
   BookingSelecting copyWith({
     List<TeacherAvailability>? availableSlots,
     TeacherAvailability? selectedSlot,
     SessionCallType? selectedCallType,
+    String? teacherExternalMeetingUrl,
   }) => BookingSelecting(
     teacherId: teacherId,
     availableSlots: availableSlots ?? this.availableSlots,
     selectedSlot: selectedSlot ?? this.selectedSlot,
     selectedCallType: selectedCallType ?? this.selectedCallType,
+    teacherExternalMeetingUrl:
+        teacherExternalMeetingUrl ?? this.teacherExternalMeetingUrl,
   );
 }
 

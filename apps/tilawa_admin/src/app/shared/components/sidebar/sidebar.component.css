@@ -1,0 +1,181 @@
+:host {
+  display: block;
+  width: var(--tilawa-sidebar-width);
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.tilawa-sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--tilawa-sidebar-bg);
+  color: var(--tilawa-sidebar-ink);
+  border-inline-end: 1px solid var(--tilawa-sidebar-border);
+}
+
+.tilawa-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  height: var(--tilawa-header-height);
+  padding: 0 1rem;
+  border-bottom: 1px solid var(--tilawa-sidebar-border);
+}
+
+.tilawa-sidebar-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--tilawa-radius-sm);
+  background-color: var(--tilawa-primary);
+  color: var(--tilawa-on-primary);
+}
+
+.tilawa-sidebar-logo svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.tilawa-sidebar-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.tilawa-sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.25rem 0.75rem;
+}
+
+.tilawa-sidebar-section {
+  margin: 0 0.5rem 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tilawa-sidebar-muted);
+}
+
+.tilawa-sidebar-link,
+.tilawa-sidebar-sublink {
+  display: flex;
+  align-items: center;
+  padding: 0.625rem 0.75rem;
+  margin-bottom: 0.125rem;
+  border-radius: var(--tilawa-radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--tilawa-sidebar-muted);
+  text-decoration: none;
+  border-inline-start: 3px solid transparent;
+  transition:
+    background-color var(--tilawa-duration-fast) ease,
+    color var(--tilawa-duration-fast) ease,
+    border-color var(--tilawa-duration-fast) ease;
+}
+
+.tilawa-sidebar-sublink {
+  padding-inline-start: 1.25rem;
+  font-size: 0.8125rem;
+}
+
+.tilawa-sidebar-link:hover,
+.tilawa-sidebar-sublink:hover {
+  color: var(--tilawa-sidebar-ink);
+  background-color: rgb(255 255 255 / 0.04);
+}
+
+.tilawa-sidebar-link.is-active,
+.tilawa-sidebar-sublink.is-active {
+  color: var(--tilawa-sidebar-ink);
+  background-color: var(--tilawa-sidebar-active);
+  border-inline-start-color: var(--tilawa-primary);
+}
+
+.tilawa-sidebar-group {
+  margin-top: 1rem;
+}
+
+.tilawa-sidebar-group-toggle {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  background: none;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tilawa-sidebar-muted);
+  cursor: pointer;
+}
+
+.tilawa-sidebar-subnav {
+  margin-top: 0.25rem;
+}
+
+.tilawa-sidebar-footer {
+  padding: 1rem;
+  border-top: 1px solid var(--tilawa-sidebar-border);
+}
+
+.tilawa-sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.tilawa-sidebar-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  background-color: var(--tilawa-primary);
+  color: var(--tilawa-on-primary);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.tilawa-sidebar-user-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.tilawa-sidebar-user-email {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tilawa-sidebar-signout {
+  margin-top: 0.125rem;
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: 0.75rem;
+  color: var(--tilawa-sidebar-muted);
+  cursor: pointer;
+  text-align: start;
+}
+
+.tilawa-sidebar-signout:hover {
+  color: var(--tilawa-sidebar-ink);
+}
+
+.tilawa-sidebar-signout:focus-visible {
+  outline: 2px solid var(--tilawa-primary);
+  outline-offset: 2px;
+  border-radius: 2px;
+}

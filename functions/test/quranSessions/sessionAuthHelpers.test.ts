@@ -73,6 +73,40 @@ test("resolveActorRole returns student for booking student", () => {
   );
 });
 
+test("resolveActorRole returns teacher when teacherUserId differs from profile id", () => {
+  assert.equal(
+    resolveActorRole(authRequest("auth_teacher_uid"), "teacher", {
+      studentId: "student_1",
+      teacherId: "profile_doc_id",
+    }, "auth_teacher_uid"),
+    "teacher",
+  );
+});
+
+test("resolveActorRole rejects teacher when profile id used instead of auth uid", () => {
+  assert.throws(
+    () =>
+      resolveActorRole(authRequest("auth_teacher_uid"), "teacher", {
+        studentId: "student_1",
+        teacherId: "profile_doc_id",
+      }),
+    (error: { code?: string }) => error.code === "permission-denied",
+  );
+});
+
+test("requireParticipantOrAdmin returns teacher actor with teacherUserId", () => {
+  const result = requireParticipantOrAdmin(
+    authRequest("auth_teacher_uid"),
+    {
+      studentId: "student_1",
+      teacherId: "profile_doc_id",
+    },
+    "auth_teacher_uid",
+  );
+
+  assert.deepEqual(result, { uid: "auth_teacher_uid", actor: "teacher" });
+});
+
 test("resolveActorRole returns teacher for booking teacher", () => {
   assert.equal(
     resolveActorRole(authRequest("teacher_1"), "teacher", {

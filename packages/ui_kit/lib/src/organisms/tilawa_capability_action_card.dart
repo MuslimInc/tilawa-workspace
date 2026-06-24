@@ -7,6 +7,7 @@ import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
 import '../foundation/semantic_tints.dart';
 import '../foundation/tilawa_icons.dart';
+import '../foundation/tilawa_interactive_surface.dart';
 import '../molecules/tilawa_verified_teacher_badge.dart';
 
 /// Premium capability entry card for approved roles and elevated settings CTAs.
@@ -439,12 +440,13 @@ class _CapabilityActionCardLayoutMetrics {
     final double leadingExtent =
         cardTokens.leadingIconSize + iconBoxTokens.padding * 2;
 
+    // Row uses [spacing] between leading, copy, and trailing — two gaps.
     return math.max(
       0,
       bodyWidth -
           contentPadding.horizontal -
           leadingExtent -
-          cardTokens.rowGap -
+          (cardTokens.rowGap * 2) -
           cardTokens.trailingIconSize,
     );
   }
@@ -596,6 +598,9 @@ class _CapabilityActionCardFrame extends StatelessWidget {
       resolvedContentPadding.vertical + bodyHeight,
     );
 
+    // Material stays for the rounded fill + clip (the gradient uses [Ink],
+    // which needs a Material ancestor). Tap handling moves to the shared
+    // interaction primitive wrapping the whole card below.
     final Widget surface = Material(
       color: useGradient ? null : colorScheme.surface,
       elevation: 0,
@@ -608,27 +613,13 @@ class _CapabilityActionCardFrame extends StatelessWidget {
         ),
       ),
       clipBehavior: Clip.antiAlias,
-      child: onTap == null
-          ? _CapabilityActionCardSurfaceFill(
-              useGradient: useGradient,
-              borderRadius: borderRadius,
-              cardTokens: cardTokens,
-              minHeight: resolvedBodyMinHeight,
-              child: child,
-            )
-          : InkWell(
-              onTap: onTap,
-              borderRadius: borderRadius,
-              splashColor: cardTokens.splashColor,
-              highlightColor: cardTokens.highlightColor,
-              child: _CapabilityActionCardSurfaceFill(
-                useGradient: useGradient,
-                borderRadius: borderRadius,
-                cardTokens: cardTokens,
-                minHeight: resolvedBodyMinHeight,
-                child: child,
-              ),
-            ),
+      child: _CapabilityActionCardSurfaceFill(
+        useGradient: useGradient,
+        borderRadius: borderRadius,
+        cardTokens: cardTokens,
+        minHeight: resolvedBodyMinHeight,
+        child: child,
+      ),
     );
 
     final Widget framed = SizedBox(
@@ -650,13 +641,25 @@ class _CapabilityActionCardFrame extends StatelessWidget {
       ),
     );
 
+    // Interactive cards route the whole frame (surface + shadow) through the
+    // kit's interaction primitive: press-scale, focus ring, and haptic — no
+    // ink ripple. The outer Semantics still owns the button role + label.
+    final Widget interactive = onTap == null
+        ? framed
+        : TilawaInteractiveSurface(
+            onTap: onTap,
+            button: false,
+            borderRadius: borderRadius,
+            child: framed,
+          );
+
     return Padding(
       padding: resolvedMargin,
       child: Semantics(
         button: isButton,
         label: semanticLabel,
         liveRegion: !isButton,
-        child: isButton ? framed : ExcludeSemantics(child: framed),
+        child: isButton ? interactive : ExcludeSemantics(child: framed),
       ),
     );
   }

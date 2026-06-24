@@ -12,10 +12,12 @@ import {
 } from "./idempotencyService";
 import { recordTerminalTransition } from "./metricsAggregationService";
 import { enqueueSessionNotification } from "./notificationOutboxService";
+import { resolveTeacherProfileUserId } from "./teacherProfileUserId";
 import { isAdmin, requireAuthenticatedUid, requireValidSessionEpochUnlessAdmin, resolveActorRole } from "./sessionAuth";
 import { cancelActionForRole, validateTransition } from "./sessionLifecycleGuard";
 import type { LifecycleStatus } from "./sessionLifecycleService";
 import type { ActorRole } from "./sessionLifecycleGuard";
+import { sessionCallableHttpsOptions } from "./sessionCallableOptions";
 
 interface CancelSessionBookingRequest {
   bookingId: string;
@@ -25,7 +27,7 @@ interface CancelSessionBookingRequest {
 }
 
 export const cancelSessionBooking = onCall(
-  { enforceAppCheck: false },
+  sessionCallableHttpsOptions,
   async (request) => {
     const uid = requireAuthenticatedUid(request);
     await requireValidSessionEpochUnlessAdmin(request, uid);
@@ -50,9 +52,13 @@ export const cancelSessionBooking = onCall(
     if (claimedRole === "admin" && !isAdmin(request)) {
       throw new HttpsError("permission-denied", "Admin access required.");
     }
+    const teacherUserId = await resolveTeacherProfileUserId(
+      db,
+      participants.teacherId,
+    );
     const actor = isAdmin(request) && claimedRole === "admin"
       ? "admin"
-      : resolveActorRole(request, claimedRole, participants);
+      : resolveActorRole(request, claimedRole, participants, teacherUserId);
     const action = cancelActionForRole(actor);
 
     const operationKey = buildOperationKey(
@@ -146,7 +152,10 @@ export const cancelSessionBooking = onCall(
         sessionId: result.sessionId,
         aggregateId: data.bookingId,
         kind: "cancellation",
-        recipientUserIds: [result.teacherId, result.studentId],
+        recipientUserIds: [
+          await resolveTeacherProfileUserId(db, result.teacherId),
+          result.studentId,
+        ],
         payload: { reason: data.reason, actorRole: actor },
       });
     }

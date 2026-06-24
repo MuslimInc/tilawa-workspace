@@ -1,4 +1,4 @@
-import { onCall, HttpsError } from "firebase-functions/v2/https";
+import { onCall, HttpsError, type CallableRequest } from "firebase-functions/v2/https";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
 
 import { appendAuditEvent } from "./aggregateWriteService";
@@ -22,11 +22,18 @@ import {
 import { assertPaidBookingAllowed } from "./paymentProviderStatus";
 import { requireAuthenticatedUid, requireValidSessionEpoch } from "./sessionAuth";
 import { validateTransition } from "./sessionLifecycleGuard";
-import { resolveMeetingLink } from "./meetingLinkResolver";
+import {
+  assertValidCallType,
+  mapCallProviderResolverError,
+  resolveCallProviderForBooking,
+} from "./callProviderResolver";
+import { buildIndividualParticipants } from "./sessionParticipants";
+import { resolveTeacherProfileUserId } from "./teacherProfileUserId";
 import {
   legacyStatusForLifecycle,
   nowServer,
 } from "./sessionLifecycleService";
+import { sessionCallableHttpsOptions } from "./sessionCallableOptions";
 
 interface CreateSessionBookingRequest {
   teacherId: string;
@@ -34,6 +41,8 @@ interface CreateSessionBookingRequest {
   startsAt: string;
   endsAt: string;
   callType: "externalMeeting" | "voiceCall" | "videoCall";
+  bookingType?: "individual" | "group";
+  callProvider?: string;
   pricingType: "free" | "fixedPerSession" | "subscription";
   paymentReference?: string;
   studentNote?: string;
@@ -58,14 +67,105 @@ function defaultCreateBookingIdempotencyKey(
   return `${studentId}:${slotId}:${startsAt}`;
 }
 
+function parseBookingTimestamp(
+  raw: string,
+  field: "startsAt" | "endsAt",
+): Timestamp {
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) {
+    throw new HttpsError(
+      "invalid-argument",
+      `Invalid ${field}.`,
+      { code: "invalid_timestamp", field },
+    );
+  }
+  try {
+    return Timestamp.fromDate(date);
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    throw new HttpsError(
+      "invalid-argument",
+      `Invalid ${field}.`,
+      { code: "invalid_timestamp", field, reason },
+    );
+  }
+}
+
+async function runPostBookingSideEffects(
+  db: FirebaseFirestore.Firestore,
+  input: {
+    teacherProfileId: string;
+    studentId: string;
+    sessionId: string;
+    bookingId: string;
+  },
+): Promise<void> {
+  try {
+    const teacherUserId = await resolveTeacherProfileUserId(
+      db,
+      input.teacherProfileId,
+    );
+    await recordTerminalTransition(db, {
+      type: "booking_confirmed",
+      teacherId: teacherUserId,
+      studentId: input.studentId,
+    });
+    await enqueueSessionNotification(db, {
+      sessionId: input.sessionId,
+      aggregateId: input.bookingId,
+      kind: "bookingConfirmed",
+      recipientUserIds: [teacherUserId, input.studentId],
+    });
+  } catch (error) {
+    console.error(
+      `createSessionBooking post-effects failed bookingId=${input.bookingId}:`,
+      error,
+    );
+  }
+}
+
 export const createSessionBooking = onCall(
-  { enforceAppCheck: false },
+  sessionCallableHttpsOptions,
   async (request) => {
-    const studentId = requireAuthenticatedUid(request);
+    try {
+      return await handleCreateSessionBooking(request);
+    } catch (error) {
+      if (error instanceof HttpsError) {
+        throw error;
+      }
+      console.error("createSessionBooking unhandled error:", error);
+      throw new HttpsError("internal", "Booking failed.");
+    }
+  },
+);
+
+async function handleCreateSessionBooking(
+  request: CallableRequest<unknown>,
+): Promise<CreateBookingResult> {
+  const studentId = requireAuthenticatedUid(request);
     await requireValidSessionEpoch(request, studentId);
     const data = request.data as CreateSessionBookingRequest;
     if (!data.teacherId || !data.slotId || !data.startsAt || !data.endsAt) {
       throw new HttpsError("invalid-argument", "Missing required fields.");
+    }
+
+    const bookingType = data.bookingType ?? "individual";
+    if (bookingType !== "individual") {
+      throw lifecycleError(
+        "group_booking_not_supported",
+        "Only individual 1:1 bookings are supported in Free Beta.",
+        { bookingType },
+      );
+    }
+
+    try {
+      assertValidCallType(data.callType);
+    } catch {
+      throw lifecycleError(
+        "unsupported_session_mode",
+        "Unsupported session mode.",
+        { callType: data.callType },
+      );
     }
 
     const db = getFirestore();
@@ -126,8 +226,8 @@ export const createSessionBooking = onCall(
         action: "create_booking",
       },
       async (tx) => {
-        const startsAt = Timestamp.fromDate(new Date(data.startsAt));
-        const endsAt = Timestamp.fromDate(new Date(data.endsAt));
+        const startsAt = parseBookingTimestamp(data.startsAt, "startsAt");
+        const endsAt = parseBookingTimestamp(data.endsAt, "endsAt");
         const bookingRef = db.collection("quran_bookings").doc();
         const sessionRef = db.collection("quran_sessions").doc();
         const lockRef = db.collection("quran_slot_locks").doc(data.slotId);
@@ -157,18 +257,36 @@ export const createSessionBooking = onCall(
         const teacherSnap = await tx.get(
           db.collection("quran_teacher_profiles").doc(data.teacherId),
         );
-        const meetingLink = resolveMeetingLink(
-          data.callType,
-          teacherSnap.data() ?? {},
-          platformConfig,
-        );
-        if (data.callType === "externalMeeting" && meetingLink == null) {
+        const teacherData = teacherSnap.data() ?? {};
+        let resolvedCall;
+        try {
+          resolvedCall = resolveCallProviderForBooking({
+            callType: data.callType,
+            sessionId: sessionRef.id,
+            teacherProfile: teacherData,
+            platformConfig,
+            clientCallProvider: data.callProvider,
+          });
+        } catch (error) {
+          mapCallProviderResolverError(error, data.callProvider);
+        }
+
+        if (
+          data.callType === "externalMeeting" &&
+          resolvedCall.meetingLink == null
+        ) {
           throw lifecycleError(
             "meeting_link_required",
             "Teacher has no external meeting URL configured.",
             { teacherId: data.teacherId },
           );
         }
+
+        const participants = buildIndividualParticipants(
+          data.teacherId,
+          studentId,
+        );
+        const meetingLink = resolvedCall.meetingLink;
 
         tx.set(lockRef, {
           lockId: data.slotId,
@@ -192,7 +310,9 @@ export const createSessionBooking = onCall(
           slotId: data.slotId,
           startsAt,
           endsAt,
+          bookingType,
           callType: data.callType,
+          callProvider: resolvedCall.callProvider,
           pricingType: serverPricingType,
           priceAmount: pricing.amount,
           priceCurrency: pricing.currencyCode,
@@ -215,7 +335,12 @@ export const createSessionBooking = onCall(
           teacherId: data.teacherId,
           startsAt,
           endsAt,
+          bookingType,
           callType: data.callType,
+          callProvider: resolvedCall.callProvider,
+          providerSessionId: resolvedCall.providerSessionId,
+          joinToken: resolvedCall.joinToken,
+          participants,
           lifecycleStatus: sessionLifecycleStatus,
           status: legacyStatusForLifecycle(sessionLifecycleStatus),
           meetingLink,
@@ -302,19 +427,13 @@ export const createSessionBooking = onCall(
     );
 
     if (!replayed && result.lifecycleStatus === "scheduled") {
-      await recordTerminalTransition(db, {
-        type: "booking_confirmed",
-        teacherId: data.teacherId,
+      await runPostBookingSideEffects(db, {
+        teacherProfileId: data.teacherId,
         studentId,
-      });
-      await enqueueSessionNotification(db, {
         sessionId: result.sessionId,
-        aggregateId: result.bookingId,
-        kind: "bookingConfirmed",
-        recipientUserIds: [data.teacherId, studentId],
+        bookingId: result.bookingId,
       });
     }
 
-    return result;
-  },
-);
+  return result;
+}

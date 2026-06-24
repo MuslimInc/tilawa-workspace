@@ -55,5 +55,18 @@ class _TilawaOffsetFabLocation extends FloatingActionButtonLocation {
   }
 
   @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is _TilawaOffsetFabLocation &&
+        other.base == base &&
+        other.bottomOffset == bottomOffset;
+  }
+
+  @override
+  int get hashCode => Object.hash(base, bottomOffset);
+
+  @override
   String toString() => 'TilawaFabLocation(offset: $bottomOffset)';
 }

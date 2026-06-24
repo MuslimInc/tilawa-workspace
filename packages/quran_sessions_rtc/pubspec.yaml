@@ -1,0 +1,32 @@
+name: quran_sessions_rtc
+resolution: workspace
+description: >
+  RTC SDK implementations for Quran Sessions — Agora and WebRTC behind
+  [SessionCallProvider]. Keeps SDK deps out of quran_sessions domain package.
+version: 0.0.1
+publish_to: none
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  agora_rtc_engine: ^6.6.3
+  flutter_webrtc: ^1.5.2
+  permission_handler: ^12.0.1
+  quran_sessions:
+    path: ../quran_sessions
+  tilawa_ui_kit:
+    path: ../ui_kit
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+  checks: ^0.3.0
+  permission_handler_platform_interface: ^4.3.0
+
+flutter:
+  uses-material-design: true

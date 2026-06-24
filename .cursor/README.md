@@ -10,6 +10,7 @@ Rules in `.cursor/rules/` apply when this workspace is open in Cursor.
 | [test-guard.mdc](rules/test-guard.mdc) | `**/*_test.dart`, agent-requested | Guard pass for changed test code (mock abuse, bloat, implementation-detail asserts) |
 | [docs-guard.mdc](rules/docs-guard.mdc) | `**/*.md`, agent-requested | Guard pass for changed docs (verify symbols/samples vs source, catch drift) |
 | [tilawa-ui-ux-guard.mdc](rules/tilawa-ui-ux-guard.mdc) | `apps/tilawa/.../presentation/**`, agent-requested | Guard pass for UI/UX (hierarchy, flows, brand, placement, a11y) |
+| [quran-sessions-performance-first.mdc](rules/quran-sessions-performance-first.mdc) | `packages/quran_sessions/**`, `quran_sessions_rtc/**`, app feature, `functions/src/quranSessions/**` | Performance → UX → UI gate for Quran Sessions |
 
 **Senior Flutter persona:** skill [`tilawa-senior-flutter`](../.agents/skills/tilawa-senior-flutter/SKILL.md)
 (**TilawaAISeniorFlutter**) — clean architecture, SOLID, and verifiable feature

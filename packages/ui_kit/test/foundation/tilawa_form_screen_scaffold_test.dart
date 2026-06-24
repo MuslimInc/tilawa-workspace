@@ -31,17 +31,46 @@ void main() {
         ),
       );
 
-      final List<Padding> paddings = tester
-          .widgetList<Padding>(
-            find.ancestor(
-              of: find.byKey(actionKey),
-              matching: find.byType(Padding),
-            ),
-          )
-          .toList();
-      final EdgeInsets padding = paddings.first.padding as EdgeInsets;
+      final AnimatedPadding animatedPadding = tester.widget<AnimatedPadding>(
+        find.ancestor(
+          of: find.byKey(actionKey),
+          matching: find.byType(AnimatedPadding),
+        ),
+      );
 
-      expect(padding.bottom, tokens.spaceHuge);
+      expect(
+        (animatedPadding.padding as EdgeInsets).bottom,
+        tokens.spaceHuge,
+      );
+    });
+
+    testWidgets('uses tokenized horizontal inset for primary actions', (
+      tester,
+    ) async {
+      const Key actionKey = Key('action');
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: Scaffold(
+            body: TilawaBottomActionArea(
+              child: const SizedBox(key: actionKey, height: 48),
+            ),
+          ),
+        ),
+      );
+
+      final AnimatedPadding animatedPadding = tester.widget<AnimatedPadding>(
+        find.ancestor(
+          of: find.byKey(actionKey),
+          matching: find.byType(AnimatedPadding),
+        ),
+      );
+
+      final EdgeInsets padding = animatedPadding.padding as EdgeInsets;
+
+      expect(padding.left, tokens.bottomActionHorizontalInset);
+      expect(padding.right, tokens.bottomActionHorizontalInset);
     });
 
     testWidgets('renders a top border by default', (tester) async {
@@ -155,5 +184,224 @@ void main() {
 
       expect(resolved, tokens.spaceHuge);
     });
+
+    testWidgets(
+      'footer bottom padding stays token-sized when keyboard is open',
+      (tester) async {
+        const Key actionKey = Key('action');
+        const double keyboardInset = 300;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: theme,
+            home: Scaffold(
+              resizeToAvoidBottomInset: true,
+              body: MediaQuery(
+                data: const MediaQueryData(
+                  viewInsets: EdgeInsets.only(bottom: keyboardInset),
+                ),
+                child: TilawaFormScreenScaffold(
+                  body: const Text('Body'),
+                  footer: const SizedBox(key: actionKey, height: 48),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        final AnimatedPadding animatedPadding = tester.widget<AnimatedPadding>(
+          find.ancestor(
+            of: find.byKey(actionKey),
+            matching: find.byType(AnimatedPadding),
+          ),
+        );
+
+        final EdgeInsets padding = animatedPadding.padding as EdgeInsets;
+
+        expect(padding.bottom, tokens.spaceSmall);
+        expect(padding.bottom, lessThan(keyboardInset));
+      },
+    );
+
+    testWidgets('footer bottom padding animates while keyboard dismisses', (
+      tester,
+    ) async {
+      const Key actionKey = Key('action');
+      const double keyboardInset = 300;
+      late void Function({double? bottomInset}) setLayout;
+
+      EdgeInsets readFooterPadding() {
+        final AnimatedPadding animatedPadding = tester.widget<AnimatedPadding>(
+          find.ancestor(
+            of: find.byKey(actionKey),
+            matching: find.byType(AnimatedPadding),
+          ),
+        );
+        return animatedPadding.padding as EdgeInsets;
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: Scaffold(
+            resizeToAvoidBottomInset: false,
+            body: _KeyboardInsetHost(
+              initialBottomInset: keyboardInset,
+              builder: (setLayoutCallback) {
+                setLayout = setLayoutCallback;
+                return TilawaFormScreenScaffold(
+                  body: const Text('Body'),
+                  footer: const SizedBox(key: actionKey, height: 48),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(readFooterPadding().bottom, tokens.spaceSmall);
+
+      final double openTop = tester.getTopLeft(find.byKey(actionKey)).dy;
+
+      setLayout(bottomInset: 0);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 125));
+
+      final double midTop = tester.getTopLeft(find.byKey(actionKey)).dy;
+      expect(midTop, lessThan(openTop));
+
+      await tester.pump(const Duration(milliseconds: 125));
+
+      expect(readFooterPadding().bottom, tokens.spaceHuge);
+      expect(
+        tester.getTopLeft(find.byKey(actionKey)).dy,
+        lessThan(openTop),
+      );
+    });
+
+    testWidgets(
+      'footer dismiss uses live closed padding without second target bump',
+      (tester) async {
+        const Key actionKey = Key('action');
+        const double keyboardInset = 300;
+        const double homeIndicatorInset = 34;
+        late void Function({double? bottomInset, EdgeInsets? viewPadding})
+        setLayout;
+
+        double readFooterTarget() {
+          final BuildContext context = tester.element(find.byKey(actionKey));
+          return TilawaComfortableReachPadding.resolveClosed(
+            context,
+            kind: TilawaComfortableReachKind.screen,
+          );
+        }
+
+        double readFooterPaddingBottom() {
+          final AnimatedPadding animatedPadding = tester
+              .widget<AnimatedPadding>(
+                find.ancestor(
+                  of: find.byKey(actionKey),
+                  matching: find.byType(AnimatedPadding),
+                ),
+              );
+          return (animatedPadding.padding as EdgeInsets).bottom;
+        }
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: theme,
+            home: Scaffold(
+              resizeToAvoidBottomInset: false,
+              body: _KeyboardInsetHost(
+                initialBottomInset: keyboardInset,
+                initialViewPadding: EdgeInsets.zero,
+                builder: (setLayoutCallback) {
+                  setLayout = setLayoutCallback;
+                  return TilawaFormScreenScaffold(
+                    body: const Text('Body'),
+                    footer: const SizedBox(key: actionKey, height: 48),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        expect(readFooterPaddingBottom(), tokens.spaceSmall);
+
+        setLayout(
+          bottomInset: 0,
+          viewPadding: const EdgeInsets.only(bottom: homeIndicatorInset),
+        );
+        await tester.pump();
+
+        final double closedTarget = readFooterTarget();
+        expect(
+          closedTarget,
+          homeIndicatorInset + tokens.spaceExtraLarge,
+        );
+        expect(readFooterPaddingBottom(), closedTarget);
+
+        await tester.pump(const Duration(milliseconds: 250));
+
+        expect(readFooterPaddingBottom(), closedTarget);
+      },
+    );
   });
+}
+
+class _KeyboardInsetHost extends StatefulWidget {
+  const _KeyboardInsetHost({
+    required this.initialBottomInset,
+    this.initialViewPadding = EdgeInsets.zero,
+    required this.builder,
+  });
+
+  final double initialBottomInset;
+  final EdgeInsets initialViewPadding;
+  final Widget Function(
+    void Function({double? bottomInset, EdgeInsets? viewPadding}) setLayout,
+  )
+  builder;
+
+  @override
+  State<_KeyboardInsetHost> createState() => _KeyboardInsetHostState();
+}
+
+class _KeyboardInsetHostState extends State<_KeyboardInsetHost> {
+  late double _bottomInset;
+  late EdgeInsets _viewPadding;
+
+  @override
+  void initState() {
+    super.initState();
+    _bottomInset = widget.initialBottomInset;
+    _viewPadding = widget.initialViewPadding;
+  }
+
+  void setLayout({double? bottomInset, EdgeInsets? viewPadding}) {
+    setState(() {
+      if (bottomInset != null) {
+        _bottomInset = bottomInset;
+      }
+      if (viewPadding != null) {
+        _viewPadding = viewPadding;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MediaQuery(
+      data: MediaQueryData(
+        viewInsets: EdgeInsets.only(bottom: _bottomInset),
+        viewPadding: _viewPadding,
+        padding: _viewPadding,
+      ),
+      child: widget.builder(setLayout),
+    );
+  }
 }

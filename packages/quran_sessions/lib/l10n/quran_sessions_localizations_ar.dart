@@ -261,7 +261,7 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
 
   @override
   String get becomeTeacherCardSubtitle =>
-      'انضم إلى نخبة المعلمين المعتمدين على تلاوة';
+      'انضم إلى نخبة المعلمين المعتمدين على MeMuslim';
 
   @override
   String get teacherListTitle => 'ابحث عن معلم';
@@ -305,6 +305,165 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get callTypeVideo => 'مرئي';
 
   @override
+  String get sessionModeVoiceBetaNote =>
+      'النسخة التجريبية: الصوت يستخدم انضمامًا مؤقتًا حتى يتوفر الاتصال داخل التطبيق.';
+
+  @override
+  String get sessionModeVideoBetaNote =>
+      'النسخة التجريبية: الفيديو يستخدم انضمامًا مؤقتًا حتى يتوفر الاتصال داخل التطبيق.';
+
+  @override
+  String bookingVoiceVideoProviderNote(String provider) {
+    return 'المكالمات داخل التطبيق تستخدم $provider.';
+  }
+
+  @override
+  String get sessionModeVoiceDisabled =>
+      'الجلسات الصوتية غير متاحة بعد. اختر الرابط الخارجي.';
+
+  @override
+  String get sessionModeVideoDisabled =>
+      'الجلسات المرئية غير متاحة بعد. اختر الرابط الخارجي.';
+
+  @override
+  String get sessionModeExternalDisabled =>
+      'لم يضف المعلم رابط الاجتماع بعد. اختر الصوت أو الفيديو.';
+
+  @override
+  String get meetingLinkUnavailable =>
+      'لم يُعدّ المعلم رابط اجتماع للجلسات الخارجية بعد. اختر الصوت أو الفيديو، أو حاول لاحقًا.';
+
+  @override
+  String get callProviderUnavailable =>
+      'لا يمكن الانضمام إلى هذه الجلسة من التطبيق حاليًا.';
+
+  @override
+  String get callProviderAgoraNotConfigured =>
+      'مكالمات Agora داخل التطبيق غير مفعّلة في هذا الإصدار. أعد البناء بإعدادات Staging Agora (TILAWA_DISTRIBUTION=staging وTILAWA_LAUNCH_AGORA_APP_ID)، أو استخدم ملف التشغيل Tilawa (Staging Agora).';
+
+  @override
+  String rtcPermissionDenied(String permission) {
+    return 'يلزم الوصول إلى الميكروفون أو الكاميرا للانضمام. فعّل $permission من الإعدادات ثم أعد المحاولة.';
+  }
+
+  @override
+  String get rtcCallJoinFailed =>
+      'تعذّر الاتصال بمكالمة الصوت أو الفيديو. حاول مرة أخرى بعد قليل.';
+
+  @override
+  String get rtcCallJoinRejected =>
+      'تعذّر الانضمام إلى هذه المكالمة. اخرج من أي مكالمة مفتوحة لهذه الجلسة، انتظر لحظة، ثم حاول مجدداً.';
+
+  @override
+  String get rtcCallJoinInvalidToken =>
+      'انتهت صلاحية رابط المكالمة أو أنه غير صالح. اضغط انضمام مرة أخرى للحصول على اتصال جديد.';
+
+  @override
+  String get webrtcSignalingUnavailable =>
+      'مكالمات WebRTC داخل التطبيق غير متاحة بعد. اختر الصوت عبر Agora أو رابط اجتماع خارجي.';
+
+  @override
+  String get inAppCallShellTitle => 'مكالمة الجلسة';
+
+  @override
+  String get inAppCallShellBody =>
+      'أنت متصل بغرفة هذه الجلسة. أنهِ المكالمة عند انتهاء الدرس.';
+
+  @override
+  String get inAppCallShellEndCall => 'مغادرة المكالمة';
+
+  @override
+  String get inAppCallShellMute => 'كتم الصوت';
+
+  @override
+  String get inAppCallShellUnmute => 'تشغيل الصوت';
+
+  @override
+  String get inAppCallShellConnecting => 'جارٍ الاتصال…';
+
+  @override
+  String get inAppCallShellConnected => 'متصل';
+
+  @override
+  String get inAppCallShellWaitingForParticipant => 'في انتظار الطرف الآخر';
+
+  @override
+  String get inAppCallShellMockBetaBody =>
+      'معاينة تجريبية — لا يوجد صوت أو فيديو مباشر. احجز جلسة جديدة مع تفعيل Agora لتجربة مكالمة حقيقية.';
+
+  @override
+  String get inAppCallShellSpeaker => 'مكبر الصوت';
+
+  @override
+  String get inAppCallShellFlipCamera => 'قلب الكاميرا';
+
+  @override
+  String get inAppCallShellTurnVideoOn => 'تشغيل الكاميرا';
+
+  @override
+  String get inAppCallShellTurnVideoOff => 'إيقاف الكاميرا';
+
+  @override
+  String get inAppCallShellMicrophoneMuted => 'تم كتم الميكروفون';
+
+  @override
+  String get inAppCallShellMicrophoneUnmuted => 'تم تشغيل الميكروفون';
+
+  @override
+  String get inAppCallShellCameraOff => 'تم إيقاف الكاميرا';
+
+  @override
+  String get inAppCallShellCameraOn => 'تم تشغيل الكاميرا';
+
+  @override
+  String get inAppCallShellSwitchCameraBlocked =>
+      'لا يمكن تبديل الكاميرا أثناء إيقافها';
+
+  @override
+  String get inAppCallShellSpeakerOn => 'تم تشغيل السماعة';
+
+  @override
+  String get inAppCallShellSpeakerOff => 'تم إيقاف السماعة';
+
+  @override
+  String get inAppCallShellControlActionFailed =>
+      'تعذر تنفيذ الإجراء، حاول مرة أخرى';
+
+  @override
+  String get externalMeetingJoinTitle => 'الانضمام خارج MeMuslim؟';
+
+  @override
+  String get externalMeetingJoinBody =>
+      'ستغادر MeMuslim مؤقتًا للانضمام إلى جلستك عبر Google Meet أو Zoom أو المتصفح. يمكنك العودة هنا في أي وقت — تفاصيل جلستك تبقى مفتوحة.';
+
+  @override
+  String get externalMeetingJoinOpen => 'فتح';
+
+  @override
+  String get externalMeetingJoinCopy => 'نسخ الرابط';
+
+  @override
+  String get externalMeetingJoinLinkCopied => 'تم نسخ الرابط';
+
+  @override
+  String get externalMeetingJoinAgain => 'فتح الاجتماع مرة أخرى';
+
+  @override
+  String get externalMeetingLaunchFailed =>
+      'تعذّر فتح رابط الاجتماع. حاول مرة أخرى أو انسخ الرابط.';
+
+  @override
+  String get externalMeetingLinkCopied =>
+      'تم نسخ رابط الاجتماع. الصقه في المتصفح للانضمام.';
+
+  @override
+  String get groupBookingNotSupported =>
+      'الجلسات الجماعية غير متاحة في النسخة التجريبية.';
+
+  @override
+  String get unsupportedSessionMode => 'نوع الجلسة غير مدعوم.';
+
+  @override
   String get reviewSubmittedThanks => 'شكراً — تم إرسال تقييمك!';
 
   @override
@@ -319,6 +478,9 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String pastSessionsSection(int count) {
     return 'السابقة ($count)';
   }
+
+  @override
+  String get loadMorePastSessions => 'تحميل المزيد';
 
   @override
   String get noPastSessions => 'لا توجد جلسات سابقة';
@@ -378,6 +540,37 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
       'تم إرسال طلب إعادة الجدولة. بانتظار التأكيد.';
 
   @override
+  String get rescheduleAwaitingCounterparty =>
+      'بانتظار تأكيد الطرف الآخر للوقت الجديد.';
+
+  @override
+  String get reschedulePendingTitle => 'طلب إعادة جدولة';
+
+  @override
+  String reschedulePendingProposedTime(String dateTime) {
+    return 'الوقت المقترح: $dateTime';
+  }
+
+  @override
+  String reschedulePendingReason(String reason) {
+    return 'السبب: $reason';
+  }
+
+  @override
+  String get rescheduleAcceptAction => 'قبول الوقت الجديد';
+
+  @override
+  String get rescheduleRejectAction => 'الإبقاء على الوقت الحالي';
+
+  @override
+  String get rescheduleAcceptedToast =>
+      'تم قبول إعادة الجدولة وتحديث وقت الجلسة.';
+
+  @override
+  String get rescheduleRejectedToast =>
+      'تم رفض إعادة الجدولة والإبقاء على الوقت الأصلي.';
+
+  @override
   String get rescheduleAction => 'إعادة الجدولة';
 
   @override
@@ -388,6 +581,31 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
 
   @override
   String get sessionTimelineEmpty => 'لا يوجد نشاط مسجل بعد.';
+
+  @override
+  String get sessionTimelineLoadFailed =>
+      'تعذّر تحميل سجل النشاط. تحقق من اتصالك وحاول مرة أخرى.';
+
+  @override
+  String get sessionPendingRescheduleLoadFailed =>
+      'تعذّر تحميل طلب إعادة الجدولة المعلّق. حاول مرة أخرى بعد قليل.';
+
+  @override
+  String sessionLockedAtBookingNote(String callType, String callProvider) {
+    return 'نوع المكالمة ($callType) والمزوّد ($callProvider) حُدّدا عند الحجز. لتغييرهما، ألغِ الجلسة وأعد الحجز أو تواصل مع الدعم.';
+  }
+
+  @override
+  String get callProviderExternal => 'رابط خارجي';
+
+  @override
+  String get callProviderMock => 'داخل التطبيق (معاينة)';
+
+  @override
+  String get callProviderAgora => 'داخل التطبيق (Agora)';
+
+  @override
+  String get callProviderWebrtc => 'داخل التطبيق (WebRTC)';
 
   @override
   String sessionStatusLabel(String status) {
@@ -789,7 +1007,7 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get submittingApplication => 'جارٍ إرسال الطلب…';
 
   @override
-  String get becomeTeacherOnTilawa => 'أصبح محفظًا على تلاوة';
+  String get becomeTeacherOnTilawa => 'أصبح محفظًا على MeMuslim';
 
   @override
   String get becomeTeacherApplicationIntro =>
@@ -897,14 +1115,14 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
 
   @override
   String get applicationStatusPendingSubtitle =>
-      'يقوم فريق تلاوة بمراجعة طلبك. سنتواصل معك قريبًا.';
+      'يقوم فريق MeMuslim بمراجعة طلبك. سنتواصل معك قريبًا.';
 
   @override
   String get applicationStatusApprovedTitle => 'تهانينا! تمت الموافقة';
 
   @override
   String get applicationStatusApprovedSubtitle =>
-      'أصبحت محفظًا معتمدًا على منصة تلاوة.';
+      'أصبحت محفظًا معتمدًا على MeMuslim.';
 
   @override
   String get applicationStatusApprovedContinue => 'متابعة';
@@ -1085,6 +1303,33 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   @override
   String get teacherPublicNameHelper =>
       'الاسم الحقيقي / اسم المعلم الظاهر للطلاب في السوق. قد يختلف عن اسم حسابك.';
+
+  @override
+  String get teacherExternalMeetingUrlLabel => 'رابط الاجتماع الخارجي';
+
+  @override
+  String get teacherExternalMeetingUrlHint =>
+      'https://meet.google.com/your-room';
+
+  @override
+  String get teacherExternalMeetingUrlHelper =>
+      'الطلاب الذين يحجزون جلسات خارجية ينضمون عبر هذا الرابط الآمن (Google Meet أو Zoom أو Teams).';
+
+  @override
+  String get teacherExternalMeetingUrlSaved => 'تم حفظ رابط الاجتماع';
+
+  @override
+  String get teacherExternalMeetingUrlSave => 'حفظ رابط الاجتماع';
+
+  @override
+  String get teacherExternalMeetingUrlInvalid =>
+      'أدخل رابط اجتماع صالحًا يبدأ بـ https (Google Meet أو Zoom أو Teams).';
+
+  @override
+  String get teacherOffersExternalSessions => 'جلسات خارجية متاحة';
+
+  @override
+  String get sessionMeetingLinkLabel => 'رابط الاجتماع';
 
   @override
   String get teacherPublicNameRequired => 'الاسم الحقيقي للمعلم مطلوب.';
@@ -1297,4 +1542,147 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
 
   @override
   String get paymentCheckoutConfirm => 'تأكيد الدفع (تجريبي)';
+
+  @override
+  String get restrictionReasonFalseIdentity => 'بيانات هوية مزيفة';
+
+  @override
+  String get restrictionReasonPolicyViolation => 'مخالفة السياسات';
+
+  @override
+  String get restrictionReasonSafetyConcern => 'مخاوف تتعلق بالسلامة';
+
+  @override
+  String get restrictionReasonAbuseReport => 'بلاغ إساءة';
+
+  @override
+  String get restrictionReasonRepeatedNoShow => 'غياب متكرر';
+
+  @override
+  String get restrictionReasonAdminDecision => 'قرار إداري';
+
+  @override
+  String get sessionLifecycleDraft => 'مسودة';
+
+  @override
+  String get sessionLifecyclePendingPayment => 'بانتظار الدفع';
+
+  @override
+  String get sessionLifecycleScheduled => 'مجدولة';
+
+  @override
+  String get sessionLifecycleConfirmed => 'مؤكدة';
+
+  @override
+  String get sessionLifecycleInProgress => 'جارية';
+
+  @override
+  String get sessionLifecycleRescheduled => 'أُعيد جدولتها';
+
+  @override
+  String get sessionLifecycleCancelledByStudent => 'ألغاها الطالب';
+
+  @override
+  String get sessionLifecycleCancelledByTeacher => 'ألغاها المعلم';
+
+  @override
+  String get sessionLifecycleCancelledByAdmin => 'ألغاها المشرف';
+
+  @override
+  String get sessionLifecycleTeacherNoShow => 'غياب المعلم';
+
+  @override
+  String get sessionLifecycleStudentNoShow => 'غياب الطالب';
+
+  @override
+  String get sessionLifecycleBothNoShow => 'غياب الطرفين';
+
+  @override
+  String get sessionLifecycleIncomplete => 'غير مكتملة';
+
+  @override
+  String get sessionLifecycleCompleted => 'مكتملة';
+
+  @override
+  String get sessionLifecycleDisputed => 'متنازع عليها';
+
+  @override
+  String get sessionLifecycleCompensated => 'مُعوَّضة';
+
+  @override
+  String get sessionLifecycleRefunded => 'مُستردة';
+
+  @override
+  String get sessionLifecycleExpired => 'منتهية';
+
+  @override
+  String get sessionActionCreateDraft => 'إنشاء مسودة';
+
+  @override
+  String get sessionActionInitiatePayment => 'بدء الدفع';
+
+  @override
+  String get sessionActionConfirmBooking => 'تأكيد الحجز';
+
+  @override
+  String get sessionActionConfirmFreeBooking => 'تأكيد الحجز المجاني';
+
+  @override
+  String get sessionActionAcknowledgeSession => 'إقرار الجلسة';
+
+  @override
+  String get sessionActionStartSession => 'بدء الجلسة';
+
+  @override
+  String get sessionActionCompleteSession => 'إكمال الجلسة';
+
+  @override
+  String get sessionActionRequestReschedule => 'طلب إعادة الجدولة';
+
+  @override
+  String get sessionActionConfirmReschedule => 'تأكيد إعادة الجدولة';
+
+  @override
+  String get sessionActionAdminForceReschedule => 'إعادة جدولة إدارية';
+
+  @override
+  String get sessionActionCancelByStudent => 'إلغاء من الطالب';
+
+  @override
+  String get sessionActionCancelByTeacher => 'إلغاء من المعلم';
+
+  @override
+  String get sessionActionCancelByAdmin => 'إلغاء إداري';
+
+  @override
+  String get sessionActionMarkTeacherNoShow => 'تسجيل غياب المعلم';
+
+  @override
+  String get sessionActionMarkStudentNoShow => 'تسجيل غياب الطالب';
+
+  @override
+  String get sessionActionMarkBothNoShow => 'تسجيل غياب الطرفين';
+
+  @override
+  String get sessionActionMarkIncomplete => 'تسجيل عدم اكتمال';
+
+  @override
+  String get sessionActionOpenDispute => 'فتح نزاع';
+
+  @override
+  String get sessionActionIssueCompensation => 'إصدار تعويض';
+
+  @override
+  String get sessionActionIssueRefund => 'إصدار استرداد';
+
+  @override
+  String get sessionActionExpireReservation => 'انتهاء الحجز';
+
+  @override
+  String get sessionActionRejectBooking => 'رفض الحجز';
+
+  @override
+  String sessionTimelineStatusTransition(String previous, String next) {
+    return '$previous ← $next';
+  }
 }

@@ -23,6 +23,11 @@ final class SessionDetailJoinRequested extends SessionDetailEvent {
   const SessionDetailJoinRequested();
 }
 
+/// Re-opens the external meeting link without re-running join validation.
+final class SessionDetailOpenMeetingAgainRequested extends SessionDetailEvent {
+  const SessionDetailOpenMeetingAgainRequested();
+}
+
 /// User submits a safety report from session detail.
 final class SessionDetailReportSubmitted extends SessionDetailEvent {
   const SessionDetailReportSubmitted({
@@ -55,4 +60,20 @@ final class SessionDetailDisputeSubmitted extends SessionDetailEvent {
 /// Clears one-shot dispute success UI after toast.
 final class SessionDetailDisputeAcknowledged extends SessionDetailEvent {
   const SessionDetailDisputeAcknowledged();
+}
+
+/// Counterparty accepts or rejects a pending reschedule request.
+final class SessionDetailRescheduleRespondSubmitted extends SessionDetailEvent {
+  const SessionDetailRescheduleRespondSubmitted({required this.accept});
+
+  final bool accept;
+
+  @override
+  List<Object?> get props => [accept];
+}
+
+/// Clears one-shot reschedule respond success UI after toast.
+final class SessionDetailRescheduleRespondAcknowledged
+    extends SessionDetailEvent {
+  const SessionDetailRescheduleRespondAcknowledged();
 }

@@ -181,6 +181,14 @@
 }
 
 # ============================================
+# Agora RTC (quran_sessions_rtc / agora_rtc_engine)
+# R8 strips reflection-used JNI classes without explicit keeps — verify on
+# minified release APK before Play upload with Agora enabled.
+# ============================================
+-keep class io.agora.** { *; }
+-dontwarn io.agora.**
+
+# ============================================
 # MultiDex
 # ============================================
 -keep class androidx.multidex.** { *; }

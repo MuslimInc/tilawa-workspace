@@ -149,6 +149,11 @@ class AppRouter {
       return invalidRestoredRoute;
     }
 
+    final String? featureGuard = quranSessionsFeatureRedirect(state);
+    if (featureGuard != null) {
+      return featureGuard;
+    }
+
     final String? sessionGuard = quranSessionsSessionRedirect(context, state);
     if (sessionGuard != null) {
       return sessionGuard;

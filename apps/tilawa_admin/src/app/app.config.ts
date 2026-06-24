@@ -26,6 +26,8 @@ import { SESSION_READ_REPOSITORY } from './core/domain/repositories/session-read
 import { FirebaseSessionReadRepository } from './core/data/repositories/firebase-session-read.repository';
 import { SESSION_AUDIT_REPOSITORY } from './core/domain/repositories/session-audit.repository';
 import { FirebaseSessionAuditRepository } from './core/data/repositories/firebase-session-audit.repository';
+import { CALL_TRACKING_REPOSITORY } from './core/domain/repositories/call-tracking.repository';
+import { FirebaseCallTrackingRepository } from './core/data/repositories/firebase-call-tracking.repository';
 import { SESSION_MODERATION_GATEWAY } from './core/domain/repositories/session-moderation.gateway';
 import { FirebaseSessionModerationGateway } from './core/data/repositories/firebase-session-moderation.gateway';
 import { SESSION_REPORT_READ_REPOSITORY } from './core/domain/repositories/session-report-read.repository';
@@ -34,6 +36,8 @@ import { SESSION_DISPUTE_READ_REPOSITORY } from './core/domain/repositories/sess
 import { FirebaseSessionDisputeReadRepository } from './core/data/repositories/firebase-session-dispute-read.repository';
 import { WALLET_READ_REPOSITORY } from './core/domain/repositories/wallet-read.repository';
 import { FirebaseWalletReadRepository } from './core/data/repositories/firebase-wallet-read.repository';
+import { TILAWA_USER_REPOSITORY } from './core/domain/repositories/tilawa-user.repository';
+import { FirebaseTilawaUserRepository } from './core/data/repositories/firebase-tilawa-user.repository';
 
 function initializeI18n(i18n: I18nService): () => Promise<void> {
   return () => i18n.initialize();
@@ -82,6 +86,10 @@ export const appConfig: ApplicationConfig = {
       useClass: FirebaseSessionAuditRepository,
     },
     {
+      provide: CALL_TRACKING_REPOSITORY,
+      useClass: FirebaseCallTrackingRepository,
+    },
+    {
       provide: SESSION_MODERATION_GATEWAY,
       useClass: FirebaseSessionModerationGateway,
     },
@@ -96,6 +104,10 @@ export const appConfig: ApplicationConfig = {
     {
       provide: WALLET_READ_REPOSITORY,
       useClass: FirebaseWalletReadRepository,
+    },
+    {
+      provide: TILAWA_USER_REPOSITORY,
+      useClass: FirebaseTilawaUserRepository,
     },
   ],
 };

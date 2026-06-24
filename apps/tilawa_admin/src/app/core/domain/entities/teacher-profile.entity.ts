@@ -34,3 +34,14 @@ export interface TeacherProfileFilters {
   readonly specialization?: string | null;
   readonly search?: string | null;
 }
+
+export const TEACHER_PROFILE_DEFAULT_SORT = {
+  field: 'updatedAt',
+  direction: 'desc',
+} as const;
+
+export const TEACHER_PROFILE_SORT_FIELDS = [
+  'updatedAt',
+  'createdAt',
+  'displayName',
+] as const;

@@ -218,11 +218,14 @@ class _SettingsVerifiedTeacherBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isGuest || SettingsTeacherCapabilityScope.isLoadingOf(context)) {
+    if (isGuest ||
+        SettingsTeacherCapabilityScope.isTeachingSectionLoadingOf(context)) {
       return const SizedBox.shrink();
     }
 
-    final capability = SettingsTeacherCapabilityScope.maybeOf(context);
+    final capability = SettingsTeacherCapabilityScope.maybeCapabilityOf(
+      context,
+    );
     if (capability == null ||
         !capability.showsVerifiedTeacherBadgeInProfileHeader) {
       return const SizedBox.shrink();

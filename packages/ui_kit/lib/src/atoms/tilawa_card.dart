@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
+import '../foundation/tilawa_interactive_surface.dart';
 
 /// Surface treatment applied to a [TilawaCard].
 ///
@@ -34,10 +35,11 @@ enum TilawaCardSurface {
 ///
 /// ## Interactive children
 ///
-/// When [onTap] is provided the card uses a [Material] + [InkWell] pair so
-/// ripples render on the card surface. Nested interactive widgets (buttons,
-/// menus, icon-buttons) receive taps before the card's [onTap] because they
-/// sit in the [InkWell] child subtree.
+/// When [onTap] is provided the card is wrapped in [TilawaInteractiveSurface],
+/// so the whole card gets the kit's shared press-scale, keyboard focus ring,
+/// and haptic on activation (no Material ink ripple). Nested interactive
+/// widgets (buttons, menus, icon-buttons) receive taps before the card's
+/// [onTap] because they sit in the card's child subtree.
 ///
 /// If an interactive control needs a *different* action from the card's
 /// [onTap] (e.g. a delete button alongside a navigation card), place it as
@@ -55,7 +57,15 @@ class TilawaCard extends StatelessWidget {
     this.borderRadius,
     this.surface = TilawaCardSurface.raised,
     this.onTap,
+    @Deprecated(
+      'Ink ripple was replaced by the shared press-scale interaction; '
+      'splashColor is now ignored. Remove it from call sites.',
+    )
     this.splashColor,
+    @Deprecated(
+      'Ink ripple was replaced by the shared press-scale interaction; '
+      'highlightColor is now ignored. Remove it from call sites.',
+    )
     this.highlightColor,
     this.expandHeight = false,
   });
@@ -70,7 +80,13 @@ class TilawaCard extends StatelessWidget {
   /// Surface treatment for this card. See [TilawaCardSurface].
   final TilawaCardSurface surface;
   final VoidCallback? onTap;
+
+  /// Deprecated: ink ripple was replaced by the shared press-scale interaction.
+  @Deprecated('Ignored — ink ripple replaced by press-scale.')
   final Color? splashColor;
+
+  /// Deprecated: ink ripple was replaced by the shared press-scale interaction.
+  @Deprecated('Ignored — ink ripple replaced by press-scale.')
   final Color? highlightColor;
 
   /// When true, expands to the maximum height offered by the parent.
@@ -107,30 +123,42 @@ class TilawaCard extends StatelessWidget {
       side: borderSide,
     );
 
-    final Widget surfaceWidget = _TilawaCardSolidSurface(
-      fillColor: resolvedFill,
+    final Widget cardBody = Material(
+      color: resolvedFill,
+      elevation: 0,
+      shadowColor: Colors.transparent,
       shape: shape,
-      borderRadius: borderRadiusValue,
-      onTap: onTap,
-      splashColor: splashColor,
-      highlightColor: highlightColor,
+      clipBehavior: Clip.antiAlias,
       child: Padding(
         padding: padding ?? tokens.padding,
         child: child,
       ),
     );
 
+    final Widget restingCard = hasShadow
+        ? _TilawaCardShadow(
+            borderRadius: borderRadiusValue,
+            designTokens: designTokens,
+            colorScheme: colorScheme,
+            child: cardBody,
+          )
+        : cardBody;
+
+    // Interactive cards route through the kit's single interaction primitive:
+    // the whole card (surface + shadow) gets press-scale, a keyboard focus
+    // ring, and a haptic on activation — no Material ink ripple.
+    final Widget surfaceWidget = onTap == null
+        ? restingCard
+        : TilawaInteractiveSurface(
+            onTap: onTap,
+            borderRadius: borderRadiusValue,
+            child: restingCard,
+          );
+
     return SizedBox(
       width: double.infinity,
       height: expandHeight ? double.infinity : null,
-      child: hasShadow
-          ? _TilawaCardShadow(
-              borderRadius: borderRadiusValue,
-              designTokens: designTokens,
-              colorScheme: colorScheme,
-              child: surfaceWidget,
-            )
-          : surfaceWidget,
+      child: surfaceWidget,
     );
   }
 }
@@ -163,87 +191,6 @@ class _TilawaCardShadow extends StatelessWidget {
           ),
         ],
       ),
-      child: child,
-    );
-  }
-}
-
-class _TilawaCardSolidSurface extends StatelessWidget {
-  const _TilawaCardSolidSurface({
-    required this.fillColor,
-    required this.shape,
-    required this.borderRadius,
-    required this.onTap,
-    required this.splashColor,
-    required this.highlightColor,
-    required this.child,
-  });
-
-  final Color fillColor;
-  final ShapeBorder shape;
-  final BorderRadius borderRadius;
-  final VoidCallback? onTap;
-  final Color? splashColor;
-  final Color? highlightColor;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: fillColor,
-      elevation: 0,
-      shadowColor: Colors.transparent,
-      shape: shape,
-      clipBehavior: Clip.antiAlias,
-      child: _TilawaCardInkWell(
-        onTap: onTap,
-        borderRadius: borderRadius,
-        splashColor: splashColor,
-        highlightColor: highlightColor,
-        child: child,
-      ),
-    );
-  }
-}
-
-class _TilawaCardInkWell extends StatelessWidget {
-  const _TilawaCardInkWell({
-    required this.onTap,
-    required this.borderRadius,
-    required this.splashColor,
-    required this.highlightColor,
-    required this.child,
-  });
-
-  final VoidCallback? onTap;
-  final BorderRadius borderRadius;
-  final Color? splashColor;
-  final Color? highlightColor;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    if (onTap == null) {
-      return child;
-    }
-
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final TilawaDesignTokens designTokens = Theme.of(context).tokens;
-
-    final Color effectiveSplashColor =
-        splashColor ??
-        colorScheme.primary.withValues(alpha: designTokens.opacitySubtle);
-    final Color effectiveHighlightColor =
-        highlightColor ??
-        colorScheme.onSurface.withValues(
-          alpha: designTokens.opacitySubtle / 2,
-        );
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: borderRadius,
-      splashColor: effectiveSplashColor,
-      highlightColor: effectiveHighlightColor,
       child: child,
     );
   }

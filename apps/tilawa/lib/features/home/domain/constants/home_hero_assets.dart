@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Bundled artwork for the home dashboard hero [SliverAppBar].
+/// Bundled artwork for the home dashboard hero persistent header.
 abstract final class HomeHeroAssets {
   const HomeHeroAssets._();
 

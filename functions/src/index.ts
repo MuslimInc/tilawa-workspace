@@ -5,6 +5,7 @@ export { reviewTeacherApplication } from "./reviewTeacherApplication";
 export { registerActiveDevice } from "./registerActiveDevice";
 export { moderateTeacherProfile } from "./moderateTeacherProfile";
 export { moderateQuranSessionsUser } from "./moderateQuranSessionsUser";
+export { setTeacherApplicationAccess } from "./setTeacherApplicationAccess";
 export { syncTeacherProfileVisibility } from "./syncTeacherProfileVisibility";
 export { createSessionBooking } from "./quranSessions/createSessionBooking";
 export { cancelSessionBooking } from "./quranSessions/cancelSessionBooking";
@@ -26,6 +27,9 @@ export { expirePendingReservations } from "./quranSessions/expirePendingReservat
 export { deliverSessionNotification } from "./quranSessions/deliverSessionNotification";
 export { getWallet, postWalletCredit } from "./quranSessions/walletCallables";
 export { confirmBookingPayment } from "./quranSessions/confirmBookingPayment";
+export { issueSessionRtcToken } from "./quranSessions/issueSessionRtcToken";
+export { recordCallTelemetryEvent } from "./quranSessions/recordCallTelemetryEvent";
+export { sessionReminders } from "./quranSessions/sessionReminders";
 
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { initializeApp } from "firebase-admin/app";

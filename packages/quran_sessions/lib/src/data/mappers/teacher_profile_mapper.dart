@@ -53,6 +53,7 @@ extension TeacherProfileDtoMapper on TeacherProfileDto {
           ? null
           : _mapAllowedGender(allowedStudentGender!),
       canTeachChildren: canTeachChildren,
+      externalMeetingUrl: externalMeetingUrl,
       createdAt: createdAt,
       updatedAt: updatedAt,
     );
@@ -80,6 +81,7 @@ extension TeacherProfileDomainMapper on TeacherProfile {
       isPubliclyVisible: withVisibility.isPubliclyVisible,
       allowedStudentGender: allowedStudentGender?.name,
       canTeachChildren: canTeachChildren,
+      externalMeetingUrl: externalMeetingUrl,
       createdAt: createdAt,
       updatedAt: updatedAt,
     );

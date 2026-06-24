@@ -4,6 +4,7 @@ import 'fakes/fake_audit_repository.dart';
 import 'fakes/fake_session_aggregate_repository.dart';
 import 'fakes/fake_session_command_gateway.dart';
 import 'fakes/fake_session_mutation_gateway.dart';
+import 'fakes/fake_teacher_profile_repository.dart';
 import 'fakes/fake_session_notification_gateway.dart';
 
 CancelSessionViaServerUseCase buildCancelSessionViaServerUseCase({
@@ -27,12 +28,33 @@ CancelSessionViaServerUseCase buildCancelSessionViaServerUseCase({
 SubmitSessionBookingUseCase buildSubmitSessionBookingUseCase({
   required GetTeacherAvailabilityUseCase getAvailability,
   FakeSessionMutationGateway? mutationGateway,
+  FakeTeacherProfileRepository? teacherProfiles,
   String studentId = 'student_1',
 }) {
   return SubmitSessionBookingUseCase(
     mutationGateway: mutationGateway ?? FakeSessionMutationGateway(),
     getAvailability: getAvailability,
     authSession: _FakeAuthSession(studentId),
+    teacherProfiles:
+        teacherProfiles ??
+        FakeTeacherProfileRepository(
+          profile: TeacherProfile(
+            id: 'teacher_1',
+            userId: 'teacher_1',
+            displayName: 'Teacher',
+            verificationStatus: TeacherVerificationStatus.verified,
+            teachingLanguages: const ['ar'],
+            specializations: const ['tajweed'],
+            averageRating: 0,
+            reviewCount: 0,
+            isActive: true,
+            profileCompleteness: TeacherProfileCompletenessStatus.complete,
+            isPubliclyVisible: true,
+            externalMeetingUrl: 'https://meet.google.com/test-room',
+            createdAt: DateTime.utc(2024, 1, 1),
+            updatedAt: DateTime.utc(2024, 1, 2),
+          ),
+        ),
   );
 }
 

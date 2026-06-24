@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../features/athkar/presentation/widgets/athkar_categories_screen_scope.dart';
 import '../../features/home/presentation/widgets/home_screen_scope.dart';
-import '../../features/qibla/presentation/widgets/qibla_screen_scope.dart';
 import '../../features/reciters/presentation/screens/reciters_screen.dart'
     show RecitersRootBackScope;
 import '../../features/reciters/presentation/widgets/reciters_screen_scope.dart';
@@ -38,6 +36,8 @@ class MainTabViewport extends StatefulWidget {
 }
 
 class _MainTabViewportState extends State<MainTabViewport> {
+  static const int _tabCount = 3;
+
   // Screen instances are cached so that tab subtrees survive the parent
   // rebuilds that occur as cubit startup flags change.
   final Map<int, Widget> _screenCache = <int, Widget>{};
@@ -49,9 +49,7 @@ class _MainTabViewportState extends State<MainTabViewport> {
           onOpenPrayer: () => const PrayerTimesRoute().push(context),
         ),
         1 => const RecitersScreenScope(),
-        2 => const QiblaScreenScope(),
-        3 => const AthkarCategoriesScreenScope(),
-        4 => const SettingsScreenScope(),
+        2 => const SettingsScreenScope(),
         _ => const SizedBox.shrink(),
       };
     });
@@ -66,7 +64,7 @@ class _MainTabViewportState extends State<MainTabViewport> {
       child: TilawaShellPadding(
         padding: widget.contentBottomPadding,
         child: Stack(
-          children: List<Widget>.generate(5, (int index) {
+          children: List<Widget>.generate(_tabCount, (int index) {
             if (!widget.builtTabIndexes.contains(index)) {
               return const SizedBox.shrink();
             }

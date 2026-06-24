@@ -11,9 +11,11 @@ import {
   runIdempotentOperation,
 } from "./idempotencyService";
 import { requireAuthenticatedUid, requireValidSessionEpochUnlessAdmin, resolveActorRole } from "./sessionAuth";
+import { resolveTeacherProfileUserId } from "./teacherProfileUserId";
 import { validateTransition } from "./sessionLifecycleGuard";
 import type { LifecycleStatus } from "./sessionLifecycleService";
 import { nowServer } from "./sessionLifecycleService";
+import { sessionCallableHttpsOptions } from "./sessionCallableOptions";
 
 interface RequestSessionRescheduleRequest {
   bookingId: string;
@@ -25,7 +27,7 @@ interface RequestSessionRescheduleRequest {
 }
 
 export const requestSessionReschedule = onCall(
-  { enforceAppCheck: false },
+  sessionCallableHttpsOptions,
   async (request) => {
     const uid = requireAuthenticatedUid(request);
     await requireValidSessionEpochUnlessAdmin(request, uid);
@@ -45,7 +47,16 @@ export const requestSessionReschedule = onCall(
       studentId: (booking.studentId as string) ?? "",
       teacherId: (booking.teacherId as string) ?? "",
     };
-    const actor = resolveActorRole(request, data.actorRole, participants);
+    const teacherUserId = await resolveTeacherProfileUserId(
+      db,
+      participants.teacherId,
+    );
+    const actor = resolveActorRole(
+      request,
+      data.actorRole,
+      participants,
+      teacherUserId,
+    );
 
     const operationKey = buildOperationKey(
       "request_reschedule",

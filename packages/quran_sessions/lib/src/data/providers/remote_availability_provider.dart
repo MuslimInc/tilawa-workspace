@@ -41,10 +41,11 @@ class RemoteAvailabilityProvider implements AvailabilityProvider {
 
   @override
   Future<Either<QuranSessionsFailure, void>> withdrawSlot(
+    String teacherId,
     String slotId,
   ) async {
     try {
-      await _remote.withdrawSlot(slotId);
+      await _remote.withdrawSlot(teacherId, slotId);
       return const Right(null);
     } on Exception catch (e) {
       return Left(mapRemoteException(e));

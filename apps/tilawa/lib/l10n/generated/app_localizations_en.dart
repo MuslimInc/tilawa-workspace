@@ -56,6 +56,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeLocationUnavailable => 'Set location';
 
   @override
+  String get homeHeroLocationContext => 'Praying in';
+
+  @override
   String get homeNextPrayerUnavailable =>
       'Set your location to see the next prayer.';
 
@@ -85,7 +88,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeExploreTitle => 'Discover';
 
   @override
-  String get homeExploreSubtitle => 'Prayer times and Quran teaching';
+  String get homeExploreSubtitle => 'Everyday tools at a glance';
+
+  @override
+  String get homeKhatmaCarouselSubtitle => 'Track your reading plan';
+
+  @override
+  String get homeSupportCarouselSubtitle =>
+      'Help keep Tilawa free for everyone';
+
+  @override
+  String get homeHistoryCarouselSubtitle => 'Pick up where you left off';
+
+  @override
+  String get homeFavoritesCarouselSubtitle => 'Saved recitations and surahs';
+
+  @override
+  String get homeDownloadsCarouselSubtitle => 'Listen offline anytime';
 
   @override
   String get homeSessionsTitle => 'Learn Quran recitation';
@@ -1573,7 +1592,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get qiblaFinderTitle => 'QIBLA FINDER';
 
   @override
-  String get qiblaDeviceAngleLabel => 'Device\'s angle to qibla';
+  String get qiblaDeviceAngleLabel => 'Qibla bearing from north';
 
   @override
   String qiblaRotatePhoneLeft(int degrees) {

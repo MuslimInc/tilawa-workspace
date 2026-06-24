@@ -7,8 +7,16 @@ import { SessionDisputesFacade } from '../../../core/application/facades/session
 import { SessionDisputeFilters } from '../../../core/domain/entities/session-dispute-summary.entity';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { StatusChipComponent } from '../../../shared/components/status-chip/status-chip.component';
+import { SortableThComponent } from '../../../shared/components/sortable-th/sortable-th.component';
+import { TilawaFilterBarComponent } from '../../../shared/components/tilawa-filter-bar/tilawa-filter-bar.component';
+import { TilawaDataTableComponent } from '../../../shared/components/tilawa-data-table/tilawa-data-table.component';
+import { TilawaLoadingStateComponent } from '../../../shared/components/tilawa-loading-state/tilawa-loading-state.component';
+import { TilawaErrorStateComponent } from '../../../shared/components/tilawa-error-state/tilawa-error-state.component';
+import { TilawaEmptyStateComponent } from '../../../shared/components/tilawa-empty-state/tilawa-empty-state.component';
+import { TilawaPaginationComponent } from '../../../shared/components/tilawa-pagination/tilawa-pagination.component';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { StatusLabelPipe } from '../../../core/i18n/status-label.pipe';
+import { SortRequest } from '../../../core/domain/entities/pagination.types';
 
 @Component({
   selector: 'app-session-disputes',
@@ -19,6 +27,13 @@ import { StatusLabelPipe } from '../../../core/i18n/status-label.pipe';
     RouterLink,
     PageHeaderComponent,
     StatusChipComponent,
+    SortableThComponent,
+    TilawaFilterBarComponent,
+    TilawaDataTableComponent,
+    TilawaLoadingStateComponent,
+    TilawaErrorStateComponent,
+    TilawaEmptyStateComponent,
+    TilawaPaginationComponent,
     TranslatePipe,
     StatusLabelPipe,
   ],
@@ -31,6 +46,7 @@ export class SessionDisputesComponent implements OnInit {
   readonly loadState = this.facade.listLoadState;
   readonly errorMessage = this.facade.listErrorMessage;
   readonly canLoadMore = this.facade.canLoadMore;
+  readonly sort = this.facade.sort;
 
   statusFilter = '';
   searchQuery = '';
@@ -64,5 +80,9 @@ export class SessionDisputesComponent implements OnInit {
 
   loadMore(): Promise<void> {
     return this.facade.loadMore(this.buildFilters());
+  }
+
+  onSortChange(sort: SortRequest): void {
+    void this.facade.changeSort(this.buildFilters(), sort);
   }
 }

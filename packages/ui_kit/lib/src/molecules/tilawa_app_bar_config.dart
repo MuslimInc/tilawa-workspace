@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
 import '../foundation/tilawa_icons.dart';
+import '../foundation/tilawa_interaction_feedback.dart';
+import '../foundation/tilawa_interactive_surface.dart';
 
 /// Surface tier for [TilawaAppBar] / [TilawaSliverAppBar].
 ///
@@ -341,13 +343,12 @@ abstract final class TilawaAppBarChrome {
     Widget body = SizedBox(
       width: hit,
       height: hit,
-      child: Material(
-        color: fill,
+      child: TilawaInteractiveSurface(
+        onTap: onPressed,
         borderRadius: radius,
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          borderRadius: radius,
-          onTap: onPressed,
+        haptic: TilawaHaptic.lightImpact,
+        child: DecoratedBox(
+          decoration: BoxDecoration(color: fill, borderRadius: radius),
           child: Center(child: icon),
         ),
       ),

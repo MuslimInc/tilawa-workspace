@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:ui' show FlutterView;
 
 import 'package:flutter/material.dart';
 
@@ -15,6 +16,18 @@ extension TilawaSafeAreaX on BuildContext {
   double get systemTopSafeArea => systemSafeArea.top;
 
   double get systemBottomSafeArea => systemSafeArea.bottom;
+
+  /// Device bottom inset when a parent [Scaffold] strips [MediaQuery.viewPadding].
+  double get effectiveSystemBottomSafeArea {
+    if (systemBottomSafeArea > 0) {
+      return systemBottomSafeArea;
+    }
+    final FlutterView? view = View.maybeOf(this);
+    if (view == null) {
+      return 0;
+    }
+    return view.viewPadding.bottom / view.devicePixelRatio;
+  }
 
   double get systemLeftSafeArea => systemSafeArea.left;
 
@@ -38,7 +51,20 @@ extension TilawaSafeAreaX on BuildContext {
 
   double get keyboardInset => systemViewInsets.bottom;
 
-  bool get isKeyboardVisible => keyboardInset > 0;
+  /// Keyboard obstruction height, including when a parent [Scaffold] strips
+  /// bottom [MediaQuery.viewInsets] after resizing its body.
+  double get effectiveKeyboardInset {
+    if (keyboardInset > 0) {
+      return keyboardInset;
+    }
+    final FlutterView? view = View.maybeOf(this);
+    if (view == null) {
+      return 0;
+    }
+    return view.viewInsets.bottom / view.devicePixelRatio;
+  }
+
+  bool get isKeyboardVisible => effectiveKeyboardInset > 0;
 
   // ---------------------------------------------------------------------------
   // Design-aware bottom spacing
@@ -52,9 +78,10 @@ extension TilawaSafeAreaX on BuildContext {
   double get floatingBottomPadding {
     final buffer = theme.tokens.spaceSmall;
     final fallback = theme.tokens.spaceExtraLarge;
+    final double bottomInset = effectiveSystemBottomSafeArea;
 
-    if (systemBottomSafeArea > 0) {
-      return systemBottomSafeArea + buffer;
+    if (bottomInset > 0) {
+      return bottomInset + buffer;
     }
 
     return fallback;
@@ -67,7 +94,7 @@ extension TilawaSafeAreaX on BuildContext {
   /// - floating bottom padding when keyboard is hidden
   double get keyboardAwareBottomPadding {
     if (isKeyboardVisible) {
-      return keyboardInset + theme.tokens.spaceSmall;
+      return effectiveKeyboardInset + theme.tokens.spaceSmall;
     }
 
     return floatingBottomPadding;
@@ -86,7 +113,7 @@ extension TilawaSafeAreaX on BuildContext {
     final buffer = keyboardBuffer ?? theme.tokens.spaceSmall;
 
     if (isKeyboardVisible) {
-      return keyboardInset + buffer;
+      return effectiveKeyboardInset + buffer;
     }
 
     if (fallbackMinSpacing != null) {

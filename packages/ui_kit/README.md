@@ -99,6 +99,7 @@ flutter run lib/previews/preview_main.dart # If available
 |-----|---------|
 | [`../../DESIGN.md`](../../DESIGN.md) | Product-wide design snapshot (agents + humans) |
 | [`docs/design_system.md`](docs/design_system.md) | UI kit freeze contract, catalog chrome, testing |
+| [`docs/ux_principles_audit.md`](docs/ux_principles_audit.md) | Ramotion UX principles audit + kit improvements |
 | [`../../docs/design/colors.md`](../../docs/design/colors.md) | Colour roles and accent-vs-surface policy |
 | [`docs/premium_visual_system.md`](docs/premium_visual_system.md) | Calm, high-quality product chrome (not paid tiers) |
 | [`docs/support_visual_system.md`](docs/support_visual_system.md) | Support Tilawa voluntary contribution surfaces |

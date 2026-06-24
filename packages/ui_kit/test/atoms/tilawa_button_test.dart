@@ -372,4 +372,70 @@ void main() {
       );
     });
   });
+
+  group('TilawaButton focus visibility (WCAG 2.4.7)', () {
+    testWidgets(
+      'paints a focus ring of focusRingWidth on keyboard focus even for '
+      'borderless variants',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          _app(
+            const TilawaButton(
+              text: 'Continue',
+              onPressed: _noop,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final ButtonStyle style = tester
+            .widget<TextButton>(find.byType(TextButton))
+            .style!;
+
+        // Resting (primary, no border): no side.
+        expect(style.side!.resolve(const {}), BorderSide.none);
+
+        // Focused: a visible ring at the kit's focus width.
+        final BorderSide focusedSide = style.side!.resolve(
+          {WidgetState.focused},
+        )!;
+        expect(focusedSide, isNot(BorderSide.none));
+        expect(focusedSide.width, TilawaDesignTokens.light().focusRingWidth);
+
+        // Focused also gets a state-layer wash distinct from the resting state.
+        expect(style.overlayColor!.resolve(const {}), isNull);
+        expect(
+          style.overlayColor!.resolve({WidgetState.focused}),
+          isNotNull,
+        );
+      },
+    );
+
+    testWidgets('pressed wash takes priority over focused wash', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(const TilawaButton(text: 'Continue', onPressed: _noop)),
+      );
+      await tester.pumpAndSettle();
+
+      final ButtonStyle style = tester
+          .widget<TextButton>(find.byType(TextButton))
+          .style!;
+
+      // When both states are active the resolver must return the pressed wash,
+      // matching TilawaInteractiveSurface's pressed > hover > focus ordering.
+      final Color bothStates = style.overlayColor!.resolve(
+        {WidgetState.pressed, WidgetState.focused},
+      )!;
+      final Color pressedOnly = style.overlayColor!.resolve(
+        {WidgetState.pressed},
+      )!;
+      final Color focusedOnly = style.overlayColor!.resolve(
+        {WidgetState.focused},
+      )!;
+      expect(bothStates, pressedOnly);
+      expect(bothStates, isNot(focusedOnly));
+    });
+  });
 }

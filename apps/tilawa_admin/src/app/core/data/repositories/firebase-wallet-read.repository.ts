@@ -1,23 +1,20 @@
 import { Injectable, inject } from '@angular/core';
-import {
-  Firestore,
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  limit,
-  orderBy,
-  query,
-  where,
-} from '@angular/fire/firestore';
+import { Firestore, doc, getDoc, where } from '@angular/fire/firestore';
 
 import { QuranSessionsPaths } from '../paths/quran-sessions.paths';
 import {
   UserWalletDetail,
   UserWalletSummary,
+  WALLET_TRANSACTION_DEFAULT_SORT,
+  WALLET_TRANSACTION_SORT_FIELDS,
   WalletTransactionSummary,
 } from '../../domain/entities/user-wallet-summary.entity';
+import {
+  DEFAULT_PAGE_SIZE,
+  PageRequest,
+} from '../../domain/entities/pagination.types';
 import { WalletReadRepository } from '../../domain/repositories/wallet-read.repository';
+import { fetchPaginatedList } from '../firestore/firestore-list-query.util';
 
 function readTimestamp(value: unknown): Date | null {
   if (
@@ -39,28 +36,33 @@ function readAmount(value: unknown): number {
 export class FirebaseWalletReadRepository implements WalletReadRepository {
   private readonly firestore = inject(Firestore);
 
-  async getByUserId(userId: string): Promise<UserWalletDetail> {
+  async getByUserId(
+    userId: string,
+    transactionsPage?: PageRequest,
+  ): Promise<UserWalletDetail> {
     const walletId = `wallet_${userId}`;
     const walletSnap = await getDoc(
       doc(this.firestore, QuranSessionsPaths.userWallets, walletId),
     );
 
-    const transactionsSnap = await getDocs(
-      query(
-        collection(this.firestore, QuranSessionsPaths.walletTransactions),
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc'),
-        limit(50),
-      ),
-    );
+    const page = transactionsPage ?? { pageSize: DEFAULT_PAGE_SIZE };
+    const txnPage = await fetchPaginatedList({
+      firestore: this.firestore,
+      collectionPath: QuranSessionsPaths.walletTransactions,
+      filters: [where('userId', '==', userId)],
+      page,
+      defaultSort: WALLET_TRANSACTION_DEFAULT_SORT,
+      allowedSortFields: WALLET_TRANSACTION_SORT_FIELDS,
+      mapDoc: (id, data) => this.mapTransaction(id, data),
+    });
 
     return {
       wallet: walletSnap.exists()
         ? this.mapWallet(walletSnap.id, walletSnap.data())
         : null,
-      transactions: transactionsSnap.docs.map((snap) =>
-        this.mapTransaction(snap.id, snap.data()),
-      ),
+      transactions: [...txnPage.items],
+      transactionsHasMore: txnPage.hasMore,
+      transactionsNextCursor: txnPage.nextCursor,
     };
   }
 

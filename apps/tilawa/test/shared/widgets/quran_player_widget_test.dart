@@ -6,6 +6,77 @@ import 'package:tilawa/shared/widgets/quran_player_chrome.dart';
 import 'package:tilawa/shared/widgets/quran_player_widget.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+/// Mirrors [_CompactNowPlayingBar] bounded-height band layout.
+Widget _compactNowPlayingBarBandLayoutHarness({
+  required double height,
+}) {
+  return Builder(
+    builder: (BuildContext context) {
+      final TilawaDesignTokens tokens = Theme.of(context).tokens;
+      final TilawaMediaPlayerBarTokens barTokens = Theme.of(
+        context,
+      ).componentTokens.mediaPlayerBar;
+      final double rowHeight = barTokens.playPauseButtonSize;
+      final ({double topBand, double bottomBand}) bands =
+          resolveTilawaMediaPlayerCollapsedBands(
+            maxHeight: height,
+            rowHeight: rowHeight,
+          );
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          SizedBox(
+            height: bands.topBand,
+            child: LinearProgressIndicator(
+              value: 0.35,
+              minHeight: bands.topBand,
+            ),
+          ),
+          Padding(
+            padding: EdgeInsetsDirectional.only(
+              start: tokens.spaceSmall,
+              end: tokens.spaceSmall,
+              bottom: bands.bottomBand,
+            ),
+            child: SizedBox(
+              height: rowHeight,
+              child: Row(
+                children: <Widget>[
+                  IconButton(
+                    constraints: BoxConstraints(
+                      minWidth: rowHeight,
+                      minHeight: rowHeight,
+                    ),
+                    padding: EdgeInsets.zero,
+                    onPressed: () {},
+                    icon: const Icon(Icons.expand_more),
+                  ),
+                  const SizedBox(
+                    width: kTilawaMediaPlayerBarCompactArtworkSize,
+                    height: kTilawaMediaPlayerBarCompactArtworkSize,
+                  ),
+                  const Expanded(child: Text('Al-Fatiha')),
+                  IconButton(
+                    constraints: BoxConstraints(
+                      minWidth: rowHeight,
+                      minHeight: rowHeight,
+                    ),
+                    padding: EdgeInsets.zero,
+                    onPressed: () {},
+                    icon: const Icon(Icons.play_arrow),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const Expanded(child: SizedBox.shrink()),
+        ],
+      );
+    },
+  );
+}
+
 Widget _wrap({
   required Widget child,
   EdgeInsets viewPadding = EdgeInsets.zero,
@@ -35,7 +106,7 @@ Widget _wrap({
       create: (_) => QuranPlayerChromeNotifier(),
       child: MaterialApp.router(
         theme: ThemeData(
-          extensions: [
+          extensions: <ThemeExtension<dynamic>>[
             TilawaDesignTokens.light(),
             TilawaComponentTokens.light(),
           ],
@@ -117,7 +188,7 @@ void main() {
     });
 
     testWidgets(
-      'shell with bottom nav uses player height and mini-nav gap for footprint',
+      'shell with bottom nav uses player height only for footprint',
       (tester) async {
         late double footprint;
 
@@ -139,7 +210,11 @@ void main() {
                 footprint = QuranPlayerWidget.collapsedFootprint(context);
                 expect(
                   QuranPlayerLayoutInsets.phoneMiniPlayerNavGap(context),
-                  4.0,
+                  0,
+                );
+                expect(
+                  QuranPlayerLayoutInsets.phoneMiniPlayerTopPadding(context),
+                  0,
                 );
                 return const SizedBox.shrink();
               },
@@ -149,7 +224,7 @@ void main() {
         await tester.pump();
 
         final tokens = TilawaDesignTokens.light();
-        expect(footprint, tokens.playerCollapsedHeight + 4.0 + 4.0);
+        expect(footprint, tokens.playerCollapsedHeight);
       },
     );
 
@@ -175,5 +250,76 @@ void main() {
         expect(spacing, 0);
       },
     );
+  });
+
+  group('Compact now playing bar layout', () {
+    testWidgets('band layout fits sub-pixel collapsed slot', (tester) async {
+      const double slotHeight = 56.6;
+      const double slotWidth = 353.9;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            extensions: <ThemeExtension<dynamic>>[
+              TilawaDesignTokens.light(),
+              TilawaComponentTokens.light(),
+            ],
+          ),
+          home: Scaffold(
+            body: SizedBox(
+              width: slotWidth,
+              height: slotHeight,
+              child: _compactNowPlayingBarBandLayoutHarness(
+                height: slotHeight,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('shell dock mini bar fits sub-pixel collapsed slot', (
+      tester,
+    ) async {
+      const double slotHeight = 56.6;
+      const double slotWidth = 353.9;
+      final TilawaDesignTokens tokens = TilawaDesignTokens.light();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            extensions: <ThemeExtension<dynamic>>[
+              tokens,
+              TilawaComponentTokens.light(),
+            ],
+          ),
+          home: Scaffold(
+            body: SizedBox(
+              width: slotWidth,
+              height: slotHeight,
+              child: TilawaMediaPlayerBar(
+                layoutWidth: slotWidth,
+                title: 'Surah Al-Baqarah',
+                subtitle: 'Al-Minshawi',
+                progress: 0.35,
+                isPlaying: true,
+                canGoPrevious: true,
+                canGoNext: true,
+                isSleepTimerEnabled: false,
+                shellDockLayout: true,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(
+        tester.getSize(find.byType(TilawaMediaPlayerBar)),
+        Size(slotWidth, slotHeight),
+      );
+    });
   });
 }

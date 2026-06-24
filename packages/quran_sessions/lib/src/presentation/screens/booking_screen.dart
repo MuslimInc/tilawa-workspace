@@ -3,11 +3,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_sessions/core/l10n_extensions.dart';
+import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/quran_booking.dart';
+import '../../domain/entities/session_call_provider_kind.dart';
 import '../../domain/entities/session_call_type.dart';
 import '../../domain/failures/quran_sessions_failure.dart';
+import '../../domain/policies/session_mode_policy.dart';
 import '../blocs/booking/booking_bloc.dart';
 import '../blocs/booking/booking_event.dart';
 import '../blocs/booking/booking_state.dart';
@@ -21,6 +24,8 @@ class BookingScreen extends StatefulWidget {
     required this.teacherId,
     required this.studentId,
     this.preSelectedSlotId,
+    this.sessionModePolicy = SessionModePolicy.freeBeta,
+    this.voiceVideoProviderHint,
     this.onBookingSuccess,
     this.onCompleteProfile,
   });
@@ -28,8 +33,10 @@ class BookingScreen extends StatefulWidget {
   final String teacherId;
   final String studentId;
   final String? preSelectedSlotId;
+  final SessionModePolicy sessionModePolicy;
+  final SessionCallProviderKind? voiceVideoProviderHint;
 
-  /// Called after a booking is confirmed. When provided, the host app handles
+  /// Called after a booking is confirmed.
   /// navigation; otherwise the screen pops itself.
   final void Function(QuranBooking booking)? onBookingSuccess;
 
@@ -192,6 +199,7 @@ class _BookingScreenState extends State<BookingScreen> {
             :final availableSlots,
             :final selectedSlot,
             :final selectedCallType,
+            :final teacherExternalMeetingUrl,
           ) =>
             Padding(
               padding: EdgeInsets.all(Theme.of(context).tokens.spaceLarge),
@@ -225,7 +233,12 @@ class _BookingScreenState extends State<BookingScreen> {
                           ),
                           SizedBox(height: Theme.of(context).tokens.spaceSmall),
                           _CallTypePicker(
+                            hostPolicy: widget.sessionModePolicy,
+                            teacherExternalMeetingUrl:
+                                teacherExternalMeetingUrl,
                             selected: selectedCallType,
+                            voiceVideoProviderHint:
+                                widget.voiceVideoProviderHint,
                             onChanged: (ct) => context.read<BookingBloc>().add(
                               CallTypeSelected(ct),
                             ),
@@ -356,33 +369,143 @@ class _EligibilityBlockedView extends StatelessWidget {
 // ── Call type picker ──────────────────────────────────────────────────────────
 
 class _CallTypePicker extends StatelessWidget {
-  const _CallTypePicker({required this.selected, required this.onChanged});
+  const _CallTypePicker({
+    required this.hostPolicy,
+    required this.teacherExternalMeetingUrl,
+    required this.selected,
+    required this.onChanged,
+    this.voiceVideoProviderHint,
+  });
 
+  final SessionModePolicy hostPolicy;
+  final String? teacherExternalMeetingUrl;
   final SessionCallType selected;
   final ValueChanged<SessionCallType> onChanged;
+  final SessionCallProviderKind? voiceVideoProviderHint;
+
+  bool get _hasExternalMeetingUrl =>
+      SessionModePolicy.hasExternalMeetingUrl(teacherExternalMeetingUrl);
+
+  SessionModePolicy get _effectivePolicy =>
+      hostPolicy.forTeacherExternalMeetingUrl(teacherExternalMeetingUrl);
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
+    final tokens = Theme.of(context).tokens;
+    final scheme = Theme.of(context).colorScheme;
+    final policy = _effectivePolicy;
+    final externalMissing =
+        hostPolicy.isEnabled(SessionCallType.externalMeeting) &&
+        !_hasExternalMeetingUrl;
 
-    return TilawaSegmentedControl<SessionCallType>(
-      segments: [
-        TilawaSegment(
-          value: SessionCallType.externalMeeting,
-          label: l10n.callTypeExternalMeeting,
+    final segments = [
+      TilawaSegment(
+        value: SessionCallType.externalMeeting,
+        label: l10n.callTypeExternalMeeting,
+        enabled:
+            hostPolicy.isEnabled(SessionCallType.externalMeeting) &&
+            _hasExternalMeetingUrl,
+        semanticsHint:
+            hostPolicy.isEnabled(SessionCallType.externalMeeting) &&
+                _hasExternalMeetingUrl
+            ? null
+            : externalMissing
+            ? l10n.sessionModeExternalDisabled
+            : l10n.unsupportedSessionMode,
+      ),
+      TilawaSegment(
+        value: SessionCallType.voiceCall,
+        label: l10n.callTypeVoice,
+        enabled: policy.isEnabled(SessionCallType.voiceCall),
+        semanticsHint: policy.isEnabled(SessionCallType.voiceCall)
+            ? null
+            : l10n.sessionModeVoiceDisabled,
+      ),
+      TilawaSegment(
+        value: SessionCallType.videoCall,
+        label: l10n.callTypeVideo,
+        enabled: policy.isEnabled(SessionCallType.videoCall),
+        semanticsHint: policy.isEnabled(SessionCallType.videoCall)
+            ? null
+            : l10n.sessionModeVideoDisabled,
+      ),
+    ];
+
+    final enabledSegments = segments
+        .where((segment) => segment.enabled)
+        .toList();
+    final effectiveSelected =
+        policy.isEnabled(selected) &&
+            (selected != SessionCallType.externalMeeting ||
+                _hasExternalMeetingUrl)
+        ? selected
+        : SessionModePolicy.defaultCallType(
+            policy: hostPolicy,
+            externalMeetingUrl: teacherExternalMeetingUrl,
+          );
+
+    if (enabledSegments.isEmpty) {
+      return Text(
+        l10n.unsupportedSessionMode,
+        style: Theme.of(context).textTheme.bodyMedium,
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        TilawaSegmentedControl<SessionCallType>(
+          segments: segments,
+          selectedValue: effectiveSelected,
+          onValueChanged: onChanged,
         ),
-        TilawaSegment(
-          value: SessionCallType.voiceCall,
-          label: l10n.callTypeVoice,
-        ),
-        TilawaSegment(
-          value: SessionCallType.videoCall,
-          label: l10n.callTypeVideo,
-        ),
+        if (_helperText(l10n, effectiveSelected) case final note?)
+          Padding(
+            padding: EdgeInsets.only(top: tokens.spaceSmall),
+            child: Text(
+              note,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+          ),
       ],
-      selectedValue: selected,
-      onValueChanged: onChanged,
     );
+  }
+
+  String? _helperText(QuranSessionsLocalizations l10n, SessionCallType type) {
+    final externalMissing =
+        hostPolicy.isEnabled(SessionCallType.externalMeeting) &&
+        !_hasExternalMeetingUrl;
+    if (externalMissing) {
+      return l10n.sessionModeExternalDisabled;
+    }
+    final policy = _effectivePolicy;
+    final voiceOff = !policy.isEnabled(SessionCallType.voiceCall);
+    final videoOff = !policy.isEnabled(SessionCallType.videoCall);
+    if (voiceOff || videoOff) {
+      if (voiceOff && videoOff) {
+        return l10n.sessionModeVoiceDisabled;
+      }
+      if (voiceOff) return l10n.sessionModeVoiceDisabled;
+      if (videoOff) return l10n.sessionModeVideoDisabled;
+    }
+    if (!policy.voiceVideoUseMockProvider) {
+      if (voiceVideoProviderHint != null &&
+          (type == SessionCallType.voiceCall ||
+              type == SessionCallType.videoCall)) {
+        return l10n.bookingVoiceVideoProviderNote(
+          l10n.callProviderKindLabel(voiceVideoProviderHint!),
+        );
+      }
+      return null;
+    }
+    return switch (type) {
+      SessionCallType.voiceCall => l10n.sessionModeVoiceBetaNote,
+      SessionCallType.videoCall => l10n.sessionModeVideoBetaNote,
+      SessionCallType.externalMeeting => null,
+    };
   }
 }
 

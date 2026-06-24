@@ -52,6 +52,7 @@
     },
     "homeProfileLabel": "ملف المستخدم",
     "homeLocationUnavailable": "حدّد الموقع",
+    "homeHeroLocationContext": "الصلاة في",
     "homeNextPrayerUnavailable": "حدّد موقعك لعرض الصلاة القادمة.",
     "homePrayerTimesAction": "مواقيت الصلاة",
     "homePrayerNow": "حان الوقت الآن",
@@ -75,7 +76,12 @@
         }
     },
     "homeExploreTitle": "اكتشف",
-    "homeExploreSubtitle": "مواقيت الصلاة وتعلّم القرآن",
+    "homeExploreSubtitle": "أدواتك اليومية بلمحة",
+    "homeKhatmaCarouselSubtitle": "تابع خطة قراءتك",
+    "homeSupportCarouselSubtitle": "ساهم في بقاء تلاوة مجانية للجميع",
+    "homeHistoryCarouselSubtitle": "تابع من حيث توقفت",
+    "homeFavoritesCarouselSubtitle": "تلاوات وسور محفوظة",
+    "homeDownloadsCarouselSubtitle": "استمع دون اتصال",
     "homeSessionsTitle": "تعلّم قراءة القرآن",
     "homeSessionsSubtitle": "احجز جلسات مع معلمين معتمدين",
     "homeExploreShowAsList": "عرض كقائمة",
@@ -1753,9 +1759,9 @@
     "@qiblaFinderTitle": {
         "description": "Centered uppercase title on the Qibla compass screen"
     },
-    "qiblaDeviceAngleLabel": "زاوية الجهاز نحو القبلة",
+    "qiblaDeviceAngleLabel": "اتجاه القبلة من الشمال",
     "@qiblaDeviceAngleLabel": {
-        "description": "Subtitle below the compass degree readout"
+        "description": "Subtitle below the Qibla bearing readout (geographic degrees from north)"
     },
     "qiblaRotatePhoneLeft": "أدر الهاتف {degrees}° إلى اليسار",
     "@qiblaRotatePhoneLeft": {

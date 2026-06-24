@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:quran_sessions_rtc/quran_sessions_rtc.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/features/quran_sessions/quran_sessions_launch_policy.dart';
 import 'package:tilawa/features/settings/presentation/widgets/settings_teacher_capability_scope.dart';
 import 'package:tilawa/features/quran_sessions/presentation/quran_sessions_analytics.dart';
 import 'package:tilawa/features/quran_sessions/presentation/quran_sessions_scheduling_analytics.dart';
@@ -167,12 +169,15 @@ List<RouteBase> get quranSessionsRoutes => [
       final teacherId = state.pathParameters['teacherId']!;
       final preSelectedSlotId = state.extra as String?;
       final studentId = requireQuranSessionsUserId(getIt);
+      final launchConfig = getIt<AppLaunchConfig>();
       return BlocProvider(
         create: (_) => getIt<BookingBloc>(),
         child: BookingScreen(
           teacherId: teacherId,
           studentId: studentId,
           preSelectedSlotId: preSelectedSlotId,
+          sessionModePolicy: sessionModePolicyFromLaunchConfig(launchConfig),
+          voiceVideoProviderHint: resolveVoiceVideoProviderHint(launchConfig),
           onBookingSuccess: (_) {
             context
               ..pop()
@@ -195,6 +200,9 @@ List<RouteBase> get quranSessionsRoutes => [
         child: MySessionsScreen(
           studentId: studentId,
           resolveTeacherName: _resolveTeacherName,
+          createCallControlGateway: _createQuranSessionCallControlGateway,
+          createCallTelemetry: _createCallTelemetry,
+          buildCallSurface: _buildQuranSessionsCallSurface(),
           onSessionDetailRequested: (bookingId) => context.push(
             QuranSessionsRoutes.sessionDetail.replaceFirst(
               ':bookingId',
@@ -233,7 +241,12 @@ List<RouteBase> get quranSessionsRoutes => [
       final bookingId = state.pathParameters['bookingId']!;
       return BlocProvider(
         create: (_) => getIt<SessionDetailBloc>(),
-        child: SessionDetailScreen(bookingId: bookingId),
+        child: SessionDetailScreen(
+          bookingId: bookingId,
+          createCallControlGateway: _createQuranSessionCallControlGateway,
+          createCallTelemetry: _createCallTelemetry,
+          buildCallSurface: _buildQuranSessionsCallSurface(),
+        ),
       );
     },
   ),
@@ -261,7 +274,18 @@ List<RouteBase> get quranSessionsRoutes => [
           teacherId: teacherId,
           onManageSchedule: () =>
               context.push(QuranSessionsRoutes.availability),
+          onSessionDetailRequested: (bookingId) => context.push(
+            QuranSessionsRoutes.sessionDetail.replaceFirst(
+              ':bookingId',
+              bookingId,
+            ),
+          ),
           schedulingAnalytics: quranSessionsSchedulingAnalyticsCallbacks(),
+          meetingUrlEditor: TeacherExternalMeetingUrlCard(
+            userId: requireQuranSessionsUserId(getIt),
+            getCapability: getIt<GetCurrentUserTeacherCapabilityUseCase>(),
+            updateMeetingLink: getIt<UpdateTeacherMeetingLinkUseCase>(),
+          ),
         ),
       ),
     ),
@@ -369,8 +393,60 @@ void _openTeacherApply(BuildContext context) {
   context.push(QuranSessionsRoutes.teacherApply);
 }
 
-Future<void> _openProfileCompletion(BuildContext context) async {
+void _openProfileCompletion(BuildContext context) async {
   await context.push(QuranSessionsRoutes.profileCompletion);
+}
+
+InAppCallSurfaceBuilder? _buildQuranSessionsCallSurface() {
+  return (
+    context, {
+    required sessionId,
+    required callType,
+    required callProviderKind,
+  }) {
+    if (!getIt.isRegistered<AgoraRtcEnginePool>()) {
+      return null;
+    }
+    final l10n = context.quranSessionsL10n;
+    return buildAgoraCallSurface(
+      sessionId: sessionId,
+      callType: callType,
+      providerKind: callProviderKind,
+      enginePool: getIt<AgoraRtcEnginePool>(),
+      eventHub: getIt.isRegistered<SessionCallProviderEventHub>()
+          ? getIt<SessionCallProviderEventHub>()
+          : null,
+      labels: AgoraCallSurfaceLabels(
+        connecting: l10n.inAppCallShellConnecting,
+        connected: l10n.inAppCallShellConnected,
+        waitingForParticipant: l10n.inAppCallShellWaitingForParticipant,
+        voiceCallTitle: l10n.inAppCallShellTitle,
+      ),
+    );
+  };
+}
+
+SessionCallControlGateway _createQuranSessionCallControlGateway(
+  String sessionId,
+) {
+  final inner = SessionCallControlGatewayAdapter(
+    provider: getIt<SessionCallProvider>(),
+    sessionId: sessionId,
+  );
+  if (!getIt.isRegistered<QuranSessionCallTelemetryCoordinator>()) {
+    return inner;
+  }
+  return TelemetrySessionCallControlGateway(
+    inner: inner,
+    telemetry: getIt<QuranSessionCallTelemetryCoordinator>(),
+  );
+}
+
+QuranSessionCallTelemetryCoordinator? _createCallTelemetry() {
+  if (!getIt.isRegistered<QuranSessionCallTelemetryCoordinator>()) {
+    return null;
+  }
+  return getIt<QuranSessionCallTelemetryCoordinator>();
 }
 
 String? _resolveTeacherName(String teacherId) {
@@ -407,7 +483,7 @@ class _QuranSessionsHomeRoute extends StatefulWidget {
 }
 
 class _QuranSessionsHomeRouteState extends State<_QuranSessionsHomeRoute> {
-  bool _showTeacherApplyEntry = true;
+  bool _showTeacherApplyEntry = false;
 
   @override
   void initState() {
@@ -419,16 +495,24 @@ class _QuranSessionsHomeRouteState extends State<_QuranSessionsHomeRoute> {
     final userId = quranSessionsCurrentUserId(getIt);
     if (userId == null) return;
 
-    final result = await getIt<GetCurrentUserTeacherCapabilityUseCase>()(
+    final accessResult = await getIt<ResolveTeacherApplicationAccessUseCase>()(
       userId,
     );
+    final capabilityResult =
+        await getIt<GetCurrentUserTeacherCapabilityUseCase>()(userId);
     if (!mounted) return;
 
-    final canApply = result.fold(
-      (_) => true,
-      (capability) => capability.canStartOrContinueApply,
+    final remoteAllowed = accessResult.fold(
+      (_) => false,
+      (access) => access.canApplyAsTeacher,
     );
-    setState(() => _showTeacherApplyEntry = canApply);
+    final canShow = capabilityResult.fold((_) => false, (capability) {
+      if (capability.state != TeacherCapabilityState.none) {
+        return capability.canStartOrContinueApply;
+      }
+      return remoteAllowed;
+    });
+    setState(() => _showTeacherApplyEntry = canShow);
   }
 
   @override
@@ -459,6 +543,7 @@ class _TeacherDashboardGate extends StatefulWidget {
 class _TeacherDashboardGateState extends State<_TeacherDashboardGate> {
   bool _allowed = false;
   bool _checking = true;
+  String? _teacherProfileId;
 
   @override
   void initState() {
@@ -479,10 +564,23 @@ class _TeacherDashboardGateState extends State<_TeacherDashboardGate> {
     );
 
     if (capability.canAccessTeacherDashboard) {
+      final teacherProfileId = capability.teacherProfileId;
+      if (teacherProfileId == null) {
+        setState(() => _checking = false);
+        navigateForTeacherCapability(
+          context,
+          capability,
+          analytics: quranSessionsAnalyticsCallbacks(),
+          showBlockedMessage: capability.shouldCompleteTeacherProfile,
+          replace: true,
+        );
+        return;
+      }
       quranSessionsAnalyticsCallbacks().onTeacherDashboardOpened?.call();
       setState(() {
         _allowed = true;
         _checking = false;
+        _teacherProfileId = teacherProfileId;
       });
       return;
     }
@@ -499,13 +597,12 @@ class _TeacherDashboardGateState extends State<_TeacherDashboardGate> {
 
   @override
   Widget build(BuildContext context) {
-    if (_checking || !_allowed) {
+    if (_checking || !_allowed || _teacherProfileId == null) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
     }
 
-    final userId = requireQuranSessionsUserId(getIt);
-    return widget.childBuilder(userId);
+    return widget.childBuilder(_teacherProfileId!);
   }
 }

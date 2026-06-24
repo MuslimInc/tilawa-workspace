@@ -4,12 +4,12 @@ import 'package:quran_sessions/quran_sessions.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 
 import '../../helpers/availability_test_helpers.dart';
+import '../../helpers/fakes/fake_booked_slot_lock_repository.dart';
 import '../../helpers/fakes/fake_booking_repository.dart';
-import '../../helpers/fakes/fake_session_repository.dart';
 
 void main() {
   late FakeScheduleRepository scheduleRepo;
-  late FakeSessionRepository sessionRepo;
+  late FakeBookedSlotLockRepository bookedSlotLockRepo;
   late FakeBookingRepository bookingRepo;
   late GetTeacherAvailabilityUseCase getAvailability;
   late CreateBookingUseCase createBooking;
@@ -21,11 +21,11 @@ void main() {
 
   setUp(() async {
     scheduleRepo = FakeScheduleRepository()..schedule = makeWeeklySchedule();
-    sessionRepo = FakeSessionRepository();
+    bookedSlotLockRepo = FakeBookedSlotLockRepository();
     bookingRepo = FakeBookingRepository();
     getAvailability = buildGetTeacherAvailabilityUseCase(
       scheduleRepository: scheduleRepo,
-      sessionRepository: sessionRepo,
+      bookedSlotLockRepository: bookedSlotLockRepo,
       now: () => fixedNow,
     );
     createBooking = CreateBookingUseCase(bookingRepo, getAvailability);
@@ -71,18 +71,10 @@ void main() {
       'rejects slot when a session already occupies the start time',
       () async {
         final slot = generatedSlot!;
-        sessionRepo.sessions = [
-          QuranSession(
-            id: 'session_1',
-            bookingId: 'booking_existing',
-            teacherId: 'teacher_1',
-            studentId: 'student_2',
-            startsAt: slot.startsAt,
-            endsAt: slot.endsAt,
-            callType: SessionCallType.externalMeeting,
-            status: QuranSessionStatus.scheduled,
-          ),
-        ];
+        bookedSlotLockRepo.seedHardLock(
+          teacherId: 'teacher_1',
+          startUtc: slot.startsAt.toUtc(),
+        );
 
         final result = await createBooking(
           teacherId: 'teacher_1',

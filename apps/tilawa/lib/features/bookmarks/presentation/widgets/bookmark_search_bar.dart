@@ -9,10 +9,12 @@ class BookmarkSearchBar extends StatefulWidget {
     super.key,
     required this.onSearchChanged,
     required this.onClearSearch,
+    this.scrollPadding,
   });
 
   final ValueChanged<String> onSearchChanged;
   final VoidCallback onClearSearch;
+  final EdgeInsets? scrollPadding;
 
   @override
   State<BookmarkSearchBar> createState() => _BookmarkSearchBarState();
@@ -34,6 +36,7 @@ class _BookmarkSearchBarState extends State<BookmarkSearchBar> {
     return TilawaSearchField(
       controller: _controller,
       focusNode: _focusNode,
+      scrollPadding: widget.scrollPadding,
       hintText: context.l10n.searchBookmarks,
       prefixIcon: FluentIcons.search_24_regular,
       clearIcon: FluentIcons.dismiss_24_regular,

@@ -7,8 +7,8 @@ import 'package:flutter/services.dart';
 
 import '../foundation/app_colors.dart';
 import '../foundation/component_tokens.dart';
-import '../foundation/content_bounds.dart';
 import '../foundation/design_tokens.dart';
+import '../foundation/tilawa_interactive_surface.dart';
 
 /// [ValueListenable] that is always `true` and never notifies.
 ///
@@ -371,16 +371,14 @@ class _BottomNavBarState extends State<_BottomNavBar>
     required double innerVPadding,
     required bool isRtl,
   }) {
-    final double rowWidth =
-        (count * hitSize) + ((count - 1) * (itemStride - hitSize));
-    final double rowLeft = (width - rowWidth) / 2;
+    final double slotWidth = width / count;
     final int visualSlot = _LongPressNavLayout.visualSlotForDestinationIndex(
       destinationIndex: index,
       count: count,
       isRtl: isRtl,
     );
     return Offset(
-      rowLeft + (visualSlot * itemStride) + (hitSize / 2),
+      (visualSlot + 0.5) * slotWidth,
       stackHeight - innerVPadding - (hitSize / 2),
     );
   }
@@ -602,33 +600,33 @@ class _BottomNavBarState extends State<_BottomNavBar>
     final ThemeData theme = Theme.of(context);
     final TilawaAdaptiveShellTokens tokens =
         theme.componentTokens.adaptiveShell;
+    final TilawaBottomSheetScaffoldTokens sheetTokens =
+        theme.componentTokens.bottomSheetScaffold;
     final TilawaDesignTokens designTokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
-    final Color dockColor = theme.scaffoldBackgroundColor;
     final double hitSize = tokens.navButtonIconOnlyMinHeight;
-    final double pillBarHeight =
-        hitSize + (2 * tokens.bottomNavInternalPadding);
-    final double outerRadius = designTokens.radiusPill(pillBarHeight);
+    final double barHeight = hitSize + (2 * tokens.bottomNavInternalPadding);
     final double systemBottomInset = MediaQuery.viewPaddingOf(context).bottom;
     final bool hasSelection = widget.selectedIndex != null;
     final double radialRadius = math.max(hitSize * 2.35, 92);
     final double radialOverlayHeight =
         radialRadius + hitSize + designTokens.spaceLarge;
-    // Vertical mode stacks items upward as an overlay; the dock keeps pill height
+    // Vertical mode stacks items upward as an overlay; the dock keeps bar height
     // so body content is not cropped when the selector opens.
     final double stackHeight =
         _isLongPressActive &&
             (widget.longPressMode == TilawaPhoneBottomNavLongPressMode.radial ||
                 !_usesVerticalStackSession(widget.destinations.length))
         ? radialOverlayHeight
-        : pillBarHeight;
+        : barHeight;
     final int? focusedIndex = _longPressFocusedIndex ?? widget.selectedIndex;
+    final Color barColor = tokens.bottomNavBackgroundColor;
 
     final SystemUiOverlayStyle bottomNavOverlayStyle = SystemUiOverlayStyle(
-      systemNavigationBarColor: dockColor.withValues(alpha: 1),
+      systemNavigationBarColor: barColor.withValues(alpha: 1),
       systemNavigationBarDividerColor: Colors.transparent,
       systemNavigationBarIconBrightness:
-          ThemeData.estimateBrightnessForColor(dockColor) == Brightness.dark
+          ThemeData.estimateBrightnessForColor(barColor) == Brightness.dark
           ? Brightness.light
           : Brightness.dark,
       systemStatusBarContrastEnforced: false,
@@ -637,19 +635,20 @@ class _BottomNavBarState extends State<_BottomNavBar>
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: bottomNavOverlayStyle,
-      child: ColoredBox(
+      child: Material(
         key: const Key('tilawa_bottom_nav_dock'),
-        color: dockColor,
-        child: TilawaContentBounds(
-          kind: TilawaContentKind.media,
-          alignment: Alignment.bottomCenter,
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(
-              tokens.bottomNavHorizontalMargin,
-              tokens.bottomNavVerticalMargin,
-              tokens.bottomNavHorizontalMargin,
-              systemBottomInset + tokens.bottomNavBottomLift,
+        color: barColor,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            border: Border(
+              top: BorderSide(
+                color: colorScheme.outlineVariant,
+                width: sheetTokens.footerTopBorderWidth,
+              ),
             ),
+          ),
+          child: Padding(
+            padding: EdgeInsets.only(bottom: systemBottomInset),
             child: Listener(
               behavior: HitTestBehavior.translucent,
               onPointerDown: _handlePointerDown,
@@ -661,27 +660,11 @@ class _BottomNavBarState extends State<_BottomNavBar>
                   final bool isRtl =
                       Directionality.of(context) == TextDirection.rtl;
                   final int destinationCount = widget.destinations.length;
-                  final double rowHorizontalInset =
-                      designTokens.spaceExtraSmall * 2;
-                  final double availableRowWidth = math.max(
-                    hitSize,
-                    constraints.maxWidth - rowHorizontalInset,
-                  );
-                  double itemGap = tokens.bottomNavItemGap;
-                  if (destinationCount > 1) {
-                    final double naturalRowWidth =
-                        (destinationCount * hitSize) +
-                        ((destinationCount - 1) * itemGap);
-                    if (naturalRowWidth > availableRowWidth) {
-                      itemGap =
-                          ((availableRowWidth - destinationCount * hitSize) /
-                                  (destinationCount - 1))
-                              .clamp(0.0, tokens.bottomNavItemGap);
-                    }
-                  }
-                  final double itemStride = hitSize + itemGap;
+                  final double slotWidth =
+                      constraints.maxWidth / destinationCount;
+                  final double itemStride = slotWidth;
                   final double verticalPointerHeight =
-                      pillBarHeight + ((destinationCount - 1) * itemStride);
+                      barHeight + ((destinationCount - 1) * itemStride);
                   final bool useVerticalPointerOverflow =
                       _usesVerticalStackSession(destinationCount);
                   final _VerticalStackAnchor? verticalAnchor =
@@ -803,72 +786,50 @@ class _BottomNavBarState extends State<_BottomNavBar>
 
                       return navStack;
                     },
-                    child: Center(
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(outerRadius),
-                          boxShadow: tokens.bottomNavShadowOpacity > 0
-                              ? [
-                                  BoxShadow(
-                                    color: colorScheme.shadow.withValues(
-                                      alpha: tokens.bottomNavShadowOpacity,
-                                    ),
-                                    blurRadius: tokens.bottomNavShadowBlur,
-                                    offset: tokens.bottomNavShadowOffset,
-                                  ),
-                                ]
-                              : const <BoxShadow>[],
-                        ),
-                        child: Material(
-                          key: const Key('tilawa_bottom_nav_bar'),
-                          color: tokens.bottomNavBackgroundColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(outerRadius),
-                            side: BorderSide(
-                              color: tokens.bottomNavOutlineColor,
-                              width: tokens.bottomNavBorderWidth,
-                            ),
+                    child: Material(
+                      key: const Key('tilawa_bottom_nav_bar'),
+                      color: Colors.transparent,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onHorizontalDragEnd: _handleHorizontalDragEnd,
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            vertical: tokens.bottomNavInternalPadding,
                           ),
-                          clipBehavior: Clip.antiAlias,
-                          child: GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onHorizontalDragEnd: _handleHorizontalDragEnd,
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: designTokens.spaceExtraSmall,
-                                vertical: designTokens.spaceExtraSmall,
-                              ),
-                              child: Stack(
-                                clipBehavior: Clip.none,
-                                children: [
-                                  if (hasSelection &&
-                                      widget
-                                          .destinations[widget.selectedIndex!]
-                                          .selectionUsesBackground)
-                                    AnimatedPositionedDirectional(
-                                      duration: designTokens.durationFast,
-                                      curve: Curves.easeOutCubic,
-                                      start: widget.selectedIndex! * itemStride,
-                                      width: hitSize,
-                                      height: hitSize,
-                                      child: DecoratedBox(
-                                        decoration: BoxDecoration(
-                                          color: tokens
-                                              .navButtonSelectedBackgroundColor,
-                                          shape: BoxShape.circle,
-                                        ),
-                                      ),
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              if (hasSelection &&
+                                  widget
+                                      .destinations[widget.selectedIndex!]
+                                      .selectionUsesBackground)
+                                AnimatedPositionedDirectional(
+                                  duration: designTokens.durationFast,
+                                  curve: Curves.easeOutCubic,
+                                  start:
+                                      (widget.selectedIndex! * slotWidth) +
+                                      ((slotWidth - hitSize) / 2),
+                                  width: hitSize,
+                                  height: hitSize,
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      color: tokens
+                                          .navButtonSelectedBackgroundColor,
+                                      shape: BoxShape.circle,
                                     ),
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    spacing: itemGap,
-                                    children: [
-                                      for (
-                                        int i = 0;
-                                        i < widget.destinations.length;
-                                        i++
-                                      )
-                                        _NavButton(
+                                  ),
+                                ),
+                              Row(
+                                children: [
+                                  for (
+                                    int i = 0;
+                                    i < widget.destinations.length;
+                                    i++
+                                  )
+                                    Expanded(
+                                      child: Align(
+                                        alignment: Alignment.center,
+                                        child: _NavButton(
                                           key: Key('nav_button_$i'),
                                           destination: widget.destinations[i],
                                           isSelected:
@@ -883,11 +844,11 @@ class _BottomNavBarState extends State<_BottomNavBar>
                                               : null,
                                           pulseKey: Key('nav_pulse_$i'),
                                         ),
-                                    ],
-                                  ),
+                                      ),
+                                    ),
                                 ],
                               ),
-                            ),
+                            ],
                           ),
                         ),
                       ),
@@ -1440,22 +1401,17 @@ class _NavButton extends StatelessWidget {
       label: destination.label,
       selected: isSelected,
       identifier: destination.identifier,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            HapticFeedback.selectionClick();
-            onTap();
-          },
-          onLongPress: onLongPress,
-          customBorder: const CircleBorder(),
-          splashColor: tokens.navButtonSplashColor,
-          highlightColor: tokens.navButtonHighlightColor,
-          child: SizedBox(
-            width: hitSize,
-            height: hitSize,
-            child: Center(child: iconWidget),
-          ),
+      child: TilawaInteractiveSurface(
+        // Outer Semantics owns the role/label/selected/identifier.
+        button: false,
+        onTap: onTap,
+        onLongPress: onLongPress,
+        // Circular focus ring + state layer for the round nav target.
+        borderRadius: BorderRadius.circular(hitSize / 2),
+        child: SizedBox(
+          width: hitSize,
+          height: hitSize,
+          child: Center(child: iconWidget),
         ),
       ),
     );

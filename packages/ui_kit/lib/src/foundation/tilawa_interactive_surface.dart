@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'design_tokens.dart';
 import 'tilawa_interaction_feedback.dart';
@@ -22,9 +23,10 @@ import 'tilawa_interaction_feedback.dart';
 ///   `stateLayerFocused` (UIK-008).
 ///
 /// It is intentionally *unopinionated about paint*: the caller supplies the
-/// resting [child] (fill, border, content). This composes existing kit pieces
-/// (it does not replace [InkWell] ripple where that is the desired feel — it
-/// adds the cross-cutting states a bare ripple lacks).
+/// resting [child] (fill, border, content). The kit's interactive atoms,
+/// molecules, and organisms route through this primitive instead of a raw
+/// [Material] + [InkWell] pair, so the whole app shares one press-scale feel
+/// (no ink ripple) plus a consistent focus ring, haptics, and state layers.
 ///
 /// ## Usage
 ///
@@ -52,8 +54,10 @@ class TilawaInteractiveSurface extends StatefulWidget {
     this.focusColor,
     this.stateLayerColor,
     this.semanticLabel,
+    this.semanticHint,
     this.button = true,
     this.selected,
+    this.toggled,
     this.enabled = true,
     this.focusNode,
     this.autofocus = false,
@@ -91,11 +95,20 @@ class TilawaInteractiveSurface extends StatefulWidget {
   /// Accessible name. Falls back to the ambient semantics of [child] if null.
   final String? semanticLabel;
 
+  /// Optional accessibility hint (e.g. why a control is unavailable). Mirrors
+  /// [Semantics.hint].
+  final String? semanticHint;
+
   /// Whether the surface is announced as a button (vs a generic tappable).
   final bool button;
 
   /// When non-null, exposes selected semantics (e.g. a selectable chip/pill).
   final bool? selected;
+
+  /// When non-null, exposes toggle semantics (e.g. an on/off icon action such
+  /// as a filter toggle). Distinct from [selected]: use [toggled] for controls
+  /// that flip an independent on/off state, [selected] for single/multi-select.
+  final bool? toggled;
 
   /// When `false`, taps are ignored and the surface is marked disabled.
   final bool enabled;
@@ -119,6 +132,26 @@ class _TilawaInteractiveSurfaceState extends State<TilawaInteractiveSurface> {
     if (!widget._isInteractive) return;
     TilawaInteractionFeedback.trigger(widget.haptic);
     widget.onTap?.call();
+  }
+
+  void _setPressed(bool pressed) {
+    if (_pressed == pressed) {
+      return;
+    }
+    _pressed = pressed;
+    if (!mounted) {
+      return;
+    }
+    final binding = WidgetsBinding.instance;
+    if (binding.schedulerPhase == SchedulerPhase.idle) {
+      setState(() {});
+      return;
+    }
+    binding.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 
   @override
@@ -150,6 +183,11 @@ class _TilawaInteractiveSurfaceState extends State<TilawaInteractiveSurface> {
         : 0;
 
     Widget surface = Stack(
+      // Pass the incoming constraints straight to the resting child so the
+      // wrapper stays layout-transparent: a tight cell (e.g. a fixed-height
+      // grid tile) makes the child fill it, exactly as the old Material+InkWell
+      // did; a loose parent lets the child size to its content.
+      fit: StackFit.passthrough,
       children: [
         widget.child,
         if (overlayAlpha > 0)
@@ -190,8 +228,14 @@ class _TilawaInteractiveSurfaceState extends State<TilawaInteractiveSurface> {
       autofocus: widget.autofocus,
       enabled: widget._isInteractive,
       mouseCursor: SystemMouseCursors.click,
-      onShowHoverHighlight: (v) => setState(() => _hovered = v),
-      onShowFocusHighlight: (v) => setState(() => _focused = v),
+      onShowHoverHighlight: (v) {
+        if (!mounted) return;
+        setState(() => _hovered = v);
+      },
+      onShowFocusHighlight: (v) {
+        if (!mounted) return;
+        setState(() => _focused = v);
+      },
       actions: <Type, Action<Intent>>{
         if (widget.onTap != null)
           ActivateIntent: CallbackAction<ActivateIntent>(
@@ -205,9 +249,9 @@ class _TilawaInteractiveSurfaceState extends State<TilawaInteractiveSurface> {
         // Opaque so taps on transparent padding inside the bounds still
         // register (kit GestureDetector contract — see kit_contracts_test).
         behavior: HitTestBehavior.opaque,
-        onTapDown: (_) => setState(() => _pressed = true),
-        onTapUp: (_) => setState(() => _pressed = false),
-        onTapCancel: () => setState(() => _pressed = false),
+        onTapDown: (_) => _setPressed(true),
+        onTapUp: (_) => _setPressed(false),
+        onTapCancel: () => _setPressed(false),
         onTap: widget.onTap != null ? _activate : null,
         onLongPress: widget.onLongPress,
         child: surface,
@@ -222,7 +266,9 @@ class _TilawaInteractiveSurfaceState extends State<TilawaInteractiveSurface> {
       button: widget.button,
       enabled: enabled,
       selected: widget.selected,
+      toggled: widget.toggled,
       label: widget.semanticLabel,
+      hint: widget.semanticHint,
       child: child,
     );
   }

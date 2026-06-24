@@ -5,6 +5,7 @@ class FakeSessionMutationGateway implements SessionMutationGateway {
   FakeSessionMutationGateway({this.onCreate});
 
   final List<String> calls = [];
+  QuranSessionsFailure? failConfirmRescheduleWith;
   Future<Either<QuranSessionsFailure, SessionBookingOutcome>> Function({
     required String teacherId,
     required String studentId,
@@ -87,7 +88,26 @@ class FakeSessionMutationGateway implements SessionMutationGateway {
     required String requestId,
     required bool accept,
     required ActorRole actorRole,
-  }) async => Left(NotFoundFailure('stub'));
+  }) async {
+    calls.add('confirmReschedule:$requestId:$accept');
+    final failure = failConfirmRescheduleWith;
+    if (failure != null) {
+      return Left(failure);
+    }
+    return Right(
+      SessionAggregate(
+        id: 'booking_1',
+        teacherId: 'teacher_1',
+        studentId: 'student_1',
+        slotId: accept ? 'slot_new' : 'slot_1',
+        startsAt: DateTime.utc(2026, 7, 1, 10),
+        pricingType: SessionPricingType.free,
+        lifecycleStatus: SessionLifecycleStatus.scheduled,
+        createdAt: DateTime.now().toUtc(),
+        updatedAt: DateTime.now().toUtc(),
+      ),
+    );
+  }
 
   @override
   Future<Either<QuranSessionsFailure, SessionAggregate>> completeSession({

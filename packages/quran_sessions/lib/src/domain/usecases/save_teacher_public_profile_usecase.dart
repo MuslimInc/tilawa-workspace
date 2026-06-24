@@ -4,6 +4,7 @@ import '../entities/teacher_profile.dart';
 import '../failures/quran_sessions_failure.dart';
 import '../repositories/teacher_profile_repository.dart';
 import '../rules/teacher_profile_completeness.dart';
+import '../value_objects/external_meeting_url.dart';
 import '../value_objects/teacher_public_name.dart';
 
 /// Saves mutable public [TeacherProfile] fields for an approved teacher.
@@ -19,6 +20,7 @@ class SaveTeacherPublicProfileUseCase {
     required List<String> teachingLanguages,
     required List<String> specializations,
     String? avatarUrl,
+    String? externalMeetingUrl,
   }) async {
     final nameFailure = ValidateTeacherPublicName.failureFor(displayName);
     if (nameFailure != null) {
@@ -26,6 +28,15 @@ class SaveTeacherPublicProfileUseCase {
     }
     final trimmedName = ValidateTeacherPublicName.normalize(displayName)!;
     final trimmedBio = publicBio.trim();
+    final meetingUrlFailure = ValidateExternalMeetingUrl.failureFor(
+      externalMeetingUrl,
+    );
+    if (meetingUrlFailure != null) {
+      return Left(meetingUrlFailure);
+    }
+    final normalizedMeetingUrl = ValidateExternalMeetingUrl.normalize(
+      externalMeetingUrl,
+    );
     if (trimmedBio.isEmpty) {
       return const Left(
         ValidationFailure(
@@ -53,14 +64,25 @@ class SaveTeacherPublicProfileUseCase {
     );
 
     final updated = TeacherProfileCompleteness.withComputedVisibility(
-      existing.copyWith(
-        displayName: trimmedName,
-        publicBio: trimmedBio,
-        teachingLanguages: teachingLanguages,
-        specializations: specializations,
-        avatarUrl: avatarUrl ?? existing.avatarUrl,
-        updatedAt: DateTime.now(),
-      ),
+      externalMeetingUrl == null
+          ? existing.copyWith(
+              displayName: trimmedName,
+              publicBio: trimmedBio,
+              teachingLanguages: teachingLanguages,
+              specializations: specializations,
+              avatarUrl: avatarUrl ?? existing.avatarUrl,
+              updatedAt: DateTime.now(),
+            )
+          : existing.copyWith(
+              displayName: trimmedName,
+              publicBio: trimmedBio,
+              teachingLanguages: teachingLanguages,
+              specializations: specializations,
+              avatarUrl: avatarUrl ?? existing.avatarUrl,
+              externalMeetingUrl: normalizedMeetingUrl,
+              clearExternalMeetingUrl: normalizedMeetingUrl == null,
+              updatedAt: DateTime.now(),
+            ),
     );
 
     return _profiles.updatePublicProfile(updated);

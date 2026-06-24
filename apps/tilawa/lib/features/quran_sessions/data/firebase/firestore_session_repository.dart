@@ -26,7 +26,12 @@ class FirestoreSessionDataSource implements SessionRemoteDataSource {
       callType: _mapCallType(data['callType'] as String?),
       status: _mapSessionStatus(data['status'] as String?),
       meetingLink: (data['meetingLink'] ?? data['meeting_link']) as String?,
-      callRoomId: data['callRoomId'] as String?,
+      callRoomId: (data['providerSessionId'] ?? data['callRoomId']) as String?,
+      bookingType: data['bookingType'] as String?,
+      callProvider: data['callProvider'] as String?,
+      providerSessionId: data['providerSessionId'] as String?,
+      joinToken: data['joinToken'] as String?,
+      participants: data['participants'],
       notes: data['notes'] as String?,
     );
   }
@@ -45,11 +50,41 @@ class FirestoreSessionDataSource implements SessionRemoteDataSource {
   }
 
   @override
-  Future<List<QuranSessionDto>> getStudentSessions(String studentId) async {
+  Future<SessionQueryPage> getStudentUpcomingSessions(
+    String studentId, {
+    String? cursor,
+    int limit = 30,
+  }) => _queryStudentSessions(
+    studentId: studentId,
+    upcoming: true,
+    cursor: cursor,
+    limit: limit,
+  );
+
+  @override
+  Future<SessionQueryPage> getStudentPastSessions(
+    String studentId, {
+    String? cursor,
+    int limit = 30,
+  }) => _queryStudentSessions(
+    studentId: studentId,
+    upcoming: false,
+    cursor: cursor,
+    limit: limit,
+  );
+
+  @override
+  Future<List<QuranSessionDto>> getTeacherUpcomingSessions(
+    String teacherId, {
+    int limit = 30,
+  }) async {
     try {
+      final now = writeDateTime(DateTime.now().toUtc());
       final snapshot = await _sessions
-          .where('studentId', isEqualTo: studentId)
-          .orderBy('startsAt', descending: true)
+          .where('teacherId', isEqualTo: teacherId)
+          .where('startsAt', isGreaterThanOrEqualTo: now)
+          .orderBy('startsAt')
+          .limit(limit)
           .get();
       return snapshot.docs.map(_mapDoc).toList();
     } on FirebaseException catch (e) {
@@ -57,14 +92,40 @@ class FirestoreSessionDataSource implements SessionRemoteDataSource {
     }
   }
 
-  @override
-  Future<List<QuranSessionDto>> getTeacherSessions(String teacherId) async {
+  Future<SessionQueryPage> _queryStudentSessions({
+    required String studentId,
+    required bool upcoming,
+    String? cursor,
+    required int limit,
+  }) async {
     try {
-      final snapshot = await _sessions
-          .where('teacherId', isEqualTo: teacherId)
-          .orderBy('startsAt', descending: true)
-          .get();
-      return snapshot.docs.map(_mapDoc).toList();
+      final now = writeDateTime(DateTime.now().toUtc());
+      Query<Map<String, dynamic>> query = _sessions.where(
+        'studentId',
+        isEqualTo: studentId,
+      );
+      if (upcoming) {
+        query = query
+            .where('startsAt', isGreaterThanOrEqualTo: now)
+            .orderBy('startsAt');
+      } else {
+        query = query
+            .where('startsAt', isLessThan: now)
+            .orderBy('startsAt', descending: true);
+      }
+      query = query.limit(limit);
+      if (cursor != null && cursor.isNotEmpty) {
+        final cursorDoc = await _sessions.doc(cursor).get();
+        if (cursorDoc.exists) {
+          query = query.startAfterDocument(cursorDoc);
+        }
+      }
+      final snapshot = await query.get();
+      final sessions = snapshot.docs.map(_mapDoc).toList();
+      final nextCursor = snapshot.docs.length == limit
+          ? snapshot.docs.last.id
+          : null;
+      return (sessions: sessions, nextCursor: nextCursor);
     } on FirebaseException catch (e) {
       throw mapFirebaseException(e);
     }

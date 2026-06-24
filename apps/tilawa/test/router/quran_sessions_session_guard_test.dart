@@ -5,6 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:tilawa/core/bootstrap/app_launch_config.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tilawa/features/auth/presentation/cubit/session_validity_cubit.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
@@ -76,6 +78,41 @@ void main() {
     );
     return result;
   }
+
+  group('quranSessionsFeatureRedirect', () {
+    tearDown(() {
+      if (getIt.isRegistered<AppLaunchConfig>()) {
+        getIt.unregister<AppLaunchConfig>();
+      }
+    });
+
+    test('returns null when feature enabled (default)', () {
+      final result = quranSessionsFeatureRedirect(
+        FakeGoRouterState(QuranSessionsRoutes.home),
+      );
+      expect(result, isNull);
+    });
+
+    test('redirects to home when feature disabled', () {
+      getIt.registerSingleton<AppLaunchConfig>(
+        const AppLaunchConfig(quranSessionsEnabled: false),
+      );
+      final result = quranSessionsFeatureRedirect(
+        FakeGoRouterState(QuranSessionsRoutes.mySessions),
+      );
+      expect(result, const HomeRoute().location);
+    });
+
+    test('ignores non-sessions routes', () {
+      getIt.registerSingleton<AppLaunchConfig>(
+        const AppLaunchConfig(quranSessionsEnabled: false),
+      );
+      final result = quranSessionsFeatureRedirect(
+        FakeGoRouterState('/settings'),
+      );
+      expect(result, isNull);
+    });
+  });
 
   group('quranSessionsSessionRedirect', () {
     testWidgets('returns null for non-protected routes', (tester) async {

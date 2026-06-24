@@ -11,6 +11,7 @@ import {
 } from "./idempotencyService";
 import { recordTerminalTransition } from "./metricsAggregationService";
 import { enqueueSessionNotification } from "./notificationOutboxService";
+import { resolveTeacherProfileUserId } from "./teacherProfileUserId";
 import {
   isAdmin,
   requireAuthenticatedUid,
@@ -22,6 +23,7 @@ import {
   validateTransition,
 } from "./sessionLifecycleGuard";
 import type { LifecycleStatus } from "./sessionLifecycleService";
+import { sessionCallableHttpsOptions } from "./sessionCallableOptions";
 
 type NoShowClassification =
   | "teacher_no_show"
@@ -61,7 +63,7 @@ function resolveClassification(
 }
 
 export const markSessionNoShow = onCall(
-  { enforceAppCheck: false },
+  sessionCallableHttpsOptions,
   async (request) => {
     const uid = requireAuthenticatedUid(request);
     await requireValidSessionEpochUnlessAdmin(request, uid);
@@ -89,9 +91,13 @@ export const markSessionNoShow = onCall(
       teacherId: (booking.teacherId as string) ?? "",
     };
 
+    const teacherUserId = await resolveTeacherProfileUserId(
+      db,
+      participants.teacherId,
+    );
     const actor = isAdmin(request)
       ? ("admin" as const)
-      : resolveActorRole(request, data.actorRole, participants);
+      : resolveActorRole(request, data.actorRole, participants, teacherUserId);
     const classification = resolveClassification(data, actor);
     const action = noShowActionForClassification(classification);
 
@@ -159,11 +165,12 @@ export const markSessionNoShow = onCall(
               ? ({ type: "student_no_show", studentId } as const)
               : ({ type: "both_no_show", teacherId, studentId } as const);
         await recordTerminalTransition(db, metricsType);
+        const teacherUserId = await resolveTeacherProfileUserId(db, teacherId);
         await enqueueSessionNotification(db, {
           sessionId: data.sessionId,
           aggregateId: (session.aggregateId as string | undefined) ?? bookingId,
           kind: "noShowMarked",
-          recipientUserIds: [teacherId, studentId],
+          recipientUserIds: [teacherUserId, studentId],
           payload: { classification },
         });
       }

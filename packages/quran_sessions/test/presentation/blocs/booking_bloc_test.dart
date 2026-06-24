@@ -3,6 +3,9 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:checks/checks.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quran_sessions/src/domain/entities/teacher_availability.dart';
+import 'package:quran_sessions/src/domain/entities/teacher_profile.dart';
+import 'package:quran_sessions/src/domain/entities/teacher_verification_status.dart';
+import 'package:quran_sessions/src/domain/rules/teacher_profile_completeness.dart';
 import 'package:quran_sessions/src/domain/entities/quran_booking.dart';
 import 'package:quran_sessions/src/domain/entities/session_call_type.dart';
 import 'package:quran_sessions/src/domain/entities/user_profile.dart';
@@ -21,6 +24,7 @@ import '../../helpers/fakes/fake_session_repository.dart';
 import '../../helpers/fakes/fake_teacher_repository.dart';
 import '../../helpers/fakes/fake_user_profile_repository.dart';
 import '../../helpers/fakes/fake_session_mutation_gateway.dart';
+import '../../helpers/fakes/fake_teacher_profile_repository.dart';
 import '../../helpers/lifecycle_test_helpers.dart';
 import '../../helpers/fixtures.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
@@ -35,6 +39,7 @@ void main() {
   late FakeMarketConfigRepository marketConfigRepo;
   late GetTeacherAvailabilityUseCase getAvailability;
   late FakeSessionMutationGateway mutationGateway;
+  late FakeTeacherProfileRepository teacherProfileRepo;
   late BookingBloc bloc;
   late TeacherAvailability generatedSlot;
 
@@ -67,11 +72,15 @@ void main() {
       now: () => fixedNow,
     );
     mutationGateway = FakeSessionMutationGateway();
+    teacherProfileRepo = FakeTeacherProfileRepository(
+      profile: _teacherProfile(externalMeetingUrl: null),
+    );
     bloc = BookingBloc(
       getAvailability: getAvailability,
       submitBooking: buildSubmitSessionBookingUseCase(
         getAvailability: getAvailability,
         mutationGateway: mutationGateway,
+        teacherProfiles: teacherProfileRepo,
       ),
       validateEligibility: ValidateBookingEligibilityUseCase(
         profileRepository: profileRepo,
@@ -79,6 +88,7 @@ void main() {
         teacherRepository: teacherRepo,
         marketConfigRepository: marketConfigRepo,
       ),
+      teacherProfiles: teacherProfileRepo,
     );
 
     final slots = await getAvailability(
@@ -117,6 +127,52 @@ void main() {
         final state = b.state as BookingSelecting;
         check(state.availableSlots).isNotEmpty();
         check(state.canSubmit).isFalse();
+        check(state.selectedCallType).equals(SessionCallType.voiceCall);
+        check(state.hasExternalMeetingUrl).isFalse();
+      },
+    );
+
+    blocTest<BookingBloc, BookingState>(
+      'defaults to external when teacher has meeting URL',
+      build: () {
+        teacherProfileRepo = FakeTeacherProfileRepository(
+          profile: _teacherProfile(
+            externalMeetingUrl: 'https://meet.example.com/room',
+          ),
+        );
+        return BookingBloc(
+          getAvailability: getAvailability,
+          submitBooking: buildSubmitSessionBookingUseCase(
+            getAvailability: getAvailability,
+            mutationGateway: mutationGateway,
+            teacherProfiles: teacherProfileRepo,
+          ),
+          validateEligibility: ValidateBookingEligibilityUseCase(
+            profileRepository: profileRepo,
+            policyRepository: policyRepo,
+            teacherRepository: teacherRepo,
+            marketConfigRepository: marketConfigRepo,
+          ),
+          teacherProfiles: teacherProfileRepo,
+        );
+      },
+      act: (b) => b.add(
+        BookingScreenOpened(
+          teacherId: 'teacher_1',
+          studentId: 'student_1',
+          from: windowFrom,
+          to: windowTo,
+        ),
+      ),
+      expect: () => [
+        isA<BookingEligibilityChecking>(),
+        isA<BookingSlotsLoading>(),
+        isA<BookingSelecting>(),
+      ],
+      verify: (b) {
+        final state = b.state as BookingSelecting;
+        check(state.selectedCallType).equals(SessionCallType.externalMeeting);
+        check(state.hasExternalMeetingUrl).isTrue();
       },
     );
 
@@ -138,6 +194,7 @@ void main() {
           submitBooking: buildSubmitSessionBookingUseCase(
             getAvailability: emptyAvailability,
             mutationGateway: mutationGateway,
+            teacherProfiles: teacherProfileRepo,
           ),
           validateEligibility: ValidateBookingEligibilityUseCase(
             profileRepository: profileRepo,
@@ -145,6 +202,7 @@ void main() {
             teacherRepository: teacherRepo,
             marketConfigRepository: marketConfigRepo,
           ),
+          teacherProfiles: teacherProfileRepo,
           onBookingLostDueToNoAvailability: bookingLostEvents.add,
           resolveMarketCode: (_) async => 'EG',
         );
@@ -194,17 +252,54 @@ void main() {
         teacherId: 'teacher_1',
         availableSlots: const [],
       ),
-      act: (b) => b.add(const CallTypeSelected(SessionCallType.voiceCall)),
+      act: (b) => b.add(const CallTypeSelected(SessionCallType.videoCall)),
       expect: () => [isA<BookingSelecting>()],
       verify: (b) {
         final state = b.state as BookingSelecting;
-        check(state.selectedCallType).equals(SessionCallType.voiceCall);
+        check(state.selectedCallType).equals(SessionCallType.videoCall);
       },
     );
 
     blocTest<BookingBloc, BookingState>(
-      'BookingSubmitted emits [Submitting, Success] for generated slot',
+      'BookingSubmitted emits [Submitting, Success] for voice when no URL',
       build: () => bloc,
+      act: (b) => b.add(
+        BookingSubmitted(
+          teacherId: 'teacher_1',
+          slotId: generatedSlot.slotId,
+          callType: SessionCallType.voiceCall,
+        ),
+      ),
+      expect: () => [
+        isA<BookingSubmitting>(),
+        isA<BookingSuccess>(),
+      ],
+    );
+
+    blocTest<BookingBloc, BookingState>(
+      'BookingSubmitted emits [Submitting, Success] for external with URL',
+      build: () {
+        teacherProfileRepo = FakeTeacherProfileRepository(
+          profile: _teacherProfile(
+            externalMeetingUrl: 'https://meet.example.com/room',
+          ),
+        );
+        return BookingBloc(
+          getAvailability: getAvailability,
+          submitBooking: buildSubmitSessionBookingUseCase(
+            getAvailability: getAvailability,
+            mutationGateway: mutationGateway,
+            teacherProfiles: teacherProfileRepo,
+          ),
+          validateEligibility: ValidateBookingEligibilityUseCase(
+            profileRepository: profileRepo,
+            policyRepository: policyRepo,
+            teacherRepository: teacherRepo,
+            marketConfigRepository: marketConfigRepo,
+          ),
+          teacherProfiles: teacherProfileRepo,
+        );
+      },
       act: (b) => b.add(
         BookingSubmitted(
           teacherId: 'teacher_1',
@@ -219,6 +314,26 @@ void main() {
       verify: (b) {
         final state = b.state as BookingSuccess;
         check(state.booking.status).equals(BookingStatus.confirmed);
+      },
+    );
+
+    blocTest<BookingBloc, BookingState>(
+      'BookingSubmitted emits meeting link failure for external without URL',
+      build: () => bloc,
+      act: (b) => b.add(
+        BookingSubmitted(
+          teacherId: 'teacher_1',
+          slotId: generatedSlot.slotId,
+          callType: SessionCallType.externalMeeting,
+        ),
+      ),
+      expect: () => [
+        isA<BookingSubmitting>(),
+        isA<BookingFailure>(),
+      ],
+      verify: (b) {
+        final state = b.state as BookingFailure;
+        check(state.failure).isA<MeetingLinkUnavailableFailure>();
       },
     );
 
@@ -260,3 +375,24 @@ void main() {
     );
   });
 }
+
+TeacherProfile _teacherProfile({required String? externalMeetingUrl}) =>
+    TeacherProfileCompleteness.withComputedVisibility(
+      TeacherProfile(
+        id: 'teacher_1',
+        userId: 'teacher_1',
+        displayName: 'Sheikh Ahmed',
+        publicBio: 'Bio',
+        verificationStatus: TeacherVerificationStatus.verified,
+        teachingLanguages: const ['ar'],
+        specializations: const ['tajweed'],
+        averageRating: 4.8,
+        reviewCount: 42,
+        isActive: true,
+        profileCompleteness: TeacherProfileCompletenessStatus.complete,
+        isPubliclyVisible: true,
+        externalMeetingUrl: externalMeetingUrl,
+        createdAt: DateTime.utc(2026, 1, 1),
+        updatedAt: DateTime.utc(2026, 1, 1),
+      ),
+    );

@@ -24,36 +24,37 @@ class FirebaseAuditRepository implements AuditRepository {
 
   @override
   Future<Either<QuranSessionsFailure, List<SessionAuditEvent>>> listBySessionId(
-    String sessionId,
+    String id,
   ) async {
     try {
-      final bySession = await _events
-          .where('sessionId', isEqualTo: sessionId)
-          .orderBy('timestamp')
-          .get();
-      if (bySession.docs.isNotEmpty) {
-        return Right(
-          bySession.docs.map((d) => mapEventDocToAuditEvent(d.data())).toList(),
+      final merged = <String, SessionAuditEvent>{};
+      for (final field in ['bookingId', 'aggregateId', 'sessionId']) {
+        await _collectTimelineEvents(
+          query: _events.where(field, isEqualTo: id),
+          merged: merged,
         );
       }
-      final byBooking = await _events
-          .where('bookingId', isEqualTo: sessionId)
-          .orderBy('timestamp')
-          .get();
-      final byAggregate = await _events
-          .where('aggregateId', isEqualTo: sessionId)
-          .orderBy('timestamp')
-          .get();
-      final merged = <String, SessionAuditEvent>{};
-      for (final doc in [...byBooking.docs, ...byAggregate.docs]) {
-        merged[doc.id] = mapEventDocToAuditEvent(doc.data());
-      }
-      return Right(
-        merged.values.toList()
-          ..sort((a, b) => a.createdAt.compareTo(b.createdAt)),
-      );
+      final timeline = merged.values.toList()
+        ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      return Right(timeline);
     } on FirebaseException catch (e) {
       return Left(mapFirebaseExceptionToFailure(e));
+    }
+  }
+
+  Future<void> _collectTimelineEvents({
+    required Query<Map<String, dynamic>> query,
+    required Map<String, SessionAuditEvent> merged,
+  }) async {
+    try {
+      final snap = await query.orderBy('timestamp').get();
+      for (final doc in snap.docs) {
+        merged[doc.id] = mapEventDocToAuditEvent(doc.data());
+      }
+    } on FirebaseException catch (e) {
+      if (e.code != 'permission-denied') {
+        rethrow;
+      }
     }
   }
 }

@@ -49,16 +49,15 @@ export class FirebaseSessionAuditRepository implements SessionAuditRepository {
       query(
         collection(this.firestore, QuranSessionsPaths.sessionCompensations),
         where('bookingId', '==', bookingId),
+        orderBy('createdAt', 'desc'),
       ),
     );
 
-    return snapshot.docs
-      .map((docSnap) =>
-        SessionCompensationMapper.fromFirestore(
-          docSnap.id,
-          docSnap.data() as CompensationFirestoreDto,
-        ),
-      )
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    return snapshot.docs.map((docSnap) =>
+      SessionCompensationMapper.fromFirestore(
+        docSnap.id,
+        docSnap.data() as CompensationFirestoreDto,
+      ),
+    );
   }
 }

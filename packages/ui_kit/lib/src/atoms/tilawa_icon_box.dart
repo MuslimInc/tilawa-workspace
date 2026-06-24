@@ -11,6 +11,9 @@ enum TilawaIconBoxVariant {
 
   /// Semantic manuscript tint, no border. Hub navigation only.
   tinted,
+
+  /// Colored glyph only — no fill or border (e.g. Home explore grid).
+  plain,
 }
 
 /// A standardized container for icons with background styling.
@@ -55,18 +58,33 @@ class TilawaIconBox extends StatelessWidget {
 
     final double effectiveSize = size ?? tokens.iconSize;
     final double effectivePadding = padding ?? tokens.padding;
+    final bool isPlain = variant == TilawaIconBoxVariant.plain;
     final bool isTinted = variant == TilawaIconBoxVariant.tinted;
+
+    final Color resolvedIconColor =
+        iconColor ??
+        (isTinted
+            ? colorScheme.semanticTintForeground(semanticTint)
+            : theme.colorScheme.onSurface);
+
+    if (isPlain) {
+      return Padding(
+        padding: EdgeInsets.all(effectivePadding),
+        child:
+            child ??
+            Icon(
+              icon,
+              size: effectiveSize,
+              color: resolvedIconColor,
+            ),
+      );
+    }
 
     final Color resolvedBackground =
         backgroundColor ??
         (isTinted
             ? colorScheme.semanticTintBackground(semanticTint)
             : tokens.backgroundColor);
-    final Color resolvedIconColor =
-        iconColor ??
-        (isTinted
-            ? colorScheme.semanticTintForeground(semanticTint)
-            : theme.colorScheme.onSurface);
 
     final BoxDecoration decoration = BoxDecoration(
       color: resolvedBackground,

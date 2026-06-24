@@ -1,4 +1,3 @@
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
@@ -21,7 +20,7 @@ class HomeQuranEntryGrid extends StatelessWidget {
       children: [
         Expanded(
           child: _QuranEntryTile(
-            icon: FluentIcons.headphones_sound_wave_24_regular,
+            icon: TilawaIcons.reciters,
             title: context.l10n.homeQuickReciters,
             subtitle: context.l10n.homeQuickRecitersSubtitle,
             onTap: () => context.read<MainScreenCubit>().selectTab(1),
@@ -29,7 +28,12 @@ class HomeQuranEntryGrid extends StatelessWidget {
         ),
         Expanded(
           child: _QuranEntryTile(
-            icon: FluentIcons.book_open_24_regular,
+            iconWidget: TilawaIcons.quran.svg(
+              size: tokens.iconSizeMedium,
+              color: Theme.of(context).colorScheme.semanticTintForeground(
+                TilawaSemanticTint.ink,
+              ),
+            ),
             title: context.l10n.homeQuickQuran,
             subtitle: context.l10n.homeStartQuranSubtitle,
             onTap: () => const QuranIndexRoute().push(context),
@@ -42,13 +46,15 @@ class HomeQuranEntryGrid extends StatelessWidget {
 
 class _QuranEntryTile extends StatelessWidget {
   const _QuranEntryTile({
-    required this.icon,
+    this.icon,
+    this.iconWidget,
     required this.title,
     required this.subtitle,
     required this.onTap,
-  });
+  }) : assert(icon != null || iconWidget != null);
 
-  final IconData icon;
+  final IconData? icon;
+  final Widget? iconWidget;
   final String title;
   final String subtitle;
   final VoidCallback onTap;
@@ -71,11 +77,12 @@ class _QuranEntryTile extends StatelessWidget {
         spacing: tokens.spaceExtraSmall,
         children: [
           TilawaIconBox(
-            icon: icon,
+            icon: icon ?? Icons.circle_outlined,
             size: tokens.iconSizeMedium,
             padding: tokens.spaceSmall,
             variant: TilawaIconBoxVariant.tinted,
             semanticTint: TilawaSemanticTint.ink,
+            child: iconWidget,
           ),
           SizedBox(height: tokens.spaceExtraSmall),
           Text(

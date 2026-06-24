@@ -101,6 +101,72 @@ final class BookingConflictFailure extends QuranSessionsFailure {
   const BookingConflictFailure();
 }
 
+/// Group bookings are not supported in Free Beta.
+final class GroupBookingNotSupportedFailure extends QuranSessionsFailure {
+  const GroupBookingNotSupportedFailure();
+}
+
+/// The selected session mode is disabled for this market / release.
+final class UnsupportedSessionModeFailure extends QuranSessionsFailure {
+  const UnsupportedSessionModeFailure({required this.callType});
+
+  final String callType;
+
+  @override
+  List<Object?> get props => [callType];
+}
+
+/// No meeting link or call provider is configured for this session.
+final class MeetingLinkUnavailableFailure extends QuranSessionsFailure {
+  const MeetingLinkUnavailableFailure();
+}
+
+/// The configured call provider cannot handle this join request.
+final class CallProviderUnavailableFailure extends QuranSessionsFailure {
+  const CallProviderUnavailableFailure({this.reasonCode});
+
+  /// Machine-readable hint for UI (e.g. `agora_not_registered`).
+  final String? reasonCode;
+
+  @override
+  List<Object?> get props => [reasonCode];
+}
+
+/// Mic or camera permission denied before joining an in-app RTC call.
+final class RtcPermissionDeniedFailure extends QuranSessionsFailure {
+  const RtcPermissionDeniedFailure({required this.permission});
+
+  final String permission;
+
+  @override
+  List<Object?> get props => [permission];
+}
+
+/// Agora/WebRTC join failed after provider routing (token, SDK, network).
+final class RtcCallJoinFailure extends QuranSessionsFailure {
+  const RtcCallJoinFailure({required this.reasonCode});
+
+  final String reasonCode;
+
+  @override
+  List<Object?> get props => [reasonCode];
+}
+
+/// WebRTC signaling/TURN infrastructure is not deployed yet.
+final class WebRtcSignalingUnavailableFailure extends QuranSessionsFailure {
+  const WebRtcSignalingUnavailableFailure();
+}
+
+/// External meeting URL could not be opened in another app.
+final class ExternalMeetingLaunchFailure extends QuranSessionsFailure {
+  const ExternalMeetingLaunchFailure({this.linkCopiedToClipboard = false});
+
+  final bool linkCopiedToClipboard;
+
+  @override
+  List<Object?> get props => [linkCopiedToClipboard];
+}
+
 /// The requested lifecycle action is not valid for the current status.
 final class InvalidTransitionFailure extends QuranSessionsFailure {
   const InvalidTransitionFailure({

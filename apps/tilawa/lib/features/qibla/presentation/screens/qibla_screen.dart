@@ -5,6 +5,7 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/qibla_direction_entity.dart';
+import '../../domain/qibla_heading_math.dart';
 import '../bloc/qibla_bloc.dart';
 import '../constants/qibla_constants.dart';
 import '../widgets/qibla_compass_widget.dart';
@@ -371,7 +372,7 @@ class _QiblaInstructionFooter extends StatelessWidget {
         final l10n = context.l10n;
         final String message;
         if (direction.isAligned) {
-          message = l10n.qiblaCompassTip;
+          message = l10n.qiblaAligned;
         } else {
           final ({int degrees, bool rotateLeft}) hint = _qiblaRotationHint(
             direction,
@@ -393,13 +394,10 @@ class _QiblaInstructionFooter extends StatelessWidget {
 ({int degrees, bool rotateLeft}) _qiblaRotationHint(
   QiblaDirectionEntity direction,
 ) {
-  double delta = direction.qibla - direction.direction;
-  while (delta > 180) {
-    delta -= 360;
-  }
-  while (delta < -180) {
-    delta += 360;
-  }
+  final double delta = shortestHeadingDelta(
+    bearing: direction.offset,
+    heading: direction.direction,
+  );
   final int degrees = delta.abs().round().clamp(1, 180);
   return (degrees: degrees, rotateLeft: delta < 0);
 }

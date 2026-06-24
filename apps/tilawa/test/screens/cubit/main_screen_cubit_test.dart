@@ -184,9 +184,9 @@ void main() {
       final cubit = MainScreenCubit();
       addTearDown(cubit.close);
 
-      cubit.selectTab(3);
+      cubit.selectTab(2);
 
-      expect(cubit.state.builtTabIndexes, contains(3));
+      expect(cubit.state.builtTabIndexes, contains(2));
     });
 
     test('accumulates all previously visited indexes', () {
@@ -195,10 +195,9 @@ void main() {
 
       cubit.selectTab(1);
       cubit.selectTab(2);
-      cubit.selectTab(3);
 
-      expect(cubit.state.builtTabIndexes, containsAll([1, 2, 3]));
-      expect(cubit.state.currentIndex, 3);
+      expect(cubit.state.builtTabIndexes, containsAll([1, 2]));
+      expect(cubit.state.currentIndex, 2);
     });
 
     test('is a no-op when selecting the already-active tab', () {

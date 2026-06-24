@@ -74,7 +74,7 @@
     "noTeachersAvailableYet": "No teachers available yet",
     "seeAllTeachers": "See all teachers →",
     "becomeTeacherCardTitle": "I want to become a teacher",
-    "becomeTeacherCardSubtitle": "Join Tilawa's certified teachers",
+    "becomeTeacherCardSubtitle": "Join MeMuslim's certified teachers",
     "teacherListTitle": "Find a teacher",
     "noTeachersForSpecialization": "No teachers found for \"{specialization}\"",
     "@noTeachersForSpecialization": {
@@ -95,6 +95,65 @@
     "callTypeExternalMeeting": "External link",
     "callTypeVoice": "Voice",
     "callTypeVideo": "Video",
+    "sessionModeVoiceBetaNote": "Free Beta: voice uses a placeholder join until in-app RTC ships.",
+    "sessionModeVideoBetaNote": "Free Beta: video uses a placeholder join until in-app RTC ships.",
+    "bookingVoiceVideoProviderNote": "In-app calls use {provider}.",
+    "@bookingVoiceVideoProviderNote": {
+        "placeholders": {
+            "provider": {
+                "type": "String"
+            }
+        }
+    },
+    "sessionModeVoiceDisabled": "Voice sessions are not available yet. Choose external link.",
+    "sessionModeVideoDisabled": "Video sessions are not available yet. Choose external link.",
+    "sessionModeExternalDisabled": "Your teacher has not added a meeting link yet. Choose voice or video.",
+    "meetingLinkUnavailable": "This teacher has not set up a meeting link for external sessions. Choose voice or video, or try again later.",
+    "callProviderUnavailable": "This session cannot be joined from the app right now.",
+    "callProviderAgoraNotConfigured": "In-app Agora calls are not enabled in this build. Rebuild with Staging Agora config (TILAWA_DISTRIBUTION=staging and TILAWA_LAUNCH_AGORA_APP_ID), or use the Tilawa (Staging Agora) launch profile.",
+    "rtcPermissionDenied": "Microphone or camera access is required to join this session. Enable {permission} in Settings and try again.",
+    "@rtcPermissionDenied": {
+        "placeholders": {
+            "permission": {
+                "type": "String"
+            }
+        }
+    },
+    "rtcCallJoinFailed": "Could not connect to the voice or video call. Try again in a moment.",
+    "rtcCallJoinRejected": "Could not join this call. Leave any open call for this session, wait a moment, then try again.",
+    "rtcCallJoinInvalidToken": "This call link expired or is invalid. Tap Join again to get a fresh connection.",
+    "webrtcSignalingUnavailable": "In-app WebRTC calls are not available yet. Choose voice with Agora or an external meeting link.",
+    "inAppCallShellTitle": "Session call",
+    "inAppCallShellBody": "You are connected to this session's call room. End the call when your lesson finishes.",
+    "inAppCallShellEndCall": "Leave call",
+    "inAppCallShellMute": "Mute microphone",
+    "inAppCallShellUnmute": "Unmute microphone",
+    "inAppCallShellConnecting": "Connecting…",
+    "inAppCallShellConnected": "Connected",
+    "inAppCallShellWaitingForParticipant": "Waiting for the other participant",
+    "inAppCallShellMockBetaBody": "Beta preview — no live audio or video. Book a new session with Agora enabled to try a real call.",
+    "inAppCallShellSpeaker": "Speaker",
+    "inAppCallShellFlipCamera": "Flip camera",
+    "inAppCallShellTurnVideoOn": "Turn camera on",
+    "inAppCallShellTurnVideoOff": "Turn camera off",
+    "inAppCallShellMicrophoneMuted": "Microphone muted",
+    "inAppCallShellMicrophoneUnmuted": "Microphone unmuted",
+    "inAppCallShellCameraOff": "Camera turned off",
+    "inAppCallShellCameraOn": "Camera turned on",
+    "inAppCallShellSwitchCameraBlocked": "Cannot switch camera while it is off",
+    "inAppCallShellSpeakerOn": "Speaker on",
+    "inAppCallShellSpeakerOff": "Speaker off",
+    "inAppCallShellControlActionFailed": "Could not complete that action. Try again.",
+    "externalMeetingJoinTitle": "Join outside MeMuslim?",
+    "externalMeetingJoinBody": "You'll briefly leave MeMuslim to join your session in Google Meet, Zoom, or your browser. Come back here anytime — your session details stay open.",
+    "externalMeetingJoinOpen": "Open",
+    "externalMeetingJoinCopy": "Copy URL",
+    "externalMeetingJoinLinkCopied": "Link copied",
+    "externalMeetingJoinAgain": "Open meeting again",
+    "externalMeetingLaunchFailed": "Couldn't open the meeting link. Try again or copy the link.",
+    "externalMeetingLinkCopied": "Meeting link copied. Paste it in your browser to join.",
+    "groupBookingNotSupported": "Group sessions are not available in Free Beta.",
+    "unsupportedSessionMode": "This session type is not supported.",
     "reviewSubmittedThanks": "Thank you — your review was submitted!",
     "upcomingSessionsSection": "Upcoming ({count})",
     "@upcomingSessionsSection": {
@@ -113,6 +172,7 @@
             }
         }
     },
+    "loadMorePastSessions": "Load more",
     "noPastSessions": "No past sessions",
     "cancelSessionDialogTitle": "Cancel session?",
     "cancelSessionDialogMessage": "This action cannot be undone.",
@@ -131,10 +191,45 @@
     "rescheduleReasonHint": "Briefly explain why you need a new time",
     "rescheduleSubmitAction": "Request reschedule",
     "rescheduleRequestSubmitted": "Reschedule request sent. Waiting for confirmation.",
+    "rescheduleAwaitingCounterparty": "Waiting for the other participant to confirm your new time.",
+    "reschedulePendingTitle": "Reschedule request",
+    "reschedulePendingProposedTime": "Proposed time: {dateTime}",
+    "@reschedulePendingProposedTime": {
+        "placeholders": {
+            "dateTime": {
+                "type": "String"
+            }
+        }
+    },
+    "reschedulePendingReason": "Reason: {reason}",
+    "@reschedulePendingReason": {
+        "placeholders": {
+            "reason": {
+                "type": "String"
+            }
+        }
+    },
+    "rescheduleAcceptAction": "Accept new time",
+    "rescheduleRejectAction": "Keep current time",
+    "rescheduleAcceptedToast": "Reschedule accepted. Session time updated.",
+    "rescheduleRejectedToast": "Reschedule declined. Original time kept.",
     "rescheduleAction": "Reschedule",
     "sessionDetailTitle": "Session details",
     "sessionTimelineTitle": "Activity timeline",
     "sessionTimelineEmpty": "No activity recorded yet.",
+    "sessionTimelineLoadFailed": "Could not load the activity timeline. Check your connection and try again.",
+    "sessionPendingRescheduleLoadFailed": "Could not load the pending reschedule request. Try again in a moment.",
+    "sessionLockedAtBookingNote": "Call type ({callType}) and provider ({callProvider}) were set when you booked. To change them, cancel and rebook or contact support.",
+    "@sessionLockedAtBookingNote": {
+        "placeholders": {
+            "callType": { "type": "String" },
+            "callProvider": { "type": "String" }
+        }
+    },
+    "callProviderExternal": "External link",
+    "callProviderMock": "In-app (preview)",
+    "callProviderAgora": "In-app (Agora)",
+    "callProviderWebrtc": "In-app (WebRTC)",
     "sessionStatusLabel": "Status: {status}",
     "@sessionStatusLabel": {
         "placeholders": {
@@ -318,7 +413,7 @@
     "weekdayFriday": "Friday",
     "teacherApplicationTitle": "Teacher application",
     "submittingApplication": "Submitting application…",
-    "becomeTeacherOnTilawa": "Become a teacher on Tilawa",
+    "becomeTeacherOnTilawa": "Become a teacher on MeMuslim",
     "becomeTeacherApplicationIntro": "Join our certified teachers and help students on their Quran journey.",
     "startApplication": "Start application",
     "phoneNumber": "Phone number",
@@ -353,9 +448,9 @@
     "applicationStatusTitle": "Application status",
     "unknownStatus": "Unknown status",
     "applicationStatusPendingTitle": "Your application is under review",
-    "applicationStatusPendingSubtitle": "The Tilawa team is reviewing your application. We will contact you soon.",
+    "applicationStatusPendingSubtitle": "The MeMuslim team is reviewing your application. We will contact you soon.",
     "applicationStatusApprovedTitle": "Congratulations! Approved",
-    "applicationStatusApprovedSubtitle": "You are now a certified teacher on Tilawa.",
+    "applicationStatusApprovedSubtitle": "You are now a certified teacher on MeMuslim.",
     "applicationStatusApprovedContinue": "Continue",
     "applicationStatusRejectedTitle": "Application not approved",
     "applicationStatusRejectedSubtitle": "You may reapply after reviewing the team's feedback.",
@@ -423,6 +518,14 @@
     "completeTeacherProfile": "Complete teacher profile",
     "teacherPublicNameLabel": "Full teacher name",
     "teacherPublicNameHelper": "Your real full name as students see it in the marketplace. It may differ from your account name.",
+    "teacherExternalMeetingUrlLabel": "External meeting link",
+    "teacherExternalMeetingUrlHint": "https://meet.google.com/your-room",
+    "teacherExternalMeetingUrlHelper": "Students who book external sessions join via this HTTPS link (Google Meet, Zoom, Microsoft Teams).",
+    "teacherExternalMeetingUrlSaved": "Meeting link saved",
+    "teacherExternalMeetingUrlSave": "Save meeting link",
+    "teacherExternalMeetingUrlInvalid": "Enter a valid HTTPS meeting link (Google Meet, Zoom, or Teams).",
+    "teacherOffersExternalSessions": "External sessions available",
+    "sessionMeetingLinkLabel": "Meeting link",
     "teacherPublicNameRequired": "Full teacher name is required.",
     "teacherPublicNameInvalid": "Enter a valid full name (at least 3 characters, or two words).",
     "teacherPublicNamePlaceholderNotAllowed": "Choose your real full name — generic placeholders like \"Quran Teacher\" are not allowed.",
@@ -508,5 +611,62 @@
     },
     "paymentCheckoutAmountPending": "Session price (sandbox)",
     "paymentCheckoutRefundToWalletNotice": "If you cancel or we approve a refund, the amount is added to your Tilawa wallet as credit. Wallet credit is not automatically returned to your card.",
-    "paymentCheckoutConfirm": "Confirm payment (sandbox)"
+    "paymentCheckoutConfirm": "Confirm payment (sandbox)",
+    "restrictionReasonFalseIdentity": "False identity information",
+    "restrictionReasonPolicyViolation": "Policy violation",
+    "restrictionReasonSafetyConcern": "Safety concern",
+    "restrictionReasonAbuseReport": "Abuse report",
+    "restrictionReasonRepeatedNoShow": "Repeated no-show",
+    "restrictionReasonAdminDecision": "Administrative decision",
+    "sessionLifecycleDraft": "Draft",
+    "sessionLifecyclePendingPayment": "Pending payment",
+    "sessionLifecycleScheduled": "Scheduled",
+    "sessionLifecycleConfirmed": "Confirmed",
+    "sessionLifecycleInProgress": "In progress",
+    "sessionLifecycleRescheduled": "Rescheduled",
+    "sessionLifecycleCancelledByStudent": "Cancelled by student",
+    "sessionLifecycleCancelledByTeacher": "Cancelled by teacher",
+    "sessionLifecycleCancelledByAdmin": "Cancelled by admin",
+    "sessionLifecycleTeacherNoShow": "Teacher no-show",
+    "sessionLifecycleStudentNoShow": "Student no-show",
+    "sessionLifecycleBothNoShow": "Both no-show",
+    "sessionLifecycleIncomplete": "Incomplete",
+    "sessionLifecycleCompleted": "Completed",
+    "sessionLifecycleDisputed": "Disputed",
+    "sessionLifecycleCompensated": "Compensated",
+    "sessionLifecycleRefunded": "Refunded",
+    "sessionLifecycleExpired": "Expired",
+    "sessionActionCreateDraft": "Create draft",
+    "sessionActionInitiatePayment": "Initiate payment",
+    "sessionActionConfirmBooking": "Confirm booking",
+    "sessionActionConfirmFreeBooking": "Confirm free booking",
+    "sessionActionAcknowledgeSession": "Acknowledge session",
+    "sessionActionStartSession": "Start session",
+    "sessionActionCompleteSession": "Complete session",
+    "sessionActionRequestReschedule": "Request reschedule",
+    "sessionActionConfirmReschedule": "Confirm reschedule",
+    "sessionActionAdminForceReschedule": "Admin force reschedule",
+    "sessionActionCancelByStudent": "Cancel by student",
+    "sessionActionCancelByTeacher": "Cancel by teacher",
+    "sessionActionCancelByAdmin": "Cancel by admin",
+    "sessionActionMarkTeacherNoShow": "Mark teacher no-show",
+    "sessionActionMarkStudentNoShow": "Mark student no-show",
+    "sessionActionMarkBothNoShow": "Mark both no-show",
+    "sessionActionMarkIncomplete": "Mark incomplete",
+    "sessionActionOpenDispute": "Open dispute",
+    "sessionActionIssueCompensation": "Issue compensation",
+    "sessionActionIssueRefund": "Issue refund",
+    "sessionActionExpireReservation": "Expire reservation",
+    "sessionActionRejectBooking": "Reject booking",
+    "sessionTimelineStatusTransition": "{previous} → {next}",
+    "@sessionTimelineStatusTransition": {
+        "placeholders": {
+            "previous": {
+                "type": "String"
+            },
+            "next": {
+                "type": "String"
+            }
+        }
+    }
 }

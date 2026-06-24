@@ -9,8 +9,18 @@ import { TeacherProfileModerationAction } from '../../../core/domain/entities/mo
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { StatusChipComponent } from '../../../shared/components/status-chip/status-chip.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { SortableThComponent } from '../../../shared/components/sortable-th/sortable-th.component';
+import { TilawaFilterBarComponent } from '../../../shared/components/tilawa-filter-bar/tilawa-filter-bar.component';
+import { TilawaDataTableComponent } from '../../../shared/components/tilawa-data-table/tilawa-data-table.component';
+import { TilawaLoadingStateComponent } from '../../../shared/components/tilawa-loading-state/tilawa-loading-state.component';
+import { TilawaErrorStateComponent } from '../../../shared/components/tilawa-error-state/tilawa-error-state.component';
+import { TilawaEmptyStateComponent } from '../../../shared/components/tilawa-empty-state/tilawa-empty-state.component';
+import { TilawaPaginationComponent } from '../../../shared/components/tilawa-pagination/tilawa-pagination.component';
+import { TilawaButtonComponent } from '../../../shared/components/tilawa-button/tilawa-button.component';
+import { TilawaAvatarComponent } from '../../../shared/components/tilawa-avatar/tilawa-avatar.component';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { StatusLabelPipe } from '../../../core/i18n/status-label.pipe';
+import { SortRequest } from '../../../core/domain/entities/pagination.types';
 
 @Component({
   selector: 'app-teachers',
@@ -21,6 +31,15 @@ import { StatusLabelPipe } from '../../../core/i18n/status-label.pipe';
     PageHeaderComponent,
     StatusChipComponent,
     ConfirmDialogComponent,
+    SortableThComponent,
+    TilawaFilterBarComponent,
+    TilawaDataTableComponent,
+    TilawaLoadingStateComponent,
+    TilawaErrorStateComponent,
+    TilawaEmptyStateComponent,
+    TilawaPaginationComponent,
+    TilawaButtonComponent,
+    TilawaAvatarComponent,
     TranslatePipe,
     StatusLabelPipe,
   ],
@@ -34,6 +53,7 @@ export class TeachersComponent implements OnInit {
   readonly errorMessage = this.facade.listErrorMessage;
   readonly canLoadMore = this.facade.canLoadMore;
   readonly isActionLoading = this.facade.isActionLoading;
+  readonly sort = this.facade.sort;
 
   searchQuery = '';
   activeFilter = '';
@@ -75,6 +95,10 @@ export class TeachersComponent implements OnInit {
 
   loadMore(): Promise<void> {
     return this.facade.loadMore(this.buildFilters());
+  }
+
+  onSortChange(sort: SortRequest): void {
+    void this.facade.changeSort(this.buildFilters(), sort);
   }
 
   openModeration(

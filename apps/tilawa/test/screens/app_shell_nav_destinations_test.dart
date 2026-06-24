@@ -4,7 +4,7 @@ import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa/screens/app_shell_nav_destinations.dart';
 
 void main() {
-  testWidgets('phone shell nav lists six Tilawa shell items', (
+  testWidgets('phone shell nav lists four Tilawa shell items', (
     tester,
   ) async {
     late AppLocalizations l10n;
@@ -24,15 +24,13 @@ void main() {
 
     final destinations = buildPhoneShellNavDestinations(l10n);
 
-    expect(destinations, hasLength(6));
+    expect(destinations, hasLength(4));
     expect(
       destinations.map((d) => d.label).toList(),
       [
         l10n.bottomNavHome,
         l10n.bottomNavQuran,
         l10n.bottomNavReciters,
-        l10n.bottomNavQibla,
-        l10n.bottomNavAthkar,
         l10n.bottomNavSettings,
       ],
     );
@@ -60,8 +58,6 @@ void main() {
         'home_tab',
         'quran_index_nav',
         'reciters_tab',
-        'qibla_tab',
-        'athkar_tab',
         'settings_tab',
       ],
     );

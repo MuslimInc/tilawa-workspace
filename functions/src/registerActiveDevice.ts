@@ -10,6 +10,7 @@ import {
   readServerSessionEpoch,
 } from "./quranSessions/sessionRegistration";
 import { buildSessionRevokedNotificationCopy } from "./quranSessions/sessionRevokedNotification";
+import { sessionCallableHttpsOptions } from "./quranSessions/sessionCallableOptions";
 
 export const SESSION_REVOKED_ACTION = "session_revoked";
 
@@ -84,7 +85,7 @@ async function sendSessionRevokedPush(
  * notifies the superseded device via FCM data message `session_revoked`.
  */
 export const registerActiveDevice = onCall(
-  { enforceAppCheck: false },
+  sessionCallableHttpsOptions,
   async (request): Promise<RegisterActiveDeviceResponse> => {
     const uid = request.auth?.uid;
     if (!uid) {

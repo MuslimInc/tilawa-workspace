@@ -1317,7 +1317,7 @@ class TilawaPermissionBannerTokens {
 
 /// Component tokens for the Home next-prayer hero card gradient shell.
 ///
-/// Warm parchment canvas — restrained stops in [AppColors].
+/// Phase-aware Islamic palette — restrained stops in [AppColors].
 @immutable
 class TilawaHomeNextPrayerHeroTokens {
   const TilawaHomeNextPrayerHeroTokens({
@@ -1401,7 +1401,23 @@ class TilawaHomeNextPrayerHeroTokens {
     );
   }
 
-  /// Night hero gradient (Isha through pre-sunrise).
+  /// Pre-dawn hero gradient (cool mist before sunrise — always light).
+  factory TilawaHomeNextPrayerHeroTokens.preDawn() {
+    return const TilawaHomeNextPrayerHeroTokens(
+      gradientTopStart: AppColors.homeNextPrayerGradientPreDawnTop,
+      gradientBottomEnd: AppColors.homeNextPrayerGradientPreDawnBottom,
+      foregroundColor: AppColors.homeNextPrayerGradientForeground,
+      locationChipFillOpacity: 0.10,
+      locationChipBorderOpacity: 0.22,
+      locationChipSplashOpacity: 0.08,
+      locationChipHighlightOpacity: 0.04,
+      mutedForegroundOpacity: 0.68,
+      tertiaryForegroundOpacity: 0.60,
+      footerForegroundOpacity: 0.90,
+    );
+  }
+
+  /// Night hero gradient (Isha through deep night before pre-dawn ease).
   factory TilawaHomeNextPrayerHeroTokens.night() {
     return const TilawaHomeNextPrayerHeroTokens(
       gradientTopStart: AppColors.homeNextPrayerGradientNightTop,
@@ -1519,6 +1535,8 @@ class TilawaHomeDashboardCardTokens {
     required this.travelSectionLinkColor,
     required this.travelDestinationIconColor,
     required this.travelDestinationHeaderTints,
+    required this.headerWaveAmplitude,
+    required this.featureCategoryTileTints,
   });
 
   final Color gradientStart;
@@ -1542,12 +1560,26 @@ class TilawaHomeDashboardCardTokens {
   /// Warm tints for travel-style destination card headers.
   final List<Color> travelDestinationHeaderTints;
 
+  /// Scallop height for the Home hero-to-sheet wave transition.
+  final double headerWaveAmplitude;
+
+  /// Beige tile fills for the Home feature category grid.
+  final List<Color> featureCategoryTileTints;
+
   Color destinationHeaderTint(int index) {
     if (travelDestinationHeaderTints.isEmpty) {
       return travelSearchFieldFill;
     }
     return travelDestinationHeaderTints[index.abs() %
         travelDestinationHeaderTints.length];
+  }
+
+  Color featureCategoryTileTint(int index) {
+    if (featureCategoryTileTints.isEmpty) {
+      return travelSearchFieldFill;
+    }
+    return featureCategoryTileTints[index.abs() %
+        featureCategoryTileTints.length];
   }
 
   factory TilawaHomeDashboardCardTokens.fromColorScheme(
@@ -1564,6 +1596,8 @@ class TilawaHomeDashboardCardTokens {
       travelSectionLinkColor: AppColors.homeTravelSectionLink,
       travelDestinationIconColor: AppColors.homeTravelDestinationIcon,
       travelDestinationHeaderTints: AppColors.homeTravelDestinationHeaderTints,
+      headerWaveAmplitude: 14,
+      featureCategoryTileTints: AppColors.homeFeatureCategoryTileTints,
     );
   }
 
@@ -1578,6 +1612,8 @@ class TilawaHomeDashboardCardTokens {
     Color? travelSectionLinkColor,
     Color? travelDestinationIconColor,
     List<Color>? travelDestinationHeaderTints,
+    double? headerWaveAmplitude,
+    List<Color>? featureCategoryTileTints,
   }) {
     return TilawaHomeDashboardCardTokens(
       gradientStart: gradientStart ?? this.gradientStart,
@@ -1594,6 +1630,9 @@ class TilawaHomeDashboardCardTokens {
           travelDestinationIconColor ?? this.travelDestinationIconColor,
       travelDestinationHeaderTints:
           travelDestinationHeaderTints ?? this.travelDestinationHeaderTints,
+      headerWaveAmplitude: headerWaveAmplitude ?? this.headerWaveAmplitude,
+      featureCategoryTileTints:
+          featureCategoryTileTints ?? this.featureCategoryTileTints,
     );
   }
 
@@ -1629,6 +1668,12 @@ class TilawaHomeDashboardCardTokens {
         t,
       )!,
       travelDestinationHeaderTints: a.travelDestinationHeaderTints,
+      headerWaveAmplitude: lerpTokenDouble(
+        a.headerWaveAmplitude,
+        b.headerWaveAmplitude,
+        t,
+      ),
+      featureCategoryTileTints: a.featureCategoryTileTints,
     );
   }
 }

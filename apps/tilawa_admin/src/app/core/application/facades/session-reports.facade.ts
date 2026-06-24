@@ -5,6 +5,12 @@ import {
   GetSessionReportUseCase,
 } from '../../domain/usecases/session-report.usecases';
 import { SessionReportFilters } from '../../domain/entities/session-report-summary.entity';
+import { SESSION_REPORT_DEFAULT_SORT } from '../../domain/entities/session-report-summary.entity';
+import {
+  DEFAULT_PAGE_SIZE,
+  SortRequest,
+  sortsEqual,
+} from '../../domain/entities/pagination.types';
 
 type LoadState = 'idle' | 'loading' | 'success' | 'error';
 
@@ -17,6 +23,7 @@ export interface SessionReportListItemVm {
   reportedUserId: string | null;
   bookingId: string | null;
   createdAt: Date;
+  updatedAt: Date | null;
   descriptionPreview: string;
 }
 
@@ -37,6 +44,7 @@ export class SessionReportsFacade {
   private readonly listItems = signal<SessionReportListItemVm[]>([]);
   private readonly nextCursor = signal<string | null>(null);
   private readonly hasMore = signal(false);
+  private readonly listSort = signal<SortRequest>(SESSION_REPORT_DEFAULT_SORT);
 
   private readonly detailState = signal<LoadState>('idle');
   private readonly detailError = signal<string | null>(null);
@@ -46,6 +54,7 @@ export class SessionReportsFacade {
   readonly listLoadState = this.listState.asReadonly();
   readonly listErrorMessage = this.listError.asReadonly();
   readonly canLoadMore = this.hasMore.asReadonly();
+  readonly sort = this.listSort.asReadonly();
 
   readonly detail = this.detailItem.asReadonly();
   readonly detailLoadState = this.detailState.asReadonly();
@@ -53,16 +62,26 @@ export class SessionReportsFacade {
 
   async loadList(
     filters: SessionReportFilters,
-    cursor: string | null = null,
-    append = false,
+    options?: {
+      cursor?: string | null;
+      append?: boolean;
+      sort?: SortRequest;
+    },
   ): Promise<void> {
+    const sort = options?.sort ?? this.listSort();
+    const sortChanged = !sortsEqual(sort, this.listSort());
+    const append = options?.append === true && !sortChanged;
+    const cursor = append ? (options?.cursor ?? this.nextCursor()) : null;
+
+    this.listSort.set(sort);
     this.listState.set('loading');
     this.listError.set(null);
 
     try {
       const page = await this.listUseCase.execute(filters, {
-        pageSize: 25,
+        pageSize: DEFAULT_PAGE_SIZE,
         cursor,
+        sort,
       });
 
       const mapped = page.items.map((item) => this.toListItem(item));
@@ -82,7 +101,18 @@ export class SessionReportsFacade {
     if (!this.hasMore() || !this.nextCursor()) {
       return;
     }
-    await this.loadList(filters, this.nextCursor(), true);
+    await this.loadList(filters, {
+      cursor: this.nextCursor(),
+      append: true,
+      sort: this.listSort(),
+    });
+  }
+
+  async changeSort(
+    filters: SessionReportFilters,
+    sort: SortRequest,
+  ): Promise<void> {
+    await this.loadList(filters, { sort, append: false, cursor: null });
   }
 
   async loadDetail(reportId: string): Promise<void> {
@@ -120,6 +150,7 @@ export class SessionReportsFacade {
       reportedUserId: item.reportedUserId,
       bookingId: item.bookingId,
       createdAt: item.createdAt,
+      updatedAt: item.updatedAt,
       descriptionPreview:
         item.description.length > 80
           ? `${item.description.slice(0, 80)}…`

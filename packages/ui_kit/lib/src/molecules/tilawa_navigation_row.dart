@@ -6,6 +6,7 @@ import '../foundation/tilawa_icons.dart';
 import '../foundation/design_tokens.dart';
 import '../foundation/semantic_tints.dart';
 import 'tilawa_settings_group_row_style.dart';
+import 'tilawa_settings_list_row.dart';
 
 /// Drill-down row for feature hub screens.
 ///
@@ -45,58 +46,39 @@ class TilawaNavigationRow extends StatelessWidget {
     final designTokens = theme.tokens;
     final BorderRadius resolvedRadius = _resolveBorderRadius(context);
     final TextDirection direction = Directionality.of(context);
-    final EdgeInsets resolvedContentPadding = tokens.tileContentPadding.resolve(
-      direction,
-    );
-    final EdgeInsetsGeometry listTileContentPadding =
-        EdgeInsetsDirectional.only(
-          start: designTokens.spaceSmall,
-          end: designTokens.spaceSmall,
-        );
     final EdgeInsets resolvedIconPadding = tokens.tileIconPadding.resolve(
       direction,
     );
-    final double minLeadingWidth =
-        resolvedIconPadding.horizontal + tokens.tileIconSize;
 
     return Column(
       children: [
-        Material(
-          color: Colors.transparent,
+        TilawaSettingsListRow(
+          semanticLabel: '$title. $subtitle',
           borderRadius: resolvedRadius,
-          clipBehavior: Clip.antiAlias,
-          child: ListTileTheme(
-            data: ListTileThemeData(
-              contentPadding: resolvedContentPadding,
-              horizontalTitleGap: tokens.tileItemGap,
-              minLeadingWidth: minLeadingWidth,
-              minTileHeight: designTokens.minInteractiveDimension,
-              minVerticalPadding: 0,
-            ),
-            child: ListTile(
-              minTileHeight: designTokens.minInteractiveDimension,
-              contentPadding: listTileContentPadding,
-              shape: RoundedRectangleBorder(borderRadius: resolvedRadius),
-              leading: TilawaIconBox(
-                icon: icon,
-                size: tokens.tileIconSize,
-                padding: resolvedIconPadding.top,
-                variant: TilawaIconBoxVariant.tinted,
-                semanticTint: semanticTint,
-              ),
-              title: _NavigationRowLabel(
-                title: title,
-                subtitle: subtitle,
-                tokens: tokens,
-              ),
-              trailing: Icon(
-                TilawaIcons.chevronRightSmall,
-                size: tokens.tileTrailingSize,
-                color: colorScheme.onSurfaceVariant.withValues(
-                  alpha: tokens.tileTrailingOpacity,
-                ),
-              ),
-              onTap: onTap,
+          contentPadding: EdgeInsetsDirectional.only(
+            start: designTokens.spaceSmall,
+            end: designTokens.spaceSmall,
+          ),
+          minTileHeight: designTokens.minInteractiveDimension,
+          rowGap: tokens.tileItemGap,
+          onTap: onTap,
+          leading: TilawaIconBox(
+            icon: icon,
+            size: tokens.tileIconSize,
+            padding: resolvedIconPadding.top,
+            variant: TilawaIconBoxVariant.tinted,
+            semanticTint: semanticTint,
+          ),
+          title: _NavigationRowLabel(
+            title: title,
+            subtitle: subtitle,
+            tokens: tokens,
+          ),
+          trailing: Icon(
+            TilawaIcons.chevronRightSmall,
+            size: tokens.tileTrailingSize,
+            color: colorScheme.onSurfaceVariant.withValues(
+              alpha: tokens.tileTrailingOpacity,
             ),
           ),
         ),

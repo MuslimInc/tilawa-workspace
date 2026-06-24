@@ -1,6 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 
+import '../src/domain/entities/session_call_provider_kind.dart';
+import '../src/domain/entities/session_call_type.dart';
 import '../src/domain/entities/teacher_application.dart';
 
 /// Provides easy access to Quran Sessions package-local localization.
@@ -39,4 +41,17 @@ extension QuranSessionsLabelX on QuranSessionsLocalizations {
         PreferredContactMethod.phone => contactPhone,
         PreferredContactMethod.email => contactEmail,
       };
+
+  String callTypeLabel(SessionCallType type) => switch (type) {
+    SessionCallType.externalMeeting => callTypeExternalMeeting,
+    SessionCallType.voiceCall => callTypeVoice,
+    SessionCallType.videoCall => callTypeVideo,
+  };
+
+  String callProviderKindLabel(SessionCallProviderKind kind) => switch (kind) {
+    SessionCallProviderKind.external => callProviderExternal,
+    SessionCallProviderKind.mock => callProviderMock,
+    SessionCallProviderKind.agora => callProviderAgora,
+    SessionCallProviderKind.webrtc => callProviderWebrtc,
+  };
 }

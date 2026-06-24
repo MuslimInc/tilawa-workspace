@@ -68,6 +68,54 @@ void main() {
       expect(find.byKey(_bottomNavKey), findsOneWidget);
     });
 
+    testWidgets('phone bottom nav uses sheet footer top border', (
+      tester,
+    ) async {
+      await _pumpShell(
+        tester,
+        size: const Size(400, 800),
+        direction: TextDirection.ltr,
+      );
+
+      final BuildContext context = tester.element(
+        find.byKey(_bottomNavDockKey),
+      );
+      final ThemeData theme = Theme.of(context);
+      final DecoratedBox decoratedBox = tester.widget<DecoratedBox>(
+        find.descendant(
+          of: find.byKey(_bottomNavDockKey),
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is DecoratedBox &&
+                widget.decoration is BoxDecoration &&
+                (widget.decoration as BoxDecoration).border?.top != null,
+          ),
+        ),
+      );
+      final BorderSide topBorder =
+          (decoratedBox.decoration as BoxDecoration).border!.top;
+
+      expect(
+        topBorder.width,
+        theme.componentTokens.bottomSheetScaffold.footerTopBorderWidth,
+      );
+      expect(topBorder.color, theme.colorScheme.outlineVariant);
+    });
+
+    testWidgets('phone bottom nav spans full viewport width', (
+      tester,
+    ) async {
+      await _pumpShell(
+        tester,
+        size: const Size(360, 800),
+        direction: TextDirection.ltr,
+      );
+
+      final Rect dockRect = tester.getRect(find.byKey(_bottomNavDockKey));
+      expect(dockRect.left, 0);
+      expect(dockRect.width, 360);
+    });
+
     testWidgets(
       'narrow bottom nav survives parent text scale clamped above 1.0',
       (tester) async {

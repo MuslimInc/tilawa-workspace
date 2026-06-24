@@ -29,7 +29,9 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Tilawa uses your location to calculate accurate prayer times and Qibla direction.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Tilawa uses the microphone to check your Quran recitation during practice.</string>
+	<string>Tilawa uses the microphone for Quran recitation practice and live tutoring session calls.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Tilawa uses the camera for optional video during live Quran tutoring sessions.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Tilawa uses recitation audio analysis to compare your recitation with the selected Quran verse.</string>
 	<key>UIApplicationSceneManifest</key>

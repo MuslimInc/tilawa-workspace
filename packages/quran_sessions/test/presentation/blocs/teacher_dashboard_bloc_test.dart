@@ -6,6 +6,7 @@ import 'package:quran_sessions/quran_sessions.dart';
 import '../../helpers/availability_test_helpers.dart';
 import '../../helpers/fakes/fake_user_profile_repository.dart';
 import '../../helpers/fakes/fake_availability_provider.dart';
+import '../../helpers/fakes/fake_booked_slot_lock_repository.dart';
 import '../../helpers/fakes/fake_session_repository.dart';
 import '../../helpers/lifecycle_test_helpers.dart';
 import '../../helpers/fixtures.dart';
@@ -46,6 +47,7 @@ void main() {
   late FakeAvailabilityProvider availabilityProvider;
   late BlockGeneratedSlotUseCase blockGeneratedSlot;
   late SpyGetTeacherAvailabilityUseCase spyGetAvailability;
+  late FakeBookedSlotLockRepository bookedSlotLockRepo;
   late FakeCommitTimers fakeTimers;
   late CommitTimerFactory testCommitTimerFactory;
 
@@ -64,6 +66,7 @@ void main() {
       scheduleRepo: scheduleRepo,
       schedulingConfigRepo: schedulingConfigRepo,
       userProfileRepo: userProfileRepo,
+      bookedSlotLockRepository: bookedSlotLockRepo,
       fridayReminderStore: fridayReminderStore,
       commitTimerFactory: testCommitTimerFactory,
       commitDelay: commitDelay,
@@ -80,10 +83,11 @@ void main() {
     userProfileRepo = FakeUserProfileRepository();
     fridayReminderStore = InMemoryFridayReviewReminderStore();
     availabilityProvider = FakeAvailabilityProvider();
+    bookedSlotLockRepo = FakeBookedSlotLockRepository();
     blockGeneratedSlot = BlockGeneratedSlotUseCase(scheduleRepo);
     spyGetAvailability = SpyGetTeacherAvailabilityUseCase(
       scheduleRepository: scheduleRepo,
-      sessionRepository: sessionRepo,
+      bookedSlotLocks: bookedSlotLockRepo,
       now: () => fixedNow,
     );
     fakeTimers = FakeCommitTimers();
@@ -417,6 +421,10 @@ void main() {
             startsAt: slot.startsAt,
           ),
         ];
+        bookedSlotLockRepo.seedHardLock(
+          teacherId: 'teacher_1',
+          startUtc: slot.startsAt.toUtc(),
+        );
         fakeTimers.fireAll();
         await b.stream.firstWhere((s) {
           return s is TeacherDashboardSuccess &&

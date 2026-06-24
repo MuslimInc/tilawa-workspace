@@ -272,7 +272,7 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get becomeTeacherCardTitle => 'I want to become a teacher';
 
   @override
-  String get becomeTeacherCardSubtitle => 'Join Tilawa\'s certified teachers';
+  String get becomeTeacherCardSubtitle => 'Join MeMuslim\'s certified teachers';
 
   @override
   String get teacherListTitle => 'Find a teacher';
@@ -316,6 +316,166 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get callTypeVideo => 'Video';
 
   @override
+  String get sessionModeVoiceBetaNote =>
+      'Free Beta: voice uses a placeholder join until in-app RTC ships.';
+
+  @override
+  String get sessionModeVideoBetaNote =>
+      'Free Beta: video uses a placeholder join until in-app RTC ships.';
+
+  @override
+  String bookingVoiceVideoProviderNote(String provider) {
+    return 'In-app calls use $provider.';
+  }
+
+  @override
+  String get sessionModeVoiceDisabled =>
+      'Voice sessions are not available yet. Choose external link.';
+
+  @override
+  String get sessionModeVideoDisabled =>
+      'Video sessions are not available yet. Choose external link.';
+
+  @override
+  String get sessionModeExternalDisabled =>
+      'Your teacher has not added a meeting link yet. Choose voice or video.';
+
+  @override
+  String get meetingLinkUnavailable =>
+      'This teacher has not set up a meeting link for external sessions. Choose voice or video, or try again later.';
+
+  @override
+  String get callProviderUnavailable =>
+      'This session cannot be joined from the app right now.';
+
+  @override
+  String get callProviderAgoraNotConfigured =>
+      'In-app Agora calls are not enabled in this build. Rebuild with Staging Agora config (TILAWA_DISTRIBUTION=staging and TILAWA_LAUNCH_AGORA_APP_ID), or use the Tilawa (Staging Agora) launch profile.';
+
+  @override
+  String rtcPermissionDenied(String permission) {
+    return 'Microphone or camera access is required to join this session. Enable $permission in Settings and try again.';
+  }
+
+  @override
+  String get rtcCallJoinFailed =>
+      'Could not connect to the voice or video call. Try again in a moment.';
+
+  @override
+  String get rtcCallJoinRejected =>
+      'Could not join this call. Leave any open call for this session, wait a moment, then try again.';
+
+  @override
+  String get rtcCallJoinInvalidToken =>
+      'This call link expired or is invalid. Tap Join again to get a fresh connection.';
+
+  @override
+  String get webrtcSignalingUnavailable =>
+      'In-app WebRTC calls are not available yet. Choose voice with Agora or an external meeting link.';
+
+  @override
+  String get inAppCallShellTitle => 'Session call';
+
+  @override
+  String get inAppCallShellBody =>
+      'You are connected to this session\'s call room. End the call when your lesson finishes.';
+
+  @override
+  String get inAppCallShellEndCall => 'Leave call';
+
+  @override
+  String get inAppCallShellMute => 'Mute microphone';
+
+  @override
+  String get inAppCallShellUnmute => 'Unmute microphone';
+
+  @override
+  String get inAppCallShellConnecting => 'Connecting…';
+
+  @override
+  String get inAppCallShellConnected => 'Connected';
+
+  @override
+  String get inAppCallShellWaitingForParticipant =>
+      'Waiting for the other participant';
+
+  @override
+  String get inAppCallShellMockBetaBody =>
+      'Beta preview — no live audio or video. Book a new session with Agora enabled to try a real call.';
+
+  @override
+  String get inAppCallShellSpeaker => 'Speaker';
+
+  @override
+  String get inAppCallShellFlipCamera => 'Flip camera';
+
+  @override
+  String get inAppCallShellTurnVideoOn => 'Turn camera on';
+
+  @override
+  String get inAppCallShellTurnVideoOff => 'Turn camera off';
+
+  @override
+  String get inAppCallShellMicrophoneMuted => 'Microphone muted';
+
+  @override
+  String get inAppCallShellMicrophoneUnmuted => 'Microphone unmuted';
+
+  @override
+  String get inAppCallShellCameraOff => 'Camera turned off';
+
+  @override
+  String get inAppCallShellCameraOn => 'Camera turned on';
+
+  @override
+  String get inAppCallShellSwitchCameraBlocked =>
+      'Cannot switch camera while it is off';
+
+  @override
+  String get inAppCallShellSpeakerOn => 'Speaker on';
+
+  @override
+  String get inAppCallShellSpeakerOff => 'Speaker off';
+
+  @override
+  String get inAppCallShellControlActionFailed =>
+      'Could not complete that action. Try again.';
+
+  @override
+  String get externalMeetingJoinTitle => 'Join outside MeMuslim?';
+
+  @override
+  String get externalMeetingJoinBody =>
+      'You\'ll briefly leave MeMuslim to join your session in Google Meet, Zoom, or your browser. Come back here anytime — your session details stay open.';
+
+  @override
+  String get externalMeetingJoinOpen => 'Open';
+
+  @override
+  String get externalMeetingJoinCopy => 'Copy URL';
+
+  @override
+  String get externalMeetingJoinLinkCopied => 'Link copied';
+
+  @override
+  String get externalMeetingJoinAgain => 'Open meeting again';
+
+  @override
+  String get externalMeetingLaunchFailed =>
+      'Couldn\'t open the meeting link. Try again or copy the link.';
+
+  @override
+  String get externalMeetingLinkCopied =>
+      'Meeting link copied. Paste it in your browser to join.';
+
+  @override
+  String get groupBookingNotSupported =>
+      'Group sessions are not available in Free Beta.';
+
+  @override
+  String get unsupportedSessionMode => 'This session type is not supported.';
+
+  @override
   String get reviewSubmittedThanks => 'Thank you — your review was submitted!';
 
   @override
@@ -330,6 +490,9 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String pastSessionsSection(int count) {
     return 'Past ($count)';
   }
+
+  @override
+  String get loadMorePastSessions => 'Load more';
 
   @override
   String get noPastSessions => 'No past sessions';
@@ -391,6 +554,37 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
       'Reschedule request sent. Waiting for confirmation.';
 
   @override
+  String get rescheduleAwaitingCounterparty =>
+      'Waiting for the other participant to confirm your new time.';
+
+  @override
+  String get reschedulePendingTitle => 'Reschedule request';
+
+  @override
+  String reschedulePendingProposedTime(String dateTime) {
+    return 'Proposed time: $dateTime';
+  }
+
+  @override
+  String reschedulePendingReason(String reason) {
+    return 'Reason: $reason';
+  }
+
+  @override
+  String get rescheduleAcceptAction => 'Accept new time';
+
+  @override
+  String get rescheduleRejectAction => 'Keep current time';
+
+  @override
+  String get rescheduleAcceptedToast =>
+      'Reschedule accepted. Session time updated.';
+
+  @override
+  String get rescheduleRejectedToast =>
+      'Reschedule declined. Original time kept.';
+
+  @override
   String get rescheduleAction => 'Reschedule';
 
   @override
@@ -401,6 +595,31 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get sessionTimelineEmpty => 'No activity recorded yet.';
+
+  @override
+  String get sessionTimelineLoadFailed =>
+      'Could not load the activity timeline. Check your connection and try again.';
+
+  @override
+  String get sessionPendingRescheduleLoadFailed =>
+      'Could not load the pending reschedule request. Try again in a moment.';
+
+  @override
+  String sessionLockedAtBookingNote(String callType, String callProvider) {
+    return 'Call type ($callType) and provider ($callProvider) were set when you booked. To change them, cancel and rebook or contact support.';
+  }
+
+  @override
+  String get callProviderExternal => 'External link';
+
+  @override
+  String get callProviderMock => 'In-app (preview)';
+
+  @override
+  String get callProviderAgora => 'In-app (Agora)';
+
+  @override
+  String get callProviderWebrtc => 'In-app (WebRTC)';
 
   @override
   String sessionStatusLabel(String status) {
@@ -797,7 +1016,7 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get submittingApplication => 'Submitting application…';
 
   @override
-  String get becomeTeacherOnTilawa => 'Become a teacher on Tilawa';
+  String get becomeTeacherOnTilawa => 'Become a teacher on MeMuslim';
 
   @override
   String get becomeTeacherApplicationIntro =>
@@ -908,14 +1127,14 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get applicationStatusPendingSubtitle =>
-      'The Tilawa team is reviewing your application. We will contact you soon.';
+      'The MeMuslim team is reviewing your application. We will contact you soon.';
 
   @override
   String get applicationStatusApprovedTitle => 'Congratulations! Approved';
 
   @override
   String get applicationStatusApprovedSubtitle =>
-      'You are now a certified teacher on Tilawa.';
+      'You are now a certified teacher on MeMuslim.';
 
   @override
   String get applicationStatusApprovedContinue => 'Continue';
@@ -1098,6 +1317,33 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   @override
   String get teacherPublicNameHelper =>
       'Your real full name as students see it in the marketplace. It may differ from your account name.';
+
+  @override
+  String get teacherExternalMeetingUrlLabel => 'External meeting link';
+
+  @override
+  String get teacherExternalMeetingUrlHint =>
+      'https://meet.google.com/your-room';
+
+  @override
+  String get teacherExternalMeetingUrlHelper =>
+      'Students who book external sessions join via this HTTPS link (Google Meet, Zoom, Microsoft Teams).';
+
+  @override
+  String get teacherExternalMeetingUrlSaved => 'Meeting link saved';
+
+  @override
+  String get teacherExternalMeetingUrlSave => 'Save meeting link';
+
+  @override
+  String get teacherExternalMeetingUrlInvalid =>
+      'Enter a valid HTTPS meeting link (Google Meet, Zoom, or Teams).';
+
+  @override
+  String get teacherOffersExternalSessions => 'External sessions available';
+
+  @override
+  String get sessionMeetingLinkLabel => 'Meeting link';
 
   @override
   String get teacherPublicNameRequired => 'Full teacher name is required.';
@@ -1317,4 +1563,147 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get paymentCheckoutConfirm => 'Confirm payment (sandbox)';
+
+  @override
+  String get restrictionReasonFalseIdentity => 'False identity information';
+
+  @override
+  String get restrictionReasonPolicyViolation => 'Policy violation';
+
+  @override
+  String get restrictionReasonSafetyConcern => 'Safety concern';
+
+  @override
+  String get restrictionReasonAbuseReport => 'Abuse report';
+
+  @override
+  String get restrictionReasonRepeatedNoShow => 'Repeated no-show';
+
+  @override
+  String get restrictionReasonAdminDecision => 'Administrative decision';
+
+  @override
+  String get sessionLifecycleDraft => 'Draft';
+
+  @override
+  String get sessionLifecyclePendingPayment => 'Pending payment';
+
+  @override
+  String get sessionLifecycleScheduled => 'Scheduled';
+
+  @override
+  String get sessionLifecycleConfirmed => 'Confirmed';
+
+  @override
+  String get sessionLifecycleInProgress => 'In progress';
+
+  @override
+  String get sessionLifecycleRescheduled => 'Rescheduled';
+
+  @override
+  String get sessionLifecycleCancelledByStudent => 'Cancelled by student';
+
+  @override
+  String get sessionLifecycleCancelledByTeacher => 'Cancelled by teacher';
+
+  @override
+  String get sessionLifecycleCancelledByAdmin => 'Cancelled by admin';
+
+  @override
+  String get sessionLifecycleTeacherNoShow => 'Teacher no-show';
+
+  @override
+  String get sessionLifecycleStudentNoShow => 'Student no-show';
+
+  @override
+  String get sessionLifecycleBothNoShow => 'Both no-show';
+
+  @override
+  String get sessionLifecycleIncomplete => 'Incomplete';
+
+  @override
+  String get sessionLifecycleCompleted => 'Completed';
+
+  @override
+  String get sessionLifecycleDisputed => 'Disputed';
+
+  @override
+  String get sessionLifecycleCompensated => 'Compensated';
+
+  @override
+  String get sessionLifecycleRefunded => 'Refunded';
+
+  @override
+  String get sessionLifecycleExpired => 'Expired';
+
+  @override
+  String get sessionActionCreateDraft => 'Create draft';
+
+  @override
+  String get sessionActionInitiatePayment => 'Initiate payment';
+
+  @override
+  String get sessionActionConfirmBooking => 'Confirm booking';
+
+  @override
+  String get sessionActionConfirmFreeBooking => 'Confirm free booking';
+
+  @override
+  String get sessionActionAcknowledgeSession => 'Acknowledge session';
+
+  @override
+  String get sessionActionStartSession => 'Start session';
+
+  @override
+  String get sessionActionCompleteSession => 'Complete session';
+
+  @override
+  String get sessionActionRequestReschedule => 'Request reschedule';
+
+  @override
+  String get sessionActionConfirmReschedule => 'Confirm reschedule';
+
+  @override
+  String get sessionActionAdminForceReschedule => 'Admin force reschedule';
+
+  @override
+  String get sessionActionCancelByStudent => 'Cancel by student';
+
+  @override
+  String get sessionActionCancelByTeacher => 'Cancel by teacher';
+
+  @override
+  String get sessionActionCancelByAdmin => 'Cancel by admin';
+
+  @override
+  String get sessionActionMarkTeacherNoShow => 'Mark teacher no-show';
+
+  @override
+  String get sessionActionMarkStudentNoShow => 'Mark student no-show';
+
+  @override
+  String get sessionActionMarkBothNoShow => 'Mark both no-show';
+
+  @override
+  String get sessionActionMarkIncomplete => 'Mark incomplete';
+
+  @override
+  String get sessionActionOpenDispute => 'Open dispute';
+
+  @override
+  String get sessionActionIssueCompensation => 'Issue compensation';
+
+  @override
+  String get sessionActionIssueRefund => 'Issue refund';
+
+  @override
+  String get sessionActionExpireReservation => 'Expire reservation';
+
+  @override
+  String get sessionActionRejectBooking => 'Reject booking';
+
+  @override
+  String sessionTimelineStatusTransition(String previous, String next) {
+    return '$previous → $next';
+  }
 }

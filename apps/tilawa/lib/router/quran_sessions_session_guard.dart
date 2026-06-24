@@ -5,6 +5,7 @@ import 'package:quran_sessions/quran_sessions.dart';
 
 import '../features/auth/presentation/bloc/auth_bloc.dart';
 import '../features/auth/presentation/cubit/session_validity_cubit.dart';
+import '../features/quran_sessions/quran_sessions_feature_flags.dart';
 import 'app_router_config.dart';
 
 /// Whether [path] is a Quran Sessions route that requires an active device session.
@@ -15,6 +16,18 @@ bool isProtectedQuranSessionsPath(String path) {
       : path;
   return normalized == QuranSessionsRoutes.home ||
       normalized.startsWith('${QuranSessionsRoutes.home}/');
+}
+
+/// Redirects when Quran Sessions feature flag is off.
+String? quranSessionsFeatureRedirect(GoRouterState state) {
+  final path = state.uri.path;
+  if (!isProtectedQuranSessionsPath(path)) {
+    return null;
+  }
+  if (!quranSessionsFeatureConfig().quranSessionsEnabled) {
+    return const HomeRoute().location;
+  }
+  return null;
 }
 
 /// Redirects stale or unsigned users away from protected Quran Sessions routes.

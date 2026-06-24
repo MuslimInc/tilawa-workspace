@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
+import '../foundation/tilawa_interactive_surface.dart';
 
 class TilawaChip extends StatelessWidget {
   const TilawaChip({
@@ -147,17 +148,14 @@ class TilawaChip extends StatelessWidget {
     // to at least 48 dp for the hit target. Static (label) chips bypass this
     // branch entirely.
     // Explicit button role / label avoids MergeSemantics (engine merge bugs).
-    // Background is painted by the Container inside [content]; Material here
-    // only provides the ink-splash canvas (transparent fill avoids double
-    // paint).
-    final Widget paintedChip = Material(
-      color: Colors.transparent,
-      shape: shape,
-      child: InkWell(
-        onTap: onTap,
-        customBorder: shape,
-        child: content,
-      ),
+    // Background + border are painted by the Container inside [content]; the
+    // interactive surface adds press-scale, focus ring, and haptics (no ripple)
+    // and its own semantics are excluded so the outer Semantics owns the node.
+    final Widget paintedChip = TilawaInteractiveSurface(
+      onTap: onTap,
+      button: false,
+      borderRadius: BorderRadius.circular(resolvedRadius),
+      child: content,
     );
 
     // Shrink-wrap both axes so chips stay compact inside [Wrap] and other

@@ -203,6 +203,27 @@ void main() {
         ),
       ],
     );
+
+    blocTest<QiblaBloc, QiblaState>(
+      'should emit [error] when permission check fails during service check',
+      setUp: () {
+        when(
+          () => mockCheckLocationServiceUseCase(any()),
+        ).thenAnswer((_) async => const Right(true));
+        when(() => mockRequestLocationPermissionUseCase(any())).thenAnswer(
+          (_) async => const Left(ServerFailure('Permission check failed')),
+        );
+      },
+      build: () => qiblaBloc,
+      act: (bloc) => bloc.add(const CheckLocationService()),
+      expect: () => [
+        const QiblaState(status: QiblaStatus.loading),
+        const QiblaState(
+          status: QiblaStatus.error,
+          errorMessage: 'Permission check failed',
+        ),
+      ],
+    );
   });
 
   group('RequestLocationPermission', () {
@@ -290,6 +311,53 @@ void main() {
     );
   });
 
+  group('CheckLocationService re-entry', () {
+    blocTest<QiblaBloc, QiblaState>(
+      'skips re-initialization when success stream is already active',
+      setUp: () {
+        when(
+          () => mockCheckLocationServiceUseCase(any()),
+        ).thenAnswer((_) async => const Right(true));
+        when(
+          () => mockRequestLocationPermissionUseCase(any()),
+        ).thenAnswer((_) async => const Right(true));
+        when(() => mockGetQiblaDirectionUseCase(any())).thenAnswer(
+          (_) => Stream<QiblaDirectionEntity>.value(tQiblaDirection),
+        );
+      },
+      build: () => qiblaBloc,
+      act: (bloc) async {
+        bloc.add(const CheckLocationService());
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+        bloc.add(const CheckLocationService());
+      },
+      expect: () => [
+        const QiblaState(status: QiblaStatus.loading),
+        const QiblaState(
+          status: QiblaStatus.success,
+          direction: tQiblaDirection,
+        ),
+      ],
+      verify: (_) {
+        verify(() => mockCheckLocationServiceUseCase(any())).called(1);
+      },
+    );
+  });
+
+  group('QiblaErrorOccurred', () {
+    blocTest<QiblaBloc, QiblaState>(
+      'emits error state with message',
+      build: () => qiblaBloc,
+      act: (bloc) => bloc.add(const QiblaErrorOccurred('sensor offline')),
+      expect: () => [
+        const QiblaState(
+          status: QiblaStatus.error,
+          errorMessage: 'sensor offline',
+        ),
+      ],
+    );
+  });
+
   group('Qibla alignment vibration', () {
     const alignedDirection = QiblaDirectionEntity(
       qibla: 10,
@@ -334,6 +402,17 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 50));
 
       expect(fakeVibrationPlatform.vibrateCalls, isEmpty);
+    });
+
+    test('vibrates without amplitude control when unsupported', () async {
+      fakeVibrationPlatform.hasAmplitudeControlValue = false;
+
+      qiblaBloc.add(const UpdateQiblaDirection(alignedDirection));
+
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      expect(fakeVibrationPlatform.vibrateCalls, hasLength(1));
+      expect(fakeVibrationPlatform.vibrateCalls.single['amplitude'], -1);
     });
   });
 }

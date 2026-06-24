@@ -28,6 +28,11 @@ project design spec:
 [`specs/016-support-tilawa/spec.md`](specs/016-support-tilawa/spec.md) and
 [`packages/ui_kit/docs/support_visual_system.md`](packages/ui_kit/docs/support_visual_system.md).
 **Living backlog (features / refactors):** [`docs/TODO.md`](docs/TODO.md).
+**Quran Sessions (perf → UX → UI):**
+[`docs/quran_sessions/performance_first_review_framework.md`](docs/quran_sessions/performance_first_review_framework.md)
+— mandatory review order; baseline audit in
+[`docs/quran_sessions/baseline_performance_audit.md`](docs/quran_sessions/baseline_performance_audit.md).
+Cursor rule: [`.cursor/rules/quran-sessions-performance-first.mdc`](.cursor/rules/quran-sessions-performance-first.mdc).
 **Senior Flutter agent:** [`tilawa-senior-flutter`](.agents/skills/tilawa-senior-flutter/SKILL.md)
 (**TilawaAISeniorFlutter**) — clean architecture, SOLID, feature implementation.
 **UI / UX:** [`tilawa-apply-ux-principles`](.agents/skills/tilawa-apply-ux-principles/SKILL.md),

@@ -31,3 +31,12 @@ test("resolveMeetingLink returns null for non-external call types", () => {
     null,
   );
 });
+
+test("resolveMeetingLink reads legacy meeting_link on teacher profile", () => {
+  const url = resolveMeetingLink(
+    "externalMeeting",
+    { meeting_link: "https://meet.example.com/legacy" },
+    {},
+  );
+  assert.equal(url, "https://meet.example.com/legacy");
+});

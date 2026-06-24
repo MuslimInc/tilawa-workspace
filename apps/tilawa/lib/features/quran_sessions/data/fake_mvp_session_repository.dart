@@ -1,4 +1,5 @@
 import 'package:dartz_plus/dartz_plus.dart';
+
 import 'package:quran_sessions/quran_sessions.dart';
 
 import 'quran_sessions_mvp_store.dart';
@@ -18,20 +19,43 @@ class FakeMvpSessionRepository implements SessionRepository {
   }
 
   @override
-  Future<Either<QuranSessionsFailure, List<QuranSession>>> getStudentSessions(
-    String studentId,
-  ) async {
-    return Right(
-      _store.sessions.where((s) => s.studentId == studentId).toList(),
-    );
+  Future<Either<QuranSessionsFailure, SessionPage>> getStudentUpcomingSessions(
+    String studentId, {
+    String? cursor,
+    int limit = kDefaultSessionPageSize,
+  }) async {
+    final now = DateTime.now();
+    final upcoming = _store.sessions
+        .where((s) => s.studentId == studentId && s.startsAt.isAfter(now))
+        .toList();
+    return Right(SessionPage(sessions: upcoming.take(limit).toList()));
   }
 
   @override
-  Future<Either<QuranSessionsFailure, List<QuranSession>>> getTeacherSessions(
-    String teacherId,
-  ) async {
+  Future<Either<QuranSessionsFailure, SessionPage>> getStudentPastSessions(
+    String studentId, {
+    String? cursor,
+    int limit = kDefaultSessionPageSize,
+  }) async {
+    final now = DateTime.now();
+    final past = _store.sessions
+        .where((s) => s.studentId == studentId && !s.startsAt.isAfter(now))
+        .toList();
+    return Right(SessionPage(sessions: past.take(limit).toList()));
+  }
+
+  @override
+  Future<Either<QuranSessionsFailure, List<QuranSession>>>
+  getTeacherUpcomingSessions(
+    String teacherId, {
+    int limit = kDefaultSessionPageSize,
+  }) async {
+    final now = DateTime.now();
     return Right(
-      _store.sessions.where((s) => s.teacherId == teacherId).toList(),
+      _store.sessions
+          .where((s) => s.teacherId == teacherId && s.startsAt.isAfter(now))
+          .take(limit)
+          .toList(),
     );
   }
 

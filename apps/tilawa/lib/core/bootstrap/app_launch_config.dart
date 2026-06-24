@@ -21,6 +21,8 @@ import 'package:flutter/foundation.dart';
 /// Example: `--dart-define=TILAWA_LAUNCH_TEACHER_APPLICATION_DISCOVERABILITY=profileAndEmptyState`
 /// Example: `--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_PAID_BOOKING_SANDBOX_ENABLED=true`
+/// Example: `--dart-define=TILAWA_LAUNCH_ENABLED_CALL_PROVIDERS=external,mock,agora`
+/// Example: `--dart-define=TILAWA_LAUNCH_AGORA_APP_ID=your_agora_app_id`
 ///
 /// Staging / pre-production builds default Quran Sessions beta flags ON via
 /// [quranSessionsStagingFlagsDefaultEnabled] (everything except
@@ -70,6 +72,9 @@ class AppLaunchConfig extends Equatable {
     this.teacherApplicationDiscoverability = 'profileAndEmptyState',
     this.quranSessionsBookingEnabled = false,
     this.quranSessionsPaidBookingSandboxEnabled = false,
+    this.enabledCallProvidersCsv = 'external,mock',
+    this.agoraAppId = '',
+    this.webrtcSignalingServerUrl = '',
     this.genUiAssistantEnabled = false,
   });
 
@@ -216,6 +221,18 @@ class AppLaunchConfig extends Equatable {
         'TILAWA_LAUNCH_QURAN_SESSIONS_PAID_BOOKING_SANDBOX_ENABLED',
         defaultValue: false,
       ),
+      enabledCallProvidersCsv: String.fromEnvironment(
+        'TILAWA_LAUNCH_ENABLED_CALL_PROVIDERS',
+        defaultValue: 'external,mock',
+      ),
+      agoraAppId: String.fromEnvironment(
+        'TILAWA_LAUNCH_AGORA_APP_ID',
+        defaultValue: '',
+      ),
+      webrtcSignalingServerUrl: String.fromEnvironment(
+        'TILAWA_LAUNCH_WEBRTC_SIGNALING_URL',
+        defaultValue: '',
+      ),
       genUiAssistantEnabled: bool.fromEnvironment(
         'TILAWA_LAUNCH_GENUI_ASSISTANT_ENABLED',
         defaultValue: false,
@@ -263,6 +280,16 @@ class AppLaunchConfig extends Equatable {
   /// `QURAN_SESSIONS_PAYMENT_PROVIDER_ENABLED=true`). Default **false**.
   final bool quranSessionsPaidBookingSandboxEnabled;
 
+  /// Comma-separated RTC providers registered client-side (must match Firestore
+  /// `enabledCallProviders`). Example: `external,mock,agora`.
+  final String enabledCallProvidersCsv;
+
+  /// Agora App ID — required when `agora` is in [enabledCallProvidersCsv].
+  final String agoraAppId;
+
+  /// WebRTC signaling base URL — required before WebRTC joins succeed.
+  final String webrtcSignalingServerUrl;
+
   /// Gates the AI-generated dynamic UI surface (Smart Quran Plan / MeMuslim
   /// Assistant). Defaults to **false** — when off, no GenUI dependencies are
   /// registered and no AI-driven UI is reachable. The whole feature is a
@@ -307,6 +334,9 @@ class AppLaunchConfig extends Equatable {
     teacherApplicationDiscoverability,
     quranSessionsBookingEnabled,
     quranSessionsPaidBookingSandboxEnabled,
+    enabledCallProvidersCsv,
+    agoraAppId,
+    webrtcSignalingServerUrl,
     genUiAssistantEnabled,
   ];
 }

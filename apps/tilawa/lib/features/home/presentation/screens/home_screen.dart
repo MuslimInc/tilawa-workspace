@@ -1,8 +1,12 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/features/home/debug/home_hero_variant_debug.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_athkar_compact_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_primary_action_cubit.dart';
@@ -17,13 +21,41 @@ import '../widgets/home_dashboard_content_sliver.dart';
 import '../widgets/home_dashboard_hero_sliver.dart';
 
 /// Main daily dashboard for the app shell.
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.onOpenPrayer});
 
   final VoidCallback onOpenPrayer;
 
   static const double _heroSnapThresholdFactor = 0.35;
   static const double _heroSnapTolerance = 0.5;
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    if (kDebugMode) {
+      HomeHeroVariantDebug.ensureLoaded(GetIt.I<SharedPreferencesAsync>());
+      HomeHeroVariantDebug.variant.addListener(_onHeroVariantChanged);
+    }
+  }
+
+  @override
+  void dispose() {
+    if (kDebugMode) {
+      HomeHeroVariantDebug.variant.removeListener(_onHeroVariantChanged);
+    }
+    super.dispose();
+  }
+
+  void _onHeroVariantChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,10 +99,10 @@ class HomeScreen extends StatelessWidget {
                   ...HomeDashboardHeroSliver.buildSlivers(
                     context: context,
                     state: state,
-                    onOpenPrayer: onOpenPrayer,
+                    onOpenPrayer: widget.onOpenPrayer,
                   ),
                   HomeDashboardContentSliver(
-                    child: HomeDashboardBody(onOpenPrayer: onOpenPrayer),
+                    child: HomeDashboardBody(onOpenPrayer: widget.onOpenPrayer),
                   ),
                 ],
               );
@@ -118,7 +150,8 @@ class HomeScreen extends StatelessWidget {
     final double clampedTarget = snapTarget
         .clamp(position.minScrollExtent, position.maxScrollExtent)
         .toDouble();
-    if ((position.pixels - clampedTarget).abs() <= _heroSnapTolerance) {
+    if ((position.pixels - clampedTarget).abs() <=
+        HomeScreen._heroSnapTolerance) {
       return;
     }
 
@@ -138,7 +171,8 @@ class HomeScreen extends StatelessWidget {
       return null;
     }
 
-    final double threshold = collapseExtent * _heroSnapThresholdFactor;
+    final double threshold =
+        collapseExtent * HomeScreen._heroSnapThresholdFactor;
     return offset < threshold ? 0 : collapseExtent;
   }
 

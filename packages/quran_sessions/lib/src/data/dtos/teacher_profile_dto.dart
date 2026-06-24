@@ -17,6 +17,7 @@ class TeacherProfileDto {
     this.publicBio,
     this.allowedStudentGender,
     this.canTeachChildren = true,
+    this.externalMeetingUrl,
   });
 
   final String id;
@@ -34,6 +35,7 @@ class TeacherProfileDto {
   final bool isPubliclyVisible;
   final String? allowedStudentGender;
   final bool canTeachChildren;
+  final String? externalMeetingUrl;
   final DateTime createdAt;
   final DateTime updatedAt;
 }

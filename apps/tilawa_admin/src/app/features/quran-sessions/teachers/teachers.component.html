@@ -1,91 +1,100 @@
-<div class="px-4 sm:px-6 lg:px-8">
-  <app-page-header
-    [title]="'teachers_title' | t"
-    [subtitle]="'teachers_subtitle' | t"
-  />
+<div class="tilawa-page-stack">
+  <app-page-header [title]="'teachers_title' | t" [subtitle]="'teachers_subtitle' | t" [hasActions]="false" />
 
-  <div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-    <input [(ngModel)]="searchQuery" [placeholder]="'teachers_searchPlaceholder' | t" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm" />
-    <select [(ngModel)]="activeFilter" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm">
+  <app-tilawa-filter-bar (apply)="reload()">
+    <input class="tilawa-field" [(ngModel)]="searchQuery" [placeholder]="'teachers_searchPlaceholder' | t" />
+    <select class="tilawa-field" [(ngModel)]="activeFilter">
       <option value="">{{ 'common_allActiveStates' | t }}</option>
       <option value="true">{{ 'status_active' | t }}</option>
       <option value="false">{{ 'status_inactive' | t }}</option>
     </select>
-    <select [(ngModel)]="verificationFilter" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm">
+    <select class="tilawa-field" [(ngModel)]="verificationFilter">
       <option value="">{{ 'common_allVerification' | t }}</option>
       <option value="verified">{{ 'status_verified' | t }}</option>
       <option value="pending">{{ 'status_pending' | t }}</option>
       <option value="rejected">{{ 'status_rejected' | t }}</option>
     </select>
-    <input [(ngModel)]="languageFilter" [placeholder]="'common_language' | t" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm" />
-    <input [(ngModel)]="specializationFilter" [placeholder]="'common_specialization' | t" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm" />
-  </div>
+    <input class="tilawa-field" [(ngModel)]="languageFilter" [placeholder]="'common_language' | t" />
+    <input class="tilawa-field" [(ngModel)]="specializationFilter" [placeholder]="'common_specialization' | t" />
+  </app-tilawa-filter-bar>
 
-  <div class="mt-4">
-    <button type="button" (click)="reload()" class="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white">{{ 'common_applyFilters' | t }}</button>
-  </div>
-
-  <div class="mt-8">
-    @if (loadState() === 'loading') {
-      <p class="text-center text-gray-500 py-8">{{ 'teachers_loading' | t }}</p>
-    } @else if (loadState() === 'error') {
-      <p class="text-center text-red-600 py-8">{{ errorMessage() }}</p>
-    } @else if (items().length === 0) {
-      <p class="text-center text-gray-500 py-8">{{ 'teachers_empty' | t }}</p>
-    } @else {
-      <div class="overflow-x-auto shadow ring-1 ring-black/5 sm:rounded-lg">
-        <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
-          <thead class="bg-gray-50 dark:bg-gray-800">
-            <tr>
-              <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'teachers_displayName' | t }}</th>
-              <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'teachers_userId' | t }}</th>
-              <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'teachers_active' | t }}</th>
-              <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'teachers_verification' | t }}</th>
-              <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'teachers_completeness' | t }}</th>
-              <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'teachers_publiclyVisible' | t }}</th>
-              <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'teachers_missingFields' | t }}</th>
-              <th class="px-3 py-3 text-right text-sm font-semibold">{{ 'common_actions' | t }}</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200 bg-white dark:bg-gray-900 dark:divide-gray-800">
-            @for (teacher of items(); track teacher.id) {
-              <tr>
-                <td class="px-3 py-4 text-sm">{{ teacher.displayName }}</td>
-                <td class="px-3 py-4 text-sm font-mono text-xs">{{ teacher.userId }}</td>
-                <td class="px-3 py-4 text-sm">{{ teacher.isActive ? ('common_yes' | t) : ('common_no' | t) }}</td>
-                <td class="px-3 py-4 text-sm"><app-status-chip [label]="teacher.verificationStatus | statusLabel" [status]="teacher.verificationStatus" /></td>
-                <td class="px-3 py-4 text-sm">
-                  <app-status-chip [label]="teacher.profileCompleteness | statusLabel" [status]="teacher.profileCompleteness" />
-                </td>
-                <td class="px-3 py-4 text-sm">{{ teacher.isPubliclyVisible ? ('common_yes' | t) : ('common_no' | t) }}</td>
-                <td class="px-3 py-4 text-sm">
-                  @if (teacher.missingFields.length === 0) {
-                    <span class="text-green-700 dark:text-green-400">{{ 'status_none' | t }}</span>
-                  } @else {
-                    <span class="text-amber-700 dark:text-amber-400" [title]="teacher.missingFields.join(', ')">
-                      {{ teacher.missingFields.join(', ') }}
-                    </span>
-                  }
-                </td>
-                <td class="px-3 py-4 text-right text-sm space-x-2">
-                  @if (teacher.isActive) {
-                    <button type="button" (click)="openModeration(teacher.id, TeacherProfileModerationAction.Deactivate)" class="text-orange-600">{{ 'teachers_deactivate' | t }}</button>
-                  } @else {
-                    <button type="button" (click)="openModeration(teacher.id, TeacherProfileModerationAction.Activate)" class="text-green-600">{{ 'teachers_activate' | t }}</button>
-                  }
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-      @if (canLoadMore()) {
-        <div class="mt-4 text-center">
-          <button type="button" (click)="loadMore()" class="rounded-md border px-4 py-2 text-sm">{{ 'common_loadMore' | t }}</button>
-        </div>
-      }
-    }
-  </div>
+  @if (loadState() === 'loading') {
+    <app-tilawa-loading-state [message]="'teachers_loading' | t" />
+  } @else if (loadState() === 'error') {
+    <app-tilawa-error-state [message]="errorMessage() ?? 'Error'" [showRetry]="true" (retry)="reload()" />
+  } @else if (items().length === 0) {
+    <app-tilawa-empty-state [title]="'teachers_empty' | t" />
+  } @else {
+    <app-tilawa-data-table>
+      <thead>
+        <tr>
+          <app-sortable-th [label]="'teachers_displayName' | t" field="displayName" [sort]="sort()" (sortChange)="onSortChange($event)" />
+          <th scope="col">{{ 'teachers_userId' | t }}</th>
+          <th scope="col">{{ 'teachers_active' | t }}</th>
+          <th scope="col">{{ 'teachers_verification' | t }}</th>
+          <th scope="col">{{ 'teachers_completeness' | t }}</th>
+          <th scope="col">{{ 'teachers_publiclyVisible' | t }}</th>
+          <th scope="col">{{ 'teachers_missingFields' | t }}</th>
+          <app-sortable-th [label]="'common_updated' | t" field="updatedAt" [sort]="sort()" (sortChange)="onSortChange($event)" />
+          <app-sortable-th [label]="'common_date' | t" field="createdAt" [sort]="sort()" (sortChange)="onSortChange($event)" />
+          <th scope="col" class="text-end">{{ 'common_actions' | t }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (teacher of items(); track teacher.id) {
+          <tr>
+            <td>
+              <div class="flex items-center gap-3">
+                <app-tilawa-avatar
+                  [displayName]="teacher.displayName"
+                  [photoUrl]="teacher.avatarUrl"
+                />
+                <span>{{ teacher.displayName }}</span>
+              </div>
+            </td>
+            <td class="font-mono text-xs">{{ teacher.userId }}</td>
+            <td>{{ teacher.isActive ? ('common_yes' | t) : ('common_no' | t) }}</td>
+            <td><app-status-chip [label]="teacher.verificationStatus | statusLabel" [status]="teacher.verificationStatus" /></td>
+            <td><app-status-chip [label]="teacher.profileCompleteness | statusLabel" [status]="teacher.profileCompleteness" [scholar]="true" /></td>
+            <td>{{ teacher.isPubliclyVisible ? ('common_yes' | t) : ('common_no' | t) }}</td>
+            <td>
+              @if (teacher.missingFields.length === 0) {
+                <span class="text-[var(--tilawa-success)]">{{ 'status_none' | t }}</span>
+              } @else {
+                <span class="text-[var(--tilawa-warning)]" [title]="teacher.missingFields.join(', ')">{{ teacher.missingFields.join(', ') }}</span>
+              }
+            </td>
+            <td>{{ teacher.updatedAt | date:'medium' }}</td>
+            <td>{{ teacher.createdAt | date:'medium' }}</td>
+            <td class="text-end">
+              @if (teacher.isActive) {
+                <app-tilawa-button
+                  variant="text"
+                  size="sm"
+                  [loading]="isActionLoading() && pendingTeacherId === teacher.id"
+                  [disabled]="isActionLoading()"
+                  (click)="openModeration(teacher.id, TeacherProfileModerationAction.Deactivate)"
+                >
+                  {{ 'teachers_deactivate' | t }}
+                </app-tilawa-button>
+              } @else {
+                <app-tilawa-button
+                  variant="text"
+                  size="sm"
+                  [loading]="isActionLoading() && pendingTeacherId === teacher.id"
+                  [disabled]="isActionLoading()"
+                  (click)="openModeration(teacher.id, TeacherProfileModerationAction.Activate)"
+                >
+                  {{ 'teachers_activate' | t }}
+                </app-tilawa-button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </app-tilawa-data-table>
+    <app-tilawa-pagination [canLoadMore]="canLoadMore()" (loadMore)="loadMore()" />
+  }
 
   <app-confirm-dialog
     [isOpen]="confirmOpen"
@@ -93,6 +102,7 @@
     [message]="'teachers_confirmMessage' | t"
     [confirmLabel]="'common_confirm' | t"
     [loading]="isActionLoading()"
+    [destructive]="pendingAction === TeacherProfileModerationAction.Deactivate"
     (confirm)="onConfirmModeration()"
     (cancel)="confirmOpen = false"
   />

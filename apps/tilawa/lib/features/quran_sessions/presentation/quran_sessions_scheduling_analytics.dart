@@ -11,7 +11,16 @@ Future<Map<String, Object>> resolveTeacherSchedulingAnalyticsBase(
       !getIt.isRegistered<GetUserProfileUseCase>()) {
     return const {};
   }
-  final profileResult = await getIt<GetUserProfileUseCase>()(teacherId);
+  var ownerUserId = teacherId;
+  if (getIt.isRegistered<TeacherProfileRepository>()) {
+    final teacherProfile = await getIt<TeacherProfileRepository>()
+        .getProfileById(teacherId);
+    ownerUserId = teacherProfile.fold(
+      (_) => teacherId,
+      (profile) => profile.userId,
+    );
+  }
+  final profileResult = await getIt<GetUserProfileUseCase>()(ownerUserId);
   final countryCode = profileResult.fold(
     (_) => null,
     (profile) => profile.countryCode,

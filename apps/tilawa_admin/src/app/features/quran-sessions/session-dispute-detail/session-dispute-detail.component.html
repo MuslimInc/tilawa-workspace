@@ -1,100 +1,102 @@
-<div class="px-4 sm:px-6 lg:px-8">
-  <p class="mb-4">
-    <a routerLink="/quran-sessions/disputes" class="text-sm text-blue-600 dark:text-blue-400">
+<div class="space-y-6">
+  <div>
+    <a routerLink="/quran-sessions/disputes" class="tilawa-link text-sm">
       {{ 'disputes_backToList' | t }}
     </a>
-  </p>
+  </div>
 
   @if (loadState() === 'loading') {
-    <p class="text-gray-500 dark:text-gray-400">{{ 'disputes_loadingDetail' | t }}</p>
+    <app-tilawa-loading-state [message]="'disputes_loadingDetail' | t" />
   } @else if (loadState() === 'error') {
-    <p class="text-red-600 dark:text-red-400">{{ errorMessage() }}</p>
+    <app-tilawa-error-state [message]="errorMessage() ?? 'Error'" />
   } @else if (detail(); as item) {
-    <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">{{ 'disputes_detailTitle' | t: { id: item.id } }}</h1>
+    <app-page-header [title]="'disputes_detailTitle' | t: { id: item.id }" />
 
-    <p class="mt-2 text-sm text-amber-700 dark:text-amber-300">
+    <p class="text-sm text-[var(--tilawa-warning)]">
       {{ 'disputes_detailNotice' | t }}
     </p>
 
-    <dl class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-      <div>
-        <dt class="text-sm text-gray-500">{{ 'common_status' | t }}</dt>
-        <dd><app-status-chip [label]="item.status | statusLabel" [status]="item.status" /></dd>
-      </div>
-      <div>
-        <dt class="text-sm text-gray-500">{{ 'common_openedBy' | t }}</dt>
-        <dd class="text-sm font-mono">{{ item.openedByUserId }} ({{ item.openedByRole }})</dd>
-      </div>
-      <div>
-        <dt class="text-sm text-gray-500">{{ 'common_student' | t }}</dt>
-        <dd class="text-sm">
-          @if (item.studentId) {
-            <span class="font-mono">{{ item.studentId }}</span>
-            @if (item.studentName) {
-              <span class="text-gray-600 dark:text-gray-400"> — {{ item.studentName }}</span>
+    <app-tilawa-card>
+      <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <dt class="tilawa-detail-label">{{ 'common_status' | t }}</dt>
+          <dd><app-status-chip [label]="item.status | statusLabel" [status]="item.status" /></dd>
+        </div>
+        <div>
+          <dt class="tilawa-detail-label">{{ 'common_openedBy' | t }}</dt>
+          <dd class="tilawa-detail-value font-mono">{{ item.openedByUserId }} ({{ item.openedByRole }})</dd>
+        </div>
+        <div>
+          <dt class="tilawa-detail-label">{{ 'common_student' | t }}</dt>
+          <dd class="tilawa-detail-value">
+            @if (item.studentId) {
+              <span class="font-mono">{{ item.studentId }}</span>
+              @if (item.studentName) {
+                <span class="text-[var(--tilawa-on-surface-variant)]"> — {{ item.studentName }}</span>
+              }
+            } @else {
+              {{ 'common_none' | t }}
             }
-          } @else {
-            {{ 'common_none' | t }}
-          }
-        </dd>
-      </div>
-      <div>
-        <dt class="text-sm text-gray-500">{{ 'common_teacher' | t }}</dt>
-        <dd class="text-sm">
-          @if (item.teacherId) {
-            <span class="font-mono">{{ item.teacherId }}</span>
-            @if (item.teacherName) {
-              <span class="text-gray-600 dark:text-gray-400"> — {{ item.teacherName }}</span>
+          </dd>
+        </div>
+        <div>
+          <dt class="tilawa-detail-label">{{ 'common_teacher' | t }}</dt>
+          <dd class="tilawa-detail-value">
+            @if (item.teacherId) {
+              <span class="font-mono">{{ item.teacherId }}</span>
+              @if (item.teacherName) {
+                <span class="text-[var(--tilawa-on-surface-variant)]"> — {{ item.teacherName }}</span>
+              }
+            } @else {
+              {{ 'common_none' | t }}
             }
-          } @else {
-            {{ 'common_none' | t }}
-          }
-        </dd>
-      </div>
-      <div>
-        <dt class="text-sm text-gray-500">{{ 'common_booking' | t }}</dt>
-        <dd class="text-sm">
-          @if (item.bookingId) {
-            <a [routerLink]="['/quran-sessions/sessions', item.bookingId]" class="text-blue-600 dark:text-blue-400 font-mono">
-              {{ item.bookingId }}
-            </a>
-          } @else {
-            {{ 'common_none' | t }}
-          }
-        </dd>
-      </div>
-      <div>
-        <dt class="text-sm text-gray-500">{{ 'common_session' | t }}</dt>
-        <dd class="text-sm font-mono">{{ item.sessionId ?? ('common_none' | t) }}</dd>
-      </div>
-      <div>
-        <dt class="text-sm text-gray-500">{{ 'common_opened' | t }}</dt>
-        <dd class="text-sm">{{ item.createdAt | date:'medium' }}</dd>
-      </div>
-      <div>
-        <dt class="text-sm text-gray-500">{{ 'common_updated' | t }}</dt>
-        <dd class="text-sm">{{ item.updatedAt ? (item.updatedAt | date:'medium') : ('common_none' | t) }}</dd>
-      </div>
-      <div>
-        <dt class="text-sm text-gray-500">{{ 'common_resolved' | t }}</dt>
-        <dd class="text-sm">{{ item.resolvedAt ? (item.resolvedAt | date:'medium') : ('common_none' | t) }}</dd>
-      </div>
-      <div>
-        <dt class="text-sm text-gray-500">{{ 'common_resolvedBy' | t }}</dt>
-        <dd class="text-sm font-mono">{{ item.resolvedByUserId ?? ('common_none' | t) }}</dd>
-      </div>
-    </dl>
+          </dd>
+        </div>
+        <div>
+          <dt class="tilawa-detail-label">{{ 'common_booking' | t }}</dt>
+          <dd class="tilawa-detail-value">
+            @if (item.bookingId) {
+              <a [routerLink]="['/quran-sessions/sessions', item.bookingId]" class="tilawa-link font-mono">
+                {{ item.bookingId }}
+              </a>
+            } @else {
+              {{ 'common_none' | t }}
+            }
+          </dd>
+        </div>
+        <div>
+          <dt class="tilawa-detail-label">{{ 'common_session' | t }}</dt>
+          <dd class="tilawa-detail-value font-mono">{{ item.sessionId ?? ('common_none' | t) }}</dd>
+        </div>
+        <div>
+          <dt class="tilawa-detail-label">{{ 'common_opened' | t }}</dt>
+          <dd class="tilawa-detail-value">{{ item.createdAt | date:'medium' }}</dd>
+        </div>
+        <div>
+          <dt class="tilawa-detail-label">{{ 'common_updated' | t }}</dt>
+          <dd class="tilawa-detail-value">{{ item.updatedAt ? (item.updatedAt | date:'medium') : ('common_none' | t) }}</dd>
+        </div>
+        <div>
+          <dt class="tilawa-detail-label">{{ 'common_resolved' | t }}</dt>
+          <dd class="tilawa-detail-value">{{ item.resolvedAt ? (item.resolvedAt | date:'medium') : ('common_none' | t) }}</dd>
+        </div>
+        <div>
+          <dt class="tilawa-detail-label">{{ 'common_resolvedBy' | t }}</dt>
+          <dd class="tilawa-detail-value font-mono">{{ item.resolvedByUserId ?? ('common_none' | t) }}</dd>
+        </div>
+      </dl>
 
-    <div class="mt-8">
-      <h2 class="text-lg font-medium text-gray-900 dark:text-white">{{ 'common_reason' | t }}</h2>
-      <p class="mt-2 whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">{{ item.reason }}</p>
-    </div>
-
-    @if (item.resolutionReason) {
-      <div class="mt-8">
-        <h2 class="text-lg font-medium text-gray-900 dark:text-white">{{ 'disputes_resolutionNotes' | t }}</h2>
-        <p class="mt-2 whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">{{ item.resolutionReason }}</p>
+      <div class="mt-6 border-t border-[var(--tilawa-outline-variant)] pt-6">
+        <h2 class="text-lg font-semibold text-[var(--tilawa-on-surface)]">{{ 'common_reason' | t }}</h2>
+        <p class="mt-2 whitespace-pre-wrap text-sm text-[var(--tilawa-on-surface)]">{{ item.reason }}</p>
       </div>
-    }
+
+      @if (item.resolutionReason) {
+        <div class="mt-6 border-t border-[var(--tilawa-outline-variant)] pt-6">
+          <h2 class="text-lg font-semibold text-[var(--tilawa-on-surface)]">{{ 'disputes_resolutionNotes' | t }}</h2>
+          <p class="mt-2 whitespace-pre-wrap text-sm text-[var(--tilawa-on-surface)]">{{ item.resolutionReason }}</p>
+        </div>
+      }
+    </app-tilawa-card>
   }
 </div>

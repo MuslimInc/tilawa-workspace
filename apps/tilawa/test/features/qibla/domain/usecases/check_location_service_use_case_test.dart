@@ -30,4 +30,18 @@ void main() {
     verify(mockQiblaRepository.isLocationServiceEnabled()).called(1);
     verifyNoMoreInteractions(mockQiblaRepository);
   });
+
+  test('returns ServerFailure when repository throws', () async {
+    when(
+      mockQiblaRepository.isLocationServiceEnabled(),
+    ).thenThrow(Exception('gps offline'));
+
+    final Either<Failure, bool> result = await useCase(const NoParams());
+
+    expect(result, isA<Left<Failure, bool>>());
+    result.fold(
+      (failure) => expect(failure, isA<ServerFailure>()),
+      (_) => fail('expected Left'),
+    );
+  });
 }

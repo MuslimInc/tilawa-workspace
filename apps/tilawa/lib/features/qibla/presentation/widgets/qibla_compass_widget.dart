@@ -23,8 +23,6 @@ class QiblaCompassWidget extends StatelessWidget {
     final ColorScheme colorScheme = theme.colorScheme;
     final bool isAligned = qiblaDirection.isAligned;
     final TilawaDesignTokens tokens = theme.tokens;
-    final double needleAngle =
-        (qiblaDirection.qibla - qiblaDirection.direction) * (math.pi / 180);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -43,7 +41,8 @@ class QiblaCompassWidget extends StatelessWidget {
               dimension: compassSize,
               child: Semantics(
                 label: 'Qibla Compass',
-                hint: 'Rotate your device to align the arrow with the Qibla',
+                hint:
+                    'Rotate your device until the Kaaba icon reaches the top marker',
                 child: Stack(
                   alignment: Alignment.center,
                   clipBehavior: Clip.none,
@@ -83,17 +82,14 @@ class QiblaCompassWidget extends StatelessWidget {
                       child: const _QiblaBezelMarker(),
                     ),
                     _CompassPivot(isAligned: isAligned),
-                    Transform.rotate(
-                      angle: needleAngle,
-                      child: _QiblaNeedle(isAligned: isAligned),
-                    ),
+                    _QiblaNeedle(isAligned: isAligned),
                   ],
                 ),
               ),
             ),
             SizedBox(height: tokens.spaceLarge),
             _AngleDisplay(
-              angle: qiblaDirection.direction,
+              qiblaBearing: qiblaDirection.offset,
               isAligned: isAligned,
               colorScheme: colorScheme,
             ),
@@ -131,17 +127,13 @@ class _CompassDial extends StatelessWidget {
               dotInset: tokens.spaceMedium,
             ),
           ),
-          Align(
-            alignment: Alignment.topCenter,
-            child: Padding(
-              padding: EdgeInsets.only(top: tokens.spaceSmall),
-              child: Transform.rotate(
-                angle: qiblaDirection.direction * (math.pi / 180),
-                child: const KaabaIcon(
-                  size: KaabaAssets.compassSize,
-                  semanticLabel: 'Kaaba',
-                ),
-              ),
+          _CompassDialOrbit(
+            angleDeg: qiblaDirection.offset,
+            heading: qiblaDirection.direction,
+            tokens: tokens,
+            child: const KaabaIcon(
+              size: KaabaAssets.compassSize,
+              semanticLabel: 'Kaaba',
             ),
           ),
           _CompassText(
@@ -250,12 +242,12 @@ class _CompassPivot extends StatelessWidget {
 
 class _AngleDisplay extends StatelessWidget {
   const _AngleDisplay({
-    required this.angle,
+    required this.qiblaBearing,
     required this.isAligned,
     required this.colorScheme,
   });
 
-  final double angle;
+  final double qiblaBearing;
   final bool isAligned;
   final ColorScheme colorScheme;
 
@@ -270,7 +262,7 @@ class _AngleDisplay extends StatelessWidget {
     return Column(
       children: [
         Text(
-          '${_displayAngle(angle)}°',
+          '${_displayBearing(qiblaBearing)}°',
           style: theme.textTheme.displaySmall?.copyWith(
             fontSize: kAngleDisplayFontSize,
             fontWeight: kAngleDisplayFontWeight,
@@ -289,10 +281,43 @@ class _AngleDisplay extends StatelessWidget {
     );
   }
 
-  int _displayAngle(double value) {
+  int _displayBearing(double value) {
     final double normalized =
         (value % kFullCircleDegrees + kFullCircleDegrees) % kFullCircleDegrees;
     return normalized.round() % kFullCircleDegrees;
+  }
+}
+
+class _CompassDialOrbit extends StatelessWidget {
+  const _CompassDialOrbit({
+    required this.angleDeg,
+    required this.heading,
+    required this.tokens,
+    required this.child,
+  });
+
+  final double angleDeg;
+  final double heading;
+  final TilawaDesignTokens tokens;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Transform.rotate(
+      angle: angleDeg * (math.pi / 180),
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: Padding(
+          padding: EdgeInsets.only(
+            top: tokens.spaceMedium + tokens.spaceExtraSmall,
+          ),
+          child: Transform.rotate(
+            angle: (heading - angleDeg) * (math.pi / 180),
+            child: child,
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -315,25 +340,16 @@ class _CompassText extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final tokens = theme.tokens;
 
-    return Transform.rotate(
-      angle: angleDeg * (math.pi / 180),
-      child: Align(
-        alignment: Alignment.topCenter,
-        child: Padding(
-          padding: EdgeInsets.only(
-            top: tokens.spaceMedium + tokens.spaceExtraSmall,
-          ),
-          child: Transform.rotate(
-            angle: (heading - angleDeg) * (math.pi / 180),
-            child: Text(
-              text,
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-                fontWeight: isCardinal ? FontWeight.w700 : FontWeight.w600,
-                letterSpacing: kCompassTextLetterSpacing,
-              ),
-            ),
-          ),
+    return _CompassDialOrbit(
+      angleDeg: angleDeg,
+      heading: heading,
+      tokens: tokens,
+      child: Text(
+        text,
+        style: theme.textTheme.labelLarge?.copyWith(
+          color: colorScheme.onSurfaceVariant,
+          fontWeight: isCardinal ? FontWeight.w700 : FontWeight.w600,
+          letterSpacing: kCompassTextLetterSpacing,
         ),
       ),
     );

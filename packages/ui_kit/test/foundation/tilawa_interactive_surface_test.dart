@@ -112,6 +112,48 @@ void main() {
       expect(semantics.flagsCollection.isSelected, Tristate.isTrue);
     });
 
+    testWidgets('is layout-transparent: child fills tight constraints', (
+      tester,
+    ) async {
+      // Regression: a fixed-size cell (e.g. a home grid tile) must make the
+      // resting child fill it, exactly as the old Material + InkWell did. A
+      // loose Stack fit would shrink the child to its content instead.
+      final childKey = GlobalKey();
+      await tester.pumpWidget(
+        _host(
+          SizedBox(
+            width: 200,
+            height: 120,
+            child: TilawaInteractiveSurface(
+              onTap: () {},
+              child: DecoratedBox(
+                key: childKey,
+                decoration: const BoxDecoration(color: Color(0xFF112233)),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.getSize(find.byKey(childKey)), const Size(200, 120));
+    });
+
+    testWidgets('exposes toggle semantics for on/off controls', (tester) async {
+      await tester.pumpWidget(
+        _host(
+          TilawaInteractiveSurface(
+            onTap: () {},
+            toggled: true,
+            semanticLabel: 'Mute',
+            child: const SizedBox(width: 48, height: 48),
+          ),
+        ),
+      );
+
+      final semantics = tester.getSemantics(find.bySemanticsLabel('Mute'));
+      expect(semantics.flagsCollection.isToggled, Tristate.isTrue);
+    });
+
     testWidgets('long-press-only surface ignores short taps', (tester) async {
       var longPresses = 0;
       await tester.pumpWidget(

@@ -7,13 +7,19 @@ import {
   validateTransition,
 } from "../../src/quranSessions/sessionLifecycleGuard";
 
+/** Two hours — safely outside the 1 h student cancel notice window. */
+const STUDENT_CANCEL_SAFE_NOTICE_MS = 2 * 60 * 60 * 1000;
+
+/** Thirty seconds — safely inside the 1 h student cancel notice window. */
+const STUDENT_CANCEL_LATE_NOTICE_MS = 30 * 1000;
+
 test("allows student cancel from scheduled with reason", () => {
   const result = validateTransition({
     currentStatus: "scheduled",
     action: "cancel_by_student",
     actor: "student",
     reason: "plans changed",
-    sessionStartsAt: new Date(Date.now() + 3_600_000),
+    sessionStartsAt: new Date(Date.now() + STUDENT_CANCEL_SAFE_NOTICE_MS),
   });
   assert.equal(result.to, "cancelled_by_student");
 });
@@ -26,7 +32,7 @@ test("blocks student cancel inside notice window", () => {
         action: "cancel_by_student",
         actor: "student",
         reason: "late",
-        sessionStartsAt: new Date(Date.now() + 30_000),
+        sessionStartsAt: new Date(Date.now() + STUDENT_CANCEL_LATE_NOTICE_MS),
       }),
     (error: { details?: { code?: string } }) =>
       error.details?.code === "late_student_cancellation_blocked",

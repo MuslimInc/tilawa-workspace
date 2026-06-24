@@ -184,6 +184,15 @@ class TilawaButton extends StatelessWidget {
 
     final Color overlayBase = resolvedFg;
 
+    // Focus visibility (WCAG 2.4.7). The kit centralises these on the theme so
+    // the button's keyboard-focus state matches TilawaInteractiveSurface.
+    final tokens = theme.tokens;
+    final double focusWashOpacity = tokens.stateLayerFocused;
+    final double focusRingWidth = tokens.focusRingWidth;
+    // Ring reads against the fill: reuse the resting border when there is one,
+    // otherwise the label colour (which is already chosen to contrast the fill).
+    final Color focusRingColor = resolvedBorder ?? resolvedFg;
+
     final double resolvedMinHeight = shrinkWrapTapTarget
         ? 0
         : math.max(height, kTilawaMinInteractiveDimension);
@@ -216,23 +225,33 @@ class TilawaButton extends StatelessWidget {
         return resolvedFg;
       }),
       overlayColor: WidgetStateProperty.resolveWith((states) {
+        // Ordering matches TilawaInteractiveSurface: pressed > hover > focus.
         if (states.contains(WidgetState.pressed)) {
           return overlayBase.withValues(alpha: _pressedOverlayOpacity);
         }
         if (states.contains(WidgetState.hovered)) {
           return overlayBase.withValues(alpha: _hoverOverlayOpacity);
         }
+        if (states.contains(WidgetState.focused)) {
+          return overlayBase.withValues(alpha: focusWashOpacity);
+        }
         return null;
       }),
       side: WidgetStateProperty.resolveWith((states) {
-        if (resolvedBorder == null) return BorderSide.none;
         if (states.contains(WidgetState.disabled)) {
+          if (resolvedBorder == null) return BorderSide.none;
           return BorderSide(
             color: colorScheme.onSurface.withValues(
               alpha: _disabledContainerOpacity,
             ),
           );
         }
+        // Visible focus ring on keyboard / switch focus, even for variants with
+        // no resting border (primary/secondary/ghost/danger). WCAG 2.4.7.
+        if (states.contains(WidgetState.focused)) {
+          return BorderSide(color: focusRingColor, width: focusRingWidth);
+        }
+        if (resolvedBorder == null) return BorderSide.none;
         return BorderSide(color: resolvedBorder);
       }),
       shape: WidgetStateProperty.all(

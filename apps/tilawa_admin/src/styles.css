@@ -1,3 +1,162 @@
 @import "tailwindcss";
+@import "./styles/tokens.css";
 
-/* You can add global styles to this file, and also import other style files */
+@theme {
+  --color-tilawa-primary: var(--tilawa-primary);
+  --color-tilawa-on-primary: var(--tilawa-on-primary);
+  --color-tilawa-secondary: var(--tilawa-secondary);
+  --color-tilawa-canvas: var(--tilawa-canvas);
+  --color-tilawa-surface: var(--tilawa-surface);
+  --color-tilawa-surface-high: var(--tilawa-surface-high);
+  --color-tilawa-ink: var(--tilawa-ink);
+  --color-tilawa-ink-muted: var(--tilawa-ink-muted);
+  --color-tilawa-outline: var(--tilawa-outline);
+  --color-tilawa-error: var(--tilawa-error);
+  --color-tilawa-success: var(--tilawa-success);
+  --color-tilawa-warning: var(--tilawa-warning);
+
+  --radius-tilawa-sm: var(--tilawa-radius-sm);
+  --radius-tilawa-md: var(--tilawa-radius-md);
+  --radius-tilawa-lg: var(--tilawa-radius-lg);
+  --radius-tilawa-xl: var(--tilawa-radius-xl);
+
+  --font-sans: "IBM Plex Sans Arabic", "Alexandria", system-ui, sans-serif;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  background-color: var(--tilawa-canvas);
+  color: var(--tilawa-on-surface);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Form controls — shared admin field style */
+.tilawa-field {
+  display: block;
+  width: 100%;
+  border-radius: var(--tilawa-radius-md);
+  border: 1px solid var(--tilawa-outline);
+  background-color: var(--tilawa-surface);
+  color: var(--tilawa-on-surface);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  transition:
+    border-color var(--tilawa-duration-fast) ease,
+    box-shadow var(--tilawa-duration-fast) ease;
+}
+
+.tilawa-field::placeholder {
+  color: var(--tilawa-ink-ash);
+}
+
+.tilawa-field:focus {
+  outline: none;
+  border-color: var(--tilawa-primary);
+  box-shadow: 0 0 0 2px rgb(139 94 60 / 0.2);
+}
+
+/* Page vertical rhythm — flex gap works with Angular @if/@else blocks */
+.tilawa-page-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tilawa-space-6);
+}
+
+/* Data table */
+.tilawa-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.tilawa-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: var(--tilawa-surface-high);
+}
+
+.tilawa-table th {
+  padding: var(--tilawa-space-4) var(--tilawa-space-5);
+  text-align: start;
+  font-weight: 600;
+  font-size: 0.875rem;
+  line-height: 1.25;
+  vertical-align: middle;
+  white-space: nowrap;
+  color: var(--tilawa-on-surface);
+  border-bottom: 1px solid var(--tilawa-outline-variant);
+}
+
+.tilawa-table td {
+  padding: 0.875rem 0.75rem;
+  color: var(--tilawa-on-surface);
+  border-bottom: 1px solid var(--tilawa-outline-variant);
+}
+
+.tilawa-table tbody tr:nth-child(even) {
+  background-color: rgb(241 241 239 / 0.35);
+}
+
+.tilawa-table tbody tr:hover {
+  background-color: rgb(139 94 60 / 0.04);
+}
+
+.tilawa-table-wrap {
+  overflow-x: auto;
+  border-radius: var(--tilawa-radius-lg);
+  border: 1px solid var(--tilawa-outline-variant);
+  background-color: var(--tilawa-surface);
+  box-shadow: var(--tilawa-shadow-sm);
+}
+
+/* Link action in tables */
+.tilawa-link {
+  color: var(--tilawa-primary);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.tilawa-link:hover {
+  color: var(--tilawa-primary-dark);
+  text-decoration: underline;
+}
+
+.tilawa-link:focus-visible {
+  outline: 2px solid var(--tilawa-primary);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.text-end {
+  text-align: end;
+}
+
+.tilawa-checkbox {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--tilawa-primary);
+}
+
+.tilawa-table tbody tr.is-selected {
+  background-color: rgb(139 94 60 / 0.08);
+}
+
+.tilawa-detail-label {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--tilawa-on-surface-variant);
+}
+
+.tilawa-detail-value {
+  margin-top: 0.125rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  color: var(--tilawa-on-surface);
+}

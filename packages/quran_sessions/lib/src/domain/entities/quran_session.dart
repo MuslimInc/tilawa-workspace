@@ -1,8 +1,11 @@
 import 'package:equatable/equatable.dart';
 
 import 'legacy_status_lifecycle_mapper.dart';
+import 'session_booking_type.dart';
+import 'session_call_provider_kind.dart';
 import 'session_call_type.dart';
 import 'session_lifecycle_status.dart';
+import 'session_participant.dart';
 
 /// The canonical state of a booked/active/completed session.
 enum QuranSessionStatus {
@@ -26,8 +29,13 @@ class QuranSession extends Equatable {
     required this.callType,
     required this.status,
     this.lifecycleStatus,
+    this.bookingType = SessionBookingType.individual,
+    this.callProviderKind = SessionCallProviderKind.external,
     this.meetingLink,
     this.callRoomId,
+    this.providerSessionId,
+    this.joinToken,
+    this.participants = const [],
     this.notes,
   });
 
@@ -40,14 +48,26 @@ class QuranSession extends Equatable {
   final SessionCallType callType;
   final QuranSessionStatus status;
   final SessionLifecycleStatus? lifecycleStatus;
+  final SessionBookingType bookingType;
+  final SessionCallProviderKind callProviderKind;
 
   /// Populated for [SessionCallType.externalMeeting].
   final String? meetingLink;
 
-  /// Populated for in-app call types (Agora / WebRTC).
+  /// Legacy alias — prefer [providerSessionId].
   final String? callRoomId;
 
+  /// Provider channel / room id (server-issued).
+  final String? providerSessionId;
+
+  /// Short-lived join token (server-issued only).
+  final String? joinToken;
+
+  final List<SessionParticipant> participants;
   final String? notes;
+
+  /// External join URL when [callProviderKind] is [SessionCallProviderKind.external].
+  String? get joinUrl => meetingLink;
 
   /// Canonical lifecycle status with backwards-compatible fallback.
   SessionLifecycleStatus get effectiveLifecycleStatus =>
@@ -66,8 +86,13 @@ class QuranSession extends Equatable {
     callType,
     status,
     lifecycleStatus,
+    bookingType,
+    callProviderKind,
     meetingLink,
     callRoomId,
+    providerSessionId,
+    joinToken,
+    participants,
     notes,
   ];
 }

@@ -548,7 +548,7 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @becomeTeacherCardSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Join Tilawa\'s certified teachers'**
+  /// **'Join MeMuslim\'s certified teachers'**
   String get becomeTeacherCardSubtitle;
 
   /// No description provided for @teacherListTitle.
@@ -629,6 +629,276 @@ abstract class QuranSessionsLocalizations {
   /// **'Video'**
   String get callTypeVideo;
 
+  /// No description provided for @sessionModeVoiceBetaNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Free Beta: voice uses a placeholder join until in-app RTC ships.'**
+  String get sessionModeVoiceBetaNote;
+
+  /// No description provided for @sessionModeVideoBetaNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Free Beta: video uses a placeholder join until in-app RTC ships.'**
+  String get sessionModeVideoBetaNote;
+
+  /// No description provided for @bookingVoiceVideoProviderNote.
+  ///
+  /// In en, this message translates to:
+  /// **'In-app calls use {provider}.'**
+  String bookingVoiceVideoProviderNote(String provider);
+
+  /// No description provided for @sessionModeVoiceDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice sessions are not available yet. Choose external link.'**
+  String get sessionModeVoiceDisabled;
+
+  /// No description provided for @sessionModeVideoDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Video sessions are not available yet. Choose external link.'**
+  String get sessionModeVideoDisabled;
+
+  /// No description provided for @sessionModeExternalDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Your teacher has not added a meeting link yet. Choose voice or video.'**
+  String get sessionModeExternalDisabled;
+
+  /// No description provided for @meetingLinkUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This teacher has not set up a meeting link for external sessions. Choose voice or video, or try again later.'**
+  String get meetingLinkUnavailable;
+
+  /// No description provided for @callProviderUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This session cannot be joined from the app right now.'**
+  String get callProviderUnavailable;
+
+  /// No description provided for @callProviderAgoraNotConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'In-app Agora calls are not enabled in this build. Rebuild with Staging Agora config (TILAWA_DISTRIBUTION=staging and TILAWA_LAUNCH_AGORA_APP_ID), or use the Tilawa (Staging Agora) launch profile.'**
+  String get callProviderAgoraNotConfigured;
+
+  /// No description provided for @rtcPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone or camera access is required to join this session. Enable {permission} in Settings and try again.'**
+  String rtcPermissionDenied(String permission);
+
+  /// No description provided for @rtcCallJoinFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not connect to the voice or video call. Try again in a moment.'**
+  String get rtcCallJoinFailed;
+
+  /// No description provided for @rtcCallJoinRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not join this call. Leave any open call for this session, wait a moment, then try again.'**
+  String get rtcCallJoinRejected;
+
+  /// No description provided for @rtcCallJoinInvalidToken.
+  ///
+  /// In en, this message translates to:
+  /// **'This call link expired or is invalid. Tap Join again to get a fresh connection.'**
+  String get rtcCallJoinInvalidToken;
+
+  /// No description provided for @webrtcSignalingUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'In-app WebRTC calls are not available yet. Choose voice with Agora or an external meeting link.'**
+  String get webrtcSignalingUnavailable;
+
+  /// No description provided for @inAppCallShellTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session call'**
+  String get inAppCallShellTitle;
+
+  /// No description provided for @inAppCallShellBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You are connected to this session\'s call room. End the call when your lesson finishes.'**
+  String get inAppCallShellBody;
+
+  /// No description provided for @inAppCallShellEndCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave call'**
+  String get inAppCallShellEndCall;
+
+  /// No description provided for @inAppCallShellMute.
+  ///
+  /// In en, this message translates to:
+  /// **'Mute microphone'**
+  String get inAppCallShellMute;
+
+  /// No description provided for @inAppCallShellUnmute.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmute microphone'**
+  String get inAppCallShellUnmute;
+
+  /// No description provided for @inAppCallShellConnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting…'**
+  String get inAppCallShellConnecting;
+
+  /// No description provided for @inAppCallShellConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected'**
+  String get inAppCallShellConnected;
+
+  /// No description provided for @inAppCallShellWaitingForParticipant.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the other participant'**
+  String get inAppCallShellWaitingForParticipant;
+
+  /// No description provided for @inAppCallShellMockBetaBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Beta preview — no live audio or video. Book a new session with Agora enabled to try a real call.'**
+  String get inAppCallShellMockBetaBody;
+
+  /// No description provided for @inAppCallShellSpeaker.
+  ///
+  /// In en, this message translates to:
+  /// **'Speaker'**
+  String get inAppCallShellSpeaker;
+
+  /// No description provided for @inAppCallShellFlipCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Flip camera'**
+  String get inAppCallShellFlipCamera;
+
+  /// No description provided for @inAppCallShellTurnVideoOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn camera on'**
+  String get inAppCallShellTurnVideoOn;
+
+  /// No description provided for @inAppCallShellTurnVideoOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn camera off'**
+  String get inAppCallShellTurnVideoOff;
+
+  /// No description provided for @inAppCallShellMicrophoneMuted.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone muted'**
+  String get inAppCallShellMicrophoneMuted;
+
+  /// No description provided for @inAppCallShellMicrophoneUnmuted.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone unmuted'**
+  String get inAppCallShellMicrophoneUnmuted;
+
+  /// No description provided for @inAppCallShellCameraOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera turned off'**
+  String get inAppCallShellCameraOff;
+
+  /// No description provided for @inAppCallShellCameraOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera turned on'**
+  String get inAppCallShellCameraOn;
+
+  /// No description provided for @inAppCallShellSwitchCameraBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot switch camera while it is off'**
+  String get inAppCallShellSwitchCameraBlocked;
+
+  /// No description provided for @inAppCallShellSpeakerOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Speaker on'**
+  String get inAppCallShellSpeakerOn;
+
+  /// No description provided for @inAppCallShellSpeakerOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Speaker off'**
+  String get inAppCallShellSpeakerOff;
+
+  /// No description provided for @inAppCallShellControlActionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not complete that action. Try again.'**
+  String get inAppCallShellControlActionFailed;
+
+  /// No description provided for @externalMeetingJoinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join outside MeMuslim?'**
+  String get externalMeetingJoinTitle;
+
+  /// No description provided for @externalMeetingJoinBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll briefly leave MeMuslim to join your session in Google Meet, Zoom, or your browser. Come back here anytime — your session details stay open.'**
+  String get externalMeetingJoinBody;
+
+  /// No description provided for @externalMeetingJoinOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get externalMeetingJoinOpen;
+
+  /// No description provided for @externalMeetingJoinCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy URL'**
+  String get externalMeetingJoinCopy;
+
+  /// No description provided for @externalMeetingJoinLinkCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied'**
+  String get externalMeetingJoinLinkCopied;
+
+  /// No description provided for @externalMeetingJoinAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Open meeting again'**
+  String get externalMeetingJoinAgain;
+
+  /// No description provided for @externalMeetingLaunchFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the meeting link. Try again or copy the link.'**
+  String get externalMeetingLaunchFailed;
+
+  /// No description provided for @externalMeetingLinkCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting link copied. Paste it in your browser to join.'**
+  String get externalMeetingLinkCopied;
+
+  /// No description provided for @groupBookingNotSupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Group sessions are not available in Free Beta.'**
+  String get groupBookingNotSupported;
+
+  /// No description provided for @unsupportedSessionMode.
+  ///
+  /// In en, this message translates to:
+  /// **'This session type is not supported.'**
+  String get unsupportedSessionMode;
+
   /// No description provided for @reviewSubmittedThanks.
   ///
   /// In en, this message translates to:
@@ -652,6 +922,12 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'Past ({count})'**
   String pastSessionsSection(int count);
+
+  /// No description provided for @loadMorePastSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get loadMorePastSessions;
 
   /// No description provided for @noPastSessions.
   ///
@@ -761,6 +1037,54 @@ abstract class QuranSessionsLocalizations {
   /// **'Reschedule request sent. Waiting for confirmation.'**
   String get rescheduleRequestSubmitted;
 
+  /// No description provided for @rescheduleAwaitingCounterparty.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the other participant to confirm your new time.'**
+  String get rescheduleAwaitingCounterparty;
+
+  /// No description provided for @reschedulePendingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reschedule request'**
+  String get reschedulePendingTitle;
+
+  /// No description provided for @reschedulePendingProposedTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Proposed time: {dateTime}'**
+  String reschedulePendingProposedTime(String dateTime);
+
+  /// No description provided for @reschedulePendingReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason: {reason}'**
+  String reschedulePendingReason(String reason);
+
+  /// No description provided for @rescheduleAcceptAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept new time'**
+  String get rescheduleAcceptAction;
+
+  /// No description provided for @rescheduleRejectAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep current time'**
+  String get rescheduleRejectAction;
+
+  /// No description provided for @rescheduleAcceptedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Reschedule accepted. Session time updated.'**
+  String get rescheduleAcceptedToast;
+
+  /// No description provided for @rescheduleRejectedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Reschedule declined. Original time kept.'**
+  String get rescheduleRejectedToast;
+
   /// No description provided for @rescheduleAction.
   ///
   /// In en, this message translates to:
@@ -784,6 +1108,48 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'No activity recorded yet.'**
   String get sessionTimelineEmpty;
+
+  /// No description provided for @sessionTimelineLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the activity timeline. Check your connection and try again.'**
+  String get sessionTimelineLoadFailed;
+
+  /// No description provided for @sessionPendingRescheduleLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the pending reschedule request. Try again in a moment.'**
+  String get sessionPendingRescheduleLoadFailed;
+
+  /// No description provided for @sessionLockedAtBookingNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Call type ({callType}) and provider ({callProvider}) were set when you booked. To change them, cancel and rebook or contact support.'**
+  String sessionLockedAtBookingNote(String callType, String callProvider);
+
+  /// No description provided for @callProviderExternal.
+  ///
+  /// In en, this message translates to:
+  /// **'External link'**
+  String get callProviderExternal;
+
+  /// No description provided for @callProviderMock.
+  ///
+  /// In en, this message translates to:
+  /// **'In-app (preview)'**
+  String get callProviderMock;
+
+  /// No description provided for @callProviderAgora.
+  ///
+  /// In en, this message translates to:
+  /// **'In-app (Agora)'**
+  String get callProviderAgora;
+
+  /// No description provided for @callProviderWebrtc.
+  ///
+  /// In en, this message translates to:
+  /// **'In-app (WebRTC)'**
+  String get callProviderWebrtc;
 
   /// No description provided for @sessionStatusLabel.
   ///
@@ -1496,7 +1862,7 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @becomeTeacherOnTilawa.
   ///
   /// In en, this message translates to:
-  /// **'Become a teacher on Tilawa'**
+  /// **'Become a teacher on MeMuslim'**
   String get becomeTeacherOnTilawa;
 
   /// No description provided for @becomeTeacherApplicationIntro.
@@ -1706,7 +2072,7 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @applicationStatusPendingSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'The Tilawa team is reviewing your application. We will contact you soon.'**
+  /// **'The MeMuslim team is reviewing your application. We will contact you soon.'**
   String get applicationStatusPendingSubtitle;
 
   /// No description provided for @applicationStatusApprovedTitle.
@@ -1718,7 +2084,7 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @applicationStatusApprovedSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'You are now a certified teacher on Tilawa.'**
+  /// **'You are now a certified teacher on MeMuslim.'**
   String get applicationStatusApprovedSubtitle;
 
   /// No description provided for @applicationStatusApprovedContinue.
@@ -2038,6 +2404,54 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'Your real full name as students see it in the marketplace. It may differ from your account name.'**
   String get teacherPublicNameHelper;
+
+  /// No description provided for @teacherExternalMeetingUrlLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'External meeting link'**
+  String get teacherExternalMeetingUrlLabel;
+
+  /// No description provided for @teacherExternalMeetingUrlHint.
+  ///
+  /// In en, this message translates to:
+  /// **'https://meet.google.com/your-room'**
+  String get teacherExternalMeetingUrlHint;
+
+  /// No description provided for @teacherExternalMeetingUrlHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Students who book external sessions join via this HTTPS link (Google Meet, Zoom, Microsoft Teams).'**
+  String get teacherExternalMeetingUrlHelper;
+
+  /// No description provided for @teacherExternalMeetingUrlSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting link saved'**
+  String get teacherExternalMeetingUrlSaved;
+
+  /// No description provided for @teacherExternalMeetingUrlSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save meeting link'**
+  String get teacherExternalMeetingUrlSave;
+
+  /// No description provided for @teacherExternalMeetingUrlInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid HTTPS meeting link (Google Meet, Zoom, or Teams).'**
+  String get teacherExternalMeetingUrlInvalid;
+
+  /// No description provided for @teacherOffersExternalSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'External sessions available'**
+  String get teacherOffersExternalSessions;
+
+  /// No description provided for @sessionMeetingLinkLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting link'**
+  String get sessionMeetingLinkLabel;
 
   /// No description provided for @teacherPublicNameRequired.
   ///
@@ -2428,6 +2842,288 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'Confirm payment (sandbox)'**
   String get paymentCheckoutConfirm;
+
+  /// No description provided for @restrictionReasonFalseIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'False identity information'**
+  String get restrictionReasonFalseIdentity;
+
+  /// No description provided for @restrictionReasonPolicyViolation.
+  ///
+  /// In en, this message translates to:
+  /// **'Policy violation'**
+  String get restrictionReasonPolicyViolation;
+
+  /// No description provided for @restrictionReasonSafetyConcern.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety concern'**
+  String get restrictionReasonSafetyConcern;
+
+  /// No description provided for @restrictionReasonAbuseReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Abuse report'**
+  String get restrictionReasonAbuseReport;
+
+  /// No description provided for @restrictionReasonRepeatedNoShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeated no-show'**
+  String get restrictionReasonRepeatedNoShow;
+
+  /// No description provided for @restrictionReasonAdminDecision.
+  ///
+  /// In en, this message translates to:
+  /// **'Administrative decision'**
+  String get restrictionReasonAdminDecision;
+
+  /// No description provided for @sessionLifecycleDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get sessionLifecycleDraft;
+
+  /// No description provided for @sessionLifecyclePendingPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending payment'**
+  String get sessionLifecyclePendingPayment;
+
+  /// No description provided for @sessionLifecycleScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled'**
+  String get sessionLifecycleScheduled;
+
+  /// No description provided for @sessionLifecycleConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed'**
+  String get sessionLifecycleConfirmed;
+
+  /// No description provided for @sessionLifecycleInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get sessionLifecycleInProgress;
+
+  /// No description provided for @sessionLifecycleRescheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Rescheduled'**
+  String get sessionLifecycleRescheduled;
+
+  /// No description provided for @sessionLifecycleCancelledByStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled by student'**
+  String get sessionLifecycleCancelledByStudent;
+
+  /// No description provided for @sessionLifecycleCancelledByTeacher.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled by teacher'**
+  String get sessionLifecycleCancelledByTeacher;
+
+  /// No description provided for @sessionLifecycleCancelledByAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled by admin'**
+  String get sessionLifecycleCancelledByAdmin;
+
+  /// No description provided for @sessionLifecycleTeacherNoShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher no-show'**
+  String get sessionLifecycleTeacherNoShow;
+
+  /// No description provided for @sessionLifecycleStudentNoShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Student no-show'**
+  String get sessionLifecycleStudentNoShow;
+
+  /// No description provided for @sessionLifecycleBothNoShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Both no-show'**
+  String get sessionLifecycleBothNoShow;
+
+  /// No description provided for @sessionLifecycleIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Incomplete'**
+  String get sessionLifecycleIncomplete;
+
+  /// No description provided for @sessionLifecycleCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get sessionLifecycleCompleted;
+
+  /// No description provided for @sessionLifecycleDisputed.
+  ///
+  /// In en, this message translates to:
+  /// **'Disputed'**
+  String get sessionLifecycleDisputed;
+
+  /// No description provided for @sessionLifecycleCompensated.
+  ///
+  /// In en, this message translates to:
+  /// **'Compensated'**
+  String get sessionLifecycleCompensated;
+
+  /// No description provided for @sessionLifecycleRefunded.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunded'**
+  String get sessionLifecycleRefunded;
+
+  /// No description provided for @sessionLifecycleExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get sessionLifecycleExpired;
+
+  /// No description provided for @sessionActionCreateDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Create draft'**
+  String get sessionActionCreateDraft;
+
+  /// No description provided for @sessionActionInitiatePayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Initiate payment'**
+  String get sessionActionInitiatePayment;
+
+  /// No description provided for @sessionActionConfirmBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm booking'**
+  String get sessionActionConfirmBooking;
+
+  /// No description provided for @sessionActionConfirmFreeBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm free booking'**
+  String get sessionActionConfirmFreeBooking;
+
+  /// No description provided for @sessionActionAcknowledgeSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Acknowledge session'**
+  String get sessionActionAcknowledgeSession;
+
+  /// No description provided for @sessionActionStartSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Start session'**
+  String get sessionActionStartSession;
+
+  /// No description provided for @sessionActionCompleteSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete session'**
+  String get sessionActionCompleteSession;
+
+  /// No description provided for @sessionActionRequestReschedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Request reschedule'**
+  String get sessionActionRequestReschedule;
+
+  /// No description provided for @sessionActionConfirmReschedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm reschedule'**
+  String get sessionActionConfirmReschedule;
+
+  /// No description provided for @sessionActionAdminForceReschedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin force reschedule'**
+  String get sessionActionAdminForceReschedule;
+
+  /// No description provided for @sessionActionCancelByStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel by student'**
+  String get sessionActionCancelByStudent;
+
+  /// No description provided for @sessionActionCancelByTeacher.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel by teacher'**
+  String get sessionActionCancelByTeacher;
+
+  /// No description provided for @sessionActionCancelByAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel by admin'**
+  String get sessionActionCancelByAdmin;
+
+  /// No description provided for @sessionActionMarkTeacherNoShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark teacher no-show'**
+  String get sessionActionMarkTeacherNoShow;
+
+  /// No description provided for @sessionActionMarkStudentNoShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark student no-show'**
+  String get sessionActionMarkStudentNoShow;
+
+  /// No description provided for @sessionActionMarkBothNoShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark both no-show'**
+  String get sessionActionMarkBothNoShow;
+
+  /// No description provided for @sessionActionMarkIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark incomplete'**
+  String get sessionActionMarkIncomplete;
+
+  /// No description provided for @sessionActionOpenDispute.
+  ///
+  /// In en, this message translates to:
+  /// **'Open dispute'**
+  String get sessionActionOpenDispute;
+
+  /// No description provided for @sessionActionIssueCompensation.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue compensation'**
+  String get sessionActionIssueCompensation;
+
+  /// No description provided for @sessionActionIssueRefund.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue refund'**
+  String get sessionActionIssueRefund;
+
+  /// No description provided for @sessionActionExpireReservation.
+  ///
+  /// In en, this message translates to:
+  /// **'Expire reservation'**
+  String get sessionActionExpireReservation;
+
+  /// No description provided for @sessionActionRejectBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject booking'**
+  String get sessionActionRejectBooking;
+
+  /// No description provided for @sessionTimelineStatusTransition.
+  ///
+  /// In en, this message translates to:
+  /// **'{previous} → {next}'**
+  String sessionTimelineStatusTransition(String previous, String next);
 }
 
 class _QuranSessionsLocalizationsDelegate

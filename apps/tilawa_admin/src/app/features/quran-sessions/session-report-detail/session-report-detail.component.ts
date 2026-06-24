@@ -3,14 +3,28 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { SessionReportsFacade } from '../../../core/application/facades/session-reports.facade';
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { StatusChipComponent } from '../../../shared/components/status-chip/status-chip.component';
+import { TilawaCardComponent } from '../../../shared/components/tilawa-card/tilawa-card.component';
+import { TilawaLoadingStateComponent } from '../../../shared/components/tilawa-loading-state/tilawa-loading-state.component';
+import { TilawaErrorStateComponent } from '../../../shared/components/tilawa-error-state/tilawa-error-state.component';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { StatusLabelPipe } from '../../../core/i18n/status-label.pipe';
 
 @Component({
   selector: 'app-session-report-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, StatusChipComponent, TranslatePipe, StatusLabelPipe],
+  imports: [
+    CommonModule,
+    RouterLink,
+    PageHeaderComponent,
+    StatusChipComponent,
+    TilawaCardComponent,
+    TilawaLoadingStateComponent,
+    TilawaErrorStateComponent,
+    TranslatePipe,
+    StatusLabelPipe,
+  ],
   templateUrl: './session-report-detail.component.html',
 })
 export class SessionReportDetailComponent implements OnInit {

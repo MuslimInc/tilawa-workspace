@@ -5,6 +5,7 @@ import '../foundation/component_tokens.dart';
 import '../foundation/tilawa_icons.dart';
 import '../foundation/design_tokens.dart';
 import 'tilawa_settings_group_row_style.dart';
+import 'tilawa_settings_list_row.dart';
 
 BorderRadius _resolveSettingsTileBorderRadius(
   BuildContext context,
@@ -16,6 +17,16 @@ BorderRadius _resolveSettingsTileBorderRadius(
 
   return TilawaSettingsGroupRowStyle.maybeOf(context)?.borderRadius ??
       BorderRadius.zero;
+}
+
+EdgeInsetsGeometry _settingsListRowPadding(
+  BuildContext context,
+  TilawaDesignTokens designTokens,
+) {
+  return EdgeInsetsDirectional.only(
+    start: designTokens.spaceSmall,
+    end: designTokens.spaceSmall,
+  );
 }
 
 class TilawaSettingsTile extends StatelessWidget {
@@ -57,67 +68,37 @@ class TilawaSettingsTile extends StatelessWidget {
       context,
       borderRadius,
     );
-    final TextDirection direction = Directionality.of(context);
-    final EdgeInsets resolvedContentPadding = tokens.tileContentPadding.resolve(
-      direction,
-    );
-    final EdgeInsetsGeometry listTileContentPadding =
-        EdgeInsetsDirectional.only(
-          start: designTokens.spaceSmall,
-          end: designTokens.spaceSmall,
-        );
-    final EdgeInsets resolvedIconPadding = tokens.tileIconPadding.resolve(
-      direction,
-    );
-    final double minLeadingWidth = icon == null
-        ? 0
-        : resolvedIconPadding.horizontal + tokens.tileIconSize;
-    final TextStyle titleStyle = _titleStyle(context, tokens);
+
     return Column(
       children: [
-        Material(
-          color: Colors.transparent,
+        TilawaSettingsListRow(
+          semanticLabel: title,
           borderRadius: resolvedRadius,
-          clipBehavior: Clip.antiAlias,
-          child: ListTileTheme(
-            data: ListTileThemeData(
-              contentPadding: resolvedContentPadding,
-              horizontalTitleGap: tokens.tileItemGap,
-              minLeadingWidth: minLeadingWidth,
-              minTileHeight: designTokens.minInteractiveDimension,
-              minVerticalPadding: 0,
-              titleTextStyle: titleStyle,
-            ),
-            child: ListTile(
-              minTileHeight: designTokens.minInteractiveDimension,
-              contentPadding: listTileContentPadding,
-              shape: RoundedRectangleBorder(borderRadius: resolvedRadius),
-              leading: icon == null
-                  ? null
-                  : _SettingsLeadingIcon(
-                      icon: icon!,
-                      color: effectiveIconColor,
-                      tokens: tokens,
-                    ),
-              title: _SettingsTileLabel(
-                title,
-                subtitle: subtitle,
-                tokens: tokens,
-              ),
-              trailing:
-                  trailing ??
-                  // Right chevron; ListTile still places trailing on the
-                  // correct edge in RTL.
-                  Icon(
-                    TilawaIcons.chevronRightSmall,
-                    size: tokens.tileTrailingSize,
-                    color: colorScheme.onSurfaceVariant.withValues(
-                      alpha: tokens.tileTrailingOpacity,
-                    ),
-                  ),
-              onTap: onTap,
-            ),
+          contentPadding: _settingsListRowPadding(context, designTokens),
+          minTileHeight: designTokens.minInteractiveDimension,
+          rowGap: tokens.tileItemGap,
+          onTap: onTap,
+          leading: icon == null
+              ? null
+              : _SettingsLeadingIcon(
+                  icon: icon!,
+                  color: effectiveIconColor,
+                  tokens: tokens,
+                ),
+          title: _SettingsTileLabel(
+            title,
+            subtitle: subtitle,
+            tokens: tokens,
           ),
+          trailing:
+              trailing ??
+              Icon(
+                TilawaIcons.chevronRightSmall,
+                size: tokens.tileTrailingSize,
+                color: colorScheme.onSurfaceVariant.withValues(
+                  alpha: tokens.tileTrailingOpacity,
+                ),
+              ),
         ),
         if (showDivider)
           Padding(
@@ -161,69 +142,42 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final tokens = theme.componentTokens.settingsGroup;
     final designTokens = theme.tokens;
-    final effectiveIconColor = iconColor ?? colorScheme.primary;
+    final effectiveIconColor = iconColor ?? theme.colorScheme.primary;
     final BorderRadius resolvedRadius = _resolveSettingsTileBorderRadius(
       context,
       borderRadius,
     );
-    final TextDirection direction = Directionality.of(context);
-    final EdgeInsets resolvedContentPadding = tokens.switchTileContentPadding
-        .resolve(direction);
-    final EdgeInsetsGeometry listTileContentPadding =
-        EdgeInsetsDirectional.only(
-          start: designTokens.spaceSmall,
-          end: designTokens.spaceSmall,
-        );
-    final EdgeInsets resolvedIconPadding = tokens.tileIconPadding.resolve(
-      direction,
-    );
-    final double minLeadingWidth = icon == null
-        ? 0
-        : resolvedIconPadding.horizontal + tokens.tileIconSize;
-    final TextStyle titleStyle = _titleStyle(context, tokens);
+
     return Column(
       children: [
-        Material(
-          color: Colors.transparent,
+        TilawaSettingsListRow(
+          semanticLabel: title,
           borderRadius: resolvedRadius,
-          clipBehavior: Clip.antiAlias,
-          child: ListTileTheme(
-            data: ListTileThemeData(
-              contentPadding: resolvedContentPadding,
-              horizontalTitleGap: tokens.tileItemGap,
-              minLeadingWidth: minLeadingWidth,
-              minTileHeight: designTokens.minInteractiveDimension,
-              minVerticalPadding: 0,
-              titleTextStyle: titleStyle,
-            ),
-            child: ListTile(
-              minTileHeight: designTokens.minInteractiveDimension,
-              contentPadding: listTileContentPadding,
-              shape: RoundedRectangleBorder(borderRadius: resolvedRadius),
-              leading: icon == null
-                  ? null
-                  : _SettingsLeadingIcon(
-                      icon: icon!,
-                      color: effectiveIconColor,
-                      tokens: tokens,
-                    ),
-              title: _SettingsTileLabel(
-                title,
-                subtitle: subtitle,
-                tokens: tokens,
-              ),
-              trailing: TilawaSwitch(
-                value: value,
-                onChanged: onChanged,
-                activeTrackColor: tokens.switchActiveTrackColor,
-                activeThumbColor: tokens.switchActiveThumbColor,
-                layoutSlotHeight: tokens.tileTrailingSize,
-              ),
-              onTap: () => onChanged(!value),
-            ),
+          contentPadding: _settingsListRowPadding(context, designTokens),
+          minTileHeight: designTokens.minInteractiveDimension,
+          rowGap: tokens.tileItemGap,
+          onTap: () => onChanged(!value),
+          toggled: value,
+          leading: icon == null
+              ? null
+              : _SettingsLeadingIcon(
+                  icon: icon!,
+                  color: effectiveIconColor,
+                  tokens: tokens,
+                ),
+          title: _SettingsTileLabel(
+            title,
+            subtitle: subtitle,
+            tokens: tokens,
+          ),
+          trailing: TilawaSwitch(
+            value: value,
+            onChanged: onChanged,
+            activeTrackColor: tokens.switchActiveTrackColor,
+            activeThumbColor: tokens.switchActiveThumbColor,
+            layoutSlotHeight: tokens.tileTrailingSize,
           ),
         ),
         if (showDivider)

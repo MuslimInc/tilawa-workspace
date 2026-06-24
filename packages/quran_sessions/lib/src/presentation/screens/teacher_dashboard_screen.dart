@@ -22,7 +22,9 @@ class TeacherDashboardScreen extends StatefulWidget {
     super.key,
     required this.teacherId,
     this.onManageSchedule,
+    this.onSessionDetailRequested,
     this.schedulingAnalytics,
+    this.meetingUrlEditor,
   });
 
   final String teacherId;
@@ -32,8 +34,14 @@ class TeacherDashboardScreen extends StatefulWidget {
   /// completes, the dashboard reloads so newly saved working hours appear.
   final Future<void> Function()? onManageSchedule;
 
+  /// Opens session detail for a booked session (booking aggregate id).
+  final void Function(String bookingId)? onSessionDetailRequested;
+
   /// Optional scheduling experiment analytics (week views, Friday banner).
   final QuranSessionsSchedulingAnalyticsCallbacks? schedulingAnalytics;
+
+  /// Optional external meeting URL editor shown above availability.
+  final Widget? meetingUrlEditor;
 
   @override
   State<TeacherDashboardScreen> createState() => _TeacherDashboardScreenState();
@@ -173,6 +181,18 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
             onRefresh: () async => _reload(),
             child: CustomScrollView(
               slivers: [
+                if (widget.meetingUrlEditor != null)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        Theme.of(context).tokens.spaceLarge,
+                        Theme.of(context).tokens.spaceLarge,
+                        Theme.of(context).tokens.spaceLarge,
+                        0,
+                      ),
+                      child: widget.meetingUrlEditor,
+                    ),
+                  ),
                 // ── Upcoming sessions ──────────────────────────────────
                 _SectionHeader(
                   title: l10n.upcomingSessionsSection(
@@ -191,8 +211,17 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                 else
                   SliverList.builder(
                     itemCount: success.upcomingSessions.length,
-                    itemBuilder: (_, i) =>
-                        SessionCard(session: success.upcomingSessions[i]),
+                    itemBuilder: (_, i) {
+                      final session = success.upcomingSessions[i];
+                      return SessionCard(
+                        session: session,
+                        onTap: widget.onSessionDetailRequested == null
+                            ? null
+                            : () => widget.onSessionDetailRequested!(
+                                session.bookingId,
+                              ),
+                      );
+                    },
                   ),
 
                 // ── Bookable times ─────────────────────────────────────

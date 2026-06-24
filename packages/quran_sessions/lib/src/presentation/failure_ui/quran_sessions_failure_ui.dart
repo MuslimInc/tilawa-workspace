@@ -4,8 +4,10 @@ import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import '../../domain/failures/quran_sessions_failure.dart';
 import '../../domain/services/vacation_override_validator.dart';
 import '../../domain/services/weekly_schedule_validator.dart';
+import '../../domain/value_objects/external_meeting_url.dart';
 import '../../domain/value_objects/teacher_public_name.dart';
 import '../forms/teacher_application_validation_l10n.dart';
+import '../l10n/session_lifecycle_l10n.dart';
 
 /// Extension that converts a typed [QuranSessionsFailure] into a
 /// user-facing, localised message.
@@ -63,11 +65,34 @@ extension QuranSessionsFailureUi on QuranSessionsFailure {
             ? loc.messageForPublicNameFailure(
                 ValidationFailure(field: f, code: c),
               )
+            : f == ValidateExternalMeetingUrl.field && c == 'invalid_url'
+            ? loc.teacherExternalMeetingUrlInvalid
             : loc.validationError(c, f),
 
       // ── Booking ─────────────────────────────────────────────────────────────
       SlotUnavailableFailure() => loc.slotUnavailable,
       BookingConflictFailure() => loc.bookingConflict,
+      GroupBookingNotSupportedFailure() => loc.groupBookingNotSupported,
+      UnsupportedSessionModeFailure() => loc.unsupportedSessionMode,
+      MeetingLinkUnavailableFailure() => loc.meetingLinkUnavailable,
+      CallProviderUnavailableFailure(
+        reasonCode: 'agora_not_registered',
+      ) =>
+        loc.callProviderAgoraNotConfigured,
+      CallProviderUnavailableFailure() => loc.callProviderUnavailable,
+      RtcPermissionDeniedFailure(:final permission) => loc.rtcPermissionDenied(
+        permission,
+      ),
+      RtcCallJoinFailure(:final reasonCode) => switch (reasonCode) {
+        'join_channel_rejected' => loc.rtcCallJoinRejected,
+        'join_invalid_token' ||
+        'join_token_expired' => loc.rtcCallJoinInvalidToken,
+        _ => loc.rtcCallJoinFailed,
+      },
+      WebRtcSignalingUnavailableFailure() => loc.webrtcSignalingUnavailable,
+      ExternalMeetingLaunchFailure(linkCopiedToClipboard: true) =>
+        loc.externalMeetingLinkCopied,
+      ExternalMeetingLaunchFailure() => loc.externalMeetingLaunchFailed,
       InvalidTransitionFailure(action: final action) => loc.validationError(
         'invalid_transition',
         action,
@@ -92,7 +117,7 @@ extension QuranSessionsFailureUi on QuranSessionsFailure {
 
       AccountBlockedFailure(reason: final r) =>
         r != null
-            ? loc.accountBlockedWithReason(_restrictionReasonAr(r))
+            ? loc.accountBlockedWithReason(restrictionReasonLabel(loc, r))
             : loc.accountBlocked,
 
       GuardianApprovalRequiredFailure() => loc.guardianApprovalRequired,
@@ -160,13 +185,3 @@ String _profileFieldLabel(QuranSessionsLocalizations loc, String field) =>
       'cityId' => loc.profileFieldCity,
       _ => field,
     };
-
-String _restrictionReasonAr(String reason) => switch (reason) {
-  'falseIdentity' => 'بيانات هوية مزيفة',
-  'policyViolation' => 'مخالفة السياسات',
-  'safetyConcern' => 'مخاوف تتعلق بالسلامة',
-  'abuseReport' => 'بلاغ إساءة',
-  'repeatedNoShow' => 'غياب متكرر',
-  'adminDecision' => 'قرار إداري',
-  _ => reason,
-};

@@ -1,10 +1,9 @@
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../boundaries/call/call_provider.dart';
-import '../../../domain/failures/quran_sessions_failure.dart';
 import '../../../domain/usecases/cancel_session_via_server_usecase.dart';
 import '../../../domain/usecases/get_student_sessions_usecase.dart';
+import '../../../domain/usecases/join_session_usecase.dart';
 import '../../../domain/usecases/submit_review_usecase.dart';
 import '../../../domain/value_objects/actor_role.dart';
 import 'my_sessions_event.dart';
@@ -15,19 +14,27 @@ class MySessionsBloc extends Bloc<MySessionsEvent, MySessionsState> {
     required this._getStudentSessions,
     required this._cancelSession,
     required this._submitReview,
-    required this._callProvider,
+    required this._joinSession,
     required this._studentId,
   }) : super(const MySessionsInitial()) {
     on<MySessionsLoadRequested>(_onLoadRequested, transformer: restartable());
+    on<MySessionsLoadMorePastRequested>(
+      _onLoadMorePast,
+      transformer: droppable(),
+    );
     on<SessionCancelled>(_onSessionCancelled, transformer: sequential());
     on<SessionJoinRequested>(_onJoinRequested, transformer: sequential());
+    on<MySessionsJoinCompletedAcknowledged>(
+      _onJoinCompletedAcknowledged,
+      transformer: sequential(),
+    );
     on<ReviewSubmitted>(_onReviewSubmitted, transformer: droppable());
   }
 
   final GetStudentSessionsUseCase _getStudentSessions;
   final CancelSessionViaServerUseCase _cancelSession;
   final SubmitReviewUseCase _submitReview;
-  final CallProvider _callProvider;
+  final JoinSessionUseCase _joinSession;
   final String _studentId;
 
   Future<void> _onLoadRequested(
@@ -40,18 +47,57 @@ class MySessionsBloc extends Bloc<MySessionsEvent, MySessionsState> {
 
     result.fold(
       (failure) => emit(MySessionsFailure(failure)),
-      (sessions) {
-        if (sessions.isEmpty) {
+      (page) {
+        if (page.upcoming.isEmpty && page.past.isEmpty) {
           emit(const MySessionsEmpty());
           return;
         }
-        final now = DateTime.now();
         emit(
           MySessionsSuccess(
-            upcoming: sessions.where((s) => s.startsAt.isAfter(now)).toList()
-              ..sort((a, b) => a.startsAt.compareTo(b.startsAt)),
-            past: sessions.where((s) => !s.startsAt.isAfter(now)).toList()
-              ..sort((a, b) => b.startsAt.compareTo(a.startsAt)),
+            upcoming: page.upcoming,
+            past: page.past,
+            pastNextCursor: page.pastNextCursor,
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _onLoadMorePast(
+    MySessionsLoadMorePastRequested event,
+    Emitter<MySessionsState> emit,
+  ) async {
+    final current = state;
+    if (current is! MySessionsSuccess ||
+        current.pastNextCursor == null ||
+        current.isLoadingMorePast) {
+      return;
+    }
+
+    emit(current.copyWith(isLoadingMorePast: true));
+
+    final result = await _getStudentSessions(
+      event.studentId,
+      pastCursor: current.pastNextCursor,
+    );
+
+    final after = state;
+    if (after is! MySessionsSuccess) return;
+
+    result.fold(
+      (failure) => emit(
+        after.copyWith(
+          isLoadingMorePast: false,
+          loadMorePastFailure: failure,
+        ),
+      ),
+      (page) {
+        emit(
+          after.copyWith(
+            past: [...after.past, ...page.past],
+            pastNextCursor: page.pastNextCursor,
+            isLoadingMorePast: false,
+            clearLoadMorePastFailure: true,
           ),
         );
       },
@@ -108,22 +154,35 @@ class MySessionsBloc extends Bloc<MySessionsEvent, MySessionsState> {
       current.copyWith(clearJoinFailure: true, joinInProgress: event.sessionId),
     );
 
-    try {
-      await _callProvider.joinSession(event.sessionId);
-      emit((state as MySessionsSuccess).clearJoin());
-    } on Object catch (_) {
-      final after = state;
-      if (after is MySessionsSuccess) {
-        emit(
-          after
-              .copyWith(
-                joinFailure: const NetworkFailure(),
-                clearJoinInProgress: true,
-              )
-              .clearJoin(),
-        );
-      }
-    }
+    final result = await _joinSession(sessionId: event.sessionId);
+
+    final after = state;
+    if (after is! MySessionsSuccess) return;
+
+    result.fold(
+      (failure) => emit(
+        after.copyWith(
+          joinFailure: failure,
+          clearJoinInProgress: true,
+        ),
+      ),
+      (_) => emit(
+        after.copyWith(
+          clearJoinInProgress: true,
+          joinCompletedSessionId: event.sessionId,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onJoinCompletedAcknowledged(
+    MySessionsJoinCompletedAcknowledged event,
+    Emitter<MySessionsState> emit,
+  ) async {
+    final current = state;
+    if (current is! MySessionsSuccess) return;
+
+    emit(current.copyWith(clearJoinCompletedSessionId: true));
   }
 
   Future<void> _onReviewSubmitted(

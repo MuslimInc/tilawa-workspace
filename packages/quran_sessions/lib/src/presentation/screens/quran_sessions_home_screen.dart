@@ -105,7 +105,22 @@ class _QuranSessionsHomeScreenState extends State<QuranSessionsHomeScreen> {
             onEmptyStateSeen: widget.analytics?.onQuranSessionsEmptyStateSeen,
           ),
           TeacherListFailure(:final failure) => Center(
-            child: Text(failure.toLocalizedMessage(context)),
+            child: Padding(
+              padding: EdgeInsets.all(context.tokens.spaceLarge),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(failure.toLocalizedMessage(context)),
+                  SizedBox(height: context.tokens.spaceMedium),
+                  TilawaButton(
+                    text: l10n.retry,
+                    onPressed: () => context.read<TeacherListBloc>().add(
+                      const LoadTeachersRequested(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
           TeacherListSuccess(:final teachers) => ListView.builder(
             padding: EdgeInsets.all(context.tokens.spaceMedium),

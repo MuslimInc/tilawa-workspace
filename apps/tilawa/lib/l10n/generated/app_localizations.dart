@@ -188,6 +188,12 @@ abstract class AppLocalizations {
   /// **'Set location'**
   String get homeLocationUnavailable;
 
+  /// Talabat-style context label above the prayer location in the Home hero header
+  ///
+  /// In en, this message translates to:
+  /// **'Praying in'**
+  String get homeHeroLocationContext;
+
   /// Home next prayer fallback when no prayer time can be calculated
   ///
   /// In en, this message translates to:
@@ -224,11 +230,41 @@ abstract class AppLocalizations {
   /// **'Discover'**
   String get homeExploreTitle;
 
-  /// Home essentials section supporting line — features not in the tab bar
+  /// Home feature category grid supporting line
   ///
   /// In en, this message translates to:
-  /// **'Prayer times and Quran teaching'**
+  /// **'Everyday tools at a glance'**
   String get homeExploreSubtitle;
+
+  /// Home carousel subtitle for Smart Khatma promo card
+  ///
+  /// In en, this message translates to:
+  /// **'Track your reading plan'**
+  String get homeKhatmaCarouselSubtitle;
+
+  /// Home carousel subtitle for Support Tilawa promo card
+  ///
+  /// In en, this message translates to:
+  /// **'Help keep Tilawa free for everyone'**
+  String get homeSupportCarouselSubtitle;
+
+  /// Home carousel subtitle for listening history card
+  ///
+  /// In en, this message translates to:
+  /// **'Pick up where you left off'**
+  String get homeHistoryCarouselSubtitle;
+
+  /// Home carousel subtitle for favorites card
+  ///
+  /// In en, this message translates to:
+  /// **'Saved recitations and surahs'**
+  String get homeFavoritesCarouselSubtitle;
+
+  /// Home carousel subtitle for downloads card
+  ///
+  /// In en, this message translates to:
+  /// **'Listen offline anytime'**
+  String get homeDownloadsCarouselSubtitle;
 
   /// Home card title for Quran teaching sessions
   ///
@@ -2792,10 +2828,10 @@ abstract class AppLocalizations {
   /// **'QIBLA FINDER'**
   String get qiblaFinderTitle;
 
-  /// Subtitle below the compass degree readout
+  /// Subtitle below the Qibla bearing readout (geographic degrees from north)
   ///
   /// In en, this message translates to:
-  /// **'Device\'s angle to qibla'**
+  /// **'Qibla bearing from north'**
   String get qiblaDeviceAngleLabel;
 
   /// Instruction when the user should rotate left to align with Qibla

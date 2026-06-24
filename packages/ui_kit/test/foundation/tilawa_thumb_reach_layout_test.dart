@@ -28,6 +28,36 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  testWidgets('applies generous horizontal inset to action controls', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await pumpLayout(
+      tester,
+      actions: TilawaButton(
+        text: 'Continue',
+        isFullWidth: true,
+        onPressed: () {},
+      ),
+    );
+
+    final Rect screen = tester.getRect(find.byType(Scaffold));
+    final Rect button = tester.getRect(
+      find.ancestor(
+        of: find.text('Continue'),
+        matching: find.byType(TextButton),
+      ),
+    );
+    final double inset = TilawaDesignTokens.light().bottomActionHorizontalInset;
+
+    expect(button.left, closeTo(inset, 1));
+    expect(screen.width - button.right, closeTo(inset, 1));
+  });
+
   testWidgets('starts the action band near 72% of the screen height', (
     WidgetTester tester,
   ) async {

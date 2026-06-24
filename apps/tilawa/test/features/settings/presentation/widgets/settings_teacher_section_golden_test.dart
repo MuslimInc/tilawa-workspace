@@ -49,6 +49,19 @@ class _UnimplementedProfileRepository implements TeacherProfileRepository {
   dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
 }
 
+class _FakeAccessRepository implements TeacherApplicationAccessRepository {
+  @override
+  Future<Either<QuranSessionsFailure, TeacherApplicationAccess>> resolveForUser(
+    String userId,
+  ) async {
+    return const Right(TeacherApplicationAccess(canApplyAsTeacher: true));
+  }
+}
+
+class _StubAccessUseCase extends ResolveTeacherApplicationAccessUseCase {
+  _StubAccessUseCase() : super(_FakeAccessRepository());
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -95,6 +108,9 @@ void main() {
   }) async {
     scopeGetIt().registerSingleton<GetCurrentUserTeacherCapabilityUseCase>(
       _StubTeacherCapabilityUseCase(capability),
+    );
+    scopeGetIt().registerSingleton<ResolveTeacherApplicationAccessUseCase>(
+      _StubAccessUseCase(),
     );
 
     final theme = brightness == Brightness.dark

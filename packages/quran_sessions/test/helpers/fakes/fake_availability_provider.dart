@@ -36,6 +36,7 @@ class FakeAvailabilityProvider implements AvailabilityProvider {
 
   @override
   Future<Either<QuranSessionsFailure, void>> withdrawSlot(
+    String teacherId,
     String slotId,
   ) async {
     if (shouldFail) return const Left(UnknownFailure());

@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:dartz_plus/dartz_plus.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/features/athkar/data/datasources/athkar_daily_progress_local_datasource.dart';
 import 'package:tilawa/features/athkar/domain/entities/athkar_category.dart';
 import 'package:tilawa/features/athkar/domain/entities/athkar_item.dart';
@@ -26,7 +28,9 @@ import 'package:tilawa/features/home/presentation/widgets/home_primary_action_zo
 import 'package:tilawa/features/home/presentation/cubit/home_quran_resume_cubit.dart';
 import 'package:tilawa/features/home/presentation/screens/home_screen.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_hero_sliver.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_daily_ayah_card.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_discover_carousel.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_features_hub.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_travel_destination_card.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_primary_action_card.dart';
 import 'package:tilawa/features/quran_reader/domain/usecases/get_last_read_position_use_case.dart';
 import 'package:tilawa/features/prayer_times/application/prayer_location_update_notifier.dart';
@@ -37,7 +41,29 @@ import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/utils/typedefs.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+class _TestSharedPreferencesAsync implements SharedPreferencesAsync {
+  @override
+  Future<String?> getString(String key) async => null;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 void main() {
+  setUp(() {
+    if (!GetIt.I.isRegistered<SharedPreferencesAsync>()) {
+      GetIt.I.registerSingleton<SharedPreferencesAsync>(
+        _TestSharedPreferencesAsync(),
+      );
+    }
+  });
+
+  tearDown(() async {
+    if (GetIt.I.isRegistered<SharedPreferencesAsync>()) {
+      await GetIt.I.unregister<SharedPreferencesAsync>();
+    }
+  });
+
   testWidgets('settles a partial home hero collapse to the pinned state', (
     tester,
   ) async {
@@ -94,7 +120,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Home contains no Reciters or Qibla shortcuts', (tester) async {
+  testWidgets('Home avoids bottom-nav duplicate shortcuts', (tester) async {
     final bloc = HomeDashboardBloc(
       GetHomeDashboardUseCase(_FakeHomeDashboardRepository()),
       NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
@@ -107,20 +133,18 @@ void main() {
       await tester.pump(const Duration(milliseconds: 16));
     }
 
-    expect(find.text('Reciters'), findsNothing);
+    expect(find.text('Reciters'), findsOneWidget);
     expect(find.text('Browse recitations'), findsNothing);
-    expect(find.text('Qibla'), findsNothing);
-    expect(find.text('Find prayer direction'), findsNothing);
     expect(find.text('Quick athkar'), findsNothing);
-    expect(find.text('Explore'), findsNothing);
-    expect(find.text('Discover'), findsNothing);
     expect(find.text("Today's prayer times"), findsNothing);
     expect(find.text('View all'), findsNothing);
 
     expect(find.text('Home'), findsNothing);
-    expect(find.text('Prayer'), findsNothing);
-    expect(find.text('Athkar'), findsNothing);
     expect(find.text('Settings'), findsNothing);
+
+    expect(find.text('Discover'), findsOneWidget);
+    expect(find.text('Athkar'), findsWidgets);
+    expect(find.text('Qibla'), findsWidgets);
   });
 
   testWidgets('Home contains no layout toggle button', (tester) async {
@@ -140,7 +164,7 @@ void main() {
     expect(find.byIcon(Icons.view_list_rounded), findsNothing);
   });
 
-  testWidgets('Home shows today ayah, primary action, and footer links', (
+  testWidgets('Home shows carousel, primary action, and feature grid', (
     tester,
   ) async {
     final bloc = HomeDashboardBloc(
@@ -157,10 +181,14 @@ void main() {
 
     expect(find.text('Today'), findsOneWidget);
     expect(find.text('Yours'), findsNothing);
-    expect(find.byType(HomeDailyAyahCard), findsOneWidget);
+    expect(find.byType(HomeDiscoverCarousel), findsOneWidget);
+    expect(find.byType(HomeTravelDestinationCard), findsWidgets);
     expect(find.byType(HomePrimaryActionCard), findsOneWidget);
-    expect(find.text('Learn Quran recitation'), findsOneWidget);
-    expect(find.text('Tasbeeh'), findsOneWidget);
+    expect(find.byType(HomeFeaturesHub), findsOneWidget);
+    expect(find.text('Discover'), findsOneWidget);
+    expect(find.text('Featured for you'), findsOneWidget);
+    expect(find.text('Tasbeeh'), findsWidgets);
+    expect(find.text('Bookmarks'), findsOneWidget);
   });
 }
 

@@ -286,6 +286,10 @@ export class QuranSessionsUserMapper {
       cityName: (profile['cityName'] as string | undefined) ?? null,
       profileCompleted: (profile['profileCompleted'] as boolean | undefined) ?? false,
       accountStatus: statusRaw as QuranSessionsUser['accountStatus'],
+      canApplyAsTeacher:
+        typeof profile['canApplyAsTeacher'] === 'boolean'
+          ? (profile['canApplyAsTeacher'] as boolean)
+          : null,
       createdAt: readTimestamp(profile['createdAt']),
       updatedAt: readTimestamp(profile['updatedAt']),
     };

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
 import '../foundation/tilawa_interaction_feedback.dart';
+import '../foundation/tilawa_interactive_surface.dart';
 
 /// A segmented control widget for switching between a small number of options.
 ///
@@ -16,6 +17,9 @@ import '../foundation/tilawa_interaction_feedback.dart';
 ///
 /// The control consists of a rounded container with segmented buttons inside.
 /// The selected segment has a distinct background color and shadow.
+///
+/// Per-segment disable: set [TilawaSegment.enabled] to false. Disabled
+/// segments stay visible, use reduced opacity, and ignore taps.
 class TilawaSegmentedControl<T> extends StatelessWidget {
   /// Creates a segmented control.
   const TilawaSegmentedControl({
@@ -111,22 +115,25 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
         spacing: tokens.itemSpacing,
         children: segments.map((segment) {
           final isSelected = segment.value == selectedValue;
+          final segmentEnabled = enabled && segment.enabled;
           return Expanded(
             child: _SegmentButton(
               label: segment.label,
               isSelected: isSelected,
               onTap: () {
-                if (enabled && segment.value != selectedValue) {
+                if (!segmentEnabled) return;
+                if (segment.value != selectedValue) {
                   TilawaInteractionFeedback.trigger(TilawaHaptic.selection);
+                  onValueChanged(segment.value);
                 }
-                onValueChanged(segment.value);
               },
               selectedBackgroundColor: effectiveSelectedColor,
               selectedTextColor: effectiveSelectedTextColor,
               unselectedTextColor: effectiveUnselectedTextColor,
               tokens: tokens,
               itemRadius: effectiveItemRadius,
-              enabled: enabled,
+              enabled: segmentEnabled,
+              semanticsHint: segment.semanticsHint,
             ),
           );
         }).toList(),
@@ -139,14 +146,28 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
 @immutable
 class TilawaSegment<T> {
   /// Creates a segment.
-  const TilawaSegment({required this.value, required this.label});
+  const TilawaSegment({
+    required this.value,
+    required this.label,
+    this.enabled = true,
+    this.semanticsHint,
+  });
 
   /// The value associated with this segment.
   final T value;
 
   /// The text label to display.
   final String label;
+
+  /// When false, segment is visible but not selectable.
+  final bool enabled;
+
+  /// Optional accessibility hint when [enabled] is false (e.g. why unavailable).
+  final String? semanticsHint;
 }
+
+// Material 3 disabled content opacity (matches [TilawaButton]).
+const double _kDisabledSegmentOpacity = 0.38;
 
 class _SegmentButton extends StatelessWidget {
   const _SegmentButton({
@@ -159,6 +180,7 @@ class _SegmentButton extends StatelessWidget {
     required this.tokens,
     required this.itemRadius,
     required this.enabled,
+    this.semanticsHint,
   });
 
   final String label;
@@ -170,6 +192,7 @@ class _SegmentButton extends StatelessWidget {
   final TilawaSegmentedControlTokens tokens;
   final double itemRadius;
   final bool enabled;
+  final String? semanticsHint;
 
   @override
   Widget build(BuildContext context) {
@@ -184,27 +207,40 @@ class _SegmentButton extends StatelessWidget {
 
     final itemBorderRadius = BorderRadius.circular(itemRadius);
 
-    return Material(
-      color: isSelected ? selectedBackgroundColor : Colors.transparent,
+    final segment = TilawaInteractiveSurface(
+      onTap: onTap,
+      enabled: enabled,
+      // fix: Accessibility — segment state.
+      selected: isSelected,
+      semanticLabel: label,
+      semanticHint: enabled ? null : semanticsHint,
+      // The control fires its own selection haptic (only when the value
+      // actually changes), so the surface stays silent to avoid a double tap.
+      haptic: TilawaHaptic.none,
       borderRadius: itemBorderRadius,
-      child: InkWell(
-        onTap: enabled ? onTap : null,
-        borderRadius: itemBorderRadius,
-        child: Semantics(
-          // fix: Accessibility — segment state (inside InkWell avoids merge bugs)
-          selected: isSelected,
-          button: true,
-          enabled: enabled,
-          label: label,
-          child: Container(
-            padding: tokens.itemPadding,
-            decoration: isSelected
-                ? BoxDecoration(borderRadius: itemBorderRadius)
-                : null,
-            child: Center(child: Text(label, style: textStyle)),
-          ),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: isSelected ? selectedBackgroundColor : Colors.transparent,
+          borderRadius: itemBorderRadius,
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: tokens.selectedItemShadowColor,
+                    blurRadius: tokens.selectedItemShadowBlur,
+                    offset: tokens.selectedItemShadowOffset,
+                  ),
+                ]
+              : null,
+        ),
+        child: Container(
+          padding: tokens.itemPadding,
+          child: Center(child: Text(label, style: textStyle)),
         ),
       ),
     );
+
+    if (enabled) return segment;
+
+    return Opacity(opacity: _kDisabledSegmentOpacity, child: segment);
   }
 }

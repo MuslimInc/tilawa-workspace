@@ -1,7 +1,9 @@
 import 'dart:math' as math;
 
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tilawa/features/home/debug/home_hero_variant_debug.dart';
 import 'package:tilawa/features/home/domain/home_hijri_date_formatter.dart';
 import 'package:tilawa/features/home/domain/entities/home_dashboard.dart';
 import 'package:tilawa/features/home/presentation/bloc/home_dashboard_state.dart';
@@ -11,6 +13,11 @@ import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 void main() {
+  setUp(() {
+    HomeHeroVariantDebug.resetForTests();
+    HomeHeroVariantDebug.variant.value = HomeHeroDesignVariant.a;
+  });
+
   testWidgets('collapses on a narrow Android viewport without flex overflow', (
     tester,
   ) async {
@@ -35,26 +42,18 @@ void main() {
       languageCode: 'ar',
     );
     expect(find.text(hijriDateLine), findsOneWidget);
+    expect(find.text(l10n.homeHeroLocationContext), findsOneWidget);
     expect(find.text(l10n.nextPrayer), findsOneWidget);
-
-    final theme = Theme.of(
-      tester.element(find.byType(SliverAppBar)),
-    );
-    final heroTokens = theme.componentTokens.homeNextPrayerHero;
-    final appBar = tester.widget<SliverAppBar>(find.byType(SliverAppBar));
-    final double expectedExpandedHeight =
-        HomeDashboardHeroSliver.collapseScrollExtent(scrollContext) +
-        kToolbarHeight;
-    expect(appBar.expandedHeight, expectedExpandedHeight);
-    expect(
-      appBar.backgroundColor,
-      HomeDashboardHeroSliver.collapsedBarColor(heroTokens),
-    );
-    expect(appBar.foregroundColor, Colors.white);
-    expect(heroTokens.foregroundColor, Colors.white);
+    expect(find.byType(ClipPath), findsNothing);
+    _expectHeroBottomBorder(scrollContext);
+    expect(find.byType(SliverPersistentHeader), findsOneWidget);
 
     final double collapseExtent = HomeDashboardHeroSliver.collapseScrollExtent(
       scrollContext,
+    );
+    expect(
+      collapseExtent,
+      greaterThan(kToolbarHeight),
     );
 
     controller.jumpTo(collapseExtent * 0.8);
@@ -79,7 +78,7 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
-  testWidgets('location chip hugs short labels instead of stretching', (
+  testWidgets('location context row shows city without stretching full width', (
     tester,
   ) async {
     final view = tester.view;
@@ -99,30 +98,98 @@ void main() {
     );
     await tester.pump();
 
-    final chipFinder = find.ancestor(
-      of: find.text('Abha'),
-      matching: find.byWidgetPredicate(
-        (widget) {
-          if (widget is! Material) {
-            return false;
-          }
-          final shape = widget.shape;
-          return shape is RoundedRectangleBorder &&
-              shape.side.width > 0 &&
-              shape.borderRadius != BorderRadius.zero;
-        },
-      ),
-    );
-    expect(chipFinder, findsOneWidget);
+    expect(find.text('Abha'), findsOneWidget);
 
-    final RenderBox chipBox = tester.renderObject(chipFinder);
+    final RenderBox locationBox = tester.renderObject<RenderBox>(
+      find.text('Abha'),
+    );
     final RenderBox viewportBox = tester.renderObject(
       find.byType(CustomScrollView),
     );
 
-    expect(chipBox.size.width, lessThan(viewportBox.size.width * 0.45));
-    expect(chipBox.size.height, kTilawaMinInteractiveDimension);
+    expect(locationBox.size.width, lessThan(viewportBox.size.width * 0.75));
   });
+
+  testWidgets('collapsed toolbar keeps location and prayer summary', (
+    tester,
+  ) async {
+    final view = tester.view;
+    view.devicePixelRatio = 1;
+    view.physicalSize = const Size(360, 640);
+    addTearDown(view.resetDevicePixelRatio);
+    addTearDown(view.resetPhysicalSize);
+
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      _HomeHeroHarness(
+        controller: controller,
+        locationLabel: 'Cairo',
+      ),
+    );
+    await tester.pump();
+
+    final BuildContext scrollContext = tester.element(
+      find.byType(CustomScrollView),
+    );
+    final double collapseExtent = HomeDashboardHeroSliver.collapseScrollExtent(
+      scrollContext,
+    );
+    controller.jumpTo(collapseExtent);
+    await tester.pump();
+
+    expect(find.text('Cairo'), findsWidgets);
+    expect(find.byIcon(FluentIcons.location_24_regular), findsOneWidget);
+    _expectCollapsedPrimaryPinnedBar(scrollContext);
+  });
+}
+
+void _expectCollapsedPrimaryPinnedBar(BuildContext context) {
+  final ThemeData theme = Theme.of(context);
+  final Color primary = theme.colorScheme.primary;
+  final TilawaDesignTokens tokens = theme.tokens;
+
+  expect(
+    find.byWidgetPredicate((widget) {
+      if (widget is! DecoratedBox || widget.decoration is! BoxDecoration) {
+        return false;
+      }
+      final BoxDecoration decoration = widget.decoration as BoxDecoration;
+      final List<Color>? gradientColors = decoration.gradient?.colors;
+      if (gradientColors == null || !gradientColors.contains(primary)) {
+        return false;
+      }
+      final List<BoxShadow>? shadows = decoration.boxShadow;
+      if (shadows == null || shadows.isEmpty) {
+        return false;
+      }
+      final BoxShadow shadow = shadows.first;
+      return shadow.blurRadius == tokens.blurShadow &&
+          shadow.offset == tokens.shadowOffsetSmall;
+    }),
+    findsWidgets,
+  );
+}
+
+void _expectHeroBottomBorder(BuildContext context) {
+  final ThemeData theme = Theme.of(context);
+  expect(
+    find.byWidgetPredicate((widget) {
+      if (widget is! DecoratedBox || widget.decoration is! BoxDecoration) {
+        return false;
+      }
+      final BorderSide? bottom =
+          (widget.decoration as BoxDecoration).border?.bottom;
+      if (bottom == null) {
+        return false;
+      }
+      return bottom.color == theme.colorScheme.outlineVariant &&
+          bottom.width ==
+              theme.componentTokens.bottomSheetScaffold.footerTopBorderWidth;
+    }),
+    findsWidgets,
+  );
 }
 
 class _HomeHeroHarness extends StatelessWidget {

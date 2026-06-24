@@ -196,6 +196,34 @@ void main() {
         expect(padding, _spaceExtraLarge);
       },
     );
+
+    testWidgets(
+      'uses view-level bottom inset when MediaQuery viewPadding is stripped',
+      (tester) async {
+        tester.view.devicePixelRatio = 1.0;
+        tester.view.viewPadding = const FakeViewPadding(bottom: 34);
+        addTearDown(tester.view.reset);
+
+        late double padding;
+
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(viewPadding: EdgeInsets.zero),
+            child: Theme(
+              data: ThemeData(extensions: [TilawaDesignTokens.light()]),
+              child: Builder(
+                builder: (context) {
+                  padding = context.floatingBottomPadding;
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+          ),
+        );
+
+        expect(padding, 34 + _spaceSmall);
+      },
+    );
   });
 
   group('TilawaSafeAreaX — keyboardAwareBottomPadding', () {

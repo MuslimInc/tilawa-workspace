@@ -42,6 +42,19 @@ class _UnimplementedProfileRepository implements TeacherProfileRepository {
   dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
 }
 
+class _FakeAccessRepository implements TeacherApplicationAccessRepository {
+  @override
+  Future<Either<QuranSessionsFailure, TeacherApplicationAccess>> resolveForUser(
+    String userId,
+  ) async {
+    return const Right(TeacherApplicationAccess(canApplyAsTeacher: true));
+  }
+}
+
+class _StubAccessUseCase extends ResolveTeacherApplicationAccessUseCase {
+  _StubAccessUseCase() : super(_FakeAccessRepository());
+}
+
 void main() {
   late TeacherCapabilityRefreshNotifier refreshNotifier;
 
@@ -73,6 +86,9 @@ void main() {
       ]);
       scopeGetIt().registerSingleton<GetCurrentUserTeacherCapabilityUseCase>(
         useCase,
+      );
+      scopeGetIt().registerSingleton<ResolveTeacherApplicationAccessUseCase>(
+        _StubAccessUseCase(),
       );
       return TeacherCapabilityCubit(refreshNotifier: refreshNotifier);
     },

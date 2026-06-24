@@ -9,6 +9,7 @@ import {
 import { lifecycleError } from "./lifecycleErrors";
 import { recordTerminalTransition } from "./metricsAggregationService";
 import { enqueueSessionNotification } from "./notificationOutboxService";
+import { resolveTeacherProfileUserId } from "./teacherProfileUserId";
 import {
   PAYMENT_INTENTS_COLLECTION,
   PAYMENT_TRANSACTIONS_COLLECTION,
@@ -244,19 +245,25 @@ export const confirmBookingPayment = onCall(
     );
 
     if (!replayed && result.lifecycleStatus === "scheduled") {
-      const teacherId = (
-        await db.collection("quran_bookings").doc(data.bookingId).get()
-      ).data()?.teacherId as string;
+      const bookingSnap = await db
+        .collection("quran_bookings")
+        .doc(data.bookingId)
+        .get();
+      const teacherProfileId = bookingSnap.data()?.teacherId as string;
+      const teacherUserId = await resolveTeacherProfileUserId(
+        db,
+        teacherProfileId,
+      );
       await recordTerminalTransition(db, {
         type: "booking_confirmed",
-        teacherId,
+        teacherId: teacherUserId,
         studentId,
       });
       await enqueueSessionNotification(db, {
         sessionId: result.sessionId,
         aggregateId: result.bookingId,
         kind: "bookingConfirmed",
-        recipientUserIds: [teacherId, studentId],
+        recipientUserIds: [teacherUserId, studentId],
       });
     }
 
