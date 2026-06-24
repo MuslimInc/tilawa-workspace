@@ -119,7 +119,7 @@ class _DateGroupedDayTabBarState extends State<DateGroupedDayTabBar> {
       position
           .animateTo(
             target,
-            duration: const Duration(milliseconds: 300),
+            duration: Theme.of(context).tokens.durationMedium,
             curve: Curves.easeInOut,
           )
           .then((_) {
@@ -148,7 +148,7 @@ class _DateGroupedDayTabBarState extends State<DateGroupedDayTabBar> {
     // ensureVisible respects text direction — correct for RTL day tabs.
     Scrollable.ensureVisible(
       chipContext,
-      duration: const Duration(milliseconds: 300),
+      duration: Theme.of(context).tokens.durationMedium,
       curve: Curves.easeInOut,
       alignment: 0.5,
       alignmentPolicy: ScrollPositionAlignmentPolicy.explicit,
@@ -167,18 +167,20 @@ class _DateGroupedDayTabBarState extends State<DateGroupedDayTabBar> {
     final weekdayFmt = DateFormat('EEE', locale);
     final dayFmt = DateFormat('d', locale);
     final monthFmt = DateFormat('MMM', locale);
+    final tabHeight = tokens.spaceXXL * 2 + tokens.spaceSmall;
+    final chipWidth = tokens.spaceXXL + tokens.spaceExtraLarge;
+    final textTheme = theme.textTheme;
 
     return SizedBox(
-      height: 72,
+      height: tabHeight,
       child: ListView.separated(
         controller: _scrollCtrl,
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(
-          horizontal: kDateGroupedDayTabBarHorizontalPadding,
+        padding: EdgeInsets.symmetric(
+          horizontal: tokens.spaceExtraSmall,
         ),
         itemCount: widget.days.length,
-        separatorBuilder: (_, _) =>
-            const SizedBox(width: kDateGroupedDayTabSeparatorWidth),
+        separatorBuilder: (_, _) => SizedBox(width: tokens.spaceSmall),
         itemBuilder: (context, i) {
           final day = widget.days[i];
           final isSelected = day == widget.selected;
@@ -188,8 +190,8 @@ class _DateGroupedDayTabBarState extends State<DateGroupedDayTabBar> {
             child: GestureDetector(
               onTap: () => widget.onDaySelected(day),
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
-                width: kDateGroupedDayTabChipWidth,
+                duration: tokens.durationFast,
+                width: chipWidth,
                 decoration: BoxDecoration(
                   color: isSelected
                       ? scheme.primary
@@ -201,27 +203,25 @@ class _DateGroupedDayTabBarState extends State<DateGroupedDayTabBar> {
                   children: [
                     Text(
                       weekdayFmt.format(day),
-                      style: TextStyle(
-                        fontSize: 11,
+                      style: textTheme.labelSmall?.copyWith(
                         color: isSelected
                             ? scheme.onPrimary
                             : scheme.onSurfaceVariant,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    SizedBox(height: tokens.spaceExtraSmall / 2),
                     Text(
                       dayFmt.format(day),
-                      style: TextStyle(
-                        fontSize: 18,
+                      style: textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: isSelected ? scheme.onPrimary : scheme.onSurface,
                       ),
                     ),
                     Text(
                       monthFmt.format(day),
-                      style: TextStyle(
-                        fontSize: 10,
+                      style: textTheme.labelSmall?.copyWith(
+                        fontSize: textTheme.labelSmall!.fontSize! - 1,
                         color: isSelected
                             ? scheme.onPrimary.withValues(alpha: 0.8)
                             : scheme.onSurfaceVariant,

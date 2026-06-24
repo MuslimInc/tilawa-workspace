@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../l10n/session_lifecycle_l10n.dart';
 import '../widgets/pending_reschedule_banner.dart';
 
 class SessionDetailScreen extends StatefulWidget {
@@ -282,7 +283,9 @@ class _SessionDetailScreenState extends State<SessionDetailScreen>
                         ),
                       ),
                     Text(
-                      l10n.sessionStatusLabel(aggregate.lifecycleStatus.name),
+                      l10n.sessionStatusLabel(
+                        aggregate.lifecycleStatus.localizedLabel(l10n),
+                      ),
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     SizedBox(height: Theme.of(context).tokens.spaceSmall),
@@ -318,10 +321,13 @@ class _SessionDetailScreenState extends State<SessionDetailScreen>
                     else
                       ...timeline.map(
                         (event) => ListTile(
-                          title: Text(event.action.name),
+                          title: Text(event.action.localizedLabel(l10n)),
                           subtitle: Text(
                             event.reason ??
-                                '${event.previousStatus.name} → ${event.newStatus.name}',
+                                l10n.sessionTimelineStatusTransition(
+                                  event.previousStatus.localizedLabel(l10n),
+                                  event.newStatus.localizedLabel(l10n),
+                                ),
                           ),
                           trailing: Text(
                             MaterialLocalizations.of(context).formatShortDate(

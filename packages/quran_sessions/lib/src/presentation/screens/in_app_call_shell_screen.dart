@@ -138,11 +138,11 @@ class _InAppCallShellScreenState extends State<InAppCallShellScreen> {
                 text: l10n.inAppCallShellEndCall,
                 isFullWidth: true,
                 size: TilawaButtonSize.large,
-                variant: TilawaButtonVariant.secondary,
+                variant: TilawaButtonVariant.danger,
                 onPressed: _endCall,
                 leadingIcon: Icon(
                   Icons.call_end_outlined,
-                  color: colorScheme.onSecondaryContainer,
+                  color: colorScheme.onError,
                 ),
               ),
             ],

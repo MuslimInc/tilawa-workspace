@@ -49,7 +49,7 @@ class _AgoraCallSurfaceState extends State<AgoraCallSurface> {
   void didUpdateWidget(covariant AgoraCallSurface oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.sessionId != widget.sessionId) {
-      _unbindEngineEvents();
+      _unbindEngineEvents(oldWidget.sessionId);
       _remoteUid = null;
       _channelId = null;
       _remoteVideoReady = false;
@@ -116,8 +116,10 @@ class _AgoraCallSurfaceState extends State<AgoraCallSurface> {
     engine.registerEventHandler(_eventHandler!);
   }
 
-  void _unbindEngineEvents() {
-    final engine = _engine;
+  void _unbindEngineEvents([String? sessionId]) {
+    final engine = widget.enginePool
+        .sessionFor(sessionId ?? widget.sessionId)
+        ?.engine;
     final handler = _eventHandler;
     if (engine != null && handler != null) {
       engine.unregisterEventHandler(handler);
@@ -207,7 +209,11 @@ class _ConnectionChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 18, color: colorScheme.onSecondaryContainer),
+            Icon(
+              icon,
+              size: tokens.iconSizeMedium,
+              color: colorScheme.onSecondaryContainer,
+            ),
             SizedBox(width: tokens.spaceSmall),
             Flexible(
               child: Text(
@@ -251,6 +257,8 @@ class _VideoLayout extends StatelessWidget {
         remoteUid != null && channelId != null && channelId!.isNotEmpty;
     final showRemoteVideo = hasRemoteParticipant && remoteVideoReady;
     final showLocalPiP = hasRemoteParticipant && localVideoReady;
+    final pipWidth = tokens.spaceXXL * 3.5;
+    final pipHeight = tokens.spaceXXL * 4.625;
 
     final (placeholderIcon, placeholderMessage) = switch (phase) {
       _AgoraCallConnectionPhase.connecting => (Icons.sync, labels.connecting),
@@ -287,17 +295,19 @@ class _VideoLayout extends StatelessWidget {
             top: tokens.spaceMedium,
             end: tokens.spaceMedium,
             child: SizedBox(
-              width: 112,
-              height: 148,
+              width: pipWidth,
+              height: pipHeight,
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(tokens.radiusMedium),
                   border: Border.all(color: colorScheme.outlineVariant),
                   boxShadow: [
                     BoxShadow(
-                      color: colorScheme.shadow.withValues(alpha: 0.2),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+                      color: colorScheme.shadow.withValues(
+                        alpha: tokens.opacityShadowStrong,
+                      ),
+                      blurRadius: tokens.spaceSmall,
+                      offset: Offset(0, tokens.spaceExtraSmall / 2),
                     ),
                   ],
                 ),
@@ -336,6 +346,9 @@ class AgoraCallVideoPlaceholder extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final tokens = Theme.of(context).tokens;
 
+    final avatarRadius = tokens.iconSizeLargePlus + tokens.spaceMedium;
+    final avatarIconSize = tokens.iconSizeLargePlus;
+
     return Center(
       child: Padding(
         padding: EdgeInsets.all(tokens.spaceLarge),
@@ -346,11 +359,11 @@ class AgoraCallVideoPlaceholder extends StatelessWidget {
               const CircularProgressIndicator()
             else
               CircleAvatar(
-                radius: 56,
+                radius: avatarRadius,
                 backgroundColor: colorScheme.primaryContainer,
                 child: Icon(
                   icon,
-                  size: 56,
+                  size: avatarIconSize,
                   color: colorScheme.onPrimaryContainer,
                 ),
               ),
@@ -405,6 +418,9 @@ class _VoiceLayout extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final tokens = Theme.of(context).tokens;
 
+    final avatarRadius = tokens.iconSizeLargePlus + tokens.spaceMedium;
+    final avatarIconSize = tokens.iconSizeLargePlus;
+
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -413,11 +429,11 @@ class _VoiceLayout extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               CircleAvatar(
-                radius: 56,
+                radius: avatarRadius,
                 backgroundColor: colorScheme.primaryContainer,
                 child: Icon(
                   Icons.person_outline,
-                  size: 56,
+                  size: avatarIconSize,
                   color: colorScheme.onPrimaryContainer,
                 ),
               ),
@@ -461,14 +477,23 @@ class _VoiceActivePulse extends StatefulWidget {
 class _VoiceActivePulseState extends State<_VoiceActivePulse>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
+  var _animationStarted = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    )..repeat(reverse: true);
+    _controller = AnimationController(vsync: this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_animationStarted) {
+      return;
+    }
+    _animationStarted = true;
+    _controller.duration = Theme.of(context).tokens.durationSlow * 2;
+    _controller.repeat(reverse: true);
   }
 
   @override
@@ -492,10 +517,16 @@ class _VoiceActivePulseState extends State<_VoiceActivePulse>
             return Row(
               mainAxisSize: MainAxisSize.min,
               children: List.generate(4, (index) {
+                final barWidth = tokens.spaceSmall * 0.75;
+                final baseHeight = tokens.spaceSmall + tokens.spaceExtraSmall;
                 final height =
-                    12 + (_controller.value * 20 * ((index + 1) % 3 + 1));
+                    baseHeight +
+                    (_controller.value *
+                        tokens.spaceLarge *
+                        1.25 *
+                        ((index + 1) % 3 + 1));
                 return Container(
-                  width: 6,
+                  width: barWidth,
                   height: height,
                   margin: EdgeInsets.symmetric(
                     horizontal: tokens.spaceSmall / 2,
@@ -539,7 +570,11 @@ class _StatusPanel extends StatelessWidget {
           if (showSpinner)
             const CircularProgressIndicator()
           else
-            Icon(icon, size: 48, color: colorScheme.primary),
+            Icon(
+              icon,
+              size: tokens.iconSizeExtraLarge + tokens.spaceExtraSmall,
+              color: colorScheme.primary,
+            ),
           SizedBox(height: tokens.spaceMedium),
           Text(
             message,

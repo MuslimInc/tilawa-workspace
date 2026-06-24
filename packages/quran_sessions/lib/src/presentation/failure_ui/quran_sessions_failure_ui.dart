@@ -7,6 +7,7 @@ import '../../domain/services/weekly_schedule_validator.dart';
 import '../../domain/value_objects/external_meeting_url.dart';
 import '../../domain/value_objects/teacher_public_name.dart';
 import '../forms/teacher_application_validation_l10n.dart';
+import '../l10n/session_lifecycle_l10n.dart';
 
 /// Extension that converts a typed [QuranSessionsFailure] into a
 /// user-facing, localised message.
@@ -111,7 +112,7 @@ extension QuranSessionsFailureUi on QuranSessionsFailure {
 
       AccountBlockedFailure(reason: final r) =>
         r != null
-            ? loc.accountBlockedWithReason(_restrictionReasonAr(r))
+            ? loc.accountBlockedWithReason(restrictionReasonLabel(loc, r))
             : loc.accountBlocked,
 
       GuardianApprovalRequiredFailure() => loc.guardianApprovalRequired,
@@ -179,13 +180,3 @@ String _profileFieldLabel(QuranSessionsLocalizations loc, String field) =>
       'cityId' => loc.profileFieldCity,
       _ => field,
     };
-
-String _restrictionReasonAr(String reason) => switch (reason) {
-  'falseIdentity' => 'بيانات هوية مزيفة',
-  'policyViolation' => 'مخالفة السياسات',
-  'safetyConcern' => 'مخاوف تتعلق بالسلامة',
-  'abuseReport' => 'بلاغ إساءة',
-  'repeatedNoShow' => 'غياب متكرر',
-  'adminDecision' => 'قرار إداري',
-  _ => reason,
-};

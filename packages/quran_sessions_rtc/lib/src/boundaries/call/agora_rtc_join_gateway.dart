@@ -60,6 +60,7 @@ class LiveAgoraRtcJoinGateway implements AgoraRtcJoinGateway {
   }
 
   Future<void> _joinLive(RtcEngine engine, AgoraRtcJoinParams params) async {
+    // coverage:ignore-start
     await engine.initialize(
       RtcEngineContext(
         appId: params.appId,
@@ -81,5 +82,6 @@ class LiveAgoraRtcJoinGateway implements AgoraRtcJoinGateway {
         channelProfile: ChannelProfileType.channelProfileCommunication,
       ),
     );
+    // coverage:ignore-end
   }
 }

@@ -596,5 +596,62 @@
     },
     "paymentCheckoutAmountPending": "Session price (sandbox)",
     "paymentCheckoutRefundToWalletNotice": "If you cancel or we approve a refund, the amount is added to your Tilawa wallet as credit. Wallet credit is not automatically returned to your card.",
-    "paymentCheckoutConfirm": "Confirm payment (sandbox)"
+    "paymentCheckoutConfirm": "Confirm payment (sandbox)",
+    "restrictionReasonFalseIdentity": "False identity information",
+    "restrictionReasonPolicyViolation": "Policy violation",
+    "restrictionReasonSafetyConcern": "Safety concern",
+    "restrictionReasonAbuseReport": "Abuse report",
+    "restrictionReasonRepeatedNoShow": "Repeated no-show",
+    "restrictionReasonAdminDecision": "Administrative decision",
+    "sessionLifecycleDraft": "Draft",
+    "sessionLifecyclePendingPayment": "Pending payment",
+    "sessionLifecycleScheduled": "Scheduled",
+    "sessionLifecycleConfirmed": "Confirmed",
+    "sessionLifecycleInProgress": "In progress",
+    "sessionLifecycleRescheduled": "Rescheduled",
+    "sessionLifecycleCancelledByStudent": "Cancelled by student",
+    "sessionLifecycleCancelledByTeacher": "Cancelled by teacher",
+    "sessionLifecycleCancelledByAdmin": "Cancelled by admin",
+    "sessionLifecycleTeacherNoShow": "Teacher no-show",
+    "sessionLifecycleStudentNoShow": "Student no-show",
+    "sessionLifecycleBothNoShow": "Both no-show",
+    "sessionLifecycleIncomplete": "Incomplete",
+    "sessionLifecycleCompleted": "Completed",
+    "sessionLifecycleDisputed": "Disputed",
+    "sessionLifecycleCompensated": "Compensated",
+    "sessionLifecycleRefunded": "Refunded",
+    "sessionLifecycleExpired": "Expired",
+    "sessionActionCreateDraft": "Create draft",
+    "sessionActionInitiatePayment": "Initiate payment",
+    "sessionActionConfirmBooking": "Confirm booking",
+    "sessionActionConfirmFreeBooking": "Confirm free booking",
+    "sessionActionAcknowledgeSession": "Acknowledge session",
+    "sessionActionStartSession": "Start session",
+    "sessionActionCompleteSession": "Complete session",
+    "sessionActionRequestReschedule": "Request reschedule",
+    "sessionActionConfirmReschedule": "Confirm reschedule",
+    "sessionActionAdminForceReschedule": "Admin force reschedule",
+    "sessionActionCancelByStudent": "Cancel by student",
+    "sessionActionCancelByTeacher": "Cancel by teacher",
+    "sessionActionCancelByAdmin": "Cancel by admin",
+    "sessionActionMarkTeacherNoShow": "Mark teacher no-show",
+    "sessionActionMarkStudentNoShow": "Mark student no-show",
+    "sessionActionMarkBothNoShow": "Mark both no-show",
+    "sessionActionMarkIncomplete": "Mark incomplete",
+    "sessionActionOpenDispute": "Open dispute",
+    "sessionActionIssueCompensation": "Issue compensation",
+    "sessionActionIssueRefund": "Issue refund",
+    "sessionActionExpireReservation": "Expire reservation",
+    "sessionActionRejectBooking": "Reject booking",
+    "sessionTimelineStatusTransition": "{previous} → {next}",
+    "@sessionTimelineStatusTransition": {
+        "placeholders": {
+            "previous": {
+                "type": "String"
+            },
+            "next": {
+                "type": "String"
+            }
+        }
+    }
 }

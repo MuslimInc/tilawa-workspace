@@ -76,16 +76,22 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
             child: _EmptyState(),
           ),
           MySessionsFailure(:final failure) => Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(failure.toLocalizedMessage(context)),
-                const SizedBox(height: 12),
-                ElevatedButton(
-                  onPressed: _reload,
-                  child: Text(l10n.retry),
-                ),
-              ],
+            child: Padding(
+              padding: EdgeInsets.all(
+                Theme.of(context).tokens.spaceLarge,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(failure.toLocalizedMessage(context)),
+                  SizedBox(height: Theme.of(context).tokens.spaceMedium),
+                  TilawaButton(
+                    text: l10n.retry,
+                    variant: TilawaButtonVariant.primary,
+                    onPressed: _reload,
+                  ),
+                ],
+              ),
             ),
           ),
           MySessionsSuccess(:final upcoming, :final past) => RefreshIndicator(
@@ -98,7 +104,9 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
                 if (upcoming.isEmpty)
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.all(
+                        Theme.of(context).tokens.spaceLarge,
+                      ),
                       child: Text(l10n.noUpcomingSessions),
                     ),
                   )
@@ -122,22 +130,26 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              TextButton(
+                              TilawaButton(
+                                text: l10n.viewSessionDetails,
+                                variant: TilawaButtonVariant.ghost,
+                                size: TilawaButtonSize.small,
                                 onPressed: () =>
                                     widget.onSessionDetailRequested?.call(
                                       session.bookingId,
                                     ),
-                                child: Text(l10n.viewSessionDetails),
                               ),
                               if (widget.onRescheduleRequested != null)
-                                TextButton(
+                                TilawaButton(
+                                  text: l10n.rescheduleAction,
+                                  variant: TilawaButtonVariant.ghost,
+                                  size: TilawaButtonSize.small,
                                   onPressed: () =>
                                       widget.onRescheduleRequested!(
                                         bookingId: session.bookingId,
                                         teacherId: session.teacherId,
                                         studentId: widget.studentId,
                                       ),
-                                  child: Text(l10n.rescheduleAction),
                                 ),
                             ],
                           ),
@@ -149,7 +161,9 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
                 if (past.isEmpty)
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.all(
+                        Theme.of(context).tokens.spaceLarge,
+                      ),
                       child: Text(l10n.noPastSessions),
                     ),
                   )
@@ -198,9 +212,15 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+        padding: EdgeInsets.fromLTRB(
+          tokens.spaceLarge,
+          tokens.spaceSection,
+          tokens.spaceLarge,
+          tokens.spaceSmall,
+        ),
         child: Text(title, style: Theme.of(context).textTheme.titleMedium),
       ),
     );
@@ -213,29 +233,16 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
+    final tokens = Theme.of(context).tokens;
+    final scheme = Theme.of(context).colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.menu_book_outlined,
-            size: 64,
-            color: Theme.of(context).colorScheme.outlineVariant,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            l10n.noSessionsYet,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            l10n.bookFirstSessionHint,
-            style: Theme.of(context).textTheme.bodySmall,
-            textAlign: TextAlign.center,
-          ),
-        ],
+      padding: EdgeInsets.all(tokens.spaceXXL),
+      child: TilawaIllustratedState(
+        title: l10n.noSessionsYet,
+        subtitle: l10n.bookFirstSessionHint,
+        icon: Icons.menu_book_outlined,
+        iconColor: scheme.outlineVariant,
       ),
     );
   }

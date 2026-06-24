@@ -40,6 +40,38 @@ void main() {
         // expected
       }
     });
+
+    test('rejects join when signaling url is blank', () async {
+      const blankProvider = WebRtcCallProvider(
+        tokenProvider: _FakeTokenProvider(),
+        signalingServerUrl: '   ',
+      );
+
+      await expectLater(
+        blankProvider.join(
+          const CallJoinRequest(
+            sessionId: 's1',
+            role: SessionParticipantRole.student,
+            callType: SessionCallType.voiceCall,
+            providerKind: SessionCallProviderKind.webrtc,
+          ),
+        ),
+        throwsA(isA<WebRtcSignalingUnavailableFailure>()),
+      );
+    });
+
+    test('joinSession is unavailable until signaling ships', () async {
+      await expectLater(
+        () async => provider.joinSession('s1'),
+        throwsA(isA<WebRtcSignalingUnavailableFailure>()),
+      );
+    });
+
+    test('leave end and mute are no-ops for MVP stub', () async {
+      await provider.leaveSession('s1');
+      await provider.endSession('s1');
+      await provider.setMicrophoneMuted('s1', muted: true);
+    });
   });
 }
 

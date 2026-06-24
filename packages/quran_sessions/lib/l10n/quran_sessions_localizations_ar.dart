@@ -1493,4 +1493,147 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
 
   @override
   String get paymentCheckoutConfirm => 'تأكيد الدفع (تجريبي)';
+
+  @override
+  String get restrictionReasonFalseIdentity => 'بيانات هوية مزيفة';
+
+  @override
+  String get restrictionReasonPolicyViolation => 'مخالفة السياسات';
+
+  @override
+  String get restrictionReasonSafetyConcern => 'مخاوف تتعلق بالسلامة';
+
+  @override
+  String get restrictionReasonAbuseReport => 'بلاغ إساءة';
+
+  @override
+  String get restrictionReasonRepeatedNoShow => 'غياب متكرر';
+
+  @override
+  String get restrictionReasonAdminDecision => 'قرار إداري';
+
+  @override
+  String get sessionLifecycleDraft => 'مسودة';
+
+  @override
+  String get sessionLifecyclePendingPayment => 'بانتظار الدفع';
+
+  @override
+  String get sessionLifecycleScheduled => 'مجدولة';
+
+  @override
+  String get sessionLifecycleConfirmed => 'مؤكدة';
+
+  @override
+  String get sessionLifecycleInProgress => 'جارية';
+
+  @override
+  String get sessionLifecycleRescheduled => 'أُعيد جدولتها';
+
+  @override
+  String get sessionLifecycleCancelledByStudent => 'ألغاها الطالب';
+
+  @override
+  String get sessionLifecycleCancelledByTeacher => 'ألغاها المعلم';
+
+  @override
+  String get sessionLifecycleCancelledByAdmin => 'ألغاها المشرف';
+
+  @override
+  String get sessionLifecycleTeacherNoShow => 'غياب المعلم';
+
+  @override
+  String get sessionLifecycleStudentNoShow => 'غياب الطالب';
+
+  @override
+  String get sessionLifecycleBothNoShow => 'غياب الطرفين';
+
+  @override
+  String get sessionLifecycleIncomplete => 'غير مكتملة';
+
+  @override
+  String get sessionLifecycleCompleted => 'مكتملة';
+
+  @override
+  String get sessionLifecycleDisputed => 'متنازع عليها';
+
+  @override
+  String get sessionLifecycleCompensated => 'مُعوَّضة';
+
+  @override
+  String get sessionLifecycleRefunded => 'مُستردة';
+
+  @override
+  String get sessionLifecycleExpired => 'منتهية';
+
+  @override
+  String get sessionActionCreateDraft => 'إنشاء مسودة';
+
+  @override
+  String get sessionActionInitiatePayment => 'بدء الدفع';
+
+  @override
+  String get sessionActionConfirmBooking => 'تأكيد الحجز';
+
+  @override
+  String get sessionActionConfirmFreeBooking => 'تأكيد الحجز المجاني';
+
+  @override
+  String get sessionActionAcknowledgeSession => 'إقرار الجلسة';
+
+  @override
+  String get sessionActionStartSession => 'بدء الجلسة';
+
+  @override
+  String get sessionActionCompleteSession => 'إكمال الجلسة';
+
+  @override
+  String get sessionActionRequestReschedule => 'طلب إعادة الجدولة';
+
+  @override
+  String get sessionActionConfirmReschedule => 'تأكيد إعادة الجدولة';
+
+  @override
+  String get sessionActionAdminForceReschedule => 'إعادة جدولة إدارية';
+
+  @override
+  String get sessionActionCancelByStudent => 'إلغاء من الطالب';
+
+  @override
+  String get sessionActionCancelByTeacher => 'إلغاء من المعلم';
+
+  @override
+  String get sessionActionCancelByAdmin => 'إلغاء إداري';
+
+  @override
+  String get sessionActionMarkTeacherNoShow => 'تسجيل غياب المعلم';
+
+  @override
+  String get sessionActionMarkStudentNoShow => 'تسجيل غياب الطالب';
+
+  @override
+  String get sessionActionMarkBothNoShow => 'تسجيل غياب الطرفين';
+
+  @override
+  String get sessionActionMarkIncomplete => 'تسجيل عدم اكتمال';
+
+  @override
+  String get sessionActionOpenDispute => 'فتح نزاع';
+
+  @override
+  String get sessionActionIssueCompensation => 'إصدار تعويض';
+
+  @override
+  String get sessionActionIssueRefund => 'إصدار استرداد';
+
+  @override
+  String get sessionActionExpireReservation => 'انتهاء الحجز';
+
+  @override
+  String get sessionActionRejectBooking => 'رفض الحجز';
+
+  @override
+  String sessionTimelineStatusTransition(String previous, String next) {
+    return '$previous ← $next';
+  }
 }

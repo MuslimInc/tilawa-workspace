@@ -136,9 +136,134 @@ void main() {
 
       check(joinGateway.lastHandle!.microphoneMuted).equals(true);
     });
+
+    test('rejects join when fallback app id is blank', () async {
+      final provider = AgoraCallProvider(
+        appId: '   ',
+        tokenProvider: tokenProvider,
+        resolveUserId: () async => 'user_42',
+        permissionGate: const _GrantAllPermissionGate(),
+        enginePool: enginePool,
+        joinGateway: joinGateway,
+      );
+
+      await expectLater(
+        provider.join(
+          const CallJoinRequest(
+            sessionId: 'session_1',
+            role: SessionParticipantRole.student,
+            callType: SessionCallType.voiceCall,
+            providerKind: SessionCallProviderKind.agora,
+          ),
+        ),
+        throwsA(isA<CallProviderUnavailableFailure>()),
+      );
+    });
+
+    test('rejects join when server token is empty', () async {
+      tokenProvider.credentials = const RtcJoinCredentials(
+        token: '',
+        channelId: 'channel-1',
+        uid: 1001,
+        appId: 'app-id',
+      );
+      final provider = buildProvider();
+
+      await expectLater(
+        provider.join(
+          const CallJoinRequest(
+            sessionId: 'session_1',
+            role: SessionParticipantRole.student,
+            callType: SessionCallType.voiceCall,
+            providerKind: SessionCallProviderKind.agora,
+          ),
+        ),
+        throwsA(isA<RtcCallJoinFailure>()),
+      );
+    });
+
+    test(
+      'falls back to provider app id when credentials omit app id',
+      () async {
+        tokenProvider.credentials = const RtcJoinCredentials(
+          token: 'rtc-token',
+          channelId: 'channel-1',
+          uid: 1001,
+          appId: '',
+        );
+        final provider = buildProvider();
+
+        await provider.join(
+          const CallJoinRequest(
+            sessionId: 'session_1',
+            role: SessionParticipantRole.student,
+            callType: SessionCallType.videoCall,
+            providerKind: SessionCallProviderKind.agora,
+          ),
+        );
+
+        check(joinGateway.lastParams?.appId).equals('fallback-app-id');
+        check(joinGateway.lastParams?.enableVideo).equals(true);
+      },
+    );
+
+    test('joinSession is unavailable on agora provider', () async {
+      final provider = buildProvider();
+
+      await expectLater(
+        () async => provider.joinSession('session_1'),
+        throwsA(isA<CallProviderUnavailableFailure>()),
+      );
+    });
+
+    test('endSession releases pooled handle', () async {
+      final provider = buildProvider();
+      await provider.join(
+        const CallJoinRequest(
+          sessionId: 'session_1',
+          role: SessionParticipantRole.student,
+          callType: SessionCallType.voiceCall,
+          providerKind: SessionCallProviderKind.agora,
+        ),
+      );
+
+      await provider.endSession('session_1');
+
+      check(joinGateway.lastHandle!.released).equals(true);
+      check(enginePool.sessionFor('session_1')).isNull();
+    });
+
+    test('setMicrophoneMuted ignores unknown session', () async {
+      final provider = buildProvider();
+
+      await provider.setMicrophoneMuted('missing', muted: true);
+
+      check(joinGateway.lastHandle).isNull();
+    });
   });
 
   group('LiveAgoraRtcJoinGateway', () {
+    test('returns live handle when join runner succeeds', () async {
+      final gateway = LiveAgoraRtcJoinGateway(
+        joinRunner: (_, params) async {
+          check(params.channelId).equals('channel-9');
+        },
+        releaseEngine: (_) async {},
+      );
+
+      final handle = await gateway.join(
+        const AgoraRtcJoinParams(
+          appId: 'app',
+          token: 'tok',
+          channelId: 'channel-9',
+          uid: 424242,
+          enableVideo: false,
+        ),
+      );
+
+      check(handle).isA<LiveAgoraRtcSessionHandle>();
+    });
+
     test('releases engine when join runner fails', () async {
       var releaseCount = 0;
       final gateway = LiveAgoraRtcJoinGateway(

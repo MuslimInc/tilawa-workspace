@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quran_sessions/core/l10n_extensions.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/quran_teacher.dart';
 import '../../domain/entities/session_pricing_type.dart';
@@ -22,88 +23,87 @@ class TeacherCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final tokens = Theme.of(context).tokens;
+    final avatarRadius = tokens.iconSizeLarge + tokens.spaceExtraSmall;
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      child: InkWell(
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceLarge,
+        vertical: tokens.spaceExtraSmall + 2,
+      ),
+      child: TilawaCard(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TeacherInitialsAvatar(
-                displayName: teacher.displayName,
-                radius: 28,
-                avatarUrl: teacher.avatarUrl,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            teacher.displayName,
-                            style: textTheme.titleSmall,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TeacherInitialsAvatar(
+              displayName: teacher.displayName,
+              radius: avatarRadius,
+              avatarUrl: teacher.avatarUrl,
+            ),
+            SizedBox(width: tokens.spaceMedium),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          teacher.displayName,
+                          style: textTheme.titleSmall,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        _PriceChip(teacher: teacher, scheme: scheme),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.star_rounded,
-                          size: 14,
+                      ),
+                      _PriceChip(teacher: teacher),
+                    ],
+                  ),
+                  SizedBox(height: tokens.spaceExtraSmall),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.star_rounded,
+                        size: tokens.iconSizeExtraSmall + 2,
+                        color: scheme.tertiary,
+                      ),
+                      SizedBox(width: tokens.spaceExtraSmall / 2),
+                      Text(
+                        teacher.averageRating.toStringAsFixed(1),
+                        style: textTheme.labelSmall?.copyWith(
                           color: scheme.tertiary,
+                          fontWeight: FontWeight.w700,
                         ),
-                        const SizedBox(width: 2),
-                        Text(
-                          teacher.averageRating.toStringAsFixed(1),
-                          style: textTheme.labelSmall?.copyWith(
-                            color: scheme.tertiary,
-                            fontWeight: FontWeight.w700,
-                          ),
+                      ),
+                      SizedBox(width: tokens.spaceExtraSmall),
+                      Text(
+                        '(${teacher.totalReviews})',
+                        style: textTheme.labelSmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '(${teacher.totalReviews})',
-                          style: textTheme.labelSmall?.copyWith(
-                            color: scheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    _SpecializationChips(specs: teacher.specializations),
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: tokens.spaceSmall - 2),
+                  _SpecializationChips(specs: teacher.specializations),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-// ── Price chip ────────────────────────────────────────────────────────────────
-
 class _PriceChip extends StatelessWidget {
-  const _PriceChip({required this.teacher, required this.scheme});
+  const _PriceChip({required this.teacher});
 
   final QuranTeacher teacher;
-  final ColorScheme scheme;
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     final priceLabel = PriceFormatter.formatOrFree(
       l10n: context.quranSessionsL10n,
       pricingType: teacher.pricingType,
@@ -112,29 +112,16 @@ class _PriceChip extends StatelessWidget {
     if (priceLabel.isEmpty) return const SizedBox.shrink();
 
     final isFree = teacher.pricingType == SessionPricingType.free;
-    final label = priceLabel;
     final bg = isFree ? scheme.secondaryContainer : scheme.primaryContainer;
     final fg = isFree ? scheme.onSecondaryContainer : scheme.onPrimaryContainer;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: fg,
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
+    return TilawaStatusChip(
+      label: priceLabel,
+      backgroundColor: bg,
+      foregroundColor: fg,
     );
   }
 }
-
-// ── Specialization chips ──────────────────────────────────────────────────────
 
 class _SpecializationChips extends StatelessWidget {
   const _SpecializationChips({required this.specs});
@@ -144,27 +131,15 @@ class _SpecializationChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
+    final tokens = Theme.of(context).tokens;
     final visible = specs.take(3).toList();
     if (visible.isEmpty) return const SizedBox.shrink();
 
     return Wrap(
-      spacing: 4,
-      runSpacing: 4,
+      spacing: tokens.spaceExtraSmall,
+      runSpacing: tokens.spaceExtraSmall,
       children: visible.map((code) {
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: Text(
-            l10n.specializationLabel(code),
-            style: TextStyle(
-              fontSize: 10,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-        );
+        return TilawaMetadataChip(label: l10n.specializationLabel(code));
       }).toList(),
     );
   }

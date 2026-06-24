@@ -26,6 +26,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   checks: ^0.3.0
+  permission_handler_platform_interface: ^4.3.0
 
 flutter:
   uses-material-design: true

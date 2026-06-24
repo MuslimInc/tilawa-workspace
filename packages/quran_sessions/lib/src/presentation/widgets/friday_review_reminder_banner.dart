@@ -26,34 +26,35 @@ class FridayReviewReminderBanner extends StatelessWidget {
         tokens.spaceLarge,
         0,
       ),
-      child: Material(
-        color: scheme.primaryContainer.withValues(alpha: 0.45),
-        borderRadius: BorderRadius.circular(tokens.radiusMedium),
-        child: Padding(
-          padding: EdgeInsets.all(tokens.spaceMedium),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                l10n.fridayReviewBannerMessage,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              SizedBox(height: tokens.spaceSmall),
-              Row(
-                children: [
-                  TextButton(
-                    onPressed: onDismiss,
-                    child: Text(l10n.fridayReviewBannerDismiss),
-                  ),
-                  const Spacer(),
-                  FilledButton.tonal(
-                    onPressed: onReview,
-                    child: Text(l10n.fridayReviewBannerAction),
-                  ),
-                ],
-              ),
-            ],
-          ),
+      child: TilawaCard(
+        surface: TilawaCardSurface.flat,
+        backgroundColor: scheme.primaryContainer.withValues(alpha: 0.45),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              l10n.fridayReviewBannerMessage,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            SizedBox(height: tokens.spaceSmall),
+            Row(
+              children: [
+                TilawaButton(
+                  text: l10n.fridayReviewBannerDismiss,
+                  variant: TilawaButtonVariant.ghost,
+                  size: TilawaButtonSize.small,
+                  onPressed: onDismiss,
+                ),
+                const Spacer(),
+                TilawaButton(
+                  text: l10n.fridayReviewBannerAction,
+                  variant: TilawaButtonVariant.secondary,
+                  size: TilawaButtonSize.small,
+                  onPressed: onReview,
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

@@ -144,29 +144,32 @@ class _StatusBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
+    final tokens = Theme.of(context).tokens;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(tokens.spaceExtraLarge),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _StatusCard(status: application.status),
-          const SizedBox(height: 24),
+          SizedBox(height: tokens.spaceExtraLarge),
           _MetaSection(application: application),
           if (application.isApproved) ...[
-            const SizedBox(height: 24),
-            FilledButton(
+            SizedBox(height: tokens.spaceExtraLarge),
+            TilawaButton(
+              text: l10n.applicationStatusApprovedContinue,
+              isFullWidth: true,
+              size: TilawaButtonSize.large,
               onPressed: onApprovedContinue,
-              child: Text(l10n.applicationStatusApprovedContinue),
             ),
           ],
 
           // ── DEBUG: Simulate Approval ─────────────────────────────────────
           // This block is completely absent in release builds.
           if (kDebugMode && application.isPending) ...[
-            const SizedBox(height: 32),
+            SizedBox(height: tokens.spaceXXL),
             const Divider(),
-            const SizedBox(height: 8),
+            SizedBox(height: tokens.spaceSmall),
             _DebugApprovalBanner(
               application: application,
               isLoading: isSimulatingApproval,
@@ -188,20 +191,23 @@ class _StatusCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final tokens = Theme.of(context).tokens;
     final l10n = context.quranSessionsL10n;
     final (icon, color, title, subtitle) = _content(status, scheme, l10n);
 
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(tokens.spaceExtraLarge),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        color: color.withValues(alpha: tokens.opacitySubtle),
+        borderRadius: BorderRadius.circular(tokens.radiusLarge),
+        border: Border.all(
+          color: color.withValues(alpha: tokens.opacityShadowStrong),
+        ),
       ),
       child: Column(
         children: [
-          Icon(icon, size: 56, color: color),
-          const SizedBox(height: 16),
+          Icon(icon, size: tokens.iconSizeLargePlus, color: color),
+          SizedBox(height: tokens.spaceLarge),
           Text(
             title,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -210,7 +216,7 @@ class _StatusCard extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: tokens.spaceSmall),
           Text(
             subtitle,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -236,7 +242,7 @@ class _StatusCard extends StatelessWidget {
     ),
     TeacherApplicationStatus.approved => (
       Icons.verified_rounded,
-      Colors.green,
+      scheme.tertiary,
       l10n.applicationStatusApprovedTitle,
       l10n.applicationStatusApprovedSubtitle,
     ),
@@ -248,7 +254,7 @@ class _StatusCard extends StatelessWidget {
     ),
     TeacherApplicationStatus.suspended => (
       Icons.pause_circle_outline,
-      Colors.orange,
+      scheme.secondary,
       l10n.applicationStatusSuspendedTitle,
       l10n.applicationStatusSuspendedSubtitle,
     ),

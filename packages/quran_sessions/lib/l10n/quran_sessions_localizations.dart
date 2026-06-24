@@ -2752,6 +2752,288 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'Confirm payment (sandbox)'**
   String get paymentCheckoutConfirm;
+
+  /// No description provided for @restrictionReasonFalseIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'False identity information'**
+  String get restrictionReasonFalseIdentity;
+
+  /// No description provided for @restrictionReasonPolicyViolation.
+  ///
+  /// In en, this message translates to:
+  /// **'Policy violation'**
+  String get restrictionReasonPolicyViolation;
+
+  /// No description provided for @restrictionReasonSafetyConcern.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety concern'**
+  String get restrictionReasonSafetyConcern;
+
+  /// No description provided for @restrictionReasonAbuseReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Abuse report'**
+  String get restrictionReasonAbuseReport;
+
+  /// No description provided for @restrictionReasonRepeatedNoShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeated no-show'**
+  String get restrictionReasonRepeatedNoShow;
+
+  /// No description provided for @restrictionReasonAdminDecision.
+  ///
+  /// In en, this message translates to:
+  /// **'Administrative decision'**
+  String get restrictionReasonAdminDecision;
+
+  /// No description provided for @sessionLifecycleDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get sessionLifecycleDraft;
+
+  /// No description provided for @sessionLifecyclePendingPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending payment'**
+  String get sessionLifecyclePendingPayment;
+
+  /// No description provided for @sessionLifecycleScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled'**
+  String get sessionLifecycleScheduled;
+
+  /// No description provided for @sessionLifecycleConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed'**
+  String get sessionLifecycleConfirmed;
+
+  /// No description provided for @sessionLifecycleInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get sessionLifecycleInProgress;
+
+  /// No description provided for @sessionLifecycleRescheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Rescheduled'**
+  String get sessionLifecycleRescheduled;
+
+  /// No description provided for @sessionLifecycleCancelledByStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled by student'**
+  String get sessionLifecycleCancelledByStudent;
+
+  /// No description provided for @sessionLifecycleCancelledByTeacher.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled by teacher'**
+  String get sessionLifecycleCancelledByTeacher;
+
+  /// No description provided for @sessionLifecycleCancelledByAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled by admin'**
+  String get sessionLifecycleCancelledByAdmin;
+
+  /// No description provided for @sessionLifecycleTeacherNoShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher no-show'**
+  String get sessionLifecycleTeacherNoShow;
+
+  /// No description provided for @sessionLifecycleStudentNoShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Student no-show'**
+  String get sessionLifecycleStudentNoShow;
+
+  /// No description provided for @sessionLifecycleBothNoShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Both no-show'**
+  String get sessionLifecycleBothNoShow;
+
+  /// No description provided for @sessionLifecycleIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Incomplete'**
+  String get sessionLifecycleIncomplete;
+
+  /// No description provided for @sessionLifecycleCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get sessionLifecycleCompleted;
+
+  /// No description provided for @sessionLifecycleDisputed.
+  ///
+  /// In en, this message translates to:
+  /// **'Disputed'**
+  String get sessionLifecycleDisputed;
+
+  /// No description provided for @sessionLifecycleCompensated.
+  ///
+  /// In en, this message translates to:
+  /// **'Compensated'**
+  String get sessionLifecycleCompensated;
+
+  /// No description provided for @sessionLifecycleRefunded.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunded'**
+  String get sessionLifecycleRefunded;
+
+  /// No description provided for @sessionLifecycleExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get sessionLifecycleExpired;
+
+  /// No description provided for @sessionActionCreateDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Create draft'**
+  String get sessionActionCreateDraft;
+
+  /// No description provided for @sessionActionInitiatePayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Initiate payment'**
+  String get sessionActionInitiatePayment;
+
+  /// No description provided for @sessionActionConfirmBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm booking'**
+  String get sessionActionConfirmBooking;
+
+  /// No description provided for @sessionActionConfirmFreeBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm free booking'**
+  String get sessionActionConfirmFreeBooking;
+
+  /// No description provided for @sessionActionAcknowledgeSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Acknowledge session'**
+  String get sessionActionAcknowledgeSession;
+
+  /// No description provided for @sessionActionStartSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Start session'**
+  String get sessionActionStartSession;
+
+  /// No description provided for @sessionActionCompleteSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete session'**
+  String get sessionActionCompleteSession;
+
+  /// No description provided for @sessionActionRequestReschedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Request reschedule'**
+  String get sessionActionRequestReschedule;
+
+  /// No description provided for @sessionActionConfirmReschedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm reschedule'**
+  String get sessionActionConfirmReschedule;
+
+  /// No description provided for @sessionActionAdminForceReschedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin force reschedule'**
+  String get sessionActionAdminForceReschedule;
+
+  /// No description provided for @sessionActionCancelByStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel by student'**
+  String get sessionActionCancelByStudent;
+
+  /// No description provided for @sessionActionCancelByTeacher.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel by teacher'**
+  String get sessionActionCancelByTeacher;
+
+  /// No description provided for @sessionActionCancelByAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel by admin'**
+  String get sessionActionCancelByAdmin;
+
+  /// No description provided for @sessionActionMarkTeacherNoShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark teacher no-show'**
+  String get sessionActionMarkTeacherNoShow;
+
+  /// No description provided for @sessionActionMarkStudentNoShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark student no-show'**
+  String get sessionActionMarkStudentNoShow;
+
+  /// No description provided for @sessionActionMarkBothNoShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark both no-show'**
+  String get sessionActionMarkBothNoShow;
+
+  /// No description provided for @sessionActionMarkIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark incomplete'**
+  String get sessionActionMarkIncomplete;
+
+  /// No description provided for @sessionActionOpenDispute.
+  ///
+  /// In en, this message translates to:
+  /// **'Open dispute'**
+  String get sessionActionOpenDispute;
+
+  /// No description provided for @sessionActionIssueCompensation.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue compensation'**
+  String get sessionActionIssueCompensation;
+
+  /// No description provided for @sessionActionIssueRefund.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue refund'**
+  String get sessionActionIssueRefund;
+
+  /// No description provided for @sessionActionExpireReservation.
+  ///
+  /// In en, this message translates to:
+  /// **'Expire reservation'**
+  String get sessionActionExpireReservation;
+
+  /// No description provided for @sessionActionRejectBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject booking'**
+  String get sessionActionRejectBooking;
+
+  /// No description provided for @sessionTimelineStatusTransition.
+  ///
+  /// In en, this message translates to:
+  /// **'{previous} → {next}'**
+  String sessionTimelineStatusTransition(String previous, String next);
 }
 
 class _QuranSessionsLocalizationsDelegate

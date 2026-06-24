@@ -1514,4 +1514,147 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get paymentCheckoutConfirm => 'Confirm payment (sandbox)';
+
+  @override
+  String get restrictionReasonFalseIdentity => 'False identity information';
+
+  @override
+  String get restrictionReasonPolicyViolation => 'Policy violation';
+
+  @override
+  String get restrictionReasonSafetyConcern => 'Safety concern';
+
+  @override
+  String get restrictionReasonAbuseReport => 'Abuse report';
+
+  @override
+  String get restrictionReasonRepeatedNoShow => 'Repeated no-show';
+
+  @override
+  String get restrictionReasonAdminDecision => 'Administrative decision';
+
+  @override
+  String get sessionLifecycleDraft => 'Draft';
+
+  @override
+  String get sessionLifecyclePendingPayment => 'Pending payment';
+
+  @override
+  String get sessionLifecycleScheduled => 'Scheduled';
+
+  @override
+  String get sessionLifecycleConfirmed => 'Confirmed';
+
+  @override
+  String get sessionLifecycleInProgress => 'In progress';
+
+  @override
+  String get sessionLifecycleRescheduled => 'Rescheduled';
+
+  @override
+  String get sessionLifecycleCancelledByStudent => 'Cancelled by student';
+
+  @override
+  String get sessionLifecycleCancelledByTeacher => 'Cancelled by teacher';
+
+  @override
+  String get sessionLifecycleCancelledByAdmin => 'Cancelled by admin';
+
+  @override
+  String get sessionLifecycleTeacherNoShow => 'Teacher no-show';
+
+  @override
+  String get sessionLifecycleStudentNoShow => 'Student no-show';
+
+  @override
+  String get sessionLifecycleBothNoShow => 'Both no-show';
+
+  @override
+  String get sessionLifecycleIncomplete => 'Incomplete';
+
+  @override
+  String get sessionLifecycleCompleted => 'Completed';
+
+  @override
+  String get sessionLifecycleDisputed => 'Disputed';
+
+  @override
+  String get sessionLifecycleCompensated => 'Compensated';
+
+  @override
+  String get sessionLifecycleRefunded => 'Refunded';
+
+  @override
+  String get sessionLifecycleExpired => 'Expired';
+
+  @override
+  String get sessionActionCreateDraft => 'Create draft';
+
+  @override
+  String get sessionActionInitiatePayment => 'Initiate payment';
+
+  @override
+  String get sessionActionConfirmBooking => 'Confirm booking';
+
+  @override
+  String get sessionActionConfirmFreeBooking => 'Confirm free booking';
+
+  @override
+  String get sessionActionAcknowledgeSession => 'Acknowledge session';
+
+  @override
+  String get sessionActionStartSession => 'Start session';
+
+  @override
+  String get sessionActionCompleteSession => 'Complete session';
+
+  @override
+  String get sessionActionRequestReschedule => 'Request reschedule';
+
+  @override
+  String get sessionActionConfirmReschedule => 'Confirm reschedule';
+
+  @override
+  String get sessionActionAdminForceReschedule => 'Admin force reschedule';
+
+  @override
+  String get sessionActionCancelByStudent => 'Cancel by student';
+
+  @override
+  String get sessionActionCancelByTeacher => 'Cancel by teacher';
+
+  @override
+  String get sessionActionCancelByAdmin => 'Cancel by admin';
+
+  @override
+  String get sessionActionMarkTeacherNoShow => 'Mark teacher no-show';
+
+  @override
+  String get sessionActionMarkStudentNoShow => 'Mark student no-show';
+
+  @override
+  String get sessionActionMarkBothNoShow => 'Mark both no-show';
+
+  @override
+  String get sessionActionMarkIncomplete => 'Mark incomplete';
+
+  @override
+  String get sessionActionOpenDispute => 'Open dispute';
+
+  @override
+  String get sessionActionIssueCompensation => 'Issue compensation';
+
+  @override
+  String get sessionActionIssueRefund => 'Issue refund';
+
+  @override
+  String get sessionActionExpireReservation => 'Expire reservation';
+
+  @override
+  String get sessionActionRejectBooking => 'Reject booking';
+
+  @override
+  String sessionTimelineStatusTransition(String previous, String next) {
+    return '$previous → $next';
+  }
 }

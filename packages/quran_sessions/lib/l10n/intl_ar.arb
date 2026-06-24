@@ -575,5 +575,62 @@
     },
     "paymentCheckoutAmountPending": "سعر الجلسة (تجريبي)",
     "paymentCheckoutRefundToWalletNotice": "عند الإلغاء أو الموافقة على استرداد، يُضاف المبلغ إلى محفظة تلاوة كرصيد. لا يُعاد الرصيد تلقائيًا إلى بطاقتك.",
-    "paymentCheckoutConfirm": "تأكيد الدفع (تجريبي)"
+    "paymentCheckoutConfirm": "تأكيد الدفع (تجريبي)",
+    "restrictionReasonFalseIdentity": "بيانات هوية مزيفة",
+    "restrictionReasonPolicyViolation": "مخالفة السياسات",
+    "restrictionReasonSafetyConcern": "مخاوف تتعلق بالسلامة",
+    "restrictionReasonAbuseReport": "بلاغ إساءة",
+    "restrictionReasonRepeatedNoShow": "غياب متكرر",
+    "restrictionReasonAdminDecision": "قرار إداري",
+    "sessionLifecycleDraft": "مسودة",
+    "sessionLifecyclePendingPayment": "بانتظار الدفع",
+    "sessionLifecycleScheduled": "مجدولة",
+    "sessionLifecycleConfirmed": "مؤكدة",
+    "sessionLifecycleInProgress": "جارية",
+    "sessionLifecycleRescheduled": "أُعيد جدولتها",
+    "sessionLifecycleCancelledByStudent": "ألغاها الطالب",
+    "sessionLifecycleCancelledByTeacher": "ألغاها المعلم",
+    "sessionLifecycleCancelledByAdmin": "ألغاها المشرف",
+    "sessionLifecycleTeacherNoShow": "غياب المعلم",
+    "sessionLifecycleStudentNoShow": "غياب الطالب",
+    "sessionLifecycleBothNoShow": "غياب الطرفين",
+    "sessionLifecycleIncomplete": "غير مكتملة",
+    "sessionLifecycleCompleted": "مكتملة",
+    "sessionLifecycleDisputed": "متنازع عليها",
+    "sessionLifecycleCompensated": "مُعوَّضة",
+    "sessionLifecycleRefunded": "مُستردة",
+    "sessionLifecycleExpired": "منتهية",
+    "sessionActionCreateDraft": "إنشاء مسودة",
+    "sessionActionInitiatePayment": "بدء الدفع",
+    "sessionActionConfirmBooking": "تأكيد الحجز",
+    "sessionActionConfirmFreeBooking": "تأكيد الحجز المجاني",
+    "sessionActionAcknowledgeSession": "إقرار الجلسة",
+    "sessionActionStartSession": "بدء الجلسة",
+    "sessionActionCompleteSession": "إكمال الجلسة",
+    "sessionActionRequestReschedule": "طلب إعادة الجدولة",
+    "sessionActionConfirmReschedule": "تأكيد إعادة الجدولة",
+    "sessionActionAdminForceReschedule": "إعادة جدولة إدارية",
+    "sessionActionCancelByStudent": "إلغاء من الطالب",
+    "sessionActionCancelByTeacher": "إلغاء من المعلم",
+    "sessionActionCancelByAdmin": "إلغاء إداري",
+    "sessionActionMarkTeacherNoShow": "تسجيل غياب المعلم",
+    "sessionActionMarkStudentNoShow": "تسجيل غياب الطالب",
+    "sessionActionMarkBothNoShow": "تسجيل غياب الطرفين",
+    "sessionActionMarkIncomplete": "تسجيل عدم اكتمال",
+    "sessionActionOpenDispute": "فتح نزاع",
+    "sessionActionIssueCompensation": "إصدار تعويض",
+    "sessionActionIssueRefund": "إصدار استرداد",
+    "sessionActionExpireReservation": "انتهاء الحجز",
+    "sessionActionRejectBooking": "رفض الحجز",
+    "sessionTimelineStatusTransition": "{previous} ← {next}",
+    "@sessionTimelineStatusTransition": {
+        "placeholders": {
+            "previous": {
+                "type": "String"
+            },
+            "next": {
+                "type": "String"
+            }
+        }
+    }
 }

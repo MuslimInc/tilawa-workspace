@@ -18,6 +18,7 @@ class TeacherInitialsAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     final hasPhoto = avatarUrl != null && avatarUrl!.isNotEmpty;
 
     if (hasPhoto) {
@@ -27,26 +28,24 @@ class TeacherInitialsAvatar extends StatelessWidget {
       );
     }
 
-    final color = _avatarColor(displayName);
+    final (background, foreground) = _avatarColors(displayName, scheme);
     final initials = _initials(displayName);
 
     return CircleAvatar(
       radius: radius,
-      backgroundColor: color,
+      backgroundColor: background,
       child: initials.isEmpty
-          ? Icon(Icons.person, color: Colors.white, size: radius * 0.9)
+          ? Icon(Icons.person, color: foreground, size: radius * 0.9)
           : Text(
               initials,
               style: TextStyle(
-                color: Colors.white,
+                color: foreground,
                 fontWeight: FontWeight.w700,
                 fontSize: radius * 0.65,
               ),
             ),
     );
   }
-
-  // ── Helpers ────────────────────────────────────────────────────────────────
 
   static String _initials(String name) {
     final trimmed = name.trim();
@@ -71,18 +70,18 @@ class TeacherInitialsAvatar extends StatelessWidget {
     return '${firstChar(meaningful[0])}${firstChar(meaningful[1])}';
   }
 
-  static final List<Color> _palette = [
-    const Color(0xFF5B7FA6),
-    const Color(0xFF7A9E7E),
-    const Color(0xFF9B6B6B),
-    const Color(0xFF7B6B9B),
-    const Color(0xFF9B8B5B),
-    const Color(0xFF5B9B9B),
-    const Color(0xFF9B7B5B),
+  static List<(Color, Color)> _palette(ColorScheme scheme) => [
+    (scheme.primaryContainer, scheme.onPrimaryContainer),
+    (scheme.secondaryContainer, scheme.onSecondaryContainer),
+    (scheme.tertiaryContainer, scheme.onTertiaryContainer),
+    (scheme.errorContainer, scheme.onErrorContainer),
+    (scheme.primaryFixed, scheme.onPrimaryFixed),
+    (scheme.secondaryFixed, scheme.onSecondaryFixed),
+    (scheme.tertiaryFixed, scheme.onTertiaryFixed),
   ];
 
-  static Color _avatarColor(String name) {
+  static (Color, Color) _avatarColors(String name, ColorScheme scheme) {
     final hash = name.codeUnits.fold(0, (acc, c) => acc + c);
-    return _palette[hash % _palette.length];
+    return _palette(scheme)[hash % _palette(scheme).length];
   }
 }

@@ -117,6 +117,122 @@ void main() {
 
       check(mutedValue).equals(true);
     });
+
+    test('routes webrtc when provider is wired', () async {
+      var webrtcJoined = false;
+      final wired = RoutingSessionCallProvider(
+        external: router.external,
+        mock: router.mock,
+        webrtc: _RecordingProvider(onJoin: () => webrtcJoined = true),
+      );
+
+      await wired.join(
+        const CallJoinRequest(
+          sessionId: 'session_webrtc',
+          role: SessionParticipantRole.student,
+          callType: SessionCallType.videoCall,
+          providerKind: SessionCallProviderKind.webrtc,
+        ),
+      );
+
+      check(webrtcJoined).isTrue();
+    });
+
+    test('leaveSession fans out to every registered provider', () async {
+      final events = <String>[];
+      final wired = RoutingSessionCallProvider(
+        external: _RecordingProvider(
+          onJoin: () {},
+          onLeave: () => events.add('external'),
+        ),
+        mock: _RecordingProvider(
+          onJoin: () {},
+          onLeave: () => events.add('mock'),
+        ),
+        agora: _RecordingProvider(
+          onJoin: () {},
+          onLeave: () => events.add('agora'),
+        ),
+        webrtc: _RecordingProvider(
+          onJoin: () {},
+          onLeave: () => events.add('webrtc'),
+        ),
+      );
+
+      await wired.leaveSession('session_1');
+
+      check(events).unorderedEquals(['external', 'mock', 'agora', 'webrtc']);
+    });
+
+    test('endSession fans out to every registered provider', () async {
+      final events = <String>[];
+      final wired = RoutingSessionCallProvider(
+        external: _RecordingProvider(
+          onJoin: () {},
+          onEnd: () => events.add('external'),
+        ),
+        mock: _RecordingProvider(
+          onJoin: () {},
+          onEnd: () => events.add('mock'),
+        ),
+        agora: _RecordingProvider(
+          onJoin: () {},
+          onEnd: () => events.add('agora'),
+        ),
+      );
+
+      await wired.endSession('session_1');
+
+      check(events).unorderedEquals(['external', 'mock', 'agora']);
+    });
+  });
+
+  group('CallProviderAdapter', () {
+    test('joinSession resolves request then delegates join', () async {
+      CallJoinRequest? resolved;
+      final adapter = CallProviderAdapter(
+        _RecordingProvider(onJoin: () {}),
+        resolveRequest: (sessionId) async {
+          resolved = CallJoinRequest(
+            sessionId: sessionId,
+            role: SessionParticipantRole.student,
+            callType: SessionCallType.voiceCall,
+            providerKind: SessionCallProviderKind.mock,
+          );
+          return resolved!;
+        },
+      );
+
+      final room = await adapter.joinSession('session_adapter');
+
+      check(resolved?.sessionId).equals('session_adapter');
+      check(room.sessionId).equals('session_adapter');
+    });
+
+    test('joinSession fails when resolver is not injected', () async {
+      final adapter = CallProviderAdapter(_RecordingProvider(onJoin: () {}));
+
+      await expectLater(
+        () async => adapter.joinSession('session_adapter'),
+        throwsA(isA<CallProviderUnavailableFailure>()),
+      );
+    });
+
+    test('leave and end delegate to inner provider', () async {
+      final events = <String>[];
+      final adapter = CallProviderAdapter(
+        _RecordingProvider(
+          onJoin: () {},
+          onLeave: () => events.add('leave'),
+          onEnd: () => events.add('end'),
+        ),
+      );
+
+      await adapter.leaveSession('session_adapter');
+      await adapter.endSession('session_adapter');
+
+      check(events).deepEquals(['leave', 'end']);
+    });
   });
 }
 
@@ -124,10 +240,14 @@ class _RecordingProvider implements SessionCallProvider {
   const _RecordingProvider({
     required this.onJoin,
     this.onMute,
+    this.onLeave,
+    this.onEnd,
   });
 
   final void Function() onJoin;
   final void Function(bool muted)? onMute;
+  final void Function()? onLeave;
+  final void Function()? onEnd;
 
   @override
   Future<CallRoom> join(CallJoinRequest request) async {
@@ -136,10 +256,14 @@ class _RecordingProvider implements SessionCallProvider {
   }
 
   @override
-  Future<void> leaveSession(String sessionId) async {}
+  Future<void> leaveSession(String sessionId) async {
+    onLeave?.call();
+  }
 
   @override
-  Future<void> endSession(String sessionId) async {}
+  Future<void> endSession(String sessionId) async {
+    onEnd?.call();
+  }
 
   @override
   Future<void> setMicrophoneMuted(

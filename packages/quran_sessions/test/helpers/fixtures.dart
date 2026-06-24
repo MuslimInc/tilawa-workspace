@@ -7,8 +7,8 @@ import 'package:quran_sessions/src/domain/entities/session_pricing_type.dart';
 import 'package:quran_sessions/src/domain/entities/teacher_availability.dart';
 import 'package:quran_sessions/src/domain/entities/teacher_profile.dart';
 import 'package:quran_sessions/src/domain/entities/teacher_verification_status.dart';
-import 'package:quran_sessions/src/domain/rules/teacher_profile_completeness.dart';
 import 'package:quran_sessions/src/domain/entities/user_profile.dart';
+import 'package:quran_sessions/src/domain/rules/teacher_profile_completeness.dart';
 
 UserProfile makeProfile({
   String userId = 'student_1',
@@ -63,11 +63,12 @@ QuranTeacher makeTeacher({
   UserGender gender = UserGender.male,
   SessionPricingType pricingType = SessionPricingType.fixedPerSession,
   SessionPrice? price = _defaultMarketPrice,
+  String avatarUrl = 'https://example.com/avatar.png',
 }) => QuranTeacher(
   id: id,
   displayName: displayName,
   bio: 'Experienced Quran teacher',
-  avatarUrl: 'https://example.com/avatar.png',
+  avatarUrl: avatarUrl ?? 'https://example.com/avatar.png',
   gender: gender,
   verificationStatus: status,
   supportedCallTypes: const [SessionCallType.externalMeeting],
