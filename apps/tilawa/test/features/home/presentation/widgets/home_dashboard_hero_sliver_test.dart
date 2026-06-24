@@ -43,12 +43,8 @@ void main() {
     expect(find.text(hijriDateLine), findsOneWidget);
     expect(find.text(l10n.homeHeroLocationContext), findsOneWidget);
     expect(find.text(l10n.nextPrayer), findsOneWidget);
-    expect(
-      find.byWidgetPredicate(
-        (widget) => widget is ClipPath && widget.clipper is TilawaWaveClipper,
-      ),
-      findsOneWidget,
-    );
+    expect(find.byType(ClipPath), findsNothing);
+    _expectHeroBottomBorder(scrollContext);
     expect(find.byType(SliverPersistentHeader), findsOneWidget);
 
     final double collapseExtent = HomeDashboardHeroSliver.collapseScrollExtent(
@@ -144,6 +140,26 @@ void main() {
 
     expect(find.textContaining('Cairo ·'), findsOneWidget);
   });
+}
+
+void _expectHeroBottomBorder(BuildContext context) {
+  final ThemeData theme = Theme.of(context);
+  expect(
+    find.byWidgetPredicate((widget) {
+      if (widget is! DecoratedBox || widget.decoration is! BoxDecoration) {
+        return false;
+      }
+      final BorderSide? bottom =
+          (widget.decoration as BoxDecoration).border?.bottom;
+      if (bottom == null) {
+        return false;
+      }
+      return bottom.color == theme.colorScheme.outlineVariant &&
+          bottom.width ==
+              theme.componentTokens.bottomSheetScaffold.footerTopBorderWidth;
+    }),
+    findsWidgets,
+  );
 }
 
 class _HomeHeroHarness extends StatelessWidget {

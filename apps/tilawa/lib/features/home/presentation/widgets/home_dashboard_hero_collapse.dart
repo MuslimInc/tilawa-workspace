@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Collapse progress for home hero [SliverPersistentHeaderDelegate]s.
 ///
@@ -26,4 +27,29 @@ double homeDashboardHeroCollapseScrollExtent({
 /// Pinned hero height: status-bar inset plus compact toolbar.
 double homeDashboardHeroPinnedExtent({required double topInset}) {
   return topInset + kToolbarHeight;
+}
+
+/// Pinned bar fill blended from prayer-phase gradient stops.
+///
+/// Avoids a flat anonymous tint when the expanded hero collapses.
+Color homeDashboardHeroCollapsedBarColor(
+  TilawaHomeNextPrayerHeroTokens heroTokens,
+  ColorScheme colorScheme,
+) {
+  final Color top = heroTokens.gradientTopStart;
+  final Color bottom = heroTokens.gradientBottomEnd;
+  final bool flatLightCanvas =
+      top == bottom && bottom.computeLuminance() > 0.82;
+  if (flatLightCanvas) {
+    return colorScheme.surfaceContainerHigh;
+  }
+
+  if (top.computeLuminance() > 0.72) {
+    return Color.lerp(top, bottom, 0.32)!;
+  }
+
+  if (bottom.computeLuminance() < 0.35) {
+    return Color.lerp(bottom, top, 0.55)!;
+  }
+  return Color.lerp(top, bottom, 0.58)!;
 }

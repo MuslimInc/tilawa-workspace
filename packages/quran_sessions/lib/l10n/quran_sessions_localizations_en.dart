@@ -272,7 +272,7 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get becomeTeacherCardTitle => 'I want to become a teacher';
 
   @override
-  String get becomeTeacherCardSubtitle => 'Join Tilawa\'s certified teachers';
+  String get becomeTeacherCardSubtitle => 'Join MeMuslim\'s certified teachers';
 
   @override
   String get teacherListTitle => 'Find a teacher';
@@ -373,11 +373,11 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get inAppCallShellUnmute => 'Unmute microphone';
 
   @override
-  String get externalMeetingJoinTitle => 'Join outside Tilawa?';
+  String get externalMeetingJoinTitle => 'Join outside MeMuslim?';
 
   @override
   String get externalMeetingJoinBody =>
-      'You\'ll briefly leave Tilawa to join your session in Google Meet, Zoom, or your browser. Come back here anytime — your session details stay open.';
+      'You\'ll briefly leave MeMuslim to join your session in Google Meet, Zoom, or your browser. Come back here anytime — your session details stay open.';
 
   @override
   String get externalMeetingJoinOpen => 'Open';
@@ -944,7 +944,7 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get submittingApplication => 'Submitting application…';
 
   @override
-  String get becomeTeacherOnTilawa => 'Become a teacher on Tilawa';
+  String get becomeTeacherOnTilawa => 'Become a teacher on MeMuslim';
 
   @override
   String get becomeTeacherApplicationIntro =>
@@ -1055,14 +1055,14 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get applicationStatusPendingSubtitle =>
-      'The Tilawa team is reviewing your application. We will contact you soon.';
+      'The MeMuslim team is reviewing your application. We will contact you soon.';
 
   @override
   String get applicationStatusApprovedTitle => 'Congratulations! Approved';
 
   @override
   String get applicationStatusApprovedSubtitle =>
-      'You are now a certified teacher on Tilawa.';
+      'You are now a certified teacher on MeMuslim.';
 
   @override
   String get applicationStatusApprovedContinue => 'Continue';

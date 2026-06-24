@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/features/home/debug/home_hero_variant_debug.dart';
@@ -44,12 +45,8 @@ void main() {
     expect(find.text(hijriDateLine), findsOneWidget);
     expect(find.text(l10n.nextPrayer), findsOneWidget);
     expect(find.byType(SliverPersistentHeader), findsOneWidget);
-    expect(
-      find.byWidgetPredicate(
-        (widget) => widget is ClipPath && widget.clipper is TilawaWaveClipper,
-      ),
-      findsNothing,
-    );
+    expect(find.byType(ClipPath), findsNothing);
+    _expectHeroBottomBorder(scrollContext);
     expect(find.byIcon(Icons.mosque_outlined), findsOneWidget);
 
     final cardTokens = Theme.of(
@@ -104,9 +101,10 @@ void main() {
     final BuildContext scrollContext = tester.element(
       find.byType(CustomScrollView),
     );
-    final double collapseExtent = HomeDashboardHeroVariantB.collapseScrollExtent(
-      scrollContext,
-    );
+    final double collapseExtent =
+        HomeDashboardHeroVariantB.collapseScrollExtent(
+          scrollContext,
+        );
 
     controller.jumpTo(collapseExtent);
     await tester.pump();
@@ -129,7 +127,30 @@ void main() {
     controller.jumpTo(collapseExtent);
     await tester.pump();
     expect(tester.takeException(), isNull);
+    expect(find.byType(ClipPath), findsNothing);
+    _expectHeroBottomBorder(scrollContext);
+    expect(find.byIcon(FluentIcons.location_24_regular), findsOneWidget);
   });
+}
+
+void _expectHeroBottomBorder(BuildContext context) {
+  final ThemeData theme = Theme.of(context);
+  expect(
+    find.byWidgetPredicate((widget) {
+      if (widget is! DecoratedBox || widget.decoration is! BoxDecoration) {
+        return false;
+      }
+      final BorderSide? bottom =
+          (widget.decoration as BoxDecoration).border?.bottom;
+      if (bottom == null) {
+        return false;
+      }
+      return bottom.color == theme.colorScheme.outlineVariant &&
+          bottom.width ==
+              theme.componentTokens.bottomSheetScaffold.footerTopBorderWidth;
+    }),
+    findsWidgets,
+  );
 }
 
 class _VariantBHarness extends StatelessWidget {

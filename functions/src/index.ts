@@ -27,6 +27,7 @@ export { deliverSessionNotification } from "./quranSessions/deliverSessionNotifi
 export { getWallet, postWalletCredit } from "./quranSessions/walletCallables";
 export { confirmBookingPayment } from "./quranSessions/confirmBookingPayment";
 export { issueSessionRtcToken } from "./quranSessions/issueSessionRtcToken";
+export { sessionReminders } from "./quranSessions/sessionReminders";
 
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { initializeApp } from "firebase-admin/app";

@@ -22,13 +22,39 @@ class SessionDetailScreen extends StatefulWidget {
   State<SessionDetailScreen> createState() => _SessionDetailScreenState();
 }
 
-class _SessionDetailScreenState extends State<SessionDetailScreen> {
+class _SessionDetailScreenState extends State<SessionDetailScreen>
+    with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     context.read<SessionDetailBloc>().add(
       SessionDetailLoadRequested(bookingId: widget.bookingId),
     );
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) return;
+    final blocState = context.read<SessionDetailBloc>().state;
+    if (blocState is! SessionDetailSuccess) return;
+    if (blocState.isAwaitingRescheduleCounterparty ||
+        blocState.aggregate.lifecycleStatus ==
+            SessionLifecycleStatus.rescheduled) {
+      _reloadDetail();
+    }
+  }
+
+  Future<void> _reloadDetail() async {
+    final bloc = context.read<SessionDetailBloc>();
+    bloc.add(SessionDetailLoadRequested(bookingId: widget.bookingId));
+    await bloc.stream.firstWhere((s) => s is! SessionDetailLoading);
   }
 
   @override
@@ -203,92 +229,96 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
               :final isAwaitingRescheduleCounterparty,
               :final rescheduleRespondInProgress,
             ) =>
-              ListView(
-                padding: EdgeInsets.all(Theme.of(context).tokens.spaceLarge),
-                children: [
-                  if (pendingRescheduleLoadFailed)
-                    Padding(
-                      padding: EdgeInsets.only(
-                        bottom: Theme.of(context).tokens.spaceLarge,
+              RefreshIndicator(
+                onRefresh: _reloadDetail,
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: EdgeInsets.all(Theme.of(context).tokens.spaceLarge),
+                  children: [
+                    if (pendingRescheduleLoadFailed)
+                      Padding(
+                        padding: EdgeInsets.only(
+                          bottom: Theme.of(context).tokens.spaceLarge,
+                        ),
+                        child: _SessionDetailLoadWarning(
+                          message: l10n.sessionPendingRescheduleLoadFailed,
+                          bookingId: widget.bookingId,
+                        ),
                       ),
-                      child: _SessionDetailLoadWarning(
-                        message: l10n.sessionPendingRescheduleLoadFailed,
+                    if (pendingRescheduleRequest != null)
+                      Padding(
+                        padding: EdgeInsets.only(
+                          bottom: Theme.of(context).tokens.spaceLarge,
+                        ),
+                        child: PendingRescheduleBanner(
+                          request: pendingRescheduleRequest,
+                          canRespond: canRespondToReschedule,
+                          isAwaitingCounterparty:
+                              isAwaitingRescheduleCounterparty,
+                          respondInProgress: rescheduleRespondInProgress,
+                          onAccept: () => context.read<SessionDetailBloc>().add(
+                            const SessionDetailRescheduleRespondSubmitted(
+                              accept: true,
+                            ),
+                          ),
+                          onReject: () => context.read<SessionDetailBloc>().add(
+                            const SessionDetailRescheduleRespondSubmitted(
+                              accept: false,
+                            ),
+                          ),
+                        ),
+                      ),
+                    Text(
+                      l10n.sessionStatusLabel(aggregate.lifecycleStatus.name),
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    SizedBox(height: Theme.of(context).tokens.spaceSmall),
+                    Text(
+                      l10n.sessionStartsAtLabel(
+                        MaterialLocalizations.of(
+                          context,
+                        ).formatFullDate(aggregate.startsAt.toLocal()),
+                      ),
+                    ),
+                    if (state.showLockedAtBookingCopy &&
+                        callType != null &&
+                        callProviderKind != null) ...[
+                      SizedBox(height: Theme.of(context).tokens.spaceLarge),
+                      _LockedAtBookingFootnote(
+                        callType: callType,
+                        callProviderKind: callProviderKind,
+                      ),
+                    ],
+                    SizedBox(height: Theme.of(context).tokens.spaceExtraLarge),
+                    Text(
+                      l10n.sessionTimelineTitle,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    SizedBox(height: Theme.of(context).tokens.spaceSmall),
+                    if (timelineLoadFailed)
+                      _SessionDetailLoadWarning(
+                        message: l10n.sessionTimelineLoadFailed,
                         bookingId: widget.bookingId,
-                      ),
-                    ),
-                  if (pendingRescheduleRequest != null)
-                    Padding(
-                      padding: EdgeInsets.only(
-                        bottom: Theme.of(context).tokens.spaceLarge,
-                      ),
-                      child: PendingRescheduleBanner(
-                        request: pendingRescheduleRequest,
-                        canRespond: canRespondToReschedule,
-                        isAwaitingCounterparty:
-                            isAwaitingRescheduleCounterparty,
-                        respondInProgress: rescheduleRespondInProgress,
-                        onAccept: () => context.read<SessionDetailBloc>().add(
-                          const SessionDetailRescheduleRespondSubmitted(
-                            accept: true,
+                      )
+                    else if (timeline.isEmpty)
+                      Text(l10n.sessionTimelineEmpty)
+                    else
+                      ...timeline.map(
+                        (event) => ListTile(
+                          title: Text(event.action.name),
+                          subtitle: Text(
+                            event.reason ??
+                                '${event.previousStatus.name} → ${event.newStatus.name}',
                           ),
-                        ),
-                        onReject: () => context.read<SessionDetailBloc>().add(
-                          const SessionDetailRescheduleRespondSubmitted(
-                            accept: false,
+                          trailing: Text(
+                            MaterialLocalizations.of(context).formatShortDate(
+                              event.createdAt.toLocal(),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  Text(
-                    l10n.sessionStatusLabel(aggregate.lifecycleStatus.name),
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  SizedBox(height: Theme.of(context).tokens.spaceSmall),
-                  Text(
-                    l10n.sessionStartsAtLabel(
-                      MaterialLocalizations.of(
-                        context,
-                      ).formatFullDate(aggregate.startsAt.toLocal()),
-                    ),
-                  ),
-                  if (state.showLockedAtBookingCopy &&
-                      callType != null &&
-                      callProviderKind != null) ...[
-                    SizedBox(height: Theme.of(context).tokens.spaceLarge),
-                    _LockedAtBookingFootnote(
-                      callType: callType,
-                      callProviderKind: callProviderKind,
-                    ),
                   ],
-                  SizedBox(height: Theme.of(context).tokens.spaceExtraLarge),
-                  Text(
-                    l10n.sessionTimelineTitle,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  SizedBox(height: Theme.of(context).tokens.spaceSmall),
-                  if (timelineLoadFailed)
-                    _SessionDetailLoadWarning(
-                      message: l10n.sessionTimelineLoadFailed,
-                      bookingId: widget.bookingId,
-                    )
-                  else if (timeline.isEmpty)
-                    Text(l10n.sessionTimelineEmpty)
-                  else
-                    ...timeline.map(
-                      (event) => ListTile(
-                        title: Text(event.action.name),
-                        subtitle: Text(
-                          event.reason ??
-                              '${event.previousStatus.name} → ${event.newStatus.name}',
-                        ),
-                        trailing: Text(
-                          MaterialLocalizations.of(context).formatShortDate(
-                            event.createdAt.toLocal(),
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
+                ),
               ),
           },
         ),

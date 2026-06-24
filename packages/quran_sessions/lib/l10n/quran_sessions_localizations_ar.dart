@@ -261,7 +261,7 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
 
   @override
   String get becomeTeacherCardSubtitle =>
-      'انضم إلى نخبة المعلمين المعتمدين على تلاوة';
+      'انضم إلى نخبة المعلمين المعتمدين على MeMuslim';
 
   @override
   String get teacherListTitle => 'ابحث عن معلم';
@@ -362,11 +362,11 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get inAppCallShellUnmute => 'إلغاء كتم الميكروفون';
 
   @override
-  String get externalMeetingJoinTitle => 'الانضمام خارج تلاوة؟';
+  String get externalMeetingJoinTitle => 'الانضمام خارج MeMuslim؟';
 
   @override
   String get externalMeetingJoinBody =>
-      'ستغادر تلاوة مؤقتًا للانضمام إلى جلستك عبر Google Meet أو Zoom أو المتصفح. يمكنك العودة هنا في أي وقت — تفاصيل جلستك تبقى مفتوحة.';
+      'ستغادر MeMuslim مؤقتًا للانضمام إلى جلستك عبر Google Meet أو Zoom أو المتصفح. يمكنك العودة هنا في أي وقت — تفاصيل جلستك تبقى مفتوحة.';
 
   @override
   String get externalMeetingJoinOpen => 'فتح';
@@ -936,7 +936,7 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get submittingApplication => 'جارٍ إرسال الطلب…';
 
   @override
-  String get becomeTeacherOnTilawa => 'أصبح محفظًا على تلاوة';
+  String get becomeTeacherOnTilawa => 'أصبح محفظًا على MeMuslim';
 
   @override
   String get becomeTeacherApplicationIntro =>
@@ -1044,14 +1044,14 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
 
   @override
   String get applicationStatusPendingSubtitle =>
-      'يقوم فريق تلاوة بمراجعة طلبك. سنتواصل معك قريبًا.';
+      'يقوم فريق MeMuslim بمراجعة طلبك. سنتواصل معك قريبًا.';
 
   @override
   String get applicationStatusApprovedTitle => 'تهانينا! تمت الموافقة';
 
   @override
   String get applicationStatusApprovedSubtitle =>
-      'أصبحت محفظًا معتمدًا على منصة تلاوة.';
+      'أصبحت محفظًا معتمدًا على MeMuslim.';
 
   @override
   String get applicationStatusApprovedContinue => 'متابعة';

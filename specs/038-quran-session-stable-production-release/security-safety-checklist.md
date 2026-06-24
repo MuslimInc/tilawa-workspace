@@ -78,6 +78,9 @@
 ## Pre-release verification commands
 
 ```sh
+# Batch deploy stable-scope session CFs (+ sessionReminders)
+./scripts/deploy_quran_session_callables.sh [firebase-project-id]
+
 # Rules tests (JDK 21)
 cd functions && npm run test:rules
 

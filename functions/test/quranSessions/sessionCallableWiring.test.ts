@@ -56,6 +56,15 @@ test("stable batch covers exactly twelve onCall exports", () => {
   assert.equal(count, 12, "expected 12 stable-scope session callables");
 });
 
+test("index exports sessionReminders scheduled job", () => {
+  const source = readFileSync(join(SRC_ROOT, "index.ts"), "utf8");
+  assert.match(
+    source,
+    /export\s*{\s*sessionReminders\s*}\s*from\s*["'].*sessionReminders["']/,
+    "index.ts must export sessionReminders for production reminders",
+  );
+});
+
 test("wallet/payment callables remain excluded from shared App Check options", () => {
   for (const relPath of EXCLUDED_CALLABLE_FILES) {
     const source = readFileSync(join(SRC_ROOT, relPath), "utf8");

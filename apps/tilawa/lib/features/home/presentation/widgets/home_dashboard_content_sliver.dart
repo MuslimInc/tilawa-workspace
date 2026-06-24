@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:tilawa/features/home/debug/home_hero_variant_debug.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_dashboard_hero_sliver.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Home content canvas below the hero.
@@ -19,28 +17,18 @@ class HomeDashboardContentSliver extends StatelessWidget {
     final TilawaHomeDashboardCardTokens cardTokens =
         theme.componentTokens.homeDashboardCard;
     final Color sheetColor = cardTokens.travelSheetSurface;
-    final bool variantB =
-        HomeDashboardHeroSliver.activeVariant(context) ==
-        HomeHeroDesignVariant.b;
-    final double topPadding = variantB
-        ? tokens.spaceSmall
-        : cardTokens.headerWaveAmplitude * 0.15;
+    final double topPadding = tokens.spaceSmall;
 
     return SliverToBoxAdapter(
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: sheetColor,
-          borderRadius: variantB
-              ? BorderRadius.vertical(
-                  top: Radius.circular(tokens.radiusExtraLarge),
-                )
-              : null,
           boxShadow: <BoxShadow>[
             BoxShadow(
               color: colorScheme.shadow.withValues(
-                alpha: tokens.opacityShadow * (variantB ? 0.45 : 0.35),
+                alpha: tokens.opacityShadow * 0.35,
               ),
-              blurRadius: tokens.blurShadow * (variantB ? 0.65 : 0.5),
+              blurRadius: tokens.blurShadow * 0.5,
               offset: Offset(0, tokens.shadowOffsetSmall.dy * -0.25),
             ),
           ],

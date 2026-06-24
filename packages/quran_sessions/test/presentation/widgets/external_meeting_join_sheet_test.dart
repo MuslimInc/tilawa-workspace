@@ -49,7 +49,7 @@ void main() {
     await tester.tap(find.text('Show'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Join outside Tilawa?'), findsOneWidget);
+    expect(find.text('Join outside MeMuslim?'), findsOneWidget);
     expect(find.text('Open'), findsOneWidget);
     expect(find.text('Copy URL'), findsOneWidget);
     expect(
@@ -123,7 +123,7 @@ void main() {
 
     expect(clipboardText, _meetingUrl);
     expect(find.text('Link copied'), findsOneWidget);
-    expect(find.text('Join outside Tilawa?'), findsOneWidget);
+    expect(find.text('Join outside MeMuslim?'), findsOneWidget);
   });
 
   testWidgets('external meeting join sheet can be dismissed', (tester) async {

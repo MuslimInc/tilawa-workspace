@@ -548,7 +548,7 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @becomeTeacherCardSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Join Tilawa\'s certified teachers'**
+  /// **'Join MeMuslim\'s certified teachers'**
   String get becomeTeacherCardSubtitle;
 
   /// No description provided for @teacherListTitle.
@@ -722,13 +722,13 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @externalMeetingJoinTitle.
   ///
   /// In en, this message translates to:
-  /// **'Join outside Tilawa?'**
+  /// **'Join outside MeMuslim?'**
   String get externalMeetingJoinTitle;
 
   /// No description provided for @externalMeetingJoinBody.
   ///
   /// In en, this message translates to:
-  /// **'You\'ll briefly leave Tilawa to join your session in Google Meet, Zoom, or your browser. Come back here anytime — your session details stay open.'**
+  /// **'You\'ll briefly leave MeMuslim to join your session in Google Meet, Zoom, or your browser. Come back here anytime — your session details stay open.'**
   String get externalMeetingJoinBody;
 
   /// No description provided for @externalMeetingJoinOpen.
@@ -1736,7 +1736,7 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @becomeTeacherOnTilawa.
   ///
   /// In en, this message translates to:
-  /// **'Become a teacher on Tilawa'**
+  /// **'Become a teacher on MeMuslim'**
   String get becomeTeacherOnTilawa;
 
   /// No description provided for @becomeTeacherApplicationIntro.
@@ -1946,7 +1946,7 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @applicationStatusPendingSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'The Tilawa team is reviewing your application. We will contact you soon.'**
+  /// **'The MeMuslim team is reviewing your application. We will contact you soon.'**
   String get applicationStatusPendingSubtitle;
 
   /// No description provided for @applicationStatusApprovedTitle.
@@ -1958,7 +1958,7 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @applicationStatusApprovedSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'You are now a certified teacher on Tilawa.'**
+  /// **'You are now a certified teacher on MeMuslim.'**
   String get applicationStatusApprovedSubtitle;
 
   /// No description provided for @applicationStatusApprovedContinue.

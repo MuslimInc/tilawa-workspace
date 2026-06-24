@@ -43,7 +43,7 @@ void main() {
     expect(find.text('body'), findsOneWidget);
   });
 
-  testWidgets('buildSlivers uses variant A wave overlap when debug is A', (
+  testWidgets('buildSlivers uses variant A sheet overlap when debug is A', (
     tester,
   ) async {
     HomeHeroVariantDebug.variant.value = HomeHeroDesignVariant.a;
@@ -53,11 +53,9 @@ void main() {
         theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
         home: Builder(
           builder: (context) {
-            final double waveAmplitude =
-                HomeDashboardHeroSliver.headerWaveAmplitude(context);
             expect(
               HomeDashboardHeroSliver.contentSheetOverlap(context),
-              HomeDashboardHeroSliver.heroWaveOverlap(waveAmplitude),
+              HomeDashboardHeroSliver.sheetOverlap,
             );
             return const SizedBox.shrink();
           },

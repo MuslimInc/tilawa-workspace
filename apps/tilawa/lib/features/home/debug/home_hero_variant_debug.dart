@@ -39,8 +39,7 @@ abstract final class HomeHeroVariantDebug {
   }
 
   static Future<void> cycle(SharedPreferencesAsync prefs) async {
-    final HomeHeroDesignVariant next =
-        variant.value == HomeHeroDesignVariant.a
+    final HomeHeroDesignVariant next = variant.value == HomeHeroDesignVariant.a
         ? HomeHeroDesignVariant.b
         : HomeHeroDesignVariant.a;
     variant.value = next;

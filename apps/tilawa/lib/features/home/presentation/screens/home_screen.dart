@@ -150,7 +150,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final double clampedTarget = snapTarget
         .clamp(position.minScrollExtent, position.maxScrollExtent)
         .toDouble();
-    if ((position.pixels - clampedTarget).abs() <= HomeScreen._heroSnapTolerance) {
+    if ((position.pixels - clampedTarget).abs() <=
+        HomeScreen._heroSnapTolerance) {
       return;
     }
 
@@ -170,7 +171,8 @@ class _HomeScreenState extends State<HomeScreen> {
       return null;
     }
 
-    final double threshold = collapseExtent * HomeScreen._heroSnapThresholdFactor;
+    final double threshold =
+        collapseExtent * HomeScreen._heroSnapThresholdFactor;
     return offset < threshold ? 0 : collapseExtent;
   }
 

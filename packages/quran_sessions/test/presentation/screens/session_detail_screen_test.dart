@@ -194,7 +194,7 @@ void main() {
     await tester.tap(find.text('Join'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Join outside Tilawa?'), findsOneWidget);
+    expect(find.text('Join outside MeMuslim?'), findsOneWidget);
     expect(
       bloc.recordedEvents.whereType<SessionDetailJoinRequested>(),
       isEmpty,

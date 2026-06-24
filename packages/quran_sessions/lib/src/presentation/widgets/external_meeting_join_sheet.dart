@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-/// Confirms leaving Tilawa to open an external meeting link.
+/// Confirms leaving MeMuslim to open an external meeting link.
 ///
 /// Returns `true` when the user taps **Open**; `false` when dismissed.
 Future<bool> showExternalMeetingJoinSheet(

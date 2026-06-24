@@ -13,7 +13,8 @@ class HomeHeroVariantDebugTile extends StatefulWidget {
   final bool isLast;
 
   @override
-  State<HomeHeroVariantDebugTile> createState() => _HomeHeroVariantDebugTileState();
+  State<HomeHeroVariantDebugTile> createState() =>
+      _HomeHeroVariantDebugTileState();
 }
 
 class _HomeHeroVariantDebugTileState extends State<HomeHeroVariantDebugTile> {

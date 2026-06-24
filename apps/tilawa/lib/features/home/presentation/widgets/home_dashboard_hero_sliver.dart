@@ -38,19 +38,8 @@ abstract final class HomeDashboardHeroSliver {
   /// Extra room for border width and sub-pixel layout drift.
   static const double _metricsLayoutSlack = 12;
 
-  /// Overlap between the hero wave valley and the content sheet.
+  /// Gap between hero body content and the pinned header bottom edge.
   static const double sheetOverlap = 8;
-
-  /// Scroll overlap consumed by the hero bottom scallop.
-  static double heroWaveOverlap(double waveAmplitude) =>
-      waveAmplitude * 0.55 + sheetOverlap;
-
-  /// Header wave amplitude from design tokens.
-  static double headerWaveAmplitude(BuildContext context) {
-    return Theme.of(
-      context,
-    ).componentTokens.homeDashboardCard.headerWaveAmplitude;
-  }
 
   /// Active hero layout variant (compact B default; debug may switch to A).
   static HomeHeroDesignVariant activeVariant(BuildContext context) {
@@ -92,7 +81,7 @@ abstract final class HomeDashboardHeroSliver {
     if (activeVariant(context) == HomeHeroDesignVariant.b) {
       return HomeDashboardHeroVariantB.contentSheetOverlap(context);
     }
-    return heroWaveOverlap(headerWaveAmplitude(context));
+    return sheetOverlap;
   }
 
   /// Hero is a single pinned [SliverPersistentHeader]; greeting, metrics, and
@@ -147,8 +136,7 @@ abstract final class HomeDashboardHeroSliver {
 
   static double _resolveBottomInset(BuildContext context) {
     final TilawaDesignTokens tokens = Theme.of(context).tokens;
-    final double waveAmplitude = headerWaveAmplitude(context);
-    return tokens.spaceSmall + waveAmplitude * 0.35 + sheetOverlap;
+    return tokens.spaceSmall + sheetOverlap;
   }
 
   /// Pinned hero chrome when the expanded gradient is fully collapsed.
@@ -159,22 +147,7 @@ abstract final class HomeDashboardHeroSliver {
     TilawaHomeNextPrayerHeroTokens heroTokens,
     ColorScheme colorScheme,
   ) {
-    final Color top = heroTokens.gradientTopStart;
-    final Color bottom = heroTokens.gradientBottomEnd;
-    final bool flatLightCanvas =
-        top == bottom && bottom.computeLuminance() > 0.82;
-    if (flatLightCanvas) {
-      return colorScheme.surfaceContainerHigh;
-    }
-
-    if (top.computeLuminance() > 0.72) {
-      return Color.lerp(top, bottom, 0.32)!;
-    }
-
-    if (bottom.computeLuminance() < 0.35) {
-      return Color.lerp(bottom, top, 0.55)!;
-    }
-    return Color.lerp(top, bottom, 0.58)!;
+    return homeDashboardHeroCollapsedBarColor(heroTokens, colorScheme);
   }
 }
 
@@ -369,7 +342,8 @@ class _HomeDashboardHeroAppBarState extends State<_HomeDashboardHeroAppBar> {
   }
 }
 
-class _HomeHeroVariantAPersistentDelegate extends SliverPersistentHeaderDelegate {
+class _HomeHeroVariantAPersistentDelegate
+    extends SliverPersistentHeaderDelegate {
   const _HomeHeroVariantAPersistentDelegate({
     required this.topInset,
     required this.maxExtent,
@@ -423,7 +397,6 @@ class _HomeHeroVariantAPersistentDelegate extends SliverPersistentHeaderDelegate
     return _HomeHeroFlexibleSpace(
       topInset: topInset,
       collapseProgress: collapseProgress,
-      overlapsContent: overlapsContent,
       collapsedBarColor: collapsedBarColor,
       dashboard: dashboard,
       nextPrayer: nextPrayer,
@@ -440,7 +413,9 @@ class _HomeHeroVariantAPersistentDelegate extends SliverPersistentHeaderDelegate
   }
 
   @override
-  bool shouldRebuild(covariant _HomeHeroVariantAPersistentDelegate oldDelegate) {
+  bool shouldRebuild(
+    covariant _HomeHeroVariantAPersistentDelegate oldDelegate,
+  ) {
     return topInset != oldDelegate.topInset ||
         maxExtent != oldDelegate.maxExtent ||
         minExtent != oldDelegate.minExtent ||
@@ -479,7 +454,6 @@ class _HomeHeroFlexibleSpace extends StatefulWidget {
   const _HomeHeroFlexibleSpace({
     required this.topInset,
     required this.collapseProgress,
-    required this.overlapsContent,
     required this.collapsedBarColor,
     required this.dashboard,
     required this.nextPrayer,
@@ -496,7 +470,6 @@ class _HomeHeroFlexibleSpace extends StatefulWidget {
 
   final double topInset;
   final double collapseProgress;
-  final bool overlapsContent;
   final Color collapsedBarColor;
   final HomeDashboard? dashboard;
   final HomeNextPrayer? nextPrayer;
@@ -572,115 +545,115 @@ class _HomeHeroFlexibleSpaceState extends State<_HomeHeroFlexibleSpace> {
       t,
       end: _collapsedFadeEnd,
     );
-    final double greetingOpacity =
-        t > _expandedFadeStart && expandedOpacity > 0 ? expandedOpacity : 0;
+    final double greetingOpacity = t > _expandedFadeStart && expandedOpacity > 0
+        ? expandedOpacity
+        : 0;
     final double expandedReveal = Curves.easeInOutCubic.transform(t);
     final double collapsedBarReveal = 1 - expandedReveal;
     final Color canvasColor = AppColors.homeTravelSheetSurface;
     final SystemUiOverlayStyle overlayStyle =
         HomeHeroBackground.systemOverlayStyle(heroTokens);
-    final double waveAmplitude =
-        HomeDashboardHeroSliver.headerWaveAmplitude(context);
-    final double hairlineAlpha = widget.overlapsContent
-        ? 0.45
-        : 0.45 * collapsedBarReveal;
+    final TilawaBottomSheetScaffoldTokens sheetTokens =
+        theme.componentTokens.bottomSheetScaffold;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: overlayStyle,
       child: Material(
         color: canvasColor,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Opacity(
-            opacity: collapsedBarReveal,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: AlignmentDirectional.topCenter,
-                  end: AlignmentDirectional.bottomCenter,
-                  colors: <Color>[
-                    Color.lerp(
-                      widget.collapsedBarColor,
-                      heroTokens.gradientTopStart,
-                      0.28,
-                    )!,
-                    widget.collapsedBarColor,
-                  ],
-                ),
-                border: Border(
-                  bottom: BorderSide(
-                    color: theme.colorScheme.outlineVariant.withValues(
-                      alpha: hairlineAlpha,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: theme.colorScheme.outlineVariant,
+                width: sheetTokens.footerTopBorderWidth,
+              ),
+            ),
+          ),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Opacity(
+                opacity: collapsedBarReveal,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: AlignmentDirectional.topCenter,
+                      end: AlignmentDirectional.bottomCenter,
+                      colors: <Color>[
+                        Color.lerp(
+                          widget.collapsedBarColor,
+                          heroTokens.gradientTopStart,
+                          0.28,
+                        )!,
+                        widget.collapsedBarColor,
+                      ],
                     ),
                   ),
                 ),
               ),
-            ),
-          ),
-          Opacity(
-            opacity: expandedReveal,
-            child: HomeHeroBackground(
-              heroTokens: heroTokens,
-              waveAmplitude: waveAmplitude,
-            ),
-          ),
-          SafeArea(
-            bottom: false,
-            child: IgnorePointer(
-              ignoring: expandedOpacity == 0,
-              child: Opacity(
-                opacity: expandedOpacity,
-                child: ClipRect(
-                  child: Align(
-                    alignment: Alignment.bottomCenter,
-                    child: OverflowBox(
-                      alignment: Alignment.bottomCenter,
-                      minHeight: widget.heroBodyHeight,
-                      maxHeight: widget.heroBodyHeight,
-                      child: SizedBox(
-                        height: widget.heroBodyHeight,
-                        width: double.infinity,
-                        child: _HomeHeroExpandedBody(
-                          greetingOpacity: greetingOpacity,
-                          locationName: widget.locationName,
-                          isRefreshingLocation: widget.isRefreshingLocation,
-                          onRefreshLocation: widget.onRefreshLocation,
-                          onOpenPrayer: widget.onOpenPrayer,
-                          bottomInset: widget.bottomInset,
-                          metricsFooterSection: _metricsFooterSection,
+              Opacity(
+                opacity: expandedReveal,
+                child: HomeHeroBackground(
+                  heroTokens: heroTokens,
+                ),
+              ),
+              SafeArea(
+                bottom: false,
+                child: IgnorePointer(
+                  ignoring: expandedOpacity == 0,
+                  child: Opacity(
+                    opacity: expandedOpacity,
+                    child: ClipRect(
+                      child: Align(
+                        alignment: Alignment.bottomCenter,
+                        child: OverflowBox(
+                          alignment: Alignment.bottomCenter,
+                          minHeight: widget.heroBodyHeight,
+                          maxHeight: widget.heroBodyHeight,
+                          child: SizedBox(
+                            height: widget.heroBodyHeight,
+                            width: double.infinity,
+                            child: _HomeHeroExpandedBody(
+                              greetingOpacity: greetingOpacity,
+                              locationName: widget.locationName,
+                              isRefreshingLocation: widget.isRefreshingLocation,
+                              onRefreshLocation: widget.onRefreshLocation,
+                              onOpenPrayer: widget.onOpenPrayer,
+                              bottomInset: widget.bottomInset,
+                              metricsFooterSection: _metricsFooterSection,
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ),
-          if (collapsedOpacity > 0)
-            SafeArea(
-              bottom: false,
-              child: Align(
-                alignment: AlignmentDirectional.bottomStart,
-                child: Padding(
-                  padding: EdgeInsetsDirectional.only(
-                    start: tokens.spaceMedium,
-                    end: tokens.spaceMedium,
-                    bottom: tokens.spaceSmall,
-                  ),
-                  child: Opacity(
-                    opacity: collapsedOpacity,
-                    child: _HomeHeroCollapsedToolbar(
-                      nextPrayer: widget.nextPrayer,
-                      locationName: widget.locationName,
-                      onOpenPrayer: widget.onOpenPrayer,
-                      expandedReveal: expandedReveal,
+              if (collapsedOpacity > 0)
+                SafeArea(
+                  bottom: false,
+                  child: Align(
+                    alignment: AlignmentDirectional.bottomStart,
+                    child: Padding(
+                      padding: EdgeInsetsDirectional.only(
+                        start: tokens.spaceMedium,
+                        end: tokens.spaceMedium,
+                        bottom: tokens.spaceSmall,
+                      ),
+                      child: Opacity(
+                        opacity: collapsedOpacity,
+                        child: _HomeHeroCollapsedToolbar(
+                          nextPrayer: widget.nextPrayer,
+                          locationName: widget.locationName,
+                          onOpenPrayer: widget.onOpenPrayer,
+                          expandedReveal: expandedReveal,
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

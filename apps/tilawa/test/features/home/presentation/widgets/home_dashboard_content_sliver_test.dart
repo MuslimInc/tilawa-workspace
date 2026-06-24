@@ -4,7 +4,7 @@ import 'package:tilawa/features/home/presentation/widgets/home_dashboard_content
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 void main() {
-  testWidgets('uses flat sheet body below hero wave handoff', (tester) async {
+  testWidgets('uses flat sheet body below hero header', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),

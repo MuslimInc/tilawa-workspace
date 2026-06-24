@@ -48,11 +48,10 @@ extension QuranSessionsLabelX on QuranSessionsLocalizations {
     SessionCallType.videoCall => callTypeVideo,
   };
 
-  String callProviderKindLabel(SessionCallProviderKind kind) =>
-      switch (kind) {
-        SessionCallProviderKind.external => callProviderExternal,
-        SessionCallProviderKind.mock => callProviderMock,
-        SessionCallProviderKind.agora => callProviderAgora,
-        SessionCallProviderKind.webrtc => callProviderWebrtc,
-      };
+  String callProviderKindLabel(SessionCallProviderKind kind) => switch (kind) {
+    SessionCallProviderKind.external => callProviderExternal,
+    SessionCallProviderKind.mock => callProviderMock,
+    SessionCallProviderKind.agora => callProviderAgora,
+    SessionCallProviderKind.webrtc => callProviderWebrtc,
+  };
 }
