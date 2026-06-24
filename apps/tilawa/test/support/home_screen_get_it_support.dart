@@ -1,6 +1,7 @@
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/features/athkar/data/datasources/athkar_daily_progress_local_datasource.dart';
 import 'package:tilawa/features/athkar/domain/entities/athkar_category.dart';
 import 'package:tilawa/features/athkar/domain/entities/athkar_item.dart';
@@ -36,6 +37,9 @@ import 'package:tilawa/features/quran_reader/domain/usecases/get_last_read_posit
 import 'package:tilawa_core/core.dart';
 
 class _MockQiblaBloc extends Mock implements QiblaBloc {}
+
+class _MockSharedPreferencesAsync extends Mock
+    implements SharedPreferencesAsync {}
 
 class _FakeAuthRepository implements AuthRepository {
   @override
@@ -152,6 +156,10 @@ void registerHomeScreenScopeGetIt(GetIt getIt) {
   registerFallbackValue(const CheckLocationService());
   final prayerRepository = _FakePrayerTimesRepository();
   final athkarRepository = _FakeAthkarRepository();
+  final mockPrefs = _MockSharedPreferencesAsync();
+  when(() => mockPrefs.getString(any())).thenAnswer((_) async => null);
+  when(() => mockPrefs.setString(any(), any())).thenAnswer((_) async => true);
+  getIt.registerSingleton<SharedPreferencesAsync>(mockPrefs);
 
   getIt.registerSingleton<PrayerLocationUpdateNotifier>(
     PrayerLocationUpdateNotifier(),

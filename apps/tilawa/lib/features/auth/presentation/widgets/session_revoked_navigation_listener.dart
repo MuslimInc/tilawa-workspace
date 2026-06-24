@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/features/localization/presentation/bloc/localization_bloc.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa/router/app_router.dart';
+import 'package:tilawa/router/app_router_config.dart';
 
 import '../cubit/session_validity_cubit.dart';
 
@@ -59,7 +60,19 @@ void _showSignedInElsewhereDialog(BuildContext listenerContext) {
           content: Text(l10n.authSignedInElsewhereBody),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                final loginLocation = const LoginRoute().location;
+                final currentLocation = AppRouter
+                    .router
+                    .routerDelegate
+                    .currentConfiguration
+                    .uri
+                    .path;
+                if (currentLocation != loginLocation) {
+                  AppRouter.router.go(loginLocation);
+                }
+              },
               child: Text(l10n.authSignedInElsewhereAction),
             ),
           ],

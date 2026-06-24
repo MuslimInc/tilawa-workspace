@@ -148,9 +148,9 @@ void main() {
     expect(
       find.descendant(
         of: find.byType(ReciterCard),
-        matching: find.byType(Stack),
+        matching: find.byType(TilawaCard),
       ),
-      findsNothing,
+      findsOneWidget,
     );
 
     await cubit.close();
@@ -301,7 +301,7 @@ void main() {
   });
 
   testWidgets(
-    'full-card InkWell wraps content; favorite retains its own InkWell',
+    'TilawaCard handles card tap; favorite uses TilawaIconToggle',
     (WidgetTester tester) async {
       final cubit = await loadedCubit();
       await pumpCard(tester, cubit);
@@ -309,30 +309,15 @@ void main() {
       expect(
         find.descendant(
           of: find.byType(ReciterCard),
-          matching: find.byType(InkWell),
+          matching: find.byType(TilawaCard),
         ),
-        findsNWidgets(2),
+        findsOneWidget,
       );
-
-      // Card InkWell wraps the row content; favorite keeps its own InkWell.
-      final Finder openInkWell = find.ancestor(
-        of: find.descendant(
-          of: find.byType(ReciterCard),
-          matching: find.byType(Row),
-        ),
-        matching: find.byType(InkWell),
-      );
-      expect(openInkWell, findsOneWidget);
-
-      final Finder favoriteInkWell = find.descendant(
-        of: find.bySemanticsIdentifier(
-          ReciterSemanticsIds.reciterFavoriteButton(tReciter.id),
-        ),
-        matching: find.byType(InkWell),
-      );
-      expect(favoriteInkWell, findsOneWidget);
       expect(
-        find.descendant(of: openInkWell, matching: favoriteInkWell),
+        find.descendant(
+          of: find.byType(ReciterCard),
+          matching: find.byType(TilawaIconToggle),
+        ),
         findsOneWidget,
       );
 

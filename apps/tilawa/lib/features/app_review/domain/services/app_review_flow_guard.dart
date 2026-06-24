@@ -42,8 +42,13 @@ class AppReviewFlowGuard {
     _tabFlows.clear();
   }
 
-  /// Keeps tab-owned sacred flows aligned with [MainScreen] viewport index.
+  /// Clears tab-owned sacred flows when the main shell tab changes.
+  ///
+  /// Athkar and prayer are route-scoped now ([AppReviewSacredFlowScope]), not
+  /// shell tabs, so [MainTabViewport] indices no longer add tab flows.
   void syncMainShellTab(int tabIndex) {
-    _tabFlows.remove(AppReviewBlockedFlow.athkar);
+    _tabFlows
+      ..remove(AppReviewBlockedFlow.prayer)
+      ..remove(AppReviewBlockedFlow.athkar);
   }
 }
