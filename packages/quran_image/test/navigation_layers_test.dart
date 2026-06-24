@@ -15,6 +15,8 @@ import 'package:quran_image/presentation/widgets/molecules/page_slider.dart';
 import 'package:quran_image/presentation/widgets/organisms/navigation_slider_overlay.dart';
 import 'package:quran_image/presentation/widgets/organisms/premium_navigation_overlay.dart';
 
+import 'quran_image_test_bootstrap.dart';
+
 void main() {
   group('PageState', () {
     test('supports initial state, derived values, and preview clearing', () {
@@ -113,8 +115,8 @@ void main() {
     int interactionEnds = 0;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: MediaQuery(
+      wrapQuranImageTestApp(
+        MediaQuery(
           data: const MediaQueryData(size: Size(400, 800)),
           child: Scaffold(
             body: NavigationSliderOverlay(
@@ -175,8 +177,8 @@ void main() {
     var indexPressed = 0;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: MediaQuery(
+      wrapQuranImageTestApp(
+        MediaQuery(
           data: const MediaQueryData(size: Size(400, 800)),
           child: Scaffold(
             body: NavigationSliderOverlay(
@@ -218,8 +220,8 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: MediaQuery(
+      wrapQuranImageTestApp(
+        MediaQuery(
           data: const MediaQueryData(size: Size(400, 800)),
           child: Scaffold(
             body: NavigationSliderOverlay(
@@ -254,8 +256,8 @@ void main() {
     var pressed = 0;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
+      wrapQuranImageTestApp(
+        Scaffold(
           body: Column(
             children: [
               NavigationIconButton(
@@ -312,8 +314,8 @@ void main() {
     });
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: BlocProvider.value(
+      wrapQuranImageTestApp(
+        BlocProvider.value(
           value: bloc,
           child: Scaffold(
             body: Stack(

@@ -8,6 +8,8 @@ import 'package:quran_image/data/repositories/asset_verse_marker_repository.dart
 import 'package:quran_image/domain/domain.dart';
 import 'package:quran_image/quran_image_page.dart';
 
+import 'quran_image_test_bootstrap.dart';
+
 void main() {
   late Directory tempDirectory;
   late _FakeDecodedQuranImageCache decodedCache;
@@ -73,7 +75,9 @@ void main() {
     addTearDown(tester.view.reset);
 
     await tester.pumpWidget(
-      const MaterialApp(home: Scaffold(body: QuranImagePage(pageNumber: 1))),
+      wrapQuranImageTestApp(
+        const Scaffold(body: QuranImagePage(pageNumber: 1)),
+      ),
     );
 
     expect(
@@ -93,8 +97,8 @@ void main() {
     var taps = 0;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
+      wrapQuranImageTestApp(
+        Scaffold(
           body: QuranImagePage(
             pageNumber: 1,
             onShowIndex: () => taps++,
