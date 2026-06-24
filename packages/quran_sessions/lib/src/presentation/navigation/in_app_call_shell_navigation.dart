@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 
 import '../../domain/entities/session_call_provider_kind.dart';
 import '../../domain/entities/session_call_type.dart';
+import '../../domain/services/quran_session_call_telemetry_coordinator.dart';
 import '../screens/in_app_call_shell_screen.dart';
 import '../../boundaries/call/session_call_control_gateway.dart';
 
 typedef SessionCallControlGatewayFactory =
     SessionCallControlGateway Function(String sessionId);
+
+typedef CallTelemetryCoordinatorFactory =
+    QuranSessionCallTelemetryCoordinator? Function();
 
 /// Pushes [InAppCallShellScreen] after a successful in-app join.
 Future<void> pushInAppCallShell(
@@ -18,6 +22,7 @@ Future<void> pushInAppCallShell(
   String? participantSubtitle,
   InAppCallSurfaceBuilder? buildCallSurface,
   SessionCallControlGatewayFactory? createCallControlGateway,
+  CallTelemetryCoordinatorFactory? createCallTelemetry,
 }) {
   return Navigator.of(context).push(
     MaterialPageRoute<void>(
@@ -35,6 +40,7 @@ Future<void> pushInAppCallShell(
           callProviderKind: callProviderKind,
         ),
         callControlGateway: createCallControlGateway?.call(sessionId),
+        callTelemetry: createCallTelemetry?.call(),
       ),
     ),
   );

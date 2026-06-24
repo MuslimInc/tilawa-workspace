@@ -1,4 +1,13 @@
 // ── Domain: entities ──────────────────────────────────────────────────────────
+// ── Domain: call tracking (pure business rules) ──────────────────────────────
+export 'src/domain/call_tracking/call_duration_calculator.dart';
+export 'src/domain/call_tracking/call_participant_status.dart';
+export 'src/domain/call_tracking/call_tracking_event.dart';
+export 'src/domain/call_tracking/call_tracking_failure.dart';
+export 'src/domain/call_tracking/call_tracking_policy.dart';
+export 'src/domain/call_tracking/participant_join_state.dart';
+export 'src/domain/call_tracking/quran_session_call_metrics.dart';
+export 'src/domain/call_tracking/quran_session_call_tracking_calculator.dart';
 // ── Localization helpers ─────────────────────────────────────────────────────
 export 'core/l10n_extensions.dart';
 // ── Boundaries: call ──────────────────────────────────────────────────────────
@@ -10,6 +19,9 @@ export 'src/boundaries/call/mock_session_call_provider.dart';
 export 'src/boundaries/call/routing_session_call_provider.dart';
 export 'src/boundaries/call/session_call_control_gateway.dart';
 export 'src/boundaries/call/session_call_provider.dart';
+export 'src/boundaries/call/session_call_provider_event_hub.dart';
+export 'src/boundaries/call/quran_session_call_telemetry_gateway.dart';
+export 'src/boundaries/call/telemetry_session_call_control_gateway.dart';
 // ── Boundaries: payment ───────────────────────────────────────────────────────
 export 'src/boundaries/payment/payment_provider.dart';
 export 'src/boundaries/payment/session_payment_confirmation.dart';
@@ -84,6 +96,8 @@ export 'src/domain/entities/session_booking_type.dart';
 export 'src/domain/entities/call_join_request.dart';
 export 'src/domain/entities/rtc_join_credentials.dart';
 export 'src/domain/entities/session_call_provider_kind.dart';
+export 'src/domain/entities/session_call_provider_event.dart';
+export 'src/domain/entities/quran_session_call_telemetry_event.dart';
 export 'src/domain/entities/session_participant.dart';
 export 'src/domain/entities/session_participant_role.dart';
 export 'src/domain/entities/session_audit_event.dart';
@@ -111,6 +125,7 @@ export 'src/domain/entities/user_wallet.dart';
 export 'src/domain/entities/wallet_transaction.dart';
 // ── Domain: services ──────────────────────────────────────────────────────────
 export 'src/domain/services/booked_slot_starts.dart';
+export 'src/domain/services/quran_session_call_telemetry_coordinator.dart';
 export 'src/domain/services/day_interval_editor.dart';
 export 'src/domain/services/slot_generator.dart';
 export 'src/domain/services/weekly_schedule_validator.dart';

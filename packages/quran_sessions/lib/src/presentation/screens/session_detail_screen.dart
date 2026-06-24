@@ -11,11 +11,13 @@ class SessionDetailScreen extends StatefulWidget {
     super.key,
     required this.bookingId,
     this.createCallControlGateway,
+    this.createCallTelemetry,
     this.buildCallSurface,
   });
 
   final String bookingId;
   final SessionCallControlGatewayFactory? createCallControlGateway;
+  final CallTelemetryCoordinatorFactory? createCallTelemetry;
   final InAppCallSurfaceBuilder? buildCallSurface;
 
   @override
@@ -114,6 +116,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen>
                   participantSubtitle: l10n.callTypeLabel(callType),
                   buildCallSurface: widget.buildCallSurface,
                   createCallControlGateway: widget.createCallControlGateway,
+                  createCallTelemetry: widget.createCallTelemetry,
                 );
               }
             },

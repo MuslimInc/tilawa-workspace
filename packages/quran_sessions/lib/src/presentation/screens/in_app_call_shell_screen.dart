@@ -31,6 +31,7 @@ class InAppCallShellScreen extends StatefulWidget {
     this.participantSubtitle,
     this.callSurface,
     this.callControlGateway,
+    this.callTelemetry,
   });
 
   final String sessionId;
@@ -40,6 +41,7 @@ class InAppCallShellScreen extends StatefulWidget {
   final String? participantSubtitle;
   final Widget? callSurface;
   final SessionCallControlGateway? callControlGateway;
+  final QuranSessionCallTelemetryCoordinator? callTelemetry;
 
   @override
   State<InAppCallShellScreen> createState() => _InAppCallShellScreenState();
@@ -81,6 +83,7 @@ class _InAppCallShellScreenState extends State<InAppCallShellScreen> {
     if (gateway != null && !ended) {
       unawaited(gateway.leave());
     }
+    widget.callTelemetry?.unbindSession();
     super.dispose();
   }
 

@@ -9,6 +9,7 @@ import '../providers/auth_session_provider.dart';
 import '../repositories/session_repository.dart';
 import '../repositories/teacher_profile_repository.dart';
 import '../../boundaries/call/session_call_provider.dart';
+import '../services/quran_session_call_telemetry_coordinator.dart';
 
 /// Joins a session through the injected [SessionCallProvider] gateway.
 ///
@@ -20,12 +21,14 @@ class JoinSessionUseCase {
     required this.callProvider,
     required this.authSession,
     required this.teacherProfileRepository,
+    this.callTelemetry,
   });
 
   final SessionRepository sessionRepository;
   final SessionCallProvider callProvider;
   final AuthSessionProvider authSession;
   final TeacherProfileRepository teacherProfileRepository;
+  final QuranSessionCallTelemetryCoordinator? callTelemetry;
 
   Future<Either<QuranSessionsFailure, void>> call({
     required String sessionId,
@@ -73,24 +76,86 @@ class JoinSessionUseCase {
       joinToken: session.joinToken,
     );
 
+    callTelemetry?.recordJoinRequested(
+      sessionId: session.id,
+      actorId: userId,
+      actorRole: participantRole,
+    );
+    callTelemetry?.bindSession(
+      sessionId: session.id,
+      actorId: userId,
+      actorRole: participantRole,
+    );
+
     try {
       await callProvider.join(request);
+      callTelemetry?.recordJoinSucceeded(
+        sessionId: session.id,
+        actorId: userId,
+        actorRole: participantRole,
+      );
       return const Right(null);
     } on MeetingLinkUnavailableFailure catch (e) {
+      _recordJoinFailed(
+        session,
+        userId,
+        participantRole,
+        'meeting_link_unavailable',
+      );
       return Left(e);
     } on CallProviderUnavailableFailure catch (e) {
+      _recordJoinFailed(
+        session,
+        userId,
+        participantRole,
+        e.reasonCode ?? 'provider_unavailable',
+      );
       return Left(e);
     } on RtcPermissionDeniedFailure catch (e) {
+      _recordJoinFailed(
+        session,
+        userId,
+        participantRole,
+        'permission_${e.permission}',
+      );
       return Left(e);
     } on RtcCallJoinFailure catch (e) {
+      _recordJoinFailed(session, userId, participantRole, e.reasonCode);
       return Left(e);
     } on WebRtcSignalingUnavailableFailure catch (e) {
+      _recordJoinFailed(
+        session,
+        userId,
+        participantRole,
+        'webrtc_signaling_unavailable',
+      );
       return Left(e);
     } on ExternalMeetingLaunchFailure catch (e) {
+      _recordJoinFailed(
+        session,
+        userId,
+        participantRole,
+        'external_meeting_launch_failed',
+      );
       return Left(e);
     } on Object {
+      _recordJoinFailed(session, userId, participantRole, 'network_failure');
       return const Left(NetworkFailure());
     }
+  }
+
+  void _recordJoinFailed(
+    QuranSession session,
+    String userId,
+    SessionParticipantRole participantRole,
+    String reasonCode,
+  ) {
+    callTelemetry?.recordJoinFailed(
+      sessionId: session.id,
+      actorId: userId,
+      actorRole: participantRole,
+      reasonCode: reasonCode,
+    );
   }
 
   Future<SessionParticipantRole?> _resolveParticipantRole({

@@ -11,6 +11,7 @@ class AgoraCallProvider implements SessionCallProvider, CallProvider {
     required this.tokenProvider,
     required this.resolveUserId,
     this.permissionGate = const RtcPermissionGate(),
+    this.eventHub,
     AgoraRtcEnginePool? enginePool,
     AgoraRtcJoinGateway? joinGateway,
   }) : _enginePool = enginePool ?? AgoraRtcEnginePool(),
@@ -20,6 +21,7 @@ class AgoraCallProvider implements SessionCallProvider, CallProvider {
   final CallTokenProvider tokenProvider;
   final Future<String> Function() resolveUserId;
   final RtcPermissionGate permissionGate;
+  final SessionCallProviderEventHub? eventHub;
   final AgoraRtcEnginePool _enginePool;
   final AgoraRtcJoinGateway _joinGateway;
   final Map<String, Future<CallRoom>> _joinInFlight =
@@ -82,6 +84,8 @@ class AgoraCallProvider implements SessionCallProvider, CallProvider {
     );
 
     _enginePool.remember(request.sessionId, handle);
+
+    eventHub?.emit(SessionCallLocalChannelJoined(sessionId: request.sessionId));
 
     return CallRoom(
       sessionId: request.sessionId,

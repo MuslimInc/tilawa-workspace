@@ -20,12 +20,14 @@ class AgoraCallSurface extends StatefulWidget {
     required this.callType,
     required this.enginePool,
     required this.labels,
+    this.eventHub,
   });
 
   final String sessionId;
   final SessionCallType callType;
   final AgoraRtcEnginePool enginePool;
   final AgoraCallSurfaceLabels labels;
+  final SessionCallProviderEventHub? eventHub;
 
   @override
   State<AgoraCallSurface> createState() => _AgoraCallSurfaceState();
@@ -86,6 +88,12 @@ class _AgoraCallSurfaceState extends State<AgoraCallSurface> {
       },
       onUserJoined: (connection, remoteUid, elapsed) {
         if (!mounted) return;
+        widget.eventHub?.emit(
+          SessionCallParticipantConnected(
+            sessionId: widget.sessionId,
+            remoteParticipantId: remoteUid.toString(),
+          ),
+        );
         setState(() {
           _remoteUid = remoteUid;
           _channelId = connection.channelId;
@@ -96,6 +104,13 @@ class _AgoraCallSurfaceState extends State<AgoraCallSurface> {
       },
       onUserOffline: (connection, remoteUid, reason) {
         if (!mounted || _remoteUid != remoteUid) return;
+        widget.eventHub?.emit(
+          SessionCallParticipantDisconnected(
+            sessionId: widget.sessionId,
+            remoteParticipantId: remoteUid.toString(),
+            reason: _mapDisconnectReason(reason),
+          ),
+        );
         setState(() {
           _remoteUid = null;
           _remoteVideoReady = false;
@@ -134,6 +149,18 @@ class _AgoraCallSurfaceState extends State<AgoraCallSurface> {
       _AgoraCallConnectionPhase.participantJoined =>
         InAppCallConnectionPhase.participantJoined,
     });
+  }
+
+  SessionCallParticipantDisconnectReason _mapDisconnectReason(
+    UserOfflineReasonType reason,
+  ) {
+    return switch (reason) {
+      UserOfflineReasonType.userOfflineQuit =>
+        SessionCallParticipantDisconnectReason.quit,
+      UserOfflineReasonType.userOfflineDropped =>
+        SessionCallParticipantDisconnectReason.dropped,
+      _ => SessionCallParticipantDisconnectReason.unknown,
+    };
   }
 
   void _unbindEngineEvents([String? sessionId]) {
@@ -551,6 +578,7 @@ Widget? buildAgoraCallSurface({
   required SessionCallProviderKind providerKind,
   required AgoraRtcEnginePool enginePool,
   required AgoraCallSurfaceLabels labels,
+  SessionCallProviderEventHub? eventHub,
 }) {
   if (providerKind != SessionCallProviderKind.agora) {
     return null;
@@ -561,5 +589,6 @@ Widget? buildAgoraCallSurface({
     callType: callType,
     enginePool: enginePool,
     labels: labels,
+    eventHub: eventHub,
   );
 }

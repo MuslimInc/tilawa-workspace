@@ -9,6 +9,10 @@ import { AdminSessionSummary } from '../../domain/entities/admin-session-summary
 import { SessionCompensationSummary } from '../../domain/entities/session-compensation-summary.entity';
 import { SessionTimelineEvent } from '../../domain/entities/session-timeline-event.entity';
 import {
+  CallEvent,
+  CallTrackingSummary,
+} from '../../domain/entities/call-tracking.entity';
+import {
   computeMissingPublicProfileFields,
   resolveApplicationPublicDisplayName,
 } from '../mappers/quran-sessions.mapper';
@@ -122,6 +126,34 @@ export interface SessionCompensationVm {
   readonly issuedByRole: string;
   readonly createdAt: Date;
   readonly completedAt: Date | null;
+}
+
+export interface CallTrackingVm {
+  readonly whoJoinedFirst: string;
+  readonly teacherJoinedAt: Date | null;
+  readonly studentJoinedAt: Date | null;
+  readonly teacherLate: boolean | null;
+  readonly studentLate: boolean | null;
+  readonly teacherDelayMinutes: number | null;
+  readonly studentDelayMinutes: number | null;
+  readonly actualCallStartedAt: Date | null;
+  readonly actualCallEndedAt: Date | null;
+  readonly connectedSeconds: number;
+  readonly connectedMinutes: number;
+  readonly reconnectCount: number;
+  readonly interruptionCount: number;
+  readonly teacherNoShow: boolean;
+  readonly studentNoShow: boolean;
+  readonly providerType: string;
+  readonly updatedAt: Date | null;
+}
+
+export interface CallEventVm {
+  readonly id: string;
+  readonly eventType: string;
+  readonly actorRole: string;
+  readonly detail: string;
+  readonly recordedAt: Date | null;
 }
 
 export class QuranSessionsViewModelMapper {
@@ -268,4 +300,83 @@ export class QuranSessionsViewModelMapper {
       completedAt: compensation.completedAt,
     };
   }
+
+  static toCallTracking(
+    summary: CallTrackingSummary,
+    providerType: string,
+  ): CallTrackingVm {
+    const teacherJoinedAt = resolveJoinAt(summary, 'teacher');
+    const studentJoinedAt = resolveJoinAt(summary, 'student');
+    const connectedSeconds = Math.max(
+      0,
+      summary.bothParticipantsConnectedSeconds,
+    );
+    return {
+      whoJoinedFirst: summary.firstJoinRole ?? '—',
+      teacherJoinedAt,
+      studentJoinedAt,
+      teacherLate: summary.teacherLate,
+      studentLate: summary.studentLate,
+      teacherDelayMinutes: computeDelayMinutes(
+        summary.scheduledStartsAt,
+        teacherJoinedAt,
+      ),
+      studentDelayMinutes: computeDelayMinutes(
+        summary.scheduledStartsAt,
+        studentJoinedAt,
+      ),
+      actualCallStartedAt: summary.actualCallStartedAt,
+      actualCallEndedAt: summary.callEndedAt,
+      connectedSeconds,
+      connectedMinutes: Math.floor(connectedSeconds / 60),
+      reconnectCount: summary.reconnectCount,
+      interruptionCount: summary.interruptionCount,
+      teacherNoShow: summary.teacherNoShow,
+      studentNoShow: summary.studentNoShow,
+      providerType,
+      updatedAt: summary.updatedAt,
+    };
+  }
+
+  static toCallEvent(event: CallEvent): CallEventVm {
+    const parts = [event.reasonCode, event.networkQuality].filter(
+      (part): part is string => !!part,
+    );
+    return {
+      id: event.id,
+      eventType: event.eventType,
+      actorRole: event.actorRole,
+      detail: parts.length > 0 ? parts.join(' · ') : '—',
+      recordedAt: event.recordedAt,
+    };
+  }
+}
+
+/** Resolves a participant's first-connect time from the role-tagged joins. */
+function resolveJoinAt(
+  summary: CallTrackingSummary,
+  role: 'teacher' | 'student',
+): Date | null {
+  if (summary.firstJoinRole === role) {
+    return summary.firstJoinAt;
+  }
+  if (summary.secondJoinRole === role) {
+    return summary.secondJoinAt;
+  }
+  return null;
+}
+
+/** Whole minutes between the scheduled start and a join, clamped at zero. */
+function computeDelayMinutes(
+  scheduledStartsAt: Date | null,
+  joinedAt: Date | null,
+): number | null {
+  if (!scheduledStartsAt || !joinedAt) {
+    return null;
+  }
+  const deltaMs = joinedAt.getTime() - scheduledStartsAt.getTime();
+  if (deltaMs <= 0) {
+    return 0;
+  }
+  return Math.floor(deltaMs / 60_000);
 }

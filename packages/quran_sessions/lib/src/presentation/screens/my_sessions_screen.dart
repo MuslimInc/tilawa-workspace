@@ -11,6 +11,7 @@ class MySessionsScreen extends StatefulWidget {
     this.onRescheduleRequested,
     this.onSessionDetailRequested,
     this.createCallControlGateway,
+    this.createCallTelemetry,
     this.buildCallSurface,
   });
 
@@ -28,6 +29,7 @@ class MySessionsScreen extends StatefulWidget {
   final void Function(String bookingId)? onSessionDetailRequested;
 
   final SessionCallControlGatewayFactory? createCallControlGateway;
+  final CallTelemetryCoordinatorFactory? createCallTelemetry;
   final InAppCallSurfaceBuilder? buildCallSurface;
 
   @override
@@ -85,6 +87,7 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
                 participantSubtitle: l10n.callTypeLabel(session.callType),
                 buildCallSurface: widget.buildCallSurface,
                 createCallControlGateway: widget.createCallControlGateway,
+                createCallTelemetry: widget.createCallTelemetry,
               );
             },
           ),

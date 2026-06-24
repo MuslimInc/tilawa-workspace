@@ -201,6 +201,7 @@ List<RouteBase> get quranSessionsRoutes => [
           studentId: studentId,
           resolveTeacherName: _resolveTeacherName,
           createCallControlGateway: _createQuranSessionCallControlGateway,
+          createCallTelemetry: _createCallTelemetry,
           buildCallSurface: _buildQuranSessionsCallSurface(),
           onSessionDetailRequested: (bookingId) => context.push(
             QuranSessionsRoutes.sessionDetail.replaceFirst(
@@ -243,6 +244,7 @@ List<RouteBase> get quranSessionsRoutes => [
         child: SessionDetailScreen(
           bookingId: bookingId,
           createCallControlGateway: _createQuranSessionCallControlGateway,
+          createCallTelemetry: _createCallTelemetry,
           buildCallSurface: _buildQuranSessionsCallSurface(),
         ),
       );
@@ -411,6 +413,9 @@ InAppCallSurfaceBuilder? _buildQuranSessionsCallSurface() {
       callType: callType,
       providerKind: callProviderKind,
       enginePool: getIt<AgoraRtcEnginePool>(),
+      eventHub: getIt.isRegistered<SessionCallProviderEventHub>()
+          ? getIt<SessionCallProviderEventHub>()
+          : null,
       labels: AgoraCallSurfaceLabels(
         connecting: l10n.inAppCallShellConnecting,
         connected: l10n.inAppCallShellConnected,
@@ -424,10 +429,24 @@ InAppCallSurfaceBuilder? _buildQuranSessionsCallSurface() {
 SessionCallControlGateway _createQuranSessionCallControlGateway(
   String sessionId,
 ) {
-  return SessionCallControlGatewayAdapter(
+  final inner = SessionCallControlGatewayAdapter(
     provider: getIt<SessionCallProvider>(),
     sessionId: sessionId,
   );
+  if (!getIt.isRegistered<QuranSessionCallTelemetryCoordinator>()) {
+    return inner;
+  }
+  return TelemetrySessionCallControlGateway(
+    inner: inner,
+    telemetry: getIt<QuranSessionCallTelemetryCoordinator>(),
+  );
+}
+
+QuranSessionCallTelemetryCoordinator? _createCallTelemetry() {
+  if (!getIt.isRegistered<QuranSessionCallTelemetryCoordinator>()) {
+    return null;
+  }
+  return getIt<QuranSessionCallTelemetryCoordinator>();
 }
 
 String? _resolveTeacherName(String teacherId) {

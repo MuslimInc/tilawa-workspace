@@ -99,6 +99,19 @@ class QuranSessionsMvpModule {
     );
 
     registerUseCases(sl);
+    sl.registerLazySingletonIfAbsent<SessionCallProviderEventHub>(
+      () => SessionCallProviderEventHub(),
+    );
+    sl.registerLazySingletonIfAbsent<QuranSessionCallTelemetryGateway>(
+      () => InMemoryCallTelemetryGateway(),
+    );
+    sl.registerLazySingletonIfAbsent<QuranSessionCallTelemetryCoordinator>(
+      () => QuranSessionCallTelemetryCoordinator(
+        gateway: sl<QuranSessionCallTelemetryGateway>(),
+        eventHub: sl<SessionCallProviderEventHub>(),
+      ),
+    );
+
     sl.registerLazySingletonIfAbsent<SessionCallProvider>(
       () => RoutingSessionCallProvider(
         external: ExternalMeetingCallProvider(
@@ -113,7 +126,9 @@ class QuranSessionsMvpModule {
           },
           urlLauncher: (_) async {},
         ),
-        mock: const MockSessionCallProvider(),
+        mock: MockSessionCallProvider(
+          eventHub: sl<SessionCallProviderEventHub>(),
+        ),
       ),
     );
     sl.registerLazySingletonIfAbsent<CallProvider>(
@@ -125,6 +140,7 @@ class QuranSessionsMvpModule {
         callProvider: sl<SessionCallProvider>(),
         authSession: sl<AuthSessionProvider>(),
         teacherProfileRepository: sl<TeacherProfileRepository>(),
+        callTelemetry: sl<QuranSessionCallTelemetryCoordinator>(),
       ),
     );
     registerBlocs(sl);

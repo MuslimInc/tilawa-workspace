@@ -379,3 +379,62 @@ test("rules: client cannot write quran_session_events", async () => {
     }),
   );
 });
+
+test("rules: participant can read callTracking summary", async () => {
+  await testEnv.clearFirestore();
+  await seedSlotLock();
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    const adminDb = context.firestore();
+    await setDoc(doc(adminDb, "quran_sessions/session1/callTracking/summary"), {
+      sessionId: "session1",
+      reconnectCount: 0,
+      bothParticipantsConnectedSeconds: 0,
+      lateGraceMinutes: 5,
+    });
+  });
+
+  const studentDb = testEnv.authenticatedContext("student2").firestore();
+  await assertSucceeds(
+    getDoc(doc(studentDb, "quran_sessions/session1/callTracking/summary")),
+  );
+});
+
+test("rules: participant can create own call_events", async () => {
+  await testEnv.clearFirestore();
+  await seedSlotLock();
+
+  const studentDb = testEnv.authenticatedContext("student2").firestore();
+  await assertSucceeds(
+    setDoc(doc(studentDb, "quran_sessions/session1/call_events/event_join"), {
+      eventId: "event_join",
+      sessionId: "session1",
+      eventType: "joinSucceeded",
+      actorId: "student2",
+      actorRole: "student",
+      recordedAt: new Date(),
+    }),
+  );
+});
+
+test("rules: client cannot patch callTracking aggregate", async () => {
+  await testEnv.clearFirestore();
+  await seedSlotLock();
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    const adminDb = context.firestore();
+    await setDoc(doc(adminDb, "quran_sessions/session1/callTracking/summary"), {
+      sessionId: "session1",
+      reconnectCount: 0,
+      bothParticipantsConnectedSeconds: 0,
+      lateGraceMinutes: 5,
+    });
+  });
+
+  const studentDb = testEnv.authenticatedContext("student2").firestore();
+  await assertFails(
+    setDoc(
+      doc(studentDb, "quran_sessions/session1/callTracking/summary"),
+      { reconnectCount: 99 },
+      { merge: true },
+    ),
+  );
+});

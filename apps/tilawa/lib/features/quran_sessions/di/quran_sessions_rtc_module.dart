@@ -18,6 +18,9 @@ class QuranSessionsRtcModule {
     AppLaunchConfig config,
   ) {
     final rtc = resolveRtcLaunchConfig(config);
+    final eventHub = sl.isRegistered<SessionCallProviderEventHub>()
+        ? sl<SessionCallProviderEventHub>()
+        : null;
 
     SessionCallProvider? agora;
     if (rtc.isAgoraEnabled) {
@@ -33,6 +36,7 @@ class QuranSessionsRtcModule {
           return uid;
         },
         enginePool: enginePool,
+        eventHub: eventHub,
       );
     }
 
@@ -57,7 +61,7 @@ class QuranSessionsRtcModule {
         },
         urlLauncher: launchExternalMeetingUrl,
       ),
-      mock: const MockSessionCallProvider(),
+      mock: MockSessionCallProvider(eventHub: eventHub),
       agora: agora,
       webrtc: webrtc,
     );

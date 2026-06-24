@@ -234,6 +234,27 @@ service cloud.firestore {
             && (resource.data.studentId == request.auth.uid
                 || ownsTeacherProfile(resource.data.teacherId)));
       allow write: if false;
+
+      // Aggregated in-call tracking — participants read summary; CF writes only.
+      match /callTracking/{docId} {
+        allow read: if isAdmin() || isSessionParticipant(sessionId);
+        allow write: if false;
+      }
+
+      // Raw call telemetry events — participant create own; CF may also write.
+      match /call_events/{eventId} {
+        allow read: if isAdmin() || isSessionParticipant(sessionId);
+        allow create: if isSignedIn()
+          && isSessionParticipant(sessionId)
+          && request.resource.data.actorId == request.auth.uid
+          && request.resource.data.sessionId == sessionId
+          && request.resource.data.eventId == eventId
+          && request.resource.data.eventType is string
+          && request.resource.data.actorRole in ['teacher', 'student']
+          && !('token' in request.resource.data)
+          && !('joinToken' in request.resource.data);
+        allow update, delete: if false;
+      }
     }
 
     // Session audit timeline — participants and admins can read; CF writes only.

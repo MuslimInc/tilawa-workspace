@@ -184,6 +184,60 @@ void main() {
       (_) => fail('expected Left'),
     );
   });
+
+  test('records join telemetry without blocking join', () async {
+    final recordingGateway = InMemoryCallTelemetryGateway();
+    final hub = SessionCallProviderEventHub();
+    final telemetry = QuranSessionCallTelemetryCoordinator(
+      gateway: recordingGateway,
+      eventHub: hub,
+    );
+    routingProvider = RoutingSessionCallProvider(
+      external: ExternalMeetingCallProvider(
+        getMeetingUrl: (_) async => 'https://meet.example.com/r',
+        urlLauncher: (url) async => launchedUrl = url,
+      ),
+      mock: MockSessionCallProvider(
+        onJoin: (request) => lastJoin = request,
+        eventHub: hub,
+      ),
+    );
+    joinSession = JoinSessionUseCase(
+      sessionRepository: sessionRepo,
+      callProvider: routingProvider,
+      authSession: _FakeAuthSession('student_1'),
+      teacherProfileRepository: teacherProfiles,
+      callTelemetry: telemetry,
+    );
+    sessionRepo.sessions = [
+      QuranSession(
+        id: 'session_voice',
+        bookingId: 'booking_1',
+        teacherId: 'teacher_1',
+        studentId: 'student_1',
+        startsAt: DateTime.now().add(const Duration(hours: 1)),
+        endsAt: DateTime.now().add(const Duration(hours: 2)),
+        callType: SessionCallType.voiceCall,
+        status: QuranSessionStatus.scheduled,
+        callProviderKind: SessionCallProviderKind.mock,
+        providerSessionId: 'session_voice',
+      ),
+    ];
+
+    final result = await joinSession(sessionId: 'session_voice');
+    await pumpEventQueue();
+
+    check(result.isRight()).isTrue();
+    check(
+      recordingGateway.recorded.map((event) => event.type).toSet(),
+    ).deepEquals({
+      QuranSessionCallTelemetryEventType.joinRequested,
+      QuranSessionCallTelemetryEventType.joinSucceeded,
+      QuranSessionCallTelemetryEventType.participantConnected,
+    });
+    telemetry.dispose();
+    hub.dispose();
+  });
 }
 
 class _FakeAuthSession implements AuthSessionProvider {

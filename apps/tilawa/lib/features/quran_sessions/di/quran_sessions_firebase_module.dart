@@ -29,6 +29,7 @@ import '../data/firebase/firestore_teacher_repository.dart';
 import '../data/firebase/firestore_user_profile_repository.dart';
 import '../data/firebase/firestore_wallet_data_source.dart';
 import '../data/shared_preferences_friday_review_reminder_store.dart';
+import '../data/firebase/firebase_call_telemetry_gateway.dart';
 import '../data/disabled_payment_provider.dart';
 import '../data/sandbox_payment_provider.dart';
 import 'quran_sessions_lifecycle_module.dart';
@@ -139,6 +140,22 @@ class QuranSessionsFirebaseModule {
 
     QuranSessionsRtcModule.register(sl, config);
 
+    sl.registerLazySingletonIfAbsent<SessionCallProviderEventHub>(
+      () => SessionCallProviderEventHub(),
+    );
+    sl.registerLazySingletonIfAbsent<QuranSessionCallTelemetryGateway>(
+      () => FirebaseCallTelemetryGateway(
+        sl<CallableSessionPayloadBuilder>(),
+        functions: functions,
+      ),
+    );
+    sl.registerLazySingletonIfAbsent<QuranSessionCallTelemetryCoordinator>(
+      () => QuranSessionCallTelemetryCoordinator(
+        gateway: sl<QuranSessionCallTelemetryGateway>(),
+        eventHub: sl<SessionCallProviderEventHub>(),
+      ),
+    );
+
     sl.registerLazySingletonIfAbsent<SessionCallProvider>(
       () => QuranSessionsRtcModule.buildRoutingProvider(sl, config),
     );
@@ -153,6 +170,7 @@ class QuranSessionsFirebaseModule {
         callProvider: sl<SessionCallProvider>(),
         authSession: sl<AuthSessionProvider>(),
         teacherProfileRepository: sl<TeacherProfileRepository>(),
+        callTelemetry: sl<QuranSessionCallTelemetryCoordinator>(),
       ),
     );
 

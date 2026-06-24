@@ -2,8 +2,11 @@ import 'package:flutter/foundation.dart';
 
 import '../../domain/entities/call_join_request.dart';
 import '../../domain/entities/session_call_provider_kind.dart';
+import '../../domain/entities/session_call_provider_event.dart';
+import '../../domain/entities/session_participant_role.dart';
 import 'call_room.dart';
 import 'session_call_provider.dart';
+import 'session_call_provider_event_hub.dart';
 
 class _MockInCallControlState {
   bool microphoneEnabled = true;
@@ -13,9 +16,10 @@ class _MockInCallControlState {
 
 /// Free Beta placeholder for in-app voice/video until Agora/WebRTC ships.
 class MockSessionCallProvider implements SessionCallProvider {
-  const MockSessionCallProvider({this.onJoin});
+  const MockSessionCallProvider({this.onJoin, this.eventHub});
 
   final void Function(CallJoinRequest request)? onJoin;
+  final SessionCallProviderEventHub? eventHub;
 
   static final Map<String, _MockInCallControlState> _controlState =
       <String, _MockInCallControlState>{};
@@ -30,6 +34,17 @@ class MockSessionCallProvider implements SessionCallProvider {
   Future<CallRoom> join(CallJoinRequest request) async {
     onJoin?.call(request);
     final channelId = request.providerSessionId ?? request.sessionId;
+    eventHub?.emit(
+      SessionCallLocalChannelJoined(sessionId: request.sessionId),
+    );
+    eventHub?.emit(
+      SessionCallParticipantConnected(
+        sessionId: request.sessionId,
+        remoteParticipantId: request.role == SessionParticipantRole.teacher
+            ? 'mock_remote_student'
+            : 'mock_remote_teacher',
+      ),
+    );
     return CallRoom(
       sessionId: request.sessionId,
       channelId: channelId,

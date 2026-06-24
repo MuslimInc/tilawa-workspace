@@ -47,8 +47,13 @@ export class SessionDetailComponent implements OnInit {
   readonly errorMessage = this.facade.detailErrorMessage;
   readonly timelineEvents = this.facade.timelineEvents;
   readonly compensationHistory = this.facade.compensationHistory;
+  readonly callTracking = this.facade.callTrackingSummary;
+  readonly callEvents = this.facade.callEvents;
+  readonly callEventsLoadState = this.facade.callEventsLoadState;
+  readonly canLoadMoreCallEvents = this.facade.canLoadMoreCallEvents;
   readonly isActionLoading = this.facade.isActionLoading;
 
+  readonly eventsPanelOpen = signal(false);
   readonly confirmOpen = signal(false);
   readonly reasonOpen = signal(false);
   readonly pendingAction = signal<PendingAction | null>(null);
@@ -80,6 +85,19 @@ export class SessionDetailComponent implements OnInit {
     if (this.bookingId) {
       void this.facade.loadDetail(this.bookingId);
     }
+  }
+
+  /** Opens the raw-events panel, triggering a one-time lazy load on first open. */
+  toggleEventsPanel(): void {
+    const opening = !this.eventsPanelOpen();
+    this.eventsPanelOpen.set(opening);
+    if (opening) {
+      void this.facade.loadCallEvents();
+    }
+  }
+
+  loadMoreCallEvents(): void {
+    void this.facade.loadMoreCallEvents();
   }
 
   openCancel(): void {
