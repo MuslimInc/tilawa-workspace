@@ -151,6 +151,35 @@ void main() {
       expect(find.text('Required field'), findsOneWidget);
     });
 
+    testWidgets(
+      'errorText is exposed to assistive tech as a live region (a11y/feedback)',
+      (tester) async {
+        await tester.pumpWidget(
+          testWrapper(
+            child: const TilawaTextField(
+              label: 'Email',
+              errorText: 'Enter a valid email',
+            ),
+          ),
+        );
+
+        final sem = tester.getSemantics(find.byType(TilawaTextField));
+        expect(sem.flagsCollection.isLiveRegion, isTrue);
+        expect(sem.value, 'Enter a valid email');
+      },
+    );
+
+    testWidgets('no error means no live region (no regression)', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        testWrapper(child: const TilawaTextField(label: 'Email')),
+      );
+
+      final sem = tester.getSemantics(find.byType(TilawaTextField));
+      expect(sem.flagsCollection.isLiveRegion, isFalse);
+    });
+
     testWidgets('respects maxLength and blocks input beyond limit', (
       tester,
     ) async {

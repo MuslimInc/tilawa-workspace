@@ -44,3 +44,20 @@ export class ModerateQuranSessionsUserUseCase {
     return this.gateway.moderateQuranSessionsUser(userId, action, reason);
   }
 }
+
+@Injectable({ providedIn: 'root' })
+export class SetUserTeacherApplicationAccessUseCase {
+  constructor(
+    @Inject(MODERATION_GATEWAY) private readonly gateway: ModerationGateway,
+  ) {}
+
+  execute(
+    userId: string,
+    canApplyAsTeacher: boolean | null,
+  ): Promise<void> {
+    return this.gateway.setUserTeacherApplicationAccess(
+      userId,
+      canApplyAsTeacher,
+    );
+  }
+}

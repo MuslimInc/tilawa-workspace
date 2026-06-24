@@ -3,6 +3,7 @@ import 'dart:ui' show Tristate;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../lib/src/atoms/tilawa_button.dart';
 import '../lib/src/atoms/tilawa_error_state.dart';
 import '../lib/src/atoms/tilawa_icon_toggle.dart';
 import '../lib/src/foundation/color_scheme_ext.dart';
@@ -37,6 +38,24 @@ Color _expectedFeedbackBorder(ColorScheme scheme, TilawaFeedbackVariant v) {
 }
 
 void main() {
+  group('TilawaButton', () {
+    testWidgets('exposes a visible focus ring on keyboard focus (WCAG 2.4.7)', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        _themed(TilawaButton(text: 'Continue', onPressed: () {})),
+      );
+
+      final ButtonStyle style = tester
+          .widget<TextButton>(find.byType(TextButton))
+          .style!;
+      final BorderSide focused = style.side!.resolve({WidgetState.focused})!;
+      expect(focused, isNot(BorderSide.none));
+      expect(focused.width, greaterThan(0));
+      expect(style.overlayColor!.resolve({WidgetState.focused}), isNotNull);
+    });
+  });
+
   group('TilawaPermissionBanner', () {
     testWidgets('action TextButton is at least 48×48 dp with semantics', (
       WidgetTester tester,

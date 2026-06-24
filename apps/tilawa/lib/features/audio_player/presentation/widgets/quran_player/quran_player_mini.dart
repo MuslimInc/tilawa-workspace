@@ -179,6 +179,7 @@ class _YtMusicMiniPlayer extends StatelessWidget {
     this.onSubtitleTap,
     required this.onClose,
     this.shellPillLayout = false,
+    this.shellDockLayout = false,
   });
 
   final AudioEntity audio;
@@ -188,6 +189,7 @@ class _YtMusicMiniPlayer extends StatelessWidget {
   final VoidCallback? onSubtitleTap;
   final VoidCallback onClose;
   final bool shellPillLayout;
+  final bool shellDockLayout;
 
   @override
   Widget build(BuildContext context) {
@@ -203,6 +205,7 @@ class _YtMusicMiniPlayer extends StatelessWidget {
           onSubtitleTap: onSubtitleTap,
           onClose: onClose,
           shellPillLayout: shellPillLayout,
+          shellDockLayout: shellDockLayout,
         );
       },
     );
@@ -219,6 +222,7 @@ class _YtMusicMiniPlayerBody extends StatelessWidget {
     this.onSubtitleTap,
     required this.onClose,
     this.shellPillLayout = false,
+    this.shellDockLayout = false,
   });
 
   final AudioEntity audio;
@@ -229,6 +233,7 @@ class _YtMusicMiniPlayerBody extends StatelessWidget {
   final VoidCallback? onSubtitleTap;
   final VoidCallback onClose;
   final bool shellPillLayout;
+  final bool shellDockLayout;
 
   @override
   Widget build(BuildContext context) {
@@ -236,7 +241,7 @@ class _YtMusicMiniPlayerBody extends StatelessWidget {
     final shellTokens = Theme.of(context).componentTokens.adaptiveShell;
     final theme = Theme.of(context);
     final designTokens = theme.tokens;
-    final bool sleepTimerEnabled = shellPillLayout
+    final bool sleepTimerEnabled = shellPillLayout || shellDockLayout
         ? false
         : context.watch<SettingsCubit>().state.isSleepTimerEnabled;
     final String subtitle = audio.artist ?? context.l10n.unknownReciter;
@@ -261,6 +266,8 @@ class _YtMusicMiniPlayerBody extends StatelessWidget {
             size: Size.square(
               shellPillLayout
                   ? kTilawaMediaPlayerBarShellArtworkSize
+                  : shellDockLayout
+                  ? kTilawaMediaPlayerBarCompactArtworkSize
                   : barTokens.artworkSize,
             ),
           )
@@ -303,13 +310,18 @@ class _YtMusicMiniPlayerBody extends StatelessWidget {
             isSleepTimerActive: snapshot.isSleepTimerActive,
             isSleepTimerEnabled: sleepTimerEnabled,
             shellPillLayout: shellPillLayout,
+            shellDockLayout: shellDockLayout,
             pillBorderRadius: shellPillLayout
                 ? designTokens.radiusPill(constraints.maxHeight)
                 : null,
             backgroundColorOverride: shellPillLayout
                 ? shellTokens.bottomNavBackgroundColor
                 : null,
-            contentPaddingOverride: shellPillLayout
+            contentPaddingOverride: shellDockLayout
+                ? EdgeInsets.symmetric(
+                    horizontal: designTokens.spaceMedium,
+                  )
+                : shellPillLayout
                 ? EdgeInsets.symmetric(
                     horizontal: shellTokens.bottomNavInternalPadding,
                   )

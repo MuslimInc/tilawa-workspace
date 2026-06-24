@@ -73,6 +73,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
     this.sleepTimerTooltip,
     this.pillBorderRadius,
     this.shellPillLayout = false,
+    this.shellDockLayout = false,
     this.contentPaddingOverride,
     this.backgroundColorOverride,
   });
@@ -130,6 +131,11 @@ class TilawaMediaPlayerBar extends StatelessWidget {
   /// Compact shell dock: smaller artwork padding, no sleep timer.
   final bool shellPillLayout;
 
+  /// Full-width shell dock above bottom nav (YouTube Music style).
+  ///
+  /// Square edges, top divider only, two-line metadata when height allows.
+  final bool shellDockLayout;
+
   /// Optional override for [TilawaMediaPlayerBarTokens.contentPadding].
   final EdgeInsetsGeometry? contentPaddingOverride;
 
@@ -167,9 +173,12 @@ class TilawaMediaPlayerBar extends StatelessWidget {
           decoration: .none,
           decorationColor: Colors.transparent,
         );
-    final borderRadius = BorderRadius.circular(
-      pillBorderRadius ?? componentTokens.borderRadius,
-    );
+    final bool isShellChrome = shellDockLayout || shellPillLayout;
+    final borderRadius = shellDockLayout
+        ? BorderRadius.zero
+        : BorderRadius.circular(
+            pillBorderRadius ?? componentTokens.borderRadius,
+          );
     final TextDirection direction = Directionality.of(context);
     final EdgeInsets basePadding =
         (contentPaddingOverride ?? componentTokens.contentPadding).resolve(
@@ -177,7 +186,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
         );
     double verticalPaddingTop = basePadding.top;
     double verticalPaddingBottom = basePadding.bottom;
-    if (!shellPillLayout &&
+    if (!isShellChrome &&
         constraints.hasBoundedHeight &&
         constraints.maxHeight.isFinite) {
       final double rowBudget =
@@ -217,9 +226,9 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                 20 +
                 componentTokens.playPauseButtonSize;
     final bool showSleepTimer =
-        isSleepTimerEnabled && !shellPillLayout && !tightHeight;
+        isSleepTimerEnabled && !isShellChrome && !tightHeight;
     final bool useCompactControls =
-        shellPillLayout ||
+        isShellChrome ||
         tilawaMediaPlayerBarNeedsCompactControls(
           maxWidth: resolvedLayoutWidth,
           tokens: componentTokens,
@@ -227,15 +236,16 @@ class TilawaMediaPlayerBar extends StatelessWidget {
         );
     final double artworkSize = shellPillLayout
         ? kTilawaMediaPlayerBarShellArtworkSize
-        : useCompactControls
+        : shellDockLayout || useCompactControls
         ? kTilawaMediaPlayerBarCompactArtworkSize
         : componentTokens.artworkSize;
-    final bool useSingleLineMetadata = shellPillLayout || tightHeight;
+    final bool useSingleLineMetadata =
+        shellPillLayout || (tightHeight && !shellDockLayout);
 
-    final double artworkInfoGap = shellPillLayout
+    final double artworkInfoGap = isShellChrome
         ? designTokens.spaceExtraSmall
         : componentTokens.artworkInfoGap;
-    final double infoControlsGap = shellPillLayout
+    final double infoControlsGap = isShellChrome
         ? designTokens.spaceExtraSmall
         : componentTokens.infoControlsGap;
 
@@ -321,6 +331,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
           isSleepTimerActive: isSleepTimerActive,
           showSleepTimer: showSleepTimer,
           compact: useCompactControls,
+          shellDockLayout: shellDockLayout,
           onPlayPause: onPlayPause,
           onPrevious: onPrevious,
           onNext: onNext,
@@ -336,7 +347,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
     );
 
     final bool useCollapsedBandLayout =
-        shellPillLayout ||
+        isShellChrome ||
         (constraints.hasBoundedHeight &&
             constraints.maxHeight.isFinite &&
             tightHeight);
@@ -354,7 +365,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
           )
         : (
             topBand: designTokens.progressHeight,
-            bottomBand: shellPillLayout
+            bottomBand: isShellChrome
                 ? kTilawaMediaPlayerBarShellEdgeBandHeight
                 : 0.0,
           );
@@ -363,7 +374,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: backgroundColorOverride ?? componentTokens.shellBackgroundColor,
         borderRadius: borderRadius,
-        boxShadow: componentTokens.shadowOpacity == 0
+        boxShadow: shellDockLayout || componentTokens.shadowOpacity == 0
             ? null
             : [
                 BoxShadow(
@@ -698,6 +709,7 @@ class _TransportControls extends StatelessWidget {
     required this.isSleepTimerActive,
     required this.showSleepTimer,
     required this.compact,
+    required this.shellDockLayout,
     required this.onPlayPause,
     required this.onPrevious,
     required this.onNext,
@@ -720,6 +732,7 @@ class _TransportControls extends StatelessWidget {
   final bool isSleepTimerActive;
   final bool showSleepTimer;
   final bool compact;
+  final bool shellDockLayout;
   final VoidCallback? onPlayPause;
   final VoidCallback? onPrevious;
   final VoidCallback? onNext;
@@ -733,13 +746,19 @@ class _TransportControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: .ltr,
-      child: Row(
-        mainAxisSize: .min,
-        spacing: componentTokens.controlsGap,
-        children: [
-          _PlayPauseButton(
+    final Widget playPause = shellDockLayout
+        ? _TransportIconButton(
+            size: componentTokens.controlButtonSize,
+            tooltip: isPlaying
+                ? (pauseTooltip ?? 'Pause')
+                : (playTooltip ?? 'Play'),
+            icon: isPlaying ? TilawaIcons.pauseSmall : TilawaIcons.playSmall,
+            iconSize: designTokens.iconSizeLarge,
+            enabled: true,
+            color: colorScheme.onSurface,
+            onPressed: onPlayPause,
+          )
+        : _PlayPauseButton(
             size: componentTokens.playPauseButtonSize,
             iconSize: componentTokens.playPauseIconSize,
             isPlaying: isPlaying,
@@ -747,7 +766,24 @@ class _TransportControls extends StatelessWidget {
             playTooltip: playTooltip,
             pauseTooltip: pauseTooltip,
             onPressed: onPlayPause,
-          ),
+          );
+
+    final Widget playPauseControl =
+        shellDockLayout && playPauseSemanticIdentifier != null
+        ? Semantics(
+            identifier: playPauseSemanticIdentifier,
+            button: true,
+            child: playPause,
+          )
+        : playPause;
+
+    return Directionality(
+      textDirection: .ltr,
+      child: Row(
+        mainAxisSize: .min,
+        spacing: componentTokens.controlsGap,
+        children: [
+          playPauseControl,
           if (!compact && showSleepTimer)
             _TransportIconButton(
               size: componentTokens.controlButtonSize,

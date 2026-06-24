@@ -6,6 +6,7 @@ import '../data/datasources/market_scheduling_config_remote_data_source.dart';
 import '../data/datasources/schedule_remote_data_source.dart';
 import '../data/datasources/session_policy_remote_data_source.dart';
 import '../data/datasources/session_remote_data_source.dart';
+import '../data/datasources/teacher_application_access_remote_data_source.dart';
 import '../data/datasources/teacher_application_remote_data_source.dart';
 import '../data/datasources/teacher_profile_remote_data_source.dart';
 import '../data/datasources/teacher_remote_data_source.dart';
@@ -19,6 +20,7 @@ import '../data/repositories/market_scheduling_config_repository_impl.dart';
 import '../data/repositories/schedule_repository_impl.dart';
 import '../data/repositories/session_policy_repository_impl.dart';
 import '../data/repositories/session_repository_impl.dart';
+import '../data/repositories/teacher_application_access_repository_impl.dart';
 import '../data/repositories/teacher_application_repository_impl.dart';
 import '../data/repositories/teacher_profile_repository_impl.dart';
 import '../data/repositories/teacher_repository_impl.dart';
@@ -34,6 +36,7 @@ import '../domain/repositories/market_scheduling_config_repository.dart';
 import '../domain/repositories/schedule_repository.dart';
 import '../domain/repositories/session_policy_repository.dart';
 import '../domain/repositories/session_repository.dart';
+import '../domain/repositories/teacher_application_access_repository.dart';
 import '../domain/repositories/teacher_application_repository.dart';
 import '../domain/repositories/teacher_profile_repository.dart';
 import '../domain/repositories/teacher_repository.dart';
@@ -58,6 +61,7 @@ import '../domain/usecases/is_slot_booked_usecase.dart';
 import '../domain/usecases/get_teachers_usecase.dart';
 import '../domain/usecases/get_user_profile_usecase.dart';
 import '../domain/usecases/get_wallet_snapshot_usecase.dart';
+import '../domain/usecases/resolve_teacher_application_access_usecase.dart';
 import '../domain/usecases/reject_teacher_application_usecase.dart';
 import '../domain/usecases/revoke_teacher_profile_usecase.dart';
 import '../domain/usecases/save_teacher_application_draft_usecase.dart';
@@ -96,6 +100,8 @@ class QuranSessionsModule {
     required MarketSchedulingConfigRemoteDataSource
     marketSchedulingConfigDataSource,
     required SessionPolicyRemoteDataSource sessionPolicyDataSource,
+    required TeacherApplicationAccessRemoteDataSource
+    teacherApplicationAccessDataSource,
     required TeacherApplicationRemoteDataSource teacherApplicationDataSource,
     required TeacherProfileRemoteDataSource teacherProfileDataSource,
     required AvailabilityRemoteDataSource availabilityDataSource,
@@ -113,6 +119,9 @@ class QuranSessionsModule {
       marketSchedulingConfigDataSource,
     );
     final policyRepo = SessionPolicyRepositoryImpl(sessionPolicyDataSource);
+    final teacherApplicationAccessRepo = TeacherApplicationAccessRepositoryImpl(
+      teacherApplicationAccessDataSource,
+    );
     final applicationRepo = TeacherApplicationRepositoryImpl(
       teacherApplicationDataSource,
     );
@@ -141,6 +150,9 @@ class QuranSessionsModule {
       marketSchedulingConfigRepo,
     );
     registerSingleton<SessionPolicyRepository>(policyRepo);
+    registerSingleton<TeacherApplicationAccessRepository>(
+      teacherApplicationAccessRepo,
+    );
     registerSingleton<TeacherApplicationRepository>(applicationRepo);
     registerSingleton<TeacherProfileRepository>(teacherProfileRepo);
     registerSingleton<AvailabilityProvider>(availabilityProvider);
@@ -177,6 +189,9 @@ class QuranSessionsModule {
     registerSingleton(SaveTeacherApplicationDraftUseCase(applicationRepo));
     registerSingleton(SubmitTeacherApplicationUseCase(applicationRepo));
     registerSingleton(GetTeacherApplicationStatusUseCase(applicationRepo));
+    registerSingleton(
+      ResolveTeacherApplicationAccessUseCase(teacherApplicationAccessRepo),
+    );
     registerSingleton<GetCurrentUserTeacherCapabilityUseCase>(
       GetCurrentUserTeacherCapabilityUseCase(
         applicationRepository: applicationRepo,

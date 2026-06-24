@@ -74,6 +74,7 @@ export interface QuranSessionsUserListItemVm {
   readonly email: string;
   readonly photoUrl: string | null;
   readonly accountStatus: string;
+  readonly canApplyAsTeacher: boolean | null;
   readonly hasDuplicateEmail: boolean;
   readonly updatedAt: Date | null;
   readonly createdAt: Date | null;
@@ -241,6 +242,7 @@ export class QuranSessionsViewModelMapper {
       email: user.email ?? '—',
       photoUrl: user.avatarUrl,
       accountStatus: user.accountStatus,
+      canApplyAsTeacher: user.canApplyAsTeacher,
       hasDuplicateEmail,
       updatedAt: user.updatedAt,
       createdAt: user.createdAt,

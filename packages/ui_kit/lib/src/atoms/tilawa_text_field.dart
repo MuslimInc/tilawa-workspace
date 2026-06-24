@@ -257,8 +257,18 @@ class _TilawaTextFieldState extends State<TilawaTextField> {
                 )
               : widget.suffixIcon);
 
+    final String? errorText = widget.errorText?.trim().isEmpty ?? true
+        ? null
+        : widget.errorText;
+    final bool hasError = errorText != null;
+
     return Semantics(
       label: widget.semanticLabel ?? widget.label,
+      // Announce validation errors to assistive tech the moment they appear
+      // (Feedback / Accessibility — mirrors TilawaFeedbackStrip's live region).
+      // The visual error is still rendered by the InputDecorator below.
+      liveRegion: hasError,
+      value: errorText,
       child: TextFormField(
         controller: _controller,
         focusNode: _focusNode,

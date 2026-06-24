@@ -105,9 +105,7 @@ class QuranPlayerWidget extends StatefulWidget {
           .shellChrome;
       if (shell != null) {
         if (shell.bottomNavBarHeight > 0) {
-          return collapsedHeight(context) +
-              QuranPlayerLayoutInsets.phoneMiniPlayerTopPadding(context) +
-              QuranPlayerLayoutInsets.phoneMiniPlayerNavGap(context);
+          return collapsedHeight(context);
         }
         return QuranPlayerLayoutInsets.phoneFooterSlotHeight(
               context,
@@ -128,6 +126,9 @@ class QuranPlayerWidget extends StatefulWidget {
   /// On phone shell layouts the mini-player sits in the shell footer column
   /// below this [Scaffold], so only a small margin is needed. When the player
   /// overlays the scaffold (e.g. wide layout), use [collapsedFootprint].
+  ///
+  /// Pushed shell routes (e.g. `/reciter/:id`) without a visible mini-player
+  /// need [floatingBottomPadding] so the FAB clears the system nav bar.
   static double fabBottomOffset(BuildContext context) {
     final String location = GoRouterState.of(context).uri.path;
     if (!QuranPlayerRoutePolicy.shouldShowPlayer(location)) {
@@ -138,14 +139,27 @@ class QuranPlayerWidget extends StatefulWidget {
       final QuranPlayerShellChrome? shell = context
           .read<QuranPlayerChromeNotifier>()
           .shellChrome;
-      // Shell footer: mini player lives in [Scaffold.bottomNavigationBar]
-      // above the bottom bar, so only a standard FAB margin is needed.
-      if (shell != null && shell.bottomNavBarHeight > 0) {
-        return context.tokens.spaceSmall;
+      if (shell != null) {
+        if (shell.bottomNavBarHeight > 0) {
+          return context.tokens.spaceSmall;
+        }
+        if (_shellFooterShowsMiniPlayer(context)) {
+          return context.tokens.spaceSmall;
+        }
+        return context.floatingBottomPadding;
       }
     }
 
     return collapsedFootprint(context);
+  }
+
+  static bool _shellFooterShowsMiniPlayer(BuildContext context) {
+    try {
+      final AudioPlayerState state = context.read<AudioPlayerBloc>().state;
+      return state.shouldShowBottomPlayer && state.currentAudio != null;
+    } on ProviderNotFoundException {
+      return false;
+    }
   }
 
   /// Height of the bottom navigation bar to offset the mini player.
@@ -1263,63 +1277,29 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     );
   }
 
-  /// Mini player anchored in the shell footer column (pill above bottom nav).
+  /// Mini player anchored in the shell footer column (flush above bottom nav).
   Widget _buildShellFooterMini(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
-    final TilawaAdaptiveShellTokens shellTokens =
-        theme.componentTokens.adaptiveShell;
     final double bottomSpacing = _shellFooterBottomSpacing(context);
-    final double gapAboveNav = widget.hostAbsorbsBottomSafeArea
-        ? QuranPlayerLayoutInsets.phoneMiniPlayerNavGap(context)
-        : 0;
-    final double pillRadius = tokens.radiusPill(_miniPlayerHeight);
 
-    Widget miniBar = DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(pillRadius),
-        boxShadow: shellTokens.bottomNavShadowOpacity > 0
-            ? [
-                BoxShadow(
-                  color: theme.colorScheme.shadow.withValues(
-                    alpha: shellTokens.bottomNavShadowOpacity,
-                  ),
-                  blurRadius: shellTokens.bottomNavShadowBlur,
-                  offset: shellTokens.bottomNavShadowOffset,
-                ),
-              ]
-            : null,
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(pillRadius),
-        child: SizedBox(
-          height: _miniPlayerHeight,
-          width: double.infinity,
-          child: _buildPlayerTree(
-            context,
-            hostRect:
-                Offset.zero &
-                Size(MediaQuery.sizeOf(context).width, _miniPlayerHeight),
-            overlaySize: MediaQuery.sizeOf(context),
-            showMiniInTree: true,
-            miniAnchoredInFooter: true,
-          ),
-        ),
+    final Widget miniBar = SizedBox(
+      height: _miniPlayerHeight,
+      width: double.infinity,
+      child: _buildPlayerTree(
+        context,
+        hostRect:
+            Offset.zero &
+            Size(MediaQuery.sizeOf(context).width, _miniPlayerHeight),
+        overlaySize: MediaQuery.sizeOf(context),
+        showMiniInTree: true,
+        miniAnchoredInFooter: true,
       ),
     );
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Padding(
-          padding: EdgeInsets.fromLTRB(
-            shellTokens.bottomNavHorizontalMargin,
-            shellTokens.bottomNavInternalPadding,
-            shellTokens.bottomNavHorizontalMargin,
-            gapAboveNav,
-          ),
-          child: miniBar,
-        ),
+        miniBar,
         if (bottomSpacing > 0)
           ColoredBox(
             color: theme.scaffoldBackgroundColor,
@@ -1471,7 +1451,7 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
                 onTap: expand,
                 onSubtitleTap: () =>
                     QuranPlayerShellNavigation.openRecitersTab(context),
-                shellPillLayout: true,
+                shellDockLayout: true,
                 onClose: _dismissWithUndo,
               )
             : null;
@@ -1565,7 +1545,7 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
                               context,
                             )
                           : null,
-                      shellPillLayout: miniAnchoredInFooter,
+                      shellDockLayout: miniAnchoredInFooter,
                       onClose: _dismissWithUndo,
                     ),
               ),

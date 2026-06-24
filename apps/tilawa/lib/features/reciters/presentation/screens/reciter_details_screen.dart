@@ -208,6 +208,8 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
+    final double fabBottomOffset =
+        QuranPlayerWidget.fabBottomOffset(context) + tokens.spaceLarge;
     final bool showBottomPlayer = context.select((AudioPlayerBloc bloc) {
       final AudioPlayerState state = bloc.state;
       return state.shouldShowBottomPlayer && state.currentAudio != null;
@@ -241,11 +243,10 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
               ),
             ),
           ),
-          floatingActionButtonLocation: showBottomPlayer
-              ? _CustomFloatingActionButtonLocation(
-                  offset: QuranPlayerWidget.fabBottomOffset(context),
-                )
-              : FloatingActionButtonLocation.endFloat,
+          floatingActionButtonLocation: TilawaFabLocation.placement(
+            TilawaFabPlacement.end,
+            bottomOffset: fabBottomOffset,
+          ),
           body: TilawaContentBounds(
             kind: TilawaContentKind.media,
             child: BlocConsumer<ReciterDetailsBloc, ReciterDetailsState>(
@@ -471,13 +472,17 @@ class _ReciterDetailsContent extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final tokens = theme.tokens;
     final bool keyboardOpen = context.isKeyboardVisible;
+    final double fabBottomOffset =
+        QuranPlayerWidget.fabBottomOffset(context) + tokens.spaceLarge;
+    final double fabClearance =
+        fabBottomOffset + kTilawaMinInteractiveDimension + tokens.spaceLarge;
     // [TilawaAdaptiveShell] lays out the mini player in [Scaffold.bottomNavigationBar],
     // so the scroll body already ends above the player — only add a small gap.
     final double bottomPadding = keyboardOpen
         ? 0
         : showBottomPlayer
         ? tokens.spaceSmall
-        : context.floatingBottomPadding;
+        : fabClearance;
     final double emptyStateIconSize =
         tokens.iconSizeExtraLarge + tokens.iconSizeSmall;
     final currentAudio = context.select(
@@ -666,25 +671,5 @@ class _ReciterDetailsContent extends StatelessWidget {
           child: TilawaLoadingIndicator(),
         );
     }
-  }
-}
-
-class _CustomFloatingActionButtonLocation extends FloatingActionButtonLocation {
-  const _CustomFloatingActionButtonLocation({required this.offset});
-  final double offset;
-
-  @override
-  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    // Default miniEndFloat style position
-    final double x =
-        scaffoldGeometry.scaffoldSize.width -
-        scaffoldGeometry.floatingActionButtonSize.width -
-        16;
-    final double y =
-        scaffoldGeometry.scaffoldSize.height -
-        scaffoldGeometry.floatingActionButtonSize.height -
-        offset;
-
-    return Offset(x, y);
   }
 }

@@ -483,7 +483,7 @@ class _QuranSessionsHomeRoute extends StatefulWidget {
 }
 
 class _QuranSessionsHomeRouteState extends State<_QuranSessionsHomeRoute> {
-  bool _showTeacherApplyEntry = true;
+  bool _showTeacherApplyEntry = false;
 
   @override
   void initState() {
@@ -495,16 +495,24 @@ class _QuranSessionsHomeRouteState extends State<_QuranSessionsHomeRoute> {
     final userId = quranSessionsCurrentUserId(getIt);
     if (userId == null) return;
 
-    final result = await getIt<GetCurrentUserTeacherCapabilityUseCase>()(
+    final accessResult = await getIt<ResolveTeacherApplicationAccessUseCase>()(
       userId,
     );
+    final capabilityResult =
+        await getIt<GetCurrentUserTeacherCapabilityUseCase>()(userId);
     if (!mounted) return;
 
-    final canApply = result.fold(
-      (_) => true,
-      (capability) => capability.canStartOrContinueApply,
+    final remoteAllowed = accessResult.fold(
+      (_) => false,
+      (access) => access.canApplyAsTeacher,
     );
-    setState(() => _showTeacherApplyEntry = canApply);
+    final canShow = capabilityResult.fold((_) => false, (capability) {
+      if (capability.state != TeacherCapabilityState.none) {
+        return capability.canStartOrContinueApply;
+      }
+      return remoteAllowed;
+    });
+    setState(() => _showTeacherApplyEntry = canShow);
   }
 
   @override

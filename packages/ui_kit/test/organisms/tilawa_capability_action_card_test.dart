@@ -153,6 +153,37 @@ void main() {
       check(subtitleStyle?.color).isNotNull();
       check(titleStyle!.color != subtitleStyle!.color).isTrue();
     });
+    testWidgets(
+      'complete teacher profile copy fits without vertical overflow at settings width',
+      (WidgetTester tester) async {
+        await tester.binding.setSurfaceSize(const Size(390, 800));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+
+        const String title = 'Complete teacher profile';
+        const String subtitle =
+            'Add the public details students see before opening your dashboard.';
+
+        await tester.pumpWidget(
+          _wrap(
+            brightness: Brightness.light,
+            child: const SizedBox(
+              width: 350,
+              child: TilawaCapabilityActionCard(
+                title: title,
+                subtitle: subtitle,
+                leadingIcon: TilawaIcons.teacherCapability,
+                badgeLabel: 'Verified teacher',
+                onTap: _noop,
+                margin: EdgeInsets.zero,
+              ),
+            ),
+          ),
+        );
+
+        expect(tester.takeException(), isNull);
+      },
+    );
+
     testWidgets('matches skeleton height for canonical badge layout', (
       WidgetTester tester,
     ) async {

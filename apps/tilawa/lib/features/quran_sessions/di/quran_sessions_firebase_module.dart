@@ -23,6 +23,7 @@ import '../data/firebase/firestore_market_scheduling_config_data_source.dart';
 import '../data/firebase/firestore_schedule_repository.dart';
 import '../data/firebase/firestore_session_policy_repository.dart';
 import '../data/firebase/firestore_session_repository.dart';
+import '../data/firebase/firestore_teacher_application_access_data_source.dart';
 import '../data/firebase/firestore_teacher_application_repository.dart';
 import '../data/firebase/firestore_teacher_profile_repository.dart';
 import '../data/firebase/firestore_teacher_repository.dart';
@@ -110,6 +111,8 @@ class QuranSessionsFirebaseModule {
       marketSchedulingConfigDataSource:
           FirestoreMarketSchedulingConfigDataSource(firestore),
       sessionPolicyDataSource: FirestoreSessionPolicyDataSource(firestore),
+      teacherApplicationAccessDataSource:
+          FirestoreTeacherApplicationAccessDataSource(firestore),
       teacherApplicationDataSource: FirestoreTeacherApplicationDataSource(
         firestore,
       ),

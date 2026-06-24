@@ -1,46 +1,95 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 
+import '../cubit/teacher_application_access_cubit.dart';
 import '../cubit/teacher_capability_cubit.dart';
 
-/// Loads [TeacherCapability] for Settings profile + teaching section.
+/// Loads [TeacherCapability] and remote apply access for Settings teaching UI.
 ///
-/// Refreshes when the settings route becomes visible again (e.g. after popping
-/// back from teacher application status), when the app resumes, and when an FCM
-/// `teacher_application_reviewed` push arrives while this scope is mounted.
+/// Refreshes on auth changes, app resume, route visibility, and FCM review push.
 class SettingsTeacherCapabilityScope extends StatelessWidget {
   const SettingsTeacherCapabilityScope({super.key, required this.child});
 
   final Widget child;
 
-  static TeacherCapability? maybeOf(BuildContext context) {
+  static TeacherCapability? maybeCapabilityOf(BuildContext context) {
     return context.select(
       (TeacherCapabilityCubit cubit) => cubit.state.capability,
     );
   }
 
-  static bool isLoadingOf(BuildContext context) {
+  static bool capabilityLoadedOf(BuildContext context) {
     return context.select(
-      (TeacherCapabilityCubit cubit) => cubit.state.isLoading,
+      (TeacherCapabilityCubit cubit) => cubit.state.hasLoaded,
     );
   }
 
-  /// Reloads capability from Firestore (e.g. after admin approval).
+  static bool canApplyAsTeacherOf(BuildContext context) {
+    return context.select(
+      (TeacherApplicationAccessCubit cubit) => cubit.state.canApplyAsTeacher,
+    );
+  }
+
+  static bool accessResolvedOf(BuildContext context) {
+    return context.select(
+      (TeacherApplicationAccessCubit cubit) => cubit.state.hasResolved,
+    );
+  }
+
+  static bool shouldShowTeachingSectionOf(BuildContext context) {
+    final capabilityState = context.watch<TeacherCapabilityCubit>().state;
+    final accessState = context.watch<TeacherApplicationAccessCubit>().state;
+    return SettingsTeachingVisibility.shouldShowSection(
+      capabilityLoaded: capabilityState.hasLoaded,
+      capability: capabilityState.capability,
+      accessResolved: accessState.hasResolved,
+      canApplyAsTeacher: accessState.canApplyAsTeacher,
+    );
+  }
+
+  static bool isTeachingSectionLoadingOf(BuildContext context) {
+    final capabilityState = context.watch<TeacherCapabilityCubit>().state;
+    final accessState = context.watch<TeacherApplicationAccessCubit>().state;
+    if (!shouldShowTeachingSectionOf(context) &&
+        !SettingsTeachingVisibility.isLoading(
+          capabilityLoaded: capabilityState.hasLoaded,
+          capability: capabilityState.capability,
+          accessResolved: accessState.hasResolved,
+        )) {
+      return false;
+    }
+    return SettingsTeachingVisibility.isLoading(
+      capabilityLoaded: capabilityState.hasLoaded,
+      capability: capabilityState.capability,
+      accessResolved: accessState.hasResolved,
+    );
+  }
+
+  /// Reloads capability + access (e.g. after admin approval).
   static void refreshOf(BuildContext context) {
     context.read<TeacherCapabilityCubit>().refresh();
+    context.read<TeacherApplicationAccessCubit>().refresh();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => TeacherCapabilityCubit()..load(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => TeacherCapabilityCubit()..load(),
+        ),
+        BlocProvider(
+          create: (_) => TeacherApplicationAccessCubit()..load(),
+        ),
+      ],
       child: _SettingsTeacherCapabilityLifecycleListener(child: child),
     );
   }
 }
 
-/// Observes app resume and route visibility; delegates refresh to the cubit.
+/// Observes auth, app resume, and route visibility.
 class _SettingsTeacherCapabilityLifecycleListener extends StatefulWidget {
   const _SettingsTeacherCapabilityLifecycleListener({required this.child});
 
@@ -68,10 +117,16 @@ class _SettingsTeacherCapabilityLifecycleListenerState
     super.dispose();
   }
 
+  void _refreshAll() {
+    if (!mounted) return;
+    context.read<TeacherCapabilityCubit>().refresh();
+    context.read<TeacherApplicationAccessCubit>().refresh();
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      context.read<TeacherCapabilityCubit>().refresh();
+      _refreshAll();
     }
   }
 
@@ -79,13 +134,13 @@ class _SettingsTeacherCapabilityLifecycleListenerState
   void didChangeDependencies() {
     super.didChangeDependencies();
     final isCurrent = ModalRoute.of(context)?.isCurrent ?? false;
-    final cubit = context.read<TeacherCapabilityCubit>();
-    if (isCurrent && cubit.state.hasLoaded && !_wasRouteCurrent) {
+    final capabilityCubit = context.read<TeacherCapabilityCubit>();
+    if (isCurrent && capabilityCubit.state.hasLoaded && !_wasRouteCurrent) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         final stillCurrent = ModalRoute.of(context)?.isCurrent ?? false;
         if (stillCurrent) {
-          context.read<TeacherCapabilityCubit>().refresh();
+          _refreshAll();
         }
       });
     }
@@ -93,5 +148,12 @@ class _SettingsTeacherCapabilityLifecycleListenerState
   }
 
   @override
-  Widget build(BuildContext context) => widget.child;
+  Widget build(BuildContext context) {
+    return BlocListener<AuthBloc, AuthState>(
+      listenWhen: (previous, current) =>
+          previous.runtimeType != current.runtimeType,
+      listener: (context, state) => _refreshAll(),
+      child: widget.child,
+    );
+  }
 }

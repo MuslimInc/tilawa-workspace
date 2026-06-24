@@ -72,6 +72,24 @@ class _UnimplementedProfileRepository implements TeacherProfileRepository {
   dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
 }
 
+class _FakeAccessRepository implements TeacherApplicationAccessRepository {
+  _FakeAccessRepository(this.canApply);
+
+  final bool canApply;
+
+  @override
+  Future<Either<QuranSessionsFailure, TeacherApplicationAccess>> resolveForUser(
+    String userId,
+  ) async {
+    return Right(TeacherApplicationAccess(canApplyAsTeacher: canApply));
+  }
+}
+
+class _StubAccessUseCase extends ResolveTeacherApplicationAccessUseCase {
+  _StubAccessUseCase({bool canApply = true})
+    : super(_FakeAccessRepository(canApply));
+}
+
 Future<void> _pumpSettingsTeachingSection(
   WidgetTester tester,
   _MockAuthBloc authBloc,
@@ -79,9 +97,13 @@ Future<void> _pumpSettingsTeachingSection(
   GoRouter? router,
   Locale? locale,
   bool useSection = true,
+  bool canApplyAsTeacher = true,
 }) async {
   scopeGetIt().registerSingleton<GetCurrentUserTeacherCapabilityUseCase>(
     _StubTeacherCapabilityUseCase(capability),
+  );
+  scopeGetIt().registerSingleton<ResolveTeacherApplicationAccessUseCase>(
+    _StubAccessUseCase(canApply: canApplyAsTeacher),
   );
 
   final Widget teachingSection = SettingsTeacherCapabilityScope(
@@ -380,6 +402,9 @@ void main() {
     scopeGetIt().registerSingleton<GetCurrentUserTeacherCapabilityUseCase>(
       useCase,
     );
+    scopeGetIt().registerSingleton<ResolveTeacherApplicationAccessUseCase>(
+      _StubAccessUseCase(canApply: true),
+    );
 
     final en = await QuranSessionsLocalizations.delegate.load(
       const Locale('en'),
@@ -424,6 +449,9 @@ void main() {
     ]);
     scopeGetIt().registerSingleton<GetCurrentUserTeacherCapabilityUseCase>(
       useCase,
+    );
+    scopeGetIt().registerSingleton<ResolveTeacherApplicationAccessUseCase>(
+      _StubAccessUseCase(canApply: true),
     );
 
     final en = await QuranSessionsLocalizations.delegate.load(

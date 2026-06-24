@@ -368,7 +368,8 @@ service cloud.firestore {
         && quranSessionsProfileEligibilityFieldUnchanged('countryCode')
         && quranSessionsProfileEligibilityFieldUnchanged('cityId')
         && quranSessionsProfileEligibilityFieldUnchanged('guardianId')
-        && quranSessionsProfileEligibilityFieldUnchanged('role');
+        && quranSessionsProfileEligibilityFieldUnchanged('role')
+        && quranSessionsProfileEligibilityFieldUnchanged('canApplyAsTeacher');
     }
 
     function quranSessionsProfileModerationUnchanged() {

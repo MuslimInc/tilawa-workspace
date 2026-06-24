@@ -245,6 +245,23 @@ void main() {
               ),
             ),
           ),
+          GoldenTestScenario(
+            name: 'Complete profile settings width light',
+            child: TilawaPreviewWrapper(
+              child: SizedBox(
+                width: 350,
+                child: TilawaCapabilityActionCard(
+                  title: 'Complete teacher profile',
+                  subtitle:
+                      'Add the public details students see before opening your dashboard.',
+                  leadingIcon: TilawaIcons.teacherCapability,
+                  badgeLabel: 'Verified teacher',
+                  onTap: () {},
+                  margin: EdgeInsets.zero,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );

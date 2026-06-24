@@ -9,6 +9,7 @@ describe('ReviewTeacherApplicationUseCase', () => {
       reviewTeacherApplication: async () => undefined,
       moderateTeacherProfile: async () => undefined,
       moderateQuranSessionsUser: async () => undefined,
+      setUserTeacherApplicationAccess: async () => undefined,
     };
 
     const useCase = new ReviewTeacherApplicationUseCase(gateway);

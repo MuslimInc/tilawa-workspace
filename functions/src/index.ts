@@ -5,6 +5,7 @@ export { reviewTeacherApplication } from "./reviewTeacherApplication";
 export { registerActiveDevice } from "./registerActiveDevice";
 export { moderateTeacherProfile } from "./moderateTeacherProfile";
 export { moderateQuranSessionsUser } from "./moderateQuranSessionsUser";
+export { setTeacherApplicationAccess } from "./setTeacherApplicationAccess";
 export { syncTeacherProfileVisibility } from "./syncTeacherProfileVisibility";
 export { createSessionBooking } from "./quranSessions/createSessionBooking";
 export { cancelSessionBooking } from "./quranSessions/cancelSessionBooking";

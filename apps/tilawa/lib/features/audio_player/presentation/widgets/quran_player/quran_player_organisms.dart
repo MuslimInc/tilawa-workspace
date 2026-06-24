@@ -98,8 +98,8 @@ class _MiniPlayerTransition extends StatelessWidget {
     required this.onTap,
     this.onSubtitleTap,
     required this.onClose,
-    this.shellPillLayout = false,
-  });
+    this.shellDockLayout = false,
+  }) : shellPillLayout = false;
 
   final double progress;
   final AudioEntity audio;
@@ -121,6 +121,7 @@ class _MiniPlayerTransition extends StatelessWidget {
   final VoidCallback? onSubtitleTap;
   final VoidCallback onClose;
   final bool shellPillLayout;
+  final bool shellDockLayout;
 
   @override
   Widget build(BuildContext context) {
@@ -149,6 +150,7 @@ class _MiniPlayerTransition extends StatelessWidget {
             onSubtitleTap: onSubtitleTap,
             onClose: onClose,
             shellPillLayout: shellPillLayout,
+            shellDockLayout: shellDockLayout,
           ),
         ),
       ),
@@ -165,6 +167,7 @@ class _MiniPlayerOrganism extends StatelessWidget {
     this.onSubtitleTap,
     required this.onClose,
     this.shellPillLayout = false,
+    this.shellDockLayout = false,
   });
 
   final AudioEntity audio;
@@ -174,6 +177,7 @@ class _MiniPlayerOrganism extends StatelessWidget {
   final VoidCallback? onSubtitleTap;
   final VoidCallback onClose;
   final bool shellPillLayout;
+  final bool shellDockLayout;
 
   @override
   Widget build(BuildContext context) {
@@ -187,6 +191,7 @@ class _MiniPlayerOrganism extends StatelessWidget {
         onSubtitleTap: onSubtitleTap,
         onClose: onClose,
         shellPillLayout: shellPillLayout,
+        shellDockLayout: shellDockLayout,
       ),
     );
   }
@@ -1153,15 +1158,16 @@ class _CompactNowPlayingBar extends StatelessWidget {
   final VoidCallback onCollapse;
   final double opacity;
 
-  static const BoxConstraints _iconConstraints = BoxConstraints(
-    minWidth: 40,
-    minHeight: 40,
-  );
-
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
+    final barTokens = Theme.of(context).componentTokens.mediaPlayerBar;
     final palette = _ExpandedPlayerPalette.of(context);
+    final double rowHeight = barTokens.playPauseButtonSize;
+    final BoxConstraints iconConstraints = BoxConstraints(
+      minWidth: rowHeight,
+      minHeight: rowHeight,
+    );
     final TextStyle? titleStyle = Theme.of(context).textTheme.titleSmall
         ?.copyWith(
           color: palette.foreground,
@@ -1174,87 +1180,139 @@ class _CompactNowPlayingBar extends StatelessWidget {
           height: 1.15,
         );
 
-    return Opacity(
-      opacity: opacity,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+    Widget buildContentRow() {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          BlocSelector<AudioPlayerBloc, AudioPlayerState, double>(
-            selector: (state) => _MiniPlayerSnapshot.fromState(state).progress,
-            builder: (context, progress) {
-              return LinearProgressIndicator(
-                value: progress,
-                backgroundColor: palette.seekInactive,
-                valueColor: AlwaysStoppedAnimation<Color>(palette.seekActive),
-                minHeight: tokens.progressHeight,
-              );
-            },
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: tokens.spaceSmall,
-              vertical: tokens.spaceExtraSmall,
+          IconButton(
+            constraints: iconConstraints,
+            padding: EdgeInsets.zero,
+            icon: Icon(
+              FluentIcons.chevron_down_24_regular,
+              color: palette.foreground,
+              size: tokens.iconSizeLarge,
             ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+            onPressed: onCollapse,
+          ),
+          _MiniArtwork(
+            artUri: audio.artUri,
+            size: kTilawaMediaPlayerBarCompactArtworkSize,
+          ),
+          SizedBox(width: tokens.spaceSmall),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              spacing: tokens.spaceExtraSmall,
               children: [
-                IconButton(
-                  constraints: _iconConstraints,
-                  padding: EdgeInsets.zero,
-                  icon: Icon(
-                    FluentIcons.chevron_down_24_regular,
-                    color: palette.foreground,
-                    size: tokens.iconSizeLarge,
-                  ),
-                  onPressed: onCollapse,
+                Text(
+                  audio.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: titleStyle,
                 ),
-                _MiniArtwork(artUri: audio.artUri, size: 40),
-                SizedBox(width: tokens.spaceSmall),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    spacing: tokens.spaceExtraSmall,
-                    children: [
-                      Text(
-                        audio.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: titleStyle,
-                      ),
-                      Text(
-                        audio.artist ?? context.l10n.unknownReciter,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: artistStyle,
-                      ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  constraints: _iconConstraints,
-                  padding: EdgeInsets.zero,
-                  icon: Icon(
-                    state.isPlaying
-                        ? FluentIcons.pause_24_filled
-                        : FluentIcons.play_24_filled,
-                    color: palette.foreground,
-                    size: tokens.iconSizeLarge,
-                  ),
-                  onPressed: () {
-                    context.read<AudioPlayerBloc>().add(
-                      state.isPlaying
-                          ? const AudioPlayerEvent.pauseAudio()
-                          : const AudioPlayerEvent.playAudio(),
-                    );
-                  },
+                Text(
+                  audio.artist ?? context.l10n.unknownReciter,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: artistStyle,
                 ),
               ],
             ),
           ),
+          IconButton(
+            constraints: iconConstraints,
+            padding: EdgeInsets.zero,
+            icon: Icon(
+              state.isPlaying
+                  ? FluentIcons.pause_24_filled
+                  : FluentIcons.play_24_filled,
+              color: palette.foreground,
+              size: tokens.iconSizeLarge,
+            ),
+            onPressed: () {
+              context.read<AudioPlayerBloc>().add(
+                state.isPlaying
+                    ? const AudioPlayerEvent.pauseAudio()
+                    : const AudioPlayerEvent.playAudio(),
+              );
+            },
+          ),
         ],
+      );
+    }
+
+    Widget buildProgressIndicator(double minHeight) {
+      return BlocSelector<AudioPlayerBloc, AudioPlayerState, double>(
+        selector: (state) => _MiniPlayerSnapshot.fromState(state).progress,
+        builder: (context, progress) {
+          return LinearProgressIndicator(
+            value: progress,
+            backgroundColor: palette.seekInactive,
+            valueColor: AlwaysStoppedAnimation<Color>(palette.seekActive),
+            minHeight: minHeight,
+          );
+        },
+      );
+    }
+
+    return Opacity(
+      opacity: opacity,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final bool boundedHeight =
+              constraints.hasBoundedHeight && constraints.maxHeight.isFinite;
+          if (!boundedHeight) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                buildProgressIndicator(tokens.progressHeight),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: tokens.spaceSmall,
+                    vertical: tokens.spaceExtraSmall,
+                  ),
+                  child: buildContentRow(),
+                ),
+              ],
+            );
+          }
+
+          final ({double topBand, double bottomBand}) bands =
+              resolveTilawaMediaPlayerCollapsedBands(
+                maxHeight: constraints.maxHeight,
+                rowHeight: rowHeight,
+              );
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                height: bands.topBand,
+                child: bands.topBand <= 0
+                    ? const SizedBox.shrink()
+                    : ClipRect(
+                        clipBehavior: Clip.hardEdge,
+                        child: buildProgressIndicator(bands.topBand),
+                      ),
+              ),
+              Padding(
+                padding: EdgeInsetsDirectional.only(
+                  start: tokens.spaceSmall,
+                  end: tokens.spaceSmall,
+                  bottom: bands.bottomBand,
+                ),
+                child: SizedBox(
+                  height: rowHeight,
+                  child: buildContentRow(),
+                ),
+              ),
+              const Expanded(child: SizedBox.shrink()),
+            ],
+          );
+        },
       ),
     );
   }

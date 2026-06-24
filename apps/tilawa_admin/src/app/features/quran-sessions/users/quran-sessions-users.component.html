@@ -35,6 +35,7 @@
           <th scope="col">{{ 'common_email' | t }}</th>
           <th scope="col">{{ 'quranSessionsUsers_photo' | t }}</th>
           <th scope="col">{{ 'quranSessionsUsers_qsProfileStatus' | t }}</th>
+          <th scope="col">{{ 'quranSessionsUsers_teacherApplyAccess' | t }}</th>
           <app-sortable-th [label]="'common_updated' | t" field="quranSessionsProfile.updatedAt" [sort]="sort()" (sortChange)="onSortChange($event)" />
           <app-sortable-th [label]="'common_date' | t" field="quranSessionsProfile.createdAt" [sort]="sort()" (sortChange)="onSortChange($event)" />
           <th scope="col" class="text-end">{{ 'common_actions' | t }}</th>
@@ -60,9 +61,24 @@
               />
             </td>
             <td><app-status-chip [label]="user.accountStatus | statusLabel" [status]="user.accountStatus" /></td>
+            <td>
+              <app-status-chip
+                [label]="teacherApplyAccessLabel(user.canApplyAsTeacher) | t"
+                [status]="user.canApplyAsTeacher === true ? 'approved' : user.canApplyAsTeacher === false ? 'rejected' : 'pending'"
+              />
+            </td>
             <td>@if (user.updatedAt) { {{ user.updatedAt | date:'medium' }} } @else { {{ 'common_none' | t }} }</td>
             <td>@if (user.createdAt) { {{ user.createdAt | date:'medium' }} } @else { {{ 'common_none' | t }} }</td>
             <td class="text-end">
+              <app-tilawa-button
+                variant="text"
+                size="sm"
+                [loading]="isActionLoading() && pendingUserId === user.userId"
+                [disabled]="isActionLoading()"
+                (click)="cycleTeacherApplyAccess(user.userId, user.canApplyAsTeacher)"
+              >
+                {{ 'quranSessionsUsers_teacherApplyFollowPolicy' | t }}
+              </app-tilawa-button>
               @if (user.accountStatus !== 'suspended' && user.accountStatus !== 'blocked') {
                 <app-tilawa-button
                   variant="text"

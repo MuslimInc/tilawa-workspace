@@ -281,14 +281,13 @@ abstract final class QuranPlayerLayoutInsets {
     return offShellBottomInset(context);
   }
 
-  /// Total height of the phone shell footer player slot (bar + bottom gap).
+  /// Total height of the phone shell footer player slot (bar only).
   static double phoneFooterSlotHeight(
     BuildContext context, {
     required double playerHeight,
     required bool hostAbsorbsBottomSafeArea,
   }) {
-    return phoneMiniPlayerTopPadding(context) +
-        playerHeight +
+    return playerHeight +
         phoneFooterBottomSpacing(
           context,
           hostAbsorbsBottomSafeArea: hostAbsorbsBottomSafeArea,
@@ -330,19 +329,11 @@ abstract final class QuranPlayerLayoutInsets {
     return offShellBottomInset(context);
   }
 
-  /// Gap between the shell mini player capsule and the bottom nav pill.
-  static double phoneMiniPlayerNavGap(BuildContext context) {
-    return Theme.of(
-      context,
-    ).componentTokens.adaptiveShell.bottomNavVerticalMargin;
-  }
+  /// Legacy gap between mini player and bottom nav — always zero (dock is flush).
+  static double phoneMiniPlayerNavGap(BuildContext context) => 0;
 
-  /// Breathing room above the shell mini player capsule.
-  static double phoneMiniPlayerTopPadding(BuildContext context) {
-    return Theme.of(
-      context,
-    ).componentTokens.adaptiveShell.bottomNavInternalPadding;
-  }
+  /// Legacy padding above shell mini player — always zero (dock is flush).
+  static double phoneMiniPlayerTopPadding(BuildContext context) => 0;
 }
 
 /// Shell navigation helpers for the global Quran mini player.

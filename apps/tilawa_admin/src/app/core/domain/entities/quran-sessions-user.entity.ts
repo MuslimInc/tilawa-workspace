@@ -23,6 +23,7 @@ export interface QuranSessionsUser {
   readonly cityName: string | null;
   readonly profileCompleted: boolean;
   readonly accountStatus: QuranSessionsAccountStatus;
+  readonly canApplyAsTeacher: boolean | null;
   readonly createdAt: Date | null;
   readonly updatedAt: Date | null;
 }

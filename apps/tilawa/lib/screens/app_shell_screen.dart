@@ -408,15 +408,6 @@ class _AppShellChrome extends StatelessWidget {
         builder: (context) {
           final bool showMiniPlayer =
               showPlayer && playerShouldShow && !isKeyboardOpen;
-          final TilawaAdaptiveShellTokens shellTokens = Theme.of(
-            context,
-          ).componentTokens.adaptiveShell;
-          final double miniPlayerTopPadding = showMiniPlayer
-              ? shellTokens.bottomNavInternalPadding
-              : 0;
-          final double miniNavGap = showMiniPlayer && navVisible
-              ? shellTokens.bottomNavVerticalMargin
-              : 0;
 
           final Widget player = QuranPlayerWidget(
             key: const ValueKey<String>('app_shell_quran_player'),
@@ -431,11 +422,7 @@ class _AppShellChrome extends StatelessWidget {
                 );
           final Widget? shellFooterPlayer = showMiniPlayer
               ? SizedBox(
-                  height:
-                      miniPlayerTopPadding +
-                      playerHeight +
-                      footerBottomSpacing +
-                      miniNavGap,
+                  height: playerHeight + footerBottomSpacing,
                   child: TourTarget(
                     targetId: RecitersTourTargets.miniPlayer,
                     child: player,

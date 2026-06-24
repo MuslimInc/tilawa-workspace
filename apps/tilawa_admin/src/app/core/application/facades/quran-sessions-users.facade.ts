@@ -3,6 +3,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import {
   ListQuranSessionsUsersUseCase,
   ModerateQuranSessionsUserUseCase,
+  SetUserTeacherApplicationAccessUseCase,
 } from '../../domain/usecases/quran-sessions-user.usecases';
 import {
   QS_USER_DEFAULT_SORT,
@@ -39,6 +40,9 @@ function countEmailsByNormalizedAddress(
 export class QuranSessionsUsersFacade {
   private readonly listUseCase = inject(ListQuranSessionsUsersUseCase);
   private readonly moderateUseCase = inject(ModerateQuranSessionsUserUseCase);
+  private readonly teacherAccessUseCase = inject(
+    SetUserTeacherApplicationAccessUseCase,
+  );
 
   private readonly listState = signal<LoadState>('idle');
   private readonly listError = signal<string | null>(null);
@@ -128,6 +132,25 @@ export class QuranSessionsUsersFacade {
         userId,
         UserModerationAction.Suspend,
         reason,
+      );
+    } finally {
+      this.actionLoading.set(false);
+    }
+  }
+
+  async setTeacherApplicationAccess(
+    userId: string,
+    canApplyAsTeacher: boolean | null,
+  ): Promise<void> {
+    this.actionLoading.set(true);
+    try {
+      await this.teacherAccessUseCase.execute(userId, canApplyAsTeacher);
+      this.listItems.update((items) =>
+        items.map((item) =>
+          item.userId === userId
+            ? { ...item, canApplyAsTeacher }
+            : item,
+        ),
       );
     } finally {
       this.actionLoading.set(false);

@@ -439,12 +439,13 @@ class _CapabilityActionCardLayoutMetrics {
     final double leadingExtent =
         cardTokens.leadingIconSize + iconBoxTokens.padding * 2;
 
+    // Row uses [spacing] between leading, copy, and trailing — two gaps.
     return math.max(
       0,
       bodyWidth -
           contentPadding.horizontal -
           leadingExtent -
-          cardTokens.rowGap -
+          (cardTokens.rowGap * 2) -
           cardTokens.trailingIconSize,
     );
   }

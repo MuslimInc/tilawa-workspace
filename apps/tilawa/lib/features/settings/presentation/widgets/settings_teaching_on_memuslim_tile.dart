@@ -22,7 +22,14 @@ class SettingsTeachingOnMemuslimSection extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    if (SettingsTeacherCapabilityScope.isLoadingOf(context)) {
+    if (!SettingsTeacherCapabilityScope.shouldShowTeachingSectionOf(context)) {
+      if (SettingsTeacherCapabilityScope.isTeachingSectionLoadingOf(context)) {
+        return const SizedBox.shrink();
+      }
+      return const SizedBox.shrink();
+    }
+
+    if (SettingsTeacherCapabilityScope.isTeachingSectionLoadingOf(context)) {
       final tokens = Theme.of(context).tokens;
       return Padding(
         padding: EdgeInsetsDirectional.only(
@@ -35,7 +42,9 @@ class SettingsTeachingOnMemuslimSection extends StatelessWidget {
       );
     }
 
-    final capability = SettingsTeacherCapabilityScope.maybeOf(context);
+    final capability = SettingsTeacherCapabilityScope.maybeCapabilityOf(
+      context,
+    );
     if (capability == null) {
       return const SizedBox.shrink();
     }
@@ -81,13 +90,19 @@ class SettingsTeachingOnMemuslimTile extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    if (SettingsTeacherCapabilityScope.isLoadingOf(context)) {
+    if (!SettingsTeacherCapabilityScope.shouldShowTeachingSectionOf(context)) {
+      return const SizedBox.shrink();
+    }
+
+    if (SettingsTeacherCapabilityScope.isTeachingSectionLoadingOf(context)) {
       return TilawaCapabilityActionCardSkeleton(
         margin: standaloneLayout ? EdgeInsets.zero : null,
       );
     }
 
-    final capability = SettingsTeacherCapabilityScope.maybeOf(context);
+    final capability = SettingsTeacherCapabilityScope.maybeCapabilityOf(
+      context,
+    );
     if (capability == null) {
       return const SizedBox.shrink();
     }

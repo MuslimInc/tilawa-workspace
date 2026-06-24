@@ -48,6 +48,16 @@ export class FirebaseModerationGateway implements ModerationGateway {
     });
   }
 
+  async setUserTeacherApplicationAccess(
+    userId: string,
+    canApplyAsTeacher: boolean | null,
+  ): Promise<void> {
+    await this.invokeCallable('setTeacherApplicationAccess', {
+      userId,
+      canApplyAsTeacher,
+    });
+  }
+
   private async invokeCallable(
     name: string,
     data: Record<string, unknown>,

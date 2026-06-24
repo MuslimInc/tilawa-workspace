@@ -114,4 +114,21 @@ export class QuranSessionsUsersComponent implements OnInit {
     this.suspendOpen = false;
     await this.reload();
   }
+
+  async cycleTeacherApplyAccess(userId: string, current: boolean | null): Promise<void> {
+    this.pendingUserId = userId;
+    const next =
+      current === null ? true : current === true ? false : null;
+    await this.facade.setTeacherApplicationAccess(userId, next);
+  }
+
+  teacherApplyAccessLabel(value: boolean | null): string {
+    if (value === true) {
+      return 'quranSessionsUsers_teacherApplyAllowed';
+    }
+    if (value === false) {
+      return 'quranSessionsUsers_teacherApplyDenied';
+    }
+    return 'quranSessionsUsers_teacherApplyPolicy';
+  }
 }

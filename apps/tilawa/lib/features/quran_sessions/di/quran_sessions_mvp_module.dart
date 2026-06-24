@@ -58,6 +58,13 @@ class QuranSessionsMvpModule {
     sl.registerLazySingletonIfAbsent<MarketConfigRepository>(
       () => FakeMvpMarketConfigRepository(),
     );
+    sl.registerLazySingletonIfAbsent<TeacherApplicationAccessRepository>(
+      () => TeacherApplicationAccessRepositoryImpl(
+        const CatalogTeacherApplicationAccessRemoteDataSource(
+          policy: TeacherApplicationAccessPolicyDto(mode: 'all'),
+        ),
+      ),
+    );
     sl.registerLazySingletonIfAbsent<TeacherApplicationRepository>(
       () => FakeMvpTeacherApplicationRepository(store),
     );
@@ -231,6 +238,11 @@ class QuranSessionsMvpModule {
       () => GetCurrentUserTeacherCapabilityUseCase(
         applicationRepository: sl<TeacherApplicationRepository>(),
         profileRepository: sl<TeacherProfileRepository>(),
+      ),
+    );
+    sl.registerLazySingletonIfAbsent(
+      () => ResolveTeacherApplicationAccessUseCase(
+        sl<TeacherApplicationAccessRepository>(),
       ),
     );
     sl.registerLazySingletonIfAbsent(
