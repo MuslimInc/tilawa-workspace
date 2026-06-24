@@ -4,6 +4,7 @@ import '../atoms/tilawa_icon_box.dart';
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
 import '../foundation/semantic_tints.dart';
+import '../foundation/tilawa_interactive_surface.dart';
 
 /// Talabat-style category tile — warm tinted square, icon, two-line label.
 class TilawaFeatureCategoryTile extends StatelessWidget {
@@ -49,14 +50,12 @@ class TilawaFeatureCategoryTile extends StatelessWidget {
     return Semantics(
       button: true,
       label: label,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
+      child: ExcludeSemantics(
+        child: TilawaInteractiveSurface(
           onTap: onTap,
+          button: false,
           borderRadius: BorderRadius.circular(radius),
-          splashColor: colorScheme.primary.withValues(alpha: 0.08),
-          highlightColor: colorScheme.onSurface.withValues(alpha: 0.04),
-          child: Ink(
+          child: DecoratedBox(
             decoration: BoxDecoration(
               color: tileFill,
               borderRadius: BorderRadius.circular(radius),

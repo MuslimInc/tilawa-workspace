@@ -54,6 +54,7 @@ class _TilawaPressAnimationState extends State<TilawaPressAnimation>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(vsync: this);
   late Animation<double> _scale;
+  bool _controllerDisposed = false;
 
   @override
   void didChangeDependencies() {
@@ -71,12 +72,13 @@ class _TilawaPressAnimationState extends State<TilawaPressAnimation>
 
   @override
   void dispose() {
+    _controllerDisposed = true;
     _controller.dispose();
     super.dispose();
   }
 
   void _setPressed(bool pressed) {
-    if (!widget.enabled) {
+    if (!widget.enabled || !mounted || _controllerDisposed) {
       return;
     }
     if (pressed) {

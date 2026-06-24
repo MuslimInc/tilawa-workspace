@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
+import '../foundation/tilawa_interactive_surface.dart';
 
 /// Calendly-style segment card for dual-field wheel pickers.
 ///
@@ -26,47 +27,44 @@ class TilawaPickerSegmentCard extends StatelessWidget {
     final tokens = theme.componentTokens.cupertinoWheelPicker;
     final radius = BorderRadius.circular(tokens.segmentBorderRadius);
 
-    return Semantics(
-      button: true,
+    return TilawaInteractiveSurface(
+      onTap: onTap,
       selected: selected,
-      label: '$label, $value',
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: radius,
-        child: Container(
-          padding: tokens.segmentPadding,
-          decoration: BoxDecoration(
+      semanticLabel: '$label, $value',
+      borderRadius: radius,
+      child: Container(
+        padding: tokens.segmentPadding,
+        decoration: BoxDecoration(
+          color: selected
+              ? tokens.segmentSelectedBackgroundColor
+              : tokens.segmentUnselectedBackgroundColor,
+          borderRadius: radius,
+          border: Border.all(
             color: selected
-                ? tokens.segmentSelectedBackgroundColor
-                : tokens.segmentUnselectedBackgroundColor,
-            borderRadius: radius,
-            border: Border.all(
-              color: selected
-                  ? tokens.segmentSelectedBorderColor
-                  : tokens.segmentUnselectedBorderColor,
-              width: tokens.segmentSelectedBorderWidth,
+                ? tokens.segmentSelectedBorderColor
+                : tokens.segmentUnselectedBorderColor,
+            width: tokens.segmentSelectedBorderWidth,
+          ),
+        ),
+        child: Column(
+          children: [
+            Text(
+              label,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: tokens.segmentLabelColor,
+              ),
             ),
-          ),
-          child: Column(
-            children: [
-              Text(
-                label,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: tokens.segmentLabelColor,
-                ),
+            SizedBox(height: tokens.segmentLabelValueGap),
+            Text(
+              value,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: selected
+                    ? tokens.segmentSelectedValueColor
+                    : tokens.segmentUnselectedValueColor,
               ),
-              SizedBox(height: tokens.segmentLabelValueGap),
-              Text(
-                value,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: selected
-                      ? tokens.segmentSelectedValueColor
-                      : tokens.segmentUnselectedValueColor,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

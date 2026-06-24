@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:tilawa_ui_kit/src/foundation/component_tokens.dart';
 import 'package:tilawa_ui_kit/src/foundation/tilawa_icons.dart';
 import 'package:tilawa_ui_kit/src/foundation/design_tokens.dart';
+import 'package:tilawa_ui_kit/src/foundation/tilawa_interactive_surface.dart';
 
 /// Minimum horizontal space reserved for surah + reciter before the bar
 /// collapses secondary transport controls (prev / sleep timer). Next track
@@ -581,9 +582,13 @@ class _SubtitleTapTarget extends StatelessWidget {
     return Semantics(
       button: true,
       label: label,
-      child: GestureDetector(
+      child: TilawaInteractiveSurface(
+        // Outer Semantics owns the button role + label.
+        button: false,
         onTap: onTap,
-        behavior: .opaque,
+        // Transparent tap region over text/metadata: keep the content static
+        // (no press-scale) but gain the keyboard focus ring + state layer.
+        enablePressAnimation: false,
         child: child,
       ),
     );
@@ -612,9 +617,13 @@ class _ProgressTapTarget extends StatelessWidget {
     return Semantics(
       button: true,
       label: semanticLabel,
-      child: GestureDetector(
+      child: TilawaInteractiveSurface(
+        // Outer Semantics owns the button role + label.
+        button: false,
         onTap: onTap,
-        behavior: .opaque,
+        // Transparent tap region over text/metadata: keep the content static
+        // (no press-scale) but gain the keyboard focus ring + state layer.
+        enablePressAnimation: false,
         child: child,
       ),
     );
@@ -645,9 +654,13 @@ class _OpenPlayerTapTarget extends StatelessWidget {
     return Semantics(
       button: true,
       label: semanticLabel,
-      child: GestureDetector(
+      child: TilawaInteractiveSurface(
+        // Outer Semantics owns the button role + label.
+        button: false,
         onTap: onTap,
-        behavior: .opaque,
+        // Transparent tap region over text/metadata: keep the content static
+        // (no press-scale) but gain the keyboard focus ring + state layer.
+        enablePressAnimation: false,
         child: child,
       ),
     );

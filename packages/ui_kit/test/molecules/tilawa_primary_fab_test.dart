@@ -38,6 +38,24 @@ void main() {
       expect(offset.dx, base.dx);
       expect(offset.dy, 800 - 56 - 80);
     });
+
+    test('offset placements with same inset compare equal', () {
+      final FloatingActionButtonLocation a = TilawaFabLocation.placement(
+        TilawaFabPlacement.end,
+        bottomOffset: 72,
+      );
+      final FloatingActionButtonLocation b = TilawaFabLocation.placement(
+        TilawaFabPlacement.end,
+        bottomOffset: 72,
+      );
+      final FloatingActionButtonLocation c = TilawaFabLocation.placement(
+        TilawaFabPlacement.end,
+        bottomOffset: 48,
+      );
+
+      expect(a, equals(b));
+      expect(a, isNot(equals(c)));
+    });
   });
 
   group('TilawaPrimaryFab', () {

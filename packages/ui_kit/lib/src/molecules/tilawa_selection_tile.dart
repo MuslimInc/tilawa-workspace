@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
 import '../foundation/tilawa_icons.dart';
+import '../foundation/tilawa_interactive_surface.dart';
 
 /// A standardized tile for selection lists in bottom sheets and dialogs.
 ///
@@ -50,33 +51,30 @@ class TilawaSelectionTile extends StatelessWidget {
 
     return Column(
       children: [
-        Material(
-          color: isSelected
-              ? tokens.selectionTileSelectedBackgroundColor
-              : Colors.transparent,
-          child: InkWell(
-            onTap: enabled ? onTap : null,
-            child: Semantics(
-              // fix: Accessibility — single-select list item state (child of InkWell avoids merge bugs)
-              selected: isSelected,
-              button: true,
-              enabled: enabled,
-              label: title,
-              child: Padding(
-                padding: tokens.tileContentPadding,
-                child: Row(
-                  spacing: tokens.tileItemGap,
-                  children: [
-                    ?leading,
-                    Expanded(child: Text(title, style: textStyle)),
-                    if (isSelected)
-                      Icon(
-                        TilawaIcons.check,
-                        color: colorScheme.onSurfaceVariant,
-                        size: tokens.tileTrailingSize,
-                      ),
-                  ],
-                ),
+        TilawaInteractiveSurface(
+          onTap: onTap,
+          enabled: enabled,
+          // fix: Accessibility — single-select list item state.
+          selected: isSelected,
+          semanticLabel: title,
+          child: ColoredBox(
+            color: isSelected
+                ? tokens.selectionTileSelectedBackgroundColor
+                : Colors.transparent,
+            child: Padding(
+              padding: tokens.tileContentPadding,
+              child: Row(
+                spacing: tokens.tileItemGap,
+                children: [
+                  ?leading,
+                  Expanded(child: Text(title, style: textStyle)),
+                  if (isSelected)
+                    Icon(
+                      TilawaIcons.check,
+                      color: colorScheme.onSurfaceVariant,
+                      size: tokens.tileTrailingSize,
+                    ),
+                ],
               ),
             ),
           ),

@@ -84,6 +84,113 @@ void main() {
     expect(find.byType(TilawaPressAnimation), findsOneWidget);
   });
 
+  testWidgets(
+    'TilawaPressAnimation ignores pointer up after widget is removed',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+          home: Scaffold(
+            body: Center(
+              child: TilawaPressAnimation(
+                child: SizedBox(
+                  key: const Key('target'),
+                  width: 100,
+                  height: 48,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.byKey(const Key('target'))),
+      );
+      await tester.pump();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+          home: const Scaffold(
+            body: Center(
+              child: SizedBox(
+                key: Key('target'),
+                width: 100,
+                height: 48,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await gesture.up();
+      await tester.pump();
+    },
+  );
+
+  testWidgets(
+    'TilawaInteractiveSurface survives disable while press in flight',
+    (tester) async {
+      var interactive = true;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+          home: StatefulBuilder(
+            builder: (context, setState) {
+              return Scaffold(
+                body: Center(
+                  child: TilawaInteractiveSurface(
+                    onTap: interactive ? () {} : null,
+                    enabled: interactive,
+                    child: const SizedBox(
+                      key: Key('surface'),
+                      width: 120,
+                      height: 48,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.byKey(const Key('surface'))),
+      );
+      await tester.pump();
+
+      interactive = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+          home: StatefulBuilder(
+            builder: (context, setState) {
+              return Scaffold(
+                body: Center(
+                  child: TilawaInteractiveSurface(
+                    onTap: interactive ? () {} : null,
+                    enabled: interactive,
+                    child: const SizedBox(
+                      key: Key('surface'),
+                      width: 120,
+                      height: 48,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      await gesture.up();
+      await tester.pump();
+    },
+  );
+
   test('TilawaInteractionFeedback respects enabled flag', () {
     TilawaInteractionFeedback.enabled = false;
     expect(() {

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
 import '../foundation/tilawa_interaction_feedback.dart';
+import '../foundation/tilawa_interactive_surface.dart';
 
 /// A segmented control widget for switching between a small number of options.
 ///
@@ -206,26 +207,25 @@ class _SegmentButton extends StatelessWidget {
 
     final itemBorderRadius = BorderRadius.circular(itemRadius);
 
-    final segment = Material(
-      color: isSelected ? selectedBackgroundColor : Colors.transparent,
+    final segment = TilawaInteractiveSurface(
+      onTap: onTap,
+      enabled: enabled,
+      // fix: Accessibility — segment state.
+      selected: isSelected,
+      semanticLabel: label,
+      semanticHint: enabled ? null : semanticsHint,
+      // The control fires its own selection haptic (only when the value
+      // actually changes), so the surface stays silent to avoid a double tap.
+      haptic: TilawaHaptic.none,
       borderRadius: itemBorderRadius,
-      child: InkWell(
-        onTap: enabled ? onTap : null,
-        borderRadius: itemBorderRadius,
-        child: Semantics(
-          // fix: Accessibility — segment state (inside InkWell avoids merge bugs)
-          selected: isSelected,
-          button: true,
-          enabled: enabled,
-          label: label,
-          hint: enabled ? null : semanticsHint,
-          child: Container(
-            padding: tokens.itemPadding,
-            decoration: isSelected
-                ? BoxDecoration(borderRadius: itemBorderRadius)
-                : null,
-            child: Center(child: Text(label, style: textStyle)),
-          ),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: isSelected ? selectedBackgroundColor : Colors.transparent,
+          borderRadius: itemBorderRadius,
+        ),
+        child: Container(
+          padding: tokens.itemPadding,
+          child: Center(child: Text(label, style: textStyle)),
         ),
       ),
     );

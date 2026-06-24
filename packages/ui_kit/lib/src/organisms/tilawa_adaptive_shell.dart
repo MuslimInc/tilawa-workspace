@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import '../foundation/app_colors.dart';
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
+import '../foundation/tilawa_interactive_surface.dart';
 
 /// [ValueListenable] that is always `true` and never notifies.
 ///
@@ -1400,22 +1401,17 @@ class _NavButton extends StatelessWidget {
       label: destination.label,
       selected: isSelected,
       identifier: destination.identifier,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            HapticFeedback.selectionClick();
-            onTap();
-          },
-          onLongPress: onLongPress,
-          customBorder: const CircleBorder(),
-          splashColor: tokens.navButtonSplashColor,
-          highlightColor: tokens.navButtonHighlightColor,
-          child: SizedBox(
-            width: hitSize,
-            height: hitSize,
-            child: Center(child: iconWidget),
-          ),
+      child: TilawaInteractiveSurface(
+        // Outer Semantics owns the role/label/selected/identifier.
+        button: false,
+        onTap: onTap,
+        onLongPress: onLongPress,
+        // Circular focus ring + state layer for the round nav target.
+        borderRadius: BorderRadius.circular(hitSize / 2),
+        child: SizedBox(
+          width: hitSize,
+          height: hitSize,
+          child: Center(child: iconWidget),
         ),
       ),
     );

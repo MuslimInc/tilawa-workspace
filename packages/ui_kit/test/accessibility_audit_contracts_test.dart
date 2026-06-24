@@ -9,6 +9,7 @@ import '../lib/src/atoms/tilawa_icon_toggle.dart';
 import '../lib/src/foundation/color_scheme_ext.dart';
 import '../lib/src/foundation/component_tokens/component_tokens_theme.dart';
 import '../lib/src/foundation/design_tokens.dart';
+import '../lib/src/foundation/tilawa_interactive_surface.dart';
 import '../lib/src/molecules/tilawa_language_switcher.dart';
 import '../lib/src/molecules/tilawa_feedback_strip.dart';
 import '../lib/src/molecules/tilawa_permission_banner.dart';
@@ -188,7 +189,7 @@ void main() {
       Future<void> checkSegment(String label, {required bool selected}) async {
         final f = find.ancestor(
           of: find.text(label),
-          matching: find.byType(InkWell),
+          matching: find.byType(TilawaInteractiveSurface),
         );
         final sem = tester.getSemantics(f.first);
         expect(sem.flagsCollection.isButton, isTrue);
@@ -289,8 +290,7 @@ void main() {
         ),
       );
 
-      final inkWell = find.byType(InkWell);
-      final sem = tester.getSemantics(inkWell);
+      final sem = tester.getSemantics(find.byType(TilawaInteractiveSurface));
       expect(sem.flagsCollection.isSelected, Tristate.isTrue);
       expect(sem.flagsCollection.isButton, isTrue);
       expect(sem.label, isNotEmpty);

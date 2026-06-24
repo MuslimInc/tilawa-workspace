@@ -4,6 +4,7 @@ import '../atoms/tilawa_switch.dart';
 import '../foundation/component_tokens.dart';
 import '../foundation/tilawa_icons.dart';
 import '../foundation/design_tokens.dart';
+import '../foundation/tilawa_interactive_surface.dart';
 import 'tilawa_settings_group_row_style.dart';
 
 /// Pinterest-style settings section: bold title, flat rows (no card).
@@ -78,41 +79,38 @@ class TilawaCatalogSettingsLinkRow extends StatelessWidget {
       height: 1.25,
     );
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: EdgeInsetsDirectional.fromSTEB(
-            tokens.spaceMedium,
-            tokens.spaceSmall + tokens.spaceTiny,
-            tokens.spaceMedium,
-            tokens.spaceSmall + tokens.spaceTiny,
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  title,
-                  style: titleStyle,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+    return TilawaInteractiveSurface(
+      onTap: onTap,
+      child: Padding(
+        padding: EdgeInsetsDirectional.fromSTEB(
+          tokens.spaceMedium,
+          tokens.spaceSmall + tokens.spaceTiny,
+          tokens.spaceMedium,
+          tokens.spaceSmall + tokens.spaceTiny,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                style: titleStyle,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (trailing != null) ...[
+              trailing!,
+              SizedBox(width: tokens.spaceSmall),
+            ],
+            if (showChevron && onTap != null)
+              Icon(
+                TilawaIcons.chevronRightSmall,
+                size: tokens.iconSizeMedium,
+                color: colorScheme.onSurface.withValues(
+                  alpha: tokens.opacityEmphasis,
                 ),
               ),
-              if (trailing != null) ...[
-                trailing!,
-                SizedBox(width: tokens.spaceSmall),
-              ],
-              if (showChevron && onTap != null)
-                Icon(
-                  TilawaIcons.chevronRightSmall,
-                  size: tokens.iconSizeMedium,
-                  color: colorScheme.onSurface.withValues(
-                    alpha: tokens.opacityEmphasis,
-                  ),
-                ),
-            ],
-          ),
+          ],
         ),
       ),
     );
@@ -139,38 +137,35 @@ class TilawaCatalogSettingsSwitchRow extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final switchTokens = theme.componentTokens.settingsGroup;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => onChanged(!value),
-        child: Padding(
-          padding: EdgeInsetsDirectional.fromSTEB(
-            tokens.spaceMedium,
-            tokens.spaceSmall + tokens.spaceTiny,
-            tokens.spaceMedium,
-            tokens.spaceSmall + tokens.spaceTiny,
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  title,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: colorScheme.onSurface,
-                    height: 1.25,
-                  ),
+    return TilawaInteractiveSurface(
+      onTap: () => onChanged(!value),
+      child: Padding(
+        padding: EdgeInsetsDirectional.fromSTEB(
+          tokens.spaceMedium,
+          tokens.spaceSmall + tokens.spaceTiny,
+          tokens.spaceMedium,
+          tokens.spaceSmall + tokens.spaceTiny,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onSurface,
+                  height: 1.25,
                 ),
               ),
-              TilawaSwitch(
-                value: value,
-                onChanged: onChanged,
-                activeTrackColor: switchTokens.switchActiveTrackColor,
-                activeThumbColor: switchTokens.switchActiveThumbColor,
-                layoutSlotHeight: tokens.iconSizeMedium,
-              ),
-            ],
-          ),
+            ),
+            TilawaSwitch(
+              value: value,
+              onChanged: onChanged,
+              activeTrackColor: switchTokens.switchActiveTrackColor,
+              activeThumbColor: switchTokens.switchActiveThumbColor,
+              layoutSlotHeight: tokens.iconSizeMedium,
+            ),
+          ],
         ),
       ),
     );
@@ -199,45 +194,40 @@ class TilawaCatalogSettingsProfileRow extends StatelessWidget {
         TilawaSettingsGroupRowStyle.maybeOf(context)?.borderRadius ??
         BorderRadius.zero;
 
-    return Material(
-      color: Colors.transparent,
+    return TilawaInteractiveSurface(
+      onTap: onTap,
       borderRadius: borderRadius,
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: borderRadius,
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            tokens.spaceMedium,
-            tokens.spaceMedium,
-            tokens.spaceMedium,
-            tokens.spaceSmall,
-          ),
-          child: Row(
-            children: [
-              avatar,
-              SizedBox(width: tokens.spaceMedium),
-              Expanded(
-                child: Text(
-                  title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: colorScheme.onSurface,
-                  ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          tokens.spaceMedium,
+          tokens.spaceMedium,
+          tokens.spaceMedium,
+          tokens.spaceSmall,
+        ),
+        child: Row(
+          children: [
+            avatar,
+            SizedBox(width: tokens.spaceMedium),
+            Expanded(
+              child: Text(
+                title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: colorScheme.onSurface,
                 ),
               ),
-              if (onTap != null)
-                Icon(
-                  TilawaIcons.chevronRightSmall,
-                  size: tokens.iconSizeMedium,
-                  color: colorScheme.onSurface.withValues(
-                    alpha: tokens.opacityEmphasis,
-                  ),
+            ),
+            if (onTap != null)
+              Icon(
+                TilawaIcons.chevronRightSmall,
+                size: tokens.iconSizeMedium,
+                color: colorScheme.onSurface.withValues(
+                  alpha: tokens.opacityEmphasis,
                 ),
-            ],
-          ),
+              ),
+          ],
         ),
       ),
     );

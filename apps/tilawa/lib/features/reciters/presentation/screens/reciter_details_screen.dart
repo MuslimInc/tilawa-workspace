@@ -12,7 +12,7 @@ import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../../../shared/widgets/quran_player_widget.dart';
+import '../../../../shared/widgets/quran_player_chrome.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../../surah/domain/entities/surah_entity.dart';
 import '../../../tour_guide/presentation/widgets/tour_target.dart';
@@ -20,6 +20,7 @@ import '../bloc/reciter_details_bloc.dart';
 import '../bloc/reciter_download_bloc.dart';
 import '../tour/reciters_tour_launcher.dart';
 import '../tour/reciters_tour_targets.dart';
+import '../layout/reciter_details_fab_layout.dart';
 import '../models/reciter_surah_list_item.dart';
 import '../widgets/download_all_button.dart';
 import '../widgets/moshaf_selector.dart';
@@ -208,12 +209,20 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final double fabBottomOffset =
-        QuranPlayerWidget.fabBottomOffset(context) + tokens.spaceLarge;
-    final bool showBottomPlayer = context.select((AudioPlayerBloc bloc) {
-      final AudioPlayerState state = bloc.state;
-      return state.shouldShowBottomPlayer && state.currentAudio != null;
-    });
+
+    // Rebuild FAB offset when shell chrome or mini-player visibility changes.
+    context.watch<QuranPlayerChromeNotifier>();
+    context.select(
+      (AudioPlayerBloc bloc) => (
+        bloc.state.shouldShowBottomPlayer,
+        bloc.state.currentAudio?.id,
+      ),
+    );
+
+    final ReciterDetailsFabLayout layout = ReciterDetailsFabLayout.resolve(
+      context,
+      scrollToTopFabVisible: _showScrollToTop,
+    );
 
     return Stack(
       children: [
@@ -222,13 +231,19 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
           // nested resize here double-applies [viewInsets] and collapses the
           // surah list to zero height (white gap above keyboard).
           resizeToAvoidBottomInset: false,
+          // Scroll-to-top uses [AnimatedSlide]/[AnimatedOpacity]; disable the
+          // scaffold scaling animator so rebuilds do not shrink the FAB.
+          floatingActionButtonAnimator:
+              FloatingActionButtonAnimator.noAnimation,
           floatingActionButton: AnimatedSlide(
-            offset: _showScrollToTop ? Offset.zero : const Offset(0, 2),
+            offset: layout.showScrollToTopFab
+                ? Offset.zero
+                : const Offset(0, 2),
             duration: tokens.durationFast,
             child: IgnorePointer(
-              ignoring: !_showScrollToTop,
+              ignoring: !layout.showScrollToTopFab,
               child: AnimatedOpacity(
-                opacity: _showScrollToTop ? 1.0 : 0.0,
+                opacity: layout.showScrollToTopFab ? 1.0 : 0.0,
                 duration: tokens.durationFast,
                 child: FloatingActionButton.small(
                   // Unique tag so this scroll-to-top FAB never shares the
@@ -245,7 +260,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
           ),
           floatingActionButtonLocation: TilawaFabLocation.placement(
             TilawaFabPlacement.end,
-            bottomOffset: fabBottomOffset,
+            bottomOffset: layout.fabBottomOffset,
           ),
           body: TilawaContentBounds(
             kind: TilawaContentKind.media,
@@ -372,7 +387,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                       _ReciterDetailsContent(
                         reciter: widget.reciter,
                         state: state,
-                        showBottomPlayer: showBottomPlayer,
+                        listBottomPadding: layout.listBottomPadding,
                         playingSurahKey: _playingSurahKey,
                         onPlaySurah: (surah) {
                           HapticFeedback.lightImpact();
@@ -457,13 +472,13 @@ class _ReciterDetailsContent extends StatelessWidget {
   const _ReciterDetailsContent({
     required this.reciter,
     required this.state,
-    required this.showBottomPlayer,
+    required this.listBottomPadding,
     required this.onPlaySurah,
     required this.playingSurahKey,
   });
   final ReciterEntity reciter;
   final ReciterDetailsState state;
-  final bool showBottomPlayer;
+  final double listBottomPadding;
   final Function(SurahEntity) onPlaySurah;
   final GlobalKey playingSurahKey;
 
@@ -471,18 +486,7 @@ class _ReciterDetailsContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final tokens = theme.tokens;
-    final bool keyboardOpen = context.isKeyboardVisible;
-    final double fabBottomOffset =
-        QuranPlayerWidget.fabBottomOffset(context) + tokens.spaceLarge;
-    final double fabClearance =
-        fabBottomOffset + kTilawaMinInteractiveDimension + tokens.spaceLarge;
-    // [TilawaAdaptiveShell] lays out the mini player in [Scaffold.bottomNavigationBar],
-    // so the scroll body already ends above the player — only add a small gap.
-    final double bottomPadding = keyboardOpen
-        ? 0
-        : showBottomPlayer
-        ? tokens.spaceSmall
-        : fabClearance;
+    final double bottomPadding = listBottomPadding;
     final double emptyStateIconSize =
         tokens.iconSizeExtraLarge + tokens.iconSizeSmall;
     final currentAudio = context.select(

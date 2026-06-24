@@ -143,18 +143,30 @@ class QuranPlayerWidget extends StatefulWidget {
         if (shell.bottomNavBarHeight > 0) {
           return context.tokens.spaceSmall;
         }
-        if (_shellFooterShowsMiniPlayer(context)) {
+        if (shellFooterShowsMiniPlayer(context)) {
           return context.tokens.spaceSmall;
         }
-        return context.floatingBottomPadding;
+        // Shell body is full-bleed (no footer slot). On 3-button Android nav
+        // [systemBottomSafeArea] is often 0 — lift FAB to min touch target.
+        return context.floatingBottomPaddingWithMin(
+          kTilawaMinInteractiveDimension,
+        );
       }
     }
 
     return collapsedFootprint(context);
   }
 
-  static bool _shellFooterShowsMiniPlayer(BuildContext context) {
+  /// Whether [TilawaAdaptiveShell] currently lays out the mini-player footer.
+  static bool shellFooterShowsMiniPlayer(BuildContext context) {
     try {
+      final QuranPlayerShellChrome? shell = context
+          .read<QuranPlayerChromeNotifier>()
+          .shellChrome;
+      if (shell != null &&
+          (shell.isKeyboardOpen || shell.isAudioBindingDeferred)) {
+        return false;
+      }
       final AudioPlayerState state = context.read<AudioPlayerBloc>().state;
       return state.shouldShowBottomPlayer && state.currentAudio != null;
     } on ProviderNotFoundException {

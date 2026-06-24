@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
+import '../foundation/tilawa_interactive_surface.dart';
 
 /// A pill-shaped badge indicating a feature is experimental or in preview.
 ///
@@ -70,15 +71,18 @@ class TilawaExperimentalBadge extends StatelessWidget {
     return Semantics(
       button: true,
       label: label,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(999),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minWidth: 48,
-            minHeight: 48,
+      child: ExcludeSemantics(
+        child: TilawaInteractiveSurface(
+          onTap: onTap,
+          button: false,
+          borderRadius: BorderRadius.circular(999),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minWidth: 48,
+              minHeight: 48,
+            ),
+            child: Center(widthFactor: 1, child: pill),
           ),
-          child: Center(widthFactor: 1, child: pill),
         ),
       ),
     );

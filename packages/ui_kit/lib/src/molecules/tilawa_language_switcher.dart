@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../atoms/tilawa_loading_indicator.dart';
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
+import '../foundation/tilawa_interactive_surface.dart';
 
 /// Switches [languages] with the same chrome as [TilawaSegmentedControl].
 class TilawaLanguageSwitcher extends StatelessWidget {
@@ -59,46 +60,43 @@ class TilawaLanguageSwitcher extends StatelessWidget {
         children: languages.map((lang) {
           final isSelected = currentLanguage == lang;
           final String label = getLanguageName(lang);
-          return Material(
-            color: isSelected ? colorScheme.onPrimary : Colors.transparent,
+          return TilawaInteractiveSurface(
+            onTap: enabled && !isLoading ? () => onLanguageChanged(lang) : null,
+            enabled: enabled && !isLoading,
+            // fix: Accessibility — segment role.
+            selected: isSelected,
+            semanticLabel: label,
             borderRadius: itemBorderRadius,
-            child: InkWell(
-              onTap: enabled && !isLoading
-                  ? () => onLanguageChanged(lang)
-                  : null,
-              borderRadius: itemBorderRadius,
-              child: Semantics(
-                // fix: Accessibility — segment role (inside InkWell avoids merge bugs)
-                selected: isSelected,
-                button: true,
-                enabled: enabled && !isLoading,
-                label: label,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minWidth: tokens.minItemWidth),
-                  child: Padding(
-                    padding: tokens.itemPadding,
-                    child: Center(
-                      child: isLoading && isSelected
-                          ? SizedBox.square(
-                              dimension: theme.tokens.iconSizeSmall,
-                              child: TilawaLoadingIndicator(
-                                centered: false,
-                                strokeWidth: 2,
-                                color: colorScheme.primary,
-                              ),
-                            )
-                          : Text(
-                              label,
-                              style: theme.textTheme.labelLarge?.copyWith(
-                                color: isSelected
-                                    ? colorScheme.primary
-                                    : colorScheme.onPrimary,
-                                fontWeight: isSelected
-                                    ? tokens.selectedFontWeight
-                                    : tokens.unselectedFontWeight,
-                              ),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: isSelected ? colorScheme.onPrimary : Colors.transparent,
+                borderRadius: itemBorderRadius,
+              ),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minWidth: tokens.minItemWidth),
+                child: Padding(
+                  padding: tokens.itemPadding,
+                  child: Center(
+                    child: isLoading && isSelected
+                        ? SizedBox.square(
+                            dimension: theme.tokens.iconSizeSmall,
+                            child: TilawaLoadingIndicator(
+                              centered: false,
+                              strokeWidth: 2,
+                              color: colorScheme.primary,
                             ),
-                    ),
+                          )
+                        : Text(
+                            label,
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              color: isSelected
+                                  ? colorScheme.primary
+                                  : colorScheme.onPrimary,
+                              fontWeight: isSelected
+                                  ? tokens.selectedFontWeight
+                                  : tokens.unselectedFontWeight,
+                            ),
+                          ),
                   ),
                 ),
               ),

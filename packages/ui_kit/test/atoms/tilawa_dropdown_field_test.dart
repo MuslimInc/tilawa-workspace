@@ -4,6 +4,7 @@ import 'package:tilawa_ui_kit/src/atoms/tilawa_dropdown_field.dart';
 import 'package:tilawa_ui_kit/src/foundation/app_colors.dart';
 import 'package:tilawa_ui_kit/src/foundation/app_theme.dart';
 import 'package:tilawa_ui_kit/src/foundation/design_tokens.dart';
+import 'package:tilawa_ui_kit/src/foundation/tilawa_interactive_surface.dart';
 
 const _items = [
   TilawaDropdownItem(value: 'eg', label: 'Egypt', icon: Icons.public),
@@ -71,7 +72,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(InkWell));
+      await tester.tap(find.byType(TilawaInteractiveSurface));
       await tester.pumpAndSettle();
       // The option appears in the menu overlay.
       await tester.tap(find.text('Saudi Arabia').last);
@@ -94,7 +95,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(InkWell));
+      await tester.tap(find.byType(TilawaInteractiveSurface));
       await tester.pumpAndSettle();
 
       // No menu item rendered → menu never opened.
@@ -114,7 +115,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(InkWell));
+      await tester.tap(find.byType(TilawaInteractiveSurface));
       await tester.pumpAndSettle();
       expect(find.text('Saudi Arabia'), findsNothing);
     });
@@ -262,7 +263,7 @@ void main() {
 
       final Size fieldSize = tester.getSize(find.byType(InputDecorator));
 
-      await tester.tap(find.byType(InkWell));
+      await tester.tap(find.byType(TilawaInteractiveSurface));
       await tester.pumpAndSettle();
 
       final Size menuSize = tester.getSize(find.byType(Material).last);
@@ -281,7 +282,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(InkWell));
+      await tester.tap(find.byType(TilawaInteractiveSurface));
       await tester.pumpAndSettle();
 
       final Size itemSize = tester.getSize(

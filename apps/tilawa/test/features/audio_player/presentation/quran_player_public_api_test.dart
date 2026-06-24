@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -243,8 +245,149 @@ void main() {
         );
         await tester.pump();
 
-        expect(offset, floatingPadding);
+        expect(
+          offset,
+          greaterThanOrEqualTo(
+            math.max(floatingPadding, kTilawaMinInteractiveDimension),
+          ),
+        );
         expect(offset, greaterThan(TilawaDesignTokens.light().spaceSmall));
+      },
+    );
+
+    testWidgets(
+      'fabBottomOffset lifts FAB to min touch target when system inset is 0',
+      (tester) async {
+        final QuranPlayerChromeNotifier notifier = QuranPlayerChromeNotifier();
+        addTearDown(notifier.dispose);
+        notifier.updateShellChrome(
+          const QuranPlayerShellChrome(
+            bottomNavBarHeight: 0,
+            isKeyboardOpen: false,
+            isAudioBindingDeferred: false,
+            hostAbsorbsBottomSafeArea: false,
+          ),
+        );
+        final MockAudioPlayerBloc audioPlayerBloc = MockAudioPlayerBloc();
+        when(() => audioPlayerBloc.state).thenReturn(
+          const AudioPlayerState(status: AudioPlayerStatus.initial),
+        );
+        when(
+          () => audioPlayerBloc.stream,
+        ).thenAnswer((_) => const Stream.empty());
+
+        late double offset;
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(),
+            child: ChangeNotifierProvider<QuranPlayerChromeNotifier>.value(
+              value: notifier,
+              child: BlocProvider<AudioPlayerBloc>.value(
+                value: audioPlayerBloc,
+                child: MaterialApp.router(
+                  theme: ThemeData(
+                    extensions: <ThemeExtension<dynamic>>[
+                      TilawaDesignTokens.light(),
+                    ],
+                  ),
+                  routerConfig: GoRouter(
+                    initialLocation: '/reciter/maher',
+                    routes: <RouteBase>[
+                      GoRoute(
+                        path: '/reciter/:reciterId',
+                        builder: (BuildContext context, GoRouterState state) {
+                          return Builder(
+                            builder: (BuildContext context) {
+                              offset = QuranPlayerWidget.fabBottomOffset(
+                                context,
+                              );
+                              return const SizedBox.shrink();
+                            },
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        expect(offset, kTilawaMinInteractiveDimension);
+      },
+    );
+
+    testWidgets(
+      'fabBottomOffset ignores audio when shell keyboard hides footer player',
+      (tester) async {
+        final QuranPlayerChromeNotifier notifier = QuranPlayerChromeNotifier();
+        addTearDown(notifier.dispose);
+        notifier.updateShellChrome(
+          const QuranPlayerShellChrome(
+            bottomNavBarHeight: 0,
+            isKeyboardOpen: true,
+            isAudioBindingDeferred: false,
+            hostAbsorbsBottomSafeArea: false,
+          ),
+        );
+        final MockAudioPlayerBloc audioPlayerBloc = MockAudioPlayerBloc();
+        when(() => audioPlayerBloc.state).thenReturn(
+          const AudioPlayerState(
+            status: AudioPlayerStatus.success,
+            currentAudio: _tAudio,
+          ),
+        );
+        when(
+          () => audioPlayerBloc.stream,
+        ).thenAnswer((_) => const Stream.empty());
+
+        late double offset;
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(),
+            child: ChangeNotifierProvider<QuranPlayerChromeNotifier>.value(
+              value: notifier,
+              child: BlocProvider<AudioPlayerBloc>.value(
+                value: audioPlayerBloc,
+                child: MaterialApp.router(
+                  theme: ThemeData(
+                    extensions: <ThemeExtension<dynamic>>[
+                      TilawaDesignTokens.light(),
+                    ],
+                  ),
+                  routerConfig: GoRouter(
+                    initialLocation: '/reciter/maher',
+                    routes: <RouteBase>[
+                      GoRoute(
+                        path: '/reciter/:reciterId',
+                        builder: (BuildContext context, GoRouterState state) {
+                          return Builder(
+                            builder: (BuildContext context) {
+                              offset = QuranPlayerWidget.fabBottomOffset(
+                                context,
+                              );
+                              return const SizedBox.shrink();
+                            },
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        expect(offset, kTilawaMinInteractiveDimension);
+        expect(
+          offset,
+          greaterThan(TilawaDesignTokens.light().spaceSmall),
+          reason: 'keyboard-open shell must not use mini-player margin',
+        );
       },
     );
 

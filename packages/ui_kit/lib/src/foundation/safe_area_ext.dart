@@ -17,6 +17,18 @@ extension TilawaSafeAreaX on BuildContext {
 
   double get systemBottomSafeArea => systemSafeArea.bottom;
 
+  /// Device bottom inset when a parent [Scaffold] strips [MediaQuery.viewPadding].
+  double get effectiveSystemBottomSafeArea {
+    if (systemBottomSafeArea > 0) {
+      return systemBottomSafeArea;
+    }
+    final FlutterView? view = View.maybeOf(this);
+    if (view == null) {
+      return 0;
+    }
+    return view.viewPadding.bottom / view.devicePixelRatio;
+  }
+
   double get systemLeftSafeArea => systemSafeArea.left;
 
   double get systemRightSafeArea => systemSafeArea.right;
@@ -66,9 +78,10 @@ extension TilawaSafeAreaX on BuildContext {
   double get floatingBottomPadding {
     final buffer = theme.tokens.spaceSmall;
     final fallback = theme.tokens.spaceExtraLarge;
+    final double bottomInset = effectiveSystemBottomSafeArea;
 
-    if (systemBottomSafeArea > 0) {
-      return systemBottomSafeArea + buffer;
+    if (bottomInset > 0) {
+      return bottomInset + buffer;
     }
 
     return fallback;

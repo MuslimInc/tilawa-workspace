@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../foundation/design_tokens.dart';
+import '../foundation/tilawa_interactive_surface.dart';
 import './tilawa_loading_indicator.dart';
 
 /// Google Identity palette for the branded sign-in button.
@@ -195,25 +196,29 @@ class TilawaGoogleSignInButton extends StatelessWidget {
       ],
     );
 
-    final Widget button = Material(
+    final Widget surface = Material(
       color: fill,
       elevation: 0,
       shadowColor: Colors.transparent,
       surfaceTintColor: Colors.transparent,
       shape: shape,
       clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: _isDisabled ? null : onPressed,
-        customBorder: shape,
-        borderRadius: borderRadius,
-        splashColor: labelColor.withValues(alpha: 0.08),
-        highlightColor: labelColor.withValues(alpha: 0.04),
-        child: SizedBox(
-          height: height,
-          width: isFullWidth ? double.infinity : null,
-          child: content,
-        ),
+      child: SizedBox(
+        height: height,
+        width: isFullWidth ? double.infinity : null,
+        child: content,
       ),
+    );
+
+    // The whole branded button gets the kit's press-scale, focus ring, and
+    // activation haptic (no Material ink ripple). The outer Semantics owns the
+    // accessible button role/label, so the surface's own semantics are excluded.
+    final Widget button = TilawaInteractiveSurface(
+      onTap: _isDisabled ? null : onPressed,
+      enabled: !_isDisabled,
+      button: false,
+      borderRadius: borderRadius,
+      child: surface,
     );
 
     return RepaintBoundary(
@@ -223,7 +228,7 @@ class TilawaGoogleSignInButton extends StatelessWidget {
             : (semanticLabel ?? label),
         button: true,
         enabled: !_isDisabled,
-        child: button,
+        child: ExcludeSemantics(child: button),
       ),
     );
   }

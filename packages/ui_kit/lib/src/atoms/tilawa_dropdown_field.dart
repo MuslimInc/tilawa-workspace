@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../foundation/design_tokens.dart';
 import '../foundation/tilawa_input_style.dart';
+import '../foundation/tilawa_interactive_surface.dart';
 
 /// A single option for a [TilawaDropdownField].
 @immutable
@@ -230,8 +231,13 @@ class TilawaDropdownField<T> extends StatelessWidget {
                         button: true,
                         enabled: isEnabled,
                         expanded: controller.isOpen,
-                        child: InkWell(
+                        child: TilawaInteractiveSurface(
                           onTap: isEnabled ? toggleMenu : null,
+                          enabled: isEnabled,
+                          button: false,
+                          // A form field should not shrink on tap; keep it
+                          // static but still gain the focus ring + haptic.
+                          enablePressAnimation: false,
                           borderRadius: BorderRadius.circular(radius),
                           child: InputDecorator(
                             decoration: fieldDecoration,
