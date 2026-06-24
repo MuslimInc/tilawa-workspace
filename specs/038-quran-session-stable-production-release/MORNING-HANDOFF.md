@@ -83,6 +83,55 @@ flutter run --release \
   --dart-define=TILAWA_LAUNCH_ENABLED_CALL_PROVIDERS=external,mock
 ```
 
+### Build flags (staging + Agora RTC)
+
+Requires CF secrets + Firestore `enabledCallProviders` (see **Agora staging setup** below). VS Code: **Tilawa (Staging Agora)** launch config.
+
+```sh
+cd apps/tilawa
+flutter run --release \
+  --dart-define=TILAWA_DISTRIBUTION=staging \
+  --dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_ENABLED=true \
+  --dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED=true \
+  --dart-define=TILAWA_LAUNCH_ENABLED_CALL_PROVIDERS=external,mock,agora \
+  --dart-define=TILAWA_LAUNCH_AGORA_APP_ID=aacd48a930944ecea29bec112f229eb9
+```
+
+### Agora staging setup (ops)
+
+**Cloud Functions secrets** (`quran-playera-app`):
+
+```sh
+# Interactive — paste App ID and Primary Certificate when prompted (never commit cert)
+firebase functions:secrets:set AGORA_APP_ID AGORA_APP_CERTIFICATE --project quran-playera-app
+
+# Redeploy token callable after secrets are set
+cd functions
+firebase deploy --only functions:issueSessionRtcToken --project quran-playera-app
+```
+
+**Local emulator / scripts only** (gitignored):
+
+```sh
+cp functions/.env.agora.local.example functions/.env.agora.local
+# Edit .env.agora.local — certificate stays local; do not commit
+```
+
+**Firestore** (`quran-playera-app` staging only — merge, do not wipe global config):
+
+```json
+// quran_session_platform_config/global
+{
+  "enabledCallProviders": ["external", "mock", "agora"]
+}
+```
+
+Set via Firebase Console or Admin SDK merge. Required for server-side Agora booking validation.
+
+**Temp Agora Console token:** manual Agora Console test only (~24h TTL). The app mints tokens at join time via `issueSessionRtcToken` — do not embed console tokens in the app or repo.
+
+**Security:** Primary Certificate was shared in chat for setup — rotate in Agora Console after testing if chat is logged.
+
 ### Student (B1–B5)
 
 1. [ ] Sign in; complete profile (gender, DOB, location)
@@ -141,6 +190,7 @@ See `final-report.md` RTC / Phase 3 staging checklist. **No-Go for Play wide** u
 | `firestore.rules` + indexes (Phase 5) | ✅ deployed `quran-playera-app` (prior pass) |
 | `confirmSessionReschedule` | ✅ deployed (prior pass) |
 | 12 stable callables + `sessionReminders` (Phase 4 wiring) | ⬜ **Run** `./scripts/deploy_quran_session_callables.sh quran-playera-app` |
+| `issueSessionRtcToken` + Agora secrets (`AGORA_APP_ID`, `AGORA_APP_CERTIFICATE`) | ✅ deployed `quran-playera-app` (2026-06-24) |
 | App Check enforcement flip | ⬜ ops — after staging smoke |
 
 ---

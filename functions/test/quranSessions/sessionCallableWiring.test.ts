@@ -30,6 +30,9 @@ const EXCLUDED_CALLABLE_FILES = [
 const IMPORT_PATTERN =
   /import\s*{[^}]*sessionCallableHttpsOptions[^}]*}\s*from\s*["'][^"']*sessionCallableOptions["']/;
 
+const ON_CALL_WITH_SESSION_OPTIONS_PATTERN =
+  /onCall\(\s*(sessionCallableHttpsOptions|\{[^}]*\.\.\.sessionCallableHttpsOptions)/;
+
 test("stable session callables import and pass sessionCallableHttpsOptions", () => {
   for (const relPath of STABLE_SESSION_CALLABLE_FILES) {
     const source = readFileSync(join(SRC_ROOT, relPath), "utf8");
@@ -38,7 +41,9 @@ test("stable session callables import and pass sessionCallableHttpsOptions", () 
       IMPORT_PATTERN,
       `${relPath} must import sessionCallableHttpsOptions`,
     );
-    const onCallMatches = source.match(/onCall\(\s*sessionCallableHttpsOptions,/g);
+    const onCallMatches = source.match(
+      new RegExp(ON_CALL_WITH_SESSION_OPTIONS_PATTERN.source, "g"),
+    );
     assert.ok(
       onCallMatches && onCallMatches.length >= 1,
       `${relPath} must pass sessionCallableHttpsOptions to onCall`,
@@ -50,7 +55,9 @@ test("stable batch covers exactly twelve onCall exports", () => {
   let count = 0;
   for (const relPath of STABLE_SESSION_CALLABLE_FILES) {
     const source = readFileSync(join(SRC_ROOT, relPath), "utf8");
-    const matches = source.match(/onCall\(\s*sessionCallableHttpsOptions,/g);
+    const matches = source.match(
+      new RegExp(ON_CALL_WITH_SESSION_OPTIONS_PATTERN.source, "g"),
+    );
     count += matches?.length ?? 0;
   }
   assert.equal(count, 12, "expected 12 stable-scope session callables");

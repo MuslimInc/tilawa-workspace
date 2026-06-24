@@ -99,8 +99,7 @@ class _HomeQuranResumeReadyCard extends StatelessWidget {
               if (progress != null)
                 _ProgressRing(progress: progress, foreground: foreground)
               else
-                Icon(
-                  Icons.menu_book_rounded,
+                TilawaIcons.quran.svg(
                   color: foreground,
                   size: tokens.iconSizeLarge,
                 ),

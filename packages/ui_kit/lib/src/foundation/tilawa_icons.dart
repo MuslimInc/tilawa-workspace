@@ -20,6 +20,8 @@ abstract final class TilawaIcons {
 
   /// The Quran tab icon — a custom open-book SVG from the design system.
   ///
+  /// Canonical Quran reader glyph for bottom nav, home shortcuts, and resume.
+  ///
   /// Because this is a vector artwork (not a font glyph), it is returned
   /// as a [Widget] via [svg] rather than an [IconData].
   ///
@@ -34,8 +36,9 @@ abstract final class TilawaIcons {
     'packages/tilawa_ui_kit/assets/icons/quran_icon.svg',
   );
 
-  static const IconData reciters = FluentIcons.person_voice_24_regular;
-  static const IconData recitersActive = FluentIcons.person_voice_24_filled;
+  static const IconData reciters = FluentIcons.headphones_sound_wave_24_regular;
+  static const IconData recitersActive =
+      FluentIcons.headphones_sound_wave_24_filled;
   static const IconData qibla = FluentIcons.compass_northwest_24_regular;
   static const IconData qiblaActive = FluentIcons.compass_northwest_24_filled;
   static const IconData athkar = FluentIcons.book_open_24_regular;
@@ -87,8 +90,8 @@ abstract final class TilawaIcons {
   static const IconData volumeMute = Icons.volume_mute_outlined;
   static const IconData equalizer = Icons.equalizer;
   static const IconData musicNote = FluentIcons.music_note_2_24_filled;
-  static const IconData headphones =
-      FluentIcons.headphones_sound_wave_24_regular;
+  static const IconData headphones = reciters;
+  static const IconData headphonesActive = recitersActive;
   static const IconData speaker = FluentIcons.speaker_2_24_regular;
   static const IconData reciter = FluentIcons.person_voice_24_regular;
   static const IconData multitrack = Icons.multitrack_audio_rounded;

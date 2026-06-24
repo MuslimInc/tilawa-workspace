@@ -88,84 +88,31 @@ class BookmarksScreen extends StatelessWidget {
                     loading: () => const TilawaLoadingIndicator(),
                     loaded: (bookmarks, filteredBookmarks, searchQuery) =>
                         Positioned.fill(
-                          child: CustomScrollView(
-                            slivers: [
-                              SliverFillRemaining(
-                                hasScrollBody: filteredBookmarks.isNotEmpty,
-                                child: filteredBookmarks.isEmpty
-                                    ? _buildEmptyState(
-                                        context,
-                                        searchQuery.isNotEmpty,
-                                      )
-                                    : ListView.separated(
-                                        padding: EdgeInsets.fromLTRB(
-                                          16,
-                                          16,
-                                          16,
-                                          120,
-                                        ),
-                                        itemCount: filteredBookmarks.length,
-                                        separatorBuilder: (context, index) =>
-                                            SizedBox(height: 8),
-                                        itemBuilder: (context, index) {
-                                          final BookmarkEntity bookmark =
-                                              filteredBookmarks[index];
-                                          final tokens = Theme.of(
-                                            context,
-                                          ).tokens;
-                                          return Dismissible(
-                                            key: ValueKey(bookmark.id),
-                                            direction:
-                                                DismissDirection.endToStart,
-                                            background: _dismissBackground(
-                                              context,
-                                              tokens,
-                                            ),
-                                            onDismissed: (_) =>
-                                                _onBookmarkDismissed(
-                                                  context,
-                                                  bookmark,
-                                                ),
-                                            child: BookmarkCard(
-                                              bookmark: bookmark,
-                                              onTap: () => _playFromBookmark(
-                                                context,
-                                                bookmark,
-                                              ),
-                                              onEdit: () =>
-                                                  _showEditLabelDialog(
-                                                    context,
-                                                    bookmark,
-                                                  ),
-                                            ),
-                                          );
-                                        },
-                                      ),
-                              ),
-                            ],
+                          child: _BookmarksList(
+                            bookmarks: filteredBookmarks,
+                            isSearching: searchQuery.isNotEmpty,
                           ),
                         ),
                     bookmarkCreated: (_, bookmarks) => Positioned.fill(
-                      child: _buildLoadedList(context, bookmarks),
+                      child: _BookmarksList(
+                        bookmarks: bookmarks,
+                        isSearching: false,
+                      ),
                     ),
                     bookmarkUpdated: (_, bookmarks) => Positioned.fill(
-                      child: _buildLoadedList(context, bookmarks),
+                      child: _BookmarksList(
+                        bookmarks: bookmarks,
+                        isSearching: false,
+                      ),
                     ),
                     bookmarkDeleted: (_, bookmarks) => Positioned.fill(
-                      child: _buildLoadedList(context, bookmarks),
+                      child: _BookmarksList(
+                        bookmarks: bookmarks,
+                        isSearching: false,
+                      ),
                     ),
                     error: (message) => Positioned.fill(
-                      child: TilawaErrorState(
-                        icon: Icons.error_outline_rounded,
-                        title: message,
-                        retryLabel: context.l10n.retry,
-                        onRetry: () {
-                          context.read<BookmarksBloc>().add(
-                            const LoadBookmarksEvent(),
-                          );
-                        },
-                        iconColor: Theme.of(context).colorScheme.error,
-                      ),
+                      child: _BookmarksErrorState(message: message),
                     ),
                   ),
                 ],
@@ -176,13 +123,21 @@ class BookmarksScreen extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildLoadedList(
-    BuildContext context,
-    List<BookmarkEntity> bookmarks,
-  ) {
+class _BookmarksList extends StatelessWidget {
+  const _BookmarksList({
+    required this.bookmarks,
+    required this.isSearching,
+  });
+
+  final List<BookmarkEntity> bookmarks;
+  final bool isSearching;
+
+  @override
+  Widget build(BuildContext context) {
     if (bookmarks.isEmpty) {
-      return _buildEmptyState(context, false);
+      return _BookmarksEmptyState(isSearching: isSearching);
     }
 
     final TilawaDesignTokens tokens = Theme.of(context).tokens;
@@ -201,7 +156,7 @@ class BookmarksScreen extends StatelessWidget {
         return Dismissible(
           key: ValueKey(bookmark.id),
           direction: DismissDirection.endToStart,
-          background: _dismissBackground(context, tokens),
+          background: const _BookmarkDismissBackground(),
           onDismissed: (_) => _onBookmarkDismissed(context, bookmark),
           child: BookmarkCard(
             bookmark: bookmark,
@@ -212,11 +167,56 @@ class BookmarksScreen extends StatelessWidget {
       },
     );
   }
+}
 
-  /// Delete background pinned to the reveal side in both LTR and RTL
-  /// (paired with `DismissDirection.endToStart`).
-  Widget _dismissBackground(BuildContext context, TilawaDesignTokens tokens) {
+class _BookmarksEmptyState extends StatelessWidget {
+  const _BookmarksEmptyState({required this.isSearching});
+
+  final bool isSearching;
+
+  @override
+  Widget build(BuildContext context) {
+    return TilawaEmptyState(
+      icon: FluentIcons.bookmark_24_regular,
+      title: isSearching
+          ? context.l10n.noBookmarksFound
+          : context.l10n.noBookmarks,
+      subtitle: isSearching
+          ? context.l10n.tryDifferentSearch
+          : context.l10n.noBookmarksHint,
+    );
+  }
+}
+
+class _BookmarksErrorState extends StatelessWidget {
+  const _BookmarksErrorState({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return TilawaErrorState(
+      icon: Icons.error_outline_rounded,
+      title: message,
+      retryLabel: context.l10n.retry,
+      onRetry: () {
+        context.read<BookmarksBloc>().add(const LoadBookmarksEvent());
+      },
+      iconColor: Theme.of(context).colorScheme.error,
+    );
+  }
+}
+
+/// Delete background pinned to the reveal side in both LTR and RTL
+/// (paired with `DismissDirection.endToStart`).
+class _BookmarkDismissBackground extends StatelessWidget {
+  const _BookmarkDismissBackground();
+
+  @override
+  Widget build(BuildContext context) {
+    final TilawaDesignTokens tokens = Theme.of(context).tokens;
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       alignment: AlignmentDirectional.centerEnd,
       padding: EdgeInsetsDirectional.only(end: tokens.spaceLarge),
@@ -229,116 +229,99 @@ class BookmarksScreen extends StatelessWidget {
       child: Icon(Icons.delete_outline_rounded, color: colorScheme.onError),
     );
   }
+}
 
-  /// Deletes with an undo affordance — the recreated bookmark gets a fresh
-  /// id/timestamps, which is acceptable for undo semantics.
-  void _onBookmarkDismissed(BuildContext context, BookmarkEntity bookmark) {
-    final BookmarksBloc bloc = context.read<BookmarksBloc>();
-    bloc.add(DeleteBookmarkEvent(id: bookmark.id));
-    TilawaFeedback.showActionable(
-      context,
-      message: context.l10n.bookmarkDeleted,
-      variant: TilawaFeedbackVariant.success,
-      dedupeKey: 'bookmark-undo-${bookmark.id}',
-      actions: <TilawaFeedbackAction>[
-        TilawaFeedbackAction(
-          label: context.l10n.undo,
-          onPressed: () => bloc.add(
-            CreateBookmarkEvent(
-              surahId: bookmark.surahId,
-              surahName: bookmark.surahName,
-              surahNameEn: bookmark.surahNameEn,
-              reciterId: bookmark.reciterId,
-              reciterName: bookmark.reciterName,
-              moshafId: bookmark.moshafId,
-              moshafName: bookmark.moshafName,
-              positionMs: bookmark.positionMs,
-              durationMs: bookmark.durationMs,
-              audioUrl: bookmark.audioUrl,
-              label: bookmark.label,
-              artworkUrl: bookmark.artworkUrl,
-            ),
+/// Deletes with an undo affordance — the recreated bookmark gets a fresh
+/// id/timestamps, which is acceptable for undo semantics.
+void _onBookmarkDismissed(BuildContext context, BookmarkEntity bookmark) {
+  final BookmarksBloc bloc = context.read<BookmarksBloc>();
+  bloc.add(DeleteBookmarkEvent(id: bookmark.id));
+  TilawaFeedback.showActionable(
+    context,
+    message: context.l10n.bookmarkDeleted,
+    variant: TilawaFeedbackVariant.success,
+    dedupeKey: 'bookmark-undo-${bookmark.id}',
+    actions: <TilawaFeedbackAction>[
+      TilawaFeedbackAction(
+        label: context.l10n.undo,
+        onPressed: () => bloc.add(
+          CreateBookmarkEvent(
+            surahId: bookmark.surahId,
+            surahName: bookmark.surahName,
+            surahNameEn: bookmark.surahNameEn,
+            reciterId: bookmark.reciterId,
+            reciterName: bookmark.reciterName,
+            moshafId: bookmark.moshafId,
+            moshafName: bookmark.moshafName,
+            positionMs: bookmark.positionMs,
+            durationMs: bookmark.durationMs,
+            audioUrl: bookmark.audioUrl,
+            label: bookmark.label,
+            artworkUrl: bookmark.artworkUrl,
           ),
+        ),
+      ),
+    ],
+  );
+}
+
+void _playFromBookmark(BuildContext context, BookmarkEntity bookmark) {
+  final audio = AudioEntity(
+    id: bookmark.audioUrl,
+    title: bookmark.surahName,
+    url: bookmark.audioUrl,
+    duration: bookmark.duration,
+    artist: bookmark.reciterName,
+    album: bookmark.moshafName,
+    artUri: bookmark.artworkUrl,
+    extras: {
+      'surahId': bookmark.surahId,
+      'reciterId': bookmark.reciterId,
+      'moshafId': bookmark.moshafId,
+    },
+  );
+
+  context.read<AudioPlayerBloc>().add(
+    AudioPlayerEvent.playFromQueue(
+      [audio],
+      0,
+      initialPosition: bookmark.position,
+    ),
+  );
+}
+
+void _showEditLabelDialog(BuildContext context, BookmarkEntity bookmark) {
+  final controller = TextEditingController(text: bookmark.label ?? '');
+
+  showDialog(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: Text(context.l10n.editBookmarkLabel),
+      content: TilawaTextField(
+        controller: controller,
+        hintText: context.l10n.enterBookmarkLabel,
+        autofocus: true,
+      ),
+      actions: [
+        TilawaButton(
+          text: context.l10n.cancel,
+          variant: TilawaButtonVariant.ghost,
+          onPressed: () => Navigator.pop(dialogContext),
+        ),
+        TilawaButton(
+          text: context.l10n.save,
+          variant: TilawaButtonVariant.primary,
+          onPressed: () {
+            context.read<BookmarksBloc>().add(
+              UpdateBookmarkLabelEvent(
+                id: bookmark.id,
+                label: controller.text.isEmpty ? null : controller.text,
+              ),
+            );
+            Navigator.pop(dialogContext);
+          },
         ),
       ],
-    );
-  }
-
-  Widget _buildEmptyState(BuildContext context, bool isSearching) {
-    return Center(
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: TilawaEmptyState(
-          icon: FluentIcons.bookmark_24_regular,
-          title: isSearching
-              ? context.l10n.noBookmarksFound
-              : context.l10n.noBookmarks,
-          subtitle: isSearching
-              ? context.l10n.tryDifferentSearch
-              : context.l10n.noBookmarksHint,
-        ),
-      ),
-    );
-  }
-
-  void _playFromBookmark(BuildContext context, BookmarkEntity bookmark) {
-    final audio = AudioEntity(
-      id: bookmark.audioUrl,
-      title: bookmark.surahName,
-      url: bookmark.audioUrl,
-      duration: bookmark.duration,
-      artist: bookmark.reciterName,
-      album: bookmark.moshafName,
-      artUri: bookmark.artworkUrl,
-      extras: {
-        'surahId': bookmark.surahId,
-        'reciterId': bookmark.reciterId,
-        'moshafId': bookmark.moshafId,
-      },
-    );
-
-    context.read<AudioPlayerBloc>().add(
-      AudioPlayerEvent.playFromQueue(
-        [audio],
-        0,
-        initialPosition: bookmark.position,
-      ),
-    );
-  }
-
-  void _showEditLabelDialog(BuildContext context, BookmarkEntity bookmark) {
-    final controller = TextEditingController(text: bookmark.label ?? '');
-
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(context.l10n.editBookmarkLabel),
-        content: TilawaTextField(
-          controller: controller,
-          hintText: context.l10n.enterBookmarkLabel,
-          autofocus: true,
-        ),
-        actions: [
-          TilawaButton(
-            text: context.l10n.cancel,
-            variant: TilawaButtonVariant.ghost,
-            onPressed: () => Navigator.pop(dialogContext),
-          ),
-          TilawaButton(
-            text: context.l10n.save,
-            variant: TilawaButtonVariant.primary,
-            onPressed: () {
-              context.read<BookmarksBloc>().add(
-                UpdateBookmarkLabelEvent(
-                  id: bookmark.id,
-                  label: controller.text.isEmpty ? null : controller.text,
-                ),
-              );
-              Navigator.pop(dialogContext);
-            },
-          ),
-        ],
-      ),
-    );
-  }
+    ),
+  );
 }

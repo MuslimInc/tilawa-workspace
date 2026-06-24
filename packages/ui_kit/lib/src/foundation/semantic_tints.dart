@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'app_colors.dart';
 import 'color_scheme_ext.dart';
 
 /// Manuscript-derived tints for hub navigation icon boxes.
@@ -61,6 +62,42 @@ extension TilawaSemanticTintColors on ColorScheme {
       TilawaSemanticTint.neutral => onSurface,
       TilawaSemanticTint.success => success,
       TilawaSemanticTint.caution => warning,
+    };
+  }
+
+  /// Stronger accent wash for Home explore grid tiles.
+  ///
+  /// Unlike [semanticTintBackground] (neutral [surfaceContainer] roles), these
+  /// blends use brand accents so each feature card reads at a glance.
+  Color featureCategoryTileBackground(TilawaSemanticTint tint) {
+    final double strength = brightness == Brightness.dark ? 0.22 : 0.15;
+
+    return switch (tint) {
+      TilawaSemanticTint.ink => Color.alphaBlend(
+        primary.withValues(alpha: strength),
+        surface,
+      ),
+      TilawaSemanticTint.scholar => Color.alphaBlend(
+        AppColors.primarySage.withValues(alpha: strength),
+        surface,
+      ),
+      TilawaSemanticTint.gilding => Color.alphaBlend(
+        AppColors.brandTertiary.withValues(alpha: strength + 0.02),
+        surface,
+      ),
+      TilawaSemanticTint.parchment => Color.alphaBlend(
+        onSurfaceVariant.withValues(alpha: 0.12),
+        surfaceContainerHigh,
+      ),
+      TilawaSemanticTint.neutral => AppColors.tripGlideCanvasElevated,
+      TilawaSemanticTint.success => Color.alphaBlend(
+        success.withValues(alpha: strength + 0.02),
+        surface,
+      ),
+      TilawaSemanticTint.caution => Color.alphaBlend(
+        warning.withValues(alpha: strength),
+        surface,
+      ),
     };
   }
 }
