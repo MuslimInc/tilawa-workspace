@@ -128,54 +128,8 @@ class _InAppCallShellScreenState extends State<InAppCallShellScreen> {
 
     return BlocProvider.value(
       value: cubit,
-      child:
-          BlocListener<
-            QuranSessionCallControlCubit,
-            QuranSessionCallControlState
-          >(
-            listenWhen: (previous, current) =>
-                current.feedback != null &&
-                current.feedback != previous.feedback,
-            listener: (context, state) {
-              final message = _feedbackMessage(
-                context.quranSessionsL10n,
-                state.feedback,
-              );
-              if (message == null) {
-                return;
-              }
-              TilawaFeedback.showToast(
-                context,
-                message: message,
-                variant: state.feedback == CallControlFeedback.actionFailed
-                    ? TilawaFeedbackVariant.error
-                    : TilawaFeedbackVariant.info,
-              );
-              context.read<QuranSessionCallControlCubit>().clearFeedback();
-            },
-            child: shell,
-          ),
+      child: shell,
     );
-  }
-
-  String? _feedbackMessage(
-    QuranSessionsLocalizations l10n,
-    CallControlFeedback? feedback,
-  ) {
-    return switch (feedback) {
-      CallControlFeedback.microphoneMuted => l10n.inAppCallShellMicrophoneMuted,
-      CallControlFeedback.microphoneUnmuted =>
-        l10n.inAppCallShellMicrophoneUnmuted,
-      CallControlFeedback.cameraOff => l10n.inAppCallShellCameraOff,
-      CallControlFeedback.cameraOn => l10n.inAppCallShellCameraOn,
-      CallControlFeedback.switchCameraBlocked =>
-        l10n.inAppCallShellSwitchCameraBlocked,
-      CallControlFeedback.speakerOn => l10n.inAppCallShellSpeakerOn,
-      CallControlFeedback.speakerOff => l10n.inAppCallShellSpeakerOff,
-      CallControlFeedback.actionFailed =>
-        l10n.inAppCallShellControlActionFailed,
-      null => null,
-    };
   }
 }
 

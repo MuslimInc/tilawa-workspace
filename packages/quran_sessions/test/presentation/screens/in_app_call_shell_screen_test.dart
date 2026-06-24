@@ -126,7 +126,8 @@ void main() {
     await tester.pumpAndSettle();
 
     check(gateway.speakerEnabledCalls).deepEquals([true]);
-    expect(find.text('Speaker on'), findsOneWidget);
+    expect(find.byIcon(Icons.volume_up_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.hearing_rounded), findsNothing);
   });
 
   testWidgets('Injected call surface fills immersive body under chrome', (
