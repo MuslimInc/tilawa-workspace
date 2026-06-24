@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../qibla_heading_math.dart';
+
 class QiblaDirectionEntity extends Equatable {
   const QiblaDirectionEntity({
     required this.qibla,
@@ -16,17 +18,17 @@ class QiblaDirectionEntity extends Equatable {
   /// The current heading of the device (0-360)
   final double direction;
 
-  /// The difference between the device direction and the Qibla (used for rotation)
+  /// Geographic bearing to the Qibla from north (0–360), fixed for location.
   final double offset;
 
   /// Estimated compass heading error in degrees, when the platform provides it.
   final double? accuracy;
 
-  /// Returns true if the device direction is within 2 degrees of the Qibla
-  bool get isAligned {
-    final double diff = (direction - offset).abs();
-    return diff < 2 || diff > 358;
-  }
+  /// Returns true when the device heading is within 2° of the Qibla bearing.
+  bool get isAligned => isHeadingAlignedWithBearing(
+    bearing: offset,
+    heading: direction,
+  );
 
   bool get hasPoorCompassAccuracy =>
       accuracy != null && accuracy! >= _poorAccuracyThreshold;

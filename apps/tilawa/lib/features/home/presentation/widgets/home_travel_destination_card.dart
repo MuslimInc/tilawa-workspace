@@ -52,7 +52,8 @@ class HomeTravelDestinationCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: .min,
+                      crossAxisAlignment: .start,
                       spacing: tokens.spaceExtraSmall,
                       children: [
                         Flexible(

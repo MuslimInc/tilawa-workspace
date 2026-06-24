@@ -1759,9 +1759,9 @@
     "@qiblaFinderTitle": {
         "description": "Centered uppercase title on the Qibla compass screen"
     },
-    "qiblaDeviceAngleLabel": "زاوية الجهاز نحو القبلة",
+    "qiblaDeviceAngleLabel": "اتجاه القبلة من الشمال",
     "@qiblaDeviceAngleLabel": {
-        "description": "Subtitle below the compass degree readout"
+        "description": "Subtitle below the Qibla bearing readout (geographic degrees from north)"
     },
     "qiblaRotatePhoneLeft": "أدر الهاتف {degrees}° إلى اليسار",
     "@qiblaRotatePhoneLeft": {

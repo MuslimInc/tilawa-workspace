@@ -47,6 +47,27 @@ void main() {
       await tester.pump();
       expect(tapped, isTrue);
     });
+
+    testWidgets('uses shared interactive surface for press feedback', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          SizedBox(
+            width: 360,
+            child: TilawaNavigationRow(
+              icon: Icons.auto_stories_outlined,
+              title: 'Daily plan',
+              subtitle: 'Track goals.',
+              onTap: () {},
+              showDivider: false,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(TilawaInteractiveSurface), findsOneWidget);
+    });
   });
 
   group('TilawaHubNavigationGroup', () {

@@ -2828,10 +2828,10 @@ abstract class AppLocalizations {
   /// **'QIBLA FINDER'**
   String get qiblaFinderTitle;
 
-  /// Subtitle below the compass degree readout
+  /// Subtitle below the Qibla bearing readout (geographic degrees from north)
   ///
   /// In en, this message translates to:
-  /// **'Device\'s angle to qibla'**
+  /// **'Qibla bearing from north'**
   String get qiblaDeviceAngleLabel;
 
   /// Instruction when the user should rotate left to align with Qibla

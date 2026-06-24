@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
+import '../foundation/design_tokens.dart';
 import '../foundation/tilawa_icons.dart';
 import '../foundation/tilawa_interactive_surface.dart';
 
@@ -43,6 +44,7 @@ class TilawaSelectionTile extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final tokens = theme.componentTokens.settingsGroup;
+    final designTokens = theme.tokens;
 
     final textStyle = theme.textTheme.bodyLarge?.copyWith(
       fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
@@ -61,20 +63,25 @@ class TilawaSelectionTile extends StatelessWidget {
             color: isSelected
                 ? tokens.selectionTileSelectedBackgroundColor
                 : Colors.transparent,
-            child: Padding(
-              padding: tokens.tileContentPadding,
-              child: Row(
-                spacing: tokens.tileItemGap,
-                children: [
-                  ?leading,
-                  Expanded(child: Text(title, style: textStyle)),
-                  if (isSelected)
-                    Icon(
-                      TilawaIcons.check,
-                      color: colorScheme.onSurfaceVariant,
-                      size: tokens.tileTrailingSize,
-                    ),
-                ],
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: designTokens.minInteractiveDimension,
+              ),
+              child: Padding(
+                padding: tokens.tileContentPadding,
+                child: Row(
+                  spacing: tokens.tileItemGap,
+                  children: [
+                    ?leading,
+                    Expanded(child: Text(title, style: textStyle)),
+                    if (isSelected)
+                      Icon(
+                        TilawaIcons.check,
+                        color: colorScheme.primary,
+                        size: tokens.tileTrailingSize,
+                      ),
+                  ],
+                ),
               ),
             ),
           ),

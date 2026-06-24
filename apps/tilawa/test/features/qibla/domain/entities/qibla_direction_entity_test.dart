@@ -74,5 +74,38 @@ void main() {
 
       expect(entity.isAligned, false);
     });
+
+    test('hasPoorCompassAccuracy is true at the accuracy threshold', () {
+      const entity = QiblaDirectionEntity(
+        qibla: 0,
+        direction: 0,
+        offset: 0,
+        accuracy: 45,
+      );
+
+      expect(entity.hasPoorCompassAccuracy, isTrue);
+    });
+
+    test('hasPoorCompassAccuracy is false below the threshold', () {
+      const entity = QiblaDirectionEntity(
+        qibla: 0,
+        direction: 0,
+        offset: 0,
+        accuracy: 44.9,
+      );
+
+      expect(entity.hasPoorCompassAccuracy, isFalse);
+    });
+
+    test('props include qibla, direction, offset, and accuracy', () {
+      const entity = QiblaDirectionEntity(
+        qibla: 1,
+        direction: 2,
+        offset: 3,
+        accuracy: 4,
+      );
+
+      expect(entity.props, [1.0, 2.0, 3.0, 4.0]);
+    });
   });
 }

@@ -34,14 +34,19 @@ class TilawaQuickFilterBar extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding:
-                  scrollPadding ??
-                  EdgeInsetsDirectional.only(end: tokens.spaceSmall),
-              child: Row(
-                spacing: tokens.spaceSmall,
-                children: children,
+            child: Semantics(
+              // Let each pill keep its own button semantics while the strip
+              // remains a scrollable region (user control / a11y).
+              explicitChildNodes: true,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding:
+                    scrollPadding ??
+                    EdgeInsetsDirectional.only(end: tokens.spaceSmall),
+                child: Row(
+                  spacing: tokens.spaceSmall,
+                  children: children,
+                ),
               ),
             ),
           ),

@@ -1584,7 +1584,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get qiblaFinderTitle => 'محدد القبلة';
 
   @override
-  String get qiblaDeviceAngleLabel => 'زاوية الجهاز نحو القبلة';
+  String get qiblaDeviceAngleLabel => 'اتجاه القبلة من الشمال';
 
   @override
   String qiblaRotatePhoneLeft(int degrees) {

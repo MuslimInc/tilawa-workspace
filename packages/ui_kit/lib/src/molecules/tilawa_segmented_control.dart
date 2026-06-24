@@ -222,6 +222,15 @@ class _SegmentButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected ? selectedBackgroundColor : Colors.transparent,
           borderRadius: itemBorderRadius,
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: tokens.selectedItemShadowColor,
+                    blurRadius: tokens.selectedItemShadowBlur,
+                    offset: tokens.selectedItemShadowOffset,
+                  ),
+                ]
+              : null,
         ),
         child: Container(
           padding: tokens.itemPadding,

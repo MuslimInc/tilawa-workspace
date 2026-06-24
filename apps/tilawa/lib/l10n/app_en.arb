@@ -2166,9 +2166,9 @@
     "@qiblaFinderTitle": {
         "description": "Centered uppercase title on the Qibla compass screen (Behance reference)"
     },
-    "qiblaDeviceAngleLabel": "Device's angle to qibla",
+    "qiblaDeviceAngleLabel": "Qibla bearing from north",
     "@qiblaDeviceAngleLabel": {
-        "description": "Subtitle below the compass degree readout"
+        "description": "Subtitle below the Qibla bearing readout (geographic degrees from north)"
     },
     "qiblaRotatePhoneLeft": "Rotate the phone {degrees}° to the left",
     "@qiblaRotatePhoneLeft": {

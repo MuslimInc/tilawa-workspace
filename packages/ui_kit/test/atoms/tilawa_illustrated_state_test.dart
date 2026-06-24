@@ -143,6 +143,54 @@ void main() {
       expect(stateSemantics, findsOneWidget);
     });
 
+    testWidgets('composes default semantic label from title and subtitle', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _wrap(
+          const TilawaIllustratedState(
+            icon: Icons.inbox_outlined,
+            title: 'No bookmarks',
+            subtitle: 'Save ayahs to find them later.',
+          ),
+        ),
+      );
+
+      final stateSemantics = find.byWidgetPredicate(
+        (widget) =>
+            widget is Semantics &&
+            widget.properties.label ==
+                'No bookmarks. Save ayahs to find them later.',
+      );
+      expect(stateSemantics, findsOneWidget);
+    });
+
+    testWidgets('renders primary action before secondary in reading order', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _wrap(
+          TilawaIllustratedState(
+            icon: Icons.search_off_rounded,
+            title: 'No results',
+            primaryAction: const Text('Primary'),
+            secondaryAction: const Text('Secondary'),
+          ),
+        ),
+      );
+
+      final labels = tester
+          .widgetList<Text>(
+            find.descendant(
+              of: find.byType(Wrap),
+              matching: find.byType(Text),
+            ),
+          )
+          .map((text) => text.data)
+          .toList();
+      expect(labels, ['Primary', 'Secondary']);
+    });
+
     testWidgets('uses provided maximum width', (tester) async {
       await tester.pumpWidget(
         _wrap(

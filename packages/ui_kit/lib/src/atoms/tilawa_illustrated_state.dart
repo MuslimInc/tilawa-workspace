@@ -90,6 +90,13 @@ class TilawaIllustratedState extends StatelessWidget {
       );
     }
 
+    final String? resolvedSemanticLabel =
+        semanticLabel ??
+        _composeSemanticLabel(
+          title: title,
+          subtitle: subtitle,
+        );
+
     final Widget content = Padding(
       padding: stateTokens.padding,
       child: ConstrainedBox(
@@ -127,8 +134,11 @@ class TilawaIllustratedState extends StatelessWidget {
                 spacing: designTokens.spaceSmall,
                 runSpacing: designTokens.spaceSmall,
                 children: [
-                  if (secondaryAction != null) layoutAction(secondaryAction!),
+                  // Primary CTA leads in reading order (hierarchy / one obvious
+                  // next step). When actions wrap on narrow widths, primary
+                  // stacks above secondary.
                   if (primaryAction != null) layoutAction(primaryAction!),
+                  if (secondaryAction != null) layoutAction(secondaryAction!),
                 ],
               ),
             ],
@@ -140,7 +150,7 @@ class TilawaIllustratedState extends StatelessWidget {
     return Center(
       child: Semantics(
         container: true,
-        label: semanticLabel,
+        label: resolvedSemanticLabel,
         child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             if (!constraints.hasBoundedHeight) {
@@ -159,6 +169,17 @@ class TilawaIllustratedState extends StatelessWidget {
       ),
     );
   }
+}
+
+String? _composeSemanticLabel({
+  required String title,
+  String? subtitle,
+}) {
+  final String trimmedSubtitle = subtitle?.trim() ?? '';
+  if (trimmedSubtitle.isEmpty) {
+    return title;
+  }
+  return '$title. $trimmedSubtitle';
 }
 
 TilawaButton _fullWidthIllustratedAction(TilawaButton button) {

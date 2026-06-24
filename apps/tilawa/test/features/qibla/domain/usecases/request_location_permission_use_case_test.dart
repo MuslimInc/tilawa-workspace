@@ -36,4 +36,18 @@ void main() {
     verify(mockQiblaRepository.requestLocationPermission()).called(1);
     verifyNoMoreInteractions(mockQiblaRepository);
   });
+
+  test('returns ServerFailure when repository throws', () async {
+    when(
+      mockQiblaRepository.requestLocationPermission(),
+    ).thenThrow(Exception('permission dialog failed'));
+
+    final Either<Failure, bool> result = await useCase(const NoParams());
+
+    expect(result, isA<Left<Failure, bool>>());
+    result.fold(
+      (failure) => expect(failure, isA<ServerFailure>()),
+      (_) => fail('expected Left'),
+    );
+  });
 }

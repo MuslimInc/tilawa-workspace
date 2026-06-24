@@ -1592,7 +1592,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get qiblaFinderTitle => 'QIBLA FINDER';
 
   @override
-  String get qiblaDeviceAngleLabel => 'Device\'s angle to qibla';
+  String get qiblaDeviceAngleLabel => 'Qibla bearing from north';
 
   @override
   String qiblaRotatePhoneLeft(int degrees) {

@@ -80,10 +80,30 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(ListTile));
+      await tester.tap(find.text('Reminders'));
       await tester.pump();
 
       expect(changedValue, isTrue);
+    });
+
+    testWidgets('drill-down tile routes through TilawaInteractiveSurface', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          SizedBox(
+            width: 360,
+            child: TilawaSettingsTile(
+              icon: Icons.language,
+              title: 'Language',
+              onTap: () {},
+              showDivider: false,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(TilawaInteractiveSurface), findsOneWidget);
     });
   });
 }
