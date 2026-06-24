@@ -637,6 +637,7 @@ class _ErrorView extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
+    final Color error = theme.colorScheme.error;
 
     return Center(
       child: Column(
@@ -646,13 +647,13 @@ class _ErrorView extends StatelessWidget {
             width: 88,
             height: 88,
             decoration: BoxDecoration(
-              color: AppColors.error.withValues(alpha: tokens.opacitySubtle),
+              color: error.withValues(alpha: tokens.opacitySubtle),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.error_outline_rounded,
               size: 44,
-              color: AppColors.error,
+              color: error,
             ),
           ),
           SizedBox(height: tokens.spaceExtraLarge),
@@ -667,10 +668,10 @@ class _ErrorView extends StatelessWidget {
           TilawaFeedbackStrip(
             icon: Icons.info_outline_rounded,
             message: message,
-            backgroundColor: AppColors.error.withValues(
+            backgroundColor: error.withValues(
               alpha: tokens.opacitySubtle,
             ),
-            foregroundColor: AppColors.error,
+            foregroundColor: error,
           ),
           SizedBox(height: tokens.spaceExtraLarge),
           TilawaButton(

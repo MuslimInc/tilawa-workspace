@@ -22,7 +22,7 @@ class ThemeState extends Equatable {
     required this.mode,
     this.primaryColorArgb = _kDefaultPrimaryColorArgb,
     this.primaryColorSource = PrimaryColorSource.preset,
-    this.primaryPresetId = 'brown',
+    this.primaryPresetId = 'teal',
     this.useSystemTheme = false,
     this.preset = AppThemePreset.defaultMode,
   });

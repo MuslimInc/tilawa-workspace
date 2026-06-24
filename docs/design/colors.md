@@ -1,43 +1,28 @@
 # Tilawa colour system (design policy)
 
-Tilawa's visual identity is **calm, modern, and premium**. The palette is intentionally small: one **brand-locked** accent, a quiet neutral surface ramp anchored on `#E5E7EB`, and three semantic colours. Decorative parallel palettes are *not* part of the system.
+Tilawa's visual identity is **calm, modern, and premium**. The palette is intentionally small: one **brand-locked** teal accent, a quiet neutral surface ramp, and three semantic colours. Decorative parallel palettes are *not* part of the system.
 
 > Spec references: [`specs/012-visual-simplification/`](../../specs/012-visual-simplification/spec.md),
 > [`specs/017-catalog-theme-freeze/`](../../specs/017-catalog-theme-freeze/spec.md).
+> Architecture: [`color_architecture.md`](color_architecture.md).
 > Implementation contract: [`packages/ui_kit/docs/design_system.md`](../../packages/ui_kit/docs/design_system.md).
 
-## Brand lock (frozen 2026-05-25)
+## Brand lock (frozen 2026-06-24)
 
-The brand colour is **fixed**. Users do not pick a primary. Production builds
-always render Sage on the `#E5E7EB` neutral; the in-Settings colour picker is
-retained behind `--dart-define=TILAWA_SHOW_COLOR_PICKER=true` for dev/QA only.
+The brand colour is **fixed**. Users do not pick a primary in production. The in-Settings colour picker is retained behind `--dart-define=TILAWA_SHOW_COLOR_PICKER=true` for dev/QA only.
 
-- **Primary (Ink):** Sage `#219653` (`AppColors.primarySage` /
-  `AppColors.defaultPrimary` / `PrimaryColorPreset.brandLocked`). Matches
-  launch surfaces; splash canvas uses the same green, wordmark `#FFFFFF`.
-  **Splash logo box:** `288dp` on Flutter (`AppColors.launchSplashLogoSize`)
-  and Android (`@dimen/splash_logo_size` / `splash_icon` drawable) — change
-  both together if resizing.
-- **Brand neutral:** `#E5E7EB` (`AppColors.lightSurfaceContainerHighBase` →
-  `ColorScheme.surfaceContainerHigh`). The cool-gray idle tier for chips, search
-  fills, settings rows, and idle controls. (Amended 2026-06-11: the light ramp
-  moved from warm Pinterest grays to one cool porcelain family — canvas
-  `#F4F5F7`, idle `#E5E7EB`, hairline `#DBDEE3` — for a crisper commercial
-  feel; never mix warm and cool tones in adjacent light fills.)
-- **Light scaffold / surface:** `#FFFFFF` — not tinted by primary.
-- **Ink (text):** `#0F172A` on white (`ColorScheme.onSurface`); body/mute/ash
-  tiers in `AppColors` for secondary copy.
-- **On primary:** `#FFFFFF` on brand green `#219653` (filled CTAs, FABs).
-- **Secondary:** neutral `#E5E7EB` on `#F4F5F7` canvas — no gold or yellow accents.
-- **Semantic (light):** error `#DC2626`, success `#43A047`, warning `#C2410C`.
-- **Semantic (dark):** error `#FFB4AB`; success `#6BCF7F` and warning `#FB923C`
-  via `TilawaStatusColors` on `ColorScheme` (lifted for 3:1 on `#353E3A`).
-- **Runtime override:** `apps/tilawa/lib/features/theme/presentation/theme_state_material.dart`
-  resolves `state.primaryColor` to the brand-locked value when
-  `Env.kShowColorPicker` is `false`.
+- **Primary:** Reference teal `#00897B` (`AppColors.primaryTeal` / `AppColors.defaultPrimary` / `PrimaryColorPreset.brandLocked`). Splash canvas uses the same teal; wordmark `#FFFFFF`.
+- **Light canvas / surface:** `#FFFFFF` (`ColorScheme.surface`, scaffold via `surfaceContainerLowest`).
+- **Ink (text):** `#212121` (`ColorScheme.onSurface`).
+- **Idle chips / upper container:** `#F5F5F5` → `ColorScheme.surfaceContainerHigh` (`AppColors.lightSurfaceContainerHighBase`).
+- **Hairline / outline:** `#EEEEEE` / `#E0E0E0` (`outlineVariant` / `outline`).
+- **On primary:** `#FFFFFF` on teal (filled CTAs, FABs).
+- **Semantic (light):** error `#D32F2F`, success `#43A047`, warning `#C2410C`.
+- **Semantic (dark):** error `#FFB4AB`; success `#6BCF7F` and warning `#FB923C` via `TilawaStatusColors` on `ColorScheme`.
+- **Product roles:** `ThemeData.productColors` (`TilawaProductColors`) for prayer, Quran, player, hub icons, featured gradients — see [`color_architecture.md`](color_architecture.md).
+- **Runtime override:** `theme_state_material.dart` resolves `state.primaryColor` to the brand-locked value when `Env.kShowColorPicker` is `false`.
 
-`AppTheme` does **not** primary-harmonize `surfaceContainerHigh` in light mode so
-catalog search and filter chips stay Pinterest-neutral.
+`AppTheme` does **not** primary-harmonize `surfaceContainerHigh` in light mode so catalog search and filter chips stay neutral.
 
 ## The four colour roles
 
@@ -53,32 +38,16 @@ A fifth role — **outline** (`outlineVariant`) — is the hairline that separat
 ## Allowed sources
 
 1. **`AppColors`** (`packages/ui_kit`) — Brand presets, neutral ramp, `AppTheme` scheme bases, three semantic colours, and `notificationAccent`. **All hex values used to build** `ColorScheme` in `AppTheme` live here so there is one source of truth.
-2. **`AppTheme`** — Builds `ThemeData` and `ColorScheme` from `AppColors` plus the user-selected primary. Defines how primary maps to containers (`_containerForPrimary`, `_blendSurfaceTowardPrimary`). Must not introduce raw `Color(0x…)` literals.
-3. **`TilawaComponentTokens`** — Component-level fills and blends; formulas live in **token factories**, not in widgets.
-4. **Feature palettes** — Closed-scope feature themes (Quran reader, share/reel composer): centralised palette files or `ThemeExtension`s.
+2. **`AppTheme`** — Builds `ThemeData` and `ColorScheme` from `AppColors` plus the user-selected primary. Registers `TilawaProductColors`, `TilawaDesignTokens`, and `TilawaComponentTokens`.
+3. **`TilawaProductColors`** — Product semantic roles (prayer, Quran, player, hub). Access: `Theme.of(context).productColors`. See [`color_architecture.md`](color_architecture.md).
+4. **`TilawaComponentTokens`** — Component-level fills and blends; formulas live in **token factories**, not in widgets.
+5. **Feature palettes** — Closed-scope feature themes (Quran reader `QuranReaderTheme`, share/reel composer): centralised palette files or `ThemeExtension`s.
 5. **Exceptions** — `Colors.transparent`; the colour-picker tool data; Quran
    reader / share composer palettes (`AppQuranReaderLegacyColors`,
    `AppShareComposerColors`); tests / previews / debug; third-party packages.
 
 ## Policy: accent vs surfaces
 
-- **User-selected primary** drives the **accent / interactive** role only (CTA,
-  active nav, favorites, switch ON, progress fill) — **not** search fields,
-  unselected filter chips, or catalog app bar backgrounds.
-- **Stable neutral surfaces** (scaffold, fixed bottom nav chrome, cards, sheets,
-  catalog headers) use **fixed primitives** or tiers derived from **neutral bases**
-  in `AppColors`, not ad-hoc widget literals.
-- **Semantic colours** are defined in `AppColors` and must not be derived from
-  user primary.
-
-### Catalog chrome (product pattern)
-
-| UI | Source |
-|----|--------|
-| List app bar | `TilawaCatalogAppBar` + `TilawaAppBarSurface.parchment` |
-| Search | `TilawaSearchFieldVariant.catalog` (white `surface` + hairline border) |
-| Filters | `TilawaSelectionPillStyle.catalog` (dark selected = lifted green-gray, not white) |
-| Feature rows (e.g. reciter details) | `ColorScheme` neutral roles or `*CatalogChrome` helper — no new hex |
 - **User-selected primary** drives the **accent / interactive** role only (CTA,
   active nav, favorites, switch ON, progress fill) — **not** search fields,
   unselected filter chips, or catalog app bar backgrounds.

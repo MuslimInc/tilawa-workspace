@@ -14,6 +14,7 @@ import 'home_dashboard_section.dart';
 import 'home_discover_carousel.dart';
 import 'home_features_hub.dart';
 import 'home_listening_resume_row.dart';
+import 'home_premium_section_shell.dart';
 import 'home_primary_action_zone.dart';
 
 /// Home body — primary action, category grid, promos, and today content.
@@ -45,11 +46,13 @@ class HomeDashboardBody extends StatelessWidget {
                 const TodayPlanCard(),
                 SizedBox(height: tokens.spaceExtraLarge),
               ],
-              HomeDashboardSection(
-                title: context.l10n.homeTodayTitle,
-                subtitle: context.l10n.homeTodaySubtitle,
-                contentSpacing: tokens.spaceMedium,
-                child: const HomeAthkarCompactCard(),
+              HomePremiumSectionShell(
+                child: HomeDashboardSection(
+                  title: context.l10n.homeTodayTitle,
+                  subtitle: context.l10n.homeTodaySubtitle,
+                  contentSpacing: tokens.spaceMedium,
+                  child: const HomeAthkarCompactCard(),
+                ),
               ),
               // The listening row owns its own leading gap so a hidden row
               // leaves no dangling space.

@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 /// Centralized app color constants.
 ///
 /// The Tilawa palette is intentionally **small and calm**:
-/// soft neutral canvas ([tripGlideCanvas] `#FAFAFA`), brown primary ink
-/// ([primaryBrown] `#8B5E3C`), neutral text ink ([tripGlideInk] `#30343C`),
-/// and restrained gold featured surfaces.
+/// white canvas ([tripGlideCanvas] `#FFFFFF`), warm brown primary
+/// ([defaultPrimary] `#8B5E3C`), neutral text ink ([tripGlideInk] `#212121`),
+/// and restrained category accent hues for hub tiles.
 ///
 /// Some `tripGlide*` names remain as compatibility aliases for the current
 /// travel-inspired Home layout. Their values now resolve to Tilawa's warm
@@ -13,8 +13,8 @@ import 'package:flutter/material.dart';
 ///
 /// All hex values used by `AppTheme` to assemble `ColorScheme` live here
 /// so there is exactly one source of truth. Product widgets should read
-/// from `ColorScheme` / `TilawaComponentTokens`, not from this file
-/// directly (see `docs/design/colors.md`).
+/// from `ColorScheme` / `TilawaComponentTokens` / `ThemeData.productColors`,
+/// not from this file directly (see `docs/design/color_architecture.md`).
 abstract final class AppColors {
   AppColors._();
 
@@ -30,8 +30,8 @@ abstract final class AppColors {
   /// docstring for the brand lock.
   static const Color primaryCoral = Color(0xFFE60023);
 
-  /// Legacy brand teal-cyan (still available in Settings).
-  static const Color primaryTeal = Color(0xFF1AADC5);
+  /// Reference teal preset (`#00897B`) — user-selectable in dev/QA picker.
+  static const Color primaryTeal = Color(0xFF00897B);
 
   /// Teal/cyan compatibility alias retained for saved theme migration.
   static const Color primaryCyan = primaryTeal;
@@ -63,36 +63,36 @@ abstract final class AppColors {
   /// controls.
   static const Color defaultPrimary = primaryBrown;
 
-  /// Warm neutral text ink for headings and body copy (`#30343C`).
+  /// High-emphasis text ink for headings and body copy (`#212121`).
   ///
   /// Compatibility alias retained for existing travel-inspired Home widgets.
-  static const Color tripGlideInk = Color(0xFF30343C);
+  static const Color tripGlideInk = Color(0xFF212121);
 
-  /// Soft neutral screen canvas (`#FAFAFA`).
+  /// Screen canvas (`#FFFFFF`).
   ///
   /// Compatibility alias retained for existing travel-inspired Home widgets.
-  static const Color tripGlideCanvas = Color(0xFFFAFAFA);
+  static const Color tripGlideCanvas = Color(0xFFFFFFFF);
 
   /// Elevated surfaces — cards, search (`#FFFFFF`).
   static const Color tripGlideSurface = Color(0xFFFFFFFF);
 
-  /// Warm secondary copy (`#78736E`).
-  static const Color tripGlideMuted = Color(0xFF78736E);
+  /// Medium-emphasis secondary copy (`#757575`).
+  static const Color tripGlideMuted = Color(0xFF757575);
 
-  /// Warm beige idle tier for chips, search rests, and header bands.
-  static const Color tripGlideCanvasElevated = Color(0xFFF1F1EF);
+  /// Idle tier for chips, search rests, and header bands (`#F5F5F5`).
+  static const Color tripGlideCanvasElevated = Color(0xFFF5F5F5);
 
-  /// Warm hairline / highest surface tier.
-  static const Color tripGlideCanvasDusk = Color(0xFFE5E5E2);
+  /// Hairline / highest surface tier (`#EEEEEE`).
+  static const Color tripGlideCanvasDusk = Color(0xFFEEEEEE);
 
-  /// Deeper warm night/dim surface tier.
-  static const Color tripGlideCanvasNight = Color(0xFFD6D6D1);
+  /// Divider / outline surface tier (`#E0E0E0`).
+  static const Color tripGlideCanvasNight = Color(0xFFE0E0E0);
 
   /// Top stop for the brand launch gradient.
   static const Color brandGradientTop = tripGlideCanvas;
 
   /// Bottom stop for the brand launch gradient.
-  static const Color brandGradientBottom = primaryBrown;
+  static const Color brandGradientBottom = defaultPrimary;
 
   /// Featured-card gold surface — ceremonial, not paywall chrome.
   static const Color featuredGradientStart = Color(0xFFFFD28E);
@@ -144,10 +144,10 @@ abstract final class AppColors {
   ];
 
   /// Icons on travel destination header bands.
-  static const Color homeTravelDestinationIcon = primaryBrown;
+  static const Color homeTravelDestinationIcon = defaultPrimary;
 
   /// Section links (See all) on the travel Home dashboard.
-  static const Color homeTravelSectionLink = primaryBrown;
+  static const Color homeTravelSectionLink = defaultPrimary;
 
   /// Day hero top — warm ivory parchment with a soft gold cast.
   static const Color homeNextPrayerGradientTop = Color(0xFFFCF8F0);
@@ -183,7 +183,7 @@ abstract final class AppColors {
   static const Color homeNextPrayerGradientNightForeground = Color(0xFFF5F0E6);
 
   /// Launch / splash canvas — warm brown brand ink.
-  static const Color launchSplashBackground = primaryBrown;
+  static const Color launchSplashBackground = defaultPrimary;
 
   /// Wordmark and progress on launch surfaces (`#FFFFFF`).
   static const Color launchSplashForeground = Color(0xFFFFFFFF);
@@ -217,8 +217,8 @@ abstract final class AppColors {
   /// Muted labels (`#78736E`).
   static const Color lightMute = tripGlideMuted;
 
-  /// Ash icons / hints — muted neutral.
-  static const Color lightAsh = tripGlideMuted;
+  /// Ash icons / hints — low-emphasis neutral (`#BDBDBD`).
+  static const Color lightAsh = Color(0xFFBDBDBD);
 
   /// Light upper container / idle chip — quiet neutral (`#F1F1EF`).
   ///
@@ -236,12 +236,11 @@ abstract final class AppColors {
   /// for a premium, grounded chrome that separates from the content canvas.
   static const Color bottomNavBackground = Color(0xFF212528);
 
-  /// Dark idle chip / upper container.
+  /// Dark idle chip / upper container — teal-grey aligned with dark ramp.
   ///
-  /// Green-tinted to sit in the same family as the dark surface ramp
-  /// ([darkSurfaceContainer] etc.); replaced the warm `#3A3936` outlier
-  /// (2026-06-11) — same lightness, hue aligned.
-  static const Color catalogFilterUnselectedDark = Color(0xFF353E3A);
+  /// Replaced warm `#3A3936` outlier (2026-06-11); hue aligned to teal
+  /// surfaces (2026-06-24 reference palette).
+  static const Color catalogFilterUnselectedDark = Color(0xFF2A3432);
 
   /// Idle background for unselected filter chips and secondary controls.
   static Color catalogFilterUnselectedBackground(Brightness brightness) {
@@ -266,23 +265,23 @@ abstract final class AppColors {
   // Dark neutral ramp.
   // ---------------------------------------------------------------------------
 
-  static const Color darkBackground = Color(0xFF101816);
-  static const Color darkSurface = Color(0xFF16201D);
-  static const Color darkSurfaceContainer = Color(0xFF1C2925);
+  static const Color darkBackground = Color(0xFF0E1413);
+  static const Color darkSurface = Color(0xFF141D1B);
+  static const Color darkSurfaceContainer = Color(0xFF1A2624);
 
   /// Dark upper container tier (neutral; no primary harmonization in [AppTheme]).
   static const Color darkSurfaceContainerHighBase = catalogFilterUnselectedDark;
 
   /// Dark top container tier **base** before optional primary harmonization
   /// in [AppTheme].
-  static const Color darkSurfaceContainerHighestBase = Color(0xFF34463F);
+  static const Color darkSurfaceContainerHighestBase = Color(0xFF2E3F3B);
 
   /// Dark [ColorScheme] error tone for Material dark scheme.
   static const Color darkSchemeError = Color(0xFFFFB4AB);
 
   /// Dark outline/divider color. Calibrated for visibility on real-device
   /// DPIs (~400 ppi); avoid going darker than this.
-  static const Color darkOutline = Color(0xFF4B5B55);
+  static const Color darkOutline = Color(0xFF4A5C57);
 
   // ---------------------------------------------------------------------------
   // AppTheme — light ColorScheme roles (brand-locked M3 palette).
@@ -297,10 +296,10 @@ abstract final class AppColors {
   /// Light [ColorScheme.onSecondary].
   static const Color lightSchemeOnSecondary = lightInk;
 
-  /// Light [ColorScheme.primaryContainer] for the default ink primary.
+  /// Light [ColorScheme.primaryContainer] — pale desaturated teal (`#E0F2F1`).
   static const Color lightSchemePrimaryContainer = tripGlideCanvasElevated;
 
-  /// Light [ColorScheme.onPrimaryContainer] for the default ink primary.
+  /// Light [ColorScheme.onPrimaryContainer].
   static const Color lightSchemeOnPrimaryContainer = tripGlideInk;
 
   /// Light [ColorScheme.secondaryContainer].
@@ -334,8 +333,8 @@ abstract final class AppColors {
 
   static const Color darkSecondary = Color(0xFF9DB5A8);
   static const Color darkSecondaryContainer = Color(0xFF2A3530);
-  static const Color darkTertiary = Color(0xFFD6B86A);
-  static const Color darkTertiaryContainer = Color(0xFF3D3015);
+  static const Color darkTertiary = Color(0xFFCE93D8);
+  static const Color darkTertiaryContainer = Color(0xFF3D2A4A);
 
   // ---------------------------------------------------------------------------
   // True-black mode (OLED-friendly dark refinement).
@@ -351,15 +350,55 @@ abstract final class AppColors {
   // AppTheme — dark refinement (non-true-black).
   // ---------------------------------------------------------------------------
 
-  static const Color darkSurfaceContainerLowest = Color(0xFF0B1210);
-  static const Color darkOutlineVariant = Color(0xFF2F3E39);
+  static const Color darkSurfaceContainerLowest = Color(0xFF0A100F);
+  static const Color darkOutlineVariant = Color(0xFF2D3B37);
+
+  // ---------------------------------------------------------------------------
+  // Category accent hues — reference mock icon backgrounds (hub / explore).
+  // ---------------------------------------------------------------------------
+
+  /// Purple accent — generators / fan icon family.
+  static const Color categoryAccentPurple = Color(0xFF7E57C2);
+
+  /// Blue accent — water / conditions icon family.
+  static const Color categoryAccentBlue = Color(0xFF42A5F5);
+
+  /// Orange accent — map pin / points-of-interest family.
+  static const Color categoryAccentOrange = Color(0xFFFF7043);
+
+  /// Green accent — plants / nature icon family.
+  static const Color categoryAccentGreen = Color(0xFF66BB6A);
+
+  /// Indigo accent — secondary hub glyph.
+  static const Color categoryAccentIndigo = Color(0xFF5C6BC0);
+
+  /// Lighter teal accent — support / secondary brand tone.
+  static const Color categoryAccentTealLight = Color(0xFF26A69A);
+
+  /// Amber accent — featured / ceremonial hub glyph.
+  static const Color categoryAccentAmber = Color(0xFFFFA726);
+
+  /// Blue-grey accent — sessions / neutral category glyph.
+  static const Color categoryAccentBlueGrey = Color(0xFF78909C);
 
   // ---------------------------------------------------------------------------
   // Semantic colors — meaning, not decoration.
   // ---------------------------------------------------------------------------
 
-  /// Error / failure — maps to light [ColorScheme.error] (`#DC2626`).
-  static const Color error = Color(0xFFDC2626);
+  /// Reference soft red/pink for inactive status surfaces (`#E57373`).
+  static const Color errorSoft = Color(0xFFE57373);
+
+  /// Error / failure — maps to light [ColorScheme.error] (`#D32F2F`).
+  ///
+  /// Slightly deeper than [errorSoft] so icons and [onError] pass contrast on
+  /// white surfaces while staying in the reference red family.
+  static const Color error = Color(0xFFD32F2F);
+
+  /// Light [ColorScheme.errorContainer] — pale soft red from the reference mock.
+  static const Color lightSchemeErrorContainer = errorSoft;
+
+  /// Light [ColorScheme.onErrorContainer].
+  static const Color lightSchemeOnErrorContainer = tripGlideInk;
 
   /// Success on light surfaces (`#43A047`).
   static const Color success = Color(0xFF43A047);
@@ -394,7 +433,7 @@ abstract final class AppColors {
   static const Color brandSecondary = lightSchemeSecondary;
 
   /// Brand tertiary used by FlexColorScheme assembly only.
-  static const Color brandTertiary = Color(0xFF8C681F);
+  static const Color brandTertiary = categoryAccentPurple;
 }
 
 /// Fixed “studio” palette for the **share audio / reel composer** (dark
@@ -412,6 +451,45 @@ abstract final class AppShareComposerColors {
 
   /// Error callout border / icon tint (composer-only).
   static const Color feedbackErrorOutline = Color(0xFFFFB4AB);
+
+  /// Primary copy on the dark gradient shell.
+  static const Color onShell = Color(0xFFFFFFFF);
+
+  /// Muted shell copy (~70% white).
+  static const Color onShellMuted = Color(0xB3FFFFFF);
+
+  /// Secondary shell copy (~84% white).
+  static const Color onShellSecondary = Color(0xD6FFFFFF);
+
+  /// Tertiary shell copy (~72% white).
+  static const Color onShellTertiary = Color(0xB8FFFFFF);
+
+  /// Sheet drag handle on the gradient shell (~24% white).
+  static const Color sheetHandle = Color(0x3DFFFFFF);
+
+  /// Card elevation shadow on the shell (~18% black).
+  static const Color shellElevationShadow = Color(0x2E000000);
+
+  /// Soft frame shadow on the shell (~16% black).
+  static const Color shellSoftShadow = Color(0x29000000);
+
+  /// Faint tint behind nested previews (~12% black).
+  static const Color shellFaintTint = Color(0x1F000000);
+
+  /// Frosted panel fill on the shell (~7% white).
+  static const Color glassFill = Color(0x12FFFFFF);
+
+  /// Frosted panel border (~8% white).
+  static const Color glassBorder = Color(0x14FFFFFF);
+
+  /// Stronger frosted border (~12% white).
+  static const Color glassBorderStrong = Color(0x1FFFFFFF);
+
+  /// Ghost button fill on shell (~8% white).
+  static const Color glassButtonFill = Color(0x14FFFFFF);
+
+  /// Outline on shell CTAs (~20% white).
+  static const Color buttonOnShellBorder = Color(0x33FFFFFF);
 }
 
 /// Poster gradient shell for multi-surah **page passage** share cards.
@@ -429,6 +507,9 @@ abstract final class AppPagePassagePosterColors {
 
   /// Warmer secondary stop in the parchment gradient.
   static const Color warmParchment = Color(0xFFEFE1C2);
+
+  /// Translucent reader frame behind embedded mushaf (~42% white).
+  static const Color readerFrameFill = Color(0x6BFFFFFF);
 }
 
 /// Default colors for **static export** screenshots (e.g. branded Quran page PNG
@@ -481,9 +562,53 @@ abstract final class AppQuranReaderLegacyColors {
   /// Muted caption gray for slider range in dark mode.
   static const Color darkMutedCaption = Color(0xA6E0E0E0);
 
+  /// Warm brown highlight for searched / selected verses (light mushaf).
+  static const Color lightVerseHighlight = Color(0xFF9A7A57);
+
+  /// Verse highlight tuned for dark reader preset.
+  static const Color darkVerseHighlight = Color(0xFF8B6F47);
+
+  /// Surah metadata and footer copy on light pages.
+  static const Color lightPageMetaText = lightVerseHighlight;
+
+  /// Page number pill fill on light mushaf.
+  static const Color lightPageNumberBackground = Color(0xFFE8DDD0);
+
+  /// Page number pill border on light mushaf.
+  static const Color lightPageNumberBorder = Color(0xFFD2C0AE);
+
   static const Color darkPillSurah = Color(0xFFE0E0E0);
   static const Color darkSurahTileName = Color(0xFFE0E0E0);
 
   /// Accent for Arabic surah names on tiles in dark reader preset.
   static const Color darkArabicAccent = Color(0xFFD4AF37);
+}
+
+/// Near-transparent fills used only during bootstrap shader warm-up.
+abstract final class AppBootstrapShaderWarmupColors {
+  static const Color blurPanelFill = Color(0x01FFFFFF);
+
+  /// Matches light-chrome bottom-nav shadow in [TilawaAdaptiveShellTokens].
+  static const Color navShadow = Color(0x0A000000);
+}
+
+/// Debug-only Quran line-guide paints (behind `_kDebugQuranLineGuides`).
+abstract final class AppQuranDebugGuideColors {
+  static const Color lineFill = Color(0x140000FF);
+  static const Color lineStroke = Color(0xB34B0082);
+  static const Color baseline = Color(0xA6FF0000);
+}
+
+/// Dev perf overlay severity fills for [PerfLogger] slow-frame banners.
+abstract final class AppPerfLoggerColors {
+  static const Color buildSlowBackground = Color(0xEECC0000);
+  static const Color rasterSlowBackground = Color(0xEEBB4400);
+  static const Color totalSlowBackground = Color(0xEE886600);
+  static const Color bannerForeground = Color(0xFFFFFFFF);
+}
+
+/// Fully transparent — prefer [Colors.transparent] in widgets; this alias is
+/// for const constructor defaults that must not reference Material palette.
+abstract final class AppPalettePrimitives {
+  static const Color fullyTransparent = Color(0x00000000);
 }

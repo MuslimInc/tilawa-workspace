@@ -17,11 +17,13 @@ class OfflineIndicatorWidget extends StatelessWidget {
 
         return Container(
           width: double.infinity,
-          color: Colors.red,
-          padding: EdgeInsets.symmetric(vertical: 4),
+          color: Theme.of(context).colorScheme.error,
+          padding: const EdgeInsets.symmetric(vertical: 4),
           child: Text(
             context.l10n.noInternetConnection,
-            style: TextStyle(color: Colors.white, fontSize: 12),
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: Theme.of(context).colorScheme.onError,
+            ),
             textAlign: TextAlign.center,
           ),
         );

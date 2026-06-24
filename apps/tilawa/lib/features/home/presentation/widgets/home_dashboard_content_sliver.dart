@@ -14,9 +14,8 @@ class HomeDashboardContentSliver extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
     final TilawaDesignTokens tokens = context.tokens;
-    final TilawaHomeDashboardCardTokens cardTokens =
-        theme.componentTokens.homeDashboardCard;
-    final Color sheetColor = cardTokens.travelSheetSurface;
+    // Soft grey canvas between premium section shells (Money Loop rhythm).
+    final Color sheetColor = colorScheme.surfaceContainerLow;
     final double topPadding = tokens.spaceSmall;
 
     return SliverToBoxAdapter(

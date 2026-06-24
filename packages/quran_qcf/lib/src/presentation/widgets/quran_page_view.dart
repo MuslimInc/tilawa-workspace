@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../quran_qcf.dart';
 import '../../helpers/app_logger.dart';
@@ -15,8 +16,8 @@ class QuranPageView extends StatefulWidget {
     super.key,
     required this.controller,
     this.onPageChanged,
-    this.textColor = const Color(0xFF000000),
-    this.pageBackgroundColor = const Color(0xFFFFF9F1),
+    this.textColor = AppQuranReaderLegacyColors.lightOnSurface,
+    this.pageBackgroundColor = AppQuranReaderLegacyColors.lightPageBackground,
     this.verseBackgroundColor,
     this.onLongPress,
     this.onLongPressUp,

@@ -1132,11 +1132,11 @@ void main() {
       expect(tokens.foregroundColor, AppColors.featuredGradientForeground);
       expect(
         tokens.splashColor,
-        AppColors.primaryBrown.withValues(alpha: 0.08),
+        AppColors.defaultPrimary.withValues(alpha: 0.08),
       );
       expect(
         tokens.highlightColor,
-        AppColors.primaryBrown.withValues(alpha: 0.04),
+        AppColors.defaultPrimary.withValues(alpha: 0.04),
       );
       expect(tokens.travelSheetSurface, AppColors.homeTravelSheetSurface);
       expect(tokens.travelSearchFieldFill, AppColors.homeTravelSearchFill);

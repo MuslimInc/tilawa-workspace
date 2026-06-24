@@ -317,7 +317,7 @@ class _PageNavigationBarState extends State<PageNavigationBar> {
                       border: Border.all(color: borderColor, width: 0.8),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(
+                          color: colorScheme.shadow.withValues(
                             alpha: isDark ? 0.35 : 0.08,
                           ),
                           blurRadius: 24,

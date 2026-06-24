@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Quran-specific design tokens for the reader UI.
 ///
@@ -89,20 +90,20 @@ class QuranDesignTokens extends ThemeExtension<QuranDesignTokens> {
 
   /// Default Quran design tokens for light theme.
   static const QuranDesignTokens light = QuranDesignTokens(
-    pageBackgroundColor: Color(0xFFFFF9F1),
-    pageTextColor: Color(0xFF000000),
-    verseHighlightColor: Color(0xFF9A7A57),
-    headerTextColor: Color(0xFF000000),
+    pageBackgroundColor: AppQuranReaderLegacyColors.lightPageBackground,
+    pageTextColor: AppQuranReaderLegacyColors.lightOnSurface,
+    verseHighlightColor: AppQuranReaderLegacyColors.lightVerseHighlight,
+    headerTextColor: AppQuranReaderLegacyColors.lightOnSurface,
     headerTopPadding: 12.0,
     bismillahFontScale: 1.0,
   );
 
   /// Default Quran design tokens for dark theme.
   static const QuranDesignTokens dark = QuranDesignTokens(
-    pageBackgroundColor: Color(0xFF1E1E1E),
-    pageTextColor: Color(0xFFFFFFFF),
-    verseHighlightColor: Color(0xFF8B6F47),
-    headerTextColor: Color(0xFFFFFFFF),
+    pageBackgroundColor: AppQuranReaderLegacyColors.darkPageBackground,
+    pageTextColor: AppQuranReaderLegacyColors.darkOnSurface,
+    verseHighlightColor: AppQuranReaderLegacyColors.darkVerseHighlight,
+    headerTextColor: AppQuranReaderLegacyColors.darkOnSurface,
     headerTopPadding: 12.0,
     bismillahFontScale: 1.0,
   );

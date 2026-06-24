@@ -22,18 +22,18 @@ Design system snapshot for **Tilawa UI Kit** (`packages/ui_kit`) and the **Tilaw
 
 ### User-selectable primary (accent)
 
-Offered in app settings (`PrimaryColorPreset`). Default aligns with the warm mockup brown **#8B5E3C**. **Custom** hex is the last row in the primary-color sheet; extreme values may be adjusted in light theme for readability.
+Offered in app settings (`PrimaryColorPreset`) when `TILAWA_SHOW_COLOR_PICKER=true`. **Production** builds lock **reference teal `#00897B`** (`PrimaryColorPreset.brandLocked`). Custom hex may be soft-clamped in light theme for readability (`AppTheme._safePrimaryForLight`).
 
 | Preset | Hex (reference) | Notes |
 |--------|-----------------|--------|
-| Coral | `#E60023` | Accent option; use sparingly |
-| Teal | `#1AADC5` | Legacy Tilawa brand teal |
-| Sage | `#219653` | Scholarly green; legacy preset |
-| Forest (picker) | `#2D6B47` | Dev/QA preset; deep green |
-| Brown (default) | `#8B5E3C` | Warm mockup brown; brand-locked |
+| Coral | `#E60023` | Dev/QA picker |
+| Teal | `#00897B` | **Brand-locked default** |
+| Sage | `#219653` | Legacy scholarly green |
+| Forest (picker) | `#2D6B47` | Dev/QA preset |
+| Brown | `#8B5E3C` | Legacy warm mockup |
 | Purple | `#7A5C89` | Muted purple |
 
-Additional constants exist in `AppColors` (e.g. gold) for Flex **secondary/tertiary** assembly or migration; product UI should use **`ColorScheme`**, not copy arbitrary hexes.
+Product UI uses **`ColorScheme`**, **`theme.productColors`**, and **`theme.componentTokens`** — not raw `AppColors` hex. See [`docs/design/color_architecture.md`](docs/design/color_architecture.md).
 
 ### Fixed semantic colors (`AppColors`)
 
@@ -52,14 +52,14 @@ Light surfaces use a **soft neutral** family — near-white canvas, white cards,
 
 | Token / role | Hex (base) | Notes |
 |--------------|------------|--------|
-| Canvas / scaffold | `#FAFAFA` | `lightCanvas` / `lightBackground` |
+| Canvas / scaffold | `#FFFFFF` | `lightCanvas` / `surfaceContainerLowest` |
 | Surface (cards, sheets) | `#FFFFFF` | `lightSurface` |
-| Ink / onSurface | `#30343C` | `lightInk` |
-| Body / mute / ash | `#30343C`, `#78736E`, `#A89B8A` | Secondary copy |
-| Container | `#FAFAFA` | `lightSurfaceContainer` (matches canvas) |
-| High (idle chips, search fill) | `#F1F1EF` | `lightSurfaceContainerHighBase` → `surfaceContainerHigh` |
-| Highest / hairline | `#E5E5E2` | Dividers, `outlineVariant` |
-| Outline (strong) | `#D6D6D1` | `lightOutline` |
+| Ink / onSurface | `#212121` | `lightInk` |
+| Body / mute | `#212121`, `#757575` | `lightInk`, `lightMute` |
+| Ash icons | `#BDBDBD` | `lightAsh` |
+| High (idle chips) | `#F5F5F5` | `lightSurfaceContainerHighBase` |
+| Highest / hairline | `#EEEEEE` | `outlineVariant` tier |
+| Outline (strong) | `#E0E0E0` | `lightOutline` |
 
 Featured cards (Last Read) use gold gradient `#FFD28E` → `#FF9E44` via `AppColors.featuredGradientStart` / `featuredGradientEnd`.
 
@@ -78,7 +78,7 @@ Separate ramp (`darkTrueBlack*` in `AppColors`) when `AppThemePreset.trueBlack` 
 - Secondary reference: `#65734F`
 - Tertiary reference: `#8C681F` (gold tone for scheme harmony)
 
-**Rule:** Widgets consume **`Theme.of(context).colorScheme`** and **`theme.componentTokens`**, not `AppColors` directly (except rare platform-fixed cases like notification accent, documented in code).
+**Rule:** Widgets consume **`Theme.of(context).colorScheme`**, **`theme.productColors`**, and **`theme.componentTokens`**, not `AppColors` directly (except rare platform-fixed cases like notification accent, documented in code).
 
 ---
 

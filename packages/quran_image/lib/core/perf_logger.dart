@@ -5,6 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Snapshot of a single slow frame, broadcast via [PerfLogger.lastSlowFrame].
 ///
@@ -564,10 +565,10 @@ class _SlowFrameBanner extends StatelessWidget {
     // Colour encodes severity: red = slow build, orange = slow raster,
     // amber = total stall (vsync/GPU).
     final Color bg = info.buildSlow
-        ? const Color(0xEECC0000)
+        ? AppPerfLoggerColors.buildSlowBackground
         : info.rasterSlow
-        ? const Color(0xEEBB4400)
-        : const Color(0xEE886600);
+        ? AppPerfLoggerColors.rasterSlowBackground
+        : AppPerfLoggerColors.totalSlowBackground;
 
     final buffer = StringBuffer('⚠ #${info.frameNumber}');
     if (info.buildSlow) {
@@ -594,7 +595,7 @@ class _SlowFrameBanner extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           child: DefaultTextStyle(
             style: const TextStyle(
-              color: Color(0xFFFFFFFF),
+              color: AppPerfLoggerColors.bannerForeground,
               fontSize: 11,
               fontFamily: 'monospace',
               decoration: TextDecoration.none,

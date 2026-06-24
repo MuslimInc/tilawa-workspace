@@ -36,6 +36,8 @@ class SliderPreviewPill extends StatelessWidget {
           : navTheme.previewPillBorderAlphaLight,
     );
 
+    final ColorScheme scheme = Theme.of(context).colorScheme;
+
     return Material(
       color: Colors.transparent,
       child: Container(
@@ -46,7 +48,7 @@ class SliderPreviewPill extends StatelessWidget {
           border: Border.all(color: pillBorder, width: 1),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(
+              color: scheme.shadow.withValues(
                 alpha: isDark
                     ? navTheme.previewPillShadowAlphaDark
                     : navTheme.previewPillShadowAlphaLight,

@@ -119,7 +119,9 @@ class _QuranRenderDemoScreenState extends State<QuranRenderDemoScreen> {
             child: Container(
               margin: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                ),
                 borderRadius: BorderRadius.circular(tokens.radiusMedium),
               ),
               child: PageView.builder(
@@ -154,7 +156,7 @@ class _QuranRenderDemoScreenState extends State<QuranRenderDemoScreen> {
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.all(12),
-              color: Colors.black.withValues(alpha: 0.05),
+              color: Theme.of(context).colorScheme.surfaceContainerLow,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

@@ -66,9 +66,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         value: 'clear_all',
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.delete_sweep,
-                              color: AppColors.error,
+                              color: Theme.of(context).colorScheme.error,
                             ),
                             const SizedBox(width: 12),
                             Text(context.l10n.clearAll),

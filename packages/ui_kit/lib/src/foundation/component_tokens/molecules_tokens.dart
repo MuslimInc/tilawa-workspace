@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../app_colors.dart';
+import '../color_scheme_ext.dart';
 import '../design_tokens.dart';
 import 'token_lerp.dart';
 
@@ -1323,6 +1324,7 @@ class TilawaHomeNextPrayerHeroTokens {
   const TilawaHomeNextPrayerHeroTokens({
     required this.gradientTopStart,
     required this.gradientBottomEnd,
+    this.gradientMidStop,
     required this.foregroundColor,
     required this.locationChipFillOpacity,
     required this.locationChipBorderOpacity,
@@ -1338,6 +1340,10 @@ class TilawaHomeNextPrayerHeroTokens {
 
   /// Bottom-end gradient stop; also used for material fill and card shadow.
   final Color gradientBottomEnd;
+
+  /// Optional middle stop for three-color day ramps; when null the app lerps
+  /// between [gradientTopStart] and [gradientBottomEnd].
+  final Color? gradientMidStop;
 
   /// Text and icons on the gradient surface.
   final Color foregroundColor;
@@ -1374,6 +1380,7 @@ class TilawaHomeNextPrayerHeroTokens {
     return const TilawaHomeNextPrayerHeroTokens(
       gradientTopStart: AppColors.homeNextPrayerGradientTop,
       gradientBottomEnd: AppColors.homeNextPrayerGradientBottom,
+      gradientMidStop: AppColors.homeNextPrayerGradientDayMid,
       foregroundColor: AppColors.homeNextPrayerGradientForeground,
       locationChipFillOpacity: 0.14,
       locationChipBorderOpacity: 0.28,
@@ -1436,6 +1443,7 @@ class TilawaHomeNextPrayerHeroTokens {
   TilawaHomeNextPrayerHeroTokens copyWith({
     Color? gradientTopStart,
     Color? gradientBottomEnd,
+    Color? gradientMidStop,
     Color? foregroundColor,
     double? locationChipFillOpacity,
     double? locationChipBorderOpacity,
@@ -1448,6 +1456,7 @@ class TilawaHomeNextPrayerHeroTokens {
     return TilawaHomeNextPrayerHeroTokens(
       gradientTopStart: gradientTopStart ?? this.gradientTopStart,
       gradientBottomEnd: gradientBottomEnd ?? this.gradientBottomEnd,
+      gradientMidStop: gradientMidStop ?? this.gradientMidStop,
       foregroundColor: foregroundColor ?? this.foregroundColor,
       locationChipFillOpacity:
           locationChipFillOpacity ?? this.locationChipFillOpacity,
@@ -1478,6 +1487,7 @@ class TilawaHomeNextPrayerHeroTokens {
         b.gradientBottomEnd,
         t,
       )!,
+      gradientMidStop: Color.lerp(a.gradientMidStop, b.gradientMidStop, t),
       foregroundColor: Color.lerp(a.foregroundColor, b.foregroundColor, t)!,
       locationChipFillOpacity: lerpTokenDouble(
         a.locationChipFillOpacity,
@@ -1589,8 +1599,8 @@ class TilawaHomeDashboardCardTokens {
       gradientStart: AppColors.featuredGradientStart,
       gradientEnd: AppColors.featuredGradientEnd,
       foregroundColor: AppColors.featuredGradientForeground,
-      splashColor: AppColors.primaryBrown.withValues(alpha: 0.08),
-      highlightColor: AppColors.primaryBrown.withValues(alpha: 0.04),
+      splashColor: AppColors.defaultPrimary.withValues(alpha: 0.08),
+      highlightColor: AppColors.defaultPrimary.withValues(alpha: 0.04),
       travelSheetSurface: AppColors.homeTravelSheetSurface,
       travelSearchFieldFill: AppColors.homeTravelSearchFill,
       travelSectionLinkColor: AppColors.homeTravelSectionLink,
@@ -1880,9 +1890,7 @@ class TilawaExperimentalBadgeTokens {
   factory TilawaExperimentalBadgeTokens.fromColorScheme(
     ColorScheme colorScheme,
   ) {
-    final warning = colorScheme.brightness == Brightness.dark
-        ? AppColors.warningDark
-        : AppColors.warning;
+    final warning = colorScheme.warning;
     return TilawaExperimentalBadgeTokens(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       backgroundColor: Color.alphaBlend(

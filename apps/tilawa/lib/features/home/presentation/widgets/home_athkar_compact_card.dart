@@ -17,11 +17,19 @@ class HomeAthkarCompactCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<HomeAthkarCompactCubit, HomeAthkarCompactState>(
       builder: (context, state) {
+        final tokens = context.tokens;
+        final colorScheme = Theme.of(context).colorScheme;
+        final double innerRadius = tokens.resolveRadius(
+          family: TilawaRadiusFamily.card,
+        );
+
         if (state.status == HomeAthkarRowStatus.loading ||
             state.status == HomeAthkarRowStatus.initial) {
-          return const HomeDashboardCard(
-            surface: TilawaCardSurface.raised,
-            child: TilawaLoadingIndicator(centered: false),
+          return HomeDashboardCard(
+            surface: TilawaCardSurface.flat,
+            backgroundColor: colorScheme.surface,
+            borderRadius: innerRadius,
+            child: const TilawaLoadingIndicator(centered: false),
           );
         }
 
@@ -29,24 +37,24 @@ class HomeAthkarCompactCard extends StatelessWidget {
           return const SizedBox.shrink();
         }
 
-        final tokens = context.tokens;
-        final colorScheme = Theme.of(context).colorScheme;
+        final double dividerIndent =
+            tokens.spaceMedium + tokens.iconSizeSmall + tokens.spaceSmall;
+        final double dividerEndIndent = tokens.spaceMedium;
 
         return HomeDashboardCard(
-          surface: TilawaCardSurface.raised,
+          surface: TilawaCardSurface.flat,
           padding: EdgeInsets.zero,
+          backgroundColor: colorScheme.surface,
+          borderRadius: innerRadius,
           child: Column(
             children: [
               for (var index = 0; index < state.rows.length; index++) ...[
                 if (index > 0)
-                  Padding(
-                    padding: EdgeInsetsDirectional.only(
-                      start: tokens.spaceMedium,
-                    ),
-                    child: TilawaDivider(
-                      height: tokens.borderWidthThin,
-                      color: colorScheme.outlineVariant,
-                    ),
+                  TilawaDivider(
+                    height: tokens.borderWidthThin,
+                    indent: dividerIndent,
+                    endIndent: dividerEndIndent,
+                    color: colorScheme.outlineVariant,
                   ),
                 _HomeAthkarCompactRow(row: state.rows[index]),
               ],

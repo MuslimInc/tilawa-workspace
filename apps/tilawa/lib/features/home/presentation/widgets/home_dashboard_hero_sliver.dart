@@ -142,12 +142,11 @@ abstract final class HomeDashboardHeroSliver {
 
   /// Pinned hero chrome when the expanded gradient is fully collapsed.
   ///
-  /// Uses brand [ColorScheme.primary] — expanded prayer-phase ramp unchanged.
+  /// Uses the same premium wash as [HomePremiumSectionShell].
   static Color collapsedBarColor(
-    TilawaHomeNextPrayerHeroTokens heroTokens,
-    ColorScheme colorScheme,
+    TilawaCapabilityActionCardTokens capabilityCardTokens,
   ) {
-    return homeDashboardHeroCollapsedBarColor(heroTokens, colorScheme);
+    return homeDashboardHeroCollapsedBarColor(capabilityCardTokens);
   }
 }
 
@@ -293,10 +292,11 @@ class _HomeDashboardHeroAppBarState extends State<_HomeDashboardHeroAppBar> {
       Theme.of(context),
       heroTokens,
     );
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final TilawaCapabilityActionCardTokens capabilityCardTokens = Theme.of(
+      context,
+    ).componentTokens.capabilityActionCard;
     final Color collapsedBarColor = HomeDashboardHeroSliver.collapsedBarColor(
-      heroTokens,
-      colorScheme,
+      capabilityCardTokens,
     );
 
     return Theme(
@@ -536,6 +536,8 @@ class _HomeHeroFlexibleSpaceState extends State<_HomeHeroFlexibleSpace> {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final heroTokens = theme.componentTokens.homeNextPrayerHero;
+    final TilawaCapabilityActionCardTokens capabilityCardTokens =
+        theme.componentTokens.capabilityActionCard;
     final double t = widget.collapseProgress;
     final double expandedOpacity = _heroFadeIn(
       t,
@@ -550,7 +552,8 @@ class _HomeHeroFlexibleSpaceState extends State<_HomeHeroFlexibleSpace> {
         : 0;
     final double expandedReveal = Curves.easeInOutCubic.transform(t);
     final double collapsedBarReveal = 1 - expandedReveal;
-    final Color canvasColor = AppColors.homeTravelSheetSurface;
+    final Color canvasColor =
+        theme.componentTokens.homeDashboardCard.travelSheetSurface;
     final SystemUiOverlayStyle overlayStyle = t < 0.12
         ? HomeHeroPhotoTheme.collapsedBarOverlayStyle(widget.collapsedBarColor)
         : HomeHeroBackground.systemOverlayStyle(heroTokens);
@@ -581,10 +584,9 @@ class _HomeHeroFlexibleSpaceState extends State<_HomeHeroFlexibleSpace> {
                     DecoratedBox(
                       decoration:
                           HomeHeroPhotoTheme.collapsedBarSurfaceDecoration(
-                            collapsedBarColor: widget.collapsedBarColor,
-                            heroTokens: heroTokens,
                             colorScheme: theme.colorScheme,
                             tokens: tokens,
+                            capabilityCardTokens: capabilityCardTokens,
                           ),
                     ),
                     DecoratedBox(
@@ -647,8 +649,6 @@ class _HomeHeroFlexibleSpaceState extends State<_HomeHeroFlexibleSpace> {
                       child: Opacity(
                         opacity: collapsedOpacity,
                         child: HomeHeroCollapsedToolbar(
-                          heroTokens: heroTokens,
-                          collapsedBarColor: widget.collapsedBarColor,
                           nextPrayer: widget.nextPrayer,
                           locationName: widget.locationName,
                           isRefreshingLocation: widget.isRefreshingLocation,
@@ -910,6 +910,7 @@ class _HomeHeroContextHeader extends StatelessWidget {
                             theme.textTheme.labelSmall,
                             chromeMuted,
                             tokens: tokens,
+                            colorScheme: theme.colorScheme,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -921,6 +922,7 @@ class _HomeHeroContextHeader extends StatelessWidget {
                             theme.textTheme.titleSmall,
                             chromeInk,
                             tokens: tokens,
+                            colorScheme: theme.colorScheme,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -962,6 +964,7 @@ class _HomeHeroContextHeader extends StatelessWidget {
                 theme.textTheme.bodySmall,
                 chromeMuted,
                 tokens: tokens,
+                colorScheme: theme.colorScheme,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -1084,6 +1087,7 @@ class _HomeHeroNextPrayerFocus extends StatelessWidget {
           theme.textTheme.titleMedium,
           cardMuted,
           tokens: tokens,
+          colorScheme: theme.colorScheme,
           fontWeight: FontWeight.w600,
         ),
       );
@@ -1100,6 +1104,7 @@ class _HomeHeroNextPrayerFocus extends StatelessWidget {
           : theme.textTheme.titleMedium,
       cardInk,
       tokens: tokens,
+      colorScheme: theme.colorScheme,
       fontWeight: FontWeight.w700,
     );
     final TextStyle? timeStyle =
@@ -1109,6 +1114,7 @@ class _HomeHeroNextPrayerFocus extends StatelessWidget {
               : theme.textTheme.titleLarge,
           cardInk,
           tokens: tokens,
+          colorScheme: theme.colorScheme,
         )?.copyWith(
           fontFeatures: const [FontFeature.tabularFigures()],
           height: 1,
@@ -1125,6 +1131,7 @@ class _HomeHeroNextPrayerFocus extends StatelessWidget {
               theme.textTheme.labelMedium,
               cardMuted,
               tokens: tokens,
+              colorScheme: theme.colorScheme,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -1253,6 +1260,7 @@ class _HomeHeroPrayerRemainingTextState
         theme.textTheme.labelMedium,
         widget.color,
         tokens: tokens,
+        colorScheme: theme.colorScheme,
         fontWeight: FontWeight.w500,
       ),
     );

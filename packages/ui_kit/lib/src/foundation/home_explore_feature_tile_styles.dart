@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'app_colors.dart';
-import 'color_scheme_ext.dart';
 import 'semantic_tints.dart';
+import 'tilawa_product_colors.dart';
 
 /// Home Discover grid features — one id per explore tile.
 enum HomeExploreFeature {
@@ -31,9 +30,9 @@ class HomeExploreFeatureTileStyle {
   final TilawaSemanticTint semanticTint;
 }
 
-/// Per-feature Discover grid colors — uniform cream tiles, colored glyphs.
+/// Per-feature Discover grid colors — neutral tiles, category accent glyphs.
 extension HomeExploreFeatureTileStyles on ColorScheme {
-  /// Warm manuscript cream shared by every Home explore tile.
+  /// Subtle teal-tinted fill shared by every Home explore tile.
   Color get homeExploreTileBackground {
     final double warmth = brightness == Brightness.dark ? 0.10 : 0.06;
     return Color.alphaBlend(
@@ -46,51 +45,9 @@ extension HomeExploreFeatureTileStyles on ColorScheme {
   HomeExploreFeatureTileStyle homeExploreFeatureTileStyle(
     HomeExploreFeature feature,
   ) {
-    return switch (feature) {
-      HomeExploreFeature.reciters => const HomeExploreFeatureTileStyle(
-        iconForeground: AppColors.primarySage,
-        semanticTint: TilawaSemanticTint.scholar,
-      ),
-      HomeExploreFeature.athkar => HomeExploreFeatureTileStyle(
-        iconForeground: warning,
-        semanticTint: TilawaSemanticTint.caution,
-      ),
-      HomeExploreFeature.prayer => HomeExploreFeatureTileStyle(
-        iconForeground: primary,
-        semanticTint: TilawaSemanticTint.ink,
-      ),
-      HomeExploreFeature.qibla => HomeExploreFeatureTileStyle(
-        iconForeground: onSurfaceVariant,
-        semanticTint: TilawaSemanticTint.parchment,
-      ),
-      HomeExploreFeature.tasbeeh => HomeExploreFeatureTileStyle(
-        iconForeground: onTertiaryContainer,
-        semanticTint: TilawaSemanticTint.gilding,
-      ),
-      HomeExploreFeature.bookmarks => const HomeExploreFeatureTileStyle(
-        iconForeground: AppColors.primaryBrownDark,
-        semanticTint: TilawaSemanticTint.ink,
-      ),
-      HomeExploreFeature.quran => HomeExploreFeatureTileStyle(
-        iconForeground: _ceremonialGoldIconColor(),
-        semanticTint: TilawaSemanticTint.gilding,
-      ),
-      HomeExploreFeature.support => HomeExploreFeatureTileStyle(
-        iconForeground: success,
-        semanticTint: TilawaSemanticTint.success,
-      ),
-      HomeExploreFeature.sessions => HomeExploreFeatureTileStyle(
-        iconForeground: tertiary,
-        semanticTint: TilawaSemanticTint.scholar,
-      ),
-    };
-  }
-
-  Color _ceremonialGoldIconColor() {
-    return Color.lerp(
-      AppColors.featuredGradientStart,
-      AppColors.featuredGradientEnd,
-      0.5,
-    )!;
+    final TilawaProductColors product = brightness == Brightness.dark
+        ? TilawaProductColors.dark(this)
+        : TilawaProductColors.light(this);
+    return product.exploreFeatureTileStyle(feature);
   }
 }

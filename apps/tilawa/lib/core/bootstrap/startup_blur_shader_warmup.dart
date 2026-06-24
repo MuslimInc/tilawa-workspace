@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'package:tilawa/core/telemetry/startup_perf_log.dart';
 
@@ -263,10 +264,10 @@ class _HeroBlurPanelWarmup extends StatelessWidget {
             ),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: const Color(0x01FFFFFF),
+                color: AppBootstrapShaderWarmupColors.blurPanelFill,
                 borderRadius: radius,
                 border: Border.all(
-                  color: const Color(0x01FFFFFF),
+                  color: AppBootstrapShaderWarmupColors.blurPanelFill,
                   width: _borderWidthThin,
                 ),
               ),
@@ -285,7 +286,7 @@ class _NavShadowWarmup extends StatelessWidget {
 
   static const List<BoxShadow> _navShadow = <BoxShadow>[
     BoxShadow(
-      color: Color(0x0A000000),
+      color: AppBootstrapShaderWarmupColors.navShadow,
       blurRadius: 8,
       offset: Offset(0, 1),
     ),
@@ -298,7 +299,7 @@ class _NavShadowWarmup extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           boxShadow: _navShadow,
-          color: const Color(0x01FFFFFF),
+          color: AppBootstrapShaderWarmupColors.blurPanelFill,
           borderRadius: BorderRadius.circular(24),
         ),
         child: const SizedBox(width: 120, height: 56),

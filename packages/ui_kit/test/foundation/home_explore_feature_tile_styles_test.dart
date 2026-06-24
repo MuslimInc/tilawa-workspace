@@ -25,11 +25,11 @@ void main() {
       );
     });
 
-    test('all tiles share warm manuscript cream background', () {
+    test('all tiles share subtle teal-tinted background', () {
       expect(
         lightScheme.homeExploreTileBackground,
         isNot(equals(lightScheme.surface)),
-        reason: 'cream fill should be warmer than plain white card',
+        reason: 'tile fill should be tinted above plain white card',
       );
       expect(
         lightScheme.homeExploreTileBackground,
@@ -41,7 +41,7 @@ void main() {
       );
     });
 
-    test('quran icon uses ceremonial gold distinct from tasbeeh', () {
+    test('quran icon uses amber accent distinct from tasbeeh', () {
       final Color quranIcon = lightScheme
           .homeExploreFeatureTileStyle(HomeExploreFeature.quran)
           .iconForeground;
@@ -52,12 +52,12 @@ void main() {
       expect(quranIcon, isNot(equals(tasbeehIcon)));
     });
 
-    test('reciters icon uses scholarly sage green', () {
+    test('reciters icon uses category green accent', () {
       expect(
         lightScheme
             .homeExploreFeatureTileStyle(HomeExploreFeature.reciters)
             .iconForeground,
-        AppColors.primarySage,
+        AppColors.categoryAccentGreen,
       );
     });
   });

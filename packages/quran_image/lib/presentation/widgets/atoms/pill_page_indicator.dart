@@ -17,6 +17,7 @@ class PillPageIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme scheme = Theme.of(context).colorScheme;
     final fontSize = screenWidth * AppDimensions.pageNumberTextSizeRatio;
     final horizontalPadding = screenWidth * 0.04;
     final verticalPadding = screenWidth * 0.02;
@@ -27,11 +28,11 @@ class PillPageIndicator extends StatelessWidget {
         vertical: verticalPadding,
       ),
       decoration: BoxDecoration(
-        color: AppColors.sliderBackground.withValues(alpha: 0.9),
+        color: scheme.surface.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(100), // Pill shape
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadow.withValues(alpha: 0.15),
+            color: scheme.shadow.withValues(alpha: 0.15),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -42,7 +43,7 @@ class PillPageIndicator extends StatelessWidget {
         style: TextStyle(
           fontSize: fontSize,
           fontWeight: FontWeight.w600,
-          color: AppColors.textPrimary,
+          color: scheme.onSurface,
         ),
       ),
     );

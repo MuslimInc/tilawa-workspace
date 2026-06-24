@@ -192,7 +192,7 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.18),
+                        color: AppShareComposerColors.shellElevationShadow,
                         blurRadius: 26,
                         offset: const Offset(0, 16),
                       ),
@@ -212,7 +212,9 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              const TilawaSheetHandle(color: Colors.white24),
+                              const TilawaSheetHandle(
+                                color: AppShareComposerColors.sheetHandle,
+                              ),
                               _ConfigHeader(
                                 arabicSurahName: _arabicSurahName,
                                 englishSurahName: _englishSurahName,
@@ -361,10 +363,9 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                                             );
                                       }
                                     : null,
-                                foregroundColor: Colors.white,
-                                borderColor: Colors.white.withValues(
-                                  alpha: 0.18,
-                                ),
+                                foregroundColor: AppShareComposerColors.onShell,
+                                borderColor:
+                                    AppShareComposerColors.buttonOnShellBorder,
                                 borderRadius: 18,
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 24,
@@ -413,8 +414,8 @@ class _ConfigHeader extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         borderRadius: _shareComposerCardRadius(tokens),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
-        color: Colors.white.withValues(alpha: 0.07),
+        border: Border.all(color: AppShareComposerColors.glassBorderStrong),
+        color: AppShareComposerColors.glassFill,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -469,14 +470,14 @@ class _ConfigHeader extends StatelessWidget {
               fontSize: 30,
               height: 1.2,
               fontWeight: FontWeight.w700,
-              color: Colors.white,
+              color: AppShareComposerColors.onShell,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             englishSurahName,
             style: theme.textTheme.titleMedium?.copyWith(
-              color: Colors.white.withValues(alpha: 0.84),
+              color: AppShareComposerColors.onShellSecondary,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -484,7 +485,7 @@ class _ConfigHeader extends StatelessWidget {
           Text(
             context.l10n.audioClipConfigSubtitle,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: Colors.white.withValues(alpha: 0.72),
+              color: AppShareComposerColors.onShellTertiary,
               height: 1.5,
             ),
           ),
@@ -539,8 +540,8 @@ class _RangeSelectionCard extends StatelessWidget {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         borderRadius: _shareComposerCardRadius(tokens),
-        color: Colors.white.withValues(alpha: 0.07),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        color: AppShareComposerColors.glassFill,
+        border: Border.all(color: AppShareComposerColors.glassBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -548,7 +549,7 @@ class _RangeSelectionCard extends StatelessWidget {
           Text(
             context.l10n.verses,
             style: theme.textTheme.titleMedium?.copyWith(
-              color: Colors.white,
+              color: AppShareComposerColors.onShell,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -556,7 +557,7 @@ class _RangeSelectionCard extends StatelessWidget {
           Text(
             '$fromAyah - $toAyah',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: Colors.white.withValues(alpha: 0.72),
+              color: AppShareComposerColors.onShellTertiary,
             ),
           ),
           const SizedBox(height: 16),
@@ -696,8 +697,8 @@ class _LiveVideoPreview extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: _shareComposerCardRadius(tokens),
-        color: Colors.white.withValues(alpha: 0.07),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        color: AppShareComposerColors.glassFill,
+        border: Border.all(color: AppShareComposerColors.glassBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -707,7 +708,7 @@ class _LiveVideoPreview extends StatelessWidget {
               Text(
                 context.l10n.liveReelPreview,
                 style: theme.textTheme.titleMedium?.copyWith(
-                  color: Colors.white,
+                  color: AppShareComposerColors.onShell,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -724,7 +725,7 @@ class _LiveVideoPreview extends StatelessWidget {
             child: AspectRatio(
               aspectRatio: 9 / 16,
               child: ColoredBox(
-                color: Colors.black.withValues(alpha: 0.16),
+                color: AppShareComposerColors.shellSoftShadow,
                 child: FittedBox(
                   fit: BoxFit.cover,
                   child: SizedBox(
@@ -763,8 +764,8 @@ class _ProgressCard extends StatelessWidget {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         borderRadius: _shareComposerCardRadius(tokens),
-        color: Colors.white.withValues(alpha: 0.07),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        color: AppShareComposerColors.glassFill,
+        border: Border.all(color: AppShareComposerColors.glassBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -772,7 +773,7 @@ class _ProgressCard extends StatelessWidget {
           Text(
             message,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: Colors.white,
+              color: AppShareComposerColors.onShell,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -785,7 +786,7 @@ class _ProgressCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: normalizedProgress,
               minHeight: 8,
-              backgroundColor: Colors.white.withValues(alpha: 0.08),
+              backgroundColor: AppShareComposerColors.glassButtonFill,
               valueColor: const AlwaysStoppedAnimation<Color>(
                 AppShareComposerColors.gold,
               ),
@@ -801,7 +802,7 @@ class _ProgressCard extends StatelessWidget {
               shrinkWrapTapTarget: true,
               leadingIcon: const Icon(Icons.close_rounded),
               onPressed: onCancel,
-              foregroundColor: Colors.white.withValues(alpha: 0.84),
+              foregroundColor: AppShareComposerColors.onShellSecondary,
             ),
           ),
         ],
@@ -824,8 +825,8 @@ class _SharingCard extends StatelessWidget {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         borderRadius: _shareComposerCardRadius(tokens),
-        color: Colors.white.withValues(alpha: 0.07),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        color: AppShareComposerColors.glassFill,
+        border: Border.all(color: AppShareComposerColors.glassBorder),
       ),
       child: Row(
         children: [
@@ -845,7 +846,7 @@ class _SharingCard extends StatelessWidget {
             child: Text(
               label,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: Colors.white,
+                color: AppShareComposerColors.onShell,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -888,7 +889,7 @@ class _FeedbackCard extends StatelessWidget {
             child: Text(
               message,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: Colors.white,
+                color: AppShareComposerColors.onShell,
                 height: 1.4,
               ),
             ),
@@ -917,7 +918,7 @@ class _MetadataPill extends StatelessWidget {
           tokens,
           _kShareComposerBadgePillHeight,
         ),
-        color: Colors.white.withValues(alpha: 0.08),
+        color: AppShareComposerColors.glassButtonFill,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -931,7 +932,7 @@ class _MetadataPill extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.labelLarge?.copyWith(
-                color: Colors.white,
+                color: AppShareComposerColors.onShell,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -959,7 +960,7 @@ class _SelectionBadge extends StatelessWidget {
     final tokens = theme.tokens;
     final backgroundColor = isError
         ? AppShareComposerColors.feedbackErrorBackground
-        : Colors.black.withValues(alpha: 0.16);
+        : AppShareComposerColors.shellSoftShadow;
     final accent = isError
         ? AppShareComposerColors.feedbackErrorOutline
         : AppShareComposerColors.mint;
@@ -983,7 +984,7 @@ class _SelectionBadge extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: Colors.white.withValues(alpha: 0.84),
+                color: AppShareComposerColors.onShellSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -1014,8 +1015,8 @@ class _VideoReviewPreview extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: _shareComposerCardRadius(tokens),
-        color: Colors.white.withValues(alpha: 0.07),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        color: AppShareComposerColors.glassFill,
+        border: Border.all(color: AppShareComposerColors.glassBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1023,7 +1024,7 @@ class _VideoReviewPreview extends StatelessWidget {
           Text(
             context.l10n.reviewReel,
             style: theme.textTheme.titleMedium?.copyWith(
-              color: Colors.white,
+              color: AppShareComposerColors.onShell,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -1033,14 +1034,14 @@ class _VideoReviewPreview extends StatelessWidget {
             child: AspectRatio(
               aspectRatio: 9 / 16,
               child: ColoredBox(
-                color: Colors.black12,
+                color: AppShareComposerColors.shellFaintTint,
                 child: Center(
                   child: Icon(
                     exists
                         ? Icons.movie_creation_outlined
                         : Icons.error_outline,
                     size: 40,
-                    color: Colors.white70,
+                    color: AppShareComposerColors.onShellMuted,
                   ),
                 ),
               ),

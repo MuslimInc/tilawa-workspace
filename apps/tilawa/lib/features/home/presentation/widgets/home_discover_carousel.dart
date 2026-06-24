@@ -9,6 +9,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'home_daily_ayah_sheet.dart';
 import 'home_dashboard_section.dart';
 import 'home_dashboard_shortcut_grid.dart';
+import 'home_premium_section_shell.dart';
 import 'home_travel_destination_card.dart';
 
 /// Horizontal promo row — daily ayah, sessions, khatma, library shortcuts.
@@ -27,31 +28,33 @@ class HomeDiscoverCarousel extends StatelessWidget {
     final tokens = context.tokens;
     final double tileHeight = homeTravelGridTileHeight(context);
 
-    return HomeDashboardSection(
-      title: context.l10n.homeFeaturedTitle,
-      subtitle: context.l10n.homeFeaturedSubtitle,
-      contentSpacing: tokens.spaceMedium,
-      child: SizedBox(
-        height: tileHeight,
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          padding: EdgeInsets.zero,
-          itemCount: items.length,
-          separatorBuilder: (_, _) => SizedBox(width: tokens.spaceSmall),
-          itemBuilder: (context, index) {
-            final _HomeDiscoverCarouselItem item = items[index];
-            return SizedBox(
-              width: _carouselTileWidth,
-              child: HomeTravelDestinationCard(
-                tintIndex: item.tintIndex,
-                icon: item.icon,
-                title: item.title,
-                subtitle: item.subtitle,
-                onTap: item.onTap,
-                semanticLabel: item.title,
-              ),
-            );
-          },
+    return HomePremiumSectionShell(
+      child: HomeDashboardSection(
+        title: context.l10n.homeFeaturedTitle,
+        subtitle: context.l10n.homeFeaturedSubtitle,
+        contentSpacing: tokens.spaceMedium,
+        child: SizedBox(
+          height: tileHeight,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: EdgeInsets.zero,
+            itemCount: items.length,
+            separatorBuilder: (_, _) => SizedBox(width: tokens.spaceSmall),
+            itemBuilder: (context, index) {
+              final _HomeDiscoverCarouselItem item = items[index];
+              return SizedBox(
+                width: _carouselTileWidth,
+                child: HomeTravelDestinationCard(
+                  tintIndex: item.tintIndex,
+                  icon: item.icon,
+                  title: item.title,
+                  subtitle: item.subtitle,
+                  onTap: item.onTap,
+                  semanticLabel: item.title,
+                ),
+              );
+            },
+          ),
         ),
       ),
     );

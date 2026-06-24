@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_hero_photo_theme.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Collapse progress for home hero [SliverPersistentHeaderDelegate]s.
@@ -29,10 +30,9 @@ double homeDashboardHeroPinnedExtent({required double topInset}) {
   return topInset + kToolbarHeight;
 }
 
-/// Pinned bar fill — brand primary, not phase gradient or cream slab.
+/// Pinned bar sample — premium wash luminance for status-bar icons.
 Color homeDashboardHeroCollapsedBarColor(
-  TilawaHomeNextPrayerHeroTokens heroTokens,
-  ColorScheme colorScheme,
+  TilawaCapabilityActionCardTokens capabilityCardTokens,
 ) {
-  return colorScheme.primary;
+  return HomeHeroPhotoTheme.collapsedBarSampleColor(capabilityCardTokens);
 }

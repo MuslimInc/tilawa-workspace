@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../quran_qcf.dart';
 import '../../helpers/app_logger.dart';
@@ -154,9 +155,12 @@ class _PageContentState extends State<PageContent>
   Timer? _deferredSnapshotTimer;
   bool _hasDeferredCenterSnapshotCapture = false;
 
-  static const Color _lightMetaTextColor = Color(0xFF9A7A57);
-  static const Color _lightPageNumberBackgroundColor = Color(0xFFE8DDD0);
-  static const Color _lightPageNumberBorderColor = Color(0xFFD2C0AE);
+  static const Color _lightMetaTextColor =
+      AppQuranReaderLegacyColors.lightPageMetaText;
+  static const Color _lightPageNumberBackgroundColor =
+      AppQuranReaderLegacyColors.lightPageNumberBackground;
+  static const Color _lightPageNumberBorderColor =
+      AppQuranReaderLegacyColors.lightPageNumberBorder;
 
   @override
   bool get wantKeepAlive {

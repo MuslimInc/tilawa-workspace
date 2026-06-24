@@ -28,9 +28,7 @@ abstract final class HomeHeroPhotoTheme {
 
   /// Ink for Hijri date and hero chrome on the gradient ramp.
   static Color heroChromeInk(TilawaHomeNextPrayerHeroTokens tokens) {
-    return isDarkHero(tokens)
-        ? tokens.foregroundColor
-        : AppColors.homeNextPrayerGradientForeground;
+    return tokens.foregroundColor;
   }
 
   /// Muted hero chrome ink for secondary gradient copy.
@@ -41,18 +39,27 @@ abstract final class HomeHeroPhotoTheme {
     return heroChromeInk(tokens).withValues(alpha: opacity);
   }
 
-  /// Collapsed toolbar copy over the pinned primary hero bar.
+  /// Collapsed toolbar copy over the pinned premium hero bar.
   static Color collapsedToolbarForeground({
-    required Color collapsedBarColor,
-    required TilawaHomeNextPrayerHeroTokens heroTokens,
     required ColorScheme colorScheme,
   }) {
-    return colorScheme.onPrimary;
+    return colorScheme.onSurface;
   }
 
-  /// Muted collapsed-toolbar ink on the pinned primary bar.
+  /// Muted collapsed-toolbar ink on the pinned premium bar.
   static Color collapsedToolbarMuted(ColorScheme colorScheme) {
-    return colorScheme.onPrimary.withValues(alpha: 0.72);
+    return colorScheme.onSurfaceVariant;
+  }
+
+  /// Representative fill for status-bar contrast and [Material] underlay.
+  static Color collapsedBarSampleColor(
+    TilawaCapabilityActionCardTokens capabilityCardTokens,
+  ) {
+    return Color.lerp(
+      capabilityCardTokens.gradientStart,
+      capabilityCardTokens.gradientEnd,
+      0.35,
+    )!;
   }
 
   /// Status bar icons when the hero is fully pinned on primary.
@@ -64,37 +71,25 @@ abstract final class HomeHeroPhotoTheme {
         : SystemUiOverlayStyle.light;
   }
 
-  /// Brand primary fill for the pinned hero bar with elevation.
+  /// Premium wash for the pinned hero bar — matches [HomePremiumSectionShell].
   static BoxDecoration collapsedBarSurfaceDecoration({
-    required Color collapsedBarColor,
-    required TilawaHomeNextPrayerHeroTokens heroTokens,
     required ColorScheme colorScheme,
     required TilawaDesignTokens tokens,
+    required TilawaCapabilityActionCardTokens capabilityCardTokens,
   }) {
     return BoxDecoration(
-      gradient: LinearGradient(
-        begin: AlignmentDirectional.topCenter,
-        end: AlignmentDirectional.bottomCenter,
-        colors: <Color>[
-          Color.lerp(
-            colorScheme.primaryContainer,
-            colorScheme.primary,
-            0.42,
-          )!,
-          colorScheme.primary,
-        ],
-      ),
+      gradient: capabilityCardTokens.backgroundGradient(),
       boxShadow: <BoxShadow>[
         BoxShadow(
           color: colorScheme.shadow.withValues(alpha: tokens.opacityShadow),
-          blurRadius: tokens.blurShadow,
           offset: tokens.shadowOffsetSmall,
+          blurRadius: tokens.spaceSmall.toDouble(),
         ),
       ],
     );
   }
 
-  /// Soft top-inner highlight on pinned primary chrome.
+  /// Soft top-inner highlight on pinned premium chrome.
   static BoxDecoration collapsedBarInnerHighlight({
     required ColorScheme colorScheme,
   }) {
@@ -103,7 +98,7 @@ abstract final class HomeHeroPhotoTheme {
         begin: AlignmentDirectional.topCenter,
         end: AlignmentDirectional.bottomCenter,
         colors: <Color>[
-          colorScheme.onPrimary.withValues(alpha: 0.1),
+          colorScheme.onSurface.withValues(alpha: 0.05),
           Colors.transparent,
         ],
         stops: const <double>[0, 0.22],
@@ -113,24 +108,24 @@ abstract final class HomeHeroPhotoTheme {
 
   /// Zone divider between pinned-toolbar columns.
   static Color collapsedToolbarDividerColor(ColorScheme colorScheme) {
-    return colorScheme.onPrimary.withValues(alpha: 0.28);
+    return colorScheme.outlineVariant.withValues(alpha: 0.72);
   }
 
-  /// Location chip on the pinned primary toolbar.
+  /// Location chip on the pinned premium toolbar.
   static BoxDecoration collapsedLocationChipDecoration({
     required ColorScheme colorScheme,
     required TilawaDesignTokens tokens,
   }) {
     return BoxDecoration(
-      color: colorScheme.onPrimary.withValues(alpha: 0.12),
+      color: colorScheme.onSurface.withValues(alpha: 0.05),
       borderRadius: BorderRadius.circular(tokens.radiusLarge),
       border: Border.all(
-        color: colorScheme.onPrimary.withValues(alpha: 0.24),
+        color: colorScheme.outlineVariant.withValues(alpha: 0.55),
       ),
     );
   }
 
-  /// Countdown pill on the pinned primary toolbar.
+  /// Countdown pill on the pinned premium toolbar.
   static BoxDecoration collapsedCountdownChipDecoration({
     required ColorScheme colorScheme,
     required TilawaDesignTokens tokens,
@@ -139,7 +134,7 @@ abstract final class HomeHeroPhotoTheme {
       color: colorScheme.semanticTintBackground(TilawaSemanticTint.gilding),
       borderRadius: BorderRadius.circular(tokens.radiusLarge),
       border: Border.all(
-        color: colorScheme.onPrimary.withValues(alpha: 0.2),
+        color: colorScheme.outlineVariant.withValues(alpha: 0.45),
       ),
     );
   }
@@ -161,14 +156,15 @@ abstract final class HomeHeroPhotoTheme {
 
   static List<Shadow> textShadows(
     Color foreground,
-    TilawaDesignTokens tokens,
-  ) {
+    TilawaDesignTokens tokens, {
+    required Color shadowColor,
+  }) {
     if (foreground.computeLuminance() > 0.45) {
       return const <Shadow>[];
     }
     return <Shadow>[
       Shadow(
-        color: Colors.black.withValues(alpha: 0.32),
+        color: shadowColor.withValues(alpha: 0.32),
         blurRadius: tokens.blurShadow * 1.5,
         offset: Offset(0, tokens.shadowOffsetSmall.dy),
       ),
@@ -179,12 +175,17 @@ abstract final class HomeHeroPhotoTheme {
     TextStyle? base,
     Color color, {
     required TilawaDesignTokens tokens,
+    required ColorScheme colorScheme,
     FontWeight fontWeight = FontWeight.w500,
   }) {
     return base?.copyWith(
       color: color,
       fontWeight: fontWeight,
-      shadows: textShadows(color, tokens),
+      shadows: textShadows(
+        color,
+        tokens,
+        shadowColor: colorScheme.scrim,
+      ),
     );
   }
 
@@ -192,13 +193,18 @@ abstract final class HomeHeroPhotoTheme {
     TextStyle? base,
     Color color, {
     required TilawaDesignTokens tokens,
+    required ColorScheme colorScheme,
     FontWeight fontWeight = FontWeight.w700,
   }) {
     return base?.copyWith(
       color: color,
       fontWeight: fontWeight,
       height: 1.1,
-      shadows: textShadows(color, tokens),
+      shadows: textShadows(
+        color,
+        tokens,
+        shadowColor: colorScheme.scrim,
+      ),
     );
   }
 }

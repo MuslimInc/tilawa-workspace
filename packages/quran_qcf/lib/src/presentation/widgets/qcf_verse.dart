@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../quran_qcf.dart';
 import '../../helpers/quran_text_paint.dart';
@@ -10,8 +11,8 @@ class QcfVerse extends StatefulWidget {
     required this.surahNumber,
     required this.verseNumber,
     this.fontSize,
-    this.textColor = const Color(0xFF000000),
-    this.backgroundColor = const Color(0x00000000),
+    this.textColor = AppQuranReaderLegacyColors.lightOnSurface,
+    this.backgroundColor = AppPalettePrimitives.fullyTransparent,
     this.onLongPress,
     this.onLongPressUp,
     this.onLongPressCancel,

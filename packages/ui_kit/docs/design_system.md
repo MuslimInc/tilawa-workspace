@@ -14,6 +14,7 @@ neutral ramp, and catalog chrome as stable. Changes are limited to:
 | Product intent | [`docs/tilawa_brand.md`](../../../docs/tilawa_brand.md) |
 | Human spec | [`DESIGN.md`](../../../DESIGN.md) (repo root) |
 | Colour policy | [`docs/design/colors.md`](../../../docs/design/colors.md) |
+| Colour architecture | [`docs/design/color_architecture.md`](../../../docs/design/color_architecture.md) |
 | This file | Implementation contracts for agents and reviewers |
 | Source of truth | `lib/src/foundation/app_colors.dart`, `app_theme.dart`, `component_tokens/` |
 
@@ -47,27 +48,29 @@ organisms/      TilawaMediaPlayerBar, TilawaSettingsGroup, …
 
 ## 2. Theme freeze — calm catalog chrome (light)
 
-Default primary: **Warm brown** `#8B5E3C` (`AppColors.defaultPrimary`), **brand-locked**
-for production per the [Behance lifestyle reference](https://www.behance.net/gallery/230050359/Islamic-App-Mobile-UIUX-Design-for-Muslim-Lifestyle).
-Legacy presets (coral, teal, sage, gold, purple) remain only for the dev/QA
+Default primary: **Reference teal** `#00897B` (`AppColors.defaultPrimary`), **brand-locked**
+for production per `PrimaryColorPreset.brandLocked` / `Env.kShowColorPicker`.
+Legacy presets (coral, sage, brown, purple) remain only for the dev/QA
 color picker and persisted user choices.
 
-**Accent usage (one-accent rule):** Brown primary for **one** emphasis per screen
+**Accent usage (one-accent rule):** Teal primary for **one** emphasis per screen
 — primary CTA, active bottom nav, selected pills/segments, progress fill,
 switch ON. **Not** for scaffold fills (use the neutral canvas).
 
-### Light neutral ramp (soft neutral canvas + white cards)
+### Light neutral ramp (white canvas + white cards)
 
 | `AppColors` | Hex | `ColorScheme` / usage |
 |-------------|-----|------------------------|
-| `lightCanvas` / `lightBackground` | `#FAFAFA` | Scaffold, `surfaceContainerLowest` |
+| `lightCanvas` / `lightBackground` | `#FFFFFF` | Scaffold, `surfaceContainerLowest` |
 | `lightSurface` | `#FFFFFF` | Cards, sheets, dialogs |
-| `lightInk` | `#30343C` | `onSurface` |
-| `lightMute` | `#78736E` | Muted labels (`onSurfaceVariant`) |
-| `lightSurfaceContainerHighBase` | `#F1F1EF` | Idle chips, `surfaceContainerHigh` |
-| `featuredGradientStart` / `End` | `#FFD28E` / `#FF9E44` | Last Read / hero gold cards |
+| `lightInk` | `#212121` | `onSurface` |
+| `lightMute` | `#757575` | Muted labels (`onSurfaceVariant`) |
+| `lightSurfaceContainerHighBase` | `#F5F5F5` | Idle chips, `surfaceContainerHigh` |
+| `featuredGradientStart` / `End` | `#FFD28E` / `#FF9E44` | Last Read / hero gold cards (via `productColors`) |
 
-Featured cards use the gold gradient; standard cards use white + warm shadow.
+### Product semantics
+
+`TilawaProductColors` (`Theme.of(context).productColors`) exposes prayer, Quran, player, hub, and brand-lock roles. Feature code should prefer this over `AppColors`.
 
 `AppTheme` sets **`surfaceTint` → transparent** on cards, dialogs, sheets, and
 app bars so Material 3 does not wash neutrals with the user primary.

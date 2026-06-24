@@ -10,7 +10,7 @@ Widget _wrap(
 }) {
   return MaterialApp(
     theme:
-        theme ?? AppTheme.getLightTheme(primaryColor: const Color(0xFF8B5E3C)),
+        theme ?? AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
     locale: locale,
@@ -69,7 +69,7 @@ void main() {
 
     testWidgets('applies light theme caution background color', (tester) async {
       final lightTheme = AppTheme.getLightTheme(
-        primaryColor: const Color(0xFF8B5E3C),
+        primaryColor: AppColors.defaultPrimary,
       );
       await tester.pumpWidget(
         _wrap(
@@ -85,7 +85,7 @@ void main() {
 
     testWidgets('applies dark theme caution background color', (tester) async {
       final darkTheme = AppTheme.getDarkTheme(
-        primaryColor: const Color(0xFF8B5E3C),
+        primaryColor: AppColors.defaultPrimary,
       );
       await tester.pumpWidget(
         MaterialApp(
@@ -118,20 +118,22 @@ void main() {
       expect(tapped, isTrue);
     });
 
-    testWidgets('no InkWell when onTap is null', (tester) async {
+    testWidgets('no interactive surface when onTap is null', (tester) async {
       await tester.pumpWidget(
         _wrap(const TilawaExperimentalBadge(label: 'Experimental')),
       );
-      expect(find.byType(InkWell), findsNothing);
+      expect(find.byType(TilawaInteractiveSurface), findsNothing);
     });
 
-    testWidgets('has InkWell when onTap is provided', (tester) async {
+    testWidgets('has interactive surface when onTap is provided', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         _wrap(
           TilawaExperimentalBadge(label: 'Experimental', onTap: () {}),
         ),
       );
-      expect(find.byType(InkWell), findsOneWidget);
+      expect(find.byType(TilawaInteractiveSurface), findsOneWidget);
     });
 
     testWidgets('semantics label matches rendered text', (tester) async {
@@ -146,10 +148,10 @@ void main() {
 
     testWidgets('token lerp produces finite values', (tester) async {
       final light = AppTheme.getLightTheme(
-        primaryColor: const Color(0xFF8B5E3C),
+        primaryColor: AppColors.defaultPrimary,
       );
       final dark = AppTheme.getDarkTheme(
-        primaryColor: const Color(0xFF8B5E3C),
+        primaryColor: AppColors.defaultPrimary,
       );
       final a = light.componentTokens.experimentalBadge;
       final b = dark.componentTokens.experimentalBadge;

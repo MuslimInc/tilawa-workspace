@@ -9,6 +9,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'home_dashboard_section.dart';
 import 'home_dashboard_shortcut_grid.dart';
+import 'home_premium_section_shell.dart';
 import 'open_home_quran_sessions.dart';
 
 /// Feature category grid for everyday Tilawa tools.
@@ -26,10 +27,6 @@ class HomeFeaturesHub extends StatelessWidget {
     final tokens = context.tokens;
     final textTheme = theme.textTheme;
     final colorScheme = theme.colorScheme;
-    final cardTokens = theme.componentTokens.capabilityActionCard;
-    final double radius = tokens.resolveRadius(
-      family: TilawaRadiusFamily.hero,
-    );
     final features = _HomeFeatureCatalog.primaryFeatures(
       context,
       onOpenPrayer: onOpenPrayer,
@@ -39,65 +36,45 @@ class HomeFeaturesHub extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(radius),
-        gradient: cardTokens.backgroundGradient(),
-        border: Border.all(
-          color: cardTokens.borderColor,
-          width: tokens.borderWidthThin,
-        ),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: colorScheme.shadow.withValues(
-              alpha: tokens.opacityShadow,
-            ),
-            offset: tokens.shadowOffsetSmall,
-            blurRadius: tokens.spaceSmall.toDouble(),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(tokens.spaceMedium),
-        child: HomeDashboardSection(
-          title: context.l10n.homeExploreTitle,
-          subtitle: context.l10n.homeExploreSubtitle,
-          contentSpacing: tokens.spaceSmall,
-          child: HomeDashboardShortcutGrid(
-            columnCount: _homeFeaturesHubColumnCount(context),
-            tileHeight: _homeCategoryGridTileHeight(context),
-            itemCount: features.length,
-            itemBuilder: (context, index) {
-              final _HomeFeatureItem item = features[index];
-              final HomeExploreFeatureTileStyle style = colorScheme
-                  .homeExploreFeatureTileStyle(item.feature);
-              final TextStyle hubLabelStyle = textTheme.titleSmall!.copyWith(
-                color: colorScheme.onSurface,
-                fontWeight: FontWeight.w600,
-                height: 1.15,
-              );
+    return HomePremiumSectionShell(
+      child: HomeDashboardSection(
+        title: context.l10n.homeExploreTitle,
+        subtitle: context.l10n.homeExploreSubtitle,
+        contentSpacing: tokens.spaceSmall,
+        child: HomeDashboardShortcutGrid(
+          columnCount: _homeFeaturesHubColumnCount(context),
+          tileHeight: _homeCategoryGridTileHeight(context),
+          itemCount: features.length,
+          itemBuilder: (context, index) {
+            final _HomeFeatureItem item = features[index];
+            final HomeExploreFeatureTileStyle style = colorScheme
+                .homeExploreFeatureTileStyle(item.feature);
+            final TextStyle hubLabelStyle = textTheme.titleSmall!.copyWith(
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
+              height: 1.15,
+            );
 
-              return TilawaFeatureCategoryTile(
-                icon: item.icon,
-                iconWidget: _HomeFeatureCatalog.iconWidget(
-                  context,
-                  feature: item.feature,
-                  iconColor: style.iconForeground,
-                  size: tokens.iconSizeLarge,
-                ),
-                label: item.label,
-                onTap: item.onTap,
-                backgroundColor: colorScheme.homeExploreTileBackground,
-                iconBoxVariant: TilawaIconBoxVariant.tinted,
-                iconBoxBackgroundColor: colorScheme.surface,
+            return TilawaFeatureCategoryTile(
+              icon: item.icon,
+              iconWidget: _HomeFeatureCatalog.iconWidget(
+                context,
+                feature: item.feature,
                 iconColor: style.iconForeground,
-                iconSize: tokens.iconSizeLarge,
-                iconPadding: tokens.spaceSmall,
-                labelStyle: hubLabelStyle,
-                contentPadding: EdgeInsets.all(tokens.spaceSmall),
-              );
-            },
-          ),
+                size: tokens.iconSizeLarge,
+              ),
+              label: item.label,
+              onTap: item.onTap,
+              backgroundColor: colorScheme.surface,
+              iconBoxVariant: TilawaIconBoxVariant.tinted,
+              iconBoxBackgroundColor: colorScheme.surface,
+              iconColor: style.iconForeground,
+              iconSize: tokens.iconSizeLarge,
+              iconPadding: tokens.spaceSmall,
+              labelStyle: hubLabelStyle,
+              contentPadding: EdgeInsets.all(tokens.spaceSmall),
+            );
+          },
         ),
       ),
     );
