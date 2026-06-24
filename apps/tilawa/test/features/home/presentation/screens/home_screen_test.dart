@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:dartz_plus/dartz_plus.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/features/athkar/data/datasources/athkar_daily_progress_local_datasource.dart';
 import 'package:tilawa/features/athkar/domain/entities/athkar_category.dart';
 import 'package:tilawa/features/athkar/domain/entities/athkar_item.dart';
@@ -39,7 +41,29 @@ import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/utils/typedefs.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+class _TestSharedPreferencesAsync implements SharedPreferencesAsync {
+  @override
+  Future<String?> getString(String key) async => null;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 void main() {
+  setUp(() {
+    if (!GetIt.I.isRegistered<SharedPreferencesAsync>()) {
+      GetIt.I.registerSingleton<SharedPreferencesAsync>(
+        _TestSharedPreferencesAsync(),
+      );
+    }
+  });
+
+  tearDown(() async {
+    if (GetIt.I.isRegistered<SharedPreferencesAsync>()) {
+      await GetIt.I.unregister<SharedPreferencesAsync>();
+    }
+  });
+
   testWidgets('settles a partial home hero collapse to the pinned state', (
     tester,
   ) async {

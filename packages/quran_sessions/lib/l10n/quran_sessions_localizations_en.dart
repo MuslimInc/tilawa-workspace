@@ -525,6 +525,31 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get sessionTimelineEmpty => 'No activity recorded yet.';
 
   @override
+  String get sessionTimelineLoadFailed =>
+      'Could not load the activity timeline. Check your connection and try again.';
+
+  @override
+  String get sessionPendingRescheduleLoadFailed =>
+      'Could not load the pending reschedule request. Try again in a moment.';
+
+  @override
+  String sessionLockedAtBookingNote(String callType, String callProvider) {
+    return 'Call type ($callType) and provider ($callProvider) were set when you booked. To change them, cancel and rebook or contact support.';
+  }
+
+  @override
+  String get callProviderExternal => 'External link';
+
+  @override
+  String get callProviderMock => 'In-app (preview)';
+
+  @override
+  String get callProviderAgora => 'In-app (Agora)';
+
+  @override
+  String get callProviderWebrtc => 'In-app (WebRTC)';
+
+  @override
   String sessionStatusLabel(String status) {
     return 'Status: $status';
   }

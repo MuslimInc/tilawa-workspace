@@ -407,4 +407,127 @@ void main() {
     expect(muteEvents, ['session_1:mute']);
     expect(find.text('Unmute microphone'), findsOneWidget);
   });
+
+  group('locked-at-booking footnote', () {
+    testWidgets('shows for confirmed session with call context', (
+      tester,
+    ) async {
+      final bloc = _RecordingSessionDetailBloc(
+        seed: SessionDetailSuccess(
+          aggregate: makeAggregate(
+            status: SessionLifecycleStatus.confirmed,
+          ),
+          timeline: const [],
+          callType: SessionCallType.voiceCall,
+          callProviderKind: SessionCallProviderKind.agora,
+        ),
+      );
+
+      await _pumpSessionDetailScreen(tester, bloc: bloc);
+
+      expect(
+        find.textContaining('Call type (Voice) and provider (In-app (Agora))'),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('were set when you booked'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('hidden when lifecycle is not booked', (tester) async {
+      final bloc = _RecordingSessionDetailBloc(
+        seed: SessionDetailSuccess(
+          aggregate: makeAggregate(
+            status: SessionLifecycleStatus.rescheduled,
+          ),
+          timeline: const [],
+          callType: SessionCallType.voiceCall,
+          callProviderKind: SessionCallProviderKind.agora,
+        ),
+      );
+
+      await _pumpSessionDetailScreen(tester, bloc: bloc);
+
+      expect(find.textContaining('were set when you booked'), findsNothing);
+    });
+  });
+
+  group('sub-fetch failure banners', () {
+    testWidgets('timeline load failure shows retry banner not empty copy', (
+      tester,
+    ) async {
+      final bloc = _RecordingSessionDetailBloc(
+        seed: SessionDetailSuccess(
+          aggregate: makeAggregate(
+            status: SessionLifecycleStatus.confirmed,
+          ),
+          timeline: const [],
+          timelineLoadFailed: true,
+        ),
+      );
+
+      await _pumpSessionDetailScreen(tester, bloc: bloc);
+
+      expect(
+        find.text(
+          'Could not load the activity timeline. Check your connection and try again.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Retry'), findsOneWidget);
+      expect(find.text('No activity recorded yet.'), findsNothing);
+    });
+
+    testWidgets('pending reschedule load failure shows retry banner', (
+      tester,
+    ) async {
+      final bloc = _RecordingSessionDetailBloc(
+        seed: SessionDetailSuccess(
+          aggregate: makeAggregate(
+            status: SessionLifecycleStatus.rescheduled,
+          ),
+          timeline: const [],
+          pendingRescheduleLoadFailed: true,
+        ),
+      );
+
+      await _pumpSessionDetailScreen(tester, bloc: bloc);
+
+      expect(
+        find.text(
+          'Could not load the pending reschedule request. Try again in a moment.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Retry'), findsOneWidget);
+    });
+
+    testWidgets('retry on timeline banner dispatches reload', (tester) async {
+      final bloc = _RecordingSessionDetailBloc(
+        seed: SessionDetailSuccess(
+          aggregate: makeAggregate(
+            status: SessionLifecycleStatus.confirmed,
+          ),
+          timeline: const [],
+          timelineLoadFailed: true,
+        ),
+      );
+
+      await _pumpSessionDetailScreen(tester, bloc: bloc);
+      bloc.recordedEvents.clear();
+
+      await tester.tap(find.text('Retry'));
+      await tester.pump();
+
+      expect(
+        bloc.recordedEvents.whereType<SessionDetailLoadRequested>(),
+        hasLength(1),
+      );
+      expect(
+        bloc.recordedEvents.whereType<SessionDetailLoadRequested>().single,
+        const SessionDetailLoadRequested(bookingId: 'session_1'),
+      );
+    });
+  });
 }

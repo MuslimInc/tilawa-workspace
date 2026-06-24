@@ -88,7 +88,7 @@ void main() {
   });
 
   blocTest<SessionDetailBloc, SessionDetailState>(
-    'loads session detail when timeline read is denied',
+    'unauthorized timeline read succeeds with empty timeline not load failure',
     build: () => SessionDetailBloc(
       aggregateRepository: aggregateRepository,
       getTimeline: GetSessionTimelineUseCase(
@@ -102,7 +102,35 @@ void main() {
       const SessionDetailLoading(),
       isA<SessionDetailSuccess>()
           .having((s) => s.aggregate.id, 'aggregate id', 'booking_1')
-          .having((s) => s.timeline, 'timeline', isEmpty),
+          .having((s) => s.timeline, 'timeline', isEmpty)
+          .having(
+            (s) => s.timelineLoadFailed,
+            'timelineLoadFailed',
+            isFalse,
+          ),
+    ],
+  );
+
+  blocTest<SessionDetailBloc, SessionDetailState>(
+    'server timeline failure surfaces timelineLoadFailed on success state',
+    build: () => SessionDetailBloc(
+      aggregateRepository: aggregateRepository,
+      getTimeline: GetSessionTimelineUseCase(
+        auditRepository..failWith = const ServerFailure(statusCode: 500),
+      ),
+    ),
+    act: (bloc) => bloc.add(
+      const SessionDetailLoadRequested(bookingId: 'booking_1'),
+    ),
+    expect: () => [
+      const SessionDetailLoading(),
+      isA<SessionDetailSuccess>()
+          .having((s) => s.timeline, 'timeline', isEmpty)
+          .having(
+            (s) => s.timelineLoadFailed,
+            'timelineLoadFailed',
+            isTrue,
+          ),
     ],
   );
 
@@ -312,6 +340,72 @@ void main() {
       verify: (_) {
         check(mutationGateway.calls).contains('dispute:booking_1');
       },
+    );
+
+    blocTest<SessionDetailBloc, SessionDetailState>(
+      'server pending reschedule failure surfaces pendingRescheduleLoadFailed',
+      build: () => buildBloc(
+        getPendingReschedule: GetPendingRescheduleRequestUseCase(
+          repository: rescheduleRequests
+            ..failWith = const ServerFailure(statusCode: 500),
+        ),
+      ),
+      setUp: () {
+        aggregateRepository.store['booking_1'] = makeAggregate(
+          id: 'booking_1',
+          status: SessionLifecycleStatus.rescheduled,
+        );
+      },
+      act: (bloc) => bloc.add(
+        const SessionDetailLoadRequested(bookingId: 'booking_1'),
+      ),
+      expect: () => [
+        const SessionDetailLoading(),
+        isA<SessionDetailSuccess>()
+            .having(
+              (s) => s.pendingRescheduleLoadFailed,
+              'pendingRescheduleLoadFailed',
+              isTrue,
+            )
+            .having(
+              (s) => s.pendingRescheduleRequest,
+              'pendingRescheduleRequest',
+              isNull,
+            ),
+      ],
+    );
+
+    blocTest<SessionDetailBloc, SessionDetailState>(
+      'unauthorized pending reschedule read does not set load failure flag',
+      build: () => buildBloc(
+        getPendingReschedule: GetPendingRescheduleRequestUseCase(
+          repository: rescheduleRequests
+            ..failWith = const UnauthorizedFailure(),
+        ),
+      ),
+      setUp: () {
+        aggregateRepository.store['booking_1'] = makeAggregate(
+          id: 'booking_1',
+          status: SessionLifecycleStatus.rescheduled,
+        );
+      },
+      act: (bloc) => bloc.add(
+        const SessionDetailLoadRequested(bookingId: 'booking_1'),
+      ),
+      expect: () => [
+        const SessionDetailLoading(),
+        isA<SessionDetailSuccess>()
+            .having(
+              (s) => s.pendingRescheduleLoadFailed,
+              'pendingRescheduleLoadFailed',
+              isFalse,
+            )
+            .having(
+              (s) => s.pendingRescheduleRequest,
+              'pendingRescheduleRequest',
+              isNull,
+            ),
+      ],
     );
 
     blocTest<SessionDetailBloc, SessionDetailState>(

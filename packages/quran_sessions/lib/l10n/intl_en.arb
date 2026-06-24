@@ -189,6 +189,19 @@
     "sessionDetailTitle": "Session details",
     "sessionTimelineTitle": "Activity timeline",
     "sessionTimelineEmpty": "No activity recorded yet.",
+    "sessionTimelineLoadFailed": "Could not load the activity timeline. Check your connection and try again.",
+    "sessionPendingRescheduleLoadFailed": "Could not load the pending reschedule request. Try again in a moment.",
+    "sessionLockedAtBookingNote": "Call type ({callType}) and provider ({callProvider}) were set when you booked. To change them, cancel and rebook or contact support.",
+    "@sessionLockedAtBookingNote": {
+        "placeholders": {
+            "callType": { "type": "String" },
+            "callProvider": { "type": "String" }
+        }
+    },
+    "callProviderExternal": "External link",
+    "callProviderMock": "In-app (preview)",
+    "callProviderAgora": "In-app (Agora)",
+    "callProviderWebrtc": "In-app (WebRTC)",
     "sessionStatusLabel": "Status: {status}",
     "@sessionStatusLabel": {
         "placeholders": {

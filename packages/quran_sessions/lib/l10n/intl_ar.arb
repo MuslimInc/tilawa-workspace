@@ -175,6 +175,19 @@
     "sessionDetailTitle": "تفاصيل الجلسة",
     "sessionTimelineTitle": "سجل النشاط",
     "sessionTimelineEmpty": "لا يوجد نشاط مسجل بعد.",
+    "sessionTimelineLoadFailed": "تعذّر تحميل سجل النشاط. تحقق من اتصالك وحاول مرة أخرى.",
+    "sessionPendingRescheduleLoadFailed": "تعذّر تحميل طلب إعادة الجدولة المعلّق. حاول مرة أخرى بعد قليل.",
+    "sessionLockedAtBookingNote": "نوع المكالمة ({callType}) والمزوّد ({callProvider}) حُدّدا عند الحجز. لتغييرهما، ألغِ الجلسة وأعد الحجز أو تواصل مع الدعم.",
+    "@sessionLockedAtBookingNote": {
+        "placeholders": {
+            "callType": { "type": "String" },
+            "callProvider": { "type": "String" }
+        }
+    },
+    "callProviderExternal": "رابط خارجي",
+    "callProviderMock": "داخل التطبيق (معاينة)",
+    "callProviderAgora": "داخل التطبيق (Agora)",
+    "callProviderWebrtc": "داخل التطبيق (WebRTC)",
     "sessionStatusLabel": "الحالة: {status}",
     "@sessionStatusLabel": {
         "placeholders": {

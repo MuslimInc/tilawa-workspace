@@ -60,10 +60,11 @@ class TilawaFeatureCategoryTile extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: tokens.spaceExtraSmall,
-                vertical: tokens.spaceSmall,
+                vertical: tokens.spaceSmall - tokens.borderWidthThin,
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   TilawaIconBox(
                     icon: icon ?? Icons.circle_outlined,
@@ -74,15 +75,17 @@ class TilawaFeatureCategoryTile extends StatelessWidget {
                     child: iconWidget,
                   ),
                   SizedBox(height: tokens.spaceSmall),
-                  Text(
-                    label,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      color: colorScheme.onSurface,
-                      fontWeight: FontWeight.w600,
-                      height: 1.2,
+                  Flexible(
+                    child: Text(
+                      label,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: colorScheme.onSurface,
+                        fontWeight: FontWeight.w600,
+                        height: 1.15,
+                      ),
                     ),
                   ),
                 ],

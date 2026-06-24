@@ -194,6 +194,10 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
             SessionDetailSuccess(
               :final aggregate,
               :final timeline,
+              :final callType,
+              :final callProviderKind,
+              :final timelineLoadFailed,
+              :final pendingRescheduleLoadFailed,
               :final pendingRescheduleRequest,
               :final canRespondToReschedule,
               :final isAwaitingRescheduleCounterparty,
@@ -202,6 +206,16 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
               ListView(
                 padding: EdgeInsets.all(Theme.of(context).tokens.spaceLarge),
                 children: [
+                  if (pendingRescheduleLoadFailed)
+                    Padding(
+                      padding: EdgeInsets.only(
+                        bottom: Theme.of(context).tokens.spaceLarge,
+                      ),
+                      child: _SessionDetailLoadWarning(
+                        message: l10n.sessionPendingRescheduleLoadFailed,
+                        bookingId: widget.bookingId,
+                      ),
+                    ),
                   if (pendingRescheduleRequest != null)
                     Padding(
                       padding: EdgeInsets.only(
@@ -237,13 +251,27 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
                       ).formatFullDate(aggregate.startsAt.toLocal()),
                     ),
                   ),
+                  if (state.showLockedAtBookingCopy &&
+                      callType != null &&
+                      callProviderKind != null) ...[
+                    SizedBox(height: Theme.of(context).tokens.spaceLarge),
+                    _LockedAtBookingFootnote(
+                      callType: callType,
+                      callProviderKind: callProviderKind,
+                    ),
+                  ],
                   SizedBox(height: Theme.of(context).tokens.spaceExtraLarge),
                   Text(
                     l10n.sessionTimelineTitle,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   SizedBox(height: Theme.of(context).tokens.spaceSmall),
-                  if (timeline.isEmpty)
+                  if (timelineLoadFailed)
+                    _SessionDetailLoadWarning(
+                      message: l10n.sessionTimelineLoadFailed,
+                      bookingId: widget.bookingId,
+                    )
+                  else if (timeline.isEmpty)
                     Text(l10n.sessionTimelineEmpty)
                   else
                     ...timeline.map(
@@ -264,6 +292,78 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
               ),
           },
         ),
+      ),
+    );
+  }
+}
+
+class _LockedAtBookingFootnote extends StatelessWidget {
+  const _LockedAtBookingFootnote({
+    required this.callType,
+    required this.callProviderKind,
+  });
+
+  final SessionCallType callType;
+  final SessionCallProviderKind callProviderKind;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+    final tokens = Theme.of(context).tokens;
+    final scheme = Theme.of(context).colorScheme;
+
+    return TilawaCard(
+      child: Padding(
+        padding: EdgeInsets.all(tokens.spaceMedium),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              TilawaIcons.info,
+              size: tokens.iconSizeMedium,
+              color: scheme.onSurfaceVariant,
+            ),
+            SizedBox(width: tokens.spaceSmall),
+            Expanded(
+              child: Text(
+                l10n.sessionLockedAtBookingNote(
+                  l10n.callTypeLabel(callType),
+                  l10n.callProviderKindLabel(callProviderKind),
+                ),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SessionDetailLoadWarning extends StatelessWidget {
+  const _SessionDetailLoadWarning({
+    required this.message,
+    required this.bookingId,
+  });
+
+  final String message;
+  final String bookingId;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+    final scheme = Theme.of(context).colorScheme;
+
+    return TilawaPermissionBanner(
+      message: message,
+      actionLabel: l10n.retry,
+      icon: TilawaIcons.warning,
+      backgroundColor: scheme.errorContainer,
+      foregroundColor: scheme.onErrorContainer,
+      onAction: () => context.read<SessionDetailBloc>().add(
+        SessionDetailLoadRequested(bookingId: bookingId),
       ),
     );
   }

@@ -512,6 +512,31 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get sessionTimelineEmpty => 'لا يوجد نشاط مسجل بعد.';
 
   @override
+  String get sessionTimelineLoadFailed =>
+      'تعذّر تحميل سجل النشاط. تحقق من اتصالك وحاول مرة أخرى.';
+
+  @override
+  String get sessionPendingRescheduleLoadFailed =>
+      'تعذّر تحميل طلب إعادة الجدولة المعلّق. حاول مرة أخرى بعد قليل.';
+
+  @override
+  String sessionLockedAtBookingNote(String callType, String callProvider) {
+    return 'نوع المكالمة ($callType) والمزوّد ($callProvider) حُدّدا عند الحجز. لتغييرهما، ألغِ الجلسة وأعد الحجز أو تواصل مع الدعم.';
+  }
+
+  @override
+  String get callProviderExternal => 'رابط خارجي';
+
+  @override
+  String get callProviderMock => 'داخل التطبيق (معاينة)';
+
+  @override
+  String get callProviderAgora => 'داخل التطبيق (Agora)';
+
+  @override
+  String get callProviderWebrtc => 'داخل التطبيق (WebRTC)';
+
+  @override
   String sessionStatusLabel(String status) {
     return 'الحالة: $status';
   }

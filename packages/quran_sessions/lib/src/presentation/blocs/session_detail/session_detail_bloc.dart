@@ -109,6 +109,11 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
     );
     final timelineId = aggregate.sessionId ?? aggregate.id;
     final timelineResult = await _getTimeline(timelineId);
+    // [UnauthorizedFailure] means no audit access — empty timeline, not an error.
+    final timelineLoadFailed = timelineResult.fold(
+      (failure) => failure is! UnauthorizedFailure,
+      (_) => false,
+    );
     final timeline = timelineResult.fold(
       (_) => const <SessionAuditEvent>[],
       (events) => events,
@@ -126,8 +131,11 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
       SessionDetailSuccess(
         aggregate: aggregate,
         timeline: timeline,
+        callType: callContext.callType,
         externalMeetingJoinUrl: callContext.externalMeetingJoinUrl,
         callProviderKind: callContext.callProviderKind,
+        timelineLoadFailed: timelineLoadFailed,
+        pendingRescheduleLoadFailed: rescheduleContext.loadFailed,
         pendingRescheduleRequest: rescheduleContext.request,
         canRespondToReschedule: rescheduleContext.canRespond,
         isAwaitingRescheduleCounterparty: rescheduleContext.isAwaiting,
@@ -140,31 +148,57 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
       PendingRescheduleRequest? request,
       bool canRespond,
       bool isAwaiting,
+      bool loadFailed,
     })
   >
   _loadRescheduleContext({required SessionAggregate aggregate}) async {
     final getPending = _getPendingReschedule;
     if (getPending == null ||
         aggregate.lifecycleStatus != SessionLifecycleStatus.rescheduled) {
-      return (request: null, canRespond: false, isAwaiting: false);
+      return (
+        request: null,
+        canRespond: false,
+        isAwaiting: false,
+        loadFailed: false,
+      );
     }
 
     final pendingResult = await getPending(aggregate.id);
-    final request = pendingResult.fold((_) => null, (value) => value);
-    if (request == null || !request.isPending) {
-      return (request: null, canRespond: false, isAwaiting: false);
-    }
+    return pendingResult.fold(
+      (failure) => (
+        request: null,
+        canRespond: false,
+        isAwaiting: false,
+        loadFailed: failure is! UnauthorizedFailure,
+      ),
+      (request) {
+        if (request == null || !request.isPending) {
+          return (
+            request: null,
+            canRespond: false,
+            isAwaiting: false,
+            loadFailed: false,
+          );
+        }
 
-    final userId = _authSession?.currentUserId;
-    if (userId == null || userId.isEmpty) {
-      return (request: request, canRespond: false, isAwaiting: false);
-    }
+        final userId = _authSession?.currentUserId;
+        if (userId == null || userId.isEmpty) {
+          return (
+            request: request,
+            canRespond: false,
+            isAwaiting: false,
+            loadFailed: false,
+          );
+        }
 
-    final isRequester = request.requestedByUserId == userId;
-    return (
-      request: request,
-      canRespond: !isRequester,
-      isAwaiting: isRequester,
+        final isRequester = request.requestedByUserId == userId;
+        return (
+          request: request,
+          canRespond: !isRequester,
+          isAwaiting: isRequester,
+          loadFailed: false,
+        );
+      },
     );
   }
 
@@ -188,6 +222,7 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
 
   Future<
     ({
+      SessionCallType? callType,
       String? externalMeetingJoinUrl,
       SessionCallProviderKind? callProviderKind,
     })
@@ -195,12 +230,20 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
   _loadSessionCallContext({required String? sessionId}) async {
     final repository = _sessionRepository;
     if (repository == null || sessionId == null || sessionId.isEmpty) {
-      return (externalMeetingJoinUrl: null, callProviderKind: null);
+      return (
+        callType: null,
+        externalMeetingJoinUrl: null,
+        callProviderKind: null,
+      );
     }
 
     final sessionResult = await repository.getSessionById(sessionId);
     return sessionResult.fold(
-      (_) => (externalMeetingJoinUrl: null, callProviderKind: null),
+      (_) => (
+        callType: null,
+        externalMeetingJoinUrl: null,
+        callProviderKind: null,
+      ),
       (session) {
         String? externalMeetingJoinUrl;
         if (session.callType == SessionCallType.externalMeeting &&
@@ -209,6 +252,7 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
           externalMeetingJoinUrl = (url?.isNotEmpty ?? false) ? url : null;
         }
         return (
+          callType: session.callType,
           externalMeetingJoinUrl: externalMeetingJoinUrl,
           callProviderKind: session.callProviderKind,
         );

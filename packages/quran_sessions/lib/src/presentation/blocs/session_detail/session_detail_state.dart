@@ -4,6 +4,7 @@ import '../../../domain/entities/session_aggregate.dart';
 import '../../../domain/entities/session_audit_event.dart';
 import '../../../domain/entities/session_call_provider_kind.dart';
 import '../../../domain/entities/pending_reschedule_request.dart';
+import '../../../domain/entities/session_call_type.dart';
 import '../../../domain/entities/session_lifecycle_status.dart';
 import '../../../domain/failures/quran_sessions_failure.dart';
 
@@ -26,8 +27,11 @@ final class SessionDetailSuccess extends SessionDetailState {
   const SessionDetailSuccess({
     required this.aggregate,
     required this.timeline,
+    this.callType,
     this.externalMeetingJoinUrl,
     this.callProviderKind,
+    this.timelineLoadFailed = false,
+    this.pendingRescheduleLoadFailed = false,
     this.hasOpenedExternalMeeting = false,
     this.joinInProgress = false,
     this.joinFailure,
@@ -47,8 +51,11 @@ final class SessionDetailSuccess extends SessionDetailState {
 
   final SessionAggregate aggregate;
   final List<SessionAuditEvent> timeline;
+  final SessionCallType? callType;
   final String? externalMeetingJoinUrl;
   final SessionCallProviderKind? callProviderKind;
+  final bool timelineLoadFailed;
+  final bool pendingRescheduleLoadFailed;
   final bool hasOpenedExternalMeeting;
   final bool joinInProgress;
   final QuranSessionsFailure? joinFailure;
@@ -81,13 +88,24 @@ final class SessionDetailSuccess extends SessionDetailState {
       callProviderKind == SessionCallProviderKind.agora ||
       callProviderKind == SessionCallProviderKind.webrtc;
 
+  /// Booked sessions lock call mode/provider (Option A — see spec 037).
+  bool get showLockedAtBookingCopy =>
+      aggregate.lifecycleStatus == SessionLifecycleStatus.scheduled ||
+      aggregate.lifecycleStatus == SessionLifecycleStatus.confirmed;
+
   SessionDetailSuccess copyWith({
     SessionAggregate? aggregate,
     List<SessionAuditEvent>? timeline,
+    SessionCallType? callType,
+    bool clearCallType = false,
     String? externalMeetingJoinUrl,
     bool clearExternalMeetingJoinUrl = false,
     SessionCallProviderKind? callProviderKind,
     bool clearCallProviderKind = false,
+    bool? timelineLoadFailed,
+    bool clearTimelineLoadFailed = false,
+    bool? pendingRescheduleLoadFailed,
+    bool clearPendingRescheduleLoadFailed = false,
     bool? hasOpenedExternalMeeting,
     bool? joinInProgress,
     bool clearJoinInProgress = false,
@@ -119,12 +137,19 @@ final class SessionDetailSuccess extends SessionDetailState {
     return SessionDetailSuccess(
       aggregate: aggregate ?? this.aggregate,
       timeline: timeline ?? this.timeline,
+      callType: clearCallType ? null : callType ?? this.callType,
       externalMeetingJoinUrl: clearExternalMeetingJoinUrl
           ? null
           : externalMeetingJoinUrl ?? this.externalMeetingJoinUrl,
       callProviderKind: clearCallProviderKind
           ? null
           : callProviderKind ?? this.callProviderKind,
+      timelineLoadFailed: clearTimelineLoadFailed
+          ? false
+          : timelineLoadFailed ?? this.timelineLoadFailed,
+      pendingRescheduleLoadFailed: clearPendingRescheduleLoadFailed
+          ? false
+          : pendingRescheduleLoadFailed ?? this.pendingRescheduleLoadFailed,
       hasOpenedExternalMeeting:
           hasOpenedExternalMeeting ?? this.hasOpenedExternalMeeting,
       joinInProgress: clearJoinInProgress
@@ -173,8 +198,11 @@ final class SessionDetailSuccess extends SessionDetailState {
   List<Object?> get props => [
     aggregate,
     timeline,
+    callType,
     externalMeetingJoinUrl,
     callProviderKind,
+    timelineLoadFailed,
+    pendingRescheduleLoadFailed,
     hasOpenedExternalMeeting,
     joinInProgress,
     joinFailure,

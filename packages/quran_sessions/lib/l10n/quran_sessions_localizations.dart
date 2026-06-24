@@ -983,6 +983,48 @@ abstract class QuranSessionsLocalizations {
   /// **'No activity recorded yet.'**
   String get sessionTimelineEmpty;
 
+  /// No description provided for @sessionTimelineLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the activity timeline. Check your connection and try again.'**
+  String get sessionTimelineLoadFailed;
+
+  /// No description provided for @sessionPendingRescheduleLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the pending reschedule request. Try again in a moment.'**
+  String get sessionPendingRescheduleLoadFailed;
+
+  /// No description provided for @sessionLockedAtBookingNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Call type ({callType}) and provider ({callProvider}) were set when you booked. To change them, cancel and rebook or contact support.'**
+  String sessionLockedAtBookingNote(String callType, String callProvider);
+
+  /// No description provided for @callProviderExternal.
+  ///
+  /// In en, this message translates to:
+  /// **'External link'**
+  String get callProviderExternal;
+
+  /// No description provided for @callProviderMock.
+  ///
+  /// In en, this message translates to:
+  /// **'In-app (preview)'**
+  String get callProviderMock;
+
+  /// No description provided for @callProviderAgora.
+  ///
+  /// In en, this message translates to:
+  /// **'In-app (Agora)'**
+  String get callProviderAgora;
+
+  /// No description provided for @callProviderWebrtc.
+  ///
+  /// In en, this message translates to:
+  /// **'In-app (WebRTC)'**
+  String get callProviderWebrtc;
+
   /// No description provided for @sessionStatusLabel.
   ///
   /// In en, this message translates to:

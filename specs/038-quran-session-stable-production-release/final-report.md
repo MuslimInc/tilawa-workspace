@@ -736,3 +736,187 @@ apps/tilawa/lib/core/bootstrap/app_startup_tasks.dart                    (commen
 | **Merge to main** | **Go** | Centralized opt-in gate; 12 CFs wired; 138 CF unit tests green; wallet batch excluded; docs + rollback plan updated |
 | **Staging enforcement flip** | **Conditional Go** | Code ready; **ops must** set `QURAN_SESSIONS_ENFORCE_APP_CHECK=true`, redeploy, then run manual staging smoke — not automatic on merge |
 | **Production enforcement flip** | **No-Go** | Blocked on staging enforcement + B1–B5/T2–T8 sign-off; legal privacy still open |
+
+---
+
+## Phase 5 — Mobile Reschedule Respond + CF Counterparty Guard (pipeline 5/5)
+
+**Date:** 2026-06-24  
+**Scope:** Counterparty accept/reject on session detail; requester awaiting copy; `assertRescheduleCounterpartyOnly` on `confirmSessionReschedule`; Firestore rules read for `quran_reschedule_requests`; composite index for pending lookup.  
+**Pipeline verdict:** **Conditional Go** — merge approved for staging; manual bilateral reschedule E2E still required.
+
+### Implementer summary
+
+| Deliverable | Status |
+|-------------|--------|
+| `PendingRescheduleBanner` — accept/reject for counterparty; awaiting copy for requester | ✅ |
+| `SessionDetailBloc` — load pending request, `canRespondToReschedule` / `isAwaitingRescheduleCounterparty`, respond events | ✅ |
+| `RespondToRescheduleRequestUseCase` + `GetPendingRescheduleRequestUseCase` | ✅ |
+| `FirebaseRescheduleRequestRepository` — participant read of pending request | ✅ |
+| `assertRescheduleCounterpartyOnly` in `sessionAuth.ts` — blocks requester self-accept/reject (incl. admin spoof) | ✅ |
+| Firestore rules — participants can **read** `quran_reschedule_requests` | ✅ |
+| `firestore.indexes.json` — `quran_reschedule_requests` composite for booking + status | ✅ |
+| l10n EN + AR for banner copy | ✅ |
+
+**Design:** Mobile **respond** only — requester sees "awaiting counterparty"; counterparty sees Accept/Reject. Admin confirm-by-ID path unchanged. CF rejects when `uid === requestedByUserId`.
+
+### Testing summary
+
+| Suite | Result |
+|-------|--------|
+| `pending_reschedule_banner_test.dart` | **4/4** pass |
+| `session_detail_screen_test.dart` (reschedule subset) | **2/2** pass (counterparty accept dispatches; requester awaiting, no actions) |
+| `session_detail_bloc_test.dart` (reschedule respond subset) | **3/3** pass |
+| `confirmSessionReschedule.test.ts` (`assertRescheduleCounterpartyOnly`) | **3/3** pass |
+| `quranSessions.rules.test.ts` (reschedule read rules) | **+2** pass |
+| `functions` unit total | **141/141** pass |
+| `functions` rules emulator | **33/33** pass (JDK 21) |
+| **Flutter Phase 5 targeted** | **24/24** pass (bloc + banner + screen subset) |
+| `./scripts/quran_sessions_preflight.sh` | ✅ pass (unit + Flutter; rules/integration skipped when default JDK ≠ 21) |
+
+### Deploy requirements
+
+| Artifact | Required | Ops note |
+|----------|----------|----------|
+| `firestore.rules` | **Yes** | Participant read on `quran_reschedule_requests` |
+| `firestore.indexes` | **Yes** | Pending lookup by `bookingId` + `status` |
+| `functions:confirmSessionReschedule` | **Yes** | Counterparty-only guard |
+| Other 11 stable-scope session CFs (Phase 4 App Check options) | **Deferred** | Default-off env safe; redeploy full batch before `QURAN_SESSIONS_ENFORCE_APP_CHECK=true` flip |
+
+**2026-06-24 deploy (`quran-playera-app`):** rules ✅, indexes ✅, `confirmSessionReschedule` ✅. Phase 4 App Check wiring on other 11 CFs **not** redeployed this pass.
+
+### Manual checklist (bilateral reschedule E2E)
+
+**Prerequisites:** staging build with `quranSessionsEnabled` + booking enabled; two accounts (student + teacher); scheduled session.
+
+**Request path (either party):**
+
+- [ ] Student or teacher opens session detail → Request reschedule → picks new slot + reason
+- [ ] Session lifecycle → `rescheduled`; pending request doc created
+- [ ] **Requester** sees awaiting copy; **no** Accept/Reject buttons
+- [ ] **Counterparty** sees proposed time + reason + Accept/Reject
+
+**Respond path:**
+
+- [ ] Counterparty taps **Accept** → session returns to `scheduled` at new time; banner clears
+- [ ] Repeat flow; counterparty taps **Reject** → session stays at original time; request closed
+- [ ] Requester attempts accept via admin tooling or spoofed client → CF `permission-denied` (counterparty-only)
+
+**Regression:**
+
+- [ ] Admin confirm-by-request-ID still works for ops escalation
+- [ ] Non-participant cannot read `quran_reschedule_requests`
+- [ ] Stale device (epoch) still blocked on respond callable
+
+### Phase 5 Go / No-Go verdict
+
+| Track | Verdict | Rationale |
+|-------|---------|-----------|
+| **Merge to main** | **Go** | 141 CF + 33 rules + 24 targeted Flutter tests green; counterparty guard + UI wired |
+| **Staging manual E2E** | **Conditional Go** | Deploy rules/indexes/`confirmSessionReschedule` done; bilateral reschedule smoke unsigned |
+| **Play production (wide)** | **No-Go** | B1–B5/T2–T8 unsigned; App Check enforcement flip pending; legal privacy open |
+
+---
+
+## Phase 6 — Session Detail UX Hardening (pipeline 5/5)
+
+**Date:** 2026-06-24  
+**Scope:** Locked-at-booking footnote, honest sub-fetch failure banners (timeline + pending reschedule), lifecycle test stability (`sessionLifecycleGuard` notice-window constants). **Excludes** home hero / dashboard WIP on branch (separate track — see [phase-6-hero-handoff.md](./phase-6-hero-handoff.md)).  
+**Pipeline verdict:** **Go** — merge approved; manual session-detail E2E still recommended before Play wide release.
+
+### Implementer summary
+
+| Deliverable | Status |
+|-------------|--------|
+| `_LockedAtBookingFootnote` — mode + provider locked at booking (Option A) | ✅ |
+| `SessionDetailSuccess.showLockedAtBookingCopy` getter (`scheduled` / `confirmed`) | ✅ |
+| `timelineLoadFailed` flag — server errors surface warning + retry; `UnauthorizedFailure` → empty timeline (not error) | ✅ |
+| `pendingRescheduleLoadFailed` flag — server errors surface warning + retry when lifecycle is `rescheduled` | ✅ |
+| `_SessionDetailLoadWarning` — retry dispatches `SessionDetailLoadRequested` | ✅ |
+| l10n EN + AR: locked footnote, timeline/reschedule load failure copy | ✅ |
+| `sessionLifecycleGuard.test.ts` — named notice-window constants (2 h safe / 30 s late) | ✅ |
+
+**Design:** Session detail stays in success state when sub-fetches fail; user sees degraded UX (warning + retry), not silent empty timeline or missing reschedule banner. No CF or Firestore deploy required.
+
+### Testing summary
+
+| Suite | Result |
+|-------|--------|
+| `session_detail_bloc_test.dart` (failure flags + existing join/report/dispute/reschedule) | **14/14** pass |
+| `session_detail_screen_test.dart` (locked footnote + sub-fetch banners + retry) | **13/13** pass |
+| `booking_bloc_test.dart` + `my_sessions_bloc_test.dart` (lifecycle helpers — flake hunt) | **16/16** pass |
+| **Flutter Phase 6 targeted** | **43/43** pass |
+| `packages/quran_sessions` full `flutter test` | **699/699** pass |
+| `functions` unit total | **141/141** pass |
+| `dart analyze` (`packages/quran_sessions`) | ✅ clean on scope (2 pre-existing test-file warnings) |
+| `./scripts/quran_sessions_preflight.sh` | ✅ pass (rules/integration skipped — default JDK 17; use JDK 21 for full rules/integration) |
+
+**New tests (+9):** 2 locked footnote widget, 3 sub-fetch failure/retry widget, 4 bloc (timeline server fail, unauthorized timeline, pending reschedule server fail, unauthorized pending reschedule).
+
+### Reviewer summary (step 3)
+
+| Finding | Severity | Resolution |
+|---------|----------|------------|
+| Screen duplicated lifecycle check instead of `showLockedAtBookingCopy` getter | **should-fix** | ✅ **Final gate:** wired getter in `session_detail_screen.dart` |
+| UX deception (mock-mute pattern) | ✅ | Failure banners are honest; unauthorized reads stay silent by design |
+| `Either` boundaries | ✅ | Failures folded in bloc; no throws across layers |
+| Test integrity | ✅ | No weakened/deleted regressions |
+| `coverage:ignore` | ✅ | None added |
+
+**Verdict after final gate fix:** ready to merge — refactor stage skipped (no structural debt).
+
+### Final gate (step 5)
+
+| Quick fix | Status |
+|-----------|--------|
+| Wire `state.showLockedAtBookingCopy` in screen; remove duplicate inline lifecycle condition | ✅ |
+
+### Phase 6 files changed
+
+```
+packages/quran_sessions/
+  lib/core/l10n_extensions.dart
+  lib/l10n/intl_en.arb
+  lib/l10n/intl_ar.arb
+  lib/l10n/quran_sessions_localizations*.dart
+  lib/src/presentation/blocs/session_detail/session_detail_bloc.dart
+  lib/src/presentation/blocs/session_detail/session_detail_state.dart
+  lib/src/presentation/screens/session_detail_screen.dart
+  test/presentation/blocs/session_detail_bloc_test.dart
+  test/presentation/screens/session_detail_screen_test.dart
+
+functions/test/quranSessions/sessionLifecycleGuard.test.ts
+
+specs/038-quran-session-stable-production-release/final-report.md
+```
+
+### Manual checklist (session detail UX)
+
+**Prerequisites:** staging build with sessions enabled; booked session with known call type + provider.
+
+- [ ] Open session detail on **scheduled/confirmed** booking → locked-at-booking footnote visible with correct mode/provider labels
+- [ ] Open session on **cancelled/completed** lifecycle → footnote hidden
+- [ ] Toggle airplane mode → reload detail → timeline warning + **Retry** (not "No activity recorded yet")
+- [ ] Rescheduled session with pending request → counterparty banner appears when fetch succeeds
+- [ ] Simulate pending-reschedule fetch failure (rules lag / offline) → warning banner + **Retry** (not silent missing banner)
+- [ ] Retry restores timeline and/or pending banner when network returns
+
+Combine with Phase 5 bilateral reschedule checklist before Play wide release.
+
+### Remaining blockers (unchanged)
+
+| Blocker | Status |
+|---------|--------|
+| Manual B1–B5 / T2–T8 E2E | **Open** |
+| Ops App Check enforcement flip | **Open** (Phase 4 staged) |
+| Legal privacy (external links + Agora) | **Open** |
+| ProGuard release APK Agora smoke | **Open** |
+| Maestro book→join E2E | **Open** |
+
+### Phase 6 Go / No-Go verdict
+
+| Track | Verdict | Rationale |
+|-------|---------|-----------|
+| **Merge to main** | **Go** | Locked copy + honest failure UX wired; reviewer should-fix applied; 699 Flutter + 141 CF + preflight green |
+| **Staging manual E2E** | **Conditional Go** | Code ready; session-detail UX smoke + Phase 5 reschedule checklist unsigned |
+| **Play production (wide)** | **No-Go** | B1–B5/T2–T8 unsigned; App Check enforcement flip pending; legal privacy open |
