@@ -11,12 +11,14 @@ class SessionDetailScreen extends StatefulWidget {
     required this.bookingId,
     this.onLeaveCall,
     this.onSetMicrophoneMuted,
+    this.buildCallSurface,
   });
 
   final String bookingId;
   final Future<void> Function(String sessionId)? onLeaveCall;
   final Future<void> Function(String sessionId, {required bool muted})?
   onSetMicrophoneMuted;
+  final InAppCallSurfaceBuilder? buildCallSurface;
 
   @override
   State<SessionDetailScreen> createState() => _SessionDetailScreenState();
@@ -103,11 +105,22 @@ class _SessionDetailScreenState extends State<SessionDetailScreen>
               if (!state.isExternalMeeting &&
                   state.aggregate.sessionId != null) {
                 final sessionId = state.aggregate.sessionId!;
+                final callType = state.callType ?? SessionCallType.voiceCall;
+                final callProviderKind =
+                    state.callProviderKind ?? SessionCallProviderKind.mock;
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     settings: const RouteSettings(name: 'in_app_call_shell'),
-                    builder: (_) => InAppCallShellScreen(
+                    builder: (routeContext) => InAppCallShellScreen(
                       sessionId: sessionId,
+                      callType: callType,
+                      callProviderKind: callProviderKind,
+                      callSurface: widget.buildCallSurface?.call(
+                        routeContext,
+                        sessionId: sessionId,
+                        callType: callType,
+                        callProviderKind: callProviderKind,
+                      ),
                       onLeaveCall: () async {
                         await widget.onLeaveCall?.call(sessionId);
                       },

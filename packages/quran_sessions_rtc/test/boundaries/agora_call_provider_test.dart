@@ -1,3 +1,4 @@
+import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:checks/checks.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quran_sessions/quran_sessions.dart';
@@ -227,4 +228,7 @@ class _FakeAgoraRtcSessionHandle implements AgoraRtcSessionHandle {
   Future<void> setMicrophoneMuted(bool muted) async {
     microphoneMuted = muted;
   }
+
+  @override
+  RtcEngine? get engine => null;
 }

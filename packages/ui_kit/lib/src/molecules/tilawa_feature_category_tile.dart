@@ -16,6 +16,10 @@ class TilawaFeatureCategoryTile extends StatelessWidget {
     this.backgroundColor,
     this.semanticTint = TilawaSemanticTint.neutral,
     this.tintIndex = 0,
+    this.iconBoxVariant = TilawaIconBoxVariant.tinted,
+    this.iconBoxBackgroundColor,
+    this.iconColor,
+    this.tileBorderOpacity = 0.35,
   }) : assert(icon != null || iconWidget != null);
 
   final IconData? icon;
@@ -25,6 +29,10 @@ class TilawaFeatureCategoryTile extends StatelessWidget {
   final Color? backgroundColor;
   final TilawaSemanticTint semanticTint;
   final int tintIndex;
+  final TilawaIconBoxVariant iconBoxVariant;
+  final Color? iconBoxBackgroundColor;
+  final Color? iconColor;
+  final double tileBorderOpacity;
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +61,9 @@ class TilawaFeatureCategoryTile extends StatelessWidget {
               color: tileFill,
               borderRadius: BorderRadius.circular(radius),
               border: Border.all(
-                color: colorScheme.outlineVariant.withValues(alpha: 0.35),
+                color: colorScheme.outlineVariant.withValues(
+                  alpha: tileBorderOpacity,
+                ),
                 width: tokens.borderWidthThin,
               ),
             ),
@@ -70,8 +80,10 @@ class TilawaFeatureCategoryTile extends StatelessWidget {
                     icon: icon ?? Icons.circle_outlined,
                     size: tokens.iconSizeMedium,
                     padding: tokens.spaceSmall,
-                    variant: TilawaIconBoxVariant.tinted,
+                    variant: iconBoxVariant,
                     semanticTint: semanticTint,
+                    backgroundColor: iconBoxBackgroundColor,
+                    iconColor: iconColor,
                     child: iconWidget,
                   ),
                   SizedBox(height: tokens.spaceSmall),

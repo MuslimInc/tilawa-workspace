@@ -44,6 +44,36 @@ void main() {
       expect(padding.bottom, tokens.spaceHuge);
     });
 
+    testWidgets('uses tokenized horizontal inset for primary actions', (
+      tester,
+    ) async {
+      const Key actionKey = Key('action');
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: Scaffold(
+            body: TilawaBottomActionArea(
+              child: const SizedBox(key: actionKey, height: 48),
+            ),
+          ),
+        ),
+      );
+
+      final List<Padding> paddings = tester
+          .widgetList<Padding>(
+            find.ancestor(
+              of: find.byKey(actionKey),
+              matching: find.byType(Padding),
+            ),
+          )
+          .toList();
+      final EdgeInsets padding = paddings.first.padding as EdgeInsets;
+
+      expect(padding.left, tokens.bottomActionHorizontalInset);
+      expect(padding.right, tokens.bottomActionHorizontalInset);
+    });
+
     testWidgets('renders a top border by default', (tester) async {
       await tester.pumpWidget(
         MaterialApp(

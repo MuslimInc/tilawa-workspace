@@ -5,6 +5,9 @@ abstract class AgoraRtcSessionHandle {
   Future<void> leaveAndRelease();
 
   Future<void> setMicrophoneMuted(bool muted);
+
+  /// Native engine for in-call video rendering; null in test fakes.
+  RtcEngine? get engine;
 }
 
 /// Production handle wrapping a native [RtcEngine].
@@ -23,4 +26,7 @@ class LiveAgoraRtcSessionHandle implements AgoraRtcSessionHandle {
   Future<void> setMicrophoneMuted(bool muted) async {
     await _engine.muteLocalAudioStream(muted);
   }
+
+  @override
+  RtcEngine get engine => _engine;
 }

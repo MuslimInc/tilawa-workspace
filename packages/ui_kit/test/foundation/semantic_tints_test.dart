@@ -108,31 +108,7 @@ void main() {
           isA<Color>(),
           reason: '$tint foreground',
         );
-        expect(
-          colorScheme.featureCategoryTileBackground(tint),
-          isA<Color>(),
-          reason: '$tint feature tile background',
-        );
       }
-    });
-
-    test('feature category tile washes differ from icon-box neutrals', () {
-      final colorScheme = AppTheme.getLightTheme(
-        primaryColor: AppColors.defaultPrimary,
-      ).colorScheme;
-
-      expect(
-        colorScheme.featureCategoryTileBackground(TilawaSemanticTint.ink),
-        isNot(colorScheme.semanticTintBackground(TilawaSemanticTint.ink)),
-      );
-      expect(
-        colorScheme.featureCategoryTileBackground(TilawaSemanticTint.scholar),
-        isNot(colorScheme.semanticTintBackground(TilawaSemanticTint.scholar)),
-      );
-      expect(
-        colorScheme.featureCategoryTileBackground(TilawaSemanticTint.gilding),
-        isNot(colorScheme.semanticTintBackground(TilawaSemanticTint.gilding)),
-      );
     });
   });
 }

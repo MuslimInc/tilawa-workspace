@@ -31,6 +31,9 @@ class QuranSessionsRtcModule {
 
     SessionCallProvider? agora;
     if (enabled.contains('agora') && config.agoraAppId.trim().isNotEmpty) {
+      final enginePool = sl.isRegistered<AgoraRtcEnginePool>()
+          ? sl<AgoraRtcEnginePool>()
+          : AgoraRtcEnginePool();
       agora = AgoraCallProvider(
         appId: config.agoraAppId.trim(),
         tokenProvider: sl<CallTokenProvider>(),
@@ -41,6 +44,7 @@ class QuranSessionsRtcModule {
           }
           return uid;
         },
+        enginePool: enginePool,
       );
     }
 
@@ -74,6 +78,9 @@ class QuranSessionsRtcModule {
   static void register(GetIt sl, AppLaunchConfig config) {
     final enabled = parseEnabledCallProviders(config);
     if (enabled.contains('agora') && config.agoraAppId.trim().isNotEmpty) {
+      sl.registerLazySingletonIfAbsent<AgoraRtcEnginePool>(
+        () => AgoraRtcEnginePool(),
+      );
       sl.registerLazySingletonIfAbsent<CallTokenProvider>(
         () => FirebaseCallTokenProvider(
           sl<CallableSessionPayloadBuilder>(),

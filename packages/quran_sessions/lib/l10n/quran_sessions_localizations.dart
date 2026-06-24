@@ -719,6 +719,30 @@ abstract class QuranSessionsLocalizations {
   /// **'Unmute microphone'**
   String get inAppCallShellUnmute;
 
+  /// No description provided for @inAppCallShellConnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting…'**
+  String get inAppCallShellConnecting;
+
+  /// No description provided for @inAppCallShellConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected'**
+  String get inAppCallShellConnected;
+
+  /// No description provided for @inAppCallShellWaitingForParticipant.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the other participant'**
+  String get inAppCallShellWaitingForParticipant;
+
+  /// No description provided for @inAppCallShellMockBetaBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Beta preview — no live audio or video. Book a new session with Agora enabled to try a real call.'**
+  String get inAppCallShellMockBetaBody;
+
   /// No description provided for @externalMeetingJoinTitle.
   ///
   /// In en, this message translates to:

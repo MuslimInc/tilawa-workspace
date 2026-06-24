@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'component_tokens.dart';
 import 'content_bounds.dart';
+import 'design_tokens.dart';
 import 'tilawa_comfortable_reach_padding.dart';
 
 /// Sticky full-screen footer chrome for primary bottom actions.
@@ -28,7 +29,7 @@ class TilawaBottomActionArea extends StatelessWidget {
   /// Space above [child] inside the padded region.
   final double top;
 
-  /// Horizontal inset; defaults to sheet footer horizontal padding.
+  /// Horizontal inset; defaults to [TilawaDesignTokens.bottomActionHorizontalInset].
   final double? horizontal;
 
   /// Additional bottom clearance (shell nav, mini-player, FAB stack).
@@ -46,13 +47,14 @@ class TilawaBottomActionArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final TilawaDesignTokens tokens = theme.tokens;
     final TilawaBottomSheetScaffoldTokens sheetTokens =
         theme.componentTokens.bottomSheetScaffold;
     final TextDirection direction = Directionality.of(context);
     final EdgeInsets footerPadding = sheetTokens.footerPadding.resolve(
       direction,
     );
-    final double side = horizontal ?? footerPadding.left;
+    final double side = horizontal ?? tokens.bottomActionHorizontalInset;
     final double bottom =
         TilawaComfortableReachPadding.resolve(
           context,

@@ -118,6 +118,12 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   /// 48.0 — hero section separator (top-of-screen hero to first content group).
   final double spaceHuge;
 
+  /// Horizontal inset for thumb-reach and sticky bottom primary actions.
+  ///
+  /// Keeps CTAs centered with generous side margin on phones (pairs with
+  /// [TilawaBottomActionInset] and [TilawaBottomActionArea]).
+  double get bottomActionHorizontalInset => spaceHuge;
+
   /// 6.0
   final double radiusSmall;
 

@@ -117,6 +117,25 @@ void main() {
       },
     );
 
+    testWidgets('primary actions sit inside comfortable horizontal inset', (
+      WidgetTester tester,
+    ) async {
+      await pumpFooterBar(
+        tester,
+        locale: const Locale('en'),
+        currentPage: 0,
+        useOnboardingScreenSplit: true,
+      );
+
+      final Rect screen = tester.getRect(find.byType(Scaffold));
+      final Rect primary = tester.getRect(primaryButtonFinder(en.next));
+      final double inset =
+          TilawaDesignTokens.light().bottomActionHorizontalInset;
+
+      expect(primary.left, greaterThanOrEqualTo(inset - 1));
+      expect(screen.width - primary.right, greaterThanOrEqualTo(inset - 1));
+    });
+
     testWidgets('starts the action band near 72% of the screen height', (
       WidgetTester tester,
     ) async {

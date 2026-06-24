@@ -32,7 +32,7 @@ class TilawaBottomActionInset extends StatelessWidget {
   /// Space above [child], e.g. offset within a thumb-reach action band.
   final double top;
 
-  /// Horizontal inset; defaults to [TilawaDesignTokens.spaceLarge].
+  /// Horizontal inset; defaults to [TilawaDesignTokens.bottomActionHorizontalInset].
   final double? horizontal;
 
   /// Minimum bottom spacing when the device reports no system inset.
@@ -67,7 +67,7 @@ class TilawaBottomActionInset extends StatelessWidget {
       );
     }
 
-    final double side = horizontal ?? tokens.spaceLarge;
+    final double side = horizontal ?? tokens.bottomActionHorizontalInset;
     final double bottom = _resolveBottom(context, tokens) + extraBottom;
 
     return Padding(

@@ -9,6 +9,7 @@ export 'tilawa_thumb_reach_layout.dart';
 export 'content_grid.dart';
 export 'design_tokens.dart';
 export 'semantic_tints.dart';
+export 'home_explore_feature_tile_styles.dart';
 export 'tilawa_fab_location.dart';
 export 'display_feature_insets.dart';
 export 'tilawa_bottom_action_inset.dart';

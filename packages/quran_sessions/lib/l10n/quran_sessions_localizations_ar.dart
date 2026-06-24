@@ -362,6 +362,19 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get inAppCallShellUnmute => 'إلغاء كتم الميكروفون';
 
   @override
+  String get inAppCallShellConnecting => 'جارٍ الاتصال…';
+
+  @override
+  String get inAppCallShellConnected => 'متصل';
+
+  @override
+  String get inAppCallShellWaitingForParticipant => 'في انتظار الطرف الآخر';
+
+  @override
+  String get inAppCallShellMockBetaBody =>
+      'معاينة تجريبية — لا يوجد صوت أو فيديو مباشر. احجز جلسة جديدة مع تفعيل Agora لتجربة مكالمة حقيقية.';
+
+  @override
   String get externalMeetingJoinTitle => 'الانضمام خارج MeMuslim؟';
 
   @override

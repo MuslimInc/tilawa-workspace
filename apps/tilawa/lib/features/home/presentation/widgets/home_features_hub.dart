@@ -39,15 +39,23 @@ class HomeFeaturesHub extends StatelessWidget {
         itemBuilder: (context, index) {
           final _HomeFeatureItem item = features[index];
           final colorScheme = Theme.of(context).colorScheme;
+          final HomeExploreFeatureTileStyle style = colorScheme
+              .homeExploreFeatureTileStyle(item.feature);
+
           return TilawaFeatureCategoryTile(
             icon: item.icon,
-            iconWidget: item.iconWidget,
+            iconWidget: _HomeFeatureCatalog.iconWidget(
+              context,
+              feature: item.feature,
+              iconColor: style.iconForeground,
+            ),
             label: item.label,
             onTap: item.onTap,
-            semanticTint: item.tint,
-            backgroundColor: colorScheme.featureCategoryTileBackground(
-              item.tint,
-            ),
+            backgroundColor: colorScheme.homeExploreTileBackground,
+            semanticTint: style.semanticTint,
+            iconBoxVariant: TilawaIconBoxVariant.plain,
+            iconColor: style.iconForeground,
+            tileBorderOpacity: 0.22,
           );
         },
       ),
@@ -58,18 +66,20 @@ class HomeFeaturesHub extends StatelessWidget {
 @immutable
 class _HomeFeatureItem {
   const _HomeFeatureItem({
+    required this.feature,
     this.icon,
-    this.iconWidget,
     required this.label,
     required this.onTap,
-    required this.tint,
-  }) : assert(icon != null || iconWidget != null);
+  }) : assert(
+         icon != null ||
+             feature == HomeExploreFeature.athkar ||
+             feature == HomeExploreFeature.quran,
+       );
 
+  final HomeExploreFeature feature;
   final IconData? icon;
-  final Widget? iconWidget;
   final String label;
   final VoidCallback onTap;
-  final TilawaSemanticTint tint;
 }
 
 abstract final class _HomeFeatureCatalog {
@@ -80,62 +90,72 @@ abstract final class _HomeFeatureCatalog {
     required VoidCallback onOpenPrayer,
   }) {
     final l10n = context.l10n;
-    final colorScheme = Theme.of(context).colorScheme;
     return [
       _HomeFeatureItem(
+        feature: HomeExploreFeature.reciters,
         icon: TilawaIcons.reciters,
         label: l10n.homeQuickReciters,
         onTap: () => context.read<MainScreenCubit>().selectTab(1),
-        tint: TilawaSemanticTint.scholar,
       ),
       _HomeFeatureItem(
-        iconWidget: TilawaIcons.athkarMisbaha.colored(
-          size: context.tokens.iconSizeMedium,
-        ),
+        feature: HomeExploreFeature.athkar,
         label: l10n.homeQuickAthkar,
         onTap: () => const AthkarCategoriesRoute().push(context),
-        tint: TilawaSemanticTint.caution,
       ),
       _HomeFeatureItem(
+        feature: HomeExploreFeature.prayer,
         icon: TilawaIcons.prayerDhuhr,
         label: l10n.homeQuickPrayer,
         onTap: onOpenPrayer,
-        tint: TilawaSemanticTint.ink,
       ),
       _HomeFeatureItem(
+        feature: HomeExploreFeature.qibla,
         icon: TilawaIcons.qibla,
         label: l10n.homeQuickQibla,
         onTap: () => const QiblaRoute().push(context),
-        tint: TilawaSemanticTint.neutral,
       ),
       _HomeFeatureItem(
+        feature: HomeExploreFeature.tasbeeh,
         icon: Icons.brightness_7_outlined,
         label: l10n.homeQuickTasbeeh,
         onTap: () => const TasbeehRoute().push(context),
-        tint: TilawaSemanticTint.gilding,
       ),
       _HomeFeatureItem(
+        feature: HomeExploreFeature.bookmarks,
         icon: TilawaIcons.bookmark,
         label: l10n.bookmarks,
         onTap: () => const BookmarksRoute().push(context),
-        tint: TilawaSemanticTint.parchment,
       ),
       _HomeFeatureItem(
-        iconWidget: TilawaIcons.quran.svg(
-          size: context.tokens.iconSizeMedium,
-          color: colorScheme.semanticTintForeground(TilawaSemanticTint.gilding),
-        ),
+        feature: HomeExploreFeature.quran,
         label: l10n.homeQuickQuran,
         onTap: () => const QuranIndexRoute().push(context),
-        tint: TilawaSemanticTint.gilding,
       ),
       _HomeFeatureItem(
+        feature: HomeExploreFeature.support,
         icon: TilawaIcons.support,
         label: l10n.supportTilawa,
         onTap: () => const SupportRoute().push(context),
-        tint: TilawaSemanticTint.success,
       ),
     ];
+  }
+
+  static Widget? iconWidget(
+    BuildContext context, {
+    required HomeExploreFeature feature,
+    required Color iconColor,
+  }) {
+    final double size = context.tokens.iconSizeMedium;
+    return switch (feature) {
+      HomeExploreFeature.athkar => TilawaIcons.athkarMisbaha.colored(
+        size: size,
+      ),
+      HomeExploreFeature.quran => TilawaIcons.quran.svg(
+        size: size,
+        color: iconColor,
+      ),
+      _ => null,
+    };
   }
 }
 

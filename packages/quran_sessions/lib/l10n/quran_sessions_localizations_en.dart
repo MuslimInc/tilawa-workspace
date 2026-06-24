@@ -373,6 +373,20 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get inAppCallShellUnmute => 'Unmute microphone';
 
   @override
+  String get inAppCallShellConnecting => 'Connecting…';
+
+  @override
+  String get inAppCallShellConnected => 'Connected';
+
+  @override
+  String get inAppCallShellWaitingForParticipant =>
+      'Waiting for the other participant';
+
+  @override
+  String get inAppCallShellMockBetaBody =>
+      'Beta preview — no live audio or video. Book a new session with Agora enabled to try a real call.';
+
+  @override
   String get externalMeetingJoinTitle => 'Join outside MeMuslim?';
 
   @override

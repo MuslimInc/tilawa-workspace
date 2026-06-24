@@ -116,4 +116,57 @@ void main() {
     expect(find.text('Unmute microphone'), findsNothing);
     expect(find.text('Leave call'), findsOneWidget);
   });
+
+  testWidgets('Injected call surface fills body above controls', (
+    tester,
+  ) async {
+    const surfaceKey = Key('fake_call_surface');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+        localizationsDelegates: const [
+          QuranSessionsLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: QuranSessionsLocalizations.supportedLocales,
+        home: InAppCallShellScreen(
+          sessionId: 'session_1',
+          callProviderKind: SessionCallProviderKind.agora,
+          callType: SessionCallType.videoCall,
+          callSurface: const SizedBox(
+            key: surfaceKey,
+            child: Text('Video area'),
+          ),
+          onSetMicrophoneMuted: ({required bool muted}) async {},
+        ),
+      ),
+    );
+
+    expect(find.byKey(surfaceKey), findsOneWidget);
+    expect(find.text('Video area'), findsOneWidget);
+    expect(find.text('Mute microphone'), findsOneWidget);
+    expect(find.text('You are connected'), findsNothing);
+  });
+
+  testWidgets('Mock provider shows beta preview banner', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+        localizationsDelegates: const [
+          QuranSessionsLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: QuranSessionsLocalizations.supportedLocales,
+        home: const InAppCallShellScreen(
+          sessionId: 'session_mock',
+          callProviderKind: SessionCallProviderKind.mock,
+        ),
+      ),
+    );
+
+    expect(find.textContaining('Beta preview'), findsOneWidget);
+  });
 }

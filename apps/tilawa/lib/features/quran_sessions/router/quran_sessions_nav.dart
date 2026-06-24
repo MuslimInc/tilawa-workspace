@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:quran_sessions_rtc/quran_sessions_rtc.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/features/settings/presentation/widgets/settings_teacher_capability_scope.dart';
@@ -242,6 +243,31 @@ List<RouteBase> get quranSessionsRoutes => [
                 sessionId,
                 muted: muted,
               ),
+          buildCallSurface:
+              (
+                context, {
+                required sessionId,
+                required callType,
+                required callProviderKind,
+              }) {
+                if (!getIt.isRegistered<AgoraRtcEnginePool>()) {
+                  return null;
+                }
+                final l10n = context.quranSessionsL10n;
+                return buildAgoraCallSurface(
+                  sessionId: sessionId,
+                  callType: callType,
+                  providerKind: callProviderKind,
+                  enginePool: getIt<AgoraRtcEnginePool>(),
+                  labels: AgoraCallSurfaceLabels(
+                    connecting: l10n.inAppCallShellConnecting,
+                    connected: l10n.inAppCallShellConnected,
+                    waitingForParticipant:
+                        l10n.inAppCallShellWaitingForParticipant,
+                    voiceCallTitle: l10n.inAppCallShellTitle,
+                  ),
+                );
+              },
         ),
       );
     },
