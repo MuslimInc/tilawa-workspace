@@ -4186,7 +4186,7 @@
     "@authSignedInElsewhereTitle": {
         "description": "Title when another device took over the active session"
     },
-    "authSignedInElsewhereBody": "Your account was opened on another device. Sign in again to continue on this device.",
+    "authSignedInElsewhereBody": "Tilawa allows one active device per account for Quran Sessions security. Your account was opened elsewhere — sign in again on this device to continue.",
     "@authSignedInElsewhereBody": {
         "description": "Body when another device took over the active session"
     },

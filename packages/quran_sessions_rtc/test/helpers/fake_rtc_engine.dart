@@ -116,10 +116,12 @@ class FakeAgoraRtcSessionHandle implements AgoraRtcSessionHandle {
   RtcEngine get engine => _engine;
 
   @override
-  Future<void> leaveAndRelease() async {
-    released = true;
+  Future<void> leaveAndRelease({bool retainEngine = false}) async {
+    released = !retainEngine;
     await _engine.leaveChannel();
-    await _engine.release();
+    if (!retainEngine) {
+      await _engine.release();
+    }
   }
 
   @override

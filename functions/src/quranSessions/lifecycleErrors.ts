@@ -16,6 +16,7 @@ export type LifecycleErrorCode =
   | "gender_not_allowed"
   | "age_not_allowed"
   | "guardian_approval_required"
+  | "guardian_approval_invalid"
   | "meeting_link_required"
   | "group_booking_not_supported"
   | "unsupported_session_mode"

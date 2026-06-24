@@ -28,7 +28,10 @@ import {
   resolveCallProviderForBooking,
 } from "./callProviderResolver";
 import { buildIndividualParticipants } from "./sessionParticipants";
-import { resolveTeacherProfileUserId } from "./teacherProfileUserId";
+import {
+  resolveTeacherProfileUserId,
+  teacherProfileUserIdFromData,
+} from "./teacherProfileUserId";
 import {
   legacyStatusForLifecycle,
   nowServer,
@@ -287,6 +290,10 @@ async function handleCreateSessionBooking(
           studentId,
         );
         const meetingLink = resolvedCall.meetingLink;
+        const teacherUserId = teacherProfileUserIdFromData(
+          data.teacherId,
+          teacherData,
+        );
 
         tx.set(lockRef, {
           lockId: data.slotId,
@@ -307,6 +314,7 @@ async function handleCreateSessionBooking(
           sessionId: sessionRef.id,
           studentId,
           teacherId: data.teacherId,
+          teacherUserId,
           slotId: data.slotId,
           startsAt,
           endsAt,
@@ -333,6 +341,7 @@ async function handleCreateSessionBooking(
           aggregateId: bookingRef.id,
           studentId,
           teacherId: data.teacherId,
+          teacherUserId,
           startsAt,
           endsAt,
           bookingType,

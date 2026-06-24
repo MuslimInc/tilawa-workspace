@@ -29,6 +29,7 @@ export interface StudentEligibilityProfile {
   countryCode: string | null;
   cityId: string | null;
   guardianId: string | null;
+  guardianChildBookingApprovedAt: Date | null;
   restrictionReason: string | null;
 }
 
@@ -196,14 +197,16 @@ export function assertBookingEligible(
       teacher.requiresGuardianApprovalForChildren ||
       policy.requireGuardianApprovalForChildren
     ) {
-      // Mirrors the client: guardian approval is required for this child
-      // booking. The capture/approval flow is a separate work item — until it
-      // exists the safe behavior is to block.
-      throw lifecycleError(
-        "guardian_approval_required",
-        "Guardian approval is required for this child's booking.",
-        { guardianId: student.guardianId },
-      );
+      const hasGuardian =
+        student.guardianId != null && student.guardianId.trim() !== "";
+      const hasApproval = student.guardianChildBookingApprovedAt != null;
+      if (!hasGuardian || !hasApproval) {
+        throw lifecycleError(
+          "guardian_approval_required",
+          "Guardian approval is required for this child's booking.",
+          { guardianId: student.guardianId },
+        );
+      }
     }
   }
 
@@ -258,6 +261,9 @@ export async function loadBookingEligibilityContext(
     countryCode: (studentProfile.countryCode as string) ?? null,
     cityId: (studentProfile.cityId as string) ?? null,
     guardianId: (studentProfile.guardianId as string) ?? null,
+    guardianChildBookingApprovedAt: parseDate(
+      studentProfile.guardianChildBookingApprovedAt,
+    ),
     restrictionReason: (studentProfile.restrictionReason as string) ?? null,
   };
 

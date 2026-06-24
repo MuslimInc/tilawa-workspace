@@ -101,6 +101,8 @@ test("integration: free booking with a verified teacher is scheduled", async () 
     sessionDoc.get("meetingLink"),
     "https://meet.example.com/teacher-room",
   );
+  assert.equal(sessionDoc.get("teacherUserId"), "uid_teacher1");
+  assert.equal(bookingDoc.get("teacherUserId"), "uid_teacher1");
   const lock = await db().collection("quran_slot_locks").doc("slot1").get();
   assert.equal(lock.exists, true);
 });
@@ -254,7 +256,7 @@ test("integration: client agora provider hint is rejected when agora disabled", 
 
   await assert.rejects(
     booking.run({
-      data: bookingData({ callProvider: "agora" }),
+      data: bookingData({ callType: "voiceCall", callProvider: "agora" }),
       auth: { uid: "student1", token: {} },
     }),
     (e) => codeOf(e) === "unsupported_call_provider",
@@ -486,7 +488,7 @@ test("integration: client webrtc provider hint is rejected when webrtc disabled"
 
   await assert.rejects(
     booking.run({
-      data: bookingData({ callProvider: "webrtc" }),
+      data: bookingData({ callType: "videoCall", callProvider: "webrtc" }),
       auth: { uid: "student1", token: {} },
     }),
     (e) => codeOf(e) === "unsupported_call_provider",

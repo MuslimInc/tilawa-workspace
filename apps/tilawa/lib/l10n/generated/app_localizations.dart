@@ -5507,7 +5507,7 @@ abstract class AppLocalizations {
   /// Body when another device took over the active session
   ///
   /// In en, this message translates to:
-  /// **'Your account was opened on another device. Sign in again to continue on this device.'**
+  /// **'Tilawa allows one active device per account for Quran Sessions security. Your account was opened elsewhere — sign in again on this device to continue.'**
   String get authSignedInElsewhereBody;
 
   /// Primary action after session revoked on this device

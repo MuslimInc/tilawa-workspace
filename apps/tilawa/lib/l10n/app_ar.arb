@@ -3731,7 +3731,7 @@
     "@authSignedInElsewhereTitle": {
         "description": "Title when another device took over the active session"
     },
-    "authSignedInElsewhereBody": "يرجى تسجيل الدخول مرة أخرى.",
+    "authSignedInElsewhereBody": "لأسباب أمنية، يُسمح بجهاز نشط واحد لحسابك في جلسات القرآن. تم فتح حسابك على جهاز آخر — سجّل الدخول مجدداً على هذا الجهاز للمتابعة.",
     "@authSignedInElsewhereBody": {
         "description": "Body when another device took over the active session"
     },

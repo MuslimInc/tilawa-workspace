@@ -160,7 +160,12 @@ class ValidateBookingEligibilityUseCase {
       }
       if (teacherPolicy.requiresGuardianApprovalForChildren ||
           policy.requireGuardianApprovalForChildren) {
-        return Left(GuardianApprovalRequiredFailure(studentId: studentId));
+        final hasGuardian =
+            student.guardianId != null && student.guardianId!.isNotEmpty;
+        final hasApproval = student.guardianChildBookingApprovedAt != null;
+        if (!hasGuardian || !hasApproval) {
+          return Left(GuardianApprovalRequiredFailure(studentId: studentId));
+        }
       }
     }
 

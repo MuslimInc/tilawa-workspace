@@ -3127,7 +3127,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authSignedInElsewhereBody =>
-      'Your account was opened on another device. Sign in again to continue on this device.';
+      'Tilawa allows one active device per account for Quran Sessions security. Your account was opened elsewhere — sign in again on this device to continue.';
 
   @override
   String get authSignedInElsewhereAction => 'Sign in again';

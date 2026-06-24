@@ -16,6 +16,7 @@ extension UserProfileDtoMapper on UserProfileDto {
     currencyCode: currencyCode,
     timezone: timezone,
     guardianId: guardianId,
+    guardianChildBookingApprovedAt: guardianChildBookingApprovedAt,
     restrictionReason: restrictionReason == null
         ? null
         : _mapRestrictionReason(restrictionReason!),
@@ -37,6 +38,7 @@ extension UserProfileDomainMapper on UserProfile {
     currencyCode: currencyCode,
     timezone: timezone,
     guardianId: guardianId,
+    guardianChildBookingApprovedAt: guardianChildBookingApprovedAt,
     restrictionReason: restrictionReason?.name,
   );
 }

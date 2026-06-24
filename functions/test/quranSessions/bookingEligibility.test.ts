@@ -29,6 +29,7 @@ function baseContext(
       countryCode: "EG",
       cityId: "cairo",
       guardianId: null,
+      guardianChildBookingApprovedAt: null,
       restrictionReason: null,
       ...overrides.student,
     },
@@ -188,6 +189,21 @@ test("assertBookingEligible blocks a child when guardian approval is required", 
       ),
     "guardian_approval_required",
   );
+});
+
+test("assertBookingEligible allows a child when guardian approval is recorded", () => {
+  const pricing = assertBookingEligible(
+    baseContext({
+      student: {
+        dateOfBirth: new Date("2015-01-01Z"),
+        guardianId: "guardian_uid",
+        guardianChildBookingApprovedAt: new Date("2024-01-01Z"),
+      },
+      policy: { requireGuardianApprovalForChildren: true },
+    }),
+    NOW,
+  );
+  assert.equal(pricing.isPaid, false);
 });
 
 test("assertBookingEligible allows an eligible child (teacher teaches children, no guardian gate)", () => {

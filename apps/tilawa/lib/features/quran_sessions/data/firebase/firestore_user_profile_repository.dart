@@ -20,6 +20,7 @@ class FirestoreUserProfileDto {
     this.currencyCode,
     this.timezone,
     this.guardianId,
+    this.guardianChildBookingApprovedAt,
     this.restrictionReason,
     this.profileCompleted = false,
   });
@@ -37,6 +38,7 @@ class FirestoreUserProfileDto {
   final String? currencyCode;
   final String? timezone;
   final String? guardianId;
+  final DateTime? guardianChildBookingApprovedAt;
   final String? restrictionReason;
   final bool profileCompleted;
 
@@ -62,6 +64,9 @@ class FirestoreUserProfileDto {
       currencyCode: profile['currencyCode'] as String?,
       timezone: profile['timezone'] as String?,
       guardianId: profile['guardianId'] as String?,
+      guardianChildBookingApprovedAt: readDateTime(
+        profile['guardianChildBookingApprovedAt'],
+      ),
       restrictionReason: profile['restrictionReason'] as String?,
       profileCompleted: profile['profileCompleted'] as bool? ?? false,
     );
@@ -79,6 +84,10 @@ class FirestoreUserProfileDto {
     if (currencyCode != null) 'currencyCode': currencyCode,
     if (timezone != null) 'timezone': timezone,
     if (guardianId != null) 'guardianId': guardianId,
+    if (guardianChildBookingApprovedAt != null)
+      'guardianChildBookingApprovedAt': writeDateTime(
+        guardianChildBookingApprovedAt!,
+      ),
     if (restrictionReason != null) 'restrictionReason': restrictionReason,
     'profileCompleted': profileCompleted,
     'updatedAt': writeDateTime(updatedAt),
@@ -98,6 +107,7 @@ class FirestoreUserProfileDto {
     currencyCode: currencyCode,
     timezone: timezone,
     guardianId: guardianId,
+    guardianChildBookingApprovedAt: guardianChildBookingApprovedAt,
     restrictionReason: restrictionReason,
   );
 
@@ -121,6 +131,7 @@ class FirestoreUserProfileDto {
       currencyCode: dto.currencyCode,
       timezone: dto.timezone,
       guardianId: dto.guardianId,
+      guardianChildBookingApprovedAt: dto.guardianChildBookingApprovedAt,
       restrictionReason: dto.restrictionReason,
       profileCompleted: complete,
     );

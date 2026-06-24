@@ -80,6 +80,7 @@ class AgoraCallProvider implements SessionCallProvider, CallProvider {
         channelId: credentials.channelId,
         uid: credentials.uid,
         enableVideo: request.callType == SessionCallType.videoCall,
+        existingEngine: _enginePool.takeParkedEngine(effectiveAppId),
       ),
     );
 
