@@ -200,6 +200,14 @@ service cloud.firestore {
         allow read: if isSignedIn();
         allow write: if canEditTeacherAvailability(teacherId);
       }
+
+      // Legacy published slots — teacher-scoped direct delete (no collectionGroup).
+      match /availability/{slotId} {
+        allow read: if isSignedIn();
+        allow create, update: if canEditTeacherAvailability(teacherId);
+        allow delete: if canEditTeacherAvailability(teacherId)
+          && (!('isBooked' in resource.data) || resource.data.isBooked == false);
+      }
     }
 
     // Availability is read both directly and via a collectionGroup query, so it

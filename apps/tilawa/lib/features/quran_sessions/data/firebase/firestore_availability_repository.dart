@@ -64,29 +64,20 @@ class FirestoreAvailabilityDataSource implements AvailabilityRemoteDataSource {
   }
 
   @override
-  Future<void> withdrawSlot(String slotId) async {
+  Future<void> withdrawSlot(String teacherId, String slotId) async {
     try {
-      final group = await _firestore
-          .collectionGroup(FirestoreQuranSessionsPaths.availability)
-          .get();
-      final match = group.docs.where((doc) => doc.id == slotId).firstOrNull;
-      if (match == null) {
+      final ref = _availability(teacherId).doc(slotId);
+      final doc = await ref.get();
+      if (!doc.exists) {
         throw NotFoundException('TeacherAvailability($slotId)');
       }
-      final isBooked = match.data()['isBooked'] as bool? ?? false;
+      final isBooked = doc.data()?['isBooked'] as bool? ?? false;
       if (isBooked) {
         throw const ConflictException(isSlotUnavailable: true);
       }
-      await match.reference.delete();
+      await ref.delete();
     } on FirebaseException catch (e) {
       throw mapFirebaseException(e);
     }
-  }
-}
-
-extension<T> on Iterable<T> {
-  T? get firstOrNull {
-    final it = iterator;
-    return it.moveNext() ? it.current : null;
   }
 }

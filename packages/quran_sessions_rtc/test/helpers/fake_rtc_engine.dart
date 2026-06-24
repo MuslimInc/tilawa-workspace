@@ -7,6 +7,9 @@ class FakeRtcEngine implements RtcEngine {
   bool leftChannel = false;
   bool released = false;
   bool? microphoneMuted;
+  bool? videoMuted;
+  bool? speakerEnabled;
+  bool switchedCamera = false;
 
   @override
   void registerEventHandler(RtcEngineEventHandler eventHandler) {
@@ -33,6 +36,21 @@ class FakeRtcEngine implements RtcEngine {
   @override
   Future<void> muteLocalAudioStream(bool mute) async {
     microphoneMuted = mute;
+  }
+
+  @override
+  Future<void> muteLocalVideoStream(bool mute) async {
+    videoMuted = mute;
+  }
+
+  @override
+  Future<void> switchCamera() async {
+    switchedCamera = true;
+  }
+
+  @override
+  Future<void> setEnableSpeakerphone(bool enabled) async {
+    speakerEnabled = enabled;
   }
 
   void simulateJoinSuccess({String channelId = 'channel-1'}) {
@@ -107,6 +125,21 @@ class FakeAgoraRtcSessionHandle implements AgoraRtcSessionHandle {
   @override
   Future<void> setMicrophoneMuted(bool muted) async {
     await _engine.muteLocalAudioStream(muted);
+  }
+
+  @override
+  Future<void> setCameraEnabled(bool enabled) async {
+    await _engine.muteLocalVideoStream(!enabled);
+  }
+
+  @override
+  Future<void> switchCamera() async {
+    await _engine.switchCamera();
+  }
+
+  @override
+  Future<void> setSpeakerEnabled(bool enabled) async {
+    await _engine.setEnableSpeakerphone(enabled);
   }
 }
 

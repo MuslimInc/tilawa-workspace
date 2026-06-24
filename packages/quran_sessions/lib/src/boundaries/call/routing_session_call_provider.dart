@@ -64,6 +64,47 @@ class RoutingSessionCallProvider implements SessionCallProvider {
     await agora?.setMicrophoneMuted(sessionId, muted: muted);
     await webrtc?.setMicrophoneMuted(sessionId, muted: muted);
   }
+
+  @override
+  Future<void> setMicrophoneEnabled(
+    String sessionId, {
+    required bool enabled,
+  }) async {
+    await external.setMicrophoneEnabled(sessionId, enabled: enabled);
+    await mock.setMicrophoneEnabled(sessionId, enabled: enabled);
+    await agora?.setMicrophoneEnabled(sessionId, enabled: enabled);
+    await webrtc?.setMicrophoneEnabled(sessionId, enabled: enabled);
+  }
+
+  @override
+  Future<void> setCameraEnabled(
+    String sessionId, {
+    required bool enabled,
+  }) async {
+    await external.setCameraEnabled(sessionId, enabled: enabled);
+    await mock.setCameraEnabled(sessionId, enabled: enabled);
+    await agora?.setCameraEnabled(sessionId, enabled: enabled);
+    await webrtc?.setCameraEnabled(sessionId, enabled: enabled);
+  }
+
+  @override
+  Future<void> switchCamera(String sessionId) async {
+    await external.switchCamera(sessionId);
+    await mock.switchCamera(sessionId);
+    await agora?.switchCamera(sessionId);
+    await webrtc?.switchCamera(sessionId);
+  }
+
+  @override
+  Future<void> setSpeakerEnabled(
+    String sessionId, {
+    required bool enabled,
+  }) async {
+    await external.setSpeakerEnabled(sessionId, enabled: enabled);
+    await mock.setSpeakerEnabled(sessionId, enabled: enabled);
+    await agora?.setSpeakerEnabled(sessionId, enabled: enabled);
+    await webrtc?.setSpeakerEnabled(sessionId, enabled: enabled);
+  }
 }
 
 /// Adapts [SessionCallProvider] to legacy [CallProvider] (student join).

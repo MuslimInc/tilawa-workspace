@@ -1,13 +1,30 @@
+import 'package:flutter/foundation.dart';
+
 import '../../domain/entities/call_join_request.dart';
 import '../../domain/entities/session_call_provider_kind.dart';
 import 'call_room.dart';
 import 'session_call_provider.dart';
+
+class _MockInCallControlState {
+  bool microphoneEnabled = true;
+  bool cameraEnabled = true;
+  bool speakerEnabled = false;
+}
 
 /// Free Beta placeholder for in-app voice/video until Agora/WebRTC ships.
 class MockSessionCallProvider implements SessionCallProvider {
   const MockSessionCallProvider({this.onJoin});
 
   final void Function(CallJoinRequest request)? onJoin;
+
+  static final Map<String, _MockInCallControlState> _controlState =
+      <String, _MockInCallControlState>{};
+
+  static _MockInCallControlState _stateFor(String sessionId) =>
+      _controlState.putIfAbsent(sessionId, _MockInCallControlState.new);
+
+  @visibleForTesting
+  static void resetControlState() => _controlState.clear();
 
   @override
   Future<CallRoom> join(CallJoinRequest request) async {
@@ -27,14 +44,45 @@ class MockSessionCallProvider implements SessionCallProvider {
   }
 
   @override
-  Future<void> leaveSession(String sessionId) async {}
+  Future<void> leaveSession(String sessionId) async {
+    _controlState.remove(sessionId);
+  }
 
   @override
-  Future<void> endSession(String sessionId) async {}
+  Future<void> endSession(String sessionId) async {
+    _controlState.remove(sessionId);
+  }
 
   @override
   Future<void> setMicrophoneMuted(
     String sessionId, {
     required bool muted,
-  }) async {}
+  }) => setMicrophoneEnabled(sessionId, enabled: !muted);
+
+  @override
+  Future<void> setMicrophoneEnabled(
+    String sessionId, {
+    required bool enabled,
+  }) async {
+    _stateFor(sessionId).microphoneEnabled = enabled;
+  }
+
+  @override
+  Future<void> setCameraEnabled(
+    String sessionId, {
+    required bool enabled,
+  }) async {
+    _stateFor(sessionId).cameraEnabled = enabled;
+  }
+
+  @override
+  Future<void> switchCamera(String sessionId) async {}
+
+  @override
+  Future<void> setSpeakerEnabled(
+    String sessionId, {
+    required bool enabled,
+  }) async {
+    _stateFor(sessionId).speakerEnabled = enabled;
+  }
 }

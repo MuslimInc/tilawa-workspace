@@ -275,6 +275,12 @@ class _LegacyLockRemoteDataSource implements BookedSlotLockRemoteDataSource {
   final Map<String, List<SlotLockDto>> locksByTeacherId;
 
   @override
-  Future<List<SlotLockDto>> getLocksForTeacher(String teacherProfileId) async =>
-      locksByTeacherId[teacherProfileId] ?? const [];
+  Future<List<SlotLockDto>> getLocksForTeacher(
+    String teacherProfileId, {
+    required DateTime windowStart,
+    required DateTime windowEnd,
+  }) async => locksByTeacherId[teacherProfileId] ?? const [];
+
+  @override
+  Future<SlotLockDto?> getLockBySlotId(String slotId) async => null;
 }

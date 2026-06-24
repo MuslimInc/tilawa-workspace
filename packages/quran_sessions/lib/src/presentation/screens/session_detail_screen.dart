@@ -10,15 +10,12 @@ class SessionDetailScreen extends StatefulWidget {
   const SessionDetailScreen({
     super.key,
     required this.bookingId,
-    this.onLeaveCall,
-    this.onSetMicrophoneMuted,
+    this.createCallControlGateway,
     this.buildCallSurface,
   });
 
   final String bookingId;
-  final Future<void> Function(String sessionId)? onLeaveCall;
-  final Future<void> Function(String sessionId, {required bool muted})?
-  onSetMicrophoneMuted;
+  final SessionCallControlGatewayFactory? createCallControlGateway;
   final InAppCallSurfaceBuilder? buildCallSurface;
 
   @override
@@ -91,7 +88,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen>
                 current is SessionDetailSuccess &&
                 previous.joinInProgress &&
                 !current.joinInProgress,
-            listener: (context, state) {
+            listener: (context, state) async {
               if (state is! SessionDetailSuccess) return;
 
               if (state.joinFailure != null) {
@@ -109,34 +106,14 @@ class _SessionDetailScreenState extends State<SessionDetailScreen>
                 final callType = state.callType ?? SessionCallType.voiceCall;
                 final callProviderKind =
                     state.callProviderKind ?? SessionCallProviderKind.mock;
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    settings: const RouteSettings(name: 'in_app_call_shell'),
-                    builder: (routeContext) => InAppCallShellScreen(
-                      sessionId: sessionId,
-                      callType: callType,
-                      callProviderKind: callProviderKind,
-                      callSurface: widget.buildCallSurface?.call(
-                        routeContext,
-                        sessionId: sessionId,
-                        callType: callType,
-                        callProviderKind: callProviderKind,
-                      ),
-                      onLeaveCall: () async {
-                        await widget.onLeaveCall?.call(sessionId);
-                      },
-                      onSetMicrophoneMuted:
-                          widget.onSetMicrophoneMuted != null &&
-                              state.supportsInAppMicrophoneMute
-                          ? ({required bool muted}) async {
-                              await widget.onSetMicrophoneMuted!(
-                                sessionId,
-                                muted: muted,
-                              );
-                            }
-                          : null,
-                    ),
-                  ),
+                await pushInAppCallShell(
+                  context,
+                  sessionId: sessionId,
+                  callType: callType,
+                  callProviderKind: callProviderKind,
+                  participantSubtitle: l10n.callTypeLabel(callType),
+                  buildCallSurface: widget.buildCallSurface,
+                  createCallControlGateway: widget.createCallControlGateway,
                 );
               }
             },

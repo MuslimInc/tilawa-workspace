@@ -41,4 +41,27 @@ class FakeBookedSlotLockRepository implements BookedSlotLockRepository {
       ),
     );
   }
+
+  @override
+  Future<Either<QuranSessionsFailure, bool>> isSlotBooked(
+    String slotId, {
+    DateTime? now,
+  }) async {
+    if (failWith != null) return Left(failWith!);
+    final lock = locks.where((l) => l.slotId == slotId).firstOrNull;
+    if (lock == null) return const Right(false);
+    return Right(
+      slotLockBlocksGeneration(
+        lock.toSnapshot(),
+        nowUtc: (now ?? DateTime.now()).toUtc(),
+      ),
+    );
+  }
+}
+
+extension<T> on Iterable<T> {
+  T? get firstOrNull {
+    final it = iterator;
+    return it.moveNext() ? it.current : null;
+  }
 }

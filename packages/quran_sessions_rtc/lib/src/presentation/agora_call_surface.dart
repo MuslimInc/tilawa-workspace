@@ -56,6 +56,7 @@ class _AgoraCallSurfaceState extends State<AgoraCallSurface> {
       _localVideoReady = false;
       _phase = _AgoraCallConnectionPhase.connecting;
       _bindEngineEvents();
+      _reportConnectionPhase();
     }
   }
 
@@ -81,6 +82,7 @@ class _AgoraCallSurfaceState extends State<AgoraCallSurface> {
           _channelId = connection.channelId;
           _phase = _AgoraCallConnectionPhase.waitingForParticipant;
         });
+        _reportConnectionPhase();
       },
       onUserJoined: (connection, remoteUid, elapsed) {
         if (!mounted) return;
@@ -90,6 +92,7 @@ class _AgoraCallSurfaceState extends State<AgoraCallSurface> {
           _remoteVideoReady = false;
           _phase = _AgoraCallConnectionPhase.participantJoined;
         });
+        _reportConnectionPhase();
       },
       onUserOffline: (connection, remoteUid, reason) {
         if (!mounted || _remoteUid != remoteUid) return;
@@ -98,6 +101,7 @@ class _AgoraCallSurfaceState extends State<AgoraCallSurface> {
           _remoteVideoReady = false;
           _phase = _AgoraCallConnectionPhase.waitingForParticipant;
         });
+        _reportConnectionPhase();
       },
       onRemoteVideoStateChanged:
           (connection, remoteUid, state, reason, elapsed) {
@@ -114,6 +118,22 @@ class _AgoraCallSurfaceState extends State<AgoraCallSurface> {
       },
     );
     engine.registerEventHandler(_eventHandler!);
+    _reportConnectionPhase();
+  }
+
+  void _reportConnectionPhase() {
+    final reporter = InAppCallConnectionReporter.maybeOf(context);
+    if (reporter == null) {
+      return;
+    }
+    reporter.onPhaseChanged(switch (_phase) {
+      _AgoraCallConnectionPhase.connecting =>
+        InAppCallConnectionPhase.connecting,
+      _AgoraCallConnectionPhase.waitingForParticipant =>
+        InAppCallConnectionPhase.waitingForParticipant,
+      _AgoraCallConnectionPhase.participantJoined =>
+        InAppCallConnectionPhase.participantJoined,
+    });
   }
 
   void _unbindEngineEvents([String? sessionId]) {
@@ -130,101 +150,38 @@ class _AgoraCallSurfaceState extends State<AgoraCallSurface> {
   @override
   Widget build(BuildContext context) {
     final engine = _engine;
-    final tokens = Theme.of(context).tokens;
-    final colorScheme = Theme.of(context).colorScheme;
 
     if (engine == null) {
-      return _StatusPanel(
-        icon: Icons.sync,
-        message: widget.labels.connecting,
-        showSpinner: true,
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _reportConnectionPhase();
+        }
+      });
+      return SizedBox.expand(
+        child: _StatusPanel(
+          icon: Icons.sync,
+          message: widget.labels.connecting,
+          showSpinner: true,
+        ),
       );
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _ConnectionChip(phase: _phase, labels: widget.labels),
-        SizedBox(height: tokens.spaceSmall),
-        Expanded(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(tokens.radiusLarge),
-            child: ColoredBox(
-              color: colorScheme.surfaceContainerHighest,
-              child: switch (widget.callType) {
-                SessionCallType.videoCall => _VideoLayout(
-                  engine: engine,
-                  remoteUid: _remoteUid,
-                  channelId: _channelId,
-                  phase: _phase,
-                  remoteVideoReady: _remoteVideoReady,
-                  localVideoReady: _localVideoReady,
-                  labels: widget.labels,
-                ),
-                SessionCallType.voiceCall || SessionCallType.externalMeeting =>
-                  _VoiceLayout(phase: _phase, labels: widget.labels),
-              },
-            ),
+    return SizedBox.expand(
+      child: ColoredBox(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        child: switch (widget.callType) {
+          SessionCallType.videoCall => _VideoLayout(
+            engine: engine,
+            remoteUid: _remoteUid,
+            channelId: _channelId,
+            phase: _phase,
+            remoteVideoReady: _remoteVideoReady,
+            localVideoReady: _localVideoReady,
+            labels: widget.labels,
           ),
-        ),
-      ],
-    );
-  }
-}
-
-class _ConnectionChip extends StatelessWidget {
-  const _ConnectionChip({required this.phase, required this.labels});
-
-  final _AgoraCallConnectionPhase phase;
-  final AgoraCallSurfaceLabels labels;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final tokens = Theme.of(context).tokens;
-
-    final (icon, message) = switch (phase) {
-      _AgoraCallConnectionPhase.connecting => (Icons.sync, labels.connecting),
-      _AgoraCallConnectionPhase.waitingForParticipant => (
-        Icons.hourglass_top_outlined,
-        labels.waitingForParticipant,
-      ),
-      _AgoraCallConnectionPhase.participantJoined => (
-        Icons.check_circle_outline,
-        labels.connected,
-      ),
-    };
-
-    return Semantics(
-      label: message,
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: tokens.spaceMedium,
-          vertical: tokens.spaceSmall,
-        ),
-        decoration: BoxDecoration(
-          color: colorScheme.secondaryContainer,
-          borderRadius: BorderRadius.circular(tokens.radiusMedium),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: tokens.iconSizeMedium,
-              color: colorScheme.onSecondaryContainer,
-            ),
-            SizedBox(width: tokens.spaceSmall),
-            Flexible(
-              child: Text(
-                message,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: colorScheme.onSecondaryContainer,
-                ),
-              ),
-            ),
-          ],
-        ),
+          SessionCallType.voiceCall || SessionCallType.externalMeeting =>
+            _VoiceLayout(phase: _phase, labels: widget.labels),
+        },
       ),
     );
   }

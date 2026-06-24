@@ -15,10 +15,24 @@ class FirestoreBookedSlotLockDataSource
       _firestore.collection(FirestoreQuranSessionsPaths.slotLocks);
 
   @override
-  Future<List<SlotLockDto>> getLocksForTeacher(String teacherProfileId) async {
+  Future<List<SlotLockDto>> getLocksForTeacher(
+    String teacherProfileId, {
+    required DateTime windowStart,
+    required DateTime windowEnd,
+  }) async {
     try {
+      final minSlotId = GeneratedSlot.deterministicId(
+        teacherProfileId,
+        windowStart.toUtc(),
+      );
+      final maxSlotId = GeneratedSlot.deterministicId(
+        teacherProfileId,
+        windowEnd.toUtc(),
+      );
       final snapshot = await _locks
           .where('teacherId', isEqualTo: teacherProfileId)
+          .where('slotId', isGreaterThanOrEqualTo: minSlotId)
+          .where('slotId', isLessThan: maxSlotId)
           .get();
       return snapshot.docs.map(_mapDoc).toList();
     } on FirebaseException catch (e) {
@@ -26,8 +40,19 @@ class FirestoreBookedSlotLockDataSource
     }
   }
 
-  SlotLockDto _mapDoc(QueryDocumentSnapshot<Map<String, dynamic>> doc) {
-    final data = doc.data();
+  @override
+  Future<SlotLockDto?> getLockBySlotId(String slotId) async {
+    try {
+      final doc = await _locks.doc(slotId).get();
+      if (!doc.exists) return null;
+      return _mapDoc(doc);
+    } on FirebaseException catch (e) {
+      throw mapFirebaseException(e);
+    }
+  }
+
+  SlotLockDto _mapDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
+    final data = doc.data() ?? const {};
     return SlotLockDto(
       slotId: data['slotId'] as String? ?? doc.id,
       teacherId: data['teacherId'] as String? ?? '',

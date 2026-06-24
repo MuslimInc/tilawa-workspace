@@ -8,7 +8,7 @@ import {
   assertSucceeds,
   type RulesTestEnvironment,
 } from "@firebase/rules-unit-testing";
-import { collection, doc, getDoc, getDocs, query, setDoc, where, orderBy } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, where, orderBy } from "firebase/firestore";
 
 const PROJECT_ID = "demo-tilawa-rules";
 let testEnv: RulesTestEnvironment;
@@ -331,6 +331,32 @@ test("rules: non-participant cannot read quran_reschedule_requests", async () =>
         orderBy("createdAt", "desc"),
       ),
     ),
+  );
+});
+
+test("rules: verified teacher owner can delete unbooked availability slot", async () => {
+  await testEnv.clearFirestore();
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    const adminDb = context.firestore();
+    await setDoc(doc(adminDb, "quran_teacher_profiles/teacher1"), {
+      userId: "uid_teacher",
+      verificationStatus: "verified",
+      isPubliclyVisible: true,
+    });
+    await setDoc(
+      doc(adminDb, "quran_teacher_profiles/teacher1/availability/slot1"),
+      {
+        teacherId: "teacher1",
+        startsAt: new Date("2026-06-24T10:00:00.000Z"),
+        endsAt: new Date("2026-06-24T10:30:00.000Z"),
+        isBooked: false,
+      },
+    );
+  });
+
+  const teacherDb = testEnv.authenticatedContext("uid_teacher").firestore();
+  await assertSucceeds(
+    deleteDoc(doc(teacherDb, "quran_teacher_profiles/teacher1/availability/slot1")),
   );
 });
 

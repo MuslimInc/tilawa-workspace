@@ -54,6 +54,7 @@ import '../domain/usecases/get_market_scheduling_config_usecase.dart';
 import '../domain/usecases/get_teacher_availability_usecase.dart';
 import '../domain/usecases/get_teacher_profile_usecase.dart';
 import '../domain/usecases/get_teacher_sessions_usecase.dart';
+import '../domain/usecases/is_slot_booked_usecase.dart';
 import '../domain/usecases/get_teachers_usecase.dart';
 import '../domain/usecases/get_user_profile_usecase.dart';
 import '../domain/usecases/get_wallet_snapshot_usecase.dart';
@@ -159,6 +160,7 @@ class QuranSessionsModule {
     registerSingleton(getTeacherAvailability);
     registerSingleton(GetTeacherSessionsUseCase(sessionRepo));
     registerSingleton(GetStudentSessionsUseCase(sessionRepo));
+    registerSingleton(IsSlotBookedUseCase(bookedSlotLockRepo));
     registerSingleton(
       CreateBookingUseCase(bookingRepo, getTeacherAvailability),
     );

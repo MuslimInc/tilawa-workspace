@@ -695,6 +695,18 @@ abstract class QuranSessionsLocalizations {
   /// **'Could not connect to the voice or video call. Try again in a moment.'**
   String get rtcCallJoinFailed;
 
+  /// No description provided for @rtcCallJoinRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not join this call. Leave any open call for this session, wait a moment, then try again.'**
+  String get rtcCallJoinRejected;
+
+  /// No description provided for @rtcCallJoinInvalidToken.
+  ///
+  /// In en, this message translates to:
+  /// **'This call link expired or is invalid. Tap Join again to get a fresh connection.'**
+  String get rtcCallJoinInvalidToken;
+
   /// No description provided for @webrtcSignalingUnavailable.
   ///
   /// In en, this message translates to:
@@ -754,6 +766,78 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'Beta preview — no live audio or video. Book a new session with Agora enabled to try a real call.'**
   String get inAppCallShellMockBetaBody;
+
+  /// No description provided for @inAppCallShellSpeaker.
+  ///
+  /// In en, this message translates to:
+  /// **'Speaker'**
+  String get inAppCallShellSpeaker;
+
+  /// No description provided for @inAppCallShellFlipCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Flip camera'**
+  String get inAppCallShellFlipCamera;
+
+  /// No description provided for @inAppCallShellTurnVideoOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn camera on'**
+  String get inAppCallShellTurnVideoOn;
+
+  /// No description provided for @inAppCallShellTurnVideoOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn camera off'**
+  String get inAppCallShellTurnVideoOff;
+
+  /// No description provided for @inAppCallShellMicrophoneMuted.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone muted'**
+  String get inAppCallShellMicrophoneMuted;
+
+  /// No description provided for @inAppCallShellMicrophoneUnmuted.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone unmuted'**
+  String get inAppCallShellMicrophoneUnmuted;
+
+  /// No description provided for @inAppCallShellCameraOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera turned off'**
+  String get inAppCallShellCameraOff;
+
+  /// No description provided for @inAppCallShellCameraOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera turned on'**
+  String get inAppCallShellCameraOn;
+
+  /// No description provided for @inAppCallShellSwitchCameraBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot switch camera while it is off'**
+  String get inAppCallShellSwitchCameraBlocked;
+
+  /// No description provided for @inAppCallShellSpeakerOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Speaker on'**
+  String get inAppCallShellSpeakerOn;
+
+  /// No description provided for @inAppCallShellSpeakerOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Speaker off'**
+  String get inAppCallShellSpeakerOff;
+
+  /// No description provided for @inAppCallShellControlActionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not complete that action. Try again.'**
+  String get inAppCallShellControlActionFailed;
 
   /// No description provided for @externalMeetingJoinTitle.
   ///
@@ -838,6 +922,12 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'Past ({count})'**
   String pastSessionsSection(int count);
+
+  /// No description provided for @loadMorePastSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get loadMorePastSessions;
 
   /// No description provided for @noPastSessions.
   ///

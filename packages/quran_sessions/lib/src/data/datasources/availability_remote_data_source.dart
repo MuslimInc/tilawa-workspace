@@ -9,5 +9,6 @@ abstract interface class AvailabilityRemoteDataSource {
 
   Future<void> publishSlot(TeacherAvailabilityDto slot);
 
-  Future<void> withdrawSlot(String slotId);
+  /// Deletes a legacy published slot at a deterministic teacher-scoped path.
+  Future<void> withdrawSlot(String teacherId, String slotId);
 }

@@ -83,7 +83,12 @@ extension QuranSessionsFailureUi on QuranSessionsFailure {
       RtcPermissionDeniedFailure(:final permission) => loc.rtcPermissionDenied(
         permission,
       ),
-      RtcCallJoinFailure() => loc.rtcCallJoinFailed,
+      RtcCallJoinFailure(:final reasonCode) => switch (reasonCode) {
+        'join_channel_rejected' => loc.rtcCallJoinRejected,
+        'join_invalid_token' ||
+        'join_token_expired' => loc.rtcCallJoinInvalidToken,
+        _ => loc.rtcCallJoinFailed,
+      },
       WebRtcSignalingUnavailableFailure() => loc.webrtcSignalingUnavailable,
       ExternalMeetingLaunchFailure(linkCopiedToClipboard: true) =>
         loc.externalMeetingLinkCopied,

@@ -1,3 +1,4 @@
+import 'package:checks/checks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -58,9 +59,7 @@ class _JoinNavigationTestBloc extends SessionDetailBloc {
 Future<void> _pumpSessionDetailScreen(
   WidgetTester tester, {
   required SessionDetailBloc bloc,
-  Future<void> Function(String sessionId)? onLeaveCall,
-  Future<void> Function(String sessionId, {required bool muted})?
-  onSetMicrophoneMuted,
+  SessionCallControlGatewayFactory? createCallControlGateway,
 }) async {
   tester.view.physicalSize = const Size(390, 640);
   tester.view.devicePixelRatio = 1;
@@ -78,12 +77,12 @@ Future<void> _pumpSessionDetailScreen(
         GlobalWidgetsLocalizations.delegate,
       ],
       supportedLocales: QuranSessionsLocalizations.supportedLocales,
+      builder: (context, child) => TilawaFeedbackHost(child: child!),
       home: BlocProvider<SessionDetailBloc>.value(
         value: bloc,
         child: SessionDetailScreen(
           bookingId: 'session_1',
-          onLeaveCall: onLeaveCall,
-          onSetMicrophoneMuted: onSetMicrophoneMuted,
+          createCallControlGateway: createCallControlGateway,
         ),
       ),
     ),
@@ -289,21 +288,17 @@ void main() {
   });
 
   testWidgets(
-    'mock in-app join hides mute even when nav wires mute callback',
+    'mock in-app join hides mute when call gateway is not wired',
     (tester) async {
       final bloc = _JoinNavigationTestBloc(seed: _inAppJoinSeed());
 
-      await _pumpSessionDetailScreen(
-        tester,
-        bloc: bloc,
-        onSetMicrophoneMuted: (_, {required muted}) async {},
-      );
+      await _pumpSessionDetailScreen(tester, bloc: bloc);
 
       await tester.tap(find.text('Join'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Leave call'), findsOneWidget);
-      expect(find.text('Mute microphone'), findsNothing);
+      expect(find.byKey(const Key('call_shell_end')), findsOneWidget);
+      expect(find.bySemanticsLabel('Mute microphone'), findsNothing);
     },
   );
 
@@ -383,7 +378,7 @@ void main() {
   testWidgets('agora in-app join wires mute callback to call shell', (
     tester,
   ) async {
-    final muteEvents = <String>[];
+    final recordingGateway = _RecordingCallControlGateway();
     final bloc = _JoinNavigationTestBloc(
       seed: _inAppJoinSeed(callProviderKind: SessionCallProviderKind.agora),
     );
@@ -391,21 +386,19 @@ void main() {
     await _pumpSessionDetailScreen(
       tester,
       bloc: bloc,
-      onSetMicrophoneMuted: (sessionId, {required bool muted}) async {
-        muteEvents.add('$sessionId:${muted ? 'mute' : 'unmute'}');
-      },
+      createCallControlGateway: (_) => recordingGateway,
     );
 
     await tester.tap(find.text('Join'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Mute microphone'), findsOneWidget);
+    expect(find.bySemanticsLabel('Mute microphone'), findsOneWidget);
 
-    await tester.tap(find.text('Mute microphone'));
+    await tester.tap(find.byKey(const Key('call_shell_mute')));
     await tester.pumpAndSettle();
 
-    expect(muteEvents, ['session_1:mute']);
-    expect(find.text('Unmute microphone'), findsOneWidget);
+    check(recordingGateway.microphoneEnabledCalls).deepEquals([false]);
+    expect(find.bySemanticsLabel('Unmute microphone'), findsOneWidget);
   });
 
   group('locked-at-booking footnote', () {
@@ -530,4 +523,25 @@ void main() {
       );
     });
   });
+}
+
+class _RecordingCallControlGateway implements SessionCallControlGateway {
+  final List<bool> microphoneEnabledCalls = [];
+
+  @override
+  Future<void> leave() async {}
+
+  @override
+  Future<void> setCameraEnabled({required bool enabled}) async {}
+
+  @override
+  Future<void> setMicrophoneEnabled({required bool enabled}) async {
+    microphoneEnabledCalls.add(enabled);
+  }
+
+  @override
+  Future<void> setSpeakerEnabled({required bool enabled}) async {}
+
+  @override
+  Future<void> switchCamera() async {}
 }

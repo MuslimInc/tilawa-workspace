@@ -17,6 +17,8 @@ class BookedSlotLockRepositoryImpl implements BookedSlotLockRepository {
   final BookedSlotLockRemoteDataSource _remote;
   final TeacherProfileRepository? _teacherProfiles;
 
+  /// Pre-migration locks may still reference the Firebase Auth uid as
+  /// [teacherId] while availability uses the public profile doc id.
   Future<String?> _legacyOwnerUserId(String teacherProfileId) async {
     final profiles = _teacherProfiles;
     if (profiles == null) return null;
@@ -27,11 +29,23 @@ class BookedSlotLockRepositoryImpl implements BookedSlotLockRepository {
     });
   }
 
-  Future<List<SlotLockDto>> _loadLocks(String teacherProfileId) async {
-    final primary = await _remote.getLocksForTeacher(teacherProfileId);
+  Future<List<SlotLockDto>> _loadLocksInWindow({
+    required String teacherProfileId,
+    required DateTime windowStart,
+    required DateTime windowEnd,
+  }) async {
+    final primary = await _remote.getLocksForTeacher(
+      teacherProfileId,
+      windowStart: windowStart,
+      windowEnd: windowEnd,
+    );
     final legacyUserId = await _legacyOwnerUserId(teacherProfileId);
     if (legacyUserId == null) return primary;
-    final legacy = await _remote.getLocksForTeacher(legacyUserId);
+    final legacy = await _remote.getLocksForTeacher(
+      legacyUserId,
+      windowStart: windowStart,
+      windowEnd: windowEnd,
+    );
     if (legacy.isEmpty) return primary;
     final bySlotId = <String, SlotLockDto>{
       for (final lock in primary) lock.slotId: lock,
@@ -51,7 +65,11 @@ class BookedSlotLockRepositoryImpl implements BookedSlotLockRepository {
   }) async {
     try {
       final legacyUserId = await _legacyOwnerUserId(teacherProfileId);
-      final dtos = await _loadLocks(teacherProfileId);
+      final dtos = await _loadLocksInWindow(
+        teacherProfileId: teacherProfileId,
+        windowStart: windowStart,
+        windowEnd: windowEnd,
+      );
       return Right(
         collectBookedStartsFromSlotLocks(
           dtos.map((dto) => dto.toSnapshot()),
@@ -62,6 +80,24 @@ class BookedSlotLockRepositoryImpl implements BookedSlotLockRepository {
           now: now ?? DateTime.now(),
         ),
       );
+    } on Exception catch (e) {
+      return Left(mapRemoteException(e));
+    }
+  }
+
+  @override
+  Future<Either<QuranSessionsFailure, bool>> isSlotBooked(
+    String slotId, {
+    DateTime? now,
+  }) async {
+    try {
+      final lock = await _remote.getLockBySlotId(slotId);
+      if (lock == null) return const Right(false);
+      final blocks = slotLockBlocksGeneration(
+        lock.toSnapshot(),
+        nowUtc: (now ?? DateTime.now()).toUtc(),
+      );
+      return Right(blocks);
     } on Exception catch (e) {
       return Left(mapRemoteException(e));
     }

@@ -146,6 +146,90 @@ void main() {
     );
 
     blocTest<MySessionsBloc, MySessionsState>(
+      'successful join sets joinCompletedSessionId and clears progress',
+      build: () {
+        sessionRepo.sessions = [
+          makeSession(id: 'session_join', studentId: 'student_1'),
+        ];
+        return bloc;
+      },
+      seed: () => MySessionsSuccess(
+        upcoming: [makeSession(id: 'session_join', studentId: 'student_1')],
+        past: const [],
+      ),
+      act: (b) => b.add(const SessionJoinRequested(sessionId: 'session_join')),
+      expect: () => [
+        isA<MySessionsSuccess>().having(
+          (s) => s.joinInProgress,
+          'joinInProgress',
+          'session_join',
+        ),
+        isA<MySessionsSuccess>()
+            .having(
+              (s) => s.joinCompletedSessionId,
+              'joinCompletedSessionId',
+              'session_join',
+            )
+            .having((s) => s.joinInProgress, 'joinInProgress', isNull),
+      ],
+    );
+
+    blocTest<MySessionsBloc, MySessionsState>(
+      'failed join surfaces joinFailure without joinCompletedSessionId',
+      build: () {
+        sessionRepo.sessions = [
+          makeSession(id: 'session_join', studentId: 'student_1'),
+        ];
+        mockProvider = MockSessionCallProvider(
+          onJoin: (_) =>
+              throw const RtcCallJoinFailure(reasonCode: 'join_failed'),
+        );
+        joinSessionUseCase = JoinSessionUseCase(
+          sessionRepository: sessionRepo,
+          callProvider: mockProvider,
+          authSession: _FakeAuthSession('student_1'),
+          teacherProfileRepository: FakeTeacherProfileRepository(),
+        );
+        bloc = MySessionsBloc(
+          getStudentSessions: GetStudentSessionsUseCase(sessionRepo),
+          cancelSession: buildCancelSessionViaServerUseCase(
+            repository: aggregateRepo,
+          ),
+          submitReview: SubmitReviewUseCase(bookingRepo),
+          joinSession: joinSessionUseCase,
+          studentId: 'student_1',
+        );
+        return bloc;
+      },
+      seed: () => MySessionsSuccess(
+        upcoming: [makeSession(id: 'session_join', studentId: 'student_1')],
+        past: const [],
+      ),
+      act: (b) => b.add(const SessionJoinRequested(sessionId: 'session_join')),
+      verify: (b) {
+        final state = b.state as MySessionsSuccess;
+        check(state.joinFailure).isA<RtcCallJoinFailure>();
+        check(state.joinCompletedSessionId).isNull();
+        check(state.joinInProgress).isNull();
+      },
+    );
+
+    blocTest<MySessionsBloc, MySessionsState>(
+      'MySessionsJoinCompletedAcknowledged clears joinCompletedSessionId',
+      build: () => bloc,
+      seed: () => MySessionsSuccess(
+        upcoming: const [],
+        past: const [],
+        joinCompletedSessionId: 'session_join',
+      ),
+      act: (b) => b.add(const MySessionsJoinCompletedAcknowledged()),
+      verify: (b) {
+        final state = b.state as MySessionsSuccess;
+        check(state.joinCompletedSessionId).isNull();
+      },
+    );
+
+    blocTest<MySessionsBloc, MySessionsState>(
       'ReviewSubmitted sets lastSubmittedReview',
       build: () => bloc,
       seed: () => MySessionsSuccess(

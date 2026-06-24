@@ -49,6 +49,7 @@ class FakeMvpAvailabilityProvider implements AvailabilityProvider {
 
   @override
   Future<Either<QuranSessionsFailure, void>> withdrawSlot(
+    String teacherId,
     String slotId,
   ) async {
     final idx = _store.slots.indexWhere((s) => s.slotId == slotId);

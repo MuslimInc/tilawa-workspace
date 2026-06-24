@@ -28,7 +28,7 @@ void main() {
       );
 
       expect(
-        resolveVoiceVideoProviderHint(config),
+        resolveVoiceVideoProviderHint(config, debugMode: false),
         SessionCallProviderKind.mock,
       );
     },
@@ -46,7 +46,7 @@ void main() {
       expect(rtc.isAgoraEnabled, isTrue);
       expect(rtc.agoraAppId, kStagingAgoraAppId);
       expect(
-        resolveVoiceVideoProviderHint(config),
+        resolveVoiceVideoProviderHint(config, debugMode: false),
         SessionCallProviderKind.mock,
       );
       expect(
@@ -59,14 +59,37 @@ void main() {
     },
   );
 
-  test('local distribution keeps agora off without explicit dart-defines', () {
+  test('local release keeps agora off without explicit dart-defines', () {
     const config = AppLaunchConfig();
 
-    final rtc = resolveRtcLaunchConfig(config, distribution: 'local');
+    final rtc = resolveRtcLaunchConfig(
+      config,
+      distribution: 'local',
+      debugMode: false,
+    );
 
     expect(rtc.isAgoraEnabled, isFalse);
     expect(rtc.enabledProviders, containsAll(['external', 'mock']));
   });
+
+  test(
+    'debug build injects agora defaults when dart-defines omitted',
+    () {
+      const config = AppLaunchConfig(
+        enabledCallProvidersCsv: 'external,mock',
+      );
+
+      final rtc = resolveRtcLaunchConfig(
+        config,
+        distribution: 'local',
+        debugMode: true,
+      );
+
+      expect(rtc.isAgoraEnabled, isTrue);
+      expect(rtc.agoraAppId, kStagingAgoraAppId);
+      expect(rtc.enabledProviders, contains('agora'));
+    },
+  );
 
   test('staging respects explicit agora dart-defines over defaults', () {
     const customId = 'custom-agora-app-id';

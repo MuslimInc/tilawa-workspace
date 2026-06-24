@@ -40,4 +40,25 @@ class WebRtcCallProvider implements SessionCallProvider, CallProvider {
     String sessionId, {
     required bool muted,
   }) async {}
+
+  @override
+  Future<void> setMicrophoneEnabled(
+    String sessionId, {
+    required bool enabled,
+  }) async {}
+
+  @override
+  Future<void> setCameraEnabled(
+    String sessionId, {
+    required bool enabled,
+  }) async {}
+
+  @override
+  Future<void> switchCamera(String sessionId) async {}
+
+  @override
+  Future<void> setSpeakerEnabled(
+    String sessionId, {
+    required bool enabled,
+  }) async {}
 }

@@ -246,6 +246,10 @@ class _RecordingProvider implements SessionCallProvider {
 
   final void Function() onJoin;
   final void Function(bool muted)? onMute;
+  final void Function(bool enabled)? onMicrophoneEnabled = null;
+  final void Function(bool enabled)? onCameraEnabled = null;
+  final void Function()? onSwitchCamera = null;
+  final void Function(bool enabled)? onSpeakerEnabled = null;
   final void Function()? onLeave;
   final void Function()? onEnd;
 
@@ -271,5 +275,34 @@ class _RecordingProvider implements SessionCallProvider {
     required bool muted,
   }) async {
     onMute?.call(muted);
+  }
+
+  @override
+  Future<void> setMicrophoneEnabled(
+    String sessionId, {
+    required bool enabled,
+  }) async {
+    onMicrophoneEnabled?.call(enabled);
+  }
+
+  @override
+  Future<void> setCameraEnabled(
+    String sessionId, {
+    required bool enabled,
+  }) async {
+    onCameraEnabled?.call(enabled);
+  }
+
+  @override
+  Future<void> switchCamera(String sessionId) async {
+    onSwitchCamera?.call();
+  }
+
+  @override
+  Future<void> setSpeakerEnabled(
+    String sessionId, {
+    required bool enabled,
+  }) async {
+    onSpeakerEnabled?.call(enabled);
   }
 }

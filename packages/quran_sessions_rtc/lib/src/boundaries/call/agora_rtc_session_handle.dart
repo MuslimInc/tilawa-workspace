@@ -6,6 +6,12 @@ abstract class AgoraRtcSessionHandle {
 
   Future<void> setMicrophoneMuted(bool muted);
 
+  Future<void> setCameraEnabled(bool enabled);
+
+  Future<void> switchCamera();
+
+  Future<void> setSpeakerEnabled(bool enabled);
+
   /// Native engine for in-call video rendering; null in test fakes.
   RtcEngine? get engine;
 }
@@ -25,6 +31,21 @@ class LiveAgoraRtcSessionHandle implements AgoraRtcSessionHandle {
   @override
   Future<void> setMicrophoneMuted(bool muted) async {
     await _engine.muteLocalAudioStream(muted);
+  }
+
+  @override
+  Future<void> setCameraEnabled(bool enabled) async {
+    await _engine.muteLocalVideoStream(!enabled);
+  }
+
+  @override
+  Future<void> switchCamera() async {
+    await _engine.switchCamera();
+  }
+
+  @override
+  Future<void> setSpeakerEnabled(bool enabled) async {
+    await _engine.setEnableSpeakerphone(enabled);
   }
 
   @override

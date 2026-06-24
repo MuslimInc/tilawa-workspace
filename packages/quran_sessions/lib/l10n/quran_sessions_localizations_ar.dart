@@ -351,6 +351,14 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
       'تعذّر الاتصال بمكالمة الصوت أو الفيديو. حاول مرة أخرى بعد قليل.';
 
   @override
+  String get rtcCallJoinRejected =>
+      'تعذّر الانضمام إلى هذه المكالمة. اخرج من أي مكالمة مفتوحة لهذه الجلسة، انتظر لحظة، ثم حاول مجدداً.';
+
+  @override
+  String get rtcCallJoinInvalidToken =>
+      'انتهت صلاحية رابط المكالمة أو أنه غير صالح. اضغط انضمام مرة أخرى للحصول على اتصال جديد.';
+
+  @override
   String get webrtcSignalingUnavailable =>
       'مكالمات WebRTC داخل التطبيق غير متاحة بعد. اختر الصوت عبر Agora أو رابط اجتماع خارجي.';
 
@@ -382,6 +390,44 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   @override
   String get inAppCallShellMockBetaBody =>
       'معاينة تجريبية — لا يوجد صوت أو فيديو مباشر. احجز جلسة جديدة مع تفعيل Agora لتجربة مكالمة حقيقية.';
+
+  @override
+  String get inAppCallShellSpeaker => 'مكبر الصوت';
+
+  @override
+  String get inAppCallShellFlipCamera => 'قلب الكاميرا';
+
+  @override
+  String get inAppCallShellTurnVideoOn => 'تشغيل الكاميرا';
+
+  @override
+  String get inAppCallShellTurnVideoOff => 'إيقاف الكاميرا';
+
+  @override
+  String get inAppCallShellMicrophoneMuted => 'تم كتم الميكروفون';
+
+  @override
+  String get inAppCallShellMicrophoneUnmuted => 'تم تشغيل الميكروفون';
+
+  @override
+  String get inAppCallShellCameraOff => 'تم إيقاف الكاميرا';
+
+  @override
+  String get inAppCallShellCameraOn => 'تم تشغيل الكاميرا';
+
+  @override
+  String get inAppCallShellSwitchCameraBlocked =>
+      'لا يمكن تبديل الكاميرا أثناء إيقافها';
+
+  @override
+  String get inAppCallShellSpeakerOn => 'تم تشغيل السماعة';
+
+  @override
+  String get inAppCallShellSpeakerOff => 'تم إيقاف السماعة';
+
+  @override
+  String get inAppCallShellControlActionFailed =>
+      'تعذر تنفيذ الإجراء، حاول مرة أخرى';
 
   @override
   String get externalMeetingJoinTitle => 'الانضمام خارج MeMuslim؟';
@@ -432,6 +478,9 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String pastSessionsSection(int count) {
     return 'السابقة ($count)';
   }
+
+  @override
+  String get loadMorePastSessions => 'تحميل المزيد';
 
   @override
   String get noPastSessions => 'لا توجد جلسات سابقة';

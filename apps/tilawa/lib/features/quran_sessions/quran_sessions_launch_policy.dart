@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 
@@ -33,20 +34,22 @@ Set<String> parseEnabledCallProviders(AppLaunchConfig config) {
 
 /// Resolves client RTC wiring from [AppLaunchConfig] and build distribution.
 ///
-/// When [distribution] is `staging`, Agora is enabled with [kStagingAgoraAppId]
-/// unless explicit dart-defines override — so `flutter build apk --release`
-/// with only `TILAWA_DISTRIBUTION=staging` can join Agora sessions.
+/// When [distribution] is `staging` or [debugMode] is true, Agora is enabled
+/// with [kStagingAgoraAppId] unless explicit dart-defines override — so
+/// `flutter run` (debug) and `flutter build apk --release` with only
+/// `TILAWA_DISTRIBUTION=staging` can join Agora sessions without extra defines.
 RtcLaunchConfig resolveRtcLaunchConfig(
   AppLaunchConfig config, {
   String distribution = const String.fromEnvironment(
     'TILAWA_DISTRIBUTION',
     defaultValue: 'local',
   ),
+  bool debugMode = kDebugMode,
 }) {
   var enabledCsv = config.enabledCallProvidersCsv;
   var agoraAppId = config.agoraAppId;
 
-  if (distribution == 'staging') {
+  if (distribution == 'staging' || debugMode) {
     final enabled = parseEnabledCallProviders(
       AppLaunchConfig(enabledCallProvidersCsv: enabledCsv),
     );
@@ -71,8 +74,19 @@ RtcLaunchConfig resolveRtcLaunchConfig(
 ///
 /// Mirrors [RTC_PROVIDER_PRIORITY] in Cloud Functions when launch config matches
 /// Firestore `quran_session_platform_config/global.enabledCallProviders`.
-SessionCallProviderKind resolveVoiceVideoProviderHint(AppLaunchConfig config) {
-  final rtc = resolveRtcLaunchConfig(config);
+SessionCallProviderKind resolveVoiceVideoProviderHint(
+  AppLaunchConfig config, {
+  String distribution = const String.fromEnvironment(
+    'TILAWA_DISTRIBUTION',
+    defaultValue: 'local',
+  ),
+  bool debugMode = kDebugMode,
+}) {
+  final rtc = resolveRtcLaunchConfig(
+    config,
+    distribution: distribution,
+    debugMode: debugMode,
+  );
   if (rtc.isAgoraEnabled) {
     return SessionCallProviderKind.agora;
   }
@@ -84,8 +98,19 @@ SessionCallProviderKind resolveVoiceVideoProviderHint(AppLaunchConfig config) {
 }
 
 /// Booking UI policy derived from [AppLaunchConfig] RTC flags.
-SessionModePolicy sessionModePolicyFromLaunchConfig(AppLaunchConfig config) {
-  final hint = resolveVoiceVideoProviderHint(config);
+SessionModePolicy sessionModePolicyFromLaunchConfig(
+  AppLaunchConfig config, {
+  String distribution = const String.fromEnvironment(
+    'TILAWA_DISTRIBUTION',
+    defaultValue: 'local',
+  ),
+  bool debugMode = kDebugMode,
+}) {
+  final hint = resolveVoiceVideoProviderHint(
+    config,
+    distribution: distribution,
+    debugMode: debugMode,
+  );
   return SessionModePolicy(
     voiceVideoUseMockProvider: hint == SessionCallProviderKind.mock,
   );

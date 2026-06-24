@@ -1,5 +1,6 @@
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter/foundation.dart';
+import 'package:quran_sessions/quran_sessions.dart';
 
 import 'agora_rtc_session_handle.dart';
 
@@ -53,9 +54,12 @@ class LiveAgoraRtcJoinGateway implements AgoraRtcJoinGateway {
         await _joinLive(engine, params);
       }
       return LiveAgoraRtcSessionHandle(engine);
-    } on Object {
+    } on RtcCallJoinFailure {
       await _releaseEngine(engine);
       rethrow;
+    } on Object catch (error) {
+      await _releaseEngine(engine);
+      throw mapAgoraRtcJoinFailure(error);
     }
   }
 
@@ -84,4 +88,24 @@ class LiveAgoraRtcJoinGateway implements AgoraRtcJoinGateway {
     );
     // coverage:ignore-end
   }
+}
+
+/// Maps native Agora join errors to domain [RtcCallJoinFailure] reason codes.
+@visibleForTesting
+RtcCallJoinFailure mapAgoraRtcJoinFailure(Object error) {
+  if (error is RtcCallJoinFailure) {
+    return error;
+  }
+  if (error is AgoraRtcException) {
+    final reasonCode = switch (error.code) {
+      -17 => 'join_channel_rejected',
+      -2 => 'join_invalid_argument',
+      -7 => 'join_not_initialized',
+      -102 => 'join_invalid_token',
+      -109 => 'join_token_expired',
+      _ => 'join_failed',
+    };
+    return RtcCallJoinFailure(reasonCode: reasonCode);
+  }
+  return const RtcCallJoinFailure(reasonCode: 'join_failed');
 }

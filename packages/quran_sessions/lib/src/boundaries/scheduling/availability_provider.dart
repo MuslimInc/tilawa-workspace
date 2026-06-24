@@ -20,5 +20,8 @@ abstract interface class AvailabilityProvider {
   );
 
   /// Removes a published slot (no active booking must exist).
-  Future<Either<QuranSessionsFailure, void>> withdrawSlot(String slotId);
+  Future<Either<QuranSessionsFailure, void>> withdrawSlot(
+    String teacherId,
+    String slotId,
+  );
 }

@@ -21,7 +21,7 @@ Set<DateTime> collectBookedStartsFromSlotLocks(
             ownerIds.contains(lock.teacherId) ||
             ownerIds.any((id) => lock.slotId.startsWith('${id}_')),
       )
-      .where((lock) => _slotLockBlocksGeneration(lock, nowUtc: nowUtc))
+      .where((lock) => slotLockBlocksGeneration(lock, nowUtc: nowUtc))
       .map((lock) => GeneratedSlot.parseEncodedStartUtc(lock.slotId))
       .whereType<DateTime>()
       .where((start) => !start.isBefore(fromUtc) && start.isBefore(toUtc))
@@ -29,7 +29,8 @@ Set<DateTime> collectBookedStartsFromSlotLocks(
       .toSet();
 }
 
-bool _slotLockBlocksGeneration(
+/// Whether a lock doc blocks generated availability for [nowUtc].
+bool slotLockBlocksGeneration(
   SlotLockSnapshot lock, {
   required DateTime nowUtc,
 }) {

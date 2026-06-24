@@ -12,7 +12,6 @@ import '../../../domain/entities/quran_session.dart';
 import '../../../domain/entities/teacher_availability.dart';
 import '../../../domain/entities/user_profile.dart';
 import '../../../domain/failures/quran_sessions_failure.dart';
-import '../../../domain/services/booked_slot_starts.dart';
 import '../../../domain/services/scheduling_policy_resolver.dart';
 import '../../../domain/services/teacher_availability_sort.dart';
 import '../../../domain/services/week_calendar.dart';
@@ -25,6 +24,7 @@ import '../../../domain/usecases/get_teacher_availability_usecase.dart';
 import '../../../domain/usecases/get_teacher_sessions_usecase.dart';
 import '../../../domain/usecases/get_user_profile_usecase.dart';
 import '../../../domain/usecases/get_weekly_schedule_usecase.dart';
+import '../../../domain/usecases/is_slot_booked_usecase.dart';
 import '../../../domain/value_objects/actor_role.dart';
 import 'teacher_dashboard_event.dart';
 import 'teacher_dashboard_state.dart';
@@ -42,6 +42,7 @@ class TeacherDashboardBloc
     extends Bloc<TeacherDashboardEvent, TeacherDashboardState> {
   TeacherDashboardBloc({
     required this._getTeacherSessions,
+    required this._isSlotBooked,
     required this._getAvailability,
     required this._blockGeneratedSlot,
     required this._availabilityProvider,
@@ -94,6 +95,7 @@ class TeacherDashboardBloc
   }
 
   final GetTeacherSessionsUseCase _getTeacherSessions;
+  final IsSlotBookedUseCase _isSlotBooked;
   final GetTeacherAvailabilityUseCase _getAvailability;
   final BlockGeneratedSlotUseCase _blockGeneratedSlot;
   final AvailabilityProvider _availabilityProvider;
@@ -483,6 +485,7 @@ class TeacherDashboardBloc
 
     // Remove the old slot then publish the replacement.
     final removeResult = await _availabilityProvider.withdrawSlot(
+      event.original.teacherId,
       event.original.slotId,
     );
     if (removeResult.isLeft()) {
@@ -655,6 +658,7 @@ class TeacherDashboardBloc
       );
     } else {
       result = await _availabilityProvider.withdrawSlot(
+        pending.teacherId,
         pending.snapshot.slotId,
       );
     }
@@ -693,16 +697,8 @@ class TeacherDashboardBloc
   }
 
   Future<bool> _isGeneratedSlotBooked(PendingSlotDelete pending) async {
-    final sessionsResult = await _getTeacherSessions(pending.teacherId);
-    if (sessionsResult.isLeft()) return false;
-    final sessions = sessionsResult.fold((_) => <QuranSession>[], (v) => v);
-    final startUtc = pending.snapshot.startsAt.toUtc();
-    final booked = collectBookedSlotStarts(
-      sessions,
-      windowStart: startUtc,
-      windowEnd: startUtc.add(const Duration(seconds: 1)),
-    );
-    return booked.contains(startUtc);
+    final result = await _isSlotBooked(pending.snapshot.slotId);
+    return result.fold((_) => false, (booked) => booked);
   }
 
   Future<void> _handleBookedAtCommit(

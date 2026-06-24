@@ -10,4 +10,10 @@ abstract interface class BookedSlotLockRepository {
     required DateTime windowEnd,
     DateTime? now,
   });
+
+  /// Whether [slotId] has an active hard/soft lock blocking slot deletion.
+  Future<Either<QuranSessionsFailure, bool>> isSlotBooked(
+    String slotId, {
+    DateTime? now,
+  });
 }

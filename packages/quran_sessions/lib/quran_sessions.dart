@@ -8,6 +8,7 @@ export 'src/boundaries/call/call_token_provider.dart';
 export 'src/boundaries/call/external_meeting_call_provider.dart';
 export 'src/boundaries/call/mock_session_call_provider.dart';
 export 'src/boundaries/call/routing_session_call_provider.dart';
+export 'src/boundaries/call/session_call_control_gateway.dart';
 export 'src/boundaries/call/session_call_provider.dart';
 // ── Boundaries: payment ───────────────────────────────────────────────────────
 export 'src/boundaries/payment/payment_provider.dart';
@@ -162,6 +163,7 @@ export 'src/domain/usecases/get_market_config_usecase.dart';
 export 'src/domain/usecases/get_session_policy_usecase.dart';
 export 'src/domain/usecases/join_session_usecase.dart';
 export 'src/domain/usecases/get_student_sessions_usecase.dart';
+export 'src/domain/usecases/is_slot_booked_usecase.dart';
 export 'src/domain/usecases/get_current_user_teacher_capability_usecase.dart';
 export 'src/domain/usecases/get_teacher_application_status_usecase.dart';
 export 'src/domain/usecases/get_teacher_availability_usecase.dart';
@@ -242,7 +244,12 @@ export 'src/presentation/failure_ui/quran_sessions_failure_ui.dart';
 // ── Presentation: router ──────────────────────────────────────────────────────
 export 'src/presentation/teacher_capability/teacher_capability_presentation.dart';
 export 'src/presentation/router/quran_sessions_routes.dart';
+export 'src/presentation/blocs/call_control/quran_session_call_control_cubit.dart';
+export 'src/presentation/blocs/call_control/quran_session_call_control_state.dart';
+export 'src/presentation/blocs/call_control/session_call_control_capabilities.dart';
+export 'src/presentation/navigation/in_app_call_shell_navigation.dart';
 export 'src/presentation/screens/in_app_call_shell_screen.dart';
+export 'src/presentation/widgets/in_app_call_connection_reporter.dart';
 export 'src/presentation/screens/booking_screen.dart';
 export 'src/presentation/screens/my_sessions_screen.dart';
 export 'src/presentation/screens/wallet_screen.dart';

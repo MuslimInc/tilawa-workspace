@@ -362,6 +362,14 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
       'Could not connect to the voice or video call. Try again in a moment.';
 
   @override
+  String get rtcCallJoinRejected =>
+      'Could not join this call. Leave any open call for this session, wait a moment, then try again.';
+
+  @override
+  String get rtcCallJoinInvalidToken =>
+      'This call link expired or is invalid. Tap Join again to get a fresh connection.';
+
+  @override
   String get webrtcSignalingUnavailable =>
       'In-app WebRTC calls are not available yet. Choose voice with Agora or an external meeting link.';
 
@@ -394,6 +402,44 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   @override
   String get inAppCallShellMockBetaBody =>
       'Beta preview — no live audio or video. Book a new session with Agora enabled to try a real call.';
+
+  @override
+  String get inAppCallShellSpeaker => 'Speaker';
+
+  @override
+  String get inAppCallShellFlipCamera => 'Flip camera';
+
+  @override
+  String get inAppCallShellTurnVideoOn => 'Turn camera on';
+
+  @override
+  String get inAppCallShellTurnVideoOff => 'Turn camera off';
+
+  @override
+  String get inAppCallShellMicrophoneMuted => 'Microphone muted';
+
+  @override
+  String get inAppCallShellMicrophoneUnmuted => 'Microphone unmuted';
+
+  @override
+  String get inAppCallShellCameraOff => 'Camera turned off';
+
+  @override
+  String get inAppCallShellCameraOn => 'Camera turned on';
+
+  @override
+  String get inAppCallShellSwitchCameraBlocked =>
+      'Cannot switch camera while it is off';
+
+  @override
+  String get inAppCallShellSpeakerOn => 'Speaker on';
+
+  @override
+  String get inAppCallShellSpeakerOff => 'Speaker off';
+
+  @override
+  String get inAppCallShellControlActionFailed =>
+      'Could not complete that action. Try again.';
 
   @override
   String get externalMeetingJoinTitle => 'Join outside MeMuslim?';
@@ -444,6 +490,9 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String pastSessionsSection(int count) {
     return 'Past ($count)';
   }
+
+  @override
+  String get loadMorePastSessions => 'Load more';
 
   @override
   String get noPastSessions => 'No past sessions';

@@ -137,6 +137,54 @@ void main() {
       check(joinGateway.lastHandle!.microphoneMuted).equals(true);
     });
 
+    test('setCameraEnabled forwards to active handle', () async {
+      final provider = buildProvider();
+      await provider.join(
+        const CallJoinRequest(
+          sessionId: 'session_1',
+          role: SessionParticipantRole.student,
+          callType: SessionCallType.videoCall,
+          providerKind: SessionCallProviderKind.agora,
+        ),
+      );
+
+      await provider.setCameraEnabled('session_1', enabled: false);
+
+      check(joinGateway.lastHandle!.cameraEnabled).equals(false);
+    });
+
+    test('switchCamera forwards to active handle', () async {
+      final provider = buildProvider();
+      await provider.join(
+        const CallJoinRequest(
+          sessionId: 'session_1',
+          role: SessionParticipantRole.student,
+          callType: SessionCallType.videoCall,
+          providerKind: SessionCallProviderKind.agora,
+        ),
+      );
+
+      await provider.switchCamera('session_1');
+
+      check(joinGateway.lastHandle!.switchedCamera).isTrue();
+    });
+
+    test('setSpeakerEnabled forwards to active handle', () async {
+      final provider = buildProvider();
+      await provider.join(
+        const CallJoinRequest(
+          sessionId: 'session_1',
+          role: SessionParticipantRole.student,
+          callType: SessionCallType.voiceCall,
+          providerKind: SessionCallProviderKind.agora,
+        ),
+      );
+
+      await provider.setSpeakerEnabled('session_1', enabled: true);
+
+      check(joinGateway.lastHandle!.speakerEnabled).equals(true);
+    });
+
     test('rejects join when fallback app id is blank', () async {
       final provider = AgoraCallProvider(
         appId: '   ',
@@ -240,6 +288,50 @@ void main() {
 
       check(joinGateway.lastHandle).isNull();
     });
+
+    test(
+      'releases stale pooled session before rejoining same session',
+      () async {
+        final provider = buildProvider();
+        const request = CallJoinRequest(
+          sessionId: 'session_1',
+          role: SessionParticipantRole.student,
+          callType: SessionCallType.voiceCall,
+          providerKind: SessionCallProviderKind.agora,
+        );
+
+        await provider.join(request);
+        final firstHandle = joinGateway.lastHandle;
+        check(firstHandle).isNotNull();
+
+        await provider.join(request);
+
+        check(firstHandle!.released).isTrue();
+        check(joinGateway.lastHandle).isNotNull();
+        check(joinGateway.lastHandle == firstHandle).isFalse();
+        check(enginePool.sessionFor('session_1')).isNotNull();
+      },
+    );
+
+    test('deduplicates concurrent join for the same session id', () async {
+      joinGateway.joinDelay = const Duration(milliseconds: 50);
+      final provider = buildProvider();
+      const request = CallJoinRequest(
+        sessionId: 'session_1',
+        role: SessionParticipantRole.student,
+        callType: SessionCallType.voiceCall,
+        providerKind: SessionCallProviderKind.agora,
+      );
+
+      final first = provider.join(request);
+      final second = provider.join(request);
+
+      final rooms = await Future.wait([first, second]);
+
+      check(rooms[0].sessionId).equals('session_1');
+      check(rooms[1].sessionId).equals('session_1');
+      check(joinGateway.joinCount).equals(1);
+    });
   });
 
   group('LiveAgoraRtcJoinGateway', () {
@@ -291,6 +383,12 @@ void main() {
 
       check(releaseCount).equals(1);
     });
+
+    test('maps Agora join rejection (-17) to join_channel_rejected', () {
+      final failure = mapAgoraRtcJoinFailure(AgoraRtcException(code: -17));
+
+      check(failure.reasonCode).equals('join_channel_rejected');
+    });
   });
 }
 
@@ -327,10 +425,16 @@ class _FakeAgoraRtcJoinGateway implements AgoraRtcJoinGateway {
   AgoraRtcJoinParams? lastParams;
   _FakeAgoraRtcSessionHandle? lastHandle;
   bool shouldFail = false;
+  Duration joinDelay = Duration.zero;
+  int joinCount = 0;
 
   @override
   Future<AgoraRtcSessionHandle> join(AgoraRtcJoinParams params) async {
+    joinCount++;
     lastParams = params;
+    if (joinDelay > Duration.zero) {
+      await Future<void>.delayed(joinDelay);
+    }
     if (shouldFail) {
       throw const RtcCallJoinFailure(reasonCode: 'join_failed');
     }
@@ -343,6 +447,9 @@ class _FakeAgoraRtcJoinGateway implements AgoraRtcJoinGateway {
 class _FakeAgoraRtcSessionHandle implements AgoraRtcSessionHandle {
   bool released = false;
   bool? microphoneMuted;
+  bool? cameraEnabled;
+  bool? speakerEnabled;
+  bool switchedCamera = false;
 
   @override
   Future<void> leaveAndRelease() async {
@@ -352,6 +459,21 @@ class _FakeAgoraRtcSessionHandle implements AgoraRtcSessionHandle {
   @override
   Future<void> setMicrophoneMuted(bool muted) async {
     microphoneMuted = muted;
+  }
+
+  @override
+  Future<void> setCameraEnabled(bool enabled) async {
+    cameraEnabled = enabled;
+  }
+
+  @override
+  Future<void> switchCamera() async {
+    switchedCamera = true;
+  }
+
+  @override
+  Future<void> setSpeakerEnabled(bool enabled) async {
+    speakerEnabled = enabled;
   }
 
   @override

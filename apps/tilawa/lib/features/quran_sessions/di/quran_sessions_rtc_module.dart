@@ -21,9 +21,7 @@ class QuranSessionsRtcModule {
 
     SessionCallProvider? agora;
     if (rtc.isAgoraEnabled) {
-      final enginePool = sl.isRegistered<AgoraRtcEnginePool>()
-          ? sl<AgoraRtcEnginePool>()
-          : AgoraRtcEnginePool();
+      final enginePool = sl<AgoraRtcEnginePool>();
       agora = AgoraCallProvider(
         appId: rtc.agoraAppId,
         tokenProvider: sl<CallTokenProvider>(),

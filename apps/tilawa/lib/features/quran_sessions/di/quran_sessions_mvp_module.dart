@@ -152,6 +152,9 @@ class QuranSessionsMvpModule {
       () => GetTeacherSessionsUseCase(sl<SessionRepository>()),
     );
     sl.registerLazySingletonIfAbsent(
+      () => IsSlotBookedUseCase(sl<BookedSlotLockRepository>()),
+    );
+    sl.registerLazySingletonIfAbsent(
       () => CreateBookingUseCase(
         sl<BookingRepository>(),
         sl<GetTeacherAvailabilityUseCase>(),
@@ -325,6 +328,7 @@ class QuranSessionsMvpModule {
     sl.registerFactoryIfAbsent(
       () => TeacherDashboardBloc(
         getTeacherSessions: sl<GetTeacherSessionsUseCase>(),
+        isSlotBooked: sl<IsSlotBookedUseCase>(),
         getAvailability: sl<GetTeacherAvailabilityUseCase>(),
         blockGeneratedSlot: sl<BlockGeneratedSlotUseCase>(),
         availabilityProvider: sl<AvailabilityProvider>(),

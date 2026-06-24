@@ -47,6 +47,7 @@ void main() {
   late FakeAvailabilityProvider availabilityProvider;
   late BlockGeneratedSlotUseCase blockGeneratedSlot;
   late SpyGetTeacherAvailabilityUseCase spyGetAvailability;
+  late FakeBookedSlotLockRepository bookedSlotLockRepo;
   late FakeCommitTimers fakeTimers;
   late CommitTimerFactory testCommitTimerFactory;
 
@@ -65,6 +66,7 @@ void main() {
       scheduleRepo: scheduleRepo,
       schedulingConfigRepo: schedulingConfigRepo,
       userProfileRepo: userProfileRepo,
+      bookedSlotLockRepository: bookedSlotLockRepo,
       fridayReminderStore: fridayReminderStore,
       commitTimerFactory: testCommitTimerFactory,
       commitDelay: commitDelay,
@@ -81,10 +83,11 @@ void main() {
     userProfileRepo = FakeUserProfileRepository();
     fridayReminderStore = InMemoryFridayReviewReminderStore();
     availabilityProvider = FakeAvailabilityProvider();
+    bookedSlotLockRepo = FakeBookedSlotLockRepository();
     blockGeneratedSlot = BlockGeneratedSlotUseCase(scheduleRepo);
     spyGetAvailability = SpyGetTeacherAvailabilityUseCase(
       scheduleRepository: scheduleRepo,
-      bookedSlotLocks: FakeBookedSlotLockRepository(),
+      bookedSlotLocks: bookedSlotLockRepo,
       now: () => fixedNow,
     );
     fakeTimers = FakeCommitTimers();
@@ -418,6 +421,10 @@ void main() {
             startsAt: slot.startsAt,
           ),
         ];
+        bookedSlotLockRepo.seedHardLock(
+          teacherId: 'teacher_1',
+          startUtc: slot.startsAt.toUtc(),
+        );
         fakeTimers.fireAll();
         await b.stream.firstWhere((s) {
           return s is TeacherDashboardSuccess &&

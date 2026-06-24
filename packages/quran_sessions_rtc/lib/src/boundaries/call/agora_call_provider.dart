@@ -22,6 +22,8 @@ class AgoraCallProvider implements SessionCallProvider, CallProvider {
   final RtcPermissionGate permissionGate;
   final AgoraRtcEnginePool _enginePool;
   final AgoraRtcJoinGateway _joinGateway;
+  final Map<String, Future<CallRoom>> _joinInFlight =
+      <String, Future<CallRoom>>{};
 
   @override
   Future<CallRoom> join(CallJoinRequest request) async {
@@ -32,9 +34,28 @@ class AgoraCallProvider implements SessionCallProvider, CallProvider {
       throw const CallProviderUnavailableFailure();
     }
 
+    final sessionId = request.sessionId;
+    final inFlight = _joinInFlight[sessionId];
+    if (inFlight != null) {
+      return inFlight;
+    }
+
+    final joinFuture = _joinOnce(request);
+    _joinInFlight[sessionId] = joinFuture;
+    try {
+      return await joinFuture;
+    } finally {
+      _joinInFlight.remove(sessionId);
+    }
+  }
+
+  Future<CallRoom> _joinOnce(CallJoinRequest request) async {
     await permissionGate.ensureGranted(
       needsCamera: request.callType == SessionCallType.videoCall,
     );
+
+    // Drop any stale engine still bound to this session before re-joining.
+    await _enginePool.release(request.sessionId);
 
     final userId = await resolveUserId();
     final credentials = await tokenProvider.fetchCredentials(
@@ -100,5 +121,44 @@ class AgoraCallProvider implements SessionCallProvider, CallProvider {
       return;
     }
     await handle.setMicrophoneMuted(muted);
+  }
+
+  @override
+  Future<void> setMicrophoneEnabled(
+    String sessionId, {
+    required bool enabled,
+  }) => setMicrophoneMuted(sessionId, muted: !enabled);
+
+  @override
+  Future<void> setCameraEnabled(
+    String sessionId, {
+    required bool enabled,
+  }) async {
+    final handle = _enginePool.sessionFor(sessionId);
+    if (handle == null) {
+      return;
+    }
+    await handle.setCameraEnabled(enabled);
+  }
+
+  @override
+  Future<void> switchCamera(String sessionId) async {
+    final handle = _enginePool.sessionFor(sessionId);
+    if (handle == null) {
+      return;
+    }
+    await handle.switchCamera();
+  }
+
+  @override
+  Future<void> setSpeakerEnabled(
+    String sessionId, {
+    required bool enabled,
+  }) async {
+    final handle = _enginePool.sessionFor(sessionId);
+    if (handle == null) {
+      return;
+    }
+    await handle.setSpeakerEnabled(enabled);
   }
 }

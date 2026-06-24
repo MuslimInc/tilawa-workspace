@@ -15,6 +15,7 @@ class SessionCard extends StatelessWidget {
     this.onTap,
     this.onJoin,
     this.onCancel,
+    this.isJoinLoading = false,
   });
 
   final QuranSession session;
@@ -25,6 +26,7 @@ class SessionCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onJoin;
   final VoidCallback? onCancel;
+  final bool isJoinLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +102,8 @@ class SessionCard extends StatelessWidget {
                     text: l10n.joinSession,
                     variant: TilawaButtonVariant.primary,
                     size: TilawaButtonSize.small,
-                    onPressed: onJoin,
+                    isLoading: isJoinLoading,
+                    onPressed: isJoinLoading ? null : onJoin,
                   ),
                 ],
               ],

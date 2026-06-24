@@ -17,6 +17,16 @@ final class MySessionsLoadRequested extends MySessionsEvent {
   List<Object?> get props => [studentId];
 }
 
+/// User scrolled to the end of past sessions.
+final class MySessionsLoadMorePastRequested extends MySessionsEvent {
+  const MySessionsLoadMorePastRequested({required this.studentId});
+
+  final String studentId;
+
+  @override
+  List<Object?> get props => [studentId];
+}
+
 /// User cancels an upcoming session from the list.
 final class SessionCancelled extends MySessionsEvent {
   const SessionCancelled({
@@ -39,6 +49,11 @@ final class SessionJoinRequested extends MySessionsEvent {
 
   @override
   List<Object?> get props => [sessionId];
+}
+
+/// UI handled post-join navigation; clears [MySessionsSuccess.joinCompletedSessionId].
+final class MySessionsJoinCompletedAcknowledged extends MySessionsEvent {
+  const MySessionsJoinCompletedAcknowledged();
 }
 
 /// User submits a star rating + comment for a completed session.

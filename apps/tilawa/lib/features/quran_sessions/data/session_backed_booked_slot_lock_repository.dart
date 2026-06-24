@@ -1,5 +1,4 @@
 import 'package:dartz_plus/dartz_plus.dart';
-
 import 'package:quran_sessions/quran_sessions.dart';
 
 /// MVP / test adapter: derives booked starts from in-memory sessions.
@@ -16,7 +15,9 @@ class SessionBackedBookedSlotLockRepository
     required DateTime windowEnd,
     DateTime? now,
   }) async {
-    final sessionsResult = await _sessions.getTeacherSessions(teacherProfileId);
+    final sessionsResult = await _sessions.getTeacherUpcomingSessions(
+      teacherProfileId,
+    );
     return sessionsResult.map(
       (sessions) => collectBookedSlotStarts(
         sessions,
@@ -24,5 +25,30 @@ class SessionBackedBookedSlotLockRepository
         windowEnd: windowEnd,
       ),
     );
+  }
+
+  @override
+  Future<Either<QuranSessionsFailure, bool>> isSlotBooked(
+    String slotId, {
+    DateTime? now,
+  }) async {
+    final start = GeneratedSlot.parseEncodedStartUtc(slotId);
+    if (start == null) return const Right(false);
+    final sessionsResult = await _sessions.getTeacherUpcomingSessions(
+      _teacherIdFromSlotId(slotId) ?? '',
+    );
+    return sessionsResult.map((sessions) {
+      final booked = collectBookedSlotStarts(
+        sessions,
+        windowStart: start,
+        windowEnd: start.add(const Duration(seconds: 1)),
+      );
+      return booked.contains(start.toUtc());
+    });
+  }
+
+  String? _teacherIdFromSlotId(String slotId) {
+    final match = RegExp(r'^(.+)_\d{8}T').firstMatch(slotId);
+    return match?.group(1);
   }
 }

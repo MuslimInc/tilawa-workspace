@@ -1,0 +1,37 @@
+---
+description: Quran Sessions — enforce Performance → UX → UI review order before any change in session packages, app feature, or Cloud Functions.
+globs: packages/quran_sessions/**, packages/quran_sessions_rtc/**, apps/tilawa/lib/features/quran_sessions/**, functions/src/quranSessions/**
+alwaysApply: false
+---
+
+# Quran Sessions — performance first
+
+**Mandatory priority:** 1. Performance 2. UX 3. UI
+
+Canonical framework (templates, acceptance criteria, final report format):
+[`docs/quran_sessions/performance_first_review_framework.md`](../../docs/quran_sessions/performance_first_review_framework.md)
+
+Baseline audit (2026-06-24):
+[`docs/quran_sessions/baseline_performance_audit.md`](../../docs/quran_sessions/baseline_performance_audit.md)
+
+## Before implementing
+
+1. Read the framework doc.
+2. Produce **Performance Impact Analysis** (template in framework) for the change.
+3. Report complexity for any **critical flow** touched (booking, availability, slot delete, overrides, teacher/session lists, join, report/dispute, notifications, device epoch, A/V join).
+4. Only after performance is accepted → **UX Review** → **UI Review**.
+
+## Hard rules
+
+- No global Firestore scans; no unbounded queries without pagination and documented bound.
+- Override lookup by date key (`yyyy-MM-dd` doc id), not full override collection scan.
+- Slot deletion: incremental override/block — not full-window regeneration.
+- Server is authoritative for price, role, provider, lifecycle — never trust client.
+- A/V provider code stays behind `SessionCallProvider` / `CallTokenProvider` abstractions; review join latency and low-end Android risk.
+- Do not polish UI while perf or UX blockers exist for the same flow.
+
+## Task not complete until
+
+Framework acceptance criteria met (documented perf impact, scoped queries, tests on critical paths, remaining risks listed).
+
+**Conflict:** performance beats UI; reliable performance beats fancy UX.

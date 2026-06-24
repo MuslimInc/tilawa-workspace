@@ -19,4 +19,25 @@ abstract interface class SessionCallProvider {
     String sessionId, {
     required bool muted,
   });
+
+  /// Enables or disables the local microphone for an active in-app call.
+  Future<void> setMicrophoneEnabled(
+    String sessionId, {
+    required bool enabled,
+  });
+
+  /// Enables or disables the local camera for an active video call.
+  Future<void> setCameraEnabled(
+    String sessionId, {
+    required bool enabled,
+  });
+
+  /// Switches between front and back camera during a video call.
+  Future<void> switchCamera(String sessionId);
+
+  /// Routes audio to the device speaker or earpiece.
+  Future<void> setSpeakerEnabled(
+    String sessionId, {
+    required bool enabled,
+  });
 }

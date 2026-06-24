@@ -10,6 +10,8 @@ class MySessionsScreen extends StatefulWidget {
     this.resolveTeacherName,
     this.onRescheduleRequested,
     this.onSessionDetailRequested,
+    this.createCallControlGateway,
+    this.buildCallSurface,
   });
 
   final String studentId;
@@ -24,6 +26,9 @@ class MySessionsScreen extends StatefulWidget {
   onRescheduleRequested;
 
   final void Function(String bookingId)? onSessionDetailRequested;
+
+  final SessionCallControlGatewayFactory? createCallControlGateway;
+  final InAppCallSurfaceBuilder? buildCallSurface;
 
   @override
   State<MySessionsScreen> createState() => _MySessionsScreenState();
@@ -44,147 +49,248 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.mySessionsTitle)),
-      body: BlocConsumer<MySessionsBloc, MySessionsState>(
-        listener: (context, state) {
-          if (state is MySessionsSuccess && state.lastSubmittedReview != null) {
-            TilawaFeedback.showToast(
-              context,
-              message: l10n.reviewSubmittedThanks,
-              variant: TilawaFeedbackVariant.success,
-            );
-          }
-          if (state is MySessionsSuccess && state.cancellationFailure != null) {
-            TilawaFeedback.showToast(
-              context,
-              message: state.cancellationFailure!.toLocalizedMessage(context),
-              variant: TilawaFeedbackVariant.error,
-            );
-          }
-          if (state is MySessionsSuccess && state.joinFailure != null) {
-            TilawaFeedback.showToast(
-              context,
-              message: state.joinFailure!.toLocalizedMessage(context),
-              variant: TilawaFeedbackVariant.error,
-            );
-          }
-        },
-        builder: (context, state) => switch (state) {
-          MySessionsInitial() || MySessionsLoading() => const Center(
-            child: CircularProgressIndicator(),
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<MySessionsBloc, MySessionsState>(
+            listenWhen: (previous, current) =>
+                current is MySessionsSuccess &&
+                current.joinCompletedSessionId != null &&
+                (previous is! MySessionsSuccess ||
+                    previous.joinCompletedSessionId !=
+                        current.joinCompletedSessionId),
+            listener: (context, state) async {
+              if (state is! MySessionsSuccess) return;
+
+              final sessionId = state.joinCompletedSessionId;
+              if (sessionId == null) return;
+
+              final session = _findSession(state, sessionId);
+              context.read<MySessionsBloc>().add(
+                const MySessionsJoinCompletedAcknowledged(),
+              );
+
+              if (session == null || _isExternalMeeting(session)) {
+                return;
+              }
+
+              if (!context.mounted) return;
+              await pushInAppCallShell(
+                context,
+                sessionId: sessionId,
+                callType: session.callType,
+                callProviderKind: session.callProviderKind,
+                participantName: widget.resolveTeacherName?.call(
+                  session.teacherId,
+                ),
+                participantSubtitle: l10n.callTypeLabel(session.callType),
+                buildCallSurface: widget.buildCallSurface,
+                createCallControlGateway: widget.createCallControlGateway,
+              );
+            },
           ),
-          MySessionsEmpty() => const Center(
-            child: _EmptyState(),
-          ),
-          MySessionsFailure(:final failure) => Center(
-            child: Padding(
-              padding: EdgeInsets.all(
-                Theme.of(context).tokens.spaceLarge,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(failure.toLocalizedMessage(context)),
-                  SizedBox(height: Theme.of(context).tokens.spaceMedium),
-                  TilawaButton(
-                    text: l10n.retry,
-                    variant: TilawaButtonVariant.primary,
-                    onPressed: _reload,
+          BlocListener<MySessionsBloc, MySessionsState>(
+            listener: (context, state) {
+              if (state is MySessionsSuccess &&
+                  state.lastSubmittedReview != null) {
+                TilawaFeedback.showToast(
+                  context,
+                  message: l10n.reviewSubmittedThanks,
+                  variant: TilawaFeedbackVariant.success,
+                );
+              }
+              if (state is MySessionsSuccess &&
+                  state.cancellationFailure != null) {
+                TilawaFeedback.showToast(
+                  context,
+                  message: state.cancellationFailure!.toLocalizedMessage(
+                    context,
                   ),
-                ],
+                  variant: TilawaFeedbackVariant.error,
+                );
+              }
+              if (state is MySessionsSuccess && state.joinFailure != null) {
+                TilawaFeedback.showToast(
+                  context,
+                  message: state.joinFailure!.toLocalizedMessage(context),
+                  variant: TilawaFeedbackVariant.error,
+                );
+              }
+            },
+          ),
+        ],
+        child: BlocBuilder<MySessionsBloc, MySessionsState>(
+          builder: (context, state) => switch (state) {
+            MySessionsInitial() || MySessionsLoading() => const Center(
+              child: CircularProgressIndicator(),
+            ),
+            MySessionsEmpty() => const Center(
+              child: _EmptyState(),
+            ),
+            MySessionsFailure(:final failure) => Center(
+              child: Padding(
+                padding: EdgeInsets.all(
+                  Theme.of(context).tokens.spaceLarge,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(failure.toLocalizedMessage(context)),
+                    SizedBox(height: Theme.of(context).tokens.spaceMedium),
+                    TilawaButton(
+                      text: l10n.retry,
+                      variant: TilawaButtonVariant.primary,
+                      onPressed: _reload,
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          MySessionsSuccess(:final upcoming, :final past) => RefreshIndicator(
-            onRefresh: () async => _reload(),
-            child: CustomScrollView(
-              slivers: [
-                _SectionHeader(
-                  title: l10n.upcomingSessionsSection(upcoming.length),
-                ),
-                if (upcoming.isEmpty)
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.all(
-                        Theme.of(context).tokens.spaceLarge,
-                      ),
-                      child: Text(l10n.noUpcomingSessions),
+            final MySessionsSuccess success => RefreshIndicator(
+              onRefresh: () async => _reload(),
+              child: CustomScrollView(
+                slivers: [
+                  _SectionHeader(
+                    title: l10n.upcomingSessionsSection(
+                      success.upcoming.length,
                     ),
-                  )
-                else
-                  SliverList.builder(
-                    itemCount: upcoming.length,
-                    itemBuilder: (context, i) {
-                      final session = upcoming[i];
-                      return Column(
-                        children: [
-                          SessionCard(
-                            session: session,
-                            teacherName: widget.resolveTeacherName?.call(
-                              session.teacherId,
-                            ),
-                            onJoin: () => context.read<MySessionsBloc>().add(
-                              SessionJoinRequested(sessionId: session.id),
-                            ),
-                            onCancel: () => _confirmCancel(session),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              TilawaButton(
-                                text: l10n.viewSessionDetails,
-                                variant: TilawaButtonVariant.ghost,
-                                size: TilawaButtonSize.small,
-                                onPressed: () =>
-                                    widget.onSessionDetailRequested?.call(
-                                      session.bookingId,
-                                    ),
+                  ),
+                  if (success.upcoming.isEmpty)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.all(
+                          Theme.of(context).tokens.spaceLarge,
+                        ),
+                        child: Text(l10n.noUpcomingSessions),
+                      ),
+                    )
+                  else
+                    SliverList.builder(
+                      itemCount: success.upcoming.length,
+                      itemBuilder: (context, i) {
+                        final session = success.upcoming[i];
+                        return Column(
+                          children: [
+                            SessionCard(
+                              session: session,
+                              teacherName: widget.resolveTeacherName?.call(
+                                session.teacherId,
                               ),
-                              if (widget.onRescheduleRequested != null)
+                              isJoinLoading:
+                                  success.joinInProgress == session.id,
+                              onJoin: () => _requestJoin(session),
+                              onCancel: () => _confirmCancel(session),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
                                 TilawaButton(
-                                  text: l10n.rescheduleAction,
+                                  text: l10n.viewSessionDetails,
                                   variant: TilawaButtonVariant.ghost,
                                   size: TilawaButtonSize.small,
                                   onPressed: () =>
-                                      widget.onRescheduleRequested!(
-                                        bookingId: session.bookingId,
-                                        teacherId: session.teacherId,
-                                        studentId: widget.studentId,
+                                      widget.onSessionDetailRequested?.call(
+                                        session.bookingId,
                                       ),
                                 ),
-                            ],
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                _SectionHeader(title: l10n.pastSessionsSection(past.length)),
-                if (past.isEmpty)
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.all(
-                        Theme.of(context).tokens.spaceLarge,
-                      ),
-                      child: Text(l10n.noPastSessions),
+                                if (widget.onRescheduleRequested != null)
+                                  TilawaButton(
+                                    text: l10n.rescheduleAction,
+                                    variant: TilawaButtonVariant.ghost,
+                                    size: TilawaButtonSize.small,
+                                    onPressed: () =>
+                                        widget.onRescheduleRequested!(
+                                          bookingId: session.bookingId,
+                                          teacherId: session.teacherId,
+                                          studentId: widget.studentId,
+                                        ),
+                                  ),
+                              ],
+                            ),
+                          ],
+                        );
+                      },
                     ),
-                  )
-                else
-                  SliverList.builder(
-                    itemCount: past.length,
-                    itemBuilder: (context, i) {
-                      final session = past[i];
-                      return SessionCard(
-                        session: session,
-                        teacherName: widget.resolveTeacherName?.call(
-                          session.teacherId,
-                        ),
-                      );
-                    },
+                  _SectionHeader(
+                    title: l10n.pastSessionsSection(success.past.length),
                   ),
-              ],
+                  if (success.past.isEmpty)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.all(
+                          Theme.of(context).tokens.spaceLarge,
+                        ),
+                        child: Text(l10n.noPastSessions),
+                      ),
+                    )
+                  else
+                    SliverList.builder(
+                      itemCount: success.past.length,
+                      itemBuilder: (context, i) {
+                        final session = success.past[i];
+                        return SessionCard(
+                          session: session,
+                          teacherName: widget.resolveTeacherName?.call(
+                            session.teacherId,
+                          ),
+                        );
+                      },
+                    ),
+                  if (success.pastNextCursor != null)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.all(
+                          Theme.of(context).tokens.spaceLarge,
+                        ),
+                        child: TilawaButton(
+                          text: l10n.loadMorePastSessions,
+                          variant: TilawaButtonVariant.secondary,
+                          isLoading: success.isLoadingMorePast,
+                          onPressed: success.isLoadingMorePast
+                              ? null
+                              : () => context.read<MySessionsBloc>().add(
+                                  MySessionsLoadMorePastRequested(
+                                    studentId: widget.studentId,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
-          ),
-        },
+          },
+        ),
       ),
+    );
+  }
+
+  QuranSession? _findSession(MySessionsSuccess state, String sessionId) {
+    for (final session in state.upcoming) {
+      if (session.id == sessionId) {
+        return session;
+      }
+    }
+    return null;
+  }
+
+  bool _isExternalMeeting(QuranSession session) {
+    if (session.callProviderKind != SessionCallProviderKind.external) {
+      return false;
+    }
+    final url = session.joinUrl?.trim();
+    return url?.isNotEmpty ?? false;
+  }
+
+  Future<void> _requestJoin(QuranSession session) async {
+    if (_isExternalMeeting(session)) {
+      final confirmed = await showExternalMeetingJoinSheet(
+        context,
+        meetingUrl: session.joinUrl!,
+      );
+      if (!confirmed || !mounted) return;
+    }
+    context.read<MySessionsBloc>().add(
+      SessionJoinRequested(sessionId: session.id),
     );
   }
 

@@ -164,6 +164,7 @@ TeacherDashboardBloc buildTestTeacherDashboardBloc({
   FakeMarketSchedulingConfigRepository? schedulingConfigRepo,
   FakeUserProfileRepository? userProfileRepo,
   FakeTeacherProfileRepository? teacherProfileRepo,
+  FakeBookedSlotLockRepository? bookedSlotLockRepository,
   InMemoryFridayReviewReminderStore? fridayReminderStore,
   CommitTimerFactory? commitTimerFactory,
   Duration commitDelay = const Duration(days: 365),
@@ -177,6 +178,9 @@ TeacherDashboardBloc buildTestTeacherDashboardBloc({
   final reminders = fridayReminderStore ?? InMemoryFridayReviewReminderStore();
   return TeacherDashboardBloc(
     getTeacherSessions: GetTeacherSessionsUseCase(sessionRepo),
+    isSlotBooked: IsSlotBookedUseCase(
+      bookedSlotLockRepository ?? FakeBookedSlotLockRepository(),
+    ),
     getAvailability: getAvailability,
     blockGeneratedSlot: blockGeneratedSlot,
     availabilityProvider: availabilityProvider,

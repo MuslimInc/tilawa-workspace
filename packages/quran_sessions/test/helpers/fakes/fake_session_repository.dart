@@ -19,19 +19,55 @@ class FakeSessionRepository implements SessionRepository {
   }
 
   @override
-  Future<Either<QuranSessionsFailure, List<QuranSession>>> getStudentSessions(
-    String studentId,
-  ) async {
+  Future<Either<QuranSessionsFailure, SessionPage>> getStudentUpcomingSessions(
+    String studentId, {
+    String? cursor,
+    int limit = kDefaultSessionPageSize,
+  }) async {
     if (failWith != null) return Left(failWith!);
-    return Right(sessions.where((s) => s.studentId == studentId).toList());
+    final now = DateTime.now();
+    final upcoming =
+        sessions
+            .where((s) => s.studentId == studentId && s.startsAt.isAfter(now))
+            .toList()
+          ..sort((a, b) => a.startsAt.compareTo(b.startsAt));
+    return Right(SessionPage(sessions: _pageSlice(upcoming, cursor, limit)));
   }
 
   @override
-  Future<Either<QuranSessionsFailure, List<QuranSession>>> getTeacherSessions(
-    String teacherId,
-  ) async {
+  Future<Either<QuranSessionsFailure, SessionPage>> getStudentPastSessions(
+    String studentId, {
+    String? cursor,
+    int limit = kDefaultSessionPageSize,
+  }) async {
     if (failWith != null) return Left(failWith!);
-    return Right(sessions.where((s) => s.teacherId == teacherId).toList());
+    final now = DateTime.now();
+    final past =
+        sessions
+            .where((s) => s.studentId == studentId && !s.startsAt.isAfter(now))
+            .toList()
+          ..sort((a, b) => b.startsAt.compareTo(a.startsAt));
+    final page = _pageSlice(past, cursor, limit);
+    final nextCursor = page.length == limit && page.isNotEmpty
+        ? page.last.id
+        : null;
+    return Right(SessionPage(sessions: page, nextCursor: nextCursor));
+  }
+
+  @override
+  Future<Either<QuranSessionsFailure, List<QuranSession>>>
+  getTeacherUpcomingSessions(
+    String teacherId, {
+    int limit = kDefaultSessionPageSize,
+  }) async {
+    if (failWith != null) return Left(failWith!);
+    final now = DateTime.now();
+    final upcoming =
+        sessions
+            .where((s) => s.teacherId == teacherId && s.startsAt.isAfter(now))
+            .toList()
+          ..sort((a, b) => a.startsAt.compareTo(b.startsAt));
+    return Right(upcoming.take(limit).toList());
   }
 
   @override
@@ -57,6 +93,19 @@ class FakeSessionRepository implements SessionRepository {
     );
     sessions[idx] = updated;
     return Right(updated);
+  }
+
+  List<QuranSession> _pageSlice(
+    List<QuranSession> sorted,
+    String? cursor,
+    int limit,
+  ) {
+    var start = 0;
+    if (cursor != null) {
+      final idx = sorted.indexWhere((s) => s.id == cursor);
+      start = idx < 0 ? 0 : idx + 1;
+    }
+    return sorted.skip(start).take(limit).toList();
   }
 }
 

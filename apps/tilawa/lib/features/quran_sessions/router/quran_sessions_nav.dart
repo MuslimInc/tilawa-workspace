@@ -200,6 +200,8 @@ List<RouteBase> get quranSessionsRoutes => [
         child: MySessionsScreen(
           studentId: studentId,
           resolveTeacherName: _resolveTeacherName,
+          createCallControlGateway: _createQuranSessionCallControlGateway,
+          buildCallSurface: _buildQuranSessionsCallSurface(),
           onSessionDetailRequested: (bookingId) => context.push(
             QuranSessionsRoutes.sessionDetail.replaceFirst(
               ':bookingId',
@@ -240,38 +242,8 @@ List<RouteBase> get quranSessionsRoutes => [
         create: (_) => getIt<SessionDetailBloc>(),
         child: SessionDetailScreen(
           bookingId: bookingId,
-          onLeaveCall: (sessionId) =>
-              getIt<SessionCallProvider>().leaveSession(sessionId),
-          onSetMicrophoneMuted: (sessionId, {required muted}) =>
-              getIt<SessionCallProvider>().setMicrophoneMuted(
-                sessionId,
-                muted: muted,
-              ),
-          buildCallSurface:
-              (
-                context, {
-                required sessionId,
-                required callType,
-                required callProviderKind,
-              }) {
-                if (!getIt.isRegistered<AgoraRtcEnginePool>()) {
-                  return null;
-                }
-                final l10n = context.quranSessionsL10n;
-                return buildAgoraCallSurface(
-                  sessionId: sessionId,
-                  callType: callType,
-                  providerKind: callProviderKind,
-                  enginePool: getIt<AgoraRtcEnginePool>(),
-                  labels: AgoraCallSurfaceLabels(
-                    connecting: l10n.inAppCallShellConnecting,
-                    connected: l10n.inAppCallShellConnected,
-                    waitingForParticipant:
-                        l10n.inAppCallShellWaitingForParticipant,
-                    voiceCallTitle: l10n.inAppCallShellTitle,
-                  ),
-                );
-              },
+          createCallControlGateway: _createQuranSessionCallControlGateway,
+          buildCallSurface: _buildQuranSessionsCallSurface(),
         ),
       );
     },
@@ -419,8 +391,43 @@ void _openTeacherApply(BuildContext context) {
   context.push(QuranSessionsRoutes.teacherApply);
 }
 
-Future<void> _openProfileCompletion(BuildContext context) async {
+void _openProfileCompletion(BuildContext context) async {
   await context.push(QuranSessionsRoutes.profileCompletion);
+}
+
+InAppCallSurfaceBuilder? _buildQuranSessionsCallSurface() {
+  return (
+    context, {
+    required sessionId,
+    required callType,
+    required callProviderKind,
+  }) {
+    if (!getIt.isRegistered<AgoraRtcEnginePool>()) {
+      return null;
+    }
+    final l10n = context.quranSessionsL10n;
+    return buildAgoraCallSurface(
+      sessionId: sessionId,
+      callType: callType,
+      providerKind: callProviderKind,
+      enginePool: getIt<AgoraRtcEnginePool>(),
+      labels: AgoraCallSurfaceLabels(
+        connecting: l10n.inAppCallShellConnecting,
+        connected: l10n.inAppCallShellConnected,
+        waitingForParticipant: l10n.inAppCallShellWaitingForParticipant,
+        voiceCallTitle: l10n.inAppCallShellTitle,
+      ),
+    );
+  };
+}
+
+SessionCallControlGateway _createQuranSessionCallControlGateway(
+  String sessionId,
+) {
+  return SessionCallControlGatewayAdapter(
+    provider: getIt<SessionCallProvider>(),
+    sessionId: sessionId,
+  );
 }
 
 String? _resolveTeacherName(String teacherId) {
