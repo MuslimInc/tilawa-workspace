@@ -74,6 +74,10 @@ extension QuranSessionsFailureUi on QuranSessionsFailure {
       GroupBookingNotSupportedFailure() => loc.groupBookingNotSupported,
       UnsupportedSessionModeFailure() => loc.unsupportedSessionMode,
       MeetingLinkUnavailableFailure() => loc.meetingLinkUnavailable,
+      CallProviderUnavailableFailure(
+        reasonCode: 'agora_not_registered',
+      ) =>
+        loc.callProviderAgoraNotConfigured,
       CallProviderUnavailableFailure() => loc.callProviderUnavailable,
       RtcPermissionDeniedFailure(:final permission) => loc.rtcPermissionDenied(
         permission,

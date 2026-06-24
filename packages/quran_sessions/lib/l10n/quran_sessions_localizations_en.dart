@@ -324,6 +324,11 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
       'Free Beta: video uses a placeholder join until in-app RTC ships.';
 
   @override
+  String bookingVoiceVideoProviderNote(String provider) {
+    return 'In-app calls use $provider.';
+  }
+
+  @override
   String get sessionModeVoiceDisabled =>
       'Voice sessions are not available yet. Choose external link.';
 
@@ -342,6 +347,10 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   @override
   String get callProviderUnavailable =>
       'This session cannot be joined from the app right now.';
+
+  @override
+  String get callProviderAgoraNotConfigured =>
+      'In-app Agora calls are not enabled in this build. Rebuild with Staging Agora config (TILAWA_DISTRIBUTION=staging and TILAWA_LAUNCH_AGORA_APP_ID), or use the Tilawa (Staging Agora) launch profile.';
 
   @override
   String rtcPermissionDenied(String permission) {

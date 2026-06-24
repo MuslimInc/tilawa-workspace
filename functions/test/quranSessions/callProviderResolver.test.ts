@@ -26,6 +26,19 @@ test("resolveCallProviderForBooking voice picks agora when enabled", () => {
   assert.equal(resolved.joinToken, null);
 });
 
+test("resolveCallProviderForBooking videoCall picks agora when enabled", () => {
+  const resolved = resolveCallProviderForBooking({
+    callType: "videoCall",
+    sessionId: "session_agora_video",
+    teacherProfile: {},
+    platformConfig: {
+      enabledCallProviders: ["external", "mock", "agora"],
+    },
+  });
+  assert.equal(resolved.callProvider, "agora");
+  assert.equal(resolved.providerSessionId, "session_agora_video");
+});
+
 test("resolveCallProviderForBooking voice keeps mock when agora disabled", () => {
   const resolved = resolveCallProviderForBooking({
     callType: "videoCall",

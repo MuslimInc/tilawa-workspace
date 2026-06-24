@@ -641,6 +641,12 @@ abstract class QuranSessionsLocalizations {
   /// **'Free Beta: video uses a placeholder join until in-app RTC ships.'**
   String get sessionModeVideoBetaNote;
 
+  /// No description provided for @bookingVoiceVideoProviderNote.
+  ///
+  /// In en, this message translates to:
+  /// **'In-app calls use {provider}.'**
+  String bookingVoiceVideoProviderNote(String provider);
+
   /// No description provided for @sessionModeVoiceDisabled.
   ///
   /// In en, this message translates to:
@@ -670,6 +676,12 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'This session cannot be joined from the app right now.'**
   String get callProviderUnavailable;
+
+  /// No description provided for @callProviderAgoraNotConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'In-app Agora calls are not enabled in this build. Rebuild with Staging Agora config (TILAWA_DISTRIBUTION=staging and TILAWA_LAUNCH_AGORA_APP_ID), or use the Tilawa (Staging Agora) launch profile.'**
+  String get callProviderAgoraNotConfigured;
 
   /// No description provided for @rtcPermissionDenied.
   ///

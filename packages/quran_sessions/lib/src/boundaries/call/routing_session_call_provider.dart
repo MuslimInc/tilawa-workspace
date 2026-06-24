@@ -25,9 +25,15 @@ class RoutingSessionCallProvider implements SessionCallProvider {
       SessionCallProviderKind.external => external,
       SessionCallProviderKind.mock => mock,
       SessionCallProviderKind.agora =>
-        agora ?? (throw const CallProviderUnavailableFailure()),
+        agora ??
+            (throw const CallProviderUnavailableFailure(
+              reasonCode: 'agora_not_registered',
+            )),
       SessionCallProviderKind.webrtc =>
-        webrtc ?? (throw const CallProviderUnavailableFailure()),
+        webrtc ??
+            (throw const CallProviderUnavailableFailure(
+              reasonCode: 'webrtc_not_registered',
+            )),
     };
     return provider.join(request);
   }

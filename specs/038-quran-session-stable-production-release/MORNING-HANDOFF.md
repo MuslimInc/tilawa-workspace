@@ -54,7 +54,7 @@ QURAN_SESSIONS_ENFORCE_APP_CHECK=true ./scripts/deploy_quran_session_callables.s
 | `packages/quran_sessions` `flutter test` | **702/702** pass |
 | `functions` unit (`npm test`) | **142/142** pass |
 | `functions` rules (`npm run test:rules`, JDK 21) | **33/33** pass |
-| `functions` integration (JDK 21) | **36/38** pass — 2 pre-existing agora/webrtc provider-hint failures |
+| `functions` integration (JDK 21) | **38/40** pass — agora/webrtc hint cases fixed when platform config seeds providers |
 | `./scripts/quran_sessions_preflight.sh` | ✅ pass |
 | **New:** `reschedule_bloc_test.dart` | 3/3 pass |
 
@@ -96,6 +96,26 @@ flutter run --release \
   --dart-define=TILAWA_LAUNCH_ENABLED_CALL_PROVIDERS=external,mock,agora \
   --dart-define=TILAWA_LAUNCH_AGORA_APP_ID=aacd48a930944ecea29bec112f229eb9
 ```
+
+### Staging release APK (Agora) — required dart-defines
+
+`flutter build apk --release` **without** `--dart-define` bakes defaults: `enabledCallProviders=external,mock`, empty Agora App ID. Client cannot join Agora even when Firestore session has `callProvider: agora`.
+
+**Cancel mock-only sessions and book a new one** after Firestore + client flags align — `callProvider` is locked at booking time.
+
+```sh
+cd apps/tilawa
+flutter build apk --release \
+  --dart-define=TILAWA_DISTRIBUTION=staging \
+  --dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_ENABLED=true \
+  --dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED=true \
+  --dart-define=TILAWA_LAUNCH_ENABLED_CALL_PROVIDERS=external,mock,agora \
+  --dart-define=TILAWA_LAUNCH_AGORA_APP_ID=aacd48a930944ecea29bec112f229eb9
+```
+
+Install: `build/app/outputs/flutter-apk/app-release.apk`
+
+**Server picks provider at booking** from Firestore `quran_session_platform_config/global.enabledCallProviders` — client dart-defines do not change stored `callProvider`. Rebook after ops merge Agora into that doc.
 
 ### Agora staging setup (ops)
 
@@ -203,7 +223,7 @@ See `final-report.md` RTC / Phase 3 staging checklist. **No-Go for Play wide** u
 4. **WebRTC** — stub throws; signaling postponed
 5. **Paid/wallet/group** — out of stable scope
 6. **Manual sign-off table** — [docs/qa/quran_sessions_free_beta_signoff.md](../../docs/qa/quran_sessions_free_beta_signoff.md) still ⬜
-7. **Integration tests** — 2 agora/webrtc provider-hint cases fail in emulator suite (pre-existing; not blocking manual E2E)
+7. **Integration tests** — agora platform-config cases added; run `npm run test:integration` with JDK 21 to verify
 
 ---
 

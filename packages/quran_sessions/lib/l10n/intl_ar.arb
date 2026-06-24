@@ -97,11 +97,20 @@
     "callTypeVideo": "مرئي",
     "sessionModeVoiceBetaNote": "النسخة التجريبية: الصوت يستخدم انضمامًا مؤقتًا حتى يتوفر الاتصال داخل التطبيق.",
     "sessionModeVideoBetaNote": "النسخة التجريبية: الفيديو يستخدم انضمامًا مؤقتًا حتى يتوفر الاتصال داخل التطبيق.",
+    "bookingVoiceVideoProviderNote": "المكالمات داخل التطبيق تستخدم {provider}.",
+    "@bookingVoiceVideoProviderNote": {
+        "placeholders": {
+            "provider": {
+                "type": "String"
+            }
+        }
+    },
     "sessionModeVoiceDisabled": "الجلسات الصوتية غير متاحة بعد. اختر الرابط الخارجي.",
     "sessionModeVideoDisabled": "الجلسات المرئية غير متاحة بعد. اختر الرابط الخارجي.",
     "sessionModeExternalDisabled": "لم يضف المعلم رابط الاجتماع بعد. اختر الصوت أو الفيديو.",
     "meetingLinkUnavailable": "لم يُعدّ المعلم رابط اجتماع للجلسات الخارجية بعد. اختر الصوت أو الفيديو، أو حاول لاحقًا.",
     "callProviderUnavailable": "لا يمكن الانضمام إلى هذه الجلسة من التطبيق حاليًا.",
+    "callProviderAgoraNotConfigured": "مكالمات Agora داخل التطبيق غير مفعّلة في هذا الإصدار. أعد البناء بإعدادات Staging Agora (TILAWA_DISTRIBUTION=staging وTILAWA_LAUNCH_AGORA_APP_ID)، أو استخدم ملف التشغيل Tilawa (Staging Agora).",
     "rtcPermissionDenied": "يلزم الوصول إلى الميكروفون أو الكاميرا للانضمام. فعّل {permission} من الإعدادات ثم أعد المحاولة.",
     "@rtcPermissionDenied": {
         "placeholders": {
@@ -115,8 +124,8 @@
     "inAppCallShellTitle": "مكالمة الجلسة",
     "inAppCallShellBody": "أنت متصل بغرفة هذه الجلسة. أنهِ المكالمة عند انتهاء الدرس.",
     "inAppCallShellEndCall": "مغادرة المكالمة",
-    "inAppCallShellMute": "كتم الميكroفون",
-    "inAppCallShellUnmute": "إلغاء كتم الميكروفون",
+    "inAppCallShellMute": "كتم الصوت",
+    "inAppCallShellUnmute": "تشغيل الصوت",
     "inAppCallShellConnecting": "جارٍ الاتصال…",
     "inAppCallShellConnected": "متصل",
     "inAppCallShellWaitingForParticipant": "في انتظار الطرف الآخر",

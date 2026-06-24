@@ -123,7 +123,13 @@ final class MeetingLinkUnavailableFailure extends QuranSessionsFailure {
 
 /// The configured call provider cannot handle this join request.
 final class CallProviderUnavailableFailure extends QuranSessionsFailure {
-  const CallProviderUnavailableFailure();
+  const CallProviderUnavailableFailure({this.reasonCode});
+
+  /// Machine-readable hint for UI (e.g. `agora_not_registered`).
+  final String? reasonCode;
+
+  @override
+  List<Object?> get props => [reasonCode];
 }
 
 /// Mic or camera permission denied before joining an in-app RTC call.

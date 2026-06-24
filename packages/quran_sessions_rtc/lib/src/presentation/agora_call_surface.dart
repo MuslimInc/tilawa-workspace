@@ -35,6 +35,8 @@ class _AgoraCallSurfaceState extends State<AgoraCallSurface> {
   _AgoraCallConnectionPhase _phase = _AgoraCallConnectionPhase.connecting;
   int? _remoteUid;
   String? _channelId;
+  bool _remoteVideoReady = false;
+  bool _localVideoReady = false;
   RtcEngineEventHandler? _eventHandler;
 
   @override
@@ -50,6 +52,8 @@ class _AgoraCallSurfaceState extends State<AgoraCallSurface> {
       _unbindEngineEvents();
       _remoteUid = null;
       _channelId = null;
+      _remoteVideoReady = false;
+      _localVideoReady = false;
       _phase = _AgoraCallConnectionPhase.connecting;
       _bindEngineEvents();
     }
@@ -83,6 +87,7 @@ class _AgoraCallSurfaceState extends State<AgoraCallSurface> {
         setState(() {
           _remoteUid = remoteUid;
           _channelId = connection.channelId;
+          _remoteVideoReady = false;
           _phase = _AgoraCallConnectionPhase.participantJoined;
         });
       },
@@ -90,7 +95,21 @@ class _AgoraCallSurfaceState extends State<AgoraCallSurface> {
         if (!mounted || _remoteUid != remoteUid) return;
         setState(() {
           _remoteUid = null;
+          _remoteVideoReady = false;
           _phase = _AgoraCallConnectionPhase.waitingForParticipant;
+        });
+      },
+      onRemoteVideoStateChanged:
+          (connection, remoteUid, state, reason, elapsed) {
+            if (!mounted || _remoteUid != remoteUid) return;
+            setState(() {
+              _remoteVideoReady = _isRemoteVideoRenderable(state);
+            });
+          },
+      onLocalVideoStateChanged: (source, state, reason) {
+        if (!mounted) return;
+        setState(() {
+          _localVideoReady = _isLocalVideoRenderable(state);
         });
       },
     );
@@ -136,6 +155,8 @@ class _AgoraCallSurfaceState extends State<AgoraCallSurface> {
                   remoteUid: _remoteUid,
                   channelId: _channelId,
                   phase: _phase,
+                  remoteVideoReady: _remoteVideoReady,
+                  localVideoReady: _localVideoReady,
                   labels: widget.labels,
                 ),
                 SessionCallType.voiceCall || SessionCallType.externalMeeting =>
@@ -209,6 +230,8 @@ class _VideoLayout extends StatelessWidget {
     required this.remoteUid,
     required this.channelId,
     required this.phase,
+    required this.remoteVideoReady,
+    required this.localVideoReady,
     required this.labels,
   });
 
@@ -216,19 +239,36 @@ class _VideoLayout extends StatelessWidget {
   final int? remoteUid;
   final String? channelId;
   final _AgoraCallConnectionPhase phase;
+  final bool remoteVideoReady;
+  final bool localVideoReady;
   final AgoraCallSurfaceLabels labels;
 
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
     final colorScheme = Theme.of(context).colorScheme;
-    final hasRemote =
+    final hasRemoteParticipant =
         remoteUid != null && channelId != null && channelId!.isNotEmpty;
+    final showRemoteVideo = hasRemoteParticipant && remoteVideoReady;
+    final showLocalPiP = hasRemoteParticipant && localVideoReady;
+
+    final (placeholderIcon, placeholderMessage) = switch (phase) {
+      _AgoraCallConnectionPhase.connecting => (Icons.sync, labels.connecting),
+      _AgoraCallConnectionPhase.waitingForParticipant => (
+        Icons.hourglass_top_outlined,
+        labels.waitingForParticipant,
+      ),
+      _AgoraCallConnectionPhase.participantJoined when !showRemoteVideo => (
+        Icons.videocam_outlined,
+        labels.connected,
+      ),
+      _ => (Icons.person_outline, labels.connected),
+    };
 
     return Stack(
       fit: StackFit.expand,
       children: [
-        if (hasRemote)
+        if (showRemoteVideo)
           AgoraVideoView(
             controller: VideoViewController.remote(
               rtcEngine: engine,
@@ -237,15 +277,12 @@ class _VideoLayout extends StatelessWidget {
             ),
           )
         else
-          AgoraVideoView(
-            controller: VideoViewController(
-              rtcEngine: engine,
-              canvas: const VideoCanvas(uid: 0),
-            ),
+          AgoraCallVideoPlaceholder(
+            icon: placeholderIcon,
+            message: placeholderMessage,
+            showSpinner: phase == _AgoraCallConnectionPhase.connecting,
           ),
-        if (!hasRemote && phase != _AgoraCallConnectionPhase.connecting)
-          _StatusOverlay(message: labels.waitingForParticipant),
-        if (hasRemote)
+        if (showLocalPiP)
           PositionedDirectional(
             top: tokens.spaceMedium,
             end: tokens.spaceMedium,
@@ -279,6 +316,82 @@ class _VideoLayout extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Placeholder for video calls before Agora streams are renderable.
+class AgoraCallVideoPlaceholder extends StatelessWidget {
+  const AgoraCallVideoPlaceholder({
+    super.key,
+    required this.icon,
+    required this.message,
+    this.showSpinner = false,
+  });
+
+  final IconData icon;
+  final String message;
+  final bool showSpinner;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final tokens = Theme.of(context).tokens;
+
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.all(tokens.spaceLarge),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (showSpinner)
+              const CircularProgressIndicator()
+            else
+              CircleAvatar(
+                radius: 56,
+                backgroundColor: colorScheme.primaryContainer,
+                child: Icon(
+                  icon,
+                  size: 56,
+                  color: colorScheme.onPrimaryContainer,
+                ),
+              ),
+            SizedBox(height: tokens.spaceLarge),
+            Text(
+              message,
+              style: Theme.of(context).textTheme.titleMedium,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+bool _isRemoteVideoRenderable(RemoteVideoState state) =>
+    agoraRemoteVideoIsRenderable(state);
+
+bool _isLocalVideoRenderable(LocalVideoStreamState state) =>
+    agoraLocalVideoIsRenderable(state);
+
+/// Whether remote Agora video is safe to bind to [AgoraVideoView].
+bool agoraRemoteVideoIsRenderable(RemoteVideoState state) {
+  return switch (state) {
+    RemoteVideoState.remoteVideoStateStarting ||
+    RemoteVideoState.remoteVideoStateDecoding ||
+    RemoteVideoState.remoteVideoStateFrozen => true,
+    RemoteVideoState.remoteVideoStateStopped ||
+    RemoteVideoState.remoteVideoStateFailed => false,
+  };
+}
+
+/// Whether local camera preview is safe to bind to [AgoraVideoView].
+bool agoraLocalVideoIsRenderable(LocalVideoStreamState state) {
+  return switch (state) {
+    LocalVideoStreamState.localVideoStreamStateCapturing ||
+    LocalVideoStreamState.localVideoStreamStateEncoding => true,
+    LocalVideoStreamState.localVideoStreamStateStopped ||
+    LocalVideoStreamState.localVideoStreamStateFailed => false,
+  };
 }
 
 class _VoiceLayout extends StatelessWidget {
@@ -434,34 +547,6 @@ class _StatusPanel extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _StatusOverlay extends StatelessWidget {
-  const _StatusOverlay({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final tokens = Theme.of(context).tokens;
-
-    return ColoredBox(
-      color: colorScheme.scrim.withValues(alpha: 0.45),
-      child: Center(
-        child: Padding(
-          padding: EdgeInsets.all(tokens.spaceLarge),
-          child: Text(
-            message,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: colorScheme.onInverseSurface,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
       ),
     );
   }

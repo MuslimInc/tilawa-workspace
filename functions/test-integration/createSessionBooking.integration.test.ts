@@ -246,7 +246,7 @@ test("integration: group booking is rejected", async () => {
   );
 });
 
-test("integration: client agora provider hint is rejected", async () => {
+test("integration: client agora provider hint is rejected when agora disabled", async () => {
   await clearFirestore();
   await seedVerifiedTeacher("teacher1");
   await seedCompleteStudent("student1");
@@ -259,6 +259,25 @@ test("integration: client agora provider hint is rejected", async () => {
     }),
     (e) => codeOf(e) === "unsupported_call_provider",
   );
+});
+
+test("integration: client agora provider hint is honored when platform enables agora", async () => {
+  await clearFirestore();
+  await seedVerifiedTeacher("teacher1");
+  await seedCompleteStudent("student1");
+  await seedUserSession("student1");
+  await db()
+    .collection("quran_session_platform_config")
+    .doc("global")
+    .set({ enabledCallProviders: ["external", "mock", "agora"] });
+
+  const res = await booking.run({
+    data: bookingData({ callType: "videoCall", callProvider: "agora" }),
+    auth: { uid: "student1", token: {} },
+  });
+
+  const sessionDoc = await db().collection("quran_sessions").doc(res.sessionId).get();
+  assert.equal(sessionDoc.get("callProvider"), "agora");
 });
 
 test("integration: different idempotency key on same slot is blocked by lock", async () => {
@@ -438,7 +457,28 @@ test("integration: video booking stores mock call provider metadata", async () =
   assert.equal(sessionDoc.get("joinToken"), null);
 });
 
-test("integration: client webrtc provider hint is rejected", async () => {
+test("integration: video booking stores agora when platform config enables it", async () => {
+  await clearFirestore();
+  await seedVerifiedTeacher("teacher1");
+  await seedCompleteStudent("student1");
+  await seedUserSession("student1");
+  await db()
+    .collection("quran_session_platform_config")
+    .doc("global")
+    .set({ enabledCallProviders: ["external", "mock", "agora"] });
+
+  const res = await booking.run({
+    data: bookingData({ callType: "videoCall" }),
+    auth: { uid: "student1", token: {} },
+  });
+
+  const sessionDoc = await db().collection("quran_sessions").doc(res.sessionId).get();
+  assert.equal(sessionDoc.get("callProvider"), "agora");
+  assert.equal(sessionDoc.get("providerSessionId"), res.sessionId);
+  assert.equal(sessionDoc.get("callType"), "videoCall");
+});
+
+test("integration: client webrtc provider hint is rejected when webrtc disabled", async () => {
   await clearFirestore();
   await seedVerifiedTeacher("teacher1");
   await seedCompleteStudent("student1");

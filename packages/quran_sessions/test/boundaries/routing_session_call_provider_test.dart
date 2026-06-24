@@ -59,8 +59,8 @@ void main() {
           ),
         );
         fail('expected CallProviderUnavailableFailure');
-      } on CallProviderUnavailableFailure {
-        // expected
+      } on CallProviderUnavailableFailure catch (e) {
+        check(e.reasonCode).equals('agora_not_registered');
       }
     });
 

@@ -7,35 +7,25 @@ import 'package:tilawa/core/di/get_it_idempotent.dart';
 import 'package:tilawa/features/auth/domain/services/callable_session_payload_builder.dart';
 import 'package:tilawa/features/quran_sessions/data/external_meeting_url_launcher.dart';
 import 'package:tilawa/features/quran_sessions/data/firebase/firebase_call_token_provider.dart';
+import 'package:tilawa/features/quran_sessions/quran_sessions_launch_policy.dart';
 
 /// Wires RTC [SessionCallProvider] implementations when launch config enables them.
 class QuranSessionsRtcModule {
   QuranSessionsRtcModule._();
 
-  static Set<String> parseEnabledCallProviders(AppLaunchConfig config) {
-    if (config.enabledCallProvidersCsv.trim().isEmpty) {
-      return {'external', 'mock'};
-    }
-    return config.enabledCallProvidersCsv
-        .split(',')
-        .map((value) => value.trim())
-        .where((value) => value.isNotEmpty)
-        .toSet();
-  }
-
   static SessionCallProvider buildRoutingProvider(
     GetIt sl,
     AppLaunchConfig config,
   ) {
-    final enabled = parseEnabledCallProviders(config);
+    final rtc = resolveRtcLaunchConfig(config);
 
     SessionCallProvider? agora;
-    if (enabled.contains('agora') && config.agoraAppId.trim().isNotEmpty) {
+    if (rtc.isAgoraEnabled) {
       final enginePool = sl.isRegistered<AgoraRtcEnginePool>()
           ? sl<AgoraRtcEnginePool>()
           : AgoraRtcEnginePool();
       agora = AgoraCallProvider(
-        appId: config.agoraAppId.trim(),
+        appId: rtc.agoraAppId,
         tokenProvider: sl<CallTokenProvider>(),
         resolveUserId: () async {
           final uid = sl<AuthSessionProvider>().currentUserId;
@@ -49,7 +39,7 @@ class QuranSessionsRtcModule {
     }
 
     SessionCallProvider? webrtc;
-    if (enabled.contains('webrtc')) {
+    if (rtc.enabledProviders.contains('webrtc')) {
       webrtc = WebRtcCallProvider(
         tokenProvider: sl<CallTokenProvider>(),
         signalingServerUrl: config.webrtcSignalingServerUrl,
@@ -76,8 +66,8 @@ class QuranSessionsRtcModule {
   }
 
   static void register(GetIt sl, AppLaunchConfig config) {
-    final enabled = parseEnabledCallProviders(config);
-    if (enabled.contains('agora') && config.agoraAppId.trim().isNotEmpty) {
+    final rtc = resolveRtcLaunchConfig(config);
+    if (rtc.isAgoraEnabled) {
       sl.registerLazySingletonIfAbsent<AgoraRtcEnginePool>(
         () => AgoraRtcEnginePool(),
       );

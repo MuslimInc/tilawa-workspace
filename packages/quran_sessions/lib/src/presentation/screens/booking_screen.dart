@@ -7,6 +7,7 @@ import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/quran_booking.dart';
+import '../../domain/entities/session_call_provider_kind.dart';
 import '../../domain/entities/session_call_type.dart';
 import '../../domain/failures/quran_sessions_failure.dart';
 import '../../domain/policies/session_mode_policy.dart';
@@ -24,6 +25,7 @@ class BookingScreen extends StatefulWidget {
     required this.studentId,
     this.preSelectedSlotId,
     this.sessionModePolicy = SessionModePolicy.freeBeta,
+    this.voiceVideoProviderHint,
     this.onBookingSuccess,
     this.onCompleteProfile,
   });
@@ -32,8 +34,9 @@ class BookingScreen extends StatefulWidget {
   final String studentId;
   final String? preSelectedSlotId;
   final SessionModePolicy sessionModePolicy;
+  final SessionCallProviderKind? voiceVideoProviderHint;
 
-  /// Called after a booking is confirmed. When provided, the host app handles
+  /// Called after a booking is confirmed.
   /// navigation; otherwise the screen pops itself.
   final void Function(QuranBooking booking)? onBookingSuccess;
 
@@ -234,6 +237,8 @@ class _BookingScreenState extends State<BookingScreen> {
                             teacherExternalMeetingUrl:
                                 teacherExternalMeetingUrl,
                             selected: selectedCallType,
+                            voiceVideoProviderHint:
+                                widget.voiceVideoProviderHint,
                             onChanged: (ct) => context.read<BookingBloc>().add(
                               CallTypeSelected(ct),
                             ),
@@ -369,12 +374,14 @@ class _CallTypePicker extends StatelessWidget {
     required this.teacherExternalMeetingUrl,
     required this.selected,
     required this.onChanged,
+    this.voiceVideoProviderHint,
   });
 
   final SessionModePolicy hostPolicy;
   final String? teacherExternalMeetingUrl;
   final SessionCallType selected;
   final ValueChanged<SessionCallType> onChanged;
+  final SessionCallProviderKind? voiceVideoProviderHint;
 
   bool get _hasExternalMeetingUrl =>
       SessionModePolicy.hasExternalMeetingUrl(teacherExternalMeetingUrl);
@@ -484,7 +491,16 @@ class _CallTypePicker extends StatelessWidget {
       if (voiceOff) return l10n.sessionModeVoiceDisabled;
       if (videoOff) return l10n.sessionModeVideoDisabled;
     }
-    if (!policy.voiceVideoUseMockProvider) return null;
+    if (!policy.voiceVideoUseMockProvider) {
+      if (voiceVideoProviderHint != null &&
+          (type == SessionCallType.voiceCall ||
+              type == SessionCallType.videoCall)) {
+        return l10n.bookingVoiceVideoProviderNote(
+          l10n.callProviderKindLabel(voiceVideoProviderHint!),
+        );
+      }
+      return null;
+    }
     return switch (type) {
       SessionCallType.voiceCall => l10n.sessionModeVoiceBetaNote,
       SessionCallType.videoCall => l10n.sessionModeVideoBetaNote,

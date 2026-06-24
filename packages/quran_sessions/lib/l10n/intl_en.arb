@@ -97,11 +97,20 @@
     "callTypeVideo": "Video",
     "sessionModeVoiceBetaNote": "Free Beta: voice uses a placeholder join until in-app RTC ships.",
     "sessionModeVideoBetaNote": "Free Beta: video uses a placeholder join until in-app RTC ships.",
+    "bookingVoiceVideoProviderNote": "In-app calls use {provider}.",
+    "@bookingVoiceVideoProviderNote": {
+        "placeholders": {
+            "provider": {
+                "type": "String"
+            }
+        }
+    },
     "sessionModeVoiceDisabled": "Voice sessions are not available yet. Choose external link.",
     "sessionModeVideoDisabled": "Video sessions are not available yet. Choose external link.",
     "sessionModeExternalDisabled": "Your teacher has not added a meeting link yet. Choose voice or video.",
     "meetingLinkUnavailable": "This teacher has not set up a meeting link for external sessions. Choose voice or video, or try again later.",
     "callProviderUnavailable": "This session cannot be joined from the app right now.",
+    "callProviderAgoraNotConfigured": "In-app Agora calls are not enabled in this build. Rebuild with Staging Agora config (TILAWA_DISTRIBUTION=staging and TILAWA_LAUNCH_AGORA_APP_ID), or use the Tilawa (Staging Agora) launch profile.",
     "rtcPermissionDenied": "Microphone or camera access is required to join this session. Enable {permission} in Settings and try again.",
     "@rtcPermissionDenied": {
         "placeholders": {

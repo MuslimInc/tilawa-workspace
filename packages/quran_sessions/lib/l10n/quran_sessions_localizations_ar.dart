@@ -313,6 +313,11 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
       'النسخة التجريبية: الفيديو يستخدم انضمامًا مؤقتًا حتى يتوفر الاتصال داخل التطبيق.';
 
   @override
+  String bookingVoiceVideoProviderNote(String provider) {
+    return 'المكالمات داخل التطبيق تستخدم $provider.';
+  }
+
+  @override
   String get sessionModeVoiceDisabled =>
       'الجلسات الصوتية غير متاحة بعد. اختر الرابط الخارجي.';
 
@@ -331,6 +336,10 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   @override
   String get callProviderUnavailable =>
       'لا يمكن الانضمام إلى هذه الجلسة من التطبيق حاليًا.';
+
+  @override
+  String get callProviderAgoraNotConfigured =>
+      'مكالمات Agora داخل التطبيق غير مفعّلة في هذا الإصدار. أعد البناء بإعدادات Staging Agora (TILAWA_DISTRIBUTION=staging وTILAWA_LAUNCH_AGORA_APP_ID)، أو استخدم ملف التشغيل Tilawa (Staging Agora).';
 
   @override
   String rtcPermissionDenied(String permission) {
@@ -356,10 +365,10 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get inAppCallShellEndCall => 'مغادرة المكالمة';
 
   @override
-  String get inAppCallShellMute => 'كتم الميكroفون';
+  String get inAppCallShellMute => 'كتم الصوت';
 
   @override
-  String get inAppCallShellUnmute => 'إلغاء كتم الميكروفون';
+  String get inAppCallShellUnmute => 'تشغيل الصوت';
 
   @override
   String get inAppCallShellConnecting => 'جارٍ الاتصال…';

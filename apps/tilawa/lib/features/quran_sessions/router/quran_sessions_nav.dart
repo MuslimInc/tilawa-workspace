@@ -5,6 +5,7 @@ import 'package:quran_sessions/quran_sessions.dart';
 import 'package:quran_sessions_rtc/quran_sessions_rtc.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/features/quran_sessions/quran_sessions_launch_policy.dart';
 import 'package:tilawa/features/settings/presentation/widgets/settings_teacher_capability_scope.dart';
 import 'package:tilawa/features/quran_sessions/presentation/quran_sessions_analytics.dart';
 import 'package:tilawa/features/quran_sessions/presentation/quran_sessions_scheduling_analytics.dart';
@@ -168,12 +169,15 @@ List<RouteBase> get quranSessionsRoutes => [
       final teacherId = state.pathParameters['teacherId']!;
       final preSelectedSlotId = state.extra as String?;
       final studentId = requireQuranSessionsUserId(getIt);
+      final launchConfig = getIt<AppLaunchConfig>();
       return BlocProvider(
         create: (_) => getIt<BookingBloc>(),
         child: BookingScreen(
           teacherId: teacherId,
           studentId: studentId,
           preSelectedSlotId: preSelectedSlotId,
+          sessionModePolicy: sessionModePolicyFromLaunchConfig(launchConfig),
+          voiceVideoProviderHint: resolveVoiceVideoProviderHint(launchConfig),
           onBookingSuccess: (_) {
             context
               ..pop()
