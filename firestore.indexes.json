@@ -509,6 +509,50 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
+          "fieldPath": "profileCompleteness",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "isPubliclyVisible",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "specializations",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "displayName",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "quran_teacher_profiles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "profileCompleteness",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "isPubliclyVisible",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "teachingLanguages",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "displayName",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "quran_teacher_profiles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
           "fieldPath": "isPubliclyVisible",
           "order": "ASCENDING"
         },

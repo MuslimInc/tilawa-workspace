@@ -29,7 +29,7 @@ enum PrimaryColorPreset {
 
   /// Default primary preset for fresh installs and corrupt-payload fallback.
   ///
-  /// Brand-locked to warm brown (`#8B5E3C`) for the Tilawa parchment system
+  /// Brand-locked to warm brown (`#8B5E3C`) for the Tilawa palette system
   /// (see `Env.kShowColorPicker`).
   static const PrimaryColorPreset defaultPreset = PrimaryColorPreset.brown;
 

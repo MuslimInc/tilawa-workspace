@@ -452,8 +452,8 @@ class _FakeAgoraRtcSessionHandle implements AgoraRtcSessionHandle {
   bool switchedCamera = false;
 
   @override
-  Future<void> leaveAndRelease() async {
-    released = true;
+  Future<void> leaveAndRelease({bool retainEngine = false}) async {
+    released = !retainEngine;
   }
 
   @override

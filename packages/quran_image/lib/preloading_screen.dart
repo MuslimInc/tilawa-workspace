@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:quran_image/core/design_tokens/colors.dart';
 import 'package:quran_image/core/perf_logger.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:quran_image/data/repositories/asset_verse_marker_repository.dart';
 import 'package:quran_image/domain/repositories/quran_image_cache_repository.dart';
 import 'package:quran_image/domain/services/decoded_quran_image_cache.dart';
@@ -308,18 +308,21 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
         : _cacheStatus.progress;
     final errorAppMessage = _errorAppMessage;
 
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme scheme = theme.colorScheme;
+    final TilawaProductColors product = theme.productColors;
+
     final scaffold = Scaffold(
-      backgroundColor: AppColors.pageBackground,
+      backgroundColor: product.quranPageBackground,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
               const AppTitleMessage().localize(l10n),
-              style: const TextStyle(
-                fontSize: 32,
+              style: theme.textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1A1A1A),
+                color: product.quranTextPrimary,
               ),
             ),
             const SizedBox(height: 40),
@@ -329,9 +332,8 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
                 child: Text(
                   errorAppMessage.localize(l10n),
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF8A2D2D),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: scheme.error,
                   ),
                 ),
               ),
@@ -343,7 +345,9 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
             ] else if (!_cacheStatus.isReady) ...[
               Text(
                 _cacheStatus.phase.toAppMessage().localize(l10n),
-                style: const TextStyle(fontSize: 16, color: Color(0xFF666666)),
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
               ),
               const SizedBox(height: 20),
               _ProgressBar(progress: progress),
@@ -351,9 +355,8 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
               if (repo.isDebugMode) ...[
                 Text(
                   const PreparingQuranMessage().localize(l10n),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Color(0xFF666666),
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: scheme.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -366,8 +369,8 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
                   ).localize(l10n),
                 ),
               ] else ...[
-                const CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4CAF50)),
+                CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(scheme.primary),
                 ),
               ],
             ],
@@ -403,6 +406,7 @@ class _ProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme scheme = Theme.of(context).colorScheme;
     final percentage = (progress * 100).toStringAsFixed(0);
     return Column(
       children: [
@@ -412,8 +416,8 @@ class _ProgressBar extends StatelessWidget {
           child: CustomPaint(
             painter: _ProgressBarPainter(
               progress: progress.clamp(0.0, 1.0),
-              trackColor: const Color(0xFFE0E0E0),
-              fillColor: const Color(0xFF4CAF50),
+              trackColor: scheme.outlineVariant,
+              fillColor: scheme.primary,
               radius: 4,
             ),
           ),
@@ -421,17 +425,18 @@ class _ProgressBar extends StatelessWidget {
         const SizedBox(height: 12),
         Text(
           '$percentage%',
-          style: const TextStyle(
-            fontSize: 14,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w500,
-            color: Color(0xFF4CAF50),
+            color: scheme.success,
           ),
         ),
         if (subtitle != null) ...[
           const SizedBox(height: 8),
           Text(
             subtitle!,
-            style: const TextStyle(fontSize: 12, color: Color(0xFF999999)),
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
           ),
         ],
       ],

@@ -2,12 +2,36 @@ import 'package:flutter/material.dart';
 
 import 'breakpoints.dart';
 
+/// M3 2021 default sizes — ratios are applied to the already-scaled
+/// [ThemeData.textTheme] from [AppTheme], not re-scaled here.
+abstract final class _M3TypographyDefaults {
+  static const double displayLarge = 57;
+  static const double displayMedium = 45;
+  static const double displaySmall = 36;
+  static const double headlineLarge = 32;
+  static const double headlineMedium = 28;
+  static const double headlineSmall = 24;
+  static const double titleLarge = 22;
+  static const double titleMedium = 16;
+  static const double titleSmall = 14;
+  static const double bodyLarge = 16;
+  static const double bodyMedium = 14;
+  static const double bodySmall = 12;
+}
+
+TextStyle? _nudgeRoleSize(
+  TextStyle? style,
+  double designSize,
+  double m3Default,
+) {
+  final double? size = style?.fontSize;
+  if (style == null || size == null) return style;
+  return style.copyWith(fontSize: size * (designSize / m3Default));
+}
+
 abstract final class _ResponsiveTypeScale {
-  // Narrow window class (phones, < 600 dp): tiny size nudges plus explicit
-  // height
-  // and letterSpacing to add presence without inflating the scale. These
-  // close most of the perceived gap between "looks great on emulator"
-  // (which usually crosses into medium/expanded) and a real ~412 dp phone.
+  // Narrow window class: tiny size nudges plus explicit height and
+  // letterSpacing. Ratios are vs M3 defaults on the globally scaled theme.
   static const double narrowTitleLarge = 23;
   static const double narrowBodyLarge = 16.5;
   static const double narrowHeadlineHeight = 1.25;
@@ -47,61 +71,95 @@ extension TilawaResponsiveTypography on BuildContext {
 
     if (size.index >= TilawaWindowSize.expanded.index) {
       return base.copyWith(
-        displayLarge: base.displayLarge?.copyWith(
-          fontSize: _ResponsiveTypeScale.expandedDisplayLarge,
+        displayLarge: _nudgeRoleSize(
+          base.displayLarge,
+          _ResponsiveTypeScale.expandedDisplayLarge,
+          _M3TypographyDefaults.displayLarge,
         ),
-        displayMedium: base.displayMedium?.copyWith(
-          fontSize: _ResponsiveTypeScale.expandedDisplayMedium,
+        displayMedium: _nudgeRoleSize(
+          base.displayMedium,
+          _ResponsiveTypeScale.expandedDisplayMedium,
+          _M3TypographyDefaults.displayMedium,
         ),
-        displaySmall: base.displaySmall?.copyWith(
-          fontSize: _ResponsiveTypeScale.expandedDisplaySmall,
+        displaySmall: _nudgeRoleSize(
+          base.displaySmall,
+          _ResponsiveTypeScale.expandedDisplaySmall,
+          _M3TypographyDefaults.displaySmall,
         ),
-        headlineLarge: base.headlineLarge?.copyWith(
-          fontSize: _ResponsiveTypeScale.expandedHeadlineLarge,
+        headlineLarge: _nudgeRoleSize(
+          base.headlineLarge,
+          _ResponsiveTypeScale.expandedHeadlineLarge,
+          _M3TypographyDefaults.headlineLarge,
         ),
-        headlineMedium: base.headlineMedium?.copyWith(
-          fontSize: _ResponsiveTypeScale.expandedHeadlineMedium,
+        headlineMedium: _nudgeRoleSize(
+          base.headlineMedium,
+          _ResponsiveTypeScale.expandedHeadlineMedium,
+          _M3TypographyDefaults.headlineMedium,
         ),
-        headlineSmall: base.headlineSmall?.copyWith(
-          fontSize: _ResponsiveTypeScale.expandedHeadlineSmall,
+        headlineSmall: _nudgeRoleSize(
+          base.headlineSmall,
+          _ResponsiveTypeScale.expandedHeadlineSmall,
+          _M3TypographyDefaults.headlineSmall,
         ),
-        titleLarge: base.titleLarge?.copyWith(
-          fontSize: _ResponsiveTypeScale.expandedTitleLarge,
+        titleLarge: _nudgeRoleSize(
+          base.titleLarge,
+          _ResponsiveTypeScale.expandedTitleLarge,
+          _M3TypographyDefaults.titleLarge,
         ),
-        titleMedium: base.titleMedium?.copyWith(
-          fontSize: _ResponsiveTypeScale.expandedTitleMedium,
+        titleMedium: _nudgeRoleSize(
+          base.titleMedium,
+          _ResponsiveTypeScale.expandedTitleMedium,
+          _M3TypographyDefaults.titleMedium,
         ),
-        titleSmall: base.titleSmall?.copyWith(
-          fontSize: _ResponsiveTypeScale.expandedTitleSmall,
+        titleSmall: _nudgeRoleSize(
+          base.titleSmall,
+          _ResponsiveTypeScale.expandedTitleSmall,
+          _M3TypographyDefaults.titleSmall,
         ),
-        bodyLarge: base.bodyLarge?.copyWith(
-          fontSize: _ResponsiveTypeScale.expandedBodyLarge,
+        bodyLarge: _nudgeRoleSize(
+          base.bodyLarge,
+          _ResponsiveTypeScale.expandedBodyLarge,
+          _M3TypographyDefaults.bodyLarge,
         ),
-        bodyMedium: base.bodyMedium?.copyWith(
-          fontSize: _ResponsiveTypeScale.expandedBodyMedium,
+        bodyMedium: _nudgeRoleSize(
+          base.bodyMedium,
+          _ResponsiveTypeScale.expandedBodyMedium,
+          _M3TypographyDefaults.bodyMedium,
         ),
-        bodySmall: base.bodySmall?.copyWith(
-          fontSize: _ResponsiveTypeScale.expandedBodySmall,
+        bodySmall: _nudgeRoleSize(
+          base.bodySmall,
+          _ResponsiveTypeScale.expandedBodySmall,
+          _M3TypographyDefaults.bodySmall,
         ),
       );
     }
 
     if (size.index >= TilawaWindowSize.medium.index) {
       return base.copyWith(
-        displayLarge: base.displayLarge?.copyWith(
-          fontSize: _ResponsiveTypeScale.mediumDisplayLarge,
+        displayLarge: _nudgeRoleSize(
+          base.displayLarge,
+          _ResponsiveTypeScale.mediumDisplayLarge,
+          _M3TypographyDefaults.displayLarge,
         ),
-        displayMedium: base.displayMedium?.copyWith(
-          fontSize: _ResponsiveTypeScale.mediumDisplayMedium,
+        displayMedium: _nudgeRoleSize(
+          base.displayMedium,
+          _ResponsiveTypeScale.mediumDisplayMedium,
+          _M3TypographyDefaults.displayMedium,
         ),
-        titleLarge: base.titleLarge?.copyWith(
-          fontSize: _ResponsiveTypeScale.mediumTitleLarge,
+        titleLarge: _nudgeRoleSize(
+          base.titleLarge,
+          _ResponsiveTypeScale.mediumTitleLarge,
+          _M3TypographyDefaults.titleLarge,
         ),
-        bodyLarge: base.bodyLarge?.copyWith(
-          fontSize: _ResponsiveTypeScale.mediumBodyLarge,
+        bodyLarge: _nudgeRoleSize(
+          base.bodyLarge,
+          _ResponsiveTypeScale.mediumBodyLarge,
+          _M3TypographyDefaults.bodyLarge,
         ),
-        bodyMedium: base.bodyMedium?.copyWith(
-          fontSize: _ResponsiveTypeScale.mediumBodyMedium,
+        bodyMedium: _nudgeRoleSize(
+          base.bodyMedium,
+          _ResponsiveTypeScale.mediumBodyMedium,
+          _M3TypographyDefaults.bodyMedium,
         ),
       );
     }
@@ -131,13 +189,19 @@ extension TilawaResponsiveTypography on BuildContext {
       headlineSmall: base.headlineSmall?.copyWith(
         height: _ResponsiveTypeScale.narrowHeadlineHeight,
       ),
-      titleLarge: base.titleLarge?.copyWith(
-        fontSize: _ResponsiveTypeScale.narrowTitleLarge,
-        height: _ResponsiveTypeScale.narrowHeadlineHeight,
+      titleLarge: _nudgeRoleSize(
+        base.titleLarge?.copyWith(
+          height: _ResponsiveTypeScale.narrowHeadlineHeight,
+        ),
+        _ResponsiveTypeScale.narrowTitleLarge,
+        _M3TypographyDefaults.titleLarge,
       ),
-      bodyLarge: base.bodyLarge?.copyWith(
-        fontSize: _ResponsiveTypeScale.narrowBodyLarge,
-        height: _ResponsiveTypeScale.narrowBodyHeight,
+      bodyLarge: _nudgeRoleSize(
+        base.bodyLarge?.copyWith(
+          height: _ResponsiveTypeScale.narrowBodyHeight,
+        ),
+        _ResponsiveTypeScale.narrowBodyLarge,
+        _M3TypographyDefaults.bodyLarge,
       ),
       bodyMedium: base.bodyMedium?.copyWith(
         height: _ResponsiveTypeScale.narrowBodyHeight,

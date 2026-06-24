@@ -29,7 +29,7 @@
 | **State update impact** | Teacher dashboard optimistic slot delete with 5s commit timer — good UX, extra state maps (`pendingDeletes`). |
 | **List/grouping/sorting** | `groupTeacherAvailabilityByLocalDay` O(n log n); perf tests cap 1000 slots @ 50ms. `MySessionsBloc` splits/sorts full session list on every load. |
 | **Memory impact** | Full session list + 14-day generated slots held in memory per dashboard/booking screen — bounded by horizon, not by pagination. |
-| **Repeated computations?** | **Yes** — `_isGeneratedSlotBooked` refetches all teacher sessions on slot delete commit; teacher list filters specialization/language client-side after fetch; dual lock load for legacy teacher IDs. |
+| **Repeated computations?** | **Partial** — teacher list primary filter now server-side (`arrayContains`); dual-filter still client secondary pass; `_isGeneratedSlotBooked` now O(1) lock read (P0); slot delete commit may still refetch sessions. |
 
 ### Audio/Video Provider
 
@@ -111,11 +111,11 @@
 | Field | Value |
 |-------|-------|
 | **Key files** | `firestore_teacher_repository.dart`, `teacher_list_bloc.dart`. |
-| **Current complexity** | O(1) query with `limit(20)` + cursor pagination. **Client filter** O(20) for specialization/language after fetch — can return &lt;20 or empty while more pages exist. |
+| **Current complexity** | O(page_size) query with `limit(20)` + cursor; **primary** filter via `arrayContains` on `specializations` or `teachingLanguages` (one per query; specialization wins). Dual-filter: O(page_size) client pass on language. |
 | **Target complexity** | O(page_size) server-side filtered query with composite index. |
 | **Data structures** | `List<QuranTeacherDto>`; cursor = last doc id. |
-| **Bottleneck** | Filters not in Firestore query — wasted reads and confusing empty states when filter excludes all 20 fetched. |
-| **Recommended optimization** | `array-contains` / composite indexes for `specializations` and `teachingLanguages`; server-side filter before `limit`. |
+| **Bottleneck** | Both filters active: only specialization in query — language still client-side; may under-fill page. |
+| **Recommended optimization** | **Done (P2.8)** primary filter + indexes. Optional: composite query strategy when both filters common. |
 | **Free Beta blocker?** | **No** (perf). UX impact when filters used: **Yes** (empty list despite more teachers). |
 
 ---
@@ -184,8 +184,8 @@
 | **Current complexity** | Enqueue: O(1) write per event. Deliver: O(r) user doc reads for r recipients (`collectActiveFcmTokens` batches of 10). Reminders: O(window_sessions) query hourly + per-doc teacher userId resolve. |
 | **Target complexity** | O(r) reads for delivery; reminders O(k) in time window with indexed query. |
 | **Data structures** | `recipientUserIds: string[]` on outbox doc; `users.notifications.activeFcmToken` single-token model. |
-| **Bottleneck** | N+1 `resolveTeacherProfileUserId` in reminder loop; scheduler scans all sessions in 30-min window each hour. |
-| **Recommended optimization** | Denormalize teacher userId on session; shard reminder windows or use per-session scheduled tasks at scale. |
+| **Bottleneck** | Legacy sessions without `teacherUserId` still hit profile resolve; scheduler scans all sessions in 30-min window each hour. |
+| **Recommended optimization** | **Done (P2.9–10)** `teacherUserId` on new session/booking docs; reminders read denormalized field first. Scale: shard reminder windows or per-session scheduled tasks. |
 | **Free Beta blocker?** | **No** at Beta volume; E2E push delivery unverified (033: treat as closed-Beta blocker for **reliability**, not algorithm). |
 
 ---
@@ -286,6 +286,21 @@ Not audited in depth for this baseline. Known from 033/034: token migration and 
 13. Filter-empty-state UX for teacher list.
 
 Each phase must ship with Performance Impact Analysis + updated complexity table rows per the framework.
+
+### Implementation status (2026-06-24)
+
+| Item | Status | Notes |
+|------|--------|-------|
+| P0.1–4 | Shipped (prior) | withdraw scoped; session pagination; lock window; O(1) booked check |
+| P2.8 | **Done** | `firestore_teacher_repository.dart` + composites in `firestore.indexes.json` |
+| P2.9 | **Done** | `createSessionBooking.ts` writes `teacherUserId` on session + booking |
+| P2.10 | **Done** | `sessionReminders.ts` uses `teacherUserIdFromDenormalizedSessionData` |
+| P3.13 | **Done** | Teacher list filter-empty state + clear-filters CTA |
+| P1.5–7 | **Done** | Active-provider routing leave; Agora engine park/reuse; RTC token prefetch on detail; `scripts/stagingRtcJoinSmoke.ts` |
+| P3.11–12 | **Done** | Guardian approval capture screen + `approveChildGuardianBooking` CF; session epoch dialog → login |
+| Indexes deploy | **Script** | `./scripts/deploy_firestore_indexes.sh` |
+| CF deploy | **Script** | `./scripts/deploy_quran_session_callables.sh` (+ App Check env) |
+| Manual E2E | **Ops** | B1–B5 / T2–T8 checklist after staging deploy |
 
 ---
 

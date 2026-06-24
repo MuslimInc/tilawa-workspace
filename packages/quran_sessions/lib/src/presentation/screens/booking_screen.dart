@@ -28,6 +28,7 @@ class BookingScreen extends StatefulWidget {
     this.voiceVideoProviderHint,
     this.onBookingSuccess,
     this.onCompleteProfile,
+    this.onGuardianApprovalRequested,
   });
 
   final String teacherId;
@@ -35,6 +36,9 @@ class BookingScreen extends StatefulWidget {
   final String? preSelectedSlotId;
   final SessionModePolicy sessionModePolicy;
   final SessionCallProviderKind? voiceVideoProviderHint;
+
+  /// Host navigates to guardian approval; retry eligibility on return.
+  final Future<bool> Function()? onGuardianApprovalRequested;
 
   /// Called after a booking is confirmed.
   /// navigation; otherwise the screen pops itself.
@@ -186,10 +190,22 @@ class _BookingScreenState extends State<BookingScreen> {
           ),
           BookingFailure(:final failure) => _EligibilityBlockedView(
             failure: failure,
+            studentId: widget.studentId,
             onCompleteProfile: widget.onCompleteProfile != null
                 ? () async {
                     await widget.onCompleteProfile!();
                     if (context.mounted) _retryEligibility();
+                  }
+                : null,
+            onGuardianApproval:
+                failure is GuardianApprovalRequiredFailure &&
+                    widget.onGuardianApprovalRequested != null
+                ? () async {
+                    final approved =
+                        await widget.onGuardianApprovalRequested!();
+                    if (approved && context.mounted) {
+                      _retryEligibility();
+                    }
                   }
                 : null,
             onRetry: _retryEligibility,
@@ -305,11 +321,15 @@ class _EligibilityBlockedView extends StatelessWidget {
     required this.failure,
     required this.onRetry,
     this.onCompleteProfile,
+    this.onGuardianApproval,
+    this.studentId,
   });
 
   final QuranSessionsFailure failure;
   final VoidCallback onRetry;
   final VoidCallback? onCompleteProfile;
+  final VoidCallback? onGuardianApproval;
+  final String? studentId;
 
   @override
   Widget build(BuildContext context) {
@@ -318,6 +338,7 @@ class _EligibilityBlockedView extends StatelessWidget {
     final tokens = Theme.of(context).tokens;
     final isProfileIncomplete = failure is ProfileIncompleteFailure;
     final isBlocked = failure is AccountBlockedFailure;
+    final needsGuardianApproval = failure is GuardianApprovalRequiredFailure;
 
     return Padding(
       padding: EdgeInsets.all(tokens.spaceExtraLarge + tokens.spaceSmall),
@@ -328,6 +349,8 @@ class _EligibilityBlockedView extends StatelessWidget {
           TilawaStateVisual(
             icon: isProfileIncomplete
                 ? Icons.person_add_outlined
+                : needsGuardianApproval
+                ? Icons.family_restroom_outlined
                 : isBlocked
                 ? Icons.block_outlined
                 : Icons.cancel_outlined,
@@ -349,6 +372,14 @@ class _EligibilityBlockedView extends StatelessWidget {
               text: l10n.profileCompletionTitle,
               leadingIcon: const Icon(Icons.edit_outlined),
               onPressed: onCompleteProfile,
+              isFullWidth: true,
+              size: TilawaButtonSize.large,
+            )
+          else if (needsGuardianApproval && onGuardianApproval != null)
+            TilawaButton(
+              text: l10n.guardianApprovalSetupAction,
+              leadingIcon: const Icon(Icons.family_restroom_outlined),
+              onPressed: onGuardianApproval,
               isFullWidth: true,
               size: TilawaButtonSize.large,
             )

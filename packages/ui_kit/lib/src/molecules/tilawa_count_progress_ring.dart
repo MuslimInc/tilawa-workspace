@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../foundation/component_tokens.dart';
 import '../foundation/tilawa_icons.dart';
 import '../foundation/design_tokens.dart';
+import '../foundation/tilawa_text_roles.dart';
 
 /// Circular athkar-style counter: bold count or done check — no progress ring.
 ///
@@ -97,14 +98,17 @@ class TilawaCountProgressRing extends StatelessWidget {
                             key: ValueKey<int>(currentCount),
                             '$currentCount',
                             maxLines: 1,
-                            style: theme.textTheme.displaySmall?.copyWith(
-                              color:
-                                  activeForegroundColor ??
-                                  colorScheme.onPrimary,
-                              fontWeight: FontWeight.w700,
-                              fontSize: componentTokens.countFontSize,
-                              height: componentTokens.countLineHeight,
-                            ),
+                            style:
+                                tilawaResolveTextRole(
+                                  theme.textTheme,
+                                  componentTokens.countTextRole,
+                                ).copyWith(
+                                  color:
+                                      activeForegroundColor ??
+                                      colorScheme.onPrimary,
+                                  fontWeight: FontWeight.w700,
+                                  height: componentTokens.countLineHeight,
+                                ),
                           ),
                         ),
                       ),

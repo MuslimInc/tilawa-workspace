@@ -29,13 +29,7 @@ import '../services/login_navigate_to_home_scheduler.dart';
 import '../services/login_sign_in_policy_warm_up.dart';
 import '../widgets/login_auth_bloc_listener.dart';
 
-/// Warm brown login canvas aligned with the brand-locked primary.
-const Color _kLoginAccent = AppColors.defaultPrimary;
-
-/// Cached on-primary for the login accent — avoids [AppTheme.getLightTheme] in
-/// [build].
-const Color _kLoginOnPrimary = AppColors.lightSchemeOnPrimary;
-
+/// Reference teal login canvas aligned with the brand-locked primary.
 void _logGoogleSignInButton(String message) {
   logger.d('[GoogleSignInButton] $message');
 }
@@ -311,9 +305,10 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
+    final TilawaProductColors product = theme.productColors;
     final ColorScheme loginScheme = colorScheme.copyWith(
-      primary: _kLoginAccent,
-      onPrimary: _kLoginOnPrimary,
+      primary: product.brandLockedPrimary,
+      onPrimary: product.brandLockedOnPrimary,
     );
     final SystemUiOverlayStyle overlayStyle =
         AppSystemChromeStyle.buildDefaultAppStyle(

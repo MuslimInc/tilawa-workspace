@@ -74,23 +74,31 @@ class _StartupFatalErrorScreenState extends State<_StartupFatalErrorScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              const Icon(
+              Icon(
                 Icons.error_outline_rounded,
                 size: 48,
-                color: Colors.white70,
+                color: AppColors.launchSplashForeground.withValues(alpha: 0.7),
               ),
               const SizedBox(height: 24),
-              const Text(
+              Text(
                 'حدث خطأ غير متوقع',
                 textDirection: TextDirection.rtl,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 18, color: Colors.white),
+                style: TextStyle(
+                  fontSize: 18,
+                  color: AppColors.launchSplashForeground,
+                ),
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 'Something went wrong',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.white70),
+                style: TextStyle(
+                  fontSize: 16,
+                  color: AppColors.launchSplashForeground.withValues(
+                    alpha: 0.7,
+                  ),
+                ),
               ),
               const SizedBox(height: 32),
               FilledButton(

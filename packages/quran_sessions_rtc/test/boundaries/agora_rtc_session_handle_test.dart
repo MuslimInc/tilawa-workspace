@@ -8,7 +8,7 @@ void main() {
   group('LiveAgoraRtcSessionHandle', () {
     test('leaveAndRelease tears down native engine', () async {
       final engine = FakeRtcEngine();
-      final handle = LiveAgoraRtcSessionHandle(engine);
+      final handle = LiveAgoraRtcSessionHandle(engine, appId: 'app_test');
 
       await handle.leaveAndRelease();
 
@@ -18,7 +18,7 @@ void main() {
 
     test('setMicrophoneMuted forwards mute to engine', () async {
       final engine = FakeRtcEngine();
-      final handle = LiveAgoraRtcSessionHandle(engine);
+      final handle = LiveAgoraRtcSessionHandle(engine, appId: 'app_test');
 
       await handle.setMicrophoneMuted(true);
 
@@ -27,7 +27,7 @@ void main() {
 
     test('exposes native engine for in-call rendering', () {
       final engine = FakeRtcEngine();
-      final handle = LiveAgoraRtcSessionHandle(engine);
+      final handle = LiveAgoraRtcSessionHandle(engine, appId: 'app_test');
 
       check(identical(handle.engine, engine)).equals(true);
     });

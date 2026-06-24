@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import {
   assertBookingEligible,
+  assertGuardianCanApproveChildBooking,
   calendarAge,
   isChild,
   isGenderCombinationAllowed,
@@ -29,6 +30,7 @@ function baseContext(
       countryCode: "EG",
       cityId: "cairo",
       guardianId: null,
+      guardianChildBookingApprovedAt: null,
       restrictionReason: null,
       ...overrides.student,
     },
@@ -190,10 +192,54 @@ test("assertBookingEligible blocks a child when guardian approval is required", 
   );
 });
 
+test("assertBookingEligible allows a child when guardian approval is recorded", () => {
+  const pricing = assertBookingEligible(
+    baseContext({
+      student: {
+        dateOfBirth: new Date("2015-01-01Z"),
+        guardianId: "guardian_uid",
+        guardianChildBookingApprovedAt: new Date("2024-01-01Z"),
+      },
+      policy: { requireGuardianApprovalForChildren: true },
+    }),
+    NOW,
+  );
+  assert.equal(pricing.isPaid, false);
+});
+
 test("assertBookingEligible allows an eligible child (teacher teaches children, no guardian gate)", () => {
   const pricing = assertBookingEligible(
     baseContext({ student: { dateOfBirth: new Date("2015-01-01Z") } }),
     NOW,
   );
   assert.equal(pricing.isPaid, false);
+});
+
+test("assertGuardianCanApproveChildBooking rejects missing guardian DOB", () => {
+  expectCode(
+    () => assertGuardianCanApproveChildBooking(null, 14, NOW),
+    "guardian_approval_invalid",
+  );
+});
+
+test("assertGuardianCanApproveChildBooking rejects child guardian DOB", () => {
+  expectCode(
+    () =>
+      assertGuardianCanApproveChildBooking(
+        new Date("2015-01-01Z"),
+        14,
+        NOW,
+      ),
+    "guardian_approval_invalid",
+  );
+});
+
+test("assertGuardianCanApproveChildBooking accepts adult guardian DOB", () => {
+  assert.doesNotThrow(() =>
+    assertGuardianCanApproveChildBooking(
+      new Date("1990-01-01Z"),
+      14,
+      NOW,
+    ),
+  );
 });

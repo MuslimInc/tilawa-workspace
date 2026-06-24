@@ -9,8 +9,7 @@ import 'package:quran_image/presentation/bloc/navigation/navigation_event.dart';
 import 'package:quran_image/presentation/bloc/navigation/navigation_state.dart';
 import 'package:quran_image/presentation/mappers/app_message_mapper.dart';
 import 'package:quran_image/quran_image_reader.dart';
-import 'package:tilawa_ui_kit/tilawa_ui_kit.dart'
-    show TilawaComponentTokens, TilawaDesignTokens;
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'core/di/dependency_injection.dart';
 import 'domain/entities/app_message.dart';
@@ -24,17 +23,8 @@ class QuranImageApp extends StatefulWidget {
 }
 
 class _QuranImageAppState extends State<QuranImageApp> {
-  static final ColorScheme _colorScheme = ColorScheme.fromSeed(
-    seedColor: Colors.green,
-  );
-
-  static final ThemeData _appTheme = ThemeData(
-    colorScheme: _colorScheme,
-    extensions: <ThemeExtension<dynamic>>[
-      TilawaDesignTokens.light(),
-      TilawaComponentTokens.light(colorScheme: _colorScheme),
-    ],
-    useMaterial3: true,
+  static final ThemeData _appTheme = AppTheme.getLightTheme(
+    primaryColor: AppColors.defaultPrimary,
   );
 
   bool _isPreloaded = false;
@@ -161,9 +151,9 @@ class _QuranReaderHome extends StatelessWidget {
                     Text(
                       state.appMessage.localize(l10n),
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
-                        color: Color(0xFF5D4037),
+                        color: AppVideoReelDesignDefaults.frameStrongTextColor,
                       ),
                     ),
                     const SizedBox(height: 24),

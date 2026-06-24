@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens/component_tokens_theme.dart';
+import '../foundation/tilawa_text_roles.dart';
 
 class TilawaShareFooterBar extends StatelessWidget {
   const TilawaShareFooterBar({
@@ -31,15 +32,21 @@ class TilawaShareFooterBar extends StatelessWidget {
             : theme.colorScheme.onSurface);
     // fix: Consistency & standards — respect ambient directionality (no RTL hardcode)
     // fix: Visual hierarchy — derive styles from text theme roles
-    final TextStyle primaryStyle = (textTheme.titleSmall ?? const TextStyle())
-        .copyWith(
+    final TextStyle primaryStyle =
+        tilawaResolveTextRole(
+          textTheme,
+          tokens.primaryLabelTextRole,
+        ).copyWith(
           fontWeight: tokens.labelFontWeight,
           color: resolvedForegroundColor,
           decoration: TextDecoration.none,
           decorationColor: Colors.transparent,
         );
-    final TextStyle secondaryStyle = (textTheme.bodySmall ?? const TextStyle())
-        .copyWith(
+    final TextStyle secondaryStyle =
+        tilawaResolveTextRole(
+          textTheme,
+          tokens.secondaryLabelTextRole,
+        ).copyWith(
           color: resolvedForegroundColor.withValues(
             alpha: tokens.secondaryLabelOpacity,
           ),

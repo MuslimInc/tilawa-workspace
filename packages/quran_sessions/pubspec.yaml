@@ -23,6 +23,7 @@ dependencies:
   tilawa_ui_kit:
     path: ../ui_kit
 
+  meta: any
 dev_dependencies:
   flutter_lints: ^6.0.0
   bloc_lint: ^0.4.1

@@ -113,6 +113,14 @@ void main() {
         ),
       );
 
+      await wired.join(
+        const CallJoinRequest(
+          sessionId: 'session_agora',
+          role: SessionParticipantRole.student,
+          callType: SessionCallType.voiceCall,
+          providerKind: SessionCallProviderKind.agora,
+        ),
+      );
       await wired.setMicrophoneMuted('session_agora', muted: true);
 
       check(mutedValue).equals(true);
@@ -138,7 +146,7 @@ void main() {
       check(webrtcJoined).isTrue();
     });
 
-    test('leaveSession fans out to every registered provider', () async {
+    test('leaveSession targets only the joined provider', () async {
       final events = <String>[];
       final wired = RoutingSessionCallProvider(
         external: _RecordingProvider(
@@ -159,12 +167,20 @@ void main() {
         ),
       );
 
+      await wired.join(
+        const CallJoinRequest(
+          sessionId: 'session_1',
+          role: SessionParticipantRole.student,
+          callType: SessionCallType.voiceCall,
+          providerKind: SessionCallProviderKind.mock,
+        ),
+      );
       await wired.leaveSession('session_1');
 
-      check(events).unorderedEquals(['external', 'mock', 'agora', 'webrtc']);
+      check(events).deepEquals(['mock']);
     });
 
-    test('endSession fans out to every registered provider', () async {
+    test('endSession targets only the joined provider', () async {
       final events = <String>[];
       final wired = RoutingSessionCallProvider(
         external: _RecordingProvider(
@@ -181,9 +197,17 @@ void main() {
         ),
       );
 
+      await wired.join(
+        const CallJoinRequest(
+          sessionId: 'session_1',
+          role: SessionParticipantRole.student,
+          callType: SessionCallType.voiceCall,
+          providerKind: SessionCallProviderKind.agora,
+        ),
+      );
       await wired.endSession('session_1');
 
-      check(events).unorderedEquals(['external', 'mock', 'agora']);
+      check(events).deepEquals(['agora']);
     });
   });
 

@@ -45,13 +45,12 @@ class _ReferenceOverlayValidatorState extends State<ReferenceOverlayValidator> {
     }
 
     final tokens = Theme.of(context).tokens;
+    final ColorScheme scheme = Theme.of(context).colorScheme;
 
     return Stack(
       children: [
-        // Live App UI
         widget.child,
 
-        // The Drag-able, Scalable, Opacity-controlled Ghost Image
         if (_isVisible && widget.referenceImagePath != null)
           Positioned.fill(
             child: IgnorePointer(
@@ -72,7 +71,6 @@ class _ReferenceOverlayValidatorState extends State<ReferenceOverlayValidator> {
             ),
           ),
 
-        // Floating Debug Controls
         Positioned(
           bottom: 20,
           right: 20,
@@ -87,26 +85,28 @@ class _ReferenceOverlayValidatorState extends State<ReferenceOverlayValidator> {
                     width: 280,
                     padding: EdgeInsets.all(tokens.spaceSmall),
                     decoration: BoxDecoration(
-                      color: Colors.black87,
+                      color: scheme.inverseSurface,
                       borderRadius: BorderRadius.circular(tokens.radiusMedium),
                     ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text(
+                        Text(
                           'Pixel Alignment Overlay',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: scheme.onInverseSurface,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         const SizedBox(height: 8),
                         Row(
                           children: [
-                            const Text(
+                            Text(
                               'Opacity',
                               style: TextStyle(
-                                color: Colors.white70,
+                                color: scheme.onInverseSurface.withValues(
+                                  alpha: 0.7,
+                                ),
                                 fontSize: 12,
                               ),
                             ),
@@ -122,10 +122,12 @@ class _ReferenceOverlayValidatorState extends State<ReferenceOverlayValidator> {
                         ),
                         Row(
                           children: [
-                            const Text(
+                            Text(
                               'Scale',
                               style: TextStyle(
-                                color: Colors.white70,
+                                color: scheme.onInverseSurface.withValues(
+                                  alpha: 0.7,
+                                ),
                                 fontSize: 12,
                               ),
                             ),
@@ -143,35 +145,35 @@ class _ReferenceOverlayValidatorState extends State<ReferenceOverlayValidator> {
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             IconButton(
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.keyboard_arrow_up,
-                                color: Colors.white,
+                                color: scheme.onInverseSurface,
                               ),
                               onPressed: () => setState(
                                 () => _offset += const Offset(0, -1),
                               ),
                             ),
                             IconButton(
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.keyboard_arrow_down,
-                                color: Colors.white,
+                                color: scheme.onInverseSurface,
                               ),
                               onPressed: () =>
                                   setState(() => _offset += const Offset(0, 1)),
                             ),
                             IconButton(
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.keyboard_arrow_left,
-                                color: Colors.white,
+                                color: scheme.onInverseSurface,
                               ),
                               onPressed: () => setState(
                                 () => _offset += const Offset(-1, 0),
                               ),
                             ),
                             IconButton(
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.keyboard_arrow_right,
-                                color: Colors.white,
+                                color: scheme.onInverseSurface,
                               ),
                               onPressed: () =>
                                   setState(() => _offset += const Offset(1, 0)),
@@ -180,7 +182,9 @@ class _ReferenceOverlayValidatorState extends State<ReferenceOverlayValidator> {
                         ),
                         TextButton(
                           style: TextButton.styleFrom(
-                            foregroundColor: Colors.white70,
+                            foregroundColor: scheme.onInverseSurface.withValues(
+                              alpha: 0.7,
+                            ),
                           ),
                           onPressed: () {
                             setState(() {
@@ -196,11 +200,11 @@ class _ReferenceOverlayValidatorState extends State<ReferenceOverlayValidator> {
                   ),
                 const SizedBox(height: 8),
                 FloatingActionButton(
-                  // Debug-only overlay tool; unique tag avoids a default-Hero
-                  // clash with the underlying screen's FAB while it is shown.
                   heroTag: 'reference_overlay_validator_fab',
                   mini: true,
-                  backgroundColor: _isVisible ? Colors.teal : Colors.grey,
+                  backgroundColor: _isVisible
+                      ? scheme.primary
+                      : scheme.surfaceContainerHighest,
                   onPressed: () {
                     setState(() {
                       _isVisible = !_isVisible;

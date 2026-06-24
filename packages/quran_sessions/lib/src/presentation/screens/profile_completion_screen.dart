@@ -234,9 +234,9 @@ class _LoadFailureView extends StatelessWidget {
         children: [
           Text(message),
           SizedBox(height: tokens.spaceMedium),
-          ElevatedButton(
+          TilawaButton(
+            text: retryLabel,
             onPressed: onRetry,
-            child: Text(retryLabel),
           ),
         ],
       ),

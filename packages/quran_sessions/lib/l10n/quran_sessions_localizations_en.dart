@@ -91,6 +91,29 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
       'Booking for this student requires guardian approval first.';
 
   @override
+  String get guardianApprovalTitle => 'Guardian approval';
+
+  @override
+  String get guardianApprovalBody =>
+      'A parent or guardian must sign in on this device and confirm that they allow Quran Sessions bookings for this student account.';
+
+  @override
+  String get guardianApprovalStudentIdLabel => 'Student account ID';
+
+  @override
+  String get guardianApprovalStudentIdHint => 'Child student user ID';
+
+  @override
+  String get guardianApprovalConfirm => 'Approve bookings';
+
+  @override
+  String get guardianApprovalCaptured =>
+      'Guardian approval recorded. You can return to booking.';
+
+  @override
+  String get guardianApprovalSetupAction => 'Set up guardian approval';
+
+  @override
   String policyViolation(Object detail, Object policy) {
     return 'Booking rejected due to policy \"$policy\": $detail.';
   }
@@ -281,6 +304,14 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String noTeachersForSpecialization(String specialization) {
     return 'No teachers found for \"$specialization\"';
   }
+
+  @override
+  String noTeachersForLanguage(String language) {
+    return 'No teachers found for \"$language\"';
+  }
+
+  @override
+  String get clearTeacherFilters => 'Clear filters';
 
   @override
   String get noTeachersAvailableRightNow => 'No teachers available right now';

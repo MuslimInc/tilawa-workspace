@@ -131,13 +131,14 @@ void main() {
     _expectHeroBottomBorder(scrollContext);
     expect(find.byIcon(FluentIcons.location_24_regular), findsOneWidget);
     _expectCollapsedPremiumChrome(scrollContext);
-    _expectCollapsedPrimaryPinnedBar(scrollContext);
+    _expectCollapsedPremiumPinnedBar(scrollContext);
   });
 }
 
-void _expectCollapsedPrimaryPinnedBar(BuildContext context) {
+void _expectCollapsedPremiumPinnedBar(BuildContext context) {
   final ThemeData theme = Theme.of(context);
-  final Color primary = theme.colorScheme.primary;
+  final TilawaCapabilityActionCardTokens cardTokens =
+      theme.componentTokens.capabilityActionCard;
   final TilawaDesignTokens tokens = theme.tokens;
 
   expect(
@@ -146,8 +147,14 @@ void _expectCollapsedPrimaryPinnedBar(BuildContext context) {
         return false;
       }
       final BoxDecoration decoration = widget.decoration as BoxDecoration;
-      final List<Color>? gradientColors = decoration.gradient?.colors;
-      if (gradientColors == null || !gradientColors.contains(primary)) {
+      final Gradient? gradient = decoration.gradient;
+      if (gradient is! LinearGradient) {
+        return false;
+      }
+      final List<Color> gradientColors = gradient.colors;
+      if (gradientColors.length != 2 ||
+          gradientColors.first != cardTokens.gradientStart ||
+          gradientColors.last != cardTokens.gradientEnd) {
         return false;
       }
       final List<BoxShadow>? shadows = decoration.boxShadow;
@@ -155,7 +162,7 @@ void _expectCollapsedPrimaryPinnedBar(BuildContext context) {
         return false;
       }
       final BoxShadow shadow = shadows.first;
-      return shadow.blurRadius == tokens.blurShadow &&
+      return shadow.blurRadius == tokens.spaceSmall &&
           shadow.offset == tokens.shadowOffsetSmall;
     }),
     findsWidgets,

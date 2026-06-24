@@ -30,6 +30,7 @@ export { confirmBookingPayment } from "./quranSessions/confirmBookingPayment";
 export { issueSessionRtcToken } from "./quranSessions/issueSessionRtcToken";
 export { recordCallTelemetryEvent } from "./quranSessions/recordCallTelemetryEvent";
 export { sessionReminders } from "./quranSessions/sessionReminders";
+export { approveChildGuardianBooking } from "./quranSessions/approveChildGuardianBooking";
 
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { initializeApp } from "firebase-admin/app";

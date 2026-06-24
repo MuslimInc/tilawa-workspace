@@ -299,6 +299,17 @@ class ScreenshotService {
     final imageWidth = pageImage.width.toDouble();
     final imageHeight = pageImage.height.toDouble();
     final footerTokens = TilawaFooterBarTokens.defaults();
+    final textTheme = AppTheme.getLightTheme(
+      primaryColor: AppColors.defaultPrimary,
+    ).textTheme;
+    final double primaryLabelFontSize = tilawaResolveTextRole(
+      textTheme,
+      footerTokens.primaryLabelTextRole,
+    ).fontSize ?? 14.0;
+    final double secondaryLabelFontSize = tilawaResolveTextRole(
+      textTheme,
+      footerTokens.secondaryLabelTextRole,
+    ).fontSize ?? 12.0;
     final stripHeight = footerTokens.height * pixelRatio;
     final totalHeight = imageHeight + stripHeight;
     final horizontalPadding = footerTokens.horizontalPadding * pixelRatio;
@@ -323,7 +334,7 @@ class ScreenshotService {
     // Draw surah name (left-aligned, RTL-friendly).
     final surahStyle = ui.TextStyle(
       color: foregroundColor,
-      fontSize: footerTokens.labelFontSize * pixelRatio,
+      fontSize: primaryLabelFontSize * pixelRatio,
       fontWeight: footerTokens.labelFontWeight,
     );
     final surahParagraphBuilder =
@@ -347,7 +358,7 @@ class ScreenshotService {
       color: foregroundColor.withValues(
         alpha: footerTokens.secondaryLabelOpacity,
       ),
-      fontSize: footerTokens.secondaryLabelFontSize * pixelRatio,
+      fontSize: secondaryLabelFontSize * pixelRatio,
     );
     final viaParagraphBuilder =
         ui.ParagraphBuilder(

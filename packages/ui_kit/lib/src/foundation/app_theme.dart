@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 import 'component_tokens.dart';
 import 'design_tokens.dart';
+import 'tilawa_product_colors.dart';
+import 'tilawa_type_scale.dart';
 
 /// Centralized app theme configuration
 class AppTheme {
@@ -56,12 +58,13 @@ class AppTheme {
 
   static TextTheme _getTextTheme(Brightness brightness) {
     final TextTheme base = _material3TypographyBase(brightness);
+    final TextTheme scaled = tilawaScaleTextTheme(base);
     if (_isFlutterTestEnvironment()) {
-      return base;
+      return scaled;
     }
     // Apply the bundled brand typeface while preserving each M3 style's own
     // weight/size so Flutter resolves the matching bundled font file.
-    return base.apply(fontFamily: _fontFamily);
+    return scaled.apply(fontFamily: _fontFamily);
   }
 
   static bool _isFlutterTestEnvironment() {
@@ -233,6 +236,8 @@ class AppTheme {
       onSecondaryContainer: AppColors.lightSchemeOnSecondaryContainer,
       error: AppColors.error,
       onError: AppColors.lightSchemeOnError,
+      errorContainer: AppColors.lightSchemeErrorContainer,
+      onErrorContainer: AppColors.lightSchemeOnErrorContainer,
       surface: AppColors.lightSurface,
       onSurface: AppColors.lightInk,
       onSurfaceVariant: AppColors.lightMute,
@@ -488,6 +493,7 @@ class AppTheme {
       extensions: [
         TilawaDesignTokens.light(),
         TilawaComponentTokens.light(colorScheme: colorScheme),
+        TilawaProductColors.light(colorScheme),
         ...extensions,
       ],
     );
@@ -533,6 +539,7 @@ class AppTheme {
       extensions: [
         TilawaDesignTokens.dark(),
         TilawaComponentTokens.dark(colorScheme: colorScheme),
+        TilawaProductColors.dark(colorScheme),
         ...extensions,
       ],
     );

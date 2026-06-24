@@ -74,10 +74,10 @@ Future<void> _pumpQuranImagePage(
   addTearDown(tester.view.resetDevicePixelRatio);
 
   await tester.pumpWidget(
-    MediaQuery(
-      data: MediaQueryData(size: logicalSize),
-      child: const MaterialApp(
-        home: Scaffold(
+    wrapQuranImageTestApp(
+      MediaQuery(
+        data: MediaQueryData(size: logicalSize),
+        child: const Scaffold(
           body: QuranImagePage(pageNumber: 1),
         ),
       ),
@@ -97,10 +97,10 @@ Future<void> _pumpQuranImagePageBox(
   addTearDown(tester.view.resetDevicePixelRatio);
 
   await tester.pumpWidget(
-    MediaQuery(
-      data: MediaQueryData(size: mediaQuerySize),
-      child: MaterialApp(
-        home: Scaffold(
+    wrapQuranImageTestApp(
+      MediaQuery(
+        data: MediaQueryData(size: mediaQuerySize),
+        child: Scaffold(
           body: Align(
             alignment: Alignment.topLeft,
             child: SizedBox.fromSize(

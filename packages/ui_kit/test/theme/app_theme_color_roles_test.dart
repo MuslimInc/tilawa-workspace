@@ -145,6 +145,8 @@ void main() {
       expect(scheme.onSecondary, AppColors.lightSchemeOnSecondary);
       expect(scheme.error, AppColors.error);
       expect(scheme.onError, AppColors.lightSchemeOnError);
+      expect(scheme.errorContainer, AppColors.lightSchemeErrorContainer);
+      expect(scheme.onErrorContainer, AppColors.lightSchemeOnErrorContainer);
       expect(scheme.surface, AppColors.lightSurface);
       expect(scheme.onSurface, AppColors.lightInk);
       expect(scheme.primaryContainer, AppColors.lightSchemePrimaryContainer);

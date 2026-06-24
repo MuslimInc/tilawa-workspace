@@ -140,7 +140,7 @@ class PagePassageCardRenderer extends StatelessWidget {
                           borderRadius: BorderRadius.circular(
                             _PagePosterLayout.readerFrameRadius,
                           ),
-                          color: Colors.white.withValues(alpha: 0.42),
+                          color: AppPagePassagePosterColors.readerFrameFill,
                           border: Border.all(
                             color: AppPagePassagePosterColors.gold.withValues(
                               alpha: 0.22,

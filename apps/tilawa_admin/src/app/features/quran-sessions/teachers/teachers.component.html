@@ -25,11 +25,13 @@
   } @else if (items().length === 0) {
     <app-tilawa-empty-state [title]="'teachers_empty' | t" />
   } @else {
-    <app-tilawa-data-table>
+    <app-tilawa-data-table pinMode="leading" leadingSize="wide">
       <thead>
         <tr>
-          <app-sortable-th [label]="'teachers_displayName' | t" field="displayName" [sort]="sort()" (sortChange)="onSortChange($event)" />
-          <th scope="col">{{ 'teachers_userId' | t }}</th>
+          <th scope="col" class="tilawa-table-pin tilawa-table-leading tilawa-table-pin-edge">
+            {{ 'teachers_displayName' | t }} · {{ 'common_actions' | t }}
+          </th>
+          <th scope="col" class="tilawa-table-col-mono">{{ 'teachers_userId' | t }}</th>
           <th scope="col">{{ 'teachers_active' | t }}</th>
           <th scope="col">{{ 'teachers_verification' | t }}</th>
           <th scope="col">{{ 'teachers_completeness' | t }}</th>
@@ -37,22 +39,44 @@
           <th scope="col">{{ 'teachers_missingFields' | t }}</th>
           <app-sortable-th [label]="'common_updated' | t" field="updatedAt" [sort]="sort()" (sortChange)="onSortChange($event)" />
           <app-sortable-th [label]="'common_date' | t" field="createdAt" [sort]="sort()" (sortChange)="onSortChange($event)" />
-          <th scope="col" class="text-end">{{ 'common_actions' | t }}</th>
         </tr>
       </thead>
       <tbody>
         @for (teacher of items(); track teacher.id) {
           <tr>
-            <td>
-              <div class="flex items-center gap-3">
-                <app-tilawa-avatar
-                  [displayName]="teacher.displayName"
-                  [photoUrl]="teacher.avatarUrl"
-                />
-                <span>{{ teacher.displayName }}</span>
+            <td class="tilawa-table-pin tilawa-table-leading tilawa-table-pin-edge">
+              <div class="tilawa-table-leading-inner">
+                <div class="tilawa-table-leading-label-row">
+                  <app-tilawa-avatar
+                    [displayName]="teacher.displayName"
+                    [photoUrl]="teacher.avatarUrl"
+                  />
+                  <span class="tilawa-table-leading-label truncate">{{ teacher.displayName }}</span>
+                </div>
+                <div class="tilawa-table-leading-actions">
+                  @if (teacher.isActive) {
+                    <app-tilawa-button
+                      variant="secondary"
+                      size="xs"
+                      [label]="'teachers_deactivate' | t"
+                      [loading]="isActionLoading() && pendingTeacherId === teacher.id"
+                      [disabled]="isActionLoading()"
+                      (click)="openModeration(teacher.id, TeacherProfileModerationAction.Deactivate)"
+                    />
+                  } @else {
+                    <app-tilawa-button
+                      variant="primary"
+                      size="xs"
+                      [label]="'teachers_activate' | t"
+                      [loading]="isActionLoading() && pendingTeacherId === teacher.id"
+                      [disabled]="isActionLoading()"
+                      (click)="openModeration(teacher.id, TeacherProfileModerationAction.Activate)"
+                    />
+                  }
+                </div>
               </div>
             </td>
-            <td class="font-mono text-xs">{{ teacher.userId }}</td>
+            <td class="font-mono text-xs tilawa-table-col-mono" [title]="teacher.userId">{{ teacher.userId }}</td>
             <td>{{ teacher.isActive ? ('common_yes' | t) : ('common_no' | t) }}</td>
             <td><app-status-chip [label]="teacher.verificationStatus | statusLabel" [status]="teacher.verificationStatus" /></td>
             <td><app-status-chip [label]="teacher.profileCompleteness | statusLabel" [status]="teacher.profileCompleteness" [scholar]="true" /></td>
@@ -66,29 +90,6 @@
             </td>
             <td>{{ teacher.updatedAt | date:'medium' }}</td>
             <td>{{ teacher.createdAt | date:'medium' }}</td>
-            <td class="text-end">
-              @if (teacher.isActive) {
-                <app-tilawa-button
-                  variant="text"
-                  size="sm"
-                  [loading]="isActionLoading() && pendingTeacherId === teacher.id"
-                  [disabled]="isActionLoading()"
-                  (click)="openModeration(teacher.id, TeacherProfileModerationAction.Deactivate)"
-                >
-                  {{ 'teachers_deactivate' | t }}
-                </app-tilawa-button>
-              } @else {
-                <app-tilawa-button
-                  variant="text"
-                  size="sm"
-                  [loading]="isActionLoading() && pendingTeacherId === teacher.id"
-                  [disabled]="isActionLoading()"
-                  (click)="openModeration(teacher.id, TeacherProfileModerationAction.Activate)"
-                >
-                  {{ 'teachers_activate' | t }}
-                </app-tilawa-button>
-              }
-            </td>
           </tr>
         }
       </tbody>

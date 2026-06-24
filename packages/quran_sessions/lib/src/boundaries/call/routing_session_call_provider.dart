@@ -7,7 +7,7 @@ import 'session_call_provider.dart';
 
 /// Routes join to the correct provider using server-issued [CallJoinRequest].
 class RoutingSessionCallProvider implements SessionCallProvider {
-  const RoutingSessionCallProvider({
+  RoutingSessionCallProvider({
     required this.external,
     required this.mock,
     this.agora,
@@ -19,9 +19,11 @@ class RoutingSessionCallProvider implements SessionCallProvider {
   final SessionCallProvider? agora;
   final SessionCallProvider? webrtc;
 
-  @override
-  Future<CallRoom> join(CallJoinRequest request) {
-    final provider = switch (request.providerKind) {
+  final Map<String, SessionCallProviderKind> _activeProviders =
+      <String, SessionCallProviderKind>{};
+
+  SessionCallProvider _providerFor(SessionCallProviderKind kind) {
+    return switch (kind) {
       SessionCallProviderKind.external => external,
       SessionCallProviderKind.mock => mock,
       SessionCallProviderKind.agora =>
@@ -35,23 +37,42 @@ class RoutingSessionCallProvider implements SessionCallProvider {
               reasonCode: 'webrtc_not_registered',
             )),
     };
-    return provider.join(request);
+  }
+
+  SessionCallProvider? _activeProviderFor(String sessionId) {
+    final kind = _activeProviders[sessionId];
+    if (kind == null) {
+      return null;
+    }
+    return _providerFor(kind);
+  }
+
+  @override
+  Future<CallRoom> join(CallJoinRequest request) async {
+    final provider = _providerFor(request.providerKind);
+    final room = await provider.join(request);
+    _activeProviders[request.sessionId] = request.providerKind;
+    return room;
   }
 
   @override
   Future<void> leaveSession(String sessionId) async {
-    await external.leaveSession(sessionId);
-    await mock.leaveSession(sessionId);
-    await agora?.leaveSession(sessionId);
-    await webrtc?.leaveSession(sessionId);
+    final provider = _activeProviderFor(sessionId);
+    if (provider == null) {
+      return;
+    }
+    await provider.leaveSession(sessionId);
+    _activeProviders.remove(sessionId);
   }
 
   @override
   Future<void> endSession(String sessionId) async {
-    await external.endSession(sessionId);
-    await mock.endSession(sessionId);
-    await agora?.endSession(sessionId);
-    await webrtc?.endSession(sessionId);
+    final provider = _activeProviderFor(sessionId);
+    if (provider == null) {
+      return;
+    }
+    await provider.endSession(sessionId);
+    _activeProviders.remove(sessionId);
   }
 
   @override
@@ -59,10 +80,11 @@ class RoutingSessionCallProvider implements SessionCallProvider {
     String sessionId, {
     required bool muted,
   }) async {
-    await external.setMicrophoneMuted(sessionId, muted: muted);
-    await mock.setMicrophoneMuted(sessionId, muted: muted);
-    await agora?.setMicrophoneMuted(sessionId, muted: muted);
-    await webrtc?.setMicrophoneMuted(sessionId, muted: muted);
+    final provider = _activeProviderFor(sessionId);
+    if (provider == null) {
+      return;
+    }
+    await provider.setMicrophoneMuted(sessionId, muted: muted);
   }
 
   @override
@@ -70,10 +92,11 @@ class RoutingSessionCallProvider implements SessionCallProvider {
     String sessionId, {
     required bool enabled,
   }) async {
-    await external.setMicrophoneEnabled(sessionId, enabled: enabled);
-    await mock.setMicrophoneEnabled(sessionId, enabled: enabled);
-    await agora?.setMicrophoneEnabled(sessionId, enabled: enabled);
-    await webrtc?.setMicrophoneEnabled(sessionId, enabled: enabled);
+    final provider = _activeProviderFor(sessionId);
+    if (provider == null) {
+      return;
+    }
+    await provider.setMicrophoneEnabled(sessionId, enabled: enabled);
   }
 
   @override
@@ -81,18 +104,20 @@ class RoutingSessionCallProvider implements SessionCallProvider {
     String sessionId, {
     required bool enabled,
   }) async {
-    await external.setCameraEnabled(sessionId, enabled: enabled);
-    await mock.setCameraEnabled(sessionId, enabled: enabled);
-    await agora?.setCameraEnabled(sessionId, enabled: enabled);
-    await webrtc?.setCameraEnabled(sessionId, enabled: enabled);
+    final provider = _activeProviderFor(sessionId);
+    if (provider == null) {
+      return;
+    }
+    await provider.setCameraEnabled(sessionId, enabled: enabled);
   }
 
   @override
   Future<void> switchCamera(String sessionId) async {
-    await external.switchCamera(sessionId);
-    await mock.switchCamera(sessionId);
-    await agora?.switchCamera(sessionId);
-    await webrtc?.switchCamera(sessionId);
+    final provider = _activeProviderFor(sessionId);
+    if (provider == null) {
+      return;
+    }
+    await provider.switchCamera(sessionId);
   }
 
   @override
@@ -100,10 +125,11 @@ class RoutingSessionCallProvider implements SessionCallProvider {
     String sessionId, {
     required bool enabled,
   }) async {
-    await external.setSpeakerEnabled(sessionId, enabled: enabled);
-    await mock.setSpeakerEnabled(sessionId, enabled: enabled);
-    await agora?.setSpeakerEnabled(sessionId, enabled: enabled);
-    await webrtc?.setSpeakerEnabled(sessionId, enabled: enabled);
+    final provider = _activeProviderFor(sessionId);
+    if (provider == null) {
+      return;
+    }
+    await provider.setSpeakerEnabled(sessionId, enabled: enabled);
   }
 }
 

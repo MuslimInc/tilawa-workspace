@@ -266,7 +266,6 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     unawaited(AppOrientationService.restoreDefaultOrientations());
     AppSystemChromeStyle.applyDefault();
     _uiVisibilityCubit.show();
-    disposeSideEffects();
     super.dispose();
   }
 
@@ -274,9 +273,6 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _updateSystemUiConfig(_uiVisibilityCubit.state);
-      onResumedSideEffects();
-    } else if (state == AppLifecycleState.paused) {
-      onPausedSideEffects();
     }
   }
 
@@ -1786,10 +1782,11 @@ class __PerformanceBenchmarkOverlayState
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme scheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.7),
+        color: scheme.scrim.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(
           Theme.of(context).tokens.radiusSmall,
         ),
@@ -1801,7 +1798,7 @@ class __PerformanceBenchmarkOverlayState
           Text(
             'BENCHMARK',
             style: TextStyle(
-              color: Colors.yellowAccent,
+              color: scheme.tertiary,
               fontSize: 10,
               fontWeight: FontWeight.bold,
             ),
@@ -1815,7 +1812,7 @@ class __PerformanceBenchmarkOverlayState
               return _buildStat(
                 'Font Ready',
                 isLoaded ? 'YES' : 'NO',
-                valueColor: isLoaded ? Colors.green : Colors.red,
+                valueColor: isLoaded ? scheme.success : scheme.error,
               );
             },
           ),
@@ -1829,6 +1826,7 @@ class __PerformanceBenchmarkOverlayState
   }
 
   Widget _buildStat(String label, String value, {Color? valueColor}) {
+    final ColorScheme scheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
@@ -1836,12 +1834,15 @@ class __PerformanceBenchmarkOverlayState
         children: [
           Text(
             '$label: ',
-            style: const TextStyle(color: Colors.white, fontSize: 12),
+            style: TextStyle(
+              color: scheme.onInverseSurface,
+              fontSize: 12,
+            ),
           ),
           Text(
             value,
             style: TextStyle(
-              color: valueColor ?? Colors.cyanAccent,
+              color: valueColor ?? scheme.tertiary,
               fontSize: 12,
               fontWeight: FontWeight.bold,
             ),

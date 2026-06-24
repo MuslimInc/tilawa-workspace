@@ -29,6 +29,7 @@ class PrayerTimeCard extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
+    final product = theme.productColors;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -39,16 +40,18 @@ class PrayerTimeCard extends StatelessWidget {
         final bool tightHeight =
             constraints.maxHeight < tokens.cardTightHeightThreshold;
 
-        final Color accentColor = colorScheme.primary;
+        final Color accentColor = product.prayerTimeActive;
         final Color emphasisColor = colorScheme.onSurface;
 
         final Color surfaceColor = isNext
-            ? colorScheme.primaryContainer.withValues(
+            ? product.prayerTimeNextSurface.withValues(
                 alpha: tokens.opacityMedium,
               )
             : colorScheme.surfaceContainerLow;
         final Color borderColor = isNext
-            ? colorScheme.primary.withValues(alpha: tokens.opacitySubtle * 1.5)
+            ? product.prayerTimeActive.withValues(
+                alpha: tokens.opacitySubtle * 1.5,
+              )
             : colorScheme.outlineVariant.withValues(
                 alpha: tokens.opacitySubtle,
               );
@@ -68,7 +71,7 @@ class PrayerTimeCard extends StatelessWidget {
             boxShadow: isNext
                 ? [
                     BoxShadow(
-                      color: colorScheme.primary.withValues(
+                      color: product.prayerTimeActive.withValues(
                         alpha: tokens.opacityShadow * 0.5,
                       ),
                       blurRadius: tokens.blurShadow,

@@ -187,6 +187,13 @@ List<RouteBase> get quranSessionsRoutes => [
           onCompleteProfile: () async {
             await context.push(QuranSessionsRoutes.profileCompletion);
           },
+          onGuardianApprovalRequested: () async {
+            final approved = await context.push<bool>(
+              QuranSessionsRoutes.guardianApproval,
+              extra: studentId,
+            );
+            return approved ?? false;
+          },
         ),
       );
     },
@@ -311,6 +318,18 @@ List<RouteBase> get quranSessionsRoutes => [
       return BlocProvider(
         create: (_) => getIt<ProfileCompletionBloc>(),
         child: ProfileCompletionScreen(userId: userId),
+      );
+    },
+  ),
+  GoRoute(
+    path: QuranSessionsRoutes.guardianApproval,
+    builder: (context, state) {
+      final studentId =
+          state.extra as String? ?? requireQuranSessionsUserId(getIt);
+      return GuardianApprovalCaptureScreen(
+        studentId: studentId,
+        approveChildGuardianBooking:
+            getIt<ApproveChildGuardianBookingUseCase>(),
       );
     },
   ),

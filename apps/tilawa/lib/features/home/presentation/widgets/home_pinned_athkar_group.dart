@@ -26,17 +26,18 @@ class HomePinnedAthkarGroup extends StatelessWidget {
 
     final tokens = Theme.of(context).tokens;
     final colorScheme = Theme.of(context).colorScheme;
+    final product = Theme.of(context).productColors;
     final Color dividerColor = colorScheme.outlineVariant;
 
     // Four distinct icon colour pairs cycling through the available palette.
     final List<(Color bg, Color fg)> tints = [
       (colorScheme.primary.withValues(alpha: 0.13), colorScheme.primary),
       (
-        AppColors.featuredGradientStart.withValues(alpha: 0.28),
-        AppColors.featuredGradientEnd,
+        product.featuredGradientStart.withValues(alpha: 0.28),
+        product.featuredGradientEnd,
       ),
-      (AppColors.success.withValues(alpha: 0.14), AppColors.success),
-      (colorScheme.primary.withValues(alpha: 0.08), AppColors.brandTertiary),
+      (colorScheme.success.withValues(alpha: 0.14), colorScheme.success),
+      (colorScheme.primary.withValues(alpha: 0.08), colorScheme.tertiary),
     ];
 
     return HomeDashboardCard(

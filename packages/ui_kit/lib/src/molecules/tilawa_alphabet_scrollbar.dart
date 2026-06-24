@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
+import '../foundation/tilawa_text_roles.dart';
 
 class TilawaAlphabetScrollbar extends StatefulWidget {
   const TilawaAlphabetScrollbar({
@@ -415,6 +416,10 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
     final Color trackBorderColor = _isScrubbing
         ? primaryColor.withValues(alpha: tokens.opacityMedium)
         : colorScheme.outlineVariant.withValues(alpha: tokens.opacityMedium);
+    final double letterFontSize = tilawaResolveTextRole(
+      theme.textTheme,
+      componentTokens.letterTextRole,
+    ).fontSize ?? 13.0;
 
     return RepaintBoundary(
       child: _MaybeScrollbarSemantics(
@@ -438,11 +443,14 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
               left: overlayLeft,
               top: overlayTop,
               child: DefaultTextStyle(
-                style: theme.textTheme.displaySmall!.copyWith(
-                  color: colorScheme.onPrimary,
-                  fontWeight: FontWeight.bold,
-                  fontSize: componentTokens.overlayFontSize,
-                ),
+                style:
+                    tilawaResolveTextRole(
+                      theme.textTheme,
+                      componentTokens.overlayTextRole,
+                    ).copyWith(
+                      color: colorScheme.onPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
                 child: TweenAnimationBuilder<double>(
                   duration: theme.tokens.durationFast,
                   curve: Curves.easeOutCubic,
@@ -532,6 +540,7 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
                             unselectedColor: unselectedColor,
                             componentTokens: componentTokens,
                             isScrubbing: _isScrubbing,
+                            letterFontSize: letterFontSize,
                           ),
                         ),
                     ],
@@ -592,6 +601,7 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
     required Color unselectedColor,
     required TilawaAlphabetScrollbarTokens componentTokens,
     required bool isScrubbing,
+    required double letterFontSize,
   }) {
     final activeLetter = _activeLetter;
     final isSelected = letter == activeLetter;
@@ -615,7 +625,7 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
                   widget.selectedLetterSemanticsId?.call(letter)
             : null,
         selectedIndicatorSize: selectedIndicatorSize,
-        fontSize: componentTokens.letterFontSize,
+        fontSize: letterFontSize,
         primaryColor: primaryColor,
         unselectedColor: unselectedColor,
       );

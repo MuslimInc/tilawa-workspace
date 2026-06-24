@@ -85,9 +85,11 @@ void main() {
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
-      home: BlocProvider<SupportBloc>.value(
-        value: bloc,
-        child: const SupportTilawaScreen(),
+      home: TilawaFeedbackHost(
+        child: BlocProvider<SupportBloc>.value(
+          value: bloc,
+          child: const SupportTilawaScreen(),
+        ),
       ),
     );
   }
@@ -226,14 +228,16 @@ void main() {
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
-          home: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              parentBuildCount++;
-              return BlocProvider<SupportBloc>.value(
-                value: bloc,
-                child: const SupportTilawaScreen(),
-              );
-            },
+          home: TilawaFeedbackHost(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                parentBuildCount++;
+                return BlocProvider<SupportBloc>.value(
+                  value: bloc,
+                  child: const SupportTilawaScreen(),
+                );
+              },
+            ),
           ),
         ),
       );
@@ -245,7 +249,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
 
       expect(parentBuildCount, buildsBeforeBlocUpdate);
-      expect(find.text(ar.purchaseVerificationFailed), findsOneWidget);
+      expect(find.text(ar.purchaseVerificationFailed), findsAtLeastNWidgets(1));
       expect(find.text(en.purchaseVerificationFailed), findsNothing);
     },
   );

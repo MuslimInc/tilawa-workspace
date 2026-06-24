@@ -6,7 +6,8 @@ import 'package:url_launcher/url_launcher.dart';
 /// Throws [ExternalMeetingLaunchFailure] when the link cannot be opened.
 Future<void> launchExternalMeetingUrl(String url) async {
   final uri = Uri.tryParse(url.trim());
-  if (uri == null || uri.scheme.isEmpty) {
+  if (uri == null ||
+      (uri.scheme != 'http' && uri.scheme != 'https')) {
     throw const MeetingLinkUnavailableFailure();
   }
 

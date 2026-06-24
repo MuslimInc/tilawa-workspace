@@ -403,6 +403,9 @@ class QuranSessionsMvpModule {
         teacherProfileRepository: sl.isRegistered<TeacherProfileRepository>()
             ? sl<TeacherProfileRepository>()
             : null,
+        tokenProvider: sl.isRegistered<CallTokenProvider>()
+            ? sl<CallTokenProvider>()
+            : null,
       ),
     );
     sl.registerFactoryIfAbsent(

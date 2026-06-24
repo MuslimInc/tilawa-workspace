@@ -35,6 +35,7 @@ class HomeHeroBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
+    final TilawaProductColors product = theme.productColors;
     final TilawaDesignTokens tokens = theme.tokens;
     final bool lightPhase =
         heroTokens.gradientBottomEnd.computeLuminance() > 0.45;
@@ -45,7 +46,7 @@ class HomeHeroBackground extends StatelessWidget {
       children: [
         DecoratedBox(
           decoration: BoxDecoration(
-            gradient: _resolveBackgroundGradient(heroTokens),
+            gradient: _resolveBackgroundGradient(heroTokens, product),
           ),
         ),
         if (lightPhase)
@@ -55,7 +56,7 @@ class HomeHeroBackground extends StatelessWidget {
                 center: AlignmentDirectional.topCenter,
                 radius: 1.05,
                 colors: <Color>[
-                  AppColors.featuredGradientStart.withValues(alpha: 0.11),
+                  product.featuredGradientStart.withValues(alpha: 0.11),
                   Colors.transparent,
                 ],
                 stops: const <double>[0, 0.78],
@@ -112,6 +113,7 @@ class HomeHeroBackground extends StatelessWidget {
   /// Three-stop phase gradient with a restrained gold mid accent.
   static LinearGradient _resolveBackgroundGradient(
     TilawaHomeNextPrayerHeroTokens heroTokens,
+    TilawaProductColors product,
   ) {
     if (heroTokens.gradientTopStart == heroTokens.gradientBottomEnd) {
       return LinearGradient(
@@ -127,7 +129,12 @@ class HomeHeroBackground extends StatelessWidget {
     final bool lightPhase =
         heroTokens.gradientBottomEnd.computeLuminance() > 0.45;
     final Color midStop = lightPhase
-        ? AppColors.homeNextPrayerGradientDayMid
+        ? (heroTokens.gradientMidStop ??
+              Color.lerp(
+                heroTokens.gradientTopStart,
+                heroTokens.gradientBottomEnd,
+                0.42,
+              )!)
         : Color.lerp(
             heroTokens.gradientTopStart,
             heroTokens.gradientBottomEnd,
@@ -136,7 +143,7 @@ class HomeHeroBackground extends StatelessWidget {
     final double goldMix = lightPhase ? 0.14 : 0.08;
     final Color accentMid = Color.lerp(
       midStop,
-      AppColors.featuredGradientStart,
+      product.featuredGradientStart,
       goldMix,
     )!;
 

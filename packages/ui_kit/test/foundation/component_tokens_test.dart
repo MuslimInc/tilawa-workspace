@@ -8,6 +8,7 @@ import '../../lib/src/foundation/component_tokens/molecules_tokens.dart';
 import '../../lib/src/foundation/component_tokens/organisms_tokens.dart';
 import '../../lib/src/foundation/component_tokens/token_lerp.dart';
 import '../../lib/src/foundation/design_tokens.dart';
+import '../../lib/src/foundation/tilawa_text_roles.dart';
 
 void main() {
   group('TilawaSectionTitleTokens', () {
@@ -337,9 +338,12 @@ void main() {
 
     test('copyWith updates values preserving others', () {
       final original = TilawaCountProgressRingTokens.defaults();
-      final updated = original.copyWith(outerSize: 80.0, countFontSize: 40.0);
+      final updated = original.copyWith(
+        outerSize: 80.0,
+        countTextRole: TilawaTextRole.headlineSmall,
+      );
       expect(updated.outerSize, 80.0);
-      expect(updated.countFontSize, 40.0);
+      expect(updated.countTextRole, TilawaTextRole.headlineSmall);
       expect(updated.innerSize, original.innerSize);
     });
 
@@ -349,7 +353,7 @@ void main() {
         innerSize: 50.0,
         ringStrokeWidth: 8.0,
         doneIconSize: 40.0,
-        countFontSize: 30.0,
+        countTextRole: TilawaTextRole.titleMedium,
         countLineHeight: 0.9,
         countHorizontalPadding: 4.0,
         doneBorderWidth: 1.0,
@@ -366,7 +370,7 @@ void main() {
         innerSize: 70.0,
         ringStrokeWidth: 12.0,
         doneIconSize: 60.0,
-        countFontSize: 42.0,
+        countTextRole: TilawaTextRole.titleLarge,
         countLineHeight: 1.1,
         countHorizontalPadding: 8.0,
         doneBorderWidth: 3.0,
@@ -380,7 +384,7 @@ void main() {
       );
       final result = TilawaCountProgressRingTokens.lerp(first, second, 0.5);
       expect(result.outerSize, closeTo(70.0, 0.01));
-      expect(result.countFontSize, closeTo(36.0, 0.01));
+      expect(result.countTextRole, TilawaTextRole.titleLarge);
       expect(result.countLineHeight, closeTo(1.0, 0.01));
       expect(result.progressLabelBackgroundOpacity, closeTo(0.3, 0.01));
     });
@@ -441,7 +445,7 @@ void main() {
       final tokens = TilawaSettingsGroupTokens.defaults();
       expect(tokens.groupHorizontalPadding, 20.0);
       expect(tokens.groupShadowOpacity, 0);
-      expect(tokens.tileTitleFontSize, 16.0);
+      expect(tokens.tileTitleTextRole, TilawaTextRole.bodyLarge);
       expect(tokens.tileSubtitleOpacity, 0.6);
       expect(tokens.switchActiveTrackOpacity, 1);
       expect(tokens.selectionTileSelectedBackgroundColor, isA<Color>());
@@ -474,10 +478,10 @@ void main() {
     test('copyWith updates nested EdgeInsets and numeric values', () {
       final original = TilawaSettingsGroupTokens.defaults();
       final updated = original.copyWith(
-        tileTitleFontSize: 16.0,
+        tileTitleTextRole: TilawaTextRole.titleMedium,
         tileSubtitleOpacity: 0.6,
       );
-      expect(updated.tileTitleFontSize, 16.0);
+      expect(updated.tileTitleTextRole, TilawaTextRole.titleMedium);
       expect(updated.tileSubtitleOpacity, 0.6);
       expect(updated.groupShadowOpacity, original.groupShadowOpacity);
     });
@@ -489,7 +493,7 @@ void main() {
         groupShadowOpacity: 0.04,
         groupShadowBlur: 8.0,
         groupShadowOffset: Offset(0, 2),
-        groupTitleFontSize: 12.0,
+        groupTitleTextRole: TilawaTextRole.labelLarge,
         groupTitleLetterSpacing: 1.0,
         tileContentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 1),
         switchTileContentPadding: EdgeInsets.symmetric(
@@ -498,8 +502,8 @@ void main() {
         ),
         tileIconPadding: EdgeInsets.all(8),
         tileIconSize: 20.0,
-        tileTitleFontSize: 15.0,
-        tileSubtitleFontSize: 12.0,
+        tileTitleTextRole: TilawaTextRole.titleMedium,
+        tileSubtitleTextRole: TilawaTextRole.bodySmall,
         tileSubtitleOpacity: 0.4,
         tileSubtitleSpacing: 2.0,
         tileTrailingSize: 12.0,
@@ -524,7 +528,7 @@ void main() {
         groupShadowOpacity: 0.08,
         groupShadowBlur: 12.0,
         groupShadowOffset: Offset(0, 6),
-        groupTitleFontSize: 13.0,
+        groupTitleTextRole: TilawaTextRole.titleSmall,
         groupTitleLetterSpacing: 1.2,
         tileContentPadding: EdgeInsets.symmetric(horizontal: 18, vertical: 3),
         switchTileContentPadding: EdgeInsets.symmetric(
@@ -533,8 +537,8 @@ void main() {
         ),
         tileIconPadding: EdgeInsets.all(12),
         tileIconSize: 24.0,
-        tileTitleFontSize: 16.0,
-        tileSubtitleFontSize: 13.0,
+        tileTitleTextRole: TilawaTextRole.bodyLarge,
+        tileSubtitleTextRole: TilawaTextRole.labelLarge,
         tileSubtitleOpacity: 0.6,
         tileSubtitleSpacing: 6.0,
         tileTrailingSize: 16.0,
@@ -556,7 +560,7 @@ void main() {
 
       final result = TilawaSettingsGroupTokens.lerp(first, second, 0.5);
       expect(result.groupHorizontalPadding, closeTo(16.0, 0.01));
-      expect(result.tileTitleFontSize, closeTo(15.5, 0.01));
+      expect(result.tileTitleTextRole, TilawaTextRole.bodyLarge);
       expect(result.switchActiveTrackOpacity, closeTo(0.5, 0.01));
       expect(
         result.selectionTileSelectedBackgroundColor,
@@ -871,7 +875,7 @@ void main() {
         navButtonSelectedBackgroundColor: Color(0xFFD7E4DC),
         navButtonSelectedBackgroundOpacity: 0.2,
         navButtonSelectedCenterOpacity: 0.25,
-        navButtonLabelFontSize: 10.0,
+        navButtonLabelTextRole: TilawaTextRole.labelSmall,
         navButtonSelectedLabelWeight: FontWeight.w700,
         navButtonUnselectedLabelWeight: FontWeight.w500,
         navButtonSplashColor: Color(0x33000000),
@@ -911,7 +915,7 @@ void main() {
         navButtonSelectedBackgroundColor: Color(0xFFC0D7CB),
         navButtonSelectedBackgroundOpacity: 0.25,
         navButtonSelectedCenterOpacity: 0.3,
-        navButtonLabelFontSize: 11.0,
+        navButtonLabelTextRole: TilawaTextRole.labelMedium,
         navButtonSelectedLabelWeight: FontWeight.w800,
         navButtonUnselectedLabelWeight: FontWeight.w600,
         navButtonSplashColor: Color(0x66000000),
@@ -1132,11 +1136,11 @@ void main() {
       expect(tokens.foregroundColor, AppColors.featuredGradientForeground);
       expect(
         tokens.splashColor,
-        AppColors.primaryBrown.withValues(alpha: 0.08),
+        AppColors.defaultPrimary.withValues(alpha: 0.08),
       );
       expect(
         tokens.highlightColor,
-        AppColors.primaryBrown.withValues(alpha: 0.04),
+        AppColors.defaultPrimary.withValues(alpha: 0.04),
       );
       expect(tokens.travelSheetSurface, AppColors.homeTravelSheetSurface);
       expect(tokens.travelSearchFieldFill, AppColors.homeTravelSearchFill);

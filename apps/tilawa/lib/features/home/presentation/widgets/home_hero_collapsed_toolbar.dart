@@ -13,8 +13,6 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 class HomeHeroCollapsedToolbar extends StatelessWidget {
   const HomeHeroCollapsedToolbar({
     super.key,
-    required this.heroTokens,
-    required this.collapsedBarColor,
     required this.nextPrayer,
     required this.locationName,
     required this.isRefreshingLocation,
@@ -22,8 +20,6 @@ class HomeHeroCollapsedToolbar extends StatelessWidget {
     required this.onOpenPrayer,
   });
 
-  final TilawaHomeNextPrayerHeroTokens heroTokens;
-  final Color collapsedBarColor;
   final HomeNextPrayer? nextPrayer;
   final String? locationName;
   final bool isRefreshingLocation;
@@ -38,27 +34,28 @@ class HomeHeroCollapsedToolbar extends StatelessWidget {
     final TilawaDesignTokens tokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
     final Color foreground = HomeHeroPhotoTheme.collapsedToolbarForeground(
-      collapsedBarColor: collapsedBarColor,
-      heroTokens: heroTokens,
       colorScheme: colorScheme,
     );
     final Color muted = HomeHeroPhotoTheme.collapsedToolbarMuted(colorScheme);
     final TextStyle? locationStyle = HomeHeroPhotoTheme.labelStyle(
       theme.textTheme.labelSmall,
-      colorScheme.onPrimary,
+      colorScheme.onSurface,
       tokens: tokens,
+      colorScheme: colorScheme,
       fontWeight: FontWeight.w600,
     );
     final TextStyle prayerStyle = HomeHeroPhotoTheme.titleStyle(
       theme.textTheme.titleSmall,
       foreground,
       tokens: tokens,
+      colorScheme: colorScheme,
       fontWeight: FontWeight.w800,
     )!;
     final TextStyle countdownStyle = HomeHeroPhotoTheme.labelStyle(
       theme.textTheme.labelSmall,
       colorScheme.semanticTintForeground(TilawaSemanticTint.gilding),
       tokens: tokens,
+      colorScheme: colorScheme,
       fontWeight: FontWeight.w700,
     )!;
     final String locationLabel =
@@ -213,7 +210,7 @@ class _HomeHeroCollapsedLocationChip extends StatelessWidget {
                       child: TilawaLoadingIndicator(
                         centered: false,
                         strokeWidth: 2,
-                        color: colorScheme.onPrimary,
+                        color: colorScheme.onSurface,
                       ),
                     )
                   else

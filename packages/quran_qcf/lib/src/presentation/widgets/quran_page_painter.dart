@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/models/quran_word_metadata.dart';
 import '../../helpers/app_logger.dart';
@@ -384,14 +385,14 @@ class _AllLinesPainter extends CustomPainter {
           painter.height,
         );
         final fillPaint = Paint()
-          ..color = Colors.blue.withValues(alpha: 0.08)
+          ..color = AppQuranDebugGuideColors.lineFill
           ..style = PaintingStyle.fill;
         final strokePaint = Paint()
-          ..color = Colors.indigo.withValues(alpha: 0.7)
+          ..color = AppQuranDebugGuideColors.lineStroke
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1;
         final baselinePaint = Paint()
-          ..color = Colors.red.withValues(alpha: 0.65)
+          ..color = AppQuranDebugGuideColors.baseline
           ..strokeWidth = 1;
         recordingCanvas.drawRect(lineRect, fillPaint);
         recordingCanvas.drawRect(lineRect, strokePaint);

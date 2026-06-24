@@ -2,6 +2,7 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/features/audio_player/presentation/quran_player_semantics_ids.dart';
+import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa/shared/widgets/quran_player_expand_physics.dart';
 import 'package:tilawa/shared/widgets/quran_player_morph_layer.dart';
 import 'package:tilawa/shared/widgets/quran_player_morph_layout.dart';
@@ -45,6 +46,9 @@ Widget _pumpMorph({
 }) {
   return MaterialApp(
     theme: AppTheme.getLightTheme(primaryColor: const Color(0xFF2E7D6F)),
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    locale: const Locale('en'),
     home: Scaffold(
       body: QuranPlayerMorphLayer(
         audio: audio,

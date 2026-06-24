@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../app_colors.dart';
+import '../color_scheme_ext.dart';
 import '../design_tokens.dart';
+import '../tilawa_text_roles.dart';
 import 'token_lerp.dart';
 
 @immutable
@@ -10,10 +12,10 @@ class TilawaAlphabetScrollbarTokens {
     required this.width,
     required this.itemExtent,
     required this.selectedIndicatorExtent,
-    required this.letterFontSize,
+    required this.letterTextRole,
     required this.verticalPadding,
     required this.overlaySize,
-    required this.overlayFontSize,
+    required this.overlayTextRole,
     required this.overlayRadius,
     required this.overlayOffset,
     required this.overlayBackgroundColor,
@@ -25,10 +27,10 @@ class TilawaAlphabetScrollbarTokens {
   final double width;
   final double itemExtent;
   final double selectedIndicatorExtent;
-  final double letterFontSize;
+  final TilawaTextRole letterTextRole;
   final EdgeInsetsGeometry verticalPadding;
   final double overlaySize;
-  final double overlayFontSize;
+  final TilawaTextRole overlayTextRole;
   final double overlayRadius;
   final double overlayOffset;
 
@@ -56,10 +58,10 @@ class TilawaAlphabetScrollbarTokens {
       width: kTilawaMinInteractiveDimension,
       itemExtent: kTilawaMinInteractiveDimension,
       selectedIndicatorExtent: 36,
-      letterFontSize: 13,
+      letterTextRole: TilawaTextRole.labelMedium,
       verticalPadding: EdgeInsets.zero,
       overlaySize: 72,
-      overlayFontSize: 36,
+      overlayTextRole: TilawaTextRole.displaySmall,
       overlayRadius: 16,
       overlayOffset: 48,
       overlayBackgroundColor: colorScheme.surfaceContainerHighest,
@@ -73,10 +75,10 @@ class TilawaAlphabetScrollbarTokens {
     double? width,
     double? itemExtent,
     double? selectedIndicatorExtent,
-    double? letterFontSize,
+    TilawaTextRole? letterTextRole,
     EdgeInsetsGeometry? verticalPadding,
     double? overlaySize,
-    double? overlayFontSize,
+    TilawaTextRole? overlayTextRole,
     double? overlayRadius,
     double? overlayOffset,
     Color? overlayBackgroundColor,
@@ -89,10 +91,10 @@ class TilawaAlphabetScrollbarTokens {
       itemExtent: itemExtent ?? this.itemExtent,
       selectedIndicatorExtent:
           selectedIndicatorExtent ?? this.selectedIndicatorExtent,
-      letterFontSize: letterFontSize ?? this.letterFontSize,
+      letterTextRole: letterTextRole ?? this.letterTextRole,
       verticalPadding: verticalPadding ?? this.verticalPadding,
       overlaySize: overlaySize ?? this.overlaySize,
-      overlayFontSize: overlayFontSize ?? this.overlayFontSize,
+      overlayTextRole: overlayTextRole ?? this.overlayTextRole,
       overlayRadius: overlayRadius ?? this.overlayRadius,
       overlayOffset: overlayOffset ?? this.overlayOffset,
       overlayBackgroundColor:
@@ -116,14 +118,22 @@ class TilawaAlphabetScrollbarTokens {
         b.selectedIndicatorExtent,
         t,
       ),
-      letterFontSize: lerpTokenDouble(a.letterFontSize, b.letterFontSize, t),
+      letterTextRole: lerpTilawaTextRole(
+        a.letterTextRole,
+        b.letterTextRole,
+        t,
+      ),
       verticalPadding: EdgeInsetsGeometry.lerp(
         a.verticalPadding,
         b.verticalPadding,
         t,
       )!,
       overlaySize: lerpTokenDouble(a.overlaySize, b.overlaySize, t),
-      overlayFontSize: lerpTokenDouble(a.overlayFontSize, b.overlayFontSize, t),
+      overlayTextRole: lerpTilawaTextRole(
+        a.overlayTextRole,
+        b.overlayTextRole,
+        t,
+      ),
       overlayRadius: lerpTokenDouble(a.overlayRadius, b.overlayRadius, t),
       overlayOffset: lerpTokenDouble(a.overlayOffset, b.overlayOffset, t),
       overlayBackgroundColor: Color.lerp(
@@ -1116,7 +1126,7 @@ class TilawaCountProgressRingTokens {
     required this.innerSize,
     required this.ringStrokeWidth,
     required this.doneIconSize,
-    required this.countFontSize,
+    required this.countTextRole,
     required this.countLineHeight,
     required this.countHorizontalPadding,
     required this.doneBorderWidth,
@@ -1133,7 +1143,7 @@ class TilawaCountProgressRingTokens {
   final double innerSize;
   final double ringStrokeWidth;
   final double doneIconSize;
-  final double countFontSize;
+  final TilawaTextRole countTextRole;
   final double countLineHeight;
   final double countHorizontalPadding;
   final double doneBorderWidth;
@@ -1146,12 +1156,12 @@ class TilawaCountProgressRingTokens {
   final double progressLabelBackgroundOpacity;
 
   factory TilawaCountProgressRingTokens.defaults() {
-    return const TilawaCountProgressRingTokens(
+    return TilawaCountProgressRingTokens(
       outerSize: 56,
       innerSize: 56,
       ringStrokeWidth: 0,
       doneIconSize: 28,
-      countFontSize: 22,
+      countTextRole: TilawaTextRole.titleLarge,
       countLineHeight: 1,
       countHorizontalPadding: 4,
       doneBorderWidth: 1.5,
@@ -1170,7 +1180,7 @@ class TilawaCountProgressRingTokens {
     double? innerSize,
     double? ringStrokeWidth,
     double? doneIconSize,
-    double? countFontSize,
+    TilawaTextRole? countTextRole,
     double? countLineHeight,
     double? countHorizontalPadding,
     double? doneBorderWidth,
@@ -1187,7 +1197,7 @@ class TilawaCountProgressRingTokens {
       innerSize: innerSize ?? this.innerSize,
       ringStrokeWidth: ringStrokeWidth ?? this.ringStrokeWidth,
       doneIconSize: doneIconSize ?? this.doneIconSize,
-      countFontSize: countFontSize ?? this.countFontSize,
+      countTextRole: countTextRole ?? this.countTextRole,
       countLineHeight: countLineHeight ?? this.countLineHeight,
       countHorizontalPadding:
           countHorizontalPadding ?? this.countHorizontalPadding,
@@ -1216,7 +1226,7 @@ class TilawaCountProgressRingTokens {
       innerSize: lerpTokenDouble(a.innerSize, b.innerSize, t),
       ringStrokeWidth: lerpTokenDouble(a.ringStrokeWidth, b.ringStrokeWidth, t),
       doneIconSize: lerpTokenDouble(a.doneIconSize, b.doneIconSize, t),
-      countFontSize: lerpTokenDouble(a.countFontSize, b.countFontSize, t),
+      countTextRole: lerpTilawaTextRole(a.countTextRole, b.countTextRole, t),
       countLineHeight: lerpTokenDouble(a.countLineHeight, b.countLineHeight, t),
       countHorizontalPadding: lerpTokenDouble(
         a.countHorizontalPadding,
@@ -1323,6 +1333,7 @@ class TilawaHomeNextPrayerHeroTokens {
   const TilawaHomeNextPrayerHeroTokens({
     required this.gradientTopStart,
     required this.gradientBottomEnd,
+    this.gradientMidStop,
     required this.foregroundColor,
     required this.locationChipFillOpacity,
     required this.locationChipBorderOpacity,
@@ -1338,6 +1349,10 @@ class TilawaHomeNextPrayerHeroTokens {
 
   /// Bottom-end gradient stop; also used for material fill and card shadow.
   final Color gradientBottomEnd;
+
+  /// Optional middle stop for three-color day ramps; when null the app lerps
+  /// between [gradientTopStart] and [gradientBottomEnd].
+  final Color? gradientMidStop;
 
   /// Text and icons on the gradient surface.
   final Color foregroundColor;
@@ -1374,6 +1389,7 @@ class TilawaHomeNextPrayerHeroTokens {
     return const TilawaHomeNextPrayerHeroTokens(
       gradientTopStart: AppColors.homeNextPrayerGradientTop,
       gradientBottomEnd: AppColors.homeNextPrayerGradientBottom,
+      gradientMidStop: AppColors.homeNextPrayerGradientDayMid,
       foregroundColor: AppColors.homeNextPrayerGradientForeground,
       locationChipFillOpacity: 0.14,
       locationChipBorderOpacity: 0.28,
@@ -1436,6 +1452,7 @@ class TilawaHomeNextPrayerHeroTokens {
   TilawaHomeNextPrayerHeroTokens copyWith({
     Color? gradientTopStart,
     Color? gradientBottomEnd,
+    Color? gradientMidStop,
     Color? foregroundColor,
     double? locationChipFillOpacity,
     double? locationChipBorderOpacity,
@@ -1448,6 +1465,7 @@ class TilawaHomeNextPrayerHeroTokens {
     return TilawaHomeNextPrayerHeroTokens(
       gradientTopStart: gradientTopStart ?? this.gradientTopStart,
       gradientBottomEnd: gradientBottomEnd ?? this.gradientBottomEnd,
+      gradientMidStop: gradientMidStop ?? this.gradientMidStop,
       foregroundColor: foregroundColor ?? this.foregroundColor,
       locationChipFillOpacity:
           locationChipFillOpacity ?? this.locationChipFillOpacity,
@@ -1478,6 +1496,7 @@ class TilawaHomeNextPrayerHeroTokens {
         b.gradientBottomEnd,
         t,
       )!,
+      gradientMidStop: Color.lerp(a.gradientMidStop, b.gradientMidStop, t),
       foregroundColor: Color.lerp(a.foregroundColor, b.foregroundColor, t)!,
       locationChipFillOpacity: lerpTokenDouble(
         a.locationChipFillOpacity,
@@ -1589,8 +1608,8 @@ class TilawaHomeDashboardCardTokens {
       gradientStart: AppColors.featuredGradientStart,
       gradientEnd: AppColors.featuredGradientEnd,
       foregroundColor: AppColors.featuredGradientForeground,
-      splashColor: AppColors.primaryBrown.withValues(alpha: 0.08),
-      highlightColor: AppColors.primaryBrown.withValues(alpha: 0.04),
+      splashColor: AppColors.defaultPrimary.withValues(alpha: 0.08),
+      highlightColor: AppColors.defaultPrimary.withValues(alpha: 0.04),
       travelSheetSurface: AppColors.homeTravelSheetSurface,
       travelSearchFieldFill: AppColors.homeTravelSearchFill,
       travelSectionLinkColor: AppColors.homeTravelSectionLink,
@@ -1880,9 +1899,7 @@ class TilawaExperimentalBadgeTokens {
   factory TilawaExperimentalBadgeTokens.fromColorScheme(
     ColorScheme colorScheme,
   ) {
-    final warning = colorScheme.brightness == Brightness.dark
-        ? AppColors.warningDark
-        : AppColors.warning;
+    final warning = colorScheme.warning;
     return TilawaExperimentalBadgeTokens(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       backgroundColor: Color.alphaBlend(

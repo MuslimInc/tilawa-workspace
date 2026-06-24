@@ -29,6 +29,7 @@ class MushafSlider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme scheme = Theme.of(context).colorScheme;
     final PageNavigationBarTheme navTheme = PageNavigationBarTheme.of(context);
     final double trackHeight = navTheme.sliderTrackHeight;
     final double thumbSize = navTheme.sliderThumbSize;
@@ -100,7 +101,7 @@ class MushafSlider extends StatelessWidget {
                       color: activeColor,
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: isDark ? Colors.black : Colors.white,
+                        color: isDark ? scheme.onSurface : scheme.surface,
                         width: navTheme.sliderHandleBorderWidth,
                       ),
                       boxShadow: [

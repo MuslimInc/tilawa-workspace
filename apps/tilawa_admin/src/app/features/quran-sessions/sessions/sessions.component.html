@@ -57,10 +57,12 @@
       [description]="'sessions_subtitle' | t"
     />
   } @else {
-    <app-tilawa-data-table>
+    <app-tilawa-data-table pinMode="leading" leadingSize="compact">
       <thead>
         <tr>
-          <th scope="col">{{ 'common_booking' | t }}</th>
+          <th scope="col" class="tilawa-table-pin tilawa-table-leading tilawa-table-pin-edge">
+            {{ 'common_booking' | t }} · {{ 'common_actions' | t }}
+          </th>
           <th scope="col">{{ 'common_session' | t }}</th>
           <app-sortable-th
             [label]="'sessions_starts' | t"
@@ -84,14 +86,25 @@
             [sort]="sort()"
             (sortChange)="onSortChange($event)"
           />
-          <th scope="col" class="text-end">{{ 'common_actions' | t }}</th>
         </tr>
       </thead>
       <tbody>
         @for (item of items(); track item.id) {
           <tr>
-            <td class="font-mono text-xs">{{ item.id }}</td>
-            <td class="font-mono text-xs">{{ item.sessionId ?? ('common_none' | t) }}</td>
+            <td class="tilawa-table-pin tilawa-table-leading tilawa-table-pin-edge">
+              <div class="tilawa-table-leading-inner">
+                <span class="tilawa-table-leading-label font-mono text-xs" [title]="item.id">{{ item.id }}</span>
+                <div class="tilawa-table-leading-actions">
+                  <app-tilawa-button
+                    variant="primary"
+                    size="xs"
+                    [label]="'common_view' | t"
+                    [link]="['/quran-sessions/sessions', item.id]"
+                  />
+                </div>
+              </div>
+            </td>
+            <td class="font-mono text-xs tilawa-table-cell-truncate" [title]="item.sessionId ?? ''">{{ item.sessionId ?? ('common_none' | t) }}</td>
             <td>{{ item.startsAt | date:'medium' }}</td>
             <td>
               <app-status-chip
@@ -99,16 +112,11 @@
                 [status]="item.lifecycleStatus"
               />
             </td>
-            <td class="font-mono text-xs">{{ item.studentId }}</td>
-            <td class="font-mono text-xs">{{ item.teacherId }}</td>
+            <td class="font-mono text-xs tilawa-table-cell-truncate" [title]="item.studentId">{{ item.studentId }}</td>
+            <td class="font-mono text-xs tilawa-table-cell-truncate" [title]="item.teacherId">{{ item.teacherId }}</td>
             <td>{{ item.countryCode }} / {{ item.cityId }}</td>
             <td>{{ item.createdAt | date:'medium' }}</td>
             <td>{{ item.updatedAt | date:'medium' }}</td>
-            <td class="text-end">
-              <a [routerLink]="['/quran-sessions/sessions', item.id]" class="tilawa-link">
-                {{ 'common_view' | t }}
-              </a>
-            </td>
           </tr>
         }
       </tbody>

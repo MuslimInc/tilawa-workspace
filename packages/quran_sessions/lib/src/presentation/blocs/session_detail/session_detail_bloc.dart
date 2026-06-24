@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -16,6 +18,8 @@ import '../../../domain/usecases/open_session_dispute_usecase.dart';
 import '../../../domain/usecases/report_session_concern_usecase.dart';
 import '../../../domain/usecases/respond_to_reschedule_request_usecase.dart';
 import '../../../domain/entities/session_lifecycle_status.dart';
+import '../../../domain/policies/session_join_window_policy.dart';
+import '../../../boundaries/call/call_token_provider.dart';
 import '../../../domain/repositories/session_aggregate_repository.dart';
 import '../../../domain/repositories/session_repository.dart';
 import '../../../domain/value_objects/actor_role.dart';
@@ -37,6 +41,8 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
     this._respondToReschedule,
     this._authSession,
     this._teacherProfileRepository,
+    this._tokenProvider,
+    this._joinWindowPolicy = const SessionJoinWindowPolicy(),
   }) : super(const SessionDetailInitial()) {
     on<SessionDetailLoadRequested>(
       _onLoadRequested,
@@ -87,6 +93,8 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
   final RespondToRescheduleRequestUseCase? _respondToReschedule;
   final AuthSessionProvider? _authSession;
   final TeacherProfileRepository? _teacherProfileRepository;
+  final CallTokenProvider? _tokenProvider;
+  final SessionJoinWindowPolicy _joinWindowPolicy;
 
   Future<void> _onLoadRequested(
     SessionDetailLoadRequested event,
@@ -140,6 +148,44 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
         canRespondToReschedule: rescheduleContext.canRespond,
         isAwaitingRescheduleCounterparty: rescheduleContext.isAwaiting,
       ),
+    );
+
+    _prefetchRtcCredentialsIfNeeded(
+      aggregate: aggregate,
+      callProviderKind: callContext.callProviderKind,
+    );
+  }
+
+  void _prefetchRtcCredentialsIfNeeded({
+    required SessionAggregate aggregate,
+    required SessionCallProviderKind? callProviderKind,
+  }) {
+    final tokenProvider = _tokenProvider;
+    final userId = _authSession?.currentUserId;
+    final sessionId = aggregate.sessionId;
+    if (tokenProvider == null ||
+        userId == null ||
+        userId.isEmpty ||
+        sessionId == null ||
+        sessionId.isEmpty) {
+      return;
+    }
+    if (callProviderKind != SessionCallProviderKind.agora &&
+        callProviderKind != SessionCallProviderKind.webrtc) {
+      return;
+    }
+    if (!aggregate.lifecycleStatus.canJoinSession) {
+      return;
+    }
+    if (!_joinWindowPolicy.isWithinJoinWindow(
+      startsAt: aggregate.startsAt,
+      now: DateTime.now(),
+    )) {
+      return;
+    }
+
+    unawaited(
+      tokenProvider.fetchCredentials(sessionId: sessionId, userId: userId),
     );
   }
 

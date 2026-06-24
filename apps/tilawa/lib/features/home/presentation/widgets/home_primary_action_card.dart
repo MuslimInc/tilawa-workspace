@@ -50,50 +50,58 @@ class _HomePrimaryListeningCard extends StatelessWidget {
         final cardTokens = theme.componentTokens.homeDashboardCard;
         final Color foreground = theme.colorScheme.onSurface;
 
-        return HomeDashboardCard(
-          surface: TilawaCardSurface.raised,
-          onTap: () => _resumePlayback(context, listeningState),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(
-                Icons.headphones_rounded,
-                color: theme.colorScheme.primary,
-                size: tokens.iconSizeLarge,
-              ),
-              SizedBox(width: tokens.spaceMedium),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.l10n.continueListening,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    SizedBox(height: tokens.spaceExtraSmall),
-                    Text(
-                      context.l10n.homeListeningResumeSubtitle(
-                        listeningState.reciterName!,
-                        listeningState.surahName!,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: foreground.withValues(alpha: 0.82),
-                      ),
-                    ),
-                  ],
+        return Semantics(
+          button: true,
+          label: context.l10n.continueListening,
+          value: context.l10n.homeListeningResumeSubtitle(
+            listeningState.reciterName!,
+            listeningState.surahName!,
+          ),
+          child: HomeDashboardCard(
+            surface: TilawaCardSurface.raised,
+            onTap: () => _resumePlayback(context, listeningState),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.headphones_rounded,
+                  color: theme.colorScheme.primary,
+                  size: tokens.iconSizeLarge,
                 ),
-              ),
-              Icon(
-                Icons.chevron_right_rounded,
-                color: cardTokens.foregroundColor.withValues(alpha: 0.82),
-              ),
-            ],
+                SizedBox(width: tokens.spaceMedium),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        context.l10n.continueListening,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      SizedBox(height: tokens.spaceExtraSmall),
+                      Text(
+                        context.l10n.homeListeningResumeSubtitle(
+                          listeningState.reciterName!,
+                          listeningState.surahName!,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: foreground.withValues(alpha: 0.82),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: cardTokens.foregroundColor.withValues(alpha: 0.82),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -148,51 +156,56 @@ class _HomePrimaryAthkarCard extends StatelessWidget {
       HomeAthkarCompletionState.notStarted => context.l10n.homeAthkarNotStarted,
     };
 
-    return HomeDashboardCard(
-      surface: TilawaCardSurface.raised,
-      onTap: () => AthkarDetailsRoute(
-        categoryId: row.category.id,
-        categoryName: title,
-        source: 'home_primary',
-      ).push(context),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(
-            athkarCategoryIcon(row.category.icon),
-            color: colorScheme.primary,
-            size: tokens.iconSizeLarge,
-          ),
-          SizedBox(width: tokens.spaceMedium),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                SizedBox(height: tokens.spaceExtraSmall),
-                Text(
-                  statusText,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
+    return Semantics(
+      button: true,
+      label: title,
+      value: statusText,
+      child: HomeDashboardCard(
+        surface: TilawaCardSurface.raised,
+        onTap: () => AthkarDetailsRoute(
+          categoryId: row.category.id,
+          categoryName: title,
+          source: 'home_primary',
+        ).push(context),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              athkarCategoryIcon(row.category.icon),
+              color: colorScheme.primary,
+              size: tokens.iconSizeLarge,
             ),
-          ),
-          Icon(
-            Icons.chevron_right_rounded,
-            color: colorScheme.onSurfaceVariant,
-          ),
-        ],
+            SizedBox(width: tokens.spaceMedium),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  SizedBox(height: tokens.spaceExtraSmall),
+                  Text(
+                    statusText,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ],
+        ),
       ),
     );
   }

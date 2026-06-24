@@ -12,6 +12,7 @@ class AgoraRtcJoinParams {
     required this.channelId,
     required this.uid,
     required this.enableVideo,
+    this.existingEngine,
   });
 
   final String appId;
@@ -19,6 +20,9 @@ class AgoraRtcJoinParams {
   final String channelId;
   final int uid;
   final bool enableVideo;
+
+  /// Reuse a parked engine from [AgoraRtcEnginePool] when [appId] matches.
+  final RtcEngine? existingEngine;
 }
 
 /// Joins an Agora channel and returns a releasable session handle.
@@ -46,31 +50,42 @@ class LiveAgoraRtcJoinGateway implements AgoraRtcJoinGateway {
 
   @override
   Future<AgoraRtcSessionHandle> join(AgoraRtcJoinParams params) async {
-    final engine = createAgoraRtcEngine();
+    final engine = params.existingEngine ?? createAgoraRtcEngine();
+    final ownsEngine = params.existingEngine == null;
     try {
       if (_joinRunner != null) {
         await _joinRunner(engine, params);
       } else {
-        await _joinLive(engine, params);
+        await _joinLive(engine, params, skipInitialize: !ownsEngine);
       }
-      return LiveAgoraRtcSessionHandle(engine);
+      return LiveAgoraRtcSessionHandle(engine, appId: params.appId);
     } on RtcCallJoinFailure {
-      await _releaseEngine(engine);
+      if (ownsEngine) {
+        await _releaseEngine(engine);
+      }
       rethrow;
     } on Object catch (error) {
-      await _releaseEngine(engine);
+      if (ownsEngine) {
+        await _releaseEngine(engine);
+      }
       throw mapAgoraRtcJoinFailure(error);
     }
   }
 
-  Future<void> _joinLive(RtcEngine engine, AgoraRtcJoinParams params) async {
+  Future<void> _joinLive(
+    RtcEngine engine,
+    AgoraRtcJoinParams params, {
+    bool skipInitialize = false,
+  }) async {
     // coverage:ignore-start
-    await engine.initialize(
-      RtcEngineContext(
-        appId: params.appId,
-        channelProfile: ChannelProfileType.channelProfileCommunication,
-      ),
-    );
+    if (!skipInitialize) {
+      await engine.initialize(
+        RtcEngineContext(
+          appId: params.appId,
+          channelProfile: ChannelProfileType.channelProfileCommunication,
+        ),
+      );
+    }
 
     await engine.enableAudio();
     if (params.enableVideo) {

@@ -50,6 +50,7 @@ class UserProfile extends Equatable {
     this.currencyCode,
     this.timezone,
     this.guardianId,
+    this.guardianChildBookingApprovedAt,
     this.restrictionReason,
   });
 
@@ -82,6 +83,9 @@ class UserProfile extends Equatable {
 
   /// ID of the guardian/parent user, if this is a child's profile.
   final String? guardianId;
+
+  /// Set when a linked guardian approves Quran Sessions bookings for a child.
+  final DateTime? guardianChildBookingApprovedAt;
 
   /// Populated when [accountStatus] is [AccountStatus.suspended] or
   /// [AccountStatus.blocked].
@@ -145,6 +149,7 @@ class UserProfile extends Equatable {
     String? currencyCode,
     String? timezone,
     String? guardianId,
+    DateTime? guardianChildBookingApprovedAt,
     AccountRestrictionReason? restrictionReason,
   }) => UserProfile(
     userId: userId,
@@ -160,6 +165,8 @@ class UserProfile extends Equatable {
     currencyCode: currencyCode ?? this.currencyCode,
     timezone: timezone ?? this.timezone,
     guardianId: guardianId ?? this.guardianId,
+    guardianChildBookingApprovedAt:
+        guardianChildBookingApprovedAt ?? this.guardianChildBookingApprovedAt,
     restrictionReason: restrictionReason ?? this.restrictionReason,
   );
 
@@ -178,6 +185,7 @@ class UserProfile extends Equatable {
     currencyCode,
     timezone,
     guardianId,
+    guardianChildBookingApprovedAt,
     restrictionReason,
   ];
 }

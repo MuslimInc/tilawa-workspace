@@ -77,9 +77,18 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
           TeacherListInitial() || TeacherListLoading() => const Center(
             child: CircularProgressIndicator(),
           ),
-          TeacherListEmpty(:final activeSpecialization) =>
-            activeSpecialization != null
-                ? _FilteredEmptyView(specialization: activeSpecialization)
+          TeacherListEmpty(
+            :final activeSpecialization,
+            :final activeLanguage,
+          ) =>
+            activeSpecialization != null || activeLanguage != null
+                ? _FilteredEmptyView(
+                    specialization: activeSpecialization,
+                    language: activeLanguage,
+                    onClearFilters: () => context.read<TeacherListBloc>().add(
+                      const TeacherFilterChanged(),
+                    ),
+                  )
                 : QuranSessionsStudentEmptyState(
                     featureConfig: widget.featureConfig,
                     showTeacherApplyEntry: true,
@@ -131,18 +140,35 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
 }
 
 class _FilteredEmptyView extends StatelessWidget {
-  const _FilteredEmptyView({required this.specialization});
+  const _FilteredEmptyView({
+    this.specialization,
+    this.language,
+    required this.onClearFilters,
+  });
 
-  final String specialization;
+  final String? specialization;
+  final String? language;
+  final VoidCallback onClearFilters;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
+    final title = switch ((specialization, language)) {
+      (final String spec, _) => l10n.noTeachersForSpecialization(spec),
+      (null, final String lang) => l10n.noTeachersForLanguage(lang),
+      _ => l10n.noTeachersAvailableRightNow,
+    };
+
     return Center(
       child: TilawaIllustratedState(
         icon: Icons.search_off_outlined,
-        title: l10n.noTeachersForSpecialization(specialization),
-        semanticLabel: l10n.noTeachersForSpecialization(specialization),
+        title: title,
+        semanticLabel: title,
+        primaryAction: TilawaButton(
+          text: l10n.clearTeacherFilters,
+          variant: TilawaButtonVariant.secondary,
+          onPressed: onClearFilters,
+        ),
       ),
     );
   }

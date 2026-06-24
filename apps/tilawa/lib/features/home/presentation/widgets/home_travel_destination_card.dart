@@ -33,6 +33,8 @@ class HomeTravelDestinationCard extends StatelessWidget {
         theme.componentTokens.homeDashboardCard;
     final double radius = tokens.resolveRadius(family: TilawaRadiusFamily.hero);
     final Color headerTint = cardTokens.destinationHeaderTint(tintIndex);
+    // Arabic previews (e.g. the daily ayah) read better with looser leading.
+    final bool isArabic = Localizations.localeOf(context).languageCode == 'ar';
 
     return Semantics(
       button: true,
@@ -75,6 +77,9 @@ class HomeTravelDestinationCard extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: colorScheme.onSurfaceVariant,
+                                height: isArabic
+                                    ? tokens.textHeightLoose
+                                    : null,
                               ),
                             ),
                           ),

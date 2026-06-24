@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/home/debug/home_hero_variant_debug.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_athkar_compact_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_cubit.dart';
@@ -59,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final Color sheetColor = context.scaffoldCanvasColor;
+    final Color sheetColor = Theme.of(context).colorScheme.surfaceContainerLow;
     final double topInset = MediaQuery.paddingOf(context).top;
 
     return Scaffold(

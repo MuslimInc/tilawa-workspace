@@ -158,6 +158,10 @@
     "@homeFeaturedTitle": {
         "description": "Home horizontal carousel section title (travel-app popular row)"
     },
+    "homeFeaturedSubtitle": "More for your day",
+    "@homeFeaturedSubtitle": {
+        "description": "Home featured carousel section subtitle"
+    },
     "homeTodayTitle": "Today",
     "@homeTodayTitle": {
         "description": "Home section title for daily actions"
@@ -4182,7 +4186,7 @@
     "@authSignedInElsewhereTitle": {
         "description": "Title when another device took over the active session"
     },
-    "authSignedInElsewhereBody": "Your account was opened on another device. Sign in again to continue on this device.",
+    "authSignedInElsewhereBody": "Tilawa allows one active device per account for Quran Sessions security. Your account was opened elsewhere — sign in again on this device to continue.",
     "@authSignedInElsewhereBody": {
         "description": "Body when another device took over the active session"
     },

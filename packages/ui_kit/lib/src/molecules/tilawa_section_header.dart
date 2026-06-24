@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
+import '../foundation/tilawa_text_roles.dart';
 
 /// Shared heading for grouped settings and form-like screens.
 ///
@@ -68,18 +69,14 @@ class TilawaSectionHeader extends StatelessWidget {
 
     final TextStyle effectiveTitleStyle =
         titleTextStyle ??
-        theme.textTheme.titleSmall?.copyWith(
+        tilawaResolveTextRole(
+          theme.textTheme,
+          groupTokens.groupTitleTextRole,
+        ).copyWith(
           fontWeight: FontWeight.w600,
           height: 1.3,
           color: colorScheme.onSurface,
-          fontSize: groupTokens.groupTitleFontSize,
           letterSpacing: groupTokens.groupTitleLetterSpacing,
-        ) ??
-        TextStyle(
-          fontSize: groupTokens.groupTitleFontSize,
-          fontWeight: FontWeight.w600,
-          letterSpacing: groupTokens.groupTitleLetterSpacing,
-          color: colorScheme.onSurface,
         );
 
     final TextStyle? effectiveSubtitleStyle =

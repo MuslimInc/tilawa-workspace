@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_image/core/constants/surah_header_constants.dart';
 import 'package:quran_image/domain/entities/verse_marker_data.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'qcf_marker_path.dart';
 import 'verse_marker_layout.dart';
@@ -119,7 +120,7 @@ class VerseMarker extends StatelessWidget {
             fontFamily: 'QuranNumbers',
             package: 'quran_image',
             fontSize: width,
-            color: const Color(0xFF5D4037),
+            color: AppVideoReelDesignDefaults.frameStrongTextColor,
             fontWeight: FontWeight.bold,
             height: 1.0,
           ),
@@ -156,7 +157,7 @@ class VerseMarker extends StatelessWidget {
                 fontFamily: 'QuranNumbers',
                 package: 'quran_image',
                 fontSize: width,
-                color: const Color(0xFF5D4037),
+                color: AppVideoReelDesignDefaults.frameStrongTextColor,
                 fontWeight: FontWeight.bold,
                 height: 1.0,
               ),
@@ -212,12 +213,15 @@ class _QcfMarkerPainter extends CustomPainter {
     // Provide a subtle shadow behind the glyph without expensive blurring
     canvas.drawPath(
       cachedPaths.shadow,
-      Paint()..color = Colors.black.withValues(alpha: 0.15),
+      Paint()
+        ..color = AppQuranReaderLegacyColors.lightOnSurface.withValues(
+          alpha: 0.15,
+        ),
     );
 
     // Draw the main QCF marker with a premium golden color
     final fillPaint = Paint()
-      ..color = const Color(0xFFC5A358)
+      ..color = AppVideoReelDesignDefaults.frameAccentColor
       ..style = PaintingStyle.fill;
 
     canvas.drawPath(cachedPaths.main, fillPaint);
@@ -241,9 +245,9 @@ class _QcfMarkerPainter extends CustomPainter {
 
 class _VerseMarkersPainter extends CustomPainter {
   static final Paint _shadowPaint = Paint()
-    ..color = Colors.black.withValues(alpha: 0.15);
+    ..color = AppQuranReaderLegacyColors.lightOnSurface.withValues(alpha: 0.15);
   static final Paint _fillPaint = Paint()
-    ..color = const Color(0xFFC5A358)
+    ..color = AppVideoReelDesignDefaults.frameAccentColor
     ..style = PaintingStyle.fill;
 
   const _VerseMarkersPainter({

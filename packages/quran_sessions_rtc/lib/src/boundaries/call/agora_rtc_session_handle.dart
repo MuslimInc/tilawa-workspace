@@ -2,7 +2,7 @@ import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 
 /// Active Agora session resources released on leave/end.
 abstract class AgoraRtcSessionHandle {
-  Future<void> leaveAndRelease();
+  Future<void> leaveAndRelease({bool retainEngine = false});
 
   Future<void> setMicrophoneMuted(bool muted);
 
@@ -18,14 +18,17 @@ abstract class AgoraRtcSessionHandle {
 
 /// Production handle wrapping a native [RtcEngine].
 class LiveAgoraRtcSessionHandle implements AgoraRtcSessionHandle {
-  LiveAgoraRtcSessionHandle(this._engine);
+  LiveAgoraRtcSessionHandle(this._engine, {required this.appId});
 
   final RtcEngine _engine;
+  final String appId;
 
   @override
-  Future<void> leaveAndRelease() async {
+  Future<void> leaveAndRelease({bool retainEngine = false}) async {
     await _engine.leaveChannel();
-    await _engine.release();
+    if (!retainEngine) {
+      await _engine.release();
+    }
   }
 
   @override

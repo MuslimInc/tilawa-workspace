@@ -1,8 +1,6 @@
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/home/domain/home_daily_inspiration_catalog.dart';
-import 'package:tilawa/features/quran_sessions/quran_sessions_feature_flags.dart';
 import 'package:tilawa/features/smart_khatma/smart_khatma_feature_flags.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa/router/app_router_config.dart';
@@ -11,8 +9,8 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'home_daily_ayah_sheet.dart';
 import 'home_dashboard_section.dart';
 import 'home_dashboard_shortcut_grid.dart';
+import 'home_premium_section_shell.dart';
 import 'home_travel_destination_card.dart';
-import 'open_home_quran_sessions.dart';
 
 /// Horizontal promo row — daily ayah, sessions, khatma, library shortcuts.
 class HomeDiscoverCarousel extends StatelessWidget {
@@ -30,30 +28,33 @@ class HomeDiscoverCarousel extends StatelessWidget {
     final tokens = context.tokens;
     final double tileHeight = homeTravelGridTileHeight(context);
 
-    return HomeDashboardSection(
-      title: context.l10n.homeFeaturedTitle,
-      contentSpacing: tokens.spaceMedium,
-      child: SizedBox(
-        height: tileHeight,
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          padding: EdgeInsets.zero,
-          itemCount: items.length,
-          separatorBuilder: (_, _) => SizedBox(width: tokens.spaceSmall),
-          itemBuilder: (context, index) {
-            final _HomeDiscoverCarouselItem item = items[index];
-            return SizedBox(
-              width: _carouselTileWidth,
-              child: HomeTravelDestinationCard(
-                tintIndex: item.tintIndex,
-                icon: item.icon,
-                title: item.title,
-                subtitle: item.subtitle,
-                onTap: item.onTap,
-                semanticLabel: item.title,
-              ),
-            );
-          },
+    return HomePremiumSectionShell(
+      child: HomeDashboardSection(
+        title: context.l10n.homeFeaturedTitle,
+        subtitle: context.l10n.homeFeaturedSubtitle,
+        contentSpacing: tokens.spaceMedium,
+        child: SizedBox(
+          height: tileHeight,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: EdgeInsets.zero,
+            itemCount: items.length,
+            separatorBuilder: (_, _) => SizedBox(width: tokens.spaceSmall),
+            itemBuilder: (context, index) {
+              final _HomeDiscoverCarouselItem item = items[index];
+              return SizedBox(
+                width: _carouselTileWidth,
+                child: HomeTravelDestinationCard(
+                  tintIndex: item.tintIndex,
+                  icon: item.icon,
+                  title: item.title,
+                  subtitle: item.subtitle,
+                  onTap: item.onTap,
+                  semanticLabel: item.title,
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -94,14 +95,6 @@ abstract final class _HomeDiscoverCarouselCatalog {
           catalogIndex: ayahIndex,
         ),
       ),
-      if (quranSessionsFeatureConfig().quranSessionsEnabled)
-        _HomeDiscoverCarouselItem(
-          tintIndex: 1,
-          icon: FluentIcons.person_voice_24_regular,
-          title: l10n.homeSessionsTitle,
-          subtitle: l10n.homeSessionsSubtitle,
-          onTap: () => openHomeQuranSessions(context),
-        ),
       if (isSmartKhatmaEnabled())
         _HomeDiscoverCarouselItem(
           tintIndex: 2,

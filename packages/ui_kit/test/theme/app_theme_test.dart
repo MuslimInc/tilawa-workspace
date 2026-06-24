@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa_ui_kit/src/foundation/app_colors.dart';
 import 'package:tilawa_ui_kit/src/foundation/app_theme.dart';
 import 'package:tilawa_ui_kit/src/foundation/component_tokens.dart';
 import 'package:tilawa_ui_kit/src/foundation/design_tokens.dart';
+import 'package:tilawa_ui_kit/src/foundation/tilawa_type_scale.dart';
 
 @immutable
 class _ProbeThemeExtension extends ThemeExtension<_ProbeThemeExtension> {
@@ -41,6 +43,15 @@ void main() {
           theme.textTheme.bodyMedium?.fontFamily,
           isNot(contains('IBMPlexSansArabic')),
         );
+        final double? baseTitleSize = Typography.material2021(
+          platform: defaultTargetPlatform,
+        ).black.titleLarge?.fontSize;
+        if (baseTitleSize != null) {
+          expect(
+            theme.textTheme.titleLarge?.fontSize,
+            closeTo(baseTitleSize * kTilawaGlobalTextScaleFactor, 0.01),
+          );
+        }
       },
     );
 

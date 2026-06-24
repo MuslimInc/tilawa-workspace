@@ -1,5 +1,6 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 export type TilawaButtonVariant =
   | 'primary'
@@ -13,17 +14,25 @@ export type TilawaButtonVariant =
   selector: 'app-tilawa-button',
   standalone: true,
   imports: [CommonModule],
+  host: {
+    '[class.tilawa-btn-host-full]': 'fullWidth',
+  },
   template: `
     <button
       [attr.type]="type"
-      [disabled]="disabled || loading"
-      [class]="buttonClass"
+      [disabled]="isDisabled"
+      [class]="controlClass"
       [attr.aria-busy]="loading ? 'true' : null"
+      (click)="onClick($event)"
     >
       @if (loading) {
         <span class="tilawa-btn-spinner" aria-hidden="true"></span>
       }
-      <ng-content />
+      @if (label) {
+        {{ label }}
+      } @else {
+        <ng-content />
+      }
     </button>
   `,
   styles: `
@@ -31,7 +40,16 @@ export type TilawaButtonVariant =
       display: inline-flex;
     }
 
-    button {
+    :host(.tilawa-btn-host-full) {
+      display: flex;
+      width: 100%;
+    }
+
+    :host(.tilawa-btn-host-full) .tilawa-btn {
+      width: 100%;
+    }
+
+    .tilawa-btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -44,6 +62,7 @@ export type TilawaButtonVariant =
       padding: 0.5rem 1rem;
       border: 1px solid transparent;
       cursor: pointer;
+      text-decoration: none;
       transition:
         background-color var(--tilawa-duration-fast) ease,
         border-color var(--tilawa-duration-fast) ease,
@@ -51,12 +70,13 @@ export type TilawaButtonVariant =
         opacity var(--tilawa-duration-fast) ease;
     }
 
-    button:disabled {
+    .tilawa-btn:disabled {
       opacity: 0.5;
       cursor: not-allowed;
+      pointer-events: none;
     }
 
-    button:focus-visible {
+    .tilawa-btn:focus-visible {
       outline: 2px solid var(--tilawa-primary);
       outline-offset: 2px;
     }
@@ -78,6 +98,19 @@ export type TilawaButtonVariant =
 
     .variant-secondary:hover:not(:disabled) {
       background-color: var(--tilawa-surface-high);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .variant-secondary {
+        background-color: var(--tilawa-surface-highest);
+        border-color: rgb(139 94 60 / 0.55);
+        color: var(--tilawa-on-surface);
+      }
+
+      .variant-secondary:hover:not(:disabled) {
+        background-color: rgb(139 94 60 / 0.18);
+        border-color: var(--tilawa-primary);
+      }
     }
 
     .variant-danger {
@@ -118,10 +151,27 @@ export type TilawaButtonVariant =
       background-color: rgb(139 94 60 / 0.08);
     }
 
+    @media (prefers-color-scheme: dark) {
+      .variant-text {
+        color: #e8c9a8;
+      }
+
+      .variant-text:hover:not(:disabled) {
+        background-color: rgb(139 94 60 / 0.2);
+      }
+    }
+
     .size-sm {
       min-height: 2.25rem;
       padding: 0.375rem 0.75rem;
       font-size: 0.8125rem;
+    }
+
+    .size-xs {
+      min-height: 2rem;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+      line-height: 1.125rem;
     }
 
     .size-full {
@@ -145,21 +195,48 @@ export type TilawaButtonVariant =
   `,
 })
 export class TilawaButtonComponent {
+  private readonly router = inject(Router);
+
   @Input() variant: TilawaButtonVariant = 'primary';
   @Input() type: 'button' | 'submit' | 'reset' = 'button';
-  @Input() size: 'md' | 'sm' = 'md';
+  @Input() size: 'md' | 'sm' | 'xs' = 'md';
   @Input() fullWidth = false;
   @Input() disabled = false;
   @Input() loading = false;
+  @Input() label = '';
+  /** When set, navigates via Router on click (use with [label]). */
+  @Input() link?: string | readonly unknown[];
 
-  get buttonClass(): string {
-    const classes = [`variant-${this.variant}`];
+  get isDisabled(): boolean {
+    return this.disabled || this.loading;
+  }
+
+  get controlClass(): string {
+    const classes = ['tilawa-btn', `variant-${this.variant}`];
     if (this.size === 'sm') {
       classes.push('size-sm');
+    }
+    if (this.size === 'xs') {
+      classes.push('size-xs');
     }
     if (this.fullWidth) {
       classes.push('size-full');
     }
     return classes.join(' ');
+  }
+
+  onClick(event: MouseEvent): void {
+    if (this.isDisabled) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+
+    if (this.link === undefined) {
+      return;
+    }
+
+    const commands = Array.isArray(this.link) ? this.link : [this.link];
+    void this.router.navigate(commands);
   }
 }

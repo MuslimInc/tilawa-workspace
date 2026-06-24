@@ -128,6 +128,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeFeaturedTitle => 'مختارة لك';
 
   @override
+  String get homeFeaturedSubtitle => 'المزيد ليومك';
+
+  @override
   String get homeTodayTitle => 'اليوم';
 
   @override
@@ -3102,7 +3105,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get authSignedInElsewhereTitle => 'تم تسجيل الدخول من جهاز آخر';
 
   @override
-  String get authSignedInElsewhereBody => 'يرجى تسجيل الدخول مرة أخرى.';
+  String get authSignedInElsewhereBody =>
+      'لأسباب أمنية، يُسمح بجهاز نشط واحد لحسابك في جلسات القرآن. تم فتح حسابك على جهاز آخر — سجّل الدخول مجدداً على هذا الجهاز للمتابعة.';
 
   @override
   String get authSignedInElsewhereAction => 'تسجيل الدخول مجدداً';

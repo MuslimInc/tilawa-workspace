@@ -216,6 +216,38 @@ void main() {
       ).isA<GuardianApprovalRequiredFailure>();
     });
 
+    test('allows child when guardian approval is recorded', () async {
+      profileRepo = FakeUserProfileRepository(
+        profile:
+            makeProfile(
+              userId: 'student_1',
+              gender: UserGender.male,
+              dateOfBirth: DateTime(2018, 1, 1),
+              countryCode: 'EG',
+              cityId: 'cairo',
+            ).copyWith(
+              guardianId: 'guardian_1',
+              guardianChildBookingApprovedAt: DateTime(2024, 1, 1),
+            ),
+      );
+      policyRepo.globalPolicy = const QuranSessionSafetyPolicy(
+        requireGuardianApprovalForChildren: true,
+      );
+      useCase = ValidateBookingEligibilityUseCase(
+        profileRepository: profileRepo,
+        policyRepository: policyRepo,
+        teacherRepository: teacherRepo,
+        marketConfigRepository: marketRepo,
+      );
+
+      final result = await useCase(
+        studentId: 'student_1',
+        teacherId: 'teacher_1',
+      );
+
+      check(result.isRight()).isTrue();
+    });
+
     test('rejects paid teacher without market price', () async {
       teacherRepo.teachers = [
         makeTeacher(pricingType: SessionPricingType.fixedPerSession),

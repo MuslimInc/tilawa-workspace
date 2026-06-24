@@ -8,6 +8,7 @@ import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa/features/share/presentation/utils/share_feature_flags.dart';
 import 'package:tilawa/features/share/presentation/utils/video_page_specs.dart';
 import 'package:tilawa/features/share/presentation/widgets/mushaf_page_renderer.dart';
+import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 final Uint8List _k1x1TransparentPng = Uint8List.fromList(const <int>[
@@ -161,6 +162,9 @@ Widget _buildRendererHarness({
 
   return MaterialApp(
     theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    locale: const Locale('en'),
     home: Scaffold(
       backgroundColor: const Color(0xFFFFF8ED),
       body: Center(

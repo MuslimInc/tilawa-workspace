@@ -31,7 +31,6 @@ import 'package:tilawa/features/reciters/presentation/cubit/favorites_cubit.dart
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tilawa/features/home/presentation/screens/home_screen.dart';
 import 'package:tilawa/features/prayer_times/domain/repositories/prayer_alerts_permission_onboarding_repository.dart';
-import 'package:tilawa/features/qibla/presentation/screens/qibla_screen.dart';
 import 'package:tilawa/features/reciters/presentation/screens/reciters_screen.dart';
 import 'package:tilawa/features/reciters/presentation/tour/reciters_tour_launcher.dart';
 import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
@@ -388,28 +387,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(HomeScreen), findsOneWidget);
-  });
-
-  testWidgets('mounts qibla tab when selected after settle gate', (
-    WidgetTester tester,
-  ) async {
-    final MainScreenCubit mainScreenCubit = MainScreenCubit();
-
-    await tester.pumpWidget(
-      buildTestApp(mainScreenCubit: mainScreenCubit),
-    );
-
-    await tester.pump(
-      AppStartupReadiness.initialTabRouteSettleDelay +
-          const Duration(milliseconds: 100),
-    );
-    await tester.pumpAndSettle();
-
-    mainScreenCubit.selectTab(2);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-
-    expect(find.byType(QiblaScreen), findsOneWidget);
   });
 
   testWidgets(

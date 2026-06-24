@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../atoms/tilawa_switch.dart';
 import '../foundation/component_tokens.dart';
+import '../foundation/tilawa_text_roles.dart';
 import '../foundation/tilawa_icons.dart';
 import '../foundation/design_tokens.dart';
 import 'tilawa_settings_group_row_style.dart';
@@ -283,18 +284,14 @@ TextStyle _titleStyle(
   TilawaSettingsGroupTokens tokens,
 ) {
   final theme = Theme.of(context);
-  return theme.textTheme.bodyLarge?.copyWith(
-        fontSize: tokens.tileTitleFontSize,
-        fontWeight: FontWeight.w600,
-        color: theme.colorScheme.onSurface,
-        height: 1.2,
-      ) ??
-      TextStyle(
-        fontSize: tokens.tileTitleFontSize,
-        fontWeight: FontWeight.w600,
-        color: theme.colorScheme.onSurface,
-        height: 1.2,
-      );
+  return tilawaResolveTextRole(
+    theme.textTheme,
+    tokens.tileTitleTextRole,
+  ).copyWith(
+    fontWeight: FontWeight.w600,
+    color: theme.colorScheme.onSurface,
+    height: 1.2,
+  );
 }
 
 TextStyle _subtitleStyle(
@@ -302,22 +299,16 @@ TextStyle _subtitleStyle(
   TilawaSettingsGroupTokens tokens,
 ) {
   final theme = Theme.of(context);
-  return theme.textTheme.bodySmall?.copyWith(
-        fontSize: tokens.tileSubtitleFontSize,
-        fontWeight: FontWeight.w400,
-        color: theme.colorScheme.onSurfaceVariant.withValues(
-          alpha: tokens.tileSubtitleOpacity,
-        ),
-        height: 1.35,
-      ) ??
-      TextStyle(
-        fontSize: tokens.tileSubtitleFontSize,
-        fontWeight: FontWeight.w400,
-        color: theme.colorScheme.onSurfaceVariant.withValues(
-          alpha: tokens.tileSubtitleOpacity,
-        ),
-        height: 1.35,
-      );
+  return tilawaResolveTextRole(
+    theme.textTheme,
+    tokens.tileSubtitleTextRole,
+  ).copyWith(
+    fontWeight: FontWeight.w400,
+    color: theme.colorScheme.onSurfaceVariant.withValues(
+      alpha: tokens.tileSubtitleOpacity,
+    ),
+    height: 1.35,
+  );
 }
 
 class _SettingsLeadingIcon extends StatelessWidget {

@@ -291,10 +291,11 @@ class _HomeHeroVariantBPersistentDelegate
       minExtent: minExtent,
     );
 
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final TilawaCapabilityActionCardTokens capabilityCardTokens = Theme.of(
+      context,
+    ).componentTokens.capabilityActionCard;
     final Color collapsedBarColor = homeDashboardHeroCollapsedBarColor(
-      heroTokens,
-      colorScheme,
+      capabilityCardTokens,
     );
     final SystemUiOverlayStyle overlayStyle = collapseProgress < 0.12
         ? HomeHeroPhotoTheme.collapsedBarOverlayStyle(collapsedBarColor)
@@ -373,11 +374,12 @@ class _HomeHeroVariantBHeaderContent extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final TilawaDesignTokens tokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
+    final TilawaCapabilityActionCardTokens capabilityCardTokens =
+        theme.componentTokens.capabilityActionCard;
     final TilawaBottomSheetScaffoldTokens sheetTokens =
         theme.componentTokens.bottomSheetScaffold;
     final Color collapsedBarColor = homeDashboardHeroCollapsedBarColor(
-      heroTokens,
-      colorScheme,
+      capabilityCardTokens,
     );
     final double t = collapseProgress;
     final double expandedOpacity = _fadeIn(t, start: _expandedFadeStart);
@@ -430,10 +432,9 @@ class _HomeHeroVariantBHeaderContent extends StatelessWidget {
                   DecoratedBox(
                     decoration:
                         HomeHeroPhotoTheme.collapsedBarSurfaceDecoration(
-                          collapsedBarColor: collapsedBarColor,
-                          heroTokens: heroTokens,
                           colorScheme: colorScheme,
                           tokens: tokens,
+                          capabilityCardTokens: capabilityCardTokens,
                         ),
                   ),
                   DecoratedBox(
@@ -509,8 +510,6 @@ class _HomeHeroVariantBHeaderContent extends StatelessWidget {
                     child: Opacity(
                       opacity: collapsedOpacity,
                       child: HomeHeroCollapsedToolbar(
-                        heroTokens: heroTokens,
-                        collapsedBarColor: collapsedBarColor,
                         nextPrayer: nextPrayer,
                         locationName: locationName,
                         isRefreshingLocation: isRefreshingLocation,
@@ -678,9 +677,12 @@ class _HomeHeroVariantBPremiumCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
     final TilawaDesignTokens tokens = theme.tokens;
     final TilawaHomeDashboardCardTokens cardTokens =
         theme.componentTokens.homeDashboardCard;
+    final TilawaCapabilityActionCardTokens capabilityCardTokens =
+        theme.componentTokens.capabilityActionCard;
     final BorderRadius radius = BorderRadius.circular(tokens.radiusExtraLarge);
     final Color onCard = cardTokens.foregroundColor;
 
@@ -702,9 +704,20 @@ class _HomeHeroVariantBPremiumCard extends StatelessWidget {
           colors: <Color>[cardTokens.gradientStart, cardTokens.gradientEnd],
         ),
         borderRadius: radius,
+        border: Border.all(
+          color: capabilityCardTokens.borderColor,
+          width: tokens.borderWidthThin,
+        ),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: AppColors.primaryBrown.withValues(
+            color: colorScheme.shadow.withValues(
+              alpha: tokens.opacityShadow,
+            ),
+            offset: tokens.shadowOffsetSmall,
+            blurRadius: tokens.spaceSmall.toDouble(),
+          ),
+          BoxShadow(
+            color: colorScheme.primary.withValues(
               alpha: tokens.opacityShadowStrong * 0.28,
             ),
             blurRadius: tokens.blurShadow,

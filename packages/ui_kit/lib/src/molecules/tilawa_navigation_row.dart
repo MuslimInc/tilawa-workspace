@@ -5,6 +5,7 @@ import '../foundation/component_tokens.dart';
 import '../foundation/tilawa_icons.dart';
 import '../foundation/design_tokens.dart';
 import '../foundation/semantic_tints.dart';
+import '../foundation/tilawa_text_roles.dart';
 import 'tilawa_settings_group_row_style.dart';
 import 'tilawa_settings_list_row.dart';
 
@@ -130,26 +131,32 @@ class _NavigationRowLabel extends StatelessWidget {
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           textAlign: TextAlign.start,
-          style: theme.textTheme.bodyLarge?.copyWith(
-            fontSize: tokens.tileTitleFontSize,
-            fontWeight: FontWeight.w600,
-            color: colorScheme.onSurface,
-            height: 1.2,
-          ),
+          style:
+              tilawaResolveTextRole(
+                theme.textTheme,
+                tokens.tileTitleTextRole,
+              ).copyWith(
+                fontWeight: FontWeight.w600,
+                color: colorScheme.onSurface,
+                height: 1.2,
+              ),
         ),
         Text(
           subtitle,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           textAlign: TextAlign.start,
-          style: theme.textTheme.bodySmall?.copyWith(
-            fontSize: tokens.tileSubtitleFontSize,
-            fontWeight: FontWeight.w400,
-            color: colorScheme.onSurfaceVariant.withValues(
-              alpha: tokens.tileSubtitleOpacity,
-            ),
-            height: 1.35,
-          ),
+          style:
+              tilawaResolveTextRole(
+                theme.textTheme,
+                tokens.tileSubtitleTextRole,
+              ).copyWith(
+                fontWeight: FontWeight.w400,
+                color: colorScheme.onSurfaceVariant.withValues(
+                  alpha: tokens.tileSubtitleOpacity,
+                ),
+                height: 1.35,
+              ),
         ),
       ],
     );

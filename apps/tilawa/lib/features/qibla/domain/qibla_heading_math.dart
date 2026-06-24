@@ -6,12 +6,11 @@ double shortestHeadingDelta({
   required double bearing,
   required double heading,
 }) {
-  double delta = bearing - heading;
-  while (delta > 180) {
-    delta -= 360;
-  }
-  while (delta < -180) {
+  double delta = (bearing - heading) % 360;
+  if (delta <= -180) {
     delta += 360;
+  } else if (delta > 180) {
+    delta -= 360;
   }
   return delta;
 }

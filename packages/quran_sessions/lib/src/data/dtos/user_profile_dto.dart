@@ -13,6 +13,7 @@ class UserProfileDto {
     this.currencyCode,
     this.timezone,
     this.guardianId,
+    this.guardianChildBookingApprovedAt,
     this.restrictionReason,
   });
 
@@ -29,5 +30,6 @@ class UserProfileDto {
   final String? currencyCode;
   final String? timezone;
   final String? guardianId;
+  final DateTime? guardianChildBookingApprovedAt;
   final String? restrictionReason;
 }

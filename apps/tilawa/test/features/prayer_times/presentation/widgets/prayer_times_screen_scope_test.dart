@@ -14,6 +14,7 @@ import 'package:tilawa/features/prayer_times/presentation/bloc/prayer_permission
 import 'package:tilawa/features/prayer_times/presentation/bloc/prayer_times_bloc.dart';
 import 'package:tilawa/features/prayer_times/presentation/screens/prayer_times_screen.dart';
 import 'package:tilawa/features/prayer_times/presentation/widgets/prayer_times_screen_scope.dart';
+import 'package:tilawa/l10n/generated/app_localizations.dart';
 
 import '../../../../support/screen_scope_test_support.dart';
 
@@ -47,6 +48,9 @@ Widget wrapPrayerTimesScopeTest({required Widget home}) {
   mocktail.when(() => localizationBloc.close()).thenAnswer((_) async {});
 
   return MaterialApp(
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    locale: const Locale('en'),
     home: BlocProvider<LocalizationBloc>.value(
       value: localizationBloc,
       child: Scaffold(body: home),

@@ -9,7 +9,7 @@ import { nextSortForField } from '../../utils/sortable-column.util';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <th [class]="alignClass" scope="col">
+    <th [class]="headerClass" scope="col">
       <button
         type="button"
         class="tilawa-sort-btn"
@@ -94,6 +94,10 @@ export class SortableThComponent {
       return '↕';
     }
     return this.sort.direction === 'asc' ? '↑' : '↓';
+  }
+
+  get headerClass(): string {
+    return this.alignClass;
   }
 
   get alignClass(): string {

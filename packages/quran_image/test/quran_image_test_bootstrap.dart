@@ -1,10 +1,22 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:quran_image/core/di/dependency_injection.dart';
 import 'package:quran_image/domain/domain.dart';
+import 'package:quran_image/l10n/quran_image_localizations.dart';
+
+/// [MaterialApp] with [QuranImageLocalizations] for widget tests.
+Widget wrapQuranImageTestApp(Widget home) {
+  return MaterialApp(
+    locale: const Locale('en'),
+    localizationsDelegates: QuranImageLocalizations.localizationsDelegates,
+    supportedLocales: QuranImageLocalizations.supportedLocales,
+    home: home,
+  );
+}
 
 /// Shared DI + temp assets for [QuranImagePage] widget tests.
 Future<Directory> bootstrapQuranImagePageTest() async {

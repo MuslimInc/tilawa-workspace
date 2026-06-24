@@ -25,6 +25,17 @@ void main() {
       );
     });
 
+    test('normalizes extreme angles without looping', () {
+      expect(
+        shortestHeadingDelta(bearing: 1e6, heading: 0),
+        shortestHeadingDelta(bearing: 1e6 % 360, heading: 0),
+      );
+      expect(
+        shortestHeadingDelta(bearing: 0, heading: 1e6),
+        shortestHeadingDelta(bearing: 0, heading: 1e6 % 360),
+      );
+    });
+
     test('returns 0 when heading matches bearing', () {
       expect(
         shortestHeadingDelta(bearing: 136, heading: 136),

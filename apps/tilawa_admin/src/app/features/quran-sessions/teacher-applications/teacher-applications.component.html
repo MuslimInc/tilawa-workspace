@@ -35,10 +35,12 @@
   } @else if (items().length === 0) {
     <app-tilawa-empty-state [title]="'teacherApplications_empty' | t" />
   } @else {
-    <app-tilawa-data-table>
+    <app-tilawa-data-table pinMode="leading">
       <thead>
         <tr>
-          <th scope="col">{{ 'teacherApplications_publicName' | t }}</th>
+          <th scope="col" class="tilawa-table-pin tilawa-table-leading tilawa-table-pin-edge">
+            {{ 'teacherApplications_publicName' | t }} · {{ 'teacherApplications_reviewActions' | t }}
+          </th>
           <th scope="col">{{ 'teacherApplications_accountName' | t }}</th>
           <th scope="col">{{ 'common_email' | t }}</th>
           <th scope="col">{{ 'common_phone' | t }}</th>
@@ -49,13 +51,29 @@
             [sort]="sort()"
             (sortChange)="onSortChange($event)"
           />
-          <th scope="col" class="text-end">{{ 'teacherApplications_reviewActions' | t }}</th>
         </tr>
       </thead>
       <tbody>
         @for (item of items(); track item.id) {
           <tr>
-            <td>{{ item.publicDisplayName }}</td>
+            <td class="tilawa-table-pin tilawa-table-leading tilawa-table-pin-edge">
+              <div class="tilawa-table-leading-inner">
+                <span class="tilawa-table-leading-label">{{ item.publicDisplayName }}</span>
+                <div class="tilawa-table-leading-actions">
+                  <app-tilawa-button
+                    variant="primary"
+                    size="xs"
+                    [label]="'teacherApplications_review' | t"
+                    [link]="['/quran-sessions/teacher-applications', item.id]"
+                  />
+                  @if (item.canReview) {
+                    <span class="text-xs text-[var(--tilawa-warning)]">
+                      {{ 'teacherApplications_pendingReview' | t }}
+                    </span>
+                  }
+                </div>
+              </div>
+            </td>
             <td>{{ item.accountDisplayName }}</td>
             <td>{{ item.email }}</td>
             <td>{{ item.phoneNumber ?? ('common_none' | t) }}</td>
@@ -63,16 +81,6 @@
               <app-status-chip [label]="item.status | statusLabel" [status]="item.status" />
             </td>
             <td>{{ item.submittedAt | date:'medium' }}</td>
-            <td class="text-end space-x-3">
-              <a [routerLink]="['/quran-sessions/teacher-applications', item.id]" class="tilawa-link">
-                {{ 'teacherApplications_review' | t }}
-              </a>
-              @if (item.canReview) {
-                <span class="text-xs text-[var(--tilawa-warning)]">
-                  {{ 'teacherApplications_pendingReview' | t }}
-                </span>
-              }
-            </td>
           </tr>
         }
       </tbody>

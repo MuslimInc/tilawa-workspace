@@ -13,6 +13,7 @@ import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/core/telemetry/startup_perf_log.dart';
 import 'package:tilawa/features/quran_reader/presentation/theme/quran_reader_theme.dart';
 import 'package:tilawa_core/constants/app_strings.dart';
+import 'package:tilawa_core/services/interfaces/keep_awake_service.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'app/app_providers.dart';
@@ -59,12 +60,14 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
       getIt<NotificationStartupService>();
   late final SessionValidityCubit _sessionValidityCubit =
       getIt<SessionValidityCubit>();
+  late final KeepAwakeService _keepAwakeService = getIt<KeepAwakeService>();
 
   @override
   void initState() {
     super.initState();
     StartupPerfLog.log('tilawa_app_init');
     WidgetsBinding.instance.addObserver(this);
+    unawaited(_keepAwakeService.enable());
     SchedulerBinding.instance.addPostFrameCallback((_) {
       StartupPerfLog.log(
         'tilawa_app_first_post_frame',
@@ -102,6 +105,7 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
     _updateCheckTimer?.cancel();
     _whatsNewTimer?.cancel();
     _notificationStartupService.dispose();
+    unawaited(_keepAwakeService.disable());
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -109,6 +113,16 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
+    switch (state) {
+      case AppLifecycleState.resumed:
+        unawaited(_keepAwakeService.enable());
+      case AppLifecycleState.paused:
+      case AppLifecycleState.detached:
+      case AppLifecycleState.hidden:
+        unawaited(_keepAwakeService.disable());
+      case AppLifecycleState.inactive:
+        break;
+    }
     // Cancel any pending debounce timer to prevent duplicate checks
     _resumeDebounceTimer?.cancel();
 

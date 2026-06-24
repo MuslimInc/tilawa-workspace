@@ -10,8 +10,9 @@ class ShareProgressOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
+    final ColorScheme scheme = Theme.of(context).colorScheme;
     return ColoredBox(
-      color: Colors.black54,
+      color: scheme.scrim.withValues(alpha: 0.54),
       child: Center(
         child: Card(
           child: Padding(

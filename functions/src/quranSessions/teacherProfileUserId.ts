@@ -25,3 +25,17 @@ export async function resolveTeacherProfileUserId(
     .get();
   return teacherProfileUserIdFromData(teacherProfileId, snap.data());
 }
+
+/**
+ * Reads denormalized teacher auth uid from session/booking docs (P2 perf).
+ * Returns undefined when legacy rows omit the field.
+ */
+export function teacherUserIdFromDenormalizedSessionData(
+  data: FirebaseFirestore.DocumentData,
+): string | undefined {
+  const direct = data.teacherUserId;
+  if (typeof direct === "string" && direct.trim().length > 0) {
+    return direct.trim();
+  }
+  return undefined;
+}

@@ -20,6 +20,10 @@ class TilawaFeatureCategoryTile extends StatelessWidget {
     this.iconBoxVariant = TilawaIconBoxVariant.tinted,
     this.iconBoxBackgroundColor,
     this.iconColor,
+    this.iconSize,
+    this.iconPadding,
+    this.labelStyle,
+    this.contentPadding,
     this.tileBorderOpacity = 0.35,
   }) : assert(icon != null || iconWidget != null);
 
@@ -33,6 +37,10 @@ class TilawaFeatureCategoryTile extends StatelessWidget {
   final TilawaIconBoxVariant iconBoxVariant;
   final Color? iconBoxBackgroundColor;
   final Color? iconColor;
+  final double? iconSize;
+  final double? iconPadding;
+  final TextStyle? labelStyle;
+  final EdgeInsetsGeometry? contentPadding;
   final double tileBorderOpacity;
 
   @override
@@ -46,6 +54,20 @@ class TilawaFeatureCategoryTile extends StatelessWidget {
     final double radius = tokens.resolveRadius(
       family: TilawaRadiusFamily.decorative,
     );
+    final TextStyle effectiveLabelStyle =
+        labelStyle ??
+        theme.textTheme.labelMedium!.copyWith(
+          color: colorScheme.onSurface,
+          fontWeight: FontWeight.w600,
+          height: 1.15,
+        );
+    final TextScaler textScaler = MediaQuery.textScalerOf(context);
+    final double labelFontSize = effectiveLabelStyle.fontSize ?? 14;
+    final double labelLineHeight =
+        textScaler.scale(labelFontSize) * (effectiveLabelStyle.height ?? 1.15);
+    final double labelBlockHeight = labelLineHeight * 2;
+    final EdgeInsetsGeometry effectiveContentPadding =
+        contentPadding ?? EdgeInsets.all(tokens.spaceSmall);
 
     return Semantics(
       button: true,
@@ -67,36 +89,33 @@ class TilawaFeatureCategoryTile extends StatelessWidget {
               ),
             ),
             child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: tokens.spaceExtraSmall,
-                vertical: tokens.spaceSmall - tokens.borderWidthThin,
-              ),
+              padding: effectiveContentPadding,
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  TilawaIconBox(
-                    icon: icon ?? Icons.circle_outlined,
-                    size: tokens.iconSizeMedium,
-                    padding: tokens.spaceSmall,
-                    variant: iconBoxVariant,
-                    semanticTint: semanticTint,
-                    backgroundColor: iconBoxBackgroundColor,
-                    iconColor: iconColor,
-                    child: iconWidget,
+                  Align(
+                    alignment: Alignment.center,
+                    child: TilawaIconBox(
+                      icon: icon ?? Icons.circle_outlined,
+                      size: iconSize ?? tokens.iconSizeMedium,
+                      padding: iconPadding ?? tokens.spaceSmall,
+                      variant: iconBoxVariant,
+                      semanticTint: semanticTint,
+                      backgroundColor: iconBoxBackgroundColor,
+                      iconColor: iconColor,
+                      child: iconWidget,
+                    ),
                   ),
                   SizedBox(height: tokens.spaceSmall),
-                  Flexible(
+                  SizedBox(
+                    height: labelBlockHeight,
                     child: Text(
                       label,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: colorScheme.onSurface,
-                        fontWeight: FontWeight.w600,
-                        height: 1.15,
-                      ),
+                      style: effectiveLabelStyle,
                     ),
                   ),
                 ],

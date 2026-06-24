@@ -108,7 +108,7 @@ void main() {
     });
 
     test(
-      'filters specialization in memory after server visibility query',
+      'filters specialization via server array-contains query',
       () async {
         await seedProfile(
           id: 'tajweed_teacher',
@@ -130,5 +130,26 @@ void main() {
         ).deepEquals(['hifz_teacher']);
       },
     );
+
+    test('filters language via server array-contains query', () async {
+      await seedProfile(
+        id: 'arabic_teacher',
+        displayName: 'Arabic Teacher',
+        isPubliclyVisible: true,
+        languages: ['ar'],
+      );
+      await seedProfile(
+        id: 'english_teacher',
+        displayName: 'English Teacher',
+        isPubliclyVisible: true,
+        languages: ['en'],
+      );
+
+      final page = await dataSource.getTeachers(language: 'ar');
+
+      check(
+        page.teachers.map((t) => t.id).toList(),
+      ).deepEquals(['arabic_teacher']);
+    });
   });
 }

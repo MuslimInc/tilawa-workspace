@@ -29,6 +29,7 @@ void main() {
     expect(find.text(l10n.homeFeaturedTitle), findsOneWidget);
     expect(find.text(l10n.homeDailyAyahLabel), findsOneWidget);
     expect(find.text(l10n.supportTilawa), findsOneWidget);
+    expect(find.text(l10n.homeSessionsTitle), findsNothing);
     expect(find.byType(HomeTravelDestinationCard), findsWidgets);
   });
 }

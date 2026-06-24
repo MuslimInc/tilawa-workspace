@@ -74,8 +74,8 @@ screenshots/
 apks/
 apps/tilawa/android/app/java_pid35914.hprof
 
-# Golden test failure artifacts (temporary output, not baseline images)
-packages/ui_kit/test/goldens/failures/
+# Golden test failure artifacts (generated on mismatch; do not commit)
+**/test/**/failures/
 
 # Claude Code agent worktrees (transient, harness-managed)
 .claude/worktrees/

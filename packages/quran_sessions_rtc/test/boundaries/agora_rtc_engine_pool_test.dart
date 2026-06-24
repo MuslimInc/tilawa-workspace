@@ -32,5 +32,41 @@ void main() {
       check(first.released).isTrue();
       check(second.released).isTrue();
     });
+
+    test(
+      'release parks engine and releases previous parked engine on second park',
+      () async {
+        final firstEngine = FakeRtcEngine();
+        final secondEngine = FakeRtcEngine();
+        pool.remember(
+          'session_a',
+          FakeAgoraRtcSessionHandle(firstEngine),
+        );
+        pool.remember(
+          'session_b',
+          FakeAgoraRtcSessionHandle(secondEngine),
+        );
+
+        await pool.release('session_a');
+        await pool.release('session_b');
+
+        check(firstEngine.released).isTrue();
+        check(secondEngine.released).isFalse();
+        expect(pool.takeParkedEngine(''), same(secondEngine));
+      },
+    );
+
+    test('releaseAll releases parked engine retained from prior release', () async {
+      final engine = FakeRtcEngine();
+      pool.remember('session_a', FakeAgoraRtcSessionHandle(engine));
+
+      await pool.release('session_a');
+      check(engine.released).isFalse();
+
+      await pool.releaseAll();
+
+      check(engine.released).isTrue();
+      check(pool.takeParkedEngine('')).isNull();
+    });
   });
 }

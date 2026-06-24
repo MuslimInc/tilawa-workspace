@@ -13,7 +13,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PROJECT="${1:-quran-playera-app}"
 
-# 12 stable-scope session callables (see sessionCallableWiring.test.ts).
+# 13 stable-scope session callables + guardian approval (see sessionCallableWiring.test.ts).
 STABLE_CALLABLES=(
   createSessionBooking
   cancelSessionBooking
@@ -27,6 +27,7 @@ STABLE_CALLABLES=(
   resolveSessionReport
   issueSessionRtcToken
   registerActiveDevice
+  approveChildGuardianBooking
 )
 
 # Scheduled jobs for session reminders (production notifications).
