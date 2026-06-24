@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../foundation/design_tokens.dart';
+import '../foundation/tilawa_text_roles.dart';
 import '../foundation/tilawa_interaction_feedback.dart';
 import './tilawa_loading_indicator.dart';
 
@@ -169,7 +170,16 @@ class TilawaButton extends StatelessWidget {
     final Color? resolvedBorder = borderColor ?? variantBorder;
 
     // Resolve dimensions based on size
-    final (height, horizontalPadding, fontSize, iconSize) = _getDimensions();
+    final (height, horizontalPadding, labelTextRole, iconSize) =
+        _getDimensions();
+    final TextStyle labelBaseStyle =
+        tilawaResolveTextRole(
+          theme.textTheme,
+          labelTextRole,
+        ).copyWith(
+          fontWeight: FontWeight.w600,
+          color: resolvedFg,
+        );
 
     final designTokens = theme.extension<TilawaDesignTokens>();
     // All full-size buttons share the pill shape; inline text-link actions
@@ -273,9 +283,8 @@ class TilawaButton extends StatelessWidget {
       isLoading: isLoading,
       isFullWidth: isFullWidth,
       foregroundColor: contentFg,
-      fontSize: fontSize,
+      labelStyle: labelBaseStyle.merge(textStyle),
       iconSize: iconSize,
-      textStyle: textStyle,
     );
 
     final TextButton textButton = TextButton(
@@ -330,11 +339,26 @@ class TilawaButton extends StatelessWidget {
     };
   }
 
-  (double, double, double, double) _getDimensions() {
+  (double, double, TilawaTextRole, double) _getDimensions() {
     return switch (size) {
-      TilawaButtonSize.small => (32.0, 12.0, 12.0, 16.0),
-      TilawaButtonSize.medium => (48.0, 16.0, 14.0, 20.0),
-      TilawaButtonSize.large => (48.0, 24.0, 16.0, 24.0),
+      TilawaButtonSize.small => (
+        32.0,
+        12.0,
+        TilawaTextRole.labelMedium,
+        16.0,
+      ),
+      TilawaButtonSize.medium => (
+        48.0,
+        16.0,
+        TilawaTextRole.labelLarge,
+        20.0,
+      ),
+      TilawaButtonSize.large => (
+        48.0,
+        24.0,
+        TilawaTextRole.titleMedium,
+        24.0,
+      ),
     };
   }
 }
@@ -343,13 +367,12 @@ class _ButtonContent extends StatelessWidget {
   const _ButtonContent({
     required this.text,
     required this.foregroundColor,
-    required this.fontSize,
+    required this.labelStyle,
     required this.iconSize,
     this.leadingIcon,
     this.trailingIcon,
     this.isLoading = false,
     this.isFullWidth = false,
-    this.textStyle,
   });
 
   final String text;
@@ -358,9 +381,8 @@ class _ButtonContent extends StatelessWidget {
   final bool isLoading;
   final bool isFullWidth;
   final Color foregroundColor;
-  final double fontSize;
+  final TextStyle labelStyle;
   final double iconSize;
-  final TextStyle? textStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -381,11 +403,7 @@ class _ButtonContent extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         maxLines: 1,
         softWrap: false,
-        style: TextStyle(
-          fontSize: fontSize,
-          fontWeight: FontWeight.w600,
-          color: foregroundColor,
-        ).merge(textStyle),
+        style: labelStyle.copyWith(color: foregroundColor),
       ),
     );
 

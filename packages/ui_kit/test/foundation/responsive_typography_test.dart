@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../lib/src/foundation/app_colors.dart';
+import '../../lib/src/foundation/app_theme.dart';
 import '../../lib/src/foundation/responsive_typography.dart';
 import '../rtl_test_matrix.dart';
+
+double _nudgedSize(double? baseSize, double design, double m3Default) {
+  return baseSize! * (design / m3Default);
+}
 
 class _ContextProbe extends StatelessWidget {
   const _ContextProbe({required this.onBuild});
@@ -27,9 +33,12 @@ Future<BuildContext> _pump(
   tester.view.devicePixelRatio = 1.0;
   await pumpWithDirection(
     tester,
-    MediaQuery(
-      data: MediaQueryData(size: size),
-      child: _ContextProbe(onBuild: (context) => captured = context),
+    MaterialApp(
+      theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+      home: MediaQuery(
+        data: MediaQueryData(size: size),
+        child: _ContextProbe(onBuild: (context) => captured = context),
+      ),
     ),
     direction,
   );
@@ -68,9 +77,16 @@ void main() {
           final ctx = await _pump(tester, size, direction);
 
           final responsive = ctx.responsiveTextTheme;
+          final base = Theme.of(ctx).textTheme;
 
-          expect(responsive.titleLarge?.fontSize, 23);
-          expect(responsive.bodyLarge?.fontSize, 16.5);
+          expect(
+            responsive.titleLarge?.fontSize,
+            _nudgedSize(base.titleLarge?.fontSize, 23, 22),
+          );
+          expect(
+            responsive.bodyLarge?.fontSize,
+            _nudgedSize(base.bodyLarge?.fontSize, 16.5, 16),
+          );
         },
       );
 
@@ -106,13 +122,28 @@ void main() {
         final ctx = await _pump(tester, size, direction);
 
         final responsive = ctx.responsiveTextTheme;
+        final base = Theme.of(ctx).textTheme;
 
-        // Medium screen should have scaled sizes
-        expect(responsive.displayLarge?.fontSize, 60);
-        expect(responsive.displayMedium?.fontSize, 48);
-        expect(responsive.titleLarge?.fontSize, 24);
-        expect(responsive.bodyLarge?.fontSize, 17);
-        expect(responsive.bodyMedium?.fontSize, 15);
+        expect(
+          responsive.displayLarge?.fontSize,
+          _nudgedSize(base.displayLarge?.fontSize, 60, 57),
+        );
+        expect(
+          responsive.displayMedium?.fontSize,
+          _nudgedSize(base.displayMedium?.fontSize, 48, 45),
+        );
+        expect(
+          responsive.titleLarge?.fontSize,
+          _nudgedSize(base.titleLarge?.fontSize, 24, 22),
+        );
+        expect(
+          responsive.bodyLarge?.fontSize,
+          _nudgedSize(base.bodyLarge?.fontSize, 17, 16),
+        );
+        expect(
+          responsive.bodyMedium?.fontSize,
+          _nudgedSize(base.bodyMedium?.fontSize, 15, 14),
+        );
       });
     });
 
@@ -125,20 +156,56 @@ void main() {
         final ctx = await _pump(tester, size, direction);
 
         final responsive = ctx.responsiveTextTheme;
+        final base = Theme.of(ctx).textTheme;
 
-        // Expanded screen should have larger scaled sizes
-        expect(responsive.displayLarge?.fontSize, 64);
-        expect(responsive.displayMedium?.fontSize, 52);
-        expect(responsive.displaySmall?.fontSize, 40);
-        expect(responsive.headlineLarge?.fontSize, 36);
-        expect(responsive.headlineMedium?.fontSize, 32);
-        expect(responsive.headlineSmall?.fontSize, 28);
-        expect(responsive.titleLarge?.fontSize, 26);
-        expect(responsive.titleMedium?.fontSize, 20);
-        expect(responsive.titleSmall?.fontSize, 18);
-        expect(responsive.bodyLarge?.fontSize, 18);
-        expect(responsive.bodyMedium?.fontSize, 16);
-        expect(responsive.bodySmall?.fontSize, 14);
+        expect(
+          responsive.displayLarge?.fontSize,
+          _nudgedSize(base.displayLarge?.fontSize, 64, 57),
+        );
+        expect(
+          responsive.displayMedium?.fontSize,
+          _nudgedSize(base.displayMedium?.fontSize, 52, 45),
+        );
+        expect(
+          responsive.displaySmall?.fontSize,
+          _nudgedSize(base.displaySmall?.fontSize, 40, 36),
+        );
+        expect(
+          responsive.headlineLarge?.fontSize,
+          _nudgedSize(base.headlineLarge?.fontSize, 36, 32),
+        );
+        expect(
+          responsive.headlineMedium?.fontSize,
+          _nudgedSize(base.headlineMedium?.fontSize, 32, 28),
+        );
+        expect(
+          responsive.headlineSmall?.fontSize,
+          _nudgedSize(base.headlineSmall?.fontSize, 28, 24),
+        );
+        expect(
+          responsive.titleLarge?.fontSize,
+          _nudgedSize(base.titleLarge?.fontSize, 26, 22),
+        );
+        expect(
+          responsive.titleMedium?.fontSize,
+          _nudgedSize(base.titleMedium?.fontSize, 20, 16),
+        );
+        expect(
+          responsive.titleSmall?.fontSize,
+          _nudgedSize(base.titleSmall?.fontSize, 18, 14),
+        );
+        expect(
+          responsive.bodyLarge?.fontSize,
+          _nudgedSize(base.bodyLarge?.fontSize, 18, 16),
+        );
+        expect(
+          responsive.bodyMedium?.fontSize,
+          _nudgedSize(base.bodyMedium?.fontSize, 16, 14),
+        );
+        expect(
+          responsive.bodySmall?.fontSize,
+          _nudgedSize(base.bodySmall?.fontSize, 14, 12),
+        );
       });
     });
 
@@ -151,10 +218,16 @@ void main() {
         final ctx = await _pump(tester, size, direction);
 
         final responsive = ctx.responsiveTextTheme;
+        final base = Theme.of(ctx).textTheme;
 
-        // Should use expanded screen sizes for 1200+
-        expect(responsive.displayLarge?.fontSize, 64);
-        expect(responsive.bodyLarge?.fontSize, 18);
+        expect(
+          responsive.displayLarge?.fontSize,
+          _nudgedSize(base.displayLarge?.fontSize, 64, 57),
+        );
+        expect(
+          responsive.bodyLarge?.fontSize,
+          _nudgedSize(base.bodyLarge?.fontSize, 18, 16),
+        );
       });
     });
 
@@ -168,6 +241,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
           home: MediaQuery(
             data: const MediaQueryData(size: size),
             child: Builder(
@@ -184,9 +258,10 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
       addTearDown(() => tester.binding.setSurfaceSize(null));
 
+      final base = Theme.of(captured).textTheme;
       expect(
         captured.responsiveStyle((theme) => theme.bodyLarge)?.fontSize,
-        18,
+        _nudgedSize(base.bodyLarge?.fontSize, 18, 16),
       );
     });
 
@@ -200,6 +275,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
           home: MediaQuery(
             data: const MediaQueryData(size: size),
             child: Builder(
@@ -219,8 +295,10 @@ void main() {
       final responsive = captured.responsiveTextTheme;
       final base = Theme.of(captured).textTheme;
 
-      // Font size changes but other properties preserved
-      expect(responsive.bodyLarge?.fontSize, 17);
+      expect(
+        responsive.bodyLarge?.fontSize,
+        _nudgedSize(base.bodyLarge?.fontSize, 17, 16),
+      );
       expect(responsive.bodyLarge?.fontWeight, base.bodyLarge?.fontWeight);
       expect(
         responsive.bodyLarge?.letterSpacing,
@@ -238,6 +316,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
           home: MediaQuery(
             data: const MediaQueryData(size: size),
             child: Builder(
@@ -268,7 +347,11 @@ void main() {
       ) async {
         const size = Size(600, 800);
         final ctx = await _pump(tester, size, direction);
-        expect(ctx.responsiveTextTheme.displayLarge?.fontSize, 60);
+        final base = Theme.of(ctx).textTheme;
+        expect(
+          ctx.responsiveTextTheme.displayLarge?.fontSize,
+          _nudgedSize(base.displayLarge?.fontSize, 60, 57),
+        );
       });
 
       testInBothDirections('scales displayMedium to 48', (
@@ -277,7 +360,11 @@ void main() {
       ) async {
         const size = Size(700, 800);
         final ctx = await _pump(tester, size, direction);
-        expect(ctx.responsiveTextTheme.displayMedium?.fontSize, 48);
+        final base = Theme.of(ctx).textTheme;
+        expect(
+          ctx.responsiveTextTheme.displayMedium?.fontSize,
+          _nudgedSize(base.displayMedium?.fontSize, 48, 45),
+        );
       });
 
       testInBothDirections('scales titleLarge to 24', (
@@ -286,13 +373,21 @@ void main() {
       ) async {
         const size = Size(650, 800);
         final ctx = await _pump(tester, size, direction);
-        expect(ctx.responsiveTextTheme.titleLarge?.fontSize, 24);
+        final base = Theme.of(ctx).textTheme;
+        expect(
+          ctx.responsiveTextTheme.titleLarge?.fontSize,
+          _nudgedSize(base.titleLarge?.fontSize, 24, 22),
+        );
       });
 
       testInBothDirections('scales bodyLarge to 17', (tester, direction) async {
         const size = Size(800, 800);
         final ctx = await _pump(tester, size, direction);
-        expect(ctx.responsiveTextTheme.bodyLarge?.fontSize, 17);
+        final base = Theme.of(ctx).textTheme;
+        expect(
+          ctx.responsiveTextTheme.bodyLarge?.fontSize,
+          _nudgedSize(base.bodyLarge?.fontSize, 17, 16),
+        );
       });
 
       testInBothDirections('scales bodyMedium to 15', (
@@ -301,7 +396,11 @@ void main() {
       ) async {
         const size = Size(750, 800);
         final ctx = await _pump(tester, size, direction);
-        expect(ctx.responsiveTextTheme.bodyMedium?.fontSize, 15);
+        final base = Theme.of(ctx).textTheme;
+        expect(
+          ctx.responsiveTextTheme.bodyMedium?.fontSize,
+          _nudgedSize(base.bodyMedium?.fontSize, 15, 14),
+        );
       });
     });
 
@@ -312,7 +411,11 @@ void main() {
       ) async {
         const size = Size(900, 1200);
         final ctx = await _pump(tester, size, direction);
-        expect(ctx.responsiveTextTheme.displayLarge?.fontSize, 64);
+        final base = Theme.of(ctx).textTheme;
+        expect(
+          ctx.responsiveTextTheme.displayLarge?.fontSize,
+          _nudgedSize(base.displayLarge?.fontSize, 64, 57),
+        );
       });
 
       testInBothDirections('scales displaySmall to 40', (
@@ -321,7 +424,11 @@ void main() {
       ) async {
         const size = Size(1000, 1200);
         final ctx = await _pump(tester, size, direction);
-        expect(ctx.responsiveTextTheme.displaySmall?.fontSize, 40);
+        final base = Theme.of(ctx).textTheme;
+        expect(
+          ctx.responsiveTextTheme.displaySmall?.fontSize,
+          _nudgedSize(base.displaySmall?.fontSize, 40, 36),
+        );
       });
 
       testInBothDirections('scales headlineLarge to 36', (
@@ -330,7 +437,11 @@ void main() {
       ) async {
         const size = Size(950, 1200);
         final ctx = await _pump(tester, size, direction);
-        expect(ctx.responsiveTextTheme.headlineLarge?.fontSize, 36);
+        final base = Theme.of(ctx).textTheme;
+        expect(
+          ctx.responsiveTextTheme.headlineLarge?.fontSize,
+          _nudgedSize(base.headlineLarge?.fontSize, 36, 32),
+        );
       });
 
       testInBothDirections('scales titleLarge to 26', (
@@ -339,7 +450,11 @@ void main() {
       ) async {
         const size = Size(1100, 1200);
         final ctx = await _pump(tester, size, direction);
-        expect(ctx.responsiveTextTheme.titleLarge?.fontSize, 26);
+        final base = Theme.of(ctx).textTheme;
+        expect(
+          ctx.responsiveTextTheme.titleLarge?.fontSize,
+          _nudgedSize(base.titleLarge?.fontSize, 26, 22),
+        );
       });
     });
   });

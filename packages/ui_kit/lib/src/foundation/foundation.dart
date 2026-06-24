@@ -41,3 +41,5 @@ export 'responsive_typography.dart';
 export 'safe_area_ext.dart';
 export 'shell_padding.dart';
 export 'text_theme_ext.dart';
+export 'tilawa_text_roles.dart';
+export 'tilawa_type_scale.dart';

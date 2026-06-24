@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../atoms/tilawa_divider.dart';
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
+import '../foundation/tilawa_text_roles.dart';
 
 /// Dense list row with optional leading, subtitle, and trailing action.
 ///
@@ -35,17 +36,22 @@ class TilawaCompactListRow extends StatelessWidget {
     final designTokens = theme.tokens;
     final subtitleText = subtitle;
 
-    final titleStyle = theme.textTheme.bodyLarge?.copyWith(
-      fontSize: tokens.tileTitleFontSize,
-      fontWeight: FontWeight.w600,
-      color: colorScheme.onSurface,
-      height: 1.15,
-    );
+    final titleStyle =
+        tilawaResolveTextRole(
+          theme.textTheme,
+          tokens.tileTitleTextRole,
+        ).copyWith(
+          fontWeight: FontWeight.w600,
+          color: colorScheme.onSurface,
+          height: 1.15,
+        );
 
     final effectiveSubtitleStyle =
         subtitleStyle ??
-        theme.textTheme.bodySmall?.copyWith(
-          fontSize: tokens.tileSubtitleFontSize,
+        tilawaResolveTextRole(
+          theme.textTheme,
+          tokens.tileSubtitleTextRole,
+        ).copyWith(
           fontWeight: FontWeight.w500,
           color: colorScheme.onSurfaceVariant.withValues(
             alpha: tokens.tileSubtitleOpacity,

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../app_colors.dart';
 import '../design_tokens.dart' show kTilawaMinInteractiveDimension;
+import '../tilawa_text_roles.dart';
 import 'token_lerp.dart';
 
 @immutable
@@ -72,28 +73,28 @@ class TilawaFooterBarTokens {
     required this.height,
     required this.horizontalPadding,
     required this.contentGap,
-    required this.labelFontSize,
+    required this.primaryLabelTextRole,
     required this.labelFontWeight,
-    required this.secondaryLabelFontSize,
+    required this.secondaryLabelTextRole,
     required this.secondaryLabelOpacity,
   });
 
   final double height;
   final double horizontalPadding;
   final double contentGap;
-  final double labelFontSize;
+  final TilawaTextRole primaryLabelTextRole;
   final FontWeight labelFontWeight;
-  final double secondaryLabelFontSize;
+  final TilawaTextRole secondaryLabelTextRole;
   final double secondaryLabelOpacity;
 
   factory TilawaFooterBarTokens.defaults() {
-    return const TilawaFooterBarTokens(
+    return TilawaFooterBarTokens(
       height: 56,
       horizontalPadding: 16,
       contentGap: 12,
-      labelFontSize: 16,
+      primaryLabelTextRole: TilawaTextRole.titleSmall,
       labelFontWeight: FontWeight.bold,
-      secondaryLabelFontSize: 12,
+      secondaryLabelTextRole: TilawaTextRole.bodySmall,
       secondaryLabelOpacity: 0.7,
     );
   }
@@ -102,19 +103,19 @@ class TilawaFooterBarTokens {
     double? height,
     double? horizontalPadding,
     double? contentGap,
-    double? labelFontSize,
+    TilawaTextRole? primaryLabelTextRole,
     FontWeight? labelFontWeight,
-    double? secondaryLabelFontSize,
+    TilawaTextRole? secondaryLabelTextRole,
     double? secondaryLabelOpacity,
   }) {
     return TilawaFooterBarTokens(
       height: height ?? this.height,
       horizontalPadding: horizontalPadding ?? this.horizontalPadding,
       contentGap: contentGap ?? this.contentGap,
-      labelFontSize: labelFontSize ?? this.labelFontSize,
+      primaryLabelTextRole: primaryLabelTextRole ?? this.primaryLabelTextRole,
       labelFontWeight: labelFontWeight ?? this.labelFontWeight,
-      secondaryLabelFontSize:
-          secondaryLabelFontSize ?? this.secondaryLabelFontSize,
+      secondaryLabelTextRole:
+          secondaryLabelTextRole ?? this.secondaryLabelTextRole,
       secondaryLabelOpacity:
           secondaryLabelOpacity ?? this.secondaryLabelOpacity,
     );
@@ -133,11 +134,15 @@ class TilawaFooterBarTokens {
         t,
       ),
       contentGap: lerpTokenDouble(a.contentGap, b.contentGap, t),
-      labelFontSize: lerpTokenDouble(a.labelFontSize, b.labelFontSize, t),
+      primaryLabelTextRole: lerpTilawaTextRole(
+        a.primaryLabelTextRole,
+        b.primaryLabelTextRole,
+        t,
+      ),
       labelFontWeight: t < 0.5 ? a.labelFontWeight : b.labelFontWeight,
-      secondaryLabelFontSize: lerpTokenDouble(
-        a.secondaryLabelFontSize,
-        b.secondaryLabelFontSize,
+      secondaryLabelTextRole: lerpTilawaTextRole(
+        a.secondaryLabelTextRole,
+        b.secondaryLabelTextRole,
         t,
       ),
       secondaryLabelOpacity: lerpTokenDouble(
@@ -390,7 +395,7 @@ class TilawaAdaptiveShellTokens {
     required this.navButtonSelectedBackgroundColor,
     required this.navButtonSelectedBackgroundOpacity,
     required this.navButtonSelectedCenterOpacity,
-    required this.navButtonLabelFontSize,
+    required this.navButtonLabelTextRole,
     required this.navButtonSelectedLabelWeight,
     required this.navButtonUnselectedLabelWeight,
     required this.navButtonSplashColor,
@@ -463,7 +468,7 @@ class TilawaAdaptiveShellTokens {
   final Color navButtonSelectedBackgroundColor;
   final double navButtonSelectedBackgroundOpacity;
   final double navButtonSelectedCenterOpacity;
-  final double navButtonLabelFontSize;
+  final TilawaTextRole navButtonLabelTextRole;
   final FontWeight navButtonSelectedLabelWeight;
   final FontWeight navButtonUnselectedLabelWeight;
 
@@ -556,7 +561,6 @@ class TilawaAdaptiveShellTokens {
     const double navButtonIconSize = 22;
     const double navButtonSelectedCenterScale = 1.0;
     const double navButtonGap = 4;
-    const double navButtonLabelFontSize = 11;
     const double navButtonSelectionContainerVerticalPadding = 4;
     const double navButtonIconOnlyMinHeight = kTilawaMinInteractiveDimension;
     const double navButtonIconOnlyVerticalPadding = 4;
@@ -605,7 +609,7 @@ class TilawaAdaptiveShellTokens {
       ),
       navButtonSelectedBackgroundOpacity: 0.2,
       navButtonSelectedCenterOpacity: 0.25,
-      navButtonLabelFontSize: navButtonLabelFontSize,
+      navButtonLabelTextRole: TilawaTextRole.labelSmall,
       navButtonSelectedLabelWeight: FontWeight.w700,
       navButtonUnselectedLabelWeight: FontWeight.w500,
       navButtonSplashColor: _navButtonSplashColor(colorScheme),
@@ -699,7 +703,7 @@ class TilawaAdaptiveShellTokens {
     Color? navButtonSelectedBackgroundColor,
     double? navButtonSelectedBackgroundOpacity,
     double? navButtonSelectedCenterOpacity,
-    double? navButtonLabelFontSize,
+    TilawaTextRole? navButtonLabelTextRole,
     FontWeight? navButtonSelectedLabelWeight,
     FontWeight? navButtonUnselectedLabelWeight,
     Color? navButtonSplashColor,
@@ -761,8 +765,8 @@ class TilawaAdaptiveShellTokens {
           this.navButtonSelectedBackgroundOpacity,
       navButtonSelectedCenterOpacity:
           navButtonSelectedCenterOpacity ?? this.navButtonSelectedCenterOpacity,
-      navButtonLabelFontSize:
-          navButtonLabelFontSize ?? this.navButtonLabelFontSize,
+      navButtonLabelTextRole:
+          navButtonLabelTextRole ?? this.navButtonLabelTextRole,
       navButtonSelectedLabelWeight:
           navButtonSelectedLabelWeight ?? this.navButtonSelectedLabelWeight,
       navButtonUnselectedLabelWeight:
@@ -931,9 +935,9 @@ class TilawaAdaptiveShellTokens {
         b.navButtonSelectedCenterOpacity,
         t,
       ),
-      navButtonLabelFontSize: lerpTokenDouble(
-        a.navButtonLabelFontSize,
-        b.navButtonLabelFontSize,
+      navButtonLabelTextRole: lerpTilawaTextRole(
+        a.navButtonLabelTextRole,
+        b.navButtonLabelTextRole,
         t,
       ),
       navButtonSelectedLabelWeight: FontWeight.lerp(
@@ -988,14 +992,14 @@ class TilawaSettingsGroupTokens {
     required this.groupShadowOpacity,
     required this.groupShadowBlur,
     required this.groupShadowOffset,
-    required this.groupTitleFontSize,
+    required this.groupTitleTextRole,
     required this.groupTitleLetterSpacing,
     required this.tileContentPadding,
     required this.switchTileContentPadding,
     required this.tileIconPadding,
     required this.tileIconSize,
-    required this.tileTitleFontSize,
-    required this.tileSubtitleFontSize,
+    required this.tileTitleTextRole,
+    required this.tileSubtitleTextRole,
     required this.tileSubtitleOpacity,
     required this.tileSubtitleSpacing,
     required this.tileTrailingSize,
@@ -1022,14 +1026,14 @@ class TilawaSettingsGroupTokens {
   final double groupShadowOpacity;
   final double groupShadowBlur;
   final Offset groupShadowOffset;
-  final double groupTitleFontSize;
+  final TilawaTextRole groupTitleTextRole;
   final double groupTitleLetterSpacing;
   final EdgeInsetsGeometry tileContentPadding;
   final EdgeInsetsGeometry switchTileContentPadding;
   final EdgeInsetsGeometry tileIconPadding;
   final double tileIconSize;
-  final double tileTitleFontSize;
-  final double tileSubtitleFontSize;
+  final TilawaTextRole tileTitleTextRole;
+  final TilawaTextRole tileSubtitleTextRole;
   final double tileSubtitleOpacity;
   final double tileSubtitleSpacing;
   final double tileTrailingSize;
@@ -1100,7 +1104,7 @@ class TilawaSettingsGroupTokens {
       groupShadowOpacity: 0,
       groupShadowBlur: 0,
       groupShadowOffset: Offset.zero,
-      groupTitleFontSize: 13.5,
+      groupTitleTextRole: TilawaTextRole.titleSmall,
       groupTitleLetterSpacing: 0,
       tileContentPadding: const EdgeInsets.symmetric(
         horizontal: 16,
@@ -1112,8 +1116,8 @@ class TilawaSettingsGroupTokens {
       ),
       tileIconPadding: const EdgeInsets.all(7),
       tileIconSize: 22,
-      tileTitleFontSize: 16,
-      tileSubtitleFontSize: 12.5,
+      tileTitleTextRole: TilawaTextRole.bodyLarge,
+      tileSubtitleTextRole: TilawaTextRole.bodySmall,
       tileSubtitleOpacity: 0.6,
       tileSubtitleSpacing: 4,
       tileTrailingSize: 16,
@@ -1153,14 +1157,14 @@ class TilawaSettingsGroupTokens {
     double? groupShadowOpacity,
     double? groupShadowBlur,
     Offset? groupShadowOffset,
-    double? groupTitleFontSize,
+    TilawaTextRole? groupTitleTextRole,
     double? groupTitleLetterSpacing,
     EdgeInsetsGeometry? tileContentPadding,
     EdgeInsetsGeometry? switchTileContentPadding,
     EdgeInsetsGeometry? tileIconPadding,
     double? tileIconSize,
-    double? tileTitleFontSize,
-    double? tileSubtitleFontSize,
+    TilawaTextRole? tileTitleTextRole,
+    TilawaTextRole? tileSubtitleTextRole,
     double? tileSubtitleOpacity,
     double? tileSubtitleSpacing,
     double? tileTrailingSize,
@@ -1186,7 +1190,7 @@ class TilawaSettingsGroupTokens {
       groupShadowOpacity: groupShadowOpacity ?? this.groupShadowOpacity,
       groupShadowBlur: groupShadowBlur ?? this.groupShadowBlur,
       groupShadowOffset: groupShadowOffset ?? this.groupShadowOffset,
-      groupTitleFontSize: groupTitleFontSize ?? this.groupTitleFontSize,
+      groupTitleTextRole: groupTitleTextRole ?? this.groupTitleTextRole,
       groupTitleLetterSpacing:
           groupTitleLetterSpacing ?? this.groupTitleLetterSpacing,
       tileContentPadding: tileContentPadding ?? this.tileContentPadding,
@@ -1194,8 +1198,8 @@ class TilawaSettingsGroupTokens {
           switchTileContentPadding ?? this.switchTileContentPadding,
       tileIconPadding: tileIconPadding ?? this.tileIconPadding,
       tileIconSize: tileIconSize ?? this.tileIconSize,
-      tileTitleFontSize: tileTitleFontSize ?? this.tileTitleFontSize,
-      tileSubtitleFontSize: tileSubtitleFontSize ?? this.tileSubtitleFontSize,
+      tileTitleTextRole: tileTitleTextRole ?? this.tileTitleTextRole,
+      tileSubtitleTextRole: tileSubtitleTextRole ?? this.tileSubtitleTextRole,
       tileSubtitleOpacity: tileSubtitleOpacity ?? this.tileSubtitleOpacity,
       tileSubtitleSpacing: tileSubtitleSpacing ?? this.tileSubtitleSpacing,
       tileTrailingSize: tileTrailingSize ?? this.tileTrailingSize,
@@ -1251,9 +1255,9 @@ class TilawaSettingsGroupTokens {
         b.groupShadowOffset,
         t,
       )!,
-      groupTitleFontSize: lerpTokenDouble(
-        a.groupTitleFontSize,
-        b.groupTitleFontSize,
+      groupTitleTextRole: lerpTilawaTextRole(
+        a.groupTitleTextRole,
+        b.groupTitleTextRole,
         t,
       ),
       groupTitleLetterSpacing: lerpTokenDouble(
@@ -1277,14 +1281,14 @@ class TilawaSettingsGroupTokens {
         t,
       )!,
       tileIconSize: lerpTokenDouble(a.tileIconSize, b.tileIconSize, t),
-      tileTitleFontSize: lerpTokenDouble(
-        a.tileTitleFontSize,
-        b.tileTitleFontSize,
+      tileTitleTextRole: lerpTilawaTextRole(
+        a.tileTitleTextRole,
+        b.tileTitleTextRole,
         t,
       ),
-      tileSubtitleFontSize: lerpTokenDouble(
-        a.tileSubtitleFontSize,
-        b.tileSubtitleFontSize,
+      tileSubtitleTextRole: lerpTilawaTextRole(
+        a.tileSubtitleTextRole,
+        b.tileSubtitleTextRole,
         t,
       ),
       tileSubtitleOpacity: lerpTokenDouble(

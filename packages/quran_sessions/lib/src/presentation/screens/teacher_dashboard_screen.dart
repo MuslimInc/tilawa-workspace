@@ -581,12 +581,15 @@ class _SlotTile extends StatelessWidget {
           ? timeFmt.format(slot.startsAt.toLocal())
           : dateFmt.format(slot.startsAt.toLocal()),
       subtitle: slot.isBooked ? l10n.slotBooked : l10n.slotAvailable,
-      subtitleStyle: TextStyle(
-        fontSize: settingsTokens.tileSubtitleFontSize,
-        fontWeight: FontWeight.w500,
-        color: slot.isBooked ? scheme.primary : scheme.tertiary,
-        height: 1.2,
-      ),
+      subtitleStyle:
+          tilawaResolveTextRole(
+            Theme.of(context).textTheme,
+            settingsTokens.tileSubtitleTextRole,
+          ).copyWith(
+            fontWeight: FontWeight.w500,
+            color: slot.isBooked ? scheme.primary : scheme.tertiary,
+            height: 1.2,
+          ),
       trailing: slot.isBooked
           ? null
           : _BlockSlotTrailing(

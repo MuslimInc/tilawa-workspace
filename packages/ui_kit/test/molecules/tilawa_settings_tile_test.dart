@@ -50,7 +50,10 @@ void main() {
 
       expect(subtitleWidget.maxLines, 2);
       expect(subtitleWidget.overflow, TextOverflow.ellipsis);
-      expect(subtitleWidget.style?.fontSize, tokens.tileSubtitleFontSize);
+      expect(
+        subtitleWidget.style?.fontSize,
+        tokens.tileSubtitleTextRole.resolve(theme.textTheme)?.fontSize,
+      );
       expect(
         subtitleWidget.style?.color,
         theme.colorScheme.onSurfaceVariant.withValues(
