@@ -242,13 +242,17 @@ class _WeeklyAvailabilityScreenState extends State<WeeklyAvailabilityScreen>
       builder: (dialogContext) => AlertDialog(
         title: Text(l10n.availabilityDiscardChanges),
         actions: [
-          TextButton(
+          TilawaButton(
+            text: l10n.availabilityKeepEditing,
+            variant: TilawaButtonVariant.ghost,
+            size: TilawaButtonSize.small,
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(l10n.availabilityKeepEditing),
           ),
-          TextButton(
+          TilawaButton(
+            text: l10n.availabilityDiscardConfirm,
+            variant: TilawaButtonVariant.dangerOutline,
+            size: TilawaButtonSize.small,
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(l10n.availabilityDiscardConfirm),
           ),
         ],
       ),

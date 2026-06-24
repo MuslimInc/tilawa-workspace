@@ -22,6 +22,13 @@
     "accountBlockedWithReason": "حسابك موقوف بسبب: {reason}.",
     "accountBlocked": "حسابك موقوف. يرجى التواصل مع الدعم.",
     "guardianApprovalRequired": "يتطلب الحجز لهذا الطالب موافقة وليّ الأمر أولاً.",
+    "guardianApprovalTitle": "موافقة وليّ الأمر",
+    "guardianApprovalBody": "يجب على وليّ الأمر تسجيل الدخول على هذا الجهاز وتأكيد السماح بحجز جلسات القرآن لهذا الحساب الطلابي.",
+    "guardianApprovalStudentIdLabel": "معرّف حساب الطالب",
+    "guardianApprovalStudentIdHint": "معرّف المستخدم للطالب",
+    "guardianApprovalConfirm": "الموافقة على الحجز",
+    "guardianApprovalCaptured": "تم تسجيل موافقة وليّ الأمر. يمكنك العودة إلى الحجز.",
+    "guardianApprovalSetupAction": "إعداد موافقة وليّ الأمر",
     "policyViolation": "تم رفض الحجز لمخالفة السياسة \"{policy}\": {detail}.",
     "marketNotEnabledWithCity": "خدمة الجلسات غير متاحة في مدينتك حالياً. جرّب مدينة أخرى.",
     "marketNotEnabled": "خدمة الجلسات غير متاحة في دولتك حالياً.",
@@ -77,13 +84,22 @@
     "becomeTeacherCardSubtitle": "انضم إلى نخبة المعلمين المعتمدين على MeMuslim",
     "teacherListTitle": "ابحث عن معلم",
     "noTeachersForSpecialization": "لم يتم العثور على معلمين لـ \"{specialization}\"",
-  "@noTeachersForSpecialization": {
-    "placeholders": {
-      "specialization": {
-        "type": "String"
-      }
-    }
-  },
+    "@noTeachersForSpecialization": {
+        "placeholders": {
+            "specialization": {
+                "type": "String"
+            }
+        }
+    },
+    "noTeachersForLanguage": "لم يتم العثور على معلمين للغة \"{language}\"",
+    "@noTeachersForLanguage": {
+        "placeholders": {
+            "language": {
+                "type": "String"
+            }
+        }
+    },
+    "clearTeacherFilters": "مسح عوامل التصفية",
     "noTeachersAvailableRightNow": "لا يوجد معلمون متاحون حالياً",
     "bookSessionTitle": "احجز جلسة",
     "bookingConfirmed": "تم تأكيد الحجز!",

@@ -233,6 +233,48 @@ abstract class QuranSessionsLocalizations {
   /// **'Booking for this student requires guardian approval first.'**
   String get guardianApprovalRequired;
 
+  /// No description provided for @guardianApprovalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Guardian approval'**
+  String get guardianApprovalTitle;
+
+  /// No description provided for @guardianApprovalBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A parent or guardian must sign in on this device and confirm that they allow Quran Sessions bookings for this student account.'**
+  String get guardianApprovalBody;
+
+  /// No description provided for @guardianApprovalStudentIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Student account ID'**
+  String get guardianApprovalStudentIdLabel;
+
+  /// No description provided for @guardianApprovalStudentIdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Child student user ID'**
+  String get guardianApprovalStudentIdHint;
+
+  /// No description provided for @guardianApprovalConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve bookings'**
+  String get guardianApprovalConfirm;
+
+  /// No description provided for @guardianApprovalCaptured.
+  ///
+  /// In en, this message translates to:
+  /// **'Guardian approval recorded. You can return to booking.'**
+  String get guardianApprovalCaptured;
+
+  /// No description provided for @guardianApprovalSetupAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up guardian approval'**
+  String get guardianApprovalSetupAction;
+
   /// No description provided for @policyViolation.
   ///
   /// In en, this message translates to:
@@ -562,6 +604,18 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'No teachers found for \"{specialization}\"'**
   String noTeachersForSpecialization(String specialization);
+
+  /// No description provided for @noTeachersForLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'No teachers found for \"{language}\"'**
+  String noTeachersForLanguage(String language);
+
+  /// No description provided for @clearTeacherFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear filters'**
+  String get clearTeacherFilters;
 
   /// No description provided for @noTeachersAvailableRightNow.
   ///

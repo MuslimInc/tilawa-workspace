@@ -78,14 +78,18 @@ class _QuranSessionsHomeScreenState extends State<QuranSessionsHomeScreen> {
         title: Text(l10n.quranSessionsHomeTitle),
         actions: [
           if (widget.onWallet != null)
-            TextButton(
+            TilawaButton(
+              text: l10n.walletEntryAction,
+              variant: TilawaButtonVariant.ghost,
+              size: TilawaButtonSize.small,
               onPressed: widget.onWallet,
-              child: Text(l10n.walletEntryAction),
             ),
           if (widget.onMySessions != null)
-            TextButton(
+            TilawaButton(
+              text: l10n.mySessionsTitle,
+              variant: TilawaButtonVariant.ghost,
+              size: TilawaButtonSize.small,
               onPressed: widget.onMySessions,
-              child: Text(l10n.mySessionsTitle),
             ),
         ],
       ),

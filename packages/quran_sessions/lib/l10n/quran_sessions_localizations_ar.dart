@@ -86,6 +86,29 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
       'يتطلب الحجز لهذا الطالب موافقة وليّ الأمر أولاً.';
 
   @override
+  String get guardianApprovalTitle => 'موافقة وليّ الأمر';
+
+  @override
+  String get guardianApprovalBody =>
+      'يجب على وليّ الأمر تسجيل الدخول على هذا الجهاز وتأكيد السماح بحجز جلسات القرآن لهذا الحساب الطلابي.';
+
+  @override
+  String get guardianApprovalStudentIdLabel => 'معرّف حساب الطالب';
+
+  @override
+  String get guardianApprovalStudentIdHint => 'معرّف المستخدم للطالب';
+
+  @override
+  String get guardianApprovalConfirm => 'الموافقة على الحجز';
+
+  @override
+  String get guardianApprovalCaptured =>
+      'تم تسجيل موافقة وليّ الأمر. يمكنك العودة إلى الحجز.';
+
+  @override
+  String get guardianApprovalSetupAction => 'إعداد موافقة وليّ الأمر';
+
+  @override
   String policyViolation(Object detail, Object policy) {
     return 'تم رفض الحجز لمخالفة السياسة \"$policy\": $detail.';
   }
@@ -270,6 +293,14 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String noTeachersForSpecialization(String specialization) {
     return 'لم يتم العثور على معلمين لـ \"$specialization\"';
   }
+
+  @override
+  String noTeachersForLanguage(String language) {
+    return 'لم يتم العثور على معلمين للغة \"$language\"';
+  }
+
+  @override
+  String get clearTeacherFilters => 'مسح عوامل التصفية';
 
   @override
   String get noTeachersAvailableRightNow => 'لا يوجد معلمون متاحون حالياً';

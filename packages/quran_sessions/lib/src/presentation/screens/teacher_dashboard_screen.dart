@@ -169,10 +169,10 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(failure.toLocalizedMessage(context)),
-                const SizedBox(height: 12),
-                ElevatedButton(
+                SizedBox(height: Theme.of(context).tokens.spaceMedium),
+                TilawaButton(
+                  text: l10n.retry,
                   onPressed: _reload,
-                  child: Text(l10n.retry),
                 ),
               ],
             ),
@@ -392,13 +392,17 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
         title: Text(l10n.deleteSlotConfirmTitle),
         content: Text(l10n.deleteSlotConfirmMessage),
         actions: [
-          TextButton(
+          TilawaButton(
+            text: l10n.cancel,
+            variant: TilawaButtonVariant.ghost,
+            size: TilawaButtonSize.small,
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(l10n.cancel),
           ),
-          TextButton(
+          TilawaButton(
+            text: l10n.deleteSlotConfirm,
+            variant: TilawaButtonVariant.dangerOutline,
+            size: TilawaButtonSize.small,
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(l10n.deleteSlotConfirm),
           ),
         ],
       ),
