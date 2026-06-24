@@ -1,16 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import {
-  Firestore,
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  limit,
-  orderBy,
-  query,
-  startAfter,
-  where,
-} from '@angular/fire/firestore';
+import { Firestore, doc, getDoc, where } from '@angular/fire/firestore';
 
 import { QuranSessionsPaths } from '../paths/quran-sessions.paths';
 import {
@@ -18,13 +7,18 @@ import {
   SessionDisputeMapper,
 } from '../mappers/session-dispute.mapper';
 import {
+  SESSION_DISPUTE_DEFAULT_SORT,
+  SESSION_DISPUTE_SORT_FIELDS,
   SessionDisputeFilters,
   SessionDisputeSummary,
 } from '../../domain/entities/session-dispute-summary.entity';
-import { PageRequest, PageResult } from '../../domain/entities/pagination.types';
+import {
+  DEFAULT_PAGE_SIZE,
+  PageRequest,
+  PageResult,
+} from '../../domain/entities/pagination.types';
 import { SessionDisputeReadRepository } from '../../domain/repositories/session-dispute-read.repository';
-
-const DEFAULT_PAGE_SIZE = 25;
+import { fetchPaginatedList } from '../firestore/firestore-list-query.util';
 
 @Injectable({ providedIn: 'root' })
 export class FirebaseSessionDisputeReadRepository
@@ -37,42 +31,24 @@ export class FirebaseSessionDisputeReadRepository
     page: PageRequest,
   ): Promise<PageResult<SessionDisputeSummary>> {
     const pageSize = page.pageSize || DEFAULT_PAGE_SIZE;
-    const constraints = this.buildQueryConstraints(filters);
+    const serverFilters = this.buildQueryConstraints(filters);
 
-    let q = query(
-      collection(this.firestore, QuranSessionsPaths.sessionDisputes),
-      ...constraints,
-      orderBy('createdAt', 'desc'),
-      limit(pageSize + 1),
-    );
+    const result = await fetchPaginatedList({
+      firestore: this.firestore,
+      collectionPath: QuranSessionsPaths.sessionDisputes,
+      filters: serverFilters,
+      page: { ...page, pageSize },
+      defaultSort: SESSION_DISPUTE_DEFAULT_SORT,
+      allowedSortFields: SESSION_DISPUTE_SORT_FIELDS,
+      mapDoc: (id, data) =>
+        SessionDisputeMapper.fromFirestore(
+          id,
+          data as SessionDisputeFirestoreDto,
+        ),
+    });
 
-    if (page.cursor) {
-      const cursorDoc = await getDoc(
-        doc(this.firestore, QuranSessionsPaths.sessionDisputes, page.cursor),
-      );
-      if (cursorDoc.exists()) {
-        q = query(q, startAfter(cursorDoc));
-      }
-    }
-
-    const snapshot = await getDocs(q);
-    const docs = snapshot.docs;
-    const hasMore = docs.length > pageSize;
-    const pageDocs = hasMore ? docs.slice(0, pageSize) : docs;
-
-    let items = pageDocs.map((snap) =>
-      SessionDisputeMapper.fromFirestore(
-        snap.id,
-        snap.data() as SessionDisputeFirestoreDto,
-      ),
-    );
-
-    items = this.applyClientFilters(items, filters);
-
-    const nextCursor =
-      hasMore && pageDocs.length > 0 ? pageDocs[pageDocs.length - 1].id : null;
-
-    return { items, nextCursor, hasMore };
+    const items = this.applyClientFilters(result.items, filters);
+    return { ...result, items };
   }
 
   async getById(disputeId: string): Promise<SessionDisputeSummary | null> {
@@ -89,7 +65,7 @@ export class FirebaseSessionDisputeReadRepository
   }
 
   private buildQueryConstraints(filters: SessionDisputeFilters) {
-    const constraints: Parameters<typeof query>[1][] = [];
+    const constraints: ReturnType<typeof where>[] = [];
 
     if (filters.status) {
       constraints.push(where('status', '==', filters.status));
@@ -99,12 +75,12 @@ export class FirebaseSessionDisputeReadRepository
   }
 
   private applyClientFilters(
-    items: SessionDisputeSummary[],
+    items: readonly SessionDisputeSummary[],
     filters: SessionDisputeFilters,
   ): SessionDisputeSummary[] {
     const search = filters.search?.trim().toLowerCase();
     if (!search) {
-      return items;
+      return [...items];
     }
 
     return items.filter(

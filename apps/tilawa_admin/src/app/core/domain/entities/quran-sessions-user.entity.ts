@@ -35,3 +35,13 @@ export interface QuranSessionsUserFilters {
   readonly accountStatus?: QuranSessionsAccountStatus | null;
   readonly search?: string | null;
 }
+
+export const QS_USER_DEFAULT_SORT = {
+  field: 'quranSessionsProfile.updatedAt',
+  direction: 'desc',
+} as const;
+
+export const QS_USER_SORT_FIELDS = [
+  'quranSessionsProfile.updatedAt',
+  'quranSessionsProfile.createdAt',
+] as const;

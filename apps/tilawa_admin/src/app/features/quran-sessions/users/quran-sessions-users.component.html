@@ -48,6 +48,18 @@
               <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'common_email' | t }}</th>
               <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'quranSessionsUsers_photo' | t }}</th>
               <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'quranSessionsUsers_qsProfileStatus' | t }}</th>
+              <app-sortable-th
+                [label]="'common_updated' | t"
+                field="quranSessionsProfile.updatedAt"
+                [sort]="sort()"
+                (sortChange)="onSortChange($event)"
+              />
+              <app-sortable-th
+                [label]="'common_date' | t"
+                field="quranSessionsProfile.createdAt"
+                [sort]="sort()"
+                (sortChange)="onSortChange($event)"
+              />
               <th class="px-3 py-3 text-right text-sm font-semibold">{{ 'common_actions' | t }}</th>
             </tr>
           </thead>
@@ -72,6 +84,20 @@
                   }
                 </td>
                 <td class="px-3 py-4 text-sm"><app-status-chip [label]="user.accountStatus | statusLabel" [status]="user.accountStatus" /></td>
+                <td class="px-3 py-4 text-sm">
+                  @if (user.updatedAt) {
+                    {{ user.updatedAt | date:'medium' }}
+                  } @else {
+                    {{ 'common_none' | t }}
+                  }
+                </td>
+                <td class="px-3 py-4 text-sm">
+                  @if (user.createdAt) {
+                    {{ user.createdAt | date:'medium' }}
+                  } @else {
+                    {{ 'common_none' | t }}
+                  }
+                </td>
                 <td class="px-3 py-4 text-right text-sm">
                   @if (user.accountStatus !== 'suspended' && user.accountStatus !== 'blocked') {
                     <button type="button" (click)="openSuspend(user.userId)" class="text-orange-600">{{ 'quranSessionsUsers_suspendAccess' | t }}</button>

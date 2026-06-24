@@ -27,4 +27,13 @@ export interface WalletTransactionSummary {
 export interface UserWalletDetail {
   wallet: UserWalletSummary | null;
   transactions: WalletTransactionSummary[];
+  transactionsHasMore: boolean;
+  transactionsNextCursor: string | null;
 }
+
+export const WALLET_TRANSACTION_DEFAULT_SORT = {
+  field: 'createdAt',
+  direction: 'desc',
+} as const;
+
+export const WALLET_TRANSACTION_SORT_FIELDS = ['createdAt'] as const;

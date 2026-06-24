@@ -4,12 +4,20 @@ import {
   ListQuranSessionsUsersUseCase,
   ModerateQuranSessionsUserUseCase,
 } from '../../domain/usecases/quran-sessions-user.usecases';
-import { QuranSessionsUserFilters } from '../../domain/entities/quran-sessions-user.entity';
+import {
+  QS_USER_DEFAULT_SORT,
+  QuranSessionsUserFilters,
+} from '../../domain/entities/quran-sessions-user.entity';
 import { UserModerationAction } from '../../domain/entities/moderation-action.enum';
 import {
   QuranSessionsUserListItemVm,
   QuranSessionsViewModelMapper,
 } from '../../data/view-models/quran-sessions.view-model';
+import {
+  DEFAULT_PAGE_SIZE,
+  SortRequest,
+  sortsEqual,
+} from '../../domain/entities/pagination.types';
 
 type LoadState = 'idle' | 'loading' | 'success' | 'error';
 
@@ -38,25 +46,37 @@ export class QuranSessionsUsersFacade {
   private readonly nextCursor = signal<string | null>(null);
   private readonly hasMore = signal(false);
   private readonly actionLoading = signal(false);
+  private readonly listSort = signal<SortRequest>(QS_USER_DEFAULT_SORT);
 
   readonly items = this.listItems.asReadonly();
   readonly listLoadState = this.listState.asReadonly();
   readonly listErrorMessage = this.listError.asReadonly();
   readonly canLoadMore = this.hasMore.asReadonly();
   readonly isActionLoading = this.actionLoading.asReadonly();
+  readonly sort = this.listSort.asReadonly();
 
   async loadList(
     filters: QuranSessionsUserFilters,
-    cursor: string | null = null,
-    append = false,
+    options?: {
+      cursor?: string | null;
+      append?: boolean;
+      sort?: SortRequest;
+    },
   ): Promise<void> {
+    const sort = options?.sort ?? this.listSort();
+    const sortChanged = !sortsEqual(sort, this.listSort());
+    const append = options?.append === true && !sortChanged;
+    const cursor = append ? (options?.cursor ?? this.nextCursor()) : null;
+
+    this.listSort.set(sort);
     this.listState.set('loading');
     this.listError.set(null);
 
     try {
       const page = await this.listUseCase.execute(filters, {
-        pageSize: 25,
+        pageSize: DEFAULT_PAGE_SIZE,
         cursor,
+        sort,
       });
 
       const emailCounts = countEmailsByNormalizedAddress(page.items);
@@ -87,7 +107,18 @@ export class QuranSessionsUsersFacade {
     if (!this.hasMore() || !this.nextCursor()) {
       return;
     }
-    await this.loadList(filters, this.nextCursor(), true);
+    await this.loadList(filters, {
+      cursor: this.nextCursor(),
+      append: true,
+      sort: this.listSort(),
+    });
+  }
+
+  async changeSort(
+    filters: QuranSessionsUserFilters,
+    sort: SortRequest,
+  ): Promise<void> {
+    await this.loadList(filters, { sort, append: false, cursor: null });
   }
 
   async suspendUser(userId: string, reason: string): Promise<void> {

@@ -28,3 +28,10 @@ export interface SessionDisputeFilters {
   status: SessionDisputeStatus | null;
   search: string | null;
 }
+
+export const SESSION_DISPUTE_DEFAULT_SORT = {
+  field: 'createdAt',
+  direction: 'desc',
+} as const;
+
+export const SESSION_DISPUTE_SORT_FIELDS = ['createdAt', 'updatedAt'] as const;

@@ -1,14 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import {
   Firestore,
-  collection,
   doc,
   getDoc,
-  getDocs,
-  limit,
-  orderBy,
-  query,
-  startAfter,
   where,
 } from '@angular/fire/firestore';
 
@@ -18,14 +12,19 @@ import {
   BookingFirestoreDto,
 } from '../mappers/session-admin.mapper';
 import {
+  ADMIN_SESSION_DEFAULT_SORT,
+  ADMIN_SESSION_SORT_FIELDS,
   AdminSessionFilters,
   AdminSessionSummary,
 } from '../../domain/entities/admin-session-summary.entity';
 import { SessionLifecycleStatus } from '../../domain/entities/session-lifecycle-status.enum';
-import { PageRequest, PageResult } from '../../domain/entities/pagination.types';
+import {
+  DEFAULT_PAGE_SIZE,
+  PageRequest,
+  PageResult,
+} from '../../domain/entities/pagination.types';
 import { SessionReadRepository } from '../../domain/repositories/session-read.repository';
-
-const DEFAULT_PAGE_SIZE = 25;
+import { fetchPaginatedList } from '../firestore/firestore-list-query.util';
 
 @Injectable({ providedIn: 'root' })
 export class FirebaseSessionReadRepository implements SessionReadRepository {
@@ -36,42 +35,21 @@ export class FirebaseSessionReadRepository implements SessionReadRepository {
     page: PageRequest,
   ): Promise<PageResult<AdminSessionSummary>> {
     const pageSize = page.pageSize || DEFAULT_PAGE_SIZE;
-    const constraints = this.buildQueryConstraints(filters);
+    const serverFilters = this.buildQueryConstraints(filters);
 
-    let q = query(
-      collection(this.firestore, QuranSessionsPaths.bookings),
-      ...constraints,
-      orderBy('startsAt', 'desc'),
-      limit(pageSize + 1),
-    );
+    const result = await fetchPaginatedList({
+      firestore: this.firestore,
+      collectionPath: QuranSessionsPaths.bookings,
+      filters: serverFilters,
+      page: { ...page, pageSize },
+      defaultSort: ADMIN_SESSION_DEFAULT_SORT,
+      allowedSortFields: ADMIN_SESSION_SORT_FIELDS,
+      mapDoc: (id, data) =>
+        AdminSessionMapper.fromBookingDoc(id, data as BookingFirestoreDto),
+    });
 
-    if (page.cursor) {
-      const cursorDoc = await getDoc(
-        doc(this.firestore, QuranSessionsPaths.bookings, page.cursor),
-      );
-      if (cursorDoc.exists()) {
-        q = query(q, startAfter(cursorDoc));
-      }
-    }
-
-    const snapshot = await getDocs(q);
-    const docs = snapshot.docs;
-    const hasMore = docs.length > pageSize;
-    const pageDocs = hasMore ? docs.slice(0, pageSize) : docs;
-
-    let items = pageDocs.map((snap) =>
-      AdminSessionMapper.fromBookingDoc(
-        snap.id,
-        snap.data() as BookingFirestoreDto,
-      ),
-    );
-
-    items = this.applyClientFilters(items, filters);
-
-    const nextCursor =
-      hasMore && pageDocs.length > 0 ? pageDocs[pageDocs.length - 1].id : null;
-
-    return { items, nextCursor, hasMore };
+    const items = this.applyClientFilters(result.items, filters);
+    return { ...result, items };
   }
 
   async getById(bookingId: string): Promise<AdminSessionSummary | null> {
@@ -88,7 +66,7 @@ export class FirebaseSessionReadRepository implements SessionReadRepository {
   }
 
   private buildQueryConstraints(filters: AdminSessionFilters) {
-    const constraints: Parameters<typeof query>[1][] = [];
+    const constraints: ReturnType<typeof where>[] = [];
 
     if (filters.status && filters.status !== SessionLifecycleStatus.Unknown) {
       constraints.push(where('lifecycleStatus', '==', filters.status));
@@ -100,6 +78,14 @@ export class FirebaseSessionReadRepository implements SessionReadRepository {
 
     if (filters.cityId?.trim()) {
       constraints.push(where('cityId', '==', filters.cityId.trim()));
+    }
+
+    if (filters.teacherId?.trim()) {
+      constraints.push(where('teacherId', '==', filters.teacherId.trim()));
+    }
+
+    if (filters.studentId?.trim()) {
+      constraints.push(where('studentId', '==', filters.studentId.trim()));
     }
 
     if (filters.startsFrom) {
@@ -114,33 +100,21 @@ export class FirebaseSessionReadRepository implements SessionReadRepository {
   }
 
   private applyClientFilters(
-    items: AdminSessionSummary[],
+    items: readonly AdminSessionSummary[],
     filters: AdminSessionFilters,
   ): AdminSessionSummary[] {
-    let filtered = items;
-
-    const teacherId = filters.teacherId?.trim();
-    if (teacherId) {
-      filtered = filtered.filter((item) => item.teacherId === teacherId);
-    }
-
-    const studentId = filters.studentId?.trim();
-    if (studentId) {
-      filtered = filtered.filter((item) => item.studentId === studentId);
-    }
-
     const search = filters.search?.trim().toLowerCase();
-    if (search) {
-      filtered = filtered.filter(
-        (item) =>
-          item.id.toLowerCase().includes(search) ||
-          item.studentId.toLowerCase().includes(search) ||
-          item.teacherId.toLowerCase().includes(search) ||
-          (item.sessionId?.toLowerCase().includes(search) ?? false) ||
-          item.slotId.toLowerCase().includes(search),
-      );
+    if (!search) {
+      return [...items];
     }
 
-    return filtered;
+    return items.filter(
+      (item) =>
+        item.id.toLowerCase().includes(search) ||
+        item.studentId.toLowerCase().includes(search) ||
+        item.teacherId.toLowerCase().includes(search) ||
+        (item.sessionId?.toLowerCase().includes(search) ?? false) ||
+        item.slotId.toLowerCase().includes(search),
+    );
   }
 }

@@ -1,20 +1,19 @@
 import { Injectable, inject } from '@angular/core';
-import { Firestore, collection, collectionData, collectionCount } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { Firestore, collection, collectionCount } from '@angular/fire/firestore';
 
+import { QuranSessionsPaths } from '../data/paths/quran-sessions.paths';
+
+/**
+ * Legacy dashboard helper — count only. User listing uses TilawaUserRepository.
+ */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class UserService {
-  private firestore = inject(Firestore);
+  private readonly firestore = inject(Firestore);
 
-  getUsers(): Observable<any[]> {
-    const usersCollection = collection(this.firestore, 'users');
-    return collectionData(usersCollection, { idField: 'id' });
-  }
-
-  getUsersCount(): Observable<number> {
-    const usersCollection = collection(this.firestore, 'users');
+  getUsersCount() {
+    const usersCollection = collection(this.firestore, QuranSessionsPaths.users);
     return collectionCount(usersCollection);
   }
 }

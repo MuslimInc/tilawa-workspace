@@ -46,7 +46,12 @@
               <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'common_email' | t }}</th>
               <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'common_phone' | t }}</th>
               <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'common_status' | t }}</th>
-              <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'teacherApplications_submitted' | t }}</th>
+              <app-sortable-th
+                [label]="'teacherApplications_submitted' | t"
+                field="submittedAt"
+                [sort]="sort()"
+                (sortChange)="onSortChange($event)"
+              />
               <th class="px-3 py-3 text-right text-sm font-semibold">{{ 'teacherApplications_reviewActions' | t }}</th>
             </tr>
           </thead>
@@ -60,7 +65,9 @@
                 <td class="px-3 py-4 text-sm">
                   <app-status-chip [label]="item.status | statusLabel" [status]="item.status" />
                 </td>
+                <td class="px-3 py-4 text-sm">{{ item.updatedAt | date:'medium' }}</td>
                 <td class="px-3 py-4 text-sm">{{ item.submittedAt | date:'medium' }}</td>
+                <td class="px-3 py-4 text-sm">{{ item.createdAt | date:'medium' }}</td>
                 <td class="px-3 py-4 text-right text-sm space-x-3">
                   <a [routerLink]="['/quran-sessions/teacher-applications', item.id]" class="text-blue-600 hover:text-blue-800 dark:text-blue-400">
                     {{ 'teacherApplications_review' | t }}

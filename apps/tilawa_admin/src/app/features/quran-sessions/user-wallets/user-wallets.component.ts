@@ -29,6 +29,7 @@ export class UserWalletsComponent implements OnInit {
   readonly detail = this.facade.detail;
   readonly loadState = this.facade.detailLoadState;
   readonly errorMessage = this.facade.detailErrorMessage;
+  readonly canLoadMoreTransactions = this.facade.canLoadMoreTransactions;
 
   userIdQuery = '';
 
@@ -42,5 +43,9 @@ export class UserWalletsComponent implements OnInit {
 
   loadWallet(): Promise<void> {
     return this.facade.loadForUser(this.userIdQuery);
+  }
+
+  loadMoreTransactions(): Promise<void> {
+    return this.facade.loadMoreTransactions();
   }
 }

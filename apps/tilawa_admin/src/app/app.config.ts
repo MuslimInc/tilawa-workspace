@@ -36,6 +36,8 @@ import { SESSION_DISPUTE_READ_REPOSITORY } from './core/domain/repositories/sess
 import { FirebaseSessionDisputeReadRepository } from './core/data/repositories/firebase-session-dispute-read.repository';
 import { WALLET_READ_REPOSITORY } from './core/domain/repositories/wallet-read.repository';
 import { FirebaseWalletReadRepository } from './core/data/repositories/firebase-wallet-read.repository';
+import { TILAWA_USER_REPOSITORY } from './core/domain/repositories/tilawa-user.repository';
+import { FirebaseTilawaUserRepository } from './core/data/repositories/firebase-tilawa-user.repository';
 
 function initializeI18n(i18n: I18nService): () => Promise<void> {
   return () => i18n.initialize();
@@ -102,6 +104,10 @@ export const appConfig: ApplicationConfig = {
     {
       provide: WALLET_READ_REPOSITORY,
       useClass: FirebaseWalletReadRepository,
+    },
+    {
+      provide: TILAWA_USER_REPOSITORY,
+      useClass: FirebaseTilawaUserRepository,
     },
   ],
 };

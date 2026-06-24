@@ -5,8 +5,14 @@ import { ListTeacherApplicationsUseCase } from '../../domain/usecases/teacher-ap
 import { GetTeacherApplicationUseCase } from '../../domain/usecases/teacher-application.usecases';
 import { ReviewTeacherApplicationUseCase } from '../../domain/usecases/review-teacher-application.usecase';
 import {
+  TEACHER_APPLICATION_DEFAULT_SORT,
   TeacherApplicationFilters,
 } from '../../domain/entities/teacher-application.entity';
+import {
+  DEFAULT_PAGE_SIZE,
+  SortRequest,
+  sortsEqual,
+} from '../../domain/entities/pagination.types';
 import { ApplicationModerationAction } from '../../domain/entities/moderation-action.enum';
 import {
   TeacherApplicationDetailVm,
@@ -36,6 +42,7 @@ export class TeacherApplicationsFacade {
   private readonly listItems = signal<TeacherApplicationListItemVm[]>([]);
   private readonly nextCursor = signal<string | null>(null);
   private readonly hasMore = signal(false);
+  private readonly listSort = signal<SortRequest>(TEACHER_APPLICATION_DEFAULT_SORT);
 
   private readonly detailState = signal<LoadState>('idle');
   private readonly detailError = signal<string | null>(null);
@@ -47,6 +54,7 @@ export class TeacherApplicationsFacade {
   readonly listLoadState = this.listState.asReadonly();
   readonly listErrorMessage = this.listError.asReadonly();
   readonly canLoadMore = this.hasMore.asReadonly();
+  readonly sort = this.listSort.asReadonly();
 
   readonly detail = this.detailItem.asReadonly();
   readonly detailLoadState = this.detailState.asReadonly();
@@ -55,44 +63,33 @@ export class TeacherApplicationsFacade {
 
   async loadList(
     filters: TeacherApplicationFilters,
-    cursor: string | null = null,
-    append = false,
+    options?: {
+      cursor?: string | null;
+      append?: boolean;
+      sort?: SortRequest;
+    },
   ): Promise<void> {
+    const sort = options?.sort ?? this.listSort();
+    const sortChanged = !sortsEqual(sort, this.listSort());
+    const append = options?.append === true && !sortChanged;
+    const cursor = append ? (options?.cursor ?? this.nextCursor()) : null;
+
+    this.listSort.set(sort);
     this.listState.set('loading');
     this.listError.set(null);
 
     try {
       const page = await this.listUseCase.execute(filters, {
-        pageSize: 25,
+        pageSize: DEFAULT_PAGE_SIZE,
         cursor,
+        sort,
       });
 
       const users = await this.userRepository.getByIds(
         page.items.map((item) => item.userId),
       );
 
-      let pageItems = page.items;
-
-      if (filters.countryCode) {
-        const country = filters.countryCode.toLowerCase();
-        pageItems = pageItems.filter((item) => {
-          const user = users.get(item.userId);
-          const countryValue =
-            user?.countryName ?? user?.countryCode ?? '';
-          return countryValue.toLowerCase().includes(country);
-        });
-      }
-
-      if (filters.cityId) {
-        const city = filters.cityId.toLowerCase();
-        pageItems = pageItems.filter((item) => {
-          const user = users.get(item.userId);
-          const cityValue = user?.cityName ?? user?.cityId ?? '';
-          return cityValue.toLowerCase().includes(city);
-        });
-      }
-
-      let mapped = pageItems.map((item) =>
+      let mapped = page.items.map((item) =>
         QuranSessionsViewModelMapper.toApplicationListItem(
           item,
           users.get(item.userId) ?? null,
@@ -127,7 +124,18 @@ export class TeacherApplicationsFacade {
     if (!this.hasMore() || !this.nextCursor()) {
       return;
     }
-    await this.loadList(filters, this.nextCursor(), true);
+    await this.loadList(filters, {
+      cursor: this.nextCursor(),
+      append: true,
+      sort: this.listSort(),
+    });
+  }
+
+  async changeSort(
+    filters: TeacherApplicationFilters,
+    sort: SortRequest,
+  ): Promise<void> {
+    await this.loadList(filters, { sort, append: false, cursor: null });
   }
 
   async loadDetail(id: string): Promise<void> {

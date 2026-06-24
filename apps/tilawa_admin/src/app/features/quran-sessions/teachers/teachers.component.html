@@ -37,13 +37,30 @@
         <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-800">
             <tr>
-              <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'teachers_displayName' | t }}</th>
+              <app-sortable-th
+                [label]="'teachers_displayName' | t"
+                field="displayName"
+                [sort]="sort()"
+                (sortChange)="onSortChange($event)"
+              />
               <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'teachers_userId' | t }}</th>
               <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'teachers_active' | t }}</th>
               <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'teachers_verification' | t }}</th>
               <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'teachers_completeness' | t }}</th>
               <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'teachers_publiclyVisible' | t }}</th>
               <th class="px-3 py-3 text-left text-sm font-semibold">{{ 'teachers_missingFields' | t }}</th>
+              <app-sortable-th
+                [label]="'common_updated' | t"
+                field="updatedAt"
+                [sort]="sort()"
+                (sortChange)="onSortChange($event)"
+              />
+              <app-sortable-th
+                [label]="'common_date' | t"
+                field="createdAt"
+                [sort]="sort()"
+                (sortChange)="onSortChange($event)"
+              />
               <th class="px-3 py-3 text-right text-sm font-semibold">{{ 'common_actions' | t }}</th>
             </tr>
           </thead>
@@ -67,6 +84,8 @@
                     </span>
                   }
                 </td>
+                <td class="px-3 py-4 text-sm">{{ teacher.updatedAt | date:'medium' }}</td>
+                <td class="px-3 py-4 text-sm">{{ teacher.createdAt | date:'medium' }}</td>
                 <td class="px-3 py-4 text-right text-sm space-x-2">
                   @if (teacher.isActive) {
                     <button type="button" (click)="openModeration(teacher.id, TeacherProfileModerationAction.Deactivate)" class="text-orange-600">{{ 'teachers_deactivate' | t }}</button>

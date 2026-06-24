@@ -8,8 +8,10 @@ import { TeacherApplicationStatus } from '../../../core/domain/entities/teacher-
 import { TeacherApplicationFilters } from '../../../core/domain/entities/teacher-application.entity';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { StatusChipComponent } from '../../../shared/components/status-chip/status-chip.component';
+import { SortableThComponent } from '../../../shared/components/sortable-th/sortable-th.component';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { StatusLabelPipe } from '../../../core/i18n/status-label.pipe';
+import { SortRequest } from '../../../core/domain/entities/pagination.types';
 
 @Component({
   selector: 'app-teacher-applications',
@@ -20,6 +22,7 @@ import { StatusLabelPipe } from '../../../core/i18n/status-label.pipe';
     RouterLink,
     PageHeaderComponent,
     StatusChipComponent,
+    SortableThComponent,
     TranslatePipe,
     StatusLabelPipe,
   ],
@@ -32,6 +35,7 @@ export class TeacherApplicationsComponent implements OnInit {
   readonly loadState = this.facade.listLoadState;
   readonly errorMessage = this.facade.listErrorMessage;
   readonly canLoadMore = this.facade.canLoadMore;
+  readonly sort = this.facade.sort;
 
   statusFilter = '';
   searchQuery = '';
@@ -67,5 +71,9 @@ export class TeacherApplicationsComponent implements OnInit {
 
   loadMore(): Promise<void> {
     return this.facade.loadMore(this.buildFilters());
+  }
+
+  onSortChange(sort: SortRequest): void {
+    void this.facade.changeSort(this.buildFilters(), sort);
   }
 }

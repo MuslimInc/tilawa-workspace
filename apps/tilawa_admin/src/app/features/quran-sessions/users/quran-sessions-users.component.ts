@@ -13,6 +13,8 @@ import { StatusChipComponent } from '../../../shared/components/status-chip/stat
 import { RejectReasonDialogComponent } from '../../../shared/components/reject-reason-dialog/reject-reason-dialog.component';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { StatusLabelPipe } from '../../../core/i18n/status-label.pipe';
+import { SortableThComponent } from '../../../shared/components/sortable-th/sortable-th.component';
+import { SortRequest } from '../../../core/domain/entities/pagination.types';
 
 @Component({
   selector: 'app-quran-sessions-users',
@@ -25,6 +27,7 @@ import { StatusLabelPipe } from '../../../core/i18n/status-label.pipe';
     RejectReasonDialogComponent,
     TranslatePipe,
     StatusLabelPipe,
+    SortableThComponent,
   ],
   templateUrl: './quran-sessions-users.component.html',
 })
@@ -36,6 +39,7 @@ export class QuranSessionsUsersComponent implements OnInit {
   readonly errorMessage = this.facade.listErrorMessage;
   readonly canLoadMore = this.facade.canLoadMore;
   readonly isActionLoading = this.facade.isActionLoading;
+  readonly sort = this.facade.sort;
 
   searchQuery = '';
   countryFilter = '';
@@ -78,6 +82,10 @@ export class QuranSessionsUsersComponent implements OnInit {
 
   loadMore(): Promise<void> {
     return this.facade.loadMore(this.buildFilters());
+  }
+
+  onSortChange(sort: SortRequest): void {
+    void this.facade.changeSort(this.buildFilters(), sort);
   }
 
   openSuspend(userId: string): void {

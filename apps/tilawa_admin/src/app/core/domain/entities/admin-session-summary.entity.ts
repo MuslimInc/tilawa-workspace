@@ -31,3 +31,14 @@ export interface AdminSessionFilters {
   readonly cityId: string | null;
   readonly search: string | null;
 }
+
+export const ADMIN_SESSION_DEFAULT_SORT = {
+  field: 'startsAt',
+  direction: 'desc',
+} as const;
+
+export const ADMIN_SESSION_SORT_FIELDS = [
+  'startsAt',
+  'createdAt',
+  'updatedAt',
+] as const;

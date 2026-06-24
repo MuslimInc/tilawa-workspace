@@ -21,6 +21,12 @@ import {
   ApproveSessionRefundUseCase,
 } from '../../domain/usecases/session-moderation.usecases';
 import { AdminSessionFilters } from '../../domain/entities/admin-session-summary.entity';
+import { ADMIN_SESSION_DEFAULT_SORT } from '../../domain/entities/admin-session-summary.entity';
+import {
+  DEFAULT_PAGE_SIZE,
+  SortRequest,
+  sortsEqual,
+} from '../../domain/entities/pagination.types';
 import {
   NoShowClassification,
   SessionCompensationType,
@@ -59,6 +65,7 @@ export class SessionsFacade {
   private readonly listItems = signal<AdminSessionListItemVm[]>([]);
   private readonly nextCursor = signal<string | null>(null);
   private readonly hasMore = signal(false);
+  private readonly listSort = signal<SortRequest>(ADMIN_SESSION_DEFAULT_SORT);
 
   private readonly detailState = signal<LoadState>('idle');
   private readonly detailError = signal<string | null>(null);
@@ -79,6 +86,7 @@ export class SessionsFacade {
   readonly listLoadState = this.listState.asReadonly();
   readonly listErrorMessage = this.listError.asReadonly();
   readonly canLoadMore = this.hasMore.asReadonly();
+  readonly sort = this.listSort.asReadonly();
 
   readonly detail = this.detailItem.asReadonly();
   readonly detailLoadState = this.detailState.asReadonly();
@@ -93,16 +101,26 @@ export class SessionsFacade {
 
   async loadList(
     filters: AdminSessionFilters,
-    cursor: string | null = null,
-    append = false,
+    options?: {
+      cursor?: string | null;
+      append?: boolean;
+      sort?: SortRequest;
+    },
   ): Promise<void> {
+    const sort = options?.sort ?? this.listSort();
+    const sortChanged = !sortsEqual(sort, this.listSort());
+    const append = options?.append === true && !sortChanged;
+    const cursor = append ? (options?.cursor ?? this.nextCursor()) : null;
+
+    this.listSort.set(sort);
     this.listState.set('loading');
     this.listError.set(null);
 
     try {
       const page = await this.listUseCase.execute(filters, {
-        pageSize: 25,
+        pageSize: DEFAULT_PAGE_SIZE,
         cursor,
+        sort,
       });
 
       const mapped = page.items.map((item) =>
@@ -125,7 +143,18 @@ export class SessionsFacade {
     if (!this.hasMore() || !this.nextCursor()) {
       return;
     }
-    await this.loadList(filters, this.nextCursor(), true);
+    await this.loadList(filters, {
+      cursor: this.nextCursor(),
+      append: true,
+      sort: this.listSort(),
+    });
+  }
+
+  async changeSort(
+    filters: AdminSessionFilters,
+    sort: SortRequest,
+  ): Promise<void> {
+    await this.loadList(filters, { sort, append: false, cursor: null });
   }
 
   async loadDetail(bookingId: string): Promise<void> {

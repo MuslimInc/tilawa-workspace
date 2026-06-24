@@ -1,34 +1,60 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { UserService } from '../../core/services/user.service';
 import { NotificationModalComponent } from './components/notification-modal/notification-modal.component';
 import { SendNotificationUseCase } from '../../core/domain/usecases/send-notification.usecase';
 import { NotificationEntity, NotificationTargetType } from '../../core/domain/entities/notification.entity';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { I18nService } from '../../core/i18n/i18n.service';
+import { TilawaUsersFacade } from '../../core/application/facades/tilawa-users.facade';
+import { SortableThComponent } from '../../shared/components/sortable-th/sortable-th.component';
+import { SortRequest } from '../../core/domain/entities/pagination.types';
 
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [CommonModule, FormsModule, NotificationModalComponent, TranslatePipe],
+  imports: [
+    CommonModule,
+    FormsModule,
+    NotificationModalComponent,
+    TranslatePipe,
+    SortableThComponent,
+  ],
   templateUrl: './users.component.html',
   styleUrl: './users.css'
 })
-export class UsersComponent {
-  private userService = inject(UserService);
-  private sendNotificationUseCase = inject(SendNotificationUseCase);
+export class UsersComponent implements OnInit {
+  private readonly usersFacade = inject(TilawaUsersFacade);
+  private readonly sendNotificationUseCase = inject(SendNotificationUseCase);
   private readonly i18n = inject(I18nService);
 
-  users$ = this.userService.getUsers();
-  
-  // Selection State
+  readonly users = this.usersFacade.items;
+  readonly loadState = this.usersFacade.listLoadState;
+  readonly errorMessage = this.usersFacade.listErrorMessage;
+  readonly canLoadMore = this.usersFacade.canLoadMore;
+  readonly sort = this.usersFacade.sort;
+
   selectedUserIds = new Set<string>();
-  
-  // Modal State
+
   isModalOpen = false;
   notificationTargetType: NotificationTargetType = 'all';
   notificationTargetSummary = '';
+
+  ngOnInit(): void {
+    void this.reload();
+  }
+
+  reload(): Promise<void> {
+    return this.usersFacade.loadList({});
+  }
+
+  loadMore(): Promise<void> {
+    return this.usersFacade.loadMore({});
+  }
+
+  onSortChange(sort: SortRequest): void {
+    void this.usersFacade.changeSort({}, sort);
+  }
 
   toggleSelection(userId: string) {
     if (this.selectedUserIds.has(userId)) {
@@ -42,17 +68,17 @@ export class UsersComponent {
     return totalUsers > 0 && this.selectedUserIds.size === totalUsers;
   }
 
-  toggleSelectAll(users: any[]) {
+  toggleSelectAll(users: { id: string }[]) {
     if (this.isAllSelected(users.length)) {
       this.selectedUserIds.clear();
     } else {
-      users.forEach(u => this.selectedUserIds.add(u.id));
+      users.forEach((u) => this.selectedUserIds.add(u.id));
     }
   }
 
   openNotificationModal(type: NotificationTargetType, singleUserId?: string) {
     this.notificationTargetType = type;
-    
+
     if (type === 'all') {
       this.notificationTargetSummary = this.i18n.t('notifications_targetAll');
       this.selectedUserIds.clear();
@@ -65,7 +91,7 @@ export class UsersComponent {
         count: String(this.selectedUserIds.size),
       });
     }
-    
+
     this.isModalOpen = true;
   }
 
@@ -81,9 +107,9 @@ export class UsersComponent {
         payload.type,
         payload.data
       );
-      
+
       await this.sendNotificationUseCase.execute(entity);
-      
+
       this.isModalOpen = false;
       this.selectedUserIds.clear();
     } catch (error) {

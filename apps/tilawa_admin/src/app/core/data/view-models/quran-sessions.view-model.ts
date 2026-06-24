@@ -26,6 +26,8 @@ export interface TeacherApplicationListItemVm {
   readonly phoneNumber: string | null;
   readonly status: string;
   readonly submittedAt: Date | null;
+  readonly updatedAt: Date;
+  readonly createdAt: Date;
   readonly canReview: boolean;
 }
 
@@ -61,6 +63,8 @@ export interface TeacherListItemVm {
   readonly profileCompleteness: ProfileCompleteness;
   readonly isPubliclyVisible: boolean;
   readonly missingFields: readonly string[];
+  readonly updatedAt: Date;
+  readonly createdAt: Date;
 }
 
 export interface QuranSessionsUserListItemVm {
@@ -70,6 +74,8 @@ export interface QuranSessionsUserListItemVm {
   readonly photoUrl: string | null;
   readonly accountStatus: string;
   readonly hasDuplicateEmail: boolean;
+  readonly updatedAt: Date | null;
+  readonly createdAt: Date | null;
 }
 
 export interface AdminSessionListItemVm {
@@ -83,6 +89,8 @@ export interface AdminSessionListItemVm {
   readonly pricingType: string;
   readonly countryCode: string;
   readonly cityId: string;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
 }
 
 export interface AdminSessionDetailVm {
@@ -171,6 +179,8 @@ export class QuranSessionsViewModelMapper {
       phoneNumber: application.phoneNumber,
       status: application.status,
       submittedAt: application.submittedAt,
+      updatedAt: application.updatedAt,
+      createdAt: application.createdAt,
       canReview: application.status === TeacherApplicationStatus.Pending,
     };
   }
@@ -214,6 +224,8 @@ export class QuranSessionsViewModelMapper {
       profileCompleteness: profile.profileCompleteness,
       isPubliclyVisible: profile.isPubliclyVisible,
       missingFields: computeMissingPublicProfileFields(profile),
+      updatedAt: profile.updatedAt,
+      createdAt: profile.createdAt,
     };
   }
 
@@ -228,6 +240,8 @@ export class QuranSessionsViewModelMapper {
       photoUrl: user.avatarUrl,
       accountStatus: user.accountStatus,
       hasDuplicateEmail,
+      updatedAt: user.updatedAt,
+      createdAt: user.createdAt,
     };
   }
 
@@ -243,6 +257,8 @@ export class QuranSessionsViewModelMapper {
       pricingType: session.pricingType,
       countryCode: session.countryCode ?? '—',
       cityId: session.cityId ?? '—',
+      createdAt: session.createdAt,
+      updatedAt: session.updatedAt,
     };
   }
 

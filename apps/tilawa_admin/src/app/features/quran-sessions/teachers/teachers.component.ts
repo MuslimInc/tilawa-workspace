@@ -9,8 +9,10 @@ import { TeacherProfileModerationAction } from '../../../core/domain/entities/mo
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { StatusChipComponent } from '../../../shared/components/status-chip/status-chip.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { SortableThComponent } from '../../../shared/components/sortable-th/sortable-th.component';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { StatusLabelPipe } from '../../../core/i18n/status-label.pipe';
+import { SortRequest } from '../../../core/domain/entities/pagination.types';
 
 @Component({
   selector: 'app-teachers',
@@ -21,6 +23,7 @@ import { StatusLabelPipe } from '../../../core/i18n/status-label.pipe';
     PageHeaderComponent,
     StatusChipComponent,
     ConfirmDialogComponent,
+    SortableThComponent,
     TranslatePipe,
     StatusLabelPipe,
   ],
@@ -34,6 +37,7 @@ export class TeachersComponent implements OnInit {
   readonly errorMessage = this.facade.listErrorMessage;
   readonly canLoadMore = this.facade.canLoadMore;
   readonly isActionLoading = this.facade.isActionLoading;
+  readonly sort = this.facade.sort;
 
   searchQuery = '';
   activeFilter = '';
@@ -75,6 +79,10 @@ export class TeachersComponent implements OnInit {
 
   loadMore(): Promise<void> {
     return this.facade.loadMore(this.buildFilters());
+  }
+
+  onSortChange(sort: SortRequest): void {
+    void this.facade.changeSort(this.buildFilters(), sort);
   }
 
   openModeration(

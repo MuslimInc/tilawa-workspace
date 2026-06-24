@@ -5,6 +5,12 @@ import {
   GetSessionDisputeUseCase,
 } from '../../domain/usecases/session-dispute.usecases';
 import { SessionDisputeFilters } from '../../domain/entities/session-dispute-summary.entity';
+import { SESSION_DISPUTE_DEFAULT_SORT } from '../../domain/entities/session-dispute-summary.entity';
+import {
+  DEFAULT_PAGE_SIZE,
+  SortRequest,
+  sortsEqual,
+} from '../../domain/entities/pagination.types';
 import { SessionReadRepository, SESSION_READ_REPOSITORY } from '../../domain/repositories/session-read.repository';
 import {
   QuranSessionsUserRepository,
@@ -21,6 +27,7 @@ export interface SessionDisputeListItemVm {
   openedByUserId: string;
   openedByRole: string;
   createdAt: Date;
+  updatedAt: Date | null;
   reasonPreview: string;
 }
 
@@ -49,6 +56,7 @@ export class SessionDisputesFacade {
   private readonly listItems = signal<SessionDisputeListItemVm[]>([]);
   private readonly nextCursor = signal<string | null>(null);
   private readonly hasMore = signal(false);
+  private readonly listSort = signal<SortRequest>(SESSION_DISPUTE_DEFAULT_SORT);
 
   private readonly detailState = signal<LoadState>('idle');
   private readonly detailError = signal<string | null>(null);
@@ -58,6 +66,7 @@ export class SessionDisputesFacade {
   readonly listLoadState = this.listState.asReadonly();
   readonly listErrorMessage = this.listError.asReadonly();
   readonly canLoadMore = this.hasMore.asReadonly();
+  readonly sort = this.listSort.asReadonly();
 
   readonly detail = this.detailItem.asReadonly();
   readonly detailLoadState = this.detailState.asReadonly();
@@ -65,16 +74,26 @@ export class SessionDisputesFacade {
 
   async loadList(
     filters: SessionDisputeFilters,
-    cursor: string | null = null,
-    append = false,
+    options?: {
+      cursor?: string | null;
+      append?: boolean;
+      sort?: SortRequest;
+    },
   ): Promise<void> {
+    const sort = options?.sort ?? this.listSort();
+    const sortChanged = !sortsEqual(sort, this.listSort());
+    const append = options?.append === true && !sortChanged;
+    const cursor = append ? (options?.cursor ?? this.nextCursor()) : null;
+
+    this.listSort.set(sort);
     this.listState.set('loading');
     this.listError.set(null);
 
     try {
       const page = await this.listUseCase.execute(filters, {
-        pageSize: 25,
+        pageSize: DEFAULT_PAGE_SIZE,
         cursor,
+        sort,
       });
 
       const mapped = page.items.map((item) => this.toListItem(item));
@@ -94,7 +113,18 @@ export class SessionDisputesFacade {
     if (!this.hasMore() || !this.nextCursor()) {
       return;
     }
-    await this.loadList(filters, this.nextCursor(), true);
+    await this.loadList(filters, {
+      cursor: this.nextCursor(),
+      append: true,
+      sort: this.listSort(),
+    });
+  }
+
+  async changeSort(
+    filters: SessionDisputeFilters,
+    sort: SortRequest,
+  ): Promise<void> {
+    await this.loadList(filters, { sort, append: false, cursor: null });
   }
 
   async loadDetail(disputeId: string): Promise<void> {
@@ -146,6 +176,7 @@ export class SessionDisputesFacade {
       openedByUserId: item.openedByUserId,
       openedByRole: item.openedByRole,
       createdAt: item.createdAt,
+      updatedAt: item.updatedAt,
       reasonPreview:
         item.reason.length > 80
           ? `${item.reason.slice(0, 80)}…`

@@ -42,7 +42,18 @@
               <th class="px-3 py-3 text-start text-sm font-semibold">{{ 'common_openedBy' | t }}</th>
               <th class="px-3 py-3 text-start text-sm font-semibold">{{ 'common_booking' | t }}</th>
               <th class="px-3 py-3 text-start text-sm font-semibold">{{ 'common_reason' | t }}</th>
-              <th class="px-3 py-3 text-start text-sm font-semibold">{{ 'common_opened' | t }}</th>
+              <app-sortable-th
+                [label]="'common_opened' | t"
+                field="createdAt"
+                [sort]="sort()"
+                (sortChange)="onSortChange($event)"
+              />
+              <app-sortable-th
+                [label]="'common_updated' | t"
+                field="updatedAt"
+                [sort]="sort()"
+                (sortChange)="onSortChange($event)"
+              />
               <th class="px-3 py-3 text-end text-sm font-semibold">{{ 'common_actions' | t }}</th>
             </tr>
           </thead>
@@ -59,6 +70,13 @@
                 <td class="px-3 py-4 text-sm font-mono text-xs">{{ item.bookingId }}</td>
                 <td class="px-3 py-4 text-sm max-w-xs truncate">{{ item.reasonPreview }}</td>
                 <td class="px-3 py-4 text-sm">{{ item.createdAt | date:'medium' }}</td>
+                <td class="px-3 py-4 text-sm">
+                  @if (item.updatedAt) {
+                    {{ item.updatedAt | date:'medium' }}
+                  } @else {
+                    {{ 'common_none' | t }}
+                  }
+                </td>
                 <td class="px-3 py-4 text-end text-sm">
                   <a [routerLink]="['/quran-sessions/disputes', item.id]" class="text-blue-600 hover:text-blue-800 dark:text-blue-400">
                     {{ 'common_view' | t }}
