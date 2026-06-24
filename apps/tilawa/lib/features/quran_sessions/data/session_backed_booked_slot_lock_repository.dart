@@ -47,8 +47,10 @@ class SessionBackedBookedSlotLockRepository
     });
   }
 
+  static final RegExp _slotIdRegex = RegExp(r'^(.+)_\d{8}T');
+
   String? _teacherIdFromSlotId(String slotId) {
-    final match = RegExp(r'^(.+)_\d{8}T').firstMatch(slotId);
+    final match = _slotIdRegex.firstMatch(slotId);
     return match?.group(1);
   }
 }

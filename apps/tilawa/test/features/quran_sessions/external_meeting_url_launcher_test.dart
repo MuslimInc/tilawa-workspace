@@ -62,6 +62,20 @@ void main() {
       },
     );
 
+    test(
+      'throws MeetingLinkUnavailableFailure for non-http schemes',
+      () async {
+        await expectLater(
+          launchExternalMeetingUrl('javascript:alert(1)'),
+          throwsA(isA<MeetingLinkUnavailableFailure>()),
+        );
+        await expectLater(
+          launchExternalMeetingUrl('file:///etc/passwd'),
+          throwsA(isA<MeetingLinkUnavailableFailure>()),
+        );
+      },
+    );
+
     test('opens valid https URL even when canLaunchUrl is false', () async {
       fakeLauncher = _FakeUrlLauncher(canLaunchResult: false);
       UrlLauncherPlatform.instance = fakeLauncher;
