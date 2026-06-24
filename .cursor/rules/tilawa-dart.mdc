@@ -15,16 +15,30 @@ Follow [karpathy-guidelines.mdc](karpathy-guidelines.mdc) for all Dart work.
 - State assumptions (screen, platform, breaking vs additive change).
 - Prefer the smallest change; no drive-by refactors.
 
+## Formatting
+
+After editing Dart (or other workspace code covered by melos scripts), from the
+**workspace root**:
+
+```sh
+melos run fix:format
+```
+
+Run again **before `git commit`** when the change set includes formatted code.
+Applies `dart fix --apply` then `dart format` across all packages.
+
 ## Success criteria (run from `apps/tilawa/` unless noted)
 
 | Change type | Verify |
 |-------------|--------|
+| Any Dart edit | `melos run fix:format` (workspace root) |
 | Logic / cubit / repository | `flutter test test/features/<feature>/` |
 | UI widget | Widget test in mirrored `test/` path |
 | Router / DI registration | `dart analyze` + affected feature tests |
 | `packages/ui_kit` or `packages/core` | `dart analyze` in that package + app tests that use it |
 
 ```sh
+melos run fix:format    # workspace root; after edits and before commit
 dart analyze
 flutter test test/features/<feature>
 ```
@@ -41,5 +55,5 @@ flutter test test/features/<feature>
 
 ## Done when
 
-Analyzer clean, targeted tests pass, and every changed line traces to the
-request.
+`melos run fix:format` has been run from the workspace root, analyzer clean,
+targeted tests pass, and every changed line traces to the request.

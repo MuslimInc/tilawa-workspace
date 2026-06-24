@@ -34,8 +34,7 @@ void main() {
     final featureConfig = QuranSessionsFeatureConfig(
       quranSessionsEnabled: config.quranSessionsEnabled,
       teacherApplicationEnabled: config.teacherApplicationEnabled,
-      teacherApplicationDiscoverability:
-          TeacherApplicationDiscoverability.none,
+      teacherApplicationDiscoverability: TeacherApplicationDiscoverability.none,
       quranSessionsBookingEnabled: config.quranSessionsBookingEnabled,
       walletEnabled: config.quranSessionsPaidBookingSandboxEnabled,
     );

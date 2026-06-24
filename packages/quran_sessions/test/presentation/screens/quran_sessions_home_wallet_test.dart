@@ -9,7 +9,9 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../helpers/fakes/fake_teacher_repository.dart';
 
 void main() {
-  testWidgets('hides wallet action when walletEnabled is false', (tester) async {
+  testWidgets('hides wallet action when walletEnabled is false', (
+    tester,
+  ) async {
     final repo = FakeTeacherRepository();
 
     await tester.pumpWidget(

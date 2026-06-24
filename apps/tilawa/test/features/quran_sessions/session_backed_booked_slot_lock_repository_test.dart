@@ -13,39 +13,34 @@ class _FakeSessionRepository implements SessionRepository {
   @override
   Future<Either<QuranSessionsFailure, QuranSession>> getSessionById(
     String sessionId,
-  ) async =>
-      throw UnimplementedError();
+  ) async => throw UnimplementedError();
 
   @override
   Future<Either<QuranSessionsFailure, SessionPage>> getStudentPastSessions(
     String studentId, {
     String? cursor,
     int limit = kDefaultSessionPageSize,
-  }) async =>
-      throw UnimplementedError();
+  }) async => throw UnimplementedError();
 
   @override
   Future<Either<QuranSessionsFailure, SessionPage>> getStudentUpcomingSessions(
     String studentId, {
     String? cursor,
     int limit = kDefaultSessionPageSize,
-  }) async =>
-      throw UnimplementedError();
+  }) async => throw UnimplementedError();
 
   @override
   Future<Either<QuranSessionsFailure, List<QuranSession>>>
   getTeacherUpcomingSessions(
     String teacherId, {
     int limit = kDefaultSessionPageSize,
-  }) async =>
-      Right(upcomingByTeacher[teacherId] ?? const []);
+  }) async => Right(upcomingByTeacher[teacherId] ?? const []);
 
   @override
   Future<Either<QuranSessionsFailure, QuranSession>> updateNotes(
     String sessionId, {
     required String notes,
-  }) async =>
-      throw UnimplementedError();
+  }) async => throw UnimplementedError();
 }
 
 QuranSession _scheduledSession({
@@ -79,18 +74,21 @@ void main() {
       check(result).equals(const Right(false));
     });
 
-    test('returns true when teacher has scheduled session at slot start', () async {
-      const teacherId = 'teacher_with_underscore';
-      final start = DateTime.utc(2026, 6, 24, 10);
-      final slotId = GeneratedSlot.deterministicId(teacherId, start);
-      sessions.upcomingByTeacher[teacherId] = [
-        _scheduledSession(teacherId: teacherId, startsAt: start),
-      ];
+    test(
+      'returns true when teacher has scheduled session at slot start',
+      () async {
+        const teacherId = 'teacher_with_underscore';
+        final start = DateTime.utc(2026, 6, 24, 10);
+        final slotId = GeneratedSlot.deterministicId(teacherId, start);
+        sessions.upcomingByTeacher[teacherId] = [
+          _scheduledSession(teacherId: teacherId, startsAt: start),
+        ];
 
-      final result = await repository.isSlotBooked(slotId);
+        final result = await repository.isSlotBooked(slotId);
 
-      check(result).equals(const Right(true));
-    });
+        check(result).equals(const Right(true));
+      },
+    );
 
     test('returns false when teacher has no session at slot start', () async {
       const teacherId = 'teacher_1';

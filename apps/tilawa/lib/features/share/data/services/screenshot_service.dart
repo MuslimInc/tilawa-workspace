@@ -302,14 +302,18 @@ class ScreenshotService {
     final textTheme = AppTheme.getLightTheme(
       primaryColor: AppColors.defaultPrimary,
     ).textTheme;
-    final double primaryLabelFontSize = tilawaResolveTextRole(
-      textTheme,
-      footerTokens.primaryLabelTextRole,
-    ).fontSize ?? 14.0;
-    final double secondaryLabelFontSize = tilawaResolveTextRole(
-      textTheme,
-      footerTokens.secondaryLabelTextRole,
-    ).fontSize ?? 12.0;
+    final double primaryLabelFontSize =
+        tilawaResolveTextRole(
+          textTheme,
+          footerTokens.primaryLabelTextRole,
+        ).fontSize ??
+        14.0;
+    final double secondaryLabelFontSize =
+        tilawaResolveTextRole(
+          textTheme,
+          footerTokens.secondaryLabelTextRole,
+        ).fontSize ??
+        12.0;
     final stripHeight = footerTokens.height * pixelRatio;
     final totalHeight = imageHeight + stripHeight;
     final horizontalPadding = footerTokens.horizontalPadding * pixelRatio;

@@ -60,6 +60,15 @@ Diff: breaking API change
 
 Always include body for: breaking changes, security fixes, data migrations, anything reverting a prior commit. Never compress these into subject-only — future debuggers need the context.
 
+## Prerequisites
+
+When the change set includes Dart or other melos-formatted code, run
+`melos run fix:format` from the workspace root before commit (canonical rule:
+[`.cursor/rules/tilawa-dart.mdc`](../../../.cursor/rules/tilawa-dart.mdc)).
+
 ## Boundaries
 
-Only generates the commit message. Does not run `git commit`, does not stage files, does not amend. Output the message as a code block ready to paste. "stop caveman-commit" or "normal mode": revert to verbose commit style.
+Only generates the commit message. Does not run `git commit`, does not stage
+files, does not amend, and does not run formatting. Output the message as a code
+block ready to paste. "stop caveman-commit" or "normal mode": revert to verbose
+commit style.

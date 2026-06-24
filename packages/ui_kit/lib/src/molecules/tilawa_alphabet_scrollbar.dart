@@ -416,10 +416,12 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
     final Color trackBorderColor = _isScrubbing
         ? primaryColor.withValues(alpha: tokens.opacityMedium)
         : colorScheme.outlineVariant.withValues(alpha: tokens.opacityMedium);
-    final double letterFontSize = tilawaResolveTextRole(
-      theme.textTheme,
-      componentTokens.letterTextRole,
-    ).fontSize ?? 13.0;
+    final double letterFontSize =
+        tilawaResolveTextRole(
+          theme.textTheme,
+          componentTokens.letterTextRole,
+        ).fontSize ??
+        13.0;
 
     return RepaintBoundary(
       child: _MaybeScrollbarSemantics(

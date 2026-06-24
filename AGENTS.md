@@ -14,7 +14,8 @@ with verifiable checks.
 
 When editing Dart (`apps/tilawa/`, `packages/`), also apply
 [`.cursor/rules/tilawa-dart.mdc`](.cursor/rules/tilawa-dart.mdc) — run
-`dart analyze` and targeted `flutter test` from `apps/tilawa/` before finishing.
+`melos run fix:format` from the workspace root after edits and before commit,
+then `dart analyze` and targeted `flutter test` from `apps/tilawa/` before finishing.
 
 See [`.cursor/README.md`](.cursor/README.md) for the rules index.
 

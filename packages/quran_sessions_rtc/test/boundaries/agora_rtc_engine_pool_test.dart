@@ -38,14 +38,8 @@ void main() {
       () async {
         final firstEngine = FakeRtcEngine();
         final secondEngine = FakeRtcEngine();
-        pool.remember(
-          'session_a',
-          FakeAgoraRtcSessionHandle(firstEngine),
-        );
-        pool.remember(
-          'session_b',
-          FakeAgoraRtcSessionHandle(secondEngine),
-        );
+        pool.remember('session_a', FakeAgoraRtcSessionHandle(firstEngine));
+        pool.remember('session_b', FakeAgoraRtcSessionHandle(secondEngine));
 
         await pool.release('session_a');
         await pool.release('session_b');
@@ -56,17 +50,20 @@ void main() {
       },
     );
 
-    test('releaseAll releases parked engine retained from prior release', () async {
-      final engine = FakeRtcEngine();
-      pool.remember('session_a', FakeAgoraRtcSessionHandle(engine));
+    test(
+      'releaseAll releases parked engine retained from prior release',
+      () async {
+        final engine = FakeRtcEngine();
+        pool.remember('session_a', FakeAgoraRtcSessionHandle(engine));
 
-      await pool.release('session_a');
-      check(engine.released).isFalse();
+        await pool.release('session_a');
+        check(engine.released).isFalse();
 
-      await pool.releaseAll();
+        await pool.releaseAll();
 
-      check(engine.released).isTrue();
-      check(pool.takeParkedEngine('')).isNull();
-    });
+        check(engine.released).isTrue();
+        check(pool.takeParkedEngine('')).isNull();
+      },
+    );
   });
 }

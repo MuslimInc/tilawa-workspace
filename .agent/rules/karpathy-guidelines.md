@@ -14,4 +14,5 @@ Apply on every task. Full text: `.cursor/rules/karpathy-guidelines.mdc`.
 4. **Goal-driven execution** — Define verifiable success (tests, `dart analyze`);
    plan multi-step work as step → verify.
 
-For Dart in this repo, also follow `.cursor/rules/tilawa-dart.mdc` and `CLAUDE.md`.
+For Dart in this repo, also follow `.cursor/rules/tilawa-dart.mdc` and `CLAUDE.md`
+(includes `melos run fix:format` after edits and before commit).
