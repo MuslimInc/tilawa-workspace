@@ -25,12 +25,16 @@ class QuranSessionsFeatureConfig extends Equatable {
     this.teacherApplicationDiscoverability =
         TeacherApplicationDiscoverability.none,
     this.quranSessionsBookingEnabled = false,
+    this.walletEnabled = false,
   });
 
   final bool quranSessionsEnabled;
   final bool teacherApplicationEnabled;
   final TeacherApplicationDiscoverability teacherApplicationDiscoverability;
   final bool quranSessionsBookingEnabled;
+
+  /// Wallet UI and routes — staging sandbox only (paid/refund scope).
+  final bool walletEnabled;
 
   bool get showProfileTeacherEntry =>
       quranSessionsEnabled &&
@@ -50,5 +54,6 @@ class QuranSessionsFeatureConfig extends Equatable {
     teacherApplicationEnabled,
     teacherApplicationDiscoverability,
     quranSessionsBookingEnabled,
+    walletEnabled,
   ];
 }

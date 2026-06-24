@@ -20,6 +20,7 @@ QuranSessionsFeatureConfig quranSessionsFeatureConfig() {
       config.teacherApplicationDiscoverability,
     ),
     quranSessionsBookingEnabled: config.quranSessionsBookingEnabled,
+    walletEnabled: config.quranSessionsPaidBookingSandboxEnabled,
   );
 }
 

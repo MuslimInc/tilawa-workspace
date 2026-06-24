@@ -10,6 +10,7 @@ import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tilawa/features/auth/presentation/cubit/session_validity_cubit.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
+import 'package:tilawa/features/quran_sessions/quran_sessions_feature_flags.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa/router/quran_sessions_session_guard.dart';
 
@@ -111,6 +112,22 @@ void main() {
         FakeGoRouterState('/settings'),
       );
       expect(result, isNull);
+    });
+
+    test('redirects booking route when booking kill switch off', () {
+      getIt.registerSingleton<AppLaunchConfig>(
+        const AppLaunchConfig(
+          quranSessionsEnabled: true,
+          quranSessionsBookingEnabled: false,
+        ),
+      );
+      addTearDown(() {
+        if (getIt.isRegistered<AppLaunchConfig>()) {
+          getIt.unregister<AppLaunchConfig>();
+        }
+      });
+      final featureConfig = quranSessionsFeatureConfig();
+      expect(featureConfig.quranSessionsBookingEnabled, isFalse);
     });
   });
 

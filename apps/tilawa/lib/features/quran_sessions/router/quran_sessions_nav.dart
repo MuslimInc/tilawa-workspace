@@ -100,7 +100,9 @@ List<RouteBase> get quranSessionsRoutes => [
           QuranSessionsRoutes.teacherProfile.replaceFirst(':teacherId', id),
         ),
         onMySessions: () => context.push(QuranSessionsRoutes.mySessions),
-        onWallet: () => context.push(QuranSessionsRoutes.wallet),
+        onWallet: quranSessionsFeatureConfig().walletEnabled
+            ? () => context.push(QuranSessionsRoutes.wallet)
+            : null,
         onBecomeTeacher: () => _openTeacherApply(context),
         onChangeCity: () => _openProfileCompletion(context),
       ),
@@ -234,6 +236,12 @@ List<RouteBase> get quranSessionsRoutes => [
   ),
   GoRoute(
     path: QuranSessionsRoutes.wallet,
+    redirect: (context, state) {
+      if (!quranSessionsFeatureConfig().walletEnabled) {
+        return QuranSessionsRoutes.home;
+      }
+      return null;
+    },
     builder: (context, state) {
       final studentId = requireQuranSessionsUserId(getIt);
       return BlocProvider(
@@ -484,7 +492,7 @@ class _QuranSessionsHomeRoute extends StatefulWidget {
     required this.onSeeAllTeachers,
     required this.onTeacherTapped,
     required this.onMySessions,
-    required this.onWallet,
+    this.onWallet,
     required this.onBecomeTeacher,
     required this.onChangeCity,
   });
@@ -492,7 +500,7 @@ class _QuranSessionsHomeRoute extends StatefulWidget {
   final VoidCallback onSeeAllTeachers;
   final void Function(String teacherId) onTeacherTapped;
   final VoidCallback onMySessions;
-  final VoidCallback onWallet;
+  final VoidCallback? onWallet;
   final VoidCallback onBecomeTeacher;
   final VoidCallback onChangeCity;
 

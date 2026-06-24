@@ -3,6 +3,7 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 
 import { AuthFacade } from '../../../core/application/facades/auth.facade';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-sidebar',
@@ -16,6 +17,7 @@ export class SidebarComponent {
 
   readonly session = this.authFacade.session;
   readonly quranSessionsExpanded = signal(true);
+  readonly walletNavEnabled = environment.quranSessionsWalletEnabled;
 
   toggleQuranSessions(): void {
     this.quranSessionsExpanded.update((value) => !value);
