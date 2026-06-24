@@ -308,6 +308,12 @@ abstract class AppLocalizations {
   /// **'Featured for you'**
   String get homeFeaturedTitle;
 
+  /// Home featured carousel section subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'More for your day'**
+  String get homeFeaturedSubtitle;
+
   /// Home section title for daily actions
   ///
   /// In en, this message translates to:

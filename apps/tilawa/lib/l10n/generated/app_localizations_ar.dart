@@ -128,6 +128,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeFeaturedTitle => 'مختارة لك';
 
   @override
+  String get homeFeaturedSubtitle => 'المزيد ليومك';
+
+  @override
   String get homeTodayTitle => 'اليوم';
 
   @override

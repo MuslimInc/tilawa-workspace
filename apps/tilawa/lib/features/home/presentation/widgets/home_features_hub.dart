@@ -42,6 +42,10 @@ class HomeFeaturesHub extends StatelessWidget {
           final HomeExploreFeatureTileStyle style = colorScheme
               .homeExploreFeatureTileStyle(item.feature);
 
+          // Premium hub treatment: a clean surface tile (consistent with the
+          // other Home cards) carrying a soft semantic-tinted icon chip, so
+          // every category is instantly scannable by colour while the curated
+          // per-feature glyph colour is preserved.
           return TilawaFeatureCategoryTile(
             icon: item.icon,
             iconWidget: _HomeFeatureCatalog.iconWidget(
@@ -51,11 +55,11 @@ class HomeFeaturesHub extends StatelessWidget {
             ),
             label: item.label,
             onTap: item.onTap,
-            backgroundColor: colorScheme.homeExploreTileBackground,
+            backgroundColor: colorScheme.surface,
             semanticTint: style.semanticTint,
-            iconBoxVariant: TilawaIconBoxVariant.plain,
+            iconBoxVariant: TilawaIconBoxVariant.tinted,
             iconColor: style.iconForeground,
-            tileBorderOpacity: 0.22,
+            tileBorderOpacity: 0.16,
           );
         },
       ),

@@ -129,6 +129,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeFeaturedTitle => 'Featured for you';
 
   @override
+  String get homeFeaturedSubtitle => 'More for your day';
+
+  @override
   String get homeTodayTitle => 'Today';
 
   @override

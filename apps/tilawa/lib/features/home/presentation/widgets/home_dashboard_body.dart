@@ -5,6 +5,8 @@ import 'package:tilawa/core/widgets/deferred_after_first_frame.dart';
 import 'package:tilawa/features/today_plan/today_plan.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../cubit/home_listening_resume_cubit.dart';
+import '../cubit/home_listening_resume_state.dart';
 import '../cubit/home_primary_action_cubit.dart';
 import '../cubit/home_primary_action_state.dart';
 import 'home_athkar_compact_card.dart';
@@ -31,15 +33,17 @@ class HomeDashboardBody extends StatelessWidget {
         DeferredAfterFirstFrame(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
+            // Uniform inter-section rhythm: one [spaceExtraLarge] between every
+            // major section so the page reads as a calm, even stack.
             children: [
-              SizedBox(height: tokens.spaceMedium),
+              SizedBox(height: tokens.spaceExtraLarge),
               HomeFeaturesHub(onOpenPrayer: onOpenPrayer),
               SizedBox(height: tokens.spaceExtraLarge),
               const HomeDiscoverCarousel(),
               SizedBox(height: tokens.spaceExtraLarge),
               if (isTodayPlanEnabled()) ...[
                 const TodayPlanCard(),
-                SizedBox(height: tokens.spaceLarge),
+                SizedBox(height: tokens.spaceExtraLarge),
               ],
               HomeDashboardSection(
                 title: context.l10n.homeTodayTitle,
@@ -47,7 +51,8 @@ class HomeDashboardBody extends StatelessWidget {
                 contentSpacing: tokens.spaceMedium,
                 child: const HomeAthkarCompactCard(),
               ),
-              SizedBox(height: tokens.spaceLarge),
+              // The listening row owns its own leading gap so a hidden row
+              // leaves no dangling space.
               const _ConditionalListeningRow(),
             ],
           ),
@@ -64,15 +69,23 @@ class _ConditionalListeningRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<HomePrimaryActionCubit, HomePrimaryActionState>(
       builder: (context, primaryState) {
+        // The primary action card already surfaces the listening resume.
         if (primaryState.kind == HomePrimaryActionKind.listening) {
           return const SizedBox.shrink();
         }
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const HomeListeningResumeRow(),
-            SizedBox(height: context.tokens.spaceLarge),
-          ],
+        return BlocBuilder<HomeListeningResumeCubit, HomeListeningResumeState>(
+          builder: (context, listeningState) {
+            if (!listeningState.isVisible) {
+              return const SizedBox.shrink();
+            }
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(height: context.tokens.spaceExtraLarge),
+                const HomeListeningResumeRow(),
+              ],
+            );
+          },
         );
       },
     );

@@ -89,6 +89,7 @@
     "homeDashboardLoadError": "تعذّر تحميل مواقيت الصلاة. تحقق من الاتصال وحاول مرة أخرى.",
     "homeSearchHint": "ابحث في السور أو الأجزاء أو الصفحة",
     "homeFeaturedTitle": "مختارة لك",
+    "homeFeaturedSubtitle": "المزيد ليومك",
     "homeTodayTitle": "اليوم",
     "homeYoursTitle": "خاصتك",
     "homeListeningResumeSubtitle": "تابع · {reciter} · {surah}",

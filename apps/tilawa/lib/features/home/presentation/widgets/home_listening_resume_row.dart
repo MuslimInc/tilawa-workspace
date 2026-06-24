@@ -22,6 +22,10 @@ class HomeListeningResumeRow extends StatelessWidget {
         final tokens = context.tokens;
         final theme = Theme.of(context);
         final colorScheme = theme.colorScheme;
+        // Match the corner radius of the surrounding dashboard cards.
+        final double radius = tokens.resolveRadius(
+          family: TilawaRadiusFamily.hero,
+        );
 
         return Semantics(
           button: true,
@@ -32,10 +36,10 @@ class HomeListeningResumeRow extends StatelessWidget {
           ),
           child: Material(
             color: colorScheme.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(tokens.radiusMedium),
+            borderRadius: BorderRadius.circular(radius),
             child: InkWell(
               onTap: () => _resumePlayback(context, state),
-              borderRadius: BorderRadius.circular(tokens.radiusMedium),
+              borderRadius: BorderRadius.circular(radius),
               child: Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: tokens.spaceMedium,

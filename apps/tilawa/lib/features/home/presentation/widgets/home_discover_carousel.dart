@@ -32,6 +32,7 @@ class HomeDiscoverCarousel extends StatelessWidget {
 
     return HomeDashboardSection(
       title: context.l10n.homeFeaturedTitle,
+      subtitle: context.l10n.homeFeaturedSubtitle,
       contentSpacing: tokens.spaceMedium,
       child: SizedBox(
         height: tileHeight,

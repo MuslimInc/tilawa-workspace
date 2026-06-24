@@ -158,6 +158,10 @@
     "@homeFeaturedTitle": {
         "description": "Home horizontal carousel section title (travel-app popular row)"
     },
+    "homeFeaturedSubtitle": "More for your day",
+    "@homeFeaturedSubtitle": {
+        "description": "Home featured carousel section subtitle"
+    },
     "homeTodayTitle": "Today",
     "@homeTodayTitle": {
         "description": "Home section title for daily actions"
