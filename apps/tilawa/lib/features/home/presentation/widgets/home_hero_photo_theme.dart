@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Hero foreground tokens and legibility helpers for phase gradients.
@@ -40,14 +41,107 @@ abstract final class HomeHeroPhotoTheme {
     return heroChromeInk(tokens).withValues(alpha: opacity);
   }
 
-  /// Collapsed toolbar copy over the pinned hero bar.
+  /// Collapsed toolbar copy over the pinned primary hero bar.
   static Color collapsedToolbarForeground({
     required Color collapsedBarColor,
     required TilawaHomeNextPrayerHeroTokens heroTokens,
+    required ColorScheme colorScheme,
   }) {
+    return colorScheme.onPrimary;
+  }
+
+  /// Muted collapsed-toolbar ink on the pinned primary bar.
+  static Color collapsedToolbarMuted(ColorScheme colorScheme) {
+    return colorScheme.onPrimary.withValues(alpha: 0.72);
+  }
+
+  /// Status bar icons when the hero is fully pinned on primary.
+  static SystemUiOverlayStyle collapsedBarOverlayStyle(
+    Color collapsedBarColor,
+  ) {
     return collapsedBarColor.computeLuminance() > 0.52
-        ? AppColors.tripGlideInk
-        : heroTokens.foregroundColor;
+        ? SystemUiOverlayStyle.dark
+        : SystemUiOverlayStyle.light;
+  }
+
+  /// Brand primary fill for the pinned hero bar with elevation.
+  static BoxDecoration collapsedBarSurfaceDecoration({
+    required Color collapsedBarColor,
+    required TilawaHomeNextPrayerHeroTokens heroTokens,
+    required ColorScheme colorScheme,
+    required TilawaDesignTokens tokens,
+  }) {
+    return BoxDecoration(
+      gradient: LinearGradient(
+        begin: AlignmentDirectional.topCenter,
+        end: AlignmentDirectional.bottomCenter,
+        colors: <Color>[
+          Color.lerp(
+            colorScheme.primaryContainer,
+            colorScheme.primary,
+            0.42,
+          )!,
+          colorScheme.primary,
+        ],
+      ),
+      boxShadow: <BoxShadow>[
+        BoxShadow(
+          color: colorScheme.shadow.withValues(alpha: tokens.opacityShadow),
+          blurRadius: tokens.blurShadow,
+          offset: tokens.shadowOffsetSmall,
+        ),
+      ],
+    );
+  }
+
+  /// Soft top-inner highlight on pinned primary chrome.
+  static BoxDecoration collapsedBarInnerHighlight({
+    required ColorScheme colorScheme,
+  }) {
+    return BoxDecoration(
+      gradient: LinearGradient(
+        begin: AlignmentDirectional.topCenter,
+        end: AlignmentDirectional.bottomCenter,
+        colors: <Color>[
+          colorScheme.onPrimary.withValues(alpha: 0.1),
+          Colors.transparent,
+        ],
+        stops: const <double>[0, 0.22],
+      ),
+    );
+  }
+
+  /// Zone divider between pinned-toolbar columns.
+  static Color collapsedToolbarDividerColor(ColorScheme colorScheme) {
+    return colorScheme.onPrimary.withValues(alpha: 0.28);
+  }
+
+  /// Location chip on the pinned primary toolbar.
+  static BoxDecoration collapsedLocationChipDecoration({
+    required ColorScheme colorScheme,
+    required TilawaDesignTokens tokens,
+  }) {
+    return BoxDecoration(
+      color: colorScheme.onPrimary.withValues(alpha: 0.12),
+      borderRadius: BorderRadius.circular(tokens.radiusLarge),
+      border: Border.all(
+        color: colorScheme.onPrimary.withValues(alpha: 0.24),
+      ),
+    );
+  }
+
+  /// Countdown pill on the pinned primary toolbar.
+  static BoxDecoration collapsedCountdownChipDecoration({
+    required ColorScheme colorScheme,
+    required TilawaDesignTokens tokens,
+  }) {
+    return BoxDecoration(
+      color: colorScheme.semanticTintBackground(TilawaSemanticTint.gilding),
+      borderRadius: BorderRadius.circular(tokens.radiusLarge),
+      border: Border.all(
+        color: colorScheme.onPrimary.withValues(alpha: 0.2),
+      ),
+    );
   }
 
   /// Keeps phase [foregroundColor] (ink on light canvas) with tuned opacities.

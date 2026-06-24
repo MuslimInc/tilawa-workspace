@@ -23,6 +23,7 @@ import '../bloc/home_dashboard_state.dart';
 import 'home_dashboard_hero_collapse.dart';
 import 'home_dashboard_hero_variant_b.dart';
 import 'home_hero_background.dart';
+import 'home_hero_collapsed_toolbar.dart';
 import 'home_hero_photo_theme.dart';
 
 /// Collapsing gradient hero sliver for the home dashboard.
@@ -141,8 +142,7 @@ abstract final class HomeDashboardHeroSliver {
 
   /// Pinned hero chrome when the expanded gradient is fully collapsed.
   ///
-  /// Blends phase stops so the bar matches the expanded ramp — never a flat
-  /// dark forest block on light pre-dawn/day phases.
+  /// Uses brand [ColorScheme.primary] — expanded prayer-phase ramp unchanged.
   static Color collapsedBarColor(
     TilawaHomeNextPrayerHeroTokens heroTokens,
     ColorScheme colorScheme,
@@ -551,8 +551,9 @@ class _HomeHeroFlexibleSpaceState extends State<_HomeHeroFlexibleSpace> {
     final double expandedReveal = Curves.easeInOutCubic.transform(t);
     final double collapsedBarReveal = 1 - expandedReveal;
     final Color canvasColor = AppColors.homeTravelSheetSurface;
-    final SystemUiOverlayStyle overlayStyle =
-        HomeHeroBackground.systemOverlayStyle(heroTokens);
+    final SystemUiOverlayStyle overlayStyle = t < 0.12
+        ? HomeHeroPhotoTheme.collapsedBarOverlayStyle(widget.collapsedBarColor)
+        : HomeHeroBackground.systemOverlayStyle(heroTokens);
     final TilawaBottomSheetScaffoldTokens sheetTokens =
         theme.componentTokens.bottomSheetScaffold;
 
@@ -574,21 +575,24 @@ class _HomeHeroFlexibleSpaceState extends State<_HomeHeroFlexibleSpace> {
             children: [
               Opacity(
                 opacity: collapsedBarReveal,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: AlignmentDirectional.topCenter,
-                      end: AlignmentDirectional.bottomCenter,
-                      colors: <Color>[
-                        Color.lerp(
-                          widget.collapsedBarColor,
-                          heroTokens.gradientTopStart,
-                          0.28,
-                        )!,
-                        widget.collapsedBarColor,
-                      ],
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    DecoratedBox(
+                      decoration:
+                          HomeHeroPhotoTheme.collapsedBarSurfaceDecoration(
+                            collapsedBarColor: widget.collapsedBarColor,
+                            heroTokens: heroTokens,
+                            colorScheme: theme.colorScheme,
+                            tokens: tokens,
+                          ),
                     ),
-                  ),
+                    DecoratedBox(
+                      decoration: HomeHeroPhotoTheme.collapsedBarInnerHighlight(
+                        colorScheme: theme.colorScheme,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               Opacity(
@@ -638,15 +642,18 @@ class _HomeHeroFlexibleSpaceState extends State<_HomeHeroFlexibleSpace> {
                       padding: EdgeInsetsDirectional.only(
                         start: tokens.spaceMedium,
                         end: tokens.spaceMedium,
-                        bottom: tokens.spaceSmall,
+                        bottom: tokens.spaceSmall + tokens.spaceExtraSmall,
                       ),
                       child: Opacity(
                         opacity: collapsedOpacity,
-                        child: _HomeHeroCollapsedToolbar(
+                        child: HomeHeroCollapsedToolbar(
+                          heroTokens: heroTokens,
+                          collapsedBarColor: widget.collapsedBarColor,
                           nextPrayer: widget.nextPrayer,
                           locationName: widget.locationName,
+                          isRefreshingLocation: widget.isRefreshingLocation,
+                          onRefreshLocation: widget.onRefreshLocation,
                           onOpenPrayer: widget.onOpenPrayer,
-                          expandedReveal: expandedReveal,
                         ),
                       ),
                     ),
@@ -837,158 +844,6 @@ class _HomeHeroIntegratedPrayerCard extends StatelessWidget {
         splashColor: colorScheme.primary.withValues(alpha: 0.08),
         highlightColor: colorScheme.primary.withValues(alpha: 0.04),
         child: card,
-      ),
-    );
-  }
-}
-
-/// Pinned toolbar row: compact location + prayer summary when collapsed.
-class _HomeHeroCollapsedToolbar extends StatelessWidget {
-  const _HomeHeroCollapsedToolbar({
-    required this.nextPrayer,
-    required this.locationName,
-    required this.onOpenPrayer,
-    required this.expandedReveal,
-  });
-
-  final HomeNextPrayer? nextPrayer;
-  final String? locationName;
-  final VoidCallback onOpenPrayer;
-  final double expandedReveal;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final heroTokens = theme.componentTokens.homeNextPrayerHero;
-    final Color collapsedBarColor = HomeDashboardHeroSliver.collapsedBarColor(
-      heroTokens,
-      theme.colorScheme,
-    );
-    final Color foreground = HomeHeroPhotoTheme.collapsedToolbarForeground(
-      collapsedBarColor: collapsedBarColor,
-      heroTokens: heroTokens,
-    );
-    final TextStyle? summaryStyle = HomeHeroPhotoTheme.titleStyle(
-      theme.textTheme.titleSmall,
-      foreground,
-      tokens: theme.tokens,
-      fontWeight: FontWeight.w700,
-    );
-    final String locationLabel =
-        PrayerLocationLabelFormatter.abbreviatedLocationLabel(
-          locationName: locationName,
-          l10n: context.l10n,
-        );
-
-    return switch (nextPrayer) {
-      null => Text(
-        '$locationLabel · ${context.l10n.homeNextPrayerUnavailable}',
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: summaryStyle,
-      ),
-      final prayer => _HomeHeroCollapsedPrayerSummary(
-        prayer: prayer,
-        locationLabel: locationLabel,
-        onOpenPrayer: onOpenPrayer,
-        style: summaryStyle!,
-      ),
-    };
-  }
-}
-
-class _HomeHeroCollapsedPrayerSummary extends StatefulWidget {
-  const _HomeHeroCollapsedPrayerSummary({
-    required this.prayer,
-    required this.locationLabel,
-    required this.onOpenPrayer,
-    required this.style,
-  });
-
-  final HomeNextPrayer prayer;
-  final String locationLabel;
-  final VoidCallback onOpenPrayer;
-  final TextStyle style;
-
-  @override
-  State<_HomeHeroCollapsedPrayerSummary> createState() =>
-      _HomeHeroCollapsedPrayerSummaryState();
-}
-
-class _HomeHeroCollapsedPrayerSummaryState
-    extends State<_HomeHeroCollapsedPrayerSummary> {
-  Timer? _ticker;
-
-  @override
-  void initState() {
-    super.initState();
-    _scheduleTicker();
-  }
-
-  @override
-  void didUpdateWidget(covariant _HomeHeroCollapsedPrayerSummary oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.prayer.time != widget.prayer.time) {
-      _scheduleTicker();
-    }
-  }
-
-  void _scheduleTicker() {
-    _ticker?.cancel();
-    final Duration remaining = _remaining;
-    if (remaining <= Duration.zero) {
-      return;
-    }
-
-    final Duration interval = remaining < const Duration(hours: 1)
-        ? const Duration(seconds: 1)
-        : const Duration(minutes: 1);
-
-    _ticker = Timer.periodic(interval, (_) {
-      if (!mounted) {
-        return;
-      }
-      if (_remaining <= Duration.zero) {
-        _ticker?.cancel();
-      }
-      setState(() {});
-    });
-  }
-
-  @override
-  void dispose() {
-    _ticker?.cancel();
-    super.dispose();
-  }
-
-  Duration get _remaining {
-    final Duration difference = widget.prayer.time.difference(DateTime.now());
-    return difference.isNegative ? Duration.zero : difference;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final String name = _localizedPrayerName(context, widget.prayer.type);
-    final String time = _formatTime(context, widget.prayer.time);
-    final String prayerSummary = _remaining <= Duration.zero
-        ? '$name · $time · ${context.l10n.homePrayerNow}'
-        : '$name · $time · ${_formatCountdown(context, _remaining)}';
-    final String summary = '${widget.locationLabel} · $prayerSummary';
-
-    return Semantics(
-      button: true,
-      label: '$name, $time',
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: widget.onOpenPrayer,
-          child: Text(
-            summary,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: widget.style,
-          ),
-        ),
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/features/home/debug/home_hero_variant_debug.dart';
@@ -138,8 +139,37 @@ void main() {
     controller.jumpTo(collapseExtent);
     await tester.pump();
 
-    expect(find.textContaining('Cairo ·'), findsOneWidget);
+    expect(find.text('Cairo'), findsWidgets);
+    expect(find.byIcon(FluentIcons.location_24_regular), findsOneWidget);
+    _expectCollapsedPrimaryPinnedBar(scrollContext);
   });
+}
+
+void _expectCollapsedPrimaryPinnedBar(BuildContext context) {
+  final ThemeData theme = Theme.of(context);
+  final Color primary = theme.colorScheme.primary;
+  final TilawaDesignTokens tokens = theme.tokens;
+
+  expect(
+    find.byWidgetPredicate((widget) {
+      if (widget is! DecoratedBox || widget.decoration is! BoxDecoration) {
+        return false;
+      }
+      final BoxDecoration decoration = widget.decoration as BoxDecoration;
+      final List<Color>? gradientColors = decoration.gradient?.colors;
+      if (gradientColors == null || !gradientColors.contains(primary)) {
+        return false;
+      }
+      final List<BoxShadow>? shadows = decoration.boxShadow;
+      if (shadows == null || shadows.isEmpty) {
+        return false;
+      }
+      final BoxShadow shadow = shadows.first;
+      return shadow.blurRadius == tokens.blurShadow &&
+          shadow.offset == tokens.shadowOffsetSmall;
+    }),
+    findsWidgets,
+  );
 }
 
 void _expectHeroBottomBorder(BuildContext context) {

@@ -920,3 +920,105 @@ Combine with Phase 5 bilateral reschedule checklist before Play wide release.
 | **Merge to main** | **Go** | Locked copy + honest failure UX wired; reviewer should-fix applied; 699 Flutter + 141 CF + preflight green |
 | **Staging manual E2E** | **Conditional Go** | Code ready; session-detail UX smoke + Phase 5 reschedule checklist unsigned |
 | **Play production (wide)** | **No-Go** | B1–B5/T2–T8 unsigned; App Check enforcement flip pending; legal privacy open |
+
+---
+
+## Phase 7 — Ops-ready App Check + CF deploy (pipeline 4/4)
+
+**Date:** 2026-06-24  
+**Scope:** Batch deploy script for 12 stable callables + `sessionReminders`; export scheduled job; verify client App Check path.  
+**Pipeline verdict:** **Go** — ops deploy script ready; live deploy deferred to ops.
+
+| Deliverable | Status |
+|-------------|--------|
+| `scripts/deploy_quran_session_callables.sh` | ✅ 12 callables + optional `sessionReminders` |
+| `sessionReminders` export in `functions/src/index.ts` | ✅ |
+| Wiring test for `sessionReminders` export | ✅ |
+| Client App Check release activation (`app_startup_tasks.dart`) | ✅ unchanged — skip in `kDebugMode` |
+| Live deploy to `quran-playera-app` | ⬜ ops — script ready |
+
+### Phase 7 tests
+
+| Suite | Result |
+|-------|--------|
+| `sessionCallableWiring.test.ts` | **4/4** pass (+sessionReminders export) |
+| `functions` unit total | **142/142** pass |
+
+---
+
+## Phase 8 — Quran Sessions UI/UX polish (pipeline 4/4)
+
+**Date:** 2026-06-24  
+**Scope:** MeMuslim branding in sessions copy; session detail refresh; teacher home retry; no experimental badges in sessions paths.  
+**Pipeline verdict:** **Go**
+
+| Deliverable | Status |
+|-------------|--------|
+| MeMuslim user-visible strings (EN + AR) | ✅ external join, teacher apply, application status |
+| Session detail pull-to-refresh | ✅ |
+| Requester/counterparty reschedule refresh on app resume | ✅ |
+| Teacher discovery load failure → Retry CTA | ✅ |
+| Experimental badges in sessions routes | ✅ none present |
+| Home hero WIP | compile fix only (`home_dashboard_hero_sliver.dart` missing `)`) |
+
+### Phase 8 tests
+
+| Suite | Result |
+|-------|--------|
+| `session_detail_screen_test.dart` | pass (MeMuslim join copy) |
+| `external_meeting_join_sheet_test.dart` | pass |
+| `packages/quran_sessions` full | **702/702** pass |
+
+---
+
+## Phase 9 — Remaining product gaps (pipeline 3/3)
+
+**Date:** 2026-06-24  
+**Scope:** Requester refresh after reschedule respond; `sessionReminders` export; admin triage sanity.  
+**Pipeline verdict:** **Go**
+
+| Item | Status |
+|------|--------|
+| Requester sees counterparty response without manual navigation hack | ✅ resume + pull-to-refresh |
+| `sessionReminders` production export | ✅ |
+| Admin reports/disputes readable | ✅ no code changes required |
+
+---
+
+## Phase 10 — Test hardening (pipeline 4/4)
+
+**Date:** 2026-06-24  
+**Scope:** Reschedule bloc tests; full verification matrix.  
+**Pipeline verdict:** **Conditional Go** — 2 pre-existing integration failures (agora/webrtc provider hints).
+
+| Suite | Result |
+|-------|--------|
+| `reschedule_bloc_test.dart` | **3/3** pass (new) |
+| `packages/quran_sessions` `flutter test` | **702/702** |
+| `functions` unit | **142/142** |
+| `functions` rules (JDK 21) | **33/33** |
+| `functions` integration (JDK 21) | **36/38** — agora/webrtc provider-hint cases (pre-existing) |
+| `./scripts/quran_sessions_preflight.sh` | ✅ pass |
+
+---
+
+## Phase 11 — Documentation + morning handoff
+
+**Date:** 2026-06-24  
+**Deliverables:**
+
+- [MORNING-HANDOFF.md](./MORNING-HANDOFF.md) — primary user-facing overnight summary + manual checklist
+- This report — Phases 7–11 sections
+- `security-safety-checklist.md` — deploy script reference
+
+---
+
+## Overnight Go / No-Go (Phases 7–11)
+
+| Track | Verdict |
+|-------|---------|
+| **Engineering stable scope** | **Go** — 702 Flutter + 142 CF unit + 33 rules + preflight green |
+| **User manual E2E session** | **Go** — run [MORNING-HANDOFF.md](./MORNING-HANDOFF.md) checklist |
+| **Ops CF batch deploy** | **Go** — run `./scripts/deploy_quran_session_callables.sh` |
+| **App Check enforcement flip** | **Conditional** — after deploy + release build smoke |
+| **Play production (wide)** | **No-Go** — manual sign-off, legal, Agora device E2E pending |

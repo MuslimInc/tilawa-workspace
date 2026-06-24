@@ -130,7 +130,52 @@ void main() {
     expect(find.byType(ClipPath), findsNothing);
     _expectHeroBottomBorder(scrollContext);
     expect(find.byIcon(FluentIcons.location_24_regular), findsOneWidget);
+    _expectCollapsedPremiumChrome(scrollContext);
+    _expectCollapsedPrimaryPinnedBar(scrollContext);
   });
+}
+
+void _expectCollapsedPrimaryPinnedBar(BuildContext context) {
+  final ThemeData theme = Theme.of(context);
+  final Color primary = theme.colorScheme.primary;
+  final TilawaDesignTokens tokens = theme.tokens;
+
+  expect(
+    find.byWidgetPredicate((widget) {
+      if (widget is! DecoratedBox || widget.decoration is! BoxDecoration) {
+        return false;
+      }
+      final BoxDecoration decoration = widget.decoration as BoxDecoration;
+      final List<Color>? gradientColors = decoration.gradient?.colors;
+      if (gradientColors == null || !gradientColors.contains(primary)) {
+        return false;
+      }
+      final List<BoxShadow>? shadows = decoration.boxShadow;
+      if (shadows == null || shadows.isEmpty) {
+        return false;
+      }
+      final BoxShadow shadow = shadows.first;
+      return shadow.blurRadius == tokens.blurShadow &&
+          shadow.offset == tokens.shadowOffsetSmall;
+    }),
+    findsWidgets,
+  );
+}
+
+void _expectCollapsedPremiumChrome(BuildContext context) {
+  final ThemeData theme = Theme.of(context);
+  final Color gildingFill = theme.colorScheme.semanticTintBackground(
+    TilawaSemanticTint.gilding,
+  );
+  expect(
+    find.byWidgetPredicate((widget) {
+      if (widget is! DecoratedBox || widget.decoration is! BoxDecoration) {
+        return false;
+      }
+      return (widget.decoration as BoxDecoration).color == gildingFill;
+    }),
+    findsWidgets,
+  );
 }
 
 void _expectHeroBottomBorder(BuildContext context) {
