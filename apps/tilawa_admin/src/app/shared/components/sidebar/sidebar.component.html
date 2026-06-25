@@ -79,6 +79,20 @@
             {{ 'sidebar_sessions' | t }}
           </a>
           <a
+            routerLink="/quran-sessions/active-sessions"
+            routerLinkActive="is-active"
+            class="tilawa-sidebar-sublink"
+          >
+            {{ 'sidebar_activeSessions' | t }}
+          </a>
+          <a
+            routerLink="/quran-sessions/create-test-session"
+            routerLinkActive="is-active"
+            class="tilawa-sidebar-sublink"
+          >
+            Create Test Session
+          </a>
+          <a
             routerLink="/quran-sessions/reports"
             routerLinkActive="is-active"
             class="tilawa-sidebar-sublink"

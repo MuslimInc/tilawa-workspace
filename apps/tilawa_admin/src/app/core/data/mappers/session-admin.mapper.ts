@@ -22,6 +22,7 @@ export interface BookingFirestoreDto {
   paymentStatus?: string;
   amountPaidUsd?: number;
   cancellationReason?: string;
+  hasActiveCall?: boolean;
   createdAt?: unknown;
   updatedAt?: unknown;
 }
@@ -89,6 +90,7 @@ export class AdminSessionMapper {
       paymentStatus: dto.paymentStatus ?? null,
       amountPaidUsd: dto.amountPaidUsd ?? null,
       cancellationReason: dto.cancellationReason ?? null,
+      hasActiveCall: dto.hasActiveCall === true,
       createdAt: readRequiredTimestamp(dto.createdAt, now),
       updatedAt: readRequiredTimestamp(dto.updatedAt, now),
     };
@@ -116,10 +118,7 @@ export class SessionTimelineMapper {
 }
 
 export class SessionCompensationMapper {
-  static fromFirestore(
-    id: string,
-    dto: CompensationFirestoreDto,
-  ): SessionCompensationSummary {
+  static fromFirestore(id: string, dto: CompensationFirestoreDto): SessionCompensationSummary {
     const now = new Date();
     return {
       id: dto.compensationId ?? id,

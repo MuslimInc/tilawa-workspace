@@ -41,6 +41,13 @@ export const routes: Routes = [
       { path: 'quran-sessions/users', component: QuranSessionsUsersComponent },
       { path: 'quran-sessions/sessions', component: SessionsComponent },
       {
+        path: 'quran-sessions/active-sessions',
+        loadComponent: () =>
+          import(
+            './features/quran-sessions/active-sessions/active-sessions.component'
+          ).then((m) => m.ActiveSessionsComponent),
+      },
+      {
         // Lazy-loaded: the session detail screen (incl. call tracking) is
         // pulled into its own chunk, keeping it out of the initial bundle.
         path: 'quran-sessions/sessions/:id',
@@ -48,6 +55,13 @@ export const routes: Routes = [
           import(
             './features/quran-sessions/session-detail/session-detail.component'
           ).then((m) => m.SessionDetailComponent),
+      },
+      {
+        path: 'quran-sessions/create-test-session',
+        loadComponent: () =>
+          import(
+            './features/quran-sessions/create-test-session/create-test-session.component'
+          ).then((m) => m.CreateTestSessionComponent),
       },
       { path: 'quran-sessions/reports', component: SessionReportsComponent },
       {

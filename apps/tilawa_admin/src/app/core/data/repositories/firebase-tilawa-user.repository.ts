@@ -3,6 +3,10 @@ import {
   Firestore,
   collection,
   collectionCount,
+  query,
+  getDocs,
+  where,
+  limit,
 } from '@angular/fire/firestore';
 import { firstValueFrom } from 'rxjs';
 
@@ -84,5 +88,42 @@ export class FirebaseTilawaUserRepository implements TilawaUserRepository {
         (user.displayName?.toLowerCase().includes(search) ?? false) ||
         (user.email?.toLowerCase().includes(search) ?? false),
     );
+  }
+
+  async searchByPrefix(searchTerm: string): Promise<TilawaUser[]> {
+    const normalized = searchTerm.trim().toLowerCase();
+    if (!normalized) {
+      return [];
+    }
+
+    // Prefix search bounds
+    const endBound = normalized + '\uf8ff';
+    const usersCol = collection(this.firestore, QuranSessionsPaths.users);
+
+    const emailQuery = getDocs(
+      query(usersCol, where('email', '>=', normalized), where('email', '<=', endBound), limit(10))
+    );
+
+    // Wait, the standard users collection doesn't have a lowercase display name field natively indexed.
+    // If displayName isn't consistently lowercase, the prefix search on it might miss capitalized names.
+    // For an admin test tool, matching by email is extremely precise and safe.
+    // However, I'll attempt both just in case, but rely heavily on email.
+    const nameQuery = getDocs(
+      query(usersCol, where('displayName', '>=', normalized), where('displayName', '<=', endBound), limit(10))
+    );
+
+    const [emailSnap, nameSnap] = await Promise.all([emailQuery, nameQuery]);
+
+    const resultsMap = new Map<string, TilawaUser>();
+
+    emailSnap.docs.forEach((doc) => {
+      resultsMap.set(doc.id, this.mapUser(doc.id, doc.data() as TilawaUserFirestoreDto));
+    });
+
+    nameSnap.docs.forEach((doc) => {
+      resultsMap.set(doc.id, this.mapUser(doc.id, doc.data() as TilawaUserFirestoreDto));
+    });
+
+    return Array.from(resultsMap.values());
   }
 }

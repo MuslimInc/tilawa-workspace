@@ -25,6 +25,8 @@ import {
   GetCallTrackingSummaryUseCase,
   ListCallEventsUseCase,
 } from '../../domain/usecases/call-tracking.usecases';
+import { TEACHER_PROFILE_REPOSITORY } from '../../domain/repositories/teacher-profile.repository';
+import { QURAN_SESSIONS_USER_REPOSITORY } from '../../domain/repositories/quran-sessions-user.repository';
 import {
   CancelSessionUseCase,
   MarkSessionNoShowUseCase,
@@ -37,7 +39,6 @@ import { ListSessionReportsUseCase } from '../../domain/usecases/session-report.
 import { GetSessionReportUseCase } from '../../domain/usecases/session-report.usecases';
 import { ListSessionDisputesUseCase } from '../../domain/usecases/session-dispute.usecases';
 import { GetSessionDisputeUseCase } from '../../domain/usecases/session-dispute.usecases';
-import { QURAN_SESSIONS_USER_REPOSITORY } from '../../domain/repositories/quran-sessions-user.repository';
 import { SESSION_READ_REPOSITORY } from '../../domain/repositories/session-read.repository';
 
 const emptyPage = { items: [], nextCursor: null, hasMore: false };
@@ -149,6 +150,19 @@ describe('browse list facades sort', () => {
           { provide: IssueSessionCompensationUseCase, useValue: noopUseCase },
           { provide: ConfirmSessionRescheduleUseCase, useValue: noopUseCase },
           { provide: ApproveSessionRefundUseCase, useValue: noopUseCase },
+          {
+            provide: TEACHER_PROFILE_REPOSITORY,
+            useValue: { list: vi.fn(), getById: vi.fn() },
+          },
+          {
+            provide: QURAN_SESSIONS_USER_REPOSITORY,
+            useValue: {
+              list: vi.fn(),
+              listMatchingUserIds: vi.fn(),
+              getById: vi.fn(),
+              getByIds: vi.fn(),
+            },
+          },
         ],
       });
     });

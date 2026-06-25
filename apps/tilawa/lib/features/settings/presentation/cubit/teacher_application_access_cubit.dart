@@ -87,7 +87,7 @@ class TeacherApplicationAccessCubit
 
     final config = quranSessionsFeatureConfig();
     if (!config.teacherApplicationEnabled) {
-      if (generation != _loadGeneration) return;
+      if (isClosed || generation != _loadGeneration) return;
       emit(
         const TeacherApplicationAccessState(
           canApplyAsTeacher: false,
@@ -100,7 +100,7 @@ class TeacherApplicationAccessCubit
 
     final userId = quranSessionsCurrentUserId(getIt);
     if (userId == null) {
-      if (generation != _loadGeneration) return;
+      if (isClosed || generation != _loadGeneration) return;
       emit(
         const TeacherApplicationAccessState(
           canApplyAsTeacher: false,
@@ -112,11 +112,13 @@ class TeacherApplicationAccessCubit
     }
 
     if (!silent) {
-      emit(state.copyWith(isLoading: true));
+      if (!isClosed) {
+        emit(state.copyWith(isLoading: true));
+      }
     }
 
     final result = await _useCase(userId);
-    if (generation != _loadGeneration) return;
+    if (isClosed || generation != _loadGeneration) return;
 
     emit(
       TeacherApplicationAccessState(

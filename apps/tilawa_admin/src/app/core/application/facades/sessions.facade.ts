@@ -22,11 +22,7 @@ import {
 } from '../../domain/usecases/session-moderation.usecases';
 import { AdminSessionFilters } from '../../domain/entities/admin-session-summary.entity';
 import { ADMIN_SESSION_DEFAULT_SORT } from '../../domain/entities/admin-session-summary.entity';
-import {
-  DEFAULT_PAGE_SIZE,
-  SortRequest,
-  sortsEqual,
-} from '../../domain/entities/pagination.types';
+import { DEFAULT_PAGE_SIZE, SortRequest, sortsEqual } from '../../domain/entities/pagination.types';
 import {
   NoShowClassification,
   SessionCompensationType,
@@ -38,8 +34,17 @@ import {
   CallTrackingVm,
   QuranSessionsViewModelMapper,
   SessionCompensationVm,
+  SessionParticipantsVm,
   SessionTimelineEventVm,
 } from '../../data/view-models/quran-sessions.view-model';
+import {
+  TEACHER_PROFILE_REPOSITORY,
+  TeacherProfileRepository,
+} from '../../domain/repositories/teacher-profile.repository';
+import {
+  QURAN_SESSIONS_USER_REPOSITORY,
+  QuranSessionsUserRepository,
+} from '../../domain/repositories/quran-sessions-user.repository';
 
 const CALL_EVENTS_PAGE_SIZE = 20;
 
@@ -59,6 +64,8 @@ export class SessionsFacade {
   private readonly compensationUseCase = inject(IssueSessionCompensationUseCase);
   private readonly rescheduleUseCase = inject(ConfirmSessionRescheduleUseCase);
   private readonly refundUseCase = inject(ApproveSessionRefundUseCase);
+  private readonly teacherProfileRepository = inject(TEACHER_PROFILE_REPOSITORY);
+  private readonly userRepository = inject(QURAN_SESSIONS_USER_REPOSITORY);
 
   private readonly listState = signal<LoadState>('idle');
   private readonly listError = signal<string | null>(null);
@@ -78,6 +85,8 @@ export class SessionsFacade {
   private readonly callEventsState = signal<LoadState>('idle');
   private readonly callEventsCursor = signal<string | null>(null);
   private readonly callEventsHasMore = signal(false);
+  private readonly participantsState = signal<SessionParticipantsVm | null>(null);
+  private readonly participantsLoading = signal(false);
   private activeSessionId: string | null = null;
 
   private readonly actionLoading = signal(false);
@@ -97,6 +106,8 @@ export class SessionsFacade {
   readonly callEvents = this.callEventsItems.asReadonly();
   readonly callEventsLoadState = this.callEventsState.asReadonly();
   readonly canLoadMoreCallEvents = this.callEventsHasMore.asReadonly();
+  readonly sessionParticipants = this.participantsState.asReadonly();
+  readonly isParticipantsLoading = this.participantsLoading.asReadonly();
   readonly isActionLoading = this.actionLoading.asReadonly();
 
   async loadList(
@@ -123,9 +134,7 @@ export class SessionsFacade {
         sort,
       });
 
-      const mapped = page.items.map((item) =>
-        QuranSessionsViewModelMapper.toSessionListItem(item),
-      );
+      const mapped = page.items.map((item) => QuranSessionsViewModelMapper.toSessionListItem(item));
 
       this.listItems.set(append ? [...this.listItems(), ...mapped] : mapped);
       this.nextCursor.set(page.nextCursor);
@@ -133,9 +142,7 @@ export class SessionsFacade {
       this.listState.set('success');
     } catch (error) {
       this.listState.set('error');
-      this.listError.set(
-        error instanceof Error ? error.message : 'Failed to load sessions.',
-      );
+      this.listError.set(error instanceof Error ? error.message : 'Failed to load sessions.');
     }
   }
 
@@ -150,10 +157,7 @@ export class SessionsFacade {
     });
   }
 
-  async changeSort(
-    filters: AdminSessionFilters,
-    sort: SortRequest,
-  ): Promise<void> {
+  async changeSort(filters: AdminSessionFilters, sort: SortRequest): Promise<void> {
     await this.loadList(filters, { sort, append: false, cursor: null });
   }
 
@@ -171,40 +175,68 @@ export class SessionsFacade {
         this.timeline.set([]);
         this.compensations.set([]);
         this.callTracking.set(null);
+        this.participantsState.set(null);
         return;
       }
 
       this.activeSessionId = session.sessionId;
 
-      // One round-trip for everything tied to the detail view. The call
-      // summary is a single aggregated doc and is only read when the booking
-      // actually has a session — no read otherwise. Raw events are NOT loaded
-      // here; they are fetched lazily on demand.
-      const [events, comps, callSummary] = await Promise.all([
-        this.timelineUseCase.execute(session.aggregateId),
-        this.compensationsUseCase.execute(session.id),
-        session.sessionId
-          ? this.callSummaryUseCase.execute(session.sessionId)
-          : Promise.resolve(null),
-      ]);
-
+      // Render critical session metadata immediately without blocking.
       this.detailItem.set(QuranSessionsViewModelMapper.toSessionDetail(session));
-      this.timeline.set(events.map(QuranSessionsViewModelMapper.toTimelineEvent));
-      this.compensations.set(comps.map(QuranSessionsViewModelMapper.toCompensation));
-      this.callTracking.set(
-        callSummary
-          ? QuranSessionsViewModelMapper.toCallTracking(
-              callSummary,
-              session.callType,
-            )
-          : null,
-      );
       this.detailState.set('success');
+
+      // Phase 2 — secondary (non-blocking): timeline, compensations, call tracking, and participants.
+      this.participantsLoading.set(true);
+
+      this.timelineUseCase.execute(session.aggregateId)
+        .then(events => this.timeline.set(events.map(QuranSessionsViewModelMapper.toTimelineEvent)))
+        .catch(error => console.error('Failed to load timeline:', error));
+
+      this.compensationsUseCase.execute(session.id)
+        .then(comps => this.compensations.set(comps.map(QuranSessionsViewModelMapper.toCompensation)))
+        .catch(error => console.error('Failed to load compensations:', error));
+
+      const callSummaryPromise = session.sessionId
+        ? this.callSummaryUseCase.execute(session.sessionId)
+        : Promise.resolve(null);
+
+      const teacherProfilePromise = this.teacherProfileRepository.getById(session.teacherId);
+
+      const studentUserPromise = session.studentId
+        ? this.userRepository.getById(session.studentId)
+        : Promise.resolve(null);
+
+      const teacherUserPromise = teacherProfilePromise.then((profile) =>
+        profile?.userId ? this.userRepository.getById(profile.userId) : Promise.resolve(null),
+      );
+
+      Promise.all([
+        callSummaryPromise,
+        teacherProfilePromise,
+        studentUserPromise,
+        teacherUserPromise,
+      ])
+        .then(([callSummary, teacherProfile, studentUser, teacherUser]) => {
+          const callTrackingVm = callSummary
+            ? QuranSessionsViewModelMapper.toCallTracking(callSummary, session.callType)
+            : null;
+          this.callTracking.set(callTrackingVm);
+
+          this.participantsState.set(
+            QuranSessionsViewModelMapper.toSessionParticipants({
+              session,
+              teacherProfile,
+              teacherUser,
+              studentUser,
+              callTracking: callTrackingVm,
+            }),
+          );
+        })
+        .catch((error) => console.error('Failed to load call tracking/participants:', error))
+        .finally(() => this.participantsLoading.set(false));
     } catch (error) {
       this.detailState.set('error');
-      this.detailError.set(
-        error instanceof Error ? error.message : 'Failed to load session.',
-      );
+      this.detailError.set(error instanceof Error ? error.message : 'Failed to load session.');
     }
   }
 
@@ -228,17 +260,13 @@ export class SessionsFacade {
         pageSize: CALL_EVENTS_PAGE_SIZE,
         cursor: null,
       });
-      this.callEventsItems.set(
-        page.items.map(QuranSessionsViewModelMapper.toCallEvent),
-      );
+      this.callEventsItems.set(page.items.map(QuranSessionsViewModelMapper.toCallEvent));
       this.callEventsCursor.set(page.nextCursor);
       this.callEventsHasMore.set(page.hasMore);
       this.callEventsState.set('success');
     } catch (error) {
       this.callEventsState.set('error');
-      this.detailError.set(
-        error instanceof Error ? error.message : 'Failed to load call events.',
-      );
+      this.detailError.set(error instanceof Error ? error.message : 'Failed to load call events.');
     }
   }
 
@@ -272,6 +300,8 @@ export class SessionsFacade {
     this.callEventsState.set('idle');
     this.callEventsCursor.set(null);
     this.callEventsHasMore.set(false);
+    this.participantsState.set(null);
+    this.participantsLoading.set(false);
     this.activeSessionId = null;
   }
 
@@ -307,21 +337,12 @@ export class SessionsFacade {
     amountUsd?: number,
   ): Promise<void> {
     await this.runAction(async () => {
-      await this.compensationUseCase.execute(
-        bookingId,
-        compensationType,
-        reason,
-        amountUsd,
-      );
+      await this.compensationUseCase.execute(bookingId, compensationType, reason, amountUsd);
       await this.loadDetail(bookingId);
     });
   }
 
-  async confirmReschedule(
-    requestId: string,
-    bookingId: string,
-    accept: boolean,
-  ): Promise<void> {
+  async confirmReschedule(requestId: string, bookingId: string, accept: boolean): Promise<void> {
     await this.runAction(async () => {
       await this.rescheduleUseCase.execute(requestId, accept);
       await this.loadDetail(bookingId);

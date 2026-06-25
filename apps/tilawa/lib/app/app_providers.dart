@@ -47,8 +47,15 @@ class AppProviders {
       providers: providers,
       child: ChangeNotifierProvider<QuranPlayerChromeNotifier>(
         create: (_) => QuranPlayerChromeNotifier(),
-        child: SessionRevokedNavigationListener(
-          child: AccountDeletionNavigationListener(child: child),
+        child: BlocListener<AuthBloc, AuthState>(
+          listenWhen: (previous, current) =>
+              previous is! AuthAuthenticated && current is AuthAuthenticated,
+          listener: (context, state) {
+            context.read<SessionValidityCubit>().resetRevocation();
+          },
+          child: SessionRevokedNavigationListener(
+            child: AccountDeletionNavigationListener(child: child),
+          ),
         ),
       ),
     );

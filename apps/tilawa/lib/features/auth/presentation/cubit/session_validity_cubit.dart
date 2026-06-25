@@ -84,6 +84,15 @@ class SessionValidityCubit extends Cubit<SessionValidityState> {
     }
   }
 
+  /// Clears the revoked latch so a freshly re-authenticated user can access
+  /// protected routes again. Called when [AuthBloc] transitions to
+  /// [AuthAuthenticated] — safe to call when already cleared (no-op).
+  void resetRevocation() {
+    if (state.revoked || state.isChecking) {
+      emit(const SessionValidityState());
+    }
+  }
+
   @override
   Future<void> close() {
     _revokedSubscription.cancel();

@@ -381,6 +381,22 @@ export async function recordCallTelemetryEventInTransaction(
       { merge: true },
     );
 
+    // Denormalize hasActiveCall onto the booking doc so admin active-sessions
+    // can find sessions with live calls without scanning all bookings or
+    // depending on the scheduled startsAt time window. Early joins (before
+    // startsAt) are correctly surfaced because the signal comes from call
+    // tracking, not the schedule.
+    const bookingId = (session.bookingId as string | undefined) ?? "";
+    if (bookingId) {
+      const hasActiveCall =
+        state.actualCallStartedAt != null && state.callEndedAt == null;
+      tx.update(db.collection("quran_bookings").doc(bookingId), {
+        hasActiveCall,
+        callTrackingUpdatedAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+    }
+
     return { replayed: false };
   });
 }

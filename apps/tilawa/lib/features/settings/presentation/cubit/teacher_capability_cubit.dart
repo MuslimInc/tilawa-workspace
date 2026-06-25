@@ -70,25 +70,27 @@ class TeacherCapabilityCubit extends Cubit<SettingsTeacherCapabilityLoadState> {
     final generation = ++_loadGeneration;
 
     if (!silent) {
-      emit(state.copyWith(isLoading: true));
+      if (!isClosed) {
+        emit(state.copyWith(isLoading: true));
+      }
     }
 
     final config = quranSessionsFeatureConfig();
     if (!config.showProfileTeacherEntry) {
-      if (generation != _loadGeneration) return;
+      if (isClosed || generation != _loadGeneration) return;
       emit(state.copyWith(isLoading: false, hasLoaded: true));
       return;
     }
 
     final userId = quranSessionsCurrentUserId(getIt);
     if (userId == null) {
-      if (generation != _loadGeneration) return;
+      if (isClosed || generation != _loadGeneration) return;
       emit(state.copyWith(isLoading: false, hasLoaded: true));
       return;
     }
 
     final result = await _useCase(userId);
-    if (generation != _loadGeneration) return;
+    if (isClosed || generation != _loadGeneration) return;
 
     emit(
       state.copyWith(

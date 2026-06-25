@@ -61,6 +61,7 @@ export class SessionDetailComponent implements OnInit {
   readonly callEvents = this.facade.callEvents;
   readonly callEventsLoadState = this.facade.callEventsLoadState;
   readonly canLoadMoreCallEvents = this.facade.canLoadMoreCallEvents;
+  readonly participants = this.facade.sessionParticipants;
   readonly isActionLoading = this.facade.isActionLoading;
 
   readonly eventsPanelOpen = signal(false);

@@ -2,28 +2,19 @@ import { Injectable, inject } from '@angular/core';
 import { Firestore, doc, getDoc, where } from '@angular/fire/firestore';
 
 import { QuranSessionsPaths } from '../paths/quran-sessions.paths';
-import {
-  SessionReportFirestoreDto,
-  SessionReportMapper,
-} from '../mappers/session-report.mapper';
+import { SessionReportFirestoreDto, SessionReportMapper } from '../mappers/session-report.mapper';
 import {
   SESSION_REPORT_DEFAULT_SORT,
   SESSION_REPORT_SORT_FIELDS,
   SessionReportFilters,
   SessionReportSummary,
 } from '../../domain/entities/session-report-summary.entity';
-import {
-  DEFAULT_PAGE_SIZE,
-  PageRequest,
-  PageResult,
-} from '../../domain/entities/pagination.types';
+import { DEFAULT_PAGE_SIZE, PageRequest, PageResult } from '../../domain/entities/pagination.types';
 import { SessionReportReadRepository } from '../../domain/repositories/session-report-read.repository';
 import { fetchPaginatedList } from '../firestore/firestore-list-query.util';
 
 @Injectable({ providedIn: 'root' })
-export class FirebaseSessionReportReadRepository
-  implements SessionReportReadRepository
-{
+export class FirebaseSessionReportReadRepository implements SessionReportReadRepository {
   private readonly firestore = inject(Firestore);
 
   async list(
@@ -31,7 +22,7 @@ export class FirebaseSessionReportReadRepository
     page: PageRequest,
   ): Promise<PageResult<SessionReportSummary>> {
     const pageSize = page.pageSize || DEFAULT_PAGE_SIZE;
-    const serverFilters = this.buildQueryConstraints(filters);
+    const serverFilters = buildSessionReportQueryConstraints(filters);
 
     const result = await fetchPaginatedList({
       firestore: this.firestore,
@@ -41,10 +32,7 @@ export class FirebaseSessionReportReadRepository
       defaultSort: SESSION_REPORT_DEFAULT_SORT,
       allowedSortFields: SESSION_REPORT_SORT_FIELDS,
       mapDoc: (id, data) =>
-        SessionReportMapper.fromFirestore(
-          id,
-          data as SessionReportFirestoreDto,
-        ),
+        SessionReportMapper.fromFirestore(id, data as SessionReportFirestoreDto),
     });
 
     const items = this.applyClientFilters(result.items, filters);
@@ -52,34 +40,11 @@ export class FirebaseSessionReportReadRepository
   }
 
   async getById(reportId: string): Promise<SessionReportSummary | null> {
-    const snap = await getDoc(
-      doc(this.firestore, QuranSessionsPaths.sessionReports, reportId),
-    );
+    const snap = await getDoc(doc(this.firestore, QuranSessionsPaths.sessionReports, reportId));
     if (!snap.exists()) {
       return null;
     }
-    return SessionReportMapper.fromFirestore(
-      snap.id,
-      snap.data() as SessionReportFirestoreDto,
-    );
-  }
-
-  private buildQueryConstraints(filters: SessionReportFilters) {
-    const constraints: ReturnType<typeof where>[] = [];
-
-    if (filters.status) {
-      constraints.push(where('status', '==', filters.status));
-    }
-
-    if (filters.severity) {
-      constraints.push(where('severity', '==', filters.severity));
-    }
-
-    if (filters.category?.trim()) {
-      constraints.push(where('category', '==', filters.category.trim()));
-    }
-
-    return constraints;
+    return SessionReportMapper.fromFirestore(snap.id, snap.data() as SessionReportFirestoreDto);
   }
 
   private applyClientFilters(
@@ -100,4 +65,28 @@ export class FirebaseSessionReportReadRepository
         (item.bookingId?.toLowerCase().includes(search) ?? false),
     );
   }
+}
+
+/**
+ * Server-side query constraints for the reports queue. Exported for
+ * query-contract tests. `search` stays client-side (current page only).
+ */
+export function buildSessionReportQueryConstraints(
+  filters: SessionReportFilters,
+): ReturnType<typeof where>[] {
+  const constraints: ReturnType<typeof where>[] = [];
+
+  if (filters.status) {
+    constraints.push(where('status', '==', filters.status));
+  }
+
+  if (filters.severity) {
+    constraints.push(where('severity', '==', filters.severity));
+  }
+
+  if (filters.category?.trim()) {
+    constraints.push(where('category', '==', filters.category.trim()));
+  }
+
+  return constraints;
 }

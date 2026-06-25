@@ -206,7 +206,9 @@ void main() {
       expect(result, isNull);
     });
 
-    testWidgets('does not redirect login route (loop guard)', (tester) async {
+    testWidgets('does not redirect on login route (not a sessions path)', (
+      tester,
+    ) async {
       whenListen(
         mockSessionCubit,
         Stream<SessionValidityState>.empty(),

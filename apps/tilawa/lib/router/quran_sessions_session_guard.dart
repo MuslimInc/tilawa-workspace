@@ -34,6 +34,10 @@ String? quranSessionsFeatureRedirect(GoRouterState state) {
 ///
 /// Uses cached [SessionValidityCubit] state only — no Firestore read per navigation.
 /// Backend callables remain the enforcement layer for mutations.
+///
+/// The [SessionValidityCubit.revoked] latch is reset by a [BlocListener] on
+/// [AuthBloc] at the app root when the user re-authenticates, so a freshly
+/// signed-in user is not permanently locked out after a prior revocation.
 String? quranSessionsSessionRedirect(
   BuildContext context,
   GoRouterState state,
@@ -43,19 +47,14 @@ String? quranSessionsSessionRedirect(
     return null;
   }
 
-  final loginLocation = const LoginRoute().location;
-  if (path == loginLocation) {
-    return null;
-  }
-
   try {
     if (context.read<SessionValidityCubit>().state.revoked) {
-      return loginLocation;
+      return const LoginRoute().location;
     }
 
     final authState = context.read<AuthBloc>().state;
     if (authState is! AuthAuthenticated) {
-      return loginLocation;
+      return const LoginRoute().location;
     }
   } catch (_) {
     // BlocProvider not mounted yet — defer to route builders.
