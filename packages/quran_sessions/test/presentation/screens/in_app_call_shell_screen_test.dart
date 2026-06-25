@@ -1,3 +1,5 @@
+import 'dart:ui' show Tristate;
+
 import 'package:checks/checks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -81,6 +83,78 @@ void main() {
 
     expect(find.byKey(const Key('call_shell_mute')), findsNothing);
     expect(find.byKey(const Key('call_shell_end')), findsOneWidget);
+  });
+
+  testWidgets('Toggle controls swap active background on state change', (
+    tester,
+  ) async {
+    final gateway = _RecordingCallControlGateway();
+    late ThemeData theme;
+
+    await tester.pumpWidget(
+      _shellApp(
+        Builder(
+          builder: (context) {
+            theme = Theme.of(context);
+            return InAppCallShellScreen(
+              sessionId: 'session_1',
+              callControlGateway: gateway,
+            );
+          },
+        ),
+      ),
+    );
+
+    final toggleTokens = theme.componentTokens.iconToggle;
+    final activeColor = toggleTokens.activeBackgroundColor;
+    final inactiveColor = toggleTokens.inactiveBackgroundColor;
+
+    expect(
+      _callControlMaterialColor(tester, const Key('call_shell_mute')),
+      activeColor,
+    );
+    expect(
+      tester
+          .getSemantics(find.byKey(const Key('call_shell_mute')))
+          .flagsCollection
+          .isToggled,
+      Tristate.isTrue,
+    );
+
+    await tester.tap(find.byKey(const Key('call_shell_mute')));
+    await tester.pumpAndSettle();
+
+    expect(
+      _callControlMaterialColor(tester, const Key('call_shell_mute')),
+      inactiveColor,
+    );
+    expect(
+      tester
+          .getSemantics(find.byKey(const Key('call_shell_mute')))
+          .flagsCollection
+          .isToggled,
+      Tristate.isFalse,
+    );
+
+    expect(
+      _callControlMaterialColor(tester, const Key('call_shell_speaker')),
+      inactiveColor,
+    );
+
+    await tester.tap(find.byKey(const Key('call_shell_speaker')));
+    await tester.pumpAndSettle();
+
+    expect(
+      _callControlMaterialColor(tester, const Key('call_shell_speaker')),
+      activeColor,
+    );
+    expect(
+      tester
+          .getSemantics(find.byKey(const Key('call_shell_speaker')))
+          .flagsCollection
+          .isToggled,
+      Tristate.isTrue,
+    );
   });
 
   testWidgets('Flip camera disabled when video is off', (tester) async {
@@ -195,6 +269,14 @@ Widget _shellApp(Widget home) {
     builder: (context, child) => TilawaFeedbackHost(child: child!),
     home: home,
   );
+}
+
+Color _callControlMaterialColor(WidgetTester tester, Key key) {
+  final materialFinder = find.descendant(
+    of: find.byKey(key),
+    matching: find.byType(Material),
+  );
+  return tester.widget<Material>(materialFinder).color!;
 }
 
 class _RecordingCallControlGateway implements SessionCallControlGateway {
