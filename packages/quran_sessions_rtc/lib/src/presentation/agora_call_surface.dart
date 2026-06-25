@@ -240,7 +240,8 @@ class _VideoLayout extends StatelessWidget {
     final hasRemoteParticipant =
         remoteUid != null && channelId != null && channelId!.isNotEmpty;
     final showRemoteVideo = hasRemoteParticipant && remoteVideoReady;
-    final showLocalPiP = hasRemoteParticipant && localVideoReady;
+    final showLocalFullscreen = localVideoReady && !showRemoteVideo;
+    final showLocalPiP = localVideoReady && showRemoteVideo;
     final pipWidth = tokens.spaceXXL * 3.5;
     final pipHeight = tokens.spaceXXL * 4.625;
 
@@ -266,6 +267,13 @@ class _VideoLayout extends StatelessWidget {
               rtcEngine: engine,
               canvas: VideoCanvas(uid: remoteUid),
               connection: RtcConnection(channelId: channelId),
+            ),
+          )
+        else if (showLocalFullscreen)
+          AgoraVideoView(
+            controller: VideoViewController(
+              rtcEngine: engine,
+              canvas: const VideoCanvas(uid: 0),
             ),
           )
         else

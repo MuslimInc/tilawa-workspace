@@ -103,4 +103,31 @@ void main() {
     expect(rtc.agoraAppId, customId);
     expect(rtc.isAgoraEnabled, isTrue);
   });
+
+  test(
+    'play_production release keeps agora and webrtc out of provider set',
+    () {
+      const config = AppLaunchConfig();
+
+      final rtc = resolveRtcLaunchConfig(
+        config,
+        distribution: 'play_production',
+        debugMode: false,
+      );
+
+      expect(rtc.enabledProviders, containsAll(['external', 'mock']));
+      expect(rtc.enabledProviders, isNot(contains('agora')));
+      expect(rtc.enabledProviders, isNot(contains('webrtc')));
+      expect(rtc.isAgoraEnabled, isFalse);
+      expect(rtc.isWebRtcEnabled, isFalse);
+      expect(
+        resolveVoiceVideoProviderHint(
+          config,
+          distribution: 'play_production',
+          debugMode: false,
+        ),
+        SessionCallProviderKind.mock,
+      );
+    },
+  );
 }

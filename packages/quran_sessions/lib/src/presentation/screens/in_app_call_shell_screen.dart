@@ -17,6 +17,63 @@ typedef InAppCallSurfaceBuilder =
       required SessionCallProviderKind callProviderKind,
     });
 
+SystemUiOverlayStyle _callShellSystemUiOverlayStyle(
+  ThemeData theme, {
+  required bool hasCallSurface,
+}) {
+  final Color statusBackground = hasCallSurface
+      ? theme.colorScheme.scrim.withValues(alpha: 1)
+      : theme.colorScheme.surfaceContainerHigh;
+  final Brightness statusBarBrightness = ThemeData.estimateBrightnessForColor(
+    statusBackground,
+  );
+  final Brightness statusIconBrightness = statusBarBrightness == Brightness.dark
+      ? Brightness.light
+      : Brightness.dark;
+
+  return SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness: statusIconBrightness,
+    statusBarBrightness: statusBarBrightness,
+    systemNavigationBarColor: Colors.transparent,
+    systemNavigationBarDividerColor: Colors.transparent,
+    systemNavigationBarIconBrightness: statusIconBrightness,
+    systemStatusBarContrastEnforced: false,
+    systemNavigationBarContrastEnforced: false,
+  );
+}
+
+/// Approximates [AppSystemChromeStyle.buildDefaultAppStyle] when leaving call.
+SystemUiOverlayStyle _restoreRouteSystemUiOverlayStyle(ThemeData theme) {
+  final Color statusBackground = theme.scaffoldBackgroundColor;
+  final Color navigationBarColor =
+      theme.componentTokens.adaptiveShell.bottomNavBackgroundColor;
+
+  final Brightness statusBarBrightness = ThemeData.estimateBrightnessForColor(
+    statusBackground,
+  );
+  final Brightness statusIconBrightness = statusBarBrightness == Brightness.dark
+      ? Brightness.light
+      : Brightness.dark;
+  final Brightness navBarBrightness = ThemeData.estimateBrightnessForColor(
+    navigationBarColor,
+  );
+  final Brightness navIconBrightness = navBarBrightness == Brightness.dark
+      ? Brightness.light
+      : Brightness.dark;
+
+  return SystemUiOverlayStyle(
+    statusBarColor: statusBackground.withValues(alpha: 1),
+    statusBarIconBrightness: statusIconBrightness,
+    statusBarBrightness: statusBarBrightness,
+    systemNavigationBarColor: navigationBarColor.withValues(alpha: 1),
+    systemNavigationBarDividerColor: Colors.transparent,
+    systemNavigationBarIconBrightness: navIconBrightness,
+    systemStatusBarContrastEnforced: false,
+    systemNavigationBarContrastEnforced: false,
+  );
+}
+
 /// In-app call surface for mock/Agora/WebRTC joins.
 ///
 /// Host app pushes this after [JoinSessionUseCase] succeeds for non-external
@@ -51,8 +108,15 @@ class _InAppCallShellScreenState extends State<InAppCallShellScreen> {
   QuranSessionCallControlCubit? _callControlCubit;
   InAppCallConnectionPhase _connectionPhase =
       InAppCallConnectionPhase.connecting;
+  SystemUiOverlayStyle? _restoreOverlayStyle;
 
   bool get _isVideoCall => widget.callType == SessionCallType.videoCall;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _restoreOverlayStyle = _restoreRouteSystemUiOverlayStyle(Theme.of(context));
+  }
 
   @override
   void initState() {
@@ -71,10 +135,29 @@ class _InAppCallShellScreenState extends State<InAppCallShellScreen> {
         ),
       );
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _applyCallShellSystemUiOverlay();
+    });
+  }
+
+  void _applyCallShellSystemUiOverlay() {
+    if (!mounted) {
+      return;
+    }
+    SystemChrome.setSystemUIOverlayStyle(
+      _callShellSystemUiOverlayStyle(
+        Theme.of(context),
+        hasCallSurface: widget.callSurface != null,
+      ),
+    );
   }
 
   @override
   void dispose() {
+    final restoreStyle = _restoreOverlayStyle;
+    if (restoreStyle != null) {
+      SystemChrome.setSystemUIOverlayStyle(restoreStyle);
+    }
     final cubit = _callControlCubit;
     final gateway = widget.callControlGateway;
     final ended = cubit?.state.hasEndedCall ?? false;
@@ -128,54 +211,8 @@ class _InAppCallShellScreenState extends State<InAppCallShellScreen> {
 
     return BlocProvider.value(
       value: cubit,
-      child:
-          BlocListener<
-            QuranSessionCallControlCubit,
-            QuranSessionCallControlState
-          >(
-            listenWhen: (previous, current) =>
-                current.feedback != null &&
-                current.feedback != previous.feedback,
-            listener: (context, state) {
-              final message = _feedbackMessage(
-                context.quranSessionsL10n,
-                state.feedback,
-              );
-              if (message == null) {
-                return;
-              }
-              TilawaFeedback.showToast(
-                context,
-                message: message,
-                variant: state.feedback == CallControlFeedback.actionFailed
-                    ? TilawaFeedbackVariant.error
-                    : TilawaFeedbackVariant.info,
-              );
-              context.read<QuranSessionCallControlCubit>().clearFeedback();
-            },
-            child: shell,
-          ),
+      child: shell,
     );
-  }
-
-  String? _feedbackMessage(
-    QuranSessionsLocalizations l10n,
-    CallControlFeedback? feedback,
-  ) {
-    return switch (feedback) {
-      CallControlFeedback.microphoneMuted => l10n.inAppCallShellMicrophoneMuted,
-      CallControlFeedback.microphoneUnmuted =>
-        l10n.inAppCallShellMicrophoneUnmuted,
-      CallControlFeedback.cameraOff => l10n.inAppCallShellCameraOff,
-      CallControlFeedback.cameraOn => l10n.inAppCallShellCameraOn,
-      CallControlFeedback.switchCameraBlocked =>
-        l10n.inAppCallShellSwitchCameraBlocked,
-      CallControlFeedback.speakerOn => l10n.inAppCallShellSpeakerOn,
-      CallControlFeedback.speakerOff => l10n.inAppCallShellSpeakerOff,
-      CallControlFeedback.actionFailed =>
-        l10n.inAppCallShellControlActionFailed,
-      null => null,
-    };
   }
 }
 
@@ -213,6 +250,10 @@ class _InAppCallShellView extends StatelessWidget {
     final statusSubtitle = _resolveStatusSubtitle(l10n);
     final displayName = participantName ?? l10n.inAppCallShellTitle;
     final cubit = _readCallControlCubit(context);
+    final overlayStyle = _callShellSystemUiOverlayStyle(
+      Theme.of(context),
+      hasCallSurface: hasCallSurface,
+    );
 
     return PopScope(
       canPop: false,
@@ -223,10 +264,8 @@ class _InAppCallShellView extends StatelessWidget {
         unawaited(onEndCall());
       },
       child: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle.light.copyWith(
-          statusBarColor: Colors.transparent,
-          systemNavigationBarColor: Colors.transparent,
-        ),
+        sized: false,
+        value: overlayStyle,
         child: Scaffold(
           backgroundColor: colorScheme.scrim,
           body: Stack(
@@ -256,7 +295,7 @@ class _InAppCallShellView extends StatelessWidget {
                         alignment: AlignmentDirectional.centerStart,
                         child: _CallChromeIconButton(
                           key: const Key('call_shell_back'),
-                          icon: Icons.arrow_back_rounded,
+                          iconWidget: const BackButtonIcon(),
                           label: l10n.inAppCallShellEndCall,
                           onPressed: cubit?.state.canEndCall ?? true
                               ? () => unawaited(onEndCall())
@@ -561,7 +600,6 @@ class _CallControlsRow extends StatelessWidget {
               ? onSwitchCamera
               : null,
           isLoading: state.isSwitchCameraLoading,
-          isActive: state.isCameraEnabled,
         ),
     ];
 
@@ -652,14 +690,16 @@ class _CallGlassPanel extends StatelessWidget {
 class _CallChromeIconButton extends StatelessWidget {
   const _CallChromeIconButton({
     super.key,
-    required this.icon,
+    this.icon,
+    this.iconWidget,
     required this.label,
     required this.onPressed,
     this.isLoading = false,
     this.isActive = false,
-  });
+  }) : assert(icon != null || iconWidget != null);
 
-  final IconData icon;
+  final IconData? icon;
+  final Widget? iconWidget;
   final String label;
   final VoidCallback? onPressed;
   final bool isLoading;
@@ -667,46 +707,65 @@ class _CallChromeIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
-    final colorScheme = Theme.of(context).colorScheme;
-    final composerTokens = Theme.of(context).componentTokens.immersiveComposer;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+    final composerTokens = theme.componentTokens.immersiveComposer;
+    final toggleTokens = theme.componentTokens.iconToggle;
     final size = composerTokens.headerButtonSize;
     final fillColor = isActive
-        ? colorScheme.primaryContainer
-        : composerTokens.headerIconButtonFillColor;
+        ? toggleTokens.activeBackgroundColor
+        : toggleTokens.inactiveBackgroundColor;
     final iconColor = isActive
         ? colorScheme.onPrimaryContainer
-        : colorScheme.onSurface;
+        : colorScheme.onSurfaceVariant;
 
     return Semantics(
       button: true,
+      toggled: isActive,
       label: label,
       enabled: onPressed != null,
-      child: Material(
-        color: fillColor,
-        shape: const CircleBorder(),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onPressed,
-          customBorder: const CircleBorder(),
-          child: SizedBox(
-            width: size,
-            height: size,
-            child: isLoading
-                ? Padding(
-                    padding: EdgeInsets.all(tokens.spaceSmall),
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: iconColor,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minWidth: tokens.minInteractiveDimension,
+          minHeight: tokens.minInteractiveDimension,
+        ),
+        child: Material(
+          color: fillColor,
+          shape: const CircleBorder(),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onPressed,
+            customBorder: const CircleBorder(),
+            child: SizedBox(
+              width: size,
+              height: size,
+              child: isLoading
+                  ? Padding(
+                      padding: EdgeInsets.all(tokens.spaceSmall),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: iconColor,
+                      ),
+                    )
+                  : iconWidget != null
+                  ? IconTheme(
+                      data: IconThemeData(
+                        color: onPressed == null
+                            ? iconColor.withValues(alpha: 0.38)
+                            : iconColor,
+                        size: tokens.iconSizeMedium,
+                      ),
+                      child: iconWidget!,
+                    )
+                  : Icon(
+                      icon!,
+                      color: onPressed == null
+                          ? iconColor.withValues(alpha: 0.38)
+                          : iconColor,
+                      size: tokens.iconSizeMedium,
                     ),
-                  )
-                : Icon(
-                    icon,
-                    color: onPressed == null
-                        ? iconColor.withValues(alpha: 0.38)
-                        : iconColor,
-                    size: tokens.iconSizeMedium,
-                  ),
+            ),
           ),
         ),
       ),

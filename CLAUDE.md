@@ -11,8 +11,9 @@ simplicity, surgical diffs, verifiable goals). Canonical copy:
 - Claude Code / other: this section + [`.agent/rules/karpathy-guidelines.md`](.agent/rules/karpathy-guidelines.md)
 
 Before implementing: state assumptions, define success criteria (e.g.
-`dart analyze`, `flutter test test/features/<feature>/`), then loop until they
-pass. Every changed line should trace to the user's request.
+`melos run fix:format`, `dart analyze`, `flutter test test/features/<feature>/`),
+then loop until they pass. Every changed line should trace to the user's request.
+Formatting: see [`.cursor/rules/tilawa-dart.mdc`](.cursor/rules/tilawa-dart.mdc).
 
 ---
 
@@ -107,9 +108,9 @@ Existing examples of the sibling pattern:
 Run from the workspace root (or `apps/tilawa/` for app-only commands):
 
 ```sh
+melos run fix:format                  # dart fix + format (workspace root; after edits, before commit)
 melos run gen                         # l10n + build_runner (--workspace)
 flutter test                          # all tests (from apps/tilawa)
 flutter test test/features/athkar     # single feature
 dart analyze                          # static analysis
-dart fix --apply                      # auto-fix lint issues
 ```

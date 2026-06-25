@@ -38,6 +38,11 @@ void main() {
         check(killSwitch.showEmptyStateTeacherEntry).isFalse();
       },
     );
+
+    test('walletEnabled defaults false for stable production scope', () {
+      const config = QuranSessionsFeatureConfig();
+      check(config.walletEnabled).isFalse();
+    });
   });
 
   group('TeacherApplication eligibility helpers', () {

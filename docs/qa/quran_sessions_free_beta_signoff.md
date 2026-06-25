@@ -12,9 +12,11 @@ No wallet, paid booking, group sessions, or in-app Agora/WebRTC.
 
 | Area | Runbook |
 |------|---------|
+| **Production manual QA (10 sections)** | [quran_sessions_production_manual_qa.md](./quran_sessions_production_manual_qa.md) |
 | Individual booking (B1–B5) | [individual_booking_qa.md](./individual_booking_qa.md) |
 | Single active device (T2/T5/T6/T7/T8) | [single_active_device_qa.md](./single_active_device_qa.md) |
 | Play internal upload | [quran_sessions_play_internal.md](../release/quran_sessions_play_internal.md) |
+| Gate status (engineering) | [production_readiness_status.md](../quran_sessions/production_readiness_status.md) |
 
 ---
 
@@ -47,7 +49,7 @@ Complete **both** runbooks on **staging Firebase** (`quran-playera-app` or team 
 |------|----------|--------|
 | B1–B5 pass on staging | Yes | ⬜ |
 | T2/T5/T6/T7/T8 pass (two devices) | Yes | ⬜ |
-| `scripts/quran_sessions_preflight.sh` green (or CI equivalent) | Yes | ⬜ |
+| `scripts/quran_sessions_preflight.sh` green (or CI equivalent) | Yes | ⬜ — CI job `quran-sessions-preflight` wired; requires GitHub billing fix to run |
 | External + mock only — no Agora/WebRTC SDK in binary | Yes | ⬜ |
 | No wallet / paid / group regressions observed | Yes | ⬜ |
 | Privacy policy covers third-party meeting links | Legal verify | ⬜ |

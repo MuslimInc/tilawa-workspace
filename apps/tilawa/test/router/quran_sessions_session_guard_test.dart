@@ -7,9 +7,9 @@ import 'package:mocktail/mocktail.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tilawa/features/auth/presentation/cubit/session_validity_cubit.dart';
-import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa/router/quran_sessions_session_guard.dart';
 

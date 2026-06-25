@@ -92,13 +92,15 @@
           >
             {{ 'sidebar_disputes' | t }}
           </a>
-          <a
-            routerLink="/quran-sessions/wallets"
-            routerLinkActive="is-active"
-            class="tilawa-sidebar-sublink"
-          >
-            {{ 'sidebar_wallets' | t }}
-          </a>
+          @if (walletNavEnabled) {
+            <a
+              routerLink="/quran-sessions/wallets"
+              routerLinkActive="is-active"
+              class="tilawa-sidebar-sublink"
+            >
+              {{ 'sidebar_wallets' | t }}
+            </a>
+          }
         </div>
       }
     </div>

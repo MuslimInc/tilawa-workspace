@@ -2,6 +2,7 @@ import { devAdminLogin } from './environment.development.local';
 
 export const environment = {
   production: false,
+  quranSessionsWalletEnabled: true,
   firebase: {
     apiKey: "AIzaSyCbarh-SeVF7qEUXHvvnC1xZOUBY7GQOHo",
     authDomain: "quran-playera-app.firebaseapp.com",

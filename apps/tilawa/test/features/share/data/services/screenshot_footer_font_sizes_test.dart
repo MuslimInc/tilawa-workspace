@@ -10,14 +10,18 @@ void main() {
     );
     final tokens = TilawaFooterBarTokens.defaults();
 
-    final primary = tilawaResolveTextRole(
-      textTheme,
-      tokens.primaryLabelTextRole,
-    ).fontSize ?? 14.0;
-    final secondary = tilawaResolveTextRole(
-      textTheme,
-      tokens.secondaryLabelTextRole,
-    ).fontSize ?? 12.0;
+    final primary =
+        tilawaResolveTextRole(
+          textTheme,
+          tokens.primaryLabelTextRole,
+        ).fontSize ??
+        14.0;
+    final secondary =
+        tilawaResolveTextRole(
+          textTheme,
+          tokens.secondaryLabelTextRole,
+        ).fontSize ??
+        12.0;
 
     expect(primary, 14.0);
     expect(secondary, 12.0);
