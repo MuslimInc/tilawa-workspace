@@ -43,6 +43,11 @@ class FCMNotificationHandlerService {
     }
 
     try {
+      if (response.actionId == 'decline_call') {
+        _logger.i('User declined incoming session call');
+        return;
+      }
+
       final Map<String, dynamic> data = _normalizePayloadData(
         Map<String, dynamic>.from(jsonDecode(payload) as Map),
       );
@@ -66,18 +71,40 @@ class FCMNotificationHandlerService {
       return;
     }
 
+    final bool isIncomingCall =
+        payload['actionType'] == 'incoming_quran_session_call';
+
+    AndroidNotificationDetails androidDetails;
+    if (isIncomingCall) {
+      androidDetails = const AndroidNotificationDetails(
+        'quran_session_calls',
+        'Incoming Calls',
+        channelDescription: 'Incoming Quran Session calls',
+        importance: Importance.max,
+        priority: Priority.max,
+        fullScreenIntent: true,
+        category: AndroidNotificationCategory.call,
+        actions: <AndroidNotificationAction>[
+          AndroidNotificationAction('accept_call', 'Join'),
+          AndroidNotificationAction('decline_call', 'Decline'),
+        ],
+      );
+    } else {
+      androidDetails = const AndroidNotificationDetails(
+        'high_importance_channel',
+        'High Importance Notifications',
+        importance: Importance.max,
+        priority: Priority.high,
+      );
+    }
+
     await _dispatcher.notificationsPlugin.show(
       id: message.hashCode,
       title: title,
       body: body,
-      notificationDetails: const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'high_importance_channel',
-          'High Importance Notifications',
-          importance: Importance.max,
-          priority: Priority.high,
-        ),
-        iOS: DarwinNotificationDetails(),
+      notificationDetails: NotificationDetails(
+        android: androidDetails,
+        iOS: const DarwinNotificationDetails(),
       ),
       payload: jsonEncode(payload),
     );

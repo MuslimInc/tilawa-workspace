@@ -5,6 +5,7 @@ import 'package:tilawa/features/athkar/domain/constants/tasbeeh_constants.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa/router/deep_link_resolver.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
+import 'package:quran_sessions/quran_sessions.dart';
 
 void main() {
   const DeepLinkResolver resolver = DeepLinkResolver();
@@ -82,6 +83,40 @@ void main() {
         NavigationSource.notification.wireValue,
       );
     });
+
+    test(
+      'maps quran_session notification with sessionId to session detail',
+      () {
+        expect(
+          DeepLinkResolver.resolveLocation(
+            const {'type': 'quran_session', 'sessionId': '1234'},
+          ),
+          QuranSessionsRoutes.sessionDetail.replaceFirst(':bookingId', '1234'),
+        );
+      },
+    );
+
+    test(
+      'maps incoming_quran_session_call notification with bookingId to session detail',
+      () {
+        expect(
+          DeepLinkResolver.resolveLocation(
+            const {'type': 'incoming_quran_session_call', 'bookingId': '5678'},
+          ),
+          QuranSessionsRoutes.sessionDetail.replaceFirst(':bookingId', '5678'),
+        );
+      },
+    );
+
+    test(
+      'maps quran_session notification without sessionId to my sessions',
+      () {
+        expect(
+          DeepLinkResolver.resolveLocation(const {'type': 'quran_session'}),
+          QuranSessionsRoutes.mySessions,
+        );
+      },
+    );
   });
 
   group('DeepLinkResolver.resolveExtra', () {

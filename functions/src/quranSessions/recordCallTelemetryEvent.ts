@@ -105,6 +105,8 @@ export const recordCallTelemetryEvent = onCall(
           remoteParticipantId: data.remoteParticipantId,
           networkQuality: data.networkQuality,
           metadata: data.metadata,
+          resolvedStudentId: studentId,
+          resolvedTeacherUserId: teacherUserId,
         },
         Date.now(),
       );

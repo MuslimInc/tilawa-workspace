@@ -1,36 +1,38 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:tilawa/features/auth/data/services/pending_session_revoke_store.dart';
-import 'package:tilawa/features/notifications/data/fcm_session_revoked_message.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart'
+    as localNotifications;
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa/core/bootstrap/app_bootstrapper.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/bootstrap/app_startup_tasks.dart';
-import 'package:tilawa/core/bootstrap/startup_launch_coordinator.dart';
 import 'package:tilawa/core/bootstrap/cold_start_navigation_metrics.dart';
-import 'package:tilawa/core/bootstrap/first_frame_log.dart';
-import 'package:tilawa/core/bootstrap/launch_splash_canvas.dart';
-import 'package:tilawa/core/bootstrap/logo_height_log.dart';
-import 'package:tilawa/core/bootstrap/launch_first_frame_gate.dart';
-import 'package:tilawa/core/bootstrap/splash_launch_handoff.dart';
-import 'package:tilawa/core/telemetry/startup_telemetry.dart';
-import 'package:tilawa/core/telemetry/startup_perf_log.dart';
 import 'package:tilawa/core/bootstrap/critical_init_coordinator.dart';
+import 'package:tilawa/core/bootstrap/first_frame_log.dart';
+import 'package:tilawa/core/bootstrap/launch_first_frame_gate.dart';
+import 'package:tilawa/core/bootstrap/launch_splash_canvas.dart';
 import 'package:tilawa/core/bootstrap/launch_timeline.dart';
+import 'package:tilawa/core/bootstrap/logo_height_log.dart';
+import 'package:tilawa/core/bootstrap/splash_launch_handoff.dart';
+import 'package:tilawa/core/bootstrap/startup_launch_coordinator.dart';
 import 'package:tilawa/core/debug/device_preview_app_builder.dart';
+import 'package:tilawa/core/telemetry/startup_perf_log.dart';
+import 'package:tilawa/core/telemetry/startup_telemetry.dart';
+import 'package:tilawa/features/auth/data/services/pending_session_revoke_store.dart';
+import 'package:tilawa/features/notifications/data/fcm_session_revoked_message.dart';
+import 'package:tilawa_core/services/app_system_chrome_style.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../firebase_options.dart';
 import '../../router/app_router.dart';
 import '../../tilawa_app.dart';
-import 'package:tilawa_core/services/app_system_chrome_style.dart';
-
 import '../di/injection.dart';
 import '../di/quran_image_dependencies_module.dart';
 import '../logging/app_logger.dart';
@@ -77,6 +79,71 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await persistBackgroundSessionRevokeIfNeeded(
     Map<String, dynamic>.from(message.data),
+  );
+  if (message.data['actionType'] == 'incoming_quran_session_call') {
+    // Show local notification for incoming call
+    await _showIncomingCallNotification(message);
+  }
+}
+
+Future<void> _showIncomingCallNotification(RemoteMessage message) async {
+  final data = message.data;
+  final title = data['title'] ?? 'Incoming Quran Session call';
+  final body = data['body'] ?? 'The other participant is waiting for you.';
+  final sessionId = data['sessionId'];
+
+  if (sessionId == null) return;
+
+  final flutterLocalNotificationsPlugin =
+      localNotifications.FlutterLocalNotificationsPlugin();
+  // We must re-initialize since this is a separate isolate
+  const localNotifications.AndroidInitializationSettings androidSettings =
+      localNotifications.AndroidInitializationSettings(
+        'ic_launcher_monochrome',
+      );
+  const localNotifications.InitializationSettings initSettings =
+      localNotifications.InitializationSettings(
+        android: androidSettings,
+      );
+  await flutterLocalNotificationsPlugin.initialize(
+    settings: initSettings,
+  );
+
+  final androidDetails = localNotifications.AndroidNotificationDetails(
+    'quran_session_calls',
+    'Incoming Calls',
+    channelDescription: 'Incoming Quran Session calls',
+    importance: localNotifications.Importance.max,
+    priority: localNotifications.Priority.max,
+    fullScreenIntent: true,
+    category: localNotifications.AndroidNotificationCategory.call,
+    actions: <localNotifications.AndroidNotificationAction>[
+      localNotifications.AndroidNotificationAction(
+        'accept_call',
+        'Join',
+        titleColor: Color(0xFF4CAF50),
+      ),
+      localNotifications.AndroidNotificationAction(
+        'decline_call',
+        'Decline',
+        titleColor: Color(0xFFF44336),
+      ),
+    ],
+  );
+
+  final platformDetails = localNotifications.NotificationDetails(
+    android: androidDetails,
+  );
+
+  await flutterLocalNotificationsPlugin.show(
+    id: sessionId.hashCode,
+    title: title,
+    body: body,
+    notificationDetails: platformDetails,
+    payload: jsonEncode({
+      'actionType': 'incoming_quran_session_call',
+      'sessionId': sessionId,
+    }),
   );
 }
 

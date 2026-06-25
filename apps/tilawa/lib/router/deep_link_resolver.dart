@@ -4,6 +4,7 @@ import 'package:tilawa/core/navigation/navigation_source.dart';
 import 'package:tilawa/core/navigation/notification_destination.dart';
 import 'package:tilawa/core/services/tasbeeh_reminder_notification_service.dart';
 import 'package:tilawa/features/athkar/domain/constants/tasbeeh_constants.dart';
+import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 
@@ -105,6 +106,18 @@ class DeepLinkResolver {
           return TasbeehRoute(dhikrId: dhikrId).location;
         }
         return const TasbeehRoute().location;
+      case 'incoming_quran_session_call':
+      case 'quran_session':
+        // Session ID might be passed as sessionId or bookingId
+        final String? sessionId =
+            data['sessionId']?.toString() ?? data['bookingId']?.toString();
+        if (sessionId != null && sessionId.isNotEmpty) {
+          return QuranSessionsRoutes.sessionDetail.replaceFirst(
+            ':bookingId',
+            sessionId,
+          );
+        }
+        return QuranSessionsRoutes.mySessions;
       case 'home':
       default:
         return const HomeRoute().location;

@@ -1,4 +1,5 @@
 import { FieldValue, Firestore, Timestamp } from "firebase-admin/firestore";
+import { enqueueSessionNotificationInTransaction } from "./notificationOutboxService";
 
 export const CALL_TRACKING_LATE_GRACE_MINUTES = 5;
 export const CALL_TRACKING_NO_SHOW_WINDOW_MINUTES = 15;
@@ -27,6 +28,8 @@ export interface RecordCallTelemetryEventInput {
   remoteParticipantId?: string;
   networkQuality?: string;
   metadata?: Record<string, unknown>;
+  resolvedStudentId?: string;
+  resolvedTeacherUserId?: string;
 }
 
 export interface CallTrackingAggregate {
@@ -48,6 +51,8 @@ export interface CallTrackingAggregate {
   noShowWindowMinutes: number;
   callEndedAt: Timestamp | null;
   updatedAt: FirebaseFirestore.FieldValue;
+  teacherNotifiedIncomingCall?: boolean;
+  studentNotifiedIncomingCall?: boolean;
 }
 
 interface MutableTrackingState {
@@ -68,6 +73,8 @@ interface MutableTrackingState {
   studentConnected: boolean;
   teacherEverConnected: boolean;
   studentEverConnected: boolean;
+  teacherNotifiedIncomingCall: boolean;
+  studentNotifiedIncomingCall: boolean;
 }
 
 function emptyTrackingState(
@@ -91,6 +98,8 @@ function emptyTrackingState(
     studentConnected: false,
     teacherEverConnected: false,
     studentEverConnected: false,
+    teacherNotifiedIncomingCall: false,
+    studentNotifiedIncomingCall: false,
   };
 }
 
@@ -210,22 +219,28 @@ export function applyCallTelemetryEvent(
       }
       maybeStartBothConnected(state, joinedAtMs);
       break;
+    // For participantConnected, the actorRole is the local user (the observer).
+    // The remote participant who actually connected is the OTHER role.
     case "participantConnected":
       if (input.actorRole === "teacher") {
-        state.teacherConnected = true;
-        state.teacherEverConnected = true;
-      } else {
+        // Teacher observed someone connect -> it must be the student
         state.studentConnected = true;
         state.studentEverConnected = true;
+      } else {
+        // Student observed someone connect -> it must be the teacher
+        state.teacherConnected = true;
+        state.teacherEverConnected = true;
       }
       maybeStartBothConnected(state, serverNowMs);
       break;
     case "participantDisconnected":
       accumulateConnectedDuration(state, serverNowMs);
       if (input.actorRole === "teacher") {
-        state.teacherConnected = false;
-      } else {
+        // Teacher observed someone disconnect -> student disconnected
         state.studentConnected = false;
+      } else {
+        // Student observed someone disconnect -> teacher disconnected
+        state.teacherConnected = false;
       }
       break;
     case "reconnect":
@@ -290,6 +305,8 @@ export function toCallTrackingAggregate(
     noShowWindowMinutes: CALL_TRACKING_NO_SHOW_WINDOW_MINUTES,
     callEndedAt: state.callEndedAt,
     updatedAt: FieldValue.serverTimestamp(),
+    teacherNotifiedIncomingCall: state.teacherNotifiedIncomingCall,
+    studentNotifiedIncomingCall: state.studentNotifiedIncomingCall,
   };
 }
 
@@ -328,6 +345,8 @@ export function loadMutableTrackingState(
     studentEverConnected:
       existing.firstJoinRole === "student" ||
       existing.secondJoinRole === "student",
+    teacherNotifiedIncomingCall: (existing.teacherNotifiedIncomingCall as boolean | undefined) ?? false,
+    studentNotifiedIncomingCall: (existing.studentNotifiedIncomingCall as boolean | undefined) ?? false,
   };
 }
 
@@ -395,6 +414,37 @@ export async function recordCallTelemetryEventInTransaction(
         callTrackingUpdatedAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp(),
       });
+    }
+
+    // Trigger Incoming Call Notification if the other participant hasn't joined.
+    // We only trigger this once per role when they join the room.
+    const isNewJoin = input.eventType === "joinSucceeded";
+    if (isNewJoin && input.resolvedStudentId && input.resolvedTeacherUserId) {
+      if (input.actorRole === "teacher" && !state.studentEverConnected && !state.studentNotifiedIncomingCall) {
+        // Teacher joined, student is not connected. Notify Student.
+        enqueueSessionNotificationInTransaction(tx, db, {
+          sessionId: input.sessionId,
+          aggregateId: input.sessionId,
+          kind: "incomingCall",
+          recipientUserIds: [input.resolvedStudentId],
+          payload: {
+            callerRole: "teacher",
+          },
+        });
+        state.studentNotifiedIncomingCall = true;
+      } else if (input.actorRole === "student" && !state.teacherEverConnected && !state.teacherNotifiedIncomingCall) {
+        // Student joined, teacher is not connected. Notify Teacher.
+        enqueueSessionNotificationInTransaction(tx, db, {
+          sessionId: input.sessionId,
+          aggregateId: input.sessionId,
+          kind: "incomingCall",
+          recipientUserIds: [input.resolvedTeacherUserId],
+          payload: {
+            callerRole: "student",
+          },
+        });
+        state.teacherNotifiedIncomingCall = true;
+      }
     }
 
     return { replayed: false };

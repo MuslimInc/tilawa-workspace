@@ -135,14 +135,20 @@ export async function sendPushToUsers(
     ...actionData,
   };
 
+  const isIncomingCall = actionType === "incoming_quran_session_call";
+
   const message: MulticastMessage = {
     tokens,
-    notification: { title, body },
+    // For incoming calls, omit top-level notification so Android receives a pure data message
+    // and our background isolate can show the full-screen intent without a duplicate system notification.
+    notification: isIncomingCall ? undefined : { title, body },
     data: dataPayload,
     android: { priority: "high" },
     apns: {
       payload: {
         aps: {
+          // Ensure iOS still shows a notification for incoming calls
+          alert: isIncomingCall ? { title, body } : undefined,
           sound: "default",
           badge: 1,
         },
