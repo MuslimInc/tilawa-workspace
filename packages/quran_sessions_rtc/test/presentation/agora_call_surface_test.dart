@@ -57,7 +57,7 @@ void main() {
       }
     });
 
-    test('local PiP renderable only while camera is active', () {
+    test('local preview renderable only while camera is active', () {
       const renderable = <LocalVideoStreamState>[
         LocalVideoStreamState.localVideoStreamStateCapturing,
         LocalVideoStreamState.localVideoStreamStateEncoding,
@@ -210,6 +210,58 @@ void main() {
       await tester.pump();
 
       expect(find.byType(AgoraVideoView), findsOneWidget);
+    });
+
+    testWidgets('video call shows local preview while waiting for remote', (
+      tester,
+    ) async {
+      final engine = FakeRtcEngine();
+      final pool = AgoraRtcEnginePool()
+        ..remember('session_1', FakeAgoraRtcSessionHandle(engine));
+
+      await pumpSurface(
+        tester,
+        sessionId: 'session_1',
+        callType: SessionCallType.videoCall,
+        enginePool: pool,
+      );
+
+      engine.simulateJoinSuccess();
+      engine.simulateLocalVideoState(
+        LocalVideoStreamState.localVideoStreamStateCapturing,
+      );
+      await tester.pump();
+
+      expect(find.byType(AgoraVideoView), findsOneWidget);
+      expect(find.byIcon(Icons.hourglass_top_outlined), findsNothing);
+    });
+
+    testWidgets('video call shows local PiP when remote video is active', (
+      tester,
+    ) async {
+      final engine = FakeRtcEngine();
+      final pool = AgoraRtcEnginePool()
+        ..remember('session_1', FakeAgoraRtcSessionHandle(engine));
+
+      await pumpSurface(
+        tester,
+        sessionId: 'session_1',
+        callType: SessionCallType.videoCall,
+        enginePool: pool,
+      );
+
+      engine.simulateJoinSuccess();
+      engine.simulateUserJoined(remoteUid: 42);
+      engine.simulateLocalVideoState(
+        LocalVideoStreamState.localVideoStreamStateCapturing,
+      );
+      engine.simulateRemoteVideoState(
+        remoteUid: 42,
+        state: RemoteVideoState.remoteVideoStateDecoding,
+      );
+      await tester.pump();
+
+      expect(find.byType(AgoraVideoView), findsNWidgets(2));
     });
 
     testWidgets('video call shows local PiP when camera is ready', (
