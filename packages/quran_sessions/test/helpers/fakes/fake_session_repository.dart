@@ -7,11 +7,16 @@ import 'package:quran_sessions/src/domain/repositories/session_repository.dart';
 class FakeSessionRepository implements SessionRepository {
   List<QuranSession> sessions = [];
   QuranSessionsFailure? failWith;
+  int getSessionByIdCallCount = 0;
+  int getStudentUpcomingSessionsCallCount = 0;
+  int getStudentPastSessionsCallCount = 0;
+  int getTeacherUpcomingSessionsCallCount = 0;
 
   @override
   Future<Either<QuranSessionsFailure, QuranSession>> getSessionById(
     String sessionId,
   ) async {
+    getSessionByIdCallCount++;
     if (failWith != null) return Left(failWith!);
     final match = sessions.where((s) => s.id == sessionId).firstOrNull;
     if (match == null) return const Left(NotFoundFailure('QuranSession'));
@@ -24,11 +29,15 @@ class FakeSessionRepository implements SessionRepository {
     String? cursor,
     int limit = kDefaultSessionPageSize,
   }) async {
+    getStudentUpcomingSessionsCallCount++;
     if (failWith != null) return Left(failWith!);
     final now = DateTime.now();
+    // Active = upcoming + ongoing: endsAt has not passed. Splitting by
+    // `endsAt` (not `startsAt`) keeps sessions that started but have not ended
+    // in the active list, matching the Firestore query semantics.
     final upcoming =
         sessions
-            .where((s) => s.studentId == studentId && s.startsAt.isAfter(now))
+            .where((s) => s.studentId == studentId && !s.endsAt.isBefore(now))
             .toList()
           ..sort((a, b) => a.startsAt.compareTo(b.startsAt));
     return Right(SessionPage(sessions: _pageSlice(upcoming, cursor, limit)));
@@ -40,11 +49,13 @@ class FakeSessionRepository implements SessionRepository {
     String? cursor,
     int limit = kDefaultSessionPageSize,
   }) async {
+    getStudentPastSessionsCallCount++;
     if (failWith != null) return Left(failWith!);
     final now = DateTime.now();
+    // Past = ended: endsAt before now.
     final past =
         sessions
-            .where((s) => s.studentId == studentId && !s.startsAt.isAfter(now))
+            .where((s) => s.studentId == studentId && s.endsAt.isBefore(now))
             .toList()
           ..sort((a, b) => b.startsAt.compareTo(a.startsAt));
     final page = _pageSlice(past, cursor, limit);
@@ -60,11 +71,13 @@ class FakeSessionRepository implements SessionRepository {
     String teacherId, {
     int limit = kDefaultSessionPageSize,
   }) async {
+    getTeacherUpcomingSessionsCallCount++;
     if (failWith != null) return Left(failWith!);
     final now = DateTime.now();
+    // Active = upcoming + ongoing: endsAt has not passed.
     final upcoming =
         sessions
-            .where((s) => s.teacherId == teacherId && s.startsAt.isAfter(now))
+            .where((s) => s.teacherId == teacherId && !s.endsAt.isBefore(now))
             .toList()
           ..sort((a, b) => a.startsAt.compareTo(b.startsAt));
     return Right(upcoming.take(limit).toList());

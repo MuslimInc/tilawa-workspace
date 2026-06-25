@@ -12,7 +12,7 @@ import {
 } from "./idempotencyService";
 import { recordTerminalTransition } from "./metricsAggregationService";
 import { enqueueSessionNotification } from "./notificationOutboxService";
-import { resolveTeacherProfileUserId } from "./teacherProfileUserId";
+import { resolveTeacherProfileUserId, teacherUserIdFromDenormalizedSessionData } from "./teacherProfileUserId";
 import { isAdmin, requireAuthenticatedUid, requireValidSessionEpochUnlessAdmin, resolveActorRole } from "./sessionAuth";
 import { cancelActionForRole, validateTransition } from "./sessionLifecycleGuard";
 import type { LifecycleStatus } from "./sessionLifecycleService";
@@ -52,10 +52,9 @@ export const cancelSessionBooking = onCall(
     if (claimedRole === "admin" && !isAdmin(request)) {
       throw new HttpsError("permission-denied", "Admin access required.");
     }
-    const teacherUserId = await resolveTeacherProfileUserId(
-      db,
-      participants.teacherId,
-    );
+    const teacherUserId =
+      teacherUserIdFromDenormalizedSessionData(booking) ??
+      (await resolveTeacherProfileUserId(db, participants.teacherId));
     const actor = isAdmin(request) && claimedRole === "admin"
       ? "admin"
       : resolveActorRole(request, claimedRole, participants, teacherUserId);
@@ -153,7 +152,7 @@ export const cancelSessionBooking = onCall(
         aggregateId: data.bookingId,
         kind: "cancellation",
         recipientUserIds: [
-          await resolveTeacherProfileUserId(db, result.teacherId),
+          teacherUserId,
           result.studentId,
         ],
         payload: { reason: data.reason, actorRole: actor },

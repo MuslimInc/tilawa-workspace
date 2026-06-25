@@ -33,6 +33,8 @@ void main() {
   late FakeRescheduleRequestRepository rescheduleRequests;
 
   SessionDetailBloc buildBloc({
+    GetSessionDetailUseCase? getSessionDetail,
+    InvalidateQuranSessionCacheUseCase? invalidateCache,
     JoinSessionUseCase? joinSession,
     ReportSessionConcernUseCase? reportConcern,
     OpenSessionDisputeUseCase? openDispute,
@@ -43,6 +45,8 @@ void main() {
     return SessionDetailBloc(
       aggregateRepository: aggregateRepository,
       getTimeline: GetSessionTimelineUseCase(auditRepository),
+      sessionDetailUseCase: getSessionDetail,
+      cacheInvalidator: invalidateCache,
       sessionRepository: sessionRepository,
       joinSession: joinSession,
       reportConcern: reportConcern,
@@ -86,6 +90,25 @@ void main() {
     teacherProfiles = FakeTeacherProfileRepository();
     rescheduleRequests = FakeRescheduleRequestRepository();
   });
+
+  blocTest<SessionDetailBloc, SessionDetailState>(
+    'loads session call context through cache across repeated load requests',
+    build: () => buildBloc(
+      getSessionDetail: GetSessionDetailUseCase(
+        sessionRepository: sessionRepository,
+        cacheStore: MemoryCacheStore(),
+      ),
+    ),
+    act: (bloc) async {
+      bloc.add(const SessionDetailLoadRequested(bookingId: 'booking_1'));
+      await bloc.stream.firstWhere((state) => state is SessionDetailSuccess);
+      bloc.add(const SessionDetailLoadRequested(bookingId: 'booking_1'));
+    },
+    wait: const Duration(milliseconds: 10),
+    verify: (_) {
+      check(sessionRepository.getSessionByIdCallCount).equals(1);
+    },
+  );
 
   blocTest<SessionDetailBloc, SessionDetailState>(
     'unauthorized timeline read succeeds with empty timeline not load failure',

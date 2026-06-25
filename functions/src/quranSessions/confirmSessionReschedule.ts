@@ -17,7 +17,7 @@ import {
   requireValidSessionEpochUnlessAdmin,
   resolveActorRole,
 } from "./sessionAuth";
-import { resolveTeacherProfileUserId } from "./teacherProfileUserId";
+import { resolveTeacherProfileUserId, teacherUserIdFromDenormalizedSessionData } from "./teacherProfileUserId";
 import { validateTransition } from "./sessionLifecycleGuard";
 import type { LifecycleStatus } from "./sessionLifecycleService";
 import { nowServer } from "./sessionLifecycleService";
@@ -68,10 +68,9 @@ export const confirmSessionReschedule = onCall(
     if (claimedRole === "admin" && !isAdmin(request)) {
       throw new HttpsError("permission-denied", "Admin access required.");
     }
-    const teacherUserId = await resolveTeacherProfileUserId(
-      db,
-      participants.teacherId,
-    );
+    const teacherUserId =
+      teacherUserIdFromDenormalizedSessionData(booking) ??
+      (await resolveTeacherProfileUserId(db, participants.teacherId));
     const actor = isAdmin(request) && claimedRole === "admin"
       ? "admin"
       : resolveActorRole(request, claimedRole, participants, teacherUserId);

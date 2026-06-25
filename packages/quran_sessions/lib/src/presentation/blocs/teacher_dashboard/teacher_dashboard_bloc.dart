@@ -8,9 +8,7 @@ import '../../../boundaries/scheduling/availability_provider.dart';
 import '../../../boundaries/scheduling/friday_review_reminder_store.dart';
 import '../../../domain/entities/generated_slot.dart';
 import '../../../domain/entities/market_scheduling_config.dart';
-import '../../../domain/entities/quran_session.dart';
 import '../../../domain/entities/teacher_availability.dart';
-import '../../../domain/entities/user_profile.dart';
 import '../../../domain/failures/quran_sessions_failure.dart';
 import '../../../domain/services/scheduling_policy_resolver.dart';
 import '../../../domain/services/teacher_availability_sort.dart';
@@ -18,12 +16,9 @@ import '../../../domain/services/week_calendar.dart';
 import '../../../domain/usecases/block_generated_slot_usecase.dart';
 import '../../../domain/usecases/cancel_session_via_server_usecase.dart';
 import '../../../domain/usecases/complete_session_via_server_usecase.dart';
-import '../../../domain/repositories/teacher_profile_repository.dart';
-import '../../../domain/usecases/get_market_scheduling_config_usecase.dart';
+import '../../../application/usecases/get_teacher_dashboard_usecase.dart';
+import '../../../application/usecases/invalidate_quran_session_cache_usecase.dart';
 import '../../../domain/usecases/get_teacher_availability_usecase.dart';
-import '../../../domain/usecases/get_teacher_sessions_usecase.dart';
-import '../../../domain/usecases/get_user_profile_usecase.dart';
-import '../../../domain/usecases/get_weekly_schedule_usecase.dart';
 import '../../../domain/usecases/is_slot_booked_usecase.dart';
 import '../../../domain/value_objects/actor_role.dart';
 import 'teacher_dashboard_event.dart';
@@ -41,25 +36,32 @@ CommitTimerFactory _defaultCommitTimerFactory = (delay, onFire) {
 class TeacherDashboardBloc
     extends Bloc<TeacherDashboardEvent, TeacherDashboardState> {
   TeacherDashboardBloc({
-    required this._getTeacherSessions,
-    required this._isSlotBooked,
-    required this._getAvailability,
-    required this._blockGeneratedSlot,
-    required this._availabilityProvider,
-    required this._cancelSession,
-    required this._completeSession,
-    required this._getMarketSchedulingConfig,
-    required this._getUserProfile,
-    required this._getWeeklySchedule,
-    required this._fridayReviewReminderStore,
-    required this._teacherProfileRepository,
-    required this._teacherId,
+    required GetTeacherDashboardUseCase dashboardUseCase,
+    required InvalidateQuranSessionCacheUseCase cacheInvalidator,
+    required IsSlotBookedUseCase slotBookedUseCase,
+    required GetTeacherAvailabilityUseCase availabilityUseCase,
+    required BlockGeneratedSlotUseCase blockSlotUseCase,
+    required AvailabilityProvider availabilityGateway,
+    required CancelSessionViaServerUseCase cancelSessionUseCase,
+    required CompleteSessionViaServerUseCase completeSessionUseCase,
+    required FridayReviewReminderStore fridayReminderStore,
+    required String teacherUserId,
     SchedulingPolicyResolver? schedulingPolicyResolver,
     WeekCalendar? weekCalendar,
     CommitTimerFactory? commitTimerFactory,
     DateTime Function()? now,
     this._commitDelay = const Duration(seconds: 5),
-  }) : _schedulingPolicyResolver =
+  }) : _getTeacherDashboard = dashboardUseCase,
+       _invalidateCache = cacheInvalidator,
+       _isSlotBooked = slotBookedUseCase,
+       _getAvailability = availabilityUseCase,
+       _blockGeneratedSlot = blockSlotUseCase,
+       _availabilityProvider = availabilityGateway,
+       _cancelSession = cancelSessionUseCase,
+       _completeSession = completeSessionUseCase,
+       _fridayReviewReminderStore = fridayReminderStore,
+       _teacherId = teacherUserId,
+       _schedulingPolicyResolver =
            schedulingPolicyResolver ?? const SchedulingPolicyResolver(),
        _weekCalendar = weekCalendar ?? const WeekCalendar(),
        _now = now ?? DateTime.now,
@@ -94,18 +96,15 @@ class TeacherDashboardBloc
     on<TeacherSessionCompleted>(_onSessionCompleted, transformer: sequential());
   }
 
-  final GetTeacherSessionsUseCase _getTeacherSessions;
+  final GetTeacherDashboardUseCase _getTeacherDashboard;
+  final InvalidateQuranSessionCacheUseCase _invalidateCache;
   final IsSlotBookedUseCase _isSlotBooked;
   final GetTeacherAvailabilityUseCase _getAvailability;
   final BlockGeneratedSlotUseCase _blockGeneratedSlot;
   final AvailabilityProvider _availabilityProvider;
   final CancelSessionViaServerUseCase _cancelSession;
   final CompleteSessionViaServerUseCase _completeSession;
-  final GetMarketSchedulingConfigUseCase _getMarketSchedulingConfig;
-  final GetUserProfileUseCase _getUserProfile;
-  final GetWeeklyScheduleUseCase _getWeeklySchedule;
   final FridayReviewReminderStore _fridayReviewReminderStore;
-  final TeacherProfileRepository _teacherProfileRepository;
   final SchedulingPolicyResolver _schedulingPolicyResolver;
   final WeekCalendar _weekCalendar;
   final DateTime Function() _now;
@@ -179,55 +178,28 @@ class TeacherDashboardBloc
 
     final now = _now();
 
-    final profileResult = await _resolveOwnerUserProfile(event.teacherId);
-    final marketCountryCode = profileResult.fold(
-      (_) => null,
-      (profile) => profile.countryCode,
-    );
-    final schedulingConfig = await _getMarketSchedulingConfig(
-      countryCode: marketCountryCode,
+    final result = await _getTeacherDashboard(
+      teacherProfileId: event.teacherId,
+      now: now,
+      forceRefresh: true,
     );
 
-    final scheduleResult = await _getWeeklySchedule(
-      event.teacherId,
-      defaultTimezone: 'Asia/Riyadh',
-    );
-    final teacherTimezone = scheduleResult.fold(
-      (_) => 'Asia/Riyadh',
-      (schedule) => schedule.timezone,
-    );
-
-    final horizonDays =
-        schedulingConfig.bookingHorizonDays < _dashboardHorizonDays
-        ? schedulingConfig.bookingHorizonDays
-        : _dashboardHorizonDays;
-    final horizon = Duration(days: horizonDays);
-
-    final sessionsResult = await _getTeacherSessions(event.teacherId);
-    final availResult = await _getAvailability(
-      event.teacherId,
-      from: now,
-      to: now.add(horizon),
-    );
-
-    // Surface the first failure encountered.
-    if (sessionsResult.isLeft()) {
-      sessionsResult.fold(
-        (f) => emit(TeacherDashboardFailure(f)),
-        (_) {},
-      );
-      return;
-    }
-    if (availResult.isLeft()) {
-      availResult.fold(
+    if (result.isLeft()) {
+      result.fold(
         (f) => emit(TeacherDashboardFailure(f)),
         (_) {},
       );
       return;
     }
 
-    final sessions = sessionsResult.fold((_) => <QuranSession>[], (v) => v);
-    final slots = availResult.fold((_) => <TeacherAvailability>[], (v) => v);
+    final dashboard = result.fold((_) => null, (v) => v)!;
+    final profile = dashboard.profile;
+    final schedulingConfig = dashboard.schedulingConfig;
+    final schedule = dashboard.schedule;
+    final teacherTimezone = schedule?.timezone ?? 'Asia/Riyadh';
+    final marketCountryCode = profile.countryCode;
+    final sessions = dashboard.upcomingSessions;
+    final slots = dashboard.availability;
 
     if (sessions.isEmpty && slots.isEmpty) {
       emit(const TeacherDashboardEmpty());
@@ -247,9 +219,8 @@ class TeacherDashboardBloc
 
     emit(
       TeacherDashboardSuccess(
-        upcomingSessions:
-            sessions.where((s) => s.startsAt.isAfter(now)).toList()
-              ..sort((a, b) => a.startsAt.compareTo(b.startsAt)),
+        upcomingSessions: sessions
+          ..sort((a, b) => a.startsAt.compareTo(b.startsAt)),
         availability: slots,
         schedulingConfig: schedulingConfig,
         thisWeekAvailability: presentation.thisWeekAvailability,
@@ -798,7 +769,12 @@ class TeacherDashboardBloc
 
     result.fold(
       (_) => null,
-      (_) {
+      (aggregate) {
+        _invalidateCache.invalidateSession(
+          aggregate.id,
+          teacherProfileId: _teacherId,
+          studentId: aggregate.studentId,
+        );
         emit(
           current.copyWith(
             upcomingSessions: current.upcomingSessions
@@ -814,25 +790,19 @@ class TeacherDashboardBloc
     TeacherSessionCompleted event,
     Emitter<TeacherDashboardState> emit,
   ) async {
-    await _completeSession(
+    final result = await _completeSession(
       sessionId: event.sessionId,
       actorRole: ActorRole.teacher,
     );
-  }
-
-  Future<Either<QuranSessionsFailure, UserProfile>> _resolveOwnerUserProfile(
-    String teacherProfileId,
-  ) async {
-    final teacherProfileResult = await _teacherProfileRepository.getProfileById(
-      teacherProfileId,
-    );
-    final ownerUserId = teacherProfileResult.fold(
+    result.fold(
       (_) => null,
-      (profile) => profile.userId,
+      (aggregate) {
+        _invalidateCache.invalidateSession(
+          event.sessionId,
+          teacherProfileId: _teacherId,
+          studentId: aggregate.studentId,
+        );
+      },
     );
-    if (ownerUserId != null && ownerUserId.isNotEmpty) {
-      return _getUserProfile(ownerUserId);
-    }
-    return _getUserProfile(teacherProfileId);
   }
 }

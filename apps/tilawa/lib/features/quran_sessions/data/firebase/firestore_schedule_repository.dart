@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:tilawa_core/services/performance_monitoring_service.dart';
 
 import 'firestore_exception_mapper.dart';
 import 'firestore_paths.dart';
+import 'firestore_performance_wrapper.dart';
 
 /// Firestore-backed [ScheduleRemoteDataSource].
 ///
@@ -13,9 +15,13 @@ import 'firestore_paths.dart';
 /// Field names are camelCase to match the rest of the Firestore schema; the
 /// [WeeklyScheduleDto] snake_case JSON contract is a package-internal concern.
 class FirestoreScheduleDataSource implements ScheduleRemoteDataSource {
-  FirestoreScheduleDataSource(this._firestore);
+  FirestoreScheduleDataSource(
+    this._firestore, [
+    this._perf,
+  ]);
 
   final FirebaseFirestore _firestore;
+  final PerformanceMonitoringService? _perf;
 
   DocumentReference<Map<String, dynamic>> _scheduleDoc(String teacherId) =>
       _firestore
@@ -32,45 +38,53 @@ class FirestoreScheduleDataSource implements ScheduleRemoteDataSource {
 
   @override
   Future<WeeklyScheduleDto?> getSchedule(String teacherId) async {
-    try {
-      final doc = await _scheduleDoc(teacherId).get();
-      if (!doc.exists) return null;
-      final data = doc.data() ?? const {};
-      return WeeklyScheduleDto(
-        teacherId: teacherId,
-        timezone: data['timezone'] as String? ?? 'Africa/Cairo',
-        slotDurationMinutes: data['slotDurationMinutes'] as int? ?? 30,
-        minNoticeMinutes: data['minNoticeMinutes'] as int? ?? 120,
-        maxHorizonDays: data['maxHorizonDays'] as int? ?? 30,
-        bufferBeforeMinutes: data['bufferBeforeMinutes'] as int? ?? 0,
-        bufferAfterMinutes: data['bufferAfterMinutes'] as int? ?? 0,
-        weeklyRules: _readRules(data['weeklyRules']),
-        version: data['version'] as int? ?? 1,
-        updatedAt: readDateTime(data['updatedAt'])?.toUtc().toIso8601String(),
-      );
-    } on FirebaseException catch (e) {
-      throw mapFirebaseException(e);
-    }
+    final schedule = await _perf.trace('firestore_getSchedule', () async {
+      try {
+        final doc = await _scheduleDoc(teacherId).get();
+        if (!doc.exists) return null;
+        final data = doc.data() ?? const {};
+        return WeeklyScheduleDto(
+          teacherId: teacherId,
+          timezone: data['timezone'] as String? ?? 'Africa/Cairo',
+          slotDurationMinutes: data['slotDurationMinutes'] as int? ?? 30,
+          minNoticeMinutes: data['minNoticeMinutes'] as int? ?? 120,
+          maxHorizonDays: data['maxHorizonDays'] as int? ?? 30,
+          bufferBeforeMinutes: data['bufferBeforeMinutes'] as int? ?? 0,
+          bufferAfterMinutes: data['bufferAfterMinutes'] as int? ?? 0,
+          weeklyRules: _readRules(data['weeklyRules']),
+          version: data['version'] as int? ?? 1,
+          updatedAt: readDateTime(
+            data['updatedAt'],
+          )?.toUtc().toIso8601String(),
+        );
+      } on FirebaseException catch (e) {
+        throw mapFirebaseException(e);
+      }
+    });
+
+    return schedule;
   }
 
   @override
   Future<void> saveSchedule(WeeklyScheduleDto schedule) async {
-    try {
-      await _scheduleDoc(schedule.teacherId).set({
-        'teacherId': schedule.teacherId,
-        'timezone': schedule.timezone,
-        'slotDurationMinutes': schedule.slotDurationMinutes,
-        'minNoticeMinutes': schedule.minNoticeMinutes,
-        'maxHorizonDays': schedule.maxHorizonDays,
-        'bufferBeforeMinutes': schedule.bufferBeforeMinutes,
-        'bufferAfterMinutes': schedule.bufferAfterMinutes,
-        'weeklyRules': schedule.weeklyRules,
-        'version': schedule.version,
-        'updatedAt': writeDateTime(DateTime.now()),
-      }, SetOptions(merge: true));
-    } on FirebaseException catch (e) {
-      throw mapFirebaseException(e);
-    }
+    return _perf.trace('firestore_saveSchedule', () async {
+      try {
+        await _scheduleDoc(schedule.teacherId).set({
+          'teacherId': schedule.teacherId,
+          'timezone': schedule.timezone,
+          'slotDurationMinutes': schedule.slotDurationMinutes,
+          'minNoticeMinutes': schedule.minNoticeMinutes,
+          'maxHorizonDays': schedule.maxHorizonDays,
+          'bufferBeforeMinutes': schedule.bufferBeforeMinutes,
+          'bufferAfterMinutes': schedule.bufferAfterMinutes,
+          'weeklyRules': schedule.weeklyRules,
+          'version': schedule.version,
+          'updatedAt': writeDateTime(DateTime.now()),
+        }, SetOptions(merge: true));
+      } on FirebaseException catch (e) {
+        throw mapFirebaseException(e);
+      }
+    });
   }
 
   @override
@@ -79,27 +93,29 @@ class FirestoreScheduleDataSource implements ScheduleRemoteDataSource {
     DateTime? from,
     DateTime? to,
   }) async {
-    try {
-      Query<Map<String, dynamic>> query = _overrides(teacherId);
-      if (from != null) {
-        query = query.where('date', isGreaterThanOrEqualTo: _dateKey(from));
+    return _perf.trace('firestore_getOverrides', () async {
+      try {
+        Query<Map<String, dynamic>> query = _overrides(teacherId);
+        if (from != null) {
+          query = query.where('date', isGreaterThanOrEqualTo: _dateKey(from));
+        }
+        if (to != null) {
+          query = query.where('date', isLessThan: _dateKey(to));
+        }
+        final snapshot = await query.get();
+        return snapshot.docs.map((doc) {
+          final data = doc.data();
+          return AvailabilityOverrideDto(
+            date: data['date'] as String? ?? doc.id,
+            type: data['type'] as String? ?? 'unavailable',
+            intervals: _readIntervals(data['intervals']),
+            reason: data['reason'] as String?,
+          );
+        }).toList();
+      } on FirebaseException catch (e) {
+        throw mapFirebaseException(e);
       }
-      if (to != null) {
-        query = query.where('date', isLessThan: _dateKey(to));
-      }
-      final snapshot = await query.get();
-      return snapshot.docs.map((doc) {
-        final data = doc.data();
-        return AvailabilityOverrideDto(
-          date: data['date'] as String? ?? doc.id,
-          type: data['type'] as String? ?? 'unavailable',
-          intervals: _readIntervals(data['intervals']),
-          reason: data['reason'] as String?,
-        );
-      }).toList();
-    } on FirebaseException catch (e) {
-      throw mapFirebaseException(e);
-    }
+    });
   }
 
   @override
@@ -107,19 +123,21 @@ class FirestoreScheduleDataSource implements ScheduleRemoteDataSource {
     String teacherId,
     String dateKey,
   ) async {
-    try {
-      final doc = await _overrides(teacherId).doc(dateKey).get();
-      if (!doc.exists) return null;
-      final data = doc.data() ?? const {};
-      return AvailabilityOverrideDto(
-        date: data['date'] as String? ?? doc.id,
-        type: data['type'] as String? ?? 'unavailable',
-        intervals: _readIntervals(data['intervals']),
-        reason: data['reason'] as String?,
-      );
-    } on FirebaseException catch (e) {
-      throw mapFirebaseException(e);
-    }
+    return _perf.trace('firestore_getOverrideByDate', () async {
+      try {
+        final doc = await _overrides(teacherId).doc(dateKey).get();
+        if (!doc.exists) return null;
+        final data = doc.data() ?? const {};
+        return AvailabilityOverrideDto(
+          date: data['date'] as String? ?? doc.id,
+          type: data['type'] as String? ?? 'unavailable',
+          intervals: _readIntervals(data['intervals']),
+          reason: data['reason'] as String?,
+        );
+      } on FirebaseException catch (e) {
+        throw mapFirebaseException(e);
+      }
+    });
   }
 
   @override
@@ -127,26 +145,30 @@ class FirestoreScheduleDataSource implements ScheduleRemoteDataSource {
     String teacherId,
     AvailabilityOverrideDto override,
   ) async {
-    try {
-      await _overrides(teacherId).doc(override.date).set({
-        'date': override.date,
-        'type': override.type,
-        'intervals': override.intervals,
-        'reason': override.reason,
-        'updatedAt': writeDateTime(DateTime.now()),
-      }, SetOptions(merge: true));
-    } on FirebaseException catch (e) {
-      throw mapFirebaseException(e);
-    }
+    return _perf.trace('firestore_saveOverride', () async {
+      try {
+        await _overrides(teacherId).doc(override.date).set({
+          'date': override.date,
+          'type': override.type,
+          'intervals': override.intervals,
+          'reason': override.reason,
+          'updatedAt': writeDateTime(DateTime.now()),
+        }, SetOptions(merge: true));
+      } on FirebaseException catch (e) {
+        throw mapFirebaseException(e);
+      }
+    });
   }
 
   @override
   Future<void> removeOverride(String teacherId, String dateKey) async {
-    try {
-      await _overrides(teacherId).doc(dateKey).delete();
-    } on FirebaseException catch (e) {
-      throw mapFirebaseException(e);
-    }
+    return _perf.trace('firestore_removeOverride', () async {
+      try {
+        await _overrides(teacherId).doc(dateKey).delete();
+      } on FirebaseException catch (e) {
+        throw mapFirebaseException(e);
+      }
+    });
   }
 
   // ── Helpers ────────────────────────────────────────────────────────────────

@@ -9,6 +9,10 @@ import {
 import { buildOperationKey, runIdempotentOperation } from "./idempotencyService";
 import { validateTransition } from "./sessionLifecycleGuard";
 
+/// Bound the scan so stale pending_payment docs cannot cause an unbounded
+/// query. The scheduler runs every 5 min; this cap is a safety valve.
+const EXPIRE_QUERY_LIMIT = 100;
+
 export const expirePendingReservations = onSchedule(
   "every 5 minutes",
   async () => {
@@ -17,6 +21,8 @@ export const expirePendingReservations = onSchedule(
       .collection("quran_bookings")
       .where("lifecycleStatus", "==", "pending_payment")
       .where("startsAt", "<=", Timestamp.fromMillis(Date.now() + 10 * 60 * 1000))
+      .orderBy("startsAt")
+      .limit(EXPIRE_QUERY_LIMIT)
       .get();
 
     for (const doc of pending.docs) {

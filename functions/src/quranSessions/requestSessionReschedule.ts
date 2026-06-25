@@ -11,7 +11,7 @@ import {
   runIdempotentOperation,
 } from "./idempotencyService";
 import { requireAuthenticatedUid, requireValidSessionEpochUnlessAdmin, resolveActorRole } from "./sessionAuth";
-import { resolveTeacherProfileUserId } from "./teacherProfileUserId";
+import { resolveTeacherProfileUserId, teacherUserIdFromDenormalizedSessionData } from "./teacherProfileUserId";
 import { validateTransition } from "./sessionLifecycleGuard";
 import type { LifecycleStatus } from "./sessionLifecycleService";
 import { nowServer } from "./sessionLifecycleService";
@@ -47,10 +47,9 @@ export const requestSessionReschedule = onCall(
       studentId: (booking.studentId as string) ?? "",
       teacherId: (booking.teacherId as string) ?? "",
     };
-    const teacherUserId = await resolveTeacherProfileUserId(
-      db,
-      participants.teacherId,
-    );
+    const teacherUserId =
+      teacherUserIdFromDenormalizedSessionData(booking) ??
+      (await resolveTeacherProfileUserId(db, participants.teacherId));
     const actor = resolveActorRole(
       request,
       data.actorRole,

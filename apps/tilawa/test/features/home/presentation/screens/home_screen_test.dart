@@ -12,6 +12,8 @@ import 'package:tilawa/features/athkar/domain/entities/athkar_item.dart';
 import 'package:tilawa/features/athkar/domain/repositories/athkar_repository.dart';
 import 'package:tilawa/features/athkar/domain/usecases/get_athkar_by_category_use_case.dart';
 import 'package:tilawa/features/athkar/domain/usecases/get_athkar_categories_use_case.dart';
+import 'package:tilawa/features/athkar/presentation/cubit/pinned_athkar_cubit.dart';
+import 'package:tilawa/features/athkar/presentation/cubit/pinned_athkar_state.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/history/domain/entities/history_entity.dart';
 import 'package:tilawa/features/history/domain/repositories/history_repository.dart';
@@ -28,10 +30,11 @@ import 'package:tilawa/features/home/presentation/widgets/home_primary_action_zo
 import 'package:tilawa/features/home/presentation/cubit/home_quran_resume_cubit.dart';
 import 'package:tilawa/features/home/presentation/screens/home_screen.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_hero_sliver.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_discover_carousel.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_features_hub.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_travel_destination_card.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_daily_inspiration_section.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_discover_shortcuts.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_more_actions_group.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_primary_action_card.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_today_section.dart';
 import 'package:tilawa/features/quran_reader/domain/usecases/get_last_read_position_use_case.dart';
 import 'package:tilawa/features/prayer_times/application/prayer_location_update_notifier.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
@@ -134,17 +137,24 @@ void main() {
     }
 
     expect(find.text('Reciters'), findsOneWidget);
+    // Discover shortcut tiles show only the label (no subtitle in the grid).
     expect(find.text('Browse recitations'), findsNothing);
-    expect(find.text('Quick athkar'), findsNothing);
+    // Today zone uses the canonical daily practice title.
+    expect(find.text('Quick athkar'), findsOneWidget);
     expect(find.text("Today's prayer times"), findsNothing);
     expect(find.text('View all'), findsNothing);
 
+    // Nav-duplicate tiles must not appear on Home.
     expect(find.text('Home'), findsNothing);
     expect(find.text('Settings'), findsNothing);
+    expect(find.text('Prayer'), findsNothing);
+    expect(find.text('Quran'), findsNothing);
 
     expect(find.text('Discover'), findsOneWidget);
-    expect(find.text('Athkar'), findsWidgets);
-    expect(find.text('Qibla'), findsWidgets);
+    // Athkar tile removed (nav duplicate); only "Quick athkar" section title
+    // remains. Qibla stays in Discover shortcuts as a non-nav destination.
+    expect(find.text('Athkar'), findsNothing);
+    expect(find.text('Qibla'), findsOneWidget);
   });
 
   testWidgets('Home contains no layout toggle button', (tester) async {
@@ -164,36 +174,65 @@ void main() {
     expect(find.byIcon(Icons.view_list_rounded), findsNothing);
   });
 
-  testWidgets('Home shows carousel, primary action, and feature grid', (
-    tester,
-  ) async {
-    final bloc = HomeDashboardBloc(
-      GetHomeDashboardUseCase(_FakeHomeDashboardRepository()),
-      NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
-    )..add(const HomeDashboardStarted(localeIdentifier: 'en'));
-    addTearDown(bloc.close);
+  testWidgets(
+    'Home shows primary action, daily practice, inspiration, and more',
+    (
+      tester,
+    ) async {
+      final bloc = HomeDashboardBloc(
+        GetHomeDashboardUseCase(_FakeHomeDashboardRepository()),
+        NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
+      )..add(const HomeDashboardStarted(localeIdentifier: 'en'));
+      addTearDown(bloc.close);
 
-    await tester.pumpWidget(_HomeScreenHarness(bloc: bloc, locale: 'en'));
-    await tester.pump();
-    for (var frame = 0; frame < 30; frame++) {
-      await tester.pump(const Duration(milliseconds: 16));
-    }
+      await tester.pumpWidget(_HomeScreenHarness(bloc: bloc, locale: 'en'));
+      await tester.pump();
+      for (var frame = 0; frame < 30; frame++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
 
-    expect(find.text('Today'), findsOneWidget);
-    expect(find.text('Yours'), findsNothing);
-    expect(find.byType(HomeDiscoverCarousel), findsOneWidget);
-    expect(find.byType(HomeTravelDestinationCard), findsWidgets);
-    expect(find.byType(HomePrimaryActionCard), findsOneWidget);
-    expect(find.byType(HomeFeaturesHub), findsOneWidget);
-    expect(find.text('Discover'), findsOneWidget);
-    expect(find.text('Featured for you'), findsOneWidget);
-    expect(find.text('Tasbeeh'), findsWidgets);
-    expect(find.text('Bookmarks'), findsOneWidget);
-  });
+      expect(find.byType(HomePrimaryActionCard), findsOneWidget);
+      expect(find.byType(HomeDiscoverShortcuts), findsOneWidget);
+      expect(find.byType(HomeDailyPracticeSection), findsOneWidget);
+      expect(find.byType(HomeDailyInspirationSection), findsOneWidget);
+      expect(find.byType(HomeMoreActionsGroup), findsOneWidget);
+
+      final double practiceTop = tester
+          .getTopLeft(find.byType(HomeDailyPracticeSection))
+          .dy;
+      final double inspirationTop = tester
+          .getTopLeft(find.byType(HomeDailyInspirationSection))
+          .dy;
+      final double discoverTop = tester
+          .getTopLeft(find.byType(HomeDiscoverShortcuts))
+          .dy;
+      final double moreTop = tester
+          .getTopLeft(find.byType(HomeMoreActionsGroup))
+          .dy;
+
+      expect(practiceTop, lessThan(inspirationTop));
+      expect(inspirationTop, lessThan(discoverTop));
+      expect(discoverTop, lessThan(moreTop));
+
+      // Old mismatched "Today" wrapper title must not appear.
+      expect(find.text('Today'), findsNothing);
+      // Discover shortcuts keep supporting tools below daily content.
+      expect(find.text('Tasbeeh'), findsOneWidget);
+      expect(find.text('Reciters'), findsOneWidget);
+      // Bookmarks is in Discover shortcuts grid now.
+      expect(find.text('Bookmarks'), findsOneWidget);
+      // Nav-duplicate tiles must not appear on Home.
+      expect(find.text('Prayer'), findsNothing);
+      expect(find.text('Quran'), findsNothing);
+    },
+  );
 }
 
 class _MockAudioPlayerBloc extends MockCubit<AudioPlayerState>
     implements AudioPlayerBloc {}
+
+class _MockPinnedAthkarCubit extends MockCubit<PinnedAthkarState>
+    implements PinnedAthkarCubit {}
 
 class _HomeScreenHarness extends StatelessWidget {
   const _HomeScreenHarness({required this.bloc, this.locale = 'ar'});
@@ -209,6 +248,12 @@ class _HomeScreenHarness extends StatelessWidget {
     );
     when(() => audioPlayerBloc.stream).thenAnswer(
       (_) => const Stream<AudioPlayerState>.empty(),
+    );
+
+    final pinnedAthkarCubit = _MockPinnedAthkarCubit();
+    when(() => pinnedAthkarCubit.state).thenReturn(const PinnedAthkarState());
+    when(() => pinnedAthkarCubit.stream).thenAnswer(
+      (_) => const Stream<PinnedAthkarState>.empty(),
     );
 
     return MaterialApp(
@@ -239,6 +284,7 @@ class _HomeScreenHarness extends StatelessWidget {
           ),
           BlocProvider(create: (_) => HomePrimaryActionCubit()),
           BlocProvider<AudioPlayerBloc>.value(value: audioPlayerBloc),
+          BlocProvider<PinnedAthkarCubit>.value(value: pinnedAthkarCubit),
         ],
         child: HomePrimaryActionSyncListener(
           child: Builder(

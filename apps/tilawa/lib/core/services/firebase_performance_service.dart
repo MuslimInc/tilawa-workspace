@@ -2,6 +2,7 @@ import 'package:firebase_performance/firebase_performance.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa_core/services/performance_monitoring_service.dart';
 import 'package:tilawa_core/services/performance_trace.dart';
 
@@ -31,12 +32,33 @@ class FirebasePerformanceService implements PerformanceMonitoringService {
     String name,
     Future<T> Function() operation,
   ) async {
+    final route = AppRouter.currentRouteLocation;
+    final routeSuffix = route != null ? ' route=$route' : '';
+
     if (!_isReleaseMode && !testMode) {
-      return operation();
+      logger.d('[PerformanceTrace] Start trace: $name$routeSuffix');
+      final stopwatch = Stopwatch()..start();
+      try {
+        final result = await operation();
+        stopwatch.stop();
+        logger.d(
+          '[PerformanceTrace] Stop trace: $name$routeSuffix - Duration: ${stopwatch.elapsedMilliseconds}ms',
+        );
+        return result;
+      } catch (e) {
+        stopwatch.stop();
+        logger.d(
+          '[PerformanceTrace] Stop trace (failed): $name$routeSuffix - Duration: ${stopwatch.elapsedMilliseconds}ms',
+        );
+        rethrow;
+      }
     }
 
     final Trace trace = _performance.newTrace(name);
     try {
+      if (route != null) {
+        trace.putAttribute('route', route);
+      }
       await trace.start();
       final T result = await operation();
       await trace.stop();
@@ -56,12 +78,18 @@ class FirebasePerformanceService implements PerformanceMonitoringService {
 
   @override
   PerformanceTrace? startTrace(String name) {
+    final route = AppRouter.currentRouteLocation;
     if (!_isReleaseMode && !testMode) {
-      return null;
+      final routeSuffix = route != null ? ' route=$route' : '';
+      logger.d('[PerformanceTrace] Start trace: $name$routeSuffix');
+      return _DebugPerformanceTrace(name, Stopwatch()..start(), route);
     }
 
     try {
       final Trace trace = _performance.newTrace(name);
+      if (route != null) {
+        trace.putAttribute('route', route);
+      }
       trace.start();
       return _FirebasePerformanceTrace(trace);
     } catch (e) {
@@ -77,6 +105,29 @@ class FirebasePerformanceService implements PerformanceMonitoringService {
     } catch (e) {
       logger.d('Performance setEnabled error: $e');
     }
+  }
+}
+
+/// Internal wrapper for Firebase Trace in debug mode to output to log console.
+class _DebugPerformanceTrace implements PerformanceTrace {
+  _DebugPerformanceTrace(this._name, this._stopwatch, [this._route]);
+
+  final String _name;
+  final Stopwatch _stopwatch;
+  final String? _route;
+
+  @override
+  void stop() {
+    _stopwatch.stop();
+    final routeSuffix = _route != null ? ' route=$_route' : '';
+    logger.d(
+      '[PerformanceTrace] Stop trace: $_name$routeSuffix - Duration: ${_stopwatch.elapsedMilliseconds}ms',
+    );
+  }
+
+  @override
+  void putAttribute(String name, String value) {
+    logger.d('[PerformanceTrace] Trace attribute on $_name: $name = $value');
   }
 }
 

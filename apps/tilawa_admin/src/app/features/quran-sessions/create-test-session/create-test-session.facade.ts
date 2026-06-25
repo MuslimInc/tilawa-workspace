@@ -101,6 +101,18 @@ export class CreateTestSessionFacade {
         throw new Error('End time must be after start time');
       }
 
+      // Enforce allowed durations client-side for clear UX. The Cloud Function
+      // re-validates server-side (source of truth).
+      const durationMinutes = Math.round(
+        (endDateTime.getTime() - startDateTime.getTime()) / 60000,
+      );
+      const allowedDurations = new Set([15, 30, 45, 60]);
+      if (!allowedDurations.has(durationMinutes)) {
+        throw new Error(
+          `Unsupported session duration: ${durationMinutes} min. Allowed: 15, 30, 45, 60.`,
+        );
+      }
+
       const slotId = this.generateSlotId(startDateTime);
 
       const callable = httpsCallable<CreateAdminTestSessionRequest, CreateBookingResult>(

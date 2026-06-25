@@ -27,6 +27,48 @@ import { sessionCallableHttpsOptions } from "./sessionCallableOptions";
 import { recordTerminalTransition } from "./metricsAggregationService";
 import { enqueueSessionNotification } from "./notificationOutboxService";
 
+/// Allowed manual session durations in minutes. 60 min is included because the
+/// booking/slot domain already supports it. Any other duration (e.g. 12h) is
+/// rejected unless an explicit test-only domain mode is introduced later.
+const ALLOWED_MANUAL_SESSION_DURATION_MINUTES = new Set([15, 30, 45, 60]);
+
+export function assertAllowedSessionDuration(
+  startsAtRaw: string,
+  endsAtRaw: string,
+): void {
+  const start = new Date(startsAtRaw);
+  const end = new Date(endsAtRaw);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    throw new HttpsError(
+      "invalid-argument",
+      "Invalid startsAt or endsAt.",
+      { code: "invalid_timestamp" },
+    );
+  }
+  const durationMs = end.getTime() - start.getTime();
+  if (durationMs <= 0) {
+    throw new HttpsError(
+      "invalid-argument",
+      "endsAt must be after startsAt.",
+      { code: "invalid_duration", durationMs },
+    );
+  }
+  const durationMinutes = Math.round(durationMs / 60000);
+  if (
+    !ALLOWED_MANUAL_SESSION_DURATION_MINUTES.has(durationMinutes)
+  ) {
+    throw new HttpsError(
+      "invalid-argument",
+      `Unsupported session duration: ${durationMinutes} min. Allowed: 15, 30, 45, 60.`,
+      {
+        code: "unsupported_duration",
+        durationMinutes,
+        allowed: [...ALLOWED_MANUAL_SESSION_DURATION_MINUTES],
+      },
+    );
+  }
+}
+
 interface CreateAdminTestSessionRequest {
   studentId: string;
   teacherId: string;
@@ -43,6 +85,7 @@ interface CreateBookingResult {
   sessionId: string;
   lifecycleStatus: string;
   status: string;
+  teacherUserId: string;
 }
 
 function parseBookingTimestamp(
@@ -127,6 +170,10 @@ async function handleCreateAdminTestSession(
   if (!data.studentId || !data.teacherId || !data.slotId || !data.startsAt || !data.endsAt) {
     throw new HttpsError("invalid-argument", "Missing required fields.");
   }
+
+  // 1b. Validate session duration is in the allowed set (15/30/45/60 min).
+  // Rejects invalid durations like 12h before any Firestore work happens.
+  assertAllowedSessionDuration(data.startsAt, data.endsAt);
 
   // 2. Validate Call Type
   try {
@@ -330,6 +377,7 @@ async function handleCreateAdminTestSession(
         sessionId: sessionRef.id,
         lifecycleStatus,
         status: legacyStatusForLifecycle(lifecycleStatus),
+        teacherUserId,
       };
       return bookingResult;
     },

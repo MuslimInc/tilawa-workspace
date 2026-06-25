@@ -29,17 +29,24 @@ Treat Home as a **daily module stack**, not an app launcher.
 **Encouraged:**
 
 - Hero prayer/time context
-- Today modules (khatma, today plan, pinned athkar)
-- Compact **More** row for non-nav destinations (Reciters, Qibla)
+- One primary resume action directly below the hero
+- Today/practice modules (today plan, contextual athkar, pinned athkar)
 - Daily ayah / dua inspiration cards
+- Compact **Discover** grid for supporting shortcuts
+- Compact **More** list for lower-frequency library and setup destinations
 
 **Forbidden on Home:**
 
-- Tiles that duplicate bottom navigation (Home, Prayer, Quran, Athkar, Settings)
+- Tiles that duplicate Home, Prayer, Quran, Athkar, or Settings navigation
 - Six-tile "Explore" launcher grids (legacy pattern — removed)
 - Cold-start modals or support prompts
 
-**More row rule:** only destinations **not** already in the phone bottom bar.
+**Current Reciters exception:** Reciters may appear in the high Discover grid
+because listening is a core daily behavior; the shortcut selects the existing
+Reciters tab. Do not put Reciters in the lower More list.
+
+**More list rule:** More is for secondary library/setup routes such as History,
+Favorites, Downloads, Smart Khatma, and Support Tilawa.
 
 ## Catalog tabs (Reciters, Athkar categories, etc.)
 

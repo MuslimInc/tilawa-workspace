@@ -9,6 +9,7 @@ import 'package:tilawa/core/services/hive_readiness.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.dart';
+import 'package:tilawa/features/athkar/presentation/cubit/pinned_athkar_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_athkar_compact_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_primary_action_cubit.dart';
@@ -118,6 +119,13 @@ class HomeScreenScope extends StatelessWidget {
           create: (_) {
             final HomeAthkarCompactCubit cubit =
                 getIt<HomeAthkarCompactCubit>();
+            _deferToNextFrame(cubit.load);
+            return cubit;
+          },
+        ),
+        BlocProvider(
+          create: (_) {
+            final PinnedAthkarCubit cubit = getIt<PinnedAthkarCubit>();
             _deferToNextFrame(cubit.load);
             return cubit;
           },

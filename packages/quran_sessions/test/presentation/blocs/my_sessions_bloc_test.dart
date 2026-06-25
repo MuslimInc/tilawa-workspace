@@ -10,7 +10,7 @@ import '../../helpers/fakes/fake_session_repository.dart';
 import '../../helpers/fakes/fake_teacher_profile_repository.dart';
 import '../../helpers/fixtures/session_aggregate_fixtures.dart';
 import '../../helpers/lifecycle_test_helpers.dart';
-import '../../helpers/fixtures.dart' show makeBooking, makeSession;
+import '../../helpers/fixtures.dart' show makeSession;
 
 void main() {
   late FakeSessionRepository sessionRepo;
@@ -88,6 +88,42 @@ void main() {
         check(state.upcoming).length.equals(1);
         check(state.past).length.equals(1);
         check(state.upcoming.first.id).equals('future');
+      },
+    );
+
+    blocTest<MySessionsBloc, MySessionsState>(
+      'ongoing session (started, not ended) stays in upcoming, not past',
+      build: () {
+        // Started 10 min ago, ends 20 min from now → ongoing.
+        final start = DateTime.now().subtract(const Duration(minutes: 10));
+        sessionRepo.sessions = [
+          makeSession(
+            id: 'ongoing',
+            studentId: 'student_1',
+            startsAt: start,
+            endsAt: start.add(const Duration(minutes: 30)),
+          ),
+          makeSession(
+            id: 'ended',
+            studentId: 'student_1',
+            status: QuranSessionStatus.completed,
+            // Started 2h ago, ended 1h ago → past.
+            startsAt: DateTime.now().subtract(const Duration(hours: 2)),
+          ),
+        ];
+        return bloc;
+      },
+      act: (b) => b.add(const MySessionsLoadRequested(studentId: 'student_1')),
+      expect: () => [
+        isA<MySessionsLoading>(),
+        isA<MySessionsSuccess>(),
+      ],
+      verify: (b) {
+        final state = b.state as MySessionsSuccess;
+        check(state.upcoming).length.equals(1);
+        check(state.upcoming.first.id).equals('ongoing');
+        check(state.past).length.equals(1);
+        check(state.past.first.id).equals('ended');
       },
     );
 

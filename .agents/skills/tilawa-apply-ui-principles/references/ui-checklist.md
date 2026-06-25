@@ -51,9 +51,10 @@
 
 ## Home-specific (if touching `features/home/`)
 
-- [ ] No Home tile duplicates bottom-nav destination
-- [ ] More row only lists non-nav routes
-- [ ] Today modules above More section
+- [ ] No Home tile duplicates core routes (Home, Quran, Prayer, Athkar, Settings/Profile)
+- [ ] Reciters, if present, selects the existing Reciters tab from Discover
+- [ ] More list only contains lower-frequency library/setup routes
+- [ ] Daily practice and inspiration appear above Discover and More
 
 ## FAB / shell chrome (if applicable)
 

@@ -10,6 +10,7 @@ enum _AgoraCallConnectionPhase {
   connecting,
   waitingForParticipant,
   participantJoined,
+  reconnecting,
 }
 
 /// Agora voice/video in-call surface backed by an active [AgoraRtcEnginePool] session.
@@ -86,6 +87,51 @@ class _AgoraCallSurfaceState extends State<AgoraCallSurface> {
         });
         _reportConnectionPhase();
       },
+      onConnectionStateChanged: (connection, state, reason) {
+        if (!mounted) return;
+        // Map Agora connection state to provider-agnostic reconnect events
+        // so the telemetry coordinator (already throttled) and the UI can
+        // react to network flutter without the user seeing a frozen screen.
+        switch (state) {
+          case ConnectionStateType.connectionStateReconnecting:
+            widget.eventHub?.emit(
+              SessionCallReconnecting(sessionId: widget.sessionId),
+            );
+            if (_phase == _AgoraCallConnectionPhase.participantJoined ||
+                _phase == _AgoraCallConnectionPhase.waitingForParticipant) {
+              setState(() {
+                _phase = _AgoraCallConnectionPhase.reconnecting;
+              });
+              _reportConnectionPhase();
+            }
+          case ConnectionStateType.connectionStateConnected:
+            if (_phase == _AgoraCallConnectionPhase.reconnecting) {
+              widget.eventHub?.emit(
+                SessionCallReconnected(sessionId: widget.sessionId),
+              );
+              setState(() {
+                _phase = _remoteUid != null
+                    ? _AgoraCallConnectionPhase.participantJoined
+                    : _AgoraCallConnectionPhase.waitingForParticipant;
+              });
+              _reportConnectionPhase();
+            }
+          default:
+            break;
+        }
+      },
+      onNetworkQuality: (connection, uid, txQuality, rxQuality) {
+        if (!mounted) return;
+        // Map Agora quality to coarse bucket; the telemetry coordinator
+        // throttles to one network event per 60s.
+        final level = _mapNetworkQuality(txQuality, rxQuality);
+        widget.eventHub?.emit(
+          SessionCallNetworkQualityChanged(
+            sessionId: widget.sessionId,
+            level: level,
+          ),
+        );
+      },
       onUserJoined: (connection, remoteUid, elapsed) {
         if (!mounted) return;
         widget.eventHub?.emit(
@@ -148,7 +194,28 @@ class _AgoraCallSurfaceState extends State<AgoraCallSurface> {
         InAppCallConnectionPhase.waitingForParticipant,
       _AgoraCallConnectionPhase.participantJoined =>
         InAppCallConnectionPhase.participantJoined,
+      _AgoraCallConnectionPhase.reconnecting =>
+        InAppCallConnectionPhase.connecting,
     });
+  }
+
+  /// Maps Agora tx/rx quality to a coarse network quality bucket.
+  /// The telemetry coordinator throttles these to one per 60s.
+  SessionCallNetworkQualityLevel _mapNetworkQuality(
+    QualityType tx,
+    QualityType rx,
+  ) {
+    // QualityType: 0=excellent, 1=good, 2=poor, 3=bad, 4=very bad, 5=down
+    final worst = tx.index > rx.index ? tx : rx;
+    return switch (worst) {
+      QualityType.qualityExcellent ||
+      QualityType.qualityGood => SessionCallNetworkQualityLevel.good,
+      QualityType.qualityPoor ||
+      QualityType.qualityBad ||
+      QualityType.qualityVbad ||
+      QualityType.qualityDown => SessionCallNetworkQualityLevel.poor,
+      _ => SessionCallNetworkQualityLevel.unknown,
+    };
   }
 
   SessionCallParticipantDisconnectReason _mapDisconnectReason(
@@ -214,7 +281,7 @@ class _AgoraCallSurfaceState extends State<AgoraCallSurface> {
   }
 }
 
-class _VideoLayout extends StatelessWidget {
+class _VideoLayout extends StatefulWidget {
   const _VideoLayout({
     required this.engine,
     required this.remoteUid,
@@ -234,53 +301,110 @@ class _VideoLayout extends StatelessWidget {
   final AgoraCallSurfaceLabels labels;
 
   @override
+  State<_VideoLayout> createState() => _VideoLayoutState();
+}
+
+class _VideoLayoutState extends State<_VideoLayout> {
+  /// Cached controllers — recreated ONLY when remoteUid or channelId
+  /// actually changes, NOT on every parent rebuild. This prevents the
+  /// expensive native video renderer (texture/surface) from being
+  /// destroyed and recreated on phase/video-state changes.
+  VideoViewController? _remoteController;
+  VideoViewController? _localController;
+
+  @override
+  void didUpdateWidget(_VideoLayout oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Invalidate remote controller only when the participant or channel
+    // actually changes — not on every phase/video-ready toggle.
+    if (oldWidget.remoteUid != widget.remoteUid ||
+        oldWidget.channelId != widget.channelId) {
+      _remoteController = null;
+    }
+    // Invalidate local controller only when the engine changes.
+    if (oldWidget.engine != widget.engine) {
+      _localController = null;
+      _remoteController = null;
+    }
+  }
+
+  @override
+  void dispose() {
+    _remoteController = null;
+    _localController = null;
+    super.dispose();
+  }
+
+  VideoViewController? get _effectiveRemoteController {
+    if (_remoteController != null) return _remoteController;
+    final uid = widget.remoteUid;
+    final channelId = widget.channelId;
+    if (uid == null || channelId == null || channelId.isEmpty) return null;
+    _remoteController = VideoViewController.remote(
+      rtcEngine: widget.engine,
+      canvas: VideoCanvas(uid: uid),
+      connection: RtcConnection(channelId: channelId),
+    );
+    return _remoteController;
+  }
+
+  VideoViewController get _effectiveLocalController {
+    if (_localController != null) return _localController!;
+    _localController = VideoViewController(
+      rtcEngine: widget.engine,
+      canvas: const VideoCanvas(uid: 0),
+    );
+    return _localController!;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
     final colorScheme = Theme.of(context).colorScheme;
     final hasRemoteParticipant =
-        remoteUid != null && channelId != null && channelId!.isNotEmpty;
-    final showRemoteVideo = hasRemoteParticipant && remoteVideoReady;
-    final showLocalFullscreen = localVideoReady && !showRemoteVideo;
-    final showLocalPiP = localVideoReady && showRemoteVideo;
+        widget.remoteUid != null &&
+        widget.channelId != null &&
+        widget.channelId!.isNotEmpty;
+    final showRemoteVideo = hasRemoteParticipant && widget.remoteVideoReady;
+    final showLocalFullscreen = widget.localVideoReady && !showRemoteVideo;
+    final showLocalPiP = widget.localVideoReady && showRemoteVideo;
     final pipWidth = tokens.spaceXXL * 3.5;
     final pipHeight = tokens.spaceXXL * 4.625;
 
-    final (placeholderIcon, placeholderMessage) = switch (phase) {
-      _AgoraCallConnectionPhase.connecting => (Icons.sync, labels.connecting),
+    final (placeholderIcon, placeholderMessage) = switch (widget.phase) {
+      _AgoraCallConnectionPhase.connecting => (
+        Icons.sync,
+        widget.labels.connecting,
+      ),
+      _AgoraCallConnectionPhase.reconnecting => (
+        Icons.wifi_off,
+        widget.labels.connecting,
+      ),
       _AgoraCallConnectionPhase.waitingForParticipant => (
         Icons.hourglass_top_outlined,
-        labels.waitingForParticipant,
+        widget.labels.waitingForParticipant,
       ),
       _AgoraCallConnectionPhase.participantJoined when !showRemoteVideo => (
         Icons.videocam_outlined,
-        labels.connected,
+        widget.labels.connected,
       ),
-      _ => (Icons.person_outline, labels.connected),
+      _ => (Icons.person_outline, widget.labels.connected),
     };
 
     return Stack(
       fit: StackFit.expand,
       children: [
         if (showRemoteVideo)
-          AgoraVideoView(
-            controller: VideoViewController.remote(
-              rtcEngine: engine,
-              canvas: VideoCanvas(uid: remoteUid),
-              connection: RtcConnection(channelId: channelId),
-            ),
-          )
+          AgoraVideoView(controller: _effectiveRemoteController!)
         else if (showLocalFullscreen)
-          AgoraVideoView(
-            controller: VideoViewController(
-              rtcEngine: engine,
-              canvas: const VideoCanvas(uid: 0),
-            ),
-          )
+          AgoraVideoView(controller: _effectiveLocalController)
         else
           AgoraCallVideoPlaceholder(
             icon: placeholderIcon,
             message: placeholderMessage,
-            showSpinner: phase == _AgoraCallConnectionPhase.connecting,
+            showSpinner:
+                widget.phase == _AgoraCallConnectionPhase.connecting ||
+                widget.phase == _AgoraCallConnectionPhase.reconnecting,
           ),
         if (showLocalPiP)
           PositionedDirectional(
@@ -305,12 +429,7 @@ class _VideoLayout extends StatelessWidget {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(tokens.radiusMedium),
-                  child: AgoraVideoView(
-                    controller: VideoViewController(
-                      rtcEngine: engine,
-                      canvas: const VideoCanvas(uid: 0),
-                    ),
-                  ),
+                  child: AgoraVideoView(controller: _effectiveLocalController),
                 ),
               ),
             ),
@@ -439,6 +558,7 @@ class _VoiceLayout extends StatelessWidget {
               Text(
                 switch (phase) {
                   _AgoraCallConnectionPhase.connecting => labels.connecting,
+                  _AgoraCallConnectionPhase.reconnecting => labels.connecting,
                   _AgoraCallConnectionPhase.waitingForParticipant =>
                     labels.waitingForParticipant,
                   _AgoraCallConnectionPhase.participantJoined =>

@@ -1,7 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CreateTestSessionFacade } from './create-test-session.facade';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { Subject, Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -11,11 +12,15 @@ import { CommonModule } from '@angular/common';
   templateUrl: './create-test-session.component.html',
   styleUrl: './create-test-session.component.css'
 })
-export class CreateTestSessionComponent {
+export class CreateTestSessionComponent implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   readonly facade = inject(CreateTestSessionFacade);
 
   form: FormGroup;
+
+  private readonly studentSearch$ = new Subject<string>();
+  private readonly teacherSearch$ = new Subject<string>();
+  private readonly subs = new Subscription();
 
   constructor() {
     this.form = this.fb.group({
@@ -26,28 +31,38 @@ export class CreateTestSessionComponent {
       endTime: ['', Validators.required],
       callType: ['externalMeeting', Validators.required]
     });
-
-    this.setupSearch();
   }
 
-  private setupSearch(): void {
-    // We could use form controls for search inputs or just generic inputs.
-    // For simplicity, let's just trigger facade search from the view via keyup events
-    // and store the selected ids in the form.
+  ngOnInit(): void {
+    // Debounce prefix searches so we don't fire Firestore queries per keystroke.
+    this.subs.add(
+      this.studentSearch$
+        .pipe(debounceTime(250), distinctUntilChanged())
+        .subscribe((query) => {
+          if (query.length >= 3) this.facade.searchStudents(query);
+        }),
+    );
+    this.subs.add(
+      this.teacherSearch$
+        .pipe(debounceTime(250), distinctUntilChanged())
+        .subscribe((query) => {
+          if (query.length >= 3) this.facade.searchTeachers(query);
+        }),
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
   }
 
   onStudentSearch(event: Event): void {
     const query = (event.target as HTMLInputElement).value;
-    if (query.length >= 3) {
-      this.facade.searchStudents(query);
-    }
+    this.studentSearch$.next(query);
   }
 
   onTeacherSearch(event: Event): void {
     const query = (event.target as HTMLInputElement).value;
-    if (query.length >= 3) {
-      this.facade.searchTeachers(query);
-    }
+    this.teacherSearch$.next(query);
   }
 
   selectStudent(id: string): void {

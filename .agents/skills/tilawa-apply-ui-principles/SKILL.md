@@ -45,9 +45,11 @@ On a typical screen, eye path should be:
 On **Home**:
 
 1. Hero (time / prayer / greeting)
-2. Today cards (khatma, plan, pinned athkar)
-3. Section title + **More** compact row (non-nav destinations only)
+2. Primary action card (Quran, listening, or urgent athkar)
+3. Daily practice (today plan, contextual athkar, pinned athkar)
 4. Daily inspiration cards (ayah / dua)
+5. Discover shortcuts for supporting tools
+6. More grouped list for lower-frequency destinations
 
 Do not restore a multi-tile launcher grid on Home — bottom nav owns primary
 destinations. See
@@ -128,11 +130,22 @@ are equal (see `flutter-apply-tilawa-theming`).
 
 ## Grids & shortcuts
 
-**More row** (`_HomeMoreActionsRow` in `home_screen.dart`):
+**Discover grid** (`HomeDiscoverShortcuts`):
 
-- 1 column narrow, 2 columns if width ≥ 520 dp
-- Horizontal tile: icon box + label + chevron; `minInteractiveDimension` height
-- **Only** destinations not in bottom nav (Reciters, Qibla today)
+- 2 columns narrow, 4 columns on medium+
+- Current supporting items: Reciters, Qibla, Tasbeeh, Bookmarks, and Sessions
+  when enabled
+- Do not add Home, Quran, Prayer, Athkar, or Settings/Profile tiles
+- Reciters is the current exception to bottom-nav duplication because the
+  shortcut selects the existing Reciters tab for daily listening use
+
+**More list** (`HomeMoreActionsGroup`):
+
+- Flat grouped rows for lower-frequency library/setup destinations
+- Current items: History, Favorites, Downloads, Smart Khatma when enabled, and
+  Support Tilawa
+- Row: icon box + label + optional subtitle + chevron;
+  `minInteractiveDimension` height
 
 **Pinned shortcuts** (athkar, favorites on Home):
 
@@ -192,7 +205,8 @@ When a nested control has a **different** action than the card tap, use
 - Magic pixel padding (`13`, `27`)
 - Second primary button beside the main CTA
 - Shadow on list tiles inside an already-raised sheet
-- **Home launcher grid** repeating bottom-nav tabs (Prayer, Athkar, Settings, etc.)
+- **Home launcher grid** repeating core tabs (Home, Quran, Prayer, Athkar,
+  Settings/Profile)
 
 ## Verification
 

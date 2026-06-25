@@ -82,15 +82,21 @@ Avoid feature-list thinking ("expose all athkar APIs on Home").
 **Home dashboard zones** (top → bottom = attention):
 
 1. **Now** — time-sensitive (next prayer, resume reading)
-2. **Today** — plans, pinned shortcuts, daily modules (e.g. pinned athkar)
-3. **More** — compact row for destinations **outside** bottom navigation only
+2. **Primary** — next best action (Quran, listening, or urgent athkar)
+3. **Practice / Today** — plans, pinned shortcuts, daily modules
+4. **Inspiration** — daily ayah and dua
+5. **Discover** — supporting shortcuts
+6. **More** — lower-frequency library/setup destinations
 
-When adding daily shortcuts (e.g. pinned athkar), place in **Today**, not More.
+When adding daily shortcuts (e.g. pinned athkar), place them in Practice/Today
+when they are ritual content, or Discover when they are supporting tools. Do
+not place them in More.
 
-**Do not duplicate bottom navigation on Home.** Shell tabs already cover Home,
-Prayer, Quran, Athkar, and Settings (`app_shell_screen.dart`). The More row is
-for secondary routes only (e.g. Reciters, Qibla) — never re-add nav tabs as
-Home tiles. See
+**Do not duplicate core navigation on Home.** The phone shell already covers
+Home, Quran push, Reciters, and Settings/Profile (`app_shell_screen.dart`).
+Current Home intentionally keeps Reciters in Discover because listening is a
+daily behavior and the shortcut selects the existing tab. Do not add Home,
+Quran, Prayer, Athkar, or Settings/Profile tiles. See
 [home-dashboard-patterns.md](../tilawa-apply-ui-principles/references/home-dashboard-patterns.md).
 
 ### Step 3 — Customization UX (favorites / pins)
@@ -146,7 +152,8 @@ From `docs/tilawa_brand.md` §8:
 ## Anti-patterns (reject in review)
 
 - Cold-start modal or popup for new Home sections
-- **Home tile that duplicates a bottom-nav destination** (Prayer, Athkar, Settings, etc.)
+- **Home tile that duplicates core navigation** (Home, Quran, Prayer, Athkar,
+  Settings/Profile)
 - Settings tile as the only path to a daily action
 - Forcing account sign-in for local pins/favorites
 - Stacking 3+ competing CTAs on Home

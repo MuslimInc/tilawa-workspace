@@ -101,6 +101,33 @@ class FakeRtcEngine implements RtcEngine {
     );
   }
 
+  void simulateConnectionStateChanged({
+    required ConnectionStateType state,
+    ConnectionChangedReasonType reason =
+        ConnectionChangedReasonType.connectionChangedConnecting,
+    String channelId = 'channel-1',
+  }) {
+    handler?.onConnectionStateChanged?.call(
+      RtcConnection(channelId: channelId),
+      state,
+      reason,
+    );
+  }
+
+  void simulateNetworkQuality({
+    required QualityType txQuality,
+    required QualityType rxQuality,
+    int uid = 0,
+    String channelId = 'channel-1',
+  }) {
+    handler?.onNetworkQuality?.call(
+      RtcConnection(channelId: channelId),
+      uid,
+      txQuality,
+      rxQuality,
+    );
+  }
+
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
 }

@@ -17,6 +17,8 @@ import '../../../domain/usecases/join_session_usecase.dart';
 import '../../../domain/usecases/open_session_dispute_usecase.dart';
 import '../../../domain/usecases/report_session_concern_usecase.dart';
 import '../../../domain/usecases/respond_to_reschedule_request_usecase.dart';
+import '../../../application/usecases/get_session_detail_usecase.dart';
+import '../../../application/usecases/invalidate_quran_session_cache_usecase.dart';
 import '../../../domain/entities/session_lifecycle_status.dart';
 import '../../../domain/policies/session_join_window_policy.dart';
 import '../../../boundaries/call/call_token_provider.dart';
@@ -32,6 +34,8 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
   SessionDetailBloc({
     required this._aggregateRepository,
     required this._getTimeline,
+    GetSessionDetailUseCase? sessionDetailUseCase,
+    InvalidateQuranSessionCacheUseCase? cacheInvalidator,
     this._sessionRepository,
     this._joinSession,
     this._openExternalMeetingUrl,
@@ -43,7 +47,9 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
     this._teacherProfileRepository,
     this._tokenProvider,
     this._joinWindowPolicy = const SessionJoinWindowPolicy(),
-  }) : super(const SessionDetailInitial()) {
+  }) : _getSessionDetail = sessionDetailUseCase,
+       _invalidateCache = cacheInvalidator,
+       super(const SessionDetailInitial()) {
     on<SessionDetailLoadRequested>(
       _onLoadRequested,
       transformer: restartable(),
@@ -84,6 +90,8 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
 
   final SessionAggregateRepository _aggregateRepository;
   final GetSessionTimelineUseCase _getTimeline;
+  final GetSessionDetailUseCase? _getSessionDetail;
+  final InvalidateQuranSessionCacheUseCase? _invalidateCache;
   final SessionRepository? _sessionRepository;
   final JoinSessionUseCase? _joinSession;
   final OpenExternalMeetingUrl? _openExternalMeetingUrl;
@@ -275,7 +283,7 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
   >
   _loadSessionCallContext({required String? sessionId}) async {
     final repository = _sessionRepository;
-    if (repository == null || sessionId == null || sessionId.isEmpty) {
+    if (sessionId == null || sessionId.isEmpty) {
       return (
         callType: null,
         externalMeetingJoinUrl: null,
@@ -283,7 +291,16 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
       );
     }
 
-    final sessionResult = await repository.getSessionById(sessionId);
+    final sessionResult = _getSessionDetail != null
+        ? await _getSessionDetail(sessionId)
+        : await repository?.getSessionById(sessionId);
+    if (sessionResult == null) {
+      return (
+        callType: null,
+        externalMeetingJoinUrl: null,
+        callProviderKind: null,
+      );
+    }
     return sessionResult.fold(
       (_) => (
         callType: null,
@@ -477,6 +494,11 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
         ),
       ),
     );
+
+    final latest = state;
+    if (result.isRight() && latest is SessionDetailSuccess) {
+      _invalidateAggregateCaches(latest.aggregate);
+    }
   }
 
   void _onDisputeAcknowledged(
@@ -536,6 +558,7 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
         );
       },
       (aggregate) async {
+        _invalidateAggregateCaches(aggregate);
         emit(
           after.copyWith(
             aggregate: aggregate,
@@ -557,5 +580,15 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
     final current = state;
     if (current is! SessionDetailSuccess) return;
     emit(current.copyWith(clearRescheduleRespondAccepted: true));
+  }
+
+  void _invalidateAggregateCaches(SessionAggregate aggregate) {
+    final sessionId = aggregate.sessionId;
+    if (sessionId == null || sessionId.isEmpty) return;
+    _invalidateCache?.invalidateSession(
+      sessionId,
+      teacherProfileId: aggregate.teacherId,
+      studentId: aggregate.studentId,
+    );
   }
 }

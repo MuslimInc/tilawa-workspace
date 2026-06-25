@@ -5,12 +5,14 @@ import 'fakes/fake_booked_slot_lock_repository.dart';
 import 'fakes/fake_session_repository.dart';
 import 'fakes/fake_teacher_profile_repository.dart';
 import 'fakes/fake_user_profile_repository.dart';
+import 'fixtures.dart';
 
 /// In-memory [ScheduleRepository] for tests.
 class FakeScheduleRepository implements ScheduleRepository {
   WeeklySchedule? schedule;
   final List<AvailabilityOverride> overrides = [];
   QuranSessionsFailure? failWith;
+  int getScheduleCallCount = 0;
   int getOverridesCallCount = 0;
   int getOverrideByDateCallCount = 0;
   bool? lastGetOverridesHadDateBounds;
@@ -19,6 +21,7 @@ class FakeScheduleRepository implements ScheduleRepository {
   Future<Either<QuranSessionsFailure, WeeklySchedule?>> getSchedule(
     String teacherId,
   ) async {
+    getScheduleCallCount++;
     if (failWith != null) return Left(failWith!);
     return Right(schedule);
   }
@@ -94,10 +97,12 @@ class FakeMarketSchedulingConfigRepository
     implements MarketSchedulingConfigRepository {
   MarketSchedulingConfig global = MarketSchedulingConfig.defaults;
   final Map<String, MarketSchedulingConfig> marketOverrides = {};
+  int getMarketSchedulingConfigCallCount = 0;
 
   @override
   Future<Either<QuranSessionsFailure, MarketSchedulingConfig>>
   getGlobal() async {
+    getMarketSchedulingConfigCallCount++;
     return Right(global);
   }
 
@@ -105,6 +110,7 @@ class FakeMarketSchedulingConfigRepository
   Future<Either<QuranSessionsFailure, MarketSchedulingConfig>> getForMarket(
     String countryCode,
   ) async {
+    getMarketSchedulingConfigCallCount++;
     final override = marketOverrides[countryCode];
     if (override == null) {
       return Left(NotFoundFailure('MarketSchedulingConfig($countryCode)'));
@@ -174,24 +180,34 @@ TeacherDashboardBloc buildTestTeacherDashboardBloc({
   final configRepo =
       schedulingConfigRepo ?? FakeMarketSchedulingConfigRepository();
   final profiles = userProfileRepo ?? FakeUserProfileRepository();
-  final teacherProfiles = teacherProfileRepo ?? FakeTeacherProfileRepository();
+  final teacherProfiles =
+      teacherProfileRepo ??
+      FakeTeacherProfileRepository(profile: makeTeacherProfile(id: teacherId));
   final reminders = fridayReminderStore ?? InMemoryFridayReviewReminderStore();
+  final cacheStore = MemoryCacheStore();
+  final getDashboard = GetTeacherDashboardUseCase(
+    userProfileRepository: profiles,
+    marketSchedulingConfigRepository: configRepo,
+    scheduleRepository: scheduleRepo,
+    sessionRepository: sessionRepo,
+    teacherProfileRepository: teacherProfiles,
+    bookedSlotLocks: bookedSlotLockRepository ?? FakeBookedSlotLockRepository(),
+    cacheStore: cacheStore,
+    currentTime: now,
+  );
   return TeacherDashboardBloc(
-    getTeacherSessions: GetTeacherSessionsUseCase(sessionRepo),
-    isSlotBooked: IsSlotBookedUseCase(
+    dashboardUseCase: getDashboard,
+    cacheInvalidator: InvalidateQuranSessionCacheUseCase(cacheStore),
+    slotBookedUseCase: IsSlotBookedUseCase(
       bookedSlotLockRepository ?? FakeBookedSlotLockRepository(),
     ),
-    getAvailability: getAvailability,
-    blockGeneratedSlot: blockGeneratedSlot,
-    availabilityProvider: availabilityProvider,
-    cancelSession: cancelSession,
-    completeSession: completeSession,
-    getMarketSchedulingConfig: GetMarketSchedulingConfigUseCase(configRepo),
-    getUserProfile: GetUserProfileUseCase(profiles),
-    getWeeklySchedule: GetWeeklyScheduleUseCase(scheduleRepo),
-    fridayReviewReminderStore: reminders,
-    teacherProfileRepository: teacherProfiles,
-    teacherId: teacherId,
+    availabilityUseCase: getAvailability,
+    blockSlotUseCase: blockGeneratedSlot,
+    availabilityGateway: availabilityProvider,
+    cancelSessionUseCase: cancelSession,
+    completeSessionUseCase: completeSession,
+    fridayReminderStore: reminders,
+    teacherUserId: teacherId,
     commitTimerFactory: commitTimerFactory,
     commitDelay: commitDelay,
     now: now,

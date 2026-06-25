@@ -121,6 +121,31 @@ Registered as a `ThemeExtension` on `ThemeData` (access: `Theme.of(context).exte
 - **Branch on `context.windowSize` (or helpers)** instead of raw widths for shell and two-pane patterns.
 - **Adaptive shell** (`TilawaAdaptiveShell` + `componentTokens.adaptiveShell`): main app chrome — bottom navigation, optional rail, **labels shown** on phone bottom nav; system navigation bar color is synced to match floating bottom nav for visual continuity (`_DefaultRouteSystemUiOverlay` in `tilawa_app.dart`).
 
+### Home dashboard IA
+
+Home is a daily ritual dashboard, not a generic launcher. Current structure in
+`apps/tilawa/lib/features/home/presentation/widgets/home_dashboard_body.dart`:
+
+1. **Now:** `HomeDashboardHeroSliver` owns prayer, greeting, date, location,
+   and collapsed prayer context.
+2. **Primary action:** `HomePrimaryActionZone` chooses the next best resume
+   surface: Quran, listening, or urgent athkar.
+3. **Daily practice:** optional Today Plan followed by contextual and pinned
+   athkar in `HomeDailyPracticeSection`.
+4. **Inspiration:** `HomeDailyInspirationSection` groups the daily ayah and dua
+   in one raised card.
+5. **Discover:** `HomeDiscoverShortcuts` shows supporting shortcuts in a compact
+   grid: Reciters, Qibla, Tasbeeh, Bookmarks, and Quran Sessions when enabled.
+   Do not add Home, Quran, Prayer, Athkar, or Settings tiles here.
+6. **More:** `HomeMoreActionsGroup` is a flat grouped list for lower-frequency
+   destinations such as History, Favorites, Downloads, Smart Khatma, and
+   Support Tilawa.
+
+The phone bottom bar currently contains Home, Quran push, Reciters, and
+Settings/Profile. Reciters is the intentional Home exception because listening
+is a core daily behavior; its Discover shortcut selects the existing Reciters
+tab instead of creating a second route.
+
 ---
 
 ## 6. Components (`TilawaComponentTokens`)

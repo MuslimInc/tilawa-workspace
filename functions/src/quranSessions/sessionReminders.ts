@@ -9,6 +9,9 @@ import { processDueNotificationRetries } from "./deliverSessionNotification";
 
 export const DEFAULT_REMINDER_HOURS = [24, 1];
 export const REMINDER_WINDOW_MINUTES = 30;
+/// Bound the per-window query so a burst of sessions cannot cause an
+/// unbounded scan. Paginate if the window ever exceeds this cap.
+const REMINDER_QUERY_LIMIT = 200;
 
 export interface ReminderWindow {
   hoursBefore: number;
@@ -52,6 +55,8 @@ export async function enqueueDueSessionReminders(
         Timestamp.fromDate(window.windowStart),
       )
       .where("startsAt", "<=", Timestamp.fromDate(window.windowEnd))
+      .orderBy("startsAt")
+      .limit(REMINDER_QUERY_LIMIT)
       .get();
 
     for (const doc of sessions.docs) {

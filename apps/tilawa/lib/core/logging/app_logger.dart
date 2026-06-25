@@ -10,7 +10,7 @@ final Logger logger = Logger(
     lineLength: 80,
     colors: false,
     printEmojis: true,
-    dateTimeFormat: DateTimeFormat.onlyDate,
+    dateTimeFormat: DateTimeFormat.dateAndTime,
   ),
   output: MultiOutput(<LogOutput>[
     if (!kReleaseMode) ConsoleOutput(),

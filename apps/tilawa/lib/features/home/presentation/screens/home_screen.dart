@@ -101,7 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     onOpenPrayer: widget.onOpenPrayer,
                   ),
                   HomeDashboardContentSliver(
-                    child: HomeDashboardBody(onOpenPrayer: widget.onOpenPrayer),
+                    child: const HomeDashboardBody(),
                   ),
                 ],
               );

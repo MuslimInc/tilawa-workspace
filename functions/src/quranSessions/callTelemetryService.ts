@@ -30,6 +30,14 @@ export interface RecordCallTelemetryEventInput {
   metadata?: Record<string, unknown>;
   resolvedStudentId?: string;
   resolvedTeacherUserId?: string;
+  /// Session doc data fetched by the caller for auth. When present, the
+  /// transaction skips a redundant `tx.get(sessionRef)` read (the doc was
+  /// already read above for participant auth). The session doc is effectively
+  /// immutable during an active call, so a stale read is safe for telemetry.
+  prefetchedSession?: {
+    bookingId?: string;
+    startsAt?: Timestamp;
+  };
 }
 
 export interface CallTrackingAggregate {
@@ -320,7 +328,8 @@ export function loadMutableTrackingState(
   return {
     scheduledStartsAt:
       asTimestamp(existing.scheduledStartsAt) ?? scheduledStartsAt,
-    firstJoinRole: (existing.firstJoinRole as CallParticipantRole | null) ?? null,
+    firstJoinRole:
+      (existing.firstJoinRole as CallParticipantRole | null) ?? null,
     firstJoinAt: asTimestamp(existing.firstJoinAt),
     secondJoinRole:
       (existing.secondJoinRole as CallParticipantRole | null) ?? null,
@@ -331,8 +340,7 @@ export function loadMutableTrackingState(
     bothParticipantsConnectedSeconds:
       (existing.bothParticipantsConnectedSeconds as number | undefined) ?? 0,
     reconnectCount: (existing.reconnectCount as number | undefined) ?? 0,
-    interruptionCount:
-      (existing.interruptionCount as number | undefined) ?? 0,
+    interruptionCount: (existing.interruptionCount as number | undefined) ?? 0,
     callEndedAt: asTimestamp(existing.callEndedAt),
     bothConnectedSinceMs: null,
     teacherConnected: false,
@@ -345,8 +353,10 @@ export function loadMutableTrackingState(
     studentEverConnected:
       existing.firstJoinRole === "student" ||
       existing.secondJoinRole === "student",
-    teacherNotifiedIncomingCall: (existing.teacherNotifiedIncomingCall as boolean | undefined) ?? false,
-    studentNotifiedIncomingCall: (existing.studentNotifiedIncomingCall as boolean | undefined) ?? false,
+    teacherNotifiedIncomingCall:
+      (existing.teacherNotifiedIncomingCall as boolean | undefined) ?? false,
+    studentNotifiedIncomingCall:
+      (existing.studentNotifiedIncomingCall as boolean | undefined) ?? false,
   };
 }
 
@@ -365,12 +375,37 @@ export async function recordCallTelemetryEventInTransaction(
       return { replayed: true };
     }
 
-    const sessionSnap = await tx.get(sessionRef);
-    if (!sessionSnap.exists) {
-      throw new Error("session_not_found");
+    // Use the caller-fetched session data when available to avoid a redundant
+    // `tx.get(sessionRef)` read (the session doc was already read above for
+    // participant auth). The session doc is immutable during an active call.
+    const scheduledStartsAt = input.prefetchedSession?.startsAt ?? null;
+    const bookingId = input.prefetchedSession?.bookingId ?? "";
+    if (scheduledStartsAt == null) {
+      // Legacy path / no prefetch: fall back to a transactional read.
+      const sessionSnap = await tx.get(sessionRef);
+      if (!sessionSnap.exists) {
+        throw new Error("session_not_found");
+      }
+      const session = sessionSnap.data() ?? {};
+      const fetchedStartsAt = asTimestamp(session.startsAt);
+      const fetchedBookingId = (session.bookingId as string | undefined) ?? "";
+      const trackingSnap = await tx.get(trackingRef);
+      const state = loadMutableTrackingState(
+        trackingSnap.data(),
+        fetchedStartsAt,
+      );
+      applyCallTelemetryEvent(state, input, serverNowMs);
+      return writeTelemetryDocs(
+        tx,
+        db,
+        input,
+        state,
+        serverNowMs,
+        eventRef,
+        trackingRef,
+        fetchedBookingId,
+      );
     }
-    const session = sessionSnap.data() ?? {};
-    const scheduledStartsAt = asTimestamp(session.startsAt);
 
     const trackingSnap = await tx.get(trackingRef);
     const state = loadMutableTrackingState(
@@ -380,73 +415,109 @@ export async function recordCallTelemetryEventInTransaction(
 
     applyCallTelemetryEvent(state, input, serverNowMs);
 
-    tx.set(eventRef, {
-      eventId: input.eventId,
-      sessionId: input.sessionId,
-      eventType: input.eventType,
-      actorId: input.actorId,
-      actorRole: input.actorRole,
-      clientTimestampMs: input.clientTimestampMs ?? null,
-      reasonCode: input.reasonCode ?? null,
-      remoteParticipantId: input.remoteParticipantId ?? null,
-      networkQuality: input.networkQuality ?? null,
-      metadata: input.metadata ?? {},
-      recordedAt: FieldValue.serverTimestamp(),
-    });
-
-    tx.set(
+    return writeTelemetryDocs(
+      tx,
+      db,
+      input,
+      state,
+      serverNowMs,
+      eventRef,
       trackingRef,
-      toCallTrackingAggregate(input.sessionId, state, serverNowMs),
-      { merge: true },
+      bookingId,
     );
-
-    // Denormalize hasActiveCall onto the booking doc so admin active-sessions
-    // can find sessions with live calls without scanning all bookings or
-    // depending on the scheduled startsAt time window. Early joins (before
-    // startsAt) are correctly surfaced because the signal comes from call
-    // tracking, not the schedule.
-    const bookingId = (session.bookingId as string | undefined) ?? "";
-    if (bookingId) {
-      const hasActiveCall =
-        state.actualCallStartedAt != null && state.callEndedAt == null;
-      tx.update(db.collection("quran_bookings").doc(bookingId), {
-        hasActiveCall,
-        callTrackingUpdatedAt: FieldValue.serverTimestamp(),
-        updatedAt: FieldValue.serverTimestamp(),
-      });
-    }
-
-    // Trigger Incoming Call Notification if the other participant hasn't joined.
-    // We only trigger this once per role when they join the room.
-    const isNewJoin = input.eventType === "joinSucceeded";
-    if (isNewJoin && input.resolvedStudentId && input.resolvedTeacherUserId) {
-      if (input.actorRole === "teacher" && !state.studentEverConnected && !state.studentNotifiedIncomingCall) {
-        // Teacher joined, student is not connected. Notify Student.
-        enqueueSessionNotificationInTransaction(tx, db, {
-          sessionId: input.sessionId,
-          aggregateId: input.sessionId,
-          kind: "incomingCall",
-          recipientUserIds: [input.resolvedStudentId],
-          payload: {
-            callerRole: "teacher",
-          },
-        });
-        state.studentNotifiedIncomingCall = true;
-      } else if (input.actorRole === "student" && !state.teacherEverConnected && !state.teacherNotifiedIncomingCall) {
-        // Student joined, teacher is not connected. Notify Teacher.
-        enqueueSessionNotificationInTransaction(tx, db, {
-          sessionId: input.sessionId,
-          aggregateId: input.sessionId,
-          kind: "incomingCall",
-          recipientUserIds: [input.resolvedTeacherUserId],
-          payload: {
-            callerRole: "student",
-          },
-        });
-        state.teacherNotifiedIncomingCall = true;
-      }
-    }
-
-    return { replayed: false };
   });
+}
+
+/// Writes the event doc, aggregate doc, and booking `hasActiveCall`
+/// denormalization inside the telemetry transaction.
+function writeTelemetryDocs(
+  tx: FirebaseFirestore.Transaction,
+  db: Firestore,
+  input: RecordCallTelemetryEventInput,
+  state: MutableTrackingState,
+  serverNowMs: number,
+  eventRef: FirebaseFirestore.DocumentReference,
+  trackingRef: FirebaseFirestore.DocumentReference,
+  bookingId: string,
+): { replayed: boolean } {
+  tx.set(eventRef, {
+    eventId: input.eventId,
+    sessionId: input.sessionId,
+    eventType: input.eventType,
+    actorId: input.actorId,
+    actorRole: input.actorRole,
+    clientTimestampMs: input.clientTimestampMs ?? null,
+    reasonCode: input.reasonCode ?? null,
+    remoteParticipantId: input.remoteParticipantId ?? null,
+    networkQuality: input.networkQuality ?? null,
+    metadata: input.metadata ?? {},
+    recordedAt: FieldValue.serverTimestamp(),
+  });
+
+  // Denormalize hasActiveCall onto the booking doc so admin active-sessions
+  // can find sessions with live calls without scanning all bookings or
+  // depending on the scheduled startsAt time window. Early joins (before
+  // startsAt) are correctly surfaced because the signal comes from call
+  // tracking, not the schedule.
+  if (bookingId) {
+    const hasActiveCall =
+      state.actualCallStartedAt != null && state.callEndedAt == null;
+    tx.update(db.collection("quran_bookings").doc(bookingId), {
+      hasActiveCall,
+      callTrackingUpdatedAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+  }
+
+  // Trigger Incoming Call Notification if the other participant hasn't joined.
+  // We only trigger this once per role when they join the room.
+  const isNewJoin = input.eventType === "joinSucceeded";
+  if (isNewJoin && input.resolvedStudentId && input.resolvedTeacherUserId) {
+    if (
+      input.actorRole === "teacher" &&
+      !state.studentEverConnected &&
+      !state.studentNotifiedIncomingCall
+    ) {
+      // Teacher joined, student is not connected. Notify Student.
+      enqueueSessionNotificationInTransaction(tx, db, {
+        sessionId: input.sessionId,
+        aggregateId: input.sessionId,
+        kind: "incomingCall",
+        recipientUserIds: [input.resolvedStudentId],
+        payload: {
+          callerRole: "teacher",
+        },
+      });
+      state.studentNotifiedIncomingCall = true;
+    } else if (
+      input.actorRole === "student" &&
+      !state.teacherEverConnected &&
+      !state.teacherNotifiedIncomingCall
+    ) {
+      // Student joined, teacher is not connected. Notify Teacher.
+      enqueueSessionNotificationInTransaction(tx, db, {
+        sessionId: input.sessionId,
+        aggregateId: input.sessionId,
+        kind: "incomingCall",
+        recipientUserIds: [input.resolvedTeacherUserId],
+        payload: {
+          callerRole: "student",
+        },
+      });
+      state.teacherNotifiedIncomingCall = true;
+    }
+  }
+
+  // Persist the call-tracking aggregate AFTER the notification block so the
+  // mutated `*NotifiedIncomingCall` flags are durably stored. Writing before
+  // the notification block left them persisted as `false` (dead data), which
+  // could allow duplicate incoming-call notifications if the `*EverConnected`
+  // guard were ever relaxed.
+  tx.set(
+    trackingRef,
+    toCallTrackingAggregate(input.sessionId, state, serverNowMs),
+    { merge: true },
+  );
+
+  return { replayed: false };
 }

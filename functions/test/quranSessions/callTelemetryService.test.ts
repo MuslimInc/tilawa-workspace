@@ -260,3 +260,21 @@ test("interruptionCount survives a reload of persisted state", () => {
   assert.equal(aggregate.teacherNoShow, false);
   assert.equal(aggregate.studentNoShow, false);
 });
+
+test("aggregate persists notifiedIncomingCall flags from state", () => {
+  // The transaction must write the aggregate AFTER the notification block
+  // mutates these flags, otherwise they are persisted as false (dead data).
+  const t0 = scheduledAt(12).toMillis();
+  const state = loadMutableTrackingState(undefined, scheduledAt(12));
+  // Simulate a teacher join that triggered a student incoming-call notification.
+  applyCallTelemetryEvent(state, {
+    sessionId: "s1", eventId: "t", eventType: "joinSucceeded",
+    actorId: "teacher", actorRole: "teacher", clientTimestampMs: t0,
+  }, t0);
+  state.studentNotifiedIncomingCall = true;
+
+  const aggregate = toCallTrackingAggregate("s1", state, t0 + 1000);
+
+  assert.equal(aggregate.studentNotifiedIncomingCall, true);
+  assert.equal(aggregate.teacherNotifiedIncomingCall, false);
+});

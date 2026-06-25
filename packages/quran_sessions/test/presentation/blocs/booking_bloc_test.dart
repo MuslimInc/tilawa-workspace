@@ -17,7 +17,6 @@ import 'package:quran_sessions/src/presentation/blocs/booking/booking_bloc.dart'
 import 'package:quran_sessions/src/presentation/blocs/booking/booking_event.dart';
 import 'package:quran_sessions/src/presentation/blocs/booking/booking_state.dart';
 import '../../helpers/availability_test_helpers.dart';
-import '../../helpers/fakes/fake_booking_repository.dart';
 import '../../helpers/fakes/fake_market_config_repository.dart';
 import '../../helpers/fakes/fake_session_policy_repository.dart';
 import '../../helpers/fakes/fake_session_repository.dart';
@@ -33,7 +32,6 @@ void main() {
   late FakeTeacherRepository teacherRepo;
   late FakeScheduleRepository scheduleRepo;
   late FakeSessionRepository sessionRepo;
-  late FakeBookingRepository bookingRepo;
   late FakeUserProfileRepository profileRepo;
   late FakeSessionPolicyRepository policyRepo;
   late FakeMarketConfigRepository marketConfigRepo;
@@ -54,7 +52,6 @@ void main() {
       ..teachers = [makeTeacher(id: 'teacher_1')];
     scheduleRepo = FakeScheduleRepository()..schedule = makeWeeklySchedule();
     sessionRepo = FakeSessionRepository();
-    bookingRepo = FakeBookingRepository();
     profileRepo = FakeUserProfileRepository(
       profile: makeProfile(
         userId: 'student_1',

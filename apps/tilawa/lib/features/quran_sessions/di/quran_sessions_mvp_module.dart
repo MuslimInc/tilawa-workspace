@@ -301,6 +301,45 @@ class QuranSessionsMvpModule {
     sl.registerLazySingletonIfAbsent(
       () => BlockGeneratedSlotUseCase(sl<ScheduleRepository>()),
     );
+
+    // ── Application-layer caching use cases ──────────────────────────────────
+    sl.registerLazySingletonIfAbsent<QuranSessionCacheStore>(
+      () => MemoryCacheStore(),
+    );
+    sl.registerLazySingletonIfAbsent(
+      () => GetTeacherDashboardUseCase(
+        userProfileRepository: sl<UserProfileRepository>(),
+        marketSchedulingConfigRepository:
+            sl<MarketSchedulingConfigRepository>(),
+        scheduleRepository: sl<ScheduleRepository>(),
+        sessionRepository: sl<SessionRepository>(),
+        teacherProfileRepository: sl<TeacherProfileRepository>(),
+        bookedSlotLocks: sl<BookedSlotLockRepository>(),
+        cacheStore: sl<QuranSessionCacheStore>(),
+      ),
+    );
+    sl.registerLazySingletonIfAbsent(
+      () => RefreshTeacherDashboardUseCase(
+        sl<GetTeacherDashboardUseCase>(),
+      ),
+    );
+    sl.registerLazySingletonIfAbsent(
+      () => GetSessionDetailUseCase(
+        sessionRepository: sl<SessionRepository>(),
+        cacheStore: sl<QuranSessionCacheStore>(),
+      ),
+    );
+    sl.registerLazySingletonIfAbsent(
+      () => RefreshSessionDetailUseCase(
+        getSessionDetail: sl<GetSessionDetailUseCase>(),
+        cacheStore: sl<QuranSessionCacheStore>(),
+      ),
+    );
+    sl.registerLazySingletonIfAbsent(
+      () => InvalidateQuranSessionCacheUseCase(
+        sl<QuranSessionCacheStore>(),
+      ),
+    );
   }
 
   /// Registers BLoC factories — new instance per navigation.
@@ -355,19 +394,16 @@ class QuranSessionsMvpModule {
     );
     sl.registerFactoryIfAbsent(
       () => TeacherDashboardBloc(
-        getTeacherSessions: sl<GetTeacherSessionsUseCase>(),
-        isSlotBooked: sl<IsSlotBookedUseCase>(),
-        getAvailability: sl<GetTeacherAvailabilityUseCase>(),
-        blockGeneratedSlot: sl<BlockGeneratedSlotUseCase>(),
-        availabilityProvider: sl<AvailabilityProvider>(),
-        cancelSession: sl<CancelSessionViaServerUseCase>(),
-        completeSession: sl<CompleteSessionViaServerUseCase>(),
-        getMarketSchedulingConfig: sl<GetMarketSchedulingConfigUseCase>(),
-        getUserProfile: sl<GetUserProfileUseCase>(),
-        getWeeklySchedule: sl<GetWeeklyScheduleUseCase>(),
-        fridayReviewReminderStore: sl<FridayReviewReminderStore>(),
-        teacherProfileRepository: sl<TeacherProfileRepository>(),
-        teacherId: sl<AuthSessionProvider>().currentUserId ?? 'teacher_mvp',
+        dashboardUseCase: sl<GetTeacherDashboardUseCase>(),
+        cacheInvalidator: sl<InvalidateQuranSessionCacheUseCase>(),
+        slotBookedUseCase: sl<IsSlotBookedUseCase>(),
+        availabilityUseCase: sl<GetTeacherAvailabilityUseCase>(),
+        blockSlotUseCase: sl<BlockGeneratedSlotUseCase>(),
+        availabilityGateway: sl<AvailabilityProvider>(),
+        cancelSessionUseCase: sl<CancelSessionViaServerUseCase>(),
+        completeSessionUseCase: sl<CompleteSessionViaServerUseCase>(),
+        fridayReminderStore: sl<FridayReviewReminderStore>(),
+        teacherUserId: sl<AuthSessionProvider>().currentUserId ?? 'teacher_mvp',
       ),
     );
     sl.registerFactoryIfAbsent(
@@ -380,6 +416,12 @@ class QuranSessionsMvpModule {
       () => SessionDetailBloc(
         aggregateRepository: sl<SessionAggregateRepository>(),
         getTimeline: sl<GetSessionTimelineUseCase>(),
+        sessionDetailUseCase: sl.isRegistered<GetSessionDetailUseCase>()
+            ? sl<GetSessionDetailUseCase>()
+            : null,
+        cacheInvalidator: sl.isRegistered<InvalidateQuranSessionCacheUseCase>()
+            ? sl<InvalidateQuranSessionCacheUseCase>()
+            : null,
         sessionRepository: sl<SessionRepository>(),
         joinSession: sl<JoinSessionUseCase>(),
         openExternalMeetingUrl: launchExternalMeetingUrl,

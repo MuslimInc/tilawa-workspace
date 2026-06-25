@@ -68,7 +68,7 @@ QuranTeacher makeTeacher({
   id: id,
   displayName: displayName,
   bio: 'Experienced Quran teacher',
-  avatarUrl: avatarUrl ?? 'https://example.com/avatar.png',
+  avatarUrl: avatarUrl,
   gender: gender,
   verificationStatus: status,
   supportedCallTypes: const [SessionCallType.externalMeeting],
@@ -125,6 +125,7 @@ QuranSession makeSession({
   String teacherId = 'teacher_1',
   QuranSessionStatus status = QuranSessionStatus.scheduled,
   DateTime? startsAt,
+  DateTime? endsAt,
 }) {
   final start = startsAt ?? DateTime.now().add(const Duration(days: 1));
   return QuranSession(
@@ -133,7 +134,7 @@ QuranSession makeSession({
     teacherId: teacherId,
     studentId: studentId,
     startsAt: start,
-    endsAt: start.add(const Duration(hours: 1)),
+    endsAt: endsAt ?? start.add(const Duration(hours: 1)),
     callType: SessionCallType.externalMeeting,
     status: status,
     meetingLink: 'https://meet.example.com/room',

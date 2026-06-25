@@ -169,6 +169,37 @@ void main() {
     );
 
     blocTest<TeacherDashboardBloc, TeacherDashboardState>(
+      'ongoing session (started, not ended) appears in upcomingSessions',
+      build: () {
+        // Started 10 min ago, ends 20 min from now → ongoing.
+        final start = DateTime.now().subtract(const Duration(minutes: 10));
+        sessionRepo.sessions = [
+          makeSession(
+            id: 'ongoing',
+            teacherId: 'teacher_1',
+            studentId: 'student_1',
+            startsAt: start,
+            endsAt: start.add(const Duration(minutes: 30)),
+          ),
+        ];
+        scheduleRepo.schedule = makeWeeklySchedule();
+        return buildBloc();
+      },
+      act: (b) => b.add(
+        const TeacherDashboardLoadRequested(teacherId: 'teacher_1'),
+      ),
+      expect: () => [
+        isA<TeacherDashboardLoading>(),
+        isA<TeacherDashboardSuccess>(),
+      ],
+      verify: (b) {
+        final state = b.state as TeacherDashboardSuccess;
+        check(state.upcomingSessions).length.equals(1);
+        check(state.upcomingSessions.first.id).equals('ongoing');
+      },
+    );
+
+    blocTest<TeacherDashboardBloc, TeacherDashboardState>(
       'AvailabilitySlotAdded appends slot to availability list',
       build: () => buildBloc(),
       seed: () => seedTeacherDashboardSuccess(

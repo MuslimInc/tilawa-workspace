@@ -325,6 +325,25 @@ class AppRouter {
     return _router!;
   }
 
+  static String? get currentRouteLocation {
+    final r = _router;
+    if (r == null) return null;
+    try {
+      final state = r.state;
+      final String path = state.uri.toString();
+      if (path.isNotEmpty) {
+        return path;
+      }
+      return state.matchedLocation;
+    } catch (_) {
+      try {
+        return r.routerDelegate.currentConfiguration.uri.toString();
+      } catch (__) {
+        return null;
+      }
+    }
+  }
+
   static List<NavigatorObserver> _getObservers() {
     final List<NavigatorObserver> observers = <NavigatorObserver>[];
     try {

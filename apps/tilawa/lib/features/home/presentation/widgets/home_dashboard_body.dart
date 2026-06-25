@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/widgets/deferred_after_first_frame.dart';
 import 'package:tilawa/features/today_plan/today_plan.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -9,19 +8,29 @@ import '../cubit/home_listening_resume_cubit.dart';
 import '../cubit/home_listening_resume_state.dart';
 import '../cubit/home_primary_action_cubit.dart';
 import '../cubit/home_primary_action_state.dart';
-import 'home_athkar_compact_card.dart';
-import 'home_dashboard_section.dart';
-import 'home_discover_carousel.dart';
-import 'home_features_hub.dart';
+import 'home_daily_inspiration_section.dart';
+import 'home_discover_shortcuts.dart';
 import 'home_listening_resume_row.dart';
-import 'home_premium_section_shell.dart';
+import 'home_more_actions_group.dart';
 import 'home_primary_action_zone.dart';
+import 'home_today_section.dart';
 
-/// Home body — primary action, category grid, promos, and today content.
+/// Home body — primary action, practice, inspiration, discover, more,
+/// listening.
+///
+/// IA zones (top → bottom):
+/// 1. **Now** — hero (prayer, greeting, location) — owned by sliver above.
+/// 2. **Primary action** — resume card (Quran / listening / urgent athkar).
+///    Always surfaces the Quran reader entry — comfortable reach.
+/// 3. **Practice** — optional Today Plan + daily athkar (pinned + edit).
+/// 4. **Inspiration** — daily ayah and dua in one raised card.
+/// 5. **Discover shortcuts** — compact 2-col grid of supporting tools
+///    (Reciters, Qibla, Tasbeeh, Bookmarks, Sessions).
+/// 6. **More** — secondary destinations as a flat grouped list (History,
+///    Favorites, Downloads, Smart Khatma, Support).
+/// 7. **Listening resume** — conditional continue-listening row.
 class HomeDashboardBody extends StatelessWidget {
-  const HomeDashboardBody({super.key, required this.onOpenPrayer});
-
-  final VoidCallback onOpenPrayer;
+  const HomeDashboardBody({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -34,26 +43,19 @@ class HomeDashboardBody extends StatelessWidget {
         DeferredAfterFirstFrame(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            // Uniform inter-section rhythm: one [spaceExtraLarge] between every
-            // major section so the page reads as a calm, even stack.
             children: [
-              SizedBox(height: tokens.spaceExtraLarge),
-              HomeFeaturesHub(onOpenPrayer: onOpenPrayer),
-              SizedBox(height: tokens.spaceExtraLarge),
-              const HomeDiscoverCarousel(),
               SizedBox(height: tokens.spaceExtraLarge),
               if (isTodayPlanEnabled()) ...[
                 const TodayPlanCard(),
                 SizedBox(height: tokens.spaceExtraLarge),
               ],
-              HomePremiumSectionShell(
-                child: HomeDashboardSection(
-                  title: context.l10n.homeTodayTitle,
-                  subtitle: context.l10n.homeTodaySubtitle,
-                  contentSpacing: tokens.spaceMedium,
-                  child: const HomeAthkarCompactCard(),
-                ),
-              ),
+              const HomeDailyPracticeSection(),
+              SizedBox(height: tokens.spaceExtraLarge),
+              const HomeDailyInspirationSection(),
+              SizedBox(height: tokens.spaceExtraLarge),
+              const HomeDiscoverShortcuts(),
+              SizedBox(height: tokens.spaceExtraLarge),
+              const HomeMoreActionsGroup(),
               // The listening row owns its own leading gap so a hidden row
               // leaves no dangling space.
               const _ConditionalListeningRow(),

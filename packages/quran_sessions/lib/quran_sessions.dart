@@ -314,3 +314,19 @@ export 'src/presentation/widgets/teacher_initials_avatar.dart';
 export 'src/utils/phone_normalizer.dart';
 export 'src/utils/price_formatter.dart';
 export 'src/utils/specialization_labels.dart';
+
+// ── Application Layer ──────────────────────────────────────────────────────────
+export 'src/application/usecases/get_teacher_dashboard_usecase.dart';
+export 'src/application/usecases/refresh_teacher_dashboard_usecase.dart';
+export 'src/application/usecases/get_session_detail_usecase.dart';
+export 'src/application/usecases/refresh_session_detail_usecase.dart';
+export 'src/application/usecases/invalidate_quran_session_cache_usecase.dart';
+export 'src/application/usecases/validate_join_session_usecase.dart';
+
+// ── Application Cache ─────────────────────────────────────────────────────────
+export 'src/application/cache/cache_freshness_policy.dart';
+export 'src/domain/policies/session_visibility_policy.dart';
+export 'src/domain/policies/session_join_policy.dart';
+export 'src/application/cache/quran_session_cache_store.dart';
+export 'src/application/cache/session_cache_key.dart';
+export 'src/data/stores/memory_cache_store.dart';
