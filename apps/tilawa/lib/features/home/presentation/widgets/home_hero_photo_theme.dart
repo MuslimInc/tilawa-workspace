@@ -74,7 +74,7 @@ abstract final class HomeHeroPhotoTheme {
   /// Premium wash for the pinned hero bar — matches [HomePremiumSectionShell].
   static BoxDecoration collapsedBarSurfaceDecoration({
     required ColorScheme colorScheme,
-    required TilawaDesignTokens tokens,
+    required MeMuslimDesignTokens tokens,
     required TilawaCapabilityActionCardTokens capabilityCardTokens,
   }) {
     return BoxDecoration(
@@ -114,7 +114,7 @@ abstract final class HomeHeroPhotoTheme {
   /// Location chip on the pinned premium toolbar.
   static BoxDecoration collapsedLocationChipDecoration({
     required ColorScheme colorScheme,
-    required TilawaDesignTokens tokens,
+    required MeMuslimDesignTokens tokens,
   }) {
     return BoxDecoration(
       color: colorScheme.onSurface.withValues(alpha: 0.05),
@@ -128,7 +128,7 @@ abstract final class HomeHeroPhotoTheme {
   /// Countdown pill on the pinned premium toolbar.
   static BoxDecoration collapsedCountdownChipDecoration({
     required ColorScheme colorScheme,
-    required TilawaDesignTokens tokens,
+    required MeMuslimDesignTokens tokens,
   }) {
     return BoxDecoration(
       color: colorScheme.semanticTintBackground(TilawaSemanticTint.gilding),
@@ -156,7 +156,7 @@ abstract final class HomeHeroPhotoTheme {
 
   static List<Shadow> textShadows(
     Color foreground,
-    TilawaDesignTokens tokens, {
+    MeMuslimDesignTokens tokens, {
     required Color shadowColor,
   }) {
     if (foreground.computeLuminance() > 0.45) {
@@ -174,7 +174,7 @@ abstract final class HomeHeroPhotoTheme {
   static TextStyle? labelStyle(
     TextStyle? base,
     Color color, {
-    required TilawaDesignTokens tokens,
+    required MeMuslimDesignTokens tokens,
     required ColorScheme colorScheme,
     FontWeight fontWeight = FontWeight.w500,
   }) {
@@ -192,7 +192,7 @@ abstract final class HomeHeroPhotoTheme {
   static TextStyle? titleStyle(
     TextStyle? base,
     Color color, {
-    required TilawaDesignTokens tokens,
+    required MeMuslimDesignTokens tokens,
     required ColorScheme colorScheme,
     FontWeight fontWeight = FontWeight.w700,
   }) {

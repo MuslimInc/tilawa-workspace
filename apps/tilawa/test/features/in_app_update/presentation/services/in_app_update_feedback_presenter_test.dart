@@ -17,7 +17,7 @@ void main() {
           InAppUpdateAction.offerOptionalImmediate,
           l10n,
         ),
-        'A new version of Tilawa is available.',
+        'A new version of MeMuslim is available.',
       );
       expect(
         InAppUpdateFeedbackPresenter.actionLabelFor(
@@ -31,7 +31,7 @@ void main() {
           InAppUpdateAction.offerRequiredStoreUpdate,
           l10n,
         ),
-        'An update is required to continue using Tilawa.',
+        'An update is required to continue using MeMuslim.',
       );
       expect(
         InAppUpdateFeedbackPresenter.durationFor(
@@ -100,7 +100,7 @@ void main() {
       await tester.pump();
 
       expect(
-        find.text('A new version of Tilawa is available.'),
+        find.text('A new version of MeMuslim is available.'),
         findsOneWidget,
       );
       expect(find.text('Update'), findsOneWidget);
@@ -133,7 +133,7 @@ void main() {
       await tester.pump();
 
       expect(
-        find.text('An update is required to continue using Tilawa.'),
+        find.text('An update is required to continue using MeMuslim.'),
         findsOneWidget,
       );
       expect(find.byType(TilawaFeedbackStrip), findsOneWidget);
@@ -143,7 +143,7 @@ void main() {
       expect(confirmed, isTrue);
       await tester.pumpAndSettle();
       expect(
-        find.text('An update is required to continue using Tilawa.'),
+        find.text('An update is required to continue using MeMuslim.'),
         findsNothing,
       );
     });
@@ -176,7 +176,7 @@ void main() {
       await tester.pump();
 
       expect(
-        find.text('A new version of Tilawa is available.'),
+        find.text('A new version of MeMuslim is available.'),
         findsOneWidget,
       );
     });

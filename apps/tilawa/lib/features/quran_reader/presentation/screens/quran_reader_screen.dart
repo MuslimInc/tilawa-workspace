@@ -1496,7 +1496,7 @@ class _ReaderAmbientPainter extends CustomPainter {
 
   final ColorScheme colorScheme;
   final QuranReaderTheme readerTheme;
-  final TilawaDesignTokens tokens;
+  final MeMuslimDesignTokens tokens;
 
   @override
   void paint(Canvas canvas, Size size) {

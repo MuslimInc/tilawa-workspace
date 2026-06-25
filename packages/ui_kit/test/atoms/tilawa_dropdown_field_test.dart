@@ -153,7 +153,7 @@ void main() {
         find.byType(InputDecorator),
       );
       final border = decorator.decoration.border! as OutlineInputBorder;
-      final expected = TilawaDesignTokens.light().resolveRadius(
+      final expected = MeMuslimDesignTokens.light().resolveRadius(
         family: TilawaRadiusFamily.chrome,
       );
       expect(border.borderRadius, BorderRadius.circular(expected));
@@ -201,7 +201,7 @@ void main() {
       final Size fieldSize = tester.getSize(find.byType(InputDecorator));
       expect(
         fieldSize.height,
-        greaterThanOrEqualTo(kTilawaMinInteractiveDimension),
+        greaterThanOrEqualTo(kMeMuslimMinInteractiveDimension),
       );
     });
 
@@ -220,7 +220,7 @@ void main() {
       );
 
       final MenuAnchor anchor = tester.widget(find.byType(MenuAnchor));
-      final tokens = TilawaDesignTokens.light();
+      final tokens = MeMuslimDesignTokens.light();
       expect(
         anchor.style?.alignment,
         AlignmentDirectional.bottomStart,
@@ -291,7 +291,7 @@ void main() {
           matching: find.byType(MenuItemButton),
         ),
       );
-      expect(itemSize.height, kTilawaMinInteractiveDimension);
+      expect(itemSize.height, kMeMuslimMinInteractiveDimension);
     });
   });
 }

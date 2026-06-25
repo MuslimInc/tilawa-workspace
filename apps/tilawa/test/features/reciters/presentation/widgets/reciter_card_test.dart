@@ -165,8 +165,8 @@ void main() {
     final Rect rect = tester.getRect(
       find.bySemanticsLabel('Add to Favorites'),
     );
-    expect(rect.width, greaterThanOrEqualTo(kTilawaMinInteractiveDimension));
-    expect(rect.height, greaterThanOrEqualTo(kTilawaMinInteractiveDimension));
+    expect(rect.width, greaterThanOrEqualTo(kMeMuslimMinInteractiveDimension));
+    expect(rect.height, greaterThanOrEqualTo(kMeMuslimMinInteractiveDimension));
 
     await cubit.close();
   });
@@ -227,8 +227,8 @@ void main() {
         ReciterSemanticsIds.reciterFavoriteButton(reciter.id),
       ),
     );
-    expect(favoriteRect.height, kTilawaMinInteractiveDimension);
-    expect(favoriteRect.width, kTilawaMinInteractiveDimension);
+    expect(favoriteRect.height, kMeMuslimMinInteractiveDimension);
+    expect(favoriteRect.width, kMeMuslimMinInteractiveDimension);
 
     await cubit.close();
   });

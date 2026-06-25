@@ -239,7 +239,7 @@ class _WarmupLayerStack extends StatelessWidget {
 class _HeroBlurPanelWarmup extends StatelessWidget {
   const _HeroBlurPanelWarmup();
 
-  // TilawaDesignTokens defaults — keep in sync with ui_kit tokens.
+  // MeMuslimDesignTokens defaults — keep in sync with ui_kit tokens.
   static const double _blurSigma = 12;
   static const double _spaceMedium = 12;
   static const double _radiusLarge = 20;

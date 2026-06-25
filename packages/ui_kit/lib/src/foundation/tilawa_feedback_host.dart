@@ -248,7 +248,7 @@ class _TilawaFeedbackHostState extends State<TilawaFeedbackHost>
       TilawaInteractionFeedback.trigger(TilawaHaptic.lightImpact);
     }
 
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     _animationController.duration = tokens.durationFast;
     await _animationController.forward(from: 0);
 
@@ -280,7 +280,7 @@ class _TilawaFeedbackHostState extends State<TilawaFeedbackHost>
       return;
     }
 
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     _animationController.duration = tokens.durationFast;
     await _animationController.reverse(from: 1);
 
@@ -309,7 +309,7 @@ class _TilawaFeedbackHostState extends State<TilawaFeedbackHost>
 
   @override
   Widget build(BuildContext context) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     final _TilawaToastRequest? active = _active;
     final double side = tokens.spaceLarge;
 

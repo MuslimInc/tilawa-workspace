@@ -154,7 +154,7 @@ void main() {
     expect(find.byTooltip('Close'), findsOneWidget);
     expect(
       tester.getSize(find.byTooltip('Close')),
-      const Size.square(kTilawaMinInteractiveDimension),
+      const Size.square(kMeMuslimMinInteractiveDimension),
     );
 
     await tester.tap(find.byIcon(TilawaIcons.dismiss));

@@ -40,7 +40,7 @@ Widget _wrapRouter({
   Widget app = MaterialApp.router(
     theme: ThemeData(
       extensions: <ThemeExtension<dynamic>>[
-        TilawaDesignTokens.light(),
+        MeMuslimDesignTokens.light(),
       ],
     ),
     routerConfig: router,
@@ -81,7 +81,7 @@ void main() {
           ),
         );
 
-        final TilawaDesignTokens tokens = TilawaDesignTokens.light();
+        final MeMuslimDesignTokens tokens = MeMuslimDesignTokens.light();
         expect(
           footprint,
           tokens.playerCollapsedHeight + tokens.spaceExtraLarge,
@@ -142,7 +142,7 @@ void main() {
                 child: MaterialApp.router(
                   theme: ThemeData(
                     extensions: <ThemeExtension<dynamic>>[
-                      TilawaDesignTokens.light(),
+                      MeMuslimDesignTokens.light(),
                     ],
                   ),
                   routerConfig: GoRouter(
@@ -170,7 +170,7 @@ void main() {
         );
         await tester.pump();
 
-        final TilawaDesignTokens tokens = TilawaDesignTokens.light();
+        final MeMuslimDesignTokens tokens = MeMuslimDesignTokens.light();
         expect(offset, tokens.spaceSmall);
         expect(
           offset,
@@ -216,7 +216,7 @@ void main() {
                 child: MaterialApp.router(
                   theme: ThemeData(
                     extensions: <ThemeExtension<dynamic>>[
-                      TilawaDesignTokens.light(),
+                      MeMuslimDesignTokens.light(),
                     ],
                   ),
                   routerConfig: GoRouter(
@@ -248,10 +248,10 @@ void main() {
         expect(
           offset,
           greaterThanOrEqualTo(
-            math.max(floatingPadding, kTilawaMinInteractiveDimension),
+            math.max(floatingPadding, kMeMuslimMinInteractiveDimension),
           ),
         );
-        expect(offset, greaterThan(TilawaDesignTokens.light().spaceSmall));
+        expect(offset, greaterThan(MeMuslimDesignTokens.light().spaceSmall));
       },
     );
 
@@ -287,7 +287,7 @@ void main() {
                 child: MaterialApp.router(
                   theme: ThemeData(
                     extensions: <ThemeExtension<dynamic>>[
-                      TilawaDesignTokens.light(),
+                      MeMuslimDesignTokens.light(),
                     ],
                   ),
                   routerConfig: GoRouter(
@@ -315,7 +315,7 @@ void main() {
         );
         await tester.pump();
 
-        expect(offset, kTilawaMinInteractiveDimension);
+        expect(offset, kMeMuslimMinInteractiveDimension);
       },
     );
 
@@ -354,7 +354,7 @@ void main() {
                 child: MaterialApp.router(
                   theme: ThemeData(
                     extensions: <ThemeExtension<dynamic>>[
-                      TilawaDesignTokens.light(),
+                      MeMuslimDesignTokens.light(),
                     ],
                   ),
                   routerConfig: GoRouter(
@@ -382,10 +382,10 @@ void main() {
         );
         await tester.pump();
 
-        expect(offset, kTilawaMinInteractiveDimension);
+        expect(offset, kMeMuslimMinInteractiveDimension);
         expect(
           offset,
-          greaterThan(TilawaDesignTokens.light().spaceSmall),
+          greaterThan(MeMuslimDesignTokens.light().spaceSmall),
           reason: 'keyboard-open shell must not use mini-player margin',
         );
       },
@@ -404,7 +404,7 @@ void main() {
         ),
       );
 
-      expect(height, TilawaDesignTokens.light().playerCollapsedHeight);
+      expect(height, MeMuslimDesignTokens.light().playerCollapsedHeight);
     });
   });
 

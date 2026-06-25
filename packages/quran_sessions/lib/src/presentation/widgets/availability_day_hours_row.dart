@@ -63,7 +63,7 @@ class AvailabilityDayHoursRow extends StatelessWidget {
   }
 }
 
-EdgeInsets availabilityRangeChipPadding(TilawaDesignTokens tokens) {
+EdgeInsets availabilityRangeChipPadding(MeMuslimDesignTokens tokens) {
   return EdgeInsets.symmetric(
     horizontal: tokens.spaceMedium,
     vertical: tokens.spaceSmall,

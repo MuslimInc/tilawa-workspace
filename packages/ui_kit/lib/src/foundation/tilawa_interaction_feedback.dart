@@ -59,7 +59,7 @@ class _TilawaPressAnimationState extends State<TilawaPressAnimation>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final tokens = Theme.of(context).extension<TilawaDesignTokens>();
+    final tokens = Theme.of(context).extension<MeMuslimDesignTokens>();
     final disableMotion = MediaQuery.disableAnimationsOf(context);
     _controller.duration = disableMotion
         ? Duration.zero

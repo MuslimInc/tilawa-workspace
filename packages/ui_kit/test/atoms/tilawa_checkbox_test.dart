@@ -8,7 +8,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+        theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
         home: Scaffold(
           body: Center(
             child: TilawaCheckbox(value: true, onChanged: (_) {}),
@@ -18,8 +18,8 @@ void main() {
     );
 
     final size = tester.getSize(find.byType(TilawaCheckbox));
-    expect(size.width, kTilawaMinInteractiveDimension);
-    expect(size.height, kTilawaMinInteractiveDimension);
+    expect(size.width, kMeMuslimMinInteractiveDimension);
+    expect(size.height, kMeMuslimMinInteractiveDimension);
   });
 
   testWidgets('TilawaCheckbox toggles when tapped', (tester) async {
@@ -27,7 +27,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+        theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
         home: Scaffold(
           body: Center(
             child: TilawaCheckbox(

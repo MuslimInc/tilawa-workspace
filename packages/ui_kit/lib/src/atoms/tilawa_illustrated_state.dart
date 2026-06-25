@@ -50,7 +50,7 @@ class TilawaIllustratedState extends StatelessWidget {
   /// Optional lower-emphasis action.
   final Widget? secondaryAction;
 
-  /// Maximum content width. Defaults to `TilawaDesignTokens.contentMaxWidthForm`.
+  /// Maximum content width. Defaults to `MeMuslimDesignTokens.contentMaxWidthForm`.
   final double? maxWidth;
 
   /// Optional semantic label for the overall state.

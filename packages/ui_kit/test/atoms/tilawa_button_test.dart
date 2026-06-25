@@ -14,8 +14,8 @@ Widget _app(Widget child) {
     theme: ThemeData(
       colorScheme: colorScheme,
       extensions: [
-        TilawaDesignTokens.light(),
-        TilawaComponentTokens.light(colorScheme: colorScheme),
+        MeMuslimDesignTokens.light(),
+        MeMuslimComponentTokens.light(colorScheme: colorScheme),
       ],
     ),
     home: Scaffold(body: child),
@@ -368,7 +368,7 @@ void main() {
       final TextButton button = tester.widget(find.byType(TextButton));
       expect(
         button.style!.minimumSize!.resolve(const {})!.height,
-        kTilawaMinInteractiveDimension,
+        kMeMuslimMinInteractiveDimension,
       );
     });
   });
@@ -400,7 +400,7 @@ void main() {
           {WidgetState.focused},
         )!;
         expect(focusedSide, isNot(BorderSide.none));
-        expect(focusedSide.width, TilawaDesignTokens.light().focusRingWidth);
+        expect(focusedSide.width, MeMuslimDesignTokens.light().focusRingWidth);
 
         // Focused also gets a state-layer wash distinct from the resting state.
         expect(style.overlayColor!.resolve(const {}), isNull);

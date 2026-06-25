@@ -31,7 +31,7 @@ class ReciterDetailsSearchBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
 
     return TilawaSearchFieldSlot(
       padding: TilawaAppBarConfig.catalogChromePadding(tokens),

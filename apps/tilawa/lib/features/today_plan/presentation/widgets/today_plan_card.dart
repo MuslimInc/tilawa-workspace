@@ -140,7 +140,7 @@ class _TodayPlanStreakChip extends StatelessWidget {
 
     return Container(
       constraints: const BoxConstraints(
-        minHeight: kTilawaMinInteractiveDimension,
+        minHeight: kMeMuslimMinInteractiveDimension,
       ),
       padding: EdgeInsets.symmetric(
         horizontal: tokens.spaceSmall,
@@ -151,7 +151,7 @@ class _TodayPlanStreakChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(
           tokens.resolveRadius(
             family: TilawaRadiusFamily.pill,
-            height: kTilawaMinInteractiveDimension,
+            height: kMeMuslimMinInteractiveDimension,
           ),
         ),
       ),
@@ -192,7 +192,7 @@ class _TodayPlanTaskRow extends StatelessWidget {
       borderRadius: BorderRadius.circular(
         tokens.resolveRadius(
           family: TilawaRadiusFamily.chrome,
-          height: kTilawaMinInteractiveDimension,
+          height: kMeMuslimMinInteractiveDimension,
         ),
       ),
       child: Padding(

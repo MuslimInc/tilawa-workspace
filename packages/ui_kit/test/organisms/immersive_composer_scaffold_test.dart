@@ -8,7 +8,10 @@ import '../../lib/src/organisms/immersive_composer_scaffold.dart';
 Widget _wrap(Widget child) {
   return MaterialApp(
     theme: ThemeData(
-      extensions: [TilawaDesignTokens.light(), TilawaComponentTokens.light()],
+      extensions: [
+        MeMuslimDesignTokens.light(),
+        MeMuslimComponentTokens.light(),
+      ],
     ),
     home: child,
   );

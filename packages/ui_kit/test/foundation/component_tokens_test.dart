@@ -178,7 +178,7 @@ void main() {
   group('TilawaIconActionButtonTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaIconActionButtonTokens.defaults();
-      expect(tokens.size, kTilawaMinInteractiveDimension);
+      expect(tokens.size, kMeMuslimMinInteractiveDimension);
       expect(tokens.activeBackgroundOpacity, 0.12);
       expect(tokens.activeBorderOpacity, 0.35);
       expect(tokens.inactiveBorderOpacity, 0.26);
@@ -217,7 +217,7 @@ void main() {
   group('TilawaSearchFieldTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaSearchFieldTokens.defaults();
-      expect(tokens.height, kTilawaMinInteractiveDimension);
+      expect(tokens.height, kMeMuslimMinInteractiveDimension);
       expect(tokens.backgroundColor, isA<Color>());
       expect(tokens.contentPadding, const EdgeInsets.symmetric(vertical: 12));
       expect(tokens.iconSize, 18.0);
@@ -635,7 +635,7 @@ void main() {
         tokens.bodyPadding,
         const EdgeInsets.fromLTRB(16, 12, 16, 24),
       );
-      expect(tokens.closeButtonSize, kTilawaMinInteractiveDimension);
+      expect(tokens.closeButtonSize, kMeMuslimMinInteractiveDimension);
       expect(
         tokens.footerPadding,
         const EdgeInsets.fromLTRB(16, 12, 16, 16),
@@ -1027,7 +1027,7 @@ void main() {
       expect(tokens.overlayBorderOpacity, 0.1);
       expect(tokens.shortWindowHeightBreakpoint, 760.0);
       expect(tokens.shortWindowPanelHeightFactor, 0.5);
-      expect(tokens.headerButtonSize, kTilawaMinInteractiveDimension);
+      expect(tokens.headerButtonSize, kMeMuslimMinInteractiveDimension);
       expect(tokens.composerSurfaceColor, isA<Color>());
       expect(tokens.panelBorderColor, isA<Color>());
     });
@@ -1234,9 +1234,9 @@ void main() {
     });
   });
 
-  group('TilawaComponentTokens', () {
+  group('MeMuslimComponentTokens', () {
     test('light() creates all component tokens', () {
-      final tokens = TilawaComponentTokens.light();
+      final tokens = MeMuslimComponentTokens.light();
       expect(tokens.sectionTitle, isNotNull);
       expect(tokens.sheetHandle, isNotNull);
       expect(tokens.feedbackStrip, isNotNull);
@@ -1251,13 +1251,13 @@ void main() {
     });
 
     test('dark() returns same as light()', () {
-      final dark = TilawaComponentTokens.dark();
-      final light = TilawaComponentTokens.light();
+      final dark = MeMuslimComponentTokens.dark();
+      final light = MeMuslimComponentTokens.light();
       expect(dark.sectionTitle.fontWeight, light.sectionTitle.fontWeight);
     });
 
     test('copyWith updates individual component tokens', () {
-      final original = TilawaComponentTokens.light();
+      final original = MeMuslimComponentTokens.light();
       final newSearchTokens = original.searchField.copyWith(
         focusedBorderOpacity: 0.3,
       );
@@ -1268,8 +1268,8 @@ void main() {
     });
 
     test('lerp interpolates all component tokens', () {
-      final first = TilawaComponentTokens.light();
-      final second = TilawaComponentTokens.dark();
+      final first = MeMuslimComponentTokens.light();
+      final second = MeMuslimComponentTokens.dark();
       final lerped = first.lerp(second, 0.5);
 
       expect(lerped.sectionTitle, isNotNull);
@@ -1277,16 +1277,16 @@ void main() {
       expect(lerped.feedbackStrip, isNotNull);
     });
 
-    test('returns self when other is not TilawaComponentTokens', () {
-      final tokens = TilawaComponentTokens.light();
+    test('returns self when other is not MeMuslimComponentTokens', () {
+      final tokens = MeMuslimComponentTokens.light();
       final result = tokens.lerp(null, 0.5);
       expect(result.sectionTitle, tokens.sectionTitle);
     });
 
     testWidgets(
-      'TilawaComponentTokensX extension accesses tokens from ThemeData',
+      'MeMuslimComponentTokensX extension accesses tokens from ThemeData',
       (WidgetTester tester) async {
-        final tokens = TilawaComponentTokens.light();
+        final tokens = MeMuslimComponentTokens.light();
         final theme = ThemeData(extensions: [tokens]);
 
         await tester.pumpWidget(
@@ -1305,7 +1305,7 @@ void main() {
     );
 
     testWidgets(
-      'TilawaComponentTokensX uses Theme colorScheme when extension is absent',
+      'MeMuslimComponentTokensX uses Theme colorScheme when extension is absent',
       (WidgetTester tester) async {
         final colorScheme = ColorScheme.fromSeed(
           seedColor: const Color(0xFF7A5C89),

@@ -31,7 +31,7 @@ class HomeHeroCollapsedToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
     final Color foreground = HomeHeroPhotoTheme.collapsedToolbarForeground(
       colorScheme: colorScheme,
@@ -127,7 +127,7 @@ class _HomeHeroCollapsedZoneDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TilawaDesignTokens tokens = context.tokens;
+    final MeMuslimDesignTokens tokens = context.tokens;
     final TilawaBottomSheetScaffoldTokens sheetTokens = Theme.of(
       context,
     ).componentTokens.bottomSheetScaffold;
@@ -165,7 +165,7 @@ class _HomeHeroCollapsedLocationChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TilawaDesignTokens tokens = context.tokens;
+    final MeMuslimDesignTokens tokens = context.tokens;
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return Semantics(
@@ -242,7 +242,7 @@ class _HomeHeroCollapsedPrayerCenter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TilawaDesignTokens tokens = context.tokens;
+    final MeMuslimDesignTokens tokens = context.tokens;
     final String name = _localizedPrayerName(context, prayer.type);
     final String time = _formatTime(context, prayer.time);
 
@@ -342,7 +342,7 @@ class _HomeHeroCollapsedCountdownPillState
 
   @override
   Widget build(BuildContext context) {
-    final TilawaDesignTokens tokens = context.tokens;
+    final MeMuslimDesignTokens tokens = context.tokens;
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final String countdown = _remaining <= Duration.zero
         ? context.l10n.homePrayerNow

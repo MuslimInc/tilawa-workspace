@@ -53,7 +53,7 @@ abstract final class TilawaAppBarConfig {
   }
 
   /// Insets for [TilawaCatalogAppBar] and catalog search slots.
-  static EdgeInsets catalogChromePadding(TilawaDesignTokens tokens) {
+  static EdgeInsets catalogChromePadding(MeMuslimDesignTokens tokens) {
     return EdgeInsets.fromLTRB(
       tokens.spaceMedium,
       tokens.spaceSmall,
@@ -74,12 +74,12 @@ abstract final class TilawaAppBarConfig {
       titleStyle,
       textScaler,
     );
-    return math.max(titleHeight, kTilawaMinInteractiveDimension);
+    return math.max(titleHeight, kMeMuslimMinInteractiveDimension);
   }
 
   /// Title-only catalog header (Settings, Favorites, Athkar).
   static double catalogTitleOnlyHeight(BuildContext context) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     final EdgeInsets padding = catalogChromePadding(tokens);
     final double raw = padding.vertical + catalogTitleRowHeight(context);
     return _ceilToDevicePixels(context, raw);
@@ -101,7 +101,7 @@ abstract final class TilawaAppBarConfig {
     BuildContext context, {
     required double contentHeight,
   }) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     final EdgeInsets padding = catalogChromePadding(tokens);
     final double raw =
         padding.vertical +
@@ -113,12 +113,12 @@ abstract final class TilawaAppBarConfig {
 
   /// Title + search + min-height filter row in catalog headers.
   static double catalogTitleSearchAndFilterRowHeight(BuildContext context) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     final double searchHeight = Theme.of(
       context,
     ).componentTokens.searchField.height;
     final double contentHeight =
-        searchHeight + tokens.spaceSmall + kTilawaMinInteractiveDimension;
+        searchHeight + tokens.spaceSmall + kMeMuslimMinInteractiveDimension;
     return catalogTitleAndContentHeight(
       context,
       contentHeight: contentHeight,
@@ -128,9 +128,9 @@ abstract final class TilawaAppBarConfig {
   /// Search (+ optional trailing control) without a title row.
   static double catalogSearchRowHeight(
     BuildContext context, {
-    double trailingMinHeight = kTilawaMinInteractiveDimension,
+    double trailingMinHeight = kMeMuslimMinInteractiveDimension,
   }) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     final double searchHeight = Theme.of(
       context,
     ).componentTokens.searchField.height;
@@ -229,7 +229,7 @@ abstract final class TilawaAppBarChrome {
   /// Prefer [showBottomHairline]; elevation is opt-in for rare scroll chrome.
   static Color elevationShadowColor(
     ColorScheme scheme,
-    TilawaDesignTokens tokens, {
+    MeMuslimDesignTokens tokens, {
     bool enabled = true,
   }) {
     if (!enabled) {
@@ -254,7 +254,7 @@ abstract final class TilawaAppBarChrome {
 
   static ShapeBorder bottomHairline(
     ColorScheme scheme,
-    TilawaDesignTokens tokens,
+    MeMuslimDesignTokens tokens,
   ) {
     return RoundedRectangleBorder(
       side: BorderSide(
@@ -275,7 +275,7 @@ abstract final class TilawaAppBarChrome {
 
   static List<Widget>? spacedActions(
     List<Widget>? actions,
-    TilawaDesignTokens tokens,
+    MeMuslimDesignTokens tokens,
   ) {
     if (actions == null || actions.isEmpty) {
       return null;
@@ -328,7 +328,7 @@ abstract final class TilawaAppBarChrome {
     String? tooltip,
   }) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final double hit = tokens.minInteractiveDimension;
     final BorderRadius radius = toolbarIconBorderRadius(theme);
     final TilawaAppBarScope? scope = TilawaAppBarScope.maybeOf(context);
@@ -366,7 +366,7 @@ abstract final class TilawaAppBarChrome {
     required VoidCallback? onPressed,
     String? tooltip,
   }) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     return Center(
       child: Padding(
         padding: EdgeInsetsDirectional.only(start: tokens.appBarEdgePadding),
@@ -416,7 +416,7 @@ abstract final class TilawaAppBarChrome {
       return null;
     }
 
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     final ({
       Widget? leading,
       bool automaticallyImplyLeading,
@@ -454,7 +454,7 @@ abstract final class TilawaAppBarChrome {
     required BuildContext context,
     required Widget? leading,
     required bool automaticallyImplyLeading,
-    required TilawaDesignTokens tokens,
+    required MeMuslimDesignTokens tokens,
   }) {
     final double hit = tokens.minInteractiveDimension;
     final double width = tokens.appBarEdgePadding + hit;

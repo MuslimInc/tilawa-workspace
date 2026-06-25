@@ -10,8 +10,8 @@ Widget _wrap(Widget child) {
   return MaterialApp(
     theme: ThemeData(
       extensions: [
-        TilawaDesignTokens.light(),
-        TilawaComponentTokens.light(),
+        MeMuslimDesignTokens.light(),
+        MeMuslimComponentTokens.light(),
       ],
     ),
     localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -136,15 +136,15 @@ void main() {
 
     final ThemeData lightTheme = ThemeData(
       extensions: [
-        TilawaDesignTokens.light(),
-        TilawaComponentTokens.light(),
+        MeMuslimDesignTokens.light(),
+        MeMuslimComponentTokens.light(),
       ],
       colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
     );
     final ThemeData darkTheme = ThemeData(
       extensions: [
-        TilawaDesignTokens.dark(),
-        TilawaComponentTokens.dark(),
+        MeMuslimDesignTokens.dark(),
+        MeMuslimComponentTokens.dark(),
       ],
       colorScheme: ColorScheme.fromSeed(
         seedColor: Colors.blue,

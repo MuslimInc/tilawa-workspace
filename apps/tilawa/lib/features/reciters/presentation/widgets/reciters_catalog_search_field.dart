@@ -50,7 +50,7 @@ class RecitersCatalogSearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     final BorderRadius borderRadius = BorderRadius.circular(
       tokens.radiusExtraLarge,
     );

@@ -16,7 +16,7 @@ Widget _buildHarness({
     locale: const Locale('en'),
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
-    theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+    theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
     home: BlocProvider<AppReviewCubit>.value(
       value: cubit,
       child: const Scaffold(
@@ -33,7 +33,7 @@ void main() {
 
     await tester.pumpWidget(_buildHarness(cubit: cubit));
 
-    expect(find.text('Rate Tilawa'), findsOneWidget);
+    expect(find.text('Rate MeMuslim'), findsOneWidget);
     expect(find.text('Share your feedback on the app store.'), findsOneWidget);
   });
 
@@ -44,7 +44,7 @@ void main() {
     addTearDown(cubit.close);
 
     await tester.pumpWidget(_buildHarness(cubit: cubit));
-    await tester.tap(find.text('Rate Tilawa'));
+    await tester.tap(find.text('Rate MeMuslim'));
     await tester.pumpAndSettle();
 
     expect(cubit.rateFromSettingsCalls, 1);
@@ -75,7 +75,7 @@ void main() {
     );
     await tester.pump();
 
-    await tester.tap(find.text('Rate Tilawa'));
+    await tester.tap(find.text('Rate MeMuslim'));
     await tester.pump();
 
     expect(cubit.rateFromSettingsCalls, 0);

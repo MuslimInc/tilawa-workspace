@@ -12,14 +12,14 @@ void main() {
     });
   });
 
-  group('tilawaScaleTextTheme', () {
+  group('meMuslimScaleTextTheme', () {
     test('scales explicit font sizes and preserves hierarchy', () {
       const base = TextTheme(
         titleLarge: TextStyle(fontSize: 22),
         bodyLarge: TextStyle(fontSize: 16),
         labelSmall: TextStyle(fontSize: 11),
       );
-      final scaled = tilawaScaleTextTheme(base);
+      final scaled = meMuslimScaleTextTheme(base);
 
       expect(scaled.titleLarge?.fontSize, closeTo(22 * factor, 0.01));
       expect(scaled.bodyLarge?.fontSize, closeTo(16 * factor, 0.01));
@@ -40,7 +40,7 @@ void main() {
       const base = TextTheme(
         titleLarge: TextStyle(fontWeight: FontWeight.w600),
       );
-      final scaled = tilawaScaleTextTheme(base);
+      final scaled = meMuslimScaleTextTheme(base);
 
       expect(scaled.titleLarge?.fontSize, isNull);
       expect(scaled.titleLarge?.fontWeight, FontWeight.w600);

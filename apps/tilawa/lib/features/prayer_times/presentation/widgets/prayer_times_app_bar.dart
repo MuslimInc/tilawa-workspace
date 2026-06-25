@@ -9,7 +9,7 @@ import '../prayer_notification_semantics_ids.dart';
 /// Matches the reciters catalog tab strip:
 /// [TilawaAppBarConfig.catalogChromePadding] + [kTextTabBarHeight].
 double prayerTimesAppBarBottomExtent(BuildContext context) {
-  final TilawaDesignTokens tokens = Theme.of(context).tokens;
+  final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
   return TilawaAppBarConfig.catalogChromePadding(tokens).vertical +
       kTextTabBarHeight;
 }
@@ -39,7 +39,7 @@ class PrayerTimesAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
 
     return TilawaSliverAppBar(
       surface: TilawaAppBarSurface.parchment,

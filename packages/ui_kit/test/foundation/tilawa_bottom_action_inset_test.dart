@@ -4,9 +4,9 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 void main() {
   final ThemeData theme = ThemeData(
-    extensions: <ThemeExtension<dynamic>>[TilawaDesignTokens.light()],
+    extensions: <ThemeExtension<dynamic>>[MeMuslimDesignTokens.light()],
   );
-  final TilawaDesignTokens tokens = TilawaDesignTokens.light();
+  final MeMuslimDesignTokens tokens = MeMuslimDesignTokens.light();
 
   Future<EdgeInsets> pumpAndReadPadding(
     WidgetTester tester, {

@@ -59,7 +59,7 @@ double _recitersRefreshIndicatorEdgeOffset(BuildContext context) {
 /// Includes the collapsible search row so the rail keeps a stable screen
 /// position when the nested header scrolls away.
 double _recitersLetterIndexTopInsetFromScaffoldBody(BuildContext context) {
-  final TilawaDesignTokens tokens = Theme.of(context).tokens;
+  final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
   return _recitersRefreshIndicatorEdgeOffset(context) + tokens.spaceSmall;
 }
 
@@ -1255,7 +1255,7 @@ class _RecitersEmptyStateContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final bool showClearAll = _hasActiveFilters(state);
     final String title = context.l10n.noRecitersFound;
     final IconData icon = Icons.person_off_outlined;
@@ -1287,7 +1287,7 @@ Alignment _recitersEmptyContentAlignment(BuildContext context) {
 
 double _recitersPinnedTabBarHeight(BuildContext context) {
   final ThemeData theme = Theme.of(context);
-  final TilawaDesignTokens tokens = theme.tokens;
+  final MeMuslimDesignTokens tokens = theme.tokens;
   final EdgeInsets padding = TilawaAppBarConfig.catalogChromePadding(tokens);
 
   return padding.vertical + kTextTabBarHeight;
@@ -1317,7 +1317,7 @@ class _RecitersScrollingHeaderSliver extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
 
     return SliverToBoxAdapter(
       child: ColoredBox(
@@ -1397,7 +1397,7 @@ class _RecitersPinnedTabBarContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
 
     return ColoredBox(
       color: theme.colorScheme.surface,
@@ -1471,7 +1471,7 @@ class _FavoritesTabLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     final String label = count > 0
         ? context.l10n.recitersFilterPillFavoritesCount(count)
         : context.l10n.recitersFilterChipFavorites;
@@ -1550,7 +1550,7 @@ class _RecitersAmbientPainter extends CustomPainter {
   });
 
   final ColorScheme colorScheme;
-  final TilawaDesignTokens tokens;
+  final MeMuslimDesignTokens tokens;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1969,7 +1969,7 @@ double _recitersWideShellBottomReserve(BuildContext context) {
 
 /// Alphabet rail sits slightly above shell chrome with a tokenized gap.
 double _recitersLetterIndexBottomInset(BuildContext context) {
-  final TilawaDesignTokens tokens = Theme.of(context).tokens;
+  final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
   return tokens.spaceSmall + _recitersWideShellBottomReserve(context);
 }
 

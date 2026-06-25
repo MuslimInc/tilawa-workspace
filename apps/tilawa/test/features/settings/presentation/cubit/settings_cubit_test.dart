@@ -18,7 +18,7 @@ import '../../../downloads/helpers/mock_helper.mocks.dart';
 const AppInfo testAppInfo = AppInfo(
   version: '1.0.0',
   buildNumber: '1',
-  appName: 'Tilawa',
+  appName: 'MeMuslim',
   packageName: 'com.tilawa.app',
 );
 

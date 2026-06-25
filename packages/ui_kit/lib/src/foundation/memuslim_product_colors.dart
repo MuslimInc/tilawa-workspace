@@ -4,15 +4,15 @@ import 'app_colors.dart';
 import 'home_explore_feature_tile_styles.dart';
 import 'semantic_tints.dart';
 
-/// Product-specific semantic colours for Tilawa features.
+/// Product-specific semantic colours for MeMuslim features.
 ///
 /// Feature widgets should read roles from [ThemeData.productColors] (or
-/// [ColorScheme] / [TilawaComponentTokens] for generic chrome) — not from
+/// [ColorScheme] / [MeMuslimComponentTokens] for generic chrome) — not from
 /// [AppColors] directly. Hex values are assembled here from the palette in
 /// [AppColors]; see `docs/design/color_architecture.md`.
 @immutable
-class TilawaProductColors extends ThemeExtension<TilawaProductColors> {
-  const TilawaProductColors({
+class MeMuslimProductColors extends ThemeExtension<MeMuslimProductColors> {
+  const MeMuslimProductColors({
     required this.brandLockedPrimary,
     required this.brandLockedOnPrimary,
     required this.prayerTimeActive,
@@ -73,8 +73,8 @@ class TilawaProductColors extends ThemeExtension<TilawaProductColors> {
 
   final Color featuredGradientForeground;
 
-  factory TilawaProductColors.light(ColorScheme scheme) {
-    return TilawaProductColors(
+  factory MeMuslimProductColors.light(ColorScheme scheme) {
+    return MeMuslimProductColors(
       brandLockedPrimary: AppColors.defaultPrimary,
       brandLockedOnPrimary: AppColors.lightSchemeOnPrimary,
       prayerTimeActive: scheme.primary,
@@ -93,8 +93,8 @@ class TilawaProductColors extends ThemeExtension<TilawaProductColors> {
     );
   }
 
-  factory TilawaProductColors.dark(ColorScheme scheme) {
-    return TilawaProductColors(
+  factory MeMuslimProductColors.dark(ColorScheme scheme) {
+    return MeMuslimProductColors(
       brandLockedPrimary: AppColors.darkDefaultPrimary,
       brandLockedOnPrimary: AppColors.lightSchemeOnPrimary,
       prayerTimeActive: scheme.primary,
@@ -156,7 +156,7 @@ class TilawaProductColors extends ThemeExtension<TilawaProductColors> {
   }
 
   @override
-  TilawaProductColors copyWith({
+  MeMuslimProductColors copyWith({
     Color? brandLockedPrimary,
     Color? brandLockedOnPrimary,
     Color? prayerTimeActive,
@@ -173,7 +173,7 @@ class TilawaProductColors extends ThemeExtension<TilawaProductColors> {
     Color? featuredGradientEnd,
     Color? featuredGradientForeground,
   }) {
-    return TilawaProductColors(
+    return MeMuslimProductColors(
       brandLockedPrimary: brandLockedPrimary ?? this.brandLockedPrimary,
       brandLockedOnPrimary: brandLockedOnPrimary ?? this.brandLockedOnPrimary,
       prayerTimeActive: prayerTimeActive ?? this.prayerTimeActive,
@@ -196,12 +196,12 @@ class TilawaProductColors extends ThemeExtension<TilawaProductColors> {
   }
 
   @override
-  TilawaProductColors lerp(TilawaProductColors? other, double t) {
-    if (other is! TilawaProductColors) {
+  MeMuslimProductColors lerp(MeMuslimProductColors? other, double t) {
+    if (other is! MeMuslimProductColors) {
       return this;
     }
     Color? lerpColor(Color a, Color b) => Color.lerp(a, b, t);
-    return TilawaProductColors(
+    return MeMuslimProductColors(
       brandLockedPrimary: lerpColor(
         brandLockedPrimary,
         other.brandLockedPrimary,
@@ -245,15 +245,15 @@ class TilawaProductColors extends ThemeExtension<TilawaProductColors> {
   }
 }
 
-/// Access [TilawaProductColors] from [ThemeData].
-extension TilawaProductColorsX on ThemeData {
-  TilawaProductColors get productColors {
-    final TilawaProductColors? ext = extension<TilawaProductColors>();
+/// Access [MeMuslimProductColors] from [ThemeData].
+extension MeMuslimProductColorsX on ThemeData {
+  MeMuslimProductColors get productColors {
+    final MeMuslimProductColors? ext = extension<MeMuslimProductColors>();
     if (ext != null) {
       return ext;
     }
     return colorScheme.brightness == Brightness.dark
-        ? TilawaProductColors.dark(colorScheme)
-        : TilawaProductColors.light(colorScheme);
+        ? MeMuslimProductColors.dark(colorScheme)
+        : MeMuslimProductColors.light(colorScheme);
   }
 }

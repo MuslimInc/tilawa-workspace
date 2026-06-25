@@ -9,7 +9,7 @@ void main() {
   final ThemeData theme = AppTheme.getLightTheme(
     primaryColor: AppColors.defaultPrimary,
   );
-  final TilawaDesignTokens tokens = TilawaDesignTokens.light();
+  final MeMuslimDesignTokens tokens = MeMuslimDesignTokens.light();
 
   Future<double> pumpAndResolve(
     WidgetTester tester, {

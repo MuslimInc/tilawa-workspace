@@ -114,7 +114,7 @@ class _PrayerAlertsPermissionFlowState
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
 
     return Scaffold(
       body: TilawaThumbReachLayout(
@@ -152,7 +152,7 @@ class _PermissionStepPage extends StatelessWidget {
   });
 
   final PrayerAlertsPermissionStep step;
-  final TilawaDesignTokens tokens;
+  final MeMuslimDesignTokens tokens;
   final ThemeData theme;
 
   @override
@@ -201,7 +201,7 @@ class _PermissionStepFooter extends StatelessWidget {
   final bool isLoading;
   final VoidCallback onAllow;
   final VoidCallback onSkip;
-  final TilawaDesignTokens tokens;
+  final MeMuslimDesignTokens tokens;
   final ThemeData theme;
 
   @override

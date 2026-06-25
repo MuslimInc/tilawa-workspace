@@ -61,7 +61,7 @@ abstract final class HomeDashboardHeroVariantB {
   static const double _layoutSlack = 12;
 
   static double _resolveHeroBodyHeight(BuildContext context) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     final double textScale = MediaQuery.textScalerOf(
       context,
     ).scale(1).clamp(1.0, 1.3);
@@ -372,7 +372,7 @@ class _HomeHeroVariantBHeaderContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
     final TilawaCapabilityActionCardTokens capabilityCardTokens =
         theme.componentTokens.capabilityActionCard;
@@ -559,7 +559,7 @@ class _HomeHeroVariantBContextRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
     final Color ink = colorScheme.onSurface;
     final Color muted = colorScheme.onSurfaceVariant;
@@ -678,7 +678,7 @@ class _HomeHeroVariantBPremiumCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final TilawaHomeDashboardCardTokens cardTokens =
         theme.componentTokens.homeDashboardCard;
     final TilawaCapabilityActionCardTokens capabilityCardTokens =
@@ -783,7 +783,7 @@ class _HomeHeroVariantBPrayerFocus extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final Color muted = onCard.withValues(alpha: 0.78);
 
     if (nextPrayer == null) {
@@ -927,7 +927,7 @@ class _HomeHeroVariantBSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -961,7 +961,7 @@ class _HomeHeroVariantBFailure extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final Color muted = onCard.withValues(alpha: 0.82);
 
     return Column(

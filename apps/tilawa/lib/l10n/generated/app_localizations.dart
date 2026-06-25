@@ -170,6 +170,18 @@ abstract class AppLocalizations {
   /// **'Assalamu alaikum'**
   String get homeGreeting;
 
+  /// Title for the daily inspiration section
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Inspiration'**
+  String get homeInspirationTitle;
+
+  /// Subtitle for the daily inspiration section
+  ///
+  /// In en, this message translates to:
+  /// **'A moment of reflection'**
+  String get homeInspirationSubtitle;
+
   /// Home greeting with display name
   ///
   /// In en, this message translates to:
@@ -245,7 +257,7 @@ abstract class AppLocalizations {
   /// Home carousel subtitle for Support Tilawa promo card
   ///
   /// In en, this message translates to:
-  /// **'Help keep Tilawa free for everyone'**
+  /// **'Help keep MeMuslim free for everyone'**
   String get homeSupportCarouselSubtitle;
 
   /// Home carousel subtitle for listening history card
@@ -1955,7 +1967,7 @@ abstract class AppLocalizations {
   /// Welcome message on login screen
   ///
   /// In en, this message translates to:
-  /// **'Welcome to Tilawa'**
+  /// **'Welcome to MeMuslim'**
   String get welcomeToApp;
 
   /// Description text for Google sign in
@@ -2315,7 +2327,7 @@ abstract class AppLocalizations {
   /// Confirmation message before deleting the app account
   ///
   /// In en, this message translates to:
-  /// **'This permanently deletes your Tilawa account and synced profile data. Purchases verified with Google Play may be kept in anonymized records for fraud prevention. This cannot be undone.'**
+  /// **'This permanently deletes your MeMuslim account and synced profile data. Purchases verified with Google Play may be kept in anonymized records for fraud prevention. This cannot be undone.'**
   String get deleteAccountConfirmation;
 
   /// Generic error when account deletion fails
@@ -4211,7 +4223,7 @@ abstract class AppLocalizations {
   /// Branding text on shared content
   ///
   /// In en, this message translates to:
-  /// **'Shared via Tilawa'**
+  /// **'Shared via MeMuslim'**
   String get sharedViaTilawa;
 
   /// Fallback message when reciter is not mapped
@@ -4667,7 +4679,7 @@ abstract class AppLocalizations {
   /// Informational banner shown on aggressive OEM ROMs (Xiaomi/Oppo/Huawei/Vivo/etc.) where the autostart whitelist must be set manually
   ///
   /// In en, this message translates to:
-  /// **'On this device, also enable Autostart for Tilawa in your phone\'s settings so reminders are not stopped in the background.'**
+  /// **'On this device, also enable Autostart for MeMuslim in your phone\'s settings so reminders are not stopped in the background.'**
   String get oemAutostartHint;
 
   /// Title for location permission setup screen
@@ -4715,7 +4727,7 @@ abstract class AppLocalizations {
   /// Body for battery optimization setup screen
   ///
   /// In en, this message translates to:
-  /// **'Exclude Tilawa from battery optimization so prayer reminders are not delayed overnight.'**
+  /// **'Exclude MeMuslim from battery optimization so prayer reminders are not delayed overnight.'**
   String get prayerAlertsPermissionBatteryBody;
 
   /// Title for OEM autostart guidance step
@@ -4727,7 +4739,7 @@ abstract class AppLocalizations {
   /// Body for OEM autostart guidance step
   ///
   /// In en, this message translates to:
-  /// **'On this device, enable Autostart for Tilawa in your phone settings so reminders are not stopped in the background.'**
+  /// **'On this device, enable Autostart for MeMuslim in your phone settings so reminders are not stopped in the background.'**
   String get prayerAlertsPermissionOemAutostartBody;
 
   /// Primary action on prayer alerts permission setup screens
@@ -4952,16 +4964,22 @@ abstract class AppLocalizations {
   /// **'More options'**
   String get moreOptions;
 
+  /// Subtitle for the More section on the home dashboard
+  ///
+  /// In en, this message translates to:
+  /// **'Library, favorites, and more'**
+  String get homeMoreOptionsSubtitle;
+
   /// Support Tilawa screen and settings entry title
   ///
   /// In en, this message translates to:
-  /// **'Support Tilawa'**
+  /// **'Support MeMuslim'**
   String get supportTilawa;
 
   /// Settings row to open the in-app review dialog
   ///
   /// In en, this message translates to:
-  /// **'Rate Tilawa'**
+  /// **'Rate MeMuslim'**
   String get rateTilawa;
 
   /// Optional subtitle under the rate Tilawa settings row
@@ -4973,7 +4991,7 @@ abstract class AppLocalizations {
   /// Settings row to share the app with others
   ///
   /// In en, this message translates to:
-  /// **'Share Tilawa'**
+  /// **'Share MeMuslim'**
   String get shareTilawa;
 
   /// Text shared from settings to recommend Tilawa to others
@@ -4991,19 +5009,19 @@ abstract class AppLocalizations {
   /// Support screen single-line intro under app bar
   ///
   /// In en, this message translates to:
-  /// **'Your contribution helps keep Tilawa going.'**
+  /// **'Your contribution helps keep MeMuslim going.'**
   String get supportIntroLine;
 
   /// Legacy alias; prefer supportIntroLine
   ///
   /// In en, this message translates to:
-  /// **'Your contribution helps keep Tilawa going.'**
+  /// **'Your contribution helps keep MeMuslim going.'**
   String get supportTilawaSubtitle;
 
   /// Legacy alias; unused on support screen
   ///
   /// In en, this message translates to:
-  /// **'Your contribution helps keep Tilawa going.'**
+  /// **'Your contribution helps keep MeMuslim going.'**
   String get supportMissionBody;
 
   /// Collapsible impact section title on support screen
@@ -5081,7 +5099,7 @@ abstract class AppLocalizations {
   /// Support purchase confirmation sheet body
   ///
   /// In en, this message translates to:
-  /// **'Payment via Google Play. Tilawa does not store your card details.'**
+  /// **'Payment via Google Play. MeMuslim does not store your card details.'**
   String get supportConfirmationBody;
 
   /// Support confirmation sheet confirm button
@@ -5231,7 +5249,7 @@ abstract class AppLocalizations {
   /// Settings group title for support entry
   ///
   /// In en, this message translates to:
-  /// **'Support Tilawa'**
+  /// **'Support MeMuslim'**
   String get supportSettingsGroupTitle;
 
   /// Settings support tile subtitle
@@ -5297,7 +5315,7 @@ abstract class AppLocalizations {
   /// Screen-reader label announced while the splash loading screen is visible
   ///
   /// In en, this message translates to:
-  /// **'Tilawa, loading'**
+  /// **'MeMuslim, loading'**
   String get a11ySplashLoading;
 
   /// Toast shown when startup times out and the app navigates to home in a degraded state
@@ -5411,13 +5429,13 @@ abstract class AppLocalizations {
   /// Snackbar message when an optional app update is available
   ///
   /// In en, this message translates to:
-  /// **'A new version of Tilawa is available.'**
+  /// **'A new version of MeMuslim is available.'**
   String get inAppUpdateOptionalMessage;
 
   /// Snackbar message when a forced update must go through the Play Store
   ///
   /// In en, this message translates to:
-  /// **'An update is required to continue using Tilawa.'**
+  /// **'An update is required to continue using MeMuslim.'**
   String get inAppUpdateRequiredMessage;
 
   /// Snackbar action to install a downloaded flexible update
@@ -5507,7 +5525,7 @@ abstract class AppLocalizations {
   /// Body when another device took over the active session
   ///
   /// In en, this message translates to:
-  /// **'Tilawa allows one active device per account for Quran Sessions security. Your account was opened elsewhere — sign in again on this device to continue.'**
+  /// **'MeMuslim allows one active device per account for Quran Sessions security. Your account was opened elsewhere — sign in again on this device to continue.'**
   String get authSignedInElsewhereBody;
 
   /// Primary action after session revoked on this device

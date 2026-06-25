@@ -9,7 +9,10 @@ import '../../lib/src/foundation/design_tokens.dart';
 Widget _wrap(Widget child) {
   return MaterialApp(
     theme: ThemeData(
-      extensions: [TilawaDesignTokens.light(), TilawaComponentTokens.light()],
+      extensions: [
+        MeMuslimDesignTokens.light(),
+        MeMuslimComponentTokens.light(),
+      ],
     ),
     home: Scaffold(body: Center(child: child)),
   );

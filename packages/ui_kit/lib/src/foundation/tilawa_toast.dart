@@ -35,7 +35,7 @@ class TilawaToast extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final int toastMessageMaxLines =
         theme.componentTokens.feedbackStrip.toastMessageMaxLines;
     final TilawaFeedbackStyle style = TilawaFeedbackStyle.forVariant(
@@ -130,7 +130,7 @@ class _TilawaToastActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final double horizontal =
         theme.componentTokens.permissionBanner.actionSpacing;
 

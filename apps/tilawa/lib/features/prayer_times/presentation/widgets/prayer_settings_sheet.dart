@@ -163,7 +163,7 @@ class _SectionTitle extends StatelessWidget {
   });
 
   final String title;
-  final TilawaDesignTokens tokens;
+  final MeMuslimDesignTokens tokens;
   final ThemeData theme;
 
   @override

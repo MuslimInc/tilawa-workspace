@@ -21,8 +21,8 @@ Widget _themed(Widget child) {
     theme: ThemeData(
       colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
       extensions: [
-        TilawaDesignTokens.light(),
-        TilawaComponentTokens.light(),
+        MeMuslimDesignTokens.light(),
+        MeMuslimComponentTokens.light(),
       ],
     ),
     home: Scaffold(body: Center(child: child)),
@@ -73,8 +73,14 @@ void main() {
 
       final buttonFinder = find.widgetWithText(TextButton, 'Open settings');
       final size = tester.getSize(buttonFinder);
-      expect(size.width, greaterThanOrEqualTo(kTilawaMinInteractiveDimension));
-      expect(size.height, greaterThanOrEqualTo(kTilawaMinInteractiveDimension));
+      expect(
+        size.width,
+        greaterThanOrEqualTo(kMeMuslimMinInteractiveDimension),
+      );
+      expect(
+        size.height,
+        greaterThanOrEqualTo(kMeMuslimMinInteractiveDimension),
+      );
 
       final sem = tester.getSemantics(buttonFinder);
       expect(sem.flagsCollection.isButton, isTrue);
@@ -108,11 +114,11 @@ void main() {
       final tokens = theme.componentTokens.mediaPlayerBar;
       expect(
         tokens.controlButtonSize,
-        greaterThanOrEqualTo(kTilawaMinInteractiveDimension),
+        greaterThanOrEqualTo(kMeMuslimMinInteractiveDimension),
       );
       expect(
         tokens.playPauseButtonSize,
-        greaterThanOrEqualTo(kTilawaMinInteractiveDimension),
+        greaterThanOrEqualTo(kMeMuslimMinInteractiveDimension),
       );
 
       final transportButtons = find.descendant(
@@ -125,11 +131,11 @@ void main() {
         final box = element.renderObject! as RenderBox;
         expect(
           box.size.width,
-          greaterThanOrEqualTo(kTilawaMinInteractiveDimension),
+          greaterThanOrEqualTo(kMeMuslimMinInteractiveDimension),
         );
         expect(
           box.size.height,
-          greaterThanOrEqualTo(kTilawaMinInteractiveDimension),
+          greaterThanOrEqualTo(kMeMuslimMinInteractiveDimension),
         );
       }
     });
@@ -157,11 +163,11 @@ void main() {
       expect(box.hasSize, isTrue);
       expect(
         box.size.width,
-        greaterThanOrEqualTo(kTilawaMinInteractiveDimension),
+        greaterThanOrEqualTo(kMeMuslimMinInteractiveDimension),
       );
       expect(
         box.size.height,
-        greaterThanOrEqualTo(kTilawaMinInteractiveDimension),
+        greaterThanOrEqualTo(kMeMuslimMinInteractiveDimension),
       );
 
       final sem = tester.getSemantics(find.byType(TilawaIconToggle));

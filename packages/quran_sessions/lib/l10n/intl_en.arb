@@ -126,7 +126,7 @@
     "sessionModeExternalDisabled": "Your teacher has not added a meeting link yet. Choose voice or video.",
     "meetingLinkUnavailable": "This teacher has not set up a meeting link for external sessions. Choose voice or video, or try again later.",
     "callProviderUnavailable": "This session cannot be joined from the app right now.",
-    "callProviderAgoraNotConfigured": "In-app Agora calls are not enabled in this build. Rebuild with Staging Agora config (TILAWA_DISTRIBUTION=staging and TILAWA_LAUNCH_AGORA_APP_ID), or use the Tilawa (Staging Agora) launch profile.",
+    "callProviderAgoraNotConfigured": "In-app Agora calls are not enabled in this build. Rebuild with Staging Agora config (TILAWA_DISTRIBUTION=staging and TILAWA_LAUNCH_AGORA_APP_ID), or use the MeMuslim (Staging Agora) launch profile.",
     "rtcPermissionDenied": "Microphone or camera access is required to join this session. Enable {permission} in Settings and try again.",
     "@rtcPermissionDenied": {
         "placeholders": {
@@ -626,7 +626,7 @@
         }
     },
     "paymentCheckoutAmountPending": "Session price (sandbox)",
-    "paymentCheckoutRefundToWalletNotice": "If you cancel or we approve a refund, the amount is added to your Tilawa wallet as credit. Wallet credit is not automatically returned to your card.",
+    "paymentCheckoutRefundToWalletNotice": "If you cancel or we approve a refund, the amount is added to your MeMuslim wallet as credit. Wallet credit is not automatically returned to your card.",
     "paymentCheckoutConfirm": "Confirm payment (sandbox)",
     "restrictionReasonFalseIdentity": "False identity information",
     "restrictionReasonPolicyViolation": "Policy violation",

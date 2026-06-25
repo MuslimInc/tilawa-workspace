@@ -30,7 +30,7 @@ class TilawaBottomActionArea extends StatefulWidget {
   /// Space above [child] inside the padded region.
   final double top;
 
-  /// Horizontal inset; defaults to [TilawaDesignTokens.bottomActionHorizontalInset].
+  /// Horizontal inset; defaults to [MeMuslimDesignTokens.bottomActionHorizontalInset].
   final double? horizontal;
 
   /// Additional bottom clearance (shell nav, mini-player, FAB stack).
@@ -124,7 +124,7 @@ class _TilawaBottomActionAreaState extends State<TilawaBottomActionArea> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final TilawaBottomSheetScaffoldTokens sheetTokens =
         theme.componentTokens.bottomSheetScaffold;
     final TextDirection direction = Directionality.of(context);

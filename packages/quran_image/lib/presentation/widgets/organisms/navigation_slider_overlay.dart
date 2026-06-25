@@ -58,7 +58,7 @@ class NavigationSliderOverlay extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
-    final componentTokens = theme.extension<TilawaComponentTokens>();
+    final componentTokens = theme.extension<MeMuslimComponentTokens>();
     final bottomInset = context.systemBottomSafeArea;
     final panelRadius = BorderRadius.circular(
       tokens.radiusExtraLarge,

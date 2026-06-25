@@ -161,7 +161,7 @@ Widget _buildRendererHarness({
       surahNumber ?? (pageEntries.isNotEmpty ? pageEntries.first.surah : 1);
 
   return MaterialApp(
-    theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+    theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
     locale: const Locale('en'),

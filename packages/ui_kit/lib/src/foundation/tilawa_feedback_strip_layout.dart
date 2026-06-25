@@ -36,7 +36,7 @@ double feedbackStripToastContentMinHeight(
   required bool hasTrailing,
   required TextStyle messageStyle,
 }) {
-  final TilawaDesignTokens designTokens = Theme.of(context).tokens;
+  final MeMuslimDesignTokens designTokens = Theme.of(context).tokens;
   final double messageHeight = feedbackStripMessageBlockHeight(
     context,
     messageStyle: messageStyle,

@@ -48,7 +48,7 @@ class _QuranIndexScreenState extends State<QuranIndexScreen> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
     final double listBottomPadding =
         QuranPlayerWidget.fabBottomOffset(context) + tokens.spaceLarge;
@@ -151,7 +151,7 @@ class _QuranCatalogList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
 
     return switch (tab) {
       QuranCatalogTab.surah => ListView.separated(

@@ -216,8 +216,8 @@ class _ImmersiveIconButton extends StatelessWidget {
           onTap: onTap,
           customBorder: const CircleBorder(),
           child: SizedBox(
-            width: kTilawaMinInteractiveDimension,
-            height: kTilawaMinInteractiveDimension,
+            width: kMeMuslimMinInteractiveDimension,
+            height: kMeMuslimMinInteractiveDimension,
             child: Icon(
               icon,
               color: foreground,
@@ -570,7 +570,7 @@ class _ImmersiveGradientButton extends StatelessWidget {
           ),
           child: ConstrainedBox(
             constraints: const BoxConstraints(
-              minHeight: kTilawaMinInteractiveDimension,
+              minHeight: kMeMuslimMinInteractiveDimension,
             ),
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
@@ -635,7 +635,7 @@ class _ImmersiveGlassButton extends StatelessWidget {
         borderRadius: radius,
         child: ConstrainedBox(
           constraints: const BoxConstraints(
-            minHeight: kTilawaMinInteractiveDimension,
+            minHeight: kMeMuslimMinInteractiveDimension,
           ),
           child: Padding(
             padding: EdgeInsets.symmetric(
@@ -788,7 +788,7 @@ class _LocationBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(
           tokens.resolveRadius(
             family: TilawaRadiusFamily.pill,
-            height: kTilawaMinInteractiveDimension,
+            height: kMeMuslimMinInteractiveDimension,
           ),
         ),
         border: Border.all(

@@ -23,7 +23,7 @@ class SupportFooterLinedRow extends StatelessWidget {
       return content;
     }
 
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     final double slot = tokens.iconSizeMedium;
     final double leadingTopInset = contentTextStyle == null
         ? 0

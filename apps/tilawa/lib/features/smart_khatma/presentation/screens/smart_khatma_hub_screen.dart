@@ -144,7 +144,7 @@ class _KhatmaHubActiveBody extends StatelessWidget {
         0,
         tokens.spaceSection,
         0,
-        tokens.spaceHuge + kTilawaMinInteractiveDimension,
+        tokens.spaceHuge + kMeMuslimMinInteractiveDimension,
       ),
       children: [
         TilawaHeroSummaryCard(

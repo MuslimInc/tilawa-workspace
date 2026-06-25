@@ -149,7 +149,7 @@ class QuranPlayerWidget extends StatefulWidget {
         // Shell body is full-bleed (no footer slot). On 3-button Android nav
         // [systemBottomSafeArea] is often 0 — lift FAB to min touch target.
         return context.floatingBottomPaddingWithMin(
-          kTilawaMinInteractiveDimension,
+          kMeMuslimMinInteractiveDimension,
         );
       }
     }
@@ -292,7 +292,7 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     QuranPlayerDebugLog.lifecycle('initState', const <String, Object?>{});
     // Token-aligned: durationMedium (400ms). Cannot read tokens in initState
     // (no theme/build context yet); keep literals in sync with
-    // TilawaDesignTokens by hand.
+    // MeMuslimDesignTokens by hand.
     _expandController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 400),

@@ -119,7 +119,7 @@ void main() {
     final BuildContext screenContext = tester.element(
       find.byType(BookmarksScreen),
     );
-    final TilawaDesignTokens tokens = Theme.of(screenContext).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(screenContext).tokens;
     final double shellScrollPadding = listScrollBottomPadding(screenContext);
 
     final SliverPadding bottomSpacer = tester.widget<SliverPadding>(
@@ -154,7 +154,7 @@ void main() {
       final BuildContext screenContext = tester.element(
         find.byType(BookmarksScreen),
       );
-      final TilawaDesignTokens tokens = Theme.of(screenContext).tokens;
+      final MeMuslimDesignTokens tokens = Theme.of(screenContext).tokens;
       final double shellScrollPadding = listScrollBottomPadding(screenContext);
 
       final SliverPadding bottomSpacer = tester.widget<SliverPadding>(

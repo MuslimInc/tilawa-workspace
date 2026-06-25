@@ -9,8 +9,8 @@ Widget _app(Widget child) {
     theme: ThemeData(
       colorScheme: colorScheme,
       extensions: [
-        TilawaDesignTokens.light(),
-        TilawaComponentTokens.light(colorScheme: colorScheme),
+        MeMuslimDesignTokens.light(),
+        MeMuslimComponentTokens.light(colorScheme: colorScheme),
       ],
     ),
     home: Scaffold(body: Center(child: child)),

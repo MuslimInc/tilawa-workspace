@@ -84,7 +84,7 @@ void main() {
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
-      theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+      theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
       home: TilawaFeedbackHost(
         child: BlocProvider<SupportBloc>.value(
           value: bloc,
@@ -227,7 +227,7 @@ void main() {
           locale: const Locale('ar'),
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
-          theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+          theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
           home: TilawaFeedbackHost(
             child: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {

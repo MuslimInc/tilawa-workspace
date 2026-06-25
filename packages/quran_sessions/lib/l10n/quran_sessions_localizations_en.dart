@@ -381,7 +381,7 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get callProviderAgoraNotConfigured =>
-      'In-app Agora calls are not enabled in this build. Rebuild with Staging Agora config (TILAWA_DISTRIBUTION=staging and TILAWA_LAUNCH_AGORA_APP_ID), or use the Tilawa (Staging Agora) launch profile.';
+      'In-app Agora calls are not enabled in this build. Rebuild with Staging Agora config (TILAWA_DISTRIBUTION=staging and TILAWA_LAUNCH_AGORA_APP_ID), or use the MeMuslim (Staging Agora) launch profile.';
 
   @override
   String rtcPermissionDenied(String permission) {
@@ -1590,7 +1590,7 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get paymentCheckoutRefundToWalletNotice =>
-      'If you cancel or we approve a refund, the amount is added to your Tilawa wallet as credit. Wallet credit is not automatically returned to your card.';
+      'If you cancel or we approve a refund, the amount is added to your MeMuslim wallet as credit. Wallet credit is not automatically returned to your card.';
 
   @override
   String get paymentCheckoutConfirm => 'Confirm payment (sandbox)';

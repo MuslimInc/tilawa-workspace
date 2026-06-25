@@ -90,7 +90,7 @@ class TilawaGoogleSignInButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     final GoogleSignInButtonAppearance resolved = _resolvedAppearance(context);
 
     final Color fill = switch (resolved) {

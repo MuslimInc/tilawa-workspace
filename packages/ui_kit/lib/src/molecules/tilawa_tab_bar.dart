@@ -130,7 +130,7 @@ class _TilawaTabBarInteraction {
   final WidgetStateProperty<Color?> overlayColor;
 
   static _TilawaTabBarInteraction resolve({
-    required TilawaDesignTokens tokens,
+    required MeMuslimDesignTokens tokens,
     required ColorScheme scheme,
     required TilawaTabBarVariant variant,
   }) {
@@ -151,12 +151,12 @@ class _TilawaTabBarInteraction {
     );
   }
 
-  static double trackRadius(TilawaDesignTokens tokens) {
+  static double trackRadius(MeMuslimDesignTokens tokens) {
     return tokens.resolveRadius(family: TilawaRadiusFamily.chrome);
   }
 
   static double _splashRadius(
-    TilawaDesignTokens tokens, {
+    MeMuslimDesignTokens tokens, {
     required TilawaTabBarVariant variant,
   }) {
     if (variant == TilawaTabBarVariant.pill) {

@@ -83,7 +83,7 @@ class TilawaCatalogAppBar extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final TextStyle? titleStyle = theme.textTheme.titleLarge?.copyWith(
       fontWeight: FontWeight.w700,
     );
@@ -145,7 +145,7 @@ class _CatalogTitleRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     final List<Widget>? spacedActions = TilawaAppBarChrome.spacedActions(
       actions,
       tokens,

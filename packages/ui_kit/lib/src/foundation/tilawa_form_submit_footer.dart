@@ -34,7 +34,7 @@ class TilawaFormSubmitFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final int count = invalidFieldCount ?? 0;
     final String? summary = count > 0
         ? TilawaFormValidationMessages.validationSummary(count)

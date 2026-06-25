@@ -11,7 +11,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+        theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
         home: Scaffold(
           body: Center(
             child: TilawaPressAnimation(
@@ -51,7 +51,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(
           extensions: [
-            TilawaDesignTokens.light().copyWith(durationFast: customFast),
+            MeMuslimDesignTokens.light().copyWith(durationFast: customFast),
           ],
         ),
         home: const Scaffold(
@@ -68,7 +68,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(
           extensions: [
-            TilawaDesignTokens.light().copyWith(durationFast: customFast),
+            MeMuslimDesignTokens.light().copyWith(durationFast: customFast),
           ],
         ),
         home: const Scaffold(
@@ -89,7 +89,7 @@ void main() {
     (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+          theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
           home: Scaffold(
             body: Center(
               child: TilawaPressAnimation(
@@ -111,7 +111,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+          theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
           home: const Scaffold(
             body: Center(
               child: SizedBox(
@@ -136,7 +136,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+          theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
           home: StatefulBuilder(
             builder: (context, setState) {
               return Scaffold(
@@ -165,7 +165,7 @@ void main() {
       interactive = false;
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+          theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
           home: StatefulBuilder(
             builder: (context, setState) {
               return Scaffold(

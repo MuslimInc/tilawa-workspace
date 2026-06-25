@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-/// Tilawa minimum interactive (hit-target) dimension, in logical pixels.
+/// MeMuslim minimum interactive (hit-target) dimension, in logical pixels.
 ///
 /// **48 dp** — matches Material's minimum touch target and WCAG 2.5.5
 /// (Target Size) Level AAA for the recommended size.
 /// Single source of truth for hit targets across the design system.
-/// [TilawaDesignTokens.minInteractiveDimension] and
+/// [MeMuslimDesignTokens.minInteractiveDimension] and
 /// `context.minInteractiveDimension` always resolve to this constant;
 ///
 /// Use this (or `context.minInteractiveDimension` /
@@ -25,13 +25,13 @@ import 'package:flutter/material.dart';
 /// declare `behavior: HitTestBehavior.opaque` and update the allow-list,
 /// or use a Material primitive (`InkWell`, `IconButton`, `ListTile`)
 /// which already provides the hit-slop and ripple.
-const double kTilawaMinInteractiveDimension = 48.0;
+const double kMeMuslimMinInteractiveDimension = 48.0;
 
-/// Design tokens for the Tilawa UI Kit to avoid magic numbers
+/// Design tokens for the MeMuslim UI Kit to avoid magic numbers
 /// and ensure consistency across components.
 @immutable
-class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
-  const TilawaDesignTokens({
+class MeMuslimDesignTokens extends ThemeExtension<MeMuslimDesignTokens> {
+  const MeMuslimDesignTokens({
     required this.spaceTiny,
     required this.spaceExtraSmall,
     required this.spaceSmall,
@@ -207,17 +207,17 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   final double iconSizeLargePlus;
 
   /// 44.0 — largest *glyph* size in the default ramp. Sits just below
-  /// [kTilawaMinInteractiveDimension] (48 dp) so a top-of-ramp icon fits
+  /// [kMeMuslimMinInteractiveDimension] (48 dp) so a top-of-ramp icon fits
   /// comfortably inside the minimum hit target with breathing room.
   /// Use [minInteractiveDimension] for layout limits on tappable chrome,
   /// not necessarily every decorative icon.
   final double iconSizeExtraLarge;
 
   /// Tilawa minimum interactive (hit-target) dimension — always
-  /// [kTilawaMinInteractiveDimension]. Use this (or the top-level constant)
+  /// [kMeMuslimMinInteractiveDimension]. Use this (or the top-level constant)
   /// for *all* in-product hit targets instead of Flutter's
   /// `kMinInteractiveDimension`.
-  double get minInteractiveDimension => kTilawaMinInteractiveDimension;
+  double get minInteractiveDimension => kMeMuslimMinInteractiveDimension;
 
   /// 2.0 — relaxed line height for dense Arabic text.
   final double textHeightLoose;
@@ -307,12 +307,12 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   final double dropdownMenuGap;
 
   /// Default values for light/dark theme.
-  factory TilawaDesignTokens.light() => TilawaDesignTokens._create();
+  factory MeMuslimDesignTokens.light() => MeMuslimDesignTokens._create();
 
-  factory TilawaDesignTokens.dark() => TilawaDesignTokens._create();
+  factory MeMuslimDesignTokens.dark() => MeMuslimDesignTokens._create();
 
-  factory TilawaDesignTokens._create() {
-    return TilawaDesignTokens(
+  factory MeMuslimDesignTokens._create() {
+    return MeMuslimDesignTokens(
       spaceTiny: 2.0,
       spaceExtraSmall: 4.0,
       spaceSmall: 8.0,
@@ -374,7 +374,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   }
 
   @override
-  TilawaDesignTokens copyWith({
+  MeMuslimDesignTokens copyWith({
     double? spaceTiny,
     double? spaceExtraSmall,
     double? spaceSmall,
@@ -433,7 +433,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     double? focusRingWidth,
     double? dropdownMenuGap,
   }) {
-    return TilawaDesignTokens(
+    return MeMuslimDesignTokens(
       spaceTiny: spaceTiny ?? this.spaceTiny,
       spaceExtraSmall: spaceExtraSmall ?? this.spaceExtraSmall,
       spaceSmall: spaceSmall ?? this.spaceSmall,
@@ -509,9 +509,12 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   }
 
   @override
-  TilawaDesignTokens lerp(ThemeExtension<TilawaDesignTokens>? other, double t) {
-    if (other is! TilawaDesignTokens) return this;
-    return TilawaDesignTokens(
+  MeMuslimDesignTokens lerp(
+    ThemeExtension<MeMuslimDesignTokens>? other,
+    double t,
+  ) {
+    if (other is! MeMuslimDesignTokens) return this;
+    return MeMuslimDesignTokens(
       spaceTiny: lerpDouble(spaceTiny, other.spaceTiny, t)!,
       spaceExtraSmall: lerpDouble(spaceExtraSmall, other.spaceExtraSmall, t)!,
       spaceSmall: lerpDouble(spaceSmall, other.spaceSmall, t)!,
@@ -683,20 +686,20 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
 }
 
 /// Helper extension to access tokens easily
-extension TilawaDesignTokensX on ThemeData {
-  TilawaDesignTokens get tokens =>
-      extension<TilawaDesignTokens>() ?? TilawaDesignTokens.light();
+extension MeMuslimDesignTokensX on ThemeData {
+  MeMuslimDesignTokens get tokens =>
+      extension<MeMuslimDesignTokens>() ?? MeMuslimDesignTokens.light();
 }
 
-extension TilawaSpaceX on BuildContext {
+extension MeMuslimSpaceX on BuildContext {
   double get spaceSection => Theme.of(this).tokens.spaceSection;
   double get spaceXXL => Theme.of(this).tokens.spaceXXL;
   double get spaceHuge => Theme.of(this).tokens.spaceHuge;
 }
 
-extension TilawaIconSizeX on BuildContext {
+extension MeMuslimIconSizeX on BuildContext {
   ThemeData get theme => Theme.of(this);
-  TilawaDesignTokens get tokens => theme.tokens;
+  MeMuslimDesignTokens get tokens => theme.tokens;
   double get iconSizeExtraSmall => tokens.iconSizeExtraSmall;
   double get iconSizeSmall => tokens.iconSizeSmall;
   double get iconSizeMedium => tokens.iconSizeMedium;
@@ -704,7 +707,7 @@ extension TilawaIconSizeX on BuildContext {
   double get iconSizeLargePlus => tokens.iconSizeLargePlus;
   double get iconSizeExtraLarge => tokens.iconSizeExtraLarge;
 
-  /// Tilawa minimum interactive (hit-target) dimension. Use this instead of
+  /// MeMuslim minimum interactive (hit-target) dimension. Use this instead of
   /// Flutter's `kMinInteractiveDimension`.
   double get minInteractiveDimension => tokens.minInteractiveDimension;
 }
@@ -717,7 +720,7 @@ extension TilawaIconSizeX on BuildContext {
 ///
 /// Hardcoding inner radii silently drifts when token values change. Always
 /// compute via [concentricInner] so the math stays correct.
-extension TilawaConcentricRadiusX on TilawaDesignTokens {
+extension MeMuslimConcentricRadiusX on MeMuslimDesignTokens {
   /// Returns the radius an inner element should use so its corners stay
   /// parallel to an outer container's corners.
   ///
@@ -737,7 +740,7 @@ extension TilawaConcentricRadiusX on TilawaDesignTokens {
 }
 
 /// Brand-doc roles for rounded components. Each family maps to a fixed token
-/// cap — use [TilawaRadiusResolverX.resolveRadius] instead of raw `radiusXxx`
+/// cap — use [MeMuslimRadiusResolverX.resolveRadius] instead of raw `radiusXxx`
 /// literals so a future token change ripples cleanly.
 ///
 /// See `docs/tilawa_brand.md` §5 (Rhythm and elevation).
@@ -746,7 +749,7 @@ enum TilawaRadiusFamily {
   card,
 
   /// Tappable affordances (chips, buttons, search fields). Resolves to
-  /// [TilawaDesignTokens.radiusPill] when [height] is provided.
+  /// [MeMuslimDesignTokens.radiusPill] when [height] is provided.
   pill,
 
   /// Chrome strips nested inside cards — standard search bars, segmented
@@ -776,7 +779,7 @@ enum TilawaRadiusFamily {
 ///
 /// Pill and icon families derive from layout (`height / 2`, `size / 2`).
 /// Card, section, chrome, hero, and decorative map to fixed token caps.
-extension TilawaRadiusResolverX on TilawaDesignTokens {
+extension MeMuslimRadiusResolverX on MeMuslimDesignTokens {
   /// Returns the corner radius for [family].
   ///
   /// When [height] is omitted, [TilawaRadiusFamily.pill] falls back to a
@@ -791,7 +794,7 @@ extension TilawaRadiusResolverX on TilawaDesignTokens {
       TilawaRadiusFamily.pill =>
         height > 0
             ? radiusPill(height)
-            : radiusPill(kTilawaMinInteractiveDimension),
+            : radiusPill(kMeMuslimMinInteractiveDimension),
       TilawaRadiusFamily.chrome => radiusMedium,
       TilawaRadiusFamily.section => radiusMedium,
       TilawaRadiusFamily.hero => radiusLarge,
@@ -808,12 +811,13 @@ extension TilawaRadiusResolverX on TilawaDesignTokens {
   ///
   /// All kit and Material buttons (primary, secondary, outline, danger) share
   /// this pill radius — only color semantics differ.
-  double buttonBorderRadius({double height = kTilawaMinInteractiveDimension}) =>
-      resolveRadius(family: TilawaRadiusFamily.pill, height: height);
+  double buttonBorderRadius({
+    double height = kMeMuslimMinInteractiveDimension,
+  }) => resolveRadius(family: TilawaRadiusFamily.pill, height: height);
 
   /// Standard [RoundedRectangleBorder] for buttons at [height].
   RoundedRectangleBorder buttonShape({
-    double height = kTilawaMinInteractiveDimension,
+    double height = kMeMuslimMinInteractiveDimension,
   }) => RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(buttonBorderRadius(height: height)),
   );
@@ -826,11 +830,11 @@ extension TilawaRadiusResolverX on TilawaDesignTokens {
   /// overriding shape.
   ButtonStyle materialButtonStyle({
     ButtonStyle? base,
-    double height = kTilawaMinInteractiveDimension,
+    double height = kMeMuslimMinInteractiveDimension,
   }) {
     return (base ?? const ButtonStyle()).copyWith(
       minimumSize: WidgetStatePropertyAll(
-        Size(kTilawaMinInteractiveDimension, height),
+        Size(kMeMuslimMinInteractiveDimension, height),
       ),
       shape: WidgetStatePropertyAll(buttonShape(height: height)),
     );
@@ -855,7 +859,7 @@ extension TilawaRadiusResolverX on TilawaDesignTokens {
 
 /// Track + segment radii for [TilawaSegmentedControl] and
 /// [TilawaLanguageSwitcher].
-extension TilawaSegmentedRadiusX on TilawaDesignTokens {
+extension MeMuslimSegmentedRadiusX on MeMuslimDesignTokens {
   /// Returns concentric outer/inner radii from segment [itemHeight] and track
   /// [containerPadding].
   ///

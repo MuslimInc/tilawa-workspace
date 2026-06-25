@@ -203,7 +203,7 @@ abstract final class OrganismsDemos {
     final ThemeData theme = Theme.of(context);
     final TilawaHomeDashboardCardTokens cardTokens =
         theme.componentTokens.homeDashboardCard;
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final double radius = tokens.resolveRadius(family: TilawaRadiusFamily.hero);
 
     return GalleryDemoFrame(
@@ -257,7 +257,7 @@ abstract final class OrganismsDemos {
   static Widget travelDashboardSheet(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final TilawaHomeNextPrayerHeroTokens heroTokens =
         theme.componentTokens.homeNextPrayerHero;
     final TilawaHomeDashboardCardTokens dashboardTokens =
@@ -386,7 +386,7 @@ abstract final class OrganismsDemos {
   static Widget behanceInstructionChip(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
 
     return GalleryDemoFrame(
       child: DecoratedBox(

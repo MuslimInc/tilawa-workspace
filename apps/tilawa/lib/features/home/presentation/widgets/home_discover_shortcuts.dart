@@ -34,6 +34,7 @@ class HomeDiscoverShortcuts extends StatelessWidget {
     return HomeDashboardSection(
       title: context.l10n.homeExploreTitle,
       subtitle: context.l10n.homeExploreSubtitle,
+      compact: true,
       contentSpacing: tokens.spaceSmall,
       child: HomeDashboardShortcutGrid(
         columnCount: _columnCount(context),
@@ -49,6 +50,16 @@ class HomeDiscoverShortcuts extends StatelessWidget {
             fontWeight: FontWeight.w700,
             height: 1.15,
           );
+          // 10% Accent Rule: Highlight the first two items (Reciters, Qibla)
+          // which are daily-use tools, with a subtle primary tint.
+          final bool isHighlighted = index < 2;
+          final Color iconBoxBg = isHighlighted
+              ? Color.alphaBlend(
+                  colorScheme.primary.withValues(alpha: 0.06),
+                  colorScheme.surfaceContainerHigh,
+                )
+              : colorScheme.surfaceContainerHigh;
+
           return TilawaFeatureCategoryTile(
             icon: item.icon,
             iconWidget: _DiscoverCatalog.iconWidget(
@@ -61,13 +72,14 @@ class HomeDiscoverShortcuts extends StatelessWidget {
             onTap: item.onTap,
             backgroundColor: colorScheme.surface,
             iconBoxVariant: TilawaIconBoxVariant.tinted,
-            iconBoxBackgroundColor: colorScheme.surfaceContainerHigh,
+            iconBoxBackgroundColor: iconBoxBg,
             iconColor: style.iconForeground,
             iconSize: tokens.iconSizeMedium,
             iconPadding: tokens.spaceSmall,
             labelStyle: labelStyle,
             contentPadding: EdgeInsets.all(tokens.spaceSmall),
-            tileBorderOpacity: tokens.opacitySubtle,
+            tileBorderOpacity:
+                tokens.opacitySubtle * 2, // slightly more visible
           );
         },
       ),

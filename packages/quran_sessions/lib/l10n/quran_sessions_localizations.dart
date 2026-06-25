@@ -734,7 +734,7 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @callProviderAgoraNotConfigured.
   ///
   /// In en, this message translates to:
-  /// **'In-app Agora calls are not enabled in this build. Rebuild with Staging Agora config (TILAWA_DISTRIBUTION=staging and TILAWA_LAUNCH_AGORA_APP_ID), or use the Tilawa (Staging Agora) launch profile.'**
+  /// **'In-app Agora calls are not enabled in this build. Rebuild with Staging Agora config (TILAWA_DISTRIBUTION=staging and TILAWA_LAUNCH_AGORA_APP_ID), or use the MeMuslim (Staging Agora) launch profile.'**
   String get callProviderAgoraNotConfigured;
 
   /// No description provided for @rtcPermissionDenied.
@@ -2888,7 +2888,7 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @paymentCheckoutRefundToWalletNotice.
   ///
   /// In en, this message translates to:
-  /// **'If you cancel or we approve a refund, the amount is added to your Tilawa wallet as credit. Wallet credit is not automatically returned to your card.'**
+  /// **'If you cancel or we approve a refund, the amount is added to your MeMuslim wallet as credit. Wallet credit is not automatically returned to your card.'**
   String get paymentCheckoutRefundToWalletNotice;
 
   /// No description provided for @paymentCheckoutConfirm.

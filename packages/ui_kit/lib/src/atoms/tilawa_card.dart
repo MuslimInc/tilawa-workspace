@@ -96,7 +96,7 @@ class TilawaCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TilawaCardTokens tokens = theme.componentTokens.card;
-    final TilawaDesignTokens designTokens = theme.tokens;
+    final MeMuslimDesignTokens designTokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
 
     final double effectiveRadius =
@@ -172,7 +172,7 @@ class _TilawaCardShadow extends StatelessWidget {
   });
 
   final BorderRadius borderRadius;
-  final TilawaDesignTokens designTokens;
+  final MeMuslimDesignTokens designTokens;
   final ColorScheme colorScheme;
   final Widget child;
 

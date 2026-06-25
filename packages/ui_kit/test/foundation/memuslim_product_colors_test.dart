@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 void main() {
-  group('TilawaProductColors', () {
+  group('MeMuslimProductColors', () {
     test('light and dark themes register the extension', () {
       final ThemeData light = AppTheme.getLightTheme(
         primaryColor: AppColors.defaultPrimary,
@@ -13,28 +13,28 @@ void main() {
         isDefaultPreset: true,
       );
 
-      expect(light.extension<TilawaProductColors>(), isNotNull);
-      expect(dark.extension<TilawaProductColors>(), isNotNull);
-      expect(light.productColors, isA<TilawaProductColors>());
+      expect(light.extension<MeMuslimProductColors>(), isNotNull);
+      expect(dark.extension<MeMuslimProductColors>(), isNotNull);
+      expect(light.productColors, isA<MeMuslimProductColors>());
     });
 
     test('prayer roles track ColorScheme primary in light mode', () {
       final ColorScheme scheme = AppTheme.getLightTheme(
         primaryColor: AppColors.defaultPrimary,
       ).colorScheme;
-      final TilawaProductColors product = TilawaProductColors.light(scheme);
+      final MeMuslimProductColors product = MeMuslimProductColors.light(scheme);
 
       expect(product.prayerTimeActive, scheme.primary);
       expect(product.prayerTimeNextSurface, scheme.primaryContainer);
     });
 
     test('quran reader roles use legacy mushaf palette', () {
-      final TilawaProductColors light = TilawaProductColors.light(
+      final MeMuslimProductColors light = MeMuslimProductColors.light(
         AppTheme.getLightTheme(
           primaryColor: AppColors.defaultPrimary,
         ).colorScheme,
       );
-      final TilawaProductColors dark = TilawaProductColors.dark(
+      final MeMuslimProductColors dark = MeMuslimProductColors.dark(
         AppTheme.getDarkTheme(
           primaryColor: AppColors.defaultPrimary,
           isDefaultPreset: true,
@@ -52,7 +52,7 @@ void main() {
     });
 
     test('explore hub icons stay distinct per feature', () {
-      final TilawaProductColors product = TilawaProductColors.light(
+      final MeMuslimProductColors product = MeMuslimProductColors.light(
         AppTheme.getLightTheme(
           primaryColor: AppColors.defaultPrimary,
         ).colorScheme,
@@ -72,7 +72,9 @@ void main() {
         final ColorScheme scheme = AppTheme.getLightTheme(
           primaryColor: customPrimary,
         ).colorScheme;
-        final TilawaProductColors product = TilawaProductColors.light(scheme);
+        final MeMuslimProductColors product = MeMuslimProductColors.light(
+          scheme,
+        );
 
         expect(product.brandLockedPrimary, AppColors.defaultPrimary);
         expect(scheme.primary, customPrimary);

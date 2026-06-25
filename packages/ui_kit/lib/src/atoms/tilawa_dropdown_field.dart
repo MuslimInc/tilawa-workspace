@@ -32,7 +32,7 @@ class TilawaDropdownItem<T> {
 /// menu **below** the field (native picker placement) instead of the legacy
 /// [DropdownButton] overlay that vertically centers on the selected row.
 ///
-/// Everything visual is sourced from [TilawaDesignTokens] and the ambient
+/// Everything visual is sourced from [MeMuslimDesignTokens] and the ambient
 /// [ThemeData]; nothing is hardcoded.
 class TilawaDropdownField<T> extends StatelessWidget {
   const TilawaDropdownField({
@@ -282,7 +282,7 @@ class _FieldContent extends StatelessWidget {
   final TextStyle? textStyle;
   final ColorScheme colorScheme;
   final IconData? prefixIcon;
-  final TilawaDesignTokens tokens;
+  final MeMuslimDesignTokens tokens;
   final bool isEnabled;
 
   @override

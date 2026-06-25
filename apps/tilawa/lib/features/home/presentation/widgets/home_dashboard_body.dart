@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/widgets/deferred_after_first_frame.dart';
 import 'package:tilawa/features/today_plan/today_plan.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -29,12 +30,21 @@ import 'home_today_section.dart';
 /// 6. **More** — secondary destinations as a flat grouped list (History,
 ///    Favorites, Downloads, Smart Khatma, Support).
 /// 7. **Listening resume** — conditional continue-listening row.
+///
+/// **Spacing rhythm** (relationship-based):
+/// - Within same zone: `spaceLarge` (16 dp).
+/// - Between zones: `spaceExtraLarge + spaceSmall` (32 dp) for unrelated
+///   zones; `spaceExtraLarge` (24 dp) for related secondary zones.
 class HomeDashboardBody extends StatelessWidget {
   const HomeDashboardBody({super.key});
 
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
+    // Zone gap — 2× the within-zone spacing for clear IA separation.
+    final double zoneGap = tokens.spaceExtraLarge + tokens.spaceSmall;
+    // Within-zone gap — tighter grouping for related content.
+    final double withinZoneGap = tokens.spaceLarge;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -44,21 +54,27 @@ class HomeDashboardBody extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SizedBox(height: tokens.spaceExtraLarge),
+              // Primary action → Practice: same ritual zone (tight).
+              SizedBox(height: withinZoneGap),
               if (isTodayPlanEnabled()) ...[
                 const TodayPlanCard(),
-                SizedBox(height: tokens.spaceExtraLarge),
+                SizedBox(height: withinZoneGap),
               ],
               const HomeDailyPracticeSection(),
-              SizedBox(height: tokens.spaceExtraLarge),
+              // Practice → Inspiration: new zone (wide).
+              SizedBox(height: zoneGap),
               const HomeDailyInspirationSection(),
-              SizedBox(height: tokens.spaceExtraLarge),
+              // Inspiration → Discover: new zone (wide).
+              SizedBox(height: zoneGap),
               const HomeDiscoverShortcuts(),
+              // Discover → More: related secondary content.
               SizedBox(height: tokens.spaceExtraLarge),
               const HomeMoreActionsGroup(),
               // The listening row owns its own leading gap so a hidden row
               // leaves no dangling space.
               const _ConditionalListeningRow(),
+              // Closing mark — Peak-End Rule ending moment.
+              const _HomeDashboardClosingMark(),
             ],
           ),
         ),
@@ -93,6 +109,51 @@ class _ConditionalListeningRow extends StatelessWidget {
           },
         );
       },
+    );
+  }
+}
+
+/// Calm ending watermark at the bottom of the home dashboard.
+///
+/// Peak-End Rule: the ending matters. This provides gentle closure
+/// instead of the page just "falling off." Extremely quiet — does not
+/// compete with content.
+class _HomeDashboardClosingMark extends StatelessWidget {
+  const _HomeDashboardClosingMark();
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = context.tokens;
+    final theme = Theme.of(context);
+    final Color markColor = theme.colorScheme.onSurfaceVariant.withValues(
+      alpha: 0.35,
+    );
+
+    return Padding(
+      padding: EdgeInsets.only(
+        top: tokens.spaceExtraLarge + tokens.spaceMedium,
+        bottom: tokens.spaceMedium,
+      ),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          spacing: tokens.spaceExtraSmall,
+          children: [
+            TilawaIcons.quran.svg(
+              size: tokens.iconSizeSmall,
+              color: markColor,
+            ),
+            Text(
+              context.l10n.appTitle,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: markColor,
+                fontWeight: FontWeight.w500,
+                letterSpacing: 1.2,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -57,10 +57,12 @@ class HomeFeaturedRitualCard extends StatelessWidget {
         subtitle: startLabel,
         onTap: openDetails,
         semanticLabel: prompt,
-        trailing: TilawaStatusChip(
-          label: nowBadgeLabel,
-          backgroundColor: colorScheme.primary,
-          foregroundColor: colorScheme.onPrimary,
+        trailing: _PulseAnimator(
+          child: TilawaStatusChip(
+            label: nowBadgeLabel,
+            backgroundColor: colorScheme.primary,
+            foregroundColor: colorScheme.onPrimary,
+          ),
         ),
       );
     }
@@ -122,10 +124,12 @@ class HomeFeaturedRitualCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       spacing: tokens.spaceExtraSmall,
                       children: [
-                        TilawaStatusChip(
-                          label: nowBadgeLabel,
-                          backgroundColor: colorScheme.primary,
-                          foregroundColor: colorScheme.onPrimary,
+                        _PulseAnimator(
+                          child: TilawaStatusChip(
+                            label: nowBadgeLabel,
+                            backgroundColor: colorScheme.primary,
+                            foregroundColor: colorScheme.onPrimary,
+                          ),
                         ),
                         Text(
                           prompt,
@@ -158,6 +162,48 @@ class HomeFeaturedRitualCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _PulseAnimator extends StatefulWidget {
+  const _PulseAnimator({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_PulseAnimator> createState() => _PulseAnimatorState();
+}
+
+class _PulseAnimatorState extends State<_PulseAnimator>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.04).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ScaleTransition(
+      scale: _scaleAnimation,
+      child: widget.child,
     );
   }
 }

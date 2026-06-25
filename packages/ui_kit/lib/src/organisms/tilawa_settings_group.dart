@@ -146,7 +146,7 @@ class TilawaSettingsGroup extends StatelessWidget {
   final List<Widget> children;
   final IconData? leadingIcon;
 
-  /// Adds [TilawaDesignTokens.spaceXXL] above the section header.
+  /// Adds [MeMuslimDesignTokens.spaceXXL] above the section header.
   final bool includeTopGap;
 
   @override

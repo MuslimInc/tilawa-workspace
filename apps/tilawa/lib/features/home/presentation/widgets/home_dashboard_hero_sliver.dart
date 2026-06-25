@@ -136,7 +136,7 @@ abstract final class HomeDashboardHeroSliver {
   }
 
   static double _resolveBottomInset(BuildContext context) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     return tokens.spaceSmall + sheetOverlap;
   }
 
@@ -439,12 +439,13 @@ ThemeData _themeWithHeroTokens(
   ThemeData theme,
   TilawaHomeNextPrayerHeroTokens heroTokens,
 ) {
-  final TilawaComponentTokens componentTokens = theme.componentTokens.copyWith(
-    homeNextPrayerHero: heroTokens,
-  );
+  final MeMuslimComponentTokens componentTokens = theme.componentTokens
+      .copyWith(
+        homeNextPrayerHero: heroTokens,
+      );
   final List<ThemeExtension<dynamic>> extensions =
       theme.extensions.values.where((ThemeExtension<dynamic> extension) {
-        return extension is! TilawaComponentTokens;
+        return extension is! MeMuslimComponentTokens;
       }).toList()..add(componentTokens);
   return theme.copyWith(extensions: extensions);
 }

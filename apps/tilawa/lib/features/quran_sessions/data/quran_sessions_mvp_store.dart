@@ -44,7 +44,7 @@ class QuranSessionsMvpStore {
       userId: 'student_mvp',
       role: UserRole.student,
       accountStatus: AccountStatus.active,
-      displayName: 'Tilawa User',
+      displayName: 'MeMuslim User',
       // No gender / DOB / country / city → profile gate fires on first entry.
     ),
     // Teachers are UserRole.student at the UserProfile level.

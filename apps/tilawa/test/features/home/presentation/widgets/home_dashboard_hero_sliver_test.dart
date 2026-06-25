@@ -149,7 +149,7 @@ void _expectCollapsedPremiumPinnedBar(BuildContext context) {
   final ThemeData theme = Theme.of(context);
   final TilawaCapabilityActionCardTokens cardTokens =
       theme.componentTokens.capabilityActionCard;
-  final TilawaDesignTokens tokens = theme.tokens;
+  final MeMuslimDesignTokens tokens = theme.tokens;
 
   expect(
     find.byWidgetPredicate((widget) {

@@ -48,7 +48,7 @@ def resolveFlutterSdkPath = {
     )
 }()
 
-def flutterEngineVersion = '1.0.0-77e2e94772b6eb43759e34ed1ad7da4674e19cab'
+def flutterEngineVersion = '+'
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'

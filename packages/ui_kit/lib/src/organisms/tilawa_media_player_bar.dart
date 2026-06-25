@@ -36,7 +36,7 @@ const double kTilawaMediaPlayerBarShellEdgeBandHeight = 4.0;
 }
 
 /// Typical horizontal inset outside the bar in the mini-player shell
-/// ([TilawaDesignTokens.spaceLarge] × 2). Used when [layoutWidth] is null.
+/// ([MeMuslimDesignTokens.spaceLarge] × 2). Used when [layoutWidth] is null.
 const double kTilawaMediaPlayerBarDefaultHorizontalInset = 32.0;
 
 /// UI-only widget for the bottom player that can be used in previews
@@ -735,7 +735,7 @@ class _TransportControls extends StatelessWidget {
     required this.sleepTimerTooltip,
   });
 
-  final TilawaDesignTokens designTokens;
+  final MeMuslimDesignTokens designTokens;
   final TilawaMediaPlayerBarTokens componentTokens;
   final ColorScheme colorScheme;
   final Color disabledControlColor;

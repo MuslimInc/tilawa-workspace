@@ -8,7 +8,7 @@ import 'package:tilawa_ui_kit/src/foundation/tilawa_input_style.dart';
 void main() {
   group('TilawaInputStyle', () {
     late ThemeData theme;
-    late TilawaDesignTokens tokens;
+    late MeMuslimDesignTokens tokens;
 
     setUp(() {
       theme = AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary);

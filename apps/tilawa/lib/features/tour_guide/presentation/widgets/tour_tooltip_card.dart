@@ -27,7 +27,7 @@ class TourTooltipCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final double maxWidth = MediaQuery.sizeOf(context).width * 0.88;
 
     return Semantics(

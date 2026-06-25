@@ -12,7 +12,7 @@ import 'package:tilawa_ui_kit/src/foundation/design_tokens.dart';
 /// pan-to-dismiss layers), or (b) declare `behavior: HitTestBehavior.opaque`
 /// so taps on transparent padding still register.
 ///
-/// See [kTilawaMinInteractiveDimension] for the companion-rule prose. If you
+/// See [kMeMuslimMinInteractiveDimension] for the companion-rule prose. If you
 /// add a new `GestureDetector` site, prefer a Material primitive
 /// (`InkWell`, `IconButton`, `ListTile`); if a bare detector is genuinely
 /// necessary, add the file to [_allowlist] **and explain why in a code
@@ -71,21 +71,21 @@ void main() {
           'and add the file to the allow-list in this test with a code-comment '
           'justification, or (b) keep it strictly for non-visible gesture '
           'regions (pan-to-dismiss, edge-of-screen pan handlers). See '
-          '`kTilawaMinInteractiveDimension` dartdoc and '
+          '`kMeMuslimMinInteractiveDimension` dartdoc and '
           '`specs/014-ergonomic-mobile-ux/spec.md` FR-006.',
     );
   });
 
   test(
-    'minInteractiveDimension is centralized on kTilawaMinInteractiveDimension',
+    'minInteractiveDimension is centralized on kMeMuslimMinInteractiveDimension',
     () {
       expect(
-        TilawaDesignTokens.light().minInteractiveDimension,
-        kTilawaMinInteractiveDimension,
+        MeMuslimDesignTokens.light().minInteractiveDimension,
+        kMeMuslimMinInteractiveDimension,
       );
       expect(
-        TilawaDesignTokens.dark().minInteractiveDimension,
-        kTilawaMinInteractiveDimension,
+        MeMuslimDesignTokens.dark().minInteractiveDimension,
+        kMeMuslimMinInteractiveDimension,
       );
     },
   );

@@ -42,6 +42,8 @@
     },
     "homeTitle": "الصفحة الرئيسية",
     "homeGreeting": "السلام عليكم",
+    "homeInspirationTitle": "إلهام اليوم",
+    "homeInspirationSubtitle": "لحظة تدبر",
     "homeGreetingName": "السلام عليكم، {name}",
     "@homeGreetingName": {
         "placeholders": {
@@ -78,7 +80,7 @@
     "homeExploreTitle": "اكتشف",
     "homeExploreSubtitle": "أدواتك اليومية بلمحة",
     "homeKhatmaCarouselSubtitle": "تابع خطة قراءتك",
-    "homeSupportCarouselSubtitle": "ساهم في بقاء تلاوة مجانية للجميع",
+    "homeSupportCarouselSubtitle": "ساهم في إبقاء أنا مسلم مجانياً للجميع",
     "homeHistoryCarouselSubtitle": "تابع من حيث توقفت",
     "homeFavoritesCarouselSubtitle": "تلاوات وسور محفوظة",
     "homeDownloadsCarouselSubtitle": "استمع دون اتصال",
@@ -1036,7 +1038,7 @@
     "@signIn": {
         "description": "Sign in button text"
     },
-    "welcomeToApp": "مرحباً بك في تلاوة",
+    "welcomeToApp": "مرحباً بك في أنا مسلم",
     "@welcomeToApp": {
         "description": "Welcome message on login screen"
     },
@@ -1343,7 +1345,7 @@
     "@deleteAccount": {
         "description": "Delete account action in settings"
     },
-    "deleteAccountConfirmation": "سيؤدي هذا إلى حذف حسابك في تلاوة وبيانات ملفك المتزامنة نهائياً. قد نحتفظ بسجلات مشتريات مجهولة للوقاية من الاحتيال. لا يمكن التراجع عن هذا الإجراء.",
+    "deleteAccountConfirmation": "سيؤدي هذا إلى حذف حسابك في أنا مسلم وبيانات ملفك المتزامنة نهائياً. قد نحتفظ بسجلات مشتريات مجهولة للوقاية من الاحتيال. لا يمكن التراجع عن هذا الإجراء.",
     "@deleteAccountConfirmation": {
         "description": "Confirmation message before deleting the app account"
     },
@@ -2816,7 +2818,7 @@
     "@sharing": {
         "description": "Status message while sharing"
     },
-    "sharedViaTilawa": "تمت المشاركة عبر تلاوة",
+    "sharedViaTilawa": "تمت المشاركة عبر أنا مسلم",
     "@sharedViaTilawa": {
         "description": "Branding text on shared content"
     },
@@ -3138,7 +3140,7 @@
     "@batteryOptimizationExemptionRequired": {
         "description": "Banner shown when the app is not whitelisted from Doze / battery optimization"
     },
-    "oemAutostartHint": "في هذا الجهاز، فعّل أيضاً التشغيل التلقائي لتطبيق تلاوة من إعدادات الهاتف حتى لا تتوقف التذكيرات في الخلفية.",
+    "oemAutostartHint": "في هذا الجهاز، فعّل أيضاً التشغيل التلقائي لتطبيق أنا مسلم من إعدادات الهاتف حتى لا تتوقف التذكيرات في الخلفية.",
     "@oemAutostartHint": {
         "description": "Informational banner shown on aggressive OEM ROMs"
     },
@@ -3149,9 +3151,9 @@
     "prayerAlertsPermissionExactAlarmTitle": "التنبيهات والتذكيرات",
     "prayerAlertsPermissionExactAlarmBody": "اسمح بإذن التنبيهات والتذكيرات حتى يعمل الأذان وتنبيهات الصلاة في وقتها، حتى عندما يكون الهاتف في وضع السكون أو الشاشة مغلقة.",
     "prayerAlertsPermissionBatteryTitle": "تحسين البطارية",
-    "prayerAlertsPermissionBatteryBody": "استثنِ تلاوة من تحسين البطارية حتى لا تتأخر تذكيرات الصلاة ليلاً.",
+    "prayerAlertsPermissionBatteryBody": "استثنِ أنا مسلم من تحسين البطارية حتى لا تتأخر تذكيرات الصلاة ليلاً.",
     "prayerAlertsPermissionOemAutostartTitle": "العمل في الخلفية",
-    "prayerAlertsPermissionOemAutostartBody": "في هذا الجهاز، فعّل التشغيل التلقائي لتلاوة من إعدادات الهاتف حتى لا تتوقف التذكيرات في الخلفية.",
+    "prayerAlertsPermissionOemAutostartBody": "في هذا الجهاز، فعّل التشغيل التلقائي لتطبيق أنا مسلم من إعدادات الهاتف حتى لا تتوقف التذكيرات في الخلفية.",
     "prayerAlertsPermissionAllow": "السماح",
     "prayerAlertsPermissionSkip": "تخطي",
     "prayerAlertsPermissionContinue": "متابعة",
@@ -3318,11 +3320,15 @@
     "@moreOptions": {
         "description": "Label for the more-options overflow menu button"
     },
-    "supportTilawa": "ادعم تلاوة",
+    "homeMoreOptionsSubtitle": "المكتبة والمفضلة والمزيد",
+    "@homeMoreOptionsSubtitle": {
+        "description": "Subtitle for the More section on the home dashboard"
+    },
+    "supportTilawa": "ادعم أنا مسلم",
     "@supportTilawa": {
         "description": "Support Tilawa screen and settings entry title"
     },
-    "rateTilawa": "قيّم تلاوة",
+    "rateTilawa": "قيّم أنا مسلم",
     "@rateTilawa": {
         "description": "Settings row to open the in-app review dialog"
     },
@@ -3330,7 +3336,7 @@
     "@rateTilawaSubtitle": {
         "description": "Optional subtitle under the rate Tilawa settings row"
     },
-    "shareTilawa": "شارك تلاوة",
+    "shareTilawa": "شارك أنا مسلم",
     "@shareTilawa": {
         "description": "Settings row to share the app with others"
     },
@@ -3350,15 +3356,15 @@
     "@shareTilawaFailed": {
         "description": "Error shown when sharing Tilawa from settings fails"
     },
-    "supportIntroLine": "مشاركتك تساعدنا على استمرار تلاوة.",
+    "supportIntroLine": "مشاركتك تساعدنا على استمرار أنا مسلم.",
     "@supportIntroLine": {
         "description": "Support screen single-line intro under app bar"
     },
-    "supportTilawaSubtitle": "مشاركتك تساعدنا على استمرار تلاوة.",
+    "supportTilawaSubtitle": "مشاركتك تساعدنا على استمرار أنا مسلم.",
     "@supportTilawaSubtitle": {
         "description": "Legacy alias; prefer supportIntroLine"
     },
-    "supportMissionBody": "مشاركتك تساعدنا على استمرار تلاوة.",
+    "supportMissionBody": "مشاركتك تساعدنا على استمرار أنا مسلم.",
     "@supportMissionBody": {
         "description": "Legacy alias; unused on support screen"
     },
@@ -3410,7 +3416,7 @@
     "@supportConfirmationTitle": {
         "description": "Support purchase confirmation sheet title"
     },
-    "supportConfirmationBody": "يتم الدفع عبر Google Play. تلاوة لا يحتفظ ببيانات بطاقتك.",
+    "supportConfirmationBody": "يتم الدفع عبر Google Play. أنا مسلم لا يحتفظ ببيانات بطاقتك.",
     "@supportConfirmationBody": {
         "description": "Support purchase confirmation sheet body"
     },
@@ -3510,7 +3516,7 @@
     "@supportSelectTier": {
         "description": "Prompt when no tier selected"
     },
-    "supportSettingsGroupTitle": "ادعم تلاوة",
+    "supportSettingsGroupTitle": "ادعم أنا مسلم",
     "@supportSettingsGroupTitle": {
         "description": "Settings group title for support entry"
     },
@@ -3554,7 +3560,7 @@
     "@appReviewPlatformUnsupported": {
         "description": "In-app review not supported (e.g. web)"
     },
-    "a11ySplashLoading": "تلاوة، جارٍ التحميل",
+    "a11ySplashLoading": "أنا مسلم، جارٍ التحميل",
     "@a11ySplashLoading": {
         "description": "Screen-reader label announced while the splash loading screen is visible"
     },
@@ -3638,11 +3644,11 @@
     "@inAppUpdateFlexibleRestartMessage": {
         "description": "Snackbar message when a flexible in-app update finished downloading"
     },
-    "inAppUpdateOptionalMessage": "يتوفر إصدار جديد من تلاوة.",
+    "inAppUpdateOptionalMessage": "يتوفر إصدار جديد من أنا مسلم.",
     "@inAppUpdateOptionalMessage": {
         "description": "Snackbar message when an optional app update is available"
     },
-    "inAppUpdateRequiredMessage": "يلزم التحديث لمتابعة استخدام تلاوة.",
+    "inAppUpdateRequiredMessage": "يلزم التحديث لمتابعة استخدام أنا مسلم.",
     "@inAppUpdateRequiredMessage": {
         "description": "Snackbar message when a forced update must go through the Play Store"
     },

@@ -33,7 +33,10 @@ final Uint8List _transparentPng = Uint8List.fromList([
 Widget _wrap(Widget child) {
   return MaterialApp(
     theme: ThemeData(
-      extensions: [TilawaDesignTokens.light(), TilawaComponentTokens.light()],
+      extensions: [
+        MeMuslimDesignTokens.light(),
+        MeMuslimComponentTokens.light(),
+      ],
     ),
     home: Scaffold(body: SizedBox(width: 400, height: 400, child: child)),
   );

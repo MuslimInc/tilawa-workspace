@@ -19,15 +19,15 @@ void main() {
         expect(theme.useMaterial3, isTrue);
         expect(theme.visualDensity, FlexColorScheme.comfortablePlatformDensity);
 
-        final TilawaDesignTokens? design = theme
-            .extension<TilawaDesignTokens>();
+        final MeMuslimDesignTokens? design = theme
+            .extension<MeMuslimDesignTokens>();
         expect(design, isNotNull);
         expect(design!.opacityShadow, 0.04);
         expect(design.opacityShadowStrong, 0.08);
         expect(design.shadowOffsetSmall, const Offset(0, 1));
         expect(design.shadowOffsetMedium, const Offset(0, 2));
 
-        expect(theme.extension<TilawaComponentTokens>(), isNotNull);
+        expect(theme.extension<MeMuslimComponentTokens>(), isNotNull);
 
         expect(theme.cardTheme.surfaceTintColor, Colors.transparent);
         expect(theme.dialogTheme.surfaceTintColor, Colors.transparent);
@@ -55,8 +55,8 @@ void main() {
         expect(theme.useMaterial3, isTrue);
         expect(theme.visualDensity, FlexColorScheme.comfortablePlatformDensity);
 
-        expect(theme.extension<TilawaDesignTokens>(), isNotNull);
-        expect(theme.extension<TilawaComponentTokens>(), isNotNull);
+        expect(theme.extension<MeMuslimDesignTokens>(), isNotNull);
+        expect(theme.extension<MeMuslimComponentTokens>(), isNotNull);
 
         expect(theme.cardTheme.surfaceTintColor, Colors.transparent);
         expect(theme.dialogTheme.surfaceTintColor, Colors.transparent);
@@ -76,8 +76,8 @@ void main() {
       final ThemeData theme = AppTheme.getLightTheme(
         primaryColor: AppColors.defaultPrimary,
       );
-      expect(theme.extension<TilawaDesignTokens>(), isNotNull);
-      expect(theme.extension<TilawaComponentTokens>(), isNotNull);
+      expect(theme.extension<MeMuslimDesignTokens>(), isNotNull);
+      expect(theme.extension<MeMuslimComponentTokens>(), isNotNull);
     });
 
     test(
@@ -115,7 +115,8 @@ void main() {
       final ThemeData theme = AppTheme.getLightTheme(
         primaryColor: AppColors.defaultPrimary,
       );
-      final TilawaDesignTokens tokens = theme.extension<TilawaDesignTokens>()!;
+      final MeMuslimDesignTokens tokens = theme
+          .extension<MeMuslimDesignTokens>()!;
       final BorderRadius expected = BorderRadius.circular(
         tokens.buttonBorderRadius(),
       );
@@ -135,7 +136,8 @@ void main() {
       final ThemeData theme = AppTheme.getLightTheme(
         primaryColor: AppColors.defaultPrimary,
       );
-      final TilawaDesignTokens tokens = theme.extension<TilawaDesignTokens>()!;
+      final MeMuslimDesignTokens tokens = theme
+          .extension<MeMuslimDesignTokens>()!;
 
       final RoundedRectangleBorder cardShape =
           theme.cardTheme.shape! as RoundedRectangleBorder;

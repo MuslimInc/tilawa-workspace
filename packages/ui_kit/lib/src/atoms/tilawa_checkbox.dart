@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../foundation/design_tokens.dart';
 import '../foundation/tilawa_interaction_feedback.dart';
 
-/// Adaptive checkbox with a guaranteed [kTilawaMinInteractiveDimension] hit
+/// Adaptive checkbox with a guaranteed [kMeMuslimMinInteractiveDimension] hit
 /// target.
 ///
 /// The control visual is fitted inside [visualSlotSize] so rows can keep a
@@ -29,7 +29,7 @@ class TilawaCheckbox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final hitSize = kTilawaMinInteractiveDimension;
+    final hitSize = kMeMuslimMinInteractiveDimension;
 
     return SizedBox(
       width: hitSize,

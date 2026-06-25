@@ -66,7 +66,7 @@ void main() {
     test('enabled uses scheme.shadow at opacityShadow', () {
       final theme = _lightTheme();
       final scheme = theme.colorScheme;
-      final tokens = theme.extension<TilawaDesignTokens>()!;
+      final tokens = theme.extension<MeMuslimDesignTokens>()!;
       expect(
         TilawaAppBarChrome.elevationShadowColor(scheme, tokens),
         scheme.shadow.withValues(alpha: tokens.opacityShadow),
@@ -76,7 +76,7 @@ void main() {
     test('bottom hairline uses softened outlineVariant', () {
       final theme = _lightTheme();
       final scheme = theme.colorScheme;
-      final tokens = theme.extension<TilawaDesignTokens>()!;
+      final tokens = theme.extension<MeMuslimDesignTokens>()!;
       final RoundedRectangleBorder shape =
           TilawaAppBarChrome.bottomHairline(
                 scheme,
@@ -93,7 +93,7 @@ void main() {
     test('disabled returns transparent shadow and zero elevation', () {
       final theme = _lightTheme();
       final scheme = theme.colorScheme;
-      final tokens = theme.extension<TilawaDesignTokens>()!;
+      final tokens = theme.extension<MeMuslimDesignTokens>()!;
       expect(
         TilawaAppBarChrome.elevationShadowColor(
           scheme,

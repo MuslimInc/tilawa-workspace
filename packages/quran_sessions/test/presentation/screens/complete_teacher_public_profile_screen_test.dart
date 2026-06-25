@@ -136,7 +136,7 @@ void main() {
     tester,
   ) async {
     const keyboardInset = 300.0;
-    final tokens = TilawaDesignTokens.light();
+    final tokens = MeMuslimDesignTokens.light();
 
     await _pumpScreen(
       tester,
@@ -160,7 +160,7 @@ void main() {
     tester,
   ) async {
     const keyboardInset = 300.0;
-    final tokens = TilawaDesignTokens.light();
+    final tokens = MeMuslimDesignTokens.light();
 
     await _pumpScreen(
       tester,

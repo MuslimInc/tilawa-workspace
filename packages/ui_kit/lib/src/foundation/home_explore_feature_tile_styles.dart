@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'semantic_tints.dart';
-import 'tilawa_product_colors.dart';
+import 'memuslim_product_colors.dart';
 
 /// Home Discover grid features — one id per explore tile.
 enum HomeExploreFeature {
@@ -45,9 +45,9 @@ extension HomeExploreFeatureTileStyles on ColorScheme {
   HomeExploreFeatureTileStyle homeExploreFeatureTileStyle(
     HomeExploreFeature feature,
   ) {
-    final TilawaProductColors product = brightness == Brightness.dark
-        ? TilawaProductColors.dark(this)
-        : TilawaProductColors.light(this);
+    final MeMuslimProductColors product = brightness == Brightness.dark
+        ? MeMuslimProductColors.dark(this)
+        : MeMuslimProductColors.light(this);
     return product.exploreFeatureTileStyle(feature);
   }
 }

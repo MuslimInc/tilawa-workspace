@@ -45,6 +45,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeGreeting => 'Assalamu alaikum';
 
   @override
+  String get homeInspirationTitle => 'Daily Inspiration';
+
+  @override
+  String get homeInspirationSubtitle => 'A moment of reflection';
+
+  @override
   String homeGreetingName(String name) {
     return 'Assalamu alaikum, $name';
   }
@@ -95,7 +101,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeSupportCarouselSubtitle =>
-      'Help keep Tilawa free for everyone';
+      'Help keep MeMuslim free for everyone';
 
   @override
   String get homeHistoryCarouselSubtitle => 'Pick up where you left off';
@@ -1077,7 +1083,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signIn => 'Sign in';
 
   @override
-  String get welcomeToApp => 'Welcome to Tilawa';
+  String get welcomeToApp => 'Welcome to MeMuslim';
 
   @override
   String get signInWithGoogleDescription =>
@@ -1288,7 +1294,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteAccountConfirmation =>
-      'This permanently deletes your Tilawa account and synced profile data. Purchases verified with Google Play may be kept in anonymized records for fraud prevention. This cannot be undone.';
+      'This permanently deletes your MeMuslim account and synced profile data. Purchases verified with Google Play may be kept in anonymized records for fraud prevention. This cannot be undone.';
 
   @override
   String get deleteAccountFailed =>
@@ -2384,7 +2390,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sharing => 'Sharing...';
 
   @override
-  String get sharedViaTilawa => 'Shared via Tilawa';
+  String get sharedViaTilawa => 'Shared via MeMuslim';
 
   @override
   String get reciterNotAvailable =>
@@ -2640,7 +2646,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get oemAutostartHint =>
-      'On this device, also enable Autostart for Tilawa in your phone\'s settings so reminders are not stopped in the background.';
+      'On this device, also enable Autostart for MeMuslim in your phone\'s settings so reminders are not stopped in the background.';
 
   @override
   String get prayerAlertsPermissionLocationTitle => 'Location';
@@ -2668,14 +2674,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get prayerAlertsPermissionBatteryBody =>
-      'Exclude Tilawa from battery optimization so prayer reminders are not delayed overnight.';
+      'Exclude MeMuslim from battery optimization so prayer reminders are not delayed overnight.';
 
   @override
   String get prayerAlertsPermissionOemAutostartTitle => 'Background access';
 
   @override
   String get prayerAlertsPermissionOemAutostartBody =>
-      'On this device, enable Autostart for Tilawa in your phone settings so reminders are not stopped in the background.';
+      'On this device, enable Autostart for MeMuslim in your phone settings so reminders are not stopped in the background.';
 
   @override
   String get prayerAlertsPermissionAllow => 'Allow';
@@ -2811,16 +2817,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moreOptions => 'More options';
 
   @override
-  String get supportTilawa => 'Support Tilawa';
+  String get homeMoreOptionsSubtitle => 'Library, favorites, and more';
 
   @override
-  String get rateTilawa => 'Rate Tilawa';
+  String get supportTilawa => 'Support MeMuslim';
+
+  @override
+  String get rateTilawa => 'Rate MeMuslim';
 
   @override
   String get rateTilawaSubtitle => 'Share your feedback on the app store.';
 
   @override
-  String get shareTilawa => 'Share Tilawa';
+  String get shareTilawa => 'Share MeMuslim';
 
   @override
   String shareTilawaMessage(String appName, String storeUrl) {
@@ -2832,14 +2841,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'We could not open the share sheet. Please try again.';
 
   @override
-  String get supportIntroLine => 'Your contribution helps keep Tilawa going.';
+  String get supportIntroLine => 'Your contribution helps keep MeMuslim going.';
 
   @override
   String get supportTilawaSubtitle =>
-      'Your contribution helps keep Tilawa going.';
+      'Your contribution helps keep MeMuslim going.';
 
   @override
-  String get supportMissionBody => 'Your contribution helps keep Tilawa going.';
+  String get supportMissionBody =>
+      'Your contribution helps keep MeMuslim going.';
 
   @override
   String get supportImpactWhyTitle => 'Why?';
@@ -2879,7 +2889,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get supportConfirmationBody =>
-      'Payment via Google Play. Tilawa does not store your card details.';
+      'Payment via Google Play. MeMuslim does not store your card details.';
 
   @override
   String get supportConfirm => 'Continue';
@@ -2963,7 +2973,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get supportSelectTier => 'Choose an amount';
 
   @override
-  String get supportSettingsGroupTitle => 'Support Tilawa';
+  String get supportSettingsGroupTitle => 'Support MeMuslim';
 
   @override
   String get supportHelpKeepFree => 'Optional';
@@ -3002,7 +3012,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Store reviews are not supported on this platform.';
 
   @override
-  String get a11ySplashLoading => 'Tilawa, loading';
+  String get a11ySplashLoading => 'MeMuslim, loading';
 
   @override
   String get splashSlowLoadingNotice =>
@@ -3069,11 +3079,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get inAppUpdateOptionalMessage =>
-      'A new version of Tilawa is available.';
+      'A new version of MeMuslim is available.';
 
   @override
   String get inAppUpdateRequiredMessage =>
-      'An update is required to continue using Tilawa.';
+      'An update is required to continue using MeMuslim.';
 
   @override
   String get inAppUpdateRestartAction => 'Restart';
@@ -3127,7 +3137,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authSignedInElsewhereBody =>
-      'Tilawa allows one active device per account for Quran Sessions security. Your account was opened elsewhere — sign in again on this device to continue.';
+      'MeMuslim allows one active device per account for Quran Sessions security. Your account was opened elsewhere — sign in again on this device to continue.';
 
   @override
   String get authSignedInElsewhereAction => 'Sign in again';

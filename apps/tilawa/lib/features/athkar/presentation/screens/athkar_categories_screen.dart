@@ -65,7 +65,7 @@ class AthkarCategoriesScreen extends StatelessWidget {
               } else if (state is AthkarCategoriesLoaded) {
                 final double fabClearance =
                     fabBottomOffset +
-                    kTilawaMinInteractiveDimension +
+                    kMeMuslimMinInteractiveDimension +
                     (tokens.spaceLarge * 2);
 
                 return TilawaContentGrid(

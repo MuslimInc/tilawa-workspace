@@ -12,7 +12,7 @@ void main() {
   final ThemeData theme = AppTheme.getLightTheme(
     primaryColor: AppColors.defaultPrimary,
   );
-  final TilawaDesignTokens tokens = TilawaDesignTokens.light();
+  final MeMuslimDesignTokens tokens = MeMuslimDesignTokens.light();
 
   group('TilawaBottomActionArea', () {
     testWidgets('uses comfortable reach bottom spacing with zero safe area', (

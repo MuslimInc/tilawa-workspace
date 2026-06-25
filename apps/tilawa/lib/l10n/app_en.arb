@@ -48,6 +48,14 @@
     "@homeGreeting": {
         "description": "Default Home greeting"
     },
+    "homeInspirationTitle": "Daily Inspiration",
+    "@homeInspirationTitle": {
+        "description": "Title for the daily inspiration section"
+    },
+    "homeInspirationSubtitle": "A moment of reflection",
+    "@homeInspirationSubtitle": {
+        "description": "Subtitle for the daily inspiration section"
+    },
     "homeGreetingName": "Assalamu alaikum, {name}",
     "@homeGreetingName": {
         "description": "Home greeting with display name",
@@ -114,7 +122,7 @@
     "@homeKhatmaCarouselSubtitle": {
         "description": "Home carousel subtitle for Smart Khatma promo card"
     },
-    "homeSupportCarouselSubtitle": "Help keep Tilawa free for everyone",
+    "homeSupportCarouselSubtitle": "Help keep MeMuslim free for everyone",
     "@homeSupportCarouselSubtitle": {
         "description": "Home carousel subtitle for Support Tilawa promo card"
     },
@@ -1443,7 +1451,7 @@
     "@signIn": {
         "description": "Sign in button text"
     },
-    "welcomeToApp": "Welcome to Tilawa",
+    "welcomeToApp": "Welcome to MeMuslim",
     "@welcomeToApp": {
         "description": "Welcome message on login screen"
     },
@@ -1753,7 +1761,7 @@
     "@deleteAccount": {
         "description": "Delete account action in settings"
     },
-    "deleteAccountConfirmation": "This permanently deletes your Tilawa account and synced profile data. Purchases verified with Google Play may be kept in anonymized records for fraud prevention. This cannot be undone.",
+    "deleteAccountConfirmation": "This permanently deletes your MeMuslim account and synced profile data. Purchases verified with Google Play may be kept in anonymized records for fraud prevention. This cannot be undone.",
     "@deleteAccountConfirmation": {
         "description": "Confirmation message before deleting the app account"
     },
@@ -3226,7 +3234,7 @@
     "@sharing": {
         "description": "Status message while sharing"
     },
-    "sharedViaTilawa": "Shared via Tilawa",
+    "sharedViaTilawa": "Shared via MeMuslim",
     "@sharedViaTilawa": {
         "description": "Branding text on shared content"
     },
@@ -3548,7 +3556,7 @@
     "@batteryOptimizationExemptionRequired": {
         "description": "Banner shown when the app is not whitelisted from Doze / battery optimization"
     },
-    "oemAutostartHint": "On this device, also enable Autostart for Tilawa in your phone's settings so reminders are not stopped in the background.",
+    "oemAutostartHint": "On this device, also enable Autostart for MeMuslim in your phone's settings so reminders are not stopped in the background.",
     "@oemAutostartHint": {
         "description": "Informational banner shown on aggressive OEM ROMs (Xiaomi/Oppo/Huawei/Vivo/etc.) where the autostart whitelist must be set manually"
     },
@@ -3580,7 +3588,7 @@
     "@prayerAlertsPermissionBatteryTitle": {
         "description": "Title for battery optimization exemption setup screen"
     },
-    "prayerAlertsPermissionBatteryBody": "Exclude Tilawa from battery optimization so prayer reminders are not delayed overnight.",
+    "prayerAlertsPermissionBatteryBody": "Exclude MeMuslim from battery optimization so prayer reminders are not delayed overnight.",
     "@prayerAlertsPermissionBatteryBody": {
         "description": "Body for battery optimization setup screen"
     },
@@ -3588,7 +3596,7 @@
     "@prayerAlertsPermissionOemAutostartTitle": {
         "description": "Title for OEM autostart guidance step"
     },
-    "prayerAlertsPermissionOemAutostartBody": "On this device, enable Autostart for Tilawa in your phone settings so reminders are not stopped in the background.",
+    "prayerAlertsPermissionOemAutostartBody": "On this device, enable Autostart for MeMuslim in your phone settings so reminders are not stopped in the background.",
     "@prayerAlertsPermissionOemAutostartBody": {
         "description": "Body for OEM autostart guidance step"
     },
@@ -3773,11 +3781,15 @@
     "@moreOptions": {
         "description": "Label for the more-options overflow menu button"
     },
-    "supportTilawa": "Support Tilawa",
+    "homeMoreOptionsSubtitle": "Library, favorites, and more",
+    "@homeMoreOptionsSubtitle": {
+        "description": "Subtitle for the More section on the home dashboard"
+    },
+    "supportTilawa": "Support MeMuslim",
     "@supportTilawa": {
         "description": "Support Tilawa screen and settings entry title"
     },
-    "rateTilawa": "Rate Tilawa",
+    "rateTilawa": "Rate MeMuslim",
     "@rateTilawa": {
         "description": "Settings row to open the in-app review dialog"
     },
@@ -3785,7 +3797,7 @@
     "@rateTilawaSubtitle": {
         "description": "Optional subtitle under the rate Tilawa settings row"
     },
-    "shareTilawa": "Share Tilawa",
+    "shareTilawa": "Share MeMuslim",
     "@shareTilawa": {
         "description": "Settings row to share the app with others"
     },
@@ -3805,15 +3817,15 @@
     "@shareTilawaFailed": {
         "description": "Error shown when sharing Tilawa from settings fails"
     },
-    "supportIntroLine": "Your contribution helps keep Tilawa going.",
+    "supportIntroLine": "Your contribution helps keep MeMuslim going.",
     "@supportIntroLine": {
         "description": "Support screen single-line intro under app bar"
     },
-    "supportTilawaSubtitle": "Your contribution helps keep Tilawa going.",
+    "supportTilawaSubtitle": "Your contribution helps keep MeMuslim going.",
     "@supportTilawaSubtitle": {
         "description": "Legacy alias; prefer supportIntroLine"
     },
-    "supportMissionBody": "Your contribution helps keep Tilawa going.",
+    "supportMissionBody": "Your contribution helps keep MeMuslim going.",
     "@supportMissionBody": {
         "description": "Legacy alias; unused on support screen"
     },
@@ -3865,7 +3877,7 @@
     "@supportConfirmationTitle": {
         "description": "Support purchase confirmation sheet title"
     },
-    "supportConfirmationBody": "Payment via Google Play. Tilawa does not store your card details.",
+    "supportConfirmationBody": "Payment via Google Play. MeMuslim does not store your card details.",
     "@supportConfirmationBody": {
         "description": "Support purchase confirmation sheet body"
     },
@@ -3965,7 +3977,7 @@
     "@supportSelectTier": {
         "description": "Prompt when no tier selected"
     },
-    "supportSettingsGroupTitle": "Support Tilawa",
+    "supportSettingsGroupTitle": "Support MeMuslim",
     "@supportSettingsGroupTitle": {
         "description": "Settings group title for support entry"
     },
@@ -4009,7 +4021,7 @@
     "@appReviewPlatformUnsupported": {
         "description": "In-app review not supported (e.g. web)"
     },
-    "a11ySplashLoading": "Tilawa, loading",
+    "a11ySplashLoading": "MeMuslim, loading",
     "@a11ySplashLoading": {
         "description": "Screen-reader label announced while the splash loading screen is visible"
     },
@@ -4093,11 +4105,11 @@
     "@inAppUpdateFlexibleRestartMessage": {
         "description": "Snackbar message when a flexible in-app update finished downloading"
     },
-    "inAppUpdateOptionalMessage": "A new version of Tilawa is available.",
+    "inAppUpdateOptionalMessage": "A new version of MeMuslim is available.",
     "@inAppUpdateOptionalMessage": {
         "description": "Snackbar message when an optional app update is available"
     },
-    "inAppUpdateRequiredMessage": "An update is required to continue using Tilawa.",
+    "inAppUpdateRequiredMessage": "An update is required to continue using MeMuslim.",
     "@inAppUpdateRequiredMessage": {
         "description": "Snackbar message when a forced update must go through the Play Store"
     },
@@ -4186,7 +4198,7 @@
     "@authSignedInElsewhereTitle": {
         "description": "Title when another device took over the active session"
     },
-    "authSignedInElsewhereBody": "Tilawa allows one active device per account for Quran Sessions security. Your account was opened elsewhere — sign in again on this device to continue.",
+    "authSignedInElsewhereBody": "MeMuslim allows one active device per account for Quran Sessions security. Your account was opened elsewhere — sign in again on this device to continue.",
     "@authSignedInElsewhereBody": {
         "description": "Body when another device took over the active session"
     },

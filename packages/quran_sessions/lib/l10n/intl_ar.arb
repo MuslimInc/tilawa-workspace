@@ -126,7 +126,7 @@
     "sessionModeExternalDisabled": "لم يضف المعلم رابط الاجتماع بعد. اختر الصوت أو الفيديو.",
     "meetingLinkUnavailable": "لم يُعدّ المعلم رابط اجتماع للجلسات الخارجية بعد. اختر الصوت أو الفيديو، أو حاول لاحقًا.",
     "callProviderUnavailable": "لا يمكن الانضمام إلى هذه الجلسة من التطبيق حاليًا.",
-    "callProviderAgoraNotConfigured": "مكالمات Agora داخل التطبيق غير مفعّلة في هذا الإصدار. أعد البناء بإعدادات Staging Agora (TILAWA_DISTRIBUTION=staging وTILAWA_LAUNCH_AGORA_APP_ID)، أو استخدم ملف التشغيل Tilawa (Staging Agora).",
+    "callProviderAgoraNotConfigured": "مكالمات Agora داخل التطبيق غير مفعّلة في هذا الإصدار. أعد البناء بإعدادات Staging Agora (TILAWA_DISTRIBUTION=staging وTILAWA_LAUNCH_AGORA_APP_ID)، أو استخدم ملف التشغيل MeMuslim (Staging Agora).",
     "rtcPermissionDenied": "يلزم الوصول إلى الميكروفون أو الكاميرا للانضمام. فعّل {permission} من الإعدادات ثم أعد المحاولة.",
     "@rtcPermissionDenied": {
         "placeholders": {
@@ -605,7 +605,7 @@
         }
     },
     "paymentCheckoutAmountPending": "سعر الجلسة (تجريبي)",
-    "paymentCheckoutRefundToWalletNotice": "عند الإلغاء أو الموافقة على استرداد، يُضاف المبلغ إلى محفظة تلاوة كرصيد. لا يُعاد الرصيد تلقائيًا إلى بطاقتك.",
+    "paymentCheckoutRefundToWalletNotice": "عند الإلغاء أو الموافقة على استرداد، يُضاف المبلغ إلى محفظة أنا مسلم كرصيد. لا يُعاد الرصيد تلقائيًا إلى بطاقتك.",
     "paymentCheckoutConfirm": "تأكيد الدفع (تجريبي)",
     "restrictionReasonFalseIdentity": "بيانات هوية مزيفة",
     "restrictionReasonPolicyViolation": "مخالفة السياسات",

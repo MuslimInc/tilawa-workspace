@@ -1,6 +1,8 @@
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+// ignore: implementation_imports
 import 'package:quran_sessions/src/data/datasources/catalog_market_config_remote_data_source.dart';
+// ignore: implementation_imports
 import 'package:quran_sessions/src/data/repositories/market_config_repository_impl.dart';
 
 /// Fake [MarketConfigRepository] backed by the curated [DefaultMarketCatalog].

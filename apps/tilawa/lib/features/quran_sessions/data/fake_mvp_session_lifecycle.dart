@@ -22,7 +22,7 @@ class FakeMvpSessionLifecycleStack {
   SessionNotificationGateway get notificationGateway =>
       _FakeNotificationGateway(this);
 
-  SessionCommandGateway get commandGateway => _FakeCommandGateway(this);
+  SessionCommandGateway get commandGateway => _FakeCommandGateway();
 
   SessionMutationGateway get mutationGateway => _FakeMutationGateway(this);
 }
@@ -105,8 +105,7 @@ class _FakeNotificationGateway implements SessionNotificationGateway {
 }
 
 class _FakeCommandGateway implements SessionCommandGateway {
-  _FakeCommandGateway(this._stack);
-  final FakeMvpSessionLifecycleStack _stack;
+  _FakeCommandGateway();
 
   @override
   Future<Either<QuranSessionsFailure, void>> capturePayment({

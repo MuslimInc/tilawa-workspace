@@ -36,7 +36,7 @@ class TilawaCountProgressRing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens designTokens = theme.tokens;
+    final MeMuslimDesignTokens designTokens = theme.tokens;
     final TilawaCountProgressRingTokens componentTokens =
         theme.componentTokens.countProgressRing;
     final ColorScheme colorScheme = theme.colorScheme;

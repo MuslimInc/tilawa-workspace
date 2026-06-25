@@ -11,7 +11,7 @@ import 'tilawa_interaction_feedback.dart';
 /// molecules stop re-implementing (and drifting on) it:
 ///
 /// - **Focus ring** — a visible 2 dp ring on keyboard / switch / D-pad focus,
-///   drawn from [TilawaDesignTokens.focusRingWidth]. Fixes the WCAG 2.4.7
+///   drawn from [MeMuslimDesignTokens.focusRingWidth]. Fixes the WCAG 2.4.7
 ///   gap where most components had no focus state (audit UIK-005).
 /// - **Press feel** — the shared scale-to-0.96 press animation via
 ///   [TilawaPressAnimation], so every surface presses the same way and honours
@@ -19,7 +19,7 @@ import 'tilawa_interaction_feedback.dart';
 /// - **Haptics** — a single [TilawaHaptic] tier fired on activation, instead of
 ///   ad-hoc per-component haptics (UIK-007).
 /// - **State layers** — hover / pressed / focused washes resolved from
-///   [TilawaDesignTokens.stateLayerHover] / `stateLayerPressed` /
+///   [MeMuslimDesignTokens.stateLayerHover] / `stateLayerPressed` /
 ///   `stateLayerFocused` (UIK-008).
 ///
 /// It is intentionally *unopinionated about paint*: the caller supplies the

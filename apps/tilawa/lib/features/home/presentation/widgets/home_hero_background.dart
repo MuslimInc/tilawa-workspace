@@ -35,8 +35,8 @@ class HomeHeroBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-    final TilawaProductColors product = theme.productColors;
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimProductColors product = theme.productColors;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final bool lightPhase =
         heroTokens.gradientBottomEnd.computeLuminance() > 0.45;
     final Color patternInk = HomeHeroPhotoTheme.heroChromeInk(heroTokens);
@@ -113,7 +113,7 @@ class HomeHeroBackground extends StatelessWidget {
   /// Three-stop phase gradient with a restrained gold mid accent.
   static LinearGradient _resolveBackgroundGradient(
     TilawaHomeNextPrayerHeroTokens heroTokens,
-    TilawaProductColors product,
+    MeMuslimProductColors product,
   ) {
     if (heroTokens.gradientTopStart == heroTokens.gradientBottomEnd) {
       return LinearGradient(

@@ -13,7 +13,7 @@ import 'package:flutter/material.dart';
 ///
 /// All hex values used by `AppTheme` to assemble `ColorScheme` live here
 /// so there is exactly one source of truth. Product widgets should read
-/// from `ColorScheme` / `TilawaComponentTokens` / `ThemeData.productColors`,
+/// from `ColorScheme` / `MeMuslimComponentTokens` / `ThemeData.productColors`,
 /// not from this file directly (see `docs/design/color_architecture.md`).
 abstract final class AppColors {
   AppColors._();

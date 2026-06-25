@@ -346,11 +346,11 @@ const List<GalleryWidgetCoverage> galleryWidgetManifest = [
     skipReason: 'Theme factory; gallery app applies AppTheme globally',
   ),
   GalleryWidgetCoverage(
-    symbol: 'TilawaDesignTokens',
+    symbol: 'MeMuslimDesignTokens',
     skipReason: 'ThemeExtension tokens',
   ),
   GalleryWidgetCoverage(
-    symbol: 'TilawaComponentTokens',
+    symbol: 'MeMuslimComponentTokens',
     skipReason: 'ThemeExtension tokens',
   ),
   GalleryWidgetCoverage(

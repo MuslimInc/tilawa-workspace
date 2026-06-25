@@ -43,10 +43,63 @@ class _HomeQuranResumeLoadingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tokens = context.tokens;
+    final theme = Theme.of(context);
+    final cardTokens = theme.componentTokens.homeDashboardCard;
+    // Base color for the shimmer — use the gold gradient if featured.
+    final Color shimmerBase = featured
+        ? cardTokens.gradientStart.withValues(alpha: 0.3)
+        : theme.colorScheme.surfaceContainerHigh;
+
     return HomeDashboardCard(
       surface: TilawaCardSurface.raised,
       useFeaturedGradient: featured,
-      child: const TilawaLoadingIndicator(centered: false),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: tokens.iconSizeLarge + tokens.spaceMedium * 2,
+        ),
+        child: _ShimmerContainer(
+          baseColor: shimmerBase,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: tokens.iconSizeLarge,
+                height: tokens.iconSizeLarge,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              SizedBox(width: tokens.spaceMedium),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 120,
+                      height: tokens.spaceMedium,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(tokens.radiusSmall),
+                      ),
+                    ),
+                    SizedBox(height: tokens.spaceExtraSmall),
+                    Container(
+                      width: 80,
+                      height: tokens.spaceSmall,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(tokens.radiusSmall),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -233,15 +286,81 @@ class _ProgressRing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
-    return SizedBox(
+    return Container(
       width: tokens.iconSizeLarge + tokens.spaceSmall,
       height: tokens.iconSizeLarge + tokens.spaceSmall,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).colorScheme.primary.withValues(
+              alpha: tokens.opacitySubtle * 1.5,
+            ),
+            blurRadius: tokens.blurShadow,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
       child: CircularProgressIndicator(
         value: progress,
         strokeWidth: 3,
         backgroundColor: foreground.withValues(alpha: 0.20),
         valueColor: AlwaysStoppedAnimation<Color>(foreground),
       ),
+    );
+  }
+}
+
+class _ShimmerContainer extends StatefulWidget {
+  const _ShimmerContainer({
+    required this.child,
+    required this.baseColor,
+  });
+
+  final Widget child;
+  final Color baseColor;
+
+  @override
+  State<_ShimmerContainer> createState() => _ShimmerContainerState();
+}
+
+class _ShimmerContainerState extends State<_ShimmerContainer>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Opacity(
+          opacity: 0.3 + (_controller.value * 0.4),
+          child: ShaderMask(
+            blendMode: BlendMode.srcATop,
+            shaderCallback: (bounds) {
+              return LinearGradient(
+                colors: [widget.baseColor, widget.baseColor],
+              ).createShader(bounds);
+            },
+            child: widget.child,
+          ),
+        );
+      },
     );
   }
 }

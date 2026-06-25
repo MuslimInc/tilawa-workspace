@@ -1,6 +1,6 @@
 # Quran Sessions — Code Quality Audit
 
-**Product:** Tilawa / تلاوة — Quran Sessions  
+**Product:** MeMuslim / أنا مسلم — Quran Sessions  
 **Audit date:** 2026-06-23  
 **Type:** Code quality (not blueprint) — read-only review of **actual source**  
 **Lineage:** `specs/031` (blueprint), `specs/032` (delivery), `specs/033` (current state)  

@@ -111,7 +111,7 @@ class _TilawaAppBarBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final Color backgroundColor = TilawaAppBarChrome.backgroundColor(
       colorScheme,
       surface,
@@ -281,7 +281,7 @@ class _TilawaSliverAppBarBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final Color backgroundColor = TilawaAppBarChrome.backgroundColor(
       colorScheme,
       surface,

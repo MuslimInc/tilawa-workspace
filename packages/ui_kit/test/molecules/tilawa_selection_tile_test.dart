@@ -33,7 +33,7 @@ void main() {
       );
       expect(
         constrainedBox.constraints.minHeight,
-        kTilawaMinInteractiveDimension,
+        kMeMuslimMinInteractiveDimension,
       );
     });
 

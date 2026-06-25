@@ -40,7 +40,7 @@ class TilawaAlphabetScrollbarTokens {
   /// Soft shadow under the drag bubble ([Colors.black] with calibrated alpha).
   final Color overlayShadowColor;
 
-  /// Blur radius for the overlay shadow (aligned with [TilawaDesignTokens.blurShadow]).
+  /// Blur radius for the overlay shadow (aligned with [MeMuslimDesignTokens.blurShadow]).
   final double overlayShadowBlur;
 
   final Offset overlayShadowOffset;
@@ -55,8 +55,8 @@ class TilawaAlphabetScrollbarTokens {
     ColorScheme colorScheme,
   ) {
     return TilawaAlphabetScrollbarTokens(
-      width: kTilawaMinInteractiveDimension,
-      itemExtent: kTilawaMinInteractiveDimension,
+      width: kMeMuslimMinInteractiveDimension,
+      itemExtent: kMeMuslimMinInteractiveDimension,
       selectedIndicatorExtent: 36,
       letterTextRole: TilawaTextRole.labelMedium,
       verticalPadding: EdgeInsets.zero,
@@ -348,10 +348,10 @@ class TilawaIconActionButtonTokens {
   final double inactiveBorderOpacity;
 
   factory TilawaIconActionButtonTokens.defaults() {
-    // Size = Tilawa hit-target floor (kTilawaMinInteractiveDimension, 48 dp).
+    // Size = Tilawa hit-target floor (kMeMuslimMinInteractiveDimension, 48 dp).
     // At the floor; do not shrink further.
     return const TilawaIconActionButtonTokens(
-      size: kTilawaMinInteractiveDimension,
+      size: kMeMuslimMinInteractiveDimension,
       activeBackgroundOpacity: 0.12,
       activeBorderOpacity: 0.35,
       inactiveBorderOpacity: 0.26,
@@ -444,7 +444,7 @@ class TilawaChipTokens {
   final EdgeInsetsGeometry inlinePadding;
   final Color backgroundColor;
 
-  /// Default stroke for [TilawaChip] / [TilawaMetadataChip] ([TilawaDesignTokens.opacityMedium] on [ColorScheme.outlineVariant]).
+  /// Default stroke for [TilawaChip] / [TilawaMetadataChip] ([MeMuslimDesignTokens.opacityMedium] on [ColorScheme.outlineVariant]).
   final Color defaultBorderColor;
 
   /// Catalog [TilawaSelectionPillStyle.catalog] selected fill/label.
@@ -864,7 +864,7 @@ class TilawaSeekBarTokens {
   factory TilawaSeekBarTokens.defaults() {
     // fix: Accessibility — Tilawa 48 dp touch strip for seek interaction.
     return const TilawaSeekBarTokens(
-      touchExtent: kTilawaMinInteractiveDimension,
+      touchExtent: kMeMuslimMinInteractiveDimension,
       horizontalMargin: 16,
       trackHeight: 8,
       thumbRadius: 12,
@@ -973,9 +973,10 @@ class TilawaSearchFieldTokens {
   }
 
   factory TilawaSearchFieldTokens.fromColorScheme(ColorScheme colorScheme) {
-    final TilawaDesignTokens tokens = colorScheme.brightness == Brightness.dark
-        ? TilawaDesignTokens.dark()
-        : TilawaDesignTokens.light();
+    final MeMuslimDesignTokens tokens =
+        colorScheme.brightness == Brightness.dark
+        ? MeMuslimDesignTokens.dark()
+        : MeMuslimDesignTokens.light();
     final backgroundColor = colorScheme.surface;
     const focusedBorderOpacity = 0.28;
     const unfocusedBorderOpacity = 0.26;
@@ -998,7 +999,7 @@ class TilawaSearchFieldTokens {
     );
     final prefixIconFocusedColor = colorScheme.onSurfaceVariant;
     return TilawaSearchFieldTokens(
-      height: kTilawaMinInteractiveDimension,
+      height: kMeMuslimMinInteractiveDimension,
       backgroundColor: backgroundColor,
       contentPadding: EdgeInsets.symmetric(vertical: tokens.spaceMedium),
       scrollPadding: EdgeInsets.all(tokens.spaceLarge),
@@ -2007,8 +2008,8 @@ class TilawaCupertinoWheelPickerTokens {
     ColorScheme colorScheme,
   ) {
     final design = colorScheme.brightness == Brightness.dark
-        ? TilawaDesignTokens.dark()
-        : TilawaDesignTokens.light();
+        ? MeMuslimDesignTokens.dark()
+        : MeMuslimDesignTokens.light();
     return TilawaCupertinoWheelPickerTokens(
       pickerHeight: 200,
       segmentGap: design.spaceSmall,

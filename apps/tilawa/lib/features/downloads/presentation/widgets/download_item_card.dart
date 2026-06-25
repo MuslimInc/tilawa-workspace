@@ -69,7 +69,7 @@ class _DismissBackground extends StatelessWidget {
   const _DismissBackground({required this.colorScheme, required this.tokens});
 
   final ColorScheme colorScheme;
-  final TilawaDesignTokens tokens;
+  final MeMuslimDesignTokens tokens;
 
   @override
   Widget build(BuildContext context) {

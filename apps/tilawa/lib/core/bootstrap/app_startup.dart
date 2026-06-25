@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart'
-    as localNotifications;
+    as local_notifications;
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa/core/bootstrap/app_bootstrapper.dart';
@@ -95,35 +95,35 @@ Future<void> _showIncomingCallNotification(RemoteMessage message) async {
   if (sessionId == null) return;
 
   final flutterLocalNotificationsPlugin =
-      localNotifications.FlutterLocalNotificationsPlugin();
+      local_notifications.FlutterLocalNotificationsPlugin();
   // We must re-initialize since this is a separate isolate
-  const localNotifications.AndroidInitializationSettings androidSettings =
-      localNotifications.AndroidInitializationSettings(
+  const local_notifications.AndroidInitializationSettings androidSettings =
+      local_notifications.AndroidInitializationSettings(
         'ic_launcher_monochrome',
       );
-  const localNotifications.InitializationSettings initSettings =
-      localNotifications.InitializationSettings(
+  const local_notifications.InitializationSettings initSettings =
+      local_notifications.InitializationSettings(
         android: androidSettings,
       );
   await flutterLocalNotificationsPlugin.initialize(
     settings: initSettings,
   );
 
-  final androidDetails = localNotifications.AndroidNotificationDetails(
+  final androidDetails = local_notifications.AndroidNotificationDetails(
     'quran_session_calls',
     'Incoming Calls',
     channelDescription: 'Incoming Quran Session calls',
-    importance: localNotifications.Importance.max,
-    priority: localNotifications.Priority.max,
+    importance: local_notifications.Importance.max,
+    priority: local_notifications.Priority.max,
     fullScreenIntent: true,
-    category: localNotifications.AndroidNotificationCategory.call,
-    actions: <localNotifications.AndroidNotificationAction>[
-      localNotifications.AndroidNotificationAction(
+    category: local_notifications.AndroidNotificationCategory.call,
+    actions: <local_notifications.AndroidNotificationAction>[
+      local_notifications.AndroidNotificationAction(
         'accept_call',
         'Join',
         titleColor: Color(0xFF4CAF50),
       ),
-      localNotifications.AndroidNotificationAction(
+      local_notifications.AndroidNotificationAction(
         'decline_call',
         'Decline',
         titleColor: Color(0xFFF44336),
@@ -131,7 +131,7 @@ Future<void> _showIncomingCallNotification(RemoteMessage message) async {
     ],
   );
 
-  final platformDetails = localNotifications.NotificationDetails(
+  final platformDetails = local_notifications.NotificationDetails(
     android: androidDetails,
   );
 

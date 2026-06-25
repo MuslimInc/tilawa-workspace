@@ -171,8 +171,8 @@ class TilawaChip extends StatelessWidget {
           heightFactor: 1,
           child: ConstrainedBox(
             constraints: const BoxConstraints(
-              minWidth: kTilawaMinInteractiveDimension,
-              minHeight: kTilawaMinInteractiveDimension,
+              minWidth: kMeMuslimMinInteractiveDimension,
+              minHeight: kMeMuslimMinInteractiveDimension,
             ),
             child: paintedChip,
           ),

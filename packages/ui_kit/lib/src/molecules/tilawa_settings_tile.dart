@@ -22,7 +22,7 @@ BorderRadius _resolveSettingsTileBorderRadius(
 
 EdgeInsetsGeometry _settingsListRowPadding(
   BuildContext context,
-  TilawaDesignTokens designTokens,
+  MeMuslimDesignTokens designTokens,
 ) {
   return EdgeInsetsDirectional.only(
     start: designTokens.spaceSmall,

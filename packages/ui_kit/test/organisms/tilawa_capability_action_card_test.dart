@@ -92,7 +92,7 @@ void main() {
       final Size cardSize = tester.getSize(
         find.byType(TilawaCapabilityActionCard),
       );
-      check(cardSize.height >= kTilawaMinInteractiveDimension).isTrue();
+      check(cardSize.height >= kMeMuslimMinInteractiveDimension).isTrue();
     });
 
     testWidgets('Arabic copy does not clip in RTL layout', (
@@ -255,7 +255,7 @@ void main() {
       final Size cardSize = tester.getSize(
         find.byType(TilawaCapabilityActionCardSkeleton),
       );
-      check(cardSize.height >= kTilawaMinInteractiveDimension).isTrue();
+      check(cardSize.height >= kMeMuslimMinInteractiveDimension).isTrue();
     });
 
     testWidgets('hides badge bone when showBadge is false', (

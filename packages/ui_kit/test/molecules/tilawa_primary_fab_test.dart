@@ -70,8 +70,8 @@ void main() {
           theme: ThemeData(
             colorScheme: colorScheme,
             extensions: [
-              TilawaDesignTokens.light(),
-              TilawaComponentTokens.light(colorScheme: colorScheme),
+              MeMuslimDesignTokens.light(),
+              MeMuslimComponentTokens.light(colorScheme: colorScheme),
             ],
           ),
           home: Scaffold(

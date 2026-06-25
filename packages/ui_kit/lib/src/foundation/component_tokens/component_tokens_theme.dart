@@ -6,8 +6,8 @@ import 'molecules_tokens.dart';
 import 'organisms_tokens.dart';
 
 @immutable
-class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
-  const TilawaComponentTokens({
+class MeMuslimComponentTokens extends ThemeExtension<MeMuslimComponentTokens> {
+  const MeMuslimComponentTokens({
     required this.sectionTitle,
     required this.sheetHandle,
     required this.card,
@@ -72,20 +72,20 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
   final TilawaCupertinoWheelPickerTokens cupertinoWheelPicker;
 
   /// Creates light theme component tokens.
-  factory TilawaComponentTokens.light({ColorScheme? colorScheme}) =>
-      TilawaComponentTokens._create(
+  factory MeMuslimComponentTokens.light({ColorScheme? colorScheme}) =>
+      MeMuslimComponentTokens._create(
         brightness: Brightness.light,
         colorScheme: colorScheme,
       );
 
-  factory TilawaComponentTokens.dark({ColorScheme? colorScheme}) =>
-      TilawaComponentTokens._create(
+  factory MeMuslimComponentTokens.dark({ColorScheme? colorScheme}) =>
+      MeMuslimComponentTokens._create(
         brightness: Brightness.dark,
         colorScheme: colorScheme,
       );
 
   /// Internal factory for creating tokens with the given brightness.
-  factory TilawaComponentTokens._create({
+  factory MeMuslimComponentTokens._create({
     required Brightness brightness,
     ColorScheme? colorScheme,
   }) {
@@ -95,7 +95,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
           seedColor: AppColors.defaultPrimary,
           brightness: brightness,
         );
-    return TilawaComponentTokens(
+    return MeMuslimComponentTokens(
       sectionTitle: TilawaSectionTitleTokens.defaults(),
       sheetHandle: TilawaSheetHandleTokens.defaults(),
       card: TilawaCardTokens.defaults(),
@@ -152,7 +152,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
   }
 
   @override
-  TilawaComponentTokens copyWith({
+  MeMuslimComponentTokens copyWith({
     TilawaSectionTitleTokens? sectionTitle,
     TilawaSheetHandleTokens? sheetHandle,
     TilawaCardTokens? card,
@@ -184,7 +184,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     TilawaExperimentalBadgeTokens? experimentalBadge,
     TilawaCupertinoWheelPickerTokens? cupertinoWheelPicker,
   }) {
-    return TilawaComponentTokens(
+    return MeMuslimComponentTokens(
       sectionTitle: sectionTitle ?? this.sectionTitle,
       sheetHandle: sheetHandle ?? this.sheetHandle,
       card: card ?? this.card,
@@ -219,12 +219,12 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
   }
 
   @override
-  TilawaComponentTokens lerp(
-    ThemeExtension<TilawaComponentTokens>? other,
+  MeMuslimComponentTokens lerp(
+    ThemeExtension<MeMuslimComponentTokens>? other,
     double t,
   ) {
-    if (other is! TilawaComponentTokens) return this;
-    return TilawaComponentTokens(
+    if (other is! MeMuslimComponentTokens) return this;
+    return MeMuslimComponentTokens(
       sectionTitle: TilawaSectionTitleTokens.lerp(
         sectionTitle,
         other.sectionTitle,
@@ -343,18 +343,18 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
   }
 }
 
-extension TilawaComponentTokensX on ThemeData {
+extension MeMuslimComponentTokensX on ThemeData {
   /// Resolves kit tokens from [ThemeExtension], or rebuilds them from
   /// [colorScheme] when a subtree uses a partial [ThemeData] that omits the
   /// extension (common with nested [Theme] wrappers). Avoids falling back to
   /// [ColorScheme.fromSeed] with [AppColors.defaultPrimary], which ignores the
   /// active user primary and refined surfaces.
-  TilawaComponentTokens get componentTokens {
-    final TilawaComponentTokens? ext = extension<TilawaComponentTokens>();
+  MeMuslimComponentTokens get componentTokens {
+    final MeMuslimComponentTokens? ext = extension<MeMuslimComponentTokens>();
     if (ext != null) return ext;
 
     return colorScheme.brightness == Brightness.dark
-        ? TilawaComponentTokens.dark(colorScheme: colorScheme)
-        : TilawaComponentTokens.light(colorScheme: colorScheme);
+        ? MeMuslimComponentTokens.dark(colorScheme: colorScheme)
+        : MeMuslimComponentTokens.light(colorScheme: colorScheme);
   }
 }

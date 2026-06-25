@@ -422,7 +422,7 @@ class _BottomNavBarState extends State<_BottomNavBar>
   }
 
   void _startLongPressSession(int index) {
-    final TilawaDesignTokens designTokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens designTokens = Theme.of(context).tokens;
     final int count = widget.destinations.length;
     _longPressController.duration = designTokens.durationMedium;
     setState(() {
@@ -602,7 +602,7 @@ class _BottomNavBarState extends State<_BottomNavBar>
         theme.componentTokens.adaptiveShell;
     final TilawaBottomSheetScaffoldTokens sheetTokens =
         theme.componentTokens.bottomSheetScaffold;
-    final TilawaDesignTokens designTokens = theme.tokens;
+    final MeMuslimDesignTokens designTokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
     final double hitSize = tokens.navButtonIconOnlyMinHeight;
     final double barHeight = hitSize + (2 * tokens.bottomNavInternalPadding);
@@ -837,8 +837,6 @@ class _BottomNavBarState extends State<_BottomNavBar>
                                               widget.selectedIndex == i,
                                           onTap: () =>
                                               _notifyDestinationSelected(i),
-                                          onLongPress: () =>
-                                              _startLongPressSession(i),
                                           pulseAnimation: _pulsingIndex == i
                                               ? _pulseAnimation
                                               : null,
@@ -1066,7 +1064,7 @@ class _RadialNavOverlay extends StatelessWidget {
   final double hitSize;
   final double radialRadius;
   final TilawaAdaptiveShellTokens tokens;
-  final TilawaDesignTokens designTokens;
+  final MeMuslimDesignTokens designTokens;
   final ColorScheme colorScheme;
 
   @override
@@ -1160,7 +1158,7 @@ class _VerticalNavOverlay extends StatelessWidget {
   final double hitSize;
   final double itemStride;
   final TilawaAdaptiveShellTokens tokens;
-  final TilawaDesignTokens designTokens;
+  final MeMuslimDesignTokens designTokens;
   final ColorScheme colorScheme;
 
   @override
@@ -1250,7 +1248,7 @@ class _LongPressNavItem extends StatelessWidget {
   final bool showFocusedLabel;
   final TilawaAdaptiveShellTokens tokens;
   final ColorScheme colorScheme;
-  final TilawaDesignTokens designTokens;
+  final MeMuslimDesignTokens designTokens;
 
   @override
   Widget build(BuildContext context) {
@@ -1332,15 +1330,14 @@ class _NavButton extends StatelessWidget {
     required this.destination,
     required this.isSelected,
     required this.onTap,
-    required this.onLongPress,
     this.pulseAnimation,
     this.pulseKey,
-  });
+  }) : onLongPress = null;
 
   final TilawaNavDestination destination;
   final bool isSelected;
   final VoidCallback onTap;
-  final VoidCallback onLongPress;
+  final VoidCallback? onLongPress;
 
   /// Non-null only when a programmatic index change just selected this item.
   final Animation<double>? pulseAnimation;

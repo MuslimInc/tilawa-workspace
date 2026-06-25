@@ -57,8 +57,8 @@ void main() {
       final context = tester.element(find.byKey(const Key('theme_probe')));
       final theme = Theme.of(context);
 
-      expect(theme.extension<TilawaDesignTokens>(), isNotNull);
-      expect(theme.extension<TilawaComponentTokens>(), isNotNull);
+      expect(theme.extension<MeMuslimDesignTokens>(), isNotNull);
+      expect(theme.extension<MeMuslimComponentTokens>(), isNotNull);
       expect(theme.scaffoldBackgroundColor, AppColors.lightCanvas);
       expect(theme.tokens.spaceMedium, 12.0);
     });

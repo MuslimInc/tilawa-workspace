@@ -45,6 +45,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeGreeting => 'السلام عليكم';
 
   @override
+  String get homeInspirationTitle => 'إلهام اليوم';
+
+  @override
+  String get homeInspirationSubtitle => 'لحظة تدبر';
+
+  @override
   String homeGreetingName(String name) {
     return 'السلام عليكم، $name';
   }
@@ -94,7 +100,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeKhatmaCarouselSubtitle => 'تابع خطة قراءتك';
 
   @override
-  String get homeSupportCarouselSubtitle => 'ساهم في بقاء تلاوة مجانية للجميع';
+  String get homeSupportCarouselSubtitle =>
+      'ساهم في إبقاء أنا مسلم مجانياً للجميع';
 
   @override
   String get homeHistoryCarouselSubtitle => 'تابع من حيث توقفت';
@@ -1075,7 +1082,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get signIn => 'تسجيل الدخول';
 
   @override
-  String get welcomeToApp => 'مرحباً بك في تلاوة';
+  String get welcomeToApp => 'مرحباً بك في أنا مسلم';
 
   @override
   String get signInWithGoogleDescription => 'سجل الدخول بحساب جوجل للمتابعة';
@@ -1284,7 +1291,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get deleteAccountConfirmation =>
-      'سيؤدي هذا إلى حذف حسابك في تلاوة وبيانات ملفك المتزامنة نهائياً. قد نحتفظ بسجلات مشتريات مجهولة للوقاية من الاحتيال. لا يمكن التراجع عن هذا الإجراء.';
+      'سيؤدي هذا إلى حذف حسابك في أنا مسلم وبيانات ملفك المتزامنة نهائياً. قد نحتفظ بسجلات مشتريات مجهولة للوقاية من الاحتيال. لا يمكن التراجع عن هذا الإجراء.';
 
   @override
   String get deleteAccountFailed => 'تعذّر حذف حسابك. يرجى المحاولة مرة أخرى.';
@@ -2372,7 +2379,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get sharing => 'جاري المشاركة...';
 
   @override
-  String get sharedViaTilawa => 'تمت المشاركة عبر تلاوة';
+  String get sharedViaTilawa => 'تمت المشاركة عبر أنا مسلم';
 
   @override
   String get reciterNotAvailable =>
@@ -2629,7 +2636,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get oemAutostartHint =>
-      'في هذا الجهاز، فعّل أيضاً التشغيل التلقائي لتطبيق تلاوة من إعدادات الهاتف حتى لا تتوقف التذكيرات في الخلفية.';
+      'في هذا الجهاز، فعّل أيضاً التشغيل التلقائي لتطبيق أنا مسلم من إعدادات الهاتف حتى لا تتوقف التذكيرات في الخلفية.';
 
   @override
   String get prayerAlertsPermissionLocationTitle => 'الموقع';
@@ -2657,14 +2664,14 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get prayerAlertsPermissionBatteryBody =>
-      'استثنِ تلاوة من تحسين البطارية حتى لا تتأخر تذكيرات الصلاة ليلاً.';
+      'استثنِ أنا مسلم من تحسين البطارية حتى لا تتأخر تذكيرات الصلاة ليلاً.';
 
   @override
   String get prayerAlertsPermissionOemAutostartTitle => 'العمل في الخلفية';
 
   @override
   String get prayerAlertsPermissionOemAutostartBody =>
-      'في هذا الجهاز، فعّل التشغيل التلقائي لتلاوة من إعدادات الهاتف حتى لا تتوقف التذكيرات في الخلفية.';
+      'في هذا الجهاز، فعّل التشغيل التلقائي لتطبيق أنا مسلم من إعدادات الهاتف حتى لا تتوقف التذكيرات في الخلفية.';
 
   @override
   String get prayerAlertsPermissionAllow => 'السماح';
@@ -2798,16 +2805,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String get moreOptions => 'المزيد';
 
   @override
-  String get supportTilawa => 'ادعم تلاوة';
+  String get homeMoreOptionsSubtitle => 'المكتبة والمفضلة والمزيد';
 
   @override
-  String get rateTilawa => 'قيّم تلاوة';
+  String get supportTilawa => 'ادعم أنا مسلم';
+
+  @override
+  String get rateTilawa => 'قيّم أنا مسلم';
 
   @override
   String get rateTilawaSubtitle => 'شاركنا رأيك في متجر التطبيقات.';
 
   @override
-  String get shareTilawa => 'شارك تلاوة';
+  String get shareTilawa => 'شارك أنا مسلم';
 
   @override
   String shareTilawaMessage(String appName, String storeUrl) {
@@ -2818,13 +2828,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get shareTilawaFailed => 'تعذر فتح نافذة المشاركة. حاول مرة أخرى.';
 
   @override
-  String get supportIntroLine => 'مشاركتك تساعدنا على استمرار تلاوة.';
+  String get supportIntroLine => 'مشاركتك تساعدنا على استمرار أنا مسلم.';
 
   @override
-  String get supportTilawaSubtitle => 'مشاركتك تساعدنا على استمرار تلاوة.';
+  String get supportTilawaSubtitle => 'مشاركتك تساعدنا على استمرار أنا مسلم.';
 
   @override
-  String get supportMissionBody => 'مشاركتك تساعدنا على استمرار تلاوة.';
+  String get supportMissionBody => 'مشاركتك تساعدنا على استمرار أنا مسلم.';
 
   @override
   String get supportImpactWhyTitle => 'لماذا؟';
@@ -2864,7 +2874,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get supportConfirmationBody =>
-      'يتم الدفع عبر Google Play. تلاوة لا يحتفظ ببيانات بطاقتك.';
+      'يتم الدفع عبر Google Play. أنا مسلم لا يحتفظ ببيانات بطاقتك.';
 
   @override
   String get supportConfirm => 'متابعة';
@@ -2946,7 +2956,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get supportSelectTier => 'اختر المبلغ';
 
   @override
-  String get supportSettingsGroupTitle => 'ادعم تلاوة';
+  String get supportSettingsGroupTitle => 'ادعم أنا مسلم';
 
   @override
   String get supportHelpKeepFree => 'اختياري';
@@ -2983,7 +2993,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'تقييمات المتجر غير مدعومة على هذه المنصة.';
 
   @override
-  String get a11ySplashLoading => 'تلاوة، جارٍ التحميل';
+  String get a11ySplashLoading => 'أنا مسلم، جارٍ التحميل';
 
   @override
   String get splashSlowLoadingNotice => 'قد يستغرق بعض المحتوى لحظة للتحميل';
@@ -3048,11 +3058,11 @@ class AppLocalizationsAr extends AppLocalizations {
       'تم تنزيل التحديث. أعد التشغيل عندما تكون مستعدًا للتثبيت.';
 
   @override
-  String get inAppUpdateOptionalMessage => 'يتوفر إصدار جديد من تلاوة.';
+  String get inAppUpdateOptionalMessage => 'يتوفر إصدار جديد من أنا مسلم.';
 
   @override
   String get inAppUpdateRequiredMessage =>
-      'يلزم التحديث لمتابعة استخدام تلاوة.';
+      'يلزم التحديث لمتابعة استخدام أنا مسلم.';
 
   @override
   String get inAppUpdateRestartAction => 'إعادة التشغيل';

@@ -32,7 +32,7 @@ class TilawaBottomActionInset extends StatelessWidget {
   /// Space above [child], e.g. offset within a thumb-reach action band.
   final double top;
 
-  /// Horizontal inset; defaults to [TilawaDesignTokens.bottomActionHorizontalInset].
+  /// Horizontal inset; defaults to [MeMuslimDesignTokens.bottomActionHorizontalInset].
   final double? horizontal;
 
   /// Minimum bottom spacing when the device reports no system inset.
@@ -49,7 +49,7 @@ class TilawaBottomActionInset extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     Widget content = child;
 
     if (maxWidthKind != null) {
@@ -76,7 +76,7 @@ class TilawaBottomActionInset extends StatelessWidget {
     );
   }
 
-  double _resolveBottom(BuildContext context, TilawaDesignTokens tokens) {
+  double _resolveBottom(BuildContext context, MeMuslimDesignTokens tokens) {
     if (keyboardAware) {
       return context.keyboardAwareBottomPadding;
     }

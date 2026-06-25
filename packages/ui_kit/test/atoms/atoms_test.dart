@@ -11,7 +11,10 @@ import '../../lib/src/foundation/design_tokens.dart';
 Widget _wrap(Widget child) {
   return MaterialApp(
     theme: ThemeData(
-      extensions: [TilawaDesignTokens.light(), TilawaComponentTokens.light()],
+      extensions: [
+        MeMuslimDesignTokens.light(),
+        MeMuslimComponentTokens.light(),
+      ],
     ),
     home: Scaffold(body: child),
   );
@@ -383,9 +386,9 @@ void main() {
     });
   });
 
-  group('New tokens in TilawaComponentTokens', () {
+  group('New tokens in MeMuslimComponentTokens', () {
     test('light() includes all new tokens', () {
-      final tokens = TilawaComponentTokens.light();
+      final tokens = MeMuslimComponentTokens.light();
       expect(tokens.card, isNotNull);
       expect(tokens.iconBox, isNotNull);
       expect(tokens.loadingIndicator, isNotNull);
@@ -394,7 +397,7 @@ void main() {
     });
 
     test('copyWith updates card tokens', () {
-      final original = TilawaComponentTokens.light();
+      final original = MeMuslimComponentTokens.light();
       final newCard = original.card.copyWith(borderWidth: 1.0);
       final updated = original.copyWith(card: newCard);
       expect(updated.card.borderWidth, 1.0);
@@ -402,8 +405,8 @@ void main() {
     });
 
     test('lerp interpolates new tokens', () {
-      final first = TilawaComponentTokens.light();
-      final second = TilawaComponentTokens.dark();
+      final first = MeMuslimComponentTokens.light();
+      final second = MeMuslimComponentTokens.dark();
       final lerped = first.lerp(second, 0.5);
       expect(lerped.card, isNotNull);
       expect(lerped.iconBox, isNotNull);

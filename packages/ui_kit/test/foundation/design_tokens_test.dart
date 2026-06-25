@@ -3,8 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa_ui_kit/src/foundation/foundation.dart';
 
 void main() {
-  group('TilawaDesignTokens', () {
-    const defaultTokens = TilawaDesignTokens(
+  group('MeMuslimDesignTokens', () {
+    const defaultTokens = MeMuslimDesignTokens(
       spaceTiny: 2.0,
       spaceExtraSmall: 4.0,
       spaceSmall: 8.0,
@@ -66,7 +66,7 @@ void main() {
 
     group('factory constructors', () {
       test('light() creates correct default values', () {
-        final light = TilawaDesignTokens.light();
+        final light = MeMuslimDesignTokens.light();
         expect(light.spaceExtraSmall, 4.0);
         expect(light.spaceSmall, 8.0);
         expect(light.spaceMedium, 12.0);
@@ -97,7 +97,7 @@ void main() {
         expect(light.iconSizeExtraLarge, 44.0);
         expect(
           light.minInteractiveDimension,
-          kTilawaMinInteractiveDimension,
+          kMeMuslimMinInteractiveDimension,
         );
         expect(light.textHeightLoose, 2.0);
         expect(light.durationFast, const Duration(milliseconds: 200));
@@ -114,8 +114,8 @@ void main() {
       });
 
       test('dark() returns same as light()', () {
-        final dark = TilawaDesignTokens.dark();
-        final light = TilawaDesignTokens.light();
+        final dark = MeMuslimDesignTokens.dark();
+        final light = MeMuslimDesignTokens.light();
         expect(dark.spaceExtraSmall, light.spaceExtraSmall);
         expect(dark.spaceSmall, light.spaceSmall);
         expect(dark.radiusSmall, light.radiusSmall);
@@ -203,7 +203,7 @@ void main() {
 
     group('lerp()', () {
       test('returns first value at t=0', () {
-        const first = TilawaDesignTokens(
+        const first = MeMuslimDesignTokens(
           spaceTiny: 2.0,
           spaceExtraSmall: 4.0,
           spaceSmall: 8.0,
@@ -262,7 +262,7 @@ void main() {
           focusRingWidth: 2.0,
           dropdownMenuGap: 4.0,
         );
-        const second = TilawaDesignTokens(
+        const second = MeMuslimDesignTokens(
           spaceTiny: 4.0,
           spaceExtraSmall: 8.0,
           spaceSmall: 16.0,
@@ -329,8 +329,8 @@ void main() {
       });
 
       test('returns second value at t=1', () {
-        final first = TilawaDesignTokens.light();
-        const second = TilawaDesignTokens(
+        final first = MeMuslimDesignTokens.light();
+        const second = MeMuslimDesignTokens(
           spaceTiny: 4.0,
           spaceExtraSmall: 8.0,
           spaceSmall: 16.0,
@@ -396,7 +396,7 @@ void main() {
       });
 
       test('returns middle value at t=0.5', () {
-        const first = TilawaDesignTokens(
+        const first = MeMuslimDesignTokens(
           spaceTiny: 2.0,
           spaceExtraSmall: 4.0,
           spaceSmall: 8.0,
@@ -455,7 +455,7 @@ void main() {
           focusRingWidth: 2.0,
           dropdownMenuGap: 4.0,
         );
-        const second = TilawaDesignTokens(
+        const second = MeMuslimDesignTokens(
           spaceTiny: 4.0,
           spaceExtraSmall: 8.0,
           spaceSmall: 16.0,
@@ -526,8 +526,8 @@ void main() {
       });
 
       test('interpolates Offset values', () {
-        final first = TilawaDesignTokens.light();
-        const second = TilawaDesignTokens(
+        final first = MeMuslimDesignTokens.light();
+        const second = MeMuslimDesignTokens(
           spaceTiny: 4.0,
           spaceExtraSmall: 4.0,
           spaceSmall: 8.0,
@@ -594,7 +594,7 @@ void main() {
       test(
         'handles Duration differently (discrete at t<0.5 returns first)',
         () {
-          const first = TilawaDesignTokens(
+          const first = MeMuslimDesignTokens(
             spaceTiny: 4.0,
             spaceExtraSmall: 4.0,
             spaceSmall: 8.0,
@@ -653,7 +653,7 @@ void main() {
             focusRingWidth: 2.0,
             dropdownMenuGap: 4.0,
           );
-          const second = TilawaDesignTokens(
+          const second = MeMuslimDesignTokens(
             spaceTiny: 4.0,
             spaceExtraSmall: 8.0,
             spaceSmall: 16.0,
@@ -718,18 +718,18 @@ void main() {
         },
       );
 
-      test('returns self when other is not TilawaDesignTokens', () {
-        final tokens = TilawaDesignTokens.light();
+      test('returns self when other is not MeMuslimDesignTokens', () {
+        final tokens = MeMuslimDesignTokens.light();
         final result = tokens.lerp(null, 0.5);
         expect(result.spaceExtraSmall, tokens.spaceExtraSmall);
       });
     });
 
-    group('TilawaDesignTokensX extension', () {
+    group('MeMuslimDesignTokensX extension', () {
       testWidgets('can access tokens from ThemeData', (
         WidgetTester tester,
       ) async {
-        final tokens = TilawaDesignTokens.light();
+        final tokens = MeMuslimDesignTokens.light();
         final theme = ThemeData(extensions: [tokens]);
 
         await tester.pumpWidget(
@@ -748,11 +748,11 @@ void main() {
       });
     });
 
-    group('TilawaIconSizeX extension', () {
+    group('MeMuslimIconSizeX extension', () {
       testWidgets('exposes icon size steps including largePlus', (
         WidgetTester tester,
       ) async {
-        final tokens = TilawaDesignTokens.light();
+        final tokens = MeMuslimDesignTokens.light();
         final theme = ThemeData(extensions: [tokens]);
 
         await tester.pumpWidget(
@@ -764,7 +764,7 @@ void main() {
                 expect(context.iconSizeLargePlus, 42.0);
                 expect(
                   context.minInteractiveDimension,
-                  kTilawaMinInteractiveDimension,
+                  kMeMuslimMinInteractiveDimension,
                 );
                 return const SizedBox.shrink();
               },
@@ -776,13 +776,13 @@ void main() {
 
     group('lerpDouble helper', () {
       test('properly interpolates double values', () {
-        final tokens = TilawaDesignTokens.light();
+        final tokens = MeMuslimDesignTokens.light();
         final lerped = tokens.lerpDouble(4.0, 8.0, 0.5);
         expect(lerped, 6.0);
       });
 
       test('handles null values by treating as 0', () {
-        final tokens = TilawaDesignTokens.light();
+        final tokens = MeMuslimDesignTokens.light();
         final result1 = tokens.lerpDouble(null, 10.0, 0.5);
         expect(result1, 5.0);
 
@@ -791,15 +791,15 @@ void main() {
       });
 
       test('handles both null values', () {
-        final tokens = TilawaDesignTokens.light();
+        final tokens = MeMuslimDesignTokens.light();
         final result = tokens.lerpDouble(null, null, 0.5);
         expect(result, isNull);
       });
     });
 
-    group('TilawaRadiusResolverX', () {
+    group('MeMuslimRadiusResolverX', () {
       test('semantic radius aliases map to token caps', () {
-        final tokens = TilawaDesignTokens.light();
+        final tokens = MeMuslimDesignTokens.light();
         expect(tokens.radiusCard, 24.0);
         expect(tokens.radiusSection, 24.0);
         expect(tokens.radiusPill(48), 24.0);
@@ -807,7 +807,7 @@ void main() {
       });
 
       test('resolveRadius returns fixed family tokens', () {
-        final tokens = TilawaDesignTokens.light();
+        final tokens = MeMuslimDesignTokens.light();
         expect(
           tokens.resolveRadius(family: TilawaRadiusFamily.card),
           12.0,
@@ -851,7 +851,7 @@ void main() {
       });
 
       test('resolveRadius uses height for pill affordances', () {
-        final tokens = TilawaDesignTokens.light();
+        final tokens = MeMuslimDesignTokens.light();
         expect(
           tokens.resolveRadius(
             family: TilawaRadiusFamily.pill,
@@ -869,7 +869,7 @@ void main() {
       });
 
       test('buttonBorderRadius and buttonShape use pill family', () {
-        final tokens = TilawaDesignTokens.light();
+        final tokens = MeMuslimDesignTokens.light();
         expect(tokens.buttonBorderRadius(), 24.0);
         expect(tokens.buttonBorderRadius(height: 56), 28.0);
         expect(
@@ -879,7 +879,7 @@ void main() {
       });
 
       test('materialButtonStyle applies pill shape and min touch target', () {
-        final tokens = TilawaDesignTokens.light();
+        final tokens = MeMuslimDesignTokens.light();
         final style = tokens.materialButtonStyle();
         final shape = style.shape!.resolve(const {})! as RoundedRectangleBorder;
         final size = style.minimumSize!.resolve(const {});
@@ -889,7 +889,7 @@ void main() {
       });
 
       test('resolveSegmentedControlRadii uses chrome track by default', () {
-        final tokens = TilawaDesignTokens.light();
+        final tokens = MeMuslimDesignTokens.light();
         final radii = tokens.resolveSegmentedControlRadii(
           itemHeight: 32,
           containerPadding: 4,
@@ -901,7 +901,7 @@ void main() {
       test(
         'resolveSegmentedControlRadii uses pill track height when requested',
         () {
-          final tokens = TilawaDesignTokens.light();
+          final tokens = MeMuslimDesignTokens.light();
           final radii = tokens.resolveSegmentedControlRadii(
             itemHeight: 32,
             containerPadding: 4,

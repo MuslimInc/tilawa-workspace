@@ -4,7 +4,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 void main() {
   final ThemeData theme = ThemeData(
-    extensions: [TilawaDesignTokens.light()],
+    extensions: [MeMuslimDesignTokens.light()],
   );
 
   Future<void> pumpLayout(
@@ -52,7 +52,8 @@ void main() {
         matching: find.byType(TextButton),
       ),
     );
-    final double inset = TilawaDesignTokens.light().bottomActionHorizontalInset;
+    final double inset =
+        MeMuslimDesignTokens.light().bottomActionHorizontalInset;
 
     expect(button.left, closeTo(inset, 1));
     expect(screen.width - button.right, closeTo(inset, 1));

@@ -305,7 +305,7 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-    final TilawaProductColors product = theme.productColors;
+    final MeMuslimProductColors product = theme.productColors;
     final ColorScheme loginScheme = colorScheme.copyWith(
       primary: product.brandLockedPrimary,
       onPrimary: product.brandLockedOnPrimary,
@@ -364,7 +364,7 @@ class _LoginHeroContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
 
     return Padding(
@@ -466,7 +466,7 @@ class _LoginGoogleSignInActionsState extends State<_LoginGoogleSignInActions>
 
   @override
   Widget build(BuildContext context) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -526,7 +526,7 @@ class _LoginLegalFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
 
     final ColorScheme colorScheme = theme.colorScheme;
 

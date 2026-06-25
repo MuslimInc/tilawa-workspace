@@ -13,7 +13,7 @@ class HomeDashboardContentSliver extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-    final TilawaDesignTokens tokens = context.tokens;
+    final MeMuslimDesignTokens tokens = context.tokens;
     // Soft grey canvas between premium section shells (Money Loop rhythm).
     final Color sheetColor = colorScheme.surfaceContainerLow;
     final double topPadding = tokens.spaceSmall;
@@ -25,10 +25,10 @@ class HomeDashboardContentSliver extends StatelessWidget {
           boxShadow: <BoxShadow>[
             BoxShadow(
               color: colorScheme.shadow.withValues(
-                alpha: tokens.opacityShadow * 0.35,
+                alpha: tokens.opacityShadow * 0.65,
               ),
-              blurRadius: tokens.blurShadow * 0.5,
-              offset: Offset(0, tokens.shadowOffsetSmall.dy * -0.25),
+              blurRadius: tokens.blurShadow,
+              offset: Offset(0, tokens.shadowOffsetSmall.dy * -0.5),
             ),
           ],
         ),

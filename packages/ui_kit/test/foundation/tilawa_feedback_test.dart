@@ -308,8 +308,8 @@ void main() {
       );
       check(undoButton.style?.minimumSize?.resolve({})).equals(
         const Size(
-          kTilawaMinInteractiveDimension,
-          kTilawaMinInteractiveDimension,
+          kMeMuslimMinInteractiveDimension,
+          kMeMuslimMinInteractiveDimension,
         ),
       );
 

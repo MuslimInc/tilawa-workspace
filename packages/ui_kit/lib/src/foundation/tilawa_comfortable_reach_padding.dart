@@ -26,7 +26,7 @@ abstract final class TilawaComfortableReachPadding {
     BuildContext context, {
     TilawaComfortableReachKind kind = TilawaComfortableReachKind.screen,
   }) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
 
     return switch (kind) {
       TilawaComfortableReachKind.floating => context.floatingBottomPadding,
@@ -42,7 +42,7 @@ abstract final class TilawaComfortableReachPadding {
     BuildContext context, {
     double keyboardBuffer = 0,
   }) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     return keyboardBuffer > 0 ? keyboardBuffer : tokens.spaceSmall;
   }
 
@@ -80,7 +80,7 @@ abstract final class TilawaComfortableReachPadding {
     bool keyboardAware = true,
     double keyboardBuffer = 0,
   }) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
 
     if (context.isKeyboardVisible) {
       if (keyboardAware) {

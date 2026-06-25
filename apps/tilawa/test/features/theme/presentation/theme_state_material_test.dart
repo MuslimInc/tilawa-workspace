@@ -83,8 +83,8 @@ void main() {
       const state = ThemeState(mode: AppThemeMode.light);
       final theme = AppTheme.getLightTheme(primaryColor: state.primaryColor);
 
-      expect(theme.extension<TilawaDesignTokens>(), isNotNull);
-      expect(theme.extension<TilawaComponentTokens>(), isNotNull);
+      expect(theme.extension<MeMuslimDesignTokens>(), isNotNull);
+      expect(theme.extension<MeMuslimComponentTokens>(), isNotNull);
       expect(theme.colorScheme.brightness, Brightness.light);
     });
 

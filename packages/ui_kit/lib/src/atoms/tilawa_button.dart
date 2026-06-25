@@ -58,12 +58,12 @@ enum TilawaButtonSize {
 ///
 /// [TilawaButton] handles its own internal layout, including icons and
 /// loading indicators, while ensuring a minimum touch target of 48×48
-/// ([kTilawaMinInteractiveDimension]).
+/// ([kMeMuslimMinInteractiveDimension]).
 ///
 /// ## Touch-target contract
 ///
 /// All non-shrink-wrapped buttons are forced to ≥ 48×48
-/// ([kTilawaMinInteractiveDimension]) regardless of [size] — a `small`
+/// ([kMeMuslimMinInteractiveDimension]) regardless of [size] — a `small`
 /// (32 dp visual) button still gets a 48 dp hit target via an outer
 /// [ConstrainedBox]. [shrinkWrapTapTarget] is the **only** way to drop below
 /// 48 dp and is reserved for *inline text-link* actions where 48 dp would
@@ -149,7 +149,7 @@ class TilawaButton extends StatelessWidget {
   /// Merged on top of the built-in label [TextStyle] (font size from [size]).
   final TextStyle? textStyle;
 
-  /// When true, skips the 48×48 minimum ([kTilawaMinInteractiveDimension])
+  /// When true, skips the 48×48 minimum ([kMeMuslimMinInteractiveDimension])
   /// and uses a shrink-wrapped tap target ([MaterialTapTargetSize.shrinkWrap]).
   final bool shrinkWrapTapTarget;
 
@@ -181,7 +181,7 @@ class TilawaButton extends StatelessWidget {
           color: resolvedFg,
         );
 
-    final designTokens = theme.extension<TilawaDesignTokens>();
+    final designTokens = theme.extension<MeMuslimDesignTokens>();
     // All full-size buttons share the pill shape; inline text-link actions
     // (shrinkWrapTapTarget) use the small decorative radius.
     final double resolvedRadius =
@@ -205,7 +205,7 @@ class TilawaButton extends StatelessWidget {
 
     final double resolvedMinHeight = shrinkWrapTapTarget
         ? 0
-        : math.max(height, kTilawaMinInteractiveDimension);
+        : math.max(height, kMeMuslimMinInteractiveDimension);
 
     final buttonStyle = ButtonStyle(
       minimumSize: WidgetStateProperty.all(
@@ -297,8 +297,8 @@ class TilawaButton extends StatelessWidget {
         ? textButton
         : ConstrainedBox(
             constraints: const BoxConstraints(
-              minHeight: kTilawaMinInteractiveDimension,
-              minWidth: kTilawaMinInteractiveDimension,
+              minHeight: kMeMuslimMinInteractiveDimension,
+              minWidth: kMeMuslimMinInteractiveDimension,
             ),
             child: textButton,
           );

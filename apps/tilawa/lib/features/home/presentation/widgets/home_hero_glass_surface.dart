@@ -26,7 +26,7 @@ class HomeHeroGlassSurface extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final BorderRadius resolvedRadius =
         borderRadius ?? BorderRadius.circular(tokens.radiusLarge);
     final Color fill = colorScheme.surface.withValues(alpha: 0.90);

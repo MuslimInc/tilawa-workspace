@@ -310,7 +310,7 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
 
     final ThemeData theme = Theme.of(context);
     final ColorScheme scheme = theme.colorScheme;
-    final TilawaProductColors product = theme.productColors;
+    final MeMuslimProductColors product = theme.productColors;
 
     final scaffold = Scaffold(
       backgroundColor: product.quranPageBackground,

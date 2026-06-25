@@ -19,7 +19,7 @@ const _destinations = <TilawaNavDestination>[
 
 Widget _wrap({required Widget child, required TextDirection direction}) {
   return MaterialApp(
-    theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+    theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
     home: Directionality(textDirection: direction, child: child),
   );
 }
@@ -128,7 +128,7 @@ void main() {
 
         await tester.pumpWidget(
           MaterialApp(
-            theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+            theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
             home: MediaQuery.withClampedTextScaling(
               minScaleFactor: 1.2,
               maxScaleFactor: 2.0,
@@ -1452,7 +1452,7 @@ Future<Future<void> Function(WidgetTester, int)> _pumpDrivableShell(
 
   await tester.pumpWidget(
     MaterialApp(
-      theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+      theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
       home: Directionality(
         textDirection: TextDirection.ltr,
         child: ListenableBuilder(

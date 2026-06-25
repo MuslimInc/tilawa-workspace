@@ -208,7 +208,7 @@ void main() {
       final theme = AppTheme.getLightTheme(
         primaryColor: customAndroidGreen,
       );
-      final tokens = theme.extension<TilawaComponentTokens>();
+      final tokens = theme.extension<MeMuslimComponentTokens>();
 
       expect(tokens, isNotNull);
       expect(

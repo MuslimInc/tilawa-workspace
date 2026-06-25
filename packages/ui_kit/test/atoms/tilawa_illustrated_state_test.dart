@@ -13,11 +13,11 @@ Widget _wrap(
     brightness: brightness,
   );
   final designTokens = brightness == Brightness.dark
-      ? TilawaDesignTokens.dark()
-      : TilawaDesignTokens.light();
+      ? MeMuslimDesignTokens.dark()
+      : MeMuslimDesignTokens.light();
   final componentTokens = brightness == Brightness.dark
-      ? TilawaComponentTokens.dark(colorScheme: colorScheme)
-      : TilawaComponentTokens.light(colorScheme: colorScheme);
+      ? MeMuslimComponentTokens.dark(colorScheme: colorScheme)
+      : MeMuslimComponentTokens.light(colorScheme: colorScheme);
 
   return MaterialApp(
     theme: ThemeData(
