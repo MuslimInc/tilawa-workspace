@@ -234,7 +234,14 @@ class _SegmentButton extends StatelessWidget {
         ),
         child: Container(
           padding: tokens.itemPadding,
-          child: Center(child: Text(label, style: textStyle)),
+          child: Center(
+            child: Text(
+              label,
+              style: textStyle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ),
       ),
     );
