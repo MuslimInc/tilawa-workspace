@@ -43,7 +43,7 @@ void main() {
       expect(cubit.state.kind, HomePrimaryActionKind.listening);
     });
 
-    test('prefers urgent athkar over quran when listening is not eligible', () {
+    test('keeps quran resume when urgent athkar exists', () {
       const AthkarCategory category = AthkarCategory(
         id: 1,
         nameAr: 'أذكار الصباح',
@@ -69,7 +69,7 @@ void main() {
         ),
       );
 
-      expect(cubit.state.kind, HomePrimaryActionKind.athkar);
+      expect(cubit.state.kind, HomePrimaryActionKind.quran);
       expect(cubit.state.urgentAthkarRow?.category.id, 1);
     });
   });

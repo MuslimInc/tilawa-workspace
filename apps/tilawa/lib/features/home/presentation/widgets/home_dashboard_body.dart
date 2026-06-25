@@ -7,29 +7,21 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../cubit/home_listening_resume_cubit.dart';
 import '../cubit/home_listening_resume_state.dart';
-import '../cubit/home_primary_action_cubit.dart';
-import '../cubit/home_primary_action_state.dart';
 import 'home_daily_inspiration_section.dart';
-import 'home_discover_shortcuts.dart';
 import 'home_listening_resume_row.dart';
 import 'home_more_actions_group.dart';
-import 'home_primary_action_zone.dart';
-import 'home_today_section.dart';
+import 'home_quick_actions_section.dart';
 
-/// Home body — primary action, practice, inspiration, discover, more,
-/// listening.
+/// Home body — quick actions, more, and inspiration.
 ///
 /// IA zones (top → bottom):
-/// 1. **Now** — hero (prayer, greeting, location) — owned by sliver above.
-/// 2. **Primary action** — resume card (Quran / listening / urgent athkar).
-///    Always surfaces the Quran reader entry — comfortable reach.
-/// 3. **Practice** — optional Today Plan + daily athkar (pinned + edit).
-/// 4. **Inspiration** — daily ayah and dua in one raised card.
-/// 5. **Discover shortcuts** — compact 2-col grid of supporting tools
-///    (Reciters, Qibla, Tasbeeh, Bookmarks, Sessions).
-/// 6. **More** — secondary destinations as a flat grouped list (History,
-///    Favorites, Downloads, Smart Khatma, Support).
-/// 7. **Listening resume** — conditional continue-listening row.
+/// 1. **Now** — hero (location, Hijri date, next prayer) — sliver above.
+/// 2. **Quick actions** — Reciters, Quran reader, Athkar, tutor, Qibla,
+///    Tasbeeh (2-column grid).
+/// 3. **Today Plan** — optional daily worship plan card.
+/// 4. **More** — secondary library/account destinations.
+/// 5. **Listening resume** — conditional continue-listening row.
+/// 6. **Inspiration** — passive daily ayah and dua at the bottom.
 ///
 /// **Spacing rhythm** (relationship-based):
 /// - Within same zone: `spaceLarge` (16 dp).
@@ -43,37 +35,25 @@ class HomeDashboardBody extends StatelessWidget {
     final tokens = context.tokens;
     // Zone gap — 2× the within-zone spacing for clear IA separation.
     final double zoneGap = tokens.spaceExtraLarge + tokens.spaceSmall;
-    // Within-zone gap — tighter grouping for related content.
     final double withinZoneGap = tokens.spaceLarge;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const HomePrimaryActionZone(),
+        const HomeQuickActionsSection(),
         DeferredAfterFirstFrame(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Primary action → Practice: same ritual zone (tight).
-              SizedBox(height: withinZoneGap),
+              SizedBox(height: zoneGap),
               if (isTodayPlanEnabled()) ...[
                 const TodayPlanCard(),
                 SizedBox(height: withinZoneGap),
               ],
-              const HomeDailyPracticeSection(),
-              // Practice → Inspiration: new zone (wide).
+              const HomeMoreActionsGroup(),
+              const _ConditionalListeningRow(),
               SizedBox(height: zoneGap),
               const HomeDailyInspirationSection(),
-              // Inspiration → Discover: new zone (wide).
-              SizedBox(height: zoneGap),
-              const HomeDiscoverShortcuts(),
-              // Discover → More: related secondary content.
-              SizedBox(height: tokens.spaceExtraLarge),
-              const HomeMoreActionsGroup(),
-              // The listening row owns its own leading gap so a hidden row
-              // leaves no dangling space.
-              const _ConditionalListeningRow(),
-              // Closing mark — Peak-End Rule ending moment.
               const _HomeDashboardClosingMark(),
             ],
           ),
@@ -88,25 +68,17 @@ class _ConditionalListeningRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<HomePrimaryActionCubit, HomePrimaryActionState>(
-      builder: (context, primaryState) {
-        // The primary action card already surfaces the listening resume.
-        if (primaryState.kind == HomePrimaryActionKind.listening) {
+    return BlocBuilder<HomeListeningResumeCubit, HomeListeningResumeState>(
+      builder: (context, listeningState) {
+        if (!listeningState.isVisible) {
           return const SizedBox.shrink();
         }
-        return BlocBuilder<HomeListeningResumeCubit, HomeListeningResumeState>(
-          builder: (context, listeningState) {
-            if (!listeningState.isVisible) {
-              return const SizedBox.shrink();
-            }
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SizedBox(height: context.tokens.spaceExtraLarge),
-                const HomeListeningResumeRow(),
-              ],
-            );
-          },
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(height: context.tokens.spaceExtraLarge),
+            const HomeListeningResumeRow(),
+          ],
         );
       },
     );

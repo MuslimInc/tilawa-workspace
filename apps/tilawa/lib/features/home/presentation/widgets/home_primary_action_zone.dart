@@ -11,7 +11,7 @@ import '../cubit/home_quran_resume_cubit.dart';
 import '../cubit/home_quran_resume_state.dart';
 import 'home_primary_action_card.dart';
 
-/// Featured resume surface directly under the Home hero.
+/// Featured Quran/listening resume surface after daily practice.
 class HomePrimaryActionZone extends StatelessWidget {
   const HomePrimaryActionZone({super.key});
 

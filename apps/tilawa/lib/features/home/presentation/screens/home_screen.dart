@@ -6,10 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/features/home/debug/home_hero_variant_debug.dart';
-import 'package:tilawa/features/home/presentation/cubit/home_athkar_compact_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_cubit.dart';
-import 'package:tilawa/features/home/presentation/cubit/home_primary_action_cubit.dart';
-import 'package:tilawa/features/home/presentation/cubit/home_quran_resume_cubit.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../bloc/home_dashboard_bloc.dart';
@@ -67,23 +64,13 @@ class _HomeScreenState extends State<HomeScreen> {
         edgeOffset: topInset + kToolbarHeight,
         onRefresh: () async {
           final String locale = Localizations.localeOf(context).languageCode;
-          final quranResumeCubit = context.read<HomeQuranResumeCubit>();
           final listeningResumeCubit = context.read<HomeListeningResumeCubit>();
-          final athkarCompactCubit = context.read<HomeAthkarCompactCubit>();
-          final primaryActionCubit = context.read<HomePrimaryActionCubit>();
           context.read<HomeDashboardBloc>().add(
             HomeDashboardRefreshRequested(localeIdentifier: locale),
           );
           await Future.wait([
-            quranResumeCubit.load(),
             listeningResumeCubit.load(),
-            athkarCompactCubit.load(),
           ]);
-          primaryActionCubit.recompute(
-            quran: quranResumeCubit.state,
-            listening: listeningResumeCubit.state,
-            athkar: athkarCompactCubit.state,
-          );
         },
         child: NotificationListener<ScrollNotification>(
           onNotification: (notification) =>

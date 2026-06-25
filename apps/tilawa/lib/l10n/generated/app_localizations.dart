@@ -410,6 +410,18 @@ abstract class AppLocalizations {
   /// **'Your pinned adhkar and supplications'**
   String get homeDailyPracticeSubtitle;
 
+  /// Home section title for the primary morning/evening athkar card
+  ///
+  /// In en, this message translates to:
+  /// **'Daily habit'**
+  String get homeDailyHabitTitle;
+
+  /// Home daily habit section supporting line
+  ///
+  /// In en, this message translates to:
+  /// **'Start or continue your routine'**
+  String get homeDailyHabitSubtitle;
+
   /// Home subsection title for pinned athkar shortcuts
   ///
   /// In en, this message translates to:
@@ -499,6 +511,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Quran'**
   String get homeQuickQuran;
+
+  /// Home section title for the high-frequency 2x2 action grid
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Actions'**
+  String get homeQuickActionsTitle;
+
+  /// Home quick action tile label for opening the Mushaf reader
+  ///
+  /// In en, this message translates to:
+  /// **'Quran Reader'**
+  String get homeQuickQuranReader;
+
+  /// Home quick action for Quran teaching sessions with a hafiz
+  ///
+  /// In en, this message translates to:
+  /// **'Learn Quran with Tutor'**
+  String get homeLearnQuranWithTutor;
 
   /// Home quick action for reciters catalog
   ///

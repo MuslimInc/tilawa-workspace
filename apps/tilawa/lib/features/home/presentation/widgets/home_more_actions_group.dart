@@ -11,9 +11,8 @@ import 'home_grouped_list_row.dart';
 /// Flat grouped list of secondary non-nav destinations — More zone.
 ///
 /// Holds the less-frequent library/account destinations (History, Favorites,
-/// Downloads, Smart Khatma, Support). Supporting shortcuts live in
-/// [HomeDiscoverShortcuts] above this list. One flat card with hairline
-/// dividers — calm density, one surface.
+/// Downloads, Smart Khatma, Support). One flat card with hairline dividers —
+/// calm density, one surface.
 class HomeMoreActionsGroup extends StatelessWidget {
   const HomeMoreActionsGroup({super.key});
 

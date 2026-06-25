@@ -188,6 +188,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeDailyPracticeSubtitle => 'أذكارك المثبتة وأدعيتك';
 
   @override
+  String get homeDailyHabitTitle => 'العادة اليومية';
+
+  @override
+  String get homeDailyHabitSubtitle => 'ابدأ أو أكمل أذكارك';
+
+  @override
   String get homeAthkarRitualsTitle => 'أذكار سريعة';
 
   @override
@@ -239,6 +245,15 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get homeQuickQuran => 'القرآن';
+
+  @override
+  String get homeQuickActionsTitle => 'إجراءات سريعة';
+
+  @override
+  String get homeQuickQuranReader => 'قارئ القرآن';
+
+  @override
+  String get homeLearnQuranWithTutor => 'تعلم القرآن مع محفظ';
 
   @override
   String get homeQuickReciters => 'القراء';

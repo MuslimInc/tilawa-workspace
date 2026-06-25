@@ -239,6 +239,14 @@
     "@homeDailyPracticeSubtitle": {
         "description": "Home Daily Practice section supporting line"
     },
+    "homeDailyHabitTitle": "Daily habit",
+    "@homeDailyHabitTitle": {
+        "description": "Home section title for the primary morning/evening athkar card"
+    },
+    "homeDailyHabitSubtitle": "Start or continue your routine",
+    "@homeDailyHabitSubtitle": {
+        "description": "Home daily habit section supporting line"
+    },
     "homeAthkarRitualsTitle": "Quick athkar",
     "@homeAthkarRitualsTitle": {
         "description": "Home subsection title for pinned athkar shortcuts"
@@ -311,6 +319,18 @@
     "homeQuickQuran": "Quran",
     "@homeQuickQuran": {
         "description": "Home quick action for Quran reader"
+    },
+    "homeQuickActionsTitle": "Quick Actions",
+    "@homeQuickActionsTitle": {
+        "description": "Home section title for the high-frequency 2x2 action grid"
+    },
+    "homeQuickQuranReader": "Quran Reader",
+    "@homeQuickQuranReader": {
+        "description": "Home quick action tile label for opening the Mushaf reader"
+    },
+    "homeLearnQuranWithTutor": "Learn Quran with Tutor",
+    "@homeLearnQuranWithTutor": {
+        "description": "Home quick action for Quran teaching sessions with a hafiz"
     },
     "homeQuickReciters": "Reciters",
     "@homeQuickReciters": {

@@ -189,6 +189,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your pinned adhkar and supplications';
 
   @override
+  String get homeDailyHabitTitle => 'Daily habit';
+
+  @override
+  String get homeDailyHabitSubtitle => 'Start or continue your routine';
+
+  @override
   String get homeAthkarRitualsTitle => 'Quick athkar';
 
   @override
@@ -240,6 +246,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeQuickQuran => 'Quran';
+
+  @override
+  String get homeQuickActionsTitle => 'Quick Actions';
+
+  @override
+  String get homeQuickQuranReader => 'Quran Reader';
+
+  @override
+  String get homeLearnQuranWithTutor => 'Learn Quran with Tutor';
 
   @override
   String get homeQuickReciters => 'Reciters';
