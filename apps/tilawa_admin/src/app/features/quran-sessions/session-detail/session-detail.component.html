@@ -415,7 +415,7 @@
                   <thead>
                     <tr>
                       <th>{{ 'callTracking_eventType' | t }}</th>
-                      <th>{{ 'common_role' | t }}</th>
+                      <th>{{ 'common_role' | t }} (Sender)</th>
                       <th>{{ 'callTracking_eventDetail' | t }}</th>
                       <th>{{ 'callTracking_recordedAt' | t }}</th>
                     </tr>
@@ -423,8 +423,18 @@
                   <tbody>
                     @for (row of callEvents(); track row.id) {
                       <tr>
-                        <td class="font-mono">{{ row.eventType }}</td>
-                        <td>{{ row.actorRole }}</td>
+                        <td class="font-mono">
+                          {{ row.eventType }}
+                          @if (row.eventType === 'participantDisconnected' || row.eventType === 'participantConnected') {
+                            <div class="text-xs text-[var(--tilawa-on-surface-variant)] font-sans mt-0.5">
+                              (Refers to {{ row.actorRole === 'student' ? 'teacher' : 'student' }})
+                            </div>
+                          }
+                        </td>
+                        <td>
+                          {{ row.actorRole }}
+                          <div class="text-[0.65rem] text-[var(--tilawa-on-surface-variant)] uppercase tracking-wider mt-0.5">Device</div>
+                        </td>
                         <td>{{ row.detail }}</td>
                         <td>{{ row.recordedAt | date:'medium' }}</td>
                       </tr>
