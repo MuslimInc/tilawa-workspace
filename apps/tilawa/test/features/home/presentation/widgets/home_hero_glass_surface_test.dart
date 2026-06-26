@@ -40,7 +40,11 @@ void main() {
     StartupBlurShaderWarmup.completeForTest();
     await tester.pump();
 
-    expect(find.byType(BackdropFilter), findsOneWidget);
+    if (HomeHeroGlassSurface.useBackdropBlur) {
+      expect(find.byType(BackdropFilter), findsOneWidget);
+    } else {
+      expect(find.byType(BackdropFilter), findsNothing);
+    }
   });
 
   testWidgets(
@@ -65,7 +69,46 @@ void main() {
 
       await tester.pump();
 
-      expect(find.byType(BackdropFilter), findsOneWidget);
+      if (HomeHeroGlassSurface.useBackdropBlur) {
+        expect(find.byType(BackdropFilter), findsOneWidget);
+      } else {
+        expect(find.byType(BackdropFilter), findsNothing);
+      }
+    },
+  );
+
+  testWidgets(
+    'HomeHeroGlassSurface prayer hero tokens render frosted surface',
+    (tester) async {
+      StartupBlurShaderWarmup.completeForTest();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          home: Scaffold(
+            body: HomeHeroGlassSurface(
+              usePrayerHeroTokens: true,
+              child: const Text('metrics'),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      final screenTokens = Theme.of(
+        tester.element(find.text('metrics')),
+      ).componentTokens.homeScreen;
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is DecoratedBox &&
+              widget.decoration is BoxDecoration &&
+              (widget.decoration as BoxDecoration).color ==
+                  screenTokens.homePrayerHeroBackground,
+        ),
+        findsWidgets,
+      );
     },
   );
 }

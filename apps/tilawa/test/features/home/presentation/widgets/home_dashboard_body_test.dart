@@ -8,7 +8,8 @@ import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_st
 import 'package:tilawa/features/home/presentation/widgets/home_daily_inspiration_section.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_body.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_more_actions_group.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_quick_actions_section.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_primary_actions_section.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_quick_tools_section.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa/screens/cubit/main_screen_cubit.dart';
 import 'package:tilawa/screens/cubit/main_screen_state.dart';
@@ -21,7 +22,7 @@ class _MockMainScreenCubit extends MockCubit<MainScreenState>
     implements MainScreenCubit {}
 
 void main() {
-  testWidgets('shows quick actions, more, and inspiration', (
+  testWidgets('shows primary actions, quick tools, more, and inspiration', (
     tester,
   ) async {
     final listeningCubit = _MockHomeListeningResumeCubit();
@@ -61,12 +62,16 @@ void main() {
       tester.element(find.byType(HomeDashboardBody)),
     );
 
-    expect(find.byType(HomeQuickActionsSection), findsOneWidget);
+    expect(find.byType(HomePrimaryActionsSection), findsOneWidget);
+    expect(find.byType(HomeQuickToolsSection), findsOneWidget);
     expect(find.byType(HomeMoreActionsGroup), findsOneWidget);
     expect(find.byType(HomeDailyInspirationSection), findsOneWidget);
 
-    final double quickActionsTop = tester
-        .getTopLeft(find.byType(HomeQuickActionsSection))
+    final double primaryTop = tester
+        .getTopLeft(find.byType(HomePrimaryActionsSection))
+        .dy;
+    final double toolsTop = tester
+        .getTopLeft(find.byType(HomeQuickToolsSection))
         .dy;
     final double moreTop = tester
         .getTopLeft(find.byType(HomeMoreActionsGroup))
@@ -75,7 +80,8 @@ void main() {
         .getTopLeft(find.byType(HomeDailyInspirationSection))
         .dy;
 
-    expect(quickActionsTop, lessThan(moreTop));
+    expect(primaryTop, lessThan(toolsTop));
+    expect(toolsTop, lessThan(moreTop));
     expect(moreTop, lessThan(inspirationTop));
 
     expect(find.text(l10n.homeDailyHabitTitle), findsNothing);
@@ -92,6 +98,7 @@ void main() {
 
     expect(find.text(l10n.homeQuickPrayer), findsNothing);
     expect(find.text(l10n.homeQuickQuran), findsNothing);
+    expect(find.text(l10n.homeQuickQuranReader), findsOneWidget);
 
     expect(find.text(l10n.listeningHistory), findsOneWidget);
     expect(find.text(l10n.favorites), findsOneWidget);

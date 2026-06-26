@@ -42,7 +42,8 @@ void main() {
       languageCode: 'ar',
     );
     expect(find.text(hijriDateLine), findsOneWidget);
-    expect(find.text(l10n.homeHeroLocationContext), findsOneWidget);
+    expect(find.text('Cairo'), findsOneWidget);
+    expect(find.text(l10n.homeHeroLocationContext), findsNothing);
     expect(find.text(l10n.nextPrayer), findsOneWidget);
     expect(find.byType(ClipPath), findsNothing);
     _expectHeroBottomBorder(scrollContext);
@@ -140,16 +141,15 @@ void main() {
     await tester.pump();
 
     expect(find.text('Cairo'), findsWidgets);
-    expect(find.byIcon(FluentIcons.location_24_regular), findsOneWidget);
+    expect(find.byIcon(FluentIcons.location_24_regular), findsWidgets);
     _expectCollapsedPremiumPinnedBar(scrollContext);
   });
 }
 
 void _expectCollapsedPremiumPinnedBar(BuildContext context) {
-  final ThemeData theme = Theme.of(context);
-  final TilawaCapabilityActionCardTokens cardTokens =
-      theme.componentTokens.capabilityActionCard;
-  final MeMuslimDesignTokens tokens = theme.tokens;
+  final TilawaHomeScreenTokens screenTokens = Theme.of(
+    context,
+  ).componentTokens.homeScreen;
 
   expect(
     find.byWidgetPredicate((widget) {
@@ -157,23 +157,7 @@ void _expectCollapsedPremiumPinnedBar(BuildContext context) {
         return false;
       }
       final BoxDecoration decoration = widget.decoration as BoxDecoration;
-      final Gradient? gradient = decoration.gradient;
-      if (gradient is! LinearGradient) {
-        return false;
-      }
-      final List<Color> gradientColors = gradient.colors;
-      if (gradientColors.length != 2 ||
-          gradientColors.first != cardTokens.gradientStart ||
-          gradientColors.last != cardTokens.gradientEnd) {
-        return false;
-      }
-      final List<BoxShadow>? shadows = decoration.boxShadow;
-      if (shadows == null || shadows.isEmpty) {
-        return false;
-      }
-      final BoxShadow shadow = shadows.first;
-      return shadow.blurRadius == tokens.spaceSmall &&
-          shadow.offset == tokens.shadowOffsetSmall;
+      return decoration.color == screenTokens.homeCollapsedHeaderFill;
     }),
     findsWidgets,
   );

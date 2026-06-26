@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-/// Home content canvas below the hero.
+/// Dashboard sections on the neutral Home canvas.
 ///
-/// Flat content sheet below the hero — no negative translate overlap.
+/// Cards float on the gray canvas with soft elevation — no overlapping sheet.
 class HomeDashboardContentSliver extends StatelessWidget {
   const HomeDashboardContentSliver({super.key, required this.child});
 
@@ -11,32 +11,15 @@ class HomeDashboardContentSliver extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
     final MeMuslimDesignTokens tokens = context.tokens;
-    // Soft grey canvas between premium section shells (Money Loop rhythm).
-    final Color sheetColor = colorScheme.surfaceContainerLow;
-    final double topPadding = tokens.spaceSmall;
+    final double horizontalInset =
+        TilawaHomeScreenTokens.screenHorizontalPadding(tokens);
 
     return SliverToBoxAdapter(
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: sheetColor,
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-              color: colorScheme.shadow.withValues(
-                alpha: tokens.opacityShadow * 0.65,
-              ),
-              blurRadius: tokens.blurShadow,
-              offset: Offset(0, tokens.shadowOffsetSmall.dy * -0.5),
-            ),
-          ],
-        ),
-        child: _HomeDashboardSheetBody(
-          color: sheetColor,
-          topPadding: topPadding,
-          child: child,
-        ),
+      child: _HomeDashboardSheetBody(
+        horizontalInset: horizontalInset,
+        topPadding: tokens.spaceMedium,
+        child: child,
       ),
     );
   }
@@ -44,12 +27,12 @@ class HomeDashboardContentSliver extends StatelessWidget {
 
 class _HomeDashboardSheetBody extends StatelessWidget {
   const _HomeDashboardSheetBody({
-    required this.color,
+    required this.horizontalInset,
     required this.topPadding,
     required this.child,
   });
 
-  final Color color;
+  final double horizontalInset;
   final double topPadding;
   final Widget child;
 
@@ -57,21 +40,18 @@ class _HomeDashboardSheetBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = context.tokens;
 
-    return ColoredBox(
-      color: color,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          minHeight: MediaQuery.sizeOf(context).height,
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        minHeight: MediaQuery.sizeOf(context).height,
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          horizontalInset,
+          topPadding,
+          horizontalInset,
+          TilawaShellPadding.of(context) + tokens.spaceMedium,
         ),
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            tokens.spaceMedium,
-            topPadding,
-            tokens.spaceMedium,
-            TilawaShellPadding.of(context) + tokens.spaceMedium,
-          ),
-          child: child,
-        ),
+        child: child,
       ),
     );
   }

@@ -17,6 +17,9 @@ void main() {
             width: 360,
             child: HomeHeroBackground(
               heroTokens: TilawaHomeNextPrayerHeroTokens.day(),
+              screenTokens: AppTheme.getLightTheme(
+                primaryColor: AppColors.defaultPrimary,
+              ).componentTokens.homeScreen,
             ),
           ),
         ),

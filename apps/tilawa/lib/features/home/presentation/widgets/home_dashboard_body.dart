@@ -8,39 +8,48 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../cubit/home_listening_resume_cubit.dart';
 import '../cubit/home_listening_resume_state.dart';
 import 'home_daily_inspiration_section.dart';
+import 'home_featured_tutor_card.dart';
 import 'home_listening_resume_row.dart';
 import 'home_more_actions_group.dart';
-import 'home_quick_actions_section.dart';
+import 'home_primary_actions_section.dart';
+import 'home_quick_tools_section.dart';
 
-/// Home body — quick actions, more, and inspiration.
+/// Home body — product-grade hierarchy under the Sliver Prayer Hero.
 ///
 /// IA zones (top → bottom):
-/// 1. **Now** — hero (location, Hijri date, next prayer) — sliver above.
-/// 2. **Quick actions** — Reciters, Quran reader, Athkar, tutor, Qibla,
-///    Tasbeeh (2-column grid).
-/// 3. **Today Plan** — optional daily worship plan card.
-/// 4. **More** — secondary library/account destinations.
-/// 5. **Listening resume** — conditional continue-listening row.
-/// 6. **Inspiration** — passive daily ayah and dua at the bottom.
+/// 1. **Now** — Sliver Prayer Hero (location, Hijri date, next prayer) — sliver above.
+/// 2. **Primary actions** — Quran Reader, Athkar (two large cards).
+/// 3. **Quick tools** — Reciters, Qibla, Tasbeeh (compact row).
+/// 4. **Featured** — Learn Quran with Tutor (full-width brand card, when enabled).
+/// 5. **Today Plan** — optional daily worship plan card.
+/// 6. **Continue** — conditional continue-listening row.
+/// 7. **More** — secondary library/account destinations.
+/// 8. **Inspiration** — passive daily ayah and dua at the bottom.
+///
+/// Hierarchy: primary cards > quick tools > more list. The featured tutor
+/// card is a deliberate brand moment between tools and the rest.
 ///
 /// **Spacing rhythm** (relationship-based):
-/// - Within same zone: `spaceLarge` (16 dp).
-/// - Between zones: `spaceExtraLarge + spaceSmall` (32 dp) for unrelated
-///   zones; `spaceExtraLarge` (24 dp) for related secondary zones.
+/// - Within same zone: `spaceLarge` rhythm.
+/// - Between zones: `spaceExtraLarge` for unrelated zones; `spaceLarge` for
+///   related secondary zones.
 class HomeDashboardBody extends StatelessWidget {
   const HomeDashboardBody({super.key});
 
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
-    // Zone gap — 2× the within-zone spacing for clear IA separation.
-    final double zoneGap = tokens.spaceExtraLarge + tokens.spaceSmall;
-    final double withinZoneGap = tokens.spaceLarge;
+    final double zoneGap = tokens.spaceExtraLarge;
+    final double sectionGap = tokens.spaceLarge;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const HomeQuickActionsSection(),
+        const HomePrimaryActionsSection(),
+        SizedBox(height: sectionGap),
+        const HomeQuickToolsSection(),
+        SizedBox(height: sectionGap),
+        const HomeFeaturedTutorCard(),
         DeferredAfterFirstFrame(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -48,7 +57,7 @@ class HomeDashboardBody extends StatelessWidget {
               SizedBox(height: zoneGap),
               if (isTodayPlanEnabled()) ...[
                 const TodayPlanCard(),
-                SizedBox(height: withinZoneGap),
+                SizedBox(height: tokens.spaceLarge),
               ],
               const HomeMoreActionsGroup(),
               const _ConditionalListeningRow(),

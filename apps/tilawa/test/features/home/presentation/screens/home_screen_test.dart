@@ -19,7 +19,8 @@ import 'package:tilawa/features/home/presentation/screens/home_screen.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_hero_sliver.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_daily_inspiration_section.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_more_actions_group.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_quick_actions_section.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_primary_actions_section.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_quick_tools_section.dart';
 import 'package:tilawa/features/prayer_times/application/prayer_location_update_notifier.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/notify_prayer_location_updated_use_case.dart';
@@ -120,7 +121,7 @@ void main() {
 
     expect(find.text('Reciters'), findsOneWidget);
     // Shortcut tiles show only the label (no subtitle in the grid).
-    expect(find.text('Browse recitations'), findsNothing);
+    expect(find.text('Listen to curated recitations'), findsNothing);
     expect(find.text("Today's prayer times"), findsNothing);
     expect(find.text('View all'), findsNothing);
 
@@ -129,6 +130,7 @@ void main() {
     expect(find.text('Settings'), findsNothing);
     expect(find.text('Prayer'), findsNothing);
     expect(find.text('Quran'), findsNothing);
+    expect(find.text('Mushaf'), findsOneWidget);
 
     expect(find.text('Discover'), findsNothing);
     expect(find.text('Athkar'), findsOneWidget);
@@ -170,12 +172,16 @@ void main() {
         await tester.pump(const Duration(milliseconds: 16));
       }
 
-      expect(find.byType(HomeQuickActionsSection), findsOneWidget);
+      expect(find.byType(HomePrimaryActionsSection), findsOneWidget);
+      expect(find.byType(HomeQuickToolsSection), findsOneWidget);
       expect(find.byType(HomeMoreActionsGroup), findsOneWidget);
       expect(find.byType(HomeDailyInspirationSection), findsOneWidget);
 
-      final double quickActionsTop = tester
-          .getTopLeft(find.byType(HomeQuickActionsSection))
+      final double primaryTop = tester
+          .getTopLeft(find.byType(HomePrimaryActionsSection))
+          .dy;
+      final double toolsTop = tester
+          .getTopLeft(find.byType(HomeQuickToolsSection))
           .dy;
       final double moreTop = tester
           .getTopLeft(find.byType(HomeMoreActionsGroup))
@@ -184,21 +190,25 @@ void main() {
           .getTopLeft(find.byType(HomeDailyInspirationSection))
           .dy;
 
-      expect(quickActionsTop, lessThan(moreTop));
+      expect(primaryTop, lessThan(toolsTop));
+      expect(toolsTop, lessThan(moreTop));
       expect(moreTop, lessThan(inspirationTop));
 
       // Old mismatched "Today" wrapper title must not appear.
       expect(find.text('Today'), findsNothing);
       // Quick actions keep supporting tools reachable.
-      expect(find.text('Tasbeeh'), findsOneWidget);
-      expect(find.text('Reciters'), findsOneWidget);
-      expect(find.text('Quran Reader'), findsOneWidget);
-      expect(find.text('Qibla'), findsOneWidget);
+      final l10n = AppLocalizations.of(
+        tester.element(find.byType(HomeScreen)),
+      );
+      expect(find.text(l10n.homeQuickTasbeeh), findsOneWidget);
+      expect(find.text(l10n.homeQuickReciters), findsOneWidget);
+      expect(find.text(l10n.homeQuickQuranReader), findsOneWidget);
+      expect(find.text(l10n.homeQuickQibla), findsOneWidget);
       // Bookmarks removed from Home.
       expect(find.text('Bookmarks'), findsNothing);
       // Nav-duplicate tiles must not appear on Home.
       expect(find.text('Prayer'), findsNothing);
-      expect(find.text('Quran'), findsNothing);
+      expect(find.text(l10n.homeQuickQuran), findsNothing);
     },
   );
 }

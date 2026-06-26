@@ -34,6 +34,7 @@ class MeMuslimComponentTokens extends ThemeExtension<MeMuslimComponentTokens> {
     required this.permissionBanner,
     required this.bottomSheetScaffold,
     required this.homeNextPrayerHero,
+    required this.homeScreen,
     required this.homeDashboardCard,
     required this.capabilityActionCard,
     required this.experimentalBadge,
@@ -66,6 +67,7 @@ class MeMuslimComponentTokens extends ThemeExtension<MeMuslimComponentTokens> {
   final TilawaPermissionBannerTokens permissionBanner;
   final TilawaBottomSheetScaffoldTokens bottomSheetScaffold;
   final TilawaHomeNextPrayerHeroTokens homeNextPrayerHero;
+  final TilawaHomeScreenTokens homeScreen;
   final TilawaHomeDashboardCardTokens homeDashboardCard;
   final TilawaCapabilityActionCardTokens capabilityActionCard;
   final TilawaExperimentalBadgeTokens experimentalBadge;
@@ -136,6 +138,9 @@ class MeMuslimComponentTokens extends ThemeExtension<MeMuslimComponentTokens> {
       permissionBanner: TilawaPermissionBannerTokens.defaults(),
       bottomSheetScaffold: TilawaBottomSheetScaffoldTokens.defaults(),
       homeNextPrayerHero: TilawaHomeNextPrayerHeroTokens.defaults(),
+      homeScreen: brightness == Brightness.dark
+          ? TilawaHomeScreenTokens.dark()
+          : TilawaHomeScreenTokens.light(),
       homeDashboardCard: TilawaHomeDashboardCardTokens.fromColorScheme(
         effectiveColorScheme,
       ),
@@ -179,6 +184,7 @@ class MeMuslimComponentTokens extends ThemeExtension<MeMuslimComponentTokens> {
     TilawaPermissionBannerTokens? permissionBanner,
     TilawaBottomSheetScaffoldTokens? bottomSheetScaffold,
     TilawaHomeNextPrayerHeroTokens? homeNextPrayerHero,
+    TilawaHomeScreenTokens? homeScreen,
     TilawaHomeDashboardCardTokens? homeDashboardCard,
     TilawaCapabilityActionCardTokens? capabilityActionCard,
     TilawaExperimentalBadgeTokens? experimentalBadge,
@@ -211,6 +217,7 @@ class MeMuslimComponentTokens extends ThemeExtension<MeMuslimComponentTokens> {
       permissionBanner: permissionBanner ?? this.permissionBanner,
       bottomSheetScaffold: bottomSheetScaffold ?? this.bottomSheetScaffold,
       homeNextPrayerHero: homeNextPrayerHero ?? this.homeNextPrayerHero,
+      homeScreen: homeScreen ?? this.homeScreen,
       homeDashboardCard: homeDashboardCard ?? this.homeDashboardCard,
       capabilityActionCard: capabilityActionCard ?? this.capabilityActionCard,
       experimentalBadge: experimentalBadge ?? this.experimentalBadge,
@@ -319,6 +326,7 @@ class MeMuslimComponentTokens extends ThemeExtension<MeMuslimComponentTokens> {
         other.homeNextPrayerHero,
         t,
       ),
+      homeScreen: TilawaHomeScreenTokens.lerp(homeScreen, other.homeScreen, t),
       homeDashboardCard: TilawaHomeDashboardCardTokens.lerp(
         homeDashboardCard,
         other.homeDashboardCard,

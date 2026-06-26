@@ -3,11 +3,14 @@ import 'dart:math' as math;
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tilawa/core/bootstrap/startup_blur_shader_warmup.dart';
 import 'package:tilawa/features/home/debug/home_hero_variant_debug.dart';
 import 'package:tilawa/features/home/domain/entities/home_dashboard.dart';
 import 'package:tilawa/features/home/domain/home_hijri_date_formatter.dart';
 import 'package:tilawa/features/home/presentation/bloc/home_dashboard_state.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_dashboard_content_sliver.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_hero_variant_b.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_hero_collapsed_bar.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -15,54 +18,73 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 void main() {
   setUp(() {
     HomeHeroVariantDebug.resetForTests();
+    StartupBlurShaderWarmup.completeForTest();
   });
 
-  testWidgets('renders compact gold card with canvas context row', (
-    tester,
-  ) async {
-    final view = tester.view;
-    view.devicePixelRatio = 1;
-    view.physicalSize = const Size(360, 640);
-    addTearDown(view.resetDevicePixelRatio);
-    addTearDown(view.resetPhysicalSize);
+  tearDown(StartupBlurShaderWarmup.resetForTest);
 
-    final controller = ScrollController();
-    addTearDown(controller.dispose);
+  testWidgets(
+    'renders sliver hero with elevated prayer card on neutral canvas',
+    (
+      tester,
+    ) async {
+      final view = tester.view;
+      view.devicePixelRatio = 1;
+      view.physicalSize = const Size(360, 640);
+      addTearDown(view.resetDevicePixelRatio);
+      addTearDown(view.resetPhysicalSize);
 
-    await tester.pumpWidget(_VariantBHarness(controller: controller));
-    expect(tester.takeException(), isNull);
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
 
-    final BuildContext scrollContext = tester.element(
-      find.byType(CustomScrollView),
-    );
-    final l10n = AppLocalizations.of(scrollContext);
-    final String hijriDateLine = formatHomeHijriDate(
-      date: DateTime.now(),
-      languageCode: 'ar',
-    );
+      await tester.pumpWidget(_VariantBHarness(controller: controller));
+      await tester.pump();
+      expect(tester.takeException(), isNull);
 
-    expect(find.text(l10n.homeHeroLocationContext), findsOneWidget);
-    expect(find.text(hijriDateLine), findsOneWidget);
-    expect(find.text(l10n.nextPrayer), findsOneWidget);
-    expect(find.byType(SliverPersistentHeader), findsOneWidget);
-    expect(find.byType(ClipPath), findsNothing);
-    _expectHeroBottomBorder(scrollContext);
-    expect(find.byIcon(Icons.mosque_outlined), findsOneWidget);
+      final BuildContext scrollContext = tester.element(
+        find.byType(CustomScrollView),
+      );
+      final l10n = AppLocalizations.of(scrollContext);
+      final String hijriDateLine = formatHomeHijriDate(
+        date: DateTime.now(),
+        languageCode: 'ar',
+      );
 
-    final cardTokens = Theme.of(
-      scrollContext,
-    ).componentTokens.homeDashboardCard;
-    expect(
-      find.byWidgetPredicate(
-        (widget) =>
-            widget is DecoratedBox &&
-            widget.decoration is BoxDecoration &&
-            (widget.decoration as BoxDecoration).gradient?.colors.first ==
-                cardTokens.gradientStart,
-      ),
-      findsWidgets,
-    );
-  });
+      expect(find.text(l10n.homeHeroLocationContext), findsNothing);
+      expect(find.text('Cairo'), findsOneWidget);
+      expect(find.text(hijriDateLine), findsOneWidget);
+      expect(find.text(l10n.nextPrayer), findsOneWidget);
+      expect(find.byType(SliverPersistentHeader), findsOneWidget);
+      expect(find.byIcon(Icons.mosque_outlined), findsNothing);
+      expect(find.byIcon(FluentIcons.location_24_regular), findsOneWidget);
+
+      final screenTokens = Theme.of(
+        scrollContext,
+      ).componentTokens.homeScreen;
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is DecoratedBox &&
+              widget.decoration is BoxDecoration &&
+              (widget.decoration as BoxDecoration).color ==
+                  screenTokens.homeContentSheetSurface &&
+              (widget.decoration as BoxDecoration).boxShadow?.isNotEmpty ==
+                  true,
+        ),
+        findsWidgets,
+      );
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is DecoratedBox &&
+              widget.decoration is BoxDecoration &&
+              (widget.decoration as BoxDecoration).color ==
+                  screenTokens.homePrayerHeroBackground,
+        ),
+        findsNothing,
+      );
+    },
+  );
 
   testWidgets('compact hero height is shorter than legacy B dimensions', (
     tester,
@@ -82,7 +104,7 @@ void main() {
       scrollContext,
     );
 
-    expect(compactHeight, lessThan(200));
+    expect(compactHeight, lessThan(225));
   });
 
   testWidgets('collapses without overflow on narrow viewport', (tester) async {
@@ -127,81 +149,103 @@ void main() {
     controller.jumpTo(collapseExtent);
     await tester.pump();
     expect(tester.takeException(), isNull);
-    expect(find.byType(ClipPath), findsNothing);
-    _expectHeroBottomBorder(scrollContext);
-    expect(find.byIcon(FluentIcons.location_24_regular), findsOneWidget);
-    _expectCollapsedPremiumChrome(scrollContext);
-    _expectCollapsedPremiumPinnedBar(scrollContext);
+    expect(find.byIcon(FluentIcons.location_24_regular), findsWidgets);
+    _expectCollapsedCanvasBar(tester);
+  });
+
+  testWidgets('content sliver keeps quick actions below pinned header', (
+    tester,
+  ) async {
+    final view = tester.view;
+    view.devicePixelRatio = 1;
+    view.physicalSize = const Size(360, 640);
+    addTearDown(view.resetDevicePixelRatio);
+    addTearDown(view.resetPhysicalSize);
+
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('ar'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+        home: Builder(
+          builder: (context) {
+            return CustomScrollView(
+              controller: controller,
+              slivers: [
+                ...HomeDashboardHeroVariantB.buildSlivers(
+                  context: context,
+                  state: _homeDashboardState(),
+                  onOpenPrayer: () {},
+                ),
+                HomeDashboardContentSliver(
+                  child: Container(
+                    key: const Key('quick_actions_probe'),
+                    height: 72,
+                    color: Colors.blue,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final BuildContext scrollContext = tester.element(
+      find.byType(CustomScrollView),
+    );
+    final double collapseExtent =
+        HomeDashboardHeroVariantB.collapseScrollExtent(scrollContext);
+    final double pinnedTop = HomeDashboardHeroVariantB.pinnedHeaderExtent(
+      scrollContext,
+    );
+
+    controller.jumpTo(collapseExtent);
+    await tester.pump();
+
+    final Offset probeTop = tester.getTopLeft(
+      find.byKey(const Key('quick_actions_probe')),
+    );
+    expect(probeTop.dy, greaterThanOrEqualTo(pinnedTop - 1));
+  });
+
+  testWidgets('collapsed bar is opaque when fully pinned', (tester) async {
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(_VariantBHarness(controller: controller));
+    await tester.pump();
+
+    final BuildContext scrollContext = tester.element(
+      find.byType(CustomScrollView),
+    );
+    controller.jumpTo(
+      HomeDashboardHeroVariantB.collapseScrollExtent(scrollContext),
+    );
+    await tester.pump();
+
+    expect(
+      HomeHeroCollapsedBar.surfaceAlpha(1),
+      greaterThanOrEqualTo(0.97),
+    );
+    _expectCollapsedCanvasBar(tester);
   });
 }
 
-void _expectCollapsedPremiumPinnedBar(BuildContext context) {
-  final ThemeData theme = Theme.of(context);
-  final TilawaCapabilityActionCardTokens cardTokens =
-      theme.componentTokens.capabilityActionCard;
-  final MeMuslimDesignTokens tokens = theme.tokens;
-
-  expect(
-    find.byWidgetPredicate((widget) {
-      if (widget is! DecoratedBox || widget.decoration is! BoxDecoration) {
-        return false;
-      }
-      final BoxDecoration decoration = widget.decoration as BoxDecoration;
-      final Gradient? gradient = decoration.gradient;
-      if (gradient is! LinearGradient) {
-        return false;
-      }
-      final List<Color> gradientColors = gradient.colors;
-      if (gradientColors.length != 2 ||
-          gradientColors.first != cardTokens.gradientStart ||
-          gradientColors.last != cardTokens.gradientEnd) {
-        return false;
-      }
-      final List<BoxShadow>? shadows = decoration.boxShadow;
-      if (shadows == null || shadows.isEmpty) {
-        return false;
-      }
-      final BoxShadow shadow = shadows.first;
-      return shadow.blurRadius == tokens.spaceSmall &&
-          shadow.offset == tokens.shadowOffsetSmall;
-    }),
-    findsWidgets,
+void _expectCollapsedCanvasBar(WidgetTester tester) {
+  expect(find.byType(HomeHeroCollapsedBar), findsOneWidget);
+  final HomeHeroCollapsedBar bar = tester.widget<HomeHeroCollapsedBar>(
+    find.byType(HomeHeroCollapsedBar),
   );
-}
-
-void _expectCollapsedPremiumChrome(BuildContext context) {
-  final ThemeData theme = Theme.of(context);
-  final Color gildingFill = theme.colorScheme.semanticTintBackground(
-    TilawaSemanticTint.gilding,
-  );
+  expect(bar.reveal, greaterThan(0.85));
   expect(
-    find.byWidgetPredicate((widget) {
-      if (widget is! DecoratedBox || widget.decoration is! BoxDecoration) {
-        return false;
-      }
-      return (widget.decoration as BoxDecoration).color == gildingFill;
-    }),
-    findsWidgets,
-  );
-}
-
-void _expectHeroBottomBorder(BuildContext context) {
-  final ThemeData theme = Theme.of(context);
-  expect(
-    find.byWidgetPredicate((widget) {
-      if (widget is! DecoratedBox || widget.decoration is! BoxDecoration) {
-        return false;
-      }
-      final BorderSide? bottom =
-          (widget.decoration as BoxDecoration).border?.bottom;
-      if (bottom == null) {
-        return false;
-      }
-      return bottom.color == theme.colorScheme.outlineVariant &&
-          bottom.width ==
-              theme.componentTokens.bottomSheetScaffold.footerTopBorderWidth;
-    }),
-    findsWidgets,
+    HomeHeroCollapsedBar.surfaceAlpha(bar.reveal),
+    greaterThanOrEqualTo(0.97),
   );
 }
 

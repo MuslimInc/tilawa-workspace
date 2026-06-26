@@ -24,6 +24,9 @@ class HomeQuickActionsSection extends StatelessWidget {
     final tokens = context.tokens;
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
+    final Color tileBackground = Theme.of(
+      context,
+    ).componentTokens.homeScreen.quickActionTileBackground;
     final items = _QuickActionsCatalog.items(context);
 
     if (items.isEmpty) {
@@ -53,14 +56,14 @@ class HomeQuickActionsSection extends StatelessWidget {
           ),
           label: item.label,
           onTap: item.onTap,
-          backgroundColor: colorScheme.surface,
+          backgroundColor: tileBackground,
           iconBoxVariant: TilawaIconBoxVariant.tinted,
           iconBoxBackgroundColor: colorScheme.surfaceContainerHigh,
           iconColor: style.iconForeground,
           iconSize: tokens.iconSizeMedium,
           iconPadding: tokens.spaceSmall,
           labelStyle: labelStyle,
-          contentPadding: EdgeInsets.all(tokens.spaceSmall),
+          contentPadding: EdgeInsets.all(tokens.spaceExtraSmall),
           tileBorderOpacity: tokens.opacitySubtle * 2,
         );
       },
@@ -158,7 +161,7 @@ double _quickActionTileHeight(BuildContext context) {
   final textTheme = Theme.of(context).textTheme;
   final textScaler = MediaQuery.textScalerOf(context);
   const double labelLineHeightFactor = 1.15;
-  final double tilePadding = tokens.spaceSmall;
+  final double tilePadding = tokens.spaceExtraSmall;
   final double iconExtent = tokens.iconSizeMedium + tokens.spaceSmall * 2;
   final double labelFontSize = textTheme.labelLarge?.fontSize ?? 14;
   final double labelLineHeight =

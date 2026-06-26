@@ -1201,6 +1201,92 @@ void main() {
     });
   });
 
+  group('TilawaHomeScreenTokens', () {
+    test('light palette uses centralized AppColors stops', () {
+      final tokens = TilawaHomeScreenTokens.light();
+
+      expect(
+        tokens.backgroundGradientStart,
+        AppColors.homeBackgroundGradientStart,
+      );
+      expect(
+        tokens.backgroundGradientMiddle,
+        AppColors.homeBackgroundGradientMiddle,
+      );
+      expect(
+        tokens.backgroundGradientEnd,
+        AppColors.homeBackgroundGradientEnd,
+      );
+      expect(
+        tokens.homePrayerHeroBackground,
+        AppColors.homePrayerHeroBackground,
+      );
+      expect(tokens.homePrayerHeroBorder, AppColors.homePrayerHeroBorder);
+      expect(tokens.homePrayerHeroShadow, AppColors.homePrayerHeroShadow);
+      expect(tokens.homePrayerHeroAccent, AppColors.homePrayerHeroAccent);
+      expect(tokens.homePrayerHeroWatermark, AppColors.homePrayerHeroWatermark);
+      expect(
+        tokens.homeHeaderChipBackground,
+        AppColors.homeHeaderChipBackground,
+      );
+      expect(
+        tokens.homeHeaderSecondaryText,
+        AppColors.homeHeaderSecondaryText,
+      );
+      expect(
+        tokens.homeCollapsedHeaderFill,
+        AppColors.homeCollapsedHeaderFill,
+      );
+      expect(
+        tokens.homeCollapsedHeaderBorder,
+        AppColors.homeCollapsedHeaderBorder,
+      );
+      expect(
+        tokens.homeFeaturedTutorGradientStart,
+        AppColors.homeFeaturedTutorGradientStart,
+      );
+      expect(
+        tokens.homeFeaturedTutorGradientEnd,
+        AppColors.homeFeaturedTutorGradientEnd,
+      );
+      expect(tokens.homeFeaturedTutorAccent, AppColors.homeFeaturedTutorAccent);
+      expect(
+        tokens.homeContentSheetSurface,
+        AppColors.homeContentSheetSurface,
+      );
+      expect(tokens.homeContentSheetShadowOpacity, 0);
+      expect(
+        tokens.homeContentSheetTopBorder,
+        AppColors.homeContentSheetTopBorder,
+      );
+      expect(tokens.homeHeroPatternInk, AppColors.homeHeroPatternInk);
+      expect(tokens.homeHeroPatternOpacity, 0);
+      expect(tokens.homeHeroGoldGlowOpacity, 0);
+      expect(
+        tokens.homeFeaturedTutorCtaForeground,
+        AppColors.homeFeaturedTutorCtaForeground,
+      );
+      expect(tokens.homePrayerHeroWatermarkOpacity, 0.07);
+      expect(
+        tokens.backgroundGradient().colors,
+        [
+          tokens.backgroundGradientStart,
+          tokens.backgroundGradientMiddle,
+          tokens.backgroundGradientEnd,
+        ],
+      );
+    });
+
+    test('screenHorizontalPadding uses spaceLarge gutter', () {
+      final designTokens = MeMuslimDesignTokens.light();
+
+      expect(
+        TilawaHomeScreenTokens.screenHorizontalPadding(designTokens),
+        designTokens.spaceLarge,
+      );
+    });
+  });
+
   group('TilawaHomeNextPrayerHeroTokens', () {
     test('defaults use centralized AppColors gradient stops', () {
       final tokens = TilawaHomeNextPrayerHeroTokens.day();
@@ -1248,6 +1334,7 @@ void main() {
       expect(tokens.settingsGroup, isNotNull);
       expect(tokens.immersiveComposer, isNotNull);
       expect(tokens.homeNextPrayerHero, isNotNull);
+      expect(tokens.homeScreen, isNotNull);
     });
 
     test('dark() returns same as light()', () {

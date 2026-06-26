@@ -48,11 +48,11 @@
     "@homeGreeting": {
         "description": "Default Home greeting"
     },
-    "homeInspirationTitle": "Daily Inspiration",
+    "homeInspirationTitle": "Today's inspiration",
     "@homeInspirationTitle": {
         "description": "Title for the daily inspiration section"
     },
-    "homeInspirationSubtitle": "A moment of reflection",
+    "homeInspirationSubtitle": "An ayah and dua for your heart",
     "@homeInspirationSubtitle": {
         "description": "Subtitle for the daily inspiration section"
     },
@@ -77,7 +77,7 @@
     "@homeHeroLocationContext": {
         "description": "Talabat-style context label above the prayer location in the Home hero header"
     },
-    "homeNextPrayerUnavailable": "Set your location to see the next prayer.",
+    "homeNextPrayerUnavailable": "Set your location to see the next prayer time.",
     "@homeNextPrayerUnavailable": {
         "description": "Home next prayer fallback when no prayer time can be calculated"
     },
@@ -85,7 +85,7 @@
     "@homePrayerTimesAction": {
         "description": "Action to open prayer times from Home"
     },
-    "homePrayerNow": "It is time now",
+    "homePrayerNow": "It's prayer time",
     "@homePrayerNow": {
         "description": "Home countdown text when the next prayer is due now"
     },
@@ -118,31 +118,31 @@
     "@homeExploreSubtitle": {
         "description": "Home feature category grid supporting line"
     },
-    "homeKhatmaCarouselSubtitle": "Track your reading plan",
+    "homeKhatmaCarouselSubtitle": "Progress on your khatma",
     "@homeKhatmaCarouselSubtitle": {
         "description": "Home carousel subtitle for Smart Khatma promo card"
     },
-    "homeSupportCarouselSubtitle": "Help keep MeMuslim free for everyone",
+    "homeSupportCarouselSubtitle": "Help keep Tilawa free for everyone",
     "@homeSupportCarouselSubtitle": {
         "description": "Home carousel subtitle for Support Tilawa promo card"
     },
-    "homeHistoryCarouselSubtitle": "Pick up where you left off",
+    "homeHistoryCarouselSubtitle": "Continue where you left off",
     "@homeHistoryCarouselSubtitle": {
         "description": "Home carousel subtitle for listening history card"
     },
-    "homeFavoritesCarouselSubtitle": "Saved recitations and surahs",
+    "homeFavoritesCarouselSubtitle": "Your saved recitations",
     "@homeFavoritesCarouselSubtitle": {
         "description": "Home carousel subtitle for favorites card"
     },
-    "homeDownloadsCarouselSubtitle": "Listen offline anytime",
+    "homeDownloadsCarouselSubtitle": "Listen offline",
     "@homeDownloadsCarouselSubtitle": {
         "description": "Home carousel subtitle for downloads card"
     },
-    "homeSessionsTitle": "Learn Quran recitation",
+    "homeSessionsTitle": "Learn recitation",
     "@homeSessionsTitle": {
         "description": "Home card title for Quran teaching sessions"
     },
-    "homeSessionsSubtitle": "Book sessions with certified teachers",
+    "homeSessionsSubtitle": "One-on-one sessions with a certified hafiz",
     "@homeSessionsSubtitle": {
         "description": "Home card subtitle for Quran teaching sessions"
     },
@@ -178,7 +178,7 @@
     "@homeYoursTitle": {
         "description": "Home section title for personalized resume content"
     },
-    "homeListeningResumeSubtitle": "Continue · {reciter} · {surah}",
+    "homeListeningResumeSubtitle": "{reciter} · {surah}",
     "@homeListeningResumeSubtitle": {
         "description": "Home continue listening row subtitle",
         "placeholders": {
@@ -324,11 +324,39 @@
     "@homeQuickActionsTitle": {
         "description": "Home section title for the high-frequency 2x2 action grid"
     },
-    "homeQuickQuranReader": "Quran Reader",
+    "homeMainActionsTitle": "Your daily worship",
+    "@homeMainActionsTitle": {
+        "description": "Home section title for the two primary daily action cards"
+    },
+    "homeQuickToolsTitle": "Quick tools",
+    "@homeQuickToolsTitle": {
+        "description": "Home section title for the compact secondary tools row"
+    },
+    "homeFeaturedTutorEyebrow": "Featured",
+    "@homeFeaturedTutorEyebrow": {
+        "description": "Eyebrow badge on the featured Learn Quran with Tutor card"
+    },
+    "homeFeaturedTutorTitle": "Learn Quran with your hafiz",
+    "@homeFeaturedTutorTitle": {
+        "description": "Title on the featured Learn Quran with Tutor card"
+    },
+    "homeFeaturedTutorSubtitle": "Choose your hafiz to master your recitation",
+    "@homeFeaturedTutorSubtitle": {
+        "description": "Subtitle on the featured Learn Quran with Tutor card"
+    },
+    "homeFeaturedTutorCta": "Start learning",
+    "@homeFeaturedTutorCta": {
+        "description": "Call to action button on the featured Learn Quran with Tutor card"
+    },
+    "homeQuickQuranReader": "Mushaf",
     "@homeQuickQuranReader": {
         "description": "Home quick action tile label for opening the Mushaf reader"
     },
-    "homeLearnQuranWithTutor": "Learn Quran with Tutor",
+    "homeQuickQuranReaderSubtitle": "Read the Quran with reflection",
+    "@homeQuickQuranReaderSubtitle": {
+        "description": "Subtitle for the Quran Reader primary action card"
+    },
+    "homeLearnQuranWithTutor": "Learn Quran with your hafiz",
     "@homeLearnQuranWithTutor": {
         "description": "Home quick action for Quran teaching sessions with a hafiz"
     },
@@ -336,7 +364,7 @@
     "@homeQuickReciters": {
         "description": "Home quick action for reciters catalog"
     },
-    "homeQuickRecitersSubtitle": "Browse recitations",
+    "homeQuickRecitersSubtitle": "Listen to curated recitations",
     "@homeQuickRecitersSubtitle": {
         "description": "Home More row subtitle for reciters"
     },
@@ -348,7 +376,7 @@
     "@homeQuickQibla": {
         "description": "Home quick action for qibla"
     },
-    "homeQuickQiblaSubtitle": "Find prayer direction",
+    "homeQuickQiblaSubtitle": "Find the Qibla with ease",
     "@homeQuickQiblaSubtitle": {
         "description": "Home More row subtitle for qibla"
     },
@@ -356,17 +384,21 @@
     "@homeQuickSettingsSubtitle": {
         "description": "Home More row subtitle for settings"
     },
-    "homeQuickTasbeeh": "Tasbeeh",
+    "homeQuickTasbeeh": "Tasbih",
     "@homeQuickTasbeeh": {
         "description": "Home More row title for tasbeeh counter"
     },
-    "homeQuickTasbeehSubtitle": "Count dhikr with one tap",
+    "homeQuickTasbeehSubtitle": "Dhikr at your fingertips",
     "@homeQuickTasbeehSubtitle": {
         "description": "Home More row subtitle for tasbeeh counter"
     },
     "homeQuickAthkar": "Athkar",
     "@homeQuickAthkar": {
         "description": "Home quick action for athkar"
+    },
+    "homeQuickAthkarSubtitle": "Your daily athkar",
+    "@homeQuickAthkarSubtitle": {
+        "description": "Subtitle for the Athkar primary action card"
     },
     "homeQuickSettings": "Settings",
     "@homeQuickSettings": {
@@ -434,7 +466,7 @@
     "@homeDailyInspirationSubtitle": {
         "description": "Home section subtitle under daily inspiration title"
     },
-    "homeDailyAyahLabel": "Daily ayah",
+    "homeDailyAyahLabel": "Ayah of the day",
     "@homeDailyAyahLabel": {
         "description": "Home daily ayah card label"
     },
@@ -446,7 +478,7 @@
     "@homeDailyAyahReference": {
         "description": "Home daily ayah reference"
     },
-    "homeDailyDuaLabel": "Daily dua",
+    "homeDailyDuaLabel": "Dua of the day",
     "@homeDailyDuaLabel": {
         "description": "Home daily dua card label"
     },
@@ -840,7 +872,7 @@
     "@noSurahsMatchSearch": {
         "description": "No surahs match search message"
     },
-    "continueListening": "Continue Listening",
+    "continueListening": "Continue listening",
     "@continueListening": {
         "description": "Continue listening section title"
     },
@@ -3797,11 +3829,11 @@
     "@errorInvalidNotificationPayload": {
         "description": "Error message when notification data is corrupted or invalid"
     },
-    "moreOptions": "More options",
+    "moreOptions": "More",
     "@moreOptions": {
         "description": "Label for the more-options overflow menu button"
     },
-    "homeMoreOptionsSubtitle": "Library, favorites, and more",
+    "homeMoreOptionsSubtitle": "Your library and more options",
     "@homeMoreOptionsSubtitle": {
         "description": "Subtitle for the More section on the home dashboard"
     },

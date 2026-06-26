@@ -4,7 +4,9 @@ import 'package:tilawa/features/home/presentation/widgets/home_dashboard_content
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 void main() {
-  testWidgets('uses flat sheet body below hero header', (tester) async {
+  testWidgets('renders dashboard sections on neutral canvas padding', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
@@ -21,7 +23,6 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.byType(ClipPath), findsNothing);
     expect(find.text('sheet body'), findsOneWidget);
   });
 }

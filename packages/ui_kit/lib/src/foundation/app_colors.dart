@@ -152,11 +152,11 @@ abstract final class AppColors {
   /// Day hero top — warm ivory parchment with a soft gold cast.
   static const Color homeNextPrayerGradientTop = Color(0xFFFCF8F0);
 
-  /// Day hero mid — subtle gold warmth between parchment and sage mist.
-  static const Color homeNextPrayerGradientDayMid = Color(0xFFF5ECD8);
+  /// Day hero mid — intentional warm gold between parchment and sage mist.
+  static const Color homeNextPrayerGradientDayMid = Color(0xFFF2E6C9);
 
-  /// Day hero bottom — airy emerald mist (visible, never flat white).
-  static const Color homeNextPrayerGradientBottom = Color(0xFFD4E8DE);
+  /// Day hero bottom — sage mist with stronger green presence (V3).
+  static const Color homeNextPrayerGradientBottom = Color(0xFFC0E0D1);
 
   /// Pre-dawn hero top — cool mist ivory (Fajr, not forest night).
   static const Color homeNextPrayerGradientPreDawnTop = Color(0xFFF4F7F5);
@@ -170,8 +170,8 @@ abstract final class AppColors {
   /// Dusk hero top — luminous gold cream (Maghrib warmth).
   static const Color homeNextPrayerGradientDuskTop = Color(0xFFF8E8CC);
 
-  /// Dusk hero bottom — amber gold with restrained teal depth.
-  static const Color homeNextPrayerGradientDuskBottom = Color(0xFFE4CFA0);
+  /// Dusk hero bottom — warm gold with restrained sage depth.
+  static const Color homeNextPrayerGradientDuskBottom = Color(0xFFD8D2A7);
 
   /// Night hero top — muted teal twilight (Isha through midnight).
   static const Color homeNextPrayerGradientNightTop = Color(0xFF5E857C);
@@ -181,6 +181,175 @@ abstract final class AppColors {
 
   /// Foreground on the Home hero night gradient — warm cream ink.
   static const Color homeNextPrayerGradientNightForeground = Color(0xFFF5F0E6);
+
+  /// Home screen canvas — flat neutral dashboard background.
+  static const Color homeBackgroundGradientStart = homeDashboardCanvas;
+
+  /// Home screen canvas — flat neutral dashboard background.
+  static const Color homeBackgroundGradientMiddle = homeDashboardCanvas;
+
+  /// Home screen canvas — flat neutral dashboard background.
+  static const Color homeBackgroundGradientEnd = homeDashboardCanvas;
+
+  /// Radial glow accent behind the Home hero / next-prayer area.
+  static const Color homeBackgroundGlow = Color(0xFFE8DCC8);
+
+  /// Home screen canvas — dark theme top.
+  static const Color homeBackgroundGradientStartDark = Color(0xFF1E2826);
+
+  /// Home screen canvas — dark theme middle.
+  static const Color homeBackgroundGradientMiddleDark = Color(0xFF161F1D);
+
+  /// Home screen canvas — dark theme bottom.
+  static const Color homeBackgroundGradientEndDark = darkBackground;
+
+  /// Radial glow accent on dark Home canvas.
+  static const Color homeBackgroundGlowDark = Color(0xFF2A3D38);
+
+  /// Neutral dashboard canvas — lifestyle reference (#FAFAFA).
+  static const Color homeDashboardCanvas = lightCanvas;
+
+  /// Elevated card surface on the Home dashboard.
+  static const Color homeDashboardCardSurface = tripGlideCanvas;
+
+  /// Dashboard accent — warm brown brand ink for Home CTAs and icons.
+  static const Color homeDashboardAccent = defaultPrimary;
+
+  /// White content area and elevated cards on the Home dashboard.
+  static const Color homeContentSheetSurface = tripGlideCanvas;
+
+  /// Dashboard canvas — dark theme.
+  static const Color homeDashboardCanvasDark = darkBackground;
+
+  /// Elevated card surface — dark theme.
+  static const Color homeDashboardCardSurfaceDark = Color(0xFF1A2220);
+
+  /// Dashboard accent — dark theme.
+  static const Color homeDashboardAccentDark = Color(0xFFC9A07A);
+
+  /// White content sheet — dark theme.
+  static const Color homeContentSheetSurfaceDark = Color(0xFF121A18);
+
+  /// Frosted next-prayer card fill — warm semi-transparent white.
+  static const Color homePrayerCardBackground = Color(0xE8FFFFFF);
+
+  /// Frosted next-prayer card hairline border.
+  static const Color homePrayerCardBorder = Color(0x40D6CFC4);
+
+  /// Next-prayer card drop shadow tint.
+  static const Color homePrayerCardShadow = tripGlideInk;
+
+  /// Mosque watermark on the next-prayer card (alpha applied in widgets).
+  static const Color homePrayerCardWatermark = primarySage;
+
+  /// Frosted next-prayer card fill — dark theme.
+  static const Color homePrayerCardBackgroundDark = Color(0xCC1A2624);
+
+  /// Frosted next-prayer card border — dark theme.
+  static const Color homePrayerCardBorderDark = Color(0x33FFFFFF);
+
+  /// Next-prayer card shadow — dark theme.
+  static const Color homePrayerCardShadowDark = Color(0xFF000000);
+
+  /// Mosque watermark — dark theme.
+  static const Color homePrayerCardWatermarkDark = Color(0xFF4A7A6E);
+
+  /// Prayer Hero fill — frosted warm white on the Home canvas gradient.
+  static const Color homePrayerHeroBackground = homePrayerCardBackground;
+
+  /// Prayer Hero hairline border — alias of [homePrayerCardBorder].
+  static const Color homePrayerHeroBorder = homePrayerCardBorder;
+
+  /// Prayer Hero drop shadow tint — alias of [homePrayerCardShadow].
+  static const Color homePrayerHeroShadow = homePrayerCardShadow;
+
+  /// Prayer Hero sage/gold accent for countdown and emphasis.
+  static const Color homePrayerHeroAccent = homeDashboardAccent;
+
+  /// Prayer Hero mosque watermark — alias of [homePrayerCardWatermark].
+  static const Color homePrayerHeroWatermark = homePrayerCardWatermark;
+
+  /// Prayer Hero fill — dark theme frosted surface.
+  static const Color homePrayerHeroBackgroundDark =
+      homePrayerCardBackgroundDark;
+
+  /// Prayer Hero border — dark theme.
+  static const Color homePrayerHeroBorderDark = homePrayerCardBorderDark;
+
+  /// Prayer Hero shadow — dark theme.
+  static const Color homePrayerHeroShadowDark = homePrayerCardShadowDark;
+
+  /// Prayer Hero accent — dark theme.
+  static const Color homePrayerHeroAccentDark = homeDashboardAccentDark;
+
+  /// Prayer Hero watermark — dark theme.
+  static const Color homePrayerHeroWatermarkDark = homePrayerCardWatermarkDark;
+
+  /// Location chip fill on the Home hero header row.
+  static const Color homeHeaderChipBackground = Color(0xFFF3F1EE);
+
+  /// Hijri and secondary header copy on the Home hero.
+  static const Color homeHeaderSecondaryText = Color(0xFF6B6560);
+
+  /// Location chip fill — dark theme.
+  static const Color homeHeaderChipBackgroundDark = Color(0x33FFFFFF);
+
+  /// Secondary header copy — dark theme.
+  static const Color homeHeaderSecondaryTextDark = Color(0xFFB8B0A8);
+
+  /// Pinned collapsed hero bar — white dashboard chrome.
+  static const Color homeCollapsedHeaderFill = tripGlideCanvas;
+
+  /// Pinned collapsed hero bar hairline.
+  static const Color homeCollapsedHeaderBorder = Color(0xFFE8E4DE);
+
+  /// Pinned collapsed hero bar — dark theme wash.
+  static const Color homeCollapsedHeaderFillDark = Color(0xFF161F1D);
+
+  /// Featured tutor card — warm white on neutral canvas.
+  static const Color homeFeaturedTutorGradientStart = Color(0xFFFDFCFB);
+
+  /// Featured tutor card — soft beige wash.
+  static const Color homeFeaturedTutorGradientEnd = Color(0xFFF5F0E8);
+
+  /// Featured tutor card accent — badge, CTA, glyph.
+  static const Color homeFeaturedTutorAccent = homeDashboardAccent;
+
+  /// Featured tutor filled CTA label on brown pill.
+  static const Color homeFeaturedTutorCtaForeground = Color(0xFFFFFFFF);
+
+  /// Hero geometric pattern ink — brown micro-accent.
+  static const Color homeHeroPatternInk = homeDashboardAccent;
+
+  /// Content sheet top hairline — unused on flat canvas; kept for API compat.
+  static const Color homeContentSheetTopBorder = Color(0xFFE8E4DE);
+
+  /// Featured tutor card ramp start — dark theme.
+  static const Color homeFeaturedTutorGradientStartDark = Color(0xFF243028);
+
+  /// Featured tutor card ramp end — dark theme.
+  static const Color homeFeaturedTutorGradientEndDark = Color(0xFF2A2620);
+
+  /// Featured tutor card accent — dark theme.
+  static const Color homeFeaturedTutorAccentDark = homeDashboardAccentDark;
+
+  /// Featured tutor CTA label — dark theme.
+  static const Color homeFeaturedTutorCtaForegroundDark = Color(0xFF0F1412);
+
+  /// Hero geometric pattern ink — dark theme.
+  static const Color homeHeroPatternInkDark = homeDashboardAccentDark;
+
+  /// Content sheet top hairline — dark theme.
+  static const Color homeContentSheetTopBorderDark = Color(0x33FFFFFF);
+
+  /// Pinned collapsed hero bar border — dark theme.
+  static const Color homeCollapsedHeaderBorderDark = Color(0x28FFFFFF);
+
+  /// Action tile fill — white cards on neutral canvas.
+  static const Color homeQuickActionTileBackground = tripGlideCanvas;
+
+  /// Action tile fill — dark theme.
+  static const Color homeQuickActionTileBackgroundDark = Color(0xFF1C2422);
 
   /// Launch / splash canvas — warm brown brand ink.
   static const Color launchSplashBackground = defaultPrimary;

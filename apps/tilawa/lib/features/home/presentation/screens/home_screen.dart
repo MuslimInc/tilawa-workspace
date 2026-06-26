@@ -15,6 +15,7 @@ import '../bloc/home_dashboard_state.dart';
 import '../widgets/home_dashboard_body.dart';
 import '../widgets/home_dashboard_content_sliver.dart';
 import '../widgets/home_dashboard_hero_sliver.dart';
+import '../widgets/home_screen_background.dart';
 
 /// Main daily dashboard for the app shell.
 class HomeScreen extends StatefulWidget {
@@ -55,46 +56,57 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final Color sheetColor = Theme.of(context).colorScheme.surfaceContainerLow;
+    final ThemeData theme = Theme.of(context);
+    final Color canvasBottom =
+        theme.componentTokens.homeScreen.backgroundGradientEnd;
     final double topInset = MediaQuery.paddingOf(context).top;
 
     return Scaffold(
-      backgroundColor: sheetColor,
-      body: RefreshIndicator(
-        edgeOffset: topInset + kToolbarHeight,
-        onRefresh: () async {
-          final String locale = Localizations.localeOf(context).languageCode;
-          final listeningResumeCubit = context.read<HomeListeningResumeCubit>();
-          context.read<HomeDashboardBloc>().add(
-            HomeDashboardRefreshRequested(localeIdentifier: locale),
-          );
-          await Future.wait([
-            listeningResumeCubit.load(),
-          ]);
-        },
-        child: NotificationListener<ScrollNotification>(
-          onNotification: (notification) =>
-              _onScrollNotification(context, notification),
-          child: BlocBuilder<HomeDashboardBloc, HomeDashboardState>(
-            builder: (context, state) {
-              return CustomScrollView(
-                physics: const AlwaysScrollableScrollPhysics(
-                  parent: BouncingScrollPhysics(),
-                ),
-                slivers: [
-                  ...HomeDashboardHeroSliver.buildSlivers(
-                    context: context,
-                    state: state,
-                    onOpenPrayer: widget.onOpenPrayer,
-                  ),
-                  HomeDashboardContentSliver(
-                    child: const HomeDashboardBody(),
-                  ),
-                ],
+      backgroundColor: canvasBottom,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          const Positioned.fill(child: HomeScreenBackground()),
+          RefreshIndicator(
+            edgeOffset: topInset + kToolbarHeight,
+            onRefresh: () async {
+              final String locale = Localizations.localeOf(
+                context,
+              ).languageCode;
+              final listeningResumeCubit = context
+                  .read<HomeListeningResumeCubit>();
+              context.read<HomeDashboardBloc>().add(
+                HomeDashboardRefreshRequested(localeIdentifier: locale),
               );
+              await Future.wait([
+                listeningResumeCubit.load(),
+              ]);
             },
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (notification) =>
+                  _onScrollNotification(context, notification),
+              child: BlocBuilder<HomeDashboardBloc, HomeDashboardState>(
+                builder: (context, state) {
+                  return CustomScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(
+                      parent: BouncingScrollPhysics(),
+                    ),
+                    slivers: [
+                      ...HomeDashboardHeroSliver.buildSlivers(
+                        context: context,
+                        state: state,
+                        onOpenPrayer: widget.onOpenPrayer,
+                      ),
+                      HomeDashboardContentSliver(
+                        child: const HomeDashboardBody(),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

@@ -1,13 +1,14 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:tilawa/core/bootstrap/startup_blur_shader_warmup.dart';
 import 'package:tilawa/core/telemetry/startup_perf_log.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-/// Frosted glass panel for readable hero metrics on the neutral canvas.
+/// Frosted glass panel for readable hero metrics on the Home canvas.
 class HomeHeroGlassSurface extends StatelessWidget {
   const HomeHeroGlassSurface({
     super.key,
@@ -15,6 +16,7 @@ class HomeHeroGlassSurface extends StatelessWidget {
     this.borderRadius,
     this.padding,
     this.onTap,
+    this.usePrayerHeroTokens = false,
   });
 
   final Widget child;
@@ -22,15 +24,34 @@ class HomeHeroGlassSurface extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final VoidCallback? onTap;
 
+  /// When true, reads fill, border, and shadow from [TilawaHomeScreenTokens].
+  final bool usePrayerHeroTokens;
+
+  /// Subtle backdrop blur on iOS/desktop; Android uses fill + border + shadow.
+  static bool get useBackdropBlur =>
+      !kIsWeb && defaultTargetPlatform != TargetPlatform.android;
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
     final MeMuslimDesignTokens tokens = theme.tokens;
+    final TilawaHomeScreenTokens screenTokens =
+        theme.componentTokens.homeScreen;
     final BorderRadius resolvedRadius =
-        borderRadius ?? BorderRadius.circular(tokens.radiusLarge);
-    final Color fill = colorScheme.surface.withValues(alpha: 0.90);
-    final Color border = colorScheme.outlineVariant.withValues(alpha: 0.48);
+        borderRadius ?? BorderRadius.circular(tokens.radiusExtraLarge);
+
+    final Color fill = usePrayerHeroTokens
+        ? screenTokens.homePrayerHeroBackground
+        : colorScheme.surface.withValues(alpha: 0.90);
+    final Color border = usePrayerHeroTokens
+        ? screenTokens.homePrayerHeroBorder
+        : colorScheme.outlineVariant.withValues(alpha: 0.48);
+    final Color shadowColor = usePrayerHeroTokens
+        ? screenTokens.homePrayerHeroShadow.withValues(
+            alpha: screenTokens.homePrayerHeroShadowOpacity,
+          )
+        : colorScheme.shadow.withValues(alpha: tokens.opacityShadowStrong);
 
     final Widget decoratedChild = DecoratedBox(
       decoration: BoxDecoration(
@@ -47,43 +68,35 @@ class HomeHeroGlassSurface extends StatelessWidget {
       ),
     );
 
-    final Widget frostedPanel = DecoratedBox(
+    final Widget shadowWrapper = DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: resolvedRadius,
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: colorScheme.shadow.withValues(
-              alpha: tokens.opacityShadowStrong,
-            ),
-            blurRadius: tokens.blurShadow * 1.35,
+            color: shadowColor,
+            blurRadius: tokens.blurShadow,
             offset: Offset(0, tokens.shadowOffsetMedium.dy),
           ),
-          BoxShadow(
-            color: colorScheme.primary.withValues(alpha: 0.04),
-            blurRadius: tokens.blurShadow * 0.6,
-            offset: Offset(0, tokens.shadowOffsetSmall.dy),
-          ),
+          if (!usePrayerHeroTokens)
+            BoxShadow(
+              color: colorScheme.primary.withValues(alpha: 0.04),
+              blurRadius: tokens.blurShadow * 0.6,
+              offset: Offset(0, tokens.shadowOffsetSmall.dy),
+            ),
         ],
       ),
       child: ClipRRect(
         borderRadius: resolvedRadius,
-        child: BackdropFilter(
-          filter: ImageFilter.blur(
-            sigmaX: tokens.blurGlass * 1.1,
-            sigmaY: tokens.blurGlass * 1.1,
-          ),
-          child: decoratedChild,
-        ),
+        child: _buildFrostedPanel(context, tokens, decoratedChild),
       ),
     );
 
-    final Widget panel = _DeferredHomeHeroBlur(
-      placeholder: ClipRRect(
-        borderRadius: resolvedRadius,
-        child: decoratedChild,
-      ),
-      child: frostedPanel,
-    );
+    final Widget panel = useBackdropBlur
+        ? _DeferredHomeHeroBlur(
+            placeholder: shadowWrapper,
+            child: shadowWrapper,
+          )
+        : shadowWrapper;
 
     if (onTap == null) {
       return panel;
@@ -98,6 +111,24 @@ class HomeHeroGlassSurface extends StatelessWidget {
         highlightColor: colorScheme.primary.withValues(alpha: 0.04),
         child: panel,
       ),
+    );
+  }
+
+  Widget _buildFrostedPanel(
+    BuildContext context,
+    MeMuslimDesignTokens tokens,
+    Widget decoratedChild,
+  ) {
+    if (!useBackdropBlur) {
+      return decoratedChild;
+    }
+
+    return BackdropFilter(
+      filter: ImageFilter.blur(
+        sigmaX: tokens.blurGlass * 0.45,
+        sigmaY: tokens.blurGlass * 0.45,
+      ),
+      child: decoratedChild,
     );
   }
 }

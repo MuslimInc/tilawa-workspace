@@ -53,13 +53,9 @@ abstract final class HomeHeroPhotoTheme {
 
   /// Representative fill for status-bar contrast and [Material] underlay.
   static Color collapsedBarSampleColor(
-    TilawaCapabilityActionCardTokens capabilityCardTokens,
+    TilawaHomeScreenTokens screenTokens,
   ) {
-    return Color.lerp(
-      capabilityCardTokens.gradientStart,
-      capabilityCardTokens.gradientEnd,
-      0.35,
-    )!;
+    return screenTokens.homeCollapsedHeaderFill;
   }
 
   /// Status bar icons when the hero is fully pinned on primary.
@@ -71,17 +67,25 @@ abstract final class HomeHeroPhotoTheme {
         : SystemUiOverlayStyle.light;
   }
 
-  /// Premium wash for the pinned hero bar — matches [HomePremiumSectionShell].
+  /// Premium wash for the pinned hero bar — canvas-aware frosted surface.
   static BoxDecoration collapsedBarSurfaceDecoration({
     required ColorScheme colorScheme,
     required MeMuslimDesignTokens tokens,
-    required TilawaCapabilityActionCardTokens capabilityCardTokens,
+    required TilawaHomeScreenTokens screenTokens,
   }) {
     return BoxDecoration(
-      gradient: capabilityCardTokens.backgroundGradient(),
+      color: screenTokens.homeCollapsedHeaderFill,
+      border: Border(
+        bottom: BorderSide(
+          color: screenTokens.homeCollapsedHeaderBorder,
+          width: tokens.borderWidthThin,
+        ),
+      ),
       boxShadow: <BoxShadow>[
         BoxShadow(
-          color: colorScheme.shadow.withValues(alpha: tokens.opacityShadow),
+          color: colorScheme.shadow.withValues(
+            alpha: screenTokens.homeCollapsedHeaderShadowOpacity,
+          ),
           offset: tokens.shadowOffsetSmall,
           blurRadius: tokens.spaceSmall.toDouble(),
         ),

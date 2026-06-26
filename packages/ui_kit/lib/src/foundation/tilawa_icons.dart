@@ -50,6 +50,11 @@ abstract final class TilawaIcons {
   static const TilawaSvgIcon athkarMisbaha = TilawaSvgIcon(
     'packages/tilawa_ui_kit/assets/icons/athkar_misbaha_icon.svg',
   );
+
+  /// Monochrome misbaha outline for compact Home tool tiles and nav chrome.
+  static const TilawaSvgIcon tasbih = TilawaSvgIcon(
+    'packages/tilawa_ui_kit/assets/icons/tasbih_outline_icon.svg',
+  );
   static const IconData profile = FluentIcons.person_24_regular;
   static const IconData profileActive = FluentIcons.person_24_filled;
 

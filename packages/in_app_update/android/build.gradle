@@ -48,7 +48,17 @@ def resolveFlutterSdkPath = {
     )
 }()
 
-def flutterEngineVersion = '+'
+// `+` cannot be resolved against download.flutter.io (no maven-metadata.xml).
+// In release builds the Flutter Gradle plugin only injects
+// flutter_embedding_release, so the debug embedding below has no concrete
+// version in the graph and the build fails. Pin to the SDK's engine stamp.
+def flutterEngineVersion = {
+    def stampFile = file("${resolveFlutterSdkPath}/bin/cache/engine.stamp")
+    if (stampFile.exists()) {
+        return "1.0.0-${stampFile.text.trim()}"
+    }
+    return '+'
+}()
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'

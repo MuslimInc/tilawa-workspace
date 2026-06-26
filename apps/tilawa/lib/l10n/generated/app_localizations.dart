@@ -173,13 +173,13 @@ abstract class AppLocalizations {
   /// Title for the daily inspiration section
   ///
   /// In en, this message translates to:
-  /// **'Daily Inspiration'**
+  /// **'Today\'s inspiration'**
   String get homeInspirationTitle;
 
   /// Subtitle for the daily inspiration section
   ///
   /// In en, this message translates to:
-  /// **'A moment of reflection'**
+  /// **'An ayah and dua for your heart'**
   String get homeInspirationSubtitle;
 
   /// Home greeting with display name
@@ -209,7 +209,7 @@ abstract class AppLocalizations {
   /// Home next prayer fallback when no prayer time can be calculated
   ///
   /// In en, this message translates to:
-  /// **'Set your location to see the next prayer.'**
+  /// **'Set your location to see the next prayer time.'**
   String get homeNextPrayerUnavailable;
 
   /// Action to open prayer times from Home
@@ -221,7 +221,7 @@ abstract class AppLocalizations {
   /// Home countdown text when the next prayer is due now
   ///
   /// In en, this message translates to:
-  /// **'It is time now'**
+  /// **'It\'s prayer time'**
   String get homePrayerNow;
 
   /// Home next-prayer countdown under one hour
@@ -251,43 +251,43 @@ abstract class AppLocalizations {
   /// Home carousel subtitle for Smart Khatma promo card
   ///
   /// In en, this message translates to:
-  /// **'Track your reading plan'**
+  /// **'Progress on your khatma'**
   String get homeKhatmaCarouselSubtitle;
 
   /// Home carousel subtitle for Support Tilawa promo card
   ///
   /// In en, this message translates to:
-  /// **'Help keep MeMuslim free for everyone'**
+  /// **'Help keep Tilawa free for everyone'**
   String get homeSupportCarouselSubtitle;
 
   /// Home carousel subtitle for listening history card
   ///
   /// In en, this message translates to:
-  /// **'Pick up where you left off'**
+  /// **'Continue where you left off'**
   String get homeHistoryCarouselSubtitle;
 
   /// Home carousel subtitle for favorites card
   ///
   /// In en, this message translates to:
-  /// **'Saved recitations and surahs'**
+  /// **'Your saved recitations'**
   String get homeFavoritesCarouselSubtitle;
 
   /// Home carousel subtitle for downloads card
   ///
   /// In en, this message translates to:
-  /// **'Listen offline anytime'**
+  /// **'Listen offline'**
   String get homeDownloadsCarouselSubtitle;
 
   /// Home card title for Quran teaching sessions
   ///
   /// In en, this message translates to:
-  /// **'Learn Quran recitation'**
+  /// **'Learn recitation'**
   String get homeSessionsTitle;
 
   /// Home card subtitle for Quran teaching sessions
   ///
   /// In en, this message translates to:
-  /// **'Book sessions with certified teachers'**
+  /// **'One-on-one sessions with a certified hafiz'**
   String get homeSessionsSubtitle;
 
   /// Home dashboard layout toggle tooltip when grid is active
@@ -341,7 +341,7 @@ abstract class AppLocalizations {
   /// Home continue listening row subtitle
   ///
   /// In en, this message translates to:
-  /// **'Continue · {reciter} · {surah}'**
+  /// **'{reciter} · {surah}'**
   String homeListeningResumeSubtitle(String reciter, String surah);
 
   /// Athkar compact card completed state
@@ -518,16 +518,58 @@ abstract class AppLocalizations {
   /// **'Quick Actions'**
   String get homeQuickActionsTitle;
 
+  /// Home section title for the two primary daily action cards
+  ///
+  /// In en, this message translates to:
+  /// **'Your daily worship'**
+  String get homeMainActionsTitle;
+
+  /// Home section title for the compact secondary tools row
+  ///
+  /// In en, this message translates to:
+  /// **'Quick tools'**
+  String get homeQuickToolsTitle;
+
+  /// Eyebrow badge on the featured Learn Quran with Tutor card
+  ///
+  /// In en, this message translates to:
+  /// **'Featured'**
+  String get homeFeaturedTutorEyebrow;
+
+  /// Title on the featured Learn Quran with Tutor card
+  ///
+  /// In en, this message translates to:
+  /// **'Learn Quran with your hafiz'**
+  String get homeFeaturedTutorTitle;
+
+  /// Subtitle on the featured Learn Quran with Tutor card
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your hafiz to master your recitation'**
+  String get homeFeaturedTutorSubtitle;
+
+  /// Call to action button on the featured Learn Quran with Tutor card
+  ///
+  /// In en, this message translates to:
+  /// **'Start learning'**
+  String get homeFeaturedTutorCta;
+
   /// Home quick action tile label for opening the Mushaf reader
   ///
   /// In en, this message translates to:
-  /// **'Quran Reader'**
+  /// **'Mushaf'**
   String get homeQuickQuranReader;
+
+  /// Subtitle for the Quran Reader primary action card
+  ///
+  /// In en, this message translates to:
+  /// **'Read the Quran with reflection'**
+  String get homeQuickQuranReaderSubtitle;
 
   /// Home quick action for Quran teaching sessions with a hafiz
   ///
   /// In en, this message translates to:
-  /// **'Learn Quran with Tutor'**
+  /// **'Learn Quran with your hafiz'**
   String get homeLearnQuranWithTutor;
 
   /// Home quick action for reciters catalog
@@ -539,7 +581,7 @@ abstract class AppLocalizations {
   /// Home More row subtitle for reciters
   ///
   /// In en, this message translates to:
-  /// **'Browse recitations'**
+  /// **'Listen to curated recitations'**
   String get homeQuickRecitersSubtitle;
 
   /// Home quick action for prayer times
@@ -557,7 +599,7 @@ abstract class AppLocalizations {
   /// Home More row subtitle for qibla
   ///
   /// In en, this message translates to:
-  /// **'Find prayer direction'**
+  /// **'Find the Qibla with ease'**
   String get homeQuickQiblaSubtitle;
 
   /// Home More row subtitle for settings
@@ -569,13 +611,13 @@ abstract class AppLocalizations {
   /// Home More row title for tasbeeh counter
   ///
   /// In en, this message translates to:
-  /// **'Tasbeeh'**
+  /// **'Tasbih'**
   String get homeQuickTasbeeh;
 
   /// Home More row subtitle for tasbeeh counter
   ///
   /// In en, this message translates to:
-  /// **'Count dhikr with one tap'**
+  /// **'Dhikr at your fingertips'**
   String get homeQuickTasbeehSubtitle;
 
   /// Home quick action for athkar
@@ -583,6 +625,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Athkar'**
   String get homeQuickAthkar;
+
+  /// Subtitle for the Athkar primary action card
+  ///
+  /// In en, this message translates to:
+  /// **'Your daily athkar'**
+  String get homeQuickAthkarSubtitle;
 
   /// Home quick action for settings
   ///
@@ -659,7 +707,7 @@ abstract class AppLocalizations {
   /// Home daily ayah card label
   ///
   /// In en, this message translates to:
-  /// **'Daily ayah'**
+  /// **'Ayah of the day'**
   String get homeDailyAyahLabel;
 
   /// Home daily ayah body
@@ -677,7 +725,7 @@ abstract class AppLocalizations {
   /// Home daily dua card label
   ///
   /// In en, this message translates to:
-  /// **'Daily dua'**
+  /// **'Dua of the day'**
   String get homeDailyDuaLabel;
 
   /// Home daily dua body
@@ -1121,7 +1169,7 @@ abstract class AppLocalizations {
   /// Continue listening section title
   ///
   /// In en, this message translates to:
-  /// **'Continue Listening'**
+  /// **'Continue listening'**
   String get continueListening;
 
   /// Play button text
@@ -4991,13 +5039,13 @@ abstract class AppLocalizations {
   /// Label for the more-options overflow menu button
   ///
   /// In en, this message translates to:
-  /// **'More options'**
+  /// **'More'**
   String get moreOptions;
 
   /// Subtitle for the More section on the home dashboard
   ///
   /// In en, this message translates to:
-  /// **'Library, favorites, and more'**
+  /// **'Your library and more options'**
   String get homeMoreOptionsSubtitle;
 
   /// Support Tilawa screen and settings entry title
