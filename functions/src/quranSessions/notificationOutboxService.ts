@@ -5,6 +5,10 @@ import { nowServer } from "./sessionLifecycleService";
 
 export type SessionNotificationKind =
   | "bookingConfirmed"
+  | "bookingRequestReceived"
+  | "bookingRequestAccepted"
+  | "bookingRequestRejected"
+  | "bookingRequestExpired"
   | "cancellation"
   | "rescheduleRequested"
   | "rescheduleConfirmed"
@@ -81,6 +85,30 @@ export function buildNotificationCopy(
         title: "Session booked",
         body: "Your Quran session is confirmed.",
         actionType: "quran_session_booking_confirmed",
+      };
+    case "bookingRequestReceived":
+      return {
+        title: "طلب حجز جديد",
+        body: "لديك طلب حجز حصة بانتظار موافقتك.",
+        actionType: "quran_session_booking_request_received",
+      };
+    case "bookingRequestAccepted":
+      return {
+        title: "تم قبول الحصة",
+        body: "يمكنك الانضمام في موعد الحصة.",
+        actionType: "quran_session_booking_request_accepted",
+      };
+    case "bookingRequestRejected":
+      return {
+        title: "اعتذر المحفظ عن قبول الحصة",
+        body: "يمكنك اختيار موعد آخر.",
+        actionType: "quran_session_booking_request_rejected",
+      };
+    case "bookingRequestExpired":
+      return {
+        title: "انتهت صلاحية طلب الحجز",
+        body: "لم يتم قبول طلب الحجز في الوقت المحدد.",
+        actionType: "quran_session_booking_request_expired",
       };
     case "cancellation":
       return {

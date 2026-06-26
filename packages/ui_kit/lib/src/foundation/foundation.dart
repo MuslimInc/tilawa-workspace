@@ -1,4 +1,5 @@
 export 'app_colors.dart';
+export 'avatar_initials/avatar_initials.dart';
 export 'tilawa_icons.dart';
 export 'app_theme.dart';
 export 'breakpoints.dart';

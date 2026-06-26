@@ -50,6 +50,9 @@ class _HomeQuranResumeLoadingCard extends StatelessWidget {
     final Color shimmerBase = featured
         ? cardTokens.gradientStart.withValues(alpha: 0.3)
         : theme.colorScheme.surfaceContainerHigh;
+    final Color shimmerHighlight = featured
+        ? cardTokens.foregroundColor.withValues(alpha: 0.35)
+        : theme.colorScheme.surface;
 
     return HomeDashboardCard(
       surface: TilawaCardSurface.raised,
@@ -66,8 +69,8 @@ class _HomeQuranResumeLoadingCard extends StatelessWidget {
               Container(
                 width: tokens.iconSizeLarge,
                 height: tokens.iconSizeLarge,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
+                decoration: BoxDecoration(
+                  color: shimmerHighlight,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -80,7 +83,7 @@ class _HomeQuranResumeLoadingCard extends StatelessWidget {
                       width: 120,
                       height: tokens.spaceMedium,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: shimmerHighlight,
                         borderRadius: BorderRadius.circular(tokens.radiusSmall),
                       ),
                     ),
@@ -89,7 +92,7 @@ class _HomeQuranResumeLoadingCard extends StatelessWidget {
                       width: 80,
                       height: tokens.spaceSmall,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: shimmerHighlight,
                         borderRadius: BorderRadius.circular(tokens.radiusSmall),
                       ),
                     ),

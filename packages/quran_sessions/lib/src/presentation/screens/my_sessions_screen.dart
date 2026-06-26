@@ -180,8 +180,15 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
                               ),
                               isJoinLoading:
                                   success.joinInProgress == session.id,
-                              onJoin: () => _requestJoin(session),
-                              onCancel: () => _confirmCancel(session),
+                              onJoin:
+                                  session
+                                      .effectiveLifecycleStatus
+                                      .canJoinSession
+                                  ? () => _requestJoin(session)
+                                  : null,
+                              onCancel: canStudentCancelQuranSession(session)
+                                  ? () => _confirmCancel(session)
+                                  : null,
                             ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,

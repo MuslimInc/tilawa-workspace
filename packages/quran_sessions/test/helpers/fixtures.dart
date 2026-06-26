@@ -2,6 +2,7 @@ import 'package:quran_sessions/src/domain/entities/quran_booking.dart';
 import 'package:quran_sessions/src/domain/entities/quran_session.dart';
 import 'package:quran_sessions/src/domain/entities/quran_teacher.dart';
 import 'package:quran_sessions/src/domain/entities/session_call_type.dart';
+import 'package:quran_sessions/src/domain/entities/session_lifecycle_status.dart';
 import 'package:quran_sessions/src/domain/entities/session_price.dart';
 import 'package:quran_sessions/src/domain/entities/session_pricing_type.dart';
 import 'package:quran_sessions/src/domain/entities/teacher_availability.dart';
@@ -124,6 +125,7 @@ QuranSession makeSession({
   String studentId = 'student_1',
   String teacherId = 'teacher_1',
   QuranSessionStatus status = QuranSessionStatus.scheduled,
+  SessionLifecycleStatus? lifecycleStatus,
   DateTime? startsAt,
   DateTime? endsAt,
 }) {
@@ -137,6 +139,7 @@ QuranSession makeSession({
     endsAt: endsAt ?? start.add(const Duration(hours: 1)),
     callType: SessionCallType.externalMeeting,
     status: status,
+    lifecycleStatus: lifecycleStatus,
     meetingLink: 'https://meet.example.com/room',
   );
 }

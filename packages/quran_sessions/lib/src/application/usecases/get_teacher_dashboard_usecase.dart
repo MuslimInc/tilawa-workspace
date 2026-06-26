@@ -5,26 +5,25 @@ import '../../domain/entities/teacher_availability.dart';
 import '../../domain/entities/teacher_profile.dart';
 import '../../domain/entities/user_profile.dart';
 import '../../domain/entities/weekly_schedule.dart';
-import '../../domain/entities/generated_slot.dart';
 import '../../domain/entities/market_scheduling_config.dart';
+import '../../domain/entities/session_lifecycle_status.dart';
 import '../../domain/failures/quran_sessions_failure.dart';
 import '../cache/cache_freshness_policy.dart';
 import '../cache/quran_session_cache_store.dart';
 import '../cache/session_cache_key.dart';
-import '../../domain/repositories/booked_slot_lock_repository.dart';
 import '../../domain/repositories/market_scheduling_config_repository.dart';
 import '../../domain/repositories/schedule_repository.dart';
 import '../../domain/repositories/session_repository.dart';
 import '../../domain/repositories/teacher_profile_repository.dart';
 import '../../domain/repositories/user_profile_repository.dart';
-import '../../domain/services/slot_generator.dart';
-import '../../domain/services/teacher_availability_sort.dart';
+import '../../domain/usecases/get_teacher_availability_usecase.dart';
 
 class TeacherDashboardResult {
   const TeacherDashboardResult({
     required this.profile,
     required this.schedulingConfig,
     required this.schedule,
+    required this.pendingBookingRequests,
     required this.upcomingSessions,
     required this.availability,
   });
@@ -32,6 +31,7 @@ class TeacherDashboardResult {
   final UserProfile profile;
   final MarketSchedulingConfig schedulingConfig;
   final WeeklySchedule? schedule;
+  final List<QuranSession> pendingBookingRequests;
   final List<QuranSession> upcomingSessions;
   final List<TeacherAvailability> availability;
 }
@@ -43,8 +43,7 @@ class GetTeacherDashboardUseCase {
     required this.scheduleRepository,
     required this.sessionRepository,
     required this.teacherProfileRepository,
-    required this.bookedSlotLocks,
-    this.slotGenerator = const SlotGenerator(),
+    required this.getTeacherAvailability,
     required this.cacheStore,
     this.currentTime,
   });
@@ -54,8 +53,7 @@ class GetTeacherDashboardUseCase {
   final ScheduleRepository scheduleRepository;
   final SessionRepository sessionRepository;
   final TeacherProfileRepository teacherProfileRepository;
-  final BookedSlotLockRepository bookedSlotLocks;
-  final SlotGenerator slotGenerator;
+  final GetTeacherAvailabilityUseCase getTeacherAvailability;
   final QuranSessionCacheStore cacheStore;
   final DateTime Function()? currentTime;
 
@@ -110,7 +108,7 @@ class GetTeacherDashboardUseCase {
         },
       );
 
-      final upcomingSessions = await cacheStore.getOrFetch<List<QuranSession>>(
+      final allUpcoming = await cacheStore.getOrFetch<List<QuranSession>>(
         key: SessionCacheKey.teacherDashboardSessions(teacherProfileId),
         ttl: CacheFreshnessPolicy.dashboardSessionsTtl,
         fetcher: () async {
@@ -121,6 +119,17 @@ class GetTeacherDashboardUseCase {
         },
       );
 
+      final pendingBookingRequests = <QuranSession>[];
+      final upcomingSessions = <QuranSession>[];
+      for (final session in allUpcoming) {
+        if (session.effectiveLifecycleStatus ==
+            SessionLifecycleStatus.pendingTutorApproval) {
+          pendingBookingRequests.add(session);
+        } else {
+          upcomingSessions.add(session);
+        }
+      }
+
       final horizonDays = schedulingConfig.bookingHorizonDays < 14
           ? schedulingConfig.bookingHorizonDays
           : 14;
@@ -130,12 +139,14 @@ class GetTeacherDashboardUseCase {
           .getOrFetch<List<TeacherAvailability>>(
             key: SessionCacheKey.teacherAvailability(teacherProfileId),
             ttl: CacheFreshnessPolicy.dashboardSessionsTtl,
-            fetcher: () => _loadAvailability(
-              teacherProfileId: teacherProfileId,
-              schedule: schedule,
-              from: now,
-              to: now.add(horizon),
-            ),
+            fetcher: () async {
+              final result = await getTeacherAvailability(
+                teacherProfileId,
+                from: now,
+                to: now.add(horizon),
+              );
+              return result.fold((f) => throw f, (slots) => slots);
+            },
           );
 
       return Right(
@@ -143,6 +154,7 @@ class GetTeacherDashboardUseCase {
           profile: userProfile,
           schedulingConfig: schedulingConfig,
           schedule: schedule,
+          pendingBookingRequests: pendingBookingRequests,
           upcomingSessions: upcomingSessions,
           availability: availability,
         ),
@@ -152,61 +164,6 @@ class GetTeacherDashboardUseCase {
     } catch (e) {
       return const Left(UnknownFailure());
     }
-  }
-
-  Future<List<TeacherAvailability>> _loadAvailability({
-    required String teacherProfileId,
-    required WeeklySchedule? schedule,
-    required DateTime from,
-    required DateTime to,
-  }) async {
-    if (schedule == null || schedule.isEmpty) {
-      return const [];
-    }
-
-    final overrideQueryTo = DateTime(to.year, to.month, to.day).add(
-      const Duration(days: 1),
-    );
-    final overridesResult = await scheduleRepository.getOverrides(
-      teacherProfileId,
-      from: from,
-      to: overrideQueryTo,
-    );
-    final overrides = overridesResult.fold((f) => throw f, (value) => value);
-
-    final bookedStartsResult = await bookedSlotLocks.getActiveBookedStarts(
-      teacherProfileId,
-      windowStart: from,
-      windowEnd: to,
-      now: currentTime?.call() ?? DateTime.now(),
-    );
-    final bookedStarts = bookedStartsResult.fold(
-      (f) => throw f,
-      (value) => value,
-    );
-
-    final generated = slotGenerator.generate(
-      schedule: schedule,
-      overrides: overrides,
-      bookedStartsUtc: bookedStarts,
-      windowStart: from,
-      windowEnd: to,
-      now: currentTime?.call() ?? DateTime.now(),
-    );
-
-    return sortTeacherAvailabilityByStart(
-      generated.map(_toTeacherAvailability).toList(),
-    );
-  }
-
-  TeacherAvailability _toTeacherAvailability(GeneratedSlot slot) {
-    return TeacherAvailability(
-      slotId: slot.slotId,
-      teacherId: slot.teacherId,
-      startsAt: slot.startUtc,
-      endsAt: slot.endUtc,
-      isBooked: false,
-    );
   }
 
   /// Resolves the effective scheduling config for [countryCode].

@@ -837,6 +837,8 @@ class _BottomNavBarState extends State<_BottomNavBar>
                                               widget.selectedIndex == i,
                                           onTap: () =>
                                               _notifyDestinationSelected(i),
+                                          onLongPress: () =>
+                                              _startLongPressSession(i),
                                           pulseAnimation: _pulsingIndex == i
                                               ? _pulseAnimation
                                               : null,
@@ -1330,9 +1332,10 @@ class _NavButton extends StatelessWidget {
     required this.destination,
     required this.isSelected,
     required this.onTap,
+    this.onLongPress,
     this.pulseAnimation,
     this.pulseKey,
-  }) : onLongPress = null;
+  });
 
   final TilawaNavDestination destination;
   final bool isSelected;

@@ -18,6 +18,7 @@ class SessionAggregate extends Equatable {
     this.rescheduleCount = 0,
     this.cancellationReason,
     this.lastActionReason,
+    this.rejectionReason,
     this.paymentReference,
     this.sessionId,
   });
@@ -34,6 +35,7 @@ class SessionAggregate extends Equatable {
   final int rescheduleCount;
   final String? cancellationReason;
   final String? lastActionReason;
+  final String? rejectionReason;
   final String? paymentReference;
 
   /// Linked operational session document id (from booking).
@@ -48,6 +50,7 @@ class SessionAggregate extends Equatable {
     int? rescheduleCount,
     String? cancellationReason,
     String? lastActionReason,
+    String? rejectionReason,
     String? paymentReference,
     String? sessionId,
   }) {
@@ -64,6 +67,7 @@ class SessionAggregate extends Equatable {
       rescheduleCount: rescheduleCount ?? this.rescheduleCount,
       cancellationReason: cancellationReason ?? this.cancellationReason,
       lastActionReason: lastActionReason ?? this.lastActionReason,
+      rejectionReason: rejectionReason ?? this.rejectionReason,
       paymentReference: paymentReference ?? this.paymentReference,
       sessionId: sessionId ?? this.sessionId,
     );
@@ -83,6 +87,7 @@ class SessionAggregate extends Equatable {
     rescheduleCount,
     cancellationReason,
     lastActionReason,
+    rejectionReason,
     paymentReference,
     sessionId,
   ];

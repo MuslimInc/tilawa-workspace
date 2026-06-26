@@ -50,7 +50,11 @@ void main() {
         scheduleRepository: schedules,
         sessionRepository: sessions,
         teacherProfileRepository: teacherProfiles,
-        bookedSlotLocks: locks,
+        getTeacherAvailability: buildGetTeacherAvailabilityUseCase(
+          scheduleRepository: schedules,
+          bookedSlotLockRepository: locks,
+          now: () => now,
+        ),
         cacheStore: cache,
         currentTime: () => now,
       );
@@ -67,7 +71,7 @@ void main() {
         check(result.isRight()).isTrue();
         check(teacherProfiles.getProfileByIdCallCount).equals(1);
         check(users.getProfileCallCount).equals(1);
-        check(schedules.getScheduleCallCount).equals(1);
+        check(schedules.getScheduleCallCount).equals(2);
         check(sessions.getTeacherUpcomingSessionsCallCount).equals(1);
       },
     );
@@ -80,7 +84,7 @@ void main() {
 
         check(teacherProfiles.getProfileByIdCallCount).equals(1);
         check(users.getProfileCallCount).equals(1);
-        check(schedules.getScheduleCallCount).equals(1);
+        check(schedules.getScheduleCallCount).equals(2);
         check(sessions.getTeacherUpcomingSessionsCallCount).equals(1);
       },
     );
@@ -94,7 +98,7 @@ void main() {
       );
 
       check(teacherProfiles.getProfileByIdCallCount).equals(2);
-      check(schedules.getScheduleCallCount).equals(2);
+      check(schedules.getScheduleCallCount).equals(4);
       check(sessions.getTeacherUpcomingSessionsCallCount).equals(2);
     });
 
@@ -113,7 +117,7 @@ void main() {
 
       check(first.isLeft()).isTrue();
       check(second.isRight()).isTrue();
-      check(schedules.getScheduleCallCount).equals(2);
+      check(schedules.getScheduleCallCount).equals(3);
     });
 
     test(
@@ -132,7 +136,11 @@ void main() {
           scheduleRepository: schedules,
           sessionRepository: sessions,
           teacherProfileRepository: teacherProfiles,
-          bookedSlotLocks: locks,
+          getTeacherAvailability: buildGetTeacherAvailabilityUseCase(
+            scheduleRepository: schedules,
+            bookedSlotLockRepository: locks,
+            now: () => now,
+          ),
           cacheStore: MemoryCacheStore(),
           currentTime: () => now,
         );

@@ -45,6 +45,7 @@ final class PendingSlotDelete extends Equatable {
 
 final class TeacherDashboardSuccess extends TeacherDashboardState {
   const TeacherDashboardSuccess({
+    required this.pendingBookingRequests,
     required this.upcomingSessions,
     required this.availability,
     required this.schedulingConfig,
@@ -61,8 +62,11 @@ final class TeacherDashboardSuccess extends TeacherDashboardState {
     this.undoableSlotId,
     this.slotFailure,
     this.refreshDiscardedPendingCount,
+    this.bookingRequestActionInProgress,
+    this.bookingRequestFailure,
   });
 
+  final List<QuranSession> pendingBookingRequests;
   final List<QuranSession> upcomingSessions;
   final List<TeacherAvailability> availability;
 
@@ -101,10 +105,17 @@ final class TeacherDashboardSuccess extends TeacherDashboardState {
   /// One-shot: pending optimistic deletes discarded on refresh (for UI toast).
   final int? refreshDiscardedPendingCount;
 
+  /// Booking id while accept/reject callable is in flight.
+  final String? bookingRequestActionInProgress;
+
+  /// Last accept/reject failure for snackbar.
+  final QuranSessionsFailure? bookingRequestFailure;
+
   bool get weekScopedDashboard => schedulingConfig.weekScopedDashboardEnabled;
 
   @override
   List<Object?> get props => [
+    pendingBookingRequests,
     upcomingSessions,
     availability,
     schedulingConfig,
@@ -121,9 +132,12 @@ final class TeacherDashboardSuccess extends TeacherDashboardState {
     undoableSlotId,
     slotFailure,
     refreshDiscardedPendingCount,
+    bookingRequestActionInProgress,
+    bookingRequestFailure,
   ];
 
   TeacherDashboardSuccess copyWith({
+    List<QuranSession>? pendingBookingRequests,
     List<QuranSession>? upcomingSessions,
     List<TeacherAvailability>? availability,
     MarketSchedulingConfig? schedulingConfig,
@@ -140,12 +154,18 @@ final class TeacherDashboardSuccess extends TeacherDashboardState {
     String? undoableSlotId,
     QuranSessionsFailure? slotFailure,
     int? refreshDiscardedPendingCount,
+    String? bookingRequestActionInProgress,
+    QuranSessionsFailure? bookingRequestFailure,
     bool clearSlotFailure = false,
     bool clearUndoableSlotId = false,
     bool clearRefreshDiscardedPendingCount = false,
     bool clearFridayReviewNextWeekKey = false,
     bool clearDismissedFridayReminderWeekKey = false,
+    bool clearBookingRequestActionInProgress = false,
+    bool clearBookingRequestFailure = false,
   }) => TeacherDashboardSuccess(
+    pendingBookingRequests:
+        pendingBookingRequests ?? this.pendingBookingRequests,
     upcomingSessions: upcomingSessions ?? this.upcomingSessions,
     availability: availability ?? this.availability,
     schedulingConfig: schedulingConfig ?? this.schedulingConfig,
@@ -173,6 +193,13 @@ final class TeacherDashboardSuccess extends TeacherDashboardState {
     refreshDiscardedPendingCount: clearRefreshDiscardedPendingCount
         ? null
         : (refreshDiscardedPendingCount ?? this.refreshDiscardedPendingCount),
+    bookingRequestActionInProgress: clearBookingRequestActionInProgress
+        ? null
+        : (bookingRequestActionInProgress ??
+              this.bookingRequestActionInProgress),
+    bookingRequestFailure: clearBookingRequestFailure
+        ? null
+        : (bookingRequestFailure ?? this.bookingRequestFailure),
   );
 }
 

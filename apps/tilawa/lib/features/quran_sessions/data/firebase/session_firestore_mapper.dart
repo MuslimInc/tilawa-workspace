@@ -46,6 +46,7 @@ SessionAggregate mapBookingDocToAggregate(
     rescheduleCount: data['rescheduleCount'] as int? ?? 0,
     cancellationReason: data['cancellationReason'] as String?,
     lastActionReason: data['lastActionReason'] as String?,
+    rejectionReason: data['rejectionReason'] as String?,
     paymentReference: data['paymentReference'] as String?,
     sessionId: data['sessionId'] as String?,
   );

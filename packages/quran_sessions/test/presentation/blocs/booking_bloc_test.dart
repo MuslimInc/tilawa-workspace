@@ -11,6 +11,7 @@ import 'package:quran_sessions/src/domain/entities/session_call_type.dart';
 import 'package:quran_sessions/src/domain/entities/user_profile.dart';
 import 'package:quran_sessions/src/domain/entities/weekly_schedule.dart';
 import 'package:quran_sessions/src/domain/failures/quran_sessions_failure.dart';
+import 'package:quran_sessions/src/domain/usecases/get_teacher_profile_by_id_usecase.dart';
 import 'package:quran_sessions/src/domain/usecases/get_teacher_availability_usecase.dart';
 import 'package:quran_sessions/src/domain/usecases/validate_booking_eligibility_usecase.dart';
 import 'package:quran_sessions/src/presentation/blocs/booking/booking_bloc.dart';
@@ -85,7 +86,7 @@ void main() {
         teacherRepository: teacherRepo,
         marketConfigRepository: marketConfigRepo,
       ),
-      teacherProfiles: teacherProfileRepo,
+      getTeacherProfile: GetTeacherProfileByIdUseCase(teacherProfileRepo),
     );
 
     final slots = await getAvailability(
@@ -150,7 +151,7 @@ void main() {
             teacherRepository: teacherRepo,
             marketConfigRepository: marketConfigRepo,
           ),
-          teacherProfiles: teacherProfileRepo,
+          getTeacherProfile: GetTeacherProfileByIdUseCase(teacherProfileRepo),
         );
       },
       act: (b) => b.add(
@@ -199,7 +200,7 @@ void main() {
             teacherRepository: teacherRepo,
             marketConfigRepository: marketConfigRepo,
           ),
-          teacherProfiles: teacherProfileRepo,
+          getTeacherProfile: GetTeacherProfileByIdUseCase(teacherProfileRepo),
           onBookingLostDueToNoAvailability: bookingLostEvents.add,
           resolveMarketCode: (_) async => 'EG',
         );
@@ -294,7 +295,7 @@ void main() {
             teacherRepository: teacherRepo,
             marketConfigRepository: marketConfigRepo,
           ),
-          teacherProfiles: teacherProfileRepo,
+          getTeacherProfile: GetTeacherProfileByIdUseCase(teacherProfileRepo),
         );
       },
       act: (b) => b.add(

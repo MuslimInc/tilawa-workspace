@@ -8,6 +8,7 @@ class QuranSessionDto {
     required this.endsAt,
     required this.callType,
     required this.status,
+    this.lifecycleStatus,
     this.meetingLink,
     this.callRoomId,
     this.bookingType,
@@ -26,6 +27,7 @@ class QuranSessionDto {
   final String endsAt;
   final String callType;
   final String status;
+  final String? lifecycleStatus;
   final String? meetingLink;
   final String? callRoomId;
   final String? bookingType;
@@ -45,6 +47,7 @@ class QuranSessionDto {
         endsAt: json['ends_at'] as String,
         callType: json['call_type'] as String,
         status: json['status'] as String,
+        lifecycleStatus: json['lifecycle_status'] as String?,
         meetingLink: json['meeting_link'] as String?,
         callRoomId: json['call_room_id'] as String?,
         bookingType: json['booking_type'] as String?,
@@ -64,6 +67,7 @@ class QuranSessionDto {
     'ends_at': endsAt,
     'call_type': callType,
     'status': status,
+    'lifecycle_status': lifecycleStatus,
     'meeting_link': meetingLink,
     'call_room_id': callRoomId,
     'booking_type': bookingType,

@@ -181,7 +181,11 @@ class QuranSessionsMvpStore {
       avatarUrl: '',
       gender: UserGender.male,
       verificationStatus: TeacherVerificationStatus.verified,
-      supportedCallTypes: [SessionCallType.externalMeeting],
+      supportedCallTypes: [
+        SessionCallType.externalMeeting,
+        SessionCallType.voiceCall,
+        SessionCallType.videoCall,
+      ],
       pricingType: SessionPricingType.fixedPerSession,
       price: SessionPrice(
         amount: 600,

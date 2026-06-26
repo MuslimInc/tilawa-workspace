@@ -95,7 +95,7 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get guardianApprovalBody =>
-      'A parent or guardian must sign in on this device and confirm that they allow Quran Sessions bookings for this student account.';
+      'A parent or guardian must sign in on this device and confirm that they allow QuranTutor bookings for this student account.';
 
   @override
   String get guardianApprovalStudentIdLabel => 'Student account ID';
@@ -280,7 +280,7 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get profileCityRequired => 'City is required.';
 
   @override
-  String get quranSessionsHomeTitle => 'Learn Quran recitation';
+  String get quranSessionsHomeTitle => 'QuranTutor';
 
   @override
   String get mySessionsTitle => 'My sessions';
@@ -348,11 +348,11 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get sessionModeVoiceBetaNote =>
-      'Free Beta: voice uses a placeholder join until in-app RTC ships.';
+      'Voice sessions use in-app calling when your teacher and device support it.';
 
   @override
   String get sessionModeVideoBetaNote =>
-      'Free Beta: video uses a placeholder join until in-app RTC ships.';
+      'Video sessions use in-app calling when your teacher and device support it.';
 
   @override
   String bookingVoiceVideoProviderNote(String provider) {
@@ -511,7 +511,7 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String upcomingSessionsSection(int count) {
-    return 'Upcoming ($count)';
+    return 'Upcoming sessions ($count)';
   }
 
   @override
@@ -567,6 +567,33 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   @override
   String get cancelPolicyNoRefund =>
       'No refund applies for cancellations at this time.';
+
+  @override
+  String get tutorCancelSessionDialogTitle => 'Cancel session?';
+
+  @override
+  String get tutorCancelSessionDialogMessage =>
+      'The student will be notified and will not be able to join this session.';
+
+  @override
+  String get tutorCancelSessionAction => 'Cancel session';
+
+  @override
+  String get tutorCancelSessionGoBack => 'Go back';
+
+  @override
+  String get tutorCancelSessionSuccess => 'Session cancelled.';
+
+  @override
+  String get tutorCancelSessionError =>
+      'Could not cancel the session. Please try again.';
+
+  @override
+  String get sessionCancelledByTutorTitle =>
+      'Your tutor cancelled this session';
+
+  @override
+  String get sessionCancelledByTutorSubtitle => 'You can choose another time';
 
   @override
   String get rescheduleSessionTitle => 'Reschedule session';
@@ -712,6 +739,32 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get joinSession => 'Join';
+
+  @override
+  String get sessionJoinStateNotStarted =>
+      'Join opens 15 minutes before your session starts.';
+
+  @override
+  String get sessionJoinStateJoinAvailable => 'You can join now.';
+
+  @override
+  String get sessionJoinStateJoining => 'Connecting to your session…';
+
+  @override
+  String get sessionJoinStateJoined => 'You joined this session.';
+
+  @override
+  String get sessionJoinStateFailed =>
+      'Could not join. Try again or contact support.';
+
+  @override
+  String get sessionJoinStateEnded => 'This session has ended.';
+
+  @override
+  String get sessionJoinStateCancelled => 'This session was cancelled.';
+
+  @override
+  String get sessionCancelledSuccess => 'Session cancelled.';
 
   @override
   String get noSlotsAvailable => 'No slots available';
@@ -1734,7 +1787,132 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get sessionActionRejectBooking => 'Reject booking';
 
   @override
+  String get bookingRequestSentTitle => 'Booking request sent';
+
+  @override
+  String get bookingRequestSentSubtitle => 'Waiting for tutor approval';
+
+  @override
+  String get bookingAcceptedTitle => 'Session accepted';
+
+  @override
+  String get bookingAcceptedSubtitle => 'You can join at session time';
+
+  @override
+  String get bookingRejectedTitle => 'Tutor declined this session';
+
+  @override
+  String get bookingRejectedSubtitle => 'You can choose another time';
+
+  @override
+  String get sendBookingRequest => 'Send booking request';
+
+  @override
+  String get sessionStatusPendingTutorApproval => 'Pending approval';
+
+  @override
+  String get sessionStatusRejectedByTutor => 'Declined';
+
+  @override
+  String teacherPendingBookingRequestsSection(int count) {
+    return 'Booking requests ($count)';
+  }
+
+  @override
+  String get teacherPendingBookingRequestsEmptyTitle =>
+      'No booking requests right now';
+
+  @override
+  String get teacherPendingBookingRequestsEmptySubtitle =>
+      'Student requests will appear here';
+
+  @override
+  String get teacherAcceptBookingRequest => 'Accept';
+
+  @override
+  String get teacherRejectBookingRequest => 'Decline';
+
+  @override
+  String get tutorRejectBookingSheetTitle => 'Decline booking request?';
+
+  @override
+  String get tutorRejectBookingSheetBody =>
+      'You can share a reason with the student, or decline without one.';
+
+  @override
+  String get tutorRejectBookingReasonLabel => 'Reason for declining';
+
+  @override
+  String get tutorRejectBookingReasonHint => 'e.g. This time does not work';
+
+  @override
+  String get tutorRejectBookingConfirmAction => 'Decline request';
+
+  @override
+  String get tutorRejectBookingGoBack => 'Go back';
+
+  @override
+  String get tutorRejectBookingReasonTooLong => 'Reason is too long';
+
+  @override
+  String get tutorCancelSessionFromCard => 'Cancel';
+
+  @override
+  String get sessionLifecyclePendingTutorApproval => 'Pending tutor approval';
+
+  @override
+  String get sessionLifecycleRejectedByTutor => 'Rejected by tutor';
+
+  @override
+  String get sessionActionSubmitBookingRequest => 'Submit booking request';
+
+  @override
+  String get sessionActionAcceptBookingRequest => 'Accept booking request';
+
+  @override
+  String get sessionActionRejectBookingRequest => 'Reject booking request';
+
+  @override
+  String get sessionActionExpireTutorApproval => 'Expire tutor approval';
+
+  @override
   String sessionTimelineStatusTransition(String previous, String next) {
     return '$previous → $next';
+  }
+
+  @override
+  String get tutorDashboardStudentFallback => 'Student';
+
+  @override
+  String get teacherDashboardLoadError =>
+      'Could not load sessions. Please try again.';
+
+  @override
+  String get tutorSessionStatusPendingApproval => 'Awaiting your approval';
+
+  @override
+  String get tutorSessionStatusAccepted => 'Accepted';
+
+  @override
+  String get tutorSessionStatusRejected => 'Declined';
+
+  @override
+  String get tutorSessionStatusCancelledByTutor => 'You cancelled';
+
+  @override
+  String get tutorSessionStatusCancelledByStudent => 'Student cancelled';
+
+  @override
+  String get tutorSessionStatusCompleted => 'Completed';
+
+  @override
+  String get tutorSessionStatusExpired => 'Expired';
+
+  @override
+  String get tutorSessionJoinNotYet => 'Join is not open yet';
+
+  @override
+  String tutorSessionDurationMinutes(int count) {
+    return '$count min';
   }
 }

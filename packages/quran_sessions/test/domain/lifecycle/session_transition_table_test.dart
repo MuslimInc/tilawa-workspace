@@ -251,6 +251,7 @@ const List<_ExpectedRow> _expectedRows = [
       SessionLifecycleStatus.scheduled,
       SessionLifecycleStatus.confirmed,
       SessionLifecycleStatus.pendingPayment,
+      SessionLifecycleStatus.pendingTutorApproval,
     },
     to: SessionLifecycleStatus.cancelledByStudent,
     allowedActors: {ActorRole.student},
@@ -273,6 +274,7 @@ const List<_ExpectedRow> _expectedRows = [
     from: {
       SessionLifecycleStatus.draft,
       SessionLifecycleStatus.pendingPayment,
+      SessionLifecycleStatus.pendingTutorApproval,
       SessionLifecycleStatus.scheduled,
       SessionLifecycleStatus.confirmed,
       SessionLifecycleStatus.inProgress,
@@ -359,6 +361,7 @@ const List<_ExpectedRow> _expectedRows = [
     from: {
       SessionLifecycleStatus.draft,
       SessionLifecycleStatus.pendingPayment,
+      SessionLifecycleStatus.pendingTutorApproval,
       SessionLifecycleStatus.scheduled,
       SessionLifecycleStatus.confirmed,
       SessionLifecycleStatus.inProgress,
@@ -375,6 +378,7 @@ const List<_ExpectedRow> _expectedRows = [
       SessionLifecycleStatus.compensated,
       SessionLifecycleStatus.refunded,
       SessionLifecycleStatus.expired,
+      SessionLifecycleStatus.rejectedByTutor,
     },
     to: SessionLifecycleStatus.refunded,
     allowedActors: {ActorRole.admin, ActorRole.system},

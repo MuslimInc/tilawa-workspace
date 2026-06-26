@@ -539,7 +539,7 @@ abstract class AppLocalizations {
   /// Title on the featured Learn Quran with Tutor card
   ///
   /// In en, this message translates to:
-  /// **'Learn Quran with your hafiz'**
+  /// **'QuranTutor'**
   String get homeFeaturedTutorTitle;
 
   /// Subtitle on the featured Learn Quran with Tutor card

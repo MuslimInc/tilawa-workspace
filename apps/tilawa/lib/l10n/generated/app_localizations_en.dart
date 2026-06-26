@@ -261,7 +261,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeFeaturedTutorEyebrow => 'Featured';
 
   @override
-  String get homeFeaturedTutorTitle => 'Learn Quran with your hafiz';
+  String get homeFeaturedTutorTitle => 'QuranTutor';
 
   @override
   String get homeFeaturedTutorSubtitle =>

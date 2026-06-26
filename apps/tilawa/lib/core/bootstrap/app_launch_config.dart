@@ -20,11 +20,12 @@ import 'package:flutter/foundation.dart';
 /// Example: `--dart-define=TILAWA_LAUNCH_TEACHER_APPLICATION_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_TEACHER_APPLICATION_DISCOVERABILITY=profileAndEmptyState`
 /// Example: `--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED=true`
-/// Example: `--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_PAID_BOOKING_SANDBOX_ENABLED=true`
+/// Example: `--dart-define=TILAWA_LAUNCH_QURAN_TUTOR_BOOKING_MODE=autoConfirm`
+/// Example: `--dart-define=TILAWA_LAUNCH_QURAN_TUTOR_BOOKING_MODE=requiresTutorApproval`
 /// Example: `--dart-define=TILAWA_LAUNCH_ENABLED_CALL_PROVIDERS=external,mock,agora`
 /// Example: `--dart-define=TILAWA_LAUNCH_AGORA_APP_ID=your_agora_app_id`
 ///
-/// Staging / pre-production builds default Quran Sessions beta flags ON via
+/// Staging / pre-production builds default QuranTutor beta flags ON via
 /// [quranSessionsStagingFlagsDefaultEnabled] (everything except
 /// `play_production`). Override per flag with `TILAWA_LAUNCH_*` dart-defines.
 bool quranSessionsStagingFlagsDefaultEnabled() {
@@ -223,7 +224,7 @@ class AppLaunchConfig extends Equatable {
       ),
       enabledCallProvidersCsv: String.fromEnvironment(
         'TILAWA_LAUNCH_ENABLED_CALL_PROVIDERS',
-        defaultValue: 'external,mock',
+        defaultValue: stagingFlagsOn ? 'external,mock,agora' : 'external,mock',
       ),
       agoraAppId: String.fromEnvironment(
         'TILAWA_LAUNCH_AGORA_APP_ID',

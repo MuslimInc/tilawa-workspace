@@ -8,6 +8,7 @@ export { moderateQuranSessionsUser } from "./moderateQuranSessionsUser";
 export { setTeacherApplicationAccess } from "./setTeacherApplicationAccess";
 export { syncTeacherProfileVisibility } from "./syncTeacherProfileVisibility";
 export { createSessionBooking } from "./quranSessions/createSessionBooking";
+export { respondToBookingRequest } from "./quranSessions/respondToBookingRequest";
 export { createAdminTestQuranSession } from "./quranSessions/createAdminTestQuranSession";
 export { cancelSessionBooking } from "./quranSessions/cancelSessionBooking";
 export { requestSessionReschedule } from "./quranSessions/requestSessionReschedule";

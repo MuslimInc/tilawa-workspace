@@ -1,3 +1,4 @@
+import '../../domain/entities/session_lifecycle_status.dart';
 import '../../domain/entities/quran_session.dart';
 import '../../domain/entities/session_booking_type.dart';
 import '../../domain/entities/session_call_provider_kind.dart';
@@ -16,6 +17,9 @@ extension QuranSessionDtoMapper on QuranSessionDto {
     endsAt: DateTime.parse(endsAt),
     callType: _mapCallType(callType),
     status: _mapStatus(status),
+    lifecycleStatus: lifecycleStatus == null
+        ? null
+        : _mapLifecycleStatus(lifecycleStatus!),
     bookingType: _mapBookingType(bookingType),
     callProviderKind: _mapCallProvider(callProvider),
     meetingLink: meetingLink,
@@ -65,7 +69,8 @@ SessionParticipantRole _mapParticipantRole(String? raw) => raw == 'teacher'
     : SessionParticipantRole.student;
 
 QuranSessionStatus _mapStatus(String raw) => switch (raw) {
-  'scheduled' => QuranSessionStatus.scheduled,
+  'scheduled' || 'confirmed' => QuranSessionStatus.scheduled,
+  'pending' => QuranSessionStatus.scheduled,
   'in_progress' || 'inProgress' => QuranSessionStatus.inProgress,
   'completed' => QuranSessionStatus.completed,
   'cancelled_by_student' ||
@@ -73,5 +78,17 @@ QuranSessionStatus _mapStatus(String raw) => switch (raw) {
   'cancelled_by_teacher' ||
   'cancelledByTeacher' => QuranSessionStatus.cancelledByTeacher,
   'no_show' || 'noShow' => QuranSessionStatus.noShow,
+  'rejected' => QuranSessionStatus.noShow,
   _ => QuranSessionStatus.scheduled,
 };
+
+SessionLifecycleStatus _mapLifecycleStatus(String raw) {
+  final normalized = raw.replaceAllMapped(
+    RegExp(r'_([a-z])'),
+    (match) => match.group(1)!.toUpperCase(),
+  );
+  return SessionLifecycleStatus.values.firstWhere(
+    (s) => s.name == raw || s.name == normalized,
+    orElse: () => SessionLifecycleStatus.scheduled,
+  );
+}

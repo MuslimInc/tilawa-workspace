@@ -23,7 +23,7 @@
     "accountBlocked": "حسابك موقوف. يرجى التواصل مع الدعم.",
     "guardianApprovalRequired": "يتطلب الحجز لهذا الطالب موافقة وليّ الأمر أولاً.",
     "guardianApprovalTitle": "موافقة وليّ الأمر",
-    "guardianApprovalBody": "يجب على وليّ الأمر تسجيل الدخول على هذا الجهاز وتأكيد السماح بحجز جلسات القرآن لهذا الحساب الطلابي.",
+    "guardianApprovalBody": "يجب على وليّ الأمر تسجيل الدخول على هذا الجهاز وتأكيد السماح بحجوزات تعلّم القرآن مع محفظك لهذا الحساب الطلابي.",
     "guardianApprovalStudentIdLabel": "معرّف حساب الطالب",
     "guardianApprovalStudentIdHint": "معرّف المستخدم للطالب",
     "guardianApprovalConfirm": "الموافقة على الحجز",
@@ -76,7 +76,7 @@
     "profileGenderRequired": "الجنس مطلوب.",
     "profileCountryRequired": "الدولة مطلوبة.",
     "profileCityRequired": "المدينة مطلوبة.",
-    "quranSessionsHomeTitle": "تعلم قراءة القرآن",
+    "quranSessionsHomeTitle": "تعلّم القرآن مع محفظك",
     "mySessionsTitle": "جلساتي",
     "noTeachersAvailableYet": "لا يوجد معلمون متاحون بعد",
     "seeAllTeachers": "عرض جميع المعلمين ←",
@@ -111,8 +111,8 @@
     "callTypeExternalMeeting": "رابط خارجي",
     "callTypeVoice": "صوتي",
     "callTypeVideo": "مرئي",
-    "sessionModeVoiceBetaNote": "النسخة التجريبية: الصوت يستخدم انضمامًا مؤقتًا حتى يتوفر الاتصال داخل التطبيق.",
-    "sessionModeVideoBetaNote": "النسخة التجريبية: الفيديو يستخدم انضمامًا مؤقتًا حتى يتوفر الاتصال داخل التطبيق.",
+    "sessionModeVoiceBetaNote": "الجلسات الصوتية تستخدم الاتصال داخل التطبيق عندما يدعمها محفظك وجهازك.",
+    "sessionModeVideoBetaNote": "جلسات الفيديو تستخدم الاتصال داخل التطبيق عندما يدعمها محفظك وجهازك.",
     "bookingVoiceVideoProviderNote": "المكالمات داخل التطبيق تستخدم {provider}.",
     "@bookingVoiceVideoProviderNote": {
         "placeholders": {
@@ -171,7 +171,7 @@
     "groupBookingNotSupported": "الجلسات الجماعية غير متاحة في النسخة التجريبية.",
     "unsupportedSessionMode": "نوع الجلسة غير مدعوم.",
     "reviewSubmittedThanks": "شكراً — تم إرسال تقييمك!",
-    "upcomingSessionsSection": "القادمة ({count})",
+    "upcomingSessionsSection": "الحصص القادمة ({count})",
   "@upcomingSessionsSection": {
     "placeholders": {
       "count": {
@@ -202,6 +202,14 @@
     "cancelPolicyFullRefund": "ستحصل على استرداد كامل إذا ألغيت الآن.",
     "cancelPolicyPartialRefund": "قد ينطبق استرداد جزئي وفق سياسة الإلغاء.",
     "cancelPolicyNoRefund": "لا ينطبق استرداد للإلغاء في هذا الوقت.",
+    "tutorCancelSessionDialogTitle": "إلغاء الحصة؟",
+    "tutorCancelSessionDialogMessage": "سيتم إبلاغ الطالب بإلغاء الحصة، ولن يتمكن من الانضمام إليها.",
+    "tutorCancelSessionAction": "إلغاء الحصة",
+    "tutorCancelSessionGoBack": "تراجع",
+    "tutorCancelSessionSuccess": "تم إلغاء الحصة",
+    "tutorCancelSessionError": "تعذّر إلغاء الحصة، حاول مرة أخرى",
+    "sessionCancelledByTutorTitle": "اعتذر المحفظ عن إلغاء الحصة",
+    "sessionCancelledByTutorSubtitle": "يمكنك اختيار موعد آخر",
     "rescheduleSessionTitle": "إعادة جدولة الجلسة",
     "rescheduleReasonLabel": "سبب إعادة الجدولة",
     "rescheduleReasonHint": "اشرح باختصار لماذا تحتاج وقتاً جديداً",
@@ -270,6 +278,14 @@
     "sessionStatusNoShow": "غائب",
     "cancel": "إلغاء",
     "joinSession": "انضمام",
+    "sessionJoinStateNotStarted": "يفتح الانضمام قبل ١٥ دقيقة من بدء الجلسة.",
+    "sessionJoinStateJoinAvailable": "يمكنك الانضمام الآن.",
+    "sessionJoinStateJoining": "جارٍ الاتصال بالجلسة…",
+    "sessionJoinStateJoined": "انضممت إلى هذه الجلسة.",
+    "sessionJoinStateFailed": "تعذّر الانضمام. أعد المحاولة أو تواصل مع الدعم.",
+    "sessionJoinStateEnded": "انتهت هذه الجلسة.",
+    "sessionJoinStateCancelled": "أُلغيت هذه الجلسة.",
+    "sessionCancelledSuccess": "تم إلغاء الجلسة.",
     "noSlotsAvailable": "لا توجد مواعيد متاحة",
     "noSlotsAvailableThisDay": "لا توجد مواعيد متاحة في هذا اليوم",
     "teacherDashboardTitle": "لوحة المعلم",
@@ -348,7 +364,7 @@
     "bookableTimesEmptyNextWeekSubtitle": "يُبنى الأسبوع القادم من توفرك الأسبوعي المتكرر. راجع جدولك لإضافة أيام أو تعديلها.",
     "bookableTimesEmptyHorizonTitle": "لا توجد مواعيد قابلة للحجز خلال 14 يومًا",
     "bookableTimesEmptyHorizonSubtitle": "حدد توفرك الأسبوعي المتكرر وستظهر المواعيد تلقائيًا للأيام المفتوحة.",
-    "upcomingSessionsEmptyTitle": "لا توجد جلسات قادمة",
+    "upcomingSessionsEmptyTitle": "لا توجد حصص قادمة",
     "upcomingSessionsEmptySubtitle": "ستظهر الحجوزات المؤكدة هنا عندما يحجز الطلاب موعدًا معك.",
     "fridayReviewBannerMessage": "راجع توفرك للأسبوع القادم. يحجز الطلاب من جدولك الأسبوعي.",
     "fridayReviewBannerAction": "مراجعة",
@@ -653,6 +669,41 @@
     "sessionActionIssueRefund": "إصدار استرداد",
     "sessionActionExpireReservation": "انتهاء الحجز",
     "sessionActionRejectBooking": "رفض الحجز",
+    "bookingRequestSentTitle": "تم إرسال طلب الحجز",
+    "bookingRequestSentSubtitle": "في انتظار موافقة المحفظ",
+    "bookingAcceptedTitle": "تم قبول الحصة",
+    "bookingAcceptedSubtitle": "يمكنك الانضمام في موعد الحصة",
+    "bookingRejectedTitle": "اعتذر المحفظ عن قبول الحصة",
+    "bookingRejectedSubtitle": "يمكنك اختيار موعد آخر",
+    "sendBookingRequest": "إرسال طلب الحجز",
+    "sessionStatusPendingTutorApproval": "بانتظار الموافقة",
+    "sessionStatusRejectedByTutor": "مرفوض",
+    "teacherPendingBookingRequestsSection": "طلبات الحجز ({count})",
+    "@teacherPendingBookingRequestsSection": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "teacherPendingBookingRequestsEmptyTitle": "لا توجد طلبات حجز حاليًا",
+    "teacherPendingBookingRequestsEmptySubtitle": "ستظهر طلبات الطلاب هنا عند إرسالها",
+    "teacherAcceptBookingRequest": "قبول",
+    "teacherRejectBookingRequest": "رفض",
+    "tutorRejectBookingSheetTitle": "رفض طلب الحجز؟",
+    "tutorRejectBookingSheetBody": "يمكنك توضيح سبب الرفض للطالب، أو رفض الطلب بدون سبب.",
+    "tutorRejectBookingReasonLabel": "سبب الرفض",
+    "tutorRejectBookingReasonHint": "مثال: الموعد غير مناسب",
+    "tutorRejectBookingConfirmAction": "رفض الطلب",
+    "tutorRejectBookingGoBack": "تراجع",
+    "tutorRejectBookingReasonTooLong": "سبب الرفض طويل جداً",
+    "tutorCancelSessionFromCard": "إلغاء",
+    "sessionLifecyclePendingTutorApproval": "بانتظار موافقة المحفظ",
+    "sessionLifecycleRejectedByTutor": "مرفوض من المحفظ",
+    "sessionActionSubmitBookingRequest": "إرسال طلب الحجز",
+    "sessionActionAcceptBookingRequest": "قبول طلب الحجز",
+    "sessionActionRejectBookingRequest": "رفض طلب الحجز",
+    "sessionActionExpireTutorApproval": "انتهاء موافقة المحفظ",
     "sessionTimelineStatusTransition": "{previous} ← {next}",
     "@sessionTimelineStatusTransition": {
         "placeholders": {
@@ -661,6 +712,24 @@
             },
             "next": {
                 "type": "String"
+            }
+        }
+    },
+    "tutorDashboardStudentFallback": "طالب",
+    "teacherDashboardLoadError": "تعذّر تحميل الحصص، حاول مرة أخرى",
+    "tutorSessionStatusPendingApproval": "بانتظار موافقتك",
+    "tutorSessionStatusAccepted": "مقبولة",
+    "tutorSessionStatusRejected": "مرفوضة",
+    "tutorSessionStatusCancelledByTutor": "ألغيتها",
+    "tutorSessionStatusCancelledByStudent": "ألغاها الطالب",
+    "tutorSessionStatusCompleted": "مكتملة",
+    "tutorSessionStatusExpired": "انتهى الموعد",
+    "tutorSessionJoinNotYet": "لم يبدأ الموعد بعد",
+    "tutorSessionDurationMinutes": "{count} د",
+    "@tutorSessionDurationMinutes": {
+        "placeholders": {
+            "count": {
+                "type": "int"
             }
         }
     }

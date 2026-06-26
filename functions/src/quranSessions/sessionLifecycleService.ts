@@ -3,6 +3,7 @@ import { Timestamp, FieldValue } from "firebase-admin/firestore";
 export type LifecycleStatus =
   | "draft"
   | "pending_payment"
+  | "pending_tutor_approval"
   | "scheduled"
   | "confirmed"
   | "in_progress"
@@ -18,11 +19,13 @@ export type LifecycleStatus =
   | "disputed"
   | "compensated"
   | "refunded"
-  | "expired";
+  | "expired"
+  | "rejected_by_tutor";
 
 export function legacyStatusForLifecycle(status: LifecycleStatus): string {
   switch (status) {
     case "pending_payment":
+    case "pending_tutor_approval":
       return "pending";
     case "scheduled":
     case "confirmed":
@@ -32,6 +35,7 @@ export function legacyStatusForLifecycle(status: LifecycleStatus): string {
     case "refunded":
       return "refunded";
     case "expired":
+    case "rejected_by_tutor":
       return "rejected";
     case "cancelled_by_student":
     case "cancelled_by_teacher":

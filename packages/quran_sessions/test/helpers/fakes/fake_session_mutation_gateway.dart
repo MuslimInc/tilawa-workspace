@@ -154,4 +154,32 @@ class FakeSessionMutationGateway implements SessionMutationGateway {
     calls.add('dispute:$bookingId');
     return const Right(SessionDisputeResult(disputeId: 'dispute_fake_1'));
   }
+
+  @override
+  Future<Either<QuranSessionsFailure, SessionAggregate>>
+  respondToBookingRequest({
+    required String bookingId,
+    required bool accept,
+    String? reason,
+  }) async {
+    calls.add(
+      'respond:$bookingId:${accept ? 'accept' : 'reject'}:${reason ?? ''}',
+    );
+    return Right(
+      SessionAggregate(
+        id: bookingId,
+        teacherId: 'teacher_1',
+        studentId: 'student_1',
+        slotId: 'slot_1',
+        startsAt: DateTime.now().toUtc().add(const Duration(days: 1)),
+        pricingType: SessionPricingType.free,
+        lifecycleStatus: accept
+            ? SessionLifecycleStatus.scheduled
+            : SessionLifecycleStatus.rejectedByTutor,
+        createdAt: DateTime.now().toUtc(),
+        updatedAt: DateTime.now().toUtc(),
+        rejectionReason: accept ? null : reason,
+      ),
+    );
+  }
 }

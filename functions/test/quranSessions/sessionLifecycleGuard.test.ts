@@ -13,7 +13,25 @@ const STUDENT_CANCEL_SAFE_NOTICE_MS = 2 * 60 * 60 * 1000;
 /** Thirty seconds — safely inside the 1 h student cancel notice window. */
 const STUDENT_CANCEL_LATE_NOTICE_MS = 30 * 1000;
 
-test("allows student cancel from scheduled with reason", () => {
+test("allows tutor accept from pending_tutor_approval", () => {
+  const result = validateTransition({
+    currentStatus: "pending_tutor_approval",
+    action: "accept_booking_request",
+    actor: "teacher",
+  });
+  assert.equal(result.to, "scheduled");
+});
+
+test("allows student cancel from pending_tutor_approval without notice guard", () => {
+  const result = validateTransition({
+    currentStatus: "pending_tutor_approval",
+    action: "cancel_by_student",
+    actor: "student",
+    reason: "changed mind",
+    sessionStartsAt: new Date(Date.now() + STUDENT_CANCEL_LATE_NOTICE_MS),
+  });
+  assert.equal(result.to, "cancelled_by_student");
+});
   const result = validateTransition({
     currentStatus: "scheduled",
     action: "cancel_by_student",

@@ -1,8 +1,11 @@
-/// Route path constants for the quran_sessions feature.
+/// Route path constants for the QuranTutor feature (legacy prefix `/sessions`).
 ///
 /// The host app wires these into its GoRouter configuration. No GoRouter
 /// import belongs in this package — the app owns the router.
 abstract final class QuranSessionsRoutes {
+  /// Product alias for docs and gradual migration (`QuranTutorRoutes.home`).
+  static const quranTutorHome = '/quran-tutor';
+
   static const home = '/sessions';
   static const teacherList = '/sessions/teachers';
   static const teacherProfile = '/sessions/teachers/:teacherId';
@@ -21,3 +24,6 @@ abstract final class QuranSessionsRoutes {
   static const teacherApply = '/sessions/teacher/apply';
   static const teacherApplicationStatus = '/sessions/teacher/status';
 }
+
+/// Product-facing alias; route paths remain `/sessions/*` for deep-link stability.
+typedef QuranTutorRoutes = QuranSessionsRoutes;

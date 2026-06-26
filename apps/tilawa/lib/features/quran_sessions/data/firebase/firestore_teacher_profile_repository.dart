@@ -156,12 +156,38 @@ class FirestoreTeacherProfileDataSource
   final FirebaseFirestore _firestore;
   final PerformanceMonitoringService? _perf;
   final SharedPreferencesAsync? _prefs;
+  final Map<String, TeacherProfileDto> _cacheById = {};
+  final Map<String, TeacherProfileDto> _cacheByUserId = {};
 
   CollectionReference<Map<String, dynamic>> get _collection =>
       _firestore.collection(FirestoreQuranSessionsPaths.teacherProfiles);
 
+  TeacherProfileDto? _readCachedById(String id) => _cacheById[id];
+
+  TeacherProfileDto? _readCachedByUserId(String userId) =>
+      _cacheByUserId[userId];
+
+  void _putInCache(TeacherProfileDto profile) {
+    _cacheById[profile.id] = profile;
+    if (profile.userId.isNotEmpty) {
+      _cacheByUserId[profile.userId] = profile;
+    }
+  }
+
+  void _invalidateForId(String id) {
+    final cached = _cacheById.remove(id);
+    if (cached != null) {
+      _cacheByUserId.remove(cached.userId);
+    }
+  }
+
   @override
   Future<TeacherProfileDto> getByUserId(String userId) async {
+    final memoryCached = _readCachedByUserId(userId);
+    if (memoryCached != null) {
+      return memoryCached;
+    }
+
     final prefs = _prefs;
     if (prefs != null) {
       final cachedProfileId = await prefs.getString('tp_id_mapping_$userId');
@@ -199,11 +225,17 @@ class FirestoreTeacherProfileDataSource
       await prefs.setString('tp_id_mapping_$userId', profile.id);
     }
 
+    _putInCache(profile);
     return profile;
   }
 
   @override
   Future<TeacherProfileDto> getById(String id) async {
+    final memoryCached = _readCachedById(id);
+    if (memoryCached != null) {
+      return memoryCached;
+    }
+
     final profile = await _perf.trace(
       'firestore_getTeacherProfileById',
       () async {
@@ -218,6 +250,7 @@ class FirestoreTeacherProfileDataSource
         }
       },
     );
+    _putInCache(profile);
     return profile;
   }
 
@@ -256,6 +289,7 @@ class FirestoreTeacherProfileDataSource
         final result = FirestoreTeacherProfileDto.fromDoc(
           created,
         ).toTransportDto();
+        _putInCache(result);
         return result;
       } on FirebaseException catch (e) {
         throw mapFirebaseException(e);
@@ -265,6 +299,7 @@ class FirestoreTeacherProfileDataSource
 
   @override
   Future<TeacherProfileDto> update(TeacherProfileDto profile) async {
+    _invalidateForId(profile.id);
     return _perf.trace('firestore_updateTeacherProfile', () async {
       try {
         final now = DateTime.now();
@@ -277,6 +312,7 @@ class FirestoreTeacherProfileDataSource
         final result = FirestoreTeacherProfileDto.fromDoc(
           updated,
         ).toTransportDto();
+        _putInCache(result);
         return result;
       } on FirebaseException catch (e) {
         throw mapFirebaseException(e);
@@ -292,6 +328,7 @@ class FirestoreTeacherProfileDataSource
   Future<TeacherProfileDto> updatePublicProfile(
     TeacherProfileDto profile,
   ) async {
+    _invalidateForId(profile.id);
     return _perf.trace('firestore_updateTeacherPublicProfile', () async {
       try {
         final now = DateTime.now();
@@ -337,6 +374,7 @@ class FirestoreTeacherProfileDataSource
     String id, {
     required bool isActive,
   }) async {
+    _invalidateForId(id);
     return _perf.trace('firestore_setTeacherProfileActive', () async {
       try {
         final now = DateTime.now();
@@ -349,6 +387,7 @@ class FirestoreTeacherProfileDataSource
           throw NotFoundException('TeacherProfile($id)');
         }
         final result = FirestoreTeacherProfileDto.fromDoc(doc).toTransportDto();
+        _putInCache(result);
         return result;
       } on FirebaseException catch (e) {
         throw mapFirebaseException(e);

@@ -6,6 +6,7 @@ enum SessionLifecycleStatus {
   // Reservation / payment.
   draft,
   pendingPayment,
+  pendingTutorApproval,
 
   // Active lifecycle.
   scheduled,
@@ -32,12 +33,15 @@ enum SessionLifecycleStatus {
   compensated,
   refunded,
   expired,
+  rejectedByTutor,
 }
 
 extension SessionLifecycleStatusX on SessionLifecycleStatus {
   SessionLifecyclePhase get phase => switch (this) {
     SessionLifecycleStatus.draft ||
-    SessionLifecycleStatus.pendingPayment => SessionLifecyclePhase.reservation,
+    SessionLifecycleStatus.pendingPayment ||
+    SessionLifecycleStatus.pendingTutorApproval =>
+      SessionLifecyclePhase.reservation,
     SessionLifecycleStatus.scheduled ||
     SessionLifecycleStatus.confirmed ||
     SessionLifecycleStatus.inProgress ||
@@ -49,7 +53,8 @@ extension SessionLifecycleStatusX on SessionLifecycleStatus {
 
   bool get isSlotBlocking =>
       phase == SessionLifecyclePhase.active ||
-      this == SessionLifecycleStatus.pendingPayment;
+      this == SessionLifecycleStatus.pendingPayment ||
+      this == SessionLifecycleStatus.pendingTutorApproval;
 
   /// True when the participant may open the meeting link / call room.
   bool get canJoinSession => switch (this) {
@@ -57,6 +62,13 @@ extension SessionLifecycleStatusX on SessionLifecycleStatus {
     SessionLifecycleStatus.confirmed ||
     SessionLifecycleStatus.inProgress ||
     SessionLifecycleStatus.rescheduled => true,
+    _ => false,
+  };
+
+  bool get isCancelled => switch (this) {
+    SessionLifecycleStatus.cancelledByStudent ||
+    SessionLifecycleStatus.cancelledByTeacher ||
+    SessionLifecycleStatus.cancelledByAdmin => true,
     _ => false,
   };
 

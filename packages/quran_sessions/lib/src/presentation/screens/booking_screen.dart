@@ -6,10 +6,12 @@ import 'package:quran_sessions/core/l10n_extensions.dart';
 import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../../domain/entities/session_lifecycle_status.dart';
 import '../../domain/entities/quran_booking.dart';
 import '../../domain/entities/session_call_provider_kind.dart';
 import '../../domain/entities/session_call_type.dart';
 import '../../domain/failures/quran_sessions_failure.dart';
+import '../../domain/policies/quran_tutor_booking_mode.dart';
 import '../../domain/policies/session_mode_policy.dart';
 import '../blocs/booking/booking_bloc.dart';
 import '../blocs/booking/booking_event.dart';
@@ -25,6 +27,7 @@ class BookingScreen extends StatefulWidget {
     required this.studentId,
     this.preSelectedSlotId,
     this.sessionModePolicy = SessionModePolicy.freeBeta,
+    this.bookingModeHint = QuranTutorBookingMode.autoConfirm,
     this.voiceVideoProviderHint,
     this.onBookingSuccess,
     this.onCompleteProfile,
@@ -35,6 +38,7 @@ class BookingScreen extends StatefulWidget {
   final String studentId;
   final String? preSelectedSlotId;
   final SessionModePolicy sessionModePolicy;
+  final QuranTutorBookingMode bookingModeHint;
   final SessionCallProviderKind? voiceVideoProviderHint;
 
   /// Host navigates to guardian approval; retry eligibility on return.
@@ -105,7 +109,9 @@ class _BookingScreenState extends State<BookingScreen> {
           }
           return TilawaBottomActionArea(
             child: TilawaButton(
-              text: l10n.confirmBooking,
+              text: widget.bookingModeHint.requiresTutorApproval
+                  ? l10n.sendBookingRequest
+                  : l10n.confirmBooking,
               onPressed: state.canSubmit ? () => _submit(context) : null,
               isFullWidth: true,
               size: TilawaButtonSize.large,
@@ -129,9 +135,15 @@ class _BookingScreenState extends State<BookingScreen> {
           }
 
           if (state is BookingSuccess) {
+            final booking = state.booking;
+            final isPending =
+                booking.effectiveLifecycleStatus ==
+                SessionLifecycleStatus.pendingTutorApproval;
             TilawaFeedback.showToast(
               context,
-              message: l10n.bookingConfirmed,
+              message: isPending
+                  ? '${l10n.bookingRequestSentTitle}\n${l10n.bookingRequestSentSubtitle}'
+                  : l10n.bookingConfirmed,
               variant: TilawaFeedbackVariant.success,
             );
             if (widget.onBookingSuccess != null) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Circular avatar that shows the teacher's initials when no photo is available.
 ///
@@ -29,45 +30,24 @@ class TeacherInitialsAvatar extends StatelessWidget {
     }
 
     final (background, foreground) = _avatarColors(displayName, scheme);
-    final initials = _initials(displayName);
+    final rawInitials = AvatarInitialsFromName.extract(displayName);
+    final textStyle = TextStyle(
+      color: foreground,
+      fontWeight: FontWeight.w700,
+      fontSize: radius * 0.65,
+    );
+    final initials = AvatarInitialsDisplay.formatForTextStyle(
+      rawInitials,
+      textStyle,
+    );
 
     return CircleAvatar(
       radius: radius,
       backgroundColor: background,
       child: initials.isEmpty
           ? Icon(Icons.person, color: foreground, size: radius * 0.9)
-          : Text(
-              initials,
-              style: TextStyle(
-                color: foreground,
-                fontWeight: FontWeight.w700,
-                fontSize: radius * 0.65,
-              ),
-            ),
+          : Text(initials, style: textStyle),
     );
-  }
-
-  static String _initials(String name) {
-    final trimmed = name.trim();
-    if (trimmed.isEmpty) return '';
-
-    final words = trimmed
-        .split(RegExp(r'\s+'))
-        .where((word) => word.isNotEmpty)
-        .toList();
-    if (words.isEmpty) return '';
-
-    String firstChar(String word) {
-      final chars = word.characters;
-      return chars.isEmpty ? '' : chars.first;
-    }
-
-    if (words.length == 1) return firstChar(words[0]);
-    const skip = {'الشيخ', 'أ.', 'د.', 'أ', 'د'};
-    final meaningful = words.where((w) => !skip.contains(w)).toList();
-    if (meaningful.isEmpty) return firstChar(words.first);
-    if (meaningful.length == 1) return firstChar(meaningful[0]);
-    return '${firstChar(meaningful[0])}${firstChar(meaningful[1])}';
   }
 
   static List<(Color, Color)> _palette(ColorScheme scheme) => [

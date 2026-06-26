@@ -74,6 +74,10 @@ RtcLaunchConfig resolveRtcLaunchConfig(
 ///
 /// Mirrors [RTC_PROVIDER_PRIORITY] in Cloud Functions when launch config matches
 /// Firestore `quran_session_platform_config/global.enabledCallProviders`.
+///
+/// Production (`play_production`) must set `agora` (or `webrtc`) in both
+/// Firestore and `TILAWA_LAUNCH_*` defines — mock is a dev fallback only when
+/// no RTC provider is configured with credentials.
 SessionCallProviderKind resolveVoiceVideoProviderHint(
   AppLaunchConfig config, {
   String distribution = const String.fromEnvironment(
@@ -95,6 +99,39 @@ SessionCallProviderKind resolveVoiceVideoProviderHint(
     return SessionCallProviderKind.webrtc;
   }
   return SessionCallProviderKind.mock;
+}
+
+/// Resolves effective tutor booking mode for client UI hints.
+///
+/// Server is authoritative on create; this drives pre-submit copy only.
+QuranTutorBookingMode resolveQuranTutorBookingModeHint({
+  AppLaunchConfig? launchConfig,
+  String? firestoreModeRaw,
+  String distribution = const String.fromEnvironment(
+    'TILAWA_DISTRIBUTION',
+    defaultValue: 'local',
+  ),
+  bool debugMode = kDebugMode,
+}) {
+  if (distribution != 'play_production' && debugMode) {
+    const defineOverride = String.fromEnvironment(
+      'TILAWA_LAUNCH_QURAN_TUTOR_BOOKING_MODE',
+      defaultValue: '',
+    );
+    final fromDefine = QuranTutorBookingModeParsing.tryParse(
+      defineOverride.isEmpty ? null : defineOverride,
+    );
+    if (fromDefine != null) {
+      return fromDefine;
+    }
+  }
+  final fromFirestore = QuranTutorBookingModeParsing.tryParse(
+    firestoreModeRaw,
+  );
+  if (fromFirestore != null) {
+    return fromFirestore;
+  }
+  return distributionDefaultQuranTutorBookingMode(distribution: distribution);
 }
 
 /// Booking UI policy derived from [AppLaunchConfig] RTC flags.

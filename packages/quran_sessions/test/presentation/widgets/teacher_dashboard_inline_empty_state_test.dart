@@ -19,7 +19,8 @@ void main() {
       );
 
       expect(find.text('No upcoming sessions'), findsOneWidget);
-      expect(find.byType(TilawaStateVisual), findsOneWidget);
+      expect(find.byType(TilawaIconBox), findsOneWidget);
+      expect(find.byType(TilawaCard), findsOneWidget);
       expect(find.byType(TilawaButton), findsNothing);
     });
 

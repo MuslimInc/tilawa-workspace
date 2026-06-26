@@ -25,6 +25,14 @@ CancelSessionViaServerUseCase buildCancelSessionViaServerUseCase({
   );
 }
 
+RespondToBookingRequestUseCase buildRespondToBookingRequestUseCase({
+  FakeSessionMutationGateway? mutationGateway,
+}) {
+  return RespondToBookingRequestUseCase(
+    mutationGateway ?? FakeSessionMutationGateway(),
+  );
+}
+
 SubmitSessionBookingUseCase buildSubmitSessionBookingUseCase({
   required GetTeacherAvailabilityUseCase getAvailability,
   FakeSessionMutationGateway? mutationGateway,

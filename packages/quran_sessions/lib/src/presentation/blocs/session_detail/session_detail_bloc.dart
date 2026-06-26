@@ -10,7 +10,9 @@ import '../../../domain/entities/pending_reschedule_request.dart';
 import '../../../domain/entities/session_call_type.dart';
 import '../../../domain/failures/quran_sessions_failure.dart';
 import '../../../domain/providers/auth_session_provider.dart';
-import '../../../domain/repositories/teacher_profile_repository.dart';
+import '../../../domain/usecases/cancel_session_via_server_usecase.dart';
+import '../../../domain/usecases/get_session_aggregate_usecase.dart';
+import '../../../domain/usecases/resolve_session_actor_role_usecase.dart';
 import '../../../domain/usecases/get_pending_reschedule_request_usecase.dart';
 import '../../../domain/usecases/get_session_timeline_usecase.dart';
 import '../../../domain/usecases/join_session_usecase.dart';
@@ -22,7 +24,6 @@ import '../../../application/usecases/invalidate_quran_session_cache_usecase.dar
 import '../../../domain/entities/session_lifecycle_status.dart';
 import '../../../domain/policies/session_join_window_policy.dart';
 import '../../../boundaries/call/call_token_provider.dart';
-import '../../../domain/repositories/session_aggregate_repository.dart';
 import '../../../domain/repositories/session_repository.dart';
 import '../../../domain/value_objects/actor_role.dart';
 import 'session_detail_event.dart';
@@ -32,7 +33,7 @@ typedef OpenExternalMeetingUrl = Future<void> Function(String url);
 
 class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
   SessionDetailBloc({
-    required this._aggregateRepository,
+    required this._getSessionAggregate,
     required this._getTimeline,
     GetSessionDetailUseCase? sessionDetailUseCase,
     InvalidateQuranSessionCacheUseCase? cacheInvalidator,
@@ -43,8 +44,9 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
     this._openDispute,
     this._getPendingReschedule,
     this._respondToReschedule,
+    this._cancelSession,
     this._authSession,
-    this._teacherProfileRepository,
+    this._resolveActorRole,
     this._tokenProvider,
     this._joinWindowPolicy = const SessionJoinWindowPolicy(),
   }) : _getSessionDetail = sessionDetailUseCase,
@@ -86,10 +88,19 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
       _onRescheduleRespondAcknowledged,
       transformer: sequential(),
     );
+    on<SessionDetailCancelSubmitted>(
+      _onCancelSubmitted,
+      transformer: sequential(),
+    );
+    on<SessionDetailCancelAcknowledged>(
+      _onCancelAcknowledged,
+      transformer: sequential(),
+    );
   }
 
-  final SessionAggregateRepository _aggregateRepository;
+  final GetSessionAggregateUseCase _getSessionAggregate;
   final GetSessionTimelineUseCase _getTimeline;
+  final ResolveSessionActorRoleUseCase? _resolveActorRole;
   final GetSessionDetailUseCase? _getSessionDetail;
   final InvalidateQuranSessionCacheUseCase? _invalidateCache;
   final SessionRepository? _sessionRepository;
@@ -99,8 +110,8 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
   final OpenSessionDisputeUseCase? _openDispute;
   final GetPendingRescheduleRequestUseCase? _getPendingReschedule;
   final RespondToRescheduleRequestUseCase? _respondToReschedule;
+  final CancelSessionViaServerUseCase? _cancelSession;
   final AuthSessionProvider? _authSession;
-  final TeacherProfileRepository? _teacherProfileRepository;
   final CallTokenProvider? _tokenProvider;
   final SessionJoinWindowPolicy _joinWindowPolicy;
 
@@ -110,7 +121,7 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
   ) async {
     emit(const SessionDetailLoading());
 
-    final aggregateResult = await _aggregateRepository.getById(event.bookingId);
+    final aggregateResult = await _getSessionAggregate(event.bookingId);
     if (aggregateResult.isLeft()) {
       aggregateResult.fold(
         (f) => emit(SessionDetailFailure(f)),
@@ -143,6 +154,8 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
       aggregate: aggregate,
     );
 
+    final viewerRole = await _resolveActorRole?.forAggregate(aggregate);
+
     emit(
       SessionDetailSuccess(
         aggregate: aggregate,
@@ -155,6 +168,7 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
         pendingRescheduleRequest: rescheduleContext.request,
         canRespondToReschedule: rescheduleContext.canRespond,
         isAwaitingRescheduleCounterparty: rescheduleContext.isAwaiting,
+        viewerRole: viewerRole,
       ),
     );
 
@@ -253,24 +267,6 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
           loadFailed: false,
         );
       },
-    );
-  }
-
-  Future<ActorRole?> _resolveActorRole(SessionAggregate aggregate) async {
-    final userId = _authSession?.currentUserId;
-    if (userId == null || userId.isEmpty) return null;
-    if (userId == aggregate.studentId) return ActorRole.student;
-    if (userId == aggregate.teacherId) return ActorRole.teacher;
-
-    final teacherProfiles = _teacherProfileRepository;
-    if (teacherProfiles == null) return null;
-
-    final profileResult = await teacherProfiles.getProfileById(
-      aggregate.teacherId,
-    );
-    return profileResult.fold(
-      (_) => null,
-      (profile) => profile.userId == userId ? ActorRole.teacher : null,
     );
   }
 
@@ -521,7 +517,7 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
     final request = current.pendingRescheduleRequest;
     if (request == null || !current.canRespondToReschedule) return;
 
-    final actorRole = await _resolveActorRole(current.aggregate);
+    final actorRole = await _resolveActorRole?.forAggregate(current.aggregate);
     if (actorRole == null) {
       emit(
         current.copyWith(
@@ -580,6 +576,85 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
     final current = state;
     if (current is! SessionDetailSuccess) return;
     emit(current.copyWith(clearRescheduleRespondAccepted: true));
+  }
+
+  Future<void> _onCancelSubmitted(
+    SessionDetailCancelSubmitted event,
+    Emitter<SessionDetailState> emit,
+  ) async {
+    final cancelSession = _cancelSession;
+    final current = state;
+    if (cancelSession == null || current is! SessionDetailSuccess) return;
+    if (!current.canCancel) return;
+
+    final actorRole = current.viewerRole;
+    if (actorRole == null ||
+        actorRole == ActorRole.admin ||
+        actorRole == ActorRole.system) {
+      return;
+    }
+
+    final actorId = switch (actorRole) {
+      ActorRole.student =>
+        _authSession?.currentUserId ?? current.aggregate.studentId,
+      ActorRole.teacher =>
+        _authSession?.currentUserId ?? current.aggregate.teacherId,
+      _ => '',
+    };
+    if (actorId.isEmpty) {
+      emit(
+        current.copyWith(cancellationFailure: const UnauthorizedFailure()),
+      );
+      return;
+    }
+
+    emit(
+      current.copyWith(
+        cancellationInProgress: true,
+        clearCancellationFailure: true,
+        clearCancellationSucceeded: true,
+      ),
+    );
+
+    final result = await cancelSession(
+      bookingId: current.aggregate.id,
+      actorId: actorId,
+      actorRole: actorRole,
+      reason: event.reason,
+    );
+
+    final after = state;
+    if (after is! SessionDetailSuccess) return;
+
+    await result.fold(
+      (failure) async {
+        emit(
+          after.copyWith(
+            cancellationFailure: failure,
+            clearCancellationInProgress: true,
+          ),
+        );
+      },
+      (aggregate) async {
+        _invalidateAggregateCaches(aggregate);
+        emit(
+          after.copyWith(
+            aggregate: aggregate,
+            cancellationSucceeded: true,
+            clearCancellationInProgress: true,
+          ),
+        );
+      },
+    );
+  }
+
+  void _onCancelAcknowledged(
+    SessionDetailCancelAcknowledged event,
+    Emitter<SessionDetailState> emit,
+  ) {
+    final current = state;
+    if (current is! SessionDetailSuccess) return;
+    emit(current.copyWith(clearCancellationSucceeded: true));
   }
 
   void _invalidateAggregateCaches(SessionAggregate aggregate) {

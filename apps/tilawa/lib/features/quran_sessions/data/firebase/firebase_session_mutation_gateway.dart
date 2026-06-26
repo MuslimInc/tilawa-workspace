@@ -310,6 +310,38 @@ class FirebaseSessionMutationGateway implements SessionMutationGateway {
     }
   }
 
+  @override
+  Future<Either<QuranSessionsFailure, SessionAggregate>>
+  respondToBookingRequest({
+    required String bookingId,
+    required bool accept,
+    String? reason,
+  }) async {
+    return _perf.trace('functions_respondToBookingRequest', () async {
+      try {
+        final callable = _functions.httpsCallable('respondToBookingRequest');
+        await callable.call<Map<String, dynamic>>(
+          await _sessionPayloadBuilder.withSessionEpoch({
+            'bookingId': bookingId,
+            'response': accept ? 'accept' : 'reject',
+            if (reason != null && reason.trim().isNotEmpty) 'reason': reason,
+          }),
+        );
+        return _loadAggregate(bookingId);
+      } on FirebaseFunctionsException catch (e) {
+        if (e.code == 'not-found') {
+          return Left(NotFoundFailure('SessionAggregate($bookingId)'));
+        }
+        if (e.code == 'permission-denied' || e.code == 'unauthenticated') {
+          return const Left(UnauthorizedFailure());
+        }
+        return const Left(UnknownFailure());
+      } on FirebaseException catch (e) {
+        return Left(mapFirebaseExceptionToFailure(e));
+      }
+    });
+  }
+
   Future<Either<QuranSessionsFailure, SessionAggregate>> _loadAggregate(
     String bookingId,
   ) async {

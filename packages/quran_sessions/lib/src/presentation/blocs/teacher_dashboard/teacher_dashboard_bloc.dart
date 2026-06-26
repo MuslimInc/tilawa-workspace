@@ -8,6 +8,7 @@ import '../../../boundaries/scheduling/availability_provider.dart';
 import '../../../boundaries/scheduling/friday_review_reminder_store.dart';
 import '../../../domain/entities/generated_slot.dart';
 import '../../../domain/entities/market_scheduling_config.dart';
+import '../../../domain/mappers/quran_session_lifecycle_mapper.dart';
 import '../../../domain/entities/teacher_availability.dart';
 import '../../../domain/failures/quran_sessions_failure.dart';
 import '../../../domain/services/scheduling_policy_resolver.dart';
@@ -20,6 +21,7 @@ import '../../../application/usecases/get_teacher_dashboard_usecase.dart';
 import '../../../application/usecases/invalidate_quran_session_cache_usecase.dart';
 import '../../../domain/usecases/get_teacher_availability_usecase.dart';
 import '../../../domain/usecases/is_slot_booked_usecase.dart';
+import '../../../domain/usecases/respond_to_booking_request_usecase.dart';
 import '../../../domain/value_objects/actor_role.dart';
 import 'teacher_dashboard_event.dart';
 import 'teacher_dashboard_state.dart';
@@ -43,6 +45,7 @@ class TeacherDashboardBloc
     required BlockGeneratedSlotUseCase blockSlotUseCase,
     required AvailabilityProvider availabilityGateway,
     required CancelSessionViaServerUseCase cancelSessionUseCase,
+    required RespondToBookingRequestUseCase respondToBookingRequestUseCase,
     required CompleteSessionViaServerUseCase completeSessionUseCase,
     required FridayReviewReminderStore fridayReminderStore,
     required String teacherUserId,
@@ -58,6 +61,7 @@ class TeacherDashboardBloc
        _blockGeneratedSlot = blockSlotUseCase,
        _availabilityProvider = availabilityGateway,
        _cancelSession = cancelSessionUseCase,
+       _respondToBookingRequest = respondToBookingRequestUseCase,
        _completeSession = completeSessionUseCase,
        _fridayReviewReminderStore = fridayReminderStore,
        _teacherId = teacherUserId,
@@ -93,6 +97,14 @@ class TeacherDashboardBloc
       transformer: sequential(),
     );
     on<TeacherSessionCancelled>(_onSessionCancelled, transformer: sequential());
+    on<TeacherBookingRequestAccepted>(
+      _onBookingRequestAccepted,
+      transformer: sequential(),
+    );
+    on<TeacherBookingRequestRejected>(
+      _onBookingRequestRejected,
+      transformer: sequential(),
+    );
     on<TeacherSessionCompleted>(_onSessionCompleted, transformer: sequential());
   }
 
@@ -103,6 +115,7 @@ class TeacherDashboardBloc
   final BlockGeneratedSlotUseCase _blockGeneratedSlot;
   final AvailabilityProvider _availabilityProvider;
   final CancelSessionViaServerUseCase _cancelSession;
+  final RespondToBookingRequestUseCase _respondToBookingRequest;
   final CompleteSessionViaServerUseCase _completeSession;
   final FridayReviewReminderStore _fridayReviewReminderStore;
   final SchedulingPolicyResolver _schedulingPolicyResolver;
@@ -199,9 +212,10 @@ class TeacherDashboardBloc
     final teacherTimezone = schedule?.timezone ?? 'Asia/Riyadh';
     final marketCountryCode = profile.countryCode;
     final sessions = dashboard.upcomingSessions;
+    final pendingRequests = dashboard.pendingBookingRequests;
     final slots = dashboard.availability;
 
-    if (sessions.isEmpty && slots.isEmpty) {
+    if (sessions.isEmpty && pendingRequests.isEmpty && slots.isEmpty) {
       emit(const TeacherDashboardEmpty());
       return;
     }
@@ -219,6 +233,8 @@ class TeacherDashboardBloc
 
     emit(
       TeacherDashboardSuccess(
+        pendingBookingRequests: pendingRequests
+          ..sort((a, b) => a.startsAt.compareTo(b.startsAt)),
         upcomingSessions: sessions
           ..sort((a, b) => a.startsAt.compareTo(b.startsAt)),
         availability: slots,
@@ -778,6 +794,107 @@ class TeacherDashboardBloc
         emit(
           current.copyWith(
             upcomingSessions: current.upcomingSessions
+                .where((s) => s.bookingId != event.bookingId)
+                .toList(),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _onBookingRequestAccepted(
+    TeacherBookingRequestAccepted event,
+    Emitter<TeacherDashboardState> emit,
+  ) async {
+    final current = state;
+    if (current is! TeacherDashboardSuccess) return;
+
+    emit(
+      current.copyWith(
+        bookingRequestActionInProgress: event.bookingId,
+        clearBookingRequestFailure: true,
+      ),
+    );
+
+    final result = await _respondToBookingRequest(
+      bookingId: event.bookingId,
+      accept: true,
+    );
+
+    final latest = state;
+    if (latest is! TeacherDashboardSuccess) return;
+
+    result.fold(
+      (failure) => emit(
+        latest.copyWith(
+          clearBookingRequestActionInProgress: true,
+          bookingRequestFailure: failure,
+        ),
+      ),
+      (aggregate) {
+        _invalidateCache.invalidateSession(
+          aggregate.id,
+          teacherProfileId: _teacherId,
+          studentId: aggregate.studentId,
+        );
+        final moved = latest.pendingBookingRequests
+            .where((s) => s.bookingId == event.bookingId)
+            .map(mapAcceptedBookingToScheduledSession)
+            .toList();
+        emit(
+          latest.copyWith(
+            clearBookingRequestActionInProgress: true,
+            pendingBookingRequests: latest.pendingBookingRequests
+                .where((s) => s.bookingId != event.bookingId)
+                .toList(),
+            upcomingSessions: [...latest.upcomingSessions, ...moved]
+              ..sort((a, b) => a.startsAt.compareTo(b.startsAt)),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _onBookingRequestRejected(
+    TeacherBookingRequestRejected event,
+    Emitter<TeacherDashboardState> emit,
+  ) async {
+    final current = state;
+    if (current is! TeacherDashboardSuccess) return;
+
+    emit(
+      current.copyWith(
+        bookingRequestActionInProgress: event.bookingId,
+        clearBookingRequestFailure: true,
+      ),
+    );
+
+    final result = await _respondToBookingRequest(
+      bookingId: event.bookingId,
+      accept: false,
+      reason: event.reason,
+    );
+
+    final latest = state;
+    if (latest is! TeacherDashboardSuccess) return;
+
+    result.fold(
+      (failure) => emit(
+        latest.copyWith(
+          clearBookingRequestActionInProgress: true,
+          bookingRequestFailure: failure,
+        ),
+      ),
+      (aggregate) {
+        _invalidateCache.invalidateSession(
+          aggregate.id,
+          teacherProfileId: _teacherId,
+          studentId: aggregate.studentId,
+        );
+        emit(
+          latest.copyWith(
+            clearBookingRequestActionInProgress: true,
+            pendingBookingRequests: latest.pendingBookingRequests
                 .where((s) => s.bookingId != event.bookingId)
                 .toList(),
           ),

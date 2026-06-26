@@ -6,6 +6,8 @@ import 'package:quran_sessions/core/l10n_extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/scheduling_mode.dart';
+import '../../domain/entities/quran_session.dart';
+import '../../domain/entities/session_lifecycle_status.dart';
 import '../../domain/entities/teacher_availability.dart';
 import '../failure_ui/quran_sessions_failure_ui.dart';
 import '../blocs/teacher_dashboard/teacher_dashboard_bloc.dart';
@@ -14,7 +16,11 @@ import '../blocs/teacher_dashboard/teacher_dashboard_state.dart';
 import '../widgets/date_grouped_slots_layout.dart';
 import '../widgets/friday_review_reminder_banner.dart';
 import '../widgets/teacher_dashboard_inline_empty_state.dart';
-import '../widgets/session_card.dart';
+import '../widgets/tutor_cancel_session_dialog.dart';
+import '../widgets/tutor_dashboard_section.dart';
+import '../widgets/tutor_session_compact_card.dart';
+import '../widgets/tutor_reject_booking_sheet.dart';
+import '../../domain/policies/session_cancel_eligibility_policy.dart';
 import '../config/quran_sessions_scheduling_analytics_callbacks.dart';
 
 class TeacherDashboardScreen extends StatefulWidget {
@@ -23,6 +29,7 @@ class TeacherDashboardScreen extends StatefulWidget {
     required this.teacherId,
     this.onManageSchedule,
     this.onSessionDetailRequested,
+    this.resolveStudentName,
     this.schedulingAnalytics,
     this.meetingUrlEditor,
   });
@@ -35,7 +42,13 @@ class TeacherDashboardScreen extends StatefulWidget {
   final Future<void> Function()? onManageSchedule;
 
   /// Opens session detail for a booked session (booking aggregate id).
-  final void Function(String bookingId)? onSessionDetailRequested;
+  ///
+  /// Return [true] when the session was mutated (e.g. tutor cancel) so the
+  /// dashboard reloads upcoming sessions on pop.
+  final Future<bool?> Function(String bookingId)? onSessionDetailRequested;
+
+  /// Resolves a student display name for dashboard session rows.
+  final String? Function(String studentId)? resolveStudentName;
 
   /// Optional scheduling experiment analytics (week views, Friday banner).
   final QuranSessionsSchedulingAnalyticsCallbacks? schedulingAnalytics;
@@ -95,6 +108,14 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
 
           _maybeLogWeekView(state);
           _maybeLogFridayBanner(state);
+
+          if (state.bookingRequestFailure != null) {
+            TilawaFeedback.showToast(
+              context,
+              message: state.bookingRequestFailure!.toLocalizedMessage(context),
+              variant: TilawaFeedbackVariant.error,
+            );
+          }
 
           if (state.slotFailure != null) {
             TilawaFeedback.showToast(
@@ -164,17 +185,25 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
               ),
             ),
           ),
-          TeacherDashboardFailure(:final failure) => Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(failure.toLocalizedMessage(context)),
-                SizedBox(height: Theme.of(context).tokens.spaceMedium),
-                TilawaButton(
-                  text: l10n.retry,
-                  onPressed: _reload,
-                ),
-              ],
+          TeacherDashboardFailure() => Center(
+            child: Padding(
+              padding: EdgeInsets.all(Theme.of(context).tokens.spaceLarge),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    l10n.teacherDashboardLoadError,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  SizedBox(height: Theme.of(context).tokens.spaceMedium),
+                  TilawaButton(
+                    text: l10n.retry,
+                    size: TilawaButtonSize.small,
+                    onPressed: _reload,
+                  ),
+                ],
+              ),
             ),
           ),
           TeacherDashboardSuccess success => RefreshIndicator(
@@ -193,10 +222,57 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                       child: widget.meetingUrlEditor,
                     ),
                   ),
+                // ── Pending booking requests ───────────────────────────
+                SliverToBoxAdapter(
+                  child: TutorDashboardSection(
+                    title: l10n.teacherPendingBookingRequestsSection(
+                      success.pendingBookingRequests.length,
+                    ),
+                  ),
+                ),
+                if (success.pendingBookingRequests.isEmpty)
+                  SliverToBoxAdapter(
+                    child: TeacherDashboardInlineEmptyState(
+                      icon: Icons.mark_email_unread_outlined,
+                      title: l10n.teacherPendingBookingRequestsEmptyTitle,
+                      iconTone: TilawaStateVisualTone.neutral,
+                    ),
+                  )
+                else
+                  SliverList.builder(
+                    itemCount: success.pendingBookingRequests.length,
+                    itemBuilder: (_, i) {
+                      final session = success.pendingBookingRequests[i];
+                      final inProgress =
+                          success.bookingRequestActionInProgress ==
+                          session.bookingId;
+                      return TutorSessionCompactCard(
+                        session: session,
+                        studentDisplayName: _studentDisplayName(
+                          context,
+                          session.studentId,
+                        ),
+                        now: DateTime.now(),
+                        isLoading: inProgress,
+                        onAccept: () =>
+                            context.read<TeacherDashboardBloc>().add(
+                              TeacherBookingRequestAccepted(
+                                bookingId: session.bookingId,
+                              ),
+                            ),
+                        onReject: () => _confirmRejectBookingRequest(
+                          session.bookingId,
+                        ),
+                      );
+                    },
+                  ),
+
                 // ── Upcoming sessions ──────────────────────────────────
-                _SectionHeader(
-                  title: l10n.upcomingSessionsSection(
-                    success.upcomingSessions.length,
+                SliverToBoxAdapter(
+                  child: TutorDashboardSection(
+                    title: l10n.upcomingSessionsSection(
+                      success.upcomingSessions.length,
+                    ),
                   ),
                 ),
                 if (success.upcomingSessions.isEmpty)
@@ -204,7 +280,6 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                     child: TeacherDashboardInlineEmptyState(
                       icon: Icons.event_note_outlined,
                       title: l10n.upcomingSessionsEmptyTitle,
-                      subtitle: l10n.upcomingSessionsEmptySubtitle,
                       iconTone: TilawaStateVisualTone.neutral,
                     ),
                   )
@@ -213,13 +288,25 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                     itemCount: success.upcomingSessions.length,
                     itemBuilder: (_, i) {
                       final session = success.upcomingSessions[i];
-                      return SessionCard(
+                      final canJoin =
+                          session.effectiveLifecycleStatus.canJoinSession;
+                      return TutorSessionCompactCard(
                         session: session,
+                        studentDisplayName: _studentDisplayName(
+                          context,
+                          session.studentId,
+                        ),
+                        now: DateTime.now(),
                         onTap: widget.onSessionDetailRequested == null
                             ? null
-                            : () => widget.onSessionDetailRequested!(
-                                session.bookingId,
-                              ),
+                            : () => _openSessionDetail(session.bookingId),
+                        onJoin: canJoin
+                            ? () => _openSessionDetail(session.bookingId)
+                            : null,
+                        showCancelInOverflowMenu: true,
+                        onCancel: canTeacherCancelQuranSession(session)
+                            ? () => _confirmTutorCancelSession(session)
+                            : null,
                       );
                     },
                   ),
@@ -435,6 +522,41 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     await _reload();
   }
 
+  String _studentDisplayName(BuildContext context, String studentId) {
+    return widget.resolveStudentName?.call(studentId) ??
+        context.quranSessionsL10n.tutorDashboardStudentFallback;
+  }
+
+  Future<void> _openSessionDetail(String bookingId) async {
+    final openDetail = widget.onSessionDetailRequested;
+    if (openDetail == null) return;
+    final shouldReload = await openDetail(bookingId);
+    if (!mounted || shouldReload != true) return;
+    await _reload();
+  }
+
+  Future<void> _confirmRejectBookingRequest(String bookingId) async {
+    final result = await showTutorRejectBookingSheet(context);
+    if (result == null || !mounted) return;
+    context.read<TeacherDashboardBloc>().add(
+      TeacherBookingRequestRejected(
+        bookingId: bookingId,
+        reason: result.reason,
+      ),
+    );
+  }
+
+  Future<void> _confirmTutorCancelSession(QuranSession session) async {
+    final confirmed = await showTutorCancelSessionDialog(context);
+    if (!confirmed || !mounted) return;
+    context.read<TeacherDashboardBloc>().add(
+      TeacherSessionCancelled(
+        bookingId: session.bookingId,
+        reason: tutorCancelSessionReason,
+      ),
+    );
+  }
+
   void _maybeLogWeekView(TeacherDashboardSuccess state) {
     if (_loggedWeekView) return;
     _loggedWeekView = true;
@@ -494,14 +616,31 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
   Future<void> _reload() async {
     final bloc = context.read<TeacherDashboardBloc>();
     final softRefresh = bloc.state is TeacherDashboardSuccess;
+
+    // Subscribe before dispatch so we never complete on the pre-reload state
+    // (Empty / Success with isRefreshing false).
+    final Future<void> reloadDone = softRefresh
+        ? bloc.stream
+              .firstWhere(
+                (s) => s is TeacherDashboardSuccess && s.isRefreshing,
+              )
+              .then(
+                (_) => bloc.stream.firstWhere(
+                  (s) => s is TeacherDashboardSuccess && !s.isRefreshing,
+                ),
+              )
+              .then((_) {})
+        : bloc.stream
+              .firstWhere(
+                (s) =>
+                    s is TeacherDashboardSuccess ||
+                    s is TeacherDashboardEmpty ||
+                    s is TeacherDashboardFailure,
+              )
+              .then((_) {});
+
     bloc.add(TeacherDashboardLoadRequested(teacherId: widget.teacherId));
-    if (softRefresh) {
-      await bloc.stream.firstWhere(
-        (s) => s is TeacherDashboardSuccess && !s.isRefreshing,
-      );
-    } else {
-      await bloc.stream.firstWhere((s) => s is! TeacherDashboardLoading);
-    }
+    await reloadDone;
   }
 }
 
@@ -1025,23 +1164,6 @@ class _BookableTimesWeekSection extends StatelessWidget {
             ),
           ),
       ],
-    );
-  }
-}
-
-// ── Section header ────────────────────────────────────────────────────────────
-
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title});
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
-        child: Text(title, style: Theme.of(context).textTheme.titleMedium),
-      ),
     );
   }
 }

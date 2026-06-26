@@ -7,6 +7,10 @@ import '../../../domain/entities/pending_reschedule_request.dart';
 import '../../../domain/entities/session_call_type.dart';
 import '../../../domain/entities/session_lifecycle_status.dart';
 import '../../../domain/failures/quran_sessions_failure.dart';
+import '../../../domain/policies/session_join_window_policy.dart';
+import '../../../domain/value_objects/actor_role.dart';
+import '../../../domain/policies/session_cancel_eligibility_policy.dart';
+import '../../session_join/session_join_ui_state.dart';
 
 sealed class SessionDetailState extends Equatable {
   const SessionDetailState();
@@ -47,6 +51,11 @@ final class SessionDetailSuccess extends SessionDetailState {
     this.rescheduleRespondInProgress = false,
     this.rescheduleRespondFailure,
     this.rescheduleRespondAccepted,
+    this.cancellationInProgress = false,
+    this.cancellationFailure,
+    this.cancellationSucceeded = false,
+    this.joinWindowPolicy = const SessionJoinWindowPolicy(),
+    this.viewerRole,
   });
 
   final SessionAggregate aggregate;
@@ -73,9 +82,29 @@ final class SessionDetailSuccess extends SessionDetailState {
 
   /// `true` accepted, `false` rejected, `null` not yet responded.
   final bool? rescheduleRespondAccepted;
+  final bool cancellationInProgress;
+  final QuranSessionsFailure? cancellationFailure;
+  final bool cancellationSucceeded;
+  final SessionJoinWindowPolicy joinWindowPolicy;
+  final ActorRole? viewerRole;
+
+  SessionJoinUiState get joinUiState => resolveSessionJoinUiState(
+    lifecycleStatus: aggregate.lifecycleStatus,
+    startsAt: aggregate.startsAt,
+    now: DateTime.now(),
+    joinInProgress: joinInProgress,
+    joinFailure: joinFailure,
+    hasOpenedMeeting: hasOpenedExternalMeeting,
+    joinWindowPolicy: joinWindowPolicy,
+  );
+
+  bool get isTeacherViewer => viewerRole == ActorRole.teacher;
+
+  bool get canCancel => canViewerCancelSession(aggregate, viewerRole);
 
   bool get canJoin =>
-      aggregate.sessionId != null && aggregate.lifecycleStatus.canJoinSession;
+      aggregate.sessionId != null &&
+      joinUiState == SessionJoinUiState.joinAvailable;
 
   bool get canOpenDispute => aggregate.lifecycleStatus.canOpenDispute;
 
@@ -133,6 +162,14 @@ final class SessionDetailSuccess extends SessionDetailState {
     bool clearRescheduleRespondFailure = false,
     bool? rescheduleRespondAccepted,
     bool clearRescheduleRespondAccepted = false,
+    bool? cancellationInProgress,
+    bool clearCancellationInProgress = false,
+    QuranSessionsFailure? cancellationFailure,
+    bool clearCancellationFailure = false,
+    bool? cancellationSucceeded,
+    bool clearCancellationSucceeded = false,
+    ActorRole? viewerRole,
+    bool clearViewerRole = false,
   }) {
     return SessionDetailSuccess(
       aggregate: aggregate ?? this.aggregate,
@@ -191,6 +228,16 @@ final class SessionDetailSuccess extends SessionDetailState {
       rescheduleRespondAccepted: clearRescheduleRespondAccepted
           ? null
           : rescheduleRespondAccepted ?? this.rescheduleRespondAccepted,
+      cancellationInProgress: clearCancellationInProgress
+          ? false
+          : cancellationInProgress ?? this.cancellationInProgress,
+      cancellationFailure: clearCancellationFailure
+          ? null
+          : cancellationFailure ?? this.cancellationFailure,
+      cancellationSucceeded: clearCancellationSucceeded
+          ? false
+          : cancellationSucceeded ?? this.cancellationSucceeded,
+      viewerRole: clearViewerRole ? null : viewerRole ?? this.viewerRole,
     );
   }
 
@@ -218,6 +265,11 @@ final class SessionDetailSuccess extends SessionDetailState {
     rescheduleRespondInProgress,
     rescheduleRespondFailure,
     rescheduleRespondAccepted,
+    cancellationInProgress,
+    cancellationFailure,
+    cancellationSucceeded,
+    joinWindowPolicy,
+    viewerRole,
   ];
 }
 

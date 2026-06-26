@@ -8,6 +8,7 @@ class SessionPolicyDto {
     required this.videoCallAllowedForChildren,
     required this.recordingEnabled,
     required this.requireGuardianApprovalForChildren,
+    this.quranTutorBookingMode,
   });
 
   final int childAgeThreshold;
@@ -18,6 +19,7 @@ class SessionPolicyDto {
   final bool videoCallAllowedForChildren;
   final bool recordingEnabled;
   final bool requireGuardianApprovalForChildren;
+  final String? quranTutorBookingMode;
 }
 
 class TeacherEligibilityPolicyDto {

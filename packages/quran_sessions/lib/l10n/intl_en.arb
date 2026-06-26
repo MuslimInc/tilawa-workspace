@@ -23,7 +23,7 @@
     "accountBlocked": "Your account is suspended. Please contact support.",
     "guardianApprovalRequired": "Booking for this student requires guardian approval first.",
     "guardianApprovalTitle": "Guardian approval",
-    "guardianApprovalBody": "A parent or guardian must sign in on this device and confirm that they allow Quran Sessions bookings for this student account.",
+    "guardianApprovalBody": "A parent or guardian must sign in on this device and confirm that they allow QuranTutor bookings for this student account.",
     "guardianApprovalStudentIdLabel": "Student account ID",
     "guardianApprovalStudentIdHint": "Child student user ID",
     "guardianApprovalConfirm": "Approve bookings",
@@ -76,7 +76,7 @@
     "profileGenderRequired": "Gender is required.",
     "profileCountryRequired": "Country is required.",
     "profileCityRequired": "City is required.",
-    "quranSessionsHomeTitle": "Learn Quran recitation",
+    "quranSessionsHomeTitle": "QuranTutor",
     "mySessionsTitle": "My sessions",
     "noTeachersAvailableYet": "No teachers available yet",
     "seeAllTeachers": "See all teachers →",
@@ -111,8 +111,8 @@
     "callTypeExternalMeeting": "External link",
     "callTypeVoice": "Voice",
     "callTypeVideo": "Video",
-    "sessionModeVoiceBetaNote": "Free Beta: voice uses a placeholder join until in-app RTC ships.",
-    "sessionModeVideoBetaNote": "Free Beta: video uses a placeholder join until in-app RTC ships.",
+    "sessionModeVoiceBetaNote": "Voice sessions use in-app calling when your teacher and device support it.",
+    "sessionModeVideoBetaNote": "Video sessions use in-app calling when your teacher and device support it.",
     "bookingVoiceVideoProviderNote": "In-app calls use {provider}.",
     "@bookingVoiceVideoProviderNote": {
         "placeholders": {
@@ -171,7 +171,7 @@
     "groupBookingNotSupported": "Group sessions are not available in Free Beta.",
     "unsupportedSessionMode": "This session type is not supported.",
     "reviewSubmittedThanks": "Thank you — your review was submitted!",
-    "upcomingSessionsSection": "Upcoming ({count})",
+    "upcomingSessionsSection": "Upcoming sessions ({count})",
     "@upcomingSessionsSection": {
         "placeholders": {
             "count": {
@@ -202,6 +202,14 @@
     "cancelPolicyFullRefund": "You will receive a full refund if you cancel now.",
     "cancelPolicyPartialRefund": "A partial refund may apply based on our cancellation policy.",
     "cancelPolicyNoRefund": "No refund applies for cancellations at this time.",
+    "tutorCancelSessionDialogTitle": "Cancel session?",
+    "tutorCancelSessionDialogMessage": "The student will be notified and will not be able to join this session.",
+    "tutorCancelSessionAction": "Cancel session",
+    "tutorCancelSessionGoBack": "Go back",
+    "tutorCancelSessionSuccess": "Session cancelled.",
+    "tutorCancelSessionError": "Could not cancel the session. Please try again.",
+    "sessionCancelledByTutorTitle": "Your tutor cancelled this session",
+    "sessionCancelledByTutorSubtitle": "You can choose another time",
     "rescheduleSessionTitle": "Reschedule session",
     "rescheduleReasonLabel": "Reason for rescheduling",
     "rescheduleReasonHint": "Briefly explain why you need a new time",
@@ -284,6 +292,14 @@
     "sessionStatusNoShow": "No-show",
     "cancel": "Cancel",
     "joinSession": "Join",
+    "sessionJoinStateNotStarted": "Join opens 15 minutes before your session starts.",
+    "sessionJoinStateJoinAvailable": "You can join now.",
+    "sessionJoinStateJoining": "Connecting to your session…",
+    "sessionJoinStateJoined": "You joined this session.",
+    "sessionJoinStateFailed": "Could not join. Try again or contact support.",
+    "sessionJoinStateEnded": "This session has ended.",
+    "sessionJoinStateCancelled": "This session was cancelled.",
+    "sessionCancelledSuccess": "Session cancelled.",
     "noSlotsAvailable": "No slots available",
     "noSlotsAvailableThisDay": "No slots available on this day",
     "teacherDashboardTitle": "Teacher dashboard",
@@ -674,6 +690,41 @@
     "sessionActionIssueRefund": "Issue refund",
     "sessionActionExpireReservation": "Expire reservation",
     "sessionActionRejectBooking": "Reject booking",
+    "bookingRequestSentTitle": "Booking request sent",
+    "bookingRequestSentSubtitle": "Waiting for tutor approval",
+    "bookingAcceptedTitle": "Session accepted",
+    "bookingAcceptedSubtitle": "You can join at session time",
+    "bookingRejectedTitle": "Tutor declined this session",
+    "bookingRejectedSubtitle": "You can choose another time",
+    "sendBookingRequest": "Send booking request",
+    "sessionStatusPendingTutorApproval": "Pending approval",
+    "sessionStatusRejectedByTutor": "Declined",
+    "teacherPendingBookingRequestsSection": "Booking requests ({count})",
+    "@teacherPendingBookingRequestsSection": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "teacherPendingBookingRequestsEmptyTitle": "No booking requests right now",
+    "teacherPendingBookingRequestsEmptySubtitle": "Student requests will appear here",
+    "teacherAcceptBookingRequest": "Accept",
+    "teacherRejectBookingRequest": "Decline",
+    "tutorRejectBookingSheetTitle": "Decline booking request?",
+    "tutorRejectBookingSheetBody": "You can share a reason with the student, or decline without one.",
+    "tutorRejectBookingReasonLabel": "Reason for declining",
+    "tutorRejectBookingReasonHint": "e.g. This time does not work",
+    "tutorRejectBookingConfirmAction": "Decline request",
+    "tutorRejectBookingGoBack": "Go back",
+    "tutorRejectBookingReasonTooLong": "Reason is too long",
+    "tutorCancelSessionFromCard": "Cancel",
+    "sessionLifecyclePendingTutorApproval": "Pending tutor approval",
+    "sessionLifecycleRejectedByTutor": "Rejected by tutor",
+    "sessionActionSubmitBookingRequest": "Submit booking request",
+    "sessionActionAcceptBookingRequest": "Accept booking request",
+    "sessionActionRejectBookingRequest": "Reject booking request",
+    "sessionActionExpireTutorApproval": "Expire tutor approval",
     "sessionTimelineStatusTransition": "{previous} → {next}",
     "@sessionTimelineStatusTransition": {
         "placeholders": {
@@ -682,6 +733,24 @@
             },
             "next": {
                 "type": "String"
+            }
+        }
+    },
+    "tutorDashboardStudentFallback": "Student",
+    "teacherDashboardLoadError": "Could not load sessions. Please try again.",
+    "tutorSessionStatusPendingApproval": "Awaiting your approval",
+    "tutorSessionStatusAccepted": "Accepted",
+    "tutorSessionStatusRejected": "Declined",
+    "tutorSessionStatusCancelledByTutor": "You cancelled",
+    "tutorSessionStatusCancelledByStudent": "Student cancelled",
+    "tutorSessionStatusCompleted": "Completed",
+    "tutorSessionStatusExpired": "Expired",
+    "tutorSessionJoinNotYet": "Join is not open yet",
+    "tutorSessionDurationMinutes": "{count} min",
+    "@tutorSessionDurationMinutes": {
+        "placeholders": {
+            "count": {
+                "type": "int"
             }
         }
     }

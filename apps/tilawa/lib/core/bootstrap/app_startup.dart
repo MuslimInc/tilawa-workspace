@@ -121,12 +121,12 @@ Future<void> _showIncomingCallNotification(RemoteMessage message) async {
       local_notifications.AndroidNotificationAction(
         'accept_call',
         'Join',
-        titleColor: Color(0xFF4CAF50),
+        titleColor: AppColors.success,
       ),
       local_notifications.AndroidNotificationAction(
         'decline_call',
         'Decline',
-        titleColor: Color(0xFFF44336),
+        titleColor: AppColors.error,
       ),
     ],
   );

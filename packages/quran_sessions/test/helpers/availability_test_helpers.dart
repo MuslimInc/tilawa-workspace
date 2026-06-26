@@ -6,6 +6,7 @@ import 'fakes/fake_session_repository.dart';
 import 'fakes/fake_teacher_profile_repository.dart';
 import 'fakes/fake_user_profile_repository.dart';
 import 'fixtures.dart';
+import 'lifecycle_test_helpers.dart';
 
 /// In-memory [ScheduleRepository] for tests.
 class FakeScheduleRepository implements ScheduleRepository {
@@ -121,6 +122,7 @@ class FakeMarketSchedulingConfigRepository
 
 /// Minimal [TeacherDashboardSuccess] for bloc/widget tests.
 TeacherDashboardSuccess seedTeacherDashboardSuccess({
+  List<QuranSession> pendingBookingRequests = const [],
   List<QuranSession> upcomingSessions = const [],
   List<TeacherAvailability> availability = const [],
   MarketSchedulingConfig schedulingConfig = MarketSchedulingConfig.defaults,
@@ -139,6 +141,7 @@ TeacherDashboardSuccess seedTeacherDashboardSuccess({
   int? refreshDiscardedPendingCount,
 }) {
   return TeacherDashboardSuccess(
+    pendingBookingRequests: pendingBookingRequests,
     upcomingSessions: upcomingSessions,
     availability: availability,
     schedulingConfig: schedulingConfig,
@@ -165,6 +168,7 @@ TeacherDashboardBloc buildTestTeacherDashboardBloc({
   required BlockGeneratedSlotUseCase blockGeneratedSlot,
   required AvailabilityProvider availabilityProvider,
   required CancelSessionViaServerUseCase cancelSession,
+  RespondToBookingRequestUseCase? respondToBookingRequest,
   required CompleteSessionViaServerUseCase completeSession,
   required FakeScheduleRepository scheduleRepo,
   FakeMarketSchedulingConfigRepository? schedulingConfigRepo,
@@ -191,7 +195,7 @@ TeacherDashboardBloc buildTestTeacherDashboardBloc({
     scheduleRepository: scheduleRepo,
     sessionRepository: sessionRepo,
     teacherProfileRepository: teacherProfiles,
-    bookedSlotLocks: bookedSlotLockRepository ?? FakeBookedSlotLockRepository(),
+    getTeacherAvailability: getAvailability,
     cacheStore: cacheStore,
     currentTime: now,
   );
@@ -205,6 +209,8 @@ TeacherDashboardBloc buildTestTeacherDashboardBloc({
     blockSlotUseCase: blockGeneratedSlot,
     availabilityGateway: availabilityProvider,
     cancelSessionUseCase: cancelSession,
+    respondToBookingRequestUseCase:
+        respondToBookingRequest ?? buildRespondToBookingRequestUseCase(),
     completeSessionUseCase: completeSession,
     fridayReminderStore: reminders,
     teacherUserId: teacherId,

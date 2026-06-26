@@ -87,8 +87,12 @@ void navigateForTeacherCapability(
   }
 }
 
-/// GoRouter route tree for the Quran Sessions feature.
+/// GoRouter route tree for the QuranTutor feature (legacy package: quran_sessions).
 List<RouteBase> get quranSessionsRoutes => [
+  GoRoute(
+    path: QuranSessionsRoutes.quranTutorHome,
+    redirect: (context, state) => QuranSessionsRoutes.home,
+  ),
   GoRoute(
     path: QuranSessionsRoutes.home,
     builder: (context, state) => BlocProvider(
@@ -118,7 +122,9 @@ List<RouteBase> get quranSessionsRoutes => [
         onTeacherTapped: (id) => context.push(
           QuranSessionsRoutes.teacherProfile.replaceFirst(':teacherId', id),
         ),
-        onNotifyInterest: () {},
+        onNotifyInterest: () => quranSessionsAnalyticsCallbacks()
+            .onQuranSessionsNotifyInterestSubmitted
+            ?.call(),
         onChangeCity: () => _openProfileCompletion(context),
         onTeacherApplyEntry:
             quranSessionsFeatureConfig().showEmptyStateTeacherEntry
@@ -179,6 +185,9 @@ List<RouteBase> get quranSessionsRoutes => [
           studentId: studentId,
           preSelectedSlotId: preSelectedSlotId,
           sessionModePolicy: sessionModePolicyFromLaunchConfig(launchConfig),
+          bookingModeHint: resolveQuranTutorBookingModeHint(
+            launchConfig: launchConfig,
+          ),
           voiceVideoProviderHint: resolveVoiceVideoProviderHint(launchConfig),
           onBookingSuccess: (_) {
             context
@@ -289,7 +298,7 @@ List<RouteBase> get quranSessionsRoutes => [
           teacherId: teacherId,
           onManageSchedule: () =>
               context.push(QuranSessionsRoutes.availability),
-          onSessionDetailRequested: (bookingId) => context.push(
+          onSessionDetailRequested: (bookingId) => context.push<bool>(
             QuranSessionsRoutes.sessionDetail.replaceFirst(
               ':bookingId',
               bookingId,

@@ -69,6 +69,13 @@ abstract interface class SessionMutationGateway {
     required String bookingId,
     required String reason,
   });
+
+  Future<Either<QuranSessionsFailure, SessionAggregate>>
+  respondToBookingRequest({
+    required String bookingId,
+    required bool accept,
+    String? reason,
+  });
 }
 
 class SessionDisputeResult {

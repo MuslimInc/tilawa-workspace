@@ -9,6 +9,8 @@ extension SessionLifecycleStatusL10n on SessionLifecycleStatus {
     SessionLifecycleStatus.draft => l10n.sessionLifecycleDraft,
     SessionLifecycleStatus.pendingPayment =>
       l10n.sessionLifecyclePendingPayment,
+    SessionLifecycleStatus.pendingTutorApproval =>
+      l10n.sessionLifecyclePendingTutorApproval,
     SessionLifecycleStatus.scheduled => l10n.sessionLifecycleScheduled,
     SessionLifecycleStatus.confirmed => l10n.sessionLifecycleConfirmed,
     SessionLifecycleStatus.inProgress => l10n.sessionLifecycleInProgress,
@@ -28,6 +30,8 @@ extension SessionLifecycleStatusL10n on SessionLifecycleStatus {
     SessionLifecycleStatus.compensated => l10n.sessionLifecycleCompensated,
     SessionLifecycleStatus.refunded => l10n.sessionLifecycleRefunded,
     SessionLifecycleStatus.expired => l10n.sessionLifecycleExpired,
+    SessionLifecycleStatus.rejectedByTutor =>
+      l10n.sessionLifecycleRejectedByTutor,
   };
 }
 
@@ -38,6 +42,13 @@ extension SessionActionL10n on SessionAction {
     SessionAction.initiatePayment => l10n.sessionActionInitiatePayment,
     SessionAction.confirmBooking => l10n.sessionActionConfirmBooking,
     SessionAction.confirmFreeBooking => l10n.sessionActionConfirmFreeBooking,
+    SessionAction.submitBookingRequest =>
+      l10n.sessionActionSubmitBookingRequest,
+    SessionAction.acceptBookingRequest =>
+      l10n.sessionActionAcceptBookingRequest,
+    SessionAction.rejectBookingRequest =>
+      l10n.sessionActionRejectBookingRequest,
+    SessionAction.expireTutorApproval => l10n.sessionActionExpireTutorApproval,
     SessionAction.acknowledgeSession => l10n.sessionActionAcknowledgeSession,
     SessionAction.startSession => l10n.sessionActionStartSession,
     SessionAction.completeSession => l10n.sessionActionCompleteSession,

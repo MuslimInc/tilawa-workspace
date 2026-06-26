@@ -11,6 +11,7 @@ import '../../helpers/fakes/fake_session_repository.dart';
 import '../../helpers/fakes/fake_teacher_profile_repository.dart';
 import '../../helpers/fixtures.dart';
 import '../../helpers/fixtures/session_aggregate_fixtures.dart';
+import '../../helpers/lifecycle_test_helpers.dart';
 
 class _FakeAuthSession implements AuthSessionProvider {
   _FakeAuthSession(this.uid);
@@ -40,10 +41,11 @@ void main() {
     OpenSessionDisputeUseCase? openDispute,
     GetPendingRescheduleRequestUseCase? getPendingReschedule,
     RespondToRescheduleRequestUseCase? respondToReschedule,
+    CancelSessionViaServerUseCase? cancelSession,
     AuthSessionProvider? authSession,
   }) {
     return SessionDetailBloc(
-      aggregateRepository: aggregateRepository,
+      getSessionAggregate: GetSessionAggregateUseCase(aggregateRepository),
       getTimeline: GetSessionTimelineUseCase(auditRepository),
       sessionDetailUseCase: getSessionDetail,
       cacheInvalidator: invalidateCache,
@@ -53,8 +55,14 @@ void main() {
       openDispute: openDispute,
       getPendingReschedule: getPendingReschedule,
       respondToReschedule: respondToReschedule,
+      cancelSession: cancelSession,
       authSession: authSession,
-      teacherProfileRepository: teacherProfiles,
+      resolveActorRole: authSession == null
+          ? null
+          : ResolveSessionActorRoleUseCase(
+              authSession: authSession,
+              teacherProfileRepository: teacherProfiles,
+            ),
     );
   }
 
@@ -113,7 +121,7 @@ void main() {
   blocTest<SessionDetailBloc, SessionDetailState>(
     'unauthorized timeline read succeeds with empty timeline not load failure',
     build: () => SessionDetailBloc(
-      aggregateRepository: aggregateRepository,
+      getSessionAggregate: GetSessionAggregateUseCase(aggregateRepository),
       getTimeline: GetSessionTimelineUseCase(
         auditRepository..failWith = const UnauthorizedFailure(),
       ),
@@ -137,7 +145,7 @@ void main() {
   blocTest<SessionDetailBloc, SessionDetailState>(
     'server timeline failure surfaces timelineLoadFailed on success state',
     build: () => SessionDetailBloc(
-      aggregateRepository: aggregateRepository,
+      getSessionAggregate: GetSessionAggregateUseCase(aggregateRepository),
       getTimeline: GetSessionTimelineUseCase(
         auditRepository..failWith = const ServerFailure(statusCode: 500),
       ),
@@ -173,7 +181,7 @@ void main() {
         ),
       );
       return SessionDetailBloc(
-        aggregateRepository: aggregateRepository,
+        getSessionAggregate: GetSessionAggregateUseCase(aggregateRepository),
         getTimeline: GetSessionTimelineUseCase(auditRepository),
       );
     },
@@ -208,7 +216,7 @@ void main() {
         ),
       ];
       return SessionDetailBloc(
-        aggregateRepository: aggregateRepository,
+        getSessionAggregate: GetSessionAggregateUseCase(aggregateRepository),
         getTimeline: GetSessionTimelineUseCase(auditRepository),
         sessionRepository: sessionRepository,
       );
@@ -665,6 +673,134 @@ void main() {
               'req_1',
             ),
       ],
+    );
+  });
+
+  group('session cancel', () {
+    blocTest<SessionDetailBloc, SessionDetailState>(
+      'load resolves teacher viewer role for owning tutor',
+      build: () => buildBloc(authSession: _FakeAuthSession('teacher_user')),
+      setUp: () {
+        teacherProfiles.seed(
+          makeTeacherProfile(id: 'teacher_1', userId: 'teacher_user'),
+        );
+      },
+      act: (bloc) => bloc.add(
+        const SessionDetailLoadRequested(bookingId: 'booking_1'),
+      ),
+      expect: () => [
+        const SessionDetailLoading(),
+        isA<SessionDetailSuccess>().having(
+          (s) => s.viewerRole,
+          'viewerRole',
+          ActorRole.teacher,
+        ),
+      ],
+    );
+
+    blocTest<SessionDetailBloc, SessionDetailState>(
+      'teacher cancel transitions aggregate to cancelledByTeacher',
+      build: () => buildBloc(
+        cancelSession: buildCancelSessionViaServerUseCase(
+          repository: aggregateRepository,
+        ),
+        authSession: _FakeAuthSession('teacher_user'),
+      ),
+      seed: () => SessionDetailSuccess(
+        aggregate: makeAggregate(
+          id: 'booking_1',
+          status: SessionLifecycleStatus.confirmed,
+        ),
+        timeline: const [],
+        viewerRole: ActorRole.teacher,
+      ),
+      act: (bloc) => bloc.add(
+        const SessionDetailCancelSubmitted(reason: 'tutor_cancelled'),
+      ),
+      expect: () => [
+        isA<SessionDetailSuccess>().having(
+          (s) => s.cancellationInProgress,
+          'inProgress',
+          isTrue,
+        ),
+        isA<SessionDetailSuccess>()
+            .having(
+              (s) => s.aggregate.lifecycleStatus,
+              'status',
+              SessionLifecycleStatus.cancelledByTeacher,
+            )
+            .having(
+              (s) => s.cancellationSucceeded,
+              'succeeded',
+              isTrue,
+            ),
+      ],
+    );
+
+    blocTest<SessionDetailBloc, SessionDetailState>(
+      'teacher cancel ignored for pending tutor approval',
+      build: () => buildBloc(
+        cancelSession: buildCancelSessionViaServerUseCase(
+          repository: aggregateRepository,
+        ),
+        authSession: _FakeAuthSession('teacher_user'),
+      ),
+      seed: () => SessionDetailSuccess(
+        aggregate: makeAggregate(
+          id: 'booking_1',
+          status: SessionLifecycleStatus.pendingTutorApproval,
+        ),
+        timeline: const [],
+        viewerRole: ActorRole.teacher,
+      ),
+      act: (bloc) => bloc.add(
+        const SessionDetailCancelSubmitted(reason: 'tutor_cancelled'),
+      ),
+      expect: () => <SessionDetailState>[],
+    );
+
+    blocTest<SessionDetailBloc, SessionDetailState>(
+      'teacher cancel ignored for non-owning viewer role',
+      build: () => buildBloc(
+        cancelSession: buildCancelSessionViaServerUseCase(
+          repository: aggregateRepository,
+        ),
+        authSession: _FakeAuthSession('other_teacher'),
+      ),
+      seed: () => SessionDetailSuccess(
+        aggregate: makeAggregate(
+          id: 'booking_1',
+          status: SessionLifecycleStatus.confirmed,
+        ),
+        timeline: const [],
+        viewerRole: null,
+      ),
+      act: (bloc) => bloc.add(
+        const SessionDetailCancelSubmitted(reason: 'tutor_cancelled'),
+      ),
+      expect: () => <SessionDetailState>[],
+    );
+
+    blocTest<SessionDetailBloc, SessionDetailState>(
+      'second teacher cancel is ignored when already cancelled',
+      build: () => buildBloc(
+        cancelSession: buildCancelSessionViaServerUseCase(
+          repository: aggregateRepository,
+        ),
+        authSession: _FakeAuthSession('teacher_user'),
+      ),
+      seed: () => SessionDetailSuccess(
+        aggregate: makeAggregate(
+          id: 'booking_1',
+          status: SessionLifecycleStatus.cancelledByTeacher,
+        ),
+        timeline: const [],
+        viewerRole: ActorRole.teacher,
+      ),
+      act: (bloc) => bloc.add(
+        const SessionDetailCancelSubmitted(reason: 'tutor_cancelled'),
+      ),
+      expect: () => <SessionDetailState>[],
     );
   });
 }

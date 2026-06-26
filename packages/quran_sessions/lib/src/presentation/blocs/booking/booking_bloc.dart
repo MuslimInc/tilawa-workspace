@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../domain/entities/teacher_availability.dart';
 import '../../../domain/policies/session_mode_policy.dart';
-import '../../../domain/repositories/teacher_profile_repository.dart';
+import '../../../domain/usecases/get_teacher_profile_by_id_usecase.dart';
 import '../../../domain/usecases/get_teacher_availability_usecase.dart';
 import '../../../boundaries/payment/session_payment_confirmation.dart';
 import '../../../domain/entities/session_lifecycle_status.dart';
@@ -19,7 +19,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     required this._getAvailability,
     required this._submitBooking,
     required this._validateEligibility,
-    required this._teacherProfiles,
+    required this._getTeacherProfile,
     this.sessionModePolicy = SessionModePolicy.freeBeta,
     this.onBookingLostDueToNoAvailability,
     this.resolveMarketCode,
@@ -39,7 +39,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
   final GetTeacherAvailabilityUseCase _getAvailability;
   final SubmitSessionBookingUseCase _submitBooking;
   final ValidateBookingEligibilityUseCase _validateEligibility;
-  final TeacherProfileRepository _teacherProfiles;
+  final GetTeacherProfileByIdUseCase _getTeacherProfile;
   final SessionModePolicy sessionModePolicy;
   final SessionPaymentConfirmation? _paymentConfirmation;
 
@@ -93,7 +93,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
 
     emit(const BookingSlotsLoading());
 
-    final profileResult = await _teacherProfiles.getProfileById(teacherId);
+    final profileResult = await _getTeacherProfile(teacherId);
     final externalMeetingUrl = profileResult.fold(
       (_) => null,
       (profile) => profile.externalMeetingUrl,

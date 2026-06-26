@@ -11,6 +11,7 @@ class SessionTransitionTable {
   static const Set<SessionLifecycleStatus> _allStatuses = {
     SessionLifecycleStatus.draft,
     SessionLifecycleStatus.pendingPayment,
+    SessionLifecycleStatus.pendingTutorApproval,
     SessionLifecycleStatus.scheduled,
     SessionLifecycleStatus.confirmed,
     SessionLifecycleStatus.inProgress,
@@ -27,6 +28,7 @@ class SessionTransitionTable {
     SessionLifecycleStatus.compensated,
     SessionLifecycleStatus.refunded,
     SessionLifecycleStatus.expired,
+    SessionLifecycleStatus.rejectedByTutor,
   };
 
   static const List<SessionTransition> _transitions = [
@@ -69,6 +71,45 @@ class SessionTransitionTable {
         TransitionSideEffect.createSessionDocument,
         TransitionSideEffect.notifyBothParties,
       ],
+    ),
+    SessionTransition(
+      action: SessionAction.submitBookingRequest,
+      from: {SessionLifecycleStatus.draft},
+      to: SessionLifecycleStatus.pendingTutorApproval,
+      allowedActors: {ActorRole.student, ActorRole.system},
+      requiresReason: false,
+      sideEffects: [
+        TransitionSideEffect.hardLockSlot,
+        TransitionSideEffect.createSessionDocument,
+        TransitionSideEffect.notifyBothParties,
+      ],
+    ),
+    SessionTransition(
+      action: SessionAction.acceptBookingRequest,
+      from: {SessionLifecycleStatus.pendingTutorApproval},
+      to: SessionLifecycleStatus.scheduled,
+      allowedActors: {ActorRole.teacher},
+      requiresReason: false,
+      sideEffects: [TransitionSideEffect.notifyBothParties],
+    ),
+    SessionTransition(
+      action: SessionAction.rejectBookingRequest,
+      from: {SessionLifecycleStatus.pendingTutorApproval},
+      to: SessionLifecycleStatus.rejectedByTutor,
+      allowedActors: {ActorRole.teacher},
+      requiresReason: false,
+      sideEffects: [
+        TransitionSideEffect.releaseSlot,
+        TransitionSideEffect.notifyCounterparty,
+      ],
+    ),
+    SessionTransition(
+      action: SessionAction.expireTutorApproval,
+      from: {SessionLifecycleStatus.pendingTutorApproval},
+      to: SessionLifecycleStatus.expired,
+      allowedActors: {ActorRole.system},
+      requiresReason: false,
+      sideEffects: [TransitionSideEffect.releaseSlot],
     ),
     SessionTransition(
       action: SessionAction.acknowledgeSession,
@@ -148,6 +189,7 @@ class SessionTransitionTable {
         SessionLifecycleStatus.scheduled,
         SessionLifecycleStatus.confirmed,
         SessionLifecycleStatus.pendingPayment,
+        SessionLifecycleStatus.pendingTutorApproval,
       },
       to: SessionLifecycleStatus.cancelledByStudent,
       allowedActors: {ActorRole.student},
@@ -170,6 +212,7 @@ class SessionTransitionTable {
       from: {
         SessionLifecycleStatus.draft,
         SessionLifecycleStatus.pendingPayment,
+        SessionLifecycleStatus.pendingTutorApproval,
         SessionLifecycleStatus.scheduled,
         SessionLifecycleStatus.confirmed,
         SessionLifecycleStatus.inProgress,
