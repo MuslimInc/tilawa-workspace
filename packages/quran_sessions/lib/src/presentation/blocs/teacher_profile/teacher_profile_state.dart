@@ -29,6 +29,9 @@ final class TeacherProfileSuccess extends TeacherProfileState {
     this.isLoadingMoreReviews = false,
     this.hasMoreReviews = false,
     this.nextReviewCursor,
+    this.reportInProgress = false,
+    this.reportFailure,
+    this.reportSubmitted = false,
   });
 
   final QuranTeacher teacher;
@@ -38,6 +41,9 @@ final class TeacherProfileSuccess extends TeacherProfileState {
   final bool isLoadingMoreReviews;
   final bool hasMoreReviews;
   final String? nextReviewCursor;
+  final bool reportInProgress;
+  final QuranSessionsFailure? reportFailure;
+  final bool reportSubmitted;
 
   @override
   List<Object?> get props => [
@@ -48,6 +54,9 @@ final class TeacherProfileSuccess extends TeacherProfileState {
     isLoadingMoreReviews,
     hasMoreReviews,
     nextReviewCursor,
+    reportInProgress,
+    reportFailure,
+    reportSubmitted,
   ];
 
   TeacherProfileSuccess copyWith({
@@ -58,6 +67,12 @@ final class TeacherProfileSuccess extends TeacherProfileState {
     bool? isLoadingMoreReviews,
     bool? hasMoreReviews,
     String? nextReviewCursor,
+    bool? reportInProgress,
+    bool clearReportInProgress = false,
+    QuranSessionsFailure? reportFailure,
+    bool clearReportFailure = false,
+    bool? reportSubmitted,
+    bool clearReportSubmitted = false,
   }) => TeacherProfileSuccess(
     teacher: teacher ?? this.teacher,
     availability: availability ?? this.availability,
@@ -66,6 +81,15 @@ final class TeacherProfileSuccess extends TeacherProfileState {
     isLoadingMoreReviews: isLoadingMoreReviews ?? this.isLoadingMoreReviews,
     hasMoreReviews: hasMoreReviews ?? this.hasMoreReviews,
     nextReviewCursor: nextReviewCursor ?? this.nextReviewCursor,
+    reportInProgress: clearReportInProgress
+        ? false
+        : reportInProgress ?? this.reportInProgress,
+    reportFailure: clearReportFailure
+        ? null
+        : reportFailure ?? this.reportFailure,
+    reportSubmitted: clearReportSubmitted
+        ? false
+        : reportSubmitted ?? this.reportSubmitted,
   );
 }
 

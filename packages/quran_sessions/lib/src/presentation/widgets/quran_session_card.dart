@@ -24,6 +24,7 @@ class QuranSessionCard extends StatelessWidget {
     this.onReschedule,
     this.onCancel,
     this.onBookAgain,
+    this.onReview,
     this.isJoinLoading = false,
     this.variant = QuranSessionCardVariant.upcoming,
   });
@@ -38,6 +39,7 @@ class QuranSessionCard extends StatelessWidget {
   final VoidCallback? onReschedule;
   final VoidCallback? onCancel;
   final VoidCallback? onBookAgain;
+  final VoidCallback? onReview;
   final bool isJoinLoading;
   final QuranSessionCardVariant variant;
 
@@ -81,6 +83,7 @@ class QuranSessionCard extends StatelessWidget {
               _PastActionsRow(
                 onViewDetails: onViewDetails,
                 onBookAgain: onBookAgain,
+                onReview: onReview,
               ),
           ],
         ),
@@ -350,17 +353,19 @@ class _PastActionsRow extends StatelessWidget {
   const _PastActionsRow({
     required this.onViewDetails,
     required this.onBookAgain,
+    required this.onReview,
   });
 
   final VoidCallback? onViewDetails;
   final VoidCallback? onBookAgain;
+  final VoidCallback? onReview;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
     final tokens = Theme.of(context).tokens;
 
-    if (onViewDetails == null && onBookAgain == null) {
+    if (onViewDetails == null && onBookAgain == null && onReview == null) {
       return const SizedBox.shrink();
     }
 
@@ -372,6 +377,13 @@ class _PastActionsRow extends StatelessWidget {
           alignment: WrapAlignment.end,
           spacing: tokens.spaceExtraSmall,
           children: [
+            if (onReview != null)
+              TilawaButton(
+                text: l10n.rateSessionAction,
+                onPressed: onReview,
+                variant: TilawaButtonVariant.ghost,
+                size: TilawaButtonSize.small,
+              ),
             if (onViewDetails != null)
               TilawaButton(
                 text: l10n.viewSessionDetails,

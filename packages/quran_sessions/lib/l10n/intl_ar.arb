@@ -88,6 +88,13 @@
     "teacherListAppBarTitle": "المحفظون",
     "teacherListTitle": "تعلّم القرآن مع محفظك",
     "teacherListSubtitle": "اختر المحفظ المناسب وابدأ رحلتك في تحسين التلاوة",
+    "teacherSearchHint": "ابحث عن المحفظ بالاسم",
+    "noTeachersForSearchQuery": "لا يوجد محفظون يطابقون \"{query}\"",
+    "@noTeachersForSearchQuery": {
+        "placeholders": {
+            "query": { "type": "String" }
+        }
+    },
     "teacherNewRating": "جديد",
     "teacherFilterAll": "الكل",
     "teacherFilterFree": "مجاني",
@@ -223,6 +230,27 @@
     "groupBookingNotSupported": "الجلسات الجماعية غير متاحة في النسخة التجريبية.",
     "unsupportedSessionMode": "نوع الجلسة غير مدعوم.",
     "reviewSubmittedThanks": "شكراً — تم إرسال تقييمك!",
+    "sessionReviewTitle": "قيّم جلستك",
+    "sessionReviewSubtitle": "كيف كانت جلستك مع {teacherName}؟",
+    "@sessionReviewSubtitle": {
+        "placeholders": {
+            "teacherName": { "type": "String" }
+        }
+    },
+    "sessionReviewSubtitleGeneric": "كيف كانت جلستك؟",
+    "sessionReviewRatingLabel": "تقييمك",
+    "sessionReviewStarLabel": "{star} نجوم",
+    "@sessionReviewStarLabel": {
+        "placeholders": {
+            "star": { "type": "int" }
+        }
+    },
+    "sessionReviewCommentLabel": "تعليق (اختياري)",
+    "sessionReviewCommentHint": "شارك ما أعجبك أو ما يمكن تحسينه",
+    "sessionReviewSubmit": "إرسال التقييم",
+    "sessionReviewSkip": "ليس الآن",
+    "rateSessionAction": "قيّم الجلسة",
+    "reportTutorAction": "الإبلاغ عن المحفظ",
     "upcomingSessionsSection": "الحصص القادمة ({count})",
   "@upcomingSessionsSection": {
     "placeholders": {

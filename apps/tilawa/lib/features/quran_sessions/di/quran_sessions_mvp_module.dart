@@ -367,6 +367,9 @@ class QuranSessionsMvpModule {
       () => TeacherProfileBloc(
         getProfile: sl<GetTeacherProfileUseCase>(),
         getAvailability: sl<GetTeacherAvailabilityUseCase>(),
+        reportConcern: sl.isRegistered<ReportSessionConcernUseCase>()
+            ? sl<ReportSessionConcernUseCase>()
+            : null,
       ),
     );
     sl.registerFactoryIfAbsent(
@@ -439,6 +442,9 @@ class QuranSessionsMvpModule {
             : null,
         openDispute: sl.isRegistered<OpenSessionDisputeUseCase>()
             ? sl<OpenSessionDisputeUseCase>()
+            : null,
+        submitReview: sl.isRegistered<SubmitReviewUseCase>()
+            ? sl<SubmitReviewUseCase>()
             : null,
         getPendingReschedule:
             sl.isRegistered<GetPendingRescheduleRequestUseCase>()

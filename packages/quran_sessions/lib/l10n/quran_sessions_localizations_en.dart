@@ -318,6 +318,14 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
       'Choose the right teacher and start improving your recitation';
 
   @override
+  String get teacherSearchHint => 'Search tutors by name';
+
+  @override
+  String noTeachersForSearchQuery(String query) {
+    return 'No tutors match \"$query\"';
+  }
+
+  @override
   String get teacherNewRating => 'New';
 
   @override
@@ -602,6 +610,44 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get reviewSubmittedThanks => 'Thank you — your review was submitted!';
+
+  @override
+  String get sessionReviewTitle => 'Rate your session';
+
+  @override
+  String sessionReviewSubtitle(String teacherName) {
+    return 'How was your session with $teacherName?';
+  }
+
+  @override
+  String get sessionReviewSubtitleGeneric => 'How was your session?';
+
+  @override
+  String get sessionReviewRatingLabel => 'Your rating';
+
+  @override
+  String sessionReviewStarLabel(int star) {
+    return '$star stars';
+  }
+
+  @override
+  String get sessionReviewCommentLabel => 'Comment (optional)';
+
+  @override
+  String get sessionReviewCommentHint =>
+      'Share what went well or what could improve';
+
+  @override
+  String get sessionReviewSubmit => 'Submit review';
+
+  @override
+  String get sessionReviewSkip => 'Not now';
+
+  @override
+  String get rateSessionAction => 'Rate session';
+
+  @override
+  String get reportTutorAction => 'Report tutor';
 
   @override
   String upcomingSessionsSection(int count) {

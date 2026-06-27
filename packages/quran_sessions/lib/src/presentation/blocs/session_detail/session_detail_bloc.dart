@@ -19,6 +19,7 @@ import '../../../domain/usecases/join_session_usecase.dart';
 import '../../../domain/usecases/open_session_dispute_usecase.dart';
 import '../../../domain/usecases/report_session_concern_usecase.dart';
 import '../../../domain/usecases/respond_to_reschedule_request_usecase.dart';
+import '../../../domain/usecases/submit_review_usecase.dart';
 import '../../../application/usecases/get_session_detail_usecase.dart';
 import '../../../application/usecases/invalidate_quran_session_cache_usecase.dart';
 import '../../../domain/entities/session_lifecycle_status.dart';
@@ -42,6 +43,7 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
     this._openExternalMeetingUrl,
     this._reportConcern,
     this._openDispute,
+    this._submitReview,
     this._getPendingReschedule,
     this._respondToReschedule,
     this._cancelSession,
@@ -96,6 +98,14 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
       _onCancelAcknowledged,
       transformer: sequential(),
     );
+    on<SessionDetailReviewSubmitted>(
+      _onReviewSubmitted,
+      transformer: sequential(),
+    );
+    on<SessionDetailReviewAcknowledged>(
+      _onReviewAcknowledged,
+      transformer: sequential(),
+    );
   }
 
   final GetSessionAggregateUseCase _getSessionAggregate;
@@ -108,6 +118,7 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
   final OpenExternalMeetingUrl? _openExternalMeetingUrl;
   final ReportSessionConcernUseCase? _reportConcern;
   final OpenSessionDisputeUseCase? _openDispute;
+  final SubmitReviewUseCase? _submitReview;
   final GetPendingRescheduleRequestUseCase? _getPendingReschedule;
   final RespondToRescheduleRequestUseCase? _respondToReschedule;
   final CancelSessionViaServerUseCase? _cancelSession;
@@ -655,6 +666,61 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
     final current = state;
     if (current is! SessionDetailSuccess) return;
     emit(current.copyWith(clearCancellationSucceeded: true));
+  }
+
+  Future<void> _onReviewSubmitted(
+    SessionDetailReviewSubmitted event,
+    Emitter<SessionDetailState> emit,
+  ) async {
+    final useCase = _submitReview;
+    final current = state;
+    if (useCase == null || current is! SessionDetailSuccess) return;
+    if (!current.canReview) return;
+
+    final sessionId = current.aggregate.sessionId;
+    if (sessionId == null || sessionId.isEmpty) return;
+
+    emit(
+      current.copyWith(
+        reviewInProgress: true,
+        clearReviewFailure: true,
+        clearReviewSubmitted: true,
+      ),
+    );
+
+    final result = await useCase(
+      sessionId: sessionId,
+      rating: event.rating,
+      comment: event.comment,
+    );
+
+    final after = state;
+    if (after is! SessionDetailSuccess) return;
+
+    result.fold(
+      (failure) => emit(
+        after.copyWith(
+          reviewFailure: failure,
+          clearReviewInProgress: true,
+        ),
+      ),
+      (_) => emit(
+        after.copyWith(
+          reviewSubmitted: true,
+          reviewCompleted: true,
+          clearReviewInProgress: true,
+        ),
+      ),
+    );
+  }
+
+  void _onReviewAcknowledged(
+    SessionDetailReviewAcknowledged event,
+    Emitter<SessionDetailState> emit,
+  ) {
+    final current = state;
+    if (current is! SessionDetailSuccess) return;
+    emit(current.copyWith(clearReviewSubmitted: true));
   }
 
   void _invalidateAggregateCaches(SessionAggregate aggregate) {

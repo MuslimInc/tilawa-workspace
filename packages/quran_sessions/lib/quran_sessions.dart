@@ -307,6 +307,8 @@ export 'src/presentation/session_join/booking_rejection_reason_display.dart';
 export 'src/presentation/widgets/open_dispute_sheet.dart';
 export 'src/presentation/widgets/payment_checkout_sheet.dart';
 export 'src/presentation/widgets/report_concern_sheet.dart';
+export 'src/presentation/widgets/session_review_sheet.dart';
+export 'src/presentation/utils/session_review_eligibility.dart';
 export 'src/presentation/widgets/external_meeting_join_sheet.dart';
 export 'src/presentation/screens/guardian_approval_capture_screen.dart';
 export 'src/presentation/screens/profile_completion_screen.dart';

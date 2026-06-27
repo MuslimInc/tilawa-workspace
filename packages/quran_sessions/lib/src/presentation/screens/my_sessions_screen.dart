@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_sessions/quran_sessions.dart';
@@ -50,6 +52,8 @@ class MySessionsScreen extends StatefulWidget {
 
 class _MySessionsScreenState extends State<MySessionsScreen> {
   _MySessionsTab _selectedTab = _MySessionsTab.upcoming;
+  final Set<String> _reviewedSessionIds = {};
+  final Set<String> _autoPromptedReviewSessionIds = {};
 
   @override
   void initState() {
@@ -109,10 +113,20 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
             listener: (context, state) {
               if (state is MySessionsSuccess &&
                   state.lastSubmittedReview != null) {
+                setState(() {
+                  _reviewedSessionIds.add(state.lastSubmittedReview!.sessionId);
+                });
                 TilawaFeedback.showToast(
                   context,
                   message: l10n.reviewSubmittedThanks,
                   variant: TilawaFeedbackVariant.success,
+                );
+              }
+              if (state is MySessionsSuccess && state.reviewFailure != null) {
+                TilawaFeedback.showToast(
+                  context,
+                  message: state.reviewFailure!.toLocalizedMessage(context),
+                  variant: TilawaFeedbackVariant.error,
                 );
               }
               if (state is MySessionsSuccess &&
@@ -165,7 +179,7 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
             final MySessionsSuccess success => _SuccessBody(
               success: success,
               selectedTab: _selectedTab,
-              onTabChanged: (tab) => setState(() => _selectedTab = tab),
+              onTabChanged: _onTabChanged,
               studentId: widget.studentId,
               scrollBottomPadding: widget.scrollBottomPadding,
               resolveTeacherName: widget.resolveTeacherName,
@@ -175,6 +189,8 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
               onJoin: _requestJoin,
               onCancel: _confirmCancel,
               onReload: _reload,
+              onReview: _promptReview,
+              canReviewSession: _canReviewSession,
             ),
           },
         ),
@@ -228,6 +244,71 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
       );
     }
   }
+
+  void _onTabChanged(_MySessionsTab tab) {
+    setState(() => _selectedTab = tab);
+    if (tab != _MySessionsTab.past) return;
+
+    final state = context.read<MySessionsBloc>().state;
+    if (state is! MySessionsSuccess) return;
+
+    final session = _firstReviewablePastSession(state);
+    if (session != null) {
+      unawaited(_maybeAutoPromptReview(session));
+    }
+  }
+
+  bool _canReviewSession(QuranSession session) {
+    if (!isSessionEligibleForStudentReview(session)) return false;
+    if (_reviewedSessionIds.contains(session.id)) return false;
+    final submitted = context.read<MySessionsBloc>().state;
+    if (submitted is MySessionsSuccess &&
+        submitted.lastSubmittedReview?.sessionId == session.id) {
+      return false;
+    }
+    return true;
+  }
+
+  QuranSession? _firstReviewablePastSession(MySessionsSuccess success) {
+    for (final session in success.past) {
+      if (_isCancelledSession(session)) continue;
+      if (_canReviewSession(session)) return session;
+    }
+    return null;
+  }
+
+  Future<void> _maybeAutoPromptReview(QuranSession session) async {
+    if (_autoPromptedReviewSessionIds.contains(session.id)) return;
+    _autoPromptedReviewSessionIds.add(session.id);
+    await _promptReview(session);
+  }
+
+  Future<void> _promptReview(QuranSession session) async {
+    if (!_canReviewSession(session) || !mounted) return;
+
+    final input = await showSessionReviewSheet(
+      context,
+      teacherName: widget.resolveTeacherName?.call(session.teacherId),
+    );
+    if (input == null || !mounted) return;
+
+    context.read<MySessionsBloc>().add(
+      ReviewSubmitted(
+        sessionId: session.id,
+        rating: input.rating,
+        comment: input.comment,
+      ),
+    );
+  }
+
+  bool _isCancelledSession(QuranSession session) {
+    if (session.effectiveLifecycleStatus.isCancelled) return true;
+    return switch (session.status) {
+      QuranSessionStatus.cancelledByStudent ||
+      QuranSessionStatus.cancelledByTeacher => true,
+      _ => false,
+    };
+  }
 }
 
 class _SuccessBody extends StatelessWidget {
@@ -244,6 +325,8 @@ class _SuccessBody extends StatelessWidget {
     required this.onJoin,
     required this.onCancel,
     required this.onReload,
+    required this.onReview,
+    required this.canReviewSession,
   });
 
   final MySessionsSuccess success;
@@ -263,6 +346,8 @@ class _SuccessBody extends StatelessWidget {
   final Future<void> Function(QuranSession session) onJoin;
   final Future<void> Function(QuranSession session) onCancel;
   final VoidCallback onReload;
+  final Future<void> Function(QuranSession session) onReview;
+  final bool Function(QuranSession session) canReviewSession;
 
   @override
   Widget build(BuildContext context) {
@@ -376,6 +461,12 @@ class _SuccessBody extends StatelessWidget {
                           selectedTab == _MySessionsTab.past &&
                           onBookAgainRequested != null
                       ? () => onBookAgainRequested!(session.teacherId)
+                      : null,
+                  onReview:
+                      !isUpcomingTab &&
+                          selectedTab == _MySessionsTab.past &&
+                          canReviewSession(session)
+                      ? () => onReview(session)
                       : null,
                 );
               },

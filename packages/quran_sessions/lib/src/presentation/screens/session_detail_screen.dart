@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_sessions/quran_sessions.dart';
@@ -30,6 +32,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen>
     with WidgetsBindingObserver {
   /// Set when tutor cancels so parent list can refresh on pop.
   bool _notifyParentOnPop = false;
+  bool _didAutoPromptReview = false;
 
   @override
   void initState() {
@@ -89,6 +92,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen>
                       previous.canOpenDispute != current.canOpenDispute ||
                       previous.canOpenMeetingAgain !=
                           current.canOpenMeetingAgain ||
+                      previous.canReview != current.canReview ||
                       previous.joinInProgress != current.joinInProgress)),
           builder: (context, state) {
             if (state is! SessionDetailSuccess) {
@@ -219,6 +223,46 @@ class _SessionDetailScreenState extends State<SessionDetailScreen>
                     const SessionDetailCancelAcknowledged(),
                   );
                 }
+              },
+            ),
+            BlocListener<SessionDetailBloc, SessionDetailState>(
+              listenWhen: (previous, current) =>
+                  current is SessionDetailSuccess &&
+                  ((previous is! SessionDetailSuccess) ||
+                      previous.reviewFailure != current.reviewFailure ||
+                      previous.reviewSubmitted != current.reviewSubmitted),
+              listener: (context, state) {
+                if (state is! SessionDetailSuccess) return;
+                if (state.reviewFailure != null) {
+                  TilawaFeedback.showToast(
+                    context,
+                    message: state.reviewFailure!.toLocalizedMessage(context),
+                    variant: TilawaFeedbackVariant.error,
+                  );
+                }
+                if (state.reviewSubmitted) {
+                  TilawaFeedback.showToast(
+                    context,
+                    message: l10n.reviewSubmittedThanks,
+                    variant: TilawaFeedbackVariant.success,
+                  );
+                  context.read<SessionDetailBloc>().add(
+                    const SessionDetailReviewAcknowledged(),
+                  );
+                }
+              },
+            ),
+            BlocListener<SessionDetailBloc, SessionDetailState>(
+              listenWhen: (previous, current) =>
+                  current is SessionDetailSuccess &&
+                  previous is! SessionDetailSuccess,
+              listener: (context, state) {
+                if (state is! SessionDetailSuccess || _didAutoPromptReview) {
+                  return;
+                }
+                if (!state.canReview) return;
+                _didAutoPromptReview = true;
+                unawaited(submitSessionReview(context));
               },
             ),
             BlocListener<SessionDetailBloc, SessionDetailState>(
@@ -609,6 +653,16 @@ class _SessionDetailFooter extends StatelessWidget {
                       const SessionDetailOpenMeetingAgainRequested(),
                     ),
             ),
+          if (state.canReview)
+            TilawaButton(
+              text: l10n.rateSessionAction,
+              variant: TilawaButtonVariant.secondary,
+              isFullWidth: true,
+              isLoading: state.reviewInProgress,
+              onPressed: state.reviewInProgress
+                  ? null
+                  : () => submitSessionReview(context),
+            ),
           TilawaButton(
             text: l10n.reportConcernAction,
             variant: TilawaButtonVariant.outline,
@@ -680,4 +734,15 @@ class _SessionDetailFooter extends StatelessWidget {
       SessionDetailCancelSubmitted(reason: reason),
     );
   }
+}
+
+Future<void> submitSessionReview(BuildContext context) async {
+  final input = await showSessionReviewSheet(context);
+  if (input == null || !context.mounted) return;
+  context.read<SessionDetailBloc>().add(
+    SessionDetailReviewSubmitted(
+      rating: input.rating,
+      comment: input.comment,
+    ),
+  );
 }

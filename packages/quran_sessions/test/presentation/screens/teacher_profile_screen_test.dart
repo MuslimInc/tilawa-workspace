@@ -150,6 +150,22 @@ void main() {
     expect(selectedSlotId, isNull);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('shows report tutor action in app bar for visible profile', (
+    tester,
+  ) async {
+    await _pumpProfile(
+      tester,
+      TeacherProfileSuccess(
+        teacher: makeTeacher(avatarUrl: ''),
+        availability: const [],
+        reviews: const [],
+      ),
+    );
+
+    expect(find.byIcon(Icons.flag_outlined), findsOneWidget);
+    expect(find.byTooltip('الإبلاغ عن المحفظ'), findsOneWidget);
+  });
 }
 
 extension on QuranTeacher {

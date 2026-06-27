@@ -17,6 +17,7 @@ import '../widgets/availability_slot_picker.dart';
 import '../widgets/quran_session_price_chip.dart';
 import '../widgets/quran_sessions_scaffold.dart';
 import '../widgets/quran_sessions_section_header.dart';
+import '../widgets/report_concern_sheet.dart';
 import '../widgets/teacher_discovery_details.dart';
 import '../widgets/teacher_initials_avatar.dart';
 
@@ -63,6 +64,23 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
 
     return QuranSessionsScaffold(
       title: l10n.teacherProfileTitle,
+      actions: [
+        BlocBuilder<TeacherProfileBloc, TeacherProfileState>(
+          builder: (context, state) {
+            if (state is! TeacherProfileSuccess ||
+                !_isTeacherMarketplaceVisible(state.teacher)) {
+              return const SizedBox.shrink();
+            }
+            return IconButton(
+              tooltip: l10n.reportTutorAction,
+              onPressed: state.reportInProgress
+                  ? null
+                  : () => _submitReport(context),
+              icon: const Icon(Icons.flag_outlined),
+            );
+          },
+        ),
+      ],
       bottomNavigationBar: widget.bookingEnabled && widget.onBookTapped != null
           ? BlocBuilder<TeacherProfileBloc, TeacherProfileState>(
               builder: (context, state) {
@@ -89,37 +107,79 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
               },
             )
           : null,
-      body: BlocBuilder<TeacherProfileBloc, TeacherProfileState>(
-        builder: (context, state) => switch (state) {
-          TeacherProfileInitial() || TeacherProfileLoading() => const Center(
-            child: CircularProgressIndicator(),
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<TeacherProfileBloc, TeacherProfileState>(
+            listenWhen: (previous, current) =>
+                current is TeacherProfileSuccess &&
+                ((previous is! TeacherProfileSuccess) ||
+                    previous.reportFailure != current.reportFailure ||
+                    previous.reportSubmitted != current.reportSubmitted),
+            listener: (context, state) {
+              if (state is! TeacherProfileSuccess) return;
+              if (state.reportFailure != null) {
+                TilawaFeedback.showToast(
+                  context,
+                  message: state.reportFailure!.toLocalizedMessage(context),
+                  variant: TilawaFeedbackVariant.error,
+                );
+              }
+              if (state.reportSubmitted) {
+                TilawaFeedback.showToast(
+                  context,
+                  message: l10n.reportConcernSubmitted,
+                  variant: TilawaFeedbackVariant.success,
+                );
+                context.read<TeacherProfileBloc>().add(
+                  const TeacherProfileReportAcknowledged(),
+                );
+              }
+            },
           ),
-          TeacherProfileFailure(:final failure) => Center(
-            child: Text(failure.toLocalizedMessage(context)),
-          ),
-          TeacherProfileSuccess(
-            :final teacher,
-            :final availability,
-            :final reviews,
-            :final isLoadingAvailability,
-          ) =>
-            _isTeacherMarketplaceVisible(teacher)
-                ? _TeacherProfileBody(
-                    teacher: teacher,
-                    availability: availability,
-                    reviews: reviews,
-                    isLoadingAvailability: isLoadingAvailability,
-                    bookingEnabled: widget.bookingEnabled,
-                    onBookTapped: widget.onBookTapped == null
-                        ? null
-                        : (slotId) => _onBookTapped(slotId),
-                    onSlotSelected: (slotId) =>
-                        setState(() => _selectedSlotId = slotId),
-                    selectedSlotId: _selectedSlotId,
-                    teacherId: widget.teacherId,
-                  )
-                : _TeacherProfileUnavailableBody(),
-        },
+        ],
+        child: BlocBuilder<TeacherProfileBloc, TeacherProfileState>(
+          builder: (context, state) => switch (state) {
+            TeacherProfileInitial() || TeacherProfileLoading() => const Center(
+              child: CircularProgressIndicator(),
+            ),
+            TeacherProfileFailure(:final failure) => Center(
+              child: Text(failure.toLocalizedMessage(context)),
+            ),
+            TeacherProfileSuccess(
+              :final teacher,
+              :final availability,
+              :final reviews,
+              :final isLoadingAvailability,
+            ) =>
+              _isTeacherMarketplaceVisible(teacher)
+                  ? _TeacherProfileBody(
+                      teacher: teacher,
+                      availability: availability,
+                      reviews: reviews,
+                      isLoadingAvailability: isLoadingAvailability,
+                      bookingEnabled: widget.bookingEnabled,
+                      onBookTapped: widget.onBookTapped == null
+                          ? null
+                          : (slotId) => _onBookTapped(slotId),
+                      onSlotSelected: (slotId) =>
+                          setState(() => _selectedSlotId = slotId),
+                      selectedSlotId: _selectedSlotId,
+                      teacherId: widget.teacherId,
+                    )
+                  : _TeacherProfileUnavailableBody(),
+          },
+        ),
+      ),
+    );
+  }
+
+  Future<void> _submitReport(BuildContext context) async {
+    final input = await showReportConcernSheet(context);
+    if (input == null || !context.mounted) return;
+    context.read<TeacherProfileBloc>().add(
+      TeacherProfileReportSubmitted(
+        category: input.category,
+        description: input.description,
       ),
     );
   }

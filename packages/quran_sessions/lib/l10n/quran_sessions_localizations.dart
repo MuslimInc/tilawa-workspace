@@ -629,6 +629,18 @@ abstract class QuranSessionsLocalizations {
   /// **'Choose the right teacher and start improving your recitation'**
   String get teacherListSubtitle;
 
+  /// No description provided for @teacherSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search tutors by name'**
+  String get teacherSearchHint;
+
+  /// No description provided for @noTeachersForSearchQuery.
+  ///
+  /// In en, this message translates to:
+  /// **'No tutors match \"{query}\"'**
+  String noTeachersForSearchQuery(String query);
+
   /// No description provided for @teacherNewRating.
   ///
   /// In en, this message translates to:
@@ -1120,6 +1132,72 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'Thank you — your review was submitted!'**
   String get reviewSubmittedThanks;
+
+  /// No description provided for @sessionReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate your session'**
+  String get sessionReviewTitle;
+
+  /// No description provided for @sessionReviewSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How was your session with {teacherName}?'**
+  String sessionReviewSubtitle(String teacherName);
+
+  /// No description provided for @sessionReviewSubtitleGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'How was your session?'**
+  String get sessionReviewSubtitleGeneric;
+
+  /// No description provided for @sessionReviewRatingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Your rating'**
+  String get sessionReviewRatingLabel;
+
+  /// No description provided for @sessionReviewStarLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{star} stars'**
+  String sessionReviewStarLabel(int star);
+
+  /// No description provided for @sessionReviewCommentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment (optional)'**
+  String get sessionReviewCommentLabel;
+
+  /// No description provided for @sessionReviewCommentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Share what went well or what could improve'**
+  String get sessionReviewCommentHint;
+
+  /// No description provided for @sessionReviewSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit review'**
+  String get sessionReviewSubmit;
+
+  /// No description provided for @sessionReviewSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get sessionReviewSkip;
+
+  /// No description provided for @rateSessionAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate session'**
+  String get rateSessionAction;
+
+  /// No description provided for @reportTutorAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Report tutor'**
+  String get reportTutorAction;
 
   /// No description provided for @upcomingSessionsSection.
   ///

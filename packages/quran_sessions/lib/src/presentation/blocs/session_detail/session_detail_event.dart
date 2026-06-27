@@ -92,3 +92,22 @@ final class SessionDetailCancelSubmitted extends SessionDetailEvent {
 final class SessionDetailCancelAcknowledged extends SessionDetailEvent {
   const SessionDetailCancelAcknowledged();
 }
+
+/// Student submits a star rating + optional comment for a completed session.
+final class SessionDetailReviewSubmitted extends SessionDetailEvent {
+  const SessionDetailReviewSubmitted({
+    required this.rating,
+    this.comment,
+  });
+
+  final int rating;
+  final String? comment;
+
+  @override
+  List<Object?> get props => [rating, comment];
+}
+
+/// Clears one-shot review success UI after toast.
+final class SessionDetailReviewAcknowledged extends SessionDetailEvent {
+  const SessionDetailReviewAcknowledged();
+}

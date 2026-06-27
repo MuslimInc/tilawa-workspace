@@ -248,5 +248,43 @@ void main() {
 
       expect(find.byType(QuranSessionsStudentEmptyState), findsOneWidget);
     });
+
+    testWidgets('search field filters teachers by display name', (
+      tester,
+    ) async {
+      final teachers = [
+        makeTeacher(id: 't1', displayName: 'Sheikh Ahmed', avatarUrl: ''),
+        makeTeacher(id: 't2', displayName: 'Ustad Fatima', avatarUrl: ''),
+      ];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          localizationsDelegates:
+              QuranSessionsLocalizations.localizationsDelegates,
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          home: BlocProvider<TeacherListBloc>(
+            create: (_) => _TeacherListTestBloc(
+              TeacherListSuccess(
+                teachers: teachers,
+                hasMore: false,
+              ),
+            ),
+            child: TeacherListScreen(
+              featureConfig: const QuranSessionsFeatureConfig(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(TeacherCard), findsNWidgets(2));
+
+      await tester.enterText(find.byType(TextField), 'Fatima');
+      await tester.pumpAndSettle();
+
+      expect(find.byType(TeacherCard), findsOneWidget);
+      expect(find.text('Ustad Fatima'), findsOneWidget);
+    });
   });
 }

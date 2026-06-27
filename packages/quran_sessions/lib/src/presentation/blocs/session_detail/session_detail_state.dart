@@ -54,6 +54,10 @@ final class SessionDetailSuccess extends SessionDetailState {
     this.cancellationInProgress = false,
     this.cancellationFailure,
     this.cancellationSucceeded = false,
+    this.reviewInProgress = false,
+    this.reviewFailure,
+    this.reviewSubmitted = false,
+    this.reviewCompleted = false,
     this.joinWindowPolicy = const SessionJoinWindowPolicy(),
     this.viewerRole,
   });
@@ -85,6 +89,10 @@ final class SessionDetailSuccess extends SessionDetailState {
   final bool cancellationInProgress;
   final QuranSessionsFailure? cancellationFailure;
   final bool cancellationSucceeded;
+  final bool reviewInProgress;
+  final QuranSessionsFailure? reviewFailure;
+  final bool reviewSubmitted;
+  final bool reviewCompleted;
   final SessionJoinWindowPolicy joinWindowPolicy;
   final ActorRole? viewerRole;
 
@@ -110,6 +118,11 @@ final class SessionDetailSuccess extends SessionDetailState {
 
   bool get canOpenMeetingAgain =>
       externalMeetingJoinUrl != null && hasOpenedExternalMeeting;
+
+  bool get canReview =>
+      !isTeacherViewer &&
+      aggregate.lifecycleStatus == SessionLifecycleStatus.completed &&
+      !reviewCompleted;
 
   bool get isExternalMeeting => externalMeetingJoinUrl != null;
 
@@ -168,6 +181,13 @@ final class SessionDetailSuccess extends SessionDetailState {
     bool clearCancellationFailure = false,
     bool? cancellationSucceeded,
     bool clearCancellationSucceeded = false,
+    bool? reviewInProgress,
+    bool clearReviewInProgress = false,
+    QuranSessionsFailure? reviewFailure,
+    bool clearReviewFailure = false,
+    bool? reviewSubmitted,
+    bool clearReviewSubmitted = false,
+    bool? reviewCompleted,
     ActorRole? viewerRole,
     bool clearViewerRole = false,
   }) {
@@ -237,6 +257,16 @@ final class SessionDetailSuccess extends SessionDetailState {
       cancellationSucceeded: clearCancellationSucceeded
           ? false
           : cancellationSucceeded ?? this.cancellationSucceeded,
+      reviewInProgress: clearReviewInProgress
+          ? false
+          : reviewInProgress ?? this.reviewInProgress,
+      reviewFailure: clearReviewFailure
+          ? null
+          : reviewFailure ?? this.reviewFailure,
+      reviewSubmitted: clearReviewSubmitted
+          ? false
+          : reviewSubmitted ?? this.reviewSubmitted,
+      reviewCompleted: reviewCompleted ?? this.reviewCompleted,
       viewerRole: clearViewerRole ? null : viewerRole ?? this.viewerRole,
     );
   }
@@ -268,6 +298,10 @@ final class SessionDetailSuccess extends SessionDetailState {
     cancellationInProgress,
     cancellationFailure,
     cancellationSucceeded,
+    reviewInProgress,
+    reviewFailure,
+    reviewSubmitted,
+    reviewCompleted,
     joinWindowPolicy,
     viewerRole,
   ];

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_sessions/core/l10n_extensions.dart';
+import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../failure_ui/quran_sessions_failure_ui.dart';
@@ -42,7 +43,9 @@ class TeacherListScreen extends StatefulWidget {
 
 class _TeacherListScreenState extends State<TeacherListScreen> {
   final _scrollController = ScrollController();
+  final _searchController = TextEditingController();
   TeacherListFilter _selectedFilter = TeacherListFilter.all;
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -54,6 +57,7 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -83,6 +87,15 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
     }
   }
 
+  void _onSearchChanged(String value) {
+    setState(() => _searchQuery = value);
+  }
+
+  void _onSearchClear() {
+    _searchController.clear();
+    setState(() => _searchQuery = '');
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
@@ -94,7 +107,11 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
         builder: (context, state) => switch (state) {
           TeacherListInitial() || TeacherListLoading() => ListView(
             children: [
-              const _TeacherListHeader(),
+              _TeacherListHeader(
+                searchController: _searchController,
+                onSearchChanged: _onSearchChanged,
+                onSearchClear: _onSearchClear,
+              ),
               TeacherListFilterBar(
                 selected: _selectedFilter,
                 onSelected: _onFilterSelected,
@@ -154,12 +171,15 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
   }) {
     final l10n = context.quranSessionsL10n;
     final tokens = Theme.of(context).tokens;
-    final visible = applyTeacherListClientFilter(
+    final filtered = applyTeacherListClientFilter(
       teachers,
       _selectedFilter,
       availabilitySummaries,
     );
-    final showClientEmpty = _selectedFilter.isClientSideOnly && visible.isEmpty;
+    final visible = filterTeachersByNameQuery(filtered, _searchQuery);
+    final showClientEmpty =
+        (_selectedFilter.isClientSideOnly && filtered.isEmpty) ||
+        (_searchQuery.trim().isNotEmpty && visible.isEmpty);
 
     return RefreshIndicator(
       onRefresh: () async => _retry(),
@@ -171,7 +191,11 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
             (isLoadingMore ? 1 : 0),
         itemBuilder: (context, i) {
           if (i == 0) {
-            return const _TeacherListHeader();
+            return _TeacherListHeader(
+              searchController: _searchController,
+              onSearchChanged: _onSearchChanged,
+              onSearchClear: _onSearchClear,
+            );
           }
           if (i == 1) {
             return TeacherListFilterBar(
@@ -185,9 +209,7 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
             return Padding(
               padding: EdgeInsets.all(tokens.spaceLarge),
               child: Text(
-                _selectedFilter == TeacherListFilter.availableToday
-                    ? l10n.noTeachersForAvailabilityFilter
-                    : l10n.noTeachersAvailableRightNow,
+                _emptyListMessage(l10n),
                 textAlign: TextAlign.center,
               ),
             );
@@ -217,18 +239,56 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
   void _onTeacherTapped(String teacherId) {
     widget.onTeacherTapped?.call(teacherId);
   }
+
+  String _emptyListMessage(QuranSessionsLocalizations l10n) {
+    if (_searchQuery.trim().isNotEmpty) {
+      return l10n.noTeachersForSearchQuery(_searchQuery.trim());
+    }
+    return _selectedFilter == TeacherListFilter.availableToday
+        ? l10n.noTeachersForAvailabilityFilter
+        : l10n.noTeachersAvailableRightNow;
+  }
 }
 
 class _TeacherListHeader extends StatelessWidget {
-  const _TeacherListHeader();
+  const _TeacherListHeader({
+    required this.searchController,
+    required this.onSearchChanged,
+    required this.onSearchClear,
+  });
+
+  final TextEditingController searchController;
+  final ValueChanged<String> onSearchChanged;
+  final VoidCallback onSearchClear;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
+    final tokens = Theme.of(context).tokens;
 
-    return QuranSessionsPageHeader(
-      title: l10n.teacherListTitle,
-      subtitle: l10n.teacherListSubtitle,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        QuranSessionsPageHeader(
+          title: l10n.teacherListTitle,
+          subtitle: l10n.teacherListSubtitle,
+        ),
+        Padding(
+          padding: EdgeInsetsDirectional.fromSTEB(
+            tokens.spaceMedium,
+            0,
+            tokens.spaceMedium,
+            tokens.spaceSmall,
+          ),
+          child: TilawaSearchField(
+            controller: searchController,
+            hintText: l10n.teacherSearchHint,
+            onChanged: onSearchChanged,
+            onClear: onSearchClear,
+            variant: TilawaSearchFieldVariant.standard,
+          ),
+        ),
+      ],
     );
   }
 }

@@ -307,6 +307,14 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
       'اختر المحفظ المناسب وابدأ رحلتك في تحسين التلاوة';
 
   @override
+  String get teacherSearchHint => 'ابحث عن المحفظ بالاسم';
+
+  @override
+  String noTeachersForSearchQuery(String query) {
+    return 'لا يوجد محفظون يطابقون \"$query\"';
+  }
+
+  @override
   String get teacherNewRating => 'جديد';
 
   @override
@@ -590,6 +598,43 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
 
   @override
   String get reviewSubmittedThanks => 'شكراً — تم إرسال تقييمك!';
+
+  @override
+  String get sessionReviewTitle => 'قيّم جلستك';
+
+  @override
+  String sessionReviewSubtitle(String teacherName) {
+    return 'كيف كانت جلستك مع $teacherName؟';
+  }
+
+  @override
+  String get sessionReviewSubtitleGeneric => 'كيف كانت جلستك؟';
+
+  @override
+  String get sessionReviewRatingLabel => 'تقييمك';
+
+  @override
+  String sessionReviewStarLabel(int star) {
+    return '$star نجوم';
+  }
+
+  @override
+  String get sessionReviewCommentLabel => 'تعليق (اختياري)';
+
+  @override
+  String get sessionReviewCommentHint => 'شارك ما أعجبك أو ما يمكن تحسينه';
+
+  @override
+  String get sessionReviewSubmit => 'إرسال التقييم';
+
+  @override
+  String get sessionReviewSkip => 'ليس الآن';
+
+  @override
+  String get rateSessionAction => 'قيّم الجلسة';
+
+  @override
+  String get reportTutorAction => 'الإبلاغ عن المحفظ';
 
   @override
   String upcomingSessionsSection(int count) {
