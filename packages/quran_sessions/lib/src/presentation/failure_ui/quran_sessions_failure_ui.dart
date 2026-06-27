@@ -47,6 +47,9 @@ extension QuranSessionsFailureUi on QuranSessionsFailure {
       UnauthorizedFailure() => loc.unauthorized,
 
       // ── Domain / resource ───────────────────────────────────────────────────
+      NotFoundFailure(resourceType: final t)
+          when t.startsWith('SessionAggregate') =>
+        loc.sessionDetailNotFound,
       NotFoundFailure(resourceType: final t) => loc.notFound(t),
       ValidationFailure(field: final f, code: final c) =>
         f == VacationOverrideValidator.field &&

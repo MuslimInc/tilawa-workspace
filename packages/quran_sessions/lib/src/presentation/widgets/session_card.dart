@@ -149,7 +149,7 @@ class _StatusBadge extends StatelessWidget {
 
     final (label, bg, fg) = switch (lifecycle) {
       SessionLifecycleStatus.pendingTutorApproval => (
-        l10n.sessionStatusPendingTutorApproval,
+        l10n.sessionStatusBookingUnderReview,
         scheme.surfaceContainerHighest,
         scheme.onSurfaceVariant,
       ),

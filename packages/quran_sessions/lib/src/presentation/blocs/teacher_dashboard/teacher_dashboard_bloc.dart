@@ -776,6 +776,14 @@ class TeacherDashboardBloc
     final current = state;
     if (current is! TeacherDashboardSuccess) return;
 
+    emit(
+      current.copyWith(
+        sessionCancelInProgress: event.bookingId,
+        clearSessionCancelFailure: true,
+        clearSessionCancelSucceeded: true,
+      ),
+    );
+
     final result = await _cancelSession(
       bookingId: event.bookingId,
       actorId: _teacherId,
@@ -783,17 +791,27 @@ class TeacherDashboardBloc
       reason: event.reason,
     );
 
+    final latest = state;
+    if (latest is! TeacherDashboardSuccess) return;
+
     result.fold(
-      (_) => null,
+      (failure) => emit(
+        latest.copyWith(
+          clearSessionCancelInProgress: true,
+          sessionCancelFailure: failure,
+        ),
+      ),
       (aggregate) {
         _invalidateCache.invalidateSession(
           aggregate.id,
-          teacherProfileId: _teacherId,
+          teacherProfileId: aggregate.teacherId,
           studentId: aggregate.studentId,
         );
         emit(
-          current.copyWith(
-            upcomingSessions: current.upcomingSessions
+          latest.copyWith(
+            clearSessionCancelInProgress: true,
+            sessionCancelSucceeded: true,
+            upcomingSessions: latest.upcomingSessions
                 .where((s) => s.bookingId != event.bookingId)
                 .toList(),
           ),
@@ -834,7 +852,7 @@ class TeacherDashboardBloc
       (aggregate) {
         _invalidateCache.invalidateSession(
           aggregate.id,
-          teacherProfileId: _teacherId,
+          teacherProfileId: aggregate.teacherId,
           studentId: aggregate.studentId,
         );
         final moved = latest.pendingBookingRequests
@@ -888,7 +906,7 @@ class TeacherDashboardBloc
       (aggregate) {
         _invalidateCache.invalidateSession(
           aggregate.id,
-          teacherProfileId: _teacherId,
+          teacherProfileId: aggregate.teacherId,
           studentId: aggregate.studentId,
         );
         emit(
@@ -916,7 +934,7 @@ class TeacherDashboardBloc
       (aggregate) {
         _invalidateCache.invalidateSession(
           event.sessionId,
-          teacherProfileId: _teacherId,
+          teacherProfileId: aggregate.teacherId,
           studentId: aggregate.studentId,
         );
       },

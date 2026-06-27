@@ -253,6 +253,8 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
       context,
       sessionStartsAt: session.startsAt,
       pricingType: SessionPricingType.free,
+      // Egypt pilot sessions are manual/off-app paid; suppress free-session copy.
+      isManualPayment: true,
     );
     if (reason != null && mounted) {
       context.read<MySessionsBloc>().add(
@@ -317,14 +319,8 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
     );
   }
 
-  bool _isCancelledSession(QuranSession session) {
-    if (session.effectiveLifecycleStatus.isCancelled) return true;
-    return switch (session.status) {
-      QuranSessionStatus.cancelledByStudent ||
-      QuranSessionStatus.cancelledByTeacher => true,
-      _ => false,
-    };
-  }
+  bool _isCancelledSession(QuranSession session) =>
+      SessionListClassifier.isCancelledSession(session);
 }
 
 class _SuccessBody extends StatelessWidget {
@@ -375,8 +371,11 @@ class _SuccessBody extends StatelessWidget {
           context,
         );
     final cancelled = _cancelledSessions(success);
+    final upcomingSessions = success.upcoming
+        .where(SessionListClassifier.isStudentUpcoming)
+        .toList();
     final sessions = switch (selectedTab) {
-      _MySessionsTab.upcoming => success.upcoming,
+      _MySessionsTab.upcoming => upcomingSessions,
       _MySessionsTab.past =>
         success.past.where((session) => !_isCancelledSession(session)).toList(),
       _MySessionsTab.cancelled => cancelled,
@@ -388,11 +387,11 @@ class _SuccessBody extends StatelessWidget {
         slivers: [
           SliverToBoxAdapter(
             child: QuranSessionSummaryStrip(
-              upcomingCount: success.upcoming.length,
+              upcomingCount: upcomingSessions.length,
               pastCount: success.past.length,
-              nextUpcoming: success.upcoming.isEmpty
+              nextUpcoming: upcomingSessions.isEmpty
                   ? null
-                  : success.upcoming.first,
+                  : upcomingSessions.first,
             ),
           ),
           SliverToBoxAdapter(
@@ -522,14 +521,8 @@ class _SuccessBody extends StatelessWidget {
     ];
   }
 
-  bool _isCancelledSession(QuranSession session) {
-    if (session.effectiveLifecycleStatus.isCancelled) return true;
-    return switch (session.status) {
-      QuranSessionStatus.cancelledByStudent ||
-      QuranSessionStatus.cancelledByTeacher => true,
-      _ => false,
-    };
-  }
+  bool _isCancelledSession(QuranSession session) =>
+      SessionListClassifier.isCancelledSession(session);
 
   bool _canStudentRequestReschedule(QuranSession session, DateTime now) {
     if (session.effectiveLifecycleStatus.phase !=

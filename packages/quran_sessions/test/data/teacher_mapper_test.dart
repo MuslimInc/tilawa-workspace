@@ -44,6 +44,39 @@ void main() {
       check(entity.pricingType).equals(SessionPricingType.fixedPerSession);
     });
 
+    test('maps manualPaymentPrice without changing free pricing type', () {
+      final dto = QuranTeacherDto(
+        id: 'founding_1',
+        displayName: 'Sheikh Founding',
+        bio: '',
+        avatarUrl: '',
+        gender: 'male',
+        verificationStatus: 'verified',
+        supportedCallTypes: ['voice_call'],
+        pricingType: 'free',
+        marketPrice: null,
+        manualPaymentPrice: const ManualPaymentPriceDto(
+          amountMinor: 10000,
+          currencyCode: 'EGP',
+        ),
+        specializations: [],
+        languages: ['ar'],
+        averageRating: 0,
+        totalReviews: 0,
+        totalSessionsCompleted: 0,
+      );
+
+      final entity = dto.toDomain();
+
+      check(entity.manualPaymentPrice).isNotNull();
+      check(entity.manualPaymentPrice!.amountMinor).equals(10000);
+      check(entity.manualPaymentPrice!.currencyCode).equals('EGP');
+      check(entity.manualPaymentPrice!.amountMajor).equals(100);
+      check(entity.hasManualPaymentPrice).isTrue();
+      check(entity.pricingType).equals(SessionPricingType.free);
+      check(entity.price).isNull();
+    });
+
     test('maps free teacher with no market price', () {
       final dto = QuranTeacherDto(
         id: 't',

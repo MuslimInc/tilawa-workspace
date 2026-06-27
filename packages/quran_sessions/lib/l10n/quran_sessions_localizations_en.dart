@@ -34,6 +34,10 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   }
 
   @override
+  String get sessionDetailNotFound =>
+      'This session could not be found. It may have been cancelled or removed.';
+
+  @override
   String validationError(Object code, Object field) {
     return 'Validation error: $field ($code).';
   }
@@ -760,7 +764,8 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
       'Cancellation is not allowed this close to the session start time.';
 
   @override
-  String get cancelPolicyFree => 'This is a free session. No refund applies.';
+  String get cancellationFreeNoRefund =>
+      'This is a free session. No refund applies.';
 
   @override
   String get cancelPolicyFullRefund =>
@@ -1959,6 +1964,44 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get sessionLifecycleCancelledByAdmin => 'Cancelled by admin';
 
   @override
+  String get sessionStatusCancelledByTutorDetail => 'Cancelled by the tutor';
+
+  @override
+  String get sessionStatusCancelledByTutorSelf => 'You cancelled this session';
+
+  @override
+  String get sessionStatusCancelledByStudentDetail =>
+      'Cancelled by the student';
+
+  @override
+  String get sessionStatusCancelledByStudentSelf =>
+      'You cancelled this session';
+
+  @override
+  String get sessionStatusCancelledBySupportDetail => 'Cancelled by support';
+
+  @override
+  String get sessionStatusCancelledDescription => 'This session was cancelled.';
+
+  @override
+  String get sessionTimelineBookingConfirmed => 'Booking confirmed';
+
+  @override
+  String get sessionTimelineCancelledByTutor => 'Session cancelled by tutor';
+
+  @override
+  String get sessionTimelineCancelledByStudent =>
+      'Session cancelled by student';
+
+  @override
+  String get sessionTimelineCancelledBySupport =>
+      'Session cancelled by support';
+
+  @override
+  String get sessionCancelledDisputeHelper =>
+      'You can open a dispute if you need our team to review this cancellation.';
+
+  @override
   String get sessionLifecycleTeacherNoShow => 'Teacher no-show';
 
   @override
@@ -2055,11 +2098,68 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get bookingRequestSentTitle => 'Booking request sent';
 
   @override
-  String get bookingRequestSentSubtitle => 'Waiting for tutor approval';
+  String get bookingRequestSentSubtitle => 'The booking is under review.';
 
   @override
-  String get sessionAwaitingTutorApprovalNextSteps =>
-      'Your tutor will accept or decline soon. You can cancel this request until then.';
+  String get sessionAwaitingReviewNextSteps =>
+      'The booking is under review.\nPlease complete the payment using one of the available methods.\nThe session will be confirmed after payment review and teacher confirmation.';
+
+  @override
+  String get paidSessionNoticeTitle => 'This session is paid';
+
+  @override
+  String get manualPaymentInstructionsBody =>
+      'Payment is currently handled manually via Vodafone Cash, InstaPay, or bank transfer until online payment methods are added inside the app.';
+
+  @override
+  String get manualPaymentInstapayHandle => 'For InstaPay payment:';
+
+  @override
+  String get manualPaymentInstapayLink => 'Or use the payment link:';
+
+  @override
+  String get manualPaymentRecipientMaskedName =>
+      'Recipient name shown during transfer:';
+
+  @override
+  String get manualPaymentReceiptWhatsappInstruction =>
+      'After completing the payment, please send a screenshot of the transfer receipt on WhatsApp to support:';
+
+  @override
+  String get manualPaymentConfirmationRule =>
+      'The booking will be confirmed after payment review and teacher confirmation.';
+
+  @override
+  String get manualPaymentCancellationPolicy =>
+      'If you have already completed the manual payment, please contact support to review the payment or refund status.';
+
+  @override
+  String manualPaymentCancellationSupportHint(String supportNumber) {
+    return 'Support: $supportNumber';
+  }
+
+  @override
+  String get manualPaymentCopiedToClipboard => 'Copied to clipboard';
+
+  @override
+  String get paymentMethodVodafoneCash => 'Vodafone Cash';
+
+  @override
+  String get paymentMethodInstapay => 'InstaPay';
+
+  @override
+  String get paymentMethodBankTransfer => 'Bank transfer';
+
+  @override
+  String get bookingUnderReviewTitle => 'Booking under review';
+
+  @override
+  String get bookingUnderReviewPaymentHint =>
+      'Please complete the payment using one of the available methods.';
+
+  @override
+  String get bookingUnderReviewConfirmHint =>
+      'The booking will be confirmed after payment review and teacher confirmation.';
 
   @override
   String get bookingAcceptedTitle => 'Session accepted';
@@ -2077,7 +2177,7 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get sendBookingRequest => 'Send booking request';
 
   @override
-  String get sessionStatusPendingTutorApproval => 'Pending approval';
+  String get sessionStatusBookingUnderReview => 'Under review';
 
   @override
   String get sessionStatusRejectedByTutor => 'Declined';
@@ -2127,7 +2227,7 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get tutorCancelSessionFromCard => 'Cancel';
 
   @override
-  String get sessionLifecyclePendingTutorApproval => 'Pending tutor approval';
+  String get sessionLifecycleBookingUnderReview => 'Booking under review';
 
   @override
   String get sessionLifecycleRejectedByTutor => 'Rejected by tutor';
@@ -2142,7 +2242,7 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get sessionActionRejectBookingRequest => 'Reject booking request';
 
   @override
-  String get sessionActionExpireTutorApproval => 'Expire tutor approval';
+  String get sessionActionExpireBookingReview => 'Expire booking review';
 
   @override
   String sessionTimelineStatusTransition(String previous, String next) {

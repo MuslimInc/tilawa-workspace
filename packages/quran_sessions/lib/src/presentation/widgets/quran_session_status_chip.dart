@@ -35,7 +35,7 @@ class QuranSessionStatusChip extends StatelessWidget {
 
     final (label, bg, fg) = switch (lifecycle) {
       SessionLifecycleStatus.pendingTutorApproval => (
-        l10n.sessionStatusPendingTutorApproval,
+        l10n.sessionStatusBookingUnderReview,
         status.upcoming.withValues(alpha: tint),
         status.upcoming,
       ),

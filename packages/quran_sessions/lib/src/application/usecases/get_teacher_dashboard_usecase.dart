@@ -8,6 +8,7 @@ import '../../domain/entities/weekly_schedule.dart';
 import '../../domain/entities/market_scheduling_config.dart';
 import '../../domain/entities/session_lifecycle_status.dart';
 import '../../domain/failures/quran_sessions_failure.dart';
+import '../../domain/policies/session_list_classifier.dart';
 import '../cache/cache_freshness_policy.dart';
 import '../cache/quran_session_cache_store.dart';
 import '../cache/session_cache_key.dart';
@@ -125,7 +126,7 @@ class GetTeacherDashboardUseCase {
         if (session.effectiveLifecycleStatus ==
             SessionLifecycleStatus.pendingTutorApproval) {
           pendingBookingRequests.add(session);
-        } else {
+        } else if (SessionListClassifier.isTeacherDashboardUpcoming(session)) {
           upcomingSessions.add(session);
         }
       }

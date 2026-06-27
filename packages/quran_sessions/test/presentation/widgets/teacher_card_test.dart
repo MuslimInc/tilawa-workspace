@@ -98,6 +98,34 @@ void main() {
       expect(find.text('مجاني'), findsOneWidget);
     });
 
+    testWidgets(
+      'shows EGP manual price and never Free when manualPaymentPrice is set',
+      (tester) async {
+        await pumpInApp(
+          tester,
+          TeacherCard(
+            teacher: makeTeacher(
+              avatarUrl: '',
+              pricingType: SessionPricingType.free,
+              price: null,
+              manualPaymentPrice: const ManualPaymentPrice(
+                amountMinor: 10000,
+                currencyCode: 'EGP',
+              ),
+            ),
+            onTap: () {},
+          ),
+          locale: const Locale('ar'),
+          textDirection: TextDirection.rtl,
+          surfaceSize: const Size(360, 800),
+        );
+
+        expect(find.textContaining('ج.م.'), findsOneWidget);
+        expect(find.textContaining('100'), findsOneWidget);
+        expect(find.text('مجاني'), findsNothing);
+      },
+    );
+
     testWidgets('shows one primary specialization chip only', (tester) async {
       await pumpInApp(
         tester,

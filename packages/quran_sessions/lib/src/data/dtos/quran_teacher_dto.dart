@@ -23,6 +23,7 @@ class QuranTeacherDto {
     required this.totalReviews,
     required this.totalSessionsCompleted,
     this.marketPrice,
+    this.manualPaymentPrice,
     this.cityName,
     this.countryName,
     this.credentials = const [],
@@ -43,6 +44,11 @@ class QuranTeacherDto {
   /// Market-resolved price, injected by the backend per student market.
   /// Null for free teachers or when queried without a market context.
   final SessionPriceDto? marketPrice;
+
+  /// Presentation-only manual/off-app price (Egypt pilot). Read from the teacher
+  /// profile doc; never from `pricing/{marketId}`. Does not affect [pricingType]
+  /// or the booking engine.
+  final ManualPaymentPriceDto? manualPaymentPrice;
 
   final List<String> specializations;
   final List<String> languages;
@@ -68,6 +74,11 @@ class QuranTeacherDto {
         marketPrice: json['market_price'] != null
             ? SessionPriceDto.fromJson(
                 json['market_price'] as Map<String, dynamic>,
+              )
+            : null,
+        manualPaymentPrice: json['manual_payment_price'] != null
+            ? ManualPaymentPriceDto.fromJson(
+                json['manual_payment_price'] as Map<String, dynamic>,
               )
             : null,
         specializations: List<String>.from(json['specializations'] as List),
@@ -102,6 +113,8 @@ class QuranTeacherDto {
     'supported_call_types': supportedCallTypes,
     'pricing_type': pricingType,
     'market_price': marketPrice?.toJson(),
+    if (manualPaymentPrice != null)
+      'manual_payment_price': manualPaymentPrice!.toJson(),
     'specializations': specializations,
     'languages': languages,
     'average_rating': averageRating,
@@ -170,5 +183,32 @@ class SessionPriceDto {
     'currency_code': currencyCode,
     'country_code': countryCode,
     if (cityId != null) 'city_id': cityId,
+  };
+}
+
+// ── ManualPaymentPriceDto ─────────────────────────────────────────────────────
+
+/// Wire representation of the presentation-only manual/off-app price.
+///
+/// Read from the teacher profile doc field `manualPaymentPrice`
+/// (`{ amountMinor, currencyCode }`). Not part of the real pricing engine.
+class ManualPaymentPriceDto {
+  const ManualPaymentPriceDto({
+    required this.amountMinor,
+    required this.currencyCode,
+  });
+
+  final int amountMinor;
+  final String currencyCode;
+
+  factory ManualPaymentPriceDto.fromJson(Map<String, dynamic> json) =>
+      ManualPaymentPriceDto(
+        amountMinor: (json['amount_minor'] as num?)?.toInt() ?? 0,
+        currencyCode: json['currency_code'] as String? ?? 'EGP',
+      );
+
+  Map<String, dynamic> toJson() => {
+    'amount_minor': amountMinor,
+    'currency_code': currencyCode,
   };
 }

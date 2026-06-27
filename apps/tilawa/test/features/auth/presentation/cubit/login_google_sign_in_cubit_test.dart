@@ -89,12 +89,12 @@ void main() {
   });
 
   test('manual launch allows sign-in when readiness is ready', () async {
-    final LoginGoogleSignInAttempt? attempt = await cubit.attemptLaunch(
+    await cubit.attemptLaunch(
       trigger: GoogleSignInLaunchTrigger.manual,
       gateway: gateway,
     );
 
-    check(attempt).isA<LoginGoogleSignInAllowed>();
+    check(cubit.state.launchAttempt).isA<LoginGoogleSignInAllowed>();
     check(cubit.state.isLaunchPending).isTrue();
     check(cubit.state.awaitingManualResult).isTrue();
   });
@@ -102,33 +102,34 @@ void main() {
   test('manual launch rejects when readiness is blocked', () async {
     gateway.readiness = const GoogleSignInLaunchReadiness.uiUnavailable();
 
-    final LoginGoogleSignInAttempt? attempt = await cubit.attemptLaunch(
+    await cubit.attemptLaunch(
       trigger: GoogleSignInLaunchTrigger.manual,
       gateway: gateway,
     );
 
-    check(attempt).isA<LoginGoogleSignInRejected>();
+    check(cubit.state.launchAttempt).isA<LoginGoogleSignInRejected>();
     check(cubit.state.isLaunchPending).isFalse();
   });
 
   test('auto launch allows sign-in without awaiting manual result', () async {
-    final LoginGoogleSignInAttempt? attempt = await cubit.attemptLaunch(
+    await cubit.attemptLaunch(
       trigger: GoogleSignInLaunchTrigger.auto,
       gateway: gateway,
     );
 
+    final attempt = cubit.state.launchAttempt;
     check(attempt).isA<LoginGoogleSignInAllowed>();
     check((attempt! as LoginGoogleSignInAllowed).manual).isFalse();
     check(cubit.state.awaitingManualResult).isFalse();
   });
 
-  test('attemptLaunch returns null when resolve throws', () async {
-    final LoginGoogleSignInAttempt? attempt = await cubit.attemptLaunch(
+  test('attemptLaunch leaves launchAttempt null when resolve throws', () async {
+    await cubit.attemptLaunch(
       trigger: GoogleSignInLaunchTrigger.manual,
       gateway: _ThrowingReadinessGateway(),
     );
 
-    check(attempt).isNull();
+    check(cubit.state.launchAttempt).isNull();
     check(cubit.state.isLaunchPending).isFalse();
   });
 
@@ -137,13 +138,14 @@ void main() {
       trigger: GoogleSignInLaunchTrigger.manual,
       gateway: gateway,
     );
+    final firstAttempt = cubit.state.launchAttempt;
 
-    final LoginGoogleSignInAttempt? second = await cubit.attemptLaunch(
+    await cubit.attemptLaunch(
       trigger: GoogleSignInLaunchTrigger.manual,
       gateway: gateway,
     );
 
-    check(second).isNull();
+    check(cubit.state.launchAttempt).equals(firstAttempt);
   });
 
   test('clearLaunchPending clears pending flag', () async {
@@ -161,6 +163,17 @@ void main() {
     cubit.clearLaunchPending();
 
     check(cubit.state.isLaunchPending).isFalse();
+  });
+
+  test('clearLaunchAttempt clears launchAttempt', () async {
+    await cubit.attemptLaunch(
+      trigger: GoogleSignInLaunchTrigger.manual,
+      gateway: gateway,
+    );
+
+    cubit.clearLaunchAttempt();
+
+    check(cubit.state.launchAttempt).isNull();
   });
 
   test('onAuthenticated resets launch state', () async {

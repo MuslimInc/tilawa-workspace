@@ -10,6 +10,7 @@ import '../../../domain/failures/quran_sessions_failure.dart';
 import '../../../domain/policies/session_join_window_policy.dart';
 import '../../../domain/value_objects/actor_role.dart';
 import '../../../domain/policies/session_cancel_eligibility_policy.dart';
+import '../../../domain/policies/session_action_policy.dart';
 import '../../session_join/session_join_ui_state.dart';
 
 sealed class SessionDetailState extends Equatable {
@@ -114,7 +115,14 @@ final class SessionDetailSuccess extends SessionDetailState {
       aggregate.sessionId != null &&
       joinUiState == SessionJoinUiState.joinAvailable;
 
-  bool get canOpenDispute => aggregate.lifecycleStatus.canOpenDispute;
+  bool get canOpenDispute =>
+      SessionActionPolicy.canOpenDispute(aggregate.lifecycleStatus);
+
+  bool get canReportConcern =>
+      SessionActionPolicy.canReportConcern(aggregate.lifecycleStatus);
+
+  bool get showCancelledDisputeHelper =>
+      SessionActionPolicy.showCancelledDisputeHelper(aggregate.lifecycleStatus);
 
   bool get canOpenMeetingAgain =>
       externalMeetingJoinUrl != null && hasOpenedExternalMeeting;

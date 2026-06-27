@@ -7,120 +7,12 @@ import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../helpers/fakes/fake_audit_repository.dart';
-import '../../helpers/fakes/fake_session_aggregate_repository.dart';
 import '../../helpers/fixtures/session_aggregate_fixtures.dart';
-
-class _RecordingSessionDetailBloc extends SessionDetailBloc {
-  _RecordingSessionDetailBloc({
-    required SessionDetailSuccess seed,
-  }) : super(
-         getSessionAggregate: GetSessionAggregateUseCase(
-           FakeSessionAggregateRepository(),
-         ),
-         getTimeline: GetSessionTimelineUseCase(FakeAuditRepository()),
-       ) {
-    emit(seed);
-  }
-
-  final recordedEvents = <SessionDetailEvent>[];
-
-  @override
-  void add(SessionDetailEvent event) {
-    recordedEvents.add(event);
-  }
-}
-
-class _TutorCancelEmitSuccessBloc extends SessionDetailBloc {
-  _TutorCancelEmitSuccessBloc({
-    required SessionDetailSuccess seed,
-  }) : super(
-         getSessionAggregate: GetSessionAggregateUseCase(
-           FakeSessionAggregateRepository(),
-         ),
-         getTimeline: GetSessionTimelineUseCase(FakeAuditRepository()),
-       ) {
-    emit(seed);
-  }
-
-  @override
-  void add(SessionDetailEvent event) {
-    if (event is SessionDetailLoadRequested) {
-      return;
-    }
-    if (event is SessionDetailCancelSubmitted) {
-      final current = state;
-      if (current is! SessionDetailSuccess) return;
-      emit(
-        current.copyWith(
-          aggregate: current.aggregate.copyWith(
-            lifecycleStatus: SessionLifecycleStatus.cancelledByTeacher,
-          ),
-          cancellationSucceeded: true,
-          clearCancellationInProgress: true,
-        ),
-      );
-      return;
-    }
-    if (event is SessionDetailCancelAcknowledged) {
-      final current = state;
-      if (current is! SessionDetailSuccess) return;
-      emit(current.copyWith(clearCancellationSucceeded: true));
-      return;
-    }
-    super.add(event);
-  }
-}
-
-class _JoinNavigationTestBloc extends SessionDetailBloc {
-  _JoinNavigationTestBloc({required SessionDetailSuccess seed})
-    : super(
-        getSessionAggregate: GetSessionAggregateUseCase(
-          FakeSessionAggregateRepository(),
-        ),
-        getTimeline: GetSessionTimelineUseCase(FakeAuditRepository()),
-      ) {
-    emit(seed);
-  }
-
-  @override
-  void add(SessionDetailEvent event) {
-    if (event is SessionDetailLoadRequested) {
-      return;
-    }
-    if (event is SessionDetailJoinRequested) {
-      final current = state;
-      if (current is! SessionDetailSuccess) {
-        return;
-      }
-      emit(current.copyWith(joinInProgress: true));
-      emit(current.copyWith(joinInProgress: false, clearJoinFailure: true));
-      return;
-    }
-    super.add(event);
-  }
-}
-
-class _ReviewEmitBloc extends SessionDetailBloc {
-  _ReviewEmitBloc({required SessionDetailSuccess seed})
-    : super(
-        getSessionAggregate: GetSessionAggregateUseCase(
-          FakeSessionAggregateRepository(),
-        ),
-        getTimeline: GetSessionTimelineUseCase(FakeAuditRepository()),
-      ) {
-    emit(seed);
-  }
-
-  @override
-  void add(SessionDetailEvent event) {}
-
-  void emitReviewSubmitted() {
-    final current = state;
-    if (current is! SessionDetailSuccess) return;
-    emit(current.copyWith(reviewSubmitted: true));
-  }
-}
+import 'join_navigation_test_bloc.dart';
+import 'recording_session_detail_bloc.dart';
+import 'review_emit_bloc.dart';
+import 'session_detail_event_recorder.dart';
+import 'tutor_cancel_emit_success_bloc.dart';
 
 Future<void> _pumpSessionDetailScreen(
   WidgetTester tester, {
@@ -203,7 +95,7 @@ void main() {
       tester.view.resetDevicePixelRatio();
     });
 
-    final bloc = _RecordingSessionDetailBloc(
+    final bloc = RecordingSessionDetailBloc(
       seed: _externalJoinSeed(meetingUrl: 'https://meet.google.com/room'),
     );
 
@@ -241,8 +133,10 @@ void main() {
       tester.view.resetDevicePixelRatio();
     });
 
-    final bloc = _RecordingSessionDetailBloc(
+    final recorder = SessionDetailEventRecorder();
+    final bloc = RecordingSessionDetailBloc(
       seed: _externalJoinSeed(meetingUrl: 'https://meet.google.com/room'),
+      onRecord: recorder.record,
     );
 
     await tester.pumpWidget(
@@ -267,7 +161,7 @@ void main() {
 
     expect(find.text('Join outside MeMuslim?'), findsOneWidget);
     expect(
-      bloc.recordedEvents.whereType<SessionDetailJoinRequested>(),
+      recorder.events.whereType<SessionDetailJoinRequested>(),
       isEmpty,
     );
 
@@ -275,7 +169,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      bloc.recordedEvents.whereType<SessionDetailJoinRequested>(),
+      recorder.events.whereType<SessionDetailJoinRequested>(),
       hasLength(1),
     );
   });
@@ -304,7 +198,7 @@ void main() {
         ],
         supportedLocales: QuranSessionsLocalizations.supportedLocales,
         home: BlocProvider<SessionDetailBloc>(
-          create: (_) => _RecordingSessionDetailBloc(
+          create: (_) => RecordingSessionDetailBloc(
             seed: SessionDetailSuccess(
               aggregate: aggregate,
               timeline: const [],
@@ -330,7 +224,7 @@ void main() {
       tester.view.resetDevicePixelRatio();
     });
 
-    final bloc = _RecordingSessionDetailBloc(
+    final bloc = RecordingSessionDetailBloc(
       seed: _externalJoinSeed(
         meetingUrl: 'https://meet.google.com/room',
       ).copyWith(hasOpenedExternalMeeting: true),
@@ -359,7 +253,7 @@ void main() {
   testWidgets(
     'mock in-app join hides mute when call gateway is not wired',
     (tester) async {
-      final bloc = _JoinNavigationTestBloc(seed: _inAppJoinSeed());
+      final bloc = JoinNavigationTestBloc(seed: _inAppJoinSeed());
 
       await _pumpSessionDetailScreen(tester, bloc: bloc);
 
@@ -376,7 +270,7 @@ void main() {
   ) async {
     String? joinedBookingId;
     String? joinedSessionId;
-    final bloc = _JoinNavigationTestBloc(seed: _inAppJoinSeed());
+    final bloc = JoinNavigationTestBloc(seed: _inAppJoinSeed());
 
     await _pumpSessionDetailScreen(
       tester,
@@ -401,7 +295,7 @@ void main() {
   ) async {
     var reviewCount = 0;
     String? reviewBookingId;
-    final bloc = _ReviewEmitBloc(
+    final bloc = ReviewEmitBloc(
       seed: SessionDetailSuccess(
         aggregate: makeAggregate(
           status: SessionLifecycleStatus.confirmed,
@@ -424,7 +318,7 @@ void main() {
 
     expect(reviewCount, 0);
 
-    bloc.emitReviewSubmitted();
+    emitSessionDetailReviewSubmitted(bloc);
     await tester.pumpAndSettle();
 
     expect(reviewCount, 1);
@@ -434,7 +328,8 @@ void main() {
   testWidgets(
     'counterparty sees pending reschedule banner and accept dispatches',
     (tester) async {
-      final bloc = _RecordingSessionDetailBloc(
+      final recorder = SessionDetailEventRecorder();
+      final bloc = RecordingSessionDetailBloc(
         seed: SessionDetailSuccess(
           aggregate: makeAggregate(
             status: SessionLifecycleStatus.rescheduled,
@@ -451,6 +346,7 @@ void main() {
           ),
           canRespondToReschedule: true,
         ),
+        onRecord: recorder.record,
       );
 
       await _pumpSessionDetailScreen(tester, bloc: bloc);
@@ -461,7 +357,7 @@ void main() {
       await tester.tap(find.text('Accept new time'));
       await tester.pump();
 
-      final respondEvents = bloc.recordedEvents
+      final respondEvents = recorder.events
           .whereType<SessionDetailRescheduleRespondSubmitted>()
           .toList();
       expect(respondEvents, hasLength(1));
@@ -472,7 +368,7 @@ void main() {
   testWidgets(
     'requester sees awaiting copy without respond actions on detail',
     (tester) async {
-      final bloc = _RecordingSessionDetailBloc(
+      final bloc = RecordingSessionDetailBloc(
         seed: SessionDetailSuccess(
           aggregate: makeAggregate(
             status: SessionLifecycleStatus.rescheduled,
@@ -508,7 +404,7 @@ void main() {
     tester,
   ) async {
     final recordingGateway = _RecordingCallControlGateway();
-    final bloc = _JoinNavigationTestBloc(
+    final bloc = JoinNavigationTestBloc(
       seed: _inAppJoinSeed(callProviderKind: SessionCallProviderKind.agora),
     );
 
@@ -538,7 +434,7 @@ void main() {
         startsAt: startsAt,
       ).copyWith(sessionId: 'session_1');
 
-      final bloc = _RecordingSessionDetailBloc(
+      final bloc = RecordingSessionDetailBloc(
         seed: SessionDetailSuccess(
           aggregate: aggregate,
           timeline: const [],
@@ -563,12 +459,14 @@ void main() {
         startsAt: DateTime.now().toUtc().add(const Duration(days: 3)),
       ).copyWith(sessionId: 'session_1');
 
-      final bloc = _RecordingSessionDetailBloc(
+      final recorder = SessionDetailEventRecorder();
+      final bloc = RecordingSessionDetailBloc(
         seed: SessionDetailSuccess(
           aggregate: aggregate,
           timeline: const [],
           viewerRole: ActorRole.student,
         ),
+        onRecord: recorder.record,
       );
 
       await _pumpSessionDetailScreen(tester, bloc: bloc);
@@ -583,7 +481,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        bloc.recordedEvents.whereType<SessionDetailCancelSubmitted>(),
+        recorder.events.whereType<SessionDetailCancelSubmitted>(),
         hasLength(1),
       );
     });
@@ -598,12 +496,14 @@ void main() {
           startsAt: DateTime.now().toUtc().add(const Duration(days: 3)),
         ).copyWith(sessionId: 'session_1');
 
-        final bloc = _RecordingSessionDetailBloc(
+        final recorder = SessionDetailEventRecorder();
+        final bloc = RecordingSessionDetailBloc(
           seed: SessionDetailSuccess(
             aggregate: aggregate,
             timeline: const [],
             viewerRole: ActorRole.teacher,
           ),
+          onRecord: recorder.record,
         );
 
         await _pumpSessionDetailScreen(tester, bloc: bloc);
@@ -622,7 +522,7 @@ void main() {
         await tester.tap(find.text('Cancel session').last);
         await tester.pumpAndSettle();
 
-        final events = bloc.recordedEvents
+        final events = recorder.events
             .whereType<SessionDetailCancelSubmitted>()
             .toList();
         check(events.length).equals(1);
@@ -639,7 +539,7 @@ void main() {
         startsAt: DateTime.now().toUtc().add(const Duration(days: 3)),
       ).copyWith(sessionId: 'session_1');
 
-      final bloc = _TutorCancelEmitSuccessBloc(
+      final bloc = TutorCancelEmitSuccessBloc(
         seed: SessionDetailSuccess(
           aggregate: aggregate,
           timeline: const [],
@@ -706,7 +606,7 @@ void main() {
     });
 
     testWidgets('tutor cancel hidden for pending approval', (tester) async {
-      final bloc = _RecordingSessionDetailBloc(
+      final bloc = RecordingSessionDetailBloc(
         seed: SessionDetailSuccess(
           aggregate: makeAggregate(
             status: SessionLifecycleStatus.pendingTutorApproval,
@@ -722,7 +622,7 @@ void main() {
     });
 
     testWidgets('tutor cancel hidden for rejected session', (tester) async {
-      final bloc = _RecordingSessionDetailBloc(
+      final bloc = RecordingSessionDetailBloc(
         seed: SessionDetailSuccess(
           aggregate: makeAggregate(
             status: SessionLifecycleStatus.rejectedByTutor,
@@ -740,7 +640,7 @@ void main() {
     testWidgets('student sees rejected copy without reason and no join', (
       tester,
     ) async {
-      final bloc = _RecordingSessionDetailBloc(
+      final bloc = RecordingSessionDetailBloc(
         seed: SessionDetailSuccess(
           aggregate: makeAggregate(
             status: SessionLifecycleStatus.rejectedByTutor,
@@ -759,7 +659,7 @@ void main() {
     });
 
     testWidgets('student sees rejection reason when provided', (tester) async {
-      final bloc = _RecordingSessionDetailBloc(
+      final bloc = RecordingSessionDetailBloc(
         seed: SessionDetailSuccess(
           aggregate: makeAggregate(
             status: SessionLifecycleStatus.rejectedByTutor,
@@ -786,7 +686,7 @@ void main() {
         startsAt: DateTime.now().toUtc().add(const Duration(days: 1)),
       ).copyWith(sessionId: 'session_1');
 
-      final bloc = _RecordingSessionDetailBloc(
+      final bloc = RecordingSessionDetailBloc(
         seed: SessionDetailSuccess(
           aggregate: aggregate,
           timeline: const [],
@@ -810,7 +710,7 @@ void main() {
     testWidgets('shows for confirmed session with call context', (
       tester,
     ) async {
-      final bloc = _RecordingSessionDetailBloc(
+      final bloc = RecordingSessionDetailBloc(
         seed: SessionDetailSuccess(
           aggregate: makeAggregate(
             status: SessionLifecycleStatus.confirmed,
@@ -834,7 +734,7 @@ void main() {
     });
 
     testWidgets('hidden when lifecycle is not booked', (tester) async {
-      final bloc = _RecordingSessionDetailBloc(
+      final bloc = RecordingSessionDetailBloc(
         seed: SessionDetailSuccess(
           aggregate: makeAggregate(
             status: SessionLifecycleStatus.rescheduled,
@@ -855,7 +755,7 @@ void main() {
     testWidgets('timeline load failure shows retry banner not empty copy', (
       tester,
     ) async {
-      final bloc = _RecordingSessionDetailBloc(
+      final bloc = RecordingSessionDetailBloc(
         seed: SessionDetailSuccess(
           aggregate: makeAggregate(
             status: SessionLifecycleStatus.confirmed,
@@ -880,7 +780,7 @@ void main() {
     testWidgets('pending reschedule load failure shows retry banner', (
       tester,
     ) async {
-      final bloc = _RecordingSessionDetailBloc(
+      final bloc = RecordingSessionDetailBloc(
         seed: SessionDetailSuccess(
           aggregate: makeAggregate(
             status: SessionLifecycleStatus.rescheduled,
@@ -902,7 +802,8 @@ void main() {
     });
 
     testWidgets('retry on timeline banner dispatches reload', (tester) async {
-      final bloc = _RecordingSessionDetailBloc(
+      final recorder = SessionDetailEventRecorder();
+      final bloc = RecordingSessionDetailBloc(
         seed: SessionDetailSuccess(
           aggregate: makeAggregate(
             status: SessionLifecycleStatus.confirmed,
@@ -910,20 +811,21 @@ void main() {
           timeline: const [],
           timelineLoadFailed: true,
         ),
+        onRecord: recorder.record,
       );
 
       await _pumpSessionDetailScreen(tester, bloc: bloc);
-      bloc.recordedEvents.clear();
+      recorder.clear();
 
       await tester.tap(find.text('Retry'));
       await tester.pump();
 
       expect(
-        bloc.recordedEvents.whereType<SessionDetailLoadRequested>(),
+        recorder.events.whereType<SessionDetailLoadRequested>(),
         hasLength(1),
       );
       expect(
-        bloc.recordedEvents.whereType<SessionDetailLoadRequested>().single,
+        recorder.events.whereType<SessionDetailLoadRequested>().single,
         const SessionDetailLoadRequested(bookingId: 'session_1'),
       );
     });
@@ -940,7 +842,7 @@ void main() {
         status: SessionLifecycleStatus.confirmed,
       ).copyWith(revisionSurahNumber: 18, revisionAyahNumber: 5);
 
-      final bloc = _RecordingSessionDetailBloc(
+      final bloc = RecordingSessionDetailBloc(
         seed: SessionDetailSuccess(
           aggregate: aggregate,
           timeline: const [],
@@ -970,7 +872,7 @@ void main() {
     });
 
     testWidgets('hidden without surah context', (tester) async {
-      final bloc = _RecordingSessionDetailBloc(
+      final bloc = RecordingSessionDetailBloc(
         seed: SessionDetailSuccess(
           aggregate: makeAggregate(status: SessionLifecycleStatus.confirmed),
           timeline: const [],
@@ -984,6 +886,109 @@ void main() {
       );
 
       expect(find.text('Practice in Quran reader'), findsNothing);
+    });
+  });
+
+  group('cancelled session detail', () {
+    testWidgets(
+      'teacher-cancelled session hides join and shows friendly status',
+      (tester) async {
+        final event = SessionAuditEvent(
+          sessionId: 'session_1',
+          actorId: 'teacher_1',
+          actorRole: ActorRole.teacher,
+          action: SessionAction.confirmBooking,
+          source: ActionSource.mobileApp,
+          previousStatus: SessionLifecycleStatus.scheduled,
+          newStatus: SessionLifecycleStatus.cancelledByTeacher,
+          createdAt: DateTime.utc(2026, 6, 27),
+          reason: 'tutor_cancelled',
+        );
+
+        final bloc = RecordingSessionDetailBloc(
+          seed: SessionDetailSuccess(
+            aggregate: makeAggregate(
+              status: SessionLifecycleStatus.cancelledByTeacher,
+            ),
+            timeline: [event],
+            viewerRole: ActorRole.teacher,
+          ),
+        );
+
+        await _pumpSessionDetailScreen(tester, bloc: bloc);
+
+        expect(find.text('Join session'), findsNothing);
+        expect(find.text('Cancel session'), findsNothing);
+        expect(find.textContaining('tutor_cancelled'), findsNothing);
+        expect(find.text('You cancelled this session'), findsWidgets);
+        expect(find.text('Session cancelled by tutor'), findsOneWidget);
+      },
+    );
+
+    testWidgets('cancelled session keeps report and dispute with helper', (
+      tester,
+    ) async {
+      final bloc = RecordingSessionDetailBloc(
+        seed: SessionDetailSuccess(
+          aggregate: makeAggregate(
+            status: SessionLifecycleStatus.cancelledByTeacher,
+          ),
+          timeline: const [],
+          viewerRole: ActorRole.student,
+        ),
+      );
+
+      await _pumpSessionDetailScreen(tester, bloc: bloc);
+
+      expect(find.text('Report a concern'), findsOneWidget);
+      expect(find.text('Open a dispute'), findsOneWidget);
+      expect(
+        find.textContaining('review this cancellation'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('Arabic RTL cancelled detail has no overflow', (tester) async {
+      final bloc = RecordingSessionDetailBloc(
+        seed: SessionDetailSuccess(
+          aggregate: makeAggregate(
+            status: SessionLifecycleStatus.cancelledByTeacher,
+          ),
+          timeline: const [],
+          viewerRole: ActorRole.teacher,
+        ),
+      );
+
+      tester.view.physicalSize = const Size(390, 640);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('ar'),
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          localizationsDelegates: const [
+            ...QuranSessionsLocalizations.localizationsDelegates,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          builder: (context, child) => TilawaFeedbackHost(child: child!),
+          home: BlocProvider<SessionDetailBloc>.value(
+            value: bloc,
+            child: const SessionDetailScreen(bookingId: 'session_1'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.textContaining('tutor_cancelled'), findsNothing);
+      expect(find.textContaining('ألغيت'), findsWidgets);
     });
   });
 }

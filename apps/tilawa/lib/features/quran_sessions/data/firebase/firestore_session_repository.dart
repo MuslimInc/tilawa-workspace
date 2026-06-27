@@ -17,9 +17,12 @@ class FirestoreSessionDataSource implements SessionRemoteDataSource {
 
   QuranSessionDto _mapDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? const {};
+    final lifecycleRaw = resolveLifecycleStatusRawFromFirestore(data);
+    final bookingId = resolveBookingIdFromFirestore(doc.id, data);
+    final statusRaw = lifecycleRaw ?? data['status'] as String? ?? 'scheduled';
     return QuranSessionDto(
       id: doc.id,
-      bookingId: data['bookingId'] as String? ?? '',
+      bookingId: bookingId,
       teacherId: data['teacherId'] as String? ?? '',
       studentId: data['studentId'] as String? ?? '',
       startsAt: readRequiredDateTime(
@@ -27,8 +30,8 @@ class FirestoreSessionDataSource implements SessionRemoteDataSource {
       ).toUtc().toIso8601String(),
       endsAt: readRequiredDateTime(data['endsAt']).toUtc().toIso8601String(),
       callType: _mapCallType(data['callType'] as String?),
-      status: _mapSessionStatus(data['status'] as String?),
-      lifecycleStatus: data['lifecycleStatus'] as String?,
+      status: _mapSessionStatus(statusRaw),
+      lifecycleStatus: lifecycleRaw ?? data['lifecycleStatus'] as String?,
       meetingLink: (data['meetingLink'] ?? data['meeting_link']) as String?,
       callRoomId: (data['providerSessionId'] ?? data['callRoomId']) as String?,
       bookingType: data['bookingType'] as String?,

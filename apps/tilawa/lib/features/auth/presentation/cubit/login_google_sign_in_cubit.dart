@@ -32,23 +32,34 @@ class LoginGoogleSignInState extends Equatable {
   const LoginGoogleSignInState({
     this.isLaunchPending = false,
     this.awaitingManualResult = false,
+    this.launchAttempt,
   });
 
   final bool isLaunchPending;
   final bool awaitingManualResult;
+  final LoginGoogleSignInAttempt? launchAttempt;
 
   LoginGoogleSignInState copyWith({
     bool? isLaunchPending,
     bool? awaitingManualResult,
+    LoginGoogleSignInAttempt? launchAttempt,
+    bool clearLaunchAttempt = false,
   }) {
     return LoginGoogleSignInState(
       isLaunchPending: isLaunchPending ?? this.isLaunchPending,
       awaitingManualResult: awaitingManualResult ?? this.awaitingManualResult,
+      launchAttempt: clearLaunchAttempt
+          ? null
+          : (launchAttempt ?? this.launchAttempt),
     );
   }
 
   @override
-  List<Object?> get props => [isLaunchPending, awaitingManualResult];
+  List<Object?> get props => [
+    isLaunchPending,
+    awaitingManualResult,
+    launchAttempt,
+  ];
 }
 
 /// Login-screen Google sign-in prewarm, readiness cache, and launch gating.
@@ -68,7 +79,7 @@ class LoginGoogleSignInCubit extends Cubit<LoginGoogleSignInState> {
   }
 
   /// Returns null when a launch is already pending.
-  Future<LoginGoogleSignInAttempt?> attemptLaunch({
+  Future<void> attemptLaunch({
     required GoogleSignInLaunchTrigger trigger,
     GoogleSignInLaunchGateway? gateway,
   }) async {
@@ -76,10 +87,10 @@ class LoginGoogleSignInCubit extends Cubit<LoginGoogleSignInState> {
       _logGoogleSignInButton(
         'launchInteractiveSignIn skipped: already pending',
       );
-      return null;
+      return;
     }
 
-    emit(state.copyWith(isLaunchPending: true));
+    emit(state.copyWith(clearLaunchAttempt: true, isLaunchPending: true));
 
     try {
       final GoogleSignInLaunchReadiness readiness = await _resolveLaunch(
@@ -88,8 +99,13 @@ class LoginGoogleSignInCubit extends Cubit<LoginGoogleSignInState> {
       );
 
       if (readiness is! GoogleSignInLaunchReady) {
-        emit(state.copyWith(isLaunchPending: false));
-        return LoginGoogleSignInRejected(readiness);
+        emit(
+          state.copyWith(
+            isLaunchPending: false,
+            launchAttempt: LoginGoogleSignInRejected(readiness),
+          ),
+        );
+        return;
       }
 
       final bool manual = trigger == GoogleSignInLaunchTrigger.manual;
@@ -97,9 +113,9 @@ class LoginGoogleSignInCubit extends Cubit<LoginGoogleSignInState> {
         state.copyWith(
           isLaunchPending: true,
           awaitingManualResult: manual,
+          launchAttempt: LoginGoogleSignInAllowed(manual: manual),
         ),
       );
-      return LoginGoogleSignInAllowed(manual: manual);
     } catch (error, stackTrace) {
       emit(state.copyWith(isLaunchPending: false));
       logger.w(
@@ -107,8 +123,14 @@ class LoginGoogleSignInCubit extends Cubit<LoginGoogleSignInState> {
         error: error,
         stackTrace: stackTrace,
       );
-      return null;
     }
+  }
+
+  void clearLaunchAttempt() {
+    if (state.launchAttempt == null) {
+      return;
+    }
+    emit(state.copyWith(clearLaunchAttempt: true));
   }
 
   void clearLaunchPending() {

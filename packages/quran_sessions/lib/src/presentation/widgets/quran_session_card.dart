@@ -275,7 +275,7 @@ class _PendingTutorApprovalBanner extends StatelessWidget {
       padding: EdgeInsets.only(top: tokens.spaceSmall),
       child: TilawaFeedbackStrip(
         icon: Icons.hourglass_top_rounded,
-        message: l10n.sessionAwaitingTutorApprovalNextSteps,
+        message: l10n.sessionAwaitingReviewNextSteps,
         backgroundColor: scheme.primaryContainer,
         foregroundColor: scheme.onPrimaryContainer,
         variant: TilawaFeedbackVariant.info,

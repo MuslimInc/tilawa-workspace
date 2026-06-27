@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -8,28 +9,36 @@ Future<String?> showCancelSessionSheet(
   required DateTime sessionStartsAt,
   required SessionPricingType pricingType,
   ConfigurableCancellationPolicy? policy,
+  bool isManualPayment = false,
 }) {
   final l10n = context.quranSessionsL10n;
   final cancellationPolicy = policy ?? const ConfigurableCancellationPolicy();
-  final policyKey = cancellationPolicy.describe(
-    actor: ActorRole.student,
-    sessionStartsAt: sessionStartsAt,
-    pricingType: pricingType,
-  );
-  final policyMessage = _policyMessage(l10n, policyKey);
+  final policyMessage = isManualPayment
+      ? null
+      : _policyMessage(
+          l10n,
+          cancellationPolicy.describe(
+            actor: ActorRole.student,
+            sessionStartsAt: sessionStartsAt,
+            pricingType: pricingType,
+          ),
+        );
 
   return showTilawaModalBottomSheet<String>(
     context: context,
     backgroundColor: Theme.of(context).colorScheme.surface,
     shape: TilawaBottomSheetScaffold.modalShape(context),
-    builder: (_) => _CancelSessionSheetBody(policyMessage: policyMessage),
+    builder: (_) => _CancelSessionSheetBody(
+      policyMessage: policyMessage,
+      isManualPayment: isManualPayment,
+    ),
   );
 }
 
-String _policyMessage(dynamic l10n, String key) {
+String _policyMessage(QuranSessionsLocalizations l10n, String key) {
   return switch (key) {
     'cancellation_blocked_within_notice' => l10n.cancelPolicyBlockedNotice,
-    'cancellation_free_no_refund' => l10n.cancelPolicyFree,
+    'cancellation_free_no_refund' => l10n.cancellationFreeNoRefund,
     'cancellation_full_refund' => l10n.cancelPolicyFullRefund,
     'cancellation_partial_refund' => l10n.cancelPolicyPartialRefund,
     _ => l10n.cancelPolicyNoRefund,
@@ -37,9 +46,13 @@ String _policyMessage(dynamic l10n, String key) {
 }
 
 class _CancelSessionSheetBody extends StatefulWidget {
-  const _CancelSessionSheetBody({required this.policyMessage});
+  const _CancelSessionSheetBody({
+    required this.policyMessage,
+    required this.isManualPayment,
+  });
 
-  final String policyMessage;
+  final String? policyMessage;
+  final bool isManualPayment;
 
   @override
   State<_CancelSessionSheetBody> createState() =>
@@ -83,7 +96,10 @@ class _CancelSessionSheetBodyState extends State<_CancelSessionSheetBody> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(widget.policyMessage),
+                  if (widget.isManualPayment)
+                    const _ManualPaymentCancellationPolicy()
+                  else if (widget.policyMessage case final message?)
+                    Text(message),
                   SizedBox(height: tokens.spaceLarge),
                   TextField(
                     controller: _controller,
@@ -111,5 +127,36 @@ class _CancelSessionSheetBodyState extends State<_CancelSessionSheetBody> {
       return;
     }
     Navigator.pop(context, reason);
+  }
+}
+
+/// Cancellation-only copy for manual/off-app paid sessions.
+class _ManualPaymentCancellationPolicy extends StatelessWidget {
+  const _ManualPaymentCancellationPolicy();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final tokens = theme.tokens;
+    final bodyStyle = theme.textTheme.bodyMedium?.copyWith(
+      color: scheme.onSurfaceVariant,
+      height: 1.4,
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(l10n.manualPaymentCancellationPolicy, style: bodyStyle),
+        SizedBox(height: tokens.spaceSmall),
+        Text(
+          l10n.manualPaymentCancellationSupportHint(
+            ManualPaymentPilotConfig.supportWhatsappNumber,
+          ),
+          style: bodyStyle,
+        ),
+      ],
+    );
   }
 }

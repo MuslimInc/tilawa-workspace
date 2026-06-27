@@ -4,6 +4,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../../domain/entities/teacher_application.dart';
 import '../../../domain/failures/quran_sessions_failure.dart';
 import '../../../domain/value_objects/teacher_public_name.dart';
+import '../../../utils/phone_normalizer.dart';
 import '../../forms/teacher_application_field_ids.dart';
 import '../../forms/teacher_application_validation_l10n.dart';
 
@@ -89,22 +90,6 @@ final class TeacherApplicationEditing extends TeacherApplicationState {
 
   String? get visibleBioErrorCode => submitAttempted ? bioErrorCode : null;
 
-  bool get canSubmit =>
-      !isSaving &&
-      application.isReadyToSubmit &&
-      phoneErrorCode == null &&
-      publicDisplayNameErrorCode == null &&
-      teachingLanguagesErrorCode == null &&
-      specializationsErrorCode == null &&
-      bioErrorCode == null;
-
-  int get invalidFieldCount {
-    if (!submitAttempted || canSubmit) {
-      return 0;
-    }
-    return validationIssues.length;
-  }
-
   TeacherApplicationEditing applySubmitValidation() {
     final nameToValidate = publicDisplayNameRaw.isNotEmpty
         ? publicDisplayNameRaw
@@ -136,6 +121,46 @@ final class TeacherApplicationEditing extends TeacherApplicationState {
       specializationsErrorCode: specsErr,
       bioErrorCode: bioErr,
     );
+  }
+
+  /// Merges in-progress raw field values into [application] before submit.
+  ///
+  /// Prefilled controller text (e.g. profile display name) may be visible in
+  /// the form without a [TeacherApplicationPublicDisplayNameChanged] event;
+  /// submit must not silently fail in that case.
+  TeacherApplicationEditing withMergedApplicationFields() {
+    final countryCode = application.phoneCountryCode ?? 'EG';
+    final mergedPhone = phoneRaw.isNotEmpty
+        ? PhoneNormalizer.normalize(phoneRaw, countryCode)
+        : application.phoneNumber;
+    final mergedName = ValidateTeacherPublicName.normalize(
+      publicDisplayNameRaw.isNotEmpty
+          ? publicDisplayNameRaw
+          : application.publicDisplayName,
+    );
+
+    return copyWith(
+      application: application.copyWith(
+        phoneNumber: mergedPhone ?? application.phoneNumber,
+        publicDisplayName: mergedName ?? application.publicDisplayName,
+      ),
+    );
+  }
+
+  bool get canSubmit =>
+      !isSaving &&
+      application.isReadyToSubmit &&
+      phoneErrorCode == null &&
+      publicDisplayNameErrorCode == null &&
+      teachingLanguagesErrorCode == null &&
+      specializationsErrorCode == null &&
+      bioErrorCode == null;
+
+  int get invalidFieldCount {
+    if (!submitAttempted || canSubmit) {
+      return 0;
+    }
+    return validationIssues.length;
   }
 
   TeacherApplicationEditing copyWith({

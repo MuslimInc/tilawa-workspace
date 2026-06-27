@@ -1,5 +1,6 @@
 import 'package:quran_sessions/src/domain/entities/quran_booking.dart';
 import 'package:quran_sessions/src/domain/entities/quran_session.dart';
+import 'package:quran_sessions/src/domain/entities/manual_payment_price.dart';
 import 'package:quran_sessions/src/domain/entities/quran_teacher.dart';
 import 'package:quran_sessions/src/domain/entities/session_call_type.dart';
 import 'package:quran_sessions/src/domain/entities/session_lifecycle_status.dart';
@@ -65,6 +66,7 @@ QuranTeacher makeTeacher({
   UserGender gender = UserGender.male,
   SessionPricingType pricingType = SessionPricingType.fixedPerSession,
   SessionPrice? price = _defaultMarketPrice,
+  ManualPaymentPrice? manualPaymentPrice,
   String avatarUrl = 'https://example.com/avatar.png',
   List<TeacherCredential> credentials = const [],
 }) => QuranTeacher(
@@ -77,6 +79,7 @@ QuranTeacher makeTeacher({
   supportedCallTypes: const [SessionCallType.externalMeeting],
   pricingType: pricingType,
   price: price,
+  manualPaymentPrice: manualPaymentPrice,
   specializations: specializations,
   languages: const ['ar', 'en'],
   averageRating: rating,

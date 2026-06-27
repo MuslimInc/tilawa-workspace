@@ -64,6 +64,9 @@ final class TeacherDashboardSuccess extends TeacherDashboardState {
     this.refreshDiscardedPendingCount,
     this.bookingRequestActionInProgress,
     this.bookingRequestFailure,
+    this.sessionCancelInProgress,
+    this.sessionCancelFailure,
+    this.sessionCancelSucceeded = false,
   });
 
   final List<QuranSession> pendingBookingRequests;
@@ -111,6 +114,15 @@ final class TeacherDashboardSuccess extends TeacherDashboardState {
   /// Last accept/reject failure for snackbar.
   final QuranSessionsFailure? bookingRequestFailure;
 
+  /// Booking id while tutor cancel is in flight.
+  final String? sessionCancelInProgress;
+
+  /// Last tutor cancel failure for snackbar.
+  final QuranSessionsFailure? sessionCancelFailure;
+
+  /// One-shot success signal after tutor cancel completes.
+  final bool sessionCancelSucceeded;
+
   bool get weekScopedDashboard => schedulingConfig.weekScopedDashboardEnabled;
 
   @override
@@ -134,6 +146,9 @@ final class TeacherDashboardSuccess extends TeacherDashboardState {
     refreshDiscardedPendingCount,
     bookingRequestActionInProgress,
     bookingRequestFailure,
+    sessionCancelInProgress,
+    sessionCancelFailure,
+    sessionCancelSucceeded,
   ];
 
   TeacherDashboardSuccess copyWith({
@@ -156,6 +171,9 @@ final class TeacherDashboardSuccess extends TeacherDashboardState {
     int? refreshDiscardedPendingCount,
     String? bookingRequestActionInProgress,
     QuranSessionsFailure? bookingRequestFailure,
+    String? sessionCancelInProgress,
+    QuranSessionsFailure? sessionCancelFailure,
+    bool? sessionCancelSucceeded,
     bool clearSlotFailure = false,
     bool clearUndoableSlotId = false,
     bool clearRefreshDiscardedPendingCount = false,
@@ -163,6 +181,9 @@ final class TeacherDashboardSuccess extends TeacherDashboardState {
     bool clearDismissedFridayReminderWeekKey = false,
     bool clearBookingRequestActionInProgress = false,
     bool clearBookingRequestFailure = false,
+    bool clearSessionCancelInProgress = false,
+    bool clearSessionCancelFailure = false,
+    bool clearSessionCancelSucceeded = false,
   }) => TeacherDashboardSuccess(
     pendingBookingRequests:
         pendingBookingRequests ?? this.pendingBookingRequests,
@@ -200,6 +221,15 @@ final class TeacherDashboardSuccess extends TeacherDashboardState {
     bookingRequestFailure: clearBookingRequestFailure
         ? null
         : (bookingRequestFailure ?? this.bookingRequestFailure),
+    sessionCancelInProgress: clearSessionCancelInProgress
+        ? null
+        : (sessionCancelInProgress ?? this.sessionCancelInProgress),
+    sessionCancelFailure: clearSessionCancelFailure
+        ? null
+        : (sessionCancelFailure ?? this.sessionCancelFailure),
+    sessionCancelSucceeded: clearSessionCancelSucceeded
+        ? false
+        : (sessionCancelSucceeded ?? this.sessionCancelSucceeded),
   );
 }
 

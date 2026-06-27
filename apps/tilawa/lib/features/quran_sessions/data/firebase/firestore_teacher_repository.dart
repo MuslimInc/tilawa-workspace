@@ -35,6 +35,7 @@ class FirestoreTeacherDataSource implements TeacherRemoteDataSource {
       ),
       pricingType: marketPrice == null ? 'free' : 'fixed_per_session',
       marketPrice: marketPrice,
+      manualPaymentPrice: _mapManualPaymentPrice(data['manualPaymentPrice']),
       specializations: List<String>.from(
         data['specializations'] as List? ?? const [],
       ),
@@ -45,6 +46,19 @@ class FirestoreTeacherDataSource implements TeacherRemoteDataSource {
       totalReviews: data['reviewCount'] as int? ?? 0,
       totalSessionsCompleted: data['totalSessionsCompleted'] as int? ?? 0,
       credentials: _mapCredentials(data['credentials']),
+    );
+  }
+
+  /// Presentation-only manual/off-app price stored on the teacher profile doc
+  /// as `manualPaymentPrice: { amountMinor, currencyCode }`. Never read by the
+  /// booking engine — display + manual-payment communication only.
+  static ManualPaymentPriceDto? _mapManualPaymentPrice(Object? raw) {
+    if (raw is! Map) return null;
+    final amountMinor = (raw['amountMinor'] as num?)?.toInt();
+    if (amountMinor == null || amountMinor <= 0) return null;
+    return ManualPaymentPriceDto(
+      amountMinor: amountMinor,
+      currencyCode: raw['currencyCode'] as String? ?? 'EGP',
     );
   }
 

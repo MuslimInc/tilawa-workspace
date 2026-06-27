@@ -46,6 +46,7 @@ class TilawaDropdownField<T> extends StatelessWidget {
     this.prefixIcon,
     this.enabled = true,
     this.semanticLabel,
+    this.shrinkWrapWidth = false,
   });
 
   /// The selectable options.
@@ -76,6 +77,10 @@ class TilawaDropdownField<T> extends StatelessWidget {
   /// Accessibility label; falls back to [labelText] then [hintText].
   final String? semanticLabel;
 
+  /// When true, the closed field sizes to its label instead of expanding to
+  /// the parent width (e.g. country-code prefix beside a phone field).
+  final bool shrinkWrapWidth;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -104,25 +109,36 @@ class TilawaDropdownField<T> extends StatelessWidget {
 
       return Semantics(
         label: semanticLabel ?? labelText ?? hintText,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            minHeight: tokens.minInteractiveDimension,
-          ),
-          child: InputDecorator(
-            decoration: fieldDecoration,
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    item.label,
-                    style: textStyle,
-                    overflow: TextOverflow.ellipsis,
+        child: shrinkWrapWidth
+            ? _ShrinkWrapInputShell(
+                decoration: fieldDecoration,
+                tokens: tokens,
+                child: Text(
+                  item.label,
+                  style: textStyle,
+                  maxLines: 1,
+                  softWrap: false,
+                ),
+              )
+            : ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: tokens.minInteractiveDimension,
+                ),
+                child: InputDecorator(
+                  decoration: fieldDecoration,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          item.label,
+                          style: textStyle,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
-        ),
+              ),
       );
     }
 
@@ -140,9 +156,14 @@ class TilawaDropdownField<T> extends StatelessWidget {
       label: semanticLabel ?? labelText ?? hintText,
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
-          final double? menuWidth = constraints.maxWidth.isFinite
-              ? constraints.maxWidth
-              : null;
+          final double? menuWidth = shrinkWrapWidth
+              ? _measureDropdownMenuWidth(
+                  context,
+                  items: items,
+                  textStyle: textStyle,
+                  tokens: tokens,
+                )
+              : (constraints.maxWidth.isFinite ? constraints.maxWidth : null);
 
           final double radius = inputStyle.borderRadius();
 
@@ -183,87 +204,179 @@ class TilawaDropdownField<T> extends StatelessWidget {
             alignment: AlignmentDirectional.centerStart,
           );
 
+          final menuAnchor = MenuAnchor(
+            crossAxisUnconstrained: false,
+            alignmentOffset: Offset(0, tokens.dropdownMenuGap),
+            style: menuStyle,
+            menuChildren: [
+              for (final item in items)
+                MenuItemButton(
+                  style: menuItemStyle,
+                  onPressed: isEnabled ? () => onChanged!(item.value) : null,
+                  leadingIcon: item.icon == null
+                      ? null
+                      : Icon(item.icon, size: tokens.iconSizeMedium),
+                  child: Text(
+                    item.label,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+            ],
+            builder:
+                (
+                  BuildContext context,
+                  MenuController controller,
+                  Widget? child,
+                ) {
+                  final bool hasValue = selectedItem != null;
+                  void toggleMenu() {
+                    if (!isEnabled) {
+                      return;
+                    }
+                    if (controller.isOpen) {
+                      controller.close();
+                    } else {
+                      controller.open();
+                    }
+                  }
+
+                  return Semantics(
+                    button: true,
+                    enabled: isEnabled,
+                    expanded: controller.isOpen,
+                    child: TilawaInteractiveSurface(
+                      onTap: isEnabled ? toggleMenu : null,
+                      enabled: isEnabled,
+                      button: false,
+                      // A form field should not shrink on tap; keep it
+                      // static but still gain the focus ring + haptic.
+                      enablePressAnimation: false,
+                      borderRadius: BorderRadius.circular(radius),
+                      child: shrinkWrapWidth
+                          ? _ShrinkWrapInputShell(
+                              decoration: fieldDecoration,
+                              tokens: tokens,
+                              child: _FieldContent(
+                                hasValue: hasValue,
+                                label: hasValue
+                                    ? selectedItem.label
+                                    : (hintText ?? ''),
+                                textStyle: textStyle,
+                                colorScheme: colorScheme,
+                                prefixIcon: prefixIcon,
+                                tokens: tokens,
+                                isEnabled: isEnabled,
+                                shrinkWrapWidth: true,
+                              ),
+                            )
+                          : InputDecorator(
+                              decoration: fieldDecoration,
+                              isEmpty: !hasValue && hintText != null,
+                              child: _FieldContent(
+                                hasValue: hasValue,
+                                label: hasValue
+                                    ? selectedItem.label
+                                    : (hintText ?? ''),
+                                textStyle: textStyle,
+                                colorScheme: colorScheme,
+                                prefixIcon: prefixIcon,
+                                tokens: tokens,
+                                isEnabled: isEnabled,
+                              ),
+                            ),
+                    ),
+                  );
+                },
+          );
+
           return ConstrainedBox(
             constraints: BoxConstraints(
               minHeight: tokens.minInteractiveDimension,
             ),
-            child: SizedBox(
-              width: double.infinity,
-              child: MenuAnchor(
-                crossAxisUnconstrained: false,
-                alignmentOffset: Offset(0, tokens.dropdownMenuGap),
-                style: menuStyle,
-                menuChildren: [
-                  for (final item in items)
-                    MenuItemButton(
-                      style: menuItemStyle,
-                      onPressed: isEnabled
-                          ? () => onChanged!(item.value)
-                          : null,
-                      leadingIcon: item.icon == null
-                          ? null
-                          : Icon(item.icon, size: tokens.iconSizeMedium),
-                      child: Text(
-                        item.label,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                ],
-                builder:
-                    (
-                      BuildContext context,
-                      MenuController controller,
-                      Widget? child,
-                    ) {
-                      final bool hasValue = selectedItem != null;
-                      void toggleMenu() {
-                        if (!isEnabled) {
-                          return;
-                        }
-                        if (controller.isOpen) {
-                          controller.close();
-                        } else {
-                          controller.open();
-                        }
-                      }
-
-                      return Semantics(
-                        button: true,
-                        enabled: isEnabled,
-                        expanded: controller.isOpen,
-                        child: TilawaInteractiveSurface(
-                          onTap: isEnabled ? toggleMenu : null,
-                          enabled: isEnabled,
-                          button: false,
-                          // A form field should not shrink on tap; keep it
-                          // static but still gain the focus ring + haptic.
-                          enablePressAnimation: false,
-                          borderRadius: BorderRadius.circular(radius),
-                          child: InputDecorator(
-                            decoration: fieldDecoration,
-                            isEmpty: !hasValue && hintText != null,
-                            child: _FieldContent(
-                              hasValue: hasValue,
-                              label: hasValue
-                                  ? selectedItem.label
-                                  : (hintText ?? ''),
-                              textStyle: textStyle,
-                              colorScheme: colorScheme,
-                              prefixIcon: prefixIcon,
-                              tokens: tokens,
-                              isEnabled: isEnabled,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-              ),
-            ),
+            child: shrinkWrapWidth
+                ? menuAnchor
+                : SizedBox(width: double.infinity, child: menuAnchor),
           );
         },
       ),
     );
   }
+}
+
+/// Closed-field shell that sizes to [child] instead of expanding like
+/// [InputDecorator].
+class _ShrinkWrapInputShell extends StatelessWidget {
+  const _ShrinkWrapInputShell({
+    required this.decoration,
+    required this.tokens,
+    required this.child,
+  });
+
+  final InputDecoration decoration;
+  final MeMuslimDesignTokens tokens;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasError =
+        decoration.errorText != null && decoration.errorText!.trim().isNotEmpty;
+    final border =
+        (hasError ? decoration.errorBorder : decoration.enabledBorder)
+            as OutlineInputBorder?;
+
+    return Container(
+      constraints: BoxConstraints(minHeight: tokens.minInteractiveDimension),
+      padding: decoration.contentPadding,
+      alignment: AlignmentDirectional.centerStart,
+      decoration: BoxDecoration(
+        color: decoration.fillColor,
+        borderRadius: border?.borderRadius,
+        border: border == null
+            ? null
+            : Border.fromBorderSide(border.borderSide),
+      ),
+      child: child,
+    );
+  }
+}
+
+double _measureDropdownMenuWidth<T>(
+  BuildContext context, {
+  required List<TilawaDropdownItem<T>> items,
+  required TextStyle? textStyle,
+  required MeMuslimDesignTokens tokens,
+}) {
+  final textDirection = Directionality.of(context);
+  final resolvedStyle = textStyle ?? DefaultTextStyle.of(context).style;
+  final textScaler = MediaQuery.textScalerOf(context);
+  var maxLabelWidth = 0.0;
+  for (final item in items) {
+    final labelWidth = _measureDropdownLabelWidth(
+      label: item.label,
+      style: resolvedStyle,
+      textDirection: textDirection,
+      textScaler: textScaler,
+    );
+    if (labelWidth > maxLabelWidth) {
+      maxLabelWidth = labelWidth;
+    }
+  }
+  return maxLabelWidth + tokens.spaceMedium * 2;
+}
+
+double _measureDropdownLabelWidth({
+  required String label,
+  required TextStyle style,
+  required TextDirection textDirection,
+  required TextScaler textScaler,
+}) {
+  final painter = TextPainter(
+    text: TextSpan(text: label, style: style),
+    textDirection: textDirection,
+    textScaler: textScaler,
+    maxLines: 1,
+  )..layout();
+  return painter.width;
 }
 
 class _FieldContent extends StatelessWidget {
@@ -275,6 +388,7 @@ class _FieldContent extends StatelessWidget {
     required this.prefixIcon,
     required this.tokens,
     required this.isEnabled,
+    this.shrinkWrapWidth = false,
   });
 
   final bool hasValue;
@@ -284,6 +398,7 @@ class _FieldContent extends StatelessWidget {
   final IconData? prefixIcon;
   final MeMuslimDesignTokens tokens;
   final bool isEnabled;
+  final bool shrinkWrapWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -291,26 +406,30 @@ class _FieldContent extends StatelessWidget {
         ? colorScheme.onSurfaceVariant
         : colorScheme.onSurface.withValues(alpha: 0.38);
 
-    return SizedBox(
-      width: double.infinity,
-      child: Row(
-        children: [
-          if (prefixIcon != null) ...[
-            Icon(prefixIcon, size: tokens.iconSizeLarge, color: iconColor),
-            SizedBox(width: tokens.spaceSmall),
-          ],
-          Expanded(
-            child: Text(
-              label,
-              overflow: TextOverflow.ellipsis,
-              style: hasValue
-                  ? textStyle
-                  : textStyle?.copyWith(color: colorScheme.onSurfaceVariant),
-            ),
-          ),
-          Icon(Icons.keyboard_arrow_down_rounded, color: iconColor),
+    final labelWidget = Text(
+      label,
+      maxLines: 1,
+      softWrap: false,
+      style: hasValue
+          ? textStyle
+          : textStyle?.copyWith(color: colorScheme.onSurfaceVariant),
+    );
+
+    return Row(
+      mainAxisSize: shrinkWrapWidth ? MainAxisSize.min : MainAxisSize.max,
+      children: [
+        if (prefixIcon != null) ...[
+          Icon(prefixIcon, size: tokens.iconSizeLarge, color: iconColor),
+          SizedBox(width: tokens.spaceSmall),
         ],
-      ),
+        if (shrinkWrapWidth) labelWidget else Flexible(child: labelWidget),
+        SizedBox(width: tokens.spaceTiny),
+        Icon(
+          Icons.keyboard_arrow_down_rounded,
+          size: tokens.iconSizeLarge,
+          color: iconColor,
+        ),
+      ],
     );
   }
 }

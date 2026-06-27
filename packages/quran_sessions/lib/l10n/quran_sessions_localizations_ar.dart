@@ -32,6 +32,10 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   }
 
   @override
+  String get sessionDetailNotFound =>
+      'تعذر العثور على هذه الجلسة. ربما تم إلغاؤها أو حذفها.';
+
+  @override
   String validationError(Object code, Object field) {
     return 'خطأ في التحقق: $field ($code).';
   }
@@ -747,7 +751,7 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
       'لا يُسمح بالإلغاء قرب موعد بدء الجلسة.';
 
   @override
-  String get cancelPolicyFree => 'هذه جلسة مجانية. لا يوجد استرداد.';
+  String get cancellationFreeNoRefund => 'هذه جلسة مجانية. لا يوجد استرداد.';
 
   @override
   String get cancelPolicyFullRefund => 'ستحصل على استرداد كامل إذا ألغيت الآن.';
@@ -1933,6 +1937,45 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get sessionLifecycleCancelledByAdmin => 'ألغاها المشرف';
 
   @override
+  String get sessionStatusCancelledByTutorDetail =>
+      'تم إلغاء الجلسة بواسطة المحفظ';
+
+  @override
+  String get sessionStatusCancelledByTutorSelf => 'ألغيت هذه الجلسة';
+
+  @override
+  String get sessionStatusCancelledByStudentDetail =>
+      'تم إلغاء الجلسة بواسطة الطالب';
+
+  @override
+  String get sessionStatusCancelledByStudentSelf => 'ألغيت هذه الجلسة';
+
+  @override
+  String get sessionStatusCancelledBySupportDetail =>
+      'تم إلغاء الجلسة بواسطة الإدارة';
+
+  @override
+  String get sessionStatusCancelledDescription => 'أُلغيت هذه الجلسة.';
+
+  @override
+  String get sessionTimelineBookingConfirmed => 'تم تأكيد الحجز';
+
+  @override
+  String get sessionTimelineCancelledByTutor => 'تم إلغاء الجلسة بواسطة المحفظ';
+
+  @override
+  String get sessionTimelineCancelledByStudent =>
+      'تم إلغاء الجلسة بواسطة الطالب';
+
+  @override
+  String get sessionTimelineCancelledBySupport =>
+      'تم إلغاء الجلسة بواسطة الإدارة';
+
+  @override
+  String get sessionCancelledDisputeHelper =>
+      'يمكنك فتح نزاع إذا احتجت لفريقنا مراجعة هذا الإلغاء.';
+
+  @override
   String get sessionLifecycleTeacherNoShow => 'غياب المعلم';
 
   @override
@@ -2029,11 +2072,68 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get bookingRequestSentTitle => 'تم إرسال طلب الحجز';
 
   @override
-  String get bookingRequestSentSubtitle => 'في انتظار موافقة المحفظ';
+  String get bookingRequestSentSubtitle => 'الحجز قيد المراجعة.';
 
   @override
-  String get sessionAwaitingTutorApprovalNextSteps =>
-      'سيقبل المحفظ أو يرفض قريبًا. يمكنك إلغاء الطلب حتى ذلك الحين.';
+  String get sessionAwaitingReviewNextSteps =>
+      'الحجز قيد المراجعة.\nيرجى إتمام الدفع عبر إحدى الطرق المتاحة.\nسيتم تأكيد الحصة بعد مراجعة الدفع وتأكيد المعلم.';
+
+  @override
+  String get paidSessionNoticeTitle => 'هذه الحصة مدفوعة';
+
+  @override
+  String get manualPaymentInstructionsBody =>
+      'الدفع حاليًا يتم يدويًا عبر فودافون كاش أو إنستاباي أو تحويل بنكي، وذلك لحين الانتهاء من إضافة طرق الدفع أونلاين داخل التطبيق.';
+
+  @override
+  String get manualPaymentInstapayHandle => 'للدفع عبر إنستاباي:';
+
+  @override
+  String get manualPaymentInstapayLink => 'أو من خلال رابط الدفع:';
+
+  @override
+  String get manualPaymentRecipientMaskedName =>
+      'اسم المستلم الظاهر عند التحويل:';
+
+  @override
+  String get manualPaymentReceiptWhatsappInstruction =>
+      'بعد إتمام الدفع، يرجى إرسال صورة التحويل على واتساب إلى رقم الدعم:';
+
+  @override
+  String get manualPaymentConfirmationRule =>
+      'سيتم تأكيد الحجز بعد مراجعة الدفع وتأكيد المعلم.';
+
+  @override
+  String get manualPaymentCancellationPolicy =>
+      'إذا كنت قد أتممت الدفع يدويًا، يرجى التواصل مع الدعم لمراجعة حالة الدفع أو الاسترداد.';
+
+  @override
+  String manualPaymentCancellationSupportHint(String supportNumber) {
+    return 'رقم الدعم: $supportNumber';
+  }
+
+  @override
+  String get manualPaymentCopiedToClipboard => 'تم النسخ إلى الحافظة';
+
+  @override
+  String get paymentMethodVodafoneCash => 'Vodafone Cash';
+
+  @override
+  String get paymentMethodInstapay => 'InstaPay';
+
+  @override
+  String get paymentMethodBankTransfer => 'تحويل بنكي';
+
+  @override
+  String get bookingUnderReviewTitle => 'الحجز قيد المراجعة';
+
+  @override
+  String get bookingUnderReviewPaymentHint =>
+      'يرجى إتمام الدفع عبر إحدى الطرق المتاحة.';
+
+  @override
+  String get bookingUnderReviewConfirmHint =>
+      'سيتم تأكيد الحجز بعد مراجعة الدفع وتأكيد المعلم.';
 
   @override
   String get bookingAcceptedTitle => 'تم قبول الحصة';
@@ -2051,7 +2151,7 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get sendBookingRequest => 'إرسال طلب الحجز';
 
   @override
-  String get sessionStatusPendingTutorApproval => 'بانتظار الموافقة';
+  String get sessionStatusBookingUnderReview => 'قيد المراجعة';
 
   @override
   String get sessionStatusRejectedByTutor => 'مرفوض';
@@ -2101,7 +2201,7 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get tutorCancelSessionFromCard => 'إلغاء';
 
   @override
-  String get sessionLifecyclePendingTutorApproval => 'بانتظار موافقة المحفظ';
+  String get sessionLifecycleBookingUnderReview => 'الحجز قيد المراجعة';
 
   @override
   String get sessionLifecycleRejectedByTutor => 'مرفوض من المحفظ';
@@ -2116,7 +2216,7 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get sessionActionRejectBookingRequest => 'رفض طلب الحجز';
 
   @override
-  String get sessionActionExpireTutorApproval => 'انتهاء موافقة المحفظ';
+  String get sessionActionExpireBookingReview => 'انتهاء مراجعة الحجز';
 
   @override
   String sessionTimelineStatusTransition(String previous, String next) {

@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import '../../../domain/policies/session_mode_policy.dart';
 import '../../../domain/entities/quran_booking.dart';
 import '../../../domain/entities/session_booking_outcome.dart';
+import '../../../domain/entities/manual_payment_price.dart';
 import '../../../domain/entities/session_call_type.dart';
 import '../../../domain/entities/session_price.dart';
 import '../../../domain/entities/session_pricing_type.dart';
@@ -39,6 +40,7 @@ final class BookingSelecting extends BookingState {
     this.teacherExternalMeetingUrl,
     this.pricingType,
     this.sessionPrice,
+    this.manualPaymentPrice,
   });
 
   final String teacherId;
@@ -48,6 +50,10 @@ final class BookingSelecting extends BookingState {
   final String? teacherExternalMeetingUrl;
   final SessionPricingType? pricingType;
   final SessionPrice? sessionPrice;
+
+  /// Presentation-only manual/off-app price (Egypt pilot). When set the booking
+  /// screen shows a paid-session notice instead of the free price summary.
+  final ManualPaymentPrice? manualPaymentPrice;
 
   bool get hasExternalMeetingUrl =>
       SessionModePolicy.hasExternalMeetingUrl(teacherExternalMeetingUrl);
@@ -63,6 +69,7 @@ final class BookingSelecting extends BookingState {
     teacherExternalMeetingUrl,
     pricingType,
     sessionPrice,
+    manualPaymentPrice,
   ];
 
   BookingSelecting copyWith({
@@ -72,6 +79,7 @@ final class BookingSelecting extends BookingState {
     String? teacherExternalMeetingUrl,
     SessionPricingType? pricingType,
     SessionPrice? sessionPrice,
+    ManualPaymentPrice? manualPaymentPrice,
   }) => BookingSelecting(
     teacherId: teacherId,
     availableSlots: availableSlots ?? this.availableSlots,
@@ -81,6 +89,7 @@ final class BookingSelecting extends BookingState {
         teacherExternalMeetingUrl ?? this.teacherExternalMeetingUrl,
     pricingType: pricingType ?? this.pricingType,
     sessionPrice: sessionPrice ?? this.sessionPrice,
+    manualPaymentPrice: manualPaymentPrice ?? this.manualPaymentPrice,
   );
 }
 

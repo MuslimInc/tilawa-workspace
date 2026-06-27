@@ -12,7 +12,7 @@ extension SessionJoinUiStateL10n on SessionJoinUiState {
     SessionJoinUiState.ended => l10n.sessionJoinStateEnded,
     SessionJoinUiState.cancelled => l10n.sessionJoinStateCancelled,
     SessionJoinUiState.awaitingTutorApproval =>
-      l10n.sessionAwaitingTutorApprovalNextSteps,
+      l10n.sessionAwaitingReviewNextSteps,
     SessionJoinUiState.rejectedByTutor => l10n.bookingRejectedSubtitle,
   };
 }

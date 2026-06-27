@@ -391,6 +391,39 @@ void main() {
     );
 
     blocTest<TeacherApplicationBloc, TeacherApplicationState>(
+      'succeeds when prefilled public name is visible but not on application',
+      build: () {
+        final draft = _draft(
+          phoneNumber: '+201060099009',
+          publicDisplayName: '',
+        ).copyWith(publicDisplayName: null);
+        repo.application = draft;
+        // ignore: invalid_use_of_visible_for_testing_member
+        bloc.emit(
+          TeacherApplicationEditing(
+            application: draft,
+            phoneRaw: '01060099009',
+            publicDisplayNameRaw: 'Muhammad Kamel',
+            prefillPublicDisplayName: 'Muhammad Kamel',
+            phoneInteracted: true,
+          ),
+        );
+        return bloc;
+      },
+      act: (b) => b.add(const TeacherApplicationSubmitRequested()),
+      expect: () => [
+        isA<TeacherApplicationEditing>(),
+        isA<TeacherApplicationSubmitting>(),
+        isA<TeacherApplicationStatusLoaded>(),
+      ],
+      verify: (b) {
+        final s = b.state as TeacherApplicationStatusLoaded;
+        check(s.application.isPending).isTrue();
+        check(s.application.publicDisplayName).equals('Muhammad Kamel');
+      },
+    );
+
+    blocTest<TeacherApplicationBloc, TeacherApplicationState>(
       'emits FailureState then restores editing state on repository error',
       build: () {
         final draft = _draft(phoneNumber: '+201012345678');

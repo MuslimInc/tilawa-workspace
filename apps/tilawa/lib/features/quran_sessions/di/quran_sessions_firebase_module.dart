@@ -28,6 +28,7 @@ import '../data/firebase/firestore_teacher_application_access_data_source.dart';
 import '../data/firebase/firestore_teacher_application_repository.dart';
 import '../data/firebase/firestore_teacher_profile_repository.dart';
 import '../data/firebase/firestore_teacher_repository.dart';
+import '../data/manual_payment_link_launcher.dart';
 import '../data/firebase/firestore_user_profile_repository.dart';
 import '../data/firebase/firebase_guardian_approval_repository.dart';
 import '../data/firebase/firestore_wallet_data_source.dart';
@@ -44,6 +45,7 @@ class QuranSessionsFirebaseModule {
   QuranSessionsFirebaseModule._();
 
   static void register(GetIt sl, {AppLaunchConfig? launchConfig}) {
+    registerManualPaymentLinkLauncher();
     final config =
         launchConfig ??
         (sl.isRegistered<AppLaunchConfig>()

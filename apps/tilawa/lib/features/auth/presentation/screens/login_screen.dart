@@ -226,12 +226,17 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
   }) async {
     final LoginGoogleSignInCubit launchCubit = context
         .read<LoginGoogleSignInCubit>();
-    final LoginGoogleSignInAttempt? attempt = await launchCubit.attemptLaunch(
+    await launchCubit.attemptLaunch(
       trigger: trigger,
       gateway: _resolveGoogleSignInLaunchGateway(),
     );
 
-    if (!mounted || attempt == null) {
+    if (!mounted) {
+      return;
+    }
+
+    final LoginGoogleSignInAttempt? attempt = launchCubit.state.launchAttempt;
+    if (attempt == null) {
       return;
     }
 
@@ -241,6 +246,7 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
       case LoginGoogleSignInRejected(:final readiness):
         _showLaunchBlockedFeedback(readiness, trigger: trigger);
     }
+    launchCubit.clearLaunchAttempt();
   }
 
   void _showLaunchBlockedFeedback(

@@ -15,6 +15,7 @@ import '../blocs/teacher_profile/teacher_profile_event.dart';
 import '../blocs/teacher_profile/teacher_profile_state.dart';
 import '../theme/quran_sessions_status_colors.dart';
 import '../widgets/availability_slot_picker.dart';
+import '../widgets/paid_session_notice.dart';
 import '../widgets/quran_session_price_chip.dart';
 import '../widgets/quran_sessions_scaffold.dart';
 import '../widgets/quran_sessions_section_header.dart';
@@ -327,6 +328,10 @@ class _TeacherProfileBodyState extends State<_TeacherProfileBody> {
             ],
           ),
         ),
+        if (widget.teacher.manualPaymentPrice case final manualPrice?) ...[
+          SizedBox(height: tokens.spaceSmall),
+          PaidSessionNotice(price: manualPrice),
+        ],
         if (bio.isNotEmpty) ...[
           SizedBox(height: tokens.spaceSmall),
           QuranSessionsSectionHeader(title: l10n.aboutTeacherSection),

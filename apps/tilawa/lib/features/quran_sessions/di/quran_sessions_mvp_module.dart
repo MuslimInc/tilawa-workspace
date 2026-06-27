@@ -18,6 +18,7 @@ import '../data/fake_mvp_user_profile_repository.dart';
 import '../data/fake_mvp_wallet_repository.dart';
 import '../data/fake_mvp_session_lifecycle.dart';
 import '../data/external_meeting_url_launcher.dart';
+import '../data/manual_payment_link_launcher.dart';
 import '../data/quran_sessions_mvp_store.dart';
 import '../data/session_backed_booked_slot_lock_repository.dart';
 import '../presentation/quran_sessions_scheduling_analytics.dart';
@@ -29,6 +30,7 @@ class QuranSessionsMvpModule {
   QuranSessionsMvpModule._();
 
   static void register(GetIt sl) {
+    registerManualPaymentLinkLauncher();
     final store = QuranSessionsMvpStore.instance;
 
     sl.registerLazySingletonIfAbsent<TeacherRepository>(

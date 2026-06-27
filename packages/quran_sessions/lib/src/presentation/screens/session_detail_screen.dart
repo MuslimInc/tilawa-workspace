@@ -383,10 +383,28 @@ class _SessionDetailScreenState extends State<SessionDetailScreen>
                         ),
                       Text(
                         l10n.sessionStatusLabel(
-                          aggregate.lifecycleStatus.localizedLabel(l10n),
+                          aggregate.lifecycleStatus.sessionDetailStatusLabel(
+                            l10n,
+                            viewerRole: state.viewerRole,
+                          ),
                         ),
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
+                      if (aggregate.lifecycleStatus
+                              .sessionDetailStatusDescription(l10n) !=
+                          null) ...[
+                        SizedBox(height: Theme.of(context).tokens.spaceSmall),
+                        Text(
+                          aggregate.lifecycleStatus
+                              .sessionDetailStatusDescription(l10n)!,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                        ),
+                      ],
                       SizedBox(height: Theme.of(context).tokens.spaceSmall),
                       _SessionJoinStateBanner(state: state),
                       if (_showsRevisionPractice(state)) ...[
@@ -440,14 +458,8 @@ class _SessionDetailScreenState extends State<SessionDetailScreen>
                       else
                         ...timeline.map(
                           (event) => ListTile(
-                            title: Text(event.action.localizedLabel(l10n)),
-                            subtitle: Text(
-                              event.reason ??
-                                  l10n.sessionTimelineStatusTransition(
-                                    event.previousStatus.localizedLabel(l10n),
-                                    event.newStatus.localizedLabel(l10n),
-                                  ),
-                            ),
+                            title: Text(event.timelineEntryTitle(l10n)),
+                            subtitle: Text(event.timelineEntrySubtitle(l10n)),
                             trailing: Text(
                               MaterialLocalizations.of(context).formatShortDate(
                                 event.createdAt.toLocal(),
@@ -534,8 +546,27 @@ class _SessionJoinStateBanner extends StatelessWidget {
     final lifecycle = state.aggregate.lifecycleStatus;
 
     if (joinState == SessionJoinUiState.cancelled &&
-        lifecycle == SessionLifecycleStatus.cancelledByTeacher &&
-        !state.isTeacherViewer) {
+        lifecycle == SessionLifecycleStatus.cancelledByTeacher) {
+      if (state.isTeacherViewer) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.sessionStatusCancelledByTutorSelf,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+            SizedBox(height: Theme.of(context).tokens.spaceExtraSmall),
+            Text(
+              l10n.sessionStatusCancelledDescription,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        );
+      }
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -596,7 +627,7 @@ class _SessionJoinStateBanner extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            l10n.bookingRequestSentTitle,
+            l10n.bookingUnderReviewTitle,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w700,
               color: scheme.onSurface,
@@ -604,7 +635,7 @@ class _SessionJoinStateBanner extends StatelessWidget {
           ),
           SizedBox(height: Theme.of(context).tokens.spaceExtraSmall),
           Text(
-            l10n.bookingRequestSentSubtitle,
+            l10n.bookingUnderReviewPaymentHint,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: scheme.onSurfaceVariant,
             ),
@@ -612,7 +643,7 @@ class _SessionJoinStateBanner extends StatelessWidget {
           SizedBox(height: Theme.of(context).tokens.spaceSmall),
           TilawaFeedbackStrip(
             icon: Icons.hourglass_top_rounded,
-            message: l10n.sessionAwaitingTutorApprovalNextSteps,
+            message: l10n.sessionAwaitingReviewNextSteps,
             backgroundColor: scheme.primaryContainer,
             foregroundColor: scheme.onPrimaryContainer,
             variant: TilawaFeedbackVariant.info,
@@ -738,13 +769,21 @@ class _SessionDetailFooter extends StatelessWidget {
                   ? null
                   : () => submitSessionReview(context),
             ),
-          TilawaButton(
-            text: l10n.reportConcernAction,
-            variant: TilawaButtonVariant.outline,
-            isFullWidth: true,
-            onPressed: () => _submitReport(context),
-          ),
-          if (state.canOpenDispute)
+          if (state.canReportConcern)
+            TilawaButton(
+              text: l10n.reportConcernAction,
+              variant: TilawaButtonVariant.outline,
+              isFullWidth: true,
+              onPressed: () => _submitReport(context),
+            ),
+          if (state.canOpenDispute) ...[
+            if (state.showCancelledDisputeHelper)
+              Text(
+                l10n.sessionCancelledDisputeHelper,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
             TilawaButton(
               text: l10n.openDisputeAction,
               variant: TilawaButtonVariant.secondary,
@@ -754,6 +793,7 @@ class _SessionDetailFooter extends StatelessWidget {
                   ? null
                   : () => _submitDispute(context),
             ),
+          ],
         ],
       ),
     );
@@ -803,6 +843,8 @@ class _SessionDetailFooter extends StatelessWidget {
       context,
       sessionStartsAt: state.aggregate.startsAt,
       pricingType: state.aggregate.pricingType,
+      // Egypt pilot sessions are manual/off-app paid; suppress free-session copy.
+      isManualPayment: true,
     );
     if (reason == null || !context.mounted) return;
     context.read<SessionDetailBloc>().add(

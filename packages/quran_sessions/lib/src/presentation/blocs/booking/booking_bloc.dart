@@ -1,17 +1,18 @@
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../domain/entities/teacher_availability.dart';
+import '../../../boundaries/payment/session_payment_confirmation.dart';
+import '../../../domain/entities/manual_payment_price.dart';
+import '../../../domain/entities/session_lifecycle_status.dart';
 import '../../../domain/entities/session_price.dart';
 import '../../../domain/entities/session_pricing_type.dart';
-import '../../../domain/policies/session_mode_policy.dart';
-import '../../../domain/usecases/get_teacher_profile_by_id_usecase.dart';
-import '../../../domain/usecases/get_teacher_profile_usecase.dart';
-import '../../../domain/usecases/get_teacher_availability_usecase.dart';
-import '../../../boundaries/payment/session_payment_confirmation.dart';
-import '../../../domain/entities/session_lifecycle_status.dart';
+import '../../../domain/entities/teacher_availability.dart';
 import '../../../domain/failures/quran_sessions_failure.dart';
 import '../../../domain/mappers/session_aggregate_mapper.dart';
+import '../../../domain/policies/session_mode_policy.dart';
+import '../../../domain/usecases/get_teacher_availability_usecase.dart';
+import '../../../domain/usecases/get_teacher_profile_by_id_usecase.dart';
+import '../../../domain/usecases/get_teacher_profile_usecase.dart';
 import '../../../domain/usecases/submit_session_booking_usecase.dart';
 import '../../../domain/usecases/validate_booking_eligibility_usecase.dart';
 import 'booking_event.dart';
@@ -24,9 +25,9 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     required this._validateEligibility,
     required this._getTeacherProfile,
     this._getTeacherListing,
-    this.sessionModePolicy = SessionModePolicy.freeBeta,
-    this.onBookingLostDueToNoAvailability,
-    this.resolveMarketCode,
+    this._sessionModePolicy = SessionModePolicy.freeBeta,
+    this._onBookingLostDueToNoAvailability,
+    this._resolveMarketCode,
     this._paymentConfirmation,
   }) : super(const BookingInitial()) {
     on<BookingScreenOpened>(_onScreenOpened, transformer: restartable());
@@ -45,15 +46,15 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
   final ValidateBookingEligibilityUseCase _validateEligibility;
   final GetTeacherProfileByIdUseCase _getTeacherProfile;
   final GetTeacherProfileUseCase? _getTeacherListing;
-  final SessionModePolicy sessionModePolicy;
+  final SessionModePolicy _sessionModePolicy;
   final SessionPaymentConfirmation? _paymentConfirmation;
 
   /// Fired when eligibility passes but no unbooked slots exist in the window.
   final void Function(Map<String, Object> parameters)?
-  onBookingLostDueToNoAvailability;
+  _onBookingLostDueToNoAvailability;
 
   /// Optional teacher market code for analytics segmentation.
-  final Future<String?> Function(String teacherId)? resolveMarketCode;
+  final Future<String?> Function(String teacherId)? _resolveMarketCode;
 
   Future<void> _onScreenOpened(
     BookingScreenOpened event,
@@ -106,17 +107,19 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
 
     SessionPricingType? pricingType;
     SessionPrice? sessionPrice;
+    ManualPaymentPrice? manualPaymentPrice;
     final listing = _getTeacherListing;
     if (listing != null) {
       final listingResult = await listing(teacherId);
       listingResult.fold((_) {}, (teacher) {
         pricingType = teacher.pricingType;
         sessionPrice = teacher.price;
+        manualPaymentPrice = teacher.manualPaymentPrice;
       });
     }
 
     final defaultCallType = SessionModePolicy.defaultCallType(
-      policy: sessionModePolicy,
+      policy: _sessionModePolicy,
       externalMeetingUrl: externalMeetingUrl,
     );
 
@@ -147,6 +150,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
         teacherExternalMeetingUrl: externalMeetingUrl,
         pricingType: pricingType,
         sessionPrice: sessionPrice,
+        manualPaymentPrice: manualPaymentPrice,
       ),
     );
   }
@@ -156,9 +160,9 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     required DateTime from,
     required DateTime to,
   }) async {
-    final callback = onBookingLostDueToNoAvailability;
+    final callback = _onBookingLostDueToNoAvailability;
     if (callback == null) return;
-    final marketCode = await resolveMarketCode?.call(teacherId);
+    final marketCode = await _resolveMarketCode?.call(teacherId);
     callback({
       'teacher_id': teacherId,
       'requested_from': from.toUtc().toIso8601String(),

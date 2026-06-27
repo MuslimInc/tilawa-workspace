@@ -53,6 +53,7 @@ service cloud.firestore {
         && incomingUnchanged('reviewCount')
         && incomingUnchanged('totalSessionsCompleted')
         && incomingUnchanged('teacherStatus')
+        && incomingUnchanged('manualPaymentPrice')
         && incomingUnchanged('createdAt');
     }
 

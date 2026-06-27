@@ -19,14 +19,21 @@ class QuranSessionPriceChip extends StatelessWidget {
     final scheme = theme.colorScheme;
     final status = context.quranSessionsStatus;
     final tokens = theme.tokens;
-    final priceLabel = PriceFormatter.formatOrFree(
-      l10n: context.quranSessionsL10n,
-      pricingType: teacher.pricingType,
-      price: teacher.price,
-    );
+    final l10n = context.quranSessionsL10n;
+
+    // Manual/off-app pilot price wins and is always shown as paid — never Free.
+    final manualPrice = teacher.manualPaymentPrice;
+    final priceLabel = manualPrice != null
+        ? PriceFormatter.formatManual(manualPrice, l10n)
+        : PriceFormatter.formatOrFree(
+            l10n: l10n,
+            pricingType: teacher.pricingType,
+            price: teacher.price,
+          );
     if (priceLabel.isEmpty) return const SizedBox.shrink();
 
-    final isFree = teacher.pricingType == SessionPricingType.free;
+    final isFree =
+        manualPrice == null && teacher.pricingType == SessionPricingType.free;
     final foreground = isFree ? scheme.primary : status.scheduledForeground;
 
     return TilawaChip(

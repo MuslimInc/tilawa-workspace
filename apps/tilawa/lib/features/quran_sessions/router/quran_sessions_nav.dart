@@ -13,6 +13,7 @@ import 'package:tilawa/features/quran_sessions/presentation/quran_sessions_sched
 import 'package:tilawa/features/quran_sessions/presentation/quran_sessions_user.dart';
 import 'package:tilawa/features/quran_sessions/quran_sessions_feature_flags.dart';
 import 'package:tilawa/router/app_router_config.dart';
+import 'package:tilawa/router/quran_sessions_session_guard.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../data/quran_sessions_mvp_store.dart';
@@ -181,7 +182,7 @@ List<RouteBase> get quranSessionsRoutes => [
       if (!quranSessionsFeatureConfig().quranSessionsBookingEnabled) {
         return QuranSessionsRoutes.home;
       }
-      return null;
+      return quranSessionsAuthRequiredRedirect(context, state);
     },
     builder: (context, state) {
       final teacherId = state.pathParameters['teacherId']!;
@@ -227,6 +228,7 @@ List<RouteBase> get quranSessionsRoutes => [
   ),
   GoRoute(
     path: QuranSessionsRoutes.mySessions,
+    redirect: quranSessionsAuthRequiredRedirect,
     builder: (context, state) {
       final studentId = requireQuranSessionsUserId(getIt);
       return BlocProvider(
@@ -269,7 +271,7 @@ List<RouteBase> get quranSessionsRoutes => [
       if (!quranSessionsFeatureConfig().walletEnabled) {
         return QuranSessionsRoutes.home;
       }
-      return null;
+      return quranSessionsAuthRequiredRedirect(context, state);
     },
     builder: (context, state) {
       final studentId = requireQuranSessionsUserId(getIt);
@@ -281,6 +283,7 @@ List<RouteBase> get quranSessionsRoutes => [
   ),
   GoRoute(
     path: QuranSessionsRoutes.sessionDetail,
+    redirect: quranSessionsAuthRequiredRedirect,
     builder: (context, state) {
       final bookingId = state.pathParameters['bookingId']!;
       return BlocProvider(
@@ -307,6 +310,7 @@ List<RouteBase> get quranSessionsRoutes => [
   ),
   GoRoute(
     path: QuranSessionsRoutes.rescheduleSession,
+    redirect: quranSessionsAuthRequiredRedirect,
     builder: (context, state) {
       final bookingId = state.pathParameters['bookingId']!;
       final extra = state.extra as Map<String, String>? ?? const {};

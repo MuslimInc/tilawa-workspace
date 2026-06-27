@@ -19,6 +19,7 @@ import '../blocs/booking/booking_state.dart';
 import '../config/quran_sessions_analytics_callbacks.dart';
 import '../failure_ui/quran_sessions_failure_ui.dart';
 import '../widgets/availability_slot_picker.dart';
+import '../widgets/paid_session_notice.dart';
 import '../widgets/payment_checkout_sheet.dart';
 import '../widgets/quran_sessions_scaffold.dart';
 import '../../domain/entities/session_price.dart';
@@ -168,7 +169,7 @@ class _BookingScreenState extends State<BookingScreen> {
             TilawaFeedback.showToast(
               context,
               message: isPending
-                  ? '${l10n.bookingRequestSentTitle}\n${l10n.bookingRequestSentSubtitle}'
+                  ? '${l10n.bookingUnderReviewTitle}\n${l10n.bookingUnderReviewPaymentHint}'
                   : l10n.bookingConfirmed,
               variant: TilawaFeedbackVariant.success,
             );
@@ -257,13 +258,19 @@ class _BookingScreenState extends State<BookingScreen> {
             :final teacherExternalMeetingUrl,
             :final pricingType,
             :final sessionPrice,
+            :final manualPaymentPrice,
           ) =>
             Padding(
               padding: EdgeInsets.all(tokens.spaceMedium),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (pricingType != null)
+                  if (manualPaymentPrice != null)
+                    Padding(
+                      padding: EdgeInsets.only(bottom: tokens.spaceSmall),
+                      child: PaidSessionNotice(price: manualPaymentPrice),
+                    )
+                  else if (pricingType != null)
                     Padding(
                       padding: EdgeInsets.only(bottom: tokens.spaceSmall),
                       child: _BookingPriceSummary(

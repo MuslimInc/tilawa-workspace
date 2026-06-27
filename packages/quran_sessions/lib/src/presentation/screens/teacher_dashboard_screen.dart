@@ -123,6 +123,24 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
             );
           }
 
+          if (state.sessionCancelFailure != null) {
+            TilawaFeedback.showToast(
+              context,
+              message: state.sessionCancelFailure!.toLocalizedMessage(context),
+              variant: TilawaFeedbackVariant.error,
+              dedupeKey: 'teacher-dashboard-session-cancel-error',
+            );
+          }
+
+          if (state.sessionCancelSucceeded) {
+            TilawaFeedback.showToast(
+              context,
+              message: context.quranSessionsL10n.tutorCancelSessionSuccess,
+              variant: TilawaFeedbackVariant.success,
+              dedupeKey: 'teacher-dashboard-session-cancel-success',
+            );
+          }
+
           if (state.slotFailure != null) {
             TilawaFeedback.showToast(
               context,

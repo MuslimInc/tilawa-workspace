@@ -22,6 +22,9 @@ class FirebaseSessionAggregateRepository implements SessionAggregateRepository {
   CollectionReference<Map<String, dynamic>> get _bookings =>
       _firestore.collection(FirestoreQuranSessionsPaths.bookings);
 
+  CollectionReference<Map<String, dynamic>> get _sessions =>
+      _firestore.collection(FirestoreQuranSessionsPaths.sessions);
+
   @override
   Future<Either<QuranSessionsFailure, SessionAggregate>> create(
     SessionAggregate aggregate,
@@ -47,11 +50,36 @@ class FirebaseSessionAggregateRepository implements SessionAggregateRepository {
     String id,
   ) async {
     try {
-      final snap = await _bookings.doc(id).get();
-      if (!snap.exists) {
-        return Left(NotFoundFailure('SessionAggregate($id)'));
+      final bookingSnap = await _bookings.doc(id).get();
+      if (bookingSnap.exists) {
+        return Right(
+          mapBookingDocToAggregate(
+            bookingSnap.id,
+            bookingSnap.data() ?? const {},
+          ),
+        );
       }
-      return Right(mapBookingDocToAggregate(snap.id, snap.data() ?? const {}));
+
+      final sessionSnap = await _sessions.doc(id).get();
+      if (sessionSnap.exists) {
+        return Right(
+          mapSessionDocToAggregate(
+            sessionSnap.id,
+            sessionSnap.data() ?? const {},
+          ),
+        );
+      }
+
+      final linkedBooking = await _bookings
+          .where('sessionId', isEqualTo: id)
+          .limit(1)
+          .get();
+      if (linkedBooking.docs.isNotEmpty) {
+        final doc = linkedBooking.docs.first;
+        return Right(mapBookingDocToAggregate(doc.id, doc.data()));
+      }
+
+      return Left(NotFoundFailure('SessionAggregate($id)'));
     } on FirebaseException catch (e) {
       return Left(mapFirebaseExceptionToFailure(e));
     }
