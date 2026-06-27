@@ -23,6 +23,8 @@ class QuranTeacherDto {
     required this.totalReviews,
     required this.totalSessionsCompleted,
     this.marketPrice,
+    this.cityName,
+    this.countryName,
   });
 
   final String id;
@@ -46,6 +48,8 @@ class QuranTeacherDto {
   final double averageRating;
   final int totalReviews;
   final int totalSessionsCompleted;
+  final String? cityName;
+  final String? countryName;
 
   factory QuranTeacherDto.fromJson(Map<String, dynamic> json) =>
       QuranTeacherDto(
@@ -69,6 +73,8 @@ class QuranTeacherDto {
         averageRating: (json['average_rating'] as num).toDouble(),
         totalReviews: json['total_reviews'] as int,
         totalSessionsCompleted: json['total_sessions_completed'] as int,
+        cityName: json['city_name'] as String?,
+        countryName: json['country_name'] as String?,
       );
 
   Map<String, dynamic> toJson() => {
@@ -86,6 +92,8 @@ class QuranTeacherDto {
     'average_rating': averageRating,
     'total_reviews': totalReviews,
     'total_sessions_completed': totalSessionsCompleted,
+    if (cityName != null) 'city_name': cityName,
+    if (countryName != null) 'country_name': countryName,
   };
 }
 

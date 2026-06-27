@@ -198,6 +198,8 @@ class QuranSessionsMvpStore {
       averageRating: 4.9,
       totalReviews: 128,
       totalSessionsCompleted: 340,
+      cityName: 'القاهرة',
+      countryName: 'مصر',
     ),
     const QuranTeacher(
       id: 'teacher_2',
@@ -217,6 +219,8 @@ class QuranSessionsMvpStore {
       averageRating: 4.8,
       totalReviews: 74,
       totalSessionsCompleted: 210,
+      cityName: 'القاهرة',
+      countryName: 'مصر',
     ),
     const QuranTeacher(
       id: 'teacher_3',
@@ -241,6 +245,8 @@ class QuranSessionsMvpStore {
       averageRating: 4.7,
       totalReviews: 55,
       totalSessionsCompleted: 180,
+      cityName: 'القاهرة',
+      countryName: 'مصر',
     ),
   ];
 

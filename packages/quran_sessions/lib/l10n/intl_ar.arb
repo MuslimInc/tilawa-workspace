@@ -66,6 +66,8 @@
     "profileFieldDateOfBirth": "تاريخ الميلاد",
     "profileFieldCountry": "الدولة",
     "profileFieldCity": "المدينة",
+    "profileFieldLearningGoals": "أهداف التعلّم",
+    "profileLearningGoalsHelper": "اختياري — يساعدنا على اقتراح المعلم المناسب لك.",
     "profileFieldDisplayName": "الاسم الكامل",
     "profileCompletionSaveAndContinue": "حفظ والمتابعة",
     "profileCompletionSelectDateOfBirth": "اختر تاريخ الميلاد",
@@ -341,6 +343,15 @@
     "sessionCancelledSuccess": "تم إلغاء الجلسة.",
     "noSlotsAvailable": "لا توجد مواعيد متاحة",
     "noSlotsAvailableThisDay": "لا توجد مواعيد متاحة في هذا اليوم",
+    "slotPickerLocalTimezoneNote": "الأوقات معروضة بتوقيتك المحلي",
+    "teacherSessionsCompleted": "{count, plural, =1{جلسة واحدة مكتملة} other{{count} جلسة مكتملة}}",
+    "@teacherSessionsCompleted": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
     "teacherDashboardTitle": "لوحة المعلم",
     "noSessionsOrSlotsYet": "لا توجد جلسات أو مواعيد بعد",
     "addAvailableSlot": "أضف موعداً متاحاً",

@@ -344,6 +344,10 @@
     "@homeFeaturedTutorCta": {
         "description": "Call to action button on the featured Learn Quran with Tutor card"
     },
+    "homeFeaturedTutorMySessions": "My sessions",
+    "@homeFeaturedTutorMySessions": {
+        "description": "Secondary link on featured tutor card to open booked sessions"
+    },
     "homeQuickQuranReader": "Mushaf",
     "@homeQuickQuranReader": {
         "description": "Home quick action tile label for opening the Mushaf reader"

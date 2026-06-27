@@ -20,7 +20,7 @@ import '../widgets/quran_sessions_scaffold.dart';
 
 /// Gate screen shown before booking when the student's profile is incomplete.
 ///
-/// Collects: gender, date of birth, country, city.
+/// Collects: gender, date of birth, country, city, and optional learning goals.
 /// On success, pops with [true] so the caller knows the profile is now
 /// complete and can retry eligibility.
 class ProfileCompletionScreen extends StatefulWidget {
@@ -144,6 +144,7 @@ class _ProfileCompletionScreenState extends State<ProfileCompletionScreen> {
             :final cityPickerLocked,
             :final submitAttempted,
             :final invalidFieldCount,
+            :final selectedLearningGoals,
           ) =>
             TilawaFormScreenScaffold(
               validationController: _validationController,
@@ -166,6 +167,7 @@ class _ProfileCompletionScreenState extends State<ProfileCompletionScreen> {
                 selectedCity: selectedCity,
                 isLoadingCities: isLoadingCities,
                 cityPickerLocked: cityPickerLocked,
+                selectedLearningGoals: selectedLearningGoals,
                 onGenderSelected: (gender) => context
                     .read<ProfileCompletionBloc>()
                     .add(GenderSelected(gender)),
@@ -178,6 +180,9 @@ class _ProfileCompletionScreenState extends State<ProfileCompletionScreen> {
                 onCitySelected: (city) => context
                     .read<ProfileCompletionBloc>()
                     .add(CitySelected(city)),
+                onLearningGoalToggled: (goal) => context
+                    .read<ProfileCompletionBloc>()
+                    .add(LearningGoalToggled(goal)),
               ),
               footer: TilawaFormSubmitFooter(
                 buttonText: l10n.profileCompletionSaveAndContinue,
@@ -263,10 +268,12 @@ class _ProfileCompletionFormBody extends StatelessWidget {
     required this.selectedCity,
     required this.isLoadingCities,
     required this.cityPickerLocked,
+    required this.selectedLearningGoals,
     required this.onGenderSelected,
     required this.onDateOfBirthSet,
     required this.onCountrySelected,
     required this.onCitySelected,
+    required this.onLearningGoalToggled,
   });
 
   final QuranSessionsLocalizations l10n;
@@ -284,10 +291,12 @@ class _ProfileCompletionFormBody extends StatelessWidget {
   final MarketCity? selectedCity;
   final bool isLoadingCities;
   final bool cityPickerLocked;
+  final List<StudentLearningGoal> selectedLearningGoals;
   final ValueChanged<UserGender> onGenderSelected;
   final ValueChanged<DateTime> onDateOfBirthSet;
   final ValueChanged<MarketCountry> onCountrySelected;
   final ValueChanged<MarketCity> onCitySelected;
+  final ValueChanged<StudentLearningGoal> onLearningGoalToggled;
 
   @override
   Widget build(BuildContext context) {
@@ -413,6 +422,41 @@ class _ProfileCompletionFormBody extends StatelessWidget {
                 selectCountryFirstHint:
                     l10n.profileCompletionSelectCountryFirst,
                 onChanged: onCitySelected,
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: tokens.spaceExtraLarge),
+        TilawaFormFieldAnchor(
+          fieldId: ProfileCompletionFieldIds.learningGoals,
+          semanticLabel: l10n.profileFieldLearningGoals,
+          order: 4,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                l10n.profileFieldLearningGoals,
+                style: theme.textTheme.titleSmall,
+              ),
+              SizedBox(height: tokens.spaceExtraSmall),
+              Text(
+                l10n.profileLearningGoalsHelper,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              SizedBox(height: tokens.spaceSmall),
+              Wrap(
+                spacing: tokens.spaceSmall,
+                runSpacing: tokens.spaceSmall,
+                children: [
+                  for (final goal in kStudentLearningGoalOptions)
+                    TilawaSelectionPill(
+                      label: l10n.specializationLabel(goal.name),
+                      selected: selectedLearningGoals.contains(goal),
+                      onTap: () => onLearningGoalToggled(goal),
+                    ),
+                ],
               ),
             ],
           ),

@@ -4,11 +4,16 @@ import 'package:tilawa/core/di/injection.dart';
 
 /// Resolves [QuranSessionsFeatureConfig] from [AppLaunchConfig].
 ///
-/// Defaults (production):
+/// Defaults (production const / `play_production` distribution):
 /// - [quranSessionsEnabled]: true
 /// - [teacherApplicationEnabled]: false until MVO ops ready
 /// - [teacherApplicationDiscoverability]: profileAndEmptyState when apply enabled
-/// - [quranSessionsBookingEnabled]: false until approved supply exists
+/// - [quranSessionsBookingEnabled]: **false** — production kill switch; do not
+///   flip via ops. Enable per build with
+///   `--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED=true` or use a
+///   non-`play_production` [TILAWA_DISTRIBUTION] (local/staging default ON via
+///   [AppLaunchConfig.fromEnvironment]). Widget tests register
+///   [AppLaunchConfig(quranSessionsBookingEnabled: true)] in get_it.
 QuranSessionsFeatureConfig quranSessionsFeatureConfig() {
   final AppLaunchConfig config = getIt.isRegistered<AppLaunchConfig>()
       ? getIt<AppLaunchConfig>()

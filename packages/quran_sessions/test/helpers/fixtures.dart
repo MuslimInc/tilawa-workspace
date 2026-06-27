@@ -80,6 +80,8 @@ QuranTeacher makeTeacher({
   averageRating: rating,
   totalReviews: 42,
   totalSessionsCompleted: 120,
+  cityName: 'القاهرة',
+  countryName: 'Egypt',
 );
 
 TeacherProfile makeTeacherProfile({

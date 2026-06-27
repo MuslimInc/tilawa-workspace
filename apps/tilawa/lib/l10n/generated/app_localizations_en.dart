@@ -268,6 +268,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeFeaturedTutorCta => 'Start learning';
 
   @override
+  String get homeFeaturedTutorMySessions => 'My sessions';
+
+  @override
   String get homeQuickQuranReader => 'Mushaf';
 
   @override

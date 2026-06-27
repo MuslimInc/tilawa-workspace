@@ -497,6 +497,18 @@ abstract class QuranSessionsLocalizations {
   /// **'City'**
   String get profileFieldCity;
 
+  /// No description provided for @profileFieldLearningGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Learning goals'**
+  String get profileFieldLearningGoals;
+
+  /// No description provided for @profileLearningGoalsHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional — helps us recommend the right teacher for you.'**
+  String get profileLearningGoalsHelper;
+
   /// No description provided for @profileFieldDisplayName.
   ///
   /// In en, this message translates to:
@@ -1588,6 +1600,18 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'No slots available on this day'**
   String get noSlotsAvailableThisDay;
+
+  /// No description provided for @slotPickerLocalTimezoneNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Times are shown in your local timezone'**
+  String get slotPickerLocalTimezoneNote;
+
+  /// No description provided for @teacherSessionsCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 session completed} other{{count} sessions completed}}'**
+  String teacherSessionsCompleted(int count);
 
   /// No description provided for @teacherDashboardTitle.
   ///

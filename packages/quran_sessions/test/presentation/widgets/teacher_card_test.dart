@@ -169,6 +169,35 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('shows verified badge for verified teachers', (tester) async {
+      await pumpInApp(
+        tester,
+        TeacherCard(
+          teacher: makeTeacher(avatarUrl: ''),
+          onTap: () {},
+        ),
+        surfaceSize: const Size(360, 800),
+      );
+
+      expect(find.byType(TilawaVerifiedTeacherBadge), findsOneWidget);
+      expect(find.text('Verified Teacher'), findsOneWidget);
+    });
+
+    testWidgets('shows session count when teacher has completed sessions', (
+      tester,
+    ) async {
+      await pumpInApp(
+        tester,
+        TeacherCard(
+          teacher: makeTeacher(avatarUrl: ''),
+          onTap: () {},
+        ),
+        surfaceSize: const Size(360, 800),
+      );
+
+      expect(find.textContaining('120'), findsOneWidget);
+    });
+
     testWidgets('tapping the card opens the teacher profile', (tester) async {
       var cardTaps = 0;
       await pumpInApp(
@@ -269,6 +298,8 @@ extension on QuranTeacher {
       averageRating: averageRating,
       totalReviews: totalReviews,
       totalSessionsCompleted: totalSessionsCompleted,
+      cityName: cityName,
+      countryName: countryName,
     );
   }
 }

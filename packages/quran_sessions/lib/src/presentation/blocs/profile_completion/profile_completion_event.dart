@@ -58,6 +58,15 @@ final class CitySelected extends ProfileCompletionEvent {
   List<Object?> get props => [city];
 }
 
+final class LearningGoalToggled extends ProfileCompletionEvent {
+  const LearningGoalToggled(this.goal);
+
+  final StudentLearningGoal goal;
+
+  @override
+  List<Object?> get props => [goal];
+}
+
 final class ProfileSubmitted extends ProfileCompletionEvent {
   const ProfileSubmitted({required this.userId});
 

@@ -6,6 +6,7 @@ import '../../domain/entities/quran_teacher.dart';
 import '../models/teacher_availability_summary.dart';
 import '../theme/quran_sessions_status_colors.dart';
 import 'quran_session_price_chip.dart';
+import 'teacher_discovery_details.dart';
 import 'teacher_initials_avatar.dart';
 
 /// Tappable teacher discovery row — whole card opens the teacher profile.
@@ -97,6 +98,15 @@ class _TeacherIdentityBlock extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           textAlign: TextAlign.start,
         ),
+        if (teacher.isVerified) ...[
+          SizedBox(height: tokens.spaceTiny),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: TilawaVerifiedTeacherBadge(
+              label: l10n.verifiedTeacherBadge,
+            ),
+          ),
+        ],
         SizedBox(height: tokens.spaceExtraSmall),
         Wrap(
           spacing: tokens.spaceExtraSmall,
@@ -111,6 +121,8 @@ class _TeacherIdentityBlock extends StatelessWidget {
             QuranSessionPriceChip(teacher: teacher),
           ],
         ),
+        SizedBox(height: denseGap),
+        TeacherDiscoveryDetails(teacher: teacher, dense: true),
         if (summary != null) ...[
           SizedBox(height: denseGap),
           _AvailabilityHint(summary: summary),

@@ -548,6 +548,12 @@ abstract class AppLocalizations {
   /// **'Start learning'**
   String get homeFeaturedTutorCta;
 
+  /// Secondary link on featured tutor card to open booked sessions
+  ///
+  /// In en, this message translates to:
+  /// **'My sessions'**
+  String get homeFeaturedTutorMySessions;
+
   /// Home quick action tile label for opening the Mushaf reader
   ///
   /// In en, this message translates to:

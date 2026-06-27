@@ -66,6 +66,8 @@
     "profileFieldDateOfBirth": "Date of birth",
     "profileFieldCountry": "Country",
     "profileFieldCity": "City",
+    "profileFieldLearningGoals": "Learning goals",
+    "profileLearningGoalsHelper": "Optional — helps us recommend the right teacher for you.",
     "profileFieldDisplayName": "Full name",
     "profileCompletionSaveAndContinue": "Save and continue",
     "profileCompletionSelectDateOfBirth": "Select date of birth",
@@ -355,6 +357,15 @@
     "sessionCancelledSuccess": "Session cancelled.",
     "noSlotsAvailable": "No slots available",
     "noSlotsAvailableThisDay": "No slots available on this day",
+    "slotPickerLocalTimezoneNote": "Times are shown in your local timezone",
+    "teacherSessionsCompleted": "{count, plural, =1{1 session completed} other{{count} sessions completed}}",
+    "@teacherSessionsCompleted": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
     "teacherDashboardTitle": "Teacher dashboard",
     "noSessionsOrSlotsYet": "No sessions or slots yet",
     "addAvailableSlot": "Add available slot",

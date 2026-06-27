@@ -30,6 +30,7 @@ class CompleteStudentProfileUseCase {
     required String cityName,
     required String currencyCode,
     required String timezone,
+    List<StudentLearningGoal> learningGoals = const [],
   }) async {
     final policyResult = await _policyRepository.getGlobalPolicy();
     if (policyResult.isLeft()) {
@@ -55,6 +56,7 @@ class CompleteStudentProfileUseCase {
       cityName: cityName,
       currencyCode: currencyCode,
       timezone: timezone,
+      learningGoals: learningGoals,
     );
     return _repository.updateProfile(updated);
   }

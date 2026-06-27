@@ -238,6 +238,13 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get profileFieldCity => 'المدينة';
 
   @override
+  String get profileFieldLearningGoals => 'أهداف التعلّم';
+
+  @override
+  String get profileLearningGoalsHelper =>
+      'اختياري — يساعدنا على اقتراح المعلم المناسب لك.';
+
+  @override
   String get profileFieldDisplayName => 'الاسم الكامل';
 
   @override
@@ -851,6 +858,20 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
 
   @override
   String get noSlotsAvailableThisDay => 'لا توجد مواعيد متاحة في هذا اليوم';
+
+  @override
+  String get slotPickerLocalTimezoneNote => 'الأوقات معروضة بتوقيتك المحلي';
+
+  @override
+  String teacherSessionsCompleted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count جلسة مكتملة',
+      one: 'جلسة واحدة مكتملة',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get teacherDashboardTitle => 'لوحة المعلم';

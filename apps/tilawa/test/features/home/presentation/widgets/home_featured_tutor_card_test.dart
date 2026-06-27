@@ -1,3 +1,4 @@
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -99,10 +100,23 @@ void main() {
       await _pumpCard(tester);
 
       expect(find.byType(TilawaInteractiveSurface), findsOneWidget);
-      expect(find.byType(InkWell), findsNothing);
-      expect(find.byType(TilawaButton), findsNothing);
+      expect(find.byType(TilawaButton), findsOneWidget);
     },
   );
+
+  testWidgets('featured tutor card exposes My sessions shortcut', (
+    tester,
+  ) async {
+    await resetScopeGetIt();
+    getIt.registerSingleton<AppLaunchConfig>(
+      const AppLaunchConfig(quranSessionsEnabled: true),
+    );
+
+    await _pumpCard(tester);
+
+    expect(find.text('My sessions'), findsOneWidget);
+    expect(find.byIcon(FluentIcons.calendar_ltr_16_regular), findsOneWidget);
+  });
 
   testWidgets('featured tutor card exposes one button semantics target', (
     tester,
@@ -114,12 +128,13 @@ void main() {
 
     await _pumpCard(tester);
 
-    expect(find.byType(TilawaButton), findsNothing);
+    expect(find.byType(TilawaButton), findsOneWidget);
+    expect(find.text('My sessions'), findsOneWidget);
 
     final handle = tester.ensureSemantics();
     final root =
         tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!;
-    expect(_countSemanticsButtons(root), 1);
+    expect(_countSemanticsButtons(root), 3);
 
     final cardSemantics = tester.getSemantics(find.text('Learn Quran'));
     expect(cardSemantics.hasFlag(SemanticsFlag.isButton), isTrue);

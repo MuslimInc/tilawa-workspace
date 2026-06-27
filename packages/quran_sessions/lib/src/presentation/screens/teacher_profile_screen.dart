@@ -17,6 +17,7 @@ import '../widgets/availability_slot_picker.dart';
 import '../widgets/quran_session_price_chip.dart';
 import '../widgets/quran_sessions_scaffold.dart';
 import '../widgets/quran_sessions_section_header.dart';
+import '../widgets/teacher_discovery_details.dart';
 import '../widgets/teacher_initials_avatar.dart';
 
 class TeacherProfileScreen extends StatefulWidget {
@@ -219,11 +220,21 @@ class _TeacherProfileBodyState extends State<_TeacherProfileBody> {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
+              if (widget.teacher.isVerified) ...[
+                SizedBox(height: tokens.spaceExtraSmall),
+                Center(
+                  child: TilawaVerifiedTeacherBadge(
+                    label: l10n.verifiedTeacherBadge,
+                  ),
+                ),
+              ],
               SizedBox(height: tokens.spaceExtraSmall),
               _TeacherProfileRatingRow(
                 rating: widget.teacher.averageRating,
                 reviewsCount: widget.teacher.totalReviews,
               ),
+              SizedBox(height: tokens.spaceSmall),
+              TeacherDiscoveryDetails(teacher: widget.teacher),
               SizedBox(height: tokens.spaceExtraSmall),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,

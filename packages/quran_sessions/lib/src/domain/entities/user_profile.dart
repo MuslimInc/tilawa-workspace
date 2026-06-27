@@ -13,6 +13,17 @@ enum UserGender { male, female }
 
 enum UserAgeGroup { child, adult }
 
+/// Student learning goals captured during profile completion (Qutor parity).
+enum StudentLearningGoal { recitation, hifz, tajweed, arabic }
+
+/// Goals offered in profile completion — order matches UI.
+const List<StudentLearningGoal> kStudentLearningGoalOptions = [
+  StudentLearningGoal.recitation,
+  StudentLearningGoal.hifz,
+  StudentLearningGoal.tajweed,
+  StudentLearningGoal.arabic,
+];
+
 enum AccountStatus { active, underReview, suspended, blocked }
 
 enum AccountRestrictionReason {
@@ -52,6 +63,7 @@ class UserProfile extends Equatable {
     this.guardianId,
     this.guardianChildBookingApprovedAt,
     this.restrictionReason,
+    this.learningGoals = const [],
   });
 
   final String userId;
@@ -90,6 +102,9 @@ class UserProfile extends Equatable {
   /// Populated when [accountStatus] is [AccountStatus.suspended] or
   /// [AccountStatus.blocked].
   final AccountRestrictionReason? restrictionReason;
+
+  /// Optional learning goals — not required for booking eligibility.
+  final List<StudentLearningGoal> learningGoals;
 
   // ── Computed ────────────────────────────────────────────────────────────────
 
@@ -151,6 +166,7 @@ class UserProfile extends Equatable {
     String? guardianId,
     DateTime? guardianChildBookingApprovedAt,
     AccountRestrictionReason? restrictionReason,
+    List<StudentLearningGoal>? learningGoals,
   }) => UserProfile(
     userId: userId,
     role: role ?? this.role,
@@ -168,6 +184,7 @@ class UserProfile extends Equatable {
     guardianChildBookingApprovedAt:
         guardianChildBookingApprovedAt ?? this.guardianChildBookingApprovedAt,
     restrictionReason: restrictionReason ?? this.restrictionReason,
+    learningGoals: learningGoals ?? this.learningGoals,
   );
 
   @override
@@ -187,5 +204,6 @@ class UserProfile extends Equatable {
     guardianId,
     guardianChildBookingApprovedAt,
     restrictionReason,
+    learningGoals,
   ];
 }

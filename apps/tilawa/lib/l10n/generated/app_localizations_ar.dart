@@ -266,6 +266,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeFeaturedTutorCta => 'ابدأ التعلّم';
 
   @override
+  String get homeFeaturedTutorMySessions => 'جلساتي';
+
+  @override
   String get homeQuickQuranReader => 'المصحف';
 
   @override

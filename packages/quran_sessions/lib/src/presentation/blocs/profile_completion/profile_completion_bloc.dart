@@ -30,6 +30,7 @@ class ProfileCompletionBloc
     on<DateOfBirthSet>(_onDateOfBirthSet, transformer: sequential());
     on<CountrySelected>(_onCountrySelected, transformer: restartable());
     on<CitySelected>(_onCitySelected, transformer: sequential());
+    on<LearningGoalToggled>(_onLearningGoalToggled, transformer: sequential());
     on<ProfileSubmitted>(_onSubmitted, transformer: droppable());
   }
 
@@ -83,6 +84,7 @@ class ProfileCompletionBloc
       selectedCountry: selectedCountry,
       countryPickerLocked: countryPickerLocked,
       isLoadingCities: selectedCountry != null,
+      selectedLearningGoals: profile.learningGoals,
     );
     emit(editing);
 
@@ -213,6 +215,23 @@ class ProfileCompletionBloc
     emit(current.copyWith(selectedCity: event.city));
   }
 
+  void _onLearningGoalToggled(
+    LearningGoalToggled event,
+    Emitter<ProfileCompletionState> emit,
+  ) {
+    final current = state;
+    if (current is! ProfileCompletionEditing) return;
+    final goals = List<StudentLearningGoal>.from(
+      current.selectedLearningGoals,
+    );
+    if (goals.contains(event.goal)) {
+      goals.remove(event.goal);
+    } else {
+      goals.add(event.goal);
+    }
+    emit(current.copyWith(selectedLearningGoals: goals));
+  }
+
   Future<void> _onSubmitted(
     ProfileSubmitted event,
     Emitter<ProfileCompletionState> emit,
@@ -241,6 +260,7 @@ class ProfileCompletionBloc
       cityName: city.cityName,
       currencyCode: city.currencyCode,
       timezone: city.timezone,
+      learningGoals: current.selectedLearningGoals,
     );
 
     result.fold(

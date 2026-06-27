@@ -22,6 +22,8 @@ extension QuranTeacherDtoMapper on QuranTeacherDto {
     averageRating: averageRating,
     totalReviews: totalReviews,
     totalSessionsCompleted: totalSessionsCompleted,
+    cityName: cityName,
+    countryName: countryName,
   );
 }
 

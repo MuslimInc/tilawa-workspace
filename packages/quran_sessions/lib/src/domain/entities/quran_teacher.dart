@@ -28,6 +28,8 @@ class QuranTeacher extends Equatable {
     required this.totalReviews,
     required this.totalSessionsCompleted,
     this.price,
+    this.cityName,
+    this.countryName,
   });
 
   final String id;
@@ -60,6 +62,10 @@ class QuranTeacher extends Equatable {
   final int totalReviews;
   final int totalSessionsCompleted;
 
+  /// Optional public location — shown on discovery cards when present.
+  final String? cityName;
+  final String? countryName;
+
   bool get isVerified =>
       verificationStatus == TeacherVerificationStatus.verified;
 
@@ -81,5 +87,7 @@ class QuranTeacher extends Equatable {
     averageRating,
     totalReviews,
     totalSessionsCompleted,
+    cityName,
+    countryName,
   ];
 }

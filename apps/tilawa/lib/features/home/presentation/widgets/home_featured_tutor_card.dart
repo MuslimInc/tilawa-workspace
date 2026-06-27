@@ -26,76 +26,97 @@ class HomeFeaturedTutorCard extends StatelessWidget {
 
     final BorderRadius borderRadius = BorderRadius.circular(radius);
 
-    return TilawaInteractiveSurface(
-      onTap: () => openHomeQuranSessions(context),
-      borderRadius: borderRadius,
-      stateLayerColor: accent,
-      semanticLabel: context.l10n.homeFeaturedTutorTitle,
-      semanticHint: context.l10n.homeFeaturedTutorCta,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        TilawaInteractiveSurface(
+          onTap: () => openHomeQuranSessions(context),
           borderRadius: borderRadius,
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-              color: theme.colorScheme.shadow.withValues(
-                alpha: screenTokens.homePrayerHeroShadowOpacity,
-              ),
-              offset: Offset(0, tokens.spaceExtraSmall.toDouble()),
-              blurRadius: tokens.spaceLarge.toDouble(),
-            ),
-          ],
-        ),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: borderRadius,
-            gradient: screenTokens.featuredTutorGradient(),
-          ),
-          child: Padding(
-            padding: EdgeInsetsDirectional.all(tokens.spaceMedium),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  spacing: tokens.spaceSmall,
-                  children: [
-                    _FeaturedTutorIconWell(accent: accent),
-                    Expanded(
-                      child: Text(
-                        context.l10n.homeFeaturedTutorTitle,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: theme.colorScheme.onSurface,
-                          fontWeight: FontWeight.w700,
-                          height: 1.15,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: tokens.spaceExtraSmall),
-                Text(
-                  context.l10n.homeFeaturedTutorSubtitle,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                    height: 1.3,
+          stateLayerColor: accent,
+          semanticLabel: context.l10n.homeFeaturedTutorTitle,
+          semanticHint: context.l10n.homeFeaturedTutorCta,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: borderRadius,
+              boxShadow: <BoxShadow>[
+                BoxShadow(
+                  color: theme.colorScheme.shadow.withValues(
+                    alpha: screenTokens.homePrayerHeroShadowOpacity,
                   ),
-                ),
-                SizedBox(height: tokens.spaceMedium),
-                _FeaturedTutorFooter(
-                  ctaLabel: context.l10n.homeFeaturedTutorCta,
-                  badgeLabel: context.l10n.experimentalBadgeLabel,
-                  accent: accent,
-                  ctaForeground: screenTokens.homeFeaturedTutorCtaForeground,
+                  offset: Offset(0, tokens.spaceExtraSmall.toDouble()),
+                  blurRadius: tokens.spaceLarge.toDouble(),
                 ),
               ],
             ),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: borderRadius,
+                gradient: screenTokens.featuredTutorGradient(),
+              ),
+              child: Padding(
+                padding: EdgeInsetsDirectional.all(tokens.spaceMedium),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      spacing: tokens.spaceSmall,
+                      children: [
+                        _FeaturedTutorIconWell(accent: accent),
+                        Expanded(
+                          child: Text(
+                            context.l10n.homeFeaturedTutorTitle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: theme.colorScheme.onSurface,
+                              fontWeight: FontWeight.w700,
+                              height: 1.15,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: tokens.spaceExtraSmall),
+                    Text(
+                      context.l10n.homeFeaturedTutorSubtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        height: 1.3,
+                      ),
+                    ),
+                    SizedBox(height: tokens.spaceMedium),
+                    _FeaturedTutorFooter(
+                      ctaLabel: context.l10n.homeFeaturedTutorCta,
+                      badgeLabel: context.l10n.experimentalBadgeLabel,
+                      accent: accent,
+                      ctaForeground:
+                          screenTokens.homeFeaturedTutorCtaForeground,
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
-      ),
+        SizedBox(height: tokens.spaceExtraSmall),
+        Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: TilawaButton(
+            text: context.l10n.homeFeaturedTutorMySessions,
+            onPressed: () => openHomeMySessions(context),
+            variant: TilawaButtonVariant.ghost,
+            size: TilawaButtonSize.small,
+            leadingIcon: Icon(
+              FluentIcons.calendar_ltr_16_regular,
+              size: tokens.iconSizeSmall,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
