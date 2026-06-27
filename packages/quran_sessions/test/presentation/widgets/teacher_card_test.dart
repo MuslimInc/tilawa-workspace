@@ -23,11 +23,13 @@ void main() {
       expect(find.text('Sheikh Ahmed'), findsOneWidget);
       expect(find.textContaining('4.8'), findsOneWidget);
       expect(find.textContaining('(42)'), findsOneWidget);
-      expect(find.text('Book'), findsOneWidget);
-      expect(find.text('View profile'), findsOneWidget);
+      expect(find.byType(TilawaButton), findsNothing);
+      expect(find.byIcon(Icons.chevron_right_rounded), findsOneWidget);
     });
 
-    testWidgets('renders identity and actions in Arabic RTL', (tester) async {
+    testWidgets('renders identity without inline actions in Arabic RTL', (
+      tester,
+    ) async {
       await pumpInApp(
         tester,
         TeacherCard(
@@ -40,8 +42,8 @@ void main() {
       );
 
       expect(find.text('الشيخ أحمد'), findsOneWidget);
-      expect(find.text('احجز'), findsOneWidget);
-      expect(find.text('عرض الملف'), findsOneWidget);
+      expect(find.text('احجز'), findsNothing);
+      expect(find.text('عرض الملف'), findsNothing);
       expect(tester.takeException(), isNull);
     });
 
@@ -108,7 +110,28 @@ void main() {
         ),
         surfaceSize: const Size(360, 800),
       );
-      expect(find.byType(QuranSessionsMetadataChip), findsOneWidget);
+      expect(find.byType(TilawaMetadataChip), findsOneWidget);
+    });
+
+    testWidgets('English name stays near avatar in Arabic RTL layout', (
+      tester,
+    ) async {
+      await pumpInApp(
+        tester,
+        TeacherCard(
+          teacher: makeTeacher(avatarUrl: '', displayName: 'Mohammad Kamel'),
+          onTap: () {},
+        ),
+        locale: const Locale('ar'),
+        textDirection: TextDirection.rtl,
+        surfaceSize: const Size(360, 800),
+      );
+
+      final avatarBox = tester.getRect(find.byType(CircleAvatar).first);
+      final nameBox = tester.getRect(find.text('Mohammad Kamel'));
+
+      expect(avatarBox.left - nameBox.right, lessThan(24));
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('long Arabic name ellipsizes without overflow', (tester) async {
@@ -146,51 +169,7 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('primary book button is compact, not full-width', (
-      tester,
-    ) async {
-      await pumpInApp(
-        tester,
-        TeacherCard(
-          teacher: makeTeacher(avatarUrl: ''),
-          onTap: () {},
-        ),
-        surfaceSize: const Size(360, 800),
-      );
-
-      final cardWidth = tester
-          .getSize(find.byType(QuranSessionsSurfaceCard))
-          .width;
-      final bookWidth = tester
-          .getSize(find.widgetWithText(TilawaButton, 'Book'))
-          .width;
-
-      expect(bookWidth, lessThan(cardWidth * 0.6));
-    });
-
-    testWidgets('book and view-profile sit in one shared action row', (
-      tester,
-    ) async {
-      await pumpInApp(
-        tester,
-        TeacherCard(
-          teacher: makeTeacher(avatarUrl: ''),
-          onTap: () {},
-        ),
-        surfaceSize: const Size(360, 800),
-      );
-
-      final bookCenter = tester.getCenter(
-        find.widgetWithText(TilawaButton, 'Book'),
-      );
-      final viewCenter = tester.getCenter(
-        find.widgetWithText(TilawaButton, 'View profile'),
-      );
-
-      expect((bookCenter.dy - viewCenter.dy).abs(), lessThan(1.0));
-    });
-
-    testWidgets('tapping the card surface opens the profile', (tester) async {
+    testWidgets('tapping the card opens the teacher profile', (tester) async {
       var cardTaps = 0;
       await pumpInApp(
         tester,
@@ -204,29 +183,6 @@ void main() {
       await tester.tap(find.text('Sheikh Ahmed'));
       await tester.pump();
       expect(cardTaps, 1);
-    });
-
-    testWidgets('book tap starts booking once and does not navigate twice', (
-      tester,
-    ) async {
-      var cardTaps = 0;
-      var bookTaps = 0;
-      await pumpInApp(
-        tester,
-        TeacherCard(
-          teacher: makeTeacher(avatarUrl: ''),
-          onTap: () => cardTaps++,
-          onBook: () => bookTaps++,
-          onViewProfile: () {},
-        ),
-        surfaceSize: const Size(360, 800),
-      );
-
-      await tester.tap(find.text('Book'));
-      await tester.pump();
-
-      expect(bookTaps, 1);
-      expect(cardTaps, 0);
     });
 
     testWidgets('three cards fit 360x800 without overflow', (tester) async {
@@ -252,7 +208,22 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('availability hint and actions survive text scale 1.4', (
+    testWidgets('availability hint survives text scale 1.3', (tester) async {
+      await pumpInApp(
+        tester,
+        TeacherCard(
+          teacher: makeTeacher(avatarUrl: '', displayName: 'Sheikh Ahmed'),
+          onTap: () {},
+        ),
+        textScaleFactor: 1.3,
+        surfaceSize: const Size(360, 800),
+      );
+
+      expect(find.byType(TilawaButton), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('availability hint survives text scale 1.4 in Arabic', (
       tester,
     ) async {
       await pumpInApp(
@@ -275,7 +246,7 @@ void main() {
       );
 
       expect(find.text('لا توجد مواعيد'), findsOneWidget);
-      expect(find.text('احجز'), findsOneWidget);
+      expect(find.text('احجز'), findsNothing);
       expect(tester.takeException(), isNull);
     });
   });

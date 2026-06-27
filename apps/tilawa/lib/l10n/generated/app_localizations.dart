@@ -530,16 +530,10 @@ abstract class AppLocalizations {
   /// **'Quick tools'**
   String get homeQuickToolsTitle;
 
-  /// Eyebrow badge on the featured Learn Quran with Tutor card
-  ///
-  /// In en, this message translates to:
-  /// **'Featured'**
-  String get homeFeaturedTutorEyebrow;
-
   /// Title on the featured Learn Quran with Tutor card
   ///
   /// In en, this message translates to:
-  /// **'QuranTutor'**
+  /// **'Learn Quran'**
   String get homeFeaturedTutorTitle;
 
   /// Subtitle on the featured Learn Quran with Tutor card

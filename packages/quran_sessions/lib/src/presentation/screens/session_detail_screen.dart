@@ -74,8 +74,8 @@ class _SessionDetailScreenState extends State<SessionDetailScreen>
         if (didPop) return;
         Navigator.of(context).pop(_notifyParentOnPop ? true : null);
       },
-      child: Scaffold(
-        appBar: AppBar(title: Text(l10n.sessionDetailTitle)),
+      child: QuranSessionsScaffold(
+        title: l10n.sessionDetailTitle,
         bottomNavigationBar: BlocBuilder<SessionDetailBloc, SessionDetailState>(
           buildWhen: (previous, current) =>
               previous.runtimeType != current.runtimeType ||

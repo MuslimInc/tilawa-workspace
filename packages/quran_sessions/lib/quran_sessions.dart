@@ -271,13 +271,10 @@ export 'src/presentation/blocs/teacher_profile/teacher_profile_event.dart';
 export 'src/presentation/blocs/teacher_profile/teacher_profile_state.dart';
 // ── Presentation: theme (feature-scoped) ───────────────────────────────────
 export 'src/presentation/models/teacher_availability_summary.dart';
-export 'src/presentation/theme/quran_sessions_palette.dart';
-export 'src/presentation/theme/quran_sessions_theme.dart';
+export 'src/presentation/theme/quran_sessions_status_colors.dart';
 export 'src/presentation/theme/quran_sessions_theme_scope.dart';
 export 'src/presentation/widgets/quran_sessions_section_header.dart';
-export 'src/presentation/widgets/quran_sessions_metadata_chip.dart';
 export 'src/presentation/widgets/quran_sessions_scaffold.dart';
-export 'src/presentation/widgets/quran_sessions_surface_card.dart';
 // ── Presentation: failure UI extension ───────────────────────────────────────
 export 'src/presentation/config/quran_sessions_analytics_callbacks.dart';
 export 'src/presentation/config/quran_sessions_scheduling_analytics_callbacks.dart';
@@ -335,7 +332,6 @@ export 'src/presentation/widgets/quran_session_price_chip.dart';
 export 'src/presentation/widgets/quran_session_status_chip.dart';
 export 'src/presentation/widgets/quran_session_summary_strip.dart';
 export 'src/presentation/widgets/quran_session_teacher_compact_card.dart';
-export 'src/presentation/widgets/quran_sessions_segmented_tabs.dart';
 export 'src/presentation/widgets/teacher_list_filter_bar.dart';
 // ── Utils ─────────────────────────────────────────────────────────────────────
 export 'src/utils/phone_normalizer.dart';

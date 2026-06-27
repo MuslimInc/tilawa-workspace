@@ -16,6 +16,7 @@ import '../blocs/profile_completion/profile_completion_event.dart';
 import '../blocs/profile_completion/profile_completion_state.dart';
 import '../failure_ui/quran_sessions_failure_ui.dart';
 import '../forms/profile_completion_field_ids.dart';
+import '../widgets/quran_sessions_scaffold.dart';
 
 /// Gate screen shown before booking when the student's profile is incomplete.
 ///
@@ -67,8 +68,9 @@ class _ProfileCompletionScreenState extends State<ProfileCompletionScreen> {
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.profileCompletionTitle)),
+    return QuranSessionsScaffold(
+      title: l10n.profileCompletionTitle,
+      resizeToAvoidBottomInset: true,
       body: BlocConsumer<ProfileCompletionBloc, ProfileCompletionState>(
         listenWhen: (ProfileCompletionState prev, ProfileCompletionState next) {
           if (_shouldScrollToValidationError(prev, next)) {
@@ -487,22 +489,24 @@ class _GenderOption extends StatelessWidget {
     final tokens = theme.tokens;
     final radius = tokens.resolveRadius(family: TilawaRadiusFamily.chrome);
 
-    return AnimatedContainer(
-      duration: theme.componentTokens.immersiveComposer.transitionDuration,
-      constraints: BoxConstraints(minHeight: tokens.minInteractiveDimension),
-      decoration: BoxDecoration(
-        color: isSelected
-            ? scheme.primaryContainer
-            : scheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(radius),
-        border: Border.all(
-          color: isSelected ? scheme.primary : Colors.transparent,
-          width: theme.componentTokens.card.borderWidth,
+    return TilawaInteractiveSurface(
+      onTap: onTap,
+      selected: isSelected,
+      semanticLabel: label,
+      borderRadius: BorderRadius.circular(radius),
+      child: AnimatedContainer(
+        duration: theme.componentTokens.immersiveComposer.transitionDuration,
+        constraints: BoxConstraints(minHeight: tokens.minInteractiveDimension),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? scheme.primaryContainer
+              : scheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(radius),
+          border: Border.all(
+            color: isSelected ? scheme.primary : Colors.transparent,
+            width: theme.componentTokens.card.borderWidth,
+          ),
         ),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(radius),
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: tokens.spaceLarge),
           child: Column(

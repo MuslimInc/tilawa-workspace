@@ -9,7 +9,7 @@ import '../failure_ui/quran_sessions_failure_ui.dart';
 import '../blocs/teacher_list/teacher_list_bloc.dart';
 import '../blocs/teacher_list/teacher_list_event.dart';
 import '../blocs/teacher_list/teacher_list_state.dart';
-import '../theme/quran_sessions_theme.dart';
+import '../widgets/quran_sessions_page_header.dart';
 import '../widgets/quran_sessions_scaffold.dart';
 import '../widgets/quran_sessions_student_empty_state.dart';
 import '../widgets/teacher_card.dart';
@@ -75,26 +75,20 @@ class _QuranSessionsHomeScreenState extends State<QuranSessionsHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
-    final feature = context.quranSessionsTheme;
+    final tokens = Theme.of(context).tokens;
 
     return QuranSessionsScaffold(
-      title: l10n.quranSessionsHomeTitle,
+      title: l10n.teacherListAppBarTitle,
       actions: [
         if (widget.onWallet != null)
-          TextButton(
-            onPressed: widget.onWallet,
-            child: Text(
-              l10n.walletEntryAction,
-              style: feature.chipLabelStyle.copyWith(color: feature.linkColor),
-            ),
+          QuranSessionsAppBarLink(
+            label: l10n.walletEntryAction,
+            onPressed: widget.onWallet!,
           ),
         if (widget.onMySessions != null)
-          TextButton(
-            onPressed: widget.onMySessions,
-            child: Text(
-              l10n.mySessionsTitle,
-              style: feature.chipLabelStyle.copyWith(color: feature.linkColor),
-            ),
+          QuranSessionsAppBarLink(
+            label: l10n.mySessionsTitle,
+            onPressed: widget.onMySessions!,
           ),
       ],
       body: BlocBuilder<TeacherListBloc, TeacherListState>(
@@ -115,12 +109,12 @@ class _QuranSessionsHomeScreenState extends State<QuranSessionsHomeScreen> {
           ),
           TeacherListFailure(:final failure) => Center(
             child: Padding(
-              padding: EdgeInsets.all(feature.screenPaddingHorizontal),
+              padding: EdgeInsets.all(tokens.spaceMedium),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(failure.toLocalizedMessage(context)),
-                  SizedBox(height: feature.sectionGap),
+                  SizedBox(height: tokens.spaceSmall),
                   TilawaButton(
                     text: l10n.retry,
                     onPressed: () => context.read<TeacherListBloc>().add(
@@ -132,24 +126,37 @@ class _QuranSessionsHomeScreenState extends State<QuranSessionsHomeScreen> {
             ),
           ),
           TeacherListSuccess(:final teachers) => ListView.builder(
-            itemCount: teachers.take(3).length + 1,
+            itemCount: teachers.take(3).length + 2,
             itemBuilder: (context, i) {
               final preview = teachers.take(3).toList();
-              if (i < preview.length) {
+              if (i == 0) {
+                return Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(
+                    tokens.spaceMedium,
+                    tokens.spaceSmall,
+                    tokens.spaceMedium,
+                    tokens.spaceExtraSmall,
+                  ),
+                  child: QuranSessionsPageHeader(
+                    subtitle: l10n.teacherListSubtitle,
+                    compact: true,
+                  ),
+                );
+              }
+              final teacherIndex = i - 1;
+              if (teacherIndex < preview.length) {
                 return TeacherCard(
-                  teacher: preview[i],
-                  onTap: () => widget.onTeacherTapped?.call(preview[i].id),
+                  teacher: preview[teacherIndex],
+                  onTap: () =>
+                      widget.onTeacherTapped?.call(preview[teacherIndex].id),
                 );
               }
               return Center(
-                child: TextButton(
+                child: TilawaButton(
+                  text: l10n.seeAllTeachers,
                   onPressed: widget.onSeeAllTeachers,
-                  child: Text(
-                    l10n.seeAllTeachers,
-                    style: feature.chipLabelStyle.copyWith(
-                      color: feature.linkColor,
-                    ),
-                  ),
+                  variant: TilawaButtonVariant.ghost,
+                  size: TilawaButtonSize.small,
                 ),
               );
             },

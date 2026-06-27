@@ -24,7 +24,6 @@ class AthkarCategoriesScreen extends StatelessWidget {
       appBar: TilawaCatalogAppBar.titleOnly(
         context,
         title: context.l10n.athkar,
-        centerTitle: true,
       ),
       body: Stack(
         children: [

@@ -241,6 +241,9 @@ void main() {
       verify(
         mockPrefs.remove(NotificationLaunchDedup.lastNotifPayloadSigKey),
       ).called(1);
+      verify(
+        mockPrefs.remove(NotificationLaunchDedup.schemaVersionKey),
+      ).called(1);
       expect(
         prefStore.containsKey(NotificationLaunchDedup.lastNotifPidKey),
         isFalse,

@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../theme/quran_sessions_theme.dart';
-import 'quran_sessions_surface_card.dart';
-
 /// Loading placeholder matching [QuranSessionTeacherCompactCard] layout.
 class TeacherCardCompactSkeleton extends StatelessWidget {
   const TeacherCardCompactSkeleton({super.key});
@@ -12,11 +9,15 @@ class TeacherCardCompactSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
     final scheme = Theme.of(context).colorScheme;
-    final feature = context.quranSessionsTheme;
+    final avatarRadius = tokens.iconSizeSmall + 2;
 
     return Padding(
-      padding: feature.cardPaddingInsets(),
-      child: QuranSessionsSurfaceCard(
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceMedium,
+        vertical: tokens.spaceExtraSmall,
+      ),
+      child: TilawaCard(
+        padding: EdgeInsets.all(tokens.spaceSmall),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -24,12 +25,12 @@ class TeacherCardCompactSkeleton extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _Bone(
-                  width: feature.listAvatarRadius * 2,
-                  height: feature.listAvatarRadius * 2,
-                  radius: feature.listAvatarRadius,
+                  width: avatarRadius * 2,
+                  height: avatarRadius * 2,
+                  radius: avatarRadius,
                   color: scheme.surfaceContainerHighest,
                 ),
-                SizedBox(width: feature.cardGap),
+                SizedBox(width: tokens.spaceSmall),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,13 +40,13 @@ class TeacherCardCompactSkeleton extends StatelessWidget {
                         height: tokens.spaceMedium,
                         color: scheme.surfaceContainerHighest,
                       ),
-                      SizedBox(height: feature.listItemGap),
+                      SizedBox(height: tokens.spaceExtraSmall),
                       _Bone(
                         width: tokens.spaceXXL * 2,
                         height: tokens.spaceSmall,
                         color: scheme.surfaceContainerHigh,
                       ),
-                      SizedBox(height: feature.listItemGap),
+                      SizedBox(height: tokens.spaceExtraSmall),
                       _Bone(
                         width: tokens.spaceXXL,
                         height: tokens.spaceSmall,
@@ -56,13 +57,13 @@ class TeacherCardCompactSkeleton extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: feature.sectionGap),
+            SizedBox(height: tokens.spaceSmall),
             _Bone(
               width: double.infinity,
               height: tokens.spaceLarge,
               color: scheme.surfaceContainerHigh,
             ),
-            SizedBox(height: feature.listItemGap),
+            SizedBox(height: tokens.spaceExtraSmall),
             _Bone(
               width: tokens.spaceXXL * 2,
               height: tokens.spaceMedium,
@@ -90,14 +91,14 @@ class _Bone extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final feature = context.quranSessionsTheme;
+    final tokens = Theme.of(context).tokens;
     return Container(
       width: width,
       height: height,
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(
-          radius ?? feature.dateChipRadius,
+          radius ?? tokens.resolveRadius(family: TilawaRadiusFamily.chip),
         ),
       ),
     );

@@ -2,48 +2,28 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// Persists which local-notification launch was already routed.
 ///
-/// ## Why this exists
+/// On Android and iOS, `getNotificationAppLaunchDetails()` can keep reporting
+/// the same launch tap after a Flutter hot restart (same OS process, Dart statics
+/// reset). Signatures are scoped to [lastNotifPidKey]; a process kill starts a
+/// new pid so a genuine cold start is never blocked.
 ///
-/// On Android and iOS, [NotificationAppLaunchDetails] from
-/// `getNotificationAppLaunchDetails()` can keep reporting the same launch tap
-/// after a Flutter **hot restart** (same OS process, Dart statics reset).
+/// ## Signature format (most specific wins)
 ///
-/// ## Dedup key (most specific wins)
+/// 1. `p:<payload>` when payload is non-empty.
+/// 2. `i:<notificationId>` when payload is empty but id is present.
+/// 3. No signature when both are missing.
 ///
-/// 1. **Payload signature** when [launchPayload] is non-empty — distinguishes
-///    same notification id with different destinations (e.g. dynamic Athkar ids).
-/// 2. **Notification id** when payload is empty but id is present.
-/// 3. **No key** when both are missing — caller must not navigate from launch
-///    probe (Athkar service already rejects empty payloads).
-///
-/// We intentionally do **not** dedup on route-only or coarse timestamps: that
-/// would block legitimate new notifications that reuse an id (Athkar 1001/1002,
-/// prayer id blocks) in a later OS process.
-///
-/// ## Process scoping
-///
-/// Signatures are scoped to [_lastNotifPidKey]. A real process kill starts a
-/// new pid, so a genuine notification cold start is never blocked by stale state.
-///
-/// ## Preference bounds
-///
-/// Three fixed keys only (`_last_notif_id`, `_last_notif_pid`,
-/// `_last_notif_payload_sig`). Values are int/string primitives — no sensitive
-/// data, no unbounded growth. Keys are overwritten on each handled launch, never
-/// appended.
+/// [persist] never downgrades `p:` to `i:` in the same process. [isProcessedLaunch]
+/// repairs legacy id-only entries when a payload replay is detected.
 class NotificationLaunchDedup {
   NotificationLaunchDedup._();
 
   static const String lastNotifIdKey = '_last_notif_id';
   static const String lastNotifPidKey = '_last_notif_pid';
   static const String lastNotifPayloadSigKey = '_last_notif_payload_sig';
-
-  /// Bumped when launch-dedup storage rules change. Marker only; repair happens
-  /// in [isProcessedLaunch] and [persist].
   static const String schemaVersionKey = '_notif_launch_dedup_schema_v';
   static const int currentSchemaVersion = 2;
 
-  /// Ensures preference schema is current before reading launch dedup state.
   static Future<void> ensureSchemaCurrent({
     required SharedPreferencesAsync prefs,
   }) async {
@@ -54,7 +34,6 @@ class NotificationLaunchDedup {
     await prefs.setInt(schemaVersionKey, currentSchemaVersion);
   }
 
-  /// Builds the dedup signature for an incoming or stored launch.
   static String? launchSignature({
     int? notificationId,
     String? payload,
@@ -88,9 +67,6 @@ class NotificationLaunchDedup {
       final String? storedSignature = await prefs.getString(
         lastNotifPayloadSigKey,
       );
-      // Bootstrap stores payload signatures; later consume clears pending
-      // response and may persist id-only. Never downgrade p: → i: or hot
-      // restart replays mismatch and re-navigate to Athkar/prayer routes.
       if (storedSignature != null &&
           storedSignature.startsWith('p:') &&
           signature.startsWith('i:')) {
@@ -130,7 +106,6 @@ class NotificationLaunchDedup {
     return prefs.getString(lastNotifPayloadSigKey);
   }
 
-  /// Whether this launch was already handled in [pid].
   static Future<bool> isProcessedLaunch({
     required int? launchNotificationId,
     String? launchPayload,
@@ -159,13 +134,11 @@ class NotificationLaunchDedup {
       if (storedSignature == incomingSignature) {
         return true;
       }
-      if (_isCorruptedIdOnlyReplay(
+      if (_isLegacyIdOnlyReplay(
         storedSignature: storedSignature,
         launchNotificationId: launchNotificationId,
         incomingSignature: incomingSignature,
       )) {
-        // Pre-fix consume wrote id-only over payload sig. Repair cache so the
-        // next hot restart matches by payload instead of replaying Athkar routes.
         await persist(
           notificationId: launchNotificationId,
           payload: launchPayload,
@@ -177,7 +150,6 @@ class NotificationLaunchDedup {
       return false;
     }
 
-    // Backward compatibility for installs that only stored id before payload sig.
     final int? storedId = await prefs.getInt(lastNotifIdKey);
     if (storedId == null) {
       return false;
@@ -185,7 +157,7 @@ class NotificationLaunchDedup {
     return launchNotificationId == null || storedId == launchNotificationId;
   }
 
-  static bool _isCorruptedIdOnlyReplay({
+  static bool _isLegacyIdOnlyReplay({
     required String storedSignature,
     required int? launchNotificationId,
     required String incomingSignature,

@@ -22,6 +22,7 @@ import '../widgets/tutor_session_compact_card.dart';
 import '../widgets/tutor_reject_booking_sheet.dart';
 import '../../domain/policies/session_cancel_eligibility_policy.dart';
 import '../config/quran_sessions_scheduling_analytics_callbacks.dart';
+import '../widgets/quran_sessions_scaffold.dart';
 
 class TeacherDashboardScreen extends StatefulWidget {
   const TeacherDashboardScreen({
@@ -84,26 +85,24 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     final l10n = context.quranSessionsL10n;
     final dashboardState = context.watch<TeacherDashboardBloc>().state;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.teacherDashboardTitle),
-        actions: [
-          if (widget.meetingUrlSettingsBuilder != null)
-            IconButton(
-              icon: const Icon(Icons.link_outlined),
-              tooltip: l10n.teacherExternalMeetingUrlLabel,
-              onPressed: _openMeetingLinkSettings,
-            ),
-          if (widget.onManageSchedule != null &&
-              dashboardState is TeacherDashboardSuccess &&
-              _hasAnyBookableSlots(dashboardState))
-            IconButton(
-              icon: const Icon(Icons.edit_calendar_outlined),
-              tooltip: l10n.editWeeklyTemplate,
-              onPressed: () => _openManageSchedule(source: 'app_bar'),
-            ),
-        ],
-      ),
+    return QuranSessionsScaffold(
+      title: l10n.teacherDashboardTitle,
+      actions: [
+        if (widget.meetingUrlSettingsBuilder != null)
+          IconButton(
+            icon: const Icon(Icons.link_outlined),
+            tooltip: l10n.teacherExternalMeetingUrlLabel,
+            onPressed: _openMeetingLinkSettings,
+          ),
+        if (widget.onManageSchedule != null &&
+            dashboardState is TeacherDashboardSuccess &&
+            _hasAnyBookableSlots(dashboardState))
+          IconButton(
+            icon: const Icon(Icons.edit_calendar_outlined),
+            tooltip: l10n.editWeeklyTemplate,
+            onPressed: () => _openManageSchedule(source: 'app_bar'),
+          ),
+      ],
       body: BlocConsumer<TeacherDashboardBloc, TeacherDashboardState>(
         listener: (context, state) {
           if (state is! TeacherDashboardSuccess) {

@@ -76,6 +76,8 @@ class MockFlutterLocalNotificationsPlatform extends Mock
     with MockPlatformInterfaceMixin
     implements FlutterLocalNotificationsPlatform {
   bool throwOnShow = false;
+  final List<int> cancelledIds = <int>[];
+  final List<int> shownIds = <int>[];
 
   @override
   Future<void> show({
@@ -88,10 +90,13 @@ class MockFlutterLocalNotificationsPlatform extends Mock
     if (throwOnShow) {
       throw PlatformException(code: 'show_failed');
     }
+    shownIds.add(id);
   }
 
   @override
-  Future<void> cancel({required int id, String? tag}) async {}
+  Future<void> cancel({required int id, String? tag}) async {
+    cancelledIds.add(id);
+  }
 
   @override
   Future<void> cancelAll() async {}
@@ -114,6 +119,14 @@ void main() {
     mockNavigator = MockDownloadNotificationNavigator();
     fakeDispatcher = FakeNotificationDispatcher();
     service = DownloadNotificationService(mockNavigator, fakeDispatcher);
+    (FlutterLocalNotificationsPlatform.instance
+            as MockFlutterLocalNotificationsPlatform)
+        .cancelledIds
+        .clear();
+    (FlutterLocalNotificationsPlatform.instance
+            as MockFlutterLocalNotificationsPlatform)
+        .shownIds
+        .clear();
   });
 
   group('initialize', () {
@@ -532,6 +545,41 @@ void main() {
     test('should handle cancelling non-existent notification', () async {
       await service.cancelNotification('non-existent-id');
       expect(service, isNotNull);
+    });
+  });
+
+  group('stableNotificationIdFor', () {
+    test('returns stable id for same download key', () {
+      const String url = 'http://example.com/a.mp3';
+      expect(
+        DownloadNotificationService.stableNotificationIdFor(url),
+        DownloadNotificationService.stableNotificationIdFor(url),
+      );
+    });
+
+    test('normalizes url variants to same notification id', () {
+      expect(
+        DownloadNotificationService.stableNotificationIdFor(
+          'http://example.com//a.mp3',
+        ),
+        DownloadNotificationService.stableNotificationIdFor(
+          'http://example.com/a.mp3',
+        ),
+      );
+    });
+
+    test('stays inside download notification id block', () {
+      final int id = DownloadNotificationService.stableNotificationIdFor(
+        'http://example.com/file.mp3',
+      );
+      expect(
+        id,
+        greaterThanOrEqualTo(DownloadNotificationService.notificationIdOffset),
+      );
+      expect(
+        id,
+        lessThan(DownloadNotificationService.notificationIdRangeEndExclusive),
+      );
     });
   });
 

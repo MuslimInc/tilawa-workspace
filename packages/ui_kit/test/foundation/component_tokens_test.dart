@@ -739,7 +739,10 @@ void main() {
       expect(tokens.bottomNavBackgroundColor, scheme.surface);
       expect(
         tokens.navButtonSelectedBackgroundColor,
-        scheme.primaryContainer,
+        Color.alphaBlend(
+          scheme.primary.withValues(alpha: 0.12),
+          scheme.surface,
+        ),
       );
       expect(
         tokens.sideRailIndicatorColor,
@@ -825,7 +828,10 @@ void main() {
       );
       expect(
         tokens.navButtonSelectedBackgroundColor,
-        scheme.surfaceContainerHighest,
+        Color.alphaBlend(
+          scheme.onSurface.withValues(alpha: 0.12),
+          scheme.surface,
+        ),
       );
     });
 

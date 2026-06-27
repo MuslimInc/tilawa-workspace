@@ -5,6 +5,7 @@ import 'package:quran_sessions/quran_sessions.dart';
 import 'package:quran_sessions_rtc/quran_sessions_rtc.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/core/layout/list_scroll_bottom_padding.dart';
 import 'package:tilawa/features/quran_sessions/quran_sessions_launch_policy.dart';
 import 'package:tilawa/features/settings/presentation/widgets/settings_teacher_capability_scope.dart';
 import 'package:tilawa/features/quran_sessions/presentation/quran_sessions_analytics.dart';
@@ -226,6 +227,7 @@ List<RouteBase> get quranSessionsRoutes => [
         child: _withQuranSessionsTheme(
           MySessionsScreen(
             studentId: studentId,
+            scrollBottomPadding: listScrollBottomPadding,
             resolveTeacherName: _resolveTeacherName,
             createCallControlGateway: _createQuranSessionCallControlGateway,
             createCallTelemetry: _createCallTelemetry,

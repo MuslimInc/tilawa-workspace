@@ -105,7 +105,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final appBarTitle = find.descendant(
-        of: find.byType(AppBar),
+        of: find.byType(TilawaAppBar),
         matching: find.text('Tutors'),
       );
       expect(appBarTitle, findsOneWidget);
@@ -141,7 +141,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final appBarTitle = find.descendant(
-        of: find.byType(AppBar),
+        of: find.byType(TilawaAppBar),
         matching: find.text('المحفظون'),
       );
       expect(appBarTitle, findsOneWidget);

@@ -33,7 +33,7 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    expect(find.text('My wallet'), findsOneWidget);
+    expect(find.text('Wallet'), findsOneWidget);
     expect(
       find.text('Credits appear when refunds are processed.'),
       findsOneWidget,

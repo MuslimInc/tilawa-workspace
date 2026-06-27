@@ -65,6 +65,11 @@ class AppRouter {
   /// launch notification that the splash screen already handled.
   static int? lastProcessedNotificationId;
 
+  /// Payload captured during bootstrap before [pendingLocalNotificationResponse]
+  /// is cleared. Lets [consumePendingNotificationLaunchState] persist a payload
+  /// signature instead of downgrading to id-only storage.
+  static String? lastProcessedNotificationPayload;
+
   static const Duration _notificationNavDedupWindow = Duration(seconds: 3);
   static String? _lastNotificationNavigationSignature;
   static DateTime? _lastNotificationNavigationAt;
@@ -285,13 +290,16 @@ class AppRouter {
   /// Clears notification launch flags after cold-start routing is consumed.
   static void consumePendingNotificationLaunchState() {
     final int? pendingId = pendingLocalNotificationResponse?.id;
-    final String? pendingPayload = pendingLocalNotificationResponse?.payload;
+    final String? pendingPayload =
+        pendingLocalNotificationResponse?.payload ??
+        lastProcessedNotificationPayload;
 
     pendingFcmMessage = null;
     pendingLocalNotificationResponse = null;
     pendingStartupNotificationLaunch = false;
     disableStateRestoration = false;
     clearPendingColdStartRoute();
+    lastProcessedNotificationPayload = null;
     unawaited(
       persistProcessedNotificationLaunch(
         notificationId: pendingId ?? lastProcessedNotificationId,
@@ -356,6 +364,7 @@ class AppRouter {
     pendingStartupNotificationLaunch = false;
     clearPendingColdStartRoute();
     lastProcessedNotificationId = null;
+    lastProcessedNotificationPayload = null;
     _lastNotificationNavigationSignature = null;
     _lastNotificationNavigationAt = null;
     isOnPrayerNotificationStatusRouteOverride = null;
@@ -371,6 +380,7 @@ class AppRouter {
     pendingStartupNotificationLaunch = false;
     clearPendingColdStartRoute();
     lastProcessedNotificationId = null;
+    lastProcessedNotificationPayload = null;
     _lastNotificationNavigationSignature = null;
     _lastNotificationNavigationAt = null;
   }

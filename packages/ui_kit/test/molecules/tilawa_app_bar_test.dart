@@ -437,7 +437,6 @@ void main() {
             appBarBuilder: (context) => TilawaCatalogAppBar.titleOnly(
               context,
               title: 'Tab title',
-              centerTitle: true,
             ),
           ),
         );
@@ -519,7 +518,6 @@ void main() {
             appBarBuilder: (context) => TilawaCatalogAppBar.titleOnly(
               context,
               title: 'Reciters',
-              centerTitle: true,
               showBottomHairline: false,
               showElevationShadow: false,
               // automaticallyImplyLeading omitted — relies on default (true).

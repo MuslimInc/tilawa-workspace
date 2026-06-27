@@ -560,8 +560,14 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @quranSessionsHomeTitle.
   ///
   /// In en, this message translates to:
-  /// **'QuranTutor'**
+  /// **'Learn Quran with your teacher'**
   String get quranSessionsHomeTitle;
+
+  /// No description provided for @quranSessionsHomeAppBarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tutors'**
+  String get quranSessionsHomeAppBarTitle;
 
   /// No description provided for @mySessionsTitle.
   ///
@@ -1720,6 +1726,12 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'Weekly availability'**
   String get availabilityTitle;
+
+  /// No description provided for @availabilityAppBarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Availability'**
+  String get availabilityAppBarTitle;
 
   /// No description provided for @availabilityRecurringBanner.
   ///
@@ -3034,6 +3046,12 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'My wallet'**
   String get walletTitle;
+
+  /// No description provided for @walletAppBarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet'**
+  String get walletAppBarTitle;
 
   /// No description provided for @walletAvailableBalanceLabel.
   ///

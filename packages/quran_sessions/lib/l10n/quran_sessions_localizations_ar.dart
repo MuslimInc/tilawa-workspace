@@ -271,6 +271,9 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get quranSessionsHomeTitle => 'تعلّم القرآن مع محفظك';
 
   @override
+  String get quranSessionsHomeAppBarTitle => 'المحفظون';
+
+  @override
   String get mySessionsTitle => 'جلساتي';
 
   @override
@@ -932,6 +935,9 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
 
   @override
   String get availabilityTitle => 'التوفر الأسبوعي';
+
+  @override
+  String get availabilityAppBarTitle => 'المواعيد';
 
   @override
   String get availabilityRecurringBanner =>
@@ -1650,6 +1656,9 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
 
   @override
   String get walletTitle => 'محفظتي';
+
+  @override
+  String get walletAppBarTitle => 'المحفظة';
 
   @override
   String get walletAvailableBalanceLabel => 'الرصيد المتاح';

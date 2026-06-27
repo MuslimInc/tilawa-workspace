@@ -152,6 +152,16 @@ class MainScreenCubit extends Cubit<MainScreenState> {
     );
   }
 
+  /// Re-tap on the already active bottom-nav tab (scroll to top or refresh).
+  void reselectTab(int index) {
+    final int nextTick = state.tabReselectTick(index) + 1;
+    emit(
+      state.copyWith(
+        tabReselectTicks: {...state.tabReselectTicks, index: nextTick},
+      ),
+    );
+  }
+
   /// Opens reciter search after a double-tap on the active reciters tab item.
   ///
   /// Does not run on the first navigation to the reciters tab; use [selectTab]

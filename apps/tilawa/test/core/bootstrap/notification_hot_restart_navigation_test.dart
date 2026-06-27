@@ -8,6 +8,7 @@ import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/bootstrap/app_startup_tasks.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/navigation/navigation_source.dart';
+import 'package:tilawa/core/navigation/notification_launch_dedup.dart';
 import 'package:tilawa/core/services/notification_startup_service.dart';
 import 'package:tilawa/features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
 import 'package:tilawa/router/app_router.dart';
@@ -80,12 +81,14 @@ void main() {
     int? storedId,
   }) {
     when(
-      mockPrefs.getInt('_last_notif_pid'),
+      mockPrefs.getInt(NotificationLaunchDedup.lastNotifPidKey),
     ).thenAnswer((_) async => storedPid);
     when(
-      mockPrefs.getString('_last_notif_payload_sig'),
+      mockPrefs.getString(NotificationLaunchDedup.lastNotifPayloadSigKey),
     ).thenAnswer((_) async => payloadSig);
-    when(mockPrefs.getInt('_last_notif_id')).thenAnswer((_) async => storedId);
+    when(
+      mockPrefs.getInt(NotificationLaunchDedup.lastNotifIdKey),
+    ).thenAnswer((_) async => storedId);
   }
 
   void stubLaunchProbe({required NotificationAppLaunchDetails? details}) {
@@ -268,7 +271,7 @@ void main() {
     });
 
     test(
-      'corrupted id-only cache is repaired and blocks hot restart replay',
+      'legacy id-only cache is repaired and blocks hot restart replay',
       () async {
         stubLaunchProbe(
           details: launchDetails(
@@ -289,7 +292,7 @@ void main() {
 
         verify(
           mockPrefs.setString(
-            '_last_notif_payload_sig',
+            NotificationLaunchDedup.lastNotifPayloadSigKey,
             'p:$morningAthkarPayload',
           ),
         ).called(1);
@@ -373,6 +376,32 @@ void main() {
 
   group('router consume safety', () {
     test(
+      'consume uses bootstrap payload when pending response was cleared',
+      () async {
+        AppRouter.setPendingColdStartRoute(morningAthkarLocation);
+        AppRouter.lastProcessedNotificationId = morningAthkarNotificationId;
+        AppRouter.lastProcessedNotificationPayload = morningAthkarPayload;
+
+        AppRouter.consumePendingNotificationLaunchState();
+        await Future<void>.delayed(Duration.zero);
+
+        expect(AppRouter.lastProcessedNotificationPayload, isNull);
+        verify(
+          mockPrefs.setString(
+            NotificationLaunchDedup.lastNotifPayloadSigKey,
+            'p:$morningAthkarPayload',
+          ),
+        ).called(1);
+        verifyNever(
+          mockPrefs.setString(
+            NotificationLaunchDedup.lastNotifPayloadSigKey,
+            'i:$morningAthkarNotificationId',
+          ),
+        );
+      },
+    );
+
+    test(
       'consume after bootstrap persist keeps payload signature for hot restart',
       () async {
         stubLaunchProbe(
@@ -388,6 +417,7 @@ void main() {
         );
         AppRouter.setPendingColdStartRoute(morningAthkarLocation);
         AppRouter.lastProcessedNotificationId = morningAthkarNotificationId;
+        AppRouter.lastProcessedNotificationPayload = morningAthkarPayload;
 
         AppRouter.consumePendingNotificationLaunchState();
         AppRouter.resetForTesting();

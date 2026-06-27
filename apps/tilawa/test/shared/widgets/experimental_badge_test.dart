@@ -67,6 +67,24 @@ void main() {
       expect(find.byType(Icon), findsNothing);
     });
 
+    testWidgets('uses foregroundColor override for label text', (tester) async {
+      final lightTheme = AppTheme.getLightTheme(
+        primaryColor: AppColors.defaultPrimary,
+      );
+      await tester.pumpWidget(
+        _wrap(
+          TilawaExperimentalBadge(
+            label: 'Experimental',
+            foregroundColor: lightTheme.colorScheme.onSurface,
+          ),
+          theme: lightTheme,
+        ),
+      );
+
+      final text = tester.widget<Text>(find.text('Experimental'));
+      expect(text.style?.color, lightTheme.colorScheme.onSurface);
+    });
+
     testWidgets('applies light theme caution background color', (tester) async {
       final lightTheme = AppTheme.getLightTheme(
         primaryColor: AppColors.defaultPrimary,

@@ -280,7 +280,10 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get profileCityRequired => 'City is required.';
 
   @override
-  String get quranSessionsHomeTitle => 'QuranTutor';
+  String get quranSessionsHomeTitle => 'Learn Quran with your teacher';
+
+  @override
+  String get quranSessionsHomeAppBarTitle => 'Tutors';
 
   @override
   String get mySessionsTitle => 'My sessions';
@@ -948,6 +951,9 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get availabilityTitle => 'Weekly availability';
+
+  @override
+  String get availabilityAppBarTitle => 'Availability';
 
   @override
   String get availabilityRecurringBanner =>
@@ -1673,6 +1679,9 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get walletTitle => 'My wallet';
+
+  @override
+  String get walletAppBarTitle => 'Wallet';
 
   @override
   String get walletAvailableBalanceLabel => 'Available balance';

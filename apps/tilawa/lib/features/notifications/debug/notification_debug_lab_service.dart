@@ -269,6 +269,7 @@ class NotificationDebugLabService {
     await _prefs.remove(NotificationLaunchDedup.lastNotifIdKey);
     await _prefs.remove(NotificationLaunchDedup.lastNotifPidKey);
     await _prefs.remove(NotificationLaunchDedup.lastNotifPayloadSigKey);
+    await _prefs.remove(NotificationLaunchDedup.schemaVersionKey);
     AppRouter.clearInMemoryNotificationLaunchStateForDebug();
     _logStore.log('dedup cleared');
   }

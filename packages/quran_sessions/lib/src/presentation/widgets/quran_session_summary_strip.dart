@@ -4,8 +4,7 @@ import 'package:quran_sessions/core/l10n_extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/quran_session.dart';
-import '../theme/quran_sessions_theme.dart';
-import 'quran_sessions_surface_card.dart';
+import '../theme/quran_sessions_status_colors.dart';
 
 /// Compact upcoming/past counts and next session hint for My Sessions.
 class QuranSessionSummaryStrip extends StatelessWidget {
@@ -23,8 +22,10 @@ class QuranSessionSummaryStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
-    final feature = context.quranSessionsTheme;
-    final tokens = Theme.of(context).tokens;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final status = context.quranSessionsStatus;
+    final tokens = theme.tokens;
 
     final nextLabel = nextUpcoming == null
         ? null
@@ -34,15 +35,15 @@ class QuranSessionSummaryStrip extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        feature.screenPaddingHorizontal,
-        feature.sectionGap,
-        feature.screenPaddingHorizontal,
-        feature.sectionGap,
+        tokens.spaceMedium,
+        tokens.spaceSmall,
+        tokens.spaceMedium,
+        tokens.spaceSmall,
       ),
-      child: QuranSessionsSurfaceCard(
+      child: TilawaCard(
         padding: EdgeInsets.symmetric(
           horizontal: tokens.spaceMedium,
-          vertical: feature.cardPadding,
+          vertical: tokens.spaceSmall,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -53,13 +54,13 @@ class QuranSessionSummaryStrip extends StatelessWidget {
               children: [
                 _SummaryPill(
                   label: l10n.sessionsSummaryUpcoming(upcomingCount),
-                  background: feature.statusScheduledBackground,
-                  foreground: feature.statusScheduledForeground,
+                  background: status.scheduledBackground,
+                  foreground: status.scheduledForeground,
                 ),
                 _SummaryPill(
                   label: l10n.sessionsSummaryPast(pastCount),
-                  background: feature.accentSoftBackground,
-                  foreground: feature.helperTextColor,
+                  background: scheme.primaryContainer,
+                  foreground: scheme.onSurfaceVariant,
                 ),
               ],
             ),
@@ -67,7 +68,10 @@ class QuranSessionSummaryStrip extends StatelessWidget {
               SizedBox(height: tokens.spaceExtraSmall),
               Text(
                 nextLabel,
-                style: feature.cardMetaStyle,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                  height: 1.3,
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -98,21 +102,20 @@ class _SummaryPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final feature = context.quranSessionsTheme;
-    final tokens = Theme.of(context).tokens;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
 
-    return Container(
+    return TilawaChip(
+      label: label,
+      backgroundColor: background,
+      foregroundColor: foreground,
       padding: EdgeInsets.symmetric(
         horizontal: tokens.spaceSmall,
-        vertical: feature.listItemGap,
+        vertical: tokens.spaceExtraSmall,
       ),
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(feature.chipRadius),
-      ),
-      child: Text(
-        label,
-        style: feature.chipLabelStyle.copyWith(color: foreground),
+      textStyle: theme.textTheme.labelMedium?.copyWith(
+        fontWeight: FontWeight.w600,
+        color: foreground,
       ),
     );
   }

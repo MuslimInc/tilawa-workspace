@@ -55,6 +55,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   @override
   Future<void> initialize() async {
     await _progressSubscription?.cancel();
+    await queueManager.initialize();
     _progressSubscription = downloadService.globalProgressStream.listen(
       (progress) {
         updateDownloadProgress(
@@ -69,6 +70,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
         logger.e('[DownloadsRepository] Error in progress stream: $e');
       },
     );
+    await downloadService.initialize();
     // Ensure queue manager has correct concurrency setting on init
     queueManager.maxConcurrentDownloads = 2;
   }
@@ -854,29 +856,40 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
           );
         }
 
-        // If not active, re-enqueue it
-        if (!isActive) {
-          logger.d(
-            '[DownloadsRepository] Resuming download: id=${download.id} title="${download.title}"',
-          );
-
-          // Ensure status is pending before enqueueing
-          if (download.status != DownloadStatus.pending) {
-            await updateDownload(
-              download.copyWith(status: DownloadStatus.pending),
-            );
-          }
-
-          await queueManager.enqueue(
+        if (isActive) {
+          await queueManager.trackInFlightDownload(
             id: download.id,
             url: download.url,
-            filePath: download.filePath,
             title: download.title,
             reciterName: download.reciterName,
             reciterId: download.reciterId,
+            showNotification: NotificationConfig.enableLocalNotifications,
           );
-          resumedCount++;
+          continue;
         }
+
+        // If not active, re-enqueue it
+        logger.d(
+          '[DownloadsRepository] Resuming download: id=${download.id} title="${download.title}"',
+        );
+
+        // Ensure status is pending before enqueueing
+        if (download.status != DownloadStatus.pending) {
+          await updateDownload(
+            download.copyWith(status: DownloadStatus.pending),
+          );
+        }
+
+        await queueManager.enqueue(
+          id: download.id,
+          url: download.url,
+          filePath: download.filePath,
+          title: download.title,
+          reciterName: download.reciterName,
+          reciterId: download.reciterId,
+          showNotification: NotificationConfig.enableLocalNotifications,
+        );
+        resumedCount++;
       }
     }
 

@@ -15,6 +15,7 @@ import '../failure_ui/quran_sessions_failure_ui.dart';
 import '../widgets/availability_day_hours_row.dart';
 import '../widgets/availability_override_sheet.dart';
 import '../widgets/availability_vacation_dialogs.dart';
+import '../widgets/quran_sessions_scaffold.dart';
 import '../widgets/time_range_editor_sheet.dart';
 
 /// MENA-first curated IANA zones offered in the timezone picker.
@@ -126,25 +127,23 @@ class _WeeklyAvailabilityScreenState extends State<WeeklyAvailabilityScreen>
           Navigator.of(context).pop();
         }
       },
-      child: Scaffold(
-        appBar: TilawaAppBar(
-          title: l10n.availabilityTitle,
-          bottom: PreferredSize(
-            preferredSize: Size.fromHeight(tabBarBottomExtent),
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(
-                tokens.spaceLarge,
-                tokens.spaceSmall,
-                tokens.spaceLarge,
-                tokens.spaceSmall,
-              ),
-              child: TilawaTabBar(
-                controller: _tabController,
-                tabs: [
-                  Tab(text: l10n.availabilityTabHours),
-                  Tab(text: l10n.availabilityTabOverrides),
-                ],
-              ),
+      child: QuranSessionsScaffold(
+        title: l10n.availabilityAppBarTitle,
+        appBarBottom: PreferredSize(
+          preferredSize: Size.fromHeight(tabBarBottomExtent),
+          child: Padding(
+            padding: EdgeInsetsDirectional.fromSTEB(
+              tokens.spaceLarge,
+              tokens.spaceSmall,
+              tokens.spaceLarge,
+              tokens.spaceSmall,
+            ),
+            child: TilawaTabBar(
+              controller: _tabController,
+              tabs: [
+                Tab(text: l10n.availabilityTabHours),
+                Tab(text: l10n.availabilityTabOverrides),
+              ],
             ),
           ),
         ),

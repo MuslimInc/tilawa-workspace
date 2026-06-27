@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:quran_sessions/src/presentation/layout/quran_sessions_scroll_padding.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../helpers/fakes/fake_booking_repository.dart';
@@ -236,5 +237,56 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Reschedule'), findsOneWidget);
+  });
+
+  testWidgets('list reserves comfortable scroll bottom padding', (
+    tester,
+  ) async {
+    final start = DateTime.now().add(const Duration(hours: 3));
+    await _pumpMySessions(
+      tester,
+      MySessionsSuccess(
+        upcoming: [
+          makeSession(
+            id: 'up_bottom_pad',
+            startsAt: start,
+            endsAt: start.add(const Duration(hours: 1)),
+          ),
+        ],
+        past: const [],
+      ),
+    );
+
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -800));
+    await tester.pumpAndSettle();
+
+    final cardBottom = tester.getBottomLeft(find.byType(QuranSessionCard));
+    final expectedPadding = quranSessionsDefaultScrollBottomPadding(
+      tester.element(find.byType(CustomScrollView)),
+    );
+
+    expect(800 - cardBottom.dy, greaterThanOrEqualTo(expectedPadding - 1));
+  });
+
+  testWidgets('upcoming actions align to the trailing edge', (tester) async {
+    final start = DateTime.now().add(const Duration(hours: 3));
+    await _pumpMySessions(
+      tester,
+      MySessionsSuccess(
+        upcoming: [
+          makeSession(
+            id: 'up_actions',
+            startsAt: start,
+            endsAt: start.add(const Duration(hours: 1)),
+          ),
+        ],
+        past: const [],
+      ),
+    );
+
+    final cardRect = tester.getRect(find.byType(QuranSessionCard));
+    final menuRect = tester.getRect(find.byIcon(Icons.more_vert));
+
+    expect(menuRect.center.dx, greaterThan(cardRect.center.dx));
   });
 }

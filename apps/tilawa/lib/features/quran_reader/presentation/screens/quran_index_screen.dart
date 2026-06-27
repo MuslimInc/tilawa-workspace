@@ -56,7 +56,7 @@ class _QuranIndexScreenState extends State<QuranIndexScreen> {
     return Scaffold(
       appBar: TilawaCatalogAppBar(
         preferredHeight: TilawaAppBarConfig.catalogTitleOnlyHeight(context),
-        centerTitle: true,
+        centerTitle: false,
         titleWidget: Text(
           context.l10n.quranHubTitle,
           style: theme.textTheme.titleMedium?.copyWith(

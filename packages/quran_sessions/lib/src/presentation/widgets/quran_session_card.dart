@@ -7,10 +7,8 @@ import '../../domain/entities/quran_session.dart';
 import '../../domain/entities/session_call_type.dart';
 import '../../domain/entities/session_lifecycle_status.dart';
 import '../session_join/session_join_ui_state.dart';
-import '../theme/quran_sessions_theme.dart';
 import 'quran_session_action_menu.dart';
 import 'quran_session_status_chip.dart';
-import 'quran_sessions_surface_card.dart';
 
 /// Compact student session card for My Sessions dashboard.
 class QuranSessionCard extends StatelessWidget {
@@ -45,14 +43,20 @@ class QuranSessionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final feature = context.quranSessionsTheme;
+    final scheme = Theme.of(context).colorScheme;
     final tokens = Theme.of(context).tokens;
 
     return Padding(
-      padding: feature.cardPaddingInsets(),
-      child: QuranSessionsSurfaceCard(
-        highlighted: highlighted,
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceMedium,
+        vertical: tokens.spaceExtraSmall,
+      ),
+      child: TilawaCard(
         onTap: onTap ?? onViewDetails,
+        padding: EdgeInsets.all(tokens.spaceSmall),
+        borderColor: highlighted
+            ? scheme.primary.withValues(alpha: 0.35)
+            : null,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -100,8 +104,9 @@ class _SessionHeaderRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final feature = context.quranSessionsTheme;
-    final tokens = Theme.of(context).tokens;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final tokens = theme.tokens;
     final startsSoon = _isStartingSoon(session, now);
 
     return Row(
@@ -113,7 +118,10 @@ class _SessionHeaderRow extends StatelessWidget {
                   teacherName!,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: feature.cardTitleStyle,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: scheme.onSurface,
+                  ),
                 ),
         ),
         QuranSessionStatusChip(session: session, startsSoon: startsSoon),
@@ -121,7 +129,7 @@ class _SessionHeaderRow extends StatelessWidget {
         Icon(
           _callTypeIcon(session.callType),
           size: tokens.iconSizeSmall,
-          color: feature.helperTextColor,
+          color: scheme.onSurfaceVariant,
           semanticLabel: context.quranSessionsL10n.callTypeLabel(
             session.callType,
           ),
@@ -151,8 +159,9 @@ class _SessionDateTimeRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final feature = context.quranSessionsTheme;
-    final tokens = Theme.of(context).tokens;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final tokens = theme.tokens;
     final locale = Localizations.localeOf(context).languageCode;
     final localStart = session.startsAt.toLocal();
     final dayFmt = DateFormat('EEEE', locale);
@@ -169,7 +178,10 @@ class _SessionDateTimeRow extends StatelessWidget {
         Flexible(
           child: Text(
             timeFmt.format(localStart),
-            style: feature.cardTitleStyle,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: scheme.onSurface,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -178,7 +190,10 @@ class _SessionDateTimeRow extends StatelessWidget {
         Expanded(
           child: Text(
             context.quranSessionsL10n.callTypeLabel(session.callType),
-            style: feature.cardMetaStyle,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: scheme.onSurfaceVariant,
+              height: 1.3,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.end,
@@ -197,8 +212,9 @@ class _DateChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final feature = context.quranSessionsTheme;
-    final tokens = Theme.of(context).tokens;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final tokens = theme.tokens;
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -206,20 +222,27 @@ class _DateChip extends StatelessWidget {
         vertical: tokens.spaceExtraSmall,
       ),
       decoration: BoxDecoration(
-        color: feature.accentSoftBackground,
-        borderRadius: BorderRadius.circular(feature.dateChipRadius),
+        color: scheme.primaryContainer,
+        borderRadius: BorderRadius.circular(
+          tokens.resolveRadius(family: TilawaRadiusFamily.chip),
+        ),
       ),
       child: Column(
         children: [
           Text(
             top,
-            style: feature.summaryLabelStyle,
+            style: theme.textTheme.labelMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
           Text(
             bottom,
-            style: feature.cardMetaStyle,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: scheme.onSurfaceVariant,
+              height: 1.3,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -251,8 +274,9 @@ class _UpcomingActionsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
-    final feature = context.quranSessionsTheme;
-    final tokens = Theme.of(context).tokens;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final tokens = theme.tokens;
 
     final joinUiState = resolveSessionJoinUiState(
       lifecycleStatus: session.effectiveLifecycleStatus,
@@ -271,100 +295,52 @@ class _UpcomingActionsRow extends StatelessWidget {
     final joinEnabled = joinUiState == SessionJoinUiState.joinAvailable;
     final minutesUntilStart = session.startsAt.difference(now).inMinutes;
 
+    final showCountdown =
+        joinUiState == SessionJoinUiState.notStarted && minutesUntilStart > 0;
+
+    final actionRow = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (showJoin) ...[
+          TilawaButton(
+            text: joinEnabled ? l10n.joinSessionNow : l10n.joinSession,
+            onPressed: joinEnabled && !isJoinLoading ? onJoin : null,
+            isLoading: isJoinLoading,
+            size: TilawaButtonSize.small,
+          ),
+          SizedBox(width: tokens.spaceSmall),
+        ],
+        QuranSessionActionMenu(
+          onViewDetails: onViewDetails,
+          onReschedule: onReschedule,
+          onCancel: onCancel,
+        ),
+      ],
+    );
+
     return Padding(
       padding: EdgeInsets.only(top: tokens.spaceSmall),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          if (joinUiState == SessionJoinUiState.notStarted &&
-              minutesUntilStart > 0)
-            Expanded(
-              child: Text(
-                l10n.sessionStartsInMinutes(minutesUntilStart),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: feature.cardMetaStyle,
+          if (showCountdown) ...[
+            Text(
+              l10n.sessionStartsInMinutes(minutesUntilStart),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+                height: 1.3,
               ),
-            )
-          else
-            const Spacer(),
-          if (showJoin) ...[
-            _SessionJoinButton(
-              label: joinEnabled ? l10n.joinSessionNow : l10n.joinSession,
-              enabled: joinEnabled && !isJoinLoading,
-              isLoading: isJoinLoading,
-              onPressed: onJoin,
             ),
-            SizedBox(width: tokens.spaceExtraSmall),
+            SizedBox(height: tokens.spaceExtraSmall),
           ],
-          QuranSessionActionMenu(
-            onViewDetails: onViewDetails,
-            onReschedule: onReschedule,
-            onCancel: onCancel,
+          Align(
+            alignment: AlignmentDirectional.centerEnd,
+            child: actionRow,
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _SessionJoinButton extends StatelessWidget {
-  const _SessionJoinButton({
-    required this.label,
-    required this.enabled,
-    required this.isLoading,
-    required this.onPressed,
-  });
-
-  final String label;
-  final bool enabled;
-  final bool isLoading;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final feature = context.quranSessionsTheme;
-    final tokens = Theme.of(context).tokens;
-    final foreground = enabled
-        ? feature.onPrimaryColor
-        : feature.joinUnavailable;
-    final background = enabled
-        ? feature.joinAvailable
-        : feature.disabledBackground;
-    final border = enabled ? feature.joinAvailable : feature.disabledBorder;
-
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        minWidth: tokens.minInteractiveDimension,
-        minHeight: tokens.minInteractiveDimension,
-      ),
-      child: Material(
-        color: background,
-        shape: StadiumBorder(side: BorderSide(color: border)),
-        child: InkWell(
-          customBorder: const StadiumBorder(),
-          onTap: enabled && !isLoading ? onPressed : null,
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: tokens.spaceMedium),
-            child: Center(
-              child: isLoading
-                  ? SizedBox.square(
-                      dimension: tokens.iconSizeSmall,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: foreground,
-                      ),
-                    )
-                  : Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: feature.chipLabelStyle.copyWith(
-                        color: foreground,
-                      ),
-                    ),
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -390,20 +366,28 @@ class _PastActionsRow extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.only(top: tokens.spaceSmall),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          if (onViewDetails != null)
-            TextButton(
-              onPressed: onViewDetails,
-              child: Text(l10n.viewSessionDetails),
-            ),
-          if (onBookAgain != null)
-            TextButton(
-              onPressed: onBookAgain,
-              child: Text(l10n.bookAgainAction),
-            ),
-        ],
+      child: Align(
+        alignment: AlignmentDirectional.centerEnd,
+        child: Wrap(
+          alignment: WrapAlignment.end,
+          spacing: tokens.spaceExtraSmall,
+          children: [
+            if (onViewDetails != null)
+              TilawaButton(
+                text: l10n.viewSessionDetails,
+                onPressed: onViewDetails,
+                variant: TilawaButtonVariant.ghost,
+                size: TilawaButtonSize.small,
+              ),
+            if (onBookAgain != null)
+              TilawaButton(
+                text: l10n.bookAgainAction,
+                onPressed: onBookAgain,
+                variant: TilawaButtonVariant.ghost,
+                size: TilawaButtonSize.small,
+              ),
+          ],
+        ),
       ),
     );
   }

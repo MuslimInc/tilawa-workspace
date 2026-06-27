@@ -258,10 +258,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeQuickToolsTitle => 'Quick tools';
 
   @override
-  String get homeFeaturedTutorEyebrow => 'Featured';
-
-  @override
-  String get homeFeaturedTutorTitle => 'QuranTutor';
+  String get homeFeaturedTutorTitle => 'Learn Quran';
 
   @override
   String get homeFeaturedTutorSubtitle =>

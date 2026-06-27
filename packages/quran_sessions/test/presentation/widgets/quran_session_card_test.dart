@@ -95,6 +95,37 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('countdown and overflow menu do not overlap in Arabic RTL', (
+      tester,
+    ) async {
+      final now = DateTime.now();
+      final start = now.add(const Duration(hours: 3));
+
+      await pumpInApp(
+        tester,
+        QuranSessionCard(
+          session: makeSession(
+            startsAt: start,
+            endsAt: start.add(const Duration(hours: 1)),
+          ),
+          now: now,
+          variant: QuranSessionCardVariant.upcoming,
+          onJoin: () {},
+          onViewDetails: () {},
+          onCancel: () {},
+        ),
+        locale: const Locale('ar'),
+        textDirection: TextDirection.rtl,
+        surfaceSize: const Size(360, 800),
+      );
+
+      final countdown = tester.getRect(find.textContaining('يبدأ بعد'));
+      final menu = tester.getRect(find.byIcon(Icons.more_vert));
+
+      expect(countdown.bottom, lessThanOrEqualTo(menu.top));
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('compact card stays readable at text scale 1.4', (
       tester,
     ) async {

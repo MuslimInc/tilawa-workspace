@@ -122,7 +122,7 @@ class DownloadServiceImpl implements DownloadServiceInterface {
       // Use step 3 to reduce frequency of updates (every 3%)
       await _flutterDownloader.registerCallback(downloadCallback, step: 3);
 
-      // Populate initial cache
+      // Populate initial cache and replay platform state after hot restart.
       try {
         final List<DownloadTask>? tasks = await _flutterDownloader.loadTasks();
         if (tasks != null) {
@@ -135,6 +135,14 @@ class DownloadServiceImpl implements DownloadServiceInterface {
             if (task.status == DownloadTaskStatus.running ||
                 task.status == DownloadTaskStatus.enqueued) {
               _activeDownloadUrls.add(task.url);
+            }
+
+            if (task.status == DownloadTaskStatus.running ||
+                task.status == DownloadTaskStatus.enqueued ||
+                task.status == DownloadTaskStatus.complete) {
+              unawaited(
+                _handleTaskUpdate(task.taskId, task.status, task.progress),
+              );
             }
           }
         }

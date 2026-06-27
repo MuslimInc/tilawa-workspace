@@ -102,12 +102,14 @@ class AvailabilityRangePill extends StatelessWidget {
       alwaysUse24HourFormat: use24,
     );
 
-    return Material(
-      color: scheme.surfaceContainerHighest,
+    return TilawaInteractiveSurface(
+      onTap: onTap,
       borderRadius: BorderRadius.circular(tokens.radiusMedium),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(tokens.radiusMedium),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(tokens.radiusMedium),
+        ),
         child: ConstrainedBox(
           constraints: BoxConstraints(
             minHeight: availabilityRangeChipHeight(context),
@@ -123,9 +125,12 @@ class AvailabilityRangePill extends StatelessWidget {
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 SizedBox(width: tokens.spaceSmall),
-                InkWell(
+                TilawaInteractiveSurface(
                   onTap: onRemove,
-                  customBorder: const CircleBorder(),
+                  borderRadius: BorderRadius.circular(tokens.iconSizeSmall),
+                  semanticLabel: MaterialLocalizations.of(
+                    context,
+                  ).deleteButtonTooltip,
                   child: Icon(Icons.close, size: tokens.iconSizeSmall),
                 ),
               ],
@@ -149,30 +154,29 @@ class AvailabilityAddRangeButton extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final l10n = context.quranSessionsL10n;
 
-    return Semantics(
-      button: true,
-      label: l10n.availabilityAddRange,
-      child: Material(
-        color: scheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(tokens.radiusMedium),
-        child: InkWell(
-          onTap: onTap,
+    return TilawaInteractiveSurface(
+      onTap: onTap,
+      semanticLabel: l10n.availabilityAddRange,
+      borderRadius: BorderRadius.circular(tokens.radiusMedium),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(tokens.radiusMedium),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: availabilityRangeChipHeight(context),
-            ),
-            child: Padding(
-              padding: availabilityRangeChipPadding(tokens),
-              child: Align(
-                alignment: AlignmentDirectional.center,
-                widthFactor: 1,
-                heightFactor: 1,
-                child: Icon(
-                  Icons.add_circle_outline,
-                  size: tokens.iconSizeSmall,
-                  color: scheme.primary,
-                ),
+        ),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: availabilityRangeChipHeight(context),
+          ),
+          child: Padding(
+            padding: availabilityRangeChipPadding(tokens),
+            child: Align(
+              alignment: AlignmentDirectional.center,
+              widthFactor: 1,
+              heightFactor: 1,
+              child: Icon(
+                Icons.add_circle_outline,
+                size: tokens.iconSizeSmall,
+                color: scheme.primary,
               ),
             ),
           ),

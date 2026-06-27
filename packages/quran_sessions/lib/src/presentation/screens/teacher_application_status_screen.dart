@@ -11,6 +11,7 @@ import '../blocs/teacher_application/teacher_application_bloc.dart';
 import '../blocs/teacher_application/teacher_application_event.dart';
 import '../blocs/teacher_application/teacher_application_state.dart';
 import '../failure_ui/quran_sessions_failure_ui.dart';
+import '../widgets/quran_sessions_scaffold.dart';
 
 /// Displays the current status of a teacher's application.
 ///
@@ -73,8 +74,8 @@ class _TeacherApplicationStatusScreenState
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.applicationStatusTitle)),
+    return QuranSessionsScaffold(
+      title: l10n.applicationStatusTitle,
       body: MultiBlocListener(
         listeners: [
           BlocListener<TeacherApplicationBloc, TeacherApplicationState>(

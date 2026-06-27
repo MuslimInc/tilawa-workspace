@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../layout/quran_sessions_scroll_padding.dart';
+
 enum _MySessionsTab { upcoming, past, cancelled }
 
 class MySessionsScreen extends StatefulWidget {
@@ -10,6 +12,7 @@ class MySessionsScreen extends StatefulWidget {
     super.key,
     required this.studentId,
     this.resolveTeacherName,
+    this.scrollBottomPadding,
     this.onRescheduleRequested,
     this.onSessionDetailRequested,
     this.onBookAgainRequested,
@@ -21,6 +24,10 @@ class MySessionsScreen extends StatefulWidget {
   final String studentId;
 
   final String? Function(String teacherId)? resolveTeacherName;
+
+  /// Host-provided bottom inset (mini-player, shell tabs). Falls back to
+  /// [quranSessionsDefaultScrollBottomPadding].
+  final QuranSessionsScrollBottomPaddingBuilder? scrollBottomPadding;
 
   final void Function({
     required String bookingId,
@@ -160,6 +167,7 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
               selectedTab: _selectedTab,
               onTabChanged: (tab) => setState(() => _selectedTab = tab),
               studentId: widget.studentId,
+              scrollBottomPadding: widget.scrollBottomPadding,
               resolveTeacherName: widget.resolveTeacherName,
               onRescheduleRequested: widget.onRescheduleRequested,
               onSessionDetailRequested: widget.onSessionDetailRequested,
@@ -228,6 +236,7 @@ class _SuccessBody extends StatelessWidget {
     required this.selectedTab,
     required this.onTabChanged,
     required this.studentId,
+    this.scrollBottomPadding,
     required this.resolveTeacherName,
     required this.onRescheduleRequested,
     required this.onSessionDetailRequested,
@@ -241,6 +250,7 @@ class _SuccessBody extends StatelessWidget {
   final _MySessionsTab selectedTab;
   final ValueChanged<_MySessionsTab> onTabChanged;
   final String studentId;
+  final QuranSessionsScrollBottomPaddingBuilder? scrollBottomPadding;
   final String? Function(String teacherId)? resolveTeacherName;
   final void Function({
     required String bookingId,
@@ -259,6 +269,10 @@ class _SuccessBody extends StatelessWidget {
     final l10n = context.quranSessionsL10n;
     final tokens = Theme.of(context).tokens;
     final now = DateTime.now();
+    final bottomPadding =
+        (scrollBottomPadding ?? quranSessionsDefaultScrollBottomPadding)(
+          context,
+        );
     final cancelled = _cancelledSessions(success);
     final sessions = switch (selectedTab) {
       _MySessionsTab.upcoming => success.upcoming,
@@ -282,11 +296,11 @@ class _SuccessBody extends StatelessWidget {
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.only(
-                top: tokens.spaceSmall,
-                bottom: tokens.spaceSmall,
+              padding: EdgeInsets.symmetric(
+                horizontal: tokens.spaceMedium,
+                vertical: tokens.spaceSmall,
               ),
-              child: QuranSessionsSegmentedTabs<_MySessionsTab>(
+              child: TilawaSegmentedControl<_MySessionsTab>(
                 selectedValue: selectedTab,
                 onValueChanged: onTabChanged,
                 segments: [
@@ -385,6 +399,10 @@ class _SuccessBody extends StatelessWidget {
                 ),
               ),
             ),
+          SliverPadding(
+            padding: EdgeInsets.only(bottom: bottomPadding),
+            sliver: const SliverToBoxAdapter(child: SizedBox.shrink()),
+          ),
         ],
       ),
     );

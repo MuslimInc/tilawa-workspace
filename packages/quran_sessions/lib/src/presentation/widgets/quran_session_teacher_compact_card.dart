@@ -4,67 +4,59 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/quran_teacher.dart';
 import '../models/teacher_availability_summary.dart';
-import '../theme/quran_sessions_theme.dart';
+import '../theme/quran_sessions_status_colors.dart';
 import 'quran_session_price_chip.dart';
-import 'quran_sessions_metadata_chip.dart';
-import 'quran_sessions_surface_card.dart';
 import 'teacher_initials_avatar.dart';
 
-/// Single coherent teacher row for the discovery list.
+/// Tappable teacher discovery row — whole card opens the teacher profile.
 ///
-/// One adaptive, [Directionality]-aware layout drives both Arabic (RTL) and
-/// English (LTR): an avatar + identity column (name, grouped metadata, optional
-/// availability hint) followed by a compact, end-aligned action pair. The whole
-/// surface opens the profile; the inner buttons own their own actions and win
-/// hit-testing, so no tap double-navigates.
+/// No inline actions: booking and profile details live on the profile screen.
 class QuranSessionTeacherCompactCard extends StatelessWidget {
   const QuranSessionTeacherCompactCard({
     super.key,
     required this.teacher,
     required this.onTap,
     this.availabilitySummary,
-    this.onBook,
-    this.onViewProfile,
   });
 
   final QuranTeacher teacher;
   final VoidCallback onTap;
   final TeacherAvailabilitySummary? availabilitySummary;
-  final VoidCallback? onBook;
-  final VoidCallback? onViewProfile;
 
   @override
   Widget build(BuildContext context) {
-    final feature = context.quranSessionsTheme;
+    final scheme = Theme.of(context).colorScheme;
+    final tokens = Theme.of(context).tokens;
 
     return Padding(
-      padding: feature.cardPaddingInsets(),
-      child: QuranSessionsSurfaceCard(
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceMedium,
+        vertical: tokens.spaceExtraSmall,
+      ),
+      child: TilawaCard(
         onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        padding: EdgeInsets.all(tokens.spaceMedium),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TeacherInitialsAvatar(
-                  displayName: teacher.displayName,
-                  radius: feature.listAvatarRadius,
-                  avatarUrl: teacher.avatarUrl,
-                ),
-                SizedBox(width: feature.cardGap),
-                Expanded(
-                  child: _TeacherIdentity(
-                    teacher: teacher,
-                    availabilitySummary: availabilitySummary,
-                  ),
-                ),
-              ],
+            TeacherInitialsAvatar(
+              displayName: teacher.displayName,
+              radius: tokens.iconSizeSmall + 2,
+              avatarUrl: teacher.avatarUrl,
             ),
-            SizedBox(height: feature.cardGap),
-            _TeacherActions(
-              onBook: onBook ?? onTap,
-              onViewProfile: onViewProfile ?? onTap,
+            SizedBox(width: tokens.spaceMedium),
+            Expanded(
+              child: _TeacherIdentityBlock(
+                teacher: teacher,
+                availabilitySummary: availabilitySummary,
+              ),
+            ),
+            SizedBox(width: tokens.spaceTiny),
+            Icon(
+              Icons.chevron_right_rounded,
+              size: tokens.iconSizeSmall,
+              color: scheme.onSurfaceVariant,
+              textDirection: Directionality.of(context),
             ),
           ],
         ),
@@ -73,9 +65,8 @@ class QuranSessionTeacherCompactCard extends StatelessWidget {
   }
 }
 
-/// Name + grouped metadata (rating · specialization · price) + availability.
-class _TeacherIdentity extends StatelessWidget {
-  const _TeacherIdentity({
+class _TeacherIdentityBlock extends StatelessWidget {
+  const _TeacherIdentityBlock({
     required this.teacher,
     required this.availabilitySummary,
   });
@@ -85,35 +76,43 @@ class _TeacherIdentity extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final feature = context.quranSessionsTheme;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final l10n = context.quranSessionsL10n;
+    final tokens = theme.tokens;
     final summary = availabilitySummary;
+    final denseGap = tokens.spaceTiny;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           teacher.displayName,
-          style: feature.cardTitleStyle,
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: scheme.onSurface,
+          ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.start,
         ),
-        SizedBox(height: feature.listItemGap),
+        SizedBox(height: tokens.spaceExtraSmall),
         Wrap(
-          spacing: feature.listItemGap,
-          runSpacing: feature.listItemGap,
+          spacing: tokens.spaceExtraSmall,
+          runSpacing: denseGap,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             _InlineRating(teacher: teacher),
             if (teacher.specializations.isNotEmpty)
-              QuranSessionsMetadataChip(
+              TilawaMetadataChip(
                 label: l10n.specializationLabel(teacher.specializations.first),
               ),
             QuranSessionPriceChip(teacher: teacher),
           ],
         ),
         if (summary != null) ...[
-          SizedBox(height: feature.listItemGap),
+          SizedBox(height: denseGap),
           _AvailabilityHint(summary: summary),
         ],
       ],
@@ -129,8 +128,9 @@ class _InlineRating extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
-    final feature = context.quranSessionsTheme;
-    final tokens = Theme.of(context).tokens;
+    final theme = Theme.of(context);
+    final status = context.quranSessionsStatus;
+    final tokens = theme.tokens;
     final isNew = teacher.totalReviews == 0;
 
     return Row(
@@ -139,7 +139,7 @@ class _InlineRating extends StatelessWidget {
         Icon(
           Icons.star_rounded,
           size: tokens.iconSizeSmall,
-          color: feature.ratingColor,
+          color: status.rating,
         ),
         SizedBox(width: tokens.spaceTiny),
         Text(
@@ -147,7 +147,10 @@ class _InlineRating extends StatelessWidget {
               ? l10n.teacherNewRating
               : '${teacher.averageRating.toStringAsFixed(1)}'
                     ' (${teacher.totalReviews})',
-          style: feature.priceBadgeStyle.copyWith(color: feature.ratingColor),
+          style: theme.textTheme.labelSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: status.rating,
+          ),
         ),
       ],
     );
@@ -162,11 +165,12 @@ class _AvailabilityHint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
-    final feature = context.quranSessionsTheme;
-    final tokens = Theme.of(context).tokens;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final tokens = theme.tokens;
     final color = summary.hasAvailableSlots
-        ? feature.success
-        : feature.helperTextColor;
+        ? scheme.tertiary
+        : scheme.onSurfaceVariant;
 
     return Row(
       children: [
@@ -178,42 +182,14 @@ class _AvailabilityHint extends StatelessWidget {
               l10n,
               localeName: Localizations.localeOf(context).toString(),
             ),
-            style: feature.cardMetaStyle.copyWith(color: color),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: color,
+              height: 1.3,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.start,
           ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Compact, end-aligned action pair: secondary "View profile" + primary "Book".
-class _TeacherActions extends StatelessWidget {
-  const _TeacherActions({required this.onBook, required this.onViewProfile});
-
-  final VoidCallback onBook;
-  final VoidCallback onViewProfile;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.quranSessionsL10n;
-    final feature = context.quranSessionsTheme;
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        TilawaButton(
-          text: l10n.teacherBookAction,
-          size: TilawaButtonSize.small,
-          onPressed: onBook,
-        ),
-        SizedBox(width: feature.listItemGap),
-        TilawaButton(
-          text: l10n.viewTeacherProfile,
-          variant: TilawaButtonVariant.ghost,
-          size: TilawaButtonSize.small,
-          onPressed: onViewProfile,
         ),
       ],
     );

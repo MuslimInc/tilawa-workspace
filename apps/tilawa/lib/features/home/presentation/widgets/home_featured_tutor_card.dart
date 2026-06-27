@@ -1,7 +1,6 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_dashboard_elevated_surface.dart';
 import 'package:tilawa/features/quran_sessions/quran_sessions_feature_flags.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -25,45 +24,74 @@ class HomeFeaturedTutorCard extends StatelessWidget {
       family: TilawaRadiusFamily.decorative,
     );
 
-    return Semantics(
-      button: true,
-      label: context.l10n.homeFeaturedTutorTitle,
+    final BorderRadius borderRadius = BorderRadius.circular(radius);
+
+    return TilawaInteractiveSurface(
+      onTap: () => openHomeQuranSessions(context),
+      borderRadius: borderRadius,
+      stateLayerColor: accent,
+      semanticLabel: context.l10n.homeFeaturedTutorTitle,
+      semanticHint: context.l10n.homeFeaturedTutorCta,
       child: DecoratedBox(
-        decoration: HomeDashboardElevatedSurface.decoration(
-          context,
-          borderRadius: BorderRadius.circular(radius),
+        decoration: BoxDecoration(
+          borderRadius: borderRadius,
+          boxShadow: <BoxShadow>[
+            BoxShadow(
+              color: theme.colorScheme.shadow.withValues(
+                alpha: screenTokens.homePrayerHeroShadowOpacity,
+              ),
+              offset: Offset(0, tokens.spaceExtraSmall.toDouble()),
+              blurRadius: tokens.spaceLarge.toDouble(),
+            ),
+          ],
         ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () => openHomeQuranSessions(context),
-            borderRadius: BorderRadius.circular(radius),
-            splashColor: accent.withValues(alpha: 0.10),
-            highlightColor: accent.withValues(alpha: 0.05),
-            child: Padding(
-              padding: EdgeInsetsDirectional.symmetric(
-                horizontal: tokens.spaceMedium,
-                vertical: tokens.spaceSmall + tokens.spaceExtraSmall,
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                spacing: tokens.spaceSmall + tokens.spaceExtraSmall,
-                children: [
-                  _FeaturedTutorAvatar(accent: accent),
-                  Expanded(
-                    child: _FeaturedTutorCopy(
-                      accent: accent,
-                      ctaBackground: accent,
-                      ctaForeground:
-                          screenTokens.homeFeaturedTutorCtaForeground,
-                      eyebrow: context.l10n.homeFeaturedTutorEyebrow,
-                      title: context.l10n.homeFeaturedTutorTitle,
-                      subtitle: context.l10n.homeFeaturedTutorSubtitle,
-                      cta: context.l10n.homeFeaturedTutorCta,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: borderRadius,
+            gradient: screenTokens.featuredTutorGradient(),
+          ),
+          child: Padding(
+            padding: EdgeInsetsDirectional.all(tokens.spaceMedium),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  spacing: tokens.spaceSmall,
+                  children: [
+                    _FeaturedTutorIconWell(accent: accent),
+                    Expanded(
+                      child: Text(
+                        context.l10n.homeFeaturedTutorTitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: theme.colorScheme.onSurface,
+                          fontWeight: FontWeight.w700,
+                          height: 1.15,
+                        ),
+                      ),
                     ),
+                  ],
+                ),
+                SizedBox(height: tokens.spaceExtraSmall),
+                Text(
+                  context.l10n.homeFeaturedTutorSubtitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    height: 1.3,
                   ),
-                ],
-              ),
+                ),
+                SizedBox(height: tokens.spaceMedium),
+                _FeaturedTutorFooter(
+                  ctaLabel: context.l10n.homeFeaturedTutorCta,
+                  badgeLabel: context.l10n.experimentalBadgeLabel,
+                  accent: accent,
+                  ctaForeground: screenTokens.homeFeaturedTutorCtaForeground,
+                ),
+              ],
             ),
           ),
         ),
@@ -72,100 +100,108 @@ class HomeFeaturedTutorCard extends StatelessWidget {
   }
 }
 
-class _FeaturedTutorCopy extends StatelessWidget {
-  const _FeaturedTutorCopy({
+class _FeaturedTutorFooter extends StatelessWidget {
+  const _FeaturedTutorFooter({
+    required this.ctaLabel,
+    required this.badgeLabel,
     required this.accent,
-    required this.ctaBackground,
     required this.ctaForeground,
-    required this.eyebrow,
-    required this.title,
-    required this.subtitle,
-    required this.cta,
   });
 
+  final String ctaLabel;
+  final String badgeLabel;
   final Color accent;
-  final Color ctaBackground;
   final Color ctaForeground;
-  final String eyebrow;
-  final String title;
-  final String subtitle;
-  final String cta;
+
+  double _minFooterRowWidth(BuildContext context) {
+    final tokens = context.tokens;
+    final theme = Theme.of(context);
+    final textDirection = Directionality.of(context);
+    final badgeTokens = theme.componentTokens.experimentalBadge;
+
+    final ctaStyle = theme.textTheme.labelMedium?.copyWith(
+      fontWeight: FontWeight.w700,
+    );
+    final ctaTextPainter = TextPainter(
+      text: TextSpan(text: ctaLabel, style: ctaStyle),
+      textDirection: textDirection,
+      maxLines: 1,
+    )..layout();
+
+    final ctaWidth =
+        (tokens.spaceMedium * 2) +
+        ctaTextPainter.width +
+        tokens.spaceExtraSmall +
+        tokens.iconSizeSmall;
+
+    final badgeStyle = theme.textTheme.labelSmall?.copyWith(
+      fontWeight: badgeTokens.fontWeight,
+      letterSpacing: badgeTokens.letterSpacing,
+      height: 1,
+    );
+    final badgeTextPainter = TextPainter(
+      text: TextSpan(text: badgeLabel, style: badgeStyle),
+      textDirection: textDirection,
+      maxLines: 1,
+    )..layout();
+
+    final badgePadding = badgeTokens.padding.resolve(textDirection);
+    final badgeWidth = badgePadding.horizontal + badgeTextPainter.width;
+
+    return ctaWidth + tokens.spaceSmall + badgeWidth;
+  }
 
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        DecoratedBox(
-          decoration: BoxDecoration(
-            color: accent.withValues(alpha: 0.10),
-            borderRadius: BorderRadius.circular(tokens.radiusLarge),
-            border: Border.all(
-              color: accent.withValues(alpha: 0.18),
-              width: tokens.borderWidthThin,
-            ),
-          ),
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: tokens.spaceExtraSmall + tokens.borderWidthThin,
-              vertical: tokens.borderWidthThin,
-            ),
-            child: Text(
-              eyebrow,
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: accent,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.2,
-              ),
-            ),
-          ),
-        ),
-        SizedBox(height: tokens.spaceExtraSmall),
-        Text(
-          title,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: theme.textTheme.titleMedium?.copyWith(
-            color: colorScheme.onSurface,
-            fontWeight: FontWeight.w700,
-            height: 1.15,
-          ),
-        ),
-        SizedBox(height: tokens.spaceExtraSmall * 0.5),
-        Text(
-          subtitle,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-            height: 1.25,
-          ),
-        ),
-        SizedBox(height: tokens.spaceSmall),
-        _FeaturedTutorCtaPill(
-          label: cta,
-          background: ctaBackground,
-          foreground: ctaForeground,
-        ),
-      ],
+    final cta = _FeaturedTutorCtaPill(
+      label: ctaLabel,
+      accent: accent,
+      foreground: ctaForeground,
+    );
+    final theme = Theme.of(context);
+    final badge = ExcludeSemantics(
+      child: TilawaExperimentalBadge(
+        label: badgeLabel,
+        foregroundColor: theme.colorScheme.onSurface,
+      ),
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final useRow = constraints.maxWidth >= _minFooterRowWidth(context);
+
+        if (useRow) {
+          return Row(
+            children: [
+              cta,
+              const Spacer(),
+              badge,
+            ],
+          );
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: tokens.spaceSmall,
+          children: [cta, badge],
+        );
+      },
     );
   }
 }
 
+/// Visual CTA affordance — card [InkWell] owns the single tap target.
 class _FeaturedTutorCtaPill extends StatelessWidget {
   const _FeaturedTutorCtaPill({
     required this.label,
-    required this.background,
+    required this.accent,
     required this.foreground,
   });
 
   final String label;
-  final Color background;
+  final Color accent;
   final Color foreground;
 
   @override
@@ -173,73 +209,63 @@ class _FeaturedTutorCtaPill extends StatelessWidget {
     final tokens = context.tokens;
     final theme = Theme.of(context);
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(tokens.radiusLarge),
-      ),
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: tokens.spaceMedium,
-          vertical: tokens.spaceExtraSmall,
+    return ExcludeSemantics(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: accent,
+          borderRadius: BorderRadius.circular(999),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          spacing: tokens.spaceExtraSmall,
-          children: [
-            Text(
-              label,
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: foreground,
-                fontWeight: FontWeight.w700,
+        child: Padding(
+          padding: EdgeInsetsDirectional.symmetric(
+            horizontal: tokens.spaceMedium,
+            vertical: tokens.spaceSmall,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: tokens.spaceExtraSmall,
+            children: [
+              Text(
+                label,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: foreground,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-            ),
-            Icon(
-              FluentIcons.chevron_right_24_filled,
-              size: tokens.iconSizeSmall * 0.9,
-              color: foreground,
-              textDirection: Directionality.of(context),
-            ),
-          ],
+              Icon(
+                FluentIcons.chevron_right_16_regular,
+                size: tokens.iconSizeSmall,
+                color: foreground,
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _FeaturedTutorAvatar extends StatelessWidget {
-  const _FeaturedTutorAvatar({required this.accent});
+class _FeaturedTutorIconWell extends StatelessWidget {
+  const _FeaturedTutorIconWell({required this.accent});
 
   final Color accent;
 
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
-    final double boxSize = tokens.iconSizeLarge + tokens.spaceSmall;
+    final double iconBoxSize = tokens.iconSizeLarge + tokens.spaceMedium;
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: accent.withValues(alpha: 0.55),
-          width: tokens.borderWidthThin * 1.5,
-        ),
+        borderRadius: BorderRadius.circular(tokens.radiusLarge),
+        color: accent.withValues(alpha: 0.10),
       ),
-      child: Padding(
-        padding: EdgeInsets.all(tokens.borderWidthThin * 1.5),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: accent.withValues(alpha: 0.12),
-            shape: BoxShape.circle,
-          ),
-          child: SizedBox(
-            width: boxSize,
-            height: boxSize,
-            child: Icon(
-              FluentIcons.person_voice_24_regular,
-              size: tokens.iconSizeMedium,
-              color: accent,
-            ),
+      child: SizedBox(
+        width: iconBoxSize,
+        height: iconBoxSize,
+        child: Center(
+          child: TilawaLearnQuranTutorIcon(
+            size: tokens.iconSizeLarge,
+            color: accent,
           ),
         ),
       ),

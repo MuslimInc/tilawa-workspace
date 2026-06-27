@@ -6,21 +6,19 @@ import 'quran_session_teacher_compact_card.dart';
 
 /// Compact card showing teacher avatar, name, specializations, rating, and price.
 /// Used in [TeacherListScreen] and the feature home preview.
+///
+/// The whole card navigates to the teacher profile; booking starts there.
 class TeacherCard extends StatelessWidget {
   const TeacherCard({
     super.key,
     required this.teacher,
     required this.onTap,
     this.availabilitySummary,
-    this.onBook,
-    this.onViewProfile,
   });
 
   final QuranTeacher teacher;
   final VoidCallback onTap;
   final TeacherAvailabilitySummary? availabilitySummary;
-  final VoidCallback? onBook;
-  final VoidCallback? onViewProfile;
 
   @override
   Widget build(BuildContext context) {
@@ -28,8 +26,6 @@ class TeacherCard extends StatelessWidget {
       teacher: teacher,
       onTap: onTap,
       availabilitySummary: availabilitySummary,
-      onBook: onBook,
-      onViewProfile: onViewProfile,
     );
   }
 }

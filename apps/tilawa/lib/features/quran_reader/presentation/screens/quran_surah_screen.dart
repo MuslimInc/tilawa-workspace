@@ -151,7 +151,7 @@ class _QuranSurahScreenState extends State<QuranSurahScreen> {
     return Scaffold(
       appBar: TilawaCatalogAppBar(
         preferredHeight: TilawaAppBarConfig.catalogTitleOnlyHeight(context),
-        centerTitle: true,
+        centerTitle: false,
         automaticallyImplyLeading: true,
         titleWidget: Text(
           context.l10n.quranHubTitle,

@@ -10,8 +10,8 @@ import '../blocs/teacher_list/teacher_list_event.dart';
 import '../blocs/teacher_list/teacher_list_state.dart';
 import '../config/quran_sessions_feature_config.dart';
 import '../models/teacher_availability_summary.dart';
-import '../theme/quran_sessions_theme.dart';
 import '../widgets/quran_sessions_student_empty_state.dart';
+import '../widgets/quran_sessions_page_header.dart';
 import '../widgets/quran_sessions_scaffold.dart';
 import '../widgets/teacher_card.dart';
 import '../widgets/teacher_card_compact_skeleton.dart';
@@ -205,8 +205,6 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
             teacher: teacher,
             onTap: () => _onTeacherTapped(teacher.id),
             availabilitySummary: availabilitySummaries[teacher.id],
-            onBook: () => _onTeacherTapped(teacher.id),
-            onViewProfile: () => _onTeacherTapped(teacher.id),
           );
         },
       ),
@@ -227,21 +225,10 @@ class _TeacherListHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
-    final feature = context.quranSessionsTheme;
 
-    return Padding(
-      padding: feature.screenPadding.copyWith(
-        top: feature.listItemGap,
-        bottom: feature.listItemGap,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(l10n.teacherListTitle, style: feature.screenTitleStyle),
-          SizedBox(height: feature.listItemGap),
-          Text(l10n.teacherListSubtitle, style: feature.screenSubtitleStyle),
-        ],
-      ),
+    return QuranSessionsPageHeader(
+      title: l10n.teacherListTitle,
+      subtitle: l10n.teacherListSubtitle,
     );
   }
 }

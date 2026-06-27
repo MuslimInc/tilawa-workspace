@@ -658,6 +658,8 @@ class AppStartupTasks {
       if (localLaunchResponse != null) {
         AppRouter.pendingLocalNotificationResponse = localLaunchResponse;
         AppRouter.lastProcessedNotificationId = localLaunchResponse.id;
+        AppRouter.lastProcessedNotificationPayload =
+            localLaunchResponse.payload;
         final int? localId = localLaunchResponse.id;
         if (localId != null) {
           await AppRouter.persistProcessedNotificationLaunch(
@@ -735,7 +737,6 @@ class AppStartupTasks {
       return false;
     }
     final SharedPreferencesAsync prefs = getIt<SharedPreferencesAsync>();
-    await NotificationLaunchDedup.ensureSchemaCurrent(prefs: prefs);
     final int currentPid = getIt<ProcessIdProvider>().currentPid;
     final int? storedId =
         await NotificationLaunchDedup.readStoredNotificationId(

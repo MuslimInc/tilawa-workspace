@@ -12,13 +12,11 @@ import '../failure_ui/quran_sessions_failure_ui.dart';
 import '../blocs/teacher_profile/teacher_profile_bloc.dart';
 import '../blocs/teacher_profile/teacher_profile_event.dart';
 import '../blocs/teacher_profile/teacher_profile_state.dart';
-import '../theme/quran_sessions_theme.dart';
+import '../theme/quran_sessions_status_colors.dart';
 import '../widgets/availability_slot_picker.dart';
 import '../widgets/quran_session_price_chip.dart';
-import '../widgets/quran_sessions_metadata_chip.dart';
 import '../widgets/quran_sessions_scaffold.dart';
 import '../widgets/quran_sessions_section_header.dart';
-import '../widgets/quran_sessions_surface_card.dart';
 import '../widgets/teacher_initials_avatar.dart';
 
 class TeacherProfileScreen extends StatefulWidget {
@@ -75,14 +73,16 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
                     !state.isLoadingAvailability &&
                     state.availability.isNotEmpty;
                 return TilawaBottomActionArea(
-                  child: _TeacherProfileBookingCta(
-                    label: canBook
+                  child: TilawaButton(
+                    text: canBook
                         ? l10n.bookSessionAction
                         : l10n.noAvailabilityBookAction,
-                    enabled: canBook,
                     onPressed: canBook
                         ? () => _onBookTapped(_selectedSlotId)
                         : null,
+                    leadingIcon: const Icon(Icons.calendar_today_outlined),
+                    size: TilawaButtonSize.large,
+                    isFullWidth: true,
                   ),
                 );
               },
@@ -125,74 +125,6 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
 
   void _onBookTapped(String? preSelectedSlotId) {
     widget.onBookTapped?.call(widget.teacherId, preSelectedSlotId);
-  }
-}
-
-class _TeacherProfileBookingCta extends StatelessWidget {
-  const _TeacherProfileBookingCta({
-    required this.label,
-    required this.enabled,
-    required this.onPressed,
-  });
-
-  final String label;
-  final bool enabled;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final feature = context.quranSessionsTheme;
-    final tokens = Theme.of(context).tokens;
-    final background = enabled
-        ? feature.primaryColor
-        : feature.disabledBackground;
-    final foreground = enabled
-        ? feature.onPrimaryColor
-        : feature.disabledForeground;
-    final border = enabled ? feature.primaryColor : feature.disabledBorder;
-
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        minWidth: double.infinity,
-        minHeight: tokens.minInteractiveDimension,
-      ),
-      child: Material(
-        color: background,
-        shape: StadiumBorder(side: BorderSide(color: border)),
-        child: InkWell(
-          customBorder: const StadiumBorder(),
-          onTap: enabled ? onPressed : null,
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: tokens.spaceLarge,
-              vertical: tokens.spaceSmall,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.calendar_today_outlined,
-                  size: tokens.iconSizeMedium,
-                  color: foreground,
-                ),
-                SizedBox(width: tokens.spaceSmall),
-                Flexible(
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: feature.sectionTitleStyle.copyWith(
-                      color: foreground,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }
 
@@ -254,39 +186,45 @@ class _TeacherProfileBodyState extends State<_TeacherProfileBody> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
-    final feature = context.quranSessionsTheme;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final status = context.quranSessionsStatus;
     final tokens = Theme.of(context).tokens;
     final displayName = widget.teacher.displayName.trim();
     final bio = widget.teacher.bio.trim();
 
     return ListView(
       padding: EdgeInsets.symmetric(
-        horizontal: feature.screenPaddingHorizontal,
-        vertical: feature.sectionGap,
+        horizontal: tokens.spaceMedium,
+        vertical: tokens.spaceSmall,
       ),
       children: [
-        QuranSessionsSurfaceCard(
+        TilawaCard(
+          padding: EdgeInsets.all(tokens.spaceSmall),
           child: Column(
             children: [
               TeacherInitialsAvatar(
                 displayName: displayName,
-                radius: feature.profileAvatarRadius,
+                radius: tokens.iconSizeLarge,
                 avatarUrl: widget.teacher.avatarUrl,
               ),
-              SizedBox(height: feature.sectionGap),
+              SizedBox(height: tokens.spaceSmall),
               Text(
                 displayName,
-                style: feature.sectionTitleStyle,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: scheme.onSurface,
+                ),
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              SizedBox(height: feature.listItemGap),
+              SizedBox(height: tokens.spaceExtraSmall),
               _TeacherProfileRatingRow(
                 rating: widget.teacher.averageRating,
                 reviewsCount: widget.teacher.totalReviews,
               ),
-              SizedBox(height: feature.listItemGap),
+              SizedBox(height: tokens.spaceExtraSmall),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -294,16 +232,16 @@ class _TeacherProfileBodyState extends State<_TeacherProfileBody> {
                   children: [
                     QuranSessionPriceChip(teacher: widget.teacher),
                     for (final code in widget.teacher.specializations) ...[
-                      SizedBox(width: feature.listItemGap),
-                      QuranSessionsMetadataChip(
+                      SizedBox(width: tokens.spaceExtraSmall),
+                      TilawaMetadataChip(
                         label: l10n.specializationLabel(code),
                       ),
                     ],
                     if (widget.teacher.supportedCallTypes.contains(
                       SessionCallType.externalMeeting,
                     )) ...[
-                      SizedBox(width: feature.listItemGap),
-                      QuranSessionsMetadataChip(
+                      SizedBox(width: tokens.spaceExtraSmall),
+                      TilawaMetadataChip(
                         label: l10n.teacherOffersExternalSessions,
                       ),
                     ],
@@ -314,14 +252,21 @@ class _TeacherProfileBodyState extends State<_TeacherProfileBody> {
           ),
         ),
         if (bio.isNotEmpty) ...[
-          SizedBox(height: feature.sectionGap),
+          SizedBox(height: tokens.spaceSmall),
           QuranSessionsSectionHeader(title: l10n.aboutTeacherSection),
-          SizedBox(height: feature.listItemGap),
-          QuranSessionsSurfaceCard(
-            child: Text(bio, style: feature.screenSubtitleStyle),
+          SizedBox(height: tokens.spaceExtraSmall),
+          TilawaCard(
+            padding: EdgeInsets.all(tokens.spaceSmall),
+            child: Text(
+              bio,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: scheme.onSurfaceVariant,
+                height: 1.35,
+              ),
+            ),
           ),
         ],
-        SizedBox(height: feature.sectionGap),
+        SizedBox(height: tokens.spaceSmall),
         QuranSessionsSectionHeader(
           title: l10n.availableSlots,
           trailing: widget.isLoadingAvailability
@@ -332,20 +277,27 @@ class _TeacherProfileBodyState extends State<_TeacherProfileBody> {
                 )
               : null,
         ),
-        SizedBox(height: feature.listItemGap),
-        QuranSessionsSurfaceCard(
+        SizedBox(height: tokens.spaceExtraSmall),
+        TilawaCard(
+          padding: EdgeInsets.all(tokens.spaceSmall),
           child: widget.availability.isEmpty && !widget.isLoadingAvailability
               ? Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       l10n.noAvailabilityYet,
-                      style: feature.cardTitleStyle,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: scheme.onSurface,
+                      ),
                     ),
-                    SizedBox(height: feature.listItemGap),
+                    SizedBox(height: tokens.spaceExtraSmall),
                     Text(
                       l10n.noAvailabilityHelper,
-                      style: feature.cardMetaStyle,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                        height: 1.3,
+                      ),
                     ),
                   ],
                 )
@@ -357,36 +309,44 @@ class _TeacherProfileBodyState extends State<_TeacherProfileBody> {
                   },
                 ),
         ),
-        SizedBox(height: feature.sectionGap),
+        SizedBox(height: tokens.spaceSmall),
         QuranSessionsSectionHeader(title: l10n.reviewsSection),
-        SizedBox(height: feature.listItemGap),
-        QuranSessionsSurfaceCard(
+        SizedBox(height: tokens.spaceExtraSmall),
+        TilawaCard(
+          padding: EdgeInsets.all(tokens.spaceSmall),
           child: widget.reviews.isEmpty
               ? Text(
                   l10n.noReviewsYet,
-                  style: feature.cardMetaStyle,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                    height: 1.3,
+                  ),
                 )
               : Column(
                   children: widget.reviews
                       .map(
                         (r) => Padding(
                           padding: EdgeInsets.only(
-                            bottom: feature.listItemGap,
+                            bottom: tokens.spaceExtraSmall,
                           ),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 '${r.rating}★',
-                                style: feature.chipLabelStyle.copyWith(
-                                  color: feature.ratingColor,
+                                style: theme.textTheme.labelMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: status.rating,
                                 ),
                               ),
-                              SizedBox(width: feature.cardGap),
+                              SizedBox(width: tokens.spaceSmall),
                               Expanded(
                                 child: Text(
                                   r.comment ?? '',
-                                  style: feature.cardMetaStyle,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: scheme.onSurfaceVariant,
+                                    height: 1.3,
+                                  ),
                                 ),
                               ),
                             ],
@@ -414,7 +374,9 @@ class _TeacherProfileRatingRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
-    final feature = context.quranSessionsTheme;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final status = context.quranSessionsStatus;
     final tokens = Theme.of(context).tokens;
     final isNew = reviewsCount == 0;
 
@@ -424,7 +386,7 @@ class _TeacherProfileRatingRow extends StatelessWidget {
         Icon(
           Icons.star_rounded,
           size: tokens.iconSizeSmall,
-          color: feature.ratingColor,
+          color: status.rating,
         ),
         SizedBox(width: tokens.spaceExtraSmall),
         Text(
@@ -434,7 +396,10 @@ class _TeacherProfileRatingRow extends StatelessWidget {
                   rating.toStringAsFixed(1),
                   reviewsCount,
                 ),
-          style: feature.cardMetaStyle,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: scheme.onSurfaceVariant,
+            height: 1.3,
+          ),
         ),
       ],
     );

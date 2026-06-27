@@ -182,6 +182,39 @@ class DownloadQueueManager implements IDownloadQueueService {
     await _processQueue();
   }
 
+  /// Restore queue metadata for a platform task that survived process restart.
+  ///
+  /// Does not re-enqueue; used when [resumePendingDownloads] finds an active
+  /// download so notification progress can reconcile with the same ID.
+  Future<void> trackInFlightDownload({
+    required String id,
+    required String url,
+    required String title,
+    required String reciterName,
+    int? reciterId,
+    bool showNotification = false,
+  }) async {
+    await initialize();
+
+    if (_downloadMetadata.containsKey(id)) {
+      return;
+    }
+
+    _downloadMetadata[id] = (
+      title: title,
+      reciterName: reciterName,
+      reciterId: reciterId,
+      showNotification: showNotification,
+    );
+    _activeDownloadUrls[id] = url;
+    _activeDownloads.add(id);
+    _lastActivityTime[id] = clock.now();
+
+    logger.d(
+      '[DownloadQueueManager] Tracked in-flight download after restart: id=$id',
+    );
+  }
+
   /// Add multiple downloads to the queue efficiently
   Future<void> enqueueBatch(
     List<

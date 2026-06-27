@@ -663,14 +663,23 @@ class TilawaAdaptiveShellTokens {
   }
 
   /// Selected nav button background on the surface bar.
+  ///
+  /// Matches the pressed state layer on an unselected destination
+  /// ([ColorScheme.primary] or [ColorScheme.onSurface] at
+  /// [MeMuslimDesignTokens.stateLayerPressed] on [bottomNavBackgroundColor])
+  /// so the resting pill and press splash read as one system.
   static Color _navButtonSelectedBackgroundColor(
     ColorScheme colorScheme,
     Color bottomNavBackgroundColor,
   ) {
-    if (colorScheme.brightness == Brightness.light) {
-      return colorScheme.primaryContainer;
-    }
-    return colorScheme.surfaceContainerHighest;
+    const double pressedAlpha = 0.12;
+    final Color pressTint = colorScheme.brightness == Brightness.light
+        ? colorScheme.primary
+        : colorScheme.onSurface;
+    return Color.alphaBlend(
+      pressTint.withValues(alpha: pressedAlpha),
+      bottomNavBackgroundColor,
+    );
   }
 
   TilawaAdaptiveShellTokens copyWith({

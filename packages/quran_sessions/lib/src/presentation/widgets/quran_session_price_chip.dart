@@ -5,7 +5,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../domain/entities/quran_teacher.dart';
 import '../../domain/entities/session_pricing_type.dart';
 import '../../utils/price_formatter.dart';
-import '../theme/quran_sessions_theme.dart';
+import '../theme/quran_sessions_status_colors.dart';
 
 /// Compact price badge for teacher list rows.
 class QuranSessionPriceChip extends StatelessWidget {
@@ -15,8 +15,10 @@ class QuranSessionPriceChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final feature = context.quranSessionsTheme;
-    final tokens = Theme.of(context).tokens;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final status = context.quranSessionsStatus;
+    final tokens = theme.tokens;
     final priceLabel = PriceFormatter.formatOrFree(
       l10n: context.quranSessionsL10n,
       pricingType: teacher.pricingType,
@@ -25,25 +27,21 @@ class QuranSessionPriceChip extends StatelessWidget {
     if (priceLabel.isEmpty) return const SizedBox.shrink();
 
     final isFree = teacher.pricingType == SessionPricingType.free;
+    final foreground = isFree ? scheme.primary : status.scheduledForeground;
 
-    return Container(
+    return TilawaChip(
+      label: priceLabel,
+      backgroundColor: isFree
+          ? scheme.primaryContainer
+          : status.scheduledBackground,
+      foregroundColor: foreground,
       padding: EdgeInsets.symmetric(
         horizontal: tokens.spaceSmall,
-        vertical: feature.listItemGap,
+        vertical: tokens.spaceExtraSmall,
       ),
-      decoration: BoxDecoration(
-        color: isFree
-            ? feature.accentSoftBackground
-            : feature.statusScheduledBackground,
-        borderRadius: BorderRadius.circular(feature.chipRadius),
-      ),
-      child: Text(
-        priceLabel,
-        style: feature.priceBadgeStyle.copyWith(
-          color: isFree
-              ? feature.primaryColor
-              : feature.statusScheduledForeground,
-        ),
+      textStyle: theme.textTheme.labelSmall?.copyWith(
+        fontWeight: FontWeight.w700,
+        color: foreground,
       ),
     );
   }

@@ -5,7 +5,6 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/teacher_availability.dart';
 import '../../domain/services/teacher_availability_sort.dart';
-import '../theme/quran_sessions_theme.dart';
 import '../utils/teacher_availability_by_date.dart';
 import 'date_grouped_slots_layout.dart';
 
@@ -40,15 +39,21 @@ class DateGroupedSlotPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
-    final feature = context.quranSessionsTheme;
+    final theme = Theme.of(context);
 
     return DateGroupedSlotsLayout(
       slots: slots,
       initialDay: _initialDay(),
       emptyChild: Padding(
-        padding: EdgeInsets.all(feature.cardPadding),
+        padding: EdgeInsets.all(theme.tokens.spaceSmall),
         child: Center(
-          child: Text(l10n.noSlotsAvailable, style: feature.cardMetaStyle),
+          child: Text(
+            l10n.noSlotsAvailable,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              height: 1.3,
+            ),
+          ),
         ),
       ),
       slotsForDayBuilder: (context, daySlots) => _TimeGrid(
@@ -76,18 +81,21 @@ class _TimeGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
-    final feature = context.quranSessionsTheme;
+    final theme = Theme.of(context);
     final available = sortTeacherAvailabilityByStart(
       slots.where((s) => !s.isBooked).toList(),
     );
 
     if (available.isEmpty) {
       return Padding(
-        padding: EdgeInsets.symmetric(vertical: feature.sectionGap),
+        padding: EdgeInsets.symmetric(vertical: theme.tokens.spaceSmall),
         child: Center(
           child: Text(
             l10n.noSlotsAvailableThisDay,
-            style: feature.cardMetaStyle,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              height: 1.3,
+            ),
           ),
         ),
       );
@@ -97,8 +105,8 @@ class _TimeGrid extends StatelessWidget {
     final timeFmt = DateFormat('h:mm a', locale);
 
     return Wrap(
-      spacing: feature.listItemGap + 2,
-      runSpacing: feature.listItemGap + 2,
+      spacing: theme.tokens.spaceExtraSmall + 2,
+      runSpacing: theme.tokens.spaceExtraSmall + 2,
       children: available.map((slot) {
         final isSelected = slot.slotId == selectedSlotId;
         return TilawaSelectionPill(

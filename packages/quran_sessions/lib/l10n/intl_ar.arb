@@ -77,6 +77,7 @@
     "profileCountryRequired": "الدولة مطلوبة.",
     "profileCityRequired": "المدينة مطلوبة.",
     "quranSessionsHomeTitle": "تعلّم القرآن مع محفظك",
+    "quranSessionsHomeAppBarTitle": "المحفظون",
     "mySessionsTitle": "جلساتي",
     "noTeachersAvailableYet": "لا يوجد معلمون متاحون بعد",
     "seeAllTeachers": "عرض جميع المعلمين ←",
@@ -394,6 +395,7 @@
     "slotTime": "وقت الموعد",
     "addSlotButton": "إضافة الموعد",
     "availabilityTitle": "التوفر الأسبوعي",
+    "availabilityAppBarTitle": "المواعيد",
     "availabilityRecurringBanner": "هذا توفرك الأسبوعي المتكرر. يُستخدم لإنشاء المواعيد القابلة للحجز في الأيام القادمة.",
     "bookableTimesSectionTitle": "المواعيد المتاحة خلال 14 يوم",
     "bookableTimesSectionSubtext": "يتم إنشاء هذه المواعيد من توفرك الأسبوعي مع استبعاد الاستثناءات والحجوزات.",
@@ -634,6 +636,7 @@
     "reportCategoryFraudOrScam": "احتيال",
     "reportCategoryOther": "أخرى",
     "walletTitle": "محفظتي",
+    "walletAppBarTitle": "المحفظة",
     "walletAvailableBalanceLabel": "الرصيد المتاح",
     "walletHeldBalanceLabel": "محجوز: {amount}",
     "@walletHeldBalanceLabel": {

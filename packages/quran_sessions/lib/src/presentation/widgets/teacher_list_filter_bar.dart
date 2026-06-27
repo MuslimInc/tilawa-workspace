@@ -3,8 +3,6 @@ import 'package:quran_sessions/core/l10n_extensions.dart';
 import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../theme/quran_sessions_theme.dart';
-
 /// Filter chips for the teacher discovery list.
 enum TeacherListFilter {
   all,
@@ -53,14 +51,15 @@ class TeacherListFilterBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
-    final feature = context.quranSessionsTheme;
-    final tokens = Theme.of(context).tokens;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final tokens = theme.tokens;
 
     return SizedBox(
-      height: feature.filterBarHeight,
+      height: tokens.minInteractiveDimension * 0.8,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: feature.screenPadding,
+        padding: EdgeInsets.symmetric(horizontal: tokens.spaceMedium),
         itemCount: filters.length,
         separatorBuilder: (_, _) => SizedBox(width: tokens.spaceExtraSmall),
         itemBuilder: (context, index) {
@@ -69,21 +68,22 @@ class TeacherListFilterBar extends StatelessWidget {
           return FilterChip(
             label: Text(
               filter.label(l10n),
-              style: feature.chipLabelStyle.copyWith(
-                color: isSelected
-                    ? feature.filterSelectedForeground
-                    : feature.filterUnselectedForeground,
+              style: theme.textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: isSelected ? scheme.onPrimary : scheme.onSurfaceVariant,
               ),
             ),
             selected: isSelected,
             showCheckmark: false,
             onSelected: (_) => onSelected(filter),
-            selectedColor: feature.filterSelectedBackground,
-            backgroundColor: feature.filterTrackColor,
+            selectedColor: scheme.primary,
+            backgroundColor: scheme.surfaceContainerHigh,
             side: BorderSide(
               color: isSelected
-                  ? feature.filterSelectedBackground
-                  : feature.cardBorderColor,
+                  ? scheme.primary
+                  : scheme.outlineVariant.withValues(
+                      alpha: tokens.opacityEmphasis,
+                    ),
             ),
             padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,

@@ -28,8 +28,8 @@ class _WalletScreenState extends State<WalletScreen> {
     final scheme = theme.colorScheme;
     final tokens = theme.tokens;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.walletTitle)),
+    return QuranSessionsScaffold(
+      title: l10n.walletAppBarTitle,
       body: BlocBuilder<WalletBloc, WalletState>(
         builder: (context, state) => switch (state) {
           WalletInitial() || WalletLoading() => const Center(

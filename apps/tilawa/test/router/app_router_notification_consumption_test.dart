@@ -27,5 +27,6 @@ void main() {
     expect(AppRouter.disableStateRestoration, isFalse);
     expect(AppRouter.pendingFcmMessage, isNull);
     expect(AppRouter.pendingLocalNotificationResponse, isNull);
+    expect(AppRouter.lastProcessedNotificationPayload, isNull);
   });
 }

@@ -332,11 +332,7 @@
     "@homeQuickToolsTitle": {
         "description": "Home section title for the compact secondary tools row"
     },
-    "homeFeaturedTutorEyebrow": "Featured",
-    "@homeFeaturedTutorEyebrow": {
-        "description": "Eyebrow badge on the featured Learn Quran with Tutor card"
-    },
-    "homeFeaturedTutorTitle": "QuranTutor",
+    "homeFeaturedTutorTitle": "Learn Quran",
     "@homeFeaturedTutorTitle": {
         "description": "Title on the featured Learn Quran with Tutor card"
     },

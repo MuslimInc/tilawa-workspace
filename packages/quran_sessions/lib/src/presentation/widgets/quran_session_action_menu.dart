@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:quran_sessions/core/l10n_extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../theme/quran_sessions_theme.dart';
-
 enum _QuranSessionAction { viewDetails, reschedule, cancel }
 
 /// Overflow menu for secondary session actions on student session cards.
@@ -34,7 +32,7 @@ class _QuranSessionActionMenuState extends State<QuranSessionActionMenu> {
 
     final l10n = context.quranSessionsL10n;
     final tokens = Theme.of(context).tokens;
-    final feature = context.quranSessionsTheme;
+    final scheme = Theme.of(context).colorScheme;
     final menuWidth = tokens.spaceXXL * 5;
 
     final action = await showMenu<_QuranSessionAction>(
@@ -89,7 +87,7 @@ class _QuranSessionActionMenuState extends State<QuranSessionActionMenu> {
             value: _QuranSessionAction.cancel,
             child: Text(
               l10n.cancelSessionAction,
-              style: TextStyle(color: feature.destructive),
+              style: TextStyle(color: scheme.error),
             ),
           ),
       ],
@@ -113,7 +111,7 @@ class _QuranSessionActionMenuState extends State<QuranSessionActionMenu> {
 
     final l10n = context.quranSessionsL10n;
     final tokens = Theme.of(context).tokens;
-    final feature = context.quranSessionsTheme;
+    final scheme = Theme.of(context).colorScheme;
 
     return Semantics(
       button: true,
@@ -124,7 +122,7 @@ class _QuranSessionActionMenuState extends State<QuranSessionActionMenu> {
         icon: Icon(
           Icons.more_vert,
           size: tokens.iconSizeSmall,
-          color: feature.helperTextColor,
+          color: scheme.onSurfaceVariant,
         ),
         tooltip: l10n.sessionCardOverflowMenu,
         style: IconButton.styleFrom(

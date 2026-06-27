@@ -394,11 +394,9 @@ class DownloadNotificationService implements IDownloadNotificationService {
     }
 
     final String stableId = _normalizeDownloadId(downloadId);
-    final int? notificationId = _notificationIds[stableId];
-    if (notificationId != null) {
-      await _notifications.cancel(id: notificationId);
-      _notificationIds.remove(stableId);
-    }
+    final int notificationId = stableNotificationIdFor(stableId);
+    await _notifications.cancel(id: notificationId);
+    _notificationIds.remove(stableId);
     _finalizedDownloadIds.add(stableId);
   }
 
@@ -479,7 +477,11 @@ class DownloadNotificationService implements IDownloadNotificationService {
   }
 
   /// Normalize download IDs/URLs so progress and completion share one notification.
-  String _normalizeDownloadId(String id) {
+  String _normalizeDownloadId(String id) => normalizeDownloadId(id);
+
+  /// Shared normalization for stable notification IDs across process restarts.
+  @visibleForTesting
+  static String normalizeDownloadId(String id) {
     final String trimmed = id.trim();
     try {
       final Uri uri = Uri.parse(trimmed);
@@ -490,12 +492,26 @@ class DownloadNotificationService implements IDownloadNotificationService {
     }
   }
 
-  /// Helper to generate a consistent notification ID from string ID
-  int _nextId = notificationIdOffset;
+  /// Deterministic Android notification ID for a download key.
+  ///
+  /// Survives hot restart so progress updates and cancellation target the same
+  /// notification instead of leaving orphaned ongoing progress bars.
+  @visibleForTesting
+  static int stableNotificationIdFor(String downloadId) {
+    final String stableId = normalizeDownloadId(downloadId);
+    var hash = 0;
+    for (final int unit in stableId.codeUnits) {
+      hash = (hash * 31 + unit) & 0x7FFFFFFF;
+    }
+    final int range = notificationIdRangeEndExclusive - notificationIdOffset;
+    return notificationIdOffset + (hash % range);
+  }
 
   int _getNotificationId(String id) {
     final String stableId = _normalizeDownloadId(id);
-    return _notificationIds.putIfAbsent(stableId, () => _nextId++);
+    final int notificationId = stableNotificationIdFor(stableId);
+    _notificationIds[stableId] = notificationId;
+    return notificationId;
   }
 
   /// Helper to show completed notification

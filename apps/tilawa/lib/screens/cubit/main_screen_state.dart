@@ -16,6 +16,7 @@ class MainScreenState extends Equatable {
     this.currentIndex = 0,
     this.builtTabIndexes = const <int>{},
     this.recitersSearchFocusTick = 0,
+    this.tabReselectTicks = const <int, int>{},
   });
 
   /// True once the short post-first-frame shell-activation delay has elapsed.
@@ -53,6 +54,13 @@ class MainScreenState extends Equatable {
   /// the tab only navigates and does not increment this counter.
   final int recitersSearchFocusTick;
 
+  /// Per-tab counters incremented when the user re-taps an active shell tab.
+  ///
+  /// Tab screens listen for their index and scroll to top or refresh.
+  final Map<int, int> tabReselectTicks;
+
+  int tabReselectTick(int tabIndex) => tabReselectTicks[tabIndex] ?? 0;
+
   MainScreenState copyWith({
     bool? isShellActivated,
     bool? isInitialTabMounted,
@@ -62,6 +70,7 @@ class MainScreenState extends Equatable {
     int? currentIndex,
     Set<int>? builtTabIndexes,
     int? recitersSearchFocusTick,
+    Map<int, int>? tabReselectTicks,
   }) {
     return MainScreenState(
       isShellActivated: isShellActivated ?? this.isShellActivated,
@@ -75,6 +84,7 @@ class MainScreenState extends Equatable {
       builtTabIndexes: builtTabIndexes ?? this.builtTabIndexes,
       recitersSearchFocusTick:
           recitersSearchFocusTick ?? this.recitersSearchFocusTick,
+      tabReselectTicks: tabReselectTicks ?? this.tabReselectTicks,
     );
   }
 
@@ -88,5 +98,6 @@ class MainScreenState extends Equatable {
     currentIndex,
     builtTabIndexes,
     recitersSearchFocusTick,
+    tabReselectTicks,
   ];
 }

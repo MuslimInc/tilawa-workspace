@@ -157,7 +157,7 @@ void main() {
     });
 
     test(
-      'repairs corrupted id-only cache and blocks payload replay on hot restart',
+      'repairs legacy id-only cache and blocks payload replay on hot restart',
       () async {
         when(
           mockPrefs.getString(NotificationLaunchDedup.lastNotifPayloadSigKey),

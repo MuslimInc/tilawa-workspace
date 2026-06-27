@@ -24,6 +24,8 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../../../router/app_router_config.dart';
 import '../../../../screens/cubit/main_screen_cubit.dart';
 import '../../../../screens/cubit/main_screen_state.dart';
+import 'package:tilawa/features/shell/application/shell_tab_reselect.dart';
+import 'package:tilawa/screens/app_shell_nav_destinations.dart';
 import '../../../../shared/widgets/quran_player_chrome.dart';
 import '../../../../shared/widgets/quran_player_system_back.dart';
 import '../../../localization/presentation/bloc/localization_bloc.dart';
@@ -404,6 +406,31 @@ class _RecitersScreenState extends State<RecitersScreen>
 
   void _scrollToTop() => _scrollPrimaryToTop();
 
+  bool _recitersListIsScrolledDown() {
+    final ScrollController? primaryScrollController =
+        PrimaryScrollController.maybeOf(context);
+    final Iterable<ScrollController> controllers = [
+      ?primaryScrollController,
+      _activeRecitersScrollController,
+      ?_nestedScrollViewKey.currentState?.innerController,
+    ];
+    for (final ScrollController controller in controllers) {
+      if (controller.hasClients &&
+          controller.offset > ShellTabReselect.scrollTopThreshold) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void _onShellTabReselect() {
+    if (_recitersListIsScrolledDown()) {
+      _scrollPrimaryToTop();
+      return;
+    }
+    unawaited(_refreshReciters());
+  }
+
   void _onAlphabetScrubStart() {
     _alphabetScrub.alphabetScrubbingActive = true;
     _alphabetScrubbingNotifier.value = true;
@@ -551,7 +578,6 @@ class _RecitersScreenState extends State<RecitersScreen>
         appBar: TilawaCatalogAppBar.titleOnly(
           context,
           title: context.l10n.reciters,
-          centerTitle: true,
           showBottomHairline: false,
           showElevationShadow: false,
         ),
@@ -577,6 +603,12 @@ class _RecitersScreenState extends State<RecitersScreen>
       child: Builder(
         builder: (innerContext) => MultiBlocListener(
           listeners: [
+            BlocListener<MainScreenCubit, MainScreenState>(
+              listenWhen: (MainScreenState previous, MainScreenState current) =>
+                  previous.tabReselectTick(kAppShellRecitersTabIndex) !=
+                  current.tabReselectTick(kAppShellRecitersTabIndex),
+              listener: (context, state) => _onShellTabReselect(),
+            ),
             BlocListener<MainScreenCubit, MainScreenState>(
               listenWhen: (MainScreenState previous, MainScreenState current) =>
                   previous.recitersSearchFocusTick !=
@@ -763,7 +795,6 @@ class _RecitersScreenState extends State<RecitersScreen>
                     appBar: TilawaCatalogAppBar.titleOnly(
                       context,
                       title: context.l10n.reciters,
-                      centerTitle: true,
                       showBottomHairline: false,
                       showElevationShadow: false,
                     ),

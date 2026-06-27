@@ -259,7 +259,8 @@ void main() {
         await repository.initialize();
 
         // Assert
-        verify(mockDownloadService.globalProgressStream).called(2);
+        verify(mockDownloadService.globalProgressStream).called(greaterThan(1));
+        verify(mockDownloadService.initialize()).called(1);
       });
       test('should call updateDownloadProgress when stream emits', () async {
         // Arrange
@@ -3524,7 +3525,7 @@ void main() {
       },
     );
 
-    test('should NOT resume if download is already active', () async {
+    test('should track active download instead of re-enqueueing', () async {
       // Arrange
       final download = DownloadItem(
         id: '1',
@@ -3560,6 +3561,31 @@ void main() {
           reciterId: anyNamed('reciterId'),
         ),
       );
+
+      progressController.add(
+        const DownloadProgress(
+          id: 'http://example.com/1.mp3',
+          status: DownloadStatus.downloading,
+          progress: 0.53,
+          downloadedSize: 0,
+          fileSize: 0,
+        ),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      verify(
+        mockNotificationService.showDownloadProgress(
+          downloadId: anyNamed('downloadId'),
+          title: download.title,
+          reciterName: download.reciterName,
+          progress: 53,
+          status: DownloadStatus.downloading,
+          pendingMessage: anyNamed('pendingMessage'),
+          progressMessage: anyNamed('progressMessage'),
+          completeMessage: anyNamed('completeMessage'),
+          failedMessage: anyNamed('failedMessage'),
+        ),
+      ).called(1);
     });
 
     test('should handle error when checking active status in resume', () async {

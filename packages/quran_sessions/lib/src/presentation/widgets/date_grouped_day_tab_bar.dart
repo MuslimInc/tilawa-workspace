@@ -176,9 +176,6 @@ class _DateGroupedDayTabBarState extends State<DateGroupedDayTabBar> {
       child: ListView.separated(
         controller: _scrollCtrl,
         scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.symmetric(
-          horizontal: tokens.spaceExtraSmall,
-        ),
         itemCount: widget.days.length,
         separatorBuilder: (_, _) => SizedBox(width: tokens.spaceSmall),
         itemBuilder: (context, i) {
@@ -187,8 +184,13 @@ class _DateGroupedDayTabBarState extends State<DateGroupedDayTabBar> {
 
           return KeyedSubtree(
             key: _chipKeys[i],
-            child: GestureDetector(
+            child: TilawaInteractiveSurface(
               onTap: () => widget.onDaySelected(day),
+              borderRadius: BorderRadius.circular(dayRadius),
+              selected: isSelected,
+              semanticLabel:
+                  '${weekdayFmt.format(day)} '
+                  '${dayFmt.format(day)} ${monthFmt.format(day)}',
               child: AnimatedContainer(
                 duration: tokens.durationFast,
                 width: chipWidth,
