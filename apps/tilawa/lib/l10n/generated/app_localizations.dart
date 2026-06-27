@@ -5498,6 +5498,402 @@ abstract class AppLocalizations {
   /// **'Product tours reset'**
   String get tourDebugResetDone;
 
+  /// Developer settings entry and screen title for notification routing tests
+  ///
+  /// In en, this message translates to:
+  /// **'Notification Debug Lab'**
+  String get notificationDebugLabTitle;
+
+  /// No description provided for @notificationDebugSectionLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Local notification tests'**
+  String get notificationDebugSectionLocal;
+
+  /// No description provided for @notificationDebugSectionLaunch.
+  ///
+  /// In en, this message translates to:
+  /// **'Launch simulation'**
+  String get notificationDebugSectionLaunch;
+
+  /// No description provided for @notificationDebugSectionDedup.
+  ///
+  /// In en, this message translates to:
+  /// **'Dedup state inspector'**
+  String get notificationDebugSectionDedup;
+
+  /// No description provided for @notificationDebugSectionChecklist.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual validation checklist'**
+  String get notificationDebugSectionChecklist;
+
+  /// No description provided for @notificationDebugSectionLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Debug logs'**
+  String get notificationDebugSectionLogs;
+
+  /// No description provided for @notificationDebugActionId.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification id'**
+  String get notificationDebugActionId;
+
+  /// No description provided for @notificationDebugActionPayload.
+  ///
+  /// In en, this message translates to:
+  /// **'Payload'**
+  String get notificationDebugActionPayload;
+
+  /// No description provided for @notificationDebugActionRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected route'**
+  String get notificationDebugActionRoute;
+
+  /// No description provided for @notificationDebugActionBehavior.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected behavior'**
+  String get notificationDebugActionBehavior;
+
+  /// No description provided for @notificationDebugActionMechanism.
+  ///
+  /// In en, this message translates to:
+  /// **'Mechanism'**
+  String get notificationDebugActionMechanism;
+
+  /// No description provided for @notificationDebugRefreshState.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh state'**
+  String get notificationDebugRefreshState;
+
+  /// No description provided for @notificationDebugClearDedup.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear notification dedup'**
+  String get notificationDebugClearDedup;
+
+  /// No description provided for @notificationDebugClearAthkarDedup.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Athkar warm dedup'**
+  String get notificationDebugClearAthkarDedup;
+
+  /// No description provided for @notificationDebugClearAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all debug state'**
+  String get notificationDebugClearAll;
+
+  /// No description provided for @notificationDebugClearLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear logs'**
+  String get notificationDebugClearLogs;
+
+  /// No description provided for @notificationDebugConfirmSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule another debug notification?'**
+  String get notificationDebugConfirmSchedule;
+
+  /// No description provided for @notificationDebugMechanismReal.
+  ///
+  /// In en, this message translates to:
+  /// **'Real local notification'**
+  String get notificationDebugMechanismReal;
+
+  /// No description provided for @notificationDebugMechanismDispatcher.
+  ///
+  /// In en, this message translates to:
+  /// **'Dispatcher simulation'**
+  String get notificationDebugMechanismDispatcher;
+
+  /// No description provided for @notificationDebugMechanismBootstrap.
+  ///
+  /// In en, this message translates to:
+  /// **'Bootstrap launch probe'**
+  String get notificationDebugMechanismBootstrap;
+
+  /// No description provided for @notificationDebugMechanismDedup.
+  ///
+  /// In en, this message translates to:
+  /// **'Dedup persist only'**
+  String get notificationDebugMechanismDedup;
+
+  /// No description provided for @notificationDebugMechanismClearPid.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear pid scope'**
+  String get notificationDebugMechanismClearPid;
+
+  /// No description provided for @notificationDebugBehaviorScheduleAthkar.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows a debug Athkar notification after a short delay'**
+  String get notificationDebugBehaviorScheduleAthkar;
+
+  /// No description provided for @notificationDebugBehaviorShowNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Posts a debug notification immediately'**
+  String get notificationDebugBehaviorShowNow;
+
+  /// No description provided for @notificationDebugBehaviorNativePayloadOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Simulates native prayer tap with payload only (no id)'**
+  String get notificationDebugBehaviorNativePayloadOnly;
+
+  /// No description provided for @notificationDebugBehaviorInvalidPayload.
+  ///
+  /// In en, this message translates to:
+  /// **'Should not navigate to Athkar'**
+  String get notificationDebugBehaviorInvalidPayload;
+
+  /// No description provided for @notificationDebugBehaviorEmptyPayload.
+  ///
+  /// In en, this message translates to:
+  /// **'Should not navigate (empty payload)'**
+  String get notificationDebugBehaviorEmptyPayload;
+
+  /// No description provided for @notificationDebugBehaviorPayloadOnlyNoId.
+  ///
+  /// In en, this message translates to:
+  /// **'Routes via payload signature only'**
+  String get notificationDebugBehaviorPayloadOnlyNoId;
+
+  /// No description provided for @notificationDebugBehaviorDedupSameSig.
+  ///
+  /// In en, this message translates to:
+  /// **'First tap navigates; same pid + signature replays suppressed'**
+  String get notificationDebugBehaviorDedupSameSig;
+
+  /// No description provided for @notificationDebugBehaviorFreshDifferentPayload.
+  ///
+  /// In en, this message translates to:
+  /// **'Treated as fresh when payload signature changes'**
+  String get notificationDebugBehaviorFreshDifferentPayload;
+
+  /// No description provided for @notificationDebugBehaviorSharedPayloadSig.
+  ///
+  /// In en, this message translates to:
+  /// **'Same payload signature dedups even if id differs'**
+  String get notificationDebugBehaviorSharedPayloadSig;
+
+  /// No description provided for @notificationDebugBehaviorSimulateTap.
+  ///
+  /// In en, this message translates to:
+  /// **'Routes through production dispatcher / bootstrap paths'**
+  String get notificationDebugBehaviorSimulateTap;
+
+  /// No description provided for @notificationDebugBehaviorInvalidLaunch.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid payload must not set Athkar cold-start route'**
+  String get notificationDebugBehaviorInvalidLaunch;
+
+  /// No description provided for @notificationDebugBehaviorMarkProcessed.
+  ///
+  /// In en, this message translates to:
+  /// **'Persists dedup without navigation'**
+  String get notificationDebugBehaviorMarkProcessed;
+
+  /// No description provided for @notificationDebugBehaviorClearPidScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Clears pid key to simulate fresh-process dedup scope'**
+  String get notificationDebugBehaviorClearPidScope;
+
+  /// No description provided for @notificationDebugFieldCurrentPid.
+  ///
+  /// In en, this message translates to:
+  /// **'Current process id'**
+  String get notificationDebugFieldCurrentPid;
+
+  /// No description provided for @notificationDebugFieldStoredPid.
+  ///
+  /// In en, this message translates to:
+  /// **'Stored pid (_last_notif_pid)'**
+  String get notificationDebugFieldStoredPid;
+
+  /// No description provided for @notificationDebugFieldStoredId.
+  ///
+  /// In en, this message translates to:
+  /// **'Stored id (_last_notif_id)'**
+  String get notificationDebugFieldStoredId;
+
+  /// No description provided for @notificationDebugFieldStoredSig.
+  ///
+  /// In en, this message translates to:
+  /// **'Stored signature (_last_notif_payload_sig)'**
+  String get notificationDebugFieldStoredSig;
+
+  /// No description provided for @notificationDebugFieldLastProcessedId.
+  ///
+  /// In en, this message translates to:
+  /// **'AppRouter.lastProcessedNotificationId'**
+  String get notificationDebugFieldLastProcessedId;
+
+  /// No description provided for @notificationDebugFieldPendingRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'pendingColdStartLocation'**
+  String get notificationDebugFieldPendingRoute;
+
+  /// No description provided for @notificationDebugFieldPendingExtra.
+  ///
+  /// In en, this message translates to:
+  /// **'pendingColdStartExtra'**
+  String get notificationDebugFieldPendingExtra;
+
+  /// No description provided for @notificationDebugFieldAthkarPayload.
+  ///
+  /// In en, this message translates to:
+  /// **'last_handled_notification_payload'**
+  String get notificationDebugFieldAthkarPayload;
+
+  /// No description provided for @notificationDebugFieldAthkarTimestamp.
+  ///
+  /// In en, this message translates to:
+  /// **'last_handled_notification_timestamp'**
+  String get notificationDebugFieldAthkarTimestamp;
+
+  /// No description provided for @notificationDebugFieldPreviewSig.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview signature'**
+  String get notificationDebugFieldPreviewSig;
+
+  /// No description provided for @notificationDebugFieldProcessedPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview is processed'**
+  String get notificationDebugFieldProcessedPreview;
+
+  /// No description provided for @notificationDebugChecklistAthkarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A. Athkar notification'**
+  String get notificationDebugChecklistAthkarTitle;
+
+  /// No description provided for @notificationDebugChecklistAthkarTap.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap Athkar notification → opens Athkar once'**
+  String get notificationDebugChecklistAthkarTap;
+
+  /// No description provided for @notificationDebugChecklistAthkarRestart.
+  ///
+  /// In en, this message translates to:
+  /// **'Hot restart → must not open Athkar again'**
+  String get notificationDebugChecklistAthkarRestart;
+
+  /// No description provided for @notificationDebugChecklistPrayerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'B. Prayer payload-only notification'**
+  String get notificationDebugChecklistPrayerTitle;
+
+  /// No description provided for @notificationDebugChecklistPrayerTap.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap Prayer notification → opens prayer route once'**
+  String get notificationDebugChecklistPrayerTap;
+
+  /// No description provided for @notificationDebugChecklistPrayerRestart.
+  ///
+  /// In en, this message translates to:
+  /// **'Hot restart → must not replay'**
+  String get notificationDebugChecklistPrayerRestart;
+
+  /// No description provided for @notificationDebugChecklistInvalidTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'C. Invalid payload'**
+  String get notificationDebugChecklistInvalidTitle;
+
+  /// No description provided for @notificationDebugChecklistInvalidBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid payload → must not fallback to Athkar'**
+  String get notificationDebugChecklistInvalidBody;
+
+  /// No description provided for @notificationDebugChecklistSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'D. Settings payload'**
+  String get notificationDebugChecklistSettingsTitle;
+
+  /// No description provided for @notificationDebugChecklistSettingsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings payload → opens Settings, not Athkar'**
+  String get notificationDebugChecklistSettingsBody;
+
+  /// No description provided for @notificationDebugChecklistSameSigTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'E. Same id + same payload'**
+  String get notificationDebugChecklistSameSigTitle;
+
+  /// No description provided for @notificationDebugChecklistSameSigTap.
+  ///
+  /// In en, this message translates to:
+  /// **'First tap → navigate once'**
+  String get notificationDebugChecklistSameSigTap;
+
+  /// No description provided for @notificationDebugChecklistSameSigRestart.
+  ///
+  /// In en, this message translates to:
+  /// **'Hot restart / same process → suppressed'**
+  String get notificationDebugChecklistSameSigRestart;
+
+  /// No description provided for @notificationDebugChecklistDiffPayloadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'F. Same id + different payload'**
+  String get notificationDebugChecklistDiffPayloadTitle;
+
+  /// No description provided for @notificationDebugChecklistDiffPayloadBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Treated as fresh launch'**
+  String get notificationDebugChecklistDiffPayloadBody;
+
+  /// No description provided for @notificationDebugChecklistDiffIdTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'G. Different id + same payload'**
+  String get notificationDebugChecklistDiffIdTitle;
+
+  /// No description provided for @notificationDebugChecklistDiffIdBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Payload signature wins → second tap suppressed in same pid'**
+  String get notificationDebugChecklistDiffIdBody;
+
+  /// No description provided for @notificationDebugChecklistKillTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'H. Full process kill'**
+  String get notificationDebugChecklistKillTitle;
+
+  /// No description provided for @notificationDebugChecklistKillSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'Kill app from recents → tap fresh notification → cold start navigation should work'**
+  String get notificationDebugChecklistKillSteps;
+
+  /// No description provided for @notificationDebugLogsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No debug events yet'**
+  String get notificationDebugLogsEmpty;
+
   /// Snackbar message when a flexible in-app update finished downloading
   ///
   /// In en, this message translates to:

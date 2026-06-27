@@ -9,8 +9,11 @@ import '../failure_ui/quran_sessions_failure_ui.dart';
 import '../blocs/teacher_list/teacher_list_bloc.dart';
 import '../blocs/teacher_list/teacher_list_event.dart';
 import '../blocs/teacher_list/teacher_list_state.dart';
+import '../theme/quran_sessions_theme.dart';
+import '../widgets/quran_sessions_scaffold.dart';
 import '../widgets/quran_sessions_student_empty_state.dart';
 import '../widgets/teacher_card.dart';
+import '../widgets/teacher_card_compact_skeleton.dart';
 
 /// Feature entry point — shows a compact teacher list with a "See all" link.
 class QuranSessionsHomeScreen extends StatefulWidget {
@@ -72,31 +75,33 @@ class _QuranSessionsHomeScreenState extends State<QuranSessionsHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
+    final feature = context.quranSessionsTheme;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.quranSessionsHomeTitle),
-        actions: [
-          if (widget.onWallet != null)
-            TilawaButton(
-              text: l10n.walletEntryAction,
-              variant: TilawaButtonVariant.ghost,
-              size: TilawaButtonSize.small,
-              onPressed: widget.onWallet,
+    return QuranSessionsScaffold(
+      title: l10n.quranSessionsHomeTitle,
+      actions: [
+        if (widget.onWallet != null)
+          TextButton(
+            onPressed: widget.onWallet,
+            child: Text(
+              l10n.walletEntryAction,
+              style: feature.chipLabelStyle.copyWith(color: feature.linkColor),
             ),
-          if (widget.onMySessions != null)
-            TilawaButton(
-              text: l10n.mySessionsTitle,
-              variant: TilawaButtonVariant.ghost,
-              size: TilawaButtonSize.small,
-              onPressed: widget.onMySessions,
+          ),
+        if (widget.onMySessions != null)
+          TextButton(
+            onPressed: widget.onMySessions,
+            child: Text(
+              l10n.mySessionsTitle,
+              style: feature.chipLabelStyle.copyWith(color: feature.linkColor),
             ),
-        ],
-      ),
+          ),
+      ],
       body: BlocBuilder<TeacherListBloc, TeacherListState>(
         builder: (context, state) => switch (state) {
-          TeacherListInitial() || TeacherListLoading() => const Center(
-            child: CircularProgressIndicator(),
+          TeacherListInitial() || TeacherListLoading() => ListView.builder(
+            itemCount: 3,
+            itemBuilder: (_, _) => const TeacherCardCompactSkeleton(),
           ),
           TeacherListEmpty() => QuranSessionsStudentEmptyState(
             featureConfig: widget.featureConfig,
@@ -110,12 +115,12 @@ class _QuranSessionsHomeScreenState extends State<QuranSessionsHomeScreen> {
           ),
           TeacherListFailure(:final failure) => Center(
             child: Padding(
-              padding: EdgeInsets.all(context.tokens.spaceLarge),
+              padding: EdgeInsets.all(feature.screenPaddingHorizontal),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(failure.toLocalizedMessage(context)),
-                  SizedBox(height: context.tokens.spaceMedium),
+                  SizedBox(height: feature.sectionGap),
                   TilawaButton(
                     text: l10n.retry,
                     onPressed: () => context.read<TeacherListBloc>().add(
@@ -127,7 +132,6 @@ class _QuranSessionsHomeScreenState extends State<QuranSessionsHomeScreen> {
             ),
           ),
           TeacherListSuccess(:final teachers) => ListView.builder(
-            padding: EdgeInsets.all(context.tokens.spaceMedium),
             itemCount: teachers.take(3).length + 1,
             itemBuilder: (context, i) {
               final preview = teachers.take(3).toList();
@@ -137,9 +141,16 @@ class _QuranSessionsHomeScreenState extends State<QuranSessionsHomeScreen> {
                   onTap: () => widget.onTeacherTapped?.call(preview[i].id),
                 );
               }
-              return TextButton(
-                onPressed: widget.onSeeAllTeachers,
-                child: Text(l10n.seeAllTeachers),
+              return Center(
+                child: TextButton(
+                  onPressed: widget.onSeeAllTeachers,
+                  child: Text(
+                    l10n.seeAllTeachers,
+                    style: feature.chipLabelStyle.copyWith(
+                      color: feature.linkColor,
+                    ),
+                  ),
+                ),
               );
             },
           ),

@@ -25,6 +25,7 @@ import '../features/downloads/presentation/widgets/downloads_screen_scope.dart';
 import '../features/genui_assistant/genui_assistant.dart';
 import '../features/history/presentation/bloc/history_bloc.dart';
 import '../features/history/presentation/screens/history_screen.dart';
+import '../features/notifications/debug/notification_debug_lab_screen.dart';
 import '../features/onboarding/presentation/screens/language_welcome_screen.dart';
 import '../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../features/prayer_times/presentation/screens/prayer_alerts_permission_screen.dart';
@@ -73,6 +74,7 @@ part 'app_router_config.g.dart';
     TypedGoRoute<QiblaRoute>(path: '/qibla'),
     TypedGoRoute<SmartKhatmaHubRoute>(path: '/smart-khatma'),
     TypedGoRoute<RouteListRoute>(path: '/routes'),
+    TypedGoRoute<NotificationDebugLabRoute>(path: '/debug/notifications'),
     TypedGoRoute<PrayerNotificationStatusRoute>(
       path: '/prayer-notification-status',
     ),
@@ -402,6 +404,21 @@ class RouteListRoute extends GoRouteData with $RouteListRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       const RouteListScreen();
+}
+
+class NotificationDebugLabRoute extends GoRouteData
+    with $NotificationDebugLabRoute {
+  const NotificationDebugLabRoute();
+
+  @override
+  String? redirect(BuildContext context, GoRouterState state) {
+    if (kReleaseMode) return const HomeRoute().location;
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const NotificationDebugLabScreen();
 }
 
 @TypedGoRoute<SplashRoute>(path: '/splash')

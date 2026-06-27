@@ -23,6 +23,7 @@ import '../../../theme/presentation/cubit/theme_cubit.dart';
 import '../../../theme/presentation/theme_state_material.dart';
 import '../../../home/presentation/widgets/home_hero_phase_debug_tile.dart';
 import '../../../home/presentation/widgets/home_hero_variant_debug_tile.dart';
+import '../../../notifications/debug/notification_debug_lab_tile.dart';
 import '../../../tour_guide/presentation/widgets/tour_guide_debug_reset_tile.dart';
 import '../cubit/settings_cubit.dart';
 import '../formatters/settings_share_text_formatter.dart';
@@ -281,6 +282,7 @@ class SettingsScreen extends StatelessWidget {
                       const SentryDebugVerifyTile(),
                       const HomeHeroPhaseDebugTile(),
                       const HomeHeroVariantDebugTile(),
+                      const NotificationDebugLabTile(),
                       const TourGuideDebugResetTile(isLast: true),
                     ],
                   ),

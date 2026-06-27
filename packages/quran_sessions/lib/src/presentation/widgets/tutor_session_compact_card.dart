@@ -317,7 +317,6 @@ class _TutorCancelOverflowButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.quranSessionsL10n;
     final tokens = Theme.of(context).tokens;
     final scheme = Theme.of(context).colorScheme;
 
@@ -338,7 +337,6 @@ class _TutorCancelOverflowButton extends StatelessWidget {
 
   Future<void> _showCancelMenu(BuildContext context) async {
     final l10n = context.quranSessionsL10n;
-    final tokens = Theme.of(context).tokens;
     final box = context.findRenderObject()! as RenderBox;
     final overlay =
         Overlay.of(context).context.findRenderObject()! as RenderBox;

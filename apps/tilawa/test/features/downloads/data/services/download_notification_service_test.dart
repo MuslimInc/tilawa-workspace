@@ -82,6 +82,7 @@ class MockFlutterLocalNotificationsPlatform extends Mock
     required int id,
     String? title,
     String? body,
+    NotificationDetails? notificationDetails,
     String? payload,
   }) async {
     if (throwOnShow) {
@@ -202,6 +203,37 @@ void main() {
         status: DownloadStatus.completed,
         completeMessage: 'Download complete',
       );
+      expect(service, isNotNull);
+    });
+
+    test('ignores stale progress after terminal completion', () async {
+      const String url = 'http://example.com/surah.mp3';
+
+      await service.showDownloadProgress(
+        downloadId: url,
+        title: title,
+        reciterName: reciterName,
+        progress: 53,
+        status: DownloadStatus.downloading,
+      );
+
+      await service.showDownloadProgress(
+        downloadId: url,
+        title: title,
+        reciterName: reciterName,
+        progress: 53,
+        status: DownloadStatus.completed,
+        completeMessage: 'Download complete',
+      );
+
+      await service.showDownloadProgress(
+        downloadId: url,
+        title: title,
+        reciterName: reciterName,
+        progress: 53,
+        status: DownloadStatus.downloading,
+      );
+
       expect(service, isNotNull);
     });
 

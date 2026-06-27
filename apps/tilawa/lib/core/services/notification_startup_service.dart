@@ -11,6 +11,7 @@ import '../../router/app_router.dart';
 import '../../router/app_router_config.dart';
 import '../bootstrap/app_startup.dart';
 import '../logging/app_logger.dart';
+import '../navigation/notification_launch_dedup.dart';
 
 typedef NotificationNavigator = void Function(String location, {Object? extra});
 
@@ -94,8 +95,6 @@ class NotificationStartupServiceImpl implements NotificationStartupService {
   static const Duration _deferredColdStartProbeDelay = Duration(
     milliseconds: 900,
   );
-  static const String _lastNotifIdKey = '_last_notif_id';
-  static const String _lastNotifPidKey = '_last_notif_pid';
 
   bool _hasProcessedStartup = false;
   bool _hasPrimedDispatcher = false;
@@ -125,6 +124,10 @@ class NotificationStartupServiceImpl implements NotificationStartupService {
       AppRouter.pendingStartupNotificationLaunch = false;
       return;
     }
+
+    // Register tap handlers on every normal launch so foreground notification
+    // taps route immediately without requiring a background/resume cycle.
+    unawaited(_handlersInitializer());
 
     // Probe local-notification cold-start lazily so startup frames stay fast.
     // The timer is cancelled in dispose() if the widget unmounts first.
@@ -189,6 +192,10 @@ class NotificationStartupServiceImpl implements NotificationStartupService {
       final bool processed = await _dispatcher.processLaunchNotification();
       if (processed) {
         AppRouter.lastProcessedNotificationId = currentId;
+        await AppRouter.persistProcessedNotificationLaunch(
+          notificationId: currentId,
+          payload: launchDetails?.notificationResponse?.payload,
+        );
         logger.d(
           '[NotificationStartupService] Launch notification processed on resume',
         );
@@ -277,14 +284,19 @@ class NotificationStartupServiceImpl implements NotificationStartupService {
       // Android Activity's Intent—and therefore getNotificationAppLaunchDetails()
       // —still returns the previously-processed notification.
       if (AppRouter.lastProcessedNotificationId == null) {
-        final storedId = await _prefs.getInt(_lastNotifIdKey);
-        final storedPid = await _prefs.getInt(_lastNotifPidKey);
-        final currentPid = _pidProvider.currentPid;
+        final int? storedId =
+            await NotificationLaunchDedup.readStoredNotificationId(
+              prefs: _prefs,
+              pid: _pidProvider.currentPid,
+            );
+        final int? storedPid = await _prefs.getInt(
+          NotificationLaunchDedup.lastNotifPidKey,
+        );
+        final int currentPid = _pidProvider.currentPid;
         logger.d(
           '[NotificationStartupService] _checkForDeferredColdStart: prefs storedId=$storedId storedPid=$storedPid currentPid=$currentPid',
         );
         if (storedId != null && storedPid == currentPid) {
-          // Same process → hot restart. Suppress re-navigation.
           AppRouter.lastProcessedNotificationId = storedId;
           logger.d(
             '[NotificationStartupService] _checkForDeferredColdStart: restored lastProcessedId=$storedId (hot restart)',
@@ -315,8 +327,10 @@ class NotificationStartupServiceImpl implements NotificationStartupService {
       final bool processed = await _dispatcher.processLaunchNotification();
       if (processed) {
         AppRouter.lastProcessedNotificationId = currentId;
-        await _prefs.setInt(_lastNotifIdKey, currentId);
-        await _prefs.setInt(_lastNotifPidKey, _pidProvider.currentPid);
+        await AppRouter.persistProcessedNotificationLaunch(
+          notificationId: currentId,
+          payload: launchDetails?.notificationResponse?.payload,
+        );
         logger.d(
           '[NotificationStartupService] Deferred cold-start local notification processed',
         );

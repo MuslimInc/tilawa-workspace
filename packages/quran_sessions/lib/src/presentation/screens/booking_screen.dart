@@ -17,8 +17,11 @@ import '../blocs/booking/booking_bloc.dart';
 import '../blocs/booking/booking_event.dart';
 import '../blocs/booking/booking_state.dart';
 import '../failure_ui/quran_sessions_failure_ui.dart';
+import '../theme/quran_sessions_theme.dart';
 import '../widgets/availability_slot_picker.dart';
 import '../widgets/payment_checkout_sheet.dart';
+import '../widgets/quran_sessions_scaffold.dart';
+import '../widgets/quran_sessions_surface_card.dart';
 
 class BookingScreen extends StatefulWidget {
   const BookingScreen({
@@ -94,9 +97,10 @@ class _BookingScreenState extends State<BookingScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
+    final feature = context.quranSessionsTheme;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.bookSessionTitle)),
+    return QuranSessionsScaffold(
+      title: l10n.bookSessionTitle,
       bottomNavigationBar: BlocBuilder<BookingBloc, BookingState>(
         buildWhen: (previous, current) =>
             previous is BookingSelecting != current is BookingSelecting ||
@@ -230,45 +234,48 @@ class _BookingScreenState extends State<BookingScreen> {
             :final teacherExternalMeetingUrl,
           ) =>
             Padding(
-              padding: EdgeInsets.all(Theme.of(context).tokens.spaceLarge),
+              padding: EdgeInsets.all(feature.screenPaddingHorizontal),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
                     l10n.selectSlot,
-                    style: Theme.of(context).textTheme.titleMedium,
+                    style: feature.sectionTitleStyle,
                   ),
-                  SizedBox(height: Theme.of(context).tokens.spaceMedium),
+                  SizedBox(height: feature.sectionGap),
                   Expanded(
                     child: SingleChildScrollView(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          AvailabilitySlotPicker(
-                            slots: availableSlots,
-                            selectedSlotId: selectedSlot?.slotId,
-                            initialSlotId: widget.preSelectedSlotId,
-                            onSlotSelected: (slot) => context
-                                .read<BookingBloc>()
-                                .add(SlotSelected(slot)),
+                          QuranSessionsSurfaceCard(
+                            child: AvailabilitySlotPicker(
+                              slots: availableSlots,
+                              selectedSlotId: selectedSlot?.slotId,
+                              initialSlotId: widget.preSelectedSlotId,
+                              onSlotSelected: (slot) => context
+                                  .read<BookingBloc>()
+                                  .add(SlotSelected(slot)),
+                            ),
                           ),
-                          SizedBox(
-                            height: Theme.of(context).tokens.spaceExtraLarge,
-                          ),
+                          SizedBox(height: feature.sectionGap),
                           Text(
                             l10n.sessionType,
-                            style: Theme.of(context).textTheme.titleMedium,
+                            style: feature.sectionTitleStyle,
                           ),
-                          SizedBox(height: Theme.of(context).tokens.spaceSmall),
-                          _CallTypePicker(
-                            hostPolicy: widget.sessionModePolicy,
-                            teacherExternalMeetingUrl:
-                                teacherExternalMeetingUrl,
-                            selected: selectedCallType,
-                            voiceVideoProviderHint:
-                                widget.voiceVideoProviderHint,
-                            onChanged: (ct) => context.read<BookingBloc>().add(
-                              CallTypeSelected(ct),
+                          SizedBox(height: feature.listItemGap),
+                          QuranSessionsSurfaceCard(
+                            child: _CallTypePicker(
+                              hostPolicy: widget.sessionModePolicy,
+                              teacherExternalMeetingUrl:
+                                  teacherExternalMeetingUrl,
+                              selected: selectedCallType,
+                              voiceVideoProviderHint:
+                                  widget.voiceVideoProviderHint,
+                              onChanged: (ct) =>
+                                  context.read<BookingBloc>().add(
+                                    CallTypeSelected(ct),
+                                  ),
                             ),
                           ),
                         ],
@@ -348,6 +355,7 @@ class _EligibilityBlockedView extends StatelessWidget {
     final l10n = context.quranSessionsL10n;
     final scheme = Theme.of(context).colorScheme;
     final tokens = Theme.of(context).tokens;
+    final feature = context.quranSessionsTheme;
     final isProfileIncomplete = failure is ProfileIncompleteFailure;
     final isBlocked = failure is AccountBlockedFailure;
     final needsGuardianApproval = failure is GuardianApprovalRequiredFailure;
@@ -375,7 +383,7 @@ class _EligibilityBlockedView extends StatelessWidget {
           SizedBox(height: tokens.spaceLarge + tokens.spaceSmall),
           Text(
             failure.toLocalizedMessage(context),
-            style: Theme.of(context).textTheme.titleMedium,
+            style: feature.sectionTitleStyle,
             textAlign: TextAlign.center,
           ),
           SizedBox(height: tokens.spaceExtraLarge),
@@ -436,7 +444,7 @@ class _CallTypePicker extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
     final tokens = Theme.of(context).tokens;
-    final scheme = Theme.of(context).colorScheme;
+    final feature = context.quranSessionsTheme;
     final policy = _effectivePolicy;
     final externalMissing =
         hostPolicy.isEnabled(SessionCallType.externalMeeting) &&
@@ -491,7 +499,7 @@ class _CallTypePicker extends StatelessWidget {
     if (enabledSegments.isEmpty) {
       return Text(
         l10n.unsupportedSessionMode,
-        style: Theme.of(context).textTheme.bodyMedium,
+        style: feature.cardMetaStyle,
       );
     }
 
@@ -508,9 +516,7 @@ class _CallTypePicker extends StatelessWidget {
             padding: EdgeInsets.only(top: tokens.spaceSmall),
             child: Text(
               note,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: scheme.onSurfaceVariant,
-              ),
+              style: feature.cardMetaStyle,
             ),
           ),
       ],

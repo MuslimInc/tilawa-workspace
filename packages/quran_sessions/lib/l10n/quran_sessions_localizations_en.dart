@@ -298,7 +298,91 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get becomeTeacherCardSubtitle => 'Join MeMuslim\'s certified teachers';
 
   @override
-  String get teacherListTitle => 'Find a teacher';
+  String get teacherListAppBarTitle => 'Tutors';
+
+  @override
+  String get teacherListTitle => 'Learn Quran with your teacher';
+
+  @override
+  String get teacherListSubtitle =>
+      'Choose the right teacher and start improving your recitation';
+
+  @override
+  String get teacherNewRating => 'New';
+
+  @override
+  String get teacherFilterAll => 'All';
+
+  @override
+  String get teacherFilterFree => 'Free';
+
+  @override
+  String get teacherFilterAvailableToday => 'Available today';
+
+  @override
+  String get teacherBookAction => 'Book';
+
+  @override
+  String get viewTeacherProfile => 'View profile';
+
+  @override
+  String get teacherAvailabilityToday => 'Available today';
+
+  @override
+  String get teacherAvailabilityTomorrow => 'Next slot tomorrow';
+
+  @override
+  String teacherAvailabilityNextAt(String when) {
+    return 'Next slot: $when';
+  }
+
+  @override
+  String get teacherAvailabilityNoSlots => 'No slots';
+
+  @override
+  String get teacherAvailabilityUnavailable => 'Not available now';
+
+  @override
+  String get joinSessionNow => 'Join now';
+
+  @override
+  String sessionsSummaryUpcoming(int count) {
+    return 'Upcoming: $count';
+  }
+
+  @override
+  String sessionsSummaryPast(int count) {
+    return 'Past: $count';
+  }
+
+  @override
+  String sessionsSummaryNextSession(String when) {
+    return 'Next session: $when';
+  }
+
+  @override
+  String get sessionsTabUpcoming => 'Upcoming';
+
+  @override
+  String get sessionsTabPast => 'Past';
+
+  @override
+  String get sessionsTabCancelled => 'Cancelled';
+
+  @override
+  String get bookAgainAction => 'Book again';
+
+  @override
+  String get sessionStatusStartingSoon => 'Starting soon';
+
+  @override
+  String sessionStartsInMinutes(int minutes) {
+    return 'Starts in $minutes min';
+  }
+
+  @override
+  String get noTeachersForAvailabilityFilter =>
+      'No teachers available today right now';
 
   @override
   String noTeachersForSpecialization(String specialization) {
@@ -693,6 +777,9 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get viewSessionDetails => 'View details';
 
   @override
+  String get sessionCardOverflowMenu => 'More session actions';
+
+  @override
   String get noSessionsYet => 'No sessions yet';
 
   @override
@@ -717,7 +804,13 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get noReviewsYet => 'No reviews yet';
 
   @override
+  String get aboutTeacherSection => 'About the teacher';
+
+  @override
   String get bookSessionAction => 'Book a session';
+
+  @override
+  String get noAvailabilityBookAction => 'No slots available';
 
   @override
   String get sessionStatusScheduled => 'Scheduled';
@@ -1490,6 +1583,10 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get noAvailabilityYet => 'No availability published yet.';
+
+  @override
+  String get noAvailabilityHelper =>
+      'Check back later when this teacher adds new slots.';
 
   @override
   String get reportConcernAction => 'Report a concern';

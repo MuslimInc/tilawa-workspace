@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import '../../../domain/entities/quran_teacher.dart';
 import '../../../domain/failures/quran_sessions_failure.dart';
+import '../../models/teacher_availability_summary.dart';
 
 sealed class TeacherListState extends Equatable {
   const TeacherListState();
@@ -22,6 +23,7 @@ final class TeacherListSuccess extends TeacherListState {
   const TeacherListSuccess({
     required this.teachers,
     required this.hasMore,
+    this.availabilitySummaries = const {},
     this.nextCursor,
     this.isLoadingMore = false,
     this.activeSpecialization,
@@ -31,6 +33,7 @@ final class TeacherListSuccess extends TeacherListState {
   final List<QuranTeacher> teachers;
   final bool hasMore;
   final String? nextCursor;
+  final Map<String, TeacherAvailabilitySummary> availabilitySummaries;
 
   /// True while appending the next page; existing [teachers] stay visible.
   final bool isLoadingMore;
@@ -42,6 +45,7 @@ final class TeacherListSuccess extends TeacherListState {
   List<Object?> get props => [
     teachers,
     hasMore,
+    availabilitySummaries,
     nextCursor,
     isLoadingMore,
     activeSpecialization,
@@ -51,6 +55,7 @@ final class TeacherListSuccess extends TeacherListState {
   TeacherListSuccess copyWith({
     List<QuranTeacher>? teachers,
     bool? hasMore,
+    Map<String, TeacherAvailabilitySummary>? availabilitySummaries,
     String? nextCursor,
     bool? isLoadingMore,
     String? activeSpecialization,
@@ -58,6 +63,7 @@ final class TeacherListSuccess extends TeacherListState {
   }) => TeacherListSuccess(
     teachers: teachers ?? this.teachers,
     hasMore: hasMore ?? this.hasMore,
+    availabilitySummaries: availabilitySummaries ?? this.availabilitySummaries,
     nextCursor: nextCursor ?? this.nextCursor,
     isLoadingMore: isLoadingMore ?? this.isLoadingMore,
     activeSpecialization: activeSpecialization ?? this.activeSpecialization,

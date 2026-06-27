@@ -593,11 +593,155 @@ abstract class QuranSessionsLocalizations {
   /// **'Join MeMuslim\'s certified teachers'**
   String get becomeTeacherCardSubtitle;
 
+  /// No description provided for @teacherListAppBarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tutors'**
+  String get teacherListAppBarTitle;
+
   /// No description provided for @teacherListTitle.
   ///
   /// In en, this message translates to:
-  /// **'Find a teacher'**
+  /// **'Learn Quran with your teacher'**
   String get teacherListTitle;
+
+  /// No description provided for @teacherListSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the right teacher and start improving your recitation'**
+  String get teacherListSubtitle;
+
+  /// No description provided for @teacherNewRating.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get teacherNewRating;
+
+  /// No description provided for @teacherFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get teacherFilterAll;
+
+  /// No description provided for @teacherFilterFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get teacherFilterFree;
+
+  /// No description provided for @teacherFilterAvailableToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Available today'**
+  String get teacherFilterAvailableToday;
+
+  /// No description provided for @teacherBookAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Book'**
+  String get teacherBookAction;
+
+  /// No description provided for @viewTeacherProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'View profile'**
+  String get viewTeacherProfile;
+
+  /// No description provided for @teacherAvailabilityToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Available today'**
+  String get teacherAvailabilityToday;
+
+  /// No description provided for @teacherAvailabilityTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Next slot tomorrow'**
+  String get teacherAvailabilityTomorrow;
+
+  /// No description provided for @teacherAvailabilityNextAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Next slot: {when}'**
+  String teacherAvailabilityNextAt(String when);
+
+  /// No description provided for @teacherAvailabilityNoSlots.
+  ///
+  /// In en, this message translates to:
+  /// **'No slots'**
+  String get teacherAvailabilityNoSlots;
+
+  /// No description provided for @teacherAvailabilityUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Not available now'**
+  String get teacherAvailabilityUnavailable;
+
+  /// No description provided for @joinSessionNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Join now'**
+  String get joinSessionNow;
+
+  /// No description provided for @sessionsSummaryUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming: {count}'**
+  String sessionsSummaryUpcoming(int count);
+
+  /// No description provided for @sessionsSummaryPast.
+  ///
+  /// In en, this message translates to:
+  /// **'Past: {count}'**
+  String sessionsSummaryPast(int count);
+
+  /// No description provided for @sessionsSummaryNextSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Next session: {when}'**
+  String sessionsSummaryNextSession(String when);
+
+  /// No description provided for @sessionsTabUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get sessionsTabUpcoming;
+
+  /// No description provided for @sessionsTabPast.
+  ///
+  /// In en, this message translates to:
+  /// **'Past'**
+  String get sessionsTabPast;
+
+  /// No description provided for @sessionsTabCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get sessionsTabCancelled;
+
+  /// No description provided for @bookAgainAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Book again'**
+  String get bookAgainAction;
+
+  /// No description provided for @sessionStatusStartingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting soon'**
+  String get sessionStatusStartingSoon;
+
+  /// No description provided for @sessionStartsInMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts in {minutes} min'**
+  String sessionStartsInMinutes(int minutes);
+
+  /// No description provided for @noTeachersForAvailabilityFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'No teachers available today right now'**
+  String get noTeachersForAvailabilityFilter;
 
   /// No description provided for @noTeachersForSpecialization.
   ///
@@ -1271,6 +1415,12 @@ abstract class QuranSessionsLocalizations {
   /// **'View details'**
   String get viewSessionDetails;
 
+  /// No description provided for @sessionCardOverflowMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'More session actions'**
+  String get sessionCardOverflowMenu;
+
   /// No description provided for @noSessionsYet.
   ///
   /// In en, this message translates to:
@@ -1313,11 +1463,23 @@ abstract class QuranSessionsLocalizations {
   /// **'No reviews yet'**
   String get noReviewsYet;
 
+  /// No description provided for @aboutTeacherSection.
+  ///
+  /// In en, this message translates to:
+  /// **'About the teacher'**
+  String get aboutTeacherSection;
+
   /// No description provided for @bookSessionAction.
   ///
   /// In en, this message translates to:
   /// **'Book a session'**
   String get bookSessionAction;
+
+  /// No description provided for @noAvailabilityBookAction.
+  ///
+  /// In en, this message translates to:
+  /// **'No slots available'**
+  String get noAvailabilityBookAction;
 
   /// No description provided for @sessionStatusScheduled.
   ///
@@ -2710,6 +2872,12 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'No availability published yet.'**
   String get noAvailabilityYet;
+
+  /// No description provided for @noAvailabilityHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Check back later when this teacher adds new slots.'**
+  String get noAvailabilityHelper;
 
   /// No description provided for @reportConcernAction.
   ///

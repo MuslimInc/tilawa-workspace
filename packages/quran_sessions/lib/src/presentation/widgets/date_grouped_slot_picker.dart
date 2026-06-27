@@ -5,6 +5,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/teacher_availability.dart';
 import '../../domain/services/teacher_availability_sort.dart';
+import '../theme/quran_sessions_theme.dart';
 import '../utils/teacher_availability_by_date.dart';
 import 'date_grouped_slots_layout.dart';
 
@@ -39,13 +40,16 @@ class DateGroupedSlotPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
+    final feature = context.quranSessionsTheme;
 
     return DateGroupedSlotsLayout(
       slots: slots,
       initialDay: _initialDay(),
       emptyChild: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Center(child: Text(l10n.noSlotsAvailable)),
+        padding: EdgeInsets.all(feature.cardPadding),
+        child: Center(
+          child: Text(l10n.noSlotsAvailable, style: feature.cardMetaStyle),
+        ),
       ),
       slotsForDayBuilder: (context, daySlots) => _TimeGrid(
         slots: daySlots,
@@ -72,14 +76,20 @@ class _TimeGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
+    final feature = context.quranSessionsTheme;
     final available = sortTeacherAvailabilityByStart(
       slots.where((s) => !s.isBooked).toList(),
     );
 
     if (available.isEmpty) {
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        child: Center(child: Text(l10n.noSlotsAvailableThisDay)),
+        padding: EdgeInsets.symmetric(vertical: feature.sectionGap),
+        child: Center(
+          child: Text(
+            l10n.noSlotsAvailableThisDay,
+            style: feature.cardMetaStyle,
+          ),
+        ),
       );
     }
 
@@ -87,8 +97,8 @@ class _TimeGrid extends StatelessWidget {
     final timeFmt = DateFormat('h:mm a', locale);
 
     return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+      spacing: feature.listItemGap + 2,
+      runSpacing: feature.listItemGap + 2,
       children: available.map((slot) {
         final isSelected = slot.slotId == selectedSlotId;
         return TilawaSelectionPill(

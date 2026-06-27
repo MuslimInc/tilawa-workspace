@@ -1,14 +1,39 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:checks/checks.dart';
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:quran_sessions/src/domain/entities/teacher_availability.dart';
 import 'package:quran_sessions/src/domain/failures/quran_sessions_failure.dart';
+import 'package:quran_sessions/src/domain/usecases/get_teacher_availability_usecase.dart';
 import 'package:quran_sessions/src/domain/usecases/get_teachers_usecase.dart';
+import 'package:quran_sessions/src/presentation/models/teacher_availability_summary.dart';
 import 'package:quran_sessions/src/presentation/blocs/teacher_list/teacher_list_bloc.dart';
 import 'package:quran_sessions/src/presentation/blocs/teacher_list/teacher_list_event.dart';
 import 'package:quran_sessions/src/presentation/blocs/teacher_list/teacher_list_state.dart';
+import '../../helpers/fakes/fake_booked_slot_lock_repository.dart';
 import '../../helpers/fakes/fake_teacher_repository.dart';
+import '../../helpers/availability_test_helpers.dart';
 import '../../helpers/fixtures.dart';
+
+class _StaticAvailabilityUseCase extends GetTeacherAvailabilityUseCase {
+  _StaticAvailabilityUseCase(this.slots)
+    : super(
+        scheduleRepository: FakeScheduleRepository(),
+        bookedSlotLocks: FakeBookedSlotLockRepository(),
+      );
+
+  final Map<String, List<TeacherAvailability>> slots;
+
+  @override
+  Future<Either<QuranSessionsFailure, List<TeacherAvailability>>> call(
+    String teacherId, {
+    required DateTime from,
+    required DateTime to,
+  }) async {
+    return Right(slots[teacherId] ?? const []);
+  }
+}
 
 void main() {
   late FakeTeacherRepository repo;
@@ -16,7 +41,10 @@ void main() {
 
   setUp(() {
     repo = FakeTeacherRepository();
-    bloc = TeacherListBloc(GetTeachersUseCase(repo));
+    bloc = TeacherListBloc(
+      GetTeachersUseCase(repo),
+      _StaticAvailabilityUseCase(const {}),
+    );
   });
 
   tearDown(() => bloc.close());
@@ -37,6 +65,37 @@ void main() {
         final state = b.state as TeacherListSuccess;
         check(state.teachers).length.equals(2);
         check(state.hasMore).isFalse();
+      },
+    );
+
+    blocTest<TeacherListBloc, TeacherListState>(
+      'emits availability summaries from generated availability use case',
+      build: () {
+        final now = DateTime.now();
+        repo.teachers = [makeTeacher(id: 'teacher_with_slots')];
+        return TeacherListBloc(
+          GetTeachersUseCase(repo),
+          _StaticAvailabilityUseCase({
+            'teacher_with_slots': [
+              makeSlot(
+                teacherId: 'teacher_with_slots',
+                startsAt: now.add(const Duration(hours: 2)),
+              ),
+            ],
+          }),
+        );
+      },
+      act: (b) => b.add(const LoadTeachersRequested()),
+      expect: () => [
+        isA<TeacherListLoading>(),
+        isA<TeacherListSuccess>(),
+      ],
+      verify: (b) {
+        final state = b.state as TeacherListSuccess;
+        final summary = state.availabilitySummaries['teacher_with_slots'];
+        check(summary).isNotNull();
+        check(summary!.status).equals(TeacherAvailabilityStatus.availableToday);
+        check(summary.hasAvailableSlots).isTrue();
       },
     );
 

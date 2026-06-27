@@ -4,12 +4,19 @@ import 'package:quran_sessions/core/l10n_extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../failure_ui/quran_sessions_failure_ui.dart';
+import '../../domain/entities/quran_teacher.dart';
 import '../blocs/teacher_list/teacher_list_bloc.dart';
 import '../blocs/teacher_list/teacher_list_event.dart';
 import '../blocs/teacher_list/teacher_list_state.dart';
 import '../config/quran_sessions_feature_config.dart';
+import '../models/teacher_availability_summary.dart';
+import '../theme/quran_sessions_theme.dart';
 import '../widgets/quran_sessions_student_empty_state.dart';
+import '../widgets/quran_sessions_scaffold.dart';
 import '../widgets/teacher_card.dart';
+import '../widgets/teacher_card_compact_skeleton.dart';
+import '../widgets/teacher_list_filter_bar.dart';
+import '../widgets/teacher_list_filter_logic.dart';
 
 class TeacherListScreen extends StatefulWidget {
   const TeacherListScreen({
@@ -35,6 +42,7 @@ class TeacherListScreen extends StatefulWidget {
 
 class _TeacherListScreenState extends State<TeacherListScreen> {
   final _scrollController = ScrollController();
+  TeacherListFilter _selectedFilter = TeacherListFilter.all;
 
   @override
   void initState() {
@@ -66,16 +74,34 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
     );
   }
 
+  void _onFilterSelected(TeacherListFilter filter) {
+    setState(() => _selectedFilter = filter);
+    if (!filter.isClientSideOnly) {
+      context.read<TeacherListBloc>().add(
+        TeacherFilterChanged(specialization: filter.specializationCode),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
+    final tokens = Theme.of(context).tokens;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.teacherListTitle)),
+    return QuranSessionsScaffold(
+      title: l10n.teacherListAppBarTitle,
       body: BlocBuilder<TeacherListBloc, TeacherListState>(
         builder: (context, state) => switch (state) {
-          TeacherListInitial() || TeacherListLoading() => const Center(
-            child: CircularProgressIndicator(),
+          TeacherListInitial() || TeacherListLoading() => ListView(
+            children: [
+              const _TeacherListHeader(),
+              TeacherListFilterBar(
+                selected: _selectedFilter,
+                onSelected: _onFilterSelected,
+              ),
+              SizedBox(height: tokens.spaceSmall),
+              for (var i = 0; i < 4; i++) const TeacherCardCompactSkeleton(),
+            ],
           ),
           TeacherListEmpty(
             :final activeSpecialization,
@@ -85,9 +111,12 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
                 ? _FilteredEmptyView(
                     specialization: activeSpecialization,
                     language: activeLanguage,
-                    onClearFilters: () => context.read<TeacherListBloc>().add(
-                      const TeacherFilterChanged(),
-                    ),
+                    onClearFilters: () {
+                      setState(() => _selectedFilter = TeacherListFilter.all);
+                      context.read<TeacherListBloc>().add(
+                        const TeacherFilterChanged(),
+                      );
+                    },
                   )
                 : QuranSessionsStudentEmptyState(
                     featureConfig: widget.featureConfig,
@@ -103,29 +132,82 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
           ),
           TeacherListSuccess(
             :final teachers,
+            :final availabilitySummaries,
             :final isLoadingMore,
           ) =>
-            RefreshIndicator(
-              onRefresh: () async => _retry(),
-              child: ListView.builder(
-                controller: _scrollController,
-                itemCount: teachers.length + (isLoadingMore ? 1 : 0),
-                itemBuilder: (context, i) {
-                  if (i == teachers.length) {
-                    return Padding(
-                      padding: EdgeInsets.symmetric(
-                        vertical: context.tokens.spaceMedium,
-                      ),
-                      child: const Center(child: CircularProgressIndicator()),
-                    );
-                  }
-                  return TeacherCard(
-                    teacher: teachers[i],
-                    onTap: () => _onTeacherTapped(teachers[i].id),
-                  );
-                },
-              ),
+            _buildSuccessList(
+              context,
+              teachers: teachers,
+              availabilitySummaries: availabilitySummaries,
+              isLoadingMore: isLoadingMore,
             ),
+        },
+      ),
+    );
+  }
+
+  Widget _buildSuccessList(
+    BuildContext context, {
+    required List<QuranTeacher> teachers,
+    required Map<String, TeacherAvailabilitySummary> availabilitySummaries,
+    required bool isLoadingMore,
+  }) {
+    final l10n = context.quranSessionsL10n;
+    final tokens = Theme.of(context).tokens;
+    final visible = applyTeacherListClientFilter(
+      teachers,
+      _selectedFilter,
+      availabilitySummaries,
+    );
+    final showClientEmpty = _selectedFilter.isClientSideOnly && visible.isEmpty;
+
+    return RefreshIndicator(
+      onRefresh: () async => _retry(),
+      child: ListView.builder(
+        controller: _scrollController,
+        itemCount:
+            2 +
+            (showClientEmpty ? 1 : visible.length) +
+            (isLoadingMore ? 1 : 0),
+        itemBuilder: (context, i) {
+          if (i == 0) {
+            return const _TeacherListHeader();
+          }
+          if (i == 1) {
+            return TeacherListFilterBar(
+              selected: _selectedFilter,
+              onSelected: _onFilterSelected,
+            );
+          }
+
+          final dataIndex = i - 2;
+          if (showClientEmpty) {
+            return Padding(
+              padding: EdgeInsets.all(tokens.spaceLarge),
+              child: Text(
+                _selectedFilter == TeacherListFilter.availableToday
+                    ? l10n.noTeachersForAvailabilityFilter
+                    : l10n.noTeachersAvailableRightNow,
+                textAlign: TextAlign.center,
+              ),
+            );
+          }
+
+          if (dataIndex == visible.length) {
+            return Padding(
+              padding: EdgeInsets.symmetric(vertical: tokens.spaceMedium),
+              child: const Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          final teacher = visible[dataIndex];
+          return TeacherCard(
+            teacher: teacher,
+            onTap: () => _onTeacherTapped(teacher.id),
+            availabilitySummary: availabilitySummaries[teacher.id],
+            onBook: () => _onTeacherTapped(teacher.id),
+            onViewProfile: () => _onTeacherTapped(teacher.id),
+          );
         },
       ),
     );
@@ -136,6 +218,31 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
 
   void _onTeacherTapped(String teacherId) {
     widget.onTeacherTapped?.call(teacherId);
+  }
+}
+
+class _TeacherListHeader extends StatelessWidget {
+  const _TeacherListHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+    final feature = context.quranSessionsTheme;
+
+    return Padding(
+      padding: feature.screenPadding.copyWith(
+        top: feature.listItemGap,
+        bottom: feature.listItemGap,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.teacherListTitle, style: feature.screenTitleStyle),
+          SizedBox(height: feature.listItemGap),
+          Text(l10n.teacherListSubtitle, style: feature.screenSubtitleStyle),
+        ],
+      ),
+    );
   }
 }
 

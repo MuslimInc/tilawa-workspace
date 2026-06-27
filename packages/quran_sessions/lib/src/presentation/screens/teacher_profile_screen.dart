@@ -5,16 +5,20 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/quran_teacher.dart';
 import '../../domain/entities/session_call_type.dart';
-import '../../domain/entities/session_pricing_type.dart';
 import '../../domain/entities/session_review.dart';
 import '../../domain/entities/teacher_availability.dart';
-import '../../utils/price_formatter.dart';
 import '../../domain/value_objects/teacher_public_name.dart';
 import '../failure_ui/quran_sessions_failure_ui.dart';
 import '../blocs/teacher_profile/teacher_profile_bloc.dart';
 import '../blocs/teacher_profile/teacher_profile_event.dart';
 import '../blocs/teacher_profile/teacher_profile_state.dart';
+import '../theme/quran_sessions_theme.dart';
 import '../widgets/availability_slot_picker.dart';
+import '../widgets/quran_session_price_chip.dart';
+import '../widgets/quran_sessions_metadata_chip.dart';
+import '../widgets/quran_sessions_scaffold.dart';
+import '../widgets/quran_sessions_section_header.dart';
+import '../widgets/quran_sessions_surface_card.dart';
 import '../widgets/teacher_initials_avatar.dart';
 
 class TeacherProfileScreen extends StatefulWidget {
@@ -58,8 +62,8 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.teacherProfileTitle)),
+    return QuranSessionsScaffold(
+      title: l10n.teacherProfileTitle,
       bottomNavigationBar: widget.bookingEnabled && widget.onBookTapped != null
           ? BlocBuilder<TeacherProfileBloc, TeacherProfileState>(
               builder: (context, state) {
@@ -67,13 +71,18 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
                     !_isTeacherMarketplaceVisible(state.teacher)) {
                   return const SizedBox.shrink();
                 }
+                final canBook =
+                    !state.isLoadingAvailability &&
+                    state.availability.isNotEmpty;
                 return TilawaBottomActionArea(
-                  child: TilawaButton(
-                    text: l10n.bookSessionAction,
-                    leadingIcon: const Icon(Icons.calendar_today_outlined),
-                    isFullWidth: true,
-                    size: TilawaButtonSize.large,
-                    onPressed: () => _onBookTapped(_selectedSlotId),
+                  child: _TeacherProfileBookingCta(
+                    label: canBook
+                        ? l10n.bookSessionAction
+                        : l10n.noAvailabilityBookAction,
+                    enabled: canBook,
+                    onPressed: canBook
+                        ? () => _onBookTapped(_selectedSlotId)
+                        : null,
                   ),
                 );
               },
@@ -116,6 +125,74 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
 
   void _onBookTapped(String? preSelectedSlotId) {
     widget.onBookTapped?.call(widget.teacherId, preSelectedSlotId);
+  }
+}
+
+class _TeacherProfileBookingCta extends StatelessWidget {
+  const _TeacherProfileBookingCta({
+    required this.label,
+    required this.enabled,
+    required this.onPressed,
+  });
+
+  final String label;
+  final bool enabled;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final feature = context.quranSessionsTheme;
+    final tokens = Theme.of(context).tokens;
+    final background = enabled
+        ? feature.primaryColor
+        : feature.disabledBackground;
+    final foreground = enabled
+        ? feature.onPrimaryColor
+        : feature.disabledForeground;
+    final border = enabled ? feature.primaryColor : feature.disabledBorder;
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        minWidth: double.infinity,
+        minHeight: tokens.minInteractiveDimension,
+      ),
+      child: Material(
+        color: background,
+        shape: StadiumBorder(side: BorderSide(color: border)),
+        child: InkWell(
+          customBorder: const StadiumBorder(),
+          onTap: enabled ? onPressed : null,
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: tokens.spaceLarge,
+              vertical: tokens.spaceSmall,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.calendar_today_outlined,
+                  size: tokens.iconSizeMedium,
+                  color: foreground,
+                ),
+                SizedBox(width: tokens.spaceSmall),
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: feature.sectionTitleStyle.copyWith(
+                      color: foreground,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -177,170 +254,189 @@ class _TeacherProfileBodyState extends State<_TeacherProfileBody> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
+    final feature = context.quranSessionsTheme;
     final tokens = Theme.of(context).tokens;
     final displayName = widget.teacher.displayName.trim();
     final bio = widget.teacher.bio.trim();
 
     return ListView(
-      padding: EdgeInsets.all(tokens.spaceMedium),
+      padding: EdgeInsets.symmetric(
+        horizontal: feature.screenPaddingHorizontal,
+        vertical: feature.sectionGap,
+      ),
       children: [
-        Center(
-          child: TeacherInitialsAvatar(
-            displayName: displayName,
-            radius: 44,
-            avatarUrl: widget.teacher.avatarUrl,
-          ),
-        ),
-        SizedBox(height: tokens.spaceMedium),
-        Center(
-          child: Text(
-            displayName,
-            style: Theme.of(context).textTheme.titleLarge,
-            textAlign: TextAlign.center,
-          ),
-        ),
-        SizedBox(height: tokens.spaceExtraSmall),
-        Center(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
+        QuranSessionsSurfaceCard(
+          child: Column(
             children: [
-              Icon(
-                Icons.star_rounded,
-                size: 16,
-                color: Theme.of(context).colorScheme.tertiary,
+              TeacherInitialsAvatar(
+                displayName: displayName,
+                radius: feature.profileAvatarRadius,
+                avatarUrl: widget.teacher.avatarUrl,
               ),
-              SizedBox(width: tokens.spaceExtraSmall),
+              SizedBox(height: feature.sectionGap),
               Text(
-                l10n.teacherRatingReviews(
-                  widget.teacher.averageRating.toStringAsFixed(1),
-                  widget.teacher.totalReviews,
+                displayName,
+                style: feature.sectionTitleStyle,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              SizedBox(height: feature.listItemGap),
+              _TeacherProfileRatingRow(
+                rating: widget.teacher.averageRating,
+                reviewsCount: widget.teacher.totalReviews,
+              ),
+              SizedBox(height: feature.listItemGap),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    QuranSessionPriceChip(teacher: widget.teacher),
+                    for (final code in widget.teacher.specializations) ...[
+                      SizedBox(width: feature.listItemGap),
+                      QuranSessionsMetadataChip(
+                        label: l10n.specializationLabel(code),
+                      ),
+                    ],
+                    if (widget.teacher.supportedCallTypes.contains(
+                      SessionCallType.externalMeeting,
+                    )) ...[
+                      SizedBox(width: feature.listItemGap),
+                      QuranSessionsMetadataChip(
+                        label: l10n.teacherOffersExternalSessions,
+                      ),
+                    ],
+                  ],
                 ),
               ),
             ],
           ),
         ),
-        SizedBox(height: tokens.spaceSmall),
-        Center(child: _PricingRow(teacher: widget.teacher)),
-        if (widget.teacher.specializations.isNotEmpty) ...[
-          SizedBox(height: tokens.spaceSmall),
-          Wrap(
-            alignment: WrapAlignment.center,
-            spacing: tokens.spaceSmall,
-            runSpacing: tokens.spaceSmall,
-            children: widget.teacher.specializations.map((code) {
-              return TilawaStatusChip(label: l10n.specializationLabel(code));
-            }).toList(),
-          ),
-        ],
-        if (widget.teacher.supportedCallTypes.contains(
-          SessionCallType.externalMeeting,
-        )) ...[
-          SizedBox(height: tokens.spaceSmall),
-          Center(
-            child: TilawaStatusChip(
-              label: l10n.teacherOffersExternalSessions,
-            ),
-          ),
-        ],
         if (bio.isNotEmpty) ...[
-          SizedBox(height: tokens.spaceMedium),
-          Text(bio, textDirection: TextDirection.ltr),
+          SizedBox(height: feature.sectionGap),
+          QuranSessionsSectionHeader(title: l10n.aboutTeacherSection),
+          SizedBox(height: feature.listItemGap),
+          QuranSessionsSurfaceCard(
+            child: Text(bio, style: feature.screenSubtitleStyle),
+          ),
         ],
-        Divider(height: tokens.spaceExtraLarge),
-        Row(
-          children: [
-            Text(
-              l10n.availableSlots,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            if (widget.isLoadingAvailability) ...[
-              SizedBox(width: tokens.spaceSmall),
-              const SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-            ],
-          ],
+        SizedBox(height: feature.sectionGap),
+        QuranSessionsSectionHeader(
+          title: l10n.availableSlots,
+          trailing: widget.isLoadingAvailability
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : null,
         ),
-        SizedBox(height: tokens.spaceMedium),
-        if (widget.availability.isEmpty && !widget.isLoadingAvailability)
-          Text(
-            l10n.noAvailabilityYet,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          )
-        else
-          AvailabilitySlotPicker(
-            slots: widget.availability,
-            selectedSlotId: widget.selectedSlotId,
-            onSlotSelected: (slot) {
-              widget.onSlotSelected?.call(slot.slotId);
-              widget.onBookTapped?.call(slot.slotId);
-            },
-          ),
-        Divider(height: tokens.spaceExtraLarge),
-        Text(
-          l10n.reviewsSection,
-          style: Theme.of(context).textTheme.titleMedium,
+        SizedBox(height: feature.listItemGap),
+        QuranSessionsSurfaceCard(
+          child: widget.availability.isEmpty && !widget.isLoadingAvailability
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.noAvailabilityYet,
+                      style: feature.cardTitleStyle,
+                    ),
+                    SizedBox(height: feature.listItemGap),
+                    Text(
+                      l10n.noAvailabilityHelper,
+                      style: feature.cardMetaStyle,
+                    ),
+                  ],
+                )
+              : AvailabilitySlotPicker(
+                  slots: widget.availability,
+                  selectedSlotId: widget.selectedSlotId,
+                  onSlotSelected: (slot) {
+                    widget.onSlotSelected?.call(slot.slotId);
+                  },
+                ),
         ),
-        SizedBox(height: tokens.spaceSmall),
-        if (widget.reviews.isEmpty)
-          Text(
-            l10n.noReviewsYet,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          )
-        else
-          ...widget.reviews.map(
-            (r) => ListTile(
-              leading: Text('${r.rating}★'),
-              title: Text(r.comment ?? ''),
-              dense: true,
-            ),
-          ),
+        SizedBox(height: feature.sectionGap),
+        QuranSessionsSectionHeader(title: l10n.reviewsSection),
+        SizedBox(height: feature.listItemGap),
+        QuranSessionsSurfaceCard(
+          child: widget.reviews.isEmpty
+              ? Text(
+                  l10n.noReviewsYet,
+                  style: feature.cardMetaStyle,
+                )
+              : Column(
+                  children: widget.reviews
+                      .map(
+                        (r) => Padding(
+                          padding: EdgeInsets.only(
+                            bottom: feature.listItemGap,
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${r.rating}★',
+                                style: feature.chipLabelStyle.copyWith(
+                                  color: feature.ratingColor,
+                                ),
+                              ),
+                              SizedBox(width: feature.cardGap),
+                              Expanded(
+                                child: Text(
+                                  r.comment ?? '',
+                                  style: feature.cardMetaStyle,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+        ),
         SizedBox(height: tokens.spaceExtraLarge * 2),
       ],
     );
   }
 }
 
-// ── Pricing row ───────────────────────────────────────────────────────────────
+class _TeacherProfileRatingRow extends StatelessWidget {
+  const _TeacherProfileRatingRow({
+    required this.rating,
+    required this.reviewsCount,
+  });
 
-class _PricingRow extends StatelessWidget {
-  const _PricingRow({required this.teacher});
-
-  final QuranTeacher teacher;
+  final double rating;
+  final int reviewsCount;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final isFree = teacher.pricingType == SessionPricingType.free;
-    final label = PriceFormatter.formatOrFree(
-      l10n: context.quranSessionsL10n,
-      pricingType: teacher.pricingType,
-      price: teacher.price,
-    );
+    final l10n = context.quranSessionsL10n;
+    final feature = context.quranSessionsTheme;
+    final tokens = Theme.of(context).tokens;
+    final isNew = reviewsCount == 0;
 
-    if (label.isEmpty) return const SizedBox.shrink();
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      decoration: BoxDecoration(
-        color: isFree ? scheme.secondaryContainer : scheme.primaryContainer,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: isFree
-              ? scheme.onSecondaryContainer
-              : scheme.onPrimaryContainer,
-          fontWeight: FontWeight.w700,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          Icons.star_rounded,
+          size: tokens.iconSizeSmall,
+          color: feature.ratingColor,
         ),
-      ),
+        SizedBox(width: tokens.spaceExtraSmall),
+        Text(
+          isNew
+              ? l10n.teacherNewRating
+              : l10n.teacherRatingReviews(
+                  rating.toStringAsFixed(1),
+                  reviewsCount,
+                ),
+          style: feature.cardMetaStyle,
+        ),
+      ],
     );
   }
 }

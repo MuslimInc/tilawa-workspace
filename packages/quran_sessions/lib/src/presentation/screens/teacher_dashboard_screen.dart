@@ -31,7 +31,7 @@ class TeacherDashboardScreen extends StatefulWidget {
     this.onSessionDetailRequested,
     this.resolveStudentName,
     this.schedulingAnalytics,
-    this.meetingUrlEditor,
+    this.meetingUrlSettingsBuilder,
   });
 
   final String teacherId;
@@ -53,8 +53,9 @@ class TeacherDashboardScreen extends StatefulWidget {
   /// Optional scheduling experiment analytics (week views, Friday banner).
   final QuranSessionsSchedulingAnalyticsCallbacks? schedulingAnalytics;
 
-  /// Optional external meeting URL editor shown above availability.
-  final Widget? meetingUrlEditor;
+  /// Builds the external meeting URL editor shown from the app bar settings
+  /// sheet. When null, the settings entry point is hidden.
+  final WidgetBuilder? meetingUrlSettingsBuilder;
 
   @override
   State<TeacherDashboardScreen> createState() => _TeacherDashboardScreenState();
@@ -87,6 +88,12 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       appBar: AppBar(
         title: Text(l10n.teacherDashboardTitle),
         actions: [
+          if (widget.meetingUrlSettingsBuilder != null)
+            IconButton(
+              icon: const Icon(Icons.link_outlined),
+              tooltip: l10n.teacherExternalMeetingUrlLabel,
+              onPressed: _openMeetingLinkSettings,
+            ),
           if (widget.onManageSchedule != null &&
               dashboardState is TeacherDashboardSuccess &&
               _hasAnyBookableSlots(dashboardState))
@@ -210,18 +217,6 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
             onRefresh: () async => _reload(),
             child: CustomScrollView(
               slivers: [
-                if (widget.meetingUrlEditor != null)
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(
-                        Theme.of(context).tokens.spaceLarge,
-                        Theme.of(context).tokens.spaceLarge,
-                        Theme.of(context).tokens.spaceLarge,
-                        0,
-                      ),
-                      child: widget.meetingUrlEditor,
-                    ),
-                  ),
                 // ── Pending booking requests ───────────────────────────
                 SliverToBoxAdapter(
                   child: TutorDashboardSection(
@@ -520,6 +515,36 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     await openEditor();
     if (!mounted) return;
     await _reload();
+  }
+
+  Future<void> _openMeetingLinkSettings() async {
+    final builder = widget.meetingUrlSettingsBuilder;
+    if (builder == null) return;
+
+    await showTilawaModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: TilawaBottomSheetScaffold.modalShape(context),
+      builder: (sheetContext) {
+        final tokens = Theme.of(sheetContext).tokens;
+        return TilawaBottomSheetScaffold(
+          topBar: TilawaBottomSheetTitleRow(
+            title:
+                sheetContext.quranSessionsL10n.teacherExternalMeetingUrlLabel,
+          ),
+          children: [
+            Padding(
+              padding: TilawaBottomSheetScaffold.resolvedBodyPadding(
+                sheetContext,
+              ),
+              child: builder(sheetContext),
+            ),
+            SizedBox(height: tokens.spaceSmall),
+          ],
+        );
+      },
+    );
   }
 
   String _studentDisplayName(BuildContext context, String studentId) {

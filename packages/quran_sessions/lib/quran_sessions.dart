@@ -269,6 +269,15 @@ export 'src/presentation/blocs/teacher_list/teacher_list_state.dart';
 export 'src/presentation/blocs/teacher_profile/teacher_profile_bloc.dart';
 export 'src/presentation/blocs/teacher_profile/teacher_profile_event.dart';
 export 'src/presentation/blocs/teacher_profile/teacher_profile_state.dart';
+// ── Presentation: theme (feature-scoped) ───────────────────────────────────
+export 'src/presentation/models/teacher_availability_summary.dart';
+export 'src/presentation/theme/quran_sessions_palette.dart';
+export 'src/presentation/theme/quran_sessions_theme.dart';
+export 'src/presentation/theme/quran_sessions_theme_scope.dart';
+export 'src/presentation/widgets/quran_sessions_section_header.dart';
+export 'src/presentation/widgets/quran_sessions_metadata_chip.dart';
+export 'src/presentation/widgets/quran_sessions_scaffold.dart';
+export 'src/presentation/widgets/quran_sessions_surface_card.dart';
 // ── Presentation: failure UI extension ───────────────────────────────────────
 export 'src/presentation/config/quran_sessions_analytics_callbacks.dart';
 export 'src/presentation/config/quran_sessions_scheduling_analytics_callbacks.dart';
@@ -320,6 +329,14 @@ export 'src/presentation/widgets/quran_sessions_student_empty_state.dart';
 export 'src/presentation/widgets/session_card.dart';
 export 'src/presentation/widgets/teacher_card.dart';
 export 'src/presentation/widgets/teacher_initials_avatar.dart';
+export 'src/presentation/widgets/quran_session_action_menu.dart';
+export 'src/presentation/widgets/quran_session_card.dart';
+export 'src/presentation/widgets/quran_session_price_chip.dart';
+export 'src/presentation/widgets/quran_session_status_chip.dart';
+export 'src/presentation/widgets/quran_session_summary_strip.dart';
+export 'src/presentation/widgets/quran_session_teacher_compact_card.dart';
+export 'src/presentation/widgets/quran_sessions_segmented_tabs.dart';
+export 'src/presentation/widgets/teacher_list_filter_bar.dart';
 // ── Utils ─────────────────────────────────────────────────────────────────────
 export 'src/utils/phone_normalizer.dart';
 export 'src/utils/price_formatter.dart';

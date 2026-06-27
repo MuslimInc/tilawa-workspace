@@ -6,7 +6,16 @@ import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../../helpers/availability_test_helpers.dart';
+import '../../helpers/fakes/fake_booked_slot_lock_repository.dart';
 import '../../helpers/fakes/fake_teacher_repository.dart';
+
+GetTeacherAvailabilityUseCase _availabilityUseCase() {
+  return GetTeacherAvailabilityUseCase(
+    scheduleRepository: FakeScheduleRepository(),
+    bookedSlotLocks: FakeBookedSlotLockRepository(),
+  );
+}
 
 void main() {
   testWidgets('hides wallet action when walletEnabled is false', (
@@ -25,7 +34,7 @@ void main() {
         supportedLocales: QuranSessionsLocalizations.supportedLocales,
         home: BlocProvider(
           create: (_) =>
-              TeacherListBloc(GetTeachersUseCase(repo))
+              TeacherListBloc(GetTeachersUseCase(repo), _availabilityUseCase())
                 ..add(const LoadTeachersRequested()),
           child: QuranSessionsHomeScreen(
             featureConfig: const QuranSessionsFeatureConfig(
@@ -57,7 +66,7 @@ void main() {
         supportedLocales: QuranSessionsLocalizations.supportedLocales,
         home: BlocProvider(
           create: (_) =>
-              TeacherListBloc(GetTeachersUseCase(repo))
+              TeacherListBloc(GetTeachersUseCase(repo), _availabilityUseCase())
                 ..add(const LoadTeachersRequested()),
           child: QuranSessionsHomeScreen(
             featureConfig: const QuranSessionsFeatureConfig(

@@ -1834,6 +1834,91 @@ void main() {
       });
     });
 
+    test(
+      'completion notification uses stable enqueue id when progress id is URL variant',
+      () {
+        fakeAsync((async) {
+          final mockNotification =
+              GetIt.instance<DownloadNotificationService>()
+                  as MockDownloadNotificationService;
+          when(
+            mockNotification.showDownloadProgress(
+              downloadId: anyNamed('downloadId'),
+              title: anyNamed('title'),
+              reciterName: anyNamed('reciterName'),
+              reciterId: anyNamed('reciterId'),
+              progress: anyNamed('progress'),
+              status: anyNamed('status'),
+              pendingMessage: anyNamed('pendingMessage'),
+              progressMessage: anyNamed('progressMessage'),
+              completeMessage: anyNamed('completeMessage'),
+              failedMessage: anyNamed('failedMessage'),
+            ),
+          ).thenAnswer((_) async {});
+
+          final manager = GetIt.instance<DownloadQueueManager>();
+          manager.locale = const Locale('en');
+          manager.initialize();
+          async.flushMicrotasks();
+
+          when(mockDownloader.loadTasks()).thenAnswer((_) async => []);
+          when(
+            mockDownloader.enqueue(
+              url: anyNamed('url'),
+              savedDir: anyNamed('savedDir'),
+              fileName: anyNamed('fileName'),
+              showNotification: anyNamed('showNotification'),
+              openFileFromNotification: anyNamed('openFileFromNotification'),
+              title: anyNamed('title'),
+              headers: anyNamed('headers'),
+              requiresStorageNotLow: anyNamed('requiresStorageNotLow'),
+              saveInPublicStorage: anyNamed('saveInPublicStorage'),
+            ),
+          ).thenAnswer((_) async => 't1');
+
+          unawaited(
+            manager.enqueue(
+              id: 'custom_id',
+              url: 'http://example.com//reciter//001.mp3',
+              filePath: '/path/to/file.mp3',
+              title: 'Al-Fatiha',
+              reciterName: 'Reciter',
+              showNotification: true,
+            ),
+          );
+          async.flushMicrotasks();
+
+          (GetIt.instance<DownloadServiceInterface>() as DownloadServiceImpl)
+              .globalProgressControllerInternal
+              .add(
+                const DownloadProgress(
+                  id: 'http://example.com/reciter/001.mp3',
+                  status: DownloadStatus.completed,
+                  progress: 1.0,
+                  downloadedSize: 100,
+                  fileSize: 100,
+                ),
+              );
+          async.flushMicrotasks();
+
+          verify(
+            mockNotification.showDownloadProgress(
+              downloadId: 'custom_id',
+              title: 'Al-Fatiha',
+              reciterName: 'Reciter',
+              reciterId: anyNamed('reciterId'),
+              progress: 100,
+              status: DownloadStatus.completed,
+              pendingMessage: anyNamed('pendingMessage'),
+              progressMessage: anyNamed('progressMessage'),
+              completeMessage: anyNamed('completeMessage'),
+              failedMessage: anyNamed('failedMessage'),
+            ),
+          ).called(1);
+        });
+      },
+    );
+
     test('periodic sync triggers queue processing when capacity available', () {
       fakeAsync((async) {
         final manager = GetIt.instance<DownloadQueueManager>();

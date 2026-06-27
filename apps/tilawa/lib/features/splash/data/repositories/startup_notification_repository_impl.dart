@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/router/app_router.dart';
@@ -15,6 +17,12 @@ class StartupNotificationRepositoryImpl
     if (response != null) {
       AppRouter.pendingLocalNotificationResponse = null;
       AppRouter.lastProcessedNotificationId = response.id;
+      unawaited(
+        AppRouter.persistProcessedNotificationLaunch(
+          notificationId: response.id,
+          payload: response.payload,
+        ),
+      );
       // Shared resolver understands both JSON payloads and the plain-string
       // athkar payloads; empty map signals "launched from a notification but
       // no destination data" so the splash falls back to home.

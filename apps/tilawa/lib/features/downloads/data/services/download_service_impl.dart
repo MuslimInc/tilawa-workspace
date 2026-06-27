@@ -189,11 +189,13 @@ class DownloadServiceImpl implements DownloadServiceInterface {
 
       final DownloadStatus downloadStatus = _statusMapper
           .mapTaskStatusToDownloadStatus(status);
+      final double normalizedProgress =
+          downloadStatus == DownloadStatus.completed ? 1.0 : progress / 100.0;
       _globalProgressController.add(
         DownloadProgress(
           id: url,
           status: downloadStatus,
-          progress: progress / 100.0,
+          progress: normalizedProgress,
           downloadedSize: 0,
           fileSize: 0,
         ),

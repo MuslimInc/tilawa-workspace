@@ -65,7 +65,7 @@ class _FakeAuthSession implements AuthSessionProvider {
 QuranSession _inAppSession({
   SessionCallProviderKind providerKind = SessionCallProviderKind.mock,
 }) {
-  final start = DateTime.now().add(const Duration(days: 1));
+  final start = DateTime.now().add(const Duration(minutes: 5));
   return QuranSession(
     id: 'session_join',
     bookingId: 'booking_1',
@@ -119,7 +119,7 @@ void main() {
 
     await _pumpMySessionsScreen(tester, bloc: bloc);
 
-    await tester.tap(find.text('Join'));
+    await tester.tap(find.text('Join now'));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('call_shell_end')), findsOneWidget);
@@ -130,14 +130,20 @@ void main() {
   ) async {
     final bloc = _JoinNavigationTestBloc(
       seed: MySessionsSuccess(
-        upcoming: [makeSession(id: 'session_join', studentId: 'student_1')],
+        upcoming: [
+          makeSession(
+            id: 'session_join',
+            studentId: 'student_1',
+            startsAt: DateTime.now().add(const Duration(minutes: 5)),
+          ),
+        ],
         past: const [],
       ),
     );
 
     await _pumpMySessionsScreen(tester, bloc: bloc);
 
-    await tester.tap(find.text('Join'));
+    await tester.tap(find.text('Join now'));
     await tester.pumpAndSettle();
 
     expect(find.text('Join outside MeMuslim?'), findsOneWidget);

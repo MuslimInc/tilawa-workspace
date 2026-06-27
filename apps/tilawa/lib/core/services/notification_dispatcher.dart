@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 
 import '../config/notification_config.dart';
@@ -253,6 +254,12 @@ class NotificationDispatcher implements INotificationDispatcher {
 
   /// Internal handler that routes notifications to the appropriate service
   void _handleNotificationResponse(NotificationResponse response) {
+    if (kDebugMode) {
+      logger.d(
+        '[NotificationForegroundTap] callback id=${response.id} '
+        'payload=${response.payload}',
+      );
+    }
     logger.d(
       '[NotificationDispatcher] _handleNotificationResponse called: id=${response.id}, payload=${response.payload}',
     );
@@ -274,54 +281,56 @@ class NotificationDispatcher implements INotificationDispatcher {
       '[NotificationDispatcher] Routing notification: id=$notificationId, payload=$payload',
     );
 
-    // First, try to match by notification ID
+    // Exact notification IDs win first (prayer static ids, athkar 1001/1002, …).
     for (final _HandlerRegistration registration in _handlers) {
       if (notificationId != null &&
           registration.notificationIds.contains(notificationId)) {
         logger.d(
           '[NotificationDispatcher] Matched handler: ${registration.serviceId}',
         );
+        await _markNotificationHandled(response);
         await registration.handler(response);
         return true;
       }
     }
 
+    _IdRangeHandlerRegistration? idRangeMatch;
     for (final _IdRangeHandlerRegistration registration in _idRangeHandlers) {
       if (notificationId != null &&
           notificationId >= registration.minIdInclusive &&
           notificationId < registration.maxIdExclusive) {
-        logger.d(
-          '[NotificationDispatcher] Matched ID range handler: '
-          '${registration.serviceId}',
-        );
-        await registration.handler(response);
-        return true;
+        idRangeMatch = registration;
+        break;
       }
     }
 
-    // If no ID match, evaluate all payload handlers and pick deterministically.
     final List<_PayloadHandlerRegistration> matchedPayloadHandlers =
-        <_PayloadHandlerRegistration>[];
-    for (final _PayloadHandlerRegistration registration in _payloadHandlers) {
-      if (registration.matcher(payload)) {
-        matchedPayloadHandlers.add(registration);
-      }
-    }
+        _matchedPayloadHandlers(payload);
 
-    if (matchedPayloadHandlers.isNotEmpty) {
-      matchedPayloadHandlers.sort((a, b) {
-        final int aPriority = _servicePriority(a.serviceId);
-        final int bPriority = _servicePriority(b.serviceId);
-        if (aPriority != bPriority) {
-          return aPriority.compareTo(bPriority);
-        }
-        return a.serviceId.compareTo(b.serviceId);
-      });
+    final _PayloadHandlerRegistration? bestPayloadMatch =
+        matchedPayloadHandlers.isEmpty ? null : matchedPayloadHandlers.first;
 
-      final _PayloadHandlerRegistration selected = matchedPayloadHandlers.first;
+    final ({NotificationHandler handler, String serviceId})? selected =
+        _selectHandlerBetweenPayloadAndIdRange(
+          payloadMatch: bestPayloadMatch,
+          idRangeMatch: idRangeMatch,
+        );
+
+    if (selected != null) {
       logger.d(
-        '[NotificationDispatcher] Matched payload handler: ${selected.serviceId}',
+        '[NotificationDispatcher] Matched handler: ${selected.serviceId}',
       );
+      if (kDebugMode && idRangeMatch != null && bestPayloadMatch != null) {
+        logger.d(
+          '[NotificationForegroundTap] resolved id_range='
+          '${idRangeMatch.serviceId} payload=${bestPayloadMatch.serviceId} '
+          '→ ${selected.serviceId}',
+        );
+      }
+      if (notificationId != null ||
+          (payload != null && payload.trim().isNotEmpty)) {
+        await _markNotificationHandled(response);
+      }
       await selected.handler(response);
       return true;
     }
@@ -329,7 +338,75 @@ class NotificationDispatcher implements INotificationDispatcher {
     logger.w(
       '[NotificationDispatcher] No handler found for notification: id=$notificationId',
     );
+    if (kDebugMode) {
+      logger.d(
+        '[NotificationForegroundTap] no_handler id=$notificationId '
+        'payload=$payload',
+      );
+    }
     return false;
+  }
+
+  List<_PayloadHandlerRegistration> _matchedPayloadHandlers(String? payload) {
+    final List<_PayloadHandlerRegistration> matched =
+        <_PayloadHandlerRegistration>[];
+    for (final _PayloadHandlerRegistration registration in _payloadHandlers) {
+      if (registration.matcher(payload)) {
+        matched.add(registration);
+      }
+    }
+    matched.sort((a, b) {
+      final int aPriority = _servicePriority(a.serviceId);
+      final int bPriority = _servicePriority(b.serviceId);
+      if (aPriority != bPriority) {
+        return aPriority.compareTo(bPriority);
+      }
+      return a.serviceId.compareTo(b.serviceId);
+    });
+    return matched;
+  }
+
+  ({NotificationHandler handler, String serviceId})?
+  _selectHandlerBetweenPayloadAndIdRange({
+    required _PayloadHandlerRegistration? payloadMatch,
+    required _IdRangeHandlerRegistration? idRangeMatch,
+  }) {
+    if (payloadMatch == null && idRangeMatch == null) {
+      return null;
+    }
+    if (payloadMatch == null) {
+      return (
+        handler: idRangeMatch!.handler,
+        serviceId: idRangeMatch.serviceId,
+      );
+    }
+    if (idRangeMatch == null) {
+      return (
+        handler: payloadMatch.handler,
+        serviceId: payloadMatch.serviceId,
+      );
+    }
+
+    final int payloadPriority = _servicePriority(payloadMatch.serviceId);
+    final int idRangePriority = _servicePriority(idRangeMatch.serviceId);
+    if (payloadPriority < idRangePriority) {
+      return (
+        handler: payloadMatch.handler,
+        serviceId: payloadMatch.serviceId,
+      );
+    }
+    if (idRangePriority < payloadPriority) {
+      return (
+        handler: idRangeMatch.handler,
+        serviceId: idRangeMatch.serviceId,
+      );
+    }
+
+    // Same priority: payload identity is more specific than coarse id block.
+    return (
+      handler: payloadMatch.handler,
+      serviceId: payloadMatch.serviceId,
+    );
   }
 
   /// Check if running on Android (for platform-specific logic)
@@ -339,21 +416,6 @@ class NotificationDispatcher implements INotificationDispatcher {
   @visibleForTesting
   Future<bool> routeNotificationForTest(NotificationResponse response) {
     return _routeNotification(response);
-  }
-
-  int _servicePriority(String serviceId) {
-    switch (serviceId) {
-      case 'prayer_notifications':
-        return 0;
-      case 'athkar':
-        return 1;
-      case 'downloads':
-        return 2;
-      case 'fcm_service':
-        return 3;
-      default:
-        return 100;
-    }
   }
 
   bool _isDuplicateTap(NotificationResponse response) {
@@ -374,6 +436,34 @@ class NotificationDispatcher implements INotificationDispatcher {
 
     _recentTapSignatures[signature] = now;
     return false;
+  }
+
+  Future<void> _markNotificationHandled(NotificationResponse response) async {
+    final int? notificationId = response.id;
+    if (notificationId != null) {
+      AppRouter.lastProcessedNotificationId = notificationId;
+    }
+    await AppRouter.persistProcessedNotificationLaunch(
+      notificationId: notificationId,
+      payload: response.payload,
+    );
+  }
+
+  int _servicePriority(String serviceId) {
+    switch (serviceId) {
+      case 'prayer_notifications':
+        return 0;
+      case 'athkar':
+        return 1;
+      case 'tasbeeh_reminder':
+        return 1;
+      case 'fcm_service':
+        return 1;
+      case 'downloads':
+        return 2;
+      default:
+        return 100;
+    }
   }
 
   /// Get the notifications plugin (for services that need to schedule notifications)

@@ -3094,6 +3094,235 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tourDebugResetDone => 'تمت إعادة تعيين الجولات التعريفية';
 
   @override
+  String get notificationDebugLabTitle => 'اختبار الإشعارات';
+
+  @override
+  String get notificationDebugSectionLocal => 'اختبارات الإشعار المحلي';
+
+  @override
+  String get notificationDebugSectionLaunch => 'محاكاة الإطلاق';
+
+  @override
+  String get notificationDebugSectionDedup => 'فحص حالة منع التكرار';
+
+  @override
+  String get notificationDebugSectionChecklist => 'قائمة التحقق اليدوية';
+
+  @override
+  String get notificationDebugSectionLogs => 'سجلات التصحيح';
+
+  @override
+  String get notificationDebugActionId => 'معرّف الإشعار';
+
+  @override
+  String get notificationDebugActionPayload => 'الحمولة';
+
+  @override
+  String get notificationDebugActionRoute => 'المسار المتوقع';
+
+  @override
+  String get notificationDebugActionBehavior => 'السلوك المتوقع';
+
+  @override
+  String get notificationDebugActionMechanism => 'الآلية';
+
+  @override
+  String get notificationDebugRefreshState => 'تحديث الحالة';
+
+  @override
+  String get notificationDebugClearDedup => 'مسح منع تكرار الإشعار';
+
+  @override
+  String get notificationDebugClearAthkarDedup => 'مسح منع تكرار أذكار (دافئ)';
+
+  @override
+  String get notificationDebugClearAll => 'مسح كل حالة التصحيح';
+
+  @override
+  String get notificationDebugClearLogs => 'مسح السجلات';
+
+  @override
+  String get notificationDebugConfirmSchedule => 'جدولة إشعار تصحيح آخر؟';
+
+  @override
+  String get notificationDebugMechanismReal => 'إشعار محلي حقيقي';
+
+  @override
+  String get notificationDebugMechanismDispatcher => 'محاكاة الموزّع';
+
+  @override
+  String get notificationDebugMechanismBootstrap => 'فحص إطلاق Bootstrap';
+
+  @override
+  String get notificationDebugMechanismDedup => 'حفظ منع التكرار فقط';
+
+  @override
+  String get notificationDebugMechanismClearPid => 'مسح نطاق pid';
+
+  @override
+  String get notificationDebugBehaviorScheduleAthkar =>
+      'يعرض إشعار أذكار تصحيح بعد تأخير قصير';
+
+  @override
+  String get notificationDebugBehaviorShowNow => 'ينشر إشعار تصحيح فورًا';
+
+  @override
+  String get notificationDebugBehaviorNativePayloadOnly =>
+      'يحاكي نقرة صلاة أصلية بحمولة فقط (بدون معرّف)';
+
+  @override
+  String get notificationDebugBehaviorInvalidPayload =>
+      'يجب ألا ينتقل إلى الأذكار';
+
+  @override
+  String get notificationDebugBehaviorEmptyPayload =>
+      'يجب ألا ينتقل (حمولة فارغة)';
+
+  @override
+  String get notificationDebugBehaviorPayloadOnlyNoId =>
+      'التوجيه عبر توقيع الحمولة فقط';
+
+  @override
+  String get notificationDebugBehaviorDedupSameSig =>
+      'النقرة الأولى تنتقل؛ نفس pid + التوقيع يُمنع التكرار';
+
+  @override
+  String get notificationDebugBehaviorFreshDifferentPayload =>
+      'يُعامل كجديد عند تغيّر توقيع الحمولة';
+
+  @override
+  String get notificationDebugBehaviorSharedPayloadSig =>
+      'توقيع الحمولة يمنع التكرار حتى لو اختلف المعرّف';
+
+  @override
+  String get notificationDebugBehaviorSimulateTap =>
+      'يتوجّه عبر مسارات الإنتاج (الموزّع / Bootstrap)';
+
+  @override
+  String get notificationDebugBehaviorInvalidLaunch =>
+      'حمولة غير صالحة لا يجب أن تضبط مسار أذكار';
+
+  @override
+  String get notificationDebugBehaviorMarkProcessed =>
+      'يحفظ منع التكرار دون تنقل';
+
+  @override
+  String get notificationDebugBehaviorClearPidScope =>
+      'يمسح مفتاح pid لمحاكاة نطاق عملية جديدة';
+
+  @override
+  String get notificationDebugFieldCurrentPid => 'معرّف العملية الحالي';
+
+  @override
+  String get notificationDebugFieldStoredPid => 'pid المخزّن (_last_notif_pid)';
+
+  @override
+  String get notificationDebugFieldStoredId =>
+      'المعرّف المخزّن (_last_notif_id)';
+
+  @override
+  String get notificationDebugFieldStoredSig =>
+      'التوقيع المخزّن (_last_notif_payload_sig)';
+
+  @override
+  String get notificationDebugFieldLastProcessedId =>
+      'AppRouter.lastProcessedNotificationId';
+
+  @override
+  String get notificationDebugFieldPendingRoute => 'pendingColdStartLocation';
+
+  @override
+  String get notificationDebugFieldPendingExtra => 'pendingColdStartExtra';
+
+  @override
+  String get notificationDebugFieldAthkarPayload =>
+      'last_handled_notification_payload';
+
+  @override
+  String get notificationDebugFieldAthkarTimestamp =>
+      'last_handled_notification_timestamp';
+
+  @override
+  String get notificationDebugFieldPreviewSig => 'معاينة التوقيع';
+
+  @override
+  String get notificationDebugFieldProcessedPreview => 'المعاينة مُعالَجة';
+
+  @override
+  String get notificationDebugChecklistAthkarTitle => 'أ. إشعار الأذكار';
+
+  @override
+  String get notificationDebugChecklistAthkarTap =>
+      'نقر إشعار الأذكار → يفتح الأذكار مرة واحدة';
+
+  @override
+  String get notificationDebugChecklistAthkarRestart =>
+      'إعادة تشغيل سريعة → لا يفتح الأذكار مجددًا';
+
+  @override
+  String get notificationDebugChecklistPrayerTitle =>
+      'ب. إشعار صلاة (حمولة فقط)';
+
+  @override
+  String get notificationDebugChecklistPrayerTap =>
+      'نقر إشعار الصلاة → يفتح مسار الصلاة مرة واحدة';
+
+  @override
+  String get notificationDebugChecklistPrayerRestart =>
+      'إعادة تشغيل سريعة → لا يُعاد التشغيل';
+
+  @override
+  String get notificationDebugChecklistInvalidTitle => 'ج. حمولة غير صالحة';
+
+  @override
+  String get notificationDebugChecklistInvalidBody =>
+      'حمولة غير صالحة → لا ترجع للأذكار';
+
+  @override
+  String get notificationDebugChecklistSettingsTitle => 'د. حمولة الإعدادات';
+
+  @override
+  String get notificationDebugChecklistSettingsBody =>
+      'حمولة الإعدادات → تفتح الإعدادات وليس الأذكار';
+
+  @override
+  String get notificationDebugChecklistSameSigTitle =>
+      'هـ. نفس المعرّف + نفس الحمولة';
+
+  @override
+  String get notificationDebugChecklistSameSigTap =>
+      'النقرة الأولى → تنقل مرة واحدة';
+
+  @override
+  String get notificationDebugChecklistSameSigRestart =>
+      'إعادة تشغيل سريعة / نفس العملية → مُمنوع';
+
+  @override
+  String get notificationDebugChecklistDiffPayloadTitle =>
+      'و. نفس المعرّف + حمولة مختلفة';
+
+  @override
+  String get notificationDebugChecklistDiffPayloadBody => 'يُعامل كإطلاق جديد';
+
+  @override
+  String get notificationDebugChecklistDiffIdTitle =>
+      'ز. معرّف مختلف + نفس الحمولة';
+
+  @override
+  String get notificationDebugChecklistDiffIdBody =>
+      'توقيع الحمولة أولًا → النقرة الثانية مُمنوعة في نفس pid';
+
+  @override
+  String get notificationDebugChecklistKillTitle => 'ح. إنهاء العملية بالكامل';
+
+  @override
+  String get notificationDebugChecklistKillSteps =>
+      'أغلق التطبيق من المهام الأخيرة → انقر إشعارًا جديدًا → يجب أن يعمل التوجيه البارد';
+
+  @override
+  String get notificationDebugLogsEmpty => 'لا أحداث تصحيح بعد';
+
+  @override
   String get inAppUpdateFlexibleRestartMessage =>
       'تم تنزيل التحديث. أعد التشغيل عندما تكون مستعدًا للتثبيت.';
 

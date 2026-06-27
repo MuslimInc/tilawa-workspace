@@ -357,7 +357,12 @@ class QuranSessionsMvpModule {
         getUserProfile: sl<GetUserProfileUseCase>(),
       ),
     );
-    sl.registerFactoryIfAbsent(() => TeacherListBloc(sl<GetTeachersUseCase>()));
+    sl.registerFactoryIfAbsent(
+      () => TeacherListBloc(
+        sl<GetTeachersUseCase>(),
+        sl<GetTeacherAvailabilityUseCase>(),
+      ),
+    );
     sl.registerFactoryIfAbsent(
       () => TeacherProfileBloc(
         getProfile: sl<GetTeacherProfileUseCase>(),

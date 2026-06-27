@@ -287,7 +287,91 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
       'انضم إلى نخبة المعلمين المعتمدين على MeMuslim';
 
   @override
-  String get teacherListTitle => 'ابحث عن معلم';
+  String get teacherListAppBarTitle => 'المحفظون';
+
+  @override
+  String get teacherListTitle => 'تعلّم القرآن مع محفظك';
+
+  @override
+  String get teacherListSubtitle =>
+      'اختر المحفظ المناسب وابدأ رحلتك في تحسين التلاوة';
+
+  @override
+  String get teacherNewRating => 'جديد';
+
+  @override
+  String get teacherFilterAll => 'الكل';
+
+  @override
+  String get teacherFilterFree => 'مجاني';
+
+  @override
+  String get teacherFilterAvailableToday => 'متاح اليوم';
+
+  @override
+  String get teacherBookAction => 'احجز';
+
+  @override
+  String get viewTeacherProfile => 'عرض الملف';
+
+  @override
+  String get teacherAvailabilityToday => 'متاح اليوم';
+
+  @override
+  String get teacherAvailabilityTomorrow => 'أقرب موعد غدًا';
+
+  @override
+  String teacherAvailabilityNextAt(String when) {
+    return 'أقرب موعد: $when';
+  }
+
+  @override
+  String get teacherAvailabilityNoSlots => 'لا توجد مواعيد';
+
+  @override
+  String get teacherAvailabilityUnavailable => 'غير متاح حاليًا';
+
+  @override
+  String get joinSessionNow => 'انضم الآن';
+
+  @override
+  String sessionsSummaryUpcoming(int count) {
+    return 'القادمة: $count';
+  }
+
+  @override
+  String sessionsSummaryPast(int count) {
+    return 'السابقة: $count';
+  }
+
+  @override
+  String sessionsSummaryNextSession(String when) {
+    return 'أقرب حصة: $when';
+  }
+
+  @override
+  String get sessionsTabUpcoming => 'القادمة';
+
+  @override
+  String get sessionsTabPast => 'السابقة';
+
+  @override
+  String get sessionsTabCancelled => 'الملغاة';
+
+  @override
+  String get bookAgainAction => 'احجز مرة أخرى';
+
+  @override
+  String get sessionStatusStartingSoon => 'تبدأ قريبًا';
+
+  @override
+  String sessionStartsInMinutes(int minutes) {
+    return 'يبدأ بعد $minutes د';
+  }
+
+  @override
+  String get noTeachersForAvailabilityFilter =>
+      'لا يوجد معلمون متاحون اليوم حالياً';
 
   @override
   String noTeachersForSpecialization(String specialization) {
@@ -677,6 +761,9 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get viewSessionDetails => 'عرض التفاصيل';
 
   @override
+  String get sessionCardOverflowMenu => 'إجراءات الجلسة';
+
+  @override
   String get noSessionsYet => 'لا توجد جلسات بعد';
 
   @override
@@ -701,7 +788,13 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get noReviewsYet => 'لا توجد تقييمات بعد';
 
   @override
+  String get aboutTeacherSection => 'نبذة عن المعلم';
+
+  @override
   String get bookSessionAction => 'احجز جلسة';
+
+  @override
+  String get noAvailabilityBookAction => 'لا توجد مواعيد متاحة';
 
   @override
   String get sessionStatusScheduled => 'مجدول';
@@ -1473,6 +1566,10 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
 
   @override
   String get noAvailabilityYet => 'لم تُنشر أي مواعيد بعد.';
+
+  @override
+  String get noAvailabilityHelper =>
+      'يمكنك العودة لاحقًا عند إضافة مواعيد جديدة.';
 
   @override
   String get reportConcernAction => 'الإبلاغ عن مخاوف';

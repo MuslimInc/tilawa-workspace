@@ -450,6 +450,32 @@ class DownloadQueueManager implements IDownloadQueueService {
     return null;
   }
 
+  /// Resolve a stable notification/download key for progress events.
+  ///
+  /// Progress events may use a URL variant while metadata is keyed by enqueue id.
+  String _resolveNotificationDownloadId(String progressId) {
+    if (_downloadMetadata.containsKey(progressId)) {
+      return progressId;
+    }
+
+    final String normalizedProgressId = _normalizeUrlString(progressId);
+
+    for (final MapEntry<String, String> entry in _activeDownloadUrls.entries) {
+      if (_normalizeUrlString(entry.key) == normalizedProgressId ||
+          _normalizeUrlString(entry.value) == normalizedProgressId) {
+        return entry.key;
+      }
+    }
+
+    for (final String key in _downloadMetadata.keys) {
+      if (_normalizeUrlString(key) == normalizedProgressId) {
+        return key;
+      }
+    }
+
+    return progressId;
+  }
+
   /// Handle download progress updates
   void _handleDownloadProgress(DownloadProgress progress) {
     // Find metadata for this download (could be by ID or URL)
@@ -462,23 +488,40 @@ class DownloadQueueManager implements IDownloadQueueService {
     metadata =
         _downloadMetadata[progress.id] ?? _findMetadataByUrl(progress.id);
 
+    final String notificationDownloadId = _resolveNotificationDownloadId(
+      progress.id,
+    );
+
     // Show notification only if requested (usually for individual downloads, not batches)
     if (metadata != null && metadata.showNotification) {
       // Get localized strings based on current locale
       final AppLocalizations l10n = lookupAppLocalizations(locale);
-      final int progressPercent = (progress.progress * 100).round();
+      final int progressPercent = progress.status == DownloadStatus.completed
+          ? 100
+          : (progress.progress * 100).round();
 
-      _notificationService.showDownloadProgress(
-        downloadId: progress.id,
-        title: metadata.title,
-        reciterName: metadata.reciterName,
-        reciterId: metadata.reciterId,
-        progress: progressPercent,
-        status: progress.status,
-        pendingMessage: l10n.notificationWaitingToStart,
-        progressMessage: l10n.notificationDownloadingProgress(progressPercent),
-        completeMessage: l10n.notificationDownloadComplete,
-        failedMessage: l10n.notificationDownloadFailed,
+      unawaited(
+        _notificationService.showDownloadProgress(
+          downloadId: notificationDownloadId,
+          title: metadata.title,
+          reciterName: metadata.reciterName,
+          reciterId: metadata.reciterId,
+          progress: progressPercent,
+          status: progress.status,
+          pendingMessage: l10n.notificationWaitingToStart,
+          progressMessage: l10n.notificationDownloadingProgress(
+            progressPercent,
+          ),
+          completeMessage: l10n.notificationDownloadComplete,
+          failedMessage: l10n.notificationDownloadFailed,
+        ),
+      );
+    } else if (progress.status == DownloadStatus.completed ||
+        progress.status == DownloadStatus.failed ||
+        progress.status == DownloadStatus.cancelled) {
+      // Clear any orphaned progress notification when metadata was already removed.
+      unawaited(
+        _notificationService.cancelNotification(notificationDownloadId),
       );
     }
 
@@ -722,8 +765,9 @@ class DownloadQueueManager implements IDownloadQueueService {
               logger.d(
                 '[Downloading Queue] Cancelling stuck notification for stale download: $id',
               );
-              // Cancel using the original ID (which is usually the URL)
-              _notificationService.cancelNotification(metadataKey);
+              _notificationService.cancelNotification(
+                _resolveNotificationDownloadId(metadataKey),
+              );
             }
             _downloadMetadata.remove(metadataKey);
           }
@@ -731,8 +775,9 @@ class DownloadQueueManager implements IDownloadQueueService {
           // Fallback: also try to remove by the stale ID itself directly just in case
           if (metadataKey != id) {
             _downloadMetadata.remove(id);
-            // Verify if we should cancel notification for this ID too
-            _notificationService.cancelNotification(id);
+            _notificationService.cancelNotification(
+              _resolveNotificationDownloadId(id),
+            );
           }
         }
 

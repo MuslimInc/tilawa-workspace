@@ -82,7 +82,56 @@
     "seeAllTeachers": "عرض جميع المعلمين ←",
     "becomeTeacherCardTitle": "أريد أن أصبح محفظًا",
     "becomeTeacherCardSubtitle": "انضم إلى نخبة المعلمين المعتمدين على MeMuslim",
-    "teacherListTitle": "ابحث عن معلم",
+    "teacherListAppBarTitle": "المحفظون",
+    "teacherListTitle": "تعلّم القرآن مع محفظك",
+    "teacherListSubtitle": "اختر المحفظ المناسب وابدأ رحلتك في تحسين التلاوة",
+    "teacherNewRating": "جديد",
+    "teacherFilterAll": "الكل",
+    "teacherFilterFree": "مجاني",
+    "teacherFilterAvailableToday": "متاح اليوم",
+    "teacherBookAction": "احجز",
+    "viewTeacherProfile": "عرض الملف",
+    "teacherAvailabilityToday": "متاح اليوم",
+    "teacherAvailabilityTomorrow": "أقرب موعد غدًا",
+    "teacherAvailabilityNextAt": "أقرب موعد: {when}",
+    "@teacherAvailabilityNextAt": {
+        "placeholders": {
+            "when": { "type": "String" }
+        }
+    },
+    "teacherAvailabilityNoSlots": "لا توجد مواعيد",
+    "teacherAvailabilityUnavailable": "غير متاح حاليًا",
+    "joinSessionNow": "انضم الآن",
+    "sessionsSummaryUpcoming": "القادمة: {count}",
+    "@sessionsSummaryUpcoming": {
+        "placeholders": {
+            "count": { "type": "int" }
+        }
+    },
+    "sessionsSummaryPast": "السابقة: {count}",
+    "@sessionsSummaryPast": {
+        "placeholders": {
+            "count": { "type": "int" }
+        }
+    },
+    "sessionsSummaryNextSession": "أقرب حصة: {when}",
+    "@sessionsSummaryNextSession": {
+        "placeholders": {
+            "when": { "type": "String" }
+        }
+    },
+    "sessionsTabUpcoming": "القادمة",
+    "sessionsTabPast": "السابقة",
+    "sessionsTabCancelled": "الملغاة",
+    "bookAgainAction": "احجز مرة أخرى",
+    "sessionStatusStartingSoon": "تبدأ قريبًا",
+    "sessionStartsInMinutes": "يبدأ بعد {minutes} د",
+    "@sessionStartsInMinutes": {
+        "placeholders": {
+            "minutes": { "type": "int" }
+        }
+    },
+    "noTeachersForAvailabilityFilter": "لا يوجد معلمون متاحون اليوم حالياً",
     "noTeachersForSpecialization": "لم يتم العثور على معلمين لـ \"{specialization}\"",
     "@noTeachersForSpecialization": {
         "placeholders": {
@@ -253,6 +302,7 @@
         }
     },
     "viewSessionDetails": "عرض التفاصيل",
+    "sessionCardOverflowMenu": "إجراءات الجلسة",
     "noSessionsYet": "لا توجد جلسات بعد",
     "bookFirstSessionHint": "احجز جلستك الأولى مع أحد معلمينا المعتمدين",
     "teacherProfileTitle": "ملف المعلم",
@@ -270,7 +320,9 @@
     "availableSlots": "المواعيد المتاحة",
     "reviewsSection": "التقييمات",
     "noReviewsYet": "لا توجد تقييمات بعد",
+    "aboutTeacherSection": "نبذة عن المعلم",
     "bookSessionAction": "احجز جلسة",
+    "noAvailabilityBookAction": "لا توجد مواعيد متاحة",
     "sessionStatusScheduled": "مجدول",
     "sessionStatusInProgress": "جارٍ الآن",
     "sessionStatusCompleted": "مكتمل",
@@ -555,6 +607,7 @@
     "teacherProfileIncompleteAction": "إكمال الملف",
     "manageYourAvailabilityAndSessions": "يمكنك إدارة مواعيدك وجلساتك من هنا",
     "noAvailabilityYet": "لم تُنشر أي مواعيد بعد.",
+    "noAvailabilityHelper": "يمكنك العودة لاحقًا عند إضافة مواعيد جديدة.",
     "reportConcernAction": "الإبلاغ عن مخاوف",
     "reportConcernTitle": "الإبلاغ عن مخاوف تتعلق بالسلامة",
     "reportConcernSubtitle": "أخبرنا بما حدث. سيقوم فريقنا بمراجعة البلاغات بسرعة.",

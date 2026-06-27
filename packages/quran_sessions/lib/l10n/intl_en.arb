@@ -82,7 +82,56 @@
     "seeAllTeachers": "See all teachers →",
     "becomeTeacherCardTitle": "I want to become a teacher",
     "becomeTeacherCardSubtitle": "Join MeMuslim's certified teachers",
-    "teacherListTitle": "Find a teacher",
+    "teacherListAppBarTitle": "Tutors",
+    "teacherListTitle": "Learn Quran with your teacher",
+    "teacherListSubtitle": "Choose the right teacher and start improving your recitation",
+    "teacherNewRating": "New",
+    "teacherFilterAll": "All",
+    "teacherFilterFree": "Free",
+    "teacherFilterAvailableToday": "Available today",
+    "teacherBookAction": "Book",
+    "viewTeacherProfile": "View profile",
+    "teacherAvailabilityToday": "Available today",
+    "teacherAvailabilityTomorrow": "Next slot tomorrow",
+    "teacherAvailabilityNextAt": "Next slot: {when}",
+    "@teacherAvailabilityNextAt": {
+        "placeholders": {
+            "when": { "type": "String" }
+        }
+    },
+    "teacherAvailabilityNoSlots": "No slots",
+    "teacherAvailabilityUnavailable": "Not available now",
+    "joinSessionNow": "Join now",
+    "sessionsSummaryUpcoming": "Upcoming: {count}",
+    "@sessionsSummaryUpcoming": {
+        "placeholders": {
+            "count": { "type": "int" }
+        }
+    },
+    "sessionsSummaryPast": "Past: {count}",
+    "@sessionsSummaryPast": {
+        "placeholders": {
+            "count": { "type": "int" }
+        }
+    },
+    "sessionsSummaryNextSession": "Next session: {when}",
+    "@sessionsSummaryNextSession": {
+        "placeholders": {
+            "when": { "type": "String" }
+        }
+    },
+    "sessionsTabUpcoming": "Upcoming",
+    "sessionsTabPast": "Past",
+    "sessionsTabCancelled": "Cancelled",
+    "bookAgainAction": "Book again",
+    "sessionStatusStartingSoon": "Starting soon",
+    "sessionStartsInMinutes": "Starts in {minutes} min",
+    "@sessionStartsInMinutes": {
+        "placeholders": {
+            "minutes": { "type": "int" }
+        }
+    },
+    "noTeachersForAvailabilityFilter": "No teachers available today right now",
     "noTeachersForSpecialization": "No teachers found for \"{specialization}\"",
     "@noTeachersForSpecialization": {
         "placeholders": {
@@ -267,6 +316,7 @@
         }
     },
     "viewSessionDetails": "View details",
+    "sessionCardOverflowMenu": "More session actions",
     "noSessionsYet": "No sessions yet",
     "bookFirstSessionHint": "Book your first session with one of our certified teachers",
     "teacherProfileTitle": "Teacher profile",
@@ -284,7 +334,9 @@
     "availableSlots": "Available slots",
     "reviewsSection": "Reviews",
     "noReviewsYet": "No reviews yet",
+    "aboutTeacherSection": "About the teacher",
     "bookSessionAction": "Book a session",
+    "noAvailabilityBookAction": "No slots available",
     "sessionStatusScheduled": "Scheduled",
     "sessionStatusInProgress": "In progress",
     "sessionStatusCompleted": "Completed",
@@ -576,6 +628,7 @@
     "teacherProfileIncompleteAction": "Complete profile",
     "manageYourAvailabilityAndSessions": "Manage your schedule and sessions from here.",
     "noAvailabilityYet": "No availability published yet.",
+    "noAvailabilityHelper": "Check back later when this teacher adds new slots.",
     "reportConcernAction": "Report a concern",
     "reportConcernTitle": "Report a safety concern",
     "reportConcernSubtitle": "Tell us what happened. Our team reviews reports promptly.",
