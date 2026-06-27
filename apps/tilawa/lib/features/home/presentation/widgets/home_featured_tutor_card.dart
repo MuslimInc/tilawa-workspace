@@ -3,12 +3,32 @@ import 'package:flutter/material.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/quran_sessions/quran_sessions_feature_flags.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
+import 'home_learn_quran_analytics.dart';
 import 'open_home_quran_sessions.dart';
 
+/// Minimum visible fraction that counts as an impression.
+const double _kImpressionVisibleFraction = 0.5;
+
 /// Featured product card for Learn Quran with Tutor.
-class HomeFeaturedTutorCard extends StatelessWidget {
+class HomeFeaturedTutorCard extends StatefulWidget {
   const HomeFeaturedTutorCard({super.key});
+
+  @override
+  State<HomeFeaturedTutorCard> createState() => _HomeFeaturedTutorCardState();
+}
+
+class _HomeFeaturedTutorCardState extends State<HomeFeaturedTutorCard> {
+  bool _loggedImpression = false;
+
+  void _onVisibilityChanged(VisibilityInfo info) {
+    if (_loggedImpression) return;
+    if (info.visibleFraction < _kImpressionVisibleFraction) return;
+    if (!quranSessionsFeatureConfig().quranSessionsEnabled) return;
+    _loggedImpression = true;
+    logHomeLearnQuranCardViewed();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,6 +36,14 @@ class HomeFeaturedTutorCard extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
+    return VisibilityDetector(
+      key: const Key('home_learn_quran_card_impression'),
+      onVisibilityChanged: _onVisibilityChanged,
+      child: _buildCard(context),
+    );
+  }
+
+  Widget _buildCard(BuildContext context) {
     final tokens = context.tokens;
     final theme = Theme.of(context);
     final screenTokens = theme.componentTokens.homeScreen;
@@ -31,7 +59,10 @@ class HomeFeaturedTutorCard extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         TilawaInteractiveSurface(
-          onTap: () => openHomeQuranSessions(context),
+          onTap: () {
+            logHomeLearnQuranCardTapped();
+            openHomeQuranSessions(context);
+          },
           borderRadius: borderRadius,
           stateLayerColor: accent,
           semanticLabel: context.l10n.homeFeaturedTutorTitle,
@@ -107,7 +138,10 @@ class HomeFeaturedTutorCard extends StatelessWidget {
           alignment: AlignmentDirectional.centerStart,
           child: TilawaButton(
             text: context.l10n.homeFeaturedTutorMySessions,
-            onPressed: () => openHomeMySessions(context),
+            onPressed: () {
+              logHomeLearnQuranMySessionsTapped();
+              openHomeMySessions(context);
+            },
             variant: TilawaButtonVariant.ghost,
             size: TilawaButtonSize.small,
             leadingIcon: Icon(

@@ -13,6 +13,7 @@ class MySessionsScreen extends StatefulWidget {
   const MySessionsScreen({
     super.key,
     required this.studentId,
+    this.analytics = const QuranSessionsAnalyticsCallbacks(),
     this.resolveTeacherName,
     this.scrollBottomPadding,
     this.onRescheduleRequested,
@@ -24,6 +25,8 @@ class MySessionsScreen extends StatefulWidget {
   });
 
   final String studentId;
+
+  final QuranSessionsAnalyticsCallbacks analytics;
 
   final String? Function(String teacherId)? resolveTeacherName;
 
@@ -54,10 +57,12 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
   _MySessionsTab _selectedTab = _MySessionsTab.upcoming;
   final Set<String> _reviewedSessionIds = {};
   final Set<String> _autoPromptedReviewSessionIds = {};
+  final Set<String> _loggedReviewSessionIds = {};
 
   @override
   void initState() {
     super.initState();
+    widget.analytics.onMySessionsOpened?.call();
     context.read<MySessionsBloc>().add(
       MySessionsLoadRequested(studentId: widget.studentId),
     );
@@ -85,6 +90,10 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
               if (sessionId == null) return;
 
               final session = _findSession(state, sessionId);
+              widget.analytics.onSessionJoined?.call(
+                bookingId: session?.bookingId,
+                sessionId: sessionId,
+              );
               context.read<MySessionsBloc>().add(
                 const MySessionsJoinCompletedAcknowledged(),
               );
@@ -113,8 +122,15 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
             listener: (context, state) {
               if (state is MySessionsSuccess &&
                   state.lastSubmittedReview != null) {
+                final review = state.lastSubmittedReview!;
+                if (_loggedReviewSessionIds.add(review.sessionId)) {
+                  widget.analytics.onReviewSubmitted?.call(
+                    sessionId: review.sessionId,
+                    rating: review.rating,
+                  );
+                }
                 setState(() {
-                  _reviewedSessionIds.add(state.lastSubmittedReview!.sessionId);
+                  _reviewedSessionIds.add(review.sessionId);
                 });
                 TilawaFeedback.showToast(
                   context,

@@ -9,6 +9,7 @@ import '../../domain/entities/quran_teacher.dart';
 import '../blocs/teacher_list/teacher_list_bloc.dart';
 import '../blocs/teacher_list/teacher_list_event.dart';
 import '../blocs/teacher_list/teacher_list_state.dart';
+import '../config/quran_sessions_analytics_callbacks.dart';
 import '../config/quran_sessions_feature_config.dart';
 import '../models/teacher_availability_summary.dart';
 import '../widgets/quran_sessions_student_empty_state.dart';
@@ -23,6 +24,7 @@ class TeacherListScreen extends StatefulWidget {
   const TeacherListScreen({
     super.key,
     required this.featureConfig,
+    this.analytics = const QuranSessionsAnalyticsCallbacks(),
     this.onTeacherTapped,
     this.onNotifyInterest,
     this.onChangeCity,
@@ -31,6 +33,7 @@ class TeacherListScreen extends StatefulWidget {
   });
 
   final QuranSessionsFeatureConfig featureConfig;
+  final QuranSessionsAnalyticsCallbacks analytics;
   final void Function(String teacherId)? onTeacherTapped;
   final VoidCallback? onNotifyInterest;
   final VoidCallback? onChangeCity;
@@ -50,6 +53,7 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
   @override
   void initState() {
     super.initState();
+    widget.analytics.onTeacherListViewed?.call();
     context.read<TeacherListBloc>().add(const LoadTeachersRequested());
     _scrollController.addListener(_onScroll);
   }

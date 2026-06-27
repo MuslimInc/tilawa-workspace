@@ -249,6 +249,38 @@ void main() {
       expect(find.byType(QuranSessionsStudentEmptyState), findsOneWidget);
     });
 
+    testWidgets('invokes onTeacherListViewed once when the screen opens', (
+      tester,
+    ) async {
+      var viewedCount = 0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          localizationsDelegates:
+              QuranSessionsLocalizations.localizationsDelegates,
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          home: BlocProvider<TeacherListBloc>(
+            create: (_) => _TeacherListTestBloc(
+              TeacherListSuccess(
+                teachers: [makeTeacher(id: 't1', avatarUrl: '')],
+                hasMore: false,
+              ),
+            ),
+            child: TeacherListScreen(
+              featureConfig: const QuranSessionsFeatureConfig(),
+              analytics: QuranSessionsAnalyticsCallbacks(
+                onTeacherListViewed: () => viewedCount++,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(viewedCount, 1);
+    });
+
     testWidgets('search field filters teachers by display name', (
       tester,
     ) async {

@@ -16,6 +16,7 @@ class SessionDetailScreen extends StatefulWidget {
   const SessionDetailScreen({
     super.key,
     required this.bookingId,
+    this.analytics = const QuranSessionsAnalyticsCallbacks(),
     this.createCallControlGateway,
     this.createCallTelemetry,
     this.buildCallSurface,
@@ -23,6 +24,7 @@ class SessionDetailScreen extends StatefulWidget {
   });
 
   final String bookingId;
+  final QuranSessionsAnalyticsCallbacks analytics;
   final SessionCallControlGatewayFactory? createCallControlGateway;
   final CallTelemetryCoordinatorFactory? createCallTelemetry;
   final InAppCallSurfaceBuilder? buildCallSurface;
@@ -127,6 +129,11 @@ class _SessionDetailScreenState extends State<SessionDetailScreen>
                   );
                   return;
                 }
+
+                widget.analytics.onSessionJoined?.call(
+                  bookingId: widget.bookingId,
+                  sessionId: state.aggregate.sessionId,
+                );
 
                 if (!state.isExternalMeeting &&
                     state.aggregate.sessionId != null) {
@@ -248,6 +255,10 @@ class _SessionDetailScreenState extends State<SessionDetailScreen>
                   );
                 }
                 if (state.reviewSubmitted) {
+                  widget.analytics.onReviewSubmitted?.call(
+                    bookingId: widget.bookingId,
+                    sessionId: state.aggregate.sessionId,
+                  );
                   TilawaFeedback.showToast(
                     context,
                     message: l10n.reviewSubmittedThanks,

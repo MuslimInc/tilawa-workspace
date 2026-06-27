@@ -8,6 +8,7 @@ import '../../domain/entities/session_call_type.dart';
 import '../../domain/entities/session_review.dart';
 import '../../domain/entities/teacher_availability.dart';
 import '../../domain/value_objects/teacher_public_name.dart';
+import '../config/quran_sessions_analytics_callbacks.dart';
 import '../failure_ui/quran_sessions_failure_ui.dart';
 import '../blocs/teacher_profile/teacher_profile_bloc.dart';
 import '../blocs/teacher_profile/teacher_profile_event.dart';
@@ -26,11 +27,13 @@ class TeacherProfileScreen extends StatefulWidget {
   const TeacherProfileScreen({
     super.key,
     required this.teacherId,
+    this.analytics = const QuranSessionsAnalyticsCallbacks(),
     this.onBookTapped,
     this.bookingEnabled = true,
   });
 
   final String teacherId;
+  final QuranSessionsAnalyticsCallbacks analytics;
 
   /// Called when the user initiates a booking. The host app navigates to
   /// [BookingScreen] with [teacherId] and the optional pre-selected [slotId].
@@ -49,6 +52,7 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
   @override
   void initState() {
     super.initState();
+    widget.analytics.onTeacherProfileViewed?.call(widget.teacherId);
     final now = DateTime.now();
     context.read<TeacherProfileBloc>().add(
       TeacherProfileRequested(

@@ -1,24 +1,60 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:quran_sessions/quran_sessions.dart' show AuthSessionProvider;
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_featured_tutor_card.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
+import 'package:tilawa_core/constants/analytics_constants.dart';
+import 'package:tilawa_core/services/analytics_service.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../support/screen_scope_test_support.dart';
 
-int _countSemanticsButtons(SemanticsNode node) {
-  var count = 0;
-  if (node.getSemanticsData().hasFlag(SemanticsFlag.isButton)) {
-    count++;
+final class _RecordingAnalyticsService implements AnalyticsService {
+  final List<String> events = <String>[];
+
+  @override
+  Future<void> logEvent(String name, {Map<String, Object>? parameters}) async {
+    events.add(name);
   }
-  node.visitChildren((child) {
-    count += _countSemanticsButtons(child);
-    return true;
-  });
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+final class _NullAuthSessionProvider implements AuthSessionProvider {
+  @override
+  String? get currentUserId => null;
+
+  @override
+  Stream<String?> watchUserId() => const Stream.empty();
+}
+
+int _countSemanticsButtons(WidgetTester tester) {
+  var count = 0;
+  void walkNode(SemanticsNode node) {
+    if (node.getSemanticsData().flagsCollection.isButton) {
+      count++;
+    }
+    node.visitChildren((child) {
+      walkNode(child);
+      return true;
+    });
+  }
+
+  void walkOwner(PipelineOwner owner) {
+    final root = owner.semanticsOwner?.rootSemanticsNode;
+    if (root != null) {
+      walkNode(root);
+    }
+    owner.visitChildren(walkOwner);
+  }
+
+  walkOwner(tester.binding.rootPipelineOwner);
   return count;
 }
 
@@ -38,7 +74,45 @@ Future<void> _pumpCard(
   await tester.pumpAndSettle();
 }
 
+/// Pumps the card inside a [GoRouter] so taps can navigate without throwing.
+/// A null current user routes Learn Quran taps to a stub `/login`.
+Future<_RecordingAnalyticsService> _pumpRoutedCard(WidgetTester tester) async {
+  final analytics = _RecordingAnalyticsService();
+  getIt
+    ..registerSingleton<AppLaunchConfig>(
+      const AppLaunchConfig(quranSessionsEnabled: true),
+    )
+    ..registerSingleton<AnalyticsService>(analytics)
+    ..registerSingleton<AuthSessionProvider>(_NullAuthSessionProvider());
+
+  final router = GoRouter(
+    routes: [
+      GoRoute(
+        path: '/',
+        builder: (_, _) => const Scaffold(body: HomeFeaturedTutorCard()),
+      ),
+      GoRoute(
+        path: '/login',
+        builder: (_, _) => const Scaffold(body: SizedBox.shrink()),
+      ),
+    ],
+  );
+
+  await tester.pumpWidget(
+    MaterialApp.router(
+      theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      routerConfig: router,
+    ),
+  );
+  await tester.pumpAndSettle();
+  return analytics;
+}
+
 void main() {
+  // VisibilityDetector is configured to report synchronously for the whole
+  // app test suite in test/flutter_test_config.dart.
   tearDown(() async {
     if (getIt.isRegistered<AppLaunchConfig>()) {
       await getIt.unregister<AppLaunchConfig>();
@@ -132,13 +206,144 @@ void main() {
     expect(find.text('My sessions'), findsOneWidget);
 
     final handle = tester.ensureSemantics();
-    final root =
-        tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!;
-    expect(_countSemanticsButtons(root), 3);
+    expect(_countSemanticsButtons(tester), 3);
 
     final cardSemantics = tester.getSemantics(find.text('Learn Quran'));
-    expect(cardSemantics.hasFlag(SemanticsFlag.isButton), isTrue);
+    expect(cardSemantics.flagsCollection.isButton, isTrue);
     expect(cardSemantics.hint, 'Start learning');
     handle.dispose();
+  });
+
+  testWidgets('logs card impression once and not again on rebuild', (
+    tester,
+  ) async {
+    await resetScopeGetIt();
+    final analytics = _RecordingAnalyticsService();
+    getIt
+      ..registerSingleton<AppLaunchConfig>(
+        const AppLaunchConfig(quranSessionsEnabled: true),
+      )
+      ..registerSingleton<AnalyticsService>(analytics);
+
+    await _pumpCard(tester);
+
+    expect(
+      analytics.events
+          .where((e) => e == AnalyticsEvents.homeLearnQuranCardViewed)
+          .length,
+      1,
+    );
+
+    // Re-pump the equivalent tree: the element (and its State) is reused, so
+    // the once-per-lifecycle guard keeps the impression from firing again.
+    await _pumpCard(tester);
+
+    expect(
+      analytics.events
+          .where((e) => e == AnalyticsEvents.homeLearnQuranCardViewed)
+          .length,
+      1,
+    );
+  });
+
+  testWidgets('does not log impression until the card scrolls into view', (
+    tester,
+  ) async {
+    await resetScopeGetIt();
+    tester.view.physicalSize = const Size(400, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final analytics = _RecordingAnalyticsService();
+    getIt
+      ..registerSingleton<AppLaunchConfig>(
+        const AppLaunchConfig(quranSessionsEnabled: true),
+      )
+      ..registerSingleton<AnalyticsService>(analytics);
+
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+        locale: const Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: ListView(
+            controller: controller,
+            children: const [
+              SizedBox(height: 1200),
+              HomeFeaturedTutorCard(),
+              SizedBox(height: 1200),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Card starts below the fold: render proxy would have logged, true
+    // viewport tracking does not.
+    expect(
+      analytics.events.where(
+        (e) => e == AnalyticsEvents.homeLearnQuranCardViewed,
+      ),
+      isEmpty,
+    );
+
+    controller.jumpTo(1200);
+    await tester.pumpAndSettle();
+
+    expect(
+      analytics.events
+          .where((e) => e == AnalyticsEvents.homeLearnQuranCardViewed)
+          .length,
+      1,
+    );
+  });
+
+  testWidgets('does not log impression when feature flag is disabled', (
+    tester,
+  ) async {
+    await resetScopeGetIt();
+    final analytics = _RecordingAnalyticsService();
+    getIt
+      ..registerSingleton<AppLaunchConfig>(
+        const AppLaunchConfig(quranSessionsEnabled: false),
+      )
+      ..registerSingleton<AnalyticsService>(analytics);
+
+    await _pumpCard(tester);
+
+    expect(analytics.events, isEmpty);
+  });
+
+  testWidgets('tapping the card logs the tap event', (tester) async {
+    await resetScopeGetIt();
+    final analytics = await _pumpRoutedCard(tester);
+
+    await tester.tap(find.byType(TilawaInteractiveSurface));
+    await tester.pumpAndSettle();
+
+    expect(
+      analytics.events,
+      contains(AnalyticsEvents.homeLearnQuranCardTapped),
+    );
+  });
+
+  testWidgets('tapping My sessions logs the shortcut event', (tester) async {
+    await resetScopeGetIt();
+    final analytics = await _pumpRoutedCard(tester);
+
+    await tester.tap(find.text('My sessions'));
+    await tester.pumpAndSettle();
+
+    expect(
+      analytics.events,
+      contains(AnalyticsEvents.homeLearnQuranMySessionsTapped),
+    );
   });
 }

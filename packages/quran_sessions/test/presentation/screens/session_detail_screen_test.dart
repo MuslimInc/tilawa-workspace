@@ -101,12 +101,35 @@ class _JoinNavigationTestBloc extends SessionDetailBloc {
   }
 }
 
+class _ReviewEmitBloc extends SessionDetailBloc {
+  _ReviewEmitBloc({required SessionDetailSuccess seed})
+    : super(
+        getSessionAggregate: GetSessionAggregateUseCase(
+          FakeSessionAggregateRepository(),
+        ),
+        getTimeline: GetSessionTimelineUseCase(FakeAuditRepository()),
+      ) {
+    emit(seed);
+  }
+
+  @override
+  void add(SessionDetailEvent event) {}
+
+  void emitReviewSubmitted() {
+    final current = state;
+    if (current is! SessionDetailSuccess) return;
+    emit(current.copyWith(reviewSubmitted: true));
+  }
+}
+
 Future<void> _pumpSessionDetailScreen(
   WidgetTester tester, {
   required SessionDetailBloc bloc,
   SessionCallControlGatewayFactory? createCallControlGateway,
   void Function({required int surahNumber, int? ayahNumber})?
   onPracticeRevisionRequested,
+  QuranSessionsAnalyticsCallbacks analytics =
+      const QuranSessionsAnalyticsCallbacks(),
 }) async {
   tester.view.physicalSize = const Size(390, 640);
   tester.view.devicePixelRatio = 1;
@@ -129,6 +152,7 @@ Future<void> _pumpSessionDetailScreen(
         value: bloc,
         child: SessionDetailScreen(
           bookingId: 'session_1',
+          analytics: analytics,
           createCallControlGateway: createCallControlGateway,
           onPracticeRevisionRequested: onPracticeRevisionRequested,
         ),
@@ -346,6 +370,66 @@ void main() {
       expect(find.bySemanticsLabel('Mute microphone'), findsNothing);
     },
   );
+
+  testWidgets('invokes onSessionJoined with ids after a successful join', (
+    tester,
+  ) async {
+    String? joinedBookingId;
+    String? joinedSessionId;
+    final bloc = _JoinNavigationTestBloc(seed: _inAppJoinSeed());
+
+    await _pumpSessionDetailScreen(
+      tester,
+      bloc: bloc,
+      analytics: QuranSessionsAnalyticsCallbacks(
+        onSessionJoined: ({bookingId, sessionId}) {
+          joinedBookingId = bookingId;
+          joinedSessionId = sessionId;
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Join'));
+    await tester.pumpAndSettle();
+
+    expect(joinedBookingId, 'session_1');
+    expect(joinedSessionId, 'session_1');
+  });
+
+  testWidgets('invokes onReviewSubmitted only after a successful submission', (
+    tester,
+  ) async {
+    var reviewCount = 0;
+    String? reviewBookingId;
+    final bloc = _ReviewEmitBloc(
+      seed: SessionDetailSuccess(
+        aggregate: makeAggregate(
+          status: SessionLifecycleStatus.confirmed,
+        ).copyWith(sessionId: 'session_1'),
+        timeline: const [],
+        viewerRole: ActorRole.student,
+      ),
+    );
+
+    await _pumpSessionDetailScreen(
+      tester,
+      bloc: bloc,
+      analytics: QuranSessionsAnalyticsCallbacks(
+        onReviewSubmitted: ({bookingId, sessionId, rating}) {
+          reviewCount++;
+          reviewBookingId = bookingId;
+        },
+      ),
+    );
+
+    expect(reviewCount, 0);
+
+    bloc.emitReviewSubmitted();
+    await tester.pumpAndSettle();
+
+    expect(reviewCount, 1);
+    expect(reviewBookingId, 'session_1');
+  });
 
   testWidgets(
     'counterparty sees pending reschedule banner and accept dispatches',

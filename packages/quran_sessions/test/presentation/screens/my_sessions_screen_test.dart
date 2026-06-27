@@ -82,6 +82,8 @@ QuranSession _inAppSession({
 Future<void> _pumpMySessionsScreen(
   WidgetTester tester, {
   required MySessionsBloc bloc,
+  QuranSessionsAnalyticsCallbacks analytics =
+      const QuranSessionsAnalyticsCallbacks(),
 }) async {
   tester.view.physicalSize = const Size(390, 640);
   tester.view.devicePixelRatio = 1;
@@ -100,6 +102,7 @@ Future<void> _pumpMySessionsScreen(
         value: bloc,
         child: MySessionsScreen(
           studentId: 'student_1',
+          analytics: analytics,
           createCallControlGateway: (_) => _NoOpCallControlGateway(),
         ),
       ),
@@ -109,6 +112,55 @@ Future<void> _pumpMySessionsScreen(
 }
 
 void main() {
+  testWidgets('invokes onMySessionsOpened once when the screen opens', (
+    tester,
+  ) async {
+    var openedCount = 0;
+    final bloc = _JoinNavigationTestBloc(
+      seed: const MySessionsSuccess(upcoming: [], past: []),
+    );
+
+    await _pumpMySessionsScreen(
+      tester,
+      bloc: bloc,
+      analytics: QuranSessionsAnalyticsCallbacks(
+        onMySessionsOpened: () => openedCount++,
+      ),
+    );
+
+    expect(openedCount, 1);
+  });
+
+  testWidgets('invokes onSessionJoined with ids after a successful join', (
+    tester,
+  ) async {
+    String? joinedBookingId;
+    String? joinedSessionId;
+    final bloc = _JoinNavigationTestBloc(
+      seed: MySessionsSuccess(
+        upcoming: [_inAppSession(providerKind: SessionCallProviderKind.mock)],
+        past: const [],
+      ),
+    );
+
+    await _pumpMySessionsScreen(
+      tester,
+      bloc: bloc,
+      analytics: QuranSessionsAnalyticsCallbacks(
+        onSessionJoined: ({bookingId, sessionId}) {
+          joinedBookingId = bookingId;
+          joinedSessionId = sessionId;
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Join now'));
+    await tester.pumpAndSettle();
+
+    expect(joinedBookingId, 'booking_1');
+    expect(joinedSessionId, 'session_join');
+  });
+
   testWidgets('in-app join from list opens call shell', (tester) async {
     final bloc = _JoinNavigationTestBloc(
       seed: MySessionsSuccess(

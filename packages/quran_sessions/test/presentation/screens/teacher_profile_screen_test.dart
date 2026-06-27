@@ -31,6 +31,8 @@ Future<void> _pumpProfile(
   WidgetTester tester,
   TeacherProfileSuccess seed, {
   double textScaleFactor = 1.0,
+  QuranSessionsAnalyticsCallbacks analytics =
+      const QuranSessionsAnalyticsCallbacks(),
 }) async {
   tester.view.physicalSize = const Size(360, 800);
   tester.view.devicePixelRatio = 1;
@@ -61,6 +63,7 @@ Future<void> _pumpProfile(
               value: _TeacherProfileTestBloc(seed),
               child: TeacherProfileScreen(
                 teacherId: seed.teacher.id,
+                analytics: analytics,
                 onBookTapped: (_, _) {},
               ),
             ),
@@ -73,6 +76,26 @@ Future<void> _pumpProfile(
 }
 
 void main() {
+  testWidgets('invokes onTeacherProfileViewed with the teacher id on open', (
+    tester,
+  ) async {
+    String? viewedTeacherId;
+
+    await _pumpProfile(
+      tester,
+      TeacherProfileSuccess(
+        teacher: makeTeacher(id: 't42', avatarUrl: ''),
+        availability: const [],
+        reviews: const [],
+      ),
+      analytics: QuranSessionsAnalyticsCallbacks(
+        onTeacherProfileViewed: (id) => viewedTeacherId = id,
+      ),
+    );
+
+    expect(viewedTeacherId, 't42');
+  });
+
   testWidgets('no-slot profile is safe on 360x800 at text scale 1.4', (
     tester,
   ) async {

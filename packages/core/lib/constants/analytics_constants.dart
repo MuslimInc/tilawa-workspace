@@ -78,6 +78,19 @@ class AnalyticsEvents {
   static const String khatmaContinueReading = 'khatma_continue_reading';
   static const String khatmaReset = 'khatma_reset';
 
+  // Learn Quran funnel (student)
+  static const String homeLearnQuranCardViewed = 'home_learn_quran_card_viewed';
+  static const String homeLearnQuranCardTapped = 'home_learn_quran_card_tapped';
+  static const String homeLearnQuranMySessionsTapped =
+      'home_learn_quran_my_sessions_tapped';
+  static const String teacherListViewed = 'teacher_list_viewed';
+  static const String teacherProfileViewed = 'teacher_profile_viewed';
+  static const String bookingStarted = 'booking_started';
+  static const String bookingCompleted = 'booking_completed';
+  static const String mySessionsOpened = 'my_sessions_opened';
+  static const String sessionJoined = 'session_joined';
+  static const String reviewSubmitted = 'review_submitted';
+
   // Quran Sessions
   static const String teacherApplyEntrySeen = 'teacher_apply_entry_seen';
   static const String teacherApplyStarted = 'teacher_apply_started';
@@ -163,6 +176,13 @@ class AnalyticsParams {
   static const String subscriptionId = 'subscription_id';
   static const String productId = 'product_id';
   static const String purchaseReason = 'purchase_reason';
+
+  // Learn Quran funnel (safe IDs / enums only — no names, notes, or PII)
+  static const String teacherId = 'teacher_id';
+  static const String bookingId = 'booking_id';
+  static const String isPaid = 'is_paid';
+  static const String pricingType = 'pricing_type';
+  static const String callType = 'call_type';
 
   // Other
   static const String searchTerm = 'search_term';

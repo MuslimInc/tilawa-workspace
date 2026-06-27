@@ -103,6 +103,7 @@ dependencies:
   disk_space_plus: ^0.2.6
   speech_to_text: ^7.4.0
   hijri: ^3.0.1
+  visibility_detector: ^0.4.0+2
 
 dev_dependencies:
   bloc_lint: ^0.4.1

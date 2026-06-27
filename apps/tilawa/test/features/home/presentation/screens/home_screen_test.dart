@@ -25,6 +25,8 @@ import 'package:tilawa/features/prayer_times/application/prayer_location_update_
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/notify_prayer_location_updated_use_case.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
+import 'package:tilawa/screens/cubit/main_screen_cubit.dart';
+import 'package:tilawa/screens/cubit/main_screen_state.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 class _TestSharedPreferencesAsync implements SharedPreferencesAsync {
@@ -216,6 +218,9 @@ void main() {
 class _MockAudioPlayerBloc extends MockCubit<AudioPlayerState>
     implements AudioPlayerBloc {}
 
+class _MockMainScreenCubit extends MockCubit<MainScreenState>
+    implements MainScreenCubit {}
+
 class _HomeScreenHarness extends StatelessWidget {
   const _HomeScreenHarness({required this.bloc, this.locale = 'ar'});
 
@@ -232,6 +237,12 @@ class _HomeScreenHarness extends StatelessWidget {
       (_) => const Stream<AudioPlayerState>.empty(),
     );
 
+    final mainScreenCubit = _MockMainScreenCubit();
+    when(() => mainScreenCubit.state).thenReturn(const MainScreenState());
+    when(() => mainScreenCubit.stream).thenAnswer(
+      (_) => const Stream<MainScreenState>.empty(),
+    );
+
     return MaterialApp(
       locale: Locale(locale),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -246,6 +257,7 @@ class _HomeScreenHarness extends StatelessWidget {
             )..load(),
           ),
           BlocProvider<AudioPlayerBloc>.value(value: audioPlayerBloc),
+          BlocProvider<MainScreenCubit>.value(value: mainScreenCubit),
         ],
         child: Builder(
           builder: (context) => HomeScreen(onOpenPrayer: () {}),

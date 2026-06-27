@@ -16,6 +16,7 @@ import '../../domain/policies/session_mode_policy.dart';
 import '../blocs/booking/booking_bloc.dart';
 import '../blocs/booking/booking_event.dart';
 import '../blocs/booking/booking_state.dart';
+import '../config/quran_sessions_analytics_callbacks.dart';
 import '../failure_ui/quran_sessions_failure_ui.dart';
 import '../widgets/availability_slot_picker.dart';
 import '../widgets/payment_checkout_sheet.dart';
@@ -29,6 +30,7 @@ class BookingScreen extends StatefulWidget {
     super.key,
     required this.teacherId,
     required this.studentId,
+    this.analytics = const QuranSessionsAnalyticsCallbacks(),
     this.preSelectedSlotId,
     this.sessionModePolicy = SessionModePolicy.freeBeta,
     this.bookingModeHint = QuranTutorBookingMode.autoConfirm,
@@ -41,6 +43,7 @@ class BookingScreen extends StatefulWidget {
 
   final String teacherId;
   final String studentId;
+  final QuranSessionsAnalyticsCallbacks analytics;
   final String? preSelectedSlotId;
   final SessionModePolicy sessionModePolicy;
   final QuranTutorBookingMode bookingModeHint;
@@ -67,10 +70,12 @@ class BookingScreen extends StatefulWidget {
 
 class _BookingScreenState extends State<BookingScreen> {
   bool _autoSelectedSlot = false;
+  bool _loggedBookingCompleted = false;
 
   @override
   void initState() {
     super.initState();
+    widget.analytics.onBookingStarted?.call(widget.teacherId);
     _dispatchOpen();
   }
 
@@ -147,6 +152,16 @@ class _BookingScreenState extends State<BookingScreen> {
 
           if (state is BookingSuccess) {
             final booking = state.booking;
+            if (!_loggedBookingCompleted) {
+              _loggedBookingCompleted = true;
+              widget.analytics.onBookingCompleted?.call(
+                teacherId: booking.teacherId,
+                bookingId: booking.id,
+                isPaid: booking.pricingType != SessionPricingType.free,
+                pricingType: booking.pricingType.name,
+                callType: booking.requestedCallType.name,
+              );
+            }
             final isPending =
                 booking.effectiveLifecycleStatus ==
                 SessionLifecycleStatus.pendingTutorApproval;

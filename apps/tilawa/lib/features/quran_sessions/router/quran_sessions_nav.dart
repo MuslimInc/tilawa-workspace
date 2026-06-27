@@ -124,6 +124,7 @@ List<RouteBase> get quranSessionsRoutes => [
       child: _withQuranSessionsTheme(
         TeacherListScreen(
           featureConfig: quranSessionsFeatureConfig(),
+          analytics: quranSessionsAnalyticsCallbacks(),
           onTeacherTapped: (id) => context.push(
             QuranSessionsRoutes.teacherProfile.replaceFirst(':teacherId', id),
           ),
@@ -162,6 +163,7 @@ List<RouteBase> get quranSessionsRoutes => [
           TeacherProfileScreen(
             teacherId: teacherId,
             bookingEnabled: bookingEnabled,
+            analytics: quranSessionsAnalyticsCallbacks(),
             onBookTapped: bookingEnabled
                 ? (tId, slotId) => context.push(
                     QuranSessionsRoutes.booking.replaceFirst(':teacherId', tId),
@@ -192,6 +194,7 @@ List<RouteBase> get quranSessionsRoutes => [
           BookingScreen(
             teacherId: teacherId,
             studentId: studentId,
+            analytics: quranSessionsAnalyticsCallbacks(),
             preSelectedSlotId: preSelectedSlotId,
             sessionModePolicy: sessionModePolicyFromLaunchConfig(launchConfig),
             bookingModeHint: resolveQuranTutorBookingModeHint(
@@ -231,6 +234,7 @@ List<RouteBase> get quranSessionsRoutes => [
         child: _withQuranSessionsTheme(
           MySessionsScreen(
             studentId: studentId,
+            analytics: quranSessionsAnalyticsCallbacks(),
             scrollBottomPadding: listScrollBottomPadding,
             resolveTeacherName: _resolveTeacherName,
             createCallControlGateway: _createQuranSessionCallControlGateway,
@@ -283,6 +287,7 @@ List<RouteBase> get quranSessionsRoutes => [
         create: (_) => getIt<SessionDetailBloc>(),
         child: SessionDetailScreen(
           bookingId: bookingId,
+          analytics: quranSessionsAnalyticsCallbacks(),
           createCallControlGateway: _createQuranSessionCallControlGateway,
           createCallTelemetry: _createCallTelemetry,
           buildCallSurface: _buildQuranSessionsCallSurface(),
