@@ -49,6 +49,8 @@ SessionAggregate mapBookingDocToAggregate(
     rejectionReason: data['rejectionReason'] as String?,
     paymentReference: data['paymentReference'] as String?,
     sessionId: data['sessionId'] as String?,
+    revisionSurahNumber: data['revisionSurahNumber'] as int?,
+    revisionAyahNumber: data['revisionAyahNumber'] as int?,
   );
 }
 

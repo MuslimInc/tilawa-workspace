@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'session_call_type.dart';
 import 'session_price.dart';
 import 'session_pricing_type.dart';
+import 'teacher_credential.dart';
 import 'teacher_verification_status.dart';
 import 'user_profile.dart' show UserGender;
 
@@ -30,6 +31,7 @@ class QuranTeacher extends Equatable {
     this.price,
     this.cityName,
     this.countryName,
+    this.credentials = const [],
   });
 
   final String id;
@@ -66,6 +68,10 @@ class QuranTeacher extends Equatable {
   final String? cityName;
   final String? countryName;
 
+  /// Teacher-supplied qualifications; [TeacherCredential.isVerified] when admin
+  /// confirmed on backend.
+  final List<TeacherCredential> credentials;
+
   bool get isVerified =>
       verificationStatus == TeacherVerificationStatus.verified;
 
@@ -89,5 +95,6 @@ class QuranTeacher extends Equatable {
     totalSessionsCompleted,
     cityName,
     countryName,
+    credentials,
   ];
 }

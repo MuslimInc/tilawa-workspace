@@ -105,6 +105,8 @@ Future<void> _pumpSessionDetailScreen(
   WidgetTester tester, {
   required SessionDetailBloc bloc,
   SessionCallControlGatewayFactory? createCallControlGateway,
+  void Function({required int surahNumber, int? ayahNumber})?
+  onPracticeRevisionRequested,
 }) async {
   tester.view.physicalSize = const Size(390, 640);
   tester.view.devicePixelRatio = 1;
@@ -128,6 +130,7 @@ Future<void> _pumpSessionDetailScreen(
         child: SessionDetailScreen(
           bookingId: 'session_1',
           createCallControlGateway: createCallControlGateway,
+          onPracticeRevisionRequested: onPracticeRevisionRequested,
         ),
       ),
     ),
@@ -839,6 +842,64 @@ void main() {
         bloc.recordedEvents.whereType<SessionDetailLoadRequested>().single,
         const SessionDetailLoadRequested(bookingId: 'session_1'),
       );
+    });
+  });
+
+  group('revision practice CTA', () {
+    testWidgets('shows and invokes host callback when surah context exists', (
+      tester,
+    ) async {
+      int? tappedSurah;
+      int? tappedAyah;
+
+      final aggregate = makeAggregate(
+        status: SessionLifecycleStatus.confirmed,
+      ).copyWith(revisionSurahNumber: 18, revisionAyahNumber: 5);
+
+      final bloc = _RecordingSessionDetailBloc(
+        seed: SessionDetailSuccess(
+          aggregate: aggregate,
+          timeline: const [],
+        ),
+      );
+
+      await _pumpSessionDetailScreen(
+        tester,
+        bloc: bloc,
+        onPracticeRevisionRequested:
+            ({
+              required surahNumber,
+              ayahNumber,
+            }) {
+              tappedSurah = surahNumber;
+              tappedAyah = ayahNumber;
+            },
+      );
+
+      expect(find.text('Practice in Quran reader'), findsOneWidget);
+
+      await tester.tap(find.text('Practice in Quran reader'));
+      await tester.pump();
+
+      check(tappedSurah).equals(18);
+      check(tappedAyah).equals(5);
+    });
+
+    testWidgets('hidden without surah context', (tester) async {
+      final bloc = _RecordingSessionDetailBloc(
+        seed: SessionDetailSuccess(
+          aggregate: makeAggregate(status: SessionLifecycleStatus.confirmed),
+          timeline: const [],
+        ),
+      );
+
+      await _pumpSessionDetailScreen(
+        tester,
+        bloc: bloc,
+        onPracticeRevisionRequested: ({required surahNumber, ayahNumber}) {},
+      );
+
+      expect(find.text('Practice in Quran reader'), findsNothing);
     });
   });
 }

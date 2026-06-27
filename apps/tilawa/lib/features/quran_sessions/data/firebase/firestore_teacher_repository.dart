@@ -44,7 +44,20 @@ class FirestoreTeacherDataSource implements TeacherRemoteDataSource {
       averageRating: (data['averageRating'] as num?)?.toDouble() ?? 0,
       totalReviews: data['reviewCount'] as int? ?? 0,
       totalSessionsCompleted: data['totalSessionsCompleted'] as int? ?? 0,
+      credentials: _mapCredentials(data['credentials']),
     );
+  }
+
+  static List<TeacherCredentialDto> _mapCredentials(Object? raw) {
+    if (raw is! List) return const [];
+    return raw
+        .whereType<Map>()
+        .map(
+          (item) => TeacherCredentialDto.fromJson(
+            Map<String, dynamic>.from(item),
+          ),
+        )
+        .toList();
   }
 
   static List<String> _supportedCallTypes(String? externalMeetingUrl) {

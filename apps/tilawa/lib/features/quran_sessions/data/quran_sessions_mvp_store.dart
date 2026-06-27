@@ -200,6 +200,17 @@ class QuranSessionsMvpStore {
       totalSessionsCompleted: 340,
       cityName: 'القاهرة',
       countryName: 'مصر',
+      credentials: [
+        TeacherCredential(
+          title: 'Ijazah in Hafs an Asim',
+          issuer: 'Al-Azhar University',
+          isVerified: true,
+        ),
+        TeacherCredential(
+          title: 'Tajweed certification',
+          issuer: 'Egyptian Ministry of Awqaf',
+        ),
+      ],
     ),
     const QuranTeacher(
       id: 'teacher_2',

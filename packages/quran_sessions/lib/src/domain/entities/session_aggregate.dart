@@ -21,6 +21,8 @@ class SessionAggregate extends Equatable {
     this.rejectionReason,
     this.paymentReference,
     this.sessionId,
+    this.revisionSurahNumber,
+    this.revisionAyahNumber,
   });
 
   final String id;
@@ -41,7 +43,16 @@ class SessionAggregate extends Equatable {
   /// Linked operational session document id (from booking).
   final String? sessionId;
 
+  /// Optional surah focus for revision practice in Tilawa Quran reader.
+  final int? revisionSurahNumber;
+
+  /// Optional starting ayah within [revisionSurahNumber].
+  final int? revisionAyahNumber;
+
   bool get isPaid => pricingType == SessionPricingType.fixedPerSession;
+
+  bool get hasRevisionSurahContext =>
+      revisionSurahNumber != null && revisionSurahNumber! >= 1;
 
   SessionAggregate copyWith({
     SessionLifecycleStatus? lifecycleStatus,
@@ -53,6 +64,8 @@ class SessionAggregate extends Equatable {
     String? rejectionReason,
     String? paymentReference,
     String? sessionId,
+    int? revisionSurahNumber,
+    int? revisionAyahNumber,
   }) {
     return SessionAggregate(
       id: id,
@@ -70,6 +83,8 @@ class SessionAggregate extends Equatable {
       rejectionReason: rejectionReason ?? this.rejectionReason,
       paymentReference: paymentReference ?? this.paymentReference,
       sessionId: sessionId ?? this.sessionId,
+      revisionSurahNumber: revisionSurahNumber ?? this.revisionSurahNumber,
+      revisionAyahNumber: revisionAyahNumber ?? this.revisionAyahNumber,
     );
   }
 
@@ -90,5 +105,7 @@ class SessionAggregate extends Equatable {
     rejectionReason,
     paymentReference,
     sessionId,
+    revisionSurahNumber,
+    revisionAyahNumber,
   ];
 }

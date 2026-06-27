@@ -12,6 +12,7 @@ import 'package:tilawa/features/quran_sessions/presentation/quran_sessions_analy
 import 'package:tilawa/features/quran_sessions/presentation/quran_sessions_scheduling_analytics.dart';
 import 'package:tilawa/features/quran_sessions/presentation/quran_sessions_user.dart';
 import 'package:tilawa/features/quran_sessions/quran_sessions_feature_flags.dart';
+import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../data/quran_sessions_mvp_store.dart';
@@ -213,6 +214,9 @@ List<RouteBase> get quranSessionsRoutes => [
               );
               return approved ?? false;
             },
+            onGuardianDashboardRequested: () {
+              context.push(QuranSessionsRoutes.guardianDashboard);
+            },
           ),
         ),
       );
@@ -282,6 +286,16 @@ List<RouteBase> get quranSessionsRoutes => [
           createCallControlGateway: _createQuranSessionCallControlGateway,
           createCallTelemetry: _createCallTelemetry,
           buildCallSurface: _buildQuranSessionsCallSurface(),
+          onPracticeRevisionRequested:
+              ({
+                required surahNumber,
+                ayahNumber,
+              }) {
+                QuranReaderRoute(
+                  surahNumber: surahNumber,
+                  ayahNumber: ayahNumber,
+                ).push(context);
+              },
         ),
       );
     },
@@ -350,6 +364,15 @@ List<RouteBase> get quranSessionsRoutes => [
         child: ProfileCompletionScreen(userId: userId),
       );
     },
+  ),
+  GoRoute(
+    path: QuranSessionsRoutes.guardianDashboard,
+    builder: (context, state) => GuardianDashboardScreen(
+      onApproveBookings: () => context.push(
+        QuranSessionsRoutes.guardianApproval,
+        extra: state.extra as String? ?? requireQuranSessionsUserId(getIt),
+      ),
+    ),
   ),
   GoRoute(
     path: QuranSessionsRoutes.guardianApproval,

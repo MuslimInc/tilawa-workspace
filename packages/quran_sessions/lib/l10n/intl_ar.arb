@@ -29,6 +29,34 @@
     "guardianApprovalConfirm": "الموافقة على الحجز",
     "guardianApprovalCaptured": "تم تسجيل موافقة وليّ الأمر. يمكنك العودة إلى الحجز.",
     "guardianApprovalSetupAction": "إعداد موافقة وليّ الأمر",
+    "guardianDashboardTitle": "لوحة وليّ الأمر",
+    "guardianDashboardIntroTitle": "حجوزات جلسات الطفل",
+    "guardianDashboardIntroBody": "وافق على حجوزات تعلّم القرآن مع محفظك لطفلك من هذا الجهاز. تُسجَّل الموافقة مرة واحدة ثم يكمل الطالب الحجز.",
+    "guardianDashboardApproveAction": "الموافقة على حجوزات الطفل",
+    "guardianDashboardOpenAction": "فتح لوحة وليّ الأمر",
+    "guardianDashboardDeferredNote": "عرض الجلسات القادمة للطفل والموافقات المعلّقة في قائمة واحدة يتطلب ربط حساب وليّ الأمر — بعد أدوار المصادقة في MVP.",
+    "sessionRevisionPracticeUpcomingTitle": "استعد لجلستك",
+    "sessionRevisionPracticeCompletedTitle": "تابع مراجعتك",
+    "sessionRevisionPracticeBody": "تدرّب على سورة {surahNumber} في قارئ القرآن في تلاوة قبل أو بعد جلستك.",
+    "@sessionRevisionPracticeBody": {
+        "placeholders": {
+            "surahNumber": {
+                "type": "int"
+            }
+        }
+    },
+    "sessionRevisionPracticeAction": "التدرّب في قارئ القرآن",
+    "teacherCredentialsSectionTitle": "الشهادات والإجازات",
+    "teacherCredentialsSummary": "{count, plural, =1{شهادة واحدة} other{{count} شهادات}}",
+    "@teacherCredentialsSummary": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "teacherCredentialsDisclaimer": "الشهادات مقدَّمة من المعلّم. البنود الموثّقة راجعتها تلاوة؛ غيرها مذكورة من المعلّم.",
+    "teacherCredentialVerifiedBadge": "موثّقة من تلاوة",
     "policyViolation": "تم رفض الحجز لمخالفة السياسة \"{policy}\": {detail}.",
     "marketNotEnabledWithCity": "خدمة الجلسات غير متاحة في مدينتك حالياً. جرّب مدينة أخرى.",
     "marketNotEnabled": "خدمة الجلسات غير متاحة في دولتك حالياً.",

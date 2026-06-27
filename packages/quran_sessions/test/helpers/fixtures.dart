@@ -6,6 +6,7 @@ import 'package:quran_sessions/src/domain/entities/session_lifecycle_status.dart
 import 'package:quran_sessions/src/domain/entities/session_price.dart';
 import 'package:quran_sessions/src/domain/entities/session_pricing_type.dart';
 import 'package:quran_sessions/src/domain/entities/teacher_availability.dart';
+import 'package:quran_sessions/src/domain/entities/teacher_credential.dart';
 import 'package:quran_sessions/src/domain/entities/teacher_profile.dart';
 import 'package:quran_sessions/src/domain/entities/teacher_verification_status.dart';
 import 'package:quran_sessions/src/domain/entities/user_profile.dart';
@@ -65,6 +66,7 @@ QuranTeacher makeTeacher({
   SessionPricingType pricingType = SessionPricingType.fixedPerSession,
   SessionPrice? price = _defaultMarketPrice,
   String avatarUrl = 'https://example.com/avatar.png',
+  List<TeacherCredential> credentials = const [],
 }) => QuranTeacher(
   id: id,
   displayName: displayName,
@@ -82,6 +84,7 @@ QuranTeacher makeTeacher({
   totalSessionsCompleted: 120,
   cityName: 'القاهرة',
   countryName: 'Egypt',
+  credentials: credentials,
 );
 
 TeacherProfile makeTeacherProfile({

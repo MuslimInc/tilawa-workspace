@@ -18,6 +18,7 @@ import '../widgets/quran_session_price_chip.dart';
 import '../widgets/quran_sessions_scaffold.dart';
 import '../widgets/quran_sessions_section_header.dart';
 import '../widgets/report_concern_sheet.dart';
+import '../widgets/teacher_credentials_section.dart';
 import '../widgets/teacher_discovery_details.dart';
 import '../widgets/teacher_initials_avatar.dart';
 
@@ -337,6 +338,8 @@ class _TeacherProfileBodyState extends State<_TeacherProfileBody> {
             ),
           ),
         ],
+        SizedBox(height: tokens.spaceSmall),
+        TeacherCredentialsSection(credentials: widget.teacher.credentials),
         SizedBox(height: tokens.spaceSmall),
         QuranSessionsSectionHeader(
           title: l10n.availableSlots,

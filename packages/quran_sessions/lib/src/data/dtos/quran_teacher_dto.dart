@@ -25,6 +25,7 @@ class QuranTeacherDto {
     this.marketPrice,
     this.cityName,
     this.countryName,
+    this.credentials = const [],
   });
 
   final String id;
@@ -50,6 +51,7 @@ class QuranTeacherDto {
   final int totalSessionsCompleted;
   final String? cityName;
   final String? countryName;
+  final List<TeacherCredentialDto> credentials;
 
   factory QuranTeacherDto.fromJson(Map<String, dynamic> json) =>
       QuranTeacherDto(
@@ -75,7 +77,20 @@ class QuranTeacherDto {
         totalSessionsCompleted: json['total_sessions_completed'] as int,
         cityName: json['city_name'] as String?,
         countryName: json['country_name'] as String?,
+        credentials: _mapCredentials(json['credentials']),
       );
+
+  static List<TeacherCredentialDto> _mapCredentials(Object? raw) {
+    if (raw is! List) return const [];
+    return raw
+        .whereType<Map>()
+        .map(
+          (item) => TeacherCredentialDto.fromJson(
+            Map<String, dynamic>.from(item),
+          ),
+        )
+        .toList();
+  }
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -94,6 +109,33 @@ class QuranTeacherDto {
     'total_sessions_completed': totalSessionsCompleted,
     if (cityName != null) 'city_name': cityName,
     if (countryName != null) 'country_name': countryName,
+    if (credentials.isNotEmpty)
+      'credentials': credentials.map((c) => c.toJson()).toList(),
+  };
+}
+
+class TeacherCredentialDto {
+  const TeacherCredentialDto({
+    required this.title,
+    this.issuer,
+    this.isVerified = false,
+  });
+
+  final String title;
+  final String? issuer;
+  final bool isVerified;
+
+  factory TeacherCredentialDto.fromJson(Map<String, dynamic> json) =>
+      TeacherCredentialDto(
+        title: json['title'] as String? ?? '',
+        issuer: json['issuer'] as String?,
+        isVerified: json['is_verified'] as bool? ?? false,
+      );
+
+  Map<String, dynamic> toJson() => {
+    'title': title,
+    if (issuer != null) 'issuer': issuer,
+    'is_verified': isVerified,
   };
 }
 

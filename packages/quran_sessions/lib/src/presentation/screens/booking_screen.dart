@@ -36,6 +36,7 @@ class BookingScreen extends StatefulWidget {
     this.onBookingSuccess,
     this.onCompleteProfile,
     this.onGuardianApprovalRequested,
+    this.onGuardianDashboardRequested,
   });
 
   final String teacherId;
@@ -47,6 +48,9 @@ class BookingScreen extends StatefulWidget {
 
   /// Host navigates to guardian approval; retry eligibility on return.
   final Future<bool> Function()? onGuardianApprovalRequested;
+
+  /// Host opens light guardian hub (pending approvals overview).
+  final VoidCallback? onGuardianDashboardRequested;
 
   /// Called after a booking is confirmed.
   /// navigation; otherwise the screen pops itself.
@@ -227,6 +231,7 @@ class _BookingScreenState extends State<BookingScreen> {
                     }
                   }
                 : null,
+            onGuardianDashboard: widget.onGuardianDashboardRequested,
             onRetry: _retryEligibility,
           ),
           BookingSuccess() => const SizedBox.shrink(),
@@ -427,6 +432,7 @@ class _EligibilityBlockedView extends StatelessWidget {
     required this.onRetry,
     this.onCompleteProfile,
     this.onGuardianApproval,
+    this.onGuardianDashboard,
     this.studentId,
   });
 
@@ -434,6 +440,7 @@ class _EligibilityBlockedView extends StatelessWidget {
   final VoidCallback onRetry;
   final VoidCallback? onCompleteProfile;
   final VoidCallback? onGuardianApproval;
+  final VoidCallback? onGuardianDashboard;
   final String? studentId;
 
   @override
@@ -484,15 +491,25 @@ class _EligibilityBlockedView extends StatelessWidget {
               isFullWidth: true,
               size: TilawaButtonSize.large,
             )
-          else if (needsGuardianApproval && onGuardianApproval != null)
-            TilawaButton(
-              text: l10n.guardianApprovalSetupAction,
-              leadingIcon: const Icon(Icons.family_restroom_outlined),
-              onPressed: onGuardianApproval,
-              isFullWidth: true,
-              size: TilawaButtonSize.large,
-            )
-          else if (!isBlocked) ...[
+          else if (needsGuardianApproval) ...[
+            if (onGuardianApproval != null)
+              TilawaButton(
+                text: l10n.guardianApprovalSetupAction,
+                leadingIcon: const Icon(Icons.family_restroom_outlined),
+                onPressed: onGuardianApproval,
+                isFullWidth: true,
+                size: TilawaButtonSize.large,
+              ),
+            if (onGuardianDashboard != null) ...[
+              SizedBox(height: tokens.spaceSmall),
+              TilawaButton(
+                text: l10n.guardianDashboardOpenAction,
+                variant: TilawaButtonVariant.secondary,
+                onPressed: onGuardianDashboard,
+                isFullWidth: true,
+              ),
+            ],
+          ] else if (!isBlocked) ...[
             TilawaButton(
               text: l10n.retry,
               onPressed: onRetry,

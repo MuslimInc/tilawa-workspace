@@ -109,6 +109,61 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get guardianApprovalSetupAction => 'إعداد موافقة وليّ الأمر';
 
   @override
+  String get guardianDashboardTitle => 'لوحة وليّ الأمر';
+
+  @override
+  String get guardianDashboardIntroTitle => 'حجوزات جلسات الطفل';
+
+  @override
+  String get guardianDashboardIntroBody =>
+      'وافق على حجوزات تعلّم القرآن مع محفظك لطفلك من هذا الجهاز. تُسجَّل الموافقة مرة واحدة ثم يكمل الطالب الحجز.';
+
+  @override
+  String get guardianDashboardApproveAction => 'الموافقة على حجوزات الطفل';
+
+  @override
+  String get guardianDashboardOpenAction => 'فتح لوحة وليّ الأمر';
+
+  @override
+  String get guardianDashboardDeferredNote =>
+      'عرض الجلسات القادمة للطفل والموافقات المعلّقة في قائمة واحدة يتطلب ربط حساب وليّ الأمر — بعد أدوار المصادقة في MVP.';
+
+  @override
+  String get sessionRevisionPracticeUpcomingTitle => 'استعد لجلستك';
+
+  @override
+  String get sessionRevisionPracticeCompletedTitle => 'تابع مراجعتك';
+
+  @override
+  String sessionRevisionPracticeBody(int surahNumber) {
+    return 'تدرّب على سورة $surahNumber في قارئ القرآن في تلاوة قبل أو بعد جلستك.';
+  }
+
+  @override
+  String get sessionRevisionPracticeAction => 'التدرّب في قارئ القرآن';
+
+  @override
+  String get teacherCredentialsSectionTitle => 'الشهادات والإجازات';
+
+  @override
+  String teacherCredentialsSummary(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count شهادات',
+      one: 'شهادة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get teacherCredentialsDisclaimer =>
+      'الشهادات مقدَّمة من المعلّم. البنود الموثّقة راجعتها تلاوة؛ غيرها مذكورة من المعلّم.';
+
+  @override
+  String get teacherCredentialVerifiedBadge => 'موثّقة من تلاوة';
+
+  @override
   String policyViolation(Object detail, Object policy) {
     return 'تم رفض الحجز لمخالفة السياسة \"$policy\": $detail.';
   }

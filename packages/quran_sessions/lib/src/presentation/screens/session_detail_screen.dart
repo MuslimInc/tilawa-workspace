@@ -8,7 +8,9 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../session_join/session_join_ui_state.dart';
 import '../l10n/session_join_l10n.dart';
 import '../l10n/session_lifecycle_l10n.dart';
+import '../utils/session_revision_practice.dart';
 import '../widgets/pending_reschedule_banner.dart';
+import '../widgets/session_revision_practice_card.dart';
 
 class SessionDetailScreen extends StatefulWidget {
   const SessionDetailScreen({
@@ -17,12 +19,17 @@ class SessionDetailScreen extends StatefulWidget {
     this.createCallControlGateway,
     this.createCallTelemetry,
     this.buildCallSurface,
+    this.onPracticeRevisionRequested,
   });
 
   final String bookingId;
   final SessionCallControlGatewayFactory? createCallControlGateway;
   final CallTelemetryCoordinatorFactory? createCallTelemetry;
   final InAppCallSurfaceBuilder? buildCallSurface;
+
+  /// Host opens Tilawa Quran reader for [surahNumber] (optional [ayahNumber]).
+  final void Function({required int surahNumber, int? ayahNumber})?
+  onPracticeRevisionRequested;
 
   @override
   State<SessionDetailScreen> createState() => _SessionDetailScreenState();
@@ -371,6 +378,22 @@ class _SessionDetailScreenState extends State<SessionDetailScreen>
                       ),
                       SizedBox(height: Theme.of(context).tokens.spaceSmall),
                       _SessionJoinStateBanner(state: state),
+                      if (_showsRevisionPractice(state)) ...[
+                        SizedBox(height: Theme.of(context).tokens.spaceLarge),
+                        SessionRevisionPracticeCard(
+                          surahNumber: state.aggregate.revisionSurahNumber!,
+                          ayahNumber: state.aggregate.revisionAyahNumber,
+                          isCompletedSession:
+                              state.aggregate.lifecycleStatus ==
+                              SessionLifecycleStatus.completed,
+                          onPracticeTapped: () =>
+                              widget.onPracticeRevisionRequested?.call(
+                                surahNumber:
+                                    state.aggregate.revisionSurahNumber!,
+                                ayahNumber: state.aggregate.revisionAyahNumber,
+                              ),
+                        ),
+                      ],
                       SizedBox(height: Theme.of(context).tokens.spaceSmall),
                       Text(
                         l10n.sessionStartsAtLabel(
@@ -429,6 +452,16 @@ class _SessionDetailScreenState extends State<SessionDetailScreen>
         ),
       ),
     );
+  }
+
+  bool _showsRevisionPractice(SessionDetailSuccess state) {
+    if (widget.onPracticeRevisionRequested == null) {
+      return false;
+    }
+    if (!state.aggregate.hasRevisionSurahContext) {
+      return false;
+    }
+    return sessionShowsRevisionPractice(state.aggregate.lifecycleStatus);
   }
 }
 

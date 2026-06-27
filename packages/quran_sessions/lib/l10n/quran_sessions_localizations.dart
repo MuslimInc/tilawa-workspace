@@ -275,6 +275,90 @@ abstract class QuranSessionsLocalizations {
   /// **'Set up guardian approval'**
   String get guardianApprovalSetupAction;
 
+  /// No description provided for @guardianDashboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Guardian hub'**
+  String get guardianDashboardTitle;
+
+  /// No description provided for @guardianDashboardIntroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Child session bookings'**
+  String get guardianDashboardIntroTitle;
+
+  /// No description provided for @guardianDashboardIntroBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve QuranTutor bookings for your child on this device. You will confirm consent once; the student can then complete booking.'**
+  String get guardianDashboardIntroBody;
+
+  /// No description provided for @guardianDashboardApproveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve child bookings'**
+  String get guardianDashboardApproveAction;
+
+  /// No description provided for @guardianDashboardOpenAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Open guardian hub'**
+  String get guardianDashboardOpenAction;
+
+  /// No description provided for @guardianDashboardDeferredNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming child sessions and pending approvals in one list require guardian account linking — coming after MVP auth roles.'**
+  String get guardianDashboardDeferredNote;
+
+  /// No description provided for @sessionRevisionPracticeUpcomingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare for your session'**
+  String get sessionRevisionPracticeUpcomingTitle;
+
+  /// No description provided for @sessionRevisionPracticeCompletedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue your revision'**
+  String get sessionRevisionPracticeCompletedTitle;
+
+  /// No description provided for @sessionRevisionPracticeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice Surah {surahNumber} in Tilawa\'s Quran reader before or after your session.'**
+  String sessionRevisionPracticeBody(int surahNumber);
+
+  /// No description provided for @sessionRevisionPracticeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice in Quran reader'**
+  String get sessionRevisionPracticeAction;
+
+  /// No description provided for @teacherCredentialsSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Credentials'**
+  String get teacherCredentialsSectionTitle;
+
+  /// No description provided for @teacherCredentialsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 credential} other{{count} credentials}}'**
+  String teacherCredentialsSummary(int count);
+
+  /// No description provided for @teacherCredentialsDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Credentials are provided by the teacher. Verified items were checked by Tilawa; others are self-reported.'**
+  String get teacherCredentialsDisclaimer;
+
+  /// No description provided for @teacherCredentialVerifiedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified by Tilawa'**
+  String get teacherCredentialVerifiedBadge;
+
   /// No description provided for @policyViolation.
   ///
   /// In en, this message translates to:

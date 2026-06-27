@@ -166,6 +166,37 @@ void main() {
     expect(find.byIcon(Icons.flag_outlined), findsOneWidget);
     expect(find.byTooltip('الإبلاغ عن المحفظ'), findsOneWidget);
   });
+
+  testWidgets('expands credentials section when teacher has credentials', (
+    tester,
+  ) async {
+    await _pumpProfile(
+      tester,
+      TeacherProfileSuccess(
+        teacher: makeTeacher(
+          avatarUrl: '',
+          credentials: const [
+            TeacherCredential(
+              title: 'Ijazah in Hafs',
+              issuer: 'Test institute',
+              isVerified: true,
+            ),
+          ],
+        ),
+        availability: const [],
+        reviews: const [],
+      ),
+    );
+
+    expect(find.text('الشهادات والإجازات'), findsOneWidget);
+    expect(find.text('Ijazah in Hafs'), findsNothing);
+
+    await tester.tap(find.text('شهادة واحدة'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Ijazah in Hafs'), findsOneWidget);
+    expect(find.text('موثّقة من تلاوة'), findsOneWidget);
+  });
 }
 
 extension on QuranTeacher {
@@ -185,6 +216,7 @@ extension on QuranTeacher {
       averageRating: averageRating,
       totalReviews: totalReviews,
       totalSessionsCompleted: totalSessionsCompleted,
+      credentials: credentials,
     );
   }
 }

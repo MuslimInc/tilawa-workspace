@@ -114,6 +114,61 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get guardianApprovalSetupAction => 'Set up guardian approval';
 
   @override
+  String get guardianDashboardTitle => 'Guardian hub';
+
+  @override
+  String get guardianDashboardIntroTitle => 'Child session bookings';
+
+  @override
+  String get guardianDashboardIntroBody =>
+      'Approve QuranTutor bookings for your child on this device. You will confirm consent once; the student can then complete booking.';
+
+  @override
+  String get guardianDashboardApproveAction => 'Approve child bookings';
+
+  @override
+  String get guardianDashboardOpenAction => 'Open guardian hub';
+
+  @override
+  String get guardianDashboardDeferredNote =>
+      'Upcoming child sessions and pending approvals in one list require guardian account linking — coming after MVP auth roles.';
+
+  @override
+  String get sessionRevisionPracticeUpcomingTitle => 'Prepare for your session';
+
+  @override
+  String get sessionRevisionPracticeCompletedTitle => 'Continue your revision';
+
+  @override
+  String sessionRevisionPracticeBody(int surahNumber) {
+    return 'Practice Surah $surahNumber in Tilawa\'s Quran reader before or after your session.';
+  }
+
+  @override
+  String get sessionRevisionPracticeAction => 'Practice in Quran reader';
+
+  @override
+  String get teacherCredentialsSectionTitle => 'Credentials';
+
+  @override
+  String teacherCredentialsSummary(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count credentials',
+      one: '1 credential',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get teacherCredentialsDisclaimer =>
+      'Credentials are provided by the teacher. Verified items were checked by Tilawa; others are self-reported.';
+
+  @override
+  String get teacherCredentialVerifiedBadge => 'Verified by Tilawa';
+
+  @override
   String policyViolation(Object detail, Object policy) {
     return 'Booking rejected due to policy \"$policy\": $detail.';
   }

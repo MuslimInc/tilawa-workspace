@@ -106,6 +106,7 @@ export 'src/domain/entities/session_participant.dart';
 export 'src/domain/entities/session_participant_role.dart';
 export 'src/domain/entities/session_audit_event.dart';
 export 'src/domain/entities/quran_teacher.dart';
+export 'src/domain/entities/teacher_credential.dart';
 export 'src/domain/entities/session_call_type.dart';
 export 'src/domain/entities/session_policy.dart';
 export 'src/domain/entities/session_price.dart';
@@ -311,6 +312,7 @@ export 'src/presentation/widgets/session_review_sheet.dart';
 export 'src/presentation/utils/session_review_eligibility.dart';
 export 'src/presentation/widgets/external_meeting_join_sheet.dart';
 export 'src/presentation/screens/guardian_approval_capture_screen.dart';
+export 'src/presentation/screens/guardian_dashboard_screen.dart';
 export 'src/presentation/screens/profile_completion_screen.dart';
 export 'src/presentation/screens/quran_sessions_home_screen.dart';
 // ── Presentation: screens ─────────────────────────────────────────────────────

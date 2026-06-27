@@ -29,6 +29,34 @@
     "guardianApprovalConfirm": "Approve bookings",
     "guardianApprovalCaptured": "Guardian approval recorded. You can return to booking.",
     "guardianApprovalSetupAction": "Set up guardian approval",
+    "guardianDashboardTitle": "Guardian hub",
+    "guardianDashboardIntroTitle": "Child session bookings",
+    "guardianDashboardIntroBody": "Approve QuranTutor bookings for your child on this device. You will confirm consent once; the student can then complete booking.",
+    "guardianDashboardApproveAction": "Approve child bookings",
+    "guardianDashboardOpenAction": "Open guardian hub",
+    "guardianDashboardDeferredNote": "Upcoming child sessions and pending approvals in one list require guardian account linking — coming after MVP auth roles.",
+    "sessionRevisionPracticeUpcomingTitle": "Prepare for your session",
+    "sessionRevisionPracticeCompletedTitle": "Continue your revision",
+    "sessionRevisionPracticeBody": "Practice Surah {surahNumber} in Tilawa's Quran reader before or after your session.",
+    "@sessionRevisionPracticeBody": {
+        "placeholders": {
+            "surahNumber": {
+                "type": "int"
+            }
+        }
+    },
+    "sessionRevisionPracticeAction": "Practice in Quran reader",
+    "teacherCredentialsSectionTitle": "Credentials",
+    "teacherCredentialsSummary": "{count, plural, =1{1 credential} other{{count} credentials}}",
+    "@teacherCredentialsSummary": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "teacherCredentialsDisclaimer": "Credentials are provided by the teacher. Verified items were checked by Tilawa; others are self-reported.",
+    "teacherCredentialVerifiedBadge": "Verified by Tilawa",
     "policyViolation": "Booking rejected due to policy \"{policy}\": {detail}.",
     "marketNotEnabledWithCity": "Sessions are not available in your city right now. Try another city.",
     "marketNotEnabled": "Sessions are not available in your country right now.",
