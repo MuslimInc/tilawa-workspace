@@ -335,6 +335,17 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get teacherFilterFree => 'Free';
 
   @override
+  String get teacherFilterPaid => 'Paid';
+
+  @override
+  String get teacherFilterBudget => 'Budget';
+
+  @override
+  String teacherFilterUnderPrice(String amount) {
+    return 'Under $amount';
+  }
+
+  @override
   String get teacherFilterAvailableToday => 'Available today';
 
   @override
@@ -1808,6 +1819,13 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get paymentCheckoutTitle => 'Confirm payment';
 
   @override
+  String get paymentCheckoutFreeTitle => 'Confirm booking';
+
+  @override
+  String get paymentCheckoutFreeAmount =>
+      'This session is free — no payment required.';
+
+  @override
   String paymentCheckoutAmount(String amount) {
     return 'Total: $amount';
   }
@@ -1816,11 +1834,29 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get paymentCheckoutAmountPending => 'Session price (sandbox)';
 
   @override
+  String get paymentCheckoutSandboxNotice =>
+      'Sandbox mode — no real charge. Enable paid booking only via the sandbox launch flag.';
+
+  @override
   String get paymentCheckoutRefundToWalletNotice =>
       'If you cancel or we approve a refund, the amount is added to your MeMuslim wallet as credit. Wallet credit is not automatically returned to your card.';
 
   @override
   String get paymentCheckoutConfirm => 'Confirm payment (sandbox)';
+
+  @override
+  String get paymentCheckoutConfirmFree => 'Confirm booking';
+
+  @override
+  String get bookingPriceSummaryTitle => 'Session price';
+
+  @override
+  String get bookingPricePerSessionHint =>
+      'Charged once when you confirm (sandbox only).';
+
+  @override
+  String get walletSandboxNotice =>
+      'Sandbox wallet — credits from refunds and test payments only. Not real money.';
 
   @override
   String get restrictionReasonFalseIdentity => 'False identity information';
@@ -1965,6 +2001,10 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get bookingRequestSentSubtitle => 'Waiting for tutor approval';
+
+  @override
+  String get sessionAwaitingTutorApprovalNextSteps =>
+      'Your tutor will accept or decline soon. You can cancel this request until then.';
 
   @override
   String get bookingAcceptedTitle => 'Session accepted';

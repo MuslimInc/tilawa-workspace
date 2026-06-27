@@ -20,6 +20,9 @@ import '../failure_ui/quran_sessions_failure_ui.dart';
 import '../widgets/availability_slot_picker.dart';
 import '../widgets/payment_checkout_sheet.dart';
 import '../widgets/quran_sessions_scaffold.dart';
+import '../../domain/entities/session_price.dart';
+import '../../domain/entities/session_pricing_type.dart';
+import '../../utils/price_formatter.dart';
 
 class BookingScreen extends StatefulWidget {
   const BookingScreen({
@@ -232,12 +235,22 @@ class _BookingScreenState extends State<BookingScreen> {
             :final selectedSlot,
             :final selectedCallType,
             :final teacherExternalMeetingUrl,
+            :final pricingType,
+            :final sessionPrice,
           ) =>
             Padding(
               padding: EdgeInsets.all(tokens.spaceMedium),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  if (pricingType != null)
+                    Padding(
+                      padding: EdgeInsets.only(bottom: tokens.spaceSmall),
+                      child: _BookingPriceSummary(
+                        pricingType: pricingType,
+                        sessionPrice: sessionPrice,
+                      ),
+                    ),
                   Text(
                     l10n.selectSlot,
                     style: theme.textTheme.titleMedium?.copyWith(
@@ -319,10 +332,19 @@ class _BookingScreenState extends State<BookingScreen> {
   ) async {
     final l10n = context.quranSessionsL10n;
     final bloc = context.read<BookingBloc>();
+    final pricingType =
+        state.pricingType ?? state.outcome.aggregate.pricingType;
+    final isFree = pricingType == SessionPricingType.free;
+    final amountLabel = isFree
+        ? l10n.priceFree
+        : state.sessionPrice != null
+        ? PriceFormatter.format(state.sessionPrice!, l10n)
+        : l10n.paymentCheckoutAmountPending;
 
     await PaymentCheckoutSheet.show(
       context,
-      amountLabel: l10n.paymentCheckoutAmountPending,
+      amountLabel: amountLabel,
+      isFreeSession: isFree,
       onConfirm: () async {
         bloc.add(BookingConfirmPayment(state.outcome));
         final next = await bloc.stream.firstWhere(
@@ -342,6 +364,62 @@ class _BookingScreenState extends State<BookingScreen> {
 }
 
 // ── Eligibility blocked view ──────────────────────────────────────────────────
+
+class _BookingPriceSummary extends StatelessWidget {
+  const _BookingPriceSummary({
+    required this.pricingType,
+    required this.sessionPrice,
+  });
+
+  final SessionPricingType pricingType;
+  final SessionPrice? sessionPrice;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final tokens = theme.tokens;
+    final isFree = pricingType == SessionPricingType.free;
+    final priceLabel = PriceFormatter.formatOrFree(
+      l10n: l10n,
+      pricingType: pricingType,
+      price: sessionPrice,
+    );
+
+    return TilawaCard(
+      padding: EdgeInsets.all(tokens.spaceMedium),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.bookingPriceSummaryTitle,
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+          SizedBox(height: tokens.spaceExtraSmall),
+          Text(
+            priceLabel.isEmpty ? l10n.paymentCheckoutAmountPending : priceLabel,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: isFree ? scheme.primary : scheme.onSurface,
+            ),
+          ),
+          if (!isFree) ...[
+            SizedBox(height: tokens.spaceExtraSmall),
+            Text(
+              l10n.bookingPricePerSessionHint,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
 
 class _EligibilityBlockedView extends StatelessWidget {
   const _EligibilityBlockedView({

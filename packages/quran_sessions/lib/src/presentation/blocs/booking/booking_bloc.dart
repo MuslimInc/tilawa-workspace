@@ -2,8 +2,11 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../domain/entities/teacher_availability.dart';
+import '../../../domain/entities/session_price.dart';
+import '../../../domain/entities/session_pricing_type.dart';
 import '../../../domain/policies/session_mode_policy.dart';
 import '../../../domain/usecases/get_teacher_profile_by_id_usecase.dart';
+import '../../../domain/usecases/get_teacher_profile_usecase.dart';
 import '../../../domain/usecases/get_teacher_availability_usecase.dart';
 import '../../../boundaries/payment/session_payment_confirmation.dart';
 import '../../../domain/entities/session_lifecycle_status.dart';
@@ -20,6 +23,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     required this._submitBooking,
     required this._validateEligibility,
     required this._getTeacherProfile,
+    this._getTeacherListing,
     this.sessionModePolicy = SessionModePolicy.freeBeta,
     this.onBookingLostDueToNoAvailability,
     this.resolveMarketCode,
@@ -40,6 +44,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
   final SubmitSessionBookingUseCase _submitBooking;
   final ValidateBookingEligibilityUseCase _validateEligibility;
   final GetTeacherProfileByIdUseCase _getTeacherProfile;
+  final GetTeacherProfileUseCase? _getTeacherListing;
   final SessionModePolicy sessionModePolicy;
   final SessionPaymentConfirmation? _paymentConfirmation;
 
@@ -98,6 +103,18 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
       (_) => null,
       (profile) => profile.externalMeetingUrl,
     );
+
+    SessionPricingType? pricingType;
+    SessionPrice? sessionPrice;
+    final listing = _getTeacherListing;
+    if (listing != null) {
+      final listingResult = await listing(teacherId);
+      listingResult.fold((_) {}, (teacher) {
+        pricingType = teacher.pricingType;
+        sessionPrice = teacher.price;
+      });
+    }
+
     final defaultCallType = SessionModePolicy.defaultCallType(
       policy: sessionModePolicy,
       externalMeetingUrl: externalMeetingUrl,
@@ -128,6 +145,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
         availableSlots: available,
         selectedCallType: defaultCallType,
         teacherExternalMeetingUrl: externalMeetingUrl,
+        pricingType: pricingType,
+        sessionPrice: sessionPrice,
       ),
     );
   }
@@ -178,7 +197,17 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
       (failure) => emit(BookingFailure(failure)),
       (outcome) {
         if (outcome.requiresPaymentConfirmation) {
-          emit(BookingPaymentRequired(outcome));
+          final selecting = state is BookingSelecting
+              ? state as BookingSelecting
+              : null;
+          emit(
+            BookingPaymentRequired(
+              outcome,
+              pricingType:
+                  selecting?.pricingType ?? outcome.aggregate.pricingType,
+              sessionPrice: selecting?.sessionPrice,
+            ),
+          );
           return;
         }
         emit(BookingSuccess(aggregateToQuranBooking(outcome.aggregate)));

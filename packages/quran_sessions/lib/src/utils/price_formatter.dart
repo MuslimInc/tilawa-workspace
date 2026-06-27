@@ -24,6 +24,12 @@ abstract final class PriceFormatter {
     return format(price, l10n);
   }
 
+  /// Formats [amount] with a market [currencyCode] symbol (no l10n wrapper).
+  static String formatAmountOnly({
+    required double amount,
+    required String currencyCode,
+  }) => _formatAmount(amount, currencyCode);
+
   static String _formatAmount(double amount, String currencyCode) {
     final symbol = _symbol(currencyCode);
     final whole = amount == amount.truncateToDouble()

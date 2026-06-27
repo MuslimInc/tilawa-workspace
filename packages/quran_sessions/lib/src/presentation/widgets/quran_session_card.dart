@@ -69,6 +69,10 @@ class QuranSessionCard extends StatelessWidget {
             ),
             SizedBox(height: tokens.spaceExtraSmall),
             _SessionDateTimeRow(session: session),
+            if (variant == QuranSessionCardVariant.upcoming &&
+                session.effectiveLifecycleStatus ==
+                    SessionLifecycleStatus.pendingTutorApproval)
+              _PendingTutorApprovalBanner(session: session),
             if (variant == QuranSessionCardVariant.upcoming)
               _UpcomingActionsRow(
                 session: session,
@@ -255,6 +259,31 @@ class _DateChip extends StatelessWidget {
   }
 }
 
+class _PendingTutorApprovalBanner extends StatelessWidget {
+  const _PendingTutorApprovalBanner({required this.session});
+
+  final QuranSession session;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final tokens = theme.tokens;
+
+    return Padding(
+      padding: EdgeInsets.only(top: tokens.spaceSmall),
+      child: TilawaFeedbackStrip(
+        icon: Icons.hourglass_top_rounded,
+        message: l10n.sessionAwaitingTutorApprovalNextSteps,
+        backgroundColor: scheme.primaryContainer,
+        foregroundColor: scheme.onPrimaryContainer,
+        variant: TilawaFeedbackVariant.info,
+      ),
+    );
+  }
+}
+
 class _UpcomingActionsRow extends StatelessWidget {
   const _UpcomingActionsRow({
     required this.session,
@@ -289,6 +318,20 @@ class _UpcomingActionsRow extends StatelessWidget {
       joinFailure: null,
       hasOpenedMeeting: false,
     );
+
+    if (joinUiState == SessionJoinUiState.awaitingTutorApproval) {
+      return Padding(
+        padding: EdgeInsets.only(top: tokens.spaceSmall),
+        child: Align(
+          alignment: AlignmentDirectional.centerEnd,
+          child: QuranSessionActionMenu(
+            onViewDetails: onViewDetails,
+            onReschedule: null,
+            onCancel: onCancel,
+          ),
+        ),
+      );
+    }
 
     final showJoin =
         onJoin != null &&

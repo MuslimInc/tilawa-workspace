@@ -171,10 +171,16 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
   }) {
     final l10n = context.quranSessionsL10n;
     final tokens = Theme.of(context).tokens;
+    final budgetPriceLabel = formatTeacherBudgetFilterLabel(
+      teachers: teachers,
+      l10n: l10n,
+    );
+    final budgetThreshold = resolveTeacherBudgetPriceThreshold(teachers);
     final filtered = applyTeacherListClientFilter(
       teachers,
       _selectedFilter,
       availabilitySummaries,
+      budgetPriceThreshold: budgetThreshold,
     );
     final visible = filterTeachersByNameQuery(filtered, _searchQuery);
     final showClientEmpty =
@@ -201,6 +207,7 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
             return TeacherListFilterBar(
               selected: _selectedFilter,
               onSelected: _onFilterSelected,
+              budgetPriceLabel: budgetPriceLabel,
             );
           }
 
@@ -244,9 +251,13 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
     if (_searchQuery.trim().isNotEmpty) {
       return l10n.noTeachersForSearchQuery(_searchQuery.trim());
     }
-    return _selectedFilter == TeacherListFilter.availableToday
-        ? l10n.noTeachersForAvailabilityFilter
-        : l10n.noTeachersAvailableRightNow;
+    return switch (_selectedFilter) {
+      TeacherListFilter.availableToday => l10n.noTeachersForAvailabilityFilter,
+      TeacherListFilter.free ||
+      TeacherListFilter.paid ||
+      TeacherListFilter.budget => l10n.noTeachersAvailableRightNow,
+      _ => l10n.noTeachersAvailableRightNow,
+    };
   }
 }
 

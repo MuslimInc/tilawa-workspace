@@ -98,6 +98,14 @@
     "teacherNewRating": "جديد",
     "teacherFilterAll": "الكل",
     "teacherFilterFree": "مجاني",
+    "teacherFilterPaid": "مدفوع",
+    "teacherFilterBudget": "اقتصادي",
+    "teacherFilterUnderPrice": "أقل من {amount}",
+    "@teacherFilterUnderPrice": {
+        "placeholders": {
+            "amount": { "type": "String" }
+        }
+    },
     "teacherFilterAvailableToday": "متاح اليوم",
     "teacherBookAction": "احجز",
     "viewTeacherProfile": "عرض الملف",
@@ -707,6 +715,8 @@
     "walletTransactionTypeExpiry": "رصيد منتهٍ",
     "walletEntryAction": "المحفظة",
     "paymentCheckoutTitle": "تأكيد الدفع",
+    "paymentCheckoutFreeTitle": "تأكيد الحجز",
+    "paymentCheckoutFreeAmount": "هذه الجلسة مجانية — لا يلزم دفع.",
     "paymentCheckoutAmount": "الإجمالي: {amount}",
     "@paymentCheckoutAmount": {
         "placeholders": {
@@ -716,8 +726,13 @@
         }
     },
     "paymentCheckoutAmountPending": "سعر الجلسة (تجريبي)",
+    "paymentCheckoutSandboxNotice": "وضع تجريبي — لا يتم خصم مبلغ حقيقي. تفعيل الحجز المدفوع عبر علم الإطلاق التجريبي فقط.",
     "paymentCheckoutRefundToWalletNotice": "عند الإلغاء أو الموافقة على استرداد، يُضاف المبلغ إلى محفظة أنا مسلم كرصيد. لا يُعاد الرصيد تلقائيًا إلى بطاقتك.",
     "paymentCheckoutConfirm": "تأكيد الدفع (تجريبي)",
+    "paymentCheckoutConfirmFree": "تأكيد الحجز",
+    "bookingPriceSummaryTitle": "سعر الجلسة",
+    "bookingPricePerSessionHint": "يُخصم مرة واحدة عند التأكيد (تجريبي فقط).",
+    "walletSandboxNotice": "محفظة تجريبية — أرصدة من الاستردادات والمدفوعات التجريبية فقط. ليست أموالًا حقيقية.",
     "restrictionReasonFalseIdentity": "بيانات هوية مزيفة",
     "restrictionReasonPolicyViolation": "مخالفة السياسات",
     "restrictionReasonSafetyConcern": "مخاوف تتعلق بالسلامة",
@@ -766,6 +781,7 @@
     "sessionActionRejectBooking": "رفض الحجز",
     "bookingRequestSentTitle": "تم إرسال طلب الحجز",
     "bookingRequestSentSubtitle": "في انتظار موافقة المحفظ",
+    "sessionAwaitingTutorApprovalNextSteps": "سيقبل المحفظ أو يرفض قريبًا. يمكنك إلغاء الطلب حتى ذلك الحين.",
     "bookingAcceptedTitle": "تم قبول الحصة",
     "bookingAcceptedSubtitle": "يمكنك الانضمام في موعد الحصة",
     "bookingRejectedTitle": "اعتذر المحفظ عن قبول الحصة",

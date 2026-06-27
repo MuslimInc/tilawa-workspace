@@ -9,16 +9,22 @@ class PaymentCheckoutSheet extends StatelessWidget {
     required this.amountLabel,
     required this.onConfirm,
     this.isLoading = false,
+    this.isSandbox = true,
+    this.isFreeSession = false,
   });
 
   final String amountLabel;
   final VoidCallback onConfirm;
   final bool isLoading;
+  final bool isSandbox;
+  final bool isFreeSession;
 
   static Future<bool?> show(
     BuildContext context, {
     required String amountLabel,
     required Future<bool> Function() onConfirm,
+    bool isSandbox = true,
+    bool isFreeSession = false,
   }) {
     return showModalBottomSheet<bool>(
       context: context,
@@ -31,6 +37,8 @@ class PaymentCheckoutSheet extends StatelessWidget {
             return PaymentCheckoutSheet(
               amountLabel: amountLabel,
               isLoading: loading,
+              isSandbox: isSandbox,
+              isFreeSession: isFreeSession,
               onConfirm: () async {
                 setState(() => loading = true);
                 final ok = await onConfirm();
@@ -64,26 +72,44 @@ class PaymentCheckoutSheet extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              l10n.paymentCheckoutTitle,
+              isFreeSession
+                  ? l10n.paymentCheckoutFreeTitle
+                  : l10n.paymentCheckoutTitle,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             SizedBox(height: tokens.spaceSmall),
             Text(
-              l10n.paymentCheckoutAmount(amountLabel),
+              isFreeSession
+                  ? l10n.paymentCheckoutFreeAmount
+                  : l10n.paymentCheckoutAmount(amountLabel),
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: scheme.primary,
+                color: isFreeSession ? scheme.primary : scheme.onSurface,
               ),
             ),
-            SizedBox(height: tokens.spaceMedium),
-            Text(
-              l10n.paymentCheckoutRefundToWalletNotice,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: scheme.onSurfaceVariant,
+            if (isSandbox && !isFreeSession) ...[
+              SizedBox(height: tokens.spaceMedium),
+              TilawaFeedbackStrip(
+                icon: Icons.science_outlined,
+                message: l10n.paymentCheckoutSandboxNotice,
+                backgroundColor: scheme.primaryContainer,
+                foregroundColor: scheme.onPrimaryContainer,
+                variant: TilawaFeedbackVariant.info,
               ),
-            ),
+            ],
+            if (!isFreeSession) ...[
+              SizedBox(height: tokens.spaceMedium),
+              Text(
+                l10n.paymentCheckoutRefundToWalletNotice,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+            ],
             SizedBox(height: tokens.spaceLarge),
             TilawaButton(
-              text: l10n.paymentCheckoutConfirm,
+              text: isFreeSession
+                  ? l10n.paymentCheckoutConfirmFree
+                  : l10n.paymentCheckoutConfirm,
               onPressed: isLoading ? null : onConfirm,
               isLoading: isLoading,
               isFullWidth: true,

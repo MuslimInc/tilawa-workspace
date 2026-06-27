@@ -50,6 +50,14 @@ class _WalletScreenState extends State<WalletScreen> {
             child: ListView(
               padding: EdgeInsets.all(tokens.spaceLarge),
               children: [
+                TilawaFeedbackStrip(
+                  icon: Icons.science_outlined,
+                  message: l10n.walletSandboxNotice,
+                  backgroundColor: scheme.primaryContainer,
+                  foregroundColor: scheme.onPrimaryContainer,
+                  variant: TilawaFeedbackVariant.info,
+                ),
+                SizedBox(height: tokens.spaceMedium),
                 if (wallet?.isFrozen == true)
                   Padding(
                     padding: EdgeInsets.only(bottom: tokens.spaceMedium),

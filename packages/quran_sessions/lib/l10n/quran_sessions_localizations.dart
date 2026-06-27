@@ -659,6 +659,24 @@ abstract class QuranSessionsLocalizations {
   /// **'Free'**
   String get teacherFilterFree;
 
+  /// No description provided for @teacherFilterPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get teacherFilterPaid;
+
+  /// No description provided for @teacherFilterBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget'**
+  String get teacherFilterBudget;
+
+  /// No description provided for @teacherFilterUnderPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Under {amount}'**
+  String teacherFilterUnderPrice(String amount);
+
   /// No description provided for @teacherFilterAvailableToday.
   ///
   /// In en, this message translates to:
@@ -3257,6 +3275,18 @@ abstract class QuranSessionsLocalizations {
   /// **'Confirm payment'**
   String get paymentCheckoutTitle;
 
+  /// No description provided for @paymentCheckoutFreeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm booking'**
+  String get paymentCheckoutFreeTitle;
+
+  /// No description provided for @paymentCheckoutFreeAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'This session is free — no payment required.'**
+  String get paymentCheckoutFreeAmount;
+
   /// No description provided for @paymentCheckoutAmount.
   ///
   /// In en, this message translates to:
@@ -3269,6 +3299,12 @@ abstract class QuranSessionsLocalizations {
   /// **'Session price (sandbox)'**
   String get paymentCheckoutAmountPending;
 
+  /// No description provided for @paymentCheckoutSandboxNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Sandbox mode — no real charge. Enable paid booking only via the sandbox launch flag.'**
+  String get paymentCheckoutSandboxNotice;
+
   /// No description provided for @paymentCheckoutRefundToWalletNotice.
   ///
   /// In en, this message translates to:
@@ -3280,6 +3316,30 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'Confirm payment (sandbox)'**
   String get paymentCheckoutConfirm;
+
+  /// No description provided for @paymentCheckoutConfirmFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm booking'**
+  String get paymentCheckoutConfirmFree;
+
+  /// No description provided for @bookingPriceSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session price'**
+  String get bookingPriceSummaryTitle;
+
+  /// No description provided for @bookingPricePerSessionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Charged once when you confirm (sandbox only).'**
+  String get bookingPricePerSessionHint;
+
+  /// No description provided for @walletSandboxNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Sandbox wallet — credits from refunds and test payments only. Not real money.'**
+  String get walletSandboxNotice;
 
   /// No description provided for @restrictionReasonFalseIdentity.
   ///
@@ -3568,6 +3628,12 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'Waiting for tutor approval'**
   String get bookingRequestSentSubtitle;
+
+  /// No description provided for @sessionAwaitingTutorApprovalNextSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'Your tutor will accept or decline soon. You can cancel this request until then.'**
+  String get sessionAwaitingTutorApprovalNextSteps;
 
   /// No description provided for @bookingAcceptedTitle.
   ///

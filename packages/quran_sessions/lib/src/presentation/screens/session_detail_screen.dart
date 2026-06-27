@@ -546,6 +546,37 @@ class _SessionJoinStateBanner extends StatelessWidget {
       );
     }
 
+    if (joinState == SessionJoinUiState.awaitingTutorApproval &&
+        !state.isTeacherViewer) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.bookingRequestSentTitle,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: scheme.onSurface,
+            ),
+          ),
+          SizedBox(height: Theme.of(context).tokens.spaceExtraSmall),
+          Text(
+            l10n.bookingRequestSentSubtitle,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+          SizedBox(height: Theme.of(context).tokens.spaceSmall),
+          TilawaFeedbackStrip(
+            icon: Icons.hourglass_top_rounded,
+            message: l10n.sessionAwaitingTutorApprovalNextSteps,
+            backgroundColor: scheme.primaryContainer,
+            foregroundColor: scheme.onPrimaryContainer,
+            variant: TilawaFeedbackVariant.info,
+          ),
+        ],
+      );
+    }
+
     final message = joinState.localizedMessage(l10n);
     if (joinState == SessionJoinUiState.joinAvailable) {
       return Text(

@@ -4,6 +4,8 @@ import '../../../domain/policies/session_mode_policy.dart';
 import '../../../domain/entities/quran_booking.dart';
 import '../../../domain/entities/session_booking_outcome.dart';
 import '../../../domain/entities/session_call_type.dart';
+import '../../../domain/entities/session_price.dart';
+import '../../../domain/entities/session_pricing_type.dart';
 import '../../../domain/entities/teacher_availability.dart';
 import '../../../domain/failures/quran_sessions_failure.dart';
 
@@ -35,6 +37,8 @@ final class BookingSelecting extends BookingState {
     this.selectedSlot,
     this.selectedCallType = SessionCallType.voiceCall,
     this.teacherExternalMeetingUrl,
+    this.pricingType,
+    this.sessionPrice,
   });
 
   final String teacherId;
@@ -42,6 +46,8 @@ final class BookingSelecting extends BookingState {
   final TeacherAvailability? selectedSlot;
   final SessionCallType selectedCallType;
   final String? teacherExternalMeetingUrl;
+  final SessionPricingType? pricingType;
+  final SessionPrice? sessionPrice;
 
   bool get hasExternalMeetingUrl =>
       SessionModePolicy.hasExternalMeetingUrl(teacherExternalMeetingUrl);
@@ -55,6 +61,8 @@ final class BookingSelecting extends BookingState {
     selectedSlot,
     selectedCallType,
     teacherExternalMeetingUrl,
+    pricingType,
+    sessionPrice,
   ];
 
   BookingSelecting copyWith({
@@ -62,6 +70,8 @@ final class BookingSelecting extends BookingState {
     TeacherAvailability? selectedSlot,
     SessionCallType? selectedCallType,
     String? teacherExternalMeetingUrl,
+    SessionPricingType? pricingType,
+    SessionPrice? sessionPrice,
   }) => BookingSelecting(
     teacherId: teacherId,
     availableSlots: availableSlots ?? this.availableSlots,
@@ -69,6 +79,8 @@ final class BookingSelecting extends BookingState {
     selectedCallType: selectedCallType ?? this.selectedCallType,
     teacherExternalMeetingUrl:
         teacherExternalMeetingUrl ?? this.teacherExternalMeetingUrl,
+    pricingType: pricingType ?? this.pricingType,
+    sessionPrice: sessionPrice ?? this.sessionPrice,
   );
 }
 
@@ -88,12 +100,18 @@ final class BookingSuccess extends BookingState {
 
 /// Paid booking created server-side; awaiting sandbox/PSP confirmation.
 final class BookingPaymentRequired extends BookingState {
-  const BookingPaymentRequired(this.outcome);
+  const BookingPaymentRequired(
+    this.outcome, {
+    this.pricingType,
+    this.sessionPrice,
+  });
 
   final SessionBookingOutcome outcome;
+  final SessionPricingType? pricingType;
+  final SessionPrice? sessionPrice;
 
   @override
-  List<Object?> get props => [outcome];
+  List<Object?> get props => [outcome, pricingType, sessionPrice];
 }
 
 final class BookingFailure extends BookingState {

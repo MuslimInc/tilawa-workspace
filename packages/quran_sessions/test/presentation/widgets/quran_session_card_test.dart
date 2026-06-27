@@ -73,6 +73,29 @@ void main() {
       expect(find.text('Cancel session'), findsOneWidget);
     });
 
+    testWidgets('pending tutor approval shows next-steps banner', (
+      tester,
+    ) async {
+      await pumpInApp(
+        tester,
+        QuranSessionCard(
+          session: makeSession(
+            lifecycleStatus: SessionLifecycleStatus.pendingTutorApproval,
+            startsAt: DateTime.now().add(const Duration(days: 2)),
+          ),
+          now: DateTime.now(),
+          variant: QuranSessionCardVariant.upcoming,
+          onCancel: () {},
+          onViewDetails: () {},
+        ),
+        surfaceSize: const Size(360, 800),
+      );
+
+      expect(find.text('Pending approval'), findsOneWidget);
+      expect(find.textContaining('accept or decline'), findsOneWidget);
+      expect(find.text('Join now'), findsNothing);
+    });
+
     testWidgets('compact card avoids horizontal overflow at 360dp', (
       tester,
     ) async {

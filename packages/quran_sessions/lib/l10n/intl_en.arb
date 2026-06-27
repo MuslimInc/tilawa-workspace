@@ -98,6 +98,14 @@
     "teacherNewRating": "New",
     "teacherFilterAll": "All",
     "teacherFilterFree": "Free",
+    "teacherFilterPaid": "Paid",
+    "teacherFilterBudget": "Budget",
+    "teacherFilterUnderPrice": "Under {amount}",
+    "@teacherFilterUnderPrice": {
+        "placeholders": {
+            "amount": { "type": "String" }
+        }
+    },
     "teacherFilterAvailableToday": "Available today",
     "teacherBookAction": "Book",
     "viewTeacherProfile": "View profile",
@@ -728,6 +736,8 @@
     "walletTransactionTypeExpiry": "Expired credit",
     "walletEntryAction": "Wallet",
     "paymentCheckoutTitle": "Confirm payment",
+    "paymentCheckoutFreeTitle": "Confirm booking",
+    "paymentCheckoutFreeAmount": "This session is free — no payment required.",
     "paymentCheckoutAmount": "Total: {amount}",
     "@paymentCheckoutAmount": {
         "placeholders": {
@@ -737,8 +747,13 @@
         }
     },
     "paymentCheckoutAmountPending": "Session price (sandbox)",
+    "paymentCheckoutSandboxNotice": "Sandbox mode — no real charge. Enable paid booking only via the sandbox launch flag.",
     "paymentCheckoutRefundToWalletNotice": "If you cancel or we approve a refund, the amount is added to your MeMuslim wallet as credit. Wallet credit is not automatically returned to your card.",
     "paymentCheckoutConfirm": "Confirm payment (sandbox)",
+    "paymentCheckoutConfirmFree": "Confirm booking",
+    "bookingPriceSummaryTitle": "Session price",
+    "bookingPricePerSessionHint": "Charged once when you confirm (sandbox only).",
+    "walletSandboxNotice": "Sandbox wallet — credits from refunds and test payments only. Not real money.",
     "restrictionReasonFalseIdentity": "False identity information",
     "restrictionReasonPolicyViolation": "Policy violation",
     "restrictionReasonSafetyConcern": "Safety concern",
@@ -787,6 +802,7 @@
     "sessionActionRejectBooking": "Reject booking",
     "bookingRequestSentTitle": "Booking request sent",
     "bookingRequestSentSubtitle": "Waiting for tutor approval",
+    "sessionAwaitingTutorApprovalNextSteps": "Your tutor will accept or decline soon. You can cancel this request until then.",
     "bookingAcceptedTitle": "Session accepted",
     "bookingAcceptedSubtitle": "You can join at session time",
     "bookingRejectedTitle": "Tutor declined this session",

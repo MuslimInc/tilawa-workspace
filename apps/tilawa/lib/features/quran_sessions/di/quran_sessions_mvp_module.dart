@@ -381,6 +381,7 @@ class QuranSessionsMvpModule {
           submitBooking: sl<SubmitSessionBookingUseCase>(),
           validateEligibility: sl<ValidateBookingEligibilityUseCase>(),
           getTeacherProfile: sl<GetTeacherProfileByIdUseCase>(),
+          getTeacherListing: sl<GetTeacherProfileUseCase>(),
           sessionModePolicy: sessionModePolicyFromLaunchConfig(launchConfig),
           paymentConfirmation: sl.isRegistered<SessionPaymentConfirmation>()
               ? sl<SessionPaymentConfirmation>()

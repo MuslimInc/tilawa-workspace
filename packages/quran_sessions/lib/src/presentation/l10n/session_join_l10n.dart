@@ -11,7 +11,8 @@ extension SessionJoinUiStateL10n on SessionJoinUiState {
     SessionJoinUiState.failed => l10n.sessionJoinStateFailed,
     SessionJoinUiState.ended => l10n.sessionJoinStateEnded,
     SessionJoinUiState.cancelled => l10n.sessionJoinStateCancelled,
-    SessionJoinUiState.awaitingTutorApproval => l10n.bookingRequestSentSubtitle,
+    SessionJoinUiState.awaitingTutorApproval =>
+      l10n.sessionAwaitingTutorApprovalNextSteps,
     SessionJoinUiState.rejectedByTutor => l10n.bookingRejectedSubtitle,
   };
 }

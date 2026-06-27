@@ -324,6 +324,17 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get teacherFilterFree => 'مجاني';
 
   @override
+  String get teacherFilterPaid => 'مدفوع';
+
+  @override
+  String get teacherFilterBudget => 'اقتصادي';
+
+  @override
+  String teacherFilterUnderPrice(String amount) {
+    return 'أقل من $amount';
+  }
+
+  @override
   String get teacherFilterAvailableToday => 'متاح اليوم';
 
   @override
@@ -1783,6 +1794,12 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get paymentCheckoutTitle => 'تأكيد الدفع';
 
   @override
+  String get paymentCheckoutFreeTitle => 'تأكيد الحجز';
+
+  @override
+  String get paymentCheckoutFreeAmount => 'هذه الجلسة مجانية — لا يلزم دفع.';
+
+  @override
   String paymentCheckoutAmount(String amount) {
     return 'الإجمالي: $amount';
   }
@@ -1791,11 +1808,29 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get paymentCheckoutAmountPending => 'سعر الجلسة (تجريبي)';
 
   @override
+  String get paymentCheckoutSandboxNotice =>
+      'وضع تجريبي — لا يتم خصم مبلغ حقيقي. تفعيل الحجز المدفوع عبر علم الإطلاق التجريبي فقط.';
+
+  @override
   String get paymentCheckoutRefundToWalletNotice =>
       'عند الإلغاء أو الموافقة على استرداد، يُضاف المبلغ إلى محفظة أنا مسلم كرصيد. لا يُعاد الرصيد تلقائيًا إلى بطاقتك.';
 
   @override
   String get paymentCheckoutConfirm => 'تأكيد الدفع (تجريبي)';
+
+  @override
+  String get paymentCheckoutConfirmFree => 'تأكيد الحجز';
+
+  @override
+  String get bookingPriceSummaryTitle => 'سعر الجلسة';
+
+  @override
+  String get bookingPricePerSessionHint =>
+      'يُخصم مرة واحدة عند التأكيد (تجريبي فقط).';
+
+  @override
+  String get walletSandboxNotice =>
+      'محفظة تجريبية — أرصدة من الاستردادات والمدفوعات التجريبية فقط. ليست أموالًا حقيقية.';
 
   @override
   String get restrictionReasonFalseIdentity => 'بيانات هوية مزيفة';
@@ -1940,6 +1975,10 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
 
   @override
   String get bookingRequestSentSubtitle => 'في انتظار موافقة المحفظ';
+
+  @override
+  String get sessionAwaitingTutorApprovalNextSteps =>
+      'سيقبل المحفظ أو يرفض قريبًا. يمكنك إلغاء الطلب حتى ذلك الحين.';
 
   @override
   String get bookingAcceptedTitle => 'تم قبول الحصة';
