@@ -42,7 +42,7 @@ class TilawaSheetHandleTokens {
   final double width;
   final double height;
 
-  /// Space above the drag pill; matches [TilawaDesignTokens.spaceMedium].
+  /// Space above the drag pill; matches [MeMuslimDesignTokens.spaceMedium].
   final double marginTop;
   final double marginBottom;
   final double colorOpacity;
@@ -91,7 +91,7 @@ class TilawaSheetHandleTokens {
 /// Component tokens for [TilawaCard].
 ///
 /// Border width and padding for [TilawaCard]. Corner radius comes from
-/// [TilawaRadiusFamily.card] via [TilawaDesignTokens.resolveRadius].
+/// [TilawaRadiusFamily.card] via [MeMuslimDesignTokens.resolveRadius].
 @immutable
 class TilawaCardTokens {
   const TilawaCardTokens({
@@ -419,7 +419,7 @@ class TilawaEmptyStateTokens {
 
   factory TilawaEmptyStateTokens.defaults() {
     return const TilawaEmptyStateTokens(
-      iconSize: kTilawaMinInteractiveDimension,
+      iconSize: kMeMuslimMinInteractiveDimension,
       iconOpacity: 0.56,
       titleSpacing: 24.0,
       subtitleSpacing: 8.0,

@@ -8,7 +8,7 @@ import '../foundation/tilawa_text_roles.dart';
 /// Dense list row with optional leading, subtitle, and trailing action.
 ///
 /// Prefer over [ListTile] when rows should stay near
-/// [TilawaDesignTokens.minInteractiveDimension] tall while still exposing a
+/// [MeMuslimDesignTokens.minInteractiveDimension] tall while still exposing a
 /// 48×48 trailing control.
 class TilawaCompactListRow extends StatelessWidget {
   const TilawaCompactListRow({

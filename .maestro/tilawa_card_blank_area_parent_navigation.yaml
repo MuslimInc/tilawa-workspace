@@ -1,0 +1,23 @@
+# Maestro E2E — blank TilawaCard area triggers parent navigation.
+#
+# Run:
+#   maestro test .maestro/tilawa_card_blank_area_parent_navigation.yaml \
+#     --device emulator-5554
+
+appId: com.tilawa.app
+
+---
+- launchApp:
+      clearState: false
+- runFlow:
+      file: subflows/ensure_main_shell.yaml
+- runFlow:
+      file: subflows/ensure_tilawa_card_demo.yaml
+
+- tapOn:
+      id: "tilawa_card_demo_reset"
+- assertVisible: "idle"
+
+- tapOn:
+      id: "tilawa_card_demo_blank_area"
+- assertVisible: "parent navigated"

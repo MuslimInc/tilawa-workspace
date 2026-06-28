@@ -20,7 +20,7 @@ Companion skills:
 
 1. User goal and primary path (≤3 taps from shell for daily actions)
 2. Worship-surface placement — no support/tours/popups on reader, prayer, athkar counting
-3. **Home does not duplicate bottom-nav destinations** (Prayer, Athkar, Settings, etc.)
+3. **Home:** follow [home-dashboard-patterns.md](../../.agents/skills/tilawa-apply-ui-principles/references/home-dashboard-patterns.md); preserve layout unless user requested redesign
 4. One primary CTA per viewport; calm copy (no Premium/Unlock/exclamation marketing)
 5. Tokens only — no raw hex or magic spacing in features
 6. Empty, loading, and error states for lists and customizable sections
@@ -33,7 +33,7 @@ Companion skills:
 
 Use [review-report-template.md](../../.agents/skills/tilawa-ui-ux-guard/references/review-report-template.md):
 
-- **Critical** — placement violation, duplicated shell IA, broken path, data loss, a11y blocker
+- **Critical** — placement violation, unapproved Home redesign/reorder, broken path, data loss, a11y blocker
 - **Major** — hierarchy, missing states, brand/token break, obscured FAB
 - **Minor** — spacing or tone nit
 

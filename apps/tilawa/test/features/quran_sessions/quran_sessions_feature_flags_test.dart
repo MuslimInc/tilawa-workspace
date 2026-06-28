@@ -27,6 +27,13 @@ void main() {
     check(featureConfig.walletEnabled).isFalse();
   });
 
+  test(
+    'staging distribution defaults booking on via fromEnvironment helper',
+    () {
+      check(quranSessionsStagingFlagsDefaultEnabled()).isTrue();
+    },
+  );
+
   test('paid sandbox flag enables wallet in feature config mapping', () {
     const config = AppLaunchConfig(
       quranSessionsPaidBookingSandboxEnabled: true,

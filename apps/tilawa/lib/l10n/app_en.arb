@@ -48,6 +48,14 @@
     "@homeGreeting": {
         "description": "Default Home greeting"
     },
+    "homeInspirationTitle": "Today's inspiration",
+    "@homeInspirationTitle": {
+        "description": "Title for the daily inspiration section"
+    },
+    "homeInspirationSubtitle": "An ayah and dua for your heart",
+    "@homeInspirationSubtitle": {
+        "description": "Subtitle for the daily inspiration section"
+    },
     "homeGreetingName": "Assalamu alaikum, {name}",
     "@homeGreetingName": {
         "description": "Home greeting with display name",
@@ -69,7 +77,7 @@
     "@homeHeroLocationContext": {
         "description": "Talabat-style context label above the prayer location in the Home hero header"
     },
-    "homeNextPrayerUnavailable": "Set your location to see the next prayer.",
+    "homeNextPrayerUnavailable": "Set your location to see the next prayer time.",
     "@homeNextPrayerUnavailable": {
         "description": "Home next prayer fallback when no prayer time can be calculated"
     },
@@ -77,9 +85,17 @@
     "@homePrayerTimesAction": {
         "description": "Action to open prayer times from Home"
     },
-    "homePrayerNow": "It is time now",
+    "homePrayerNow": "It's prayer time",
     "@homePrayerNow": {
-        "description": "Home countdown text when the next prayer is due now"
+        "description": "Home countdown when the next salah adhan is due now (five daily prayers only)"
+    },
+    "homeSunriseNow": "Sunrise time now",
+    "@homeSunriseNow": {
+        "description": "Home countdown when sunrise (Shurooq) is due now"
+    },
+    "homeDuhaNow": "Duha time now",
+    "@homeDuhaNow": {
+        "description": "Home countdown when Duha time is due now"
     },
     "homePrayerInMinutes": "{minutes, plural, =1{In 1 minute} other{In {minutes} minutes}}",
     "@homePrayerInMinutes": {
@@ -110,7 +126,7 @@
     "@homeExploreSubtitle": {
         "description": "Home feature category grid supporting line"
     },
-    "homeKhatmaCarouselSubtitle": "Track your reading plan",
+    "homeKhatmaCarouselSubtitle": "Progress on your khatma",
     "@homeKhatmaCarouselSubtitle": {
         "description": "Home carousel subtitle for Smart Khatma promo card"
     },
@@ -118,23 +134,23 @@
     "@homeSupportCarouselSubtitle": {
         "description": "Home carousel subtitle for Support Tilawa promo card"
     },
-    "homeHistoryCarouselSubtitle": "Pick up where you left off",
+    "homeHistoryCarouselSubtitle": "Continue where you left off",
     "@homeHistoryCarouselSubtitle": {
         "description": "Home carousel subtitle for listening history card"
     },
-    "homeFavoritesCarouselSubtitle": "Saved recitations and surahs",
+    "homeFavoritesCarouselSubtitle": "Your saved recitations",
     "@homeFavoritesCarouselSubtitle": {
         "description": "Home carousel subtitle for favorites card"
     },
-    "homeDownloadsCarouselSubtitle": "Listen offline anytime",
+    "homeDownloadsCarouselSubtitle": "Listen offline",
     "@homeDownloadsCarouselSubtitle": {
         "description": "Home carousel subtitle for downloads card"
     },
-    "homeSessionsTitle": "Learn Quran recitation",
+    "homeSessionsTitle": "Learn recitation",
     "@homeSessionsTitle": {
         "description": "Home card title for Quran teaching sessions"
     },
-    "homeSessionsSubtitle": "Book sessions with certified teachers",
+    "homeSessionsSubtitle": "One-on-one sessions with a certified hafiz",
     "@homeSessionsSubtitle": {
         "description": "Home card subtitle for Quran teaching sessions"
     },
@@ -170,7 +186,7 @@
     "@homeYoursTitle": {
         "description": "Home section title for personalized resume content"
     },
-    "homeListeningResumeSubtitle": "Continue · {reciter} · {surah}",
+    "homeListeningResumeSubtitle": "{reciter} · {surah}",
     "@homeListeningResumeSubtitle": {
         "description": "Home continue listening row subtitle",
         "placeholders": {
@@ -230,6 +246,14 @@
     "homeDailyPracticeSubtitle": "Your pinned adhkar and supplications",
     "@homeDailyPracticeSubtitle": {
         "description": "Home Daily Practice section supporting line"
+    },
+    "homeDailyHabitTitle": "Daily habit",
+    "@homeDailyHabitTitle": {
+        "description": "Home section title for the primary morning/evening athkar card"
+    },
+    "homeDailyHabitSubtitle": "Start or continue your routine",
+    "@homeDailyHabitSubtitle": {
+        "description": "Home daily habit section supporting line"
     },
     "homeAthkarRitualsTitle": "Quick athkar",
     "@homeAthkarRitualsTitle": {
@@ -304,11 +328,51 @@
     "@homeQuickQuran": {
         "description": "Home quick action for Quran reader"
     },
+    "homeQuickActionsTitle": "Quick Actions",
+    "@homeQuickActionsTitle": {
+        "description": "Home section title for the high-frequency 2x2 action grid"
+    },
+    "homeMainActionsTitle": "Your daily worship",
+    "@homeMainActionsTitle": {
+        "description": "Home section title for the two primary daily action cards"
+    },
+    "homeQuickToolsTitle": "Quick tools",
+    "@homeQuickToolsTitle": {
+        "description": "Home section title for the compact secondary tools row"
+    },
+    "homeFeaturedTutorTitle": "Learn Quran",
+    "@homeFeaturedTutorTitle": {
+        "description": "Title on the featured Learn Quran with Tutor card"
+    },
+    "homeFeaturedTutorSubtitle": "Choose your hafiz to master your recitation",
+    "@homeFeaturedTutorSubtitle": {
+        "description": "Subtitle on the featured Learn Quran with Tutor card"
+    },
+    "homeFeaturedTutorCta": "Start learning",
+    "@homeFeaturedTutorCta": {
+        "description": "Call to action button on the featured Learn Quran with Tutor card"
+    },
+    "homeFeaturedTutorMySessions": "My sessions",
+    "@homeFeaturedTutorMySessions": {
+        "description": "Secondary link on featured tutor card to open booked sessions"
+    },
+    "homeQuickQuranReader": "Mushaf",
+    "@homeQuickQuranReader": {
+        "description": "Home quick action tile label for opening the Mushaf reader"
+    },
+    "homeQuickQuranReaderSubtitle": "Read the Quran with reflection",
+    "@homeQuickQuranReaderSubtitle": {
+        "description": "Subtitle for the Quran Reader primary action card"
+    },
+    "homeLearnQuranWithTutor": "Learn Quran with your hafiz",
+    "@homeLearnQuranWithTutor": {
+        "description": "Home quick action for Quran teaching sessions with a hafiz"
+    },
     "homeQuickReciters": "Reciters",
     "@homeQuickReciters": {
         "description": "Home quick action for reciters catalog"
     },
-    "homeQuickRecitersSubtitle": "Browse recitations",
+    "homeQuickRecitersSubtitle": "Listen to curated recitations",
     "@homeQuickRecitersSubtitle": {
         "description": "Home More row subtitle for reciters"
     },
@@ -320,7 +384,7 @@
     "@homeQuickQibla": {
         "description": "Home quick action for qibla"
     },
-    "homeQuickQiblaSubtitle": "Find prayer direction",
+    "homeQuickQiblaSubtitle": "Find the Qibla with ease",
     "@homeQuickQiblaSubtitle": {
         "description": "Home More row subtitle for qibla"
     },
@@ -328,17 +392,21 @@
     "@homeQuickSettingsSubtitle": {
         "description": "Home More row subtitle for settings"
     },
-    "homeQuickTasbeeh": "Tasbeeh",
+    "homeQuickTasbeeh": "Tasbih",
     "@homeQuickTasbeeh": {
         "description": "Home More row title for tasbeeh counter"
     },
-    "homeQuickTasbeehSubtitle": "Count dhikr with one tap",
+    "homeQuickTasbeehSubtitle": "Dhikr at your fingertips",
     "@homeQuickTasbeehSubtitle": {
         "description": "Home More row subtitle for tasbeeh counter"
     },
     "homeQuickAthkar": "Athkar",
     "@homeQuickAthkar": {
         "description": "Home quick action for athkar"
+    },
+    "homeQuickAthkarSubtitle": "Your daily athkar",
+    "@homeQuickAthkarSubtitle": {
+        "description": "Subtitle for the Athkar primary action card"
     },
     "homeQuickSettings": "Settings",
     "@homeQuickSettings": {
@@ -406,7 +474,7 @@
     "@homeDailyInspirationSubtitle": {
         "description": "Home section subtitle under daily inspiration title"
     },
-    "homeDailyAyahLabel": "Daily ayah",
+    "homeDailyAyahLabel": "Ayah of the day",
     "@homeDailyAyahLabel": {
         "description": "Home daily ayah card label"
     },
@@ -418,7 +486,7 @@
     "@homeDailyAyahReference": {
         "description": "Home daily ayah reference"
     },
-    "homeDailyDuaLabel": "Daily dua",
+    "homeDailyDuaLabel": "Dua of the day",
     "@homeDailyDuaLabel": {
         "description": "Home daily dua card label"
     },
@@ -812,7 +880,7 @@
     "@noSurahsMatchSearch": {
         "description": "No surahs match search message"
     },
-    "continueListening": "Continue Listening",
+    "continueListening": "Continue listening",
     "@continueListening": {
         "description": "Continue listening section title"
     },
@@ -1443,7 +1511,7 @@
     "@signIn": {
         "description": "Sign in button text"
     },
-    "welcomeToApp": "Welcome to Tilawa",
+    "welcomeToApp": "Welcome to MeMuslim",
     "@welcomeToApp": {
         "description": "Welcome message on login screen"
     },
@@ -1753,7 +1821,7 @@
     "@deleteAccount": {
         "description": "Delete account action in settings"
     },
-    "deleteAccountConfirmation": "This permanently deletes your Tilawa account and synced profile data. Purchases verified with Google Play may be kept in anonymized records for fraud prevention. This cannot be undone.",
+    "deleteAccountConfirmation": "This permanently deletes your MeMuslim account and synced profile data. Purchases verified with Google Play may be kept in anonymized records for fraud prevention. This cannot be undone.",
     "@deleteAccountConfirmation": {
         "description": "Confirmation message before deleting the app account"
     },
@@ -3226,7 +3294,7 @@
     "@sharing": {
         "description": "Status message while sharing"
     },
-    "sharedViaTilawa": "Shared via Tilawa",
+    "sharedViaTilawa": "Shared via MeMuslim",
     "@sharedViaTilawa": {
         "description": "Branding text on shared content"
     },
@@ -3548,7 +3616,7 @@
     "@batteryOptimizationExemptionRequired": {
         "description": "Banner shown when the app is not whitelisted from Doze / battery optimization"
     },
-    "oemAutostartHint": "On this device, also enable Autostart for Tilawa in your phone's settings so reminders are not stopped in the background.",
+    "oemAutostartHint": "On this device, also enable Autostart for MeMuslim in your phone's settings so reminders are not stopped in the background.",
     "@oemAutostartHint": {
         "description": "Informational banner shown on aggressive OEM ROMs (Xiaomi/Oppo/Huawei/Vivo/etc.) where the autostart whitelist must be set manually"
     },
@@ -3580,7 +3648,7 @@
     "@prayerAlertsPermissionBatteryTitle": {
         "description": "Title for battery optimization exemption setup screen"
     },
-    "prayerAlertsPermissionBatteryBody": "Exclude Tilawa from battery optimization so prayer reminders are not delayed overnight.",
+    "prayerAlertsPermissionBatteryBody": "Exclude MeMuslim from battery optimization so prayer reminders are not delayed overnight.",
     "@prayerAlertsPermissionBatteryBody": {
         "description": "Body for battery optimization setup screen"
     },
@@ -3588,7 +3656,7 @@
     "@prayerAlertsPermissionOemAutostartTitle": {
         "description": "Title for OEM autostart guidance step"
     },
-    "prayerAlertsPermissionOemAutostartBody": "On this device, enable Autostart for Tilawa in your phone settings so reminders are not stopped in the background.",
+    "prayerAlertsPermissionOemAutostartBody": "On this device, enable Autostart for MeMuslim in your phone settings so reminders are not stopped in the background.",
     "@prayerAlertsPermissionOemAutostartBody": {
         "description": "Body for OEM autostart guidance step"
     },
@@ -3769,15 +3837,19 @@
     "@errorInvalidNotificationPayload": {
         "description": "Error message when notification data is corrupted or invalid"
     },
-    "moreOptions": "More options",
+    "moreOptions": "More",
     "@moreOptions": {
         "description": "Label for the more-options overflow menu button"
     },
-    "supportTilawa": "Support Tilawa",
+    "homeMoreOptionsSubtitle": "Your library and more options",
+    "@homeMoreOptionsSubtitle": {
+        "description": "Subtitle for the More section on the home dashboard"
+    },
+    "supportTilawa": "Support MeMuslim",
     "@supportTilawa": {
         "description": "Support Tilawa screen and settings entry title"
     },
-    "rateTilawa": "Rate Tilawa",
+    "rateTilawa": "Rate MeMuslim",
     "@rateTilawa": {
         "description": "Settings row to open the in-app review dialog"
     },
@@ -3785,7 +3857,7 @@
     "@rateTilawaSubtitle": {
         "description": "Optional subtitle under the rate Tilawa settings row"
     },
-    "shareTilawa": "Share Tilawa",
+    "shareTilawa": "Share MeMuslim",
     "@shareTilawa": {
         "description": "Settings row to share the app with others"
     },
@@ -3805,15 +3877,15 @@
     "@shareTilawaFailed": {
         "description": "Error shown when sharing Tilawa from settings fails"
     },
-    "supportIntroLine": "Your contribution helps keep Tilawa going.",
+    "supportIntroLine": "Your contribution helps keep MeMuslim going.",
     "@supportIntroLine": {
         "description": "Support screen single-line intro under app bar"
     },
-    "supportTilawaSubtitle": "Your contribution helps keep Tilawa going.",
+    "supportTilawaSubtitle": "Your contribution helps keep MeMuslim going.",
     "@supportTilawaSubtitle": {
         "description": "Legacy alias; prefer supportIntroLine"
     },
-    "supportMissionBody": "Your contribution helps keep Tilawa going.",
+    "supportMissionBody": "Your contribution helps keep MeMuslim going.",
     "@supportMissionBody": {
         "description": "Legacy alias; unused on support screen"
     },
@@ -3865,7 +3937,7 @@
     "@supportConfirmationTitle": {
         "description": "Support purchase confirmation sheet title"
     },
-    "supportConfirmationBody": "Payment via Google Play. Tilawa does not store your card details.",
+    "supportConfirmationBody": "Payment via Google Play. MeMuslim does not store your card details.",
     "@supportConfirmationBody": {
         "description": "Support purchase confirmation sheet body"
     },
@@ -3965,7 +4037,7 @@
     "@supportSelectTier": {
         "description": "Prompt when no tier selected"
     },
-    "supportSettingsGroupTitle": "Support Tilawa",
+    "supportSettingsGroupTitle": "Support MeMuslim",
     "@supportSettingsGroupTitle": {
         "description": "Settings group title for support entry"
     },
@@ -4009,7 +4081,7 @@
     "@appReviewPlatformUnsupported": {
         "description": "In-app review not supported (e.g. web)"
     },
-    "a11ySplashLoading": "Tilawa, loading",
+    "a11ySplashLoading": "MeMuslim, loading",
     "@a11ySplashLoading": {
         "description": "Screen-reader label announced while the splash loading screen is visible"
     },
@@ -4089,15 +4161,84 @@
     "@tourDebugResetDone": {
         "description": "Confirmation shown after the debug reset clears tour progress"
     },
+    "notificationDebugLabTitle": "Notification Debug Lab",
+    "@notificationDebugLabTitle": {
+        "description": "Developer settings entry and screen title for notification routing tests"
+    },
+    "notificationDebugSectionLocal": "Local notification tests",
+    "notificationDebugSectionLaunch": "Launch simulation",
+    "notificationDebugSectionDedup": "Dedup state inspector",
+    "notificationDebugSectionChecklist": "Manual validation checklist",
+    "notificationDebugSectionLogs": "Debug logs",
+    "notificationDebugActionId": "Notification id",
+    "notificationDebugActionPayload": "Payload",
+    "notificationDebugActionRoute": "Expected route",
+    "notificationDebugActionBehavior": "Expected behavior",
+    "notificationDebugActionMechanism": "Mechanism",
+    "notificationDebugRefreshState": "Refresh state",
+    "notificationDebugClearDedup": "Clear notification dedup",
+    "notificationDebugClearAthkarDedup": "Clear Athkar warm dedup",
+    "notificationDebugClearAll": "Clear all debug state",
+    "notificationDebugClearLogs": "Clear logs",
+    "notificationDebugConfirmSchedule": "Schedule another debug notification?",
+    "notificationDebugMechanismReal": "Real local notification",
+    "notificationDebugMechanismDispatcher": "Dispatcher simulation",
+    "notificationDebugMechanismBootstrap": "Bootstrap launch probe",
+    "notificationDebugMechanismDedup": "Dedup persist only",
+    "notificationDebugMechanismClearPid": "Clear pid scope",
+    "notificationDebugBehaviorScheduleAthkar": "Shows a debug Athkar notification after a short delay",
+    "notificationDebugBehaviorShowNow": "Posts a debug notification immediately",
+    "notificationDebugBehaviorNativePayloadOnly": "Simulates native prayer tap with payload only (no id)",
+    "notificationDebugBehaviorInvalidPayload": "Should not navigate to Athkar",
+    "notificationDebugBehaviorEmptyPayload": "Should not navigate (empty payload)",
+    "notificationDebugBehaviorPayloadOnlyNoId": "Routes via payload signature only",
+    "notificationDebugBehaviorDedupSameSig": "First tap navigates; same pid + signature replays suppressed",
+    "notificationDebugBehaviorFreshDifferentPayload": "Treated as fresh when payload signature changes",
+    "notificationDebugBehaviorSharedPayloadSig": "Same payload signature dedups even if id differs",
+    "notificationDebugBehaviorSimulateTap": "Routes through production dispatcher / bootstrap paths",
+    "notificationDebugBehaviorInvalidLaunch": "Invalid payload must not set Athkar cold-start route",
+    "notificationDebugBehaviorMarkProcessed": "Persists dedup without navigation",
+    "notificationDebugBehaviorClearPidScope": "Clears pid key to simulate fresh-process dedup scope",
+    "notificationDebugFieldCurrentPid": "Current process id",
+    "notificationDebugFieldStoredPid": "Stored pid (_last_notif_pid)",
+    "notificationDebugFieldStoredId": "Stored id (_last_notif_id)",
+    "notificationDebugFieldStoredSig": "Stored signature (_last_notif_payload_sig)",
+    "notificationDebugFieldLastProcessedId": "AppRouter.lastProcessedNotificationId",
+    "notificationDebugFieldPendingRoute": "pendingColdStartLocation",
+    "notificationDebugFieldPendingExtra": "pendingColdStartExtra",
+    "notificationDebugFieldAthkarPayload": "last_handled_notification_payload",
+    "notificationDebugFieldAthkarTimestamp": "last_handled_notification_timestamp",
+    "notificationDebugFieldPreviewSig": "Preview signature",
+    "notificationDebugFieldProcessedPreview": "Preview is processed",
+    "notificationDebugChecklistAthkarTitle": "A. Athkar notification",
+    "notificationDebugChecklistAthkarTap": "Tap Athkar notification → opens Athkar once",
+    "notificationDebugChecklistAthkarRestart": "Hot restart → must not open Athkar again",
+    "notificationDebugChecklistPrayerTitle": "B. Prayer payload-only notification",
+    "notificationDebugChecklistPrayerTap": "Tap Prayer notification → opens prayer route once",
+    "notificationDebugChecklistPrayerRestart": "Hot restart → must not replay",
+    "notificationDebugChecklistInvalidTitle": "C. Invalid payload",
+    "notificationDebugChecklistInvalidBody": "Invalid payload → must not fallback to Athkar",
+    "notificationDebugChecklistSettingsTitle": "D. Settings payload",
+    "notificationDebugChecklistSettingsBody": "Settings payload → opens Settings, not Athkar",
+    "notificationDebugChecklistSameSigTitle": "E. Same id + same payload",
+    "notificationDebugChecklistSameSigTap": "First tap → navigate once",
+    "notificationDebugChecklistSameSigRestart": "Hot restart / same process → suppressed",
+    "notificationDebugChecklistDiffPayloadTitle": "F. Same id + different payload",
+    "notificationDebugChecklistDiffPayloadBody": "Treated as fresh launch",
+    "notificationDebugChecklistDiffIdTitle": "G. Different id + same payload",
+    "notificationDebugChecklistDiffIdBody": "Payload signature wins → second tap suppressed in same pid",
+    "notificationDebugChecklistKillTitle": "H. Full process kill",
+    "notificationDebugChecklistKillSteps": "Kill app from recents → tap fresh notification → cold start navigation should work",
+    "notificationDebugLogsEmpty": "No debug events yet",
     "inAppUpdateFlexibleRestartMessage": "Update downloaded. Restart when you are ready to install it.",
     "@inAppUpdateFlexibleRestartMessage": {
         "description": "Snackbar message when a flexible in-app update finished downloading"
     },
-    "inAppUpdateOptionalMessage": "A new version of Tilawa is available.",
+    "inAppUpdateOptionalMessage": "A new version of MeMuslim is available.",
     "@inAppUpdateOptionalMessage": {
         "description": "Snackbar message when an optional app update is available"
     },
-    "inAppUpdateRequiredMessage": "An update is required to continue using Tilawa.",
+    "inAppUpdateRequiredMessage": "An update is required to continue using MeMuslim.",
     "@inAppUpdateRequiredMessage": {
         "description": "Snackbar message when a forced update must go through the Play Store"
     },
@@ -4186,7 +4327,7 @@
     "@authSignedInElsewhereTitle": {
         "description": "Title when another device took over the active session"
     },
-    "authSignedInElsewhereBody": "Tilawa allows one active device per account for Quran Sessions security. Your account was opened elsewhere — sign in again on this device to continue.",
+    "authSignedInElsewhereBody": "MeMuslim allows one active device per account for Quran Sessions security. Your account was opened elsewhere — sign in again on this device to continue.",
     "@authSignedInElsewhereBody": {
         "description": "Body when another device took over the active session"
     },

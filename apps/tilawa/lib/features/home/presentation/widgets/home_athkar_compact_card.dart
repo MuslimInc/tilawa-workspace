@@ -86,12 +86,14 @@ class _HomeAthkarCompactRow extends StatelessWidget {
       button: true,
       label: title,
       value: statusText,
-      child: InkWell(
+      child: TilawaInteractiveSurface(
+        button: false,
         onTap: () => AthkarDetailsRoute(
           categoryId: row.category.id,
           categoryName: title,
           source: 'home_compact',
         ).push(context),
+        stateLayerColor: colorScheme.primary,
         child: Padding(
           padding: EdgeInsets.symmetric(
             horizontal: tokens.spaceMedium,

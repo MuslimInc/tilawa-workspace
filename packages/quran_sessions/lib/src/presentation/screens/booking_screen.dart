@@ -6,39 +6,55 @@ import 'package:quran_sessions/core/l10n_extensions.dart';
 import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../../domain/entities/session_lifecycle_status.dart';
 import '../../domain/entities/quran_booking.dart';
 import '../../domain/entities/session_call_provider_kind.dart';
 import '../../domain/entities/session_call_type.dart';
 import '../../domain/failures/quran_sessions_failure.dart';
+import '../../domain/policies/quran_tutor_booking_mode.dart';
 import '../../domain/policies/session_mode_policy.dart';
 import '../blocs/booking/booking_bloc.dart';
 import '../blocs/booking/booking_event.dart';
 import '../blocs/booking/booking_state.dart';
+import '../config/quran_sessions_analytics_callbacks.dart';
 import '../failure_ui/quran_sessions_failure_ui.dart';
 import '../widgets/availability_slot_picker.dart';
+import '../widgets/paid_session_notice.dart';
 import '../widgets/payment_checkout_sheet.dart';
+import '../widgets/quran_sessions_scaffold.dart';
+import '../../domain/entities/session_price.dart';
+import '../../domain/entities/session_pricing_type.dart';
+import '../../utils/price_formatter.dart';
 
 class BookingScreen extends StatefulWidget {
   const BookingScreen({
     super.key,
     required this.teacherId,
     required this.studentId,
+    this.analytics = const QuranSessionsAnalyticsCallbacks(),
     this.preSelectedSlotId,
     this.sessionModePolicy = SessionModePolicy.freeBeta,
+    this.bookingModeHint = QuranTutorBookingMode.autoConfirm,
     this.voiceVideoProviderHint,
     this.onBookingSuccess,
     this.onCompleteProfile,
     this.onGuardianApprovalRequested,
+    this.onGuardianDashboardRequested,
   });
 
   final String teacherId;
   final String studentId;
+  final QuranSessionsAnalyticsCallbacks analytics;
   final String? preSelectedSlotId;
   final SessionModePolicy sessionModePolicy;
+  final QuranTutorBookingMode bookingModeHint;
   final SessionCallProviderKind? voiceVideoProviderHint;
 
   /// Host navigates to guardian approval; retry eligibility on return.
   final Future<bool> Function()? onGuardianApprovalRequested;
+
+  /// Host opens light guardian hub (pending approvals overview).
+  final VoidCallback? onGuardianDashboardRequested;
 
   /// Called after a booking is confirmed.
   /// navigation; otherwise the screen pops itself.
@@ -55,10 +71,12 @@ class BookingScreen extends StatefulWidget {
 
 class _BookingScreenState extends State<BookingScreen> {
   bool _autoSelectedSlot = false;
+  bool _loggedBookingCompleted = false;
 
   @override
   void initState() {
     super.initState();
+    widget.analytics.onBookingStarted?.call(widget.teacherId);
     _dispatchOpen();
   }
 
@@ -90,9 +108,12 @@ class _BookingScreenState extends State<BookingScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final tokens = theme.tokens;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.bookSessionTitle)),
+    return QuranSessionsScaffold(
+      title: l10n.bookSessionTitle,
       bottomNavigationBar: BlocBuilder<BookingBloc, BookingState>(
         buildWhen: (previous, current) =>
             previous is BookingSelecting != current is BookingSelecting ||
@@ -105,7 +126,9 @@ class _BookingScreenState extends State<BookingScreen> {
           }
           return TilawaBottomActionArea(
             child: TilawaButton(
-              text: l10n.confirmBooking,
+              text: widget.bookingModeHint.requiresTutorApproval
+                  ? l10n.sendBookingRequest
+                  : l10n.confirmBooking,
               onPressed: state.canSubmit ? () => _submit(context) : null,
               isFullWidth: true,
               size: TilawaButtonSize.large,
@@ -129,9 +152,25 @@ class _BookingScreenState extends State<BookingScreen> {
           }
 
           if (state is BookingSuccess) {
+            final booking = state.booking;
+            if (!_loggedBookingCompleted) {
+              _loggedBookingCompleted = true;
+              widget.analytics.onBookingCompleted?.call(
+                teacherId: booking.teacherId,
+                bookingId: booking.id,
+                isPaid: booking.pricingType != SessionPricingType.free,
+                pricingType: booking.pricingType.name,
+                callType: booking.requestedCallType.name,
+              );
+            }
+            final isPending =
+                booking.effectiveLifecycleStatus ==
+                SessionLifecycleStatus.pendingTutorApproval;
             TilawaFeedback.showToast(
               context,
-              message: l10n.bookingConfirmed,
+              message: isPending
+                  ? '${l10n.bookingUnderReviewTitle}\n${l10n.bookingUnderReviewPaymentHint}'
+                  : l10n.bookingConfirmed,
               variant: TilawaFeedbackVariant.success,
             );
             if (widget.onBookingSuccess != null) {
@@ -208,6 +247,7 @@ class _BookingScreenState extends State<BookingScreen> {
                     }
                   }
                 : null,
+            onGuardianDashboard: widget.onGuardianDashboardRequested,
             onRetry: _retryEligibility,
           ),
           BookingSuccess() => const SizedBox.shrink(),
@@ -216,47 +256,74 @@ class _BookingScreenState extends State<BookingScreen> {
             :final selectedSlot,
             :final selectedCallType,
             :final teacherExternalMeetingUrl,
+            :final pricingType,
+            :final sessionPrice,
+            :final manualPaymentPrice,
           ) =>
             Padding(
-              padding: EdgeInsets.all(Theme.of(context).tokens.spaceLarge),
+              padding: EdgeInsets.all(tokens.spaceMedium),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  if (manualPaymentPrice != null)
+                    Padding(
+                      padding: EdgeInsets.only(bottom: tokens.spaceSmall),
+                      child: PaidSessionNotice(price: manualPaymentPrice),
+                    )
+                  else if (pricingType != null)
+                    Padding(
+                      padding: EdgeInsets.only(bottom: tokens.spaceSmall),
+                      child: _BookingPriceSummary(
+                        pricingType: pricingType,
+                        sessionPrice: sessionPrice,
+                      ),
+                    ),
                   Text(
                     l10n.selectSlot,
-                    style: Theme.of(context).textTheme.titleMedium,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: scheme.onSurface,
+                    ),
                   ),
-                  SizedBox(height: Theme.of(context).tokens.spaceMedium),
+                  SizedBox(height: tokens.spaceSmall),
                   Expanded(
                     child: SingleChildScrollView(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          AvailabilitySlotPicker(
-                            slots: availableSlots,
-                            selectedSlotId: selectedSlot?.slotId,
-                            initialSlotId: widget.preSelectedSlotId,
-                            onSlotSelected: (slot) => context
-                                .read<BookingBloc>()
-                                .add(SlotSelected(slot)),
+                          TilawaCard(
+                            padding: EdgeInsets.all(tokens.spaceSmall),
+                            child: AvailabilitySlotPicker(
+                              slots: availableSlots,
+                              selectedSlotId: selectedSlot?.slotId,
+                              initialSlotId: widget.preSelectedSlotId,
+                              onSlotSelected: (slot) => context
+                                  .read<BookingBloc>()
+                                  .add(SlotSelected(slot)),
+                            ),
                           ),
-                          SizedBox(
-                            height: Theme.of(context).tokens.spaceExtraLarge,
-                          ),
+                          SizedBox(height: tokens.spaceSmall),
                           Text(
                             l10n.sessionType,
-                            style: Theme.of(context).textTheme.titleMedium,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: scheme.onSurface,
+                            ),
                           ),
-                          SizedBox(height: Theme.of(context).tokens.spaceSmall),
-                          _CallTypePicker(
-                            hostPolicy: widget.sessionModePolicy,
-                            teacherExternalMeetingUrl:
-                                teacherExternalMeetingUrl,
-                            selected: selectedCallType,
-                            voiceVideoProviderHint:
-                                widget.voiceVideoProviderHint,
-                            onChanged: (ct) => context.read<BookingBloc>().add(
-                              CallTypeSelected(ct),
+                          SizedBox(height: tokens.spaceExtraSmall),
+                          TilawaCard(
+                            padding: EdgeInsets.all(tokens.spaceSmall),
+                            child: _CallTypePicker(
+                              hostPolicy: widget.sessionModePolicy,
+                              teacherExternalMeetingUrl:
+                                  teacherExternalMeetingUrl,
+                              selected: selectedCallType,
+                              voiceVideoProviderHint:
+                                  widget.voiceVideoProviderHint,
+                              onChanged: (ct) =>
+                                  context.read<BookingBloc>().add(
+                                    CallTypeSelected(ct),
+                                  ),
                             ),
                           ),
                         ],
@@ -292,10 +359,19 @@ class _BookingScreenState extends State<BookingScreen> {
   ) async {
     final l10n = context.quranSessionsL10n;
     final bloc = context.read<BookingBloc>();
+    final pricingType =
+        state.pricingType ?? state.outcome.aggregate.pricingType;
+    final isFree = pricingType == SessionPricingType.free;
+    final amountLabel = isFree
+        ? l10n.priceFree
+        : state.sessionPrice != null
+        ? PriceFormatter.format(state.sessionPrice!, l10n)
+        : l10n.paymentCheckoutAmountPending;
 
     await PaymentCheckoutSheet.show(
       context,
-      amountLabel: l10n.paymentCheckoutAmountPending,
+      amountLabel: amountLabel,
+      isFreeSession: isFree,
       onConfirm: () async {
         bloc.add(BookingConfirmPayment(state.outcome));
         final next = await bloc.stream.firstWhere(
@@ -316,12 +392,69 @@ class _BookingScreenState extends State<BookingScreen> {
 
 // ── Eligibility blocked view ──────────────────────────────────────────────────
 
+class _BookingPriceSummary extends StatelessWidget {
+  const _BookingPriceSummary({
+    required this.pricingType,
+    required this.sessionPrice,
+  });
+
+  final SessionPricingType pricingType;
+  final SessionPrice? sessionPrice;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final tokens = theme.tokens;
+    final isFree = pricingType == SessionPricingType.free;
+    final priceLabel = PriceFormatter.formatOrFree(
+      l10n: l10n,
+      pricingType: pricingType,
+      price: sessionPrice,
+    );
+
+    return TilawaCard(
+      padding: EdgeInsets.all(tokens.spaceMedium),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.bookingPriceSummaryTitle,
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+          SizedBox(height: tokens.spaceExtraSmall),
+          Text(
+            priceLabel.isEmpty ? l10n.paymentCheckoutAmountPending : priceLabel,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: isFree ? scheme.primary : scheme.onSurface,
+            ),
+          ),
+          if (!isFree) ...[
+            SizedBox(height: tokens.spaceExtraSmall),
+            Text(
+              l10n.bookingPricePerSessionHint,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
 class _EligibilityBlockedView extends StatelessWidget {
   const _EligibilityBlockedView({
     required this.failure,
     required this.onRetry,
     this.onCompleteProfile,
     this.onGuardianApproval,
+    this.onGuardianDashboard,
     this.studentId,
   });
 
@@ -329,13 +462,15 @@ class _EligibilityBlockedView extends StatelessWidget {
   final VoidCallback onRetry;
   final VoidCallback? onCompleteProfile;
   final VoidCallback? onGuardianApproval;
+  final VoidCallback? onGuardianDashboard;
   final String? studentId;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
-    final scheme = Theme.of(context).colorScheme;
-    final tokens = Theme.of(context).tokens;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final tokens = theme.tokens;
     final isProfileIncomplete = failure is ProfileIncompleteFailure;
     final isBlocked = failure is AccountBlockedFailure;
     final needsGuardianApproval = failure is GuardianApprovalRequiredFailure;
@@ -363,7 +498,10 @@ class _EligibilityBlockedView extends StatelessWidget {
           SizedBox(height: tokens.spaceLarge + tokens.spaceSmall),
           Text(
             failure.toLocalizedMessage(context),
-            style: Theme.of(context).textTheme.titleMedium,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: scheme.onSurface,
+            ),
             textAlign: TextAlign.center,
           ),
           SizedBox(height: tokens.spaceExtraLarge),
@@ -375,15 +513,25 @@ class _EligibilityBlockedView extends StatelessWidget {
               isFullWidth: true,
               size: TilawaButtonSize.large,
             )
-          else if (needsGuardianApproval && onGuardianApproval != null)
-            TilawaButton(
-              text: l10n.guardianApprovalSetupAction,
-              leadingIcon: const Icon(Icons.family_restroom_outlined),
-              onPressed: onGuardianApproval,
-              isFullWidth: true,
-              size: TilawaButtonSize.large,
-            )
-          else if (!isBlocked) ...[
+          else if (needsGuardianApproval) ...[
+            if (onGuardianApproval != null)
+              TilawaButton(
+                text: l10n.guardianApprovalSetupAction,
+                leadingIcon: const Icon(Icons.family_restroom_outlined),
+                onPressed: onGuardianApproval,
+                isFullWidth: true,
+                size: TilawaButtonSize.large,
+              ),
+            if (onGuardianDashboard != null) ...[
+              SizedBox(height: tokens.spaceSmall),
+              TilawaButton(
+                text: l10n.guardianDashboardOpenAction,
+                variant: TilawaButtonVariant.secondary,
+                onPressed: onGuardianDashboard,
+                isFullWidth: true,
+              ),
+            ],
+          ] else if (!isBlocked) ...[
             TilawaButton(
               text: l10n.retry,
               onPressed: onRetry,
@@ -423,8 +571,9 @@ class _CallTypePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
-    final tokens = Theme.of(context).tokens;
-    final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final tokens = theme.tokens;
     final policy = _effectivePolicy;
     final externalMissing =
         hostPolicy.isEnabled(SessionCallType.externalMeeting) &&
@@ -479,7 +628,10 @@ class _CallTypePicker extends StatelessWidget {
     if (enabledSegments.isEmpty) {
       return Text(
         l10n.unsupportedSessionMode,
-        style: Theme.of(context).textTheme.bodyMedium,
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: scheme.onSurfaceVariant,
+          height: 1.3,
+        ),
       );
     }
 
@@ -496,8 +648,9 @@ class _CallTypePicker extends StatelessWidget {
             padding: EdgeInsets.only(top: tokens.spaceSmall),
             child: Text(
               note,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              style: theme.textTheme.bodySmall?.copyWith(
                 color: scheme.onSurfaceVariant,
+                height: 1.3,
               ),
             ),
           ),

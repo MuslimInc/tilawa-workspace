@@ -21,7 +21,7 @@ class SurahIndexTile extends StatelessWidget {
     final QuranReaderTheme readerTheme = QuranReaderTheme.of(context);
     final SurahIndexTheme indexTheme = SurahIndexTheme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
 
     final String arabicName = getSurahNameArabic(surahNumber);
     final String englishName = getSurahName(surahNumber);

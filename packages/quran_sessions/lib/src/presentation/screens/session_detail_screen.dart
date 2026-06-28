@@ -1,24 +1,37 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../session_join/session_join_ui_state.dart';
+import '../l10n/session_join_l10n.dart';
 import '../l10n/session_lifecycle_l10n.dart';
+import '../utils/session_revision_practice.dart';
 import '../widgets/pending_reschedule_banner.dart';
+import '../widgets/session_revision_practice_card.dart';
 
 class SessionDetailScreen extends StatefulWidget {
   const SessionDetailScreen({
     super.key,
     required this.bookingId,
+    this.analytics = const QuranSessionsAnalyticsCallbacks(),
     this.createCallControlGateway,
     this.createCallTelemetry,
     this.buildCallSurface,
+    this.onPracticeRevisionRequested,
   });
 
   final String bookingId;
+  final QuranSessionsAnalyticsCallbacks analytics;
   final SessionCallControlGatewayFactory? createCallControlGateway;
   final CallTelemetryCoordinatorFactory? createCallTelemetry;
   final InAppCallSurfaceBuilder? buildCallSurface;
+
+  /// Host opens Tilawa Quran reader for [surahNumber] (optional [ayahNumber]).
+  final void Function({required int surahNumber, int? ayahNumber})?
+  onPracticeRevisionRequested;
 
   @override
   State<SessionDetailScreen> createState() => _SessionDetailScreenState();
@@ -26,6 +39,10 @@ class SessionDetailScreen extends StatefulWidget {
 
 class _SessionDetailScreenState extends State<SessionDetailScreen>
     with WidgetsBindingObserver {
+  /// Set when tutor cancels so parent list can refresh on pop.
+  bool _notifyParentOnPop = false;
+  bool _didAutoPromptReview = false;
+
   @override
   void initState() {
     super.initState();
@@ -63,266 +80,411 @@ class _SessionDetailScreenState extends State<SessionDetailScreen>
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.sessionDetailTitle)),
-      bottomNavigationBar: BlocBuilder<SessionDetailBloc, SessionDetailState>(
-        buildWhen: (previous, current) =>
-            previous.runtimeType != current.runtimeType ||
-            (current is SessionDetailSuccess &&
-                previous is SessionDetailSuccess &&
-                (previous.canJoin != current.canJoin ||
-                    previous.canOpenDispute != current.canOpenDispute ||
-                    previous.canOpenMeetingAgain !=
-                        current.canOpenMeetingAgain ||
-                    previous.joinInProgress != current.joinInProgress)),
-        builder: (context, state) {
-          if (state is! SessionDetailSuccess) {
-            return const SizedBox.shrink();
-          }
-          return _SessionDetailFooter(state: state);
-        },
-      ),
-      body: MultiBlocListener(
-        listeners: [
-          BlocListener<SessionDetailBloc, SessionDetailState>(
-            listenWhen: (previous, current) =>
-                previous is SessionDetailSuccess &&
-                current is SessionDetailSuccess &&
-                previous.joinInProgress &&
-                !current.joinInProgress,
-            listener: (context, state) async {
-              if (state is! SessionDetailSuccess) return;
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        Navigator.of(context).pop(_notifyParentOnPop ? true : null);
+      },
+      child: QuranSessionsScaffold(
+        title: l10n.sessionDetailTitle,
+        bottomNavigationBar: BlocBuilder<SessionDetailBloc, SessionDetailState>(
+          buildWhen: (previous, current) =>
+              previous.runtimeType != current.runtimeType ||
+              (current is SessionDetailSuccess &&
+                  previous is SessionDetailSuccess &&
+                  (previous.canJoin != current.canJoin ||
+                      previous.canCancel != current.canCancel ||
+                      previous.joinUiState != current.joinUiState ||
+                      previous.cancellationInProgress !=
+                          current.cancellationInProgress ||
+                      previous.canOpenDispute != current.canOpenDispute ||
+                      previous.canOpenMeetingAgain !=
+                          current.canOpenMeetingAgain ||
+                      previous.canReview != current.canReview ||
+                      previous.joinInProgress != current.joinInProgress)),
+          builder: (context, state) {
+            if (state is! SessionDetailSuccess) {
+              return const SizedBox.shrink();
+            }
+            return _SessionDetailFooter(state: state);
+          },
+        ),
+        body: MultiBlocListener(
+          listeners: [
+            BlocListener<SessionDetailBloc, SessionDetailState>(
+              listenWhen: (previous, current) =>
+                  previous is SessionDetailSuccess &&
+                  current is SessionDetailSuccess &&
+                  previous.joinInProgress &&
+                  !current.joinInProgress,
+              listener: (context, state) async {
+                if (state is! SessionDetailSuccess) return;
 
-              if (state.joinFailure != null) {
-                TilawaFeedback.showToast(
-                  context,
-                  message: state.joinFailure!.toLocalizedMessage(context),
-                  variant: TilawaFeedbackVariant.error,
-                );
-                return;
-              }
-
-              if (!state.isExternalMeeting &&
-                  state.aggregate.sessionId != null) {
-                final sessionId = state.aggregate.sessionId!;
-                final callType = state.callType ?? SessionCallType.voiceCall;
-                final callProviderKind =
-                    state.callProviderKind ?? SessionCallProviderKind.mock;
-                await pushInAppCallShell(
-                  context,
-                  sessionId: sessionId,
-                  callType: callType,
-                  callProviderKind: callProviderKind,
-                  participantSubtitle: l10n.callTypeLabel(callType),
-                  buildCallSurface: widget.buildCallSurface,
-                  createCallControlGateway: widget.createCallControlGateway,
-                  createCallTelemetry: widget.createCallTelemetry,
-                );
-              }
-            },
-          ),
-          BlocListener<SessionDetailBloc, SessionDetailState>(
-            listenWhen: (previous, current) =>
-                current is SessionDetailSuccess &&
-                ((previous is! SessionDetailSuccess) ||
-                    previous.reportFailure != current.reportFailure ||
-                    previous.reportSubmitted != current.reportSubmitted ||
-                    previous.disputeFailure != current.disputeFailure ||
-                    previous.disputeSubmitted != current.disputeSubmitted),
-            listener: (context, state) {
-              if (state is SessionDetailSuccess &&
-                  state.reportFailure != null) {
-                TilawaFeedback.showToast(
-                  context,
-                  message: state.reportFailure!.toLocalizedMessage(context),
-                  variant: TilawaFeedbackVariant.error,
-                );
-              }
-              if (state is SessionDetailSuccess && state.reportSubmitted) {
-                TilawaFeedback.showToast(
-                  context,
-                  message: l10n.reportConcernSubmitted,
-                  variant: TilawaFeedbackVariant.success,
-                );
-                context.read<SessionDetailBloc>().add(
-                  const SessionDetailReportAcknowledged(),
-                );
-              }
-              if (state is SessionDetailSuccess &&
-                  state.disputeFailure != null) {
-                TilawaFeedback.showToast(
-                  context,
-                  message: state.disputeFailure!.toLocalizedMessage(context),
-                  variant: TilawaFeedbackVariant.error,
-                );
-              }
-              if (state is SessionDetailSuccess && state.disputeSubmitted) {
-                TilawaFeedback.showToast(
-                  context,
-                  message: l10n.openDisputeSubmitted,
-                  variant: TilawaFeedbackVariant.success,
-                );
-                context.read<SessionDetailBloc>().add(
-                  const SessionDetailDisputeAcknowledged(),
-                );
-              }
-            },
-          ),
-          BlocListener<SessionDetailBloc, SessionDetailState>(
-            listenWhen: (previous, current) =>
-                current is SessionDetailSuccess &&
-                ((previous is! SessionDetailSuccess) ||
-                    previous.rescheduleRespondFailure !=
-                        current.rescheduleRespondFailure ||
-                    previous.rescheduleRespondAccepted !=
-                        current.rescheduleRespondAccepted),
-            listener: (context, state) {
-              if (state is! SessionDetailSuccess) return;
-              if (state.rescheduleRespondFailure != null) {
-                TilawaFeedback.showToast(
-                  context,
-                  message: state.rescheduleRespondFailure!.toLocalizedMessage(
+                if (state.joinFailure != null) {
+                  TilawaFeedback.showToast(
                     context,
-                  ),
-                  variant: TilawaFeedbackVariant.error,
+                    message: state.joinFailure!.toLocalizedMessage(context),
+                    variant: TilawaFeedbackVariant.error,
+                  );
+                  return;
+                }
+
+                widget.analytics.onSessionJoined?.call(
+                  bookingId: widget.bookingId,
+                  sessionId: state.aggregate.sessionId,
                 );
-              }
-              final accepted = state.rescheduleRespondAccepted;
-              if (accepted != null) {
-                TilawaFeedback.showToast(
-                  context,
-                  message: accepted
-                      ? l10n.rescheduleAcceptedToast
-                      : l10n.rescheduleRejectedToast,
-                  variant: TilawaFeedbackVariant.success,
-                );
-                context.read<SessionDetailBloc>().add(
-                  const SessionDetailRescheduleRespondAcknowledged(),
-                );
-              }
-            },
-          ),
-        ],
-        child: BlocBuilder<SessionDetailBloc, SessionDetailState>(
-          builder: (context, state) => switch (state) {
-            SessionDetailInitial() || SessionDetailLoading() => const Center(
-              child: CircularProgressIndicator(),
+
+                if (!state.isExternalMeeting &&
+                    state.aggregate.sessionId != null) {
+                  final sessionId = state.aggregate.sessionId!;
+                  final callType = state.callType ?? SessionCallType.voiceCall;
+                  final callProviderKind =
+                      state.callProviderKind ?? SessionCallProviderKind.mock;
+                  await pushInAppCallShell(
+                    context,
+                    sessionId: sessionId,
+                    callType: callType,
+                    callProviderKind: callProviderKind,
+                    participantSubtitle: l10n.callTypeLabel(callType),
+                    buildCallSurface: widget.buildCallSurface,
+                    createCallControlGateway: widget.createCallControlGateway,
+                    createCallTelemetry: widget.createCallTelemetry,
+                  );
+                }
+              },
             ),
-            SessionDetailFailure(:final failure) => Center(
-              child: Text(failure.toLocalizedMessage(context)),
+            BlocListener<SessionDetailBloc, SessionDetailState>(
+              listenWhen: (previous, current) =>
+                  current is SessionDetailSuccess &&
+                  ((previous is! SessionDetailSuccess) ||
+                      previous.reportFailure != current.reportFailure ||
+                      previous.reportSubmitted != current.reportSubmitted ||
+                      previous.disputeFailure != current.disputeFailure ||
+                      previous.disputeSubmitted != current.disputeSubmitted),
+              listener: (context, state) {
+                if (state is SessionDetailSuccess &&
+                    state.reportFailure != null) {
+                  TilawaFeedback.showToast(
+                    context,
+                    message: state.reportFailure!.toLocalizedMessage(context),
+                    variant: TilawaFeedbackVariant.error,
+                  );
+                }
+                if (state is SessionDetailSuccess && state.reportSubmitted) {
+                  TilawaFeedback.showToast(
+                    context,
+                    message: l10n.reportConcernSubmitted,
+                    variant: TilawaFeedbackVariant.success,
+                  );
+                  context.read<SessionDetailBloc>().add(
+                    const SessionDetailReportAcknowledged(),
+                  );
+                }
+                if (state is SessionDetailSuccess &&
+                    state.disputeFailure != null) {
+                  TilawaFeedback.showToast(
+                    context,
+                    message: state.disputeFailure!.toLocalizedMessage(context),
+                    variant: TilawaFeedbackVariant.error,
+                  );
+                }
+                if (state is SessionDetailSuccess && state.disputeSubmitted) {
+                  TilawaFeedback.showToast(
+                    context,
+                    message: l10n.openDisputeSubmitted,
+                    variant: TilawaFeedbackVariant.success,
+                  );
+                  context.read<SessionDetailBloc>().add(
+                    const SessionDetailDisputeAcknowledged(),
+                  );
+                }
+              },
             ),
-            SessionDetailSuccess(
-              :final aggregate,
-              :final timeline,
-              :final callType,
-              :final callProviderKind,
-              :final timelineLoadFailed,
-              :final pendingRescheduleLoadFailed,
-              :final pendingRescheduleRequest,
-              :final canRespondToReschedule,
-              :final isAwaitingRescheduleCounterparty,
-              :final rescheduleRespondInProgress,
-            ) =>
-              RefreshIndicator(
-                onRefresh: _reloadDetail,
-                child: ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: EdgeInsets.all(Theme.of(context).tokens.spaceLarge),
-                  children: [
-                    if (pendingRescheduleLoadFailed)
-                      Padding(
-                        padding: EdgeInsets.only(
-                          bottom: Theme.of(context).tokens.spaceLarge,
-                        ),
-                        child: _SessionDetailLoadWarning(
-                          message: l10n.sessionPendingRescheduleLoadFailed,
-                          bookingId: widget.bookingId,
-                        ),
-                      ),
-                    if (pendingRescheduleRequest != null)
-                      Padding(
-                        padding: EdgeInsets.only(
-                          bottom: Theme.of(context).tokens.spaceLarge,
-                        ),
-                        child: PendingRescheduleBanner(
-                          request: pendingRescheduleRequest,
-                          canRespond: canRespondToReschedule,
-                          isAwaitingCounterparty:
-                              isAwaitingRescheduleCounterparty,
-                          respondInProgress: rescheduleRespondInProgress,
-                          onAccept: () => context.read<SessionDetailBloc>().add(
-                            const SessionDetailRescheduleRespondSubmitted(
-                              accept: true,
-                            ),
+            BlocListener<SessionDetailBloc, SessionDetailState>(
+              listenWhen: (previous, current) =>
+                  current is SessionDetailSuccess &&
+                  ((previous is! SessionDetailSuccess) ||
+                      previous.cancellationFailure !=
+                          current.cancellationFailure ||
+                      previous.cancellationSucceeded !=
+                          current.cancellationSucceeded),
+              listener: (context, state) {
+                if (state is! SessionDetailSuccess) return;
+                if (state.cancellationFailure != null) {
+                  TilawaFeedback.showToast(
+                    context,
+                    message: state.isTeacherViewer
+                        ? l10n.tutorCancelSessionError
+                        : state.cancellationFailure!.toLocalizedMessage(
+                            context,
                           ),
-                          onReject: () => context.read<SessionDetailBloc>().add(
-                            const SessionDetailRescheduleRespondSubmitted(
-                              accept: false,
-                            ),
+                    variant: TilawaFeedbackVariant.error,
+                  );
+                }
+                if (state.cancellationSucceeded) {
+                  if (state.isTeacherViewer) {
+                    setState(() => _notifyParentOnPop = true);
+                  }
+                  TilawaFeedback.showToast(
+                    context,
+                    message: state.isTeacherViewer
+                        ? l10n.tutorCancelSessionSuccess
+                        : l10n.sessionCancelledSuccess,
+                    variant: TilawaFeedbackVariant.success,
+                  );
+                  context.read<SessionDetailBloc>().add(
+                    const SessionDetailCancelAcknowledged(),
+                  );
+                }
+              },
+            ),
+            BlocListener<SessionDetailBloc, SessionDetailState>(
+              listenWhen: (previous, current) =>
+                  current is SessionDetailSuccess &&
+                  ((previous is! SessionDetailSuccess) ||
+                      previous.reviewFailure != current.reviewFailure ||
+                      previous.reviewSubmitted != current.reviewSubmitted),
+              listener: (context, state) {
+                if (state is! SessionDetailSuccess) return;
+                if (state.reviewFailure != null) {
+                  TilawaFeedback.showToast(
+                    context,
+                    message: state.reviewFailure!.toLocalizedMessage(context),
+                    variant: TilawaFeedbackVariant.error,
+                  );
+                }
+                if (state.reviewSubmitted) {
+                  widget.analytics.onReviewSubmitted?.call(
+                    bookingId: widget.bookingId,
+                    sessionId: state.aggregate.sessionId,
+                  );
+                  TilawaFeedback.showToast(
+                    context,
+                    message: l10n.reviewSubmittedThanks,
+                    variant: TilawaFeedbackVariant.success,
+                  );
+                  context.read<SessionDetailBloc>().add(
+                    const SessionDetailReviewAcknowledged(),
+                  );
+                }
+              },
+            ),
+            BlocListener<SessionDetailBloc, SessionDetailState>(
+              listenWhen: (previous, current) =>
+                  current is SessionDetailSuccess &&
+                  previous is! SessionDetailSuccess,
+              listener: (context, state) {
+                if (state is! SessionDetailSuccess || _didAutoPromptReview) {
+                  return;
+                }
+                if (!state.canReview) return;
+                _didAutoPromptReview = true;
+                unawaited(submitSessionReview(context));
+              },
+            ),
+            BlocListener<SessionDetailBloc, SessionDetailState>(
+              listenWhen: (previous, current) =>
+                  current is SessionDetailSuccess &&
+                  ((previous is! SessionDetailSuccess) ||
+                      previous.rescheduleRespondFailure !=
+                          current.rescheduleRespondFailure ||
+                      previous.rescheduleRespondAccepted !=
+                          current.rescheduleRespondAccepted),
+              listener: (context, state) {
+                if (state is! SessionDetailSuccess) return;
+                if (state.rescheduleRespondFailure != null) {
+                  TilawaFeedback.showToast(
+                    context,
+                    message: state.rescheduleRespondFailure!.toLocalizedMessage(
+                      context,
+                    ),
+                    variant: TilawaFeedbackVariant.error,
+                  );
+                }
+                final accepted = state.rescheduleRespondAccepted;
+                if (accepted != null) {
+                  TilawaFeedback.showToast(
+                    context,
+                    message: accepted
+                        ? l10n.rescheduleAcceptedToast
+                        : l10n.rescheduleRejectedToast,
+                    variant: TilawaFeedbackVariant.success,
+                  );
+                  context.read<SessionDetailBloc>().add(
+                    const SessionDetailRescheduleRespondAcknowledged(),
+                  );
+                }
+              },
+            ),
+          ],
+          child: BlocBuilder<SessionDetailBloc, SessionDetailState>(
+            builder: (context, state) => switch (state) {
+              SessionDetailInitial() || SessionDetailLoading() => const Center(
+                child: CircularProgressIndicator(),
+              ),
+              SessionDetailFailure(:final failure) => Center(
+                child: Text(failure.toLocalizedMessage(context)),
+              ),
+              SessionDetailSuccess(
+                :final aggregate,
+                :final timeline,
+                :final callType,
+                :final callProviderKind,
+                :final timelineLoadFailed,
+                :final pendingRescheduleLoadFailed,
+                :final pendingRescheduleRequest,
+                :final canRespondToReschedule,
+                :final isAwaitingRescheduleCounterparty,
+                :final rescheduleRespondInProgress,
+              ) =>
+                RefreshIndicator(
+                  onRefresh: _reloadDetail,
+                  child: ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: EdgeInsets.all(
+                      Theme.of(context).tokens.spaceLarge,
+                    ),
+                    children: [
+                      if (pendingRescheduleLoadFailed)
+                        Padding(
+                          padding: EdgeInsets.only(
+                            bottom: Theme.of(context).tokens.spaceLarge,
+                          ),
+                          child: _SessionDetailLoadWarning(
+                            message: l10n.sessionPendingRescheduleLoadFailed,
+                            bookingId: widget.bookingId,
                           ),
                         ),
-                      ),
-                    Text(
-                      l10n.sessionStatusLabel(
-                        aggregate.lifecycleStatus.localizedLabel(l10n),
-                      ),
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    SizedBox(height: Theme.of(context).tokens.spaceSmall),
-                    Text(
-                      l10n.sessionStartsAtLabel(
-                        MaterialLocalizations.of(
-                          context,
-                        ).formatFullDate(aggregate.startsAt.toLocal()),
-                      ),
-                    ),
-                    if (state.showLockedAtBookingCopy &&
-                        callType != null &&
-                        callProviderKind != null) ...[
-                      SizedBox(height: Theme.of(context).tokens.spaceLarge),
-                      _LockedAtBookingFootnote(
-                        callType: callType,
-                        callProviderKind: callProviderKind,
-                      ),
-                    ],
-                    SizedBox(height: Theme.of(context).tokens.spaceExtraLarge),
-                    Text(
-                      l10n.sessionTimelineTitle,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    SizedBox(height: Theme.of(context).tokens.spaceSmall),
-                    if (timelineLoadFailed)
-                      _SessionDetailLoadWarning(
-                        message: l10n.sessionTimelineLoadFailed,
-                        bookingId: widget.bookingId,
-                      )
-                    else if (timeline.isEmpty)
-                      Text(l10n.sessionTimelineEmpty)
-                    else
-                      ...timeline.map(
-                        (event) => ListTile(
-                          title: Text(event.action.localizedLabel(l10n)),
-                          subtitle: Text(
-                            event.reason ??
-                                l10n.sessionTimelineStatusTransition(
-                                  event.previousStatus.localizedLabel(l10n),
-                                  event.newStatus.localizedLabel(l10n),
+                      if (pendingRescheduleRequest != null)
+                        Padding(
+                          padding: EdgeInsets.only(
+                            bottom: Theme.of(context).tokens.spaceLarge,
+                          ),
+                          child: PendingRescheduleBanner(
+                            request: pendingRescheduleRequest,
+                            canRespond: canRespondToReschedule,
+                            isAwaitingCounterparty:
+                                isAwaitingRescheduleCounterparty,
+                            respondInProgress: rescheduleRespondInProgress,
+                            onAccept: () =>
+                                context.read<SessionDetailBloc>().add(
+                                  const SessionDetailRescheduleRespondSubmitted(
+                                    accept: true,
+                                  ),
+                                ),
+                            onReject: () =>
+                                context.read<SessionDetailBloc>().add(
+                                  const SessionDetailRescheduleRespondSubmitted(
+                                    accept: false,
+                                  ),
                                 ),
                           ),
-                          trailing: Text(
-                            MaterialLocalizations.of(context).formatShortDate(
-                              event.createdAt.toLocal(),
+                        ),
+                      Text(
+                        l10n.sessionStatusLabel(
+                          aggregate.lifecycleStatus.sessionDetailStatusLabel(
+                            l10n,
+                            viewerRole: state.viewerRole,
+                          ),
+                        ),
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      if (aggregate.lifecycleStatus
+                              .sessionDetailStatusDescription(l10n) !=
+                          null) ...[
+                        SizedBox(height: Theme.of(context).tokens.spaceSmall),
+                        Text(
+                          aggregate.lifecycleStatus
+                              .sessionDetailStatusDescription(l10n)!,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                        ),
+                      ],
+                      SizedBox(height: Theme.of(context).tokens.spaceSmall),
+                      _SessionJoinStateBanner(state: state),
+                      if (_showsRevisionPractice(state)) ...[
+                        SizedBox(height: Theme.of(context).tokens.spaceLarge),
+                        SessionRevisionPracticeCard(
+                          surahNumber: state.aggregate.revisionSurahNumber!,
+                          ayahNumber: state.aggregate.revisionAyahNumber,
+                          isCompletedSession:
+                              state.aggregate.lifecycleStatus ==
+                              SessionLifecycleStatus.completed,
+                          onPracticeTapped: () =>
+                              widget.onPracticeRevisionRequested?.call(
+                                surahNumber:
+                                    state.aggregate.revisionSurahNumber!,
+                                ayahNumber: state.aggregate.revisionAyahNumber,
+                              ),
+                        ),
+                      ],
+                      SizedBox(height: Theme.of(context).tokens.spaceSmall),
+                      Text(
+                        l10n.sessionStartsAtLabel(
+                          MaterialLocalizations.of(
+                            context,
+                          ).formatFullDate(aggregate.startsAt.toLocal()),
+                        ),
+                      ),
+                      if (state.showLockedAtBookingCopy &&
+                          callType != null &&
+                          callProviderKind != null) ...[
+                        SizedBox(height: Theme.of(context).tokens.spaceLarge),
+                        _LockedAtBookingFootnote(
+                          callType: callType,
+                          callProviderKind: callProviderKind,
+                        ),
+                      ],
+                      SizedBox(
+                        height: Theme.of(context).tokens.spaceExtraLarge,
+                      ),
+                      Text(
+                        l10n.sessionTimelineTitle,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      SizedBox(height: Theme.of(context).tokens.spaceSmall),
+                      if (timelineLoadFailed)
+                        _SessionDetailLoadWarning(
+                          message: l10n.sessionTimelineLoadFailed,
+                          bookingId: widget.bookingId,
+                        )
+                      else if (timeline.isEmpty)
+                        Text(l10n.sessionTimelineEmpty)
+                      else
+                        ...timeline.map(
+                          (event) => ListTile(
+                            title: Text(event.timelineEntryTitle(l10n)),
+                            subtitle: Text(event.timelineEntrySubtitle(l10n)),
+                            trailing: Text(
+                              MaterialLocalizations.of(context).formatShortDate(
+                                event.createdAt.toLocal(),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-          },
+            },
+          ),
         ),
       ),
     );
+  }
+
+  bool _showsRevisionPractice(SessionDetailSuccess state) {
+    if (widget.onPracticeRevisionRequested == null) {
+      return false;
+    }
+    if (!state.aggregate.hasRevisionSurahContext) {
+      return false;
+    }
+    return sessionShowsRevisionPractice(state.aggregate.lifecycleStatus);
   }
 }
 
@@ -366,6 +528,155 @@ class _LockedAtBookingFootnote extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _SessionJoinStateBanner extends StatelessWidget {
+  const _SessionJoinStateBanner({required this.state});
+
+  final SessionDetailSuccess state;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+    final scheme = Theme.of(context).colorScheme;
+    final joinState = state.joinUiState;
+    final lifecycle = state.aggregate.lifecycleStatus;
+
+    if (joinState == SessionJoinUiState.cancelled &&
+        lifecycle == SessionLifecycleStatus.cancelledByTeacher) {
+      if (state.isTeacherViewer) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.sessionStatusCancelledByTutorSelf,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+            SizedBox(height: Theme.of(context).tokens.spaceExtraSmall),
+            Text(
+              l10n.sessionStatusCancelledDescription,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        );
+      }
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.sessionCancelledByTutorTitle,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+          SizedBox(height: Theme.of(context).tokens.spaceExtraSmall),
+          Text(
+            l10n.sessionCancelledByTutorSubtitle,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (joinState == SessionJoinUiState.rejectedByTutor &&
+        !state.isTeacherViewer) {
+      final reason = safeBookingRejectionReasonForDisplay(
+        state.aggregate.rejectionReason,
+      );
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.bookingRejectedTitle,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+          SizedBox(height: Theme.of(context).tokens.spaceExtraSmall),
+          Text(
+            l10n.bookingRejectedSubtitle,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+          if (reason != null) ...[
+            SizedBox(height: Theme.of(context).tokens.spaceSmall),
+            Text(
+              reason,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ],
+      );
+    }
+
+    if (joinState == SessionJoinUiState.awaitingTutorApproval &&
+        !state.isTeacherViewer) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.bookingUnderReviewTitle,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: scheme.onSurface,
+            ),
+          ),
+          SizedBox(height: Theme.of(context).tokens.spaceExtraSmall),
+          Text(
+            l10n.bookingUnderReviewPaymentHint,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+          SizedBox(height: Theme.of(context).tokens.spaceSmall),
+          TilawaFeedbackStrip(
+            icon: Icons.hourglass_top_rounded,
+            message: l10n.sessionAwaitingReviewNextSteps,
+            backgroundColor: scheme.primaryContainer,
+            foregroundColor: scheme.onPrimaryContainer,
+            variant: TilawaFeedbackVariant.info,
+          ),
+        ],
+      );
+    }
+
+    final message = joinState.localizedMessage(l10n);
+    if (joinState == SessionJoinUiState.joinAvailable) {
+      return Text(
+        message,
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          color: scheme.primary,
+        ),
+      );
+    }
+    if (joinState == SessionJoinUiState.failed) {
+      return TilawaPermissionBanner(
+        message: state.joinFailure?.toLocalizedMessage(context) ?? message,
+        actionLabel: l10n.retry,
+        icon: TilawaIcons.warning,
+        backgroundColor: scheme.errorContainer,
+        foregroundColor: scheme.onErrorContainer,
+        onAction: () => context.read<SessionDetailBloc>().add(
+          const SessionDetailJoinRequested(),
+        ),
+      );
+    }
+    return Text(
+      message,
+      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+        color: scheme.onSurfaceVariant,
       ),
     );
   }
@@ -424,6 +735,18 @@ class _SessionDetailFooter extends StatelessWidget {
                   ? null
                   : () => _requestJoin(context),
             ),
+          if (state.canCancel)
+            TilawaButton(
+              text: state.isTeacherViewer
+                  ? l10n.tutorCancelSessionAction
+                  : l10n.cancelSessionAction,
+              variant: TilawaButtonVariant.dangerOutline,
+              isFullWidth: true,
+              isLoading: state.cancellationInProgress,
+              onPressed: state.cancellationInProgress
+                  ? null
+                  : () => _confirmCancel(context),
+            ),
           if (state.canOpenMeetingAgain)
             TilawaButton(
               text: l10n.externalMeetingJoinAgain,
@@ -436,13 +759,31 @@ class _SessionDetailFooter extends StatelessWidget {
                       const SessionDetailOpenMeetingAgainRequested(),
                     ),
             ),
-          TilawaButton(
-            text: l10n.reportConcernAction,
-            variant: TilawaButtonVariant.outline,
-            isFullWidth: true,
-            onPressed: () => _submitReport(context),
-          ),
-          if (state.canOpenDispute)
+          if (state.canReview)
+            TilawaButton(
+              text: l10n.rateSessionAction,
+              variant: TilawaButtonVariant.secondary,
+              isFullWidth: true,
+              isLoading: state.reviewInProgress,
+              onPressed: state.reviewInProgress
+                  ? null
+                  : () => submitSessionReview(context),
+            ),
+          if (state.canReportConcern)
+            TilawaButton(
+              text: l10n.reportConcernAction,
+              variant: TilawaButtonVariant.outline,
+              isFullWidth: true,
+              onPressed: () => _submitReport(context),
+            ),
+          if (state.canOpenDispute) ...[
+            if (state.showCancelledDisputeHelper)
+              Text(
+                l10n.sessionCancelledDisputeHelper,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
             TilawaButton(
               text: l10n.openDisputeAction,
               variant: TilawaButtonVariant.secondary,
@@ -452,6 +793,7 @@ class _SessionDetailFooter extends StatelessWidget {
                   ? null
                   : () => _submitDispute(context),
             ),
+          ],
         ],
       ),
     );
@@ -486,4 +828,38 @@ class _SessionDetailFooter extends StatelessWidget {
       SessionDetailDisputeSubmitted(reason: reason),
     );
   }
+
+  Future<void> _confirmCancel(BuildContext context) async {
+    if (state.isTeacherViewer) {
+      final confirmed = await showTutorCancelSessionDialog(context);
+      if (!confirmed || !context.mounted) return;
+      context.read<SessionDetailBloc>().add(
+        const SessionDetailCancelSubmitted(reason: tutorCancelSessionReason),
+      );
+      return;
+    }
+
+    final reason = await showCancelSessionSheet(
+      context,
+      sessionStartsAt: state.aggregate.startsAt,
+      pricingType: state.aggregate.pricingType,
+      // Egypt pilot sessions are manual/off-app paid; suppress free-session copy.
+      isManualPayment: true,
+    );
+    if (reason == null || !context.mounted) return;
+    context.read<SessionDetailBloc>().add(
+      SessionDetailCancelSubmitted(reason: reason),
+    );
+  }
+}
+
+Future<void> submitSessionReview(BuildContext context) async {
+  final input = await showSessionReviewSheet(context);
+  if (input == null || !context.mounted) return;
+  context.read<SessionDetailBloc>().add(
+    SessionDetailReviewSubmitted(
+      rating: input.rating,
+      comment: input.comment,
+    ),
+  );
 }

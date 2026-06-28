@@ -72,7 +72,7 @@ void main() {
     expect(find.text('Signed in on another device'), findsOneWidget);
     expect(
       find.text(
-        'Tilawa allows one active device per account for Quran Sessions '
+        'MeMuslim allows one active device per account for Quran Sessions '
         'security. Your account was opened elsewhere — sign in again on this '
         'device to continue.',
       ),

@@ -204,7 +204,7 @@ class _DownloadsScreenAppBar extends StatelessWidget
     }
 
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final TextScaler textScaler = MediaQuery.textScalerOf(context);
     final TextStyle? subtitleStyle = theme.textTheme.bodySmall?.copyWith(
       fontWeight: FontWeight.w500,

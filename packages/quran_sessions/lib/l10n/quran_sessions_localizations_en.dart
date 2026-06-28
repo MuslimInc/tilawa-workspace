@@ -34,6 +34,10 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   }
 
   @override
+  String get sessionDetailNotFound =>
+      'This session could not be found. It may have been cancelled or removed.';
+
+  @override
   String validationError(Object code, Object field) {
     return 'Validation error: $field ($code).';
   }
@@ -95,7 +99,7 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get guardianApprovalBody =>
-      'A parent or guardian must sign in on this device and confirm that they allow Quran Sessions bookings for this student account.';
+      'A parent or guardian must sign in on this device and confirm that they allow QuranTutor bookings for this student account.';
 
   @override
   String get guardianApprovalStudentIdLabel => 'Student account ID';
@@ -112,6 +116,61 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get guardianApprovalSetupAction => 'Set up guardian approval';
+
+  @override
+  String get guardianDashboardTitle => 'Guardian hub';
+
+  @override
+  String get guardianDashboardIntroTitle => 'Child session bookings';
+
+  @override
+  String get guardianDashboardIntroBody =>
+      'Approve QuranTutor bookings for your child on this device. You will confirm consent once; the student can then complete booking.';
+
+  @override
+  String get guardianDashboardApproveAction => 'Approve child bookings';
+
+  @override
+  String get guardianDashboardOpenAction => 'Open guardian hub';
+
+  @override
+  String get guardianDashboardDeferredNote =>
+      'Upcoming child sessions and pending approvals in one list require guardian account linking — coming after MVP auth roles.';
+
+  @override
+  String get sessionRevisionPracticeUpcomingTitle => 'Prepare for your session';
+
+  @override
+  String get sessionRevisionPracticeCompletedTitle => 'Continue your revision';
+
+  @override
+  String sessionRevisionPracticeBody(int surahNumber) {
+    return 'Practice Surah $surahNumber in Tilawa\'s Quran reader before or after your session.';
+  }
+
+  @override
+  String get sessionRevisionPracticeAction => 'Practice in Quran reader';
+
+  @override
+  String get teacherCredentialsSectionTitle => 'Credentials';
+
+  @override
+  String teacherCredentialsSummary(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count credentials',
+      one: '1 credential',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get teacherCredentialsDisclaimer =>
+      'Credentials are provided by the teacher. Verified items were checked by Tilawa; others are self-reported.';
+
+  @override
+  String get teacherCredentialVerifiedBadge => 'Verified by Tilawa';
 
   @override
   String policyViolation(Object detail, Object policy) {
@@ -250,6 +309,13 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get profileFieldCity => 'City';
 
   @override
+  String get profileFieldLearningGoals => 'Learning goals';
+
+  @override
+  String get profileLearningGoalsHelper =>
+      'Optional — helps us recommend the right teacher for you.';
+
+  @override
   String get profileFieldDisplayName => 'Full name';
 
   @override
@@ -280,7 +346,10 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get profileCityRequired => 'City is required.';
 
   @override
-  String get quranSessionsHomeTitle => 'Learn Quran recitation';
+  String get quranSessionsHomeTitle => 'Learn Quran with your teacher';
+
+  @override
+  String get quranSessionsHomeAppBarTitle => 'Tutors';
 
   @override
   String get mySessionsTitle => 'My sessions';
@@ -298,7 +367,110 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get becomeTeacherCardSubtitle => 'Join MeMuslim\'s certified teachers';
 
   @override
-  String get teacherListTitle => 'Find a teacher';
+  String get teacherListAppBarTitle => 'Tutors';
+
+  @override
+  String get teacherListTitle => 'Learn Quran with your teacher';
+
+  @override
+  String get teacherListSubtitle =>
+      'Choose the right teacher and start improving your recitation';
+
+  @override
+  String get teacherSearchHint => 'Search tutors by name';
+
+  @override
+  String noTeachersForSearchQuery(String query) {
+    return 'No tutors match \"$query\"';
+  }
+
+  @override
+  String get teacherNewRating => 'New';
+
+  @override
+  String get teacherFilterAll => 'All';
+
+  @override
+  String get teacherFilterFree => 'Free';
+
+  @override
+  String get teacherFilterPaid => 'Paid';
+
+  @override
+  String get teacherFilterBudget => 'Budget';
+
+  @override
+  String teacherFilterUnderPrice(String amount) {
+    return 'Under $amount';
+  }
+
+  @override
+  String get teacherFilterAvailableToday => 'Available today';
+
+  @override
+  String get teacherBookAction => 'Book';
+
+  @override
+  String get viewTeacherProfile => 'View profile';
+
+  @override
+  String get teacherAvailabilityToday => 'Available today';
+
+  @override
+  String get teacherAvailabilityTomorrow => 'Next slot tomorrow';
+
+  @override
+  String teacherAvailabilityNextAt(String when) {
+    return 'Next slot: $when';
+  }
+
+  @override
+  String get teacherAvailabilityNoSlots => 'No slots';
+
+  @override
+  String get teacherAvailabilityUnavailable => 'Not available now';
+
+  @override
+  String get joinSessionNow => 'Join now';
+
+  @override
+  String sessionsSummaryUpcoming(int count) {
+    return 'Upcoming: $count';
+  }
+
+  @override
+  String sessionsSummaryPast(int count) {
+    return 'Past: $count';
+  }
+
+  @override
+  String sessionsSummaryNextSession(String when) {
+    return 'Next session: $when';
+  }
+
+  @override
+  String get sessionsTabUpcoming => 'Upcoming';
+
+  @override
+  String get sessionsTabPast => 'Past';
+
+  @override
+  String get sessionsTabCancelled => 'Cancelled';
+
+  @override
+  String get bookAgainAction => 'Book again';
+
+  @override
+  String get sessionStatusStartingSoon => 'Starting soon';
+
+  @override
+  String sessionStartsInMinutes(int minutes) {
+    return 'Starts in $minutes min';
+  }
+
+  @override
+  String get noTeachersForAvailabilityFilter =>
+      'No teachers available today right now';
 
   @override
   String noTeachersForSpecialization(String specialization) {
@@ -348,11 +520,11 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get sessionModeVoiceBetaNote =>
-      'Free Beta: voice uses a placeholder join until in-app RTC ships.';
+      'Voice sessions use in-app calling when your teacher and device support it.';
 
   @override
   String get sessionModeVideoBetaNote =>
-      'Free Beta: video uses a placeholder join until in-app RTC ships.';
+      'Video sessions use in-app calling when your teacher and device support it.';
 
   @override
   String bookingVoiceVideoProviderNote(String provider) {
@@ -381,7 +553,7 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get callProviderAgoraNotConfigured =>
-      'In-app Agora calls are not enabled in this build. Rebuild with Staging Agora config (TILAWA_DISTRIBUTION=staging and TILAWA_LAUNCH_AGORA_APP_ID), or use the Tilawa (Staging Agora) launch profile.';
+      'In-app Agora calls are not enabled in this build. Rebuild with Staging Agora config (TILAWA_DISTRIBUTION=staging and TILAWA_LAUNCH_AGORA_APP_ID), or use the MeMuslim (Staging Agora) launch profile.';
 
   @override
   String rtcPermissionDenied(String permission) {
@@ -510,8 +682,46 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get reviewSubmittedThanks => 'Thank you — your review was submitted!';
 
   @override
+  String get sessionReviewTitle => 'Rate your session';
+
+  @override
+  String sessionReviewSubtitle(String teacherName) {
+    return 'How was your session with $teacherName?';
+  }
+
+  @override
+  String get sessionReviewSubtitleGeneric => 'How was your session?';
+
+  @override
+  String get sessionReviewRatingLabel => 'Your rating';
+
+  @override
+  String sessionReviewStarLabel(int star) {
+    return '$star stars';
+  }
+
+  @override
+  String get sessionReviewCommentLabel => 'Comment (optional)';
+
+  @override
+  String get sessionReviewCommentHint =>
+      'Share what went well or what could improve';
+
+  @override
+  String get sessionReviewSubmit => 'Submit review';
+
+  @override
+  String get sessionReviewSkip => 'Not now';
+
+  @override
+  String get rateSessionAction => 'Rate session';
+
+  @override
+  String get reportTutorAction => 'Report tutor';
+
+  @override
   String upcomingSessionsSection(int count) {
-    return 'Upcoming ($count)';
+    return 'Upcoming sessions ($count)';
   }
 
   @override
@@ -554,7 +764,8 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
       'Cancellation is not allowed this close to the session start time.';
 
   @override
-  String get cancelPolicyFree => 'This is a free session. No refund applies.';
+  String get cancellationFreeNoRefund =>
+      'This is a free session. No refund applies.';
 
   @override
   String get cancelPolicyFullRefund =>
@@ -567,6 +778,33 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   @override
   String get cancelPolicyNoRefund =>
       'No refund applies for cancellations at this time.';
+
+  @override
+  String get tutorCancelSessionDialogTitle => 'Cancel session?';
+
+  @override
+  String get tutorCancelSessionDialogMessage =>
+      'The student will be notified and will not be able to join this session.';
+
+  @override
+  String get tutorCancelSessionAction => 'Cancel session';
+
+  @override
+  String get tutorCancelSessionGoBack => 'Go back';
+
+  @override
+  String get tutorCancelSessionSuccess => 'Session cancelled.';
+
+  @override
+  String get tutorCancelSessionError =>
+      'Could not cancel the session. Please try again.';
+
+  @override
+  String get sessionCancelledByTutorTitle =>
+      'Your tutor cancelled this session';
+
+  @override
+  String get sessionCancelledByTutorSubtitle => 'You can choose another time';
 
   @override
   String get rescheduleSessionTitle => 'Reschedule session';
@@ -666,6 +904,9 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get viewSessionDetails => 'View details';
 
   @override
+  String get sessionCardOverflowMenu => 'More session actions';
+
+  @override
   String get noSessionsYet => 'No sessions yet';
 
   @override
@@ -690,7 +931,13 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get noReviewsYet => 'No reviews yet';
 
   @override
+  String get aboutTeacherSection => 'About the teacher';
+
+  @override
   String get bookSessionAction => 'Book a session';
+
+  @override
+  String get noAvailabilityBookAction => 'No slots available';
 
   @override
   String get sessionStatusScheduled => 'Scheduled';
@@ -714,10 +961,51 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get joinSession => 'Join';
 
   @override
+  String get sessionJoinStateNotStarted =>
+      'Join opens 15 minutes before your session starts.';
+
+  @override
+  String get sessionJoinStateJoinAvailable => 'You can join now.';
+
+  @override
+  String get sessionJoinStateJoining => 'Connecting to your session…';
+
+  @override
+  String get sessionJoinStateJoined => 'You joined this session.';
+
+  @override
+  String get sessionJoinStateFailed =>
+      'Could not join. Try again or contact support.';
+
+  @override
+  String get sessionJoinStateEnded => 'This session has ended.';
+
+  @override
+  String get sessionJoinStateCancelled => 'This session was cancelled.';
+
+  @override
+  String get sessionCancelledSuccess => 'Session cancelled.';
+
+  @override
   String get noSlotsAvailable => 'No slots available';
 
   @override
   String get noSlotsAvailableThisDay => 'No slots available on this day';
+
+  @override
+  String get slotPickerLocalTimezoneNote =>
+      'Times are shown in your local timezone';
+
+  @override
+  String teacherSessionsCompleted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sessions completed',
+      one: '1 session completed',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get teacherDashboardTitle => 'Teacher dashboard';
@@ -802,6 +1090,9 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get availabilityTitle => 'Weekly availability';
+
+  @override
+  String get availabilityAppBarTitle => 'Availability';
 
   @override
   String get availabilityRecurringBanner =>
@@ -1439,6 +1730,10 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get noAvailabilityYet => 'No availability published yet.';
 
   @override
+  String get noAvailabilityHelper =>
+      'Check back later when this teacher adds new slots.';
+
+  @override
   String get reportConcernAction => 'Report a concern';
 
   @override
@@ -1525,6 +1820,9 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get walletTitle => 'My wallet';
 
   @override
+  String get walletAppBarTitle => 'Wallet';
+
+  @override
   String get walletAvailableBalanceLabel => 'Available balance';
 
   @override
@@ -1581,6 +1879,13 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get paymentCheckoutTitle => 'Confirm payment';
 
   @override
+  String get paymentCheckoutFreeTitle => 'Confirm booking';
+
+  @override
+  String get paymentCheckoutFreeAmount =>
+      'This session is free — no payment required.';
+
+  @override
   String paymentCheckoutAmount(String amount) {
     return 'Total: $amount';
   }
@@ -1589,11 +1894,29 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get paymentCheckoutAmountPending => 'Session price (sandbox)';
 
   @override
+  String get paymentCheckoutSandboxNotice =>
+      'Sandbox mode — no real charge. Enable paid booking only via the sandbox launch flag.';
+
+  @override
   String get paymentCheckoutRefundToWalletNotice =>
-      'If you cancel or we approve a refund, the amount is added to your Tilawa wallet as credit. Wallet credit is not automatically returned to your card.';
+      'If you cancel or we approve a refund, the amount is added to your MeMuslim wallet as credit. Wallet credit is not automatically returned to your card.';
 
   @override
   String get paymentCheckoutConfirm => 'Confirm payment (sandbox)';
+
+  @override
+  String get paymentCheckoutConfirmFree => 'Confirm booking';
+
+  @override
+  String get bookingPriceSummaryTitle => 'Session price';
+
+  @override
+  String get bookingPricePerSessionHint =>
+      'Charged once when you confirm (sandbox only).';
+
+  @override
+  String get walletSandboxNotice =>
+      'Sandbox wallet — credits from refunds and test payments only. Not real money.';
 
   @override
   String get restrictionReasonFalseIdentity => 'False identity information';
@@ -1639,6 +1962,44 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get sessionLifecycleCancelledByAdmin => 'Cancelled by admin';
+
+  @override
+  String get sessionStatusCancelledByTutorDetail => 'Cancelled by the tutor';
+
+  @override
+  String get sessionStatusCancelledByTutorSelf => 'You cancelled this session';
+
+  @override
+  String get sessionStatusCancelledByStudentDetail =>
+      'Cancelled by the student';
+
+  @override
+  String get sessionStatusCancelledByStudentSelf =>
+      'You cancelled this session';
+
+  @override
+  String get sessionStatusCancelledBySupportDetail => 'Cancelled by support';
+
+  @override
+  String get sessionStatusCancelledDescription => 'This session was cancelled.';
+
+  @override
+  String get sessionTimelineBookingConfirmed => 'Booking confirmed';
+
+  @override
+  String get sessionTimelineCancelledByTutor => 'Session cancelled by tutor';
+
+  @override
+  String get sessionTimelineCancelledByStudent =>
+      'Session cancelled by student';
+
+  @override
+  String get sessionTimelineCancelledBySupport =>
+      'Session cancelled by support';
+
+  @override
+  String get sessionCancelledDisputeHelper =>
+      'You can open a dispute if you need our team to review this cancellation.';
 
   @override
   String get sessionLifecycleTeacherNoShow => 'Teacher no-show';
@@ -1734,7 +2095,193 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get sessionActionRejectBooking => 'Reject booking';
 
   @override
+  String get bookingRequestSentTitle => 'Booking request sent';
+
+  @override
+  String get bookingRequestSentSubtitle => 'The booking is under review.';
+
+  @override
+  String get sessionAwaitingReviewNextSteps =>
+      'The booking is under review.\nPlease complete the payment using one of the available methods.\nThe session will be confirmed after payment review and teacher confirmation.';
+
+  @override
+  String get paidSessionNoticeTitle => 'This session is paid';
+
+  @override
+  String get manualPaymentInstructionsBody =>
+      'Payment is currently handled manually via Vodafone Cash, InstaPay, or bank transfer until online payment methods are added inside the app.';
+
+  @override
+  String get manualPaymentInstapayHandle => 'For InstaPay payment:';
+
+  @override
+  String get manualPaymentInstapayLink => 'Or use the payment link:';
+
+  @override
+  String get manualPaymentRecipientMaskedName =>
+      'Recipient name shown during transfer:';
+
+  @override
+  String get manualPaymentReceiptWhatsappInstruction =>
+      'After completing the payment, please send a screenshot of the transfer receipt on WhatsApp to support:';
+
+  @override
+  String get manualPaymentConfirmationRule =>
+      'The booking will be confirmed after payment review and teacher confirmation.';
+
+  @override
+  String get manualPaymentCancellationPolicy =>
+      'If you have already completed the manual payment, please contact support to review the payment or refund status.';
+
+  @override
+  String manualPaymentCancellationSupportHint(String supportNumber) {
+    return 'Support: $supportNumber';
+  }
+
+  @override
+  String get manualPaymentCopiedToClipboard => 'Copied to clipboard';
+
+  @override
+  String get paymentMethodVodafoneCash => 'Vodafone Cash';
+
+  @override
+  String get paymentMethodInstapay => 'InstaPay';
+
+  @override
+  String get paymentMethodBankTransfer => 'Bank transfer';
+
+  @override
+  String get bookingUnderReviewTitle => 'Booking under review';
+
+  @override
+  String get bookingUnderReviewPaymentHint =>
+      'Please complete the payment using one of the available methods.';
+
+  @override
+  String get bookingUnderReviewConfirmHint =>
+      'The booking will be confirmed after payment review and teacher confirmation.';
+
+  @override
+  String get bookingAcceptedTitle => 'Session accepted';
+
+  @override
+  String get bookingAcceptedSubtitle => 'You can join at session time';
+
+  @override
+  String get bookingRejectedTitle => 'Tutor declined this session';
+
+  @override
+  String get bookingRejectedSubtitle => 'You can choose another time';
+
+  @override
+  String get sendBookingRequest => 'Send booking request';
+
+  @override
+  String get sessionStatusBookingUnderReview => 'Under review';
+
+  @override
+  String get sessionStatusRejectedByTutor => 'Declined';
+
+  @override
+  String teacherPendingBookingRequestsSection(int count) {
+    return 'Booking requests ($count)';
+  }
+
+  @override
+  String get teacherPendingBookingRequestsEmptyTitle =>
+      'No booking requests right now';
+
+  @override
+  String get teacherPendingBookingRequestsEmptySubtitle =>
+      'Student requests will appear here';
+
+  @override
+  String get teacherAcceptBookingRequest => 'Accept';
+
+  @override
+  String get teacherRejectBookingRequest => 'Decline';
+
+  @override
+  String get tutorRejectBookingSheetTitle => 'Decline booking request?';
+
+  @override
+  String get tutorRejectBookingSheetBody =>
+      'You can share a reason with the student, or decline without one.';
+
+  @override
+  String get tutorRejectBookingReasonLabel => 'Reason for declining';
+
+  @override
+  String get tutorRejectBookingReasonHint => 'e.g. This time does not work';
+
+  @override
+  String get tutorRejectBookingConfirmAction => 'Decline request';
+
+  @override
+  String get tutorRejectBookingGoBack => 'Go back';
+
+  @override
+  String get tutorRejectBookingReasonTooLong => 'Reason is too long';
+
+  @override
+  String get tutorCancelSessionFromCard => 'Cancel';
+
+  @override
+  String get sessionLifecycleBookingUnderReview => 'Booking under review';
+
+  @override
+  String get sessionLifecycleRejectedByTutor => 'Rejected by tutor';
+
+  @override
+  String get sessionActionSubmitBookingRequest => 'Submit booking request';
+
+  @override
+  String get sessionActionAcceptBookingRequest => 'Accept booking request';
+
+  @override
+  String get sessionActionRejectBookingRequest => 'Reject booking request';
+
+  @override
+  String get sessionActionExpireBookingReview => 'Expire booking review';
+
+  @override
   String sessionTimelineStatusTransition(String previous, String next) {
     return '$previous → $next';
+  }
+
+  @override
+  String get tutorDashboardStudentFallback => 'Student';
+
+  @override
+  String get teacherDashboardLoadError =>
+      'Could not load sessions. Please try again.';
+
+  @override
+  String get tutorSessionStatusPendingApproval => 'Awaiting your approval';
+
+  @override
+  String get tutorSessionStatusAccepted => 'Accepted';
+
+  @override
+  String get tutorSessionStatusRejected => 'Declined';
+
+  @override
+  String get tutorSessionStatusCancelledByTutor => 'You cancelled';
+
+  @override
+  String get tutorSessionStatusCancelledByStudent => 'Student cancelled';
+
+  @override
+  String get tutorSessionStatusCompleted => 'Completed';
+
+  @override
+  String get tutorSessionStatusExpired => 'Expired';
+
+  @override
+  String get tutorSessionJoinNotYet => 'Join is not open yet';
+
+  @override
+  String tutorSessionDurationMinutes(int count) {
+    return '$count min';
   }
 }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -5,7 +6,10 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/core/navigation/notification_launch_dedup.dart';
+import 'package:tilawa/core/services/notification_startup_service.dart';
 import 'package:tilawa/features/audio_player/domain/repositories/audio_player_repository.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -60,6 +64,11 @@ class AppRouter {
   /// resume). Used to prevent the resume handler from re-processing the same
   /// launch notification that the splash screen already handled.
   static int? lastProcessedNotificationId;
+
+  /// Payload captured during bootstrap before [pendingLocalNotificationResponse]
+  /// is cleared. Lets [consumePendingNotificationLaunchState] persist a payload
+  /// signature instead of downgrading to id-only storage.
+  static String? lastProcessedNotificationPayload;
 
   static const Duration _notificationNavDedupWindow = Duration(seconds: 3);
   static String? _lastNotificationNavigationSignature;
@@ -131,6 +140,11 @@ class AppRouter {
       if (isPrayerStatus) {
         logger.d('[AppRouter] NAVIGATION_TO_PRAYER_STATUS_SUCCESS');
       }
+      unawaited(
+        persistProcessedNotificationLaunch(
+          notificationId: lastProcessedNotificationId,
+        ),
+      );
     } catch (e, stackTrace) {
       if (isPrayerStatus) {
         logger.e(
@@ -275,11 +289,69 @@ class AppRouter {
 
   /// Clears notification launch flags after cold-start routing is consumed.
   static void consumePendingNotificationLaunchState() {
+    final int? pendingId = pendingLocalNotificationResponse?.id;
+    final String? pendingPayload =
+        pendingLocalNotificationResponse?.payload ??
+        lastProcessedNotificationPayload;
+
     pendingFcmMessage = null;
     pendingLocalNotificationResponse = null;
     pendingStartupNotificationLaunch = false;
     disableStateRestoration = false;
     clearPendingColdStartRoute();
+    lastProcessedNotificationPayload = null;
+    unawaited(
+      persistProcessedNotificationLaunch(
+        notificationId: pendingId ?? lastProcessedNotificationId,
+        payload: pendingPayload,
+      ),
+    );
+  }
+
+  /// Records a handled local-notification launch so hot restart does not replay
+  /// the same launch response (Android Activity intent / iOS plugin state).
+  static Future<void> persistProcessedNotificationLaunch({
+    int? notificationId,
+    String? payload,
+  }) async {
+    final int? resolvedId = notificationId ?? lastProcessedNotificationId;
+    if (resolvedId != null) {
+      lastProcessedNotificationId = resolvedId;
+    }
+    if (NotificationLaunchDedup.launchSignature(
+          notificationId: resolvedId,
+          payload: payload,
+        ) ==
+        null) {
+      return;
+    }
+    if (!getIt.isRegistered<SharedPreferencesAsync>() ||
+        !getIt.isRegistered<ProcessIdProvider>()) {
+      return;
+    }
+    await NotificationLaunchDedup.persist(
+      notificationId: resolvedId,
+      payload: payload,
+      prefs: getIt<SharedPreferencesAsync>(),
+      pid: getIt<ProcessIdProvider>().currentPid,
+    );
+  }
+
+  /// Whether this launch was already handled in the current OS process.
+  static Future<bool> isProcessedNotificationLaunch({
+    required int? launchNotificationId,
+    String? launchPayload,
+  }) async {
+    if (!getIt.isRegistered<SharedPreferencesAsync>() ||
+        !getIt.isRegistered<ProcessIdProvider>()) {
+      return false;
+    }
+    return NotificationLaunchDedup.isProcessedLaunch(
+      launchNotificationId: launchNotificationId,
+      launchPayload: launchPayload,
+      prefs: getIt<SharedPreferencesAsync>(),
+      pid: getIt<ProcessIdProvider>().currentPid,
+    );
   }
 
   @visibleForTesting
@@ -292,9 +364,25 @@ class AppRouter {
     pendingStartupNotificationLaunch = false;
     clearPendingColdStartRoute();
     lastProcessedNotificationId = null;
+    lastProcessedNotificationPayload = null;
     _lastNotificationNavigationSignature = null;
     _lastNotificationNavigationAt = null;
     isOnPrayerNotificationStatusRouteOverride = null;
+  }
+
+  /// Clears in-memory notification launch flags for the debug lab.
+  static void clearInMemoryNotificationLaunchStateForDebug() {
+    if (!kDebugMode) {
+      return;
+    }
+    pendingFcmMessage = null;
+    pendingLocalNotificationResponse = null;
+    pendingStartupNotificationLaunch = false;
+    clearPendingColdStartRoute();
+    lastProcessedNotificationId = null;
+    lastProcessedNotificationPayload = null;
+    _lastNotificationNavigationSignature = null;
+    _lastNotificationNavigationAt = null;
   }
 
   static GoRouter get router {
@@ -323,6 +411,25 @@ class AppRouter {
       );
     }
     return _router!;
+  }
+
+  static String? get currentRouteLocation {
+    final r = _router;
+    if (r == null) return null;
+    try {
+      final state = r.state;
+      final String path = state.uri.toString();
+      if (path.isNotEmpty) {
+        return path;
+      }
+      return state.matchedLocation;
+    } catch (_) {
+      try {
+        return r.routerDelegate.currentConfiguration.uri.toString();
+      } catch (__) {
+        return null;
+      }
+    }
   }
 
   static List<NavigatorObserver> _getObservers() {
@@ -354,6 +461,14 @@ class AppRouter {
     _lastNotificationNavigationSignature = signature;
     _lastNotificationNavigationAt = now;
     return false;
+  }
+
+  @visibleForTesting
+  static bool shouldIgnoreDuplicateNotificationNavigation(
+    String location, {
+    Object? extra,
+  }) {
+    return _isDuplicateNotificationNavigation(location, extra);
   }
 
   static String _notificationExtraSignature(Object? extra) {

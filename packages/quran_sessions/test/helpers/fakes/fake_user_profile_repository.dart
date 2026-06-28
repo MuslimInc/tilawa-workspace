@@ -16,11 +16,13 @@ class FakeUserProfileRepository implements UserProfileRepository {
 
   UserProfile _profile;
   QuranSessionsFailure? failWith;
+  int getProfileCallCount = 0;
 
   @override
   Future<Either<QuranSessionsFailure, UserProfile>> getProfile(
     String userId,
   ) async {
+    getProfileCallCount++;
     if (failWith != null) return Left(failWith!);
     return Right(_profile);
   }

@@ -269,7 +269,8 @@ class TeacherApplicationBloc
     final current = state;
     if (current is! TeacherApplicationEditing) return;
 
-    final withAttempt = current.applySubmitValidation();
+    final merged = current.withMergedApplicationFields();
+    final withAttempt = merged.applySubmitValidation();
     emit(withAttempt);
     if (!withAttempt.canSubmit) return;
 
@@ -329,14 +330,23 @@ class TeacherApplicationBloc
   ) async {
     if (application.isDraft) {
       final prefill = await _loadPrefillPublicName(application.userId);
+      final displayNameRaw =
+          application.publicDisplayName?.trim().isNotEmpty == true
+          ? application.publicDisplayName!.trim()
+          : (prefill ?? '');
+      final normalizedPrefill = ValidateTeacherPublicName.normalize(
+        displayNameRaw.isNotEmpty ? displayNameRaw : null,
+      );
+      final draftApplication =
+          normalizedPrefill != null &&
+              application.publicDisplayName?.trim().isNotEmpty != true
+          ? application.copyWith(publicDisplayName: normalizedPrefill)
+          : application;
       emit(
         TeacherApplicationEditing(
-          application: application,
-          phoneRaw: application.phoneNumber ?? '',
-          publicDisplayNameRaw:
-              application.publicDisplayName?.trim().isNotEmpty == true
-              ? application.publicDisplayName!.trim()
-              : (prefill ?? ''),
+          application: draftApplication,
+          phoneRaw: draftApplication.phoneNumber ?? '',
+          publicDisplayNameRaw: displayNameRaw,
           prefillPublicDisplayName: prefill,
         ),
       );

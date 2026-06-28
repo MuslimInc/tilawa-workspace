@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 
-import 'firebase_session_mutation_gateway.dart';
+import 'firestore_exception_mapper.dart';
 import 'session_firestore_mapper.dart';
 
 /// Reads audit events from `quran_session_events`; appends are server-only.
@@ -23,17 +23,35 @@ class FirebaseAuditRepository implements AuditRepository {
   }
 
   @override
-  Future<Either<QuranSessionsFailure, List<SessionAuditEvent>>> listBySessionId(
-    String id,
-  ) async {
+  Future<Either<QuranSessionsFailure, List<SessionAuditEvent>>>
+  listForAggregate({
+    required String bookingId,
+    String? sessionId,
+  }) async {
     try {
       final merged = <String, SessionAuditEvent>{};
-      for (final field in ['bookingId', 'aggregateId', 'sessionId']) {
+      for (final field in ['bookingId', 'aggregateId']) {
         await _collectTimelineEvents(
-          query: _events.where(field, isEqualTo: id),
+          query: _events.where(field, isEqualTo: bookingId),
           merged: merged,
         );
       }
+
+      final sessionDocId = sessionId?.trim();
+      if (sessionDocId != null &&
+          sessionDocId.isNotEmpty &&
+          sessionDocId != bookingId) {
+        await _collectTimelineEvents(
+          query: _events.where('sessionId', isEqualTo: sessionDocId),
+          merged: merged,
+        );
+      } else {
+        await _collectTimelineEvents(
+          query: _events.where('sessionId', isEqualTo: bookingId),
+          merged: merged,
+        );
+      }
+
       final timeline = merged.values.toList()
         ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
       return Right(timeline);

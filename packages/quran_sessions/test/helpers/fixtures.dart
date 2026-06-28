@@ -1,10 +1,13 @@
 import 'package:quran_sessions/src/domain/entities/quran_booking.dart';
 import 'package:quran_sessions/src/domain/entities/quran_session.dart';
+import 'package:quran_sessions/src/domain/entities/manual_payment_price.dart';
 import 'package:quran_sessions/src/domain/entities/quran_teacher.dart';
 import 'package:quran_sessions/src/domain/entities/session_call_type.dart';
+import 'package:quran_sessions/src/domain/entities/session_lifecycle_status.dart';
 import 'package:quran_sessions/src/domain/entities/session_price.dart';
 import 'package:quran_sessions/src/domain/entities/session_pricing_type.dart';
 import 'package:quran_sessions/src/domain/entities/teacher_availability.dart';
+import 'package:quran_sessions/src/domain/entities/teacher_credential.dart';
 import 'package:quran_sessions/src/domain/entities/teacher_profile.dart';
 import 'package:quran_sessions/src/domain/entities/teacher_verification_status.dart';
 import 'package:quran_sessions/src/domain/entities/user_profile.dart';
@@ -63,22 +66,28 @@ QuranTeacher makeTeacher({
   UserGender gender = UserGender.male,
   SessionPricingType pricingType = SessionPricingType.fixedPerSession,
   SessionPrice? price = _defaultMarketPrice,
+  ManualPaymentPrice? manualPaymentPrice,
   String avatarUrl = 'https://example.com/avatar.png',
+  List<TeacherCredential> credentials = const [],
 }) => QuranTeacher(
   id: id,
   displayName: displayName,
   bio: 'Experienced Quran teacher',
-  avatarUrl: avatarUrl ?? 'https://example.com/avatar.png',
+  avatarUrl: avatarUrl,
   gender: gender,
   verificationStatus: status,
   supportedCallTypes: const [SessionCallType.externalMeeting],
   pricingType: pricingType,
   price: price,
+  manualPaymentPrice: manualPaymentPrice,
   specializations: specializations,
   languages: const ['ar', 'en'],
   averageRating: rating,
   totalReviews: 42,
   totalSessionsCompleted: 120,
+  cityName: 'القاهرة',
+  countryName: 'Egypt',
+  credentials: credentials,
 );
 
 TeacherProfile makeTeacherProfile({
@@ -124,7 +133,9 @@ QuranSession makeSession({
   String studentId = 'student_1',
   String teacherId = 'teacher_1',
   QuranSessionStatus status = QuranSessionStatus.scheduled,
+  SessionLifecycleStatus? lifecycleStatus,
   DateTime? startsAt,
+  DateTime? endsAt,
 }) {
   final start = startsAt ?? DateTime.now().add(const Duration(days: 1));
   return QuranSession(
@@ -133,9 +144,10 @@ QuranSession makeSession({
     teacherId: teacherId,
     studentId: studentId,
     startsAt: start,
-    endsAt: start.add(const Duration(hours: 1)),
+    endsAt: endsAt ?? start.add(const Duration(hours: 1)),
     callType: SessionCallType.externalMeeting,
     status: status,
+    lifecycleStatus: lifecycleStatus,
     meetingLink: 'https://meet.example.com/room',
   );
 }

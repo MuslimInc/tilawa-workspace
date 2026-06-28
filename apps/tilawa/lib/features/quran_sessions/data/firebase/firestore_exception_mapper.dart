@@ -37,3 +37,10 @@ Object writeDateTime(DateTime value) => Timestamp.fromDate(value.toUtc());
 
 Object? writeOptionalDateTime(DateTime? value) =>
     value == null ? null : writeDateTime(value);
+
+/// Maps a Firestore [FirebaseException] to a domain [QuranSessionsFailure].
+QuranSessionsFailure mapFirebaseExceptionToFailure(
+  FirebaseException exception,
+) {
+  return mapRemoteException(mapFirebaseException(exception));
+}

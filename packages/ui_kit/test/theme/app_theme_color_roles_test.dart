@@ -8,11 +8,10 @@ void main() {
   group('AppTheme color roles', () {
     const customAndroidGreen = Color(0xFF87CC23);
     const paletteCases = <String, Color>{
-      'default brown': AppColors.defaultPrimary,
+      'default green': AppColors.defaultPrimary,
       'custom android green': customAndroidGreen,
       'muted gold': AppColors.primaryGold,
-      'purple': AppColors.primaryPurple,
-      'warm brown': AppColors.primaryBrown,
+      'forest green': AppColors.primarySage,
       // Pathological custom HEX values — protected by _safePrimaryForLight.
       'pure white': Color(0xFFFFFFFF),
       'pure black': Color(0xFF000000),
@@ -25,8 +24,7 @@ void main() {
       'teal': AppColors.primaryTeal,
       'sage': AppColors.primarySage,
       'gold': AppColors.primaryGold,
-      'brown': AppColors.primaryBrown,
-      'purple': AppColors.primaryPurple,
+      'brand green': AppColors.brandActionGreen,
     };
 
     test('light themes keep accessible contrast on core color roles', () {
@@ -134,7 +132,7 @@ void main() {
       },
     );
 
-    test('default brown light theme matches brand ColorScheme roles', () {
+    test('default green light theme matches brand ColorScheme roles', () {
       final scheme = AppTheme.getLightTheme(
         primaryColor: AppColors.defaultPrimary,
       ).colorScheme;
@@ -208,7 +206,7 @@ void main() {
       final theme = AppTheme.getLightTheme(
         primaryColor: customAndroidGreen,
       );
-      final tokens = theme.extension<TilawaComponentTokens>();
+      final tokens = theme.extension<MeMuslimComponentTokens>();
 
       expect(tokens, isNotNull);
       expect(

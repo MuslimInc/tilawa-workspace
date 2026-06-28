@@ -17,6 +17,7 @@ export interface AdminSessionSummary {
   readonly paymentStatus: string | null;
   readonly amountPaidUsd: number | null;
   readonly cancellationReason: string | null;
+  readonly hasActiveCall: boolean;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 }
@@ -37,8 +38,4 @@ export const ADMIN_SESSION_DEFAULT_SORT = {
   direction: 'desc',
 } as const;
 
-export const ADMIN_SESSION_SORT_FIELDS = [
-  'startsAt',
-  'createdAt',
-  'updatedAt',
-] as const;
+export const ADMIN_SESSION_SORT_FIELDS = ['startsAt', 'createdAt', 'updatedAt'] as const;

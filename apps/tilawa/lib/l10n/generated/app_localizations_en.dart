@@ -45,6 +45,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeGreeting => 'Assalamu alaikum';
 
   @override
+  String get homeInspirationTitle => 'Today\'s inspiration';
+
+  @override
+  String get homeInspirationSubtitle => 'An ayah and dua for your heart';
+
+  @override
   String homeGreetingName(String name) {
     return 'Assalamu alaikum, $name';
   }
@@ -60,13 +66,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeNextPrayerUnavailable =>
-      'Set your location to see the next prayer.';
+      'Set your location to see the next prayer time.';
 
   @override
   String get homePrayerTimesAction => 'Prayer times';
 
   @override
-  String get homePrayerNow => 'It is time now';
+  String get homePrayerNow => 'It\'s prayer time';
+
+  @override
+  String get homeSunriseNow => 'Sunrise time now';
+
+  @override
+  String get homeDuhaNow => 'Duha time now';
 
   @override
   String homePrayerInMinutes(int minutes) {
@@ -91,26 +103,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeExploreSubtitle => 'Everyday tools at a glance';
 
   @override
-  String get homeKhatmaCarouselSubtitle => 'Track your reading plan';
+  String get homeKhatmaCarouselSubtitle => 'Progress on your khatma';
 
   @override
   String get homeSupportCarouselSubtitle =>
       'Help keep Tilawa free for everyone';
 
   @override
-  String get homeHistoryCarouselSubtitle => 'Pick up where you left off';
+  String get homeHistoryCarouselSubtitle => 'Continue where you left off';
 
   @override
-  String get homeFavoritesCarouselSubtitle => 'Saved recitations and surahs';
+  String get homeFavoritesCarouselSubtitle => 'Your saved recitations';
 
   @override
-  String get homeDownloadsCarouselSubtitle => 'Listen offline anytime';
+  String get homeDownloadsCarouselSubtitle => 'Listen offline';
 
   @override
-  String get homeSessionsTitle => 'Learn Quran recitation';
+  String get homeSessionsTitle => 'Learn recitation';
 
   @override
-  String get homeSessionsSubtitle => 'Book sessions with certified teachers';
+  String get homeSessionsSubtitle =>
+      'One-on-one sessions with a certified hafiz';
 
   @override
   String get homeExploreShowAsList => 'Show as list';
@@ -139,7 +152,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String homeListeningResumeSubtitle(String reciter, String surah) {
-    return 'Continue · $reciter · $surah';
+    return '$reciter · $surah';
   }
 
   @override
@@ -181,6 +194,12 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get homeDailyPracticeSubtitle =>
       'Your pinned adhkar and supplications';
+
+  @override
+  String get homeDailyHabitTitle => 'Daily habit';
+
+  @override
+  String get homeDailyHabitSubtitle => 'Start or continue your routine';
 
   @override
   String get homeAthkarRitualsTitle => 'Quick athkar';
@@ -236,10 +255,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeQuickQuran => 'Quran';
 
   @override
+  String get homeQuickActionsTitle => 'Quick Actions';
+
+  @override
+  String get homeMainActionsTitle => 'Your daily worship';
+
+  @override
+  String get homeQuickToolsTitle => 'Quick tools';
+
+  @override
+  String get homeFeaturedTutorTitle => 'Learn Quran';
+
+  @override
+  String get homeFeaturedTutorSubtitle =>
+      'Choose your hafiz to master your recitation';
+
+  @override
+  String get homeFeaturedTutorCta => 'Start learning';
+
+  @override
+  String get homeFeaturedTutorMySessions => 'My sessions';
+
+  @override
+  String get homeQuickQuranReader => 'Mushaf';
+
+  @override
+  String get homeQuickQuranReaderSubtitle => 'Read the Quran with reflection';
+
+  @override
+  String get homeLearnQuranWithTutor => 'Learn Quran with your hafiz';
+
+  @override
   String get homeQuickReciters => 'Reciters';
 
   @override
-  String get homeQuickRecitersSubtitle => 'Browse recitations';
+  String get homeQuickRecitersSubtitle => 'Listen to curated recitations';
 
   @override
   String get homeQuickPrayer => 'Prayer';
@@ -248,19 +298,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeQuickQibla => 'Qibla';
 
   @override
-  String get homeQuickQiblaSubtitle => 'Find prayer direction';
+  String get homeQuickQiblaSubtitle => 'Find the Qibla with ease';
 
   @override
   String get homeQuickSettingsSubtitle => 'Theme, audio, and account';
 
   @override
-  String get homeQuickTasbeeh => 'Tasbeeh';
+  String get homeQuickTasbeeh => 'Tasbih';
 
   @override
-  String get homeQuickTasbeehSubtitle => 'Count dhikr with one tap';
+  String get homeQuickTasbeehSubtitle => 'Dhikr at your fingertips';
 
   @override
   String get homeQuickAthkar => 'Athkar';
+
+  @override
+  String get homeQuickAthkarSubtitle => 'Your daily athkar';
 
   @override
   String get homeQuickSettings => 'Settings';
@@ -307,7 +360,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'A verse and supplication for your day';
 
   @override
-  String get homeDailyAyahLabel => 'Daily ayah';
+  String get homeDailyAyahLabel => 'Ayah of the day';
 
   @override
   String get homeDailyAyahBody =>
@@ -317,7 +370,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeDailyAyahReference => 'Quran 2:43';
 
   @override
-  String get homeDailyDuaLabel => 'Daily dua';
+  String get homeDailyDuaLabel => 'Dua of the day';
 
   @override
   String get homeDailyDuaBody =>
@@ -616,7 +669,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noSurahsMatchSearch => 'No surahs match your search';
 
   @override
-  String get continueListening => 'Continue Listening';
+  String get continueListening => 'Continue listening';
 
   @override
   String get play => 'Play';
@@ -1077,7 +1130,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signIn => 'Sign in';
 
   @override
-  String get welcomeToApp => 'Welcome to Tilawa';
+  String get welcomeToApp => 'Welcome to MeMuslim';
 
   @override
   String get signInWithGoogleDescription =>
@@ -1288,7 +1341,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteAccountConfirmation =>
-      'This permanently deletes your Tilawa account and synced profile data. Purchases verified with Google Play may be kept in anonymized records for fraud prevention. This cannot be undone.';
+      'This permanently deletes your MeMuslim account and synced profile data. Purchases verified with Google Play may be kept in anonymized records for fraud prevention. This cannot be undone.';
 
   @override
   String get deleteAccountFailed =>
@@ -2384,7 +2437,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sharing => 'Sharing...';
 
   @override
-  String get sharedViaTilawa => 'Shared via Tilawa';
+  String get sharedViaTilawa => 'Shared via MeMuslim';
 
   @override
   String get reciterNotAvailable =>
@@ -2640,7 +2693,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get oemAutostartHint =>
-      'On this device, also enable Autostart for Tilawa in your phone\'s settings so reminders are not stopped in the background.';
+      'On this device, also enable Autostart for MeMuslim in your phone\'s settings so reminders are not stopped in the background.';
 
   @override
   String get prayerAlertsPermissionLocationTitle => 'Location';
@@ -2668,14 +2721,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get prayerAlertsPermissionBatteryBody =>
-      'Exclude Tilawa from battery optimization so prayer reminders are not delayed overnight.';
+      'Exclude MeMuslim from battery optimization so prayer reminders are not delayed overnight.';
 
   @override
   String get prayerAlertsPermissionOemAutostartTitle => 'Background access';
 
   @override
   String get prayerAlertsPermissionOemAutostartBody =>
-      'On this device, enable Autostart for Tilawa in your phone settings so reminders are not stopped in the background.';
+      'On this device, enable Autostart for MeMuslim in your phone settings so reminders are not stopped in the background.';
 
   @override
   String get prayerAlertsPermissionAllow => 'Allow';
@@ -2808,19 +2861,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorInvalidNotificationPayload => 'Invalid notification payload.';
 
   @override
-  String get moreOptions => 'More options';
+  String get moreOptions => 'More';
 
   @override
-  String get supportTilawa => 'Support Tilawa';
+  String get homeMoreOptionsSubtitle => 'Your library and more options';
 
   @override
-  String get rateTilawa => 'Rate Tilawa';
+  String get supportTilawa => 'Support MeMuslim';
+
+  @override
+  String get rateTilawa => 'Rate MeMuslim';
 
   @override
   String get rateTilawaSubtitle => 'Share your feedback on the app store.';
 
   @override
-  String get shareTilawa => 'Share Tilawa';
+  String get shareTilawa => 'Share MeMuslim';
 
   @override
   String shareTilawaMessage(String appName, String storeUrl) {
@@ -2832,14 +2888,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'We could not open the share sheet. Please try again.';
 
   @override
-  String get supportIntroLine => 'Your contribution helps keep Tilawa going.';
+  String get supportIntroLine => 'Your contribution helps keep MeMuslim going.';
 
   @override
   String get supportTilawaSubtitle =>
-      'Your contribution helps keep Tilawa going.';
+      'Your contribution helps keep MeMuslim going.';
 
   @override
-  String get supportMissionBody => 'Your contribution helps keep Tilawa going.';
+  String get supportMissionBody =>
+      'Your contribution helps keep MeMuslim going.';
 
   @override
   String get supportImpactWhyTitle => 'Why?';
@@ -2879,7 +2936,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get supportConfirmationBody =>
-      'Payment via Google Play. Tilawa does not store your card details.';
+      'Payment via Google Play. MeMuslim does not store your card details.';
 
   @override
   String get supportConfirm => 'Continue';
@@ -2963,7 +3020,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get supportSelectTier => 'Choose an amount';
 
   @override
-  String get supportSettingsGroupTitle => 'Support Tilawa';
+  String get supportSettingsGroupTitle => 'Support MeMuslim';
 
   @override
   String get supportHelpKeepFree => 'Optional';
@@ -3002,7 +3059,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Store reviews are not supported on this platform.';
 
   @override
-  String get a11ySplashLoading => 'Tilawa, loading';
+  String get a11ySplashLoading => 'MeMuslim, loading';
 
   @override
   String get splashSlowLoadingNotice =>
@@ -3064,16 +3121,247 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tourDebugResetDone => 'Product tours reset';
 
   @override
+  String get notificationDebugLabTitle => 'Notification Debug Lab';
+
+  @override
+  String get notificationDebugSectionLocal => 'Local notification tests';
+
+  @override
+  String get notificationDebugSectionLaunch => 'Launch simulation';
+
+  @override
+  String get notificationDebugSectionDedup => 'Dedup state inspector';
+
+  @override
+  String get notificationDebugSectionChecklist => 'Manual validation checklist';
+
+  @override
+  String get notificationDebugSectionLogs => 'Debug logs';
+
+  @override
+  String get notificationDebugActionId => 'Notification id';
+
+  @override
+  String get notificationDebugActionPayload => 'Payload';
+
+  @override
+  String get notificationDebugActionRoute => 'Expected route';
+
+  @override
+  String get notificationDebugActionBehavior => 'Expected behavior';
+
+  @override
+  String get notificationDebugActionMechanism => 'Mechanism';
+
+  @override
+  String get notificationDebugRefreshState => 'Refresh state';
+
+  @override
+  String get notificationDebugClearDedup => 'Clear notification dedup';
+
+  @override
+  String get notificationDebugClearAthkarDedup => 'Clear Athkar warm dedup';
+
+  @override
+  String get notificationDebugClearAll => 'Clear all debug state';
+
+  @override
+  String get notificationDebugClearLogs => 'Clear logs';
+
+  @override
+  String get notificationDebugConfirmSchedule =>
+      'Schedule another debug notification?';
+
+  @override
+  String get notificationDebugMechanismReal => 'Real local notification';
+
+  @override
+  String get notificationDebugMechanismDispatcher => 'Dispatcher simulation';
+
+  @override
+  String get notificationDebugMechanismBootstrap => 'Bootstrap launch probe';
+
+  @override
+  String get notificationDebugMechanismDedup => 'Dedup persist only';
+
+  @override
+  String get notificationDebugMechanismClearPid => 'Clear pid scope';
+
+  @override
+  String get notificationDebugBehaviorScheduleAthkar =>
+      'Shows a debug Athkar notification after a short delay';
+
+  @override
+  String get notificationDebugBehaviorShowNow =>
+      'Posts a debug notification immediately';
+
+  @override
+  String get notificationDebugBehaviorNativePayloadOnly =>
+      'Simulates native prayer tap with payload only (no id)';
+
+  @override
+  String get notificationDebugBehaviorInvalidPayload =>
+      'Should not navigate to Athkar';
+
+  @override
+  String get notificationDebugBehaviorEmptyPayload =>
+      'Should not navigate (empty payload)';
+
+  @override
+  String get notificationDebugBehaviorPayloadOnlyNoId =>
+      'Routes via payload signature only';
+
+  @override
+  String get notificationDebugBehaviorDedupSameSig =>
+      'First tap navigates; same pid + signature replays suppressed';
+
+  @override
+  String get notificationDebugBehaviorFreshDifferentPayload =>
+      'Treated as fresh when payload signature changes';
+
+  @override
+  String get notificationDebugBehaviorSharedPayloadSig =>
+      'Same payload signature dedups even if id differs';
+
+  @override
+  String get notificationDebugBehaviorSimulateTap =>
+      'Routes through production dispatcher / bootstrap paths';
+
+  @override
+  String get notificationDebugBehaviorInvalidLaunch =>
+      'Invalid payload must not set Athkar cold-start route';
+
+  @override
+  String get notificationDebugBehaviorMarkProcessed =>
+      'Persists dedup without navigation';
+
+  @override
+  String get notificationDebugBehaviorClearPidScope =>
+      'Clears pid key to simulate fresh-process dedup scope';
+
+  @override
+  String get notificationDebugFieldCurrentPid => 'Current process id';
+
+  @override
+  String get notificationDebugFieldStoredPid => 'Stored pid (_last_notif_pid)';
+
+  @override
+  String get notificationDebugFieldStoredId => 'Stored id (_last_notif_id)';
+
+  @override
+  String get notificationDebugFieldStoredSig =>
+      'Stored signature (_last_notif_payload_sig)';
+
+  @override
+  String get notificationDebugFieldLastProcessedId =>
+      'AppRouter.lastProcessedNotificationId';
+
+  @override
+  String get notificationDebugFieldPendingRoute => 'pendingColdStartLocation';
+
+  @override
+  String get notificationDebugFieldPendingExtra => 'pendingColdStartExtra';
+
+  @override
+  String get notificationDebugFieldAthkarPayload =>
+      'last_handled_notification_payload';
+
+  @override
+  String get notificationDebugFieldAthkarTimestamp =>
+      'last_handled_notification_timestamp';
+
+  @override
+  String get notificationDebugFieldPreviewSig => 'Preview signature';
+
+  @override
+  String get notificationDebugFieldProcessedPreview => 'Preview is processed';
+
+  @override
+  String get notificationDebugChecklistAthkarTitle => 'A. Athkar notification';
+
+  @override
+  String get notificationDebugChecklistAthkarTap =>
+      'Tap Athkar notification → opens Athkar once';
+
+  @override
+  String get notificationDebugChecklistAthkarRestart =>
+      'Hot restart → must not open Athkar again';
+
+  @override
+  String get notificationDebugChecklistPrayerTitle =>
+      'B. Prayer payload-only notification';
+
+  @override
+  String get notificationDebugChecklistPrayerTap =>
+      'Tap Prayer notification → opens prayer route once';
+
+  @override
+  String get notificationDebugChecklistPrayerRestart =>
+      'Hot restart → must not replay';
+
+  @override
+  String get notificationDebugChecklistInvalidTitle => 'C. Invalid payload';
+
+  @override
+  String get notificationDebugChecklistInvalidBody =>
+      'Invalid payload → must not fallback to Athkar';
+
+  @override
+  String get notificationDebugChecklistSettingsTitle => 'D. Settings payload';
+
+  @override
+  String get notificationDebugChecklistSettingsBody =>
+      'Settings payload → opens Settings, not Athkar';
+
+  @override
+  String get notificationDebugChecklistSameSigTitle =>
+      'E. Same id + same payload';
+
+  @override
+  String get notificationDebugChecklistSameSigTap =>
+      'First tap → navigate once';
+
+  @override
+  String get notificationDebugChecklistSameSigRestart =>
+      'Hot restart / same process → suppressed';
+
+  @override
+  String get notificationDebugChecklistDiffPayloadTitle =>
+      'F. Same id + different payload';
+
+  @override
+  String get notificationDebugChecklistDiffPayloadBody =>
+      'Treated as fresh launch';
+
+  @override
+  String get notificationDebugChecklistDiffIdTitle =>
+      'G. Different id + same payload';
+
+  @override
+  String get notificationDebugChecklistDiffIdBody =>
+      'Payload signature wins → second tap suppressed in same pid';
+
+  @override
+  String get notificationDebugChecklistKillTitle => 'H. Full process kill';
+
+  @override
+  String get notificationDebugChecklistKillSteps =>
+      'Kill app from recents → tap fresh notification → cold start navigation should work';
+
+  @override
+  String get notificationDebugLogsEmpty => 'No debug events yet';
+
+  @override
   String get inAppUpdateFlexibleRestartMessage =>
       'Update downloaded. Restart when you are ready to install it.';
 
   @override
   String get inAppUpdateOptionalMessage =>
-      'A new version of Tilawa is available.';
+      'A new version of MeMuslim is available.';
 
   @override
   String get inAppUpdateRequiredMessage =>
-      'An update is required to continue using Tilawa.';
+      'An update is required to continue using MeMuslim.';
 
   @override
   String get inAppUpdateRestartAction => 'Restart';
@@ -3127,7 +3415,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authSignedInElsewhereBody =>
-      'Tilawa allows one active device per account for Quran Sessions security. Your account was opened elsewhere — sign in again on this device to continue.';
+      'MeMuslim allows one active device per account for Quran Sessions security. Your account was opened elsewhere — sign in again on this device to continue.';
 
   @override
   String get authSignedInElsewhereAction => 'Sign in again';

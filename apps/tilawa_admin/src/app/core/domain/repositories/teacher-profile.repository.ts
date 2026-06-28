@@ -13,6 +13,10 @@ export interface TeacherProfileRepository {
   ): Promise<PageResult<TeacherProfile>>;
 
   getById(id: string): Promise<TeacherProfile | null>;
+
+  getByIds(ids: readonly string[]): Promise<Map<string, TeacherProfile>>;
+
+  searchActiveTeachers?(query: string): Promise<TeacherProfile[]>;
 }
 
 export const TEACHER_PROFILE_REPOSITORY = new InjectionToken<TeacherProfileRepository>(

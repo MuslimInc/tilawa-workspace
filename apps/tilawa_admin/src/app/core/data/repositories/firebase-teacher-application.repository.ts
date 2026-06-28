@@ -13,11 +13,7 @@ import {
   TeacherApplicationFilters,
 } from '../../domain/entities/teacher-application.entity';
 import { TeacherApplicationStatus } from '../../domain/entities/teacher-application-status.enum';
-import {
-  DEFAULT_PAGE_SIZE,
-  PageRequest,
-  PageResult,
-} from '../../domain/entities/pagination.types';
+import { DEFAULT_PAGE_SIZE, PageRequest, PageResult } from '../../domain/entities/pagination.types';
 import { TeacherApplicationRepository } from '../../domain/repositories/teacher-application.repository';
 import { fetchPaginatedList } from '../firestore/firestore-list-query.util';
 import {
@@ -44,7 +40,7 @@ export class FirebaseTeacherApplicationRepository implements TeacherApplicationR
       return { items: [], nextCursor: null, hasMore: false };
     }
 
-    const serverFilters = this.buildQueryConstraints(filters, geoUserIds);
+    const serverFilters = buildTeacherApplicationQueryConstraints(filters, geoUserIds);
 
     const result = await fetchPaginatedList({
       firestore: this.firestore,
@@ -54,10 +50,7 @@ export class FirebaseTeacherApplicationRepository implements TeacherApplicationR
       defaultSort: TEACHER_APPLICATION_DEFAULT_SORT,
       allowedSortFields: TEACHER_APPLICATION_SORT_FIELDS,
       mapDoc: (id, data) =>
-        TeacherApplicationMapper.fromFirestore(
-          id,
-          data as TeacherApplicationFirestoreDto,
-        ),
+        TeacherApplicationMapper.fromFirestore(id, data as TeacherApplicationFirestoreDto),
     });
 
     const items = this.applyClientFilters(result.items, filters);
@@ -65,9 +58,7 @@ export class FirebaseTeacherApplicationRepository implements TeacherApplicationR
   }
 
   async getById(id: string): Promise<TeacherApplication | null> {
-    const snap = await getDoc(
-      doc(this.firestore, QuranSessionsPaths.teacherApplications, id),
-    );
+    const snap = await getDoc(doc(this.firestore, QuranSessionsPaths.teacherApplications, id));
     if (!snap.exists()) {
       return null;
     }
@@ -89,37 +80,6 @@ export class FirebaseTeacherApplicationRepository implements TeacherApplicationR
     return this.userRepository.listMatchingUserIds({ countryCode, cityId });
   }
 
-  private buildQueryConstraints(
-    filters: TeacherApplicationFilters,
-    geoUserIds: readonly string[] | null,
-  ) {
-    const constraints: ReturnType<typeof where>[] = [];
-
-    if (geoUserIds !== null) {
-      constraints.push(where('userId', 'in', [...geoUserIds]));
-    }
-
-    if (filters.status && filters.status !== TeacherApplicationStatus.None) {
-      constraints.push(where('status', '==', filters.status));
-    }
-
-    if (filters.submittedFrom) {
-      constraints.push(where('submittedAt', '>=', filters.submittedFrom));
-    }
-
-    if (filters.submittedTo) {
-      constraints.push(where('submittedAt', '<=', filters.submittedTo));
-    }
-
-    if (filters.specialization) {
-      constraints.push(
-        where('specializations', 'array-contains', filters.specialization),
-      );
-    }
-
-    return constraints;
-  }
-
   private applyClientFilters(
     items: readonly TeacherApplication[],
     filters: TeacherApplicationFilters,
@@ -135,4 +95,39 @@ export class FirebaseTeacherApplicationRepository implements TeacherApplicationR
         (item.phoneNumber?.toLowerCase().includes(search) ?? false),
     );
   }
+}
+
+/**
+ * Server-side query constraints for teacher applications. Exported for
+ * query-contract tests. `geoUserIds` is the bounded `userId in [...]` set
+ * resolved from the QS users geo lookup (capped at 30). `search` stays
+ * client-side (current page only).
+ */
+export function buildTeacherApplicationQueryConstraints(
+  filters: TeacherApplicationFilters,
+  geoUserIds: readonly string[] | null,
+): ReturnType<typeof where>[] {
+  const constraints: ReturnType<typeof where>[] = [];
+
+  if (geoUserIds !== null) {
+    constraints.push(where('userId', 'in', [...geoUserIds]));
+  }
+
+  if (filters.status && filters.status !== TeacherApplicationStatus.None) {
+    constraints.push(where('status', '==', filters.status));
+  }
+
+  if (filters.submittedFrom) {
+    constraints.push(where('submittedAt', '>=', filters.submittedFrom));
+  }
+
+  if (filters.submittedTo) {
+    constraints.push(where('submittedAt', '<=', filters.submittedTo));
+  }
+
+  if (filters.specialization) {
+    constraints.push(where('specializations', 'array-contains', filters.specialization));
+  }
+
+  return constraints;
 }

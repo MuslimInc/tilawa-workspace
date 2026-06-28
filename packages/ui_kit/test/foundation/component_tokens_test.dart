@@ -178,7 +178,7 @@ void main() {
   group('TilawaIconActionButtonTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaIconActionButtonTokens.defaults();
-      expect(tokens.size, kTilawaMinInteractiveDimension);
+      expect(tokens.size, kMeMuslimMinInteractiveDimension);
       expect(tokens.activeBackgroundOpacity, 0.12);
       expect(tokens.activeBorderOpacity, 0.35);
       expect(tokens.inactiveBorderOpacity, 0.26);
@@ -217,7 +217,7 @@ void main() {
   group('TilawaSearchFieldTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaSearchFieldTokens.defaults();
-      expect(tokens.height, kTilawaMinInteractiveDimension);
+      expect(tokens.height, kMeMuslimMinInteractiveDimension);
       expect(tokens.backgroundColor, isA<Color>());
       expect(tokens.contentPadding, const EdgeInsets.symmetric(vertical: 12));
       expect(tokens.iconSize, 18.0);
@@ -635,7 +635,7 @@ void main() {
         tokens.bodyPadding,
         const EdgeInsets.fromLTRB(16, 12, 16, 24),
       );
-      expect(tokens.closeButtonSize, kTilawaMinInteractiveDimension);
+      expect(tokens.closeButtonSize, kMeMuslimMinInteractiveDimension);
       expect(
         tokens.footerPadding,
         const EdgeInsets.fromLTRB(16, 12, 16, 16),
@@ -739,7 +739,10 @@ void main() {
       expect(tokens.bottomNavBackgroundColor, scheme.surface);
       expect(
         tokens.navButtonSelectedBackgroundColor,
-        scheme.primaryContainer,
+        Color.alphaBlend(
+          scheme.primary.withValues(alpha: 0.12),
+          scheme.surface,
+        ),
       );
       expect(
         tokens.sideRailIndicatorColor,
@@ -780,7 +783,7 @@ void main() {
           surfaceContainerHighest: Color(0xFF00FF00),
         );
         final purpleScheme = ColorScheme.light(
-          primary: Color(0xFF7A5C89),
+          primary: AppColors.defaultPrimary,
           primaryContainer: Color(0xFFE3D4E9),
           surfaceContainerHigh: Color(0xFF0000FF),
           surfaceContainerHighest: Color(0xFFFFFF00),
@@ -825,7 +828,10 @@ void main() {
       );
       expect(
         tokens.navButtonSelectedBackgroundColor,
-        scheme.surfaceContainerHighest,
+        Color.alphaBlend(
+          scheme.onSurface.withValues(alpha: 0.12),
+          scheme.surface,
+        ),
       );
     });
 
@@ -1027,7 +1033,7 @@ void main() {
       expect(tokens.overlayBorderOpacity, 0.1);
       expect(tokens.shortWindowHeightBreakpoint, 760.0);
       expect(tokens.shortWindowPanelHeightFactor, 0.5);
-      expect(tokens.headerButtonSize, kTilawaMinInteractiveDimension);
+      expect(tokens.headerButtonSize, kMeMuslimMinInteractiveDimension);
       expect(tokens.composerSurfaceColor, isA<Color>());
       expect(tokens.panelBorderColor, isA<Color>());
     });
@@ -1201,6 +1207,111 @@ void main() {
     });
   });
 
+  group('TilawaHomeScreenTokens', () {
+    test('light palette uses centralized AppColors stops', () {
+      final tokens = TilawaHomeScreenTokens.light();
+
+      expect(
+        tokens.backgroundGradientStart,
+        AppColors.homeBackgroundGradientStart,
+      );
+      expect(
+        tokens.backgroundGradientMiddle,
+        AppColors.homeBackgroundGradientMiddle,
+      );
+      expect(
+        tokens.backgroundGradientEnd,
+        AppColors.homeBackgroundGradientEnd,
+      );
+      expect(
+        tokens.homePrayerHeroBackground,
+        AppColors.homePrayerHeroBackground,
+      );
+      expect(tokens.homePrayerHeroBorder, AppColors.homePrayerHeroBorder);
+      expect(tokens.homePrayerHeroShadow, AppColors.homePrayerHeroShadow);
+      expect(tokens.homePrayerHeroAccent, AppColors.homePrayerHeroAccent);
+      expect(tokens.homePrayerHeroWatermark, AppColors.homePrayerHeroWatermark);
+      expect(
+        tokens.homeHeaderChipBackground,
+        AppColors.homeHeaderChipBackground,
+      );
+      expect(
+        tokens.homeHeaderSecondaryText,
+        AppColors.homeHeaderSecondaryText,
+      );
+      expect(
+        tokens.homeCollapsedHeaderFill,
+        AppColors.homeCollapsedHeaderFill,
+      );
+      expect(
+        tokens.homeCollapsedHeaderBorder,
+        AppColors.homeCollapsedHeaderBorder,
+      );
+      expect(
+        tokens.homeFeaturedTutorGradientStart,
+        AppColors.homeFeaturedTutorGradientStart,
+      );
+      expect(
+        tokens.homeFeaturedTutorGradientEnd,
+        AppColors.homeFeaturedTutorGradientEnd,
+      );
+      expect(tokens.homeFeaturedTutorAccent, AppColors.homeFeaturedTutorAccent);
+      expect(
+        tokens.homeContentSheetSurface,
+        AppColors.homeContentSheetSurface,
+      );
+      expect(tokens.homeContentSheetShadowOpacity, 0);
+      expect(
+        tokens.homeContentSheetTopBorder,
+        AppColors.homeContentSheetTopBorder,
+      );
+      expect(tokens.homeHeroPatternInk, AppColors.homeHeroPatternInk);
+      expect(tokens.homeHeroPatternOpacity, 0);
+      expect(tokens.homeHeroGoldGlowOpacity, 0);
+      expect(
+        tokens.homeFeaturedTutorCtaForeground,
+        AppColors.homeFeaturedTutorCtaForeground,
+      );
+      expect(tokens.homePrayerHeroWatermarkOpacity, 0.07);
+      expect(
+        tokens.backgroundGradient().colors,
+        [
+          tokens.backgroundGradientStart,
+          Color.lerp(
+            tokens.backgroundGradientStart,
+            tokens.backgroundGradientEnd,
+            0.42,
+          )!,
+          tokens.backgroundGradientEnd,
+        ],
+      );
+    });
+
+    test('screenHorizontalPadding uses spaceLarge gutter', () {
+      final designTokens = MeMuslimDesignTokens.light();
+
+      expect(
+        TilawaHomeScreenTokens.screenHorizontalPadding(designTokens),
+        designTokens.spaceLarge,
+      );
+    });
+
+    test('dashboardSurfaceDecoration is flat by default', () {
+      final designTokens = MeMuslimDesignTokens.light();
+      final colorScheme = ColorScheme.fromSeed(seedColor: Colors.blue);
+      final tokens = TilawaHomeScreenTokens.light();
+      final decoration = tokens.dashboardSurfaceDecoration(
+        tokens: designTokens,
+        colorScheme: colorScheme,
+        borderRadius: BorderRadius.circular(designTokens.radiusLarge),
+      );
+
+      expect(decoration.boxShadow, isNull);
+      expect(decoration.border, isNotNull);
+      expect(decoration.color, tokens.homeContentSheetSurface);
+    });
+  });
+
   group('TilawaHomeNextPrayerHeroTokens', () {
     test('defaults use centralized AppColors gradient stops', () {
       final tokens = TilawaHomeNextPrayerHeroTokens.day();
@@ -1234,9 +1345,9 @@ void main() {
     });
   });
 
-  group('TilawaComponentTokens', () {
+  group('MeMuslimComponentTokens', () {
     test('light() creates all component tokens', () {
-      final tokens = TilawaComponentTokens.light();
+      final tokens = MeMuslimComponentTokens.light();
       expect(tokens.sectionTitle, isNotNull);
       expect(tokens.sheetHandle, isNotNull);
       expect(tokens.feedbackStrip, isNotNull);
@@ -1248,16 +1359,17 @@ void main() {
       expect(tokens.settingsGroup, isNotNull);
       expect(tokens.immersiveComposer, isNotNull);
       expect(tokens.homeNextPrayerHero, isNotNull);
+      expect(tokens.homeScreen, isNotNull);
     });
 
     test('dark() returns same as light()', () {
-      final dark = TilawaComponentTokens.dark();
-      final light = TilawaComponentTokens.light();
+      final dark = MeMuslimComponentTokens.dark();
+      final light = MeMuslimComponentTokens.light();
       expect(dark.sectionTitle.fontWeight, light.sectionTitle.fontWeight);
     });
 
     test('copyWith updates individual component tokens', () {
-      final original = TilawaComponentTokens.light();
+      final original = MeMuslimComponentTokens.light();
       final newSearchTokens = original.searchField.copyWith(
         focusedBorderOpacity: 0.3,
       );
@@ -1268,8 +1380,8 @@ void main() {
     });
 
     test('lerp interpolates all component tokens', () {
-      final first = TilawaComponentTokens.light();
-      final second = TilawaComponentTokens.dark();
+      final first = MeMuslimComponentTokens.light();
+      final second = MeMuslimComponentTokens.dark();
       final lerped = first.lerp(second, 0.5);
 
       expect(lerped.sectionTitle, isNotNull);
@@ -1277,16 +1389,16 @@ void main() {
       expect(lerped.feedbackStrip, isNotNull);
     });
 
-    test('returns self when other is not TilawaComponentTokens', () {
-      final tokens = TilawaComponentTokens.light();
+    test('returns self when other is not MeMuslimComponentTokens', () {
+      final tokens = MeMuslimComponentTokens.light();
       final result = tokens.lerp(null, 0.5);
       expect(result.sectionTitle, tokens.sectionTitle);
     });
 
     testWidgets(
-      'TilawaComponentTokensX extension accesses tokens from ThemeData',
+      'MeMuslimComponentTokensX extension accesses tokens from ThemeData',
       (WidgetTester tester) async {
-        final tokens = TilawaComponentTokens.light();
+        final tokens = MeMuslimComponentTokens.light();
         final theme = ThemeData(extensions: [tokens]);
 
         await tester.pumpWidget(
@@ -1305,10 +1417,10 @@ void main() {
     );
 
     testWidgets(
-      'TilawaComponentTokensX uses Theme colorScheme when extension is absent',
+      'MeMuslimComponentTokensX uses Theme colorScheme when extension is absent',
       (WidgetTester tester) async {
         final colorScheme = ColorScheme.fromSeed(
-          seedColor: const Color(0xFF7A5C89),
+          seedColor: AppColors.defaultPrimary,
           brightness: Brightness.light,
         );
         final theme = ThemeData(colorScheme: colorScheme);

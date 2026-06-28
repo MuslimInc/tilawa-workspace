@@ -40,7 +40,7 @@ class TilawaAlphabetScrollbarTokens {
   /// Soft shadow under the drag bubble ([Colors.black] with calibrated alpha).
   final Color overlayShadowColor;
 
-  /// Blur radius for the overlay shadow (aligned with [TilawaDesignTokens.blurShadow]).
+  /// Blur radius for the overlay shadow (aligned with [MeMuslimDesignTokens.blurShadow]).
   final double overlayShadowBlur;
 
   final Offset overlayShadowOffset;
@@ -55,8 +55,8 @@ class TilawaAlphabetScrollbarTokens {
     ColorScheme colorScheme,
   ) {
     return TilawaAlphabetScrollbarTokens(
-      width: kTilawaMinInteractiveDimension,
-      itemExtent: kTilawaMinInteractiveDimension,
+      width: kMeMuslimMinInteractiveDimension,
+      itemExtent: kMeMuslimMinInteractiveDimension,
       selectedIndicatorExtent: 36,
       letterTextRole: TilawaTextRole.labelMedium,
       verticalPadding: EdgeInsets.zero,
@@ -348,10 +348,10 @@ class TilawaIconActionButtonTokens {
   final double inactiveBorderOpacity;
 
   factory TilawaIconActionButtonTokens.defaults() {
-    // Size = Tilawa hit-target floor (kTilawaMinInteractiveDimension, 48 dp).
+    // Size = Tilawa hit-target floor (kMeMuslimMinInteractiveDimension, 48 dp).
     // At the floor; do not shrink further.
     return const TilawaIconActionButtonTokens(
-      size: kTilawaMinInteractiveDimension,
+      size: kMeMuslimMinInteractiveDimension,
       activeBackgroundOpacity: 0.12,
       activeBorderOpacity: 0.35,
       inactiveBorderOpacity: 0.26,
@@ -444,7 +444,7 @@ class TilawaChipTokens {
   final EdgeInsetsGeometry inlinePadding;
   final Color backgroundColor;
 
-  /// Default stroke for [TilawaChip] / [TilawaMetadataChip] ([TilawaDesignTokens.opacityMedium] on [ColorScheme.outlineVariant]).
+  /// Default stroke for [TilawaChip] / [TilawaMetadataChip] ([MeMuslimDesignTokens.opacityMedium] on [ColorScheme.outlineVariant]).
   final Color defaultBorderColor;
 
   /// Catalog [TilawaSelectionPillStyle.catalog] selected fill/label.
@@ -864,7 +864,7 @@ class TilawaSeekBarTokens {
   factory TilawaSeekBarTokens.defaults() {
     // fix: Accessibility — Tilawa 48 dp touch strip for seek interaction.
     return const TilawaSeekBarTokens(
-      touchExtent: kTilawaMinInteractiveDimension,
+      touchExtent: kMeMuslimMinInteractiveDimension,
       horizontalMargin: 16,
       trackHeight: 8,
       thumbRadius: 12,
@@ -973,9 +973,10 @@ class TilawaSearchFieldTokens {
   }
 
   factory TilawaSearchFieldTokens.fromColorScheme(ColorScheme colorScheme) {
-    final TilawaDesignTokens tokens = colorScheme.brightness == Brightness.dark
-        ? TilawaDesignTokens.dark()
-        : TilawaDesignTokens.light();
+    final MeMuslimDesignTokens tokens =
+        colorScheme.brightness == Brightness.dark
+        ? MeMuslimDesignTokens.dark()
+        : MeMuslimDesignTokens.light();
     final backgroundColor = colorScheme.surface;
     const focusedBorderOpacity = 0.28;
     const unfocusedBorderOpacity = 0.26;
@@ -998,7 +999,7 @@ class TilawaSearchFieldTokens {
     );
     final prefixIconFocusedColor = colorScheme.onSurfaceVariant;
     return TilawaSearchFieldTokens(
-      height: kTilawaMinInteractiveDimension,
+      height: kMeMuslimMinInteractiveDimension,
       backgroundColor: backgroundColor,
       contentPadding: EdgeInsets.symmetric(vertical: tokens.spaceMedium),
       scrollPadding: EdgeInsets.all(tokens.spaceLarge),
@@ -1537,6 +1538,497 @@ class TilawaHomeNextPrayerHeroTokens {
   }
 }
 
+/// Screen-level Home canvas and next-prayer glass card semantics.
+@immutable
+class TilawaHomeScreenTokens {
+  const TilawaHomeScreenTokens({
+    required this.backgroundGradientStart,
+    required this.backgroundGradientMiddle,
+    required this.backgroundGradientEnd,
+    required this.backgroundGlowColor,
+    required this.backgroundGlowOpacity,
+    required this.homePrayerHeroBackground,
+    required this.homePrayerHeroBorder,
+    required this.homePrayerHeroShadow,
+    required this.homePrayerHeroShadowOpacity,
+    required this.homePrayerHeroAccent,
+    required this.homePrayerHeroWatermark,
+    required this.homePrayerHeroWatermarkOpacity,
+    required this.homeHeaderChipBackground,
+    required this.homeHeaderSecondaryText,
+    required this.homeCollapsedHeaderFill,
+    required this.homeCollapsedHeaderBorder,
+    required this.homeCollapsedHeaderShadowOpacity,
+    required this.homeFeaturedTutorGradientStart,
+    required this.homeFeaturedTutorGradientEnd,
+    required this.homeFeaturedTutorAccent,
+    required this.homeContentSheetSurface,
+    required this.homeContentSheetShadowOpacity,
+    required this.homeContentSheetTopBorder,
+    required this.homeHeroPatternInk,
+    required this.homeHeroPatternOpacity,
+    required this.homeHeroGoldGlowOpacity,
+    required this.homeFeaturedTutorCtaForeground,
+    required this.quickActionTileBackground,
+  });
+
+  final Color backgroundGradientStart;
+  final Color backgroundGradientMiddle;
+  final Color backgroundGradientEnd;
+  final Color backgroundGlowColor;
+  final double backgroundGlowOpacity;
+  final Color homePrayerHeroBackground;
+  final Color homePrayerHeroBorder;
+  final Color homePrayerHeroShadow;
+  final double homePrayerHeroShadowOpacity;
+  final Color homePrayerHeroAccent;
+  final Color homePrayerHeroWatermark;
+  final double homePrayerHeroWatermarkOpacity;
+  final Color homeHeaderChipBackground;
+  final Color homeHeaderSecondaryText;
+  final Color homeCollapsedHeaderFill;
+  final Color homeCollapsedHeaderBorder;
+  final double homeCollapsedHeaderShadowOpacity;
+  final Color homeFeaturedTutorGradientStart;
+  final Color homeFeaturedTutorGradientEnd;
+  final Color homeFeaturedTutorAccent;
+  final Color homeContentSheetSurface;
+  final double homeContentSheetShadowOpacity;
+  final Color homeContentSheetTopBorder;
+  final Color homeHeroPatternInk;
+  final double homeHeroPatternOpacity;
+  final double homeHeroGoldGlowOpacity;
+  final Color homeFeaturedTutorCtaForeground;
+  final Color quickActionTileBackground;
+
+  /// Overlap between the hero bottom and the content sheet top edge.
+  static double contentSheetOverlap(MeMuslimDesignTokens tokens) {
+    return tokens.spaceMedium;
+  }
+
+  /// Horizontal inset for Home dashboard screen edges.
+  ///
+  /// Uses [MeMuslimDesignTokens.spaceLarge] — same gutter as other product
+  /// screens (prayer times, reciters, history).
+  static double screenHorizontalPadding(MeMuslimDesignTokens tokens) {
+    return tokens.spaceLarge;
+  }
+
+  BoxDecoration contentSheetDecoration({
+    required MeMuslimDesignTokens tokens,
+    required ColorScheme colorScheme,
+    required BorderRadius borderRadius,
+  }) {
+    return BoxDecoration(
+      color: homeContentSheetSurface,
+      borderRadius: borderRadius,
+      border: Border(
+        top: BorderSide(
+          color: homeContentSheetTopBorder,
+          width: tokens.borderWidthThin,
+        ),
+      ),
+      boxShadow: homeContentSheetShadowOpacity > 0
+          ? <BoxShadow>[
+              BoxShadow(
+                color: colorScheme.shadow.withValues(
+                  alpha: homeContentSheetShadowOpacity,
+                ),
+                offset: Offset(0, -tokens.shadowOffsetSmall.dy.abs()),
+                blurRadius: tokens.spaceMedium.toDouble(),
+              ),
+            ]
+          : null,
+    );
+  }
+
+  /// Flat dashboard card chrome — hairline border with optional soft shadow.
+  BoxDecoration dashboardSurfaceDecoration({
+    required MeMuslimDesignTokens tokens,
+    required ColorScheme colorScheme,
+    required BorderRadius borderRadius,
+    Color? color,
+    double? shadowOpacity,
+  }) {
+    final double opacity = shadowOpacity ?? homePrayerHeroShadowOpacity;
+    final Color borderColor = Color.alphaBlend(
+      homePrayerHeroBorder.withValues(alpha: 0.72),
+      colorScheme.outlineVariant.withValues(alpha: 0.28),
+    );
+
+    return BoxDecoration(
+      color: color ?? homeContentSheetSurface,
+      borderRadius: borderRadius,
+      border: Border.all(
+        color: borderColor,
+        width: tokens.borderWidthThin,
+      ),
+      boxShadow: opacity > 0
+          ? <BoxShadow>[
+              BoxShadow(
+                color: homePrayerHeroShadow.withValues(alpha: opacity),
+                offset: Offset(0, tokens.spaceExtraSmall.toDouble()),
+                blurRadius: tokens.spaceLarge.toDouble(),
+              ),
+            ]
+          : null,
+    );
+  }
+
+  LinearGradient featuredTutorGradient() {
+    return LinearGradient(
+      begin: AlignmentDirectional.topStart,
+      end: AlignmentDirectional.bottomEnd,
+      colors: <Color>[
+        homeFeaturedTutorGradientStart,
+        homeFeaturedTutorGradientEnd,
+      ],
+    );
+  }
+
+  LinearGradient backgroundGradient() {
+    final Color middle = Color.lerp(
+      backgroundGradientStart,
+      backgroundGradientEnd,
+      0.42,
+    )!;
+
+    return LinearGradient(
+      begin: AlignmentDirectional.topCenter,
+      end: AlignmentDirectional.bottomCenter,
+      colors: <Color>[
+        backgroundGradientStart,
+        middle,
+        backgroundGradientEnd,
+      ],
+      stops: const <double>[0, 0.42, 1],
+    );
+  }
+
+  /// Theme-aware Home canvas gradient — soft warm off-white, not primary wash.
+  LinearGradient backgroundGradientFor(ColorScheme colorScheme) {
+    final Color top = Color.lerp(
+      backgroundGradientStart,
+      AppColors.brandActionGreen,
+      0.03,
+    )!;
+
+    return LinearGradient(
+      begin: AlignmentDirectional.topCenter,
+      end: AlignmentDirectional.bottomCenter,
+      colors: <Color>[
+        top,
+        backgroundGradientMiddle,
+        backgroundGradientEnd,
+      ],
+      stops: const <double>[0, 0.38, 1],
+    );
+  }
+
+  factory TilawaHomeScreenTokens.light() {
+    return const TilawaHomeScreenTokens(
+      backgroundGradientStart: AppColors.homeBackgroundGradientStart,
+      backgroundGradientMiddle: AppColors.homeBackgroundGradientMiddle,
+      backgroundGradientEnd: AppColors.homeBackgroundGradientEnd,
+      backgroundGlowColor: AppColors.homeBackgroundGlow,
+      backgroundGlowOpacity: 0,
+      homePrayerHeroBackground: AppColors.homePrayerHeroBackground,
+      homePrayerHeroBorder: AppColors.homePrayerHeroBorder,
+      homePrayerHeroShadow: AppColors.homePrayerHeroShadow,
+      homePrayerHeroShadowOpacity: 0,
+      homePrayerHeroAccent: AppColors.homePrayerHeroAccent,
+      homePrayerHeroWatermark: AppColors.homePrayerHeroWatermark,
+      homePrayerHeroWatermarkOpacity: 0.07,
+      homeHeaderChipBackground: AppColors.homeHeaderChipBackground,
+      homeHeaderSecondaryText: AppColors.homeHeaderSecondaryText,
+      homeCollapsedHeaderFill: AppColors.homeCollapsedHeaderFill,
+      homeCollapsedHeaderBorder: AppColors.homeCollapsedHeaderBorder,
+      homeCollapsedHeaderShadowOpacity: 0,
+      homeFeaturedTutorGradientStart: AppColors.homeFeaturedTutorGradientStart,
+      homeFeaturedTutorGradientEnd: AppColors.homeFeaturedTutorGradientEnd,
+      homeFeaturedTutorAccent: AppColors.homeFeaturedTutorAccent,
+      homeContentSheetSurface: AppColors.homeContentSheetSurface,
+      homeContentSheetShadowOpacity: 0,
+      homeContentSheetTopBorder: AppColors.homeContentSheetTopBorder,
+      homeHeroPatternInk: AppColors.homeHeroPatternInk,
+      homeHeroPatternOpacity: 0,
+      homeHeroGoldGlowOpacity: 0,
+      homeFeaturedTutorCtaForeground: AppColors.homeFeaturedTutorCtaForeground,
+      quickActionTileBackground: AppColors.homeQuickActionTileBackground,
+    );
+  }
+
+  factory TilawaHomeScreenTokens.dark() {
+    return const TilawaHomeScreenTokens(
+      backgroundGradientStart: AppColors.homeBackgroundGradientStartDark,
+      backgroundGradientMiddle: AppColors.homeBackgroundGradientMiddleDark,
+      backgroundGradientEnd: AppColors.homeBackgroundGradientEndDark,
+      backgroundGlowColor: AppColors.homeBackgroundGlowDark,
+      backgroundGlowOpacity: 0.28,
+      homePrayerHeroBackground: AppColors.homePrayerHeroBackgroundDark,
+      homePrayerHeroBorder: AppColors.homePrayerHeroBorderDark,
+      homePrayerHeroShadow: AppColors.homePrayerHeroShadowDark,
+      homePrayerHeroShadowOpacity: 0,
+      homePrayerHeroAccent: AppColors.homePrayerHeroAccentDark,
+      homePrayerHeroWatermark: AppColors.homePrayerHeroWatermarkDark,
+      homePrayerHeroWatermarkOpacity: 0.06,
+      homeHeaderChipBackground: AppColors.homeHeaderChipBackgroundDark,
+      homeHeaderSecondaryText: AppColors.homeHeaderSecondaryTextDark,
+      homeCollapsedHeaderFill: AppColors.homeCollapsedHeaderFillDark,
+      homeCollapsedHeaderBorder: AppColors.homeCollapsedHeaderBorderDark,
+      homeCollapsedHeaderShadowOpacity: 0,
+      homeFeaturedTutorGradientStart:
+          AppColors.homeFeaturedTutorGradientStartDark,
+      homeFeaturedTutorGradientEnd: AppColors.homeFeaturedTutorGradientEndDark,
+      homeFeaturedTutorAccent: AppColors.homeFeaturedTutorAccentDark,
+      homeContentSheetSurface: AppColors.homeContentSheetSurfaceDark,
+      homeContentSheetShadowOpacity: 0,
+      homeContentSheetTopBorder: AppColors.homeContentSheetTopBorderDark,
+      homeHeroPatternInk: AppColors.homeHeroPatternInkDark,
+      homeHeroPatternOpacity: 0.04,
+      homeHeroGoldGlowOpacity: 0.10,
+      homeFeaturedTutorCtaForeground:
+          AppColors.homeFeaturedTutorCtaForegroundDark,
+      quickActionTileBackground: AppColors.homeQuickActionTileBackgroundDark,
+    );
+  }
+
+  TilawaHomeScreenTokens copyWith({
+    Color? backgroundGradientStart,
+    Color? backgroundGradientMiddle,
+    Color? backgroundGradientEnd,
+    Color? backgroundGlowColor,
+    double? backgroundGlowOpacity,
+    Color? homePrayerHeroBackground,
+    Color? homePrayerHeroBorder,
+    Color? homePrayerHeroShadow,
+    double? homePrayerHeroShadowOpacity,
+    Color? homePrayerHeroAccent,
+    Color? homePrayerHeroWatermark,
+    double? homePrayerHeroWatermarkOpacity,
+    Color? homeHeaderChipBackground,
+    Color? homeHeaderSecondaryText,
+    Color? homeCollapsedHeaderFill,
+    Color? homeCollapsedHeaderBorder,
+    double? homeCollapsedHeaderShadowOpacity,
+    Color? homeFeaturedTutorGradientStart,
+    Color? homeFeaturedTutorGradientEnd,
+    Color? homeFeaturedTutorAccent,
+    Color? homeContentSheetSurface,
+    double? homeContentSheetShadowOpacity,
+    Color? homeContentSheetTopBorder,
+    Color? homeHeroPatternInk,
+    double? homeHeroPatternOpacity,
+    double? homeHeroGoldGlowOpacity,
+    Color? homeFeaturedTutorCtaForeground,
+    Color? quickActionTileBackground,
+  }) {
+    return TilawaHomeScreenTokens(
+      backgroundGradientStart:
+          backgroundGradientStart ?? this.backgroundGradientStart,
+      backgroundGradientMiddle:
+          backgroundGradientMiddle ?? this.backgroundGradientMiddle,
+      backgroundGradientEnd:
+          backgroundGradientEnd ?? this.backgroundGradientEnd,
+      backgroundGlowColor: backgroundGlowColor ?? this.backgroundGlowColor,
+      backgroundGlowOpacity:
+          backgroundGlowOpacity ?? this.backgroundGlowOpacity,
+      homePrayerHeroBackground:
+          homePrayerHeroBackground ?? this.homePrayerHeroBackground,
+      homePrayerHeroBorder: homePrayerHeroBorder ?? this.homePrayerHeroBorder,
+      homePrayerHeroShadow: homePrayerHeroShadow ?? this.homePrayerHeroShadow,
+      homePrayerHeroShadowOpacity:
+          homePrayerHeroShadowOpacity ?? this.homePrayerHeroShadowOpacity,
+      homePrayerHeroAccent: homePrayerHeroAccent ?? this.homePrayerHeroAccent,
+      homePrayerHeroWatermark:
+          homePrayerHeroWatermark ?? this.homePrayerHeroWatermark,
+      homePrayerHeroWatermarkOpacity:
+          homePrayerHeroWatermarkOpacity ?? this.homePrayerHeroWatermarkOpacity,
+      homeHeaderChipBackground:
+          homeHeaderChipBackground ?? this.homeHeaderChipBackground,
+      homeHeaderSecondaryText:
+          homeHeaderSecondaryText ?? this.homeHeaderSecondaryText,
+      homeCollapsedHeaderFill:
+          homeCollapsedHeaderFill ?? this.homeCollapsedHeaderFill,
+      homeCollapsedHeaderBorder:
+          homeCollapsedHeaderBorder ?? this.homeCollapsedHeaderBorder,
+      homeCollapsedHeaderShadowOpacity:
+          homeCollapsedHeaderShadowOpacity ??
+          this.homeCollapsedHeaderShadowOpacity,
+      homeFeaturedTutorGradientStart:
+          homeFeaturedTutorGradientStart ?? this.homeFeaturedTutorGradientStart,
+      homeFeaturedTutorGradientEnd:
+          homeFeaturedTutorGradientEnd ?? this.homeFeaturedTutorGradientEnd,
+      homeFeaturedTutorAccent:
+          homeFeaturedTutorAccent ?? this.homeFeaturedTutorAccent,
+      homeContentSheetSurface:
+          homeContentSheetSurface ?? this.homeContentSheetSurface,
+      homeContentSheetShadowOpacity:
+          homeContentSheetShadowOpacity ?? this.homeContentSheetShadowOpacity,
+      homeContentSheetTopBorder:
+          homeContentSheetTopBorder ?? this.homeContentSheetTopBorder,
+      homeHeroPatternInk: homeHeroPatternInk ?? this.homeHeroPatternInk,
+      homeHeroPatternOpacity:
+          homeHeroPatternOpacity ?? this.homeHeroPatternOpacity,
+      homeHeroGoldGlowOpacity:
+          homeHeroGoldGlowOpacity ?? this.homeHeroGoldGlowOpacity,
+      homeFeaturedTutorCtaForeground:
+          homeFeaturedTutorCtaForeground ?? this.homeFeaturedTutorCtaForeground,
+      quickActionTileBackground:
+          quickActionTileBackground ?? this.quickActionTileBackground,
+    );
+  }
+
+  static TilawaHomeScreenTokens lerp(
+    TilawaHomeScreenTokens a,
+    TilawaHomeScreenTokens b,
+    double t,
+  ) {
+    return TilawaHomeScreenTokens(
+      backgroundGradientStart: Color.lerp(
+        a.backgroundGradientStart,
+        b.backgroundGradientStart,
+        t,
+      )!,
+      backgroundGradientMiddle: Color.lerp(
+        a.backgroundGradientMiddle,
+        b.backgroundGradientMiddle,
+        t,
+      )!,
+      backgroundGradientEnd: Color.lerp(
+        a.backgroundGradientEnd,
+        b.backgroundGradientEnd,
+        t,
+      )!,
+      backgroundGlowColor: Color.lerp(
+        a.backgroundGlowColor,
+        b.backgroundGlowColor,
+        t,
+      )!,
+      backgroundGlowOpacity: lerpTokenDouble(
+        a.backgroundGlowOpacity,
+        b.backgroundGlowOpacity,
+        t,
+      ),
+      homePrayerHeroBackground: Color.lerp(
+        a.homePrayerHeroBackground,
+        b.homePrayerHeroBackground,
+        t,
+      )!,
+      homePrayerHeroBorder: Color.lerp(
+        a.homePrayerHeroBorder,
+        b.homePrayerHeroBorder,
+        t,
+      )!,
+      homePrayerHeroShadow: Color.lerp(
+        a.homePrayerHeroShadow,
+        b.homePrayerHeroShadow,
+        t,
+      )!,
+      homePrayerHeroShadowOpacity: lerpTokenDouble(
+        a.homePrayerHeroShadowOpacity,
+        b.homePrayerHeroShadowOpacity,
+        t,
+      ),
+      homePrayerHeroAccent: Color.lerp(
+        a.homePrayerHeroAccent,
+        b.homePrayerHeroAccent,
+        t,
+      )!,
+      homePrayerHeroWatermark: Color.lerp(
+        a.homePrayerHeroWatermark,
+        b.homePrayerHeroWatermark,
+        t,
+      )!,
+      homePrayerHeroWatermarkOpacity: lerpTokenDouble(
+        a.homePrayerHeroWatermarkOpacity,
+        b.homePrayerHeroWatermarkOpacity,
+        t,
+      ),
+      homeHeaderChipBackground: Color.lerp(
+        a.homeHeaderChipBackground,
+        b.homeHeaderChipBackground,
+        t,
+      )!,
+      homeHeaderSecondaryText: Color.lerp(
+        a.homeHeaderSecondaryText,
+        b.homeHeaderSecondaryText,
+        t,
+      )!,
+      homeCollapsedHeaderFill: Color.lerp(
+        a.homeCollapsedHeaderFill,
+        b.homeCollapsedHeaderFill,
+        t,
+      )!,
+      homeCollapsedHeaderBorder: Color.lerp(
+        a.homeCollapsedHeaderBorder,
+        b.homeCollapsedHeaderBorder,
+        t,
+      )!,
+      homeCollapsedHeaderShadowOpacity: lerpTokenDouble(
+        a.homeCollapsedHeaderShadowOpacity,
+        b.homeCollapsedHeaderShadowOpacity,
+        t,
+      ),
+      homeFeaturedTutorGradientStart: Color.lerp(
+        a.homeFeaturedTutorGradientStart,
+        b.homeFeaturedTutorGradientStart,
+        t,
+      )!,
+      homeFeaturedTutorGradientEnd: Color.lerp(
+        a.homeFeaturedTutorGradientEnd,
+        b.homeFeaturedTutorGradientEnd,
+        t,
+      )!,
+      homeFeaturedTutorAccent: Color.lerp(
+        a.homeFeaturedTutorAccent,
+        b.homeFeaturedTutorAccent,
+        t,
+      )!,
+      homeContentSheetSurface: Color.lerp(
+        a.homeContentSheetSurface,
+        b.homeContentSheetSurface,
+        t,
+      )!,
+      homeContentSheetShadowOpacity: lerpTokenDouble(
+        a.homeContentSheetShadowOpacity,
+        b.homeContentSheetShadowOpacity,
+        t,
+      ),
+      homeContentSheetTopBorder: Color.lerp(
+        a.homeContentSheetTopBorder,
+        b.homeContentSheetTopBorder,
+        t,
+      )!,
+      homeHeroPatternInk: Color.lerp(
+        a.homeHeroPatternInk,
+        b.homeHeroPatternInk,
+        t,
+      )!,
+      homeHeroPatternOpacity: lerpTokenDouble(
+        a.homeHeroPatternOpacity,
+        b.homeHeroPatternOpacity,
+        t,
+      ),
+      homeHeroGoldGlowOpacity: lerpTokenDouble(
+        a.homeHeroGoldGlowOpacity,
+        b.homeHeroGoldGlowOpacity,
+        t,
+      ),
+      homeFeaturedTutorCtaForeground: Color.lerp(
+        a.homeFeaturedTutorCtaForeground,
+        b.homeFeaturedTutorCtaForeground,
+        t,
+      )!,
+      quickActionTileBackground: Color.lerp(
+        a.quickActionTileBackground,
+        b.quickActionTileBackground,
+        t,
+      )!,
+    );
+  }
+}
+
 /// Home dashboard card surface — a soft [ColorScheme.primaryContainer] wash so
 /// Token-backed featured dashboard cards (Last Read, resume hubs).
 ///
@@ -2007,8 +2499,8 @@ class TilawaCupertinoWheelPickerTokens {
     ColorScheme colorScheme,
   ) {
     final design = colorScheme.brightness == Brightness.dark
-        ? TilawaDesignTokens.dark()
-        : TilawaDesignTokens.light();
+        ? MeMuslimDesignTokens.dark()
+        : MeMuslimDesignTokens.light();
     return TilawaCupertinoWheelPickerTokens(
       pickerHeight: 200,
       segmentGap: design.spaceSmall,

@@ -8,7 +8,10 @@ import '../../lib/src/molecules/tilawa_alphabet_scrollbar.dart';
 Widget _wrap(Widget child) {
   return MaterialApp(
     theme: ThemeData(
-      extensions: [TilawaDesignTokens.light(), TilawaComponentTokens.light()],
+      extensions: [
+        MeMuslimDesignTokens.light(),
+        MeMuslimComponentTokens.light(),
+      ],
     ),
     home: Scaffold(body: child),
   );
@@ -963,8 +966,8 @@ void main() {
         MaterialApp(
           theme: ThemeData(
             extensions: [
-              TilawaDesignTokens.light(),
-              TilawaComponentTokens.light(),
+              MeMuslimDesignTokens.light(),
+              MeMuslimComponentTokens.light(),
             ],
           ),
           home: NotificationListener<ScrollNotification>(
@@ -1047,8 +1050,8 @@ void main() {
         brightness: Brightness.light,
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         extensions: [
-          TilawaDesignTokens.light(),
-          TilawaComponentTokens.light(),
+          MeMuslimDesignTokens.light(),
+          MeMuslimComponentTokens.light(),
         ],
       );
       final ThemeData darkTheme = ThemeData(
@@ -1058,8 +1061,8 @@ void main() {
           brightness: Brightness.dark,
         ),
         extensions: [
-          TilawaDesignTokens.dark(),
-          TilawaComponentTokens.dark(),
+          MeMuslimDesignTokens.dark(),
+          MeMuslimComponentTokens.dark(),
         ],
       );
       final ValueNotifier<ThemeMode> themeMode = ValueNotifier<ThemeMode>(
@@ -1117,8 +1120,8 @@ void main() {
               labelMedium: TextStyle(),
             ),
             extensions: [
-              TilawaDesignTokens.light(),
-              TilawaComponentTokens.light(),
+              MeMuslimDesignTokens.light(),
+              MeMuslimComponentTokens.light(),
             ],
           ),
           home: Scaffold(

@@ -1,11 +1,14 @@
 import {
   Timestamp,
-  WriteBatch,
 } from "firebase-admin/firestore";
 import { nowServer } from "./sessionLifecycleService";
 
 export type SessionNotificationKind =
   | "bookingConfirmed"
+  | "bookingRequestReceived"
+  | "bookingRequestAccepted"
+  | "bookingRequestRejected"
+  | "bookingRequestExpired"
   | "cancellation"
   | "rescheduleRequested"
   | "rescheduleConfirmed"
@@ -13,7 +16,8 @@ export type SessionNotificationKind =
   | "compensationIssued"
   | "refundApproved"
   | "disputeOpened"
-  | "reminder";
+  | "reminder"
+  | "incomingCall";
 
 export interface EnqueueSessionNotificationInput {
   sessionId: string;
@@ -82,6 +86,30 @@ export function buildNotificationCopy(
         body: "Your Quran session is confirmed.",
         actionType: "quran_session_booking_confirmed",
       };
+    case "bookingRequestReceived":
+      return {
+        title: "طلب حجز جديد",
+        body: "لديك طلب حجز حصة بانتظار موافقتك.",
+        actionType: "quran_session_booking_request_received",
+      };
+    case "bookingRequestAccepted":
+      return {
+        title: "تم قبول الحصة",
+        body: "يمكنك الانضمام في موعد الحصة.",
+        actionType: "quran_session_booking_request_accepted",
+      };
+    case "bookingRequestRejected":
+      return {
+        title: "اعتذر المحفظ عن قبول الحصة",
+        body: "يمكنك اختيار موعد آخر.",
+        actionType: "quran_session_booking_request_rejected",
+      };
+    case "bookingRequestExpired":
+      return {
+        title: "انتهت صلاحية طلب الحجز",
+        body: "لم يتم قبول طلب الحجز في الوقت المحدد.",
+        actionType: "quran_session_booking_request_expired",
+      };
     case "cancellation":
       return {
         title: "Session cancelled",
@@ -139,6 +167,21 @@ export function buildNotificationCopy(
         actionType: "quran_session_reminder",
       };
     }
+    case "incomingCall": {
+      const callerRole = payload.callerRole as string;
+      const isTeacherCaller = callerRole === "teacher";
+      return {
+        title: "Incoming Quran Session call",
+        // Using English here since the current backend translations are English by default. 
+        // We could also do Arabic if supported by the notification builder.
+        // For teacher (recipient): "The student is waiting for you to join."
+        // For student (recipient): "The teacher is waiting for you to join."
+        body: isTeacherCaller 
+          ? "The teacher is waiting for you to join the session." 
+          : "The student is waiting for you to join the session.",
+        actionType: "incoming_quran_session_call",
+      };
+    }
   }
 }
 
@@ -152,12 +195,22 @@ export async function enqueueSessionNotification(
 }
 
 export function enqueueSessionNotificationInBatch(
-  batch: WriteBatch,
+  batch: FirebaseFirestore.WriteBatch,
   db: FirebaseFirestore.Firestore,
   input: EnqueueSessionNotificationInput,
 ): string {
   const ref = db.collection("quran_session_notifications").doc();
   batch.set(ref, buildSessionNotificationDoc(ref.id, input));
+  return ref.id;
+}
+
+export function enqueueSessionNotificationInTransaction(
+  tx: FirebaseFirestore.Transaction,
+  db: FirebaseFirestore.Firestore,
+  input: EnqueueSessionNotificationInput,
+): string {
+  const ref = db.collection("quran_session_notifications").doc();
+  tx.set(ref, buildSessionNotificationDoc(ref.id, input));
   return ref.id;
 }
 

@@ -53,7 +53,7 @@ Future<ReciterDetailsFabLayout> _resolveLayout(
           child: MaterialApp.router(
             theme: ThemeData(
               extensions: <ThemeExtension<dynamic>>[
-                TilawaDesignTokens.light(),
+                MeMuslimDesignTokens.light(),
               ],
             ),
             routerConfig: GoRouter(
@@ -98,14 +98,16 @@ void main() {
         audioState: const AudioPlayerState(status: AudioPlayerStatus.initial),
       );
 
-      final TilawaDesignTokens tokens = TilawaDesignTokens.light();
+      final MeMuslimDesignTokens tokens = MeMuslimDesignTokens.light();
       final double expectedFabOffset =
-          kTilawaMinInteractiveDimension + tokens.spaceLarge;
+          kMeMuslimMinInteractiveDimension + tokens.spaceLarge;
 
       expect(layout.fabBottomOffset, expectedFabOffset);
       expect(
         layout.listBottomPadding,
-        expectedFabOffset + kTilawaMinInteractiveDimension + tokens.spaceLarge,
+        expectedFabOffset +
+            kMeMuslimMinInteractiveDimension +
+            tokens.spaceLarge,
       );
       expect(layout.showScrollToTopFab, isTrue);
     });
@@ -129,10 +131,12 @@ void main() {
         ),
       );
 
-      final TilawaDesignTokens tokens = TilawaDesignTokens.light();
+      final MeMuslimDesignTokens tokens = MeMuslimDesignTokens.light();
       final double fabBottomOffset = tokens.spaceSmall + tokens.spaceLarge;
       final double fabClearance =
-          fabBottomOffset + kTilawaMinInteractiveDimension + tokens.spaceLarge;
+          fabBottomOffset +
+          kMeMuslimMinInteractiveDimension +
+          tokens.spaceLarge;
 
       expect(layout.fabBottomOffset, fabBottomOffset);
       expect(layout.listBottomPadding, fabClearance + tokens.spaceMedium);
@@ -163,7 +167,7 @@ void main() {
         viewInsets: const EdgeInsets.only(bottom: 280),
       );
 
-      final TilawaDesignTokens tokens = TilawaDesignTokens.light();
+      final MeMuslimDesignTokens tokens = MeMuslimDesignTokens.light();
 
       expect(layout.showScrollToTopFab, isFalse);
       expect(layout.fabBottomOffset, 0);
@@ -190,18 +194,18 @@ void main() {
           viewPadding: const EdgeInsets.only(bottom: systemBottomInset),
         );
 
-        final TilawaDesignTokens tokens = TilawaDesignTokens.light();
+        final MeMuslimDesignTokens tokens = MeMuslimDesignTokens.light();
         final double floatingPadding = systemBottomInset + tokens.spaceSmall;
         final double expectedFabOffset =
-            (floatingPadding > kTilawaMinInteractiveDimension
+            (floatingPadding > kMeMuslimMinInteractiveDimension
                 ? floatingPadding
-                : kTilawaMinInteractiveDimension) +
+                : kMeMuslimMinInteractiveDimension) +
             tokens.spaceLarge;
 
         expect(layout.fabBottomOffset, expectedFabOffset);
         expect(
           layout.fabBottomOffset,
-          greaterThan(kTilawaMinInteractiveDimension),
+          greaterThan(kMeMuslimMinInteractiveDimension),
         );
       },
     );

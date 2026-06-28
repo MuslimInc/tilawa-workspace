@@ -144,7 +144,7 @@ Widget _buildPageContent({
   VoidCallback? onShowIndex,
 }) {
   return MaterialApp(
-    theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+    theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
     home: Scaffold(
       body: PageContent(
         pageNumber: 10,
@@ -176,7 +176,7 @@ Future<PreparedQuranPage> _preparePageContent(WidgetTester tester) async {
   late final PreparedQuranPage preparedPage;
   await tester.pumpWidget(
     MaterialApp(
-      theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+      theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
       home: Scaffold(
         body: Builder(
           builder: (context) {

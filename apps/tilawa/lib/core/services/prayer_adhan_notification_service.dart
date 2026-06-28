@@ -869,7 +869,7 @@ class PrayerAdhanNotificationService
       if (!nativeSuccess) {
         await _notifications.zonedSchedule(
           id: testId,
-          title: 'Tilawa Debug',
+          title: 'MeMuslim Debug',
           body: 'Manual Adhan Test (10s) - Fallback',
           scheduledDate: tzTarget,
           notificationDetails: _detailsFor(

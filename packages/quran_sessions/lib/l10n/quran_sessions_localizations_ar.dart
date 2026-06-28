@@ -32,6 +32,10 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   }
 
   @override
+  String get sessionDetailNotFound =>
+      'تعذر العثور على هذه الجلسة. ربما تم إلغاؤها أو حذفها.';
+
+  @override
   String validationError(Object code, Object field) {
     return 'خطأ في التحقق: $field ($code).';
   }
@@ -90,7 +94,7 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
 
   @override
   String get guardianApprovalBody =>
-      'يجب على وليّ الأمر تسجيل الدخول على هذا الجهاز وتأكيد السماح بحجز جلسات القرآن لهذا الحساب الطلابي.';
+      'يجب على وليّ الأمر تسجيل الدخول على هذا الجهاز وتأكيد السماح بحجوزات تعلّم القرآن مع محفظك لهذا الحساب الطلابي.';
 
   @override
   String get guardianApprovalStudentIdLabel => 'معرّف حساب الطالب';
@@ -107,6 +111,61 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
 
   @override
   String get guardianApprovalSetupAction => 'إعداد موافقة وليّ الأمر';
+
+  @override
+  String get guardianDashboardTitle => 'لوحة وليّ الأمر';
+
+  @override
+  String get guardianDashboardIntroTitle => 'حجوزات جلسات الطفل';
+
+  @override
+  String get guardianDashboardIntroBody =>
+      'وافق على حجوزات تعلّم القرآن مع محفظك لطفلك من هذا الجهاز. تُسجَّل الموافقة مرة واحدة ثم يكمل الطالب الحجز.';
+
+  @override
+  String get guardianDashboardApproveAction => 'الموافقة على حجوزات الطفل';
+
+  @override
+  String get guardianDashboardOpenAction => 'فتح لوحة وليّ الأمر';
+
+  @override
+  String get guardianDashboardDeferredNote =>
+      'عرض الجلسات القادمة للطفل والموافقات المعلّقة في قائمة واحدة يتطلب ربط حساب وليّ الأمر — بعد أدوار المصادقة في MVP.';
+
+  @override
+  String get sessionRevisionPracticeUpcomingTitle => 'استعد لجلستك';
+
+  @override
+  String get sessionRevisionPracticeCompletedTitle => 'تابع مراجعتك';
+
+  @override
+  String sessionRevisionPracticeBody(int surahNumber) {
+    return 'تدرّب على سورة $surahNumber في قارئ القرآن في تلاوة قبل أو بعد جلستك.';
+  }
+
+  @override
+  String get sessionRevisionPracticeAction => 'التدرّب في قارئ القرآن';
+
+  @override
+  String get teacherCredentialsSectionTitle => 'الشهادات والإجازات';
+
+  @override
+  String teacherCredentialsSummary(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count شهادات',
+      one: 'شهادة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get teacherCredentialsDisclaimer =>
+      'الشهادات مقدَّمة من المعلّم. البنود الموثّقة راجعتها تلاوة؛ غيرها مذكورة من المعلّم.';
+
+  @override
+  String get teacherCredentialVerifiedBadge => 'موثّقة من تلاوة';
 
   @override
   String policyViolation(Object detail, Object policy) {
@@ -238,6 +297,13 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get profileFieldCity => 'المدينة';
 
   @override
+  String get profileFieldLearningGoals => 'أهداف التعلّم';
+
+  @override
+  String get profileLearningGoalsHelper =>
+      'اختياري — يساعدنا على اقتراح المعلم المناسب لك.';
+
+  @override
   String get profileFieldDisplayName => 'الاسم الكامل';
 
   @override
@@ -268,7 +334,10 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get profileCityRequired => 'المدينة مطلوبة.';
 
   @override
-  String get quranSessionsHomeTitle => 'تعلم قراءة القرآن';
+  String get quranSessionsHomeTitle => 'تعلّم القرآن مع محفظك';
+
+  @override
+  String get quranSessionsHomeAppBarTitle => 'المحفظون';
 
   @override
   String get mySessionsTitle => 'جلساتي';
@@ -287,7 +356,110 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
       'انضم إلى نخبة المعلمين المعتمدين على MeMuslim';
 
   @override
-  String get teacherListTitle => 'ابحث عن معلم';
+  String get teacherListAppBarTitle => 'المحفظون';
+
+  @override
+  String get teacherListTitle => 'تعلّم القرآن مع محفظك';
+
+  @override
+  String get teacherListSubtitle =>
+      'اختر المحفظ المناسب وابدأ رحلتك في تحسين التلاوة';
+
+  @override
+  String get teacherSearchHint => 'ابحث عن المحفظ بالاسم';
+
+  @override
+  String noTeachersForSearchQuery(String query) {
+    return 'لا يوجد محفظون يطابقون \"$query\"';
+  }
+
+  @override
+  String get teacherNewRating => 'جديد';
+
+  @override
+  String get teacherFilterAll => 'الكل';
+
+  @override
+  String get teacherFilterFree => 'مجاني';
+
+  @override
+  String get teacherFilterPaid => 'مدفوع';
+
+  @override
+  String get teacherFilterBudget => 'اقتصادي';
+
+  @override
+  String teacherFilterUnderPrice(String amount) {
+    return 'أقل من $amount';
+  }
+
+  @override
+  String get teacherFilterAvailableToday => 'متاح اليوم';
+
+  @override
+  String get teacherBookAction => 'احجز';
+
+  @override
+  String get viewTeacherProfile => 'عرض الملف';
+
+  @override
+  String get teacherAvailabilityToday => 'متاح اليوم';
+
+  @override
+  String get teacherAvailabilityTomorrow => 'أقرب موعد غدًا';
+
+  @override
+  String teacherAvailabilityNextAt(String when) {
+    return 'أقرب موعد: $when';
+  }
+
+  @override
+  String get teacherAvailabilityNoSlots => 'لا توجد مواعيد';
+
+  @override
+  String get teacherAvailabilityUnavailable => 'غير متاح حاليًا';
+
+  @override
+  String get joinSessionNow => 'انضم الآن';
+
+  @override
+  String sessionsSummaryUpcoming(int count) {
+    return 'القادمة: $count';
+  }
+
+  @override
+  String sessionsSummaryPast(int count) {
+    return 'السابقة: $count';
+  }
+
+  @override
+  String sessionsSummaryNextSession(String when) {
+    return 'أقرب حصة: $when';
+  }
+
+  @override
+  String get sessionsTabUpcoming => 'القادمة';
+
+  @override
+  String get sessionsTabPast => 'السابقة';
+
+  @override
+  String get sessionsTabCancelled => 'الملغاة';
+
+  @override
+  String get bookAgainAction => 'احجز مرة أخرى';
+
+  @override
+  String get sessionStatusStartingSoon => 'تبدأ قريبًا';
+
+  @override
+  String sessionStartsInMinutes(int minutes) {
+    return 'يبدأ بعد $minutes د';
+  }
+
+  @override
+  String get noTeachersForAvailabilityFilter =>
+      'لا يوجد معلمون متاحون اليوم حالياً';
 
   @override
   String noTeachersForSpecialization(String specialization) {
@@ -337,11 +509,11 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
 
   @override
   String get sessionModeVoiceBetaNote =>
-      'النسخة التجريبية: الصوت يستخدم انضمامًا مؤقتًا حتى يتوفر الاتصال داخل التطبيق.';
+      'الجلسات الصوتية تستخدم الاتصال داخل التطبيق عندما يدعمها محفظك وجهازك.';
 
   @override
   String get sessionModeVideoBetaNote =>
-      'النسخة التجريبية: الفيديو يستخدم انضمامًا مؤقتًا حتى يتوفر الاتصال داخل التطبيق.';
+      'جلسات الفيديو تستخدم الاتصال داخل التطبيق عندما يدعمها محفظك وجهازك.';
 
   @override
   String bookingVoiceVideoProviderNote(String provider) {
@@ -370,7 +542,7 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
 
   @override
   String get callProviderAgoraNotConfigured =>
-      'مكالمات Agora داخل التطبيق غير مفعّلة في هذا الإصدار. أعد البناء بإعدادات Staging Agora (TILAWA_DISTRIBUTION=staging وTILAWA_LAUNCH_AGORA_APP_ID)، أو استخدم ملف التشغيل Tilawa (Staging Agora).';
+      'مكالمات Agora داخل التطبيق غير مفعّلة في هذا الإصدار. أعد البناء بإعدادات Staging Agora (TILAWA_DISTRIBUTION=staging وTILAWA_LAUNCH_AGORA_APP_ID)، أو استخدم ملف التشغيل MeMuslim (Staging Agora).';
 
   @override
   String rtcPermissionDenied(String permission) {
@@ -498,8 +670,45 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get reviewSubmittedThanks => 'شكراً — تم إرسال تقييمك!';
 
   @override
+  String get sessionReviewTitle => 'قيّم جلستك';
+
+  @override
+  String sessionReviewSubtitle(String teacherName) {
+    return 'كيف كانت جلستك مع $teacherName؟';
+  }
+
+  @override
+  String get sessionReviewSubtitleGeneric => 'كيف كانت جلستك؟';
+
+  @override
+  String get sessionReviewRatingLabel => 'تقييمك';
+
+  @override
+  String sessionReviewStarLabel(int star) {
+    return '$star نجوم';
+  }
+
+  @override
+  String get sessionReviewCommentLabel => 'تعليق (اختياري)';
+
+  @override
+  String get sessionReviewCommentHint => 'شارك ما أعجبك أو ما يمكن تحسينه';
+
+  @override
+  String get sessionReviewSubmit => 'إرسال التقييم';
+
+  @override
+  String get sessionReviewSkip => 'ليس الآن';
+
+  @override
+  String get rateSessionAction => 'قيّم الجلسة';
+
+  @override
+  String get reportTutorAction => 'الإبلاغ عن المحفظ';
+
+  @override
   String upcomingSessionsSection(int count) {
-    return 'القادمة ($count)';
+    return 'الحصص القادمة ($count)';
   }
 
   @override
@@ -542,7 +751,7 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
       'لا يُسمح بالإلغاء قرب موعد بدء الجلسة.';
 
   @override
-  String get cancelPolicyFree => 'هذه جلسة مجانية. لا يوجد استرداد.';
+  String get cancellationFreeNoRefund => 'هذه جلسة مجانية. لا يوجد استرداد.';
 
   @override
   String get cancelPolicyFullRefund => 'ستحصل على استرداد كامل إذا ألغيت الآن.';
@@ -553,6 +762,31 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
 
   @override
   String get cancelPolicyNoRefund => 'لا ينطبق استرداد للإلغاء في هذا الوقت.';
+
+  @override
+  String get tutorCancelSessionDialogTitle => 'إلغاء الحصة؟';
+
+  @override
+  String get tutorCancelSessionDialogMessage =>
+      'سيتم إبلاغ الطالب بإلغاء الحصة، ولن يتمكن من الانضمام إليها.';
+
+  @override
+  String get tutorCancelSessionAction => 'إلغاء الحصة';
+
+  @override
+  String get tutorCancelSessionGoBack => 'تراجع';
+
+  @override
+  String get tutorCancelSessionSuccess => 'تم إلغاء الحصة';
+
+  @override
+  String get tutorCancelSessionError => 'تعذّر إلغاء الحصة، حاول مرة أخرى';
+
+  @override
+  String get sessionCancelledByTutorTitle => 'اعتذر المحفظ عن إلغاء الحصة';
+
+  @override
+  String get sessionCancelledByTutorSubtitle => 'يمكنك اختيار موعد آخر';
 
   @override
   String get rescheduleSessionTitle => 'إعادة جدولة الجلسة';
@@ -652,6 +886,9 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get viewSessionDetails => 'عرض التفاصيل';
 
   @override
+  String get sessionCardOverflowMenu => 'إجراءات الجلسة';
+
+  @override
   String get noSessionsYet => 'لا توجد جلسات بعد';
 
   @override
@@ -676,7 +913,13 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get noReviewsYet => 'لا توجد تقييمات بعد';
 
   @override
+  String get aboutTeacherSection => 'نبذة عن المعلم';
+
+  @override
   String get bookSessionAction => 'احجز جلسة';
+
+  @override
+  String get noAvailabilityBookAction => 'لا توجد مواعيد متاحة';
 
   @override
   String get sessionStatusScheduled => 'مجدول';
@@ -700,10 +943,50 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get joinSession => 'انضمام';
 
   @override
+  String get sessionJoinStateNotStarted =>
+      'يفتح الانضمام قبل ١٥ دقيقة من بدء الجلسة.';
+
+  @override
+  String get sessionJoinStateJoinAvailable => 'يمكنك الانضمام الآن.';
+
+  @override
+  String get sessionJoinStateJoining => 'جارٍ الاتصال بالجلسة…';
+
+  @override
+  String get sessionJoinStateJoined => 'انضممت إلى هذه الجلسة.';
+
+  @override
+  String get sessionJoinStateFailed =>
+      'تعذّر الانضمام. أعد المحاولة أو تواصل مع الدعم.';
+
+  @override
+  String get sessionJoinStateEnded => 'انتهت هذه الجلسة.';
+
+  @override
+  String get sessionJoinStateCancelled => 'أُلغيت هذه الجلسة.';
+
+  @override
+  String get sessionCancelledSuccess => 'تم إلغاء الجلسة.';
+
+  @override
   String get noSlotsAvailable => 'لا توجد مواعيد متاحة';
 
   @override
   String get noSlotsAvailableThisDay => 'لا توجد مواعيد متاحة في هذا اليوم';
+
+  @override
+  String get slotPickerLocalTimezoneNote => 'الأوقات معروضة بتوقيتك المحلي';
+
+  @override
+  String teacherSessionsCompleted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count جلسة مكتملة',
+      one: 'جلسة واحدة مكتملة',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get teacherDashboardTitle => 'لوحة المعلم';
@@ -790,6 +1073,9 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get availabilityTitle => 'التوفر الأسبوعي';
 
   @override
+  String get availabilityAppBarTitle => 'المواعيد';
+
+  @override
   String get availabilityRecurringBanner =>
       'هذا توفرك الأسبوعي المتكرر. يُستخدم لإنشاء المواعيد القابلة للحجز في الأيام القادمة.';
 
@@ -847,7 +1133,7 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
       'حدد توفرك الأسبوعي المتكرر وستظهر المواعيد تلقائيًا للأيام المفتوحة.';
 
   @override
-  String get upcomingSessionsEmptyTitle => 'لا توجد جلسات قادمة';
+  String get upcomingSessionsEmptyTitle => 'لا توجد حصص قادمة';
 
   @override
   String get upcomingSessionsEmptySubtitle =>
@@ -1424,6 +1710,10 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get noAvailabilityYet => 'لم تُنشر أي مواعيد بعد.';
 
   @override
+  String get noAvailabilityHelper =>
+      'يمكنك العودة لاحقًا عند إضافة مواعيد جديدة.';
+
+  @override
   String get reportConcernAction => 'الإبلاغ عن مخاوف';
 
   @override
@@ -1504,6 +1794,9 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get walletTitle => 'محفظتي';
 
   @override
+  String get walletAppBarTitle => 'المحفظة';
+
+  @override
   String get walletAvailableBalanceLabel => 'الرصيد المتاح';
 
   @override
@@ -1560,6 +1853,12 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get paymentCheckoutTitle => 'تأكيد الدفع';
 
   @override
+  String get paymentCheckoutFreeTitle => 'تأكيد الحجز';
+
+  @override
+  String get paymentCheckoutFreeAmount => 'هذه الجلسة مجانية — لا يلزم دفع.';
+
+  @override
   String paymentCheckoutAmount(String amount) {
     return 'الإجمالي: $amount';
   }
@@ -1568,11 +1867,29 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get paymentCheckoutAmountPending => 'سعر الجلسة (تجريبي)';
 
   @override
+  String get paymentCheckoutSandboxNotice =>
+      'وضع تجريبي — لا يتم خصم مبلغ حقيقي. تفعيل الحجز المدفوع عبر علم الإطلاق التجريبي فقط.';
+
+  @override
   String get paymentCheckoutRefundToWalletNotice =>
-      'عند الإلغاء أو الموافقة على استرداد، يُضاف المبلغ إلى محفظة تلاوة كرصيد. لا يُعاد الرصيد تلقائيًا إلى بطاقتك.';
+      'عند الإلغاء أو الموافقة على استرداد، يُضاف المبلغ إلى محفظة أنا مسلم كرصيد. لا يُعاد الرصيد تلقائيًا إلى بطاقتك.';
 
   @override
   String get paymentCheckoutConfirm => 'تأكيد الدفع (تجريبي)';
+
+  @override
+  String get paymentCheckoutConfirmFree => 'تأكيد الحجز';
+
+  @override
+  String get bookingPriceSummaryTitle => 'سعر الجلسة';
+
+  @override
+  String get bookingPricePerSessionHint =>
+      'يُخصم مرة واحدة عند التأكيد (تجريبي فقط).';
+
+  @override
+  String get walletSandboxNotice =>
+      'محفظة تجريبية — أرصدة من الاستردادات والمدفوعات التجريبية فقط. ليست أموالًا حقيقية.';
 
   @override
   String get restrictionReasonFalseIdentity => 'بيانات هوية مزيفة';
@@ -1618,6 +1935,45 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
 
   @override
   String get sessionLifecycleCancelledByAdmin => 'ألغاها المشرف';
+
+  @override
+  String get sessionStatusCancelledByTutorDetail =>
+      'تم إلغاء الجلسة بواسطة المحفظ';
+
+  @override
+  String get sessionStatusCancelledByTutorSelf => 'ألغيت هذه الجلسة';
+
+  @override
+  String get sessionStatusCancelledByStudentDetail =>
+      'تم إلغاء الجلسة بواسطة الطالب';
+
+  @override
+  String get sessionStatusCancelledByStudentSelf => 'ألغيت هذه الجلسة';
+
+  @override
+  String get sessionStatusCancelledBySupportDetail =>
+      'تم إلغاء الجلسة بواسطة الإدارة';
+
+  @override
+  String get sessionStatusCancelledDescription => 'أُلغيت هذه الجلسة.';
+
+  @override
+  String get sessionTimelineBookingConfirmed => 'تم تأكيد الحجز';
+
+  @override
+  String get sessionTimelineCancelledByTutor => 'تم إلغاء الجلسة بواسطة المحفظ';
+
+  @override
+  String get sessionTimelineCancelledByStudent =>
+      'تم إلغاء الجلسة بواسطة الطالب';
+
+  @override
+  String get sessionTimelineCancelledBySupport =>
+      'تم إلغاء الجلسة بواسطة الإدارة';
+
+  @override
+  String get sessionCancelledDisputeHelper =>
+      'يمكنك فتح نزاع إذا احتجت لفريقنا مراجعة هذا الإلغاء.';
 
   @override
   String get sessionLifecycleTeacherNoShow => 'غياب المعلم';
@@ -1713,7 +2069,192 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get sessionActionRejectBooking => 'رفض الحجز';
 
   @override
+  String get bookingRequestSentTitle => 'تم إرسال طلب الحجز';
+
+  @override
+  String get bookingRequestSentSubtitle => 'الحجز قيد المراجعة.';
+
+  @override
+  String get sessionAwaitingReviewNextSteps =>
+      'الحجز قيد المراجعة.\nيرجى إتمام الدفع عبر إحدى الطرق المتاحة.\nسيتم تأكيد الحصة بعد مراجعة الدفع وتأكيد المعلم.';
+
+  @override
+  String get paidSessionNoticeTitle => 'هذه الحصة مدفوعة';
+
+  @override
+  String get manualPaymentInstructionsBody =>
+      'الدفع حاليًا يتم يدويًا عبر فودافون كاش أو إنستاباي أو تحويل بنكي، وذلك لحين الانتهاء من إضافة طرق الدفع أونلاين داخل التطبيق.';
+
+  @override
+  String get manualPaymentInstapayHandle => 'للدفع عبر إنستاباي:';
+
+  @override
+  String get manualPaymentInstapayLink => 'أو من خلال رابط الدفع:';
+
+  @override
+  String get manualPaymentRecipientMaskedName =>
+      'اسم المستلم الظاهر عند التحويل:';
+
+  @override
+  String get manualPaymentReceiptWhatsappInstruction =>
+      'بعد إتمام الدفع، يرجى إرسال صورة التحويل على واتساب إلى رقم الدعم:';
+
+  @override
+  String get manualPaymentConfirmationRule =>
+      'سيتم تأكيد الحجز بعد مراجعة الدفع وتأكيد المعلم.';
+
+  @override
+  String get manualPaymentCancellationPolicy =>
+      'إذا كنت قد أتممت الدفع يدويًا، يرجى التواصل مع الدعم لمراجعة حالة الدفع أو الاسترداد.';
+
+  @override
+  String manualPaymentCancellationSupportHint(String supportNumber) {
+    return 'رقم الدعم: $supportNumber';
+  }
+
+  @override
+  String get manualPaymentCopiedToClipboard => 'تم النسخ إلى الحافظة';
+
+  @override
+  String get paymentMethodVodafoneCash => 'Vodafone Cash';
+
+  @override
+  String get paymentMethodInstapay => 'InstaPay';
+
+  @override
+  String get paymentMethodBankTransfer => 'تحويل بنكي';
+
+  @override
+  String get bookingUnderReviewTitle => 'الحجز قيد المراجعة';
+
+  @override
+  String get bookingUnderReviewPaymentHint =>
+      'يرجى إتمام الدفع عبر إحدى الطرق المتاحة.';
+
+  @override
+  String get bookingUnderReviewConfirmHint =>
+      'سيتم تأكيد الحجز بعد مراجعة الدفع وتأكيد المعلم.';
+
+  @override
+  String get bookingAcceptedTitle => 'تم قبول الحصة';
+
+  @override
+  String get bookingAcceptedSubtitle => 'يمكنك الانضمام في موعد الحصة';
+
+  @override
+  String get bookingRejectedTitle => 'اعتذر المحفظ عن قبول الحصة';
+
+  @override
+  String get bookingRejectedSubtitle => 'يمكنك اختيار موعد آخر';
+
+  @override
+  String get sendBookingRequest => 'إرسال طلب الحجز';
+
+  @override
+  String get sessionStatusBookingUnderReview => 'قيد المراجعة';
+
+  @override
+  String get sessionStatusRejectedByTutor => 'مرفوض';
+
+  @override
+  String teacherPendingBookingRequestsSection(int count) {
+    return 'طلبات الحجز ($count)';
+  }
+
+  @override
+  String get teacherPendingBookingRequestsEmptyTitle =>
+      'لا توجد طلبات حجز حاليًا';
+
+  @override
+  String get teacherPendingBookingRequestsEmptySubtitle =>
+      'ستظهر طلبات الطلاب هنا عند إرسالها';
+
+  @override
+  String get teacherAcceptBookingRequest => 'قبول';
+
+  @override
+  String get teacherRejectBookingRequest => 'رفض';
+
+  @override
+  String get tutorRejectBookingSheetTitle => 'رفض طلب الحجز؟';
+
+  @override
+  String get tutorRejectBookingSheetBody =>
+      'يمكنك توضيح سبب الرفض للطالب، أو رفض الطلب بدون سبب.';
+
+  @override
+  String get tutorRejectBookingReasonLabel => 'سبب الرفض';
+
+  @override
+  String get tutorRejectBookingReasonHint => 'مثال: الموعد غير مناسب';
+
+  @override
+  String get tutorRejectBookingConfirmAction => 'رفض الطلب';
+
+  @override
+  String get tutorRejectBookingGoBack => 'تراجع';
+
+  @override
+  String get tutorRejectBookingReasonTooLong => 'سبب الرفض طويل جداً';
+
+  @override
+  String get tutorCancelSessionFromCard => 'إلغاء';
+
+  @override
+  String get sessionLifecycleBookingUnderReview => 'الحجز قيد المراجعة';
+
+  @override
+  String get sessionLifecycleRejectedByTutor => 'مرفوض من المحفظ';
+
+  @override
+  String get sessionActionSubmitBookingRequest => 'إرسال طلب الحجز';
+
+  @override
+  String get sessionActionAcceptBookingRequest => 'قبول طلب الحجز';
+
+  @override
+  String get sessionActionRejectBookingRequest => 'رفض طلب الحجز';
+
+  @override
+  String get sessionActionExpireBookingReview => 'انتهاء مراجعة الحجز';
+
+  @override
   String sessionTimelineStatusTransition(String previous, String next) {
     return '$previous ← $next';
+  }
+
+  @override
+  String get tutorDashboardStudentFallback => 'طالب';
+
+  @override
+  String get teacherDashboardLoadError => 'تعذّر تحميل الحصص، حاول مرة أخرى';
+
+  @override
+  String get tutorSessionStatusPendingApproval => 'بانتظار موافقتك';
+
+  @override
+  String get tutorSessionStatusAccepted => 'مقبولة';
+
+  @override
+  String get tutorSessionStatusRejected => 'مرفوضة';
+
+  @override
+  String get tutorSessionStatusCancelledByTutor => 'ألغيتها';
+
+  @override
+  String get tutorSessionStatusCancelledByStudent => 'ألغاها الطالب';
+
+  @override
+  String get tutorSessionStatusCompleted => 'مكتملة';
+
+  @override
+  String get tutorSessionStatusExpired => 'انتهى الموعد';
+
+  @override
+  String get tutorSessionJoinNotYet => 'لم يبدأ الموعد بعد';
+
+  @override
+  String tutorSessionDurationMinutes(int count) {
+    return '$count د';
   }
 }

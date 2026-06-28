@@ -90,7 +90,7 @@ class TilawaGoogleSignInButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     final GoogleSignInButtonAppearance resolved = _resolvedAppearance(context);
 
     final Color fill = switch (resolved) {
@@ -196,30 +196,35 @@ class TilawaGoogleSignInButton extends StatelessWidget {
       ],
     );
 
-    final Widget surface = Material(
-      color: fill,
-      elevation: 0,
-      shadowColor: Colors.transparent,
-      surfaceTintColor: Colors.transparent,
-      shape: shape,
-      clipBehavior: Clip.antiAlias,
-      child: SizedBox(
-        height: height,
-        width: isFullWidth ? double.infinity : null,
-        child: content,
-      ),
+    final Widget sizedContent = SizedBox(
+      height: height,
+      width: isFullWidth ? double.infinity : null,
+      child: content,
     );
 
-    // The whole branded button gets the kit's press-scale, focus ring, and
-    // activation haptic (no Material ink ripple). The outer Semantics owns the
-    // accessible button role/label, so the surface's own semantics are excluded.
-    final Widget button = TilawaInteractiveSurface(
-      onTap: _isDisabled ? null : onPressed,
-      enabled: !_isDisabled,
-      button: false,
-      borderRadius: borderRadius,
-      child: surface,
-    );
+    // The whole branded button gets soft ink splash/highlight, state-layer press,
+    // focus ring, and activation haptic. The surface owns the Material fill so
+    // ink renders on the button face. Outer Semantics owns the accessible button
+    // role/label, so the surface's own semantics are excluded.
+    final Widget button = _isDisabled
+        ? Material(
+            color: fill,
+            elevation: 0,
+            shadowColor: Colors.transparent,
+            surfaceTintColor: Colors.transparent,
+            shape: shape,
+            clipBehavior: Clip.antiAlias,
+            child: sizedContent,
+          )
+        : TilawaInteractiveSurface(
+            onTap: onPressed,
+            enabled: true,
+            button: false,
+            borderRadius: borderRadius,
+            materialColor: fill,
+            materialShape: shape,
+            child: sizedContent,
+          );
 
     return RepaintBoundary(
       child: Semantics(

@@ -1,13 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:tilawa/features/quran_sessions/data/firebase/firestore_performance_wrapper.dart';
+import 'package:tilawa_core/services/performance_monitoring_service.dart';
 
 import 'firestore_exception_mapper.dart';
 import 'firestore_paths.dart';
 
 class FirestoreTeacherDataSource implements TeacherRemoteDataSource {
-  FirestoreTeacherDataSource(this._firestore);
+  FirestoreTeacherDataSource(this._firestore, [this._perf]);
 
   final FirebaseFirestore _firestore;
+  final PerformanceMonitoringService? _perf;
 
   CollectionReference<Map<String, dynamic>> get _profiles =>
       _firestore.collection(FirestoreQuranSessionsPaths.teacherProfiles);
@@ -32,6 +35,7 @@ class FirestoreTeacherDataSource implements TeacherRemoteDataSource {
       ),
       pricingType: marketPrice == null ? 'free' : 'fixed_per_session',
       marketPrice: marketPrice,
+      manualPaymentPrice: _mapManualPaymentPrice(data['manualPaymentPrice']),
       specializations: List<String>.from(
         data['specializations'] as List? ?? const [],
       ),
@@ -41,7 +45,33 @@ class FirestoreTeacherDataSource implements TeacherRemoteDataSource {
       averageRating: (data['averageRating'] as num?)?.toDouble() ?? 0,
       totalReviews: data['reviewCount'] as int? ?? 0,
       totalSessionsCompleted: data['totalSessionsCompleted'] as int? ?? 0,
+      credentials: _mapCredentials(data['credentials']),
     );
+  }
+
+  /// Presentation-only manual/off-app price stored on the teacher profile doc
+  /// as `manualPaymentPrice: { amountMinor, currencyCode }`. Never read by the
+  /// booking engine — display + manual-payment communication only.
+  static ManualPaymentPriceDto? _mapManualPaymentPrice(Object? raw) {
+    if (raw is! Map) return null;
+    final amountMinor = (raw['amountMinor'] as num?)?.toInt();
+    if (amountMinor == null || amountMinor <= 0) return null;
+    return ManualPaymentPriceDto(
+      amountMinor: amountMinor,
+      currencyCode: raw['currencyCode'] as String? ?? 'EGP',
+    );
+  }
+
+  static List<TeacherCredentialDto> _mapCredentials(Object? raw) {
+    if (raw is! List) return const [];
+    return raw
+        .whereType<Map>()
+        .map(
+          (item) => TeacherCredentialDto.fromJson(
+            Map<String, dynamic>.from(item),
+          ),
+        )
+        .toList();
   }
 
   static List<String> _supportedCallTypes(String? externalMeetingUrl) {
@@ -61,62 +91,66 @@ class FirestoreTeacherDataSource implements TeacherRemoteDataSource {
     String? language,
     String? cursor,
   }) async {
-    try {
-      final hasSpecialization =
-          specialization != null && specialization.isNotEmpty;
-      final hasLanguage = language != null && language.isNotEmpty;
+    return _perf.trace('firestore_getTeachers', () async {
+      try {
+        final hasSpecialization =
+            specialization != null && specialization.isNotEmpty;
+        final hasLanguage = language != null && language.isNotEmpty;
 
-      Query<Map<String, dynamic>> query = _profiles
-          .where('profileCompleteness', isEqualTo: 'complete')
-          .where('isPubliclyVisible', isEqualTo: true);
+        Query<Map<String, dynamic>> query = _profiles
+            .where('profileCompleteness', isEqualTo: 'complete')
+            .where('isPubliclyVisible', isEqualTo: true);
 
-      // Firestore allows one array-contains per query — specialization wins.
-      if (hasSpecialization) {
-        query = query.where('specializations', arrayContains: specialization);
-      } else if (hasLanguage) {
-        query = query.where('teachingLanguages', arrayContains: language);
-      }
-
-      query = query.orderBy('displayName').limit(_pageSize);
-      if (cursor != null && cursor.isNotEmpty) {
-        final cursorDoc = await _profiles.doc(cursor).get();
-        if (cursorDoc.exists) {
-          query = query.startAfterDocument(cursorDoc);
+        // Firestore allows one array-contains per query — specialization wins.
+        if (hasSpecialization) {
+          query = query.where('specializations', arrayContains: specialization);
+        } else if (hasLanguage) {
+          query = query.where('teachingLanguages', arrayContains: language);
         }
-      }
-      final snapshot = await query.get();
-      var teachers = snapshot.docs.map((d) => _mapProfile(d)).toList();
-      teachers = teachers
-          .where((t) => ValidateTeacherPublicName.isValid(t.displayName))
-          .toList();
 
-      // Secondary filter when both specialization and language are active.
-      if (hasSpecialization && hasLanguage) {
+        query = query.orderBy('displayName').limit(_pageSize);
+        if (cursor != null && cursor.isNotEmpty) {
+          final cursorDoc = await _profiles.doc(cursor).get();
+          if (cursorDoc.exists) {
+            query = query.startAfterDocument(cursorDoc);
+          }
+        }
+        final snapshot = await query.get();
+        var teachers = snapshot.docs.map((d) => _mapProfile(d)).toList();
         teachers = teachers
-            .where((t) => t.languages.contains(language))
+            .where((t) => ValidateTeacherPublicName.isValid(t.displayName))
             .toList();
-      }
 
-      final nextCursor = snapshot.docs.length == _pageSize
-          ? snapshot.docs.last.id
-          : null;
-      return (teachers: teachers, nextCursor: nextCursor);
-    } on FirebaseException catch (e) {
-      throw mapFirebaseException(e);
-    }
+        // Secondary filter when both specialization and language are active.
+        if (hasSpecialization && hasLanguage) {
+          teachers = teachers
+              .where((t) => t.languages.contains(language))
+              .toList();
+        }
+
+        final nextCursor = snapshot.docs.length == _pageSize
+            ? snapshot.docs.last.id
+            : null;
+        return (teachers: teachers, nextCursor: nextCursor);
+      } on FirebaseException catch (e) {
+        throw mapFirebaseException(e);
+      }
+    });
   }
 
   @override
   Future<QuranTeacherDto> getTeacherById(String teacherId) async {
-    try {
-      final doc = await _profiles.doc(teacherId).get();
-      if (!doc.exists) {
-        throw NotFoundException('QuranTeacher($teacherId)');
+    return _perf.trace('firestore_getTeacherById', () async {
+      try {
+        final doc = await _profiles.doc(teacherId).get();
+        if (!doc.exists) {
+          throw NotFoundException('QuranTeacher($teacherId)');
+        }
+        return _mapProfile(doc);
+      } on FirebaseException catch (e) {
+        throw mapFirebaseException(e);
       }
-      return _mapProfile(doc);
-    } on FirebaseException catch (e) {
-      throw mapFirebaseException(e);
-    }
+    });
   }
 
   @override

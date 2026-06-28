@@ -47,7 +47,7 @@ class AthkarDetailsHeader extends StatelessWidget {
             ),
         ],
       ),
-      centerTitle: true,
+      centerTitle: false,
       bottom: totalItems > 0
           ? PreferredSize(
               preferredSize: const Size.fromHeight(4),

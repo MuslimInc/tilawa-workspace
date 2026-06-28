@@ -1,7 +1,12 @@
 # Tilawa feature placement policy
 
 Consolidated from `DESIGN.md` and product specs. When docs conflict on
-*implementation*, trust code + `DESIGN.md`; this file guides *UX placement*.
+*implementation*, trust **code** and the Home canonical docs below.
+
+**Home canonical references:**
+
+- Technical: [home-dashboard-patterns.md](../../tilawa-apply-ui-principles/references/home-dashboard-patterns.md)
+- Design: [home_screen_design_artifacts.md](../../../docs/design/home_screen_design_artifacts.md)
 
 ## Worship surfaces (restrictive)
 
@@ -24,22 +29,17 @@ Treat as **active worship / reading** — minimal interruption:
 
 ## Home dashboard
 
-Treat Home as a **daily module stack**, not an app launcher.
+Preserve the **approved** layout (see Home canonical references above).
 
-**Encouraged:**
+**Encouraged:** prayer hero, optional tutor pin, primary worship tiles, compact
+tools row, today plan, More list, conditional listening resume, daily
+inspiration, quiet closing mark.
 
-- Hero prayer/time context
-- Today modules (khatma, today plan, pinned athkar)
-- Compact **More** row for non-nav destinations (Reciters, Qibla)
-- Daily ayah / dua inspiration cards
+**Forbidden:** unapproved redesign/reorder; stale widgets from superseded docs;
+Home/Prayer/Settings tiles; launcher grids mirroring bottom nav; cold-start
+modals on entry.
 
-**Forbidden on Home:**
-
-- Tiles that duplicate bottom navigation (Home, Prayer, Quran, Athkar, Settings)
-- Six-tile "Explore" launcher grids (legacy pattern — removed)
-- Cold-start modals or support prompts
-
-**More row rule:** only destinations **not** already in the phone bottom bar.
+**Reciters exception:** quick-tools shortcut selects the existing Reciters tab.
 
 ## Catalog tabs (Reciters, Athkar categories, etc.)
 

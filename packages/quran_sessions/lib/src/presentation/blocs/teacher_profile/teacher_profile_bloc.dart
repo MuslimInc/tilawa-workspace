@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../domain/usecases/get_teacher_availability_usecase.dart';
 import '../../../domain/usecases/get_teacher_profile_usecase.dart';
+import '../../../domain/usecases/report_session_concern_usecase.dart';
 import 'teacher_profile_event.dart';
 import 'teacher_profile_state.dart';
 
@@ -11,6 +12,7 @@ class TeacherProfileBloc
   TeacherProfileBloc({
     required this._getProfile,
     required this._getAvailability,
+    this._reportConcern,
   }) : super(const TeacherProfileInitial()) {
     on<TeacherProfileRequested>(
       _onProfileRequested,
@@ -18,10 +20,19 @@ class TeacherProfileBloc
     );
     on<AvailabilityWeekChanged>(_onWeekChanged, transformer: sequential());
     on<MoreReviewsRequested>(_onMoreReviews, transformer: droppable());
+    on<TeacherProfileReportSubmitted>(
+      _onReportSubmitted,
+      transformer: sequential(),
+    );
+    on<TeacherProfileReportAcknowledged>(
+      _onReportAcknowledged,
+      transformer: sequential(),
+    );
   }
 
   final GetTeacherProfileUseCase _getProfile;
   final GetTeacherAvailabilityUseCase _getAvailability;
+  final ReportSessionConcernUseCase? _reportConcern;
 
   Future<void> _onProfileRequested(
     TeacherProfileRequested event,
@@ -86,5 +97,54 @@ class TeacherProfileBloc
   ) async {
     // Reviews fetch is wired when ReviewRepository use case is implemented.
     // Placeholder: no-op to keep the event contract stable.
+  }
+
+  Future<void> _onReportSubmitted(
+    TeacherProfileReportSubmitted event,
+    Emitter<TeacherProfileState> emit,
+  ) async {
+    final useCase = _reportConcern;
+    final current = state;
+    if (useCase == null || current is! TeacherProfileSuccess) return;
+
+    emit(
+      current.copyWith(
+        reportInProgress: true,
+        clearReportFailure: true,
+        clearReportSubmitted: true,
+      ),
+    );
+
+    final result = await useCase(
+      category: event.category,
+      description: event.description,
+    );
+
+    final after = state;
+    if (after is! TeacherProfileSuccess) return;
+
+    result.fold(
+      (failure) => emit(
+        after.copyWith(
+          reportFailure: failure,
+          clearReportInProgress: true,
+        ),
+      ),
+      (_) => emit(
+        after.copyWith(
+          reportSubmitted: true,
+          clearReportInProgress: true,
+        ),
+      ),
+    );
+  }
+
+  void _onReportAcknowledged(
+    TeacherProfileReportAcknowledged event,
+    Emitter<TeacherProfileState> emit,
+  ) {
+    final current = state;
+    if (current is! TeacherProfileSuccess) return;
+    emit(current.copyWith(clearReportSubmitted: true));
   }
 }

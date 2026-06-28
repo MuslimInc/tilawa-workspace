@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:tilawa/core/di/injection.dart';
 
 import '../features/auth/presentation/bloc/auth_bloc.dart';
 import '../features/auth/presentation/cubit/session_validity_cubit.dart';
+import '../features/quran_sessions/presentation/quran_sessions_user.dart';
 import '../features/quran_sessions/quran_sessions_feature_flags.dart';
 import 'app_router_config.dart';
 
@@ -30,10 +32,71 @@ String? quranSessionsFeatureRedirect(GoRouterState state) {
   return null;
 }
 
+/// Whether [path] requires a signed-in Quran Sessions user (bookings, detail, …).
+@visibleForTesting
+bool isAuthRequiredQuranSessionsPath(String path) {
+  final normalized = path.endsWith('/') && path.length > 1
+      ? path.substring(0, path.length - 1)
+      : path;
+
+  const exactPaths = <String>{
+    QuranSessionsRoutes.mySessions,
+    QuranSessionsRoutes.wallet,
+    QuranSessionsRoutes.teacherDashboard,
+    QuranSessionsRoutes.availability,
+    QuranSessionsRoutes.profileCompletion,
+    QuranSessionsRoutes.completeTeacherProfile,
+    QuranSessionsRoutes.guardianDashboard,
+    QuranSessionsRoutes.guardianApproval,
+    QuranSessionsRoutes.teacherApply,
+    QuranSessionsRoutes.teacherApplicationStatus,
+  };
+  if (exactPaths.contains(normalized)) {
+    return true;
+  }
+
+  if (normalized.startsWith('${QuranSessionsRoutes.home}/teachers/') &&
+      normalized.endsWith('/book')) {
+    return true;
+  }
+
+  const detailPrefix = '${QuranSessionsRoutes.home}/detail/';
+  if (normalized.startsWith(detailPrefix) &&
+      normalized.length > detailPrefix.length) {
+    return true;
+  }
+
+  const reschedulePrefix = '${QuranSessionsRoutes.home}/reschedule/';
+  if (normalized.startsWith(reschedulePrefix) &&
+      normalized.length > reschedulePrefix.length) {
+    return true;
+  }
+
+  return false;
+}
+
+/// Route-level redirect for Quran Sessions flows that need a signed-in user.
+///
+/// Used on individual GoRoutes so cold-start / notification deep links still
+/// reach login when the root redirect deferred because blocs were not mounted.
+String? quranSessionsAuthRequiredRedirect(
+  BuildContext context,
+  GoRouterState state,
+) {
+  if (!isAuthRequiredQuranSessionsPath(state.uri.path)) {
+    return null;
+  }
+  return _quranSessionsLoginRedirect(context);
+}
+
 /// Redirects stale or unsigned users away from protected Quran Sessions routes.
 ///
 /// Uses cached [SessionValidityCubit] state only — no Firestore read per navigation.
 /// Backend callables remain the enforcement layer for mutations.
+///
+/// The [SessionValidityCubit.revoked] latch is reset by a [BlocListener] on
+/// [AuthBloc] at the app root when the user re-authenticates, so a freshly
+/// signed-in user is not permanently locked out after a prior revocation.
 String? quranSessionsSessionRedirect(
   BuildContext context,
   GoRouterState state,
@@ -43,23 +106,28 @@ String? quranSessionsSessionRedirect(
     return null;
   }
 
-  final loginLocation = const LoginRoute().location;
-  if (path == loginLocation) {
-    return null;
-  }
+  return _quranSessionsLoginRedirect(context);
+}
 
+String? _quranSessionsLoginRedirect(BuildContext context) {
   try {
     if (context.read<SessionValidityCubit>().state.revoked) {
-      return loginLocation;
+      return const LoginRoute().location;
     }
 
     final authState = context.read<AuthBloc>().state;
     if (authState is! AuthAuthenticated) {
-      return loginLocation;
+      return const LoginRoute().location;
     }
   } catch (_) {
-    // BlocProvider not mounted yet — defer to route builders.
-    return null;
+    // BlocProvider not mounted yet — fall through to AuthSessionProvider.
+  }
+
+  if (getIt.isRegistered<AuthSessionProvider>()) {
+    final userId = quranSessionsCurrentUserId(getIt);
+    if (userId == null || userId.isEmpty) {
+      return const LoginRoute().location;
+    }
   }
 
   return null;

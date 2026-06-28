@@ -9,9 +9,13 @@ class GetSessionTimelineUseCase {
 
   final AuditRepository _auditRepository;
 
-  Future<Either<QuranSessionsFailure, List<SessionAuditEvent>>> call(
-    String sessionId,
-  ) async {
-    return _auditRepository.listBySessionId(sessionId);
+  Future<Either<QuranSessionsFailure, List<SessionAuditEvent>>> call({
+    required String bookingId,
+    String? sessionId,
+  }) {
+    return _auditRepository.listForAggregate(
+      bookingId: bookingId,
+      sessionId: sessionId,
+    );
   }
 }

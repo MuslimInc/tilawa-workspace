@@ -260,8 +260,8 @@ void main() {
         child: MaterialApp.router(
           theme: ThemeData(
             extensions: [
-              TilawaDesignTokens.light(),
-              TilawaComponentTokens.light(),
+              MeMuslimDesignTokens.light(),
+              MeMuslimComponentTokens.light(),
             ],
           ),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -350,8 +350,8 @@ void main() {
       child: MaterialApp(
         theme: ThemeData(
           extensions: [
-            TilawaDesignTokens.light(),
-            TilawaComponentTokens.light(),
+            MeMuslimDesignTokens.light(),
+            MeMuslimComponentTokens.light(),
           ],
         ),
         localizationsDelegates: AppLocalizations.localizationsDelegates,

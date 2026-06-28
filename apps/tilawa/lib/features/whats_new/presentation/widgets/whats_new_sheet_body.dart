@@ -13,7 +13,7 @@ class WhatsNewSheetBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
     final TextDirection textDirection = Directionality.of(context);
     final TextStyle bodyStyle = theme.textTheme.bodyMedium!.copyWith(
@@ -94,7 +94,7 @@ class WhatsNewSheetBody extends StatelessWidget {
 
   EdgeInsets _contentPadding(
     BuildContext context,
-    TilawaDesignTokens tokens,
+    MeMuslimDesignTokens tokens,
   ) {
     final EdgeInsets base = TilawaBottomSheetScaffold.resolvedBodyPadding(
       context,

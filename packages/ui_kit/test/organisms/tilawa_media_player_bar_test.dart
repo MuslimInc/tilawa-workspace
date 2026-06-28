@@ -4,7 +4,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 Widget _themed(Widget child) {
   return MaterialApp(
-    theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+    theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
     home: Scaffold(body: Center(child: child)),
   );
 }
@@ -116,7 +116,7 @@ void main() {
     testWidgets('shell dock layout fits collapsed height at full width', (
       tester,
     ) async {
-      final tokens = TilawaDesignTokens.light();
+      final tokens = MeMuslimDesignTokens.light();
       await tester.pumpWidget(
         _themed(
           SizedBox(
@@ -149,7 +149,7 @@ void main() {
     testWidgets('shell dock play/pause is flat icon not filled circle', (
       tester,
     ) async {
-      final tokens = TilawaDesignTokens.light();
+      final tokens = MeMuslimDesignTokens.light();
       await tester.pumpWidget(
         _themed(
           SizedBox(
@@ -198,7 +198,7 @@ void main() {
     });
 
     testWidgets('shell pill layout fits 56dp collapsed height', (tester) async {
-      final tokens = TilawaDesignTokens.light();
+      final tokens = MeMuslimDesignTokens.light();
       await tester.pumpWidget(
         _themed(
           SizedBox(

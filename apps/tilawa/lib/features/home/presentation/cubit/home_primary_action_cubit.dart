@@ -36,9 +36,6 @@ class HomePrimaryActionCubit extends Cubit<HomePrimaryActionState> {
     if (listening.isVisible && !hasReadingProgress) {
       return HomePrimaryActionKind.listening;
     }
-    if (urgentAthkarRow != null) {
-      return HomePrimaryActionKind.athkar;
-    }
     return HomePrimaryActionKind.quran;
   }
 
@@ -55,14 +52,6 @@ class HomePrimaryActionCubit extends Cubit<HomePrimaryActionState> {
   }
 
   HomeAthkarRowState? _urgentAthkarRow(HomeAthkarCompactState athkar) {
-    if (athkar.status != HomeAthkarRowStatus.ready || athkar.rows.isEmpty) {
-      return null;
-    }
-    for (final HomeAthkarRowState row in athkar.rows) {
-      if (row.completion != HomeAthkarCompletionState.done) {
-        return row;
-      }
-    }
-    return null;
+    return urgentHomeAthkarRow(athkar);
   }
 }

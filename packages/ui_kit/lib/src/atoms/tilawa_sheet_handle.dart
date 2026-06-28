@@ -76,7 +76,7 @@ class TilawaSheetHandle extends StatelessWidget {
 
     final Widget handleBody = SizedBox(
       width: double.infinity,
-      height: kTilawaMinInteractiveDimension,
+      height: kMeMuslimMinInteractiveDimension,
       child: Center(child: pill),
     );
 
@@ -85,7 +85,7 @@ class TilawaSheetHandle extends StatelessWidget {
     }
 
     // Bare detector: expanded hit strip for drag-to-dismiss only; not a visible
-    // button surface beyond the pill (see kTilawaMinInteractiveDimension dartdoc).
+    // button surface beyond the pill (see kMeMuslimMinInteractiveDimension dartdoc).
     return Semantics(
       button: true,
       label: semanticLabel ?? 'Dismiss sheet',

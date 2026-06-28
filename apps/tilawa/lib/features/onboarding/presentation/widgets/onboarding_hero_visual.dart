@@ -27,7 +27,7 @@ class OnboardingHeroVisual extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
 
     return switch (style) {
       OnboardingHeroStyle.illustration => ConstrainedBox(
@@ -73,7 +73,7 @@ class _OnboardingMemorialPortrait extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final ColorScheme scheme = theme.colorScheme;
 
     final Color matTop = scheme.surfaceContainerHighest;
@@ -205,7 +205,7 @@ class _OnboardingPhoneFrame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final ColorScheme scheme = theme.colorScheme;
     final Color bezelColor = scheme.brightness == Brightness.light
         ? scheme.onSurface.withValues(alpha: 0.92)

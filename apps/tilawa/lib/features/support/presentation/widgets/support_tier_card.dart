@@ -25,7 +25,7 @@ class SupportTierCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
     final Brightness brightness = theme.brightness;
     final SupportTierVisual visual = supportTierVisualFor(
@@ -175,7 +175,7 @@ class _TierIconCapsule extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
 
     return AnimatedContainer(

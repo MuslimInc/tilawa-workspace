@@ -29,6 +29,7 @@ final class MySessionsSuccess extends MySessionsState {
     this.cancellationInProgress,
     this.cancellationFailure,
     this.lastSubmittedReview,
+    this.reviewFailure,
     this.joinInProgress,
     this.joinFailure,
     this.joinCompletedSessionId,
@@ -49,6 +50,9 @@ final class MySessionsSuccess extends MySessionsState {
   /// Set after a review is submitted so the UI can show a confirmation snack.
   final SessionReview? lastSubmittedReview;
 
+  /// Set when review submission fails so UI can show feedback.
+  final QuranSessionsFailure? reviewFailure;
+
   /// Session id currently launching the meeting link.
   final String? joinInProgress;
 
@@ -68,6 +72,7 @@ final class MySessionsSuccess extends MySessionsState {
     cancellationInProgress,
     cancellationFailure,
     lastSubmittedReview,
+    reviewFailure,
     joinInProgress,
     joinFailure,
     joinCompletedSessionId,
@@ -85,6 +90,8 @@ final class MySessionsSuccess extends MySessionsState {
     QuranSessionsFailure? cancellationFailure,
     bool clearCancellationFailure = false,
     SessionReview? lastSubmittedReview,
+    QuranSessionsFailure? reviewFailure,
+    bool clearReviewFailure = false,
     String? joinInProgress,
     bool clearJoinInProgress = false,
     QuranSessionsFailure? joinFailure,
@@ -107,6 +114,9 @@ final class MySessionsSuccess extends MySessionsState {
         ? null
         : cancellationFailure ?? this.cancellationFailure,
     lastSubmittedReview: lastSubmittedReview ?? this.lastSubmittedReview,
+    reviewFailure: clearReviewFailure
+        ? null
+        : reviewFailure ?? this.reviewFailure,
     joinInProgress: clearJoinInProgress
         ? null
         : joinInProgress ?? this.joinInProgress,

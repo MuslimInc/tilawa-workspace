@@ -127,7 +127,7 @@ class _BookmarksLoadingBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
 
     return Align(
       alignment: AlignmentDirectional.topCenter,
@@ -150,7 +150,7 @@ class _BookmarksList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     final double bottomPadding = _bookmarksScrollBottomPadding(context);
 
     if (bookmarks.isEmpty) {
@@ -234,7 +234,7 @@ class _BookmarksErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     final double bottomPadding = _bookmarksScrollBottomPadding(context);
 
     return CustomScrollView(
@@ -274,7 +274,7 @@ class _BookmarkDismissBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return Container(

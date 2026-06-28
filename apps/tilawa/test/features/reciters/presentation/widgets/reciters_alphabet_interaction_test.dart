@@ -404,8 +404,8 @@ void main() {
         MaterialApp(
           theme: ThemeData(
             extensions: [
-              TilawaDesignTokens.light(),
-              TilawaComponentTokens.light(),
+              MeMuslimDesignTokens.light(),
+              MeMuslimComponentTokens.light(),
             ],
           ),
           home: MultiBlocProvider(
@@ -461,8 +461,8 @@ void main() {
         MaterialApp(
           theme: ThemeData(
             extensions: [
-              TilawaDesignTokens.light(),
-              TilawaComponentTokens.light(),
+              MeMuslimDesignTokens.light(),
+              MeMuslimComponentTokens.light(),
             ],
           ),
           home: MultiBlocProvider(
@@ -509,8 +509,8 @@ void main() {
         MaterialApp(
           theme: ThemeData(
             extensions: [
-              TilawaDesignTokens.light(),
-              TilawaComponentTokens.light(),
+              MeMuslimDesignTokens.light(),
+              MeMuslimComponentTokens.light(),
             ],
           ),
           home: MultiBlocProvider(

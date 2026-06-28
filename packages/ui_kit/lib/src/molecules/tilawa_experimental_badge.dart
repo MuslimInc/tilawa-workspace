@@ -14,11 +14,15 @@ class TilawaExperimentalBadge extends StatelessWidget {
   const TilawaExperimentalBadge({
     super.key,
     required this.label,
+    this.foregroundColor,
     this.icon,
     this.onTap,
   });
 
   final String label;
+
+  /// When set, overrides [TilawaExperimentalBadgeTokens.foregroundColor].
+  final Color? foregroundColor;
 
   /// Optional leading icon rendered at [TilawaExperimentalBadgeTokens.iconSize].
   final IconData? icon;
@@ -31,6 +35,7 @@ class TilawaExperimentalBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.componentTokens.experimentalBadge;
+    final labelColor = foregroundColor ?? tokens.foregroundColor;
 
     final pill = Semantics(
       label: label,
@@ -49,13 +54,13 @@ class TilawaExperimentalBadge extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (icon != null) ...[
-              Icon(icon, size: tokens.iconSize, color: tokens.foregroundColor),
+              Icon(icon, size: tokens.iconSize, color: labelColor),
               SizedBox(width: tokens.iconGap),
             ],
             Text(
               label,
               style: theme.textTheme.labelSmall?.copyWith(
-                color: tokens.foregroundColor,
+                color: labelColor,
                 fontWeight: tokens.fontWeight,
                 letterSpacing: tokens.letterSpacing,
                 height: 1,

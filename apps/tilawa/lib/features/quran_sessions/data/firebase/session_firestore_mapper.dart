@@ -8,22 +8,14 @@ DateTime readFirestoreDateTime(Object? raw) {
   throw FormatException('Unsupported Firestore datetime: $raw');
 }
 
-SessionLifecycleStatus parseLifecycleStatus(String raw) {
-  final normalized = raw.replaceAllMapped(
-    RegExp(r'_([a-z])'),
-    (match) => match.group(1)!.toUpperCase(),
-  );
-  return SessionLifecycleStatus.values.firstWhere(
-    (s) => s.name == raw || s.name == normalized,
-    orElse: () => SessionLifecycleStatus.scheduled,
-  );
-}
+SessionLifecycleStatus parseLifecycleStatus(String raw) =>
+    parseLifecycleStatusFromRaw(raw);
 
 SessionAggregate mapBookingDocToAggregate(
   String bookingId,
   Map<String, dynamic> data,
 ) {
-  final lifecycleRaw = data['lifecycleStatus'] as String?;
+  final lifecycleRaw = resolveLifecycleStatusRawFromFirestore(data);
   final lifecycleStatus = lifecycleRaw == null
       ? SessionLifecycleStatus.scheduled
       : parseLifecycleStatus(lifecycleRaw);
@@ -46,8 +38,57 @@ SessionAggregate mapBookingDocToAggregate(
     rescheduleCount: data['rescheduleCount'] as int? ?? 0,
     cancellationReason: data['cancellationReason'] as String?,
     lastActionReason: data['lastActionReason'] as String?,
+    rejectionReason: data['rejectionReason'] as String?,
     paymentReference: data['paymentReference'] as String?,
     sessionId: data['sessionId'] as String?,
+    revisionSurahNumber: data['revisionSurahNumber'] as int?,
+    revisionAyahNumber: data['revisionAyahNumber'] as int?,
+  );
+}
+
+/// Maps a `quran_sessions` document when no matching booking exists.
+SessionAggregate mapSessionDocToAggregate(
+  String sessionDocId,
+  Map<String, dynamic> data,
+) {
+  final lifecycleRaw = resolveLifecycleStatusRawFromFirestore(data);
+  final lifecycleStatus = lifecycleRaw == null
+      ? SessionLifecycleStatus.scheduled
+      : parseLifecycleStatus(lifecycleRaw);
+  final pricingRaw = data['pricingType'] as String? ?? 'free';
+  final pricingType = SessionPricingType.values.firstWhere(
+    (p) => p.name == pricingRaw || _legacyPricing(p, pricingRaw),
+    orElse: () => SessionPricingType.free,
+  );
+  final bookingId = resolveBookingIdFromFirestore(sessionDocId, data);
+  final startsAt = readFirestoreDateTime(data['startsAt']);
+  final createdAt = data['createdAt'] != null
+      ? readFirestoreDateTime(data['createdAt'])
+      : startsAt;
+  final updatedAt = data['updatedAt'] != null
+      ? readFirestoreDateTime(data['updatedAt'])
+      : createdAt;
+
+  return SessionAggregate(
+    id: bookingId,
+    teacherId: data['teacherId'] as String? ?? '',
+    studentId: data['studentId'] as String? ?? '',
+    slotId: data['slotId'] as String? ?? '',
+    startsAt: startsAt,
+    pricingType: pricingType,
+    lifecycleStatus: lifecycleStatus,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+    rescheduleCount: data['rescheduleCount'] as int? ?? 0,
+    cancellationReason: data['cancellationReason'] as String?,
+    lastActionReason:
+        data['lastActionReason'] as String? ??
+        data['cancellationReason'] as String?,
+    rejectionReason: data['rejectionReason'] as String?,
+    paymentReference: data['paymentReference'] as String?,
+    sessionId: sessionDocId,
+    revisionSurahNumber: data['revisionSurahNumber'] as int?,
+    revisionAyahNumber: data['revisionAyahNumber'] as int?,
   );
 }
 
@@ -76,10 +117,7 @@ SessionAuditEvent mapEventDocToAuditEvent(Map<String, dynamic> data) {
       (r) => r.name == actorRoleRaw,
       orElse: () => ActorRole.system,
     ),
-    action: SessionAction.values.firstWhere(
-      (a) => a.name == _snakeToCamel(actionRaw),
-      orElse: () => SessionAction.confirmBooking,
-    ),
+    action: parseSessionActionFromRaw(actionRaw),
     source: ActionSource.values.firstWhere(
       (s) => s.name == (data['source'] as String? ?? 'mobileApp'),
       orElse: () => ActionSource.mobileApp,
@@ -93,14 +131,5 @@ SessionAuditEvent mapEventDocToAuditEvent(Map<String, dynamic> data) {
   );
 }
 
-SessionLifecycleStatus _parseLifecycle(String raw) => parseLifecycleStatus(raw);
-
-String _snakeToCamel(String raw) {
-  final parts = raw.split('_');
-  if (parts.length == 1) return raw;
-  return parts.first +
-      parts
-          .skip(1)
-          .map((p) => p.isEmpty ? '' : p[0].toUpperCase() + p.substring(1))
-          .join();
-}
+SessionLifecycleStatus _parseLifecycle(String raw) =>
+    parseLifecycleStatusFromRaw(raw);

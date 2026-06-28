@@ -18,8 +18,11 @@ class SessionAggregate extends Equatable {
     this.rescheduleCount = 0,
     this.cancellationReason,
     this.lastActionReason,
+    this.rejectionReason,
     this.paymentReference,
     this.sessionId,
+    this.revisionSurahNumber,
+    this.revisionAyahNumber,
   });
 
   final String id;
@@ -34,12 +37,22 @@ class SessionAggregate extends Equatable {
   final int rescheduleCount;
   final String? cancellationReason;
   final String? lastActionReason;
+  final String? rejectionReason;
   final String? paymentReference;
 
   /// Linked operational session document id (from booking).
   final String? sessionId;
 
+  /// Optional surah focus for revision practice in Tilawa Quran reader.
+  final int? revisionSurahNumber;
+
+  /// Optional starting ayah within [revisionSurahNumber].
+  final int? revisionAyahNumber;
+
   bool get isPaid => pricingType == SessionPricingType.fixedPerSession;
+
+  bool get hasRevisionSurahContext =>
+      revisionSurahNumber != null && revisionSurahNumber! >= 1;
 
   SessionAggregate copyWith({
     SessionLifecycleStatus? lifecycleStatus,
@@ -48,8 +61,11 @@ class SessionAggregate extends Equatable {
     int? rescheduleCount,
     String? cancellationReason,
     String? lastActionReason,
+    String? rejectionReason,
     String? paymentReference,
     String? sessionId,
+    int? revisionSurahNumber,
+    int? revisionAyahNumber,
   }) {
     return SessionAggregate(
       id: id,
@@ -64,8 +80,11 @@ class SessionAggregate extends Equatable {
       rescheduleCount: rescheduleCount ?? this.rescheduleCount,
       cancellationReason: cancellationReason ?? this.cancellationReason,
       lastActionReason: lastActionReason ?? this.lastActionReason,
+      rejectionReason: rejectionReason ?? this.rejectionReason,
       paymentReference: paymentReference ?? this.paymentReference,
       sessionId: sessionId ?? this.sessionId,
+      revisionSurahNumber: revisionSurahNumber ?? this.revisionSurahNumber,
+      revisionAyahNumber: revisionAyahNumber ?? this.revisionAyahNumber,
     );
   }
 
@@ -83,7 +102,10 @@ class SessionAggregate extends Equatable {
     rescheduleCount,
     cancellationReason,
     lastActionReason,
+    rejectionReason,
     paymentReference,
     sessionId,
+    revisionSurahNumber,
+    revisionAyahNumber,
   ];
 }

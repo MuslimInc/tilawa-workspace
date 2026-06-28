@@ -6,129 +6,6 @@ void main() {
   setUp(() => TilawaInteractionFeedback.enabled = true);
   tearDown(() => TilawaInteractionFeedback.enabled = true);
 
-  testWidgets('TilawaPressAnimation wraps child in ScaleTransition', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
-        home: Scaffold(
-          body: Center(
-            child: TilawaPressAnimation(
-              child: SizedBox(
-                width: 100,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: () {},
-                  child: const Text('Tap'),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    expect(
-      find.descendant(
-        of: find.byType(TilawaPressAnimation),
-        matching: find.byType(ScaleTransition),
-      ),
-      findsOneWidget,
-    );
-
-    await tester.startGesture(tester.getCenter(find.text('Tap')));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200));
-  });
-
-  testWidgets('TilawaPressAnimation respects custom durationFast token', (
-    tester,
-  ) async {
-    const customFast = Duration(milliseconds: 150);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(
-          extensions: [
-            TilawaDesignTokens.light().copyWith(durationFast: customFast),
-          ],
-        ),
-        home: const Scaffold(
-          body: Center(
-            child: TilawaPressAnimation(
-              child: SizedBox(width: 48, height: 48),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(
-          extensions: [
-            TilawaDesignTokens.light().copyWith(durationFast: customFast),
-          ],
-        ),
-        home: const Scaffold(
-          body: Center(
-            child: TilawaPressAnimation(
-              child: SizedBox(width: 48, height: 48),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    expect(find.byType(TilawaPressAnimation), findsOneWidget);
-  });
-
-  testWidgets(
-    'TilawaPressAnimation ignores pointer up after widget is removed',
-    (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
-          home: Scaffold(
-            body: Center(
-              child: TilawaPressAnimation(
-                child: SizedBox(
-                  key: const Key('target'),
-                  width: 100,
-                  height: 48,
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      final gesture = await tester.startGesture(
-        tester.getCenter(find.byKey(const Key('target'))),
-      );
-      await tester.pump();
-
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
-          home: const Scaffold(
-            body: Center(
-              child: SizedBox(
-                key: Key('target'),
-                width: 100,
-                height: 48,
-              ),
-            ),
-          ),
-        ),
-      );
-
-      await gesture.up();
-      await tester.pump();
-    },
-  );
-
   testWidgets(
     'TilawaInteractiveSurface survives disable while press in flight',
     (tester) async {
@@ -136,7 +13,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+          theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
           home: StatefulBuilder(
             builder: (context, setState) {
               return Scaffold(
@@ -165,7 +42,7 @@ void main() {
       interactive = false;
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+          theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
           home: StatefulBuilder(
             builder: (context, setState) {
               return Scaffold(

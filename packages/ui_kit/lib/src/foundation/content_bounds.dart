@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'design_tokens.dart';
 
 /// Canonical content-width kinds. Each maps to a `contentMaxWidth*` token on
-/// [TilawaDesignTokens].
+/// [MeMuslimDesignTokens].
 enum TilawaContentKind {
   /// Quran reader body — `contentMaxWidthReader` (720).
   reader,
@@ -62,7 +62,7 @@ class TilawaContentBounds extends StatelessWidget {
   }
 
   static double resolveMaxWidth(BuildContext context, TilawaContentKind kind) {
-    final tokens = Theme.of(context).extension<TilawaDesignTokens>()!;
+    final tokens = Theme.of(context).extension<MeMuslimDesignTokens>()!;
     switch (kind) {
       case TilawaContentKind.reader:
         return tokens.contentMaxWidthReader;

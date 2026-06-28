@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:checks/checks.dart';
 import 'package:dartz_plus/dartz_plus.dart';
@@ -55,6 +57,43 @@ class _StubAccessUseCase extends ResolveTeacherApplicationAccessUseCase {
   _StubAccessUseCase() : super(_FakeAccessRepository());
 }
 
+/// Capability use case whose [call] completes only when [completer] fires.
+class _ControllableCapabilityUseCase
+    extends GetCurrentUserTeacherCapabilityUseCase {
+  _ControllableCapabilityUseCase()
+    : super(
+        applicationRepository: _UnimplementedApplicationRepository(),
+        profileRepository: _UnimplementedProfileRepository(),
+      );
+
+  var callCount = 0;
+
+  /// Completer controlling the most recent [call] future. A new completer is
+  /// created on each invocation so async sequences can be driven deterministically.
+  Completer<Either<QuranSessionsFailure, TeacherCapability>> completer =
+      Completer<Either<QuranSessionsFailure, TeacherCapability>>();
+
+  @override
+  Future<Either<QuranSessionsFailure, TeacherCapability>> call(
+    String userId,
+  ) {
+    callCount++;
+    completer = Completer<Either<QuranSessionsFailure, TeacherCapability>>();
+    return completer.future;
+  }
+}
+
+/// Auth provider with no signed-in user; [currentUserId] returns null.
+class _AnonymousAuthSessionProvider implements AuthSessionProvider {
+  const _AnonymousAuthSessionProvider();
+
+  @override
+  String? get currentUserId => null;
+
+  @override
+  Stream<String?> watchUserId() => const Stream.empty();
+}
+
 void main() {
   late TeacherCapabilityRefreshNotifier refreshNotifier;
 
@@ -108,6 +147,142 @@ void main() {
         cubit.state.capability?.state,
       ).equals(TeacherCapabilityState.approvedActive);
       check(cubit.state.isLoading).isFalse();
+    },
+  );
+
+  blocTest<TeacherCapabilityCubit, SettingsTeacherCapabilityLoadState>(
+    'emits hasLoaded true when teacher application feature disabled',
+    build: () {
+      scopeGetIt().registerSingleton<AppLaunchConfig>(
+        const AppLaunchConfig(
+          teacherApplicationEnabled: false,
+          teacherApplicationDiscoverability: 'profileOnly',
+        ),
+      );
+      scopeGetIt().registerSingleton<GetCurrentUserTeacherCapabilityUseCase>(
+        _StubTeacherCapabilityUseCase([
+          const TeacherCapability(state: TeacherCapabilityState.approvedActive),
+        ]),
+      );
+      scopeGetIt().registerSingleton<ResolveTeacherApplicationAccessUseCase>(
+        _StubAccessUseCase(),
+      );
+      return TeacherCapabilityCubit(refreshNotifier: refreshNotifier);
+    },
+    act: (cubit) async {
+      cubit.load();
+      await Future<void>.delayed(Duration.zero);
+    },
+    verify: (cubit) {
+      check(cubit.state.hasLoaded).isTrue();
+      check(cubit.state.isLoading).isFalse();
+      check(cubit.state.capability).isNull();
+    },
+  );
+
+  blocTest<TeacherCapabilityCubit, SettingsTeacherCapabilityLoadState>(
+    'emits hasLoaded true when user is anonymous',
+    build: () {
+      scopeGetIt().registerSingleton<AuthSessionProvider>(
+        const _AnonymousAuthSessionProvider(),
+      );
+      scopeGetIt().registerSingleton<GetCurrentUserTeacherCapabilityUseCase>(
+        _StubTeacherCapabilityUseCase([
+          const TeacherCapability(state: TeacherCapabilityState.approvedActive),
+        ]),
+      );
+      scopeGetIt().registerSingleton<ResolveTeacherApplicationAccessUseCase>(
+        _StubAccessUseCase(),
+      );
+      return TeacherCapabilityCubit(refreshNotifier: refreshNotifier);
+    },
+    act: (cubit) async {
+      cubit.load();
+      await Future<void>.delayed(Duration.zero);
+    },
+    verify: (cubit) {
+      check(cubit.state.hasLoaded).isTrue();
+      check(cubit.state.isLoading).isFalse();
+      check(cubit.state.capability).isNull();
+    },
+  );
+
+  test(
+    'does not emit (and does not throw) when closed during in-flight load',
+    () async {
+      final useCase = _ControllableCapabilityUseCase();
+      scopeGetIt().registerSingleton<GetCurrentUserTeacherCapabilityUseCase>(
+        useCase,
+      );
+      scopeGetIt().registerSingleton<ResolveTeacherApplicationAccessUseCase>(
+        _StubAccessUseCase(),
+      );
+
+      final notifier = TeacherCapabilityRefreshNotifier();
+      final cubit = TeacherCapabilityCubit(refreshNotifier: notifier);
+
+      cubit.load();
+      await Future<void>.delayed(Duration.zero);
+      check(useCase.callCount).equals(1);
+      check(cubit.state.isLoading).isTrue();
+
+      await cubit.close();
+      check(cubit.isClosed).isTrue();
+
+      useCase.completer.complete(
+        const Right(
+          TeacherCapability(state: TeacherCapabilityState.approvedActive),
+        ),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      check(cubit.state.isLoading).isTrue();
+      check(cubit.state.hasLoaded).isFalse();
+      check(cubit.state.capability).isNull();
+    },
+  );
+
+  test(
+    'review notification received while closed does not throw and does not '
+    'refresh',
+    () async {
+      final useCase = _ControllableCapabilityUseCase();
+      scopeGetIt().registerSingleton<GetCurrentUserTeacherCapabilityUseCase>(
+        useCase,
+      );
+      scopeGetIt().registerSingleton<ResolveTeacherApplicationAccessUseCase>(
+        _StubAccessUseCase(),
+      );
+
+      final notifier = TeacherCapabilityRefreshNotifier();
+      final cubit = TeacherCapabilityCubit(refreshNotifier: notifier);
+
+      cubit.load();
+      await Future<void>.delayed(Duration.zero);
+      check(useCase.callCount).equals(1);
+
+      useCase.completer.complete(
+        const Right(
+          TeacherCapability(state: TeacherCapabilityState.approvedActive),
+        ),
+      );
+      await Future<void>.delayed(Duration.zero);
+      check(cubit.state.hasLoaded).isTrue();
+      check(useCase.callCount).equals(1);
+
+      await cubit.close();
+      check(cubit.isClosed).isTrue();
+
+      notifier.resetDedupeForTest();
+      notifier.notifyApplicationReviewed('approved');
+      await Future<void>.delayed(Duration.zero);
+
+      check(useCase.callCount).equals(1);
+      check(cubit.state.isLoading).isFalse();
+      check(cubit.state.hasLoaded).isTrue();
+      check(
+        cubit.state.capability?.state,
+      ).equals(TeacherCapabilityState.approvedActive);
     },
   );
 }

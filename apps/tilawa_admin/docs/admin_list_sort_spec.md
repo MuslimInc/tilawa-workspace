@@ -191,6 +191,26 @@
 
 Deploy: `firebase deploy --only firestore:indexes --project quran-playera-app`
 
+**2026-06-25 cost/performance audit — 93 composite indexes added.** Every
+admin browse `filter × sort` combination now has a 2-field composite in **both
+sort directions**, so no filter+sort view throws a "query requires an index"
+error. Multi-equality filters (e.g. `status` + `countryCode`) are served by
+Firestore **index merging** of the single-filter composites, so no triple
+indexes are required. Index counts added per collection:
+
+| Collection | Filters × Sorts × 2 dirs | Added |
+|------------|--------------------------|-------|
+| `quran_session_reports` | 3 × 2 × 2 | 12 |
+| `quran_session_disputes` | 1 × 2 × 2 | 4 |
+| `quran_bookings` | 5 × 3 × 2 (minus 5 existing) | 25 |
+| `quran_teacher_applications` | 3 × 3 × 2 (minus 3 existing) | 15 |
+| `quran_teacher_profiles` | 4 × 3 × 2 (minus 2 existing) | 22 |
+| `users` (QS slice) | 5 × 2 × 2 (minus 5 existing) | 15 |
+
+`array-contains` filters (`specializations`, `teachingLanguages`) use
+`arrayConfig: CONTAINS` as the leading field. `in` queries (`userId in [...]`
+for application geo) reuse the same composite as `==`. Total file: 131 indexes.
+
 **2026-06-24 parity check:** deploy without `--force` reported 2 remote-only indexes. They are **production** indexes (not orphan `users` single-field leftovers):
 
 | Collection | Fields | Consumer |
@@ -219,4 +239,41 @@ Firestore has no full-text / substring search. Admin `search` inputs filter **on
 | `/quran-sessions/disputes` | session/booking ids | Prefix on id fields |
 
 **Recommendation:** keep client page search for MVP admin volume; add Algolia only if operators need cross-page search. Prefix queries help exact-startswith id lookup only.
+
+---
+
+## Remaining cost / performance risks (2026-06-25 audit)
+
+Accepted, documented trade-offs — none block production:
+
+1. **Text search is client-side on the current page only.** Firestore has no
+   full-text/substring search. Cross-page search needs Algolia/Typesense
+   (future). Not a scan-then-filter bug: the server page is already bounded to
+   25 rows; search filters only those.
+2. **Active-sessions operational filter is client-side on a bounded server
+   page.** `operationalStatus` (live / waiting / no-show / …) is *derived* from
+   the aggregated `callTracking/summary` doc, not a stored field, so it cannot
+   be pushed to Firestore. The server query is bounded by the
+   `startsAt ∈ [now−30m, now+2h]` window + `lifecycleStatus in […]`, so the
+   client filter runs on ≤25 rows — not a collection scan.
+3. **Active-sessions page is the most read-heavy page** (~26 booking reads +
+   per-row `callTracking/summary` + teacher profile + student user by ID,
+   bounded to the 25-row page). Inherent to the operational view; mitigated by
+   page-size bound. Denormalizing teacher/student display names onto the
+   booking would remove the per-row user/profile reads (future data-model work).
+4. **Moderation actions re-fetch the session detail** (timeline +
+   compensations + call summary + participants) to confirm server state. This
+   is intentional correctness-first behavior for state transitions, not an
+   optimistic-update regression. `setTeacherApplicationAccess` on the QS users
+   page is already optimistic (no re-fetch).
+5. **Session-audit sub-lists (timeline, compensations) are bounded to 200
+   docs** via a safety `limit` — expected <20 per session; the cap prevents an
+   unbounded read if a session ever accumulates abnormal history.
+6. **`getByIds` issues N parallel `getDoc` reads** (one per participant on the
+   visible page). Bounded to page size (≤25); acceptable. A single
+   `where(documentId(), 'in', ids)` would reduce round-trips but not read
+   count.
+7. **Raw call events are lazy + idempotent** — loaded only when the events
+   panel is opened, never on detail load, and never re-queried on repeated
+   panel toggles.
 

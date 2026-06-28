@@ -7,6 +7,7 @@
     "errorServer": "A server error occurred. Please try again later.",
     "unauthorized": "You are not authorized to perform this action.",
     "notFound": "{resource} not found.",
+    "sessionDetailNotFound": "This session could not be found. It may have been cancelled or removed.",
     "validationError": "Validation error: {field} ({code}).",
     "slotUnavailable": "This slot is no longer available. Please choose another.",
     "bookingConflict": "You have another session at the same time.",
@@ -23,12 +24,40 @@
     "accountBlocked": "Your account is suspended. Please contact support.",
     "guardianApprovalRequired": "Booking for this student requires guardian approval first.",
     "guardianApprovalTitle": "Guardian approval",
-    "guardianApprovalBody": "A parent or guardian must sign in on this device and confirm that they allow Quran Sessions bookings for this student account.",
+    "guardianApprovalBody": "A parent or guardian must sign in on this device and confirm that they allow QuranTutor bookings for this student account.",
     "guardianApprovalStudentIdLabel": "Student account ID",
     "guardianApprovalStudentIdHint": "Child student user ID",
     "guardianApprovalConfirm": "Approve bookings",
     "guardianApprovalCaptured": "Guardian approval recorded. You can return to booking.",
     "guardianApprovalSetupAction": "Set up guardian approval",
+    "guardianDashboardTitle": "Guardian hub",
+    "guardianDashboardIntroTitle": "Child session bookings",
+    "guardianDashboardIntroBody": "Approve QuranTutor bookings for your child on this device. You will confirm consent once; the student can then complete booking.",
+    "guardianDashboardApproveAction": "Approve child bookings",
+    "guardianDashboardOpenAction": "Open guardian hub",
+    "guardianDashboardDeferredNote": "Upcoming child sessions and pending approvals in one list require guardian account linking — coming after MVP auth roles.",
+    "sessionRevisionPracticeUpcomingTitle": "Prepare for your session",
+    "sessionRevisionPracticeCompletedTitle": "Continue your revision",
+    "sessionRevisionPracticeBody": "Practice Surah {surahNumber} in Tilawa's Quran reader before or after your session.",
+    "@sessionRevisionPracticeBody": {
+        "placeholders": {
+            "surahNumber": {
+                "type": "int"
+            }
+        }
+    },
+    "sessionRevisionPracticeAction": "Practice in Quran reader",
+    "teacherCredentialsSectionTitle": "Credentials",
+    "teacherCredentialsSummary": "{count, plural, =1{1 credential} other{{count} credentials}}",
+    "@teacherCredentialsSummary": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "teacherCredentialsDisclaimer": "Credentials are provided by the teacher. Verified items were checked by Tilawa; others are self-reported.",
+    "teacherCredentialVerifiedBadge": "Verified by Tilawa",
     "policyViolation": "Booking rejected due to policy \"{policy}\": {detail}.",
     "marketNotEnabledWithCity": "Sessions are not available in your city right now. Try another city.",
     "marketNotEnabled": "Sessions are not available in your country right now.",
@@ -66,6 +95,8 @@
     "profileFieldDateOfBirth": "Date of birth",
     "profileFieldCountry": "Country",
     "profileFieldCity": "City",
+    "profileFieldLearningGoals": "Learning goals",
+    "profileLearningGoalsHelper": "Optional — helps us recommend the right teacher for you.",
     "profileFieldDisplayName": "Full name",
     "profileCompletionSaveAndContinue": "Save and continue",
     "profileCompletionSelectDateOfBirth": "Select date of birth",
@@ -76,13 +107,78 @@
     "profileGenderRequired": "Gender is required.",
     "profileCountryRequired": "Country is required.",
     "profileCityRequired": "City is required.",
-    "quranSessionsHomeTitle": "Learn Quran recitation",
+    "quranSessionsHomeTitle": "Learn Quran with your teacher",
+    "quranSessionsHomeAppBarTitle": "Tutors",
     "mySessionsTitle": "My sessions",
     "noTeachersAvailableYet": "No teachers available yet",
     "seeAllTeachers": "See all teachers →",
     "becomeTeacherCardTitle": "I want to become a teacher",
     "becomeTeacherCardSubtitle": "Join MeMuslim's certified teachers",
-    "teacherListTitle": "Find a teacher",
+    "teacherListAppBarTitle": "Tutors",
+    "teacherListTitle": "Learn Quran with your teacher",
+    "teacherListSubtitle": "Choose the right teacher and start improving your recitation",
+    "teacherSearchHint": "Search tutors by name",
+    "noTeachersForSearchQuery": "No tutors match \"{query}\"",
+    "@noTeachersForSearchQuery": {
+        "placeholders": {
+            "query": { "type": "String" }
+        }
+    },
+    "teacherNewRating": "New",
+    "teacherFilterAll": "All",
+    "teacherFilterFree": "Free",
+    "teacherFilterPaid": "Paid",
+    "teacherFilterBudget": "Budget",
+    "teacherFilterUnderPrice": "Under {amount}",
+    "@teacherFilterUnderPrice": {
+        "placeholders": {
+            "amount": { "type": "String" }
+        }
+    },
+    "teacherFilterAvailableToday": "Available today",
+    "teacherBookAction": "Book",
+    "viewTeacherProfile": "View profile",
+    "teacherAvailabilityToday": "Available today",
+    "teacherAvailabilityTomorrow": "Next slot tomorrow",
+    "teacherAvailabilityNextAt": "Next slot: {when}",
+    "@teacherAvailabilityNextAt": {
+        "placeholders": {
+            "when": { "type": "String" }
+        }
+    },
+    "teacherAvailabilityNoSlots": "No slots",
+    "teacherAvailabilityUnavailable": "Not available now",
+    "joinSessionNow": "Join now",
+    "sessionsSummaryUpcoming": "Upcoming: {count}",
+    "@sessionsSummaryUpcoming": {
+        "placeholders": {
+            "count": { "type": "int" }
+        }
+    },
+    "sessionsSummaryPast": "Past: {count}",
+    "@sessionsSummaryPast": {
+        "placeholders": {
+            "count": { "type": "int" }
+        }
+    },
+    "sessionsSummaryNextSession": "Next session: {when}",
+    "@sessionsSummaryNextSession": {
+        "placeholders": {
+            "when": { "type": "String" }
+        }
+    },
+    "sessionsTabUpcoming": "Upcoming",
+    "sessionsTabPast": "Past",
+    "sessionsTabCancelled": "Cancelled",
+    "bookAgainAction": "Book again",
+    "sessionStatusStartingSoon": "Starting soon",
+    "sessionStartsInMinutes": "Starts in {minutes} min",
+    "@sessionStartsInMinutes": {
+        "placeholders": {
+            "minutes": { "type": "int" }
+        }
+    },
+    "noTeachersForAvailabilityFilter": "No teachers available today right now",
     "noTeachersForSpecialization": "No teachers found for \"{specialization}\"",
     "@noTeachersForSpecialization": {
         "placeholders": {
@@ -111,8 +207,8 @@
     "callTypeExternalMeeting": "External link",
     "callTypeVoice": "Voice",
     "callTypeVideo": "Video",
-    "sessionModeVoiceBetaNote": "Free Beta: voice uses a placeholder join until in-app RTC ships.",
-    "sessionModeVideoBetaNote": "Free Beta: video uses a placeholder join until in-app RTC ships.",
+    "sessionModeVoiceBetaNote": "Voice sessions use in-app calling when your teacher and device support it.",
+    "sessionModeVideoBetaNote": "Video sessions use in-app calling when your teacher and device support it.",
     "bookingVoiceVideoProviderNote": "In-app calls use {provider}.",
     "@bookingVoiceVideoProviderNote": {
         "placeholders": {
@@ -126,7 +222,7 @@
     "sessionModeExternalDisabled": "Your teacher has not added a meeting link yet. Choose voice or video.",
     "meetingLinkUnavailable": "This teacher has not set up a meeting link for external sessions. Choose voice or video, or try again later.",
     "callProviderUnavailable": "This session cannot be joined from the app right now.",
-    "callProviderAgoraNotConfigured": "In-app Agora calls are not enabled in this build. Rebuild with Staging Agora config (TILAWA_DISTRIBUTION=staging and TILAWA_LAUNCH_AGORA_APP_ID), or use the Tilawa (Staging Agora) launch profile.",
+    "callProviderAgoraNotConfigured": "In-app Agora calls are not enabled in this build. Rebuild with Staging Agora config (TILAWA_DISTRIBUTION=staging and TILAWA_LAUNCH_AGORA_APP_ID), or use the MeMuslim (Staging Agora) launch profile.",
     "rtcPermissionDenied": "Microphone or camera access is required to join this session. Enable {permission} in Settings and try again.",
     "@rtcPermissionDenied": {
         "placeholders": {
@@ -171,7 +267,28 @@
     "groupBookingNotSupported": "Group sessions are not available in Free Beta.",
     "unsupportedSessionMode": "This session type is not supported.",
     "reviewSubmittedThanks": "Thank you — your review was submitted!",
-    "upcomingSessionsSection": "Upcoming ({count})",
+    "sessionReviewTitle": "Rate your session",
+    "sessionReviewSubtitle": "How was your session with {teacherName}?",
+    "@sessionReviewSubtitle": {
+        "placeholders": {
+            "teacherName": { "type": "String" }
+        }
+    },
+    "sessionReviewSubtitleGeneric": "How was your session?",
+    "sessionReviewRatingLabel": "Your rating",
+    "sessionReviewStarLabel": "{star} stars",
+    "@sessionReviewStarLabel": {
+        "placeholders": {
+            "star": { "type": "int" }
+        }
+    },
+    "sessionReviewCommentLabel": "Comment (optional)",
+    "sessionReviewCommentHint": "Share what went well or what could improve",
+    "sessionReviewSubmit": "Submit review",
+    "sessionReviewSkip": "Not now",
+    "rateSessionAction": "Rate session",
+    "reportTutorAction": "Report tutor",
+    "upcomingSessionsSection": "Upcoming sessions ({count})",
     "@upcomingSessionsSection": {
         "placeholders": {
             "count": {
@@ -198,10 +315,18 @@
     "cancelReasonHint": "Tell us why you need to cancel (required)",
     "cancelReasonRequired": "Please enter at least 3 characters.",
     "cancelPolicyBlockedNotice": "Cancellation is not allowed this close to the session start time.",
-    "cancelPolicyFree": "This is a free session. No refund applies.",
+    "cancellationFreeNoRefund": "This is a free session. No refund applies.",
     "cancelPolicyFullRefund": "You will receive a full refund if you cancel now.",
     "cancelPolicyPartialRefund": "A partial refund may apply based on our cancellation policy.",
     "cancelPolicyNoRefund": "No refund applies for cancellations at this time.",
+    "tutorCancelSessionDialogTitle": "Cancel session?",
+    "tutorCancelSessionDialogMessage": "The student will be notified and will not be able to join this session.",
+    "tutorCancelSessionAction": "Cancel session",
+    "tutorCancelSessionGoBack": "Go back",
+    "tutorCancelSessionSuccess": "Session cancelled.",
+    "tutorCancelSessionError": "Could not cancel the session. Please try again.",
+    "sessionCancelledByTutorTitle": "Your tutor cancelled this session",
+    "sessionCancelledByTutorSubtitle": "You can choose another time",
     "rescheduleSessionTitle": "Reschedule session",
     "rescheduleReasonLabel": "Reason for rescheduling",
     "rescheduleReasonHint": "Briefly explain why you need a new time",
@@ -259,6 +384,7 @@
         }
     },
     "viewSessionDetails": "View details",
+    "sessionCardOverflowMenu": "More session actions",
     "noSessionsYet": "No sessions yet",
     "bookFirstSessionHint": "Book your first session with one of our certified teachers",
     "teacherProfileTitle": "Teacher profile",
@@ -276,7 +402,9 @@
     "availableSlots": "Available slots",
     "reviewsSection": "Reviews",
     "noReviewsYet": "No reviews yet",
+    "aboutTeacherSection": "About the teacher",
     "bookSessionAction": "Book a session",
+    "noAvailabilityBookAction": "No slots available",
     "sessionStatusScheduled": "Scheduled",
     "sessionStatusInProgress": "In progress",
     "sessionStatusCompleted": "Completed",
@@ -284,8 +412,25 @@
     "sessionStatusNoShow": "No-show",
     "cancel": "Cancel",
     "joinSession": "Join",
+    "sessionJoinStateNotStarted": "Join opens 15 minutes before your session starts.",
+    "sessionJoinStateJoinAvailable": "You can join now.",
+    "sessionJoinStateJoining": "Connecting to your session…",
+    "sessionJoinStateJoined": "You joined this session.",
+    "sessionJoinStateFailed": "Could not join. Try again or contact support.",
+    "sessionJoinStateEnded": "This session has ended.",
+    "sessionJoinStateCancelled": "This session was cancelled.",
+    "sessionCancelledSuccess": "Session cancelled.",
     "noSlotsAvailable": "No slots available",
     "noSlotsAvailableThisDay": "No slots available on this day",
+    "slotPickerLocalTimezoneNote": "Times are shown in your local timezone",
+    "teacherSessionsCompleted": "{count, plural, =1{1 session completed} other{{count} sessions completed}}",
+    "@teacherSessionsCompleted": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
     "teacherDashboardTitle": "Teacher dashboard",
     "noSessionsOrSlotsYet": "No sessions or slots yet",
     "addAvailableSlot": "Add available slot",
@@ -340,6 +485,7 @@
     "slotTime": "Slot time",
     "addSlotButton": "Add slot",
     "availabilityTitle": "Weekly availability",
+    "availabilityAppBarTitle": "Availability",
     "availabilityRecurringBanner": "This is your recurring weekly availability. It is used to generate bookable times for future days.",
     "bookableTimesSectionTitle": "Bookable times — next 14 days",
     "bookableTimesSectionSubtext": "Generated from your weekly availability, minus exceptions and bookings.",
@@ -560,6 +706,7 @@
     "teacherProfileIncompleteAction": "Complete profile",
     "manageYourAvailabilityAndSessions": "Manage your schedule and sessions from here.",
     "noAvailabilityYet": "No availability published yet.",
+    "noAvailabilityHelper": "Check back later when this teacher adds new slots.",
     "reportConcernAction": "Report a concern",
     "reportConcernTitle": "Report a safety concern",
     "reportConcernSubtitle": "Tell us what happened. Our team reviews reports promptly.",
@@ -586,6 +733,7 @@
     "reportCategoryFraudOrScam": "Fraud or scam",
     "reportCategoryOther": "Other",
     "walletTitle": "My wallet",
+    "walletAppBarTitle": "Wallet",
     "walletAvailableBalanceLabel": "Available balance",
     "walletHeldBalanceLabel": "On hold: {amount}",
     "@walletHeldBalanceLabel": {
@@ -617,6 +765,8 @@
     "walletTransactionTypeExpiry": "Expired credit",
     "walletEntryAction": "Wallet",
     "paymentCheckoutTitle": "Confirm payment",
+    "paymentCheckoutFreeTitle": "Confirm booking",
+    "paymentCheckoutFreeAmount": "This session is free — no payment required.",
     "paymentCheckoutAmount": "Total: {amount}",
     "@paymentCheckoutAmount": {
         "placeholders": {
@@ -626,8 +776,13 @@
         }
     },
     "paymentCheckoutAmountPending": "Session price (sandbox)",
-    "paymentCheckoutRefundToWalletNotice": "If you cancel or we approve a refund, the amount is added to your Tilawa wallet as credit. Wallet credit is not automatically returned to your card.",
+    "paymentCheckoutSandboxNotice": "Sandbox mode — no real charge. Enable paid booking only via the sandbox launch flag.",
+    "paymentCheckoutRefundToWalletNotice": "If you cancel or we approve a refund, the amount is added to your MeMuslim wallet as credit. Wallet credit is not automatically returned to your card.",
     "paymentCheckoutConfirm": "Confirm payment (sandbox)",
+    "paymentCheckoutConfirmFree": "Confirm booking",
+    "bookingPriceSummaryTitle": "Session price",
+    "bookingPricePerSessionHint": "Charged once when you confirm (sandbox only).",
+    "walletSandboxNotice": "Sandbox wallet — credits from refunds and test payments only. Not real money.",
     "restrictionReasonFalseIdentity": "False identity information",
     "restrictionReasonPolicyViolation": "Policy violation",
     "restrictionReasonSafetyConcern": "Safety concern",
@@ -643,6 +798,17 @@
     "sessionLifecycleCancelledByStudent": "Cancelled by student",
     "sessionLifecycleCancelledByTeacher": "Cancelled by teacher",
     "sessionLifecycleCancelledByAdmin": "Cancelled by admin",
+    "sessionStatusCancelledByTutorDetail": "Cancelled by the tutor",
+    "sessionStatusCancelledByTutorSelf": "You cancelled this session",
+    "sessionStatusCancelledByStudentDetail": "Cancelled by the student",
+    "sessionStatusCancelledByStudentSelf": "You cancelled this session",
+    "sessionStatusCancelledBySupportDetail": "Cancelled by support",
+    "sessionStatusCancelledDescription": "This session was cancelled.",
+    "sessionTimelineBookingConfirmed": "Booking confirmed",
+    "sessionTimelineCancelledByTutor": "Session cancelled by tutor",
+    "sessionTimelineCancelledByStudent": "Session cancelled by student",
+    "sessionTimelineCancelledBySupport": "Session cancelled by support",
+    "sessionCancelledDisputeHelper": "You can open a dispute if you need our team to review this cancellation.",
     "sessionLifecycleTeacherNoShow": "Teacher no-show",
     "sessionLifecycleStudentNoShow": "Student no-show",
     "sessionLifecycleBothNoShow": "Both no-show",
@@ -674,6 +840,65 @@
     "sessionActionIssueRefund": "Issue refund",
     "sessionActionExpireReservation": "Expire reservation",
     "sessionActionRejectBooking": "Reject booking",
+    "bookingRequestSentTitle": "Booking request sent",
+    "bookingRequestSentSubtitle": "The booking is under review.",
+    "sessionAwaitingReviewNextSteps": "The booking is under review.\nPlease complete the payment using one of the available methods.\nThe session will be confirmed after payment review and teacher confirmation.",
+    "paidSessionNoticeTitle": "This session is paid",
+    "manualPaymentInstructionsBody": "Payment is currently handled manually via Vodafone Cash, InstaPay, or bank transfer until online payment methods are added inside the app.",
+    "manualPaymentInstapayHandle": "For InstaPay payment:",
+    "manualPaymentInstapayLink": "Or use the payment link:",
+    "manualPaymentRecipientMaskedName": "Recipient name shown during transfer:",
+    "manualPaymentReceiptWhatsappInstruction": "After completing the payment, please send a screenshot of the transfer receipt on WhatsApp to support:",
+    "manualPaymentConfirmationRule": "The booking will be confirmed after payment review and teacher confirmation.",
+    "manualPaymentCancellationPolicy": "If you have already completed the manual payment, please contact support to review the payment or refund status.",
+    "manualPaymentCancellationSupportHint": "Support: {supportNumber}",
+    "@manualPaymentCancellationSupportHint": {
+        "placeholders": {
+            "supportNumber": {
+                "type": "String"
+            }
+        }
+    },
+    "manualPaymentCopiedToClipboard": "Copied to clipboard",
+    "paymentMethodVodafoneCash": "Vodafone Cash",
+    "paymentMethodInstapay": "InstaPay",
+    "paymentMethodBankTransfer": "Bank transfer",
+    "bookingUnderReviewTitle": "Booking under review",
+    "bookingUnderReviewPaymentHint": "Please complete the payment using one of the available methods.",
+    "bookingUnderReviewConfirmHint": "The booking will be confirmed after payment review and teacher confirmation.",
+    "bookingAcceptedTitle": "Session accepted",
+    "bookingAcceptedSubtitle": "You can join at session time",
+    "bookingRejectedTitle": "Tutor declined this session",
+    "bookingRejectedSubtitle": "You can choose another time",
+    "sendBookingRequest": "Send booking request",
+    "sessionStatusBookingUnderReview": "Under review",
+    "sessionStatusRejectedByTutor": "Declined",
+    "teacherPendingBookingRequestsSection": "Booking requests ({count})",
+    "@teacherPendingBookingRequestsSection": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "teacherPendingBookingRequestsEmptyTitle": "No booking requests right now",
+    "teacherPendingBookingRequestsEmptySubtitle": "Student requests will appear here",
+    "teacherAcceptBookingRequest": "Accept",
+    "teacherRejectBookingRequest": "Decline",
+    "tutorRejectBookingSheetTitle": "Decline booking request?",
+    "tutorRejectBookingSheetBody": "You can share a reason with the student, or decline without one.",
+    "tutorRejectBookingReasonLabel": "Reason for declining",
+    "tutorRejectBookingReasonHint": "e.g. This time does not work",
+    "tutorRejectBookingConfirmAction": "Decline request",
+    "tutorRejectBookingGoBack": "Go back",
+    "tutorRejectBookingReasonTooLong": "Reason is too long",
+    "tutorCancelSessionFromCard": "Cancel",
+    "sessionLifecycleBookingUnderReview": "Booking under review",
+    "sessionLifecycleRejectedByTutor": "Rejected by tutor",
+    "sessionActionSubmitBookingRequest": "Submit booking request",
+    "sessionActionAcceptBookingRequest": "Accept booking request",
+    "sessionActionRejectBookingRequest": "Reject booking request",
+    "sessionActionExpireBookingReview": "Expire booking review",
     "sessionTimelineStatusTransition": "{previous} → {next}",
     "@sessionTimelineStatusTransition": {
         "placeholders": {
@@ -682,6 +907,24 @@
             },
             "next": {
                 "type": "String"
+            }
+        }
+    },
+    "tutorDashboardStudentFallback": "Student",
+    "teacherDashboardLoadError": "Could not load sessions. Please try again.",
+    "tutorSessionStatusPendingApproval": "Awaiting your approval",
+    "tutorSessionStatusAccepted": "Accepted",
+    "tutorSessionStatusRejected": "Declined",
+    "tutorSessionStatusCancelledByTutor": "You cancelled",
+    "tutorSessionStatusCancelledByStudent": "Student cancelled",
+    "tutorSessionStatusCompleted": "Completed",
+    "tutorSessionStatusExpired": "Expired",
+    "tutorSessionJoinNotYet": "Join is not open yet",
+    "tutorSessionDurationMinutes": "{count} min",
+    "@tutorSessionDurationMinutes": {
+        "placeholders": {
+            "count": {
+                "type": "int"
             }
         }
     }

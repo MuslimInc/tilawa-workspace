@@ -49,6 +49,24 @@ export class FirebaseCallTrackingRepository implements CallTrackingRepository {
     );
   }
 
+  async getSummariesBySessionIds(
+    sessionIds: readonly string[],
+  ): Promise<Map<string, CallTrackingSummary>> {
+    const uniqueIds = [...new Set(sessionIds.filter((id) => id.trim().length > 0))];
+    const result = new Map<string, CallTrackingSummary>();
+
+    await Promise.all(
+      uniqueIds.map(async (sessionId) => {
+        const summary = await this.getSummary(sessionId);
+        if (summary) {
+          result.set(sessionId, summary);
+        }
+      }),
+    );
+
+    return result;
+  }
+
   async listEvents(
     sessionId: string,
     page: PageRequest,

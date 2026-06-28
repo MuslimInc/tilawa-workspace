@@ -25,7 +25,7 @@ class AyahListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TilawaDesignTokens tokens = context.tokens;
+    final MeMuslimDesignTokens tokens = context.tokens;
 
     return CustomScrollView(
       controller: scrollController,
@@ -65,7 +65,7 @@ class SurahHeaderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final TilawaHomeDashboardCardTokens cardTokens =
         theme.componentTokens.homeDashboardCard;
     final Color foreground = cardTokens.foregroundColor;
@@ -160,7 +160,7 @@ class BasmalaWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
 
     return Padding(
@@ -202,7 +202,7 @@ class AyahWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
 
     return Padding(
@@ -289,7 +289,7 @@ class _AyahActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
 
     return Semantics(
       button: true,

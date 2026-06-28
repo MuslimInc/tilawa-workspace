@@ -40,6 +40,7 @@ final class ProfileCompletionEditing extends ProfileCompletionState {
     this.dobFailure,
     this.submitAttempted = false,
     this.submitValidationAttempt = 0,
+    this.selectedLearningGoals = const [],
   });
 
   final String userId;
@@ -64,6 +65,7 @@ final class ProfileCompletionEditing extends ProfileCompletionState {
   final QuranSessionsFailure? dobFailure;
   final bool submitAttempted;
   final int submitValidationAttempt;
+  final List<StudentLearningGoal> selectedLearningGoals;
 
   bool get hasGenderError => submitAttempted && selectedGender == null;
 
@@ -135,6 +137,7 @@ final class ProfileCompletionEditing extends ProfileCompletionState {
     bool clearDobFailure = false,
     bool? submitAttempted,
     int? submitValidationAttempt,
+    List<StudentLearningGoal>? selectedLearningGoals,
   }) => ProfileCompletionEditing(
     userId: userId,
     availableCountries: availableCountries,
@@ -153,6 +156,7 @@ final class ProfileCompletionEditing extends ProfileCompletionState {
     submitAttempted: submitAttempted ?? this.submitAttempted,
     submitValidationAttempt:
         submitValidationAttempt ?? this.submitValidationAttempt,
+    selectedLearningGoals: selectedLearningGoals ?? this.selectedLearningGoals,
   );
 
   @override
@@ -171,6 +175,7 @@ final class ProfileCompletionEditing extends ProfileCompletionState {
     dobFailure,
     submitAttempted,
     submitValidationAttempt,
+    selectedLearningGoals,
   ];
 }
 

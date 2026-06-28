@@ -193,7 +193,7 @@ class _HeroAlertControl extends StatelessWidget {
   final bool showLabel;
   final VoidCallback? onTap;
   final String? tooltip;
-  final TilawaDesignTokens tokens;
+  final MeMuslimDesignTokens tokens;
 
   @override
   Widget build(BuildContext context) {

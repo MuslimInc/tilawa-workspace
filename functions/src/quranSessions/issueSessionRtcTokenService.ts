@@ -14,7 +14,7 @@ import {
   requireValidSessionEpoch,
   resolveActorRole,
 } from "./sessionAuth";
-import { resolveTeacherProfileUserId } from "./teacherProfileUserId";
+import { resolveTeacherProfileUserId, teacherUserIdFromDenormalizedSessionData } from "./teacherProfileUserId";
 
 interface IssueSessionRtcTokenRequest {
   sessionId: string;
@@ -92,10 +92,9 @@ export async function issueSessionRtcTokenForRequest(
     teacherId: (booking.teacherId as string) ?? "",
   };
 
-  const teacherUserId = await resolveTeacherProfileUserId(
-    deps.db,
-    participants.teacherId,
-  );
+  const teacherUserId =
+    teacherUserIdFromDenormalizedSessionData(booking) ??
+    (await resolveTeacherProfileUserId(deps.db, participants.teacherId));
   resolveActorRole(request, undefined, participants, teacherUserId);
 
   const readCredentials = deps.readCredentials ?? readAgoraRtcCredentials;

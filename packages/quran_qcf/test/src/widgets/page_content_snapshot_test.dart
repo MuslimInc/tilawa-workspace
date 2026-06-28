@@ -91,7 +91,7 @@ Future<PreparedQuranPage> _preparePage(WidgetTester tester) async {
   late final PreparedQuranPage preparedPage;
   await tester.pumpWidget(
     MaterialApp(
-      theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+      theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
       home: Scaffold(
         body: Builder(
           builder: (context) {
@@ -129,7 +129,7 @@ Widget _buildPageContentWidget({
   Color textColor = Colors.black,
 }) {
   return MaterialApp(
-    theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+    theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
     home: Scaffold(
       body: PageContent(
         pageNumber: 10,

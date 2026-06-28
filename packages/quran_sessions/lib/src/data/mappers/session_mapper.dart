@@ -1,9 +1,11 @@
+import '../../domain/entities/session_lifecycle_status.dart';
 import '../../domain/entities/quran_session.dart';
 import '../../domain/entities/session_booking_type.dart';
 import '../../domain/entities/session_call_provider_kind.dart';
 import '../../domain/entities/session_call_type.dart';
 import '../../domain/entities/session_participant.dart';
 import '../../domain/entities/session_participant_role.dart';
+import '../../domain/services/lifecycle_status_parser.dart';
 import '../dtos/quran_session_dto.dart';
 
 extension QuranSessionDtoMapper on QuranSessionDto {
@@ -16,6 +18,9 @@ extension QuranSessionDtoMapper on QuranSessionDto {
     endsAt: DateTime.parse(endsAt),
     callType: _mapCallType(callType),
     status: _mapStatus(status),
+    lifecycleStatus: lifecycleStatus == null
+        ? null
+        : _mapLifecycleStatus(lifecycleStatus!),
     bookingType: _mapBookingType(bookingType),
     callProviderKind: _mapCallProvider(callProvider),
     meetingLink: meetingLink,
@@ -65,13 +70,22 @@ SessionParticipantRole _mapParticipantRole(String? raw) => raw == 'teacher'
     : SessionParticipantRole.student;
 
 QuranSessionStatus _mapStatus(String raw) => switch (raw) {
-  'scheduled' => QuranSessionStatus.scheduled,
+  'scheduled' || 'confirmed' => QuranSessionStatus.scheduled,
+  'pending' => QuranSessionStatus.scheduled,
   'in_progress' || 'inProgress' => QuranSessionStatus.inProgress,
   'completed' => QuranSessionStatus.completed,
   'cancelled_by_student' ||
-  'cancelledByStudent' => QuranSessionStatus.cancelledByStudent,
+  'cancelledByStudent' ||
+  'student_cancelled' ||
+  'studentCancelled' => QuranSessionStatus.cancelledByStudent,
   'cancelled_by_teacher' ||
-  'cancelledByTeacher' => QuranSessionStatus.cancelledByTeacher,
+  'cancelledByTeacher' ||
+  'tutor_cancelled' ||
+  'tutorCancelled' => QuranSessionStatus.cancelledByTeacher,
   'no_show' || 'noShow' => QuranSessionStatus.noShow,
+  'cancelled' => QuranSessionStatus.cancelledByStudent,
   _ => QuranSessionStatus.scheduled,
 };
+
+SessionLifecycleStatus _mapLifecycleStatus(String raw) =>
+    parseLifecycleStatusFromRaw(raw);

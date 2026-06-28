@@ -11,6 +11,8 @@ class FakeTeacherProfileRepository implements TeacherProfileRepository {
 
   final Map<String, TeacherProfile> _byId;
   final Map<String, TeacherProfile> _byUserId;
+  int getProfileByIdCallCount = 0;
+  int getProfileByUserIdCallCount = 0;
 
   /// Last profile passed to [updatePublicProfile] (for regression tests).
   TeacherProfile? lastUpdatedPublicProfile;
@@ -39,6 +41,7 @@ class FakeTeacherProfileRepository implements TeacherProfileRepository {
   Future<Either<QuranSessionsFailure, TeacherProfile>> getProfileById(
     String id,
   ) async {
+    getProfileByIdCallCount++;
     final profile = _byId[id];
     if (profile == null) {
       return const Left(NotFoundFailure('TeacherProfile'));
@@ -50,6 +53,7 @@ class FakeTeacherProfileRepository implements TeacherProfileRepository {
   Future<Either<QuranSessionsFailure, TeacherProfile>> getProfileByUserId(
     String userId,
   ) async {
+    getProfileByUserIdCallCount++;
     final profile = _byUserId[userId];
     if (profile == null) {
       return const Left(NotFoundFailure('TeacherProfile'));

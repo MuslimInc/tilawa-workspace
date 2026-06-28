@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Global readability scale for Tilawa product chrome typography.
 ///
-/// Applied centrally in [AppTheme] via [tilawaScaleTextTheme] only. Component
+/// Applied centrally in [AppTheme] via [meMuslimScaleTextTheme] only. Component
 /// tokens reference [TilawaTextRole] so this scale flows through
 /// [ThemeData.textTheme] automatically.
 ///
@@ -23,7 +23,7 @@ TextStyle? _scaleTextStyle(TextStyle? style) {
 /// Scales every non-null [TextStyle.fontSize] in [base] by
 /// [kTilawaGlobalTextScaleFactor]. Skips styles without an explicit size so M3
 /// inherited sizes are unchanged.
-TextTheme tilawaScaleTextTheme(TextTheme base) {
+TextTheme meMuslimScaleTextTheme(TextTheme base) {
   return base.copyWith(
     displayLarge: _scaleTextStyle(base.displayLarge),
     displayMedium: _scaleTextStyle(base.displayMedium),

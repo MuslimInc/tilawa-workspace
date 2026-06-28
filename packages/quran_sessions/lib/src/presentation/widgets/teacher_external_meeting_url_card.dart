@@ -14,11 +14,15 @@ class TeacherExternalMeetingUrlCard extends StatefulWidget {
     required this.userId,
     required this.getCapability,
     required this.updateMeetingLink,
+    this.useCardChrome = true,
   });
 
   final String userId;
   final GetCurrentUserTeacherCapabilityUseCase getCapability;
   final UpdateTeacherMeetingLinkUseCase updateMeetingLink;
+
+  /// When false, renders form only (for dashboard settings sheet).
+  final bool useCardChrome;
 
   @override
   State<TeacherExternalMeetingUrlCard> createState() =>
@@ -107,35 +111,42 @@ class _TeacherExternalMeetingUrlCardState
     final l10n = context.quranSessionsL10n;
     final tokens = Theme.of(context).tokens;
 
+    final form = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (widget.useCardChrome) ...[
+          Text(
+            l10n.teacherExternalMeetingUrlLabel,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          SizedBox(height: tokens.spaceSmall),
+        ],
+        TilawaTextField(
+          controller: _meetingUrlCtrl,
+          label: l10n.teacherExternalMeetingUrlLabel,
+          hintText: l10n.teacherExternalMeetingUrlHint,
+          helperText: l10n.teacherExternalMeetingUrlHelper,
+          keyboardType: TextInputType.url,
+          textInputAction: TextInputAction.done,
+        ),
+        SizedBox(height: tokens.spaceMedium),
+        TilawaButton(
+          text: l10n.teacherExternalMeetingUrlSave,
+          isLoading: _saving,
+          onPressed: _saving ? null : _save,
+          size: TilawaButtonSize.small,
+          isFullWidth: true,
+        ),
+      ],
+    );
+
+    if (!widget.useCardChrome) {
+      return form;
+    }
+
     return Padding(
       padding: EdgeInsets.only(bottom: tokens.spaceLarge),
-      child: TilawaCard(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              l10n.teacherExternalMeetingUrlLabel,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            SizedBox(height: tokens.spaceSmall),
-            TilawaTextField(
-              controller: _meetingUrlCtrl,
-              label: l10n.teacherExternalMeetingUrlLabel,
-              hintText: l10n.teacherExternalMeetingUrlHint,
-              helperText: l10n.teacherExternalMeetingUrlHelper,
-              keyboardType: TextInputType.url,
-              textInputAction: TextInputAction.done,
-            ),
-            SizedBox(height: tokens.spaceMedium),
-            TilawaButton(
-              text: l10n.teacherExternalMeetingUrlSave,
-              isLoading: _saving,
-              onPressed: _saving ? null : _save,
-              size: TilawaButtonSize.small,
-            ),
-          ],
-        ),
-      ),
+      child: TilawaCard(child: form),
     );
   }
 }

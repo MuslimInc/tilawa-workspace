@@ -36,7 +36,7 @@ const double kTilawaMediaPlayerBarShellEdgeBandHeight = 4.0;
 }
 
 /// Typical horizontal inset outside the bar in the mini-player shell
-/// ([TilawaDesignTokens.spaceLarge] × 2). Used when [layoutWidth] is null.
+/// ([MeMuslimDesignTokens.spaceLarge] × 2). Used when [layoutWidth] is null.
 const double kTilawaMediaPlayerBarDefaultHorizontalInset = 32.0;
 
 /// UI-only widget for the bottom player that can be used in previews
@@ -586,9 +586,7 @@ class _SubtitleTapTarget extends StatelessWidget {
         // Outer Semantics owns the button role + label.
         button: false,
         onTap: onTap,
-        // Transparent tap region over text/metadata: keep the content static
-        // (no press-scale) but gain the keyboard focus ring + state layer.
-        enablePressAnimation: false,
+        // Transparent tap region: stable state-layer press (default).
         child: child,
       ),
     );
@@ -621,9 +619,7 @@ class _ProgressTapTarget extends StatelessWidget {
         // Outer Semantics owns the button role + label.
         button: false,
         onTap: onTap,
-        // Transparent tap region over text/metadata: keep the content static
-        // (no press-scale) but gain the keyboard focus ring + state layer.
-        enablePressAnimation: false,
+        // Transparent tap region: stable state-layer press (default).
         child: child,
       ),
     );
@@ -658,9 +654,7 @@ class _OpenPlayerTapTarget extends StatelessWidget {
         // Outer Semantics owns the button role + label.
         button: false,
         onTap: onTap,
-        // Transparent tap region over text/metadata: keep the content static
-        // (no press-scale) but gain the keyboard focus ring + state layer.
-        enablePressAnimation: false,
+        // Transparent tap region: stable state-layer press (default).
         child: child,
       ),
     );
@@ -735,7 +729,7 @@ class _TransportControls extends StatelessWidget {
     required this.sleepTimerTooltip,
   });
 
-  final TilawaDesignTokens designTokens;
+  final MeMuslimDesignTokens designTokens;
   final TilawaMediaPlayerBarTokens componentTokens;
   final ColorScheme colorScheme;
   final Color disabledControlColor;

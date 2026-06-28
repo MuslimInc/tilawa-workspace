@@ -22,7 +22,7 @@ void main() {
   });
 
   group('LaunchSplashCanvas widget', () {
-    const SystemUiOverlayStyle overlayStyle = SystemUiOverlayStyle(
+    final SystemUiOverlayStyle overlayStyle = SystemUiOverlayStyle(
       statusBarColor: AppColors.launchSplashBackground,
       systemNavigationBarColor: AppColors.launchSplashBackground,
     );

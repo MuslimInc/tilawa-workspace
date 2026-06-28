@@ -1,7 +1,9 @@
+import '../../domain/entities/manual_payment_price.dart';
 import '../../domain/entities/quran_teacher.dart';
 import '../../domain/entities/session_call_type.dart';
 import '../../domain/entities/session_price.dart';
 import '../../domain/entities/session_pricing_type.dart';
+import '../../domain/entities/teacher_credential.dart';
 import '../../domain/entities/teacher_verification_status.dart';
 import '../../domain/entities/user_profile.dart' show UserGender;
 import '../dtos/quran_teacher_dto.dart';
@@ -17,11 +19,23 @@ extension QuranTeacherDtoMapper on QuranTeacherDto {
     supportedCallTypes: supportedCallTypes.map(_mapCallType).toList(),
     pricingType: _mapPricingType(pricingType),
     price: marketPrice?.toDomain(),
+    manualPaymentPrice: manualPaymentPrice?.toDomain(),
     specializations: specializations,
     languages: languages,
     averageRating: averageRating,
     totalReviews: totalReviews,
     totalSessionsCompleted: totalSessionsCompleted,
+    cityName: cityName,
+    countryName: countryName,
+    credentials: credentials.map((c) => c.toDomain()).toList(),
+  );
+}
+
+extension TeacherCredentialDtoMapper on TeacherCredentialDto {
+  TeacherCredential toDomain() => TeacherCredential(
+    title: title,
+    issuer: issuer,
+    isVerified: isVerified,
   );
 }
 
@@ -31,6 +45,13 @@ extension SessionPriceDtoMapper on SessionPriceDto {
     currencyCode: currencyCode,
     countryCode: countryCode,
     cityId: cityId,
+  );
+}
+
+extension ManualPaymentPriceDtoMapper on ManualPaymentPriceDto {
+  ManualPaymentPrice toDomain() => ManualPaymentPrice(
+    amountMinor: amountMinor,
+    currencyCode: currencyCode,
   );
 }
 

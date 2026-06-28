@@ -45,6 +45,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeGreeting => 'السلام عليكم';
 
   @override
+  String get homeInspirationTitle => 'إلهام اليوم';
+
+  @override
+  String get homeInspirationSubtitle => 'آية ودعاء لقلبك';
+
+  @override
   String homeGreetingName(String name) {
     return 'السلام عليكم، $name';
   }
@@ -59,13 +65,20 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeHeroLocationContext => 'الصلاة في';
 
   @override
-  String get homeNextPrayerUnavailable => 'حدّد موقعك لعرض الصلاة القادمة.';
+  String get homeNextPrayerUnavailable =>
+      'حدّد موقعك لمعرفة موعد الصلاة القادمة.';
 
   @override
   String get homePrayerTimesAction => 'مواقيت الصلاة';
 
   @override
-  String get homePrayerNow => 'حان الوقت الآن';
+  String get homePrayerNow => 'حان وقت الأذان';
+
+  @override
+  String get homeSunriseNow => 'حان وقت الشروق';
+
+  @override
+  String get homeDuhaNow => 'حان وقت الضحى';
 
   @override
   String homePrayerInMinutes(int minutes) {
@@ -91,25 +104,26 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeExploreSubtitle => 'أدواتك اليومية بلمحة';
 
   @override
-  String get homeKhatmaCarouselSubtitle => 'تابع خطة قراءتك';
+  String get homeKhatmaCarouselSubtitle => 'تقدّم في ختمتك';
 
   @override
-  String get homeSupportCarouselSubtitle => 'ساهم في بقاء تلاوة مجانية للجميع';
+  String get homeSupportCarouselSubtitle =>
+      'ساهِم في إبقاء تلاوة مجانية للجميع';
 
   @override
-  String get homeHistoryCarouselSubtitle => 'تابع من حيث توقفت';
+  String get homeHistoryCarouselSubtitle => 'تابع من حيث توقّفت';
 
   @override
-  String get homeFavoritesCarouselSubtitle => 'تلاوات وسور محفوظة';
+  String get homeFavoritesCarouselSubtitle => 'تلاواتك وسورك المحفوظة';
 
   @override
-  String get homeDownloadsCarouselSubtitle => 'استمع دون اتصال';
+  String get homeDownloadsCarouselSubtitle => 'استمع بلا إنترنت';
 
   @override
-  String get homeSessionsTitle => 'تعلّم قراءة القرآن';
+  String get homeSessionsTitle => 'تعلّم التلاوة';
 
   @override
-  String get homeSessionsSubtitle => 'احجز جلسات مع معلمين معتمدين';
+  String get homeSessionsSubtitle => 'جلسات مخصصة مع محفظ معتمد';
 
   @override
   String get homeExploreShowAsList => 'عرض كقائمة';
@@ -119,7 +133,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get homeDashboardLoadError =>
-      'تعذّر تحميل مواقيت الصلاة. تحقق من الاتصال وحاول مرة أخرى.';
+      'تعذّر تحميل المواقيت. تحقق من اتصالك وحاول مجددًا.';
 
   @override
   String get homeSearchHint => 'ابحث في السور أو الأجزاء أو الصفحة';
@@ -138,7 +152,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String homeListeningResumeSubtitle(String reciter, String surah) {
-    return 'تابع · $reciter · $surah';
+    return '$reciter · $surah';
   }
 
   @override
@@ -179,6 +193,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get homeDailyPracticeSubtitle => 'أذكارك المثبتة وأدعيتك';
+
+  @override
+  String get homeDailyHabitTitle => 'العادة اليومية';
+
+  @override
+  String get homeDailyHabitSubtitle => 'ابدأ أو أكمل أذكارك';
 
   @override
   String get homeAthkarRitualsTitle => 'أذكار سريعة';
@@ -234,10 +254,40 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeQuickQuran => 'القرآن';
 
   @override
-  String get homeQuickReciters => 'القراء';
+  String get homeQuickActionsTitle => 'إجراءات سريعة';
 
   @override
-  String get homeQuickRecitersSubtitle => 'تصفّح التلاوات';
+  String get homeMainActionsTitle => 'عباداتك اليومية';
+
+  @override
+  String get homeQuickToolsTitle => 'أدوات سريعة';
+
+  @override
+  String get homeFeaturedTutorTitle => 'تعلّم القرآن مع محفظك';
+
+  @override
+  String get homeFeaturedTutorSubtitle => 'اختر محفظك المفضل لتتقن التلاوة';
+
+  @override
+  String get homeFeaturedTutorCta => 'ابدأ التعلّم';
+
+  @override
+  String get homeFeaturedTutorMySessions => 'جلساتي';
+
+  @override
+  String get homeQuickQuranReader => 'المصحف';
+
+  @override
+  String get homeQuickQuranReaderSubtitle => 'اقرأ القرآن بتدبّر';
+
+  @override
+  String get homeLearnQuranWithTutor => 'تعلّم القرآن مع محفظك';
+
+  @override
+  String get homeQuickReciters => 'القرّاء';
+
+  @override
+  String get homeQuickRecitersSubtitle => 'استمع لتلاوات مختارة';
 
   @override
   String get homeQuickPrayer => 'الصلاة';
@@ -246,19 +296,22 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeQuickQibla => 'القبلة';
 
   @override
-  String get homeQuickQiblaSubtitle => 'اعرف اتجاه القبلة';
+  String get homeQuickQiblaSubtitle => 'اتجه نحو القبلة بسهولة';
 
   @override
   String get homeQuickSettingsSubtitle => 'المظهر والصوت والحساب';
 
   @override
-  String get homeQuickTasbeeh => 'المسبحة';
+  String get homeQuickTasbeeh => 'التسبيح';
 
   @override
-  String get homeQuickTasbeehSubtitle => 'عدّ الذكر بلمسة واحدة';
+  String get homeQuickTasbeehSubtitle => 'سبّح واذكر الله بلمسة';
 
   @override
   String get homeQuickAthkar => 'الأذكار';
+
+  @override
+  String get homeQuickAthkarSubtitle => 'وردك اليومي من الأذكار';
 
   @override
   String get homeQuickSettings => 'الإعدادات';
@@ -304,7 +357,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeDailyInspirationSubtitle => 'آية ودعاء ليومك';
 
   @override
-  String get homeDailyAyahLabel => 'الآية اليومية';
+  String get homeDailyAyahLabel => 'آية اليوم';
 
   @override
   String get homeDailyAyahBody =>
@@ -314,7 +367,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeDailyAyahReference => 'القرآن ٢:٤٣';
 
   @override
-  String get homeDailyDuaLabel => 'الدعاء اليومي';
+  String get homeDailyDuaLabel => 'دعاء اليوم';
 
   @override
   String get homeDailyDuaBody => 'اللهم أعني على ذكرك وشكرك وحسن عبادتك.';
@@ -615,7 +668,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noSurahsMatchSearch => 'لا توجد سور تطابق البحث';
 
   @override
-  String get continueListening => 'متابعة الاستماع';
+  String get continueListening => 'أكمل الاستماع';
 
   @override
   String get play => 'تشغيل';
@@ -1075,7 +1128,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get signIn => 'تسجيل الدخول';
 
   @override
-  String get welcomeToApp => 'مرحباً بك في تلاوة';
+  String get welcomeToApp => 'مرحباً بك في أنا مسلم';
 
   @override
   String get signInWithGoogleDescription => 'سجل الدخول بحساب جوجل للمتابعة';
@@ -1284,7 +1337,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get deleteAccountConfirmation =>
-      'سيؤدي هذا إلى حذف حسابك في تلاوة وبيانات ملفك المتزامنة نهائياً. قد نحتفظ بسجلات مشتريات مجهولة للوقاية من الاحتيال. لا يمكن التراجع عن هذا الإجراء.';
+      'سيؤدي هذا إلى حذف حسابك في أنا مسلم وبيانات ملفك المتزامنة نهائياً. قد نحتفظ بسجلات مشتريات مجهولة للوقاية من الاحتيال. لا يمكن التراجع عن هذا الإجراء.';
 
   @override
   String get deleteAccountFailed => 'تعذّر حذف حسابك. يرجى المحاولة مرة أخرى.';
@@ -2372,7 +2425,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get sharing => 'جاري المشاركة...';
 
   @override
-  String get sharedViaTilawa => 'تمت المشاركة عبر تلاوة';
+  String get sharedViaTilawa => 'تمت المشاركة عبر أنا مسلم';
 
   @override
   String get reciterNotAvailable =>
@@ -2629,7 +2682,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get oemAutostartHint =>
-      'في هذا الجهاز، فعّل أيضاً التشغيل التلقائي لتطبيق تلاوة من إعدادات الهاتف حتى لا تتوقف التذكيرات في الخلفية.';
+      'في هذا الجهاز، فعّل أيضاً التشغيل التلقائي لتطبيق أنا مسلم من إعدادات الهاتف حتى لا تتوقف التذكيرات في الخلفية.';
 
   @override
   String get prayerAlertsPermissionLocationTitle => 'الموقع';
@@ -2657,14 +2710,14 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get prayerAlertsPermissionBatteryBody =>
-      'استثنِ تلاوة من تحسين البطارية حتى لا تتأخر تذكيرات الصلاة ليلاً.';
+      'استثنِ أنا مسلم من تحسين البطارية حتى لا تتأخر تذكيرات الصلاة ليلاً.';
 
   @override
   String get prayerAlertsPermissionOemAutostartTitle => 'العمل في الخلفية';
 
   @override
   String get prayerAlertsPermissionOemAutostartBody =>
-      'في هذا الجهاز، فعّل التشغيل التلقائي لتلاوة من إعدادات الهاتف حتى لا تتوقف التذكيرات في الخلفية.';
+      'في هذا الجهاز، فعّل التشغيل التلقائي لتطبيق أنا مسلم من إعدادات الهاتف حتى لا تتوقف التذكيرات في الخلفية.';
 
   @override
   String get prayerAlertsPermissionAllow => 'السماح';
@@ -2798,16 +2851,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String get moreOptions => 'المزيد';
 
   @override
-  String get supportTilawa => 'ادعم تلاوة';
+  String get homeMoreOptionsSubtitle => 'مكتبتك وخيارات أخرى';
 
   @override
-  String get rateTilawa => 'قيّم تلاوة';
+  String get supportTilawa => 'ادعم أنا مسلم';
+
+  @override
+  String get rateTilawa => 'قيّم أنا مسلم';
 
   @override
   String get rateTilawaSubtitle => 'شاركنا رأيك في متجر التطبيقات.';
 
   @override
-  String get shareTilawa => 'شارك تلاوة';
+  String get shareTilawa => 'شارك أنا مسلم';
 
   @override
   String shareTilawaMessage(String appName, String storeUrl) {
@@ -2818,13 +2874,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get shareTilawaFailed => 'تعذر فتح نافذة المشاركة. حاول مرة أخرى.';
 
   @override
-  String get supportIntroLine => 'مشاركتك تساعدنا على استمرار تلاوة.';
+  String get supportIntroLine => 'مشاركتك تساعدنا على استمرار أنا مسلم.';
 
   @override
-  String get supportTilawaSubtitle => 'مشاركتك تساعدنا على استمرار تلاوة.';
+  String get supportTilawaSubtitle => 'مشاركتك تساعدنا على استمرار أنا مسلم.';
 
   @override
-  String get supportMissionBody => 'مشاركتك تساعدنا على استمرار تلاوة.';
+  String get supportMissionBody => 'مشاركتك تساعدنا على استمرار أنا مسلم.';
 
   @override
   String get supportImpactWhyTitle => 'لماذا؟';
@@ -2864,7 +2920,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get supportConfirmationBody =>
-      'يتم الدفع عبر Google Play. تلاوة لا يحتفظ ببيانات بطاقتك.';
+      'يتم الدفع عبر Google Play. أنا مسلم لا يحتفظ ببيانات بطاقتك.';
 
   @override
   String get supportConfirm => 'متابعة';
@@ -2946,7 +3002,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get supportSelectTier => 'اختر المبلغ';
 
   @override
-  String get supportSettingsGroupTitle => 'ادعم تلاوة';
+  String get supportSettingsGroupTitle => 'ادعم أنا مسلم';
 
   @override
   String get supportHelpKeepFree => 'اختياري';
@@ -2983,7 +3039,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'تقييمات المتجر غير مدعومة على هذه المنصة.';
 
   @override
-  String get a11ySplashLoading => 'تلاوة، جارٍ التحميل';
+  String get a11ySplashLoading => 'أنا مسلم، جارٍ التحميل';
 
   @override
   String get splashSlowLoadingNotice => 'قد يستغرق بعض المحتوى لحظة للتحميل';
@@ -3044,15 +3100,244 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tourDebugResetDone => 'تمت إعادة تعيين الجولات التعريفية';
 
   @override
+  String get notificationDebugLabTitle => 'اختبار الإشعارات';
+
+  @override
+  String get notificationDebugSectionLocal => 'اختبارات الإشعار المحلي';
+
+  @override
+  String get notificationDebugSectionLaunch => 'محاكاة الإطلاق';
+
+  @override
+  String get notificationDebugSectionDedup => 'فحص حالة منع التكرار';
+
+  @override
+  String get notificationDebugSectionChecklist => 'قائمة التحقق اليدوية';
+
+  @override
+  String get notificationDebugSectionLogs => 'سجلات التصحيح';
+
+  @override
+  String get notificationDebugActionId => 'معرّف الإشعار';
+
+  @override
+  String get notificationDebugActionPayload => 'الحمولة';
+
+  @override
+  String get notificationDebugActionRoute => 'المسار المتوقع';
+
+  @override
+  String get notificationDebugActionBehavior => 'السلوك المتوقع';
+
+  @override
+  String get notificationDebugActionMechanism => 'الآلية';
+
+  @override
+  String get notificationDebugRefreshState => 'تحديث الحالة';
+
+  @override
+  String get notificationDebugClearDedup => 'مسح منع تكرار الإشعار';
+
+  @override
+  String get notificationDebugClearAthkarDedup => 'مسح منع تكرار أذكار (دافئ)';
+
+  @override
+  String get notificationDebugClearAll => 'مسح كل حالة التصحيح';
+
+  @override
+  String get notificationDebugClearLogs => 'مسح السجلات';
+
+  @override
+  String get notificationDebugConfirmSchedule => 'جدولة إشعار تصحيح آخر؟';
+
+  @override
+  String get notificationDebugMechanismReal => 'إشعار محلي حقيقي';
+
+  @override
+  String get notificationDebugMechanismDispatcher => 'محاكاة الموزّع';
+
+  @override
+  String get notificationDebugMechanismBootstrap => 'فحص إطلاق Bootstrap';
+
+  @override
+  String get notificationDebugMechanismDedup => 'حفظ منع التكرار فقط';
+
+  @override
+  String get notificationDebugMechanismClearPid => 'مسح نطاق pid';
+
+  @override
+  String get notificationDebugBehaviorScheduleAthkar =>
+      'يعرض إشعار أذكار تصحيح بعد تأخير قصير';
+
+  @override
+  String get notificationDebugBehaviorShowNow => 'ينشر إشعار تصحيح فورًا';
+
+  @override
+  String get notificationDebugBehaviorNativePayloadOnly =>
+      'يحاكي نقرة صلاة أصلية بحمولة فقط (بدون معرّف)';
+
+  @override
+  String get notificationDebugBehaviorInvalidPayload =>
+      'يجب ألا ينتقل إلى الأذكار';
+
+  @override
+  String get notificationDebugBehaviorEmptyPayload =>
+      'يجب ألا ينتقل (حمولة فارغة)';
+
+  @override
+  String get notificationDebugBehaviorPayloadOnlyNoId =>
+      'التوجيه عبر توقيع الحمولة فقط';
+
+  @override
+  String get notificationDebugBehaviorDedupSameSig =>
+      'النقرة الأولى تنتقل؛ نفس pid + التوقيع يُمنع التكرار';
+
+  @override
+  String get notificationDebugBehaviorFreshDifferentPayload =>
+      'يُعامل كجديد عند تغيّر توقيع الحمولة';
+
+  @override
+  String get notificationDebugBehaviorSharedPayloadSig =>
+      'توقيع الحمولة يمنع التكرار حتى لو اختلف المعرّف';
+
+  @override
+  String get notificationDebugBehaviorSimulateTap =>
+      'يتوجّه عبر مسارات الإنتاج (الموزّع / Bootstrap)';
+
+  @override
+  String get notificationDebugBehaviorInvalidLaunch =>
+      'حمولة غير صالحة لا يجب أن تضبط مسار أذكار';
+
+  @override
+  String get notificationDebugBehaviorMarkProcessed =>
+      'يحفظ منع التكرار دون تنقل';
+
+  @override
+  String get notificationDebugBehaviorClearPidScope =>
+      'يمسح مفتاح pid لمحاكاة نطاق عملية جديدة';
+
+  @override
+  String get notificationDebugFieldCurrentPid => 'معرّف العملية الحالي';
+
+  @override
+  String get notificationDebugFieldStoredPid => 'pid المخزّن (_last_notif_pid)';
+
+  @override
+  String get notificationDebugFieldStoredId =>
+      'المعرّف المخزّن (_last_notif_id)';
+
+  @override
+  String get notificationDebugFieldStoredSig =>
+      'التوقيع المخزّن (_last_notif_payload_sig)';
+
+  @override
+  String get notificationDebugFieldLastProcessedId =>
+      'AppRouter.lastProcessedNotificationId';
+
+  @override
+  String get notificationDebugFieldPendingRoute => 'pendingColdStartLocation';
+
+  @override
+  String get notificationDebugFieldPendingExtra => 'pendingColdStartExtra';
+
+  @override
+  String get notificationDebugFieldAthkarPayload =>
+      'last_handled_notification_payload';
+
+  @override
+  String get notificationDebugFieldAthkarTimestamp =>
+      'last_handled_notification_timestamp';
+
+  @override
+  String get notificationDebugFieldPreviewSig => 'معاينة التوقيع';
+
+  @override
+  String get notificationDebugFieldProcessedPreview => 'المعاينة مُعالَجة';
+
+  @override
+  String get notificationDebugChecklistAthkarTitle => 'أ. إشعار الأذكار';
+
+  @override
+  String get notificationDebugChecklistAthkarTap =>
+      'نقر إشعار الأذكار → يفتح الأذكار مرة واحدة';
+
+  @override
+  String get notificationDebugChecklistAthkarRestart =>
+      'إعادة تشغيل سريعة → لا يفتح الأذكار مجددًا';
+
+  @override
+  String get notificationDebugChecklistPrayerTitle =>
+      'ب. إشعار صلاة (حمولة فقط)';
+
+  @override
+  String get notificationDebugChecklistPrayerTap =>
+      'نقر إشعار الصلاة → يفتح مسار الصلاة مرة واحدة';
+
+  @override
+  String get notificationDebugChecklistPrayerRestart =>
+      'إعادة تشغيل سريعة → لا يُعاد التشغيل';
+
+  @override
+  String get notificationDebugChecklistInvalidTitle => 'ج. حمولة غير صالحة';
+
+  @override
+  String get notificationDebugChecklistInvalidBody =>
+      'حمولة غير صالحة → لا ترجع للأذكار';
+
+  @override
+  String get notificationDebugChecklistSettingsTitle => 'د. حمولة الإعدادات';
+
+  @override
+  String get notificationDebugChecklistSettingsBody =>
+      'حمولة الإعدادات → تفتح الإعدادات وليس الأذكار';
+
+  @override
+  String get notificationDebugChecklistSameSigTitle =>
+      'هـ. نفس المعرّف + نفس الحمولة';
+
+  @override
+  String get notificationDebugChecklistSameSigTap =>
+      'النقرة الأولى → تنقل مرة واحدة';
+
+  @override
+  String get notificationDebugChecklistSameSigRestart =>
+      'إعادة تشغيل سريعة / نفس العملية → مُمنوع';
+
+  @override
+  String get notificationDebugChecklistDiffPayloadTitle =>
+      'و. نفس المعرّف + حمولة مختلفة';
+
+  @override
+  String get notificationDebugChecklistDiffPayloadBody => 'يُعامل كإطلاق جديد';
+
+  @override
+  String get notificationDebugChecklistDiffIdTitle =>
+      'ز. معرّف مختلف + نفس الحمولة';
+
+  @override
+  String get notificationDebugChecklistDiffIdBody =>
+      'توقيع الحمولة أولًا → النقرة الثانية مُمنوعة في نفس pid';
+
+  @override
+  String get notificationDebugChecklistKillTitle => 'ح. إنهاء العملية بالكامل';
+
+  @override
+  String get notificationDebugChecklistKillSteps =>
+      'أغلق التطبيق من المهام الأخيرة → انقر إشعارًا جديدًا → يجب أن يعمل التوجيه البارد';
+
+  @override
+  String get notificationDebugLogsEmpty => 'لا أحداث تصحيح بعد';
+
+  @override
   String get inAppUpdateFlexibleRestartMessage =>
       'تم تنزيل التحديث. أعد التشغيل عندما تكون مستعدًا للتثبيت.';
 
   @override
-  String get inAppUpdateOptionalMessage => 'يتوفر إصدار جديد من تلاوة.';
+  String get inAppUpdateOptionalMessage => 'يتوفر إصدار جديد من أنا مسلم.';
 
   @override
   String get inAppUpdateRequiredMessage =>
-      'يلزم التحديث لمتابعة استخدام تلاوة.';
+      'يلزم التحديث لمتابعة استخدام أنا مسلم.';
 
   @override
   String get inAppUpdateRestartAction => 'إعادة التشغيل';

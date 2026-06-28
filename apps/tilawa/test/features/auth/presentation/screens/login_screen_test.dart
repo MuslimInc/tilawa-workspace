@@ -251,7 +251,7 @@ void main() {
       await pumpLoginScreen(tester);
       await pumpLoginInitFrames(tester);
 
-      expect(find.text('Welcome to Tilawa'), findsOneWidget);
+      expect(find.text('Welcome to MeMuslim'), findsOneWidget);
       expect(find.text('Sign in with Google'), findsOneWidget);
       expect(find.text('Privacy policy'), findsOneWidget);
     });

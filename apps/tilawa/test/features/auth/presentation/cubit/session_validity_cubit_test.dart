@@ -190,4 +190,31 @@ void main() {
     expect(cubit.state.revoked, isTrue);
     await cubit.close();
   });
+
+  blocTest<SessionValidityCubit, SessionValidityState>(
+    'resetRevocation clears the revoked latch so re-auth can access sessions',
+    build: buildCubit,
+    seed: () => const SessionValidityState(revoked: true),
+    act: (cubit) => cubit.resetRevocation(),
+    expect: () => [const SessionValidityState()],
+    verify: (cubit) {
+      expect(cubit.state.revoked, isFalse);
+      expect(cubit.state.isChecking, isFalse);
+    },
+  );
+
+  blocTest<SessionValidityCubit, SessionValidityState>(
+    'resetRevocation is a no-op when already clear',
+    build: buildCubit,
+    act: (cubit) => cubit.resetRevocation(),
+    expect: () => <SessionValidityState>[],
+  );
+
+  blocTest<SessionValidityCubit, SessionValidityState>(
+    'resetRevocation clears isChecking along with revoked',
+    build: buildCubit,
+    seed: () => const SessionValidityState(revoked: true, isChecking: true),
+    act: (cubit) => cubit.resetRevocation(),
+    expect: () => [const SessionValidityState()],
+  );
 }

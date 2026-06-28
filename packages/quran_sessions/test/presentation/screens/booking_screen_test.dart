@@ -36,22 +36,24 @@ class _SeededBookingBloc extends BookingBloc {
           teacherRepository: FakeTeacherRepository(),
           marketConfigRepository: FakeMarketConfigRepository(),
         ),
-        teacherProfiles: FakeTeacherProfileRepository(
-          profile: TeacherProfile(
-            id: 'teacher_1',
-            userId: 'teacher_1',
-            displayName: 'Teacher',
-            verificationStatus: TeacherVerificationStatus.verified,
-            teachingLanguages: const ['ar'],
-            specializations: const ['tajweed'],
-            averageRating: 0,
-            reviewCount: 0,
-            isActive: true,
-            profileCompleteness: TeacherProfileCompletenessStatus.complete,
-            isPubliclyVisible: true,
-            externalMeetingUrl: 'https://meet.google.com/room',
-            createdAt: DateTime.utc(2024, 1, 1),
-            updatedAt: DateTime.utc(2024, 1, 2),
+        getTeacherProfile: GetTeacherProfileByIdUseCase(
+          FakeTeacherProfileRepository(
+            profile: TeacherProfile(
+              id: 'teacher_1',
+              userId: 'teacher_1',
+              displayName: 'Teacher',
+              verificationStatus: TeacherVerificationStatus.verified,
+              teachingLanguages: const ['ar'],
+              specializations: const ['tajweed'],
+              averageRating: 0,
+              reviewCount: 0,
+              isActive: true,
+              profileCompleteness: TeacherProfileCompletenessStatus.complete,
+              isPubliclyVisible: true,
+              externalMeetingUrl: 'https://meet.google.com/room',
+              createdAt: DateTime.utc(2024, 1, 1),
+              updatedAt: DateTime.utc(2024, 1, 2),
+            ),
           ),
         ),
       ) {
@@ -60,6 +62,40 @@ class _SeededBookingBloc extends BookingBloc {
 
   @override
   void add(BookingEvent event) {}
+}
+
+class _SuccessEmittingBookingBloc extends BookingBloc {
+  _SuccessEmittingBookingBloc()
+    : super(
+        getAvailability: buildGetTeacherAvailabilityUseCase(
+          scheduleRepository: FakeScheduleRepository(),
+          sessionRepository: FakeSessionRepository(),
+        ),
+        submitBooking: buildSubmitSessionBookingUseCase(
+          getAvailability: buildGetTeacherAvailabilityUseCase(
+            scheduleRepository: FakeScheduleRepository(),
+            sessionRepository: FakeSessionRepository(),
+          ),
+        ),
+        validateEligibility: ValidateBookingEligibilityUseCase(
+          profileRepository: FakeUserProfileRepository(),
+          policyRepository: FakeSessionPolicyRepository(),
+          teacherRepository: FakeTeacherRepository(),
+          marketConfigRepository: FakeMarketConfigRepository(),
+        ),
+        getTeacherProfile: GetTeacherProfileByIdUseCase(
+          FakeTeacherProfileRepository(),
+        ),
+      ) {
+    emit(
+      const BookingSelecting(teacherId: 'teacher_1', availableSlots: []),
+    );
+  }
+
+  @override
+  void add(BookingEvent event) {}
+
+  void emitSuccess(QuranBooking booking) => emit(BookingSuccess(booking));
 }
 
 TeacherAvailability _slot(int day) {
@@ -74,6 +110,115 @@ TeacherAvailability _slot(int day) {
 }
 
 void main() {
+  testWidgets('invokes onBookingStarted with the teacher id on open', (
+    tester,
+  ) async {
+    String? startedTeacherId;
+    final slots = [_slot(1)];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+        localizationsDelegates: const [
+          QuranSessionsLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: QuranSessionsLocalizations.supportedLocales,
+        home: BlocProvider<BookingBloc>(
+          create: (_) => _SeededBookingBloc(
+            seed: BookingSelecting(
+              teacherId: 'teacher_1',
+              availableSlots: slots,
+              selectedSlot: slots.first,
+              selectedCallType: SessionCallType.externalMeeting,
+            ),
+          ),
+          child: BookingScreen(
+            teacherId: 'teacher_1',
+            studentId: 'student_1',
+            analytics: QuranSessionsAnalyticsCallbacks(
+              onBookingStarted: (id) => startedTeacherId = id,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(startedTeacherId, 'teacher_1');
+  });
+
+  testWidgets('invokes onBookingCompleted with safe properties on success', (
+    tester,
+  ) async {
+    String? capturedTeacherId;
+    String? capturedBookingId;
+    bool? capturedIsPaid;
+    String? capturedPricingType;
+    String? capturedCallType;
+
+    final bloc = _SuccessEmittingBookingBloc();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+        localizationsDelegates: const [
+          QuranSessionsLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: QuranSessionsLocalizations.supportedLocales,
+        builder: (context, child) => TilawaFeedbackHost(child: child!),
+        home: BlocProvider<BookingBloc>.value(
+          value: bloc,
+          child: BookingScreen(
+            teacherId: 'teacher_1',
+            studentId: 'student_1',
+            onBookingSuccess: (_) {},
+            analytics: QuranSessionsAnalyticsCallbacks(
+              onBookingCompleted:
+                  ({
+                    required teacherId,
+                    required bookingId,
+                    required isPaid,
+                    pricingType,
+                    callType,
+                  }) {
+                    capturedTeacherId = teacherId;
+                    capturedBookingId = bookingId;
+                    capturedIsPaid = isPaid;
+                    capturedPricingType = pricingType;
+                    capturedCallType = callType;
+                  },
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    bloc.emitSuccess(
+      QuranBooking(
+        id: 'b1',
+        teacherId: 'teacher_1',
+        studentId: 'student_1',
+        slotId: 'slot_1',
+        requestedCallType: SessionCallType.voiceCall,
+        pricingType: SessionPricingType.fixedPerSession,
+        status: BookingStatus.confirmed,
+        createdAt: DateTime.utc(2026, 1, 1),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(capturedTeacherId, 'teacher_1');
+    expect(capturedBookingId, 'b1');
+    expect(capturedIsPaid, isTrue);
+    expect(capturedPricingType, 'fixedPerSession');
+    expect(capturedCallType, 'voiceCall');
+  });
+
   testWidgets('booking confirm stays visible with many slots', (tester) async {
     tester.view.physicalSize = const Size(390, 500);
     tester.view.devicePixelRatio = 1;

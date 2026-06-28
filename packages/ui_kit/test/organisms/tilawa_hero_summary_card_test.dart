@@ -11,8 +11,8 @@ Widget _app(Widget child) {
     theme: ThemeData(
       colorScheme: colorScheme,
       extensions: [
-        TilawaDesignTokens.light(),
-        TilawaComponentTokens.light(colorScheme: colorScheme),
+        MeMuslimDesignTokens.light(),
+        MeMuslimComponentTokens.light(colorScheme: colorScheme),
       ],
     ),
     home: Scaffold(body: Center(child: child)),
@@ -57,8 +57,8 @@ void main() {
       final ColorScheme colorScheme = ColorScheme.fromSeed(
         seedColor: const Color(0xFF219653),
       );
-      final designTokens = TilawaDesignTokens.light();
-      final componentTokens = TilawaComponentTokens.light(
+      final designTokens = MeMuslimDesignTokens.light();
+      final componentTokens = MeMuslimComponentTokens.light(
         colorScheme: colorScheme,
       );
 

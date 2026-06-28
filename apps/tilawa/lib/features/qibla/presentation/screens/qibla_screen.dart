@@ -84,7 +84,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
               preferredHeight: TilawaAppBarConfig.catalogTitleOnlyHeight(
                 context,
               ),
-              centerTitle: true,
+              centerTitle: false,
               titleWidget: Text(
                 context.l10n.qiblaFinderTitle,
                 style: theme.textTheme.titleMedium?.copyWith(

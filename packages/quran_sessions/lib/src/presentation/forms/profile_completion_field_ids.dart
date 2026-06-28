@@ -4,4 +4,5 @@ abstract final class ProfileCompletionFieldIds {
   static const String dateOfBirth = 'profile.dateOfBirth';
   static const String country = 'profile.country';
   static const String city = 'profile.city';
+  static const String learningGoals = 'profile.learningGoals';
 }

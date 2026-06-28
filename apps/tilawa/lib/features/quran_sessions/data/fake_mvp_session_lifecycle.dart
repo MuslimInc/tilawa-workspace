@@ -22,7 +22,7 @@ class FakeMvpSessionLifecycleStack {
   SessionNotificationGateway get notificationGateway =>
       _FakeNotificationGateway(this);
 
-  SessionCommandGateway get commandGateway => _FakeCommandGateway(this);
+  SessionCommandGateway get commandGateway => _FakeCommandGateway();
 
   SessionMutationGateway get mutationGateway => _FakeMutationGateway(this);
 }
@@ -82,11 +82,18 @@ class _FakeAuditRepository implements AuditRepository {
   }
 
   @override
-  Future<Either<QuranSessionsFailure, List<SessionAuditEvent>>> listBySessionId(
-    String sessionId,
-  ) async {
+  Future<Either<QuranSessionsFailure, List<SessionAuditEvent>>>
+  listForAggregate({
+    required String bookingId,
+    String? sessionId,
+  }) async {
     return Right(
-      _stack.auditEvents.where((e) => e.sessionId == sessionId).toList(),
+      _stack.auditEvents
+          .where(
+            (event) =>
+                event.sessionId == bookingId || event.sessionId == sessionId,
+          )
+          .toList(),
     );
   }
 }
@@ -105,8 +112,7 @@ class _FakeNotificationGateway implements SessionNotificationGateway {
 }
 
 class _FakeCommandGateway implements SessionCommandGateway {
-  _FakeCommandGateway(this._stack);
-  final FakeMvpSessionLifecycleStack _stack;
+  _FakeCommandGateway();
 
   @override
   Future<Either<QuranSessionsFailure, void>> capturePayment({
@@ -339,5 +345,35 @@ class _FakeMutationGateway implements SessionMutationGateway {
     );
     _stack.aggregates[key] = updated;
     return const Right(SessionDisputeResult(disputeId: 'dispute_mvp_1'));
+  }
+
+  @override
+  Future<Either<QuranSessionsFailure, SessionAggregate>>
+  respondToBookingRequest({
+    required String bookingId,
+    required bool accept,
+    String? reason,
+  }) async {
+    SessionAggregate? found;
+    String? key;
+    for (final entry in _stack.aggregates.entries) {
+      if (entry.key == bookingId || entry.value.id == bookingId) {
+        found = entry.value;
+        key = entry.key;
+        break;
+      }
+    }
+    if (found == null || key == null) {
+      return Left(NotFoundFailure('SessionAggregate($bookingId)'));
+    }
+    final updated = found.copyWith(
+      lifecycleStatus: accept
+          ? SessionLifecycleStatus.scheduled
+          : SessionLifecycleStatus.rejectedByTutor,
+      rejectionReason: accept ? null : reason?.trim(),
+      updatedAt: DateTime.now().toUtc(),
+    );
+    _stack.aggregates[key] = updated;
+    return Right(updated);
   }
 }

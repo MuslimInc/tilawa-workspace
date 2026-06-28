@@ -170,6 +170,18 @@ abstract class AppLocalizations {
   /// **'Assalamu alaikum'**
   String get homeGreeting;
 
+  /// Title for the daily inspiration section
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s inspiration'**
+  String get homeInspirationTitle;
+
+  /// Subtitle for the daily inspiration section
+  ///
+  /// In en, this message translates to:
+  /// **'An ayah and dua for your heart'**
+  String get homeInspirationSubtitle;
+
   /// Home greeting with display name
   ///
   /// In en, this message translates to:
@@ -197,7 +209,7 @@ abstract class AppLocalizations {
   /// Home next prayer fallback when no prayer time can be calculated
   ///
   /// In en, this message translates to:
-  /// **'Set your location to see the next prayer.'**
+  /// **'Set your location to see the next prayer time.'**
   String get homeNextPrayerUnavailable;
 
   /// Action to open prayer times from Home
@@ -206,11 +218,23 @@ abstract class AppLocalizations {
   /// **'Prayer times'**
   String get homePrayerTimesAction;
 
-  /// Home countdown text when the next prayer is due now
+  /// Home countdown when the next salah adhan is due now (five daily prayers only)
   ///
   /// In en, this message translates to:
-  /// **'It is time now'**
+  /// **'It\'s prayer time'**
   String get homePrayerNow;
+
+  /// Home countdown when sunrise (Shurooq) is due now
+  ///
+  /// In en, this message translates to:
+  /// **'Sunrise time now'**
+  String get homeSunriseNow;
+
+  /// Home countdown when Duha time is due now
+  ///
+  /// In en, this message translates to:
+  /// **'Duha time now'**
+  String get homeDuhaNow;
 
   /// Home next-prayer countdown under one hour
   ///
@@ -239,7 +263,7 @@ abstract class AppLocalizations {
   /// Home carousel subtitle for Smart Khatma promo card
   ///
   /// In en, this message translates to:
-  /// **'Track your reading plan'**
+  /// **'Progress on your khatma'**
   String get homeKhatmaCarouselSubtitle;
 
   /// Home carousel subtitle for Support Tilawa promo card
@@ -251,31 +275,31 @@ abstract class AppLocalizations {
   /// Home carousel subtitle for listening history card
   ///
   /// In en, this message translates to:
-  /// **'Pick up where you left off'**
+  /// **'Continue where you left off'**
   String get homeHistoryCarouselSubtitle;
 
   /// Home carousel subtitle for favorites card
   ///
   /// In en, this message translates to:
-  /// **'Saved recitations and surahs'**
+  /// **'Your saved recitations'**
   String get homeFavoritesCarouselSubtitle;
 
   /// Home carousel subtitle for downloads card
   ///
   /// In en, this message translates to:
-  /// **'Listen offline anytime'**
+  /// **'Listen offline'**
   String get homeDownloadsCarouselSubtitle;
 
   /// Home card title for Quran teaching sessions
   ///
   /// In en, this message translates to:
-  /// **'Learn Quran recitation'**
+  /// **'Learn recitation'**
   String get homeSessionsTitle;
 
   /// Home card subtitle for Quran teaching sessions
   ///
   /// In en, this message translates to:
-  /// **'Book sessions with certified teachers'**
+  /// **'One-on-one sessions with a certified hafiz'**
   String get homeSessionsSubtitle;
 
   /// Home dashboard layout toggle tooltip when grid is active
@@ -329,7 +353,7 @@ abstract class AppLocalizations {
   /// Home continue listening row subtitle
   ///
   /// In en, this message translates to:
-  /// **'Continue · {reciter} · {surah}'**
+  /// **'{reciter} · {surah}'**
   String homeListeningResumeSubtitle(String reciter, String surah);
 
   /// Athkar compact card completed state
@@ -397,6 +421,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your pinned adhkar and supplications'**
   String get homeDailyPracticeSubtitle;
+
+  /// Home section title for the primary morning/evening athkar card
+  ///
+  /// In en, this message translates to:
+  /// **'Daily habit'**
+  String get homeDailyHabitTitle;
+
+  /// Home daily habit section supporting line
+  ///
+  /// In en, this message translates to:
+  /// **'Start or continue your routine'**
+  String get homeDailyHabitSubtitle;
 
   /// Home subsection title for pinned athkar shortcuts
   ///
@@ -488,6 +524,66 @@ abstract class AppLocalizations {
   /// **'Quran'**
   String get homeQuickQuran;
 
+  /// Home section title for the high-frequency 2x2 action grid
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Actions'**
+  String get homeQuickActionsTitle;
+
+  /// Home section title for the two primary daily action cards
+  ///
+  /// In en, this message translates to:
+  /// **'Your daily worship'**
+  String get homeMainActionsTitle;
+
+  /// Home section title for the compact secondary tools row
+  ///
+  /// In en, this message translates to:
+  /// **'Quick tools'**
+  String get homeQuickToolsTitle;
+
+  /// Title on the featured Learn Quran with Tutor card
+  ///
+  /// In en, this message translates to:
+  /// **'Learn Quran'**
+  String get homeFeaturedTutorTitle;
+
+  /// Subtitle on the featured Learn Quran with Tutor card
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your hafiz to master your recitation'**
+  String get homeFeaturedTutorSubtitle;
+
+  /// Call to action button on the featured Learn Quran with Tutor card
+  ///
+  /// In en, this message translates to:
+  /// **'Start learning'**
+  String get homeFeaturedTutorCta;
+
+  /// Secondary link on featured tutor card to open booked sessions
+  ///
+  /// In en, this message translates to:
+  /// **'My sessions'**
+  String get homeFeaturedTutorMySessions;
+
+  /// Home quick action tile label for opening the Mushaf reader
+  ///
+  /// In en, this message translates to:
+  /// **'Mushaf'**
+  String get homeQuickQuranReader;
+
+  /// Subtitle for the Quran Reader primary action card
+  ///
+  /// In en, this message translates to:
+  /// **'Read the Quran with reflection'**
+  String get homeQuickQuranReaderSubtitle;
+
+  /// Home quick action for Quran teaching sessions with a hafiz
+  ///
+  /// In en, this message translates to:
+  /// **'Learn Quran with your hafiz'**
+  String get homeLearnQuranWithTutor;
+
   /// Home quick action for reciters catalog
   ///
   /// In en, this message translates to:
@@ -497,7 +593,7 @@ abstract class AppLocalizations {
   /// Home More row subtitle for reciters
   ///
   /// In en, this message translates to:
-  /// **'Browse recitations'**
+  /// **'Listen to curated recitations'**
   String get homeQuickRecitersSubtitle;
 
   /// Home quick action for prayer times
@@ -515,7 +611,7 @@ abstract class AppLocalizations {
   /// Home More row subtitle for qibla
   ///
   /// In en, this message translates to:
-  /// **'Find prayer direction'**
+  /// **'Find the Qibla with ease'**
   String get homeQuickQiblaSubtitle;
 
   /// Home More row subtitle for settings
@@ -527,13 +623,13 @@ abstract class AppLocalizations {
   /// Home More row title for tasbeeh counter
   ///
   /// In en, this message translates to:
-  /// **'Tasbeeh'**
+  /// **'Tasbih'**
   String get homeQuickTasbeeh;
 
   /// Home More row subtitle for tasbeeh counter
   ///
   /// In en, this message translates to:
-  /// **'Count dhikr with one tap'**
+  /// **'Dhikr at your fingertips'**
   String get homeQuickTasbeehSubtitle;
 
   /// Home quick action for athkar
@@ -541,6 +637,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Athkar'**
   String get homeQuickAthkar;
+
+  /// Subtitle for the Athkar primary action card
+  ///
+  /// In en, this message translates to:
+  /// **'Your daily athkar'**
+  String get homeQuickAthkarSubtitle;
 
   /// Home quick action for settings
   ///
@@ -617,7 +719,7 @@ abstract class AppLocalizations {
   /// Home daily ayah card label
   ///
   /// In en, this message translates to:
-  /// **'Daily ayah'**
+  /// **'Ayah of the day'**
   String get homeDailyAyahLabel;
 
   /// Home daily ayah body
@@ -635,7 +737,7 @@ abstract class AppLocalizations {
   /// Home daily dua card label
   ///
   /// In en, this message translates to:
-  /// **'Daily dua'**
+  /// **'Dua of the day'**
   String get homeDailyDuaLabel;
 
   /// Home daily dua body
@@ -1079,7 +1181,7 @@ abstract class AppLocalizations {
   /// Continue listening section title
   ///
   /// In en, this message translates to:
-  /// **'Continue Listening'**
+  /// **'Continue listening'**
   String get continueListening;
 
   /// Play button text
@@ -1955,7 +2057,7 @@ abstract class AppLocalizations {
   /// Welcome message on login screen
   ///
   /// In en, this message translates to:
-  /// **'Welcome to Tilawa'**
+  /// **'Welcome to MeMuslim'**
   String get welcomeToApp;
 
   /// Description text for Google sign in
@@ -2315,7 +2417,7 @@ abstract class AppLocalizations {
   /// Confirmation message before deleting the app account
   ///
   /// In en, this message translates to:
-  /// **'This permanently deletes your Tilawa account and synced profile data. Purchases verified with Google Play may be kept in anonymized records for fraud prevention. This cannot be undone.'**
+  /// **'This permanently deletes your MeMuslim account and synced profile data. Purchases verified with Google Play may be kept in anonymized records for fraud prevention. This cannot be undone.'**
   String get deleteAccountConfirmation;
 
   /// Generic error when account deletion fails
@@ -4211,7 +4313,7 @@ abstract class AppLocalizations {
   /// Branding text on shared content
   ///
   /// In en, this message translates to:
-  /// **'Shared via Tilawa'**
+  /// **'Shared via MeMuslim'**
   String get sharedViaTilawa;
 
   /// Fallback message when reciter is not mapped
@@ -4667,7 +4769,7 @@ abstract class AppLocalizations {
   /// Informational banner shown on aggressive OEM ROMs (Xiaomi/Oppo/Huawei/Vivo/etc.) where the autostart whitelist must be set manually
   ///
   /// In en, this message translates to:
-  /// **'On this device, also enable Autostart for Tilawa in your phone\'s settings so reminders are not stopped in the background.'**
+  /// **'On this device, also enable Autostart for MeMuslim in your phone\'s settings so reminders are not stopped in the background.'**
   String get oemAutostartHint;
 
   /// Title for location permission setup screen
@@ -4715,7 +4817,7 @@ abstract class AppLocalizations {
   /// Body for battery optimization setup screen
   ///
   /// In en, this message translates to:
-  /// **'Exclude Tilawa from battery optimization so prayer reminders are not delayed overnight.'**
+  /// **'Exclude MeMuslim from battery optimization so prayer reminders are not delayed overnight.'**
   String get prayerAlertsPermissionBatteryBody;
 
   /// Title for OEM autostart guidance step
@@ -4727,7 +4829,7 @@ abstract class AppLocalizations {
   /// Body for OEM autostart guidance step
   ///
   /// In en, this message translates to:
-  /// **'On this device, enable Autostart for Tilawa in your phone settings so reminders are not stopped in the background.'**
+  /// **'On this device, enable Autostart for MeMuslim in your phone settings so reminders are not stopped in the background.'**
   String get prayerAlertsPermissionOemAutostartBody;
 
   /// Primary action on prayer alerts permission setup screens
@@ -4949,19 +5051,25 @@ abstract class AppLocalizations {
   /// Label for the more-options overflow menu button
   ///
   /// In en, this message translates to:
-  /// **'More options'**
+  /// **'More'**
   String get moreOptions;
+
+  /// Subtitle for the More section on the home dashboard
+  ///
+  /// In en, this message translates to:
+  /// **'Your library and more options'**
+  String get homeMoreOptionsSubtitle;
 
   /// Support Tilawa screen and settings entry title
   ///
   /// In en, this message translates to:
-  /// **'Support Tilawa'**
+  /// **'Support MeMuslim'**
   String get supportTilawa;
 
   /// Settings row to open the in-app review dialog
   ///
   /// In en, this message translates to:
-  /// **'Rate Tilawa'**
+  /// **'Rate MeMuslim'**
   String get rateTilawa;
 
   /// Optional subtitle under the rate Tilawa settings row
@@ -4973,7 +5081,7 @@ abstract class AppLocalizations {
   /// Settings row to share the app with others
   ///
   /// In en, this message translates to:
-  /// **'Share Tilawa'**
+  /// **'Share MeMuslim'**
   String get shareTilawa;
 
   /// Text shared from settings to recommend Tilawa to others
@@ -4991,19 +5099,19 @@ abstract class AppLocalizations {
   /// Support screen single-line intro under app bar
   ///
   /// In en, this message translates to:
-  /// **'Your contribution helps keep Tilawa going.'**
+  /// **'Your contribution helps keep MeMuslim going.'**
   String get supportIntroLine;
 
   /// Legacy alias; prefer supportIntroLine
   ///
   /// In en, this message translates to:
-  /// **'Your contribution helps keep Tilawa going.'**
+  /// **'Your contribution helps keep MeMuslim going.'**
   String get supportTilawaSubtitle;
 
   /// Legacy alias; unused on support screen
   ///
   /// In en, this message translates to:
-  /// **'Your contribution helps keep Tilawa going.'**
+  /// **'Your contribution helps keep MeMuslim going.'**
   String get supportMissionBody;
 
   /// Collapsible impact section title on support screen
@@ -5081,7 +5189,7 @@ abstract class AppLocalizations {
   /// Support purchase confirmation sheet body
   ///
   /// In en, this message translates to:
-  /// **'Payment via Google Play. Tilawa does not store your card details.'**
+  /// **'Payment via Google Play. MeMuslim does not store your card details.'**
   String get supportConfirmationBody;
 
   /// Support confirmation sheet confirm button
@@ -5231,7 +5339,7 @@ abstract class AppLocalizations {
   /// Settings group title for support entry
   ///
   /// In en, this message translates to:
-  /// **'Support Tilawa'**
+  /// **'Support MeMuslim'**
   String get supportSettingsGroupTitle;
 
   /// Settings support tile subtitle
@@ -5297,7 +5405,7 @@ abstract class AppLocalizations {
   /// Screen-reader label announced while the splash loading screen is visible
   ///
   /// In en, this message translates to:
-  /// **'Tilawa, loading'**
+  /// **'MeMuslim, loading'**
   String get a11ySplashLoading;
 
   /// Toast shown when startup times out and the app navigates to home in a degraded state
@@ -5402,6 +5510,402 @@ abstract class AppLocalizations {
   /// **'Product tours reset'**
   String get tourDebugResetDone;
 
+  /// Developer settings entry and screen title for notification routing tests
+  ///
+  /// In en, this message translates to:
+  /// **'Notification Debug Lab'**
+  String get notificationDebugLabTitle;
+
+  /// No description provided for @notificationDebugSectionLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Local notification tests'**
+  String get notificationDebugSectionLocal;
+
+  /// No description provided for @notificationDebugSectionLaunch.
+  ///
+  /// In en, this message translates to:
+  /// **'Launch simulation'**
+  String get notificationDebugSectionLaunch;
+
+  /// No description provided for @notificationDebugSectionDedup.
+  ///
+  /// In en, this message translates to:
+  /// **'Dedup state inspector'**
+  String get notificationDebugSectionDedup;
+
+  /// No description provided for @notificationDebugSectionChecklist.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual validation checklist'**
+  String get notificationDebugSectionChecklist;
+
+  /// No description provided for @notificationDebugSectionLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Debug logs'**
+  String get notificationDebugSectionLogs;
+
+  /// No description provided for @notificationDebugActionId.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification id'**
+  String get notificationDebugActionId;
+
+  /// No description provided for @notificationDebugActionPayload.
+  ///
+  /// In en, this message translates to:
+  /// **'Payload'**
+  String get notificationDebugActionPayload;
+
+  /// No description provided for @notificationDebugActionRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected route'**
+  String get notificationDebugActionRoute;
+
+  /// No description provided for @notificationDebugActionBehavior.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected behavior'**
+  String get notificationDebugActionBehavior;
+
+  /// No description provided for @notificationDebugActionMechanism.
+  ///
+  /// In en, this message translates to:
+  /// **'Mechanism'**
+  String get notificationDebugActionMechanism;
+
+  /// No description provided for @notificationDebugRefreshState.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh state'**
+  String get notificationDebugRefreshState;
+
+  /// No description provided for @notificationDebugClearDedup.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear notification dedup'**
+  String get notificationDebugClearDedup;
+
+  /// No description provided for @notificationDebugClearAthkarDedup.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Athkar warm dedup'**
+  String get notificationDebugClearAthkarDedup;
+
+  /// No description provided for @notificationDebugClearAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all debug state'**
+  String get notificationDebugClearAll;
+
+  /// No description provided for @notificationDebugClearLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear logs'**
+  String get notificationDebugClearLogs;
+
+  /// No description provided for @notificationDebugConfirmSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule another debug notification?'**
+  String get notificationDebugConfirmSchedule;
+
+  /// No description provided for @notificationDebugMechanismReal.
+  ///
+  /// In en, this message translates to:
+  /// **'Real local notification'**
+  String get notificationDebugMechanismReal;
+
+  /// No description provided for @notificationDebugMechanismDispatcher.
+  ///
+  /// In en, this message translates to:
+  /// **'Dispatcher simulation'**
+  String get notificationDebugMechanismDispatcher;
+
+  /// No description provided for @notificationDebugMechanismBootstrap.
+  ///
+  /// In en, this message translates to:
+  /// **'Bootstrap launch probe'**
+  String get notificationDebugMechanismBootstrap;
+
+  /// No description provided for @notificationDebugMechanismDedup.
+  ///
+  /// In en, this message translates to:
+  /// **'Dedup persist only'**
+  String get notificationDebugMechanismDedup;
+
+  /// No description provided for @notificationDebugMechanismClearPid.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear pid scope'**
+  String get notificationDebugMechanismClearPid;
+
+  /// No description provided for @notificationDebugBehaviorScheduleAthkar.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows a debug Athkar notification after a short delay'**
+  String get notificationDebugBehaviorScheduleAthkar;
+
+  /// No description provided for @notificationDebugBehaviorShowNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Posts a debug notification immediately'**
+  String get notificationDebugBehaviorShowNow;
+
+  /// No description provided for @notificationDebugBehaviorNativePayloadOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Simulates native prayer tap with payload only (no id)'**
+  String get notificationDebugBehaviorNativePayloadOnly;
+
+  /// No description provided for @notificationDebugBehaviorInvalidPayload.
+  ///
+  /// In en, this message translates to:
+  /// **'Should not navigate to Athkar'**
+  String get notificationDebugBehaviorInvalidPayload;
+
+  /// No description provided for @notificationDebugBehaviorEmptyPayload.
+  ///
+  /// In en, this message translates to:
+  /// **'Should not navigate (empty payload)'**
+  String get notificationDebugBehaviorEmptyPayload;
+
+  /// No description provided for @notificationDebugBehaviorPayloadOnlyNoId.
+  ///
+  /// In en, this message translates to:
+  /// **'Routes via payload signature only'**
+  String get notificationDebugBehaviorPayloadOnlyNoId;
+
+  /// No description provided for @notificationDebugBehaviorDedupSameSig.
+  ///
+  /// In en, this message translates to:
+  /// **'First tap navigates; same pid + signature replays suppressed'**
+  String get notificationDebugBehaviorDedupSameSig;
+
+  /// No description provided for @notificationDebugBehaviorFreshDifferentPayload.
+  ///
+  /// In en, this message translates to:
+  /// **'Treated as fresh when payload signature changes'**
+  String get notificationDebugBehaviorFreshDifferentPayload;
+
+  /// No description provided for @notificationDebugBehaviorSharedPayloadSig.
+  ///
+  /// In en, this message translates to:
+  /// **'Same payload signature dedups even if id differs'**
+  String get notificationDebugBehaviorSharedPayloadSig;
+
+  /// No description provided for @notificationDebugBehaviorSimulateTap.
+  ///
+  /// In en, this message translates to:
+  /// **'Routes through production dispatcher / bootstrap paths'**
+  String get notificationDebugBehaviorSimulateTap;
+
+  /// No description provided for @notificationDebugBehaviorInvalidLaunch.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid payload must not set Athkar cold-start route'**
+  String get notificationDebugBehaviorInvalidLaunch;
+
+  /// No description provided for @notificationDebugBehaviorMarkProcessed.
+  ///
+  /// In en, this message translates to:
+  /// **'Persists dedup without navigation'**
+  String get notificationDebugBehaviorMarkProcessed;
+
+  /// No description provided for @notificationDebugBehaviorClearPidScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Clears pid key to simulate fresh-process dedup scope'**
+  String get notificationDebugBehaviorClearPidScope;
+
+  /// No description provided for @notificationDebugFieldCurrentPid.
+  ///
+  /// In en, this message translates to:
+  /// **'Current process id'**
+  String get notificationDebugFieldCurrentPid;
+
+  /// No description provided for @notificationDebugFieldStoredPid.
+  ///
+  /// In en, this message translates to:
+  /// **'Stored pid (_last_notif_pid)'**
+  String get notificationDebugFieldStoredPid;
+
+  /// No description provided for @notificationDebugFieldStoredId.
+  ///
+  /// In en, this message translates to:
+  /// **'Stored id (_last_notif_id)'**
+  String get notificationDebugFieldStoredId;
+
+  /// No description provided for @notificationDebugFieldStoredSig.
+  ///
+  /// In en, this message translates to:
+  /// **'Stored signature (_last_notif_payload_sig)'**
+  String get notificationDebugFieldStoredSig;
+
+  /// No description provided for @notificationDebugFieldLastProcessedId.
+  ///
+  /// In en, this message translates to:
+  /// **'AppRouter.lastProcessedNotificationId'**
+  String get notificationDebugFieldLastProcessedId;
+
+  /// No description provided for @notificationDebugFieldPendingRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'pendingColdStartLocation'**
+  String get notificationDebugFieldPendingRoute;
+
+  /// No description provided for @notificationDebugFieldPendingExtra.
+  ///
+  /// In en, this message translates to:
+  /// **'pendingColdStartExtra'**
+  String get notificationDebugFieldPendingExtra;
+
+  /// No description provided for @notificationDebugFieldAthkarPayload.
+  ///
+  /// In en, this message translates to:
+  /// **'last_handled_notification_payload'**
+  String get notificationDebugFieldAthkarPayload;
+
+  /// No description provided for @notificationDebugFieldAthkarTimestamp.
+  ///
+  /// In en, this message translates to:
+  /// **'last_handled_notification_timestamp'**
+  String get notificationDebugFieldAthkarTimestamp;
+
+  /// No description provided for @notificationDebugFieldPreviewSig.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview signature'**
+  String get notificationDebugFieldPreviewSig;
+
+  /// No description provided for @notificationDebugFieldProcessedPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview is processed'**
+  String get notificationDebugFieldProcessedPreview;
+
+  /// No description provided for @notificationDebugChecklistAthkarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A. Athkar notification'**
+  String get notificationDebugChecklistAthkarTitle;
+
+  /// No description provided for @notificationDebugChecklistAthkarTap.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap Athkar notification → opens Athkar once'**
+  String get notificationDebugChecklistAthkarTap;
+
+  /// No description provided for @notificationDebugChecklistAthkarRestart.
+  ///
+  /// In en, this message translates to:
+  /// **'Hot restart → must not open Athkar again'**
+  String get notificationDebugChecklistAthkarRestart;
+
+  /// No description provided for @notificationDebugChecklistPrayerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'B. Prayer payload-only notification'**
+  String get notificationDebugChecklistPrayerTitle;
+
+  /// No description provided for @notificationDebugChecklistPrayerTap.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap Prayer notification → opens prayer route once'**
+  String get notificationDebugChecklistPrayerTap;
+
+  /// No description provided for @notificationDebugChecklistPrayerRestart.
+  ///
+  /// In en, this message translates to:
+  /// **'Hot restart → must not replay'**
+  String get notificationDebugChecklistPrayerRestart;
+
+  /// No description provided for @notificationDebugChecklistInvalidTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'C. Invalid payload'**
+  String get notificationDebugChecklistInvalidTitle;
+
+  /// No description provided for @notificationDebugChecklistInvalidBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid payload → must not fallback to Athkar'**
+  String get notificationDebugChecklistInvalidBody;
+
+  /// No description provided for @notificationDebugChecklistSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'D. Settings payload'**
+  String get notificationDebugChecklistSettingsTitle;
+
+  /// No description provided for @notificationDebugChecklistSettingsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings payload → opens Settings, not Athkar'**
+  String get notificationDebugChecklistSettingsBody;
+
+  /// No description provided for @notificationDebugChecklistSameSigTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'E. Same id + same payload'**
+  String get notificationDebugChecklistSameSigTitle;
+
+  /// No description provided for @notificationDebugChecklistSameSigTap.
+  ///
+  /// In en, this message translates to:
+  /// **'First tap → navigate once'**
+  String get notificationDebugChecklistSameSigTap;
+
+  /// No description provided for @notificationDebugChecklistSameSigRestart.
+  ///
+  /// In en, this message translates to:
+  /// **'Hot restart / same process → suppressed'**
+  String get notificationDebugChecklistSameSigRestart;
+
+  /// No description provided for @notificationDebugChecklistDiffPayloadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'F. Same id + different payload'**
+  String get notificationDebugChecklistDiffPayloadTitle;
+
+  /// No description provided for @notificationDebugChecklistDiffPayloadBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Treated as fresh launch'**
+  String get notificationDebugChecklistDiffPayloadBody;
+
+  /// No description provided for @notificationDebugChecklistDiffIdTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'G. Different id + same payload'**
+  String get notificationDebugChecklistDiffIdTitle;
+
+  /// No description provided for @notificationDebugChecklistDiffIdBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Payload signature wins → second tap suppressed in same pid'**
+  String get notificationDebugChecklistDiffIdBody;
+
+  /// No description provided for @notificationDebugChecklistKillTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'H. Full process kill'**
+  String get notificationDebugChecklistKillTitle;
+
+  /// No description provided for @notificationDebugChecklistKillSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'Kill app from recents → tap fresh notification → cold start navigation should work'**
+  String get notificationDebugChecklistKillSteps;
+
+  /// No description provided for @notificationDebugLogsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No debug events yet'**
+  String get notificationDebugLogsEmpty;
+
   /// Snackbar message when a flexible in-app update finished downloading
   ///
   /// In en, this message translates to:
@@ -5411,13 +5915,13 @@ abstract class AppLocalizations {
   /// Snackbar message when an optional app update is available
   ///
   /// In en, this message translates to:
-  /// **'A new version of Tilawa is available.'**
+  /// **'A new version of MeMuslim is available.'**
   String get inAppUpdateOptionalMessage;
 
   /// Snackbar message when a forced update must go through the Play Store
   ///
   /// In en, this message translates to:
-  /// **'An update is required to continue using Tilawa.'**
+  /// **'An update is required to continue using MeMuslim.'**
   String get inAppUpdateRequiredMessage;
 
   /// Snackbar action to install a downloaded flexible update
@@ -5507,7 +6011,7 @@ abstract class AppLocalizations {
   /// Body when another device took over the active session
   ///
   /// In en, this message translates to:
-  /// **'Tilawa allows one active device per account for Quran Sessions security. Your account was opened elsewhere — sign in again on this device to continue.'**
+  /// **'MeMuslim allows one active device per account for Quran Sessions security. Your account was opened elsewhere — sign in again on this device to continue.'**
   String get authSignedInElsewhereBody;
 
   /// Primary action after session revoked on this device

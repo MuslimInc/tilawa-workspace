@@ -1,8 +1,10 @@
 import 'package:equatable/equatable.dart';
 
+import 'manual_payment_price.dart';
 import 'session_call_type.dart';
 import 'session_price.dart';
 import 'session_pricing_type.dart';
+import 'teacher_credential.dart';
 import 'teacher_verification_status.dart';
 import 'user_profile.dart' show UserGender;
 
@@ -28,6 +30,10 @@ class QuranTeacher extends Equatable {
     required this.totalReviews,
     required this.totalSessionsCompleted,
     this.price,
+    this.manualPaymentPrice,
+    this.cityName,
+    this.countryName,
+    this.credentials = const [],
   });
 
   final String id;
@@ -50,6 +56,14 @@ class QuranTeacher extends Equatable {
   /// teacher list was fetched without a market context.
   final SessionPrice? price;
 
+  /// Presentation-only manual/off-app price for the Egypt pilot. Independent of
+  /// the booking engine: when set the UI shows the price + manual-payment
+  /// instructions while the booking stays internally free. Never read by
+  /// eligibility, booking creation, payment, commission, or payout logic.
+  final ManualPaymentPrice? manualPaymentPrice;
+
+  bool get hasManualPaymentPrice => manualPaymentPrice != null;
+
   /// E.g. ['tajweed', 'hifz', 'tafsir', 'recitation'].
   final List<String> specializations;
 
@@ -59,6 +73,14 @@ class QuranTeacher extends Equatable {
   final double averageRating;
   final int totalReviews;
   final int totalSessionsCompleted;
+
+  /// Optional public location — shown on discovery cards when present.
+  final String? cityName;
+  final String? countryName;
+
+  /// Teacher-supplied qualifications; [TeacherCredential.isVerified] when admin
+  /// confirmed on backend.
+  final List<TeacherCredential> credentials;
 
   bool get isVerified =>
       verificationStatus == TeacherVerificationStatus.verified;
@@ -76,10 +98,14 @@ class QuranTeacher extends Equatable {
     supportedCallTypes,
     pricingType,
     price,
+    manualPaymentPrice,
     specializations,
     languages,
     averageRating,
     totalReviews,
     totalSessionsCompleted,
+    cityName,
+    countryName,
+    credentials,
   ];
 }

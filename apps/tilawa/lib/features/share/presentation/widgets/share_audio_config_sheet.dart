@@ -1071,18 +1071,18 @@ class _VideoReviewPreview extends StatelessWidget {
 const double _kShareComposerBadgePillHeight = 32;
 const double _kShareComposerProgressHeight = 8;
 
-BorderRadius _shareComposerCardRadius(TilawaDesignTokens tokens) =>
+BorderRadius _shareComposerCardRadius(MeMuslimDesignTokens tokens) =>
     BorderRadius.circular(
       tokens.resolveRadius(family: TilawaRadiusFamily.card),
     );
 
-BorderRadius _shareComposerChromeRadius(TilawaDesignTokens tokens) =>
+BorderRadius _shareComposerChromeRadius(MeMuslimDesignTokens tokens) =>
     BorderRadius.circular(
       tokens.resolveRadius(family: TilawaRadiusFamily.chrome),
     );
 
 BorderRadius _shareComposerPillRadius(
-  TilawaDesignTokens tokens,
+  MeMuslimDesignTokens tokens,
   double height,
 ) => BorderRadius.circular(
   tokens.resolveRadius(family: TilawaRadiusFamily.pill, height: height),

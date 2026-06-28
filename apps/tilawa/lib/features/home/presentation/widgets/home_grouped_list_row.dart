@@ -48,76 +48,69 @@ class HomeGroupedListRow extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final cardTokens = theme.componentTokens.homeDashboardCard;
 
-    return Semantics(
-      button: true,
-      label: semanticLabel ?? title,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          onLongPress: onLongPress,
-          splashColor: cardTokens.splashColor,
-          highlightColor: cardTokens.highlightColor,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: tokens.minInteractiveDimension,
-            ),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: tokens.spaceMedium,
-                vertical: tokens.spaceSmall,
+    return TilawaInteractiveSurface(
+      onTap: onTap,
+      onLongPress: onLongPress,
+      semanticLabel: semanticLabel ?? title,
+      stateLayerColor: cardTokens.splashColor,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: tokens.minInteractiveDimension,
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: tokens.spaceMedium,
+            vertical: tokens.spaceSmall,
+          ),
+          child: Row(
+            spacing: tokens.spaceMedium,
+            children: [
+              TilawaIconBox(
+                icon: icon,
+                size: tokens.iconSizeMedium,
+                variant: TilawaIconBoxVariant.tinted,
+                semanticTint: iconTint,
+                backgroundColor: iconBackgroundColor,
+                iconColor: iconColor,
               ),
-              child: Row(
-                spacing: tokens.spaceMedium,
-                children: [
-                  TilawaIconBox(
-                    icon: icon,
-                    size: tokens.iconSizeMedium,
-                    variant: TilawaIconBoxVariant.tinted,
-                    semanticTint: iconTint,
-                    backgroundColor: iconBackgroundColor,
-                    iconColor: iconColor,
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      spacing: tokens.spaceExtraSmall,
-                      children: [
-                        Text(
-                          title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            color: colorScheme.onSurface,
-                            fontWeight: FontWeight.w700,
-                          ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: tokens.spaceExtraSmall,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        color: colorScheme.onSurface,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    if (subtitle != null)
+                      Text(
+                        subtitle!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
                         ),
-                        if (subtitle != null)
-                          Text(
-                            subtitle!,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                  if (trailingWidget != null)
-                    trailingWidget!
-                  else if (showChevron)
-                    // Keep the right chevron in both LTR and RTL; this icon
-                    // reads correctly in Arabic and avoids unwanted mirroring.
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      size: tokens.iconSizeSmall,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                ],
+                      ),
+                  ],
+                ),
               ),
-            ),
+              if (trailingWidget != null)
+                trailingWidget!
+              else if (showChevron)
+                // Keep the right chevron in both LTR and RTL; this icon
+                // reads correctly in Arabic and avoids unwanted mirroring.
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: tokens.iconSizeSmall,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+            ],
           ),
         ),
       ),

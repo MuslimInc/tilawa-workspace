@@ -10,6 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  characters: ^1.4.0
   flutter_svg: ^2.2.3
 
   # Utils
@@ -32,6 +33,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/icons/athkar_misbaha_icon.svg
+    - assets/icons/tasbih_outline_icon.svg
     - assets/icons/google_g_logo.svg
     - assets/icons/quran_icon.svg
 

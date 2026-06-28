@@ -3,6 +3,7 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/home/domain/home_daily_inspiration_catalog.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_card.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_dashboard_section.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Daily ayah and dua in one grouped card with a hairline separator.
@@ -17,32 +18,74 @@ class HomeDailyInspirationSection extends StatelessWidget {
     final int catalogIndex = homeDailyInspirationCatalogIndex(DateTime.now());
     final _DailyInspirationCopy copy = _resolveCopy(context.l10n, catalogIndex);
 
-    return HomeDashboardCard(
-      surface: TilawaCardSurface.raised,
-      padding: EdgeInsets.zero,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _DailyInspirationRow(
-            label: context.l10n.homeDailyAyahLabel,
-            body: copy.ayahBody,
-            reference: copy.ayahReference,
-            useArabicTypography: context.isArabic,
+    return _EntranceAnimator(
+      child: HomeDashboardSection(
+        title: context.l10n.homeInspirationTitle,
+        subtitle: context.l10n.homeInspirationSubtitle,
+        child: HomeDashboardCard(
+          padding: EdgeInsets.zero,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _DailyInspirationRow(
+                label: context.l10n.homeDailyAyahLabel,
+                body: copy.ayahBody,
+                reference: copy.ayahReference,
+                useArabicTypography: context.isArabic,
+              ),
+              Padding(
+                padding: EdgeInsetsDirectional.only(start: tokens.spaceMedium),
+                child: TilawaDivider(
+                  height: tokens.borderWidthThin,
+                  color: dividerColor,
+                ),
+              ),
+              _DailyInspirationRow(
+                label: context.l10n.homeDailyDuaLabel,
+                body: copy.duaBody,
+                reference: copy.duaReference,
+                useArabicTypography: context.isArabic,
+              ),
+            ],
           ),
-          Padding(
-            padding: EdgeInsetsDirectional.only(start: tokens.spaceMedium),
-            child: TilawaDivider(
-              height: tokens.borderWidthThin,
-              color: dividerColor,
-            ),
-          ),
-          _DailyInspirationRow(
-            label: context.l10n.homeDailyDuaLabel,
-            body: copy.duaBody,
-            reference: copy.duaReference,
-            useArabicTypography: context.isArabic,
-          ),
-        ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Entrance animation for the peak moment when scrolled into view.
+class _EntranceAnimator extends StatefulWidget {
+  const _EntranceAnimator({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_EntranceAnimator> createState() => _EntranceAnimatorState();
+}
+
+class _EntranceAnimatorState extends State<_EntranceAnimator> {
+  bool _isVisible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() => _isVisible = true);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedOpacity(
+      opacity: _isVisible ? 1.0 : 0.0,
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeOutCubic,
+      child: AnimatedSlide(
+        offset: _isVisible ? Offset.zero : const Offset(0, 0.08),
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeOutCubic,
+        child: widget.child,
       ),
     );
   }
@@ -128,11 +171,11 @@ class _DailyInspirationRow extends StatelessWidget {
           spacing: tokens.spaceSmall,
           children: [
             Container(
-              width: tokens.spaceExtraSmall / 2,
+              width: tokens.spaceExtraSmall,
               height: tokens.spaceExtraLarge + tokens.spaceSmall,
               decoration: BoxDecoration(
                 color: colorScheme.tertiary.withValues(
-                  alpha: tokens.opacitySubtle * 2,
+                  alpha: tokens.opacitySubtle * 3.5,
                 ),
                 borderRadius: BorderRadius.circular(
                   tokens.resolveRadius(family: TilawaRadiusFamily.decorative),

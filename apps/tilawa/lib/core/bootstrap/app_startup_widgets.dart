@@ -136,7 +136,7 @@ class _BootGate extends StatefulWidget {
 class _BootGateState extends State<_BootGate> {
   bool _loggedBootGateSplash = false;
 
-  static const Color _launchBackground = AppColors.launchSplashBackground;
+  static final Color _launchBackground = AppColors.launchSplashBackground;
   static const String _appLogoAsset = 'assets/images/app_logo.png';
   static const double _wordmarkBoxSize = AppColors.launchSplashLogoSize;
   static final SystemUiOverlayStyle _launchOverlayStyle =

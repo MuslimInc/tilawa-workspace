@@ -26,7 +26,7 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  static const Color _launchBackground = AppColors.launchSplashBackground;
+  static final Color _launchBackground = AppColors.launchSplashBackground;
   static const Color _logoForeground = AppColors.launchSplashForeground;
   static const String _appLogoAsset = 'assets/images/app_logo.png';
   static const double _wordmarkBoxSize = AppColors.launchSplashLogoSize;

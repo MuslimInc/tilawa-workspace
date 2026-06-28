@@ -5,6 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
+import 'package:quran_sessions/src/presentation/widgets/tutor_session_compact_card.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
@@ -62,8 +63,9 @@ void main() {
             create: (_) => bloc,
             child: TeacherDashboardScreen(
               teacherId: 'teacher_1',
-              onSessionDetailRequested: (bookingId) {
+              onSessionDetailRequested: (bookingId) async {
                 openedBookingId = bookingId;
+                return null;
               },
             ),
           ),
@@ -72,9 +74,69 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byType(SessionCard));
+    await tester.tap(find.byType(TutorSessionCompactCard));
     await tester.pumpAndSettle();
 
     check(openedBookingId).equals('booking_1');
   });
+
+  testWidgets(
+    'teacher dashboard reloads upcoming when detail returns mutation',
+    (tester) async {
+      final sessionRepo = FakeSessionRepository()
+        ..sessions = [
+          makeSession(startsAt: DateTime.now().add(const Duration(days: 1))),
+        ];
+      final scheduleRepo = FakeScheduleRepository();
+      final bloc = buildTestTeacherDashboardBloc(
+        sessionRepo: sessionRepo,
+        getAvailability: SpyGetTeacherAvailabilityUseCase(
+          scheduleRepository: scheduleRepo,
+          bookedSlotLocks: FakeBookedSlotLockRepository(),
+        ),
+        blockGeneratedSlot: BlockGeneratedSlotUseCase(scheduleRepo),
+        availabilityProvider: FakeAvailabilityProvider(),
+        cancelSession: buildCancelSessionViaServerUseCase(),
+        completeSession: buildCompleteSessionViaServerUseCase(),
+        scheduleRepo: scheduleRepo,
+        userProfileRepo: FakeUserProfileRepository(),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          locale: const Locale('en'),
+          localizationsDelegates: const [
+            ...QuranSessionsLocalizations.localizationsDelegates,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          home: TilawaFeedbackHost(
+            child: BlocProvider<TeacherDashboardBloc>(
+              create: (_) => bloc,
+              child: TeacherDashboardScreen(
+                teacherId: 'teacher_1',
+                onSessionDetailRequested: (bookingId) async {
+                  sessionRepo.sessions = [];
+                  return true;
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      check(sessionRepo.getTeacherUpcomingSessionsCallCount).equals(1);
+      expect(find.byType(TutorSessionCompactCard), findsOneWidget);
+
+      await tester.tap(find.byType(TutorSessionCompactCard));
+      await tester.pumpAndSettle();
+
+      check(sessionRepo.getTeacherUpcomingSessionsCallCount).equals(2);
+      expect(find.byType(TutorSessionCompactCard), findsNothing);
+    },
+  );
 }

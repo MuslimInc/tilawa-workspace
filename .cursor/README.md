@@ -25,9 +25,7 @@ implementation. Delegate PR fixes and feature work to this agent by name.
 | [`tilawa-ui-ux-guard`](../.agents/skills/tilawa-ui-ux-guard/SKILL.md) | Reactive review before shipping presentation changes |
 | [`flutter-apply-tilawa-theming`](../.agents/skills/flutter-apply-tilawa-theming/SKILL.md) | Tokens, colors, spacing scale |
 
-**Senior Flutter persona:** skill [`tilawa-senior-flutter`](../.agents/skills/tilawa-senior-flutter/SKILL.md)
-(**TilawaAISeniorFlutter**) — clean architecture, SOLID, and verifiable feature
-implementation. Delegate PR fixes and feature work to this agent by name.
+**Home (approved):** [patterns](../.agents/skills/tilawa-apply-ui-principles/references/home-dashboard-patterns.md) · [design](../docs/design/home_screen_design_artifacts.md) — preserve layout unless user asks.
 
 **Confirm in Cursor:** Settings → Rules — all rules should appear;
 `karpathy-guidelines` is always on; the others activate by glob or when the

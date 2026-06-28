@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 
-import 'firebase_session_mutation_gateway.dart';
+import 'firestore_exception_mapper.dart';
 import 'firestore_paths.dart';
 import 'session_firestore_mapper.dart';
 
@@ -21,6 +21,9 @@ class FirebaseSessionAggregateRepository implements SessionAggregateRepository {
 
   CollectionReference<Map<String, dynamic>> get _bookings =>
       _firestore.collection(FirestoreQuranSessionsPaths.bookings);
+
+  CollectionReference<Map<String, dynamic>> get _sessions =>
+      _firestore.collection(FirestoreQuranSessionsPaths.sessions);
 
   @override
   Future<Either<QuranSessionsFailure, SessionAggregate>> create(
@@ -47,13 +50,79 @@ class FirebaseSessionAggregateRepository implements SessionAggregateRepository {
     String id,
   ) async {
     try {
-      final snap = await _bookings.doc(id).get();
-      if (!snap.exists) {
-        return Left(NotFoundFailure('SessionAggregate($id)'));
+      final sessionSnap = await _readExistingDoc(_sessions.doc(id));
+      if (sessionSnap != null) {
+        return Right(
+          mapSessionDocToAggregate(
+            sessionSnap.id,
+            sessionSnap.data()!,
+          ),
+        );
       }
-      return Right(mapBookingDocToAggregate(snap.id, snap.data() ?? const {}));
+
+      final bookingSnap = await _readExistingDoc(_bookings.doc(id));
+      if (bookingSnap != null) {
+        return Right(
+          mapBookingDocToAggregate(
+            bookingSnap.id,
+            bookingSnap.data()!,
+          ),
+        );
+      }
+
+      final linkedBooking = await _readLinkedBookingBySessionId(id);
+      if (linkedBooking != null) {
+        return Right(
+          mapBookingDocToAggregate(
+            linkedBooking.id,
+            linkedBooking.data(),
+          ),
+        );
+      }
+
+      return Left(NotFoundFailure('SessionAggregate($id)'));
     } on FirebaseException catch (e) {
       return Left(mapFirebaseExceptionToFailure(e));
+    }
+  }
+
+  /// Firestore rules deny reads on non-existent booking docs when the rule
+  /// inspects [DocumentSnapshot.data]. Treat that as a miss and keep resolving.
+  Future<DocumentSnapshot<Map<String, dynamic>>?> _readExistingDoc(
+    DocumentReference<Map<String, dynamic>> ref,
+  ) async {
+    try {
+      final snap = await ref.get();
+      if (!snap.exists) {
+        return null;
+      }
+      return snap;
+    } on FirebaseException catch (e) {
+      if (e.code == 'permission-denied') {
+        return null;
+      }
+      rethrow;
+    }
+  }
+
+  Future<QueryDocumentSnapshot<Map<String, dynamic>>?>
+  _readLinkedBookingBySessionId(
+    String sessionId,
+  ) async {
+    try {
+      final linkedBooking = await _bookings
+          .where('sessionId', isEqualTo: sessionId)
+          .limit(1)
+          .get();
+      if (linkedBooking.docs.isEmpty) {
+        return null;
+      }
+      return linkedBooking.docs.first;
+    } on FirebaseException catch (e) {
+      if (e.code == 'permission-denied') {
+        return null;
+      }
+      rethrow;
     }
   }
 

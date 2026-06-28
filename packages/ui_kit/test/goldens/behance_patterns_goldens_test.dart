@@ -34,7 +34,7 @@ Widget _featuredGradientCard(BuildContext context) {
   final ThemeData theme = Theme.of(context);
   final TilawaHomeDashboardCardTokens cardTokens =
       theme.componentTokens.homeDashboardCard;
-  final TilawaDesignTokens tokens = theme.tokens;
+  final MeMuslimDesignTokens tokens = theme.tokens;
   final double radius = tokens.resolveRadius(family: TilawaRadiusFamily.hero);
 
   return SizedBox(
@@ -89,7 +89,7 @@ Widget _featuredGradientCard(BuildContext context) {
 Widget _instructionChip(BuildContext context) {
   final ThemeData theme = Theme.of(context);
   final ColorScheme colorScheme = theme.colorScheme;
-  final TilawaDesignTokens tokens = theme.tokens;
+  final MeMuslimDesignTokens tokens = theme.tokens;
 
   return SizedBox(
     width: 340,

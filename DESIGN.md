@@ -121,6 +121,12 @@ Registered as a `ThemeExtension` on `ThemeData` (access: `Theme.of(context).exte
 - **Branch on `context.windowSize` (or helpers)** instead of raw widths for shell and two-pane patterns.
 - **Adaptive shell** (`TilawaAdaptiveShell` + `componentTokens.adaptiveShell`): main app chrome — bottom navigation, optional rail, **labels shown** on phone bottom nav; system navigation bar color is synced to match floating bottom nav for visual continuity (`_DefaultRouteSystemUiOverlay` in `tilawa_app.dart`).
 
+### Home dashboard
+
+Approved layout — do not redesign or reorder unless the user asks.
+**Technical:** [home-dashboard-patterns.md](.agents/skills/tilawa-apply-ui-principles/references/home-dashboard-patterns.md).
+**Design:** [home_screen_design_artifacts.md](docs/design/home_screen_design_artifacts.md).
+
 ---
 
 ## 6. Components (`TilawaComponentTokens`)

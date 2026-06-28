@@ -4,6 +4,7 @@ import 'package:quran_sessions/core/l10n_extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/quran_session.dart';
+import '../../domain/entities/session_lifecycle_status.dart';
 
 /// Card showing session time, teacher name, and status badge.
 /// Used in [MySessionsScreen] and [TeacherDashboardScreen].
@@ -16,6 +17,7 @@ class SessionCard extends StatelessWidget {
     this.onJoin,
     this.onCancel,
     this.isJoinLoading = false,
+    this.showCancelInOverflowMenu = false,
   });
 
   final QuranSession session;
@@ -28,6 +30,10 @@ class SessionCard extends StatelessWidget {
   final VoidCallback? onCancel;
   final bool isJoinLoading;
 
+  /// When true, [onCancel] appears in a card overflow menu instead of the
+  /// action row (teacher dashboard upcoming sessions).
+  final bool showCancelInOverflowMenu;
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
@@ -38,6 +44,8 @@ class SessionCard extends StatelessWidget {
     final dateFmt = DateFormat('EEEE، d MMMM y', locale);
     final timeFmt = DateFormat('h:mm a', locale);
     final localStart = session.startsAt.toLocal();
+    final showCancelButton = onCancel != null && !showCancelInOverflowMenu;
+    final showCancelOverflow = onCancel != null && showCancelInOverflowMenu;
 
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -78,18 +86,31 @@ class SessionCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    _StatusBadge(status: session.status),
+                    if (showCancelOverflow)
+                      PopupMenuButton<void>(
+                        icon: Icon(
+                          Icons.more_vert,
+                          color: scheme.onSurfaceVariant,
+                        ),
+                        itemBuilder: (context) => [
+                          PopupMenuItem<void>(
+                            onTap: onCancel,
+                            child: Text(l10n.tutorCancelSessionFromCard),
+                          ),
+                        ],
+                      ),
+                    _StatusBadge(session: session),
                   ],
                 ),
               ],
             ),
           ),
-          if (onJoin != null || onCancel != null) ...[
+          if (onJoin != null || showCancelButton) ...[
             SizedBox(height: tokens.spaceSmall + 2),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                if (onCancel != null)
+                if (showCancelButton)
                   TilawaButton(
                     text: l10n.cancel,
                     variant: TilawaButtonVariant.dangerOutline,
@@ -116,42 +137,55 @@ class SessionCard extends StatelessWidget {
 }
 
 class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.status});
+  const _StatusBadge({required this.session});
 
-  final QuranSessionStatus status;
+  final QuranSession session;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
     final scheme = Theme.of(context).colorScheme;
+    final lifecycle = session.effectiveLifecycleStatus;
 
-    final (label, bg, fg) = switch (status) {
-      QuranSessionStatus.scheduled => (
-        l10n.sessionStatusScheduled,
-        scheme.primaryContainer,
-        scheme.onPrimaryContainer,
+    final (label, bg, fg) = switch (lifecycle) {
+      SessionLifecycleStatus.pendingTutorApproval => (
+        l10n.sessionStatusBookingUnderReview,
+        scheme.surfaceContainerHighest,
+        scheme.onSurfaceVariant,
       ),
-      QuranSessionStatus.inProgress => (
-        l10n.sessionStatusInProgress,
-        scheme.tertiaryContainer,
-        scheme.onTertiaryContainer,
-      ),
-      QuranSessionStatus.completed => (
-        l10n.sessionStatusCompleted,
-        scheme.secondaryContainer,
-        scheme.onSecondaryContainer,
-      ),
-      QuranSessionStatus.cancelledByStudent ||
-      QuranSessionStatus.cancelledByTeacher => (
-        l10n.sessionStatusCancelled,
+      SessionLifecycleStatus.rejectedByTutor => (
+        l10n.sessionStatusRejectedByTutor,
         scheme.errorContainer,
         scheme.onErrorContainer,
       ),
-      QuranSessionStatus.noShow => (
-        l10n.sessionStatusNoShow,
-        scheme.errorContainer,
-        scheme.onErrorContainer,
-      ),
+      _ => switch (session.status) {
+        QuranSessionStatus.scheduled => (
+          l10n.sessionStatusScheduled,
+          scheme.primaryContainer,
+          scheme.onPrimaryContainer,
+        ),
+        QuranSessionStatus.inProgress => (
+          l10n.sessionStatusInProgress,
+          scheme.tertiaryContainer,
+          scheme.onTertiaryContainer,
+        ),
+        QuranSessionStatus.completed => (
+          l10n.sessionStatusCompleted,
+          scheme.secondaryContainer,
+          scheme.onSecondaryContainer,
+        ),
+        QuranSessionStatus.cancelledByStudent ||
+        QuranSessionStatus.cancelledByTeacher => (
+          l10n.sessionStatusCancelled,
+          scheme.errorContainer,
+          scheme.onErrorContainer,
+        ),
+        QuranSessionStatus.noShow => (
+          l10n.sessionStatusNoShow,
+          scheme.errorContainer,
+          scheme.onErrorContainer,
+        ),
+      },
     };
 
     return TilawaStatusChip(

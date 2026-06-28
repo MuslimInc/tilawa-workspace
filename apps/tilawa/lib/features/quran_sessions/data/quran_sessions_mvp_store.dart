@@ -44,7 +44,7 @@ class QuranSessionsMvpStore {
       userId: 'student_mvp',
       role: UserRole.student,
       accountStatus: AccountStatus.active,
-      displayName: 'Tilawa User',
+      displayName: 'MeMuslim User',
       // No gender / DOB / country / city → profile gate fires on first entry.
     ),
     // Teachers are UserRole.student at the UserProfile level.
@@ -181,7 +181,11 @@ class QuranSessionsMvpStore {
       avatarUrl: '',
       gender: UserGender.male,
       verificationStatus: TeacherVerificationStatus.verified,
-      supportedCallTypes: [SessionCallType.externalMeeting],
+      supportedCallTypes: [
+        SessionCallType.externalMeeting,
+        SessionCallType.voiceCall,
+        SessionCallType.videoCall,
+      ],
       pricingType: SessionPricingType.fixedPerSession,
       price: SessionPrice(
         amount: 600,
@@ -194,6 +198,19 @@ class QuranSessionsMvpStore {
       averageRating: 4.9,
       totalReviews: 128,
       totalSessionsCompleted: 340,
+      cityName: 'القاهرة',
+      countryName: 'مصر',
+      credentials: [
+        TeacherCredential(
+          title: 'Ijazah in Hafs an Asim',
+          issuer: 'Al-Azhar University',
+          isVerified: true,
+        ),
+        TeacherCredential(
+          title: 'Tajweed certification',
+          issuer: 'Egyptian Ministry of Awqaf',
+        ),
+      ],
     ),
     const QuranTeacher(
       id: 'teacher_2',
@@ -213,6 +230,8 @@ class QuranSessionsMvpStore {
       averageRating: 4.8,
       totalReviews: 74,
       totalSessionsCompleted: 210,
+      cityName: 'القاهرة',
+      countryName: 'مصر',
     ),
     const QuranTeacher(
       id: 'teacher_3',
@@ -237,6 +256,8 @@ class QuranSessionsMvpStore {
       averageRating: 4.7,
       totalReviews: 55,
       totalSessionsCompleted: 180,
+      cityName: 'القاهرة',
+      countryName: 'مصر',
     ),
   ];
 

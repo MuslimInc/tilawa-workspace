@@ -106,37 +106,34 @@ class _TeacherApplyLink extends StatelessWidget {
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
 
-    return Semantics(
-      button: true,
-      label: '$question $action',
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(tokens.radiusSmall),
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: tokens.spaceSmall,
-            vertical: tokens.spaceExtraSmall,
-          ),
-          child: Column(
-            children: [
-              Text(
-                question,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
+    return TilawaInteractiveSurface(
+      onTap: onTap,
+      semanticLabel: '$question $action',
+      borderRadius: BorderRadius.circular(tokens.radiusSmall),
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: tokens.spaceSmall,
+          vertical: tokens.spaceExtraSmall,
+        ),
+        child: Column(
+          children: [
+            Text(
+              question,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
               ),
-              SizedBox(height: tokens.spaceExtraSmall),
-              Text(
-                action,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: colorScheme.primary,
-                  fontWeight: FontWeight.w600,
-                ),
+            ),
+            SizedBox(height: tokens.spaceExtraSmall),
+            Text(
+              action,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: colorScheme.primary,
+                fontWeight: FontWeight.w600,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

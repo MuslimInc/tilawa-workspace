@@ -7,7 +7,7 @@ void main() {
     testWidgets('downward fling dismisses the modal route', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+          theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
           home: Builder(
             builder: (context) {
               return Scaffold(
@@ -52,7 +52,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+          theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
           home: Scaffold(
             body: TilawaSheetHandle(
               onDismiss: () => dismissed = true,

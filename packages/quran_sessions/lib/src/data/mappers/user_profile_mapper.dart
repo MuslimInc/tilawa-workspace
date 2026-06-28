@@ -1,6 +1,20 @@
 import '../../domain/entities/user_profile.dart';
 import '../dtos/user_profile_dto.dart';
 
+StudentLearningGoal _mapLearningGoal(String raw) => switch (raw) {
+  'hifz' => StudentLearningGoal.hifz,
+  'tajweed' => StudentLearningGoal.tajweed,
+  'arabic' => StudentLearningGoal.arabic,
+  _ => StudentLearningGoal.recitation,
+};
+
+String _learningGoalCode(StudentLearningGoal goal) => switch (goal) {
+  StudentLearningGoal.recitation => 'recitation',
+  StudentLearningGoal.hifz => 'hifz',
+  StudentLearningGoal.tajweed => 'tajweed',
+  StudentLearningGoal.arabic => 'arabic',
+};
+
 extension UserProfileDtoMapper on UserProfileDto {
   UserProfile toDomain() => UserProfile(
     userId: userId,
@@ -20,6 +34,7 @@ extension UserProfileDtoMapper on UserProfileDto {
     restrictionReason: restrictionReason == null
         ? null
         : _mapRestrictionReason(restrictionReason!),
+    learningGoals: learningGoals.map(_mapLearningGoal).toList(),
   );
 }
 
@@ -40,6 +55,7 @@ extension UserProfileDomainMapper on UserProfile {
     guardianId: guardianId,
     guardianChildBookingApprovedAt: guardianChildBookingApprovedAt,
     restrictionReason: restrictionReason?.name,
+    learningGoals: learningGoals.map(_learningGoalCode).toList(),
   );
 }
 

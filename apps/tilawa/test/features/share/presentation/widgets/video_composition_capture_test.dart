@@ -32,7 +32,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+        theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
         home: Scaffold(
           body: RepaintBoundary(
             key: boundaryKey,

@@ -21,7 +21,7 @@ final class ReciterDetailsFabLayout {
     BuildContext context, {
     required bool scrollToTopFabVisible,
   }) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
 
     if (context.isKeyboardVisible) {
       return ReciterDetailsFabLayout(
@@ -34,7 +34,7 @@ final class ReciterDetailsFabLayout {
     final double fabBottomOffset =
         QuranPlayerWidget.fabBottomOffset(context) + tokens.spaceLarge;
     final double fabClearance =
-        fabBottomOffset + kTilawaMinInteractiveDimension + tokens.spaceLarge;
+        fabBottomOffset + kMeMuslimMinInteractiveDimension + tokens.spaceLarge;
 
     final double listBottomPadding =
         QuranPlayerWidget.shellFooterShowsMiniPlayer(context)

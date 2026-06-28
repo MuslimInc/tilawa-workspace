@@ -54,6 +54,6 @@ SupportTierVisual supportTierVisualFor(
 }
 
 /// Icon capsule diameter for tier cards.
-double supportTierIconCapsuleSize(TilawaDesignTokens tokens) {
+double supportTierIconCapsuleSize(MeMuslimDesignTokens tokens) {
   return tokens.minInteractiveDimension;
 }

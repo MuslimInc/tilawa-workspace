@@ -24,11 +24,6 @@ import 'cubit/main_screen_cubit.dart';
 import 'cubit/main_screen_state.dart';
 import 'widgets/main_bottom_overlay.dart';
 
-/// Flip to compare long-press bottom-nav selector patterns during UX review.
-const TilawaPhoneBottomNavLongPressMode _kPhoneBottomNavLongPressMode =
-    // TilawaPhoneBottomNavLongPressMode.radial;
-    TilawaPhoneBottomNavLongPressMode.verticalRight;
-
 /// Persistent shell with bottom navigation and the Quran mini-player.
 ///
 /// [child] is the active [GoRouter] shell route (home tabs or a pushed screen).
@@ -218,7 +213,15 @@ class _AppShellScreenState extends State<AppShellScreen> {
       return;
     }
 
-    _navigateToShellTab(context, destination.tabIndex!);
+    final int tabIndex = destination.tabIndex!;
+    final bool onMainShell = _isOnMainShell();
+
+    if (onMainShell && _mainScreenCubit.state.currentIndex == tabIndex) {
+      _mainScreenCubit.reselectTab(tabIndex);
+      return;
+    }
+
+    _navigateToShellTab(context, tabIndex);
   }
 
   void _onAdjacentDestinationSelected(
@@ -435,7 +438,6 @@ class _AppShellChrome extends StatelessWidget {
             selectedIndex: selectedIndex,
             onDestinationSelected: onDestinationSelected,
             onAdjacentDestinationSelected: onAdjacentDestinationSelected,
-            phoneBottomNavLongPressMode: _kPhoneBottomNavLongPressMode,
             phoneBottomNavigationBarVisible: bottomNavVisibility,
             phoneFooterAboveNav: shellFooterPlayer,
             bottomPlayer: MainBottomOverlay(

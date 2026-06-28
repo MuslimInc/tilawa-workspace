@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-/// Compact premium empty state for sections inside [TeacherDashboardScreen].
+/// Compact empty state for sections inside [TeacherDashboardScreen].
+///
+/// Uses [TilawaCard], [TilawaCompactListRow], and [TilawaIconBox] so inline
+/// empties match the shared Tilawa atom system (no clipped [TilawaStateVisual]).
 class TeacherDashboardInlineEmptyState extends StatelessWidget {
   const TeacherDashboardInlineEmptyState({
     super.key,
@@ -18,67 +21,69 @@ class TeacherDashboardInlineEmptyState extends StatelessWidget {
   final String? subtitle;
   final String? actionLabel;
   final VoidCallback? onAction;
+
+  /// Maps to [TilawaIconBox] [TilawaSemanticTint] via [_semanticTintForTone].
   final TilawaStateVisualTone iconTone;
+
+  static TilawaSemanticTint _semanticTintForTone(TilawaStateVisualTone tone) {
+    return switch (tone) {
+      TilawaStateVisualTone.primary => TilawaSemanticTint.ink,
+      TilawaStateVisualTone.secondary => TilawaSemanticTint.scholar,
+      TilawaStateVisualTone.tertiary => TilawaSemanticTint.gilding,
+      TilawaStateVisualTone.neutral => TilawaSemanticTint.parchment,
+      TilawaStateVisualTone.error => TilawaSemanticTint.caution,
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final scheme = theme.colorScheme;
+    final tokens = Theme.of(context).tokens;
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
         tokens.spaceLarge,
         0,
         tokens.spaceLarge,
-        tokens.spaceMedium,
+        tokens.spaceSmall,
       ),
       child: TilawaCard(
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: tokens.spaceLarge,
-            vertical: tokens.spaceExtraLarge,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TilawaStateVisual(
+        surface: TilawaCardSurface.flat,
+        padding: EdgeInsets.symmetric(
+          horizontal: tokens.spaceExtraSmall,
+          vertical: tokens.spaceExtraSmall,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TilawaCompactListRow(
+              leading: TilawaIconBox(
                 icon: icon,
-                tone: iconTone,
-                size: tokens.iconSizeExtraLarge + tokens.spaceLarge * 2,
+                variant: TilawaIconBoxVariant.tinted,
+                semanticTint: _semanticTintForTone(iconTone),
               ),
-              SizedBox(height: tokens.spaceMedium),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.titleSmall?.copyWith(
-                  color: scheme.onSurface,
-                  fontWeight: FontWeight.w700,
+              title: title,
+              subtitle: subtitle,
+            ),
+            if (actionLabel != null && onAction != null)
+              Padding(
+                padding: EdgeInsetsDirectional.only(
+                  start: tokens.spaceSmall,
+                  end: tokens.spaceSmall,
+                  bottom: tokens.spaceExtraSmall,
                 ),
-              ),
-              if (subtitle != null) ...[
-                SizedBox(height: tokens.spaceSmall),
-                Text(
-                  subtitle!,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                    height: 1.45,
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: TilawaButton(
+                    text: actionLabel!,
+                    leadingIcon: const Icon(Icons.edit_calendar_outlined),
+                    variant: TilawaButtonVariant.secondary,
+                    size: TilawaButtonSize.small,
+                    onPressed: onAction,
                   ),
                 ),
-              ],
-              if (actionLabel != null && onAction != null) ...[
-                SizedBox(height: tokens.spaceMedium),
-                TilawaButton(
-                  text: actionLabel!,
-                  leadingIcon: const Icon(Icons.edit_calendar_outlined),
-                  variant: TilawaButtonVariant.secondary,
-                  isFullWidth: true,
-                  onPressed: onAction,
-                ),
-              ],
-            ],
-          ),
+              ),
+          ],
         ),
       ),
     );

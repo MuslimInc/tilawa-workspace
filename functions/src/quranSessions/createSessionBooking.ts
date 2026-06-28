@@ -37,6 +37,7 @@ import {
   nowServer,
 } from "./sessionLifecycleService";
 import { sessionCallableHttpsOptions } from "./sessionCallableOptions";
+import { resolveQuranTutorBookingMode } from "./quranTutorBookingMode";
 
 interface CreateSessionBookingRequest {
   teacherId: string;
@@ -101,6 +102,7 @@ async function runPostBookingSideEffects(
     studentId: string;
     sessionId: string;
     bookingId: string;
+    lifecycleStatus: string;
   },
 ): Promise<void> {
   try {
@@ -108,17 +110,28 @@ async function runPostBookingSideEffects(
       db,
       input.teacherProfileId,
     );
-    await recordTerminalTransition(db, {
-      type: "booking_confirmed",
-      teacherId: teacherUserId,
-      studentId: input.studentId,
-    });
-    await enqueueSessionNotification(db, {
-      sessionId: input.sessionId,
-      aggregateId: input.bookingId,
-      kind: "bookingConfirmed",
-      recipientUserIds: [teacherUserId, input.studentId],
-    });
+    if (input.lifecycleStatus === "scheduled") {
+      await recordTerminalTransition(db, {
+        type: "booking_confirmed",
+        teacherId: teacherUserId,
+        studentId: input.studentId,
+      });
+      await enqueueSessionNotification(db, {
+        sessionId: input.sessionId,
+        aggregateId: input.bookingId,
+        kind: "bookingConfirmed",
+        recipientUserIds: [teacherUserId, input.studentId],
+      });
+      return;
+    }
+    if (input.lifecycleStatus === "pending_tutor_approval") {
+      await enqueueSessionNotification(db, {
+        sessionId: input.sessionId,
+        aggregateId: input.bookingId,
+        kind: "bookingRequestReceived",
+        recipientUserIds: [teacherUserId],
+      });
+    }
   } catch (error) {
     console.error(
       `createSessionBooking post-effects failed bookingId=${input.bookingId}:`,
@@ -237,7 +250,12 @@ async function handleCreateSessionBooking(
         const now = nowServer();
 
         const isFree = !pricing.isPaid;
-        const bookingAction = isFree ? "confirm_free_booking" : "initiate_payment";
+        const bookingMode = resolveQuranTutorBookingMode(platformConfig);
+        const bookingAction = isFree
+          ? bookingMode === "requiresTutorApproval"
+            ? "submit_booking_request"
+            : "confirm_free_booking"
+          : "initiate_payment";
         const draftGuard = validateTransition({
           currentStatus: null,
           action: "create_draft",
@@ -300,15 +318,21 @@ async function handleCreateSessionBooking(
           slotId: data.slotId,
           teacherId: data.teacherId,
           aggregateId: bookingRef.id,
-          lockType: lifecycleStatus === "scheduled" ? "hard" : "soft",
+          lockType:
+            lifecycleStatus === "scheduled" ||
+            lifecycleStatus === "pending_tutor_approval"
+              ? "hard"
+              : "soft",
           lockedAt: now,
           expiresAt:
             lifecycleStatus === "scheduled"
               ? Timestamp.fromDate(new Date("2099-01-01T00:00:00.000Z"))
-              : Timestamp.fromMillis(Date.now() + 10 * 60 * 1000),
+              : lifecycleStatus === "pending_tutor_approval"
+                ? startsAt
+                : Timestamp.fromMillis(Date.now() + 10 * 60 * 1000),
         });
 
-        tx.set(bookingRef, {
+        const bookingDoc: Record<string, unknown> = {
           bookingId: bookingRef.id,
           aggregateId: bookingRef.id,
           sessionId: sessionRef.id,
@@ -333,7 +357,15 @@ async function handleCreateSessionBooking(
           status: legacyStatusForLifecycle(lifecycleStatus),
           createdAt: now,
           updatedAt: now,
-        });
+        };
+        if (lifecycleStatus === "pending_tutor_approval") {
+          bookingDoc.approvalRequestedAt = now;
+          bookingDoc.approvalExpiresAt = startsAt;
+        }
+        if (isFree) {
+          bookingDoc.bookingModeAtCreation = bookingMode;
+        }
+        tx.set(bookingRef, bookingDoc);
 
         tx.set(sessionRef, {
           sessionId: sessionRef.id,
@@ -435,12 +467,17 @@ async function handleCreateSessionBooking(
       },
     );
 
-    if (!replayed && result.lifecycleStatus === "scheduled") {
+    if (
+      !replayed &&
+      (result.lifecycleStatus === "scheduled" ||
+        result.lifecycleStatus === "pending_tutor_approval")
+    ) {
       await runPostBookingSideEffects(db, {
         teacherProfileId: data.teacherId,
         studentId,
         sessionId: result.sessionId,
         bookingId: result.bookingId,
+        lifecycleStatus: result.lifecycleStatus,
       });
     }
 

@@ -62,8 +62,8 @@ void main() {
         extensions: [probe],
       );
 
-      expect(theme.extension<TilawaDesignTokens>(), isNotNull);
-      expect(theme.extension<TilawaComponentTokens>(), isNotNull);
+      expect(theme.extension<MeMuslimDesignTokens>(), isNotNull);
+      expect(theme.extension<MeMuslimComponentTokens>(), isNotNull);
       expect(theme.extension<_ProbeThemeExtension>()?.marker, 'probe');
     });
 
@@ -73,8 +73,8 @@ void main() {
         isDefaultPreset: true,
       );
 
-      expect(theme.extension<TilawaDesignTokens>(), isNotNull);
-      expect(theme.extension<TilawaComponentTokens>(), isNotNull);
+      expect(theme.extension<MeMuslimDesignTokens>(), isNotNull);
+      expect(theme.extension<MeMuslimComponentTokens>(), isNotNull);
       expect(theme.colorScheme.brightness, Brightness.dark);
     });
   });

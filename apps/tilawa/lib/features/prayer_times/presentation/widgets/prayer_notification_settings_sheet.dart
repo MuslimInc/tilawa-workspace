@@ -330,7 +330,7 @@ class _PermissionSetupCard extends StatelessWidget {
   });
 
   final VoidCallback onSetUp;
-  final TilawaDesignTokens tokens;
+  final MeMuslimDesignTokens tokens;
   final ThemeData theme;
 
   @override

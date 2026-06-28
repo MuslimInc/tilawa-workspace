@@ -52,7 +52,7 @@ class _AthkarItemWidgetState extends State<AthkarItemWidget> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
     final double bottomInset = context.systemBottomSafeArea;
     final bool isDone = widget.currentCount == 0;
@@ -133,7 +133,7 @@ class _AthkarDhikrTapCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     final BorderRadius radius = BorderRadius.circular(borderRadius);
 
     return ClipRRect(
@@ -207,7 +207,7 @@ class _AthkarTapFlash extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
     final BorderRadius radius = BorderRadius.circular(borderRadius);
 
@@ -338,7 +338,7 @@ class _AthkarDhikrText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
 
     return LayoutBuilder(
       builder: (context, constraints) {

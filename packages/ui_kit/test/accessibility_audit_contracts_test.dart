@@ -21,8 +21,8 @@ Widget _themed(Widget child) {
     theme: ThemeData(
       colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
       extensions: [
-        TilawaDesignTokens.light(),
-        TilawaComponentTokens.light(),
+        MeMuslimDesignTokens.light(),
+        MeMuslimComponentTokens.light(),
       ],
     ),
     home: Scaffold(body: Center(child: child)),
@@ -36,6 +36,25 @@ Color _expectedFeedbackBorder(ColorScheme scheme, TilawaFeedbackVariant v) {
     TilawaFeedbackVariant.warning => scheme.warning.withValues(alpha: 0.55),
     TilawaFeedbackVariant.error => scheme.error.withValues(alpha: 0.72),
   };
+}
+
+dynamic _semanticsForSurface(
+  WidgetTester tester,
+  Finder surface,
+) {
+  final semanticsFinder = find.descendant(
+    of: surface,
+    matching: find.byWidgetPredicate(
+      (Widget widget) {
+        if (widget is! Semantics) {
+          return false;
+        }
+        final String? label = widget.properties.label;
+        return label != null && label.isNotEmpty;
+      },
+    ),
+  );
+  return tester.getSemantics(semanticsFinder.first);
 }
 
 void main() {
@@ -73,8 +92,14 @@ void main() {
 
       final buttonFinder = find.widgetWithText(TextButton, 'Open settings');
       final size = tester.getSize(buttonFinder);
-      expect(size.width, greaterThanOrEqualTo(kTilawaMinInteractiveDimension));
-      expect(size.height, greaterThanOrEqualTo(kTilawaMinInteractiveDimension));
+      expect(
+        size.width,
+        greaterThanOrEqualTo(kMeMuslimMinInteractiveDimension),
+      );
+      expect(
+        size.height,
+        greaterThanOrEqualTo(kMeMuslimMinInteractiveDimension),
+      );
 
       final sem = tester.getSemantics(buttonFinder);
       expect(sem.flagsCollection.isButton, isTrue);
@@ -108,11 +133,11 @@ void main() {
       final tokens = theme.componentTokens.mediaPlayerBar;
       expect(
         tokens.controlButtonSize,
-        greaterThanOrEqualTo(kTilawaMinInteractiveDimension),
+        greaterThanOrEqualTo(kMeMuslimMinInteractiveDimension),
       );
       expect(
         tokens.playPauseButtonSize,
-        greaterThanOrEqualTo(kTilawaMinInteractiveDimension),
+        greaterThanOrEqualTo(kMeMuslimMinInteractiveDimension),
       );
 
       final transportButtons = find.descendant(
@@ -125,11 +150,11 @@ void main() {
         final box = element.renderObject! as RenderBox;
         expect(
           box.size.width,
-          greaterThanOrEqualTo(kTilawaMinInteractiveDimension),
+          greaterThanOrEqualTo(kMeMuslimMinInteractiveDimension),
         );
         expect(
           box.size.height,
-          greaterThanOrEqualTo(kTilawaMinInteractiveDimension),
+          greaterThanOrEqualTo(kMeMuslimMinInteractiveDimension),
         );
       }
     });
@@ -157,11 +182,11 @@ void main() {
       expect(box.hasSize, isTrue);
       expect(
         box.size.width,
-        greaterThanOrEqualTo(kTilawaMinInteractiveDimension),
+        greaterThanOrEqualTo(kMeMuslimMinInteractiveDimension),
       );
       expect(
         box.size.height,
-        greaterThanOrEqualTo(kTilawaMinInteractiveDimension),
+        greaterThanOrEqualTo(kMeMuslimMinInteractiveDimension),
       );
 
       final sem = tester.getSemantics(find.byType(TilawaIconToggle));
@@ -187,11 +212,11 @@ void main() {
       );
 
       Future<void> checkSegment(String label, {required bool selected}) async {
-        final f = find.ancestor(
+        final surface = find.ancestor(
           of: find.text(label),
           matching: find.byType(TilawaInteractiveSurface),
         );
-        final sem = tester.getSemantics(f.first);
+        final sem = _semanticsForSurface(tester, surface);
         expect(sem.flagsCollection.isButton, isTrue);
         if (selected) {
           expect(sem.flagsCollection.isSelected, Tristate.isTrue);
@@ -290,7 +315,10 @@ void main() {
         ),
       );
 
-      final sem = tester.getSemantics(find.byType(TilawaInteractiveSurface));
+      final sem = _semanticsForSurface(
+        tester,
+        find.byType(TilawaInteractiveSurface),
+      );
       expect(sem.flagsCollection.isSelected, Tristate.isTrue);
       expect(sem.flagsCollection.isButton, isTrue);
       expect(sem.label, isNotEmpty);

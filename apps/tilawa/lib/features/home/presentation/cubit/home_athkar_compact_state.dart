@@ -44,3 +44,16 @@ final class HomeAthkarCompactState extends Equatable {
   @override
   List<Object?> get props => [status, rows];
 }
+
+/// First incomplete daily athkar row, or the first row when all are done.
+HomeAthkarRowState? urgentHomeAthkarRow(HomeAthkarCompactState state) {
+  if (state.status != HomeAthkarRowStatus.ready || state.rows.isEmpty) {
+    return null;
+  }
+  for (final HomeAthkarRowState row in state.rows) {
+    if (row.completion != HomeAthkarCompletionState.done) {
+      return row;
+    }
+  }
+  return state.rows.first;
+}

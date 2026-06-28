@@ -92,6 +92,17 @@ class QuranSessionsLifecycleModule {
     sl.registerLazySingletonIfAbsent<GetSessionTimelineUseCase>(
       () => GetSessionTimelineUseCase(sl<AuditRepository>()),
     );
+    sl.registerLazySingletonIfAbsent<GetSessionAggregateUseCase>(
+      () => GetSessionAggregateUseCase(sl<SessionAggregateRepository>()),
+    );
+    if (authSession != null) {
+      sl.registerLazySingletonIfAbsent<ResolveSessionActorRoleUseCase>(
+        () => ResolveSessionActorRoleUseCase(
+          authSession: authSession,
+          teacherProfileRepository: sl<TeacherProfileRepository>(),
+        ),
+      );
+    }
 
     if (mutationGateway != null && authSession != null) {
       sl.registerLazySingletonIfAbsent<SessionMutationGateway>(
@@ -134,6 +145,9 @@ class QuranSessionsLifecycleModule {
       );
       sl.registerLazySingletonIfAbsent<OpenSessionDisputeUseCase>(
         () => OpenSessionDisputeUseCase(gateway: mutationGateway),
+      );
+      sl.registerLazySingletonIfAbsent<RespondToBookingRequestUseCase>(
+        () => RespondToBookingRequestUseCase(mutationGateway),
       );
     }
   }

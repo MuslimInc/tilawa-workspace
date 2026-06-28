@@ -5,7 +5,7 @@
 
 ## Foundation
 
-- [x] **T-001**: Trim `packages/ui_kit/lib/src/foundation/app_colors.dart` to brand presets, neutral ramps, `AppTheme` scheme bases, semantics, and `notificationAccent`. Remove `settings*` per-category palette (11 colours), `profileGradientStart/End`, `logoutBackground`, `settingsCardShadow`, and `divider` alias. Keep `primaryCyan` / `primaryGreen` / `primaryPurple` as aliases for saved-theme migration.
+- [x] **T-001**: Trim `packages/ui_kit/lib/src/foundation/app_colors.dart` to brand presets, neutral ramps, `AppTheme` scheme bases, semantics, and `notificationAccent`. Remove `settings*` per-category palette (11 colours), `profileGradientStart/End`, `logoutBackground`, `settingsCardShadow`, and `divider` alias. Keep `primaryCyan` / `primaryGreen` as aliases for saved-theme migration; purple migrates to `brandGreen`.
 - [x] **T-002**: No changes to `TilawaDesignTokens`. Keep `opacityGlass` / `blurGlass` (still used by `tilawa_glass_panel` — out of scope).
 - [x] **T-003**: No changes to `AppTheme`. The colour-scheme assembly already reads from the kept primitives.
 

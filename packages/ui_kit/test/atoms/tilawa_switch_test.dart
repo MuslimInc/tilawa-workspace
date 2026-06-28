@@ -8,7 +8,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+        theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
         home: Scaffold(
           body: Center(
             child: TilawaSwitch(value: true, onChanged: (_) {}),
@@ -18,8 +18,8 @@ void main() {
     );
 
     final size = tester.getSize(find.byType(TilawaSwitch));
-    expect(size.width, kTilawaMinInteractiveDimension);
-    expect(size.height, kTilawaMinInteractiveDimension);
+    expect(size.width, kMeMuslimMinInteractiveDimension);
+    expect(size.height, kMeMuslimMinInteractiveDimension);
   });
 
   testWidgets('TilawaSwitch layoutSlotHeight keeps row slot compact', (
@@ -29,7 +29,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+        theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
         home: Scaffold(
           body: Center(
             child: TilawaSwitch(
@@ -43,7 +43,7 @@ void main() {
     );
 
     final size = tester.getSize(find.byType(TilawaSwitch));
-    expect(size.width, kTilawaMinInteractiveDimension);
+    expect(size.width, kMeMuslimMinInteractiveDimension);
     expect(size.height, slotHeight);
 
     final hitTarget = tester.widget<SizedBox>(
@@ -52,10 +52,10 @@ void main() {
         matching: find.byWidgetPredicate(
           (widget) =>
               widget is SizedBox &&
-              widget.height == kTilawaMinInteractiveDimension,
+              widget.height == kMeMuslimMinInteractiveDimension,
         ),
       ),
     );
-    expect(hitTarget.height, kTilawaMinInteractiveDimension);
+    expect(hitTarget.height, kMeMuslimMinInteractiveDimension);
   });
 }

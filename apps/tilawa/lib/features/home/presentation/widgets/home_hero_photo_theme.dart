@@ -53,13 +53,9 @@ abstract final class HomeHeroPhotoTheme {
 
   /// Representative fill for status-bar contrast and [Material] underlay.
   static Color collapsedBarSampleColor(
-    TilawaCapabilityActionCardTokens capabilityCardTokens,
+    TilawaHomeScreenTokens screenTokens,
   ) {
-    return Color.lerp(
-      capabilityCardTokens.gradientStart,
-      capabilityCardTokens.gradientEnd,
-      0.35,
-    )!;
+    return screenTokens.homeCollapsedHeaderFill;
   }
 
   /// Status bar icons when the hero is fully pinned on primary.
@@ -71,17 +67,25 @@ abstract final class HomeHeroPhotoTheme {
         : SystemUiOverlayStyle.light;
   }
 
-  /// Premium wash for the pinned hero bar — matches [HomePremiumSectionShell].
+  /// Premium wash for the pinned hero bar — canvas-aware frosted surface.
   static BoxDecoration collapsedBarSurfaceDecoration({
     required ColorScheme colorScheme,
-    required TilawaDesignTokens tokens,
-    required TilawaCapabilityActionCardTokens capabilityCardTokens,
+    required MeMuslimDesignTokens tokens,
+    required TilawaHomeScreenTokens screenTokens,
   }) {
     return BoxDecoration(
-      gradient: capabilityCardTokens.backgroundGradient(),
+      color: screenTokens.homeCollapsedHeaderFill,
+      border: Border(
+        bottom: BorderSide(
+          color: screenTokens.homeCollapsedHeaderBorder,
+          width: tokens.borderWidthThin,
+        ),
+      ),
       boxShadow: <BoxShadow>[
         BoxShadow(
-          color: colorScheme.shadow.withValues(alpha: tokens.opacityShadow),
+          color: colorScheme.shadow.withValues(
+            alpha: screenTokens.homeCollapsedHeaderShadowOpacity,
+          ),
           offset: tokens.shadowOffsetSmall,
           blurRadius: tokens.spaceSmall.toDouble(),
         ),
@@ -114,7 +118,7 @@ abstract final class HomeHeroPhotoTheme {
   /// Location chip on the pinned premium toolbar.
   static BoxDecoration collapsedLocationChipDecoration({
     required ColorScheme colorScheme,
-    required TilawaDesignTokens tokens,
+    required MeMuslimDesignTokens tokens,
   }) {
     return BoxDecoration(
       color: colorScheme.onSurface.withValues(alpha: 0.05),
@@ -128,7 +132,7 @@ abstract final class HomeHeroPhotoTheme {
   /// Countdown pill on the pinned premium toolbar.
   static BoxDecoration collapsedCountdownChipDecoration({
     required ColorScheme colorScheme,
-    required TilawaDesignTokens tokens,
+    required MeMuslimDesignTokens tokens,
   }) {
     return BoxDecoration(
       color: colorScheme.semanticTintBackground(TilawaSemanticTint.gilding),
@@ -156,7 +160,7 @@ abstract final class HomeHeroPhotoTheme {
 
   static List<Shadow> textShadows(
     Color foreground,
-    TilawaDesignTokens tokens, {
+    MeMuslimDesignTokens tokens, {
     required Color shadowColor,
   }) {
     if (foreground.computeLuminance() > 0.45) {
@@ -174,7 +178,7 @@ abstract final class HomeHeroPhotoTheme {
   static TextStyle? labelStyle(
     TextStyle? base,
     Color color, {
-    required TilawaDesignTokens tokens,
+    required MeMuslimDesignTokens tokens,
     required ColorScheme colorScheme,
     FontWeight fontWeight = FontWeight.w500,
   }) {
@@ -192,7 +196,7 @@ abstract final class HomeHeroPhotoTheme {
   static TextStyle? titleStyle(
     TextStyle? base,
     Color color, {
-    required TilawaDesignTokens tokens,
+    required MeMuslimDesignTokens tokens,
     required ColorScheme colorScheme,
     FontWeight fontWeight = FontWeight.w700,
   }) {

@@ -27,6 +27,8 @@ class HomeListeningResumeRow extends StatelessWidget {
           family: TilawaRadiusFamily.hero,
         );
 
+        final BorderRadius borderRadius = BorderRadius.circular(radius);
+
         return Semantics(
           button: true,
           label: context.l10n.continueListening,
@@ -34,12 +36,16 @@ class HomeListeningResumeRow extends StatelessWidget {
             state.reciterName!,
             state.surahName!,
           ),
-          child: Material(
-            color: colorScheme.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(radius),
-            child: InkWell(
-              onTap: () => _resumePlayback(context, state),
-              borderRadius: BorderRadius.circular(radius),
+          child: TilawaInteractiveSurface(
+            button: false,
+            onTap: () => _resumePlayback(context, state),
+            borderRadius: borderRadius,
+            stateLayerColor: colorScheme.primary,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerLow,
+                borderRadius: borderRadius,
+              ),
               child: Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: tokens.spaceMedium,

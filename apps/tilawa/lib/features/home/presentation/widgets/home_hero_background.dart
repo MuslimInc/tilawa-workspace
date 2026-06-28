@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import 'home_hero_photo_theme.dart';
-
 /// Prayer-period gradient hero surface with optional bottom wave clip.
 class HomeHeroBackground extends StatelessWidget {
   const HomeHeroBackground({
     super.key,
     required this.heroTokens,
+    required this.screenTokens,
     this.waveAmplitude = 0,
   });
 
   final TilawaHomeNextPrayerHeroTokens heroTokens;
+  final TilawaHomeScreenTokens screenTokens;
 
   /// Scallop depth at the hero bottom; 0 keeps a flat edge.
   final double waveAmplitude;
@@ -35,18 +35,18 @@ class HomeHeroBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-    final TilawaProductColors product = theme.productColors;
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final bool lightPhase =
         heroTokens.gradientBottomEnd.computeLuminance() > 0.45;
-    final Color patternInk = HomeHeroPhotoTheme.heroChromeInk(heroTokens);
+    final Color patternInk = screenTokens.homeHeroPatternInk;
+    final Color watermarkInk = screenTokens.homePrayerHeroWatermark;
 
     final Widget gradientStack = Stack(
       fit: StackFit.expand,
       children: [
         DecoratedBox(
           decoration: BoxDecoration(
-            gradient: _resolveBackgroundGradient(heroTokens, product),
+            gradient: _resolveBackgroundGradient(heroTokens),
           ),
         ),
         if (lightPhase)
@@ -56,13 +56,34 @@ class HomeHeroBackground extends StatelessWidget {
                 center: AlignmentDirectional.topCenter,
                 radius: 1.05,
                 colors: <Color>[
-                  product.featuredGradientStart.withValues(alpha: 0.11),
+                  (heroTokens.gradientMidStop ?? heroTokens.gradientTopStart)
+                      .withValues(alpha: screenTokens.homeHeroGoldGlowOpacity),
                   Colors.transparent,
                 ],
                 stops: const <double>[0, 0.78],
               ),
             ),
           ),
+        TilawaIslamicPatternOverlay(
+          color: patternInk,
+          opacity: screenTokens.homeHeroPatternOpacity,
+          cellSize: tokens.spaceExtraLarge,
+        ),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: RadialGradient(
+              center: AlignmentDirectional.centerStart,
+              radius: 0.9,
+              colors: <Color>[
+                heroTokens.gradientTopStart.withValues(
+                  alpha: lightPhase ? 0.18 : 0.05,
+                ),
+                Colors.transparent,
+              ],
+              stops: const <double>[0, 0.72],
+            ),
+          ),
+        ),
         DecoratedBox(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -82,13 +103,29 @@ class HomeHeroBackground extends StatelessWidget {
           ),
         ),
         PositionedDirectional(
-          end: -tokens.spaceExtraLarge,
-          top: tokens.spaceLarge,
+          end: -tokens.spaceMedium,
+          bottom: -tokens.spaceSmall,
           child: IgnorePointer(
-            child: Icon(
-              Icons.mosque_outlined,
-              size: tokens.iconSizeExtraLarge * 2.2,
-              color: patternInk.withValues(alpha: lightPhase ? 0.06 : 0.10),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: <Color>[
+                    watermarkInk.withValues(
+                      alpha: screenTokens.homePrayerHeroWatermarkOpacity * 0.45,
+                    ),
+                    Colors.transparent,
+                  ],
+                  stops: const <double>[0, 0.72],
+                ),
+              ),
+              child: Icon(
+                Icons.mosque_outlined,
+                size: tokens.iconSizeExtraLarge * 2.8,
+                color: watermarkInk.withValues(
+                  alpha: screenTokens.homePrayerHeroWatermarkOpacity * 0.85,
+                ),
+              ),
             ),
           ),
         ),
@@ -113,7 +150,6 @@ class HomeHeroBackground extends StatelessWidget {
   /// Three-stop phase gradient with a restrained gold mid accent.
   static LinearGradient _resolveBackgroundGradient(
     TilawaHomeNextPrayerHeroTokens heroTokens,
-    TilawaProductColors product,
   ) {
     if (heroTokens.gradientTopStart == heroTokens.gradientBottomEnd) {
       return LinearGradient(
@@ -140,19 +176,12 @@ class HomeHeroBackground extends StatelessWidget {
             heroTokens.gradientBottomEnd,
             0.5,
           )!;
-    final double goldMix = lightPhase ? 0.14 : 0.08;
-    final Color accentMid = Color.lerp(
-      midStop,
-      product.featuredGradientStart,
-      goldMix,
-    )!;
-
     return LinearGradient(
       begin: AlignmentDirectional.topCenter,
       end: AlignmentDirectional.bottomCenter,
       colors: <Color>[
         heroTokens.gradientTopStart,
-        accentMid,
+        midStop,
         heroTokens.gradientBottomEnd,
       ],
       stops: const <double>[0, 0.42, 1],

@@ -5,6 +5,7 @@ import { QuranSessionsUsersFacade } from './quran-sessions-users.facade';
 import {
   ListQuranSessionsUsersUseCase,
   ModerateQuranSessionsUserUseCase,
+  SetUserTeacherApplicationAccessUseCase,
 } from '../../domain/usecases/quran-sessions-user.usecases';
 import { QS_USER_DEFAULT_SORT } from '../../domain/entities/quran-sessions-user.entity';
 import { QuranSessionsAccountStatus } from '../../domain/entities/quran-sessions-user.entity';
@@ -13,6 +14,7 @@ describe('QuranSessionsUsersFacade', () => {
   let facade: QuranSessionsUsersFacade;
   const listUseCase = { execute: vi.fn() };
   const moderateUseCase = { execute: vi.fn() };
+  const teacherApplyUseCase = { execute: vi.fn() };
 
   beforeEach(() => {
     listUseCase.execute.mockReset();
@@ -21,6 +23,10 @@ describe('QuranSessionsUsersFacade', () => {
         QuranSessionsUsersFacade,
         { provide: ListQuranSessionsUsersUseCase, useValue: listUseCase },
         { provide: ModerateQuranSessionsUserUseCase, useValue: moderateUseCase },
+        {
+          provide: SetUserTeacherApplicationAccessUseCase,
+          useValue: teacherApplyUseCase,
+        },
       ],
     });
     facade = TestBed.inject(QuranSessionsUsersFacade);

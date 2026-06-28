@@ -12,18 +12,12 @@ import {
   SessionDisputeFilters,
   SessionDisputeSummary,
 } from '../../domain/entities/session-dispute-summary.entity';
-import {
-  DEFAULT_PAGE_SIZE,
-  PageRequest,
-  PageResult,
-} from '../../domain/entities/pagination.types';
+import { DEFAULT_PAGE_SIZE, PageRequest, PageResult } from '../../domain/entities/pagination.types';
 import { SessionDisputeReadRepository } from '../../domain/repositories/session-dispute-read.repository';
 import { fetchPaginatedList } from '../firestore/firestore-list-query.util';
 
 @Injectable({ providedIn: 'root' })
-export class FirebaseSessionDisputeReadRepository
-  implements SessionDisputeReadRepository
-{
+export class FirebaseSessionDisputeReadRepository implements SessionDisputeReadRepository {
   private readonly firestore = inject(Firestore);
 
   async list(
@@ -31,7 +25,7 @@ export class FirebaseSessionDisputeReadRepository
     page: PageRequest,
   ): Promise<PageResult<SessionDisputeSummary>> {
     const pageSize = page.pageSize || DEFAULT_PAGE_SIZE;
-    const serverFilters = this.buildQueryConstraints(filters);
+    const serverFilters = buildSessionDisputeQueryConstraints(filters);
 
     const result = await fetchPaginatedList({
       firestore: this.firestore,
@@ -41,10 +35,7 @@ export class FirebaseSessionDisputeReadRepository
       defaultSort: SESSION_DISPUTE_DEFAULT_SORT,
       allowedSortFields: SESSION_DISPUTE_SORT_FIELDS,
       mapDoc: (id, data) =>
-        SessionDisputeMapper.fromFirestore(
-          id,
-          data as SessionDisputeFirestoreDto,
-        ),
+        SessionDisputeMapper.fromFirestore(id, data as SessionDisputeFirestoreDto),
     });
 
     const items = this.applyClientFilters(result.items, filters);
@@ -52,26 +43,11 @@ export class FirebaseSessionDisputeReadRepository
   }
 
   async getById(disputeId: string): Promise<SessionDisputeSummary | null> {
-    const snap = await getDoc(
-      doc(this.firestore, QuranSessionsPaths.sessionDisputes, disputeId),
-    );
+    const snap = await getDoc(doc(this.firestore, QuranSessionsPaths.sessionDisputes, disputeId));
     if (!snap.exists()) {
       return null;
     }
-    return SessionDisputeMapper.fromFirestore(
-      snap.id,
-      snap.data() as SessionDisputeFirestoreDto,
-    );
-  }
-
-  private buildQueryConstraints(filters: SessionDisputeFilters) {
-    const constraints: ReturnType<typeof where>[] = [];
-
-    if (filters.status) {
-      constraints.push(where('status', '==', filters.status));
-    }
-
-    return constraints;
+    return SessionDisputeMapper.fromFirestore(snap.id, snap.data() as SessionDisputeFirestoreDto);
   }
 
   private applyClientFilters(
@@ -92,4 +68,20 @@ export class FirebaseSessionDisputeReadRepository
         (item.sessionId?.toLowerCase().includes(search) ?? false),
     );
   }
+}
+
+/**
+ * Server-side query constraints for the disputes queue. Exported for
+ * query-contract tests. `search` stays client-side (current page only).
+ */
+export function buildSessionDisputeQueryConstraints(
+  filters: SessionDisputeFilters,
+): ReturnType<typeof where>[] {
+  const constraints: ReturnType<typeof where>[] = [];
+
+  if (filters.status) {
+    constraints.push(where('status', '==', filters.status));
+  }
+
+  return constraints;
 }

@@ -11,6 +11,7 @@ import {
   AdminSessionDetailVm,
   CallEventVm,
   CallTrackingVm,
+  SessionParticipantsVm,
 } from '../../../core/data/view-models/quran-sessions.view-model';
 
 function detailVm(overrides: Partial<AdminSessionDetailVm> = {}): AdminSessionDetailVm {
@@ -60,6 +61,41 @@ function callVm(overrides: Partial<CallTrackingVm> = {}): CallTrackingVm {
   };
 }
 
+function participantsVm(
+  overrides: Partial<SessionParticipantsVm> = {},
+): SessionParticipantsVm {
+  return {
+    teacher: {
+      loadState: 'loaded',
+      teacherId: 'teacher-1',
+      userId: 'user-teacher',
+      displayName: 'Ustad Ahmad',
+      verificationStatus: 'verified',
+      profileCompleteness: 'complete',
+      isActive: true,
+      isPubliclyVisible: true,
+      accountStatus: 'active',
+      matchesSession: true,
+      sessionJoinStatus: 'joined',
+      ...overrides.teacher,
+    },
+    student: {
+      loadState: 'loaded',
+      studentId: 'student-1',
+      displayName: 'Fatima',
+      email: 'fatima@example.com',
+      accountStatus: 'active',
+      profileCompleted: true,
+      canApplyAsTeacher: true,
+      matchesSession: true,
+      sessionJoinStatus: 'not_joined_yet',
+      ...overrides.student,
+    },
+    callPhase: 'waiting',
+    ...overrides,
+  };
+}
+
 /** Minimal signal-backed stand-in for the facade surface the component reads. */
 function makeFakeFacade() {
   const detail = signal<AdminSessionDetailVm | null>(detailVm());
@@ -68,6 +104,7 @@ function makeFakeFacade() {
   const callEvents = signal<CallEventVm[]>([]);
   const callEventsLoadState = signal<'idle' | 'loading' | 'success' | 'error'>('idle');
   const canLoadMoreCallEvents = signal(false);
+  const sessionParticipants = signal<SessionParticipantsVm | null>(participantsVm());
 
   return {
     // signals the component aliases
@@ -80,6 +117,7 @@ function makeFakeFacade() {
     callEvents,
     callEventsLoadState,
     canLoadMoreCallEvents,
+    sessionParticipants,
     isActionLoading: signal(false),
     // spied methods
     loadDetail: vi.fn().mockResolvedValue(undefined),
@@ -127,6 +165,102 @@ describe('SessionDetailComponent — call tracking', () => {
 
   it('loads the detail (and its aggregated summary) on init', () => {
     expect(facade.loadDetail).toHaveBeenCalledWith('booking-1');
+  });
+
+  it('renders teacher and student participant info', () => {
+    const body = text();
+    expect(body).toContain('sessionDetail_participants');
+    expect(body).toContain('Ustad Ahmad');
+    expect(body).toContain('Fatima');
+    expect(body).toContain('teacher-1');
+    expect(body).toContain('student-1');
+  });
+
+  it('shows warning when teacher profile is missing', () => {
+    facade.sessionParticipants.set(
+      participantsVm({
+        teacher: {
+          loadState: 'not_found',
+          teacherId: 'teacher-1',
+          userId: null,
+          displayName: null,
+          verificationStatus: null,
+          profileCompleteness: null,
+          isActive: null,
+          isPubliclyVisible: null,
+          accountStatus: null,
+          matchesSession: false,
+          sessionJoinStatus: 'not_available',
+        },
+      }),
+    );
+    fixture.detectChanges();
+    expect(text()).toContain('sessionDetail_teacherNotFound');
+  });
+
+  it('shows warning when student profile is missing', () => {
+    facade.sessionParticipants.set(
+      participantsVm({
+        student: {
+          loadState: 'not_found',
+          studentId: 'student-1',
+          displayName: null,
+          email: null,
+          accountStatus: null,
+          profileCompleted: null,
+          canApplyAsTeacher: null,
+          matchesSession: false,
+          sessionJoinStatus: 'not_available',
+        },
+      }),
+    );
+    fixture.detectChanges();
+    expect(text()).toContain('sessionDetail_studentNotFound');
+  });
+
+  it('shows suspended teacher and blocked student statuses', () => {
+    facade.sessionParticipants.set(
+      participantsVm({
+        teacher: {
+          loadState: 'loaded',
+          teacherId: 'teacher-1',
+          userId: 'user-teacher',
+          displayName: 'Suspended Teacher',
+          verificationStatus: 'verified',
+          profileCompleteness: 'complete',
+          isActive: false,
+          isPubliclyVisible: false,
+          accountStatus: 'suspended',
+          matchesSession: true,
+          sessionJoinStatus: 'no_show',
+        },
+        student: {
+          loadState: 'loaded',
+          studentId: 'student-1',
+          displayName: 'Blocked Student',
+          email: 'b@example.com',
+          accountStatus: 'blocked',
+          profileCompleted: true,
+          canApplyAsTeacher: false,
+          matchesSession: true,
+          sessionJoinStatus: 'did_not_join',
+        },
+      }),
+    );
+    fixture.detectChanges();
+    const body = text();
+    expect(body).toContain('Suspended Teacher');
+    expect(body).toContain('Blocked Student');
+    expect(body).toContain('status_suspended');
+    expect(body).toContain('status_blocked');
+    expect(body).toContain('status_no_show');
+  });
+
+  it('renders participant account links', () => {
+    const links = fixture.nativeElement.querySelectorAll('a[href]');
+    const hrefs = [...links].map((a: HTMLAnchorElement) => a.getAttribute('href'));
+    expect(hrefs).toContain('/quran-sessions/wallets/user-teacher');
+    expect(hrefs).toContain('/quran-sessions/wallets/student-1');
   });
 
   it('renders the aggregated call-tracking metrics', () => {

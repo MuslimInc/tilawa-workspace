@@ -46,8 +46,12 @@ void main() {
       expect(rtc.isAgoraEnabled, isTrue);
       expect(rtc.agoraAppId, kStagingAgoraAppId);
       expect(
-        resolveVoiceVideoProviderHint(config, debugMode: false),
-        SessionCallProviderKind.mock,
+        resolveVoiceVideoProviderHint(
+          config,
+          distribution: 'staging',
+          debugMode: false,
+        ),
+        SessionCallProviderKind.agora,
       );
       expect(
         resolveRtcLaunchConfig(
@@ -127,6 +131,26 @@ void main() {
           debugMode: false,
         ),
         SessionCallProviderKind.mock,
+      );
+    },
+  );
+
+  test('resolveQuranTutorBookingModeHint uses Firestore when set', () {
+    expect(
+      resolveQuranTutorBookingModeHint(
+        firestoreModeRaw: 'autoConfirm',
+        distribution: 'play_production',
+      ),
+      QuranTutorBookingMode.autoConfirm,
+    );
+  });
+
+  test(
+    'resolveQuranTutorBookingModeHint defaults play_production to approval',
+    () {
+      expect(
+        resolveQuranTutorBookingModeHint(distribution: 'play_production'),
+        QuranTutorBookingMode.requiresTutorApproval,
       );
     },
   );

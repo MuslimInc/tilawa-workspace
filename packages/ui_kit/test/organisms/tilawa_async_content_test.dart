@@ -8,7 +8,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+        theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
         home: Scaffold(
           body: TilawaAsyncContent(
             state: TilawaAsyncContentState.loading,
@@ -26,7 +26,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+        theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
         home: Scaffold(
           body: TilawaAsyncContent(
             state: TilawaAsyncContentState.loading,
@@ -48,8 +48,8 @@ void main() {
       MaterialApp(
         theme: ThemeData(
           extensions: [
-            TilawaDesignTokens.light(),
-            TilawaComponentTokens.light(),
+            MeMuslimDesignTokens.light(),
+            MeMuslimComponentTokens.light(),
           ],
         ),
         home: Scaffold(
@@ -68,8 +68,8 @@ void main() {
       MaterialApp(
         theme: ThemeData(
           extensions: [
-            TilawaDesignTokens.light(),
-            TilawaComponentTokens.light(),
+            MeMuslimDesignTokens.light(),
+            MeMuslimComponentTokens.light(),
           ],
         ),
         home: Scaffold(
@@ -94,8 +94,8 @@ void main() {
       MaterialApp(
         theme: ThemeData(
           extensions: [
-            TilawaDesignTokens.light(),
-            TilawaComponentTokens.light(),
+            MeMuslimDesignTokens.light(),
+            MeMuslimComponentTokens.light(),
           ],
         ),
         home: Scaffold(
@@ -115,7 +115,7 @@ void main() {
   testWidgets('TilawaAsyncContent shows content builder', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+        theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
         home: Scaffold(
           body: TilawaAsyncContent(
             state: TilawaAsyncContentState.content,

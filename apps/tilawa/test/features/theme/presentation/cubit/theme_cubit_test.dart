@@ -84,21 +84,24 @@ void main() {
 
   group('new schema restore', () {
     test(
-      'preset source with valid preset id restores canonical preset color',
+      'legacy brown preset id migrates to brand green',
       () {
         final restored = cubit.fromJson({
           'mode': 'light',
           'primaryColor': const Color(0xFF000000).toARGB32(),
           'primaryColorSource': 'preset',
-          'primaryPresetId': PrimaryColorPreset.brown.id,
+          'primaryPresetId': PrimaryColorPreset.legacyBrownPresetId,
           'useSystemTheme': false,
           'preset': AppThemePreset.defaultMode.name,
         });
 
         expect(restored, isNotNull);
         expect(restored!.primaryColorSource, PrimaryColorSource.preset);
-        expect(restored.primaryPresetId, PrimaryColorPreset.brown.id);
-        expect(restored.primaryColorArgb, PrimaryColorPreset.brown.valueArgb);
+        expect(restored.primaryPresetId, PrimaryColorPreset.brandGreen.id);
+        expect(
+          restored.primaryColorArgb,
+          PrimaryColorPreset.brandGreen.valueArgb,
+        );
       },
     );
 

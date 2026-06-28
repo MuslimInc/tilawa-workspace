@@ -36,7 +36,7 @@ Widget _buildSubject(
   MushafPageRenderer pageRenderer = const _FakeMushafPageRenderer(),
 }) {
   return MaterialApp(
-    theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+    theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
     home: Scaffold(
       body: Center(
         child: OverflowBox(

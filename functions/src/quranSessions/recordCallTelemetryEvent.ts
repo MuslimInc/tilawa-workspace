@@ -1,5 +1,5 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
-import { getFirestore } from "firebase-admin/firestore";
+import { getFirestore, Timestamp } from "firebase-admin/firestore";
 
 import {
   recordCallTelemetryEventInTransaction,
@@ -11,7 +11,10 @@ import {
   requireParticipantOrAdmin,
   requireValidSessionEpochUnlessAdmin,
 } from "./sessionAuth";
-import { resolveTeacherProfileUserId } from "./teacherProfileUserId";
+import {
+  resolveTeacherProfileUserId,
+  teacherUserIdFromDenormalizedSessionData,
+} from "./teacherProfileUserId";
 import { sessionCallableHttpsOptions } from "./sessionCallableOptions";
 
 const VALID_EVENT_TYPES = new Set<CallTelemetryEventType>([
@@ -81,12 +84,22 @@ export const recordCallTelemetryEvent = onCall(
     const session = sessionSnap.data() ?? {};
     const studentId = (session.studentId as string | undefined) ?? "";
     const teacherId = (session.teacherId as string | undefined) ?? "";
-    const teacherUserId = await resolveTeacherProfileUserId(db, teacherId);
+    // Prefer the denormalized `teacherUserId` on the session doc (written by
+    // createSessionBooking + createAdminTestQuranSession since P2.9) to avoid a
+    // redundant teacher_profiles doc read on every telemetry event. Fall back
+    // to a profile lookup only for legacy sessions that predate the field.
+    const teacherUserId =
+      teacherUserIdFromDenormalizedSessionData(session) ??
+      (await resolveTeacherProfileUserId(db, teacherId));
 
-    const { actor } = requireParticipantOrAdmin(request, {
-      studentId,
-      teacherId,
-    }, teacherUserId);
+    const { actor } = requireParticipantOrAdmin(
+      request,
+      {
+        studentId,
+        teacherId,
+      },
+      teacherUserId,
+    );
     if (actor !== data.actorRole) {
       throw new HttpsError("permission-denied", "actorRole mismatch.");
     }
@@ -105,6 +118,14 @@ export const recordCallTelemetryEvent = onCall(
           remoteParticipantId: data.remoteParticipantId,
           networkQuality: data.networkQuality,
           metadata: data.metadata,
+          resolvedStudentId: studentId,
+          resolvedTeacherUserId: teacherUserId,
+          // Pass the session data already fetched for auth so the transaction
+          // can skip a redundant `tx.get(sessionRef)` read.
+          prefetchedSession: {
+            bookingId: (session.bookingId as string | undefined) ?? "",
+            startsAt: session.startsAt as Timestamp | undefined,
+          },
         },
         Date.now(),
       );

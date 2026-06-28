@@ -23,10 +23,10 @@ class PinnedAthkarHomeSection extends StatelessWidget {
     this.hideContextualFeatured = false,
     this.hideHeader = false,
     this.layoutMode = HomeLayoutMode.list,
+    this.excludeCategoryId,
   });
 
-  /// When true, the contextual featured card is omitted (shown above this
-  /// widget in [HomeDailyPracticeSection] instead).
+  /// When true, the contextual featured card is omitted (parent may show it).
   final bool hideContextualFeatured;
 
   /// When true, the "Rituals" sub-header and edit button are omitted because
@@ -34,6 +34,10 @@ class PinnedAthkarHomeSection extends StatelessWidget {
   final bool hideHeader;
 
   final HomeLayoutMode layoutMode;
+
+  /// Omits one category from the quick-access list (e.g. when Home primary
+  /// action already surfaces the same athkar).
+  final int? excludeCategoryId;
 
   @override
   Widget build(BuildContext context) {
@@ -71,6 +75,7 @@ class PinnedAthkarHomeSection extends StatelessWidget {
                 onEdit: () => showPinnedAthkarPicker(context),
                 hideContextualFeatured: hideContextualFeatured,
                 layoutMode: layoutMode,
+                excludeCategoryId: excludeCategoryId,
               ),
           ],
         );
@@ -130,12 +135,14 @@ class _PinnedAthkarQuickAccess extends StatelessWidget {
     required this.onEdit,
     required this.layoutMode,
     this.hideContextualFeatured = false,
+    this.excludeCategoryId,
   });
 
   final List<AthkarCategory> categories;
   final VoidCallback onEdit;
   final HomeLayoutMode layoutMode;
   final bool hideContextualFeatured;
+  final int? excludeCategoryId;
 
   @override
   Widget build(BuildContext context) {
@@ -148,9 +155,14 @@ class _PinnedAthkarQuickAccess extends StatelessWidget {
       categories: ordered,
       now: now,
     );
-    final List<AthkarCategory> stripCategories = featured == null
-        ? categories
+    var stripCategories = featured == null
+        ? List<AthkarCategory>.from(categories)
         : categories.where((c) => c.id != featured.id).toList();
+    if (excludeCategoryId != null) {
+      stripCategories = stripCategories
+          .where((category) => category.id != excludeCategoryId)
+          .toList();
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

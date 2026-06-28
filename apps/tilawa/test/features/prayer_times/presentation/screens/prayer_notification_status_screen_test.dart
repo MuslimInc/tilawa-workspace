@@ -54,7 +54,7 @@ void main() {
     return MaterialApp.router(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+      theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
       routerConfig: router,
     );
   }

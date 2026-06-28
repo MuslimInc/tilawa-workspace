@@ -166,6 +166,53 @@ export interface CallEventVm {
   readonly recordedAt: Date | null;
 }
 
+export type ParticipantLoadState = 'loaded' | 'not_found';
+
+export type SessionCallPhase =
+  | 'not_started'
+  | 'waiting'
+  | 'active'
+  | 'ended';
+
+export type SessionParticipantJoinStatus =
+  | 'not_available'
+  | 'not_joined_yet'
+  | 'joined'
+  | 'no_show'
+  | 'did_not_join';
+
+export interface SessionParticipantTeacherVm {
+  readonly loadState: ParticipantLoadState;
+  readonly teacherId: string;
+  readonly userId: string | null;
+  readonly displayName: string | null;
+  readonly verificationStatus: string | null;
+  readonly profileCompleteness: string | null;
+  readonly isActive: boolean | null;
+  readonly isPubliclyVisible: boolean | null;
+  readonly accountStatus: string | null;
+  readonly matchesSession: boolean;
+  readonly sessionJoinStatus: SessionParticipantJoinStatus;
+}
+
+export interface SessionParticipantStudentVm {
+  readonly loadState: ParticipantLoadState;
+  readonly studentId: string;
+  readonly displayName: string | null;
+  readonly email: string | null;
+  readonly accountStatus: string | null;
+  readonly profileCompleted: boolean | null;
+  readonly canApplyAsTeacher: boolean | null;
+  readonly matchesSession: boolean;
+  readonly sessionJoinStatus: SessionParticipantJoinStatus;
+}
+
+export interface SessionParticipantsVm {
+  readonly teacher: SessionParticipantTeacherVm;
+  readonly student: SessionParticipantStudentVm;
+  readonly callPhase: SessionCallPhase;
+}
+
 export class QuranSessionsViewModelMapper {
   static toApplicationListItem(
     application: TeacherApplication,
@@ -370,6 +417,156 @@ export class QuranSessionsViewModelMapper {
       recordedAt: event.recordedAt,
     };
   }
+
+  static toSessionParticipants(input: {
+    session: Pick<AdminSessionSummary, 'teacherId' | 'studentId' | 'lifecycleStatus'>;
+    teacherProfile: TeacherProfile | null;
+    teacherUser: QuranSessionsUser | null;
+    studentUser: QuranSessionsUser | null;
+    callTracking: CallTrackingVm | null;
+  }): SessionParticipantsVm {
+    const callPhase = resolveSessionCallPhase(
+      input.session.lifecycleStatus,
+      input.callTracking,
+    );
+    return {
+      teacher: toTeacherParticipantVm(
+        input.session.teacherId,
+        input.teacherProfile,
+        input.teacherUser,
+        input.callTracking,
+      ),
+      student: toStudentParticipantVm(
+        input.session.studentId,
+        input.studentUser,
+        input.callTracking,
+      ),
+      callPhase,
+    };
+  }
+}
+
+function toTeacherParticipantVm(
+  sessionTeacherId: string,
+  profile: TeacherProfile | null,
+  user: QuranSessionsUser | null,
+  call: CallTrackingVm | null,
+): SessionParticipantTeacherVm {
+  if (!profile) {
+    return {
+      loadState: 'not_found',
+      teacherId: sessionTeacherId,
+      userId: null,
+      displayName: null,
+      verificationStatus: null,
+      profileCompleteness: null,
+      isActive: null,
+      isPubliclyVisible: null,
+      accountStatus: null,
+      matchesSession: false,
+      sessionJoinStatus: resolveParticipantJoinStatus(call, 'teacher'),
+    };
+  }
+
+  return {
+    loadState: 'loaded',
+    teacherId: profile.id,
+    userId: profile.userId,
+    displayName: profile.displayName,
+    verificationStatus: profile.verificationStatus,
+    profileCompleteness: profile.profileCompleteness,
+    isActive: profile.isActive,
+    isPubliclyVisible: profile.isPubliclyVisible,
+    accountStatus: user?.accountStatus ?? null,
+    matchesSession: profile.id === sessionTeacherId,
+    sessionJoinStatus: resolveParticipantJoinStatus(call, 'teacher'),
+  };
+}
+
+function toStudentParticipantVm(
+  sessionStudentId: string,
+  user: QuranSessionsUser | null,
+  call: CallTrackingVm | null,
+): SessionParticipantStudentVm {
+  if (!user) {
+    return {
+      loadState: 'not_found',
+      studentId: sessionStudentId,
+      displayName: null,
+      email: null,
+      accountStatus: null,
+      profileCompleted: null,
+      canApplyAsTeacher: null,
+      matchesSession: false,
+      sessionJoinStatus: resolveParticipantJoinStatus(call, 'student'),
+    };
+  }
+
+  return {
+    loadState: 'loaded',
+    studentId: user.userId,
+    displayName: user.displayName,
+    email: user.email,
+    accountStatus: user.accountStatus,
+    profileCompleted: user.profileCompleted,
+    canApplyAsTeacher: user.canApplyAsTeacher,
+    matchesSession: user.userId === sessionStudentId,
+    sessionJoinStatus: resolveParticipantJoinStatus(call, 'student'),
+  };
+}
+
+/** Derives high-level call phase for the session detail glance strip. */
+export function resolveSessionCallPhase(
+  lifecycleStatus: string,
+  call: CallTrackingVm | null,
+): SessionCallPhase {
+  if (call?.actualCallEndedAt) {
+    return 'ended';
+  }
+  if (
+    lifecycleStatus === 'completed' ||
+    lifecycleStatus === 'cancelled_by_student' ||
+    lifecycleStatus === 'cancelled_by_teacher' ||
+    lifecycleStatus === 'cancelled_by_admin' ||
+    lifecycleStatus === 'teacher_no_show' ||
+    lifecycleStatus === 'student_no_show' ||
+    lifecycleStatus === 'both_no_show' ||
+    lifecycleStatus === 'noShow'
+  ) {
+    return 'ended';
+  }
+  if (call?.actualCallStartedAt) {
+    return 'active';
+  }
+  if (call && (call.teacherJoinedAt || call.studentJoinedAt)) {
+    return 'waiting';
+  }
+  return 'not_started';
+}
+
+/** Per-participant join state from aggregated call tracking (no raw events). */
+export function resolveParticipantJoinStatus(
+  call: CallTrackingVm | null,
+  role: 'teacher' | 'student',
+): SessionParticipantJoinStatus {
+  if (!call) {
+    return 'not_available';
+  }
+  if (role === 'teacher' && call.teacherNoShow) {
+    return 'no_show';
+  }
+  if (role === 'student' && call.studentNoShow) {
+    return 'no_show';
+  }
+  const joinedAt =
+    role === 'teacher' ? call.teacherJoinedAt : call.studentJoinedAt;
+  if (joinedAt) {
+    return 'joined';
+  }
+  if (call.actualCallEndedAt || call.teacherNoShow || call.studentNoShow) {
+    return 'did_not_join';
+  }
+  return 'not_joined_yet';
 }
 
 /** Resolves a participant's first-connect time from the role-tagged joins. */

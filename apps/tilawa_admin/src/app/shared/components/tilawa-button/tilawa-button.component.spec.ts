@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
+import { vi } from 'vitest';
 
 import { TilawaButtonComponent } from './tilawa-button.component';
 
@@ -47,7 +48,9 @@ describe('TilawaButtonComponent', () => {
 
   it('navigates when link is set', () => {
     const router = TestBed.inject(Router);
-    const navigateSpy = spyOn(router, 'navigate').and.returnValue(Promise.resolve(true));
+    const navigateSpy = vi
+      .spyOn(router, 'navigate')
+      .mockResolvedValue(true);
     fixture.componentRef.setInput('label', 'View');
     fixture.componentRef.setInput('link', ['/reports', '1']);
     fixture.detectChanges();

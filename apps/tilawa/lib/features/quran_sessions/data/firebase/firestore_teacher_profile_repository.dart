@@ -1,8 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tilawa_core/services/performance_monitoring_service.dart';
 
 import 'firestore_exception_mapper.dart';
 import 'firestore_paths.dart';
+import 'firestore_performance_wrapper.dart';
 
 class FirestoreTeacherProfileDto {
   const FirestoreTeacherProfileDto({
@@ -144,95 +147,177 @@ class FirestoreTeacherProfileDto {
 
 class FirestoreTeacherProfileDataSource
     implements TeacherProfileRemoteDataSource {
-  FirestoreTeacherProfileDataSource(this._firestore);
+  FirestoreTeacherProfileDataSource(
+    this._firestore, [
+    this._perf,
+    this._prefs,
+  ]);
 
   final FirebaseFirestore _firestore;
+  final PerformanceMonitoringService? _perf;
+  final SharedPreferencesAsync? _prefs;
+  final Map<String, TeacherProfileDto> _cacheById = {};
+  final Map<String, TeacherProfileDto> _cacheByUserId = {};
 
   CollectionReference<Map<String, dynamic>> get _collection =>
       _firestore.collection(FirestoreQuranSessionsPaths.teacherProfiles);
 
+  TeacherProfileDto? _readCachedById(String id) => _cacheById[id];
+
+  TeacherProfileDto? _readCachedByUserId(String userId) =>
+      _cacheByUserId[userId];
+
+  void _putInCache(TeacherProfileDto profile) {
+    _cacheById[profile.id] = profile;
+    if (profile.userId.isNotEmpty) {
+      _cacheByUserId[profile.userId] = profile;
+    }
+  }
+
+  void _invalidateForId(String id) {
+    final cached = _cacheById.remove(id);
+    if (cached != null) {
+      _cacheByUserId.remove(cached.userId);
+    }
+  }
+
   @override
   Future<TeacherProfileDto> getByUserId(String userId) async {
-    try {
-      final query = await _collection
-          .where('userId', isEqualTo: userId)
-          .limit(1)
-          .get();
-      if (query.docs.isEmpty) {
-        throw NotFoundException('TeacherProfile(userId=$userId)');
-      }
-      return FirestoreTeacherProfileDto.fromDoc(
-        query.docs.first,
-      ).toTransportDto();
-    } on FirebaseException catch (e) {
-      throw mapFirebaseException(e);
+    final memoryCached = _readCachedByUserId(userId);
+    if (memoryCached != null) {
+      return memoryCached;
     }
+
+    final prefs = _prefs;
+    if (prefs != null) {
+      final cachedProfileId = await prefs.getString('tp_id_mapping_$userId');
+      if (cachedProfileId != null && cachedProfileId.isNotEmpty) {
+        try {
+          final profile = await getById(cachedProfileId);
+          return profile;
+        } catch (_) {
+          await prefs.remove('tp_id_mapping_$userId');
+        }
+      }
+    }
+
+    final profile = await _perf.trace(
+      'firestore_getTeacherProfileByUserId',
+      () async {
+        try {
+          final query = await _collection
+              .where('userId', isEqualTo: userId)
+              .limit(1)
+              .get();
+          if (query.docs.isEmpty) {
+            throw NotFoundException('TeacherProfile(userId=$userId)');
+          }
+          return FirestoreTeacherProfileDto.fromDoc(
+            query.docs.first,
+          ).toTransportDto();
+        } on FirebaseException catch (e) {
+          throw mapFirebaseException(e);
+        }
+      },
+    );
+
+    if (prefs != null) {
+      await prefs.setString('tp_id_mapping_$userId', profile.id);
+    }
+
+    _putInCache(profile);
+    return profile;
   }
 
   @override
   Future<TeacherProfileDto> getById(String id) async {
-    try {
-      final doc = await _collection.doc(id).get();
-      if (!doc.exists) {
-        throw NotFoundException('TeacherProfile($id)');
-      }
-      return FirestoreTeacherProfileDto.fromDoc(doc).toTransportDto();
-    } on FirebaseException catch (e) {
-      throw mapFirebaseException(e);
+    final memoryCached = _readCachedById(id);
+    if (memoryCached != null) {
+      return memoryCached;
     }
+
+    final profile = await _perf.trace(
+      'firestore_getTeacherProfileById',
+      () async {
+        try {
+          final doc = await _collection.doc(id).get();
+          if (!doc.exists) {
+            throw NotFoundException('TeacherProfile($id)');
+          }
+          return FirestoreTeacherProfileDto.fromDoc(doc).toTransportDto();
+        } on FirebaseException catch (e) {
+          throw mapFirebaseException(e);
+        }
+      },
+    );
+    _putInCache(profile);
+    return profile;
   }
 
   @override
   Future<TeacherProfileDto> create(TeacherProfileDto profile) async {
-    try {
-      final ref = profile.id.isEmpty
-          ? _collection.doc()
-          : _collection.doc(profile.id);
-      final now = DateTime.now();
-      final dto = FirestoreTeacherProfileDto.fromTransportDto(
-        TeacherProfileDto(
-          id: ref.id,
-          userId: profile.userId,
-          displayName: profile.displayName,
-          avatarUrl: profile.avatarUrl,
-          publicBio: profile.publicBio,
-          verificationStatus: profile.verificationStatus,
-          teachingLanguages: profile.teachingLanguages,
-          specializations: profile.specializations,
-          averageRating: profile.averageRating,
-          reviewCount: profile.reviewCount,
-          isActive: profile.isActive,
-          profileCompleteness: profile.profileCompleteness,
-          isPubliclyVisible: profile.isPubliclyVisible,
-          allowedStudentGender: profile.allowedStudentGender,
-          canTeachChildren: profile.canTeachChildren,
-          externalMeetingUrl: profile.externalMeetingUrl,
-          createdAt: now,
-          updatedAt: now,
-        ),
-      );
-      await ref.set(dto.toMap());
-      final created = await ref.get();
-      return FirestoreTeacherProfileDto.fromDoc(created).toTransportDto();
-    } on FirebaseException catch (e) {
-      throw mapFirebaseException(e);
-    }
+    return _perf.trace('firestore_createTeacherProfile', () async {
+      try {
+        final ref = profile.id.isEmpty
+            ? _collection.doc()
+            : _collection.doc(profile.id);
+        final now = DateTime.now();
+        final dto = FirestoreTeacherProfileDto.fromTransportDto(
+          TeacherProfileDto(
+            id: ref.id,
+            userId: profile.userId,
+            displayName: profile.displayName,
+            avatarUrl: profile.avatarUrl,
+            publicBio: profile.publicBio,
+            verificationStatus: profile.verificationStatus,
+            teachingLanguages: profile.teachingLanguages,
+            specializations: profile.specializations,
+            averageRating: profile.averageRating,
+            reviewCount: profile.reviewCount,
+            isActive: profile.isActive,
+            profileCompleteness: profile.profileCompleteness,
+            isPubliclyVisible: profile.isPubliclyVisible,
+            allowedStudentGender: profile.allowedStudentGender,
+            canTeachChildren: profile.canTeachChildren,
+            externalMeetingUrl: profile.externalMeetingUrl,
+            createdAt: now,
+            updatedAt: now,
+          ),
+        );
+        await ref.set(dto.toMap());
+        final created = await ref.get();
+        final result = FirestoreTeacherProfileDto.fromDoc(
+          created,
+        ).toTransportDto();
+        _putInCache(result);
+        return result;
+      } on FirebaseException catch (e) {
+        throw mapFirebaseException(e);
+      }
+    });
   }
 
   @override
   Future<TeacherProfileDto> update(TeacherProfileDto profile) async {
-    try {
-      final now = DateTime.now();
-      final dto = FirestoreTeacherProfileDto.fromTransportDto(profile);
-      await _collection.doc(profile.id).set({
-        ...dto.toMap(),
-        'updatedAt': writeDateTime(now),
-      }, SetOptions(merge: true));
-      final updated = await _collection.doc(profile.id).get();
-      return FirestoreTeacherProfileDto.fromDoc(updated).toTransportDto();
-    } on FirebaseException catch (e) {
-      throw mapFirebaseException(e);
-    }
+    _invalidateForId(profile.id);
+    return _perf.trace('firestore_updateTeacherProfile', () async {
+      try {
+        final now = DateTime.now();
+        final dto = FirestoreTeacherProfileDto.fromTransportDto(profile);
+        await _collection.doc(profile.id).set({
+          ...dto.toMap(),
+          'updatedAt': writeDateTime(now),
+        }, SetOptions(merge: true));
+        final updated = await _collection.doc(profile.id).get();
+        final result = FirestoreTeacherProfileDto.fromDoc(
+          updated,
+        ).toTransportDto();
+        _putInCache(result);
+        return result;
+      } on FirebaseException catch (e) {
+        throw mapFirebaseException(e);
+      }
+    });
   }
 
   /// Writes only fields a verified profile owner may edit client-side.
@@ -243,30 +328,36 @@ class FirestoreTeacherProfileDataSource
   Future<TeacherProfileDto> updatePublicProfile(
     TeacherProfileDto profile,
   ) async {
-    try {
-      final now = DateTime.now();
-      final payload = <String, dynamic>{
-        'displayName': profile.displayName,
-        'publicBio': profile.publicBio,
-        'teachingLanguages': profile.teachingLanguages,
-        'specializations': profile.specializations,
-        'updatedAt': writeDateTime(now),
-      };
-      final trimmedMeetingUrl = profile.externalMeetingUrl?.trim();
-      if (trimmedMeetingUrl != null && trimmedMeetingUrl.isNotEmpty) {
-        payload['externalMeetingUrl'] = trimmedMeetingUrl;
-      } else {
-        payload['externalMeetingUrl'] = FieldValue.delete();
+    _invalidateForId(profile.id);
+    return _perf.trace('firestore_updateTeacherPublicProfile', () async {
+      try {
+        final now = DateTime.now();
+        final payload = <String, dynamic>{
+          'displayName': profile.displayName,
+          'publicBio': profile.publicBio,
+          'teachingLanguages': profile.teachingLanguages,
+          'specializations': profile.specializations,
+          'updatedAt': writeDateTime(now),
+        };
+        final trimmedMeetingUrl = profile.externalMeetingUrl?.trim();
+        if (trimmedMeetingUrl != null && trimmedMeetingUrl.isNotEmpty) {
+          payload['externalMeetingUrl'] = trimmedMeetingUrl;
+        } else {
+          payload['externalMeetingUrl'] = FieldValue.delete();
+        }
+        if (profile.avatarUrl != null) {
+          payload['avatarUrl'] = profile.avatarUrl;
+        }
+        await _collection.doc(profile.id).set(payload, SetOptions(merge: true));
+        final updated = await _collection.doc(profile.id).get();
+        final result = FirestoreTeacherProfileDto.fromDoc(
+          updated,
+        ).toTransportDto();
+        return result;
+      } on FirebaseException catch (e) {
+        throw mapFirebaseException(e);
       }
-      if (profile.avatarUrl != null) {
-        payload['avatarUrl'] = profile.avatarUrl;
-      }
-      await _collection.doc(profile.id).set(payload, SetOptions(merge: true));
-      final updated = await _collection.doc(profile.id).get();
-      return FirestoreTeacherProfileDto.fromDoc(updated).toTransportDto();
-    } on FirebaseException catch (e) {
-      throw mapFirebaseException(e);
-    }
+    });
   }
 
   @override
@@ -283,19 +374,24 @@ class FirestoreTeacherProfileDataSource
     String id, {
     required bool isActive,
   }) async {
-    try {
-      final now = DateTime.now();
-      await _collection.doc(id).set({
-        'isActive': isActive,
-        'updatedAt': writeDateTime(now),
-      }, SetOptions(merge: true));
-      final doc = await _collection.doc(id).get();
-      if (!doc.exists) {
-        throw NotFoundException('TeacherProfile($id)');
+    _invalidateForId(id);
+    return _perf.trace('firestore_setTeacherProfileActive', () async {
+      try {
+        final now = DateTime.now();
+        await _collection.doc(id).set({
+          'isActive': isActive,
+          'updatedAt': writeDateTime(now),
+        }, SetOptions(merge: true));
+        final doc = await _collection.doc(id).get();
+        if (!doc.exists) {
+          throw NotFoundException('TeacherProfile($id)');
+        }
+        final result = FirestoreTeacherProfileDto.fromDoc(doc).toTransportDto();
+        _putInCache(result);
+        return result;
+      } on FirebaseException catch (e) {
+        throw mapFirebaseException(e);
       }
-      return FirestoreTeacherProfileDto.fromDoc(doc).toTransportDto();
-    } on FirebaseException catch (e) {
-      throw mapFirebaseException(e);
-    }
+    });
   }
 }

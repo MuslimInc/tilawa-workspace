@@ -57,34 +57,36 @@ class _FooterLink extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Semantics(
-      button: true,
-      label: label,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(tokens.radiusMedium),
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: tokens.spaceSmall,
-            vertical: tokens.spaceExtraSmall,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                size: tokens.iconSizeSmall,
+    final BorderRadius borderRadius = BorderRadius.circular(
+      tokens.radiusMedium,
+    );
+
+    return TilawaInteractiveSurface(
+      onTap: onTap,
+      borderRadius: borderRadius,
+      semanticLabel: label,
+      stateLayerColor: colorScheme.onSurfaceVariant,
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: tokens.spaceSmall,
+          vertical: tokens.spaceExtraSmall,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: tokens.iconSizeSmall,
+              color: colorScheme.onSurfaceVariant,
+            ),
+            SizedBox(width: tokens.spaceSmall),
+            Text(
+              label,
+              style: theme.textTheme.labelLarge?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
-              SizedBox(width: tokens.spaceSmall),
-              Text(
-                label,
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

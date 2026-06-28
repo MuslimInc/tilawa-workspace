@@ -22,7 +22,7 @@ class QiblaCompassWidget extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
     final bool isAligned = qiblaDirection.isAligned;
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -298,7 +298,7 @@ class _CompassDialOrbit extends StatelessWidget {
 
   final double angleDeg;
   final double heading;
-  final TilawaDesignTokens tokens;
+  final MeMuslimDesignTokens tokens;
   final Widget child;
 
   @override
@@ -386,7 +386,7 @@ class _QiblaNeedlePainter extends CustomPainter {
   });
 
   final bool isAligned;
-  final TilawaDesignTokens tokens;
+  final MeMuslimDesignTokens tokens;
   final ColorScheme colorScheme;
 
   @override
@@ -445,7 +445,7 @@ class _CompassDialPainter extends CustomPainter {
   });
 
   final ColorScheme colorScheme;
-  final TilawaDesignTokens tokens;
+  final MeMuslimDesignTokens tokens;
   final double dotInset;
 
   @override

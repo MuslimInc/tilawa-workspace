@@ -223,6 +223,30 @@ void main() {
     });
   });
 
+  group('reselectTab', () {
+    test('increments tick for the requested tab index', () {
+      final cubit = MainScreenCubit();
+      addTearDown(cubit.close);
+
+      cubit.reselectTab(0);
+
+      expect(cubit.state.tabReselectTick(0), 1);
+      expect(cubit.state.currentIndex, 0);
+    });
+
+    test('keeps independent counters per tab', () {
+      final cubit = MainScreenCubit();
+      addTearDown(cubit.close);
+
+      cubit.reselectTab(0);
+      cubit.reselectTab(2);
+
+      expect(cubit.state.tabReselectTick(0), 1);
+      expect(cubit.state.tabReselectTick(2), 1);
+      expect(cubit.state.tabReselectTick(1), 0);
+    });
+  });
+
   // ── Reciters tab / search focus ─────────────────────────────────────────
 
   group('requestRecitersSearchFocus', () {

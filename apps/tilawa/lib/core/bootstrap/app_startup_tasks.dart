@@ -23,6 +23,7 @@ import 'package:tilawa/core/bootstrap/app_startup.dart';
 import 'package:tilawa/core/bootstrap/launch_timeline.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:tilawa/core/navigation/notification_launch_dedup.dart';
 import 'package:tilawa/core/observers/composite_bloc_observer.dart';
 import 'package:tilawa/core/observers/crashlytics_bloc_observer.dart';
 import 'package:tilawa/core/services/analytics_initialization_service.dart';
@@ -72,8 +73,6 @@ class AppStartupTasks {
   static const Duration notificationLaunchProbeTimeout = Duration(
     milliseconds: 180,
   );
-  static const String _lastNotifIdKey = '_last_notif_id';
-  static const String _lastNotifPidKey = '_last_notif_pid';
   static const Duration notificationPermissionSoftTimeout = Duration(
     milliseconds: 1500,
   );
@@ -659,9 +658,14 @@ class AppStartupTasks {
       if (localLaunchResponse != null) {
         AppRouter.pendingLocalNotificationResponse = localLaunchResponse;
         AppRouter.lastProcessedNotificationId = localLaunchResponse.id;
+        AppRouter.lastProcessedNotificationPayload =
+            localLaunchResponse.payload;
         final int? localId = localLaunchResponse.id;
         if (localId != null) {
-          await _persistProcessedNotificationLaunch(localId);
+          await AppRouter.persistProcessedNotificationLaunch(
+            notificationId: localId,
+            payload: localLaunchResponse.payload,
+          );
         }
       } else if (fcmInitialMessage != null) {
         AppRouter.pendingFcmMessage = fcmInitialMessage;
@@ -706,7 +710,10 @@ class AppStartupTasks {
           details.didNotificationLaunchApp &&
           details.notificationResponse != null) {
         final NotificationResponse response = details.notificationResponse!;
-        if (await _isStaleLocalLaunchOnHotRestart(response.id)) {
+        if (await _isStaleLocalLaunchOnHotRestart(
+          notificationId: response.id,
+          payload: response.payload,
+        )) {
           return null;
         }
         return response;
@@ -719,38 +726,30 @@ class AppStartupTasks {
     return null;
   }
 
-  /// Android keeps [getNotificationAppLaunchDetails] across Flutter hot restart
-  /// (same OS process). Skip re-routing when we already handled this launch.
-  Future<bool> _isStaleLocalLaunchOnHotRestart(
-    int? launchNotificationId,
-  ) async {
+  /// Local notification launch details can replay after Flutter hot restart on
+  /// Android (Activity intent) and iOS (plugin launch state in same process).
+  Future<bool> _isStaleLocalLaunchOnHotRestart({
+    required int? notificationId,
+    String? payload,
+  }) async {
     if (!getIt.isRegistered<SharedPreferencesAsync>() ||
         !getIt.isRegistered<ProcessIdProvider>()) {
       return false;
     }
     final SharedPreferencesAsync prefs = getIt<SharedPreferencesAsync>();
     final int currentPid = getIt<ProcessIdProvider>().currentPid;
-    final int? storedPid = await prefs.getInt(_lastNotifPidKey);
-    if (storedPid != currentPid) {
-      return false;
-    }
-    final int? storedId = await prefs.getInt(_lastNotifIdKey);
+    final int? storedId =
+        await NotificationLaunchDedup.readStoredNotificationId(
+          prefs: prefs,
+          pid: currentPid,
+        );
     if (storedId != null) {
       AppRouter.lastProcessedNotificationId = storedId;
     }
-    return storedId != null &&
-        (launchNotificationId == null || storedId == launchNotificationId);
-  }
-
-  Future<void> _persistProcessedNotificationLaunch(int notificationId) async {
-    if (!getIt.isRegistered<SharedPreferencesAsync>() ||
-        !getIt.isRegistered<ProcessIdProvider>()) {
-      return;
-    }
-    final SharedPreferencesAsync prefs = getIt<SharedPreferencesAsync>();
-    final int currentPid = getIt<ProcessIdProvider>().currentPid;
-    await prefs.setInt(_lastNotifIdKey, notificationId);
-    await prefs.setInt(_lastNotifPidKey, currentPid);
+    return AppRouter.isProcessedNotificationLaunch(
+      launchNotificationId: notificationId,
+      launchPayload: payload,
+    );
   }
 
   Future<void> _applyNativeAdhanColdStartIfNeeded() async {
@@ -794,6 +793,12 @@ class AppStartupTasks {
   @visibleForTesting
   void applyColdStartRouteFromPendingLaunchForTesting() {
     _applyColdStartRouteFromPendingLaunch();
+  }
+
+  @visibleForTesting
+  Future<NotificationResponse?>
+  probeLocalNotificationLaunchResponseForTesting() {
+    return _probeLocalNotificationLaunchResponse();
   }
 
   void _applyColdStartRouteFromPendingLaunch() {

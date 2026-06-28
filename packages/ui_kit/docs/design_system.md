@@ -61,7 +61,7 @@ switch ON. **Not** for scaffold fills (use the neutral canvas).
 
 | `AppColors` | Hex | `ColorScheme` / usage |
 |-------------|-----|------------------------|
-| `lightCanvas` / `lightBackground` | `#FFFFFF` | Scaffold, `surfaceContainerLowest` |
+| `lightCanvas` / `lightBackground` | `#FAF9F7` | Scaffold, `surfaceContainerLowest` |
 | `lightSurface` | `#FFFFFF` | Cards, sheets, dialogs |
 | `lightInk` | `#212121` | `onSurface` |
 | `lightMute` | `#757575` | Muted labels (`onSurfaceVariant`) |
@@ -125,6 +125,26 @@ Settings lists, Athkar, etc.).
 Feature-specific neutral chrome (e.g. reciter details moshaf row) may use a
 local `*CatalogChrome` helper that reads the same `ColorScheme` roles — do not
 duplicate hex.
+
+---
+
+## 4.1 Interaction feedback (press / focus)
+
+**Rule:** Interactive surfaces use a soft splash/highlight/state-layer effect by
+default. Press-scale is not the default because it can look unstable on clipped
+or rounded surfaces.
+
+| Mechanism | Where | Tokens |
+|-----------|-------|--------|
+| Ink splash | `TilawaInteractiveSurface` (default) | `inkSplashAlpha` (0.08) on `ColorScheme.primary` |
+| Ink highlight | `TilawaInteractiveSurface` (default) | `inkHighlightAlpha` (0.04) on `ColorScheme.onSurface` |
+| State-layer wash | `TilawaInteractiveSurface` (default) | `stateLayerPressed` (0.12), `stateLayerHover` (0.08), `stateLayerFocused` (0.12) on `ColorScheme.onSurface` |
+| Motion | Press/hover/focus transitions | `durationFast` (200 ms) |
+| Material overlay | `TilawaButton` | M3 pressed 10% on label colour; focus ring via `focusRingWidth` |
+
+**Nested taps on cards:** enabled nested controls own their action; disabled
+controls are dead zones; parent `TilawaCard` only reacts from blank areas (see
+`CLAUDE.md`).
 
 ---
 

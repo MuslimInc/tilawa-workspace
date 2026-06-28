@@ -124,3 +124,27 @@ final class TeacherSessionCompleted extends TeacherDashboardEvent {
   @override
   List<Object?> get props => [sessionId];
 }
+
+/// Teacher accepts a pending booking request.
+final class TeacherBookingRequestAccepted extends TeacherDashboardEvent {
+  const TeacherBookingRequestAccepted({required this.bookingId});
+
+  final String bookingId;
+
+  @override
+  List<Object?> get props => [bookingId];
+}
+
+/// Teacher rejects a pending booking request.
+final class TeacherBookingRequestRejected extends TeacherDashboardEvent {
+  const TeacherBookingRequestRejected({
+    required this.bookingId,
+    this.reason,
+  });
+
+  final String bookingId;
+  final String? reason;
+
+  @override
+  List<Object?> get props => [bookingId, reason];
+}

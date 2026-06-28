@@ -10,6 +10,7 @@ import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tilawa/features/auth/presentation/cubit/session_validity_cubit.dart';
+import 'package:tilawa/features/quran_sessions/data/fake_auth_session_provider.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa/router/quran_sessions_session_guard.dart';
 
@@ -35,6 +36,56 @@ void main() {
   setUp(() {
     mockSessionCubit = MockSessionValidityCubit();
     mockAuthBloc = MockAuthBloc();
+  });
+
+  tearDown(() {
+    if (getIt.isRegistered<AuthSessionProvider>()) {
+      getIt.unregister<AuthSessionProvider>();
+    }
+  });
+
+  group('isAuthRequiredQuranSessionsPath', () {
+    test('matches session detail and other signed-in flows', () {
+      expect(
+        isAuthRequiredQuranSessionsPath(
+          QuranSessionsRoutes.sessionDetail.replaceFirst(
+            ':bookingId',
+            'booking-1',
+          ),
+        ),
+        isTrue,
+      );
+      expect(
+        isAuthRequiredQuranSessionsPath(QuranSessionsRoutes.mySessions),
+        isTrue,
+      );
+      expect(
+        isAuthRequiredQuranSessionsPath(
+          QuranSessionsRoutes.booking.replaceFirst(':teacherId', 'teacher-1'),
+        ),
+        isTrue,
+      );
+    });
+
+    test('ignores browse-only sessions routes', () {
+      expect(
+        isAuthRequiredQuranSessionsPath(QuranSessionsRoutes.home),
+        isFalse,
+      );
+      expect(
+        isAuthRequiredQuranSessionsPath(QuranSessionsRoutes.teacherList),
+        isFalse,
+      );
+      expect(
+        isAuthRequiredQuranSessionsPath(
+          QuranSessionsRoutes.teacherProfile.replaceFirst(
+            ':teacherId',
+            'teacher-1',
+          ),
+        ),
+        isFalse,
+      );
+    });
   });
 
   group('isProtectedQuranSessionsPath', () {
@@ -181,6 +232,9 @@ void main() {
           ),
         ),
       );
+      getIt.registerSingleton<AuthSessionProvider>(
+        const FakeAuthSessionProvider(userId: 'user_1'),
+      );
 
       final result = await redirectForPath(
         tester,
@@ -189,7 +243,9 @@ void main() {
       expect(result, isNull);
     });
 
-    testWidgets('returns null when blocs are not mounted', (tester) async {
+    testWidgets('returns null when blocs are not mounted and auth unknown', (
+      tester,
+    ) async {
       final state = FakeGoRouterState(QuranSessionsRoutes.home);
 
       late String? result;
@@ -206,7 +262,37 @@ void main() {
       expect(result, isNull);
     });
 
-    testWidgets('does not redirect login route (loop guard)', (tester) async {
+    testWidgets(
+      'redirects to login when blocs are not mounted and user is signed out',
+      (tester) async {
+        getIt.registerSingleton<AuthSessionProvider>(
+          const FakeAuthSessionProvider(userId: ''),
+        );
+        final state = FakeGoRouterState(
+          QuranSessionsRoutes.sessionDetail.replaceFirst(
+            ':bookingId',
+            'booking-1',
+          ),
+        );
+
+        late String? result;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Builder(
+              builder: (context) {
+                result = quranSessionsAuthRequiredRedirect(context, state);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+        expect(result, const LoginRoute().location);
+      },
+    );
+
+    testWidgets('does not redirect on login route (not a sessions path)', (
+      tester,
+    ) async {
       whenListen(
         mockSessionCubit,
         Stream<SessionValidityState>.empty(),

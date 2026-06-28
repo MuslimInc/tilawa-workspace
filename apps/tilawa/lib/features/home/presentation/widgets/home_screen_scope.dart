@@ -9,10 +9,7 @@ import 'package:tilawa/core/services/hive_readiness.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.dart';
-import 'package:tilawa/features/home/presentation/cubit/home_athkar_compact_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_cubit.dart';
-import 'package:tilawa/features/home/presentation/cubit/home_primary_action_cubit.dart';
-import 'package:tilawa/features/home/presentation/cubit/home_quran_resume_cubit.dart';
 import 'package:tilawa/features/history/domain/repositories/history_repository.dart';
 import 'package:tilawa/features/home/home.dart';
 import 'package:tilawa/features/localization/presentation/bloc/localization_bloc.dart';
@@ -27,8 +24,6 @@ import 'package:tilawa/features/quran_reader/domain/repositories/quran_reader_re
 import 'package:tilawa/features/smart_khatma/smart_khatma.dart';
 import 'package:tilawa/features/today_plan/today_plan.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
-
-import 'home_primary_action_zone.dart';
 
 /// Composition root for the Home dashboard tab.
 class HomeScreenScope extends StatelessWidget {
@@ -101,28 +96,12 @@ class HomeScreenScope extends StatelessWidget {
         ),
         BlocProvider(
           create: (_) {
-            final HomeQuranResumeCubit cubit = getIt<HomeQuranResumeCubit>();
-            _deferToNextFrame(cubit.load);
-            return cubit;
-          },
-        ),
-        BlocProvider(
-          create: (_) {
             final HomeListeningResumeCubit cubit =
                 getIt<HomeListeningResumeCubit>();
             _deferToNextFrame(cubit.load);
             return cubit;
           },
         ),
-        BlocProvider(
-          create: (_) {
-            final HomeAthkarCompactCubit cubit =
-                getIt<HomeAthkarCompactCubit>();
-            _deferToNextFrame(cubit.load);
-            return cubit;
-          },
-        ),
-        BlocProvider(create: (_) => HomePrimaryActionCubit()),
         if (isSmartKhatmaEnabled())
           BlocProvider(create: (_) => SmartKhatmaDependencies.bloc()),
         if (isTodayPlanEnabled())
@@ -130,11 +109,9 @@ class HomeScreenScope extends StatelessWidget {
       ],
       child: _HomeLocationSyncListener(
         child: _HomeAuthSyncListener(
-          child: HomePrimaryActionSyncListener(
-            child: isSmartKhatmaEnabled() && isTodayPlanEnabled()
-                ? _HomeKhatmaPlanSyncListener(child: homeContent)
-                : homeContent,
-          ),
+          child: isSmartKhatmaEnabled() && isTodayPlanEnabled()
+              ? _HomeKhatmaPlanSyncListener(child: homeContent)
+              : homeContent,
         ),
       ),
     );

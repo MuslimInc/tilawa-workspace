@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
+import 'package:quran_sessions/src/presentation/theme/quran_sessions_theme_scope.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Pumps [child] inside a themed, localized [MaterialApp] + [Scaffold].
@@ -13,6 +14,7 @@ Future<void> pumpInApp(
   Widget child, {
   Locale? locale,
   TextDirection? textDirection,
+  double? textScaleFactor,
   bool settle = true,
   Size? surfaceSize,
 }) async {
@@ -37,10 +39,19 @@ Future<void> pumpInApp(
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: QuranSessionsLocalizations.supportedLocales,
-      home: Scaffold(
-        body: textDirection == null
-            ? child
-            : Directionality(textDirection: textDirection, child: child),
+      home: QuranSessionsThemeScope(
+        child: Scaffold(
+          body: MediaQuery(
+            data: MediaQueryData(
+              textScaler: textScaleFactor == null
+                  ? TextScaler.noScaling
+                  : TextScaler.linear(textScaleFactor),
+            ),
+            child: textDirection == null
+                ? child
+                : Directionality(textDirection: textDirection, child: child),
+          ),
+        ),
       ),
     ),
   );

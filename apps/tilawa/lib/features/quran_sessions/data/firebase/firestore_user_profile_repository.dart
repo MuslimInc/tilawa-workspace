@@ -23,6 +23,7 @@ class FirestoreUserProfileDto {
     this.guardianChildBookingApprovedAt,
     this.restrictionReason,
     this.profileCompleted = false,
+    this.learningGoals = const [],
   });
 
   final String userId;
@@ -41,6 +42,7 @@ class FirestoreUserProfileDto {
   final DateTime? guardianChildBookingApprovedAt;
   final String? restrictionReason;
   final bool profileCompleted;
+  final List<String> learningGoals;
 
   factory FirestoreUserProfileDto.fromUserDoc(
     String userId,
@@ -69,6 +71,9 @@ class FirestoreUserProfileDto {
       ),
       restrictionReason: profile['restrictionReason'] as String?,
       profileCompleted: profile['profileCompleted'] as bool? ?? false,
+      learningGoals: List<String>.from(
+        profile['learningGoals'] as List? ?? const [],
+      ),
     );
   }
 
@@ -90,6 +95,7 @@ class FirestoreUserProfileDto {
       ),
     if (restrictionReason != null) 'restrictionReason': restrictionReason,
     'profileCompleted': profileCompleted,
+    if (learningGoals.isNotEmpty) 'learningGoals': learningGoals,
     'updatedAt': writeDateTime(updatedAt),
   };
 
@@ -109,6 +115,7 @@ class FirestoreUserProfileDto {
     guardianId: guardianId,
     guardianChildBookingApprovedAt: guardianChildBookingApprovedAt,
     restrictionReason: restrictionReason,
+    learningGoals: learningGoals,
   );
 
   static FirestoreUserProfileDto fromTransportDto(UserProfileDto dto) {
@@ -134,6 +141,7 @@ class FirestoreUserProfileDto {
       guardianChildBookingApprovedAt: dto.guardianChildBookingApprovedAt,
       restrictionReason: dto.restrictionReason,
       profileCompleted: complete,
+      learningGoals: dto.learningGoals,
     );
   }
 

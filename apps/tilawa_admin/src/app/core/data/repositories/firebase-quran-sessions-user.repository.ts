@@ -11,21 +11,14 @@ import {
 } from '@angular/fire/firestore';
 
 import { QuranSessionsPaths } from '../paths/quran-sessions.paths';
-import {
-  QuranSessionsUserMapper,
-  TilawaUserFirestoreDto,
-} from '../mappers/quran-sessions.mapper';
+import { QuranSessionsUserMapper, TilawaUserFirestoreDto } from '../mappers/quran-sessions.mapper';
 import {
   QS_USER_DEFAULT_SORT,
   QS_USER_SORT_FIELDS,
   QuranSessionsUser,
   QuranSessionsUserFilters,
 } from '../../domain/entities/quran-sessions-user.entity';
-import {
-  DEFAULT_PAGE_SIZE,
-  PageRequest,
-  PageResult,
-} from '../../domain/entities/pagination.types';
+import { DEFAULT_PAGE_SIZE, PageRequest, PageResult } from '../../domain/entities/pagination.types';
 import {
   QS_USER_ID_IN_QUERY_LIMIT,
   QuranSessionsUserRepository,
@@ -45,7 +38,7 @@ export class FirebaseQuranSessionsUserRepository implements QuranSessionsUserRep
     page: PageRequest,
   ): Promise<PageResult<QuranSessionsUser>> {
     const pageSize = page.pageSize || DEFAULT_PAGE_SIZE;
-    const serverFilters = this.buildServerFilters(filters);
+    const serverFilters = buildQuranSessionsUserServerFilters(filters);
 
     const result = await fetchPaginatedList<QuranSessionsUser | null>({
       firestore: this.firestore,
@@ -54,8 +47,7 @@ export class FirebaseQuranSessionsUserRepository implements QuranSessionsUserRep
       page: { ...page, pageSize },
       defaultSort: QS_USER_DEFAULT_SORT,
       allowedSortFields: QS_USER_SORT_FIELDS,
-      mapDoc: (id, data) =>
-        QuranSessionsUserMapper.fromUserDoc(id, data as TilawaUserFirestoreDto),
+      mapDoc: (id, data) => QuranSessionsUserMapper.fromUserDoc(id, data as TilawaUserFirestoreDto),
     });
 
     const items = result.items
@@ -69,7 +61,7 @@ export class FirebaseQuranSessionsUserRepository implements QuranSessionsUserRep
     filters: Pick<QuranSessionsUserFilters, 'countryCode' | 'cityId'>,
     maxIds = QS_USER_ID_IN_QUERY_LIMIT,
   ): Promise<readonly string[]> {
-    const serverFilters = this.buildServerFilters({
+    const serverFilters = buildQuranSessionsUserServerFilters({
       ...filters,
       accountStatus: null,
       gender: null,
@@ -82,11 +74,7 @@ export class FirebaseQuranSessionsUserRepository implements QuranSessionsUserRep
     }
 
     const snapshot = await getDocs(
-      query(
-        collection(this.firestore, QuranSessionsPaths.users),
-        ...serverFilters,
-        limit(maxIds),
-      ),
+      query(collection(this.firestore, QuranSessionsPaths.users), ...serverFilters, limit(maxIds)),
     );
 
     return snapshot.docs.map((snap) => snap.id);
@@ -97,16 +85,11 @@ export class FirebaseQuranSessionsUserRepository implements QuranSessionsUserRep
     if (!snap.exists()) {
       return null;
     }
-    return QuranSessionsUserMapper.fromUserDoc(
-      snap.id,
-      snap.data() as TilawaUserFirestoreDto,
-    );
+    return QuranSessionsUserMapper.fromUserDoc(snap.id, snap.data() as TilawaUserFirestoreDto);
   }
 
-  async getByIds(
-    userIds: readonly string[],
-  ): Promise<Map<string, QuranSessionsUser>> {
-    const uniqueIds = [...new Set(userIds)];
+  async getByIds(userIds: readonly string[]): Promise<Map<string, QuranSessionsUser>> {
+    const uniqueIds = [...new Set(userIds.filter((id) => id.trim().length > 0))];
     const result = new Map<string, QuranSessionsUser>();
 
     await Promise.all(
@@ -121,42 +104,7 @@ export class FirebaseQuranSessionsUserRepository implements QuranSessionsUserRep
     return result;
   }
 
-  private buildServerFilters(filters: QuranSessionsUserFilters) {
-    const constraints = [];
-
-    if (filters.accountStatus) {
-      constraints.push(
-        where(`${QS_PROFILE}.accountStatus`, '==', filters.accountStatus),
-      );
-    }
-
-    if (filters.gender) {
-      constraints.push(where(`${QS_PROFILE}.gender`, '==', filters.gender));
-    }
-
-    if (filters.countryCode) {
-      constraints.push(
-        where(`${QS_PROFILE}.countryCode`, '==', filters.countryCode),
-      );
-    }
-
-    if (filters.cityId) {
-      constraints.push(where(`${QS_PROFILE}.cityId`, '==', filters.cityId));
-    }
-
-    if (filters.profileCompleted != null) {
-      constraints.push(
-        where(`${QS_PROFILE}.profileCompleted`, '==', filters.profileCompleted),
-      );
-    }
-
-    return constraints;
-  }
-
-  private matchesSearch(
-    user: QuranSessionsUser,
-    filters: QuranSessionsUserFilters,
-  ): boolean {
+  private matchesSearch(user: QuranSessionsUser, filters: QuranSessionsUserFilters): boolean {
     const search = filters.search?.trim().toLowerCase();
     if (!search) {
       return true;
@@ -168,4 +116,38 @@ export class FirebaseQuranSessionsUserRepository implements QuranSessionsUserRep
       .toLowerCase();
     return haystack.includes(search);
   }
+}
+
+/**
+ * Server-side query constraints for the QS users slice (nested
+ * `quranSessionsProfile.*` fields). Exported for query-contract tests so the
+ * filter→Firestore mapping can be verified without a Firestore instance.
+ * `search` is intentionally NOT pushed here (client-side, current page only).
+ */
+export function buildQuranSessionsUserServerFilters(
+  filters: QuranSessionsUserFilters,
+): ReturnType<typeof where>[] {
+  const constraints: ReturnType<typeof where>[] = [];
+
+  if (filters.accountStatus) {
+    constraints.push(where(`${QS_PROFILE}.accountStatus`, '==', filters.accountStatus));
+  }
+
+  if (filters.gender) {
+    constraints.push(where(`${QS_PROFILE}.gender`, '==', filters.gender));
+  }
+
+  if (filters.countryCode) {
+    constraints.push(where(`${QS_PROFILE}.countryCode`, '==', filters.countryCode));
+  }
+
+  if (filters.cityId) {
+    constraints.push(where(`${QS_PROFILE}.cityId`, '==', filters.cityId));
+  }
+
+  if (filters.profileCompleted != null) {
+    constraints.push(where(`${QS_PROFILE}.profileCompleted`, '==', filters.profileCompleted));
+  }
+
+  return constraints;
 }

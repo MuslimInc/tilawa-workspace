@@ -51,7 +51,7 @@ class TilawaFormScreenScaffold extends StatelessWidget {
     double footerTop = 0,
     double extraBottom = 0,
   }) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     final double comfortableBottom =
         TilawaComfortableReachPadding.resolve(
           context,
@@ -73,7 +73,7 @@ class TilawaFormScreenScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     final ScrollController? scrollController =
         validationController?.scrollController;
     final TextDirection direction = Directionality.of(context);

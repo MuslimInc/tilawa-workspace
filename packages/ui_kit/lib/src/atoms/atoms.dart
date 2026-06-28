@@ -6,6 +6,8 @@ export 'tilawa_divider.dart';
 export 'tilawa_empty_state.dart';
 export 'tilawa_error_state.dart';
 export 'tilawa_icon_box.dart';
+export 'tilawa_learn_quran_tutor_icon.dart';
+export 'tilawa_islamic_pattern_overlay.dart';
 export 'tilawa_icon_toggle.dart';
 export 'tilawa_illustrated_state.dart';
 export 'tilawa_loading_indicator.dart';

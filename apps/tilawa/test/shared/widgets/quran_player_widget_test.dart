@@ -12,7 +12,7 @@ Widget _compactNowPlayingBarBandLayoutHarness({
 }) {
   return Builder(
     builder: (BuildContext context) {
-      final TilawaDesignTokens tokens = Theme.of(context).tokens;
+      final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
       final TilawaMediaPlayerBarTokens barTokens = Theme.of(
         context,
       ).componentTokens.mediaPlayerBar;
@@ -107,8 +107,8 @@ Widget _wrap({
       child: MaterialApp.router(
         theme: ThemeData(
           extensions: <ThemeExtension<dynamic>>[
-            TilawaDesignTokens.light(),
-            TilawaComponentTokens.light(),
+            MeMuslimDesignTokens.light(),
+            MeMuslimComponentTokens.light(),
           ],
         ),
         routerConfig: router,
@@ -135,7 +135,7 @@ void main() {
         ),
       );
 
-      final tokens = TilawaDesignTokens.light();
+      final tokens = MeMuslimDesignTokens.light();
       expect(footprint, tokens.playerCollapsedHeight + tokens.spaceExtraLarge);
     });
 
@@ -155,7 +155,7 @@ void main() {
           ),
         );
 
-        final tokens = TilawaDesignTokens.light();
+        final tokens = MeMuslimDesignTokens.light();
         expect(
           footprint,
           tokens.playerCollapsedHeight + 34 + tokens.spaceSmall,
@@ -180,7 +180,7 @@ void main() {
         ),
       );
 
-      final tokens = TilawaDesignTokens.light();
+      final tokens = MeMuslimDesignTokens.light();
       expect(
         footprint,
         tokens.playerCollapsedHeight + 56 + tokens.spaceExtraLarge,
@@ -223,7 +223,7 @@ void main() {
         );
         await tester.pump();
 
-        final tokens = TilawaDesignTokens.light();
+        final tokens = MeMuslimDesignTokens.light();
         expect(footprint, tokens.playerCollapsedHeight);
       },
     );
@@ -261,8 +261,8 @@ void main() {
         MaterialApp(
           theme: ThemeData(
             extensions: <ThemeExtension<dynamic>>[
-              TilawaDesignTokens.light(),
-              TilawaComponentTokens.light(),
+              MeMuslimDesignTokens.light(),
+              MeMuslimComponentTokens.light(),
             ],
           ),
           home: Scaffold(
@@ -285,14 +285,14 @@ void main() {
     ) async {
       const double slotHeight = 56.6;
       const double slotWidth = 353.9;
-      final TilawaDesignTokens tokens = TilawaDesignTokens.light();
+      final MeMuslimDesignTokens tokens = MeMuslimDesignTokens.light();
 
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
             extensions: <ThemeExtension<dynamic>>[
               tokens,
-              TilawaComponentTokens.light(),
+              MeMuslimComponentTokens.light(),
             ],
           ),
           home: Scaffold(

@@ -11,7 +11,7 @@ import {
 } from "./idempotencyService";
 import { recordTerminalTransition } from "./metricsAggregationService";
 import { enqueueSessionNotification } from "./notificationOutboxService";
-import { resolveTeacherProfileUserId } from "./teacherProfileUserId";
+import { resolveTeacherProfileUserId, teacherUserIdFromDenormalizedSessionData } from "./teacherProfileUserId";
 import {
   isAdmin,
   requireAuthenticatedUid,
@@ -91,10 +91,9 @@ export const markSessionNoShow = onCall(
       teacherId: (booking.teacherId as string) ?? "",
     };
 
-    const teacherUserId = await resolveTeacherProfileUserId(
-      db,
-      participants.teacherId,
-    );
+    const teacherUserId =
+      teacherUserIdFromDenormalizedSessionData(booking) ??
+      (await resolveTeacherProfileUserId(db, participants.teacherId));
     const actor = isAdmin(request)
       ? ("admin" as const)
       : resolveActorRole(request, data.actorRole, participants, teacherUserId);
@@ -165,7 +164,6 @@ export const markSessionNoShow = onCall(
               ? ({ type: "student_no_show", studentId } as const)
               : ({ type: "both_no_show", teacherId, studentId } as const);
         await recordTerminalTransition(db, metricsType);
-        const teacherUserId = await resolveTeacherProfileUserId(db, teacherId);
         await enqueueSessionNotification(db, {
           sessionId: data.sessionId,
           aggregateId: (session.aggregateId as string | undefined) ?? bookingId,

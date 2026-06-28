@@ -130,7 +130,7 @@ void main() {
       final Rect screen = tester.getRect(find.byType(Scaffold));
       final Rect primary = tester.getRect(primaryButtonFinder(en.next));
       final double inset =
-          TilawaDesignTokens.light().bottomActionHorizontalInset;
+          MeMuslimDesignTokens.light().bottomActionHorizontalInset;
 
       expect(primary.left, greaterThanOrEqualTo(inset - 1));
       expect(screen.width - primary.right, greaterThanOrEqualTo(inset - 1));

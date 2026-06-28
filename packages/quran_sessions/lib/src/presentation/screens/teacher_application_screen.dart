@@ -13,6 +13,7 @@ import '../blocs/teacher_application/teacher_application_state.dart';
 import '../failure_ui/quran_sessions_failure_ui.dart';
 import '../forms/teacher_application_field_ids.dart';
 import '../forms/teacher_application_validation_l10n.dart';
+import '../widgets/quran_sessions_scaffold.dart';
 
 /// Form screen for filling a teacher application (draft → pending).
 ///
@@ -84,8 +85,8 @@ class _TeacherApplicationScreenState extends State<TeacherApplicationScreen> {
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.teacherApplicationTitle)),
+    return QuranSessionsScaffold(
+      title: l10n.teacherApplicationTitle,
       body: BlocConsumer<TeacherApplicationBloc, TeacherApplicationState>(
         listener: (context, state) {
           if (state is TeacherApplicationStatusLoaded &&
@@ -413,13 +414,10 @@ class _FormContent extends StatelessWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(
-                        width: 110,
-                        child: _CountryCodePicker(
-                          selected: countryCode,
-                          onChanged: (code) => bloc.add(
-                            TeacherApplicationPhoneCountryCodeChanged(code),
-                          ),
+                      _CountryCodePicker(
+                        selected: countryCode,
+                        onChanged: (code) => bloc.add(
+                          TeacherApplicationPhoneCountryCodeChanged(code),
                         ),
                       ),
                       SizedBox(width: tokens.spaceSmall),
@@ -595,6 +593,7 @@ class _CountryCodePicker extends StatelessWidget {
     return TilawaDropdownField<String>(
       value: selected,
       semanticLabel: l10n.countryCode,
+      shrinkWrapWidth: true,
       items: [
         for (final e in _options) TilawaDropdownItem(value: e.$1, label: e.$2),
       ],

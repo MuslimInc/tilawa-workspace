@@ -46,7 +46,7 @@ class HomePinnedAthkarGrid extends StatelessWidget {
 }
 
 double _athkarGridTileHeight(BuildContext context) {
-  final TilawaDesignTokens tokens = Theme.of(context).tokens;
+  final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
   final TextTheme textTheme = Theme.of(context).textTheme;
   final double iconExtent = tokens.iconSizeLarge + tokens.spaceLarge * 2;
   final double titleLineHeight = (textTheme.titleMedium?.fontSize ?? 16) * 1.25;

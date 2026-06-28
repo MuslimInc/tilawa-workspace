@@ -106,8 +106,8 @@ void main() {
                 child: MaterialApp.router(
                   theme: ThemeData(
                     extensions: <ThemeExtension<dynamic>>[
-                      TilawaDesignTokens.light(),
-                      TilawaComponentTokens.light(
+                      MeMuslimDesignTokens.light(),
+                      MeMuslimComponentTokens.light(
                         colorScheme: ColorScheme.fromSeed(
                           seedColor: const Color(0xFF219653),
                         ),
@@ -141,14 +141,14 @@ void main() {
         final double fabBottom = fabTopLeft.dy + tester.getSize(fab).height;
         expect(
           800 - fabBottom,
-          greaterThanOrEqualTo(kTilawaMinInteractiveDimension),
+          greaterThanOrEqualTo(kMeMuslimMinInteractiveDimension),
         );
 
         expect(
           layout.listBottomPadding,
           layout.fabBottomOffset +
-              kTilawaMinInteractiveDimension +
-              TilawaDesignTokens.light().spaceLarge,
+              kMeMuslimMinInteractiveDimension +
+              MeMuslimDesignTokens.light().spaceLarge,
         );
       },
     );
@@ -178,7 +178,7 @@ void main() {
           () => audioPlayerBloc.stream,
         ).thenAnswer((_) => const Stream.empty());
 
-        final TilawaDesignTokens tokens = TilawaDesignTokens.light();
+        final MeMuslimDesignTokens tokens = MeMuslimDesignTokens.light();
         final double footerHeight =
             tokens.playerCollapsedHeight +
             tokens.spaceExtraLarge +
@@ -197,7 +197,7 @@ void main() {
                   theme: ThemeData(
                     extensions: <ThemeExtension<dynamic>>[
                       tokens,
-                      TilawaComponentTokens.light(
+                      MeMuslimComponentTokens.light(
                         colorScheme: ColorScheme.fromSeed(
                           seedColor: const Color(0xFF219653),
                         ),
@@ -260,7 +260,7 @@ void main() {
         final double fabBottomOffset = tokens.spaceSmall + tokens.spaceLarge;
         final double fabClearance =
             fabBottomOffset +
-            kTilawaMinInteractiveDimension +
+            kMeMuslimMinInteractiveDimension +
             tokens.spaceLarge;
 
         expect(layout.listBottomPadding, fabClearance + tokens.spaceMedium);
@@ -283,7 +283,7 @@ void main() {
           MaterialApp(
             theme: ThemeData(
               extensions: <ThemeExtension<dynamic>>[
-                TilawaDesignTokens.light(),
+                MeMuslimDesignTokens.light(),
               ],
             ),
             home: _FabRebuildProbe(bottomOffset: fabBottomOffset),

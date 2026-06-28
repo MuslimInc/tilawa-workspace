@@ -30,9 +30,9 @@ double homeDashboardHeroPinnedExtent({required double topInset}) {
   return topInset + kToolbarHeight;
 }
 
-/// Pinned bar sample — premium wash luminance for status-bar icons.
+/// Pinned bar sample — canvas wash luminance for status-bar icons.
 Color homeDashboardHeroCollapsedBarColor(
-  TilawaCapabilityActionCardTokens capabilityCardTokens,
+  TilawaHomeScreenTokens screenTokens,
 ) {
-  return HomeHeroPhotoTheme.collapsedBarSampleColor(capabilityCardTokens);
+  return HomeHeroPhotoTheme.collapsedBarSampleColor(screenTokens);
 }

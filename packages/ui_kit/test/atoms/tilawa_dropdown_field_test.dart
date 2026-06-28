@@ -30,6 +30,82 @@ Widget _wrap(Widget child, {TextDirection direction = TextDirection.ltr}) {
 
 void main() {
   group('TilawaDropdownField', () {
+    testWidgets('shrinkWrapWidth sizes to label in a row', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          home: Scaffold(
+            body: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Row(
+                children: [
+                  TilawaDropdownField<String>(
+                    items: const [
+                      TilawaDropdownItem(value: 'EG', label: '🇪🇬 +20'),
+                      TilawaDropdownItem(value: 'BH', label: '🇧🇭 +973'),
+                    ],
+                    value: 'EG',
+                    shrinkWrapWidth: true,
+                    onChanged: (_) {},
+                  ),
+                  const Expanded(child: SizedBox(height: 48)),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final egWidth = tester
+          .getSize(
+            find.byType(TilawaDropdownField<String>),
+          )
+          .width;
+      final egRowWidth = tester
+          .getSize(
+            find.descendant(
+              of: find.byType(TilawaDropdownField<String>),
+              matching: find.byType(Row),
+            ),
+          )
+          .width;
+      expect(find.textContaining('+20'), findsOneWidget);
+      expect(egWidth - egRowWidth, lessThan(28));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          home: Scaffold(
+            body: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Row(
+                children: [
+                  TilawaDropdownField<String>(
+                    items: const [
+                      TilawaDropdownItem(value: 'EG', label: '🇪🇬 +20'),
+                      TilawaDropdownItem(value: 'BH', label: '🇧🇭 +973'),
+                    ],
+                    value: 'BH',
+                    shrinkWrapWidth: true,
+                    onChanged: (_) {},
+                  ),
+                  const Expanded(child: SizedBox(height: 48)),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final bhWidth = tester
+          .getSize(
+            find.byType(TilawaDropdownField<String>),
+          )
+          .width;
+      expect(find.textContaining('+973'), findsOneWidget);
+      expect(bhWidth, greaterThan(egWidth));
+    });
+
     testWidgets('shows the hint when no value is selected', (tester) async {
       await tester.pumpWidget(
         _wrap(
@@ -153,7 +229,7 @@ void main() {
         find.byType(InputDecorator),
       );
       final border = decorator.decoration.border! as OutlineInputBorder;
-      final expected = TilawaDesignTokens.light().resolveRadius(
+      final expected = MeMuslimDesignTokens.light().resolveRadius(
         family: TilawaRadiusFamily.chrome,
       );
       expect(border.borderRadius, BorderRadius.circular(expected));
@@ -201,7 +277,7 @@ void main() {
       final Size fieldSize = tester.getSize(find.byType(InputDecorator));
       expect(
         fieldSize.height,
-        greaterThanOrEqualTo(kTilawaMinInteractiveDimension),
+        greaterThanOrEqualTo(kMeMuslimMinInteractiveDimension),
       );
     });
 
@@ -220,7 +296,7 @@ void main() {
       );
 
       final MenuAnchor anchor = tester.widget(find.byType(MenuAnchor));
-      final tokens = TilawaDesignTokens.light();
+      final tokens = MeMuslimDesignTokens.light();
       expect(
         anchor.style?.alignment,
         AlignmentDirectional.bottomStart,
@@ -291,7 +367,7 @@ void main() {
           matching: find.byType(MenuItemButton),
         ),
       );
-      expect(itemSize.height, kTilawaMinInteractiveDimension);
+      expect(itemSize.height, kMeMuslimMinInteractiveDimension);
     });
   });
 }

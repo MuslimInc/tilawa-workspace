@@ -6,9 +6,10 @@ import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb;
 import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
+import 'app_brand_probe.dart';
 import 'component_tokens.dart';
 import 'design_tokens.dart';
-import 'tilawa_product_colors.dart';
+import 'memuslim_product_colors.dart';
 import 'tilawa_type_scale.dart';
 
 /// Centralized app theme configuration
@@ -58,7 +59,7 @@ class AppTheme {
 
   static TextTheme _getTextTheme(Brightness brightness) {
     final TextTheme base = _material3TypographyBase(brightness);
-    final TextTheme scaled = tilawaScaleTextTheme(base);
+    final TextTheme scaled = meMuslimScaleTextTheme(base);
     if (_isFlutterTestEnvironment()) {
       return scaled;
     }
@@ -73,10 +74,13 @@ class AppTheme {
   }
 
   static FlexSchemeColor _lightScheme(Color primaryColor) {
-    final safePrimary = primaryColor == AppColors.defaultPrimary
+    final safePrimary =
+        AppBrandProbe.usesBrandLockedSchemeRoles(primaryColor.toARGB32())
         ? primaryColor
         : _safePrimaryForLight(primaryColor);
-    final isBrandPrimary = safePrimary == AppColors.defaultPrimary;
+    final isBrandPrimary = AppBrandProbe.usesBrandLockedSchemeRoles(
+      safePrimary.toARGB32(),
+    );
     final primaryContainer = isBrandPrimary
         ? AppColors.lightSchemePrimaryContainer
         : _containerForPrimary(
@@ -217,7 +221,9 @@ class AppTheme {
 
   static ColorScheme _refineLightColorScheme(ColorScheme scheme) {
     final Color primary = scheme.primary;
-    final isBrandPrimary = primary == AppColors.defaultPrimary;
+    final isBrandPrimary = AppBrandProbe.usesBrandLockedSchemeRoles(
+      primary.toARGB32(),
+    );
     final Color primaryContainer = isBrandPrimary
         ? AppColors.lightSchemePrimaryContainer
         : scheme.primaryContainer;
@@ -342,8 +348,8 @@ class AppTheme {
   static final WidgetStateProperty<Size?> _buttonMinimumTouchSize =
       WidgetStateProperty.all(
         const Size(
-          kTilawaMinInteractiveDimension,
-          kTilawaMinInteractiveDimension,
+          kMeMuslimMinInteractiveDimension,
+          kMeMuslimMinInteractiveDimension,
         ),
       );
 
@@ -359,7 +365,7 @@ class AppTheme {
   /// Applies the kit pill shape to Material button themes.
   static ButtonStyle? _buttonStyleWithKitShape(
     ButtonStyle? base,
-    TilawaDesignTokens tokens,
+    MeMuslimDesignTokens tokens,
   ) => tokens.materialButtonStyle(base: base);
 
   static ThemeData _applySurfaceScale({
@@ -368,10 +374,10 @@ class AppTheme {
     required Color scaffoldBackgroundColor,
   }) {
     const Color componentSurfaceTint = Colors.transparent;
-    final TilawaDesignTokens designTokens =
+    final MeMuslimDesignTokens designTokens =
         colorScheme.brightness == Brightness.dark
-        ? TilawaDesignTokens.dark()
-        : TilawaDesignTokens.light();
+        ? MeMuslimDesignTokens.dark()
+        : MeMuslimDesignTokens.light();
     final double cardRadius = designTokens.resolveRadius(
       family: TilawaRadiusFamily.card,
     );
@@ -396,7 +402,7 @@ class AppTheme {
           fontWeight: FontWeight.w700,
           color: colorScheme.onSurface,
         ),
-        actionsPadding: TilawaDesignTokens.light().appBarActionsPadding,
+        actionsPadding: MeMuslimDesignTokens.light().appBarActionsPadding,
       ),
       cardTheme: theme.cardTheme.copyWith(
         color: colorScheme.surface,
@@ -491,9 +497,9 @@ class AppTheme {
 
     return themedSurfaces.copyWith(
       extensions: [
-        TilawaDesignTokens.light(),
-        TilawaComponentTokens.light(colorScheme: colorScheme),
-        TilawaProductColors.light(colorScheme),
+        MeMuslimDesignTokens.light(),
+        MeMuslimComponentTokens.light(colorScheme: colorScheme),
+        MeMuslimProductColors.light(colorScheme),
         ...extensions,
       ],
     );
@@ -537,9 +543,9 @@ class AppTheme {
 
     return themedSurfaces.copyWith(
       extensions: [
-        TilawaDesignTokens.dark(),
-        TilawaComponentTokens.dark(colorScheme: colorScheme),
-        TilawaProductColors.dark(colorScheme),
+        MeMuslimDesignTokens.dark(),
+        MeMuslimComponentTokens.dark(colorScheme: colorScheme),
+        MeMuslimProductColors.dark(colorScheme),
         ...extensions,
       ],
     );

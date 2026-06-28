@@ -76,7 +76,7 @@ void main() {
         find.byType(InputDecorator),
       );
       final border = decorator.decoration.border! as OutlineInputBorder;
-      final expected = TilawaDesignTokens.light().resolveRadius(
+      final expected = MeMuslimDesignTokens.light().resolveRadius(
         family: TilawaRadiusFamily.chrome,
       );
       expect(border.borderRadius, BorderRadius.circular(expected));

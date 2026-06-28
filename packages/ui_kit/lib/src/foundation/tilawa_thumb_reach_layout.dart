@@ -59,7 +59,7 @@ class TilawaThumbReachLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
 
     final Widget column = Column(
       children: <Widget>[

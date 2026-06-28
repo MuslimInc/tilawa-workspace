@@ -15,7 +15,7 @@ Widget _wrap({
     child: Directionality(
       textDirection: direction,
       child: Theme(
-        data: ThemeData(extensions: [TilawaDesignTokens.light()]),
+        data: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
         child: child,
       ),
     ),

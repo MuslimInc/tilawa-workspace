@@ -185,6 +185,10 @@ void main() {
 
         check(editorOpened).isTrue();
         expect(find.text(l10n.availabilitySetupHeadline), findsNothing);
+        await tester.scrollUntilVisible(
+          find.text(l10n.bookableTimesThisWeekSectionTitle),
+          100,
+        );
         expect(
           find.text(l10n.bookableTimesWeekScopedTitle),
           findsOneWidget,
@@ -242,6 +246,10 @@ void main() {
 
       final state = bloc.state as TeacherDashboardSuccess;
       check(state.availability.length).isGreaterThan(initialCount);
+      await tester.scrollUntilVisible(
+        find.text(l10n.bookableTimesWeekScopedTitle),
+        100,
+      );
       expect(find.text(l10n.bookableTimesWeekScopedTitle), findsOneWidget);
     });
 

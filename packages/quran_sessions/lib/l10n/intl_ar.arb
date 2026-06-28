@@ -7,6 +7,7 @@
     "errorServer": "حدث خطأ في الخادم. يرجى المحاولة لاحقاً.",
     "unauthorized": "غير مخوّل للقيام بهذا الإجراء.",
     "notFound": "{resource} غير موجود.",
+    "sessionDetailNotFound": "تعذر العثور على هذه الجلسة. ربما تم إلغاؤها أو حذفها.",
     "validationError": "خطأ في التحقق: {field} ({code}).",
     "slotUnavailable": "هذا الموعد لم يعد متاحاً. يرجى اختيار موعد آخر.",
     "bookingConflict": "لديك جلسة أخرى في نفس الوقت.",
@@ -23,12 +24,40 @@
     "accountBlocked": "حسابك موقوف. يرجى التواصل مع الدعم.",
     "guardianApprovalRequired": "يتطلب الحجز لهذا الطالب موافقة وليّ الأمر أولاً.",
     "guardianApprovalTitle": "موافقة وليّ الأمر",
-    "guardianApprovalBody": "يجب على وليّ الأمر تسجيل الدخول على هذا الجهاز وتأكيد السماح بحجز جلسات القرآن لهذا الحساب الطلابي.",
+    "guardianApprovalBody": "يجب على وليّ الأمر تسجيل الدخول على هذا الجهاز وتأكيد السماح بحجوزات تعلّم القرآن مع محفظك لهذا الحساب الطلابي.",
     "guardianApprovalStudentIdLabel": "معرّف حساب الطالب",
     "guardianApprovalStudentIdHint": "معرّف المستخدم للطالب",
     "guardianApprovalConfirm": "الموافقة على الحجز",
     "guardianApprovalCaptured": "تم تسجيل موافقة وليّ الأمر. يمكنك العودة إلى الحجز.",
     "guardianApprovalSetupAction": "إعداد موافقة وليّ الأمر",
+    "guardianDashboardTitle": "لوحة وليّ الأمر",
+    "guardianDashboardIntroTitle": "حجوزات جلسات الطفل",
+    "guardianDashboardIntroBody": "وافق على حجوزات تعلّم القرآن مع محفظك لطفلك من هذا الجهاز. تُسجَّل الموافقة مرة واحدة ثم يكمل الطالب الحجز.",
+    "guardianDashboardApproveAction": "الموافقة على حجوزات الطفل",
+    "guardianDashboardOpenAction": "فتح لوحة وليّ الأمر",
+    "guardianDashboardDeferredNote": "عرض الجلسات القادمة للطفل والموافقات المعلّقة في قائمة واحدة يتطلب ربط حساب وليّ الأمر — بعد أدوار المصادقة في MVP.",
+    "sessionRevisionPracticeUpcomingTitle": "استعد لجلستك",
+    "sessionRevisionPracticeCompletedTitle": "تابع مراجعتك",
+    "sessionRevisionPracticeBody": "تدرّب على سورة {surahNumber} في قارئ القرآن في تلاوة قبل أو بعد جلستك.",
+    "@sessionRevisionPracticeBody": {
+        "placeholders": {
+            "surahNumber": {
+                "type": "int"
+            }
+        }
+    },
+    "sessionRevisionPracticeAction": "التدرّب في قارئ القرآن",
+    "teacherCredentialsSectionTitle": "الشهادات والإجازات",
+    "teacherCredentialsSummary": "{count, plural, =1{شهادة واحدة} other{{count} شهادات}}",
+    "@teacherCredentialsSummary": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "teacherCredentialsDisclaimer": "الشهادات مقدَّمة من المعلّم. البنود الموثّقة راجعتها تلاوة؛ غيرها مذكورة من المعلّم.",
+    "teacherCredentialVerifiedBadge": "موثّقة من تلاوة",
     "policyViolation": "تم رفض الحجز لمخالفة السياسة \"{policy}\": {detail}.",
     "marketNotEnabledWithCity": "خدمة الجلسات غير متاحة في مدينتك حالياً. جرّب مدينة أخرى.",
     "marketNotEnabled": "خدمة الجلسات غير متاحة في دولتك حالياً.",
@@ -66,6 +95,8 @@
     "profileFieldDateOfBirth": "تاريخ الميلاد",
     "profileFieldCountry": "الدولة",
     "profileFieldCity": "المدينة",
+    "profileFieldLearningGoals": "أهداف التعلّم",
+    "profileLearningGoalsHelper": "اختياري — يساعدنا على اقتراح المعلم المناسب لك.",
     "profileFieldDisplayName": "الاسم الكامل",
     "profileCompletionSaveAndContinue": "حفظ والمتابعة",
     "profileCompletionSelectDateOfBirth": "اختر تاريخ الميلاد",
@@ -76,13 +107,92 @@
     "profileGenderRequired": "الجنس مطلوب.",
     "profileCountryRequired": "الدولة مطلوبة.",
     "profileCityRequired": "المدينة مطلوبة.",
-    "quranSessionsHomeTitle": "تعلم قراءة القرآن",
+    "quranSessionsHomeTitle": "تعلّم القرآن مع محفظك",
+    "quranSessionsHomeAppBarTitle": "المحفظون",
     "mySessionsTitle": "جلساتي",
     "noTeachersAvailableYet": "لا يوجد معلمون متاحون بعد",
     "seeAllTeachers": "عرض جميع المعلمين ←",
     "becomeTeacherCardTitle": "أريد أن أصبح محفظًا",
     "becomeTeacherCardSubtitle": "انضم إلى نخبة المعلمين المعتمدين على MeMuslim",
-    "teacherListTitle": "ابحث عن معلم",
+    "teacherListAppBarTitle": "المحفظون",
+    "teacherListTitle": "تعلّم القرآن مع محفظك",
+    "teacherListSubtitle": "اختر المحفظ المناسب وابدأ رحلتك في تحسين التلاوة",
+    "teacherSearchHint": "ابحث عن المحفظ بالاسم",
+    "noTeachersForSearchQuery": "لا يوجد محفظون يطابقون \"{query}\"",
+    "@noTeachersForSearchQuery": {
+        "placeholders": {
+            "query": {
+                "type": "String"
+            }
+        }
+    },
+    "teacherNewRating": "جديد",
+    "teacherFilterAll": "الكل",
+    "teacherFilterFree": "مجاني",
+    "teacherFilterPaid": "مدفوع",
+    "teacherFilterBudget": "اقتصادي",
+    "teacherFilterUnderPrice": "أقل من {amount}",
+    "@teacherFilterUnderPrice": {
+        "placeholders": {
+            "amount": {
+                "type": "String"
+            }
+        }
+    },
+    "teacherFilterAvailableToday": "متاح اليوم",
+    "teacherBookAction": "احجز",
+    "viewTeacherProfile": "عرض الملف",
+    "teacherAvailabilityToday": "متاح اليوم",
+    "teacherAvailabilityTomorrow": "أقرب موعد غدًا",
+    "teacherAvailabilityNextAt": "أقرب موعد: {when}",
+    "@teacherAvailabilityNextAt": {
+        "placeholders": {
+            "when": {
+                "type": "String"
+            }
+        }
+    },
+    "teacherAvailabilityNoSlots": "لا توجد مواعيد",
+    "teacherAvailabilityUnavailable": "غير متاح حاليًا",
+    "joinSessionNow": "انضم الآن",
+    "sessionsSummaryUpcoming": "القادمة: {count}",
+    "@sessionsSummaryUpcoming": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "sessionsSummaryPast": "السابقة: {count}",
+    "@sessionsSummaryPast": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "sessionsSummaryNextSession": "أقرب حصة: {when}",
+    "@sessionsSummaryNextSession": {
+        "placeholders": {
+            "when": {
+                "type": "String"
+            }
+        }
+    },
+    "sessionsTabUpcoming": "القادمة",
+    "sessionsTabPast": "السابقة",
+    "sessionsTabCancelled": "الملغاة",
+    "bookAgainAction": "احجز مرة أخرى",
+    "sessionStatusStartingSoon": "تبدأ قريبًا",
+    "sessionStartsInMinutes": "يبدأ بعد {minutes} د",
+    "@sessionStartsInMinutes": {
+        "placeholders": {
+            "minutes": {
+                "type": "int"
+            }
+        }
+    },
+    "noTeachersForAvailabilityFilter": "لا يوجد معلمون متاحون اليوم حالياً",
     "noTeachersForSpecialization": "لم يتم العثور على معلمين لـ \"{specialization}\"",
     "@noTeachersForSpecialization": {
         "placeholders": {
@@ -111,8 +221,8 @@
     "callTypeExternalMeeting": "رابط خارجي",
     "callTypeVoice": "صوتي",
     "callTypeVideo": "مرئي",
-    "sessionModeVoiceBetaNote": "النسخة التجريبية: الصوت يستخدم انضمامًا مؤقتًا حتى يتوفر الاتصال داخل التطبيق.",
-    "sessionModeVideoBetaNote": "النسخة التجريبية: الفيديو يستخدم انضمامًا مؤقتًا حتى يتوفر الاتصال داخل التطبيق.",
+    "sessionModeVoiceBetaNote": "الجلسات الصوتية تستخدم الاتصال داخل التطبيق عندما يدعمها محفظك وجهازك.",
+    "sessionModeVideoBetaNote": "جلسات الفيديو تستخدم الاتصال داخل التطبيق عندما يدعمها محفظك وجهازك.",
     "bookingVoiceVideoProviderNote": "المكالمات داخل التطبيق تستخدم {provider}.",
     "@bookingVoiceVideoProviderNote": {
         "placeholders": {
@@ -126,7 +236,7 @@
     "sessionModeExternalDisabled": "لم يضف المعلم رابط الاجتماع بعد. اختر الصوت أو الفيديو.",
     "meetingLinkUnavailable": "لم يُعدّ المعلم رابط اجتماع للجلسات الخارجية بعد. اختر الصوت أو الفيديو، أو حاول لاحقًا.",
     "callProviderUnavailable": "لا يمكن الانضمام إلى هذه الجلسة من التطبيق حاليًا.",
-    "callProviderAgoraNotConfigured": "مكالمات Agora داخل التطبيق غير مفعّلة في هذا الإصدار. أعد البناء بإعدادات Staging Agora (TILAWA_DISTRIBUTION=staging وTILAWA_LAUNCH_AGORA_APP_ID)، أو استخدم ملف التشغيل Tilawa (Staging Agora).",
+    "callProviderAgoraNotConfigured": "مكالمات Agora داخل التطبيق غير مفعّلة في هذا الإصدار. أعد البناء بإعدادات Staging Agora (TILAWA_DISTRIBUTION=staging وTILAWA_LAUNCH_AGORA_APP_ID)، أو استخدم ملف التشغيل MeMuslim (Staging Agora).",
     "rtcPermissionDenied": "يلزم الوصول إلى الميكروفون أو الكاميرا للانضمام. فعّل {permission} من الإعدادات ثم أعد المحاولة.",
     "@rtcPermissionDenied": {
         "placeholders": {
@@ -171,23 +281,48 @@
     "groupBookingNotSupported": "الجلسات الجماعية غير متاحة في النسخة التجريبية.",
     "unsupportedSessionMode": "نوع الجلسة غير مدعوم.",
     "reviewSubmittedThanks": "شكراً — تم إرسال تقييمك!",
-    "upcomingSessionsSection": "القادمة ({count})",
-  "@upcomingSessionsSection": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+    "sessionReviewTitle": "قيّم جلستك",
+    "sessionReviewSubtitle": "كيف كانت جلستك مع {teacherName}؟",
+    "@sessionReviewSubtitle": {
+        "placeholders": {
+            "teacherName": {
+                "type": "String"
+            }
+        }
+    },
+    "sessionReviewSubtitleGeneric": "كيف كانت جلستك؟",
+    "sessionReviewRatingLabel": "تقييمك",
+    "sessionReviewStarLabel": "{star} نجوم",
+    "@sessionReviewStarLabel": {
+        "placeholders": {
+            "star": {
+                "type": "int"
+            }
+        }
+    },
+    "sessionReviewCommentLabel": "تعليق (اختياري)",
+    "sessionReviewCommentHint": "شارك ما أعجبك أو ما يمكن تحسينه",
+    "sessionReviewSubmit": "إرسال التقييم",
+    "sessionReviewSkip": "ليس الآن",
+    "rateSessionAction": "قيّم الجلسة",
+    "reportTutorAction": "الإبلاغ عن المحفظ",
+    "upcomingSessionsSection": "الحصص القادمة ({count})",
+    "@upcomingSessionsSection": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
     "noUpcomingSessions": "لا توجد جلسات قادمة",
     "pastSessionsSection": "السابقة ({count})",
-  "@pastSessionsSection": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+    "@pastSessionsSection": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
     "loadMorePastSessions": "تحميل المزيد",
     "noPastSessions": "لا توجد جلسات سابقة",
     "cancelSessionDialogTitle": "إلغاء الجلسة؟",
@@ -198,10 +333,18 @@
     "cancelReasonHint": "أخبرنا لماذا تحتاج إلى الإلغاء (مطلوب)",
     "cancelReasonRequired": "يرجى إدخال 3 أحرف على الأقل.",
     "cancelPolicyBlockedNotice": "لا يُسمح بالإلغاء قرب موعد بدء الجلسة.",
-    "cancelPolicyFree": "هذه جلسة مجانية. لا يوجد استرداد.",
+    "cancellationFreeNoRefund": "هذه جلسة مجانية. لا يوجد استرداد.",
     "cancelPolicyFullRefund": "ستحصل على استرداد كامل إذا ألغيت الآن.",
     "cancelPolicyPartialRefund": "قد ينطبق استرداد جزئي وفق سياسة الإلغاء.",
     "cancelPolicyNoRefund": "لا ينطبق استرداد للإلغاء في هذا الوقت.",
+    "tutorCancelSessionDialogTitle": "إلغاء الحصة؟",
+    "tutorCancelSessionDialogMessage": "سيتم إبلاغ الطالب بإلغاء الحصة، ولن يتمكن من الانضمام إليها.",
+    "tutorCancelSessionAction": "إلغاء الحصة",
+    "tutorCancelSessionGoBack": "تراجع",
+    "tutorCancelSessionSuccess": "تم إلغاء الحصة",
+    "tutorCancelSessionError": "تعذّر إلغاء الحصة، حاول مرة أخرى",
+    "sessionCancelledByTutorTitle": "اعتذر المحفظ عن إلغاء الحصة",
+    "sessionCancelledByTutorSubtitle": "يمكنك اختيار موعد آخر",
     "rescheduleSessionTitle": "إعادة جدولة الجلسة",
     "rescheduleReasonLabel": "سبب إعادة الجدولة",
     "rescheduleReasonHint": "اشرح باختصار لماذا تحتاج وقتاً جديداً",
@@ -224,8 +367,12 @@
     "sessionLockedAtBookingNote": "نوع المكالمة ({callType}) والمزوّد ({callProvider}) حُدّدا عند الحجز. لتغييرهما، ألغِ الجلسة وأعد الحجز أو تواصل مع الدعم.",
     "@sessionLockedAtBookingNote": {
         "placeholders": {
-            "callType": { "type": "String" },
-            "callProvider": { "type": "String" }
+            "callType": {
+                "type": "String"
+            },
+            "callProvider": {
+                "type": "String"
+            }
         }
     },
     "callProviderExternal": "رابط خارجي",
@@ -235,34 +382,41 @@
     "sessionStatusLabel": "الحالة: {status}",
     "@sessionStatusLabel": {
         "placeholders": {
-            "status": { "type": "String" }
+            "status": {
+                "type": "String"
+            }
         }
     },
     "sessionStartsAtLabel": "تبدأ: {when}",
     "@sessionStartsAtLabel": {
         "placeholders": {
-            "when": { "type": "String" }
+            "when": {
+                "type": "String"
+            }
         }
     },
     "viewSessionDetails": "عرض التفاصيل",
+    "sessionCardOverflowMenu": "إجراءات الجلسة",
     "noSessionsYet": "لا توجد جلسات بعد",
     "bookFirstSessionHint": "احجز جلستك الأولى مع أحد معلمينا المعتمدين",
     "teacherProfileTitle": "ملف المعلم",
     "teacherRatingReviews": "{rating} · {count} تقييم",
-  "@teacherRatingReviews": {
-    "placeholders": {
-      "rating": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+    "@teacherRatingReviews": {
+        "placeholders": {
+            "rating": {
+                "type": "String"
+            },
+            "count": {
+                "type": "int"
+            }
+        }
+    },
     "availableSlots": "المواعيد المتاحة",
     "reviewsSection": "التقييمات",
     "noReviewsYet": "لا توجد تقييمات بعد",
+    "aboutTeacherSection": "نبذة عن المعلم",
     "bookSessionAction": "احجز جلسة",
+    "noAvailabilityBookAction": "لا توجد مواعيد متاحة",
     "sessionStatusScheduled": "مجدول",
     "sessionStatusInProgress": "جارٍ الآن",
     "sessionStatusCompleted": "مكتمل",
@@ -270,19 +424,36 @@
     "sessionStatusNoShow": "غائب",
     "cancel": "إلغاء",
     "joinSession": "انضمام",
+    "sessionJoinStateNotStarted": "يفتح الانضمام قبل ١٥ دقيقة من بدء الجلسة.",
+    "sessionJoinStateJoinAvailable": "يمكنك الانضمام الآن.",
+    "sessionJoinStateJoining": "جارٍ الاتصال بالجلسة…",
+    "sessionJoinStateJoined": "انضممت إلى هذه الجلسة.",
+    "sessionJoinStateFailed": "تعذّر الانضمام. أعد المحاولة أو تواصل مع الدعم.",
+    "sessionJoinStateEnded": "انتهت هذه الجلسة.",
+    "sessionJoinStateCancelled": "أُلغيت هذه الجلسة.",
+    "sessionCancelledSuccess": "تم إلغاء الجلسة.",
     "noSlotsAvailable": "لا توجد مواعيد متاحة",
     "noSlotsAvailableThisDay": "لا توجد مواعيد متاحة في هذا اليوم",
+    "slotPickerLocalTimezoneNote": "الأوقات معروضة بتوقيتك المحلي",
+    "teacherSessionsCompleted": "{count, plural, =1{جلسة واحدة مكتملة} other{{count} جلسة مكتملة}}",
+    "@teacherSessionsCompleted": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
     "teacherDashboardTitle": "لوحة المعلم",
     "noSessionsOrSlotsYet": "لا توجد جلسات أو مواعيد بعد",
     "addAvailableSlot": "أضف موعداً متاحاً",
     "openSlotsSection": "المواعيد المفتوحة ({count})",
-  "@openSlotsSection": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+    "@openSlotsSection": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
     "addSlot": "أضف موعداً",
     "noOpenSlots": "لا توجد مواعيد مفتوحة",
     "slotBooked": "محجوز",
@@ -326,6 +497,7 @@
     "slotTime": "وقت الموعد",
     "addSlotButton": "إضافة الموعد",
     "availabilityTitle": "التوفر الأسبوعي",
+    "availabilityAppBarTitle": "المواعيد",
     "availabilityRecurringBanner": "هذا توفرك الأسبوعي المتكرر. يُستخدم لإنشاء المواعيد القابلة للحجز في الأيام القادمة.",
     "bookableTimesSectionTitle": "المواعيد المتاحة خلال 14 يوم",
     "bookableTimesSectionSubtext": "يتم إنشاء هذه المواعيد من توفرك الأسبوعي مع استبعاد الاستثناءات والحجوزات.",
@@ -348,7 +520,7 @@
     "bookableTimesEmptyNextWeekSubtitle": "يُبنى الأسبوع القادم من توفرك الأسبوعي المتكرر. راجع جدولك لإضافة أيام أو تعديلها.",
     "bookableTimesEmptyHorizonTitle": "لا توجد مواعيد قابلة للحجز خلال 14 يومًا",
     "bookableTimesEmptyHorizonSubtitle": "حدد توفرك الأسبوعي المتكرر وستظهر المواعيد تلقائيًا للأيام المفتوحة.",
-    "upcomingSessionsEmptyTitle": "لا توجد جلسات قادمة",
+    "upcomingSessionsEmptyTitle": "لا توجد حصص قادمة",
     "upcomingSessionsEmptySubtitle": "ستظهر الحجوزات المؤكدة هنا عندما يحجز الطلاب موعدًا معك.",
     "fridayReviewBannerMessage": "راجع توفرك للأسبوع القادم. يحجز الطلاب من جدولك الأسبوعي.",
     "fridayReviewBannerAction": "مراجعة",
@@ -457,25 +629,25 @@
     "reviewedAtLabel": "تاريخ المراجعة",
     "reasonLabel": "السبب",
     "labelWithColon": "{label}:",
-  "@labelWithColon": {
-    "placeholders": {
-      "label": {
-        "type": "String"
-      }
-    }
-  },
+    "@labelWithColon": {
+        "placeholders": {
+            "label": {
+                "type": "String"
+            }
+        }
+    },
     "debugModeTitle": "وضع التطوير",
     "debugApprovalDescription": "هذا الزر للاختبار الداخلي فقط ولا يظهر في نسخة الإنتاج. يحاكي موافقة المشرف دون الحاجة إلى واجهة إدارة.",
     "simulateAdminApproval": "محاكاة موافقة المشرف",
     "priceFree": "مجاني",
     "pricePerSession": "{amount} / جلسة",
-  "@pricePerSession": {
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
+    "@pricePerSession": {
+        "placeholders": {
+            "amount": {
+                "type": "String"
+            }
+        }
+    },
     "teachingOnMemuslimTitle": "التدريس على MeMuslim",
     "teachingOnMemuslimApply": "التقديم كمحفظ",
     "teachingOnMemuslimContinueDraft": "استكمال طلب التسجيل",
@@ -539,6 +711,7 @@
     "teacherProfileIncompleteAction": "إكمال الملف",
     "manageYourAvailabilityAndSessions": "يمكنك إدارة مواعيدك وجلساتك من هنا",
     "noAvailabilityYet": "لم تُنشر أي مواعيد بعد.",
+    "noAvailabilityHelper": "يمكنك العودة لاحقًا عند إضافة مواعيد جديدة.",
     "reportConcernAction": "الإبلاغ عن مخاوف",
     "reportConcernTitle": "الإبلاغ عن مخاوف تتعلق بالسلامة",
     "reportConcernSubtitle": "أخبرنا بما حدث. سيقوم فريقنا بمراجعة البلاغات بسرعة.",
@@ -565,6 +738,7 @@
     "reportCategoryFraudOrScam": "احتيال",
     "reportCategoryOther": "أخرى",
     "walletTitle": "محفظتي",
+    "walletAppBarTitle": "المحفظة",
     "walletAvailableBalanceLabel": "الرصيد المتاح",
     "walletHeldBalanceLabel": "محجوز: {amount}",
     "@walletHeldBalanceLabel": {
@@ -596,6 +770,8 @@
     "walletTransactionTypeExpiry": "رصيد منتهٍ",
     "walletEntryAction": "المحفظة",
     "paymentCheckoutTitle": "تأكيد الدفع",
+    "paymentCheckoutFreeTitle": "تأكيد الحجز",
+    "paymentCheckoutFreeAmount": "هذه الجلسة مجانية — لا يلزم دفع.",
     "paymentCheckoutAmount": "الإجمالي: {amount}",
     "@paymentCheckoutAmount": {
         "placeholders": {
@@ -605,8 +781,13 @@
         }
     },
     "paymentCheckoutAmountPending": "سعر الجلسة (تجريبي)",
-    "paymentCheckoutRefundToWalletNotice": "عند الإلغاء أو الموافقة على استرداد، يُضاف المبلغ إلى محفظة تلاوة كرصيد. لا يُعاد الرصيد تلقائيًا إلى بطاقتك.",
+    "paymentCheckoutSandboxNotice": "وضع تجريبي — لا يتم خصم مبلغ حقيقي. تفعيل الحجز المدفوع عبر علم الإطلاق التجريبي فقط.",
+    "paymentCheckoutRefundToWalletNotice": "عند الإلغاء أو الموافقة على استرداد، يُضاف المبلغ إلى محفظة أنا مسلم كرصيد. لا يُعاد الرصيد تلقائيًا إلى بطاقتك.",
     "paymentCheckoutConfirm": "تأكيد الدفع (تجريبي)",
+    "paymentCheckoutConfirmFree": "تأكيد الحجز",
+    "bookingPriceSummaryTitle": "سعر الجلسة",
+    "bookingPricePerSessionHint": "يُخصم مرة واحدة عند التأكيد (تجريبي فقط).",
+    "walletSandboxNotice": "محفظة تجريبية — أرصدة من الاستردادات والمدفوعات التجريبية فقط. ليست أموالًا حقيقية.",
     "restrictionReasonFalseIdentity": "بيانات هوية مزيفة",
     "restrictionReasonPolicyViolation": "مخالفة السياسات",
     "restrictionReasonSafetyConcern": "مخاوف تتعلق بالسلامة",
@@ -622,6 +803,17 @@
     "sessionLifecycleCancelledByStudent": "ألغاها الطالب",
     "sessionLifecycleCancelledByTeacher": "ألغاها المعلم",
     "sessionLifecycleCancelledByAdmin": "ألغاها المشرف",
+    "sessionStatusCancelledByTutorDetail": "تم إلغاء الجلسة بواسطة المحفظ",
+    "sessionStatusCancelledByTutorSelf": "ألغيت هذه الجلسة",
+    "sessionStatusCancelledByStudentDetail": "تم إلغاء الجلسة بواسطة الطالب",
+    "sessionStatusCancelledByStudentSelf": "ألغيت هذه الجلسة",
+    "sessionStatusCancelledBySupportDetail": "تم إلغاء الجلسة بواسطة الإدارة",
+    "sessionStatusCancelledDescription": "أُلغيت هذه الجلسة.",
+    "sessionTimelineBookingConfirmed": "تم تأكيد الحجز",
+    "sessionTimelineCancelledByTutor": "تم إلغاء الجلسة بواسطة المحفظ",
+    "sessionTimelineCancelledByStudent": "تم إلغاء الجلسة بواسطة الطالب",
+    "sessionTimelineCancelledBySupport": "تم إلغاء الجلسة بواسطة الإدارة",
+    "sessionCancelledDisputeHelper": "يمكنك فتح نزاع إذا احتجت لفريقنا مراجعة هذا الإلغاء.",
     "sessionLifecycleTeacherNoShow": "غياب المعلم",
     "sessionLifecycleStudentNoShow": "غياب الطالب",
     "sessionLifecycleBothNoShow": "غياب الطرفين",
@@ -653,6 +845,65 @@
     "sessionActionIssueRefund": "إصدار استرداد",
     "sessionActionExpireReservation": "انتهاء الحجز",
     "sessionActionRejectBooking": "رفض الحجز",
+    "bookingRequestSentTitle": "تم إرسال طلب الحجز",
+    "bookingRequestSentSubtitle": "الحجز قيد المراجعة.",
+    "sessionAwaitingReviewNextSteps": "الحجز قيد المراجعة.\nيرجى إتمام الدفع عبر إحدى الطرق المتاحة.\nسيتم تأكيد الحصة بعد مراجعة الدفع وتأكيد المعلم.",
+    "paidSessionNoticeTitle": "هذه الحصة مدفوعة",
+    "manualPaymentInstructionsBody": "الدفع حاليًا يتم يدويًا عبر فودافون كاش أو إنستاباي أو تحويل بنكي، وذلك لحين الانتهاء من إضافة طرق الدفع أونلاين داخل التطبيق.",
+    "manualPaymentInstapayHandle": "للدفع عبر إنستاباي:",
+    "manualPaymentInstapayLink": "أو من خلال رابط الدفع:",
+    "manualPaymentRecipientMaskedName": "اسم المستلم الظاهر عند التحويل:",
+    "manualPaymentReceiptWhatsappInstruction": "بعد إتمام الدفع، يرجى إرسال صورة التحويل على واتساب إلى رقم الدعم:",
+    "manualPaymentConfirmationRule": "سيتم تأكيد الحجز بعد مراجعة الدفع وتأكيد المعلم.",
+    "manualPaymentCancellationPolicy": "إذا كنت قد أتممت الدفع يدويًا، يرجى التواصل مع الدعم لمراجعة حالة الدفع أو الاسترداد.",
+    "manualPaymentCancellationSupportHint": "رقم الدعم: {supportNumber}",
+    "@manualPaymentCancellationSupportHint": {
+        "placeholders": {
+            "supportNumber": {
+                "type": "String"
+            }
+        }
+    },
+    "manualPaymentCopiedToClipboard": "تم النسخ إلى الحافظة",
+    "paymentMethodVodafoneCash": "Vodafone Cash",
+    "paymentMethodInstapay": "InstaPay",
+    "paymentMethodBankTransfer": "تحويل بنكي",
+    "bookingUnderReviewTitle": "الحجز قيد المراجعة",
+    "bookingUnderReviewPaymentHint": "يرجى إتمام الدفع عبر إحدى الطرق المتاحة.",
+    "bookingUnderReviewConfirmHint": "سيتم تأكيد الحجز بعد مراجعة الدفع وتأكيد المعلم.",
+    "bookingAcceptedTitle": "تم قبول الحصة",
+    "bookingAcceptedSubtitle": "يمكنك الانضمام في موعد الحصة",
+    "bookingRejectedTitle": "اعتذر المحفظ عن قبول الحصة",
+    "bookingRejectedSubtitle": "يمكنك اختيار موعد آخر",
+    "sendBookingRequest": "إرسال طلب الحجز",
+    "sessionStatusBookingUnderReview": "قيد المراجعة",
+    "sessionStatusRejectedByTutor": "مرفوض",
+    "teacherPendingBookingRequestsSection": "طلبات الحجز ({count})",
+    "@teacherPendingBookingRequestsSection": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "teacherPendingBookingRequestsEmptyTitle": "لا توجد طلبات حجز حاليًا",
+    "teacherPendingBookingRequestsEmptySubtitle": "ستظهر طلبات الطلاب هنا عند إرسالها",
+    "teacherAcceptBookingRequest": "قبول",
+    "teacherRejectBookingRequest": "رفض",
+    "tutorRejectBookingSheetTitle": "رفض طلب الحجز؟",
+    "tutorRejectBookingSheetBody": "يمكنك توضيح سبب الرفض للطالب، أو رفض الطلب بدون سبب.",
+    "tutorRejectBookingReasonLabel": "سبب الرفض",
+    "tutorRejectBookingReasonHint": "مثال: الموعد غير مناسب",
+    "tutorRejectBookingConfirmAction": "رفض الطلب",
+    "tutorRejectBookingGoBack": "تراجع",
+    "tutorRejectBookingReasonTooLong": "سبب الرفض طويل جداً",
+    "tutorCancelSessionFromCard": "إلغاء",
+    "sessionLifecycleBookingUnderReview": "الحجز قيد المراجعة",
+    "sessionLifecycleRejectedByTutor": "مرفوض من المحفظ",
+    "sessionActionSubmitBookingRequest": "إرسال طلب الحجز",
+    "sessionActionAcceptBookingRequest": "قبول طلب الحجز",
+    "sessionActionRejectBookingRequest": "رفض طلب الحجز",
+    "sessionActionExpireBookingReview": "انتهاء مراجعة الحجز",
     "sessionTimelineStatusTransition": "{previous} ← {next}",
     "@sessionTimelineStatusTransition": {
         "placeholders": {
@@ -661,6 +912,24 @@
             },
             "next": {
                 "type": "String"
+            }
+        }
+    },
+    "tutorDashboardStudentFallback": "طالب",
+    "teacherDashboardLoadError": "تعذّر تحميل الحصص، حاول مرة أخرى",
+    "tutorSessionStatusPendingApproval": "بانتظار موافقتك",
+    "tutorSessionStatusAccepted": "مقبولة",
+    "tutorSessionStatusRejected": "مرفوضة",
+    "tutorSessionStatusCancelledByTutor": "ألغيتها",
+    "tutorSessionStatusCancelledByStudent": "ألغاها الطالب",
+    "tutorSessionStatusCompleted": "مكتملة",
+    "tutorSessionStatusExpired": "انتهى الموعد",
+    "tutorSessionJoinNotYet": "لم يبدأ الموعد بعد",
+    "tutorSessionDurationMinutes": "{count} د",
+    "@tutorSessionDurationMinutes": {
+        "placeholders": {
+            "count": {
+                "type": "int"
             }
         }
     }

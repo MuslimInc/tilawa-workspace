@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -49,7 +49,6 @@ class FavoritesScreen extends StatelessWidget {
               appBar: TilawaCatalogAppBar.titleOnly(
                 context,
                 title: context.l10n.favorites,
-                centerTitle: true,
               ),
               body: BlocBuilder<FavoritesCubit, FavoritesState>(
                 builder: (context, state) {

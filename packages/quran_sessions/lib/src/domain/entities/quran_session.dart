@@ -17,6 +17,16 @@ enum QuranSessionStatus {
   noShow,
 }
 
+/// Time-based classification of a session relative to `now`.
+///
+/// Backend/list queries split sessions by [endsAt] so ongoing sessions
+/// (started but not ended) stay in the active list, not in past:
+///
+///   - `now < startsAt`        → [QuranSessionTimePhase.upcoming]
+///   - `startsAt <= now <= endsAt` → [QuranSessionTimePhase.ongoing]
+///   - `now > endsAt`         → [QuranSessionTimePhase.past]
+enum QuranSessionTimePhase { upcoming, ongoing, past }
+
 /// A Quran tutoring session as returned from the backend.
 class QuranSession extends Equatable {
   const QuranSession({
@@ -73,7 +83,22 @@ class QuranSession extends Equatable {
   SessionLifecycleStatus get effectiveLifecycleStatus =>
       lifecycleStatus ?? status.toLifecycleStatus();
 
-  bool get isUpcoming => startsAt.isAfter(DateTime.now());
+  /// `now` is before [startsAt] — session has not started yet.
+  bool get isUpcoming => DateTime.now().isBefore(startsAt);
+
+  /// [startsAt] has arrived but [endsAt] has not — session is live/ongoing.
+  bool get isOngoing =>
+      !DateTime.now().isBefore(startsAt) && !DateTime.now().isAfter(endsAt);
+
+  /// `now` is at or after [endsAt] — session has ended.
+  bool get isPast => DateTime.now().isAfter(endsAt);
+
+  /// Pure classification at a fixed [now] (testable, no side effects).
+  QuranSessionTimePhase phaseAt(DateTime now) {
+    if (now.isBefore(startsAt)) return QuranSessionTimePhase.upcoming;
+    if (!now.isAfter(endsAt)) return QuranSessionTimePhase.ongoing;
+    return QuranSessionTimePhase.past;
+  }
 
   @override
   List<Object?> get props => [

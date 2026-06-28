@@ -15,6 +15,7 @@ class UserProfileDto {
     this.guardianId,
     this.guardianChildBookingApprovedAt,
     this.restrictionReason,
+    this.learningGoals = const [],
   });
 
   final String userId;
@@ -32,4 +33,5 @@ class UserProfileDto {
   final String? guardianId;
   final DateTime? guardianChildBookingApprovedAt;
   final String? restrictionReason;
+  final List<String> learningGoals;
 }

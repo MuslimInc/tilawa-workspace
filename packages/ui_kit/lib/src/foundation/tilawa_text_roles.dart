@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 /// Semantic typography slot on [TextTheme].
 ///
 /// Component tokens store these instead of raw font sizes so
-/// [tilawaScaleTextTheme] in [AppTheme] remains the single global scale point.
+/// [meMuslimScaleTextTheme] in [AppTheme] remains the single global scale point.
 enum TilawaTextRole {
   displaySmall,
   headlineSmall,

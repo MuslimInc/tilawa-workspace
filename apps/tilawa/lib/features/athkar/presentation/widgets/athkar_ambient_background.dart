@@ -28,7 +28,7 @@ class _AthkarAmbientPainter extends CustomPainter {
   });
 
   final ColorScheme colorScheme;
-  final TilawaDesignTokens tokens;
+  final MeMuslimDesignTokens tokens;
 
   @override
   void paint(Canvas canvas, Size size) {

@@ -11,6 +11,14 @@ export interface CallTrackingRepository {
   /** One aggregated doc read; null when no call has been tracked yet. */
   getSummary(sessionId: string): Promise<CallTrackingSummary | null>;
 
+  /**
+   * Parallel direct reads of `callTracking/summary` for the given session ids.
+   * Skips empty ids; never lists raw events.
+   */
+  getSummariesBySessionIds(
+    sessionIds: readonly string[],
+  ): Promise<Map<string, CallTrackingSummary>>;
+
   /** Bounded, paginated read of raw events ordered by recordedAt desc. */
   listEvents(
     sessionId: string,

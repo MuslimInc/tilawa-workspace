@@ -1,6 +1,6 @@
-# Tilawa Brand
+# MeMuslim Brand
 
-Visual identity layer for **Tilawa**, aligned with the warm Islamic lifestyle
+Visual identity layer for **MeMuslim / أنا مسلم**, aligned with the warm Islamic lifestyle
 reference: [Behance — Islamic App Mobile UI/UX Design for Muslim Lifestyle](https://www.behance.net/gallery/230050359/Islamic-App-Mobile-UIUX-Design-for-Muslim-Lifestyle)
 (Deen Muslim concept by SpineEdge Studio).
 
@@ -13,9 +13,9 @@ this file wins on intent.
 
 ## 1. Brand essence
 
-Tilawa is a **daily Muslim lifestyle companion** — prayer, Quran, Qibla, dhikr,
-and calm home rituals in one warm, approachable shell. The product name stays
-**Tilawa / تلاوة**; the visual language follows the Behance warm parchment +
+MeMuslim is a **daily Muslim lifestyle companion** — prayer, Quran, Qibla, dhikr,
+and calm home rituals in one warm, approachable shell. The product name is
+**MeMuslim / أنا مسلم**; the visual language follows the Behance warm parchment +
 brown + gold system.
 
 | Word | What it means in pixels |
@@ -53,7 +53,7 @@ brown + gold system.
 **Anti-patterns:**
 - Don't reintroduce sage green (`#219653`) as production primary.
 - Don't use cool grey porcelain (`#F4F5F7`) on lifestyle surfaces.
-- Don't use gold gradient on Support Tilawa CTAs.
+- Don't use gold gradient on Support MeMuslim CTAs.
 
 ---
 
@@ -109,7 +109,7 @@ not Premium. See §8 in prior revision — strings live in `*.arb`.
 5. Bottom navigation shell
 6. Mushaf reader
 7. Athkar / dhikr
-8. Settings + Support Tilawa
+8. Settings + Support MeMuslim
 
 ---
 
@@ -122,7 +122,7 @@ not Premium. See §8 in prior revision — strings live in `*.arb`.
 
 ---
 
-## 10. Support Tilawa
+## 10. Support MeMuslim
 
 Unchanged ethics — see [`specs/016-support-tilawa/spec.md`](../specs/016-support-tilawa/spec.md)
 and [`packages/ui_kit/docs/support_visual_system.md`](../packages/ui_kit/docs/support_visual_system.md).

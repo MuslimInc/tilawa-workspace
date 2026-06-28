@@ -26,7 +26,7 @@ Tilawa-specific tenets from `tilawa-apply-ux-principles` reinforce these: **cont
 
 ### Strengths (already in kit)
 
-- Shared press-scale + focus ring via `TilawaInteractiveSurface` (consistency, accessibility).
+- Shared soft ink + state-layer press + focus ring via `TilawaInteractiveSurface` (consistency, accessibility).
 - `TilawaEmptyState` / `TilawaErrorState` share `TilawaIllustratedState` (comfort, hierarchy).
 - Catalog filters use `TilawaSelectionPillStyle.catalog` (contrast without primary wash on chrome).
 - 2026 accessibility audit closed touch-target and semantics gaps on chips, segments, feedback strips.
@@ -58,7 +58,7 @@ Tilawa-specific tenets from `tilawa-apply-ux-principles` reinforce these: **cont
 |-----------|---------|
 | **Consistency** | Settings and hub rows press like cards, chips, and selection tiles. |
 | **Accessibility** | Keyboard focus ring on every drill-down row. |
-| **Feedback** | Shared haptic + press-scale on row activation. |
+| **Feedback** | Shared haptic + soft ink + state-layer press on row activation. |
 
 ---
 

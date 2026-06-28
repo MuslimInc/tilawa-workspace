@@ -2,16 +2,11 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:dartz_plus/dartz_plus.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tilawa/features/athkar/data/datasources/athkar_daily_progress_local_datasource.dart';
-import 'package:tilawa/features/athkar/domain/entities/athkar_category.dart';
-import 'package:tilawa/features/athkar/domain/entities/athkar_item.dart';
-import 'package:tilawa/features/athkar/domain/repositories/athkar_repository.dart';
-import 'package:tilawa/features/athkar/domain/usecases/get_athkar_by_category_use_case.dart';
-import 'package:tilawa/features/athkar/domain/usecases/get_athkar_categories_use_case.dart';
+import 'package:tilawa/core/bootstrap/app_launch_config.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/history/domain/entities/history_entity.dart';
 import 'package:tilawa/features/history/domain/repositories/history_repository.dart';
@@ -21,24 +16,19 @@ import 'package:tilawa/features/home/domain/repositories/home_dashboard_reposito
 import 'package:tilawa/features/home/domain/usecases/get_home_dashboard_use_case.dart';
 import 'package:tilawa/features/home/presentation/bloc/home_dashboard_bloc.dart';
 import 'package:tilawa/features/home/presentation/bloc/home_dashboard_event.dart';
-import 'package:tilawa/features/home/presentation/cubit/home_athkar_compact_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_cubit.dart';
-import 'package:tilawa/features/home/presentation/cubit/home_primary_action_cubit.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_primary_action_zone.dart';
-import 'package:tilawa/features/home/presentation/cubit/home_quran_resume_cubit.dart';
 import 'package:tilawa/features/home/presentation/screens/home_screen.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_dashboard_hero_sliver.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_discover_carousel.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_features_hub.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_travel_destination_card.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_primary_action_card.dart';
-import 'package:tilawa/features/quran_reader/domain/usecases/get_last_read_position_use_case.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_next_prayer_time.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_daily_inspiration_section.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_more_actions_group.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_primary_actions_section.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_quick_tools_section.dart';
 import 'package:tilawa/features/prayer_times/application/prayer_location_update_notifier.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/notify_prayer_location_updated_use_case.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
-import 'package:tilawa_core/errors/failures.dart';
-import 'package:tilawa_core/utils/typedefs.dart';
+import 'package:tilawa/screens/cubit/main_screen_cubit.dart';
+import 'package:tilawa/screens/cubit/main_screen_state.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 class _TestSharedPreferencesAsync implements SharedPreferencesAsync {
@@ -64,7 +54,7 @@ void main() {
     }
   });
 
-  testWidgets('settles a partial home hero collapse to the pinned state', (
+  testWidgets('home screen hero does not pin', (
     tester,
   ) async {
     final view = tester.view;
@@ -79,45 +69,27 @@ void main() {
     )..add(const HomeDashboardStarted(localeIdentifier: 'ar'));
     addTearDown(bloc.close);
 
+    if (!getIt.isRegistered<AppLaunchConfig>()) {
+      getIt.registerSingleton<AppLaunchConfig>(
+        const AppLaunchConfig(quranSessionsEnabled: false),
+      );
+    }
+    addTearDown(() async {
+      if (getIt.isRegistered<AppLaunchConfig>()) {
+        await getIt.unregister<AppLaunchConfig>();
+      }
+    });
+
     await tester.pumpWidget(_HomeScreenHarness(bloc: bloc));
     await tester.pump();
     for (var frame = 0; frame < 20; frame++) {
       await tester.pump(const Duration(milliseconds: 16));
     }
 
-    expect(find.byType(SliverPersistentHeader), findsOneWidget);
+    expect(find.byType(SliverPersistentHeader), findsNothing);
 
     final BuildContext homeContext = tester.element(find.byType(HomeScreen));
-    final double collapseExtent = HomeDashboardHeroSliver.collapseScrollExtent(
-      homeContext,
-    );
-    final scrollableFinder = find
-        .descendant(
-          of: find.byType(CustomScrollView),
-          matching: find.byType(Scrollable),
-        )
-        .first;
-    final scrollable = tester.state<ScrollableState>(scrollableFinder);
-    final position = scrollable.position;
-
-    position.jumpTo(collapseExtent * 0.5);
-    await tester.pump();
-
-    ScrollEndNotification(
-      metrics: position,
-      context: tester.element(scrollableFinder),
-    ).dispatch(tester.element(scrollableFinder));
-
-    await tester.pump();
-    for (var frame = 0; frame < 50; frame++) {
-      await tester.pump(const Duration(milliseconds: 16));
-      if ((position.pixels - collapseExtent).abs() < 0.5) {
-        break;
-      }
-    }
-
-    expect(position.pixels, closeTo(collapseExtent, 0.5));
-    expect(tester.takeException(), isNull);
+    expect(HomeNextPrayerTime.collapseScrollExtent(homeContext), 0);
   });
 
   testWidgets('Home avoids bottom-nav duplicate shortcuts', (tester) async {
@@ -134,17 +106,22 @@ void main() {
     }
 
     expect(find.text('Reciters'), findsOneWidget);
-    expect(find.text('Browse recitations'), findsNothing);
-    expect(find.text('Quick athkar'), findsNothing);
+    // Shortcut tiles show only the label (no subtitle in the grid).
+    expect(find.text('Listen to curated recitations'), findsNothing);
     expect(find.text("Today's prayer times"), findsNothing);
     expect(find.text('View all'), findsNothing);
 
+    // Nav-duplicate tiles must not appear on Home.
     expect(find.text('Home'), findsNothing);
     expect(find.text('Settings'), findsNothing);
+    expect(find.text('Prayer'), findsNothing);
+    expect(find.text('Quran'), findsNothing);
+    expect(find.text('Mushaf'), findsOneWidget);
 
-    expect(find.text('Discover'), findsOneWidget);
-    expect(find.text('Athkar'), findsWidgets);
-    expect(find.text('Qibla'), findsWidgets);
+    expect(find.text('Discover'), findsNothing);
+    expect(find.text('Athkar'), findsOneWidget);
+    expect(find.text('Qibla'), findsOneWidget);
+    expect(find.text('Quick Actions'), findsNothing);
   });
 
   testWidgets('Home contains no layout toggle button', (tester) async {
@@ -164,42 +141,134 @@ void main() {
     expect(find.byIcon(Icons.view_list_rounded), findsNothing);
   });
 
-  testWidgets('Home shows carousel, primary action, and feature grid', (
-    tester,
-  ) async {
-    final bloc = HomeDashboardBloc(
-      GetHomeDashboardUseCase(_FakeHomeDashboardRepository()),
-      NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
-    )..add(const HomeDashboardStarted(localeIdentifier: 'en'));
-    addTearDown(bloc.close);
+  testWidgets(
+    'Home shows quick actions, more, and inspiration',
+    (
+      tester,
+    ) async {
+      final bloc = HomeDashboardBloc(
+        GetHomeDashboardUseCase(_FakeHomeDashboardRepository()),
+        NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
+      )..add(const HomeDashboardStarted(localeIdentifier: 'en'));
+      addTearDown(bloc.close);
 
-    await tester.pumpWidget(_HomeScreenHarness(bloc: bloc, locale: 'en'));
-    await tester.pump();
-    for (var frame = 0; frame < 30; frame++) {
-      await tester.pump(const Duration(milliseconds: 16));
-    }
+      await tester.pumpWidget(_HomeScreenHarness(bloc: bloc, locale: 'en'));
+      await tester.pump();
+      for (var frame = 0; frame < 30; frame++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
 
-    expect(find.text('Today'), findsOneWidget);
-    expect(find.text('Yours'), findsNothing);
-    expect(find.byType(HomeDiscoverCarousel), findsOneWidget);
-    expect(find.byType(HomeTravelDestinationCard), findsWidgets);
-    expect(find.byType(HomePrimaryActionCard), findsOneWidget);
-    expect(find.byType(HomeFeaturesHub), findsOneWidget);
-    expect(find.text('Discover'), findsOneWidget);
-    expect(find.text('Featured for you'), findsOneWidget);
-    expect(find.text('Tasbeeh'), findsWidgets);
-    expect(find.text('Bookmarks'), findsOneWidget);
-  });
+      expect(find.byType(HomePrimaryActionsSection), findsOneWidget);
+      expect(find.byType(HomeQuickToolsSection), findsOneWidget);
+      expect(find.byType(HomeMoreActionsGroup), findsOneWidget);
+      expect(find.byType(HomeDailyInspirationSection), findsOneWidget);
+
+      final double primaryTop = tester
+          .getTopLeft(find.byType(HomePrimaryActionsSection))
+          .dy;
+      final double toolsTop = tester
+          .getTopLeft(find.byType(HomeQuickToolsSection))
+          .dy;
+      final double moreTop = tester
+          .getTopLeft(find.byType(HomeMoreActionsGroup))
+          .dy;
+      final double inspirationTop = tester
+          .getTopLeft(find.byType(HomeDailyInspirationSection))
+          .dy;
+
+      expect(primaryTop, lessThan(toolsTop));
+      expect(toolsTop, lessThan(moreTop));
+      expect(moreTop, lessThan(inspirationTop));
+
+      // Old mismatched "Today" wrapper title must not appear.
+      expect(find.text('Today'), findsNothing);
+      // Quick actions keep supporting tools reachable.
+      final l10n = AppLocalizations.of(
+        tester.element(find.byType(HomeScreen)),
+      );
+      expect(find.text(l10n.homeQuickTasbeeh), findsOneWidget);
+      expect(find.text(l10n.homeQuickReciters), findsOneWidget);
+      expect(find.text(l10n.homeQuickQuranReader), findsOneWidget);
+      expect(find.text(l10n.homeQuickQibla), findsOneWidget);
+      // Bookmarks removed from Home.
+      expect(find.text('Bookmarks'), findsNothing);
+      // Nav-duplicate tiles must not appear on Home.
+      expect(find.text('Prayer'), findsNothing);
+      expect(find.text(l10n.homeQuickQuran), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'featured tutor card scrolls away with content on small screen',
+    (tester) async {
+      final view = tester.view;
+      view.devicePixelRatio = 1;
+      view.physicalSize = const Size(360, 640);
+      addTearDown(view.resetDevicePixelRatio);
+      addTearDown(view.resetPhysicalSize);
+
+      final bloc = HomeDashboardBloc(
+        GetHomeDashboardUseCase(_FakeHomeDashboardRepository()),
+        NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
+      )..add(const HomeDashboardStarted(localeIdentifier: 'en'));
+      addTearDown(bloc.close);
+
+      if (!getIt.isRegistered<AppLaunchConfig>()) {
+        getIt.registerSingleton<AppLaunchConfig>(
+          const AppLaunchConfig(quranSessionsEnabled: true),
+        );
+      }
+      addTearDown(() async {
+        if (getIt.isRegistered<AppLaunchConfig>()) {
+          await getIt.unregister<AppLaunchConfig>();
+        }
+      });
+
+      await tester.pumpWidget(
+        _HomeScreenHarness(
+          bloc: bloc,
+          locale: 'en',
+          shellPadding: 80,
+        ),
+      );
+      await tester.pump();
+      for (var frame = 0; frame < 30; frame++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+
+      expect(find.byType(SliverPersistentHeader), findsNothing);
+      expect(find.text('Learn Quran'), findsOneWidget);
+
+      final double scrollAmount = tester
+          .getSize(find.byType(CustomScrollView))
+          .height;
+      await tester.drag(
+        find.byType(CustomScrollView),
+        Offset(0, -scrollAmount),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Learn Quran'), findsNothing);
+    },
+  );
 }
 
 class _MockAudioPlayerBloc extends MockCubit<AudioPlayerState>
     implements AudioPlayerBloc {}
 
+class _MockMainScreenCubit extends MockCubit<MainScreenState>
+    implements MainScreenCubit {}
+
 class _HomeScreenHarness extends StatelessWidget {
-  const _HomeScreenHarness({required this.bloc, this.locale = 'ar'});
+  const _HomeScreenHarness({
+    required this.bloc,
+    this.locale = 'ar',
+    this.shellPadding = 0,
+  });
 
   final HomeDashboardBloc bloc;
   final String locale;
+  final double shellPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -211,6 +280,12 @@ class _HomeScreenHarness extends StatelessWidget {
       (_) => const Stream<AudioPlayerState>.empty(),
     );
 
+    final mainScreenCubit = _MockMainScreenCubit();
+    when(() => mainScreenCubit.state).thenReturn(const MainScreenState());
+    when(() => mainScreenCubit.stream).thenAnswer(
+      (_) => const Stream<MainScreenState>.empty(),
+    );
+
     return MaterialApp(
       locale: Locale(locale),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -220,27 +295,15 @@ class _HomeScreenHarness extends StatelessWidget {
         providers: [
           BlocProvider.value(value: bloc),
           BlocProvider(
-            create: (_) => HomeQuranResumeCubit(
-              _FakeGetLastReadPosition(),
-              _FakeHistoryRepository(),
-            )..load(),
-          ),
-          BlocProvider(
             create: (_) => HomeListeningResumeCubit(
               _FakeHistoryRepository(),
             )..load(),
           ),
-          BlocProvider(
-            create: (_) => HomeAthkarCompactCubit(
-              GetAthkarCategoriesUseCase(_FakeAthkarRepository()),
-              GetAthkarByCategoryUseCase(_FakeAthkarRepository()),
-              _FakeAthkarDailyProgressLocalDataSource(),
-            )..load(),
-          ),
-          BlocProvider(create: (_) => HomePrimaryActionCubit()),
           BlocProvider<AudioPlayerBloc>.value(value: audioPlayerBloc),
+          BlocProvider<MainScreenCubit>.value(value: mainScreenCubit),
         ],
-        child: HomePrimaryActionSyncListener(
+        child: TilawaShellPadding(
+          padding: shellPadding,
           child: Builder(
             builder: (context) => HomeScreen(onOpenPrayer: () {}),
           ),
@@ -284,62 +347,6 @@ final HomeDashboard _dashboard = HomeDashboard(
     ),
   ],
 );
-
-class _FakeAthkarRepository implements AthkarRepository {
-  @override
-  ResultFuture<List<AthkarCategory>> getCategories() async {
-    return const Right([
-      AthkarCategory(
-        id: 1,
-        nameAr: 'أذكار الصباح',
-        nameEn: 'Morning Athkar',
-        icon: 'wb_sunny_rounded',
-      ),
-      AthkarCategory(
-        id: 2,
-        nameAr: 'أذكار المساء',
-        nameEn: 'Evening Athkar',
-        icon: 'nights_stay_rounded',
-      ),
-      AthkarCategory(
-        id: 3,
-        nameAr: 'أذكار النوم',
-        nameEn: 'Sleep Athkar',
-        icon: 'bedtime_rounded',
-      ),
-    ]);
-  }
-
-  @override
-  ResultFuture<List<AthkarItem>> getAthkarByCategory(int categoryId) async {
-    return Right([
-      AthkarItem(
-        id: categoryId * 10,
-        categoryId: categoryId,
-        textAr: 'test',
-        textEn: 'test',
-        count: 3,
-        reference: 'ref',
-      ),
-    ]);
-  }
-}
-
-class _FakeAthkarDailyProgressLocalDataSource
-    implements AthkarDailyProgressLocalDataSource {
-  @override
-  Future<Map<int, int>> loadCounts({
-    required int categoryId,
-    required String dateKey,
-  }) async => const {};
-
-  @override
-  Future<void> saveCounts({
-    required int categoryId,
-    required String dateKey,
-    required Map<int, int> remainingCounts,
-  }) async {}
-}
 
 class _FakeHistoryRepository implements HistoryRepository {
   @override
@@ -412,12 +419,4 @@ class _FakeHistoryRepository implements HistoryRepository {
     required String reciterId,
     required int moshafId,
   }) async => false;
-}
-
-class _FakeGetLastReadPosition implements GetLastReadPositionUseCase {
-  @override
-  Future<Either<Failure, ({int? surahNumber, int? ayahNumber, int? page})>>
-  call() async {
-    return const Right((surahNumber: 2, ayahNumber: 43, page: 42));
-  }
 }

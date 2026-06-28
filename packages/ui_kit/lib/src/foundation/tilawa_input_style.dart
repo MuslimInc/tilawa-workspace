@@ -27,7 +27,7 @@ class TilawaInputStyle {
     this.searchTokens,
   });
 
-  final TilawaDesignTokens tokens;
+  final MeMuslimDesignTokens tokens;
   final ColorScheme colorScheme;
   final TextTheme textTheme;
   final TilawaInputRole role;

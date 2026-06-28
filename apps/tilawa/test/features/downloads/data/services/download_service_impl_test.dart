@@ -99,6 +99,47 @@ void main() {
       ).called(1);
     });
 
+    test(
+      'initialize replays active platform tasks to progress stream',
+      () async {
+        const String url = 'http://example.com/running.mp3';
+        when(mockDownloader.loadTasks()).thenAnswer(
+          (_) async => <DownloadTask>[
+            DownloadTask(
+              taskId: 'task-running',
+              url: url,
+              filename: 'running.mp3',
+              status: DownloadTaskStatus.running,
+              timeCreated: 0,
+              savedDir: '/tmp',
+              progress: 53,
+              allowCellular: true,
+            ),
+          ],
+        );
+        when(
+          mockStatusMapper.mapTaskStatusToDownloadStatus(
+            DownloadTaskStatus.running,
+          ),
+        ).thenReturn(DownloadStatus.downloading);
+
+        final List<DownloadProgress> events = <DownloadProgress>[];
+        final StreamSubscription<DownloadProgress> sub = downloadService
+            .globalProgressStream
+            .listen(events.add);
+
+        await downloadService.initialize();
+        await Future<void>.delayed(Duration.zero);
+
+        await sub.cancel();
+
+        expect(events, hasLength(1));
+        expect(events.single.id, url);
+        expect(events.single.status, DownloadStatus.downloading);
+        expect(events.single.progress, closeTo(0.53, 0.001));
+      },
+    );
+
     test('download delegates to helpers and enqueues task', () async {
       const url = 'http://example.com/audio.mp3';
       const path = '/local/path.mp3';
@@ -1211,14 +1252,16 @@ void main() {
         localMockDownloader.remove(taskId: taskId, shouldDeleteContent: true),
       ).thenThrow(Exception('Remove failed'));
 
-      // Should still emit cancelled event
       final Future<void> expectation = expectLater(
         localService.globalProgressStream,
-        emits(
+        emitsInOrder([
+          predicate<DownloadProgress>(
+            (p) => p.id == url && p.status == DownloadStatus.downloading,
+          ),
           predicate<DownloadProgress>(
             (p) => p.id == url && p.status == DownloadStatus.cancelled,
           ),
-        ),
+        ]),
       );
 
       await localService.cancel(url);

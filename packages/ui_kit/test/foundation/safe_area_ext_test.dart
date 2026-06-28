@@ -20,7 +20,7 @@ Widget _wrap({
       viewInsets: viewInsets,
     ),
     child: Theme(
-      data: ThemeData(extensions: [TilawaDesignTokens.light()]),
+      data: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
       child: child,
     ),
   );
@@ -210,7 +210,7 @@ void main() {
           MediaQuery(
             data: const MediaQueryData(viewPadding: EdgeInsets.zero),
             child: Theme(
-              data: ThemeData(extensions: [TilawaDesignTokens.light()]),
+              data: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
               child: Builder(
                 builder: (context) {
                   padding = context.floatingBottomPadding;

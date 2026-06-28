@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../domain/entities/session_report_category.dart';
+
 sealed class TeacherProfileEvent extends Equatable {
   const TeacherProfileEvent();
 
@@ -48,4 +50,23 @@ final class MoreReviewsRequested extends TeacherProfileEvent {
 
   @override
   List<Object?> get props => [teacherId, cursor];
+}
+
+/// User submits a safety report from the teacher profile app bar.
+final class TeacherProfileReportSubmitted extends TeacherProfileEvent {
+  const TeacherProfileReportSubmitted({
+    required this.category,
+    required this.description,
+  });
+
+  final SessionReportCategory category;
+  final String description;
+
+  @override
+  List<Object?> get props => [category, description];
+}
+
+/// Clears one-shot report success UI after toast.
+final class TeacherProfileReportAcknowledged extends TeacherProfileEvent {
+  const TeacherProfileReportAcknowledged();
 }

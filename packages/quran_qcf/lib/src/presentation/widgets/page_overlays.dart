@@ -9,7 +9,7 @@ import 'page_number_badge.dart';
 
 /// Renders the UI overlays for a Quran page (metadata strip and page number).
 ///
-/// Uses [TilawaDesignTokens] for consistent spacing and typography.
+/// Uses [MeMuslimDesignTokens] for consistent spacing and typography.
 class PageOverlays extends StatelessWidget {
   const PageOverlays({
     super.key,

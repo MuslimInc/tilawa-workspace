@@ -1,15 +1,10 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get_it/get_it.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tilawa/features/home/debug/home_hero_variant_debug.dart';
-import 'package:tilawa/features/home/presentation/cubit/home_athkar_compact_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_cubit.dart';
-import 'package:tilawa/features/home/presentation/cubit/home_primary_action_cubit.dart';
-import 'package:tilawa/features/home/presentation/cubit/home_quran_resume_cubit.dart';
+import 'package:tilawa/features/shell/application/shell_tab_reselect.dart';
+import 'package:tilawa/features/shell/presentation/shell_tab_reselect_listener.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../bloc/home_dashboard_bloc.dart';
@@ -17,7 +12,9 @@ import '../bloc/home_dashboard_event.dart';
 import '../bloc/home_dashboard_state.dart';
 import '../widgets/home_dashboard_body.dart';
 import '../widgets/home_dashboard_content_sliver.dart';
-import '../widgets/home_dashboard_hero_sliver.dart';
+import '../widgets/home_featured_tutor_card.dart';
+import '../widgets/home_next_prayer_time.dart';
+import '../widgets/home_screen_background.dart';
 
 /// Main daily dashboard for the app shell.
 class HomeScreen extends StatefulWidget {
@@ -33,80 +30,84 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  @override
-  void initState() {
-    super.initState();
-    if (kDebugMode) {
-      HomeHeroVariantDebug.ensureLoaded(GetIt.I<SharedPreferencesAsync>());
-      HomeHeroVariantDebug.variant.addListener(_onHeroVariantChanged);
-    }
-  }
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void dispose() {
-    if (kDebugMode) {
-      HomeHeroVariantDebug.variant.removeListener(_onHeroVariantChanged);
-    }
+    _scrollController.dispose();
     super.dispose();
   }
 
-  void _onHeroVariantChanged() {
-    if (mounted) {
-      setState(() {});
-    }
+  Future<void> _refreshHome() async {
+    final String locale = Localizations.localeOf(context).languageCode;
+    final listeningResumeCubit = context.read<HomeListeningResumeCubit>();
+    context.read<HomeDashboardBloc>().add(
+      HomeDashboardRefreshRequested(localeIdentifier: locale),
+    );
+    await Future.wait([
+      listeningResumeCubit.load(),
+    ]);
+  }
+
+  void _onShellTabReselect() {
+    unawaited(
+      ShellTabReselect.scrollToTopOrRefresh(
+        scrollController: _scrollController,
+        refresh: _refreshHome,
+        duration: context.tokens.durationFast,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final Color sheetColor = Theme.of(context).colorScheme.surfaceContainerLow;
+    final ThemeData theme = Theme.of(context);
+    final Color canvasBottom =
+        theme.componentTokens.homeScreen.backgroundGradientEnd;
     final double topInset = MediaQuery.paddingOf(context).top;
 
-    return Scaffold(
-      backgroundColor: sheetColor,
-      body: RefreshIndicator(
-        edgeOffset: topInset + kToolbarHeight,
-        onRefresh: () async {
-          final String locale = Localizations.localeOf(context).languageCode;
-          final quranResumeCubit = context.read<HomeQuranResumeCubit>();
-          final listeningResumeCubit = context.read<HomeListeningResumeCubit>();
-          final athkarCompactCubit = context.read<HomeAthkarCompactCubit>();
-          final primaryActionCubit = context.read<HomePrimaryActionCubit>();
-          context.read<HomeDashboardBloc>().add(
-            HomeDashboardRefreshRequested(localeIdentifier: locale),
-          );
-          await Future.wait([
-            quranResumeCubit.load(),
-            listeningResumeCubit.load(),
-            athkarCompactCubit.load(),
-          ]);
-          primaryActionCubit.recompute(
-            quran: quranResumeCubit.state,
-            listening: listeningResumeCubit.state,
-            athkar: athkarCompactCubit.state,
-          );
-        },
-        child: NotificationListener<ScrollNotification>(
-          onNotification: (notification) =>
-              _onScrollNotification(context, notification),
-          child: BlocBuilder<HomeDashboardBloc, HomeDashboardState>(
-            builder: (context, state) {
-              return CustomScrollView(
-                physics: const AlwaysScrollableScrollPhysics(
-                  parent: BouncingScrollPhysics(),
+    return ShellTabReselectListener(
+      tabIndex: 0,
+      onReselect: _onShellTabReselect,
+      child: Scaffold(
+        backgroundColor: canvasBottom,
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            const Positioned.fill(child: HomeScreenBackground()),
+            RefreshIndicator(
+              edgeOffset: topInset + kToolbarHeight,
+              onRefresh: _refreshHome,
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (notification) =>
+                    _onScrollNotification(context, notification),
+                child: BlocBuilder<HomeDashboardBloc, HomeDashboardState>(
+                  builder: (context, state) {
+                    final Widget? tutorHeaderSliver =
+                        homeFeaturedTutorCardSliver(context);
+
+                    return CustomScrollView(
+                      controller: _scrollController,
+                      physics: const AlwaysScrollableScrollPhysics(
+                        parent: BouncingScrollPhysics(),
+                      ),
+                      slivers: [
+                        ...HomeNextPrayerTime.buildSlivers(
+                          context: context,
+                          state: state,
+                          onOpenPrayer: widget.onOpenPrayer,
+                        ),
+                        if (tutorHeaderSliver case final Widget sliver) sliver,
+                        HomeDashboardContentSliver(
+                          child: const HomeDashboardBody(),
+                        ),
+                      ],
+                    );
+                  },
                 ),
-                slivers: [
-                  ...HomeDashboardHeroSliver.buildSlivers(
-                    context: context,
-                    state: state,
-                    onOpenPrayer: widget.onOpenPrayer,
-                  ),
-                  HomeDashboardContentSliver(
-                    child: HomeDashboardBody(onOpenPrayer: widget.onOpenPrayer),
-                  ),
-                ],
-              );
-            },
-          ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -162,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen> {
       return null;
     }
 
-    final double collapseExtent = HomeDashboardHeroSliver.collapseScrollExtent(
+    final double collapseExtent = HomeNextPrayerTime.collapseScrollExtent(
       context,
     );
     final double offset = metrics.pixels;

@@ -1,0 +1,42 @@
+# Maestro E2E — enabled nested controls inside TilawaCard own their tap.
+#
+# Tap play / delete / favorite → nested result only, NOT parent navigation.
+#
+# Run:
+#   maestro test .maestro/tilawa_card_nested_enabled_control.yaml --device emulator-5554
+#
+# Semantics ids: apps/tilawa/lib/features/ui_kit_debug/tilawa_card_demo_semantics_ids.dart
+
+appId: com.tilawa.app
+
+---
+- launchApp:
+      clearState: false
+- runFlow:
+      file: subflows/ensure_main_shell.yaml
+- runFlow:
+      file: subflows/ensure_tilawa_card_demo.yaml
+
+- tapOn:
+      id: "tilawa_card_demo_reset"
+
+- tapOn:
+      id: "tilawa_card_demo_enabled_play"
+- assertVisible: "nested play"
+- assertNotVisible: "parent navigated"
+
+- tapOn:
+      id: "tilawa_card_demo_reset"
+
+- tapOn:
+      id: "tilawa_card_demo_enabled_delete"
+- assertVisible: "nested delete"
+- assertNotVisible: "parent navigated"
+
+- tapOn:
+      id: "tilawa_card_demo_reset"
+
+- tapOn:
+      id: "tilawa_card_demo_enabled_favorite"
+- assertVisible: "nested favorite"
+- assertNotVisible: "parent navigated"

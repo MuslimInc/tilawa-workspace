@@ -154,15 +154,15 @@ Future<void> _pumpSettingsTeachingSection(
   await tester.pumpAndSettle();
 }
 
-late _MockAuthBloc mockAuthBloc;
+late _MockAuthBloc _mockAuthBloc;
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() async {
     await resetScopeGetIt();
-    mockAuthBloc = _MockAuthBloc();
-    when(() => mockAuthBloc.state).thenReturn(
+    _mockAuthBloc = _MockAuthBloc();
+    when(() => _mockAuthBloc.state).thenReturn(
       AuthState.authenticated(
         user: UserEntity(
           id: 'user_1',
@@ -172,7 +172,7 @@ void main() {
         ),
       ),
     );
-    when(() => mockAuthBloc.stream).thenAnswer((_) => const Stream.empty());
+    when(() => _mockAuthBloc.stream).thenAnswer((_) => const Stream.empty());
 
     scopeGetIt().registerSingleton<AppLaunchConfig>(
       const AppLaunchConfig(
@@ -197,7 +197,7 @@ void main() {
   ) async {
     await _pumpSettingsTeachingSection(
       tester,
-      mockAuthBloc,
+      _mockAuthBloc,
       const TeacherCapability(state: TeacherCapabilityState.approvedActive),
     );
 
@@ -215,7 +215,7 @@ void main() {
   ) async {
     await _pumpSettingsTeachingSection(
       tester,
-      mockAuthBloc,
+      _mockAuthBloc,
       const TeacherCapability(state: TeacherCapabilityState.approvedActive),
     );
 
@@ -240,7 +240,7 @@ void main() {
     ) async {
       await _pumpSettingsTeachingSection(
         tester,
-        mockAuthBloc,
+        _mockAuthBloc,
         const TeacherCapability(
           state: TeacherCapabilityState.approvedIncompleteProfile,
         ),
@@ -266,7 +266,7 @@ void main() {
   ) async {
     await _pumpSettingsTeachingSection(
       tester,
-      mockAuthBloc,
+      _mockAuthBloc,
       const TeacherCapability(state: TeacherCapabilityState.none),
     );
 
@@ -290,7 +290,7 @@ void main() {
         GoRoute(
           path: '/',
           builder: (context, state) => BlocProvider<AuthBloc>.value(
-            value: mockAuthBloc,
+            value: _mockAuthBloc,
             child: SettingsTeacherCapabilityScope(
               child: SettingsTeachingOnMemuslimTile(showDivider: false),
             ),
@@ -306,7 +306,7 @@ void main() {
 
     await _pumpSettingsTeachingSection(
       tester,
-      mockAuthBloc,
+      _mockAuthBloc,
       const TeacherCapability(state: TeacherCapabilityState.approvedActive),
       router: router,
     );
@@ -328,7 +328,7 @@ void main() {
           GoRoute(
             path: '/',
             builder: (context, state) => BlocProvider<AuthBloc>.value(
-              value: mockAuthBloc,
+              value: _mockAuthBloc,
               child: SettingsTeacherCapabilityScope(
                 child: SettingsTeachingOnMemuslimTile(showDivider: false),
               ),
@@ -344,7 +344,7 @@ void main() {
 
       await _pumpSettingsTeachingSection(
         tester,
-        mockAuthBloc,
+        _mockAuthBloc,
         const TeacherCapability(
           state: TeacherCapabilityState.approvedIncompleteProfile,
         ),
@@ -371,7 +371,7 @@ void main() {
 
     await _pumpSettingsTeachingSection(
       tester,
-      mockAuthBloc,
+      _mockAuthBloc,
       const TeacherCapability(state: TeacherCapabilityState.approvedActive),
       locale: const Locale('ar'),
     );
@@ -419,7 +419,7 @@ void main() {
         ],
         supportedLocales: AppLocalizations.supportedLocales,
         home: BlocProvider<AuthBloc>.value(
-          value: mockAuthBloc,
+          value: _mockAuthBloc,
           child: SettingsTeacherCapabilityScope(
             child: SettingsTeachingOnMemuslimTile(showDivider: false),
           ),
@@ -467,7 +467,7 @@ void main() {
         ],
         supportedLocales: AppLocalizations.supportedLocales,
         home: BlocProvider<AuthBloc>.value(
-          value: mockAuthBloc,
+          value: _mockAuthBloc,
           child: SettingsTeacherCapabilityScope(
             child: SettingsTeachingOnMemuslimTile(showDivider: false),
           ),

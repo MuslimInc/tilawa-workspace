@@ -42,6 +42,8 @@
     },
     "homeTitle": "الصفحة الرئيسية",
     "homeGreeting": "السلام عليكم",
+    "homeInspirationTitle": "إلهام اليوم",
+    "homeInspirationSubtitle": "آية ودعاء لقلبك",
     "homeGreetingName": "السلام عليكم، {name}",
     "@homeGreetingName": {
         "placeholders": {
@@ -53,9 +55,20 @@
     "homeProfileLabel": "ملف المستخدم",
     "homeLocationUnavailable": "حدّد الموقع",
     "homeHeroLocationContext": "الصلاة في",
-    "homeNextPrayerUnavailable": "حدّد موقعك لعرض الصلاة القادمة.",
+    "homeNextPrayerUnavailable": "حدّد موقعك لمعرفة موعد الصلاة القادمة.",
     "homePrayerTimesAction": "مواقيت الصلاة",
-    "homePrayerNow": "حان الوقت الآن",
+    "homePrayerNow": "حان وقت الأذان",
+    "@homePrayerNow": {
+        "description": "Home countdown when the next salah adhan is due now (five daily prayers only)"
+    },
+    "homeSunriseNow": "حان وقت الشروق",
+    "@homeSunriseNow": {
+        "description": "Home countdown when sunrise (Shurooq) is due now"
+    },
+    "homeDuhaNow": "حان وقت الضحى",
+    "@homeDuhaNow": {
+        "description": "Home countdown when Duha time is due now"
+    },
     "homePrayerInMinutes": "{minutes, plural, =1{بعد دقيقة} =2{بعد دقيقتين} other{بعد {minutes} دقائق}}",
     "@homePrayerInMinutes": {
         "placeholders": {
@@ -77,22 +90,22 @@
     },
     "homeExploreTitle": "اكتشف",
     "homeExploreSubtitle": "أدواتك اليومية بلمحة",
-    "homeKhatmaCarouselSubtitle": "تابع خطة قراءتك",
-    "homeSupportCarouselSubtitle": "ساهم في بقاء تلاوة مجانية للجميع",
-    "homeHistoryCarouselSubtitle": "تابع من حيث توقفت",
-    "homeFavoritesCarouselSubtitle": "تلاوات وسور محفوظة",
-    "homeDownloadsCarouselSubtitle": "استمع دون اتصال",
-    "homeSessionsTitle": "تعلّم قراءة القرآن",
-    "homeSessionsSubtitle": "احجز جلسات مع معلمين معتمدين",
+    "homeKhatmaCarouselSubtitle": "تقدّم في ختمتك",
+    "homeSupportCarouselSubtitle": "ساهِم في إبقاء تلاوة مجانية للجميع",
+    "homeHistoryCarouselSubtitle": "تابع من حيث توقّفت",
+    "homeFavoritesCarouselSubtitle": "تلاواتك وسورك المحفوظة",
+    "homeDownloadsCarouselSubtitle": "استمع بلا إنترنت",
+    "homeSessionsTitle": "تعلّم التلاوة",
+    "homeSessionsSubtitle": "جلسات مخصصة مع محفظ معتمد",
     "homeExploreShowAsList": "عرض كقائمة",
     "homeExploreShowAsGrid": "عرض كشبكة",
-    "homeDashboardLoadError": "تعذّر تحميل مواقيت الصلاة. تحقق من الاتصال وحاول مرة أخرى.",
+    "homeDashboardLoadError": "تعذّر تحميل المواقيت. تحقق من اتصالك وحاول مجددًا.",
     "homeSearchHint": "ابحث في السور أو الأجزاء أو الصفحة",
     "homeFeaturedTitle": "مختارة لك",
     "homeFeaturedSubtitle": "المزيد ليومك",
     "homeTodayTitle": "اليوم",
     "homeYoursTitle": "خاصتك",
-    "homeListeningResumeSubtitle": "تابع · {reciter} · {surah}",
+    "homeListeningResumeSubtitle": "{reciter} · {surah}",
     "@homeListeningResumeSubtitle": {
         "placeholders": {
             "reciter": { "type": "String" },
@@ -125,6 +138,8 @@
     "homeContinueTitle": "تابع",
     "homeDailyPracticeTitle": "الممارسة اليومية",
     "homeDailyPracticeSubtitle": "أذكارك المثبتة وأدعيتك",
+    "homeDailyHabitTitle": "العادة اليومية",
+    "homeDailyHabitSubtitle": "ابدأ أو أكمل أذكارك",
     "homeAthkarRitualsTitle": "أذكار سريعة",
     "homePrayerStripTitle": "مواقيت اليوم",
     "homePrayerStripViewAll": "عرض الكل",
@@ -161,15 +176,26 @@
     "homeAthkarNowBadge": "الآن",
     "experimentalBadgeLabel": "تجريبي",
     "homeQuickQuran": "القرآن",
-    "homeQuickReciters": "القراء",
-    "homeQuickRecitersSubtitle": "تصفّح التلاوات",
+    "homeQuickActionsTitle": "إجراءات سريعة",
+    "homeMainActionsTitle": "عباداتك اليومية",
+    "homeQuickToolsTitle": "أدوات سريعة",
+    "homeFeaturedTutorTitle": "تعلّم القرآن مع محفظك",
+    "homeFeaturedTutorSubtitle": "اختر محفظك المفضل لتتقن التلاوة",
+    "homeFeaturedTutorCta": "ابدأ التعلّم",
+    "homeFeaturedTutorMySessions": "جلساتي",
+    "homeQuickQuranReader": "المصحف",
+    "homeQuickQuranReaderSubtitle": "اقرأ القرآن بتدبّر",
+    "homeLearnQuranWithTutor": "تعلّم القرآن مع محفظك",
+    "homeQuickReciters": "القرّاء",
+    "homeQuickRecitersSubtitle": "استمع لتلاوات مختارة",
     "homeQuickPrayer": "الصلاة",
     "homeQuickQibla": "القبلة",
-    "homeQuickQiblaSubtitle": "اعرف اتجاه القبلة",
+    "homeQuickQiblaSubtitle": "اتجه نحو القبلة بسهولة",
     "homeQuickSettingsSubtitle": "المظهر والصوت والحساب",
-    "homeQuickTasbeeh": "المسبحة",
-    "homeQuickTasbeehSubtitle": "عدّ الذكر بلمسة واحدة",
+    "homeQuickTasbeeh": "التسبيح",
+    "homeQuickTasbeehSubtitle": "سبّح واذكر الله بلمسة",
     "homeQuickAthkar": "الأذكار",
+    "homeQuickAthkarSubtitle": "وردك اليومي من الأذكار",
     "homeQuickSettings": "الإعدادات",
     "homePinnedAthkarTitle": "أذكارك السريعة",
     "homePinnedAthkarEdit": "تعديل اختصارات الأذكار",
@@ -206,10 +232,10 @@
     },
     "homeDailyInspirationTitle": "إلهام اليوم",
     "homeDailyInspirationSubtitle": "آية ودعاء ليومك",
-    "homeDailyAyahLabel": "الآية اليومية",
+    "homeDailyAyahLabel": "آية اليوم",
     "homeDailyAyahBody": "وَأَقِيمُوا الصَّلَاةَ وَآتُوا الزَّكَاةَ وَارْكَعُوا مَعَ الرَّاكِعِينَ",
     "homeDailyAyahReference": "القرآن ٢:٤٣",
-    "homeDailyDuaLabel": "الدعاء اليومي",
+    "homeDailyDuaLabel": "دعاء اليوم",
     "homeDailyDuaBody": "اللهم أعني على ذكرك وشكرك وحسن عبادتك.",
     "homeDailyDuaReference": "أبو داود",
     "homeDailyAyahBody1": "فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ",
@@ -514,7 +540,7 @@
     "@noSurahsMatchSearch": {
         "description": "No surahs match search message"
     },
-    "continueListening": "متابعة الاستماع",
+    "continueListening": "أكمل الاستماع",
     "@continueListening": {
         "description": "Continue listening section title"
     },
@@ -1036,7 +1062,7 @@
     "@signIn": {
         "description": "Sign in button text"
     },
-    "welcomeToApp": "مرحباً بك في تلاوة",
+    "welcomeToApp": "مرحباً بك في أنا مسلم",
     "@welcomeToApp": {
         "description": "Welcome message on login screen"
     },
@@ -1343,7 +1369,7 @@
     "@deleteAccount": {
         "description": "Delete account action in settings"
     },
-    "deleteAccountConfirmation": "سيؤدي هذا إلى حذف حسابك في تلاوة وبيانات ملفك المتزامنة نهائياً. قد نحتفظ بسجلات مشتريات مجهولة للوقاية من الاحتيال. لا يمكن التراجع عن هذا الإجراء.",
+    "deleteAccountConfirmation": "سيؤدي هذا إلى حذف حسابك في أنا مسلم وبيانات ملفك المتزامنة نهائياً. قد نحتفظ بسجلات مشتريات مجهولة للوقاية من الاحتيال. لا يمكن التراجع عن هذا الإجراء.",
     "@deleteAccountConfirmation": {
         "description": "Confirmation message before deleting the app account"
     },
@@ -2816,7 +2842,7 @@
     "@sharing": {
         "description": "Status message while sharing"
     },
-    "sharedViaTilawa": "تمت المشاركة عبر تلاوة",
+    "sharedViaTilawa": "تمت المشاركة عبر أنا مسلم",
     "@sharedViaTilawa": {
         "description": "Branding text on shared content"
     },
@@ -3138,7 +3164,7 @@
     "@batteryOptimizationExemptionRequired": {
         "description": "Banner shown when the app is not whitelisted from Doze / battery optimization"
     },
-    "oemAutostartHint": "في هذا الجهاز، فعّل أيضاً التشغيل التلقائي لتطبيق تلاوة من إعدادات الهاتف حتى لا تتوقف التذكيرات في الخلفية.",
+    "oemAutostartHint": "في هذا الجهاز، فعّل أيضاً التشغيل التلقائي لتطبيق أنا مسلم من إعدادات الهاتف حتى لا تتوقف التذكيرات في الخلفية.",
     "@oemAutostartHint": {
         "description": "Informational banner shown on aggressive OEM ROMs"
     },
@@ -3149,9 +3175,9 @@
     "prayerAlertsPermissionExactAlarmTitle": "التنبيهات والتذكيرات",
     "prayerAlertsPermissionExactAlarmBody": "اسمح بإذن التنبيهات والتذكيرات حتى يعمل الأذان وتنبيهات الصلاة في وقتها، حتى عندما يكون الهاتف في وضع السكون أو الشاشة مغلقة.",
     "prayerAlertsPermissionBatteryTitle": "تحسين البطارية",
-    "prayerAlertsPermissionBatteryBody": "استثنِ تلاوة من تحسين البطارية حتى لا تتأخر تذكيرات الصلاة ليلاً.",
+    "prayerAlertsPermissionBatteryBody": "استثنِ أنا مسلم من تحسين البطارية حتى لا تتأخر تذكيرات الصلاة ليلاً.",
     "prayerAlertsPermissionOemAutostartTitle": "العمل في الخلفية",
-    "prayerAlertsPermissionOemAutostartBody": "في هذا الجهاز، فعّل التشغيل التلقائي لتلاوة من إعدادات الهاتف حتى لا تتوقف التذكيرات في الخلفية.",
+    "prayerAlertsPermissionOemAutostartBody": "في هذا الجهاز، فعّل التشغيل التلقائي لتطبيق أنا مسلم من إعدادات الهاتف حتى لا تتوقف التذكيرات في الخلفية.",
     "prayerAlertsPermissionAllow": "السماح",
     "prayerAlertsPermissionSkip": "تخطي",
     "prayerAlertsPermissionContinue": "متابعة",
@@ -3318,11 +3344,15 @@
     "@moreOptions": {
         "description": "Label for the more-options overflow menu button"
     },
-    "supportTilawa": "ادعم تلاوة",
+    "homeMoreOptionsSubtitle": "مكتبتك وخيارات أخرى",
+    "@homeMoreOptionsSubtitle": {
+        "description": "Subtitle for the More section on the home dashboard"
+    },
+    "supportTilawa": "ادعم أنا مسلم",
     "@supportTilawa": {
         "description": "Support Tilawa screen and settings entry title"
     },
-    "rateTilawa": "قيّم تلاوة",
+    "rateTilawa": "قيّم أنا مسلم",
     "@rateTilawa": {
         "description": "Settings row to open the in-app review dialog"
     },
@@ -3330,7 +3360,7 @@
     "@rateTilawaSubtitle": {
         "description": "Optional subtitle under the rate Tilawa settings row"
     },
-    "shareTilawa": "شارك تلاوة",
+    "shareTilawa": "شارك أنا مسلم",
     "@shareTilawa": {
         "description": "Settings row to share the app with others"
     },
@@ -3350,15 +3380,15 @@
     "@shareTilawaFailed": {
         "description": "Error shown when sharing Tilawa from settings fails"
     },
-    "supportIntroLine": "مشاركتك تساعدنا على استمرار تلاوة.",
+    "supportIntroLine": "مشاركتك تساعدنا على استمرار أنا مسلم.",
     "@supportIntroLine": {
         "description": "Support screen single-line intro under app bar"
     },
-    "supportTilawaSubtitle": "مشاركتك تساعدنا على استمرار تلاوة.",
+    "supportTilawaSubtitle": "مشاركتك تساعدنا على استمرار أنا مسلم.",
     "@supportTilawaSubtitle": {
         "description": "Legacy alias; prefer supportIntroLine"
     },
-    "supportMissionBody": "مشاركتك تساعدنا على استمرار تلاوة.",
+    "supportMissionBody": "مشاركتك تساعدنا على استمرار أنا مسلم.",
     "@supportMissionBody": {
         "description": "Legacy alias; unused on support screen"
     },
@@ -3410,7 +3440,7 @@
     "@supportConfirmationTitle": {
         "description": "Support purchase confirmation sheet title"
     },
-    "supportConfirmationBody": "يتم الدفع عبر Google Play. تلاوة لا يحتفظ ببيانات بطاقتك.",
+    "supportConfirmationBody": "يتم الدفع عبر Google Play. أنا مسلم لا يحتفظ ببيانات بطاقتك.",
     "@supportConfirmationBody": {
         "description": "Support purchase confirmation sheet body"
     },
@@ -3510,7 +3540,7 @@
     "@supportSelectTier": {
         "description": "Prompt when no tier selected"
     },
-    "supportSettingsGroupTitle": "ادعم تلاوة",
+    "supportSettingsGroupTitle": "ادعم أنا مسلم",
     "@supportSettingsGroupTitle": {
         "description": "Settings group title for support entry"
     },
@@ -3554,7 +3584,7 @@
     "@appReviewPlatformUnsupported": {
         "description": "In-app review not supported (e.g. web)"
     },
-    "a11ySplashLoading": "تلاوة، جارٍ التحميل",
+    "a11ySplashLoading": "أنا مسلم، جارٍ التحميل",
     "@a11ySplashLoading": {
         "description": "Screen-reader label announced while the splash loading screen is visible"
     },
@@ -3634,15 +3664,84 @@
     "@tourDebugResetDone": {
         "description": "Confirmation shown after the debug reset clears tour progress"
     },
+    "notificationDebugLabTitle": "اختبار الإشعارات",
+    "@notificationDebugLabTitle": {
+        "description": "Developer settings entry and screen title for notification routing tests"
+    },
+    "notificationDebugSectionLocal": "اختبارات الإشعار المحلي",
+    "notificationDebugSectionLaunch": "محاكاة الإطلاق",
+    "notificationDebugSectionDedup": "فحص حالة منع التكرار",
+    "notificationDebugSectionChecklist": "قائمة التحقق اليدوية",
+    "notificationDebugSectionLogs": "سجلات التصحيح",
+    "notificationDebugActionId": "معرّف الإشعار",
+    "notificationDebugActionPayload": "الحمولة",
+    "notificationDebugActionRoute": "المسار المتوقع",
+    "notificationDebugActionBehavior": "السلوك المتوقع",
+    "notificationDebugActionMechanism": "الآلية",
+    "notificationDebugRefreshState": "تحديث الحالة",
+    "notificationDebugClearDedup": "مسح منع تكرار الإشعار",
+    "notificationDebugClearAthkarDedup": "مسح منع تكرار أذكار (دافئ)",
+    "notificationDebugClearAll": "مسح كل حالة التصحيح",
+    "notificationDebugClearLogs": "مسح السجلات",
+    "notificationDebugConfirmSchedule": "جدولة إشعار تصحيح آخر؟",
+    "notificationDebugMechanismReal": "إشعار محلي حقيقي",
+    "notificationDebugMechanismDispatcher": "محاكاة الموزّع",
+    "notificationDebugMechanismBootstrap": "فحص إطلاق Bootstrap",
+    "notificationDebugMechanismDedup": "حفظ منع التكرار فقط",
+    "notificationDebugMechanismClearPid": "مسح نطاق pid",
+    "notificationDebugBehaviorScheduleAthkar": "يعرض إشعار أذكار تصحيح بعد تأخير قصير",
+    "notificationDebugBehaviorShowNow": "ينشر إشعار تصحيح فورًا",
+    "notificationDebugBehaviorNativePayloadOnly": "يحاكي نقرة صلاة أصلية بحمولة فقط (بدون معرّف)",
+    "notificationDebugBehaviorInvalidPayload": "يجب ألا ينتقل إلى الأذكار",
+    "notificationDebugBehaviorEmptyPayload": "يجب ألا ينتقل (حمولة فارغة)",
+    "notificationDebugBehaviorPayloadOnlyNoId": "التوجيه عبر توقيع الحمولة فقط",
+    "notificationDebugBehaviorDedupSameSig": "النقرة الأولى تنتقل؛ نفس pid + التوقيع يُمنع التكرار",
+    "notificationDebugBehaviorFreshDifferentPayload": "يُعامل كجديد عند تغيّر توقيع الحمولة",
+    "notificationDebugBehaviorSharedPayloadSig": "توقيع الحمولة يمنع التكرار حتى لو اختلف المعرّف",
+    "notificationDebugBehaviorSimulateTap": "يتوجّه عبر مسارات الإنتاج (الموزّع / Bootstrap)",
+    "notificationDebugBehaviorInvalidLaunch": "حمولة غير صالحة لا يجب أن تضبط مسار أذكار",
+    "notificationDebugBehaviorMarkProcessed": "يحفظ منع التكرار دون تنقل",
+    "notificationDebugBehaviorClearPidScope": "يمسح مفتاح pid لمحاكاة نطاق عملية جديدة",
+    "notificationDebugFieldCurrentPid": "معرّف العملية الحالي",
+    "notificationDebugFieldStoredPid": "pid المخزّن (_last_notif_pid)",
+    "notificationDebugFieldStoredId": "المعرّف المخزّن (_last_notif_id)",
+    "notificationDebugFieldStoredSig": "التوقيع المخزّن (_last_notif_payload_sig)",
+    "notificationDebugFieldLastProcessedId": "AppRouter.lastProcessedNotificationId",
+    "notificationDebugFieldPendingRoute": "pendingColdStartLocation",
+    "notificationDebugFieldPendingExtra": "pendingColdStartExtra",
+    "notificationDebugFieldAthkarPayload": "last_handled_notification_payload",
+    "notificationDebugFieldAthkarTimestamp": "last_handled_notification_timestamp",
+    "notificationDebugFieldPreviewSig": "معاينة التوقيع",
+    "notificationDebugFieldProcessedPreview": "المعاينة مُعالَجة",
+    "notificationDebugChecklistAthkarTitle": "أ. إشعار الأذكار",
+    "notificationDebugChecklistAthkarTap": "نقر إشعار الأذكار → يفتح الأذكار مرة واحدة",
+    "notificationDebugChecklistAthkarRestart": "إعادة تشغيل سريعة → لا يفتح الأذكار مجددًا",
+    "notificationDebugChecklistPrayerTitle": "ب. إشعار صلاة (حمولة فقط)",
+    "notificationDebugChecklistPrayerTap": "نقر إشعار الصلاة → يفتح مسار الصلاة مرة واحدة",
+    "notificationDebugChecklistPrayerRestart": "إعادة تشغيل سريعة → لا يُعاد التشغيل",
+    "notificationDebugChecklistInvalidTitle": "ج. حمولة غير صالحة",
+    "notificationDebugChecklistInvalidBody": "حمولة غير صالحة → لا ترجع للأذكار",
+    "notificationDebugChecklistSettingsTitle": "د. حمولة الإعدادات",
+    "notificationDebugChecklistSettingsBody": "حمولة الإعدادات → تفتح الإعدادات وليس الأذكار",
+    "notificationDebugChecklistSameSigTitle": "هـ. نفس المعرّف + نفس الحمولة",
+    "notificationDebugChecklistSameSigTap": "النقرة الأولى → تنقل مرة واحدة",
+    "notificationDebugChecklistSameSigRestart": "إعادة تشغيل سريعة / نفس العملية → مُمنوع",
+    "notificationDebugChecklistDiffPayloadTitle": "و. نفس المعرّف + حمولة مختلفة",
+    "notificationDebugChecklistDiffPayloadBody": "يُعامل كإطلاق جديد",
+    "notificationDebugChecklistDiffIdTitle": "ز. معرّف مختلف + نفس الحمولة",
+    "notificationDebugChecklistDiffIdBody": "توقيع الحمولة أولًا → النقرة الثانية مُمنوعة في نفس pid",
+    "notificationDebugChecklistKillTitle": "ح. إنهاء العملية بالكامل",
+    "notificationDebugChecklistKillSteps": "أغلق التطبيق من المهام الأخيرة → انقر إشعارًا جديدًا → يجب أن يعمل التوجيه البارد",
+    "notificationDebugLogsEmpty": "لا أحداث تصحيح بعد",
     "inAppUpdateFlexibleRestartMessage": "تم تنزيل التحديث. أعد التشغيل عندما تكون مستعدًا للتثبيت.",
     "@inAppUpdateFlexibleRestartMessage": {
         "description": "Snackbar message when a flexible in-app update finished downloading"
     },
-    "inAppUpdateOptionalMessage": "يتوفر إصدار جديد من تلاوة.",
+    "inAppUpdateOptionalMessage": "يتوفر إصدار جديد من أنا مسلم.",
     "@inAppUpdateOptionalMessage": {
         "description": "Snackbar message when an optional app update is available"
     },
-    "inAppUpdateRequiredMessage": "يلزم التحديث لمتابعة استخدام تلاوة.",
+    "inAppUpdateRequiredMessage": "يلزم التحديث لمتابعة استخدام أنا مسلم.",
     "@inAppUpdateRequiredMessage": {
         "description": "Snackbar message when a forced update must go through the Play Store"
     },

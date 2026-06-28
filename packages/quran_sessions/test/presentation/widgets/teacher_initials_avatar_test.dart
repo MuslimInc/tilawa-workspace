@@ -47,7 +47,28 @@ void main() {
   ) async {
     await _pumpAvatar(tester, displayName: 'الشيخ أحمد محمد');
 
-    expect(find.text('أم'), findsOneWidget);
+    final text = tester.widget<Text>(find.byType(Text));
+    expect(text.data, isNot('أم'));
+    expect(text.data, anyOf('أ\u200Aم', 'أ\u2009م'));
+  });
+
+  testWidgets(
+    'Arabic two-word name separates initials with hair or thin space',
+    (
+      tester,
+    ) async {
+      await _pumpAvatar(tester, displayName: 'محمد المعلم');
+
+      final text = tester.widget<Text>(find.byType(Text));
+      expect(text.data, isNot('ما'));
+      expect(text.data, anyOf('م\u200Aا', 'م\u2009ا'));
+    },
+  );
+
+  testWidgets('Latin two-word initials stay unspaced', (tester) async {
+    await _pumpAvatar(tester, displayName: 'Mohammad Kamel');
+
+    expect(find.text('MK'), findsOneWidget);
   });
 
   testWidgets('single meaningful word after honorific uses its first char', (

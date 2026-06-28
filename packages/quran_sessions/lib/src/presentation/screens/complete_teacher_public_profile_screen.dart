@@ -8,6 +8,7 @@ import '../../domain/usecases/save_teacher_public_profile_usecase.dart';
 import '../../domain/value_objects/teacher_public_name.dart';
 import '../failure_ui/quran_sessions_failure_ui.dart';
 import '../forms/teacher_application_validation_l10n.dart';
+import '../widgets/quran_sessions_scaffold.dart';
 
 /// Collects required public teacher profile fields before dashboard access.
 class CompleteTeacherPublicProfileScreen extends StatefulWidget {
@@ -174,8 +175,8 @@ class _CompleteTeacherPublicProfileScreenState
     final tokens = Theme.of(context).tokens;
     final scheme = Theme.of(context).colorScheme;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.completeTeacherProfileTitle)),
+    return QuranSessionsScaffold(
+      title: l10n.completeTeacherProfileTitle,
       resizeToAvoidBottomInset: true,
       body: _loading
           ? const Center(child: CircularProgressIndicator())

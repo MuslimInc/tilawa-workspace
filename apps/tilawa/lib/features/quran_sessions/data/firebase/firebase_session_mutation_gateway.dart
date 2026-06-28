@@ -5,22 +5,26 @@ import 'package:flutter/foundation.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/features/auth/domain/services/callable_session_payload_builder.dart';
+import 'package:tilawa_core/services/performance_monitoring_service.dart';
 
 import 'firestore_exception_mapper.dart';
 import 'firestore_paths.dart';
 import 'firebase_callable_failure_mapper.dart';
 import 'session_firestore_mapper.dart';
+import 'firestore_performance_wrapper.dart';
 
 class FirebaseSessionMutationGateway implements SessionMutationGateway {
   FirebaseSessionMutationGateway(
     this._firestore,
     this._functions,
-    this._sessionPayloadBuilder,
-  );
+    this._sessionPayloadBuilder, [
+    this._perf,
+  ]);
 
   final FirebaseFirestore _firestore;
   final FirebaseFunctions _functions;
   final CallableSessionPayloadBuilder _sessionPayloadBuilder;
+  final PerformanceMonitoringService? _perf;
 
   CollectionReference<Map<String, dynamic>> get _bookings =>
       _firestore.collection(FirestoreQuranSessionsPaths.bookings);
@@ -40,53 +44,56 @@ class FirebaseSessionMutationGateway implements SessionMutationGateway {
     String? paymentReference,
     String? studentNote,
   }) async {
-    try {
-      final callable = _functions.httpsCallable('createSessionBooking');
-      final response = await callable.call<Map<String, dynamic>>(
-        await _sessionPayloadBuilder.withSessionEpoch({
-          'teacherId': teacherId,
-          'slotId': slotId,
-          'startsAt': startsAt.toUtc().toIso8601String(),
-          'endsAt': endsAt.toUtc().toIso8601String(),
-          'callType': _callTypeToCf(callType),
-          'bookingType': 'individual',
-          'pricingType': _pricingTypeToCf(pricingType),
-          'paymentReference': paymentReference,
-          'studentNote': studentNote,
-          'idempotencyKey':
-              '$studentId:$slotId:${startsAt.toUtc().toIso8601String()}',
-        }),
-      );
-      final bookingId = response.data['bookingId'] as String? ?? '';
-      final clientConfirmToken = response.data['clientConfirmToken'] as String?;
-      final paymentRef =
-          response.data['paymentReference'] as String? ?? paymentReference;
-      final aggregateResult = await _loadAggregate(bookingId);
-      return aggregateResult.map(
-        (aggregate) => SessionBookingOutcome(
-          aggregate: aggregate,
-          clientConfirmToken: clientConfirmToken,
-          paymentReference: paymentRef ?? aggregate.paymentReference,
-        ),
-      );
-    } on FirebaseFunctionsException catch (e) {
-      if (kDebugMode) {
-        logger.w(
-          'createSessionBooking failed: code=${e.code} '
-          'message=${e.message} details=${e.details}',
+    return _perf.trace('functions_createSessionBooking', () async {
+      try {
+        final callable = _functions.httpsCallable('createSessionBooking');
+        final response = await callable.call<Map<String, dynamic>>(
+          await _sessionPayloadBuilder.withSessionEpoch({
+            'teacherId': teacherId,
+            'slotId': slotId,
+            'startsAt': startsAt.toUtc().toIso8601String(),
+            'endsAt': endsAt.toUtc().toIso8601String(),
+            'callType': _callTypeToCf(callType),
+            'bookingType': 'individual',
+            'pricingType': _pricingTypeToCf(pricingType),
+            'paymentReference': paymentReference,
+            'studentNote': studentNote,
+            'idempotencyKey':
+                '$studentId:$slotId:${startsAt.toUtc().toIso8601String()}',
+          }),
         );
+        final bookingId = response.data['bookingId'] as String? ?? '';
+        final clientConfirmToken =
+            response.data['clientConfirmToken'] as String?;
+        final paymentRef =
+            response.data['paymentReference'] as String? ?? paymentReference;
+        final aggregateResult = await _loadAggregate(bookingId);
+        return aggregateResult.map(
+          (aggregate) => SessionBookingOutcome(
+            aggregate: aggregate,
+            clientConfirmToken: clientConfirmToken,
+            paymentReference: paymentRef ?? aggregate.paymentReference,
+          ),
+        );
+      } on FirebaseFunctionsException catch (e) {
+        if (kDebugMode) {
+          logger.w(
+            'createSessionBooking failed: code=${e.code} '
+            'message=${e.message} details=${e.details}',
+          );
+        }
+        return Left(
+          mapQuranSessionsCallableFailure(
+            e,
+            slotId: slotId,
+            teacherId: teacherId,
+            callType: callType,
+          ),
+        );
+      } on FirebaseException catch (e) {
+        return Left(mapFirebaseExceptionToFailure(e));
       }
-      return Left(
-        mapQuranSessionsCallableFailure(
-          e,
-          slotId: slotId,
-          teacherId: teacherId,
-          callType: callType,
-        ),
-      );
-    } on FirebaseException catch (e) {
-      return Left(mapFirebaseExceptionToFailure(e));
-    }
+    });
   }
 
   @override
@@ -95,24 +102,26 @@ class FirebaseSessionMutationGateway implements SessionMutationGateway {
     required String reason,
     required ActorRole actorRole,
   }) async {
-    try {
-      final callable = _functions.httpsCallable('cancelSessionBooking');
-      await callable.call<Map<String, dynamic>>(
-        await _sessionPayloadBuilder.withSessionEpoch({
-          'bookingId': bookingId,
-          'reason': reason,
-          'actorRole': _actorRoleToCf(actorRole),
-        }),
-      );
-      return _loadAggregate(bookingId);
-    } on FirebaseFunctionsException catch (e) {
-      if (e.code == 'not-found') {
-        return Left(NotFoundFailure('SessionAggregate($bookingId)'));
+    return _perf.trace('functions_cancelSessionBooking', () async {
+      try {
+        final callable = _functions.httpsCallable('cancelSessionBooking');
+        await callable.call<Map<String, dynamic>>(
+          await _sessionPayloadBuilder.withSessionEpoch({
+            'bookingId': bookingId,
+            'reason': reason,
+            'actorRole': _actorRoleToCf(actorRole),
+          }),
+        );
+        return _loadAggregate(bookingId);
+      } on FirebaseFunctionsException catch (e) {
+        if (e.code == 'not-found') {
+          return Left(NotFoundFailure('SessionAggregate($bookingId)'));
+        }
+        return const Left(UnknownFailure());
+      } on FirebaseException catch (e) {
+        return Left(mapFirebaseExceptionToFailure(e));
       }
-      return const Left(UnknownFailure());
-    } on FirebaseException catch (e) {
-      return Left(mapFirebaseExceptionToFailure(e));
-    }
+    });
   }
 
   @override
@@ -189,22 +198,25 @@ class FirebaseSessionMutationGateway implements SessionMutationGateway {
     required String sessionId,
     required ActorRole actorRole,
   }) async {
-    try {
-      final callable = _functions.httpsCallable('completeSession');
-      await callable.call<Map<String, dynamic>>(
-        await _sessionPayloadBuilder.withSessionEpoch({
-          'sessionId': sessionId,
-          'actorRole': _actorRoleToCf(actorRole),
-        }),
-      );
-      final sessionDoc = await _sessions.doc(sessionId).get();
-      final bookingId = sessionDoc.data()?['bookingId'] as String? ?? sessionId;
-      return _loadAggregate(bookingId);
-    } on FirebaseFunctionsException catch (_) {
-      return const Left(UnknownFailure());
-    } on FirebaseException catch (e) {
-      return Left(mapFirebaseExceptionToFailure(e));
-    }
+    return _perf.trace('functions_completeSession', () async {
+      try {
+        final callable = _functions.httpsCallable('completeSession');
+        await callable.call<Map<String, dynamic>>(
+          await _sessionPayloadBuilder.withSessionEpoch({
+            'sessionId': sessionId,
+            'actorRole': _actorRoleToCf(actorRole),
+          }),
+        );
+        final sessionDoc = await _sessions.doc(sessionId).get();
+        final bookingId =
+            sessionDoc.data()?['bookingId'] as String? ?? sessionId;
+        return _loadAggregate(bookingId);
+      } on FirebaseFunctionsException catch (_) {
+        return const Left(UnknownFailure());
+      } on FirebaseException catch (e) {
+        return Left(mapFirebaseExceptionToFailure(e));
+      }
+    });
   }
 
   @override
@@ -298,6 +310,38 @@ class FirebaseSessionMutationGateway implements SessionMutationGateway {
     }
   }
 
+  @override
+  Future<Either<QuranSessionsFailure, SessionAggregate>>
+  respondToBookingRequest({
+    required String bookingId,
+    required bool accept,
+    String? reason,
+  }) async {
+    return _perf.trace('functions_respondToBookingRequest', () async {
+      try {
+        final callable = _functions.httpsCallable('respondToBookingRequest');
+        await callable.call<Map<String, dynamic>>(
+          await _sessionPayloadBuilder.withSessionEpoch({
+            'bookingId': bookingId,
+            'response': accept ? 'accept' : 'reject',
+            if (reason != null && reason.trim().isNotEmpty) 'reason': reason,
+          }),
+        );
+        return _loadAggregate(bookingId);
+      } on FirebaseFunctionsException catch (e) {
+        if (e.code == 'not-found') {
+          return Left(NotFoundFailure('SessionAggregate($bookingId)'));
+        }
+        if (e.code == 'permission-denied' || e.code == 'unauthenticated') {
+          return const Left(UnauthorizedFailure());
+        }
+        return const Left(UnknownFailure());
+      } on FirebaseException catch (e) {
+        return Left(mapFirebaseExceptionToFailure(e));
+      }
+    });
+  }
+
   Future<Either<QuranSessionsFailure, SessionAggregate>> _loadAggregate(
     String bookingId,
   ) async {
@@ -337,17 +381,4 @@ class FirebaseSessionMutationGateway implements SessionMutationGateway {
     ActorRole.admin => 'teacher_no_show',
     ActorRole.system => 'both_no_show',
   };
-}
-
-QuranSessionsFailure mapFirebaseExceptionToFailure(FirebaseException e) {
-  try {
-    mapFirebaseException(e);
-    return const UnknownFailure();
-  } on PermissionDeniedException {
-    return const UnauthorizedFailure();
-  } on NotFoundException catch (ex) {
-    return NotFoundFailure(ex.resourceType);
-  } on HttpException catch (ex) {
-    return ServerFailure(statusCode: ex.statusCode);
-  }
 }

@@ -39,8 +39,8 @@ class _RescheduleSessionScreenState extends State<RescheduleSessionScreen> {
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.rescheduleSessionTitle)),
+    return QuranSessionsScaffold(
+      title: l10n.rescheduleSessionTitle,
       resizeToAvoidBottomInset: true,
       body: BlocConsumer<RescheduleBloc, RescheduleState>(
         listener: (context, state) {

@@ -158,7 +158,7 @@ class _FavoritesEmptySliver extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     final String title = context.l10n.noFavorites;
 
     return _FavoritesViewportSliver(
@@ -192,7 +192,7 @@ class _FavoritesListSliver extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     final int itemCount = favorites.length + favorites.length - 1;
 
     return SliverPadding(

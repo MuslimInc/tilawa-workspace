@@ -37,6 +37,8 @@ class DownloadNotificationService implements IDownloadNotificationService {
 
   bool _initialized = false;
   final Map<String, int> _notificationIds = {};
+  final Set<String> _finalizedDownloadIds = {};
+  final Map<String, Future<void>> _notificationUpdateChains = {};
 
   /// Initialize the notification service
   @override
@@ -132,8 +134,70 @@ class DownloadNotificationService implements IDownloadNotificationService {
       return;
     }
 
+    final String stableId = _normalizeDownloadId(downloadId);
+    final Future<void> previous =
+        _notificationUpdateChains[stableId] ?? Future<void>.value();
+    final Future<void> next = previous
+        .catchError((Object _) {})
+        .then(
+          (_) => _showDownloadProgressImpl(
+            stableId: stableId,
+            downloadId: downloadId,
+            title: title,
+            reciterName: reciterName,
+            reciterId: reciterId,
+            progress: progress,
+            status: status,
+            pendingMessage: pendingMessage,
+            progressMessage: progressMessage,
+            completeMessage: completeMessage,
+            failedMessage: failedMessage,
+          ),
+        );
+
+    _notificationUpdateChains[stableId] = next;
+    try {
+      await next;
+    } finally {
+      if (identical(_notificationUpdateChains[stableId], next)) {
+        _notificationUpdateChains.remove(stableId);
+      }
+    }
+  }
+
+  Future<void> _showDownloadProgressImpl({
+    required String stableId,
+    required String downloadId,
+    required String title,
+    required String reciterName,
+    int? reciterId,
+    required int progress,
+    required DownloadStatus status,
+    String? pendingMessage,
+    String? progressMessage,
+    String? completeMessage,
+    String? failedMessage,
+  }) async {
     if (!_initialized) {
       await initialize();
+    }
+
+    if (status == DownloadStatus.pending) {
+      _finalizedDownloadIds.remove(stableId);
+    }
+
+    final bool isTerminal =
+        status == DownloadStatus.completed ||
+        status == DownloadStatus.failed ||
+        status == DownloadStatus.cancelled ||
+        status == DownloadStatus.paused;
+
+    if (!isTerminal && _finalizedDownloadIds.contains(stableId)) {
+      logger.d(
+        '[DownloadNotificationService] Ignoring stale progress for $stableId '
+        '(status=$status progress=$progress)',
+      );
+      return;
     }
 
     final int notificationId = _getNotificationId(downloadId);
@@ -144,6 +208,12 @@ class DownloadNotificationService implements IDownloadNotificationService {
       final bool isEffectivelyCompleted =
           status == DownloadStatus.completed ||
           (status == DownloadStatus.downloading && progress >= 100);
+
+      if (isEffectivelyCompleted || status == DownloadStatus.failed) {
+        _finalizedDownloadIds.add(stableId);
+        // Clear ongoing progress bar before showing terminal state.
+        await _notifications.cancel(id: notificationId);
+      }
 
       if (!isEffectivelyCompleted &&
           (status == DownloadStatus.downloading ||
@@ -209,7 +279,7 @@ class DownloadNotificationService implements IDownloadNotificationService {
         );
       } else if (status == DownloadStatus.cancelled ||
           status == DownloadStatus.paused) {
-        // Cancel/remove the notification
+        _finalizedDownloadIds.add(stableId);
         await cancelNotification(downloadId);
       }
     } catch (e) {
@@ -323,11 +393,11 @@ class DownloadNotificationService implements IDownloadNotificationService {
       return;
     }
 
-    final int? notificationId = _notificationIds[downloadId];
-    if (notificationId != null) {
-      await _notifications.cancel(id: notificationId);
-      _notificationIds.remove(downloadId);
-    }
+    final String stableId = _normalizeDownloadId(downloadId);
+    final int notificationId = stableNotificationIdFor(stableId);
+    await _notifications.cancel(id: notificationId);
+    _notificationIds.remove(stableId);
+    _finalizedDownloadIds.add(stableId);
   }
 
   /// Cancel all download notifications
@@ -346,6 +416,8 @@ class DownloadNotificationService implements IDownloadNotificationService {
       await _notifications.cancel(id: id);
     }
     _notificationIds.clear();
+    _finalizedDownloadIds.clear();
+    _notificationUpdateChains.clear();
   }
 
   /// Handle notification tap
@@ -404,11 +476,42 @@ class DownloadNotificationService implements IDownloadNotificationService {
     });
   }
 
-  /// Helper to generate a consistent notification ID from string ID
-  int _nextId = notificationIdOffset;
+  /// Normalize download IDs/URLs so progress and completion share one notification.
+  String _normalizeDownloadId(String id) => normalizeDownloadId(id);
+
+  /// Shared normalization for stable notification IDs across process restarts.
+  @visibleForTesting
+  static String normalizeDownloadId(String id) {
+    final String trimmed = id.trim();
+    try {
+      final Uri uri = Uri.parse(trimmed);
+      final String normalizedPath = uri.path.replaceAll(RegExp('/+'), '/');
+      return uri.replace(path: normalizedPath).toString();
+    } catch (_) {
+      return trimmed;
+    }
+  }
+
+  /// Deterministic Android notification ID for a download key.
+  ///
+  /// Survives hot restart so progress updates and cancellation target the same
+  /// notification instead of leaving orphaned ongoing progress bars.
+  @visibleForTesting
+  static int stableNotificationIdFor(String downloadId) {
+    final String stableId = normalizeDownloadId(downloadId);
+    var hash = 0;
+    for (final int unit in stableId.codeUnits) {
+      hash = (hash * 31 + unit) & 0x7FFFFFFF;
+    }
+    final int range = notificationIdRangeEndExclusive - notificationIdOffset;
+    return notificationIdOffset + (hash % range);
+  }
 
   int _getNotificationId(String id) {
-    return _notificationIds.putIfAbsent(id, () => _nextId++);
+    final String stableId = _normalizeDownloadId(id);
+    final int notificationId = stableNotificationIdFor(stableId);
+    _notificationIds[stableId] = notificationId;
+    return notificationId;
   }
 
   /// Helper to show completed notification
@@ -430,6 +533,10 @@ class DownloadNotificationService implements IDownloadNotificationService {
         channelDescription: _downloadChannelDescription,
         icon: 'ic_launcher_monochrome',
         color: AppColors.notificationAccent,
+        ongoing: false,
+        showProgress: false,
+        autoCancel: true,
+        onlyAlertOnce: false,
       );
 
       const iosDetails = DarwinNotificationDetails(
@@ -477,6 +584,10 @@ class DownloadNotificationService implements IDownloadNotificationService {
         channelDescription: _downloadChannelDescription,
         icon: 'ic_launcher_monochrome',
         color: AppColors.error,
+        ongoing: false,
+        showProgress: false,
+        autoCancel: true,
+        onlyAlertOnce: false,
       );
 
       const iosDetails = DarwinNotificationDetails(

@@ -24,6 +24,14 @@ import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/utils/typedefs.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+/// [HomeFeaturedRitualCard] pulses forever; avoid [WidgetTester.pumpAndSettle].
+Future<void> _pumpPinnedAthkarSection(WidgetTester tester) async {
+  await tester.pump();
+  for (var frame = 0; frame < 30; frame++) {
+    await tester.pump(const Duration(milliseconds: 16));
+  }
+}
+
 void main() {
   testWidgets('shows default athkar shortcuts on Home in list mode', (
     tester,
@@ -41,7 +49,7 @@ void main() {
         layoutMode: HomeLayoutMode.list,
       ),
     );
-    await tester.pumpAndSettle();
+    await _pumpPinnedAthkarSection(tester);
 
     expect(find.text('Quick athkar'), findsOneWidget);
     expect(find.byType(HomeFeaturedRitualCard), findsOneWidget);
@@ -67,7 +75,7 @@ void main() {
         layoutMode: HomeLayoutMode.grid,
       ),
     );
-    await tester.pumpAndSettle();
+    await _pumpPinnedAthkarSection(tester);
 
     expect(find.byType(HomePinnedAthkarGrid), findsOneWidget);
     expect(find.byType(AthkarCategoryCard), findsOneWidget);
@@ -98,7 +106,7 @@ void main() {
     addTearDown(cubit.close);
 
     await tester.pumpWidget(_PinnedAthkarHarness(cubit: cubit));
-    await tester.pumpAndSettle();
+    await _pumpPinnedAthkarSection(tester);
 
     expect(find.text('Choose your daily athkar'), findsOneWidget);
     expect(find.text('Choose athkar'), findsOneWidget);
@@ -115,10 +123,10 @@ void main() {
     addTearDown(cubit.close);
 
     await tester.pumpWidget(_PinnedAthkarHarness(cubit: cubit));
-    await tester.pumpAndSettle();
+    await _pumpPinnedAthkarSection(tester);
 
     await tester.tap(find.byTooltip('Edit athkar shortcuts'));
-    await tester.pumpAndSettle();
+    await _pumpPinnedAthkarSection(tester);
 
     expect(find.text('Choose quick athkar'), findsOneWidget);
     expect(find.text('2 of 4 shortcuts selected'), findsOneWidget);

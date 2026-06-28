@@ -324,8 +324,8 @@ void main() {
         find.widgetWithText(TextButton, 'Undo'),
       );
       final Size? minimumSize = button.style?.minimumSize?.resolve({});
-      expect(minimumSize?.width, kTilawaMinInteractiveDimension);
-      expect(minimumSize?.height, kTilawaMinInteractiveDimension);
+      expect(minimumSize?.width, kMeMuslimMinInteractiveDimension);
+      expect(minimumSize?.height, kMeMuslimMinInteractiveDimension);
     });
   });
 }

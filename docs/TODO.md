@@ -66,6 +66,12 @@ _Add new product work here._
 - [ ] **Friday section** `P2` — Jumu'ah hub with Surah al-Kahf deep link, salawat, sunan, hour of acceptance; surfaces on home on Fridays
   Full spec: [`specs/029-friday-section/spec.md`](../specs/029-friday-section/spec.md)
 
+- [ ] **Learn Quran entry — personalized Home priority (no launch fork)** `P1`
+  State-aware top-zone Home slot (Next Session / Continue Learning / Pending
+  Booking, else calm featured card); reject launch-time choice + separate mode;
+  defer bottom-nav tab until metrics. Step 1: ship analytics on current card
+  first. Decision: [`adr/007-learn-quran-entry-strategy.md`](adr/007-learn-quran-entry-strategy.md).
+
 - [ ] _Your next feature idea_
 
 ---
@@ -135,4 +141,4 @@ _Move completed items here with date._
 
 ---
 
-Last touched: 2026-06-20
+Last touched: 2026-06-27

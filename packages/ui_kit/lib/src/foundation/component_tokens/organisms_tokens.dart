@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../app_colors.dart';
-import '../design_tokens.dart' show kTilawaMinInteractiveDimension;
+import '../design_tokens.dart' show kMeMuslimMinInteractiveDimension;
 import '../tilawa_text_roles.dart';
 import 'token_lerp.dart';
 
@@ -205,7 +205,7 @@ class TilawaMediaPlayerBarTokens {
   /// Placeholder fill behind album art when no image is shown.
   final Color artworkPlaceholderColor;
 
-  /// Hairline border around the bar ([TilawaDesignTokens.opacitySubtle] on [ColorScheme.outlineVariant]).
+  /// Hairline border around the bar ([MeMuslimDesignTokens.opacitySubtle] on [ColorScheme.outlineVariant]).
   final Color shellOutlineColor;
 
   factory TilawaMediaPlayerBarTokens.defaults() {
@@ -228,8 +228,8 @@ class TilawaMediaPlayerBarTokens {
       artworkInfoGap: 12,
       infoControlsGap: 8,
       controlsGap: 4,
-      controlButtonSize: kTilawaMinInteractiveDimension,
-      playPauseButtonSize: kTilawaMinInteractiveDimension,
+      controlButtonSize: kMeMuslimMinInteractiveDimension,
+      playPauseButtonSize: kMeMuslimMinInteractiveDimension,
       defaultIconSize: 24,
       playPauseIconSize: 16,
       disabledControlOpacity: 0.3,
@@ -446,7 +446,7 @@ class TilawaAdaptiveShellTokens {
   /// [NavigationRail.indicatorColor]: primary tint over [ColorScheme.surfaceContainerHigh].
   final Color sideRailIndicatorColor;
 
-  /// Frosted rail panel fill ([ColorScheme.surface] at [TilawaDesignTokens.opacityGlass]).
+  /// Frosted rail panel fill ([ColorScheme.surface] at [MeMuslimDesignTokens.opacityGlass]).
   final Color sideRailBackgroundColor;
 
   /// Hairline border around the side rail panel.
@@ -562,7 +562,7 @@ class TilawaAdaptiveShellTokens {
     const double navButtonSelectedCenterScale = 1.0;
     const double navButtonGap = 4;
     const double navButtonSelectionContainerVerticalPadding = 4;
-    const double navButtonIconOnlyMinHeight = kTilawaMinInteractiveDimension;
+    const double navButtonIconOnlyMinHeight = kMeMuslimMinInteractiveDimension;
     const double navButtonIconOnlyVerticalPadding = 4;
     const double navButtonIconOnlySelectionContainerVerticalPadding = 4;
     const TextScaler unitTextScaler = TextScaler.linear(1);
@@ -631,7 +631,7 @@ class TilawaAdaptiveShellTokens {
     return colorScheme.onSurface.withValues(alpha: 0.04);
   }
 
-  /// Matches [TilawaDesignTokens.opacitySubtle] (0.1) on [ColorScheme.outlineVariant].
+  /// Matches [MeMuslimDesignTokens.opacitySubtle] (0.1) on [ColorScheme.outlineVariant].
   static Color _shellChromeOutlineColor(ColorScheme colorScheme) {
     return colorScheme.outlineVariant.withValues(alpha: 0.1);
   }
@@ -645,7 +645,7 @@ class TilawaAdaptiveShellTokens {
     return colorScheme.outlineVariant.withValues(alpha: alpha);
   }
 
-  /// Matches [TilawaDesignTokens.opacityGlass] (0.8) on [ColorScheme.surface].
+  /// Matches [MeMuslimDesignTokens.opacityGlass] (0.8) on [ColorScheme.surface].
   static Color _sideRailBackgroundColor(ColorScheme colorScheme) {
     return colorScheme.surface.withValues(alpha: 0.8);
   }
@@ -663,14 +663,23 @@ class TilawaAdaptiveShellTokens {
   }
 
   /// Selected nav button background on the surface bar.
+  ///
+  /// Matches the pressed state layer on an unselected destination
+  /// ([ColorScheme.primary] or [ColorScheme.onSurface] at
+  /// [MeMuslimDesignTokens.stateLayerPressed] on [bottomNavBackgroundColor])
+  /// so the resting pill and press splash read as one system.
   static Color _navButtonSelectedBackgroundColor(
     ColorScheme colorScheme,
     Color bottomNavBackgroundColor,
   ) {
-    if (colorScheme.brightness == Brightness.light) {
-      return colorScheme.primaryContainer;
-    }
-    return colorScheme.surfaceContainerHighest;
+    const double pressedAlpha = 0.12;
+    final Color pressTint = colorScheme.brightness == Brightness.light
+        ? colorScheme.primary
+        : colorScheme.onSurface;
+    return Color.alphaBlend(
+      pressTint.withValues(alpha: pressedAlpha),
+      bottomNavBackgroundColor,
+    );
   }
 
   TilawaAdaptiveShellTokens copyWith({
@@ -1070,7 +1079,7 @@ class TilawaSettingsGroupTokens {
   ///
   /// Horizontal list insets stay on [tileContentPadding] /
   /// [switchTileContentPadding]; vertical is zero so row height is driven by
-  /// [ListTile.minTileHeight] (48 dp, [kTilawaMinInteractiveDimension]) in the
+  /// [ListTile.minTileHeight] (48 dp, [kMeMuslimMinInteractiveDimension]) in the
   /// settings tile widgets.
   factory TilawaSettingsGroupTokens.defaults() {
     return TilawaSettingsGroupTokens.fromColorScheme(
@@ -1456,7 +1465,7 @@ class TilawaImmersiveComposerTokens {
       regularPreviewHeightFactor: 0.5,
       panelMinHeight: 220,
       previewMaxHeight: 460,
-      headerButtonSize: kTilawaMinInteractiveDimension,
+      headerButtonSize: kMeMuslimMinInteractiveDimension,
       headerIconSizeOffset: 2,
       composerSurfaceColor: surface,
       overlayPanelTranslucentFillColor: surface.withValues(
@@ -1619,7 +1628,7 @@ class TilawaImmersiveComposerTokens {
 ///
 /// Default insets follow the kit spacing scale: **16 dp** horizontal,
 /// **12 dp** body top, **24 dp** body bottom (Medium / Extra Large on
-/// [TilawaDesignTokens]) for reading-oriented sheets—see **§14** in root
+/// [MeMuslimDesignTokens]) for reading-oriented sheets—see **§14** in root
 /// `DESIGN.md`.
 @immutable
 class TilawaBottomSheetScaffoldTokens {
@@ -1654,7 +1663,7 @@ class TilawaBottomSheetScaffoldTokens {
       // close-button side mirrors in RTL.
       headerPadding: EdgeInsetsDirectional.fromSTEB(16, 8, 12, 12),
       bodyPadding: EdgeInsets.fromLTRB(16, 12, 16, 24),
-      closeButtonSize: kTilawaMinInteractiveDimension,
+      closeButtonSize: kMeMuslimMinInteractiveDimension,
       footerPadding: EdgeInsets.fromLTRB(16, 12, 16, 16),
       footerActionGap: 12,
       footerTopBorderWidth: 0.5,

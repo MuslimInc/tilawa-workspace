@@ -77,3 +77,37 @@ final class SessionDetailRescheduleRespondAcknowledged
     extends SessionDetailEvent {
   const SessionDetailRescheduleRespondAcknowledged();
 }
+
+/// Student confirms cancellation with a reason from [showCancelSessionSheet].
+final class SessionDetailCancelSubmitted extends SessionDetailEvent {
+  const SessionDetailCancelSubmitted({required this.reason});
+
+  final String reason;
+
+  @override
+  List<Object?> get props => [reason];
+}
+
+/// Clears one-shot cancellation success UI after toast.
+final class SessionDetailCancelAcknowledged extends SessionDetailEvent {
+  const SessionDetailCancelAcknowledged();
+}
+
+/// Student submits a star rating + optional comment for a completed session.
+final class SessionDetailReviewSubmitted extends SessionDetailEvent {
+  const SessionDetailReviewSubmitted({
+    required this.rating,
+    this.comment,
+  });
+
+  final int rating;
+  final String? comment;
+
+  @override
+  List<Object?> get props => [rating, comment];
+}
+
+/// Clears one-shot review success UI after toast.
+final class SessionDetailReviewAcknowledged extends SessionDetailEvent {
+  const SessionDetailReviewAcknowledged();
+}

@@ -8,7 +8,10 @@ import '../../lib/src/molecules/tilawa_seek_bar.dart';
 Widget _wrap(Widget child, {TextDirection textDirection = TextDirection.ltr}) {
   return MaterialApp(
     theme: ThemeData(
-      extensions: [TilawaDesignTokens.light(), TilawaComponentTokens.light()],
+      extensions: [
+        MeMuslimDesignTokens.light(),
+        MeMuslimComponentTokens.light(),
+      ],
     ),
     home: Directionality(
       textDirection: textDirection,
@@ -205,7 +208,7 @@ void main() {
       );
       expect(
         tester.getSize(stackFinder).height,
-        greaterThanOrEqualTo(kTilawaMinInteractiveDimension),
+        greaterThanOrEqualTo(kMeMuslimMinInteractiveDimension),
       );
 
       await tester.drag(find.byType(Slider).last, const Offset(24, 0));

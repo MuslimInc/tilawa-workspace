@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../foundation/design_tokens.dart';
 import '../foundation/tilawa_interaction_feedback.dart';
 
-/// Adaptive switch with a guaranteed [kTilawaMinInteractiveDimension] hit target.
+/// Adaptive switch with a guaranteed [kMeMuslimMinInteractiveDimension] hit target.
 ///
 /// The control visual is fitted inside an optional [visualSlotSize] so rows can
 /// keep a compact switch silhouette without shrinking the tap target (FR-001).
@@ -33,7 +33,7 @@ class TilawaSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final hitSize = kTilawaMinInteractiveDimension;
+    final hitSize = kMeMuslimMinInteractiveDimension;
 
     final Widget switchControl = Theme(
       data: theme.copyWith(

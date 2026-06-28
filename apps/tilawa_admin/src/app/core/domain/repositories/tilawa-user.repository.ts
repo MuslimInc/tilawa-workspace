@@ -13,6 +13,8 @@ export interface TilawaUserRepository {
   ): Promise<PageResult<TilawaUser>>;
 
   count(): Promise<number>;
+
+  searchByPrefix?(query: string): Promise<TilawaUser[]>;
 }
 
 export const TILAWA_USER_REPOSITORY = new InjectionToken<TilawaUserRepository>(

@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/get_it_idempotent.dart';
 import 'package:tilawa/features/auth/domain/services/callable_session_payload_builder.dart';
+import 'package:tilawa_core/services/performance_monitoring_service.dart';
 
 import '../data/firebase/firebase_auth_session_provider.dart';
 import '../data/firebase/firebase_audit_repository.dart';
@@ -27,6 +28,7 @@ import '../data/firebase/firestore_teacher_application_access_data_source.dart';
 import '../data/firebase/firestore_teacher_application_repository.dart';
 import '../data/firebase/firestore_teacher_profile_repository.dart';
 import '../data/firebase/firestore_teacher_repository.dart';
+import '../data/manual_payment_link_launcher.dart';
 import '../data/firebase/firestore_user_profile_repository.dart';
 import '../data/firebase/firebase_guardian_approval_repository.dart';
 import '../data/firebase/firestore_wallet_data_source.dart';
@@ -43,6 +45,7 @@ class QuranSessionsFirebaseModule {
   QuranSessionsFirebaseModule._();
 
   static void register(GetIt sl, {AppLaunchConfig? launchConfig}) {
+    registerManualPaymentLinkLauncher();
     final config =
         launchConfig ??
         (sl.isRegistered<AppLaunchConfig>()
@@ -57,10 +60,16 @@ class QuranSessionsFirebaseModule {
       () => const FirebaseSessionCommandGateway(),
     );
 
+    final sessionDataSource = FirestoreSessionDataSource(
+      firestore,
+      sl<PerformanceMonitoringService>(),
+    );
+
     final mutationGateway = FirebaseSessionMutationGateway(
       firestore,
       functions,
       sl<CallableSessionPayloadBuilder>(),
+      sl<PerformanceMonitoringService>(),
     );
     sl.registerLazySingletonIfAbsent<SessionMutationGateway>(
       () => mutationGateway,
@@ -99,8 +108,11 @@ class QuranSessionsFirebaseModule {
       <T extends Object>(T instance, {String? instanceName}) {
         sl.registerSingletonOnce<T>(instance, instanceName: instanceName);
       },
-      teacherDataSource: FirestoreTeacherDataSource(firestore),
-      sessionDataSource: FirestoreSessionDataSource(firestore),
+      teacherDataSource: FirestoreTeacherDataSource(
+        firestore,
+        sl<PerformanceMonitoringService>(),
+      ),
+      sessionDataSource: sessionDataSource,
       bookingDataSource: FirestoreBookingDataSource(
         firestore,
         authSession,
@@ -117,10 +129,17 @@ class QuranSessionsFirebaseModule {
       teacherApplicationDataSource: FirestoreTeacherApplicationDataSource(
         firestore,
       ),
-      teacherProfileDataSource: FirestoreTeacherProfileDataSource(firestore),
+      teacherProfileDataSource: FirestoreTeacherProfileDataSource(
+        firestore,
+        sl<PerformanceMonitoringService>(),
+        sl<SharedPreferencesAsync>(),
+      ),
       availabilityDataSource: FirestoreAvailabilityDataSource(firestore),
       bookedSlotLockDataSource: FirestoreBookedSlotLockDataSource(firestore),
-      scheduleDataSource: FirestoreScheduleDataSource(firestore),
+      scheduleDataSource: FirestoreScheduleDataSource(
+        firestore,
+        sl<PerformanceMonitoringService>(),
+      ),
       walletDataSource: FirestoreWalletDataSource(firestore),
       fridayReviewReminderStore: SharedPreferencesFridayReviewReminderStore(
         sl<SharedPreferencesAsync>(),
@@ -190,6 +209,12 @@ class QuranSessionsFirebaseModule {
       ),
     );
 
+    // Application-layer caching use cases (GetTeacherDashboardUseCase,
+    // InvalidateQuranSessionCacheUseCase, QuranSessionCacheStore, …) are only
+    // registered here; the package module wires domain use cases alone.
+    // registerUseCases is idempotent, so already-registered domain use cases
+    // are skipped and only the caching layer is added.
+    QuranSessionsMvpModule.registerUseCases(sl);
     QuranSessionsMvpModule.registerBlocs(sl);
   }
 }

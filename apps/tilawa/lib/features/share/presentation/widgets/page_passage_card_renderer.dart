@@ -164,9 +164,9 @@ class PagePassageCardRenderer extends StatelessWidget {
                       spacing: _PagePosterLayout.footerPillSpacing,
                       runSpacing: _PagePosterLayout.footerPillRunSpacing,
                       children: [
-                        const _PosterPill(
+                        _PosterPill(
                           icon: Icons.auto_stories_rounded,
-                          label: 'Shared from Tilawa',
+                          label: context.l10n.sharedViaTilawa,
                         ),
                         if (normalizedReciterName != null &&
                             normalizedReciterName.isNotEmpty)

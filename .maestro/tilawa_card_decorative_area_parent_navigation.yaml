@@ -1,0 +1,31 @@
+# Maestro E2E — decorative null-callback regions let parent TilawaCard navigate.
+#
+# Covers InkWell(onTap: null) and handler-less GestureDetector().
+#
+# Run:
+#   maestro test .maestro/tilawa_card_decorative_area_parent_navigation.yaml \
+#     --device emulator-5554
+
+appId: com.tilawa.app
+
+---
+- launchApp:
+      clearState: false
+- runFlow:
+      file: subflows/ensure_main_shell.yaml
+- runFlow:
+      file: subflows/ensure_tilawa_card_demo.yaml
+
+- tapOn:
+      id: "tilawa_card_demo_reset"
+
+- tapOn:
+      id: "tilawa_card_demo_decorative_ink_well"
+- assertVisible: "parent navigated"
+
+- tapOn:
+      id: "tilawa_card_demo_reset"
+
+- tapOn:
+      id: "tilawa_card_demo_decorative_gesture_detector"
+- assertVisible: "parent navigated"

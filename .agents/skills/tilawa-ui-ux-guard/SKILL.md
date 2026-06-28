@@ -56,7 +56,8 @@ Focus: hierarchy, tokens, elevation, components, RTL, density, FAB/player cleara
 
 | Flag | Why |
 |------|-----|
-| **Home tile duplicates bottom-nav tab** | Shell already exposes Home, Prayer, Quran, Athkar, Settings |
+| **Home tile duplicates shell tab** | See home-dashboard-patterns.md |
+| **Home redesign without user request** | See home-dashboard-patterns.md |
 | Donation/support on reader/prayer/athkar | Violates §9 placement |
 | Cold-start modal for new feature | Breaks calm entry |
 | Settings-only path to daily action | UX anti-pattern |
@@ -72,12 +73,11 @@ Focus: hierarchy, tokens, elevation, components, RTL, density, FAB/player cleara
 
 ## Home dashboard extra checks
 
-If touching `features/home/`:
+If touching `features/home/`, verify against
+[home-dashboard-patterns.md](../tilawa-apply-ui-principles/references/home-dashboard-patterns.md):
 
-- [ ] Today modules (khatma, plan, pinned athkar) **above** More section
-- [ ] More row = non-nav destinations only (see `home-dashboard-patterns.md`)
-- [ ] Section header uses `Row` + `TilawaIconActionButton` for edit (not fake trailing on title)
-- [ ] Pull-to-refresh only refreshes data `HomeDashboardBloc` reloads
+- [ ] No unapproved redesign, reorder, or stale widgets
+- [ ] Scope limited to bugs / spacing / overflow / a11y / tokens / RTL unless user asked for redesign
 
 ## Visual verification (manual or Maestro)
 

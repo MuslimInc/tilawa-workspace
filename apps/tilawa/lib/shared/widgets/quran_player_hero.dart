@@ -120,7 +120,7 @@ class QuranPlayerHeroArtwork extends StatelessWidget {
     return BorderRadius.zero;
   }
 
-  Widget _placeholder(TilawaDesignTokens tokens, Color bg, Color icon) {
+  Widget _placeholder(MeMuslimDesignTokens tokens, Color bg, Color icon) {
     return ColoredBox(
       color: bg,
       child: Center(

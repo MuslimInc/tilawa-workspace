@@ -24,6 +24,8 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../../../router/app_router_config.dart';
 import '../../../../screens/cubit/main_screen_cubit.dart';
 import '../../../../screens/cubit/main_screen_state.dart';
+import 'package:tilawa/features/shell/application/shell_tab_reselect.dart';
+import 'package:tilawa/screens/app_shell_nav_destinations.dart';
 import '../../../../shared/widgets/quran_player_chrome.dart';
 import '../../../../shared/widgets/quran_player_system_back.dart';
 import '../../../localization/presentation/bloc/localization_bloc.dart';
@@ -59,7 +61,7 @@ double _recitersRefreshIndicatorEdgeOffset(BuildContext context) {
 /// Includes the collapsible search row so the rail keeps a stable screen
 /// position when the nested header scrolls away.
 double _recitersLetterIndexTopInsetFromScaffoldBody(BuildContext context) {
-  final TilawaDesignTokens tokens = Theme.of(context).tokens;
+  final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
   return _recitersRefreshIndicatorEdgeOffset(context) + tokens.spaceSmall;
 }
 
@@ -404,6 +406,31 @@ class _RecitersScreenState extends State<RecitersScreen>
 
   void _scrollToTop() => _scrollPrimaryToTop();
 
+  bool _recitersListIsScrolledDown() {
+    final ScrollController? primaryScrollController =
+        PrimaryScrollController.maybeOf(context);
+    final Iterable<ScrollController> controllers = [
+      ?primaryScrollController,
+      _activeRecitersScrollController,
+      ?_nestedScrollViewKey.currentState?.innerController,
+    ];
+    for (final ScrollController controller in controllers) {
+      if (controller.hasClients &&
+          controller.offset > ShellTabReselect.scrollTopThreshold) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void _onShellTabReselect() {
+    if (_recitersListIsScrolledDown()) {
+      _scrollPrimaryToTop();
+      return;
+    }
+    unawaited(_refreshReciters());
+  }
+
   void _onAlphabetScrubStart() {
     _alphabetScrub.alphabetScrubbingActive = true;
     _alphabetScrubbingNotifier.value = true;
@@ -551,7 +578,6 @@ class _RecitersScreenState extends State<RecitersScreen>
         appBar: TilawaCatalogAppBar.titleOnly(
           context,
           title: context.l10n.reciters,
-          centerTitle: true,
           showBottomHairline: false,
           showElevationShadow: false,
         ),
@@ -577,6 +603,12 @@ class _RecitersScreenState extends State<RecitersScreen>
       child: Builder(
         builder: (innerContext) => MultiBlocListener(
           listeners: [
+            BlocListener<MainScreenCubit, MainScreenState>(
+              listenWhen: (MainScreenState previous, MainScreenState current) =>
+                  previous.tabReselectTick(kAppShellRecitersTabIndex) !=
+                  current.tabReselectTick(kAppShellRecitersTabIndex),
+              listener: (context, state) => _onShellTabReselect(),
+            ),
             BlocListener<MainScreenCubit, MainScreenState>(
               listenWhen: (MainScreenState previous, MainScreenState current) =>
                   previous.recitersSearchFocusTick !=
@@ -763,7 +795,6 @@ class _RecitersScreenState extends State<RecitersScreen>
                     appBar: TilawaCatalogAppBar.titleOnly(
                       context,
                       title: context.l10n.reciters,
-                      centerTitle: true,
                       showBottomHairline: false,
                       showElevationShadow: false,
                     ),
@@ -1255,7 +1286,7 @@ class _RecitersEmptyStateContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final bool showClearAll = _hasActiveFilters(state);
     final String title = context.l10n.noRecitersFound;
     final IconData icon = Icons.person_off_outlined;
@@ -1287,7 +1318,7 @@ Alignment _recitersEmptyContentAlignment(BuildContext context) {
 
 double _recitersPinnedTabBarHeight(BuildContext context) {
   final ThemeData theme = Theme.of(context);
-  final TilawaDesignTokens tokens = theme.tokens;
+  final MeMuslimDesignTokens tokens = theme.tokens;
   final EdgeInsets padding = TilawaAppBarConfig.catalogChromePadding(tokens);
 
   return padding.vertical + kTextTabBarHeight;
@@ -1317,7 +1348,7 @@ class _RecitersScrollingHeaderSliver extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
 
     return SliverToBoxAdapter(
       child: ColoredBox(
@@ -1397,7 +1428,7 @@ class _RecitersPinnedTabBarContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
 
     return ColoredBox(
       color: theme.colorScheme.surface,
@@ -1471,7 +1502,7 @@ class _FavoritesTabLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     final String label = count > 0
         ? context.l10n.recitersFilterPillFavoritesCount(count)
         : context.l10n.recitersFilterChipFavorites;
@@ -1550,7 +1581,7 @@ class _RecitersAmbientPainter extends CustomPainter {
   });
 
   final ColorScheme colorScheme;
-  final TilawaDesignTokens tokens;
+  final MeMuslimDesignTokens tokens;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1969,7 +2000,7 @@ double _recitersWideShellBottomReserve(BuildContext context) {
 
 /// Alphabet rail sits slightly above shell chrome with a tokenized gap.
 double _recitersLetterIndexBottomInset(BuildContext context) {
-  final TilawaDesignTokens tokens = Theme.of(context).tokens;
+  final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
   return tokens.spaceSmall + _recitersWideShellBottomReserve(context);
 }
 

@@ -1,5 +1,6 @@
 import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 
+import '../domain/entities/manual_payment_price.dart';
 import '../domain/entities/session_price.dart';
 import '../domain/entities/session_pricing_type.dart';
 
@@ -23,6 +24,24 @@ abstract final class PriceFormatter {
     if (price == null) return '';
     return format(price, l10n);
   }
+
+  /// Formats a presentation-only [ManualPaymentPrice] as a per-session label.
+  static String formatManual(
+    ManualPaymentPrice price,
+    QuranSessionsLocalizations l10n,
+  ) => l10n.pricePerSession(
+    _formatAmount(price.amountMajor, price.currencyCode),
+  );
+
+  /// Formats a [ManualPaymentPrice] amount only (no l10n wrapper).
+  static String formatManualAmountOnly(ManualPaymentPrice price) =>
+      _formatAmount(price.amountMajor, price.currencyCode);
+
+  /// Formats [amount] with a market [currencyCode] symbol (no l10n wrapper).
+  static String formatAmountOnly({
+    required double amount,
+    required String currencyCode,
+  }) => _formatAmount(amount, currencyCode);
 
   static String _formatAmount(double amount, String currencyCode) {
     final symbol = _symbol(currencyCode);

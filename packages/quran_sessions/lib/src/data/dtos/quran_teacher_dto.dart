@@ -23,6 +23,10 @@ class QuranTeacherDto {
     required this.totalReviews,
     required this.totalSessionsCompleted,
     this.marketPrice,
+    this.manualPaymentPrice,
+    this.cityName,
+    this.countryName,
+    this.credentials = const [],
   });
 
   final String id;
@@ -41,11 +45,19 @@ class QuranTeacherDto {
   /// Null for free teachers or when queried without a market context.
   final SessionPriceDto? marketPrice;
 
+  /// Presentation-only manual/off-app price (Egypt pilot). Read from the teacher
+  /// profile doc; never from `pricing/{marketId}`. Does not affect [pricingType]
+  /// or the booking engine.
+  final ManualPaymentPriceDto? manualPaymentPrice;
+
   final List<String> specializations;
   final List<String> languages;
   final double averageRating;
   final int totalReviews;
   final int totalSessionsCompleted;
+  final String? cityName;
+  final String? countryName;
+  final List<TeacherCredentialDto> credentials;
 
   factory QuranTeacherDto.fromJson(Map<String, dynamic> json) =>
       QuranTeacherDto(
@@ -64,12 +76,32 @@ class QuranTeacherDto {
                 json['market_price'] as Map<String, dynamic>,
               )
             : null,
+        manualPaymentPrice: json['manual_payment_price'] != null
+            ? ManualPaymentPriceDto.fromJson(
+                json['manual_payment_price'] as Map<String, dynamic>,
+              )
+            : null,
         specializations: List<String>.from(json['specializations'] as List),
         languages: List<String>.from(json['languages'] as List),
         averageRating: (json['average_rating'] as num).toDouble(),
         totalReviews: json['total_reviews'] as int,
         totalSessionsCompleted: json['total_sessions_completed'] as int,
+        cityName: json['city_name'] as String?,
+        countryName: json['country_name'] as String?,
+        credentials: _mapCredentials(json['credentials']),
       );
+
+  static List<TeacherCredentialDto> _mapCredentials(Object? raw) {
+    if (raw is! List) return const [];
+    return raw
+        .whereType<Map>()
+        .map(
+          (item) => TeacherCredentialDto.fromJson(
+            Map<String, dynamic>.from(item),
+          ),
+        )
+        .toList();
+  }
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -81,11 +113,42 @@ class QuranTeacherDto {
     'supported_call_types': supportedCallTypes,
     'pricing_type': pricingType,
     'market_price': marketPrice?.toJson(),
+    if (manualPaymentPrice != null)
+      'manual_payment_price': manualPaymentPrice!.toJson(),
     'specializations': specializations,
     'languages': languages,
     'average_rating': averageRating,
     'total_reviews': totalReviews,
     'total_sessions_completed': totalSessionsCompleted,
+    if (cityName != null) 'city_name': cityName,
+    if (countryName != null) 'country_name': countryName,
+    if (credentials.isNotEmpty)
+      'credentials': credentials.map((c) => c.toJson()).toList(),
+  };
+}
+
+class TeacherCredentialDto {
+  const TeacherCredentialDto({
+    required this.title,
+    this.issuer,
+    this.isVerified = false,
+  });
+
+  final String title;
+  final String? issuer;
+  final bool isVerified;
+
+  factory TeacherCredentialDto.fromJson(Map<String, dynamic> json) =>
+      TeacherCredentialDto(
+        title: json['title'] as String? ?? '',
+        issuer: json['issuer'] as String?,
+        isVerified: json['is_verified'] as bool? ?? false,
+      );
+
+  Map<String, dynamic> toJson() => {
+    'title': title,
+    if (issuer != null) 'issuer': issuer,
+    'is_verified': isVerified,
   };
 }
 
@@ -120,5 +183,32 @@ class SessionPriceDto {
     'currency_code': currencyCode,
     'country_code': countryCode,
     if (cityId != null) 'city_id': cityId,
+  };
+}
+
+// ── ManualPaymentPriceDto ─────────────────────────────────────────────────────
+
+/// Wire representation of the presentation-only manual/off-app price.
+///
+/// Read from the teacher profile doc field `manualPaymentPrice`
+/// (`{ amountMinor, currencyCode }`). Not part of the real pricing engine.
+class ManualPaymentPriceDto {
+  const ManualPaymentPriceDto({
+    required this.amountMinor,
+    required this.currencyCode,
+  });
+
+  final int amountMinor;
+  final String currencyCode;
+
+  factory ManualPaymentPriceDto.fromJson(Map<String, dynamic> json) =>
+      ManualPaymentPriceDto(
+        amountMinor: (json['amount_minor'] as num?)?.toInt() ?? 0,
+        currencyCode: json['currency_code'] as String? ?? 'EGP',
+      );
+
+  Map<String, dynamic> toJson() => {
+    'amount_minor': amountMinor,
+    'currency_code': currencyCode,
   };
 }

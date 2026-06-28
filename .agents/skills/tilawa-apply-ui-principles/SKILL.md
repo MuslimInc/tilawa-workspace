@@ -42,15 +42,7 @@ On a typical screen, eye path should be:
 3. **Supporting metadata** — `onSurfaceVariant`, `bodySmall`
 4. **Actions** — one primary CTA; others secondary
 
-On **Home**:
-
-1. Hero (time / prayer / greeting)
-2. Today cards (khatma, plan, pinned athkar)
-3. Section title + **More** compact row (non-nav destinations only)
-4. Daily inspiration cards (ayah / dua)
-
-Do not restore a multi-tile launcher grid on Home — bottom nav owns primary
-destinations. See
+On **Home:** preserve approved layout — see
 [home-dashboard-patterns.md](references/home-dashboard-patterns.md).
 
 ## One accent per screen
@@ -128,13 +120,10 @@ are equal (see `flutter-apply-tilawa-theming`).
 
 ## Grids & shortcuts
 
-**More row** (`_HomeMoreActionsRow` in `home_screen.dart`):
+**Home:** Section surfaces and nav rules — see
+[home-dashboard-patterns.md](references/home-dashboard-patterns.md).
 
-- 1 column narrow, 2 columns if width ≥ 520 dp
-- Horizontal tile: icon box + label + chevron; `minInteractiveDimension` height
-- **Only** destinations not in bottom nav (Reciters, Qibla today)
-
-**Pinned shortcuts** (athkar, favorites on Home):
+**Pinned shortcuts** (athkar, favorites on other screens):
 
 - Prefer **2-column compact grid** or **horizontal scroll** when ≤4 items
 - Show category icon + localized title
@@ -192,7 +181,7 @@ When a nested control has a **different** action than the card tap, use
 - Magic pixel padding (`13`, `27`)
 - Second primary button beside the main CTA
 - Shadow on list tiles inside an already-raised sheet
-- **Home launcher grid** repeating bottom-nav tabs (Prayer, Athkar, Settings, etc.)
+- **Unapproved Home redesign** — see home-dashboard-patterns.md
 
 ## Verification
 

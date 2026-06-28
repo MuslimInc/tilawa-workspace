@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 
-import 'firebase_session_mutation_gateway.dart';
+import 'firestore_exception_mapper.dart';
 
 /// Enqueues session notifications into the outbox for the delivery worker.
 class FirebaseSessionNotificationGateway implements SessionNotificationGateway {

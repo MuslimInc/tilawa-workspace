@@ -19,7 +19,7 @@ class JuzIndexTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final QuranReaderTheme readerTheme = QuranReaderTheme.of(context);
     final Juz? juz = getJuz(juzNumber);
     if (juz == null) {
@@ -85,7 +85,7 @@ class PageIndexTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final QuranReaderTheme readerTheme = QuranReaderTheme.of(context);
     final List<PageSurahEntry> pageData = getPageData(pageNumber);
     final PageSurahEntry first = pageData.first;
@@ -140,7 +140,7 @@ class _CatalogNumberBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     final SurahIndexTheme indexTheme = SurahIndexTheme.of(context);
     final QuranReaderTheme readerTheme = QuranReaderTheme.of(context);
 

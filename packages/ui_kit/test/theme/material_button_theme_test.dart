@@ -38,7 +38,7 @@ BorderRadius _resolvedPillRadius(WidgetTester tester, Type buttonType) {
 
 void main() {
   group('Material button widgets inherit AppTheme pill shape', () {
-    final TilawaDesignTokens tokens = TilawaDesignTokens.light();
+    final MeMuslimDesignTokens tokens = MeMuslimDesignTokens.light();
     final BorderRadius expectedPill = BorderRadius.circular(
       tokens.buttonBorderRadius(),
     );
@@ -114,7 +114,7 @@ void main() {
 
   group('materialButtonStyle', () {
     test('merges pill shape onto an existing ButtonStyle', () {
-      final tokens = TilawaDesignTokens.light();
+      final tokens = MeMuslimDesignTokens.light();
       const ButtonStyle base = ButtonStyle(
         foregroundColor: WidgetStatePropertyAll(Colors.red),
       );

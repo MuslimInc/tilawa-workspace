@@ -9,8 +9,11 @@ import '../failure_ui/quran_sessions_failure_ui.dart';
 import '../blocs/teacher_list/teacher_list_bloc.dart';
 import '../blocs/teacher_list/teacher_list_event.dart';
 import '../blocs/teacher_list/teacher_list_state.dart';
+import '../widgets/quran_sessions_page_header.dart';
+import '../widgets/quran_sessions_scaffold.dart';
 import '../widgets/quran_sessions_student_empty_state.dart';
 import '../widgets/teacher_card.dart';
+import '../widgets/teacher_card_compact_skeleton.dart';
 
 /// Feature entry point — shows a compact teacher list with a "See all" link.
 class QuranSessionsHomeScreen extends StatefulWidget {
@@ -72,31 +75,27 @@ class _QuranSessionsHomeScreenState extends State<QuranSessionsHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
+    final tokens = Theme.of(context).tokens;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.quranSessionsHomeTitle),
-        actions: [
-          if (widget.onWallet != null)
-            TilawaButton(
-              text: l10n.walletEntryAction,
-              variant: TilawaButtonVariant.ghost,
-              size: TilawaButtonSize.small,
-              onPressed: widget.onWallet,
-            ),
-          if (widget.onMySessions != null)
-            TilawaButton(
-              text: l10n.mySessionsTitle,
-              variant: TilawaButtonVariant.ghost,
-              size: TilawaButtonSize.small,
-              onPressed: widget.onMySessions,
-            ),
-        ],
-      ),
+    return QuranSessionsScaffold(
+      title: l10n.teacherListAppBarTitle,
+      actions: [
+        if (widget.onWallet != null)
+          QuranSessionsAppBarLink(
+            label: l10n.walletEntryAction,
+            onPressed: widget.onWallet!,
+          ),
+        if (widget.onMySessions != null)
+          QuranSessionsAppBarLink(
+            label: l10n.mySessionsTitle,
+            onPressed: widget.onMySessions!,
+          ),
+      ],
       body: BlocBuilder<TeacherListBloc, TeacherListState>(
         builder: (context, state) => switch (state) {
-          TeacherListInitial() || TeacherListLoading() => const Center(
-            child: CircularProgressIndicator(),
+          TeacherListInitial() || TeacherListLoading() => ListView.builder(
+            itemCount: 3,
+            itemBuilder: (_, _) => const TeacherCardCompactSkeleton(),
           ),
           TeacherListEmpty() => QuranSessionsStudentEmptyState(
             featureConfig: widget.featureConfig,
@@ -110,12 +109,12 @@ class _QuranSessionsHomeScreenState extends State<QuranSessionsHomeScreen> {
           ),
           TeacherListFailure(:final failure) => Center(
             child: Padding(
-              padding: EdgeInsets.all(context.tokens.spaceLarge),
+              padding: EdgeInsets.all(tokens.spaceMedium),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(failure.toLocalizedMessage(context)),
-                  SizedBox(height: context.tokens.spaceMedium),
+                  SizedBox(height: tokens.spaceSmall),
                   TilawaButton(
                     text: l10n.retry,
                     onPressed: () => context.read<TeacherListBloc>().add(
@@ -127,19 +126,38 @@ class _QuranSessionsHomeScreenState extends State<QuranSessionsHomeScreen> {
             ),
           ),
           TeacherListSuccess(:final teachers) => ListView.builder(
-            padding: EdgeInsets.all(context.tokens.spaceMedium),
-            itemCount: teachers.take(3).length + 1,
+            itemCount: teachers.take(3).length + 2,
             itemBuilder: (context, i) {
               final preview = teachers.take(3).toList();
-              if (i < preview.length) {
-                return TeacherCard(
-                  teacher: preview[i],
-                  onTap: () => widget.onTeacherTapped?.call(preview[i].id),
+              if (i == 0) {
+                return Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(
+                    tokens.spaceMedium,
+                    tokens.spaceSmall,
+                    tokens.spaceMedium,
+                    tokens.spaceExtraSmall,
+                  ),
+                  child: QuranSessionsPageHeader(
+                    subtitle: l10n.teacherListSubtitle,
+                    compact: true,
+                  ),
                 );
               }
-              return TextButton(
-                onPressed: widget.onSeeAllTeachers,
-                child: Text(l10n.seeAllTeachers),
+              final teacherIndex = i - 1;
+              if (teacherIndex < preview.length) {
+                return TeacherCard(
+                  teacher: preview[teacherIndex],
+                  onTap: () =>
+                      widget.onTeacherTapped?.call(preview[teacherIndex].id),
+                );
+              }
+              return Center(
+                child: TilawaButton(
+                  text: l10n.seeAllTeachers,
+                  onPressed: widget.onSeeAllTeachers,
+                  variant: TilawaButtonVariant.ghost,
+                  size: TilawaButtonSize.small,
+                ),
               );
             },
           ),

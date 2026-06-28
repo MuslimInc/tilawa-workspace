@@ -25,7 +25,7 @@ class DeleteAccountProgressDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
     final String message = context.l10n.deleteAccountInProgress;
     final double maxWidth = tokens.contentMaxWidthForm * 0.78;

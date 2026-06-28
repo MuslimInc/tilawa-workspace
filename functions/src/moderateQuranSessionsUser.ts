@@ -1,13 +1,10 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 
-type UserModerationAction = "suspend" | "reactivate";
-
-interface ModerateQuranSessionsUserRequest {
-  userId: string;
-  action: UserModerationAction;
-  reason?: string;
-}
+import {
+  buildModerateQuranSessionsUserPatch,
+  validateModerateQuranSessionsUserRequest,
+} from "./moderateQuranSessionsUserLogic";
 
 const profileField = "quranSessionsProfile";
 
@@ -22,14 +19,18 @@ export const moderateQuranSessionsUser = onCall(
       throw new HttpsError("permission-denied", "Admin access required.");
     }
 
-    const data = request.data as ModerateQuranSessionsUserRequest;
-    const userId = data.userId?.trim();
-    const action = data.action;
-
-    if (!userId || !action) {
-      throw new HttpsError("invalid-argument", "userId and action required.");
+    let validated;
+    try {
+      validated = validateModerateQuranSessionsUserRequest(
+        request.data as Parameters<typeof validateModerateQuranSessionsUserRequest>[0],
+      );
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Invalid request.";
+      throw new HttpsError("invalid-argument", message);
     }
 
+    const { userId, action, reason } = validated;
     const db = getFirestore();
     const userRef = db.collection("users").doc(userId);
     const userSnap = await userRef.get();
@@ -39,27 +40,44 @@ export const moderateQuranSessionsUser = onCall(
     }
 
     const userData = userSnap.data() ?? {};
-    const profile = (userData[profileField] as Record<string, unknown> | undefined) ?? {};
+    const profile =
+      (userData[profileField] as Record<string, unknown> | undefined) ?? {};
 
     if (!userData[profileField]) {
-      throw new HttpsError("failed-precondition", "User has no Quran Sessions profile.");
+      throw new HttpsError(
+        "failed-precondition",
+        "User has no Quran Sessions profile.",
+      );
     }
 
-    const accountStatus = action === "suspend" ? "suspended" : "active";
+    const patch = buildModerateQuranSessionsUserPatch({
+      existingProfile: profile,
+      action,
+      reason,
+    });
     const now = FieldValue.serverTimestamp();
+    const profilePrefix = `${profileField}.`;
 
-    await userRef.set(
-      {
-        [profileField]: {
-          ...profile,
-          accountStatus,
-          updatedAt: now,
-          ...(data.reason ? { restrictionReason: "adminDecision" } : {}),
-        },
-      },
-      { merge: true },
-    );
+    const updatePayload: Record<string, unknown> = {
+      [`${profilePrefix}accountStatus`]: patch.accountStatus,
+      [`${profilePrefix}updatedAt`]: now,
+    };
 
-    return { userId, accountStatus };
+    if (patch.restrictionReason === null) {
+      updatePayload[`${profilePrefix}restrictionReason`] = FieldValue.delete();
+    } else if (patch.restrictionReason !== undefined) {
+      updatePayload[`${profilePrefix}restrictionReason`] = patch.restrictionReason;
+    }
+
+    await userRef.update(updatePayload);
+
+    console.info("moderateQuranSessionsUser", {
+      adminUid: request.auth.uid,
+      userId,
+      action,
+      accountStatus: patch.accountStatus,
+    });
+
+    return { userId, accountStatus: patch.accountStatus };
   },
 );

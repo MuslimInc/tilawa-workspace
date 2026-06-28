@@ -57,8 +57,8 @@ void main() {
     return MaterialApp(
       theme: ThemeData(
         extensions: [
-          TilawaDesignTokens.light(),
-          TilawaComponentTokens.light(),
+          MeMuslimDesignTokens.light(),
+          MeMuslimComponentTokens.light(),
         ],
       ),
       home: Scaffold(

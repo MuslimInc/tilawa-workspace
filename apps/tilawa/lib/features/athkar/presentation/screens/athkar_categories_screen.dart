@@ -18,23 +18,12 @@ class AthkarCategoriesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
-    final double fabBottomOffset =
+    final double bottomPadding =
         QuranPlayerWidget.fabBottomOffset(context) + tokens.spaceLarge;
     return Scaffold(
       appBar: TilawaCatalogAppBar.titleOnly(
         context,
         title: context.l10n.athkar,
-        centerTitle: true,
-      ),
-      floatingActionButton: TilawaPrimaryFab(
-        heroTag: 'athkar_tasbeeh_fab',
-        icon: Icons.auto_awesome_rounded,
-        label: context.l10n.tasbeehCategory,
-        onPressed: () => const TasbeehRoute().push(context),
-      ),
-      floatingActionButtonLocation: TilawaFabLocation.placement(
-        TilawaFabPlacement.start,
-        bottomOffset: fabBottomOffset,
       ),
       body: Stack(
         children: [
@@ -63,17 +52,12 @@ class AthkarCategoriesScreen extends StatelessWidget {
                   ),
                 );
               } else if (state is AthkarCategoriesLoaded) {
-                final double fabClearance =
-                    fabBottomOffset +
-                    kTilawaMinInteractiveDimension +
-                    (tokens.spaceLarge * 2);
-
                 return TilawaContentGrid(
                   padding: EdgeInsets.fromLTRB(
                     tokens.spaceLarge,
                     tokens.spaceLarge,
                     tokens.spaceLarge,
-                    fabClearance,
+                    bottomPadding,
                   ),
                   targetItemExtent: 180,
                   crossAxisSpacing: tokens.spaceLarge,

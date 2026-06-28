@@ -20,7 +20,7 @@ import {
 } from "./idempotencyService";
 import { lifecycleError } from "./lifecycleErrors";
 import { enqueueSessionNotification } from "./notificationOutboxService";
-import { resolveTeacherProfileUserId } from "./teacherProfileUserId";
+import { resolveTeacherProfileUserId, teacherUserIdFromDenormalizedSessionData } from "./teacherProfileUserId";
 import { requireAdmin, requireParticipantOrAdmin, requireValidSessionEpochUnlessAdmin } from "./sessionAuth";
 import { validateTransition } from "./sessionLifecycleGuard";
 import type { LifecycleStatus } from "./sessionLifecycleService";
@@ -55,10 +55,9 @@ export const openSessionDispute = onCall(
       studentId: (booking.studentId as string) ?? "",
       teacherId: (booking.teacherId as string) ?? "",
     };
-    const teacherUserId = await resolveTeacherProfileUserId(
-      db,
-      participants.teacherId,
-    );
+    const teacherUserId =
+      teacherUserIdFromDenormalizedSessionData(booking) ??
+      (await resolveTeacherProfileUserId(db, participants.teacherId));
     const { uid, actor } = requireParticipantOrAdmin(
       request,
       participants,
@@ -152,7 +151,7 @@ export const openSessionDispute = onCall(
           kind: "disputeOpened",
           recipientUserIds: [
             studentId,
-            await resolveTeacherProfileUserId(db, teacherId),
+            teacherUserId,
           ],
           payload: { reason: data.reason },
         });

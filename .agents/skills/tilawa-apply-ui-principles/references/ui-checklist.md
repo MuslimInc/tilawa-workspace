@@ -51,9 +51,8 @@
 
 ## Home-specific (if touching `features/home/`)
 
-- [ ] No Home tile duplicates bottom-nav destination
-- [ ] More row only lists non-nav routes
-- [ ] Today modules above More section
+- [ ] Matches [home-dashboard-patterns.md](home-dashboard-patterns.md); no unapproved redesign/reorder
+- [ ] Bugfix scope only unless user requested redesign (spacing, overflow, a11y, tokens, RTL)
 
 ## FAB / shell chrome (if applicable)
 

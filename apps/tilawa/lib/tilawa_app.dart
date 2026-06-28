@@ -32,7 +32,6 @@ import 'features/prayer_times/domain/entities/entities.dart';
 import 'features/prayer_times/domain/usecases/load_prayer_settings_use_case.dart';
 import 'features/prayer_times/domain/usecases/schedule_prayer_notifications_use_case.dart';
 import 'features/theme/domain/entities/app_theme_preset.dart';
-import 'features/theme/domain/primary_color_preset.dart';
 import 'features/theme/presentation/cubit/theme_cubit.dart';
 import 'features/theme/presentation/theme_state_material.dart';
 import 'features/whats_new/whats_new.dart';
@@ -292,9 +291,7 @@ class _AppThemeSnapshot extends Equatable {
     return _AppThemeSnapshot(
       themeMode: state.themeMode,
       primaryColor: state.primaryColor,
-      isDefaultPreset:
-          state.primaryColorSource == PrimaryColorSource.preset &&
-          state.primaryPresetId == PrimaryColorPreset.defaultPreset.id,
+      isDefaultPreset: state.isDefaultPresetForDarkTheme,
       darkIsTrueBlack: state.preset == AppThemePreset.trueBlack,
     );
   }

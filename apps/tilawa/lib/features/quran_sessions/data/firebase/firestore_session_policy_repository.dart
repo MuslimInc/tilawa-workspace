@@ -28,6 +28,7 @@ class FirestoreSessionPolicyDataSource
           videoCallAllowedForChildren: false,
           recordingEnabled: false,
           requireGuardianApprovalForChildren: false,
+          quranTutorBookingMode: null,
         );
       }
       final data = snapshot.data() ?? const {};
@@ -44,6 +45,7 @@ class FirestoreSessionPolicyDataSource
         recordingEnabled: data['recordingEnabled'] as bool? ?? false,
         requireGuardianApprovalForChildren:
             data['requireGuardianApprovalForChildren'] as bool? ?? false,
+        quranTutorBookingMode: data['quranTutorBookingMode'] as String?,
       );
     } on FirebaseException catch (e) {
       throw mapFirebaseException(e);

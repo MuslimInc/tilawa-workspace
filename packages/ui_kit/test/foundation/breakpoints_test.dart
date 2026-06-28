@@ -78,7 +78,7 @@ void main() {
     });
   });
 
-  // resolveContentWidth depends on a Theme with TilawaDesignTokens; it is
+  // resolveContentWidth depends on a Theme with MeMuslimDesignTokens; it is
   // exercised end-to-end via content_bounds_test.dart. Unit coverage of the
   // raw BuildContext extension is intentionally omitted here to avoid
   // duplicating theme setup.

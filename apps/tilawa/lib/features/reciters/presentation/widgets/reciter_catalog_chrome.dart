@@ -11,7 +11,7 @@ abstract final class ReciterCatalogChrome {
 
   static Color activeOnFill(ColorScheme scheme) => scheme.onPrimary;
 
-  static Color hairline(ColorScheme scheme, TilawaDesignTokens tokens) =>
+  static Color hairline(ColorScheme scheme, MeMuslimDesignTokens tokens) =>
       scheme.outlineVariant.withValues(alpha: tokens.opacitySubtle);
 
   static Color activeRowFill(ColorScheme scheme) =>

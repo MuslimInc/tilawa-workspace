@@ -4,6 +4,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/usecases/approve_child_guardian_booking_usecase.dart';
 import '../failure_ui/quran_sessions_failure_ui.dart';
+import '../widgets/quran_sessions_scaffold.dart';
 
 /// Guardian signs in and records consent for a child student's bookings.
 class GuardianApprovalCaptureScreen extends StatefulWidget {
@@ -80,8 +81,8 @@ class _GuardianApprovalCaptureScreenState
     final l10n = context.quranSessionsL10n;
     final tokens = Theme.of(context).tokens;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.guardianApprovalTitle)),
+    return QuranSessionsScaffold(
+      title: l10n.guardianApprovalTitle,
       bottomNavigationBar: TilawaBottomActionArea(
         child: TilawaButton(
           text: l10n.guardianApprovalConfirm,

@@ -1,0 +1,164 @@
+<div class="tilawa-page-stack">
+  <app-page-header
+    [title]="'activeSessions_title' | t"
+    [subtitle]="'activeSessions_subtitle' | t"
+    [hasActions]="false"
+  />
+
+  <div class="flex flex-wrap gap-2">
+    @for (option of filterOptions; track option.value) {
+      <app-tilawa-button
+        type="button"
+        size="sm"
+        [variant]="isFilterActive(option.value) ? 'primary' : 'secondary'"
+        [label]="option.labelKey | t"
+        (click)="setFilter(option.value)"
+      />
+    }
+  </div>
+
+  @if (loadState() === 'loading') {
+    <app-tilawa-loading-state [message]="'activeSessions_loading' | t" />
+  } @else if (loadState() === 'error') {
+    <app-tilawa-error-state
+      [message]="errorMessage() ?? 'Error'"
+      [showRetry]="true"
+      (retry)="reload()"
+    />
+  } @else if (items().length === 0) {
+    <app-tilawa-empty-state
+      [title]="'activeSessions_empty' | t"
+      [description]="'activeSessions_emptyDescription' | t"
+    />
+  } @else {
+    <app-tilawa-data-table pinMode="leading" leadingSize="wide">
+      <thead>
+        <tr>
+          <th scope="col" class="tilawa-table-pin tilawa-table-leading tilawa-table-pin-edge">
+            {{ 'activeSessions_starts' | t }} · {{ 'common_actions' | t }}
+          </th>
+          <th scope="col">{{ 'activeSessions_operationalStatus' | t }}</th>
+          <th scope="col">{{ 'common_teacher' | t }}</th>
+          <th scope="col">{{ 'common_student' | t }}</th>
+          <th scope="col">{{ 'sessionDetail_callPhase' | t }}</th>
+          <th scope="col">{{ 'callTracking_whoJoinedFirst' | t }}</th>
+          <th scope="col">{{ 'activeSessions_teacherJoin' | t }}</th>
+          <th scope="col">{{ 'activeSessions_studentJoin' | t }}</th>
+          <th scope="col">{{ 'activeSessions_lateNoShow' | t }}</th>
+          <th scope="col">{{ 'callTracking_connectedMinutes' | t }}</th>
+          <th scope="col">{{ 'callTracking_reconnectCount' | t }}</th>
+          <th scope="col">{{ 'callTracking_interruptionCount' | t }}</th>
+          <th scope="col">{{ 'callTracking_provider' | t }}</th>
+          <th scope="col">{{ 'activeSessions_trackingUpdated' | t }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of items(); track row.bookingId) {
+          <tr>
+            <td class="tilawa-table-pin tilawa-table-leading tilawa-table-pin-edge">
+              <div class="tilawa-table-leading-inner">
+                <span class="tilawa-table-leading-label">{{ row.startsAt | date:'short' }}</span>
+                <div class="tilawa-table-leading-actions">
+                  <app-tilawa-button
+                    variant="primary"
+                    size="xs"
+                    [label]="'common_view' | t"
+                    [link]="['/quran-sessions/sessions', row.bookingId]"
+                  />
+                  @if (row.teacherUserId) {
+                    <app-tilawa-button
+                      variant="text"
+                      size="xs"
+                      [label]="'activeSessions_teacherAccount' | t"
+                      [link]="['/quran-sessions/wallets', row.teacherUserId]"
+                    />
+                  }
+                  <app-tilawa-button
+                    variant="text"
+                    size="xs"
+                    [label]="'activeSessions_studentAccount' | t"
+                    [link]="['/quran-sessions/wallets', row.studentId]"
+                  />
+                </div>
+              </div>
+            </td>
+            <td>
+              <app-status-chip
+                [label]="row.operationalStatus | statusLabel"
+                [status]="row.operationalStatus"
+              />
+            </td>
+            <td>
+              <div class="flex flex-col gap-1">
+                <span>{{ row.teacherName ?? row.teacherId }}</span>
+                <div class="flex flex-wrap gap-1">
+                  @if (row.teacherIsActive === false) {
+                    <app-status-chip [label]="'status_inactive' | t" status="inactive" />
+                  }
+                  @if (row.teacherAccountStatus) {
+                    <app-status-chip
+                      [label]="row.teacherAccountStatus | statusLabel"
+                      [status]="row.teacherAccountStatus"
+                    />
+                  }
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="flex flex-col gap-1">
+                <span>{{ row.studentName ?? row.studentId }}</span>
+                @if (row.studentAccountStatus) {
+                  <app-status-chip
+                    [label]="row.studentAccountStatus | statusLabel"
+                    [status]="row.studentAccountStatus"
+                  />
+                }
+              </div>
+            </td>
+            <td>
+              <app-status-chip
+                [label]="row.callPhase | statusLabel"
+                [status]="row.callPhase"
+              />
+            </td>
+            <td>{{ row.whoJoinedFirst | statusLabel }}</td>
+            <td>{{ row.teacherJoinStatus | statusLabel }}</td>
+            <td>{{ row.studentJoinStatus | statusLabel }}</td>
+            <td>
+              @if (row.teacherLate || row.studentLate || row.teacherNoShow || row.studentNoShow) {
+                <div class="flex flex-wrap gap-1">
+                  @if (row.teacherLate) {
+                    <app-status-chip [label]="'callTracking_teacherLate' | t" status="teacher_no_show" />
+                  }
+                  @if (row.studentLate) {
+                    <app-status-chip [label]="'callTracking_studentLate' | t" status="student_no_show" />
+                  }
+                  @if (row.teacherNoShow) {
+                    <app-status-chip [label]="'status_teacher_no_show' | t" status="teacher_no_show" />
+                  }
+                  @if (row.studentNoShow) {
+                    <app-status-chip [label]="'status_student_no_show' | t" status="student_no_show" />
+                  }
+                </div>
+              } @else {
+                {{ 'common_none' | t }}
+              }
+            </td>
+            <td>{{ row.connectedMinutes }}</td>
+            <td>{{ row.reconnectCount }}</td>
+            <td>{{ row.interruptionCount }}</td>
+            <td>{{ row.providerType }}</td>
+            <td>
+              {{ row.trackingUpdatedAt ? (row.trackingUpdatedAt | date:'short') : ('common_none' | t) }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </app-tilawa-data-table>
+
+    <app-tilawa-pagination
+      [canLoadMore]="canLoadMore()"
+      (loadMore)="loadMore()"
+    />
+  }
+</div>

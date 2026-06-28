@@ -15,14 +15,14 @@ enum PrimaryColorSource { preset, custom }
 /// Must stay in sync with [PrimaryColorPreset.defaultPreset.valueArgb]; the
 /// constructor uses a literal here because Dart constant-list initialisers
 /// can't call a non-trivial getter chain.
-const int _kDefaultPrimaryColorArgb = 0xFF8B5E3C;
+const int _kDefaultPrimaryColorArgb = 0xFF2B8659;
 
 class ThemeState extends Equatable {
   const ThemeState({
     required this.mode,
     this.primaryColorArgb = _kDefaultPrimaryColorArgb,
     this.primaryColorSource = PrimaryColorSource.preset,
-    this.primaryPresetId = 'brown',
+    this.primaryPresetId = 'brand_green',
     this.useSystemTheme = false,
     this.preset = AppThemePreset.defaultMode,
   });
@@ -125,10 +125,19 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
         primaryColorSource = PrimaryColorSource.preset;
         primaryPresetId = preset.id;
       } else if (sourceValue == 'custom' && colorValue != null) {
-        // New shape, custom HEX preserved verbatim.
-        primaryColorArgb = colorValue;
-        primaryColorSource = PrimaryColorSource.custom;
-        primaryPresetId = null;
+        // New shape, custom HEX preserved verbatim (except legacy purple).
+        final migratedArgb = PrimaryColorPreset.migrateLegacyPrimaryArgb(
+          colorValue,
+        );
+        if (migratedArgb != colorValue) {
+          primaryColorArgb = migratedArgb;
+          primaryColorSource = PrimaryColorSource.preset;
+          primaryPresetId = PrimaryColorPreset.brandGreen.id;
+        } else {
+          primaryColorArgb = colorValue;
+          primaryColorSource = PrimaryColorSource.custom;
+          primaryPresetId = null;
+        }
       } else if (colorValue != null) {
         // Legacy payload (no source field). Migrate by ARGB lookup.
         final match = PrimaryColorPreset.findByArgb(colorValue);

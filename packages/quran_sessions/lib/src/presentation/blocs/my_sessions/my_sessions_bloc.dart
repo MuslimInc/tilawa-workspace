@@ -199,8 +199,13 @@ class MySessionsBloc extends Bloc<MySessionsEvent, MySessionsState> {
     );
 
     result.fold(
-      (_) => null,
-      (review) => emit(current.copyWith(lastSubmittedReview: review)),
+      (failure) => emit(current.copyWith(reviewFailure: failure)),
+      (review) => emit(
+        current.copyWith(
+          lastSubmittedReview: review,
+          clearReviewFailure: true,
+        ),
+      ),
     );
   }
 }

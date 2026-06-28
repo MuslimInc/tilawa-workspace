@@ -266,7 +266,7 @@ class _SearchFieldBody extends StatelessWidget {
   }
 }
 
-/// Centers [child] within [TilawaDesignTokens.contentMaxWidthMedia].
+/// Centers [child] within [MeMuslimDesignTokens.contentMaxWidthMedia].
 ///
 /// Use for feature-screen search rows (Reciters, History, Playlists, etc.)
 /// so the field aligns with list content on tablet/desktop.

@@ -11,9 +11,8 @@ Run before shipping or in review mode. Mark each item pass / fail / N/A.
 
 ## Information architecture
 
-- [ ] High-frequency actions not buried in Settings or More row
-- [ ] Home follows Now → Today → More if touching Home
-- [ ] Home does **not** duplicate bottom-nav destinations (Home, Prayer, Quran, Athkar, Settings)
+- [ ] High-frequency actions not buried in Settings or More
+- [ ] **Home:** matches [home-dashboard-patterns.md](../../tilawa-apply-ui-principles/references/home-dashboard-patterns.md); no unapproved redesign/reorder
 - [ ] Customization (pins/favorites) has edit entry and sensible defaults
 - [ ] Pin/favorite count capped; empty state has add CTA
 - [ ] Picker modality matches [decision-trees.md](decision-trees.md) (sheet vs full screen)

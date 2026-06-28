@@ -8,6 +8,10 @@ export type SessionAction =
   | "initiate_payment"
   | "confirm_booking"
   | "confirm_free_booking"
+  | "submit_booking_request"
+  | "accept_booking_request"
+  | "reject_booking_request"
+  | "expire_tutor_approval"
   | "acknowledge_session"
   | "start_session"
   | "complete_session"
@@ -38,6 +42,7 @@ export interface SessionTransition {
 const ALL_STATUSES: ReadonlySet<LifecycleStatus> = new Set([
   "draft",
   "pending_payment",
+  "pending_tutor_approval",
   "scheduled",
   "confirmed",
   "in_progress",
@@ -54,6 +59,7 @@ const ALL_STATUSES: ReadonlySet<LifecycleStatus> = new Set([
   "compensated",
   "refunded",
   "expired",
+  "rejected_by_tutor",
 ]);
 
 const TRANSITIONS: readonly SessionTransition[] = [
@@ -83,6 +89,34 @@ const TRANSITIONS: readonly SessionTransition[] = [
     from: new Set(["draft"]),
     to: "scheduled",
     allowedActors: new Set(["student", "system"]),
+    requiresReason: false,
+  },
+  {
+    action: "submit_booking_request",
+    from: new Set(["draft"]),
+    to: "pending_tutor_approval",
+    allowedActors: new Set(["student", "system"]),
+    requiresReason: false,
+  },
+  {
+    action: "accept_booking_request",
+    from: new Set(["pending_tutor_approval"]),
+    to: "scheduled",
+    allowedActors: new Set(["teacher"]),
+    requiresReason: false,
+  },
+  {
+    action: "reject_booking_request",
+    from: new Set(["pending_tutor_approval"]),
+    to: "rejected_by_tutor",
+    allowedActors: new Set(["teacher"]),
+    requiresReason: false,
+  },
+  {
+    action: "expire_tutor_approval",
+    from: new Set(["pending_tutor_approval"]),
+    to: "expired",
+    allowedActors: new Set(["system"]),
     requiresReason: false,
   },
   {
@@ -129,7 +163,12 @@ const TRANSITIONS: readonly SessionTransition[] = [
   },
   {
     action: "cancel_by_student",
-    from: new Set(["scheduled", "confirmed", "pending_payment"]),
+    from: new Set([
+      "scheduled",
+      "confirmed",
+      "pending_payment",
+      "pending_tutor_approval",
+    ]),
     to: "cancelled_by_student",
     allowedActors: new Set(["student"]),
     requiresReason: true,
@@ -146,6 +185,7 @@ const TRANSITIONS: readonly SessionTransition[] = [
     from: new Set([
       "draft",
       "pending_payment",
+      "pending_tutor_approval",
       "scheduled",
       "confirmed",
       "in_progress",
@@ -301,7 +341,8 @@ export function validateTransition(input: GuardInput): GuardResult {
 
   if (
     input.action === "cancel_by_student" &&
-    input.sessionStartsAt != null
+    input.sessionStartsAt != null &&
+    input.currentStatus !== "pending_tutor_approval"
   ) {
     const remaining = input.sessionStartsAt.getTime() - Date.now();
     if (remaining < STUDENT_CANCEL_MIN_NOTICE_MS) {

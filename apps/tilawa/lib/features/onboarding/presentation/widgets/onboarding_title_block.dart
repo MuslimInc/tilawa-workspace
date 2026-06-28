@@ -15,7 +15,7 @@ class OnboardingTitleBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
     final List<String> lines = title.split('\n');
     final String headline = lines.first.trim();

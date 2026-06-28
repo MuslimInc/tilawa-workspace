@@ -1,15 +1,24 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../layout/quran_sessions_scroll_padding.dart';
+
+enum _MySessionsTab { upcoming, past, cancelled }
+
 class MySessionsScreen extends StatefulWidget {
   const MySessionsScreen({
     super.key,
     required this.studentId,
+    this.analytics = const QuranSessionsAnalyticsCallbacks(),
     this.resolveTeacherName,
+    this.scrollBottomPadding,
     this.onRescheduleRequested,
     this.onSessionDetailRequested,
+    this.onBookAgainRequested,
     this.createCallControlGateway,
     this.createCallTelemetry,
     this.buildCallSurface,
@@ -17,7 +26,13 @@ class MySessionsScreen extends StatefulWidget {
 
   final String studentId;
 
+  final QuranSessionsAnalyticsCallbacks analytics;
+
   final String? Function(String teacherId)? resolveTeacherName;
+
+  /// Host-provided bottom inset (mini-player, shell tabs). Falls back to
+  /// [quranSessionsDefaultScrollBottomPadding].
+  final QuranSessionsScrollBottomPaddingBuilder? scrollBottomPadding;
 
   final void Function({
     required String bookingId,
@@ -28,6 +43,8 @@ class MySessionsScreen extends StatefulWidget {
 
   final void Function(String bookingId)? onSessionDetailRequested;
 
+  final void Function(String teacherId)? onBookAgainRequested;
+
   final SessionCallControlGatewayFactory? createCallControlGateway;
   final CallTelemetryCoordinatorFactory? createCallTelemetry;
   final InAppCallSurfaceBuilder? buildCallSurface;
@@ -37,9 +54,15 @@ class MySessionsScreen extends StatefulWidget {
 }
 
 class _MySessionsScreenState extends State<MySessionsScreen> {
+  _MySessionsTab _selectedTab = _MySessionsTab.upcoming;
+  final Set<String> _reviewedSessionIds = {};
+  final Set<String> _autoPromptedReviewSessionIds = {};
+  final Set<String> _loggedReviewSessionIds = {};
+
   @override
   void initState() {
     super.initState();
+    widget.analytics.onMySessionsOpened?.call();
     context.read<MySessionsBloc>().add(
       MySessionsLoadRequested(studentId: widget.studentId),
     );
@@ -49,8 +72,8 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.mySessionsTitle)),
+    return QuranSessionsScaffold(
+      title: l10n.mySessionsTitle,
       body: MultiBlocListener(
         listeners: [
           BlocListener<MySessionsBloc, MySessionsState>(
@@ -67,6 +90,10 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
               if (sessionId == null) return;
 
               final session = _findSession(state, sessionId);
+              widget.analytics.onSessionJoined?.call(
+                bookingId: session?.bookingId,
+                sessionId: sessionId,
+              );
               context.read<MySessionsBloc>().add(
                 const MySessionsJoinCompletedAcknowledged(),
               );
@@ -95,10 +122,27 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
             listener: (context, state) {
               if (state is MySessionsSuccess &&
                   state.lastSubmittedReview != null) {
+                final review = state.lastSubmittedReview!;
+                if (_loggedReviewSessionIds.add(review.sessionId)) {
+                  widget.analytics.onReviewSubmitted?.call(
+                    sessionId: review.sessionId,
+                    rating: review.rating,
+                  );
+                }
+                setState(() {
+                  _reviewedSessionIds.add(review.sessionId);
+                });
                 TilawaFeedback.showToast(
                   context,
                   message: l10n.reviewSubmittedThanks,
                   variant: TilawaFeedbackVariant.success,
+                );
+              }
+              if (state is MySessionsSuccess && state.reviewFailure != null) {
+                TilawaFeedback.showToast(
+                  context,
+                  message: state.reviewFailure!.toLocalizedMessage(context),
+                  variant: TilawaFeedbackVariant.error,
                 );
               }
               if (state is MySessionsSuccess &&
@@ -148,118 +192,21 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
                 ),
               ),
             ),
-            final MySessionsSuccess success => RefreshIndicator(
-              onRefresh: () async => _reload(),
-              child: CustomScrollView(
-                slivers: [
-                  _SectionHeader(
-                    title: l10n.upcomingSessionsSection(
-                      success.upcoming.length,
-                    ),
-                  ),
-                  if (success.upcoming.isEmpty)
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.all(
-                          Theme.of(context).tokens.spaceLarge,
-                        ),
-                        child: Text(l10n.noUpcomingSessions),
-                      ),
-                    )
-                  else
-                    SliverList.builder(
-                      itemCount: success.upcoming.length,
-                      itemBuilder: (context, i) {
-                        final session = success.upcoming[i];
-                        return Column(
-                          children: [
-                            SessionCard(
-                              session: session,
-                              teacherName: widget.resolveTeacherName?.call(
-                                session.teacherId,
-                              ),
-                              isJoinLoading:
-                                  success.joinInProgress == session.id,
-                              onJoin: () => _requestJoin(session),
-                              onCancel: () => _confirmCancel(session),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                TilawaButton(
-                                  text: l10n.viewSessionDetails,
-                                  variant: TilawaButtonVariant.ghost,
-                                  size: TilawaButtonSize.small,
-                                  onPressed: () =>
-                                      widget.onSessionDetailRequested?.call(
-                                        session.bookingId,
-                                      ),
-                                ),
-                                if (widget.onRescheduleRequested != null)
-                                  TilawaButton(
-                                    text: l10n.rescheduleAction,
-                                    variant: TilawaButtonVariant.ghost,
-                                    size: TilawaButtonSize.small,
-                                    onPressed: () =>
-                                        widget.onRescheduleRequested!(
-                                          bookingId: session.bookingId,
-                                          teacherId: session.teacherId,
-                                          studentId: widget.studentId,
-                                        ),
-                                  ),
-                              ],
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  _SectionHeader(
-                    title: l10n.pastSessionsSection(success.past.length),
-                  ),
-                  if (success.past.isEmpty)
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.all(
-                          Theme.of(context).tokens.spaceLarge,
-                        ),
-                        child: Text(l10n.noPastSessions),
-                      ),
-                    )
-                  else
-                    SliverList.builder(
-                      itemCount: success.past.length,
-                      itemBuilder: (context, i) {
-                        final session = success.past[i];
-                        return SessionCard(
-                          session: session,
-                          teacherName: widget.resolveTeacherName?.call(
-                            session.teacherId,
-                          ),
-                        );
-                      },
-                    ),
-                  if (success.pastNextCursor != null)
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.all(
-                          Theme.of(context).tokens.spaceLarge,
-                        ),
-                        child: TilawaButton(
-                          text: l10n.loadMorePastSessions,
-                          variant: TilawaButtonVariant.secondary,
-                          isLoading: success.isLoadingMorePast,
-                          onPressed: success.isLoadingMorePast
-                              ? null
-                              : () => context.read<MySessionsBloc>().add(
-                                  MySessionsLoadMorePastRequested(
-                                    studentId: widget.studentId,
-                                  ),
-                                ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
+            final MySessionsSuccess success => _SuccessBody(
+              success: success,
+              selectedTab: _selectedTab,
+              onTabChanged: _onTabChanged,
+              studentId: widget.studentId,
+              scrollBottomPadding: widget.scrollBottomPadding,
+              resolveTeacherName: widget.resolveTeacherName,
+              onRescheduleRequested: widget.onRescheduleRequested,
+              onSessionDetailRequested: widget.onSessionDetailRequested,
+              onBookAgainRequested: widget.onBookAgainRequested,
+              onJoin: _requestJoin,
+              onCancel: _confirmCancel,
+              onReload: _reload,
+              onReview: _promptReview,
+              canReviewSession: _canReviewSession,
             ),
           },
         ),
@@ -306,6 +253,8 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
       context,
       sessionStartsAt: session.startsAt,
       pricingType: SessionPricingType.free,
+      // Egypt pilot sessions are manual/off-app paid; suppress free-session copy.
+      isManualPayment: true,
     );
     if (reason != null && mounted) {
       context.read<MySessionsBloc>().add(
@@ -313,26 +262,277 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
       );
     }
   }
+
+  void _onTabChanged(_MySessionsTab tab) {
+    setState(() => _selectedTab = tab);
+    if (tab != _MySessionsTab.past) return;
+
+    final state = context.read<MySessionsBloc>().state;
+    if (state is! MySessionsSuccess) return;
+
+    final session = _firstReviewablePastSession(state);
+    if (session != null) {
+      unawaited(_maybeAutoPromptReview(session));
+    }
+  }
+
+  bool _canReviewSession(QuranSession session) {
+    if (!isSessionEligibleForStudentReview(session)) return false;
+    if (_reviewedSessionIds.contains(session.id)) return false;
+    final submitted = context.read<MySessionsBloc>().state;
+    if (submitted is MySessionsSuccess &&
+        submitted.lastSubmittedReview?.sessionId == session.id) {
+      return false;
+    }
+    return true;
+  }
+
+  QuranSession? _firstReviewablePastSession(MySessionsSuccess success) {
+    for (final session in success.past) {
+      if (_isCancelledSession(session)) continue;
+      if (_canReviewSession(session)) return session;
+    }
+    return null;
+  }
+
+  Future<void> _maybeAutoPromptReview(QuranSession session) async {
+    if (_autoPromptedReviewSessionIds.contains(session.id)) return;
+    _autoPromptedReviewSessionIds.add(session.id);
+    await _promptReview(session);
+  }
+
+  Future<void> _promptReview(QuranSession session) async {
+    if (!_canReviewSession(session) || !mounted) return;
+
+    final input = await showSessionReviewSheet(
+      context,
+      teacherName: widget.resolveTeacherName?.call(session.teacherId),
+    );
+    if (input == null || !mounted) return;
+
+    context.read<MySessionsBloc>().add(
+      ReviewSubmitted(
+        sessionId: session.id,
+        rating: input.rating,
+        comment: input.comment,
+      ),
+    );
+  }
+
+  bool _isCancelledSession(QuranSession session) =>
+      SessionListClassifier.isCancelledSession(session);
 }
 
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title});
-  final String title;
+class _SuccessBody extends StatelessWidget {
+  const _SuccessBody({
+    required this.success,
+    required this.selectedTab,
+    required this.onTabChanged,
+    required this.studentId,
+    this.scrollBottomPadding,
+    required this.resolveTeacherName,
+    required this.onRescheduleRequested,
+    required this.onSessionDetailRequested,
+    required this.onBookAgainRequested,
+    required this.onJoin,
+    required this.onCancel,
+    required this.onReload,
+    required this.onReview,
+    required this.canReviewSession,
+  });
+
+  final MySessionsSuccess success;
+  final _MySessionsTab selectedTab;
+  final ValueChanged<_MySessionsTab> onTabChanged;
+  final String studentId;
+  final QuranSessionsScrollBottomPaddingBuilder? scrollBottomPadding;
+  final String? Function(String teacherId)? resolveTeacherName;
+  final void Function({
+    required String bookingId,
+    required String teacherId,
+    required String studentId,
+  })?
+  onRescheduleRequested;
+  final void Function(String bookingId)? onSessionDetailRequested;
+  final void Function(String teacherId)? onBookAgainRequested;
+  final Future<void> Function(QuranSession session) onJoin;
+  final Future<void> Function(QuranSession session) onCancel;
+  final VoidCallback onReload;
+  final Future<void> Function(QuranSession session) onReview;
+  final bool Function(QuranSession session) canReviewSession;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
     final tokens = Theme.of(context).tokens;
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          tokens.spaceLarge,
-          tokens.spaceSection,
-          tokens.spaceLarge,
-          tokens.spaceSmall,
-        ),
-        child: Text(title, style: Theme.of(context).textTheme.titleMedium),
+    final now = DateTime.now();
+    final bottomPadding =
+        (scrollBottomPadding ?? quranSessionsDefaultScrollBottomPadding)(
+          context,
+        );
+    final cancelled = _cancelledSessions(success);
+    final upcomingSessions = success.upcoming
+        .where(SessionListClassifier.isStudentUpcoming)
+        .toList();
+    final sessions = switch (selectedTab) {
+      _MySessionsTab.upcoming => upcomingSessions,
+      _MySessionsTab.past =>
+        success.past.where((session) => !_isCancelledSession(session)).toList(),
+      _MySessionsTab.cancelled => cancelled,
+    };
+
+    return RefreshIndicator(
+      onRefresh: () async => onReload(),
+      child: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: QuranSessionSummaryStrip(
+              upcomingCount: upcomingSessions.length,
+              pastCount: success.past.length,
+              nextUpcoming: upcomingSessions.isEmpty
+                  ? null
+                  : upcomingSessions.first,
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: tokens.spaceMedium,
+                vertical: tokens.spaceSmall,
+              ),
+              child: TilawaSegmentedControl<_MySessionsTab>(
+                selectedValue: selectedTab,
+                onValueChanged: onTabChanged,
+                segments: [
+                  TilawaSegment(
+                    value: _MySessionsTab.upcoming,
+                    label: l10n.sessionsTabUpcoming,
+                  ),
+                  TilawaSegment(
+                    value: _MySessionsTab.past,
+                    label: l10n.sessionsTabPast,
+                  ),
+                  TilawaSegment(
+                    value: _MySessionsTab.cancelled,
+                    label: l10n.sessionsTabCancelled,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (sessions.isEmpty)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.all(tokens.spaceLarge),
+                child: Text(
+                  switch (selectedTab) {
+                    _MySessionsTab.upcoming => l10n.noUpcomingSessions,
+                    _MySessionsTab.past => l10n.noPastSessions,
+                    _MySessionsTab.cancelled => l10n.sessionStatusCancelled,
+                  },
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            )
+          else
+            SliverList.builder(
+              itemCount: sessions.length,
+              itemBuilder: (context, index) {
+                final session = sessions[index];
+                final isUpcomingTab = selectedTab == _MySessionsTab.upcoming;
+                return QuranSessionCard(
+                  session: session,
+                  now: now,
+                  highlighted: isUpcomingTab && index == 0,
+                  teacherName: resolveTeacherName?.call(session.teacherId),
+                  variant: isUpcomingTab
+                      ? QuranSessionCardVariant.upcoming
+                      : QuranSessionCardVariant.past,
+                  isJoinLoading: success.joinInProgress == session.id,
+                  onJoin:
+                      isUpcomingTab &&
+                          session.effectiveLifecycleStatus.canJoinSession
+                      ? () => onJoin(session)
+                      : null,
+                  onViewDetails: onSessionDetailRequested == null
+                      ? null
+                      : () => onSessionDetailRequested!(session.bookingId),
+                  onReschedule:
+                      isUpcomingTab &&
+                          onRescheduleRequested != null &&
+                          _canStudentRequestReschedule(session, now)
+                      ? () => onRescheduleRequested!(
+                          bookingId: session.bookingId,
+                          teacherId: session.teacherId,
+                          studentId: studentId,
+                        )
+                      : null,
+                  onCancel:
+                      isUpcomingTab && canStudentCancelQuranSession(session)
+                      ? () => onCancel(session)
+                      : null,
+                  onBookAgain:
+                      !isUpcomingTab &&
+                          selectedTab == _MySessionsTab.past &&
+                          onBookAgainRequested != null
+                      ? () => onBookAgainRequested!(session.teacherId)
+                      : null,
+                  onReview:
+                      !isUpcomingTab &&
+                          selectedTab == _MySessionsTab.past &&
+                          canReviewSession(session)
+                      ? () => onReview(session)
+                      : null,
+                );
+              },
+            ),
+          if (selectedTab == _MySessionsTab.past &&
+              success.pastNextCursor != null)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.all(tokens.spaceLarge),
+                child: TilawaButton(
+                  text: l10n.loadMorePastSessions,
+                  variant: TilawaButtonVariant.secondary,
+                  isLoading: success.isLoadingMorePast,
+                  onPressed: success.isLoadingMorePast
+                      ? null
+                      : () => context.read<MySessionsBloc>().add(
+                          MySessionsLoadMorePastRequested(
+                            studentId: studentId,
+                          ),
+                        ),
+                ),
+              ),
+            ),
+          SliverPadding(
+            padding: EdgeInsets.only(bottom: bottomPadding),
+            sliver: const SliverToBoxAdapter(child: SizedBox.shrink()),
+          ),
+        ],
       ),
     );
+  }
+
+  List<QuranSession> _cancelledSessions(MySessionsSuccess success) {
+    return [
+      ...success.upcoming.where(_isCancelledSession),
+      ...success.past.where(_isCancelledSession),
+    ];
+  }
+
+  bool _isCancelledSession(QuranSession session) =>
+      SessionListClassifier.isCancelledSession(session);
+
+  bool _canStudentRequestReschedule(QuranSession session, DateTime now) {
+    if (session.effectiveLifecycleStatus.phase !=
+        SessionLifecyclePhase.active) {
+      return false;
+    }
+    if (!session.startsAt.isAfter(now)) {
+      return false;
+    }
+    return session.startsAt.difference(now) >= const Duration(hours: 24);
   }
 }
 

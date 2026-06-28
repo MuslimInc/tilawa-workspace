@@ -58,7 +58,7 @@ void main() {
       (_) async => const AppInfo(
         version: '2.0.0',
         buildNumber: '1',
-        appName: 'Tilawa',
+        appName: 'MeMuslim',
         packageName: 'com.tilawa',
       ),
     );

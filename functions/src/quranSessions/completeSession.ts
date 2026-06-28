@@ -16,7 +16,7 @@ import {
   requireValidSessionEpochUnlessAdmin,
   resolveActorRole,
 } from "./sessionAuth";
-import { resolveTeacherProfileUserId } from "./teacherProfileUserId";
+import { resolveTeacherProfileUserId, teacherUserIdFromDenormalizedSessionData } from "./teacherProfileUserId";
 import { validateTransition } from "./sessionLifecycleGuard";
 import type { LifecycleStatus } from "./sessionLifecycleService";
 import type { ActorRole } from "./sessionLifecycleGuard";
@@ -57,10 +57,9 @@ export const completeSession = onCall(
       teacherId: (booking.teacherId as string) ?? "",
     };
 
-    const teacherUserId = await resolveTeacherProfileUserId(
-      db,
-      participants.teacherId,
-    );
+    const teacherUserId =
+      teacherUserIdFromDenormalizedSessionData(booking) ??
+      (await resolveTeacherProfileUserId(db, participants.teacherId));
     const actor = isAdmin(request)
       ? ("admin" as const)
       : resolveActorRole(request, data.actorRole, participants, teacherUserId);
