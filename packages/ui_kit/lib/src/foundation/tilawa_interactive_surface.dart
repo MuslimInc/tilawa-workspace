@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
+import '../atoms/tilawa_button.dart';
 import 'design_tokens.dart';
 import 'tilawa_interaction_feedback.dart';
 
@@ -41,6 +43,13 @@ import 'tilawa_interaction_feedback.dart';
 ///
 /// Pass `onTap: null` for a non-interactive surface; the wrapper then renders
 /// [child] directly with no focus/press/haptic overhead.
+///
+/// ## Nested interactive children
+///
+/// Nested controls inside a tappable card own their interaction area. Enabled
+/// controls handle their own action; disabled controls become dead zones. The
+/// parent card should only navigate and show press feedback from blank/
+/// non-interactive card areas.
 class TilawaInteractiveSurface extends StatefulWidget {
   const TilawaInteractiveSurface({
     super.key,
@@ -127,9 +136,76 @@ class _TilawaInteractiveSurfaceState extends State<TilawaInteractiveSurface> {
   bool _hovered = false;
   bool _focused = false;
   bool _pressed = false;
+  Offset? _pendingTapPosition;
+  final ValueNotifier<bool> _pressedNotifier = ValueNotifier<bool>(false);
+  final GlobalKey _childKey = GlobalKey();
+
+  @override
+  void dispose() {
+    _pressedNotifier.dispose();
+    super.dispose();
+  }
+
+  bool _shouldSuppressNestedInteraction(Offset localPosition) {
+    final childElement = _childKey.currentContext as Element?;
+    final surfaceElement = context as Element;
+    final renderObject = surfaceElement.renderObject;
+    if (renderObject is! RenderBox || !renderObject.hasSize) {
+      return false;
+    }
+
+    final result = BoxHitTestResult();
+    if (!renderObject.hitTest(result, position: localPosition)) {
+      return false;
+    }
+
+    if (childElement == null) {
+      return false;
+    }
+
+    for (final HitTestEntry entry in result.path) {
+      final target = entry.target;
+      if (target is! RenderObject) {
+        continue;
+      }
+
+      final element = _findElementForRenderObject(surfaceElement, target);
+      if (element == null || !_isDescendantOf(element, childElement)) {
+        continue;
+      }
+
+      if (_isNestedInteractiveWidget(element.widget)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  void _handlePressDown(Offset localPosition) {
+    _pendingTapPosition = localPosition;
+    if (_shouldSuppressNestedInteraction(localPosition)) {
+      return;
+    }
+    _setPressed(true);
+  }
+
+  void _handlePressEnd() {
+    _setPressed(false);
+  }
+
+  void _handleTapCancel() {
+    _pendingTapPosition = null;
+    _handlePressEnd();
+  }
 
   void _activate() {
     if (!widget._isInteractive) return;
+    final position = _pendingTapPosition;
+    _pendingTapPosition = null;
+    if (position != null && _shouldSuppressNestedInteraction(position)) {
+      return;
+    }
     TilawaInteractionFeedback.trigger(widget.haptic);
     widget.onTap?.call();
   }
@@ -139,6 +215,7 @@ class _TilawaInteractiveSurfaceState extends State<TilawaInteractiveSurface> {
       return;
     }
     _pressed = pressed;
+    _pressedNotifier.value = pressed;
     if (!mounted) {
       return;
     }
@@ -189,7 +266,7 @@ class _TilawaInteractiveSurfaceState extends State<TilawaInteractiveSurface> {
       // did; a loose parent lets the child size to its content.
       fit: StackFit.passthrough,
       children: [
-        widget.child,
+        KeyedSubtree(key: _childKey, child: widget.child),
         if (overlayAlpha > 0)
           Positioned.fill(
             child: IgnorePointer(
@@ -220,7 +297,10 @@ class _TilawaInteractiveSurfaceState extends State<TilawaInteractiveSurface> {
     );
 
     if (widget.enablePressAnimation) {
-      surface = TilawaPressAnimation(child: surface);
+      surface = TilawaPressAnimation(
+        pressedNotifier: _pressedNotifier,
+        child: surface,
+      );
     }
 
     surface = FocusableActionDetector(
@@ -249,9 +329,9 @@ class _TilawaInteractiveSurfaceState extends State<TilawaInteractiveSurface> {
         // Opaque so taps on transparent padding inside the bounds still
         // register (kit GestureDetector contract — see kit_contracts_test).
         behavior: HitTestBehavior.opaque,
-        onTapDown: (_) => _setPressed(true),
-        onTapUp: (_) => _setPressed(false),
-        onTapCancel: () => _setPressed(false),
+        onTapDown: (details) => _handlePressDown(details.localPosition),
+        onTapUp: (_) => _handlePressEnd(),
+        onTapCancel: _handleTapCancel,
         onTap: widget.onTap != null ? _activate : null,
         onLongPress: widget.onLongPress,
         child: surface,
@@ -272,4 +352,67 @@ class _TilawaInteractiveSurfaceState extends State<TilawaInteractiveSurface> {
       child: child,
     );
   }
+}
+
+Element? _findElementForRenderObject(Element root, RenderObject target) {
+  Element? found;
+  void walk(Element element) {
+    if (found != null) {
+      return;
+    }
+    if (element.renderObject == target) {
+      found = element;
+      return;
+    }
+    element.visitChildren(walk);
+  }
+
+  walk(root);
+  return found;
+}
+
+bool _isDescendantOf(Element element, Element ancestor) {
+  var found = false;
+  element.visitAncestorElements((Element parent) {
+    if (parent == ancestor) {
+      found = true;
+      return false;
+    }
+    return true;
+  });
+  return found;
+}
+
+bool _isNestedInteractiveWidget(Widget widget) {
+  return switch (widget) {
+    IconButton() ||
+    FloatingActionButton() ||
+    PopupMenuButton<Object?>() ||
+    DropdownButton<Object?>() => true,
+    InkWell(
+      :final VoidCallback? onTap,
+      :final VoidCallback? onDoubleTap,
+      :final VoidCallback? onLongPress,
+    )
+        when onTap != null || onDoubleTap != null || onLongPress != null =>
+      true,
+    GestureDetector(
+      :final VoidCallback? onTap,
+      :final VoidCallback? onLongPress,
+      :final VoidCallback? onDoubleTap,
+    )
+        when onTap != null || onLongPress != null || onDoubleTap != null =>
+      true,
+    TilawaInteractiveSurface(
+      :final VoidCallback? onTap,
+      :final VoidCallback? onLongPress,
+    )
+        when onTap != null || onLongPress != null =>
+      true,
+    TilawaButton(:final VoidCallback? onPressed) when onPressed != null => true,
+    ListTile(:final VoidCallback? onTap, :final VoidCallback? onLongPress)
+        when onTap != null || onLongPress != null =>
+      true,
+    _ => widget is ButtonStyleButton,
+  };
 }

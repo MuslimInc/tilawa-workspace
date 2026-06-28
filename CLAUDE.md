@@ -72,10 +72,10 @@ visual tokens: `flutter-apply-tilawa-theming`. Canonical human specs: `DESIGN.md
 
 ## Known pitfall — TilawaCard and interactive children
 
-`TilawaCard` places a `Positioned.fill` InkWell at **z=0** (background) and
-the card content at **z=1** (foreground). Flutter hit-tests the foreground
-first, so nested interactive widgets (buttons, menus) receive taps correctly
-and the card's `onTap` fires only on blank space.
+`TilawaInteractiveSurface` routes card taps and press-scale on blank areas only;
+nested buttons keep their own tap and pressed feedback. Flutter hit-tests
+foreground controls first, so nested interactive widgets receive taps before the
+card's `onTap`.
 
 **The one case this still doesn't cover**: when a nested widget needs a
 *different* action from the card's `onTap`. In that case, place the control as

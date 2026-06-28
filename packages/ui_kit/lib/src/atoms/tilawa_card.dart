@@ -36,10 +36,11 @@ enum TilawaCardSurface {
 /// ## Interactive children
 ///
 /// When [onTap] is provided the card is wrapped in [TilawaInteractiveSurface],
-/// so the whole card gets the kit's shared press-scale, keyboard focus ring,
-/// and haptic on activation (no Material ink ripple). Nested interactive
-/// widgets (buttons, menus, icon-buttons) receive taps before the card's
-/// [onTap] because they sit in the card's child subtree.
+/// so blank/card navigation areas get the kit's shared press-scale, keyboard
+/// focus ring, and haptic on activation (no Material ink ripple). Nested
+/// interactive widgets (buttons, menus, icon-buttons) receive taps before the
+/// card's [onTap] and keep their own pressed feedback — the card does not
+/// press-scale when a nested control is pressed.
 ///
 /// If an interactive control needs a *different* action from the card's
 /// [onTap] (e.g. a delete button alongside a navigation card), place it as

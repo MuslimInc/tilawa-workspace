@@ -6,6 +6,16 @@ import 'package:tilawa/features/home/presentation/widgets/home_hijri_calendar_sh
 import 'package:tilawa/features/prayer_times/presentation/formatters/prayer_location_label_formatter.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+Color _homeDashboardHairlineBorder(
+  TilawaHomeScreenTokens screenTokens,
+  ColorScheme colorScheme,
+) {
+  return Color.alphaBlend(
+    screenTokens.homePrayerHeroBorder.withValues(alpha: 0.72),
+    colorScheme.outlineVariant.withValues(alpha: 0.28),
+  );
+}
+
 /// Location chip + Hijri date row above the Home Prayer Hero card.
 class HomePrayerHeroContextRow extends StatelessWidget {
   const HomePrayerHeroContextRow({
@@ -28,7 +38,7 @@ class HomePrayerHeroContextRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final MeMuslimDesignTokens tokens = theme.tokens;
+    final MeMuslimDesignTokens tokens = context.tokens;
     final TilawaHomeScreenTokens screenTokens =
         theme.componentTokens.homeScreen;
     final ColorScheme colorScheme = theme.colorScheme;
@@ -56,26 +66,27 @@ class HomePrayerHeroContextRow extends StatelessWidget {
               ink: resolvedInk,
               muted: resolvedMuted,
               chipBackground: screenTokens.homeHeaderChipBackground,
+              chipBorder: _homeDashboardHairlineBorder(
+                screenTokens,
+                colorScheme,
+              ),
               isRefreshingLocation: isRefreshingLocation,
               onRefreshLocation: onRefreshLocation,
             ),
           ),
         ),
-        Semantics(
-          button: true,
-          label: context.l10n.hijriCalendarOpenLabel,
-          child: InkWell(
-            onTap: () => showHomeHijriCalendarSheet(context),
-            borderRadius: BorderRadius.circular(tokens.radiusSmall),
-            child: Text(
-              hijriDateLine,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.end,
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: resolvedMuted,
-                fontWeight: FontWeight.w500,
-              ),
+        TilawaInteractiveSurface(
+          onTap: () => showHomeHijriCalendarSheet(context),
+          borderRadius: BorderRadius.circular(tokens.radiusSmall),
+          semanticLabel: context.l10n.hijriCalendarOpenLabel,
+          child: Text(
+            hijriDateLine,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.end,
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: resolvedMuted,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),
@@ -90,6 +101,7 @@ class _HomePrayerHeroLocationChip extends StatelessWidget {
     required this.ink,
     required this.muted,
     required this.chipBackground,
+    required this.chipBorder,
     required this.isRefreshingLocation,
     required this.onRefreshLocation,
   });
@@ -98,76 +110,71 @@ class _HomePrayerHeroLocationChip extends StatelessWidget {
   final Color ink;
   final Color muted;
   final Color chipBackground;
+  final Color chipBorder;
   final bool isRefreshingLocation;
   final VoidCallback? onRefreshLocation;
 
   @override
   Widget build(BuildContext context) {
-    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
+    final ThemeData theme = Theme.of(context);
+    final MeMuslimDesignTokens tokens = context.tokens;
+    final BorderRadius chipRadius = BorderRadius.circular(tokens.radiusLarge);
 
-    return Semantics(
-      button: true,
-      label: label,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: isRefreshingLocation ? null : onRefreshLocation,
-          borderRadius: BorderRadius.circular(tokens.radiusLarge),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: chipBackground,
-              borderRadius: BorderRadius.circular(tokens.radiusLarge),
-              border: Border.all(
-                color: Theme.of(
-                  context,
-                ).componentTokens.homeScreen.homePrayerHeroBorder,
-                width: tokens.borderWidthThin,
+    return TilawaInteractiveSurface(
+      onTap: isRefreshingLocation ? null : onRefreshLocation,
+      borderRadius: chipRadius,
+      semanticLabel: label,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: chipBackground,
+          borderRadius: chipRadius,
+          border: Border.all(
+            color: chipBorder,
+            width: tokens.borderWidthThin,
+          ),
+        ),
+        child: Padding(
+          padding: EdgeInsetsDirectional.symmetric(
+            horizontal: tokens.spaceSmall,
+            vertical: tokens.spaceExtraSmall,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: tokens.spaceExtraSmall * 0.75,
+            children: [
+              Icon(
+                FluentIcons.location_24_regular,
+                size: tokens.iconSizeSmall,
+                color: muted,
               ),
-            ),
-            child: Padding(
-              padding: EdgeInsetsDirectional.symmetric(
-                horizontal: tokens.spaceSmall,
-                vertical: tokens.spaceExtraSmall,
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                spacing: tokens.spaceExtraSmall * 0.75,
-                children: [
-                  Icon(
-                    FluentIcons.location_24_regular,
-                    size: tokens.iconSizeSmall,
-                    color: muted,
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: ink,
+                    fontWeight: FontWeight.w600,
                   ),
-                  Flexible(
-                    child: Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: ink,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  if (isRefreshingLocation)
-                    SizedBox(
-                      width: tokens.iconSizeSmall,
-                      height: tokens.iconSizeSmall,
-                      child: TilawaLoadingIndicator(
-                        centered: false,
-                        strokeWidth: 2,
-                        color: ink,
-                      ),
-                    )
-                  else
-                    Icon(
-                      FluentIcons.chevron_down_24_regular,
-                      size: tokens.iconSizeSmall * 0.85,
-                      color: muted,
-                    ),
-                ],
+                ),
               ),
-            ),
+              if (isRefreshingLocation)
+                SizedBox(
+                  width: tokens.iconSizeSmall,
+                  height: tokens.iconSizeSmall,
+                  child: TilawaLoadingIndicator(
+                    centered: false,
+                    strokeWidth: 2,
+                    color: ink,
+                  ),
+                )
+              else
+                Icon(
+                  FluentIcons.chevron_down_24_regular,
+                  size: tokens.iconSizeSmall * 0.85,
+                  color: muted,
+                ),
+            ],
           ),
         ),
       ),
