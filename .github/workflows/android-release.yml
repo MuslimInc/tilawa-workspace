@@ -110,6 +110,15 @@ jobs:
           python3 tool/stamp_changelog_release.py \
             --release-id "${{ inputs.build_name }}+${{ inputs.build_number }}"
 
+      # setup-java Gradle cache restore can leave a corrupted journal on
+      # shared runners; clear it before bundleRelease (see run 28322480371).
+      - name: Reset Gradle journal cache
+        run: |
+          rm -rf "$HOME/.gradle/caches/journal-1"
+          if [ -x apps/tilawa/android/gradlew ]; then
+            (cd apps/tilawa/android && ./gradlew --stop) || true
+          fi
+
       - name: Build signed release AAB
         working-directory: apps/tilawa
         run: |
