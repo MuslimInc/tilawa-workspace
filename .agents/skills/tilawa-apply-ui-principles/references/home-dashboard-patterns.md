@@ -30,7 +30,7 @@ Match this order everywhere (slivers + body):
 | # | Layer | Widget / behavior |
 |---|--------|-------------------|
 | 1 | Sliver — Now | `HomeNextPrayerTime` |
-| 2 | Sliver — tutor (flag) | `homeFeaturedTutorCardSliver` → pinned tutor promo when Quran Sessions enabled |
+| 2 | Sliver — tutor (flag) | `homeFeaturedTutorCardSliver` → scroll-away tutor promo when Quran Sessions enabled |
 | 3 | Body | `HomePrimaryActionsSection` |
 | 4 | Body | `HomeQuickToolsSection` |
 | 5 | Body | `TodayPlanCard` (optional, deferred) |
@@ -60,8 +60,7 @@ Scaffold
 └── RefreshIndicator
     └── CustomScrollView
         ├── HomeNextPrayerTime
-        ├── [flag] homeFeaturedTutorCardSliver
-        │   └── HomeFeaturedTutorCardHeaderDelegate (pinned)
+        ├── [flag] homeFeaturedTutorCardSliver (SliverToBoxAdapter)
         └── HomeDashboardContentSliver
             └── HomeDashboardBody
                 ├── HomePrimaryActionsSection
@@ -78,21 +77,18 @@ Above-deferred: primary actions + quick tools load immediately under the hero.
 
 ---
 
-## Sliver pin policy (Quran Sessions flag)
+## Sliver scroll policy (Quran Sessions flag)
 
 When `quranSessionsFeatureConfig().quranSessionsEnabled`:
 
-- `homeDashboardHeroShouldPin()` → `false` (hero scrolls away)
-- `homeFeaturedTutorCardSliver()` pins `HomeFeaturedTutorCardHeaderDelegate`
-  below the hero with `topInset`, scroll-linked bottom elevation, and
-  `pinScrollOffset` from `HomeNextPrayerTime.scrollOffsetWhenTutorCardPins`
+- Hero and featured tutor slivers scroll away — no pinned headers on Home
+- `homeFeaturedTutorCardSliver()` uses transparent canvas padding like
+  `HomeNextPrayerTime` and `HomeDashboardContentSliver`
 
 When the flag is off:
 
 - Hero scrolls away (no pin)
 - No tutor sliver
-
-Do not change this pin hand-off without explicit product approval.
 
 ---
 

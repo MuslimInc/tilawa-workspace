@@ -197,6 +197,60 @@ void main() {
       expect(find.text(l10n.homeQuickQuran), findsNothing);
     },
   );
+
+  testWidgets(
+    'featured tutor card scrolls away with content on small screen',
+    (tester) async {
+      final view = tester.view;
+      view.devicePixelRatio = 1;
+      view.physicalSize = const Size(360, 640);
+      addTearDown(view.resetDevicePixelRatio);
+      addTearDown(view.resetPhysicalSize);
+
+      final bloc = HomeDashboardBloc(
+        GetHomeDashboardUseCase(_FakeHomeDashboardRepository()),
+        NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
+      )..add(const HomeDashboardStarted(localeIdentifier: 'en'));
+      addTearDown(bloc.close);
+
+      if (!getIt.isRegistered<AppLaunchConfig>()) {
+        getIt.registerSingleton<AppLaunchConfig>(
+          const AppLaunchConfig(quranSessionsEnabled: true),
+        );
+      }
+      addTearDown(() async {
+        if (getIt.isRegistered<AppLaunchConfig>()) {
+          await getIt.unregister<AppLaunchConfig>();
+        }
+      });
+
+      await tester.pumpWidget(
+        _HomeScreenHarness(
+          bloc: bloc,
+          locale: 'en',
+          shellPadding: 80,
+        ),
+      );
+      await tester.pump();
+      for (var frame = 0; frame < 30; frame++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+
+      expect(find.byType(SliverPersistentHeader), findsNothing);
+      expect(find.text('Learn Quran'), findsOneWidget);
+
+      final double scrollAmount = tester
+          .getSize(find.byType(CustomScrollView))
+          .height;
+      await tester.drag(
+        find.byType(CustomScrollView),
+        Offset(0, -scrollAmount),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Learn Quran'), findsNothing);
+    },
+  );
 }
 
 class _MockAudioPlayerBloc extends MockCubit<AudioPlayerState>
@@ -206,10 +260,15 @@ class _MockMainScreenCubit extends MockCubit<MainScreenState>
     implements MainScreenCubit {}
 
 class _HomeScreenHarness extends StatelessWidget {
-  const _HomeScreenHarness({required this.bloc, this.locale = 'ar'});
+  const _HomeScreenHarness({
+    required this.bloc,
+    this.locale = 'ar',
+    this.shellPadding = 0,
+  });
 
   final HomeDashboardBloc bloc;
   final String locale;
+  final double shellPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -243,8 +302,11 @@ class _HomeScreenHarness extends StatelessWidget {
           BlocProvider<AudioPlayerBloc>.value(value: audioPlayerBloc),
           BlocProvider<MainScreenCubit>.value(value: mainScreenCubit),
         ],
-        child: Builder(
-          builder: (context) => HomeScreen(onOpenPrayer: () {}),
+        child: TilawaShellPadding(
+          padding: shellPadding,
+          child: Builder(
+            builder: (context) => HomeScreen(onOpenPrayer: () {}),
+          ),
         ),
       ),
     );

@@ -2,32 +2,23 @@ import 'dart:math' as math;
 
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/quran_sessions/quran_sessions_feature_flags.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import 'home_learn_quran_analytics.dart';
-import 'home_hero_photo_theme.dart';
 import 'open_home_quran_sessions.dart';
 
 /// Minimum visible fraction that counts as an impression.
 const double _kImpressionVisibleFraction = 0.5;
 
-/// Layout metrics for the pinned home featured tutor header.
+/// Layout metrics for the home featured tutor sliver.
 abstract final class HomeFeaturedTutorCardLayout {
   const HomeFeaturedTutorCardLayout._();
 
-  static const double _layoutSlack = 24;
-
-  /// Total vertical extent for [HomeFeaturedTutorCardHeaderDelegate].
-  ///
-  /// Includes [_layoutSlack] so TextPainter estimates stay below real
-  /// [Text] layout (Arabic / text scale) while the delegate still paints
-  /// a fixed [SizedBox] height for valid pinned sliver geometry.
+  /// Total vertical extent for tutor sliver padding + card body.
   static double extentFor(BuildContext context) {
-    final double topInset = MediaQuery.paddingOf(context).top;
     final MeMuslimDesignTokens tokens = context.tokens;
     final ThemeData theme = Theme.of(context);
     final double horizontalInset =
@@ -49,10 +40,13 @@ abstract final class HomeFeaturedTutorCardLayout {
           height: 1.15,
           fontWeight: FontWeight.w700,
         );
+    final double cardInnerWidth = contentWidth - cardPadding;
+
     final double titleHeight = _lineHeight(
       context: context,
       style: titleStyle,
       maxLines: 1,
+      maxWidth: cardInnerWidth - iconBoxSize - tokens.spaceSmall,
       textDirection: textDirection,
       text: context.l10n.homeFeaturedTutorTitle,
     );
@@ -65,13 +59,14 @@ abstract final class HomeFeaturedTutorCardLayout {
       context: context,
       style: subtitleStyle,
       maxLines: 2,
+      maxWidth: cardInnerWidth,
       textDirection: textDirection,
       text: context.l10n.homeFeaturedTutorSubtitle,
     );
 
     final double footerHeight = _FeaturedTutorFooterMetrics.heightFor(
       context: context,
-      maxWidth: contentWidth - cardPadding,
+      maxWidth: cardInnerWidth,
       ctaLabel: context.l10n.homeFeaturedTutorCta,
       badgeLabel: context.l10n.experimentalBadgeLabel,
     );
@@ -82,9 +77,13 @@ abstract final class HomeFeaturedTutorCardLayout {
         tokens.spaceExtraSmall +
         subtitleHeight +
         tokens.spaceMedium +
-        footerHeight;
+        footerHeight +
+        (tokens.borderWidthThin * 2);
 
-    return topInset + cardHeight + tokens.spaceMedium + _layoutSlack;
+    final double textScale = MediaQuery.textScalerOf(context).scale(1);
+    final double textScaleSlack = textScale > 1.15 ? tokens.spaceSmall : 0;
+
+    return cardHeight + tokens.spaceMedium + textScaleSlack;
   }
 
   static double _lineHeight({
@@ -93,191 +92,41 @@ abstract final class HomeFeaturedTutorCardLayout {
     required int maxLines,
     required TextDirection textDirection,
     required String text,
+    double? maxWidth,
   }) {
     final TextPainter painter = TextPainter(
       text: TextSpan(text: text, style: style),
       textDirection: textDirection,
       textScaler: MediaQuery.textScalerOf(context),
       maxLines: maxLines,
-    )..layout();
+    )..layout(maxWidth: maxWidth ?? double.infinity);
 
     return painter.height;
   }
 }
 
-/// Pinned [SliverPersistentHeader] for the Learn Quran featured card.
-class HomeFeaturedTutorCardHeaderDelegate
-    extends SliverPersistentHeaderDelegate {
-  const HomeFeaturedTutorCardHeaderDelegate({
-    required this.extent,
-    required this.topInset,
-    required this.pinScrollOffset,
-    required this.scrollController,
-  });
-
-  final double extent;
-  final double topInset;
-  final double pinScrollOffset;
-  final ScrollController scrollController;
-
-  @override
-  double get minExtent => extent;
-
-  @override
-  double get maxExtent => extent;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    final MeMuslimDesignTokens tokens = context.tokens;
-    final ThemeData theme = Theme.of(context);
-    final TilawaHomeScreenTokens screenTokens =
-        theme.componentTokens.homeScreen;
-    final double horizontalInset =
-        TilawaHomeScreenTokens.screenHorizontalPadding(tokens);
-    final Color pinnedOverlayColor =
-        screenTokens.homeFeaturedTutorGradientStart;
-
-    return ListenableBuilder(
-      listenable: scrollController,
-      builder: (context, _) {
-        final bool isPinned = _isPinnedAtTop();
-
-        final Widget header = SizedBox(
-          height: extent,
-          child: DecoratedBox(
-            decoration: isPinned
-                ? BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: AlignmentDirectional.topCenter,
-                      end: AlignmentDirectional.bottomCenter,
-                      colors: <Color>[
-                        screenTokens.homeFeaturedTutorGradientStart,
-                        screenTokens.homeFeaturedTutorGradientEnd,
-                        screenTokens.backgroundGradientEnd,
-                      ],
-                      stops: const <double>[0, 0.68, 1],
-                    ),
-                  )
-                : const BoxDecoration(color: Colors.transparent),
-            child: Stack(
-              clipBehavior: Clip.none,
-              fit: StackFit.expand,
-              children: [
-                Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(
-                    horizontalInset,
-                    topInset,
-                    horizontalInset,
-                    tokens.spaceMedium,
-                  ),
-                  child: Align(
-                    alignment: AlignmentDirectional.topCenter,
-                    child: const _HomeFeaturedTutorCardImpressionScope(
-                      child: _HomeFeaturedTutorCardContent(),
-                    ),
-                  ),
-                ),
-                _HomeFeaturedTutorPinnedChrome(visible: isPinned),
-              ],
-            ),
-          ),
-        );
-
-        if (!isPinned) {
-          return header;
-        }
-
-        return AnnotatedRegion<SystemUiOverlayStyle>(
-          value: HomeHeroPhotoTheme.collapsedBarOverlayStyle(
-            pinnedOverlayColor,
-          ),
-          child: header,
-        );
-      },
-    );
-  }
-
-  bool _isPinnedAtTop() {
-    if (!scrollController.hasClients) {
-      return false;
-    }
-    return scrollController.offset >= pinScrollOffset - 1;
-  }
-
-  @override
-  bool shouldRebuild(
-    covariant HomeFeaturedTutorCardHeaderDelegate oldDelegate,
-  ) {
-    return extent != oldDelegate.extent ||
-        topInset != oldDelegate.topInset ||
-        pinScrollOffset != oldDelegate.pinScrollOffset ||
-        scrollController != oldDelegate.scrollController;
-  }
-}
-
-/// Bottom hairline for the pinned tutor header — no shadow, calm separation.
-class _HomeFeaturedTutorPinnedChrome extends StatelessWidget {
-  const _HomeFeaturedTutorPinnedChrome({required this.visible});
-
-  final bool visible;
-
-  @override
-  Widget build(BuildContext context) {
-    final MeMuslimDesignTokens tokens = context.tokens;
-    final ThemeData theme = Theme.of(context);
-
-    return Positioned(
-      left: 0,
-      right: 0,
-      bottom: 0,
-      child: IgnorePointer(
-        child: AnimatedOpacity(
-          duration: tokens.durationFast,
-          curve: Curves.easeOutCubic,
-          opacity: visible ? 1 : 0,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: theme.colorScheme.outlineVariant.withValues(
-                    alpha: tokens.opacitySubtle * 1.8,
-                  ),
-                  width: tokens.borderWidthThin,
-                ),
-              ),
-            ),
-            child: const SizedBox(height: 1),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Prayer hero no longer pins — only the featured tutor header may pin.
-bool homeDashboardHeroShouldPin() => false;
-
-/// Builds the pinned featured tutor sliver when the feature flag is enabled.
-Widget? homeFeaturedTutorCardSliver(
-  BuildContext context, {
-  required ScrollController scrollController,
-  required double pinScrollOffset,
-}) {
+/// Builds the featured tutor sliver when the feature flag is enabled.
+Widget? homeFeaturedTutorCardSliver(BuildContext context) {
   if (!quranSessionsFeatureConfig().quranSessionsEnabled) {
     return null;
   }
 
-  return SliverPersistentHeader(
-    pinned: true,
-    delegate: HomeFeaturedTutorCardHeaderDelegate(
-      topInset: MediaQuery.paddingOf(context).top,
-      extent: HomeFeaturedTutorCardLayout.extentFor(context),
-      pinScrollOffset: pinScrollOffset,
-      scrollController: scrollController,
+  final MeMuslimDesignTokens tokens = context.tokens;
+  final double horizontalInset = TilawaHomeScreenTokens.screenHorizontalPadding(
+    tokens,
+  );
+
+  return SliverToBoxAdapter(
+    child: Padding(
+      padding: EdgeInsetsDirectional.fromSTEB(
+        horizontalInset,
+        0,
+        horizontalInset,
+        tokens.spaceMedium,
+      ),
+      child: const _HomeFeaturedTutorCardImpressionScope(
+        child: _HomeFeaturedTutorCardContent(),
+      ),
     ),
   );
 }
@@ -349,6 +198,10 @@ class _HomeFeaturedTutorCardContent extends StatelessWidget {
     final TilawaHomeScreenTokens screenTokens =
         theme.componentTokens.homeScreen;
     final Color accent = screenTokens.homeFeaturedTutorAccent;
+    final Color cardBorder = Color.alphaBlend(
+      screenTokens.homePrayerHeroBorder.withValues(alpha: 0.72),
+      theme.colorScheme.outlineVariant.withValues(alpha: 0.28),
+    );
     final double radius = tokens.resolveRadius(
       family: TilawaRadiusFamily.decorative,
     );
@@ -370,60 +223,54 @@ class _HomeFeaturedTutorCardContent extends StatelessWidget {
           child: DecoratedBox(
             decoration: BoxDecoration(
               borderRadius: borderRadius,
+              color: screenTokens.homeContentSheetSurface,
               border: Border.all(
-                color: screenTokens.homePrayerHeroBorder,
+                color: cardBorder,
                 width: tokens.borderWidthThin,
               ),
             ),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: borderRadius,
-                gradient: screenTokens.featuredTutorGradient(),
-              ),
-              child: Padding(
-                padding: EdgeInsetsDirectional.all(tokens.spaceMedium),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      spacing: tokens.spaceSmall,
-                      children: [
-                        _FeaturedTutorIconWell(accent: accent),
-                        Expanded(
-                          child: Text(
-                            context.l10n.homeFeaturedTutorTitle,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              color: theme.colorScheme.onSurface,
-                              fontWeight: FontWeight.w700,
-                              height: 1.15,
-                            ),
+            child: Padding(
+              padding: EdgeInsetsDirectional.all(tokens.spaceMedium),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    spacing: tokens.spaceSmall,
+                    children: [
+                      _FeaturedTutorIconWell(accent: accent),
+                      Expanded(
+                        child: Text(
+                          context.l10n.homeFeaturedTutorTitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: theme.colorScheme.onSurface,
+                            fontWeight: FontWeight.w700,
+                            height: 1.15,
                           ),
                         ),
-                      ],
-                    ),
-                    SizedBox(height: tokens.spaceExtraSmall),
-                    Text(
-                      context.l10n.homeFeaturedTutorSubtitle,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        height: 1.3,
                       ),
+                    ],
+                  ),
+                  SizedBox(height: tokens.spaceExtraSmall),
+                  Text(
+                    context.l10n.homeFeaturedTutorSubtitle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      height: 1.3,
                     ),
-                    SizedBox(height: tokens.spaceMedium),
-                    _FeaturedTutorFooter(
-                      ctaLabel: context.l10n.homeFeaturedTutorCta,
-                      badgeLabel: context.l10n.experimentalBadgeLabel,
-                      accent: accent,
-                      ctaForeground:
-                          screenTokens.homeFeaturedTutorCtaForeground,
-                    ),
-                  ],
-                ),
+                  ),
+                  SizedBox(height: tokens.spaceMedium),
+                  _FeaturedTutorFooter(
+                    ctaLabel: context.l10n.homeFeaturedTutorCta,
+                    badgeLabel: context.l10n.experimentalBadgeLabel,
+                    accent: accent,
+                    ctaForeground: screenTokens.homeFeaturedTutorCtaForeground,
+                  ),
+                ],
               ),
             ),
           ),

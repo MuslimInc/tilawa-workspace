@@ -41,13 +41,6 @@ abstract final class HomeNextPrayerTime {
     return MediaQuery.paddingOf(context).top + _resolveHeroBodyHeight(context);
   }
 
-  /// Scroll offset where the featured tutor card sticks under the status bar.
-  static double scrollOffsetWhenTutorCardPins(BuildContext context) {
-    return expandedLayoutExtent(context);
-  }
-
-  static const double _layoutSlack = 12;
-
   static double _resolveHeroBodyHeight(BuildContext context) {
     final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     final double textScale = MediaQuery.textScalerOf(
@@ -57,19 +50,21 @@ abstract final class HomeNextPrayerTime {
         TilawaHomeScreenTokens.screenHorizontalPadding(tokens) * 2;
     final bool tightCard =
         MediaQuery.sizeOf(context).width - horizontalGutter < 320;
-    final double verticalPadding = tokens.spaceSmall + tokens.spaceMedium;
     final double contextRow = 36 * textScale;
     final double prayerBlock = 104 * textScale;
-    final double cardPadding = tokens.spaceMedium * 2;
     final double tightSlack = tightCard ? tokens.spaceExtraLarge : 0;
-    return verticalPadding +
-        tokens.spaceSmall +
+
+    // Mirrors [_HomeNextPrayerTimeSliver] padding + card layout, plus small
+    // slack for countdown pill / text-scale layout drift vs estimates.
+    return tokens.spaceSmall +
+        (tokens.spaceMedium * 2) +
         contextRow +
         tokens.spaceSmall +
         prayerBlock +
-        cardPadding +
+        tokens.spaceMedium +
+        (tokens.borderWidthThin * 2) +
         tightSlack +
-        _layoutSlack;
+        12;
   }
 }
 

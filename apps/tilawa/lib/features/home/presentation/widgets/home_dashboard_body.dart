@@ -24,7 +24,7 @@ import 'home_quick_tools_section.dart';
 /// 6. **More** — secondary library/account destinations.
 /// 7. **Inspiration** — passive daily ayah and dua at the bottom.
 ///
-/// The featured tutor card is a pinned sliver directly under the hero.
+/// The featured tutor card is a scroll-away sliver directly under the hero.
 ///
 /// Hierarchy: primary cards > quick tools > more list.
 ///

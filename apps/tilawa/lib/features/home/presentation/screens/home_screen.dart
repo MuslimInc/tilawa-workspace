@@ -31,12 +31,9 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
-  final SliverOverlapAbsorberHandle _tutorHeaderOverlapHandle =
-      SliverOverlapAbsorberHandle();
 
   @override
   void dispose() {
-    _tutorHeaderOverlapHandle.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -86,6 +83,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     _onScrollNotification(context, notification),
                 child: BlocBuilder<HomeDashboardBloc, HomeDashboardState>(
                   builder: (context, state) {
+                    final Widget? tutorHeaderSliver =
+                        homeFeaturedTutorCardSliver(context);
+
                     return CustomScrollView(
                       controller: _scrollController,
                       physics: const AlwaysScrollableScrollPhysics(
@@ -97,23 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           state: state,
                           onOpenPrayer: widget.onOpenPrayer,
                         ),
-                        if (homeFeaturedTutorCardSliver(
-                              context,
-                              scrollController: _scrollController,
-                              pinScrollOffset:
-                                  HomeNextPrayerTime.scrollOffsetWhenTutorCardPins(
-                                    context,
-                                  ),
-                            )
-                            case final Widget sliver) ...[
-                          SliverOverlapAbsorber(
-                            handle: _tutorHeaderOverlapHandle,
-                            sliver: sliver,
-                          ),
-                          SliverOverlapInjector(
-                            handle: _tutorHeaderOverlapHandle,
-                          ),
-                        ],
+                        if (tutorHeaderSliver case final Widget sliver) sliver,
                         HomeDashboardContentSliver(
                           child: const HomeDashboardBody(),
                         ),

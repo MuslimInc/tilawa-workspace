@@ -163,7 +163,7 @@ void main() {
   });
 
   testWidgets(
-    'pinned tutor header sliver lays out without geometry errors in Arabic',
+    'featured tutor sliver lays out without geometry errors in Arabic',
     (tester) async {
       await resetScopeGetIt();
       getIt.registerSingleton<AppLaunchConfig>(
@@ -175,9 +175,6 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      final controller = ScrollController();
-      addTearDown(controller.dispose);
-
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
@@ -186,13 +183,8 @@ void main() {
           supportedLocales: AppLocalizations.supportedLocales,
           home: Builder(
             builder: (context) {
-              final Widget? sliver = homeFeaturedTutorCardSliver(
-                context,
-                scrollController: controller,
-                pinScrollOffset: 0,
-              );
+              final Widget? sliver = homeFeaturedTutorCardSliver(context);
               return CustomScrollView(
-                controller: controller,
                 slivers: [
                   ?sliver,
                   const SliverToBoxAdapter(child: SizedBox(height: 800)),
@@ -364,16 +356,5 @@ void main() {
       analytics.events,
       contains(AnalyticsEvents.homeLearnQuranCardTapped),
     );
-  });
-
-  testWidgets('prayer hero never pins', (
-    tester,
-  ) async {
-    await resetScopeGetIt();
-    getIt.registerSingleton<AppLaunchConfig>(
-      const AppLaunchConfig(quranSessionsEnabled: false),
-    );
-
-    expect(homeDashboardHeroShouldPin(), isFalse);
   });
 }
