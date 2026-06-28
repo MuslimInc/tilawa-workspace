@@ -27,6 +27,18 @@ Preserve layout; do not redesign or reorder unless the user asks.
 
 ---
 
+## UI Kit interaction feedback
+
+Interactive surfaces ([`TilawaInteractiveSurface`](packages/ui_kit/lib/src/foundation/tilawa_interactive_surface.dart))
+use **stable state-layer press feedback**. See
+[`packages/ui_kit/docs/design_system.md`](packages/ui_kit/docs/design_system.md) §4.1.
+
+**TilawaCard nested taps:** parent `onTap` fires from blank areas only; enabled
+nested controls keep their own action; disabled nested controls are dead zones.
+Conflicting actions → sibling `Row` pattern (see [`CLAUDE.md`](CLAUDE.md)).
+
+---
+
 For **visual and UX rules** (colors, tokens, layout, components), read the
 project design spec:
 [`DESIGN.md`](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/DESIGN.md).

@@ -328,10 +328,6 @@ const List<GalleryWidgetCoverage> galleryWidgetManifest = [
     skipReason: 'Low-level interaction primitive',
   ),
   GalleryWidgetCoverage(
-    symbol: 'TilawaPressAnimation',
-    skipReason: 'Interaction animation helper',
-  ),
-  GalleryWidgetCoverage(
     symbol: 'TilawaInteractionFeedback',
     skipReason: 'Haptic helper; no visual demo',
   ),

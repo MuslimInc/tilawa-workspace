@@ -4,7 +4,7 @@
 
 ### Breaking
 
-- None.
+- Removed `TilawaPressAnimation`, `TilawaInteractionFeedback.pressScaleEnd`, and `TilawaInteractiveSurface.enablePressAnimation`. Pressed feedback is state-layer washes only.
 
 ### Deprecated
 
@@ -14,10 +14,12 @@
 
 ### Changed
 
+- `TilawaInteractiveSurface` — pressed feedback is stable state-layer washes (`stateLayerPressed` / `stateLayerHover` / `stateLayerFocused`).
+- `TilawaCard` / `TilawaButton` — cards use state layers; buttons use Material overlay states.
 - `TilawaIllustratedState` — primary action precedes secondary in reading order; default screen-reader label composed from title + subtitle when `semanticLabel` is omitted.
 - `TilawaSelectionTile` — selected checkmark uses `primary` for clearer hierarchy; row enforces `minInteractiveDimension`.
 - `TilawaSegmentedControl` — selected segment paints tokenized elevation shadow (visual feedback).
-- `TilawaSettingsTile` / `TilawaSettingsSwitchTile` / `TilawaNavigationRow` — shared `TilawaSettingsListRow` routes list rows through `TilawaInteractiveSurface` (press scale, focus ring, haptics) instead of `ListTile` ink.
+- `TilawaSettingsTile` / `TilawaSettingsSwitchTile` / `TilawaNavigationRow` — shared `TilawaSettingsListRow` routes list rows through `TilawaInteractiveSurface` (state-layer press, focus ring, haptics) instead of `ListTile` ink.
 - `TilawaButton` — non–full-width labels now ellipsize in constrained parents via `Flexible(fit: FlexFit.loose)`; `isFullWidth` behavior unchanged.
 - `TilawaSearchFieldTokens` — hint text uses a slightly higher alpha on `onSurfaceVariant` for readability.
 - `TilawaMediaPlayerBarTokens` — compact density tightens padding, radii, and artwork while keeping transport controls at ≥48dp.

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 import '../foundation/design_tokens.dart';
 import '../foundation/tilawa_text_roles.dart';
-import '../foundation/tilawa_interaction_feedback.dart';
 import './tilawa_loading_indicator.dart';
 
 // Material 3 state opacities (m3.material.io — interaction states):
@@ -309,10 +308,7 @@ class TilawaButton extends StatelessWidget {
           : (semanticLabel ?? text),
       button: true,
       enabled: !_isDisabled,
-      child: TilawaPressAnimation(
-        enabled: !_isDisabled,
-        child: sizedButton,
-      ),
+      child: sizedButton,
     );
   }
 

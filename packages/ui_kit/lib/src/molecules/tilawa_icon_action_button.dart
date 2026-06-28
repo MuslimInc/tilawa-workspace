@@ -75,7 +75,7 @@ class TilawaIconActionButton extends StatelessWidget {
             ? appBarScope.actionControlFillColor(theme.colorScheme)
             : theme.colorScheme.surface);
 
-    // The interaction primitive owns press-scale, the focus ring, and the
+    // The interaction primitive owns state-layer press, the focus ring, and the
     // activation haptic (light impact, matching the previous behaviour) — no
     // hand-rolled AnimationController and no Material ink ripple.
     Widget result = SizedBox(

@@ -72,8 +72,8 @@ visual tokens: `flutter-apply-tilawa-theming`. Canonical human specs: `DESIGN.md
 
 ## Known pitfall — TilawaCard and interactive children
 
-`TilawaInteractiveSurface` routes card taps and press-scale on blank areas only;
-nested buttons keep their own tap and pressed feedback. Flutter hit-tests
+`TilawaInteractiveSurface` routes card taps and state-layer press feedback on
+blank areas only; nested buttons keep their own tap and pressed feedback. Flutter hit-tests
 foreground controls first, so nested interactive widgets receive taps before the
 card's `onTap`.
 

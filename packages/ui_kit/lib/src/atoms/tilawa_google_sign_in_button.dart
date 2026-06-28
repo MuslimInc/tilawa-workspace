@@ -210,7 +210,7 @@ class TilawaGoogleSignInButton extends StatelessWidget {
       ),
     );
 
-    // The whole branded button gets the kit's press-scale, focus ring, and
+    // The whole branded button gets the kit's state-layer press, focus ring, and
     // activation haptic (no Material ink ripple). The outer Semantics owns the
     // accessible button role/label, so the surface's own semantics are excluded.
     final Widget button = TilawaInteractiveSurface(

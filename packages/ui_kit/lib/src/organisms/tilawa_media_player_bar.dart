@@ -586,9 +586,7 @@ class _SubtitleTapTarget extends StatelessWidget {
         // Outer Semantics owns the button role + label.
         button: false,
         onTap: onTap,
-        // Transparent tap region over text/metadata: keep the content static
-        // (no press-scale) but gain the keyboard focus ring + state layer.
-        enablePressAnimation: false,
+        // Transparent tap region: stable state-layer press (default).
         child: child,
       ),
     );
@@ -621,9 +619,7 @@ class _ProgressTapTarget extends StatelessWidget {
         // Outer Semantics owns the button role + label.
         button: false,
         onTap: onTap,
-        // Transparent tap region over text/metadata: keep the content static
-        // (no press-scale) but gain the keyboard focus ring + state layer.
-        enablePressAnimation: false,
+        // Transparent tap region: stable state-layer press (default).
         child: child,
       ),
     );
@@ -658,9 +654,7 @@ class _OpenPlayerTapTarget extends StatelessWidget {
         // Outer Semantics owns the button role + label.
         button: false,
         onTap: onTap,
-        // Transparent tap region over text/metadata: keep the content static
-        // (no press-scale) but gain the keyboard focus ring + state layer.
-        enablePressAnimation: false,
+        // Transparent tap region: stable state-layer press (default).
         child: child,
       ),
     );

@@ -15,9 +15,9 @@ import 'tilawa_interaction_feedback.dart';
 /// - **Focus ring** — a visible 2 dp ring on keyboard / switch / D-pad focus,
 ///   drawn from [MeMuslimDesignTokens.focusRingWidth]. Fixes the WCAG 2.4.7
 ///   gap where most components had no focus state (audit UIK-005).
-/// - **Press feel** — the shared scale-to-0.96 press animation via
-///   [TilawaPressAnimation], so every surface presses the same way and honours
-///   reduced-motion (UIK-006).
+/// - **Press feel** — stable state-layer washes from
+///   [MeMuslimDesignTokens.stateLayerPressed] / `stateLayerHover` /
+///   `stateLayerFocused` (no layout shift, no scale) (UIK-006).
 /// - **Haptics** — a single [TilawaHaptic] tier fired on activation, instead of
 ///   ad-hoc per-component haptics (UIK-007).
 /// - **State layers** — hover / pressed / focused washes resolved from
@@ -27,8 +27,12 @@ import 'tilawa_interaction_feedback.dart';
 /// It is intentionally *unopinionated about paint*: the caller supplies the
 /// resting [child] (fill, border, content). The kit's interactive atoms,
 /// molecules, and organisms route through this primitive instead of a raw
-/// [Material] + [InkWell] pair, so the whole app shares one press-scale feel
-/// (no ink ripple) plus a consistent focus ring, haptics, and state layers.
+/// [Material] + [InkWell] pair, so the whole app shares one stable pressed feel
+/// (state layers, no ink ripple) plus a consistent focus ring and haptics.
+///
+/// **UX rule:** Interactive surfaces use state layers, ripple, or opacity/tint
+/// changes for pressed feedback — not press-scale, which can look unstable on
+/// clipped or rounded surfaces.
 ///
 /// ## Usage
 ///
@@ -58,7 +62,6 @@ class TilawaInteractiveSurface extends StatefulWidget {
     this.onLongPress,
     this.borderRadius = BorderRadius.zero,
     this.haptic = TilawaHaptic.selection,
-    this.enablePressAnimation = true,
     this.enableStateLayer = true,
     this.focusColor,
     this.stateLayerColor,
@@ -74,7 +77,7 @@ class TilawaInteractiveSurface extends StatefulWidget {
   });
 
   /// The resting visual (fill, border, content). The wrapper paints focus and
-  /// state-layer overlays on top and applies press scaling around it.
+  /// state-layer overlays on top.
   final Widget child;
 
   /// Activation callback. When `null` the surface is non-interactive.
@@ -89,9 +92,6 @@ class TilawaInteractiveSurface extends StatefulWidget {
 
   /// Haptic tier fired on activation. [TilawaHaptic.none] disables it.
   final TilawaHaptic haptic;
-
-  /// Whether to apply the shared press-scale animation.
-  final bool enablePressAnimation;
 
   /// Whether to paint hover/pressed/focused state-layer washes.
   final bool enableStateLayer;
@@ -141,14 +141,7 @@ class _TilawaInteractiveSurfaceState extends State<TilawaInteractiveSurface> {
   bool _focused = false;
   bool _pressed = false;
   Offset? _pendingTapPosition;
-  final ValueNotifier<bool> _pressedNotifier = ValueNotifier<bool>(false);
   final GlobalKey _childKey = GlobalKey();
-
-  @override
-  void dispose() {
-    _pressedNotifier.dispose();
-    super.dispose();
-  }
 
   bool _shouldSuppressNestedInteraction(Offset localPosition) {
     final childElement = _childKey.currentContext as Element?;
@@ -219,7 +212,6 @@ class _TilawaInteractiveSurfaceState extends State<TilawaInteractiveSurface> {
       return;
     }
     _pressed = pressed;
-    _pressedNotifier.value = pressed;
     if (!mounted) {
       return;
     }
@@ -299,13 +291,6 @@ class _TilawaInteractiveSurfaceState extends State<TilawaInteractiveSurface> {
           ),
       ],
     );
-
-    if (widget.enablePressAnimation) {
-      surface = TilawaPressAnimation(
-        pressedNotifier: _pressedNotifier,
-        child: surface,
-      );
-    }
 
     surface = FocusableActionDetector(
       focusNode: widget.focusNode,

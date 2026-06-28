@@ -149,7 +149,7 @@ class TilawaChip extends StatelessWidget {
     // branch entirely.
     // Explicit button role / label avoids MergeSemantics (engine merge bugs).
     // Background + border are painted by the Container inside [content]; the
-    // interactive surface adds press-scale, focus ring, and haptics (no ripple)
+    // interactive surface adds state-layer press, focus ring, and haptics
     // and its own semantics are excluded so the outer Semantics owns the node.
     final Widget paintedChip = TilawaInteractiveSurface(
       onTap: onTap,

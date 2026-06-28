@@ -248,9 +248,7 @@ class TilawaDropdownField<T> extends StatelessWidget {
                       onTap: isEnabled ? toggleMenu : null,
                       enabled: isEnabled,
                       button: false,
-                      // A form field should not shrink on tap; keep it
-                      // static but still gain the focus ring + haptic.
-                      enablePressAnimation: false,
+                      // Form fields use stable state-layer press (default).
                       borderRadius: BorderRadius.circular(radius),
                       child: shrinkWrapWidth
                           ? _ShrinkWrapInputShell(

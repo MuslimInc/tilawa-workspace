@@ -178,6 +178,52 @@ void main() {
 
       expect(longPresses, 1);
     });
+
+    testWidgets('shows pressed state layer without scale by default', (
+      tester,
+    ) async {
+      final tokens = MeMuslimDesignTokens.light();
+
+      await tester.pumpWidget(
+        _host(
+          TilawaInteractiveSurface(
+            onTap: () {},
+            borderRadius: BorderRadius.circular(12),
+            child: const SizedBox(width: 120, height: 48),
+          ),
+        ),
+      );
+
+      expect(
+        find.descendant(
+          of: find.byType(TilawaInteractiveSurface),
+          matching: find.byType(ScaleTransition),
+        ),
+        findsNothing,
+      );
+
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.byType(TilawaInteractiveSurface)),
+      );
+      await tester.pump();
+
+      final washes = tester
+          .widgetList<DecoratedBox>(find.byType(DecoratedBox))
+          .map((box) => box.decoration)
+          .whereType<BoxDecoration>()
+          .where(
+            (decoration) =>
+                decoration.color != null &&
+                decoration.color!.a > 0 &&
+                decoration.border == null,
+          );
+
+      expect(washes.length, 1);
+      expect(washes.first.color!.a, tokens.stateLayerPressed);
+
+      await gesture.up();
+      await tester.pump();
+    });
   });
 }
 

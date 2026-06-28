@@ -36,11 +36,12 @@ enum TilawaCardSurface {
 /// ## Interactive children
 ///
 /// When [onTap] is provided the card is wrapped in [TilawaInteractiveSurface],
-/// so blank/card navigation areas get the kit's shared press-scale, keyboard
-/// focus ring, and haptic on activation (no Material ink ripple). Nested
-/// interactive widgets (buttons, menus, icon-buttons) receive taps before the
-/// card's [onTap] and keep their own pressed feedback — the card does not
-/// press-scale when a nested control is pressed.
+/// so blank/card navigation areas get the kit's shared state-layer press
+/// feedback, keyboard focus ring, and haptic on activation (no Material ink
+/// ripple, no press-scale). Nested interactive widgets (buttons, menus,
+/// icon-buttons) receive taps before the card's [onTap] and keep their own
+/// pressed feedback — the card does not show a pressed wash when a nested
+/// control is pressed.
 ///
 /// If an interactive control needs a *different* action from the card's
 /// [onTap] (e.g. a delete button alongside a navigation card), place it as
@@ -59,12 +60,12 @@ class TilawaCard extends StatelessWidget {
     this.surface = TilawaCardSurface.raised,
     this.onTap,
     @Deprecated(
-      'Ink ripple was replaced by the shared press-scale interaction; '
+      'Ink ripple was replaced by the shared state-layer interaction; '
       'splashColor is now ignored. Remove it from call sites.',
     )
     this.splashColor,
     @Deprecated(
-      'Ink ripple was replaced by the shared press-scale interaction; '
+      'Ink ripple was replaced by the shared state-layer interaction; '
       'highlightColor is now ignored. Remove it from call sites.',
     )
     this.highlightColor,
@@ -82,12 +83,12 @@ class TilawaCard extends StatelessWidget {
   final TilawaCardSurface surface;
   final VoidCallback? onTap;
 
-  /// Deprecated: ink ripple was replaced by the shared press-scale interaction.
-  @Deprecated('Ignored — ink ripple replaced by press-scale.')
+  /// Deprecated: ink ripple was replaced by the shared state-layer interaction.
+  @Deprecated('Ignored — ink ripple replaced by state-layer press feedback.')
   final Color? splashColor;
 
-  /// Deprecated: ink ripple was replaced by the shared press-scale interaction.
-  @Deprecated('Ignored — ink ripple replaced by press-scale.')
+  /// Deprecated: ink ripple was replaced by the shared state-layer interaction.
+  @Deprecated('Ignored — ink ripple replaced by state-layer press feedback.')
   final Color? highlightColor;
 
   /// When true, expands to the maximum height offered by the parent.
@@ -146,8 +147,8 @@ class TilawaCard extends StatelessWidget {
         : cardBody;
 
     // Interactive cards route through the kit's single interaction primitive:
-    // the whole card (surface + shadow) gets press-scale, a keyboard focus
-    // ring, and a haptic on activation — no Material ink ripple.
+    // the whole card (surface + shadow) gets state-layer press feedback, a
+    // keyboard focus ring, and a haptic on activation — no Material ink ripple.
     final Widget surfaceWidget = onTap == null
         ? restingCard
         : TilawaInteractiveSurface(

@@ -54,7 +54,7 @@ Subflows include `appId: com.tilawa.app` (required by Maestro 2.5+).
 Enabled controls handle their own action; disabled controls are dead zones. The
 parent card should only navigate from blank or non-interactive card areas.
 
-Press-scale feedback is covered by widget tests (`tilawa_card_test.dart`); these
+State-layer press feedback is covered by widget tests (`tilawa_card_test.dart`); these
 Maestro flows assert observable tap routing only.
 
 | File | Scenario |

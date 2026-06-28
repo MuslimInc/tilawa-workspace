@@ -128,6 +128,23 @@ duplicate hex.
 
 ---
 
+## 4.1 Interaction feedback (press / focus)
+
+**Rule:** UI Kit interactive surfaces use stable pressed feedback — state
+layers, Material ripple/overlay, or opacity/tint changes.
+
+| Mechanism | Where | Tokens |
+|-----------|-------|--------|
+| State-layer wash | `TilawaInteractiveSurface` (default) | `stateLayerPressed` (0.12), `stateLayerHover` (0.08), `stateLayerFocused` (0.12) on `ColorScheme.onSurface` |
+| Motion | Press/hover/focus transitions | `durationFast` (200 ms) |
+| Material overlay | `TilawaButton` | M3 pressed 10% on label colour; focus ring via `focusRingWidth` |
+
+**Nested taps on cards:** enabled nested controls own their action; disabled
+controls are dead zones; parent `TilawaCard` only reacts from blank areas (see
+`CLAUDE.md`).
+
+---
+
 ## 5. Testing contract
 
 | Suite | Path | Purpose |

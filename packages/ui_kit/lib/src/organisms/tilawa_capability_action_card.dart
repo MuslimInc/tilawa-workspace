@@ -642,8 +642,8 @@ class _CapabilityActionCardFrame extends StatelessWidget {
     );
 
     // Interactive cards route the whole frame (surface + shadow) through the
-    // kit's interaction primitive: press-scale, focus ring, and haptic — no
-    // ink ripple. The outer Semantics still owns the button role + label.
+    // kit's interaction primitive: state-layer press, focus ring, and haptic —
+    // no ink ripple. The outer Semantics still owns the button role + label.
     final Widget interactive = onTap == null
         ? framed
         : TilawaInteractiveSurface(
