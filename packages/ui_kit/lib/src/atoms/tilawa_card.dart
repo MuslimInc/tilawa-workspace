@@ -36,9 +36,9 @@ enum TilawaCardSurface {
 /// ## Interactive children
 ///
 /// When [onTap] is provided the card is wrapped in [TilawaInteractiveSurface],
-/// so blank/card navigation areas get the kit's shared state-layer press
-/// feedback, keyboard focus ring, and haptic on activation (no Material ink
-/// ripple, no press-scale). Nested interactive widgets (buttons, menus,
+/// so blank/card navigation areas get the kit's shared soft ink splash,
+/// highlight, and state-layer press feedback, keyboard focus ring, and haptic on
+/// activation (no press-scale). Nested interactive widgets (buttons, menus,
 /// icon-buttons) receive taps before the card's [onTap] and keep their own
 /// pressed feedback — the card does not show a pressed wash when a nested
 /// control is pressed.
@@ -60,13 +60,13 @@ class TilawaCard extends StatelessWidget {
     this.surface = TilawaCardSurface.raised,
     this.onTap,
     @Deprecated(
-      'Ink ripple was replaced by the shared state-layer interaction; '
-      'splashColor is now ignored. Remove it from call sites.',
+      'Prefer theme tokens — splashColor is forwarded to '
+      'TilawaInteractiveSurface when set.',
     )
     this.splashColor,
     @Deprecated(
-      'Ink ripple was replaced by the shared state-layer interaction; '
-      'highlightColor is now ignored. Remove it from call sites.',
+      'Prefer theme tokens — highlightColor is forwarded to '
+      'TilawaInteractiveSurface when set.',
     )
     this.highlightColor,
     this.expandHeight = false,
@@ -83,12 +83,12 @@ class TilawaCard extends StatelessWidget {
   final TilawaCardSurface surface;
   final VoidCallback? onTap;
 
-  /// Deprecated: ink ripple was replaced by the shared state-layer interaction.
-  @Deprecated('Ignored — ink ripple replaced by state-layer press feedback.')
+  /// Optional override for [TilawaInteractiveSurface.splashColor].
+  @Deprecated('Prefer theme tokens — forwarded when set.')
   final Color? splashColor;
 
-  /// Deprecated: ink ripple was replaced by the shared state-layer interaction.
-  @Deprecated('Ignored — ink ripple replaced by state-layer press feedback.')
+  /// Optional override for [TilawaInteractiveSurface.highlightColor].
+  @Deprecated('Prefer theme tokens — forwarded when set.')
   final Color? highlightColor;
 
   /// When true, expands to the maximum height offered by the parent.
@@ -125,37 +125,51 @@ class TilawaCard extends StatelessWidget {
       side: borderSide,
     );
 
-    final Widget cardBody = Material(
-      color: resolvedFill,
-      elevation: 0,
-      shadowColor: Colors.transparent,
-      shape: shape,
-      clipBehavior: Clip.antiAlias,
-      child: Padding(
-        padding: padding ?? tokens.padding,
-        child: child,
-      ),
+    final Widget paddingChild = Padding(
+      padding: padding ?? tokens.padding,
+      child: child,
     );
 
-    final Widget restingCard = hasShadow
-        ? _TilawaCardShadow(
-            borderRadius: borderRadiusValue,
-            designTokens: designTokens,
-            colorScheme: colorScheme,
-            child: cardBody,
-          )
-        : cardBody;
-
-    // Interactive cards route through the kit's single interaction primitive:
-    // the whole card (surface + shadow) gets state-layer press feedback, a
-    // keyboard focus ring, and a haptic on activation — no Material ink ripple.
-    final Widget surfaceWidget = onTap == null
-        ? restingCard
-        : TilawaInteractiveSurface(
-            onTap: onTap,
-            borderRadius: borderRadiusValue,
-            child: restingCard,
-          );
+    final Widget surfaceWidget;
+    if (onTap == null) {
+      final Widget cardBody = Material(
+        color: resolvedFill,
+        elevation: 0,
+        shadowColor: Colors.transparent,
+        shape: shape,
+        clipBehavior: Clip.antiAlias,
+        child: paddingChild,
+      );
+      surfaceWidget = hasShadow
+          ? _TilawaCardShadow(
+              borderRadius: borderRadiusValue,
+              designTokens: designTokens,
+              colorScheme: colorScheme,
+              child: cardBody,
+            )
+          : cardBody;
+    } else {
+      // Interactive cards route through the kit's single interaction primitive.
+      // The surface owns the Material fill so ink splash/highlight render on
+      // the card face (not behind an opaque child).
+      final Widget interactiveCore = TilawaInteractiveSurface(
+        onTap: onTap,
+        borderRadius: borderRadiusValue,
+        materialColor: resolvedFill,
+        materialShape: shape,
+        splashColor: splashColor,
+        highlightColor: highlightColor,
+        child: paddingChild,
+      );
+      surfaceWidget = hasShadow
+          ? _TilawaCardShadow(
+              borderRadius: borderRadiusValue,
+              designTokens: designTokens,
+              colorScheme: colorScheme,
+              child: interactiveCore,
+            )
+          : interactiveCore;
+    }
 
     return SizedBox(
       width: double.infinity,

@@ -60,6 +60,8 @@ void main() {
       stateLayerHover: 0.08,
       stateLayerPressed: 0.12,
       stateLayerFocused: 0.12,
+      inkSplashAlpha: 0.08,
+      inkHighlightAlpha: 0.04,
       focusRingWidth: 2.0,
       dropdownMenuGap: 4.0,
     );
@@ -259,6 +261,8 @@ void main() {
           stateLayerHover: 0.08,
           stateLayerPressed: 0.12,
           stateLayerFocused: 0.12,
+          inkSplashAlpha: 0.08,
+          inkHighlightAlpha: 0.04,
           focusRingWidth: 2.0,
           dropdownMenuGap: 4.0,
         );
@@ -318,6 +322,8 @@ void main() {
           stateLayerHover: 0.16,
           stateLayerPressed: 0.20,
           stateLayerFocused: 0.20,
+          inkSplashAlpha: 0.08,
+          inkHighlightAlpha: 0.04,
           focusRingWidth: 3.0,
           dropdownMenuGap: 6.0,
         );
@@ -386,6 +392,8 @@ void main() {
           stateLayerHover: 0.16,
           stateLayerPressed: 0.20,
           stateLayerFocused: 0.20,
+          inkSplashAlpha: 0.08,
+          inkHighlightAlpha: 0.04,
           focusRingWidth: 3.0,
           dropdownMenuGap: 6.0,
         );
@@ -452,6 +460,8 @@ void main() {
           stateLayerHover: 0.08,
           stateLayerPressed: 0.12,
           stateLayerFocused: 0.12,
+          inkSplashAlpha: 0.08,
+          inkHighlightAlpha: 0.04,
           focusRingWidth: 2.0,
           dropdownMenuGap: 4.0,
         );
@@ -511,6 +521,8 @@ void main() {
           stateLayerHover: 0.16,
           stateLayerPressed: 0.20,
           stateLayerFocused: 0.20,
+          inkSplashAlpha: 0.08,
+          inkHighlightAlpha: 0.04,
           focusRingWidth: 3.0,
           dropdownMenuGap: 6.0,
         );
@@ -583,6 +595,8 @@ void main() {
           stateLayerHover: 0.08,
           stateLayerPressed: 0.12,
           stateLayerFocused: 0.12,
+          inkSplashAlpha: 0.08,
+          inkHighlightAlpha: 0.04,
           focusRingWidth: 2.0,
           dropdownMenuGap: 4.0,
         );
@@ -650,6 +664,8 @@ void main() {
             stateLayerHover: 0.08,
             stateLayerPressed: 0.12,
             stateLayerFocused: 0.12,
+            inkSplashAlpha: 0.08,
+            inkHighlightAlpha: 0.04,
             focusRingWidth: 2.0,
             dropdownMenuGap: 4.0,
           );
@@ -709,6 +725,8 @@ void main() {
             stateLayerHover: 0.16,
             stateLayerPressed: 0.20,
             stateLayerFocused: 0.20,
+            inkSplashAlpha: 0.08,
+            inkHighlightAlpha: 0.04,
             focusRingWidth: 3.0,
             dropdownMenuGap: 6.0,
           );

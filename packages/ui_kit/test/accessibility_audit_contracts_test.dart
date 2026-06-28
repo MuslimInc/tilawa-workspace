@@ -38,6 +38,25 @@ Color _expectedFeedbackBorder(ColorScheme scheme, TilawaFeedbackVariant v) {
   };
 }
 
+dynamic _semanticsForSurface(
+  WidgetTester tester,
+  Finder surface,
+) {
+  final semanticsFinder = find.descendant(
+    of: surface,
+    matching: find.byWidgetPredicate(
+      (Widget widget) {
+        if (widget is! Semantics) {
+          return false;
+        }
+        final String? label = widget.properties.label;
+        return label != null && label.isNotEmpty;
+      },
+    ),
+  );
+  return tester.getSemantics(semanticsFinder.first);
+}
+
 void main() {
   group('TilawaButton', () {
     testWidgets('exposes a visible focus ring on keyboard focus (WCAG 2.4.7)', (
@@ -193,11 +212,11 @@ void main() {
       );
 
       Future<void> checkSegment(String label, {required bool selected}) async {
-        final f = find.ancestor(
+        final surface = find.ancestor(
           of: find.text(label),
           matching: find.byType(TilawaInteractiveSurface),
         );
-        final sem = tester.getSemantics(f.first);
+        final sem = _semanticsForSurface(tester, surface);
         expect(sem.flagsCollection.isButton, isTrue);
         if (selected) {
           expect(sem.flagsCollection.isSelected, Tristate.isTrue);
@@ -296,7 +315,10 @@ void main() {
         ),
       );
 
-      final sem = tester.getSemantics(find.byType(TilawaInteractiveSurface));
+      final sem = _semanticsForSurface(
+        tester,
+        find.byType(TilawaInteractiveSurface),
+      );
       expect(sem.flagsCollection.isSelected, Tristate.isTrue);
       expect(sem.flagsCollection.isButton, isTrue);
       expect(sem.label, isNotEmpty);

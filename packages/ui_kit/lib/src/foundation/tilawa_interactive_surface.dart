@@ -15,9 +15,10 @@ import 'tilawa_interaction_feedback.dart';
 /// - **Focus ring** — a visible 2 dp ring on keyboard / switch / D-pad focus,
 ///   drawn from [MeMuslimDesignTokens.focusRingWidth]. Fixes the WCAG 2.4.7
 ///   gap where most components had no focus state (audit UIK-005).
-/// - **Press feel** — stable state-layer washes from
-///   [MeMuslimDesignTokens.stateLayerPressed] / `stateLayerHover` /
-///   `stateLayerFocused` (no layout shift, no scale) (UIK-006).
+/// - **Press feel** — soft Material ink (`splashColor`, `highlightColor`) plus
+///   a stable state-layer wash from [MeMuslimDesignTokens.stateLayerPressed] /
+///   `stateLayerHover` / `stateLayerFocused` (no layout shift, no scale)
+///   (UIK-006).
 /// - **Haptics** — a single [TilawaHaptic] tier fired on activation, instead of
 ///   ad-hoc per-component haptics (UIK-007).
 /// - **State layers** — hover / pressed / focused washes resolved from
@@ -28,11 +29,12 @@ import 'tilawa_interaction_feedback.dart';
 /// resting [child] (fill, border, content). The kit's interactive atoms,
 /// molecules, and organisms route through this primitive instead of a raw
 /// [Material] + [InkWell] pair, so the whole app shares one stable pressed feel
-/// (state layers, no ink ripple) plus a consistent focus ring and haptics.
+/// (ink splash + highlight + state layers) plus a consistent focus ring and
+/// haptics.
 ///
-/// **UX rule:** Interactive surfaces use state layers, ripple, or opacity/tint
-/// changes for pressed feedback — not press-scale, which can look unstable on
-/// clipped or rounded surfaces.
+/// **UX rule:** Interactive surfaces use a soft splash/highlight/state-layer
+/// effect by default. Press-scale is not the default because it can look
+/// unstable on clipped or rounded surfaces.
 ///
 /// ## Usage
 ///
@@ -47,6 +49,10 @@ import 'tilawa_interaction_feedback.dart';
 ///
 /// Pass `onTap: null` for a non-interactive surface; the wrapper then renders
 /// [child] directly with no focus/press/haptic overhead.
+///
+/// When the surface needs ink on an opaque fill (e.g. [TilawaCard]), pass
+/// [materialColor] and [materialShape] so the ink host is the same [Material]
+/// that paints the fill.
 ///
 /// ## Nested interactive children
 ///
@@ -65,6 +71,10 @@ class TilawaInteractiveSurface extends StatefulWidget {
     this.enableStateLayer = true,
     this.focusColor,
     this.stateLayerColor,
+    this.splashColor,
+    this.highlightColor,
+    this.materialColor,
+    this.materialShape,
     this.semanticLabel,
     this.semanticHint,
     this.semanticsIdentifier,
@@ -87,7 +97,7 @@ class TilawaInteractiveSurface extends StatefulWidget {
   final VoidCallback? onLongPress;
 
   /// Clip / overlay shape. Should match the child's own corner radius so the
-  /// focus ring and state layer stay concentric.
+  /// focus ring, ink splash, and state layer stay concentric.
   final BorderRadius borderRadius;
 
   /// Haptic tier fired on activation. [TilawaHaptic.none] disables it.
@@ -101,6 +111,19 @@ class TilawaInteractiveSurface extends StatefulWidget {
 
   /// Base colour for state-layer washes (defaults to [ColorScheme.onSurface]).
   final Color? stateLayerColor;
+
+  /// Overrides [InkWell.splashColor] base (defaults to [ColorScheme.primary]).
+  final Color? splashColor;
+
+  /// Overrides [InkWell.highlightColor] base (defaults to [ColorScheme.onSurface]).
+  final Color? highlightColor;
+
+  /// When set, the surface owns the opaque [Material] fill so ink renders on
+  /// the card/list surface instead of behind an opaque [child].
+  final Color? materialColor;
+
+  /// Shape for [materialColor]. Required when [materialColor] is set.
+  final ShapeBorder? materialShape;
 
   /// Accessible name. Falls back to the ambient semantics of [child] if null.
   final String? semanticLabel;
@@ -125,6 +148,12 @@ class TilawaInteractiveSurface extends StatefulWidget {
 
   /// When `false`, taps are ignored and the surface is marked disabled.
   final bool enabled;
+  bool get _hasExplicitSemantics =>
+      semanticLabel != null ||
+      semanticHint != null ||
+      semanticsIdentifier != null ||
+      selected != null ||
+      toggled != null;
 
   final FocusNode? focusNode;
   final bool autofocus;
@@ -140,6 +169,7 @@ class _TilawaInteractiveSurfaceState extends State<TilawaInteractiveSurface> {
   bool _hovered = false;
   bool _focused = false;
   bool _pressed = false;
+  bool _inkSuppressed = false;
   Offset? _pendingTapPosition;
   final GlobalKey _childKey = GlobalKey();
 
@@ -179,21 +209,23 @@ class _TilawaInteractiveSurfaceState extends State<TilawaInteractiveSurface> {
     return false;
   }
 
-  void _handlePressDown(Offset localPosition) {
-    _pendingTapPosition = localPosition;
-    if (_shouldSuppressNestedInteraction(localPosition)) {
-      return;
+  void _handleTapDown(TapDownDetails details) {
+    _pendingTapPosition = details.localPosition;
+    _inkSuppressed = _shouldSuppressNestedInteraction(details.localPosition);
+    if (!_inkSuppressed) {
+      _setPressed(true);
     }
-    _setPressed(true);
   }
 
-  void _handlePressEnd() {
+  void _handleTapEnd() {
+    _inkSuppressed = false;
     _setPressed(false);
   }
 
   void _handleTapCancel() {
     _pendingTapPosition = null;
-    _handlePressEnd();
+    _inkSuppressed = false;
+    _setPressed(false);
   }
 
   void _activate() {
@@ -227,6 +259,42 @@ class _TilawaInteractiveSurfaceState extends State<TilawaInteractiveSurface> {
     });
   }
 
+  Color _resolveSplashColor(
+    ColorScheme colorScheme,
+    MeMuslimDesignTokens tokens,
+  ) {
+    if (_inkSuppressed) {
+      return Colors.transparent;
+    }
+    final Color base = widget.splashColor ?? colorScheme.primary;
+    return base.withValues(alpha: tokens.inkSplashAlpha);
+  }
+
+  Color _resolveHighlightColor(
+    ColorScheme colorScheme,
+    MeMuslimDesignTokens tokens,
+  ) {
+    if (_inkSuppressed) {
+      return Colors.transparent;
+    }
+    final Color base =
+        widget.highlightColor ??
+        widget.stateLayerColor ??
+        colorScheme.onSurface;
+    return base.withValues(alpha: tokens.inkHighlightAlpha);
+  }
+
+  Color _resolveHoverColor(
+    ColorScheme colorScheme,
+    MeMuslimDesignTokens tokens,
+  ) {
+    if (_inkSuppressed) {
+      return Colors.transparent;
+    }
+    final Color base = widget.stateLayerColor ?? colorScheme.onSurface;
+    return base.withValues(alpha: tokens.stateLayerHover);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -255,7 +323,7 @@ class _TilawaInteractiveSurfaceState extends State<TilawaInteractiveSurface> {
         ? tokens.stateLayerFocused
         : 0;
 
-    Widget surface = Stack(
+    Widget surfaceStack = Stack(
       // Pass the incoming constraints straight to the resting child so the
       // wrapper stays layout-transparent: a tight cell (e.g. a fixed-height
       // grid tile) makes the child fill it, exactly as the old Material+InkWell
@@ -292,7 +360,45 @@ class _TilawaInteractiveSurfaceState extends State<TilawaInteractiveSurface> {
       ],
     );
 
-    surface = FocusableActionDetector(
+    final bool explicitSemantics = widget._hasExplicitSemantics;
+    final Widget inkChild = explicitSemantics
+        ? _wrapSemantics(child: surfaceStack, enabled: true)
+        : surfaceStack;
+
+    Widget inkHost = InkWell(
+      borderRadius: widget.borderRadius,
+      splashColor: _resolveSplashColor(colorScheme, tokens),
+      highlightColor: _resolveHighlightColor(colorScheme, tokens),
+      hoverColor: _resolveHoverColor(colorScheme, tokens),
+      onTapDown: _handleTapDown,
+      onTapUp: (_) => _handleTapEnd(),
+      onTapCancel: _handleTapCancel,
+      onTap: widget.onTap != null ? _activate : null,
+      onLongPress: widget.onLongPress,
+      excludeFromSemantics: explicitSemantics,
+      child: inkChild,
+    );
+
+    if (widget.materialColor != null) {
+      inkHost = Material(
+        color: widget.materialColor,
+        elevation: 0,
+        shadowColor: Colors.transparent,
+        shape: widget.materialShape,
+        clipBehavior: Clip.antiAlias,
+        child: inkHost,
+      );
+    } else {
+      inkHost = Material(
+        type: MaterialType.transparency,
+        elevation: 0,
+        clipBehavior: Clip.antiAlias,
+        borderRadius: widget.borderRadius,
+        child: inkHost,
+      );
+    }
+
+    final Widget surface = FocusableActionDetector(
       focusNode: widget.focusNode,
       autofocus: widget.autofocus,
       enabled: widget._isInteractive,
@@ -314,20 +420,12 @@ class _TilawaInteractiveSurfaceState extends State<TilawaInteractiveSurface> {
             },
           ),
       },
-      child: GestureDetector(
-        // Opaque so taps on transparent padding inside the bounds still
-        // register (kit GestureDetector contract — see kit_contracts_test).
-        behavior: HitTestBehavior.opaque,
-        onTapDown: (details) => _handlePressDown(details.localPosition),
-        onTapUp: (_) => _handlePressEnd(),
-        onTapCancel: _handleTapCancel,
-        onTap: widget.onTap != null ? _activate : null,
-        onLongPress: widget.onLongPress,
-        child: surface,
-      ),
+      child: inkHost,
     );
 
-    return _wrapSemantics(child: surface, enabled: true);
+    return explicitSemantics
+        ? surface
+        : _wrapSemantics(child: surface, enabled: true);
   }
 
   Widget _wrapSemantics({required Widget child, required bool enabled}) {

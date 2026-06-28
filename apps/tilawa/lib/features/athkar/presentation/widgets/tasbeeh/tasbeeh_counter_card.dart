@@ -41,21 +41,25 @@ class TasbeehCounterCard extends StatelessWidget {
       borderRadius: tokens.radiusExtraLarge,
       surface: TilawaCardSurface.raised,
       backgroundColor: colorScheme.surface,
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            counterBody,
-            SizedBox(height: tokens.spaceLarge),
-            Text(
-              context.l10n.tasbeehTapToCount,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
+      expandHeight: true,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Flexible(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: counterBody,
             ),
-          ],
-        ),
+          ),
+          SizedBox(height: tokens.spaceLarge),
+          Text(
+            context.l10n.tasbeehTapToCount,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
       ),
     );
 

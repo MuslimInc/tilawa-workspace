@@ -30,8 +30,8 @@ Preserve layout; do not redesign or reorder unless the user asks.
 ## UI Kit interaction feedback
 
 Interactive surfaces ([`TilawaInteractiveSurface`](packages/ui_kit/lib/src/foundation/tilawa_interactive_surface.dart))
-use **stable state-layer press feedback**. See
-[`packages/ui_kit/docs/design_system.md`](packages/ui_kit/docs/design_system.md) §4.1.
+use **soft Material ink (splash/highlight) plus stable state-layer press feedback**.
+See [`packages/ui_kit/docs/design_system.md`](packages/ui_kit/docs/design_system.md) §4.1.
 
 **TilawaCard nested taps:** parent `onTap` fires from blank areas only; enabled
 nested controls keep their own action; disabled nested controls are dead zones.

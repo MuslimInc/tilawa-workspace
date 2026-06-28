@@ -179,7 +179,7 @@ void main() {
       expect(longPresses, 1);
     });
 
-    testWidgets('shows pressed state layer without scale by default', (
+    testWidgets('shows soft ink and state layer without scale by default', (
       tester,
     ) async {
       final tokens = MeMuslimDesignTokens.light();
@@ -200,6 +200,21 @@ void main() {
           matching: find.byType(ScaleTransition),
         ),
         findsNothing,
+      );
+
+      final inkWell = tester.widget<InkWell>(
+        find.descendant(
+          of: find.byType(TilawaInteractiveSurface),
+          matching: find.byType(InkWell),
+        ),
+      );
+      expect(
+        inkWell.splashColor,
+        AppColors.defaultPrimary.withValues(alpha: tokens.inkSplashAlpha),
+      );
+      expect(
+        inkWell.highlightColor,
+        isNotNull,
       );
 
       final gesture = await tester.startGesture(

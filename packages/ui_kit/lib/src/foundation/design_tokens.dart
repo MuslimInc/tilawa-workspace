@@ -87,6 +87,8 @@ class MeMuslimDesignTokens extends ThemeExtension<MeMuslimDesignTokens> {
     required this.stateLayerHover,
     required this.stateLayerPressed,
     required this.stateLayerFocused,
+    required this.inkSplashAlpha,
+    required this.inkHighlightAlpha,
     required this.focusRingWidth,
     required this.dropdownMenuGap,
   });
@@ -299,6 +301,14 @@ class MeMuslimDesignTokens extends ThemeExtension<MeMuslimDesignTokens> {
   /// 0.12 — alpha for the Material state layer on keyboard focus.
   final double stateLayerFocused;
 
+  /// 0.08 — alpha for [InkWell.splashColor] on interactive surfaces (warm
+  /// primary-tinted ripple). Pairs with [inkHighlightAlpha].
+  final double inkSplashAlpha;
+
+  /// 0.04 — alpha for [InkWell.highlightColor] while pressed. Subtler than
+  /// [stateLayerPressed] so splash + highlight + state layer stay calm.
+  final double inkHighlightAlpha;
+
   /// 2.0 — width of the focus indicator ring (Material 3 default). Centralised
   /// here so component-level focus styling is consistent.
   final double focusRingWidth;
@@ -368,6 +378,8 @@ class MeMuslimDesignTokens extends ThemeExtension<MeMuslimDesignTokens> {
       stateLayerHover: 0.08,
       stateLayerPressed: 0.12,
       stateLayerFocused: 0.12,
+      inkSplashAlpha: 0.08,
+      inkHighlightAlpha: 0.04,
       focusRingWidth: 2.0,
       dropdownMenuGap: 4.0,
     );
@@ -430,6 +442,8 @@ class MeMuslimDesignTokens extends ThemeExtension<MeMuslimDesignTokens> {
     double? stateLayerHover,
     double? stateLayerPressed,
     double? stateLayerFocused,
+    double? inkSplashAlpha,
+    double? inkHighlightAlpha,
     double? focusRingWidth,
     double? dropdownMenuGap,
   }) {
@@ -503,6 +517,8 @@ class MeMuslimDesignTokens extends ThemeExtension<MeMuslimDesignTokens> {
       stateLayerHover: stateLayerHover ?? this.stateLayerHover,
       stateLayerPressed: stateLayerPressed ?? this.stateLayerPressed,
       stateLayerFocused: stateLayerFocused ?? this.stateLayerFocused,
+      inkSplashAlpha: inkSplashAlpha ?? this.inkSplashAlpha,
+      inkHighlightAlpha: inkHighlightAlpha ?? this.inkHighlightAlpha,
       focusRingWidth: focusRingWidth ?? this.focusRingWidth,
       dropdownMenuGap: dropdownMenuGap ?? this.dropdownMenuGap,
     );
@@ -668,6 +684,12 @@ class MeMuslimDesignTokens extends ThemeExtension<MeMuslimDesignTokens> {
       stateLayerFocused: lerpDouble(
         stateLayerFocused,
         other.stateLayerFocused,
+        t,
+      )!,
+      inkSplashAlpha: lerpDouble(inkSplashAlpha, other.inkSplashAlpha, t)!,
+      inkHighlightAlpha: lerpDouble(
+        inkHighlightAlpha,
+        other.inkHighlightAlpha,
         t,
       )!,
       focusRingWidth: lerpDouble(focusRingWidth, other.focusRingWidth, t)!,

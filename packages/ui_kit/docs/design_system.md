@@ -130,11 +130,14 @@ duplicate hex.
 
 ## 4.1 Interaction feedback (press / focus)
 
-**Rule:** UI Kit interactive surfaces use stable pressed feedback — state
-layers, Material ripple/overlay, or opacity/tint changes.
+**Rule:** Interactive surfaces use a soft splash/highlight/state-layer effect by
+default. Press-scale is not the default because it can look unstable on clipped
+or rounded surfaces.
 
 | Mechanism | Where | Tokens |
 |-----------|-------|--------|
+| Ink splash | `TilawaInteractiveSurface` (default) | `inkSplashAlpha` (0.08) on `ColorScheme.primary` |
+| Ink highlight | `TilawaInteractiveSurface` (default) | `inkHighlightAlpha` (0.04) on `ColorScheme.onSurface` |
 | State-layer wash | `TilawaInteractiveSurface` (default) | `stateLayerPressed` (0.12), `stateLayerHover` (0.08), `stateLayerFocused` (0.12) on `ColorScheme.onSurface` |
 | Motion | Press/hover/focus transitions | `durationFast` (200 ms) |
 | Material overlay | `TilawaButton` | M3 pressed 10% on label colour; focus ring via `focusRingWidth` |

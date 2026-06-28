@@ -4,7 +4,7 @@
 
 ### Breaking
 
-- Removed `TilawaPressAnimation`, `TilawaInteractionFeedback.pressScaleEnd`, and `TilawaInteractiveSurface.enablePressAnimation`. Pressed feedback is state-layer washes only.
+- Removed `TilawaPressAnimation`, `TilawaInteractionFeedback.pressScaleEnd`, and `TilawaInteractiveSurface.enablePressAnimation`. Pressed feedback is soft Material ink plus state-layer washes (no press-scale).
 
 ### Deprecated
 
@@ -14,8 +14,8 @@
 
 ### Changed
 
-- `TilawaInteractiveSurface` — pressed feedback is stable state-layer washes (`stateLayerPressed` / `stateLayerHover` / `stateLayerFocused`).
-- `TilawaCard` / `TilawaButton` — cards use state layers; buttons use Material overlay states.
+- `TilawaInteractiveSurface` — soft Material ink (`inkSplashAlpha` / `inkHighlightAlpha`) plus stable state-layer washes (`stateLayerPressed` / `stateLayerHover` / `stateLayerFocused`). Optional `materialColor` / `materialShape` host ink on opaque fills (e.g. cards).
+- `TilawaCard` / `TilawaButton` — cards use ink + state layers; buttons use Material overlay states.
 - `TilawaIllustratedState` — primary action precedes secondary in reading order; default screen-reader label composed from title + subtitle when `semanticLabel` is omitted.
 - `TilawaSelectionTile` — selected checkmark uses `primary` for clearer hierarchy; row enforces `minInteractiveDimension`.
 - `TilawaSegmentedControl` — selected segment paints tokenized elevation shadow (visual feedback).

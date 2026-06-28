@@ -397,21 +397,18 @@ class _NavButton extends StatelessWidget {
             color: isSelected ? selectedFg : unselectedFg,
           );
 
-    return Semantics(
+    return TilawaInteractiveSurface(
       button: true,
-      label: destination.label,
+      semanticLabel: destination.label,
+      semanticsIdentifier: destination.identifier,
       selected: isSelected,
-      identifier: destination.identifier,
-      child: TilawaInteractiveSurface(
-        button: false,
-        onTap: onTap,
-        borderRadius: indicatorRadius,
-        stateLayerColor: pressStateLayerColor,
-        child: SizedBox(
-          width: targetWidth,
-          height: hitSize,
-          child: Center(child: iconWidget),
-        ),
+      onTap: onTap,
+      borderRadius: indicatorRadius,
+      stateLayerColor: pressStateLayerColor,
+      child: SizedBox(
+        width: targetWidth,
+        height: hitSize,
+        child: Center(child: iconWidget),
       ),
     );
   }
