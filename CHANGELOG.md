@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.0.16+61] - 2026-06-28 [Google Play Release]
+## [2.0.16+62] - 2026-06-28 [Google Play Release]
 
 ### Added
 
@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Version**: Production track bumped to **2.0.16** (build **61**).
+- **Version**: Production track bumped to **2.0.16** (build **62**).
 - **Theme**: Brand primary restored to green; warm canvas scaffold (`#FAF9F7`)
   across Home and the app shell.
 - **Home**: Approved dashboard layout — prayer hero, primary actions, Today
@@ -33,6 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Android**: Exclude unused Agora screen-sharing SDK so the release bundle
+  only declares `mediaPlayback` foreground services (Play Console compliance).
 - **Tasbeeh**: Counter card scales across viewport sizes without layout overflow.
 - **Quran Sessions**: My Sessions correctly classifies upcoming vs past sessions
   (including tutor-cancelled slots); list caches invalidate after booking,

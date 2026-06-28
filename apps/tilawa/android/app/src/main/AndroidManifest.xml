@@ -7,6 +7,10 @@
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
+    <!-- Agora screen-sharing AAR excluded in build.gradle; strip merged projection. -->
+    <uses-permission
+        android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"
+        tools:node="remove" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -195,6 +199,14 @@
         <meta-data
             android:name="vn.hunghd.flutterdownloader.NOTIFICATION_ICON"
             android:resource="@drawable/ic_launcher_monochrome" />
+
+        <!-- Agora screen-sharing (excluded); avoid Play FGS mediaProjection declaration. -->
+        <service
+            android:name="io.agora.rtc2.extensions.MediaProjectionMgr$LocalScreenSharingService"
+            tools:node="remove" />
+        <activity
+            android:name="io.agora.rtc2.extensions.MediaProjectionMgr$LocalScreenCaptureAssistantActivity"
+            tools:node="remove" />
 
     </application>
 </manifest>

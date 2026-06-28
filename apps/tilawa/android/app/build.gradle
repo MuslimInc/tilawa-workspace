@@ -127,6 +127,9 @@ flutter {
 // avoids identityauth and uses the legacy playservices path these ROMs composite.
 // Plugin only uses androidx.credentials APIs that exist since 1.2.0.
 configurations.configureEach {
+    // Screen sharing is not shipped yet; Agora's full-screen-sharing AAR adds
+    // FOREGROUND_SERVICE_MEDIA_PROJECTION and Play Console FGS declaration friction.
+    exclude group: 'io.agora.rtc', module: 'full-screen-sharing'
     resolutionStrategy {
         force "androidx.credentials:credentials:1.5.0"
         force "androidx.credentials:credentials-play-services-auth:1.5.0"
