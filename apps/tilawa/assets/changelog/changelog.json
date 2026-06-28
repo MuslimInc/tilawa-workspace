@@ -3,6 +3,23 @@
   "lastUpdatedAt": "2026-06-14T12:00:00Z",
   "releases": [
     {
+      "id": "2.0.16+64",
+      "version": "2.0.16",
+      "buildNumber": 64,
+      "highlights": {
+        "en": [
+          "Fixed Android crash when resuming the app from background",
+          "Improved sign-out and single-device session handling",
+          "Reduced false crash reports from startup lifecycle edge cases"
+        ],
+        "ar": [
+          "إصلاح تعطل على أندرويد عند العودة للتطبيق من الخلفية",
+          "تحسين تسجيل الخروج وإدارة الجلسة على جهاز واحد",
+          "تقليل تقارير الأعطال الخاطئة أثناء بدء التشغيل"
+        ]
+      }
+    },
+    {
       "id": "2.0.14+59",
       "version": "2.0.14",
       "buildNumber": 59,

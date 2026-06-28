@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.16+64] - 2026-06-29 [Google Play Hotfix]
+
+### Fixed
+
+- **Android**: Wakelock keep-awake no longer crashes when the app resumes before
+  `MainActivity` is foreground; obfuscated release `PlatformException` codes are
+  handled and Sentry/Crashlytics wakelock lifecycle noise is filtered.
+- **Android**: Boot shutdown/airplane-mode events during cold start are tagged in
+  Sentry breadcrumbs (`during_boot`) to separate startup ANRs from runtime noise.
+- **Auth**: Sign-out clears active-device registration and session state more
+  reliably; device registration uses platform device info without hardware IDs.
+
 ## [2.0.16+63] - 2026-06-29 [Google Play Hotfix]
 
 ### Fixed
