@@ -50,6 +50,8 @@ class MainActivity : AudioServiceActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        BootDeviceEventBreadcrumbs.resetForLaunch()
+        BootDeviceEventBreadcrumbs.register(this)
         Log.d(
             TAG,
             "MAIN_ACTIVITY_ON_CREATE_INTENT action=${intent?.action} extras=${intent?.extras?.keySet()} renderMode=texture"
@@ -66,6 +68,7 @@ class MainActivity : AudioServiceActivity() {
                 Log.w(TAG, "Launch splash failsafe fired — Flutter never sent 'ready'")
                 firstFrameLog("FAILSAFE: forcing keepLaunchSplashOnScreen=false")
                 keepLaunchSplashOnScreen = false
+                BootDeviceEventBreadcrumbs.markBootComplete()
             }
         }, LAUNCH_SPLASH_FAILSAFE_MS)
         super.onCreate(savedInstanceState)
@@ -160,6 +163,7 @@ class MainActivity : AudioServiceActivity() {
                     "ready" -> {
                         firstFrameLog("MethodChannel ready → keepLaunchSplashOnScreen=false")
                         keepLaunchSplashOnScreen = false
+                        BootDeviceEventBreadcrumbs.markBootComplete()
                         result.success(null)
                     }
                     else -> result.notImplemented()
@@ -212,6 +216,11 @@ class MainActivity : AudioServiceActivity() {
             @Suppress("DEPRECATION")
             packageManager.getInstallerPackageName(packageName)
         }
+    }
+
+    override fun onDestroy() {
+        BootDeviceEventBreadcrumbs.unregister(this)
+        super.onDestroy()
     }
 
     override fun onResume() {
