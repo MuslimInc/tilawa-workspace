@@ -1,28 +1,34 @@
 export type DevicePlatform = "android" | "ios" | "web";
 
+export type DeviceRegistrationMode = "explicit_sign_in" | "passive_sync";
+
+export type DeviceRegistrationStatus =
+  | "registered"
+  | "updated_same_device"
+  | "stale_device_rejected"
+  | "requires_explicit_sign_in";
+
 export interface SessionState {
   epoch: number;
   activeDeviceId: string;
 }
 
-export interface NotificationsState {
-  activeFcmToken: string | null;
-}
-
 export interface RegisterDeviceInput {
   deviceId: string;
-  fcmToken: string;
+  fcmToken?: string;
   platform: DevicePlatform;
   appVersion?: string;
+  registrationMode: DeviceRegistrationMode;
   signOut?: boolean;
 }
 
 export interface RegisterDevicePlan {
+  status: DeviceRegistrationStatus;
   deviceChanged: boolean;
   nextEpoch: number;
   nextActiveDeviceId: string;
-  clearTokenOnly: boolean;
-  /** Stale-device sign-out or missing deviceId — leave server session untouched. */
+  clearActiveSession: boolean;
+  writeActiveDevice: boolean;
   noOp: boolean;
 }
 
@@ -34,40 +40,96 @@ export function planDeviceRegistration(
   const currentDeviceId = session?.activeDeviceId ?? "";
 
   if (input.signOut === true) {
-    const requestingDeviceId = input.deviceId.trim();
-    const isActiveDevice =
-      requestingDeviceId.length > 0 &&
-      currentDeviceId.length > 0 &&
-      requestingDeviceId === currentDeviceId;
-
-    if (!isActiveDevice) {
-      return {
-        deviceChanged: false,
-        nextEpoch: currentEpoch,
-        nextActiveDeviceId: currentDeviceId,
-        clearTokenOnly: false,
-        noOp: true,
-      };
-    }
-
-    return {
-      deviceChanged: false,
-      nextEpoch: currentEpoch,
-      nextActiveDeviceId: currentDeviceId,
-      clearTokenOnly: true,
-      noOp: false,
-    };
+    return planSignOut(currentEpoch, currentDeviceId, input.deviceId);
   }
 
-  const deviceChanged =
-    input.deviceId.length > 0 && input.deviceId !== currentDeviceId;
+  if (input.registrationMode === "passive_sync") {
+    return planPassiveSync(currentEpoch, currentDeviceId, input.deviceId);
+  }
+
+  return planExplicitSignIn(currentEpoch, currentDeviceId, input.deviceId);
+}
+
+function planSignOut(
+  currentEpoch: number,
+  currentDeviceId: string,
+  requestingDeviceId: string,
+): RegisterDevicePlan {
+  if (currentDeviceId.length === 0) {
+    return noOpPlan("requires_explicit_sign_in", currentEpoch, currentDeviceId);
+  }
+
+  if (requestingDeviceId.trim() !== currentDeviceId) {
+    return noOpPlan("stale_device_rejected", currentEpoch, currentDeviceId);
+  }
 
   return {
+    status: "updated_same_device",
+    deviceChanged: false,
+    nextEpoch: currentEpoch,
+    nextActiveDeviceId: currentDeviceId,
+    clearActiveSession: true,
+    writeActiveDevice: false,
+    noOp: false,
+  };
+}
+
+function planPassiveSync(
+  currentEpoch: number,
+  currentDeviceId: string,
+  requestingDeviceId: string,
+): RegisterDevicePlan {
+  if (currentDeviceId.length === 0) {
+    return noOpPlan("requires_explicit_sign_in", currentEpoch, currentDeviceId);
+  }
+
+  if (requestingDeviceId !== currentDeviceId) {
+    return noOpPlan("stale_device_rejected", currentEpoch, currentDeviceId);
+  }
+
+  return {
+    status: "updated_same_device",
+    deviceChanged: false,
+    nextEpoch: currentEpoch,
+    nextActiveDeviceId: currentDeviceId,
+    clearActiveSession: false,
+    writeActiveDevice: true,
+    noOp: false,
+  };
+}
+
+function planExplicitSignIn(
+  currentEpoch: number,
+  currentDeviceId: string,
+  requestingDeviceId: string,
+): RegisterDevicePlan {
+  const deviceChanged =
+    currentDeviceId.length === 0 || requestingDeviceId !== currentDeviceId;
+
+  return {
+    status: deviceChanged ? "registered" : "updated_same_device",
     deviceChanged,
     nextEpoch: deviceChanged ? currentEpoch + 1 : currentEpoch,
-    nextActiveDeviceId: input.deviceId,
-    clearTokenOnly: false,
+    nextActiveDeviceId: requestingDeviceId,
+    clearActiveSession: false,
+    writeActiveDevice: true,
     noOp: false,
+  };
+}
+
+function noOpPlan(
+  status: DeviceRegistrationStatus,
+  currentEpoch: number,
+  currentDeviceId: string,
+): RegisterDevicePlan {
+  return {
+    status,
+    deviceChanged: false,
+    nextEpoch: currentEpoch,
+    nextActiveDeviceId: currentDeviceId,
+    clearActiveSession: false,
+    writeActiveDevice: false,
+    noOp: true,
   };
 }
 

@@ -37,6 +37,7 @@ class LoginAuthBlocListener extends StatelessWidget {
           shouldSkipAutoSignIn: shouldSkipAutoSignIn(),
           messages: LoginAuthBlocTransitionMessages(
             authErrorFallback: context.l10n.unableToSignInWithThirdPartyAccount,
+            deviceRegistrationFailed: context.l10n.authDeviceRegistrationFailed,
             noGoogleAccounts: context.l10n.googleSignInNoAccountsOnDevice,
           ),
           onNavigateToHome: onNavigateToHome,

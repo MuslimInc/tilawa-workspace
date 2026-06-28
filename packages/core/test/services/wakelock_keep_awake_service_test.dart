@@ -10,6 +10,43 @@ void main() {
       service = WakelockKeepAwakeService();
     });
 
+    test('enable sets internal state when plugin succeeds', () async {
+      var enableCalls = 0;
+      service.wakelockEnable = () async {
+        enableCalls++;
+      };
+
+      await service.enable();
+
+      expect(enableCalls, 1);
+      expect(await service.isEnabled, isTrue);
+    });
+
+    test('enable is idempotent when already enabled', () async {
+      var enableCalls = 0;
+      service.wakelockEnable = () async {
+        enableCalls++;
+      };
+
+      await service.enable();
+      await service.enable();
+
+      expect(enableCalls, 1);
+      expect(await service.isEnabled, isTrue);
+    });
+
+    test(
+      'enable rethrows unrelated PlatformException',
+      () async {
+        service.wakelockEnable = () async {
+          throw PlatformException(code: 'OTHER', message: 'fail');
+        };
+
+        await expectLater(service.enable(), throwsA(isA<PlatformException>()));
+        expect(await service.isEnabled, isFalse);
+      },
+    );
+
     test(
       'disable swallows NoActivityException and clears internal state',
       () async {
@@ -69,6 +106,37 @@ void main() {
         expect(await service.isEnabled, isFalse);
       },
     );
+
+    test(
+      'enable swallows obfuscated release code d with wakelock message',
+      () async {
+        service.wakelockEnable = () async {
+          throw PlatformException(
+            code: 'd',
+            message: 'R2.d: wakelock requires a foreground activity',
+          );
+        };
+
+        await expectLater(service.enable(), completes);
+        expect(await service.isEnabled, isFalse);
+      },
+    );
+  });
+
+  group('platformExceptionDescription', () {
+    test('joins message details and toString', () {
+      final PlatformException exception = PlatformException(
+        code: 'd',
+        message: 'wakelock requires a foreground activity',
+        details: 'extra',
+      );
+
+      expect(
+        platformExceptionDescription(exception),
+        contains('wakelock requires a foreground activity'),
+      );
+      expect(platformExceptionDescription(exception), contains('extra'));
+    });
   });
 
   group('isNoActivityPlatformException', () {
@@ -102,6 +170,60 @@ void main() {
           ),
         ),
         isTrue,
+      );
+    });
+
+    test('matches obfuscated code d when description mentions wakelock', () {
+      expect(
+        isNoActivityPlatformException(
+          PlatformException(
+            code: 'd',
+            message: 'R2.d: wakelock requires a foreground activity',
+          ),
+        ),
+        isTrue,
+      );
+    });
+
+    test('rejects obfuscated code d without wakelock context', () {
+      expect(
+        isNoActivityPlatformException(
+          PlatformException(code: 'd', message: 'unrelated failure'),
+        ),
+        isFalse,
+      );
+    });
+  });
+
+  group('isIgnorableWakelockPlatformNoise', () {
+    test('matches PlatformException from FLUTTER-AK', () {
+      expect(
+        isIgnorableWakelockPlatformNoise(
+          PlatformException(
+            code: 'd',
+            message: 'R2.d: wakelock requires a foreground activity',
+          ),
+        ),
+        isTrue,
+      );
+    });
+
+    test('matches AppErrorGuard log string', () {
+      expect(
+        isIgnorableWakelockPlatformNoise(
+          'Uncaught platform error: PlatformException(d, '
+          'R2.d: wakelock requires a foreground activity, null)',
+        ),
+        isTrue,
+      );
+    });
+
+    test('rejects unrelated errors', () {
+      expect(
+        isIgnorableWakelockPlatformNoise(
+          PlatformException(code: 'OTHER', message: 'network down'),
+        ),
+        isFalse,
       );
     });
   });

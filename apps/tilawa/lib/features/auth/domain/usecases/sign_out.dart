@@ -2,6 +2,7 @@ import 'package:injectable/injectable.dart';
 
 import '../../../premium/domain/repositories/premium_repository.dart';
 import '../repositories/auth_repository.dart';
+import '../services/token_sync_cache.dart';
 import 'sync_device_token_use_case.dart';
 
 @injectable
@@ -10,10 +11,12 @@ class SignOut {
     this._repository,
     this._syncDeviceTokenUseCase,
     this._premiumRepository,
+    this._tokenSyncCache,
   );
   final AuthRepository _repository;
   final SyncDeviceTokenUseCase _syncDeviceTokenUseCase;
   final PremiumRepository _premiumRepository;
+  final TokenSyncCache _tokenSyncCache;
 
   /// When [skipServerTokenClear] is true (remote session revoke), local sign-out
   /// must not call the server token-clear path that could race with a new device.
@@ -26,6 +29,7 @@ class SignOut {
         // Best-effort only; sign-out must still complete.
       }
     }
+    await _tokenSyncCache.clearSession();
     await _premiumRepository.clearPremiumStatus();
     await _repository.signOut();
   }

@@ -1,5 +1,6 @@
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../../domain/entities/auth_error_key.dart';
 import '../bloc/auth_bloc.dart';
 import '../cubit/login_google_sign_in_cubit.dart';
 import 'login_auth_state_diagnostics.dart';
@@ -9,9 +10,11 @@ class LoginAuthBlocTransitionMessages {
   const LoginAuthBlocTransitionMessages({
     required this.authErrorFallback,
     required this.noGoogleAccounts,
+    this.deviceRegistrationFailed = '',
   });
 
   final String authErrorFallback;
+  final String deviceRegistrationFailed;
   final String noGoogleAccounts;
 }
 
@@ -47,7 +50,7 @@ void handleLoginAuthBlocTransition({
     error: (String message) {
       launchCubit.onTerminalAuthState();
       showToast(
-        message.isNotEmpty ? message : messages.authErrorFallback,
+        _visibleAuthErrorMessage(message, messages),
         TilawaFeedbackVariant.error,
       );
     },
@@ -59,4 +62,18 @@ void handleLoginAuthBlocTransition({
       );
     },
   );
+}
+
+String _visibleAuthErrorMessage(
+  String message,
+  LoginAuthBlocTransitionMessages messages,
+) {
+  return switch (message) {
+    AuthErrorKey.deviceRegistrationFailed =>
+      messages.deviceRegistrationFailed.isNotEmpty
+          ? messages.deviceRegistrationFailed
+          : messages.authErrorFallback,
+    '' => messages.authErrorFallback,
+    _ => message,
+  };
 }

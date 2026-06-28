@@ -4,12 +4,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/features/auth/data/services/pending_session_revoke_store.dart';
+import 'package:tilawa/features/auth/domain/entities/session_validity_result.dart';
+import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/domain/repositories/auth_repository.dart';
 import 'package:tilawa/features/auth/domain/services/session_revoked_notifier.dart';
 import 'package:tilawa/features/auth/domain/usecases/check_session_validity_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/sign_out.dart';
 import 'package:tilawa/features/auth/presentation/cubit/session_validity_cubit.dart';
-import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 class MockAuthRepository extends Mock implements AuthRepository {}
@@ -77,12 +78,12 @@ void main() {
   );
 
   blocTest<SessionValidityCubit, SessionValidityState>(
-    'checkOnResume signs out when server epoch is stale',
+    'checkOnResume signs out when server session is stale',
     build: buildCubit,
     act: (cubit) async {
-      when(
-        () => mockCheckValidity('user_1'),
-      ).thenAnswer((_) async => const Right(false));
+      when(() => mockCheckValidity('user_1')).thenAnswer(
+        (_) async => const Right(SessionValidityResult.stale),
+      );
       await cubit.checkOnResume();
     },
     expect: () => [
@@ -96,17 +97,42 @@ void main() {
   );
 
   blocTest<SessionValidityCubit, SessionValidityState>(
-    'checkOnResume keeps session when epoch matches',
+    'checkOnResume keeps session when epoch and device match',
     build: buildCubit,
     act: (cubit) async {
-      when(
-        () => mockCheckValidity('user_1'),
-      ).thenAnswer((_) async => const Right(true));
+      when(() => mockCheckValidity('user_1')).thenAnswer(
+        (_) async => const Right(SessionValidityResult.valid),
+      );
       await cubit.checkOnResume();
     },
     expect: () => [
       const SessionValidityState(isChecking: true),
       const SessionValidityState(isChecking: false),
+    ],
+    verify: (_) {
+      verifyNever(
+        () => mockSignOut(
+          skipServerTokenClear: any(named: 'skipServerTokenClear'),
+        ),
+      );
+    },
+  );
+
+  blocTest<SessionValidityCubit, SessionValidityState>(
+    'checkOnResume marks verification unknown instead of valid on errors',
+    build: buildCubit,
+    act: (cubit) async {
+      when(() => mockCheckValidity('user_1')).thenAnswer(
+        (_) async => Left(Failure.unexpectedError('offline')),
+      );
+      await cubit.checkOnResume();
+    },
+    expect: () => [
+      const SessionValidityState(isChecking: true),
+      const SessionValidityState(
+        isChecking: false,
+        verificationUnknown: true,
+      ),
     ],
     verify: (_) {
       verifyNever(
@@ -146,28 +172,6 @@ void main() {
     },
   );
 
-  blocTest<SessionValidityCubit, SessionValidityState>(
-    'checkOnResume treats validity check errors as still valid',
-    build: buildCubit,
-    act: (cubit) async {
-      when(() => mockCheckValidity('user_1')).thenAnswer(
-        (_) async => Left(Failure.unexpectedError('offline')),
-      );
-      await cubit.checkOnResume();
-    },
-    expect: () => [
-      const SessionValidityState(isChecking: true),
-      const SessionValidityState(isChecking: false),
-    ],
-    verify: (_) {
-      verifyNever(
-        () => mockSignOut(
-          skipServerTokenClear: any(named: 'skipServerTokenClear'),
-        ),
-      );
-    },
-  );
-
   test('close cancels session revoked subscription', () async {
     final cubit = buildCubit();
     await cubit.close();
@@ -188,9 +192,9 @@ void main() {
 
   test('revoked cubit ignores subsequent resume checks', () async {
     final cubit = buildCubit();
-    when(
-      () => mockCheckValidity('user_1'),
-    ).thenAnswer((_) async => const Right(false));
+    when(() => mockCheckValidity('user_1')).thenAnswer(
+      (_) async => const Right(SessionValidityResult.stale),
+    );
     await cubit.checkOnResume();
     clearInteractions(mockCheckValidity);
 
@@ -202,15 +206,14 @@ void main() {
   });
 
   blocTest<SessionValidityCubit, SessionValidityState>(
-    'resetRevocation clears the revoked latch so re-auth can access sessions',
+    'resetRevocation clears revoked and unknown state for re-auth',
     build: buildCubit,
-    seed: () => const SessionValidityState(revoked: true),
+    seed: () => const SessionValidityState(
+      revoked: true,
+      verificationUnknown: true,
+    ),
     act: (cubit) => cubit.resetRevocation(),
     expect: () => [const SessionValidityState()],
-    verify: (cubit) {
-      expect(cubit.state.revoked, isFalse);
-      expect(cubit.state.isChecking, isFalse);
-    },
   );
 
   blocTest<SessionValidityCubit, SessionValidityState>(
@@ -218,13 +221,5 @@ void main() {
     build: buildCubit,
     act: (cubit) => cubit.resetRevocation(),
     expect: () => <SessionValidityState>[],
-  );
-
-  blocTest<SessionValidityCubit, SessionValidityState>(
-    'resetRevocation clears isChecking along with revoked',
-    build: buildCubit,
-    seed: () => const SessionValidityState(revoked: true, isChecking: true),
-    act: (cubit) => cubit.resetRevocation(),
-    expect: () => [const SessionValidityState()],
   );
 }

@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/features/auth/application/account_deletion_flow_tracker.dart';
+import 'package:tilawa/features/auth/domain/entities/auth_error_key.dart';
 import 'package:tilawa/features/auth/domain/entities/auth_result.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/domain/usecases/delete_account.dart';
@@ -82,6 +83,9 @@ void main() {
     when(mockSyncDeviceTokenUseCase(any)).thenAnswer(
       (_) async => const Right(null),
     );
+    when(mockSyncDeviceTokenUseCase.registerExplicitSignIn(any)).thenAnswer(
+      (_) async => const Right(null),
+    );
 
     authBloc = AuthBloc(
       mockSignInWithGoogleUseCase,
@@ -106,11 +110,13 @@ void main() {
 
     group('CheckAuthStatusEvent', () {
       blocTest<AuthBloc, AuthState>(
-        'emits [unauthenticated] when user is logged in but device registration fails',
+        'emits [unauthenticated] when passive sync confirms stale device',
         build: () {
           when(mockGetCurrentUserUseCase()).thenReturn(tUser);
           when(mockSyncDeviceTokenUseCase(tUser.id)).thenAnswer(
-            (_) async => Left(Failure.validationError('FCM token unavailable')),
+            (_) async => const Left(
+              PermissionFailure(AuthErrorKey.staleDeviceRejected),
+            ),
           );
           when(
             mockSignOut(skipServerTokenClear: true),
@@ -144,6 +150,26 @@ void main() {
       );
 
       blocTest<AuthBloc, AuthState>(
+        'keeps user authenticated when passive sync fails without stale proof',
+        build: () {
+          when(mockGetCurrentUserUseCase()).thenReturn(tUser);
+          when(mockSyncDeviceTokenUseCase(tUser.id)).thenAnswer(
+            (_) async => Left(Failure.networkError('offline')),
+          );
+          return authBloc;
+        },
+        act: (bloc) => bloc.add(const CheckAuthStatusEvent()),
+        expect: () => [AuthState.authenticated(user: tUser)],
+        verify: (_) {
+          verifyNever(
+            mockSignOut(
+              skipServerTokenClear: anyNamed('skipServerTokenClear'),
+            ),
+          );
+        },
+      );
+
+      blocTest<AuthBloc, AuthState>(
         'emits [unauthenticated] when user is NOT logged in',
         build: () {
           when(mockGetCurrentUserUseCase()).thenReturn(null);
@@ -165,7 +191,9 @@ void main() {
           when(
             mockSignInWithGoogleUseCase(),
           ).thenAnswer((_) async => AuthResult.success(user: tUser));
-          when(mockSyncDeviceTokenUseCase(tUser.id)).thenAnswer(
+          when(
+            mockSyncDeviceTokenUseCase.registerExplicitSignIn(tUser.id),
+          ).thenAnswer(
             (_) async => Left(Failure.serverError('registration failed')),
           );
           when(
@@ -176,7 +204,9 @@ void main() {
         act: (bloc) => bloc.add(const SignInWithGoogleEvent()),
         expect: () => [
           const AuthState.loading(),
-          const AuthState.error(message: 'registration failed'),
+          const AuthState.error(
+            message: AuthErrorKey.deviceRegistrationFailed,
+          ),
         ],
         verify: (_) {
           verify(mockSignOut(skipServerTokenClear: true)).called(1);
@@ -199,7 +229,9 @@ void main() {
         ],
         verify: (_) {
           verify(mockSignInWithGoogleUseCase()).called(1);
-          verify(mockSyncDeviceTokenUseCase(tUser.id)).called(1);
+          verify(
+            mockSyncDeviceTokenUseCase.registerExplicitSignIn(tUser.id),
+          ).called(1);
           verify(mockGetCurrentLanguageUseCase()).called(1);
           verify(
             mockSyncUserLanguagePreference(LanguageConfig.defaultLanguageCode),

@@ -46,11 +46,37 @@ class WakelockKeepAwakeService implements KeepAwakeService {
 }
 
 @visibleForTesting
+String platformExceptionDescription(PlatformException exception) {
+  return <String?>[
+    exception.message,
+    exception.details?.toString(),
+    exception.toString(),
+  ].whereType<String>().join(' ');
+}
+
+@visibleForTesting
 bool isNoActivityPlatformException(PlatformException exception) {
   if (exception.code == 'NoActivityException') {
     return true;
   }
 
-  final String message = exception.message ?? '';
-  return message.contains('foreground activity');
+  final String description = platformExceptionDescription(exception);
+  if (description.contains('foreground activity')) {
+    return true;
+  }
+
+  // Release ProGuard maps NoActivityException to short codes such as `d`.
+  return exception.code == 'd' && description.contains('wakelock');
+}
+
+/// True for wakelock/no-foreground-activity noise that must not reach crash
+/// reporters (Sentry, Crashlytics) when lifecycle races the Android activity.
+bool isIgnorableWakelockPlatformNoise(Object error) {
+  if (error is PlatformException && isNoActivityPlatformException(error)) {
+    return true;
+  }
+
+  final String description = error.toString();
+  return description.contains('wakelock') &&
+      description.contains('foreground activity');
 }

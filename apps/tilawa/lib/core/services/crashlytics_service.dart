@@ -4,6 +4,7 @@ import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/bootstrap/app_error_guard.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/core/telemetry/crash_reporting_context.dart';
+import 'package:tilawa_core/services/wakelock_keep_awake_service.dart';
 
 /// Centralized service for Firebase Crashlytics functionality
 abstract class CrashlyticsService {
@@ -88,7 +89,9 @@ class FirebaseCrashlyticsServiceImpl implements CrashlyticsService {
       AppErrorGuard.attachReporter(
         onFlutterError: _reportFlutterError,
         onPlatformError: (Object error, StackTrace stack) {
-          recordError(error, stack, fatal: true);
+          if (shouldReportPlatformErrorFatally(error)) {
+            recordError(error, stack, fatal: true);
+          }
           return true;
         },
       );
@@ -99,6 +102,14 @@ class FirebaseCrashlyticsServiceImpl implements CrashlyticsService {
     } catch (e) {
       logger.d('Crashlytics initialization error: $e');
     }
+  }
+
+  @visibleForTesting
+  bool shouldReportPlatformErrorFatally(Object error) {
+    if (isIgnorableWakelockPlatformNoise(error)) {
+      return false;
+    }
+    return true;
   }
 
   void _reportFlutterError(FlutterErrorDetails details) {

@@ -21,11 +21,11 @@ void main() {
       expect(options.autoInitializeNativeSdk, isFalse);
       expect(
         options.beforeSend,
-        CrashReportingContext.filterEmulatorsInRelease,
+        CrashReportingContext.filterBeforeSend,
       );
       expect(
         options.beforeSendLog,
-        CrashReportingContext.filterEmulatorLogsInRelease,
+        CrashReportingContext.filterBeforeSendLog,
       );
     });
   });

@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:tilawa_core/services/wakelock_keep_awake_service.dart';
 
 import 'distribution_config.dart';
 
@@ -78,6 +79,100 @@ abstract final class CrashReportingContext {
     }
 
     return event;
+  }
+
+  /// Chained [beforeSend]: emulator filter, then wakelock lifecycle noise.
+  static SentryEvent? filterBeforeSend(SentryEvent event, Hint hint) {
+    final SentryEvent? afterEmulator = filterEmulatorsInRelease(event, hint);
+    if (afterEmulator == null) {
+      return null;
+    }
+    return filterWakelockPlatformNoiseInRelease(afterEmulator, hint);
+  }
+
+  /// Drops wakelock/no-foreground-activity platform errors in release builds.
+  @visibleForTesting
+  static SentryEvent? filterWakelockPlatformNoiseInRelease(
+    SentryEvent event,
+    Hint hint,
+  ) {
+    return filterWakelockPlatformNoiseForMode(
+      event: event,
+      releaseMode: kReleaseMode,
+    );
+  }
+
+  @visibleForTesting
+  static SentryEvent? filterWakelockPlatformNoiseForMode({
+    required SentryEvent event,
+    required bool releaseMode,
+  }) {
+    if (!releaseMode) {
+      return event;
+    }
+
+    final Object? throwable = event.throwable;
+    if (throwable != null && isIgnorableWakelockPlatformNoise(throwable)) {
+      return null;
+    }
+
+    final String formattedMessage = _eventMessageText(event);
+    if (formattedMessage.isNotEmpty &&
+        isIgnorableWakelockPlatformNoise(formattedMessage)) {
+      return null;
+    }
+
+    return event;
+  }
+
+  static String _eventMessageText(SentryEvent event) {
+    final dynamic message = event.message;
+    if (message == null) {
+      return '';
+    }
+    if (message is String) {
+      return message;
+    }
+    try {
+      final Object? formatted = (message as dynamic).formatted;
+      if (formatted is String) {
+        return formatted;
+      }
+    } on Object {
+      // Fall through to toString().
+    }
+    return message.toString();
+  }
+
+  /// Chained [beforeSendLog]: emulator filter, then wakelock lifecycle noise.
+  static SentryLog? filterBeforeSendLog(SentryLog log) {
+    final SentryLog? afterEmulator = filterEmulatorLogsInRelease(log);
+    if (afterEmulator == null) {
+      return null;
+    }
+    return filterWakelockLogsInRelease(afterEmulator);
+  }
+
+  /// Drops wakelock/no-foreground-activity structured logs in release builds.
+  @visibleForTesting
+  static SentryLog? filterWakelockLogsInRelease(SentryLog log) {
+    return filterWakelockLogsForMode(log: log, releaseMode: kReleaseMode);
+  }
+
+  @visibleForTesting
+  static SentryLog? filterWakelockLogsForMode({
+    required SentryLog log,
+    required bool releaseMode,
+  }) {
+    if (!releaseMode) {
+      return log;
+    }
+
+    if (isIgnorableWakelockPlatformNoise(log.body)) {
+      return null;
+    }
+
+    return log;
   }
 
   /// Drops emulator/simulator structured logs in release builds.

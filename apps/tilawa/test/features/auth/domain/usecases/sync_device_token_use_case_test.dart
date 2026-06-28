@@ -1,7 +1,9 @@
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:tilawa/features/auth/domain/entities/auth_error_key.dart';
 import 'package:tilawa/features/auth/domain/entities/session_registration.dart';
+import 'package:tilawa/features/auth/domain/services/session_revoked_notifier.dart';
 import 'package:tilawa/features/auth/domain/usecases/register_active_device_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/sync_device_token_use_case.dart';
 import 'package:tilawa_core/errors/failures.dart';
@@ -10,54 +12,77 @@ class MockRegisterActiveDeviceUseCase extends Mock
     implements RegisterActiveDeviceUseCase {}
 
 void main() {
+  late MockRegisterActiveDeviceUseCase mockRegisterActiveDevice;
+  late SessionRevokedNotifier sessionRevokedNotifier;
   late SyncDeviceTokenUseCase useCase;
-  late MockRegisterActiveDeviceUseCase mockRegister;
-
-  const tUserId = 'user_123';
-  const tRegistration = SessionRegistration(
-    epoch: 1,
-    activeDeviceId: 'device_1',
-  );
 
   setUp(() {
-    mockRegister = MockRegisterActiveDeviceUseCase();
-    useCase = SyncDeviceTokenUseCase(mockRegister);
+    mockRegisterActiveDevice = MockRegisterActiveDeviceUseCase();
+    sessionRevokedNotifier = SessionRevokedNotifier();
+    useCase = SyncDeviceTokenUseCase(
+      mockRegisterActiveDevice,
+      sessionRevokedNotifier,
+    );
   });
 
-  test('returns Right when registration succeeds', () async {
-    when(
-      () => mockRegister(tUserId),
-    ).thenAnswer((_) async => const Right(tRegistration));
-
-    final result = await useCase(tUserId);
-
-    expect(result.isRight(), isTrue);
-    verify(() => mockRegister(tUserId)).called(1);
+  tearDown(() {
+    sessionRevokedNotifier.resetDedupeForTest();
   });
 
-  test('swallows register failures without throwing', () async {
-    when(() => mockRegister(tUserId)).thenAnswer(
-      (_) async => Left(Failure.serverError('failed')),
+  test('call performs passive sync', () async {
+    when(() => mockRegisterActiveDevice.syncPassive('user_1')).thenAnswer(
+      (_) async => const Right(
+        SessionRegistration(
+          status: SessionRegistrationStatus.updatedSameDevice,
+          sessionEpoch: 1,
+          activeDeviceId: 'device_1',
+        ),
+      ),
     );
 
-    final result = await useCase(tUserId);
+    final result = await useCase('user_1');
 
-    expect(result.isLeft(), isTrue);
-    result.fold((failure) {
-      expect(failure, isA<ServerFailure>());
-    }, (_) => fail('expected Left'));
+    expect(result.isRight(), isTrue);
+    verify(() => mockRegisterActiveDevice.syncPassive('user_1')).called(1);
   });
 
-  test(
-    'removeCurrentTokenForUser clears active device via register use case',
-    () async {
-      when(
-        () => mockRegister.clearActiveDeviceOnSignOut(tUserId),
-      ).thenAnswer((_) async => const Right(null));
+  test('registerExplicitSignIn forwards explicit registration', () async {
+    when(
+      () => mockRegisterActiveDevice.registerExplicitSignIn('user_1'),
+    ).thenAnswer(
+      (_) async => const Right(
+        SessionRegistration(
+          status: SessionRegistrationStatus.registered,
+          sessionEpoch: 2,
+          activeDeviceId: 'device_1',
+        ),
+      ),
+    );
 
-      await useCase.removeCurrentTokenForUser(tUserId);
+    final result = await useCase.registerExplicitSignIn('user_1');
 
-      verify(() => mockRegister.clearActiveDeviceOnSignOut(tUserId)).called(1);
-    },
-  );
+    expect(result.isRight(), isTrue);
+    verify(
+      () => mockRegisterActiveDevice.registerExplicitSignIn('user_1'),
+    ).called(1);
+  });
+
+  test('passive stale failure notifies session revoked', () async {
+    var revoked = false;
+    final subscription = sessionRevokedNotifier.onSessionRevoked.listen((_) {
+      revoked = true;
+    });
+    when(() => mockRegisterActiveDevice.syncPassive('user_1')).thenAnswer(
+      (_) async => const Left(
+        PermissionFailure(AuthErrorKey.staleDeviceRejected),
+      ),
+    );
+
+    final result = await useCase('user_1');
+    await Future<void>.delayed(Duration.zero);
+
+    expect(result.isLeft(), isTrue);
+    expect(revoked, isTrue);
+    await subscription.cancel();
+  });
 }

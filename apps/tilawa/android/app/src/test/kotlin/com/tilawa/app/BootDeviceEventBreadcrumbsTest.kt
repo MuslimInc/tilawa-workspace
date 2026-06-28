@@ -6,7 +6,6 @@ import io.sentry.Breadcrumb
 import io.sentry.Hint
 import io.sentry.Sentry
 import io.sentry.SentryOptions
-import io.sentry.transport.RateLimiter
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

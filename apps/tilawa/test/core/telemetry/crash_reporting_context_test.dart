@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:tilawa/core/telemetry/crash_reporting_context.dart';
@@ -163,6 +164,107 @@ void main() {
       expect(
         CrashReportingContext.filterEmulatorsInRelease(event, Hint()),
         event,
+      );
+    });
+  });
+
+  group('filterWakelockPlatformNoiseForMode', () {
+    test('drops wakelock PlatformException in release', () {
+      final SentryEvent event = SentryEvent(
+        throwable: PlatformException(
+          code: 'd',
+          message: 'R2.d: wakelock requires a foreground activity',
+        ),
+      );
+
+      expect(
+        CrashReportingContext.filterWakelockPlatformNoiseForMode(
+          event: event,
+          releaseMode: true,
+        ),
+        isNull,
+      );
+    });
+
+    test('keeps unrelated errors in release', () {
+      final SentryEvent event = SentryEvent(
+        throwable: PlatformException(code: 'OTHER', message: 'network'),
+      );
+
+      expect(
+        CrashReportingContext.filterWakelockPlatformNoiseForMode(
+          event: event,
+          releaseMode: true,
+        ),
+        event,
+      );
+    });
+
+    test('keeps wakelock noise in debug builds', () {
+      final SentryEvent event = SentryEvent(
+        throwable: PlatformException(
+          code: 'd',
+          message: 'wakelock requires a foreground activity',
+        ),
+      );
+
+      expect(
+        CrashReportingContext.filterWakelockPlatformNoiseForMode(
+          event: event,
+          releaseMode: false,
+        ),
+        event,
+      );
+    });
+  });
+
+  group('filterWakelockLogsForMode', () {
+    final SentryLog wakelockLog = SentryLog(
+      timestamp: DateTime.utc(2026),
+      level: SentryLogLevel.error,
+      body:
+          'Uncaught platform error: PlatformException(d, '
+          'wakelock requires a foreground activity, null)',
+      attributes: <String, SentryAttribute>{},
+    );
+
+    test('drops wakelock AppErrorGuard logs in release', () {
+      expect(
+        CrashReportingContext.filterWakelockLogsForMode(
+          log: wakelockLog,
+          releaseMode: true,
+        ),
+        isNull,
+      );
+    });
+
+    test('keeps wakelock logs in debug', () {
+      expect(
+        CrashReportingContext.filterWakelockLogsForMode(
+          log: wakelockLog,
+          releaseMode: false,
+        ),
+        wakelockLog,
+      );
+    });
+  });
+
+  group('filterBeforeSendLog', () {
+    test('drops wakelock logs in release via chained filter', () {
+      final SentryLog log = SentryLog(
+        timestamp: DateTime.utc(2026),
+        level: SentryLogLevel.error,
+        body:
+            'Uncaught platform error: wakelock requires a foreground activity',
+        attributes: <String, SentryAttribute>{},
+      );
+
+      expect(
+        CrashReportingContext.filterWakelockLogsForMode(
+          log: log,
+          releaseMode: true,
+        ),
+        isNull,
       );
     });
   });

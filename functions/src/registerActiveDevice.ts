@@ -1,30 +1,69 @@
-import { onCall, HttpsError } from "firebase-functions/v2/https";
-import { logger } from "firebase-functions/v2";
 import { getAuth } from "firebase-admin/auth";
 import { FieldValue, getFirestore } from "firebase-admin/firestore";
 import { getMessaging } from "firebase-admin/messaging";
+import { logger } from "firebase-functions/v2";
+import { onCall, HttpsError } from "firebase-functions/v2/https";
 
+import { sessionCallableHttpsOptions } from "./quranSessions/sessionCallableOptions";
 import {
   type DevicePlatform,
+  type DeviceRegistrationMode,
+  type DeviceRegistrationStatus,
   planDeviceRegistration,
   readServerSessionEpoch,
 } from "./quranSessions/sessionRegistration";
 import { buildSessionRevokedNotificationCopy } from "./quranSessions/sessionRevokedNotification";
-import { sessionCallableHttpsOptions } from "./quranSessions/sessionCallableOptions";
 
 export const SESSION_REVOKED_ACTION = "session_revoked";
 
+const SAFE_DEVICE_INFO_KEYS = new Set([
+  "manufacturer",
+  "model",
+  "os",
+  "osVersion",
+  "appBuildNumber",
+  "appVersion",
+]);
+
+const UNSAFE_DEVICE_INFO_KEYS = new Set([
+  "adid",
+  "advertisingid",
+  "androidid",
+  "android_id",
+  "imei",
+  "mac",
+  "macaddress",
+  "mac_address",
+  "meid",
+  "phone",
+  "phonenumber",
+  "phone_number",
+  "serial",
+  "serialnumber",
+  "serial_number",
+]);
+
 interface RegisterActiveDeviceRequest {
-  deviceId: string;
-  fcmToken: string;
-  platform: DevicePlatform;
-  appVersion?: string;
-  signOut?: boolean;
+  deviceId?: unknown;
+  fcmToken?: unknown;
+  platform?: unknown;
+  appVersion?: unknown;
+  registrationMode?: unknown;
+  deviceInfo?: unknown;
+  signOut?: unknown;
 }
 
 interface RegisterActiveDeviceResponse {
-  epoch: number;
-  activeDeviceId: string;
+  status: DeviceRegistrationStatus;
+  sessionEpoch?: number;
+  epoch?: number;
+  activeDeviceId?: string;
+}
+
+interface TransactionResult extends RegisterActiveDeviceResponse {
+  deviceChanged: boolean;
+  noOp: boolean;
+  previousToken: string | null;
 }
 
 export function parseDevicePlatform(value: unknown): DevicePlatform | null {
@@ -32,6 +71,71 @@ export function parseDevicePlatform(value: unknown): DevicePlatform | null {
     return value;
   }
   return null;
+}
+
+export function parseRegistrationMode(
+  value: unknown,
+): DeviceRegistrationMode | null {
+  if (value === "explicit_sign_in" || value === "passive_sync") {
+    return value;
+  }
+  return null;
+}
+
+export function sanitizeDeviceInfo(
+  value: unknown,
+): Record<string, string> | undefined {
+  if (value == null) {
+    return undefined;
+  }
+  if (typeof value !== "object" || Array.isArray(value)) {
+    throw new HttpsError("invalid-argument", "deviceInfo must be an object.");
+  }
+
+  const sanitized: Record<string, string> = {};
+  for (const [key, raw] of Object.entries(value as Record<string, unknown>)) {
+    const normalizedKey = key.toLowerCase();
+    if (UNSAFE_DEVICE_INFO_KEYS.has(normalizedKey)) {
+      throw new HttpsError(
+        "invalid-argument",
+        `Unsafe deviceInfo field rejected: ${key}.`,
+      );
+    }
+    if (!SAFE_DEVICE_INFO_KEYS.has(key) || raw == null) {
+      continue;
+    }
+    if (typeof raw !== "string") {
+      throw new HttpsError(
+        "invalid-argument",
+        `deviceInfo.${key} must be a string.`,
+      );
+    }
+    const trimmed = raw.trim();
+    if (trimmed.length > 0) {
+      sanitized[key] = trimmed.slice(0, 120);
+    }
+  }
+
+  return Object.keys(sanitized).length === 0 ? undefined : sanitized;
+}
+
+function optionalString(value: unknown, fieldName: string): string | undefined {
+  if (value == null) {
+    return undefined;
+  }
+  if (typeof value !== "string") {
+    throw new HttpsError("invalid-argument", `${fieldName} must be a string.`);
+  }
+  const trimmed = value.trim();
+  return trimmed.length === 0 ? undefined : trimmed.slice(0, 240);
+}
+
+function requiredString(value: unknown, fieldName: string): string {
+  const parsed = optionalString(value, fieldName);
+  if (parsed == null) {
+    throw new HttpsError("invalid-argument", `${fieldName} is required.`);
+  }
+  return parsed;
 }
 
 export async function deleteLegacyFcmTokens(
@@ -78,11 +182,89 @@ async function sendSessionRevokedPush(
   }
 }
 
+function activeDeviceWrite(
+  plan: ReturnType<typeof planDeviceRegistration>,
+  input: {
+    appVersion?: string;
+    deviceInfo?: Record<string, string>;
+    fcmToken?: string;
+    platform: DevicePlatform;
+  },
+  now: FirebaseFirestore.FieldValue,
+): Record<string, unknown> {
+  const sessionUpdate: Record<string, unknown> = {
+    epoch: plan.nextEpoch,
+    activeDeviceId: plan.nextActiveDeviceId,
+    lastSeenAt: now,
+    platform: input.platform,
+  };
+  if (plan.deviceChanged) {
+    sessionUpdate.registeredAt = now;
+  }
+  if (input.appVersion) {
+    sessionUpdate.appVersion = input.appVersion;
+  }
+  if (input.deviceInfo) {
+    sessionUpdate.deviceInfo = input.deviceInfo;
+  }
+
+  const notifications: Record<string, unknown> = {
+    platform: input.platform,
+  };
+  if (input.fcmToken) {
+    notifications.activeFcmToken = input.fcmToken;
+    notifications.tokenUpdatedAt = now;
+  } else if (plan.deviceChanged) {
+    notifications.activeFcmToken = FieldValue.delete();
+    notifications.tokenUpdatedAt = FieldValue.delete();
+  }
+
+  return {
+    session: sessionUpdate,
+    notifications,
+    updatedAt: now,
+  };
+}
+
+function activeSessionClearWrite(
+  now: FirebaseFirestore.FieldValue,
+): Record<string, unknown> {
+  return {
+    session: {
+      activeDeviceId: FieldValue.delete(),
+      registeredAt: FieldValue.delete(),
+      lastSeenAt: FieldValue.delete(),
+      platform: FieldValue.delete(),
+      appVersion: FieldValue.delete(),
+      deviceInfo: FieldValue.delete(),
+    },
+    notifications: {
+      activeFcmToken: FieldValue.delete(),
+      tokenUpdatedAt: FieldValue.delete(),
+      platform: FieldValue.delete(),
+    },
+    updatedAt: now,
+  };
+}
+
+function responseFor(
+  status: DeviceRegistrationStatus,
+  sessionEpoch: number,
+  activeDeviceId: string,
+): RegisterActiveDeviceResponse {
+  return {
+    status,
+    sessionEpoch,
+    epoch: sessionEpoch,
+    activeDeviceId: activeDeviceId || undefined,
+  };
+}
+
 /**
- * Registers the caller's active device + FCM token (server-authoritative).
+ * Registers or passively refreshes the caller's active device.
  *
- * Bumps [session.epoch] when [deviceId] changes, revokes refresh tokens, and
- * notifies the superseded device via FCM data message `session_revoked`.
+ * Only `explicit_sign_in` may replace `session.activeDeviceId`. `passive_sync`
+ * can update last-seen/device token data for the already-active device only.
  */
 export const registerActiveDevice = onCall(
   sessionCallableHttpsOptions,
@@ -92,22 +274,23 @@ export const registerActiveDevice = onCall(
       throw new HttpsError("unauthenticated", "Authentication required.");
     }
 
-    const data = request.data as RegisterActiveDeviceRequest;
-    const deviceId = data.deviceId?.trim() ?? "";
-    const fcmToken = data.fcmToken?.trim() ?? "";
+    const data = (request.data ?? {}) as RegisterActiveDeviceRequest;
+    const deviceId = requiredString(data.deviceId, "deviceId");
+    const fcmToken = optionalString(data.fcmToken, "fcmToken");
     const platform = parseDevicePlatform(data.platform);
+    const registrationMode = parseRegistrationMode(data.registrationMode);
+    const appVersion = optionalString(data.appVersion, "appVersion");
+    const deviceInfo = sanitizeDeviceInfo(data.deviceInfo);
     const signOut = data.signOut === true;
 
-    if (!signOut) {
-      if (!deviceId) {
-        throw new HttpsError("invalid-argument", "deviceId is required.");
-      }
-      if (!fcmToken) {
-        throw new HttpsError("invalid-argument", "fcmToken is required.");
-      }
-      if (!platform) {
-        throw new HttpsError("invalid-argument", "platform is required.");
-      }
+    if (!platform) {
+      throw new HttpsError("invalid-argument", "platform is required.");
+    }
+    if (!registrationMode) {
+      throw new HttpsError(
+        "invalid-argument",
+        "registrationMode must be explicit_sign_in or passive_sync.",
+      );
     }
 
     const db = getFirestore();
@@ -136,80 +319,74 @@ export const registerActiveDevice = onCall(
         {
           deviceId,
           fcmToken,
-          platform: platform ?? "android",
-          appVersion: data.appVersion,
+          platform,
+          appVersion,
+          registrationMode,
           signOut,
         },
       );
 
-      const previousToken = currentNotifications?.activeFcmToken ?? null;
+      const previousToken =
+        typeof currentNotifications?.activeFcmToken === "string"
+          ? currentNotifications.activeFcmToken
+          : null;
 
       if (plan.noOp) {
         return {
-          epoch: readServerSessionEpoch(userData),
-          activeDeviceId: String(currentSession?.activeDeviceId ?? ""),
-          previousToken: null as string | null,
+          ...responseFor(
+            plan.status,
+            plan.nextEpoch,
+            plan.nextActiveDeviceId,
+          ),
+          previousToken: null,
           deviceChanged: false,
-        };
+          noOp: true,
+        } satisfies TransactionResult;
       }
 
-      if (plan.clearTokenOnly) {
-        tx.set(
-          userRef,
-          {
-            notifications: {
-              activeFcmToken: FieldValue.delete(),
-              tokenUpdatedAt: FieldValue.delete(),
-              platform: FieldValue.delete(),
-            },
-            updatedAt: now,
-          },
-          { merge: true },
-        );
+      if (plan.clearActiveSession) {
+        tx.set(userRef, activeSessionClearWrite(now), { merge: true });
         return {
-          epoch: plan.nextEpoch,
-          activeDeviceId: plan.nextActiveDeviceId,
-          previousToken: null as string | null,
+          ...responseFor(
+            plan.status,
+            plan.nextEpoch,
+            plan.nextActiveDeviceId,
+          ),
+          previousToken: null,
           deviceChanged: false,
-        };
-      }
-
-      const sessionUpdate: Record<string, unknown> = {
-        epoch: plan.nextEpoch,
-        activeDeviceId: plan.nextActiveDeviceId,
-        registeredAt: now,
-        platform,
-      };
-      if (data.appVersion) {
-        sessionUpdate.appVersion = data.appVersion;
+          noOp: false,
+        } satisfies TransactionResult;
       }
 
       tx.set(
         userRef,
-        {
-          session: sessionUpdate,
-          notifications: {
-            activeFcmToken: fcmToken,
-            tokenUpdatedAt: now,
+        activeDeviceWrite(
+          plan,
+          {
+            appVersion,
+            deviceInfo,
+            fcmToken,
             platform,
           },
-          updatedAt: now,
-        },
+          now,
+        ),
         { merge: true },
       );
 
       return {
-        epoch: plan.nextEpoch,
-        activeDeviceId: plan.nextActiveDeviceId,
+        ...responseFor(plan.status, plan.nextEpoch, plan.nextActiveDeviceId),
         previousToken:
           plan.deviceChanged && previousToken && previousToken !== fcmToken
             ? previousToken
             : null,
         deviceChanged: plan.deviceChanged,
-      };
+        noOp: false,
+      } satisfies TransactionResult;
     });
 
-    await deleteLegacyFcmTokens(userRef);
+    if (!result.noOp) {
+      await deleteLegacyFcmTokens(userRef);
+    }
 
     if (result.deviceChanged) {
       await getAuth().revokeRefreshTokens(uid);
@@ -219,6 +396,8 @@ export const registerActiveDevice = onCall(
     }
 
     return {
+      status: result.status,
+      sessionEpoch: result.sessionEpoch,
       epoch: result.epoch,
       activeDeviceId: result.activeDeviceId,
     };

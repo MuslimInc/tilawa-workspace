@@ -202,6 +202,32 @@ void main() {
       expect(result, const LoginRoute().location);
     });
 
+    testWidgets('redirects verification-unknown sessions to login', (
+      tester,
+    ) async {
+      whenListen(
+        mockSessionCubit,
+        Stream<SessionValidityState>.empty(),
+        initialState: const SessionValidityState(verificationUnknown: true),
+      );
+      when(() => mockAuthBloc.state).thenReturn(
+        AuthState.authenticated(
+          user: UserEntity(
+            id: 'user_1',
+            email: 'user@example.com',
+            displayName: 'User',
+            createdAt: DateTime.utc(2024),
+          ),
+        ),
+      );
+
+      final result = await redirectForPath(
+        tester,
+        QuranSessionsRoutes.mySessions,
+      );
+      expect(result, const LoginRoute().location);
+    });
+
     testWidgets('redirects unauthenticated users to login', (tester) async {
       whenListen(
         mockSessionCubit,

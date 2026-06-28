@@ -43,6 +43,7 @@ test("integration: device B registration supersedes device A epoch", async () =>
     deviceId: "device-a",
     fcmToken: "tok-a",
     platform: "android",
+    registrationMode: "explicit_sign_in",
   });
   const second = planDeviceRegistration(
     { epoch: first.nextEpoch, activeDeviceId: first.nextActiveDeviceId },
@@ -50,6 +51,7 @@ test("integration: device B registration supersedes device A epoch", async () =>
       deviceId: "device-b",
       fcmToken: "tok-b",
       platform: "ios",
+      registrationMode: "explicit_sign_in",
     },
   );
 

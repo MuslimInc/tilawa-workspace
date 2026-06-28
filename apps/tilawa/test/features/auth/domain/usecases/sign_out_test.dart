@@ -11,6 +11,7 @@ void main() {
   late MockAuthRepository mockAuthRepository;
   late MockSyncDeviceTokenUseCase mockSyncDeviceTokenUseCase;
   late MockPremiumRepository mockPremiumRepository;
+  late MockTokenSyncCache mockTokenSyncCache;
 
   final tUser = UserEntity(
     id: 'user_123',
@@ -23,11 +24,14 @@ void main() {
     mockAuthRepository = MockAuthRepository();
     mockSyncDeviceTokenUseCase = MockSyncDeviceTokenUseCase();
     mockPremiumRepository = MockPremiumRepository();
+    mockTokenSyncCache = MockTokenSyncCache();
     useCase = SignOut(
       mockAuthRepository,
       mockSyncDeviceTokenUseCase,
       mockPremiumRepository,
+      mockTokenSyncCache,
     );
+    when(mockTokenSyncCache.clearSession()).thenAnswer((_) async {});
   });
 
   test(
@@ -41,6 +45,7 @@ void main() {
 
       verifyNever(mockSyncDeviceTokenUseCase.removeCurrentTokenForUser(any));
       verifyInOrder([
+        mockTokenSyncCache.clearSession(),
         mockPremiumRepository.clearPremiumStatus(),
         mockAuthRepository.signOut(),
       ]);
@@ -59,6 +64,7 @@ void main() {
 
     verifyInOrder([
       mockSyncDeviceTokenUseCase.removeCurrentTokenForUser(tUser.id),
+      mockTokenSyncCache.clearSession(),
       mockPremiumRepository.clearPremiumStatus(),
       mockAuthRepository.signOut(),
     ]);
@@ -74,6 +80,7 @@ void main() {
       await useCase();
 
       verifyNever(mockSyncDeviceTokenUseCase.removeCurrentTokenForUser(any));
+      verify(mockTokenSyncCache.clearSession()).called(1);
       verify(mockPremiumRepository.clearPremiumStatus()).called(1);
       verify(mockAuthRepository.signOut()).called(1);
     },
@@ -91,6 +98,7 @@ void main() {
 
       await useCase();
 
+      verify(mockTokenSyncCache.clearSession()).called(1);
       verify(mockPremiumRepository.clearPremiumStatus()).called(1);
       verify(mockAuthRepository.signOut()).called(1);
     },

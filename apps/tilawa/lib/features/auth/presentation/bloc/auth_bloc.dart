@@ -9,6 +9,7 @@ import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../../application/account_deletion_flow_tracker.dart';
+import '../../domain/entities/auth_error_key.dart';
 import '../../domain/entities/auth_result.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/usecases/delete_account.dart';
@@ -125,7 +126,8 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
       return;
     }
 
-    final Either<Failure, void> registration = await _syncDeviceToken(user.id);
+    final Either<Failure, void> registration = await _syncDeviceToken
+        .registerExplicitSignIn(user.id);
     if (generation != _interactiveSignInGeneration) {
       return;
     }
@@ -139,9 +141,7 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
       emit(
         AuthState.error(
           message: registration.fold(
-            (failure) =>
-                failure.message ??
-                'Sign-in could not be completed. Check your connection and try again.',
+            (_) => AuthErrorKey.deviceRegistrationFailed,
             (_) => 'Sign-in could not be completed.',
           ),
         ),
@@ -238,8 +238,11 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
       final Either<Failure, void> registration = await _syncDeviceToken(
         user.id,
       );
-      final bool registered = registration.fold((_) => false, (_) => true);
-      if (!registered) {
+      final bool staleDevice = registration.fold(
+        _isStaleDeviceFailure,
+        (_) => false,
+      );
+      if (staleDevice) {
         await _signOut(skipServerTokenClear: true);
         emit(const AuthState.unauthenticated());
         return;
@@ -249,6 +252,11 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
       return;
     }
     emit(const AuthState.unauthenticated());
+  }
+
+  bool _isStaleDeviceFailure(Failure failure) {
+    return failure.message == AuthErrorKey.staleDeviceRejected ||
+        failure.message == AuthErrorKey.requiresExplicitSignIn;
   }
 
   Future<void> _syncLanguagePreferenceAfterAuth() async {

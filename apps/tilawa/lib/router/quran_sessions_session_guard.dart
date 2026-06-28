@@ -121,7 +121,8 @@ String? _quranSessionsLoginRedirect(
   bool redirectWhenAuthUnknown = false,
 }) {
   try {
-    if (context.read<SessionValidityCubit>().state.revoked) {
+    final sessionState = context.read<SessionValidityCubit>().state;
+    if (sessionState.revoked || sessionState.verificationUnknown) {
       return const LoginRoute().location;
     }
 

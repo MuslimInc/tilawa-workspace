@@ -68,6 +68,7 @@ test("planDeviceRegistration first device bumps epoch from zero to one", () => {
     deviceId: "device-a",
     fcmToken: "tok-a",
     platform: "android",
+    registrationMode: "explicit_sign_in",
   });
 
   assert.equal(plan.nextEpoch, 1);
@@ -79,6 +80,7 @@ test("planDeviceRegistration re-login same device after supersede", () => {
     deviceId: "device-a",
     fcmToken: "tok-a",
     platform: "android",
+    registrationMode: "explicit_sign_in",
   });
   const second = planDeviceRegistration(
     { epoch: first.nextEpoch, activeDeviceId: first.nextActiveDeviceId },
@@ -86,6 +88,7 @@ test("planDeviceRegistration re-login same device after supersede", () => {
       deviceId: "device-b",
       fcmToken: "tok-b",
       platform: "ios",
+      registrationMode: "explicit_sign_in",
     },
   );
   const third = planDeviceRegistration(
@@ -94,6 +97,7 @@ test("planDeviceRegistration re-login same device after supersede", () => {
       deviceId: "device-a",
       fcmToken: "tok-a2",
       platform: "android",
+      registrationMode: "explicit_sign_in",
     },
   );
 
