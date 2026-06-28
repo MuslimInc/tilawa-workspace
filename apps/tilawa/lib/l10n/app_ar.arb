@@ -58,6 +58,17 @@
     "homeNextPrayerUnavailable": "حدّد موقعك لمعرفة موعد الصلاة القادمة.",
     "homePrayerTimesAction": "مواقيت الصلاة",
     "homePrayerNow": "حان وقت الأذان",
+    "@homePrayerNow": {
+        "description": "Home countdown when the next salah adhan is due now (five daily prayers only)"
+    },
+    "homeSunriseNow": "حان وقت الشروق",
+    "@homeSunriseNow": {
+        "description": "Home countdown when sunrise (Shurooq) is due now"
+    },
+    "homeDuhaNow": "حان وقت الضحى",
+    "@homeDuhaNow": {
+        "description": "Home countdown when Duha time is due now"
+    },
     "homePrayerInMinutes": "{minutes, plural, =1{بعد دقيقة} =2{بعد دقيقتين} other{بعد {minutes} دقائق}}",
     "@homePrayerInMinutes": {
         "placeholders": {

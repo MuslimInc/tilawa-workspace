@@ -8,6 +8,7 @@ import 'package:tilawa/features/home/domain/entities/home_dashboard.dart';
 import 'package:tilawa/features/home/domain/home_hijri_date_formatter.dart';
 import 'package:tilawa/features/home/presentation/bloc/home_dashboard_state.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_content_sliver.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_dashboard_card.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_next_prayer_time.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
@@ -55,20 +56,13 @@ void main() {
     final screenTokens = Theme.of(
       scrollContext,
     ).componentTokens.homeScreen;
-    expect(
-      find.byWidgetPredicate(
-        (widget) =>
-            widget is DecoratedBox &&
-            widget.decoration is BoxDecoration &&
-            (widget.decoration as BoxDecoration).color ==
-                screenTokens.homeContentSheetSurface &&
-            (widget.decoration as BoxDecoration).border != null &&
-            ((widget.decoration as BoxDecoration).boxShadow?.isNotEmpty ??
-                    false) ==
-                false,
-      ),
-      findsWidgets,
+    expect(find.byType(HomeDashboardCard), findsOneWidget);
+    expect(find.byType(TilawaCard), findsOneWidget);
+    final TilawaCard prayerCard = tester.widget<TilawaCard>(
+      find.byType(TilawaCard).first,
     );
+    expect(prayerCard.surface, TilawaCardSurface.flat);
+    expect(prayerCard.backgroundColor, screenTokens.homeContentSheetSurface);
   });
 
   testWidgets('hero has no collapse scroll extent', (tester) async {
@@ -122,6 +116,57 @@ void main() {
     }
   });
 
+  testWidgets('shows sunrise neutral label when Shurooq is due now', (
+    tester,
+  ) async {
+    final view = tester.view;
+    view.devicePixelRatio = 1;
+    view.physicalSize = const Size(360, 640);
+    addTearDown(view.resetDevicePixelRatio);
+    addTearDown(view.resetPhysicalSize);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('ar'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+        home: Builder(
+          builder: (context) {
+            return CustomScrollView(
+              slivers: [
+                ...HomeNextPrayerTime.buildSlivers(
+                  context: context,
+                  state: HomeDashboardLoaded(
+                    HomeDashboard(
+                      generatedAt: DateTime(2026, 6, 16, 5, 29),
+                      locationLabel: 'Cairo',
+                      nextPrayer: HomeNextPrayer(
+                        type: PrayerType.sunrise,
+                        time: DateTime.now().add(const Duration(seconds: 30)),
+                        timeUntil: const Duration(seconds: 30),
+                      ),
+                    ),
+                  ),
+                  onOpenPrayer: () {},
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final BuildContext scrollContext = tester.element(
+      find.byType(CustomScrollView),
+    );
+    final l10n = AppLocalizations.of(scrollContext);
+
+    expect(find.text(l10n.homePrayerNow), findsNothing);
+    expect(find.text(l10n.homeSunriseNow), findsOneWidget);
+  });
+
   testWidgets('content sliver follows hero in scroll order', (tester) async {
     final view = tester.view;
     view.devicePixelRatio = 1;
@@ -170,6 +215,8 @@ void main() {
       scrollContext,
     );
 
+    final MeMuslimDesignTokens tokens = Theme.of(scrollContext).tokens;
+
     controller.jumpTo(heroExtent);
     await tester.pump();
 
@@ -178,7 +225,9 @@ void main() {
     );
     expect(
       probeTop.dy,
-      lessThanOrEqualTo(MediaQuery.paddingOf(scrollContext).top + 1),
+      lessThanOrEqualTo(
+        MediaQuery.paddingOf(scrollContext).top + tokens.spaceMedium + 1,
+      ),
     );
   });
 }

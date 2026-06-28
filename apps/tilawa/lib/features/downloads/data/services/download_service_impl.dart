@@ -195,19 +195,23 @@ class DownloadServiceImpl implements DownloadServiceInterface {
         _activeDownloadUrls.remove(url);
       }
 
-      final DownloadStatus downloadStatus = _statusMapper
-          .mapTaskStatusToDownloadStatus(status);
-      final double normalizedProgress =
-          downloadStatus == DownloadStatus.completed ? 1.0 : progress / 100.0;
-      _globalProgressController.add(
-        DownloadProgress(
-          id: url,
-          status: downloadStatus,
-          progress: normalizedProgress,
-          downloadedSize: 0,
-          fileSize: 0,
-        ),
-      );
+      try {
+        final DownloadStatus downloadStatus = _statusMapper
+            .mapTaskStatusToDownloadStatus(status);
+        final double normalizedProgress =
+            downloadStatus == DownloadStatus.completed ? 1.0 : progress / 100.0;
+        _globalProgressController.add(
+          DownloadProgress(
+            id: url,
+            status: downloadStatus,
+            progress: normalizedProgress,
+            downloadedSize: 0,
+            fileSize: 0,
+          ),
+        );
+      } catch (e) {
+        logger.w('[DownloadService] Error mapping task status for $url: $e');
+      }
     }
   }
 

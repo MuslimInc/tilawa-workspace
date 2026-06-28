@@ -167,7 +167,7 @@ class _DateGroupedDayTabBarState extends State<DateGroupedDayTabBar> {
     final weekdayFmt = DateFormat('EEE', locale);
     final dayFmt = DateFormat('d', locale);
     final monthFmt = DateFormat('MMM', locale);
-    final tabHeight = tokens.spaceXXL * 2 + tokens.spaceSmall;
+    final tabHeight = tokens.spaceXXL * 2 + tokens.spaceMedium;
     final chipWidth = tokens.spaceXXL + tokens.spaceExtraLarge;
     final textTheme = theme.textTheme;
 

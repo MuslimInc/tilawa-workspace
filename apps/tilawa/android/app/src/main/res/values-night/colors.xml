@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Match light launch canvas for a single branded handoff. -->
-    <color name="launch_background">#219653</color>
+    <!-- Production: #2A9C64 -->
+    <color name="launch_background">#2A9C64</color>
 </resources>

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb;
 import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
+import 'app_brand_probe.dart';
 import 'component_tokens.dart';
 import 'design_tokens.dart';
 import 'memuslim_product_colors.dart';
@@ -73,10 +74,13 @@ class AppTheme {
   }
 
   static FlexSchemeColor _lightScheme(Color primaryColor) {
-    final safePrimary = primaryColor == AppColors.defaultPrimary
+    final safePrimary =
+        AppBrandProbe.usesBrandLockedSchemeRoles(primaryColor.toARGB32())
         ? primaryColor
         : _safePrimaryForLight(primaryColor);
-    final isBrandPrimary = safePrimary == AppColors.defaultPrimary;
+    final isBrandPrimary = AppBrandProbe.usesBrandLockedSchemeRoles(
+      safePrimary.toARGB32(),
+    );
     final primaryContainer = isBrandPrimary
         ? AppColors.lightSchemePrimaryContainer
         : _containerForPrimary(
@@ -217,7 +221,9 @@ class AppTheme {
 
   static ColorScheme _refineLightColorScheme(ColorScheme scheme) {
     final Color primary = scheme.primary;
-    final isBrandPrimary = primary == AppColors.defaultPrimary;
+    final isBrandPrimary = AppBrandProbe.usesBrandLockedSchemeRoles(
+      primary.toARGB32(),
+    );
     final Color primaryContainer = isBrandPrimary
         ? AppColors.lightSchemePrimaryContainer
         : scheme.primaryContainer;

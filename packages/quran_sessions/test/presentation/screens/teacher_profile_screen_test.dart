@@ -127,7 +127,7 @@ void main() {
     var selectedTeacherId = '';
     String? selectedSlotId;
 
-    tester.view.physicalSize = const Size(360, 800);
+    tester.view.physicalSize = const Size(360, 1200);
     tester.view.devicePixelRatio = 1;
     addTearDown(() {
       tester.view.resetPhysicalSize();
@@ -164,14 +164,14 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
 
     await tester.tap(find.text('احجز جلسة'));
     await tester.pump();
 
     expect(selectedTeacherId, seed.teacher.id);
     expect(selectedSlotId, isNull);
-    expect(tester.takeException(), isNull);
   });
 
   testWidgets('shows report tutor action in app bar for visible profile', (

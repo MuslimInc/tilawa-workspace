@@ -218,11 +218,23 @@ abstract class AppLocalizations {
   /// **'Prayer times'**
   String get homePrayerTimesAction;
 
-  /// Home countdown text when the next prayer is due now
+  /// Home countdown when the next salah adhan is due now (five daily prayers only)
   ///
   /// In en, this message translates to:
   /// **'It\'s prayer time'**
   String get homePrayerNow;
+
+  /// Home countdown when sunrise (Shurooq) is due now
+  ///
+  /// In en, this message translates to:
+  /// **'Sunrise time now'**
+  String get homeSunriseNow;
+
+  /// Home countdown when Duha time is due now
+  ///
+  /// In en, this message translates to:
+  /// **'Duha time now'**
+  String get homeDuhaNow;
 
   /// Home next-prayer countdown under one hour
   ///

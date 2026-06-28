@@ -783,7 +783,7 @@ void main() {
           surfaceContainerHighest: Color(0xFF00FF00),
         );
         final purpleScheme = ColorScheme.light(
-          primary: Color(0xFF7A5C89),
+          primary: AppColors.defaultPrimary,
           primaryContainer: Color(0xFFE3D4E9),
           surfaceContainerHigh: Color(0xFF0000FF),
           surfaceContainerHighest: Color(0xFFFFFF00),
@@ -1420,7 +1420,7 @@ void main() {
       'MeMuslimComponentTokensX uses Theme colorScheme when extension is absent',
       (WidgetTester tester) async {
         final colorScheme = ColorScheme.fromSeed(
-          seedColor: const Color(0xFF7A5C89),
+          seedColor: AppColors.defaultPrimary,
           brightness: Brightness.light,
         );
         final theme = ThemeData(colorScheme: colorScheme);

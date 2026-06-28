@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 /// Centralized app color constants.
 ///
 /// The Tilawa palette is intentionally **small and calm**:
-/// white canvas ([tripGlideCanvas] `#FFFFFF`), warm brown primary
-/// ([defaultPrimary] `#8B5E3C`), neutral text ink ([tripGlideInk] `#212121`),
+/// white canvas ([tripGlideCanvas] `#FFFFFF`), green global accent
+/// ([defaultPrimary] `#2B8659`), neutral text ink ([tripGlideInk] `#212121`),
 /// and restrained category accent hues for hub tiles.
 ///
 /// Some `tripGlide*` names remain as compatibility aliases for the current
@@ -45,23 +45,20 @@ abstract final class AppColors {
   /// Forest green theme option (dev/QA picker; not gold).
   static const Color primaryGold = Color(0xFF2D6B47);
 
-  /// Warm brown — the brand-locked mockup accent (`#8B5E3C`).
-  static const Color primaryBrown = Color(0xFF8B5E3C);
+  /// Brand splash canvas — flat launch / native splash green (`#2A9C64`).
+  static const Color brandSplashGreen = Color(0xFF2A9C64);
 
-  /// Pressed / strong brown for shadows and emphasis (`#6B4A2E`).
-  static const Color primaryBrownDark = Color(0xFF6B4A2E);
+  /// Global accent — nav, switches, selected states, CTAs (`#2B8659`).
+  static const Color brandActionGreen = Color(0xFF2B8659);
 
   /// Green alias retained for saved theme migration.
   static const Color primaryGreen = primarySage;
 
-  /// Purple alias retained for saved theme migration.
-  static const Color primaryPurple = Color(0xFF7A5C89);
-
   /// Default primary color used throughout the app.
   ///
-  /// Warm brown brand ink (`#8B5E3C`) for CTAs, active nav, and selected
-  /// controls.
-  static const Color defaultPrimary = primaryBrown;
+  /// Green global accent (`#2B8659`) for CTAs, active nav, selected controls,
+  /// and Home dashboard micro-accents.
+  static const Color defaultPrimary = brandActionGreen;
 
   /// High-emphasis text ink for headings and body copy (`#212121`).
   ///
@@ -144,10 +141,10 @@ abstract final class AppColors {
   ];
 
   /// Icons on travel destination header bands.
-  static const Color homeTravelDestinationIcon = defaultPrimary;
+  static const Color homeTravelDestinationIcon = brandActionGreen;
 
   /// Section links (See all) on the travel Home dashboard.
-  static const Color homeTravelSectionLink = defaultPrimary;
+  static const Color homeTravelSectionLink = brandActionGreen;
 
   /// Day hero top — warm ivory parchment with a soft gold cast.
   static const Color homeNextPrayerGradientTop = Color(0xFFFCF8F0);
@@ -212,8 +209,8 @@ abstract final class AppColors {
   /// Elevated card surface on the Home dashboard.
   static const Color homeDashboardCardSurface = tripGlideCanvas;
 
-  /// Dashboard accent — warm brown brand ink for Home CTAs and icons.
-  static const Color homeDashboardAccent = defaultPrimary;
+  /// Dashboard accent — brand green for Home CTAs and icons.
+  static const Color homeDashboardAccent = brandActionGreen;
 
   /// White content area and elevated cards on the Home dashboard.
   static const Color homeContentSheetSurface = tripGlideCanvas;
@@ -224,8 +221,8 @@ abstract final class AppColors {
   /// Elevated card surface — dark theme.
   static const Color homeDashboardCardSurfaceDark = Color(0xFF1A2220);
 
-  /// Dashboard accent — dark theme.
-  static const Color homeDashboardAccentDark = Color(0xFFC9A07A);
+  /// Dashboard accent — dark theme (lifted green).
+  static const Color homeDashboardAccentDark = darkDefaultPrimary;
 
   /// White content sheet — dark theme.
   static const Color homeContentSheetSurfaceDark = Color(0xFF121A18);
@@ -312,13 +309,13 @@ abstract final class AppColors {
   /// Featured tutor card — soft beige wash.
   static const Color homeFeaturedTutorGradientEnd = Color(0xFFF5F0E8);
 
-  /// Featured tutor card accent — badge, CTA, glyph.
-  static const Color homeFeaturedTutorAccent = homeDashboardAccent;
+  /// Featured tutor card accent — CTA pill and icon well (global green CTA).
+  static const Color homeFeaturedTutorAccent = brandActionGreen;
 
-  /// Featured tutor filled CTA label on brown pill.
+  /// Featured tutor filled CTA label on green pill.
   static const Color homeFeaturedTutorCtaForeground = Color(0xFFFFFFFF);
 
-  /// Hero geometric pattern ink — brown micro-accent.
+  /// Hero geometric pattern ink — brand green micro-accent.
   static const Color homeHeroPatternInk = homeDashboardAccent;
 
   /// Content sheet top hairline — unused on flat canvas; kept for API compat.
@@ -330,8 +327,8 @@ abstract final class AppColors {
   /// Featured tutor card ramp end — dark theme.
   static const Color homeFeaturedTutorGradientEndDark = Color(0xFF2A2620);
 
-  /// Featured tutor card accent — dark theme.
-  static const Color homeFeaturedTutorAccentDark = homeDashboardAccentDark;
+  /// Featured tutor card accent — dark theme (lifted green CTA).
+  static const Color homeFeaturedTutorAccentDark = darkDefaultPrimary;
 
   /// Featured tutor CTA label — dark theme.
   static const Color homeFeaturedTutorCtaForegroundDark = Color(0xFF0F1412);
@@ -351,8 +348,8 @@ abstract final class AppColors {
   /// Action tile fill — dark theme.
   static const Color homeQuickActionTileBackgroundDark = Color(0xFF1C2422);
 
-  /// Launch / splash canvas — warm brown brand ink.
-  static const Color launchSplashBackground = defaultPrimary;
+  /// Launch / splash canvas — brand splash green (`#2A9C64`).
+  static const Color launchSplashBackground = brandSplashGreen;
 
   /// Wordmark and progress on launch surfaces (`#FFFFFF`).
   static const Color launchSplashForeground = Color(0xFFFFFFFF);
@@ -493,12 +490,12 @@ abstract final class AppColors {
   // AppTheme — dark Flex scheme refinement.
   // ---------------------------------------------------------------------------
 
-  /// Lifted warm companion of [defaultPrimary] for contrast on dark surfaces.
-  static const Color darkDefaultPrimary = Color(0xFFD6B08A);
+  /// Lifted green companion of [brandActionGreen] for contrast on dark surfaces.
+  static const Color darkDefaultPrimary = Color(0xFF6BC992);
 
   /// Historical reference: dark primary container paired with
   /// [darkDefaultPrimary]. [AppTheme] derives it from selected primary instead.
-  static const Color darkDefaultPrimaryContainer = Color(0xFF3D2A1D);
+  static const Color darkDefaultPrimaryContainer = Color(0xFF1E4A38);
 
   static const Color darkSecondary = Color(0xFF9DB5A8);
   static const Color darkSecondaryContainer = Color(0xFF2A3530);
@@ -525,9 +522,6 @@ abstract final class AppColors {
   // ---------------------------------------------------------------------------
   // Category accent hues — reference mock icon backgrounds (hub / explore).
   // ---------------------------------------------------------------------------
-
-  /// Purple accent — generators / fan icon family.
-  static const Color categoryAccentPurple = Color(0xFF7E57C2);
 
   /// Blue accent — water / conditions icon family.
   static const Color categoryAccentBlue = Color(0xFF42A5F5);
@@ -602,7 +596,7 @@ abstract final class AppColors {
   static const Color brandSecondary = lightSchemeSecondary;
 
   /// Brand tertiary used by FlexColorScheme assembly only.
-  static const Color brandTertiary = categoryAccentPurple;
+  static const Color brandTertiary = brandActionGreen;
 }
 
 /// Fixed “studio” palette for the **share audio / reel composer** (dark

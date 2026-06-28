@@ -124,7 +124,7 @@ class MeMuslimProductColors extends ThemeExtension<MeMuslimProductColors> {
       HomeExploreFeature.athkar => AppColors.categoryAccentOrange,
       HomeExploreFeature.prayer => prayerTimeActive,
       HomeExploreFeature.qibla => AppColors.categoryAccentBlue,
-      HomeExploreFeature.tasbeeh => AppColors.categoryAccentPurple,
+      HomeExploreFeature.tasbeeh => AppColors.success,
       HomeExploreFeature.bookmarks => AppColors.categoryAccentIndigo,
       HomeExploreFeature.quran => AppColors.categoryAccentAmber,
       HomeExploreFeature.support => AppColors.categoryAccentTealLight,

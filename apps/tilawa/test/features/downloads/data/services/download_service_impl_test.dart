@@ -1252,14 +1252,16 @@ void main() {
         localMockDownloader.remove(taskId: taskId, shouldDeleteContent: true),
       ).thenThrow(Exception('Remove failed'));
 
-      // Should still emit cancelled event
       final Future<void> expectation = expectLater(
         localService.globalProgressStream,
-        emits(
+        emitsInOrder([
+          predicate<DownloadProgress>(
+            (p) => p.id == url && p.status == DownloadStatus.downloading,
+          ),
           predicate<DownloadProgress>(
             (p) => p.id == url && p.status == DownloadStatus.cancelled,
           ),
-        ),
+        ]),
       );
 
       await localService.cancel(url);

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../helpers/fixtures.dart';
 import '../../helpers/widget_pump.dart';
@@ -63,6 +64,25 @@ void main() {
       );
 
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('cancelled chip uses tinted danger surface not solid fill', (
+      tester,
+    ) async {
+      await pumpInApp(
+        tester,
+        QuranSessionStatusChip(
+          session: makeSession(
+            lifecycleStatus: SessionLifecycleStatus.cancelledByStudent,
+          ),
+        ),
+        surfaceSize: const Size(360, 800),
+      );
+
+      final chip = tester.widget<TilawaChip>(find.byType(TilawaChip));
+      expect(chip.backgroundColor!.a, lessThan(0.5));
+      expect(chip.foregroundColor, isNot(equals(chip.backgroundColor)));
+      expect(chip.showShadow, isFalse);
     });
   });
 }

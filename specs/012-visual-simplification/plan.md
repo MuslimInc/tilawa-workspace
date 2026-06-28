@@ -78,7 +78,7 @@ No changes. Eight-dp grid in `TilawaDesignTokens` is preserved. The unused `opac
 
 ## Risks & mitigations
 
-- **Risk**: Saved user themes that picked a deprecated preset name. **Mitigation**: alias constants (`primaryCyan`, `primaryGreen`, `primaryPurple`) stay.
+- **Risk**: Saved user themes that picked a deprecated preset name. **Mitigation**: alias constants (`primaryCyan`, `primaryGreen`) stay; legacy purple preset id/ARGB migrate to `brandGreen` via `PrimaryColorPreset`.
 - **Risk**: Goldens drift. **Mitigation**: tests still pass — visual changes are within token tolerances since most "gradient" gradients were 1-2% alpha overlays that didn't render distinctly anyway.
 - **Risk**: Accessibility regression. **Mitigation**: semantic IDs and labels untouched; reciter card tests (failing pre-existing) tracked separately.
 - **Risk**: Notification chrome breaks. **Mitigation**: `notificationAccent` retained.

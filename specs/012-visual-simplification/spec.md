@@ -52,7 +52,7 @@ As a user sharing a Mushaf passage, I want the share-composer output to keep its
 
 ## Edge Cases
 
-- **Saved primary colour preset migration**: `primaryCyan`, `primaryGreen`, `primaryPurple` constants stay (alias-only) so users who saved a non-default theme don't lose their choice.
+- **Saved primary colour preset migration**: `primaryCyan` and `primaryGreen` constants stay (alias-only). Legacy purple preset id (`purple`) and ARGB (`0xFF7A5C89`) migrate to brand green (`brandGreen` / `#2B8659`).
 - **Notification chrome**: `AppColors.notificationAccent` stays — system notifications render outside Flutter's theme and can't resolve `ColorScheme`.
 - **Composer output (share / reel)**: gradients here are *generated artwork*, not chrome. They are explicitly out of scope.
 - **Qibla compass needle**: a `RadialGradient` lives inside a `CustomPainter` shader. It is a functional rendering, not chrome.

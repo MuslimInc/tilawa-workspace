@@ -41,7 +41,7 @@ class QuranSessionStatusChip extends StatelessWidget {
       ),
       SessionLifecycleStatus.rejectedByTutor => (
         l10n.sessionStatusRejectedByTutor,
-        status.cancelledSoft,
+        status.rejected.withValues(alpha: tint),
         status.rejected,
       ),
       SessionLifecycleStatus.expired => (
@@ -58,7 +58,7 @@ class QuranSessionStatusChip extends StatelessWidget {
       SessionLifecycleStatus.cancelledByStudent ||
       SessionLifecycleStatus.cancelledByAdmin => (
         l10n.sessionStatusCancelled,
-        status.cancelledSoft,
+        status.cancelled.withValues(alpha: tint),
         status.cancelled,
       ),
       SessionLifecycleStatus.inProgress => (
@@ -92,7 +92,7 @@ class QuranSessionStatusChip extends StatelessWidget {
         QuranSessionStatus.cancelledByStudent ||
         QuranSessionStatus.cancelledByTeacher => (
           l10n.sessionStatusCancelled,
-          status.cancelledSoft,
+          status.cancelled.withValues(alpha: tint),
           status.cancelled,
         ),
         QuranSessionStatus.noShow => (
@@ -103,31 +103,50 @@ class QuranSessionStatusChip extends StatelessWidget {
       },
     };
 
+    final isDangerChip =
+        lifecycle == SessionLifecycleStatus.rejectedByTutor ||
+        lifecycle == SessionLifecycleStatus.cancelledByTeacher ||
+        lifecycle == SessionLifecycleStatus.cancelledByStudent ||
+        lifecycle == SessionLifecycleStatus.cancelledByAdmin ||
+        session.status == QuranSessionStatus.cancelledByStudent ||
+        session.status == QuranSessionStatus.cancelledByTeacher;
+
     return _statusChip(
       context,
       label: label,
       background: bg,
       foreground: fg,
+      borderColor: isDangerChip ? fg.withValues(alpha: tint * 2.5) : null,
     );
   }
 }
 
-/// Renders a student session status badge via the kit [TilawaStatusChip],
+/// Renders a student session status badge via the kit [TilawaChip],
 /// matching [TutorSessionStatusChip] padding so both rails align.
 Widget _statusChip(
   BuildContext context, {
   required String label,
   required Color background,
   required Color foreground,
+  Color? borderColor,
 }) {
-  final tokens = Theme.of(context).tokens;
-  return TilawaStatusChip(
+  final theme = Theme.of(context);
+  final tokens = theme.tokens;
+  final chipTokens = theme.componentTokens.chip;
+  return TilawaChip(
     label: label,
     backgroundColor: background,
     foregroundColor: foreground,
+    borderColor: borderColor,
+    showShadow: false,
     padding: EdgeInsets.symmetric(
       horizontal: tokens.spaceSmall,
       vertical: tokens.spaceExtraSmall,
+    ),
+    textStyle: theme.textTheme.labelSmall?.copyWith(
+      fontWeight: chipTokens.statusFontWeight,
+      color: foreground,
+      letterSpacing: chipTokens.statusLetterSpacing,
     ),
   );
 }

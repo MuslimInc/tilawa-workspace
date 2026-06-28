@@ -87,7 +87,15 @@
     },
     "homePrayerNow": "It's prayer time",
     "@homePrayerNow": {
-        "description": "Home countdown text when the next prayer is due now"
+        "description": "Home countdown when the next salah adhan is due now (five daily prayers only)"
+    },
+    "homeSunriseNow": "Sunrise time now",
+    "@homeSunriseNow": {
+        "description": "Home countdown when sunrise (Shurooq) is due now"
+    },
+    "homeDuhaNow": "Duha time now",
+    "@homeDuhaNow": {
+        "description": "Home countdown when Duha time is due now"
     },
     "homePrayerInMinutes": "{minutes, plural, =1{In 1 minute} other{In {minutes} minutes}}",
     "@homePrayerInMinutes": {

@@ -7,7 +7,7 @@ import 'package:tilawa/features/home/domain/entities/home_dashboard.dart';
 import 'package:tilawa/features/home/presentation/bloc/home_dashboard_bloc.dart';
 import 'package:tilawa/features/home/presentation/bloc/home_dashboard_event.dart';
 import 'package:tilawa/features/home/presentation/bloc/home_dashboard_state.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_dashboard_elevated_surface.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_dashboard_card.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_prayer_hero_context_row.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -51,7 +51,7 @@ abstract final class HomeNextPrayerTime {
     final bool tightCard =
         MediaQuery.sizeOf(context).width - horizontalGutter < 320;
     final double contextRow = 36 * textScale;
-    final double prayerBlock = 104 * textScale;
+    final double prayerBlock = 135 * textScale;
     final double tightSlack = tightCard ? tokens.spaceExtraLarge : 0;
 
     // Mirrors [_HomeNextPrayerTimeSliver] padding + card layout, plus small
@@ -99,10 +99,6 @@ class _HomeNextPrayerTimeSliver extends StatelessWidget {
         state is! HomeDashboardLoaded && state is! HomeDashboardFailure;
     final bool dashboardFailed = state is HomeDashboardFailure;
     final String? locationName = dashboard?.locationLabel;
-    final double cardRadius = tokens.resolveRadius(
-      family: TilawaRadiusFamily.hero,
-    );
-    final BorderRadius borderRadius = BorderRadius.circular(cardRadius);
 
     return SliverToBoxAdapter(
       child: Padding(
@@ -112,43 +108,31 @@ class _HomeNextPrayerTimeSliver extends StatelessWidget {
           horizontalInset,
           tokens.spaceMedium,
         ),
-        child: DecoratedBox(
-          decoration: HomeDashboardElevatedSurface.decoration(
-            context,
-            borderRadius: borderRadius,
-          ),
-          child: ClipRRect(
-            borderRadius: borderRadius,
-            child: Padding(
-              padding: EdgeInsets.all(tokens.spaceMedium),
-              child: _HomeNextPrayerTimeCard(
-                locationName: locationName,
-                isRefreshingLocation: isRefreshingLocation,
-                onRefreshLocation: () {
-                  context.read<HomeDashboardBloc>().add(
-                    HomeDashboardLocationRefreshRequested(
-                      localeIdentifier: Localizations.localeOf(
-                        context,
-                      ).languageCode,
-                    ),
-                  );
-                },
-                nextPrayer: nextPrayer,
-                metricsLoading: metricsLoading,
-                dashboardFailed: dashboardFailed,
-                onRetryDashboard: () {
-                  context.read<HomeDashboardBloc>().add(
-                    HomeDashboardRefreshRequested(
-                      localeIdentifier: Localizations.localeOf(
-                        context,
-                      ).languageCode,
-                    ),
-                  );
-                },
-                onOpenPrayer: onOpenPrayer,
+        child: _HomeNextPrayerTimeCard(
+          locationName: locationName,
+          isRefreshingLocation: isRefreshingLocation,
+          onRefreshLocation: () {
+            context.read<HomeDashboardBloc>().add(
+              HomeDashboardLocationRefreshRequested(
+                localeIdentifier: Localizations.localeOf(
+                  context,
+                ).languageCode,
               ),
-            ),
-          ),
+            );
+          },
+          nextPrayer: nextPrayer,
+          metricsLoading: metricsLoading,
+          dashboardFailed: dashboardFailed,
+          onRetryDashboard: () {
+            context.read<HomeDashboardBloc>().add(
+              HomeDashboardRefreshRequested(
+                localeIdentifier: Localizations.localeOf(
+                  context,
+                ).languageCode,
+              ),
+            );
+          },
+          onOpenPrayer: onOpenPrayer,
         ),
       ),
     );
@@ -199,26 +183,22 @@ class _HomeNextPrayerTimeCard extends StatelessWidget {
     return Semantics(
       button: !dashboardFailed,
       label: context.l10n.nextPrayer,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: dashboardFailed ? null : onOpenPrayer,
-          splashColor: colorScheme.primary.withValues(alpha: 0.08),
-          highlightColor: colorScheme.primary.withValues(alpha: 0.04),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: tokens.spaceSmall,
-            children: [
-              HomePrayerHeroContextRow(
-                locationName: locationName,
-                isRefreshingLocation: isRefreshingLocation,
-                onRefreshLocation: onRefreshLocation,
-                ink: ink,
-                muted: muted,
-              ),
-              metricsChild,
-            ],
-          ),
+      child: HomeDashboardCard(
+        surface: TilawaCardSurface.flat,
+        onTap: dashboardFailed ? null : onOpenPrayer,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: tokens.spaceSmall,
+          children: [
+            HomePrayerHeroContextRow(
+              locationName: locationName,
+              isRefreshingLocation: isRefreshingLocation,
+              onRefreshLocation: onRefreshLocation,
+              ink: ink,
+              muted: muted,
+            ),
+            metricsChild,
+          ],
         ),
       ),
     );
@@ -295,6 +275,7 @@ class _HomeNextPrayerTimeFocus extends StatelessWidget {
           ),
         ),
         _HomeNextPrayerTimeRemainingText(
+          prayerType: prayer.type,
           prayerTime: prayer.time,
           color: accent,
         ),
@@ -305,10 +286,12 @@ class _HomeNextPrayerTimeFocus extends StatelessWidget {
 
 class _HomeNextPrayerTimeRemainingText extends StatefulWidget {
   const _HomeNextPrayerTimeRemainingText({
+    required this.prayerType,
     required this.prayerTime,
     required this.color,
   });
 
+  final PrayerType prayerType;
   final DateTime prayerTime;
   final Color color;
 
@@ -330,7 +313,8 @@ class _HomeNextPrayerTimeRemainingTextState
   @override
   void didUpdateWidget(covariant _HomeNextPrayerTimeRemainingText oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.prayerTime != widget.prayerTime) {
+    if (oldWidget.prayerTime != widget.prayerTime ||
+        oldWidget.prayerType != widget.prayerType) {
       _scheduleTicker();
     }
   }
@@ -390,7 +374,7 @@ class _HomeNextPrayerTimeRemainingTextState
             vertical: tokens.spaceExtraSmall * 0.75,
           ),
           child: Text(
-            _formatCountdown(context, _remaining),
+            _formatCountdown(context, _remaining, widget.prayerType),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.titleSmall?.copyWith(
@@ -503,9 +487,38 @@ String _formatTime(BuildContext context, DateTime time) {
   );
 }
 
-String _formatCountdown(BuildContext context, Duration duration) {
-  if (duration.inMinutes < 1) {
+bool _isFiveDailyPrayer(PrayerType type) {
+  return switch (type) {
+    PrayerType.fajr ||
+    PrayerType.dhuhr ||
+    PrayerType.asr ||
+    PrayerType.maghrib ||
+    PrayerType.isha => true,
+    _ => false,
+  };
+}
+
+String _countdownNowLabel(BuildContext context, PrayerType type) {
+  if (_isFiveDailyPrayer(type)) {
     return context.l10n.homePrayerNow;
+  }
+
+  return switch (type) {
+    PrayerType.sunrise => context.l10n.homeSunriseNow,
+    // Wire [homeDuhaNow] when [PrayerType.duha] is added to the prayer model.
+    _ => context.l10n.prayerNotificationBody(
+      _localizedPrayerName(context, type),
+    ),
+  };
+}
+
+String _formatCountdown(
+  BuildContext context,
+  Duration duration,
+  PrayerType type,
+) {
+  if (duration.inMinutes < 1) {
+    return _countdownNowLabel(context, type);
   }
   final int totalMinutes = duration.inMinutes;
   final int hours = totalMinutes ~/ 60;

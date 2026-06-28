@@ -3,5 +3,6 @@
     <!-- Android 12 SplashScreen only supports a flat color background here. -->
     <!-- Must match AppColors.launchSplashBackground in Flutter (ui_kit).
          Logo size: @dimen/splash_logo_size == AppColors.launchSplashLogoSize. -->
-    <color name="launch_background">#219653</color>
+    <!-- Production: brand splash green #2A9C64 -->
+    <color name="launch_background">#2A9C64</color>
 </resources>

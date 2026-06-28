@@ -68,7 +68,7 @@ void main() {
     test(
       'brand lock stays on default primary when scheme uses custom accent',
       () {
-        const Color customPrimary = Color(0xFF7A5C89);
+        const Color customPrimary = Color(0xFF87CC23);
         final ColorScheme scheme = AppTheme.getLightTheme(
           primaryColor: customPrimary,
         ).colorScheme;

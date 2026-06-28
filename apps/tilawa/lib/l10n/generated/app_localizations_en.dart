@@ -75,6 +75,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homePrayerNow => 'It\'s prayer time';
 
   @override
+  String get homeSunriseNow => 'Sunrise time now';
+
+  @override
+  String get homeDuhaNow => 'Duha time now';
+
+  @override
   String homePrayerInMinutes(int minutes) {
     String _temp0 = intl.Intl.pluralLogic(
       minutes,

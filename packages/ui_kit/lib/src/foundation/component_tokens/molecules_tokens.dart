@@ -1709,8 +1709,8 @@ class TilawaHomeScreenTokens {
   LinearGradient backgroundGradientFor(ColorScheme colorScheme) {
     final Color top = Color.lerp(
       backgroundGradientStart,
-      colorScheme.primary,
-      0.05,
+      AppColors.brandActionGreen,
+      0.03,
     )!;
 
     return LinearGradient(
