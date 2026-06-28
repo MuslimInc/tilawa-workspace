@@ -61,7 +61,7 @@ switch ON. **Not** for scaffold fills (use the neutral canvas).
 
 | `AppColors` | Hex | `ColorScheme` / usage |
 |-------------|-----|------------------------|
-| `lightCanvas` / `lightBackground` | `#FFFFFF` | Scaffold, `surfaceContainerLowest` |
+| `lightCanvas` / `lightBackground` | `#FAF9F7` | Scaffold, `surfaceContainerLowest` |
 | `lightSurface` | `#FFFFFF` | Cards, sheets, dialogs |
 | `lightInk` | `#212121` | `onSurface` |
 | `lightMute` | `#757575` | Muted labels (`onSurfaceVariant`) |

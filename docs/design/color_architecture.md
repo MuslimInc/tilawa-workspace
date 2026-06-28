@@ -60,6 +60,10 @@ Kit-owned formulas (search field, bottom nav, hero prayer gradients via `homeNex
 
 | Area | Why |
 |------|-----|
+| Home `Scaffold` | Uses `homeScreen.backgroundGradientEnd` so the gradient background bleeds through at the bottom edge |
+| Launch / splash surfaces | `AppColors.launchSplashBackground` — brand green, not app canvas |
+| Quran reader scaffolds | Transparent or `QuranReaderTheme.pageBackground` — mushaf page, not app chrome |
+| Share / reel composers | `AppShareComposerColors` + `ImmersiveComposerScaffold` — marketing-style dark gradient |
 | `AppShareComposerColors` + share sheet literals | Marketing-style share/reel composer — intentional brand palette outside `ColorScheme` |
 | `AppQuranReaderLegacyColors` | Mushaf reading presets (surfaced via `TilawaProductColors`) |
 | `features/color_picker/` | Dev/QA tool |

@@ -363,10 +363,10 @@ abstract final class AppColors {
   // (#FAFAFA / #FFFFFF / warm neutral ink). One temperature family end-to-end.
   // ---------------------------------------------------------------------------
 
-  /// App canvas / scaffold — soft neutral (`#FAFAFA`).
+  /// App canvas / scaffold — warm off-white matching Home (`#FAF9F7`).
   ///
   /// Cards use [lightSurface] (`#FFFFFF`) for quiet lift with soft shadows.
-  static const Color lightCanvas = tripGlideCanvas;
+  static const Color lightCanvas = homeBackgroundGradientStart;
 
   /// Alias for scaffold assembly — same as [lightCanvas].
   static const Color lightBackground = lightCanvas;

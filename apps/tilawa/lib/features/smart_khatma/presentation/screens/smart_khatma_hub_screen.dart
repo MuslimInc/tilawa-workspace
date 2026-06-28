@@ -23,7 +23,6 @@ class SmartKhatmaHubScreen extends StatelessWidget {
         QuranPlayerWidget.fabBottomOffset(context) + tokens.spaceLarge;
 
     return Scaffold(
-      backgroundColor: context.scaffoldCanvasColor,
       appBar: TilawaCatalogAppBar.titleOnly(
         context,
         title: context.l10n.khatmaHubTitle,
