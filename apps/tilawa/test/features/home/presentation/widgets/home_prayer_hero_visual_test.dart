@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:tilawa/features/home/debug/home_hero_variant_debug.dart';
+import 'package:tilawa/core/bootstrap/app_launch_config.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/features/home/domain/entities/home_dashboard.dart';
 import 'package:tilawa/features/home/presentation/bloc/home_dashboard_state.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_state.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_body.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_dashboard_hero_variant_b.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_next_prayer_time.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_screen_background.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
@@ -26,7 +27,19 @@ class _MockMainScreenCubit extends MockCubit<MainScreenState>
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  setUp(HomeHeroVariantDebug.resetForTests);
+  setUp(() {
+    if (!getIt.isRegistered<AppLaunchConfig>()) {
+      getIt.registerSingleton<AppLaunchConfig>(
+        const AppLaunchConfig(quranSessionsEnabled: false),
+      );
+    }
+  });
+
+  tearDown(() async {
+    if (getIt.isRegistered<AppLaunchConfig>()) {
+      await getIt.unregister<AppLaunchConfig>();
+    }
+  });
 
   group('Home Prayer Hero visual captures', () {
     testWidgets('expanded state', (tester) async {
@@ -49,16 +62,19 @@ void main() {
         controller: controller,
       );
 
-      final double mid = HomeDashboardHeroVariantB.collapseScrollExtent(
-        tester.element(find.byType(CustomScrollView)),
+      final BuildContext scrollContext = tester.element(
+        find.byType(CustomScrollView),
       );
-      controller.jumpTo(mid * 0.45);
+      final double heroExtent = HomeNextPrayerTime.expandedLayoutExtent(
+        scrollContext,
+      );
+      controller.jumpTo(heroExtent * 0.45);
       await tester.pump();
 
       await _expectGolden(tester, 'home_hero_mid_scroll');
     });
 
-    testWidgets('fully collapsed state', (tester) async {
+    testWidgets('hero scrolled off screen', (tester) async {
       final ScrollController controller = ScrollController();
       addTearDown(controller.dispose);
 
@@ -69,11 +85,10 @@ void main() {
         controller: controller,
       );
 
-      final double collapseExtent =
-          HomeDashboardHeroVariantB.collapseScrollExtent(
-            tester.element(find.byType(CustomScrollView)),
-          );
-      controller.jumpTo(collapseExtent);
+      final double heroExtent = HomeNextPrayerTime.expandedLayoutExtent(
+        tester.element(find.byType(CustomScrollView)),
+      );
+      controller.jumpTo(heroExtent);
       await tester.pump();
 
       await _expectGolden(tester, 'home_hero_collapsed');
@@ -144,7 +159,7 @@ Future<void> _pumpHome(
                   CustomScrollView(
                     controller: controller,
                     slivers: [
-                      ...HomeDashboardHeroVariantB.buildSlivers(
+                      ...HomeNextPrayerTime.buildSlivers(
                         context: context,
                         state: _homeDashboardState(),
                         onOpenPrayer: () {},

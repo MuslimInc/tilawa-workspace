@@ -3,7 +3,8 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Dashboard sections on the neutral Home canvas.
 ///
-/// Cards float on the gray canvas with soft elevation — no overlapping sheet.
+/// Cards sit on the canvas through spacing, contrast, and hairline borders —
+/// no overlapping sheet or heavy elevation.
 class HomeDashboardContentSliver extends StatelessWidget {
   const HomeDashboardContentSliver({super.key, required this.child});
 

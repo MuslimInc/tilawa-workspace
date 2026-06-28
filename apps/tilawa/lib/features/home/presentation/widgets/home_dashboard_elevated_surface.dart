@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-/// Reference-style elevated white card for the Home dashboard.
+/// Flat dashboard surface — white fill, hairline border, optional soft shadow.
 abstract final class HomeDashboardElevatedSurface {
   const HomeDashboardElevatedSurface._();
 
@@ -19,18 +19,10 @@ abstract final class HomeDashboardElevatedSurface {
           tokens.resolveRadius(family: TilawaRadiusFamily.hero),
         );
 
-    return BoxDecoration(
-      color: screenTokens.homeContentSheetSurface,
+    return screenTokens.dashboardSurfaceDecoration(
+      tokens: tokens,
+      colorScheme: theme.colorScheme,
       borderRadius: resolved,
-      boxShadow: <BoxShadow>[
-        BoxShadow(
-          color: theme.colorScheme.shadow.withValues(
-            alpha: screenTokens.homePrayerHeroShadowOpacity,
-          ),
-          offset: Offset(0, tokens.spaceExtraSmall.toDouble()),
-          blurRadius: tokens.spaceLarge.toDouble(),
-        ),
-      ],
     );
   }
 }

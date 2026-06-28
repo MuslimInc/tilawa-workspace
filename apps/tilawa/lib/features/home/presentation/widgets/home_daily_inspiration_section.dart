@@ -23,7 +23,6 @@ class HomeDailyInspirationSection extends StatelessWidget {
         title: context.l10n.homeInspirationTitle,
         subtitle: context.l10n.homeInspirationSubtitle,
         child: HomeDashboardCard(
-          surface: TilawaCardSurface.raised,
           padding: EdgeInsets.zero,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

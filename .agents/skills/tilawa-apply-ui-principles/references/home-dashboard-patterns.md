@@ -29,8 +29,8 @@ Match this order everywhere (slivers + body):
 
 | # | Layer | Widget / behavior |
 |---|--------|-------------------|
-| 1 | Sliver — Now | `HomeDashboardHeroSliver` (Variant B) |
-| 2 | Sliver — tutor (flag) | `homeFeaturedTutorCardSliver` → pinned tutor promo when Quran Sessions enabled; hero unpins |
+| 1 | Sliver — Now | `HomeNextPrayerTime` |
+| 2 | Sliver — tutor (flag) | `homeFeaturedTutorCardSliver` → pinned tutor promo when Quran Sessions enabled |
 | 3 | Body | `HomePrimaryActionsSection` |
 | 4 | Body | `HomeQuickToolsSection` |
 | 5 | Body | `TodayPlanCard` (optional, deferred) |
@@ -58,9 +58,8 @@ More list, conditional listening, inspiration, closing mark.
 Scaffold
 ├── HomeScreenBackground (canvas gradient)
 └── RefreshIndicator
-    └── CustomScrollView (+ hero snap on scroll end)
-        ├── HomeDashboardHeroSliver
-        │   └── HomeDashboardHeroVariantB (default)
+    └── CustomScrollView
+        ├── HomeNextPrayerTime
         ├── [flag] homeFeaturedTutorCardSliver
         │   └── HomeFeaturedTutorCardHeaderDelegate (pinned)
         └── HomeDashboardContentSliver
@@ -86,11 +85,11 @@ When `quranSessionsFeatureConfig().quranSessionsEnabled`:
 - `homeDashboardHeroShouldPin()` → `false` (hero scrolls away)
 - `homeFeaturedTutorCardSliver()` pins `HomeFeaturedTutorCardHeaderDelegate`
   below the hero with `topInset`, scroll-linked bottom elevation, and
-  `pinScrollOffset` from `HomeDashboardHeroSliver.scrollOffsetWhenTutorCardPins`
+  `pinScrollOffset` from `HomeNextPrayerTime.scrollOffsetWhenTutorCardPins`
 
 When the flag is off:
 
-- Hero stays pinned at collapsed height
+- Hero scrolls away (no pin)
 - No tutor sliver
 
 Do not change this pin hand-off without explicit product approval.
@@ -118,13 +117,10 @@ Shell tabs (`app_shell_nav_destinations.dart`): **Home**, **Quran** (push),
 
 ## Hero
 
-Files: `home_dashboard_hero_sliver.dart`, `home_dashboard_hero_variant_b.dart`
+File: `home_next_prayer_time.dart`
 
-- Pinned `SliverPersistentHeader` with prayer-period photo/gradient tokens
+- Scrollable `SliverToBoxAdapter` with prayer-period photo/gradient tokens
 - Expanded: context row + featured next-prayer card
-- Collapsed toolbar preserves prayer context while scrolling
-- Snap threshold: 35% of `HomeDashboardHeroSliver.collapseScrollExtent`
-- Snap motion: `tokens.durationFast`, `Curves.easeOutCubic`
 - Hero text scale clamped 1.0–1.3 for extent math
 - Prayer day strip removed — hero owns prayer context
 

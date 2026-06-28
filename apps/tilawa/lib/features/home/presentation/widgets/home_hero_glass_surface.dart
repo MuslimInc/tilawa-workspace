@@ -52,6 +52,9 @@ class HomeHeroGlassSurface extends StatelessWidget {
             alpha: screenTokens.homePrayerHeroShadowOpacity,
           )
         : colorScheme.shadow.withValues(alpha: tokens.opacityShadowStrong);
+    final bool showShadow = usePrayerHeroTokens
+        ? screenTokens.homePrayerHeroShadowOpacity > 0
+        : true;
 
     final Widget decoratedChild = DecoratedBox(
       decoration: BoxDecoration(
@@ -68,35 +71,39 @@ class HomeHeroGlassSurface extends StatelessWidget {
       ),
     );
 
-    final Widget shadowWrapper = DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: resolvedRadius,
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: shadowColor,
-            blurRadius: tokens.blurShadow,
-            offset: Offset(0, tokens.shadowOffsetMedium.dy),
-          ),
-          if (!usePrayerHeroTokens)
-            BoxShadow(
-              color: colorScheme.primary.withValues(alpha: 0.04),
-              blurRadius: tokens.blurShadow * 0.6,
-              offset: Offset(0, tokens.shadowOffsetSmall.dy),
-            ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: resolvedRadius,
-        child: _buildFrostedPanel(context, tokens, decoratedChild),
-      ),
+    final Widget frostedPanel = ClipRRect(
+      borderRadius: resolvedRadius,
+      child: _buildFrostedPanel(context, tokens, decoratedChild),
     );
+
+    final Widget panelBody = showShadow
+        ? DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: resolvedRadius,
+              boxShadow: <BoxShadow>[
+                BoxShadow(
+                  color: shadowColor,
+                  blurRadius: tokens.blurShadow,
+                  offset: Offset(0, tokens.shadowOffsetMedium.dy),
+                ),
+                if (!usePrayerHeroTokens)
+                  BoxShadow(
+                    color: colorScheme.primary.withValues(alpha: 0.04),
+                    blurRadius: tokens.blurShadow * 0.6,
+                    offset: Offset(0, tokens.shadowOffsetSmall.dy),
+                  ),
+              ],
+            ),
+            child: frostedPanel,
+          )
+        : frostedPanel;
 
     final Widget panel = useBackdropBlur
         ? _DeferredHomeHeroBlur(
-            placeholder: shadowWrapper,
-            child: shadowWrapper,
+            placeholder: panelBody,
+            child: panelBody,
           )
-        : shadowWrapper;
+        : panelBody;
 
     if (onTap == null) {
       return panel;

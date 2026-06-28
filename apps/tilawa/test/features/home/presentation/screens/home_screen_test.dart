@@ -5,6 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tilawa/core/bootstrap/app_launch_config.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/history/domain/entities/history_entity.dart';
 import 'package:tilawa/features/history/domain/repositories/history_repository.dart';
@@ -16,7 +18,7 @@ import 'package:tilawa/features/home/presentation/bloc/home_dashboard_bloc.dart'
 import 'package:tilawa/features/home/presentation/bloc/home_dashboard_event.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_cubit.dart';
 import 'package:tilawa/features/home/presentation/screens/home_screen.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_dashboard_hero_sliver.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_next_prayer_time.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_daily_inspiration_section.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_more_actions_group.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_primary_actions_section.dart';
@@ -52,7 +54,7 @@ void main() {
     }
   });
 
-  testWidgets('settles a partial home hero collapse to the pinned state', (
+  testWidgets('home screen hero does not pin', (
     tester,
   ) async {
     final view = tester.view;
@@ -67,45 +69,27 @@ void main() {
     )..add(const HomeDashboardStarted(localeIdentifier: 'ar'));
     addTearDown(bloc.close);
 
+    if (!getIt.isRegistered<AppLaunchConfig>()) {
+      getIt.registerSingleton<AppLaunchConfig>(
+        const AppLaunchConfig(quranSessionsEnabled: false),
+      );
+    }
+    addTearDown(() async {
+      if (getIt.isRegistered<AppLaunchConfig>()) {
+        await getIt.unregister<AppLaunchConfig>();
+      }
+    });
+
     await tester.pumpWidget(_HomeScreenHarness(bloc: bloc));
     await tester.pump();
     for (var frame = 0; frame < 20; frame++) {
       await tester.pump(const Duration(milliseconds: 16));
     }
 
-    expect(find.byType(SliverPersistentHeader), findsOneWidget);
+    expect(find.byType(SliverPersistentHeader), findsNothing);
 
     final BuildContext homeContext = tester.element(find.byType(HomeScreen));
-    final double collapseExtent = HomeDashboardHeroSliver.collapseScrollExtent(
-      homeContext,
-    );
-    final scrollableFinder = find
-        .descendant(
-          of: find.byType(CustomScrollView),
-          matching: find.byType(Scrollable),
-        )
-        .first;
-    final scrollable = tester.state<ScrollableState>(scrollableFinder);
-    final position = scrollable.position;
-
-    position.jumpTo(collapseExtent * 0.5);
-    await tester.pump();
-
-    ScrollEndNotification(
-      metrics: position,
-      context: tester.element(scrollableFinder),
-    ).dispatch(tester.element(scrollableFinder));
-
-    await tester.pump();
-    for (var frame = 0; frame < 50; frame++) {
-      await tester.pump(const Duration(milliseconds: 16));
-      if ((position.pixels - collapseExtent).abs() < 0.5) {
-        break;
-      }
-    }
-
-    expect(position.pixels, closeTo(collapseExtent, 0.5));
-    expect(tester.takeException(), isNull);
+    expect(HomeNextPrayerTime.collapseScrollExtent(homeContext), 0);
   });
 
   testWidgets('Home avoids bottom-nav duplicate shortcuts', (tester) async {

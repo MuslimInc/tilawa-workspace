@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-/// Flat neutral canvas for the Home dashboard.
+/// Primary-tinted top fading into a neutral Home dashboard canvas.
 class HomeScreenBackground extends StatelessWidget {
   const HomeScreenBackground({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final TilawaHomeScreenTokens screenTokens = Theme.of(
-      context,
-    ).componentTokens.homeScreen;
+    final ThemeData theme = Theme.of(context);
+    final TilawaHomeScreenTokens screenTokens =
+        theme.componentTokens.homeScreen;
 
-    return ColoredBox(color: screenTokens.backgroundGradientEnd);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: screenTokens.backgroundGradientFor(theme.colorScheme),
+      ),
+    );
   }
 }

@@ -1277,7 +1277,11 @@ void main() {
         tokens.backgroundGradient().colors,
         [
           tokens.backgroundGradientStart,
-          tokens.backgroundGradientMiddle,
+          Color.lerp(
+            tokens.backgroundGradientStart,
+            tokens.backgroundGradientEnd,
+            0.42,
+          )!,
           tokens.backgroundGradientEnd,
         ],
       );
@@ -1290,6 +1294,21 @@ void main() {
         TilawaHomeScreenTokens.screenHorizontalPadding(designTokens),
         designTokens.spaceLarge,
       );
+    });
+
+    test('dashboardSurfaceDecoration is flat by default', () {
+      final designTokens = MeMuslimDesignTokens.light();
+      final colorScheme = ColorScheme.fromSeed(seedColor: Colors.blue);
+      final tokens = TilawaHomeScreenTokens.light();
+      final decoration = tokens.dashboardSurfaceDecoration(
+        tokens: designTokens,
+        colorScheme: colorScheme,
+        borderRadius: BorderRadius.circular(designTokens.radiusLarge),
+      );
+
+      expect(decoration.boxShadow, isNull);
+      expect(decoration.border, isNotNull);
+      expect(decoration.color, tokens.homeContentSheetSurface);
     });
   });
 

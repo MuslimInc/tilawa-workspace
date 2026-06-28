@@ -182,14 +182,14 @@ abstract final class AppColors {
   /// Foreground on the Home hero night gradient — warm cream ink.
   static const Color homeNextPrayerGradientNightForeground = Color(0xFFF5F0E6);
 
-  /// Home screen canvas — flat neutral dashboard background.
-  static const Color homeBackgroundGradientStart = homeDashboardCanvas;
+  /// Home screen canvas — primary-tinted top of the dashboard gradient.
+  static const Color homeBackgroundGradientStart = defaultPrimary;
 
-  /// Home screen canvas — flat neutral dashboard background.
-  static const Color homeBackgroundGradientMiddle = homeDashboardCanvas;
+  /// Home screen canvas — mid stop between primary top and neutral bottom.
+  static const Color homeBackgroundGradientMiddle = Color(0xFFD9D2CC);
 
-  /// Home screen canvas — flat neutral dashboard background.
-  static const Color homeBackgroundGradientEnd = homeDashboardCanvas;
+  /// Home screen canvas — neutral dashboard bottom (#EFEFEF).
+  static const Color homeBackgroundGradientEnd = Color(0xFFEFEFEF);
 
   /// Radial glow accent behind the Home hero / next-prayer area.
   static const Color homeBackgroundGlow = Color(0xFFE8DCC8);

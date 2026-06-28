@@ -1628,15 +1628,46 @@ class TilawaHomeScreenTokens {
           width: tokens.borderWidthThin,
         ),
       ),
-      boxShadow: <BoxShadow>[
-        BoxShadow(
-          color: colorScheme.shadow.withValues(
-            alpha: homeContentSheetShadowOpacity,
-          ),
-          offset: Offset(0, -tokens.shadowOffsetSmall.dy.abs()),
-          blurRadius: tokens.spaceMedium.toDouble(),
-        ),
-      ],
+      boxShadow: homeContentSheetShadowOpacity > 0
+          ? <BoxShadow>[
+              BoxShadow(
+                color: colorScheme.shadow.withValues(
+                  alpha: homeContentSheetShadowOpacity,
+                ),
+                offset: Offset(0, -tokens.shadowOffsetSmall.dy.abs()),
+                blurRadius: tokens.spaceMedium.toDouble(),
+              ),
+            ]
+          : null,
+    );
+  }
+
+  /// Flat dashboard card chrome — hairline border with optional soft shadow.
+  BoxDecoration dashboardSurfaceDecoration({
+    required MeMuslimDesignTokens tokens,
+    required ColorScheme colorScheme,
+    required BorderRadius borderRadius,
+    Color? color,
+    double? shadowOpacity,
+  }) {
+    final double opacity = shadowOpacity ?? homePrayerHeroShadowOpacity;
+
+    return BoxDecoration(
+      color: color ?? homeContentSheetSurface,
+      borderRadius: borderRadius,
+      border: Border.all(
+        color: homePrayerHeroBorder,
+        width: tokens.borderWidthThin,
+      ),
+      boxShadow: opacity > 0
+          ? <BoxShadow>[
+              BoxShadow(
+                color: homePrayerHeroShadow.withValues(alpha: opacity),
+                offset: Offset(0, tokens.spaceExtraSmall.toDouble()),
+                blurRadius: tokens.spaceLarge.toDouble(),
+              ),
+            ]
+          : null,
     );
   }
 
@@ -1652,14 +1683,33 @@ class TilawaHomeScreenTokens {
   }
 
   LinearGradient backgroundGradient() {
+    final Color middle = Color.lerp(
+      backgroundGradientStart,
+      backgroundGradientEnd,
+      0.42,
+    )!;
+
     return LinearGradient(
       begin: AlignmentDirectional.topCenter,
       end: AlignmentDirectional.bottomCenter,
       colors: <Color>[
         backgroundGradientStart,
-        backgroundGradientMiddle,
+        middle,
         backgroundGradientEnd,
       ],
+      stops: const <double>[0, 0.42, 1],
+    );
+  }
+
+  /// Theme-aware Home canvas gradient — primary at the top, neutral at the bottom.
+  LinearGradient backgroundGradientFor(ColorScheme colorScheme) {
+    final Color top = colorScheme.primary;
+    final Color middle = Color.lerp(top, backgroundGradientEnd, 0.42)!;
+
+    return LinearGradient(
+      begin: AlignmentDirectional.topCenter,
+      end: AlignmentDirectional.bottomCenter,
+      colors: <Color>[top, middle, backgroundGradientEnd],
       stops: const <double>[0, 0.42, 1],
     );
   }
@@ -1674,7 +1724,7 @@ class TilawaHomeScreenTokens {
       homePrayerHeroBackground: AppColors.homePrayerHeroBackground,
       homePrayerHeroBorder: AppColors.homePrayerHeroBorder,
       homePrayerHeroShadow: AppColors.homePrayerHeroShadow,
-      homePrayerHeroShadowOpacity: 0.05,
+      homePrayerHeroShadowOpacity: 0,
       homePrayerHeroAccent: AppColors.homePrayerHeroAccent,
       homePrayerHeroWatermark: AppColors.homePrayerHeroWatermark,
       homePrayerHeroWatermarkOpacity: 0.07,
@@ -1682,7 +1732,7 @@ class TilawaHomeScreenTokens {
       homeHeaderSecondaryText: AppColors.homeHeaderSecondaryText,
       homeCollapsedHeaderFill: AppColors.homeCollapsedHeaderFill,
       homeCollapsedHeaderBorder: AppColors.homeCollapsedHeaderBorder,
-      homeCollapsedHeaderShadowOpacity: 0.08,
+      homeCollapsedHeaderShadowOpacity: 0,
       homeFeaturedTutorGradientStart: AppColors.homeFeaturedTutorGradientStart,
       homeFeaturedTutorGradientEnd: AppColors.homeFeaturedTutorGradientEnd,
       homeFeaturedTutorAccent: AppColors.homeFeaturedTutorAccent,
@@ -1707,7 +1757,7 @@ class TilawaHomeScreenTokens {
       homePrayerHeroBackground: AppColors.homePrayerHeroBackgroundDark,
       homePrayerHeroBorder: AppColors.homePrayerHeroBorderDark,
       homePrayerHeroShadow: AppColors.homePrayerHeroShadowDark,
-      homePrayerHeroShadowOpacity: 0.12,
+      homePrayerHeroShadowOpacity: 0,
       homePrayerHeroAccent: AppColors.homePrayerHeroAccentDark,
       homePrayerHeroWatermark: AppColors.homePrayerHeroWatermarkDark,
       homePrayerHeroWatermarkOpacity: 0.06,
@@ -1715,13 +1765,13 @@ class TilawaHomeScreenTokens {
       homeHeaderSecondaryText: AppColors.homeHeaderSecondaryTextDark,
       homeCollapsedHeaderFill: AppColors.homeCollapsedHeaderFillDark,
       homeCollapsedHeaderBorder: AppColors.homeCollapsedHeaderBorderDark,
-      homeCollapsedHeaderShadowOpacity: 0.10,
+      homeCollapsedHeaderShadowOpacity: 0,
       homeFeaturedTutorGradientStart:
           AppColors.homeFeaturedTutorGradientStartDark,
       homeFeaturedTutorGradientEnd: AppColors.homeFeaturedTutorGradientEndDark,
       homeFeaturedTutorAccent: AppColors.homeFeaturedTutorAccentDark,
       homeContentSheetSurface: AppColors.homeContentSheetSurfaceDark,
-      homeContentSheetShadowOpacity: 0.14,
+      homeContentSheetShadowOpacity: 0,
       homeContentSheetTopBorder: AppColors.homeContentSheetTopBorderDark,
       homeHeroPatternInk: AppColors.homeHeroPatternInkDark,
       homeHeroPatternOpacity: 0.04,

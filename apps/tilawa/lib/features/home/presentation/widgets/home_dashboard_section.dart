@@ -34,7 +34,17 @@ class HomeDashboardSection extends StatelessWidget {
 
     final Widget titleWidget = compact
         ? _CompactSectionTitle(title: title)
-        : TilawaSectionTitle(title: title);
+        : Semantics(
+            header: true,
+            child: Text(
+              title,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: theme.colorScheme.onSurface,
+                height: 1.2,
+              ),
+            ),
+          );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

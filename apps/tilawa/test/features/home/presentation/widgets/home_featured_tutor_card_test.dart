@@ -366,18 +366,7 @@ void main() {
     );
   });
 
-  testWidgets('hero stays unpinned when tutor card feature is enabled', (
-    tester,
-  ) async {
-    await resetScopeGetIt();
-    getIt.registerSingleton<AppLaunchConfig>(
-      const AppLaunchConfig(quranSessionsEnabled: true),
-    );
-
-    expect(homeDashboardHeroShouldPin(), isFalse);
-  });
-
-  testWidgets('hero stays pinned when tutor card feature is disabled', (
+  testWidgets('prayer hero never pins', (
     tester,
   ) async {
     await resetScopeGetIt();
@@ -385,6 +374,6 @@ void main() {
       const AppLaunchConfig(quranSessionsEnabled: false),
     );
 
-    expect(homeDashboardHeroShouldPin(), isTrue);
+    expect(homeDashboardHeroShouldPin(), isFalse);
   });
 }

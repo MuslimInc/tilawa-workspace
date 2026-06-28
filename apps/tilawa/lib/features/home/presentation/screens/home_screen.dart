@@ -1,11 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get_it/get_it.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tilawa/features/home/debug/home_hero_variant_debug.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_cubit.dart';
 import 'package:tilawa/features/shell/application/shell_tab_reselect.dart';
 import 'package:tilawa/features/shell/presentation/shell_tab_reselect_listener.dart';
@@ -16,8 +12,8 @@ import '../bloc/home_dashboard_event.dart';
 import '../bloc/home_dashboard_state.dart';
 import '../widgets/home_dashboard_body.dart';
 import '../widgets/home_dashboard_content_sliver.dart';
-import '../widgets/home_dashboard_hero_sliver.dart';
 import '../widgets/home_featured_tutor_card.dart';
+import '../widgets/home_next_prayer_time.dart';
 import '../widgets/home_screen_background.dart';
 
 /// Main daily dashboard for the app shell.
@@ -37,27 +33,9 @@ class _HomeScreenState extends State<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
 
   @override
-  void initState() {
-    super.initState();
-    if (kDebugMode) {
-      HomeHeroVariantDebug.ensureLoaded(GetIt.I<SharedPreferencesAsync>());
-      HomeHeroVariantDebug.variant.addListener(_onHeroVariantChanged);
-    }
-  }
-
-  @override
   void dispose() {
     _scrollController.dispose();
-    if (kDebugMode) {
-      HomeHeroVariantDebug.variant.removeListener(_onHeroVariantChanged);
-    }
     super.dispose();
-  }
-
-  void _onHeroVariantChanged() {
-    if (mounted) {
-      setState(() {});
-    }
   }
 
   Future<void> _refreshHome() async {
@@ -111,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         parent: BouncingScrollPhysics(),
                       ),
                       slivers: [
-                        ...HomeDashboardHeroSliver.buildSlivers(
+                        ...HomeNextPrayerTime.buildSlivers(
                           context: context,
                           state: state,
                           onOpenPrayer: widget.onOpenPrayer,
@@ -120,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               context,
                               scrollController: _scrollController,
                               pinScrollOffset:
-                                  HomeDashboardHeroSliver.scrollOffsetWhenTutorCardPins(
+                                  HomeNextPrayerTime.scrollOffsetWhenTutorCardPins(
                                     context,
                                   ),
                             )
@@ -191,7 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
       return null;
     }
 
-    final double collapseExtent = HomeDashboardHeroSliver.collapseScrollExtent(
+    final double collapseExtent = HomeNextPrayerTime.collapseScrollExtent(
       context,
     );
     final double offset = metrics.pixels;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-/// Home dashboard surface — white elevated card with thin shadow.
+/// Home dashboard surface — flat white card with hairline border.
 class HomeDashboardCard extends StatelessWidget {
   const HomeDashboardCard({
     super.key,
@@ -10,7 +10,7 @@ class HomeDashboardCard extends StatelessWidget {
     this.useFeaturedGradient = false,
     this.backgroundColor,
     this.borderRadius,
-    this.surface = TilawaCardSurface.raised,
+    this.surface = TilawaCardSurface.flat,
     this.onTap,
     this.splashColor,
     this.highlightColor,
@@ -32,6 +32,7 @@ class HomeDashboardCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cardTokens = theme.componentTokens.homeDashboardCard;
+    final screenTokens = theme.componentTokens.homeScreen;
     final tokens = theme.tokens;
     final double effectiveRadius =
         borderRadius ?? tokens.resolveRadius(family: TilawaRadiusFamily.hero);
@@ -51,9 +52,10 @@ class HomeDashboardCard extends StatelessWidget {
         final Widget card = !useFeaturedGradient
             ? TilawaCard(
                 padding: padding,
-                backgroundColor: backgroundColor ?? theme.colorScheme.surface,
+                backgroundColor:
+                    backgroundColor ?? screenTokens.homeContentSheetSurface,
+                borderColor: screenTokens.homePrayerHeroBorder,
                 borderRadius: effectiveRadius,
-                borderWidth: 0,
                 surface: surface,
                 onTap: onTap,
                 expandHeight: stretchVertically,
@@ -62,8 +64,8 @@ class HomeDashboardCard extends StatelessWidget {
             : TilawaCard(
                 padding: EdgeInsets.zero,
                 backgroundColor: Colors.transparent,
+                borderColor: screenTokens.homePrayerHeroBorder,
                 borderRadius: effectiveRadius,
-                borderWidth: 0,
                 surface: surface,
                 onTap: onTap,
                 expandHeight: stretchVertically,

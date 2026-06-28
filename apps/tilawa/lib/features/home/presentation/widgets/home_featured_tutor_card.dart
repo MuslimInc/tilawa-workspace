@@ -138,46 +138,57 @@ class HomeFeaturedTutorCardHeaderDelegate
         theme.componentTokens.homeScreen;
     final double horizontalInset =
         TilawaHomeScreenTokens.screenHorizontalPadding(tokens);
-    final Color canvasColor = screenTokens.backgroundGradientEnd;
-    final SystemUiOverlayStyle overlayStyle =
-        HomeHeroPhotoTheme.collapsedBarOverlayStyle(canvasColor);
+    final Color pinnedOverlayColor =
+        screenTokens.homeFeaturedTutorGradientStart;
 
     return ListenableBuilder(
       listenable: scrollController,
       builder: (context, _) {
-        final bool showBottomElevation = _isPinnedAtTop();
+        final bool isPinned = _isPinnedAtTop();
 
-        return AnnotatedRegion<SystemUiOverlayStyle>(
-          value: overlayStyle,
-          child: SizedBox(
-            height: extent,
-            child: ColoredBox(
-              color: canvasColor,
-              child: Stack(
-                clipBehavior: Clip.none,
-                fit: StackFit.expand,
-                children: [
-                  Padding(
-                    padding: EdgeInsetsDirectional.fromSTEB(
-                      horizontalInset,
-                      topInset,
-                      horizontalInset,
-                      tokens.spaceMedium,
-                    ),
-                    child: Align(
-                      alignment: AlignmentDirectional.topCenter,
-                      child: const _HomeFeaturedTutorCardImpressionScope(
-                        child: _HomeFeaturedTutorCardContent(),
-                      ),
+        final Widget header = SizedBox(
+          height: extent,
+          child: DecoratedBox(
+            decoration: isPinned
+                ? BoxDecoration(
+                    gradient: screenTokens.featuredTutorGradient(),
+                  )
+                : const BoxDecoration(color: Colors.transparent),
+            child: Stack(
+              clipBehavior: Clip.none,
+              fit: StackFit.expand,
+              children: [
+                Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(
+                    horizontalInset,
+                    topInset,
+                    horizontalInset,
+                    tokens.spaceMedium,
+                  ),
+                  child: Align(
+                    alignment: AlignmentDirectional.topCenter,
+                    child: const _HomeFeaturedTutorCardImpressionScope(
+                      child: _HomeFeaturedTutorCardContent(),
                     ),
                   ),
-                  _HomeFeaturedTutorPinnedElevation(
-                    visible: showBottomElevation,
-                  ),
-                ],
-              ),
+                ),
+                _HomeFeaturedTutorPinnedElevation(
+                  visible: isPinned,
+                ),
+              ],
             ),
           ),
+        );
+
+        if (!isPinned) {
+          return header;
+        }
+
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: HomeHeroPhotoTheme.collapsedBarOverlayStyle(
+            pinnedOverlayColor,
+          ),
+          child: header,
         );
       },
     );
@@ -252,13 +263,8 @@ class _HomeFeaturedTutorPinnedElevation extends StatelessWidget {
   }
 }
 
-/// Whether the prayer hero should stay pinned at its collapsed height.
-///
-/// When the featured tutor card is enabled, only the tutor header pins;
-/// the hero scrolls away so the pinned stack stays compact.
-bool homeDashboardHeroShouldPin() {
-  return !quranSessionsFeatureConfig().quranSessionsEnabled;
-}
+/// Prayer hero no longer pins — only the featured tutor header may pin.
+bool homeDashboardHeroShouldPin() => false;
 
 /// Builds the pinned featured tutor sliver when the feature flag is enabled.
 Widget? homeFeaturedTutorCardSliver(
@@ -369,15 +375,10 @@ class _HomeFeaturedTutorCardContent extends StatelessWidget {
           child: DecoratedBox(
             decoration: BoxDecoration(
               borderRadius: borderRadius,
-              boxShadow: <BoxShadow>[
-                BoxShadow(
-                  color: theme.colorScheme.shadow.withValues(
-                    alpha: screenTokens.homePrayerHeroShadowOpacity,
-                  ),
-                  offset: Offset(0, tokens.spaceExtraSmall.toDouble()),
-                  blurRadius: tokens.spaceLarge.toDouble(),
-                ),
-              ],
+              border: Border.all(
+                color: screenTokens.homePrayerHeroBorder,
+                width: tokens.borderWidthThin,
+              ),
             ),
             child: DecoratedBox(
               decoration: BoxDecoration(
