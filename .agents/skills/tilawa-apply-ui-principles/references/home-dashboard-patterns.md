@@ -1,18 +1,25 @@
 # Home dashboard UI patterns
 
-**Source of truth:** code under
-`apps/tilawa/lib/features/home/presentation/`.
+> **Design / product intent:**
+> [`docs/design/home_screen_design_artifacts.md`](../../../docs/design/home_screen_design_artifacts.md)
 
-**Agent rule:** The current Home layout is **product-approved**. Preserve and
-refine it in place. Do **not** redesign Home from scratch, reorder sections, or
-substitute widgets from older docs unless the user explicitly requests a Home
-redesign.
+**Canonical technical Home reference** — sliver stack, body order, widget names,
+pin policy, stale-widget list, and agent rules. Other docs must **link here**,
+not copy this content.
 
-**Allowed Home work without redesign approval:** bug fixes, spacing rhythm,
-overflow/layout at text scale 1.4, semantics/accessibility, token/theme
-consistency, and RTL-safe layout — using existing approved widgets only.
+**Source of truth:** `apps/tilawa/lib/features/home/presentation/` (entry:
+`screens/home_screen.dart`).
 
-Reference entry point: `screens/home_screen.dart`.
+---
+
+## Agent rules
+
+- **Product-approved layout** — preserve; do not redesign or reorder sections
+  unless the user explicitly requests a Home redesign.
+- **Allowed without redesign approval:** bug fixes, spacing rhythm, overflow at
+  text scale 1.4, semantics/accessibility, token/theme consistency, RTL-safe
+  layout — using approved widgets only.
+- **Do not wire** stale widgets listed in [Building blocks not on Home](#building-blocks-not-on-home--do-not-implement-as-home-targets).
 
 ---
 

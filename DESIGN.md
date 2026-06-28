@@ -121,33 +121,11 @@ Registered as a `ThemeExtension` on `ThemeData` (access: `Theme.of(context).exte
 - **Branch on `context.windowSize` (or helpers)** instead of raw widths for shell and two-pane patterns.
 - **Adaptive shell** (`TilawaAdaptiveShell` + `componentTokens.adaptiveShell`): main app chrome — bottom navigation, optional rail, **labels shown** on phone bottom nav; system navigation bar color is synced to match floating bottom nav for visual continuity (`_DefaultRouteSystemUiOverlay` in `tilawa_app.dart`).
 
-### Home dashboard IA
+### Home dashboard
 
-Home is a **product-approved daily dashboard**. Code in `home_dashboard_body.dart`
-and `home_screen.dart` is the source of truth. **Do not redesign or reorder**
-unless the user explicitly asks. Improve only: bugs, spacing, overflow,
-accessibility, tokens, RTL — using approved widgets.
-
-**Approved order (full stack):**
-
-1. `HomeDashboardHeroSliver` — prayer “Now”
-2. `homeFeaturedTutorCardSliver` (flag) — pinned tutor promo; hero unpins when on
-3. `HomePrimaryActionsSection` — Mushaf + Athkar tiles
-4. `HomeQuickToolsSection` — Reciters (tab), Qibla, Tasbeeh
-5. `TodayPlanCard` (optional, deferred)
-6. `HomeMoreActionsGroup`
-7. `HomeListeningResumeRow` (conditional, deferred)
-8. `HomeDailyInspirationSection` (deferred)
-9. `_HomeDashboardClosingMark` (deferred)
-
-Do **not** add Home, Prayer, or Settings/Profile tiles. Do not wire
-`HomePrimaryActionZone`, `HomeDiscoverShortcuts`, or `HomeDailyPracticeSection`
-— they are not on the approved Home. Reciters in quick tools is the intentional
-tab-selection exception.
-
-Canonical detail:
-`.agents/skills/tilawa-apply-ui-principles/references/home-dashboard-patterns.md`
-and `docs/design/home_screen_design_artifacts.md`.
+Approved layout — do not redesign or reorder unless the user asks.
+**Technical:** [home-dashboard-patterns.md](.agents/skills/tilawa-apply-ui-principles/references/home-dashboard-patterns.md).
+**Design:** [home_screen_design_artifacts.md](docs/design/home_screen_design_artifacts.md).
 
 ---
 

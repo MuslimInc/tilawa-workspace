@@ -51,18 +51,8 @@
 
 ## Home-specific (if touching `features/home/`)
 
-- [ ] Preserves approved full stack order (hero → tutor flag → primary actions →
-  quick tools → today plan → more → listening → inspiration → closing mark)
-- [ ] No Home redesign/reorder without explicit user request
-- [ ] No stale widgets wired (`HomePrimaryActionZone`, `HomeDiscoverShortcuts`,
-  `HomeDailyPracticeSection`)
-- [ ] No Home / Prayer / Settings tiles; no launcher grid mirroring bottom nav
-- [ ] Reciters in quick tools selects the existing Reciters tab
-- [ ] More list only contains lower-frequency library/setup routes
-- [ ] Uses approved section widgets before inventing new ones
-- [ ] Spacing follows `spaceLarge` / `spaceExtraLarge` rhythm in body
-- [ ] Changes limited to bugs, spacing, overflow, a11y, tokens, RTL unless
-  user requested redesign
+- [ ] Matches [home-dashboard-patterns.md](home-dashboard-patterns.md); no unapproved redesign/reorder
+- [ ] Bugfix scope only unless user requested redesign (spacing, overflow, a11y, tokens, RTL)
 
 ## FAB / shell chrome (if applicable)
 

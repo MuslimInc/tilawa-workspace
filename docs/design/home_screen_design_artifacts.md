@@ -1,205 +1,106 @@
 # Home Screen Design Artifacts
 
-**Status:** Approved implementation reference  
+**Status:** Approved design / product reference  
 **Last verified:** 2026-06-28  
-**Implementation:** `apps/tilawa/lib/features/home/presentation/`  
-**Pattern reference:**
-`.agents/skills/tilawa-apply-ui-principles/references/home-dashboard-patterns.md`  
-**Related tests:** `apps/tilawa/test/features/home/presentation/`
+**Technical reference (widgets, order, pin policy):**
+[home-dashboard-patterns.md](../../.agents/skills/tilawa-apply-ui-principles/references/home-dashboard-patterns.md)  
+**Code:** `apps/tilawa/lib/features/home/presentation/`
 
-This document describes the **current, product-approved** Home UI/UX. Older
-redesign plans (ADR-002, product PDR, migration notes) are historical context
-only — **trust this file and the code** when implementing or reviewing Home.
-
-**For AI agents:** Do not redesign Home from scratch. Preserve the approved
-order below. Improve only: bugs, spacing, overflow, accessibility, token
-consistency, RTL layout — using existing approved widgets. Do not reorder
-sections or wire stale widgets (`HomePrimaryActionZone`, `HomeDiscoverShortcuts`,
-`HomeDailyPracticeSection`, etc.) unless explicitly requested.
+Do **not** duplicate stack order or widget names here — use the patterns file
+for implementation. This document captures **design intent** and **UX direction**.
 
 ---
 
-## 1. Approved order (full stack)
+## Design intent
 
-| # | Layer | Widget / behavior |
-|---|--------|-------------------|
-| 1 | Sliver | `HomeDashboardHeroSliver` (Variant B) |
-| 2 | Sliver (flag) | `homeFeaturedTutorCardSliver` — pinned tutor promo; hero unpins when enabled |
-| 3 | Body | `HomePrimaryActionsSection` |
-| 4 | Body | `HomeQuickToolsSection` |
-| 5 | Body | `TodayPlanCard` (optional, deferred) |
-| 6 | Body | `HomeMoreActionsGroup` (deferred) |
-| 7 | Body | `HomeListeningResumeRow` (conditional, deferred) |
-| 8 | Body | `HomeDailyInspirationSection` (deferred) |
-| 9 | Body | `_HomeDashboardClosingMark` (deferred) |
+Home is a **calm daily dashboard**, not an app launcher. It should feel:
 
----
+- **Polished** — intentional hierarchy, no visual noise or “dashboard of tiles”
+- **Calm** — few choices per viewport; secondary surfaces recede (`compact`
+  section titles for More)
+- **Reverent** — worship context in the hero; gold accent used sparingly on
+  primary Mushaf/Athkar tiles only
+- **RTL-first** — directional layout, Arabic typography where content is Arabic
+- **Professional** — token-driven spacing and surfaces; no ad-hoc hex or magic
+  numbers
 
-## 2. Screen structure
-
-```text
-HomeScreenScope
-└── HomeScreen
-    └── Scaffold
-        ├── HomeScreenBackground
-        └── RefreshIndicator
-            └── CustomScrollView
-                ├── HomeDashboardHeroSliver → Variant B
-                ├── [flag] homeFeaturedTutorCardSliver
-                └── HomeDashboardContentSliver
-                    └── HomeDashboardBody
-```
-
-Content sheet: flat on `surfaceContainerLow`, horizontal padding from
-`TilawaHomeScreenTokens.screenHorizontalPadding`, bottom padding from
-`TilawaShellPadding` (clears shell + mini-player).
+The approved layout is **fixed**. Agents and contributors preserve it unless
+the user explicitly requests a Home redesign. Permitted improvements without
+redesign approval: bugs, spacing, overflow, accessibility, token consistency,
+RTL layout.
 
 ---
 
-## 3. Body detail (matches stack above)
+## Visual hierarchy (eye path)
 
-From `home_dashboard_body.dart`. Sliver layers #1–2 sit above this column.
+1. **Now** — prayer/time context in the hero (and optional pinned tutor promo
+   when Quran Sessions is enabled)
+2. **Daily entry** — two featured primary tiles (Mushaf + Athkar), equal weight
+3. **Supporting tools** — lighter compact row (Reciters, Qibla, Tasbeeh)
+4. **Personal / library** — optional today plan, then flat More list
+5. **Resume** — conditional continue-listening row (neutral, not gold)
+6. **Reflection** — daily ayah + dua in one restrained card
+7. **Closure** — quiet watermark at scroll end (peak-end rule)
 
-Items 5–9 use `DeferredAfterFirstFrame`. Primary actions + quick tools load
-immediately.
-
----
-
-## 4. Hero
-
-`HomeDashboardHeroVariantB` — pinned `SliverPersistentHeader`:
-
-- Prayer-period photo/gradient via `HomeHeroGradientResolver` /
-  `HomeHeroPhotoTheme`
-- Context row, next-prayer featured card, location refresh, retry
-- Collapsed toolbar keeps prayer context while scrolling
-- `sheetOverlap`: 8 dp
-- Snap: 35% of collapse extent; `durationFast` + `easeOutCubic`
-- Text scale clamp 1.0–1.3 for hero height math
-
-When Quran Sessions is enabled, the hero **unpins** and the tutor header
-**pins** instead (`homeDashboardHeroShouldPin()`).
+Primary tiles use **hero radius** and elevated surfaces. Quick tools use
+**decorative radius** and lighter treatment. More uses a **flat grouped list**
+with hairline dividers.
 
 ---
 
-## 4. Primary actions
+## UX principles on Home
 
-Two equal `HomePrimaryActionTile` widgets:
+| Principle | On Home |
+|-----------|---------|
+| Content-first | Hero owns prayer context; no duplicate prayer strip in body |
+| Calm density | No multi-column shortcut grid mirroring bottom nav |
+| Progressive disclosure | Deferred sections after first frame for startup perf |
+| One accent lane | Gold on primary pair only; listening/inspiration stay neutral |
+| Respectful placement | No support prompts or cold-start modals on Home entry |
 
-| Tile | Destination | Visual |
-|------|-------------|--------|
-| Mushaf | `QuranIndexRoute` | Gold accent rail (start) |
-| Athkar | `AthkarCategoriesRoute` | Gold accent rail (end) |
+**Navigation:** Shell covers Home, Quran (push), Reciters, Settings. Mushaf and
+Athkar tiles are worship entry points, not tab duplicates. Reciters in quick
+tools is an approved exception (selects existing tab).
 
-Elevated surface + hero radius. Section title from `homeMainActionsTitle`.
-
-This pair is intentional daily worship entry — not a bottom-nav duplicate grid.
-
----
-
-## 5. Quick tools
-
-Compact three-tile row (`_QuickToolTile`):
-
-| Tool | Action |
-|------|--------|
-| Reciters | `openHomeRecitersTab` — selects existing shell tab |
-| Qibla | `QiblaRoute` |
-| Tasbeeh | `TasbeehRoute` |
-
-Visually lighter than primary tiles. Reciters on Home is an approved exception
-for daily listening; do not move it to More or remove it without product sign-off.
+**Not on Home:** stale patterns from older docs (`HomePrimaryActionZone`,
+`HomeDiscoverShortcuts`, `HomeDailyPracticeSection`, etc.) — see patterns file.
 
 ---
 
-## 6. More
+## Canvas & theming
 
-Flat grouped list (`HomeMoreActionsGroup`, `compact: true`):
-
-- History, Favorites, Downloads
-- Smart Khatma when `isSmartKhatmaEnabled()`
-- Support Tilawa
-
-One flat card, hairline dividers, `HomeGroupedListRow` rows.
-
----
-
-## 7. Continue listening
-
-`HomeListeningResumeRow` when `HomeListeningResumeCubit.state.isVisible`.
-
-- Appears **after** More in the approved order
-- Neutral surface; resumes last playback
-- Hidden entirely when no listening history
-
----
-
-## 8. Inspiration
-
-`HomeDailyInspirationSection` — single raised card:
-
-- Daily ayah row + divider + daily dua row
-- Catalog rotation via `homeDailyInspirationCatalogIndex`
-- Arabic typography uses `tokens.textHeightLoose`
-- Compact body lines (capped) so inspiration supports rather than dominates
-
----
-
-## 9. Featured tutor (Quran Sessions flag)
-
-When enabled:
-
-- Pinned `HomeFeaturedTutorCardHeaderDelegate` between hero and body
-- Status-bar `topInset`, scroll-linked bottom elevation when pinned
-- Hero unpins to keep the pinned stack compact
-
-Standalone `HomeFeaturedTutorCard` exists for tests; production Home uses the
-pinned header sliver API.
-
----
-
-## 10. States & refresh
-
-- Pull-to-refresh: `HomeDashboardRefreshRequested` + `HomeListeningResumeCubit.load()`
-- Shell tab reselect: scroll to top or refresh (`ShellTabReselectListener`)
-- Hero snap on partial collapse (see `home_screen.dart`)
-- Listening row collapses to zero height when not visible
-
----
-
-## 11. Design system usage
-
+- Background: gradient canvas (`HomeScreenBackground`) + neutral content sheet
+  (`surfaceContainerLow`)
+- Horizontal inset: `TilawaHomeScreenTokens.screenHorizontalPadding`
+- Bottom inset: `TilawaShellPadding` (clears shell + mini-player)
 - Tokens: `context.tokens`, `theme.componentTokens.homeScreen`
 - Sections: `HomeDashboardSection` / `TilawaSectionTitle`
 - Cards: `HomeDashboardCard`, `HomeDashboardElevatedSurface`
-- Icons: `TilawaIcons`, hero accent from `homePrayerHeroAccent`
-- RTL: directional padding/alignment throughout
-- No raw hex or magic spacing in feature widgets
+- Hero accent: `homePrayerHeroAccent` on primary/tool icon treatments
 
 ---
 
-## 12. Tests covering the contract
+## Motion & interaction
 
-- `home_dashboard_body_test.dart` — section presence and vertical order
-- `home_screen_test.dart`
-- `home_dashboard_hero_variant_b_test.dart`
-- `home_dashboard_content_sliver_test.dart`
-- `home_featured_tutor_card_test.dart`
-
-Before changing Home UI, update this document, `home-dashboard-patterns.md`,
-and affected tests together — **only when the user approves the change**.
+- Hero snap at 35% collapse extent (`home_screen.dart`)
+- Pull-to-refresh reloads dashboard + listening resume state
+- Shell tab reselect: scroll to top or refresh
+- Inspiration section: subtle entrance animation; must not dominate first screen
 
 ---
 
-## 13. Superseded references
+## Verification
 
-Do not implement from these without explicit user request:
+Widget tests under `apps/tilawa/test/features/home/presentation/`. When Home
+UI changes (with user approval), update **both** this file and
+`home-dashboard-patterns.md`, plus affected tests.
 
-- `docs/product/home_screen_redesign.md`
-- `docs/adr/ADR-home-screen-information-architecture.md`
-- `docs/plans/home_screen_redesign_plan.md`
-- `docs/migrations/home_screen_redesign_migration.md`
-- `docs/specs/home_screen_acceptance_criteria.md`
+---
 
-Those describe an earlier redesign trajectory that **does not match** the
-approved Home on disk.
+## Superseded (historical only)
+
+Do not implement from: `docs/product/home_screen_redesign.md`,
+`docs/adr/ADR-home-screen-information-architecture.md`,
+`docs/plans/home_screen_redesign_plan.md`,
+`docs/migrations/home_screen_redesign_migration.md`,
+`docs/specs/home_screen_acceptance_criteria.md`.

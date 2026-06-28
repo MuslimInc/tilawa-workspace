@@ -35,13 +35,11 @@ before handoff.
 **Review mode:** Walk [references/ux-checklist.md](references/ux-checklist.md) and
 report findings with screen/flow evidence — do not rewrite unless asked.
 
-**Home dashboard:** The current `HomeDashboardBody` order is product-approved.
-Read [home-dashboard-patterns.md](../tilawa-apply-ui-principles/references/home-dashboard-patterns.md)
-before touching Home. Preserve the approved layout; do not redesign from
-superseded ADR/PDR docs unless the user explicitly requests it.
-
-**Allowed without redesign approval:** bug fixes, spacing, overflow, a11y,
-tokens, RTL — using existing approved widgets only.
+**Home:** Approved layout — see
+[home-dashboard-patterns.md](../tilawa-apply-ui-principles/references/home-dashboard-patterns.md)
+(technical) and
+[home_screen_design_artifacts.md](../../../docs/design/home_screen_design_artifacts.md)
+(design). Preserve unless the user requests a redesign.
 
 ## Core UX tenets (Tilawa)
 
@@ -87,27 +85,8 @@ Avoid feature-list thinking ("expose all athkar APIs on Home").
 | Weekly / setup | Settings, profile, or full-screen picker |
 | Rare / debug | Settings developer section only |
 
-**Home dashboard zones** (approved full stack — match `home_dashboard_body.dart`):
-
-1. **Now** — `HomeDashboardHeroSliver` (Variant B)
-2. **Tutor (flag)** — pinned `homeFeaturedTutorCardSliver` when Quran Sessions enabled
-3. **Primary actions** — `HomePrimaryActionsSection` (Mushaf + Athkar)
-4. **Quick tools** — `HomeQuickToolsSection` (Reciters tab, Qibla, Tasbeeh)
-5. **Today plan** — optional `TodayPlanCard` (deferred)
-6. **More** — `HomeMoreActionsGroup` (deferred)
-7. **Continue listening** — conditional `HomeListeningResumeRow` (deferred)
-8. **Inspiration** — `HomeDailyInspirationSection` (deferred)
-9. **Closure** — `_HomeDashboardClosingMark` (deferred)
-
-Do not reorder these sections or substitute stale widgets (`HomePrimaryActionZone`,
-`HomeDiscoverShortcuts`, `HomeDailyPracticeSection`) unless the user explicitly
-requests a Home redesign.
-
-**Navigation on Home:** Shell tabs are Home, Quran push, Reciters, Settings.
-Approved Home surfaces: Mushaf + Athkar primary tiles, Reciters in quick tools
-(tab exception), Qibla/Tasbeeh pushes. Do **not** add Home, Prayer, or Settings
-tiles. Do not expand into a launcher grid that mirrors the bottom bar. See
-[home-dashboard-patterns.md](../tilawa-apply-ui-principles/references/home-dashboard-patterns.md).
+**Home placement:** See [placement-policy.md](references/placement-policy.md)
+and [home-dashboard-patterns.md](../tilawa-apply-ui-principles/references/home-dashboard-patterns.md).
 
 ### Step 3 — Customization UX (favorites / pins)
 
@@ -161,13 +140,8 @@ From `docs/tilawa_brand.md` §8:
 
 ## Anti-patterns (reject in review)
 
-- **Redesigning Home from scratch** or reordering approved sections without
-  explicit user request (see home-dashboard-patterns.md)
-- **Wiring stale Home widgets** (`HomePrimaryActionZone`, `HomeDiscoverShortcuts`,
-  `HomeDailyPracticeSection`, etc.) — not on approved Home
+- **Unapproved Home redesign/reorder** — see home-dashboard-patterns.md
 - Cold-start modal or popup for new Home sections
-- **Home tile that duplicates shell tabs** (Home, Prayer, Settings/Profile) or
-  a multi-column launcher grid mirroring bottom nav
 - Settings tile as the only path to a daily action
 - Forcing account sign-in for local pins/favorites
 - Stacking 3+ competing CTAs on Home

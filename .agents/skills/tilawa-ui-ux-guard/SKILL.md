@@ -56,9 +56,8 @@ Focus: hierarchy, tokens, elevation, components, RTL, density, FAB/player cleara
 
 | Flag | Why |
 |------|-----|
-| **Home tile duplicates shell tab** | Shell exposes Home, Reciters, Settings; do not add Prayer/Settings tiles |
-| **Home redesign without user request** | Approved stack is in home-dashboard-patterns.md — preserve it |
-| **Stale Home widget wired** | `HomePrimaryActionZone`, `HomeDiscoverShortcuts`, `HomeDailyPracticeSection` are not approved Home |
+| **Home tile duplicates shell tab** | See home-dashboard-patterns.md |
+| **Home redesign without user request** | See home-dashboard-patterns.md |
 | Donation/support on reader/prayer/athkar | Violates §9 placement |
 | Cold-start modal for new feature | Breaks calm entry |
 | Settings-only path to daily action | UX anti-pattern |
@@ -74,20 +73,11 @@ Focus: hierarchy, tokens, elevation, components, RTL, density, FAB/player cleara
 
 ## Home dashboard extra checks
 
-If touching `features/home/`:
+If touching `features/home/`, verify against
+[home-dashboard-patterns.md](../tilawa-apply-ui-principles/references/home-dashboard-patterns.md):
 
-- [ ] **Preserve approved full stack** — hero → tutor (flag) → primary actions
-  → quick tools → today plan → more → listening → inspiration → closing mark
-  (see `home-dashboard-patterns.md`)
-- [ ] **No redesign/reorder** unless user explicitly asked
-- [ ] **No stale widgets** — do not wire `HomePrimaryActionZone`,
-  `HomeDiscoverShortcuts`, `HomeDailyPracticeSection`, etc.
-- [ ] **Improvement scope only** unless redesign requested: bugs, spacing,
-  overflow, accessibility, tokens, RTL
-- [ ] No Home / Prayer / Settings tiles; no launcher grid mirroring bottom nav
-- [ ] Reciters stays in quick tools (tab selection exception)
-- [ ] More list = library/setup destinations only
-- [ ] Pull-to-refresh reloads `HomeDashboardBloc` + `HomeListeningResumeCubit`
+- [ ] No unapproved redesign, reorder, or stale widgets
+- [ ] Scope limited to bugs / spacing / overflow / a11y / tokens / RTL unless user asked for redesign
 
 ## Visual verification (manual or Maestro)
 

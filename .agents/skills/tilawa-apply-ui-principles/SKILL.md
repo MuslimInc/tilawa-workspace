@@ -42,22 +42,7 @@ On a typical screen, eye path should be:
 3. **Supporting metadata** — `onSurfaceVariant`, `bodySmall`
 4. **Actions** — one primary CTA; others secondary
 
-On **Home** (approved — preserve this hierarchy):
-
-1. `HomeDashboardHeroSliver` (Now)
-2. Pinned tutor sliver when Quran Sessions enabled
-3. `HomePrimaryActionsSection` (Mushaf + Athkar)
-4. `HomeQuickToolsSection` (Reciters, Qibla, Tasbeeh)
-5. `TodayPlanCard` (optional, deferred)
-6. `HomeMoreActionsGroup`
-7. `HomeListeningResumeRow` (conditional, deferred)
-8. `HomeDailyInspirationSection` (deferred)
-9. `_HomeDashboardClosingMark` (deferred)
-
-Do **not** replace this with a multi-tile launcher grid, reorder sections, or
-wire stale widgets (`HomePrimaryActionZone`, `HomeDiscoverShortcuts`,
-`HomeDailyPracticeSection`) without explicit user approval. Improve only bugs,
-spacing, overflow, a11y, tokens, RTL. See
+On **Home:** preserve approved layout — see
 [home-dashboard-patterns.md](references/home-dashboard-patterns.md).
 
 ## One accent per screen
@@ -135,28 +120,10 @@ are equal (see `flutter-apply-tilawa-theming`).
 
 ## Grids & shortcuts
 
-**Quick tools** (`HomeQuickToolsSection`):
+**Home:** Section surfaces and nav rules — see
+[home-dashboard-patterns.md](references/home-dashboard-patterns.md).
 
-- Three equal compact tiles in one row: Reciters, Qibla, Tasbeeh
-- Reciters selects the existing Reciters shell tab (approved exception)
-- Do not add Home, Prayer, or Settings/Profile tiles
-- Do not expand into a 4+ column grid duplicating bottom nav
-
-**Primary actions** (`HomePrimaryActionsSection`):
-
-- Two featured tiles: Mushaf + Athkar
-- `HomePrimaryActionTile` + `HomeDashboardElevatedSurface` + hero radius
-- One gold accent lane across the pair — not rainbow tiles
-
-**More list** (`HomeMoreActionsGroup`):
-
-- Flat grouped rows for lower-frequency library/setup destinations
-- Current items: History, Favorites, Downloads, Smart Khatma when enabled, and
-  Support Tilawa
-- Row: icon box + label + optional subtitle + chevron;
-  `minInteractiveDimension` height
-
-**Pinned shortcuts** (athkar, favorites on Home):
+**Pinned shortcuts** (athkar, favorites on other screens):
 
 - Prefer **2-column compact grid** or **horizontal scroll** when ≤4 items
 - Show category icon + localized title
@@ -214,8 +181,7 @@ When a nested control has a **different** action than the card tap, use
 - Magic pixel padding (`13`, `27`)
 - Second primary button beside the main CTA
 - Shadow on list tiles inside an already-raised sheet
-- **Home launcher grid** or reordering approved Home sections without user request
-- Shadow on list tiles inside an already-raised sheet
+- **Unapproved Home redesign** — see home-dashboard-patterns.md
 
 ## Verification
 
