@@ -64,6 +64,7 @@ class TilawaInteractiveSurface extends StatefulWidget {
     this.stateLayerColor,
     this.semanticLabel,
     this.semanticHint,
+    this.semanticsIdentifier,
     this.button = true,
     this.selected,
     this.toggled,
@@ -107,6 +108,9 @@ class TilawaInteractiveSurface extends StatefulWidget {
   /// Optional accessibility hint (e.g. why a control is unavailable). Mirrors
   /// [Semantics.hint].
   final String? semanticHint;
+
+  /// Maestro / UI-test resource id ([Semantics.identifier]).
+  final String? semanticsIdentifier;
 
   /// Whether the surface is announced as a button (vs a generic tappable).
   final bool button;
@@ -349,6 +353,7 @@ class _TilawaInteractiveSurfaceState extends State<TilawaInteractiveSurface> {
       toggled: widget.toggled,
       label: widget.semanticLabel,
       hint: widget.semanticHint,
+      identifier: widget.semanticsIdentifier,
       child: child,
     );
   }

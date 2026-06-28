@@ -1,0 +1,26 @@
+# Maestro E2E — disabled nested control is a dead zone on TilawaCard.
+#
+# Tap disabled control → nothing happens, NOT parent navigation.
+#
+# Run:
+#   maestro test .maestro/tilawa_card_nested_disabled_control_dead_zone.yaml \
+#     --device emulator-5554
+
+appId: com.tilawa.app
+
+---
+- launchApp:
+      clearState: false
+- runFlow:
+      file: subflows/ensure_main_shell.yaml
+- runFlow:
+      file: subflows/ensure_tilawa_card_demo.yaml
+
+- tapOn:
+      id: "tilawa_card_demo_reset"
+- assertVisible: "idle"
+
+- tapOn:
+      id: "tilawa_card_demo_disabled_control"
+- assertVisible: "idle"
+- assertNotVisible: "parent navigated"

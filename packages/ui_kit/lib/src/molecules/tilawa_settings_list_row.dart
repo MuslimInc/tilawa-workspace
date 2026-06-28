@@ -18,6 +18,7 @@ class TilawaSettingsListRow extends StatelessWidget {
     this.leading,
     this.trailing,
     this.onTap,
+    this.semanticsIdentifier,
     this.toggled,
     this.selected,
   });
@@ -31,6 +32,7 @@ class TilawaSettingsListRow extends StatelessWidget {
   final Widget? leading;
   final Widget? trailing;
   final VoidCallback? onTap;
+  final String? semanticsIdentifier;
   final bool? toggled;
   final bool? selected;
 
@@ -60,6 +62,7 @@ class TilawaSettingsListRow extends StatelessWidget {
         onTap: onTap,
         borderRadius: borderRadius,
         semanticLabel: semanticLabel,
+        semanticsIdentifier: semanticsIdentifier,
         toggled: toggled,
         selected: selected,
         child: row,

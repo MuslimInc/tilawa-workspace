@@ -26,6 +26,7 @@ maestro test .maestro/reciters_alphabet_scrollbar.yaml \
 | File | Purpose |
 |------|---------|
 | `subflows/ensure_main_shell.yaml` | Reach main shell after launch |
+| `subflows/ensure_tilawa_card_demo.yaml` | Settings → TilawaCard nested tap demo |
 | `subflows/ensure_reciters_alphabet.yaml` | Reciters loaded + A–Z rail visible |
 | `subflows/ensure_reciters_screen.yaml` | Open Reciters tab + dismiss permissions |
 | `subflows/alphabet_scrub_gestures.yaml` | Tap/scrub/drift off-rail while selecting |
@@ -46,6 +47,41 @@ Focused mini-player flows:
 | `quran_player/quran_player_reexpand.yaml` | Expand → collapse → re-expand cycle |
 
 Subflows include `appId: com.tilawa.app` (required by Maestro 2.5+).
+
+## TilawaCard nested tap (debug demo)
+
+**UX rule:** Nested controls inside a tappable card own their interaction area.
+Enabled controls handle their own action; disabled controls are dead zones. The
+parent card should only navigate from blank or non-interactive card areas.
+
+Press-scale feedback is covered by widget tests (`tilawa_card_test.dart`); these
+Maestro flows assert observable tap routing only.
+
+| File | Scenario |
+|------|----------|
+| `tilawa_card_nested_enabled_control.yaml` | Play / delete / favorite → nested result, not parent |
+| `tilawa_card_nested_disabled_control_dead_zone.yaml` | Disabled control → stays `idle` |
+| `tilawa_card_blank_area_parent_navigation.yaml` | Blank body → `parent navigated` |
+| `tilawa_card_decorative_area_parent_navigation.yaml` | InkWell(null) / GestureDetector → parent |
+
+**Demo screen:** Settings → Developer → *TilawaCard nested tap demo* (debug /
+profile builds only). Route: `/debug/tilawa-card`.
+
+**Subflow:** `subflows/ensure_tilawa_card_demo.yaml` (after `ensure_main_shell`).
+
+**Semantics ids:** `apps/tilawa/lib/features/ui_kit_debug/tilawa_card_demo_semantics_ids.dart`
+
+```bash
+maestro test .maestro/tilawa_card_nested_enabled_control.yaml \
+  .maestro/tilawa_card_nested_disabled_control_dead_zone.yaml \
+  .maestro/tilawa_card_blank_area_parent_navigation.yaml \
+  .maestro/tilawa_card_decorative_area_parent_navigation.yaml \
+  --device emulator-5554
+```
+
+Requires a signed-in session (`launchApp: clearState: false`) like other shell
+flows. Install a **debug** or **profile** build — the demo route redirects to
+home in release mode.
 
 ## Reciters alphabet index (Android-style scrubber)
 

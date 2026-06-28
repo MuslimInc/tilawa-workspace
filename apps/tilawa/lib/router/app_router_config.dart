@@ -26,6 +26,7 @@ import '../features/genui_assistant/genui_assistant.dart';
 import '../features/history/presentation/bloc/history_bloc.dart';
 import '../features/history/presentation/screens/history_screen.dart';
 import '../features/notifications/debug/notification_debug_lab_screen.dart';
+import '../features/ui_kit_debug/tilawa_card_nested_tap_demo_screen.dart';
 import '../features/onboarding/presentation/screens/language_welcome_screen.dart';
 import '../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../features/prayer_times/presentation/screens/prayer_alerts_permission_screen.dart';
@@ -75,6 +76,7 @@ part 'app_router_config.g.dart';
     TypedGoRoute<SmartKhatmaHubRoute>(path: '/smart-khatma'),
     TypedGoRoute<RouteListRoute>(path: '/routes'),
     TypedGoRoute<NotificationDebugLabRoute>(path: '/debug/notifications'),
+    TypedGoRoute<TilawaCardNestedTapDemoRoute>(path: '/debug/tilawa-card'),
     TypedGoRoute<PrayerNotificationStatusRoute>(
       path: '/prayer-notification-status',
     ),
@@ -419,6 +421,21 @@ class NotificationDebugLabRoute extends GoRouteData
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       const NotificationDebugLabScreen();
+}
+
+class TilawaCardNestedTapDemoRoute extends GoRouteData
+    with $TilawaCardNestedTapDemoRoute {
+  const TilawaCardNestedTapDemoRoute();
+
+  @override
+  String? redirect(BuildContext context, GoRouterState state) {
+    if (kReleaseMode) return const HomeRoute().location;
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const TilawaCardNestedTapDemoScreen();
 }
 
 @TypedGoRoute<SplashRoute>(path: '/splash')

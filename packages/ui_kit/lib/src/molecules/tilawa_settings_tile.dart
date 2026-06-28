@@ -41,6 +41,7 @@ class TilawaSettingsTile extends StatelessWidget {
     this.showDivider = true,
     this.borderRadius = BorderRadius.zero,
     this.trailing,
+    this.semanticsIdentifier,
   });
 
   final IconData? icon;
@@ -57,6 +58,7 @@ class TilawaSettingsTile extends StatelessWidget {
   final bool showDivider;
   final BorderRadiusGeometry borderRadius;
   final Widget? trailing;
+  final String? semanticsIdentifier;
 
   @override
   Widget build(BuildContext context) {
@@ -79,6 +81,7 @@ class TilawaSettingsTile extends StatelessWidget {
           minTileHeight: designTokens.minInteractiveDimension,
           rowGap: tokens.tileItemGap,
           onTap: onTap,
+          semanticsIdentifier: semanticsIdentifier,
           leading: icon == null
               ? null
               : _SettingsLeadingIcon(

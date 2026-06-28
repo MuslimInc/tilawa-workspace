@@ -1,0 +1,21 @@
+appId: com.tilawa.app
+---
+# Opens the debug-only TilawaCard nested tap demo (Settings → Developer).
+- runFlow:
+    when:
+      notVisible:
+        id: "tilawa_card_demo_screen"
+    commands:
+      - tapOn:
+            id: "settings_tab"
+      - waitForAnimationToEnd
+      - scrollUntilVisible:
+            element:
+                id: "tilawa_card_demo_settings_tile"
+            direction: DOWN
+            timeout: 15000
+      - tapOn:
+            id: "tilawa_card_demo_settings_tile"
+      - waitForAnimationToEnd
+- assertVisible:
+      id: "tilawa_card_demo_screen"
