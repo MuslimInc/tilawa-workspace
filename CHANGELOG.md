@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.16+63] - 2026-06-29 [Google Play Hotfix]
+
+### Fixed
+
+- **Quran Sessions**: Prevent fatal crash when auth is not ready at startup;
+  auth-required paths redirect to login instead of throwing
+  `StateError: Quran Sessions requires a signed-in user`.
+- **Android**: Keep-awake disable during background or teardown swallows
+  wakelock `PlatformException` when no foreground activity is available.
+
 ## [2.0.16+62] - 2026-06-28 [Google Play Release]
 
 ### Added

@@ -187,40 +187,45 @@ List<RouteBase> get quranSessionsRoutes => [
     builder: (context, state) {
       final teacherId = state.pathParameters['teacherId']!;
       final preSelectedSlotId = state.extra as String?;
-      final studentId = requireQuranSessionsUserId(getIt);
       final launchConfig = getIt<AppLaunchConfig>();
-      return BlocProvider(
-        create: (_) => getIt<BookingBloc>(),
-        child: _withQuranSessionsTheme(
-          BookingScreen(
-            teacherId: teacherId,
-            studentId: studentId,
-            analytics: quranSessionsAnalyticsCallbacks(),
-            preSelectedSlotId: preSelectedSlotId,
-            sessionModePolicy: sessionModePolicyFromLaunchConfig(launchConfig),
-            bookingModeHint: resolveQuranTutorBookingModeHint(
-              launchConfig: launchConfig,
+      return _QuranSessionsSignedInGate(
+        builder: (studentId) => BlocProvider(
+          create: (_) => getIt<BookingBloc>(),
+          child: _withQuranSessionsTheme(
+            BookingScreen(
+              teacherId: teacherId,
+              studentId: studentId,
+              analytics: quranSessionsAnalyticsCallbacks(),
+              preSelectedSlotId: preSelectedSlotId,
+              sessionModePolicy: sessionModePolicyFromLaunchConfig(
+                launchConfig,
+              ),
+              bookingModeHint: resolveQuranTutorBookingModeHint(
+                launchConfig: launchConfig,
+              ),
+              voiceVideoProviderHint: resolveVoiceVideoProviderHint(
+                launchConfig,
+              ),
+              onBookingSuccess: (_) {
+                context
+                  ..pop()
+                  ..pop()
+                  ..push(QuranSessionsRoutes.mySessions);
+              },
+              onCompleteProfile: () async {
+                await context.push(QuranSessionsRoutes.profileCompletion);
+              },
+              onGuardianApprovalRequested: () async {
+                final approved = await context.push<bool>(
+                  QuranSessionsRoutes.guardianApproval,
+                  extra: studentId,
+                );
+                return approved ?? false;
+              },
+              onGuardianDashboardRequested: () {
+                context.push(QuranSessionsRoutes.guardianDashboard);
+              },
             ),
-            voiceVideoProviderHint: resolveVoiceVideoProviderHint(launchConfig),
-            onBookingSuccess: (_) {
-              context
-                ..pop()
-                ..pop()
-                ..push(QuranSessionsRoutes.mySessions);
-            },
-            onCompleteProfile: () async {
-              await context.push(QuranSessionsRoutes.profileCompletion);
-            },
-            onGuardianApprovalRequested: () async {
-              final approved = await context.push<bool>(
-                QuranSessionsRoutes.guardianApproval,
-                extra: studentId,
-              );
-              return approved ?? false;
-            },
-            onGuardianDashboardRequested: () {
-              context.push(QuranSessionsRoutes.guardianDashboard);
-            },
           ),
         ),
       );
@@ -230,36 +235,37 @@ List<RouteBase> get quranSessionsRoutes => [
     path: QuranSessionsRoutes.mySessions,
     redirect: quranSessionsAuthRequiredRedirect,
     builder: (context, state) {
-      final studentId = requireQuranSessionsUserId(getIt);
-      return BlocProvider(
-        create: (_) => getIt<MySessionsBloc>(),
-        child: _withQuranSessionsTheme(
-          MySessionsScreen(
-            studentId: studentId,
-            analytics: quranSessionsAnalyticsCallbacks(),
-            scrollBottomPadding: listScrollBottomPadding,
-            resolveTeacherName: _resolveTeacherName,
-            createCallControlGateway: _createQuranSessionCallControlGateway,
-            createCallTelemetry: _createCallTelemetry,
-            buildCallSurface: _buildQuranSessionsCallSurface(),
-            onSessionDetailRequested: (bookingId) => context.push(
-              QuranSessionsRoutes.sessionDetail.replaceFirst(
-                ':bookingId',
-                bookingId,
-              ),
-            ),
-            onRescheduleRequested:
-                ({
-                  required bookingId,
-                  required teacherId,
-                  required studentId,
-                }) => context.push(
-                  QuranSessionsRoutes.rescheduleSession.replaceFirst(
-                    ':bookingId',
-                    bookingId,
-                  ),
-                  extra: {'teacherId': teacherId, 'actorId': studentId},
+      return _QuranSessionsSignedInGate(
+        builder: (studentId) => BlocProvider(
+          create: (_) => getIt<MySessionsBloc>(),
+          child: _withQuranSessionsTheme(
+            MySessionsScreen(
+              studentId: studentId,
+              analytics: quranSessionsAnalyticsCallbacks(),
+              scrollBottomPadding: listScrollBottomPadding,
+              resolveTeacherName: _resolveTeacherName,
+              createCallControlGateway: _createQuranSessionCallControlGateway,
+              createCallTelemetry: _createCallTelemetry,
+              buildCallSurface: _buildQuranSessionsCallSurface(),
+              onSessionDetailRequested: (bookingId) => context.push(
+                QuranSessionsRoutes.sessionDetail.replaceFirst(
+                  ':bookingId',
+                  bookingId,
                 ),
+              ),
+              onRescheduleRequested:
+                  ({
+                    required bookingId,
+                    required teacherId,
+                    required studentId,
+                  }) => context.push(
+                    QuranSessionsRoutes.rescheduleSession.replaceFirst(
+                      ':bookingId',
+                      bookingId,
+                    ),
+                    extra: {'teacherId': teacherId, 'actorId': studentId},
+                  ),
+            ),
           ),
         ),
       );
@@ -274,10 +280,11 @@ List<RouteBase> get quranSessionsRoutes => [
       return quranSessionsAuthRequiredRedirect(context, state);
     },
     builder: (context, state) {
-      final studentId = requireQuranSessionsUserId(getIt);
-      return BlocProvider(
-        create: (_) => getIt<WalletBloc>(),
-        child: WalletScreen(userId: studentId),
+      return _QuranSessionsSignedInGate(
+        builder: (studentId) => BlocProvider(
+          create: (_) => getIt<WalletBloc>(),
+          child: WalletScreen(userId: studentId),
+        ),
       );
     },
   ),
@@ -314,18 +321,21 @@ List<RouteBase> get quranSessionsRoutes => [
     builder: (context, state) {
       final bookingId = state.pathParameters['bookingId']!;
       final extra = state.extra as Map<String, String>? ?? const {};
+      final actorId =
+          extra['actorId'] ?? resolveQuranSessionsUserId(getIt) ?? '';
       return BlocProvider(
         create: (_) => getIt<RescheduleBloc>(),
         child: RescheduleSessionScreen(
           bookingId: bookingId,
           teacherId: extra['teacherId'] ?? '',
-          actorId: extra['actorId'] ?? requireQuranSessionsUserId(getIt),
+          actorId: actorId,
         ),
       );
     },
   ),
   GoRoute(
     path: QuranSessionsRoutes.teacherDashboard,
+    redirect: quranSessionsAuthRequiredRedirect,
     builder: (context, state) => _TeacherDashboardGate(
       childBuilder: (teacherId) => BlocProvider(
         create: (_) => getIt<TeacherDashboardBloc>(),
@@ -340,11 +350,13 @@ List<RouteBase> get quranSessionsRoutes => [
             ),
           ),
           schedulingAnalytics: quranSessionsSchedulingAnalyticsCallbacks(),
-          meetingUrlSettingsBuilder: (context) => TeacherExternalMeetingUrlCard(
-            userId: requireQuranSessionsUserId(getIt),
-            getCapability: getIt<GetCurrentUserTeacherCapabilityUseCase>(),
-            updateMeetingLink: getIt<UpdateTeacherMeetingLinkUseCase>(),
-            useCardChrome: false,
+          meetingUrlSettingsBuilder: (context) => _QuranSessionsSignedInGate(
+            builder: (userId) => TeacherExternalMeetingUrlCard(
+              userId: userId,
+              getCapability: getIt<GetCurrentUserTeacherCapabilityUseCase>(),
+              updateMeetingLink: getIt<UpdateTeacherMeetingLinkUseCase>(),
+              useCardChrome: false,
+            ),
           ),
         ),
       ),
@@ -352,6 +364,7 @@ List<RouteBase> get quranSessionsRoutes => [
   ),
   GoRoute(
     path: QuranSessionsRoutes.availability,
+    redirect: quranSessionsAuthRequiredRedirect,
     builder: (context, state) => _TeacherDashboardGate(
       childBuilder: (teacherId) => BlocProvider(
         create: (_) => getIt<AvailabilityCubit>()..load(teacherId),
@@ -366,49 +379,59 @@ List<RouteBase> get quranSessionsRoutes => [
   ),
   GoRoute(
     path: QuranSessionsRoutes.profileCompletion,
+    redirect: quranSessionsAuthRequiredRedirect,
     builder: (context, state) {
-      final userId = requireQuranSessionsUserId(getIt);
-      return BlocProvider(
-        create: (_) => getIt<ProfileCompletionBloc>(),
-        child: ProfileCompletionScreen(userId: userId),
+      return _QuranSessionsSignedInGate(
+        builder: (userId) => BlocProvider(
+          create: (_) => getIt<ProfileCompletionBloc>(),
+          child: ProfileCompletionScreen(userId: userId),
+        ),
       );
     },
   ),
   GoRoute(
     path: QuranSessionsRoutes.guardianDashboard,
-    builder: (context, state) => GuardianDashboardScreen(
-      onApproveBookings: () => context.push(
-        QuranSessionsRoutes.guardianApproval,
-        extra: state.extra as String? ?? requireQuranSessionsUserId(getIt),
+    redirect: quranSessionsAuthRequiredRedirect,
+    builder: (context, state) => _QuranSessionsSignedInGate(
+      builder: (userId) => GuardianDashboardScreen(
+        onApproveBookings: () => context.push(
+          QuranSessionsRoutes.guardianApproval,
+          extra: state.extra as String? ?? userId,
+        ),
       ),
     ),
   ),
   GoRoute(
     path: QuranSessionsRoutes.guardianApproval,
+    redirect: quranSessionsAuthRequiredRedirect,
     builder: (context, state) {
-      final studentId =
-          state.extra as String? ?? requireQuranSessionsUserId(getIt);
-      return GuardianApprovalCaptureScreen(
-        studentId: studentId,
-        approveChildGuardianBooking:
-            getIt<ApproveChildGuardianBookingUseCase>(),
+      return _QuranSessionsSignedInGate(
+        builder: (userId) => GuardianApprovalCaptureScreen(
+          studentId: state.extra as String? ?? userId,
+          approveChildGuardianBooking:
+              getIt<ApproveChildGuardianBookingUseCase>(),
+        ),
       );
     },
   ),
   GoRoute(
     path: QuranSessionsRoutes.completeTeacherProfile,
+    redirect: quranSessionsAuthRequiredRedirect,
     builder: (context, state) {
-      final userId = requireQuranSessionsUserId(getIt);
-      final analytics = quranSessionsAnalyticsCallbacks();
-      return CompleteTeacherPublicProfileScreen(
-        userId: userId,
-        getCapability: getIt<GetCurrentUserTeacherCapabilityUseCase>(),
-        saveProfile: getIt<SaveTeacherPublicProfileUseCase>(),
-        onComplete: () {
-          analytics.onTeacherDashboardOpened?.call();
-          context
-            ..pop()
-            ..push(QuranSessionsRoutes.teacherDashboard);
+      return _QuranSessionsSignedInGate(
+        builder: (userId) {
+          final analytics = quranSessionsAnalyticsCallbacks();
+          return CompleteTeacherPublicProfileScreen(
+            userId: userId,
+            getCapability: getIt<GetCurrentUserTeacherCapabilityUseCase>(),
+            saveProfile: getIt<SaveTeacherPublicProfileUseCase>(),
+            onComplete: () {
+              analytics.onTeacherDashboardOpened?.call();
+              context
+                ..pop()
+                ..push(QuranSessionsRoutes.teacherDashboard);
+            },
+          );
         },
       );
     },
@@ -419,43 +442,50 @@ List<RouteBase> get quranSessionsRoutes => [
       if (!quranSessionsFeatureConfig().teacherApplicationEnabled) {
         return QuranSessionsRoutes.home;
       }
-      return null;
+      return quranSessionsAuthRequiredRedirect(context, state);
     },
     builder: (context, state) {
-      final userId = requireQuranSessionsUserId(getIt);
-      final analytics = quranSessionsAnalyticsCallbacks();
-      analytics.onTeacherApplyStarted?.call();
-      return BlocProvider(
-        create: (_) => getIt<TeacherApplicationBloc>(),
-        child: TeacherApplicationScreen(
-          userId: userId,
-          onSubmitted: () {
-            analytics.onTeacherApplicationSubmitted?.call();
-            context
-              ..pop()
-              ..push(QuranSessionsRoutes.teacherApplicationStatus);
-          },
-        ),
+      return _QuranSessionsSignedInGate(
+        builder: (userId) {
+          final analytics = quranSessionsAnalyticsCallbacks();
+          analytics.onTeacherApplyStarted?.call();
+          return BlocProvider(
+            create: (_) => getIt<TeacherApplicationBloc>(),
+            child: TeacherApplicationScreen(
+              userId: userId,
+              onSubmitted: () {
+                analytics.onTeacherApplicationSubmitted?.call();
+                context
+                  ..pop()
+                  ..push(QuranSessionsRoutes.teacherApplicationStatus);
+              },
+            ),
+          );
+        },
       );
     },
   ),
   GoRoute(
     path: QuranSessionsRoutes.teacherApplicationStatus,
+    redirect: quranSessionsAuthRequiredRedirect,
     builder: (context, state) {
-      final userId = requireQuranSessionsUserId(getIt);
-      final analytics = quranSessionsAnalyticsCallbacks();
-      analytics.onTeacherApplicationStatusViewed?.call();
-      return BlocProvider(
-        create: (_) => getIt<TeacherApplicationBloc>(),
-        child: TeacherApplicationStatusScreen(
-          userId: userId,
-          onApproved: () => navigateAfterTeacherApproval(
-            context,
-            userId: userId,
-            analytics: analytics,
-            replace: true,
-          ),
-        ),
+      return _QuranSessionsSignedInGate(
+        builder: (userId) {
+          final analytics = quranSessionsAnalyticsCallbacks();
+          analytics.onTeacherApplicationStatusViewed?.call();
+          return BlocProvider(
+            create: (_) => getIt<TeacherApplicationBloc>(),
+            child: TeacherApplicationStatusScreen(
+              userId: userId,
+              onApproved: () => navigateAfterTeacherApproval(
+                context,
+                userId: userId,
+                analytics: analytics,
+                replace: true,
+              ),
+            ),
+          );
+        },
       );
     },
   ),
@@ -544,6 +574,42 @@ String? _resolveTeacherName(String teacherId) {
     return QuranSessionsMvpStore.instance.resolveTeacherName(teacherId);
   }
   return null;
+}
+
+/// Route-build safety net when auth redirects race startup.
+class _QuranSessionsSignedInGate extends StatefulWidget {
+  const _QuranSessionsSignedInGate({required this.builder});
+
+  final Widget Function(String userId) builder;
+
+  @override
+  State<_QuranSessionsSignedInGate> createState() =>
+      _QuranSessionsSignedInGateState();
+}
+
+class _QuranSessionsSignedInGateState
+    extends State<_QuranSessionsSignedInGate> {
+  @override
+  void initState() {
+    super.initState();
+    if (resolveQuranSessionsUserId(getIt) == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        GoRouter.maybeOf(context)?.go(const LoginRoute().location);
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final userId = resolveQuranSessionsUserId(getIt);
+    if (userId == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+    return widget.builder(userId);
+  }
 }
 
 class _QuranSessionsHomeRoute extends StatefulWidget {
@@ -638,7 +704,12 @@ class _TeacherDashboardGateState extends State<_TeacherDashboardGate> {
   }
 
   Future<void> _verifyAccess() async {
-    final userId = requireQuranSessionsUserId(getIt);
+    final userId = resolveQuranSessionsUserId(getIt);
+    if (userId == null) {
+      if (!mounted) return;
+      GoRouter.maybeOf(context)?.go(const LoginRoute().location);
+      return;
+    }
     final result = await getIt<GetCurrentUserTeacherCapabilityUseCase>()(
       userId,
     );

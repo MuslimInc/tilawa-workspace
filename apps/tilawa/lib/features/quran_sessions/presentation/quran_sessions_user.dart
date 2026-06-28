@@ -5,11 +5,13 @@ import 'package:quran_sessions/quran_sessions.dart';
 String? quranSessionsCurrentUserId(GetIt sl) =>
     sl<AuthSessionProvider>().currentUserId;
 
-/// Requires a signed-in user for Quran Sessions flows.
-String requireQuranSessionsUserId(GetIt sl) {
+/// Signed-in Quran Sessions user id, or null when absent or empty.
+///
+/// Never throws — route redirects and UI gates must handle null.
+String? resolveQuranSessionsUserId(GetIt sl) {
   final userId = quranSessionsCurrentUserId(sl);
   if (userId == null || userId.isEmpty) {
-    throw StateError('Quran Sessions requires a signed-in user.');
+    return null;
   }
   return userId;
 }

@@ -86,7 +86,10 @@ String? quranSessionsAuthRequiredRedirect(
   if (!isAuthRequiredQuranSessionsPath(state.uri.path)) {
     return null;
   }
-  return _quranSessionsLoginRedirect(context);
+  return _quranSessionsLoginRedirect(
+    context,
+    redirectWhenAuthUnknown: true,
+  );
 }
 
 /// Redirects stale or unsigned users away from protected Quran Sessions routes.
@@ -106,10 +109,17 @@ String? quranSessionsSessionRedirect(
     return null;
   }
 
-  return _quranSessionsLoginRedirect(context);
+  final redirectWhenAuthUnknown = isAuthRequiredQuranSessionsPath(path);
+  return _quranSessionsLoginRedirect(
+    context,
+    redirectWhenAuthUnknown: redirectWhenAuthUnknown,
+  );
 }
 
-String? _quranSessionsLoginRedirect(BuildContext context) {
+String? _quranSessionsLoginRedirect(
+  BuildContext context, {
+  bool redirectWhenAuthUnknown = false,
+}) {
   try {
     if (context.read<SessionValidityCubit>().state.revoked) {
       return const LoginRoute().location;
@@ -128,6 +138,11 @@ String? _quranSessionsLoginRedirect(BuildContext context) {
     if (userId == null || userId.isEmpty) {
       return const LoginRoute().location;
     }
+    return null;
+  }
+
+  if (redirectWhenAuthUnknown) {
+    return const LoginRoute().location;
   }
 
   return null;

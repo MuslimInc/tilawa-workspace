@@ -66,7 +66,6 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
     super.initState();
     StartupPerfLog.log('tilawa_app_init');
     WidgetsBinding.instance.addObserver(this);
-    unawaited(_keepAwakeService.enable());
     SchedulerBinding.instance.addPostFrameCallback((_) {
       StartupPerfLog.log(
         'tilawa_app_first_post_frame',
@@ -115,12 +114,11 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
     switch (state) {
       case AppLifecycleState.resumed:
         unawaited(_keepAwakeService.enable());
+      case AppLifecycleState.inactive:
       case AppLifecycleState.paused:
       case AppLifecycleState.detached:
       case AppLifecycleState.hidden:
         unawaited(_keepAwakeService.disable());
-      case AppLifecycleState.inactive:
-        break;
     }
     // Cancel any pending debounce timer to prevent duplicate checks
     _resumeDebounceTimer?.cancel();

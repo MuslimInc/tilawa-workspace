@@ -34,8 +34,8 @@ class WakelockKeepAwakeService implements KeepAwakeService {
 
     try {
       await (wakelockDisable ?? WakelockPlus.disable)();
-    } on PlatformException catch (e) {
-      if (!isNoActivityPlatformException(e)) rethrow;
+    } on PlatformException {
+      // Activity may already be gone during background or teardown.
     } finally {
       _enabled = false;
     }
@@ -46,5 +46,11 @@ class WakelockKeepAwakeService implements KeepAwakeService {
 }
 
 @visibleForTesting
-bool isNoActivityPlatformException(PlatformException exception) =>
-    exception.code == 'NoActivityException';
+bool isNoActivityPlatformException(PlatformException exception) {
+  if (exception.code == 'NoActivityException') {
+    return true;
+  }
+
+  final String message = exception.message ?? '';
+  return message.contains('foreground activity');
+}

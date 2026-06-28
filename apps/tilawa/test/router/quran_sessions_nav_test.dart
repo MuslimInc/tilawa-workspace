@@ -71,6 +71,33 @@ Future<String?> redirectSessionDetailRoute(
   return await route.redirect!(context, state);
 }
 
+GoRoute _profileCompletionRoute() {
+  return quranSessionsRoutes.whereType<GoRoute>().firstWhere(
+    (route) => route.path == QuranSessionsRoutes.profileCompletion,
+  );
+}
+
+Future<String?> redirectProfileCompletionRoute(
+  WidgetTester tester,
+) async {
+  final state = FakeGoRouterState(QuranSessionsRoutes.profileCompletion);
+  final route = _profileCompletionRoute();
+
+  late BuildContext context;
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Builder(
+        builder: (builderContext) {
+          context = builderContext;
+          return const SizedBox.shrink();
+        },
+      ),
+    ),
+  );
+
+  return route.redirect!(context, state);
+}
+
 void main() {
   tearDown(() {
     if (getIt.isRegistered<AppLaunchConfig>()) {
@@ -112,6 +139,9 @@ void main() {
           quranSessionsBookingEnabled: true,
         ),
       );
+      getIt.registerSingleton<AuthSessionProvider>(
+        const FakeAuthSessionProvider(userId: 'student_1'),
+      );
 
       final result = await redirectBookingRoute(
         tester,
@@ -150,6 +180,19 @@ void main() {
         ),
       );
       expect(result, isNull);
+    });
+  });
+
+  group('profile completion route redirect', () {
+    testWidgets('redirects unsigned users to login before builder runs', (
+      tester,
+    ) async {
+      getIt.registerSingleton<AuthSessionProvider>(
+        const FakeAuthSessionProvider(userId: ''),
+      );
+
+      final result = await redirectProfileCompletionRoute(tester);
+      expect(result, const LoginRoute().location);
     });
   });
 }

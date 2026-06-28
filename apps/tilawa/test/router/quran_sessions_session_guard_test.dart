@@ -263,6 +263,46 @@ void main() {
     });
 
     testWidgets(
+      'redirects auth-required routes when auth state is unknown at startup',
+      (tester) async {
+        final state = FakeGoRouterState(QuranSessionsRoutes.profileCompletion);
+
+        late String? result;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Builder(
+              builder: (context) {
+                result = quranSessionsSessionRedirect(context, state);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+        expect(result, const LoginRoute().location);
+      },
+    );
+
+    testWidgets(
+      'redirects teacher dashboard when auth provider is missing at startup',
+      (tester) async {
+        final state = FakeGoRouterState(QuranSessionsRoutes.teacherDashboard);
+
+        late String? result;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Builder(
+              builder: (context) {
+                result = quranSessionsSessionRedirect(context, state);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+        expect(result, const LoginRoute().location);
+      },
+    );
+
+    testWidgets(
       'redirects to login when blocs are not mounted and user is signed out',
       (tester) async {
         getIt.registerSingleton<AuthSessionProvider>(
