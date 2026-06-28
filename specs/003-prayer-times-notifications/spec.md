@@ -6,7 +6,7 @@
 **Last Updated**: 2026-05-10
 **Type**: Feature Specification
 **Platform Scope**: Android (Google Play). iOS documented as future work.
-**GitHub Tracking**: [GitHub Projects — tilawa-workspace](https://github.com/muhammadkamel/tilawa-workspace/projects)
+**GitHub Tracking**: [GitHub Projects — tilawa-workspace](https://github.com/MuslimInc/tilawa-workspace/projects)
 
 **Input**: User requirement — stable, production-ready prayer time notifications with native Android
 reliability, per-prayer configuration, graceful permission handling, and long-term maintainability.

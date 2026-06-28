@@ -307,7 +307,7 @@ the changelog for full engineering detail.
 | Field | Value |
 |-------|--------|
 | Version | **1.0.5** (build **32**) |
-| Git tag | [`v1.0.5+32`](https://github.com/muhammadkamel/tilawa-workspace/releases/tag/v1.0.5%2B32) |
+| Git tag | [`v1.0.5+32`](https://github.com/MuslimInc/tilawa-workspace/releases/tag/v1.0.5%2B32) |
 | Date | 2026-05-24 |
 | Track | Production |
 
@@ -337,10 +337,10 @@ the changelog for full engineering detail.
 
 | Tag | Date | Summary |
 |-----|------|---------|
-| [v1.0.4+31](https://github.com/muhammadkamel/tilawa-workspace/releases/tag/v1.0.4%2B31) | 2026-05-23 | Production — Support Tilawa, player UX, App Check |
-| [v1.0.4+30](https://github.com/muhammadkamel/tilawa-workspace/releases/tag/v1.0.4%2B30) | 2026-05-22 | Closed testing — Support Tilawa billing + App Check groundwork |
-| [v1.0.3+28](https://github.com/muhammadkamel/tilawa-workspace/releases/tag/v1.0.3%2B28) | 2026-05-20 | Settings UX, ui_kit feedback, default Arabic for new installs |
-| [v1.0.2+27](https://github.com/muhammadkamel/tilawa-workspace/releases/tag/v1.0.2%2B27) | 2026-05-15 | Compact bottom nav, prayer list contrast, sheet handles |
+| [v1.0.4+31](https://github.com/MuslimInc/tilawa-workspace/releases/tag/v1.0.4%2B31) | 2026-05-23 | Production — Support Tilawa, player UX, App Check |
+| [v1.0.4+30](https://github.com/MuslimInc/tilawa-workspace/releases/tag/v1.0.4%2B30) | 2026-05-22 | Closed testing — Support Tilawa billing + App Check groundwork |
+| [v1.0.3+28](https://github.com/MuslimInc/tilawa-workspace/releases/tag/v1.0.3%2B28) | 2026-05-20 | Settings UX, ui_kit feedback, default Arabic for new installs |
+| [v1.0.2+27](https://github.com/MuslimInc/tilawa-workspace/releases/tag/v1.0.2%2B27) | 2026-05-15 | Compact bottom nav, prayer list contrast, sheet handles |
 
 Older entries: see [`CHANGELOG.md`](../CHANGELOG.md).
 

@@ -3,7 +3,7 @@
 **Phase**: 0 — Codebase & Platform Investigation
 **Date**: 2026-04-28
 **Spec**: [specs/003-prayer-times-notifications/spec.md](spec.md)
-**GitHub Tracking**: [GitHub Projects — tilawa-workspace](https://github.com/muhammadkamel/tilawa-workspace/projects) *(no project item created yet — see spec.md OD-6)*
+**GitHub Tracking**: [GitHub Projects — tilawa-workspace](https://github.com/MuslimInc/tilawa-workspace/projects) *(no project item created yet — see spec.md OD-6)*
 
 ---
 

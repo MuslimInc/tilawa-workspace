@@ -32,6 +32,8 @@ test("allows student cancel from pending_tutor_approval without notice guard", (
   });
   assert.equal(result.to, "cancelled_by_student");
 });
+
+test("allows student cancel from scheduled outside notice window", () => {
   const result = validateTransition({
     currentStatus: "scheduled",
     action: "cancel_by_student",

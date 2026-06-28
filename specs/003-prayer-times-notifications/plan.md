@@ -4,7 +4,7 @@
 **Status**: Production-ready design
 **Input**: Feature specification from `specs/003-prayer-times-notifications/spec.md`
 **Research**: Phase 0 + package evaluation in [research.md](research.md)
-**GitHub Tracking**: [GitHub Projects — tilawa-workspace](https://github.com/muhammadkamel/tilawa-workspace/projects)
+**GitHub Tracking**: [GitHub Projects — tilawa-workspace](https://github.com/MuslimInc/tilawa-workspace/projects)
 
 ---
 

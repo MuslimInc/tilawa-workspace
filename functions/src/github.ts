@@ -1,7 +1,7 @@
 // Shared GitHub issue helpers used by both the Crashlytics alert trigger and
 // the one-off backfill script, so dedup/formatting stays identical.
 
-export const GITHUB_OWNER = "muhammadkamel";
+export const GITHUB_OWNER = "MuslimInc";
 export const GITHUB_REPO = "tilawa-workspace";
 export const FIREBASE_PROJECT_ID = "quran-playera-app";
 
