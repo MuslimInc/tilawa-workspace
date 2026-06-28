@@ -1374,6 +1374,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get audioError => 'Audio playback error';
 
   @override
+  String get audioServiceInitFailed =>
+      'Background audio could not start. Playback may be unavailable until you restart the app.';
+
+  @override
   String get validationError => 'Invalid data provided';
 
   @override
@@ -1453,13 +1457,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chooseHomeLayout => 'Choose Home Layout';
-
-  @override
-  String get restorePlaybackState => 'Restore Last Playback';
-
-  @override
-  String get restorePlaybackStateSubtitle =>
-      'Resume audio from where you left off';
 
   @override
   String get showRecitersAlphabetIndex => 'Show Alphabet Index';

@@ -84,10 +84,15 @@ class _PlayerArtAtom extends StatelessWidget {
 }
 
 class _PlayerPlayPauseAtom extends StatelessWidget {
-  const _PlayerPlayPauseAtom({required this.isPlaying, required this.onTap});
+  const _PlayerPlayPauseAtom({
+    required this.isPlaying,
+    required this.onTap,
+    this.isPlaybackStalled = false,
+  });
 
   final bool isPlaying;
   final VoidCallback onTap;
+  final bool isPlaybackStalled;
 
   @override
   Widget build(BuildContext context) {
@@ -109,11 +114,22 @@ class _PlayerPlayPauseAtom extends StatelessWidget {
         ],
       ),
       child: IconButton(
-        icon: Icon(
-          isPlaying ? FluentIcons.pause_48_filled : FluentIcons.play_48_filled,
-          color: palette.playButtonIcon,
-          size: tokens.iconSizeLarge * 1.6, // approx 40
-        ),
+        icon: isPlaybackStalled
+            ? SizedBox(
+                width: tokens.iconSizeLarge * 1.6,
+                height: tokens.iconSizeLarge * 1.6,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: palette.playButtonIcon,
+                ),
+              )
+            : Icon(
+                isPlaying
+                    ? FluentIcons.pause_48_filled
+                    : FluentIcons.play_48_filled,
+                color: palette.playButtonIcon,
+                size: tokens.iconSizeLarge * 1.6, // approx 40
+              ),
         onPressed: onTap,
       ),
     );
@@ -128,6 +144,7 @@ class _MiniPlayerSnapshot {
     required this.canGoPrevious,
     required this.canGoNext,
     required this.isSleepTimerActive,
+    required this.isPlaybackStalled,
   });
 
   final double progress;
@@ -135,6 +152,7 @@ class _MiniPlayerSnapshot {
   final bool canGoPrevious;
   final bool canGoNext;
   final bool isSleepTimerActive;
+  final bool isPlaybackStalled;
 
   static _MiniPlayerSnapshot fromState(AudioPlayerState state) {
     final PositionData? data = state.positionData;
@@ -147,6 +165,7 @@ class _MiniPlayerSnapshot {
       canGoPrevious: state.canGoPrevious,
       canGoNext: state.canGoNext,
       isSleepTimerActive: state.isSleepTimerActive,
+      isPlaybackStalled: state.isPlaybackStalled,
     );
   }
 
@@ -158,7 +177,8 @@ class _MiniPlayerSnapshot {
           isPlaying == other.isPlaying &&
           canGoPrevious == other.canGoPrevious &&
           canGoNext == other.canGoNext &&
-          isSleepTimerActive == other.isSleepTimerActive;
+          isSleepTimerActive == other.isSleepTimerActive &&
+          isPlaybackStalled == other.isPlaybackStalled;
 
   @override
   int get hashCode => Object.hash(
@@ -167,6 +187,7 @@ class _MiniPlayerSnapshot {
     canGoPrevious,
     canGoNext,
     isSleepTimerActive,
+    isPlaybackStalled,
   );
 }
 
@@ -305,6 +326,7 @@ class _YtMusicMiniPlayerBody extends StatelessWidget {
             identityChromeOpacity: identityChromeOpacity,
             progress: snapshot.progress,
             isPlaying: snapshot.isPlaying,
+            isPlaybackStalled: snapshot.isPlaybackStalled,
             canGoPrevious: snapshot.canGoPrevious,
             canGoNext: snapshot.canGoNext,
             isSleepTimerActive: snapshot.isSleepTimerActive,

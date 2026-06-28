@@ -1369,6 +1369,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get audioError => 'خطأ في تشغيل الصوت';
 
   @override
+  String get audioServiceInitFailed =>
+      'تعذّر تشغيل الصوت في الخلفية. قد لا يعمل التشغيل حتى إعادة فتح التطبيق.';
+
+  @override
   String get validationError => 'البيانات المُدخلة غير صالحة';
 
   @override
@@ -1448,12 +1452,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get chooseHomeLayout => 'اختر تخطيط الصفحة الرئيسية';
-
-  @override
-  String get restorePlaybackState => 'استعادة آخر تشغيل';
-
-  @override
-  String get restorePlaybackStateSubtitle => 'استئناف الصوت من حيث توقفت';
 
   @override
   String get showRecitersAlphabetIndex => 'إظهار فهرس الحروف';

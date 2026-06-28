@@ -11,7 +11,6 @@ import '../../domain/services/sleep_timer_settings.dart';
 class SettingsState extends Equatable {
   const SettingsState({
     this.maxConcurrentDownloads = 2,
-    this.restorePlaybackState = true,
     this.isSleepTimerEnabled = true,
     this.prefetchQuranAssetsOnWifiOnly = true,
     this.showPrayerTimesAlertChipLabels = true,
@@ -20,7 +19,6 @@ class SettingsState extends Equatable {
   });
 
   final int maxConcurrentDownloads;
-  final bool restorePlaybackState;
   final bool isSleepTimerEnabled;
   final bool prefetchQuranAssetsOnWifiOnly;
   final bool showPrayerTimesAlertChipLabels;
@@ -29,7 +27,6 @@ class SettingsState extends Equatable {
 
   SettingsState copyWith({
     int? maxConcurrentDownloads,
-    bool? restorePlaybackState,
     bool? isSleepTimerEnabled,
     bool? prefetchQuranAssetsOnWifiOnly,
     bool? showPrayerTimesAlertChipLabels,
@@ -39,7 +36,6 @@ class SettingsState extends Equatable {
     return SettingsState(
       maxConcurrentDownloads:
           maxConcurrentDownloads ?? this.maxConcurrentDownloads,
-      restorePlaybackState: restorePlaybackState ?? this.restorePlaybackState,
       isSleepTimerEnabled: isSleepTimerEnabled ?? this.isSleepTimerEnabled,
       prefetchQuranAssetsOnWifiOnly:
           prefetchQuranAssetsOnWifiOnly ?? this.prefetchQuranAssetsOnWifiOnly,
@@ -54,7 +50,6 @@ class SettingsState extends Equatable {
   @override
   List<Object?> get props => [
     maxConcurrentDownloads,
-    restorePlaybackState,
     isSleepTimerEnabled,
     prefetchQuranAssetsOnWifiOnly,
     showPrayerTimesAlertChipLabels,
@@ -107,7 +102,6 @@ class SettingsCubit extends HydratedCubit<SettingsState>
     try {
       return SettingsState(
         maxConcurrentDownloads: json['maxConcurrentDownloads'] as int? ?? 2,
-        restorePlaybackState: json['restorePlaybackState'] as bool? ?? true,
         isSleepTimerEnabled: json['isSleepTimerEnabled'] as bool? ?? true,
         prefetchQuranAssetsOnWifiOnly:
             json['prefetchQuranAssetsOnWifiOnly'] as bool? ?? true,
@@ -125,7 +119,6 @@ class SettingsCubit extends HydratedCubit<SettingsState>
   Map<String, dynamic>? toJson(SettingsState state) {
     return {
       'maxConcurrentDownloads': state.maxConcurrentDownloads,
-      'restorePlaybackState': state.restorePlaybackState,
       'isSleepTimerEnabled': state.isSleepTimerEnabled,
       'prefetchQuranAssetsOnWifiOnly': state.prefetchQuranAssetsOnWifiOnly,
       'showPrayerTimesAlertChipLabels': state.showPrayerTimesAlertChipLabels,
@@ -136,10 +129,6 @@ class SettingsCubit extends HydratedCubit<SettingsState>
   Future<void> setMaxConcurrentDownloads(int count) async {
     emit(state.copyWith(maxConcurrentDownloads: count));
     _updateQueueManager();
-  }
-
-  Future<void> toggleRestorePlaybackState(bool enabled) async {
-    emit(state.copyWith(restorePlaybackState: enabled));
   }
 
   Future<void> toggleSleepTimerEnabled(bool enabled) async {

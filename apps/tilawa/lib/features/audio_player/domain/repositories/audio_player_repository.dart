@@ -43,5 +43,4 @@ abstract class AudioPlayerRepository {
     int index, {
     Duration? initialPosition,
   });
-  ResultVoid loadAudioPlayerData({bool restorePlayback = true});
 }

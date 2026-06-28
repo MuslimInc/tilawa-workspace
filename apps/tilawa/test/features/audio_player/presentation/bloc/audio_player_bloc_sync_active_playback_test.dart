@@ -1,5 +1,6 @@
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:rxdart/rxdart.dart';
@@ -38,7 +39,6 @@ import 'audio_player_bloc_sync_active_playback_test.mocks.dart';
   AddQueueItemUseCase,
   RemoveQueueItemUseCase,
   MoveQueueItemUseCase,
-  LoadAudioPlayerDataUseCase,
   GetAudioStreamsUseCase,
   SyncActivePlaybackFromHandlerUseCase,
   SettingsCubit,
@@ -144,7 +144,6 @@ void main() {
       MockAddQueueItemUseCase(),
       MockRemoveQueueItemUseCase(),
       MockMoveQueueItemUseCase(),
-      MockLoadAudioPlayerDataUseCase(),
       mockSyncActivePlayback,
       MockCheckAudioPlayabilityUseCase(),
       mockSettingsCubit,
@@ -245,6 +244,18 @@ void main() {
     queue: <AudioEntity>[],
   );
 
+  group('AudioPlayerBloc hydration removal', () {
+    test('extends Bloc without HydratedBloc persistence', () async {
+      final AudioPlayerBloc bloc = buildBloc();
+      expect(bloc, isA<Bloc<AudioPlayerEvent, AudioPlayerState>>());
+      expect(
+        bloc,
+        isNot(isA<HydratedBloc<AudioPlayerEvent, AudioPlayerState>>()),
+      );
+      await bloc.close();
+    });
+  });
+
   group('syncActivePlayback after hot restart', () {
     test(
       'manual sync aligns bloc with handler surah and clears dismiss',
@@ -273,7 +284,7 @@ void main() {
       },
     );
 
-    test('null snapshot sync demotes chrome but keeps currentAudio', () async {
+    test('null snapshot sync clears session and hides mini player', () async {
       when(mockSyncActivePlayback.call()).thenAnswer(
         (_) async => const Right(null),
       );
@@ -288,7 +299,8 @@ void main() {
       await bloc.stream.firstWhere(
         (s) => s.status == AudioPlayerStatus.initial,
       );
-      expect(bloc.state.currentAudio, hydratedSurah);
+      expect(bloc.state.currentAudio, isNull);
+      expect(bloc.state.dismissedAudioId, isNull);
       expect(bloc.state.shouldShowBottomPlayer, isFalse);
       verify(mockSyncActivePlayback.call()).called(1);
       await bloc.close();
@@ -317,7 +329,7 @@ void main() {
       await bloc.close();
     });
 
-    test('sync failure leaves state unchanged', () async {
+    test('sync failure clears unconfirmed success state', () async {
       when(mockSyncActivePlayback.call()).thenAnswer(
         (_) async => Left(ServerFailure('sync failed')),
       );
@@ -329,8 +341,39 @@ void main() {
         ),
       );
       bloc.add(const AudioPlayerEvent.syncActivePlayback());
+      await bloc.stream.firstWhere(
+        (s) => s.status == AudioPlayerStatus.initial,
+      );
+      expect(bloc.state.currentAudio, isNull);
+      expect(bloc.state.shouldShowBottomPlayer, isFalse);
+      await bloc.close();
+    });
+
+    test('sync failure preserves state with live playback', () async {
+      when(mockSyncActivePlayback.call()).thenAnswer(
+        (_) async => Left(ServerFailure('sync failed')),
+      );
+      final PlaybackStateEntity activePlayback = PlaybackStateEntity(
+        isPlaying: true,
+        processingState: AudioProcessingStateStatus.ready,
+        position: const Duration(seconds: 30),
+        bufferedPosition: const Duration(seconds: 45),
+        duration: const Duration(minutes: 5),
+        currentIndex: 0,
+        queue: <AudioEntity>[hydratedSurah],
+      );
+      final AudioPlayerBloc bloc = buildBloc();
+      bloc.emit(
+        AudioPlayerState(
+          status: AudioPlayerStatus.success,
+          currentAudio: hydratedSurah,
+          playbackState: activePlayback,
+        ),
+      );
+      bloc.add(const AudioPlayerEvent.syncActivePlayback());
       await Future<void>.delayed(const Duration(milliseconds: 50));
       expect(bloc.state.currentAudio, hydratedSurah);
+      expect(bloc.state.status, AudioPlayerStatus.success);
       await bloc.close();
     });
 

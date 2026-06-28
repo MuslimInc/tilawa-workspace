@@ -122,12 +122,3 @@ class RemoveQueueItemUseCase {
   final AudioPlayerRepository _repository;
   ResultVoid call(AudioEntity audio) => _repository.removeQueueItem(audio);
 }
-
-@injectable
-class LoadAudioPlayerDataUseCase {
-  const LoadAudioPlayerDataUseCase(this._repository);
-  final AudioPlayerRepository _repository;
-
-  ResultVoid call({bool restorePlayback = true}) =>
-      _repository.loadAudioPlayerData(restorePlayback: restorePlayback);
-}

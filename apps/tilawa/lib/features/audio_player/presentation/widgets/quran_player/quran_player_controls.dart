@@ -154,6 +154,7 @@ class _PlayerPlaybackCluster extends StatelessWidget {
         _PlayerTransportRow(
           state: state,
           isPlaying: state.isPlaying,
+          isPlaybackStalled: state.isPlaybackStalled,
         ),
         SizedBox(height: tokens.spaceMedium),
         _PlayerActionPillsMolecule(state: state),
@@ -241,10 +242,12 @@ class _PlayerTransportRow extends StatelessWidget {
   const _PlayerTransportRow({
     required this.state,
     required this.isPlaying,
+    required this.isPlaybackStalled,
   });
 
   final AudioPlayerState state;
   final bool isPlaying;
+  final bool isPlaybackStalled;
 
   @override
   Widget build(BuildContext context) {
@@ -333,6 +336,7 @@ class _PlayerTransportRow extends StatelessWidget {
             button: true,
             child: _PlayerPlayPauseAtom(
               isPlaying: isPlaying,
+              isPlaybackStalled: isPlaybackStalled,
               onTap: () {
                 context.read<AudioPlayerBloc>().add(
                   isPlaying

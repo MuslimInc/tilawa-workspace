@@ -1867,6 +1867,10 @@
     "@audioError": {
         "description": "Audio playback error message"
     },
+    "audioServiceInitFailed": "Background audio could not start. Playback may be unavailable until you restart the app.",
+    "@audioServiceInitFailed": {
+        "description": "Toast when AudioService.init fails during app startup on Android"
+    },
     "validationError": "Invalid data provided",
     "@validationError": {
         "description": "Validation error message"
@@ -1986,14 +1990,6 @@
     "chooseHomeLayout": "Choose Home Layout",
     "@chooseHomeLayout": {
         "description": "Choose home layout dialog title"
-    },
-    "restorePlaybackState": "Restore Last Playback",
-    "@restorePlaybackState": {
-        "description": "Restore playback state setting title"
-    },
-    "restorePlaybackStateSubtitle": "Resume audio from where you left off",
-    "@restorePlaybackStateSubtitle": {
-        "description": "Restore playback state setting subtitle"
     },
     "showRecitersAlphabetIndex": "Show Alphabet Index",
     "@showRecitersAlphabetIndex": {

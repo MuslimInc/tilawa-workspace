@@ -6,7 +6,6 @@ enum SleepTimerType { preset, endOfTrack, custom }
 
 @freezed
 abstract class AudioPlayerState with _$AudioPlayerState {
-  @JsonSerializable(explicitToJson: true)
   const factory AudioPlayerState({
     required AudioPlayerStatus status,
     AudioEntity? currentAudio,
@@ -23,9 +22,6 @@ abstract class AudioPlayerState with _$AudioPlayerState {
     @JsonKey(includeFromJson: false, includeToJson: false) Failure? failure,
   }) = _AudioPlayerState;
 
-  factory AudioPlayerState.fromJson(Map<String, dynamic> json) =>
-      _$AudioPlayerStateFromJson(json);
-
   const AudioPlayerState._();
 
   QueueState get queueState => QueueState(
@@ -36,6 +32,14 @@ abstract class AudioPlayerState with _$AudioPlayerState {
   );
 
   bool get isPlaying => playbackState?.isPlaying ?? false;
+
+  bool get isPlaybackStalled {
+    final AudioProcessingStateStatus? processing =
+        playbackState?.processingState;
+    return processing == AudioProcessingStateStatus.loading ||
+        processing == AudioProcessingStateStatus.buffering;
+  }
+
   bool get canGoNext => queueState.hasNext;
   bool get canGoPrevious => queueState.hasPrevious;
   bool get hasMediaItem => currentAudio != null;

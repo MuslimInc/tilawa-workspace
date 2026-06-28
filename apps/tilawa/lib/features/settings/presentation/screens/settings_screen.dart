@@ -211,17 +211,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       BlocBuilder<SettingsCubit, SettingsState>(
                         builder: (context, state) {
                           return TilawaSettingsSwitchTile(
-                            title: l10n.restorePlaybackState,
-                            value: state.restorePlaybackState,
-                            onChanged: context
-                                .read<SettingsCubit>()
-                                .toggleRestorePlaybackState,
-                          );
-                        },
-                      ),
-                      BlocBuilder<SettingsCubit, SettingsState>(
-                        builder: (context, state) {
-                          return TilawaSettingsSwitchTile(
                             title: l10n.enableRecitationDuration,
                             value: state.isSleepTimerEnabled,
                             onChanged: context

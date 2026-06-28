@@ -1415,6 +1415,10 @@
     "@audioError": {
         "description": "Audio playback error message"
     },
+    "audioServiceInitFailed": "تعذّر تشغيل الصوت في الخلفية. قد لا يعمل التشغيل حتى إعادة فتح التطبيق.",
+    "@audioServiceInitFailed": {
+        "description": "Toast when AudioService.init fails during app startup on Android"
+    },
     "validationError": "البيانات المُدخلة غير صالحة",
     "@validationError": {
         "description": "Validation error message"
@@ -1534,14 +1538,6 @@
     "chooseHomeLayout": "اختر تخطيط الصفحة الرئيسية",
     "@chooseHomeLayout": {
         "description": "Choose home layout dialog title"
-    },
-    "restorePlaybackState": "استعادة آخر تشغيل",
-    "@restorePlaybackState": {
-        "description": "Restore playback state setting title"
-    },
-    "restorePlaybackStateSubtitle": "استئناف الصوت من حيث توقفت",
-    "@restorePlaybackStateSubtitle": {
-        "description": "Restore playback state setting subtitle"
     },
     "showRecitersAlphabetIndex": "إظهار فهرس الحروف",
     "@showRecitersAlphabetIndex": {

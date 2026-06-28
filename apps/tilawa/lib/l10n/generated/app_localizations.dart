@@ -2474,6 +2474,12 @@ abstract class AppLocalizations {
   /// **'Audio playback error'**
   String get audioError;
 
+  /// Toast when AudioService.init fails during app startup on Android
+  ///
+  /// In en, this message translates to:
+  /// **'Background audio could not start. Playback may be unavailable until you restart the app.'**
+  String get audioServiceInitFailed;
+
   /// Validation error message
   ///
   /// In en, this message translates to:
@@ -2617,18 +2623,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose Home Layout'**
   String get chooseHomeLayout;
-
-  /// Restore playback state setting title
-  ///
-  /// In en, this message translates to:
-  /// **'Restore Last Playback'**
-  String get restorePlaybackState;
-
-  /// Restore playback state setting subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'Resume audio from where you left off'**
-  String get restorePlaybackStateSubtitle;
 
   /// Settings title for showing the reciters alphabet index rail
   ///

@@ -27,7 +27,6 @@ void main() {
   late MoveQueueItemUseCase moveQueueItemUseCase;
   late AddQueueItemUseCase addQueueItemUseCase;
   late RemoveQueueItemUseCase removeQueueItemUseCase;
-  late LoadAudioPlayerDataUseCase loadAudioPlayerDataUseCase;
 
   setUp(() {
     repository = MockAudioPlayerRepository();
@@ -47,7 +46,6 @@ void main() {
     moveQueueItemUseCase = MoveQueueItemUseCase(repository);
     addQueueItemUseCase = AddQueueItemUseCase(repository);
     removeQueueItemUseCase = RemoveQueueItemUseCase(repository);
-    loadAudioPlayerDataUseCase = LoadAudioPlayerDataUseCase(repository);
   });
 
   const tAudio = AudioEntity(
@@ -221,18 +219,6 @@ void main() {
         );
         expect(result, const Right<Failure, void>(null));
         verify(() => repository.removeQueueItem(tAudio)).called(1);
-      },
-    );
-
-    test(
-      'LoadAudioPlayerDataUseCase should call repository.loadAudioPlayerData',
-      () async {
-        when(
-          () => repository.loadAudioPlayerData(),
-        ).thenAnswer((_) async => const Right(null));
-        final Either<Failure, void> result = await loadAudioPlayerDataUseCase();
-        expect(result, const Right<Failure, void>(null));
-        verify(() => repository.loadAudioPlayerData()).called(1);
       },
     );
   });

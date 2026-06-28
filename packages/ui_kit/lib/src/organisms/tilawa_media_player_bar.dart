@@ -50,6 +50,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
     required this.progress,
     this.progressBarOverride,
     required this.isPlaying,
+    this.isPlaybackStalled = false,
     required this.canGoPrevious,
     required this.canGoNext,
     this.isSleepTimerActive = false,
@@ -85,6 +86,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
   final double progress;
   final Widget? progressBarOverride;
   final bool isPlaying;
+  final bool isPlaybackStalled;
   final bool canGoPrevious;
   final bool canGoNext;
   final bool isSleepTimerActive;
@@ -327,6 +329,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
           colorScheme: colorScheme,
           disabledControlColor: disabledControlColor,
           isPlaying: isPlaying,
+          isPlaybackStalled: isPlaybackStalled,
           canGoPrevious: canGoPrevious,
           canGoNext: canGoNext,
           isSleepTimerActive: isSleepTimerActive,
@@ -711,6 +714,7 @@ class _TransportControls extends StatelessWidget {
     required this.colorScheme,
     required this.disabledControlColor,
     required this.isPlaying,
+    required this.isPlaybackStalled,
     required this.canGoPrevious,
     required this.canGoNext,
     required this.isSleepTimerActive,
@@ -734,6 +738,7 @@ class _TransportControls extends StatelessWidget {
   final ColorScheme colorScheme;
   final Color disabledControlColor;
   final bool isPlaying;
+  final bool isPlaybackStalled;
   final bool canGoPrevious;
   final bool canGoNext;
   final bool isSleepTimerActive;
@@ -756,10 +761,17 @@ class _TransportControls extends StatelessWidget {
     final Widget playPause = shellDockLayout
         ? _TransportIconButton(
             size: componentTokens.controlButtonSize,
-            tooltip: isPlaying
+            tooltip: isPlaybackStalled
+                ? (playTooltip ?? 'Play')
+                : isPlaying
                 ? (pauseTooltip ?? 'Pause')
                 : (playTooltip ?? 'Play'),
-            icon: isPlaying ? TilawaIcons.pauseSmall : TilawaIcons.playSmall,
+            icon: isPlaybackStalled
+                ? null
+                : isPlaying
+                ? TilawaIcons.pauseSmall
+                : TilawaIcons.playSmall,
+            loading: isPlaybackStalled,
             iconSize: designTokens.iconSizeLarge,
             enabled: true,
             color: colorScheme.onSurface,
@@ -769,6 +781,7 @@ class _TransportControls extends StatelessWidget {
             size: componentTokens.playPauseButtonSize,
             iconSize: componentTokens.playPauseIconSize,
             isPlaying: isPlaying,
+            isPlaybackStalled: isPlaybackStalled,
             semanticIdentifier: playPauseSemanticIdentifier,
             playTooltip: playTooltip,
             pauseTooltip: pauseTooltip,
@@ -817,6 +830,7 @@ class _TransportIconButton extends StatelessWidget {
     required this.tooltip,
     required this.icon,
     required this.iconSize,
+    this.loading = false,
     required this.enabled,
     required this.color,
     required this.onPressed,
@@ -824,8 +838,9 @@ class _TransportIconButton extends StatelessWidget {
 
   final double size;
   final String tooltip;
-  final IconData icon;
+  final IconData? icon;
   final double iconSize;
+  final bool loading;
   final bool enabled;
   final Color color;
   final VoidCallback? onPressed;
@@ -838,7 +853,16 @@ class _TransportIconButton extends StatelessWidget {
       child: IconButton(
         padding: EdgeInsets.zero,
         tooltip: tooltip,
-        icon: Icon(icon, size: iconSize, color: color),
+        icon: loading
+            ? SizedBox(
+                width: iconSize,
+                height: iconSize,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: color,
+                ),
+              )
+            : Icon(icon, size: iconSize, color: color),
         onPressed: onPressed,
       ),
     );
@@ -850,6 +874,7 @@ class _PlayPauseButton extends StatelessWidget {
     required this.size,
     required this.iconSize,
     required this.isPlaying,
+    this.isPlaybackStalled = false,
     this.semanticIdentifier,
     required this.playTooltip,
     required this.pauseTooltip,
@@ -859,6 +884,7 @@ class _PlayPauseButton extends StatelessWidget {
   final double size;
   final double iconSize;
   final bool isPlaying;
+  final bool isPlaybackStalled;
   final String? semanticIdentifier;
   final String? playTooltip;
   final String? pauseTooltip;
@@ -876,14 +902,25 @@ class _PlayPauseButton extends StatelessWidget {
       ),
       child: IconButton(
         padding: EdgeInsets.zero,
-        tooltip: isPlaying
+        tooltip: isPlaybackStalled
+            ? (playTooltip ?? 'Play')
+            : isPlaying
             ? (pauseTooltip ?? 'Pause')
             : (playTooltip ?? 'Play'),
-        icon: Icon(
-          isPlaying ? TilawaIcons.pauseSmall : TilawaIcons.playSmall,
-          color: colorScheme.onPrimary,
-          size: iconSize,
-        ),
+        icon: isPlaybackStalled
+            ? SizedBox(
+                width: iconSize,
+                height: iconSize,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: colorScheme.onPrimary,
+                ),
+              )
+            : Icon(
+                isPlaying ? TilawaIcons.pauseSmall : TilawaIcons.playSmall,
+                color: colorScheme.onPrimary,
+                size: iconSize,
+              ),
         onPressed: onPressed,
       ),
     );

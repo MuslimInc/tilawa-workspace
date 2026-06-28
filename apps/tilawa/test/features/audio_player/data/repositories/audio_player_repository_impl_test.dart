@@ -766,44 +766,6 @@ void main() {
     });
   });
 
-  group('AudioPlayerRepositoryImpl - Load Audio Data', () {
-    test(
-      'loadAudioPlayerData with default restorePlayback calls audioHandler',
-      () async {
-        when(
-          mockAudioHandler.loadAudioPlayerData(
-            restorePlayback: anyNamed('restorePlayback'),
-          ),
-        ).thenAnswer((_) async {});
-
-        final Either<Failure, void> result = await repository
-            .loadAudioPlayerData();
-
-        expect(result.isRight(), true);
-        verify(mockAudioHandler.loadAudioPlayerData()).called(1);
-      },
-    );
-
-    test(
-      'loadAudioPlayerData with restorePlayback=false calls audioHandler',
-      () async {
-        when(
-          mockAudioHandler.loadAudioPlayerData(
-            restorePlayback: anyNamed('restorePlayback'),
-          ),
-        ).thenAnswer((_) async {});
-
-        final Either<Failure, void> result = await repository
-            .loadAudioPlayerData(restorePlayback: false);
-
-        expect(result.isRight(), true);
-        verify(
-          mockAudioHandler.loadAudioPlayerData(restorePlayback: false),
-        ).called(1);
-      },
-    );
-  });
-
   group('AudioPlayerRepositoryImpl - distinct() behavior', () {
     test(
       'currentAudio filters duplicate AudioEntity emissions with same values',

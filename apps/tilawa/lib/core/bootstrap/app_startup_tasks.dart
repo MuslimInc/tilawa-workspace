@@ -41,7 +41,10 @@ import 'package:tilawa/features/audio_player/domain/repositories/audio_player_re
 import 'package:tilawa/features/audio_player/domain/services/playback_notification_bridge.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/audio_player/presentation/player_presentation_controller.dart';
+import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/audio_player/presentation/quran_player_presentation_entry.dart';
+import 'package:tilawa/router/app_router.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:tilawa/features/downloads/domain/services/download_notification_service_interface.dart';
 import 'package:tilawa/features/downloads/domain/services/downloads_initializer.dart';
 import 'package:tilawa/features/notifications/data/services/fcm_service.dart';
@@ -52,7 +55,6 @@ import 'package:tilawa/features/prayer_times/domain/services/prayer_adhan_notifi
 import 'package:tilawa/features/prayer_times/domain/services/prayer_notification_watchdog_scheduler.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/usecases.dart';
 import 'package:tilawa/firebase_options.dart';
-import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa/router/notification_navigation_resolver.dart';
 import 'package:tilawa/shared/audio/audio_player_handler.dart';
@@ -82,6 +84,11 @@ class AppStartupTasks {
   static const Duration notificationChannelDeferredDelay = Duration(seconds: 5);
 
   static const Duration quranAssetsPrefetchDelay = Duration(milliseconds: 400);
+
+  /// SharedPreferences key marking legacy [AudioPlayerBloc] hydration cleanup.
+  @visibleForTesting
+  static const String legacyAudioPlayerBlocHydrationCleanupKey =
+      'audio_player_bloc_hydration_removed_v1';
 
   QuranAssetsPrefetchService? _quranAssetsPrefetchService;
   QuranAssetsPrefetchPolicyService? _quranAssetsPrefetchPolicyService;
@@ -478,6 +485,8 @@ class AppStartupTasks {
               ),
       );
 
+      await cleanupLegacyAudioPlayerBlocHydration();
+
       logger.d(
         '[AppLaunch] source=AppStartupTasks.initializeHydratedStorage: HydratedStorage initialized successfully at (${DateTime.now()})',
       );
@@ -486,6 +495,27 @@ class AppStartupTasks {
         '[AppLaunch] source=AppStartupTasks.initializeHydratedStorage: Warning: Could not initialize HydratedStorage, using in-memory fallback at (${DateTime.now()}): $e',
       );
       HydratedBloc.storage = _InMemoryStorage();
+    }
+  }
+
+  /// Deletes persisted [AudioPlayerBloc] hydration once per install upgrade.
+  Future<void> cleanupLegacyAudioPlayerBlocHydration() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      if (prefs.getBool(legacyAudioPlayerBlocHydrationCleanupKey) ?? false) {
+        return;
+      }
+      await HydratedBloc.storage.delete('AudioPlayerBloc');
+      await prefs.setBool(legacyAudioPlayerBlocHydrationCleanupKey, true);
+      logger.d(
+        '[AppLaunch] source=AppStartupTasks.cleanupLegacyAudioPlayerBlocHydration: '
+        'Removed legacy AudioPlayerBloc hydration at (${DateTime.now()})',
+      );
+    } catch (e) {
+      logger.d(
+        '[AppLaunch] source=AppStartupTasks.cleanupLegacyAudioPlayerBlocHydration: '
+        'Warning: cleanup failed at (${DateTime.now()}): $e',
+      );
     }
   }
 
@@ -913,7 +943,23 @@ class AppStartupTasks {
       logger.d(
         '[AppLaunch] source=AppStartupTasks.initializeAudioService: Warning: Could not initialize audio service at (${DateTime.now()}): $e',
       );
+      _showAudioServiceInitFailureFeedback();
     }
+  }
+
+  void _showAudioServiceInitFailureFeedback() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final BuildContext? context = AppRouter.navigatorKey.currentContext;
+      if (context == null) {
+        return;
+      }
+      TilawaFeedbackService.showToast(
+        AppRouter.navigatorKey,
+        message: context.l10n.audioServiceInitFailed,
+        variant: TilawaFeedbackVariant.error,
+        dedupeKey: 'audio-service-init-failed',
+      );
+    });
   }
 
   Future<void> initializeAthkarNotifications() async {

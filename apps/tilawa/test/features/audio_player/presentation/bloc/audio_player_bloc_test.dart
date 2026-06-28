@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:rxdart/rxdart.dart';
@@ -40,7 +41,6 @@ import 'audio_player_bloc_test.mocks.dart';
   AddQueueItemUseCase,
   RemoveQueueItemUseCase,
   MoveQueueItemUseCase,
-  LoadAudioPlayerDataUseCase,
   SyncActivePlaybackFromHandlerUseCase,
   GetAudioStreamsUseCase,
   SettingsCubit,
@@ -98,7 +98,6 @@ void main() {
   late MockMoveQueueItemUseCase mockMoveQueueItem;
   late MockSetRepeatModeUseCase mockSetRepeatMode;
   late MockSetShuffleModeUseCase mockSetShuffleMode;
-  late MockLoadAudioPlayerDataUseCase mockLoadAudioPlayerData;
   late MockSyncActivePlaybackFromHandlerUseCase mockSyncActivePlayback;
   late MockGetAudioStreamsUseCase mockGetAudioStreams;
   late MockSettingsCubit mockSettingsCubit;
@@ -131,7 +130,6 @@ void main() {
     mockMoveQueueItem = MockMoveQueueItemUseCase();
     mockSetRepeatMode = MockSetRepeatModeUseCase();
     mockSetShuffleMode = MockSetShuffleModeUseCase();
-    mockLoadAudioPlayerData = MockLoadAudioPlayerDataUseCase();
     mockSyncActivePlayback = MockSyncActivePlaybackFromHandlerUseCase();
     mockGetAudioStreams = MockGetAudioStreamsUseCase();
     when(
@@ -261,7 +259,6 @@ void main() {
       mockAddQueueItem,
       mockRemoveQueueItem,
       mockMoveQueueItem,
-      mockLoadAudioPlayerData,
       mockSyncActivePlayback,
       mockCheckAudioPlayability,
       mockSettingsCubit,
@@ -274,6 +271,18 @@ void main() {
   // ... (previous tests) ...
   // Re-adding previous tests here would be verbose, assume they are there in real file.
   // I will append the History Saving tests.
+
+  group('AudioPlayerBloc hydration removal', () {
+    test('extends Bloc without HydratedBloc persistence', () async {
+      final AudioPlayerBloc bloc = buildBloc();
+      expect(bloc, isA<Bloc<AudioPlayerEvent, AudioPlayerState>>());
+      expect(
+        bloc,
+        isNot(isA<HydratedBloc<AudioPlayerEvent, AudioPlayerState>>()),
+      );
+      await bloc.close();
+    });
+  });
 
   group('AudioPlayerBloc - Move queue item', () {
     blocTest<AudioPlayerBloc, AudioPlayerState>(

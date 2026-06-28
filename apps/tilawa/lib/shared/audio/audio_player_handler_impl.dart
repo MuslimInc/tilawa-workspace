@@ -174,14 +174,6 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
   }
 
   @override
-  Future<void> loadAudioPlayerData({bool restorePlayback = true}) async {
-    // Implementation for loading audio player data (e.g. from local storage)
-    // This was previously handled by HydratedBloc, but now moved to UseCase/Repository/Handler
-    log('Loading audio player data (restorePlayback: $restorePlayback)');
-    // Add logic here if needed to restore state from SharedPreferences or similar
-  }
-
-  @override
   Future<void> setShuffleMode(
     audio_service.AudioServiceShuffleMode shuffleMode,
   ) async {
@@ -291,8 +283,7 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
 
     _player.processingStateStream.listen((state) {
       if (state == ProcessingState.completed) {
-        stop();
-        _player.seek(Duration.zero, index: 0);
+        unawaited(_handlePlaybackCompleted());
         return;
       }
       if (state == ProcessingState.ready && mediaItem.valueOrNull != null) {
@@ -317,6 +308,34 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
     if (initialSources.isNotEmpty) {
       await _safeSetAudioSources(initialSources);
     }
+  }
+
+  Future<void> _handlePlaybackCompleted() async {
+    final audio_service.AudioServiceRepeatMode repeatMode =
+        playbackState.value.repeatMode;
+    final int? currentIndex = _player.currentIndex;
+    final int playlistLength = _player.audioSources.length;
+
+    if (repeatMode == audio_service.AudioServiceRepeatMode.one) {
+      await _player.seek(Duration.zero);
+      await _player.play();
+      return;
+    }
+
+    if (currentIndex != null && currentIndex < playlistLength - 1) {
+      await skipToNext();
+      return;
+    }
+
+    if (repeatMode == audio_service.AudioServiceRepeatMode.all &&
+        playlistLength > 0) {
+      await skipToQueueItem(0);
+      await _player.play();
+      return;
+    }
+
+    await stop();
+    await _player.seek(Duration.zero, index: 0);
   }
 
   int _indexOfAudioSourceWithTag(String mediaId) {

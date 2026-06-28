@@ -1057,14 +1057,39 @@ void main() {
       expect(currentState.queue.length, currentState.shuffleIndices!.length);
     });
 
-    test('stops and resets when processing state is completed', () async {
+    test('stops and resets when last queue item completes', () async {
       await Future.delayed(Duration.zero);
+      clearInteractions(mockPlayer);
+      when(mockPlayer.currentIndex).thenReturn(0);
+      when(mockPlayer.stop()).thenAnswer((_) async {});
+
+      processingStateSubject.add(ProcessingState.completed);
+
+      await Future.delayed(const Duration(milliseconds: 50));
+      verify(mockPlayer.stop()).called(1);
+      verify(mockPlayer.seek(Duration.zero, index: 0)).called(1);
+    });
+
+    test('skipToNext when completed with next queue item', () async {
+      when(mockPlayer.currentIndex).thenReturn(0);
+      const item1 = MediaItem(
+        id: '1',
+        title: '1',
+        extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+      );
+      const item2 = MediaItem(
+        id: '2',
+        title: '2',
+        extras: <String, dynamic>{'url': 'https://example.com/2.mp3'},
+      );
+      await handler.addQueueItems([item1, item2]);
       clearInteractions(mockPlayer);
 
       processingStateSubject.add(ProcessingState.completed);
 
       await Future.delayed(const Duration(milliseconds: 50));
-      verify(mockPlayer.seek(Duration.zero, index: 0)).called(1);
+      verifyNever(mockPlayer.stop());
+      verify(mockPlayer.seek(Duration.zero, index: 1)).called(1);
     });
 
     test('playArtistPlaylist ignores concurrent calls for same artist', () async {
@@ -1486,12 +1511,6 @@ void main() {
         expect(state.repeatMode, AudioRepeatMode.all);
       },
     );
-
-    test('loadAudioPlayerData does not throw', () async {
-      // Should not throw
-      await handler.loadAudioPlayerData();
-      await handler.loadAudioPlayerData(restorePlayback: false);
-    });
 
     test('_itemToSource handles download check errors gracefully', () async {
       // Make getDownloadedFilePath throw an error

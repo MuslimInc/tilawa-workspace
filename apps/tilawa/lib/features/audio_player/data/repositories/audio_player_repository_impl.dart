@@ -233,13 +233,6 @@ class AudioPlayerRepositoryImpl implements AudioPlayerRepository {
     );
   }
 
-  @override
-  ResultVoid loadAudioPlayerData({bool restorePlayback = true}) async {
-    return _guardVoid(
-      () => _audioHandler.loadAudioPlayerData(restorePlayback: restorePlayback),
-    );
-  }
-
   // Mappers
   AudioProcessingStateStatus _mapProcessingStateToEntity(
     audio_service.AudioProcessingState serviceState,

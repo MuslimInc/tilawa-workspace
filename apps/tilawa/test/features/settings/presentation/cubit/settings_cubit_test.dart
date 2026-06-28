@@ -171,28 +171,6 @@ void main() {
     );
 
     blocTest<SettingsCubit, SettingsState>(
-      'toggleRestorePlaybackState updates state',
-      build: () => cubit,
-      act: (cubit) => cubit.toggleRestorePlaybackState(false),
-      expect: () => [
-        const SettingsState(restorePlaybackState: false, appInfo: testAppInfo),
-      ],
-    );
-
-    blocTest<SettingsCubit, SettingsState>(
-      'toggleRestorePlaybackState can be toggled back to true',
-      build: () => cubit,
-      act: (cubit) async {
-        await cubit.toggleRestorePlaybackState(false);
-        await cubit.toggleRestorePlaybackState(true);
-      },
-      expect: () => [
-        const SettingsState(restorePlaybackState: false, appInfo: testAppInfo),
-        const SettingsState(appInfo: testAppInfo),
-      ],
-    );
-
-    blocTest<SettingsCubit, SettingsState>(
       'toggleSleepTimerEnabled updates state',
       build: () => cubit,
       act: (cubit) => cubit.toggleSleepTimerEnabled(false),
@@ -230,7 +208,6 @@ void main() {
         expect(
           cubit.fromJson({
             'maxConcurrentDownloads': 5,
-            'restorePlaybackState': true,
             'isSleepTimerEnabled': false,
             'showRecitersAlphabetIndex': false,
           }),
@@ -252,7 +229,6 @@ void main() {
       test('toJson returns correct map', () {
         expect(cubit.toJson(const SettingsState(maxConcurrentDownloads: 3)), {
           'maxConcurrentDownloads': 3,
-          'restorePlaybackState': true,
           'isSleepTimerEnabled': true,
           'prefetchQuranAssetsOnWifiOnly': true,
           'showPrayerTimesAlertChipLabels': true,
@@ -265,7 +241,7 @@ void main() {
         // Call copyWith with null to test the ?? fallback on line 22
         final SettingsState newState = originalState.copyWith();
         expect(newState.maxConcurrentDownloads, 5);
-        expect(newState.restorePlaybackState, true);
+        expect(newState.isSleepTimerEnabled, true);
       });
     });
   });

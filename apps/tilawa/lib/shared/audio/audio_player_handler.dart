@@ -64,7 +64,6 @@ abstract class AudioPlayerHandler implements AudioHandler {
 
   // Audio state management
   Future<void> clearAudioState();
-  Future<void> loadAudioPlayerData({bool restorePlayback = true});
 
   // Reciter and surah management
   Future<List<AudioEntity>?> getReciters({String? languageCode});
