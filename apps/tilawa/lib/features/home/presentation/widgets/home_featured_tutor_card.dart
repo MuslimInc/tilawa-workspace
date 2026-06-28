@@ -476,7 +476,7 @@ class _FeaturedTutorFooter extends StatelessWidget {
   }
 }
 
-/// Visual CTA affordance — card [InkWell] owns the single tap target.
+/// Visual CTA affordance — card tap target owns navigation.
 class _FeaturedTutorCtaPill extends StatelessWidget {
   const _FeaturedTutorCtaPill({
     required this.label,
@@ -493,27 +493,44 @@ class _FeaturedTutorCtaPill extends StatelessWidget {
     final MeMuslimDesignTokens tokens = context.tokens;
     final ThemeData theme = Theme.of(context);
 
+    final EdgeInsetsDirectional pillPadding = EdgeInsetsDirectional.symmetric(
+      horizontal: tokens.spaceMedium,
+      vertical: tokens.spaceSmall,
+    );
+    final TextStyle labelStyle =
+        theme.textTheme.labelMedium?.copyWith(
+          color: foreground,
+          fontWeight: FontWeight.w700,
+        ) ??
+        const TextStyle(fontSize: 12, fontWeight: FontWeight.w700);
+    final TextPainter labelPainter = TextPainter(
+      text: TextSpan(text: label, style: labelStyle),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+      maxLines: 1,
+    )..layout();
+    final double pillHeight =
+        pillPadding.vertical +
+        math.max(labelPainter.height, tokens.iconSizeSmall);
+    final BorderRadius pillRadius = BorderRadius.circular(
+      tokens.radiusPill(pillHeight),
+    );
+
     return ExcludeSemantics(
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: accent,
-          borderRadius: BorderRadius.circular(999),
+          borderRadius: pillRadius,
         ),
         child: Padding(
-          padding: EdgeInsetsDirectional.symmetric(
-            horizontal: tokens.spaceMedium,
-            vertical: tokens.spaceSmall,
-          ),
+          padding: pillPadding,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             spacing: tokens.spaceExtraSmall,
             children: [
               Text(
                 label,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: foreground,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: labelStyle,
               ),
               Icon(
                 FluentIcons.chevron_right_16_regular,

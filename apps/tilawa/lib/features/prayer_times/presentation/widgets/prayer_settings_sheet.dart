@@ -341,7 +341,9 @@ class _QASectionState extends State<_QASection> {
           child: SingleChildScrollView(
             child: SelectableText(
               logs,
-              style: const TextStyle(fontSize: 10, fontFamily: 'monospace'),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                fontFamily: 'monospace',
+              ),
             ),
           ),
         ),
@@ -422,11 +424,11 @@ class _QASectionState extends State<_QASection> {
                 ],
               ),
               if (_isLoading)
-                const Padding(
-                  padding: EdgeInsets.only(top: 8.0),
-                  child: LinearProgressIndicator(),
+                Padding(
+                  padding: EdgeInsets.only(top: tokens.spaceSmall),
+                  child: const LinearProgressIndicator(),
                 ),
-              const SizedBox(height: 8),
+              SizedBox(height: tokens.spaceSmall),
               Text(
                 'Tests real AlarmManager pipeline. Close app/lock device to verify.',
                 style: theme.textTheme.labelSmall?.copyWith(

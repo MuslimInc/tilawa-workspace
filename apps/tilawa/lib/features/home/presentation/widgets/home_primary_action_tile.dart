@@ -30,56 +30,51 @@ class HomePrimaryActionTile extends StatelessWidget {
       family: TilawaRadiusFamily.hero,
     );
 
-    return Semantics(
-      button: true,
-      label: label,
+    final BorderRadius borderRadius = BorderRadius.circular(radius);
+
+    return TilawaInteractiveSurface(
+      onTap: onTap,
+      borderRadius: borderRadius,
+      semanticLabel: label,
+      stateLayerColor: iconAccent,
       child: DecoratedBox(
         decoration: HomeDashboardElevatedSurface.decoration(
           context,
-          borderRadius: BorderRadius.circular(radius),
+          borderRadius: borderRadius,
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(radius),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onTap,
-              child: Padding(
-                padding: EdgeInsets.all(tokens.spaceMedium),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _HomePrimaryActionIconWell(
-                      icon: icon,
-                      iconAccent: iconAccent,
-                    ),
-                    SizedBox(
-                      height: tokens.spaceSmall + tokens.spaceExtraSmall,
-                    ),
-                    Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: colorScheme.onSurface,
-                        fontWeight: FontWeight.w700,
-                        height: 1.15,
-                      ),
-                    ),
-                    SizedBox(height: tokens.spaceExtraSmall),
-                    Text(
-                      subtitle,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                        height: 1.3,
-                      ),
-                    ),
-                  ],
+        child: Padding(
+          padding: EdgeInsets.all(tokens.spaceMedium),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _HomePrimaryActionIconWell(
+                icon: icon,
+                iconAccent: iconAccent,
+              ),
+              SizedBox(
+                height: tokens.spaceSmall + tokens.spaceExtraSmall,
+              ),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.w700,
+                  height: 1.15,
                 ),
               ),
-            ),
+              SizedBox(height: tokens.spaceExtraSmall),
+              Text(
+                subtitle,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  height: 1.3,
+                ),
+              ),
+            ],
           ),
         ),
       ),

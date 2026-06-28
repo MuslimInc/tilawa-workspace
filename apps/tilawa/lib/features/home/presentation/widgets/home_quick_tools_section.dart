@@ -75,56 +75,51 @@ class _QuickToolTile extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final double iconBoxSize = tokens.iconSizeMedium + tokens.spaceSmall * 2;
 
-    return Semantics(
-      button: true,
-      label: label,
+    final BorderRadius borderRadius = BorderRadius.circular(radius);
+
+    return TilawaInteractiveSurface(
+      onTap: onTap,
+      borderRadius: borderRadius,
+      semanticLabel: label,
+      stateLayerColor: colorScheme.primary,
       child: DecoratedBox(
         decoration: HomeDashboardElevatedSurface.decoration(
           context,
-          borderRadius: BorderRadius.circular(radius),
+          borderRadius: borderRadius,
         ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(radius),
-            splashColor: colorScheme.primary.withValues(alpha: 0.08),
-            highlightColor: colorScheme.primary.withValues(alpha: 0.04),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                vertical: tokens.spaceSmall,
-                horizontal: tokens.spaceExtraSmall,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: iconAccent.withValues(alpha: 0.10),
-                      borderRadius: BorderRadius.circular(
-                        tokens.radiusMedium,
-                      ),
-                    ),
-                    child: SizedBox(
-                      width: iconBoxSize,
-                      height: iconBoxSize,
-                      child: Center(child: icon),
-                    ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            vertical: tokens.spaceSmall,
+            horizontal: tokens.spaceExtraSmall,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: iconAccent.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(
+                    tokens.radiusMedium,
                   ),
-                  SizedBox(height: tokens.spaceExtraSmall),
-                  Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      color: colorScheme.onSurface,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
+                ),
+                child: SizedBox(
+                  width: iconBoxSize,
+                  height: iconBoxSize,
+                  child: Center(child: icon),
+                ),
               ),
-            ),
+              SizedBox(height: tokens.spaceExtraSmall),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
           ),
         ),
       ),
