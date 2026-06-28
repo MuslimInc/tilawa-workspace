@@ -12,6 +12,35 @@ the changelog for full engineering detail.
 
 | Field | Value |
 |-------|--------|
+| Version | **2.0.16** (build **61**) |
+| Git tag | `v2.0.16+61` |
+| Date | 2026-06-28 |
+| Track | Production |
+
+### What's new (en-US) — copy for Play Console
+
+```text
+• Quran Sessions: discover tutors and manage live recitation bookings
+• Refreshed home dashboard with next prayer, Today Plan, and quick tools
+• Clearer tap feedback on cards and buttons; warm green theme polish
+• Login, Tasbeeh layout, and My Sessions stability fixes
+```
+
+### ما الجديد (ar) — نص متجر Play
+
+```text
+• جلسات القرآن: اكتشف المعلّمين وأدر حجوزات التلاوة المباشرة
+• لوحة رئيسية محدّثة: الصلاة القادمة، خطة اليوم، وأدوات سريعة
+• ردود لمس أوضح على البطاقات والأزرار؛ تحسينات المظهر الأخضر الدافئ
+• إصلاحات تسجيل الدخول وتخطيط التسبيح وجلساتي
+```
+
+---
+
+## Previous current release (2.0.13+58)
+
+| Field | Value |
+|-------|--------|
 | Version | **2.0.13** (build **58**) |
 | Git tag | `v2.0.13+58` |
 | Date | 2026-06-14 |
