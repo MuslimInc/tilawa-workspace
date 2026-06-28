@@ -98,6 +98,8 @@ class LoginGoogleSignInCubit extends Cubit<LoginGoogleSignInState> {
         gateway: gateway,
       );
 
+      if (isClosed) return;
+
       if (readiness is! GoogleSignInLaunchReady) {
         emit(
           state.copyWith(

@@ -4,6 +4,7 @@ import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/bootstrap/app_startup_tasks.dart';
+import 'package:tilawa/core/navigation/notification_destination.dart';
 import 'package:tilawa/core/navigation/notification_launch_dedup.dart';
 import 'package:tilawa/core/services/navigation_service.dart';
 import 'package:tilawa/core/services/notification_dispatcher.dart';
@@ -142,14 +143,18 @@ class NotificationDebugLabService {
         detail: 'NotificationDispatcher.routeNotificationForTest',
       );
       if (!handled && data != null) {
-        _navigationService.navigateToNotification(route);
+        _navigationService.routeToDestination(
+          NotificationDestination(location: route),
+        );
         _logStore.log('navigation fallback', detail: route);
       }
       return;
     }
 
     if (data != null) {
-      _navigationService.navigateToNotification(route);
+      _navigationService.routeToDestination(
+        NotificationDestination(location: route),
+      );
       _logStore.log('navigation fallback', detail: route);
     }
   }
@@ -190,9 +195,11 @@ class NotificationDebugLabService {
     );
 
     if (AppRouter.pendingColdStartLocation != null) {
-      _navigationService.navigateToNotification(
-        AppRouter.pendingColdStartLocation!,
-        extra: AppRouter.pendingColdStartExtra,
+      _navigationService.routeToDestination(
+        NotificationDestination(
+          location: AppRouter.pendingColdStartLocation!,
+          extra: AppRouter.pendingColdStartExtra,
+        ),
       );
       AppRouter.consumePendingNotificationLaunchState();
       _logStore.log('pending route consumed');

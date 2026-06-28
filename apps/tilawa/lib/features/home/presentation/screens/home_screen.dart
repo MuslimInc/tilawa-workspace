@@ -97,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           state: state,
                           onOpenPrayer: widget.onOpenPrayer,
                         ),
-                        if (tutorHeaderSliver case final Widget sliver) sliver,
+                        ?tutorHeaderSliver,
                         HomeDashboardContentSliver(
                           child: const HomeDashboardBody(),
                         ),

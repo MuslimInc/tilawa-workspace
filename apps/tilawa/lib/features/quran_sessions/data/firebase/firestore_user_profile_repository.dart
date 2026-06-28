@@ -72,7 +72,9 @@ class FirestoreUserProfileDto {
       restrictionReason: profile['restrictionReason'] as String?,
       profileCompleted: profile['profileCompleted'] as bool? ?? false,
       learningGoals: List<String>.from(
-        profile['learningGoals'] as List? ?? const [],
+        profile['learningGoals'] is List
+            ? profile['learningGoals'] as List
+            : const [],
       ),
     );
   }

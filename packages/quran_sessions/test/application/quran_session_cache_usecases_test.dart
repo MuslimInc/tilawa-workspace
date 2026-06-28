@@ -151,12 +151,22 @@ void main() {
         );
 
         check(result.isRight()).isTrue();
-        // FakeMarketSchedulingConfigRepository returns Left(NotFoundFailure)
-        // for 'EG' (no override registered), so the use case must fall back
-        // to getGlobal(). Both calls increment the counter.
         check(config.getMarketSchedulingConfigCallCount).equals(2);
       },
     );
+  });
+
+  group('MemoryCacheStore', () {
+    test('remove clears in-flight entry for the key', () {
+      final cache = MemoryCacheStore();
+      const key = 'dashboard';
+      cache.putInFlight<List<String>>(key, Future.value(['stale']));
+
+      cache.remove(key);
+
+      check(cache.getInFlight<List<String>>(key)).isNull();
+      check(cache.get<List<String>>(key)).isNull();
+    });
   });
 
   group('GetSessionDetailUseCase cache', () {

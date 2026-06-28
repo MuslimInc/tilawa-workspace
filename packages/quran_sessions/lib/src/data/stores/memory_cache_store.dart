@@ -21,6 +21,7 @@ class MemoryCacheStore implements QuranSessionCacheStore {
   @override
   void remove(String key) {
     _resolved.remove(key);
+    _inFlight.remove(key);
   }
 
   @override
