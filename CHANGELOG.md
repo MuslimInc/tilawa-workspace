@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.16+61] - 2026-06-28 [Google Play Release]
+
+### Added
+
+- **Quran Sessions**: Discover verified Quran tutors, book 1:1 sessions, and join
+  via external meeting links; My Sessions hub for upcoming and past bookings;
+  teacher dashboard with schedule, bookings, and session management; guardian
+  approval for student bookings where required.
+- **Home**: Next-prayer hero with Hijri date, optional Today Plan card, featured
+  tutor discovery card, and quick tools row for daily actions.
+
+### Changed
+
+- **Version**: Production track bumped to **2.0.16** (build **61**).
+- **Theme**: Brand primary restored to green; warm canvas scaffold (`#FAF9F7`)
+  across Home and the app shell.
+- **Home**: Approved dashboard layout — prayer hero, primary actions, Today
+  Plan, and scroll-away featured tutor sliver; interactive surfaces migrated to
+  `TilawaInteractiveSurface`.
+- **UI kit**: Soft Material ink splash/highlight without press-scale; `TilawaCard`
+  nested-tap semantics (parent navigation from blank areas, nested controls keep
+  their own action, disabled nested controls are dead zones); settings list rows
+  use shared state-layer press, focus ring, and haptics.
+
+### Fixed
+
+- **Tasbeeh**: Counter card scales across viewport sizes without layout overflow.
+- **Quran Sessions**: My Sessions correctly classifies upcoming vs past sessions
+  (including tutor-cancelled slots); list caches invalidate after booking,
+  cancel, and reschedule mutations.
+- **Quran Sessions**: In-call toasts no longer overlay controls; local camera
+  preview before remote participants join.
+- **UI kit**: Long segmented-control labels ellipsize instead of overflowing.
+- **Login / Home**: Sign-in flow polish and home layout cleanup after
+  authentication.
+
 ## [2.0.13+58] - 2026-06-14 [Google Play Release]
 
 ### Fixed

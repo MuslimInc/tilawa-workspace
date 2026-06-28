@@ -56,10 +56,10 @@ void main() {
 
         final result = await useCase('student_1');
 
-      final page = result.fold((_) => null, (v) => v)!;
-      check(page.upcoming.length).equals(1);
-      check(page.upcoming.single.id).equals('cancelled');
-      check(page.past).isEmpty();
+        final page = result.fold((_) => null, (v) => v)!;
+        check(page.upcoming.length).equals(1);
+        check(page.upcoming.single.id).equals('cancelled');
+        check(page.past).isEmpty();
       },
     );
   });
