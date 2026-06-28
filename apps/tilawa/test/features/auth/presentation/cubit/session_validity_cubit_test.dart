@@ -39,7 +39,9 @@ void main() {
     sessionRevokedNotifier = SessionRevokedNotifier();
 
     when(() => mockAuthRepository.currentUser).thenReturn(tUser);
-    when(() => mockSignOut()).thenAnswer((_) async {});
+    when(
+      () => mockSignOut(skipServerTokenClear: true),
+    ).thenAnswer((_) async {});
   });
 
   tearDown(() {
@@ -69,7 +71,7 @@ void main() {
       const SessionValidityState(revoked: true, isChecking: false),
     ],
     verify: (_) {
-      verify(() => mockSignOut()).called(1);
+      verify(() => mockSignOut(skipServerTokenClear: true)).called(1);
       verifyNever(() => mockCheckValidity(any()));
     },
   );
@@ -89,7 +91,7 @@ void main() {
       const SessionValidityState(revoked: true, isChecking: false),
     ],
     verify: (_) {
-      verify(() => mockSignOut()).called(1);
+      verify(() => mockSignOut(skipServerTokenClear: true)).called(1);
     },
   );
 
@@ -107,7 +109,11 @@ void main() {
       const SessionValidityState(isChecking: false),
     ],
     verify: (_) {
-      verifyNever(() => mockSignOut());
+      verifyNever(
+        () => mockSignOut(
+          skipServerTokenClear: any(named: 'skipServerTokenClear'),
+        ),
+      );
     },
   );
 
@@ -136,7 +142,7 @@ void main() {
       const SessionValidityState(revoked: true, isChecking: false),
     ],
     verify: (_) {
-      verify(() => mockSignOut()).called(1);
+      verify(() => mockSignOut(skipServerTokenClear: true)).called(1);
     },
   );
 
@@ -154,7 +160,11 @@ void main() {
       const SessionValidityState(isChecking: false),
     ],
     verify: (_) {
-      verifyNever(() => mockSignOut());
+      verifyNever(
+        () => mockSignOut(
+          skipServerTokenClear: any(named: 'skipServerTokenClear'),
+        ),
+      );
     },
   );
 

@@ -79,6 +79,9 @@ void main() {
     when(
       mockSyncUserLanguagePreference(any),
     ).thenAnswer((_) async {});
+    when(mockSyncDeviceTokenUseCase(any)).thenAnswer(
+      (_) async => const Right(null),
+    );
 
     authBloc = AuthBloc(
       mockSignInWithGoogleUseCase,
@@ -102,6 +105,26 @@ void main() {
     });
 
     group('CheckAuthStatusEvent', () {
+      blocTest<AuthBloc, AuthState>(
+        'emits [unauthenticated] when user is logged in but device registration fails',
+        build: () {
+          when(mockGetCurrentUserUseCase()).thenReturn(tUser);
+          when(mockSyncDeviceTokenUseCase(tUser.id)).thenAnswer(
+            (_) async => Left(Failure.validationError('FCM token unavailable')),
+          );
+          when(
+            mockSignOut(skipServerTokenClear: true),
+          ).thenAnswer((_) async {});
+          return authBloc;
+        },
+        act: (bloc) => bloc.add(const CheckAuthStatusEvent()),
+        expect: () => [const AuthState.unauthenticated()],
+        verify: (_) {
+          verify(mockSignOut(skipServerTokenClear: true)).called(1);
+          verifyNever(mockGetCurrentLanguageUseCase());
+        },
+      );
+
       blocTest<AuthBloc, AuthState>(
         'emits [authenticated] when user is logged in',
         build: () {
@@ -136,6 +159,31 @@ void main() {
     });
 
     group('SignInWithGoogleEvent', () {
+      blocTest<AuthBloc, AuthState>(
+        'emits [loading, error] when device registration fails after Google success',
+        build: () {
+          when(
+            mockSignInWithGoogleUseCase(),
+          ).thenAnswer((_) async => AuthResult.success(user: tUser));
+          when(mockSyncDeviceTokenUseCase(tUser.id)).thenAnswer(
+            (_) async => Left(Failure.serverError('registration failed')),
+          );
+          when(
+            mockSignOut(skipServerTokenClear: true),
+          ).thenAnswer((_) async {});
+          return authBloc;
+        },
+        act: (bloc) => bloc.add(const SignInWithGoogleEvent()),
+        expect: () => [
+          const AuthState.loading(),
+          const AuthState.error(message: 'registration failed'),
+        ],
+        verify: (_) {
+          verify(mockSignOut(skipServerTokenClear: true)).called(1);
+          verifyNever(mockGetCurrentLanguageUseCase());
+        },
+      );
+
       blocTest<AuthBloc, AuthState>(
         'emits [loading, authenticated] when sign in is successful and syncs token',
         build: () {

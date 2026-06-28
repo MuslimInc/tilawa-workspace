@@ -15,9 +15,11 @@ class SignOut {
   final SyncDeviceTokenUseCase _syncDeviceTokenUseCase;
   final PremiumRepository _premiumRepository;
 
-  Future<void> call() async {
+  /// When [skipServerTokenClear] is true (remote session revoke), local sign-out
+  /// must not call the server token-clear path that could race with a new device.
+  Future<void> call({bool skipServerTokenClear = false}) async {
     final currentUser = _repository.currentUser;
-    if (currentUser != null) {
+    if (currentUser != null && !skipServerTokenClear) {
       try {
         await _syncDeviceTokenUseCase.removeCurrentTokenForUser(currentUser.id);
       } catch (_) {

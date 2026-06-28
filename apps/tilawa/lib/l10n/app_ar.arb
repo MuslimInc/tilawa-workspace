@@ -3826,12 +3826,16 @@
     "@authSignedInElsewhereTitle": {
         "description": "Title when another device took over the active session"
     },
-    "authSignedInElsewhereBody": "لأسباب أمنية، يُسمح بجهاز نشط واحد لحسابك في جلسات القرآن. تم فتح حسابك على جهاز آخر — سجّل الدخول مجدداً على هذا الجهاز للمتابعة.",
+    "authSignedInElsewhereBody": "تم تسجيل خروجك لأن الحساب تم استخدامه على جهاز آخر.",
     "@authSignedInElsewhereBody": {
         "description": "Body when another device took over the active session"
     },
     "authSignedInElsewhereAction": "تسجيل الدخول مجدداً",
     "@authSignedInElsewhereAction": {
         "description": "Primary action after session revoked on this device"
+    },
+    "authDeviceRegistrationFailed": "تعذّر إكمال تسجيل الدخول. تحقق من اتصالك وحاول مرة أخرى.",
+    "@authDeviceRegistrationFailed": {
+        "description": "Shown when Firebase auth succeeds but active-device registration fails"
     }
 }

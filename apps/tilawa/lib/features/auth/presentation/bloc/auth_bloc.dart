@@ -75,34 +75,33 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
         return;
       }
 
-      result.when(
-        success: (user) {
-          _accountDeletionFlow.clearLoginAutoSignInSuppression();
-          unawaited(_syncDeviceToken(user.id).catchError((_) {}));
-          unawaited(_syncLanguagePreferenceAfterAuth());
-          emit(AuthState.authenticated(user: user));
-        },
-        failure: (message, code, details) {
+      switch (result) {
+        case AuthSuccess(:final user):
+          await _handleSignInSuccess(
+            user: user,
+            generation: generation,
+            emit: emit,
+          );
+        case AuthFailure(
+          :final message,
+          :final code,
+          :final details,
+        ):
           final String detail = code == null
               ? 'Google sign-in failed: $message'
               : 'Google sign-in failed: $message (code: $code)';
-          // Provider details are a native stack trace; passing them as the
-          // log stack trace gets them truncated and attached by Sentry.
           logger.w(
             detail,
             stackTrace: details == null ? null : StackTrace.fromString(details),
           );
           emit(AuthState.error(message: message));
-        },
-        cancelled: () {
+        case AuthCancelled():
           logger.d('[GoogleSignIn] cancelled by user');
           emit(const AuthState.unauthenticated());
-        },
-        noGoogleAccounts: () {
+        case AuthResultNoGoogleAccounts():
           logger.d('[GoogleSignIn] no Google accounts on device');
           emit(const AuthState.noGoogleAccounts());
-        },
-      );
+      }
     } catch (error, stackTrace) {
       if (generation != _interactiveSignInGeneration) {
         return;
@@ -114,6 +113,44 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
       );
       emit(const AuthState.error(message: 'Authentication failed'));
     }
+  }
+
+  Future<void> _handleSignInSuccess({
+    required UserEntity user,
+    required int generation,
+    required Emitter<AuthState> emit,
+  }) async {
+    _accountDeletionFlow.clearLoginAutoSignInSuppression();
+    if (generation != _interactiveSignInGeneration) {
+      return;
+    }
+
+    final Either<Failure, void> registration = await _syncDeviceToken(user.id);
+    if (generation != _interactiveSignInGeneration) {
+      return;
+    }
+
+    final bool registered = registration.fold((_) => false, (_) => true);
+    if (!registered) {
+      await _signOut(skipServerTokenClear: true);
+      if (generation != _interactiveSignInGeneration) {
+        return;
+      }
+      emit(
+        AuthState.error(
+          message: registration.fold(
+            (failure) =>
+                failure.message ??
+                'Sign-in could not be completed. Check your connection and try again.',
+            (_) => 'Sign-in could not be completed.',
+          ),
+        ),
+      );
+      return;
+    }
+
+    unawaited(_syncLanguagePreferenceAfterAuth());
+    emit(AuthState.authenticated(user: user));
   }
 
   Future<void> _onSignOut(SignOutEvent event, Emitter<AuthState> emit) async {
@@ -198,12 +235,20 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
   ) async {
     final UserEntity? user = _getCurrentUser();
     if (user != null) {
-      unawaited(_syncDeviceToken(user.id).catchError((_) {}));
+      final Either<Failure, void> registration = await _syncDeviceToken(
+        user.id,
+      );
+      final bool registered = registration.fold((_) => false, (_) => true);
+      if (!registered) {
+        await _signOut(skipServerTokenClear: true);
+        emit(const AuthState.unauthenticated());
+        return;
+      }
       unawaited(_syncLanguagePreferenceAfterAuth());
       emit(AuthState.authenticated(user: user));
-    } else {
-      emit(const AuthState.unauthenticated());
+      return;
     }
+    emit(const AuthState.unauthenticated());
   }
 
   Future<void> _syncLanguagePreferenceAfterAuth() async {

@@ -3412,8 +3412,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authSignedInElsewhereBody =>
-      'MeMuslim allows one active device per account for Quran Sessions security. Your account was opened elsewhere — sign in again on this device to continue.';
+      'You were signed out because this account was used on another device.';
 
   @override
   String get authSignedInElsewhereAction => 'Sign in again';
+
+  @override
+  String get authDeviceRegistrationFailed =>
+      'Sign-in could not be completed. Check your connection and try again.';
 }

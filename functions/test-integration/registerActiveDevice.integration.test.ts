@@ -87,7 +87,7 @@ test("integration: registerActiveDevice keeps epoch on same device refresh", asy
   assert.equal(snap.get("notifications.activeFcmToken"), "tok-new");
 });
 
-test("integration: registerActiveDevice signOut clears active token", async () => {
+test("integration: registerActiveDevice signOut clears active token for active device", async () => {
   await db().collection("users").doc("user_1").set({
     session: { epoch: 2, activeDeviceId: "device-a" },
     notifications: { activeFcmToken: "tok-a", platform: "android" },
@@ -96,7 +96,7 @@ test("integration: registerActiveDevice signOut clears active token", async () =
   const result = await callable.run({
     auth: { uid: "user_1" },
     data: {
-      deviceId: "",
+      deviceId: "device-a",
       fcmToken: "",
       platform: "android",
       signOut: true,
@@ -106,4 +106,27 @@ test("integration: registerActiveDevice signOut clears active token", async () =
   assert.equal(result.epoch, 2);
   const snap = await db().collection("users").doc("user_1").get();
   assert.equal(snap.get("notifications.activeFcmToken"), undefined);
+});
+
+test("integration: stale device signOut does not clear new device token", async () => {
+  await db().collection("users").doc("user_1").set({
+    session: { epoch: 3, activeDeviceId: "device-b" },
+    notifications: { activeFcmToken: "tok-b", platform: "ios" },
+  });
+
+  const result = await callable.run({
+    auth: { uid: "user_1" },
+    data: {
+      deviceId: "device-a",
+      fcmToken: "",
+      platform: "android",
+      signOut: true,
+    },
+  });
+
+  assert.equal(result.epoch, 3);
+  assert.equal(result.activeDeviceId, "device-b");
+  const snap = await db().collection("users").doc("user_1").get();
+  assert.equal(snap.get("notifications.activeFcmToken"), "tok-b");
+  assert.equal(snap.get("session.activeDeviceId"), "device-b");
 });

@@ -78,7 +78,7 @@ class SessionValidityCubit extends Cubit<SessionValidityState> {
     _handlingRevocation = true;
     emit(state.copyWith(revoked: true, isChecking: false));
     try {
-      await _signOut();
+      await _signOut(skipServerTokenClear: true);
     } finally {
       _handlingRevocation = false;
     }

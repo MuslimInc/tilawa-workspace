@@ -22,6 +22,8 @@ export interface RegisterDevicePlan {
   nextEpoch: number;
   nextActiveDeviceId: string;
   clearTokenOnly: boolean;
+  /** Stale-device sign-out or missing deviceId — leave server session untouched. */
+  noOp: boolean;
 }
 
 export function planDeviceRegistration(
@@ -32,11 +34,28 @@ export function planDeviceRegistration(
   const currentDeviceId = session?.activeDeviceId ?? "";
 
   if (input.signOut === true) {
+    const requestingDeviceId = input.deviceId.trim();
+    const isActiveDevice =
+      requestingDeviceId.length > 0 &&
+      currentDeviceId.length > 0 &&
+      requestingDeviceId === currentDeviceId;
+
+    if (!isActiveDevice) {
+      return {
+        deviceChanged: false,
+        nextEpoch: currentEpoch,
+        nextActiveDeviceId: currentDeviceId,
+        clearTokenOnly: false,
+        noOp: true,
+      };
+    }
+
     return {
       deviceChanged: false,
       nextEpoch: currentEpoch,
       nextActiveDeviceId: currentDeviceId,
       clearTokenOnly: true,
+      noOp: false,
     };
   }
 
@@ -48,6 +67,7 @@ export function planDeviceRegistration(
     nextEpoch: deviceChanged ? currentEpoch + 1 : currentEpoch,
     nextActiveDeviceId: input.deviceId,
     clearTokenOnly: false,
+    noOp: false,
   };
 }
 

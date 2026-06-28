@@ -144,6 +144,15 @@ export const registerActiveDevice = onCall(
 
       const previousToken = currentNotifications?.activeFcmToken ?? null;
 
+      if (plan.noOp) {
+        return {
+          epoch: readServerSessionEpoch(userData),
+          activeDeviceId: String(currentSession?.activeDeviceId ?? ""),
+          previousToken: null as string | null,
+          deviceChanged: false,
+        };
+      }
+
       if (plan.clearTokenOnly) {
         tx.set(
           userRef,

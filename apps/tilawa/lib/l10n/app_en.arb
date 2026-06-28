@@ -4323,12 +4323,16 @@
     "@authSignedInElsewhereTitle": {
         "description": "Title when another device took over the active session"
     },
-    "authSignedInElsewhereBody": "MeMuslim allows one active device per account for Quran Sessions security. Your account was opened elsewhere — sign in again on this device to continue.",
+    "authSignedInElsewhereBody": "You were signed out because this account was used on another device.",
     "@authSignedInElsewhereBody": {
         "description": "Body when another device took over the active session"
     },
     "authSignedInElsewhereAction": "Sign in again",
     "@authSignedInElsewhereAction": {
         "description": "Primary action after session revoked on this device"
+    },
+    "authDeviceRegistrationFailed": "Sign-in could not be completed. Check your connection and try again.",
+    "@authDeviceRegistrationFailed": {
+        "description": "Shown when Firebase auth succeeds but active-device registration fails"
     }
 }

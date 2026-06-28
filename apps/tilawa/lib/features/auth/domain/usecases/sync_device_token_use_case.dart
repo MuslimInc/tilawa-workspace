@@ -1,5 +1,8 @@
 import 'package:injectable/injectable.dart';
 
+import 'package:dartz_plus/dartz_plus.dart';
+import 'package:tilawa_core/errors/failures.dart';
+
 import 'register_active_device_use_case.dart';
 
 @injectable
@@ -8,9 +11,9 @@ class SyncDeviceTokenUseCase {
 
   final RegisterActiveDeviceUseCase _registerActiveDeviceUseCase;
 
-  Future<void> call(String userId) async {
+  Future<Either<Failure, void>> call(String userId) async {
     final result = await _registerActiveDeviceUseCase(userId);
-    result.fold((_) => null, (_) => null);
+    return result.fold(Left.new, (_) => const Right(null));
   }
 
   Future<void> removeCurrentTokenForUser(String userId) async {

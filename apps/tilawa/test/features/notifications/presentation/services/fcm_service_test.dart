@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -38,7 +39,9 @@ void main() {
       mockDeviceTokenService.onTokenRefresh,
     ).thenAnswer((_) => const Stream.empty());
     when(mockAuthRepository.currentUser).thenReturn(null);
-    when(mockSyncDeviceTokenUseCase(any)).thenAnswer((_) async {});
+    when(mockSyncDeviceTokenUseCase(any)).thenAnswer(
+      (_) async => const Right(null),
+    );
 
     service = FCMService(
       mockAuthRepository,

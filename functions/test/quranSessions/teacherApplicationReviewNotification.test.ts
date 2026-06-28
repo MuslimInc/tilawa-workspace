@@ -77,6 +77,13 @@ test("buildSessionRevokedNotificationCopy localizes by user languageCode", () =>
 
   assert.equal(enCopy.title, "Signed in on another device");
   assert.equal(arCopy.title, "تم تسجيل الدخول من جهاز آخر");
-  assert.equal(arCopy.body, "يرجى تسجيل الدخول مرة أخرى.");
+  assert.equal(
+    enCopy.body,
+    "You were signed out because this account was used on another device.",
+  );
+  assert.equal(
+    arCopy.body,
+    "تم تسجيل خروجك لأن الحساب تم استخدامه على جهاز آخر.",
+  );
   assert.notEqual(enCopy.body, arCopy.body);
 });

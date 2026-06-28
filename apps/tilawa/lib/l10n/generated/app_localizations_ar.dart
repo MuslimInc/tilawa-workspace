@@ -3389,8 +3389,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get authSignedInElsewhereBody =>
-      'لأسباب أمنية، يُسمح بجهاز نشط واحد لحسابك في جلسات القرآن. تم فتح حسابك على جهاز آخر — سجّل الدخول مجدداً على هذا الجهاز للمتابعة.';
+      'تم تسجيل خروجك لأن الحساب تم استخدامه على جهاز آخر.';
 
   @override
   String get authSignedInElsewhereAction => 'تسجيل الدخول مجدداً';
+
+  @override
+  String get authDeviceRegistrationFailed =>
+      'تعذّر إكمال تسجيل الدخول. تحقق من اتصالك وحاول مرة أخرى.';
 }

@@ -6005,7 +6005,7 @@ abstract class AppLocalizations {
   /// Body when another device took over the active session
   ///
   /// In en, this message translates to:
-  /// **'MeMuslim allows one active device per account for Quran Sessions security. Your account was opened elsewhere — sign in again on this device to continue.'**
+  /// **'You were signed out because this account was used on another device.'**
   String get authSignedInElsewhereBody;
 
   /// Primary action after session revoked on this device
@@ -6013,6 +6013,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign in again'**
   String get authSignedInElsewhereAction;
+
+  /// Shown when Firebase auth succeeds but active-device registration fails
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in could not be completed. Check your connection and try again.'**
+  String get authDeviceRegistrationFailed;
 }
 
 class _AppLocalizationsDelegate

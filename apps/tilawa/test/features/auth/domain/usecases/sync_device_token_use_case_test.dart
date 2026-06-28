@@ -24,13 +24,14 @@ void main() {
     useCase = SyncDeviceTokenUseCase(mockRegister);
   });
 
-  test('delegates registration to RegisterActiveDeviceUseCase', () async {
+  test('returns Right when registration succeeds', () async {
     when(
       () => mockRegister(tUserId),
     ).thenAnswer((_) async => const Right(tRegistration));
 
-    await useCase(tUserId);
+    final result = await useCase(tUserId);
 
+    expect(result.isRight(), isTrue);
     verify(() => mockRegister(tUserId)).called(1);
   });
 
@@ -39,7 +40,12 @@ void main() {
       (_) async => Left(Failure.serverError('failed')),
     );
 
-    await expectLater(useCase(tUserId), completes);
+    final result = await useCase(tUserId);
+
+    expect(result.isLeft(), isTrue);
+    result.fold((failure) {
+      expect(failure, isA<ServerFailure>());
+    }, (_) => fail('expected Left'));
   });
 
   test(

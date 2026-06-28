@@ -132,7 +132,9 @@ void main() {
     testLauncher = TestGoogleSignInInteractiveLauncher();
 
     when(mockGetCurrentUserUseCase()).thenReturn(null);
-    when(mockSyncDeviceTokenUseCase(any)).thenAnswer((_) async {});
+    when(mockSyncDeviceTokenUseCase(any)).thenAnswer(
+      (_) async => const Right(null),
+    );
     when(
       mockGetCurrentLanguageUseCase(),
     ).thenAnswer((_) async => Right(LanguageConfig.defaultLanguageCode));
@@ -276,11 +278,18 @@ void main() {
         verify(mockSignInWithGoogleUseCase()).called(1);
         expect(isGoogleButtonLoading(tester), isTrue);
 
-        signInCompleter.complete(AuthResult.success(user: testUser));
-        await tester.pump();
+        await tester.runAsync(() async {
+          signInCompleter.complete(AuthResult.success(user: testUser));
+          await authBloc.stream.firstWhere((AuthState state) {
+            return state is AuthAuthenticated ||
+                state is AuthError ||
+                state is AuthUnauthenticated;
+          });
+        });
         await tester.pump();
 
         expect(authBloc.state, isA<AuthAuthenticated>());
+        verify(mockSyncDeviceTokenUseCase(testUser.id)).called(1);
       },
     );
 

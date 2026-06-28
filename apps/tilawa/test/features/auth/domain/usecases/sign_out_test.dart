@@ -30,6 +30,23 @@ void main() {
     );
   });
 
+  test(
+    'remote revoke skips server token clear so new device token is preserved',
+    () async {
+      when(mockAuthRepository.currentUser).thenReturn(tUser);
+      when(mockPremiumRepository.clearPremiumStatus()).thenAnswer((_) async {});
+      when(mockAuthRepository.signOut()).thenAnswer((_) async {});
+
+      await useCase(skipServerTokenClear: true);
+
+      verifyNever(mockSyncDeviceTokenUseCase.removeCurrentTokenForUser(any));
+      verifyInOrder([
+        mockPremiumRepository.clearPremiumStatus(),
+        mockAuthRepository.signOut(),
+      ]);
+    },
+  );
+
   test('should revoke token, clear premium cache, and sign out', () async {
     when(mockAuthRepository.currentUser).thenReturn(tUser);
     when(

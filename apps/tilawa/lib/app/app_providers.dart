@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
@@ -52,6 +54,7 @@ class AppProviders {
               previous is! AuthAuthenticated && current is AuthAuthenticated,
           listener: (context, state) {
             context.read<SessionValidityCubit>().resetRevocation();
+            unawaited(context.read<SessionValidityCubit>().checkOnResume());
           },
           child: SessionRevokedNavigationListener(
             child: AccountDeletionNavigationListener(child: child),

@@ -12,13 +12,13 @@ export function buildSessionRevokedNotificationCopy(
   if (locale === "ar") {
     return {
       title: "تم تسجيل الدخول من جهاز آخر",
-      body: "يرجى تسجيل الدخول مرة أخرى.",
+      body: "تم تسجيل خروجك لأن الحساب تم استخدامه على جهاز آخر.",
     };
   }
 
   return {
     title: "Signed in on another device",
     body:
-      "Your account was opened on another device. Sign in again to continue on this device.",
+      "You were signed out because this account was used on another device.",
   };
 }
