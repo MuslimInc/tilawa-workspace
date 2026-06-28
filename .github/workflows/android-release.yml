@@ -53,15 +53,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Free disk space for release build
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost
+          sudo rm -rf /usr/local/lib/android/sdk/ndk
+          df -h /
+
+
       - name: Set up Java 17
         uses: actions/setup-java@v5
         with:
           distribution: zulu
           java-version: "17"
-          cache: gradle
-          cache-dependency-path: |
-            apps/tilawa/android/**/*.gradle*
-            apps/tilawa/android/**/gradle-wrapper.properties
 
       - name: Set up Flutter 3.44.2
         uses: subosito/flutter-action@v2
@@ -110,14 +113,14 @@ jobs:
           python3 tool/stamp_changelog_release.py \
             --release-id "${{ inputs.build_name }}+${{ inputs.build_number }}"
 
-      # setup-java Gradle cache restore can leave a corrupted journal on
-      # shared runners; clear it before bundleRelease (see run 28322480371).
-      - name: Reset Gradle journal cache
+      # Shared runners exhaust disk when global Gradle + Flutter caches stack.
+      - name: Reset Gradle caches before bundleRelease
         run: |
-          rm -rf "$HOME/.gradle/caches/journal-1"
           if [ -x apps/tilawa/android/gradlew ]; then
             (cd apps/tilawa/android && ./gradlew --stop) || true
           fi
+          rm -rf "$HOME/.gradle/caches"
+          df -h /
 
       - name: Build signed release AAB
         working-directory: apps/tilawa
