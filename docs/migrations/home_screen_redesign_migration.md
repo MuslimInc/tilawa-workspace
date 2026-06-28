@@ -1,17 +1,27 @@
 # Home Screen Redesign — Migration Notes
 
-**Status:** Pre-implementation reference  
+> **Superseded (2026-06-28).** Current Home is documented in
+> `docs/design/home_screen_design_artifacts.md`. Do not follow removal/rename
+> steps here unless explicitly requested.
+
+> **⚠️ AI agents — historical archive only:** Everything below describes a
+> **superseded** Home redesign. Do **not** execute steps, removals, or renames.
+> Approved Home:
+> [`home-dashboard-patterns.md`](../../.agents/skills/tilawa-apply-ui-principles/references/home-dashboard-patterns.md)
+> and [`home_screen_design_artifacts.md`](../design/home_screen_design_artifacts.md).
+
+**Status:** Superseded (historical)  
 **Date:** 2026-06-20  
 **Implementation Plan:** [Home Screen Redesign Plan](../plans/home_screen_redesign_plan.md)  
 **Acceptance Criteria:** [Home Screen Acceptance Criteria](../specs/home_screen_acceptance_criteria.md)
 
 ---
 
-## Purpose
+## Purpose (historical)
 
-This document is the authoritative inventory of every component that changes during the Home screen redesign. A developer or AI agent continuing this work should read this document before touching any file to understand what is being removed, what is being kept, what is being renamed, and what state management changes are involved.
-
-Cross-reference each item with its phase in the [Implementation Plan](../plans/home_screen_redesign_plan.md).
+This archived inventory described a **planned** Home redesign that does **not**
+match the approved Home on disk. It is kept for historical reference only. AI
+agents must use `home-dashboard-patterns.md` instead — not this file.
 
 ---
 

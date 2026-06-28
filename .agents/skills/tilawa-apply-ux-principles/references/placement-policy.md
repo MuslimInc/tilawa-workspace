@@ -1,7 +1,8 @@
 # Tilawa feature placement policy
 
 Consolidated from `DESIGN.md` and product specs. When docs conflict on
-*implementation*, trust code + `DESIGN.md`; this file guides *UX placement*.
+*implementation*, trust **code** + `home-dashboard-patterns.md` +
+`docs/design/home_screen_design_artifacts.md`; this file guides *UX placement*.
 
 ## Worship surfaces (restrictive)
 
@@ -24,29 +25,35 @@ Treat as **active worship / reading** — minimal interruption:
 
 ## Home dashboard
 
-Treat Home as a **daily module stack**, not an app launcher.
+Treat Home as an **approved daily module stack**. Preserve the current layout
+unless the user explicitly requests a Home redesign.
 
-**Encouraged:**
+**Encouraged (current implementation):**
 
-- Hero prayer/time context
-- One primary resume action directly below the hero
-- Today/practice modules (today plan, contextual athkar, pinned athkar)
-- Daily ayah / dua inspiration cards
-- Compact **Discover** grid for supporting shortcuts
-- Compact **More** list for lower-frequency library and setup destinations
+- Hero prayer/time context (`HomeDashboardHeroSliver`)
+- Optional pinned tutor header when Quran Sessions is enabled
+- Two primary tiles: Mushaf + Athkar (`HomePrimaryActionsSection`)
+- Compact quick tools row: Reciters, Qibla, Tasbeeh
+- Optional Today plan card
+- Flat More list for library/setup destinations
+- Conditional continue-listening row
+- Daily ayah / dua inspiration + quiet closing mark
 
 **Forbidden on Home:**
 
-- Tiles that duplicate Home, Prayer, Quran, Athkar, or Settings navigation
-- Six-tile "Explore" launcher grids (legacy pattern — removed)
-- Cold-start modals or support prompts
+- Redesigning or reordering approved sections without explicit user approval
+- Wiring stale widgets (`HomePrimaryActionZone`, `HomeDiscoverShortcuts`,
+  `HomeDailyPracticeSection`, etc.)
+- Tiles for Home, Prayer, or Settings/Profile
+- Multi-column shortcut grids that mirror the bottom navigation bar
+- Cold-start modals or support prompts on entry
 
-**Current Reciters exception:** Reciters may appear in the high Discover grid
-because listening is a core daily behavior; the shortcut selects the existing
-Reciters tab. Do not put Reciters in the lower More list.
+**Reciters exception:** Reciters appears in **quick tools** and selects the
+existing Reciters shell tab — intentional for daily listening. Do not move it
+to More or remove it without product sign-off.
 
-**More list rule:** More is for secondary library/setup routes such as History,
-Favorites, Downloads, Smart Khatma, and Support Tilawa.
+**More list rule:** History, Favorites, Downloads, Smart Khatma (when enabled),
+Support Tilawa. Qibla and Tasbeeh belong in quick tools, not More.
 
 ## Catalog tabs (Reciters, Athkar categories, etc.)
 

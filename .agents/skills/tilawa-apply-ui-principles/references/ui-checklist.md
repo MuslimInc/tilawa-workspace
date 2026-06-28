@@ -51,10 +51,18 @@
 
 ## Home-specific (if touching `features/home/`)
 
-- [ ] No Home tile duplicates core routes (Home, Quran, Prayer, Athkar, Settings/Profile)
-- [ ] Reciters, if present, selects the existing Reciters tab from Discover
+- [ ] Preserves approved full stack order (hero → tutor flag → primary actions →
+  quick tools → today plan → more → listening → inspiration → closing mark)
+- [ ] No Home redesign/reorder without explicit user request
+- [ ] No stale widgets wired (`HomePrimaryActionZone`, `HomeDiscoverShortcuts`,
+  `HomeDailyPracticeSection`)
+- [ ] No Home / Prayer / Settings tiles; no launcher grid mirroring bottom nav
+- [ ] Reciters in quick tools selects the existing Reciters tab
 - [ ] More list only contains lower-frequency library/setup routes
-- [ ] Daily practice and inspiration appear above Discover and More
+- [ ] Uses approved section widgets before inventing new ones
+- [ ] Spacing follows `spaceLarge` / `spaceExtraLarge` rhythm in body
+- [ ] Changes limited to bugs, spacing, overflow, a11y, tokens, RTL unless
+  user requested redesign
 
 ## FAB / shell chrome (if applicable)
 

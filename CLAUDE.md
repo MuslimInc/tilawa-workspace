@@ -47,6 +47,33 @@ Feature code lives under `apps/tilawa/lib/features/<feature>/` with
   layer boundaries
 - No `BuildContext` below the presentation layer
 
+## Home dashboard (approved — do not redesign)
+
+The current Home screen is **product-approved**. Source of truth:
+
+- Code: `apps/tilawa/lib/features/home/presentation/`
+- Patterns: [`.agents/skills/tilawa-apply-ui-principles/references/home-dashboard-patterns.md`](.agents/skills/tilawa-apply-ui-principles/references/home-dashboard-patterns.md)
+- Artifacts: [`docs/design/home_screen_design_artifacts.md`](docs/design/home_screen_design_artifacts.md)
+
+**Approved order:** `HomeDashboardHeroSliver` → tutor sliver (flag) →
+`HomePrimaryActionsSection` → `HomeQuickToolsSection` → `TodayPlanCard` →
+`HomeMoreActionsGroup` → `HomeListeningResumeRow` → `HomeDailyInspirationSection`
+→ closing mark.
+
+When working on Home: **preserve** this stack. Do **not** redesign from scratch,
+reorder sections, wire stale widgets (`HomePrimaryActionZone`,
+`HomeDiscoverShortcuts`, `HomeDailyPracticeSection`), or add a launcher grid
+unless the user explicitly requests a Home redesign.
+
+**Allowed without redesign approval:** bug fixes, spacing, overflow,
+accessibility, token consistency, RTL layout — using existing approved widgets.
+
+**Historical only (do not implement):** `docs/product/home_screen_redesign.md`,
+`docs/plans/home_screen_redesign_plan.md`,
+`docs/migrations/home_screen_redesign_migration.md`,
+`docs/specs/home_screen_acceptance_criteria.md`,
+`docs/adr/ADR-home-screen-information-architecture.md`.
+
 ## Design system
 
 All design values come from theme extensions — never hard-code sizes or colors.

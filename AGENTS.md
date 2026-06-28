@@ -19,6 +19,17 @@ then `dart analyze` and targeted `flutter test` from `apps/tilawa/` before finis
 
 See [`.cursor/README.md`](.cursor/README.md) for the rules index.
 
+**Home dashboard:** The current Home layout is product-approved. Before changing
+Home, read
+[`home-dashboard-patterns.md`](.agents/skills/tilawa-apply-ui-principles/references/home-dashboard-patterns.md)
+and [`docs/design/home_screen_design_artifacts.md`](docs/design/home_screen_design_artifacts.md).
+
+Preserve the approved full stack (hero → tutor flag → primary actions → quick
+tools → today plan → more → listening → inspiration → closing mark). Do not
+redesign, reorder, or wire stale widgets (`HomePrimaryActionZone`,
+`HomeDiscoverShortcuts`, `HomeDailyPracticeSection`) unless the user explicitly
+requests it. Improve only bugs, spacing, overflow, a11y, tokens, RTL.
+
 ---
 
 For **visual and UX rules** (colors, tokens, layout, components), read the

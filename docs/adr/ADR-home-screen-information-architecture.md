@@ -1,6 +1,16 @@
 # ADR-002: Home Screen Information Architecture
 
-**Status:** Accepted  
+> **Superseded for implementation (2026-06-28).** The approved Home UI is
+> documented in `docs/design/home_screen_design_artifacts.md` and
+> `.agents/skills/tilawa-apply-ui-principles/references/home-dashboard-patterns.md`.
+> Do not implement this ADR's removal of Reciters/Qibla shortcuts or alternate
+> layer model unless the user explicitly requests a Home redesign. Kept for
+> historical context only.
+
+> **⚠️ AI agents — historical archive only:** The Concept C / Hybrid IA below
+> was **not** adopted as the current Home. Do not implement from this ADR.
+
+**Status:** Superseded (historical)  
 **Date:** 2026-06-20  
 **Deciders:** MeMuslim product & engineering  
 **Product Decision Record:** [Home Screen Redesign](../product/home_screen_redesign.md)

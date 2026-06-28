@@ -1,6 +1,12 @@
 # Home Screen Redesign — Implementation Plan
 
-**Status:** Ready for implementation  
+> **Superseded (2026-06-28).** Do not execute this plan. Approved Home UI:
+> `docs/design/home_screen_design_artifacts.md`.
+
+> **⚠️ AI agents — historical archive only:** Phases below must **not** be
+> executed. They reference widgets and orders not on the approved Home.
+
+**Status:** Superseded (historical)  
 **Date:** 2026-06-20  
 **ADR:** [ADR-002: Home Screen Information Architecture](../adr/ADR-home-screen-information-architecture.md)  
 **Product Decision Record:** [Home Screen Redesign](../product/home_screen_redesign.md)  
@@ -9,9 +15,11 @@
 
 ---
 
-## Overview
+## Overview (historical)
 
-Five sequential phases. Each phase is independently deployable and leaves the app in a valid state. Phases build on each other — do not skip phases. Run `dart analyze` and `flutter test test/features/home/` after every phase before proceeding.
+The phases below were a **planned** Home redesign. The approved Home on disk
+differs. Do not execute these phases unless the user explicitly requests that
+historical redesign.
 
 **Target architecture after all phases:**
 

@@ -42,17 +42,22 @@ On a typical screen, eye path should be:
 3. **Supporting metadata** — `onSurfaceVariant`, `bodySmall`
 4. **Actions** — one primary CTA; others secondary
 
-On **Home**:
+On **Home** (approved — preserve this hierarchy):
 
-1. Hero (time / prayer / greeting)
-2. Primary action card (Quran, listening, or urgent athkar)
-3. Daily practice (today plan, contextual athkar, pinned athkar)
-4. Daily inspiration cards (ayah / dua)
-5. Discover shortcuts for supporting tools
-6. More grouped list for lower-frequency destinations
+1. `HomeDashboardHeroSliver` (Now)
+2. Pinned tutor sliver when Quran Sessions enabled
+3. `HomePrimaryActionsSection` (Mushaf + Athkar)
+4. `HomeQuickToolsSection` (Reciters, Qibla, Tasbeeh)
+5. `TodayPlanCard` (optional, deferred)
+6. `HomeMoreActionsGroup`
+7. `HomeListeningResumeRow` (conditional, deferred)
+8. `HomeDailyInspirationSection` (deferred)
+9. `_HomeDashboardClosingMark` (deferred)
 
-Do not restore a multi-tile launcher grid on Home — bottom nav owns primary
-destinations. See
+Do **not** replace this with a multi-tile launcher grid, reorder sections, or
+wire stale widgets (`HomePrimaryActionZone`, `HomeDiscoverShortcuts`,
+`HomeDailyPracticeSection`) without explicit user approval. Improve only bugs,
+spacing, overflow, a11y, tokens, RTL. See
 [home-dashboard-patterns.md](references/home-dashboard-patterns.md).
 
 ## One accent per screen
@@ -130,14 +135,18 @@ are equal (see `flutter-apply-tilawa-theming`).
 
 ## Grids & shortcuts
 
-**Discover grid** (`HomeDiscoverShortcuts`):
+**Quick tools** (`HomeQuickToolsSection`):
 
-- 2 columns narrow, 4 columns on medium+
-- Current supporting items: Reciters, Qibla, Tasbeeh, Bookmarks, and Sessions
-  when enabled
-- Do not add Home, Quran, Prayer, Athkar, or Settings/Profile tiles
-- Reciters is the current exception to bottom-nav duplication because the
-  shortcut selects the existing Reciters tab for daily listening use
+- Three equal compact tiles in one row: Reciters, Qibla, Tasbeeh
+- Reciters selects the existing Reciters shell tab (approved exception)
+- Do not add Home, Prayer, or Settings/Profile tiles
+- Do not expand into a 4+ column grid duplicating bottom nav
+
+**Primary actions** (`HomePrimaryActionsSection`):
+
+- Two featured tiles: Mushaf + Athkar
+- `HomePrimaryActionTile` + `HomeDashboardElevatedSurface` + hero radius
+- One gold accent lane across the pair — not rainbow tiles
 
 **More list** (`HomeMoreActionsGroup`):
 
@@ -205,8 +214,8 @@ When a nested control has a **different** action than the card tap, use
 - Magic pixel padding (`13`, `27`)
 - Second primary button beside the main CTA
 - Shadow on list tiles inside an already-raised sheet
-- **Home launcher grid** repeating core tabs (Home, Quran, Prayer, Athkar,
-  Settings/Profile)
+- **Home launcher grid** or reordering approved Home sections without user request
+- Shadow on list tiles inside an already-raised sheet
 
 ## Verification
 

@@ -123,28 +123,31 @@ Registered as a `ThemeExtension` on `ThemeData` (access: `Theme.of(context).exte
 
 ### Home dashboard IA
 
-Home is a daily ritual dashboard, not a generic launcher. Current structure in
-`apps/tilawa/lib/features/home/presentation/widgets/home_dashboard_body.dart`:
+Home is a **product-approved daily dashboard**. Code in `home_dashboard_body.dart`
+and `home_screen.dart` is the source of truth. **Do not redesign or reorder**
+unless the user explicitly asks. Improve only: bugs, spacing, overflow,
+accessibility, tokens, RTL — using approved widgets.
 
-1. **Now:** `HomeDashboardHeroSliver` owns prayer, greeting, date, location,
-   and collapsed prayer context.
-2. **Primary action:** `HomePrimaryActionZone` chooses the next best resume
-   surface: Quran, listening, or urgent athkar.
-3. **Daily practice:** optional Today Plan followed by contextual and pinned
-   athkar in `HomeDailyPracticeSection`.
-4. **Inspiration:** `HomeDailyInspirationSection` groups the daily ayah and dua
-   in one raised card.
-5. **Discover:** `HomeDiscoverShortcuts` shows supporting shortcuts in a compact
-   grid: Reciters, Qibla, Tasbeeh, Bookmarks, and Quran Sessions when enabled.
-   Do not add Home, Quran, Prayer, Athkar, or Settings tiles here.
-6. **More:** `HomeMoreActionsGroup` is a flat grouped list for lower-frequency
-   destinations such as History, Favorites, Downloads, Smart Khatma, and
-   Support Tilawa.
+**Approved order (full stack):**
 
-The phone bottom bar currently contains Home, Quran push, Reciters, and
-Settings/Profile. Reciters is the intentional Home exception because listening
-is a core daily behavior; its Discover shortcut selects the existing Reciters
-tab instead of creating a second route.
+1. `HomeDashboardHeroSliver` — prayer “Now”
+2. `homeFeaturedTutorCardSliver` (flag) — pinned tutor promo; hero unpins when on
+3. `HomePrimaryActionsSection` — Mushaf + Athkar tiles
+4. `HomeQuickToolsSection` — Reciters (tab), Qibla, Tasbeeh
+5. `TodayPlanCard` (optional, deferred)
+6. `HomeMoreActionsGroup`
+7. `HomeListeningResumeRow` (conditional, deferred)
+8. `HomeDailyInspirationSection` (deferred)
+9. `_HomeDashboardClosingMark` (deferred)
+
+Do **not** add Home, Prayer, or Settings/Profile tiles. Do not wire
+`HomePrimaryActionZone`, `HomeDiscoverShortcuts`, or `HomeDailyPracticeSection`
+— they are not on the approved Home. Reciters in quick tools is the intentional
+tab-selection exception.
+
+Canonical detail:
+`.agents/skills/tilawa-apply-ui-principles/references/home-dashboard-patterns.md`
+and `docs/design/home_screen_design_artifacts.md`.
 
 ---
 

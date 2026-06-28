@@ -1,18 +1,24 @@
 # Home Screen Redesign — Acceptance Criteria
 
-**Status:** Draft — awaiting implementation  
+> **Superseded (2026-06-28).** Validate Home against
+> `home-dashboard-patterns.md` and `home_dashboard_body_test.dart` instead.
+
+> **⚠️ AI agents — historical archive only:** Criteria below reference widgets
+> and orders **not** on the approved Home (`HomeQuranResumeCard` as primary,
+> etc.). Do **not** use this file for implementation or review.
+
+**Status:** Superseded (historical)  
 **Date:** 2026-06-20  
 **Implementation Plan:** [Home Screen Redesign Plan](../plans/home_screen_redesign_plan.md)  
 **ADR:** [ADR-002: Home Screen Information Architecture](../adr/ADR-home-screen-information-architecture.md)
 
 ---
 
-## How to Use This Document
+## How to Use This Document (historical)
 
-Each criterion is assigned to a phase. Criteria are testable — each has a clear pass/fail condition. Run these checks after the relevant phase is complete before merging.
-
-An **automated** criterion should be covered by a widget or unit test.  
-A **manual** criterion requires a device or simulator with a human tester.
+**Do not use.** This file recorded acceptance criteria for a superseded Home
+redesign. For current Home validation, use `home-dashboard-patterns.md` and
+`home_dashboard_body_test.dart`.
 
 ---
 

@@ -56,7 +56,9 @@ Focus: hierarchy, tokens, elevation, components, RTL, density, FAB/player cleara
 
 | Flag | Why |
 |------|-----|
-| **Home tile duplicates bottom-nav tab** | Shell already exposes Home, Prayer, Quran, Athkar, Settings |
+| **Home tile duplicates shell tab** | Shell exposes Home, Reciters, Settings; do not add Prayer/Settings tiles |
+| **Home redesign without user request** | Approved stack is in home-dashboard-patterns.md — preserve it |
+| **Stale Home widget wired** | `HomePrimaryActionZone`, `HomeDiscoverShortcuts`, `HomeDailyPracticeSection` are not approved Home |
 | Donation/support on reader/prayer/athkar | Violates §9 placement |
 | Cold-start modal for new feature | Breaks calm entry |
 | Settings-only path to daily action | UX anti-pattern |
@@ -74,10 +76,18 @@ Focus: hierarchy, tokens, elevation, components, RTL, density, FAB/player cleara
 
 If touching `features/home/`:
 
-- [ ] Today modules (khatma, plan, pinned athkar) **above** More section
-- [ ] More row = non-nav destinations only (see `home-dashboard-patterns.md`)
-- [ ] Section header uses `Row` + `TilawaIconActionButton` for edit (not fake trailing on title)
-- [ ] Pull-to-refresh only refreshes data `HomeDashboardBloc` reloads
+- [ ] **Preserve approved full stack** — hero → tutor (flag) → primary actions
+  → quick tools → today plan → more → listening → inspiration → closing mark
+  (see `home-dashboard-patterns.md`)
+- [ ] **No redesign/reorder** unless user explicitly asked
+- [ ] **No stale widgets** — do not wire `HomePrimaryActionZone`,
+  `HomeDiscoverShortcuts`, `HomeDailyPracticeSection`, etc.
+- [ ] **Improvement scope only** unless redesign requested: bugs, spacing,
+  overflow, accessibility, tokens, RTL
+- [ ] No Home / Prayer / Settings tiles; no launcher grid mirroring bottom nav
+- [ ] Reciters stays in quick tools (tab selection exception)
+- [ ] More list = library/setup destinations only
+- [ ] Pull-to-refresh reloads `HomeDashboardBloc` + `HomeListeningResumeCubit`
 
 ## Visual verification (manual or Maestro)
 

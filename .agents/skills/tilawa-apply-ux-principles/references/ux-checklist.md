@@ -12,9 +12,13 @@ Run before shipping or in review mode. Mark each item pass / fail / N/A.
 ## Information architecture
 
 - [ ] High-frequency actions not buried in Settings or More
-- [ ] Home follows Now → Primary → Practice/Today → Inspiration → Discover → More if touching Home
-- [ ] Home does **not** duplicate core routes (Home, Quran, Prayer, Athkar, Settings/Profile)
-- [ ] Reciters shortcut, if present, selects the existing Reciters tab
+- [ ] Home matches approved full stack in `home-dashboard-patterns.md` if touching Home
+- [ ] No Home redesign/reorder without explicit user request
+- [ ] No stale Home targets (`HomePrimaryActionZone`, `HomeDiscoverShortcuts`,
+  `HomeDailyPracticeSection`, etc.)
+- [ ] Home does **not** add Home, Prayer, or Settings/Profile tiles; no launcher
+  grid mirroring bottom nav
+- [ ] Reciters in quick tools, if present, selects the existing Reciters tab
 - [ ] Customization (pins/favorites) has edit entry and sensible defaults
 - [ ] Pin/favorite count capped; empty state has add CTA
 - [ ] Picker modality matches [decision-trees.md](decision-trees.md) (sheet vs full screen)

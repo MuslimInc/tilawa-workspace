@@ -1,134 +1,269 @@
 # Home dashboard UI patterns
 
-Reference: `apps/tilawa/lib/features/home/presentation/screens/home_screen.dart`
+**Source of truth:** code under
+`apps/tilawa/lib/features/home/presentation/`.
 
-## Structure (current)
+**Agent rule:** The current Home layout is **product-approved**. Preserve and
+refine it in place. Do **not** redesign Home from scratch, reorder sections, or
+substitute widgets from older docs unless the user explicitly requests a Home
+redesign.
 
+**Allowed Home work without redesign approval:** bug fixes, spacing rhythm,
+overflow/layout at text scale 1.4, semantics/accessibility, token/theme
+consistency, and RTL-safe layout — using existing approved widgets only.
+
+Reference entry point: `screens/home_screen.dart`.
+
+---
+
+## Approved order (full stack)
+
+Match this order everywhere (slivers + body):
+
+| # | Layer | Widget / behavior |
+|---|--------|-------------------|
+| 1 | Sliver — Now | `HomeDashboardHeroSliver` (Variant B) |
+| 2 | Sliver — tutor (flag) | `homeFeaturedTutorCardSliver` → pinned tutor promo when Quran Sessions enabled; hero unpins |
+| 3 | Body | `HomePrimaryActionsSection` |
+| 4 | Body | `HomeQuickToolsSection` |
+| 5 | Body | `TodayPlanCard` (optional, deferred) |
+| 6 | Body | `HomeMoreActionsGroup` (deferred) |
+| 7 | Body | `HomeListeningResumeRow` (conditional, deferred) |
+| 8 | Body | `HomeDailyInspirationSection` (deferred) |
+| 9 | Body | `_HomeDashboardClosingMark` (deferred) |
+
+Items 5–9 render inside `DeferredAfterFirstFrame` except primary actions and
+quick tools, which load immediately under the sliver stack.
+
+**Spacing rhythm** (do not change casually without cause): within a zone
+`tokens.spaceLarge`; between unrelated zones `tokens.spaceExtraLarge`; More
+uses `HomeDashboardSection(compact: true)`.
+
+This is **not** a multi-tab launcher grid. Preserve the calm, polished,
+RTL-first dashboard — two featured primary tiles, one compact tools row, flat
+More list, conditional listening, inspiration, closing mark.
+
+---
+
+## Approved structure (current)
+
+```text
+Scaffold
+├── HomeScreenBackground (canvas gradient)
+└── RefreshIndicator
+    └── CustomScrollView (+ hero snap on scroll end)
+        ├── HomeDashboardHeroSliver
+        │   └── HomeDashboardHeroVariantB (default)
+        ├── [flag] homeFeaturedTutorCardSliver
+        │   └── HomeFeaturedTutorCardHeaderDelegate (pinned)
+        └── HomeDashboardContentSliver
+            └── HomeDashboardBody
+                ├── HomePrimaryActionsSection
+                ├── HomeQuickToolsSection
+                ├── [deferred] TodayPlanCard
+                ├── HomeMoreActionsGroup
+                ├── [conditional] HomeListeningResumeRow
+                ├── HomeDailyInspirationSection
+                └── _HomeDashboardClosingMark
 ```
-CustomScrollView
-├── HomeDashboardHeroSliver (pinned prayer hero, Variant B by default)
-└── HomeDashboardContentSliver
-    └── Column
-        ├── HomePrimaryActionZone         ← Quran / listening / urgent athkar
-        ├── [flag] TodayPlanCard
-        ├── HomeDailyPracticeSection      ← contextual + pinned athkar
-        ├── HomeDailyInspirationSection   ← ayah + dua in one card
-        ├── HomeDiscoverShortcuts         ← supporting shortcuts grid
-        ├── HomeMoreActionsGroup          ← library / setup destinations
-        └── [conditional] HomeListeningResumeRow
-```
 
-## IA zones (top → bottom)
+Deferred body content uses `DeferredAfterFirstFrame` for first-frame perf.
+Above-deferred: primary actions + quick tools load immediately under the hero.
 
-1. **Now** — hero (prayer, greeting, profile)
-2. **Primary action** — the next useful action: Quran resume, listening resume,
-   or urgent athkar
-3. **Today / practice** — optional Today Plan, contextual athkar, pinned athkar
-4. **Inspiration** — daily ayah and dua in one raised card
-5. **Discover** — supporting shortcuts in a compact grid
-6. **More** — lower-frequency library, account, and setup destinations
-7. **Listening resume** — conditional row only when listening is not primary
+---
 
-## Bottom navigation (do not duplicate on Home)
+## Sliver pin policy (Quran Sessions flag)
 
-Shell tabs (`app_shell_screen.dart` → `app_shell_nav_destinations.dart`):
-**Home**, **Quran** (push), **Reciters**, **Settings / Profile**.
-Viewport index `kAppShellRecitersTabIndex` (1) = Reciters.
+When `quranSessionsFeatureConfig().quranSessionsEnabled`:
 
-**Never** add Home tiles for: Home, Quran, Prayer, Athkar, Settings.
+- `homeDashboardHeroShouldPin()` → `false` (hero scrolls away)
+- `homeFeaturedTutorCardSliver()` pins `HomeFeaturedTutorCardHeaderDelegate`
+  below the hero with `topInset`, scroll-linked bottom elevation, and
+  `pinScrollOffset` from `HomeDashboardHeroSliver.scrollOffsetWhenTutorCardPins`
 
-**Current exception:** `HomeDiscoverShortcuts` keeps **Reciters** on Home
-because listening is a several-times-daily behavior in Tilawa. It selects the
-Reciters tab instead of pushing a duplicate route.
+When the flag is off:
+
+- Hero stays pinned at collapsed height
+- No tutor sliver
+
+Do not change this pin hand-off without explicit product approval.
+
+---
+
+## Bottom navigation vs Home surfaces
+
+Shell tabs (`app_shell_nav_destinations.dart`): **Home**, **Quran** (push),
+**Reciters**, **Settings / Profile**.
+
+| Home surface | Nav relationship | Approved? |
+|--------------|------------------|-----------|
+| Mushaf tile → `QuranIndexRoute` | Quran push (not a tab duplicate) | Yes |
+| Athkar tile → `AthkarCategoriesRoute` | No Athkar tab | Yes |
+| Reciters in quick tools | Selects Reciters tab | Yes — intentional daily-listening shortcut |
+| Qibla / Tasbeeh in quick tools | Pushed routes, no shell tab | Yes |
+| More list items | Library/setup routes | Yes |
+
+**Do not add** Home, Settings/Profile, or Prayer tiles to the body.
+
+**Do not** expand into a 4+ column shortcut grid that mirrors the bottom bar.
+
+---
 
 ## Hero
 
-File: `home_dashboard_hero_variant_b.dart`
+Files: `home_dashboard_hero_sliver.dart`, `home_dashboard_hero_variant_b.dart`
 
-- Compact pinned SliverPersistentHeader with prayer-period photo/gradient tokens.
-- Expanded state shows context row + featured next-prayer card.
-- Collapsed toolbar preserves prayer context while scrolling.
-- Hero snap threshold is 35% of collapse extent; animation uses
-  `tokens.durationFast` and `Curves.easeOutCubic`.
-- The old prayer day strip is removed from Home; the hero owns prayer context.
+- Pinned `SliverPersistentHeader` with prayer-period photo/gradient tokens
+- Expanded: context row + featured next-prayer card
+- Collapsed toolbar preserves prayer context while scrolling
+- Snap threshold: 35% of `HomeDashboardHeroSliver.collapseScrollExtent`
+- Snap motion: `tokens.durationFast`, `Curves.easeOutCubic`
+- Hero text scale clamped 1.0–1.3 for extent math
+- Prayer day strip removed — hero owns prayer context
 
-## Primary action hierarchy
+---
 
-| Priority | Widget | Surface / accent |
-|----------|--------|------------------|
-| Primary Quran | `HomeQuranResumeCard(featured: true)` | Gold featured gradient, progress ring when resumable |
-| Primary listening | `_HomePrimaryListeningCard` | Raised neutral card, headphones icon |
-| Primary athkar | `_HomePrimaryAthkarCard` | Raised neutral card, urgent athkar row |
-| Daily practice | `HomeDailyPracticeSection` | Section title + edit action + contextual card + pinned list |
-| Secondary library | `HomeMoreActionsGroup` | Flat grouped list with hairline dividers |
+## Primary actions section
 
-`HomePrimaryActionSyncListener` keeps the primary card aligned with Quran,
-listening, and athkar cubits.
+File: `home_primary_actions_section.dart`
 
-## Discover shortcuts
+- `HomeDashboardSection` + two `HomePrimaryActionTile` in a row
+- Mushaf tile: gold accent rail on start; `TilawaIcons.quran`
+- Athkar tile: accent rail on end; morning icon
+- Surface: `HomeDashboardElevatedSurface` + hero radius family
+- Routes: `QuranIndexRoute`, `AthkarCategoriesRoute`
 
-File: `home_discover_shortcuts.dart`
+---
 
-- Neutral section treatment; no gradient shell.
-- Uses `HomeDashboardShortcutGrid`: 2 columns on narrow, 4 columns on medium+.
-- Current items: Reciters, Qibla, Tasbeeh, Bookmarks, plus Quran Sessions when
-  `quranSessionsFeatureConfig().quranSessionsEnabled`.
-- Excludes Prayer, Quran, Athkar, Home, and Settings tiles.
+## Quick tools section
 
-## More list layout (grouped card)
+File: `home_quick_tools_section.dart`
 
-- Widget: `HomeMoreActionsGroup` + `HomeGroupedListRow`
-- One flat `TilawaCard` with hairline dividers between rows
-- Row: small outline icon box + title + optional subtitle + RTL chevron
-- Min height: `tokens.minInteractiveDimension` (44 dp)
-- Current items: History, Favorites, Downloads, Smart Khatma when enabled, and
-  Support Tilawa.
+- Three equal `_QuickToolTile` widgets in one row
+- Lighter visual weight than primary tiles (decorative radius, icon box)
+- Reciters: `openHomeRecitersTab(context)` — tab selection, not a new route
+- Qibla: `QiblaRoute`; Tasbeeh: `TasbeehRoute`
 
-## Pinned athkar section (canonical customizable block)
+---
 
-Files: `home_today_section.dart`, `pinned_athkar_home_section.dart`
+## More list
 
-- **Section header:** `HomeDashboardSection` title row with trailing edit
-  `TilawaIconActionButton` (`Icons.edit_outlined`).
-- **Picker:** `showTilawaModalBottomSheet` + flat grouped rows (`TilawaCheckbox`)
-- **Populated:** contextual featured ritual card + pinned athkar list
-- **Empty / loading / error:** `_PinnedAthkarEmptyCard`, loading card,
-  `_PinnedAthkarFailureCard`
+Files: `home_more_actions_group.dart`, `home_grouped_list_row.dart`
+
+- One flat `HomeDashboardCard` with hairline `TilawaDivider`s
+- Row: outline icon box + title + optional subtitle + RTL chevron
+- Min height: `tokens.minInteractiveDimension`
+- Items: History, Favorites, Downloads, Smart Khatma (flag), Support Tilawa
+
+Reciters, Qibla, and Tasbeeh belong in quick tools — not in More.
+
+---
+
+## Continue listening
+
+File: `home_listening_resume_row.dart`
+
+- Shown when `HomeListeningResumeCubit.state.isVisible`
+- Placed after More in the approved order
+- Resumes last audio queue position
+- Neutral raised row — not the featured gold primary lane
+
+Refresh on pull-to-refresh: `HomeListeningResumeCubit.load()` alongside
+`HomeDashboardBloc` refresh (`home_screen.dart`).
+
+---
 
 ## Daily inspiration
 
 File: `home_daily_inspiration_section.dart`
 
-- One raised `TilawaCard` with ayah and dua blocks separated by `TilawaDivider`
-- Arabic line height only when `context.isArabic`
-- Reference labels (`Quran 2:43`) use `bodySmall` w500 — not bold badges
+- One raised `HomeDashboardCard`: ayah block, `TilawaDivider`, dua block
+- Arabic line height when `context.isArabic`
+- Reference labels: `bodySmall` w500 — not bold badges
+- Entrance animation via `_EntranceAnimator`
 
-## Adding another Today section
+---
 
-Insert a new daily module in `HomeDashboardBody` near the existing
-`TodayPlanCard` or before `HomeDailyInspirationSection` if it is part of the
-daily ritual surface:
+## Closing mark
 
-```dart
-const YourTodaySection(),
-SizedBox(height: tokens.spaceLarge),
-```
+Private widget in `home_dashboard_body.dart`.
 
-## Patterns to reuse
+- Quiet Quran icon + app title at scroll bottom
+- Does not compete with content; supports peak-end UX
+
+---
+
+## Composition root & refresh
+
+File: `home_screen_scope.dart`
+
+Provides: `HomeDashboardBloc`, `HomeListeningResumeCubit`, optional
+`TodayPlanBloc`, optional `SmartKhatmaBloc`.
+
+Pull-to-refresh reloads dashboard bloc + listening resume cubit.
+
+---
+
+## Building blocks **not** on Home — do not implement as Home targets
+
+These names appear in older docs or unused files. They are **not** part of the
+approved Home body. Do **not** wire, recommend, or substitute them on Home:
+
+| Name | Status |
+|------|--------|
+| `HomePrimaryActionZone` | Unused on Home; not an implementation target |
+| `HomeDiscoverShortcuts` | Does not exist on disk; superseded by `HomeQuickToolsSection` |
+| `HomeDailyPracticeSection` | Does not exist on disk; athkar entry is `HomePrimaryActionsSection` |
+| `HomeMorningAthkarSection` | Exists but not in approved Home body |
+| `HomeQuickActionsSection` | Legacy; not in approved Home body |
+| `HomeDashboardShortcutGrid` | Helper for legacy sections only |
+| `PinnedAthkarHomeSection` | Athkar feature; not in approved Home body |
+
+When improving Home, extend **approved widgets** in the order table — never
+replace the body with patterns from superseded redesign docs.
+
+---
+
+## Patterns to reuse on Home
 
 | Pattern | File |
 |---------|------|
-| Primary card selection | `home_primary_action_zone.dart` |
-| Featured Quran resume | `home_quran_resume_card.dart` |
-| Discover shortcuts | `home_discover_shortcuts.dart` |
-| Pinned section + sheet picker | `pinned_athkar_home_section.dart` |
+| Section rhythm | `home_dashboard_section.dart` |
+| Primary pair tiles | `home_primary_action_tile.dart` |
+| Compact tool tile | `home_quick_tools_section.dart` (`_QuickToolTile`) |
 | Grouped list row | `home_grouped_list_row.dart` |
-| More actions group | `home_more_actions_group.dart` |
+| More actions | `home_more_actions_group.dart` |
 | Daily inspiration | `home_daily_inspiration_section.dart` |
-| Category card | `athkar_category_card.dart` |
-| Content sheet padding | `home_dashboard_content_sliver.dart` |
+| Content padding | `home_dashboard_content_sliver.dart` |
+| Featured tutor pin | `home_featured_tutor_card.dart` |
+
+---
 
 ## Feature flags
 
-`isSmartKhatmaEnabled()`, `isTodayPlanEnabled()`, and
-`quranSessionsFeatureConfig().quranSessionsEnabled` gate optional Home modules.
+- `isTodayPlanEnabled()` → `TodayPlanCard`
+- `isSmartKhatmaEnabled()` → Smart Khatma row in More
+- `quranSessionsFeatureConfig().quranSessionsEnabled` → pinned tutor sliver + hero pin policy
+
+---
+
+## Adding a new Home section
+
+1. Confirm placement with the **approved body order** table above.
+2. Use `HomeDashboardSection` + existing card/tile patterns.
+3. Match spacing rhythm (`spaceLarge` / `spaceExtraLarge`).
+4. Add l10n (en + ar); no hard-coded chrome strings.
+5. Update this file + `docs/design/home_screen_design_artifacts.md` together.
+6. Add or update widget tests under `test/features/home/`.
+
+---
+
+## Verification
+
+```sh
+cd apps/tilawa && dart analyze
+flutter test test/features/home/
+```
+
+Manual: light + dark, RTL Arabic, text scale 1.4, hero snap, tutor pin when
+flag on.

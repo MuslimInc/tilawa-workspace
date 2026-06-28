@@ -1,6 +1,14 @@
 # Home Screen Redesign — Product Decision Record
 
-**Status:** Accepted  
+> **Superseded for implementation (2026-06-28).** Current approved Home UI:
+> `docs/design/home_screen_design_artifacts.md`. This PDR describes an earlier
+> redesign direction that does not match the Home screen on disk. AI agents must
+> not use it to reorder or replace the current Home layout.
+
+> **⚠️ AI agents — historical archive only:** Product rationale below is **not**
+> implementation guidance for the current Home.
+
+**Status:** Superseded (historical)  
 **Date:** 2026-06-20  
 **Deciders:** MeMuslim product & engineering  
 **Related ADR:** [ADR-002: Home Screen Information Architecture](../adr/ADR-home-screen-information-architecture.md)  
