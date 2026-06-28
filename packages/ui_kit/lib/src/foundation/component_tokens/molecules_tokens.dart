@@ -1651,12 +1651,16 @@ class TilawaHomeScreenTokens {
     double? shadowOpacity,
   }) {
     final double opacity = shadowOpacity ?? homePrayerHeroShadowOpacity;
+    final Color borderColor = Color.alphaBlend(
+      homePrayerHeroBorder.withValues(alpha: 0.72),
+      colorScheme.outlineVariant.withValues(alpha: 0.28),
+    );
 
     return BoxDecoration(
       color: color ?? homeContentSheetSurface,
       borderRadius: borderRadius,
       border: Border.all(
-        color: homePrayerHeroBorder,
+        color: borderColor,
         width: tokens.borderWidthThin,
       ),
       boxShadow: opacity > 0
@@ -1701,16 +1705,23 @@ class TilawaHomeScreenTokens {
     );
   }
 
-  /// Theme-aware Home canvas gradient — primary at the top, neutral at the bottom.
+  /// Theme-aware Home canvas gradient — soft warm off-white, not primary wash.
   LinearGradient backgroundGradientFor(ColorScheme colorScheme) {
-    final Color top = colorScheme.primary;
-    final Color middle = Color.lerp(top, backgroundGradientEnd, 0.42)!;
+    final Color top = Color.lerp(
+      backgroundGradientStart,
+      colorScheme.primary,
+      0.05,
+    )!;
 
     return LinearGradient(
       begin: AlignmentDirectional.topCenter,
       end: AlignmentDirectional.bottomCenter,
-      colors: <Color>[top, middle, backgroundGradientEnd],
-      stops: const <double>[0, 0.42, 1],
+      colors: <Color>[
+        top,
+        backgroundGradientMiddle,
+        backgroundGradientEnd,
+      ],
+      stops: const <double>[0, 0.38, 1],
     );
   }
 

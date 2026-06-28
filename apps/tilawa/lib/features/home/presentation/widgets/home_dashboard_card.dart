@@ -36,6 +36,10 @@ class HomeDashboardCard extends StatelessWidget {
     final tokens = theme.tokens;
     final double effectiveRadius =
         borderRadius ?? tokens.resolveRadius(family: TilawaRadiusFamily.hero);
+    final Color cardBorder = Color.alphaBlend(
+      screenTokens.homePrayerHeroBorder.withValues(alpha: 0.72),
+      theme.colorScheme.outlineVariant.withValues(alpha: 0.28),
+    );
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
@@ -54,7 +58,7 @@ class HomeDashboardCard extends StatelessWidget {
                 padding: padding,
                 backgroundColor:
                     backgroundColor ?? screenTokens.homeContentSheetSurface,
-                borderColor: screenTokens.homePrayerHeroBorder,
+                borderColor: cardBorder,
                 borderRadius: effectiveRadius,
                 surface: surface,
                 onTap: onTap,
@@ -64,7 +68,7 @@ class HomeDashboardCard extends StatelessWidget {
             : TilawaCard(
                 padding: EdgeInsets.zero,
                 backgroundColor: Colors.transparent,
-                borderColor: screenTokens.homePrayerHeroBorder,
+                borderColor: cardBorder,
                 borderRadius: effectiveRadius,
                 surface: surface,
                 onTap: onTap,

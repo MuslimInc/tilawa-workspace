@@ -19,7 +19,7 @@ const double _kImpressionVisibleFraction = 0.5;
 abstract final class HomeFeaturedTutorCardLayout {
   const HomeFeaturedTutorCardLayout._();
 
-  static const double _layoutSlack = 16;
+  static const double _layoutSlack = 24;
 
   /// Total vertical extent for [HomeFeaturedTutorCardHeaderDelegate].
   ///
@@ -151,7 +151,16 @@ class HomeFeaturedTutorCardHeaderDelegate
           child: DecoratedBox(
             decoration: isPinned
                 ? BoxDecoration(
-                    gradient: screenTokens.featuredTutorGradient(),
+                    gradient: LinearGradient(
+                      begin: AlignmentDirectional.topCenter,
+                      end: AlignmentDirectional.bottomCenter,
+                      colors: <Color>[
+                        screenTokens.homeFeaturedTutorGradientStart,
+                        screenTokens.homeFeaturedTutorGradientEnd,
+                        screenTokens.backgroundGradientEnd,
+                      ],
+                      stops: const <double>[0, 0.68, 1],
+                    ),
                   )
                 : const BoxDecoration(color: Colors.transparent),
             child: Stack(
@@ -172,9 +181,7 @@ class HomeFeaturedTutorCardHeaderDelegate
                     ),
                   ),
                 ),
-                _HomeFeaturedTutorPinnedElevation(
-                  visible: isPinned,
-                ),
+                _HomeFeaturedTutorPinnedChrome(visible: isPinned),
               ],
             ),
           ),
@@ -212,10 +219,9 @@ class HomeFeaturedTutorCardHeaderDelegate
   }
 }
 
-/// Bottom chrome for the pinned tutor header — hidden while the card scrolls
-/// in the hero stack, shown once the header sticks under the status bar.
-class _HomeFeaturedTutorPinnedElevation extends StatelessWidget {
-  const _HomeFeaturedTutorPinnedElevation({required this.visible});
+/// Bottom hairline for the pinned tutor header — no shadow, calm separation.
+class _HomeFeaturedTutorPinnedChrome extends StatelessWidget {
+  const _HomeFeaturedTutorPinnedChrome({required this.visible});
 
   final bool visible;
 
@@ -223,8 +229,6 @@ class _HomeFeaturedTutorPinnedElevation extends StatelessWidget {
   Widget build(BuildContext context) {
     final MeMuslimDesignTokens tokens = context.tokens;
     final ThemeData theme = Theme.of(context);
-    final TilawaHomeScreenTokens screenTokens =
-        theme.componentTokens.homeScreen;
 
     return Positioned(
       left: 0,
@@ -240,20 +244,11 @@ class _HomeFeaturedTutorPinnedElevation extends StatelessWidget {
               border: Border(
                 bottom: BorderSide(
                   color: theme.colorScheme.outlineVariant.withValues(
-                    alpha: tokens.opacitySubtle * 2.5,
+                    alpha: tokens.opacitySubtle * 1.8,
                   ),
                   width: tokens.borderWidthThin,
                 ),
               ),
-              boxShadow: <BoxShadow>[
-                BoxShadow(
-                  color: theme.colorScheme.shadow.withValues(
-                    alpha: screenTokens.homeCollapsedHeaderShadowOpacity,
-                  ),
-                  offset: tokens.shadowOffsetSmall,
-                  blurRadius: tokens.spaceSmall.toDouble(),
-                ),
-              ],
             ),
             child: const SizedBox(height: 1),
           ),

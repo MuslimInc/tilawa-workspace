@@ -6,9 +6,14 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 /// Cards sit on the canvas through spacing, contrast, and hairline borders —
 /// no overlapping sheet or heavy elevation.
 class HomeDashboardContentSliver extends StatelessWidget {
-  const HomeDashboardContentSliver({super.key, required this.child});
+  const HomeDashboardContentSliver({
+    super.key,
+    required this.child,
+    this.topPadding,
+  });
 
   final Widget child;
+  final double? topPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +24,7 @@ class HomeDashboardContentSliver extends StatelessWidget {
     return SliverToBoxAdapter(
       child: _HomeDashboardSheetBody(
         horizontalInset: horizontalInset,
-        topPadding: tokens.spaceMedium,
+        topPadding: topPadding ?? tokens.spaceMedium,
         child: child,
       ),
     );

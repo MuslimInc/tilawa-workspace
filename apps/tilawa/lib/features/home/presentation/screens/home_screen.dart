@@ -31,9 +31,12 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
+  final SliverOverlapAbsorberHandle _tutorHeaderOverlapHandle =
+      SliverOverlapAbsorberHandle();
 
   @override
   void dispose() {
+    _tutorHeaderOverlapHandle.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -102,8 +105,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                     context,
                                   ),
                             )
-                            case final Widget sliver)
-                          sliver,
+                            case final Widget sliver) ...[
+                          SliverOverlapAbsorber(
+                            handle: _tutorHeaderOverlapHandle,
+                            sliver: sliver,
+                          ),
+                          SliverOverlapInjector(
+                            handle: _tutorHeaderOverlapHandle,
+                          ),
+                        ],
                         HomeDashboardContentSliver(
                           child: const HomeDashboardBody(),
                         ),

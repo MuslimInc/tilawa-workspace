@@ -182,17 +182,17 @@ abstract final class AppColors {
   /// Foreground on the Home hero night gradient — warm cream ink.
   static const Color homeNextPrayerGradientNightForeground = Color(0xFFF5F0E6);
 
-  /// Home screen canvas — primary-tinted top of the dashboard gradient.
-  static const Color homeBackgroundGradientStart = defaultPrimary;
+  /// Home screen canvas — soft warm off-white top stop.
+  static const Color homeBackgroundGradientStart = Color(0xFFFAF9F7);
 
-  /// Home screen canvas — mid stop between primary top and neutral bottom.
-  static const Color homeBackgroundGradientMiddle = Color(0xFFD9D2CC);
+  /// Home screen canvas — calm warm beige mid stop.
+  static const Color homeBackgroundGradientMiddle = Color(0xFFF7F5F2);
 
-  /// Home screen canvas — neutral dashboard bottom (#EFEFEF).
-  static const Color homeBackgroundGradientEnd = Color(0xFFEFEFEF);
+  /// Home screen canvas — neutral dashboard bottom.
+  static const Color homeBackgroundGradientEnd = Color(0xFFF3F1ED);
 
   /// Radial glow accent behind the Home hero / next-prayer area.
-  static const Color homeBackgroundGlow = Color(0xFFE8DCC8);
+  static const Color homeBackgroundGlow = Color(0xFFF0EBE4);
 
   /// Home screen canvas — dark theme top.
   static const Color homeBackgroundGradientStartDark = Color(0xFF1E2826);
@@ -234,7 +234,7 @@ abstract final class AppColors {
   static const Color homePrayerCardBackground = Color(0xE8FFFFFF);
 
   /// Frosted next-prayer card hairline border.
-  static const Color homePrayerCardBorder = Color(0x40D6CFC4);
+  static const Color homePrayerCardBorder = Color(0xFFE8E4DE);
 
   /// Next-prayer card drop shadow tint.
   static const Color homePrayerCardShadow = tripGlideInk;
