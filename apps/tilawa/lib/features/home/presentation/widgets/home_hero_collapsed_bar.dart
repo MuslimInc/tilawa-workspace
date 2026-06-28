@@ -10,10 +10,20 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 /// [reveal] drives fill alpha directly — never wraps the panel in [Opacity],
 /// so scrolling content cannot bleed through a semi-transparent overlay.
 class HomeHeroCollapsedBar extends StatelessWidget {
-  const HomeHeroCollapsedBar({super.key, required this.reveal});
+  const HomeHeroCollapsedBar({
+    super.key,
+    required this.reveal,
+    this.showBottomChrome = true,
+  });
 
   /// Collapsed-bar visibility from 0 (hidden) to 1 (fully pinned).
   final double reveal;
+
+  /// Bottom border and shadow for the pinned hero bar.
+  ///
+  /// Disabled when a pinned featured tutor card sits directly below so the
+  /// stack reads as one connected surface without double separators.
+  final bool showBottomChrome;
 
   static const double _opaqueRevealThreshold = 0.22;
 
@@ -48,15 +58,17 @@ class HomeHeroCollapsedBar extends StatelessWidget {
     );
     final BoxDecoration decoration = BoxDecoration(
       color: fillColor,
-      border: Border(
-        bottom: BorderSide(
-          color: screenTokens.homeCollapsedHeaderBorder.withValues(
-            alpha: chromeAlpha,
-          ),
-          width: tokens.borderWidthThin,
-        ),
-      ),
-      boxShadow: chromeAlpha > 0
+      border: showBottomChrome
+          ? Border(
+              bottom: BorderSide(
+                color: screenTokens.homeCollapsedHeaderBorder.withValues(
+                  alpha: chromeAlpha,
+                ),
+                width: tokens.borderWidthThin,
+              ),
+            )
+          : null,
+      boxShadow: showBottomChrome && chromeAlpha > 0
           ? <BoxShadow>[
               BoxShadow(
                 color: colorScheme.shadow.withValues(

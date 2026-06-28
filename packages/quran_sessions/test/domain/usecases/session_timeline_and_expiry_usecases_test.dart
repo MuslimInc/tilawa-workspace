@@ -11,6 +11,31 @@ void main() {
   final now = DateTime.utc(2026, 1, 1, 10);
 
   group('GetSessionTimelineUseCase', () {
+    test('returns events keyed by linked session doc id', () async {
+      final audit = FakeAuditRepository()
+        ..events.add(
+          SessionAuditEvent(
+            sessionId: 'session_doc_1',
+            actorId: 'student_1',
+            actorRole: ActorRole.student,
+            action: SessionAction.createDraft,
+            source: ActionSource.mobileApp,
+            previousStatus: SessionLifecycleStatus.draft,
+            newStatus: SessionLifecycleStatus.draft,
+            createdAt: now,
+          ),
+        );
+      final useCase = GetSessionTimelineUseCase(audit);
+      final result = await useCase(
+        bookingId: 'booking_1',
+        sessionId: 'session_doc_1',
+      );
+      result.fold(
+        (_) => fail('expected Right'),
+        (events) => check(events.length).equals(1),
+      );
+    });
+
     test('returns events from audit repository', () async {
       final audit = FakeAuditRepository()
         ..events.add(
@@ -26,7 +51,7 @@ void main() {
           ),
         );
       final useCase = GetSessionTimelineUseCase(audit);
-      final result = await useCase('session_1');
+      final result = await useCase(bookingId: 'session_1');
       result.fold(
         (_) => fail('expected Right'),
         (events) => check(events.length).equals(1),

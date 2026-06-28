@@ -13,6 +13,7 @@
     "seed:staging-teachers:apply": "ts-node --project tsconfig.scripts.json scripts/seedStagingTeachers.ts --apply",
     "admin:list-pending-applications": "ts-node --project tsconfig.scripts.json scripts/listPendingTeacherApplications.ts",
     "admin:review-teacher-application": "ts-node --project tsconfig.scripts.json scripts/reviewTeacherApplicationAdmin.ts",
+    "admin:reactivate-quran-sessions-user": "ts-node --project tsconfig.scripts.json scripts/reactivateQuranSessionsUser.ts",
     "admin:create-user": "ts-node --project tsconfig.scripts.json scripts/createAdminUser.ts",
     "admin:audit-duplicate-emails": "ts-node --project tsconfig.scripts.json scripts/auditDuplicateUserEmails.ts",
     "quran-sessions:backfill-lifecycle": "ts-node --project tsconfig.scripts.json scripts/backfillLifecycleStatus.ts",

@@ -82,11 +82,18 @@ class _FakeAuditRepository implements AuditRepository {
   }
 
   @override
-  Future<Either<QuranSessionsFailure, List<SessionAuditEvent>>> listBySessionId(
-    String sessionId,
-  ) async {
+  Future<Either<QuranSessionsFailure, List<SessionAuditEvent>>>
+  listForAggregate({
+    required String bookingId,
+    String? sessionId,
+  }) async {
     return Right(
-      _stack.auditEvents.where((e) => e.sessionId == sessionId).toList(),
+      _stack.auditEvents
+          .where(
+            (event) =>
+                event.sessionId == bookingId || event.sessionId == sessionId,
+          )
+          .toList(),
     );
   }
 }

@@ -166,7 +166,7 @@ void main() {
   );
 
   blocTest<SessionDetailBloc, SessionDetailState>(
-    'requests timeline by linked session id',
+    'requests timeline by booking id and linked session doc id',
     build: () {
       auditRepository.events.add(
         SessionAuditEvent(

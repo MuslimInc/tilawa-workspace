@@ -80,6 +80,7 @@ export 'src/data/dtos/user_profile_dto.dart';
 export 'src/data/dtos/wallet_dto.dart';
 // ── Data: typed exceptions (for datasource implementors) ─────────────────────
 export 'src/data/exceptions/remote_exception.dart';
+export 'src/data/repositories/repository_error_mapper.dart';
 export 'src/data/seed/default_market_catalog.dart';
 // ── Data: DI registration module ─────────────────────────────────────────────
 // Host app uses QuranSessionsModule.register() — never imports *Impl directly.

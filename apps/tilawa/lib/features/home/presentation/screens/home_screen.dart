@@ -17,6 +17,7 @@ import '../bloc/home_dashboard_state.dart';
 import '../widgets/home_dashboard_body.dart';
 import '../widgets/home_dashboard_content_sliver.dart';
 import '../widgets/home_dashboard_hero_sliver.dart';
+import '../widgets/home_featured_tutor_card.dart';
 import '../widgets/home_screen_background.dart';
 
 /// Main daily dashboard for the app shell.
@@ -115,6 +116,16 @@ class _HomeScreenState extends State<HomeScreen> {
                           state: state,
                           onOpenPrayer: widget.onOpenPrayer,
                         ),
+                        if (homeFeaturedTutorCardSliver(
+                              context,
+                              scrollController: _scrollController,
+                              pinScrollOffset:
+                                  HomeDashboardHeroSliver.scrollOffsetWhenTutorCardPins(
+                                    context,
+                                  ),
+                            )
+                            case final Widget sliver)
+                          sliver,
                         HomeDashboardContentSliver(
                           child: const HomeDashboardBody(),
                         ),

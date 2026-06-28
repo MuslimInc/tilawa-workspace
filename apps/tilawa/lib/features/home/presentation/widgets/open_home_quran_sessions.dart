@@ -35,18 +35,3 @@ Future<void> openHomeQuranSessions(BuildContext context) async {
     context.push(QuranSessionsRoutes.home);
   }
 }
-
-/// Opens the student's booked sessions list from home shortcuts.
-Future<void> openHomeMySessions(BuildContext context) async {
-  if (!quranSessionsFeatureConfig().quranSessionsEnabled) {
-    return;
-  }
-
-  final userId = quranSessionsCurrentUserId(getIt);
-  if (userId == null) {
-    context.push('/login');
-    return;
-  }
-
-  context.push(QuranSessionsRoutes.mySessions);
-}

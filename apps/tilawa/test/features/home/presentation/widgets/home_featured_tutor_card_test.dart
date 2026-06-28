@@ -1,4 +1,3 @@
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -164,6 +163,52 @@ void main() {
   });
 
   testWidgets(
+    'pinned tutor header sliver lays out without geometry errors in Arabic',
+    (tester) async {
+      await resetScopeGetIt();
+      getIt.registerSingleton<AppLaunchConfig>(
+        const AppLaunchConfig(quranSessionsEnabled: true),
+      );
+
+      tester.view.physicalSize = const Size(360, 712);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          locale: const Locale('ar'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Builder(
+            builder: (context) {
+              final Widget? sliver = homeFeaturedTutorCardSliver(
+                context,
+                scrollController: controller,
+                pinScrollOffset: 0,
+              );
+              return CustomScrollView(
+                controller: controller,
+                slivers: [
+                  ?sliver,
+                  const SliverToBoxAdapter(child: SizedBox(height: 800)),
+                ],
+              );
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('تعلّم القرآن مع محفظك'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
     'featured tutor card uses one kit interactive surface without ink wells',
     (tester) async {
       await resetScopeGetIt();
@@ -174,23 +219,10 @@ void main() {
       await _pumpCard(tester);
 
       expect(find.byType(TilawaInteractiveSurface), findsOneWidget);
-      expect(find.byType(TilawaButton), findsOneWidget);
+      expect(find.byType(TilawaButton), findsNothing);
+      expect(find.text('My sessions'), findsNothing);
     },
   );
-
-  testWidgets('featured tutor card exposes My sessions shortcut', (
-    tester,
-  ) async {
-    await resetScopeGetIt();
-    getIt.registerSingleton<AppLaunchConfig>(
-      const AppLaunchConfig(quranSessionsEnabled: true),
-    );
-
-    await _pumpCard(tester);
-
-    expect(find.text('My sessions'), findsOneWidget);
-    expect(find.byIcon(FluentIcons.calendar_ltr_16_regular), findsOneWidget);
-  });
 
   testWidgets('featured tutor card exposes one button semantics target', (
     tester,
@@ -202,11 +234,11 @@ void main() {
 
     await _pumpCard(tester);
 
-    expect(find.byType(TilawaButton), findsOneWidget);
-    expect(find.text('My sessions'), findsOneWidget);
+    expect(find.byType(TilawaButton), findsNothing);
+    expect(find.text('My sessions'), findsNothing);
 
     final handle = tester.ensureSemantics();
-    expect(_countSemanticsButtons(tester), 3);
+    expect(_countSemanticsButtons(tester), 1);
 
     final cardSemantics = tester.getSemantics(find.text('Learn Quran'));
     expect(cardSemantics.flagsCollection.isButton, isTrue);
@@ -334,16 +366,25 @@ void main() {
     );
   });
 
-  testWidgets('tapping My sessions logs the shortcut event', (tester) async {
+  testWidgets('hero stays unpinned when tutor card feature is enabled', (
+    tester,
+  ) async {
     await resetScopeGetIt();
-    final analytics = await _pumpRoutedCard(tester);
-
-    await tester.tap(find.text('My sessions'));
-    await tester.pumpAndSettle();
-
-    expect(
-      analytics.events,
-      contains(AnalyticsEvents.homeLearnQuranMySessionsTapped),
+    getIt.registerSingleton<AppLaunchConfig>(
+      const AppLaunchConfig(quranSessionsEnabled: true),
     );
+
+    expect(homeDashboardHeroShouldPin(), isFalse);
+  });
+
+  testWidgets('hero stays pinned when tutor card feature is disabled', (
+    tester,
+  ) async {
+    await resetScopeGetIt();
+    getIt.registerSingleton<AppLaunchConfig>(
+      const AppLaunchConfig(quranSessionsEnabled: false),
+    );
+
+    expect(homeDashboardHeroShouldPin(), isTrue);
   });
 }

@@ -1,34 +1,292 @@
+import 'dart:math' as math;
+
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/quran_sessions/quran_sessions_feature_flags.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import 'home_learn_quran_analytics.dart';
+import 'home_hero_photo_theme.dart';
 import 'open_home_quran_sessions.dart';
 
 /// Minimum visible fraction that counts as an impression.
 const double _kImpressionVisibleFraction = 0.5;
 
-/// Featured product card for Learn Quran with Tutor.
-class HomeFeaturedTutorCard extends StatefulWidget {
-  const HomeFeaturedTutorCard({super.key});
+/// Layout metrics for the pinned home featured tutor header.
+abstract final class HomeFeaturedTutorCardLayout {
+  const HomeFeaturedTutorCardLayout._();
 
-  @override
-  State<HomeFeaturedTutorCard> createState() => _HomeFeaturedTutorCardState();
+  static const double _layoutSlack = 16;
+
+  /// Total vertical extent for [HomeFeaturedTutorCardHeaderDelegate].
+  ///
+  /// Includes [_layoutSlack] so TextPainter estimates stay below real
+  /// [Text] layout (Arabic / text scale) while the delegate still paints
+  /// a fixed [SizedBox] height for valid pinned sliver geometry.
+  static double extentFor(BuildContext context) {
+    final double topInset = MediaQuery.paddingOf(context).top;
+    final MeMuslimDesignTokens tokens = context.tokens;
+    final ThemeData theme = Theme.of(context);
+    final double horizontalInset =
+        TilawaHomeScreenTokens.screenHorizontalPadding(tokens);
+    final double contentWidth =
+        MediaQuery.sizeOf(context).width - (horizontalInset * 2);
+    final TextDirection textDirection = Directionality.of(context);
+
+    final double cardPadding = tokens.spaceMedium * 2;
+    final double iconBoxSize = tokens.iconSizeLarge + tokens.spaceMedium;
+
+    final TextStyle titleStyle =
+        theme.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w700,
+          height: 1.15,
+        ) ??
+        const TextStyle(
+          fontSize: 16,
+          height: 1.15,
+          fontWeight: FontWeight.w700,
+        );
+    final double titleHeight = _lineHeight(
+      context: context,
+      style: titleStyle,
+      maxLines: 1,
+      textDirection: textDirection,
+      text: context.l10n.homeFeaturedTutorTitle,
+    );
+    final double rowHeight = math.max(iconBoxSize, titleHeight);
+
+    final TextStyle subtitleStyle =
+        theme.textTheme.bodySmall?.copyWith(height: 1.3) ??
+        const TextStyle(fontSize: 12, height: 1.3);
+    final double subtitleHeight = _lineHeight(
+      context: context,
+      style: subtitleStyle,
+      maxLines: 2,
+      textDirection: textDirection,
+      text: context.l10n.homeFeaturedTutorSubtitle,
+    );
+
+    final double footerHeight = _FeaturedTutorFooterMetrics.heightFor(
+      context: context,
+      maxWidth: contentWidth - cardPadding,
+      ctaLabel: context.l10n.homeFeaturedTutorCta,
+      badgeLabel: context.l10n.experimentalBadgeLabel,
+    );
+
+    final double cardHeight =
+        cardPadding +
+        rowHeight +
+        tokens.spaceExtraSmall +
+        subtitleHeight +
+        tokens.spaceMedium +
+        footerHeight;
+
+    return topInset + cardHeight + tokens.spaceMedium + _layoutSlack;
+  }
+
+  static double _lineHeight({
+    required BuildContext context,
+    required TextStyle style,
+    required int maxLines,
+    required TextDirection textDirection,
+    required String text,
+  }) {
+    final TextPainter painter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: textDirection,
+      textScaler: MediaQuery.textScalerOf(context),
+      maxLines: maxLines,
+    )..layout();
+
+    return painter.height;
+  }
 }
 
-class _HomeFeaturedTutorCardState extends State<HomeFeaturedTutorCard> {
-  bool _loggedImpression = false;
+/// Pinned [SliverPersistentHeader] for the Learn Quran featured card.
+class HomeFeaturedTutorCardHeaderDelegate
+    extends SliverPersistentHeaderDelegate {
+  const HomeFeaturedTutorCardHeaderDelegate({
+    required this.extent,
+    required this.topInset,
+    required this.pinScrollOffset,
+    required this.scrollController,
+  });
 
-  void _onVisibilityChanged(VisibilityInfo info) {
-    if (_loggedImpression) return;
-    if (info.visibleFraction < _kImpressionVisibleFraction) return;
-    if (!quranSessionsFeatureConfig().quranSessionsEnabled) return;
-    _loggedImpression = true;
-    logHomeLearnQuranCardViewed();
+  final double extent;
+  final double topInset;
+  final double pinScrollOffset;
+  final ScrollController scrollController;
+
+  @override
+  double get minExtent => extent;
+
+  @override
+  double get maxExtent => extent;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    final MeMuslimDesignTokens tokens = context.tokens;
+    final ThemeData theme = Theme.of(context);
+    final TilawaHomeScreenTokens screenTokens =
+        theme.componentTokens.homeScreen;
+    final double horizontalInset =
+        TilawaHomeScreenTokens.screenHorizontalPadding(tokens);
+    final Color canvasColor = screenTokens.backgroundGradientEnd;
+    final SystemUiOverlayStyle overlayStyle =
+        HomeHeroPhotoTheme.collapsedBarOverlayStyle(canvasColor);
+
+    return ListenableBuilder(
+      listenable: scrollController,
+      builder: (context, _) {
+        final bool showBottomElevation = _isPinnedAtTop();
+
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: overlayStyle,
+          child: SizedBox(
+            height: extent,
+            child: ColoredBox(
+              color: canvasColor,
+              child: Stack(
+                clipBehavior: Clip.none,
+                fit: StackFit.expand,
+                children: [
+                  Padding(
+                    padding: EdgeInsetsDirectional.fromSTEB(
+                      horizontalInset,
+                      topInset,
+                      horizontalInset,
+                      tokens.spaceMedium,
+                    ),
+                    child: Align(
+                      alignment: AlignmentDirectional.topCenter,
+                      child: const _HomeFeaturedTutorCardImpressionScope(
+                        child: _HomeFeaturedTutorCardContent(),
+                      ),
+                    ),
+                  ),
+                  _HomeFeaturedTutorPinnedElevation(
+                    visible: showBottomElevation,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
+
+  bool _isPinnedAtTop() {
+    if (!scrollController.hasClients) {
+      return false;
+    }
+    return scrollController.offset >= pinScrollOffset - 1;
+  }
+
+  @override
+  bool shouldRebuild(
+    covariant HomeFeaturedTutorCardHeaderDelegate oldDelegate,
+  ) {
+    return extent != oldDelegate.extent ||
+        topInset != oldDelegate.topInset ||
+        pinScrollOffset != oldDelegate.pinScrollOffset ||
+        scrollController != oldDelegate.scrollController;
+  }
+}
+
+/// Bottom chrome for the pinned tutor header — hidden while the card scrolls
+/// in the hero stack, shown once the header sticks under the status bar.
+class _HomeFeaturedTutorPinnedElevation extends StatelessWidget {
+  const _HomeFeaturedTutorPinnedElevation({required this.visible});
+
+  final bool visible;
+
+  @override
+  Widget build(BuildContext context) {
+    final MeMuslimDesignTokens tokens = context.tokens;
+    final ThemeData theme = Theme.of(context);
+    final TilawaHomeScreenTokens screenTokens =
+        theme.componentTokens.homeScreen;
+
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: 0,
+      child: IgnorePointer(
+        child: AnimatedOpacity(
+          duration: tokens.durationFast,
+          curve: Curves.easeOutCubic,
+          opacity: visible ? 1 : 0,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: theme.colorScheme.outlineVariant.withValues(
+                    alpha: tokens.opacitySubtle * 2.5,
+                  ),
+                  width: tokens.borderWidthThin,
+                ),
+              ),
+              boxShadow: <BoxShadow>[
+                BoxShadow(
+                  color: theme.colorScheme.shadow.withValues(
+                    alpha: screenTokens.homeCollapsedHeaderShadowOpacity,
+                  ),
+                  offset: tokens.shadowOffsetSmall,
+                  blurRadius: tokens.spaceSmall.toDouble(),
+                ),
+              ],
+            ),
+            child: const SizedBox(height: 1),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Whether the prayer hero should stay pinned at its collapsed height.
+///
+/// When the featured tutor card is enabled, only the tutor header pins;
+/// the hero scrolls away so the pinned stack stays compact.
+bool homeDashboardHeroShouldPin() {
+  return !quranSessionsFeatureConfig().quranSessionsEnabled;
+}
+
+/// Builds the pinned featured tutor sliver when the feature flag is enabled.
+Widget? homeFeaturedTutorCardSliver(
+  BuildContext context, {
+  required ScrollController scrollController,
+  required double pinScrollOffset,
+}) {
+  if (!quranSessionsFeatureConfig().quranSessionsEnabled) {
+    return null;
+  }
+
+  return SliverPersistentHeader(
+    pinned: true,
+    delegate: HomeFeaturedTutorCardHeaderDelegate(
+      topInset: MediaQuery.paddingOf(context).top,
+      extent: HomeFeaturedTutorCardLayout.extentFor(context),
+      pinScrollOffset: pinScrollOffset,
+      scrollController: scrollController,
+    ),
+  );
+}
+
+/// Featured product card for Learn Quran with Tutor.
+///
+/// Standalone wrapper for tests; on Home it is rendered via
+/// [homeFeaturedTutorCardSliver].
+class HomeFeaturedTutorCard extends StatelessWidget {
+  const HomeFeaturedTutorCard({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -36,22 +294,63 @@ class _HomeFeaturedTutorCardState extends State<HomeFeaturedTutorCard> {
       return const SizedBox.shrink();
     }
 
+    return const _HomeFeaturedTutorCardImpressionScope(
+      child: _HomeFeaturedTutorCardContent(),
+    );
+  }
+}
+
+class _HomeFeaturedTutorCardImpressionScope extends StatefulWidget {
+  const _HomeFeaturedTutorCardImpressionScope({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_HomeFeaturedTutorCardImpressionScope> createState() =>
+      _HomeFeaturedTutorCardImpressionScopeState();
+}
+
+class _HomeFeaturedTutorCardImpressionScopeState
+    extends State<_HomeFeaturedTutorCardImpressionScope> {
+  bool _loggedImpression = false;
+
+  void _onVisibilityChanged(VisibilityInfo info) {
+    if (_loggedImpression) {
+      return;
+    }
+    if (info.visibleFraction < _kImpressionVisibleFraction) {
+      return;
+    }
+    if (!quranSessionsFeatureConfig().quranSessionsEnabled) {
+      return;
+    }
+    _loggedImpression = true;
+    logHomeLearnQuranCardViewed();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return VisibilityDetector(
       key: const Key('home_learn_quran_card_impression'),
       onVisibilityChanged: _onVisibilityChanged,
-      child: _buildCard(context),
+      child: widget.child,
     );
   }
+}
 
-  Widget _buildCard(BuildContext context) {
-    final tokens = context.tokens;
-    final theme = Theme.of(context);
-    final screenTokens = theme.componentTokens.homeScreen;
+class _HomeFeaturedTutorCardContent extends StatelessWidget {
+  const _HomeFeaturedTutorCardContent();
+
+  @override
+  Widget build(BuildContext context) {
+    final MeMuslimDesignTokens tokens = context.tokens;
+    final ThemeData theme = Theme.of(context);
+    final TilawaHomeScreenTokens screenTokens =
+        theme.componentTokens.homeScreen;
     final Color accent = screenTokens.homeFeaturedTutorAccent;
     final double radius = tokens.resolveRadius(
       family: TilawaRadiusFamily.decorative,
     );
-
     final BorderRadius borderRadius = BorderRadius.circular(radius);
 
     return Column(
@@ -133,25 +432,141 @@ class _HomeFeaturedTutorCardState extends State<HomeFeaturedTutorCard> {
             ),
           ),
         ),
-        SizedBox(height: tokens.spaceExtraSmall),
-        Align(
-          alignment: AlignmentDirectional.centerStart,
-          child: TilawaButton(
-            text: context.l10n.homeFeaturedTutorMySessions,
-            onPressed: () {
-              logHomeLearnQuranMySessionsTapped();
-              openHomeMySessions(context);
-            },
-            variant: TilawaButtonVariant.ghost,
-            size: TilawaButtonSize.small,
-            leadingIcon: Icon(
-              FluentIcons.calendar_ltr_16_regular,
-              size: tokens.iconSizeSmall,
-            ),
-          ),
-        ),
       ],
     );
+  }
+}
+
+abstract final class _FeaturedTutorFooterMetrics {
+  static double heightFor({
+    required BuildContext context,
+    required double maxWidth,
+    required String ctaLabel,
+    required String badgeLabel,
+  }) {
+    final MeMuslimDesignTokens tokens = context.tokens;
+    final TextDirection textDirection = Directionality.of(context);
+
+    final double ctaHeight = _ctaPillHeight(
+      context: context,
+      label: ctaLabel,
+      textDirection: textDirection,
+    );
+    final double badgeHeight = _badgeHeight(
+      context: context,
+      label: badgeLabel,
+      textDirection: textDirection,
+    );
+
+    if (maxWidth >=
+        _minFooterRowWidth(
+          context: context,
+          ctaLabel: ctaLabel,
+          badgeLabel: badgeLabel,
+          textDirection: textDirection,
+        )) {
+      return math.max(ctaHeight, badgeHeight);
+    }
+
+    return ctaHeight + tokens.spaceSmall + badgeHeight;
+  }
+
+  static double _ctaPillHeight({
+    required BuildContext context,
+    required String label,
+    required TextDirection textDirection,
+  }) {
+    final MeMuslimDesignTokens tokens = context.tokens;
+    final ThemeData theme = Theme.of(context);
+    final TextStyle style =
+        theme.textTheme.labelMedium?.copyWith(
+          fontWeight: FontWeight.w700,
+        ) ??
+        const TextStyle(fontSize: 12, fontWeight: FontWeight.w700);
+
+    final TextPainter painter = TextPainter(
+      text: TextSpan(text: label, style: style),
+      textDirection: textDirection,
+      textScaler: MediaQuery.textScalerOf(context),
+      maxLines: 1,
+    )..layout();
+
+    return (tokens.spaceSmall * 2) +
+        math.max(painter.height, tokens.iconSizeSmall);
+  }
+
+  static double _badgeHeight({
+    required BuildContext context,
+    required String label,
+    required TextDirection textDirection,
+  }) {
+    final ThemeData theme = Theme.of(context);
+    final badgeTokens = theme.componentTokens.experimentalBadge;
+    final TextStyle style =
+        theme.textTheme.labelSmall?.copyWith(
+          fontWeight: badgeTokens.fontWeight,
+          letterSpacing: badgeTokens.letterSpacing,
+          height: 1,
+        ) ??
+        const TextStyle(fontSize: 11, height: 1);
+
+    final TextPainter painter = TextPainter(
+      text: TextSpan(text: label, style: style),
+      textDirection: textDirection,
+      textScaler: MediaQuery.textScalerOf(context),
+      maxLines: 1,
+    )..layout();
+
+    final EdgeInsets badgePadding = badgeTokens.padding.resolve(textDirection);
+    return badgePadding.vertical + painter.height;
+  }
+
+  static double _minFooterRowWidth({
+    required BuildContext context,
+    required String ctaLabel,
+    required String badgeLabel,
+    required TextDirection textDirection,
+  }) {
+    final MeMuslimDesignTokens tokens = context.tokens;
+    final ThemeData theme = Theme.of(context);
+    final badgeTokens = theme.componentTokens.experimentalBadge;
+
+    final TextStyle ctaStyle =
+        theme.textTheme.labelMedium?.copyWith(
+          fontWeight: FontWeight.w700,
+        ) ??
+        const TextStyle(fontSize: 12, fontWeight: FontWeight.w700);
+    final TextPainter ctaTextPainter = TextPainter(
+      text: TextSpan(text: ctaLabel, style: ctaStyle),
+      textDirection: textDirection,
+      textScaler: MediaQuery.textScalerOf(context),
+      maxLines: 1,
+    )..layout();
+
+    final double ctaWidth =
+        (tokens.spaceMedium * 2) +
+        ctaTextPainter.width +
+        tokens.spaceExtraSmall +
+        tokens.iconSizeSmall;
+
+    final TextStyle badgeStyle =
+        theme.textTheme.labelSmall?.copyWith(
+          fontWeight: badgeTokens.fontWeight,
+          letterSpacing: badgeTokens.letterSpacing,
+          height: 1,
+        ) ??
+        const TextStyle(fontSize: 11, height: 1);
+    final TextPainter badgeTextPainter = TextPainter(
+      text: TextSpan(text: badgeLabel, style: badgeStyle),
+      textDirection: textDirection,
+      textScaler: MediaQuery.textScalerOf(context),
+      maxLines: 1,
+    )..layout();
+
+    final EdgeInsets badgePadding = badgeTokens.padding.resolve(textDirection);
+    final double badgeWidth = badgePadding.horizontal + badgeTextPainter.width;
+
+    return ctaWidth + tokens.spaceSmall + badgeWidth;
   }
 }
 
@@ -169,46 +584,17 @@ class _FeaturedTutorFooter extends StatelessWidget {
   final Color ctaForeground;
 
   double _minFooterRowWidth(BuildContext context) {
-    final tokens = context.tokens;
-    final theme = Theme.of(context);
-    final textDirection = Directionality.of(context);
-    final badgeTokens = theme.componentTokens.experimentalBadge;
-
-    final ctaStyle = theme.textTheme.labelMedium?.copyWith(
-      fontWeight: FontWeight.w700,
+    return _FeaturedTutorFooterMetrics._minFooterRowWidth(
+      context: context,
+      ctaLabel: ctaLabel,
+      badgeLabel: badgeLabel,
+      textDirection: Directionality.of(context),
     );
-    final ctaTextPainter = TextPainter(
-      text: TextSpan(text: ctaLabel, style: ctaStyle),
-      textDirection: textDirection,
-      maxLines: 1,
-    )..layout();
-
-    final ctaWidth =
-        (tokens.spaceMedium * 2) +
-        ctaTextPainter.width +
-        tokens.spaceExtraSmall +
-        tokens.iconSizeSmall;
-
-    final badgeStyle = theme.textTheme.labelSmall?.copyWith(
-      fontWeight: badgeTokens.fontWeight,
-      letterSpacing: badgeTokens.letterSpacing,
-      height: 1,
-    );
-    final badgeTextPainter = TextPainter(
-      text: TextSpan(text: badgeLabel, style: badgeStyle),
-      textDirection: textDirection,
-      maxLines: 1,
-    )..layout();
-
-    final badgePadding = badgeTokens.padding.resolve(textDirection);
-    final badgeWidth = badgePadding.horizontal + badgeTextPainter.width;
-
-    return ctaWidth + tokens.spaceSmall + badgeWidth;
   }
 
   @override
   Widget build(BuildContext context) {
-    final tokens = context.tokens;
+    final MeMuslimDesignTokens tokens = context.tokens;
 
     final cta = _FeaturedTutorCtaPill(
       label: ctaLabel,
@@ -261,8 +647,8 @@ class _FeaturedTutorCtaPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = context.tokens;
-    final theme = Theme.of(context);
+    final MeMuslimDesignTokens tokens = context.tokens;
+    final ThemeData theme = Theme.of(context);
 
     return ExcludeSemantics(
       child: DecoratedBox(
@@ -306,7 +692,7 @@ class _FeaturedTutorIconWell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = context.tokens;
+    final MeMuslimDesignTokens tokens = context.tokens;
     final double iconBoxSize = tokens.iconSizeLarge + tokens.spaceMedium;
 
     return DecoratedBox(

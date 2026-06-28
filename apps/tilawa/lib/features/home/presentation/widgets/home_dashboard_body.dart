@@ -8,7 +8,6 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../cubit/home_listening_resume_cubit.dart';
 import '../cubit/home_listening_resume_state.dart';
 import 'home_daily_inspiration_section.dart';
-import 'home_featured_tutor_card.dart';
 import 'home_listening_resume_row.dart';
 import 'home_more_actions_group.dart';
 import 'home_primary_actions_section.dart';
@@ -20,14 +19,14 @@ import 'home_quick_tools_section.dart';
 /// 1. **Now** — Sliver Prayer Hero (location, Hijri date, next prayer) — sliver above.
 /// 2. **Primary actions** — Quran Reader, Athkar (two large cards).
 /// 3. **Quick tools** — Reciters, Qibla, Tasbeeh (compact row).
-/// 4. **Featured** — Learn Quran with Tutor (full-width brand card, when enabled).
-/// 5. **Today Plan** — optional daily worship plan card.
-/// 6. **Continue** — conditional continue-listening row.
-/// 7. **More** — secondary library/account destinations.
-/// 8. **Inspiration** — passive daily ayah and dua at the bottom.
+/// 4. **Today Plan** — optional daily worship plan card.
+/// 5. **Continue** — conditional continue-listening row.
+/// 6. **More** — secondary library/account destinations.
+/// 7. **Inspiration** — passive daily ayah and dua at the bottom.
 ///
-/// Hierarchy: primary cards > quick tools > more list. The featured tutor
-/// card is a deliberate brand moment between tools and the rest.
+/// The featured tutor card is a pinned sliver directly under the hero.
+///
+/// Hierarchy: primary cards > quick tools > more list.
 ///
 /// **Spacing rhythm** (relationship-based):
 /// - Within same zone: `spaceLarge` rhythm.
@@ -48,8 +47,6 @@ class HomeDashboardBody extends StatelessWidget {
         const HomePrimaryActionsSection(),
         SizedBox(height: sectionGap),
         const HomeQuickToolsSection(),
-        SizedBox(height: sectionGap),
-        const HomeFeaturedTutorCard(),
         DeferredAfterFirstFrame(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

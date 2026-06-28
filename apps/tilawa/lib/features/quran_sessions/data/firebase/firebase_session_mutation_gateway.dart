@@ -382,16 +382,3 @@ class FirebaseSessionMutationGateway implements SessionMutationGateway {
     ActorRole.system => 'both_no_show',
   };
 }
-
-QuranSessionsFailure mapFirebaseExceptionToFailure(FirebaseException e) {
-  try {
-    mapFirebaseException(e);
-    return const UnknownFailure();
-  } on PermissionDeniedException {
-    return const UnauthorizedFailure();
-  } on NotFoundException catch (ex) {
-    return NotFoundFailure(ex.resourceType);
-  } on HttpException catch (ex) {
-    return ServerFailure(statusCode: ex.statusCode);
-  }
-}

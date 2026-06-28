@@ -16,6 +16,3 @@ void logHomeLearnQuranCardViewed() =>
 
 void logHomeLearnQuranCardTapped() =>
     _logHomeLearnQuranEvent(AnalyticsEvents.homeLearnQuranCardTapped);
-
-void logHomeLearnQuranMySessionsTapped() =>
-    _logHomeLearnQuranEvent(AnalyticsEvents.homeLearnQuranMySessionsTapped);

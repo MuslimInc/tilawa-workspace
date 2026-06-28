@@ -2,7 +2,6 @@ import 'package:checks/checks.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:quran_sessions/src/data/mappers/teacher_application_mapper.dart';
 import 'package:quran_sessions/src/data/mappers/user_profile_mapper.dart';
-import 'package:quran_sessions/src/data/repositories/repository_error_mapper.dart';
 import 'package:test/test.dart';
 
 void main() {

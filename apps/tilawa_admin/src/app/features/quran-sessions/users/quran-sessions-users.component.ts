@@ -10,6 +10,7 @@ import {
 } from '../../../core/domain/entities/quran-sessions-user.entity';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { StatusChipComponent } from '../../../shared/components/status-chip/status-chip.component';
+import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { RejectReasonDialogComponent } from '../../../shared/components/reject-reason-dialog/reject-reason-dialog.component';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { StatusLabelPipe } from '../../../core/i18n/status-label.pipe';
@@ -32,6 +33,7 @@ import { SortRequest } from '../../../core/domain/entities/pagination.types';
     FormsModule,
     PageHeaderComponent,
     StatusChipComponent,
+    ConfirmDialogComponent,
     RejectReasonDialogComponent,
     TranslatePipe,
     StatusLabelPipe,
@@ -65,6 +67,7 @@ export class QuranSessionsUsersComponent implements OnInit {
   statusFilter = '';
 
   suspendOpen = false;
+  reactivateOpen = false;
   pendingUserId = '';
 
   readonly accountStatuses = Object.values(QuranSessionsAccountStatus);
@@ -112,6 +115,17 @@ export class QuranSessionsUsersComponent implements OnInit {
   async onSuspend(reason: string): Promise<void> {
     await this.facade.suspendUser(this.pendingUserId, reason);
     this.suspendOpen = false;
+    await this.reload();
+  }
+
+  openReactivate(userId: string): void {
+    this.pendingUserId = userId;
+    this.reactivateOpen = true;
+  }
+
+  async onReactivate(): Promise<void> {
+    await this.facade.reactivateUser(this.pendingUserId);
+    this.reactivateOpen = false;
     await this.reload();
   }
 

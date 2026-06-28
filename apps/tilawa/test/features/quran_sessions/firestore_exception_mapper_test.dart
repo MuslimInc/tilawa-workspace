@@ -25,4 +25,20 @@ void main() {
       check(value!.toUtc()).equals(DateTime.utc(2024, 6, 1));
     });
   });
+
+  group('mapFirebaseExceptionToFailure', () {
+    test('maps permission-denied to UnauthorizedFailure', () {
+      final failure = mapFirebaseExceptionToFailure(
+        FirebaseException(plugin: 'firestore', code: 'permission-denied'),
+      );
+      check(failure).isA<UnauthorizedFailure>();
+    });
+
+    test('maps unavailable to NetworkFailure', () {
+      final failure = mapFirebaseExceptionToFailure(
+        FirebaseException(plugin: 'firestore', code: 'unavailable'),
+      );
+      check(failure).isA<NetworkFailure>();
+    });
+  });
 }

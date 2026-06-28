@@ -73,6 +73,15 @@
                       [disabled]="isActionLoading()"
                       (click)="openSuspend(user.userId)"
                     />
+                  } @else {
+                    <app-tilawa-button
+                      variant="primary"
+                      size="xs"
+                      [label]="'quranSessionsUsers_reactivateAccess' | t"
+                      [loading]="isActionLoading() && pendingUserId === user.userId"
+                      [disabled]="isActionLoading()"
+                      (click)="openReactivate(user.userId)"
+                    />
                   }
                 </div>
               </div>
@@ -101,4 +110,14 @@
   }
 
   <app-reject-reason-dialog [isOpen]="suspendOpen" [title]="'quranSessionsUsers_suspendTitle' | t" [message]="'quranSessionsUsers_suspendMessage' | t" [confirmLabel]="'teacherApplications_suspend' | t" [loading]="isActionLoading()" (submit)="onSuspend($event)" (cancel)="suspendOpen = false" />
+
+  <app-confirm-dialog
+    [isOpen]="reactivateOpen"
+    [title]="'quranSessionsUsers_reactivateTitle' | t"
+    [message]="'quranSessionsUsers_reactivateMessage' | t"
+    [confirmLabel]="'quranSessionsUsers_reactivateAccess' | t"
+    [loading]="isActionLoading()"
+    (confirm)="onReactivate()"
+    (cancel)="reactivateOpen = false"
+  />
 </div>

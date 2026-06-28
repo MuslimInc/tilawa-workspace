@@ -14,6 +14,7 @@ import 'package:tilawa/features/home/presentation/bloc/home_dashboard_event.dart
 import 'package:tilawa/features/home/presentation/bloc/home_dashboard_state.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_elevated_surface.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_hero_collapse.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_featured_tutor_card.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_hero_collapsed_bar.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_hero_collapsed_toolbar.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_hero_photo_theme.dart';
@@ -63,6 +64,11 @@ abstract final class HomeDashboardHeroVariantB {
 
   static double contentSheetOverlap(BuildContext context) {
     return TilawaHomeScreenTokens.contentSheetOverlap(context.tokens);
+  }
+
+  /// Full expanded hero layout extent (status bar + body).
+  static double expandedLayoutExtent(BuildContext context) {
+    return MediaQuery.paddingOf(context).top + _resolveHeroBodyHeight(context);
   }
 
   /// Extra room for sub-pixel layout drift.
@@ -227,7 +233,7 @@ class _HomeDashboardHeroVariantBHeaderState
     final TilawaHomeNextPrayerHeroTokens heroTokens = _resolveHeroTokens();
 
     return SliverPersistentHeader(
-      pinned: true,
+      pinned: homeDashboardHeroShouldPin(),
       delegate: _HomeHeroVariantBPersistentDelegate(
         topInset: topInset,
         maxExtent: expandedHeight,
@@ -401,6 +407,7 @@ class _HomeHeroVariantBHeaderContent extends StatelessWidget {
     final double cardRadius = tokens.resolveRadius(
       family: TilawaRadiusFamily.hero,
     );
+    final bool stacksWithTutorCard = !homeDashboardHeroShouldPin();
 
     return Material(
       color: Colors.transparent,
@@ -409,7 +416,10 @@ class _HomeHeroVariantBHeaderContent extends StatelessWidget {
         clipBehavior: Clip.hardEdge,
         children: [
           ColoredBox(color: screenTokens.backgroundGradientEnd),
-          HomeHeroCollapsedBar(reveal: collapsedBarReveal),
+          HomeHeroCollapsedBar(
+            reveal: collapsedBarReveal,
+            showBottomChrome: !stacksWithTutorCard,
+          ),
           SafeArea(
             bottom: false,
             child: IgnorePointer(

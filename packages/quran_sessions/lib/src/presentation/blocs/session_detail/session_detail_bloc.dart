@@ -145,8 +145,10 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
       (_) => throw StateError('noop'),
       (r) => r,
     );
-    final timelineId = aggregate.sessionId ?? aggregate.id;
-    final timelineResult = await _getTimeline(timelineId);
+    final timelineResult = await _getTimeline(
+      bookingId: aggregate.id,
+      sessionId: aggregate.sessionId,
+    );
     // [UnauthorizedFailure] means no audit access — empty timeline, not an error.
     final timelineLoadFailed = timelineResult.fold(
       (failure) => failure is! UnauthorizedFailure,

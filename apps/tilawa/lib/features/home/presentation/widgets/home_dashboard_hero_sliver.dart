@@ -18,6 +18,7 @@ import '../bloc/home_dashboard_event.dart';
 import '../bloc/home_dashboard_state.dart';
 import 'home_dashboard_hero_collapse.dart';
 import 'home_dashboard_hero_variant_b.dart';
+import 'home_featured_tutor_card.dart';
 import 'home_hero_collapsed_bar.dart';
 import 'home_hero_collapsed_toolbar.dart';
 import 'home_hero_glass_surface.dart';
@@ -81,6 +82,18 @@ abstract final class HomeDashboardHeroSliver {
       return HomeDashboardHeroVariantB.contentSheetOverlap(context);
     }
     return sheetOverlap;
+  }
+
+  /// Scroll offset where the featured tutor card sticks under the status bar.
+  ///
+  /// When the prayer hero is unpinned, this equals the hero's expanded layout
+  /// extent — the distance the user must scroll before the tutor header pins.
+  static double scrollOffsetWhenTutorCardPins(BuildContext context) {
+    final double topInset = MediaQuery.paddingOf(context).top;
+    if (activeVariant(context) == HomeHeroDesignVariant.b) {
+      return HomeDashboardHeroVariantB.expandedLayoutExtent(context);
+    }
+    return topInset + _resolveHeroBodyHeight(context);
   }
 
   /// Hero is a single pinned [SliverPersistentHeader]; greeting, metrics, and
@@ -300,7 +313,7 @@ class _HomeDashboardHeroAppBarState extends State<_HomeDashboardHeroAppBar> {
     return Theme(
       data: heroTheme,
       child: SliverPersistentHeader(
-        pinned: true,
+        pinned: homeDashboardHeroShouldPin(),
         delegate: _HomeHeroVariantAPersistentDelegate(
           topInset: topInset,
           maxExtent: expandedHeight,
@@ -557,26 +570,32 @@ class _HomeHeroFlexibleSpaceState extends State<_HomeHeroFlexibleSpace> {
         : _homeScreenExpandedOverlayStyle(screenTokens);
     final TilawaBottomSheetScaffoldTokens sheetTokens =
         theme.componentTokens.bottomSheetScaffold;
+    final bool stacksWithTutorCard = !homeDashboardHeroShouldPin();
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: overlayStyle,
       child: Material(
         color: Colors.transparent,
         child: DecoratedBox(
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(
-                color: theme.colorScheme.outlineVariant,
-                width: sheetTokens.footerTopBorderWidth,
-              ),
-            ),
-          ),
+          decoration: stacksWithTutorCard
+              ? const BoxDecoration()
+              : BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: theme.colorScheme.outlineVariant,
+                      width: sheetTokens.footerTopBorderWidth,
+                    ),
+                  ),
+                ),
           child: Stack(
             fit: StackFit.expand,
             children: [
               Opacity(
                 opacity: collapsedBarReveal,
-                child: HomeHeroCollapsedBar(reveal: 1),
+                child: HomeHeroCollapsedBar(
+                  reveal: 1,
+                  showBottomChrome: !stacksWithTutorCard,
+                ),
               ),
               SafeArea(
                 bottom: false,

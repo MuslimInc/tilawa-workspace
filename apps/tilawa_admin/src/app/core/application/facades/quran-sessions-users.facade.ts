@@ -138,6 +138,18 @@ export class QuranSessionsUsersFacade {
     }
   }
 
+  async reactivateUser(userId: string): Promise<void> {
+    this.actionLoading.set(true);
+    try {
+      await this.moderateUseCase.execute(
+        userId,
+        UserModerationAction.Reactivate,
+      );
+    } finally {
+      this.actionLoading.set(false);
+    }
+  }
+
   async setTeacherApplicationAccess(
     userId: string,
     canApplyAsTeacher: boolean | null,

@@ -87,6 +87,23 @@ service cloud.firestore {
         );
     }
 
+    // Lets clients probe by doc id without PERMISSION_DENIED on missing docs.
+    function canReadBookingDoc(bookingId) {
+      return isAdmin()
+        || (isSignedIn()
+            && (!exists(/databases/$(database)/documents/quran_bookings/$(bookingId))
+                || resource.data.studentId == request.auth.uid
+                || ownsTeacherProfile(resource.data.teacherId)));
+    }
+
+    function canReadSessionDoc(sessionId) {
+      return isAdmin()
+        || (isSignedIn()
+            && (!exists(/databases/$(database)/documents/quran_sessions/$(sessionId))
+                || resource.data.studentId == request.auth.uid
+                || ownsTeacherProfile(resource.data.teacherId)));
+    }
+
     // Remote in-app update policy (see InAppUpdateConfigDataSourceImpl).
     match /app_config/in_app_update {
       allow read: if true;
@@ -221,19 +238,16 @@ service cloud.firestore {
 
     // Bookings — admin or participant read; writes via CF.
     match /quran_bookings/{bookingId} {
-      allow read: if isAdmin()
+      allow read: if canReadBookingDoc(bookingId)
         || (isSignedIn()
-            && (resource.data.studentId == request.auth.uid
-                || ownsTeacherProfile(resource.data.teacherId)));
+            && 'sessionId' in resource.data
+            && isSessionParticipant(resource.data.sessionId));
       allow write: if false;
     }
 
     // Sessions — admin or participant read; writes via CF.
     match /quran_sessions/{sessionId} {
-      allow read: if isAdmin()
-        || (isSignedIn()
-            && (resource.data.studentId == request.auth.uid
-                || ownsTeacherProfile(resource.data.teacherId)));
+      allow read: if canReadSessionDoc(sessionId);
       allow write: if false;
 
       // Aggregated in-call tracking — participants read summary; CF writes only.

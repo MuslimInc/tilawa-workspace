@@ -8,7 +8,7 @@ import {
   assertSucceeds,
   type RulesTestEnvironment,
 } from "@firebase/rules-unit-testing";
-import { collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, where, orderBy } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, getDocs, limit, query, setDoc, where, orderBy } from "firebase/firestore";
 
 const PROJECT_ID = "demo-tilawa-rules";
 let testEnv: RulesTestEnvironment;
@@ -107,6 +107,15 @@ test("rules: signed-in student cannot read another student's quran_sessions", as
   await assertFails(getDoc(doc(studentDb, "quran_sessions/session1")));
 });
 
+test("rules: signed-in user can read missing booking and session docs", async () => {
+  await testEnv.clearFirestore();
+  await seedSlotLock();
+
+  const studentDb = testEnv.authenticatedContext("student1").firestore();
+  await assertSucceeds(getDoc(doc(studentDb, "quran_bookings/missing_booking")));
+  await assertSucceeds(getDoc(doc(studentDb, "quran_sessions/missing_session")));
+});
+
 test("rules: session participant can read quran_sessions and audit events", async () => {
   await testEnv.clearFirestore();
   await seedSlotLock();
@@ -114,6 +123,15 @@ test("rules: session participant can read quran_sessions and audit events", asyn
   const studentDb = testEnv.authenticatedContext("student2").firestore();
   await assertSucceeds(getDoc(doc(studentDb, "quran_sessions/session1")));
   await assertSucceeds(getDoc(doc(studentDb, "quran_bookings/booking1")));
+  await assertSucceeds(
+    getDocs(
+      query(
+        collection(studentDb, "quran_bookings"),
+        where("sessionId", "==", "session1"),
+        limit(1),
+      ),
+    ),
+  );
   await assertSucceeds(getDoc(doc(studentDb, "quran_session_events/event1")));
   await assertSucceeds(
     getDocs(
