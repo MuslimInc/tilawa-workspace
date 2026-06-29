@@ -1,3 +1,4 @@
+import 'package:tilawa/core/firebase/app_check_failure.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/auth_error_key.dart';
@@ -11,10 +12,12 @@ class LoginAuthBlocTransitionMessages {
     required this.authErrorFallback,
     required this.noGoogleAccounts,
     this.deviceRegistrationFailed = '',
+    this.appCheckFailed = '',
   });
 
   final String authErrorFallback;
   final String deviceRegistrationFailed;
+  final String appCheckFailed;
   final String noGoogleAccounts;
 }
 
@@ -69,11 +72,19 @@ String _visibleAuthErrorMessage(
   LoginAuthBlocTransitionMessages messages,
 ) {
   return switch (message) {
+    AuthErrorKey.appCheckFailed =>
+      messages.appCheckFailed.isNotEmpty
+          ? messages.appCheckFailed
+          : messages.authErrorFallback,
     AuthErrorKey.deviceRegistrationFailed =>
       messages.deviceRegistrationFailed.isNotEmpty
           ? messages.deviceRegistrationFailed
           : messages.authErrorFallback,
     '' => messages.authErrorFallback,
+    _ when isAppCheckAuthErrorMessage(message) =>
+      messages.appCheckFailed.isNotEmpty
+          ? messages.appCheckFailed
+          : messages.authErrorFallback,
     _ => message,
   };
 }

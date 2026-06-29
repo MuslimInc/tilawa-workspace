@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/firebase/app_check_failure.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -38,6 +39,7 @@ class LoginAuthBlocListener extends StatelessWidget {
           messages: LoginAuthBlocTransitionMessages(
             authErrorFallback: context.l10n.unableToSignInWithThirdPartyAccount,
             deviceRegistrationFailed: context.l10n.authDeviceRegistrationFailed,
+            appCheckFailed: AppCheckUxMessages.authSignIn(context.l10n),
             noGoogleAccounts: context.l10n.googleSignInNoAccountsOnDevice,
           ),
           onNavigateToHome: onNavigateToHome,

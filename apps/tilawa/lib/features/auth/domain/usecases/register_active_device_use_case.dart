@@ -1,6 +1,7 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa/core/firebase/app_check_failure.dart';
 import 'package:tilawa/core/services/device_token_service.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/services/interfaces/app_info_service.dart';
@@ -81,11 +82,10 @@ class RegisterActiveDeviceUseCase {
 
       return Right(registration);
     } on FirebaseFunctionsException catch (error) {
-      return Left(
-        Failure.serverError(
-          error.message ?? AuthErrorKey.deviceRegistrationFailed,
-        ),
-      );
+      final String message = isAppCheckCallableFailureFromException(error)
+          ? AuthErrorKey.appCheckFailed
+          : (error.message ?? AuthErrorKey.deviceRegistrationFailed);
+      return Left(Failure.serverError(message));
     } catch (error) {
       return Left(Failure.unexpectedError(error.toString()));
     }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import 'firebase/app_check_failure.dart';
 import '../l10n/generated/app_localizations.dart';
 
 extension AppLang on BuildContext {
@@ -76,7 +77,7 @@ extension FailureExtensions on Failure {
         PurchaseFailureReason.userCancelled => null,
         PurchaseFailureReason.pending => l10n.purchasePending,
         PurchaseFailureReason.verificationFailed =>
-          l10n.purchaseVerificationFailed,
+          _localizedPurchaseVerificationFailure(l10n, this as PurchaseFailure),
         PurchaseFailureReason.alreadyOwned => l10n.purchaseAlreadyOwned,
         PurchaseFailureReason.network => l10n.networkError,
       },
@@ -91,4 +92,14 @@ extension FailureExtensions on Failure {
       InAppUpdateFailure() => null,
     };
   }
+}
+
+String _localizedPurchaseVerificationFailure(
+  AppLocalizations l10n,
+  PurchaseFailure failure,
+) {
+  if (isAppCheckPurchaseErrorMessage(failure.message)) {
+    return AppCheckUxMessages.supportPurchase(l10n);
+  }
+  return l10n.purchaseVerificationFailed;
 }

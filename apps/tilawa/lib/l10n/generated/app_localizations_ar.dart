@@ -3016,6 +3016,14 @@ class AppLocalizationsAr extends AppLocalizations {
       'تعذّر التأكيد. أعد المحاولة لاحقًا.';
 
   @override
+  String get purchaseAppCheckFailedDebug =>
+      'تعذّر تأكيد الدعم لأن App Check غير مُعدّ لهذا الإصدار. في Firebase Console، افتح App Check وسجّل رمز تصحيح لهذا الجهاز، ثم أعد المحاولة.';
+
+  @override
+  String get purchaseAppCheckFailedRelease =>
+      'تعذّر تأكيد دعمك لأن هذا الجهاز لم يُتحقق منه. حدّث التطبيق وأعد المحاولة لاحقًا.';
+
+  @override
   String get purchasePending => 'ما زالت قيد المعالجة.';
 
   @override
@@ -3397,4 +3405,12 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get authDeviceRegistrationFailed =>
       'تعذّر إكمال تسجيل الدخول. تحقق من اتصالك وحاول مرة أخرى.';
+
+  @override
+  String get authAppCheckFailedDebug =>
+      'تعذّر تسجيل الدخول لأن App Check غير مُعدّ لهذا الإصدار. في Firebase Console، افتح App Check وسجّل رمز تصحيح لهذا الجهاز، ثم أعد المحاولة.';
+
+  @override
+  String get authAppCheckFailedRelease =>
+      'تعذّر إكمال تسجيل الدخول لأن هذا الجهاز لم يُتحقق منه. حدّث التطبيق وأعد المحاولة لاحقًا.';
 }
