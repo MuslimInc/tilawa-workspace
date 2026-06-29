@@ -9,8 +9,16 @@ Do **not** flip enforcement on production Firebase until staging smoke passes an
 
 ## Why release build is required
 
-The Flutter client activates Firebase App Check in **release/profile** builds only (`app_startup_tasks.dart`).  
-**Debug builds skip App Check** — they cannot validate CF enforcement and will not reproduce production client behavior.
+The Flutter client activates Firebase App Check in **release** builds with
+production attestation (Play Integrity / App Attest + DeviceCheck).
+
+**Debug and profile** builds use App Check **debug providers** so the iOS
+Simulator and local staging builds obtain valid tokens. Register the debug
+token in Firebase Console — see
+[ios_app_check_debug_setup.md](../observability/ios_app_check_debug_setup.md).
+
+Release builds are still required to validate production attestation before
+enabling CF enforcement in staging/production.
 
 ---
 

@@ -144,18 +144,50 @@ class AppStartupTasks {
   /// non-fatal — App Check will fall back to unattested mode and the function
   /// will reject the call with an `unauthenticated` error, which the support
   /// flow already maps to a localized "purchase verification failed".
+  ///
+  /// Debug/profile builds use App Check debug providers (simulator-safe).
+  /// Release builds use Play Integrity / App Attest + DeviceCheck.
   Future<void> _activateAppCheck() async {
-    if (kDebugMode) {
-      // Skipping activation in debug avoids debug-token rate limits on callable requests.
-      return;
-    }
     try {
+      if (!kReleaseMode) {
+        await FirebaseAppCheck.instance.activate(
+          providerAndroid: const AndroidDebugProvider(),
+          providerApple: const AppleDebugProvider(),
+        );
+        await _logAppCheckDebugToken();
+        return;
+      }
       await FirebaseAppCheck.instance.activate(
         providerAndroid: const AndroidPlayIntegrityProvider(),
         providerApple: const AppleAppAttestWithDeviceCheckFallbackProvider(),
       );
     } catch (e, st) {
       logger.e('App Check activation failed: $e', stackTrace: st);
+    }
+  }
+
+  /// Logs the App Check debug token for Firebase Console registration.
+  Future<void> _logAppCheckDebugToken() async {
+    try {
+      final String? token = await FirebaseAppCheck.instance.getToken(true);
+      if (token == null || token.isEmpty) {
+        logger.w(
+          '[AppCheck] Debug/profile build: no token yet. Also check Xcode '
+          'logs for a native debug token, then register it in Firebase Console '
+          '→ App Check → Manage debug tokens. '
+          'See docs/observability/ios_app_check_debug_setup.md',
+        );
+        return;
+      }
+      logger.i(
+        '[AppCheck] Register this debug token in Firebase Console → '
+        'App Check → Manage debug tokens: $token',
+      );
+    } catch (e, st) {
+      logger.w(
+        '[AppCheck] Debug token fetch failed: $e',
+        stackTrace: st,
+      );
     }
   }
 
