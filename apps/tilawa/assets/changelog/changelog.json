@@ -3,6 +3,25 @@
   "lastUpdatedAt": "2026-06-14T12:00:00Z",
   "releases": [
     {
+      "id": "2.0.16+65",
+      "version": "2.0.16",
+      "buildNumber": 65,
+      "highlights": {
+        "en": [
+          "Fixed ghost mini-player after restart — audio state no longer persists incorrectly",
+          "Smoother Android playback: loading, buffering, queue advance, and init errors",
+          "Single-device sign-in hardening: safer sign-out, registration gating, localized session messages",
+          "Clearer errors when App Check blocks sign-in or support purchases"
+        ],
+        "ar": [
+          "إصلاح المشغّل المصغّر الوهمي بعد إعادة التشغيل — لا يُحفظ حالة التشغيل بشكل خاطئ",
+          "تشغيل أسلس على أندرويد: التحميل والتخزين المؤقت وتقدّم القائمة وأخطاء البدء",
+          "تقوية تسجيل الدخول لجهاز واحد: خروج أآمن وتسجيل مُقيّد ورسائل جلسة مترجمة",
+          "رسائل أوضح عند حظر App Check لتسجيل الدخول أو دعم التطبيق"
+        ]
+      }
+    },
+    {
       "id": "2.0.16+64",
       "version": "2.0.16",
       "buildNumber": 64,

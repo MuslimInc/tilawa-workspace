@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.16+65] - 2026-06-29 [Google Play Closed Testing]
+
+### Fixed
+
+- **Audio**: Removed live `HydratedBloc` persistence for the Quran player — no
+  more ghost mini-player or stale playback state after cold start; legacy
+  hydration keys are cleared on startup.
+- **Audio (Android)**: Closed-testing playback hardening — clearer loading and
+  buffering UX, reliable queue advance, init-failure toast, and tighter handler
+  sync for `audio_service`.
+- **Auth**: Single-device P0 fixes — stale sign-out no longer races FCM session
+  revocation; active-device registration is gated on explicit sign-in; localized
+  session-revoked and registration-failure messages.
+- **Auth**: Sign-out clears active-device registration and session state more
+  reliably; device registration sends platform device info (no hardware IDs).
+- **Android**: Wakelock keep-awake no longer crashes when the app resumes before
+  `MainActivity` is foreground; obfuscated release `PlatformException` codes are
+  handled and Sentry/Crashlytics wakelock lifecycle noise is filtered.
+- **Android**: Boot shutdown/airplane-mode events during cold start are tagged in
+  Sentry breadcrumbs (`during_boot`) to separate startup ANRs from runtime noise.
+- **App Check**: Clearer sign-in and support-purchase errors when Firebase App
+  Check blocks a request (localized copy instead of opaque failures).
+- **Startup**: Single cold-start splash resolution via boot launch plan — no
+  double splash or flicker on relaunch.
+
+### Notes
+
+- **Backend**: `registerActiveDevice` Cloud Function is already deployed to
+  `quran-playera-app`; no app-side CF deploy is required for this build.
+
 ## [2.0.16+64] - 2026-06-29 [Google Play Hotfix]
 
 ### Fixed
