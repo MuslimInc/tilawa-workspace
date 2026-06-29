@@ -136,7 +136,7 @@ final class SessionDetailSuccess extends SessionDetailState {
 
   bool get supportsInAppMicrophoneMute =>
       callProviderKind == SessionCallProviderKind.agora ||
-      callProviderKind == SessionCallProviderKind.webrtc;
+      callProviderKind == SessionCallProviderKind.livekit;
 
   /// Booked sessions lock call mode/provider (Option A — see spec 037).
   bool get showLockedAtBookingCopy =>

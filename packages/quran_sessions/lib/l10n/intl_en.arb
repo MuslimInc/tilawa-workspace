@@ -370,7 +370,7 @@
     "callProviderExternal": "External link",
     "callProviderMock": "In-app (preview)",
     "callProviderAgora": "In-app (Agora)",
-    "callProviderWebrtc": "In-app (WebRTC)",
+    "callProviderLivekit": "In-app (LiveKit)",
     "sessionStatusLabel": "Status: {status}",
     "@sessionStatusLabel": {
         "placeholders": {

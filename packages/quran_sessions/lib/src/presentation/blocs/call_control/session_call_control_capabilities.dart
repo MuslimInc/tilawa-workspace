@@ -22,7 +22,7 @@ class SessionCallControlCapabilities {
     final isVideoCall = callType == SessionCallType.videoCall;
     return switch (providerKind) {
       SessionCallProviderKind.agora ||
-      SessionCallProviderKind.webrtc ||
+      SessionCallProviderKind.livekit ||
       SessionCallProviderKind.mock => SessionCallControlCapabilities(
         microphone: true,
         camera: isVideoCall,

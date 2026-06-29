@@ -4,14 +4,14 @@ import { lifecycleError } from "./lifecycleErrors";
 /**
  * Resolves call provider metadata when a booking is created.
  *
- * Free Beta default: external + mock. When platform config enables Agora or
- * WebRTC, voice/video bookings lock to the highest-priority enabled RTC provider.
+ * Free Beta default: external + mock. When platform config enables LiveKit or
+ * Agora, voice/video bookings lock to the highest-priority enabled RTC provider.
  */
 export type SessionCallProviderKind =
   | "external"
   | "mock"
   | "agora"
-  | "webrtc";
+  | "livekit";
 
 export interface ResolvedCallProvider {
   callProvider: SessionCallProviderKind;
@@ -30,7 +30,7 @@ const ALL_CALL_PROVIDERS = new Set<SessionCallProviderKind>([
   "external",
   "mock",
   "agora",
-  "webrtc",
+  "livekit",
 ]);
 
 const FREE_BETA_PROVIDERS = new Set<SessionCallProviderKind>([
@@ -39,10 +39,21 @@ const FREE_BETA_PROVIDERS = new Set<SessionCallProviderKind>([
 ]);
 
 const RTC_PROVIDER_PRIORITY: SessionCallProviderKind[] = [
+  "livekit",
   "agora",
-  "webrtc",
   "mock",
 ];
+
+/** Maps legacy Firestore `webrtc` entries to LiveKit. */
+function normalizeCallProvider(raw: string): SessionCallProviderKind | null {
+  if (raw === "webrtc") {
+    return "livekit";
+  }
+  if (ALL_CALL_PROVIDERS.has(raw as SessionCallProviderKind)) {
+    return raw as SessionCallProviderKind;
+  }
+  return null;
+}
 
 export function assertValidCallType(callType: string): void {
   if (!ALLOWED_CALL_TYPES.has(callType)) {
@@ -99,11 +110,10 @@ export function parseEnabledCallProviders(raw: unknown): Set<SessionCallProvider
   if (!Array.isArray(raw)) {
     throw new Error("invalid_enabled_call_providers");
   }
-  const parsed = raw.filter(
-    (provider): provider is SessionCallProviderKind =>
-      typeof provider === "string"
-      && ALL_CALL_PROVIDERS.has(provider as SessionCallProviderKind),
-  );
+  const parsed = raw
+    .filter((provider): provider is string => typeof provider === "string")
+    .map((provider) => normalizeCallProvider(provider.trim()))
+    .filter((provider): provider is SessionCallProviderKind => provider != null);
   if (parsed.length === 0) {
     throw new Error("invalid_enabled_call_providers");
   }
@@ -129,11 +139,11 @@ export function resolveRtcProviderForBooking(params: {
   }
 
   if (clientCallProvider != null && clientCallProvider.trim() !== "") {
-    const requested = clientCallProvider.trim() as SessionCallProviderKind;
-    if (requested === "external") {
+    const requested = normalizeCallProvider(clientCallProvider.trim());
+    if (requested == null) {
       throw new Error("unsupported_call_provider");
     }
-    if (!ALL_CALL_PROVIDERS.has(requested)) {
+    if (requested === "external") {
       throw new Error("unsupported_call_provider");
     }
     if (!enabledRtcProviders.has(requested)) {

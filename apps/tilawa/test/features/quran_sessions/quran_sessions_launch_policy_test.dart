@@ -4,15 +4,15 @@ import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/features/quran_sessions/quran_sessions_launch_policy.dart';
 
 void main() {
-  test('resolveVoiceVideoProviderHint picks agora when app id present', () {
+  test('resolveVoiceVideoProviderHint picks livekit when url present', () {
     const config = AppLaunchConfig(
-      enabledCallProvidersCsv: 'external,mock,agora',
-      agoraAppId: kStagingAgoraAppId,
+      enabledCallProvidersCsv: 'external,mock,livekit',
+      livekitServerUrl: kStagingLiveKitUrl,
     );
 
     expect(
       resolveVoiceVideoProviderHint(config),
-      SessionCallProviderKind.agora,
+      SessionCallProviderKind.livekit,
     );
     expect(
       sessionModePolicyFromLaunchConfig(config).voiceVideoUseMockProvider,
@@ -21,10 +21,29 @@ void main() {
   });
 
   test(
-    'resolveVoiceVideoProviderHint falls back to mock without agora app id',
+    'resolveVoiceVideoProviderHint picks agora when livekit url missing',
     () {
       const config = AppLaunchConfig(
-        enabledCallProvidersCsv: 'external,mock,agora',
+        enabledCallProvidersCsv: 'external,mock,agora,livekit',
+        agoraAppId: kStagingAgoraAppId,
+      );
+
+      expect(
+        resolveVoiceVideoProviderHint(
+          config,
+          distribution: 'local',
+          debugMode: false,
+        ),
+        SessionCallProviderKind.agora,
+      );
+    },
+  );
+
+  test(
+    'resolveVoiceVideoProviderHint falls back to mock without rtc credentials',
+    () {
+      const config = AppLaunchConfig(
+        enabledCallProvidersCsv: 'external,mock,livekit',
       );
 
       expect(
@@ -35,7 +54,7 @@ void main() {
   );
 
   test(
-    'staging distribution injects agora defaults when dart-defines omitted',
+    'staging distribution injects livekit defaults when dart-defines omitted',
     () {
       const config = AppLaunchConfig(
         enabledCallProvidersCsv: 'external,mock',
@@ -43,27 +62,27 @@ void main() {
 
       final rtc = resolveRtcLaunchConfig(config, distribution: 'staging');
 
-      expect(rtc.isAgoraEnabled, isTrue);
-      expect(rtc.agoraAppId, kStagingAgoraAppId);
+      expect(rtc.isLiveKitEnabled, isTrue);
+      expect(rtc.livekitServerUrl, kStagingLiveKitUrl);
       expect(
         resolveVoiceVideoProviderHint(
           config,
           distribution: 'staging',
           debugMode: false,
         ),
-        SessionCallProviderKind.agora,
+        SessionCallProviderKind.livekit,
       );
       expect(
         resolveRtcLaunchConfig(
           config,
           distribution: 'staging',
         ).enabledProviders,
-        contains('agora'),
+        contains('livekit'),
       );
     },
   );
 
-  test('local release keeps agora off without explicit dart-defines', () {
+  test('local release keeps rtc off without explicit dart-defines', () {
     const config = AppLaunchConfig();
 
     final rtc = resolveRtcLaunchConfig(
@@ -73,11 +92,12 @@ void main() {
     );
 
     expect(rtc.isAgoraEnabled, isFalse);
+    expect(rtc.isLiveKitEnabled, isFalse);
     expect(rtc.enabledProviders, containsAll(['external', 'mock']));
   });
 
   test(
-    'debug build injects agora defaults when dart-defines omitted',
+    'debug build injects livekit defaults when dart-defines omitted',
     () {
       const config = AppLaunchConfig(
         enabledCallProvidersCsv: 'external,mock',
@@ -89,27 +109,37 @@ void main() {
         debugMode: true,
       );
 
-      expect(rtc.isAgoraEnabled, isTrue);
-      expect(rtc.agoraAppId, kStagingAgoraAppId);
-      expect(rtc.enabledProviders, contains('agora'));
+      expect(rtc.isLiveKitEnabled, isTrue);
+      expect(rtc.livekitServerUrl, kStagingLiveKitUrl);
+      expect(rtc.enabledProviders, contains('livekit'));
     },
   );
 
-  test('staging respects explicit agora dart-defines over defaults', () {
+  test('staging respects explicit agora dart-defines over livekit', () {
     const customId = 'custom-agora-app-id';
     const config = AppLaunchConfig(
-      enabledCallProvidersCsv: 'external,mock,agora',
+      enabledCallProvidersCsv: 'external,mock,agora,livekit',
       agoraAppId: customId,
+      livekitServerUrl: kStagingLiveKitUrl,
     );
 
     final rtc = resolveRtcLaunchConfig(config, distribution: 'staging');
 
     expect(rtc.agoraAppId, customId);
     expect(rtc.isAgoraEnabled, isTrue);
+    expect(rtc.isLiveKitEnabled, isTrue);
+    expect(
+      resolveVoiceVideoProviderHint(
+        config,
+        distribution: 'staging',
+        debugMode: false,
+      ),
+      SessionCallProviderKind.livekit,
+    );
   });
 
   test(
-    'play_production release keeps agora and webrtc out of provider set',
+    'play_production release keeps agora and livekit out of provider set',
     () {
       const config = AppLaunchConfig();
 
@@ -121,9 +151,9 @@ void main() {
 
       expect(rtc.enabledProviders, containsAll(['external', 'mock']));
       expect(rtc.enabledProviders, isNot(contains('agora')));
-      expect(rtc.enabledProviders, isNot(contains('webrtc')));
+      expect(rtc.enabledProviders, isNot(contains('livekit')));
       expect(rtc.isAgoraEnabled, isFalse);
-      expect(rtc.isWebRtcEnabled, isFalse);
+      expect(rtc.isLiveKitEnabled, isFalse);
       expect(
         resolveVoiceVideoProviderHint(
           config,

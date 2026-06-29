@@ -30,6 +30,7 @@ export { deliverSessionNotification } from "./quranSessions/deliverSessionNotifi
 export { getWallet, postWalletCredit } from "./quranSessions/walletCallables";
 export { confirmBookingPayment } from "./quranSessions/confirmBookingPayment";
 export { issueSessionRtcToken } from "./quranSessions/issueSessionRtcToken";
+export { issueDebugLiveKitToken } from "./quranSessions/issueDebugLiveKitToken";
 export { recordCallTelemetryEvent } from "./quranSessions/recordCallTelemetryEvent";
 export { sessionReminders } from "./quranSessions/sessionReminders";
 export { approveChildGuardianBooking } from "./quranSessions/approveChildGuardianBooking";

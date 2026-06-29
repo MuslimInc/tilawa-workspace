@@ -2,6 +2,8 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/features/auth/domain/services/callable_session_payload_builder.dart';
+import 'package:tilawa/features/quran_sessions/data/firebase/firebase_callable_failure_mapper.dart';
+import 'package:tilawa/features/quran_sessions/debug/quran_sessions_debug_tools.dart';
 
 /// Fetches short-lived Agora RTC tokens from [issueSessionRtcToken] CF.
 class FirebaseCallTokenProvider implements CallTokenProvider {
@@ -21,26 +23,39 @@ class FirebaseCallTokenProvider implements CallTokenProvider {
     required String sessionId,
     required String userId,
   }) async {
-    final payload = await _payloadBuilder.withSessionEpoch({
-      'sessionId': sessionId,
-    });
+    final isDebugLiveKitJoin = sessionId == kDebugLiveKitSessionId;
+    final callableName = isDebugLiveKitJoin
+        ? 'issueDebugLiveKitToken'
+        : 'issueSessionRtcToken';
+    final payload = isDebugLiveKitJoin
+        ? <String, dynamic>{}
+        : await _payloadBuilder.withSessionEpoch({
+            'sessionId': sessionId,
+          });
     final Map<String, dynamic> data;
     final invoker = _issueSessionRtcTokenInvoker;
-    if (invoker != null) {
-      data = await invoker(payload);
-    } else {
-      final functions = _functions;
-      if (functions == null) {
-        throw StateError(
-          'FirebaseCallTokenProvider requires FirebaseFunctions when '
-          'issueSessionRtcTokenInvoker is unset.',
-        );
+    try {
+      if (invoker != null) {
+        data = await invoker(payload);
+      } else {
+        final functions = _functions;
+        if (functions == null) {
+          throw StateError(
+            'FirebaseCallTokenProvider requires FirebaseFunctions when '
+            'issueSessionRtcTokenInvoker is unset.',
+          );
+        }
+        data =
+            (await functions
+                    .httpsCallable(callableName)
+                    .call<Map<String, dynamic>>(payload))
+                .data;
       }
-      data =
-          (await functions
-                  .httpsCallable('issueSessionRtcToken')
-                  .call<Map<String, dynamic>>(payload))
-              .data;
+    } on FirebaseFunctionsException catch (error) {
+      if (isDebugLiveKitJoin) {
+        throw mapDebugLiveKitTokenCallableFailure(error);
+      }
+      throw mapQuranSessionsCallableFailure(error);
     }
 
     final token = data['token'];

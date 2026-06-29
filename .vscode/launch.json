@@ -35,6 +35,21 @@
                 "--dart-define=TILAWA_LAUNCH_ENABLED_CALL_PROVIDERS=external,mock,agora",
                 "--dart-define=TILAWA_LAUNCH_AGORA_APP_ID=aacd48a930944ecea29bec112f229eb9"
             ]
+        },
+        {
+            // Staging + LiveKit QA: Settings → QA Tools → "Test LiveKit video call"
+            // LiveKit URL auto-fills (kStagingLiveKitUrl) in debug/staging — no URL define needed.
+            "name": "Tilawa (staging + LiveKit QA)",
+            "request": "launch",
+            "type": "dart",
+            "program": "apps/tilawa/lib/main.dart",
+            "flutterMode": "debug",
+            "toolArgs": [
+                "--dart-define=TILAWA_DISTRIBUTION=staging",
+                "--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_ENABLED=true",
+                "--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED=true",
+                "--dart-define=TILAWA_LAUNCH_ENABLED_CALL_PROVIDERS=external,mock,livekit"
+            ]
         }
     ]
 }

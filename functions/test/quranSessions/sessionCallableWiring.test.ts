@@ -16,6 +16,7 @@ const STABLE_SESSION_CALLABLE_FILES = [
   "quranSessions/sessionDisputeCallables.ts",
   "quranSessions/sessionReportCallables.ts",
   "quranSessions/issueSessionRtcToken.ts",
+  "quranSessions/issueDebugLiveKitToken.ts",
   "quranSessions/recordCallTelemetryEvent.ts",
   "registerActiveDevice.ts",
 ] as const;
@@ -52,7 +53,7 @@ test("stable session callables import and pass sessionCallableHttpsOptions", () 
   }
 });
 
-test("stable batch covers exactly thirteen onCall exports", () => {
+test("stable batch covers exactly fourteen onCall exports", () => {
   let count = 0;
   for (const relPath of STABLE_SESSION_CALLABLE_FILES) {
     const source = readFileSync(join(SRC_ROOT, relPath), "utf8");
@@ -61,7 +62,7 @@ test("stable batch covers exactly thirteen onCall exports", () => {
     );
     count += matches?.length ?? 0;
   }
-  assert.equal(count, 13, "expected 13 stable-scope session callables");
+  assert.equal(count, 14, "expected 14 stable-scope session callables");
 });
 
 test("index exports sessionReminders scheduled job", () => {

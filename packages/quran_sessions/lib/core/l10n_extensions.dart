@@ -52,6 +52,6 @@ extension QuranSessionsLabelX on QuranSessionsLocalizations {
     SessionCallProviderKind.external => callProviderExternal,
     SessionCallProviderKind.mock => callProviderMock,
     SessionCallProviderKind.agora => callProviderAgora,
-    SessionCallProviderKind.webrtc => callProviderWebrtc,
+    SessionCallProviderKind.livekit => callProviderLivekit,
   };
 }

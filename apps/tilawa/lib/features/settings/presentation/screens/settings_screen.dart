@@ -27,6 +27,8 @@ import '../../../home/presentation/widgets/home_hero_phase_debug_tile.dart';
 import '../../../notifications/debug/notification_debug_lab_tile.dart';
 import '../../../ui_kit_debug/tilawa_card_nested_tap_demo_tile.dart';
 import '../../../tour_guide/presentation/widgets/tour_guide_debug_reset_tile.dart';
+import '../../../quran_sessions/debug/quran_sessions_debug_tools.dart';
+import '../../../quran_sessions/presentation/widgets/debug_livekit_call_tile.dart';
 import '../cubit/settings_cubit.dart';
 import '../formatters/settings_share_text_formatter.dart';
 import '../../../quran_sessions/quran_sessions_feature_flags.dart';
@@ -293,6 +295,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           context,
                         ),
                   ),
+                  if (isQuranSessionsDebugToolsVisible())
+                    TilawaSettingsGroup(
+                      title: 'QA Tools',
+                      leadingIcon: FluentIcons.beaker_24_regular,
+                      children: const [
+                        DebugLiveKitCallTile(isLast: true),
+                      ],
+                    ),
                   if (kDebugMode)
                     TilawaSettingsGroup(
                       title: 'Developer',

@@ -888,7 +888,7 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get callProviderAgora => 'In-app (Agora)';
 
   @override
-  String get callProviderWebrtc => 'In-app (WebRTC)';
+  String get callProviderLivekit => 'In-app (LiveKit)';
 
   @override
   String sessionStatusLabel(String status) {

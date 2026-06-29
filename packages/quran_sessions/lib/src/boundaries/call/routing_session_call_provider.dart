@@ -11,13 +11,13 @@ class RoutingSessionCallProvider implements SessionCallProvider {
     required this.external,
     required this.mock,
     this.agora,
-    this.webrtc,
+    this.livekit,
   });
 
   final SessionCallProvider external;
   final SessionCallProvider mock;
   final SessionCallProvider? agora;
-  final SessionCallProvider? webrtc;
+  final SessionCallProvider? livekit;
 
   final Map<String, SessionCallProviderKind> _activeProviders =
       <String, SessionCallProviderKind>{};
@@ -31,10 +31,10 @@ class RoutingSessionCallProvider implements SessionCallProvider {
             (throw const CallProviderUnavailableFailure(
               reasonCode: 'agora_not_registered',
             )),
-      SessionCallProviderKind.webrtc =>
-        webrtc ??
+      SessionCallProviderKind.livekit =>
+        livekit ??
             (throw const CallProviderUnavailableFailure(
-              reasonCode: 'webrtc_not_registered',
+              reasonCode: 'livekit_not_registered',
             )),
     };
   }

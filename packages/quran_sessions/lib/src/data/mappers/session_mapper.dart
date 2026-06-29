@@ -47,7 +47,7 @@ SessionBookingType _mapBookingType(String? raw) => switch (raw) {
 SessionCallProviderKind _mapCallProvider(String? raw) => switch (raw) {
   'mock' => SessionCallProviderKind.mock,
   'agora' => SessionCallProviderKind.agora,
-  'webrtc' => SessionCallProviderKind.webrtc,
+  'livekit' || 'webrtc' => SessionCallProviderKind.livekit,
   _ => SessionCallProviderKind.external,
 };
 

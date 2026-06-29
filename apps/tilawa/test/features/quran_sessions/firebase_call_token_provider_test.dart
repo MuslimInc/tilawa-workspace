@@ -4,6 +4,7 @@ import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/features/auth/domain/services/callable_session_payload_builder.dart';
 import 'package:tilawa/features/auth/domain/services/session_epoch_provider.dart';
 import 'package:tilawa/features/quran_sessions/data/firebase/firebase_call_token_provider.dart';
+import 'package:tilawa/features/quran_sessions/debug/quran_sessions_debug_tools.dart';
 
 class _FakePayloadBuilder extends CallableSessionPayloadBuilder {
   _FakePayloadBuilder() : super(_FakeEpochProvider());
@@ -49,6 +50,30 @@ void main() {
       check(credentials.channelId).equals('channel-1');
       check(credentials.uid).equals(918273);
       check(credentials.appId).equals('app-id');
+    });
+
+    test('debug LiveKit join uses empty payload', () async {
+      Map<String, dynamic>? capturedPayload;
+      final provider = _provider(
+        invoke: (payload) async {
+          capturedPayload = payload;
+          return {
+            'token': 'livekit-token',
+            'channelId': kDebugLiveKitRoomName,
+            'uid': 0,
+            'appId': 'wss://tilawa-7whzug8z.livekit.cloud',
+          };
+        },
+      );
+
+      final credentials = await provider.fetchCredentials(
+        sessionId: kDebugLiveKitSessionId,
+        userId: 'user_1',
+      );
+
+      check(capturedPayload).isNotNull();
+      check(capturedPayload!).isEmpty();
+      check(credentials.channelId).equals(kDebugLiveKitRoomName);
     });
 
     test('rejects missing or blank token', () async {
