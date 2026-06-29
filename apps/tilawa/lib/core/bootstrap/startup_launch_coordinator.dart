@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/bootstrap/app_startup_readiness.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa/router/notification_navigation_resolver.dart';
 
@@ -114,8 +115,20 @@ class StartupLaunchCoordinator {
       );
     }
 
+    if (result.destination == SplashDestination.login) {
+      if (AppRouter.pendingColdStartLocation != null) {
+        logger.d(
+          '[DebugNotificationAuthFlow] discarding pending notification route '
+          '(unauthenticated)',
+        );
+        AppRouter.clearPendingColdStartRoute();
+        AppRouter.pendingStartupNotificationLaunch = false;
+      }
+    }
+
     final String? pendingColdStartLocation = AppRouter.pendingColdStartLocation;
-    if (pendingColdStartLocation != null) {
+    if (pendingColdStartLocation != null &&
+        result.destination != SplashDestination.login) {
       return StartupLaunchPlan.notification(
         pendingColdStartLocation,
         extra: AppRouter.pendingColdStartExtra,

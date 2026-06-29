@@ -740,6 +740,14 @@ class AppStartupTasks {
       }
 
       logger.d(
+        '[DebugNotificationAuthFlow] prepareNotificationLaunchState '
+        'fcm=${fcmInitialMessage != null} '
+        'local=${localLaunchResponse != null} '
+        'coldStart=${AppRouter.pendingColdStartLocation} '
+        'startupFlag=${AppRouter.pendingStartupNotificationLaunch}',
+      );
+
+      logger.d(
         '[AppLaunch] source=AppStartupTasks.prepareNotificationLaunchState: '
         'prepared fcm=${fcmInitialMessage != null} '
         'local=${localLaunchResponse != null} '
