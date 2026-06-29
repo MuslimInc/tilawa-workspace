@@ -1,4 +1,5 @@
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/features/auth/domain/services/callable_session_payload_builder.dart';
@@ -10,13 +11,17 @@ class FirebaseCallTokenProvider implements CallTokenProvider {
   FirebaseCallTokenProvider(
     this._payloadBuilder, {
     this._functions,
+    FirebaseAuth? auth,
     @visibleForTesting this._issueSessionRtcTokenInvoker,
-  });
+  }) : _authOverride = auth;
 
   final FirebaseFunctions? _functions;
+  final FirebaseAuth? _authOverride;
   final CallableSessionPayloadBuilder _payloadBuilder;
   final Future<Map<String, dynamic>> Function(Map<String, dynamic> payload)?
   _issueSessionRtcTokenInvoker;
+
+  FirebaseAuth get _auth => _authOverride ?? FirebaseAuth.instance;
 
   @override
   Future<RtcJoinCredentials> fetchCredentials({
@@ -37,6 +42,9 @@ class FirebaseCallTokenProvider implements CallTokenProvider {
     try {
       if (invoker != null) {
         data = await invoker(payload);
+      } else if (isDebugLiveKitJoin) {
+        await _ensureDebugCallableAuthAttached();
+        data = await _invokeDebugLiveKitCallable(payload);
       } else {
         final functions = _functions;
         if (functions == null) {
@@ -82,5 +90,29 @@ class FirebaseCallTokenProvider implements CallTokenProvider {
       uid: uid.toInt(),
       appId: appId.trim(),
     );
+  }
+
+  Future<void> _ensureDebugCallableAuthAttached() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw const RtcCallJoinFailure(reasonCode: 'debug_callable_unauthorized');
+    }
+    await user.getIdToken(true);
+  }
+
+  Future<Map<String, dynamic>> _invokeDebugLiveKitCallable(
+    Map<String, dynamic> payload,
+  ) async {
+    final functions = _functions;
+    if (functions == null) {
+      throw StateError(
+        'FirebaseCallTokenProvider requires FirebaseFunctions when '
+        'issueSessionRtcTokenInvoker is unset.',
+      );
+    }
+    return (await functions
+            .httpsCallable('issueDebugLiveKitToken')
+            .call<Map<String, dynamic>>(payload))
+        .data;
   }
 }

@@ -76,6 +76,10 @@ export async function issueDebugLiveKitTokenForRequest(
 export const issueDebugLiveKitToken = onCall(
   {
     ...sessionCallableHttpsOptions,
+    // QA-only callable: debug/staging clients often skip App Check activation
+    // (see AppStartupTasks._activateAppCheck). Auth uid + non-production gate
+    // are sufficient here.
+    enforceAppCheck: false,
     secrets: [LIVEKIT_API_KEY, LIVEKIT_API_SECRET, LIVEKIT_URL],
   },
   async (request) => issueDebugLiveKitTokenForRequest(request),

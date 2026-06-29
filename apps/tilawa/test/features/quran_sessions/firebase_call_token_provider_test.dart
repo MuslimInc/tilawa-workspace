@@ -1,5 +1,7 @@
 import 'package:checks/checks.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/features/auth/domain/services/callable_session_payload_builder.dart';
 import 'package:tilawa/features/auth/domain/services/session_epoch_provider.dart';
@@ -14,6 +16,8 @@ class _FakeEpochProvider implements SessionEpochProvider {
   @override
   Future<int> getSessionEpoch() async => 7;
 }
+
+class _MockFirebaseAuth extends Mock implements FirebaseAuth {}
 
 FirebaseCallTokenProvider _provider({
   required Future<Map<String, dynamic>> Function(Map<String, dynamic> payload)
@@ -75,6 +79,32 @@ void main() {
       check(capturedPayload!).isEmpty();
       check(credentials.channelId).equals(kDebugLiveKitRoomName);
     });
+
+    test(
+      'debug LiveKit join fails when Firebase Auth user is missing',
+      () async {
+        final auth = _MockFirebaseAuth();
+        when(() => auth.currentUser).thenReturn(null);
+        final provider = FirebaseCallTokenProvider(
+          _FakePayloadBuilder(),
+          auth: auth,
+        );
+
+        await expectLater(
+          provider.fetchCredentials(
+            sessionId: kDebugLiveKitSessionId,
+            userId: 'user_1',
+          ),
+          throwsA(
+            isA<RtcCallJoinFailure>().having(
+              (failure) => failure.reasonCode,
+              'reasonCode',
+              'debug_callable_unauthorized',
+            ),
+          ),
+        );
+      },
+    );
 
     test('rejects missing or blank token', () async {
       final provider = _provider(

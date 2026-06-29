@@ -16,9 +16,13 @@ const STABLE_SESSION_CALLABLE_FILES = [
   "quranSessions/sessionDisputeCallables.ts",
   "quranSessions/sessionReportCallables.ts",
   "quranSessions/issueSessionRtcToken.ts",
-  "quranSessions/issueDebugLiveKitToken.ts",
   "quranSessions/recordCallTelemetryEvent.ts",
   "registerActiveDevice.ts",
+] as const;
+
+/** Debug QA callables — auth + distribution gate only; no App Check. */
+const DEBUG_QA_CALLABLE_FILES = [
+  "quranSessions/issueDebugLiveKitToken.ts",
 ] as const;
 
 /** Wallet/payment batch — must stay on explicit enforceAppCheck: false. */
@@ -53,7 +57,23 @@ test("stable session callables import and pass sessionCallableHttpsOptions", () 
   }
 });
 
-test("stable batch covers exactly fourteen onCall exports", () => {
+test("debug QA callables disable App Check enforcement", () => {
+  for (const relPath of DEBUG_QA_CALLABLE_FILES) {
+    const source = readFileSync(join(SRC_ROOT, relPath), "utf8");
+    assert.match(
+      source,
+      IMPORT_PATTERN,
+      `${relPath} must import sessionCallableHttpsOptions`,
+    );
+    assert.match(
+      source,
+      /enforceAppCheck:\s*false/,
+      `${relPath} must set enforceAppCheck: false`,
+    );
+  }
+});
+
+test("stable batch covers exactly thirteen onCall exports", () => {
   let count = 0;
   for (const relPath of STABLE_SESSION_CALLABLE_FILES) {
     const source = readFileSync(join(SRC_ROOT, relPath), "utf8");
@@ -62,7 +82,7 @@ test("stable batch covers exactly fourteen onCall exports", () => {
     );
     count += matches?.length ?? 0;
   }
-  assert.equal(count, 14, "expected 14 stable-scope session callables");
+  assert.equal(count, 13, "expected 13 stable-scope session callables");
 });
 
 test("index exports sessionReminders scheduled job", () => {

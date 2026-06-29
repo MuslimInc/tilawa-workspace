@@ -18,6 +18,10 @@ const String kDebugLiveKitCallableNotDeployedMessage =
     'Deploy issueDebugLiveKitToken Cloud Function '
     '(firebase deploy --only functions:issueDebugLiveKitToken)';
 
+/// Toast when the debug callable rejects the caller (signed out or stale auth).
+const String kDebugLiveKitAuthRequiredMessage =
+    'Sign in again to test LiveKit. Firebase Auth session may have expired.';
+
 /// Maps [issueDebugLiveKitToken] callable errors for QA debug joins only.
 RtcCallJoinFailure mapDebugLiveKitTokenCallableFailure(
   FirebaseFunctionsException error,

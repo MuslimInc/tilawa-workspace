@@ -63,5 +63,16 @@ void main() {
 
       check(failure.reasonCode).equals('debug_callable_unauthorized');
     });
+
+    test('maps unauthenticated to unauthorized reason', () {
+      final failure = mapDebugLiveKitTokenCallableFailure(
+        FirebaseFunctionsException(
+          code: 'unauthenticated',
+          message: 'Authentication required.',
+        ),
+      );
+
+      check(failure.reasonCode).equals('debug_callable_unauthorized');
+    });
   });
 }

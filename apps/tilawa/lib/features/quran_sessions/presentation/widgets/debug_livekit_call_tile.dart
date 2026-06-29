@@ -87,9 +87,12 @@ class _DebugLiveKitCallTileState extends State<DebugLiveKitCallTile> {
       if (!context.mounted) {
         return;
       }
-      final message = failure.reasonCode == 'debug_callable_not_deployed'
-          ? kDebugLiveKitCallableNotDeployedMessage
-          : failure.toLocalizedMessage(context);
+      final message = switch (failure.reasonCode) {
+        'debug_callable_not_deployed' =>
+          kDebugLiveKitCallableNotDeployedMessage,
+        'debug_callable_unauthorized' => kDebugLiveKitAuthRequiredMessage,
+        _ => failure.toLocalizedMessage(context),
+      };
       TilawaFeedback.showToast(
         context,
         message: message,
