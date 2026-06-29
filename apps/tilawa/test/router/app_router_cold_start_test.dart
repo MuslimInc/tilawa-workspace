@@ -33,5 +33,67 @@ void main() {
       expect(AppRouter.pendingStartupNotificationLaunch, isTrue);
       expect(AppRouter.disableStateRestoration, isTrue);
     });
+
+    test('applyBootLaunchPlan keeps router off splash for home', () {
+      AppRouter.applyBootLaunchPlan(targetLocation: const HomeRoute().location);
+      expect(AppRouter.bootLaunchPlanApplied, isTrue);
+      expect(
+        AppRouter.resolveInitialLocation(),
+        isNot(const SplashRoute().location),
+      );
+      expect(AppRouter.resolveInitialLocation(), const HomeRoute().location);
+    });
+
+    test('applyBootLaunchPlan keeps router off splash for login', () {
+      AppRouter.applyBootLaunchPlan(
+        targetLocation: const LoginRoute().location,
+      );
+      expect(AppRouter.bootLaunchPlanApplied, isTrue);
+      expect(
+        AppRouter.resolveInitialLocation(),
+        const LoginRoute().location,
+      );
+    });
+
+    test('applyBootLaunchPlan uses home initial route for notification', () {
+      AppRouter.applyBootLaunchPlan(
+        targetLocation: const PrayerNotificationStatusRoute().location,
+        notificationLocation: const PrayerNotificationStatusRoute().location,
+        notificationExtra: '{"prayer_key":"fajr"}',
+      );
+      expect(AppRouter.bootLaunchPlanApplied, isTrue);
+      expect(
+        AppRouter.resolveInitialLocation(),
+        const HomeRoute().location,
+      );
+      expect(
+        AppRouter.pendingColdStartLocation,
+        const PrayerNotificationStatusRoute().location,
+      );
+    });
+
+    test('resetForTesting clears boot launch state for test isolation', () {
+      AppRouter.applyBootLaunchPlan(
+        targetLocation: const HomeRoute().location,
+        notificationLocation: const PrayerNotificationStatusRoute().location,
+        notificationExtra: '{"prayer_key":"fajr"}',
+        timedOut: true,
+      );
+      AppRouter.setInitialLaunchLocation(const LoginRoute().location);
+
+      AppRouter.resetForTesting();
+
+      expect(AppRouter.bootLaunchPlanApplied, isFalse);
+      expect(AppRouter.bootLaunchTimedOut, isFalse);
+      expect(AppRouter.initialLaunchLocation, isNull);
+      expect(AppRouter.pendingColdStartLocation, isNull);
+      expect(AppRouter.pendingColdStartExtra, isNull);
+      expect(AppRouter.pendingStartupNotificationLaunch, isFalse);
+      expect(AppRouter.disableStateRestoration, isFalse);
+      expect(
+        AppRouter.resolveInitialLocation(),
+        const SplashRoute().location,
+      );
+    });
   });
 }

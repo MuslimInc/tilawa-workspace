@@ -53,6 +53,47 @@ void main() {
     });
 
     blocTest<SplashBloc, SplashState>(
+      'skips route resolution when boot launch plan already applied',
+      build: () => bloc,
+      act: (bloc) {
+        AppRouter.applyBootLaunchPlan(
+          targetLocation: const HomeRoute().location,
+        );
+        bloc.add(const SplashStarted());
+      },
+      expect: () => [const SplashNavigateToHome(timedOut: false)],
+      verify: (_) {
+        verifyNever(mockGetSplashNextRouteUseCase.call());
+        verifyNever(
+          mockReadiness.waitUntilReady(prepareShell: anyNamed('prepareShell')),
+        );
+      },
+    );
+
+    blocTest<SplashBloc, SplashState>(
+      'uses boot notification target without re-resolving route',
+      build: () => bloc,
+      act: (bloc) {
+        AppRouter.applyBootLaunchPlan(
+          targetLocation: const PrayerNotificationStatusRoute().location,
+          notificationLocation: const PrayerNotificationStatusRoute().location,
+          notificationExtra: '{"prayer_key":"fajr"}',
+        );
+        bloc.add(const SplashStarted());
+      },
+      expect: () => [
+        isA<SplashNavigateToNotification>().having(
+          (state) => state.location,
+          'location',
+          const PrayerNotificationStatusRoute().location,
+        ),
+      ],
+      verify: (_) {
+        verifyNever(mockGetSplashNextRouteUseCase.call());
+      },
+    );
+
+    blocTest<SplashBloc, SplashState>(
       'emits notification route when pending cold start is set during splash',
       build: () {
         when(
