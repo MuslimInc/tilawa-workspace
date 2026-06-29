@@ -255,6 +255,32 @@ void main() {
     }, (_) => fail('expected Left'));
   });
 
+  test('maps App Check callable failure to auth app check key', () async {
+    when(
+      () => mockRemote.registerActiveDevice(
+        deviceId: any(named: 'deviceId'),
+        fcmToken: any(named: 'fcmToken'),
+        registrationMode: any(named: 'registrationMode'),
+        platform: any(named: 'platform'),
+        appVersion: any(named: 'appVersion'),
+        deviceInfo: any(named: 'deviceInfo'),
+        signOut: any(named: 'signOut'),
+      ),
+    ).thenThrow(
+      FirebaseFunctionsException(
+        code: 'unauthenticated',
+        message: 'App Check token is invalid.',
+      ),
+    );
+
+    final result = await useCase.registerExplicitSignIn(tUserId);
+
+    expect(result.isLeft(), isTrue);
+    result.fold((failure) {
+      expect(failure.message, AuthErrorKey.appCheckFailed);
+    }, (_) => fail('expected Left'));
+  });
+
   test('clearActiveDeviceOnSignOut clears local session cache', () async {
     when(
       () => mockCache.getActiveDeviceId(),

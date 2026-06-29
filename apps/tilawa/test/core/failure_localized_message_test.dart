@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/firebase/app_check_failure.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
@@ -96,6 +97,67 @@ void main() {
         );
       },
     );
+
+    testWidgets('App Check sentinel maps to debug copy in debug mode', (
+      tester,
+    ) async {
+      String? message;
+      await tester.pumpWidget(
+        _localizedHarness(
+          locale: const Locale('en'),
+          builder: (BuildContext context) {
+            message = const PurchaseFailure(
+              AppCheckFailureKey.purchase,
+              PurchaseFailureReason.verificationFailed,
+            ).localizedMessage(context);
+            return const SizedBox.shrink();
+          },
+        ),
+      );
+
+      expect(message, en.purchaseAppCheckFailedDebug);
+      expect(message, isNot(en.purchaseVerificationFailed));
+      expect(message, isNot(en.purchaseAppCheckFailedRelease));
+    });
+
+    testWidgets('App Check Firebase message maps to debug copy', (
+      tester,
+    ) async {
+      String? message;
+      await tester.pumpWidget(
+        _localizedHarness(
+          locale: const Locale('en'),
+          builder: (BuildContext context) {
+            message = const PurchaseFailure(
+              'App Check token is invalid.',
+              PurchaseFailureReason.verificationFailed,
+            ).localizedMessage(context);
+            return const SizedBox.shrink();
+          },
+        ),
+      );
+
+      expect(message, en.purchaseAppCheckFailedDebug);
+      expect(message, isNot(en.purchaseVerificationFailed));
+    });
+  });
+
+  group('App Check l10n keys', () {
+    test('debug and release purchase copy differ', () {
+      expect(
+        en.purchaseAppCheckFailedDebug,
+        isNot(en.purchaseAppCheckFailedRelease),
+      );
+      expect(
+        ar.purchaseAppCheckFailedDebug,
+        isNot(ar.purchaseAppCheckFailedRelease),
+      );
+    });
+
+    test('debug and release auth copy differ', () {
+      expect(en.authAppCheckFailedDebug, isNot(en.authAppCheckFailedRelease));
+      expect(ar.authAppCheckFailedDebug, isNot(ar.authAppCheckFailedRelease));
+    });
   });
 }
 

@@ -4053,6 +4053,14 @@
     "@purchaseVerificationFailed": {
         "description": "Localized purchase verification failed failure"
     },
+    "purchaseAppCheckFailedDebug": "Support confirmation was blocked because App Check is not set up for this build. In Firebase Console, open App Check, register a debug token for this device, then try again.",
+    "@purchaseAppCheckFailedDebug": {
+        "description": "Support purchase blocked by missing/invalid App Check in debug or profile builds"
+    },
+    "purchaseAppCheckFailedRelease": "We could not confirm your support because this device could not be verified. Update the app and try again later.",
+    "@purchaseAppCheckFailedRelease": {
+        "description": "Support purchase blocked by App Check in release builds"
+    },
     "purchasePending": "Still processing.",
     "@purchasePending": {
         "description": "Localized purchase pending failure"
@@ -4334,5 +4342,13 @@
     "authDeviceRegistrationFailed": "Sign-in could not be completed. Check your connection and try again.",
     "@authDeviceRegistrationFailed": {
         "description": "Shown when Firebase auth succeeds but active-device registration fails"
+    },
+    "authAppCheckFailedDebug": "Sign-in was blocked because App Check is not set up for this build. In Firebase Console, open App Check, register a debug token for this device, then try again.",
+    "@authAppCheckFailedDebug": {
+        "description": "Sign-in device registration blocked by App Check in debug or profile builds"
+    },
+    "authAppCheckFailedRelease": "Sign-in could not be completed because this device could not be verified. Update the app and try again later.",
+    "@authAppCheckFailedRelease": {
+        "description": "Sign-in device registration blocked by App Check in release builds"
     }
 }

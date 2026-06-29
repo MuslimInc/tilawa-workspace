@@ -3556,6 +3556,14 @@
     "@purchaseVerificationFailed": {
         "description": "Localized purchase verification failed failure"
     },
+    "purchaseAppCheckFailedDebug": "تعذّر تأكيد الدعم لأن App Check غير مُعدّ لهذا الإصدار. في Firebase Console، افتح App Check وسجّل رمز تصحيح لهذا الجهاز، ثم أعد المحاولة.",
+    "@purchaseAppCheckFailedDebug": {
+        "description": "Support purchase blocked by missing/invalid App Check in debug or profile builds"
+    },
+    "purchaseAppCheckFailedRelease": "تعذّر تأكيد دعمك لأن هذا الجهاز لم يُتحقق منه. حدّث التطبيق وأعد المحاولة لاحقًا.",
+    "@purchaseAppCheckFailedRelease": {
+        "description": "Support purchase blocked by App Check in release builds"
+    },
     "purchasePending": "ما زالت قيد المعالجة.",
     "@purchasePending": {
         "description": "Localized purchase pending failure"
@@ -3837,5 +3845,13 @@
     "authDeviceRegistrationFailed": "تعذّر إكمال تسجيل الدخول. تحقق من اتصالك وحاول مرة أخرى.",
     "@authDeviceRegistrationFailed": {
         "description": "Shown when Firebase auth succeeds but active-device registration fails"
+    },
+    "authAppCheckFailedDebug": "تعذّر تسجيل الدخول لأن App Check غير مُعدّ لهذا الإصدار. في Firebase Console، افتح App Check وسجّل رمز تصحيح لهذا الجهاز، ثم أعد المحاولة.",
+    "@authAppCheckFailedDebug": {
+        "description": "Sign-in device registration blocked by App Check in debug or profile builds"
+    },
+    "authAppCheckFailedRelease": "تعذّر إكمال تسجيل الدخول لأن هذا الجهاز لم يُتحقق منه. حدّث التطبيق وأعد المحاولة لاحقًا.",
+    "@authAppCheckFailedRelease": {
+        "description": "Sign-in device registration blocked by App Check in release builds"
     }
 }

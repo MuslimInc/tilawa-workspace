@@ -3034,6 +3034,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Could not confirm. Try again later.';
 
   @override
+  String get purchaseAppCheckFailedDebug =>
+      'Support confirmation was blocked because App Check is not set up for this build. In Firebase Console, open App Check, register a debug token for this device, then try again.';
+
+  @override
+  String get purchaseAppCheckFailedRelease =>
+      'We could not confirm your support because this device could not be verified. Update the app and try again later.';
+
+  @override
   String get purchasePending => 'Still processing.';
 
   @override
@@ -3420,4 +3428,12 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get authDeviceRegistrationFailed =>
       'Sign-in could not be completed. Check your connection and try again.';
+
+  @override
+  String get authAppCheckFailedDebug =>
+      'Sign-in was blocked because App Check is not set up for this build. In Firebase Console, open App Check, register a debug token for this device, then try again.';
+
+  @override
+  String get authAppCheckFailedRelease =>
+      'Sign-in could not be completed because this device could not be verified. Update the app and try again later.';
 }

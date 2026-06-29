@@ -1,5 +1,6 @@
 import 'package:checks/checks.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tilawa/features/auth/domain/entities/auth_error_key.dart';
 import 'package:tilawa/features/auth/domain/entities/auth_result.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/domain/repositories/auth_repository.dart';
@@ -132,6 +133,79 @@ void main() {
       handle(const AuthState.error(message: ''));
 
       check(toasts.single.$1).equals('fallback');
+    });
+
+    test('app check key shows dedicated message', () {
+      const LoginAuthBlocTransitionMessages appCheckMessages =
+          LoginAuthBlocTransitionMessages(
+            authErrorFallback: 'fallback',
+            noGoogleAccounts: 'no accounts',
+            appCheckFailed: 'app check setup hint',
+          );
+
+      handleLoginAuthBlocTransition(
+        state: const AuthState.error(message: AuthErrorKey.appCheckFailed),
+        launchCubit: cubit,
+        shouldSkipAutoSignIn: false,
+        messages: appCheckMessages,
+        onNavigateToHome: () => navigateCount++,
+        showToast: (String message, TilawaFeedbackVariant variant) {
+          toasts.add((message, variant));
+        },
+      );
+
+      check(toasts.single.$1).equals('app check setup hint');
+      check(toasts.single.$2).equals(TilawaFeedbackVariant.error);
+    });
+
+    test('raw App Check Firebase copy maps to app check message', () {
+      const LoginAuthBlocTransitionMessages appCheckMessages =
+          LoginAuthBlocTransitionMessages(
+            authErrorFallback: 'fallback',
+            noGoogleAccounts: 'no accounts',
+            appCheckFailed: 'app check setup hint',
+            deviceRegistrationFailed: 'registration failed',
+          );
+
+      handleLoginAuthBlocTransition(
+        state: const AuthState.error(
+          message: 'App Check token is invalid.',
+        ),
+        launchCubit: cubit,
+        shouldSkipAutoSignIn: false,
+        messages: appCheckMessages,
+        onNavigateToHome: () => navigateCount++,
+        showToast: (String message, TilawaFeedbackVariant variant) {
+          toasts.add((message, variant));
+        },
+      );
+
+      check(toasts.single.$1).equals('app check setup hint');
+    });
+
+    test('device registration key still uses dedicated copy', () {
+      const LoginAuthBlocTransitionMessages registrationMessages =
+          LoginAuthBlocTransitionMessages(
+            authErrorFallback: 'fallback',
+            noGoogleAccounts: 'no accounts',
+            deviceRegistrationFailed: 'registration failed',
+            appCheckFailed: 'app check setup hint',
+          );
+
+      handleLoginAuthBlocTransition(
+        state: const AuthState.error(
+          message: AuthErrorKey.deviceRegistrationFailed,
+        ),
+        launchCubit: cubit,
+        shouldSkipAutoSignIn: false,
+        messages: registrationMessages,
+        onNavigateToHome: () => navigateCount++,
+        showToast: (String message, TilawaFeedbackVariant variant) {
+          toasts.add((message, variant));
+        },
+      );
+
+      check(toasts.single.$1).equals('registration failed');
     });
 
     test('noGoogleAccounts shows info toast', () {

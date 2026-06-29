@@ -5360,6 +5360,18 @@ abstract class AppLocalizations {
   /// **'Could not confirm. Try again later.'**
   String get purchaseVerificationFailed;
 
+  /// Support purchase blocked by missing/invalid App Check in debug or profile builds
+  ///
+  /// In en, this message translates to:
+  /// **'Support confirmation was blocked because App Check is not set up for this build. In Firebase Console, open App Check, register a debug token for this device, then try again.'**
+  String get purchaseAppCheckFailedDebug;
+
+  /// Support purchase blocked by App Check in release builds
+  ///
+  /// In en, this message translates to:
+  /// **'We could not confirm your support because this device could not be verified. Update the app and try again later.'**
+  String get purchaseAppCheckFailedRelease;
+
   /// Localized purchase pending failure
   ///
   /// In en, this message translates to:
@@ -6019,6 +6031,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign-in could not be completed. Check your connection and try again.'**
   String get authDeviceRegistrationFailed;
+
+  /// Sign-in device registration blocked by App Check in debug or profile builds
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in was blocked because App Check is not set up for this build. In Firebase Console, open App Check, register a debug token for this device, then try again.'**
+  String get authAppCheckFailedDebug;
+
+  /// Sign-in device registration blocked by App Check in release builds
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in could not be completed because this device could not be verified. Update the app and try again later.'**
+  String get authAppCheckFailedRelease;
 }
 
 class _AppLocalizationsDelegate

@@ -141,7 +141,8 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
       emit(
         AuthState.error(
           message: registration.fold(
-            (_) => AuthErrorKey.deviceRegistrationFailed,
+            (failure) =>
+                failure.message ?? AuthErrorKey.deviceRegistrationFailed,
             (_) => 'Sign-in could not be completed.',
           ),
         ),

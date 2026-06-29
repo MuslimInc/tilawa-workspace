@@ -1,5 +1,6 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa/core/firebase/app_check_failure.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../../domain/constants/support_product_ids.dart';
@@ -53,6 +54,12 @@ class FirebasePurchaseVerificationClient implements PurchaseVerificationClient {
     } on FirebaseFunctionsException catch (e) {
       if (e.code == 'already-exists') {
         throw const PurchaseFailure.alreadyOwned();
+      }
+      if (isAppCheckCallableFailureFromException(e)) {
+        throw const PurchaseFailure(
+          AppCheckFailureKey.purchase,
+          PurchaseFailureReason.verificationFailed,
+        );
       }
       throw PurchaseFailure(
         e.message,
