@@ -326,6 +326,17 @@ class AppRouter {
     _initialLaunchLocation = null;
   }
 
+  /// Clears boot-gate launch plan flags after splash handoff (R2 one-shot).
+  ///
+  /// Lets a later `/splash` visit re-run route resolution in the same process.
+  /// Does not clear notification cold-start state — use
+  /// [consumePendingNotificationLaunchState] for that.
+  static void consumeBootLaunchPlan() {
+    _bootLaunchPlanApplied = false;
+    _bootLaunchTimedOut = false;
+    clearInitialLaunchLocation();
+  }
+
   /// Clears notification launch flags after cold-start routing is consumed.
   static void consumePendingNotificationLaunchState() {
     final int? pendingId = pendingLocalNotificationResponse?.id;

@@ -71,6 +71,30 @@ void main() {
     );
 
     blocTest<SplashBloc, SplashState>(
+      're-resolves route after boot plan consumed',
+      build: () {
+        when(
+          mockGetSplashNextRouteUseCase.call(),
+        ).thenAnswer((_) async => SplashRouteResult(SplashDestination.home));
+        return bloc;
+      },
+      setUp: () {
+        AppRouter.applyBootLaunchPlan(
+          targetLocation: const HomeRoute().location,
+        );
+        AppRouter.consumeBootLaunchPlan();
+      },
+      act: (bloc) => bloc.add(const SplashStarted()),
+      expect: () => [const SplashNavigateToHome(timedOut: false)],
+      verify: (_) {
+        verify(mockGetSplashNextRouteUseCase.call()).called(1);
+        verify(
+          mockReadiness.waitUntilReady(prepareShell: true),
+        ).called(1);
+      },
+    );
+
+    blocTest<SplashBloc, SplashState>(
       'uses boot notification target without re-resolving route',
       build: () => bloc,
       act: (bloc) {

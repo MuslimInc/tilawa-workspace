@@ -61,6 +61,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void _goAndReset(String location) {
+    AppRouter.consumeBootLaunchPlan();
     AppRouter.disableStateRestoration = false;
     AppRouter.pendingStartupNotificationLaunch = false;
     AppRouter.router.go(location);
@@ -120,6 +121,7 @@ class _SplashScreenState extends State<SplashScreen> {
               case SplashNavigateToOnboarding():
                 _goAndReset(const LanguageWelcomeRoute().location);
               case SplashNavigateToNotification(:final location, :final extra):
+                AppRouter.consumeBootLaunchPlan();
                 AppRouter.navigateFromColdStart(location, extra: extra);
               case SplashFailure():
                 _goAndReset(const HomeRoute().location);

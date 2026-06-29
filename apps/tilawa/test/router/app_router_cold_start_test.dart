@@ -72,6 +72,43 @@ void main() {
       );
     });
 
+    test('consumeBootLaunchPlan clears boot flags and initial launch', () {
+      AppRouter.applyBootLaunchPlan(
+        targetLocation: const HomeRoute().location,
+        timedOut: true,
+      );
+
+      AppRouter.consumeBootLaunchPlan();
+
+      expect(AppRouter.bootLaunchPlanApplied, isFalse);
+      expect(AppRouter.bootLaunchTimedOut, isFalse);
+      expect(AppRouter.initialLaunchLocation, isNull);
+      expect(
+        AppRouter.resolveInitialLocation(),
+        const SplashRoute().location,
+      );
+    });
+
+    test(
+      'consumeBootLaunchPlan does not clear pending notification cold start',
+      () {
+        AppRouter.applyBootLaunchPlan(
+          targetLocation: const PrayerNotificationStatusRoute().location,
+          notificationLocation: const PrayerNotificationStatusRoute().location,
+          notificationExtra: '{"prayer_key":"fajr"}',
+        );
+
+        AppRouter.consumeBootLaunchPlan();
+
+        expect(AppRouter.bootLaunchPlanApplied, isFalse);
+        expect(
+          AppRouter.pendingColdStartLocation,
+          const PrayerNotificationStatusRoute().location,
+        );
+        expect(AppRouter.pendingStartupNotificationLaunch, isTrue);
+      },
+    );
+
     test('resetForTesting clears boot launch state for test isolation', () {
       AppRouter.applyBootLaunchPlan(
         targetLocation: const HomeRoute().location,
