@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 
 import '../features/auth/presentation/bloc/auth_bloc.dart';
 import '../features/auth/presentation/cubit/session_validity_cubit.dart';
@@ -127,6 +128,13 @@ String? _quranSessionsLoginRedirect(
     }
 
     final authState = context.read<AuthBloc>().state;
+    if (authState is AuthInitial || authState is AuthLoading) {
+      logger.d(
+        '[DebugNotificationAuthFlow] session guard deferred '
+        '(auth restoring)',
+      );
+      return null;
+    }
     if (authState is! AuthAuthenticated) {
       return const LoginRoute().location;
     }
