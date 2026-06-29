@@ -300,14 +300,19 @@ class _BootGateState extends State<_BootGate> {
   void _applyStartupLaunchPlan(StartupLaunchPlan plan) {
     switch (plan.target) {
       case StartupLaunchTarget.notification:
-        AppRouter.setPendingColdStartRoute(plan.location, extra: plan.extra);
+        AppRouter.applyBootLaunchPlan(
+          targetLocation: plan.location,
+          notificationLocation: plan.location,
+          notificationExtra: plan.extra,
+          timedOut: plan.timedOut,
+        );
       case StartupLaunchTarget.home:
       case StartupLaunchTarget.login:
       case StartupLaunchTarget.onboarding:
-        AppRouter.clearPendingColdStartRoute();
-        AppRouter.pendingStartupNotificationLaunch = false;
-        AppRouter.disableStateRestoration = false;
-        AppRouter.setInitialLaunchLocation(plan.location);
+        AppRouter.applyBootLaunchPlan(
+          targetLocation: plan.location,
+          timedOut: plan.timedOut,
+        );
     }
   }
 

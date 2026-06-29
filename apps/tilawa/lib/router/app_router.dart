@@ -60,6 +60,22 @@ class AppRouter {
   /// Non-notification startup destination selected before the router is built.
   static String? _initialLaunchLocation;
 
+  /// Set when [BootGate] applies a [StartupLaunchPlan] before the router mounts.
+  ///
+  /// [SplashBloc] must not re-run route resolution or readiness waits when this
+  /// is true (R1: single resolution on the cold-start happy path).
+  static bool _bootLaunchPlanApplied = false;
+
+  /// Whether splash readiness timed out during boot-gate resolution.
+  static bool _bootLaunchTimedOut = false;
+
+  static bool get bootLaunchPlanApplied => _bootLaunchPlanApplied;
+
+  static bool get bootLaunchTimedOut => _bootLaunchTimedOut;
+
+  /// Boot-selected initial route (non-notification cold start).
+  static String? get initialLaunchLocation => _initialLaunchLocation;
+
   /// The ID of the last local notification that was processed (cold-start or
   /// resume). Used to prevent the resume handler from re-processing the same
   /// launch notification that the splash screen already handled.
@@ -268,6 +284,29 @@ class AppRouter {
     _initialLaunchLocation = location;
   }
 
+  /// Records boot-gate launch resolution and router cold-start targets.
+  ///
+  /// For notification launches, [notificationLocation] is stored as a pending
+  /// cold-start push from home; otherwise [targetLocation] becomes the router
+  /// initial location.
+  static void applyBootLaunchPlan({
+    required String targetLocation,
+    String? notificationLocation,
+    Object? notificationExtra,
+    bool timedOut = false,
+  }) {
+    _bootLaunchPlanApplied = true;
+    _bootLaunchTimedOut = timedOut;
+    if (notificationLocation != null && notificationLocation.isNotEmpty) {
+      setPendingColdStartRoute(notificationLocation, extra: notificationExtra);
+      return;
+    }
+    clearPendingColdStartRoute();
+    pendingStartupNotificationLaunch = false;
+    disableStateRestoration = false;
+    setInitialLaunchLocation(targetLocation);
+  }
+
   /// Records a notification cold-start target resolved during bootstrap.
   static void setPendingColdStartRoute(String location, {Object? extra}) {
     _initialLaunchLocation = null;
@@ -285,6 +324,17 @@ class AppRouter {
 
   static void clearInitialLaunchLocation() {
     _initialLaunchLocation = null;
+  }
+
+  /// Clears boot-gate launch plan flags after splash handoff (R2 one-shot).
+  ///
+  /// Lets a later `/splash` visit re-run route resolution in the same process.
+  /// Does not clear notification cold-start state — use
+  /// [consumePendingNotificationLaunchState] for that.
+  static void consumeBootLaunchPlan() {
+    _bootLaunchPlanApplied = false;
+    _bootLaunchTimedOut = false;
+    clearInitialLaunchLocation();
   }
 
   /// Clears notification launch flags after cold-start routing is consumed.
@@ -359,6 +409,8 @@ class AppRouter {
     _router = null;
     disableStateRestoration = false;
     _initialLaunchLocation = null;
+    _bootLaunchPlanApplied = false;
+    _bootLaunchTimedOut = false;
     pendingFcmMessage = null;
     pendingLocalNotificationResponse = null;
     pendingStartupNotificationLaunch = false;

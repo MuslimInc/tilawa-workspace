@@ -6,6 +6,7 @@ import 'package:tilawa/core/bootstrap/app_startup_readiness.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 
 import '../../../../router/app_router.dart';
+import '../../../../router/app_router_config.dart';
 import '../../../../router/notification_navigation_resolver.dart';
 import '../../../auth/domain/usecases/prepare_google_sign_in_use_case.dart';
 import '../../domain/usecases/get_splash_next_route_use_case.dart';
@@ -34,6 +35,11 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     Emitter<SplashState> emit,
   ) async {
     try {
+      if (AppRouter.bootLaunchPlanApplied) {
+        _emitBootResolvedNavigation(emit);
+        return;
+      }
+
       final SplashRouteResult result = await _getSplashNextRoute();
 
       final bool prepareShell = result.destination == SplashDestination.home;
@@ -97,5 +103,30 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
         emit(const SplashNavigateToHome());
       }
     }
+  }
+
+  /// Navigates using the launch plan [BootGate] already applied (R1).
+  void _emitBootResolvedNavigation(Emitter<SplashState> emit) {
+    final String? pendingColdStartLocation = AppRouter.pendingColdStartLocation;
+    if (pendingColdStartLocation != null) {
+      emit(
+        SplashNavigateToNotification(
+          pendingColdStartLocation,
+          extra: AppRouter.pendingColdStartExtra,
+        ),
+      );
+      return;
+    }
+
+    final String? launchLocation = AppRouter.initialLaunchLocation;
+    if (launchLocation == const LoginRoute().location) {
+      emit(const SplashNavigateToLogin());
+      return;
+    }
+    if (launchLocation == const LanguageWelcomeRoute().location) {
+      emit(const SplashNavigateToOnboarding());
+      return;
+    }
+    emit(SplashNavigateToHome(timedOut: AppRouter.bootLaunchTimedOut));
   }
 }

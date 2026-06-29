@@ -53,6 +53,71 @@ void main() {
     });
 
     blocTest<SplashBloc, SplashState>(
+      'skips route resolution when boot launch plan already applied',
+      build: () => bloc,
+      act: (bloc) {
+        AppRouter.applyBootLaunchPlan(
+          targetLocation: const HomeRoute().location,
+        );
+        bloc.add(const SplashStarted());
+      },
+      expect: () => [const SplashNavigateToHome(timedOut: false)],
+      verify: (_) {
+        verifyNever(mockGetSplashNextRouteUseCase.call());
+        verifyNever(
+          mockReadiness.waitUntilReady(prepareShell: anyNamed('prepareShell')),
+        );
+      },
+    );
+
+    blocTest<SplashBloc, SplashState>(
+      're-resolves route after boot plan consumed',
+      build: () {
+        when(
+          mockGetSplashNextRouteUseCase.call(),
+        ).thenAnswer((_) async => SplashRouteResult(SplashDestination.home));
+        return bloc;
+      },
+      setUp: () {
+        AppRouter.applyBootLaunchPlan(
+          targetLocation: const HomeRoute().location,
+        );
+        AppRouter.consumeBootLaunchPlan();
+      },
+      act: (bloc) => bloc.add(const SplashStarted()),
+      expect: () => [const SplashNavigateToHome(timedOut: false)],
+      verify: (_) {
+        verify(mockGetSplashNextRouteUseCase.call()).called(1);
+        verify(
+          mockReadiness.waitUntilReady(prepareShell: true),
+        ).called(1);
+      },
+    );
+
+    blocTest<SplashBloc, SplashState>(
+      'uses boot notification target without re-resolving route',
+      build: () => bloc,
+      act: (bloc) {
+        AppRouter.applyBootLaunchPlan(
+          targetLocation: const PrayerNotificationStatusRoute().location,
+          notificationLocation: const PrayerNotificationStatusRoute().location,
+          notificationExtra: '{"prayer_key":"fajr"}',
+        );
+        bloc.add(const SplashStarted());
+      },
+      expect: () => [
+        isA<SplashNavigateToNotification>().having(
+          (state) => state.location,
+          'location',
+          const PrayerNotificationStatusRoute().location,
+        ),
+      ],
+      verify: (_) {
+        verifyNever(mockGetSplashNextRouteUseCase.call());
+      },
+    );
+
+    blocTest<SplashBloc, SplashState>(
       'emits notification route when pending cold start is set during splash',
       build: () {
         when(
