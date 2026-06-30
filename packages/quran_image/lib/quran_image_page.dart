@@ -154,51 +154,13 @@ class _QuranImagePageState extends State<QuranImagePage> {
         : availableHeight;
 
     final lastLineIndex = SurahHeaderConstants.lastLineIndex.toDouble();
-
-    // Base grid: evenly distribute all 15 slots across the layout height.
-    final baseOffsets = List<double>.generate(
+    final yOffsets = List<double>.generate(
       SurahHeaderConstants.lineCount,
       (index) => (layoutHeight - lineHeight) / lastLineIndex * index,
       growable: false,
     );
-
-    // Pages 1 & 2 use fewer than 15 line slots (Fatihah occupies ~slots 3–10,
-    // Baqarah opener ~slots 3–9). The base grid leaves a large blank region at
-    // the top because slots 0–2 are empty. Vertically centre the used content
-    // block so equal whitespace appears above and below — matching the Ayah app.
-    //
-    // We use a static last-used-line map rather than inspecting _lineProviders
-    // so the correct offset is applied on the very first build, before async
-    // image providers have been resolved.
-    if (!isLandscape) {
-      final lastUsed = _sparsePageLastLineIndex[widget.pageNumber];
-      if (lastUsed != null) {
-        final contentBottom = baseOffsets[lastUsed] + lineHeight;
-        final slack = layoutHeight - contentBottom;
-        if (slack > 0) {
-          final shift = slack / 2;
-          return (
-            layoutHeight: layoutHeight,
-            yOffsets: List<double>.generate(
-              SurahHeaderConstants.lineCount,
-              (i) => baseOffsets[i] + shift,
-              growable: false,
-            ),
-          );
-        }
-      }
-    }
-
-    return (layoutHeight: layoutHeight, yOffsets: baseOffsets);
+    return (layoutHeight: layoutHeight, yOffsets: yOffsets);
   }
-
-  // Pages whose content block does not fill all 15 line slots, mapped to the
-  // index of their last used line slot (0-based). Only pages 1 and 2 have this
-  // characteristic in the standard Hafs Mushaf layout.
-  static const Map<int, int> _sparsePageLastLineIndex = {
-    1: 10, // Fatihah: banner line 3, bismillah line 4, ayahs 5–10
-    2: 9, // Baqarah opener: banner line 3, bismillah line 4, ayahs 5–9
-  };
 
   void _rebuildLineProviders() {
     _lineProviders = List<ImageProvider<Object>?>.generate(

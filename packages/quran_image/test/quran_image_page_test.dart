@@ -3,9 +3,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:quran_image/core/constants/surah_header_constants.dart';
 import 'package:quran_image/core/di/dependency_injection.dart';
 import 'package:quran_image/data/repositories/asset_verse_marker_repository.dart';
 import 'package:quran_image/domain/domain.dart';
+import 'package:quran_image/presentation/widgets/quran_image_content.dart';
 import 'package:quran_image/quran_image_page.dart';
 
 import 'quran_image_test_bootstrap.dart';
@@ -34,12 +36,19 @@ void main() {
       linePaths[line] = file.path;
     }
 
+    final pageTwoLinePaths = <int, String>{};
+    for (var line = 1; line <= 15; line++) {
+      final file = File('${tempDirectory.path}/page_2_line_$line.png');
+      await file.writeAsBytes(imageBytes);
+      pageTwoLinePaths[line] = file.path;
+    }
+
     final headerFile = File('${tempDirectory.path}/sura_header_banner.png');
     await headerFile.writeAsBytes(imageBytes);
 
     decodedCache = _FakeDecodedQuranImageCache();
     imageCacheRepository = _ReadyQuranImageCacheRepository(
-      linePaths: linePaths,
+      linePathsByPage: {1: linePaths, 2: pageTwoLinePaths},
       headerPath: headerFile.path,
     );
 
@@ -113,15 +122,64 @@ void main() {
     expect(taps, 1);
     expect(find.byIcon(Icons.format_list_bulleted_rounded), findsOneWidget);
   });
+
+  testWidgets(
+    'pages 1 and 2 use the standard 15-line grid without vertical centering',
+    (tester) async {
+      const viewport = Size(390, 700);
+      tester.view.physicalSize = viewport;
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      for (final pageNumber in [1, 2]) {
+        await tester.pumpWidget(
+          wrapQuranImageTestApp(
+            Scaffold(body: QuranImagePage(pageNumber: pageNumber)),
+          ),
+        );
+        await tester.pump();
+
+        final firstLine = tester.widget<Positioned>(
+          find.byKey(const ValueKey<int>(0)),
+        );
+        expect(
+          firstLine.top,
+          0,
+          reason: 'page $pageNumber line slot 0 must start at the top',
+        );
+
+        final headerLine = tester.widget<Positioned>(
+          find.byKey(const ValueKey<String>('header:3')),
+        );
+        final layoutHeight = tester
+            .getSize(find.byType(QuranImageContent))
+            .height;
+        final lineHeight = tester
+            .getSize(
+              find.byKey(const ValueKey<int>(0)),
+            )
+            .height;
+        final expectedHeaderTop =
+            (layoutHeight - lineHeight) /
+            SurahHeaderConstants.lastLineIndex *
+            3;
+        expect(
+          headerLine.top,
+          closeTo(expectedHeaderTop, 0.01),
+          reason: 'page $pageNumber surah banner must sit on line slot 3',
+        );
+      }
+    },
+  );
 }
 
 class _ReadyQuranImageCacheRepository implements QuranImageCacheRepository {
   const _ReadyQuranImageCacheRepository({
-    required this.linePaths,
+    required this.linePathsByPage,
     required this.headerPath,
   });
 
-  final Map<int, String> linePaths;
+  final Map<int, Map<int, String>> linePathsByPage;
   final String headerPath;
 
   @override
@@ -132,10 +190,7 @@ class _ReadyQuranImageCacheRepository implements QuranImageCacheRepository {
     required int pageNumber,
     required int oneBasedLineNumber,
   }) {
-    if (pageNumber != 1) {
-      return null;
-    }
-    return linePaths[oneBasedLineNumber];
+    return linePathsByPage[pageNumber]?[oneBasedLineNumber];
   }
 
   @override
