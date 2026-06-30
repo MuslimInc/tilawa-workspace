@@ -77,7 +77,29 @@ To build the project run:
 ng build
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+This will compile your project and store the build artifacts in
+`dist/tilawa-admin/browser/`. By default, the production build optimizes your
+application for performance and speed.
+
+## Deploy (Firebase Hosting)
+
+Admin site target: `hosting:admin` → Firebase site `tilawa-admin` (project
+`quran-playera-app`). Requires the site to exist in Firebase Console and hosting
+targets applied (see repo-root `.firebaserc`).
+
+From repo root:
+
+```bash
+melos run admin:deploy
+```
+
+From this directory:
+
+```bash
+npm run deploy
+```
+
+Legal pages (`tilawa.app`) use a separate target: `firebase deploy --only hosting:legal`.
 
 ## Running unit tests
 

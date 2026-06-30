@@ -120,6 +120,17 @@ melos:
       description: Stop a running build_runner watch/serve across the workspace.
       run: dart run build_runner stop --workspace
 
+    # -- Firebase Hosting (admin panel) --------------------------------
+    admin:build:
+      description: Build Tilawa admin panel for production.
+      run: cd apps/tilawa_admin && npm ci && npm run build
+
+    admin:deploy:
+      description: Build and deploy Tilawa admin panel to Firebase Hosting.
+      run: |
+        cd apps/tilawa_admin && npm ci && npm run build
+        firebase deploy --only hosting:admin --project quran-playera-app
+
 sentry:
   upload_debug_symbols: true
   upload_source_maps: true

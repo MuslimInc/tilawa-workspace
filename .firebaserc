@@ -1,5 +1,17 @@
 {
   "projects": {
     "default": "quran-playera-app"
+  },
+  "targets": {
+    "quran-playera-app": {
+      "hosting": {
+        "legal": [
+          "quran-playera-app"
+        ],
+        "admin": [
+          "tilawa-admin"
+        ]
+      }
+    }
   }
 }
