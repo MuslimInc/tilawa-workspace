@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Android**: Enforce arm64-v8a-only native libs via `ndk.abiFilters` in Gradle
+  (local debug/release; complements CI `--target-platform android-arm64`).
+
 ## [2.0.16+65] - 2026-06-29 [Google Play Closed Testing]
 
 ### Fixed
