@@ -41,7 +41,7 @@ class QuranSessionsRtcModule {
     }
 
     SessionCallProvider? livekit;
-    if (rtc.enabledProviders.contains('livekit')) {
+    if (rtc.isLiveKitEnabled) {
       livekit = LiveKitCallProvider(
         serverUrl: rtc.livekitServerUrl,
         tokenProvider: sl<CallTokenProvider>(),
@@ -78,8 +78,7 @@ class QuranSessionsRtcModule {
 
   static void register(GetIt sl, AppLaunchConfig config) {
     final rtc = resolveRtcLaunchConfig(config);
-    final needsTokenProvider =
-        rtc.isAgoraEnabled || rtc.enabledProviders.contains('livekit');
+    final needsTokenProvider = rtc.isAgoraEnabled || rtc.isLiveKitEnabled;
     if (needsTokenProvider) {
       sl.registerLazySingletonIfAbsent<CallTokenProvider>(
         () => FirebaseCallTokenProvider(
@@ -93,7 +92,7 @@ class QuranSessionsRtcModule {
         () => AgoraRtcEnginePool(),
       );
     }
-    if (rtc.enabledProviders.contains('livekit')) {
+    if (rtc.isLiveKitEnabled) {
       sl.registerLazySingletonIfAbsent<LiveKitRoomPool>(
         () => LiveKitRoomPool(),
       );

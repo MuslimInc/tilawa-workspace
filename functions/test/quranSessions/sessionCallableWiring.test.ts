@@ -20,7 +20,7 @@ const STABLE_SESSION_CALLABLE_FILES = [
   "registerActiveDevice.ts",
 ] as const;
 
-/** Debug QA callables — auth + distribution gate only; no App Check. */
+/** Debug QA callables — auth + distribution gate; App Check follows ops flag. */
 const DEBUG_QA_CALLABLE_FILES = [
   "quranSessions/issueDebugLiveKitToken.ts",
 ] as const;
@@ -57,7 +57,7 @@ test("stable session callables import and pass sessionCallableHttpsOptions", () 
   }
 });
 
-test("debug QA callables disable App Check enforcement", () => {
+test("debug QA callables follow shared App Check enforcement flag", () => {
   for (const relPath of DEBUG_QA_CALLABLE_FILES) {
     const source = readFileSync(join(SRC_ROOT, relPath), "utf8");
     assert.match(
@@ -67,8 +67,8 @@ test("debug QA callables disable App Check enforcement", () => {
     );
     assert.match(
       source,
-      /enforceAppCheck:\s*false/,
-      `${relPath} must set enforceAppCheck: false`,
+      /enforceAppCheck:\s*isSessionAppCheckEnforced\(\)/,
+      `${relPath} must use isSessionAppCheckEnforced()`,
     );
   }
 });

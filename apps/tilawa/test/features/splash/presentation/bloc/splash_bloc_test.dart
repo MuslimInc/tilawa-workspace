@@ -182,6 +182,28 @@ void main() {
     );
 
     blocTest<SplashBloc, SplashState>(
+      'discards pending cold start when splash resolves to login',
+      build: () {
+        when(
+          mockGetSplashNextRouteUseCase.call(),
+        ).thenAnswer((_) async => SplashRouteResult(SplashDestination.login));
+        return bloc;
+      },
+      act: (bloc) {
+        AppRouter.setPendingColdStartRoute(
+          const PrayerNotificationStatusRoute().location,
+          extra: '{"prayer_key":"fajr"}',
+        );
+        bloc.add(const SplashStarted());
+      },
+      expect: () => [const SplashNavigateToLogin()],
+      verify: (_) {
+        expect(AppRouter.pendingColdStartLocation, isNull);
+        verify(mockPrepareGoogleSignIn.call()).called(1);
+      },
+    );
+
+    blocTest<SplashBloc, SplashState>(
       'emits onboarding',
       build: () {
         when(mockGetSplashNextRouteUseCase.call()).thenAnswer(

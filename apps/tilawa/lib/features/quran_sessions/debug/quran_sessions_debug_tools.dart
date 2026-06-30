@@ -50,3 +50,20 @@ bool isQuranSessionsDebugToolsVisible({
   }
   return distribution == 'staging';
 }
+
+/// Whether the client may call [issueDebugLiveKitToken] for QA smoke joins.
+///
+/// Blocked on Play-track release builds (`play_production`, `play_alpha`, etc.)
+/// and on non-debug local release builds.
+bool isDebugLiveKitCallableAllowed({
+  bool debugMode = kDebugMode,
+  String distribution = DistributionConfig.distribution,
+}) {
+  if (distribution == 'play_production' ||
+      distribution == 'play_alpha' ||
+      distribution == 'play_beta' ||
+      distribution == 'play_internal') {
+    return false;
+  }
+  return debugMode || distribution == 'staging' || distribution == 'local';
+}

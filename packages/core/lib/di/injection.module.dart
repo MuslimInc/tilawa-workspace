@@ -16,23 +16,20 @@ import 'package:tilawa_core/services/interfaces/keep_awake_service.dart'
 import 'package:tilawa_core/services/wakelock_keep_awake_service.dart' as _i874;
 
 class TilawaCorePackageModule extends _i526.MicroPackageModule {
-  // initializes the registration of main-scope dependencies inside of GetIt
+// initializes the registration of main-scope dependencies inside of GetIt
   @override
   _i687.FutureOr<void> init(_i526.GetItHelper gh) {
-    gh.factoryParam<_i464.NetworkInfo, _i571.InternetLookup?, dynamic>(
-      (
-        internetLookup,
-        _,
-      ) => _i571.NetworkInfoImpl(
-        gh<_i895.Connectivity>(),
-        internetLookup: internetLookup,
-      ),
-    );
+    gh.factoryParam<_i464.NetworkInfo, _i571.InternetLookup?, dynamic>((
+      internetLookup,
+      _,
+    ) =>
+        _i571.NetworkInfoImpl(
+          gh<_i895.Connectivity>(),
+          internetLookup: internetLookup,
+        ));
     gh.lazySingleton<_i951.KeepAwakeService>(
-      () => _i874.WakelockKeepAwakeService(),
-    );
+        () => _i874.WakelockKeepAwakeService());
     gh.factory<_i516.InternetStatusBloc>(
-      () => _i516.InternetStatusBloc(gh<_i464.NetworkInfo>()),
-    );
+        () => _i516.InternetStatusBloc(gh<_i464.NetworkInfo>()));
   }
 }

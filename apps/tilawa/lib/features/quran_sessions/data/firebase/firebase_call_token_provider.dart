@@ -13,6 +13,7 @@ class FirebaseCallTokenProvider implements CallTokenProvider {
     this._functions,
     FirebaseAuth? auth,
     @visibleForTesting this._issueSessionRtcTokenInvoker,
+    @visibleForTesting this._debugLiveKitCallableAllowed,
   }) : _authOverride = auth;
 
   final FirebaseFunctions? _functions;
@@ -20,6 +21,7 @@ class FirebaseCallTokenProvider implements CallTokenProvider {
   final CallableSessionPayloadBuilder _payloadBuilder;
   final Future<Map<String, dynamic>> Function(Map<String, dynamic> payload)?
   _issueSessionRtcTokenInvoker;
+  final bool Function()? _debugLiveKitCallableAllowed;
 
   FirebaseAuth get _auth => _authOverride ?? FirebaseAuth.instance;
 
@@ -29,6 +31,11 @@ class FirebaseCallTokenProvider implements CallTokenProvider {
     required String userId,
   }) async {
     final isDebugLiveKitJoin = sessionId == kDebugLiveKitSessionId;
+    if (isDebugLiveKitJoin &&
+        !(_debugLiveKitCallableAllowed?.call() ??
+            isDebugLiveKitCallableAllowed())) {
+      throw const RtcCallJoinFailure(reasonCode: 'debug_callable_unauthorized');
+    }
     final callableName = isDebugLiveKitJoin
         ? 'issueDebugLiveKitToken'
         : 'issueSessionRtcToken';

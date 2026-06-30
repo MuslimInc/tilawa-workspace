@@ -176,6 +176,25 @@ void main() {
   });
 
   test(
+    'play_alpha release keeps livekit disabled without explicit url',
+    () {
+      const config = AppLaunchConfig(
+        enabledCallProvidersCsv: 'external,mock,livekit',
+      );
+
+      final rtc = resolveRtcLaunchConfig(
+        config,
+        distribution: 'play_alpha',
+        debugMode: false,
+      );
+
+      expect(rtc.enabledProviders, contains('livekit'));
+      expect(rtc.isLiveKitEnabled, isFalse);
+      expect(rtc.livekitServerUrl, isEmpty);
+    },
+  );
+
+  test(
     'resolveQuranTutorBookingModeHint defaults play_production to approval',
     () {
       expect(

@@ -161,6 +161,22 @@ void main() {
       expect(result.destination, SplashDestination.onboarding);
       verifyNever(() => mockAwaitAuthRestoration());
       verifyNever(() => mockGetCurrentUserUseCase.call());
+      verifyNever(
+        () => mockNotificationRepository.consumePendingNotification(),
+      );
     });
+
+    test(
+      'defers notification consume until onboarding is complete',
+      () async {
+        when(() => mockCheckOnboardingStatus()).thenAnswer((_) async => false);
+
+        await useCase();
+
+        verifyNever(
+          () => mockNotificationRepository.consumePendingNotification(),
+        );
+      },
+    );
   });
 }

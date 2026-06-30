@@ -43,6 +43,56 @@ void main() {
     });
   });
 
+  group('isDebugLiveKitCallableAllowed', () {
+    test('blocks play_production and play_alpha release tracks', () {
+      check(
+        isDebugLiveKitCallableAllowed(
+          debugMode: false,
+          distribution: 'play_production',
+        ),
+      ).isFalse();
+      check(
+        isDebugLiveKitCallableAllowed(
+          debugMode: false,
+          distribution: 'play_alpha',
+        ),
+      ).isFalse();
+    });
+
+    test('blocks play-track distributions even in debug mode', () {
+      check(
+        isDebugLiveKitCallableAllowed(
+          debugMode: true,
+          distribution: 'play_alpha',
+        ),
+      ).isFalse();
+    });
+
+    test('allows debug builds on local distribution', () {
+      check(
+        isDebugLiveKitCallableAllowed(
+          debugMode: true,
+          distribution: 'local',
+        ),
+      ).isTrue();
+    });
+
+    test('allows staging and local non-debug builds', () {
+      check(
+        isDebugLiveKitCallableAllowed(
+          debugMode: false,
+          distribution: 'staging',
+        ),
+      ).isTrue();
+      check(
+        isDebugLiveKitCallableAllowed(
+          debugMode: false,
+          distribution: 'local',
+        ),
+      ).isTrue();
+    });
+  });
+
   group('mapDebugLiveKitTokenCallableFailure', () {
     test('maps not-found to deploy hint reason', () {
       final failure = mapDebugLiveKitTokenCallableFailure(

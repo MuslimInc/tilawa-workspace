@@ -106,6 +106,36 @@ void main() {
       },
     );
 
+    test(
+      'debug LiveKit join is blocked when callable guard rejects build',
+      () async {
+        final provider = FirebaseCallTokenProvider(
+          _FakePayloadBuilder(),
+          debugLiveKitCallableAllowed: () => false,
+          issueSessionRtcTokenInvoker: (_) async => {
+            'token': 'livekit-token',
+            'channelId': kDebugLiveKitRoomName,
+            'uid': 0,
+            'appId': 'wss://tilawa-7whzug8z.livekit.cloud',
+          },
+        );
+
+        await expectLater(
+          provider.fetchCredentials(
+            sessionId: kDebugLiveKitSessionId,
+            userId: 'user_1',
+          ),
+          throwsA(
+            isA<RtcCallJoinFailure>().having(
+              (failure) => failure.reasonCode,
+              'reasonCode',
+              'debug_callable_unauthorized',
+            ),
+          ),
+        );
+      },
+    );
+
     test('rejects missing or blank token', () async {
       final provider = _provider(
         invoke: (_) async => {

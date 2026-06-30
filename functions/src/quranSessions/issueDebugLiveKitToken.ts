@@ -7,10 +7,18 @@ import {
 } from "./livekitTokenService";
 import { lifecycleError } from "./lifecycleErrors";
 import { requireAuthenticatedUid } from "./sessionAuth";
-import { sessionCallableHttpsOptions } from "./sessionCallableOptions";
+import {
+  isSessionAppCheckEnforced,
+  sessionCallableHttpsOptions,
+} from "./sessionCallableOptions";
 
 /** Fixed LiveKit room for QA smoke tests — must match client [kDebugLiveKitRoomName]. */
 export const DEBUG_LIVEKIT_ROOM_NAME = "debug-livekit-test";
+
+const ALLOWED_DEBUG_LIVEKIT_DISTRIBUTIONS = new Set([
+  "local",
+  "staging",
+]);
 
 /**
  * Deploy after first add or secret changes (same project/region as issueSessionRtcToken):
@@ -28,10 +36,18 @@ const LIVEKIT_URL = defineSecret("LIVEKIT_URL");
 
 function assertDebugLiveKitAllowed(): void {
   const distribution = process.env.TILAWA_DISTRIBUTION ?? "local";
-  if (distribution === "play_production") {
+  const explicitAllow =
+    process.env.TILAWA_ALLOW_DEBUG_LIVEKIT_TOKEN === "true";
+  if (
+    distribution === "play_production" ||
+    distribution === "play_alpha" ||
+    distribution === "play_beta" ||
+    distribution === "play_internal" ||
+    (!ALLOWED_DEBUG_LIVEKIT_DISTRIBUTIONS.has(distribution) && !explicitAllow)
+  ) {
     throw new HttpsError(
       "permission-denied",
-      "Debug LiveKit tokens are disabled in production.",
+      "Debug LiveKit tokens are disabled for this distribution.",
     );
   }
 }
@@ -76,10 +92,7 @@ export async function issueDebugLiveKitTokenForRequest(
 export const issueDebugLiveKitToken = onCall(
   {
     ...sessionCallableHttpsOptions,
-    // QA-only callable: debug/staging clients often skip App Check activation
-    // (see AppStartupTasks._activateAppCheck). Auth uid + non-production gate
-    // are sufficient here.
-    enforceAppCheck: false,
+    enforceAppCheck: isSessionAppCheckEnforced(),
     secrets: [LIVEKIT_API_KEY, LIVEKIT_API_SECRET, LIVEKIT_URL],
   },
   async (request) => issueDebugLiveKitTokenForRequest(request),

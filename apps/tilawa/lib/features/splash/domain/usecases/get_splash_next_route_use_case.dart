@@ -32,17 +32,17 @@ class GetSplashNextRouteUseCase {
   Future<SplashRouteResult> call() async {
     logger.d('[DebugNotificationAuthFlow] startup route resolution started');
 
+    final bool isOnboardingCompleted = await _checkOnboardingStatus();
+    if (!isOnboardingCompleted) {
+      return const SplashRouteResult(SplashDestination.onboarding);
+    }
+
     final Map<String, dynamic>? notificationData =
         _startupNotificationRepository.consumePendingNotification();
     logger.d(
       '[DebugNotificationAuthFlow] pending notification route '
       '${notificationData == null ? 'not found' : 'found'}',
     );
-
-    final bool isOnboardingCompleted = await _checkOnboardingStatus();
-    if (!isOnboardingCompleted) {
-      return const SplashRouteResult(SplashDestination.onboarding);
-    }
 
     logger.d('[DebugNotificationAuthFlow] auth restoration started');
     await _awaitAuthRestoration();
