@@ -20,6 +20,7 @@ import 'package:quran_qcf/quran_qcf.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/bootstrap/app_startup.dart';
+import 'package:tilawa/core/bootstrap/shared_preferences_migration.dart';
 import 'package:tilawa/core/bootstrap/launch_timeline.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
@@ -89,6 +90,9 @@ class AppStartupTasks {
   @visibleForTesting
   static const String legacyAudioPlayerBlocHydrationCleanupKey =
       'audio_player_bloc_hydration_removed_v1';
+
+  @visibleForTesting
+  SharedPreferencesAsync? sharedPreferencesAsyncOverride;
 
   QuranAssetsPrefetchService? _quranAssetsPrefetchService;
   QuranAssetsPrefetchPolicyService? _quranAssetsPrefetchPolicyService;
@@ -254,6 +258,7 @@ class AppStartupTasks {
       '[AppLaunch] source=AppStartupTasks.runCriticalInit: Start in (${DateTime.now()})',
     );
     unawaited(StartupTelemetry.phase('critical_init_start'));
+    await migrateLegacySharedPreferencesToAsyncIfNeeded();
     final bool firebaseOk = await initializeFirebaseAndHydratedStorage(
       timeline,
     );
@@ -540,8 +545,11 @@ class AppStartupTasks {
   /// Deletes persisted [AudioPlayerBloc] hydration once per install upgrade.
   Future<void> cleanupLegacyAudioPlayerBlocHydration() async {
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      if (prefs.getBool(legacyAudioPlayerBlocHydrationCleanupKey) ?? false) {
+      final SharedPreferencesAsync prefs =
+          sharedPreferencesAsyncOverride ??
+          SharedPreferencesAsync(options: tilawaSharedPreferencesOptions);
+      if (await prefs.getBool(legacyAudioPlayerBlocHydrationCleanupKey) ??
+          false) {
         return;
       }
       await HydratedBloc.storage.delete('AudioPlayerBloc');
