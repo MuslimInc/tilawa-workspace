@@ -411,6 +411,64 @@ class QuranPageMapping {
     60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60,
   ];
 
+  /// Pages that span more than one surah (derived from Uthmani page_data).
+  static const Map<int, List<int>> _multiSurahByPage = {
+    106: [4, 5],
+    221: [10, 11],
+    235: [11, 12],
+    255: [13, 14],
+    267: [15, 16],
+    293: [17, 18],
+    312: [19, 20],
+    359: [24, 25],
+    385: [27, 28],
+    396: [28, 29],
+    404: [29, 30],
+    434: [34, 35],
+    440: [35, 36],
+    458: [38, 39],
+    467: [39, 40],
+    489: [42, 43],
+    502: [45, 46],
+    515: [48, 49],
+    520: [50, 51],
+    523: [51, 52],
+    528: [53, 54],
+    531: [54, 55],
+    534: [55, 56],
+    537: [56, 57],
+    545: [58, 59],
+    551: [60, 61],
+    554: [62, 63],
+    564: [67, 68],
+    566: [68, 69],
+    568: [69, 70],
+    570: [70, 71],
+    575: [73, 74],
+    577: [74, 75],
+    578: [75, 76],
+    580: [76, 77],
+    583: [78, 79],
+    586: [80, 81],
+    587: [82, 83],
+    589: [83, 84],
+    590: [84, 85],
+    591: [86, 87],
+    592: [87, 88],
+    593: [88, 89],
+    594: [89, 90],
+    595: [90, 91, 92],
+    596: [92, 93, 94],
+    597: [94, 95, 96],
+    598: [96, 97, 98],
+    599: [98, 99, 100],
+    600: [100, 101, 102],
+    601: [103, 104, 105],
+    602: [106, 107, 108],
+    603: [109, 110, 111],
+    604: [112, 113, 114],
+  };
+
   static final List<PageInfo> pages = _buildPages();
 
   static List<PageInfo> _buildPages() {
@@ -466,6 +524,14 @@ class QuranPageMapping {
       throw ArgumentError('Invalid page number: $pageNumber');
     }
     return pages[pageNumber - 1];
+  }
+
+  /// Returns the distinct surah numbers shown on [pageNumber].
+  static List<int> getSurahNumbers(int pageNumber) {
+    if (pageNumber < 1 || pageNumber > PageState.quranPageCount) {
+      throw ArgumentError('Invalid page number: $pageNumber');
+    }
+    return _multiSurahByPage[pageNumber] ?? [_surahByPage[pageNumber - 1]];
   }
 }
 

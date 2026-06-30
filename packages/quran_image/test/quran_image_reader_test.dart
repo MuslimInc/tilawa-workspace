@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -107,6 +108,9 @@ void main() {
     );
     sl.registerLazySingleton<SurahHeaderRepository>(
       () => _EmptySurahHeaderRepository(),
+    );
+    sl.registerLazySingleton<DecodedQuranImageCache>(
+      _ReaderTestDecodedQuranImageCache.new,
     );
   });
 
@@ -401,4 +405,31 @@ class _InMemoryLastVisitedPageRepository implements LastVisitedPageRepository {
   Future<void> saveLastVisitedPage(int pageNumber) async {
     _page = pageNumber;
   }
+}
+
+class _ReaderTestDecodedQuranImageCache implements DecodedQuranImageCache {
+  @override
+  void handleMemoryPressure() {}
+
+  @override
+  ImageProvider<Object> fileImageProvider({required String imagePath}) {
+    return MemoryImage(Uint8List(0));
+  }
+
+  @override
+  ImageProvider<Object> lineImageProvider({
+    required String imagePath,
+    required int cacheWidth,
+  }) {
+    return MemoryImage(Uint8List(0));
+  }
+
+  @override
+  Future<void> prewarmFileImage(String imagePath) async {}
+
+  @override
+  Future<void> prewarmLineImage({
+    required String imagePath,
+    required int cacheWidth,
+  }) async {}
 }

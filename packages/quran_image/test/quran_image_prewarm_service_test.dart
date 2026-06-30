@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:fake_async/fake_async.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quran_image/data/services/quran_image_prewarm_service.dart';
 import 'package:quran_image/domain/domain.dart';
@@ -142,6 +144,19 @@ class _FakeDecodedQuranImageCache implements DecodedQuranImageCache {
   }
 
   @override
+  ImageProvider<Object> fileImageProvider({required String imagePath}) {
+    return MemoryImage(Uint8List(0));
+  }
+
+  @override
+  ImageProvider<Object> lineImageProvider({
+    required String imagePath,
+    required int cacheWidth,
+  }) {
+    return MemoryImage(Uint8List(0));
+  }
+
+  @override
   Future<void> prewarmFileImage(String imagePath) async {}
 
   @override
@@ -159,6 +174,19 @@ class _ControllableDecodedQuranImageCache implements DecodedQuranImageCache {
 
   @override
   void handleMemoryPressure() {}
+
+  @override
+  ImageProvider<Object> fileImageProvider({required String imagePath}) {
+    return MemoryImage(Uint8List(0));
+  }
+
+  @override
+  ImageProvider<Object> lineImageProvider({
+    required String imagePath,
+    required int cacheWidth,
+  }) {
+    return MemoryImage(Uint8List(0));
+  }
 
   @override
   Future<void> prewarmFileImage(String imagePath) async {}
