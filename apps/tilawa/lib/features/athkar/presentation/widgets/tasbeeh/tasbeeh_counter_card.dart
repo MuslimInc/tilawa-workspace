@@ -42,6 +42,7 @@ class TasbeehCounterCard extends StatelessWidget {
       surface: TilawaCardSurface.raised,
       backgroundColor: colorScheme.surface,
       expandHeight: true,
+      onTap: onTap,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -63,16 +64,12 @@ class TasbeehCounterCard extends StatelessWidget {
       ),
     );
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: _usesTargetFeedback
-          ? TasbeehShakeOnTrigger(
-              trigger: targetFeedbackPulse,
-              child: counterCard,
-            )
-          : counterCard,
-    );
+    return _usesTargetFeedback
+        ? TasbeehShakeOnTrigger(
+            trigger: targetFeedbackPulse,
+            child: counterCard,
+          )
+        : counterCard;
   }
 }
 
