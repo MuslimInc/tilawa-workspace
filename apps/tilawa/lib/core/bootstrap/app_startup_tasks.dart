@@ -145,11 +145,18 @@ class AppStartupTasks {
   /// will reject the call with an `unauthenticated` error, which the support
   /// flow already maps to a localized "purchase verification failed".
   ///
-  /// Debug/profile builds use App Check debug providers (simulator-safe).
-  /// Release builds use Play Integrity / App Attest + DeviceCheck.
+  /// Debug builds use App Check debug providers (simulator-safe).
+  /// Profile and release use Play Integrity / App Attest + DeviceCheck.
+  ///
+  /// Gate on [kDebugMode], not `!kReleaseMode`: profile builds are non-release
+  /// but must use production attestation (e.g. Play Integrity alpha).
+  @visibleForTesting
+  static bool useAppCheckDebugProviders({bool debugMode = kDebugMode}) =>
+      debugMode;
+
   Future<void> _activateAppCheck() async {
     try {
-      if (!kReleaseMode) {
+      if (useAppCheckDebugProviders()) {
         await FirebaseAppCheck.instance.activate(
           providerAndroid: const AndroidDebugProvider(),
           providerApple: const AppleDebugProvider(),
@@ -172,7 +179,7 @@ class AppStartupTasks {
       final String? token = await FirebaseAppCheck.instance.getToken(true);
       if (token == null || token.isEmpty) {
         logger.w(
-          '[AppCheck] Debug/profile build: no token yet. Also check Xcode '
+          '[AppCheck] Debug build: no token yet. Also check Xcode '
           'logs for a native debug token, then register it in Firebase Console '
           '→ App Check → Manage debug tokens. '
           'See docs/observability/ios_app_check_debug_setup.md',
