@@ -93,9 +93,8 @@ RtcLaunchConfig resolveRtcLaunchConfig(
 /// Mirrors [RTC_PROVIDER_PRIORITY] in Cloud Functions when launch config matches
 /// Firestore `quran_session_platform_config/global.enabledCallProviders`.
 ///
-/// Production (`play_production`) must set `agora` or `livekit` in both
-/// Firestore and `TILAWA_LAUNCH_*` defines — mock is a dev fallback only when
-/// no RTC provider is configured with credentials.
+/// Production (`play_production`) ships external + mock only; native Agora/LiveKit
+/// are excluded from the release dependency graph via `configure_rtc_deps.dart`.
 SessionCallProviderKind resolveVoiceVideoProviderHint(
   AppLaunchConfig config, {
   String distribution = const String.fromEnvironment(

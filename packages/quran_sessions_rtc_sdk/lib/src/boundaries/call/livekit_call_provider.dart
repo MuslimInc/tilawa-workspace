@@ -1,39 +1,42 @@
 import 'package:quran_sessions/quran_sessions.dart';
 
-import 'agora_rtc_engine_pool.dart';
-import 'agora_rtc_join_gateway.dart';
-import 'rtc_permission_gate.dart';
+import 'livekit_room_pool.dart';
+import 'livekit_rtc_join_gateway.dart';
+import 'package:quran_sessions_rtc/quran_sessions_rtc.dart';
 
-/// Agora voice/video join via server-issued channel + token.
-class AgoraCallProvider implements SessionCallProvider, CallProvider {
-  AgoraCallProvider({
-    required this.appId,
+/// LiveKit voice/video join via server-issued room token.
+class LiveKitCallProvider implements SessionCallProvider, CallProvider {
+  LiveKitCallProvider({
+    required this.serverUrl,
     required this.tokenProvider,
     required this.resolveUserId,
     this.permissionGate = const RtcPermissionGate(),
     this.eventHub,
-    AgoraRtcEnginePool? enginePool,
-    AgoraRtcJoinGateway? joinGateway,
-  }) : _enginePool = enginePool ?? AgoraRtcEnginePool(),
-       _joinGateway = joinGateway ?? LiveAgoraRtcJoinGateway();
+    LiveKitRoomPool? roomPool,
+    LiveKitRtcJoinGateway? joinGateway,
+  }) : _roomPool = roomPool ?? LiveKitRoomPool(),
+       _joinGateway = joinGateway ?? LiveLiveKitRtcJoinGateway();
 
-  final String appId;
+  final String serverUrl;
   final CallTokenProvider tokenProvider;
   final Future<String> Function() resolveUserId;
   final RtcPermissionGate permissionGate;
   final SessionCallProviderEventHub? eventHub;
-  final AgoraRtcEnginePool _enginePool;
-  final AgoraRtcJoinGateway _joinGateway;
+  final LiveKitRoomPool _roomPool;
+  final LiveKitRtcJoinGateway _joinGateway;
   final Map<String, Future<CallRoom>> _joinInFlight =
       <String, Future<CallRoom>>{};
 
   @override
   Future<CallRoom> join(CallJoinRequest request) async {
-    if (request.providerKind != SessionCallProviderKind.agora) {
+    if (request.providerKind != SessionCallProviderKind.livekit) {
       throw const CallProviderUnavailableFailure();
     }
-    if (appId.trim().isEmpty) {
-      throw const CallProviderUnavailableFailure();
+    final effectiveUrl = serverUrl.trim();
+    if (effectiveUrl.isEmpty) {
+      throw const CallProviderUnavailableFailure(
+        reasonCode: 'livekit_url_missing',
+      );
     }
 
     final sessionId = request.sessionId;
@@ -42,7 +45,7 @@ class AgoraCallProvider implements SessionCallProvider, CallProvider {
       return inFlight;
     }
 
-    final joinFuture = _joinOnce(request);
+    final joinFuture = _joinOnce(request, effectiveUrl);
     _joinInFlight[sessionId] = joinFuture;
     try {
       return await joinFuture;
@@ -51,13 +54,15 @@ class AgoraCallProvider implements SessionCallProvider, CallProvider {
     }
   }
 
-  Future<CallRoom> _joinOnce(CallJoinRequest request) async {
+  Future<CallRoom> _joinOnce(
+    CallJoinRequest request,
+    String effectiveUrl,
+  ) async {
     await permissionGate.ensureGranted(
       needsCamera: request.callType == SessionCallType.videoCall,
     );
 
-    // Drop any stale engine still bound to this session before re-joining.
-    await _enginePool.release(request.sessionId);
+    await _roomPool.release(request.sessionId);
 
     final userId = await resolveUserId();
     final credentials = await tokenProvider.fetchCredentials(
@@ -69,22 +74,19 @@ class AgoraCallProvider implements SessionCallProvider, CallProvider {
       throw const RtcCallJoinFailure(reasonCode: 'missing_join_token');
     }
 
-    final effectiveAppId = credentials.appId.isNotEmpty
-        ? credentials.appId
-        : appId.trim();
+    final joinUrl = credentials.appId.trim().isNotEmpty
+        ? credentials.appId.trim()
+        : effectiveUrl;
 
     final handle = await _joinGateway.join(
-      AgoraRtcJoinParams(
-        appId: effectiveAppId,
+      LiveKitJoinParams(
+        serverUrl: joinUrl,
         token: credentials.token,
-        channelId: credentials.channelId,
-        uid: credentials.uid,
         enableVideo: request.callType == SessionCallType.videoCall,
-        existingEngine: _enginePool.takeParkedEngine(effectiveAppId),
       ),
     );
 
-    _enginePool.remember(request.sessionId, handle);
+    _roomPool.remember(request.sessionId, handle);
 
     eventHub?.emit(SessionCallLocalChannelJoined(sessionId: request.sessionId));
 
@@ -93,10 +95,10 @@ class AgoraCallProvider implements SessionCallProvider, CallProvider {
       channelId: credentials.channelId,
       token: credentials.token,
       extraData: {
-        'providerKind': SessionCallProviderKind.agora.name,
+        'providerKind': SessionCallProviderKind.livekit.name,
         'callType': request.callType.name,
         'role': request.role.name,
-        'agoraUid': credentials.uid,
+        'livekitIdentity': userId,
       },
     );
   }
@@ -108,12 +110,12 @@ class AgoraCallProvider implements SessionCallProvider, CallProvider {
 
   @override
   Future<void> leaveSession(String sessionId) async {
-    await _enginePool.release(sessionId);
+    await _roomPool.release(sessionId);
   }
 
   @override
   Future<void> endSession(String sessionId) async {
-    await _enginePool.release(sessionId);
+    await _roomPool.release(sessionId);
   }
 
   @override
@@ -121,7 +123,7 @@ class AgoraCallProvider implements SessionCallProvider, CallProvider {
     String sessionId, {
     required bool muted,
   }) async {
-    final handle = _enginePool.sessionFor(sessionId);
+    final handle = _roomPool.sessionFor(sessionId);
     if (handle == null) {
       return;
     }
@@ -139,7 +141,7 @@ class AgoraCallProvider implements SessionCallProvider, CallProvider {
     String sessionId, {
     required bool enabled,
   }) async {
-    final handle = _enginePool.sessionFor(sessionId);
+    final handle = _roomPool.sessionFor(sessionId);
     if (handle == null) {
       return;
     }
@@ -148,7 +150,7 @@ class AgoraCallProvider implements SessionCallProvider, CallProvider {
 
   @override
   Future<void> switchCamera(String sessionId) async {
-    final handle = _enginePool.sessionFor(sessionId);
+    final handle = _roomPool.sessionFor(sessionId);
     if (handle == null) {
       return;
     }
@@ -160,7 +162,7 @@ class AgoraCallProvider implements SessionCallProvider, CallProvider {
     String sessionId, {
     required bool enabled,
   }) async {
-    final handle = _enginePool.sessionFor(sessionId);
+    final handle = _roomPool.sessionFor(sessionId);
     if (handle == null) {
       return;
     }

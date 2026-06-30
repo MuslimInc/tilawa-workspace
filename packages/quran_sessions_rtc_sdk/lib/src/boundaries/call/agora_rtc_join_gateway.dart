@@ -38,10 +38,9 @@ typedef AgoraRtcEngineReleaser = Future<void> Function(RtcEngine engine);
 /// Native Agora join via [RtcEngine].
 class LiveAgoraRtcJoinGateway implements AgoraRtcJoinGateway {
   LiveAgoraRtcJoinGateway({
-    @visibleForTesting AgoraRtcEngineJoinRunner? joinRunner,
+    @visibleForTesting this._joinRunner,
     @visibleForTesting AgoraRtcEngineReleaser? releaseEngine,
-  }) : _joinRunner = joinRunner,
-       _releaseEngine = releaseEngine ?? _defaultRelease;
+  }) : _releaseEngine = releaseEngine ?? _defaultRelease;
 
   final AgoraRtcEngineJoinRunner? _joinRunner;
   final AgoraRtcEngineReleaser _releaseEngine;

@@ -1,8 +1,7 @@
-name: quran_sessions_rtc
+name: quran_sessions_rtc_stub
 resolution: workspace
 description: >
-  RTC shared utilities for Quran Sessions — permission gate and call-surface
-  labels. Native Agora/LiveKit implementations live in quran_sessions_rtc_sdk.
+  No-op RTC wiring for production builds without Agora/LiveKit native SDKs.
 version: 0.0.1
 publish_to: none
 
@@ -13,16 +12,16 @@ dependencies:
   flutter:
     sdk: flutter
 
-  permission_handler: ^12.0.1
+  get_it: ^9.2.0
   quran_sessions:
     path: ../quran_sessions
+  quran_sessions_rtc:
+    path: ../quran_sessions_rtc
 
 dev_dependencies:
   flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
-  checks: ^0.3.0
-  permission_handler_platform_interface: ^4.3.0
 
 flutter:
   uses-material-design: true

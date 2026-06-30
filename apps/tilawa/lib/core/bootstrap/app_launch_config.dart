@@ -286,6 +286,9 @@ class AppLaunchConfig extends Equatable {
 
   /// Comma-separated RTC providers registered client-side (must match Firestore
   /// `enabledCallProviders`). Example: `external,mock,agora`.
+  ///
+  /// Play production builds default to `external,mock` only and exclude native
+  /// Agora/LiveKit via [tool/configure_rtc_deps.dart] before release AAB build.
   final String enabledCallProvidersCsv;
 
   /// Agora App ID — required when `agora` is in [enabledCallProvidersCsv].

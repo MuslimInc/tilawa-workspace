@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:quran_sessions_rtc/quran_sessions_rtc.dart';
+import 'package:quran_sessions_rtc_sdk/quran_sessions_rtc_sdk.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../helpers/fake_rtc_engine.dart';

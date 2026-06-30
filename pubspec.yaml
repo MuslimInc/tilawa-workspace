@@ -19,6 +19,8 @@ workspace:
   - packages/in_app_update
   - packages/quran_sessions
   - packages/quran_sessions_rtc
+  - packages/quran_sessions_rtc_sdk
+  - packages/quran_sessions_rtc_stub
 
 dev_dependencies:
   sentry_dart_plugin: ^3.4.0

@@ -1,42 +1,39 @@
 import 'package:quran_sessions/quran_sessions.dart';
 
-import 'livekit_room_pool.dart';
-import 'livekit_rtc_join_gateway.dart';
-import 'rtc_permission_gate.dart';
+import 'agora_rtc_engine_pool.dart';
+import 'agora_rtc_join_gateway.dart';
+import 'package:quran_sessions_rtc/quran_sessions_rtc.dart';
 
-/// LiveKit voice/video join via server-issued room token.
-class LiveKitCallProvider implements SessionCallProvider, CallProvider {
-  LiveKitCallProvider({
-    required this.serverUrl,
+/// Agora voice/video join via server-issued channel + token.
+class AgoraCallProvider implements SessionCallProvider, CallProvider {
+  AgoraCallProvider({
+    required this.appId,
     required this.tokenProvider,
     required this.resolveUserId,
     this.permissionGate = const RtcPermissionGate(),
     this.eventHub,
-    LiveKitRoomPool? roomPool,
-    LiveKitRtcJoinGateway? joinGateway,
-  }) : _roomPool = roomPool ?? LiveKitRoomPool(),
-       _joinGateway = joinGateway ?? LiveLiveKitRtcJoinGateway();
+    AgoraRtcEnginePool? enginePool,
+    AgoraRtcJoinGateway? joinGateway,
+  }) : _enginePool = enginePool ?? AgoraRtcEnginePool(),
+       _joinGateway = joinGateway ?? LiveAgoraRtcJoinGateway();
 
-  final String serverUrl;
+  final String appId;
   final CallTokenProvider tokenProvider;
   final Future<String> Function() resolveUserId;
   final RtcPermissionGate permissionGate;
   final SessionCallProviderEventHub? eventHub;
-  final LiveKitRoomPool _roomPool;
-  final LiveKitRtcJoinGateway _joinGateway;
+  final AgoraRtcEnginePool _enginePool;
+  final AgoraRtcJoinGateway _joinGateway;
   final Map<String, Future<CallRoom>> _joinInFlight =
       <String, Future<CallRoom>>{};
 
   @override
   Future<CallRoom> join(CallJoinRequest request) async {
-    if (request.providerKind != SessionCallProviderKind.livekit) {
+    if (request.providerKind != SessionCallProviderKind.agora) {
       throw const CallProviderUnavailableFailure();
     }
-    final effectiveUrl = serverUrl.trim();
-    if (effectiveUrl.isEmpty) {
-      throw const CallProviderUnavailableFailure(
-        reasonCode: 'livekit_url_missing',
-      );
+    if (appId.trim().isEmpty) {
+      throw const CallProviderUnavailableFailure();
     }
 
     final sessionId = request.sessionId;
@@ -45,7 +42,7 @@ class LiveKitCallProvider implements SessionCallProvider, CallProvider {
       return inFlight;
     }
 
-    final joinFuture = _joinOnce(request, effectiveUrl);
+    final joinFuture = _joinOnce(request);
     _joinInFlight[sessionId] = joinFuture;
     try {
       return await joinFuture;
@@ -54,15 +51,13 @@ class LiveKitCallProvider implements SessionCallProvider, CallProvider {
     }
   }
 
-  Future<CallRoom> _joinOnce(
-    CallJoinRequest request,
-    String effectiveUrl,
-  ) async {
+  Future<CallRoom> _joinOnce(CallJoinRequest request) async {
     await permissionGate.ensureGranted(
       needsCamera: request.callType == SessionCallType.videoCall,
     );
 
-    await _roomPool.release(request.sessionId);
+    // Drop any stale engine still bound to this session before re-joining.
+    await _enginePool.release(request.sessionId);
 
     final userId = await resolveUserId();
     final credentials = await tokenProvider.fetchCredentials(
@@ -74,19 +69,22 @@ class LiveKitCallProvider implements SessionCallProvider, CallProvider {
       throw const RtcCallJoinFailure(reasonCode: 'missing_join_token');
     }
 
-    final joinUrl = credentials.appId.trim().isNotEmpty
-        ? credentials.appId.trim()
-        : effectiveUrl;
+    final effectiveAppId = credentials.appId.isNotEmpty
+        ? credentials.appId
+        : appId.trim();
 
     final handle = await _joinGateway.join(
-      LiveKitJoinParams(
-        serverUrl: joinUrl,
+      AgoraRtcJoinParams(
+        appId: effectiveAppId,
         token: credentials.token,
+        channelId: credentials.channelId,
+        uid: credentials.uid,
         enableVideo: request.callType == SessionCallType.videoCall,
+        existingEngine: _enginePool.takeParkedEngine(effectiveAppId),
       ),
     );
 
-    _roomPool.remember(request.sessionId, handle);
+    _enginePool.remember(request.sessionId, handle);
 
     eventHub?.emit(SessionCallLocalChannelJoined(sessionId: request.sessionId));
 
@@ -95,10 +93,10 @@ class LiveKitCallProvider implements SessionCallProvider, CallProvider {
       channelId: credentials.channelId,
       token: credentials.token,
       extraData: {
-        'providerKind': SessionCallProviderKind.livekit.name,
+        'providerKind': SessionCallProviderKind.agora.name,
         'callType': request.callType.name,
         'role': request.role.name,
-        'livekitIdentity': userId,
+        'agoraUid': credentials.uid,
       },
     );
   }
@@ -110,12 +108,12 @@ class LiveKitCallProvider implements SessionCallProvider, CallProvider {
 
   @override
   Future<void> leaveSession(String sessionId) async {
-    await _roomPool.release(sessionId);
+    await _enginePool.release(sessionId);
   }
 
   @override
   Future<void> endSession(String sessionId) async {
-    await _roomPool.release(sessionId);
+    await _enginePool.release(sessionId);
   }
 
   @override
@@ -123,7 +121,7 @@ class LiveKitCallProvider implements SessionCallProvider, CallProvider {
     String sessionId, {
     required bool muted,
   }) async {
-    final handle = _roomPool.sessionFor(sessionId);
+    final handle = _enginePool.sessionFor(sessionId);
     if (handle == null) {
       return;
     }
@@ -141,7 +139,7 @@ class LiveKitCallProvider implements SessionCallProvider, CallProvider {
     String sessionId, {
     required bool enabled,
   }) async {
-    final handle = _roomPool.sessionFor(sessionId);
+    final handle = _enginePool.sessionFor(sessionId);
     if (handle == null) {
       return;
     }
@@ -150,7 +148,7 @@ class LiveKitCallProvider implements SessionCallProvider, CallProvider {
 
   @override
   Future<void> switchCamera(String sessionId) async {
-    final handle = _roomPool.sessionFor(sessionId);
+    final handle = _enginePool.sessionFor(sessionId);
     if (handle == null) {
       return;
     }
@@ -162,7 +160,7 @@ class LiveKitCallProvider implements SessionCallProvider, CallProvider {
     String sessionId, {
     required bool enabled,
   }) async {
-    final handle = _roomPool.sessionFor(sessionId);
+    final handle = _enginePool.sessionFor(sessionId);
     if (handle == null) {
       return;
     }

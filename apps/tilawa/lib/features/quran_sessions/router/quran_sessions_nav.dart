@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:tilawa/features/quran_sessions/rtc/quran_sessions_rtc_impl.dart';
 import 'package:quran_sessions_rtc/quran_sessions_rtc.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/injection.dart';
@@ -534,41 +535,26 @@ InAppCallSurfaceBuilder? _buildQuranSessionsCallSurface() {
     required callType,
     required callProviderKind,
   }) {
-    final l10n = context.quranSessionsL10n;
     final labels = AgoraCallSurfaceLabels(
-      connecting: l10n.inAppCallShellConnecting,
-      connected: l10n.inAppCallShellConnected,
-      waitingForParticipant: l10n.inAppCallShellWaitingForParticipant,
-      voiceCallTitle: l10n.inAppCallShellTitle,
+      connecting: context.quranSessionsL10n.inAppCallShellConnecting,
+      connected: context.quranSessionsL10n.inAppCallShellConnected,
+      waitingForParticipant:
+          context.quranSessionsL10n.inAppCallShellWaitingForParticipant,
+      voiceCallTitle: context.quranSessionsL10n.inAppCallShellTitle,
     );
     final eventHub = getIt.isRegistered<SessionCallProviderEventHub>()
         ? getIt<SessionCallProviderEventHub>()
         : null;
-
-    if (getIt.isRegistered<LiveKitRoomPool>()) {
-      final livekitSurface = buildLiveKitCallSurface(
-        sessionId: sessionId,
-        callType: callType,
-        providerKind: callProviderKind,
-        roomPool: getIt<LiveKitRoomPool>(),
-        labels: labels,
-        eventHub: eventHub,
-      );
-      if (livekitSurface != null) {
-        return livekitSurface;
-      }
-    }
-
-    if (!getIt.isRegistered<AgoraRtcEnginePool>()) {
-      return null;
-    }
-    return buildAgoraCallSurface(
+    final builder = QuranSessionsRtcWiring.buildInAppCallSurface(
+      sl: getIt,
+      labels: labels,
+      eventHub: eventHub,
+    );
+    return builder?.call(
+      context,
       sessionId: sessionId,
       callType: callType,
-      providerKind: callProviderKind,
-      enginePool: getIt<AgoraRtcEnginePool>(),
-      eventHub: eventHub,
-      labels: labels,
+      callProviderKind: callProviderKind,
     );
   };
 }

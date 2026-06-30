@@ -3,6 +3,7 @@ import 'package:checks/checks.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:quran_sessions_rtc/quran_sessions_rtc.dart';
+import 'package:quran_sessions_rtc_sdk/quran_sessions_rtc_sdk.dart';
 
 void main() {
   group('AgoraCallProvider', () {

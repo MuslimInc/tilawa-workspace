@@ -1,13 +1,13 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:get_it/get_it.dart';
 import 'package:quran_sessions/quran_sessions.dart';
-import 'package:quran_sessions_rtc/quran_sessions_rtc.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/get_it_idempotent.dart';
 import 'package:tilawa/features/auth/domain/services/callable_session_payload_builder.dart';
 import 'package:tilawa/features/quran_sessions/data/external_meeting_url_launcher.dart';
 import 'package:tilawa/features/quran_sessions/data/firebase/firebase_call_token_provider.dart';
 import 'package:tilawa/features/quran_sessions/quran_sessions_launch_policy.dart';
+import 'package:tilawa/features/quran_sessions/rtc/quran_sessions_rtc_impl.dart';
 
 /// Wires RTC [SessionCallProvider] implementations when launch config enables them.
 class QuranSessionsRtcModule {
@@ -23,38 +23,35 @@ class QuranSessionsRtcModule {
         : null;
 
     SessionCallProvider? agora;
-    if (rtc.isAgoraEnabled) {
-      final enginePool = sl<AgoraRtcEnginePool>();
-      agora = AgoraCallProvider(
-        appId: rtc.agoraAppId,
-        tokenProvider: sl<CallTokenProvider>(),
-        resolveUserId: () async {
-          final uid = sl<AuthSessionProvider>().currentUserId;
-          if (uid == null || uid.isEmpty) {
-            throw const UnauthorizedFailure();
-          }
-          return uid;
-        },
-        enginePool: enginePool,
-        eventHub: eventHub,
-      );
-    }
-
     SessionCallProvider? livekit;
-    if (rtc.isLiveKitEnabled) {
-      livekit = LiveKitCallProvider(
-        serverUrl: rtc.livekitServerUrl,
-        tokenProvider: sl<CallTokenProvider>(),
-        resolveUserId: () async {
-          final uid = sl<AuthSessionProvider>().currentUserId;
-          if (uid == null || uid.isEmpty) {
-            throw const UnauthorizedFailure();
-          }
-          return uid;
-        },
-        roomPool: sl<LiveKitRoomPool>(),
-        eventHub: eventHub,
-      );
+    if (rtc.isAgoraEnabled || rtc.isLiveKitEnabled) {
+      final tokenProvider = sl<CallTokenProvider>();
+      Future<String> resolveUserId() async {
+        final uid = sl<AuthSessionProvider>().currentUserId;
+        if (uid == null || uid.isEmpty) {
+          throw const UnauthorizedFailure();
+        }
+        return uid;
+      }
+
+      if (rtc.isAgoraEnabled) {
+        agora = QuranSessionsRtcWiring.createAgoraProvider(
+          sl,
+          appId: rtc.agoraAppId,
+          tokenProvider: tokenProvider,
+          resolveUserId: resolveUserId,
+          eventHub: eventHub,
+        );
+      }
+      if (rtc.isLiveKitEnabled) {
+        livekit = QuranSessionsRtcWiring.createLiveKitProvider(
+          sl,
+          serverUrl: rtc.livekitServerUrl,
+          tokenProvider: tokenProvider,
+          resolveUserId: resolveUserId,
+          eventHub: eventHub,
+        );
+      }
     }
 
     return RoutingSessionCallProvider(
@@ -87,15 +84,10 @@ class QuranSessionsRtcModule {
         ),
       );
     }
-    if (rtc.isAgoraEnabled) {
-      sl.registerLazySingletonIfAbsent<AgoraRtcEnginePool>(
-        () => AgoraRtcEnginePool(),
-      );
-    }
-    if (rtc.isLiveKitEnabled) {
-      sl.registerLazySingletonIfAbsent<LiveKitRoomPool>(
-        () => LiveKitRoomPool(),
-      );
-    }
+    QuranSessionsRtcWiring.registerPools(
+      sl,
+      registerAgora: rtc.isAgoraEnabled,
+      registerLivekit: rtc.isLiveKitEnabled,
+    );
   }
 }

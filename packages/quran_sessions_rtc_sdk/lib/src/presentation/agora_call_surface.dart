@@ -4,7 +4,7 @@ import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../boundaries/call/agora_rtc_engine_pool.dart';
-import 'agora_call_surface_labels.dart';
+import 'package:quran_sessions_rtc/quran_sessions_rtc.dart';
 
 enum _AgoraCallConnectionPhase {
   connecting,

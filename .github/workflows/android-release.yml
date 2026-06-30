@@ -79,6 +79,15 @@ jobs:
       - name: Resolve workspace dependencies
         run: flutter pub get
 
+      - name: Exclude RTC native SDKs for production track
+        if: inputs.track == 'production'
+        working-directory: apps/tilawa
+        run: dart run tool/configure_rtc_deps.dart --stub
+
+      - name: Refresh dependencies after RTC configure
+        if: inputs.track == 'production'
+        run: flutter pub get
+
       - name: Generate code (melos run gen)
         run: |
           # The `gen` melos script calls `melos exec ...` internally, so melos
