@@ -260,15 +260,6 @@ void main() {
     }
   }
 
-  Future<void> pumpUntilAuthLoading(WidgetTester tester) async {
-    for (var i = 0; i < 30; i++) {
-      await tester.pump(const Duration(milliseconds: 50));
-      if (authBloc.state is AuthLoading) {
-        return;
-      }
-    }
-  }
-
   group('LoginScreen', () {
     testWidgets('renders welcome copy and the Google sign-in button', (
       WidgetTester tester,
