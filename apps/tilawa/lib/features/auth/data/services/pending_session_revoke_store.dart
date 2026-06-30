@@ -12,6 +12,11 @@ abstract final class PendingSessionRevokeStore {
     await prefs.setBool(key, true);
   }
 
+  static Future<void> clear() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(key);
+  }
+
   /// Returns true once, then clears the flag.
   static Future<bool> consume() async {
     final prefs = await SharedPreferences.getInstance();

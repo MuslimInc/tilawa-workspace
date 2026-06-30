@@ -85,4 +85,23 @@ void main() {
     expect(revoked, isTrue);
     await subscription.cancel();
   });
+
+  test('requiresExplicitSignIn does not notify session revoked', () async {
+    var revoked = false;
+    final subscription = sessionRevokedNotifier.onSessionRevoked.listen((_) {
+      revoked = true;
+    });
+    when(() => mockRegisterActiveDevice.syncPassive('user_1')).thenAnswer(
+      (_) async => const Left(
+        PermissionFailure(AuthErrorKey.requiresExplicitSignIn),
+      ),
+    );
+
+    final result = await useCase('user_1');
+    await Future<void>.delayed(Duration.zero);
+
+    expect(result.isLeft(), isTrue);
+    expect(revoked, isFalse);
+    await subscription.cancel();
+  });
 }

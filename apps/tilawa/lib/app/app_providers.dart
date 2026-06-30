@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:tilawa/core/di/injection.dart';
 import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../features/audio_player/presentation/cubit/player_background_cubit.dart';
+import '../features/auth/data/services/pending_session_revoke_store.dart';
 import '../features/auth/presentation/bloc/auth_bloc.dart';
 import '../features/auth/presentation/cubit/session_validity_cubit.dart';
 import '../features/auth/presentation/widgets/account_deletion_navigation_listener.dart';
@@ -54,6 +55,7 @@ class AppProviders {
               previous is! AuthAuthenticated && current is AuthAuthenticated,
           listener: (context, state) {
             context.read<SessionValidityCubit>().resetRevocation();
+            unawaited(PendingSessionRevokeStore.clear());
             unawaited(context.read<SessionValidityCubit>().checkOnResume());
           },
           child: SessionRevokedNavigationListener(

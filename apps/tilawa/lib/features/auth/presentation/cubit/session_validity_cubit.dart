@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa/features/auth/data/services/google_sign_in_session_tracker.dart';
 import 'package:tilawa/features/auth/data/services/pending_session_revoke_store.dart';
 import 'package:tilawa/features/auth/domain/entities/session_validity_result.dart';
 import 'package:tilawa/features/auth/domain/repositories/auth_repository.dart';
@@ -45,6 +46,7 @@ class SessionValidityCubit extends Cubit<SessionValidityState> {
     this._checkSessionValidity,
     this._signOut,
     this._sessionRevokedNotifier,
+    this._signInSessionTracker,
   ) : super(const SessionValidityState()) {
     _revokedSubscription = _sessionRevokedNotifier.onSessionRevoked.listen(
       (_) => _handleRevoked(trigger: 'fcm'),
@@ -61,12 +63,17 @@ class SessionValidityCubit extends Cubit<SessionValidityState> {
   final CheckSessionValidityUseCase _checkSessionValidity;
   final SignOut _signOut;
   final SessionRevokedNotifier _sessionRevokedNotifier;
+  final GoogleSignInSessionTracker _signInSessionTracker;
   late final StreamSubscription<void> _revokedSubscription;
   Timer? _unknownRetryTimer;
   int _unknownRetryCount = 0;
   bool _handlingRevocation = false;
 
   Future<void> checkOnResume() async {
+    if (_signInSessionTracker.inFlight) {
+      return;
+    }
+
     final user = _authRepository.currentUser;
     if (user == null || state.revoked || _handlingRevocation) {
       return;

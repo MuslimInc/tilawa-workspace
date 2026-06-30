@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/features/auth/application/account_deletion_flow_tracker.dart';
+import 'package:tilawa/features/auth/data/services/google_sign_in_session_tracker.dart';
 import 'package:tilawa/features/auth/domain/entities/auth_error_key.dart';
 import 'package:tilawa/features/auth/domain/entities/auth_result.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
@@ -15,6 +16,8 @@ import 'package:tilawa/features/auth/domain/usecases/sign_in_with_google_use_cas
 import 'package:tilawa/features/auth/domain/usecases/sign_out.dart';
 import 'package:tilawa/features/auth/domain/usecases/sync_device_token_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/sync_user_language_preference_use_case.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tilawa/features/auth/data/services/pending_session_revoke_store.dart';
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tilawa/features/localization/domain/usecases/get_current_language_use_case.dart';
 import 'package:tilawa_core/config/language_config.dart';
@@ -43,9 +46,11 @@ void main() {
   late MockGetCurrentLanguageUseCase mockGetCurrentLanguageUseCase;
   late MockSyncUserLanguagePreferenceUseCase mockSyncUserLanguagePreference;
   late AccountDeletionFlowTracker accountDeletionFlowTracker;
+  late GoogleSignInSessionTracker signInSessionTracker;
 
   setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
+    SharedPreferences.setMockInitialValues({});
     provideDummy<Either<Failure, void>>(const Right(null));
     provideDummy<Either<Failure, String>>(
       Right(LanguageConfig.defaultLanguageCode),
@@ -73,6 +78,8 @@ void main() {
     mockGetCurrentLanguageUseCase = MockGetCurrentLanguageUseCase();
     mockSyncUserLanguagePreference = MockSyncUserLanguagePreferenceUseCase();
     accountDeletionFlowTracker = AccountDeletionFlowTracker();
+    signInSessionTracker = GoogleSignInSessionTracker();
+    signInSessionTracker.markFinished();
 
     when(
       mockGetCurrentLanguageUseCase(),
@@ -96,10 +103,12 @@ void main() {
       mockGetCurrentLanguageUseCase,
       mockSyncUserLanguagePreference,
       accountDeletionFlowTracker,
+      signInSessionTracker,
     );
   });
 
   tearDown(() {
+    signInSessionTracker.markFinished();
     authBloc.close();
   });
 
@@ -170,6 +179,25 @@ void main() {
       );
 
       blocTest<AuthBloc, AuthState>(
+        'ignores CheckAuthStatus while interactive sign-in is loading',
+        build: () {
+          when(
+            mockSignInWithGoogleUseCase(),
+          ).thenAnswer((_) => Completer<AuthResult>().future);
+          return authBloc;
+        },
+        act: (bloc) async {
+          bloc.add(const SignInWithGoogleEvent());
+          await Future<void>.delayed(Duration.zero);
+          bloc.add(const CheckAuthStatusEvent());
+        },
+        expect: () => [const AuthState.loading()],
+        verify: (_) {
+          verifyNever(mockGetCurrentUserUseCase());
+        },
+      );
+
+      blocTest<AuthBloc, AuthState>(
         'emits [unauthenticated] when user is NOT logged in',
         build: () {
           when(mockGetCurrentUserUseCase()).thenReturn(null);
@@ -186,6 +214,28 @@ void main() {
 
     group('SignInWithGoogleEvent', () {
       blocTest<AuthBloc, AuthState>(
+        'clears stale pending session revoke flag at sign-in start',
+        build: () {
+          SharedPreferences.setMockInitialValues({
+            PendingSessionRevokeStore.key: true,
+          });
+          when(
+            mockSignInWithGoogleUseCase(),
+          ).thenAnswer((_) async => const AuthResult.cancelled());
+          return authBloc;
+        },
+        act: (bloc) => bloc.add(const SignInWithGoogleEvent()),
+        expect: () => [
+          const AuthState.loading(),
+          const AuthState.unauthenticated(),
+        ],
+        verify: (_) async {
+          final prefs = await SharedPreferences.getInstance();
+          expect(prefs.containsKey(PendingSessionRevokeStore.key), isFalse);
+        },
+      );
+
+      blocTest<AuthBloc, AuthState>(
         'emits [loading, error] when device registration fails after Google success',
         build: () {
           when(
@@ -194,7 +244,9 @@ void main() {
           when(
             mockSyncDeviceTokenUseCase.registerExplicitSignIn(tUser.id),
           ).thenAnswer(
-            (_) async => Left(Failure.serverError('registration failed')),
+            (_) async => Left(
+              Failure.serverError(AuthErrorKey.deviceRegistrationFailed),
+            ),
           );
           when(
             mockSignOut(skipServerTokenClear: true),

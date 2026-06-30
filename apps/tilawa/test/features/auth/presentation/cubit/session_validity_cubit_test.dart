@@ -3,6 +3,7 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tilawa/features/auth/data/services/google_sign_in_session_tracker.dart';
 import 'package:tilawa/features/auth/data/services/pending_session_revoke_store.dart';
 import 'package:tilawa/features/auth/domain/entities/session_validity_result.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
@@ -25,6 +26,7 @@ void main() {
   late MockCheckSessionValidityUseCase mockCheckValidity;
   late MockSignOut mockSignOut;
   late SessionRevokedNotifier sessionRevokedNotifier;
+  late GoogleSignInSessionTracker signInSessionTracker;
 
   final tUser = UserEntity(
     id: 'user_1',
@@ -38,6 +40,7 @@ void main() {
     mockCheckValidity = MockCheckSessionValidityUseCase();
     mockSignOut = MockSignOut();
     sessionRevokedNotifier = SessionRevokedNotifier();
+    signInSessionTracker = GoogleSignInSessionTracker();
 
     when(() => mockAuthRepository.currentUser).thenReturn(tUser);
     when(
@@ -54,6 +57,7 @@ void main() {
     mockCheckValidity,
     mockSignOut,
     sessionRevokedNotifier,
+    signInSessionTracker,
   );
 
   blocTest<SessionValidityCubit, SessionValidityState>(
@@ -214,6 +218,24 @@ void main() {
     ),
     act: (cubit) => cubit.resetRevocation(),
     expect: () => [const SessionValidityState()],
+  );
+
+  blocTest<SessionValidityCubit, SessionValidityState>(
+    'checkOnResume is no-op while interactive Google sign-in is in flight',
+    build: buildCubit,
+    act: (cubit) async {
+      signInSessionTracker.markStarted();
+      await cubit.checkOnResume();
+    },
+    expect: () => <SessionValidityState>[],
+    verify: (_) {
+      verifyNever(() => mockCheckValidity(any()));
+      verifyNever(
+        () => mockSignOut(
+          skipServerTokenClear: any(named: 'skipServerTokenClear'),
+        ),
+      );
+    },
   );
 
   blocTest<SessionValidityCubit, SessionValidityState>(

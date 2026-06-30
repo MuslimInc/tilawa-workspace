@@ -9,6 +9,8 @@ import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../../application/account_deletion_flow_tracker.dart';
+import '../../data/services/google_sign_in_session_tracker.dart';
+import '../../data/services/pending_session_revoke_store.dart';
 import '../../domain/entities/auth_error_key.dart';
 import '../../domain/entities/auth_result.dart';
 import '../../domain/entities/user_entity.dart';
@@ -36,6 +38,7 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
     this._getCurrentLanguage,
     this._syncUserLanguagePreference,
     this._accountDeletionFlow,
+    this._signInSessionTracker,
   ) : super(const AuthState.initial()) {
     on<SignInWithGoogleEvent>(_onSignInWithGoogle);
     on<SignOutEvent>(_onSignOut);
@@ -54,12 +57,15 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
   final GetCurrentLanguageUseCase _getCurrentLanguage;
   final SyncUserLanguagePreferenceUseCase _syncUserLanguagePreference;
   final AccountDeletionFlowTracker _accountDeletionFlow;
+  final GoogleSignInSessionTracker _signInSessionTracker;
 
   Future<void> _onSignInWithGoogle(
     SignInWithGoogleEvent event,
     Emitter<AuthState> emit,
   ) async {
     final int generation = ++_interactiveSignInGeneration;
+    _signInSessionTracker.markStarted();
+    await PendingSessionRevokeStore.clear();
     emit(const AuthState.loading());
 
     try {
@@ -113,6 +119,8 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
         stackTrace: stackTrace,
       );
       emit(const AuthState.error(message: 'Authentication failed'));
+    } finally {
+      _signInSessionTracker.markFinished();
     }
   }
 
@@ -234,6 +242,10 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
     CheckAuthStatusEvent event,
     Emitter<AuthState> emit,
   ) async {
+    if (state is AuthLoading || _signInSessionTracker.inFlight) {
+      return;
+    }
+
     final UserEntity? user = _getCurrentUser();
     if (user != null) {
       final Either<Failure, void> registration = await _syncDeviceToken(
@@ -256,8 +268,7 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
   }
 
   bool _isStaleDeviceFailure(Failure failure) {
-    return failure.message == AuthErrorKey.staleDeviceRejected ||
-        failure.message == AuthErrorKey.requiresExplicitSignIn;
+    return failure.message == AuthErrorKey.staleDeviceRejected;
   }
 
   Future<void> _syncLanguagePreferenceAfterAuth() async {
