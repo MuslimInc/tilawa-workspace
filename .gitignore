@@ -82,3 +82,8 @@ apps/tilawa/android/app/java_pid35914.hprof
 
 sentry.properties
 sentry-wizard
+
+# Notion sync local config (database id, never commit API keys)
+tools/notion/.notion.local.json
+.env
+.env.*
