@@ -62,11 +62,14 @@ android {
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         // Play AAB: arm64 only — 64-bit required on Play since 2019.
-        //
-        // Do not set ndk.abiFilters here: Flutter Gradle plugin sets filters
-        // when splits are off, and --split-per-abi conflicts with manual filters.
-        // For lean Play bundles use:
-        //   flutter build appbundle --release --target-platform android-arm64
+        // ndk.abiFilters limits native code built by this module only; plugin
+        // AARs (Agora, etc.) still merge prebuilt .so for every ABI unless
+        // packaging.jniLibs.excludes strips them below. Flutter AOT needs
+        // --target-platform android-arm64 for libapp.so. Do not combine
+        // abiFilters with --split-per-abi.
+        ndk {
+            abiFilters 'arm64-v8a'
+        }
     }
 
     signingConfigs {
@@ -77,6 +80,13 @@ android {
                 storeFile file(keystoreProperties['storeFile'])
                 storePassword keystoreProperties['storePassword']
             }
+        }
+    }
+
+    packaging {
+        jniLibs {
+            // Plugin AARs ship arm64 + armeabi-v7a + x86_64; keep arm64 only.
+            excludes += ['**/armeabi-v7a/**', '**/x86/**', '**/x86_64/**']
         }
     }
 
