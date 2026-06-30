@@ -40,8 +40,7 @@ class SyncDeviceTokenUseCase {
 
   void _notifyWhenStale<T>(Either<Failure, T> result) {
     result.fold((failure) {
-      if (failure.message == AuthErrorKey.staleDeviceRejected ||
-          failure.message == AuthErrorKey.requiresExplicitSignIn) {
+      if (failure.message == AuthErrorKey.staleDeviceRejected) {
         _sessionRevokedNotifier.notifySessionRevoked();
       }
     }, (_) {});

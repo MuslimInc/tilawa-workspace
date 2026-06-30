@@ -4327,7 +4327,7 @@
             }
         }
     },
-    "authSignedInElsewhereTitle": "Signed in on another device",
+    "authSignedInElsewhereTitle": "Signed out on another device",
     "@authSignedInElsewhereTitle": {
         "description": "Title when another device took over the active session"
     },

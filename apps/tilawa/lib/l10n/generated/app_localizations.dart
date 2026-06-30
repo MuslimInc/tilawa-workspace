@@ -6011,7 +6011,7 @@ abstract class AppLocalizations {
   /// Title when another device took over the active session
   ///
   /// In en, this message translates to:
-  /// **'Signed in on another device'**
+  /// **'Signed out on another device'**
   String get authSignedInElsewhereTitle;
 
   /// Body when another device took over the active session

@@ -6,26 +6,27 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/mockito.dart';
-import 'package:tilawa_core/config/language_config.dart';
-import 'package:tilawa_core/errors/failures.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/bootstrap/splash_launch_handoff.dart';
 import 'package:tilawa/features/auth/application/account_deletion_flow_tracker.dart';
 import 'package:tilawa/features/auth/data/services/android_sign_in_platform_policy.dart';
 import 'package:tilawa/features/auth/data/services/google_sign_in_session_tracker.dart';
 import 'package:tilawa/features/auth/domain/entities/auth_result.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
-import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tilawa/features/auth/domain/gateways/google_sign_in_launch_gateway.dart';
 import 'package:tilawa/features/auth/domain/repositories/auth_repository.dart';
 import 'package:tilawa/features/auth/domain/services/google_sign_in_launch_readiness_store.dart';
-import 'package:tilawa/features/auth/domain/usecases/prewarm_google_sign_in_launch_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/prepare_google_sign_in_use_case.dart';
+import 'package:tilawa/features/auth/domain/usecases/prewarm_google_sign_in_launch_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/resolve_google_sign_in_launch_use_case.dart';
+import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tilawa/features/auth/presentation/cubit/login_google_sign_in_cubit.dart';
 import 'package:tilawa/features/auth/presentation/screens/login_screen.dart';
 import 'package:tilawa/features/auth/presentation/services/google_sign_in_interactive_launcher.dart';
 import 'package:tilawa/features/theme/domain/primary_color_preset.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
+import 'package:tilawa_core/config/language_config.dart';
+import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../helpers/hydrated_bloc_test_helper.dart';
@@ -110,6 +111,7 @@ void main() {
     provideDummy<Either<Failure, String>>(
       Right(LanguageConfig.defaultLanguageCode),
     );
+    SharedPreferences.setMockInitialValues({});
     await initializeHydratedStorageForTest();
   });
 
@@ -119,6 +121,7 @@ void main() {
 
   setUp(() async {
     TilawaInteractionFeedback.enabled = false;
+    SharedPreferences.setMockInitialValues({});
     await getIt.reset();
     mockSignInWithGoogleUseCase = MockSignInWithGoogleUseCase();
     mockSignOut = MockSignOut();
@@ -135,6 +138,9 @@ void main() {
     when(mockSyncDeviceTokenUseCase(any)).thenAnswer(
       (_) async => const Right(null),
     );
+    when(mockSyncDeviceTokenUseCase.registerExplicitSignIn(any)).thenAnswer(
+      (_) async => const Right(null),
+    );
     when(
       mockGetCurrentLanguageUseCase(),
     ).thenAnswer((_) async => Right(LanguageConfig.defaultLanguageCode));
@@ -149,6 +155,7 @@ void main() {
       mockGetCurrentLanguageUseCase,
       mockSyncUserLanguagePreference,
       accountDeletionFlowTracker,
+      sessionTracker,
     );
 
     getIt.registerSingleton<GoogleSignInLaunchGateway>(testLauncher);
@@ -179,6 +186,7 @@ void main() {
   });
 
   tearDown(() async {
+    sessionTracker.markFinished();
     await authBloc.close();
     await getIt.reset();
   });
@@ -207,6 +215,7 @@ void main() {
   Future<void> pumpLoginInitFrames(WidgetTester tester) async {
     await tester.pump();
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
   }
 
   Finder googleButtonFinder() {
@@ -246,6 +255,15 @@ void main() {
     }
   }
 
+  Future<void> pumpUntilAuthLoading(WidgetTester tester) async {
+    for (var i = 0; i < 30; i++) {
+      await tester.pump(const Duration(milliseconds: 50));
+      if (authBloc.state is AuthLoading) {
+        return;
+      }
+    }
+  }
+
   group('LoginScreen', () {
     testWidgets('renders welcome copy and the Google sign-in button', (
       WidgetTester tester,
@@ -273,6 +291,12 @@ void main() {
 
         await tester.tap(googleButtonFinder());
         await tester.pump();
+        await tester.runAsync(() async {
+          await authBloc.stream.firstWhere(
+            (AuthState state) => state is AuthLoading,
+          );
+        });
+        await tester.pump();
 
         expect(testLauncher.settledInvocations, 0);
         verify(mockSignInWithGoogleUseCase()).called(1);
@@ -289,7 +313,9 @@ void main() {
         await tester.pump();
 
         expect(authBloc.state, isA<AuthAuthenticated>());
-        verify(mockSyncDeviceTokenUseCase(testUser.id)).called(1);
+        verify(
+          mockSyncDeviceTokenUseCase.registerExplicitSignIn(testUser.id),
+        ).called(1);
       },
     );
 
@@ -347,6 +373,12 @@ void main() {
 
       await tester.tap(googleButtonFinder());
       await tester.pump();
+      await tester.runAsync(() async {
+        await authBloc.stream.firstWhere(
+          (AuthState state) => state is AuthLoading,
+        );
+      });
+      await tester.pump();
 
       expect(testLauncher.settledInvocations, 0);
       verify(mockSignInWithGoogleUseCase()).called(1);
@@ -376,10 +408,20 @@ void main() {
     ) async {
       getIt.unregister<GoogleSignInLaunchGateway>();
 
+      when(
+        mockSignInWithGoogleUseCase(),
+      ).thenAnswer((_) async => const AuthResult.cancelled());
+
       await pumpLoginScreen(tester);
       await pumpLoginInitFrames(tester);
 
       await tester.tap(googleButtonFinder());
+      await tester.pump();
+      await tester.runAsync(() async {
+        await authBloc.stream.firstWhere(
+          (AuthState state) => state is AuthLoading,
+        );
+      });
       await tester.pump();
 
       verify(mockSignInWithGoogleUseCase()).called(1);
@@ -429,8 +471,6 @@ void main() {
       (
         WidgetTester tester,
       ) async {
-        registerAutoSignInPolicy();
-
         when(
           mockSignInWithGoogleUseCase(),
         ).thenAnswer((_) => Completer<AuthResult>().future);
@@ -438,9 +478,16 @@ void main() {
         await pumpLoginScreen(tester);
         await pumpLoginInitFrames(tester);
 
+        authBloc.add(const SignInWithGoogleEvent());
+        await tester.runAsync(() async {
+          await authBloc.stream.firstWhere(
+            (AuthState state) => state is AuthLoading,
+          );
+        });
+        await tester.pump();
+
         expect(authBloc.state, isA<AuthLoading>());
 
-        sessionTracker.markStarted();
         clearInteractions(mockGetCurrentUserUseCase);
 
         binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
@@ -450,29 +497,6 @@ void main() {
         verifyNever(mockGetCurrentUserUseCase());
       },
     );
-
-    testWidgets('dispatches CheckAuthStatus after resume when loading stalls', (
-      WidgetTester tester,
-    ) async {
-      registerAutoSignInPolicy();
-
-      when(
-        mockSignInWithGoogleUseCase(),
-      ).thenAnswer((_) => Completer<AuthResult>().future);
-
-      await pumpLoginScreen(tester);
-      await pumpLoginInitFrames(tester);
-
-      expect(authBloc.state, isA<AuthLoading>());
-
-      clearInteractions(mockGetCurrentUserUseCase);
-
-      binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
-      binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-      await tester.pump();
-
-      verify(mockGetCurrentUserUseCase()).called(1);
-    });
 
     testWidgets('skips auto sign-in during account deletion flow', (
       WidgetTester tester,
@@ -498,6 +522,12 @@ void main() {
       await pumpLoginInitFrames(tester);
 
       await tester.tap(googleButtonFinder());
+      await tester.pump();
+      await tester.runAsync(() async {
+        await authBloc.stream.firstWhere(
+          (AuthState state) => state is AuthLoading,
+        );
+      });
       await tester.pump();
 
       expect(authBloc.state, isA<AuthLoading>());
@@ -532,6 +562,12 @@ void main() {
 
         await tester.tap(googleButtonFinder());
         await tester.pump();
+        await tester.runAsync(() async {
+          await authBloc.stream.firstWhere(
+            (AuthState state) => state is AuthLoading,
+          );
+        });
+        await tester.pump();
 
         await completeSignInAndPump(
           tester,
@@ -555,6 +591,12 @@ void main() {
       await pumpLoginInitFrames(tester);
 
       await tester.tap(googleButtonFinder());
+      await tester.pump();
+      await tester.runAsync(() async {
+        await authBloc.stream.firstWhere(
+          (AuthState state) => state is AuthLoading,
+        );
+      });
       await tester.pump();
 
       await completeSignInAndPump(

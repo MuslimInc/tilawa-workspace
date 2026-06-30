@@ -3393,7 +3393,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get authSignedInElsewhereTitle => 'تم تسجيل الدخول من جهاز آخر';
+  String get authSignedInElsewhereTitle => 'تم تسجيل خروجك من جهاز آخر';
 
   @override
   String get authSignedInElsewhereBody =>

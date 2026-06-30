@@ -30,4 +30,13 @@ void main() {
     expect(await PendingSessionRevokeStore.consume(), isTrue);
     expect(await PendingSessionRevokeStore.consume(), isFalse);
   });
+
+  test('clear removes pending flag', () async {
+    await PendingSessionRevokeStore.mark();
+    await PendingSessionRevokeStore.clear();
+
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.containsKey(PendingSessionRevokeStore.key), isFalse);
+    expect(await PendingSessionRevokeStore.consume(), isFalse);
+  });
 }

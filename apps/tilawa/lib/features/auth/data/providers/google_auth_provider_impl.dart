@@ -177,8 +177,6 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
       );
     } catch (e) {
       return AuthResult.failure(message: e.toString());
-    } finally {
-      _sessionTracker.markFinished();
     }
   }
 

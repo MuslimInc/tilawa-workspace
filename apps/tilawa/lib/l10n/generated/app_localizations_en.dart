@@ -3416,7 +3416,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get authSignedInElsewhereTitle => 'Signed in on another device';
+  String get authSignedInElsewhereTitle => 'Signed out on another device';
 
   @override
   String get authSignedInElsewhereBody =>

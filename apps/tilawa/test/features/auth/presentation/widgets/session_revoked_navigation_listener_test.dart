@@ -2,12 +2,15 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tilawa/features/localization/presentation/bloc/localization_bloc.dart';
+import 'package:tilawa/features/auth/data/services/google_sign_in_session_tracker.dart';
 import 'package:tilawa/features/auth/domain/repositories/auth_repository.dart';
 import 'package:tilawa/features/auth/domain/services/session_revoked_notifier.dart';
 import 'package:tilawa/features/auth/domain/usecases/check_session_validity_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/sign_out.dart';
+import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tilawa/features/auth/presentation/cubit/session_validity_cubit.dart';
 import 'package:tilawa/features/auth/presentation/widgets/session_revoked_navigation_listener.dart';
 import 'package:tilawa/features/theme/domain/primary_color_preset.dart';
@@ -26,6 +29,8 @@ class MockLocalizationBloc
     extends MockBloc<LocalizationEvent, LocalizationState>
     implements LocalizationBloc {}
 
+class MockAuthBloc extends MockBloc<AuthEvent, AuthState> implements AuthBloc {}
+
 Widget _materialAppWithL10n({required Widget child}) {
   return MaterialApp(
     navigatorKey: AppRouter.navigatorKey,
@@ -40,17 +45,26 @@ Widget _materialAppWithL10n({required Widget child}) {
 
 void main() {
   late SessionValidityCubit cubit;
+  late GoogleSignInSessionTracker signInSessionTracker;
+  final GetIt getIt = GetIt.instance;
 
   setUp(() {
+    signInSessionTracker = GoogleSignInSessionTracker();
     cubit = SessionValidityCubit(
       MockAuthRepository(),
       MockCheckSessionValidityUseCase(),
       MockSignOut(),
       SessionRevokedNotifier(),
+      signInSessionTracker,
     );
   });
 
-  tearDown(() => cubit.close());
+  tearDown(() {
+    cubit.close();
+    if (getIt.isRegistered<GoogleSignInSessionTracker>()) {
+      getIt.unregister<GoogleSignInSessionTracker>();
+    }
+  });
 
   testWidgets('shows signed-in-elsewhere dialog when session revoked', (
     tester,
@@ -69,7 +83,7 @@ void main() {
     cubit.emit(const SessionValidityState(revoked: true));
     await tester.pumpAndSettle();
 
-    expect(find.text('Signed in on another device'), findsOneWidget);
+    expect(find.text('Signed out on another device'), findsOneWidget);
     expect(
       find.text(
         'You were signed out because this account was used on another device.',
@@ -111,7 +125,7 @@ void main() {
       cubit.emit(const SessionValidityState(revoked: true));
       await tester.pumpAndSettle();
 
-      expect(find.text('Signed in on another device'), findsOneWidget);
+      expect(find.text('Signed out on another device'), findsOneWidget);
     },
   );
 
@@ -133,7 +147,7 @@ void main() {
       cubit.emit(const SessionValidityState(revoked: true));
       await tester.pumpAndSettle();
 
-      expect(find.text('Signed in on another device'), findsOneWidget);
+      expect(find.text('Signed out on another device'), findsOneWidget);
     },
   );
 
@@ -154,7 +168,59 @@ void main() {
       cubit.emit(const SessionValidityState(revoked: true));
       await tester.pumpAndSettle();
 
-      expect(find.text('Signed in on another device'), findsOneWidget);
+      expect(find.text('Signed out on another device'), findsOneWidget);
     },
   );
+
+  testWidgets('suppresses dialog while Google sign-in is in flight', (
+    tester,
+  ) async {
+    final tracker = GoogleSignInSessionTracker()..markStarted();
+    getIt.registerSingleton<GoogleSignInSessionTracker>(tracker);
+
+    await tester.pumpWidget(
+      BlocProvider<SessionValidityCubit>.value(
+        value: cubit,
+        child: SessionRevokedNavigationListener(
+          child: _materialAppWithL10n(
+            child: const Scaffold(body: Text('child')),
+          ),
+        ),
+      ),
+    );
+
+    cubit.emit(const SessionValidityState(revoked: true));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Signed out on another device'), findsNothing);
+    tracker.markFinished();
+  });
+
+  testWidgets('suppresses dialog while AuthBloc is loading', (tester) async {
+    final mockAuthBloc = MockAuthBloc();
+    whenListen(
+      mockAuthBloc,
+      Stream<AuthState>.empty(),
+      initialState: const AuthState.loading(),
+    );
+
+    await tester.pumpWidget(
+      MultiBlocProvider(
+        providers: <BlocProvider<dynamic>>[
+          BlocProvider<SessionValidityCubit>.value(value: cubit),
+          BlocProvider<AuthBloc>.value(value: mockAuthBloc),
+        ],
+        child: SessionRevokedNavigationListener(
+          child: _materialAppWithL10n(
+            child: const Scaffold(body: Text('child')),
+          ),
+        ),
+      ),
+    );
+
+    cubit.emit(const SessionValidityState(revoked: true));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Signed out on another device'), findsNothing);
+  });
 }

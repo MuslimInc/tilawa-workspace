@@ -2,6 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/features/auth/data/services/google_sign_in_session_tracker.dart';
+import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tilawa/features/localization/presentation/bloc/localization_bloc.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa/router/app_router.dart';
@@ -40,6 +43,10 @@ void _scheduleSignedInElsewhereDialog(BuildContext listenerContext) {
 }
 
 void _showSignedInElsewhereDialog(BuildContext listenerContext) {
+  if (_shouldSuppressSessionRevokedDialog(listenerContext)) {
+    return;
+  }
+
   final BuildContext? dialogHost = AppRouter.navigatorKey.currentContext;
   if (dialogHost == null || !dialogHost.mounted) {
     return;
@@ -80,6 +87,23 @@ void _showSignedInElsewhereDialog(BuildContext listenerContext) {
       },
     ),
   );
+}
+
+bool _shouldSuppressSessionRevokedDialog(BuildContext listenerContext) {
+  try {
+    if (listenerContext.read<AuthBloc>().state is AuthLoading) {
+      return true;
+    }
+  } on Object {
+    // Tests may omit [AuthBloc].
+  }
+
+  if (getIt.isRegistered<GoogleSignInSessionTracker>() &&
+      getIt<GoogleSignInSessionTracker>().inFlight) {
+    return true;
+  }
+
+  return false;
 }
 
 AppLocalizations _resolveSessionRevokedL10n(
