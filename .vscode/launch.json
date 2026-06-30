@@ -23,6 +23,18 @@
             "flutterMode": "release"
         },
         {
+            // Run `dart run tool/configure_rtc_deps.dart --stub` from apps/tilawa
+            // first, then `flutter pub get` at repo root. Restores with --sdk.
+            "name": "Tilawa (Production no RTC)",
+            "request": "launch",
+            "type": "dart",
+            "program": "apps/tilawa/lib/main.dart",
+            "flutterMode": "release",
+            "toolArgs": [
+                "--dart-define=TILAWA_DISTRIBUTION=play_production"
+            ]
+        },
+        {
             "name": "Tilawa (Staging Agora)",
             "request": "launch",
             "type": "dart",
