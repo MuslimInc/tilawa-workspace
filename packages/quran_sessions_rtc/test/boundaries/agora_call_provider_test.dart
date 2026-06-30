@@ -36,7 +36,7 @@ void main() {
             sessionId: 'session_1',
             role: SessionParticipantRole.student,
             callType: SessionCallType.voiceCall,
-            providerKind: SessionCallProviderKind.webrtc,
+            providerKind: SessionCallProviderKind.livekit,
           ),
         ),
         throwsA(isA<CallProviderUnavailableFailure>()),

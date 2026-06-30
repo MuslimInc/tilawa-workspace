@@ -63,6 +63,14 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
           _googlePrepareTimeout,
           onTimeout: () {},
         );
+        if (AppRouter.pendingColdStartLocation != null) {
+          logger.d(
+            '[DebugNotificationAuthFlow] discarding pending notification route '
+            '(unauthenticated)',
+          );
+          AppRouter.clearPendingColdStartRoute();
+          AppRouter.pendingStartupNotificationLaunch = false;
+        }
       }
 
       if (isClosed) {
@@ -71,7 +79,8 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
 
       final String? pendingColdStartLocation =
           AppRouter.pendingColdStartLocation;
-      if (pendingColdStartLocation != null) {
+      if (pendingColdStartLocation != null &&
+          result.destination != SplashDestination.login) {
         emit(
           SplashNavigateToNotification(
             pendingColdStartLocation,
@@ -107,6 +116,20 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
 
   /// Navigates using the launch plan [BootGate] already applied (R1).
   void _emitBootResolvedNavigation(Emitter<SplashState> emit) {
+    final String? launchLocation = AppRouter.initialLaunchLocation;
+    if (launchLocation == const LoginRoute().location) {
+      if (AppRouter.pendingColdStartLocation != null) {
+        logger.d(
+          '[DebugNotificationAuthFlow] discarding pending notification route '
+          '(unauthenticated)',
+        );
+        AppRouter.clearPendingColdStartRoute();
+        AppRouter.pendingStartupNotificationLaunch = false;
+      }
+      emit(const SplashNavigateToLogin());
+      return;
+    }
+
     final String? pendingColdStartLocation = AppRouter.pendingColdStartLocation;
     if (pendingColdStartLocation != null) {
       emit(
@@ -115,12 +138,6 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
           extra: AppRouter.pendingColdStartExtra,
         ),
       );
-      return;
-    }
-
-    final String? launchLocation = AppRouter.initialLaunchLocation;
-    if (launchLocation == const LoginRoute().location) {
-      emit(const SplashNavigateToLogin());
       return;
     }
     if (launchLocation == const LanguageWelcomeRoute().location) {

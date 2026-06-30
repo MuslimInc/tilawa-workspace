@@ -244,9 +244,9 @@ List<RouteBase> get quranSessionsRoutes => [
               analytics: quranSessionsAnalyticsCallbacks(),
               scrollBottomPadding: listScrollBottomPadding,
               resolveTeacherName: _resolveTeacherName,
-              createCallControlGateway: _createQuranSessionCallControlGateway,
-              createCallTelemetry: _createCallTelemetry,
-              buildCallSurface: _buildQuranSessionsCallSurface(),
+              createCallControlGateway: createQuranSessionsCallControlGateway,
+              createCallTelemetry: createQuranSessionsCallTelemetry,
+              buildCallSurface: buildQuranSessionsInAppCallSurface(),
               onSessionDetailRequested: (bookingId) => context.push(
                 QuranSessionsRoutes.sessionDetail.replaceFirst(
                   ':bookingId',
@@ -298,9 +298,9 @@ List<RouteBase> get quranSessionsRoutes => [
         child: SessionDetailScreen(
           bookingId: bookingId,
           analytics: quranSessionsAnalyticsCallbacks(),
-          createCallControlGateway: _createQuranSessionCallControlGateway,
-          createCallTelemetry: _createCallTelemetry,
-          buildCallSurface: _buildQuranSessionsCallSurface(),
+          createCallControlGateway: createQuranSessionsCallControlGateway,
+          createCallTelemetry: createQuranSessionsCallTelemetry,
+          buildCallSurface: buildQuranSessionsInAppCallSurface(),
           onPracticeRevisionRequested:
               ({
                 required surahNumber,
@@ -513,6 +513,20 @@ Widget _withQuranSessionsTheme(Widget child) {
   return QuranSessionsThemeScope(child: child);
 }
 
+InAppCallSurfaceBuilder? buildQuranSessionsInAppCallSurface() {
+  return _buildQuranSessionsCallSurface();
+}
+
+SessionCallControlGateway createQuranSessionsCallControlGateway(
+  String sessionId,
+) {
+  return _createQuranSessionCallControlGateway(sessionId);
+}
+
+QuranSessionCallTelemetryCoordinator? createQuranSessionsCallTelemetry() {
+  return _createCallTelemetry();
+}
+
 InAppCallSurfaceBuilder? _buildQuranSessionsCallSurface() {
   return (
     context, {
@@ -520,24 +534,41 @@ InAppCallSurfaceBuilder? _buildQuranSessionsCallSurface() {
     required callType,
     required callProviderKind,
   }) {
+    final l10n = context.quranSessionsL10n;
+    final labels = AgoraCallSurfaceLabels(
+      connecting: l10n.inAppCallShellConnecting,
+      connected: l10n.inAppCallShellConnected,
+      waitingForParticipant: l10n.inAppCallShellWaitingForParticipant,
+      voiceCallTitle: l10n.inAppCallShellTitle,
+    );
+    final eventHub = getIt.isRegistered<SessionCallProviderEventHub>()
+        ? getIt<SessionCallProviderEventHub>()
+        : null;
+
+    if (getIt.isRegistered<LiveKitRoomPool>()) {
+      final livekitSurface = buildLiveKitCallSurface(
+        sessionId: sessionId,
+        callType: callType,
+        providerKind: callProviderKind,
+        roomPool: getIt<LiveKitRoomPool>(),
+        labels: labels,
+        eventHub: eventHub,
+      );
+      if (livekitSurface != null) {
+        return livekitSurface;
+      }
+    }
+
     if (!getIt.isRegistered<AgoraRtcEnginePool>()) {
       return null;
     }
-    final l10n = context.quranSessionsL10n;
     return buildAgoraCallSurface(
       sessionId: sessionId,
       callType: callType,
       providerKind: callProviderKind,
       enginePool: getIt<AgoraRtcEnginePool>(),
-      eventHub: getIt.isRegistered<SessionCallProviderEventHub>()
-          ? getIt<SessionCallProviderEventHub>()
-          : null,
-      labels: AgoraCallSurfaceLabels(
-        connecting: l10n.inAppCallShellConnecting,
-        connected: l10n.inAppCallShellConnected,
-        waitingForParticipant: l10n.inAppCallShellWaitingForParticipant,
-        voiceCallTitle: l10n.inAppCallShellTitle,
-      ),
+      eventHub: eventHub,
+      labels: labels,
     );
   };
 }

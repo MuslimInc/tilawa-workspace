@@ -870,7 +870,7 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get callProviderAgora => 'داخل التطبيق (Agora)';
 
   @override
-  String get callProviderWebrtc => 'داخل التطبيق (WebRTC)';
+  String get callProviderLivekit => 'داخل التطبيق (LiveKit)';
 
   @override
   String sessionStatusLabel(String status) {

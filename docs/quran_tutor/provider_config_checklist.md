@@ -12,10 +12,24 @@ Cross-ref: [production_config.md](./production_config.md) · [ops_qa_runbook.md]
 |----------|-------------------|-----------|------------------|
 | `external` | `externalMeeting` | Opens `meetingLink` / teacher `externalMeetingUrl` in browser | Stable v1 primary |
 | `mock` | `voiceCall`, `videoCall` | `MockSessionCallProvider` — placeholder UX, no real RTC | Staging / internal QA only |
+| `livekit` | `voiceCall`, `videoCall` | `LiveKitCallProvider` + `issueSessionRtcToken` CF | Staging QA default |
 | `agora` | `voiceCall`, `videoCall` | `AgoraCallProvider` + `issueSessionRtcToken` CF | Requires secrets + App ID in build |
-| `webrtc` | `voiceCall`, `videoCall` | `WebRtcCallProvider` + signaling URL | Requires `TILAWA_LAUNCH_WEBRTC_SIGNALING_URL` |
 
-**Resolution priority:** `agora` → `webrtc` → `mock` (when client does not send `callProvider` hint).
+**Resolution priority:** `livekit` → `agora` → `mock` (when client does not send `callProvider` hint). Legacy Firestore `webrtc` entries map to `livekit`.
+
+---
+
+## Staging LiveKit project (Tilawa / MeMuslim)
+
+| Item | Value | Where it lives |
+|------|-------|----------------|
+| Project ID | `p_2n1vvcqjfqy` | LiveKit Cloud console only — **not** used at runtime for JWT minting |
+| WebSocket URL | `wss://tilawa-7whzug8z.livekit.cloud` | Client: `kStagingLiveKitUrl` / `TILAWA_LAUNCH_LIVEKIT_URL`; CF secret `LIVEKIT_URL` |
+| SIP URI | `sip:2n1vvcqjfqy.sip.livekit.cloud` | Out of scope for v1 Flutter app (telephony / PSTN bridge) |
+| API Key | From LiveKit Cloud → Project → Settings → Keys | **Firebase secret `LIVEKIT_API_KEY` only** — never commit |
+| API Secret | Same Keys page (shown once at creation) | **Firebase secret `LIVEKIT_API_SECRET` only** — never commit |
+
+Local emulator template: `functions/.env.livekit.local.example` → copy to `.env.livekit.local` (gitignored).
 
 ---
 
@@ -25,16 +39,17 @@ Source: `AppLaunchConfig.fromEnvironment()`.
 
 | Define | `play_production` default | Non-production default |
 |--------|---------------------------|------------------------|
-| `TILAWA_LAUNCH_ENABLED_CALL_PROVIDERS` | `external,mock` | `external,mock,agora` |
-| `TILAWA_LAUNCH_AGORA_APP_ID` | empty | empty (auto-filled in staging/debug — see below) |
-| `TILAWA_LAUNCH_WEBRTC_SIGNALING_URL` | empty | empty |
+| `TILAWA_LAUNCH_ENABLED_CALL_PROVIDERS` | `external,mock` | `external,mock,livekit` |
+| `TILAWA_LAUNCH_LIVEKIT_URL` | empty | empty (auto-filled in staging/debug — see below) |
+| `TILAWA_LAUNCH_AGORA_APP_ID` | empty | empty (auto-filled in staging when `agora` enabled) |
 
 ### Staging / debug auto-inject
 
 `resolveRtcLaunchConfig()` (`quran_sessions_launch_policy.dart`):
 
-- When `distribution == staging` **or** `kDebugMode`: appends `agora` to providers if missing
-- When Agora App ID empty: uses `kStagingAgoraAppId` (`aacd48a930944ecea29bec112f229eb9`)
+- When `distribution == staging` **or** `kDebugMode`: appends `livekit` to providers if neither `livekit` nor `agora` is listed
+- When LiveKit is enabled and URL empty: uses `kStagingLiveKitUrl` (`wss://tilawa-7whzug8z.livekit.cloud`)
+- When Agora is enabled and App ID empty: uses `kStagingAgoraAppId`
 
 **Production release builds** do not auto-inject — ops must set defines explicitly for RTC.
 
@@ -53,10 +68,11 @@ Field: `enabledCallProviders` — **array of strings**.
 | Environment | Firestore value | Client CSV | Notes |
 |-------------|-----------------|------------|-------|
 | Staging Free Beta | `["external","mock"]` | `external,mock` | B1 + B2 QA |
+| Staging LiveKit QA | `["external","mock","livekit"]` | `external,mock,livekit` | URL auto-fills in staging/debug |
 | Staging Agora QA | `["external","mock","agora"]` | `external,mock,agora` + App ID | Two-device Agora join |
-| Play internal (stable) | `["external","mock"]` | `external,mock` | No Agora in prod binary path |
+| Play internal (stable) | `["external","mock"]` | `external,mock` | No RTC in prod binary path |
 | Play production GA | `["external"]` | `external,mock` or `external` | Remove `mock` from Firestore to block server mock |
-| Production RTC | `["external","agora"]` | `external,agora` + App ID | Remove `mock` from both sides |
+| Production RTC | `["external","livekit"]` or `["external","agora"]` | matching CSV + credentials | Remove `mock` from both sides |
 
 ---
 
@@ -66,8 +82,8 @@ Registered only when launch config enables provider:
 
 | Provider | DI registration |
 |----------|-----------------|
+| `livekit` | `LiveKitRoomPool`, `FirebaseCallTokenProvider` → `issueSessionRtcToken` |
 | `agora` | `AgoraRtcEnginePool`, `FirebaseCallTokenProvider` → `issueSessionRtcToken` |
-| `webrtc` | `WebRtcCallProvider` with signaling URL |
 | `external` | `ExternalMeetingCallProvider` (always in router) |
 | `mock` | `MockSessionCallProvider` (always in router) |
 
@@ -75,80 +91,79 @@ Registered only when launch config enables provider:
 
 ---
 
-## UI booking policy
+## Cloud Functions secrets (LiveKit)
 
-`sessionModePolicyFromLaunchConfig` → `SessionModePolicy.voiceVideoUseMockProvider`:
+Required for `issueSessionRtcToken` when session `callProvider` is `livekit`:
 
-- `true` when client hint is `mock` (no Agora + no WebRTC URL on prod build)
-- Booking screen shows voice/video segments when `SessionModePolicy.freeBeta` and types enabled
+| Secret | Source |
+|--------|--------|
+| `LIVEKIT_API_KEY` | LiveKit Cloud → Project → Settings → Keys |
+| `LIVEKIT_API_SECRET` | Same page — **required**; shown only once when the key is created |
+| `LIVEKIT_URL` | `wss://tilawa-7whzug8z.livekit.cloud` (returned to client as `appId` in token response) |
 
-`SessionModePolicy.externalOnly` hides voice/video when teacher has no external URL policy applied.
+Set interactively (values are **not** stored in the repo):
+
+```sh
+firebase functions:secrets:set LIVEKIT_API_KEY --project <project-id>
+# paste API key when prompted
+
+firebase functions:secrets:set LIVEKIT_API_SECRET --project <project-id>
+# paste API secret when prompted (from LiveKit console — not the same as API key)
+
+firebase functions:secrets:set LIVEKIT_URL --project <project-id>
+# paste: wss://tilawa-7whzug8z.livekit.cloud
+```
+
+Deploy after secrets are set:
+
+```sh
+firebase deploy --only functions:issueSessionRtcToken,functions:issueDebugLiveKitToken --project <project-id>
+```
+
+`issueDebugLiveKitToken` is **debug/staging QA only** (Settings → QA Tools → Test LiveKit video call). A client `not-found` on that tile means this callable was never deployed — deploy it alongside `issueSessionRtcToken`.
+
+Agora secrets (unchanged): `AGORA_APP_ID`, `AGORA_APP_CERTIFICATE`.
 
 ---
 
-## Cloud Functions secrets
+## Alignment checklist (do before LiveKit QA)
 
-| Secret | Used by |
-|--------|---------|
-| `AGORA_APP_ID` | `issueSessionRtcToken` |
-| `AGORA_APP_CERTIFICATE` | Token minting |
-
-Set:
-
-```sh
-firebase functions:secrets:set AGORA_APP_ID AGORA_APP_CERTIFICATE --project <project-id>
-```
-
-Deploy:
-
-```sh
-firebase deploy --only functions:issueSessionRtcToken --project <project-id>
-```
-
----
-
-## Alignment checklist (do before RTC QA)
-
-- [ ] Firestore `enabledCallProviders` includes intended RTC provider
-- [ ] Release APK built with matching `TILAWA_LAUNCH_ENABLED_CALL_PROVIDERS`
-- [ ] `TILAWA_LAUNCH_AGORA_APP_ID` set for production Agora (staging ID only for staging)
-- [ ] CF secrets deployed; `issueSessionRtcToken` callable live
+- [ ] Firestore `enabledCallProviders` includes `livekit`
+- [ ] `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`, and `LIVEKIT_URL` set in Firebase secrets
+- [ ] `issueSessionRtcToken` deployed
+- [ ] `issueDebugLiveKitToken` deployed (required for Settings → QA Tools LiveKit smoke test)
 - [ ] **New booking** after config change (existing sessions keep old `callProvider`)
-- [ ] Cancel mock-only sessions when switching staging → Agora path
+- [ ] Staging build uses `TILAWA_DISTRIBUTION=staging` (LiveKit URL auto-fills) or explicit `TILAWA_LAUNCH_LIVEKIT_URL`
 
 ---
 
-## Missing config — expected failures
+## Example build / run commands
 
-| Misconfiguration | Failure mode |
-|------------------|--------------|
-| Book voice/video, Firestore has only `external` | `unsupported_call_provider` from CF |
-| Session `callProvider: agora`, client lacks Agora in defines / empty App ID | Join fails; may fall back to mock hint on UI only — join still calls Agora path |
-| Agora session, secrets missing | `issueSessionRtcToken` error at join |
-| `webrtc` in Firestore, empty signaling URL | WebRTC provider not constructed; booking may still pick `webrtc` server-side → join broken |
-| Prod Firestore still has `mock`, ops thinks RTC live | Students get mock sessions — **mock leak** |
-
----
-
-## Mock leak prevention (release)
-
-1. Remove `mock` from Firestore `enabledCallProviders` for production wide release
-2. Ship `play_production` with `external` only (or `external,agora` when RTC ready)
-3. Do not set `TILAWA_QURAN_SESSIONS_BACKEND=fake` on shipped builds
-4. Verify sample session doc after test booking: `callProvider` matches intent
-
----
-
-## Example release build commands
-
-**Staging Free Beta (external + mock):**
+**Staging LiveKit QA** (URL auto-fills; override only if needed):
 
 ```sh
 cd apps/tilawa
+flutter run \
+  --dart-define=TILAWA_DISTRIBUTION=staging \
+  --dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED=true
+```
+
+Release APK:
+
+```sh
 flutter build apk --release \
   --dart-define=TILAWA_DISTRIBUTION=staging \
   --dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED=true \
-  --dart-define=TILAWA_LAUNCH_ENABLED_CALL_PROVIDERS=external,mock
+  --dart-define=TILAWA_LAUNCH_ENABLED_CALL_PROVIDERS=external,mock,livekit
+```
+
+Explicit URL override (optional):
+
+```sh
+flutter build apk --release \
+  --dart-define=TILAWA_DISTRIBUTION=staging \
+  --dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED=true \
+  --dart-define=TILAWA_LAUNCH_LIVEKIT_URL=wss://tilawa-7whzug8z.livekit.cloud
 ```
 
 **Staging Agora:**
@@ -166,5 +181,4 @@ flutter build apk --release \
 ```sh
 flutter build appbundle --release \
   --dart-define=TILAWA_DISTRIBUTION=play_production
-# Booking: add --dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED=true when ops ready
 ```

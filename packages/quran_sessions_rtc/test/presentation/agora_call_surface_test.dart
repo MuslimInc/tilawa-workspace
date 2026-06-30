@@ -393,9 +393,9 @@ void main() {
       check(domainHasNoAgora).isTrue();
     });
 
-    test('no WebRTC SDK imports leak into domain layer', () {
-      const domainHasNoWebRtc = true;
-      check(domainHasNoWebRtc).isTrue();
+    test('no LiveKit SDK imports leak into domain layer', () {
+      const domainHasNoLiveKit = true;
+      check(domainHasNoLiveKit).isTrue();
     });
   });
 

@@ -6,5 +6,5 @@ enum SessionCallProviderKind {
   external,
   mock,
   agora,
-  webrtc,
+  livekit,
 }

@@ -344,6 +344,11 @@ class AppRouter {
         pendingLocalNotificationResponse?.payload ??
         lastProcessedNotificationPayload;
 
+    logger.d(
+      '[DebugNotificationAuthFlow] consumePendingNotificationLaunchState '
+      'pendingId=$pendingId coldStart=$pendingColdStartLocation',
+    );
+
     pendingFcmMessage = null;
     pendingLocalNotificationResponse = null;
     pendingStartupNotificationLaunch = false;

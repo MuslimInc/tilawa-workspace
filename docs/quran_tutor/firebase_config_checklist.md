@@ -153,7 +153,9 @@ npx ts-node scripts/stagingFreeBetaSmoke.ts   # end-to-end CF smoke against live
 
 | Step | Check |
 |------|-------|
-| Client | Release build activates Play Integrity / App Attest (`app_startup_tasks.dart`) |
+| Client release | Play Integrity / App Attest + DeviceCheck (`app_startup_tasks.dart`) |
+| Client debug/profile | Debug providers + register token — [ios_app_check_debug_setup.md](../observability/ios_app_check_debug_setup.md) |
+| iOS app registered | App Check → `1:181575856185:ios:3f02220381ba118d381de8` |
 | CF default | `QURAN_SESSIONS_ENFORCE_APP_CHECK` **not** `true` until staging verified |
 | Staging smoke | Follow [app_check_staging_verification.md](../quran_sessions/app_check_staging_verification.md) |
 | Production | Flip env + redeploy callables only after staging pass |

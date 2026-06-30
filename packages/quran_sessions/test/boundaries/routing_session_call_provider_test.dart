@@ -64,19 +64,19 @@ void main() {
       }
     });
 
-    test('rejects webrtc when provider not registered', () async {
+    test('rejects livekit when provider not registered', () async {
       try {
         await router.join(
           const CallJoinRequest(
-            sessionId: 'session_webrtc',
+            sessionId: 'session_livekit',
             role: SessionParticipantRole.student,
             callType: SessionCallType.videoCall,
-            providerKind: SessionCallProviderKind.webrtc,
+            providerKind: SessionCallProviderKind.livekit,
           ),
         );
         fail('expected CallProviderUnavailableFailure');
-      } on CallProviderUnavailableFailure {
-        // expected
+      } on CallProviderUnavailableFailure catch (e) {
+        check(e.reasonCode).equals('livekit_not_registered');
       }
     });
 
@@ -126,24 +126,24 @@ void main() {
       check(mutedValue).equals(true);
     });
 
-    test('routes webrtc when provider is wired', () async {
-      var webrtcJoined = false;
+    test('routes livekit when provider is wired', () async {
+      var livekitJoined = false;
       final wired = RoutingSessionCallProvider(
         external: router.external,
         mock: router.mock,
-        webrtc: _RecordingProvider(onJoin: () => webrtcJoined = true),
+        livekit: _RecordingProvider(onJoin: () => livekitJoined = true),
       );
 
       await wired.join(
         const CallJoinRequest(
-          sessionId: 'session_webrtc',
+          sessionId: 'session_livekit',
           role: SessionParticipantRole.student,
           callType: SessionCallType.videoCall,
-          providerKind: SessionCallProviderKind.webrtc,
+          providerKind: SessionCallProviderKind.livekit,
         ),
       );
 
-      check(webrtcJoined).isTrue();
+      check(livekitJoined).isTrue();
     });
 
     test('leaveSession targets only the joined provider', () async {
@@ -161,9 +161,9 @@ void main() {
           onJoin: () {},
           onLeave: () => events.add('agora'),
         ),
-        webrtc: _RecordingProvider(
+        livekit: _RecordingProvider(
           onJoin: () {},
-          onLeave: () => events.add('webrtc'),
+          onLeave: () => events.add('livekit'),
         ),
       );
 

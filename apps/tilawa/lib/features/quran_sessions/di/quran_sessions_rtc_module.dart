@@ -40,11 +40,20 @@ class QuranSessionsRtcModule {
       );
     }
 
-    SessionCallProvider? webrtc;
-    if (rtc.enabledProviders.contains('webrtc')) {
-      webrtc = WebRtcCallProvider(
+    SessionCallProvider? livekit;
+    if (rtc.isLiveKitEnabled) {
+      livekit = LiveKitCallProvider(
+        serverUrl: rtc.livekitServerUrl,
         tokenProvider: sl<CallTokenProvider>(),
-        signalingServerUrl: config.webrtcSignalingServerUrl,
+        resolveUserId: () async {
+          final uid = sl<AuthSessionProvider>().currentUserId;
+          if (uid == null || uid.isEmpty) {
+            throw const UnauthorizedFailure();
+          }
+          return uid;
+        },
+        roomPool: sl<LiveKitRoomPool>(),
+        eventHub: eventHub,
       );
     }
 
@@ -63,21 +72,29 @@ class QuranSessionsRtcModule {
       ),
       mock: MockSessionCallProvider(eventHub: eventHub),
       agora: agora,
-      webrtc: webrtc,
+      livekit: livekit,
     );
   }
 
   static void register(GetIt sl, AppLaunchConfig config) {
     final rtc = resolveRtcLaunchConfig(config);
-    if (rtc.isAgoraEnabled) {
-      sl.registerLazySingletonIfAbsent<AgoraRtcEnginePool>(
-        () => AgoraRtcEnginePool(),
-      );
+    final needsTokenProvider = rtc.isAgoraEnabled || rtc.isLiveKitEnabled;
+    if (needsTokenProvider) {
       sl.registerLazySingletonIfAbsent<CallTokenProvider>(
         () => FirebaseCallTokenProvider(
           sl<CallableSessionPayloadBuilder>(),
           functions: FirebaseFunctions.instanceFor(region: 'us-central1'),
         ),
+      );
+    }
+    if (rtc.isAgoraEnabled) {
+      sl.registerLazySingletonIfAbsent<AgoraRtcEnginePool>(
+        () => AgoraRtcEnginePool(),
+      );
+    }
+    if (rtc.isLiveKitEnabled) {
+      sl.registerLazySingletonIfAbsent<LiveKitRoomPool>(
+        () => LiveKitRoomPool(),
       );
     }
   }

@@ -2,6 +2,11 @@ import 'package:flutter/foundation.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 
+/// Public LiveKit server URL for staging builds (token minting stays server-side).
+///
+/// LiveKit Cloud project ID (console reference only): `p_2n1vvcqjfqy`.
+const String kStagingLiveKitUrl = 'wss://tilawa-7whzug8z.livekit.cloud';
+
 /// Public Agora App ID for staging builds (token minting stays server-side).
 const String kStagingAgoraAppId = 'aacd48a930944ecea29bec112f229eb9';
 
@@ -10,15 +15,19 @@ class RtcLaunchConfig {
   const RtcLaunchConfig({
     required this.enabledProviders,
     required this.agoraAppId,
+    required this.livekitServerUrl,
   });
 
   final Set<String> enabledProviders;
   final String agoraAppId;
+  final String livekitServerUrl;
 
   bool get isAgoraEnabled =>
       enabledProviders.contains('agora') && agoraAppId.trim().isNotEmpty;
 
-  bool get isWebRtcEnabled => enabledProviders.contains('webrtc');
+  bool get isLiveKitEnabled =>
+      enabledProviders.contains('livekit') &&
+      livekitServerUrl.trim().isNotEmpty;
 }
 
 Set<String> parseEnabledCallProviders(AppLaunchConfig config) {
@@ -34,10 +43,9 @@ Set<String> parseEnabledCallProviders(AppLaunchConfig config) {
 
 /// Resolves client RTC wiring from [AppLaunchConfig] and build distribution.
 ///
-/// When [distribution] is `staging` or [debugMode] is true, Agora is enabled
-/// with [kStagingAgoraAppId] unless explicit dart-defines override — so
-/// `flutter run` (debug) and `flutter build apk --release` with only
-/// `TILAWA_DISTRIBUTION=staging` can join Agora sessions without extra defines.
+/// When [distribution] is `staging` or [debugMode] is true, LiveKit is enabled
+/// by default unless explicit dart-defines override — so `flutter run` (debug)
+/// and staging release builds can join LiveKit sessions without Agora defines.
 RtcLaunchConfig resolveRtcLaunchConfig(
   AppLaunchConfig config, {
   String distribution = const String.fromEnvironment(
@@ -48,17 +56,26 @@ RtcLaunchConfig resolveRtcLaunchConfig(
 }) {
   var enabledCsv = config.enabledCallProvidersCsv;
   var agoraAppId = config.agoraAppId;
+  var livekitServerUrl = config.livekitServerUrl;
 
   if (distribution == 'staging' || debugMode) {
-    final enabled = parseEnabledCallProviders(
+    var enabled = parseEnabledCallProviders(
       AppLaunchConfig(enabledCallProvidersCsv: enabledCsv),
     );
-    if (!enabled.contains('agora')) {
+    if (!enabled.contains('livekit') && !enabled.contains('agora')) {
       final trimmed = enabledCsv.trim();
-      enabledCsv = trimmed.isEmpty ? 'external,mock,agora' : '$trimmed,agora';
+      enabledCsv = trimmed.isEmpty
+          ? 'external,mock,livekit'
+          : '$trimmed,livekit';
     }
-    if (agoraAppId.trim().isEmpty) {
+    enabled = parseEnabledCallProviders(
+      AppLaunchConfig(enabledCallProvidersCsv: enabledCsv),
+    );
+    if (agoraAppId.trim().isEmpty && enabled.contains('agora')) {
       agoraAppId = kStagingAgoraAppId;
+    }
+    if (livekitServerUrl.trim().isEmpty && enabled.contains('livekit')) {
+      livekitServerUrl = kStagingLiveKitUrl;
     }
   }
 
@@ -67,6 +84,7 @@ RtcLaunchConfig resolveRtcLaunchConfig(
       AppLaunchConfig(enabledCallProvidersCsv: enabledCsv),
     ),
     agoraAppId: agoraAppId.trim(),
+    livekitServerUrl: livekitServerUrl.trim(),
   );
 }
 
@@ -75,7 +93,7 @@ RtcLaunchConfig resolveRtcLaunchConfig(
 /// Mirrors [RTC_PROVIDER_PRIORITY] in Cloud Functions when launch config matches
 /// Firestore `quran_session_platform_config/global.enabledCallProviders`.
 ///
-/// Production (`play_production`) must set `agora` (or `webrtc`) in both
+/// Production (`play_production`) must set `agora` or `livekit` in both
 /// Firestore and `TILAWA_LAUNCH_*` defines — mock is a dev fallback only when
 /// no RTC provider is configured with credentials.
 SessionCallProviderKind resolveVoiceVideoProviderHint(
@@ -91,12 +109,11 @@ SessionCallProviderKind resolveVoiceVideoProviderHint(
     distribution: distribution,
     debugMode: debugMode,
   );
+  if (rtc.isLiveKitEnabled) {
+    return SessionCallProviderKind.livekit;
+  }
   if (rtc.isAgoraEnabled) {
     return SessionCallProviderKind.agora;
-  }
-  if (rtc.isWebRtcEnabled &&
-      config.webrtcSignalingServerUrl.trim().isNotEmpty) {
-    return SessionCallProviderKind.webrtc;
   }
   return SessionCallProviderKind.mock;
 }

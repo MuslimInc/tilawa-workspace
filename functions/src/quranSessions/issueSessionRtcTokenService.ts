@@ -9,6 +9,11 @@ import {
 } from "./agoraTokenService";
 import { lifecycleError } from "./lifecycleErrors";
 import {
+  buildLiveKitRtcToken,
+  LiveKitRtcCredentials,
+  readLiveKitRtcCredentials,
+} from "./livekitTokenService";
+import {
   isAdmin,
   requireAuthenticatedUid,
   requireValidSessionEpoch,
@@ -25,12 +30,13 @@ export interface IssueSessionRtcTokenResult {
   channelId: string;
   uid: number;
   appId: string;
-  callProvider: "agora";
+  callProvider: "agora" | "livekit";
 }
 
 export interface IssueSessionRtcTokenDeps {
   db: Firestore;
-  readCredentials?: () => AgoraRtcCredentials | null;
+  readAgoraCredentials?: () => AgoraRtcCredentials | null;
+  readLiveKitCredentials?: () => LiveKitRtcCredentials | null;
 }
 
 const JOINABLE_STATUSES = new Set([
@@ -61,10 +67,10 @@ export async function issueSessionRtcTokenForRequest(
 
   const session = sessionSnap.data() ?? {};
   const callProvider = session.callProvider as string | undefined;
-  if (callProvider !== "agora") {
+  if (callProvider !== "agora" && callProvider !== "livekit") {
     throw lifecycleError(
       "unsupported_call_provider",
-      "Session is not configured for Agora RTC.",
+      "Session is not configured for in-app RTC.",
       { callProvider: callProvider ?? "unknown" },
     );
   }
@@ -97,8 +103,40 @@ export async function issueSessionRtcTokenForRequest(
     (await resolveTeacherProfileUserId(deps.db, participants.teacherId));
   resolveActorRole(request, undefined, participants, teacherUserId);
 
-  const readCredentials = deps.readCredentials ?? readAgoraRtcCredentials;
-  const credentials = readCredentials();
+  const channelName =
+    (session.providerSessionId as string | undefined)?.trim()
+    || data.sessionId;
+
+  if (callProvider === "livekit") {
+    const readLiveKitCredentials =
+      deps.readLiveKitCredentials ?? readLiveKitRtcCredentials;
+    const credentials = readLiveKitCredentials();
+    if (credentials == null) {
+      throw lifecycleError(
+        "unsupported_call_provider",
+        "LiveKit credentials are not configured on the server.",
+        { callProvider: "livekit" },
+      );
+    }
+
+    const token = await buildLiveKitRtcToken({
+      credentials,
+      roomName: channelName,
+      identity: uid,
+    });
+
+    return {
+      token,
+      channelId: channelName,
+      uid: 0,
+      appId: credentials.serverUrl,
+      callProvider: "livekit",
+    };
+  }
+
+  const readAgoraCredentials =
+    deps.readAgoraCredentials ?? readAgoraRtcCredentials;
+  const credentials = readAgoraCredentials();
   if (credentials == null) {
     throw lifecycleError(
       "unsupported_call_provider",
@@ -107,9 +145,6 @@ export async function issueSessionRtcTokenForRequest(
     );
   }
 
-  const channelName =
-    (session.providerSessionId as string | undefined)?.trim()
-    || data.sessionId;
   const agoraUid = agoraUidForFirebaseUser(uid);
   const token = buildAgoraRtcToken({
     credentials,

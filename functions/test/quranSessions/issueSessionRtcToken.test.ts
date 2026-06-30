@@ -5,6 +5,7 @@ import {
   agoraUidForFirebaseUser,
   buildAgoraRtcToken,
 } from "../../src/quranSessions/agoraTokenService";
+import { buildLiveKitRtcToken } from "../../src/quranSessions/livekitTokenService";
 import { issueSessionRtcTokenForRequest } from "../../src/quranSessions/issueSessionRtcTokenService";
 
 const TEST_CREDENTIALS = {
@@ -98,7 +99,7 @@ test("issueSessionRtcTokenForRequest rejects non-participant callers", async () 
     () =>
       issueSessionRtcTokenForRequest(
         authRequest("stranger_1", { data: { sessionId } }),
-        { db, readCredentials: () => TEST_CREDENTIALS },
+        { db, readAgoraCredentials: () => TEST_CREDENTIALS },
       ),
     (error: { code?: string; details?: { code?: string } }) =>
       error.code === "permission-denied" &&
@@ -116,7 +117,7 @@ test("issueSessionRtcTokenForRequest rejects non-joinable lifecycle", async () =
     () =>
       issueSessionRtcTokenForRequest(
         authRequest("student_1", { data: { sessionId } }),
-        { db, readCredentials: () => TEST_CREDENTIALS },
+        { db, readAgoraCredentials: () => TEST_CREDENTIALS },
       ),
     (error: { details?: { code?: string; reasonCode?: string } }) =>
       error.details?.code === "invalid_transition" &&
@@ -124,7 +125,7 @@ test("issueSessionRtcTokenForRequest rejects non-joinable lifecycle", async () =
   );
 });
 
-test("issueSessionRtcTokenForRequest rejects non-agora sessions", async () => {
+test("issueSessionRtcTokenForRequest rejects non-rtc sessions", async () => {
   const { sessionId, docs } = agoraSessionDocs({ callProvider: "mock" });
   const db = createDb(docs);
 
@@ -132,7 +133,7 @@ test("issueSessionRtcTokenForRequest rejects non-agora sessions", async () => {
     () =>
       issueSessionRtcTokenForRequest(
         authRequest("student_1", { data: { sessionId } }),
-        { db, readCredentials: () => TEST_CREDENTIALS },
+        { db, readAgoraCredentials: () => TEST_CREDENTIALS },
       ),
     (error: { details?: { code?: string } }) =>
       error.details?.code === "unsupported_call_provider",
@@ -147,7 +148,7 @@ test("issueSessionRtcTokenForRequest rejects missing booking", async () => {
     () =>
       issueSessionRtcTokenForRequest(
         authRequest("student_1", { data: { sessionId } }),
-        { db, readCredentials: () => TEST_CREDENTIALS },
+        { db, readAgoraCredentials: () => TEST_CREDENTIALS },
       ),
     (error: { code?: string }) => error.code === "not-found",
   );
@@ -163,7 +164,7 @@ test("issueSessionRtcTokenForRequest returns Agora credentials for participant",
 
   const result = await issueSessionRtcTokenForRequest(
     authRequest(uid, { data: { sessionId } }),
-    { db, readCredentials: () => TEST_CREDENTIALS },
+    { db, readAgoraCredentials: () => TEST_CREDENTIALS },
   );
 
   assert.equal(result.callProvider, "agora");
@@ -186,7 +187,7 @@ test("issueSessionRtcTokenForRequest allows teacher auth uid via profile mapping
 
   const result = await issueSessionRtcTokenForRequest(
     authRequest("teacher_auth_1", { data: { sessionId } }),
-    { db, readCredentials: () => TEST_CREDENTIALS },
+    { db, readAgoraCredentials: () => TEST_CREDENTIALS },
   );
 
   assert.equal(result.uid, agoraUidForFirebaseUser("teacher_auth_1"));
@@ -203,7 +204,7 @@ test("issueSessionRtcTokenForRequest allows admin without epoch bypassing partic
       admin: true,
       data: { sessionId },
     }),
-    { db, readCredentials: () => TEST_CREDENTIALS },
+    { db, readAgoraCredentials: () => TEST_CREDENTIALS },
   );
 
   assert.equal(result.callProvider, "agora");
@@ -215,6 +216,41 @@ test("issueSessionRtcTokenForRequest allows admin without epoch bypassing partic
       credentials: TEST_CREDENTIALS,
       channelName: sessionId,
       uid: agoraUidForFirebaseUser(adminUid),
+    }),
+  );
+});
+
+test("issueSessionRtcTokenForRequest returns LiveKit credentials for participant", async () => {
+  const { sessionId, docs } = agoraSessionDocs({
+    callProvider: "livekit",
+    providerSessionId: "livekit_room_1",
+  });
+  const db = createDb(docs);
+  const uid = "student_1";
+  const liveKitCredentials = {
+    apiKey: "APIKEY123",
+    apiSecret: "secret123456789012345678901234567890",
+    serverUrl: "wss://project.livekit.cloud",
+  };
+
+  const result = await issueSessionRtcTokenForRequest(
+    authRequest(uid, { data: { sessionId } }),
+    {
+      db,
+      readLiveKitCredentials: () => liveKitCredentials,
+    },
+  );
+
+  assert.equal(result.callProvider, "livekit");
+  assert.equal(result.channelId, "livekit_room_1");
+  assert.equal(result.uid, 0);
+  assert.equal(result.appId, liveKitCredentials.serverUrl);
+  assert.equal(
+    result.token,
+    await buildLiveKitRtcToken({
+      credentials: liveKitCredentials,
+      roomName: "livekit_room_1",
+      identity: uid,
     }),
   );
 });

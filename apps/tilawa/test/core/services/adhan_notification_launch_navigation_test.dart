@@ -11,6 +11,9 @@ import 'package:tilawa/core/services/notification_startup_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/services/prayer_adhan_notification_service.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
+import 'package:tilawa/features/auth/domain/entities/auth_result.dart';
+import 'package:tilawa/features/auth/domain/repositories/auth_repository.dart';
+import 'package:tilawa/features/auth/domain/usecases/await_auth_restoration_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/prepare_google_sign_in_use_case.dart';
 import 'package:tilawa/features/onboarding/domain/usecases/check_onboarding_status.dart';
@@ -25,6 +28,26 @@ import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 import 'adhan_notification_launch_navigation_test.mocks.dart';
+
+class _FakeAuthRepository implements AuthRepository {
+  @override
+  Stream<UserEntity?> get authStateChanges => const Stream<UserEntity?>.empty();
+
+  @override
+  UserEntity? get currentUser => null;
+
+  @override
+  Future<void> deleteAccount() async {}
+
+  @override
+  Future<void> prepareGoogleSignIn() async {}
+
+  @override
+  Future<AuthResult> signInWithGoogle() async => throw UnimplementedError();
+
+  @override
+  Future<void> signOut() async {}
+}
 
 /// Regression tests for the cold-start adhan notification navigation race:
 ///
@@ -280,6 +303,7 @@ void main() {
             mockGetCurrentUser,
             mockCheckOnboarding,
             mockNotificationRepository,
+            AwaitAuthRestorationUseCase(_FakeAuthRepository()),
           );
 
           final result = await useCase();

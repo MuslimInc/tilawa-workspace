@@ -22,8 +22,9 @@ import 'package:flutter/foundation.dart';
 /// Example: `--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_QURAN_TUTOR_BOOKING_MODE=autoConfirm`
 /// Example: `--dart-define=TILAWA_LAUNCH_QURAN_TUTOR_BOOKING_MODE=requiresTutorApproval`
-/// Example: `--dart-define=TILAWA_LAUNCH_ENABLED_CALL_PROVIDERS=external,mock,agora`
+/// Example: `--dart-define=TILAWA_LAUNCH_ENABLED_CALL_PROVIDERS=external,mock,livekit`
 /// Example: `--dart-define=TILAWA_LAUNCH_AGORA_APP_ID=your_agora_app_id`
+/// Example: `--dart-define=TILAWA_LAUNCH_LIVEKIT_URL=wss://tilawa-7whzug8z.livekit.cloud`
 ///
 /// Staging / pre-production builds default QuranTutor beta flags ON via
 /// [quranSessionsStagingFlagsDefaultEnabled] (everything except
@@ -75,7 +76,7 @@ class AppLaunchConfig extends Equatable {
     this.quranSessionsPaidBookingSandboxEnabled = false,
     this.enabledCallProvidersCsv = 'external,mock',
     this.agoraAppId = '',
-    this.webrtcSignalingServerUrl = '',
+    this.livekitServerUrl = '',
     this.genUiAssistantEnabled = false,
   });
 
@@ -224,14 +225,16 @@ class AppLaunchConfig extends Equatable {
       ),
       enabledCallProvidersCsv: String.fromEnvironment(
         'TILAWA_LAUNCH_ENABLED_CALL_PROVIDERS',
-        defaultValue: stagingFlagsOn ? 'external,mock,agora' : 'external,mock',
+        defaultValue: stagingFlagsOn
+            ? 'external,mock,livekit'
+            : 'external,mock',
       ),
       agoraAppId: String.fromEnvironment(
         'TILAWA_LAUNCH_AGORA_APP_ID',
         defaultValue: '',
       ),
-      webrtcSignalingServerUrl: String.fromEnvironment(
-        'TILAWA_LAUNCH_WEBRTC_SIGNALING_URL',
+      livekitServerUrl: String.fromEnvironment(
+        'TILAWA_LAUNCH_LIVEKIT_URL',
         defaultValue: '',
       ),
       genUiAssistantEnabled: bool.fromEnvironment(
@@ -288,8 +291,8 @@ class AppLaunchConfig extends Equatable {
   /// Agora App ID — required when `agora` is in [enabledCallProvidersCsv].
   final String agoraAppId;
 
-  /// WebRTC signaling base URL — required before WebRTC joins succeed.
-  final String webrtcSignalingServerUrl;
+  /// LiveKit server URL (`wss://…`) — required when `livekit` is enabled.
+  final String livekitServerUrl;
 
   /// Gates the AI-generated dynamic UI surface (Smart Quran Plan / MeMuslim
   /// Assistant). Defaults to **false** — when off, no GenUI dependencies are
@@ -337,7 +340,7 @@ class AppLaunchConfig extends Equatable {
     quranSessionsPaidBookingSandboxEnabled,
     enabledCallProvidersCsv,
     agoraAppId,
-    webrtcSignalingServerUrl,
+    livekitServerUrl,
     genUiAssistantEnabled,
   ];
 }

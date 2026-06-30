@@ -3,7 +3,7 @@
 **Scope:** Stable production v1 — individual 1:1 free booking (external + mock), single-active-device.  
 **Out of scope:** paid booking, wallet checkout, group sessions, in-app Agora/WebRTC rollout.
 
-**Prerequisites:** Staging Firebase (`quran-playera-app` or team staging), **release build** (debug skips App Check — invalid for CF enforcement smoke).  
+**Prerequisites:** Staging Firebase (`quran-playera-app` or team staging), **release build** for production attestation smoke (debug/profile: App Check debug token — [ios_app_check_debug_setup.md](../observability/ios_app_check_debug_setup.md)).  
 **Sign-off table:** Record pass/fail in [quran_sessions_free_beta_signoff.md](./quran_sessions_free_beta_signoff.md).
 
 ---

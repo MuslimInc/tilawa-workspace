@@ -206,7 +206,7 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
       return;
     }
     if (callProviderKind != SessionCallProviderKind.agora &&
-        callProviderKind != SessionCallProviderKind.webrtc) {
+        callProviderKind != SessionCallProviderKind.livekit) {
       return;
     }
     if (!aggregate.lifecycleStatus.canJoinSession) {

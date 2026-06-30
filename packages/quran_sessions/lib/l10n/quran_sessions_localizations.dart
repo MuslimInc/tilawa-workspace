@@ -1595,11 +1595,11 @@ abstract class QuranSessionsLocalizations {
   /// **'In-app (Agora)'**
   String get callProviderAgora;
 
-  /// No description provided for @callProviderWebrtc.
+  /// No description provided for @callProviderLivekit.
   ///
   /// In en, this message translates to:
-  /// **'In-app (WebRTC)'**
-  String get callProviderWebrtc;
+  /// **'In-app (LiveKit)'**
+  String get callProviderLivekit;
 
   /// No description provided for @sessionStatusLabel.
   ///

@@ -242,6 +242,20 @@ void main() {
       expect(result, const LoginRoute().location);
     });
 
+    testWidgets('defers redirect while auth is restoring on sessions home', (
+      tester,
+    ) async {
+      whenListen(
+        mockSessionCubit,
+        Stream<SessionValidityState>.empty(),
+        initialState: const SessionValidityState(),
+      );
+      when(() => mockAuthBloc.state).thenReturn(const AuthState.initial());
+
+      final result = await redirectForPath(tester, QuranSessionsRoutes.home);
+      expect(result, isNull);
+    });
+
     testWidgets('allows authenticated active session through', (tester) async {
       whenListen(
         mockSessionCubit,

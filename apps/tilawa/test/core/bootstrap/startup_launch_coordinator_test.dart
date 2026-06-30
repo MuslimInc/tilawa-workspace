@@ -68,7 +68,7 @@ void main() {
   });
 
   test(
-    'prefers pending cold-start route when bootstrap already resolved one',
+    'prefers pending cold-start route when splash confirms authenticated home',
     () async {
       AppRouter.setPendingColdStartRoute(
         const PrayerNotificationStatusRoute().location,
@@ -83,6 +83,24 @@ void main() {
       expect(plan.target, StartupLaunchTarget.notification);
       expect(plan.location, const PrayerNotificationStatusRoute().location);
       expect(plan.extra, '{"prayer_key":"fajr"}');
+    },
+  );
+
+  test(
+    'login plan discards pending cold-start route for unauthenticated user',
+    () async {
+      AppRouter.setPendingColdStartRoute(
+        const PrayerNotificationStatusRoute().location,
+      );
+      when(mockGetSplashNextRouteUseCase.call()).thenAnswer(
+        (_) async => const SplashRouteResult(SplashDestination.login),
+      );
+
+      final StartupLaunchPlan plan = await coordinator.resolve();
+
+      expect(plan.target, StartupLaunchTarget.login);
+      expect(plan.location, const LoginRoute().location);
+      expect(AppRouter.pendingColdStartLocation, isNull);
     },
   );
 

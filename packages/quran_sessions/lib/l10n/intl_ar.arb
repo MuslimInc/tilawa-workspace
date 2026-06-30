@@ -378,7 +378,7 @@
     "callProviderExternal": "رابط خارجي",
     "callProviderMock": "داخل التطبيق (معاينة)",
     "callProviderAgora": "داخل التطبيق (Agora)",
-    "callProviderWebrtc": "داخل التطبيق (WebRTC)",
+    "callProviderLivekit": "داخل التطبيق (LiveKit)",
     "sessionStatusLabel": "الحالة: {status}",
     "@sessionStatusLabel": {
         "placeholders": {
