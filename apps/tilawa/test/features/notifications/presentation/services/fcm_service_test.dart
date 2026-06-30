@@ -9,11 +9,13 @@ import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/domain/repositories/auth_repository.dart';
 import 'package:tilawa/features/auth/domain/usecases/sync_device_token_use_case.dart';
 import 'package:tilawa/features/notifications/data/services/fcm_service.dart';
+import 'package:tilawa_core/errors/failures.dart';
 
 import 'fcm_service_test.mocks.dart';
 
 @GenerateMocks([AuthRepository, SyncDeviceTokenUseCase, DeviceTokenService])
 void main() {
+  provideDummy<Either<Failure, void>>(const Right<Failure, void>(null));
   late FCMService service;
   late MockAuthRepository mockAuthRepository;
   late MockSyncDeviceTokenUseCase mockSyncDeviceTokenUseCase;
@@ -111,7 +113,7 @@ void main() {
         await Future.delayed(Duration.zero);
 
         // Assert
-        verifyNever(mockSyncDeviceTokenUseCase(any));
+        verifyZeroInteractions(mockSyncDeviceTokenUseCase);
 
         await tokenController.close();
       },

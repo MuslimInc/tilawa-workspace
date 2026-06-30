@@ -6,11 +6,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/mockito.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/bootstrap/splash_launch_handoff.dart';
 import 'package:tilawa/features/auth/application/account_deletion_flow_tracker.dart';
 import 'package:tilawa/features/auth/data/services/android_sign_in_platform_policy.dart';
 import 'package:tilawa/features/auth/data/services/google_sign_in_session_tracker.dart';
+import 'package:tilawa/features/auth/data/services/pending_session_revoke_store.dart';
 import 'package:tilawa/features/auth/domain/entities/auth_result.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/domain/gateways/google_sign_in_launch_gateway.dart';
@@ -30,6 +30,7 @@ import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../helpers/hydrated_bloc_test_helper.dart';
+import '../../../../support/map_backed_shared_preferences_async.dart';
 import '../bloc/auth_bloc_test.mocks.dart';
 import '../services/google_sign_in_interactive_launcher_test.mocks.dart';
 
@@ -98,6 +99,7 @@ void main() {
   late GoogleSignInSessionTracker sessionTracker;
   late TestGoogleSignInInteractiveLauncher testLauncher;
   late AuthBloc authBloc;
+  late MapBackedSharedPreferencesAsync defaultRevokePrefs;
 
   final UserEntity testUser = UserEntity(
     id: '1',
@@ -111,7 +113,6 @@ void main() {
     provideDummy<Either<Failure, String>>(
       Right(LanguageConfig.defaultLanguageCode),
     );
-    SharedPreferences.setMockInitialValues({});
     await initializeHydratedStorageForTest();
   });
 
@@ -121,7 +122,10 @@ void main() {
 
   setUp(() async {
     TilawaInteractionFeedback.enabled = false;
-    SharedPreferences.setMockInitialValues({});
+    defaultRevokePrefs = MapBackedSharedPreferencesAsync();
+    PendingSessionRevokeStore.setPrefsFactoryForTesting(
+      () => defaultRevokePrefs.prefs,
+    );
     await getIt.reset();
     mockSignInWithGoogleUseCase = MockSignInWithGoogleUseCase();
     mockSignOut = MockSignOut();
@@ -186,6 +190,7 @@ void main() {
   });
 
   tearDown(() async {
+    PendingSessionRevokeStore.setPrefsFactoryForTesting(null);
     sessionTracker.markFinished();
     await authBloc.close();
     await getIt.reset();
@@ -250,15 +255,6 @@ void main() {
         noGoogleAccounts: () => authBloc.state is AuthNoGoogleAccounts,
       );
       if (authSettled) {
-        return;
-      }
-    }
-  }
-
-  Future<void> pumpUntilAuthLoading(WidgetTester tester) async {
-    for (var i = 0; i < 30; i++) {
-      await tester.pump(const Duration(milliseconds: 50));
-      if (authBloc.state is AuthLoading) {
         return;
       }
     }

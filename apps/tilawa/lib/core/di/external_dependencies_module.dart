@@ -18,6 +18,7 @@ import 'package:logger/logger.dart';
 import 'package:quran_qcf/quran_qcf.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
+import 'package:tilawa/core/bootstrap/shared_preferences_migration.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/features/audio_player/domain/services/artist_media_playlist_cache.dart';
 import 'package:tilawa/features/audio_player/domain/services/audio_entity_media_item_mapper.dart';
@@ -71,7 +72,8 @@ abstract class ExternalDependenciesModule {
   FirebasePerformance get firebasePerformance => FirebasePerformance.instance;
 
   @singleton
-  SharedPreferencesAsync get sharedPreferences => SharedPreferencesAsync();
+  SharedPreferencesAsync get sharedPreferences =>
+      SharedPreferencesAsync(options: tilawaSharedPreferencesOptions);
 
   @singleton
   HiveInterface get hive => Hive;

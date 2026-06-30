@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:quran_sessions/src/domain/entities/local_time.dart';
 import 'package:quran_sessions/src/domain/entities/time_range.dart';
 import 'package:quran_sessions/src/presentation/widgets/availability_day_hours_row.dart';
-import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
+
+import '../../helpers/widget_pump.dart';
 
 const _sampleRanges = <TimeRange>[
   TimeRange(
@@ -27,42 +26,22 @@ Future<void> pumpAvailabilityDayHoursRow(
   required List<TimeRange> ranges,
   required String label,
 }) async {
-  tester.view.physicalSize = const Size(390, 260);
-  tester.view.devicePixelRatio = 1;
-  addTearDown(() {
-    tester.view.resetPhysicalSize();
-    tester.view.resetDevicePixelRatio();
-  });
-
-  await tester.pumpWidget(
-    MaterialApp(
-      theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
-      locale: const Locale('ar'),
-      localizationsDelegates: const [
-        ...QuranSessionsLocalizations.localizationsDelegates,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: QuranSessionsLocalizations.supportedLocales,
-      home: Directionality(
-        textDirection: TextDirection.rtl,
-        child: Scaffold(
-          body: Padding(
-            padding: const EdgeInsets.all(16),
-            child: AvailabilityDayHoursRow(
-              label: label,
-              ranges: ranges,
-              onAddRange: () {},
-              onEditRange: (_) {},
-              onRemoveRange: (_) {},
-            ),
-          ),
-        ),
+  await pumpInApp(
+    tester,
+    Padding(
+      padding: const EdgeInsets.all(16),
+      child: AvailabilityDayHoursRow(
+        label: label,
+        ranges: ranges,
+        onAddRange: () {},
+        onEditRange: (_) {},
+        onRemoveRange: (_) {},
       ),
     ),
+    locale: const Locale('ar'),
+    textDirection: TextDirection.rtl,
+    surfaceSize: const Size(390, 260),
   );
-  await tester.pumpAndSettle();
 }
 
 void main() {

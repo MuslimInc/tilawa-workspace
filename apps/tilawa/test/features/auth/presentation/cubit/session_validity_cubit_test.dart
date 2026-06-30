@@ -2,7 +2,6 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/features/auth/data/services/google_sign_in_session_tracker.dart';
 import 'package:tilawa/features/auth/data/services/pending_session_revoke_store.dart';
 import 'package:tilawa/features/auth/domain/entities/session_validity_result.dart';
@@ -13,6 +12,8 @@ import 'package:tilawa/features/auth/domain/usecases/check_session_validity_use_
 import 'package:tilawa/features/auth/domain/usecases/sign_out.dart';
 import 'package:tilawa/features/auth/presentation/cubit/session_validity_cubit.dart';
 import 'package:tilawa_core/errors/failures.dart';
+
+import '../../../../support/map_backed_shared_preferences_async.dart';
 
 class MockAuthRepository extends Mock implements AuthRepository {}
 
@@ -27,6 +28,7 @@ void main() {
   late MockSignOut mockSignOut;
   late SessionRevokedNotifier sessionRevokedNotifier;
   late GoogleSignInSessionTracker signInSessionTracker;
+  late MapBackedSharedPreferencesAsync defaultRevokePrefs;
 
   final tUser = UserEntity(
     id: 'user_1',
@@ -36,6 +38,10 @@ void main() {
   );
 
   setUp(() {
+    defaultRevokePrefs = MapBackedSharedPreferencesAsync();
+    PendingSessionRevokeStore.setPrefsFactoryForTesting(
+      () => defaultRevokePrefs.prefs,
+    );
     mockAuthRepository = MockAuthRepository();
     mockCheckValidity = MockCheckSessionValidityUseCase();
     mockSignOut = MockSignOut();
@@ -49,6 +55,7 @@ void main() {
   });
 
   tearDown(() {
+    PendingSessionRevokeStore.setPrefsFactoryForTesting(null);
     sessionRevokedNotifier.resetDedupeForTest();
   });
 
@@ -64,9 +71,13 @@ void main() {
     'checkOnResume signs out when background session_revoked flag is set',
     build: buildCubit,
     setUp: () {
-      SharedPreferences.setMockInitialValues({
+      final mapPrefs = MapBackedSharedPreferencesAsync({
         PendingSessionRevokeStore.key: true,
       });
+      PendingSessionRevokeStore.setPrefsFactoryForTesting(() => mapPrefs.prefs);
+    },
+    tearDown: () {
+      PendingSessionRevokeStore.setPrefsFactoryForTesting(null);
     },
     act: (cubit) async {
       await cubit.checkOnResume();
@@ -224,7 +235,10 @@ void main() {
     'FCM session_revoked defers while interactive Google sign-in is in flight',
     build: buildCubit,
     setUp: () {
-      SharedPreferences.setMockInitialValues(<String, Object>{});
+      defaultRevokePrefs = MapBackedSharedPreferencesAsync();
+      PendingSessionRevokeStore.setPrefsFactoryForTesting(
+        () => defaultRevokePrefs.prefs,
+      );
     },
     act: (cubit) async {
       signInSessionTracker.markStarted();
@@ -232,14 +246,16 @@ void main() {
       await Future<void>.delayed(Duration.zero);
     },
     expect: () => <SessionValidityState>[],
-    verify: (_) async {
+    verify: (_) {
       verifyNever(
         () => mockSignOut(
           skipServerTokenClear: any(named: 'skipServerTokenClear'),
         ),
       );
-      final prefs = await SharedPreferences.getInstance();
-      expect(prefs.getBool(PendingSessionRevokeStore.key), isTrue);
+      expect(
+        defaultRevokePrefs.store[PendingSessionRevokeStore.key],
+        isTrue,
+      );
     },
   );
 
@@ -247,7 +263,10 @@ void main() {
     'deferred FCM session_revoked is handled after sign-in completes',
     build: buildCubit,
     setUp: () {
-      SharedPreferences.setMockInitialValues(<String, Object>{});
+      defaultRevokePrefs = MapBackedSharedPreferencesAsync();
+      PendingSessionRevokeStore.setPrefsFactoryForTesting(
+        () => defaultRevokePrefs.prefs,
+      );
     },
     act: (cubit) async {
       signInSessionTracker.markStarted();

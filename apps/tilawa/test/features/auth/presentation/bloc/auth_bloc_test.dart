@@ -16,13 +16,14 @@ import 'package:tilawa/features/auth/domain/usecases/sign_in_with_google_use_cas
 import 'package:tilawa/features/auth/domain/usecases/sign_out.dart';
 import 'package:tilawa/features/auth/domain/usecases/sync_device_token_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/sync_user_language_preference_use_case.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/features/auth/data/services/pending_session_revoke_store.dart';
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tilawa/features/localization/domain/usecases/get_current_language_use_case.dart';
 import 'package:tilawa_core/config/language_config.dart';
 
 import 'package:tilawa_core/errors/failures.dart';
+
+import '../../../../support/map_backed_shared_preferences_async.dart';
 
 import '../../../../helpers/hydrated_bloc_test_helper.dart';
 import 'auth_bloc_test.mocks.dart';
@@ -47,10 +48,10 @@ void main() {
   late MockSyncUserLanguagePreferenceUseCase mockSyncUserLanguagePreference;
   late AccountDeletionFlowTracker accountDeletionFlowTracker;
   late GoogleSignInSessionTracker signInSessionTracker;
+  late MapBackedSharedPreferencesAsync defaultRevokePrefs;
 
   setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
-    SharedPreferences.setMockInitialValues({});
     provideDummy<Either<Failure, void>>(const Right(null));
     provideDummy<Either<Failure, String>>(
       Right(LanguageConfig.defaultLanguageCode),
@@ -70,6 +71,10 @@ void main() {
   );
 
   setUp(() {
+    defaultRevokePrefs = MapBackedSharedPreferencesAsync();
+    PendingSessionRevokeStore.setPrefsFactoryForTesting(
+      () => defaultRevokePrefs.prefs,
+    );
     mockSignInWithGoogleUseCase = MockSignInWithGoogleUseCase();
     mockSignOut = MockSignOut();
     mockDeleteAccount = MockDeleteAccount();
@@ -108,6 +113,7 @@ void main() {
   });
 
   tearDown(() {
+    PendingSessionRevokeStore.setPrefsFactoryForTesting(null);
     signInSessionTracker.markFinished();
     authBloc.close();
   });
@@ -213,12 +219,17 @@ void main() {
     });
 
     group('SignInWithGoogleEvent', () {
+      late MapBackedSharedPreferencesAsync revokePrefs;
+
       blocTest<AuthBloc, AuthState>(
         'clears stale pending session revoke flag at sign-in start',
         build: () {
-          SharedPreferences.setMockInitialValues({
+          revokePrefs = MapBackedSharedPreferencesAsync({
             PendingSessionRevokeStore.key: true,
           });
+          PendingSessionRevokeStore.setPrefsFactoryForTesting(
+            () => revokePrefs.prefs,
+          );
           when(
             mockSignInWithGoogleUseCase(),
           ).thenAnswer((_) async => const AuthResult.cancelled());
@@ -229,10 +240,15 @@ void main() {
           const AuthState.loading(),
           const AuthState.unauthenticated(),
         ],
-        verify: (_) async {
-          final prefs = await SharedPreferences.getInstance();
-          expect(prefs.containsKey(PendingSessionRevokeStore.key), isFalse);
+        verify: (_) {
+          expect(
+            revokePrefs.store.containsKey(PendingSessionRevokeStore.key),
+            isFalse,
+          );
           expect(signInSessionTracker.inFlight, isFalse);
+        },
+        tearDown: () {
+          PendingSessionRevokeStore.setPrefsFactoryForTesting(null);
         },
       );
 

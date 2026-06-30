@@ -1,11 +1,19 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/bootstrap/app_startup.dart';
 import 'package:tilawa/features/auth/data/services/pending_session_revoke_store.dart';
 
+import '../../support/map_backed_shared_preferences_async.dart';
+
 void main() {
+  late MapBackedSharedPreferencesAsync mapPrefs;
+
   setUp(() {
-    SharedPreferences.setMockInitialValues({});
+    mapPrefs = MapBackedSharedPreferencesAsync();
+    PendingSessionRevokeStore.setPrefsFactoryForTesting(() => mapPrefs.prefs);
+  });
+
+  tearDown(() {
+    PendingSessionRevokeStore.setPrefsFactoryForTesting(null);
   });
 
   test('ignores unrelated background payloads', () async {
@@ -13,8 +21,7 @@ void main() {
       const {'actionType': 'reciter'},
     );
 
-    final prefs = await SharedPreferences.getInstance();
-    expect(prefs.getBool(PendingSessionRevokeStore.key), isNull);
+    expect(mapPrefs.store[PendingSessionRevokeStore.key], isNull);
   });
 
   test('marks pending revoke for session_revoked payloads', () async {
@@ -22,7 +29,6 @@ void main() {
       const {'type': 'session_revoked'},
     );
 
-    final prefs = await SharedPreferences.getInstance();
-    expect(prefs.getBool(PendingSessionRevokeStore.key), isTrue);
+    expect(mapPrefs.store[PendingSessionRevokeStore.key], isTrue);
   });
 }

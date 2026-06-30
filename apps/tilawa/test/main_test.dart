@@ -4,9 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/bootstrap/app_startup.dart';
 import 'package:tilawa/core/bootstrap/app_startup_tasks.dart';
+import 'package:tilawa/core/bootstrap/shared_preferences_migration.dart';
 import 'package:tilawa/core/services/analytics_initialization_service.dart';
 import 'package:tilawa/core/services/crashlytics_service.dart';
 import 'package:tilawa/core/services/firebase_initialization_service.dart';
@@ -21,6 +23,8 @@ import 'package:tilawa/shared/audio/audio_player_handler.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 import 'package:tilawa/features/downloads/domain/services/download_notification_service_interface.dart';
 import 'package:quran_qcf/quran_qcf.dart';
+
+import 'support/map_backed_shared_preferences_async.dart';
 
 // Mocks
 class MockCrashlyticsService extends Mock implements CrashlyticsService {}
@@ -77,6 +81,7 @@ void main() {
   late MockDownloadNotificationService mockDownloadNotificationService;
   late MockPrayerAdhanNotificationService mockPrayerNotificationService;
   late MockMushafService mockMushafService;
+  late MapBackedSharedPreferencesAsync mapPrefs;
 
   setUpAll(() async {
     AppStartupTasks.skipNonCriticalServicesForTesting = true;
@@ -124,6 +129,13 @@ void main() {
   });
 
   setUp(() {
+    mapPrefs = MapBackedSharedPreferencesAsync();
+    sharedPreferencesAsyncFactoryForTesting = () => mapPrefs.prefs;
+    legacySharedPreferencesFactoryForTesting = () async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      return SharedPreferences.getInstance();
+    };
+
     mockCrashlytics = MockCrashlyticsService();
     mockAnalytics = MockAnalyticsInitService();
     mockNotificationPermission = MockNotificationPermissionService();
@@ -218,6 +230,11 @@ void main() {
     // Bootstrap memoizes one-shot init helpers to avoid duplicate runtime init;
     // clear the cache so each test's freshly stubbed mocks are actually called.
     resetMemoizedInitFutures();
+  });
+
+  tearDown(() {
+    sharedPreferencesAsyncFactoryForTesting = null;
+    legacySharedPreferencesFactoryForTesting = null;
   });
 
   group('Main Initialization Functions', () {
