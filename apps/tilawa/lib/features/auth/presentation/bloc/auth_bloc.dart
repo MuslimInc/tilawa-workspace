@@ -64,11 +64,12 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     final int generation = ++_interactiveSignInGeneration;
-    _signInSessionTracker.markStarted();
-    await PendingSessionRevokeStore.clear();
-    emit(const AuthState.loading());
 
     try {
+      _signInSessionTracker.markStarted();
+      await PendingSessionRevokeStore.clear();
+      emit(const AuthState.loading());
+
       final AuthResult result = await _signInWithGoogle();
 
       if (generation != _interactiveSignInGeneration) {

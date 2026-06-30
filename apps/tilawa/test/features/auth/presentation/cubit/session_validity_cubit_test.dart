@@ -221,6 +221,52 @@ void main() {
   );
 
   blocTest<SessionValidityCubit, SessionValidityState>(
+    'FCM session_revoked defers while interactive Google sign-in is in flight',
+    build: buildCubit,
+    setUp: () {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+    },
+    act: (cubit) async {
+      signInSessionTracker.markStarted();
+      sessionRevokedNotifier.notifySessionRevoked();
+      await Future<void>.delayed(Duration.zero);
+    },
+    expect: () => <SessionValidityState>[],
+    verify: (_) async {
+      verifyNever(
+        () => mockSignOut(
+          skipServerTokenClear: any(named: 'skipServerTokenClear'),
+        ),
+      );
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getBool(PendingSessionRevokeStore.key), isTrue);
+    },
+  );
+
+  blocTest<SessionValidityCubit, SessionValidityState>(
+    'deferred FCM session_revoked is handled after sign-in completes',
+    build: buildCubit,
+    setUp: () {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+    },
+    act: (cubit) async {
+      signInSessionTracker.markStarted();
+      sessionRevokedNotifier.notifySessionRevoked();
+      await Future<void>.delayed(Duration.zero);
+      signInSessionTracker.markFinished();
+      await cubit.checkOnResume();
+      await Future<void>.delayed(Duration.zero);
+    },
+    expect: () => [
+      const SessionValidityState(revoked: true, isChecking: false),
+    ],
+    verify: (_) {
+      verify(() => mockSignOut(skipServerTokenClear: true)).called(1);
+      verifyNever(() => mockCheckValidity(any()));
+    },
+  );
+
+  blocTest<SessionValidityCubit, SessionValidityState>(
     'checkOnResume is no-op while interactive Google sign-in is in flight',
     build: buildCubit,
     act: (cubit) async {

@@ -232,6 +232,7 @@ void main() {
         verify: (_) async {
           final prefs = await SharedPreferences.getInstance();
           expect(prefs.containsKey(PendingSessionRevokeStore.key), isFalse);
+          expect(signInSessionTracker.inFlight, isFalse);
         },
       );
 
@@ -342,6 +343,9 @@ void main() {
           const AuthState.loading(),
           const AuthState.error(message: 'Authentication failed'),
         ],
+        verify: (_) {
+          expect(signInSessionTracker.inFlight, isFalse);
+        },
       );
 
       blocTest<AuthBloc, AuthState>(

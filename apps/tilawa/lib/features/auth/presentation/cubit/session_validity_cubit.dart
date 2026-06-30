@@ -49,7 +49,7 @@ class SessionValidityCubit extends Cubit<SessionValidityState> {
     this._signInSessionTracker,
   ) : super(const SessionValidityState()) {
     _revokedSubscription = _sessionRevokedNotifier.onSessionRevoked.listen(
-      (_) => _handleRevoked(trigger: 'fcm'),
+      (_) => unawaited(_onSessionRevokedFromFcm()),
     );
   }
 
@@ -80,7 +80,7 @@ class SessionValidityCubit extends Cubit<SessionValidityState> {
     }
 
     if (await PendingSessionRevokeStore.consume()) {
-      _sessionRevokedNotifier.notifySessionRevoked();
+      await _handleRevoked(trigger: 'resume');
       return;
     }
 
@@ -118,6 +118,14 @@ class SessionValidityCubit extends Cubit<SessionValidityState> {
         );
         _scheduleUnknownRetry();
     }
+  }
+
+  Future<void> _onSessionRevokedFromFcm() async {
+    if (_signInSessionTracker.inFlight) {
+      await PendingSessionRevokeStore.mark();
+      return;
+    }
+    await _handleRevoked(trigger: 'fcm');
   }
 
   Future<void> _handleRevoked({required String trigger}) async {
