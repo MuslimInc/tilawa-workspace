@@ -15,7 +15,7 @@ import {
 /** Fixed LiveKit room for QA smoke tests — must match client [kDebugLiveKitRoomName]. */
 export const DEBUG_LIVEKIT_ROOM_NAME = "debug-livekit-test";
 
-const ALLOWED_DEBUG_LIVEKIT_DISTRIBUTIONS = new Set([
+const SAFE_DEBUG_LIVEKIT_DISTRIBUTIONS = new Set([
   "local",
   "staging",
 ]);
@@ -35,16 +35,14 @@ const LIVEKIT_API_SECRET = defineSecret("LIVEKIT_API_SECRET");
 const LIVEKIT_URL = defineSecret("LIVEKIT_URL");
 
 function assertDebugLiveKitAllowed(): void {
-  const distribution = process.env.TILAWA_DISTRIBUTION ?? "local";
+  const distribution = process.env.TILAWA_DISTRIBUTION;
   const explicitAllow =
     process.env.TILAWA_ALLOW_DEBUG_LIVEKIT_TOKEN === "true";
-  if (
-    distribution === "play_production" ||
-    distribution === "play_alpha" ||
-    distribution === "play_beta" ||
-    distribution === "play_internal" ||
-    (!ALLOWED_DEBUG_LIVEKIT_DISTRIBUTIONS.has(distribution) && !explicitAllow)
-  ) {
+  const isSafeDistribution =
+    distribution != null &&
+    SAFE_DEBUG_LIVEKIT_DISTRIBUTIONS.has(distribution);
+
+  if (!isSafeDistribution || !explicitAllow) {
     throw new HttpsError(
       "permission-denied",
       "Debug LiveKit tokens are disabled for this distribution.",

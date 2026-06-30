@@ -91,18 +91,80 @@ test(
 );
 
 test(
-  "issueDebugLiveKitTokenForRequest allows unknown distribution with explicit flag",
+  "issueDebugLiveKitTokenForRequest rejects unknown distribution even with explicit flag",
   async () => {
     const previousDistribution = process.env.TILAWA_DISTRIBUTION;
     const previousAllow = process.env.TILAWA_ALLOW_DEBUG_LIVEKIT_TOKEN;
     process.env.TILAWA_DISTRIBUTION = "custom_qa";
     process.env.TILAWA_ALLOW_DEBUG_LIVEKIT_TOKEN = "true";
     try {
-      const result = await issueDebugLiveKitTokenForRequest(
-        authRequest("user_1"),
-        () => LIVEKIT_CREDENTIALS,
+      await assert.rejects(
+        () =>
+          issueDebugLiveKitTokenForRequest(authRequest("user_1"), () =>
+            LIVEKIT_CREDENTIALS,
+          ),
+        (error: { code?: string }) => error.code === "permission-denied",
       );
-      assert.equal(result.callProvider, "livekit");
+    } finally {
+      if (previousDistribution === undefined) {
+        delete process.env.TILAWA_DISTRIBUTION;
+      } else {
+        process.env.TILAWA_DISTRIBUTION = previousDistribution;
+      }
+      if (previousAllow === undefined) {
+        delete process.env.TILAWA_ALLOW_DEBUG_LIVEKIT_TOKEN;
+      } else {
+        process.env.TILAWA_ALLOW_DEBUG_LIVEKIT_TOKEN = previousAllow;
+      }
+    }
+  },
+);
+
+test(
+  "issueDebugLiveKitTokenForRequest rejects missing distribution",
+  async () => {
+    const previousDistribution = process.env.TILAWA_DISTRIBUTION;
+    const previousAllow = process.env.TILAWA_ALLOW_DEBUG_LIVEKIT_TOKEN;
+    delete process.env.TILAWA_DISTRIBUTION;
+    delete process.env.TILAWA_ALLOW_DEBUG_LIVEKIT_TOKEN;
+    try {
+      await assert.rejects(
+        () =>
+          issueDebugLiveKitTokenForRequest(authRequest("user_1"), () =>
+            LIVEKIT_CREDENTIALS,
+          ),
+        (error: { code?: string }) => error.code === "permission-denied",
+      );
+    } finally {
+      if (previousDistribution === undefined) {
+        delete process.env.TILAWA_DISTRIBUTION;
+      } else {
+        process.env.TILAWA_DISTRIBUTION = previousDistribution;
+      }
+      if (previousAllow === undefined) {
+        delete process.env.TILAWA_ALLOW_DEBUG_LIVEKIT_TOKEN;
+      } else {
+        process.env.TILAWA_ALLOW_DEBUG_LIVEKIT_TOKEN = previousAllow;
+      }
+    }
+  },
+);
+
+test(
+  "issueDebugLiveKitTokenForRequest rejects safe distribution without explicit flag",
+  async () => {
+    const previousDistribution = process.env.TILAWA_DISTRIBUTION;
+    const previousAllow = process.env.TILAWA_ALLOW_DEBUG_LIVEKIT_TOKEN;
+    process.env.TILAWA_DISTRIBUTION = "staging";
+    delete process.env.TILAWA_ALLOW_DEBUG_LIVEKIT_TOKEN;
+    try {
+      await assert.rejects(
+        () =>
+          issueDebugLiveKitTokenForRequest(authRequest("user_1"), () =>
+            LIVEKIT_CREDENTIALS,
+          ),
+        (error: { code?: string }) => error.code === "permission-denied",
+      );
     } finally {
       if (previousDistribution === undefined) {
         delete process.env.TILAWA_DISTRIBUTION;
@@ -119,16 +181,35 @@ test(
 );
 
 test("issueDebugLiveKitTokenForRequest rejects unauthenticated callers", async () => {
-  await assert.rejects(
-    () =>
-      issueDebugLiveKitTokenForRequest({ auth: null }, () => LIVEKIT_CREDENTIALS),
-    (error: { code?: string }) => error.code === "unauthenticated",
-  );
+  const previousDistribution = process.env.TILAWA_DISTRIBUTION;
+  const previousAllow = process.env.TILAWA_ALLOW_DEBUG_LIVEKIT_TOKEN;
+  process.env.TILAWA_DISTRIBUTION = "local";
+  process.env.TILAWA_ALLOW_DEBUG_LIVEKIT_TOKEN = "true";
+  try {
+    await assert.rejects(
+      () =>
+        issueDebugLiveKitTokenForRequest({ auth: null }, () => LIVEKIT_CREDENTIALS),
+      (error: { code?: string }) => error.code === "unauthenticated",
+    );
+  } finally {
+    if (previousDistribution === undefined) {
+      delete process.env.TILAWA_DISTRIBUTION;
+    } else {
+      process.env.TILAWA_DISTRIBUTION = previousDistribution;
+    }
+    if (previousAllow === undefined) {
+      delete process.env.TILAWA_ALLOW_DEBUG_LIVEKIT_TOKEN;
+    } else {
+      process.env.TILAWA_ALLOW_DEBUG_LIVEKIT_TOKEN = previousAllow;
+    }
+  }
 });
 
 test("issueDebugLiveKitTokenForRequest returns LiveKit credentials", async () => {
-  const previous = process.env.TILAWA_DISTRIBUTION;
+  const previousDistribution = process.env.TILAWA_DISTRIBUTION;
+  const previousAllow = process.env.TILAWA_ALLOW_DEBUG_LIVEKIT_TOKEN;
   process.env.TILAWA_DISTRIBUTION = "staging";
+  process.env.TILAWA_ALLOW_DEBUG_LIVEKIT_TOKEN = "true";
   try {
     const uid = "qa_user_1";
     const result = await issueDebugLiveKitTokenForRequest(
@@ -149,10 +230,15 @@ test("issueDebugLiveKitTokenForRequest returns LiveKit credentials", async () =>
       }),
     );
   } finally {
-    if (previous === undefined) {
+    if (previousDistribution === undefined) {
       delete process.env.TILAWA_DISTRIBUTION;
     } else {
-      process.env.TILAWA_DISTRIBUTION = previous;
+      process.env.TILAWA_DISTRIBUTION = previousDistribution;
+    }
+    if (previousAllow === undefined) {
+      delete process.env.TILAWA_ALLOW_DEBUG_LIVEKIT_TOKEN;
+    } else {
+      process.env.TILAWA_ALLOW_DEBUG_LIVEKIT_TOKEN = previousAllow;
     }
   }
 });
