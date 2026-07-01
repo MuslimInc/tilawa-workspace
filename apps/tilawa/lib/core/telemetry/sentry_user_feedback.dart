@@ -3,10 +3,11 @@ import 'package:flutter/widgets.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/telemetry/crash_reporting_context.dart';
+import 'package:tilawa/core/telemetry/tilawa_sentry_feedback_form.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa/router/app_router.dart';
 
-/// Presents [SentryFeedbackForm] and wires Tilawa-specific feedback policy.
+/// Presents [TilawaSentryFeedbackForm] and wires Tilawa-specific feedback policy.
 abstract final class SentryUserFeedback {
   static SentryFlutterOptions? _flutterOptions;
 
@@ -22,6 +23,7 @@ abstract final class SentryUserFeedback {
   static void resetForTesting() {
     _flutterOptions = null;
   }
+
   /// Chained [beforeSend]: existing Tilawa filters, then optional feedback UI.
   static Future<SentryEvent?> filterBeforeSend(
     SentryEvent event,
@@ -60,9 +62,10 @@ abstract final class SentryUserFeedback {
       return;
     }
 
-    SentryFeedbackForm.show(
+    TilawaSentryFeedbackForm.show(
       context,
       screenshot: screenshot,
+      flutterOptions: _flutterOptions,
     );
   }
 
@@ -131,10 +134,11 @@ abstract final class SentryUserFeedback {
       return;
     }
 
-    SentryFeedbackForm.show(
+    TilawaSentryFeedbackForm.show(
       context,
       associatedEventId: event.eventId,
       screenshot: screenshot,
+      flutterOptions: _flutterOptions,
     );
   }
 }
