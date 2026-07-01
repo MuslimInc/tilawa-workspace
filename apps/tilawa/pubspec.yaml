@@ -110,6 +110,8 @@ dependencies:
   visibility_detector: ^0.4.0+2
 
 dev_dependencies:
+  quran_sessions_rtc_stub:
+    path: ../../packages/quran_sessions_rtc_stub
   bloc_lint: ^0.4.1
   bloc_test: ^10.0.0
   build_runner: ^2.15.0
