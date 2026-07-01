@@ -76,8 +76,18 @@ class InAppUpdateCoordinator {
       final evaluateResult = await _evaluateUpdate();
       await evaluateResult.fold(
         (failure) async {
-          logger.e(
-            '[InAppUpdateCoordinator] Failed to evaluate update: $failure',
+          if (failure is InAppUpdateFailure &&
+              failure.reason == InAppUpdateFailureReason.checkFailed) {
+            logger.d(
+              '[InAppUpdateCoordinator] Update check failed (benign): '
+              '${failure.message ?? 'unknown'}',
+            );
+            return;
+          }
+          logger.w(
+            '[InAppUpdateCoordinator] Failed to evaluate update: '
+            'reason=${failure is InAppUpdateFailure ? failure.reason.name : failure.runtimeType} '
+            'message=${failure.message}',
           );
         },
         (action) async {

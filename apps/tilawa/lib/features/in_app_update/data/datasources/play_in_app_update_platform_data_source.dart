@@ -53,10 +53,11 @@ class PlayInAppUpdatePlatformDataSource
         );
         return const Right(InAppUpdateAvailability.unavailable());
       }
-      if (e is PlatformException && _isUnsupportedPlayEnvironment(e)) {
+      if (e is PlatformException && _isBenignPlayCheckFailure(e)) {
         logger.d(
-          '[InAppUpdatePlatform] In-app updates unavailable (${_installErrorCode(e)}). '
-          'Expected on emulators, sideloads, or devices without Play Store.',
+          '[InAppUpdatePlatform] In-app updates unavailable '
+          '(installError=${_installErrorCode(e)}). '
+          'Expected when Play cannot check updates.',
         );
         return const Right(InAppUpdateAvailability.unavailable());
       }
@@ -147,15 +148,9 @@ class PlayInAppUpdatePlatformDataSource
   bool _isForegroundActivityUnavailable(PlatformException error) =>
       error.code == 'REQUIRE_FOREGROUND_ACTIVITY';
 
-  bool _isUnsupportedPlayEnvironment(PlatformException error) {
-    if (error.code != 'TASK_FAILURE') {
-      return false;
-    }
-    return switch (_installErrorCode(error)) {
-      '-9' || '-10' => true,
-      _ => false,
-    };
-  }
+  /// Play [appUpdateInfo] task failures are environmental — not app bugs.
+  bool _isBenignPlayCheckFailure(PlatformException error) =>
+      error.code == 'TASK_FAILURE';
 
   String _installErrorCode(PlatformException error) {
     final String message = error.message ?? '';

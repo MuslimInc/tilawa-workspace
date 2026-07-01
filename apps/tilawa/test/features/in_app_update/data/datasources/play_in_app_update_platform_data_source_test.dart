@@ -148,7 +148,7 @@ void main() {
       );
     });
 
-    test('returns checkFailed for other platform exceptions', () async {
+    test('returns unavailable for other TASK_FAILURE messages', () async {
       setMethodHandler((_) async {
         throw PlatformException(code: 'TASK_FAILURE', message: 'other');
       });
@@ -156,10 +156,30 @@ void main() {
       final Either<Failure, InAppUpdateAvailability> result = await dataSource
           .checkAvailability();
 
-      expect(result.isLeft(), isTrue);
       result.fold(
-        (Failure failure) => expect(failure, isA<InAppUpdateFailure>()),
-        (_) => fail('expected Left'),
+        (_) => fail('expected Right'),
+        (InAppUpdateAvailability availability) {
+          expect(availability.updateAvailable, isFalse);
+        },
+      );
+    });
+
+    test('returns unavailable for transient Play install errors', () async {
+      setMethodHandler((_) async {
+        throw PlatformException(
+          code: 'TASK_FAILURE',
+          message: 'Install Error(-3): API not available',
+        );
+      });
+
+      final Either<Failure, InAppUpdateAvailability> result = await dataSource
+          .checkAvailability();
+
+      result.fold(
+        (_) => fail('expected Right'),
+        (InAppUpdateAvailability availability) {
+          expect(availability.updateAvailable, isFalse);
+        },
       );
     });
 
