@@ -47,6 +47,9 @@ class _FakeAuthRepository implements AuthRepository {
 
   @override
   Future<void> signOut() async {}
+
+  @override
+  Future<bool> hasAdminClaim() async => false;
 }
 
 /// Regression tests for the cold-start adhan notification navigation race:

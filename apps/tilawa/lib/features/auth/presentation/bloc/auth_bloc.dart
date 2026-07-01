@@ -138,7 +138,9 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
 
     unawaited(_syncLanguagePreferenceAfterAuth());
     emit(AuthState.authenticated(user: user));
-    unawaited(_registerDeviceAfterSignIn(user.id, generation));
+    // Keep [GoogleSignInSessionTracker.inFlight] true until registration
+    // finishes so resume/session checks do not treat the fresh login as stale.
+    await _registerDeviceAfterSignIn(user.id, generation);
   }
 
   Future<void> _registerDeviceAfterSignIn(
@@ -211,7 +213,7 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
           return;
         }
 
-        final String message = failure.message ?? 'Unable to delete account';
+        final String message = failure.message ?? DeleteAccountErrorKey.failed;
         logger.w(
           'Delete account failed: $message',
           error: failure,

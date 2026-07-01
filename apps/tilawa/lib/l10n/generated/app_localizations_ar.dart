@@ -1367,6 +1367,33 @@ class AppLocalizationsAr extends AppLocalizations {
   String get deleteAccountFailed => 'تعذّر حذف حسابك. يرجى المحاولة مرة أخرى.';
 
   @override
+  String get deleteAccountAdminMustUseAdminPanel =>
+      'يجب حذف حسابات المسؤولين من لوحة الإدارة.';
+
+  @override
+  String get deleteAccountWalletNotEmpty =>
+      'يجب أن يكون رصيد محفظتك صفراً قبل حذف حسابك. يرجى استرداد الرصيد أو استخدامه أولاً.';
+
+  @override
+  String get deleteAccountActiveBookingsStudent =>
+      'لديك حجوزات نشطة كطالب. يرجى إلغاءها أو إكمالها قبل حذف حسابك.';
+
+  @override
+  String get deleteAccountActiveBookingsTeacher =>
+      'لديك حجوزات نشطة كمعلّم. يرجى إلغاءها أو إكمالها قبل حذف حسابك.';
+
+  @override
+  String get deleteAccountAlreadyPending =>
+      'طلب حذف الحساب قيد الانتظار بالفعل.';
+
+  @override
+  String get deleteAccountServiceUnavailable =>
+      'حذف الحساب غير متاح مؤقتاً. يرجى تحديث التطبيق أو المحاولة لاحقاً.';
+
+  @override
+  String get deleteAccountNotSignedIn => 'يجب تسجيل الدخول لحذف حسابك.';
+
+  @override
   String get deleteAccountInProgress => 'جارٍ حذف حسابك...';
 
   @override
@@ -3489,4 +3516,7 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get authAppCheckFailedRelease =>
       'تعذّر إكمال تسجيل الدخول لأن هذا الجهاز لم يُتحقق منه. حدّث التطبيق وأعد المحاولة لاحقًا.';
+
+  @override
+  String get settingsAdminUserBadge => 'مستخدم إداري';
 }

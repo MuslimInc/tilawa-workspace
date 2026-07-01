@@ -15,4 +15,7 @@ abstract class AuthRepository {
   Future<void> deleteAccount();
 
   UserEntity? get currentUser;
+
+  /// Whether the signed-in Firebase user has `{ admin: true }` on their ID token.
+  Future<bool> hasAdminClaim();
 }

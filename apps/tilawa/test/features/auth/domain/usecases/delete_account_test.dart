@@ -1,13 +1,12 @@
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:tilawa/features/auth/data/datasources/account_deletion_remote_data_source.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/domain/repositories/auth_repository.dart';
-import 'package:tilawa/features/auth/domain/repositories/user_repository.dart';
+import 'package:tilawa/features/auth/domain/entities/auth_error_key.dart';
 import 'package:tilawa/features/auth/domain/usecases/delete_account.dart';
 import 'package:tilawa/features/auth/domain/usecases/sync_device_token_use_case.dart';
 import 'package:tilawa/features/premium/domain/repositories/premium_repository.dart';
@@ -17,16 +16,21 @@ import 'delete_account_test.mocks.dart';
 
 @GenerateMocks([
   AuthRepository,
-  UserRepository,
+  AccountDeletionRemoteDataSource,
   SyncDeviceTokenUseCase,
   PremiumRepository,
 ])
 void main() {
   late DeleteAccount useCase;
   late MockAuthRepository mockAuthRepository;
-  late MockUserRepository mockUserRepository;
+  late MockAccountDeletionRemoteDataSource mockAccountDeletionRemoteDataSource;
   late MockSyncDeviceTokenUseCase mockSyncDeviceTokenUseCase;
   late MockPremiumRepository mockPremiumRepository;
+
+  const tResult = AccountDeletionRequestResult(
+    status: 'pending_deletion',
+    purgeAfter: '2026-02-01T00:00:00.000Z',
+  );
 
   final tUser = UserEntity(
     id: 'user-1',
@@ -37,13 +41,13 @@ void main() {
 
   setUp(() {
     mockAuthRepository = MockAuthRepository();
-    mockUserRepository = MockUserRepository();
+    mockAccountDeletionRemoteDataSource = MockAccountDeletionRemoteDataSource();
     mockSyncDeviceTokenUseCase = MockSyncDeviceTokenUseCase();
     mockPremiumRepository = MockPremiumRepository();
 
     useCase = DeleteAccount(
       mockAuthRepository,
-      mockUserRepository,
+      mockAccountDeletionRemoteDataSource,
       mockSyncDeviceTokenUseCase,
       mockPremiumRepository,
     );
@@ -52,9 +56,14 @@ void main() {
     when(
       mockSyncDeviceTokenUseCase.removeCurrentTokenForUser(any),
     ).thenAnswer((_) async {});
-    when(mockUserRepository.deleteUserData(any)).thenAnswer((_) async {});
     when(mockPremiumRepository.clearPremiumStatus()).thenAnswer((_) async {});
-    when(mockAuthRepository.deleteAccount()).thenAnswer((_) async {});
+    when(
+      mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
+        reason: anyNamed('reason'),
+        confirmEmail: anyNamed('confirmEmail'),
+      ),
+    ).thenAnswer((_) async => tResult);
+    when(mockAuthRepository.signOut()).thenAnswer((_) async {});
   });
 
   test('returns ValidationFailure when no user is signed in', () async {
@@ -67,159 +76,193 @@ void main() {
       (failure) => expect(failure, isA<ValidationFailure>()),
       (_) => fail('expected left'),
     );
-    verifyNever(mockUserRepository.deleteUserData(any));
+    verifyNever(
+      mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
+        reason: anyNamed('reason'),
+        confirmEmail: anyNamed('confirmEmail'),
+      ),
+    );
   });
 
-  test('deletes app data before auth account', () async {
+  test('requests soft-delete then signs out', () async {
     final Either<Failure, void> result = await useCase();
 
     expect(result.isRight(), isTrue);
     verifyInOrder([
+      mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
+        reason: 'Self-service account deletion from mobile app',
+        confirmEmail: 'test@example.com',
+      ),
       mockSyncDeviceTokenUseCase.removeCurrentTokenForUser('user-1'),
-      mockUserRepository.deleteUserData('user-1'),
       mockPremiumRepository.clearPremiumStatus(),
-      mockAuthRepository.deleteAccount(),
+      mockAuthRepository.signOut(),
     ]);
   });
 
-  test('returns UserCancelledFailure when re-auth is cancelled', () async {
-    when(mockAuthRepository.deleteAccount()).thenThrow(
-      FirebaseAuthException(
-        code: 'requires-recent-login',
-        message: 'Google re-authentication was cancelled',
+  test('uses uid confirmation when email is missing', () async {
+    when(mockAuthRepository.currentUser).thenReturn(
+      UserEntity(
+        id: 'user-1',
+        email: '',
+        displayName: 'Test User',
+        createdAt: DateTime.utc(2024),
+      ),
+    );
+
+    final Either<Failure, void> result = await useCase();
+
+    expect(result.isRight(), isTrue);
+    verify(
+      mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
+        reason: 'Self-service account deletion from mobile app',
+        confirmEmail: 'user-1',
+      ),
+    ).called(1);
+  });
+
+  test(
+    'maps permission-denied callable errors without clearing session side effects',
+    () async {
+      when(
+        mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
+          reason: anyNamed('reason'),
+          confirmEmail: anyNamed('confirmEmail'),
+        ),
+      ).thenThrow(
+        FirebaseFunctionsException(
+          code: 'permission-denied',
+          message: 'Admin accounts must be deleted from the admin panel.',
+        ),
+      );
+
+      final Either<Failure, void> result = await useCase();
+
+      expect(result.isLeft(), isTrue);
+      result.fold((failure) {
+        expect(failure, isA<PermissionFailure>());
+        expect(
+          failure.message,
+          DeleteAccountErrorKey.adminMustUseAdminPanel,
+        );
+      }, (_) => fail('expected left'));
+      verifyNever(mockSyncDeviceTokenUseCase.removeCurrentTokenForUser(any));
+      verifyNever(mockPremiumRepository.clearPremiumStatus());
+      verifyNever(mockAuthRepository.signOut());
+    },
+  );
+
+  test(
+    'maps failed-precondition callable errors to ValidationFailure',
+    () async {
+      when(
+        mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
+          reason: anyNamed('reason'),
+          confirmEmail: anyNamed('confirmEmail'),
+        ),
+      ).thenThrow(
+        FirebaseFunctionsException(
+          code: 'failed-precondition',
+          message: 'Wallet balance is not zero',
+        ),
+      );
+
+      final Either<Failure, void> result = await useCase();
+
+      expect(result.isLeft(), isTrue);
+      result.fold((failure) {
+        expect(failure, isA<ValidationFailure>());
+        expect(failure.message, DeleteAccountErrorKey.walletNotEmpty);
+      }, (_) => fail('expected left'));
+      verifyNever(mockAuthRepository.signOut());
+      verifyNever(mockSyncDeviceTokenUseCase.removeCurrentTokenForUser(any));
+      verifyNever(mockPremiumRepository.clearPremiumStatus());
+    },
+  );
+
+  test('maps undeployed callable not-found to ServerFailure', () async {
+    when(
+      mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
+        reason: anyNamed('reason'),
+        confirmEmail: anyNamed('confirmEmail'),
+      ),
+    ).thenThrow(
+      FirebaseFunctionsException(
+        code: 'not-found',
+        message: 'NOT_FOUND',
       ),
     );
 
     final Either<Failure, void> result = await useCase();
 
     expect(result.isLeft(), isTrue);
-    result.fold(
-      (failure) => expect(failure, isA<UserCancelledFailure>()),
-      (_) => fail('expected left'),
-    );
+    result.fold((failure) {
+      expect(failure, isA<ServerFailure>());
+      expect(
+        failure.message,
+        DeleteAccountErrorKey.serviceUnavailable,
+      );
+    }, (_) => fail('expected left'));
+    verifyNever(mockAuthRepository.signOut());
   });
 
-  Future<Failure> failureFor(Object error) async {
-    when(mockAuthRepository.deleteAccount()).thenThrow(error);
+  test('maps backend target-not-found to ValidationFailure', () async {
+    when(
+      mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
+        reason: anyNamed('reason'),
+        confirmEmail: anyNamed('confirmEmail'),
+      ),
+    ).thenThrow(
+      FirebaseFunctionsException(
+        code: 'not-found',
+        message: 'Target user not found.',
+      ),
+    );
+
     final Either<Failure, void> result = await useCase();
+
     expect(result.isLeft(), isTrue);
-    late final Failure captured;
-    result.fold((failure) => captured = failure, (_) => fail('expected left'));
-    return captured;
-  }
-
-  group('FirebaseAuthException mapping', () {
-    test(
-      'returns UnexpectedFailure for non-cancellation auth errors',
-      () async {
-        final Failure failure = await failureFor(
-          FirebaseAuthException(
-            code: 'network-request-failed',
-            message: 'A network error occurred',
-          ),
-        );
-
-        expect(failure, isA<UnexpectedFailure>());
-        expect(failure.message, 'A network error occurred');
-      },
-    );
-
-    test('returns UnexpectedFailure when requires-recent-login is not '
-        'a cancellation', () async {
-      final Failure failure = await failureFor(
-        FirebaseAuthException(code: 'requires-recent-login'),
-      );
-
-      expect(failure, isA<UnexpectedFailure>());
-    });
+    result.fold((failure) {
+      expect(failure, isA<ValidationFailure>());
+      expect(failure.message, 'Target user not found.');
+    }, (_) => fail('expected left'));
   });
 
-  group('GoogleSignInException mapping', () {
-    for (final code in [
-      GoogleSignInExceptionCode.canceled,
-      GoogleSignInExceptionCode.interrupted,
-      GoogleSignInExceptionCode.uiUnavailable,
-    ]) {
-      test('returns UserCancelledFailure for ${code.name}', () async {
-        final Failure failure = await failureFor(
-          GoogleSignInException(code: code),
-        );
-
-        expect(failure, isA<UserCancelledFailure>());
-      });
-    }
-
-    test('returns UnexpectedFailure for genuine sign-in errors', () async {
-      final Failure failure = await failureFor(
-        const GoogleSignInException(
-          code: GoogleSignInExceptionCode.providerConfigurationError,
-          description: 'Missing SHA-1 fingerprint',
-        ),
-      );
-
-      expect(failure, isA<UnexpectedFailure>());
-      expect(failure.message, 'Missing SHA-1 fingerprint');
-    });
-
-    test('falls back to the code name when description is missing', () async {
-      final Failure failure = await failureFor(
-        const GoogleSignInException(
-          code: GoogleSignInExceptionCode.unknownError,
-        ),
-      );
-
-      expect(failure.message, 'unknownError');
-    });
-  });
-
-  group('PlatformException mapping', () {
-    test('returns UserCancelledFailure for code 204', () async {
-      final Failure failure = await failureFor(
-        PlatformException(code: '204', message: 'Login failed'),
-      );
-
-      expect(failure, isA<UserCancelledFailure>());
-    });
-
-    test(
-      'returns UserCancelledFailure for "No credentials available"',
-      () async {
-        final Failure failure = await failureFor(
-          PlatformException(
-            code: '16',
-            message: 'No credentials available on this device',
-          ),
-        );
-
-        expect(failure, isA<UserCancelledFailure>());
-      },
+  test('maps internal callable errors to ServerFailure', () async {
+    when(
+      mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
+        reason: anyNamed('reason'),
+        confirmEmail: anyNamed('confirmEmail'),
+      ),
+    ).thenThrow(
+      FirebaseFunctionsException(
+        code: 'internal',
+        message: 'boom',
+      ),
     );
 
-    test('returns UserCancelledFailure for "Login failed" messages', () async {
-      final Failure failure = await failureFor(
-        PlatformException(
-          code: '500',
-          message: 'Login failed User cancelled the selector',
-        ),
-      );
+    final Either<Failure, void> result = await useCase();
 
-      expect(failure, isA<UserCancelledFailure>());
-    });
-
-    test('returns UnexpectedFailure for genuine platform errors', () async {
-      final Failure failure = await failureFor(
-        PlatformException(code: '500', message: 'Service unavailable'),
-      );
-
-      expect(failure, isA<UnexpectedFailure>());
-      expect(failure.message, 'Service unavailable');
-    });
+    expect(result.isLeft(), isTrue);
+    result.fold((failure) {
+      expect(failure, isA<ServerFailure>());
+      expect(failure.message, DeleteAccountErrorKey.failed);
+    }, (_) => fail('expected left'));
   });
 
   test('returns UnexpectedFailure for unrecognised errors', () async {
-    final Failure failure = await failureFor(StateError('boom'));
+    when(
+      mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
+        reason: anyNamed('reason'),
+        confirmEmail: anyNamed('confirmEmail'),
+      ),
+    ).thenThrow(StateError('boom'));
 
-    expect(failure, isA<UnexpectedFailure>());
-    expect(failure.message, contains('boom'));
+    final Either<Failure, void> result = await useCase();
+
+    expect(result.isLeft(), isTrue);
+    result.fold((failure) {
+      expect(failure, isA<UnexpectedFailure>());
+      expect(failure.message, contains('boom'));
+    }, (_) => fail('expected left'));
   });
 }

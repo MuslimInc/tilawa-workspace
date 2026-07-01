@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -9,11 +11,13 @@ import 'package:tilawa/core/utils/legal_url_launcher.dart';
 import 'package:tilawa/shared/widgets/profile_avatar.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../../../../core/di/injection.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../router/app_router_config.dart';
 import '../../../app_review/presentation/cubit/app_review_cubit.dart';
 import '../../../app_review/presentation/cubit/app_review_state.dart';
 import '../../../auth/domain/entities/user_entity.dart';
+import '../../../auth/domain/repositories/auth_repository.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../theme/domain/app_theme_mode.dart';
 import '../../../theme/presentation/cubit/theme_cubit.dart';
@@ -197,9 +201,11 @@ class SettingsProfileHeader extends StatelessWidget {
                         ),
                       ),
                     ],
-                    if (!isGuest &&
-                        quranSessionsFeatureConfig().showProfileTeacherEntry)
-                      _SettingsVerifiedTeacherBadge(isGuest: isGuest),
+                    if (!isGuest) ...[
+                      const _SettingsAdminBadge(),
+                      if (quranSessionsFeatureConfig().showProfileTeacherEntry)
+                        _SettingsVerifiedTeacherBadge(isGuest: isGuest),
+                    ],
                   ],
                 ),
               ),
@@ -207,6 +213,58 @@ class SettingsProfileHeader extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _SettingsAdminBadge extends StatefulWidget {
+  const _SettingsAdminBadge();
+
+  @override
+  State<_SettingsAdminBadge> createState() => _SettingsAdminBadgeState();
+}
+
+class _SettingsAdminBadgeState extends State<_SettingsAdminBadge> {
+  bool? _isAdmin;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_load());
+  }
+
+  Future<void> _load() async {
+    final bool isAdmin = await getIt<AuthRepository>().hasAdminClaim();
+    if (mounted) {
+      setState(() => _isAdmin = isAdmin);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isAdmin != true) {
+      return const SizedBox.shrink();
+    }
+
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+
+    return Padding(
+      padding: EdgeInsets.only(top: tokens.spaceSmall),
+      child: Semantics(
+        label: context.l10n.settingsAdminUserBadge,
+        child: TilawaStatusChip(
+          label: context.l10n.settingsAdminUserBadge,
+          icon: Icons.admin_panel_settings_rounded,
+          backgroundColor: colorScheme.semanticTintBackground(
+            TilawaSemanticTint.ink,
+          ),
+          foregroundColor: colorScheme.semanticTintForeground(
+            TilawaSemanticTint.ink,
+          ),
+        ),
+      ),
     );
   }
 }

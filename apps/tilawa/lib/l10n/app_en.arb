@@ -1857,6 +1857,34 @@
     "@deleteAccountFailed": {
         "description": "Generic error when account deletion fails"
     },
+    "deleteAccountAdminMustUseAdminPanel": "Admin accounts must be deleted from the admin panel.",
+    "@deleteAccountAdminMustUseAdminPanel": {
+        "description": "Error when a Firebase admin user tries self-service account deletion"
+    },
+    "deleteAccountWalletNotEmpty": "Your wallet balance must be zero before deleting your account. Please refund or use your balance first.",
+    "@deleteAccountWalletNotEmpty": {
+        "description": "Error when account deletion is blocked by a non-zero wallet balance"
+    },
+    "deleteAccountActiveBookingsStudent": "You have active bookings as a student. Please cancel or complete them before deleting your account.",
+    "@deleteAccountActiveBookingsStudent": {
+        "description": "Error when account deletion is blocked by active student bookings"
+    },
+    "deleteAccountActiveBookingsTeacher": "You have active bookings as a teacher. Please cancel or complete them before deleting your account.",
+    "@deleteAccountActiveBookingsTeacher": {
+        "description": "Error when account deletion is blocked by active teacher bookings"
+    },
+    "deleteAccountAlreadyPending": "Account deletion is already pending.",
+    "@deleteAccountAlreadyPending": {
+        "description": "Error when the user already has a pending account deletion request"
+    },
+    "deleteAccountServiceUnavailable": "Account deletion is temporarily unavailable. Please update the app or try again later.",
+    "@deleteAccountServiceUnavailable": {
+        "description": "Error when the account deletion callable is unavailable or not deployed"
+    },
+    "deleteAccountNotSignedIn": "You must be signed in to delete your account.",
+    "@deleteAccountNotSignedIn": {
+        "description": "Error when delete account is requested without an active session"
+    },
     "deleteAccountInProgress": "Deleting your account...",
     "@deleteAccountInProgress": {
         "description": "Loading message shown while account deletion is in progress"
@@ -4446,5 +4474,9 @@
     "authAppCheckFailedRelease": "Sign-in could not be completed because this device could not be verified. Update the app and try again later.",
     "@authAppCheckFailedRelease": {
         "description": "Sign-in device registration blocked by App Check in release builds"
+    },
+    "settingsAdminUserBadge": "Admin User",
+    "@settingsAdminUserBadge": {
+        "description": "Badge on Settings profile when the signed-in user has the Firebase admin custom claim"
     }
 }

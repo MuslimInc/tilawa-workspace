@@ -1,27 +1,28 @@
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/services.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../../../premium/domain/repositories/premium_repository.dart';
+import '../../data/datasources/account_deletion_remote_data_source.dart';
+import '../entities/auth_error_key.dart';
 import '../repositories/auth_repository.dart';
-import '../repositories/user_repository.dart';
 import 'sync_device_token_use_case.dart';
+
+const _selfDeletionReason = 'Self-service account deletion from mobile app';
 
 @injectable
 class DeleteAccount {
   DeleteAccount(
     this._authRepository,
-    this._userRepository,
+    this._accountDeletionRemoteDataSource,
     this._syncDeviceTokenUseCase,
     this._premiumRepository,
   );
 
   final AuthRepository _authRepository;
-  final UserRepository _userRepository;
+  final AccountDeletionRemoteDataSource _accountDeletionRemoteDataSource;
   final SyncDeviceTokenUseCase _syncDeviceTokenUseCase;
   final PremiumRepository _premiumRepository;
 
@@ -29,57 +30,38 @@ class DeleteAccount {
     final currentUser = _authRepository.currentUser;
     if (currentUser == null) {
       logger.d('[DeleteFirebaseUser] Usecase: not signed in, aborting');
-      return const Left(ValidationFailure('Not signed in'));
+      return const Left(
+        ValidationFailure(DeleteAccountErrorKey.notSignedIn),
+      );
     }
 
     final String userId = currentUser.id;
     logger.d('[DeleteFirebaseUser] Usecase: start userId=$userId');
 
     try {
-      // Firestore rules require an authenticated owner — clean up before
-      // deleting the Firebase Auth user. Re-auth runs inside [deleteAccount]
-      // only when Firebase returns requires-recent-login.
+      final confirmEmail = currentUser.email.isNotEmpty
+          ? currentUser.email
+          : currentUser.id;
+      await _accountDeletionRemoteDataSource.requestSelfAccountDeletion(
+        reason: _selfDeletionReason,
+        confirmEmail: confirmEmail,
+      );
+      logger.d('[DeleteFirebaseUser] Usecase: soft-delete requested');
+
       await _syncDeviceTokenUseCase.removeCurrentTokenForUser(userId);
       logger.d('[DeleteFirebaseUser] Usecase: device token removed');
-      await _userRepository.deleteUserData(userId);
-      logger.d('[DeleteFirebaseUser] Usecase: user data deleted');
       await _premiumRepository.clearPremiumStatus();
       logger.d('[DeleteFirebaseUser] Usecase: premium status cleared');
 
-      await _authRepository.deleteAccount();
+      await _authRepository.signOut();
       logger.d('[DeleteFirebaseUser] Usecase: completed successfully');
       return const Right(null);
-    } on FirebaseAuthException catch (e) {
+    } on FirebaseFunctionsException catch (e) {
       logger.d(
-        '[DeleteFirebaseUser] Usecase: FirebaseAuthException '
+        '[DeleteFirebaseUser] Usecase: FirebaseFunctionsException '
         'code=${e.code} message=${e.message}',
       );
-      if (_isReauthCancelled(e)) {
-        return const Left(UserCancelledFailure());
-      }
-      return Left(UnexpectedFailure(e.message ?? e.code));
-    } on GoogleSignInException catch (e) {
-      logger.d(
-        '[DeleteFirebaseUser] Usecase: GoogleSignInException '
-        'code=${e.code.name} description=${e.description}',
-      );
-      if (e.code == GoogleSignInExceptionCode.canceled ||
-          e.code == GoogleSignInExceptionCode.interrupted ||
-          e.code == GoogleSignInExceptionCode.uiUnavailable) {
-        return const Left(UserCancelledFailure());
-      }
-      return Left(UnexpectedFailure(e.description ?? e.code.name));
-    } on PlatformException catch (e) {
-      logger.d(
-        '[DeleteFirebaseUser] Usecase: PlatformException '
-        'code=${e.code} message=${e.message} details=${e.details}',
-      );
-      if (e.code == '204' ||
-          (e.message?.contains('No credentials available') ?? false) ||
-          (e.message?.contains('Login failed') ?? false)) {
-        return const Left(UserCancelledFailure());
-      }
-      return Left(UnexpectedFailure(e.message ?? e.code));
+      return Left(_mapCallableFailure(e));
     } catch (e) {
       logger.d(
         '[DeleteFirebaseUser] Usecase: unexpected ${e.runtimeType}: $e',
@@ -88,8 +70,59 @@ class DeleteAccount {
     }
   }
 
-  bool _isReauthCancelled(FirebaseAuthException e) {
-    return e.code == 'requires-recent-login' &&
-        (e.message?.contains('cancelled') ?? false);
+  Failure _mapCallableFailure(FirebaseFunctionsException error) {
+    if (error.code == 'not-found' && _isUndeployedCallable(error)) {
+      return const ServerFailure(DeleteAccountErrorKey.serviceUnavailable);
+    }
+
+    final message =
+        _mapServerMessageToKey(error.message) ?? error.message ?? error.code;
+    return switch (error.code) {
+      'failed-precondition' => ValidationFailure(message),
+      'invalid-argument' => ValidationFailure(message),
+      'permission-denied' => PermissionFailure(message),
+      'unauthenticated' => PermissionFailure(message),
+      'not-found' => ValidationFailure(message),
+      'internal' || 'unavailable' || 'deadline-exceeded' => ServerFailure(
+        DeleteAccountErrorKey.failed,
+      ),
+      _ => UnexpectedFailure(DeleteAccountErrorKey.failed),
+    };
+  }
+
+  String? _mapServerMessageToKey(String? message) {
+    if (message == null || message.isEmpty) {
+      return null;
+    }
+
+    final normalized = message.toLowerCase();
+    if (message.contains(
+          'Admin accounts must be deleted from the admin panel',
+        ) ||
+        message.contains('Admin accounts cannot be deleted via self-service')) {
+      return DeleteAccountErrorKey.adminMustUseAdminPanel;
+    }
+    if (normalized.contains('wallet balance is not zero')) {
+      return DeleteAccountErrorKey.walletNotEmpty;
+    }
+    if (message.contains('active bookings as a student')) {
+      return DeleteAccountErrorKey.activeBookingsStudent;
+    }
+    if (message.contains('active bookings as a teacher')) {
+      return DeleteAccountErrorKey.activeBookingsTeacher;
+    }
+    if (message.contains('Deletion is already pending')) {
+      return DeleteAccountErrorKey.alreadyPending;
+    }
+    return null;
+  }
+
+  /// Firebase returns generic [NOT_FOUND] when the callable is not deployed.
+  /// Backend guard errors use a descriptive message instead.
+  bool _isUndeployedCallable(FirebaseFunctionsException error) {
+    final message = error.message?.trim();
+    return message == null ||
+        message.isEmpty ||
+        message.toUpperCase() == 'NOT_FOUND';
   }
 }

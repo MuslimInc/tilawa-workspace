@@ -448,6 +448,17 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
     return _mapFirebaseUserToUser(firebaseUser);
   }
 
+  @override
+  Future<bool> hasAdminClaim() async {
+    final User? firebaseUser = _firebaseAuth.currentUser;
+    if (firebaseUser == null) {
+      return false;
+    }
+
+    final IdTokenResult tokenResult = await firebaseUser.getIdTokenResult();
+    return tokenResult.claims?['admin'] == true;
+  }
+
   UserEntity _mapFirebaseUserToUser(User firebaseUser) {
     return UserEntity(
       id: firebaseUser.uid,

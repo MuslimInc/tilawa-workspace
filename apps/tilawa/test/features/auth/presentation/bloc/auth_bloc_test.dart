@@ -280,7 +280,6 @@ void main() {
           AuthState.authenticated(user: tUser),
         ],
         verify: (_) async {
-          await Future<void>.delayed(Duration.zero);
           verify(
             mockSyncDeviceTokenUseCase.registerExplicitSignIn(tUser.id),
           ).called(1);
@@ -307,7 +306,6 @@ void main() {
         ],
         verify: (_) async {
           verify(mockSignInWithGoogleUseCase()).called(1);
-          await Future<void>.delayed(Duration.zero);
           verify(
             mockSyncDeviceTokenUseCase.registerExplicitSignIn(tUser.id),
           ).called(1);
@@ -319,7 +317,31 @@ void main() {
       );
 
       test(
-        'emits authenticated immediately when background registration returns stale',
+        'keeps session inFlight until explicit device registration completes',
+        () async {
+          final registrationCompleter = Completer<Either<Failure, void>>();
+          when(
+            mockSignInWithGoogleUseCase(),
+          ).thenAnswer((_) async => AuthResult.success(user: tUser));
+          when(
+            mockSyncDeviceTokenUseCase.registerExplicitSignIn(tUser.id),
+          ).thenAnswer((_) => registrationCompleter.future);
+
+          authBloc.add(const SignInWithGoogleEvent());
+          await Future<void>.delayed(Duration.zero);
+
+          expect(authBloc.state, AuthState.authenticated(user: tUser));
+          expect(signInSessionTracker.inFlight, isTrue);
+
+          registrationCompleter.complete(const Right(null));
+          await Future<void>.delayed(Duration.zero);
+
+          expect(signInSessionTracker.inFlight, isFalse);
+        },
+      );
+
+      test(
+        'stays authenticated when explicit registration returns stale',
         () async {
           when(
             mockSignInWithGoogleUseCase(),
@@ -339,6 +361,11 @@ void main() {
           verify(
             mockSyncDeviceTokenUseCase.registerExplicitSignIn(tUser.id),
           ).called(1);
+          verifyNever(
+            mockSignOut(
+              skipServerTokenClear: anyNamed('skipServerTokenClear'),
+            ),
+          );
         },
       );
 
@@ -577,7 +604,7 @@ void main() {
         act: (bloc) => bloc.add(const DeleteAccountEvent()),
         expect: () => [
           const AuthState.loading(),
-          const AuthState.error(message: 'Unable to delete account'),
+          const AuthState.error(message: DeleteAccountErrorKey.failed),
           const AuthState.unauthenticated(),
         ],
       );

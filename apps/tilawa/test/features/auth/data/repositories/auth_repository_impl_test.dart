@@ -138,5 +138,14 @@ void main() {
       expect(result, tUser);
       verify(mockAuthProvider.currentUser);
     });
+
+    test('hasAdminClaim should delegate to provider', () async {
+      when(mockAuthProvider.hasAdminClaim()).thenAnswer((_) async => true);
+
+      final bool result = await authRepository.hasAdminClaim();
+
+      expect(result, isTrue);
+      verify(mockAuthProvider.hasAdminClaim()).called(1);
+    });
   });
 }

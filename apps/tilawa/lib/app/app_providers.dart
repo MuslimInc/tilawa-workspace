@@ -63,7 +63,6 @@ class AppProviders {
             listener: (context, state) {
               context.read<SessionValidityCubit>().resetRevocation();
               unawaited(PendingSessionRevokeStore.clear());
-              unawaited(context.read<SessionValidityCubit>().checkOnResume());
             },
             child: SessionRevokedNavigationListener(
               child: AccountDeletionNavigationListener(child: child),

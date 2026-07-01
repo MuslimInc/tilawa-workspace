@@ -2468,6 +2468,48 @@ abstract class AppLocalizations {
   /// **'Unable to delete your account. Please try again.'**
   String get deleteAccountFailed;
 
+  /// Error when a Firebase admin user tries self-service account deletion
+  ///
+  /// In en, this message translates to:
+  /// **'Admin accounts must be deleted from the admin panel.'**
+  String get deleteAccountAdminMustUseAdminPanel;
+
+  /// Error when account deletion is blocked by a non-zero wallet balance
+  ///
+  /// In en, this message translates to:
+  /// **'Your wallet balance must be zero before deleting your account. Please refund or use your balance first.'**
+  String get deleteAccountWalletNotEmpty;
+
+  /// Error when account deletion is blocked by active student bookings
+  ///
+  /// In en, this message translates to:
+  /// **'You have active bookings as a student. Please cancel or complete them before deleting your account.'**
+  String get deleteAccountActiveBookingsStudent;
+
+  /// Error when account deletion is blocked by active teacher bookings
+  ///
+  /// In en, this message translates to:
+  /// **'You have active bookings as a teacher. Please cancel or complete them before deleting your account.'**
+  String get deleteAccountActiveBookingsTeacher;
+
+  /// Error when the user already has a pending account deletion request
+  ///
+  /// In en, this message translates to:
+  /// **'Account deletion is already pending.'**
+  String get deleteAccountAlreadyPending;
+
+  /// Error when the account deletion callable is unavailable or not deployed
+  ///
+  /// In en, this message translates to:
+  /// **'Account deletion is temporarily unavailable. Please update the app or try again later.'**
+  String get deleteAccountServiceUnavailable;
+
+  /// Error when delete account is requested without an active session
+  ///
+  /// In en, this message translates to:
+  /// **'You must be signed in to delete your account.'**
+  String get deleteAccountNotSignedIn;
+
   /// Loading message shown while account deletion is in progress
   ///
   /// In en, this message translates to:
@@ -6187,6 +6229,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign-in could not be completed because this device could not be verified. Update the app and try again later.'**
   String get authAppCheckFailedRelease;
+
+  /// Badge on Settings profile when the signed-in user has the Firebase admin custom claim
+  ///
+  /// In en, this message translates to:
+  /// **'Admin User'**
+  String get settingsAdminUserBadge;
 }
 
 class _AppLocalizationsDelegate

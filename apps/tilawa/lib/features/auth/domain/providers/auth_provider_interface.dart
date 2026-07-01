@@ -19,4 +19,7 @@ abstract class AuthProviderInterface {
 
   /// Stream of authentication state changes
   Stream<UserEntity?> get authStateChanges;
+
+  /// Whether the signed-in Firebase user has `{ admin: true }` on their ID token.
+  Future<bool> hasAdminClaim();
 }

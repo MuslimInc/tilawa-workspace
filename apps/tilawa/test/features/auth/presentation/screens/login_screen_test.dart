@@ -81,6 +81,9 @@ class _ThrowingAuthRepositoryForPrepare implements AuthRepository {
 
   @override
   Future<void> signOut() async {}
+
+  @override
+  Future<bool> hasAdminClaim() async => false;
 }
 
 void main() {

@@ -19,6 +19,7 @@ import '../../../../router/app_router_config.dart';
 import '../../../whats_new/whats_new.dart';
 import '../../../auth/application/account_deletion_flow_tracker.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/services/auth_error_messages.dart';
 import '../../../localization/presentation/bloc/localization_bloc.dart';
 import '../../../share/domain/entities/share_content.dart';
 import '../../../share/domain/usecases/share_content_use_case.dart';
@@ -103,7 +104,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           },
           error: (message) => TilawaFeedback.showToast(
             context,
-            message: message,
+            message: localizedAuthBlocErrorMessage(message, l10n),
             variant: TilawaFeedbackVariant.error,
           ),
           noGoogleAccounts: () {},

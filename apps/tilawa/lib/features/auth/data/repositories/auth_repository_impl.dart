@@ -63,4 +63,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   UserEntity? get currentUser => _authProvider.currentUser;
+
+  @override
+  Future<bool> hasAdminClaim() => _authProvider.hasAdminClaim();
 }

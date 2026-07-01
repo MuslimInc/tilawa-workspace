@@ -1373,6 +1373,34 @@ class AppLocalizationsEn extends AppLocalizations {
       'Unable to delete your account. Please try again.';
 
   @override
+  String get deleteAccountAdminMustUseAdminPanel =>
+      'Admin accounts must be deleted from the admin panel.';
+
+  @override
+  String get deleteAccountWalletNotEmpty =>
+      'Your wallet balance must be zero before deleting your account. Please refund or use your balance first.';
+
+  @override
+  String get deleteAccountActiveBookingsStudent =>
+      'You have active bookings as a student. Please cancel or complete them before deleting your account.';
+
+  @override
+  String get deleteAccountActiveBookingsTeacher =>
+      'You have active bookings as a teacher. Please cancel or complete them before deleting your account.';
+
+  @override
+  String get deleteAccountAlreadyPending =>
+      'Account deletion is already pending.';
+
+  @override
+  String get deleteAccountServiceUnavailable =>
+      'Account deletion is temporarily unavailable. Please update the app or try again later.';
+
+  @override
+  String get deleteAccountNotSignedIn =>
+      'You must be signed in to delete your account.';
+
+  @override
   String get deleteAccountInProgress => 'Deleting your account...';
 
   @override
@@ -3514,4 +3542,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get authAppCheckFailedRelease =>
       'Sign-in could not be completed because this device could not be verified. Update the app and try again later.';
+
+  @override
+  String get settingsAdminUserBadge => 'Admin User';
 }

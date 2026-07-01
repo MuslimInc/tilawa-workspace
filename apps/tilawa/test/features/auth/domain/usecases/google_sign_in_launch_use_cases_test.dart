@@ -28,6 +28,9 @@ class _FakeAuthRepository implements AuthRepository {
 
   @override
   Future<void> signOut() async {}
+
+  @override
+  Future<bool> hasAdminClaim() async => false;
 }
 
 class FakePrepareGoogleSignInUseCase extends PrepareGoogleSignInUseCase {
