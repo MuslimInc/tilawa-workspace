@@ -116,6 +116,13 @@ void main() {
     PendingSessionRevokeStore.setPrefsFactoryForTesting(null);
     signInSessionTracker.markFinished();
     authBloc.close();
+    reset(mockSignInWithGoogleUseCase);
+    reset(mockSignOut);
+    reset(mockDeleteAccount);
+    reset(mockGetCurrentUserUseCase);
+    reset(mockSyncDeviceTokenUseCase);
+    reset(mockGetCurrentLanguageUseCase);
+    reset(mockSyncUserLanguagePreference);
   });
 
   group('AuthBloc', () {
@@ -311,6 +318,67 @@ void main() {
         },
       );
 
+      test(
+        'emits authenticated immediately when background registration returns stale',
+        () async {
+          when(
+            mockSignInWithGoogleUseCase(),
+          ).thenAnswer((_) async => AuthResult.success(user: tUser));
+          when(
+            mockSyncDeviceTokenUseCase.registerExplicitSignIn(tUser.id),
+          ).thenAnswer(
+            (_) async => const Left(
+              PermissionFailure(AuthErrorKey.staleDeviceRejected),
+            ),
+          );
+
+          authBloc.add(const SignInWithGoogleEvent());
+          await Future<void>.delayed(Duration.zero);
+
+          expect(authBloc.state, AuthState.authenticated(user: tUser));
+          verify(
+            mockSyncDeviceTokenUseCase.registerExplicitSignIn(tUser.id),
+          ).called(1);
+        },
+      );
+
+      late Completer<Either<Failure, void>> registrationCompleter;
+
+      blocTest<AuthBloc, AuthState>(
+        'ignores stale background registration after sign-out',
+        build: () {
+          registrationCompleter = Completer<Either<Failure, void>>();
+          when(
+            mockSignInWithGoogleUseCase(),
+          ).thenAnswer((_) async => AuthResult.success(user: tUser));
+          when(
+            mockSyncDeviceTokenUseCase.registerExplicitSignIn(tUser.id),
+          ).thenAnswer((_) => registrationCompleter.future);
+          when(mockSignOut()).thenAnswer((_) async {});
+          return authBloc;
+        },
+        act: (bloc) async {
+          bloc.add(const SignInWithGoogleEvent());
+          await Future<void>.delayed(Duration.zero);
+          bloc.add(const SignOutEvent());
+          registrationCompleter.complete(
+            const Left(
+              PermissionFailure(AuthErrorKey.staleDeviceRejected),
+            ),
+          );
+          await Future<void>.delayed(Duration.zero);
+        },
+        expect: () => [
+          const AuthState.loading(),
+          AuthState.authenticated(user: tUser),
+          const AuthState.unauthenticated(),
+        ],
+        verify: (_) {
+          verify(mockSignOut()).called(1);
+          verifyNever(mockSignOut(skipServerTokenClear: true));
+        },
+      );
+
       blocTest<AuthBloc, AuthState>(
         'emits [loading, error] when sign in fails',
         build: () {
@@ -384,6 +452,16 @@ void main() {
           verify(mockSignInWithGoogleUseCase()).called(1);
           verifyNever(mockSyncDeviceTokenUseCase(any));
         },
+      );
+    });
+
+    group('SessionInvalidatedEvent', () {
+      blocTest<AuthBloc, AuthState>(
+        'emits [unauthenticated] after remote session revocation',
+        seed: () => AuthState.authenticated(user: tUser),
+        build: () => authBloc,
+        act: (bloc) => bloc.add(const SessionInvalidatedEvent()),
+        expect: () => [const AuthState.unauthenticated()],
       );
     });
 

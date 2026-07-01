@@ -7,6 +7,9 @@ abstract class AuthEvent with _$AuthEvent {
   const factory AuthEvent.deleteAccount() = DeleteAccountEvent;
   const factory AuthEvent.checkAuthStatus() = CheckAuthStatusEvent;
 
+  /// Syncs bloc state after [SessionValidityCubit] revoked the remote session.
+  const factory AuthEvent.sessionInvalidated() = SessionInvalidatedEvent;
+
   /// Drops an in-flight interactive sign-in without signing out of Firebase.
   const factory AuthEvent.abortInteractiveSignIn() =
       AbortInteractiveSignInEvent;

@@ -304,6 +304,26 @@ void main() {
   );
 
   blocTest<SessionValidityCubit, SessionValidityState>(
+    'FCM session_revoked is ignored when user already signed out',
+    build: () {
+      when(() => mockAuthRepository.currentUser).thenReturn(null);
+      return buildCubit();
+    },
+    act: (cubit) async {
+      sessionRevokedNotifier.notifySessionRevoked();
+      await Future<void>.delayed(Duration.zero);
+    },
+    expect: () => <SessionValidityState>[],
+    verify: (_) {
+      verifyNever(
+        () => mockSignOut(
+          skipServerTokenClear: any(named: 'skipServerTokenClear'),
+        ),
+      );
+    },
+  );
+
+  blocTest<SessionValidityCubit, SessionValidityState>(
     'resetRevocation is a no-op when already clear',
     build: buildCubit,
     act: (cubit) => cubit.resetRevocation(),

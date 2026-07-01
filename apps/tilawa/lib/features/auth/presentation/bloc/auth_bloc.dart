@@ -44,6 +44,7 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
     on<SignOutEvent>(_onSignOut);
     on<DeleteAccountEvent>(_onDeleteAccount);
     on<CheckAuthStatusEvent>(_onCheckAuthStatus);
+    on<SessionInvalidatedEvent>(_onSessionInvalidated);
     on<AbortInteractiveSignInEvent>(_onAbortInteractiveSignIn);
   }
 
@@ -169,6 +170,7 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onSignOut(SignOutEvent event, Emitter<AuthState> emit) async {
+    _interactiveSignInGeneration++;
     try {
       await _signOut();
       emit(const AuthState.unauthenticated());
@@ -242,6 +244,14 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
       // #endregion
       emit(const AuthState.unauthenticated());
     }
+  }
+
+  void _onSessionInvalidated(
+    SessionInvalidatedEvent event,
+    Emitter<AuthState> emit,
+  ) {
+    _interactiveSignInGeneration++;
+    emit(const AuthState.unauthenticated());
   }
 
   Future<void> _onCheckAuthStatus(
