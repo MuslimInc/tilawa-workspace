@@ -1,0 +1,225 @@
+<div class="tilawa-page-stack">
+  <app-page-header
+    [title]="'duplicateAccounts_title' | t"
+    [subtitle]="'duplicateAccounts_subtitle' | t"
+    [hasActions]="false"
+  />
+
+  <div class="flex flex-wrap items-end gap-3">
+    <label class="flex min-w-[18rem] flex-1 flex-col gap-1 text-sm">
+      <span>{{ 'duplicateAccounts_emailLabel' | t }}</span>
+      <input
+        type="email"
+        class="tilawa-field"
+        [(ngModel)]="emailQuery"
+        [placeholder]="'duplicateAccounts_emailPlaceholder' | t"
+        (keyup.enter)="search()"
+      />
+    </label>
+    <app-tilawa-button
+      variant="primary"
+      [label]="'duplicateAccounts_search' | t"
+      [loading]="loadState() === 'loading'"
+      [disabled]="!emailQuery.trim() || loadState() === 'loading'"
+      (click)="search()"
+    />
+  </div>
+
+  @if (loadState() === 'loading') {
+    <app-tilawa-loading-state [message]="'duplicateAccounts_loading' | t" />
+  } @else if (loadState() === 'error') {
+    <app-tilawa-error-state
+      [message]="errorMessage() ?? 'Error'"
+      [showRetry]="true"
+      (retry)="search()"
+    />
+  } @else if (result()) {
+    @if (result()?.authScanTruncated) {
+      <p class="rounded-md bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+        {{ 'duplicateAccounts_scanTruncated' | t }}
+      </p>
+    }
+
+    @if (accounts().length === 0) {
+      <p class="text-sm text-gray-600 dark:text-gray-300">
+        {{ 'duplicateAccounts_noAccounts' | t }}
+      </p>
+    } @else if (accounts().length === 1) {
+      <p class="text-sm text-gray-600 dark:text-gray-300">
+        {{ 'duplicateAccounts_singleAccount' | t }}
+      </p>
+    } @else {
+      @if (requiresManualSelection()) {
+        <p class="rounded-md bg-red-50 p-3 text-sm text-red-800 dark:bg-red-950/40 dark:text-red-200">
+          {{ 'duplicateAccounts_multipleGoogleWarning' | t }}
+        </p>
+      }
+
+      <div class="flex flex-wrap gap-3">
+        @if (canUseKeepGoogle()) {
+          <app-tilawa-button
+            variant="secondary"
+            [label]="'duplicateAccounts_keepGooglePlan' | t"
+            [disabled]="isActionLoading()"
+            (click)="applyKeepGooglePlan()"
+          />
+        }
+        <app-tilawa-button
+          variant="primary"
+          [label]="'duplicateAccounts_reviewDeletion' | t"
+          [disabled]="!canOpenConfirm || isActionLoading()"
+          (click)="openConfirm()"
+        />
+      </div>
+
+      <app-tilawa-data-table pinMode="leading" leadingSize="wide">
+        <thead>
+          <tr>
+            <th scope="col">{{ 'duplicateAccounts_keep' | t }}</th>
+            <th scope="col">{{ 'duplicateAccounts_delete' | t }}</th>
+            <th scope="col">{{ 'quranSessionsUsers_uid' | t }}</th>
+            <th scope="col">{{ 'common_email' | t }}</th>
+            <th scope="col">{{ 'duplicateAccounts_providers' | t }}</th>
+            <th scope="col">{{ 'duplicateAccounts_googleLinked' | t }}</th>
+            <th scope="col">{{ 'duplicateAccounts_created' | t }}</th>
+            <th scope="col">{{ 'duplicateAccounts_lastSignIn' | t }}</th>
+            <th scope="col">{{ 'duplicateAccounts_disabled' | t }}</th>
+            <th scope="col">{{ 'quranSessionsUsers_qsProfileStatus' | t }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (account of accounts(); track account.uid) {
+            <tr>
+              <td>
+                <input
+                  type="radio"
+                  name="keepAccount"
+                  [checked]="keepUserId() === account.uid"
+                  (change)="selectKeep(account.uid)"
+                />
+              </td>
+              <td>
+                <input
+                  type="checkbox"
+                  [checked]="isDeleteSelected(account.uid)"
+                  [disabled]="keepUserId() === account.uid"
+                  (change)="toggleDelete(account.uid, $any($event.target).checked)"
+                />
+              </td>
+              <td class="font-mono text-xs">{{ account.uid }}</td>
+              <td>
+                {{ account.email ?? '—' }}
+                @if (account.isFirestoreOnly) {
+                  <app-status-chip
+                    class="ms-2"
+                    [label]="'appUsers_firestoreOnly' | t"
+                    status="pending"
+                  />
+                }
+              </td>
+              <td class="font-mono text-xs">{{ account.providerIds.join(', ') || '—' }}</td>
+              <td>
+                @if (account.hasGoogleProvider) {
+                  <app-status-chip [label]="'common_yes' | t" status="approved" />
+                } @else {
+                  <app-status-chip [label]="'common_no' | t" status="rejected" />
+                }
+              </td>
+              <td>{{ formatTimestamp(account.creationTime) }}</td>
+              <td>{{ formatTimestamp(account.lastSignInTime) }}</td>
+              <td>{{ account.disabled ? ('common_yes' | t) : ('common_no' | t) }}</td>
+              <td>
+                <app-status-chip
+                  [label]="accountStatusLabel(account) | statusLabel"
+                  [status]="accountStatusLabel(account)"
+                />
+              </td>
+            </tr>
+          }
+        </tbody>
+      </app-tilawa-data-table>
+    }
+  }
+
+  @if (actionErrorMessage()) {
+    <p class="rounded-md bg-red-50 p-3 text-sm text-red-800 dark:bg-red-950/40 dark:text-red-200">
+      {{ actionErrorMessage() }}
+    </p>
+  }
+
+  @if (confirmOpen) {
+    <div class="fixed inset-0 z-50 overflow-y-auto">
+      <div class="flex min-h-screen items-center justify-center p-4">
+        <div class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/80" (click)="closeConfirm()"></div>
+        <div class="relative w-full max-w-xl rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
+          <h3 class="text-lg font-medium text-red-700 dark:text-red-400">
+            {{ 'duplicateAccounts_confirmTitle' | t }}
+          </h3>
+          <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
+            {{ 'duplicateAccounts_confirmMessage' | t }}
+          </p>
+          <dl class="mt-4 space-y-2 text-sm">
+            <div>
+              <dt class="font-medium">{{ 'duplicateAccounts_affectedCount' | t }}</dt>
+              <dd>{{ deletePreview().length }}</dd>
+            </div>
+            <div>
+              <dt class="font-medium">{{ 'duplicateAccounts_keepUid' | t }}</dt>
+              <dd class="font-mono text-xs">{{ keepPreview() }}</dd>
+            </div>
+            <div>
+              <dt class="font-medium">{{ 'duplicateAccounts_deleteUids' | t }}</dt>
+              <dd class="font-mono text-xs">{{ deletePreview().join(', ') }}</dd>
+            </div>
+          </dl>
+          <label class="mt-4 block text-sm font-medium">
+            {{ 'duplicateAccounts_confirmEmailLabel' | t }}
+          </label>
+          <input
+            type="text"
+            class="tilawa-field mt-1 w-full"
+            [(ngModel)]="confirmEmail"
+            [placeholder]="normalizedEmail()"
+          />
+          <label class="mt-4 block text-sm font-medium">
+            {{ 'dialogs_enterReason' | t }}
+          </label>
+          <textarea
+            rows="4"
+            class="tilawa-field mt-1 w-full"
+            [(ngModel)]="reason"
+            [placeholder]="'userDeletion_reasonPlaceholder' | t"
+          ></textarea>
+          @if (requiresForceForGoogle()) {
+            <label class="mt-4 flex items-start gap-2 text-sm">
+              <input type="checkbox" [(ngModel)]="forceDeleteGoogleAccount" />
+              <span>{{ 'duplicateAccounts_forceDeleteGoogle' | t }}</span>
+            </label>
+          }
+          @if (actionErrorMessage()) {
+            <p
+              class="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-800 dark:bg-red-950/40 dark:text-red-200"
+              role="alert"
+            >
+              {{ actionErrorMessage() }}
+            </p>
+          }
+          <div class="mt-6 flex justify-end gap-3">
+            <button type="button" class="rounded-md border px-4 py-2 text-sm" (click)="closeConfirm()">
+              {{ 'common_cancel' | t }}
+            </button>
+            <button
+              type="button"
+              class="rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+              [disabled]="!confirmEmailMatches || reason.trim().length < 10 || isActionLoading() || (requiresForceForGoogle() && !forceDeleteGoogleAccount)"
+              (click)="submitDeletion()"
+            >
+              {{ 'duplicateAccounts_confirmSubmit' | t }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+

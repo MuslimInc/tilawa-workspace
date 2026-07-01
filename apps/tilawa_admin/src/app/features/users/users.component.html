@@ -10,6 +10,12 @@
     </div>
   </app-page-header>
 
+  @if (hasDuplicateEmailsInList()) {
+    <p class="rounded-md bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+      {{ 'appUsers_duplicateEmailBanner' | t }}
+    </p>
+  }
+
   @if (loadState() === 'loading' && users().length === 0) {
     <app-tilawa-loading-state [message]="'appUsers_loading' | t" />
   } @else if (loadState() === 'error') {
@@ -47,10 +53,20 @@
                     variant="primary"
                     size="xs"
                     [label]="'appUsers_notify' | t"
-                    [disabled]="notifyLoading()"
+                    [disabled]="notifyLoading() || isActionLoading()"
                     [loading]="notifyLoading()"
                     (click)="openNotificationModal('single', user.id)"
                   />
+                  <span [title]="!user.hasAuthAccount ? ('userDeletion_firestoreOnlyHint' | t) : ''">
+                    <app-tilawa-button
+                      variant="secondary"
+                      size="xs"
+                      [label]="'userDeletion_deleteAccount' | t"
+                      [loading]="isActionLoading() && pendingUserId === user.id"
+                      [disabled]="notifyLoading() || isActionLoading() || !user.hasAuthAccount"
+                      (click)="openDelete(user.id, user.email)"
+                    />
+                  </span>
                 </div>
               </div>
             </td>
@@ -65,7 +81,25 @@
                 <span>{{ user.displayName || ('appUsers_notAvailable' | t) }}</span>
               </div>
             </td>
-            <td>{{ user.email || ('appUsers_notAvailable' | t) }}</td>
+            <td>
+              {{ user.email || ('appUsers_notAvailable' | t) }}
+              @if (user.isAdmin) {
+                <app-status-chip class="ms-2" [label]="'appUsers_adminUser' | t" status="approved" />
+              }
+              @if (!user.hasAuthAccount) {
+                <app-status-chip class="ms-2" [label]="'appUsers_firestoreOnly' | t" status="pending" />
+              }
+              @if (user.hasDuplicateEmail) {
+                <a
+                  class="ms-2 inline-flex no-underline"
+                  [routerLink]="['/quran-sessions/duplicate-accounts']"
+                  [queryParams]="{ email: user.email }"
+                  [title]="'quranSessionsUsers_duplicateEmailTitle' | t"
+                >
+                  <app-status-chip [label]="'quranSessionsUsers_duplicateEmail' | t" status="pending" />
+                </a>
+              }
+            </td>
             <td>@if (user.createdAt) { {{ user.createdAt | date:'medium' }} } @else { {{ 'appUsers_notAvailable' | t }} }</td>
           </tr>
         } @empty {
@@ -80,6 +114,29 @@
 
     <app-tilawa-pagination [canLoadMore]="canLoadMore()" (loadMore)="loadMore()" />
   }
+
+  @if (actionErrorMessage()) {
+    <p class="rounded-md bg-red-50 dark:bg-red-950/40 p-3 text-sm text-red-800 dark:text-red-200">
+      {{ actionErrorMessage() }}
+    </p>
+  }
 </div>
 
 <app-notification-modal [isOpen]="isModalOpen" [targetSummary]="notificationTargetSummary" [loading]="notifyLoading()" (send)="onSendNotification($event)" (close)="isModalOpen = false" />
+
+<app-delete-user-dialog
+  [isOpen]="deleteOpen"
+  [title]="'userDeletion_deleteTitle' | t"
+  [message]="'userDeletion_deleteMessage' | t"
+  [warning]="'userDeletion_deleteWarning' | t"
+  [targetEmail]="pendingUserEmail"
+  [confirmLabel]="'userDeletion_confirmLabel' | t"
+  [confirmPlaceholder]="'userDeletion_confirmPlaceholder' | t"
+  [submitLabel]="'userDeletion_deleteAccount' | t"
+  [loading]="isActionLoading()"
+  [errorMessage]="actionErrorMessage()"
+  (submit)="onDelete($event)"
+  (cancel)="onDeleteCancel()"
+/>
+
+

@@ -140,6 +140,9 @@ export interface TilawaUserFirestoreDto {
   displayName?: string;
   photoUrl?: string;
   quranSessionsProfile?: Record<string, unknown>;
+  deletion?: {
+    purgeAfter?: unknown;
+  };
 }
 
 export function readTimestamp(value: unknown): Date | null {
@@ -270,6 +273,7 @@ export class QuranSessionsUserMapper {
 
     const genderRaw = profile['gender'] as string | undefined;
     const statusRaw = (profile['accountStatus'] as string | undefined) ?? 'active';
+    const deletionPurgeAfter = readTimestamp(dto.deletion?.purgeAfter);
 
     return {
       userId,
@@ -290,6 +294,7 @@ export class QuranSessionsUserMapper {
         typeof profile['canApplyAsTeacher'] === 'boolean'
           ? (profile['canApplyAsTeacher'] as boolean)
           : null,
+      deletionPurgeAfter,
       createdAt: readTimestamp(profile['createdAt']),
       updatedAt: readTimestamp(profile['updatedAt']),
     };

@@ -3,6 +3,7 @@ export enum QuranSessionsAccountStatus {
   UnderReview = 'underReview',
   Suspended = 'suspended',
   Blocked = 'blocked',
+  PendingDeletion = 'pending_deletion',
 }
 
 export enum UserGender {
@@ -24,6 +25,7 @@ export interface QuranSessionsUser {
   readonly profileCompleted: boolean;
   readonly accountStatus: QuranSessionsAccountStatus;
   readonly canApplyAsTeacher: boolean | null;
+  readonly deletionPurgeAfter: Date | null;
   readonly createdAt: Date | null;
   readonly updatedAt: Date | null;
 }

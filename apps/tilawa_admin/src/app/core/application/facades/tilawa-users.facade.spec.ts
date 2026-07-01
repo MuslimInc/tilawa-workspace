@@ -84,4 +84,25 @@ describe('TilawaUsersFacade', () => {
     );
     expect(facade.items().map((u) => u.id)).toEqual(['u1', 'u2']);
   });
+
+  it('marks duplicate emails across loaded rows', async () => {
+    listUseCase.execute.mockResolvedValue({
+      items: [
+        { id: 'u1', email: 'dup@example.com', displayName: 'A', photoUrl: null },
+        { id: 'u2', email: 'dup@example.com', displayName: 'B', photoUrl: null },
+        { id: 'u3', email: 'unique@example.com', displayName: 'C', photoUrl: null },
+      ],
+      nextCursor: null,
+      hasMore: false,
+    });
+
+    await facade.loadList({});
+
+    expect(facade.items().map((user) => user.hasDuplicateEmail)).toEqual([
+      true,
+      true,
+      false,
+    ]);
+  });
 });
+

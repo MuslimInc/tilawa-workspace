@@ -6,9 +6,16 @@ import {
   SetUserTeacherApplicationAccessUseCase,
 } from '../../domain/usecases/quran-sessions-user.usecases';
 import {
+  CancelUserDeletionUseCase,
+  ListUserDeletionAuditUseCase,
+  RequestUserDeletionUseCase,
+} from '../../domain/usecases/user-deletion.usecases';
+import {
   QS_USER_DEFAULT_SORT,
+  QuranSessionsAccountStatus,
   QuranSessionsUserFilters,
 } from '../../domain/entities/quran-sessions-user.entity';
+import { UserDeletionAuditEvent } from '../../domain/entities/user-deletion-audit.entity';
 import { UserModerationAction } from '../../domain/entities/moderation-action.enum';
 import {
   QuranSessionsUserListItemVm,
@@ -43,6 +50,11 @@ export class QuranSessionsUsersFacade {
   private readonly teacherAccessUseCase = inject(
     SetUserTeacherApplicationAccessUseCase,
   );
+  private readonly requestDeletionUseCase = inject(RequestUserDeletionUseCase);
+  private readonly cancelDeletionUseCase = inject(CancelUserDeletionUseCase);
+  private readonly listDeletionAuditUseCase = inject(
+    ListUserDeletionAuditUseCase,
+  );
 
   private readonly listState = signal<LoadState>('idle');
   private readonly listError = signal<string | null>(null);
@@ -50,13 +62,19 @@ export class QuranSessionsUsersFacade {
   private readonly nextCursor = signal<string | null>(null);
   private readonly hasMore = signal(false);
   private readonly actionLoading = signal(false);
+  private readonly actionError = signal<string | null>(null);
   private readonly listSort = signal<SortRequest>(QS_USER_DEFAULT_SORT);
+  private readonly deletionAudit = signal<readonly UserDeletionAuditEvent[]>(
+    [],
+  );
 
   readonly items = this.listItems.asReadonly();
   readonly listLoadState = this.listState.asReadonly();
   readonly listErrorMessage = this.listError.asReadonly();
   readonly canLoadMore = this.hasMore.asReadonly();
   readonly isActionLoading = this.actionLoading.asReadonly();
+  readonly actionErrorMessage = this.actionError.asReadonly();
+  readonly deletionAuditEvents = this.deletionAudit.asReadonly();
   readonly sort = this.listSort.asReadonly();
 
   async loadList(
@@ -155,6 +173,7 @@ export class QuranSessionsUsersFacade {
     canApplyAsTeacher: boolean | null,
   ): Promise<void> {
     this.actionLoading.set(true);
+    this.actionError.set(null);
     try {
       await this.teacherAccessUseCase.execute(userId, canApplyAsTeacher);
       this.listItems.update((items) =>
@@ -164,8 +183,65 @@ export class QuranSessionsUsersFacade {
             : item,
         ),
       );
+    } catch (error) {
+      this.actionError.set(
+        error instanceof Error ? error.message : 'Action failed.',
+      );
+      throw error;
     } finally {
       this.actionLoading.set(false);
     }
   }
+
+  clearActionError(): void {
+    this.actionError.set(null);
+  }
+
+  async requestUserDeletion(
+    userId: string,
+    reason: string,
+    confirmEmail: string,
+  ): Promise<void> {
+    this.actionLoading.set(true);
+    this.actionError.set(null);
+    try {
+      await this.requestDeletionUseCase.execute(userId, reason, confirmEmail);
+    } catch (error) {
+      this.actionError.set(
+        error instanceof Error ? error.message : 'Deletion request failed.',
+      );
+      throw error;
+    } finally {
+      this.actionLoading.set(false);
+    }
+  }
+
+  async cancelUserDeletion(userId: string, reason: string): Promise<void> {
+    this.actionLoading.set(true);
+    this.actionError.set(null);
+    try {
+      await this.cancelDeletionUseCase.execute(userId, reason);
+    } catch (error) {
+      this.actionError.set(
+        error instanceof Error ? error.message : 'Cancel deletion failed.',
+      );
+      throw error;
+    } finally {
+      this.actionLoading.set(false);
+    }
+  }
+
+  async loadDeletionAudit(userId: string): Promise<void> {
+    try {
+      const events = await this.listDeletionAuditUseCase.execute(userId);
+      this.deletionAudit.set(events);
+    } catch {
+      this.deletionAudit.set([]);
+    }
+  }
+
+  isPendingDeletion(accountStatus: string): boolean {
+    return accountStatus === QuranSessionsAccountStatus.PendingDeletion;
+  }
 }
+

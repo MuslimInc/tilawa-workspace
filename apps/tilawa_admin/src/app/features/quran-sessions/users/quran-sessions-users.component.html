@@ -56,31 +56,62 @@
                   <span class="tilawa-table-leading-label truncate">{{ user.displayName }}</span>
                 </div>
                 <div class="tilawa-table-leading-actions">
-                  <app-tilawa-button
-                    variant="primary"
-                    size="xs"
-                    [label]="'quranSessionsUsers_teacherApplyFollowPolicy' | t"
-                    [loading]="isActionLoading() && pendingUserId === user.userId"
-                    [disabled]="isActionLoading()"
-                    (click)="cycleTeacherApplyAccess(user.userId, user.canApplyAsTeacher)"
-                  />
-                  @if (user.accountStatus !== 'suspended' && user.accountStatus !== 'blocked') {
+                  @if (isPendingDeletion(user.accountStatus)) {
+                    @if (user.deletionPurgeAfter) {
+                      <span class="text-xs text-gray-500 dark:text-gray-400">
+                        {{ 'userDeletion_purgeAfter' | t }}: {{ user.deletionPurgeAfter | date:'medium' }}
+                      </span>
+                    }
                     <app-tilawa-button
                       variant="secondary"
                       size="xs"
-                      [label]="'quranSessionsUsers_suspendAccess' | t"
+                      [label]="'userDeletion_cancelDeletion' | t"
                       [loading]="isActionLoading() && pendingUserId === user.userId"
                       [disabled]="isActionLoading()"
-                      (click)="openSuspend(user.userId)"
+                      (click)="openCancelDeletion(user.userId)"
+                    />
+                    <app-tilawa-button
+                      variant="secondary"
+                      size="xs"
+                      [label]="'userDeletion_viewAudit' | t"
+                      [disabled]="isActionLoading()"
+                      (click)="openAudit(user.userId)"
                     />
                   } @else {
                     <app-tilawa-button
                       variant="primary"
                       size="xs"
-                      [label]="'quranSessionsUsers_reactivateAccess' | t"
+                      [label]="'quranSessionsUsers_teacherApplyFollowPolicy' | t"
                       [loading]="isActionLoading() && pendingUserId === user.userId"
                       [disabled]="isActionLoading()"
-                      (click)="openReactivate(user.userId)"
+                      (click)="cycleTeacherApplyAccess(user.userId, user.canApplyAsTeacher)"
+                    />
+                    @if (user.accountStatus !== 'suspended' && user.accountStatus !== 'blocked') {
+                      <app-tilawa-button
+                        variant="secondary"
+                        size="xs"
+                        [label]="'quranSessionsUsers_suspendAccess' | t"
+                        [loading]="isActionLoading() && pendingUserId === user.userId"
+                        [disabled]="isActionLoading()"
+                        (click)="openSuspend(user.userId)"
+                      />
+                    } @else {
+                      <app-tilawa-button
+                        variant="primary"
+                        size="xs"
+                        [label]="'quranSessionsUsers_reactivateAccess' | t"
+                        [loading]="isActionLoading() && pendingUserId === user.userId"
+                        [disabled]="isActionLoading()"
+                        (click)="openReactivate(user.userId)"
+                      />
+                    }
+                    <app-tilawa-button
+                      variant="secondary"
+                      size="xs"
+                      [label]="'userDeletion_deleteAccount' | t"
+                      [loading]="isActionLoading() && pendingUserId === user.userId"
+                      [disabled]="isActionLoading()"
+                      (click)="openDelete(user.userId, user.email)"
                     />
                   }
                 </div>
@@ -111,6 +142,71 @@
 
   <app-reject-reason-dialog [isOpen]="suspendOpen" [title]="'quranSessionsUsers_suspendTitle' | t" [message]="'quranSessionsUsers_suspendMessage' | t" [confirmLabel]="'teacherApplications_suspend' | t" [loading]="isActionLoading()" (submit)="onSuspend($event)" (cancel)="suspendOpen = false" />
 
+  <app-delete-user-dialog
+    [isOpen]="deleteOpen"
+    [title]="'userDeletion_deleteTitle' | t"
+    [message]="'userDeletion_deleteMessage' | t"
+    [warning]="'userDeletion_deleteWarning' | t"
+    [targetEmail]="pendingUserEmail"
+    [confirmLabel]="'userDeletion_confirmLabel' | t"
+    [confirmPlaceholder]="'userDeletion_confirmPlaceholder' | t"
+  [submitLabel]="'userDeletion_deleteAccount' | t"
+  [loading]="isActionLoading()"
+  [errorMessage]="actionErrorMessage()"
+  (submit)="onDelete($event)"
+  (cancel)="onDeleteCancel()"
+/>
+
+  <app-reject-reason-dialog
+    [isOpen]="cancelDeletionOpen"
+    [title]="'userDeletion_cancelTitle' | t"
+    [message]="'userDeletion_cancelMessage' | t"
+    [confirmLabel]="'userDeletion_cancelDeletion' | t"
+    [loading]="isActionLoading()"
+    (submit)="onCancelDeletion($event)"
+    (cancel)="cancelDeletionOpen = false"
+  />
+
+  @if (actionErrorMessage()) {
+    <p class="rounded-md bg-red-50 dark:bg-red-950/40 p-3 text-sm text-red-800 dark:text-red-200">
+      {{ actionErrorMessage() }}
+    </p>
+  }
+
+  @if (auditOpen) {
+    <div class="fixed inset-0 z-50 overflow-y-auto">
+      <div class="flex min-h-screen items-center justify-center p-4">
+        <div class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/80" (click)="closeAudit()"></div>
+        <div class="relative w-full max-w-2xl rounded-lg bg-white dark:bg-gray-800 p-6 shadow-xl">
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ 'userDeletion_auditTitle' | t }}</h3>
+          @if (deletionAuditEvents().length === 0) {
+            <p class="mt-4 text-sm text-gray-600 dark:text-gray-300">{{ 'userDeletion_auditEmpty' | t }}</p>
+          } @else {
+            <ul class="mt-4 space-y-3">
+              @for (event of deletionAuditEvents(); track event.id) {
+                <li class="rounded-md border border-gray-200 dark:border-gray-700 p-3 text-sm">
+                  <div class="font-medium text-gray-900 dark:text-white">{{ auditActionLabel(event.action) }}</div>
+                  @if (event.createdAt) {
+                    <div class="text-gray-500 dark:text-gray-400">{{ event.createdAt | date:'medium' }}</div>
+                  }
+                  @if (event.reason) {
+                    <div class="mt-1 text-gray-700 dark:text-gray-200">{{ event.reason }}</div>
+                  }
+                  <div class="mt-1 font-mono text-xs text-gray-500">{{ event.actorUid }}</div>
+                </li>
+              }
+            </ul>
+          }
+          <div class="mt-6 flex justify-end">
+            <button type="button" (click)="closeAudit()" class="rounded-md border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm">
+              {{ 'common_cancel' | t }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
   <app-confirm-dialog
     [isOpen]="reactivateOpen"
     [title]="'quranSessionsUsers_reactivateTitle' | t"
@@ -121,3 +217,4 @@
     (cancel)="reactivateOpen = false"
   />
 </div>
+

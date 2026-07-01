@@ -11,8 +11,10 @@ import {
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { StatusChipComponent } from '../../../shared/components/status-chip/status-chip.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { DeleteUserDialogComponent } from '../../../shared/components/delete-user-dialog/delete-user-dialog.component';
 import { RejectReasonDialogComponent } from '../../../shared/components/reject-reason-dialog/reject-reason-dialog.component';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { I18nService } from '../../../core/i18n/i18n.service';
 import { StatusLabelPipe } from '../../../core/i18n/status-label.pipe';
 import { SortableThComponent } from '../../../shared/components/sortable-th/sortable-th.component';
 import { TilawaFilterBarComponent } from '../../../shared/components/tilawa-filter-bar/tilawa-filter-bar.component';
@@ -34,6 +36,7 @@ import { SortRequest } from '../../../core/domain/entities/pagination.types';
     PageHeaderComponent,
     StatusChipComponent,
     ConfirmDialogComponent,
+    DeleteUserDialogComponent,
     RejectReasonDialogComponent,
     TranslatePipe,
     StatusLabelPipe,
@@ -51,13 +54,18 @@ import { SortRequest } from '../../../core/domain/entities/pagination.types';
 })
 export class QuranSessionsUsersComponent implements OnInit {
   private readonly facade = inject(QuranSessionsUsersFacade);
+  private readonly i18n = inject(I18nService);
 
   readonly items = this.facade.items;
   readonly loadState = this.facade.listLoadState;
   readonly errorMessage = this.facade.listErrorMessage;
   readonly canLoadMore = this.facade.canLoadMore;
   readonly isActionLoading = this.facade.isActionLoading;
+  readonly actionErrorMessage = this.facade.actionErrorMessage;
+  readonly deletionAuditEvents = this.facade.deletionAuditEvents;
   readonly sort = this.facade.sort;
+
+  readonly pendingDeletionStatus = QuranSessionsAccountStatus.PendingDeletion;
 
   searchQuery = '';
   countryFilter = '';
@@ -68,7 +76,11 @@ export class QuranSessionsUsersComponent implements OnInit {
 
   suspendOpen = false;
   reactivateOpen = false;
+  deleteOpen = false;
+  cancelDeletionOpen = false;
+  auditOpen = false;
   pendingUserId = '';
+  pendingUserEmail: string | null = null;
 
   readonly accountStatuses = Object.values(QuranSessionsAccountStatus);
   readonly genders = Object.values(UserGender);
@@ -136,6 +148,67 @@ export class QuranSessionsUsersComponent implements OnInit {
     await this.facade.setTeacherApplicationAccess(userId, next);
   }
 
+  openDelete(userId: string, email: string): void {
+    this.facade.clearActionError();
+    this.pendingUserId = userId;
+    this.pendingUserEmail = email === '—' ? null : email;
+    this.deleteOpen = true;
+  }
+
+  onDeleteCancel(): void {
+    this.facade.clearActionError();
+    this.deleteOpen = false;
+  }
+
+  async onDelete(payload: { reason: string; confirmEmail: string }): Promise<void> {
+    try {
+      await this.facade.requestUserDeletion(
+        this.pendingUserId,
+        payload.reason,
+        payload.confirmEmail,
+      );
+      this.deleteOpen = false;
+      await this.reload();
+    } catch {
+      // actionErrorMessage surfaced in delete dialog
+    }
+  }
+
+  openCancelDeletion(userId: string): void {
+    this.pendingUserId = userId;
+    this.cancelDeletionOpen = true;
+  }
+
+  async onCancelDeletion(reason: string): Promise<void> {
+    try {
+      await this.facade.cancelUserDeletion(this.pendingUserId, reason);
+      this.cancelDeletionOpen = false;
+      await this.reload();
+    } catch {
+      // actionErrorMessage surfaced in template
+    }
+  }
+
+  async openAudit(userId: string): Promise<void> {
+    this.pendingUserId = userId;
+    await this.facade.loadDeletionAudit(userId);
+    this.auditOpen = true;
+  }
+
+  closeAudit(): void {
+    this.auditOpen = false;
+  }
+
+  isPendingDeletion(status: string): boolean {
+    return this.facade.isPendingDeletion(status);
+  }
+
+  auditActionLabel(action: string): string {
+    const key = `userDeletion_action_${action}`;
+    const translated = this.i18n.t(key);
+    return translated === key ? action : translated;
+  }
+
   teacherApplyAccessLabel(value: boolean | null): string {
     if (value === true) {
       return 'quranSessionsUsers_teacherApplyAllowed';
@@ -146,3 +219,4 @@ export class QuranSessionsUsersComponent implements OnInit {
     return 'quranSessionsUsers_teacherApplyPolicy';
   }
 }
+

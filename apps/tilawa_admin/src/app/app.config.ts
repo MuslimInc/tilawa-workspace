@@ -22,6 +22,8 @@ import { AUTH_SESSION_REPOSITORY } from './core/domain/repositories/auth-session
 import { FirebaseAuthSessionRepository } from './core/data/repositories/firebase-auth-session.repository';
 import { MODERATION_GATEWAY } from './core/domain/repositories/moderation.gateway';
 import { FirebaseModerationGateway } from './core/data/repositories/firebase-moderation.gateway';
+import { USER_DELETION_GATEWAY } from './core/domain/repositories/user-deletion.gateway';
+import { FirebaseUserDeletionGateway } from './core/data/repositories/firebase-user-deletion.gateway';
 import { SESSION_READ_REPOSITORY } from './core/domain/repositories/session-read.repository';
 import { FirebaseSessionReadRepository } from './core/data/repositories/firebase-session-read.repository';
 import { SESSION_AUDIT_REPOSITORY } from './core/domain/repositories/session-audit.repository';
@@ -38,6 +40,8 @@ import { WALLET_READ_REPOSITORY } from './core/domain/repositories/wallet-read.r
 import { FirebaseWalletReadRepository } from './core/data/repositories/firebase-wallet-read.repository';
 import { TILAWA_USER_REPOSITORY } from './core/domain/repositories/tilawa-user.repository';
 import { FirebaseTilawaUserRepository } from './core/data/repositories/firebase-tilawa-user.repository';
+import { AUTH_ADMIN_GATEWAY } from './core/domain/repositories/auth-admin.gateway';
+import { FirebaseAuthAdminGateway } from './core/data/repositories/firebase-auth-admin.gateway';
 
 function initializeI18n(i18n: I18nService): () => Promise<void> {
   return () => i18n.initialize();
@@ -77,6 +81,7 @@ export const appConfig: ApplicationConfig = {
     },
     { provide: AUTH_SESSION_REPOSITORY, useClass: FirebaseAuthSessionRepository },
     { provide: MODERATION_GATEWAY, useClass: FirebaseModerationGateway },
+    { provide: USER_DELETION_GATEWAY, useClass: FirebaseUserDeletionGateway },
     {
       provide: SESSION_READ_REPOSITORY,
       useClass: FirebaseSessionReadRepository,
@@ -109,5 +114,7 @@ export const appConfig: ApplicationConfig = {
       provide: TILAWA_USER_REPOSITORY,
       useClass: FirebaseTilawaUserRepository,
     },
+    { provide: AUTH_ADMIN_GATEWAY, useClass: FirebaseAuthAdminGateway },
   ],
 };
+

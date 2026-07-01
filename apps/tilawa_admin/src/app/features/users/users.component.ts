@@ -1,12 +1,15 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { NotificationModalComponent } from './components/notification-modal/notification-modal.component';
+import { DeleteUserDialogComponent } from '../../shared/components/delete-user-dialog/delete-user-dialog.component';
 import { SendNotificationUseCase } from '../../core/domain/usecases/send-notification.usecase';
 import { NotificationEntity, NotificationTargetType } from '../../core/domain/entities/notification.entity';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { TilawaUsersFacade } from '../../core/application/facades/tilawa-users.facade';
+import { StatusChipComponent } from '../../shared/components/status-chip/status-chip.component';
 import { SortableThComponent } from '../../shared/components/sortable-th/sortable-th.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { TilawaButtonComponent } from '../../shared/components/tilawa-button/tilawa-button.component';
@@ -24,8 +27,11 @@ import { SortRequest } from '../../core/domain/entities/pagination.types';
   imports: [
     CommonModule,
     FormsModule,
+    RouterLink,
     NotificationModalComponent,
+    DeleteUserDialogComponent,
     TranslatePipe,
+    StatusChipComponent,
     SortableThComponent,
     PageHeaderComponent,
     TilawaButtonComponent,
@@ -48,10 +54,18 @@ export class UsersComponent implements OnInit {
   readonly errorMessage = this.usersFacade.listErrorMessage;
   readonly canLoadMore = this.usersFacade.canLoadMore;
   readonly sort = this.usersFacade.sort;
+  readonly isActionLoading = this.usersFacade.isActionLoading;
+  readonly actionErrorMessage = this.usersFacade.actionErrorMessage;
+  readonly hasDuplicateEmailsInList = computed(() =>
+    this.users().some((user) => user.hasDuplicateEmail),
+  );
 
   selectedUserIds = new Set<string>();
 
   isModalOpen = false;
+  deleteOpen = false;
+  pendingUserId = '';
+  pendingUserEmail: string | null = null;
   readonly notifyLoading = signal(false);
   notificationTargetType: NotificationTargetType = 'all';
   notificationTargetSummary = '';
@@ -136,4 +150,33 @@ export class UsersComponent implements OnInit {
       this.notifyLoading.set(false);
     }
   }
+
+  openDelete(userId: string, email: string): void {
+    this.usersFacade.clearActionError();
+    this.pendingUserId = userId;
+    this.pendingUserEmail =
+      email && email !== this.i18n.t('appUsers_notAvailable') ? email : null;
+    this.deleteOpen = true;
+  }
+
+  onDeleteCancel(): void {
+    this.usersFacade.clearActionError();
+    this.deleteOpen = false;
+  }
+
+  async onDelete(payload: { reason: string; confirmEmail: string }): Promise<void> {
+    try {
+      await this.usersFacade.requestUserDeletion(
+        this.pendingUserId,
+        payload.reason,
+        payload.confirmEmail,
+      );
+      this.deleteOpen = false;
+      await this.reload();
+    } catch {
+      // actionErrorMessage surfaced in delete dialog
+    }
+  }
 }
+
+

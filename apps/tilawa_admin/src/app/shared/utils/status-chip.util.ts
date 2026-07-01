@@ -41,6 +41,7 @@ const WARNING = new Set([
 const DANGER = new Set([
   'rejected',
   'blocked',
+  'pending_deletion',
   'revoked',
   'cancelled_by_student',
   'cancelled_by_teacher',
